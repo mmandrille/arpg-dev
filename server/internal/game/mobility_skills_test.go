@@ -57,6 +57,35 @@ func TestBarbarianLeapMovesDamagesAndStunsLandingTargets(t *testing.T) {
 	}
 }
 
+func TestPaladinChargeMovesDamagesAndStunsEndpointTargets(t *testing.T) {
+	sim := mobilitySkillSim(t, "paladin", "charge")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: 2, Y: 2}
+	endpoint := addRangerSkillMonster(sim, Vec2{X: 8, Y: 2}, 40)
+	far := addRangerSkillMonster(sim, Vec2{X: 11, Y: 2}, 40)
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "charge",
+		CorrelationID: "corr_charge",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "charge", Direction: &Vec2{X: 1}},
+	}})
+
+	assertAck(t, cast, "charge")
+	if !hasEvent(cast, "skill_cast") || !hasSkillDamageEvent(cast, "charge") || !hasEvent(cast, "skill_effect_started") {
+		t.Fatalf("charge events = %+v", cast.Events)
+	}
+	if player.pos.X <= 2 {
+		t.Fatalf("charge player x = %.2f, want moved forward", player.pos.X)
+	}
+	if endpoint.hp >= endpoint.maxHP || !containsStringValue(endpoint.effectIDs, "charge_stun") {
+		t.Fatalf("endpoint hp/effects = %d/%d %v, want damaged and stunned", endpoint.hp, endpoint.maxHP, endpoint.effectIDs)
+	}
+	if far.hp != far.maxHP || containsStringValue(far.effectIDs, "charge_stun") {
+		t.Fatalf("far hp/effects = %d/%d %v, want unaffected", far.hp, far.maxHP, far.effectIDs)
+	}
+}
+
 func mobilitySkillSim(t *testing.T, classID string, skillID string) *Sim {
 	t.Helper()
 	rules := loadRules(t)

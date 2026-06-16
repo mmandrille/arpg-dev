@@ -125,6 +125,17 @@
       "effect_visual": "healing_pulse",
       "summary_key": "skill.heal.summary"
     },
+    "charge": {
+      "icon": {
+        "label": "C",
+        "shape": "shield",
+        "color": "#d9a33f",
+        "accent": "#fff1bd"
+      },
+      "summary": "Shield rush stun",
+      "effect_visual": "charge_smash",
+      "summary_key": "skill.charge.summary"
+    },
     "holy_shield": {
       "icon": {
         "label": "S",

@@ -26,6 +26,7 @@ const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.
 
 var _pass_count: int = 0
 var _fail_count: int = 0
+var _selected_companion: Dictionary = {}
 
 
 func _initialize() -> void:
@@ -1014,6 +1015,10 @@ func _test_local_companions_render_in_top_left_row() -> void:
 	_assert_eq("companion row duration total", int((companions[1] as Dictionary).get("total_ticks", 0)), 600)
 	_assert_eq("companion row revived icon", str((companions[1] as Dictionary).get("icon_kind", "")), "revived")
 	_assert_eq("companion row mercenary icon", str((companions[2] as Dictionary).get("icon_kind", "")), "mercenary")
+	_selected_companion = {}
+	main.companion_bar.companion_selected.connect(func(companion: Dictionary) -> void: _selected_companion = companion)
+	main.companion_bar.bot_click_slot(2)
+	_assert_eq("companion row click selects mercenary", str(_selected_companion.get("monster_def_id", "")), "mercenary_guard")
 	main.companion_bar.queue_free()
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()

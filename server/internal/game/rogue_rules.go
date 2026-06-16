@@ -23,6 +23,7 @@ type SkillMobilityDef struct {
 	Mode                 string  `json:"mode"`
 	Visual               string  `json:"visual"`
 	SpeedTilesPerSecond  float64 `json:"speed_tiles_per_second"`
+	SpeedMultiplier      float64 `json:"speed_multiplier"`
 	ChannelManaPer10Sec  int     `json:"channel_mana_per_10_seconds"`
 	DamagePercentBase    int     `json:"damage_percent_base"`
 	DamagePercentPerRank int     `json:"damage_percent_per_rank"`
@@ -54,10 +55,13 @@ func validateRogueConeSkillPayload(skillID string, skill SkillDef) error {
 		default:
 			return fmt.Errorf("game: invalid rules skills.%s.mobility.mode: unsupported %s", skillID, skill.Mobility.Mode)
 		}
-		if skill.Mobility.SpeedTilesPerSecond < 0 || skill.Mobility.ChannelManaPer10Sec < 0 || skill.Mobility.DamagePercentBase < 0 || skill.Mobility.DamagePercentPerRank < 0 || skill.Mobility.ImpactRadius < 0 ||
+		if skill.Mobility.SpeedTilesPerSecond < 0 || skill.Mobility.SpeedMultiplier < 0 || skill.Mobility.ChannelManaPer10Sec < 0 || skill.Mobility.DamagePercentBase < 0 || skill.Mobility.DamagePercentPerRank < 0 || skill.Mobility.ImpactRadius < 0 ||
 			skill.Mobility.PushMin < 0 || skill.Mobility.PushMax < skill.Mobility.PushMin ||
 			skill.Mobility.StunDurationTicks < 0 || skill.Mobility.RootDurationTicks < 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.mobility: effect values must be non-negative", skillID)
+		}
+		if skill.Mobility.Mode == "charge" && skill.Mobility.SpeedMultiplier <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.mobility.speed_multiplier: required for charge", skillID)
 		}
 		if skill.Mobility.Mode == "charge" && skill.Mobility.ChannelManaPer10Sec <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.mobility.channel_mana_per_10_seconds: required for charge", skillID)

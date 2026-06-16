@@ -1,0 +1,70 @@
+server/internal/store/upgrade_pity.go
+  s_91cf6549724495::t_ba21d559bf6bb6 1-42
+client/scripts/blacksmith_panel.gd
+  s_91cf6549724495::t_03ca07f333d1dd 23,89,131-136,375-384,394,409-410
+  s_91cf6549724495::t_63772b6eb334d1 149-150
+docs/progress/slice-lifecycle.md
+  s_91cf6549724495::t_309308e9363bdb 220
+shared/rules/main_config.v0.json
+  s_91cf6549724495::t_a2c96ab1ed3e83 12
+server/internal/store/interfaces.go
+  s_91cf6549724495::t_464be56a0c2e15 75-76
+docs/as-built/v203_upgrade-pity-counter.md
+  s_91cf6549724495::t_309308e9363bdb 1-34
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_91cf6549724495::t_1c727b0174376c 44
+server/internal/replay/replay_test.go
+  s_91cf6549724495::t_120216526dc286 1490,1493
+server/internal/http/account_stash.go
+  s_91cf6549724495::t_120216526dc286 198,203
+PROGRESS.md
+  s_91cf6549724495::t_309308e9363bdb 26,28
+server/internal/store/repos.go
+  s_91cf6549724495::t_464be56a0c2e15 1527-1528,1532-1533,1627-1629,1639-1641
+  s_91cf6549724495::t_160bc7bc4b01f9 1594,1598,1624-1626,1630-1635,1642,1645
+server/internal/game/rules.go
+  s_91cf6549724495::t_a2c96ab1ed3e83 56,994-995
+client/tests/test_blacksmith_panel.gd
+  s_91cf6549724495::t_71125a39985ce4 1-82
+client/scripts/bot_step_catalog.gd
+  s_91cf6549724495::t_606eec415e8904 228-229
+docs/specs/v203_spec-upgrade-pity-counter.md
+  s_91cf6549724495::t_ea3aaf4bb1b6fb 1-2,4-49
+  s_91cf6549724495::t_309308e9363bdb 3
+shared/rules/main_config.v0.schema.json
+  s_91cf6549724495::t_a2c96ab1ed3e83 13,24
+server/internal/store/store_test.go
+  s_91cf6549724495::t_120216526dc286 1089,1110,1129,1152,1183
+  s_91cf6549724495::t_6147f3814ab0f2 1099-1103,1107,1123
+docs/plans/v203_2026-06-15-upgrade-pity-counter.md
+  s_91cf6549724495::t_ea3aaf4bb1b6fb 1-2,4-24,26-46,49-61,64-73,75-77,83-96,101-113,116-127,131-137
+  s_91cf6549724495::t_863ccc6b78d98e 144
+  s_91cf6549724495::t_309308e9363bdb 3,25,47-48,62-63,74,78-82,97-100,114-115,128-130,138-143
+server/internal/http/auth_session_test.go
+  s_91cf6549724495::t_f4b822f10095eb 613-619,623,639
+scripts/client_smoke.sh
+  s_91cf6549724495::t_71125a39985ce4 128
+client/scripts/bot_scenario_runner.gd
+  s_91cf6549724495::t_606eec415e8904 974-979
+server/internal/store/upgrade_chance_test.go
+  s_91cf6549724495::t_6147f3814ab0f2 49-55,59,63-130
+  s_91cf6549724495::t_120216526dc286 39
+client/tests/test_blacksmith_panel.gd.uid
+  s_91cf6549724495::t_fe45030667e285 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6f5470b6c1c296d3b46e38e8b093f20c1caff50e",
+  "prompts": {},
+  "sessions": {
+    "s_91cf6549724495": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdc2-d0c7-77a3-bdd7-9c7d3b38e3f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

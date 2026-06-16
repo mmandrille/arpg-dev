@@ -15,6 +15,7 @@ const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_m
 const EliteAuraPreviewSync := preload("res://scripts/elite_aura_preview_sync.gd")
 const ProjectileVisualsScript := preload("res://scripts/projectile_visuals.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
+const EnemyHealthBarVisibilityScript := preload("res://scripts/enemy_health_bar_visibility.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
@@ -570,7 +571,8 @@ func _on_settings_from_main() -> void:
 			client_settings.floating_combat_text,
 			client_settings.status_text,
 			client_settings.create_game_session_type,
-			client_settings.language
+			client_settings.language,
+			client_settings.monster_health_bar_mode
 		)
 
 func _on_settings_from_pause() -> void:
@@ -583,7 +585,8 @@ func _on_settings_from_pause() -> void:
 			client_settings.floating_combat_text,
 			client_settings.status_text,
 			client_settings.create_game_session_type,
-			client_settings.language
+			client_settings.language,
+			client_settings.monster_health_bar_mode
 		)
 
 func _on_settings_back() -> void:
@@ -624,6 +627,12 @@ func _on_language_selected(language: String) -> void:
 	_refresh_localized_texts()
 	_sync_settings_panel()
 
+func _on_monster_health_bar_mode_selected(mode: String) -> void:
+	if client_settings != null:
+		client_settings.set_monster_health_bar_mode(mode)
+		_sync_settings_panel()
+		_refresh_monster_health_bar_visibility()
+
 func _sync_settings_panel() -> void:
 	if settings_panel != null and client_settings != null:
 		settings_panel.set_selected_size_label(ClientSettingsScript.size_label(client_settings.window_size))
@@ -631,6 +640,7 @@ func _sync_settings_panel() -> void:
 		settings_panel.set_status_text_enabled(client_settings.status_text)
 		settings_panel.set_create_game_session_type(client_settings.create_game_session_type)
 		settings_panel.set_language(client_settings.language)
+		settings_panel.set_monster_health_bar_mode(client_settings.monster_health_bar_mode)
 
 func _refresh_localized_texts() -> void:
 	if main_menu != null:
@@ -769,6 +779,7 @@ func _process(delta: float) -> void:
 		player_anim.set_locomotion(_local_player_is_walking())
 	if not _user_input_blocked():
 		_update_facing_toward_mouse()
+	_refresh_monster_health_bar_visibility()
 	_update_debug()
 
 # --- message handling -------------------------------------------------------
@@ -2161,6 +2172,16 @@ func _upsert_monster_health_bar(entity_id: String, target: Node3D, hp: int, max_
 	health_bars_layer.add_child(bar)
 	bar.setup(_camera, target, hp, max_hp)
 	monster_health_bars[entity_id] = bar
+	_refresh_monster_health_bar_visibility(entity_id)
+
+func _refresh_monster_health_bar_visibility(entity_id: String = "") -> void:
+	var ids := [entity_id] if entity_id != "" else monster_health_bars.keys()
+	var hovered_id := _pick_entity_at_mouse()
+	var mode := client_settings.monster_health_bar_mode if client_settings != null else ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE
+	for raw_id in ids:
+		var id := str(raw_id)
+		if monster_health_bars.has(id) and is_instance_valid(monster_health_bars[id]):
+			monster_health_bars[id].visible = EnemyHealthBarVisibilityScript.should_show(mode, id, hovered_id, pending_action_targets, pending_skill_casts)
 
 func _sync_companion_bar() -> void:
 	if companion_bar == null:
@@ -3437,6 +3458,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.status_text_toggled.connect(_on_status_text_toggled)
 	settings_panel.create_game_session_type_selected.connect(_on_create_game_session_type_selected)
 	settings_panel.language_selected.connect(_on_language_selected)
+	settings_panel.monster_health_bar_mode_selected.connect(_on_monster_health_bar_mode_selected)
 	menu_layer.add_child(settings_panel)
 
 	pause_menu = PauseMenuScript.new()
@@ -3814,7 +3836,10 @@ func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction
 		_show_skill_rejected_feedback("invalid_target")
 		return false
 	var message_id := client.send("cast_skill_intent", last_server_tick, payload)
-	pending_skill_casts[message_id] = {"skill_id": skill_id}
+	var pending_skill := {"skill_id": skill_id}
+	if payload.has("target_id"):
+		pending_skill["target_id"] = str(payload.get("target_id", ""))
+	pending_skill_casts[message_id] = pending_skill
 	_attack_cooldown = ClientConstants.SEND_INTERVAL
 	if player_anim != null:
 		player_anim.play_one_shot("attack")

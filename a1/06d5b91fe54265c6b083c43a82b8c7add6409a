@@ -1,0 +1,21 @@
+shared/rules/treasure_classes.v0.json
+  s_eea129eb412d67::t_9d943425e297f5 256-257,259-268
+server/internal/game/special_drops_test.go
+  s_eea129eb412d67::t_5ce049ef766444 22,27-29,31-33,35-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a106d5b91fe54265c6b083c43a82b8c7add6409a",
+  "prompts": {},
+  "sessions": {
+    "s_eea129eb412d67": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eceba-bd9a-7d12-8a0f-26a79adb679d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

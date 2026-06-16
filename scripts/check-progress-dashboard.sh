@@ -36,4 +36,10 @@ for path in "${required[@]}"; do
   fi
 done
 
+if grep -RIn '\](docs/' "${ROOT}/docs/progress"/*.md; then
+  echo "check-progress-dashboard: docs/progress links must be relative to docs/progress/." >&2
+  echo "Use ../specs, ../plans, ../as-built, ../reviews, etc. instead of docs/..." >&2
+  exit 1
+fi
+
 echo "check-progress-dashboard: ok (${line_count}/${MAX_LINES} lines)"

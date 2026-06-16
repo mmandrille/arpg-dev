@@ -87,9 +87,6 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Progress archive links need repair.** The v200 progress compaction moved history under
-  `docs/progress/`; many archive links still use `docs/...` paths that likely resolve relative to the
-  new folder.
 - **Companion tuning and monster-rarity validation need data/golden ownership.** The v223 review
   keeps the v200 finding open: companion/elite follow tuning remains code-owned, and monster rarity
   validation still pins tuning values in Go instead of a schema-backed catalog or named golden.

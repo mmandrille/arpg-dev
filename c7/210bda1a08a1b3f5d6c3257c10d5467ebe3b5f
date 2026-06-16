@@ -1,0 +1,83 @@
+scripts/client_smoke.sh
+  s_91cf6549724495::t_da51d2a7b28850 130
+client/scripts/net_client.gd
+  s_91cf6549724495::t_947014c0ef4c5c 152-171
+client/tests/test_mercenary_panel.gd.uid
+  s_91cf6549724495::t_a3bb92aaa6f89e 1
+docs/specs/v207_spec-mercenary-roster-ui.md
+  s_91cf6549724495::t_3dd6f94040334a 3,44-45
+  s_91cf6549724495::t_308fcecefd16d5 1-2,4-43,46-62
+client/scripts/mercenary_panel.gd.uid
+  s_91cf6549724495::t_a3bb92aaa6f89e 1
+client/scripts/bot_mercenary_panel_assertions.gd
+  s_91cf6549724495::t_474e47524dc53c 1-31
+client/scripts/bot_debug_progression_setup.gd.uid
+  s_91cf6549724495::t_2fe1ee7f071e9e 1
+client/scripts/bot_mercenary_panel_assertions.gd.uid
+  s_91cf6549724495::t_2fe1ee7f071e9e 1
+docs/as-built/v207_mercenary-roster-ui.md
+  s_91cf6549724495::t_3dd6f94040334a 1-2,4-27
+  s_91cf6549724495::t_19fd196cdee3de 3
+client/tests/test_mercenary_panel.gd
+  s_91cf6549724495::t_60ae4a752ac922 1-74
+client/scripts/bot_wait_handlers.gd
+  s_91cf6549724495::t_845df7c69f93f3 7,57
+  s_91cf6549724495::t_026af0761d212c 54-56
+client/scripts/mercenary_panel_bridge.gd
+  s_91cf6549724495::t_fe1d47bd17661f 28-38
+  s_91cf6549724495::t_474e47524dc53c 1-27
+client/scripts/mercenary_panel.gd
+  s_91cf6549724495::t_60ae4a752ac922 1-41,45-51,54-212
+  s_91cf6549724495::t_16aeea9fc499e6 42-44,52-53
+docs/progress/scenario-catalog.md
+  s_91cf6549724495::t_3dd6f94040334a 46
+client/scripts/bot_assertion_handlers.gd
+  s_91cf6549724495::t_9f8d518400da23 8,114
+  s_91cf6549724495::t_567683a2be7ba7 111-113,115-119
+docs/progress/slice-lifecycle.md
+  s_91cf6549724495::t_3dd6f94040334a 224
+PROGRESS.md
+  s_91cf6549724495::t_3dd6f94040334a 26,29,112
+  s_91cf6549724495::t_19fd196cdee3de 18,28
+client/scripts/mercenary_panel_bridge.gd.uid
+  s_91cf6549724495::t_2fe1ee7f071e9e 1
+docs/plans/v207_2026-06-15-mercenary-roster-ui.md
+  s_91cf6549724495::t_308fcecefd16d5 1-2,4-16,20,22,28-36,40-41,44-55,59-67,73-84,88-101,104-109,115-118
+  s_91cf6549724495::t_3dd6f94040334a 3,17-19,21,23-27,37-39,42-43,56-58,68-72,85-87,102-103,110-114
+client/scripts/bot_debug_progression_setup.gd
+  s_91cf6549724495::t_474e47524dc53c 1-9,11-14,16-27
+  s_91cf6549724495::t_70e5af0c1cd9f9 10,15
+client/scripts/main.gd
+  s_91cf6549724495::t_8733d428e708db 2355-2356
+  s_91cf6549724495::t_47ab6c1dbaa679 356,1246,1588,2100,3320
+  s_91cf6549724495::t_088a42f840738f 25,247
+  s_91cf6549724495::t_e7c43383e84ec7 26-27
+  s_91cf6549724495::t_8e985f9594ff7e 1247
+  s_91cf6549724495::t_5e715a83658bdf 2347
+  s_91cf6549724495::t_5e9734a2f3deb4 360,384-385
+  s_91cf6549724495::t_d4d373a59d418b 6022,6036
+client/scripts/bot_scenario_runner.gd
+  s_91cf6549724495::t_7bb49c2d3f93e1 1613-1614
+tools/bot/scenarios/client/47_mercenary_roster_ui.json
+  s_91cf6549724495::t_47a2b6eb46e249 1-43
+client/scripts/bot_step_catalog.gd
+  s_91cf6549724495::t_5e19a318ac2571 16,44,227-229
+scripts/bot_client.sh
+  s_91cf6549724495::t_8b30d963da53ed 27,256,260,292,294,309,311
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c7210bda1a08a1b3f5d6c3257c10d5467ebe3b5f",
+  "prompts": {},
+  "sessions": {
+    "s_91cf6549724495": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdc2-d0c7-77a3-bdd7-9c7d3b38e3f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

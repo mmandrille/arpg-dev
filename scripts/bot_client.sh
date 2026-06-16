@@ -24,6 +24,7 @@ _ts() {
 
 BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
+DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
 GAMEPLAY_DEBUG="${ARPG_GAMEPLAY_DEBUG:-true}"
 EMAIL="${ARPG_EMAIL:-client-bot@example.test}"
 EMAIL_RUN_ID="${ARPG_BOT_CLIENT_RUN_ID:-$(date -u +%Y%m%d%H%M%S)-$$}"
@@ -252,10 +253,11 @@ start_preflight() {
 
 run_scenario() {
   local scenario_path="$1"
-  local scenario_id world_id seed exit_code started_ts tmpfile preflight_metadata preflight_log expected_join_session
+  local scenario_id world_id seed debug_gold exit_code started_ts tmpfile preflight_metadata preflight_log expected_join_session
   scenario_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('id','unknown'))")"
   world_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('world_id',''))")"
   seed="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('seed',''))")"
+  debug_gold="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('debug_progression', {}).get('gold', ''))")"
   started_ts="$(python3 -c 'import time; print(time.monotonic())')"
   tmpfile="$(mktemp)"
   preflight_metadata="$(mktemp)"
@@ -287,7 +289,9 @@ run_scenario() {
       ARPG_SEED="$seed" \
       ARPG_BASE_URL="$BASE_URL" \
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
+      ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
       ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
+      ARPG_BOT_DEBUG_GOLD="$debug_gold" \
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
@@ -302,7 +306,9 @@ run_scenario() {
       ARPG_SEED="$seed" \
       ARPG_BASE_URL="$BASE_URL" \
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
+      ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
       ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
+      ARPG_BOT_DEBUG_GOLD="$debug_gold" \
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \

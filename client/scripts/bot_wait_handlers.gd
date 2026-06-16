@@ -4,6 +4,7 @@ extends RefCounted
 const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journal_assertions.gd")
 const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_objective_assertions.gd")
 const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
+const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -50,6 +51,10 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			if not bool(state.get("bishop_panel_visible", false)):
 				return false
 			return runner._bishop_panel_matches(step, state)
+		"wait_mercenary_panel":
+			if not bool(state.get("mercenary_panel_visible", false)):
+				return false
+			return BotMercenaryPanelAssertionsScript.matches(step, state)
 		"wait_blacksmith_panel":
 			if not bool(state.get("blacksmith_panel_visible", false)):
 				return false

@@ -221,5 +221,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v204** | `set-collection-panel` | Complete (`make ci` green) | [`v204_spec-set-collection-panel.md`](docs/specs/v204_spec-set-collection-panel.md) | [`v204_2026-06-15-set-collection-panel.md`](docs/plans/v204_2026-06-15-set-collection-panel.md) | [`as-built`](docs/as-built/v204_set-collection-panel.md) |
 | **v205** | `boss-enrage-phase` | Complete (`make ci` green) | [`v205_spec-boss-enrage-phase.md`](docs/specs/v205_spec-boss-enrage-phase.md) | [`v205_2026-06-15-boss-enrage-phase.md`](docs/plans/v205_2026-06-15-boss-enrage-phase.md) | [`as-built`](docs/as-built/v205_boss-enrage-phase.md) |
 | **v206** | `mercenary-hiring-board` | Complete (`make ci` green) | [`v206_spec-mercenary-hiring-board.md`](docs/specs/v206_spec-mercenary-hiring-board.md) | [`v206_2026-06-15-mercenary-hiring-board.md`](docs/plans/v206_2026-06-15-mercenary-hiring-board.md) | [`as-built`](docs/as-built/v206_mercenary-hiring-board.md) |
+| **v207** | `mercenary-roster-ui` | Complete (`make ci` green) | [`v207_spec-mercenary-roster-ui.md`](docs/specs/v207_spec-mercenary-roster-ui.md) | [`v207_2026-06-15-mercenary-roster-ui.md`](docs/plans/v207_2026-06-15-mercenary-roster-ui.md) | [`as-built`](docs/as-built/v207_mercenary-roster-ui.md) |
 
 ---

@@ -1,0 +1,43 @@
+docs/as-built/v211_paladin-charge.md
+  s_4e57aa710a1c1f::t_f84ba291a847ad 1-22
+client/tests/test_skills_panel.gd
+  s_4e57aa710a1c1f::t_8bb103a7240b2f 151-155,164
+docs/plans/v211_2026-06-16-paladin-charge.md
+  s_4e57aa710a1c1f::t_f84ba291a847ad 1-79
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_4e57aa710a1c1f::t_ce52a0fa84b4b3 7,18,28-29,40
+server/internal/game/mobility_skills_test.go
+  s_4e57aa710a1c1f::t_5c9444c62fdc1b 60-88
+docs/specs/v211_spec-paladin-charge.md
+  s_4e57aa710a1c1f::t_f84ba291a847ad 1-48
+shared/rules/skills.v0.json
+  s_4e57aa710a1c1f::t_dc5acc137df5b8 581
+  s_4e57aa710a1c1f::t_fdb9c12cd72bff 588
+  s_4e57aa710a1c1f::t_aff60b9b1bb837 573-580,582-587,589-617
+shared/i18n/en.json
+  s_4e57aa710a1c1f::t_ce52a0fa84b4b3 76-77
+PROGRESS.md
+  s_4e57aa710a1c1f::t_2ef96d152eab7d 26,28-29
+shared/i18n/es.json
+  s_4e57aa710a1c1f::t_ce52a0fa84b4b3 60-61
+docs/progress/slice-lifecycle.md
+  s_4e57aa710a1c1f::t_2ef96d152eab7d 228
+shared/assets/skill_presentations.v0.json
+  s_4e57aa710a1c1f::t_ce52a0fa84b4b3 128-138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "81e506ae5e3ae3c86eefb778fe8a1f5e1d5a1ef1",
+  "prompts": {},
+  "sessions": {
+    "s_4e57aa710a1c1f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ece4a-9220-7c91-bf31-333e57a6cffa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+client/scripts/main.gd
+  s_cec0ce30bfe03e::t_ebcff0f451a939 782
+  s_cec0ce30bfe03e::t_7d3400dbeaa011 18,2178-2184
+  s_cec0ce30bfe03e::t_0d7018e8049f80 3839,3841-3842
+  s_cec0ce30bfe03e::t_626680be028e43 631-634
+  s_cec0ce30bfe03e::t_9c314668ec23db 3840
+  s_cec0ce30bfe03e::t_7d3d23cd8da585 574-575,588-589,630,635,643,2175-2177,3461
+client/tests/test_enemy_health_bar_settings.gd.uid
+  s_cec0ce30bfe03e::t_adc8aeaf9231f2 1
+shared/i18n/en.json
+  s_cec0ce30bfe03e::t_64aa58e29276da 18-20
+client/scripts/client_settings.gd
+  s_cec0ce30bfe03e::t_009fafd5cd492e 13-15,18-21,40,107-116,159-164,173,183,201,279-282
+shared/i18n/es.json
+  s_cec0ce30bfe03e::t_b72061ef8d677b 51-53
+client/scripts/enemy_health_bar_visibility.gd.uid
+  s_cec0ce30bfe03e::t_adc8aeaf9231f2 1
+scripts/client_smoke.sh
+  s_cec0ce30bfe03e::t_8467741ab2645a 141
+client/tests/test_enemy_health_bar_settings.gd
+  s_cec0ce30bfe03e::t_a400edc739c2fe 1-60,62-104
+  s_cec0ce30bfe03e::t_c2cd6788412c70 61
+client/scripts/settings_panel.gd
+  s_cec0ce30bfe03e::t_1bd5345b446784 13,18,22,28,40,48,93-99,164-174,217-227,251-252,263-265
+  s_cec0ce30bfe03e::t_64260077a2ca7c 107,111-112
+client/scripts/enemy_health_bar_visibility.gd
+  s_cec0ce30bfe03e::t_7b0beb76fa839c 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "4c3083c063c664e8e568e592e43aa5316d2e4c76",
+  "prompts": {},
+  "sessions": {
+    "s_cec0ce30bfe03e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed1af-4342-7812-a81e-2cc9ff456f4a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

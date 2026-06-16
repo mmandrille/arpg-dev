@@ -20,6 +20,8 @@ var base_cost: int = 100
 var growth_cost: int = 50
 var max_level: int = 3
 var success_chance_percent: int = 100
+var resource_item_def_id: String = ""
+var resource_count: int = 0
 var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
 var staged_item: Dictionary = {}
@@ -85,6 +87,8 @@ func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int,
 	growth_cost = int(config.get("item_upgrade_cost_growth_per_level", growth_cost))
 	max_level = int(config.get("item_upgrade_max_level", max_level))
 	success_chance_percent = int(config.get("item_upgrade_success_chance_percent", success_chance_percent))
+	resource_item_def_id = str(config.get("item_upgrade_resource_item_def_id", ""))
+	resource_count = int(config.get("item_upgrade_resource_count", 0))
 	_status_label.text = status
 	_rebuild()
 	visible = true
@@ -131,6 +135,9 @@ func get_debug_state() -> Dictionary:
 		"stash_gold": stash_gold,
 		"wallet_gold": _wallet_gold(),
 		"success_chance_percent": success_chance_percent,
+		"resource_item_def_id": resource_item_def_id,
+		"resource_required_count": resource_count,
+		"resource_inventory_count": _resource_inventory_count(),
 		"item_count": inventory_items.size(),
 		"staged_item": staged_item.duplicate(true),
 		"staged_item_id": str(staged_item.get("item_instance_id", staged_item.get("stash_item_id", ""))),
@@ -259,6 +266,12 @@ func _preview_block() -> Control:
 	cost_label.add_theme_color_override("font_color", Color("#d8c8a8"))
 	cost_row.add_child(cost_label)
 	box.add_child(cost_row)
+	if resource_count > 0:
+		var resource_label := _empty_label("%s: %d/%d" % [_resource_display_name(), _resource_inventory_count(), resource_count])
+		resource_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		resource_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+		resource_label.add_theme_color_override("font_color", Color("#d8c8a8") if _has_upgrade_resource() else Color("#ff9f7a"))
+		box.add_child(resource_label)
 	for line in _upgrade_preview_lines(staged_item):
 		var label := _empty_label(line)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -274,6 +287,9 @@ func _emit_upgrade(item: Dictionary) -> void:
 		return
 	if _wallet_gold() < cost:
 		show_status("Need %d gold" % cost, true)
+		return
+	if not _has_upgrade_resource():
+		show_status("Need %d %s" % [resource_count, _resource_display_name()], true)
 		return
 	var item_instance_id := str(item.get("item_instance_id", ""))
 	if item_instance_id != "":
@@ -326,18 +342,48 @@ func _debug_row(item: Dictionary) -> Dictionary:
 		"rarity": str(item.get("rarity", "")),
 		"item_level": level,
 		"next_cost_gold": _next_cost(level),
-		"upgrade_enabled": level < max_level and _wallet_gold() >= _next_cost(level),
+		"upgrade_enabled": _upgrade_enabled(item),
 	}
 
 
 func _upgrade_enabled(item: Dictionary) -> bool:
 	var level := _item_level(item)
-	return level < max_level and _wallet_gold() >= _next_cost(level)
+	return _is_upgrade_candidate(item) and level < max_level and _wallet_gold() >= _next_cost(level) and _has_upgrade_resource()
 
+
+func _is_upgrade_candidate(item: Dictionary) -> bool:
+	if item.is_empty():
+		return false
+	if resource_item_def_id != "" and str(item.get("item_def_id", "")) == resource_item_def_id:
+		return false
+	return str(item.get("item_template_id", "")) != "" or str(item.get("slot", "")) != "" or str(item.get("category", "")) == "equipment"
+
+
+func _has_upgrade_resource() -> bool:
+	return resource_count <= 0 or _resource_inventory_count() >= resource_count
+
+
+func _resource_inventory_count() -> int:
+	if resource_count <= 0 or resource_item_def_id == "":
+		return 0
+	var total := 0
+	for value in inventory_items:
+		if typeof(value) != TYPE_DICTIONARY:
+			continue
+		var item := value as Dictionary
+		if str(item.get("item_def_id", "")) == resource_item_def_id:
+			total += 1
+	return total
+
+
+func _resource_display_name() -> String:
+	if resource_item_def_id == "":
+		return "resource"
+	var def := ItemRulesLoader.item_definition(resource_item_def_id)
+	return str(def.get("name", resource_item_def_id.replace("_", " ").capitalize()))
 
 func _wallet_gold() -> int:
 	return gold + stash_gold
-
 
 func _item_level(item: Dictionary) -> int:
 	var rolled = item.get("rolled_stats", {})
@@ -345,13 +391,11 @@ func _item_level(item: Dictionary) -> int:
 		var payload := rolled as Dictionary
 		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
 			return int((payload.get("stats", {}) as Dictionary).get("item_level", 0))
-		return int(payload.get("item_level", 0))
+			return int(payload.get("item_level", 0))
 	return 0
-
 
 func _next_cost(level: int) -> int:
 	return base_cost + level * growth_cost
-
 
 func _upgrade_preview_lines(item: Dictionary) -> Array:
 	var lines: Array = []
@@ -375,7 +419,6 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 		lines.append("Item level: %d -> %d" % [level, min(max_level, level + 1)])
 	return lines
 
-
 func _stats_map(item: Dictionary) -> Dictionary:
 	var base_stats := _template_base_stats(item)
 	var rolled: Variant = item.get("rolled_stats", {})
@@ -396,7 +439,6 @@ func _stats_map(item: Dictionary) -> Dictionary:
 	_merge_missing_stats(summary_only, base_stats)
 	return summary_only
 
-
 func _template_base_stats(item: Dictionary) -> Dictionary:
 	var def_id := str(item.get("item_def_id", ""))
 	var template: Dictionary = ItemRulesLoader.item_definition(def_id)
@@ -404,12 +446,10 @@ func _template_base_stats(item: Dictionary) -> Dictionary:
 		return {}
 	return _dictionary_from_variant(template.get("base_stats", {}))
 
-
 func _merge_missing_stats(target: Dictionary, fallback: Dictionary) -> void:
 	for key in fallback.keys():
 		if not target.has(key):
 			target[key] = fallback.get(key)
-
 
 func _dictionary_from_variant(value: Variant) -> Dictionary:
 	var parsed = JSON.parse_string(JSON.stringify(value))
@@ -541,16 +581,6 @@ func _empty_label(text: String) -> Label:
 	empty.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	empty.add_theme_color_override("font_color", Color("#e8dcc8"))
 	return empty
-
-
-func _row_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.07, 0.065, 0.052, 0.95)
-	s.border_color = Color("#3b3020")
-	s.set_border_width_all(1)
-	s.set_content_margin_all(8)
-	return s
-
 
 func _stage_slot_style(hover: bool) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()

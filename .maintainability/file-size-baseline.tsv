@@ -3,12 +3,12 @@
 client/scripts/bot_controller.gd	742
 client/scripts/bot_scenario_runner.gd	1640
 client/scripts/character_select_panel.gd	642
-client/scripts/inventory_panel.gd	1528
+client/scripts/inventory_panel.gd	1556
 client/scripts/main.gd	6521
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010
-client/scripts/stash_panel.gd	1069
+client/scripts/stash_panel.gd	1155
 client/tests/test_client_bot.gd	1105
 client/tests/test_coop_client.gd	1519
 client/tests/test_golden.gd	784

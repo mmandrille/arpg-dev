@@ -1529,6 +1529,17 @@ func _remove_inventory_item(item_instance_id: String) -> void:
 		if str(inventory[i].get("item_instance_id", "")) == item_instance_id:
 			inventory.remove_at(i)
 
+func _remove_inventory_items_by_def(item_def_id: String, count: int) -> void:
+	if item_def_id == "" or count <= 0:
+		return
+	var removed := 0
+	for i in range(inventory.size() - 1, -1, -1):
+		if str(inventory[i].get("item_def_id", "")) == item_def_id:
+			inventory.remove_at(i)
+			removed += 1
+			if removed >= count:
+				return
+
 func _upsert_stash_item(item: Dictionary) -> void:
 	var stash_item_id := str(item.get("stash_item_id", ""))
 	if stash_item_id == "":
@@ -4481,6 +4492,7 @@ func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> voi
 	gold = int(result.get("gold", gold))
 	stash_gold = int(result.get("stash_gold", stash_gold))
 	_update_inventory_item(item)
+	_remove_inventory_items_by_def(str(result.get("resource_item_def_id", "")), int(result.get("resource_count", 0)))
 	if blacksmith_panel != null:
 		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)))
 	_refresh_inventory_ui()

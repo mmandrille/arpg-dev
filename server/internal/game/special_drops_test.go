@@ -19,20 +19,33 @@ func TestBossSpecialTreasureClassDropsAuthoredPackages(t *testing.T) {
 	}
 }
 
-func TestEliteObjectiveSpecialTreasureClassDropsAuthoredSetPiece(t *testing.T) {
+func TestEliteObjectiveSpecialTreasureClassUsesWeightedSetPool(t *testing.T) {
 	rules := loadRules(t)
 	if rules.DungeonGeneration.EliteObjective.LootTable != "elite_objective_special_drop" {
 		t.Fatalf("elite objective loot table = %s, want elite_objective_special_drop", rules.DungeonGeneration.EliteObjective.LootTable)
 	}
-	drops := rules.LootDrops("elite_objective_special_drop", NewRNG(2))
-	if len(drops) != 2 {
-		t.Fatalf("elite special drops = %+v, want 2 drops", drops)
+	tc := rules.TreasureClasses["elite_objective_special_tc_1"]
+	if len(tc.Attempts) < 2 {
+		t.Fatalf("elite special treasure class = %+v, want set and equipment attempts", tc.Attempts)
 	}
-	if drops[0].SetItemID != "verdant_vanguard_gloves" {
-		t.Fatalf("elite set drop = %+v, want verdant_vanguard_gloves", drops[0])
+	setAttempt := tc.Attempts[0]
+	if setAttempt.AttemptID != "set_piece" || setAttempt.SuccessWeight != 20 || setAttempt.NoDropWeight != 80 {
+		t.Fatalf("elite set attempt = %+v, want 20/80 weighted chance", setAttempt)
 	}
-	if drops[1].ItemTemplateID != "cave_ring" {
-		t.Fatalf("elite equipment drop = %+v, want cave_ring", drops[1])
+	setIDs := map[string]bool{}
+	for _, entry := range setAttempt.Entries {
+		if entry.SetItemID == "" {
+			t.Fatalf("elite set attempt entry = %+v, want set_item_id", entry)
+		}
+		setIDs[entry.SetItemID] = true
+	}
+	for setItemID := range rules.SetItems {
+		if !setIDs[setItemID] {
+			t.Fatalf("elite set attempt missing %s in %+v", setItemID, setAttempt.Entries)
+		}
+	}
+	if len(setIDs) != len(rules.SetItems) {
+		t.Fatalf("elite set attempt entries = %d, want %d", len(setIDs), len(rules.SetItems))
 	}
 }
 

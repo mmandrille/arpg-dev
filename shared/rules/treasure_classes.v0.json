@@ -253,10 +253,19 @@
       "attempts": [
         {
           "attempt_id": "set_piece",
-          "success_weight": 100,
-          "no_drop_weight": 0,
+          "success_weight": 20,
+          "no_drop_weight": 80,
           "entries": [
-            { "set_item_id": "verdant_vanguard_gloves", "weight": 1 }
+            { "set_item_id": "verdant_vanguard_blade", "weight": 1 },
+            { "set_item_id": "verdant_vanguard_helm", "weight": 1 },
+            { "set_item_id": "verdant_vanguard_mail", "weight": 1 },
+            { "set_item_id": "verdant_vanguard_gloves", "weight": 1 },
+            { "set_item_id": "verdant_vanguard_boots", "weight": 1 },
+            { "set_item_id": "stormrunner_covenant_bow", "weight": 1 },
+            { "set_item_id": "stormrunner_covenant_mask", "weight": 1 },
+            { "set_item_id": "stormrunner_covenant_grips", "weight": 1 },
+            { "set_item_id": "stormrunner_covenant_treads", "weight": 1 },
+            { "set_item_id": "stormrunner_covenant_loop", "weight": 1 }
           ]
         },
         {

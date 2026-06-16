@@ -67,6 +67,8 @@
     "skill.cleave.summary": "Cone weapon attack",
     "skill.rage.name": "Rage",
     "skill.rage.summary": "STR/VIT size buff",
+    "skill.leap.name": "Leap",
+    "skill.leap.summary": "Jumping impact stun",
     "skill.earthbreaker.name": "Earthbreaker",
     "skill.earthbreaker.summary": "Radial leap smash",
     "skill.heal.name": "Heal",

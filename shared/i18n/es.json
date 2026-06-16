@@ -75,6 +75,8 @@
     "skill.teleport.summary": "Parpadeo instantaneo dirigido",
     "skill.rage.name": "Furia",
     "skill.rage.summary": "Mejora de FUE/VIT y tamano",
+    "skill.leap.name": "Salto",
+    "skill.leap.summary": "Impacto con aturdimiento",
     "skill.earthbreaker.name": "Rompetierra",
     "skill.earthbreaker.summary": "Salto y golpe radial",
     "skill.poison_stab.name": "Punialada venenosa",

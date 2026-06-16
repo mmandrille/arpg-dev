@@ -8,7 +8,6 @@ import (
 	"strconv"
 )
 
-// Simulation constants for the v0 slice.
 const (
 	baseEntityID                   = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
 	playerStartHP                  = 10
@@ -86,17 +85,13 @@ var equipmentSlots = []string{
 	offHandSlot,
 }
 
-// DefaultWorldID is the compatibility world used when callers do not choose a
-// preset explicitly.
-const DefaultWorldID = "vertical_slice"
-
 const (
+	DefaultWorldID            = "vertical_slice"
 	townLevel                 = 0
 	levelZero                 = 0
 	townNavigationMarginCells = 8.0
 )
 
-// entity is the internal mutable scene entity.
 type entity struct {
 	id                    uint64
 	kind                  string
@@ -171,7 +166,6 @@ type entity struct {
 	hasAttacked           bool
 }
 
-// invItem is an internal inventory item.
 type invItem struct {
 	instanceID  uint64
 	itemDefID   string
@@ -812,7 +806,6 @@ type Input struct {
 	UniqueChestTakeItem *UniqueChestTakeItemIntent
 }
 
-// Intent payloads.
 type (
 	MoveIntent struct {
 		Direction     Vec2

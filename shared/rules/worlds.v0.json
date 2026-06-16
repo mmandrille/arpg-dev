@@ -624,6 +624,11 @@
           "type": "interactable",
           "interactable_def_id": "town_unique_chest",
           "position": { "x": 6, "y": 7 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_mercenary_board",
+          "position": { "x": 12, "y": 18 }
         }
       ]
     },
@@ -697,6 +702,11 @@
           "type": "interactable",
           "interactable_def_id": "town_market_board",
           "position": { "x": 7, "y": 12 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_mercenary_board",
+          "position": { "x": 7, "y": 10 }
         },
         {
           "type": "interactable",
@@ -874,6 +884,17 @@
       "player": { "position": { "x": 2, "y": 5 } },
       "entities": [
         { "type": "companion", "monster_def_id": "mercenary_guard", "position": { "x": 2.8, "y": 5 } },
+        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
+        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
+        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+      ]
+    },
+    "mercenary_hiring_lab": {
+      "player": { "position": { "x": 2, "y": 5 } },
+      "entities": [
+        { "type": "interactable", "interactable_def_id": "town_mercenary_board", "position": { "x": 3, "y": 5 } },
         { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
         { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
         { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },

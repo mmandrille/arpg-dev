@@ -202,7 +202,7 @@
       "additionalProperties": false,
       "properties": {
         "shop_id": { "type": "string" },
-        "service": { "type": "string", "enum": ["bishop", "market"] },
+        "service": { "type": "string", "enum": ["bishop", "market", "mercenary", "blacksmith"] },
         "refresh_key": { "type": "string", "pattern": "^[a-z0-9_:-]+$" },
         "offer_index": { "type": "integer", "minimum": 0 },
         "offer_id": { "type": "string", "pattern": "^(generated|mystery):[a-z0-9_:-]+$" },
@@ -669,6 +669,20 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "service"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "mercenary_board_opened" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "offer_id", "monster_def_id", "price", "affordable", "total_gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "mercenary_hired" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "target_entity_id", "service", "offer_id", "monster_def_id", "price", "total_gold"] }
         },
         {
           "if": {

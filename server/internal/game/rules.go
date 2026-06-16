@@ -56,6 +56,7 @@ type MainGameplayConfig struct {
 	ItemUpgradePityFailures int     `json:"item_upgrade_pity_failure_threshold"`
 	ItemUpgradeResourceID   string  `json:"item_upgrade_resource_item_def_id"`
 	ItemUpgradeResourceCost int     `json:"item_upgrade_resource_count"`
+	MercenaryHireCostGold   int     `json:"mercenary_hire_cost_gold"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -995,8 +996,8 @@ func LoadRules(dir string) (*Rules, error) {
 	if mainConfig.Gameplay.ItemUpgradePityFailures < 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_pity_failure_threshold: must be non-negative")
 	}
-	if mainConfig.Gameplay.ItemUpgradeResourceCost < 0 {
-		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_count: must be non-negative")
+	if err := validateMainGameplayEconomyConfig(mainConfig.Gameplay); err != nil {
+		return nil, err
 	}
 	if mainConfig.Gameplay.ItemUpgradeResourceCost > 0 {
 		if mainConfig.Gameplay.ItemUpgradeResourceID == "" {
@@ -1753,7 +1754,7 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.StashID != "" && def.StashID != "account_stash" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.stash_id: unknown stash %s", id, def.StashID)
 			}
-			if def.Service != "" && def.Service != "bishop" && def.Service != "market" && def.Service != "blacksmith" && def.Service != uniqueTestChestService {
+			if def.Service != "" && def.Service != "bishop" && def.Service != "market" && def.Service != "mercenary" && def.Service != "blacksmith" && def.Service != uniqueTestChestService {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.service: unsupported service %s", id, def.Service)
 			}
 		default:

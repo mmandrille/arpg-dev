@@ -481,7 +481,8 @@
         "range": { "type": "number", "exclusiveMinimum": 0 },
         "angle_degrees": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
         "reason": { "type": "string" },
-        "service": { "type": "string", "enum": ["bishop", "market"] },
+        "service": { "type": "string", "enum": ["bishop", "market", "mercenary", "blacksmith"] },
+        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback|mystery):[a-z0-9_:-]+$" },
         "price": { "type": "integer", "minimum": 0 },
         "affordable": { "type": "boolean" },
         "stash_id": { "type": "string" },
@@ -717,6 +718,20 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "service"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "mercenary_board_opened" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "offer_id", "monster_def_id", "price", "affordable", "total_gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "mercenary_hired" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "target_entity_id", "service", "offer_id", "monster_def_id", "price", "total_gold"] }
         },
         {
           "if": {

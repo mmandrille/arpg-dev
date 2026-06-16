@@ -47,6 +47,11 @@
       "initial_state": "ready",
       "service": "market"
     },
+    "town_mercenary_board": {
+      "name": "Mercenary Board",
+      "initial_state": "ready",
+      "service": "mercenary"
+    },
     "town_blacksmith": {
       "name": "Blacksmith",
       "initial_state": "ready",

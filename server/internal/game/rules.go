@@ -53,6 +53,7 @@ type MainGameplayConfig struct {
 	ItemUpgradeCostGrowth   int     `json:"item_upgrade_cost_growth_per_level"`
 	ItemUpgradeMaxLevel     int     `json:"item_upgrade_max_level"`
 	ItemUpgradeSuccessPct   int     `json:"item_upgrade_success_chance_percent"`
+	ItemUpgradePityFailures int     `json:"item_upgrade_pity_failure_threshold"`
 	ItemUpgradeResourceID   string  `json:"item_upgrade_resource_item_def_id"`
 	ItemUpgradeResourceCost int     `json:"item_upgrade_resource_count"`
 }
@@ -989,6 +990,9 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.ItemUpgradeSuccessPct < 0 || mainConfig.Gameplay.ItemUpgradeSuccessPct > 100 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_success_chance_percent: must be 0-100")
+	}
+	if mainConfig.Gameplay.ItemUpgradePityFailures < 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_pity_failure_threshold: must be non-negative")
 	}
 	if mainConfig.Gameplay.ItemUpgradeResourceCost < 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_count: must be non-negative")

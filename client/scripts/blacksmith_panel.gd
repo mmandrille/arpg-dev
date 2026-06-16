@@ -20,6 +20,7 @@ var base_cost: int = 100
 var growth_cost: int = 50
 var max_level: int = 3
 var success_chance_percent: int = 100
+var pity_failure_threshold: int = 0
 var resource_item_def_id: String = ""
 var resource_count: int = 0
 var item_presentations: Dictionary:
@@ -69,12 +70,10 @@ class BlacksmithStageSlot:
 
 	func _drop_data(_at_position: Vector2, data: Variant) -> void:
 		panel.stage_inventory_item(data.get("item", {}))
-
 func _ready() -> void:
 	ItemRulesLoader.ensure_loaded()
 	_build()
 	hide_display()
-
 
 func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int, next_stash_gold: int, config: Dictionary, status: String = "") -> void:
 	if _panel == null:
@@ -87,6 +86,7 @@ func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int,
 	growth_cost = int(config.get("item_upgrade_cost_growth_per_level", growth_cost))
 	max_level = int(config.get("item_upgrade_max_level", max_level))
 	success_chance_percent = int(config.get("item_upgrade_success_chance_percent", success_chance_percent))
+	pity_failure_threshold = int(config.get("item_upgrade_pity_failure_threshold", 0))
 	resource_item_def_id = str(config.get("item_upgrade_resource_item_def_id", ""))
 	resource_count = int(config.get("item_upgrade_resource_count", 0))
 	_status_label.text = status
@@ -95,13 +95,11 @@ func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int,
 	_panel.visible = true
 	_panel.clamp_to_viewport()
 
-
 func hide_display() -> void:
 	unstage_item(false)
 	visible = false
 	if _panel != null:
 		_panel.visible = false
-
 
 func show_status(message: String, warning: bool = false) -> void:
 	if _status_label == null:
@@ -109,14 +107,12 @@ func show_status(message: String, warning: bool = false) -> void:
 	_status_label.text = message
 	_status_label.add_theme_color_override("font_color", Color("#ffcf5a") if warning else Color("#9fd7ff"))
 
-
 func update_after_upgrade(item: Dictionary, next_gold: int, next_stash_gold: int, charged_cost: int, success: bool = true) -> void:
 	staged_item = item.duplicate(true)
 	gold = next_gold
 	stash_gold = next_stash_gold
 	show_status(("Upgraded for %d gold" if success else "Upgrade failed for %d gold") % charged_cost, not success)
 	_rebuild()
-
 
 func bot_click_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	var item := _matching_item(stash_item_id, item_def_id, stash_index)
@@ -126,16 +122,18 @@ func bot_click_upgrade(stash_item_id: String = "", item_def_id: String = "", sta
 	stage_inventory_item(item)
 	_emit_upgrade(staged_item)
 
-
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"blacksmith_entity_id": blacksmith_entity_id,
 		"gold": gold,
 		"stash_gold": stash_gold,
-		"wallet_gold": _wallet_gold(),
-		"success_chance_percent": success_chance_percent,
-		"resource_item_def_id": resource_item_def_id,
+			"wallet_gold": _wallet_gold(),
+			"success_chance_percent": success_chance_percent,
+			"pity_failure_count": _pity_failure_count(staged_item),
+			"pity_threshold": pity_failure_threshold,
+			"pity_guaranteed": _pity_guaranteed(staged_item),
+			"resource_item_def_id": resource_item_def_id,
 		"resource_required_count": resource_count,
 		"resource_inventory_count": _resource_inventory_count(),
 		"item_count": inventory_items.size(),
@@ -148,9 +146,8 @@ func get_debug_state() -> Dictionary:
 		"instruction_visible": false,
 		"rows": _debug_rows(),
 		"status": _status_label.text if _status_label != null else "",
-		"window": _panel.get_debug_state() if _panel != null else {},
-	}
-
+			"window": _panel.get_debug_state() if _panel != null else {},
+		}
 
 func stage_inventory_item(item: Dictionary) -> void:
 	if item.is_empty():
@@ -158,7 +155,6 @@ func stage_inventory_item(item: Dictionary) -> void:
 	staged_item = item.duplicate(true)
 	show_status("Ready to upgrade %s" % _item_title(staged_item))
 	_rebuild()
-
 
 func unstage_item(show_message: bool = true) -> void:
 	if staged_item.is_empty():
@@ -168,7 +164,6 @@ func unstage_item(show_message: bool = true) -> void:
 	if show_message:
 		show_status("%s returned to inventory" % title)
 	_rebuild()
-
 
 func _build() -> void:
 	if _panel != null:
@@ -208,7 +203,6 @@ func _build() -> void:
 	_rows.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	root.add_child(_rows)
 
-
 func _rebuild() -> void:
 	_gold_label.text = "Gold: %d  Stash: %d" % [gold, stash_gold]
 	_clear_rows()
@@ -222,7 +216,6 @@ func _rebuild() -> void:
 	button.pressed.connect(func() -> void: _emit_upgrade(staged_item))
 	button_center.add_child(button)
 	_rows.add_child(button_center)
-
 
 func _stage_slot() -> Control:
 	var center := CenterContainer.new()
@@ -240,7 +233,6 @@ func _stage_slot() -> Control:
 	btn.add_theme_stylebox_override("pressed", _stage_slot_style(true))
 	center.add_child(btn)
 	return center
-
 
 func _preview_block() -> Control:
 	var box := VBoxContainer.new()
@@ -278,7 +270,6 @@ func _preview_block() -> Control:
 		box.add_child(label)
 	return box
 
-
 func _emit_upgrade(item: Dictionary) -> void:
 	var level := _item_level(item)
 	var cost := _next_cost(level)
@@ -300,7 +291,6 @@ func _emit_upgrade(item: Dictionary) -> void:
 		show_status("Missing item id", true)
 		return
 	upgrade_requested.emit(stash_item_id)
-
 
 func _matching_item(stash_item_id: String, item_def_id: String, stash_index: int) -> Dictionary:
 	var matches: Array = []
@@ -382,6 +372,16 @@ func _resource_display_name() -> String:
 	var def := ItemRulesLoader.item_definition(resource_item_def_id)
 	return str(def.get("name", resource_item_def_id.replace("_", " ").capitalize()))
 
+func _pity_failure_count(item: Dictionary) -> int:
+	var rolled = item.get("rolled_stats", {})
+	if typeof(rolled) != TYPE_DICTIONARY:
+		return 0
+	var pity = (rolled as Dictionary).get("upgrade_pity", {})
+	return max(0, int((pity as Dictionary).get("failures", 0))) if typeof(pity) == TYPE_DICTIONARY else 0
+
+func _pity_guaranteed(item: Dictionary) -> bool:
+	return pity_failure_threshold > 0 and _pity_failure_count(item) >= pity_failure_threshold
+
 func _wallet_gold() -> int:
 	return gold + stash_gold
 
@@ -391,7 +391,7 @@ func _item_level(item: Dictionary) -> int:
 		var payload := rolled as Dictionary
 		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
 			return int((payload.get("stats", {}) as Dictionary).get("item_level", 0))
-			return int(payload.get("item_level", 0))
+		return int(payload.get("item_level", 0))
 	return 0
 
 func _next_cost(level: int) -> int:
@@ -406,6 +406,8 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 	if level >= max_level:
 		return ["Max level reached"]
 	lines.append("Success chance: %d%%" % success_chance_percent)
+	if pity_failure_threshold > 0:
+		lines.append("Next upgrade guaranteed" if _pity_guaranteed(item) else "Pity: %d/%d failures" % [_pity_failure_count(item), pity_failure_threshold])
 	for key in _ordered_upgrade_stat_keys(stats):
 		var current := int(stats.get(key, 0))
 		var next := current

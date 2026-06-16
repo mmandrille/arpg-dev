@@ -610,11 +610,17 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if upgraded.StashGold != 150 || upgraded.CostGold != 100 || !upgraded.Success {
 		t.Fatalf("upgrade balances = %+v", upgraded)
 	}
-	var stats map[string]int
+	var stats struct {
+		ItemLevel int `json:"item_level"`
+		DamageMax int `json:"damage_max"`
+		Pity      struct {
+			Failures int `json:"failures"`
+		} `json:"upgrade_pity"`
+	}
 	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
 	}
-	if stats["item_level"] != 1 || stats["damage_max"] != 5 {
+	if stats.ItemLevel != 1 || stats.DamageMax != 5 || stats.Pity.Failures != 0 {
 		t.Fatalf("upgraded route stats = %+v", stats)
 	}
 	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
@@ -630,7 +636,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
 	}
-	if stats["item_level"] != 2 || stats["damage_max"] != 6 {
+	if stats.ItemLevel != 2 || stats.DamageMax != 6 || stats.Pity.Failures != 0 {
 		t.Fatalf("second upgraded route stats = %+v", stats)
 	}
 	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})

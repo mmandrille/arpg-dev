@@ -195,11 +195,12 @@ func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID st
 	growth := s.rules.MainConfig.Gameplay.ItemUpgradeCostGrowth
 	maxLevel := s.rules.MainConfig.Gameplay.ItemUpgradeMaxLevel
 	chance := s.rules.MainConfig.Gameplay.ItemUpgradeSuccessPct
+	pityFailures := s.rules.MainConfig.Gameplay.ItemUpgradePityFailures
 	roll, err := upgradeSuccessRoll()
 	if err != nil {
 		return store.AccountStashItem{}, 0, 0, 0, false, err
 	}
-	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, chance, roll, eligible)
+	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, chance, roll, pityFailures, eligible)
 	return item, characterGold, stashGold, chargedCost, success, err
 }
 

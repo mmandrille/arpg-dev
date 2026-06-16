@@ -84,7 +84,8 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 		preview.setup(item, item_presentations, fallback_label, price >= 0 and not affordable)
 		top_row.add_child(preview)
 
-	var visible_requirement_lines := _visible_requirement_lines(requirement_lines)
+	var level_text := _item_level_text(item)
+	var visible_requirement_lines := _visible_requirement_lines(requirement_lines, not level_text.begins_with("Item level"))
 	if not visible_requirement_lines.is_empty():
 		root.add_child(_tooltip_spacer(8))
 		root.add_child(_tooltip_label("Requirements", Color("#c9a227")))
@@ -101,7 +102,6 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 			var color: Color = rec.get("color", Color("#d8c7a6"))
 			root.add_child(_tooltip_label(str(rec.get("text", "")), color))
 
-	var level_text := _item_level_text(item)
 	if price >= 0 or level_text != "":
 		root.add_child(_tooltip_spacer(FOOTER_TOP_GAP))
 		var footer := HBoxContainer.new()
@@ -254,10 +254,10 @@ func _entry_font_size(value, fallback: int) -> int:
 	return int(rec.get("font_size", fallback))
 
 
-func _visible_requirement_lines(requirement_lines: Array) -> Array:
+func _visible_requirement_lines(requirement_lines: Array, hide_level_requirement: bool = true) -> Array:
 	var out: Array = []
 	for line in requirement_lines:
-		if _is_level_line(_entry_text(line)):
+		if hide_level_requirement and _is_level_line(_entry_text(line)):
 			continue
 		out.append(line)
 	return out
@@ -266,6 +266,9 @@ func _visible_requirement_lines(requirement_lines: Array) -> Array:
 func _item_level_text(item: Dictionary) -> String:
 	if item.is_empty():
 		return ""
+	var item_level = _explicit_item_level(item)
+	if item_level != null:
+		return "Item level %s" % _format_level_value(item_level)
 	var requirements = item.get("requirements", {})
 	if typeof(requirements) == TYPE_DICTIONARY:
 		var req := requirements as Dictionary
@@ -280,6 +283,18 @@ func _item_level_text(item: Dictionary) -> String:
 			if str(rec.get("stat", "")) == "level" and int(rec.get("required", 0)) > 0:
 				return "Level %s" % _format_level_value(rec.get("required", 0))
 	return ""
+
+
+func _explicit_item_level(item: Dictionary):
+	if item.has("item_level"):
+		return item.get("item_level", 0)
+	var stats = item.get("stats", {})
+	if typeof(stats) == TYPE_DICTIONARY and (stats as Dictionary).has("item_level"):
+		return (stats as Dictionary).get("item_level", 0)
+	var rolled_stats = item.get("rolled_stats", {})
+	if typeof(rolled_stats) == TYPE_DICTIONARY and (rolled_stats as Dictionary).has("item_level"):
+		return (rolled_stats as Dictionary).get("item_level", 0)
+	return null
 
 
 func _format_level_value(value: Variant) -> String:

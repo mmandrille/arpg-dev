@@ -215,6 +215,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v198** | `mercenary-foundation` | Complete (`make ci` green) | [`v198_spec-mercenary-foundation.md`](docs/specs/v198_spec-mercenary-foundation.md) | [`v198_2026-06-15-mercenary-foundation.md`](docs/plans/v198_2026-06-15-mercenary-foundation.md) | [`as-built`](docs/as-built/v198_mercenary-foundation.md) |
 | **v199** | `new-boss-pattern-deck` | Complete (`make ci` green) | [`v199_spec-new-boss-pattern-deck.md`](docs/specs/v199_spec-new-boss-pattern-deck.md) | [`v199_2026-06-15-new-boss-pattern-deck.md`](docs/plans/v199_2026-06-15-new-boss-pattern-deck.md) | [`as-built`](docs/as-built/v199_new-boss-pattern-deck.md) |
 | **v200** | `progress-doc-compaction` | Complete (`make maintainability` green) | — | — | [`as-built`](docs/as-built/v200_progress-doc-compaction.md) |
+| **v201** | `item-level-tooltip` | Complete (`make ci` green) | [`v201_spec-item-level-tooltip.md`](docs/specs/v201_spec-item-level-tooltip.md) | [`v201_2026-06-15-item-level-tooltip.md`](docs/plans/v201_2026-06-15-item-level-tooltip.md) | [`as-built`](docs/as-built/v201_item-level-tooltip.md) |
 
 ---
-

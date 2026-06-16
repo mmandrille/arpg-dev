@@ -1,0 +1,29 @@
+client/tests/test_coop_client.gd
+  s_a8770cc34038ef::t_89932661d31915 25,60
+  s_a8770cc34038ef::t_360f2b708cd413 1463-1487
+client/scripts/main.gd
+  s_a8770cc34038ef::t_a7dd2b7c59bc50 57,104
+  s_a8770cc34038ef::t_f30a53871a1dfd 1016-1025
+  s_a8770cc34038ef::t_c97f34bc760c1d 1951-1964
+client/scripts/charge_channel_visual.gd.uid
+  s_a8770cc34038ef::t_1144c8a95bcd54 1
+client/scripts/charge_channel_visual.gd
+  s_a8770cc34038ef::t_036e31f5dbfeda 1-71,73-141
+  s_a8770cc34038ef::t_1763cf0d929564 72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "f3f257f3ed9648449e93c529adff8f4c4efa6e80",
+  "prompts": {},
+  "sessions": {
+    "s_a8770cc34038ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed073-156b-7a42-ba3c-3ba0f571d8a3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -23,7 +23,7 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
 
     assert entries["rage"].category == "self_buff"
     assert entries["rage"].class_id == "barbarian"
-    assert entries["rage"].icon_shape == "burst"
+    assert entries["rage"].icon_shape == "flame"
 
     assert entries["earthbreaker"].category == "attack"
     assert entries["earthbreaker"].class_id == "barbarian"

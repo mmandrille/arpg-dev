@@ -21,6 +21,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.openMarketService(e, in, res, ack)
 		return
 	}
+	if service := s.serviceForInteractable(e); service == "mercenary" {
+		s.hireMercenaryFromBoard(e, in, res, ack)
+		return
+	}
 	if service := s.serviceForInteractable(e); service == "blacksmith" {
 		s.openBlacksmithService(e, in, res, ack)
 		return

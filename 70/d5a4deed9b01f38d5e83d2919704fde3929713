@@ -1,0 +1,36 @@
+client/tests/test_stash_panel.gd
+  s_b1425f2ce33aac::t_269ac72f8d6c9d 224,250-253
+  s_b1425f2ce33aac::t_0b789392da6e14 267
+  s_b1425f2ce33aac::t_a34f941765b5d6 248-249,254
+client/scripts/stash_panel.gd
+  s_91cf6549724495::t_d0e0cb6d35eb36 937,939
+  s_b1425f2ce33aac::t_5395d8f5b3dbf4 852-865
+  s_b1425f2ce33aac::t_e95d383f6a59d5 558,993-1002
+  s_b1425f2ce33aac::t_7721842f8c28ff 942,944-945,947,959-992
+client/scripts/inventory_panel.gd
+  s_b1425f2ce33aac::t_7721842f8c28ff 1048,1050,1056-1074
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "70d5a4deed9b01f38d5e83d2919704fde3929713",
+  "prompts": {},
+  "sessions": {
+    "s_91cf6549724495": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdc2-d0c7-77a3-bdd7-9c7d3b38e3f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_b1425f2ce33aac": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdbd-5548-79d3-98a2-0abcc3639c32",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

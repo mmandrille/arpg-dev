@@ -1,0 +1,69 @@
+server/internal/game/rogue_rules.go
+  s_a8770cc34038ef::t_95e7179927e0b0 29-30,57
+  s_a8770cc34038ef::t_4a19f214fb463c 25,56
+client/scripts/main.gd
+  s_a8770cc34038ef::t_abf135de73f1dd 134
+  s_a8770cc34038ef::t_932e5c42f69be5 982-984,992-994,1088-1090
+  s_a8770cc34038ef::t_8a2efab6142d4f 1966-1971,1975-1988,2006
+  s_a8770cc34038ef::t_ad58c96869c883 55
+  s_a8770cc34038ef::t_c612cf6ad6382f 1972
+  s_a8770cc34038ef::t_670a2551849937 1343,1350-1353,1401
+  s_a8770cc34038ef::t_d4860fe14770b7 1991,1999
+  s_a8770cc34038ef::t_2bbe5e03f5b226 1895,1949,1954-1955,1958-1959,1974,1989-1990,1992-1998,2000-2005
+  s_a8770cc34038ef::t_c2b671df61ae84 1948,1973
+AGENTS.md
+  s_a8770cc34038ef::t_a69d151ea0f97b 81
+shared/rules/skills.v0.schema.json
+  s_a8770cc34038ef::t_c922ee311ed536 341
+  s_a8770cc34038ef::t_3095c2bf9baad7 345-346
+  s_a8770cc34038ef::t_eb7b9766b998f5 468,471,476-478
+shared/assets/skill_presentations.v0.json
+  s_a8770cc34038ef::t_89958303050f51 104-105,128
+server/internal/game/rules.go
+  s_a8770cc34038ef::t_920ade5ec978d7 2834,2837
+server/internal/game/item_skill_stats.go
+  s_a8770cc34038ef::t_1dfbb1a8cc9d94 52-54
+shared/rules/skills.v0.json
+  s_a8770cc34038ef::t_dea7494d5c8b84 610-611
+  h_6c904e338a0e5a 606
+  s_a8770cc34038ef::t_5401e2f38073ca 616
+server/internal/game/mobility_skills.go
+  s_a8770cc34038ef::t_730b4e09a340aa 36-40,86-153
+shared/assets/skill_presentations.v0.schema.json
+  s_a8770cc34038ef::t_bf40732d247bb5 52-55
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_a8770cc34038ef::t_a5e36614a71448 7,36,44-45
+  s_a8770cc34038ef::t_5c332a15472d13 31-35
+  s_a8770cc34038ef::t_c0e8e15a95fa8c 10
+docs/specs/v214_spec-paladin-charge-channel.md
+  s_a8770cc34038ef::t_a3c1c8c2712145 1-60
+server/internal/game/sim.go
+  s_a8770cc34038ef::t_71d49b931568e5 2315-2317
+  s_a8770cc34038ef::t_d57cbc8e5aa186 877-878
+server/internal/game/mobility_skills_test.go
+  s_a8770cc34038ef::t_728ec63c25b039 60,64,67,77,86-87
+  s_a8770cc34038ef::t_12bb31945f1964 80-82
+server/internal/game/handlers.go
+  s_a8770cc34038ef::t_e775eeb62794b1 1274-1276,1312-1314
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "18fc565890c1ad4aced4aff92242b89d03f7fa9b",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_a8770cc34038ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed073-156b-7a42-ba3c-3ba0f571d8a3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,69 @@
+server/internal/game/handlers.go
+  s_4e57aa710a1c1f::t_39f09c2b8bdcde 1259-1260
+  s_eea129eb412d67::t_0ea9c05a3a417b 792
+client/tests/test_skills_panel.gd
+  s_4e57aa710a1c1f::t_5efdd82e262037 63,65-69
+docs/progress/slice-lifecycle.md
+  s_4e57aa710a1c1f::t_4d10cae57fd010 226
+shared/assets/skill_presentations.v0.json
+  s_4e57aa710a1c1f::t_263a55e68f31db 15-25
+shared/rules/skills.v0.json
+  s_4e57aa710a1c1f::t_c59095e9f549be 56-94
+server/internal/game/rules.go
+  s_4e57aa710a1c1f::t_1fe25eeb18f9c9 2882,2942,2946
+  s_4e57aa710a1c1f::t_78b3caa56641fd 535
+  s_4e57aa710a1c1f::t_a29eaf44a4abba 2943-2945
+docs/as-built/v209_sorcerer-teleport.md
+  s_4e57aa710a1c1f::t_94ea33192388db 1-23
+PROGRESS.md
+  s_4e57aa710a1c1f::t_4d10cae57fd010 26,28-29
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_4e57aa710a1c1f::t_777f91eede6767 18,24-25,43
+server/internal/game/rogue_rules.go
+  s_4e57aa710a1c1f::t_aea64b2b10f8d6 20-33,44-62
+tools/bot/skill_visual_runtime.py
+  s_4e57aa710a1c1f::t_00b0b9843a0da6 134
+  s_4e57aa710a1c1f::t_7739ffb7cd76fd 143-145,149
+shared/i18n/es.json
+  s_4e57aa710a1c1f::t_4be1509ce02e58 74-75
+server/internal/game/mobility_skills.go
+  s_4e57aa710a1c1f::t_32683d34758a77 1-87
+server/internal/game/mobility_skills_test.go
+  s_4e57aa710a1c1f::t_bcb3138ea24deb 1-52
+shared/rules/skills.v0.schema.json
+  s_4e57aa710a1c1f::t_3a8356fd7dd982 28,41,117-123,332-347
+docs/specs/v209_spec-sorcerer-teleport.md
+  s_4e57aa710a1c1f::t_94ea33192388db 3
+  s_4e57aa710a1c1f::t_6f03614db42c56 1-2,4-57
+shared/i18n/en.json
+  s_4e57aa710a1c1f::t_92182d3ede6aab 56-57
+tools/bot/skill_demo.py
+  s_4e57aa710a1c1f::t_f12d5be67ccb89 95-96
+docs/plans/v209_2026-06-16-sorcerer-teleport.md
+  s_4e57aa710a1c1f::t_6f03614db42c56 1-2,4-31,36-37,40-51,54-66,70-79,82-94,97-102,108-111
+  s_4e57aa710a1c1f::t_94ea33192388db 3,32-35,38-39,52-53,67-69,80-81,95-96,103-107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c29212e97dbfe7c52c6b04ec9c4e558c9c0d5ebb",
+  "prompts": {},
+  "sessions": {
+    "s_4e57aa710a1c1f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ece4a-9220-7c91-bf31-333e57a6cffa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_eea129eb412d67": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eceba-bd9a-7d12-8a0f-26a79adb679d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

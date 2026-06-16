@@ -45,6 +45,10 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["shadow_flurry"].class_id == "rogue"
     assert entries["shadow_flurry"].icon_shape == "slash"
 
+    assert entries["executioner"].category == "passive"
+    assert entries["executioner"].class_id == "rogue"
+    assert entries["executioner"].icon_label == "X"
+
     assert entries["split_arrow"].category == "attack"
     assert entries["split_arrow"].class_id == "ranger"
     assert entries["split_arrow"].icon_label == "S"

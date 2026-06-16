@@ -100,6 +100,8 @@ def demo_category(skill: dict[str, Any]) -> str:
         return "self_buff"
     if kind == "area_stat_buff":
         return "stat_buff"
+    if kind == "passive_execute":
+        return "passive"
     return "unknown"
 
 

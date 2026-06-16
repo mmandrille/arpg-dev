@@ -255,6 +255,9 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["shadow_flurry"]; skill.Class != "rogue" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "dash" || skill.Cone.AngleDegrees <= r.Skills["dash"].Cone.AngleDegrees {
 		t.Fatalf("shadow_flurry skill = %+v, want rogue tier 2 cone requiring dash with wider angle", skill)
 	}
+	if skill := r.Skills["executioner"]; skill.Class != "rogue" || skill.Kind != "passive_execute" || skill.Targeting != "self" || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "poison_stab" || skill.Execute.ThresholdPercentBase != 10 || skill.Execute.ThresholdPercentPerRank != 5 {
+		t.Fatalf("executioner skill = %+v, want rogue passive execute requiring poison_stab with 10%% + 5%%/rank threshold", skill)
+	}
 	if skill := r.Skills["split_arrow"]; skill.Class != "ranger" || skill.Kind != "projectile_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "volley" || skill.Pierce.MaxHits != 3 || skill.Projectile.Visual != "split_arrow_projectile" {
 		t.Fatalf("split_arrow skill = %+v, want ranger tier 3 projectile requiring volley with pierce", skill)
 	}

@@ -13,6 +13,18 @@ type poisonDotState struct {
 	CorrelationID  string
 }
 
+type rogueMarkState struct {
+	SourcePlayerID     uint64
+	TargetID           uint64
+	SkillID            string
+	Rank               int
+	DamageBonusPercent int
+	EndsTick           uint64
+	TotalTicks         int
+	EffectID           string
+	CorrelationID      string
+}
+
 func clonePoisonDots(in map[uint64]poisonDotState) map[uint64]poisonDotState {
 	if len(in) == 0 {
 		return make(map[uint64]poisonDotState)
@@ -20,6 +32,17 @@ func clonePoisonDots(in map[uint64]poisonDotState) map[uint64]poisonDotState {
 	out := make(map[uint64]poisonDotState, len(in))
 	for targetID, dot := range in { //nolint:determinism — pure map clone, output is a map
 		out[targetID] = dot
+	}
+	return out
+}
+
+func cloneRogueMarks(in map[uint64]rogueMarkState) map[uint64]rogueMarkState {
+	if len(in) == 0 {
+		return make(map[uint64]rogueMarkState)
+	}
+	out := make(map[uint64]rogueMarkState, len(in))
+	for targetID, mark := range in { //nolint:determinism — pure map clone, output is a map
+		out[targetID] = mark
 	}
 	return out
 }
@@ -182,6 +205,9 @@ func (s *Sim) applyDashSkill(player *entity, skillID string, def SkillDef, rank 
 				res.Events[i].SkillID = skillID
 			}
 		}
+		if target.hp > 0 && def.Dash.StunDurationTicks > 0 {
+			s.applyMonsterRoot(target, player.id, skillID, SkillRootDef{EffectID: def.Dash.StunEffectID, DurationTicks: def.Dash.StunDurationTicks}, correlationID, res)
+		}
 	}
 }
 
@@ -239,7 +265,45 @@ func (s *Sim) startPoisonDot(player *entity, target *entity, skillID string, def
 		RemainingTicks: intPtr(duration),
 		TotalTicks:     intPtr(duration),
 	})
+	s.startRogueMark(player, target, skillID, def, rank, correlationID, res)
 	s.replicatePoisonDot(player.id, target, s.poisonDots[target.id], res)
+}
+
+func (s *Sim) startRogueMark(player *entity, target *entity, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
+	if player == nil || target == nil || def.Poison.MarkDurationTicks <= 0 || def.Poison.MarkDamageBonusPercent <= 0 {
+		return
+	}
+	if s.rogueMarks == nil {
+		s.rogueMarks = make(map[uint64]rogueMarkState)
+	}
+	mark := rogueMarkState{
+		SourcePlayerID:     player.id,
+		TargetID:           target.id,
+		SkillID:            skillID,
+		Rank:               rank,
+		DamageBonusPercent: def.Poison.MarkDamageBonusPercent,
+		EndsTick:           s.tick + uint64(def.Poison.MarkDurationTicks),
+		TotalTicks:         def.Poison.MarkDurationTicks,
+		EffectID:           def.Poison.MarkEffectID,
+		CorrelationID:      correlationID,
+	}
+	s.rogueMarks[target.id] = mark
+	if mark.EffectID != "" {
+		target.effectIDs = sortedUniqueStrings(append(target.effectIDs, mark.EffectID))
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+	}
+	res.Events = append(res.Events, Event{
+		EventType:      "skill_effect_started",
+		EntityID:       idStr(target.id),
+		SourceEntityID: idStr(player.id),
+		TargetEntityID: idStr(target.id),
+		CorrelationID:  correlationID,
+		SkillID:        skillID,
+		Rank:           intPtr(rank),
+		Amount:         intPtr(mark.DamageBonusPercent),
+		RemainingTicks: intPtr(mark.TotalTicks),
+		TotalTicks:     intPtr(mark.TotalTicks),
+	})
 }
 
 func (s *Sim) replicatePoisonDot(playerID uint64, primary *entity, dot poisonDotState, res *TickResult) {
@@ -281,6 +345,8 @@ func (s *Sim) advancePoisonDots(res *TickResult) {
 			continue
 		}
 		rawDamage := dot.DamagePerTick
+		markedDamage := s.applyRogueMarkDamageBonus(target, DamageRange{Min: rawDamage, Max: rawDamage})
+		rawDamage = markedDamage.Min
 		damage := s.applyResistanceToDamage(rawDamage, s.monsterResistance(target, damageTypePoison))
 		if damage > target.hp {
 			damage = target.hp
@@ -303,9 +369,13 @@ func (s *Sim) advancePoisonDots(res *TickResult) {
 			RawDamage:       intPtr(rawDamage),
 			MitigatedDamage: intPtr(rawDamage),
 		})
+		if damage > 0 {
+			s.tryPassiveExecute(target, dot.SourcePlayerID, dot.CorrelationID, res)
+		}
 		if target.hp == 0 {
 			s.finishMonsterKill(target, dot.SourcePlayerID, dot.CorrelationID, res)
 			delete(s.poisonDots, targetID)
+			delete(s.rogueMarks, targetID)
 			continue
 		}
 		if dot.RemainingTicks <= 0 {
@@ -321,6 +391,82 @@ func (s *Sim) advancePoisonDots(res *TickResult) {
 		}
 		s.poisonDots[targetID] = dot
 	}
+}
+
+func (s *Sim) advanceRogueMarks(res *TickResult) {
+	if len(s.rogueMarks) == 0 {
+		return
+	}
+	for _, targetID := range sortedUint64Keys(s.rogueMarks) {
+		mark := s.rogueMarks[targetID]
+		target := s.activeLevel().entities[targetID]
+		if target == nil || target.kind != monsterEntity || target.hp <= 0 || s.tick >= mark.EndsTick {
+			delete(s.rogueMarks, targetID)
+			if target != nil {
+				removeEffectIDAndUpdate(target, mark.EffectID, s, res)
+			}
+			res.Events = append(res.Events, Event{
+				EventType:      "skill_effect_ended",
+				EntityID:       idStr(targetID),
+				SourceEntityID: idStr(mark.SourcePlayerID),
+				TargetEntityID: idStr(targetID),
+				SkillID:        mark.SkillID,
+			})
+		}
+	}
+}
+
+func (s *Sim) applyRogueMarkDamageBonus(target *entity, damageRange DamageRange) DamageRange {
+	if target == nil || damageRange.Max <= 0 {
+		return damageRange
+	}
+	mark, ok := s.rogueMarks[target.id]
+	if !ok || mark.DamageBonusPercent <= 0 || s.tick >= mark.EndsTick {
+		return damageRange
+	}
+	return DamageRange{
+		Min: applyPercentBonus(damageRange.Min, mark.DamageBonusPercent),
+		Max: applyPercentBonus(damageRange.Max, mark.DamageBonusPercent),
+	}
+}
+
+func (s *Sim) tryPassiveExecute(target *entity, playerID uint64, corr string, res *TickResult) bool {
+	if target == nil || target.kind != monsterEntity || target.hp <= 0 || target.maxHP <= 0 {
+		return false
+	}
+	rank := s.effectiveSkillRank("executioner")
+	if rank <= 0 {
+		return false
+	}
+	def, ok := s.rules.Skills["executioner"]
+	if !ok || def.Kind != "passive_execute" {
+		return false
+	}
+	threshold := def.Execute.ThresholdPercentBase + def.Execute.ThresholdPercentPerRank*(rank-1)
+	if threshold <= 0 || target.hp*100 > target.maxHP*threshold {
+		return false
+	}
+	if !s.rollChance(float64(def.Execute.ChancePercent) / 100.0) {
+		return false
+	}
+	damage := target.hp
+	target.hp = 0
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+	res.Events = append(res.Events, Event{
+		EventType:       "monster_damaged",
+		EntityID:        idStr(target.id),
+		SourceEntityID:  idStr(playerID),
+		TargetEntityID:  idStr(target.id),
+		CorrelationID:   corr,
+		SkillID:         "executioner",
+		Rank:            intPtr(rank),
+		Damage:          intPtr(damage),
+		DamageType:      damageTypeForce,
+		Outcome:         "execute",
+		RawDamage:       intPtr(damage),
+		MitigatedDamage: intPtr(damage),
+	})
+	return true
 }
 
 func (s *Sim) consumeBasicAttack(in Input, res *TickResult) (string, bool) {

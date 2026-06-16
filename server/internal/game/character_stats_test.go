@@ -36,6 +36,24 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	}
 }
 
+func TestCritDamageUsesDexterityAsStandardDerivedStat(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	base := MustNewSim("sess_crit_damage_dex_base", "01", rules)
+	highDexState := rules.DefaultCharacterProgressionState()
+	highDexState.BaseStats.Dex += 10
+	highDex, err := NewSimWithWorldProgression("sess_crit_damage_dex_high", "01", rules, DefaultWorldID, highDexState)
+	if err != nil {
+		t.Fatalf("new high dex sim: %v", err)
+	}
+
+	formula := rules.CharacterProgression.DerivedStats["crit_damage"]
+	wantDelta := formula.PerDex * 10
+	gotDelta := highDex.characterDerivedStatsView().CritDamage - base.characterDerivedStatsView().CritDamage
+	if math.Abs(gotDelta-wantDelta) > 0.000001 {
+		t.Fatalf("crit damage dex delta = %.6f, want %.6f from rule %+v", gotDelta, wantDelta, formula)
+	}
+}
+
 func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	rules := loadRules(t)
 	base := MustNewSim("sess_regen_base", "01", rules)

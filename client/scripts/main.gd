@@ -4861,6 +4861,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, alive and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, alive and PlayerStatusEffectMarkers.has_pinning_root_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_stun_effect(node, alive and PlayerStatusEffectMarkers.has_stun_effect_id(rec.get("effect_ids", [])))
+	PlayerStatusEffectMarkers.sync_rogue_mark_effect(node, alive and PlayerStatusEffectMarkers.has_rogue_mark_effect_id(rec.get("effect_ids", [])))
 	if _boss_visuals != null:
 		_boss_visuals_context.last_server_tick = last_server_tick
 		_boss_visuals.normalize_boss_phase_metadata(rec)
@@ -4956,6 +4957,7 @@ func _set_entity_stun(entity_id: String, active: bool) -> void:
 		effect_ids.erase(PlayerStatusEffectMarkers.STUN_EFFECT_ID)
 		effect_ids.erase("leap_stun")
 		effect_ids.erase("charge_stun")
+		effect_ids.erase(PlayerStatusEffectMarkers.DASH_STUN_EFFECT_ID)
 	rec["effect_ids"] = effect_ids
 	var node := rec.get("node", null) as Node3D
 	PlayerStatusEffectMarkers.sync_stun_effect(node, active)
@@ -5341,6 +5343,7 @@ func _bot_entities_presentation_debug() -> Array:
 			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node), "has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(node),
 			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node), "has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
 			"has_pinning_root_effect": PlayerStatusEffectMarkers.has_pinning_root_effect(node), "has_stun_effect": PlayerStatusEffectMarkers.has_stun_effect(node),
+			"has_rogue_mark_effect": PlayerStatusEffectMarkers.has_rogue_mark_effect(node),
 			"has_elite_command_radius_preview": PlayerStatusEffectMarkers.has_elite_command_radius_preview(node), "elite_command_radius_preview": PlayerStatusEffectMarkers.elite_command_radius_preview_value(node),
 			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node), "hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {}, "animation": controller.get_debug_state() if controller != null else {},

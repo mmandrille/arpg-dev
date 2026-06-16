@@ -3,10 +3,13 @@ package game
 import "fmt"
 
 type SkillPoisonDef struct {
-	DamagePercentBase          int `json:"damage_percent_base"`
-	DamagePercentPerRank       int `json:"damage_percent_per_rank"`
-	DurationTicks              int `json:"duration_ticks"`
-	MagicDurationTicksPerPoint int `json:"magic_duration_ticks_per_point"`
+	DamagePercentBase          int    `json:"damage_percent_base"`
+	DamagePercentPerRank       int    `json:"damage_percent_per_rank"`
+	DurationTicks              int    `json:"duration_ticks"`
+	MagicDurationTicksPerPoint int    `json:"magic_duration_ticks_per_point"`
+	MarkDamageBonusPercent     int    `json:"mark_damage_bonus_percent"`
+	MarkDurationTicks          int    `json:"mark_duration_ticks"`
+	MarkEffectID               string `json:"mark_effect_id"`
 }
 
 type SkillDashDef struct {
@@ -15,6 +18,8 @@ type SkillDashDef struct {
 	DamagePercentBase     int     `json:"damage_percent_base"`
 	DamagePercentPerMagic int     `json:"damage_percent_per_magic"`
 	MaxDamageBonusPercent int     `json:"max_damage_bonus_percent"`
+	StunEffectID          string  `json:"stun_effect_id"`
+	StunDurationTicks     int     `json:"stun_duration_ticks"`
 }
 
 type SkillMobilityDef struct {
@@ -38,13 +43,20 @@ type SkillMobilityDef struct {
 
 func validateRogueConeSkillPayload(skillID string, skill SkillDef) error {
 	if skill.Poison.DurationTicks > 0 &&
-		(skill.Poison.DamagePercentBase <= 0 || skill.Poison.DamagePercentPerRank < 0 || skill.Poison.MagicDurationTicksPerPoint < 0) {
+		(skill.Poison.DamagePercentBase <= 0 || skill.Poison.DamagePercentPerRank < 0 || skill.Poison.MagicDurationTicksPerPoint < 0 ||
+			skill.Poison.MarkDamageBonusPercent < 0 || skill.Poison.MarkDurationTicks < 0) {
 		return fmt.Errorf("game: invalid rules skills.%s.poison: values must be valid", skillID)
+	}
+	if skill.Poison.MarkDurationTicks > 0 && (skill.Poison.MarkDamageBonusPercent <= 0 || skill.Poison.MarkEffectID == "") {
+		return fmt.Errorf("game: invalid rules skills.%s.poison.mark: bonus and effect id are required", skillID)
 	}
 	if (skill.Dash.RangeBase > 0 || skill.Dash.DamagePercentBase > 0) &&
 		(skill.Dash.RangeBase <= 0 || skill.Dash.RangePerRank < 0 || skill.Dash.DamagePercentBase <= 0 ||
-			skill.Dash.DamagePercentPerMagic < 0 || skill.Dash.MaxDamageBonusPercent < 0) {
+			skill.Dash.DamagePercentPerMagic < 0 || skill.Dash.MaxDamageBonusPercent < 0 || skill.Dash.StunDurationTicks < 0) {
 		return fmt.Errorf("game: invalid rules skills.%s.dash: values must be valid", skillID)
+	}
+	if skill.Dash.StunDurationTicks > 0 && skill.Dash.StunEffectID == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.dash.stun_effect_id: required", skillID)
 	}
 	if skill.Kind == "mobility" {
 		if skill.Mobility.RangeBase <= 0 || skill.Mobility.RangePerRank < 0 || skill.Mobility.Visual == "" {

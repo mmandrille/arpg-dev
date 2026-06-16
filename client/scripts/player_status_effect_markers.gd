@@ -1,5 +1,6 @@
 extends RefCounted
 
+const RogueMarkEffectScript := preload("res://scripts/rogue_mark_effect.gd")
 const HOLY_SHIELD_EFFECT_ID := "holy_shield"
 const SANCTUARY_EFFECT_ID := "sanctuary"
 const RAGE_EFFECT_ID := "rage"
@@ -8,7 +9,9 @@ const BURNING_EFFECT_ID := "everburning_wound"
 const ELITE_COMMAND_EFFECT_ID := "elite_command"
 const PINNING_ROOT_EFFECT_ID := "pinning_root"
 const STUN_EFFECT_ID := "stun"
-const STUN_SKILL_IDS := ["leap", "charge"]
+const DASH_STUN_EFFECT_ID := "dash_stun"
+const ROGUE_MARK_EFFECT_ID := "rogue_mark"
+const STUN_SKILL_IDS := ["leap", "charge", "dash"]
 
 const HOLY_SHIELD_MARKER_NAME := "HolyShieldEffect"
 const SANCTUARY_MARKER_NAME := "SanctuaryDomeEffect"
@@ -18,6 +21,7 @@ const ELITE_COMMAND_MARKER_NAME := "EliteCommandVisualEffect"
 const ELITE_COMMAND_RADIUS_PREVIEW_NAME := "EliteCommandRadiusPreview"
 const PINNING_ROOT_MARKER_NAME := "PinningRootVisualEffect"
 const STUN_MARKER_NAME := "StunStarsVisualEffect"
+const ROGUE_MARK_MARKER_NAME := "RogueMarkSkullEffect"
 const HOLY_SHIELD_AURA_PULSE_NAME := "HolyShieldAuraPulse"
 const HOLY_SHIELD_TARGET_PULSE_NAME := "HolyShieldTargetPulse"
 const AURA_PULSE_SECONDS := 0.30
@@ -101,13 +105,17 @@ static func has_pinning_root_effect_id(effect_ids_value) -> bool:
 	return effect_ids.has(PINNING_ROOT_EFFECT_ID)
 
 
+static func has_rogue_mark_effect_id(effect_ids_value) -> bool:
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	return effect_ids.has(ROGUE_MARK_EFFECT_ID)
+
 static func is_stun_skill_id(skill_id: String) -> bool:
 	return STUN_SKILL_IDS.has(skill_id)
 
 
 static func has_stun_effect_id(effect_ids_value) -> bool:
 	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
-	return effect_ids.has(STUN_EFFECT_ID) or effect_ids.has("leap_stun") or effect_ids.has("charge_stun")
+	return effect_ids.has(STUN_EFFECT_ID) or effect_ids.has("leap_stun") or effect_ids.has("charge_stun") or effect_ids.has(DASH_STUN_EFFECT_ID)
 
 
 static func sync_burning_effect(root: Node3D, active: bool) -> void:
@@ -180,6 +188,23 @@ static func sync_stun_effect(root: Node3D, active: bool) -> void:
 
 static func has_stun_effect(root: Node3D) -> bool:
 	return root != null and root.find_child(STUN_MARKER_NAME, false, false) != null
+
+static func sync_rogue_mark_effect(root: Node3D, active: bool) -> void:
+	if root == null:
+		return
+	var existing := root.find_child(ROGUE_MARK_MARKER_NAME, false, false) as Node3D
+	if not active:
+		if existing != null:
+			root.remove_child(existing)
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = RogueMarkEffectScript.new()
+		root.add_child(existing)
+
+
+static func has_rogue_mark_effect(root: Node3D) -> bool:
+	return root != null and root.find_child(ROGUE_MARK_MARKER_NAME, false, false) != null
 
 
 static func sync_elite_command_radius_preview(root: Node3D, active: bool, radius: float) -> void:
@@ -576,7 +601,6 @@ static func make_stun_effect() -> Node3D:
 	tween.set_loops()
 	tween.tween_property(orbit, "rotation:y", TAU, 0.95).from(0.0)
 	return marker
-
 
 static func _pinning_root_material(color: Color, emission: Color, emission_energy: float) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()

@@ -504,12 +504,13 @@
       "min": 0,
       "max": 0.5
     },
-    "crit_damage": {
-      "type": "linear",
-      "base": 1.5,
-      "per_str": 0.005,
-      "min": 1
-    },
+  "crit_damage": {
+    "type": "linear",
+    "base": 1.5,
+    "per_str": 0.005,
+    "per_dex": 0.003,
+    "min": 1
+  },
     "movement_speed": {
       "type": "linear",
       "base": 0.49,

@@ -102,6 +102,118 @@ func TestRogueDashMovesThroughAndDamagesTarget(t *testing.T) {
 	if target.hp >= 20 {
 		t.Fatalf("dash target hp = %d, want damaged", target.hp)
 	}
+	if !containsStringValue(target.effectIDs, "dash_stun") {
+		t.Fatalf("dash target effects = %+v, want dash_stun", target.effectIDs)
+	}
+	if !hasEvent(cast, "skill_effect_started") {
+		t.Fatalf("dash events = %+v, want stun skill_effect_started", cast.Events)
+	}
+}
+
+func TestRoguePoisonStabMarkIncreasesAllPlayerDamage(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.Combat.BaseHitChance = 1
+	rules.Combat.BaseCritChance = 0
+	poison := rules.Skills["poison_stab"]
+	poison.Poison.MarkDamageBonusPercent = 100
+	poison.Poison.MarkDurationTicks = 40
+	poison.Poison.MarkEffectID = "test_rogue_mark"
+	rules.Skills["poison_stab"] = poison
+	sim := newRogueSkillTestSim(t, rules)
+	player := sim.entities[sim.playerID]
+	target := addRogueSkillTarget(sim, Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, 100)
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "mark",
+		CorrelationID: "corr_mark",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "poison_stab", TargetID: idStr(target.id)},
+	}})
+	assertAck(t, cast, "mark")
+	if _, ok := sim.rogueMarks[target.id]; !ok || !containsStringValue(target.effectIDs, "test_rogue_mark") {
+		t.Fatalf("mark state/effects = %+v / %+v, want active mark", sim.rogueMarks, target.effectIDs)
+	}
+
+	var hit TickResult
+	outcome := sim.damageMonsterByPlayerWithSlot(target, player.id, "marked_hit", &hit, DamageRange{Min: 4, Max: 4}, damageTypeForce, mainHandSlot)
+	if !outcome.Hit || outcome.Damage < 8 {
+		t.Fatalf("marked basic outcome=%+v events=%+v, want doubled damage", outcome, hit.Events)
+	}
+}
+
+func TestRogueMarkIncreasesPoisonTickDamage(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.Combat.BaseCritChance = 0
+	sim := newRogueSkillTestSim(t, rules)
+	player := sim.entities[sim.playerID]
+	target := addRogueSkillTarget(sim, Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, 100)
+	sim.rogueMarks[target.id] = rogueMarkState{
+		SourcePlayerID:     player.id,
+		TargetID:           target.id,
+		SkillID:            "poison_stab",
+		Rank:               1,
+		DamageBonusPercent: 100,
+		EndsTick:           sim.tick + 20,
+		TotalTicks:         20,
+		EffectID:           "test_rogue_mark",
+		CorrelationID:      "corr_poison_mark",
+	}
+	sim.poisonDots[target.id] = poisonDotState{
+		SourcePlayerID: player.id,
+		TargetID:       target.id,
+		SkillID:        "poison_stab",
+		Rank:           1,
+		DamagePerTick:  4,
+		NextTick:       sim.tick,
+		RemainingTicks: 10,
+		CorrelationID:  "corr_poison_mark",
+	}
+
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+	sim.advancePoisonDots(&res)
+	if damage := eventDamage(res, "monster_damaged"); damage < 8 {
+		t.Fatalf("poison mark tick events=%+v, want at least 8 damage", res.Events)
+	}
+}
+
+func TestRogueExecutionerPassiveExecutesLowHealthTarget(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.Combat.BaseHitChance = 1
+	rules.Combat.BaseCritChance = 0
+	executioner := rules.Skills["executioner"]
+	executioner.Execute.ChancePercent = 100
+	rules.Skills["executioner"] = executioner
+	sim := newRogueSkillTestSim(t, rules)
+	sim.progression.SkillRanks["executioner"] = 1
+	player := sim.entities[sim.playerID]
+	target := addRogueSkillTarget(sim, Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, 100)
+	target.hp = 11
+
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+	outcome := sim.damageMonsterByPlayerWithSlot(target, player.id, "execute_hit", &res, DamageRange{Min: 1, Max: 1}, damageTypeForce, mainHandSlot)
+	if !outcome.Hit || target.hp != 0 {
+		t.Fatalf("executioner outcome=%+v hp=%d events=%+v, want executed target", outcome, target.hp, res.Events)
+	}
+	if !hasSkillDamageEvent(res, "executioner") || !hasEvent(res, "monster_killed") {
+		t.Fatalf("executioner events=%+v, want execute damage and kill", res.Events)
+	}
+}
+
+func TestRogueExecutionerCannotBeCast(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim := newRogueSkillTestSim(t, rules)
+	sim.progression.BaseStats.Dex = 12
+	sim.progression.SkillRanks["executioner"] = 1
+	sim.savePlayer(sim.defaultPlayer())
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "cast_executioner",
+		CorrelationID: "corr_cast_executioner",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "executioner"},
+	}})
+
+	assertReject(t, cast, "cast_executioner", "passive_skill_not_castable")
 }
 
 func TestRogueOffHandBasicAttackCanFireBetweenMainHandAttacks(t *testing.T) {

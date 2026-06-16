@@ -87,6 +87,8 @@
     "skill.dash.summary": "Golpe veloz hacia adelante",
     "skill.shadow_flurry.name": "Rafaga sombria",
     "skill.shadow_flurry.summary": "Rafaga cercana rapida",
+    "skill.executioner.name": "Ejecutor",
+    "skill.executioner.summary": "Ejecucion pasiva contra enemigos debilitados",
     "skill.piercing_shot.name": "Disparo perforante",
     "skill.piercing_shot.summary": "Flecha que atraviesa enemigos",
     "skill.disengage.name": "Retirada",

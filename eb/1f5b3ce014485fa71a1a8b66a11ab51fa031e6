@@ -1,0 +1,66 @@
+docs/plans/v224_2026-06-16-client-audio-foundation.md
+  s_484c58413531eb::t_3d8263fe71df6c 1-2,4-33,35,37-52,56-69,73-83,89-103,107-115,120-123
+  s_484c58413531eb::t_3a61a3f0eb38a0 119
+  s_484c58413531eb::t_127873da8c30aa 3,34,36,53-55,70-72,84-88,104-106,116-118
+scripts/client_smoke.sh
+  s_484c58413531eb::t_829850c7f6236e 142-143
+client/tests/test_client_audio_controller.gd
+  s_484c58413531eb::t_8375008d586912 1-85
+client/scripts/client_audio_bridge.gd
+  s_484c58413531eb::t_884dda81fddc53 1-51
+  s_484c58413531eb::t_4fe6b05e336cfd 52-53,69-106
+  s_484c58413531eb::t_4e604a86f80300 54-68
+shared/i18n/en.json
+  s_484c58413531eb::t_6a2d6ce623af86 21-23
+PROGRESS.md
+  s_484c58413531eb::t_127873da8c30aa 26,28-29,107
+docs/specs/v224_spec-client-audio-foundation.md
+  s_484c58413531eb::t_127873da8c30aa 3
+  s_484c58413531eb::t_3d8263fe71df6c 1-2,4-72
+client/tests/test_audio_settings.gd.uid
+  s_484c58413531eb::t_444b8c80ea25d3 1
+client/scripts/settings_panel.gd
+  s_484c58413531eb::t_6a2d6ce623af86 14-16,32-37,49,58,110-115,191-203,257-281,307-312
+shared/i18n/es.json
+  s_484c58413531eb::t_6a2d6ce623af86 55-57
+docs/progress/slice-lifecycle.md
+  s_484c58413531eb::t_127873da8c30aa 240
+client/scripts/client_audio_bridge.gd.uid
+  s_484c58413531eb::t_5456b7da892198 1
+docs/as-built/v224_client-audio-foundation.md
+  s_484c58413531eb::t_127873da8c30aa 1-39
+client/tests/test_audio_settings.gd
+  s_484c58413531eb::t_6a2d6ce623af86 1-81
+client/scripts/client_settings.gd
+  s_484c58413531eb::t_2da1c8c95e9c4c 16-18,44-46,124,126-128,177-179,181-185,187-191,193-194,204-206,217-219,238-240,324-347
+  s_484c58413531eb::t_6a2d6ce623af86 123,125,180,186,192
+client/tests/test_client_audio_controller.gd.uid
+  s_484c58413531eb::t_444b8c80ea25d3 1
+client/scripts/main.gd
+  s_484c58413531eb::t_4fe6b05e336cfd 700,1050,1080,1150,1171,1265-1266,1270,1286,1292,1296,1299,2385
+  s_484c58413531eb::t_4e604a86f80300 3498
+  s_484c58413531eb::t_94b45802f4961d 3351-3352
+  s_484c58413531eb::t_884dda81fddc53 51,258,573,578,642
+  s_484c58413531eb::t_d14bf8c1c25d50 50,174
+client/scripts/client_audio_controller.gd.uid
+  s_484c58413531eb::t_444b8c80ea25d3 1
+client/scripts/client_audio_controller.gd
+  s_484c58413531eb::t_2da1c8c95e9c4c 1-135,137-140,144-229
+  s_484c58413531eb::t_f43081aae1914f 136,141-143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "eb1f5b3ce014485fa71a1a8b66a11ab51fa031e6",
+  "prompts": {},
+  "sessions": {
+    "s_484c58413531eb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed1cf-2723-75d3-922e-5e5b1ee95408",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

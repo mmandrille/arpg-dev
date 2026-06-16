@@ -123,6 +123,77 @@ func TestMercenaryHiringReplacesExistingHire(t *testing.T) {
 	}
 }
 
+func TestMercenaryLossRemovesHireAndEmitsEvent(t *testing.T) {
+	sim, board := newMercenaryHiringSim(t, "v220_mercenary_loss")
+	cost := sim.rules.MainConfig.Gameplay.MercenaryHireCostGold
+	sim.gold = cost
+	sim.progression.Gold = cost
+	sim.savePlayer(sim.defaultPlayer())
+	hire := sim.Tick([]Input{mercenaryHireInput(board, "hire_for_loss")})
+	assertAck(t, hire, "hire_for_loss")
+	mercenary := hiredMercenary(sim)
+	if mercenary == nil {
+		t.Fatalf("hire missing mercenary")
+	}
+
+	res := &TickResult{}
+	attacker := mercenaryLossAttacker(sim, mercenary)
+	damage := mercenary.maxHP + int(mercenary.monsterArmor) + 1
+	sim.damageCompanionByMonster(attacker, mercenary, DamageRange{Min: damage, Max: damage}, "merc_loss", res)
+
+	if hiredMercenary(sim) != nil || countHiredMercenaries(sim) != 0 {
+		t.Fatalf("lost mercenary still active: count=%d mercenary=%+v", countHiredMercenaries(sim), hiredMercenary(sim))
+	}
+	if !hasRemovedEntity(*res, mercenary.id) {
+		t.Fatalf("loss did not remove mercenary entity: changes=%+v", res.Changes)
+	}
+	killed := findEvent(res.Events, "companion_killed")
+	if killed == nil || killed.SourceEntityID != idStr(attacker.id) || killed.TargetEntityID != idStr(mercenary.id) {
+		t.Fatalf("companion_killed event = %+v", killed)
+	}
+	lost := findEvent(res.Events, "mercenary_lost")
+	if lost == nil || lost.EntityID != idStr(mercenary.id) || lost.SourceEntityID != idStr(attacker.id) ||
+		lost.TargetEntityID != idStr(mercenary.id) || lost.Service != mercenaryService ||
+		lost.OfferID != mercenaryGuardOfferID || lost.MonsterDefID != mercenaryGuardMonsterDefID {
+		t.Fatalf("mercenary_lost event = %+v", lost)
+	}
+}
+
+func TestMercenaryCanRehireAfterLoss(t *testing.T) {
+	sim, board := newMercenaryHiringSim(t, "v220_mercenary_rehire_after_loss")
+	cost := sim.rules.MainConfig.Gameplay.MercenaryHireCostGold
+	sim.gold = cost * 2
+	sim.progression.Gold = cost * 2
+	sim.savePlayer(sim.defaultPlayer())
+
+	first := sim.Tick([]Input{mercenaryHireInput(board, "first_hire_for_loss")})
+	assertAck(t, first, "first_hire_for_loss")
+	firstMercenary := hiredMercenary(sim)
+	if firstMercenary == nil {
+		t.Fatalf("first hire missing mercenary")
+	}
+	loss := &TickResult{}
+	attacker := mercenaryLossAttacker(sim, firstMercenary)
+	damage := firstMercenary.maxHP + int(firstMercenary.monsterArmor) + 1
+	sim.damageCompanionByMonster(attacker, firstMercenary, DamageRange{Min: damage, Max: damage}, "merc_loss_rehire", loss)
+	if findEvent(loss.Events, "mercenary_lost") == nil {
+		t.Fatalf("loss events missing mercenary_lost: %+v", loss.Events)
+	}
+
+	second := sim.Tick([]Input{mercenaryHireInput(board, "rehire_after_loss")})
+	assertAck(t, second, "rehire_after_loss")
+	secondMercenary := hiredMercenary(sim)
+	if secondMercenary == nil || secondMercenary.id == firstMercenary.id {
+		t.Fatalf("rehire did not spawn replacement: first=%+v second=%+v", firstMercenary, secondMercenary)
+	}
+	if countHiredMercenaries(sim) != 1 {
+		t.Fatalf("hired mercenary count=%d, want 1", countHiredMercenaries(sim))
+	}
+	if sim.gold != 0 || sim.progression.Gold != 0 {
+		t.Fatalf("gold after hire/loss/rehire sim/progression=%d/%d, want 0/0", sim.gold, sim.progression.Gold)
+	}
+}
+
 func newMercenaryHiringSim(t *testing.T, seed string) (*Sim, *entity) {
 	t.Helper()
 	sim, err := NewSimWithWorld("sess_mercenary_hiring", seed, loadRules(t), "mercenary_hiring_lab")
@@ -163,6 +234,21 @@ func countHiredMercenaries(sim *Sim) int {
 		}
 	}
 	return count
+}
+
+func mercenaryLossAttacker(sim *Sim, mercenary *entity) *entity {
+	attacker := &entity{
+		kind:             monsterEntity,
+		pos:              mercenary.pos,
+		spawnPos:         mercenary.pos,
+		hp:               1,
+		maxHP:            1,
+		monsterDefID:     "combat_lab_crit_attacker",
+		monsterHitChance: 1,
+	}
+	attacker.id = sim.alloc()
+	sim.activeLevel().entities[attacker.id] = attacker
+	return attacker
 }
 
 func hasRemovedEntity(res TickResult, id uint64) bool {

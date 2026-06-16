@@ -1,0 +1,25 @@
+{
+  "id": "mercenary_death_loss",
+  "world_id": "mercenary_death_loss_lab",
+  "seed": "v220_mercenary_death_loss",
+  "title": "Mercenary death loss",
+  "description": "Hires a guard, lets a hostile lab monster kill it, proves the loss event removes the active companion, then hires a replacement.",
+  "debug_progression": { "gold": 600 },
+  "steps": [
+    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board", "state": "ready", "equals": 1 },
+    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "combat_lab_crit_attacker", "alive": true, "equals": 1 },
+    { "action": "action_entity", "interactable_def_id": "town_mercenary_board", "event_type": "mercenary_hired" },
+    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "mercenary_guard", "alive": true, "equals": 1 },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "mercenary_lost", "service": "mercenary" }, "timeout_s": 12 },
+    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "mercenary_guard", "alive": true, "equals": 0 },
+    { "action": "action_entity", "interactable_def_id": "town_mercenary_board", "event_type": "mercenary_hired" },
+    { "action": "wait_until_assertion", "assertion": { "type": "entity_count", "entity_type": "companion", "monster_def_id": "mercenary_guard", "alive": true, "equals": 1 }, "timeout_s": 3 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "mercenary_lost", "service": "mercenary" },
+    { "type": "entity_count", "entity_type": "companion", "monster_def_id": "mercenary_guard", "alive": true, "equals": 1 }
+  ],
+  "visual": {
+    "camera": { "x": 4, "y": 5, "zoom": 1.0 }
+  }
+}

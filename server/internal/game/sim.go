@@ -3333,7 +3333,8 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 			continue
 		}
 		s.usePlayer(targetPlayer)
-		if !s.monsterInAttackRange(monster, player, def) {
+		target := s.monsterAttackTarget(monster, player, def)
+		if target == nil {
 			continue
 		}
 		attackCooldown := def.AttackCooldown
@@ -3355,7 +3356,11 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 			s.fireMonsterProjectile(monster, player, def, *attackDamage, res)
 			continue
 		}
-		s.damagePlayerByMonster(monster, player, *attackDamage, "", res)
+		if target.kind == companionEntity {
+			s.damageCompanionByMonster(monster, target, *attackDamage, "", res)
+			continue
+		}
+		s.damagePlayerByMonster(monster, target, *attackDamage, "", res)
 	}
 }
 

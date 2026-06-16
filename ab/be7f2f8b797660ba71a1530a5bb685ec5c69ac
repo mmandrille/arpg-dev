@@ -1,0 +1,38 @@
+docs/specs/v210_spec-barbarian-leap.md
+  s_57676dc346e356::t_6ba79ba362c353 25
+docs/specs/v211_spec-paladin-charge.md
+  s_57676dc346e356::t_6ba79ba362c353 25
+client/scripts/player_status_effect_markers.gd
+  s_57676dc346e356::t_3289caa3c9bf0a 10-11,20,104-112,167-182
+  s_57676dc346e356::t_cb14da66224bd9 542-580
+shared/rules/skills.v0.json
+  s_57676dc346e356::t_3289caa3c9bf0a 466,609
+docs/as-built/v210_barbarian-leap.md
+  s_57676dc346e356::t_6ba79ba362c353 8
+client/scripts/main.gd
+  s_57676dc346e356::t_92ee2d976092b7 5260-5277
+  s_57676dc346e356::t_eee00e3f83ad72 1140-1146,1535
+  s_57676dc346e356::t_3729560d8fe472 5074,6287
+docs/as-built/v211_paladin-charge.md
+  s_57676dc346e356::t_6ba79ba362c353 8
+client/tests/test_status_effect_presentation.gd
+  s_57676dc346e356::t_81d5c5de75a82e 23,250-283
+server/internal/game/mobility_skills_test.go
+  s_57676dc346e356::t_e3e4ff74d7dc37 52,55,81,84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "abbe7f2f8b797660ba71a1530a5bb685ec5c69ac",
+  "prompts": {},
+  "sessions": {
+    "s_57676dc346e356": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed0b9-9d97-71a3-a179-6451b17c6e1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

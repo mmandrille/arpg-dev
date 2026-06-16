@@ -1,0 +1,85 @@
+client/scripts/channel_skill_input.gd
+  s_a8770cc34038ef::t_6918d5e81dd95b 1-44
+  s_a8770cc34038ef::t_4524b824185494 45-86
+server/internal/game/sim_players.go
+  s_a8770cc34038ef::t_c6a531e57a3f0f 386,426
+server/internal/game/level.go
+  s_a8770cc34038ef::t_c6a531e57a3f0f 13
+server/internal/inputdecode/inputdecode.go
+  s_a8770cc34038ef::t_2ac57e1af0cd96 167-175
+  s_a8770cc34038ef::t_c6a531e57a3f0f 30,110-114,161,287-298
+docs/plans/v217_2026-06-16-paladin-charge-channeling-protocol.md
+  s_a8770cc34038ef::t_ec5113afd53462 1-10,18-26
+  s_a8770cc34038ef::t_336c635c993c9e 11-17
+shared/protocol/state_delta.v8.schema.json
+  s_a8770cc34038ef::t_0449fd599e55b3 586-597
+server/internal/game/rogue_rules.go
+  s_a8770cc34038ef::t_c6a531e57a3f0f 26,57,62-63
+docs/progress/slice-codename-index.md
+  s_a8770cc34038ef::t_4b6a15c14bb5d1 206
+client/tests/test_coop_client.gd
+  s_a8770cc34038ef::t_f35eb82bb53514 58,1449,1451-1455,1457,1459
+  s_a8770cc34038ef::t_07740bc61e032a 24,1450,1456,1458
+server/internal/game/sim.go
+  s_a8770cc34038ef::t_21817a32578a6f 1026-1028
+  s_a8770cc34038ef::t_363f22def8b850 207-213
+  s_a8770cc34038ef::t_c6a531e57a3f0f 206,214-215,311,803,874-876
+tools/bot/channel_skill.py
+  s_a8770cc34038ef::t_6918d5e81dd95b 1-69
+PROGRESS.md
+  s_a8770cc34038ef::t_336c635c993c9e 26,28
+server/internal/inputdecode/inputdecode_test.go
+  s_a8770cc34038ef::t_bb5ab668cf51bf 95-127
+server/internal/game/mobility_skills.go
+  s_a8770cc34038ef::t_21817a32578a6f 13-16,50-239,281-284,295-299
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_a8770cc34038ef::t_e6e2b5434052a0 7,32-44,53-54
+docs/as-built/v217_paladin-charge-channeling-protocol.md
+  s_a8770cc34038ef::t_500739d9a0eae2 21
+  s_a8770cc34038ef::t_336c635c993c9e 1-20,22-30
+server/internal/game/mobility_skills_test.go
+  s_a8770cc34038ef::t_36bfb5bebb6972 83,86,95,98,107,124,126-127
+  s_a8770cc34038ef::t_bb5ab668cf51bf 64,66-67,69,71-72,74-75,77-80,82,84-85,87-94,96-97,99-106,108-109,111-112,117-122
+  s_a8770cc34038ef::t_1ad5ce71f42431 123,134-140
+server/internal/game/handlers.go
+  s_a8770cc34038ef::t_c6a531e57a3f0f 45
+tools/bot/run.py
+  s_a8770cc34038ef::t_32f1d3e208eafc 1328
+docs/progress/slice-lifecycle.md
+  s_a8770cc34038ef::t_336c635c993c9e 233
+shared/protocol/session_snapshot.v8.schema.json
+  s_a8770cc34038ef::t_0449fd599e55b3 663-674
+shared/protocol/messages.v8.schema.json
+  s_a8770cc34038ef::t_0449fd599e55b3 31,98-99,330-347
+client/scripts/channel_skill_input.gd.uid
+  s_a8770cc34038ef::t_0e283e188c8811 1
+client/scripts/main.gd
+  s_a8770cc34038ef::t_8863a882e73108 2266-2270
+  s_a8770cc34038ef::t_80b724204d3984 56,102
+  s_a8770cc34038ef::t_ec12e399619eb2 3754-3755,3769,3772,3774-3775
+  s_a8770cc34038ef::t_06d381136b33dd 2277,2285
+  s_a8770cc34038ef::t_4ee0a737b7107f 2287,3768
+  s_a8770cc34038ef::t_7119b0f2a5f5fa 3770-3771,3773,3776-3778
+shared/rules/skills.v0.schema.json
+  s_a8770cc34038ef::t_c6a531e57a3f0f 342
+shared/rules/skills.v0.json
+  s_a8770cc34038ef::t_c6a531e57a3f0f 606-607
+docs/specs/v217_spec-paladin-charge-channeling-protocol.md
+  s_a8770cc34038ef::t_ec5113afd53462 1-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "665e4534d624092aaa7681b56c7f9e5401e31d49",
+  "prompts": {},
+  "sessions": {
+    "s_a8770cc34038ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed073-156b-7a42-ba3c-3ba0f571d8a3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

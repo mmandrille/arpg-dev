@@ -182,6 +182,10 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, helpers: dict[str, An
             remove_stash_item(state, str(c["stash_item_id"]))
         elif c["op"] == "stash_gold_update":
             state.stash_gold = int(c.get("stash_gold", state.stash_gold))
+        elif c["op"] == "resource_wallet_update":
+            resource_id = str(c.get("resource_id", ""))
+            if resource_id:
+                state.resource_wallet[resource_id] = max(0, int(c.get("amount", state.resource_wallet.get(resource_id, 0))))
         elif c["op"] == "teleporter_discovery_update":
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
         elif c["op"] == "character_progression_update":
@@ -234,6 +238,11 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState, helpers: dict[
     state.stash_items = [dict(item) for item in payload.get("stash_items", [])]
     state.stash_gold = int(payload.get("stash_gold", 0))
     state.stash_capacity = int(payload.get("stash_capacity", 50))
+    state.resource_wallet = {
+        str(row.get("resource_id", "")): max(0, int(row.get("amount", 0)))
+        for row in payload.get("resource_wallet", [])
+        if str(row.get("resource_id", ""))
+    }
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
         entity_id

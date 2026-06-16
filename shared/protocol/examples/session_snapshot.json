@@ -60,6 +60,9 @@
     { "stash_item_id": "1015", "item_def_id": "cave_shield", "item_template_id": "cave_shield", "display_name": "Common Cave Shield", "rarity": "common", "rolled_stats": { "armor": 2, "block_percent": 5 }, "requirements": { "level": 1 }, "requirement_status": [{ "stat": "level", "required": 1, "current": 1, "met": true }], "requirements_met": true, "equip_preview": { "slot": "off_hand", "requirements_met": true, "deltas": [{ "stat": "armor", "current": 1, "preview": 3, "delta": 2 }] }, "effect_ids": [] }
   ],
   "stash_gold": 25,
+  "resource_wallet": [
+    { "resource_id": "upgrade_shard", "amount": 1 }
+  ],
   "stash_capacity": 50,
   "discovered_teleporters": [],
   "character_progression": {

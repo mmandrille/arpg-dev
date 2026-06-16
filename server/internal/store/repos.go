@@ -1360,37 +1360,6 @@ func (s *Store) ListAccountStashItems(ctx context.Context, accountID string) ([]
 	return out, nil
 }
 
-func (s *Store) GetOrCreateAccountStashGold(ctx context.Context, accountID string) (AccountStashGold, error) {
-	var out AccountStashGold
-	if err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
-		if _, err := tx.Exec(ctx,
-			`INSERT INTO account_stash_gold (account_id, gold)
-			 SELECT $1, 0
-			 WHERE EXISTS (SELECT 1 FROM accounts WHERE id = $1)
-			 ON CONFLICT (account_id) DO NOTHING`,
-			accountID,
-		); err != nil {
-			return fmt.Errorf("store: initialize account stash gold: %w", err)
-		}
-		err := tx.QueryRow(ctx,
-			`SELECT account_id, gold, created_at, updated_at
-			 FROM account_stash_gold
-			 WHERE account_id = $1`,
-			accountID,
-		).Scan(&out.AccountID, &out.Gold, &out.CreatedAt, &out.UpdatedAt)
-		if errors.Is(err, pgx.ErrNoRows) {
-			return ErrNotFound
-		}
-		if err != nil {
-			return fmt.Errorf("store: get account stash gold: %w", err)
-		}
-		return nil
-	}); err != nil {
-		return AccountStashGold{}, err
-	}
-	return out, nil
-}
-
 func (s *Store) TransferCharacterItemToAccountStash(ctx context.Context, accountID, characterID, itemInstanceID, stashItemID string) (AccountStashItem, error) {
 	var out AccountStashItem
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
@@ -1889,7 +1858,7 @@ func scanAccountStashItem(row rowScanner) (AccountStashItem, error) {
 	return item, nil
 }
 
-func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error {
+func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, progression CharacterProgression) error {
 	characterClass := progression.CharacterClass
 	if characterClass == "" {
 		characterClass = "barbarian"
@@ -2029,6 +1998,23 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 		); err != nil {
 			return fmt.Errorf("store: insert session start account stash gold: %w", err)
 		}
+		for _, resource := range resources {
+			if resource.ResourceID == "" || resource.Amount < 0 {
+				return fmt.Errorf("store: insert session start account resource: invalid resource %q amount %d", resource.ResourceID, resource.Amount)
+			}
+			resourceAccountID := resource.AccountID
+			if resourceAccountID == "" {
+				resourceAccountID = accountID
+			}
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_start_account_resource_wallet (session_id, account_id, resource_id, amount)
+				 VALUES ($1, $2, $3, $4)
+				 ON CONFLICT (session_id, account_id, resource_id) DO NOTHING`,
+				sessionID, resourceAccountID, resource.ResourceID, resource.Amount,
+			); err != nil {
+				return fmt.Errorf("store: insert session start account resource: %w", err)
+			}
+		}
 		return nil
 	})
 }
@@ -2106,7 +2092,6 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	if err := itemRows.Err(); err != nil {
 		return snap, err
 	}
-
 	hotbarRows, err := s.pool.Query(ctx,
 		`SELECT account_id, character_id, slot_index, item_instance_id, created_at
 		 FROM session_start_hotbar_slots
@@ -2128,7 +2113,6 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	if err := hotbarRows.Err(); err != nil {
 		return snap, err
 	}
-
 	snap.SkillBinds = CharacterSkillBindings{AccountID: accountID, CharacterID: characterID, FunctionKeys: make([]string, 16)}
 	skillRows, err := s.pool.Query(ctx,
 		`SELECT slot_index, skill_id
@@ -2162,7 +2146,6 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	).Scan(&snap.SkillBinds.RightClickSkillID); err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return snap, fmt.Errorf("store: load session start skill preference: %w", err)
 	}
-
 	stockRows, err := s.pool.Query(ctx,
 		`SELECT account_id, character_id, shop_id, refresh_key, offer_index, offer_id, source_depth, item_template_id, rolled_payload, buy_price, available, created_at, created_at
 		 FROM session_start_shop_stock
@@ -2184,7 +2167,6 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	if err := stockRows.Err(); err != nil {
 		return snap, err
 	}
-
 	stashRows, err := s.pool.Query(ctx,
 		`SELECT account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, created_at
 		 FROM session_start_account_stash_items
@@ -2206,7 +2188,6 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	if err := stashRows.Err(); err != nil {
 		return snap, err
 	}
-
 	var stashGold AccountStashGold
 	err = s.pool.QueryRow(ctx,
 		`SELECT account_id, gold, created_at, created_at
@@ -2222,7 +2203,27 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	} else {
 		snap.StashGold = AccountStashGold{AccountID: accountID}
 	}
-
+	resourceRows, err := s.pool.Query(ctx,
+		`SELECT account_id, resource_id, amount, created_at, created_at
+		 FROM session_start_account_resource_wallet
+		 WHERE session_id = $1 AND account_id = $2 AND amount > 0
+		 ORDER BY resource_id ASC`,
+		sessionID, accountID,
+	)
+	if err != nil {
+		return snap, fmt.Errorf("store: load session start account resources: %w", err)
+	}
+	defer resourceRows.Close()
+	for resourceRows.Next() {
+		var resource AccountResourceAmount
+		if err := resourceRows.Scan(&resource.AccountID, &resource.ResourceID, &resource.Amount, &resource.CreatedAt, &resource.UpdatedAt); err != nil {
+			return snap, fmt.Errorf("store: scan session start account resource: %w", err)
+		}
+		snap.Resources = append(snap.Resources, resource)
+	}
+	if err := resourceRows.Err(); err != nil {
+		return snap, err
+	}
 	wpRows, err := s.pool.Query(ctx,
 		`SELECT character_id, level, discovered_at
 		 FROM session_start_waypoints

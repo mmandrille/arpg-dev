@@ -971,6 +971,8 @@ func _blacksmith_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 		return false
 	if step.has("resource_inventory_count") and int(panel.get("resource_inventory_count", -1)) != int(step.get("resource_inventory_count", 0)):
 		return false
+	if step.has("resource_wallet_count") and int(panel.get("resource_wallet_count", -1)) != int(step.get("resource_wallet_count", 0)):
+		return false
 	if step.has("pity_failure_count") and int(panel.get("pity_failure_count", -1)) != int(step.get("pity_failure_count", 0)):
 		return false
 	if step.has("pity_threshold") and int(panel.get("pity_threshold", -1)) != int(step.get("pity_threshold", 0)):

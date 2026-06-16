@@ -3,20 +3,22 @@
   "world_id": "ranged_lab",
   "seed": "v180_upgrade_resource_drop",
   "title": "Upgrade resource drop",
-  "description": "Kill the ranged dummy and prove the upgrade shard drops as explicit non-gold loot that can be picked up into inventory.",
+  "description": "Kill the ranged dummy and prove the upgrade shard drops as explicit non-gold loot that can be picked up into the account wallet.",
   "steps": [
     { "action": "action_entity", "item_def_id": "training_bow", "event_type": "item_picked_up" },
     { "action": "equip_inventory_item", "item_def_id": "training_bow", "slot": "main_hand" },
     { "action": "move_until_player_position", "x": 2, "y": 8 },
     { "action": "action_until_event", "monster_def_id": "training_dummy_ranged", "event_type": "monster_killed" },
-    { "action": "action_entity", "item_def_id": "upgrade_shard", "event_type": "item_picked_up" },
-    { "action": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 1 },
+    { "action": "action_entity", "item_def_id": "upgrade_shard", "event_type": "resource_picked_up" },
+    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "upgrade_shard", "equals": 1 }, "timeout_s": 5 },
+    { "action": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },
     { "action": "action_entity", "item_def_id": "red_potion", "event_type": "item_picked_up" },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "gold_picked_up" }, "timeout_s": 5 }
   ],
   "assertions": [
     { "type": "monster_dead", "monster_def_id": "training_dummy_ranged" },
-    { "type": "inventory_count", "item_def_id": "upgrade_shard", "equals": 1 },
+    { "type": "inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },
+    { "type": "resource_wallet_count", "resource_id": "upgrade_shard", "equals": 1 },
     { "type": "gold", "at_least": 6 },
     { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" }
   ],

@@ -24,6 +24,7 @@ def run_assertions(
     stash_items: list[dict[str, Any]] | None = None,
     stash_gold: int | None = None,
     stash_capacity: int | None = None,
+    resource_wallet: dict[str, int] | None = None,
     skill_progression: dict[str, Any] | None = None,
     skill_cooldowns: list[dict[str, Any]] | None = None,
     helpers: dict[str, Any] | None = None,
@@ -91,6 +92,12 @@ def run_assertions(
             assert_count_matches(int(stash_gold or 0), assertion, f"{where}: stash gold")
         elif typ == "stash_capacity":
             assert_count_matches(int(stash_capacity or 0), assertion, f"{where}: stash capacity")
+        elif typ == "resource_wallet_count":
+            resource_id = str(assertion.get("resource_id", assertion.get("item_def_id", "")))
+            if not resource_id:
+                raise AssertionError(f"{where}: resource_wallet_count requires resource_id")
+            wallet = resource_wallet or {}
+            assert_count_matches(int(wallet.get(resource_id, 0)), assertion, f"{where}: resource_wallet_count {resource_id}")
         elif typ == "wall_count":
             wall_rows = list(walls or [])
             if assertion.get("source") is not None:

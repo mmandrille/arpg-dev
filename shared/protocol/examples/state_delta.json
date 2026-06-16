@@ -35,6 +35,7 @@
     { "op": "gold_update", "gold": 8 },
     { "op": "stash_item_add", "item": { "stash_item_id": "1015", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade", "rarity": "common", "rolled_stats": { "damage_min": 2, "damage_max": 6 }, "requirements": { "level": 1 }, "requirement_status": [{ "stat": "level", "required": 1, "current": 1, "met": true }], "requirements_met": true, "equip_preview": { "slot": "main_hand", "requirements_met": true, "deltas": [{ "stat": "damage_max", "current": 4, "preview": 6, "delta": 2 }] }, "effect_ids": [] } },
     { "op": "stash_gold_update", "stash_gold": 25 },
+    { "op": "resource_wallet_update", "resource_id": "upgrade_shard", "amount": 1 },
     { "op": "stash_item_remove", "stash_item_id": "1015" },
     {
       "op": "character_progression_update",
@@ -99,6 +100,7 @@
     { "event_type": "player_damaged", "entity_id": "1001", "source_entity_id": "1002", "target_entity_id": "1001", "correlation_id": "corr_01H00000000000000000000000", "damage": 1, "outcome": "hit", "raw_damage": 5, "mitigated_damage": 1, "blocked": false, "critical": false },
     { "event_type": "projectile_blocked", "correlation_id": "corr_01H00000000000000000000000" },
     { "event_type": "gold_picked_up", "entity_id": "1001", "amount": 8, "total_gold": 8, "correlation_id": "corr_01H00000000000000000000000" },
+    { "event_type": "resource_picked_up", "entity_id": "1001", "resource_id": "upgrade_shard", "amount": 1, "correlation_id": "corr_01H00000000000000000000000" },
     { "event_type": "item_dropped", "entity_id": "1006", "item_instance_id": "1004", "correlation_id": "corr_01H00000000000000000000000" },
     { "event_type": "boss_phase_started", "entity_id": "1010", "pattern_id": "charged_melee", "phase_index": 0, "phase_kind": "telegraph", "duration_ticks": 30, "telegraph": { "type": "body_color_charge", "from_color": "#b77cff", "to_color": "#ff0000", "radius": 1.6 }, "hit_shape": { "shape": "melee_contact", "radius": 1.6 } },
     { "event_type": "boss_phase_ended", "entity_id": "1010", "pattern_id": "charged_melee", "phase_index": 0, "phase_kind": "telegraph" },

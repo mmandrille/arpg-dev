@@ -27,6 +27,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	shopStock := make(map[string]*shopStockState)
 	stashItems := []*stashItem{}
 	stashCapacity := defaultStashCapacity
+	resourceWallet := make(map[string]int)
 	character := progression
 	gold := progression.Gold
 	s.equipped = equipped
@@ -42,6 +43,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	s.stashItems = stashItems
 	s.stashGold = 0
 	s.stashCapacity = stashCapacity
+	s.resourceWallet = resourceWallet
 	maxHP := s.currentMaxHP()
 	maxMana := s.currentMaxMana()
 	player := &entity{
@@ -82,6 +84,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		StashItems:            stashItems,
 		StashGold:             0,
 		StashCapacity:         stashCapacity,
+		ResourceWallet:        resourceWallet,
 	}
 	s.usePlayer(s.defaultPlayer())
 	return player.id, nil
@@ -377,6 +380,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	s.stashItems = ps.StashItems
 	s.stashGold = ps.StashGold
 	s.stashCapacity = ps.StashCapacity
+	s.resourceWallet = cloneIntMap(ps.ResourceWallet)
+	if s.resourceWallet == nil {
+		s.resourceWallet = make(map[string]int)
+	}
 	if s.stashCapacity <= 0 {
 		s.stashCapacity = defaultStashCapacity
 	}
@@ -421,6 +428,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.StashItems = s.stashItems
 	ps.StashGold = s.stashGold
 	ps.StashCapacity = s.stashCapacity
+	ps.ResourceWallet = cloneIntMap(s.resourceWallet)
 	ps.HPRegenCarry = s.hpRegenCarry
 	ps.ManaRegenCarry = s.manaRegenCarry
 	ps.NextBasicAttackTick = s.nextBasicAttackTick

@@ -204,6 +204,7 @@ v199_* = new-boss-pattern-deck
 v200_* = progress-doc-compaction
 v213_* = bishop-account-revival
 v217_* = paladin-charge-channeling-protocol
+v221_* = resource-wallet-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

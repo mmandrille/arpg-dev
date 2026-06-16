@@ -81,6 +81,7 @@ class RuntimeState:
     stash_items: list[dict[str, Any]] = field(default_factory=list)
     stash_gold: int = 0
     stash_capacity: int = 50
+    resource_wallet: dict[str, int] = field(default_factory=dict)
     stash_events: list[dict[str, Any]] = field(default_factory=list)
     last_stash_event: dict[str, Any] | None = None
     last_gold_before_action: int | None = None

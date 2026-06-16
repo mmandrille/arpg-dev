@@ -408,13 +408,13 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	hostHotbar := []store.CharacterHotbarSlot{{AccountID: hostAcct.ID, CharacterID: hostChar.ID, SlotIndex: 0, ItemInstanceID: &hostItem.ID}}
 	guestHotbar := []store.CharacterHotbarSlot{{AccountID: guestAcct.ID, CharacterID: guestChar.ID, SlotIndex: 0, ItemInstanceID: &guestItem.ID}}
 	thirdHotbar := []store.CharacterHotbarSlot{{AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, SlotIndex: 0, ItemInstanceID: &thirdItem.ID}}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: hostAcct.ID}, hostProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: hostAcct.ID}, nil, hostProgression); err != nil {
 		t.Fatalf("host start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: guestAcct.ID}, guestProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: guestAcct.ID}, nil, guestProgression); err != nil {
 		t.Fatalf("guest start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: thirdAcct.ID}, thirdProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: thirdAcct.ID}, nil, thirdProgression); err != nil {
 		t.Fatalf("third start snapshot: %v", err)
 	}
 	snaps, err := s.LoadSessionStartSnapshots(ctx, sess.ID)
@@ -718,7 +718,8 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("restore missing stock: expected ErrNotFound, got %v", err)
 	}
 
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, skillBinds, shopStock, nil, store.AccountStashGold{AccountID: acct.ID}, loadedProgression); err != nil {
+	resources := []store.AccountResourceAmount{{AccountID: acct.ID, ResourceID: "upgrade_shard", Amount: 2}}
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, skillBinds, shopStock, nil, store.AccountStashGold{AccountID: acct.ID}, resources, loadedProgression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false, 0); err != nil {
@@ -762,6 +763,9 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err := s.ReplaceCharacterShopStock(ctx, acct.ID, char.ID, "town_vendor", "wp:-2", replacementStock); err != nil {
 		t.Fatalf("mutate live shop stock: %v", err)
 	}
+	if _, err := s.AddAccountResource(ctx, acct.ID, "upgrade_shard", 3); err != nil {
+		t.Fatalf("mutate live resource wallet: %v", err)
+	}
 	snap, err := s.LoadSessionStartSnapshot(ctx, sess.ID)
 	if err != nil {
 		t.Fatalf("load session snapshot: %v", err)
@@ -780,6 +784,9 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 	if len(snap.ShopStock) != 2 || snap.ShopStock[0].OfferID != "generated:depth1:000" || snap.ShopStock[0].Available || snap.ShopStock[1].OfferID != "generated:depth2:001" {
 		t.Fatalf("snapshot shop stock mutated with live state: %+v", snap.ShopStock)
+	}
+	if len(snap.Resources) != 1 || snap.Resources[0].ResourceID != "upgrade_shard" || snap.Resources[0].Amount != 2 {
+		t.Fatalf("snapshot resources mutated with live state: %+v", snap.Resources)
 	}
 	if snap.Progression == nil {
 		t.Fatalf("snapshot progression missing")

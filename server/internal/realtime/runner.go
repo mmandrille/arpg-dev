@@ -530,6 +530,14 @@ func (r *runner) persistTick(res game.TickResult) {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist character gold", "error", err)
 			}
+		case game.OpResourceWalletUpdate:
+			if c.ResourceID == "" {
+				continue
+			}
+			if _, err := r.store.AddAccountResource(ctx, r.sess.AccountID, c.ResourceID, 1); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist account resource", "resource_id", c.ResourceID, "error", err)
+			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
 				if _, err := r.store.AddAccountWaypoint(ctx, r.sess.AccountID, c.Level); err != nil {

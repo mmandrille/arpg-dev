@@ -34,8 +34,7 @@ func _run() -> void:
 		"rarity": "common",
 		"rolled_stats": {"damage_min": 1, "damage_max": 2, "upgrade_pity": {"failures": 1}},
 	}
-	var shard := {"item_instance_id": "shard_1", "item_def_id": "upgrade_shard", "display_name": "Upgrade Shard"}
-	panel.show_blacksmith("smith-1", [item, shard], 100, 0, config, "Choose")
+	panel.show_blacksmith("smith-1", [item], 100, 0, config, "Choose", {"upgrade_shard": 1})
 	panel.stage_inventory_item(item)
 	var state := panel.get_debug_state()
 	_assert_eq("pity threshold", int(state.get("pity_threshold", 0)), 2)

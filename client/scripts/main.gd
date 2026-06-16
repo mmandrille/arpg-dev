@@ -92,6 +92,7 @@ var gold: int = 0
 var stash_items: Array = []
 var stash_gold: int = 0
 var stash_capacity: int = 50
+var resource_wallet: Dictionary = {}
 var pending_stash_equips: Dictionary = {}
 var hotbar_capacity: int = 2
 var hotbar: Array = []
@@ -903,6 +904,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	stash_items = p.get("stash_items", [])
 	stash_gold = int(p.get("stash_gold", stash_gold))
 	stash_capacity = int(p.get("stash_capacity", stash_capacity))
+	_apply_resource_wallet_snapshot(p.get("resource_wallet", []))
 	hotbar_capacity = int(p.get("hotbar_capacity", 2))
 	hotbar = p.get("hotbar", [])
 	character_progression = p.get("character_progression", {})
@@ -1007,6 +1009,10 @@ func _apply_delta(p: Dictionary) -> void:
 				_remove_stash_item(str(c.get("stash_item_id", "")))
 			"stash_gold_update":
 				stash_gold = int(c.get("stash_gold", stash_gold))
+			"resource_wallet_update":
+				var resource_id := str(c.get("resource_id", ""))
+				if resource_id != "":
+					resource_wallet[resource_id] = max(0, int(c.get("amount", resource_wallet.get(resource_id, 0))))
 			"teleporter_discovery_update":
 				var discovered_level := int(c.get("level", 0))
 				var discovered := bool(c.get("discovered", false))
@@ -1595,6 +1601,17 @@ func _remove_stash_item(stash_item_id: String) -> void:
 		if str(stash_items[i].get("stash_item_id", "")) == stash_item_id:
 			stash_items.remove_at(i)
 
+func _apply_resource_wallet_snapshot(rows: Variant) -> void:
+	resource_wallet.clear()
+	if typeof(rows) != TYPE_ARRAY:
+		return
+	for value in rows:
+		if typeof(value) != TYPE_DICTIONARY:
+			continue
+		var row := value as Dictionary
+		var resource_id := str(row.get("resource_id", ""))
+		if resource_id != "":
+			resource_wallet[resource_id] = max(0, int(row.get("amount", 0)))
 func _apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = {}) -> void:
 	if slot_index < 0 or slot_index >= 10:
 		return
@@ -1625,7 +1642,8 @@ func _refresh_inventory_ui() -> void:
 			gold,
 			stash_gold,
 			_blacksmith_config(),
-			blacksmith_panel.get_debug_state().get("status", "")
+			blacksmith_panel.get_debug_state().get("status", ""),
+			resource_wallet
 		)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
@@ -4454,7 +4472,7 @@ func _show_blacksmith_panel(ev: Dictionary) -> void:
 	stash_items = ev.get("stash_items", stash_items)
 	stash_gold = int(ev.get("stash_gold", stash_gold))
 	stash_capacity = int(ev.get("stash_capacity", stash_capacity))
-	blacksmith_panel.show_blacksmith(next_entity_id, inventory, gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade")
+	blacksmith_panel.show_blacksmith(next_entity_id, inventory, gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade", resource_wallet)
 	_raise_gameplay_windows()
 
 func _hide_blacksmith_panel() -> void:
@@ -4475,7 +4493,7 @@ func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
 	stash_gold = int(result.get("stash_gold", stash_gold))
 	_upsert_stash_item(item)
 	if blacksmith_panel != null:
-		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)))
+		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)), resource_wallet)
 	if stash_panel != null and stash_panel.visible:
 		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
 
@@ -4490,11 +4508,17 @@ func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> voi
 	var item: Dictionary = result.get("item", {})
 	gold = int(result.get("gold", gold))
 	stash_gold = int(result.get("stash_gold", stash_gold))
+	_apply_upgrade_resource_wallet_response(result)
 	_update_inventory_item(item)
-	_remove_inventory_items_by_def(str(result.get("resource_item_def_id", "")), int(result.get("resource_count", 0)))
 	if blacksmith_panel != null:
-		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)))
+		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)), resource_wallet)
 	_refresh_inventory_ui()
+
+func _apply_upgrade_resource_wallet_response(result: Dictionary) -> void:
+	var resource_id := str(result.get("resource_item_def_id", ""))
+	if resource_id == "" or not result.has("resource_wallet"):
+		return
+	resource_wallet[resource_id] = max(0, int(result.get("resource_wallet", 0)))
 
 func _blacksmith_config() -> Dictionary:
 	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/main_config.v0.json")
@@ -5203,6 +5227,7 @@ func get_bot_state() -> Dictionary:
 		"stash_items": stash_items.duplicate(true),
 		"stash_gold": stash_gold,
 		"stash_capacity": stash_capacity,
+		"resource_wallet": resource_wallet.duplicate(true),
 		"monster_ids": live_monster_ids,
 		"entities_debug": _bot_entities_debug(live_monster_ids),
 		"local_player_presentation": _bot_local_player_presentation(),

@@ -2770,7 +2770,6 @@ def assert_shop_detail_rows(rows: list[dict[str, Any]], step: dict[str, Any], la
         if not any(needle in str(line) for row in rows for line in row.get("summary_lines", [])):
             raise AssertionError(f"{label}: no summary line contains {needle!r}: {rows}")
 
-
 async def check_persistence(base_url: str, token: str, session_id: str, item_id: str | None, assertions: list[Any]) -> None:
     """Reconnect and assert the snapshot was reconstructed from recorded inputs."""
     uri = to_ws_url(base_url, "/v0/ws?session_id=" + session_id)
@@ -2799,14 +2798,13 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             stash_items=payload.get("stash_items", []),
             stash_gold=int(payload.get("stash_gold", 0)),
             stash_capacity=int(payload.get("stash_capacity", 50)),
+            resource_wallet={str(row.get("resource_id", "")): max(0, int(row.get("amount", 0))) for row in payload.get("resource_wallet", []) if str(row.get("resource_id", ""))},
             skill_progression=payload.get("skill_progression", {}),
             skill_cooldowns=payload.get("skill_cooldowns", []),
         )
         log("reconnect snapshot restored expected scenario state")
 
-
 # --- assertions -------------------------------------------------------------
-
 def assert_equipped_sword(inventory: list[dict], equipped: dict, item_id: str | None, where: str) -> None:
     item = find_inventory_item(inventory, "rusty_sword")
     if item is None:
@@ -3211,7 +3209,6 @@ def assert_stat_breakdowns(actual: Any, expected_rows: list[dict[str, Any]], whe
             if str(kind) not in source_kinds:
                 raise AssertionError(f"{where}: stat_breakdown {key} missing source kind {kind}: {row}")
 
-
 def run_assertions(
     assertions: list[Any],
     entities: list[dict],
@@ -3231,6 +3228,7 @@ def run_assertions(
     stash_items: list[dict[str, Any]] | None = None,
     stash_gold: int | None = None,
     stash_capacity: int | None = None,
+    resource_wallet: dict[str, int] | None = None,
     skill_progression: dict[str, Any] | None = None,
     skill_cooldowns: list[dict[str, Any]] | None = None,
 ) -> None:
@@ -3255,11 +3253,11 @@ def run_assertions(
         stash_items,
         stash_gold,
         stash_capacity,
+        resource_wallet,
         skill_progression,
         skill_cooldowns,
         globals(),
     )
-
 
 def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: str) -> None:
     from tools.bot.runtime_assertions import run_runtime_assertions as run_runtime_assertions_impl
@@ -3370,6 +3368,7 @@ def run_verified_session(
         stash_items=state.get("stash_items", []),
         stash_gold=int(state.get("stash_gold", 0)),
         stash_capacity=int(state.get("stash_capacity", 50)),
+        resource_wallet={str(row.get("resource_id", "")): max(0, int(row.get("amount", 0))) for row in state.get("resource_wallet", []) if str(row.get("resource_id", ""))},
         skill_progression=state.get("skill_progression", {}),
         skill_cooldowns=state.get("skill_cooldowns", []),
     )

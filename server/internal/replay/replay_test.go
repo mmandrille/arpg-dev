@@ -1488,6 +1488,15 @@ func (f *fakeRepo) TransferCharacterGoldToAccountStash(context.Context, string, 
 func (f *fakeRepo) TransferAccountStashGoldToCharacter(context.Context, string, string, int) (int, int, error) {
 	return 0, 0, nil
 }
+func (f *fakeRepo) ListAccountResources(context.Context, string) ([]store.AccountResourceAmount, error) {
+	return nil, nil
+}
+func (f *fakeRepo) AddAccountResource(context.Context, string, string, int) (store.AccountResourceAmount, error) {
+	return store.AccountResourceAmount{}, nil
+}
+func (f *fakeRepo) SpendAccountResource(context.Context, string, string, int) (store.AccountResourceAmount, error) {
+	return store.AccountResourceAmount{}, nil
+}
 func (f *fakeRepo) UpgradeAccountStashItem(context.Context, string, string, int, int, int, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, bool, error) {
 	return store.AccountStashItem{}, 0, 0, true, nil
 }
@@ -1524,7 +1533,7 @@ func (f *fakeRepo) ExpireMarketListings(context.Context) (int, error) {
 func (f *fakeRepo) GetMarketSummary(context.Context, string) (store.MarketSummary, error) {
 	return store.MarketSummary{}, nil
 }
-func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, store.CharacterProgression) error {
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, []store.AccountResourceAmount, store.CharacterProgression) error {
 	return nil
 }
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {

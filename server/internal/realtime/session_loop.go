@@ -146,6 +146,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	sim.LoadDiscoveredTeleportersForPlayer(hostPlayerID, waypointLevels(hostStart.Waypoints))
 	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
 	sim.LoadAccountStashForPlayer(hostPlayerID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
+	sim.LoadResourceWalletForPlayer(hostPlayerID, persistedResources(hostStart.Resources))
 	h.loadCharacterCorpses(ctx, h.log, sim, host)
 	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, host.AccountID, host.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err
@@ -173,6 +174,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 		sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 		sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
+		sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
 		h.loadCharacterCorpses(ctx, h.log, sim, member)
 		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 			return nil, nil, err
@@ -288,6 +290,7 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 	l.sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 	l.sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
+	l.sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
 	l.hub.loadCharacterCorpses(context.Background(), l.log, l.sim, member)
 	l.mu.Unlock()
 	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
@@ -604,7 +607,7 @@ func filterChangesForClient(changes []game.Change, actorPlayerID, clientPlayerID
 			game.OpEquippedUpdate, game.OpHotbarUpdate, game.OpTeleporterDiscoveryUpdate,
 			game.OpGoldUpdate, game.OpCharacterProgressionUpdate, game.OpSkillProgressionUpdate,
 			game.OpShopStockReplace, game.OpShopStockAvailability,
-			game.OpStashItemAdd, game.OpStashItemRemove, game.OpStashGoldUpdate:
+			game.OpStashItemAdd, game.OpStashItemRemove, game.OpStashGoldUpdate, game.OpResourceWalletUpdate:
 			ownerPlayerID := actorPlayerID
 			if change.OwnerPlayerID != 0 {
 				ownerPlayerID = change.OwnerPlayerID
@@ -626,7 +629,7 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 			if actorPlayerID != clientPlayerID {
 				continue
 			}
-		case "experience_gained", "character_leveled", "skill_point_gained", "gold_picked_up":
+		case "experience_gained", "character_leveled", "skill_point_gained", "gold_picked_up", "resource_picked_up":
 			ownerPlayerID, ok := eventEntityPlayerID(event)
 			if !ok || ownerPlayerID != clientPlayerID {
 				continue
@@ -821,6 +824,14 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if err := l.hub.store.SetCharacterGold(ctx, changeMember.AccountID, changeMember.CharacterID, *c.Gold); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist character gold", "error", err)
+			}
+		case game.OpResourceWalletUpdate:
+			if c.ResourceID == "" {
+				continue
+			}
+			if _, err := l.hub.store.AddAccountResource(ctx, changeMember.AccountID, c.ResourceID, 1); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist account resource", "resource_id", c.ResourceID, "error", err)
 			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {

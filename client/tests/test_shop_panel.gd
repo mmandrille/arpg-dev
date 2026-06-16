@@ -480,16 +480,15 @@ func _run() -> void:
 	var upgrade_item: Dictionary = (inventory[0] as Dictionary).duplicate(true)
 	upgrade_item["rolled_stats"] = {"damage_min": 2, "damage_max": 4}
 	upgrade_item["summary_lines"] = ["Min damage: +2", "Max damage: +4"]
-	var upgrade_shard := {"item_instance_id": "shard_1", "item_def_id": "upgrade_shard", "display_name": "Upgrade Shard", "category": "currency"}
 	var blacksmith_config := {"item_upgrade_cost_gold": 100, "item_upgrade_cost_growth_per_level": 50, "item_upgrade_max_level": 3, "item_upgrade_resource_item_def_id": "upgrade_shard", "item_upgrade_resource_count": 1}
-	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item, upgrade_shard], 40, 60, blacksmith_config, "Choose")
+	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item], 40, 60, blacksmith_config, "Choose", {"upgrade_shard": 1})
 	blacksmith_panel.stage_inventory_item(upgrade_item)
 	var blacksmith_state := blacksmith_panel.get_debug_state()
 	_assert_eq("blacksmith staged item id", str(blacksmith_state.get("staged_item_id", "")), "2001")
 	_assert_eq("blacksmith wallet gold", int(blacksmith_state.get("wallet_gold", 0)), 100)
 	_assert_eq("blacksmith resource item", str(blacksmith_state.get("resource_item_def_id", "")), "upgrade_shard")
 	_assert_eq("blacksmith required shard count", int(blacksmith_state.get("resource_required_count", 0)), 1)
-	_assert_eq("blacksmith inventory shard count", int(blacksmith_state.get("resource_inventory_count", 0)), 1)
+	_assert_eq("blacksmith wallet shard count", int(blacksmith_state.get("resource_wallet_count", 0)), 1)
 	var blacksmith_window_size: Dictionary = (blacksmith_state.get("window", {}) as Dictionary).get("minimum_size", {})
 	_assert_eq("blacksmith compact window width", int(blacksmith_window_size.get("x", 0)), 320)
 	_assert_eq("blacksmith compact window height", int(blacksmith_window_size.get("y", 0)), 254)
@@ -523,10 +522,10 @@ func _run() -> void:
 	blacksmith_panel.stage_inventory_item(upgrade_item)
 	blacksmith_panel._emit_upgrade(upgrade_item)
 	_assert_eq("blacksmith inventory upgrade emitted", str(blacksmith_emitted[0]), "2001")
-	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item], 100, 0, blacksmith_config, "Choose")
+	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item], 100, 0, blacksmith_config, "Choose", {})
 	blacksmith_panel.stage_inventory_item(upgrade_item)
 	blacksmith_state = blacksmith_panel.get_debug_state()
-	_assert_eq("blacksmith missing shard count", int(blacksmith_state.get("resource_inventory_count", -1)), 0)
+	_assert_eq("blacksmith missing wallet shard count", int(blacksmith_state.get("resource_wallet_count", -1)), 0)
 	var missing_rows: Array = blacksmith_state.get("rows", [])
 	_assert_false("blacksmith disables upgrade without shard", bool((missing_rows[0] as Dictionary).get("upgrade_enabled", true)))
 	blacksmith_panel._emit_upgrade(upgrade_item)

@@ -145,6 +145,15 @@ type AccountStashGold struct {
 	UpdatedAt time.Time
 }
 
+// AccountResourceAmount is an account-owned material/resource balance.
+type AccountResourceAmount struct {
+	AccountID  string
+	ResourceID string
+	Amount     int
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
 const (
 	MarketListingActive   = "active"
 	MarketListingCanceled = "canceled"
@@ -317,6 +326,7 @@ type SessionStartSnapshot struct {
 	ShopStock   []CharacterShopStockItem
 	StashItems  []AccountStashItem
 	StashGold   AccountStashGold
+	Resources   []AccountResourceAmount
 	Progression *CharacterProgression
 }
 

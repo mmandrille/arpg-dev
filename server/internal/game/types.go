@@ -97,6 +97,12 @@ type StashItemView struct {
 	SummaryLines      []string                `json:"summary_lines,omitempty"`
 }
 
+// ResourceAmountView is an account-wide material/resource balance.
+type ResourceAmountView struct {
+	ResourceID string `json:"resource_id"`
+	Amount     int    `json:"amount"`
+}
+
 // ItemRollPayload is the durable JSON payload stored in rolled_stats columns.
 type ItemRollPayload struct {
 	ItemTemplateID string         `json:"item_template_id"`
@@ -440,6 +446,7 @@ type Event struct {
 	StashItems           []StashItemView         `json:"stash_items,omitempty"`
 	StashGold            *int                    `json:"stash_gold,omitempty"`
 	StashCapacity        *int                    `json:"stash_capacity,omitempty"`
+	ResourceID           string                  `json:"resource_id,omitempty"`
 	CorpseCharacterID    string                  `json:"corpse_character_id,omitempty"`
 	CorpseName           string                  `json:"corpse_name,omitempty"`
 	CorpseItems          []ItemView              `json:"corpse_items,omitempty"`
@@ -508,6 +515,7 @@ type Snapshot struct {
 	StashItems            []StashItemView           `json:"stash_items"`
 	StashGold             int                       `json:"stash_gold"`
 	StashCapacity         int                       `json:"stash_capacity"`
+	ResourceWallet        []ResourceAmountView      `json:"resource_wallet"`
 	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
 	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
 	SkillProgression      SkillProgressionView      `json:"skill_progression"`
@@ -537,6 +545,7 @@ const (
 	OpStashItemAdd               = "stash_item_add"
 	OpStashItemRemove            = "stash_item_remove"
 	OpStashGoldUpdate            = "stash_gold_update"
+	OpResourceWalletUpdate       = "resource_wallet_update"
 	OpWallLayoutUpdate           = "wall_layout_update"
 	OpTeleporterDiscoveryUpdate  = "teleporter_discovery_update"
 	OpCharacterProgressionUpdate = "character_progression_update"
@@ -569,6 +578,8 @@ type Change struct {
 	InventoryCap     *int
 	Gold             *int
 	StashGold        *int
+	ResourceID       string
+	ResourceAmount   *int
 	Walls            []WallView
 	Level            int
 	Discovered       bool
@@ -663,6 +674,16 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			Op        string `json:"op"`
 			StashGold int    `json:"stash_gold"`
 		}{c.Op, stashGold})
+	case OpResourceWalletUpdate:
+		amount := 0
+		if c.ResourceAmount != nil {
+			amount = *c.ResourceAmount
+		}
+		return json.Marshal(struct {
+			Op         string `json:"op"`
+			ResourceID string `json:"resource_id"`
+			Amount     int    `json:"amount"`
+		}{c.Op, c.ResourceID, amount})
 	case OpWallLayoutUpdate:
 		return json.Marshal(struct {
 			Op    string     `json:"op"`

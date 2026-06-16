@@ -370,6 +370,7 @@
         "heal": { "type": "integer", "minimum": 0 },
         "mana": { "type": "integer", "minimum": 0 },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "resource_id": { "type": "string", "minLength": 1 },
         "level": { "type": "integer" },
         "from_level": { "type": "integer" },
         "to_level": { "type": "integer" },
@@ -462,6 +463,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "item_instance_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "resource_picked_up" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "resource_id", "amount"] }
         },
         {
           "if": {
@@ -1065,6 +1073,16 @@
           "properties": {
             "op": { "const": "stash_gold_update" },
             "stash_gold": { "type": "integer", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "resource_id", "amount"],
+          "properties": {
+            "op": { "const": "resource_wallet_update" },
+            "resource_id": { "type": "string", "minLength": 1 },
+            "amount": { "type": "integer", "minimum": 0 }
           }
         },
         {

@@ -4,7 +4,7 @@
   "title": "session_snapshot payload (v8)",
   "description": "Full authoritative state needed to render the scene. This validates the bare payload body (the `payload` field of a session_snapshot envelope).",
   "type": "object",
-  "required": ["server_tick", "session_id", "seed", "current_level", "local_player_id", "party", "walls", "entities", "inventory", "equipped", "hotbar_capacity", "hotbar", "inventory_rows", "inventory_capacity", "gold", "stash_items", "stash_gold", "stash_capacity", "discovered_teleporters", "character_progression", "skill_progression", "skill_cooldowns", "recent_events"],
+  "required": ["server_tick", "session_id", "seed", "current_level", "local_player_id", "party", "walls", "entities", "inventory", "equipped", "hotbar_capacity", "hotbar", "inventory_rows", "inventory_capacity", "gold", "stash_items", "stash_gold", "resource_wallet", "stash_capacity", "discovered_teleporters", "character_progression", "skill_progression", "skill_cooldowns", "recent_events"],
   "additionalProperties": false,
   "properties": {
     "server_tick": { "type": "integer", "minimum": 0 },
@@ -36,6 +36,7 @@
     "gold": { "type": "integer", "minimum": 0 },
     "stash_items": { "type": "array", "items": { "$ref": "#/$defs/stash_item" } },
     "stash_gold": { "type": "integer", "minimum": 0 },
+    "resource_wallet": { "type": "array", "items": { "$ref": "#/$defs/resource_amount" } },
     "stash_capacity": { "type": "integer", "minimum": 0, "maximum": 200 },
     "discovered_teleporters": { "type": "array", "items": { "$ref": "#/$defs/teleporter_discovery" } },
     "character_progression": { "$ref": "#/$defs/character_progression" },
@@ -186,6 +187,15 @@
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "summary_lines": { "$ref": "#/$defs/item_summary_lines" }
+      }
+    },
+    "resource_amount": {
+      "type": "object",
+      "required": ["resource_id", "amount"],
+      "additionalProperties": false,
+      "properties": {
+        "resource_id": { "type": "string", "minLength": 1 },
+        "amount": { "type": "integer", "minimum": 0 }
       }
     },
     "item_summary_lines": {
@@ -462,6 +472,7 @@
         "heal": { "type": "integer", "minimum": 0 },
         "mana": { "type": "integer", "minimum": 0 },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
+        "resource_id": { "type": "string", "minLength": 1 },
         "level": { "type": "integer" },
         "from_level": { "type": "integer" },
         "to_level": { "type": "integer" },
@@ -544,6 +555,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "item_instance_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "resource_picked_up" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "resource_id", "amount"] }
         },
         {
           "if": {

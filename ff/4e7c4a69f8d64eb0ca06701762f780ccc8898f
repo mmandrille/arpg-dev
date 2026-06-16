@@ -1,0 +1,23 @@
+AGENTS.md
+  s_bf6c5056249bf0::t_29e72b23241966 41
+skills/autoloop/SKILL.md
+  s_bf6c5056249bf0::t_29e72b23241966 9-10,16,20-23,35-36,44-47,61-81,113,139,147,190-191,199,221,296,316-317,321,330
+skills/README.md
+  s_bf6c5056249bf0::t_29e72b23241966 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "ff4e7c4a69f8d64eb0ca06701762f780ccc8898f",
+  "prompts": {},
+  "sessions": {
+    "s_bf6c5056249bf0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed1c3-548a-72d2-ab38-b259610bff2b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+tools/bot/test_skill_demo.py
+  s_988e4c34d2ce08::t_3ecabe0c9452a4 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a1143252ef8aebe1ac987f4b1ccc18f12d903c56",
+  "prompts": {},
+  "sessions": {
+    "s_988e4c34d2ce08": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed110-d283-78e0-98eb-792237de9efa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

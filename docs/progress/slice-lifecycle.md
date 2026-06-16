@@ -227,5 +227,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v210** | `barbarian-leap` | Complete (`make ci` green) | [`v210_spec-barbarian-leap.md`](docs/specs/v210_spec-barbarian-leap.md) | [`v210_2026-06-16-barbarian-leap.md`](docs/plans/v210_2026-06-16-barbarian-leap.md) | [`as-built`](docs/as-built/v210_barbarian-leap.md) |
 | **v211** | `paladin-charge` | Complete (`make ci` green) | [`v211_spec-paladin-charge.md`](docs/specs/v211_spec-paladin-charge.md) | [`v211_2026-06-16-paladin-charge.md`](docs/plans/v211_2026-06-16-paladin-charge.md) | [`as-built`](docs/as-built/v211_paladin-charge.md) |
 | **v212** | `ranger-disengage` | Complete (`make ci` green) | [`v212_spec-ranger-disengage.md`](docs/specs/v212_spec-ranger-disengage.md) | [`v212_2026-06-16-ranger-disengage.md`](docs/plans/v212_2026-06-16-ranger-disengage.md) | [`as-built`](docs/as-built/v212_ranger-disengage.md) |
+| **v213** | `bishop-account-revival` | Complete (`make ci` green) | [`v213_spec-bishop-account-revival.md`](docs/specs/v213_spec-bishop-account-revival.md) | [`v213_2026-06-16-bishop-account-revival.md`](docs/plans/v213_2026-06-16-bishop-account-revival.md) | [`as-built`](docs/as-built/v213_bishop-account-revival.md) |
 
 ---

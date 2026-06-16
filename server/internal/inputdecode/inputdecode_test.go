@@ -280,6 +280,19 @@ func TestDecodeBishopDebugIntents(t *testing.T) {
 	}
 }
 
+func TestDecodeBishopReviveAllIntent(t *testing.T) {
+	in, ok := Decode(TypeBishopReviveAll, "msg_bishop_revive_all", "corr_bishop_revive_all", json.RawMessage(`{"bishop_entity_id":"1013"}`))
+	if !ok {
+		t.Fatal("Decode rejected valid bishop revive all payload")
+	}
+	if !IsClientIntent(TypeBishopReviveAll) {
+		t.Fatal("bishop_revive_all_intent not marked as client intent")
+	}
+	if in.BishopReviveAll == nil || in.BishopReviveAll.BishopEntityID != "1013" {
+		t.Fatalf("decoded bishop revive all = %+v", in.BishopReviveAll)
+	}
+}
+
 func TestDecodeBishopDebugIntentsRejectInvalidPayload(t *testing.T) {
 	for _, typ := range []string{TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat} {
 		for _, payload := range []json.RawMessage{

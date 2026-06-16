@@ -4,15 +4,15 @@
   "world_id": "vendor_lab",
   "seed": "v92_client_bishop_respec",
   "title": "Town bishop respec panel",
-  "description": "Client opens the red town bishop service panel and verifies the respec option and unaffordable state.",
+  "description": "Client opens the red town bishop service panel and verifies the free respec and revive-all buttons.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "click_floor", "x": 10.0, "z": 12.0 },
     { "type": "wait_player_near", "x": 10.0, "z": 12.0, "distance": 0.8, "timeout_s": 10.0 },
     { "type": "wait_ticks", "ticks": 1, "timeout_s": 5.0 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_bishop" },
-    { "type": "wait_bishop_panel", "price": 250, "affordable": false, "respec_enabled": false, "debug_enabled": true, "timeout_s": 15.0 },
+    { "type": "wait_bishop_panel", "price": 0, "affordable": true, "respec_enabled": true, "revive_all_enabled": true, "debug_enabled": true, "timeout_s": 15.0 },
     { "type": "assert_bishop_panel_visible", "visible": true },
-    { "type": "assert_bishop_panel", "price": 250, "service_id": "bishop", "affordable": false, "respec_enabled": false, "debug_enabled": true }
+    { "type": "assert_bishop_panel", "price": 0, "service_id": "bishop", "affordable": true, "respec_enabled": true, "revive_all_enabled": true, "debug_enabled": true }
   ]
 }

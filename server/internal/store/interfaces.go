@@ -20,6 +20,7 @@ type CharacterRepo interface {
 	CreateCharacter(ctx context.Context, charID, accountID, name, characterClass string) (Character, error)
 	RenameCharacter(ctx context.Context, accountID, characterID, name string) (Character, error)
 	MarkCharacterDead(ctx context.Context, accountID, characterID string, deathLevel int) error
+	ReviveDeadCharacters(ctx context.Context, accountID string) (int, error)
 	DeleteCharacter(ctx context.Context, accountID, characterID string) error
 }
 

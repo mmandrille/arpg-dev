@@ -751,6 +751,13 @@
         },
         {
           "if": {
+            "properties": { "event_type": { "const": "bishop_revive_all" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "amount"] }
+        },
+        {
+          "if": {
             "properties": { "event_type": { "enum": ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained"] } },
             "required": ["event_type"]
           },

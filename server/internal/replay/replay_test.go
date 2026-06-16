@@ -1371,6 +1371,7 @@ func (f *fakeRepo) RenameCharacter(context.Context, string, string, string) (sto
 	return store.Character{}, nil
 }
 func (f *fakeRepo) MarkCharacterDead(context.Context, string, string, int) error { return nil }
+func (f *fakeRepo) ReviveDeadCharacters(context.Context, string) (int, error)    { return 0, nil }
 func (f *fakeRepo) CreateSession(context.Context, store.Session) error           { return nil }
 func (f *fakeRepo) GetSession(context.Context, string) (store.Session, error) {
 	return f.session, nil

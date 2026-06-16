@@ -33,6 +33,7 @@ const (
 	TypeShopSell            = "shop_sell_intent"
 	TypeShopReroll          = "shop_reroll_intent"
 	TypeBishopRespec        = "bishop_respec_intent"
+	TypeBishopReviveAll     = "bishop_revive_all_intent"
 	TypeBishopDebugLevel    = "bishop_debug_level_intent"
 	TypeBishopDebugSkill    = "bishop_debug_skill_point_intent"
 	TypeBishopDebugStat     = "bishop_debug_stat_point_intent"
@@ -151,7 +152,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
 		return true
 	}
 	return false
@@ -304,6 +305,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.BishopRespec = &game.BishopRespecIntent{BishopEntityID: p.BishopEntityID}
+	case TypeBishopReviveAll:
+		var p bishopRespecPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {
+			return in, false
+		}
+		in.BishopReviveAll = &game.BishopReviveAllIntent{BishopEntityID: p.BishopEntityID}
 	case TypeBishopDebugLevel:
 		var p bishopDebugPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {

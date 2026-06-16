@@ -48,6 +48,7 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"shop_sell_intent":                (*Sim).handleShopSell,
 	"shop_reroll_intent":              (*Sim).handleShopReroll,
 	"bishop_respec_intent":            (*Sim).handleBishopRespec,
+	"bishop_revive_all_intent":        (*Sim).handleBishopReviveAll,
 	"bishop_debug_level_intent":       (*Sim).handleBishopDebugLevel,
 	"bishop_debug_skill_point_intent": (*Sim).handleBishopDebugSkillPoint,
 	"bishop_debug_stat_point_intent":  (*Sim).handleBishopDebugStatPoint,

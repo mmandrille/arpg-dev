@@ -92,7 +92,7 @@ func (s *Sim) fixedShopOffers(shop ShopDef) []ShopOfferView {
 			Slot:         item.Slot,
 			Category:     item.Category,
 			BuyPrice:     offer.BuyPrice,
-			SummaryLines: s.itemSummaryLines(item.Category, item.Slot, stats, nil, nil, &item),
+			SummaryLines: s.itemSummaryLines(item.Category, item.Slot, item.Handedness, stats, nil, nil, &item),
 			Comparison:   s.shopComparisonForItem(item.Slot, stats),
 		}
 		s.annotateShopOfferView(&view, &invItem{instanceID: previewItemInstanceID(), itemDefID: offer.ItemDefID})
@@ -164,7 +164,7 @@ func (s *Sim) generatedShopOffers(shopID string, shop ShopDef, characterID strin
 				Requirements:   cloneIntMap(payload.Requirements),
 				EffectIDs:      cloneStringSlice(payload.EffectIDs),
 				BuyPrice:       buyPrice,
-				SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, stats, payload.Requirements, payload.EffectIDs, nil),
+				SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, template.Handedness, stats, payload.Requirements, payload.EffectIDs, nil),
 				Comparison:     s.shopComparisonForItem(template.Slot, stats),
 				Source:         gen.Source,
 				Depth:          depth,
@@ -530,7 +530,7 @@ func (s *Sim) shopOfferViewFromGeneratedStock(shop ShopDef, row *shopStockItem) 
 			OfferID:        row.OfferID,
 			Kind:           shopOfferKindMystery,
 			Concealed:      true,
-			MysteryLabel:   "Unidentified " + displaySlotName(template.Slot),
+			MysteryLabel:   "Unidentified " + displayEquipmentSlotName(template.Slot, template.Handedness),
 			Slot:           template.Slot,
 			Category:       template.Category,
 			BuyPrice:       row.BuyPrice,
@@ -560,7 +560,7 @@ func (s *Sim) shopOfferViewFromGeneratedStock(shop ShopDef, row *shopStockItem) 
 		Requirements:   cloneIntMap(row.Payload.Requirements),
 		EffectIDs:      cloneStringSlice(row.Payload.EffectIDs),
 		BuyPrice:       row.BuyPrice,
-		SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, stats, row.Payload.Requirements, row.Payload.EffectIDs, nil),
+		SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, template.Handedness, stats, row.Payload.Requirements, row.Payload.EffectIDs, nil),
 		Comparison:     s.shopComparisonForItem(template.Slot, stats),
 		Source:         shop.GeneratedOffers.Source,
 		Depth:          row.SourceDepth,
@@ -719,7 +719,7 @@ func (s *Sim) shopSellAppraisalView(item *invItem, sellPrice int) ShopSellApprai
 		EquipPreview:      view.EquipPreview,
 		EffectIDs:         view.EffectIDs,
 		SellPrice:         sellPrice,
-		SummaryLines:      s.itemSummaryLines(category, view.Slot, stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
+		SummaryLines:      s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
 		Comparison:        s.shopComparisonForItem(view.Slot, stats),
 	}
 }
@@ -759,7 +759,7 @@ func (s *Sim) shopOfferViewFromBuyback(row *shopBuybackItem) (ShopOfferView, boo
 		EquipPreview:      view.EquipPreview,
 		EffectIDs:         view.EffectIDs,
 		BuyPrice:          row.BuyPrice,
-		SummaryLines:      s.itemSummaryLines(category, view.Slot, stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
+		SummaryLines:      s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, view.EffectIDs, itemDefPtr(s.rules.Items[item.itemDefID])),
 		Comparison:        s.shopComparisonForItem(view.Slot, stats),
 	}
 	return offer, true
@@ -871,10 +871,10 @@ func itemDefPtr(item ItemDef) *ItemDef {
 	return &item
 }
 
-func (s *Sim) itemSummaryLines(category, slot string, stats map[string]int, requirements map[string]int, effectIDs []string, fixed *ItemDef) []string {
+func (s *Sim) itemSummaryLines(category, slot, handedness string, stats map[string]int, requirements map[string]int, effectIDs []string, fixed *ItemDef) []string {
 	lines := []string{}
 	if slot != "" {
-		lines = append(lines, fmt.Sprintf("Slot: %s", displaySlotName(slot)))
+		lines = append(lines, fmt.Sprintf("Slot: %s", displayEquipmentSlotName(slot, handedness)))
 	} else if category != "" {
 		lines = append(lines, fmt.Sprintf("Kind: %s", displayStatName(category)))
 	}
@@ -1103,6 +1103,13 @@ func displayStatName(stat string) string {
 
 func displaySlotName(slot string) string {
 	return displayStatName(slot)
+}
+
+func displayEquipmentSlotName(slot, handedness string) string {
+	if slot == mainHandSlot && handedness == "two_handed" {
+		return "Both hands"
+	}
+	return displaySlotName(slot)
 }
 
 func (offer ShopOfferView) inventoryItem(instanceID uint64) *invItem {

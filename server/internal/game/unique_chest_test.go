@@ -124,6 +124,14 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 		effectIDs    []string
 	}{
 		{
+			uniqueID:     "bloodbound_sigil",
+			templateID:   "cave_ring",
+			displayName:  "Bloodbound Sigil",
+			wantStats:    map[string]int{"max_hp": 6, "max_mana": 6},
+			requirements: map[string]int{"level": 5, "magic": 5},
+			effectIDs:    []string{"blood_price"},
+		},
+		{
 			uniqueID:     "conduit_staff",
 			templateID:   "starter_sorcerer_staff",
 			displayName:  "Conduit Staff",

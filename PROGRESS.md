@@ -23,10 +23,10 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v222 — upgrade result preview |
+| **Latest completed slice** | v223 — unique non-damage skill modifier |
 | **Active branch** | `main` |
-| **CI gate** | Focused v222 verification green on 2026-06-16 during `$autoloop`; final batch `make ci` pending |
-| **Next slice** | Continue selected `$autoloop` queue with v223 `unique-non-damage-skill-modifier`; then run due v210+ review/refactor handoff after the feature batch |
+| **CI gate** | Focused v223 verification green on 2026-06-16 during `$autoloop`; final batch `make ci` pending |
+| **Next slice** | Selected `$autoloop` feature queue complete; run final batch `make ci`, then due v210+ review/refactor handoff |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |
 

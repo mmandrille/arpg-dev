@@ -45,6 +45,20 @@
       "fixed_effect_ids": ["arcane_conduit"],
       "behavior_hook": "Named fixed unique package modifies Magic Bolt damage through the live arcane_conduit effect.",
       "status": "ready"
+    },
+    "bloodbound_sigil": {
+      "id": "bloodbound_sigil",
+      "enabled": true,
+      "base_template_id": "cave_ring",
+      "display_name": "Bloodbound Sigil",
+      "minimum_level": 5,
+      "fixed_stats": {
+        "max_hp": 6,
+        "max_mana": 6
+      },
+      "fixed_effect_ids": ["blood_price"],
+      "behavior_hook": "Named fixed unique package lets skills pay missing mana with HP through the live blood_price effect.",
+      "status": "ready"
     }
   }
 }

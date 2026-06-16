@@ -397,6 +397,44 @@ func TestResourceUniqueBloodPricePaysMissingManaWithHP(t *testing.T) {
 	}
 }
 
+func TestNamedUniqueBloodboundSigilPaysMissingManaWithHP(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim := MustNewSim("sess_bloodbound_sigil", "bloodbound_sigil", rules)
+	clearUniqueTestMonsters(sim)
+	player := sim.entities[sim.playerID]
+	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 50)
+	payload, ok := rules.namedUniquePayload("bloodbound_sigil")
+	if !ok {
+		t.Fatal("missing bloodbound_sigil named payload")
+	}
+	sim.progression.Level = 5
+	sim.progression.CharacterClass = "sorcerer"
+	sim.progression.BaseStats.Magic = 10
+	sim.progression.SkillRanks[magicBoltSkillID] = 1
+	item := &invItem{
+		instanceID:  9916,
+		itemDefID:   payload.ItemTemplateID,
+		slot:        sim.itemSlot(payload.ItemTemplateID, &payload),
+		rollPayload: cloneRollPayload(&payload),
+	}
+	addTestInventoryItem(sim, item)
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_bloodbound", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(item.instanceID), Slot: ringLeftSlot}}}), "equip_bloodbound")
+	player.mana = 0
+	player.hp = 20
+	player.maxHP = 50
+	manaCost := sim.effectiveSkillManaCost(rules.Skills[magicBoltSkillID], 1)
+	sim.savePlayer(sim.defaultPlayer())
+
+	cast := sim.Tick([]Input{{MessageID: "bloodbound_cast", Type: "cast_skill_intent", CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(target.id)}}})
+	assertAck(t, cast, "bloodbound_cast")
+	if player.hp != 20-manaCost || player.mana != 0 {
+		t.Fatalf("player hp/mana = %d/%d, want hp paid by named unique cost %d and mana clamped; events=%+v", player.hp, player.mana, manaCost, cast.Events)
+	}
+	if !eventListHas(cast.Events, "skill_cast") || !eventListHas(cast.Events, "skill_effect_started") {
+		t.Fatalf("bloodbound cast events = %+v, want skill cast and blood price marker", cast.Events)
+	}
+}
+
 func TestUniqueSkillModifierBoostsConfiguredSkill(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	sim := MustNewSim("sess_arcane_conduit", "arcane_conduit", rules)

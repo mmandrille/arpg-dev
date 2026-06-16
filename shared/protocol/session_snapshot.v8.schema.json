@@ -95,6 +95,8 @@
         "item_level": { "type": "integer", "minimum": 1 },
         "is_boss": { "type": "boolean" },
         "boss_template_id": { "type": "string" },
+        "enraged": { "type": "boolean" },
+        "enrage_health_ratio_threshold": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
         "visual_model": { "type": "string" },
         "visual_scale": { "type": "number", "exclusiveMinimum": 0 },
         "visual_tint": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
@@ -446,7 +448,9 @@
         "source_entity_id": { "$ref": "#/$defs/decimal_id" },
         "target_entity_id": { "$ref": "#/$defs/decimal_id" },
         "monster_def_id": { "type": "string" },
+        "boss_template_id": { "type": "string" },
         "correlation_id": { "$ref": "#/$defs/prefixed_id" },
+        "health_ratio_threshold": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
         "damage": { "type": "integer", "minimum": 0 },
         "damage_type": { "type": "string", "enum": ["force", "cold", "poison", "lightning"] },
         "outcome": { "type": "string", "enum": ["hit", "crit", "miss", "block", "immune", "kill"] },
@@ -671,6 +675,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "pattern_id", "phase_index", "phase_kind"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "boss_enraged" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "target_entity_id", "boss_template_id", "health_ratio_threshold"] }
         },
         {
           "if": {

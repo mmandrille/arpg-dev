@@ -23,9 +23,9 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v204 — set collection panel |
+| **Latest completed slice** | v205 — boss enrage phase |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-15 after v204 set collection panel |
+| **CI gate** | `make ci` green on 2026-06-15 after v205 boss enrage phase |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |

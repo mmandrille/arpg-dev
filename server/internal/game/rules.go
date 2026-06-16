@@ -349,13 +349,14 @@ type MonsterDepthScalingRules struct {
 }
 
 type BossTemplateDef struct {
-	Name             string        `json:"name"`
-	BaseMonsterDefID string        `json:"base_monster_def_id"`
-	PatternDeck      []string      `json:"pattern_deck"`
-	HPMultiplier     float64       `json:"hp_multiplier"`
-	DamageMultiplier float64       `json:"damage_multiplier"`
-	LootTable        string        `json:"loot_table"`
-	Visual           BossVisualDef `json:"visual"`
+	Name             string         `json:"name"`
+	BaseMonsterDefID string         `json:"base_monster_def_id"`
+	PatternDeck      []string       `json:"pattern_deck"`
+	HPMultiplier     float64        `json:"hp_multiplier"`
+	DamageMultiplier float64        `json:"damage_multiplier"`
+	Enrage           *BossEnrageDef `json:"enrage,omitempty"`
+	LootTable        string         `json:"loot_table"`
+	Visual           BossVisualDef  `json:"visual"`
 }
 
 type BossVisualDef struct {
@@ -2435,6 +2436,9 @@ func validateBossTemplates(templates map[string]BossTemplateDef, r *Rules) error
 		}
 		if template.HPMultiplier <= 0 || template.DamageMultiplier <= 0 {
 			return fmt.Errorf("game: invalid rules boss_templates.%s: multipliers must be positive", templateID)
+		}
+		if err := validateBossTemplateEnrage(templateID, template.Enrage); err != nil {
+			return err
 		}
 		if _, ok := r.LootTables[template.LootTable]; !ok {
 			return fmt.Errorf("game: invalid rules boss_templates.%s.loot_table: unknown table %s", templateID, template.LootTable)

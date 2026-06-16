@@ -124,6 +124,9 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 				monster.bossPatternDeckIndex = 0
 				monster.bossPatternID = template.PatternDeck[0]
 			}
+			if template.Enrage != nil {
+				monster.bossEnrageThreshold = template.Enrage.HealthRatioThreshold
+			}
 			monster.maxHP = roundPositive(float64(def.MaxHP) * template.HPMultiplier)
 			monster.hp = monster.maxHP
 			if def.AttackDamage != nil {

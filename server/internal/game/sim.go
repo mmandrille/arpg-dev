@@ -134,6 +134,8 @@ type entity struct {
 	bossPhaseExecuted     bool
 	bossPhaseAim          Vec2
 	bossPhaseHasAim       bool
+	bossEnraged           bool
+	bossEnrageThreshold   float64
 	itemDefID             string
 	goldAmount            int
 	rollPayload           *ItemRollPayload

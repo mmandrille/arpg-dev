@@ -1,0 +1,70 @@
+server/internal/game/companion_stance.go
+  s_91cf6549724495::t_0379a63f8f07de 1-8,13-84
+  s_91cf6549724495::t_71286861ffefdf 9-12
+tools/bot/run.py
+  s_91cf6549724495::t_71286861ffefdf 475
+  s_91cf6549724495::t_f8ddd0511b49c0 3059
+  s_91cf6549724495::t_970591511360d8 2114
+  s_91cf6549724495::t_fe62a0f151442a 474
+server/internal/game/sim.go
+  s_91cf6549724495::t_0379a63f8f07de 151,799
+  s_91cf6549724495::t_71286861ffefdf 962
+server/internal/game/handlers.go
+  s_91cf6549724495::t_80725e5946b2dd 46
+PROGRESS.md
+  s_91cf6549724495::t_169f231a919c54 28
+  s_91cf6549724495::t_ea3c16309e38bd 26,29,112
+server/internal/inputdecode/inputdecode.go
+  s_91cf6549724495::t_3210479a3251e0 375-382
+  s_91cf6549724495::t_e00b9b50b0c5b1 31,112-114,154,277-282
+server/internal/inputdecode/inputdecode_test.go
+  s_91cf6549724495::t_0febfa92ad3061 95-120
+shared/protocol/messages.v8.schema.json
+  s_91cf6549724495::t_a0741847b92ca1 32,98-99
+  s_91cf6549724495::t_a19e8ce2ee72de 281-287
+docs/progress/slice-lifecycle.md
+  s_91cf6549724495::t_169f231a919c54 225
+docs/progress/scenario-catalog.md
+  s_91cf6549724495::t_ea3c16309e38bd 47
+docs/as-built/v208_companion-stance-command.md
+  s_91cf6549724495::t_ea3c16309e38bd 1-30
+server/internal/game/companion_ai.go
+  s_91cf6549724495::t_80725e5946b2dd 270,328-330,357-364
+docs/specs/v208_spec-companion-stance-command.md
+  s_91cf6549724495::t_a3a2d615cc4875 1-2,4-70
+  s_91cf6549724495::t_ea3c16309e38bd 3
+server/internal/game/types.go
+  s_91cf6549724495::t_80725e5946b2dd 57,463
+docs/plans/v208_2026-06-16-companion-stance-command.md
+  s_91cf6549724495::t_169f231a919c54 124
+  s_91cf6549724495::t_a3a2d615cc4875 1-2,4-35,41-42,46-61,66-78,82-93,97-110,113-118,125-128
+  s_91cf6549724495::t_ea3c16309e38bd 3,36-40,43-45,62-65,79-81,94-96,111-112,119-123
+shared/protocol/session_snapshot.v8.schema.json
+  s_91cf6549724495::t_dae27d43072e38 119,516-517,738-743
+shared/protocol/state_delta.v8.schema.json
+  s_91cf6549724495::t_dae27d43072e38 86,434-435,689-694
+tools/bot/scenarios/89_companion_stance_command.json
+  s_91cf6549724495::t_4e294f1a35431e 1-48
+tools/bot/companion_commands.py
+  s_91cf6549724495::t_71286861ffefdf 1-21
+shared/protocol/examples/companion_command_intent.json
+  s_91cf6549724495::t_a19e8ce2ee72de 1-9
+server/internal/game/companion_stance_test.go
+  s_91cf6549724495::t_0febfa92ad3061 1-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fd00c4e2f2e3a3e7c650e6a4de066abad906afb4",
+  "prompts": {},
+  "sessions": {
+    "s_91cf6549724495": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdc2-d0c7-77a3-bdd7-9c7d3b38e3f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -456,7 +456,7 @@
         }
       },
       "mobility": {
-        "range_base": 5.5,
+        "range_base": 8,
         "range_per_rank": 0.5,
         "mode": "leap",
         "visual": "leap_impact",

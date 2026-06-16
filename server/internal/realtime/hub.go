@@ -153,6 +153,7 @@ func persistedItems(items []store.CharacterItemInstance) []game.PersistedItem {
 			ItemDefID:   item.ItemDefID,
 			Slot:        item.Slot,
 			Equipped:    item.Equipped,
+			WeaponSet:   item.WeaponSet,
 			RolledStats: item.RolledStats,
 		})
 	}

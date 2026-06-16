@@ -566,7 +566,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		t.Fatalf("re-add character item: %v", err)
 	}
 
-	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "main_hand", true); err != nil {
+	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "main_hand", true, 1); err != nil {
 		t.Fatalf("set equipped: %v", err)
 	}
 	insertedWaypoint, err := s.AddAccountWaypoint(ctx, acct.ID, -1)
@@ -591,7 +591,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if len(items) != 1 {
 		t.Fatalf("character item count = %d, want 1", len(items))
 	}
-	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "main_hand" || items[0].ItemDefID != "cave_blade" {
+	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "main_hand" || items[0].WeaponSet != 1 || items[0].ItemDefID != "cave_blade" {
 		t.Fatalf("character item not persisted/equipped correctly: %+v", items[0])
 	}
 	var payload struct {
@@ -721,7 +721,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, skillBinds, shopStock, nil, store.AccountStashGold{AccountID: acct.ID}, loadedProgression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
-	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false); err != nil {
+	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false, 0); err != nil {
 		t.Fatalf("mutate live item: %v", err)
 	}
 	if _, err := s.AddAccountWaypoint(ctx, acct.ID, -2); err != nil {
@@ -766,7 +766,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load session snapshot: %v", err)
 	}
-	if len(snap.Items) != 1 || !snap.Items[0].Equipped || snap.Items[0].Slot != "main_hand" {
+	if len(snap.Items) != 1 || !snap.Items[0].Equipped || snap.Items[0].Slot != "main_hand" || snap.Items[0].WeaponSet != 1 {
 		t.Fatalf("snapshot item mutated with live state: %+v", snap.Items)
 	}
 	if len(snap.Hotbar) != 10 || snap.Hotbar[2].ItemInstanceID == nil || *snap.Hotbar[2].ItemInstanceID != item.ID {
@@ -792,7 +792,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 
 	otherAcct, _ := s.UpsertAccountByEmail(ctx, ids.New("acct"), "other+"+ids.Token()[:12]+"@example.test")
 	otherChar, _ := s.GetOrCreateDefaultCharacter(ctx, ids.New("char"), otherAcct.ID, "Hero")
-	if err := s.SetCharacterItemEquipped(ctx, otherAcct.ID, otherChar.ID, item.ID, "main_hand", true); !errors.Is(err, store.ErrNotFound) {
+	if err := s.SetCharacterItemEquipped(ctx, otherAcct.ID, otherChar.ID, item.ID, "main_hand", true, 0); !errors.Is(err, store.ErrNotFound) {
 		t.Fatalf("equip missing item: expected ErrNotFound, got %v", err)
 	}
 	if err := s.SetCharacterHotbarSlot(ctx, otherAcct.ID, otherChar.ID, 2, &item.ID); !errors.Is(err, store.ErrNotFound) {

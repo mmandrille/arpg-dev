@@ -84,7 +84,7 @@
     "rage": {
       "icon": {
         "label": "R",
-        "shape": "burst",
+        "shape": "flame",
         "color": "#cf4f3e",
         "accent": "#ffd0a8"
       },
@@ -95,9 +95,9 @@
     "leap": {
       "icon": {
         "label": "L",
-        "shape": "burst",
-        "color": "#b96d35",
-        "accent": "#ffe0b8"
+        "shape": "leap",
+        "color": "#d78737",
+        "accent": "#fff1c7"
       },
       "summary": "Jumping impact stun",
       "effect_visual": "leap_impact",
@@ -106,9 +106,9 @@
     "earthbreaker": {
       "icon": {
         "label": "E",
-        "shape": "burst",
-        "color": "#9b5f2f",
-        "accent": "#ffe0b5"
+        "shape": "quake",
+        "color": "#8b5a34",
+        "accent": "#ffd68a"
       },
       "summary": "Radial leap smash",
       "effect_visual": "earthbreaker_ring",

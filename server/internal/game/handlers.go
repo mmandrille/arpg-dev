@@ -782,7 +782,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		}
 		if prev := s.findItemByID(prevID); prev != nil {
 			prev.equipped = false
-			res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(prev))})
+			res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(prev)), WeaponSet: intPtr(weaponSet)})
 		}
 		s.setEquippedSlot(slot, 0, weaponSet)
 		if !isHandSlot(slot) || weaponSet == s.activeWeaponSet {
@@ -794,13 +794,14 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 	item.equipped = true
 	s.setEquippedSlot(in.Equip.Slot, item.instanceID, weaponSet)
 
-	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item))})
+	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item)), WeaponSet: intPtr(weaponSet)})
 	idCopy := idStr(item.instanceID)
 	if !isHandSlot(in.Equip.Slot) || weaponSet == s.activeWeaponSet {
 		res.Changes = append(res.Changes, Change{
 			Op:             OpEquippedUpdate,
 			Slot:           in.Equip.Slot,
 			ItemInstanceID: &idCopy,
+			WeaponSet:      intPtr(weaponSet),
 			HotbarCapacity: intPtr(s.hotbarCapacity()),
 			InventoryRows:  intPtr(s.inventoryRows()),
 			InventoryCap:   intPtr(s.inventoryCapacity()),
@@ -842,7 +843,7 @@ func (s *Sim) handleUnequip(in Input, res *TickResult) {
 	}
 	item.equipped = false
 	s.setEquippedSlot(in.Unequip.Slot, 0, weaponSet)
-	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item))})
+	res.Changes = append(res.Changes, Change{Op: OpInventoryUpdate, Item: ptrItemView(s.itemView(item)), WeaponSet: intPtr(weaponSet)})
 	if !isHandSlot(in.Unequip.Slot) || weaponSet == s.activeWeaponSet {
 		res.Changes = append(res.Changes, Change{
 			Op:             OpEquippedUpdate,

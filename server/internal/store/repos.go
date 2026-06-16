@@ -692,7 +692,7 @@ func scanSessionMember(row rowScanner) (SessionMember, error) {
 
 func (s *Store) ListCharacterItems(ctx context.Context, accountID, characterID string) ([]CharacterItemInstance, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at
+		`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, weapon_set, rolled_stats, created_at, updated_at
 		 FROM character_item_instances
 		 WHERE account_id = $1 AND character_id = $2
 		 ORDER BY created_at ASC, id ASC`,
@@ -706,7 +706,7 @@ func (s *Store) ListCharacterItems(ctx context.Context, accountID, characterID s
 	var items []CharacterItemInstance
 	for rows.Next() {
 		var it CharacterItemInstance
-		if err := rows.Scan(&it.ID, &it.AccountID, &it.CharacterID, &it.ItemDefID, &it.Location, &it.Slot, &it.Equipped, &it.RolledStats, &it.CreatedAt, &it.UpdatedAt); err != nil {
+		if err := rows.Scan(&it.ID, &it.AccountID, &it.CharacterID, &it.ItemDefID, &it.Location, &it.Slot, &it.Equipped, &it.WeaponSet, &it.RolledStats, &it.CreatedAt, &it.UpdatedAt); err != nil {
 			return nil, fmt.Errorf("store: scan character item: %w", err)
 		}
 		items = append(items, it)
@@ -728,18 +728,19 @@ func (s *Store) AddCharacterItem(ctx context.Context, item CharacterItemInstance
 		rolledStats = []byte(`{}`)
 	}
 	_, err := s.pool.Exec(ctx,
-		`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
+		`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, weapon_set, rolled_stats)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
 		 ON CONFLICT (character_id, id) DO UPDATE SET
 		   item_def_id = EXCLUDED.item_def_id,
 		   location = EXCLUDED.location,
 		   slot = EXCLUDED.slot,
 		   equipped = EXCLUDED.equipped,
+		   weapon_set = EXCLUDED.weapon_set,
 		   rolled_stats = EXCLUDED.rolled_stats,
 		   updated_at = now()
 		 WHERE character_item_instances.account_id = EXCLUDED.account_id
 		   AND character_item_instances.character_id = EXCLUDED.character_id`,
-		item.ID, item.AccountID, item.CharacterID, item.ItemDefID, location, slot, item.Equipped, []byte(rolledStats),
+		item.ID, item.AccountID, item.CharacterID, item.ItemDefID, location, slot, item.Equipped, normalizeWeaponSet(item.WeaponSet), []byte(rolledStats),
 	)
 	if err != nil {
 		return fmt.Errorf("store: add character item: %w", err)
@@ -763,7 +764,7 @@ func (s *Store) SetCharacterItemLocation(ctx context.Context, accountID, charact
 	return nil
 }
 
-func (s *Store) SetCharacterItemEquipped(ctx context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool) error {
+func (s *Store) SetCharacterItemEquipped(ctx context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool, weaponSet int) error {
 	var slotArg any
 	if slot != "" {
 		slotArg = slot
@@ -774,9 +775,9 @@ func (s *Store) SetCharacterItemEquipped(ctx context.Context, accountID, charact
 	}
 	tag, err := s.pool.Exec(ctx,
 		`UPDATE character_item_instances
-		 SET slot = $4, equipped = $5, location = $6, updated_at = now()
+		 SET slot = $4, equipped = $5, location = $6, weapon_set = $7, updated_at = now()
 		 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
-		accountID, characterID, itemInstanceID, slotArg, equipped, location,
+		accountID, characterID, itemInstanceID, slotArg, equipped, location, normalizeWeaponSet(weaponSet),
 	)
 	if err != nil {
 		return fmt.Errorf("store: set character item equipped: %w", err)
@@ -785,6 +786,13 @@ func (s *Store) SetCharacterItemEquipped(ctx context.Context, accountID, charact
 		return ErrNotFound
 	}
 	return nil
+}
+
+func normalizeWeaponSet(index int) int {
+	if index < 0 || index > 1 {
+		return 0
+	}
+	return index
 }
 
 func (s *Store) RemoveCharacterItem(ctx context.Context, accountID, characterID, itemInstanceID string) error {
@@ -1388,12 +1396,12 @@ func (s *Store) TransferCharacterItemToAccountStash(ctx context.Context, account
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		var item CharacterItemInstance
 		err := tx.QueryRow(ctx,
-			`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at
+			`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, weapon_set, rolled_stats, created_at, updated_at
 			 FROM character_item_instances
 			 WHERE account_id = $1 AND character_id = $2 AND id = $3 AND location IN ($4, $5)
 			 FOR UPDATE`,
 			accountID, characterID, itemInstanceID, ItemLocationInventory, ItemLocationEquipped,
-		).Scan(&item.ID, &item.AccountID, &item.CharacterID, &item.ItemDefID, &item.Location, &item.Slot, &item.Equipped, &item.RolledStats, &item.CreatedAt, &item.UpdatedAt)
+		).Scan(&item.ID, &item.AccountID, &item.CharacterID, &item.ItemDefID, &item.Location, &item.Slot, &item.Equipped, &item.WeaponSet, &item.RolledStats, &item.CreatedAt, &item.UpdatedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -1485,12 +1493,12 @@ func (s *Store) TransferAccountStashItemToCharacterWithPlacement(ctx context.Con
 			return ErrNotFound
 		}
 		err = tx.QueryRow(ctx,
-			`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
-			 SELECT $1, $2, $3, $4, $5, NULLIF($6, ''), $7, $8::jsonb
+			`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, weapon_set, rolled_stats)
+			 SELECT $1, $2, $3, $4, $5, NULLIF($6, ''), $7, 0, $8::jsonb
 			 WHERE EXISTS (SELECT 1 FROM characters WHERE id = $3 AND account_id = $2)
-			 RETURNING id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at`,
+			 RETURNING id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, weapon_set, rolled_stats, created_at, updated_at`,
 			itemInstanceID, accountID, characterID, stash.ItemDefID, location, slot, equipped, []byte(rolledStats),
-		).Scan(&out.ID, &out.AccountID, &out.CharacterID, &out.ItemDefID, &out.Location, &out.Slot, &out.Equipped, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
+		).Scan(&out.ID, &out.AccountID, &out.CharacterID, &out.ItemDefID, &out.Location, &out.Slot, &out.Equipped, &out.WeaponSet, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -1764,14 +1772,15 @@ func insertCharacterInventoryItem(ctx context.Context, tx pgx.Tx, accountID, cha
 		rolledStats = []byte(`{}`)
 	}
 	tag, err := tx.Exec(ctx,
-		`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
-		 SELECT $1, $2, $3, $4, $5, NULL, false, $6::jsonb
+		`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, weapon_set, rolled_stats)
+		 SELECT $1, $2, $3, $4, $5, NULL, false, 0, $6::jsonb
 		 WHERE EXISTS (SELECT 1 FROM characters WHERE account_id = $2 AND id = $3)
 		 ON CONFLICT (character_id, id) DO UPDATE SET
 		   item_def_id = EXCLUDED.item_def_id,
 		   location = EXCLUDED.location,
 		   slot = EXCLUDED.slot,
 		   equipped = EXCLUDED.equipped,
+		   weapon_set = EXCLUDED.weapon_set,
 		   rolled_stats = EXCLUDED.rolled_stats,
 		   updated_at = now()
 		 WHERE character_item_instances.account_id = EXCLUDED.account_id`,
@@ -1924,10 +1933,10 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 				rolledStats = []byte(`{}`)
 			}
 			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_item_instances (session_id, id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
-				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
+				`INSERT INTO session_start_item_instances (session_id, id, account_id, character_id, item_def_id, location, slot, equipped, weapon_set, rolled_stats)
+				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
 				 ON CONFLICT (session_id, account_id, character_id, id) DO NOTHING`,
-				sessionID, item.ID, accountID, characterID, item.ItemDefID, location, slot, item.Equipped, []byte(rolledStats),
+				sessionID, item.ID, accountID, characterID, item.ItemDefID, location, slot, item.Equipped, normalizeWeaponSet(item.WeaponSet), []byte(rolledStats),
 			); err != nil {
 				return fmt.Errorf("store: insert session start item: %w", err)
 			}
@@ -2077,7 +2086,7 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 		snap.Progression = &prog
 	}
 	itemRows, err := s.pool.Query(ctx,
-		`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, created_at
+		`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, weapon_set, rolled_stats, created_at, created_at
 		 FROM session_start_item_instances
 		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3
 		 ORDER BY created_at ASC, id ASC`,
@@ -2089,7 +2098,7 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	defer itemRows.Close()
 	for itemRows.Next() {
 		var it CharacterItemInstance
-		if err := itemRows.Scan(&it.ID, &it.AccountID, &it.CharacterID, &it.ItemDefID, &it.Location, &it.Slot, &it.Equipped, &it.RolledStats, &it.CreatedAt, &it.UpdatedAt); err != nil {
+		if err := itemRows.Scan(&it.ID, &it.AccountID, &it.CharacterID, &it.ItemDefID, &it.Location, &it.Slot, &it.Equipped, &it.WeaponSet, &it.RolledStats, &it.CreatedAt, &it.UpdatedAt); err != nil {
 			return snap, fmt.Errorf("store: scan session start item: %w", err)
 		}
 		snap.Items = append(snap.Items, it)

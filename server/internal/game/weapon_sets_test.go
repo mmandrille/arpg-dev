@@ -47,6 +47,30 @@ func TestWeaponSetEquipTargetsInactiveSetAndSwapUpdatesActiveHands(t *testing.T)
 	}
 }
 
+func TestLoadInventoryRestoresPersistedWeaponSets(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_weapon_sets_reload", "weapon_sets_reload", loadRules(t), "equipment_lab")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+
+	sim.LoadInventory([]PersistedItem{
+		{InstanceID: "9301", ItemDefID: "cave_greatsword", Slot: mainHandSlot, Equipped: true, WeaponSet: 0},
+		{InstanceID: "9302", ItemDefID: "cave_bow", Slot: mainHandSlot, Equipped: true, WeaponSet: 1},
+	})
+
+	assertEquippedItemDef(t, sim, mainHandSlot, "cave_greatsword")
+	if sim.weaponSets[0][mainHandSlot] != 9301 {
+		t.Fatalf("set 1 main_hand = %d, want 9301", sim.weaponSets[0][mainHandSlot])
+	}
+	if sim.weaponSets[1][mainHandSlot] != 9302 {
+		t.Fatalf("set 2 main_hand = %d, want 9302", sim.weaponSets[1][mainHandSlot])
+	}
+
+	swap := sim.Tick([]Input{{MessageID: "swap", Type: "swap_weapon_set_intent", SwapWeaponSet: &SwapWeaponSetIntent{}}})
+	assertAck(t, swap, "swap")
+	assertEquippedItemDef(t, sim, mainHandSlot, "cave_bow")
+}
+
 func TestWeaponSetHandBlockingIsPerSet(t *testing.T) {
 	sim, err := NewSimWithWorld("sess_weapon_sets_blocking", "weapon_sets", loadRules(t), "equipment_lab")
 	if err != nil {
@@ -64,4 +88,12 @@ func TestWeaponSetHandBlockingIsPerSet(t *testing.T) {
 
 	reject := sim.Tick([]Input{{MessageID: "shield_set1", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(shield.instanceID), Slot: offHandSlot}}})
 	assertReject(t, reject, "shield_set1", "hands_blocked")
+}
+
+func assertEquippedItemDef(t *testing.T, sim *Sim, slot, itemDefID string) {
+	t.Helper()
+	item := sim.findItemByID(sim.equipped[slot])
+	if item == nil || item.itemDefID != itemDefID {
+		t.Fatalf("equipped[%s] = %+v, want item def %s", slot, item, itemDefID)
+	}
 }

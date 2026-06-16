@@ -5,6 +5,7 @@ signal allocate_stat_requested(stat: String)
 
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 const BASE_STATS := StatLabels.BASE_STATS
 const DERIVED_LABELS := {
 	"damage_min": "Damage min",
@@ -66,6 +67,7 @@ func hide_display() -> void:
 
 func set_progression(next_progression: Dictionary) -> void:
 	progression = next_progression.duplicate(true)
+	_sync_title()
 	_render()
 
 
@@ -200,7 +202,14 @@ func _build() -> void:
 
 func _sync_title() -> void:
 	if _panel != null:
-		_panel.configure(_hero_name, Vector2(304, 436))
+		_panel.configure(_title_text(), Vector2(304, 436))
+
+
+func _title_text() -> String:
+	var class_id := str(progression.get("character_class", "")).strip_edges()
+	if class_id == "":
+		return _hero_name
+	return "%s (%s)" % [_hero_name, TextCatalogScript.get_text("character.class.%s" % class_id, class_id.capitalize())]
 
 
 func _render() -> void:

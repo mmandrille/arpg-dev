@@ -457,6 +457,7 @@ func (r *runner) persistTick(res game.TickResult) {
 				Location:    location,
 				Slot:        c.Item.Slot,
 				Equipped:    c.Item.Equipped,
+				WeaponSet:   changeWeaponSet(c),
 				RolledStats: rolledStats,
 			})
 			if err != nil {
@@ -475,7 +476,7 @@ func (r *runner) persistTick(res game.TickResult) {
 				"slot", c.Item.Slot,
 				"equipped", c.Item.Equipped,
 			)
-			if err := r.store.SetCharacterItemEquipped(ctx, r.sess.AccountID, r.sess.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped); err != nil {
+			if err := r.store.SetCharacterItemEquipped(ctx, r.sess.AccountID, r.sess.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist inventory update", "error", err)
 			}
@@ -499,7 +500,7 @@ func (r *runner) persistTick(res game.TickResult) {
 			if c.ItemInstanceID == nil || c.Slot == "" {
 				continue
 			}
-			if err := r.store.SetCharacterItemEquipped(ctx, r.sess.AccountID, r.sess.CharacterID, *c.ItemInstanceID, c.Slot, true); err != nil {
+			if err := r.store.SetCharacterItemEquipped(ctx, r.sess.AccountID, r.sess.CharacterID, *c.ItemInstanceID, c.Slot, true, changeWeaponSet(c)); err != nil {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist equipped update", "error", err)
 			}
@@ -612,6 +613,13 @@ func less(a, b game.Input) bool {
 
 func isInventoryIntentType(t string) bool {
 	return t == inputdecode.TypeEquip || t == inputdecode.TypeUnequip || t == inputdecode.TypeDrop || t == inputdecode.TypeUse
+}
+
+func changeWeaponSet(c game.Change) int {
+	if c.WeaponSet == nil {
+		return 0
+	}
+	return *c.WeaponSet
 }
 
 func inventoryPayloadSummary(in game.Input) map[string]string {

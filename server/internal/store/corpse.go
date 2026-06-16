@@ -61,12 +61,12 @@ func (s *Store) TransferCorpseItemToCharacter(ctx context.Context, accountID, co
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		var item CharacterItemInstance
 		err := tx.QueryRow(ctx,
-			`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at
+			`SELECT id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, weapon_set, rolled_stats, created_at, updated_at
 			   FROM character_item_instances
 			  WHERE account_id = $1 AND character_id = $2 AND id = $3 AND location IN ('inventory', 'equipped')
 			  FOR UPDATE`,
 			accountID, corpseCharacterID, corpseItemID,
-		).Scan(&item.ID, &item.AccountID, &item.CharacterID, &item.ItemDefID, &item.Location, &item.Slot, &item.Equipped, &item.RolledStats, &item.CreatedAt, &item.UpdatedAt)
+		).Scan(&item.ID, &item.AccountID, &item.CharacterID, &item.ItemDefID, &item.Location, &item.Slot, &item.Equipped, &item.WeaponSet, &item.RolledStats, &item.CreatedAt, &item.UpdatedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -82,11 +82,11 @@ func (s *Store) TransferCorpseItemToCharacter(ctx context.Context, accountID, co
 			return fmt.Errorf("store: delete corpse item: %w", err)
 		}
 		err = tx.QueryRow(ctx,
-			`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, rolled_stats)
-			 VALUES ($1, $2, $3, $4, $5, '', FALSE, $6)
-			 RETURNING id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, rolled_stats, created_at, updated_at`,
+			`INSERT INTO character_item_instances (id, account_id, character_id, item_def_id, location, slot, equipped, weapon_set, rolled_stats)
+			 VALUES ($1, $2, $3, $4, $5, '', FALSE, 0, $6)
+			 RETURNING id, account_id, character_id, item_def_id, location, COALESCE(slot, ''), equipped, weapon_set, rolled_stats, created_at, updated_at`,
 			newItemID, accountID, targetCharacterID, item.ItemDefID, ItemLocationInventory, item.RolledStats,
-		).Scan(&out.ID, &out.AccountID, &out.CharacterID, &out.ItemDefID, &out.Location, &out.Slot, &out.Equipped, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
+		).Scan(&out.ID, &out.AccountID, &out.CharacterID, &out.ItemDefID, &out.Location, &out.Slot, &out.Equipped, &out.WeaponSet, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
 		if err != nil {
 			return fmt.Errorf("store: insert recovered corpse item: %w", err)
 		}

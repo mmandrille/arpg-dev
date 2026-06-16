@@ -32,8 +32,8 @@ func TestBarbarianLeapMovesDamagesAndStunsLandingTargets(t *testing.T) {
 	sim := mobilitySkillSim(t, "barbarian", "leap")
 	player := sim.activeLevel().entities[sim.playerID]
 	player.pos = Vec2{X: 2, Y: 2}
-	nearLanding := addRangerSkillMonster(sim, Vec2{X: 7, Y: 2}, 40)
-	far := addRangerSkillMonster(sim, Vec2{X: 11, Y: 2}, 40)
+	nearLanding := addRangerSkillMonster(sim, Vec2{X: 10, Y: 2}, 40)
+	far := addRangerSkillMonster(sim, Vec2{X: 13, Y: 2}, 40)
 
 	cast := sim.Tick([]Input{{
 		MessageID:     "leap",

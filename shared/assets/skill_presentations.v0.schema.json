@@ -31,9 +31,12 @@
                   "shield",
                   "slash",
                   "dash",
+                  "flame",
                   "ice_spike",
+                  "leap",
                   "orb_projectile",
                   "poison_dagger",
+                  "quake",
                   "arrow",
                   "pin",
                   "volley"

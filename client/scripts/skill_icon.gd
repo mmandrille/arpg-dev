@@ -41,12 +41,18 @@ func _draw() -> void:
 			_draw_heart(center, radius)
 		"ice_spike":
 			_draw_ice_spike(center, radius)
+		"flame":
+			_draw_flame(center, radius)
+		"leap":
+			_draw_leap(center, radius)
 		"orb_projectile":
 			_draw_orb_projectile(center, radius)
 		"pin":
 			_draw_pin(center, radius)
 		"poison_dagger":
 			_draw_poison_dagger(center, radius)
+		"quake":
+			_draw_quake(center, radius)
 		"shield":
 			_draw_shield(center, radius)
 		"slash":
@@ -151,6 +157,46 @@ func _draw_ice_spike(center: Vector2, radius: float) -> void:
 	draw_line(center + Vector2(-radius * 0.12, -radius * 0.12), center + Vector2(radius * 0.34, radius * 0.44), accent_color, 1.6, true)
 
 
+func _draw_flame(center: Vector2, radius: float) -> void:
+	var flame := PackedVector2Array([
+		center + Vector2(-radius * 0.12, radius * 0.86),
+		center + Vector2(-radius * 0.58, radius * 0.30),
+		center + Vector2(-radius * 0.34, -radius * 0.22),
+		center + Vector2(-radius * 0.08, -radius * 0.84),
+		center + Vector2(radius * 0.16, -radius * 0.26),
+		center + Vector2(radius * 0.48, -radius * 0.56),
+		center + Vector2(radius * 0.38, radius * 0.18),
+		center + Vector2(radius * 0.14, radius * 0.86),
+	])
+	draw_colored_polygon(flame, fill_color)
+	draw_polyline(flame, accent_color, 2.0, true)
+	var core := PackedVector2Array([
+		center + Vector2(-radius * 0.04, radius * 0.60),
+		center + Vector2(-radius * 0.22, radius * 0.18),
+		center + Vector2(radius * 0.08, -radius * 0.28),
+		center + Vector2(radius * 0.20, radius * 0.26),
+	])
+	draw_colored_polygon(core, accent_color)
+
+
+func _draw_leap(center: Vector2, radius: float) -> void:
+	var takeoff := center + Vector2(-radius * 0.66, radius * 0.48)
+	var landing := center + Vector2(radius * 0.66, radius * 0.48)
+	draw_arc(center + Vector2(0.0, radius * 0.42), radius * 0.74, PI * 1.10, PI * 1.90, 26, accent_color, 3.0, true)
+	draw_circle(takeoff, radius * 0.16, fill_color)
+	draw_circle(landing, radius * 0.20, fill_color)
+	var body := PackedVector2Array([
+		center + Vector2(-radius * 0.16, -radius * 0.68),
+		center + Vector2(radius * 0.30, -radius * 0.36),
+		center + Vector2(radius * 0.08, radius * 0.02),
+		center + Vector2(-radius * 0.34, -radius * 0.18),
+	])
+	draw_colored_polygon(body, fill_color)
+	draw_polyline(body, accent_color, 2.0, true)
+	draw_line(center + Vector2(-radius * 0.24, radius * 0.00), center + Vector2(-radius * 0.58, radius * 0.42), accent_color, 2.4, true)
+	draw_line(center + Vector2(radius * 0.02, radius * 0.04), center + Vector2(radius * 0.46, radius * 0.42), accent_color, 2.4, true)
+
+
 func _draw_orb_projectile(center: Vector2, radius: float) -> void:
 	for i in range(3):
 		var offset := radius * (0.46 + float(i) * 0.18)
@@ -208,6 +254,28 @@ func _draw_poison_dagger(center: Vector2, radius: float) -> void:
 	draw_circle(center + Vector2(-radius * 0.42, -radius * 0.18), radius * 0.13, fill_color)
 	draw_circle(center + Vector2(-radius * 0.62, radius * 0.10), radius * 0.09, accent_color)
 	draw_circle(center + Vector2(-radius * 0.28, -radius * 0.38), radius * 0.08, accent_color)
+
+
+func _draw_quake(center: Vector2, radius: float) -> void:
+	var hammer := PackedVector2Array([
+		center + Vector2(-radius * 0.20, -radius * 0.78),
+		center + Vector2(radius * 0.58, -radius * 0.30),
+		center + Vector2(radius * 0.36, radius * 0.06),
+		center + Vector2(-radius * 0.42, -radius * 0.42),
+	])
+	draw_colored_polygon(hammer, fill_color)
+	draw_polyline(hammer, accent_color, 2.0, true)
+	draw_line(center + Vector2(radius * 0.14, radius * 0.00), center + Vector2(-radius * 0.42, radius * 0.66), accent_color, 4.0, true)
+	var cracks := [
+		[Vector2(-0.74, 0.62), Vector2(-0.42, 0.38), Vector2(-0.18, 0.68)],
+		[Vector2(0.00, 0.62), Vector2(0.22, 0.34), Vector2(0.50, 0.66)],
+		[Vector2(0.34, 0.20), Vector2(0.60, 0.06), Vector2(0.78, 0.24)],
+	]
+	for crack in cracks:
+		var points := PackedVector2Array()
+		for p in crack:
+			points.append(center + p * radius)
+		draw_polyline(points, accent_color, 2.0, false)
 
 
 func _draw_shield(center: Vector2, radius: float) -> void:

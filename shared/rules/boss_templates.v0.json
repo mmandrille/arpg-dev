@@ -7,6 +7,10 @@
       "pattern_deck": ["charged_melee", "stone_lance", "summon_wolves", "shard_fan", "ground_slam"],
       "hp_multiplier": 8.0,
       "damage_multiplier": 1.0,
+      "enrage": {
+        "health_ratio_threshold": 0.5,
+        "cooldown_multiplier": 0.5
+      },
       "loot_table": "boss_drop_tier_1",
       "visual": {
         "model": "current_humanoid_player",

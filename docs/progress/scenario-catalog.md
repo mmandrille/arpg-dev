@@ -40,6 +40,7 @@ client_combat_feedback: equip gear → assert stat breakdowns → prove normal/c
 true_coop_session: host creates co-op → guest joins → shared-level visibility → independent movement → disconnect/reconnect → replay proof
 model_reaction_polish: attack training dummy → prove monster hit reaction → prove local player hit reaction → kill dummy → prove terminal corpse reaction
 boss_floor_gate: start on compact boss floor → assert locked exits → observe boss phase telegraphs including `stone_lance` and `summon_wolves` → assert summoned wolf adds → kill boss → unlock exits → descend to -6
+boss_enrage_phase: compact boss floor → damage Cave Warden below threshold → observe server-authored `boss_enraged`
 boss_kill_reward_polish: compact boss floor → kill Cave Warden → observe `boss_killed` with `boss_template_id` and client reward status
 paladin_class_foundation / barbarian_class_foundation / sorcerer_class_foundation / rogue_class_foundation / ranger_class_foundation: class starter gear → movement → at least three basic attacks → all current class skills
 ranger_piercing_and_pinning_shots: Ranger casts Pinning Shot to root a chase target, waits for expiry, then fires Piercing Shot through lined-up monsters
@@ -95,4 +96,3 @@ make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenar
 ```
 
 ---
-

@@ -282,6 +282,12 @@ func (e *entity) applyMonsterLikeViewFields(ev *EntityView) {
 	if e.isBoss && e.bossPhaseKind != "" {
 		ev.BossPhase = e.bossPhaseView()
 	}
+	if e.isBoss {
+		ev.Enraged = e.bossEnraged
+		if e.bossEnrageThreshold > 0 {
+			ev.EnrageHealthRatioThreshold = e.bossEnrageThreshold
+		}
+	}
 }
 
 func (s *Sim) advanceCompanions(res *TickResult) {

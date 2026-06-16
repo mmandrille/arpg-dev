@@ -219,5 +219,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v202** | `upgrade-resource-consumption` | Complete (`make ci` green) | [`v202_spec-upgrade-resource-consumption.md`](docs/specs/v202_spec-upgrade-resource-consumption.md) | [`v202_2026-06-15-upgrade-resource-consumption.md`](docs/plans/v202_2026-06-15-upgrade-resource-consumption.md) | [`as-built`](docs/as-built/v202_upgrade-resource-consumption.md) |
 | **v203** | `upgrade-pity-counter` | Complete (`make ci` green) | [`v203_spec-upgrade-pity-counter.md`](docs/specs/v203_spec-upgrade-pity-counter.md) | [`v203_2026-06-15-upgrade-pity-counter.md`](docs/plans/v203_2026-06-15-upgrade-pity-counter.md) | [`as-built`](docs/as-built/v203_upgrade-pity-counter.md) |
 | **v204** | `set-collection-panel` | Complete (`make ci` green) | [`v204_spec-set-collection-panel.md`](docs/specs/v204_spec-set-collection-panel.md) | [`v204_2026-06-15-set-collection-panel.md`](docs/plans/v204_2026-06-15-set-collection-panel.md) | [`as-built`](docs/as-built/v204_set-collection-panel.md) |
+| **v205** | `boss-enrage-phase` | Complete (`make ci` green) | [`v205_spec-boss-enrage-phase.md`](docs/specs/v205_spec-boss-enrage-phase.md) | [`v205_2026-06-15-boss-enrage-phase.md`](docs/plans/v205_2026-06-15-boss-enrage-phase.md) | [`as-built`](docs/as-built/v205_boss-enrage-phase.md) |
 
 ---

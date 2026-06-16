@@ -8,6 +8,7 @@ func (s *Sim) advanceBossPhases(res *TickResult) {
 		if boss == nil || boss.kind != monsterEntity || !boss.isBoss || boss.hp <= 0 {
 			continue
 		}
+		s.updateBossEnrage(boss, res)
 		runtime, ok := s.ensureBossPhase(boss, res)
 		if !ok {
 			continue
@@ -86,7 +87,7 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 	res.Events = append(res.Events, bossPhaseEvent("boss_phase_ended", boss, runtime))
 	pattern := s.rules.BossPatterns[runtime.patternID]
 	if runtime.index >= len(pattern.Phases)-1 {
-		boss.bossCooldownEnds = s.tick + 1 + uint64(pattern.CooldownTicks)
+		boss.bossCooldownEnds = s.tick + 1 + uint64(s.bossPatternCooldownTicks(boss, pattern.CooldownTicks))
 		boss.bossPhaseKind = ""
 		boss.bossPhaseIndex = -1
 		boss.bossPhaseStarted = 0
@@ -109,6 +110,47 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 		res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(boss))})
+}
+
+func (s *Sim) updateBossEnrage(boss *entity, res *TickResult) {
+	if boss.bossEnraged || boss.maxHP <= 0 {
+		return
+	}
+	template, ok := s.rules.BossTemplates[boss.bossTemplateID]
+	if !ok || template.Enrage == nil {
+		return
+	}
+	threshold := template.Enrage.HealthRatioThreshold
+	if boss.bossEnrageThreshold <= 0 {
+		boss.bossEnrageThreshold = threshold
+	}
+	if float64(boss.hp)/float64(boss.maxHP) > threshold {
+		return
+	}
+	boss.bossEnraged = true
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(boss))})
+	res.Events = append(res.Events, Event{
+		EventType:            "boss_enraged",
+		EntityID:             idStr(boss.id),
+		TargetEntityID:       idStr(boss.id),
+		BossTemplateID:       boss.bossTemplateID,
+		HealthRatioThreshold: &threshold,
+	})
+}
+
+func (s *Sim) bossPatternCooldownTicks(boss *entity, baseCooldownTicks int) int {
+	if baseCooldownTicks <= 0 || !boss.bossEnraged {
+		return baseCooldownTicks
+	}
+	template, ok := s.rules.BossTemplates[boss.bossTemplateID]
+	if !ok || template.Enrage == nil {
+		return baseCooldownTicks
+	}
+	cooldown := int(math.Ceil(float64(baseCooldownTicks) * template.Enrage.CooldownMultiplier))
+	if cooldown < 1 {
+		return 1
+	}
+	return cooldown
 }
 
 func (s *Sim) advanceBossPatternDeck(boss *entity) {

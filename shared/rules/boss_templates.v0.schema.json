@@ -32,6 +32,15 @@
           },
           "hp_multiplier": { "type": "number", "exclusiveMinimum": 0 },
           "damage_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+          "enrage": {
+            "type": "object",
+            "required": ["health_ratio_threshold", "cooldown_multiplier"],
+            "additionalProperties": false,
+            "properties": {
+              "health_ratio_threshold": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+              "cooldown_multiplier": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          },
           "loot_table": { "type": "string", "minLength": 1 },
           "visual": {
             "type": "object",

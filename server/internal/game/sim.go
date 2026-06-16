@@ -4454,6 +4454,13 @@ func (s *Sim) itemOccupiesHandsForSlot(slot string, item *invItem) []string {
 	return s.itemOccupiesHands(item)
 }
 
+func (s *Sim) itemSlotAfterEquip(slot string, item *invItem) string {
+	if slot == offHandSlot && s.canOffhandWeapon(item) {
+		return mainHandSlot
+	}
+	return slot
+}
+
 func validHotbarSlot(slotIndex int) bool {
 	return slotIndex >= 0 && slotIndex < maxHotbarCapacity
 }

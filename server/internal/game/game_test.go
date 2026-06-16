@@ -2711,8 +2711,8 @@ func TestRogueOffhandWeaponEquipRules(t *testing.T) {
 	if rogue.equipped[mainHandSlot] != main.instanceID || rogue.equipped[offHandSlot] != off.instanceID {
 		t.Fatalf("rogue equipped = %+v, want main %d off %d", rogue.equipped, main.instanceID, off.instanceID)
 	}
-	if off.slot != offHandSlot {
-		t.Fatalf("offhand weapon slot = %q, want %q", off.slot, offHandSlot)
+	if off.slot != mainHandSlot {
+		t.Fatalf("offhand weapon item slot = %q, want %q", off.slot, mainHandSlot)
 	}
 
 	barbarian := MustNewSim("sess_barbarian_offhand", "barbarian_offhand_seed", rules)

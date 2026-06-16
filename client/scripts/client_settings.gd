@@ -10,8 +10,15 @@ const CREATE_GAME_SESSION_TYPE_SOLO := "solo"
 const DEFAULT_CREATE_GAME_SESSION_TYPE := CREATE_GAME_SESSION_TYPE_COOP
 const DEFAULT_LANGUAGE := "en"
 const DEFAULT_LOOT_FILTER_MODE := "All"
+const MONSTER_HEALTH_BAR_CONTEXTUAL := "contextual"
+const MONSTER_HEALTH_BAR_ALWAYS := "always"
+const DEFAULT_MONSTER_HEALTH_BAR_MODE := MONSTER_HEALTH_BAR_CONTEXTUAL
 const SUPPORTED_LANGUAGES := ["en", "es"]
 const SUPPORTED_LOOT_FILTER_MODES := ["All", "Magic+", "Rare+", "Unique"]
+const SUPPORTED_MONSTER_HEALTH_BAR_MODES := [
+	MONSTER_HEALTH_BAR_CONTEXTUAL,
+	MONSTER_HEALTH_BAR_ALWAYS,
+]
 const SUPPORTED_SIZES := [
 	Vector2i(1280, 720),
 	Vector2i(1600, 900),
@@ -30,6 +37,7 @@ var status_text: bool = true
 var create_game_session_type: String = DEFAULT_CREATE_GAME_SESSION_TYPE
 var language: String = DEFAULT_LANGUAGE
 var loot_filter_mode: String = DEFAULT_LOOT_FILTER_MODE
+var monster_health_bar_mode: String = DEFAULT_MONSTER_HEALTH_BAR_MODE
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -96,6 +104,16 @@ static func normalize_loot_filter_mode(mode: String) -> String:
 	return DEFAULT_LOOT_FILTER_MODE
 
 
+static func normalize_monster_health_bar_mode(mode: String) -> String:
+	var normalized := mode.strip_edges().to_lower()
+	if normalized == "default":
+		return MONSTER_HEALTH_BAR_CONTEXTUAL
+	for supported in SUPPORTED_MONSTER_HEALTH_BAR_MODES:
+		if supported == normalized:
+			return supported
+	return DEFAULT_MONSTER_HEALTH_BAR_MODE
+
+
 static func size_from_data(data) -> Vector2i:
 	if typeof(data) != TYPE_DICTIONARY:
 		return DEFAULT_SIZE
@@ -138,6 +156,12 @@ static func loot_filter_mode_from_data(data) -> String:
 	return normalize_loot_filter_mode(str((data as Dictionary).get("loot_filter_mode", DEFAULT_LOOT_FILTER_MODE)))
 
 
+static func monster_health_bar_mode_from_data(data) -> String:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_MONSTER_HEALTH_BAR_MODE
+	return normalize_monster_health_bar_mode(str((data as Dictionary).get("monster_health_bar_mode", DEFAULT_MONSTER_HEALTH_BAR_MODE)))
+
+
 func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
@@ -146,6 +170,7 @@ func load() -> void:
 		create_game_session_type = DEFAULT_CREATE_GAME_SESSION_TYPE
 		language = DEFAULT_LANGUAGE
 		loot_filter_mode = DEFAULT_LOOT_FILTER_MODE
+		monster_health_bar_mode = DEFAULT_MONSTER_HEALTH_BAR_MODE
 		return
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
@@ -155,6 +180,7 @@ func load() -> void:
 	create_game_session_type = create_game_session_type_from_data(parsed)
 	language = language_from_data(parsed)
 	loot_filter_mode = loot_filter_mode_from_data(parsed)
+	monster_health_bar_mode = monster_health_bar_mode_from_data(parsed)
 
 
 func save() -> void:
@@ -172,6 +198,7 @@ func save() -> void:
 		"create_game_session_type": create_game_session_type,
 		"language": language,
 		"loot_filter_mode": loot_filter_mode,
+		"monster_health_bar_mode": monster_health_bar_mode,
 	}))
 
 
@@ -247,5 +274,11 @@ func set_language(language_id: String, persist: bool = true) -> void:
 
 func set_loot_filter_mode(mode: String, persist: bool = true) -> void:
 	loot_filter_mode = normalize_loot_filter_mode(mode)
+	if persist:
+		save()
+
+
+func set_monster_health_bar_mode(mode: String, persist: bool = true) -> void:
+	monster_health_bar_mode = normalize_monster_health_bar_mode(mode)
 	if persist:
 		save()

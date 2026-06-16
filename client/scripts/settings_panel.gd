@@ -10,18 +10,22 @@ signal floating_combat_text_toggled(enabled: bool)
 signal status_text_toggled(enabled: bool)
 signal create_game_session_type_selected(session_type: String)
 signal language_selected(language: String)
+signal monster_health_bar_mode_selected(mode: String)
 
 var _buttons: Dictionary = {}
 var _session_type_buttons: Dictionary = {}
 var _language_buttons: Dictionary = {}
+var _monster_health_bar_buttons: Dictionary = {}
 var _selected_label: String = ""
 var _selected_session_type: String = "coop"
 var _selected_language: String = "en"
+var _selected_monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE
 var _floating_toggle: CheckButton
 var _status_text_toggle: CheckButton
 var _title: Label
 var _session_type_label: Label
 var _language_label: Label
+var _monster_health_bar_label: Label
 var _back_button: Button
 
 
@@ -33,7 +37,7 @@ func _ready() -> void:
 	visible = false
 
 
-func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en") -> void:
+func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE) -> void:
 	_sync_viewport_size()
 	visible = true
 	set_selected_size_label(selected_label)
@@ -41,6 +45,7 @@ func show_settings(selected_label: String, floating_combat_text_enabled: bool = 
 	set_status_text_enabled(status_text_enabled)
 	set_create_game_session_type(create_game_session_type)
 	set_language(language)
+	set_monster_health_bar_mode(monster_health_bar_mode)
 
 
 func hide_panel() -> void:
@@ -85,6 +90,13 @@ func set_language(language: String) -> void:
 	refresh_texts()
 
 
+func set_monster_health_bar_mode(mode: String) -> void:
+	_selected_monster_health_bar_mode = ClientSettingsScript.normalize_monster_health_bar_mode(mode)
+	for key in _monster_health_bar_buttons.keys():
+		var button: Button = _monster_health_bar_buttons[key]
+		button.disabled = str(key) == _selected_monster_health_bar_mode
+
+
 func _build() -> void:
 	var bg := ColorRect.new()
 	bg.color = Color(0.03, 0.035, 0.04, 0.88)
@@ -92,12 +104,12 @@ func _build() -> void:
 	add_child(bg)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(460, 520)
+	panel.custom_minimum_size = Vector2(460, 680)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.offset_left = -230
 	panel.offset_right = 230
-	panel.offset_top = -260
-	panel.offset_bottom = 260
+	panel.offset_top = -340
+	panel.offset_bottom = 340
 	add_child(panel)
 
 	var box := VBoxContainer.new()
@@ -149,6 +161,17 @@ func _build() -> void:
 	)
 	box.add_child(_status_text_toggle)
 
+	_monster_health_bar_label = Label.new()
+	_monster_health_bar_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_monster_health_bar_label.add_theme_font_size_override("font_size", 30)
+	box.add_child(_monster_health_bar_label)
+
+	var monster_health_bar_row := HBoxContainer.new()
+	monster_health_bar_row.add_theme_constant_override("separation", 8)
+	box.add_child(monster_health_bar_row)
+	_add_monster_health_bar_button(monster_health_bar_row, ClientSettingsScript.MONSTER_HEALTH_BAR_CONTEXTUAL)
+	_add_monster_health_bar_button(monster_health_bar_row, ClientSettingsScript.MONSTER_HEALTH_BAR_ALWAYS)
+
 	_language_label = Label.new()
 	_language_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_language_label.add_theme_font_size_override("font_size", 30)
@@ -191,6 +214,17 @@ func _add_language_button(parent: Control, language: String) -> void:
 	parent.add_child(button)
 
 
+func _add_monster_health_bar_button(parent: Control, mode: String) -> void:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(154, 42)
+	button.add_theme_font_size_override("font_size", 34)
+	button.pressed.connect(func() -> void:
+		monster_health_bar_mode_selected.emit(mode)
+	)
+	_monster_health_bar_buttons[mode] = button
+	parent.add_child(button)
+
+
 func _normalize_session_type(session_type: String) -> String:
 	var normalized := session_type.strip_edges().to_lower()
 	if normalized == "solo":
@@ -214,6 +248,8 @@ func refresh_texts() -> void:
 		_floating_toggle.text = TextCatalogScript.get_text("settings.floating_combat_text", "Floating combat text")
 	if _status_text_toggle != null:
 		_status_text_toggle.text = TextCatalogScript.get_text("settings.status_text", "Status text")
+	if _monster_health_bar_label != null:
+		_monster_health_bar_label.text = TextCatalogScript.get_text("settings.enemy_health_bars", "Enemy health bars")
 	if _language_label != null:
 		_language_label.text = TextCatalogScript.get_text("settings.language", "Language")
 	if _back_button != null:
@@ -224,3 +260,6 @@ func refresh_texts() -> void:
 	for key in _language_buttons.keys():
 		var language_button: Button = _language_buttons[key]
 		language_button.text = TextCatalogScript.get_text("settings.language.%s" % str(key), str(key))
+	for key in _monster_health_bar_buttons.keys():
+		var mode_button: Button = _monster_health_bar_buttons[key]
+		mode_button.text = TextCatalogScript.get_text("settings.enemy_health_bars.%s" % str(key), str(key))

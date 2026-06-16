@@ -1,0 +1,31 @@
+docs/as-built/v223_unique-non-damage-skill-modifier.md
+  s_898d01ce740857::t_6b43e8eb79740f 29
+docs/as-built/v219_companion-stance-ui.md
+  s_898d01ce740857::t_6b43e8eb79740f 24
+docs/as-built/v220_mercenary-death-loss.md
+  s_898d01ce740857::t_6b43e8eb79740f 27
+docs/progress/slice-lifecycle.md
+  s_898d01ce740857::t_6b43e8eb79740f 235-239
+PROGRESS.md
+  s_898d01ce740857::t_6b43e8eb79740f 28-29
+docs/as-built/v221_resource-wallet-foundation.md
+  s_898d01ce740857::t_6b43e8eb79740f 32
+docs/as-built/v222_upgrade-result-preview.md
+  s_898d01ce740857::t_6b43e8eb79740f 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "41d712e3ed217284a6c9f400d7f9df88dd2762d7",
+  "prompts": {},
+  "sessions": {
+    "s_898d01ce740857": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed1c5-b55c-76f1-8252-fcaf1d718185",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

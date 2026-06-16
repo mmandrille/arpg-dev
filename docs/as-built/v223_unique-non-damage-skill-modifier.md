@@ -26,7 +26,7 @@ make maintainability
 ```
 
 All focused checks passed on 2026-06-16 during `$autoloop`. The enclosing batch-level `make ci`
-remains deferred until the selected feature queue is complete.
+also passed after the selected v219-v223 feature queue completed.
 
 Manual visual proof, if desired:
 

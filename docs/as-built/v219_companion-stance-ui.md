@@ -21,6 +21,7 @@ Date: 2026-06-16
 - `make client-unit`
 - `make bot-client scenario=mercenary_roster_ui`
 - `make maintainability`
+- Batch proof after the selected v219-v223 `$autoloop` feature queue: `make ci`
 
 ## Visual Verification
 

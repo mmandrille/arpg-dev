@@ -9,6 +9,7 @@
     "item_upgrade_cost_growth_per_level": 50,
     "item_upgrade_max_level": 2,
     "item_upgrade_success_chance_percent": 100,
+    "item_upgrade_pity_failure_threshold": 2,
     "item_upgrade_resource_item_def_id": "upgrade_shard",
     "item_upgrade_resource_count": 1
   }

@@ -225,8 +225,8 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("respec_enabled") and not step.has("service_id") and not step.has("visible") and not step.has("status_contains"):
 			return "client_steps[%d] (%s) requires a bishop panel expectation" % [index, stype]
 	if stype in ["wait_blacksmith_panel", "assert_blacksmith_panel"]:
-		if not step.has("visible") and not step.has("stash_gold_equals") and not step.has("stash_gold_at_least") and not step.has("item_count") and not step.has("status_contains") and not step.has("success_chance_percent") and not step.has("resource_item_def_id") and not step.has("resource_required_count") and not step.has("resource_inventory_count") and not step.has("item_def_id") and not step.has("stash_item_id") and not step.has("item_level") and not step.has("upgrade_enabled"):
-			return "client_steps[%d] (%s) requires a blacksmith panel expectation" % [index, stype]
+			if not step.has("visible") and not step.has("stash_gold_equals") and not step.has("stash_gold_at_least") and not step.has("item_count") and not step.has("status_contains") and not step.has("success_chance_percent") and not step.has("resource_item_def_id") and not step.has("resource_required_count") and not step.has("resource_inventory_count") and not step.has("pity_failure_count") and not step.has("pity_threshold") and not step.has("pity_guaranteed") and not step.has("item_def_id") and not step.has("stash_item_id") and not step.has("item_level") and not step.has("upgrade_enabled"):
+				return "client_steps[%d] (%s) requires a blacksmith panel expectation" % [index, stype]
 	if stype == "assert_shop_buy_button":
 		if str(step.get("offer_id", "")) == "":
 			return "client_steps[%d] (%s) requires offer_id" % [index, stype]

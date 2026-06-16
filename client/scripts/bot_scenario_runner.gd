@@ -971,6 +971,12 @@ func _blacksmith_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 		return false
 	if step.has("resource_inventory_count") and int(panel.get("resource_inventory_count", -1)) != int(step.get("resource_inventory_count", 0)):
 		return false
+	if step.has("pity_failure_count") and int(panel.get("pity_failure_count", -1)) != int(step.get("pity_failure_count", 0)):
+		return false
+	if step.has("pity_threshold") and int(panel.get("pity_threshold", -1)) != int(step.get("pity_threshold", 0)):
+		return false
+	if step.has("pity_guaranteed") and bool(panel.get("pity_guaranteed", false)) != bool(step.get("pity_guaranteed", false)):
+		return false
 	var rows := _matching_blacksmith_rows(step, state)
 	if step.has("item_def_id") or step.has("stash_item_id") or step.has("item_level") or step.has("upgrade_enabled"):
 		if rows.is_empty():

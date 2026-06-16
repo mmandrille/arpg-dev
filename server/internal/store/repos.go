@@ -1524,13 +1524,13 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 	return result.characterGold, result.stashGold, nil
 }
 
-func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, bool, error) {
-	item, _, stashGold, chargedCost, success, err := s.UpgradeAccountStashItemWithWallet(ctx, accountID, "", stashItemID, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, eligibleItemDefs)
+func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, bool, error) {
+	item, _, stashGold, chargedCost, success, err := s.UpgradeAccountStashItemWithWallet(ctx, accountID, "", stashItemID, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold, eligibleItemDefs)
 	return item, stashGold, chargedCost, success, err
 }
 
-func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, int, bool, error) {
-	if baseCostGold < 0 || costGrowthPerLevel < 0 || maxLevel <= 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 {
+func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, int, bool, error) {
+	if baseCostGold < 0 || costGrowthPerLevel < 0 || maxLevel <= 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 || pityFailureThreshold < 0 {
 		return AccountStashItem{}, 0, 0, 0, false, ErrConflict
 	}
 	var out AccountStashItem
@@ -1591,11 +1591,11 @@ func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID
 		if characterGold+stashGold < chargedCost {
 			return ErrConflict
 		}
-		success = successRoll <= successChancePercent
-		upgradedStats, err := upgradedRolledStats(item.RolledStats, maxLevel)
+		failures, err := upgradePityFailures(item.RolledStats)
 		if err != nil {
 			return err
 		}
+		success = successRoll <= successChancePercent || (pityFailureThreshold > 0 && failures >= pityFailureThreshold)
 		spendCharacter := chargedCost
 		if spendCharacter > characterGold {
 			spendCharacter = characterGold
@@ -1621,19 +1621,28 @@ func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID
 		); err != nil {
 			return fmt.Errorf("store: spend account stash gold for upgrade: %w", err)
 		}
-		if !success {
-			out = item
-			return nil
+		var nextStats []byte
+		if success {
+			nextStats, err = upgradedRolledStats(item.RolledStats, maxLevel)
+			if err != nil {
+				return err
+			}
+			nextStats, err = rolledStatsWithUpgradePityFailures(nextStats, 0)
+		} else {
+			nextStats, err = rolledStatsWithUpgradePityFailures(item.RolledStats, failures+1)
+		}
+		if err != nil {
+			return err
 		}
 		err = tx.QueryRow(ctx,
 			`UPDATE account_stash_items
-			 SET rolled_stats = $3::jsonb, updated_at = now()
-			 WHERE account_id = $1 AND stash_item_id = $2
-			 RETURNING account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at`,
-			accountID, stashItemID, upgradedStats,
+				 SET rolled_stats = $3::jsonb, updated_at = now()
+				 WHERE account_id = $1 AND stash_item_id = $2
+				 RETURNING account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at`,
+			accountID, stashItemID, nextStats,
 		).Scan(&out.AccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
 		if err != nil {
-			return fmt.Errorf("store: update upgraded account stash item: %w", err)
+			return fmt.Errorf("store: update account stash item after upgrade attempt: %w", err)
 		}
 		return nil
 	})

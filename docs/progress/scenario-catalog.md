@@ -43,6 +43,7 @@ boss_floor_gate: start on compact boss floor → assert locked exits → observe
 boss_enrage_phase: compact boss floor → damage Cave Warden below threshold → observe server-authored `boss_enraged`
 boss_kill_reward_polish: compact boss floor → kill Cave Warden → observe `boss_killed` with `boss_template_id` and client reward status
 mercenary_hiring_board: compact town lab → open mercenary board → spend gold to hire one guard → prove hired guard follows and damages a target
+mercenary_roster_ui: headless Godot client opens the mercenary board → hires the fixed guard → asserts the roster panel and mercenary companion HUD icon
 paladin_class_foundation / barbarian_class_foundation / sorcerer_class_foundation / rogue_class_foundation / ranger_class_foundation: class starter gear → movement → at least three basic attacks → all current class skills
 ranger_piercing_and_pinning_shots: Ranger casts Pinning Shot to root a chase target, waits for expiry, then fires Piercing Shot through lined-up monsters
 ranger_volley_and_visual_showcase: Ranger shows starter bow, Pinning Shot, Piercing Shot, and Volley in a compact visual lab

@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-15
+Last updated: 2026-06-16
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v206 — mercenary hiring board |
+| **Latest completed slice** | v207 — mercenary roster UI |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-15 after v206 mercenary hiring board |
-| **Next slice** | Continue selected autoloop queue with v207 — mercenary roster UI |
+| **CI gate** | `make ci` green on 2026-06-16 after v207 mercenary roster UI |
+| **Next slice** | Continue selected autoloop queue with v208 — companion stance command |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |
 
@@ -109,7 +109,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
 | Multiplayer | Matchmaking/lobby beyond backend-listed sessions, advanced active-session filtering/pagination/load-aware capacity controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49/v164 non-goals, ADR-0001, ADR-0014 |
-| Companions / AI | Hired mercenaries derived from other players' characters, mercenary roster UI, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, commands/stances, mercenary loot/XP/potion behavior | v206 non-goals, ADR-0010 |
+| Companions / AI | Hired mercenaries derived from other players' characters, mercenary death/loss rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, commands/stances, mercenary loot/XP/potion behavior | v206/v207 non-goals, ADR-0010 |
 
 ### Curated autoloop candidates
 

@@ -13,7 +13,7 @@ const STEP_TYPES_WAIT := [
 	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
-	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel", "wait_market_panel", "wait_bishop_panel", "wait_blacksmith_panel",
+	"wait_wall_layout", "wait_shop_panel", "wait_stash_panel", "wait_market_panel", "wait_bishop_panel", "wait_mercenary_panel", "wait_blacksmith_panel",
 	"wait_boss_health_bar", "wait_remote_player_count",
 	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker", "wait_elite_objective_minimap",
 ]
@@ -41,7 +41,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
 	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar",
-	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
+	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_mercenary_panel_visible", "assert_mercenary_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
 	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap",
 ]
 const STEP_TYPES_ACTION := [
@@ -224,6 +224,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_bishop_panel", "assert_bishop_panel"]:
 		if not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("respec_enabled") and not step.has("service_id") and not step.has("visible") and not step.has("status_contains"):
 			return "client_steps[%d] (%s) requires a bishop panel expectation" % [index, stype]
+	if stype in ["wait_mercenary_panel", "assert_mercenary_panel"]:
+		if not step.has("visible") and not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("service_id") and not step.has("offer_id") and not step.has("monster_def_id") and not step.has("hired_entity_id") and not step.has("hired_count") and not step.has("status_contains") and not step.has("companion_bar_count") and not step.has("companion_icon_kind"):
+			return "client_steps[%d] (%s) requires a mercenary panel expectation" % [index, stype]
 	if stype in ["wait_blacksmith_panel", "assert_blacksmith_panel"]:
 			if not step.has("visible") and not step.has("stash_gold_equals") and not step.has("stash_gold_at_least") and not step.has("item_count") and not step.has("status_contains") and not step.has("success_chance_percent") and not step.has("resource_item_def_id") and not step.has("resource_required_count") and not step.has("resource_inventory_count") and not step.has("pity_failure_count") and not step.has("pity_threshold") and not step.has("pity_guaranteed") and not step.has("item_def_id") and not step.has("stash_item_id") and not step.has("item_level") and not step.has("upgrade_enabled"):
 				return "client_steps[%d] (%s) requires a blacksmith panel expectation" % [index, stype]

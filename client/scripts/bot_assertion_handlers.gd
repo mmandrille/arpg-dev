@@ -5,6 +5,7 @@ const BotUiAssertionHandlersScript := preload("res://scripts/bot_ui_assertion_ha
 const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journal_assertions.gd")
 const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_objective_assertions.gd")
 const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
+const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -104,6 +105,15 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			if not runner._bishop_panel_matches(step, state):
 				runner._fail("assert_bishop_panel failed: want=%s panel=%s step=%d scenario=%s" % [
 					str(step), str(state.get("bishop_panel", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_mercenary_panel_visible":
+			return runner._assert_bool_state("assert_mercenary_panel_visible", "mercenary_panel_visible", step, state)
+		"assert_mercenary_panel":
+			if not BotMercenaryPanelAssertionsScript.matches(step, state):
+				runner._fail("assert_mercenary_panel failed: want=%s panel=%s companion_bar=%s step=%d scenario=%s" % [
+					str(step), str(state.get("mercenary_panel", {})), str(state.get("companion_bar", {})), runner._step_index, str(runner.scenario.get("id", "?"))
 				])
 				return false
 			return true

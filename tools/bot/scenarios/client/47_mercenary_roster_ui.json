@@ -1,0 +1,43 @@
+{
+  "id": "mercenary_roster_ui",
+  "runner": "godot_client",
+  "world_id": "mercenary_hiring_lab",
+  "seed": "v207_mercenary_roster_ui",
+  "title": "Mercenary roster UI",
+  "description": "Client opens the mercenary board, hires the fixed guard, and verifies the roster panel and companion HUD.",
+  "debug_progression": { "gold": 300 },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
+    { "type": "wait_event", "event_type": "mercenary_board_opened", "offer_id": "fixed:mercenary_guard", "timeout_s": 15.0 },
+    {
+      "type": "wait_mercenary_panel",
+      "price": 75,
+      "gold": 225,
+      "affordable": true,
+      "service_id": "mercenary",
+      "offer_id": "fixed:mercenary_guard",
+      "monster_def_id": "mercenary_guard",
+      "hired_count": 1,
+      "status_contains": "Hired",
+      "companion_bar_count": 1,
+      "companion_icon_kind": "mercenary",
+      "timeout_s": 15.0
+    },
+    { "type": "assert_mercenary_panel_visible", "visible": true },
+    {
+      "type": "assert_mercenary_panel",
+      "price": 75,
+      "gold": 225,
+      "affordable": true,
+      "service_id": "mercenary",
+      "offer_id": "fixed:mercenary_guard",
+      "monster_def_id": "mercenary_guard",
+      "hired_count": 1,
+      "status_contains": "Mercenary Guard",
+      "companion_bar_count": 1,
+      "companion_icon_kind": "mercenary"
+    }
+  ]
+}

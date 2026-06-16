@@ -22,6 +22,9 @@ const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
+const MercenaryPanelScript := preload("res://scripts/mercenary_panel.gd")
+const MercenaryPanelBridgeScript := preload("res://scripts/mercenary_panel_bridge.gd")
+const BotDebugProgressionSetupScript := preload("res://scripts/bot_debug_progression_setup.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
 const TownServiceBridgeScript := preload("res://scripts/town_service_bridge.gd")
@@ -241,6 +244,7 @@ var inventory_panel: InventoryPanel
 var shop_panel: ShopPanel
 var stash_panel: StashPanel
 var bishop_panel: BishopPanel
+var mercenary_panel: MercenaryPanel
 var market_panel
 var blacksmith_panel: BlacksmithPanel
 var consumable_bar: ConsumableBar
@@ -349,16 +353,16 @@ func _ready() -> void:
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
 	var requested_seed := _env("ARPG_SEED", "")
+	var requested_character_id := BotDebugProgressionSetupScript.prepare_character(client, _env("ARPG_DEBUG_TOKEN", "local-debug-token"), _env("ARPG_BOT_DEBUG_GOLD", "") if bot_client_run else "")
 	if requested_world_id == "" and not bot_client_run:
 		requested_world_id = "dungeon_levels"
 	if bot_client_run or resume_session_id != "" or _truthy_env("ARPG_AUTOSTART"):
-		if not _start_automation_session(resume_session_id, requested_world_id, requested_seed, bot_client_run):
+		if not _start_automation_session(resume_session_id, requested_world_id, requested_seed, bot_client_run, requested_character_id):
 			return
 		if bot_client_run:
 			_mount_bot_controller()
 		return
 	_show_main_menu()
-
 func _bot_uses_menu() -> bool:
 	if _truthy_env("ARPG_BOT_MENU"):
 		return true
@@ -377,8 +381,8 @@ func _mount_bot_controller() -> void:
 	var bot := preload("res://scripts/bot_controller.gd").new()
 	add_child(bot)
 
-func _start_automation_session(resume_session_id: String, requested_world_id: String, requested_seed: String, bot_client_run: bool) -> bool:
-	if not client.create_session(resume_session_id, requested_world_id, "", requested_seed):
+func _start_automation_session(resume_session_id: String, requested_world_id: String, requested_seed: String, bot_client_run: bool, requested_character_id: String = "") -> bool:
+	if not client.create_session(resume_session_id, requested_world_id, requested_character_id, requested_seed):
 		if bot_client_run:
 			printerr("[bot-client] session failed world_id=%s resume=%s" % [requested_world_id, resume_session_id])
 		_debug("session failed")
@@ -1239,6 +1243,8 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "bishop_service_opened":
 			_show_bishop_panel(ev)
 			continue
+		if MercenaryPanelBridgeScript.try_handle_event(self, mercenary_panel, ev, gold):
+			continue
 		if event_type == "market_service_opened":
 			_show_market_panel(ev)
 			continue
@@ -1579,6 +1585,7 @@ func _refresh_inventory_ui() -> void:
 		stash_panel.set_inventory_state(inventory, equipped, gold, hotbar)
 	if bishop_panel != null and bishop_panel.visible:
 		bishop_panel.set_gold(gold)
+	if mercenary_panel != null and mercenary_panel.visible: mercenary_panel.set_gold(gold)
 	if blacksmith_panel != null and blacksmith_panel.visible:
 		blacksmith_panel.show_blacksmith(
 			blacksmith_panel.blacksmith_entity_id,
@@ -2090,6 +2097,7 @@ func _sync_companion_bar() -> void:
 			"total_ticks": int(rec.get("total_ticks", 0)),
 		})
 	companion_bar.set_companions(companions)
+	if mercenary_panel != null: mercenary_panel.set_companions(companions)
 
 func _hide_boss_health_bar() -> void:
 	if boss_health_bar != null:
@@ -2336,7 +2344,7 @@ func _is_skill_slot_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_Q or event.physical_keycode == KEY_Q or event.unicode == 113 or event.unicode == 81
 
 func _close_gameplay_panels(except: String = "") -> void:
-	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop", "market", "blacksmith"]) and inventory_panel != null:
+	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop", "mercenary", "market", "blacksmith"]) and inventory_panel != null:
 		inventory_panel.hide_display()
 	if not (except in ["shop", "shop_with_inventory"]):
 		_hide_shop_panel()
@@ -2344,6 +2352,8 @@ func _close_gameplay_panels(except: String = "") -> void:
 		_hide_stash_panel()
 	if except != "bishop":
 		_hide_bishop_panel()
+	if except != "mercenary" and mercenary_panel != null:
+		mercenary_panel.hide_display()
 	if except != "market":
 		_hide_market_panel()
 	if except != "blacksmith":
@@ -3307,6 +3317,7 @@ func _build_scene() -> void:
 	bishop_panel.debug_requested.connect(_on_bishop_debug_requested)
 	bishop_panel.set_debug_enabled(gameplay_debug_enabled)
 	ui.add_child(bishop_panel)
+	mercenary_panel = MercenaryPanelScript.new(); ui.add_child(mercenary_panel)
 	market_panel = MarketPanelScript.new()
 	market_panel.market_action_requested.connect(_on_market_action_requested)
 	market_panel.inventory_context_requested.connect(_on_market_inventory_context_requested)
@@ -6008,6 +6019,7 @@ func get_bot_state() -> Dictionary:
 		"shop_panel_visible": shop_panel != null and shop_panel.visible,
 		"stash_panel_visible": stash_panel != null and stash_panel.visible,
 		"bishop_panel_visible": bishop_panel != null and bishop_panel.visible,
+		"mercenary_panel_visible": mercenary_panel != null and mercenary_panel.visible,
 		"market_panel_visible": market_panel != null and market_panel.visible,
 		"blacksmith_panel_visible": blacksmith_panel != null and blacksmith_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
@@ -6021,6 +6033,7 @@ func get_bot_state() -> Dictionary:
 		"shop_panel": shop_panel.get_debug_state() if shop_panel != null else {},
 		"stash_panel": stash_panel.get_debug_state() if stash_panel != null else {},
 		"bishop_panel": bishop_panel.get_debug_state() if bishop_panel != null else {},
+		"mercenary_panel": mercenary_panel.get_debug_state() if mercenary_panel != null else {},
 		"market_panel": market_panel.get_debug_state() if market_panel != null else {},
 		"blacksmith_panel": blacksmith_panel.get_debug_state() if blacksmith_panel != null else {},
 		"character_stats_panel": character_stats_panel.get_debug_state() if character_stats_panel != null else {},

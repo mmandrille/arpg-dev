@@ -149,6 +149,26 @@ func delete_character(character_id: String) -> bool:
 	return r.get("_code", 0) == 204
 
 
+func set_debug_progression(debug_token: String, character_id: String, progression: Dictionary) -> bool:
+	if character_id == "":
+		return false
+	var body := {
+		"level": int(progression.get("level", 1)),
+		"experience": int(progression.get("experience", 0)),
+		"unspent_stat_points": int(progression.get("unspent_stat_points", 0)),
+		"unspent_skill_points": int(progression.get("unspent_skill_points", 0)),
+		"stats": progression.get("stats", {}),
+		"gold": int(progression.get("gold", 0)),
+		"skill_ranks": progression.get("skill_ranks", {}),
+	}
+	var r := _http(HTTPClient.METHOD_PUT, "/v0/debug/characters/" + character_id + "/progression",
+		["Authorization: Bearer " + token, "X-Debug-Token: " + debug_token], JSON.stringify(body))
+	if r.get("_code", 0) == 200:
+		return true
+	push_error("set_debug_progression failed: %s" % r)
+	return false
+
+
 func create_session(resume_session_id: String = "", requested_world_id: String = "", requested_character_id: String = "", requested_seed: String = "") -> bool:
 	# resume_session_id rejoins an existing session: the server rehydrates
 	# inventory AND equipped state before the initial session_snapshot (no

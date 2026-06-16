@@ -1,0 +1,53 @@
+docs/as-built/v215_client-pure-factories.md
+  s_988e4c34d2ce08::t_3c5707d68a71e1 1-21
+docs/specs/v215_spec-client-pure-factories.md
+  s_a8770cc34038ef::t_34d723661a8af0 115,146
+  s_a8770cc34038ef::t_97a3b557e98df0 1-114,116-145,147-152
+PROGRESS.md
+  s_988e4c34d2ce08::t_17638fa8859076 26,28
+docs/specs/v216_spec-client-context-controllers.md
+  s_a8770cc34038ef::t_8951427b04bc3f 1-83,85-132,134-158,160-167,169-177,180-184,186-219
+  s_a8770cc34038ef::t_c10875d121e785 84,133,159,168,178-179,185
+docs/plans/v216_2026-06-16-client-context-controllers.md
+  s_988e4c34d2ce08::t_8577176266fae9 30-32,35,48-49,61-63,73-74,86-88,98-102
+  s_57676dc346e356::t_fba0abc66b226e 1-29,33-34,36-47,50-60,64-72,75-85,89-97,103
+docs/plans/v215_2026-06-16-client-pure-factories.md
+  s_988e4c34d2ce08::t_8577176266fae9 31-33,36,49-50,62-64,75-77,87-88,100-102,112-116
+  s_57676dc346e356::t_fba0abc66b226e 1-30,34-35,37-48,51-61,65-74,78-86,89-99,103-111,117
+docs/progress/slice-lifecycle.md
+  s_988e4c34d2ce08::t_17638fa8859076 231-232
+docs/as-built/v216_client-context-controllers.md
+  s_988e4c34d2ce08::t_3c5707d68a71e1 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fa7cd177b4e2fa4fedf0e40f5734f4d9a455c006",
+  "prompts": {},
+  "sessions": {
+    "s_57676dc346e356": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed0b9-9d97-71a3-a179-6451b17c6e1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_988e4c34d2ce08": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed110-d283-78e0-98eb-792237de9efa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_a8770cc34038ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed073-156b-7a42-ba3c-3ba0f571d8a3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

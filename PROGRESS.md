@@ -23,10 +23,10 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v210 — barbarian leap |
+| **Latest completed slice** | v211 — paladin charge |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-16 after v210 barbarian leap |
-| **Next slice** | Continue selected autoloop queue with v211 paladin charge |
+| **CI gate** | `make ci` green on 2026-06-16 after v211 paladin charge |
+| **Next slice** | Continue selected autoloop queue with v212 ranger disengage |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |
 

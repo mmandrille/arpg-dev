@@ -570,6 +570,51 @@
       },
       "name_key": "skill.heal.name"
     },
+    "charge": {
+      "name": "Charge",
+      "class": "paladin",
+      "tree": {
+        "tier": 1,
+        "column": 2
+      },
+      "kind": "mobility",
+      "damage_type": "force",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "str": 6
+        },
+        "stats_per_rank": {
+          "str": 2
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "mobility": {
+        "range_base": 6,
+        "range_per_rank": 0.5,
+        "mode": "charge",
+        "visual": "charge_smash",
+        "damage_percent_base": 80,
+        "damage_percent_per_rank": 10,
+        "impact_radius": 1.75,
+        "stun_effect_id": "charge_stun",
+        "stun_duration_ticks": 20
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 5
+      },
+      "name_key": "skill.charge.name"
+    },
     "holy_shield": {
       "name": "Holy Shield",
       "class": "paladin",

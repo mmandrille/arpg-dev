@@ -57,6 +57,8 @@
     "skill.cleave.summary": "Ataque de arma en cono",
     "skill.heal.name": "Curar",
     "skill.heal.summary": "Curacion de aliados en area",
+    "skill.charge.name": "Carga",
+    "skill.charge.summary": "Embestida con escudo que aturde",
     "skill.holy_shield.name": "Escudo sagrado",
     "skill.holy_shield.summary": "Defensa de aliados en area",
     "skill.sanctuary.name": "Santuario",

@@ -225,5 +225,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v208** | `companion-stance-command` | Complete (`make ci` green) | [`v208_spec-companion-stance-command.md`](docs/specs/v208_spec-companion-stance-command.md) | [`v208_2026-06-16-companion-stance-command.md`](docs/plans/v208_2026-06-16-companion-stance-command.md) | [`as-built`](docs/as-built/v208_companion-stance-command.md) |
 | **v209** | `sorcerer-teleport` | Complete (`make ci` green) | [`v209_spec-sorcerer-teleport.md`](docs/specs/v209_spec-sorcerer-teleport.md) | [`v209_2026-06-16-sorcerer-teleport.md`](docs/plans/v209_2026-06-16-sorcerer-teleport.md) | [`as-built`](docs/as-built/v209_sorcerer-teleport.md) |
 | **v210** | `barbarian-leap` | Complete (`make ci` green) | [`v210_spec-barbarian-leap.md`](docs/specs/v210_spec-barbarian-leap.md) | [`v210_2026-06-16-barbarian-leap.md`](docs/plans/v210_2026-06-16-barbarian-leap.md) | [`as-built`](docs/as-built/v210_barbarian-leap.md) |
+| **v211** | `paladin-charge` | Complete (`make ci` green) | [`v211_spec-paladin-charge.md`](docs/specs/v211_spec-paladin-charge.md) | [`v211_2026-06-16-paladin-charge.md`](docs/plans/v211_2026-06-16-paladin-charge.md) | [`as-built`](docs/as-built/v211_paladin-charge.md) |
 
 ---

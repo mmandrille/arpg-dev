@@ -73,6 +73,8 @@
     "skill.earthbreaker.summary": "Radial leap smash",
     "skill.heal.name": "Heal",
     "skill.heal.summary": "Area ally heal",
+    "skill.charge.name": "Charge",
+    "skill.charge.summary": "Shield rush stun",
     "skill.holy_shield.name": "Holy Shield",
     "skill.holy_shield.summary": "Area ally defense",
     "skill.sanctuary.name": "Sanctuary",

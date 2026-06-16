@@ -1,0 +1,25 @@
+docs/progress/shipped-changelog-archive.md
+  s_898d01ce740857::t_16e853705cbe46 149,214,267,322
+make/ci.mk
+  s_898d01ce740857::t_afb1afaad72505 2,8
+docs/progress/slice-lifecycle.md
+  s_898d01ce740857::t_16e853705cbe46 20-239
+scripts/check-progress-dashboard.sh
+  s_898d01ce740857::t_afb1afaad72505 39-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "113887593f6075e7b12ea5337fba94df083dc01d",
+  "prompts": {},
+  "sessions": {
+    "s_898d01ce740857": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed1c5-b55c-76f1-8252-fcaf1d718185",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

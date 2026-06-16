@@ -41,6 +41,10 @@ func _run() -> void:
 	_assert_eq("pity failure count", int(state.get("pity_failure_count", 0)), 1)
 	_assert_false("pity not guaranteed before threshold", bool(state.get("pity_guaranteed", true)))
 	_assert_true("pity preview shows progress", _array_contains_text(state.get("preview_lines", []), "Pity: 1/2 failures"))
+	_assert_true("preview shows success result", _array_contains_text(state.get("preview_lines", []), "On success: Level 0 -> 1"))
+	_assert_true("preview shows failure result", _array_contains_text(state.get("preview_lines", []), "On failure: item unchanged; pity 1 -> 2 failures"))
+	_assert_true("preview shows attempt spend", _array_contains_text(state.get("preview_lines", []), "Spend on attempt: 100 gold, 1 Upgrade Shard"))
+	_assert_true("preview shows after attempt balance", _array_contains_text(state.get("preview_lines", []), "After attempt: 0 gold, 0 Upgrade Shard"))
 
 	item["rolled_stats"] = {"item_level": 0, "damage_min": 1, "damage_max": 2, "upgrade_pity": {"failures": 2}}
 	panel.stage_inventory_item(item)
@@ -48,6 +52,7 @@ func _run() -> void:
 	_assert_eq("guaranteed failure count", int(state.get("pity_failure_count", 0)), 2)
 	_assert_true("pity guaranteed at threshold", bool(state.get("pity_guaranteed", false)))
 	_assert_true("pity preview shows guarantee", _array_contains_text(state.get("preview_lines", []), "Next upgrade guaranteed"))
+	_assert_false("guaranteed preview hides failure result", _array_contains_text(state.get("preview_lines", []), "On failure"))
 
 	panel.queue_free()
 	print("[gdtest] PASS: test_blacksmith_panel (%d passed, %d failed)" % [_pass_count, _fail_count])

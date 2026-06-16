@@ -42,6 +42,8 @@
     { "type": "assert_stash_gold", "at_least": 100 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_blacksmith" },
     { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 0, "upgrade_enabled": true, "success_chance_percent": 100, "resource_item_def_id": "upgrade_shard", "resource_required_count": 1, "resource_wallet_count": 1, "pity_failure_count": 0, "pity_threshold": 2, "pity_guaranteed": false, "timeout_s": 15.0 },
+    { "type": "click_blacksmith_stage_item", "item_def_id": "cave_blade" },
+    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 0, "upgrade_enabled": true, "preview_contains": ["On success: Level 0 -> 1", "Spend on attempt: 100 gold, 1 Upgrade Shard", "After attempt: 200 gold, 0 Upgrade Shard"], "timeout_s": 15.0 },
     { "type": "click_blacksmith_upgrade", "item_def_id": "cave_blade" },
     { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "upgrade_enabled": false, "resource_wallet_count": 0, "status_contains": "Upgraded", "timeout_s": 15.0 },
     { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },

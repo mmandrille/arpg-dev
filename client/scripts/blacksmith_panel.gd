@@ -5,6 +5,7 @@ signal upgrade_requested(stash_item_id: String)
 signal upgrade_inventory_requested(item_instance_id: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const PANEL_SIZE := Vector2(320, 220)
 const STAGE_SLOT_SIZE := Vector2(84, 84)
@@ -125,16 +126,23 @@ func bot_click_upgrade(stash_item_id: String = "", item_def_id: String = "", sta
 	stage_inventory_item(item)
 	_emit_upgrade(staged_item)
 
+func bot_stage_item(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
+	var item := _matching_item(stash_item_id, item_def_id, stash_index)
+	if item.is_empty():
+		show_status("No matching inventory item", true)
+		return
+	stage_inventory_item(item)
+
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"blacksmith_entity_id": blacksmith_entity_id,
 		"gold": gold,
 		"stash_gold": stash_gold,
-			"wallet_gold": _wallet_gold(),
-			"success_chance_percent": success_chance_percent,
-			"pity_failure_count": _pity_failure_count(staged_item),
-			"pity_threshold": pity_failure_threshold,
+		"wallet_gold": _wallet_gold(),
+		"success_chance_percent": success_chance_percent,
+		"pity_failure_count": BlacksmithUpgradePreviewScript.pity_failure_count(staged_item),
+		"pity_threshold": pity_failure_threshold,
 		"pity_guaranteed": _pity_guaranteed(staged_item),
 		"resource_item_def_id": resource_item_def_id,
 		"resource_required_count": resource_count,
@@ -149,8 +157,8 @@ func get_debug_state() -> Dictionary:
 		"instruction_visible": false,
 		"rows": _debug_rows(),
 		"status": _status_label.text if _status_label != null else "",
-			"window": _panel.get_debug_state() if _panel != null else {},
-		}
+		"window": _panel.get_debug_state() if _panel != null else {},
+	}
 
 func stage_inventory_item(item: Dictionary) -> void:
 	if item.is_empty():
@@ -369,150 +377,32 @@ func _resource_display_name() -> String:
 	return str(def.get("name", resource_item_def_id.replace("_", " ").capitalize()))
 
 func _pity_failure_count(item: Dictionary) -> int:
-	var rolled = item.get("rolled_stats", {})
-	if typeof(rolled) != TYPE_DICTIONARY:
-		return 0
-	var pity = (rolled as Dictionary).get("upgrade_pity", {})
-	return max(0, int((pity as Dictionary).get("failures", 0))) if typeof(pity) == TYPE_DICTIONARY else 0
+	return BlacksmithUpgradePreviewScript.pity_failure_count(item)
 
 func _pity_guaranteed(item: Dictionary) -> bool:
-	return pity_failure_threshold > 0 and _pity_failure_count(item) >= pity_failure_threshold
+	return BlacksmithUpgradePreviewScript.pity_guaranteed(item, pity_failure_threshold)
 
 func _wallet_gold() -> int:
 	return gold + stash_gold
 
 func _item_level(item: Dictionary) -> int:
-	var rolled = item.get("rolled_stats", {})
-	if typeof(rolled) == TYPE_DICTIONARY:
-		var payload := rolled as Dictionary
-		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-			return int((payload.get("stats", {}) as Dictionary).get("item_level", 0))
-		return int(payload.get("item_level", 0))
-	return 0
+	return BlacksmithUpgradePreviewScript.item_level(item)
 
 func _next_cost(level: int) -> int:
-	return base_cost + level * growth_cost
+	return BlacksmithUpgradePreviewScript.next_cost(level, base_cost, growth_cost)
 
 func _upgrade_preview_lines(item: Dictionary) -> Array:
-	var lines: Array = []
-	var stats := _summary_stat_map(item)
-	if stats.is_empty():
-		stats = _stats_map(item)
-	var level := _item_level(item)
-	if level >= max_level:
-		return ["Max level reached"]
-	lines.append("Success chance: %d%%" % success_chance_percent)
-	if pity_failure_threshold > 0:
-		lines.append("Next upgrade guaranteed" if _pity_guaranteed(item) else "Pity: %d/%d failures" % [_pity_failure_count(item), pity_failure_threshold])
-	for key in _ordered_upgrade_stat_keys(stats):
-		var current := int(stats.get(key, 0))
-		var next := current
-		if str(key) == "item_level":
-			next = min(max_level, level + 1)
-		elif current > 0:
-			next = current + 1
-		if next != current:
-			lines.append("%s: %d -> %d" % [_display_stat(str(key)), current, next])
-	if lines.is_empty():
-		lines.append("Item level: %d -> %d" % [level, min(max_level, level + 1)])
-	return lines
-
-func _stats_map(item: Dictionary) -> Dictionary:
-	var base_stats := _template_base_stats(item)
-	var rolled: Variant = item.get("rolled_stats", {})
-	if typeof(rolled) == TYPE_DICTIONARY:
-		var payload := _dictionary_from_variant(rolled)
-		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-			var nested := _dictionary_from_variant(payload.get("stats", {}))
-			_merge_missing_stats(nested, base_stats)
-			return nested
-		var out := payload
-		var summary_stats := _summary_stat_map(item)
-		for key in summary_stats.keys():
-			if not out.has(key):
-				out[key] = summary_stats.get(key)
-		_merge_missing_stats(out, base_stats)
-		return out
-	var summary_only := _summary_stat_map(item)
-	_merge_missing_stats(summary_only, base_stats)
-	return summary_only
-
-func _template_base_stats(item: Dictionary) -> Dictionary:
-	var def_id := str(item.get("item_def_id", ""))
-	var template: Dictionary = ItemRulesLoader.item_definition(def_id)
-	if typeof(template.get("base_stats", {})) != TYPE_DICTIONARY:
-		return {}
-	return _dictionary_from_variant(template.get("base_stats", {}))
-
-func _merge_missing_stats(target: Dictionary, fallback: Dictionary) -> void:
-	for key in fallback.keys():
-		if not target.has(key):
-			target[key] = fallback.get(key)
-
-func _dictionary_from_variant(value: Variant) -> Dictionary:
-	var parsed = JSON.parse_string(JSON.stringify(value))
-	if typeof(parsed) != TYPE_DICTIONARY:
-		return {}
-	var out := {}
-	for key in (parsed as Dictionary).keys():
-		out[str(key)] = (parsed as Dictionary).get(key)
-	return out
-
-
-func _summary_stat_map(item: Dictionary) -> Dictionary:
-	var out := {}
-	var summary: Variant = item.get("summary_lines", [])
-	if typeof(summary) != TYPE_ARRAY:
-		return out
-	for line in summary as Array:
-		var text := str(line)
-		if text.begins_with("Armor"):
-			out["armor"] = _last_int_in_text(text)
-		elif text.begins_with("Block"):
-			out["block_percent"] = _last_int_in_text(text)
-		elif text.begins_with("Min damage"):
-			out["damage_min"] = _last_int_in_text(text)
-		elif text.begins_with("Max damage"):
-			out["damage_max"] = _last_int_in_text(text)
-	return out
-
-
-func _last_int_in_text(text: String) -> int:
-	var regex := RegEx.new()
-	regex.compile("-?\\d+")
-	var matches := regex.search_all(text)
-	if matches.is_empty():
-		return 0
-	return int(matches[matches.size() - 1].get_string())
-
-
-func _ordered_upgrade_stat_keys(stats: Dictionary) -> Array:
-	var out: Array = []
-	for key in ["armor", "block_percent", "damage_min", "damage_max", "str", "dex", "vit", "magic", "max_hp", "max_mana", "attack_speed_percent", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "hotbar_slots", "inventory_rows", "item_level"]:
-		if stats.has(key):
-			out.append(key)
-	for key in stats.keys():
-		if not out.has(str(key)):
-			out.append(str(key))
-	return out
-
-
-func _display_stat(stat: String) -> String:
-	match stat:
-		"block_percent":
-			return "Block"
-		"damage_min":
-			return "Min damage"
-		"damage_max":
-			return "Max damage"
-		"max_hp":
-			return "Max HP"
-		"max_mana":
-			return "Max mana"
-		"item_level":
-			return "Item level"
-		_:
-			return stat.replace("_", " ").capitalize()
+	return BlacksmithUpgradePreviewScript.preview_lines(item, {
+		"base_cost": base_cost,
+		"growth_cost": growth_cost,
+		"max_level": max_level,
+		"success_chance_percent": success_chance_percent,
+		"pity_failure_threshold": pity_failure_threshold,
+		"resource_count": resource_count,
+		"resource_wallet_count": _resource_wallet_count(),
+		"resource_name": _resource_display_name(),
+		"wallet_gold": _wallet_gold(),
+	})
 
 
 func _item_title(item: Dictionary) -> String:

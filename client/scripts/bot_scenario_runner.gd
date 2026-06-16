@@ -963,6 +963,8 @@ func _blacksmith_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 		return false
 	if step.has("status_contains") and not str(panel.get("status", "")).contains(str(step.get("status_contains", ""))):
 		return false
+	if step.has("preview_contains") and not _blacksmith_preview_contains(panel, step.get("preview_contains", [])):
+		return false
 	if step.has("success_chance_percent") and int(panel.get("success_chance_percent", -1)) != int(step.get("success_chance_percent", 0)):
 		return false
 	if step.has("resource_item_def_id") and str(panel.get("resource_item_def_id", "")) != str(step.get("resource_item_def_id", "")):
@@ -1000,6 +1002,20 @@ func _blacksmith_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 				found_enabled = true
 				break
 		if not found_enabled:
+			return false
+	return true
+
+
+func _blacksmith_preview_contains(panel: Dictionary, expected: Variant) -> bool:
+	var preview_lines: Array = panel.get("preview_lines", [])
+	var needles: Array = expected if typeof(expected) == TYPE_ARRAY else [expected]
+	for needle in needles:
+		var found := false
+		for line in preview_lines:
+			if str(line).contains(str(needle)):
+				found = true
+				break
+		if not found:
 			return false
 	return true
 
@@ -1614,7 +1630,7 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "bishop=%s" % str(step)
 		"wait_mercenary_panel", "assert_mercenary_panel", "assert_mercenary_panel_visible", "click_mercenary_stance":
 			return "mercenary=%s" % str(step)
-		"wait_blacksmith_panel", "assert_blacksmith_panel", "assert_blacksmith_panel_visible", "click_blacksmith_upgrade":
+		"wait_blacksmith_panel", "assert_blacksmith_panel", "assert_blacksmith_panel_visible", "click_blacksmith_upgrade", "click_blacksmith_stage_item":
 			return "blacksmith=%s" % str(step)
 		"press_key":
 			return "key=%s" % str(step.get("keycode", ""))

@@ -174,6 +174,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_bishop_respec()
 		"click_blacksmith_upgrade":
 			_do_click_blacksmith_upgrade(action)
+		"click_blacksmith_stage_item":
+			_do_click_blacksmith_stage_item(action)
 		"click_mercenary_stance":
 			_do_click_mercenary_stance(action)
 		"set_stash_search":
@@ -343,6 +345,16 @@ func _do_click_bishop_respec() -> void:
 func _do_click_blacksmith_upgrade(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_click_blacksmith_upgrade"):
 		_main.bot_click_blacksmith_upgrade(
+			str(action.get("stash_item_id", "")),
+			str(action.get("item_def_id", "")),
+			int(action.get("stash_index", 0))
+		)
+
+
+func _do_click_blacksmith_stage_item(action: Dictionary) -> void:
+	var panel = _main.get("blacksmith_panel") if _main != null else null
+	if panel != null and panel.has_method("bot_stage_item"):
+		panel.bot_stage_item(
 			str(action.get("stash_item_id", "")),
 			str(action.get("item_def_id", "")),
 			int(action.get("stash_index", 0))
@@ -719,6 +731,12 @@ func _format_action(action: Dictionary) -> String:
 			return "click_bishop_respec"
 		"click_blacksmith_upgrade":
 			return "click_blacksmith_upgrade stash_item=%s item=%s stash_index=%s" % [
+				str(action.get("stash_item_id", "")),
+				str(action.get("item_def_id", "")),
+				str(action.get("stash_index", 0)),
+			]
+		"click_blacksmith_stage_item":
+			return "click_blacksmith_stage_item stash_item=%s item=%s stash_index=%s" % [
 				str(action.get("stash_item_id", "")),
 				str(action.get("item_def_id", "")),
 				str(action.get("stash_index", 0)),

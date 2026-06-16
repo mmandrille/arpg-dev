@@ -1,0 +1,19 @@
+docs/CODEMAP.md
+  s_1f673d2f0bd3d2::t_d7237faca71f5c 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7d07cfb0204eb5bb33eb15b6c9a59cb33bc3c31b",
+  "prompts": {},
+  "sessions": {
+    "s_1f673d2f0bd3d2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecea2-8022-7922-bd04-83c0b6c32e45",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

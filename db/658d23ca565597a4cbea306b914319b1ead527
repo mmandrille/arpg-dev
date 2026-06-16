@@ -1,0 +1,67 @@
+shared/protocol/state_delta.v8.schema.json
+  s_1f673d2f0bd3d2::t_3422936371b32c 834,854,863
+server/internal/game/derived_stats.go
+  s_1f673d2f0bd3d2::t_b8976457bef95a 10,34,61
+client/tests/test_skills_panel.gd
+  s_1f673d2f0bd3d2::t_fb1f9cc79246be 63,66-70,152,155-157,181,184-185
+  s_1f673d2f0bd3d2::t_ab484b1262ac5b 167
+server/internal/game/item_skill_stats.go
+  s_1f673d2f0bd3d2::t_b8976457bef95a 59-60
+server/internal/game/passive_skills_test.go
+  s_1f673d2f0bd3d2::t_0705ac70ebc78e 94
+  s_1f673d2f0bd3d2::t_33d8b2bb868f71 1-89,92-93,95-147
+  s_1f673d2f0bd3d2::t_fb1f9cc79246be 90
+  s_1f673d2f0bd3d2::t_12af81cbcbef67 91
+client/scripts/skills_panel.gd
+  s_1f673d2f0bd3d2::t_a35fcce3587c24 805-809
+  s_1f673d2f0bd3d2::t_ce6b4f008296bd 53-57,103-109,210-240
+server/internal/game/passive_skills.go
+  s_1f673d2f0bd3d2::t_b8976457bef95a 1-6,8-30
+  s_1f673d2f0bd3d2::t_33d8b2bb868f71 7
+server/internal/game/sim.go
+  s_1f673d2f0bd3d2::t_7337239101c5e0 224,5773-5774,5899-5902,5954,5974
+  s_1f673d2f0bd3d2::t_b8976457bef95a 4780-4781,4785-4786,4790,4792-4793,4799-4800,4804,4806-4807,5885-5898
+shared/i18n/en.json
+  s_1f673d2f0bd3d2::t_bb83ab40923bad 66-67,76-77,86-87,94-95,106-107
+shared/i18n/es.json
+  s_1f673d2f0bd3d2::t_bb83ab40923bad 80-81,88-89,96-97,108-109
+  s_1f673d2f0bd3d2::t_e20279e1bc8627 66-67
+docs/specs/v218_spec-class-passive-stat-perks.md
+  s_1f673d2f0bd3d2::t_71f59e34489ec8 1-31
+docs/progress/slice-lifecycle.md
+  s_1f673d2f0bd3d2::t_71f59e34489ec8 235
+docs/as-built/v218_class-passive-stat-perks.md
+  s_1f673d2f0bd3d2::t_71f59e34489ec8 1-20
+PROGRESS.md
+  s_1f673d2f0bd3d2::t_71f59e34489ec8 26,28-29
+shared/rules/skills.v0.schema.json
+  s_1f673d2f0bd3d2::t_cc3f6c31f423e2 28,47,125-131,358-365
+shared/assets/skill_presentations.v0.json
+  s_1f673d2f0bd3d2::t_2c430c3625f7c9 73-82,127-136,181-190,224-233,292-300
+server/internal/game/rules.go
+  s_1f673d2f0bd3d2::t_b8976457bef95a 541,673-677
+  s_1f673d2f0bd3d2::t_ab484b1262ac5b 2890,2955-2959,2965-2977
+shared/protocol/session_snapshot.v8.schema.json
+  s_1f673d2f0bd3d2::t_3422936371b32c 338,358,367
+shared/rules/skills.v0.json
+  s_1f673d2f0bd3d2::t_e971d05456f47e 560-593,595-597,982-1015,1017-1018
+  s_1f673d2f0bd3d2::t_6b505bc79de102 338-371,373-375,805-838,840-841,1273-1306,1308-1309
+docs/plans/v218_2026-06-16-class-passive-stat-perks.md
+  s_1f673d2f0bd3d2::t_71f59e34489ec8 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "db658d23ca565597a4cbea306b914319b1ead527",
+  "prompts": {},
+  "sessions": {
+    "s_1f673d2f0bd3d2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecea2-8022-7922-bd04-83c0b6c32e45",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

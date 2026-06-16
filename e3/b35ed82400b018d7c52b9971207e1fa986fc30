@@ -1,0 +1,25 @@
+docs/reviews/backend/20260615_v200-backend.md
+  s_13315a75b4306b::t_583af87abdbf70 4-5,13-15,19-21,25-27,31-33,37-38,42-46,48
+docs/reviews/20260615_v200-overview.md
+  s_13315a75b4306b::t_583af87abdbf70 5-6,16,18,20,26-33,37-41,45-54,58-62,66-72
+docs/reviews/client/20260615_v200-client.md
+  s_13315a75b4306b::t_583af87abdbf70 4-5,13-15,19-21,25-27,31-33,37-38,42-46,48
+docs/reviews/extras/20260615_v200-shared-tooling-and-process.md
+  s_13315a75b4306b::t_583af87abdbf70 5-6,13-15,19-21,25-27,31-33,37-39,43-47,49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e3b35ed82400b018d7c52b9971207e1fa986fc30",
+  "prompts": {},
+  "sessions": {
+    "s_13315a75b4306b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecd3e-9bad-73b3-9657-f693ecbdb46d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

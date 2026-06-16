@@ -47,8 +47,8 @@ up to the requested slice count.
 It does **not** authorize architecture cleanup, documentation cleanup,
 documentation reordering, scorecard paydown, repository-maintenance edits, or
 refactor-only work. If such work is detected, do not treat it as a pre-task or
-slice candidate; record it as input for `$refactor`, which runs before
-engineering review generation.
+slice candidate; record it as input for the post-loop `$review` recommendations
+and the `$refactor` pass that follows them.
 After the user picks one or more ideas from the menu, that reply authorizes the
 agent to order the selected ideas and run the batch clarification gate. If that
 gate emits no questions, the agent may continue from brief to spec, plan,
@@ -72,7 +72,7 @@ blockers.
    - the number of viable selected ideas.
 7. If the user selects more ideas than the execution target, order all selected ideas,
    execute the first target-sized prefix, and report the rest as deferred.
-8. After the execution target is completed and committed, run the post-loop refactor/review handoff; stop
+8. After the execution target is completed and committed, run the post-loop review/refactor handoff; stop
    earlier only on a hard stop condition.
 
 ## Defaults for non-blocking choices
@@ -129,7 +129,7 @@ commands unless the user explicitly asks in a later message.
    - [`skills/plan/SKILL.md`](../plan/SKILL.md)
    - [`skills/execute/SKILL.md`](../execute/SKILL.md)
    - [`skills/finish/SKILL.md`](../finish/SKILL.md)
-6. If `PROGRESS.md` says an engineering review is due, record that `$refactor` and `$review`
+6. If `PROGRESS.md` says an engineering review is due, record that `$review` and `$refactor`
    should run after the requested feature loop completes. Do **not** stop the loop or replace a
    selected feature slice with review, refactor, or cleanup work solely because the review cadence
    is due.
@@ -299,17 +299,20 @@ After the checkpoint and optional context hygiene:
 2. If the worktree is clean and the execution target is not reached, begin the next slice.
 3. If the worktree is clean and the execution target is reached, run the post-loop handoff below.
 
-### 8. Post-loop refactor/review handoff
+### 8. Post-loop review/refactor handoff
 
 After all requested slices have completed and committed:
 
 1. Re-read `PROGRESS.md`.
-2. If the engineering-review cadence is due, do **not** generate the review from `$autoloop`.
-   Report that the requested feature slices are complete and that the next autonomous step is
-   `$refactor`, followed by `$review`.
-3. `$refactor` is responsible for scorecard-driven minor cleanup commits before the fresh
-   engineering review is written.
-4. If no engineering review is due, stop and report completion.
+2. If the engineering-review cadence is due, run `$review` first to generate the fresh review set
+   from the just-completed feature baseline. Treat the autoloop command as authorization for this
+   post-loop review only after the feature target is committed and the worktree is clean.
+3. After `$review` writes the fresh overview and companion reports, run `$refactor` pointed at that
+   new review. `$refactor` must classify every recommendation as `minor-commit`, `future-slice`,
+   `future-plan`, or `reject`, and land only small verified cleanup commits.
+4. Stop after `$refactor` reports no more safe minor commits remain, or earlier if either skill
+   hits a hard stop.
+5. If no engineering review is due, stop and report completion.
 
 ## Reporting
 

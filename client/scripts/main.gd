@@ -79,7 +79,7 @@ const POISON_TINT := Color("#38f06f")
 const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
 const NO_MANA_TEXT := "NO MANA"
 const HEAL_RAIN_RADIUS := 4.0
-const LEAP_VISUAL_DURATION := 1.55
+const LEAP_VISUAL_DURATION := 1
 const LEAP_VISUAL_HEIGHT := 2.05
 const MONSTER_RARITY_TINTS := {
 	"common": Color("#f2f2ec"),

@@ -87,6 +87,8 @@
     "skill.shadow_flurry.summary": "Fast close flurry",
     "skill.piercing_shot.name": "Piercing Shot",
     "skill.piercing_shot.summary": "Arrow that pierces enemies",
+    "skill.disengage.name": "Disengage",
+    "skill.disengage.summary": "Vault away and snare pursuers",
     "skill.pinning_shot.name": "Pinning Shot",
     "skill.pinning_shot.summary": "Arrow that roots one enemy",
     "skill.volley.name": "Volley",

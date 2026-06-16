@@ -226,5 +226,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v209** | `sorcerer-teleport` | Complete (`make ci` green) | [`v209_spec-sorcerer-teleport.md`](docs/specs/v209_spec-sorcerer-teleport.md) | [`v209_2026-06-16-sorcerer-teleport.md`](docs/plans/v209_2026-06-16-sorcerer-teleport.md) | [`as-built`](docs/as-built/v209_sorcerer-teleport.md) |
 | **v210** | `barbarian-leap` | Complete (`make ci` green) | [`v210_spec-barbarian-leap.md`](docs/specs/v210_spec-barbarian-leap.md) | [`v210_2026-06-16-barbarian-leap.md`](docs/plans/v210_2026-06-16-barbarian-leap.md) | [`as-built`](docs/as-built/v210_barbarian-leap.md) |
 | **v211** | `paladin-charge` | Complete (`make ci` green) | [`v211_spec-paladin-charge.md`](docs/specs/v211_spec-paladin-charge.md) | [`v211_2026-06-16-paladin-charge.md`](docs/plans/v211_2026-06-16-paladin-charge.md) | [`as-built`](docs/as-built/v211_paladin-charge.md) |
+| **v212** | `ranger-disengage` | Complete (`make ci` green) | [`v212_spec-ranger-disengage.md`](docs/specs/v212_spec-ranger-disengage.md) | [`v212_2026-06-16-ranger-disengage.md`](docs/plans/v212_2026-06-16-ranger-disengage.md) | [`as-built`](docs/as-built/v212_ranger-disengage.md) |
 
 ---

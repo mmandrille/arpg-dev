@@ -29,7 +29,11 @@ func (s *Sim) handleMobilitySkillCast(in Input, res *TickResult, player *entity,
 	player.pos = end
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	s.appendMobilitySkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, start, dir, rng, def.Mobility.Visual)
-	s.applyMobilityImpact(player, skillID, def, rank, in.CorrelationID, res)
+	impactPos := player.pos
+	if def.Mobility.Mode == "disengage" {
+		impactPos = start
+	}
+	s.applyMobilityImpact(player, impactPos, skillID, def, rank, in.CorrelationID, res)
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)
@@ -46,7 +50,7 @@ func (s *Sim) appendMobilitySkillCastEvent(res *TickResult, player *entity, skil
 	event.Range = floatPtr(rng)
 }
 
-func (s *Sim) applyMobilityImpact(player *entity, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
+func (s *Sim) applyMobilityImpact(player *entity, impactPos Vec2, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
 	impactRadius := def.Mobility.ImpactRadius
 	if impactRadius <= 0 {
 		return
@@ -54,7 +58,7 @@ func (s *Sim) applyMobilityImpact(player *entity, skillID string, def SkillDef, 
 	damageRange := mobilityDamageRange(s.resolvePlayerAttackDamage(), def, rank)
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		target := s.activeLevel().entities[id]
-		if target == nil || target.kind != monsterEntity || target.hp <= 0 || distance(player.pos, target.pos) > impactRadius {
+		if target == nil || target.kind != monsterEntity || target.hp <= 0 || distance(impactPos, target.pos) > impactRadius {
 			continue
 		}
 		if damageRange.Max > 0 {

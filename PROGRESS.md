@@ -23,10 +23,10 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v211 — paladin charge |
+| **Latest completed slice** | v212 — ranger disengage |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-16 after v211 paladin charge |
-| **Next slice** | Continue selected autoloop queue with v212 ranger disengage |
+| **CI gate** | `make ci` green on 2026-06-16 after v212 ranger disengage |
+| **Next slice** | Run the due v210+ engineering review/refactor handoff, then choose the next feature slice |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |
 

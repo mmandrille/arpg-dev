@@ -89,6 +89,8 @@
     "skill.shadow_flurry.summary": "Rafaga cercana rapida",
     "skill.piercing_shot.name": "Disparo perforante",
     "skill.piercing_shot.summary": "Flecha que atraviesa enemigos",
+    "skill.disengage.name": "Retirada",
+    "skill.disengage.summary": "Salto evasivo que atrapa perseguidores",
     "skill.pinning_shot.name": "Disparo inmovilizador",
     "skill.pinning_shot.summary": "Flecha que enraiza a un enemigo",
     "skill.volley.name": "Andanada",

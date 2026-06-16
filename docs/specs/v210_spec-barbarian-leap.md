@@ -22,7 +22,7 @@ Builds on v209 `mobility` skill support. Asset/plugin decision: borrow existing 
 
 - `leap` is a Barbarian mobility skill with data-driven range, impact radius, damage percent, stun duration, mana cost, cooldown, and presentation metadata.
 - Casting Leap moves the player to a collision-safe endpoint.
-- Monsters near the landing point take server-authoritative damage and receive `leap_stun`.
+- Monsters near the landing point take server-authoritative damage and receive the shared `stun` effect.
 - Barbarian class-foundation bot coverage includes Leap.
 - Focused Go tests prove movement, damage, stun, and unaffected distant monsters.
 

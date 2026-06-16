@@ -5,7 +5,7 @@ Date: 2026-06-16
 ## What Shipped
 
 - Added `leap` as a Barbarian mobility skill.
-- Leap moves to a server-authoritative collision-safe endpoint, damages monsters near landing, and applies `leap_stun`.
+- Leap moves to a server-authoritative collision-safe endpoint, damages monsters near landing, and applies the shared `stun` effect.
 - Added shared presentation/i18n metadata and Barbarian class-foundation bot coverage.
 
 ## Proof

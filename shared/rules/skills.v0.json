@@ -463,7 +463,7 @@
         "damage_percent_base": 70,
         "damage_percent_per_rank": 10,
         "impact_radius": 2.25,
-        "stun_effect_id": "leap_stun",
+        "stun_effect_id": "stun",
         "stun_duration_ticks": 20
       },
       "cooldown": {
@@ -606,7 +606,7 @@
         "damage_percent_base": 80,
         "damage_percent_per_rank": 10,
         "impact_radius": 1.75,
-        "stun_effect_id": "charge_stun",
+        "stun_effect_id": "stun",
         "stun_duration_ticks": 20
       },
       "cooldown": {

@@ -1137,6 +1137,13 @@ func _apply_delta(p: Dictionary) -> void:
 			if event_type == "skill_effect_ended":
 				_set_entity_pinning_root(eid, false)
 				continue
+		if PlayerStatusEffectMarkers.is_stun_skill_id(str(ev.get("skill_id", ""))):
+			if event_type == "skill_effect_started":
+				_set_entity_stun(eid, true)
+				continue
+			if event_type == "skill_effect_ended":
+				_set_entity_stun(eid, false)
+				continue
 		if event_type == "skill_effect_started" and eid == player_id:
 			if status_effects_bar != null:
 				status_effects_bar.start_effect(ev)
@@ -1525,6 +1532,7 @@ func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 	PlayerStatusEffectMarkers.sync_burning_effect(node, false)
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, false)
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, false)
+	PlayerStatusEffectMarkers.sync_stun_effect(node, false)
 	PlayerStatusEffectMarkers.sync_elite_command_radius_preview(node, false, 0.0)
 
 func _clear_elite_command_for_pack_if_leader_died(dead_rec: Dictionary) -> void:
@@ -5063,6 +5071,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	PlayerStatusEffectMarkers.sync_burning_effect(node, alive and PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, alive and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, alive and PlayerStatusEffectMarkers.has_pinning_root_effect_id(rec.get("effect_ids", [])))
+	PlayerStatusEffectMarkers.sync_stun_effect(node, alive and PlayerStatusEffectMarkers.has_stun_effect_id(rec.get("effect_ids", [])))
 	_normalize_boss_phase_metadata(rec)
 	_sync_boss_telegraph_marker_from_record(rec)
 	EliteAuraPreviewSync.sync(entities, dungeon_generation)
@@ -5247,6 +5256,24 @@ func _set_entity_pinning_root(entity_id: String, active: bool) -> void:
 	rec["effect_ids"] = effect_ids
 	var node := rec.get("node", null) as Node3D
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, active)
+
+
+func _set_entity_stun(entity_id: String, active: bool) -> void:
+	var rec: Dictionary = entities.get(entity_id, {})
+	if rec.is_empty():
+		return
+	var effect_ids: Array = rec.get("effect_ids", []) if rec.get("effect_ids", []) is Array else []
+	if active:
+		if not effect_ids.has(PlayerStatusEffectMarkers.STUN_EFFECT_ID):
+			effect_ids.append(PlayerStatusEffectMarkers.STUN_EFFECT_ID)
+	else:
+		effect_ids.erase(PlayerStatusEffectMarkers.STUN_EFFECT_ID)
+		effect_ids.erase("leap_stun")
+		effect_ids.erase("charge_stun")
+	rec["effect_ids"] = effect_ids
+	var node := rec.get("node", null) as Node3D
+	PlayerStatusEffectMarkers.sync_stun_effect(node, active)
+
 
 func _apply_entity_status_tint(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
@@ -6257,7 +6284,7 @@ func _bot_entities_presentation_debug() -> Array:
 			"quest_reward": bool(rec.get("quest_reward", false)), "has_objective_marker": ChestPresentationScript.has_objective_marker(node), "has_quest_marker": ChestPresentationScript.has_quest_marker(node),
 			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node), "has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(node),
 			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node), "has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
-			"has_pinning_root_effect": PlayerStatusEffectMarkers.has_pinning_root_effect(node),
+			"has_pinning_root_effect": PlayerStatusEffectMarkers.has_pinning_root_effect(node), "has_stun_effect": PlayerStatusEffectMarkers.has_stun_effect(node),
 			"has_elite_command_radius_preview": PlayerStatusEffectMarkers.has_elite_command_radius_preview(node), "elite_command_radius_preview": PlayerStatusEffectMarkers.elite_command_radius_preview_value(node),
 			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node), "hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {}, "animation": controller.get_debug_state() if controller != null else {},

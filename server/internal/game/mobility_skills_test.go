@@ -49,10 +49,10 @@ func TestBarbarianLeapMovesDamagesAndStunsLandingTargets(t *testing.T) {
 	if player.pos.X <= 2 {
 		t.Fatalf("leap player x = %.2f, want moved forward", player.pos.X)
 	}
-	if nearLanding.hp >= nearLanding.maxHP || !containsStringValue(nearLanding.effectIDs, "leap_stun") {
+	if nearLanding.hp >= nearLanding.maxHP || !containsStringValue(nearLanding.effectIDs, "stun") {
 		t.Fatalf("near landing hp/effects = %d/%d %v, want damaged and stunned", nearLanding.hp, nearLanding.maxHP, nearLanding.effectIDs)
 	}
-	if far.hp != far.maxHP || containsStringValue(far.effectIDs, "leap_stun") {
+	if far.hp != far.maxHP || containsStringValue(far.effectIDs, "stun") {
 		t.Fatalf("far hp/effects = %d/%d %v, want unaffected", far.hp, far.maxHP, far.effectIDs)
 	}
 }
@@ -78,10 +78,10 @@ func TestPaladinChargeMovesDamagesAndStunsEndpointTargets(t *testing.T) {
 	if player.pos.X <= 2 {
 		t.Fatalf("charge player x = %.2f, want moved forward", player.pos.X)
 	}
-	if endpoint.hp >= endpoint.maxHP || !containsStringValue(endpoint.effectIDs, "charge_stun") {
+	if endpoint.hp >= endpoint.maxHP || !containsStringValue(endpoint.effectIDs, "stun") {
 		t.Fatalf("endpoint hp/effects = %d/%d %v, want damaged and stunned", endpoint.hp, endpoint.maxHP, endpoint.effectIDs)
 	}
-	if far.hp != far.maxHP || containsStringValue(far.effectIDs, "charge_stun") {
+	if far.hp != far.maxHP || containsStringValue(far.effectIDs, "stun") {
 		t.Fatalf("far hp/effects = %d/%d %v, want unaffected", far.hp, far.maxHP, far.effectIDs)
 	}
 }

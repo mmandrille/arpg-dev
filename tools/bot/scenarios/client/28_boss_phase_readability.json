@@ -19,29 +19,24 @@
       "timeout_s": 15.0
     },
     {
-      "type": "wait_boss_health_bar",
-      "visible": true,
-      "boss_template_id": "cave_warden",
-      "phase_kind": "telegraph",
-      "pattern_id": "charged_melee",
-      "phase_index": 0,
-      "duration_ticks": 20,
-      "remaining_ticks_min": 1,
-      "remaining_ticks_max": 20,
-      "phase_ratio_min": 0.01,
-      "phase_ratio_max": 1.0,
-      "timeout_s": 15.0
-    },
-    {
       "type": "wait_entity_reaction",
       "entity_type": "monster",
       "is_boss": true,
       "boss_template_id": "cave_warden",
       "boss_telegraph_active": true,
       "has_boss_telegraph_marker": true,
-      "telegraph_radius_min": 1.5,
-      "telegraph_radius_max": 1.7,
       "timeout_s": 5.0
+    },
+    {
+      "type": "wait_boss_health_bar",
+      "visible": true,
+      "boss_template_id": "cave_warden",
+      "phase_kind": "telegraph",
+      "remaining_ticks_min": 1,
+      "remaining_ticks_max": 20,
+      "phase_ratio_min": 0.01,
+      "phase_ratio_max": 1.0,
+      "timeout_s": 15.0
     }
   ]
 }

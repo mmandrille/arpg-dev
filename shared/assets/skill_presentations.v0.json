@@ -203,6 +203,17 @@
       "effect_visual": "piercing_shot",
       "summary_key": "skill.piercing_shot.summary"
     },
+    "disengage": {
+      "icon": {
+        "label": "D",
+        "shape": "dash",
+        "color": "#41c8a0",
+        "accent": "#dbfff2"
+      },
+      "summary": "Vault away and snare pursuers",
+      "effect_visual": "disengage_vault",
+      "summary_key": "skill.disengage.summary"
+    },
     "pinning_shot": {
       "icon": {
         "label": "N",

@@ -915,6 +915,51 @@
       },
       "name_key": "skill.piercing_shot.name"
     },
+    "disengage": {
+      "name": "Disengage",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 1,
+        "column": 2
+      },
+      "kind": "mobility",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "dex": 8
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 1,
+          "per_rank": 0
+        }
+      },
+      "mobility": {
+        "range_base": 5,
+        "range_per_rank": 0.4,
+        "mode": "disengage",
+        "visual": "disengage_vault",
+        "damage_percent_base": 0,
+        "damage_percent_per_rank": 0,
+        "impact_radius": 2,
+        "root_effect_id": "disengage_snare",
+        "root_duration_ticks": 24
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 5
+      },
+      "name_key": "skill.disengage.name"
+    },
     "pinning_shot": {
       "name": "Pinning Shot",
       "class": "ranger",

@@ -86,6 +86,38 @@ func TestPaladinChargeMovesDamagesAndStunsEndpointTargets(t *testing.T) {
 	}
 }
 
+func TestRangerDisengageMovesAndSnaresStartTargets(t *testing.T) {
+	sim := mobilitySkillSim(t, "ranger", "disengage")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: 8, Y: 2}
+	pursuer := addRangerSkillMonster(sim, Vec2{X: 7, Y: 2}, 40)
+	endpoint := addRangerSkillMonster(sim, Vec2{X: 3, Y: 2}, 40)
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "disengage",
+		CorrelationID: "corr_disengage",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "disengage", Direction: &Vec2{X: -1}},
+	}})
+
+	assertAck(t, cast, "disengage")
+	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_effect_started") {
+		t.Fatalf("disengage events = %+v", cast.Events)
+	}
+	if hasSkillDamageEvent(cast, "disengage") {
+		t.Fatalf("disengage should not damage, events = %+v", cast.Events)
+	}
+	if player.pos.X >= 8 {
+		t.Fatalf("disengage player x = %.2f, want moved backward", player.pos.X)
+	}
+	if pursuer.hp != pursuer.maxHP || !containsStringValue(pursuer.effectIDs, "disengage_snare") {
+		t.Fatalf("pursuer hp/effects = %d/%d %v, want snared without damage", pursuer.hp, pursuer.maxHP, pursuer.effectIDs)
+	}
+	if endpoint.hp != endpoint.maxHP || containsStringValue(endpoint.effectIDs, "disengage_snare") {
+		t.Fatalf("endpoint hp/effects = %d/%d %v, want unaffected", endpoint.hp, endpoint.maxHP, endpoint.effectIDs)
+	}
+}
+
 func mobilitySkillSim(t *testing.T, classID string, skillID string) *Sim {
 	t.Helper()
 	rules := loadRules(t)

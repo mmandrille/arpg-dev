@@ -10,6 +10,7 @@ type LevelState struct {
 	walls                  []wallObstacle
 	move                   *activeMove
 	autoNav                *autoNavState
+	activeChannel          *activeSkillChannel
 	nav                    *NavigationRules
 }
 

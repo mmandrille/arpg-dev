@@ -383,6 +383,7 @@ func (s *Sim) usePlayer(ps *playerState) {
 	level := s.activeLevel()
 	level.move = ps.Move
 	level.autoNav = ps.AutoNav
+	level.activeChannel = ps.ActiveChannel
 	s.syncCompatibilityFields()
 }
 
@@ -422,6 +423,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	if level := s.levels[ps.CurrentLevel]; level != nil {
 		ps.Move = level.move
 		ps.AutoNav = level.autoNav
+		ps.ActiveChannel = level.activeChannel
 	}
 }
 

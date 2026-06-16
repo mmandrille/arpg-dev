@@ -583,6 +583,20 @@
         },
         {
           "if": {
+            "properties": { "event_type": { "enum": ["skill_channel_started", "skill_channel_updated"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "skill_id", "position", "direction"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "skill_channel_ended" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "skill_id", "position", "reason"] }
+        },
+        {
+          "if": {
             "properties": { "event_type": { "const": "skill_cooldown_started" } },
             "required": ["event_type"]
           },

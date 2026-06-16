@@ -28,6 +28,7 @@
         "allocate_stat_intent",
         "allocate_skill_point_intent",
         "cast_skill_intent",
+        "channel_skill_intent",
         "set_skill_bindings_intent",
         "companion_command_intent",
         "shop_buy_intent",
@@ -94,6 +95,8 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/allocate_skill_point_intent" } } } },
     { "if": { "properties": { "type": { "const": "cast_skill_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/cast_skill_intent" } } } },
+    { "if": { "properties": { "type": { "const": "channel_skill_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/channel_skill_intent" } } } },
     { "if": { "properties": { "type": { "const": "set_skill_bindings_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/set_skill_bindings_intent" } } } },
     { "if": { "properties": { "type": { "const": "companion_command_intent" } } },
@@ -322,6 +325,26 @@
       "anyOf": [
         { "required": ["target_id"] },
         { "required": ["direction"] }
+      ]
+    },
+    "channel_skill_intent": {
+      "type": "object",
+      "required": ["skill_id", "phase"],
+      "additionalProperties": false,
+      "properties": {
+        "skill_id": { "type": "string", "minLength": 1 },
+        "phase": { "type": "string", "enum": ["start", "update", "stop"] },
+        "direction": { "$ref": "#/$defs/vec2" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "phase": { "enum": ["start", "update"] } }, "required": ["phase"] },
+          "then": { "required": ["direction"] }
+        },
+        {
+          "if": { "properties": { "phase": { "const": "stop" } }, "required": ["phase"] },
+          "then": { "not": { "required": ["direction"] } }
+        }
       ]
     },
     "shop_buy_intent": {

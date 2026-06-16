@@ -27,6 +27,7 @@ const (
 	TypeAllocateStat        = "allocate_stat_intent"
 	TypeAllocateSkillPoint  = "allocate_skill_point_intent"
 	TypeCastSkill           = "cast_skill_intent"
+	TypeChannelSkill        = "channel_skill_intent"
 	TypeSetSkillBindings    = "set_skill_bindings_intent"
 	TypeCompanionCommand    = "companion_command_intent"
 	TypeShopBuy             = "shop_buy_intent"
@@ -106,6 +107,11 @@ type (
 		TargetID  string     `json:"target_id"`
 		Direction *game.Vec2 `json:"direction"`
 	}
+	channelSkillPayloadWire struct {
+		SkillID   string     `json:"skill_id"`
+		Phase     string     `json:"phase"`
+		Direction *game.Vec2 `json:"direction"`
+	}
 	setSkillBindingsPayloadWire struct {
 		FunctionKeys      []string `json:"function_keys"`
 		RightClickSkillID string   `json:"right_click_skill_id"`
@@ -152,10 +158,19 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
 		return true
 	}
 	return false
+}
+
+func validChannelPhase(phase string) bool {
+	switch phase {
+	case "start", "update", "stop":
+		return true
+	default:
+		return false
+	}
 }
 
 // Decode converts an intent type and payload into a sim Input. It returns
@@ -269,6 +284,18 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.CastSkill = &game.CastSkillIntent{SkillID: p.SkillID, TargetID: p.TargetID, Direction: p.Direction}
+	case TypeChannelSkill:
+		var p channelSkillPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.SkillID == "" || !validChannelPhase(p.Phase) {
+			return in, false
+		}
+		if p.Phase != "stop" && p.Direction == nil {
+			return in, false
+		}
+		if p.Phase == "stop" && p.Direction != nil {
+			return in, false
+		}
+		in.ChannelSkill = &game.ChannelSkillIntent{SkillID: p.SkillID, Phase: p.Phase, Direction: p.Direction}
 	case TypeSetSkillBindings:
 		var p setSkillBindingsPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || len(p.FunctionKeys) > 16 {

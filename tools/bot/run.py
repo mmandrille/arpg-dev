@@ -1325,7 +1325,7 @@ async def execute_step(
         if isinstance(expected, dict):
             await wait_for_skill_cooldown(ws, state, expected, loop)
         return
-
+    if action == "channel_skill_path": from tools.bot.channel_skill import execute_channel_skill_path; await execute_channel_skill_path(ws, session_id, state, step, loop, globals()); return
     if action == "assert_skill_progression":
         assert_skill_progression(state.skill_progression, step, "runtime protocol")
         return

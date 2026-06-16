@@ -4,7 +4,7 @@
   "seed": "paladin_class_foundation_seed",
   "character_class": "paladin",
   "title": "Paladin class foundation",
-  "description": "Create a Paladin, prove starter sword and shield, move into combat, attack three times, seed all current Paladin skills, then cast Heal, Holy Shield, and finish with Charge through the target line.",
+  "description": "Create a Paladin, prove starter sword and shield, move into combat, attack three times, seed all current Paladin skills, then cast Heal, Holy Shield, and finish with one held Charge path that turns through the target line.",
   "visual": {
     "camera": { "x": 8, "y": 5, "zoom": 1.0 },
     "post_complete_hold_s": 4.5
@@ -29,9 +29,19 @@
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "heal", "rank": 1 }, "timeout_s": 3 },
     { "action": "cast_skill", "skill_id": "holy_shield", "target_self": true, "event_type": "skill_cast" },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "holy_shield", "rank": 1 }, "timeout_s": 3 },
-    { "action": "move", "direction": { "x": -1, "y": 0 }, "duration_ticks": 14 },
-    { "action": "cast_skill", "skill_id": "charge", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "charge", "rank": 1 }, "timeout_s": 3 },
+    { "action": "move", "direction": { "x": -1, "y": 0 }, "duration_ticks": 20 },
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [
+        { "direction": { "x": 1, "y": 0 }, "ticks": 12 },
+        { "direction": { "x": 0, "y": 1 }, "ticks": 8 },
+        { "direction": { "x": -1, "y": 0 }, "ticks": 8 },
+        { "direction": { "x": 0, "y": -1 }, "ticks": 8 }
+      ]
+    },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_channel_started", "skill_id": "charge", "rank": 1 }, "timeout_s": 3 },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_channel_ended", "skill_id": "charge" }, "timeout_s": 3 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "monster_pushed", "skill_id": "charge" }, "timeout_s": 3 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "charge" }, "timeout_s": 3 }
   ],
@@ -40,7 +50,8 @@
     { "type": "equipped_slot_def", "slot": "off_hand", "item_def_id": "starter_paladin_shield" },
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "holy_shield", "rank": 1 },
     { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "holy_shield" },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "charge", "rank": 1 },
+    { "type": "event_seen", "event_type": "skill_channel_started", "skill_id": "charge", "rank": 1 },
+    { "type": "event_seen", "event_type": "skill_channel_ended", "skill_id": "charge" },
     { "type": "event_seen", "event_type": "monster_pushed", "skill_id": "charge" },
     { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "charge" },
     { "type": "event_count", "event_type": "monster_damaged", "weapon_slot": "main_hand", "min": 3 },

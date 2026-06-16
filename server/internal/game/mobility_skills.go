@@ -10,6 +10,10 @@ func mobilityRange(def SkillDef, rank int) float64 {
 }
 
 func (s *Sim) handleMobilitySkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
+	if def.Mobility.Mode == "charge" {
+		res.reject(in.MessageID, "use_channel_skill_intent")
+		return
+	}
 	rng := mobilityRange(def, rank)
 	dir, targetID, rejectReason := s.skillCastDirectionWithRange(def, in.CastSkill, player, rng)
 	if rejectReason != "" {
@@ -41,6 +45,196 @@ func (s *Sim) handleMobilitySkillCast(in Input, res *TickResult, player *entity,
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)
+}
+
+func (s *Sim) handleChannelSkill(in Input, res *TickResult) {
+	if in.ChannelSkill == nil {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	skillID := in.ChannelSkill.SkillID
+	def, ok := s.rules.Skills[skillID]
+	if !ok {
+		res.reject(in.MessageID, "unknown_skill")
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	rank := s.effectiveSkillRank(skillID)
+	if rank <= 0 {
+		res.reject(in.MessageID, "skill_not_learned")
+		return
+	}
+	if !s.skillClassAllowed(def) {
+		res.reject(in.MessageID, "skill_class_not_allowed")
+		return
+	}
+	if !s.skillRequirementsMet(def, rank) {
+		res.reject(in.MessageID, "skill_requirements_not_met")
+		return
+	}
+	if def.Kind != "mobility" || def.Mobility.Mode != "charge" {
+		res.reject(in.MessageID, "unsupported_channel_skill")
+		return
+	}
+	switch in.ChannelSkill.Phase {
+	case "start":
+		s.startChargeChannel(in, res, player, skillID, def, rank)
+	case "update":
+		s.updateChargeChannel(in, res, player, skillID)
+	case "stop":
+		s.stopChargeChannel(res, player, skillID, in.CorrelationID, "released")
+		res.ack(in.MessageID)
+	default:
+		res.reject(in.MessageID, "invalid_phase")
+	}
+}
+
+func (s *Sim) startChargeChannel(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int) {
+	if s.activeLevel().activeChannel != nil {
+		res.reject(in.MessageID, "channel_already_active")
+		return
+	}
+	if in.ChannelSkill.Direction == nil || !finiteVec2(*in.ChannelSkill.Direction) {
+		res.reject(in.MessageID, "invalid_direction")
+		return
+	}
+	dir := normalize(*in.ChannelSkill.Direction)
+	if dir.X == 0 && dir.Y == 0 {
+		res.reject(in.MessageID, "invalid_direction")
+		return
+	}
+	if player.mana <= 0 {
+		res.reject(in.MessageID, "not_enough_mana")
+		return
+	}
+	s.activeLevel().move = nil
+	s.clearAutoNav()
+	s.activeLevel().activeChannel = &activeSkillChannel{
+		skillID:            skillID,
+		rank:               rank,
+		dir:                dir,
+		correlationID:      in.CorrelationID,
+		manaPer10Seconds:   def.Mobility.ChannelManaPer10Sec,
+		impactedMonsterIDs: make(map[uint64]bool),
+	}
+	res.Events = append(res.Events, Event{
+		EventType:     "skill_channel_started",
+		EntityID:      idStr(player.id),
+		CorrelationID: in.CorrelationID,
+		SkillID:       skillID,
+		Rank:          intPtr(rank),
+		Position:      cloneVec2Ptr(&player.pos),
+		Direction:     cloneVec2Ptr(&dir),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) updateChargeChannel(in Input, res *TickResult, player *entity, skillID string) {
+	channel := s.activeLevel().activeChannel
+	if channel == nil || channel.skillID != skillID {
+		res.reject(in.MessageID, "channel_not_active")
+		return
+	}
+	if in.ChannelSkill.Direction == nil || !finiteVec2(*in.ChannelSkill.Direction) {
+		res.reject(in.MessageID, "invalid_direction")
+		return
+	}
+	dir := normalize(*in.ChannelSkill.Direction)
+	if dir.X == 0 && dir.Y == 0 {
+		res.reject(in.MessageID, "invalid_direction")
+		return
+	}
+	channel.dir = dir
+	res.Events = append(res.Events, Event{
+		EventType:     "skill_channel_updated",
+		EntityID:      idStr(player.id),
+		CorrelationID: in.CorrelationID,
+		SkillID:       skillID,
+		Position:      cloneVec2Ptr(&player.pos),
+		Direction:     cloneVec2Ptr(&dir),
+	})
+	res.ack(in.MessageID)
+}
+
+func (s *Sim) stopChargeChannel(res *TickResult, player *entity, skillID string, correlationID string, reason string) {
+	channel := s.activeLevel().activeChannel
+	if channel == nil || channel.skillID != skillID {
+		return
+	}
+	if correlationID == "" {
+		correlationID = channel.correlationID
+	}
+	s.activeLevel().activeChannel = nil
+	res.Events = append(res.Events, Event{
+		EventType:     "skill_channel_ended",
+		EntityID:      idStr(player.id),
+		CorrelationID: correlationID,
+		SkillID:       skillID,
+		Position:      cloneVec2Ptr(&player.pos),
+		Reason:        reason,
+	})
+}
+
+func (s *Sim) applyActiveSkillChannel(res *TickResult) bool {
+	channel := s.activeLevel().activeChannel
+	if channel == nil {
+		return false
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		s.activeLevel().activeChannel = nil
+		return true
+	}
+	def, ok := s.rules.Skills[channel.skillID]
+	if !ok || def.Mobility.Mode != "charge" {
+		s.stopChargeChannel(res, player, channel.skillID, channel.correlationID, "invalid_skill")
+		return true
+	}
+	if !s.spendChannelMana(player, channel, res) {
+		s.stopChargeChannel(res, player, channel.skillID, channel.correlationID, "insufficient_mana")
+		return true
+	}
+	step := def.Mobility.SpeedTilesPerSecond * tickDuration
+	if step <= 0 {
+		s.stopChargeChannel(res, player, channel.skillID, channel.correlationID, "blocked")
+		return true
+	}
+	start := player.pos
+	end := s.resolveDashEndpoint(start, channel.dir, step)
+	if end == start {
+		s.stopChargeChannel(res, player, channel.skillID, channel.correlationID, "blocked")
+		return true
+	}
+	player.pos = end
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	s.applyChargeLineImpactOnce(player, start, end, channel.dir, channel.skillID, def, channel.rank, channel.correlationID, channel.impactedMonsterIDs, res)
+	return true
+}
+
+func (s *Sim) spendChannelMana(player *entity, channel *activeSkillChannel, res *TickResult) bool {
+	if channel.manaPer10Seconds <= 0 {
+		return true
+	}
+	ticksPer10Seconds := int(math.Round(10.0 / tickDuration))
+	if ticksPer10Seconds <= 0 {
+		ticksPer10Seconds = 1
+	}
+	channel.manaAccumulator += channel.manaPer10Seconds
+	cost := channel.manaAccumulator / ticksPer10Seconds
+	if cost <= 0 {
+		return true
+	}
+	if player.mana < cost {
+		return false
+	}
+	channel.manaAccumulator -= cost * ticksPer10Seconds
+	player.mana -= cost
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	return true
 }
 
 func (s *Sim) appendMobilitySkillCastEvent(res *TickResult, player *entity, skillID string, rank int, manaCost int, correlationID string, targetID uint64, start Vec2, dir Vec2, rng float64, visual string) {
@@ -84,6 +278,10 @@ func (s *Sim) applyMobilityImpact(player *entity, impactPos Vec2, skillID string
 }
 
 func (s *Sim) applyChargeLineImpact(player *entity, start Vec2, end Vec2, dir Vec2, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
+	s.applyChargeLineImpactOnce(player, start, end, dir, skillID, def, rank, correlationID, nil, res)
+}
+
+func (s *Sim) applyChargeLineImpactOnce(player *entity, start Vec2, end Vec2, dir Vec2, skillID string, def SkillDef, rank int, correlationID string, impacted map[uint64]bool, res *TickResult) {
 	impactRadius := def.Mobility.ImpactRadius
 	if impactRadius <= 0 {
 		return
@@ -93,6 +291,12 @@ func (s *Sim) applyChargeLineImpact(player *entity, start Vec2, end Vec2, dir Ve
 		target := s.activeLevel().entities[id]
 		if target == nil || target.kind != monsterEntity || target.hp <= 0 || distancePointToSegment(target.pos, start, end) > impactRadius {
 			continue
+		}
+		if impacted != nil && impacted[target.id] {
+			continue
+		}
+		if impacted != nil {
+			impacted[target.id] = true
 		}
 		if damageRange.Max > 0 {
 			beforeEvents := len(res.Events)

@@ -53,6 +53,7 @@ const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
+const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
@@ -98,6 +99,7 @@ var skill_cooldowns: Array = []
 var right_click_skill_id: String = ""
 var skill_function_keys: Array = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
 var pending_skill_casts: Dictionary = {}
+var _channel_skill_input := ChannelSkillInputScript.new()
 var _last_holy_shield_aura_pulse_key: String = ""
 var item_rules: Dictionary:
 	get: return ItemRulesLoader.item_rules
@@ -2261,12 +2263,18 @@ func _unhandled_input(event: InputEvent) -> void:
 				_adjust_camera_zoom(-ClientConstants.CAMERA_ZOOM_STEP)
 			MOUSE_BUTTON_WHEEL_DOWN:
 				_adjust_camera_zoom(ClientConstants.CAMERA_ZOOM_STEP)
+	if event is InputEventMouseButton and not event.pressed:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			_stop_active_channel_skill()
+			get_viewport().set_input_as_handled()
+			return
 
 func _handle_input(delta: float) -> void:
 	_update_loot_hover_label()
 	if _user_input_blocked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		if _sustained_click.active:
 			_sustained_click.clear()
+		_stop_active_channel_skill()
 		return
 
 	_send_cooldown -= delta
@@ -2274,7 +2282,9 @@ func _handle_input(delta: float) -> void:
 	if player_hp <= 0:
 		if _sustained_click.active:
 			_sustained_click.clear()
+		_stop_active_channel_skill()
 		return
+	_tick_active_channel_skill(delta)
 
 	var input := Vector2.ZERO
 	if Input.is_key_pressed(KEY_W): input.y -= 1
@@ -3741,6 +3751,8 @@ func _sync_progression_interactivity() -> void:
 func _try_use_right_click_skill() -> bool:
 	if right_click_skill_id == "":
 		return false
+	if ChannelSkillInputScript.is_channel_skill(right_click_skill_id):
+		return _channel_skill_input.try_start(right_click_skill_id, _aim_direction_from_mouse(), _last_facing_direction, _skill_cast_block_reason(right_click_skill_id), Callable(self, "_send_channel_skill_payload"), Callable(self, "_face_direction"), Callable(self, "_show_skill_rejected_feedback"), ClientConstants.SEND_INTERVAL)
 	var pick := _resolve_click_at_mouse()
 	var target_id := ""
 	var direction := Vector2.ZERO
@@ -3752,6 +3764,18 @@ func _try_use_right_click_skill() -> bool:
 		direction = _aim_direction_from_mouse()
 	var sent := _send_skill_cast_intent(right_click_skill_id, target_id, direction, false)
 	return sent
+
+func _tick_active_channel_skill(delta: float) -> void:
+	_channel_skill_input.tick_and_send(delta, Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT), _aim_direction_from_mouse(), _last_facing_direction, Callable(self, "_send_channel_skill_payload"), Callable(self, "_face_direction"), ClientConstants.SEND_INTERVAL)
+
+func _stop_active_channel_skill() -> void:
+	_channel_skill_input.stop_and_send(Callable(self, "_send_channel_skill_payload"))
+
+func _send_channel_skill_payload(payload: Dictionary) -> bool:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or payload.is_empty():
+		return false
+	client.send("channel_skill_intent", last_server_tick, payload)
+	return true
 
 func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> bool:
 	var blocked_reason := _skill_cast_block_reason(skill_id)

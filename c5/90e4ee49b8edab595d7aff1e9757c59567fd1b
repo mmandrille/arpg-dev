@@ -1,0 +1,25 @@
+PROGRESS.md
+  s_b1425f2ce33aac::t_e88fb146e4920d 39-43,146-148
+skills/refactor/SKILL.md
+  s_b1425f2ce33aac::t_e88fb146e4920d 4,6-12,16,23-24,30,35,38,113-115,122,139-142,177
+skills/autoloop/SKILL.md
+  s_b1425f2ce33aac::t_e88fb146e4920d 50-51,75,132,302,307-315
+skills/review/SKILL.md
+  s_b1425f2ce33aac::t_e88fb146e4920d 8-9,24-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c590e4ee49b8edab595d7aff1e9757c59567fd1b",
+  "prompts": {},
+  "sessions": {
+    "s_b1425f2ce33aac": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdbd-5548-79d3-98a2-0abcc3639c32",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

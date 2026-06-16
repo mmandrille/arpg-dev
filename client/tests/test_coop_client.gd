@@ -22,6 +22,7 @@ const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
+const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -56,6 +57,7 @@ func _initialize() -> void:
 	_test_learned_skill_auto_selects_right_click()
 	_test_skill_cast_payload_uses_direction_without_nearest_fallback()
 	_test_channel_skill_payload_requires_direction_until_stop()
+	_test_charge_channel_visual_poses_shield_and_trails()
 	_test_loss_popup_shows_for_dead_local_player()
 	_test_dead_character_rows_are_disabled()
 	_test_character_panel_modes_for_v45()
@@ -1457,6 +1459,31 @@ func _test_channel_skill_payload_requires_direction_until_stop() -> void:
 	_assert_eq("channel stop omits direction", stop.has("direction"), false)
 	var invalid := ChannelSkillInputScript.payload("", "start", Vector2(1.0, 0.0), Vector2(1.0, 0.0))
 	_assert_eq("channel invalid empty", invalid.is_empty(), true)
+
+func _test_charge_channel_visual_poses_shield_and_trails() -> void:
+	var anchor := Node3D.new()
+	var character := Node3D.new()
+	var off_hand := Node3D.new()
+	off_hand.name = "off_hand_socket"
+	character.add_child(off_hand)
+	get_root().add_child(anchor)
+	anchor.add_child(character)
+	var original_transform := off_hand.transform
+	var visual = ChargeChannelVisualScript.new()
+	visual.start(anchor, character, Vector2(1.0, 0.0))
+	var state: Dictionary = visual.get_debug_state()
+	_assert_eq("charge visual active", bool(state.get("active", false)), true)
+	_assert_eq("charge visual guard", bool(state.get("has_guard", false)), true)
+	_assert_eq("charge visual trails", int(state.get("trail_count", 0)), 5)
+	_assert_eq("charge visual shield pose", bool(state.get("has_shield_pose", false)), true)
+	_assert_true("charge visual rotates toward direction", absf(visual.rotation.y - PI * 0.5) < 0.001)
+	_assert_true("charge visual moves off hand", off_hand.transform != original_transform)
+	visual.stop()
+	state = visual.get_debug_state()
+	_assert_eq("charge visual inactive", bool(state.get("active", true)), false)
+	_assert_eq("charge visual restores off hand", off_hand.transform, original_transform)
+	anchor.queue_free()
+	visual.free()
 
 
 func _test_remote_player_delta_and_remove() -> void:

@@ -53,6 +53,8 @@ type MainGameplayConfig struct {
 	ItemUpgradeCostGrowth   int     `json:"item_upgrade_cost_growth_per_level"`
 	ItemUpgradeMaxLevel     int     `json:"item_upgrade_max_level"`
 	ItemUpgradeSuccessPct   int     `json:"item_upgrade_success_chance_percent"`
+	ItemUpgradeResourceID   string  `json:"item_upgrade_resource_item_def_id"`
+	ItemUpgradeResourceCost int     `json:"item_upgrade_resource_count"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -988,6 +990,14 @@ func LoadRules(dir string) (*Rules, error) {
 	if mainConfig.Gameplay.ItemUpgradeSuccessPct < 0 || mainConfig.Gameplay.ItemUpgradeSuccessPct > 100 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_success_chance_percent: must be 0-100")
 	}
+	if mainConfig.Gameplay.ItemUpgradeResourceCost < 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_count: must be non-negative")
+	}
+	if mainConfig.Gameplay.ItemUpgradeResourceCost > 0 {
+		if mainConfig.Gameplay.ItemUpgradeResourceID == "" {
+			return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_item_def_id: required when count is positive")
+		}
+	}
 	r.MainConfig = MainConfig{Gameplay: mainConfig.Gameplay}
 
 	var combat struct {
@@ -1274,6 +1284,11 @@ func LoadRules(dir string) (*Rules, error) {
 			}
 		default:
 			return nil, fmt.Errorf("game: invalid rules items.%s.attack_mode: %s", id, def.AttackMode)
+		}
+	}
+	if mainConfig.Gameplay.ItemUpgradeResourceCost > 0 {
+		if _, ok := items.Items[mainConfig.Gameplay.ItemUpgradeResourceID]; !ok {
+			return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_item_def_id: unknown item %q", mainConfig.Gameplay.ItemUpgradeResourceID)
 		}
 	}
 	r.Items = items.Items

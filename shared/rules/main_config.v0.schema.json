@@ -10,7 +10,7 @@
     "version": { "type": "integer", "const": 0 },
     "gameplay": {
       "type": "object",
-      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent", "respec_cost_gold", "item_upgrade_cost_gold", "item_upgrade_cost_growth_per_level", "item_upgrade_max_level", "item_upgrade_success_chance_percent"],
+      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent", "respec_cost_gold", "item_upgrade_cost_gold", "item_upgrade_cost_growth_per_level", "item_upgrade_max_level", "item_upgrade_success_chance_percent", "item_upgrade_resource_item_def_id", "item_upgrade_resource_count"],
       "additionalProperties": false,
       "properties": {
         "base_attack_interval_ticks": { "type": "integer", "minimum": 1 },
@@ -20,7 +20,9 @@
         "item_upgrade_cost_gold": { "type": "integer", "minimum": 0 },
         "item_upgrade_cost_growth_per_level": { "type": "integer", "minimum": 0 },
         "item_upgrade_max_level": { "type": "integer", "minimum": 1 },
-        "item_upgrade_success_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 }
+        "item_upgrade_success_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "item_upgrade_resource_item_def_id": { "type": "string", "minLength": 1 },
+        "item_upgrade_resource_count": { "type": "integer", "minimum": 0 }
       }
     }
   }

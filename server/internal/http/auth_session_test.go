@@ -654,10 +654,20 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_shield", Location: store.ItemLocationEquipped, Slot: "off_hand", Equipped: true, RolledStats: json.RawMessage(rareShield)}); err != nil {
 		t.Fatal(err)
 	}
+	rec := postJSON(h, "/v0/account-stash/items/upgrade", token, map[string]string{
+		"item_instance_id": itemID,
+		"character_id":     char.CharacterID,
+	})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("missing-resource inventory upgrade status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "upgrade_shard_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "upgrade_shard", Location: store.ItemLocationInventory}); err != nil {
+		t.Fatal(err)
+	}
 	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 40); err != nil {
 		t.Fatal(err)
 	}
-	rec := postJSON(h, "/v0/account-stash/items/upgrade", token, map[string]string{
+	rec = postJSON(h, "/v0/account-stash/items/upgrade", token, map[string]string{
 		"item_instance_id": itemID,
 		"character_id":     char.CharacterID,
 	})
@@ -668,7 +678,7 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.Item.ItemInstanceID != itemID || !upgraded.Item.Equipped || upgraded.Item.Slot != "off_hand" || upgraded.Gold != 0 || upgraded.StashGold != 0 || upgraded.CostGold != 100 {
+	if upgraded.Item.ItemInstanceID != itemID || !upgraded.Item.Equipped || upgraded.Item.Slot != "off_hand" || upgraded.Gold != 0 || upgraded.StashGold != 0 || upgraded.CostGold != 100 || upgraded.ResourceItemDefID != "upgrade_shard" || upgraded.ResourceCount != 1 {
 		t.Fatalf("inventory upgrade response = %+v", upgraded)
 	}
 	if upgraded.Item.ItemDefID != "cave_shield" || upgraded.Item.ItemTemplateID != "cave_shield" || upgraded.Item.DisplayName != "Rare Cave Shield" || upgraded.Item.Rarity != "rare" {
@@ -680,6 +690,9 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	}
 	if !characterItemsContain(items, itemID) {
 		t.Fatalf("upgraded item missing from character after inventory upgrade = %+v", items)
+	}
+	if characterItemsContain(items, "upgrade_shard_"+suffix) {
+		t.Fatalf("upgrade shard was not consumed: %+v", items)
 	}
 	var found store.CharacterItemInstance
 	for _, item := range items {

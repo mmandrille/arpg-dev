@@ -221,7 +221,7 @@ func _run() -> void:
 		"unique_chest_entity_1",
 		[
 			{"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
-			{"stash_item_id": "set_item_1", "item_def_id": "verdant_vanguard_blade", "item_template_id": "verdant_vanguard_blade", "display_name": "Verdant Vanguard Blade", "rarity": "set", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "set_item_1", "item_def_id": "verdant_vanguard_blade", "item_template_id": "verdant_vanguard_blade", "display_name": "Verdant Vanguard Blade", "rarity": "set", "slot": "main_hand", "summary_lines": ["Slot: Main hand", "Set: Verdant Vanguard (2/5 equipped)", "2-piece set bonus: Armor +3 (active)", "3-piece set bonus: Max HP +8 (inactive)"]},
 		],
 		inventory,
 		{},
@@ -245,6 +245,13 @@ func _run() -> void:
 	_assert_eq("unique chest sets tab selected", str(state.get("unique_chest_active_tab", "")), "sets")
 	_assert_eq("unique chest sets tab filters items", int(state.get("filtered_stash_item_count", 0)), 1)
 	_assert_eq("unique chest sets tab row", str((state.get("stash_rows", [])[0] as Dictionary).get("stash_item_id", "")), "set_item_1")
+	var set_chest_tooltip := panel._make_item_tooltip(state.get("stash_rows", [])[0] as Dictionary)
+	_assert_eq("unique chest set tooltip name is rarity green", set_chest_tooltip.debug_first_main_line_color(), "55e66f")
+	var set_chest_texts: Array = set_chest_tooltip.debug_main_line_font_sizes()
+	_assert_true("unique chest set tooltip separates equipped count", _array_contains_text(set_chest_texts, "(2/5 equipped)"))
+	_assert_true("unique chest set tooltip separates bonus label", _array_contains_text(set_chest_texts, "2-piece set bonus:"))
+	_assert_true("unique chest set tooltip separates bonus value", _array_contains_text(set_chest_texts, "Armor +3 (active)"))
+	set_chest_tooltip.queue_free()
 	var unique_chest_item := {
 		"stash_item_id": "unique_item_1",
 		"item_def_id": "cave_blade",
@@ -257,6 +264,7 @@ func _run() -> void:
 	}
 	var unique_chest_tooltip := panel._make_item_tooltip(unique_chest_item)
 	_assert_eq("unique chest tooltip uses shared panel", unique_chest_tooltip.get_script(), ItemTooltipPanelScript)
+	_assert_eq("unique chest unique tooltip name is rarity orange", unique_chest_tooltip.debug_first_main_line_color(), "ffb26b")
 	var unique_chest_texts: Array = unique_chest_tooltip.debug_main_line_font_sizes()
 	_assert_true("unique chest tooltip names effect", _array_contains_text(unique_chest_texts, "Unique effect: Everburning Wound"))
 	_assert_true("unique chest tooltip summarizes effect", _array_contains_text(unique_chest_texts, "All hero damage applies burn"))

@@ -555,7 +555,7 @@ func _fill_slot(slot: StashSlotButton, item: Dictionary, kind: String) -> void:
 	if kind == "stash":
 		_withdraw_buttons[str(item.get("stash_item_id", ""))] = {"enabled": enabled}
 	slot.text = ""
-	slot.tooltip_text = "\n".join(_tooltip_lines(item))
+	slot.tooltip_text = "\n".join(_tooltip_text_lines(_tooltip_lines(item)))
 	slot.disabled = not enabled
 	var rarity := str(item.get("rarity", "common"))
 	slot.add_theme_stylebox_override("normal", _item_slot_style(rarity, false, enabled))
@@ -849,6 +849,20 @@ func _rarity_rank(rarity: String) -> int:
 			return 0
 
 
+func _rarity_color(rarity: String) -> Color:
+	match rarity.to_lower():
+		"magic":
+			return Color("#93c5fd")
+		"rare":
+			return Color("#f4d481")
+		"unique":
+			return Color("#ffb26b")
+		"set":
+			return Color("#55e66f")
+		_:
+			return Color("#e8dcc8")
+
+
 func _set_sort_mode(mode: String) -> void:
 	if not SORT_MODES.has(mode):
 		return
@@ -919,16 +933,18 @@ func _debug_withdraw_buttons() -> Dictionary:
 
 
 func _tooltip_lines(row: Dictionary) -> Array:
-	var lines: Array = [_item_name(row)]
 	var rarity := str(row.get("rarity", ""))
+	var lines: Array = [{"text": _item_name(row), "color": _rarity_color(rarity)}]
 	if rarity != "":
-		lines.append("Rarity: %s" % rarity.capitalize())
+		lines.append({"text": "Rarity: %s" % rarity.capitalize(), "color": Color("#cdbd9f"), "font_size": DETAIL_FONT_SIZE})
 	var summary = row.get("summary_lines", [])
 	if typeof(summary) == TYPE_ARRAY:
-		for line in summary:
+		for line in _compact_metadata_lines(summary):
 			var text := str(line)
+			if typeof(line) == TYPE_DICTIONARY:
+				text = str((line as Dictionary).get("text", ""))
 			if text != "":
-				lines.append(text)
+				lines.append(line)
 	if lines.size() == 1:
 		var slot := str(row.get("slot", ""))
 		if slot != "":
@@ -938,6 +954,52 @@ func _tooltip_lines(row: Dictionary) -> Array:
 		if typeof(req) == TYPE_DICTIONARY and int((req as Dictionary).get("level", 0)) > 0:
 			lines.append("Requires level %d" % int((req as Dictionary).get("level", 0)))
 	return lines
+
+
+func _compact_metadata_lines(lines: Array) -> Array:
+	var out: Array = []
+	for line in lines:
+		var text := str(line)
+		if text.begins_with("Slot:"):
+			out.append({"text": text, "color": Color("#cdbd9f"), "font_size": DETAIL_FONT_SIZE})
+		elif text.begins_with("Set:"):
+			out.append_array(_set_membership_tooltip_lines(text))
+		elif text.find("set bonus:") >= 0:
+			out.append_array(_set_bonus_tooltip_lines(text))
+		else:
+			out.append(line)
+	return out
+
+
+func _set_membership_tooltip_lines(text: String) -> Array:
+	var split_at := text.rfind(" (")
+	if split_at < 0:
+		return [{"text": text, "color": Color("#55e66f"), "font_size": DETAIL_FONT_SIZE}]
+	return [
+		{"text": text.substr(0, split_at), "color": Color("#55e66f"), "font_size": DETAIL_FONT_SIZE},
+		{"text": text.substr(split_at + 1), "color": Color("#55e66f"), "font_size": DETAIL_FONT_SIZE},
+	]
+
+
+func _set_bonus_tooltip_lines(text: String) -> Array:
+	var color := Color("#7df095") if text.find("(active)") >= 0 else Color("#7d8d7f")
+	var split_at := text.find(": ")
+	if split_at < 0:
+		return [{"text": text, "color": color, "font_size": DETAIL_FONT_SIZE}]
+	return [
+		{"text": text.substr(0, split_at + 1), "color": color, "font_size": DETAIL_FONT_SIZE},
+		{"text": text.substr(split_at + 2), "color": color, "font_size": DETAIL_FONT_SIZE},
+	]
+
+
+func _tooltip_text_lines(lines: Array) -> Array:
+	var out: Array = []
+	for line in lines:
+		if typeof(line) == TYPE_DICTIONARY:
+			out.append(str((line as Dictionary).get("text", "")))
+		else:
+			out.append(str(line))
+	return out
 
 
 func _requirement_lines(row: Dictionary) -> Array:

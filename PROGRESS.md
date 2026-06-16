@@ -27,8 +27,8 @@ Last updated: 2026-06-16
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green on 2026-06-16 after the v219-v223 `$autoloop` feature batch |
 | **Next slice** | Run due v210+ review/refactor handoff before the next feature batch |
-| **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
-| **Next engineering review** | v210 after the next feature batch, once CI is green |
+| **Last engineering review** | v223 — [`docs/reviews/20260616_v223-overview.md`](docs/reviews/20260616_v223-overview.md) (2026-06-16) |
+| **Next engineering review** | v233 after the next feature batch, once CI is green |
 
 
 ### Periodic engineering reviews
@@ -90,6 +90,9 @@ Do **not** assume these are the next slice — they are documented backlog items
 - **Progress archive links need repair.** The v200 progress compaction moved history under
   `docs/progress/`; many archive links still use `docs/...` paths that likely resolve relative to the
   new folder.
+- **Companion tuning and monster-rarity validation need data/golden ownership.** The v223 review
+  keeps the v200 finding open: companion/elite follow tuning remains code-owned, and monster rarity
+  validation still pins tuning values in Go instead of a schema-backed catalog or named golden.
 
 ### Other deferred items (from specs / ADRs)
 

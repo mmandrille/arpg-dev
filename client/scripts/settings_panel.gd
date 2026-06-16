@@ -11,6 +11,9 @@ signal status_text_toggled(enabled: bool)
 signal create_game_session_type_selected(session_type: String)
 signal language_selected(language: String)
 signal monster_health_bar_mode_selected(mode: String)
+signal master_volume_changed(value: float)
+signal music_volume_changed(value: float)
+signal sfx_volume_changed(value: float)
 
 var _buttons: Dictionary = {}
 var _session_type_buttons: Dictionary = {}
@@ -26,6 +29,12 @@ var _title: Label
 var _session_type_label: Label
 var _language_label: Label
 var _monster_health_bar_label: Label
+var _master_volume_label: Label
+var _music_volume_label: Label
+var _sfx_volume_label: Label
+var _master_volume_slider: HSlider
+var _music_volume_slider: HSlider
+var _sfx_volume_slider: HSlider
 var _back_button: Button
 
 
@@ -37,7 +46,7 @@ func _ready() -> void:
 	visible = false
 
 
-func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE) -> void:
+func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE, master_volume: float = ClientSettingsScript.DEFAULT_MASTER_VOLUME, music_volume: float = ClientSettingsScript.DEFAULT_MUSIC_VOLUME, sfx_volume: float = ClientSettingsScript.DEFAULT_SFX_VOLUME) -> void:
 	_sync_viewport_size()
 	visible = true
 	set_selected_size_label(selected_label)
@@ -46,6 +55,7 @@ func show_settings(selected_label: String, floating_combat_text_enabled: bool = 
 	set_create_game_session_type(create_game_session_type)
 	set_language(language)
 	set_monster_health_bar_mode(monster_health_bar_mode)
+	set_audio_volumes(master_volume, music_volume, sfx_volume)
 
 
 func hide_panel() -> void:
@@ -95,6 +105,12 @@ func set_monster_health_bar_mode(mode: String) -> void:
 	for key in _monster_health_bar_buttons.keys():
 		var button: Button = _monster_health_bar_buttons[key]
 		button.disabled = str(key) == _selected_monster_health_bar_mode
+
+
+func set_audio_volumes(master: float, music: float, sfx: float) -> void:
+	_set_slider_value(_master_volume_slider, master)
+	_set_slider_value(_music_volume_slider, music)
+	_set_slider_value(_sfx_volume_slider, sfx)
 
 
 func _build() -> void:
@@ -172,6 +188,19 @@ func _build() -> void:
 	_add_monster_health_bar_button(monster_health_bar_row, ClientSettingsScript.MONSTER_HEALTH_BAR_CONTEXTUAL)
 	_add_monster_health_bar_button(monster_health_bar_row, ClientSettingsScript.MONSTER_HEALTH_BAR_ALWAYS)
 
+	_master_volume_label = _add_slider_label(box)
+	_master_volume_slider = _add_volume_slider(box, func(value: float) -> void:
+		master_volume_changed.emit(value)
+	)
+	_music_volume_label = _add_slider_label(box)
+	_music_volume_slider = _add_volume_slider(box, func(value: float) -> void:
+		music_volume_changed.emit(value)
+	)
+	_sfx_volume_label = _add_slider_label(box)
+	_sfx_volume_slider = _add_volume_slider(box, func(value: float) -> void:
+		sfx_volume_changed.emit(value)
+	)
+
 	_language_label = Label.new()
 	_language_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_language_label.add_theme_font_size_override("font_size", 30)
@@ -225,6 +254,31 @@ func _add_monster_health_bar_button(parent: Control, mode: String) -> void:
 	parent.add_child(button)
 
 
+func _add_slider_label(parent: Control) -> Label:
+	var label := Label.new()
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 26)
+	parent.add_child(label)
+	return label
+
+
+func _add_volume_slider(parent: Control, handler: Callable) -> HSlider:
+	var slider := HSlider.new()
+	slider.min_value = 0.0
+	slider.max_value = 1.0
+	slider.step = 0.05
+	slider.custom_minimum_size = Vector2(320, 28)
+	slider.value_changed.connect(handler)
+	parent.add_child(slider)
+	return slider
+
+
+func _set_slider_value(slider: HSlider, value: float) -> void:
+	if slider == null:
+		return
+	slider.set_value_no_signal(clampf(value, 0.0, 1.0))
+
+
 func _normalize_session_type(session_type: String) -> String:
 	var normalized := session_type.strip_edges().to_lower()
 	if normalized == "solo":
@@ -250,6 +304,12 @@ func refresh_texts() -> void:
 		_status_text_toggle.text = TextCatalogScript.get_text("settings.status_text", "Status text")
 	if _monster_health_bar_label != null:
 		_monster_health_bar_label.text = TextCatalogScript.get_text("settings.enemy_health_bars", "Enemy health bars")
+	if _master_volume_label != null:
+		_master_volume_label.text = TextCatalogScript.get_text("settings.master_volume", "Master volume")
+	if _music_volume_label != null:
+		_music_volume_label.text = TextCatalogScript.get_text("settings.music_volume", "Music volume")
+	if _sfx_volume_label != null:
+		_sfx_volume_label.text = TextCatalogScript.get_text("settings.sfx_volume", "SFX volume")
 	if _language_label != null:
 		_language_label.text = TextCatalogScript.get_text("settings.language", "Language")
 	if _back_button != null:

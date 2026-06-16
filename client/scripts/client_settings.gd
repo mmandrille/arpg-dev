@@ -13,6 +13,9 @@ const DEFAULT_LOOT_FILTER_MODE := "All"
 const MONSTER_HEALTH_BAR_CONTEXTUAL := "contextual"
 const MONSTER_HEALTH_BAR_ALWAYS := "always"
 const DEFAULT_MONSTER_HEALTH_BAR_MODE := MONSTER_HEALTH_BAR_CONTEXTUAL
+const DEFAULT_MASTER_VOLUME := 0.8
+const DEFAULT_MUSIC_VOLUME := 0.7
+const DEFAULT_SFX_VOLUME := 0.8
 const SUPPORTED_LANGUAGES := ["en", "es"]
 const SUPPORTED_LOOT_FILTER_MODES := ["All", "Magic+", "Rare+", "Unique"]
 const SUPPORTED_MONSTER_HEALTH_BAR_MODES := [
@@ -38,6 +41,9 @@ var create_game_session_type: String = DEFAULT_CREATE_GAME_SESSION_TYPE
 var language: String = DEFAULT_LANGUAGE
 var loot_filter_mode: String = DEFAULT_LOOT_FILTER_MODE
 var monster_health_bar_mode: String = DEFAULT_MONSTER_HEALTH_BAR_MODE
+var master_volume: float = DEFAULT_MASTER_VOLUME
+var music_volume: float = DEFAULT_MUSIC_VOLUME
+var sfx_volume: float = DEFAULT_SFX_VOLUME
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -114,6 +120,12 @@ static func normalize_monster_health_bar_mode(mode: String) -> String:
 	return DEFAULT_MONSTER_HEALTH_BAR_MODE
 
 
+static func normalize_volume(value, fallback: float) -> float:
+	if typeof(value) != TYPE_FLOAT and typeof(value) != TYPE_INT:
+		return fallback
+	return clampf(float(value), 0.0, 1.0)
+
+
 static func size_from_data(data) -> Vector2i:
 	if typeof(data) != TYPE_DICTIONARY:
 		return DEFAULT_SIZE
@@ -162,6 +174,24 @@ static func monster_health_bar_mode_from_data(data) -> String:
 	return normalize_monster_health_bar_mode(str((data as Dictionary).get("monster_health_bar_mode", DEFAULT_MONSTER_HEALTH_BAR_MODE)))
 
 
+static func master_volume_from_data(data) -> float:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_MASTER_VOLUME
+	return normalize_volume((data as Dictionary).get("master_volume", DEFAULT_MASTER_VOLUME), DEFAULT_MASTER_VOLUME)
+
+
+static func music_volume_from_data(data) -> float:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_MUSIC_VOLUME
+	return normalize_volume((data as Dictionary).get("music_volume", DEFAULT_MUSIC_VOLUME), DEFAULT_MUSIC_VOLUME)
+
+
+static func sfx_volume_from_data(data) -> float:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_SFX_VOLUME
+	return normalize_volume((data as Dictionary).get("sfx_volume", DEFAULT_SFX_VOLUME), DEFAULT_SFX_VOLUME)
+
+
 func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
@@ -171,6 +201,9 @@ func load() -> void:
 		language = DEFAULT_LANGUAGE
 		loot_filter_mode = DEFAULT_LOOT_FILTER_MODE
 		monster_health_bar_mode = DEFAULT_MONSTER_HEALTH_BAR_MODE
+		master_volume = DEFAULT_MASTER_VOLUME
+		music_volume = DEFAULT_MUSIC_VOLUME
+		sfx_volume = DEFAULT_SFX_VOLUME
 		return
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
@@ -181,6 +214,9 @@ func load() -> void:
 	language = language_from_data(parsed)
 	loot_filter_mode = loot_filter_mode_from_data(parsed)
 	monster_health_bar_mode = monster_health_bar_mode_from_data(parsed)
+	master_volume = master_volume_from_data(parsed)
+	music_volume = music_volume_from_data(parsed)
+	sfx_volume = sfx_volume_from_data(parsed)
 
 
 func save() -> void:
@@ -199,6 +235,9 @@ func save() -> void:
 		"language": language,
 		"loot_filter_mode": loot_filter_mode,
 		"monster_health_bar_mode": monster_health_bar_mode,
+		"master_volume": master_volume,
+		"music_volume": music_volume,
+		"sfx_volume": sfx_volume,
 	}))
 
 
@@ -280,5 +319,31 @@ func set_loot_filter_mode(mode: String, persist: bool = true) -> void:
 
 func set_monster_health_bar_mode(mode: String, persist: bool = true) -> void:
 	monster_health_bar_mode = normalize_monster_health_bar_mode(mode)
+	if persist:
+		save()
+
+
+func set_audio_volumes(master: float, music: float, sfx: float, persist: bool = true) -> void:
+	master_volume = clampf(master, 0.0, 1.0)
+	music_volume = clampf(music, 0.0, 1.0)
+	sfx_volume = clampf(sfx, 0.0, 1.0)
+	if persist:
+		save()
+
+
+func set_master_volume(value: float, persist: bool = true) -> void:
+	master_volume = clampf(value, 0.0, 1.0)
+	if persist:
+		save()
+
+
+func set_music_volume(value: float, persist: bool = true) -> void:
+	music_volume = clampf(value, 0.0, 1.0)
+	if persist:
+		save()
+
+
+func set_sfx_volume(value: float, persist: bool = true) -> void:
+	sfx_volume = clampf(value, 0.0, 1.0)
 	if persist:
 		save()

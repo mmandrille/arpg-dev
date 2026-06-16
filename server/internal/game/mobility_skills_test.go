@@ -28,6 +28,35 @@ func TestSorcererTeleportMovesWithoutDamage(t *testing.T) {
 	}
 }
 
+func TestBarbarianLeapMovesDamagesAndStunsLandingTargets(t *testing.T) {
+	sim := mobilitySkillSim(t, "barbarian", "leap")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: 2, Y: 2}
+	nearLanding := addRangerSkillMonster(sim, Vec2{X: 7, Y: 2}, 40)
+	far := addRangerSkillMonster(sim, Vec2{X: 11, Y: 2}, 40)
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "leap",
+		CorrelationID: "corr_leap",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "leap", Direction: &Vec2{X: 1}},
+	}})
+
+	assertAck(t, cast, "leap")
+	if !hasEvent(cast, "skill_cast") || !hasSkillDamageEvent(cast, "leap") || !hasEvent(cast, "skill_effect_started") {
+		t.Fatalf("leap events = %+v", cast.Events)
+	}
+	if player.pos.X <= 2 {
+		t.Fatalf("leap player x = %.2f, want moved forward", player.pos.X)
+	}
+	if nearLanding.hp >= nearLanding.maxHP || !containsStringValue(nearLanding.effectIDs, "leap_stun") {
+		t.Fatalf("near landing hp/effects = %d/%d %v, want damaged and stunned", nearLanding.hp, nearLanding.maxHP, nearLanding.effectIDs)
+	}
+	if far.hp != far.maxHP || containsStringValue(far.effectIDs, "leap_stun") {
+		t.Fatalf("far hp/effects = %d/%d %v, want unaffected", far.hp, far.maxHP, far.effectIDs)
+	}
+}
+
 func mobilitySkillSim(t *testing.T, classID string, skillID string) *Sim {
 	t.Helper()
 	rules := loadRules(t)

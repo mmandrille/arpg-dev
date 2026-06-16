@@ -426,6 +426,52 @@
       },
       "name_key": "skill.rage.name"
     },
+    "leap": {
+      "name": "Leap",
+      "class": "barbarian",
+      "tree": {
+        "tier": 1,
+        "column": 2
+      },
+      "kind": "mobility",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "str": 5,
+          "vit": 5
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "mobility": {
+        "range_base": 5.5,
+        "range_per_rank": 0.5,
+        "mode": "leap",
+        "visual": "leap_impact",
+        "damage_percent_base": 70,
+        "damage_percent_per_rank": 10,
+        "impact_radius": 2.25,
+        "stun_effect_id": "leap_stun",
+        "stun_duration_ticks": 20
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 6
+      },
+      "name_key": "skill.leap.name"
+    },
     "earthbreaker": {
       "name": "Earthbreaker",
       "class": "barbarian",

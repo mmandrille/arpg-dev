@@ -92,6 +92,17 @@
       "effect_visual": "rage_scale",
       "summary_key": "skill.rage.summary"
     },
+    "leap": {
+      "icon": {
+        "label": "L",
+        "shape": "burst",
+        "color": "#b96d35",
+        "accent": "#ffe0b8"
+      },
+      "summary": "Jumping impact stun",
+      "effect_visual": "leap_impact",
+      "summary_key": "skill.leap.summary"
+    },
     "earthbreaker": {
       "icon": {
         "label": "E",

@@ -1,0 +1,31 @@
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_a8770cc34038ef::t_e18c4e4fe8d92a 32,37-40
+client/scripts/main.gd
+  s_a8770cc34038ef::t_99f63b2fb54a92 1934
+server/internal/game/mobility_skills_test.go
+  s_a8770cc34038ef::t_d0387fceecaae2 132-152
+  s_a8770cc34038ef::t_f2c6529fae3200 62-64,69,94-96
+server/internal/game/mobility_skills.go
+  s_a8770cc34038ef::t_1819972c4b0ebb 201,218-222
+server/internal/game/rogue_rules.go
+  s_a8770cc34038ef::t_1819972c4b0ebb 58
+shared/rules/skills.v0.json
+  s_a8770cc34038ef::t_1819972c4b0ebb 606
+  s_a8770cc34038ef::t_e18c4e4fe8d92a 607
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "009f097785a0165b16fbd171039516690703cbb7",
+  "prompts": {},
+  "sessions": {
+    "s_a8770cc34038ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed073-156b-7a42-ba3c-3ba0f571d8a3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

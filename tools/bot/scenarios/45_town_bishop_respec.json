@@ -4,7 +4,7 @@
   "seed": "v92_town_bishop_respec",
   "character_class": "sorcerer",
   "title": "Town bishop respec",
-  "description": "Open the town bishop service, pay for a full respec, then prove an unaffordable respec is rejected.",
+  "description": "Open the town bishop service and perform a free full respec.",
   "debug_progression": {
     "level": 6,
     "experience": 270,
@@ -21,7 +21,7 @@
       "expect_progression": {
         "level": 6,
         "unspent_stat_points": 15,
-        "gold": 50,
+        "gold": 300,
         "base_stats": { "str": 3, "dex": 5, "vit": 5, "magic": 5 }
       },
       "expect_skill_progression": {
@@ -32,39 +32,14 @@
         "can_spend": true
       }
     },
-    { "action": "assert_gold_changed", "direction": "decrease", "by_at_least": 250 },
     { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "ice_shard", "rank": 0, "max_rank": 5, "can_spend": false }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "bishop_service_opened", "service": "bishop", "price": 250, "affordable": true },
-    { "type": "event_seen", "event_type": "bishop_respec", "service": "bishop", "price": 250, "total_gold": 50, "unspent_stat_points": 15, "unspent_skill_points": 2 },
-    { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "gold": 50, "base_stats": { "str": 3, "dex": 5, "vit": 5, "magic": 5 } },
+    { "type": "event_seen", "event_type": "bishop_service_opened", "service": "bishop", "price": 0, "affordable": true },
+    { "type": "event_seen", "event_type": "bishop_respec", "service": "bishop", "price": 0, "total_gold": 300, "unspent_stat_points": 15, "unspent_skill_points": 2 },
+    { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "gold": 300, "base_stats": { "str": 3, "dex": 5, "vit": 5, "magic": 5 } },
     { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true },
     { "type": "skill_cooldown", "skill_id": "magic_bolt", "absent": true }
-  ],
-  "fresh_session_checks": [
-    {
-      "world_id": "vendor_lab",
-      "seed": "v92_town_bishop_respec_poor",
-      "debug_progression": {
-        "level": 6,
-        "experience": 270,
-        "unspent_stat_points": 4,
-        "unspent_skill_points": 0,
-        "stats": { "str": 4, "dex": 6, "vit": 7, "magic": 12 },
-        "gold": 249,
-        "skill_ranks": { "magic_bolt": 1 }
-      },
-      "steps": [
-        { "action": "open_bishop_service" },
-        { "action": "respec_bishop", "expect_reject": "not_enough_gold" }
-      ],
-      "assertions": [
-        { "type": "event_seen", "event_type": "bishop_service_opened", "service": "bishop", "price": 250, "affordable": false },
-        { "type": "character_progression", "level": 6, "unspent_stat_points": 4, "gold": 249, "base_stats": { "str": 4, "dex": 6, "vit": 7, "magic": 12 } },
-        { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "magic_bolt", "rank": 1, "max_rank": 5 }
-      ]
-    }
   ],
   "visual": {
     "camera": { "x": 10, "y": 12, "zoom": 1.0 }

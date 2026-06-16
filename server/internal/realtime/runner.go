@@ -408,6 +408,12 @@ func (r *runner) persistTick(res game.TickResult) {
 				r.log.Error("persist character death", "error", err)
 			}
 		}
+		if ev.EventType == "bishop_revive_all" {
+			if _, err := r.store.ReviveDeadCharacters(ctx, r.sess.AccountID); err != nil {
+				r.metrics.PersistenceErrors.Inc()
+				r.log.Error("persist bishop revive all", "error", err)
+			}
+		}
 	}
 
 	hotbarAssignedItems := map[string]struct{}{}

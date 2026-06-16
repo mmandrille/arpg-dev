@@ -622,7 +622,7 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 	out := make([]game.Event, 0, len(events))
 	for _, event := range events {
 		switch event.EventType {
-		case "level_changed", "shop_opened", "shop_purchase", "shop_sale", "stash_opened", "stash_item_deposited", "stash_item_withdrawn", "stash_gold_deposited", "stash_gold_withdrawn", "corpse_opened", "corpse_item_recovered":
+		case "level_changed", "shop_opened", "shop_purchase", "shop_sale", "bishop_revive_all", "stash_opened", "stash_item_deposited", "stash_item_withdrawn", "stash_gold_deposited", "stash_gold_withdrawn", "corpse_opened", "corpse_item_recovered":
 			if actorPlayerID != clientPlayerID {
 				continue
 			}
@@ -672,6 +672,11 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			}
 		}
 		switch ev.EventType {
+		case "bishop_revive_all":
+			if _, err := l.hub.store.ReviveDeadCharacters(ctx, member.AccountID); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist bishop revive all", "account_id", member.AccountID, "error", err)
+			}
 		case "stash_item_deposited":
 			if ev.ItemInstanceID == "" || ev.StashItemID == "" {
 				break

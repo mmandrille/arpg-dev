@@ -202,7 +202,7 @@ v197_* = upgrade-success-chance
 v198_* = mercenary-foundation
 v199_* = new-boss-pattern-deck
 v200_* = progress-doc-compaction
+v213_* = bishop-account-revival
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.
-

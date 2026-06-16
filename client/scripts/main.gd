@@ -1255,6 +1255,9 @@ func _apply_delta(p: Dictionary) -> void:
 			bishop_panel.set_gold(gold)
 			bishop_panel.show_status("Respec complete")
 			continue
+		if event_type == "bishop_revive_all" and bishop_panel != null and bishop_panel.visible:
+			bishop_panel.show_status("Account heroes revived")
+			continue
 		if event_type in ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained"] and bishop_panel != null and bishop_panel.visible:
 			if event_type == "bishop_debug_level_gained":
 				bishop_panel.show_status("Level gained")
@@ -3314,6 +3317,7 @@ func _build_scene() -> void:
 	ui.add_child(stash_panel)
 	bishop_panel = BishopPanelScript.new()
 	bishop_panel.respec_requested.connect(_on_bishop_respec_requested)
+	bishop_panel.revive_all_requested.connect(_on_bishop_revive_all_requested)
 	bishop_panel.debug_requested.connect(_on_bishop_debug_requested)
 	bishop_panel.set_debug_enabled(gameplay_debug_enabled)
 	ui.add_child(bishop_panel)
@@ -4274,8 +4278,8 @@ func _show_bishop_panel(ev: Dictionary) -> void:
 	bishop_panel.show_bishop(
 		next_entity_id,
 		str(ev.get("service", "bishop")),
-		int(ev.get("price", 250)),
-		bool(ev.get("affordable", gold >= int(ev.get("price", 250)))),
+		int(ev.get("price", 0)),
+		bool(ev.get("affordable", gold >= int(ev.get("price", 0)))),
 		gold
 	)
 	_raise_gameplay_windows()
@@ -4519,6 +4523,13 @@ func _on_bishop_respec_requested(bishop_entity_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "":
 		return
 	client.send("bishop_respec_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+
+
+func _on_bishop_revive_all_requested(bishop_entity_id: String) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "":
+		return
+	client.send("bishop_revive_all_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+
 
 func _on_bishop_debug_requested(action: String, bishop_entity_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "" or not gameplay_debug_enabled:
@@ -6327,19 +6338,14 @@ func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> 
 	BotFacade.assign_consumable_hotbar(self, slot_index, item_instance_id)
 func bot_use_consumable_hotbar(slot_index: int) -> void:
 	BotFacade.use_consumable_hotbar(self, slot_index)
-
 func bot_click_stat_button(stat: String) -> void:
 	BotFacade.click_stat_button(self, stat)
-
 func bot_click_skill_button(skill_id: String = "") -> void:
 	BotFacade.click_skill_button(self, skill_id)
-
 func bot_use_skill_bar(skill_id: String = "", target_id: String = "", force_direct: bool = false) -> void:
 	BotFacade.use_skill_bar(self, skill_id, target_id, force_direct)
-
 func bot_cast_skill_direction(skill_id: String = "", direction: Dictionary = {}) -> void:
 	BotFacade.cast_skill_direction(self, skill_id, direction)
-
 func bot_click_menu_button(button: String) -> void:
 	match button:
 		"create_game":
@@ -6391,27 +6397,20 @@ func bot_click_menu_button(button: String) -> void:
 func bot_enter_character_name(name: String) -> void:
 	if character_panel != null:
 		character_panel.set_name_text(name)
-
 func bot_select_character(index: int) -> void:
 	if character_panel != null:
 		character_panel.start_character_at_index(index)
-
 func bot_select_character_class(class_id: String) -> void:
 	if character_panel != null:
 		character_panel.select_class(class_id)
-
 func bot_select_window_size(size: String) -> void:
 	_on_window_size_selected(size)
-
 func bot_set_floating_combat_text(enabled: bool) -> void:
 	_on_floating_combat_text_toggled(enabled)
-
 func bot_select_create_game_type(session_type: String) -> void:
 	_on_create_game_session_type_selected(session_type)
-
 func bot_select_language(language: String) -> void:
 	_on_language_selected(language)
-
 func bot_consume_pending_event_at(index: int) -> void:
 	if index < 0 or index >= _bot_pending_events.size():
 		return

@@ -23,9 +23,9 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v212 — ranger disengage |
+| **Latest completed slice** | v213 — bishop account revival |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-16 after v212 ranger disengage |
+| **CI gate** | `make ci` green on 2026-06-16 after v213 bishop account revival |
 | **Next slice** | Run the due v210+ engineering review/refactor handoff, then choose the next feature slice |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |

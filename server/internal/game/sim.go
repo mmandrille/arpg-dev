@@ -795,6 +795,7 @@ type Input struct {
 	ShopSell            *ShopSellIntent
 	ShopReroll          *ShopRerollIntent
 	BishopRespec        *BishopRespecIntent
+	BishopReviveAll     *BishopReviveAllIntent
 	BishopDebugLevel    *BishopDebugLevelIntent
 	BishopDebugSkill    *BishopDebugSkillPointIntent
 	BishopDebugStat     *BishopDebugStatPointIntent
@@ -873,9 +874,8 @@ type (
 	ShopRerollIntent struct {
 		ShopEntityID string
 	}
-	BishopRespecIntent struct {
-		BishopEntityID string
-	}
+	BishopRespecIntent    struct{ BishopEntityID string }
+	BishopReviveAllIntent struct{ BishopEntityID string }
 	BishopDebugLevelIntent struct {
 		BishopEntityID string
 	}

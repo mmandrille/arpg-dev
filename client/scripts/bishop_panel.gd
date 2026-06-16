@@ -2,6 +2,7 @@ class_name BishopPanel
 extends Control
 
 signal respec_requested(bishop_entity_id: String)
+signal revive_all_requested(bishop_entity_id: String)
 signal debug_requested(action: String, bishop_entity_id: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
@@ -11,7 +12,7 @@ const BODY_FONT_SIZE := 20
 
 var bishop_entity_id: String = ""
 var service_id: String = "bishop"
-var price: int = 250
+var price: int = 0
 var affordable: bool = false
 var gold: int = 0
 var debug_enabled: bool = false
@@ -20,6 +21,7 @@ var _panel: DraggableWindow
 var _title_label: Label
 var _body_label: Label
 var _respec_button: Button
+var _revive_all_button: Button
 var _debug_level_button: Button
 var _debug_skill_button: Button
 var _debug_stat_button: Button
@@ -83,6 +85,7 @@ func get_debug_state() -> Dictionary:
 		"gold": gold,
 		"affordable": affordable,
 		"respec_enabled": _respec_enabled(),
+		"revive_all_enabled": _revive_all_enabled(),
 		"debug_enabled": debug_enabled,
 		"status": _status_label.text if _status_label != null else "",
 		"window": _panel.get_debug_state() if _panel != null else {},
@@ -92,6 +95,11 @@ func get_debug_state() -> Dictionary:
 func bot_click_respec() -> void:
 	if _respec_enabled():
 		_emit_respec()
+
+
+func bot_click_revive_all() -> void:
+	if _revive_all_enabled():
+		_emit_revive_all()
 
 
 func bot_click_debug(action: String) -> void:
@@ -144,6 +152,12 @@ func _build() -> void:
 	_respec_button.pressed.connect(_emit_respec)
 	root.add_child(_respec_button)
 
+	_revive_all_button = Button.new()
+	_revive_all_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 42)
+	_revive_all_button.text = "Revive all dead heroes"
+	_revive_all_button.pressed.connect(_emit_revive_all)
+	root.add_child(_revive_all_button)
+
 	_debug_level_button = Button.new()
 	_debug_level_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
 	_debug_level_button.text = "Debug: gain level"
@@ -177,8 +191,10 @@ func _render() -> void:
 	if _body_label != null:
 		_body_label.text = "Restored health and mana."
 	if _respec_button != null:
-		_respec_button.text = "Respec - %d gold" % price
+		_respec_button.text = "Respec" if price == 0 else "Respec - %d gold" % price
 		_respec_button.disabled = not _respec_enabled()
+	if _revive_all_button != null:
+		_revive_all_button.disabled = not _revive_all_enabled()
 	for button in [_debug_level_button, _debug_skill_button, _debug_stat_button]:
 		if button != null:
 			button.visible = debug_enabled
@@ -195,6 +211,12 @@ func _emit_respec() -> void:
 	respec_requested.emit(bishop_entity_id)
 
 
+func _emit_revive_all() -> void:
+	if not _revive_all_enabled():
+		return
+	revive_all_requested.emit(bishop_entity_id)
+
+
 func _emit_debug(action: String) -> void:
 	if not _debug_action_enabled():
 		return
@@ -203,6 +225,10 @@ func _emit_debug(action: String) -> void:
 
 func _respec_enabled() -> bool:
 	return _interactive and visible and bishop_entity_id != "" and affordable and gold >= price
+
+
+func _revive_all_enabled() -> bool:
+	return _interactive and visible and bishop_entity_id != ""
 
 
 func _debug_action_enabled() -> bool:

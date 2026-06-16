@@ -1,0 +1,63 @@
+server/internal/game/rules.go
+  s_91cf6549724495::t_2b72e1057f6452 1289-1291
+  s_91cf6549724495::t_11966af479c497 56-57,993-999
+server/internal/http/account_stash.go
+  s_91cf6549724495::t_5fbc04a84abfb5 10,45-51,55-61,114-125,157-162,164-170,206-256
+  s_91cf6549724495::t_b5fa39237d9e99 4
+docs/progress/slice-lifecycle.md
+  s_91cf6549724495::t_75ef6da4965f1c 219
+docs/specs/v202_spec-upgrade-resource-consumption.md
+  s_91cf6549724495::t_1ccb0db9e5172d 1-2,4-60
+  s_91cf6549724495::t_75ef6da4965f1c 3
+shared/rules/main_config.v0.json
+  s_91cf6549724495::t_11966af479c497 11-13
+client/scripts/bot_scenario_runner.gd
+  s_91cf6549724495::t_60e525760f704e 968-973
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_91cf6549724495::t_7c752131729773 10-13,44,47
+client/scripts/bot_step_catalog.gd
+  s_91cf6549724495::t_60e525760f704e 228
+.maintainability/file-size-baseline.tsv
+  s_91cf6549724495::t_c171b4f55deddf 6,11
+client/scripts/blacksmith_panel.gd
+  s_91cf6549724495::t_900e50eeaaf464 90-91
+  s_91cf6549724495::t_a59c46d37353f8 345,351-359
+  s_91cf6549724495::t_a004b356f7b209 394
+  s_91cf6549724495::t_79a8e3667ca23c 23-24,138-140,269-274,291-293,360-376,379-383
+docs/plans/v202_2026-06-15-upgrade-resource-consumption.md
+  s_91cf6549724495::t_c171b4f55deddf 42,132
+  s_91cf6549724495::t_1ccb0db9e5172d 1-2,4-41,43-60,64-74,79-90,95-106,110-121,125-131
+  s_91cf6549724495::t_c2ad1f5c61a2b3 137
+  s_91cf6549724495::t_75ef6da4965f1c 3,61-63,75-78,91-94,107-109,122-124,133-136
+shared/rules/main_config.v0.schema.json
+  s_91cf6549724495::t_11966af479c497 13,23-25
+server/internal/http/auth_session_test.go
+  s_91cf6549724495::t_c041011887070c 657-666,670,681,694-695
+shared/rules/worlds.v0.json
+  s_91cf6549724495::t_22db989fa78b68 716-717
+client/scripts/main.gd
+  s_91cf6549724495::t_1aca2bfa34f446 1532-1542,4495
+client/tests/test_shop_panel.gd
+  s_91cf6549724495::t_48b20bcbeff6ad 483-485,490-492,526-534
+PROGRESS.md
+  s_91cf6549724495::t_75ef6da4965f1c 26,28,100
+docs/as-built/v202_upgrade-resource-consumption.md
+  s_91cf6549724495::t_c171b4f55deddf 30-35
+  s_91cf6549724495::t_75ef6da4965f1c 1-29,36-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "911df8175ba3ade9c3504313b6a91f979e3a3419",
+  "prompts": {},
+  "sessions": {
+    "s_91cf6549724495": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecdc2-d0c7-77a3-bdd7-9c7d3b38e3f2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -23,9 +23,9 @@ Last updated: 2026-06-15
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v200 — progress doc compaction |
+| **Latest completed slice** | v201 — item level tooltip |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-15 after v200 review-gate repairs |
+| **CI gate** | `make ci` green on 2026-06-15 after v201 item level tooltip |
 | **Next slice** | Use `$next` to choose the next feature/gameplay slice |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |

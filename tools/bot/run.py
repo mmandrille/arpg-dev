@@ -1978,25 +1978,25 @@ async def wait_for_player_move_or_accept(ws, state: RuntimeState, before: dict[s
 async def wait_for_tick_advance(ws, state: RuntimeState, loop) -> None:
     from tools.bot.wait_runtime import wait_for_tick_advance as wait_for_tick_advance_impl
 
-    await wait_for_tick_advance_impl(ws, state, loop, helpers=globals())
+    await wait_for_tick_advance_impl(ws, state, loop, ctx=_runtime_context())
 
 
 async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop) -> None:
     from tools.bot.wait_runtime import wait_for_tick as wait_for_tick_impl
 
-    await wait_for_tick_impl(ws, state, target_tick, loop, helpers=globals())
+    await wait_for_tick_impl(ws, state, target_tick, loop, ctx=_runtime_context())
 
 
 async def wait_for_accept(ws, state: RuntimeState, message_id: str, loop) -> None:
     from tools.bot.wait_runtime import wait_for_accept as wait_for_accept_impl
 
-    await wait_for_accept_impl(ws, state, message_id, loop, helpers=globals())
+    await wait_for_accept_impl(ws, state, message_id, loop, ctx=_runtime_context())
 
 
 async def wait_for_reject(ws, state: RuntimeState, message_id: str, reason: str, loop) -> None:
     from tools.bot.wait_runtime import wait_for_reject as wait_for_reject_impl
 
-    await wait_for_reject_impl(ws, state, message_id, reason, loop, helpers=globals())
+    await wait_for_reject_impl(ws, state, message_id, reason, loop, ctx=_runtime_context())
 
 
 async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, timeout_s: float = SLICE_TIMEOUT_S, start_index: int = 0) -> None:
@@ -2232,13 +2232,13 @@ def combat_event_summary(expected: dict[str, Any]) -> str:
 async def wait_for_level_change(ws, state: RuntimeState, previous_level: int, loop) -> None:
     from tools.bot.wait_runtime import wait_for_level_change as wait_for_level_change_impl
 
-    await wait_for_level_change_impl(ws, state, previous_level, loop, helpers=globals())
+    await wait_for_level_change_impl(ws, state, previous_level, loop, ctx=_runtime_context())
 
 
 async def wait_for_teleporter_discovery(ws, state: RuntimeState, level: int, loop) -> None:
     from tools.bot.wait_runtime import wait_for_teleporter_discovery as wait_for_teleporter_discovery_impl
 
-    await wait_for_teleporter_discovery_impl(ws, state, level, loop, helpers=globals())
+    await wait_for_teleporter_discovery_impl(ws, state, level, loop, ctx=_runtime_context())
 
 
 async def wait_for_character_progression(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:

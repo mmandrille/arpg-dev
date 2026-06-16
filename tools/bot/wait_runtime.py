@@ -4,6 +4,7 @@ import asyncio
 import json
 from typing import Any
 
+from tools.bot.bot_context import BotContext
 from tools.bot.bot_types import RuntimeState
 
 SLICE_TIMEOUT_S = 20.0
@@ -15,9 +16,14 @@ def _require_helpers(helpers: dict[str, Any] | None) -> dict[str, Any]:
     return helpers
 
 
-async def wait_for_tick_advance(ws, state: RuntimeState, loop, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    pump_one = helpers["pump_one"]
+def _pump_one(ctx: BotContext | None, helpers: dict[str, Any] | None):
+    if ctx is not None:
+        return ctx.pump_one
+    return _require_helpers(helpers)["pump_one"]
+
+
+async def wait_for_tick_advance(ws, state: RuntimeState, loop, helpers: dict[str, Any] | None = None, ctx: BotContext | None = None) -> None:
+    pump_one = _pump_one(ctx, helpers)
     start = state.last_tick
     deadline = loop.time() + SLICE_TIMEOUT_S
     while state.last_tick <= start:
@@ -26,9 +32,8 @@ async def wait_for_tick_advance(ws, state: RuntimeState, loop, helpers: dict[str
         await pump_one(ws, state, timeout=0.1)
 
 
-async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    pump_one = helpers["pump_one"]
+async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop, helpers: dict[str, Any] | None = None, ctx: BotContext | None = None) -> None:
+    pump_one = _pump_one(ctx, helpers)
     deadline = loop.time() + SLICE_TIMEOUT_S
     while state.last_tick < target_tick:
         if loop.time() > deadline:
@@ -36,9 +41,8 @@ async def wait_for_tick(ws, state: RuntimeState, target_tick: int, loop, helpers
         await pump_one(ws, state, timeout=0.1)
 
 
-async def wait_for_accept(ws, state: RuntimeState, message_id: str, loop, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    pump_one = helpers["pump_one"]
+async def wait_for_accept(ws, state: RuntimeState, message_id: str, loop, helpers: dict[str, Any] | None = None, ctx: BotContext | None = None) -> None:
+    pump_one = _pump_one(ctx, helpers)
     deadline = loop.time() + SLICE_TIMEOUT_S
     while message_id not in state.accepted_message_ids:
         reason = state.rejected_message_reasons.get(message_id)
@@ -49,9 +53,8 @@ async def wait_for_accept(ws, state: RuntimeState, message_id: str, loop, helper
         await pump_one(ws, state, timeout=0.1)
 
 
-async def wait_for_reject(ws, state: RuntimeState, message_id: str, reason: str, loop, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    pump_one = helpers["pump_one"]
+async def wait_for_reject(ws, state: RuntimeState, message_id: str, reason: str, loop, helpers: dict[str, Any] | None = None, ctx: BotContext | None = None) -> None:
+    pump_one = _pump_one(ctx, helpers)
     deadline = loop.time() + SLICE_TIMEOUT_S
     while message_id not in state.rejected_message_reasons:
         if loop.time() > deadline:
@@ -153,9 +156,8 @@ async def wait_for_stash_event(
         await pump_one(ws, state, timeout=0.1)
 
 
-async def wait_for_level_change(ws, state: RuntimeState, previous_level: int, loop, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    pump_one = helpers["pump_one"]
+async def wait_for_level_change(ws, state: RuntimeState, previous_level: int, loop, helpers: dict[str, Any] | None = None, ctx: BotContext | None = None) -> None:
+    pump_one = _pump_one(ctx, helpers)
     deadline = loop.time() + SLICE_TIMEOUT_S
     while state.current_level == previous_level or state.pending_level_load is not None:
         if loop.time() > deadline:
@@ -163,9 +165,8 @@ async def wait_for_level_change(ws, state: RuntimeState, previous_level: int, lo
         await pump_one(ws, state, timeout=0.1)
 
 
-async def wait_for_teleporter_discovery(ws, state: RuntimeState, level: int, loop, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    pump_one = helpers["pump_one"]
+async def wait_for_teleporter_discovery(ws, state: RuntimeState, level: int, loop, helpers: dict[str, Any] | None = None, ctx: BotContext | None = None) -> None:
+    pump_one = _pump_one(ctx, helpers)
     deadline = loop.time() + SLICE_TIMEOUT_S
     while not state.discovered_teleporters.get(level, False):
         if loop.time() > deadline:

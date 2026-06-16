@@ -1,0 +1,39 @@
+docs/progress/slice-lifecycle.md
+  s_31eb8e97d92d7d::t_50729ba16082bf 241
+client/scripts/client_audio_controller.gd
+  s_31eb8e97d92d7d::t_473fe24c3101ee 16-19,84-91,108-109,215-224,235,237-238,243-293
+docs/plans/v225_2026-06-16-boss-audio-readability.md
+  s_31eb8e97d92d7d::t_c00648ec8f54b9 1-2,4-33,35-51,56-66,70-84,88-96,101-104
+  s_31eb8e97d92d7d::t_c1e0e28b3a4c30 100
+  s_31eb8e97d92d7d::t_50729ba16082bf 3,34,85-87,97-99
+  s_31eb8e97d92d7d::t_adac65e4a0ebbf 52-55,67-69
+docs/as-built/v225_boss-audio-readability.md
+  s_31eb8e97d92d7d::t_50729ba16082bf 1-37
+docs/specs/v225_spec-boss-audio-readability.md
+  s_31eb8e97d92d7d::t_50729ba16082bf 3
+  s_31eb8e97d92d7d::t_c00648ec8f54b9 1-2,4-67
+client/scripts/main.gd
+  s_31eb8e97d92d7d::t_473fe24c3101ee 1270
+client/tests/test_client_audio_controller.gd
+  s_31eb8e97d92d7d::t_473fe24c3101ee 14,62-91
+client/scripts/client_audio_bridge.gd
+  s_31eb8e97d92d7d::t_473fe24c3101ee 99,101
+PROGRESS.md
+  s_31eb8e97d92d7d::t_50729ba16082bf 26,28,102-103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e58afb931ec31b5f976a209f55143010e01ed5ff",
+  "prompts": {},
+  "sessions": {
+    "s_31eb8e97d92d7d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2ce-e0c1-7eb1-bba8-c2aa1728f9e8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

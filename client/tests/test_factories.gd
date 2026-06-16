@@ -1,0 +1,113 @@
+# Headless tests for extracted client presentation factories.
+# Run via: godot --headless --path client --script res://tests/test_factories.gd
+extends SceneTree
+
+const ClientConstantsScript := preload("res://scripts/client_constants.gd")
+const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
+const WallRendererScript := preload("res://scripts/wall_renderer.gd")
+const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
+const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
+const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
+const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
+
+var _pass_count: int = 0
+var _fail_count: int = 0
+
+
+func _initialize() -> void:
+	_test_client_constants()
+	_test_ground_wall_factory()
+	_test_wall_renderer()
+	_test_loot_node_factory()
+	_test_town_node_factory()
+	_test_boss_visuals()
+
+	if _fail_count > 0:
+		print("[gdtest] FAIL: test_factories (%d passed, %d failed)" % [_pass_count, _fail_count])
+		quit(1)
+	print("[gdtest] PASS: test_factories (%d passed, %d failed)" % [_pass_count, _fail_count])
+	quit(0)
+
+
+func _test_client_constants() -> void:
+	_assert_eq("player start hp", ClientConstantsScript.PLAYER_START_HP, 10)
+	_assert_true("rarity color present", ClientConstantsScript.LOOT_LABEL_RARITY_COLORS.has("rare"))
+
+
+func _test_ground_wall_factory() -> void:
+	var factory = GroundWallFactoryScript.new()
+	var town_texture := factory.make_ground_texture(ClientConstantsScript.GROUND_TEXTURE_TOWN)
+	var dungeon_texture := factory.make_ground_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON)
+	_assert_true("town ground texture exists", town_texture != null)
+	_assert_true("dungeon ground texture exists", dungeon_texture != null)
+	_assert_eq("ground texture cache count", factory.ground_textures.size(), 2)
+	var ground := factory.make_ground_node(0)
+	_assert_eq("ground node name", ground.name, "Ground")
+	ground.queue_free()
+
+
+func _test_wall_renderer() -> void:
+	var root := Node3D.new()
+	get_root().add_child(root)
+	var renderer = WallRendererScript.new(root, GroundWallFactoryScript.new())
+	var walls := renderer.render_wall_layout([{
+		"id": "test_wall",
+		"position": {"x": 2.0, "y": 3.0},
+		"size": {"x": 4.0, "y": 1.5},
+		"source": "generated",
+	}])
+	_assert_eq("wall layout count", walls.size(), 1)
+	_assert_eq("wall child count", root.get_child_count(), 1)
+	var wall := root.get_child(0) as MeshInstance3D
+	_assert_eq("wall child name", wall.name, "Wall_test_wall")
+	root.queue_free()
+
+
+func _test_loot_node_factory() -> void:
+	ItemRulesLoader.ensure_loaded()
+	var factory = LootNodeFactoryScript.new({}, ItemRulesLoader.item_presentations)
+	_assert_eq("gold label text", factory.loot_label_text({"item_def_id": "gold", "amount": 7}), "7 gold")
+	_assert_eq("known loot name", factory.generic_loot_name("rusty_sword"), "Sword")
+	var node := factory.make_loot_node({"item_def_id": "rusty_sword", "rarity": "common"})
+	_assert_eq("loot node name", node.name, "Loot_rusty_sword")
+	_assert_true("loot label exists", node.find_child("LootLabel", true, false) != null)
+	node.queue_free()
+
+
+func _test_town_node_factory() -> void:
+	var door := TownNodeFactoryScript.make_door_node()
+	_assert_true("door pivot exists", door.find_child("DoorPivot", true, false) != null)
+	door.queue_free()
+	var chest := TownNodeFactoryScript.make_chest_node("town_stash")
+	_assert_true("chest lid pivot exists", chest.find_child("ChestLidPivot", true, false) != null)
+	chest.queue_free()
+	var preview := TownNodeFactoryScript.make_town_preview_scene()
+	_assert_eq("town preview name", preview.name, "TownPreview")
+	preview.queue_free()
+
+
+func _test_boss_visuals() -> void:
+	var ctx = BossVisualsContextScript.new()
+	ctx.entities = {
+		"boss_b": {"type": "monster", "is_boss": true, "hp": 0},
+		"boss_a": {"type": "monster", "is_boss": true, "hp": 7, "max_hp": 10, "boss_template_id": "cave_warden"},
+	}
+	var controller = BossVisualsControllerScript.new(ctx, null)
+	_assert_eq("active boss id", controller.active_boss_entity_id(), "boss_a")
+	_assert_eq("boss title", controller.boss_health_bar_title("cave_warden"), "Cave Warden")
+
+
+func _assert_eq(label: String, got, want) -> void:
+	if got == want:
+		_pass_count += 1
+	else:
+		_fail_count += 1
+		push_error("[gdtest] FAIL %s: got=%s want=%s" % [label, str(got), str(want)])
+
+
+func _assert_true(label: String, value: bool) -> void:
+	if value:
+		_pass_count += 1
+	else:
+		_fail_count += 1
+		push_error("[gdtest] FAIL %s" % label)

@@ -3,6 +3,7 @@
 extends SceneTree
 
 const MainScript := preload("res://scripts/main.gd")
+const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const NetClientScript := preload("res://scripts/net_client.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
@@ -127,7 +128,7 @@ func _test_local_and_remote_players_apply_from_snapshot() -> void:
 	_assert_true("remote player entity stored", main.entities.has("1002"))
 	_assert_eq("remote entity type", str(main.entities["1002"].get("type", "")), "player")
 	_assert_eq("remote character metadata", str(main.entities["1002"].get("character_id", "")), "char_guest")
-	_assert_eq("remote visual tint", str(main.entities["1002"].get("base_tint", "")), MainScript.REMOTE_PLAYER_TINT.to_html(false))
+	_assert_eq("remote visual tint", str(main.entities["1002"].get("base_tint", "")), ClientConstantsScript.REMOTE_PLAYER_TINT.to_html(false))
 	_assert_true("remote player has character model", (main.entities["1002"]["node"] as Node3D).find_child("ModelRoot", true, false) != null)
 	_assert_true("remote player has animation controller", main.entities["1002"].get("controller", null) != null)
 	_assert_true("remote player has reaction controller", main.entities["1002"].get("reaction", null) != null)
@@ -774,7 +775,7 @@ func _test_path_reject_clears_held_click_state() -> void:
 func _test_capacity_reject_shows_bag_full_unequip_message() -> void:
 	var main = _make_main()
 	main._handle_intent_rejected({"rejected_message_id": "msg-capacity", "reason": "capacity_would_overflow"})
-	_assert_eq("capacity overflow hint text", main._last_inventory_feedback_text, MainScript.BAG_FULL_CANT_UNEQUIP_TEXT)
+	_assert_eq("capacity overflow hint text", main._last_inventory_feedback_text, ClientConstantsScript.BAG_FULL_CANT_UNEQUIP_TEXT)
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
@@ -794,7 +795,7 @@ func _test_no_mana_reject_shows_floating_text() -> void:
 	main._handle_intent_rejected({"rejected_message_id": "msg-no-mana", "reason": "not_enough_mana"})
 	var numbers := main._bot_damage_numbers()
 	_assert_eq("no mana floating text count", numbers.size(), 1)
-	_assert_eq("no mana floating text", str((numbers[0] as Dictionary).get("text", "")), MainScript.NO_MANA_TEXT)
+	_assert_eq("no mana floating text", str((numbers[0] as Dictionary).get("text", "")), ClientConstantsScript.NO_MANA_TEXT)
 	_assert_eq("no mana floating text variant", str((numbers[0] as Dictionary).get("variant", "")), "mana")
 	main.damage_numbers_layer.queue_free()
 	main._camera.queue_free()

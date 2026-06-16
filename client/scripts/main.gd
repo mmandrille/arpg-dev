@@ -18,6 +18,9 @@ const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
+const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
+const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
+const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
@@ -58,63 +61,6 @@ const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MonsterQuadrupedScene := preload("res://scenes/monster_quadruped.tscn")
 const MonsterTinyFlyerScene := preload("res://scenes/monster_tiny_flyer.tscn")
 const MonsterSkeletonScene := preload("res://scenes/monster_skeleton.tscn")
-const MONSTER_EVENT_CLIPS := {
-	"monster_damaged": "hit",
-	"monster_killed": "death",
-}
-const PLAYER_EVENT_CLIPS := {
-	"player_damaged": "hit",
-	"player_killed": "death",
-}
-const PLAYER_START_HP := 10
-const INTERACTABLE_ACTIVATION_RANGE := 1.5
-const SKILL_FUNCTION_KEY_COUNT := 16
-const LOCAL_UNARMED_REACH := 1.0
-const LOCAL_MONSTER_RADIUS := 0.45
-const LOCAL_LOOT_RADIUS := 0.35
-const LOCAL_INTERACTABLE_RADIUS := 0.50
-const LOCAL_REACH_EPSILON := 0.000001
-const PLAYER_TINT := Color("#8fe8a7")
-const REMOTE_PLAYER_TINT := Color("#202934")
-const POISON_TINT := Color("#38f06f")
-const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
-const NO_MANA_TEXT := "NO MANA"
-const MONSTER_RARITY_TINTS := {
-	"common": Color("#f2f2ec"),
-	"champion": Color("#9fc7ff"),
-	"rare": Color("#ff9b9b"),
-	"unique": Color("#ffd978"),
-}
-const ITEM_RARITY_BACKGROUNDS := {
-	"common": Color("#343432"),
-	"magic": Color("#1b3458"),
-	"rare": Color("#5a4520"),
-	"unique": Color("#5a2f17"),
-	"set": Color("#173f28"),
-}
-const LOOT_LABEL_RARITY_COLORS := {
-	"common": Color("#e8dcc8"),
-	"magic": Color("#93c5fd"),
-	"rare": Color("#f4d481"),
-	"unique": Color("#ffb26b"),
-	"set": Color("#55e66f"),
-}
-const LOOT_LABEL_CATEGORY_COLORS := {
-	"currency": Color("#ffd75e"),
-	"quest": Color("#6ee68b"),
-	"consumable": Color("#ff8f70"),
-}
-const GROUND_EQUIPMENT_MODEL_SCALE := 1.0
-const BOSS_VISUAL_MODEL := "current_humanoid_player"
-const BOSS_PHASE_TICK_RATE := 10.0
-const BOSS_TELEGRAPH_MARKER_NAME := "BossTelegraphMarker"
-const ARCHER_MONSTER_DEF_ID := "dungeon_archer"
-const ARCHER_BOW_MARKER_NAME := "ArcherBowMarker"
-const CHARACTER_FLOW_CREATE_GAME := "create_game"
-const CHARACTER_FLOW_JOIN_GAME := "join_game"
-const CHARACTER_FLOW_LEGACY_SOLO := "solo"
-const CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST := "multiplayer_host"
-const CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN := "multiplayer_join"
 var client: NetClient
 var resolver: EquipmentVisualResolver
 var player_anim: AnimationController
@@ -122,8 +68,8 @@ var player_reaction: ModelReactionController
 var entities: Dictionary = {}        # id (String) -> {node:Node3D, controller:AnimationController|null, type:String}
 var player_id: String = ""
 var party: Array = []
-var player_hp: int = PLAYER_START_HP
-var player_max_hp: int = PLAYER_START_HP
+var player_hp: int = ClientConstants.PLAYER_START_HP
+var player_max_hp: int = ClientConstants.PLAYER_START_HP
 var player_mana: int = 10
 var player_max_mana: int = 10
 var player_visual_scale: float = 1.0
@@ -221,7 +167,7 @@ var pause_menu: PauseMenu
 var loss_popup: Control
 var gameplay_active: bool = false
 var settings_return_target: String = "main"
-var character_flow: String = CHARACTER_FLOW_CREATE_GAME
+var character_flow: String = ClientConstants.CHARACTER_FLOW_CREATE_GAME
 var pending_join_session_id: String = ""
 const INVENTORY_REPLAY_EVENT_HINTS := {
 	"item_picked_up": "Pickup",
@@ -275,23 +221,11 @@ var _debug_label: Label
 var _level_label: Label
 var _camera: Camera3D
 var ground_node: MeshInstance3D
-var ground_textures: Dictionary = {}
-var wall_textures: Dictionary = {}
-
-const SEND_INTERVAL := 0.1
-const SERVER_TICK_RATE := 10.0
-const DEFAULT_ATTACK_INTERVAL_TICKS := 20
-const PLAYER_SPEED := 2.8
-const WALK_ANIMATION_LINGER_SECONDS := 0.28
-const CAMERA_ZOOM_DEFAULT := 20.0
-const CAMERA_ZOOM_STEP := 1.5
-const CAMERA_ZOOM_MIN := 8.0
-const CAMERA_ZOOM_MAX := 40.0
-const CAMERA_FOLLOW_OFFSET := Vector3(9.0, 20.0, 15.0)
-const PROJECTILE_LERP_SECONDS := 0.10
-const GROUND_TEXTURE_TOWN := "town_grass"
-const GROUND_TEXTURE_DUNGEON := "dungeon_rock"
-const WALL_TEXTURE_CAVE := "cave_wall"
+var _ground_factory: GroundWallFactory = GroundWallFactory.new()
+var _wall_renderer: WallRenderer
+var _loot_factory: LootNodeFactory = LootNodeFactory.new()
+var _boss_visuals_context: BossVisualsContext
+var _boss_visuals: BossVisualsController
 
 func _ready() -> void:
 	player_anchor = $World/PlayerAnchor
@@ -303,8 +237,8 @@ func _ready() -> void:
 	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
-	_apply_model_tint(character_visual, PLAYER_TINT)
-	player_reaction = ModelReactionControllerScript.new(character_visual, PLAYER_TINT)
+	_apply_model_tint(character_visual, ClientConstants.PLAYER_TINT)
+	player_reaction = ModelReactionControllerScript.new(character_visual, ClientConstants.PLAYER_TINT)
 	gameplay_debug_enabled = _truthy_env("ARPG_GAMEPLAY_DEBUG")
 	_build_scene()
 	client_settings = ClientSettingsScript.new()
@@ -456,7 +390,7 @@ func _hide_all_menus() -> void:
 	_hide_character_info_panel()
 
 func _on_create_game_pressed() -> void:
-	character_flow = CHARACTER_FLOW_CREATE_GAME
+	character_flow = ClientConstants.CHARACTER_FLOW_CREATE_GAME
 	pending_join_session_id = ""
 	var characters := client.list_characters()
 	if character_panel != null:
@@ -468,7 +402,7 @@ func _on_create_game_pressed() -> void:
 			character_panel.show_choose_or_create(characters, _account_title("Choose Character"))
 
 func _on_join_game_pressed() -> void:
-	character_flow = CHARACTER_FLOW_JOIN_GAME
+	character_flow = ClientConstants.CHARACTER_FLOW_JOIN_GAME
 	pending_join_session_id = ""
 	_show_join_game_panel(true)
 
@@ -499,14 +433,14 @@ func _refresh_multiplayer_sessions() -> void:
 	multiplayer_panel.set_sessions(client.list_active_sessions())
 
 func _on_host_listed_session_requested() -> void:
-	character_flow = CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST
+	character_flow = ClientConstants.CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST
 	pending_join_session_id = ""
 	_show_character_picker_for_flow("Choose Character")
 
 func _on_join_listed_session_requested(session_id: String) -> void:
 	if session_id == "":
 		return
-	character_flow = CHARACTER_FLOW_JOIN_GAME
+	character_flow = ClientConstants.CHARACTER_FLOW_JOIN_GAME
 	pending_join_session_id = session_id
 	_show_character_picker_for_flow("Choose Character")
 
@@ -514,7 +448,7 @@ func _on_character_panel_back() -> void:
 	if character_panel != null:
 		character_panel.hide_panel()
 	match character_flow:
-		CHARACTER_FLOW_JOIN_GAME, CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN, CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST:
+		ClientConstants.CHARACTER_FLOW_JOIN_GAME, ClientConstants.CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN, ClientConstants.CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST:
 			_show_join_game_panel(false)
 		_:
 			pending_join_session_id = ""
@@ -568,13 +502,13 @@ func _refresh_character_panel_for_current_flow() -> void:
 
 func _start_selected_character(character_id: String) -> void:
 	match character_flow:
-		CHARACTER_FLOW_CREATE_GAME:
+		ClientConstants.CHARACTER_FLOW_CREATE_GAME:
 			_start_create_game_session(character_id)
-		CHARACTER_FLOW_JOIN_GAME:
+		ClientConstants.CHARACTER_FLOW_JOIN_GAME:
 			_start_listed_join_session(character_id)
-		CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST:
+		ClientConstants.CHARACTER_FLOW_LEGACY_MULTIPLAYER_HOST:
 			_start_listed_host_session(character_id)
-		CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN:
+		ClientConstants.CHARACTER_FLOW_LEGACY_MULTIPLAYER_JOIN:
 			_start_listed_join_session(character_id)
 		_:
 			_start_character_session(character_id)
@@ -607,7 +541,7 @@ func _start_listed_host_session(character_id: String) -> void:
 		character_panel.set_error("Could not host listed session")
 		return
 	bot_mode = false
-	character_flow = CHARACTER_FLOW_CREATE_GAME
+	character_flow = ClientConstants.CHARACTER_FLOW_CREATE_GAME
 	_begin_gameplay_connection(false)
 
 func _start_listed_join_session(character_id: String) -> void:
@@ -619,7 +553,7 @@ func _start_listed_join_session(character_id: String) -> void:
 		character_panel.set_error("Could not join listed session")
 		return
 	bot_mode = false
-	character_flow = CHARACTER_FLOW_CREATE_GAME
+	character_flow = ClientConstants.CHARACTER_FLOW_CREATE_GAME
 	pending_join_session_id = ""
 	_begin_gameplay_connection(false)
 
@@ -730,8 +664,8 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	ready_sent = false
 	player_id = ""
 	party = []
-	player_hp = PLAYER_START_HP
-	player_max_hp = PLAYER_START_HP
+	player_hp = ClientConstants.PLAYER_START_HP
+	player_max_hp = ClientConstants.PLAYER_START_HP
 	player_mana = 10
 	player_max_mana = 10
 	predicted_pos = Vector3.ZERO
@@ -766,7 +700,8 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	_bot_pending_events.clear()
 	_bot_logged_snapshot = false
 	_clear_level_entities()
-	_hide_boss_health_bar()
+	if _boss_visuals != null:
+		_boss_visuals.hide_boss_health_bar()
 	if walls_root != null:
 		_clear_wall_nodes()
 	if resolver != null:
@@ -809,7 +744,9 @@ func _process(delta: float) -> void:
 	if gameplay_active or visual_replay_enabled:
 		for env in client.poll():
 			_handle_message(env)
-		_advance_boss_phase_display(delta)
+		if _boss_visuals != null:
+			_boss_visuals_context.last_server_tick = last_server_tick
+			_boss_visuals.advance_boss_phase_display(delta)
 		_tick_skill_cooldowns(delta)
 	_sync_progression_interactivity()
 	_try_complete_pending_interactable_action()
@@ -923,7 +860,9 @@ func _apply_snapshot(p: Dictionary) -> void:
 	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
 	for e in p.get("entities", []):
 		_upsert_entity(e)
-	_sync_boss_health_bar()
+	if _boss_visuals != null:
+		_boss_visuals_context.last_server_tick = last_server_tick
+		_boss_visuals.sync_boss_health_bar()
 	inventory = p.get("inventory", [])
 	equipped = p.get("equipped", {})
 	active_weapon_set = int(p.get("active_weapon_set", active_weapon_set))
@@ -1186,7 +1125,7 @@ func _apply_delta(p: Dictionary) -> void:
 				_show_loss_popup()
 			if event_type == "attack_missed":
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
-			var player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
+			var player_clip = ClientConstants.PLAYER_EVENT_CLIPS.get(event_type, null)
 			if player_clip == null or player_anim == null:
 				continue
 			if player_clip == "death":
@@ -1194,7 +1133,7 @@ func _apply_delta(p: Dictionary) -> void:
 			else:
 				_play_local_player_reaction_animation(player_clip)
 			continue
-		if PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
+		if ClientConstants.PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
 			if event_type == "player_damaged":
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
@@ -1203,7 +1142,7 @@ func _apply_delta(p: Dictionary) -> void:
 				var remote_dead: Dictionary = entities[eid]
 				remote_dead["hp"] = 0
 				_play_entity_reaction(eid, ev, "death")
-			var remote_player_clip = PLAYER_EVENT_CLIPS.get(event_type, null)
+			var remote_player_clip = ClientConstants.PLAYER_EVENT_CLIPS.get(event_type, null)
 			var remote_ctrl = entities[eid].get("controller", null)
 			if remote_ctrl != null:
 				if remote_player_clip == "death":
@@ -1289,18 +1228,21 @@ func _apply_delta(p: Dictionary) -> void:
 				bishop_panel.show_status("Stat point gained")
 			continue
 		if event_type == "boss_killed":
-			_last_boss_reward_status = "%s defeated" % _boss_health_bar_title(str(ev.get("boss_template_id", "")))
+			_last_boss_reward_status = "%s defeated" % (_boss_visuals.boss_health_bar_title(str(ev.get("boss_template_id", ""))) if _boss_visuals != null else "Boss")
 			continue
 		if event_type == "boss_phase_started" and entities.has(eid):
-			_apply_boss_phase_started(eid, ev)
+			if _boss_visuals != null:
+				_boss_visuals_context.last_server_tick = last_server_tick
+				_boss_visuals.apply_boss_phase_started(eid, ev)
 			continue
 		if event_type == "boss_phase_ended" and entities.has(eid):
-			_apply_boss_phase_ended(eid, ev)
+			if _boss_visuals != null:
+				_boss_visuals.apply_boss_phase_ended(eid, ev)
 			continue
 		if event_type == "monster_aggro":
 			_show_damage_number(eid, Color("#80ff8f"), null, "", 0.0, "threat", "AGGRO")
 			continue
-		var clip = MONSTER_EVENT_CLIPS.get(event_type, null)
+		var clip = ClientConstants.MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
 			if event_type in ["attack_missed", "attack_blocked"]:
 				if str(ev.get("source_entity_id", "")) == player_id:
@@ -1337,7 +1279,9 @@ func _apply_delta(p: Dictionary) -> void:
 	if bot_mode:
 		for ev in p.get("events", []):
 			_bot_pending_events.append(ev)
-	_sync_boss_health_bar()
+	if _boss_visuals != null:
+		_boss_visuals_context.last_server_tick = last_server_tick
+		_boss_visuals.sync_boss_health_bar()
 	_reconcile_player()
 
 func _local_player_motion_skill_id(events: Array) -> String:
@@ -1470,12 +1414,12 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 			var hp_val := int(e.get("hp", rec.get("hp", 1)))
 			var moved := prev_pos.distance_to(server_pos) > 0.001
 			if moved and hp_val > 0:
-				rec["walk_linger"] = WALK_ANIMATION_LINGER_SECONDS
+				rec["walk_linger"] = ClientConstants.WALK_ANIMATION_LINGER_SECONDS
 				_face_entity_direction(node, Vector2(server_pos.x - prev_pos.x, server_pos.z - prev_pos.z))
 			rec["controller"].set_locomotion(float(rec.get("walk_linger", 0.0)) > 0.0 and hp_val > 0)
 		if rec["type"] == "player":
-			rec["hp"] = int(e.get("hp", rec.get("hp", PLAYER_START_HP)))
-			rec["max_hp"] = int(e.get("max_hp", rec.get("max_hp", PLAYER_START_HP)))
+			rec["hp"] = int(e.get("hp", rec.get("hp", ClientConstants.PLAYER_START_HP)))
+			rec["max_hp"] = int(e.get("max_hp", rec.get("max_hp", ClientConstants.PLAYER_START_HP)))
 			if int(rec["hp"]) <= 0:
 				_enter_entity_terminal_death(id, rec)
 	if rec["type"] == "interactable":
@@ -1520,7 +1464,9 @@ func _remove_entity(id: String) -> void:
 	loot_ids.erase(id)
 	monster_ids.erase(id)
 	interactable_ids.erase(id)
-	_sync_boss_health_bar()
+	if _boss_visuals != null:
+		_boss_visuals_context.last_server_tick = last_server_tick
+		_boss_visuals.sync_boss_health_bar()
 	_sync_companion_bar()
 
 func _entity_type_uses_combat_presentation(entity_type: String) -> bool:
@@ -1562,7 +1508,8 @@ func _clear_level_entities() -> void:
 		if is_instance_valid(bar):
 			bar.queue_free()
 	monster_health_bars.clear()
-	_hide_boss_health_bar()
+	if _boss_visuals != null:
+		_boss_visuals.hide_boss_health_bar()
 	loot_ids.clear()
 	hovered_loot_id = ""
 	monster_ids.clear()
@@ -1661,7 +1608,7 @@ func _sync_camera_to_player() -> void:
 	if _camera == null or player_anchor == null:
 		return
 	var target := player_anchor.global_position
-	_camera.global_position = target + CAMERA_FOLLOW_OFFSET
+	_camera.global_position = target + ClientConstants.CAMERA_FOLLOW_OFFSET
 	_camera.look_at(target, Vector3.UP)
 
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
@@ -2117,10 +2064,10 @@ func _show_inventory_full_text(target_id: String) -> void:
 	pop.setup(_camera, target, target.global_position, null, Color("#ffcf5a"), 0.0, "", "inventory", "BAG FULL")
 
 func _show_bag_full_cant_unequip_text() -> void:
-	_last_inventory_feedback_text = BAG_FULL_CANT_UNEQUIP_TEXT
+	_last_inventory_feedback_text = ClientConstants.BAG_FULL_CANT_UNEQUIP_TEXT
 	if inventory_panel != null:
-		inventory_panel.show_gesture_hint(BAG_FULL_CANT_UNEQUIP_TEXT)
-	_show_damage_number(player_id, Color("#ffcf5a"), null, "", 0.0, "inventory", BAG_FULL_CANT_UNEQUIP_TEXT)
+		inventory_panel.show_gesture_hint(ClientConstants.BAG_FULL_CANT_UNEQUIP_TEXT)
+	_show_damage_number(player_id, Color("#ffcf5a"), null, "", 0.0, "inventory", ClientConstants.BAG_FULL_CANT_UNEQUIP_TEXT)
 
 func _send_action_intent(target_id: String) -> void:
 	if client == null or target_id == "":
@@ -2129,13 +2076,13 @@ func _send_action_intent(target_id: String) -> void:
 	pending_action_targets[message_id] = {"target_id": target_id}
 
 func _basic_attack_cooldown_seconds() -> float:
-	var ticks := DEFAULT_ATTACK_INTERVAL_TICKS
+	var ticks := ClientConstants.DEFAULT_ATTACK_INTERVAL_TICKS
 	var derived = character_progression.get("derived_stats", {})
 	if typeof(derived) == TYPE_DICTIONARY:
-		ticks = int(derived.get("attack_interval_ticks", DEFAULT_ATTACK_INTERVAL_TICKS))
+		ticks = int(derived.get("attack_interval_ticks", ClientConstants.DEFAULT_ATTACK_INTERVAL_TICKS))
 	if ticks <= 0:
-		ticks = DEFAULT_ATTACK_INTERVAL_TICKS
-	return maxf(SEND_INTERVAL, float(ticks) / SERVER_TICK_RATE)
+		ticks = ClientConstants.DEFAULT_ATTACK_INTERVAL_TICKS
+	return maxf(ClientConstants.SEND_INTERVAL, float(ticks) / ClientConstants.SERVER_TICK_RATE)
 
 func _start_basic_attack_recovery_ui(duration_seconds: float = -1.0) -> void:
 	if character_bar == null:
@@ -2211,89 +2158,6 @@ func _sync_companion_bar() -> void:
 		})
 	companion_bar.set_companions(companions)
 	if mercenary_panel != null: mercenary_panel.set_companions(companions)
-
-func _hide_boss_health_bar() -> void:
-	if boss_health_bar != null:
-		boss_health_bar.hide_boss()
-
-func _sync_boss_health_bar() -> void:
-	if boss_health_bar == null:
-		return
-	var boss_id := _active_boss_entity_id()
-	if boss_id == "":
-		boss_health_bar.hide_boss()
-		return
-	var rec: Dictionary = entities[boss_id]
-	var hp := int(rec.get("hp", 0))
-	var max_hp := int(rec.get("max_hp", hp))
-	var template_id := str(rec.get("boss_template_id", ""))
-	boss_health_bar.show_boss(boss_id, template_id, _boss_health_bar_title(template_id), hp, max_hp)
-	var phase := _boss_phase_for_display(rec)
-	if phase.is_empty():
-		boss_health_bar.clear_phase_state()
-	else:
-		boss_health_bar.set_phase_state(phase)
-
-func _advance_boss_phase_display(delta: float) -> void:
-	var changed := false
-	for id in entities.keys():
-		var rec: Dictionary = entities[id]
-		var phase := _boss_phase_for_display(rec)
-		if phase.is_empty():
-			continue
-		var remaining := float(phase.get("remaining_ticks_float", float(phase.get("remaining_ticks", 0))))
-		remaining = maxf(0.0, remaining - maxf(0.0, delta) * BOSS_PHASE_TICK_RATE)
-		phase["remaining_ticks_float"] = remaining
-		phase["remaining_ticks"] = int(ceil(remaining))
-		rec["boss_phase"] = phase
-		changed = true
-	if changed:
-		_sync_boss_health_bar()
-
-func _boss_phase_for_display(rec: Dictionary) -> Dictionary:
-	var raw = rec.get("boss_phase", {})
-	if typeof(raw) != TYPE_DICTIONARY:
-		return {}
-	var phase: Dictionary = (raw as Dictionary).duplicate(true)
-	var kind := str(phase.get("phase_kind", ""))
-	if kind == "":
-		return {}
-	var duration := maxi(0, int(phase.get("duration_ticks", 0)))
-	phase["duration_ticks"] = duration
-	var remaining := int(phase.get("remaining_ticks", -1))
-	if remaining < 0:
-		var started_tick := int(phase.get("started_tick", last_server_tick))
-		remaining = max(0, duration - max(0, last_server_tick - started_tick))
-	phase["remaining_ticks"] = clampi(remaining, 0, duration)
-	phase["remaining_ticks_float"] = clampf(float(phase.get("remaining_ticks_float", phase["remaining_ticks"])), 0.0, float(duration))
-	rec["boss_phase"] = phase
-	return phase
-
-func _active_boss_entity_id() -> String:
-	var candidates: Array = []
-	for id in entities.keys():
-		var rec: Dictionary = entities[id]
-		if str(rec.get("type", "")) != "monster":
-			continue
-		if not bool(rec.get("is_boss", false)):
-			continue
-		if int(rec.get("hp", 0)) <= 0:
-			continue
-		candidates.append(str(id))
-	candidates.sort()
-	return str(candidates[0]) if not candidates.is_empty() else ""
-
-func _boss_health_bar_title(template_id: String) -> String:
-	if template_id == "":
-		return "Boss"
-	var pieces := template_id.replace("-", "_").split("_", false)
-	var words := PackedStringArray()
-	for piece in pieces:
-		var word := str(piece)
-		if word == "":
-			continue
-		words.append(word.substr(0, 1).to_upper() + word.substr(1).to_lower())
-	return " ".join(words) if words.size() > 0 else template_id
 
 # --- input + prediction -----------------------------------------------------
 
@@ -2394,9 +2258,9 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 					return
 			MOUSE_BUTTON_WHEEL_UP:
-				_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
+				_adjust_camera_zoom(-ClientConstants.CAMERA_ZOOM_STEP)
 			MOUSE_BUTTON_WHEEL_DOWN:
-				_adjust_camera_zoom(CAMERA_ZOOM_STEP)
+				_adjust_camera_zoom(ClientConstants.CAMERA_ZOOM_STEP)
 
 func _handle_input(delta: float) -> void:
 	_update_loot_hover_label()
@@ -2427,11 +2291,11 @@ func _handle_input(delta: float) -> void:
 		var dir := _camera_relative_flat_direction(input)
 		_close_gameplay_panels_for_movement()
 		# Local prediction: move immediately for responsive feel.
-		predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
+		predicted_pos += Vector3(dir.x, 0, dir.y) * ClientConstants.PLAYER_SPEED * ClientConstants.SEND_INTERVAL
 		_reconcile_player()
 		_mark_local_player_walking()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
-		_send_cooldown = SEND_INTERVAL
+		_send_cooldown = ClientConstants.SEND_INTERVAL
 
 	if _hold_input_allowed():
 		_tick_sustained_click()
@@ -2496,7 +2360,7 @@ func _movement_intent_starts_motion(intent_type: String, payload: Dictionary) ->
 	return absf(float(direction.get("x", 0.0))) > 0.0001 or absf(float(direction.get("y", 0.0))) > 0.0001
 
 func _mark_local_player_walking() -> void:
-	_player_walk_linger = WALK_ANIMATION_LINGER_SECONDS
+	_player_walk_linger = ClientConstants.WALK_ANIMATION_LINGER_SECONDS
 
 func _local_player_is_walking() -> bool:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
@@ -2606,7 +2470,7 @@ func _handle_autoplay(delta: float) -> void:
 		"move":
 			if not autoplay_move_sent:
 				var dir := Vector2(1, 0)
-				predicted_pos += Vector3(dir.x, 0, dir.y) * PLAYER_SPEED * SEND_INTERVAL
+				predicted_pos += Vector3(dir.x, 0, dir.y) * ClientConstants.PLAYER_SPEED * ClientConstants.SEND_INTERVAL
 				_reconcile_player()
 				_mark_local_player_walking()
 				client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
@@ -2706,7 +2570,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 		_close_gameplay_panels_for_movement()
 		_mark_local_player_walking()
 		client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
-		_attack_cooldown = SEND_INTERVAL
+		_attack_cooldown = ClientConstants.SEND_INTERVAL
 		if _sustained_click.mode == "move":
 			_sustained_click.mark_move_sent(ground)
 		return
@@ -2731,7 +2595,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 		player_anim.play_one_shot("attack")
 
 	_send_action_intent(target_id)
-	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else SEND_INTERVAL
+	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else ClientConstants.SEND_INTERVAL
 	if typ == "monster":
 		_start_basic_attack_recovery_ui(_attack_cooldown)
 
@@ -2746,15 +2610,15 @@ func _target_in_local_attack_range(target_id: String) -> bool:
 	var player_position := _node_world_or_local_position(player_anchor)
 	var flat := Vector2(target_position.x - player_position.x, target_position.z - player_position.z)
 	var reach := _local_player_attack_reach()
-	return flat.length() <= reach + _local_target_interaction_radius(rec) + LOCAL_REACH_EPSILON
+	return flat.length() <= reach + _local_target_interaction_radius(rec) + ClientConstants.LOCAL_REACH_EPSILON
 
 func _local_player_attack_reach() -> float:
 	var item := _local_equipped_weapon_item()
 	if item.is_empty():
-		return LOCAL_UNARMED_REACH
+		return ClientConstants.LOCAL_UNARMED_REACH
 	var def := _local_equipped_weapon_definition(item)
-	var reach := float(def.get("reach", LOCAL_UNARMED_REACH))
-	return reach if reach > 0.0 else LOCAL_UNARMED_REACH
+	var reach := float(def.get("reach", ClientConstants.LOCAL_UNARMED_REACH))
+	return reach if reach > 0.0 else ClientConstants.LOCAL_UNARMED_REACH
 
 func _local_equipped_weapon_item() -> Dictionary:
 	var raw_weapon_id = equipped.get("main_hand", null)
@@ -2784,11 +2648,11 @@ func _local_equipped_weapon_definition(item: Dictionary) -> Dictionary:
 func _local_target_interaction_radius(rec: Dictionary) -> float:
 	match str(rec.get("type", "")):
 		"monster":
-			return LOCAL_MONSTER_RADIUS
+			return ClientConstants.LOCAL_MONSTER_RADIUS
 		"loot":
-			return LOCAL_LOOT_RADIUS
+			return ClientConstants.LOCAL_LOOT_RADIUS
 		"interactable":
-			return LOCAL_INTERACTABLE_RADIUS
+			return ClientConstants.LOCAL_INTERACTABLE_RADIUS
 		_:
 			return 0.0
 
@@ -2851,7 +2715,7 @@ func _repeat_hold_move() -> void:
 	_mark_local_player_walking()
 	client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
 	_sustained_click.mark_move_sent(ground)
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = ClientConstants.SEND_INTERVAL
 
 func _try_action_at_mouse() -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
@@ -2887,7 +2751,7 @@ func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> v
 	}
 	if interactable_def_id == "teleporter":
 		_send_action_intent(target_id)
-		_attack_cooldown = SEND_INTERVAL
+		_attack_cooldown = ClientConstants.SEND_INTERVAL
 		return
 	var target_node := rec["node"] as Node3D
 	if target_node == null:
@@ -2898,7 +2762,7 @@ func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> v
 	client.send("move_to_intent", last_server_tick, {
 		"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
 	})
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = ClientConstants.SEND_INTERVAL
 
 func _try_complete_pending_interactable_action() -> void:
 	if pending_interactable_action.is_empty() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
@@ -2923,27 +2787,27 @@ func _interactable_in_activation_range(rec: Dictionary) -> bool:
 		target_pos.x - player_pos.x,
 		target_pos.z - player_pos.z
 	)
-	return flat.length() <= INTERACTABLE_ACTIVATION_RANGE
+	return flat.length() <= ClientConstants.INTERACTABLE_ACTIVATION_RANGE
 
 func _activate_interactable_now(target_id: String, rec: Dictionary) -> void:
 	var interactable_def_id := str(rec.get("interactable_def_id", ""))
 	if interactable_def_id == "stairs_down":
 		client.send("descend_intent", last_server_tick, {})
-		_attack_cooldown = SEND_INTERVAL
+		_attack_cooldown = ClientConstants.SEND_INTERVAL
 		return
 	if interactable_def_id == "stairs_up":
 		client.send("ascend_intent", last_server_tick, {})
-		_attack_cooldown = SEND_INTERVAL
+		_attack_cooldown = ClientConstants.SEND_INTERVAL
 		return
 	if interactable_def_id == "teleporter":
 		if bool(discovered_teleporters.get(current_level, false)):
 			_show_waypoint_panel()
 		else:
 			_send_action_intent(target_id)
-			_attack_cooldown = SEND_INTERVAL
+			_attack_cooldown = ClientConstants.SEND_INTERVAL
 		return
 	_send_action_intent(target_id)
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = ClientConstants.SEND_INTERVAL
 
 func _update_facing_toward_mouse() -> void:
 	var aim := _aim_direction_from_mouse()
@@ -3229,7 +3093,7 @@ func _adjust_camera_zoom(delta_size: float) -> void:
 	if _camera == null:
 		return
 
-	_camera.size = clampf(_camera.size + delta_size, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
+	_camera.size = clampf(_camera.size + delta_size, ClientConstants.CAMERA_ZOOM_MIN, ClientConstants.CAMERA_ZOOM_MAX)
 
 # --- visual replay playlist -------------------------------------------------
 
@@ -3381,13 +3245,13 @@ func _entity_world_center(entity_id: String) -> Vector3:
 # --- scene construction (placeholder primitives) ----------------------------
 
 func _build_scene() -> void:
-	ground_node = _make_ground_node()
+	ground_node = _ground_factory.make_ground_node(current_level)
 	add_child(ground_node)
 
 	_camera = Camera3D.new()
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	_camera.size = CAMERA_ZOOM_DEFAULT
-	_camera.position = CAMERA_FOLLOW_OFFSET
+	_camera.size = ClientConstants.CAMERA_ZOOM_DEFAULT
+	_camera.position = ClientConstants.CAMERA_FOLLOW_OFFSET
 	add_child(_camera)
 	# look_at requires the node to be inside the scene tree (Godot 4).
 	_sync_camera_to_player()
@@ -3415,6 +3279,11 @@ func _build_scene() -> void:
 	_update_level_hud()
 	boss_health_bar = BossHealthBarScript.new()
 	ui.add_child(boss_health_bar)
+	_boss_visuals_context = BossVisualsContextScript.new()
+	_boss_visuals_context.entities = entities
+	_boss_visuals_context.apply_model_tint = Callable(self, "_apply_model_tint")
+	_boss_visuals_context.apply_entity_status_tint = Callable(self, "_apply_entity_status_tint")
+	_boss_visuals = BossVisualsControllerScript.new(_boss_visuals_context, boss_health_bar)
 	_setup_waypoint_panel(ui)
 	inventory_panel = InventoryPanelScript.new()
 	inventory_panel.intent_requested.connect(_on_inventory_intent_requested)
@@ -3490,100 +3359,10 @@ func _build_scene() -> void:
 	walls_root = Node3D.new()
 	walls_root.name = "StaticWalls"
 	add_child(walls_root)
-
-func _make_ground_node() -> MeshInstance3D:
-	var node := MeshInstance3D.new()
-	node.name = "Ground"
-	var mesh := PlaneMesh.new()
-	mesh.size = Vector2(140.0, 90.0)
-	mesh.subdivide_width = 32
-	mesh.subdivide_depth = 20
-	node.mesh = mesh
-	node.position = Vector3(50.0, -0.02, 25.0)
-	node.material_override = _ground_material_for_level(current_level)
-	return node
+	_wall_renderer = WallRenderer.new(walls_root, _ground_factory)
 
 func _update_ground_material() -> void:
-	if ground_node == null:
-		return
-	ground_node.material_override = _ground_material_for_level(current_level)
-
-func _ground_texture_id_for_level(level: int) -> String:
-	return GROUND_TEXTURE_TOWN if level == 0 else GROUND_TEXTURE_DUNGEON
-
-func _ground_material_for_level(level: int) -> StandardMaterial3D:
-	var texture_id := _ground_texture_id_for_level(level)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = _make_ground_texture(texture_id)
-	mat.albedo_color = Color.WHITE
-	mat.roughness = 0.92
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	mat.uv1_scale = Vector3(28.0, 18.0, 1.0)
-	return mat
-
-func _make_ground_texture(texture_id: String) -> ImageTexture:
-	if ground_textures.has(texture_id):
-		return ground_textures[texture_id] as ImageTexture
-	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
-	for y in range(64):
-		for x in range(64):
-			image.set_pixel(x, y, _ground_texel(texture_id, x, y))
-	var texture := ImageTexture.create_from_image(image)
-	ground_textures[texture_id] = texture
-	return texture
-
-func _ground_texel(texture_id: String, x: int, y: int) -> Color:
-	var n := int((x * 37 + y * 19 + ((x / 8) * 11) + ((y / 8) * 23)) % 17)
-	if texture_id == GROUND_TEXTURE_TOWN:
-		var base := Color("#2f6136").lerp(Color("#79aa58"), float(n) / 16.0)
-		var dirt_patch := int((x * 9 + y * 5 + ((x / 8) * 17) + ((y / 8) * 29)) % 41)
-		if dirt_patch < 8:
-			base = base.lerp(Color("#8f7447"), 0.50)
-		elif dirt_patch < 13:
-			base = base.lerp(Color("#6f5f39"), 0.30)
-		if ((x * 5 + y * 3) % 23) == 0:
-			base = base.lerp(Color("#b7b56c"), 0.34)
-		if ((x * 11 + y * 7) % 31) == 0:
-			base = base.lerp(Color("#274c2b"), 0.36)
-		if ((x / 8 + y / 8) % 5) == 0 and ((x * 13 + y * 17) % 19) < 3:
-			base = base.lerp(Color("#456f35"), 0.20)
-		return base
-	var rock := Color("#3c3f43").lerp(Color("#73706b"), float(n) / 16.0)
-	if abs((x % 16) - (y % 16)) <= 1:
-		rock = rock.lerp(Color("#25282c"), 0.35)
-	if ((x * 3 + y * 5) % 29) == 0:
-		rock = rock.lerp(Color("#a09a8e"), 0.28)
-	return rock
-
-func _make_wall_texture(texture_id: String) -> ImageTexture:
-	if wall_textures.has(texture_id):
-		return wall_textures[texture_id] as ImageTexture
-	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
-	for y in range(64):
-		for x in range(64):
-			image.set_pixel(x, y, _wall_texel(texture_id, x, y))
-	var texture := ImageTexture.create_from_image(image)
-	wall_textures[texture_id] = texture
-	return texture
-
-func _wall_texel(_texture_id: String, x: int, y: int) -> Color:
-	var brick_w := 16
-	var brick_h := 12
-	var row := int(y / brick_h)
-	var offset := 8 if row % 2 == 1 else 0
-	var local_x := int((x + offset) % brick_w)
-	var local_y := int(y % brick_h)
-	var noise := int((x * 29 + y * 43 + row * 17 + int((x + offset) / brick_w) * 13) % 23)
-	var stone := Color("#34363a").lerp(Color("#6b6255"), float(noise) / 22.0)
-	if local_x <= 1 or local_y <= 1:
-		return stone.lerp(Color("#17191c"), 0.62)
-	if local_x >= brick_w - 2 or local_y >= brick_h - 2:
-		stone = stone.lerp(Color("#202226"), 0.34)
-	if ((x * 5 + y * 7) % 31) == 0:
-		stone = stone.lerp(Color("#9b9386"), 0.32)
-	if ((x - y) % 19) == 0:
-		stone = stone.lerp(Color("#22252a"), 0.30)
-	return stone
+	_ground_factory.update_ground_material(ground_node, current_level)
 
 func _setup_menu_layer() -> void:
 	menu_layer = CanvasLayer.new()
@@ -3812,7 +3591,7 @@ func _assign_right_click_skill(skill_id: String) -> bool:
 	return true
 
 func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
-	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT or skill_id == "":
+	if slot_index < 0 or slot_index >= ClientConstants.SKILL_FUNCTION_KEY_COUNT or skill_id == "":
 		return false
 	_ensure_skill_function_key_slots()
 	skill_function_keys[slot_index] = skill_id
@@ -3824,7 +3603,7 @@ func _assign_skill_function_key(slot_index: int, skill_id: String) -> bool:
 	return true
 
 func _select_right_click_skill_from_function_key(slot_index: int) -> bool:
-	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT:
+	if slot_index < 0 or slot_index >= ClientConstants.SKILL_FUNCTION_KEY_COUNT:
 		return false
 	_ensure_skill_function_key_slots()
 	var skill_id := str(skill_function_keys[slot_index])
@@ -3833,7 +3612,7 @@ func _select_right_click_skill_from_function_key(slot_index: int) -> bool:
 	return _assign_right_click_skill(skill_id)
 
 func _handle_skill_function_key(slot_index: int) -> bool:
-	if slot_index < 0 or slot_index >= SKILL_FUNCTION_KEY_COUNT:
+	if slot_index < 0 or slot_index >= ClientConstants.SKILL_FUNCTION_KEY_COUNT:
 		return false
 	if skills_panel != null and skills_panel.visible:
 		var hovered_skill_id := skills_panel.hovered_skill_id()
@@ -3842,10 +3621,10 @@ func _handle_skill_function_key(slot_index: int) -> bool:
 	return _select_right_click_skill_from_function_key(slot_index)
 
 func _ensure_skill_function_key_slots() -> void:
-	while skill_function_keys.size() < SKILL_FUNCTION_KEY_COUNT:
+	while skill_function_keys.size() < ClientConstants.SKILL_FUNCTION_KEY_COUNT:
 		skill_function_keys.append("")
-	if skill_function_keys.size() > SKILL_FUNCTION_KEY_COUNT:
-		skill_function_keys.resize(SKILL_FUNCTION_KEY_COUNT)
+	if skill_function_keys.size() > ClientConstants.SKILL_FUNCTION_KEY_COUNT:
+		skill_function_keys.resize(ClientConstants.SKILL_FUNCTION_KEY_COUNT)
 
 func _apply_skill_bindings(bindings: Dictionary) -> void:
 	var keys: Array = bindings.get("function_keys", [])
@@ -3887,7 +3666,7 @@ func _sync_skill_bar_selection() -> void:
 func _tick_skill_cooldowns(delta: float) -> void:
 	if skill_cooldowns.is_empty():
 		return
-	var elapsed_ticks := maxf(0.0, delta) * SERVER_TICK_RATE
+	var elapsed_ticks := maxf(0.0, delta) * ClientConstants.SERVER_TICK_RATE
 	var next: Array = []
 	var changed := false
 	for row in skill_cooldowns:
@@ -3985,7 +3764,7 @@ func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction
 		return false
 	var message_id := client.send("cast_skill_intent", last_server_tick, payload)
 	pending_skill_casts[message_id] = {"skill_id": skill_id}
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = ClientConstants.SEND_INTERVAL
 	if player_anim != null:
 		player_anim.play_one_shot("attack")
 	return true
@@ -4053,7 +3832,7 @@ func _show_skill_rejected_feedback(reason: String = "") -> void:
 func _skill_reject_message(reason: String) -> String:
 	match reason:
 		"not_enough_mana":
-			return NO_MANA_TEXT
+			return ClientConstants.NO_MANA_TEXT
 		"skill_not_learned":
 			return "SKILL NOT LEARNED"
 		"target_out_of_range":
@@ -4830,96 +4609,25 @@ func _current_teleporter_record() -> Dictionary:
 	return {}
 
 func _render_world_walls(world_id: String) -> void:
-	if walls_root == null:
-		return
 	current_wall_layout = []
-	_clear_wall_nodes()
-
-	var rules_path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/worlds.v0.json")
-	var parsed = _read_json(rules_path)
-	if typeof(parsed) != TYPE_DICTIONARY:
-		push_warning("[main] could not read world rules for walls: %s" % rules_path)
-		return
-	var worlds: Dictionary = parsed.get("worlds", {})
-	var world: Dictionary = worlds.get(world_id, {})
-	if str(world.get("mode", "")) == "multi_level":
-		return
-	var local_walls: Array = []
-	var local_index := 0
-	for entity in world.get("entities", []):
-		if str(entity.get("type", "")) != "wall":
-			continue
-		var pos: Dictionary = entity.get("position", {})
-		var size: Dictionary = entity.get("size", {})
-		local_walls.append({
-			"id": "%s_wall_%03d" % [world_id, local_index],
-			"position": {"x": float(pos.get("x", 0.0)), "y": float(pos.get("y", 0.0))},
-			"size": {"x": float(size.get("x", 1.0)), "y": float(size.get("y", 1.0))},
-			"source": "preset",
-		})
-		local_index += 1
-	_render_wall_layout(local_walls)
+	_ensure_wall_renderer()
+	if _wall_renderer != null:
+		current_wall_layout = _wall_renderer.render_world_walls(world_id)
 
 func _render_wall_layout(walls: Array) -> void:
-	if walls_root == null:
-		return
 	current_wall_layout = []
-	_clear_wall_nodes()
-	for wall in walls:
-		if typeof(wall) != TYPE_DICTIONARY:
-			continue
-		var normalized := _normalized_wall_view(wall as Dictionary, current_wall_layout.size())
-		current_wall_layout.append(normalized)
-		walls_root.add_child(_make_wall_node(normalized))
+	_ensure_wall_renderer()
+	if _wall_renderer != null:
+		current_wall_layout = _wall_renderer.render_wall_layout(walls)
 
 func _clear_wall_nodes() -> void:
-	if walls_root == null:
-		return
-	for child in walls_root.get_children():
-		walls_root.remove_child(child)
-		child.queue_free()
+	_ensure_wall_renderer()
+	if _wall_renderer != null:
+		_wall_renderer.clear_wall_nodes()
 
-func _normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
-	var pos: Dictionary = {}
-	var size: Dictionary = {}
-	if typeof(wall.get("position", {})) == TYPE_DICTIONARY:
-		pos = wall.get("position", {})
-	if typeof(wall.get("size", {})) == TYPE_DICTIONARY:
-		size = wall.get("size", {})
-	var out := {
-		"id": str(wall.get("id", "wall_%03d" % index)),
-		"position": {"x": float(pos.get("x", 0.0)), "y": float(pos.get("y", 0.0))},
-		"size": {"x": float(size.get("x", 1.0)), "y": float(size.get("y", 1.0))},
-	}
-	if wall.has("source"):
-		out["source"] = str(wall.get("source", ""))
-	return out
-
-func _make_wall_node(wall: Dictionary) -> MeshInstance3D:
-	var pos: Dictionary = wall.get("position", {})
-	var size: Dictionary = wall.get("size", {})
-	var node := MeshInstance3D.new()
-	node.name = "Wall_%s" % str(wall.get("id", ""))
-	node.set_meta("wall_id", str(wall.get("id", "")))
-	node.set_meta("source", str(wall.get("source", "")))
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(float(size.get("x", 1.0)), 1.0, float(size.get("y", 1.0)))
-	node.mesh = mesh
-	node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
-	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = _make_wall_texture(WALL_TEXTURE_CAVE)
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	mat.roughness = 0.96
-	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.0), max(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
-	match str(wall.get("source", "")):
-		"generated":
-			mat.albedo_color = Color(0.92, 0.86, 0.76)
-		"perimeter":
-			mat.albedo_color = Color(0.62, 0.64, 0.68)
-		_:
-			mat.albedo_color = Color(0.78, 0.80, 0.82)
-	node.material_override = mat
-	return node
+func _ensure_wall_renderer() -> void:
+	if _wall_renderer == null and walls_root != null:
+		_wall_renderer = WallRenderer.new(walls_root, _ground_factory)
 
 func _update_level_hud() -> void:
 	if _level_label == null:
@@ -4958,7 +4666,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	if kind == "monster" or kind == "companion":
 		var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
 		var packed := _monster_scene_for_visual(str(visual.get("scene", "monster_dummy")))
-		if str(e.get("visual_model", "")) == BOSS_VISUAL_MODEL:
+		if str(e.get("visual_model", "")) == ClientConstants.BOSS_VISUAL_MODEL:
 			packed = CharacterScene
 		if packed != null:
 			var root := Node3D.new()
@@ -4984,26 +4692,12 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 		return _make_remote_player_node(e)
 	if kind == "interactable":
 		var def_id := str(e.get("interactable_def_id", ""))
-		if def_id == "stairs_down" or def_id == "stairs_up":
-			return _make_stair_node(def_id)
-		if def_id == "teleporter":
-			return _make_teleporter_node()
-		if def_id == "treasure_chest" or def_id == "town_stash" or def_id == "town_unique_chest":
-			return _make_chest_node(def_id, bool(e.get("elite_objective", false)), bool(e.get("quest_reward", false)))
 		if def_id == "hero_corpse":
 			return _make_hero_corpse_node(e)
-		if def_id == "town_vendor" or def_id == "town_mystery_seller":
-			return _make_merchant_node(def_id)
-		if def_id == "town_bishop":
-			return _make_bishop_node()
-		if def_id == "town_market_board":
-			return _make_market_board_node()
-		if def_id == "town_blacksmith":
-			return _make_blacksmith_node()
-		return _make_door_node()
+		return TownNodeFactoryScript.make_interactable_node(def_id, bool(e.get("elite_objective", false)), bool(e.get("quest_reward", false)))
 	if kind == "projectile":
 		return ProjectileVisualsScript.make_node(str(e.get("projectile_def_id", "")))
-	return _make_loot_node(e)
+	return _loot_factory.make_loot_node(e)
 
 func _monster_scene_for_visual(scene_key: String) -> PackedScene:
 	match scene_key:
@@ -5021,16 +4715,16 @@ func _make_remote_player_node(e: Dictionary) -> Node3D:
 	root.name = "RemotePlayer_%s" % str(e.get("id", ""))
 	_apply_character_class_model(root, str(e.get("character_class", "")))
 	root.scale = Vector3.ONE * _entity_visual_scale(e)
-	_apply_model_tint(root, REMOTE_PLAYER_TINT)
+	_apply_model_tint(root, ClientConstants.REMOTE_PLAYER_TINT)
 	return root
 
 func _monster_tint(rarity: String) -> Color:
-	return MONSTER_RARITY_TINTS.get(rarity, MONSTER_RARITY_TINTS["common"])
+	return ClientConstants.MONSTER_RARITY_TINTS.get(rarity, ClientConstants.MONSTER_RARITY_TINTS["common"])
 
 func _entity_base_tint(e: Dictionary) -> Color:
 	var kind := str(e.get("type", ""))
 	if kind == "player":
-		return REMOTE_PLAYER_TINT
+		return ClientConstants.REMOTE_PLAYER_TINT
 	if kind == "monster" or kind == "companion":
 		if e.has("visual_tint"):
 			return Color(str(e.get("visual_tint", "#ffffff")))
@@ -5059,8 +4753,8 @@ func _apply_local_player_class_model() -> void:
 	_local_player_class_asset_id = asset_id
 	_apply_character_class_model(character_visual, class_id)
 	_apply_local_player_visual_scale(player_visual_scale)
-	_apply_model_tint(character_visual, PLAYER_TINT)
-	player_reaction = ModelReactionControllerScript.new(character_visual, PLAYER_TINT)
+	_apply_model_tint(character_visual, ClientConstants.PLAYER_TINT)
+	player_reaction = ModelReactionControllerScript.new(character_visual, ClientConstants.PLAYER_TINT)
 	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
@@ -5116,15 +4810,17 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	PlayerStatusEffectMarkers.sync_elite_command_effect(node, alive and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, alive and PlayerStatusEffectMarkers.has_pinning_root_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_stun_effect(node, alive and PlayerStatusEffectMarkers.has_stun_effect_id(rec.get("effect_ids", [])))
-	_normalize_boss_phase_metadata(rec)
-	_sync_boss_telegraph_marker_from_record(rec)
+	if _boss_visuals != null:
+		_boss_visuals_context.last_server_tick = last_server_tick
+		_boss_visuals.normalize_boss_phase_metadata(rec)
+		_boss_visuals.sync_boss_telegraph_marker_from_record(rec)
 	EliteAuraPreviewSync.sync(entities, dungeon_generation)
 
 func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
 	if root == null:
 		return
-	var existing := root.find_child(ARCHER_BOW_MARKER_NAME, true, false) as Node3D
-	if monster_def_id != ARCHER_MONSTER_DEF_ID:
+	var existing := root.find_child(ClientConstants.ARCHER_BOW_MARKER_NAME, true, false) as Node3D
+	if monster_def_id != ClientConstants.ARCHER_MONSTER_DEF_ID:
 		if existing != null:
 			existing.queue_free()
 		return
@@ -5134,11 +4830,11 @@ func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
 	_apply_archer_bow_material(existing)
 
 func _has_archer_bow_marker(root: Node3D) -> bool:
-	return root != null and root.find_child(ARCHER_BOW_MARKER_NAME, true, false) != null
+	return root != null and root.find_child(ClientConstants.ARCHER_BOW_MARKER_NAME, true, false) != null
 
 func _make_archer_bow_marker() -> Node3D:
 	var marker := Node3D.new()
-	marker.name = ARCHER_BOW_MARKER_NAME
+	marker.name = ClientConstants.ARCHER_BOW_MARKER_NAME
 	marker.position = Vector3(0.42, 0.88, -0.28)
 	marker.rotation_degrees = Vector3(0.0, 0.0, -8.0)
 	marker.add_child(_make_archer_bow_part("BowGrip", Vector3(0.055, 0.46, 0.045), Vector3(0.0, 0.0, 0.0), 0.0, Color(0.39, 0.21, 0.08)))
@@ -5165,111 +4861,6 @@ func _apply_archer_bow_material(root: Node) -> void:
 		(root as MeshInstance3D).material_override = mat
 	for child in root.get_children():
 		_apply_archer_bow_material(child)
-
-func _apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
-	var rec: Dictionary = entities.get(entity_id, {})
-	if rec.is_empty():
-		return
-	var duration := maxi(0, int(ev.get("duration_ticks", 0)))
-	rec["boss_phase"] = {
-		"pattern_id": str(ev.get("pattern_id", "")),
-		"phase_index": int(ev.get("phase_index", -1)),
-		"phase_kind": str(ev.get("phase_kind", "")),
-		"duration_ticks": duration,
-		"remaining_ticks": duration,
-		"remaining_ticks_float": float(duration),
-		"telegraph": ev.get("telegraph", {}),
-		"hit_shape": ev.get("hit_shape", {}),
-	}
-	var node := rec.get("node", null) as Node3D
-	if node == null:
-		return
-	var phase_kind := str(ev.get("phase_kind", ""))
-	if phase_kind == "telegraph":
-		var telegraph: Dictionary = ev.get("telegraph", {})
-		var tint := Color(str(telegraph.get("to_color", "#ff0000")))
-		rec["boss_telegraph_active"] = true
-		rec["telegraph_tint"] = tint.to_html(false)
-		_apply_model_tint(node, tint)
-		_sync_boss_telegraph_marker(rec, telegraph)
-	else:
-		rec["boss_telegraph_active"] = false
-		_remove_boss_telegraph_marker(rec)
-		_apply_entity_status_tint(rec)
-	_sync_boss_health_bar()
-
-func _apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
-	var rec: Dictionary = entities.get(entity_id, {})
-	if rec.is_empty():
-		return
-	rec["boss_telegraph_active"] = false
-	rec.erase("boss_phase")
-	_remove_boss_telegraph_marker(rec)
-	_apply_entity_status_tint(rec)
-	_sync_boss_health_bar()
-
-func _normalize_boss_phase_metadata(rec: Dictionary) -> void:
-	var phase := _boss_phase_for_display(rec)
-	if phase.is_empty():
-		return
-	if str(phase.get("phase_kind", "")) == "telegraph":
-		var telegraph: Dictionary = phase.get("telegraph", {})
-		if not telegraph.is_empty():
-			rec["boss_telegraph_active"] = true
-			rec["telegraph_tint"] = Color(str(telegraph.get("to_color", "#ff0000"))).to_html(false)
-
-func _sync_boss_telegraph_marker_from_record(rec: Dictionary) -> void:
-	var phase := _boss_phase_for_display(rec)
-	if phase.is_empty() or str(phase.get("phase_kind", "")) != "telegraph":
-		_remove_boss_telegraph_marker(rec)
-		return
-	var telegraph: Dictionary = phase.get("telegraph", {})
-	if telegraph.is_empty():
-		_remove_boss_telegraph_marker(rec)
-		return
-	_sync_boss_telegraph_marker(rec, telegraph)
-
-func _sync_boss_telegraph_marker(rec: Dictionary, telegraph: Dictionary) -> void:
-	var node := rec.get("node", null) as Node3D
-	if node == null:
-		return
-	var marker := node.find_child(BOSS_TELEGRAPH_MARKER_NAME, false, false) as MeshInstance3D
-	if marker == null:
-		marker = MeshInstance3D.new()
-		marker.name = BOSS_TELEGRAPH_MARKER_NAME
-		marker.position = Vector3(0.0, 0.035, 0.0)
-		node.add_child(marker)
-	var radius := maxf(0.1, float(telegraph.get("radius", 1.0)))
-	var visual_scale := maxf(0.1, float(rec.get("visual_scale", 1.0)))
-	var local_radius := radius / visual_scale
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = local_radius
-	mesh.bottom_radius = local_radius
-	mesh.height = 0.035
-	mesh.radial_segments = 48
-	marker.mesh = mesh
-	var color := Color(str(telegraph.get("to_color", "#ff4a32")))
-	color.a = 0.34
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	marker.material_override = mat
-	rec["boss_telegraph_active"] = true
-	rec["telegraph_tint"] = color.to_html(false)
-	rec["has_boss_telegraph_marker"] = true
-	rec["telegraph_radius"] = radius
-	rec["telegraph_marker_color"] = color.to_html(false)
-
-func _remove_boss_telegraph_marker(rec: Dictionary) -> void:
-	var node := rec.get("node", null) as Node3D
-	if node != null:
-		var marker := node.find_child(BOSS_TELEGRAPH_MARKER_NAME, false, false)
-		if marker != null:
-			marker.queue_free()
-	rec["has_boss_telegraph_marker"] = false
-	rec["telegraph_radius"] = 0.0
-	rec["telegraph_marker_color"] = ""
 
 func _set_entity_poison_tint(entity_id: String, active: bool) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
@@ -5329,7 +4920,7 @@ func _apply_entity_status_tint(rec: Dictionary) -> void:
 	if bool(rec.get("burning", false)) or PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])):
 		tint = Color(1.0, 0.38, 0.12)
 	if bool(rec.get("poisoned", false)):
-		tint = POISON_TINT
+		tint = ClientConstants.POISON_TINT
 	var reaction = rec.get("reaction", null)
 	if reaction != null and reaction.has_method("set_base_tint"):
 		reaction.set_base_tint(tint)
@@ -5344,227 +4935,11 @@ func _apply_model_tint(root: Node, color: Color) -> void:
 	for child in root.get_children():
 		_apply_model_tint(child, color)
 
-func _make_loot_node(e: Dictionary) -> Node3D:
-	var item_def_id := str(e.get("item_def_id", ""))
-	var root := Node3D.new()
-	root.name = "Loot_%s" % item_def_id
-	var ground: Dictionary = item_presentations.get(item_def_id, {}).get("ground", {})
-	var shape := str(ground.get("shape", "box"))
-	var color := Color(str(ground.get("color", "#" + _loot_color(item_def_id).to_html(false))))
-	var accent := Color(str(ground.get("accent", "#f6e8b1")))
-	var scale := float(ground.get("scale", 1.0))
-	var model := _make_ground_equipment_model(item_def_id, str(e.get("rarity", "common")))
-	if model != null:
-		root.add_child(model)
-	else:
-		_add_loot_rarity_background(root, _item_rarity_background(str(e.get("rarity", "common"))), scale)
-		_add_loot_primitive(root, shape, color, accent, scale)
-	_add_loot_label(root, _loot_label_text(e), scale, _loot_label_color(e))
-	return root
-
-func _add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color, scale: float) -> void:
-	match shape:
-		"blade":
-			_add_loot_box(root, "Blade", Vector3(0.12, 0.08, 0.78) * scale, Vector3(0.0, 0.20, 0.0), color)
-			_add_loot_box(root, "Grip", Vector3(0.34, 0.10, 0.10) * scale, Vector3(0.0, 0.16, 0.34 * scale), accent)
-		"bow":
-			_add_loot_box(root, "BowTop", Vector3(0.10, 0.08, 0.42) * scale, Vector3(0.14 * scale, 0.20, -0.18 * scale), color)
-			_add_loot_box(root, "BowBottom", Vector3(0.10, 0.08, 0.42) * scale, Vector3(-0.14 * scale, 0.20, 0.18 * scale), color)
-			_add_loot_box(root, "String", Vector3(0.04, 0.06, 0.75) * scale, Vector3(0.0, 0.18, 0.0), accent)
-		"shield":
-			_add_loot_cylinder(root, "ShieldFace", 0.30 * scale, 0.08 * scale, Vector3(0.0, 0.18, 0.0), color)
-			_add_loot_cylinder(root, "ShieldBoss", 0.11 * scale, 0.10 * scale, Vector3(0.0, 0.24, 0.0), accent)
-		"helm":
-			_add_loot_cylinder(root, "HelmCap", 0.25 * scale, 0.22 * scale, Vector3(0.0, 0.22, 0.0), color)
-			_add_loot_box(root, "HelmBrow", Vector3(0.44, 0.08, 0.18) * scale, Vector3(0.0, 0.26, -0.12 * scale), accent)
-		"chest":
-			_add_loot_box(root, "ChestPlate", Vector3(0.46, 0.16, 0.40) * scale, Vector3(0.0, 0.18, 0.0), color)
-			_add_loot_box(root, "ChestTrim", Vector3(0.34, 0.18, 0.08) * scale, Vector3(0.0, 0.26, -0.16 * scale), accent)
-		"gloves":
-			_add_loot_box(root, "LeftGlove", Vector3(0.22, 0.12, 0.20) * scale, Vector3(-0.16 * scale, 0.18, 0.0), color)
-			_add_loot_box(root, "RightGlove", Vector3(0.22, 0.12, 0.20) * scale, Vector3(0.16 * scale, 0.18, 0.0), accent)
-		"belt":
-			_add_loot_box(root, "BeltBand", Vector3(0.56, 0.10, 0.20) * scale, Vector3(0.0, 0.16, 0.0), color)
-			_add_loot_box(root, "BeltBuckle", Vector3(0.14, 0.12, 0.23) * scale, Vector3(0.0, 0.22, -0.02 * scale), accent)
-		"boots":
-			_add_loot_box(root, "LeftBoot", Vector3(0.20, 0.16, 0.34) * scale, Vector3(-0.14 * scale, 0.18, 0.0), color)
-			_add_loot_box(root, "RightBoot", Vector3(0.20, 0.16, 0.34) * scale, Vector3(0.14 * scale, 0.18, 0.0), accent)
-		"ring":
-			_add_loot_cylinder(root, "RingBand", 0.18 * scale, 0.05 * scale, Vector3(0.0, 0.17, 0.0), color)
-			_add_loot_box(root, "RingStone", Vector3(0.09, 0.08, 0.08) * scale, Vector3(0.0, 0.24, -0.14 * scale), accent)
-		"amulet":
-			_add_loot_cylinder(root, "AmuletChain", 0.20 * scale, 0.04 * scale, Vector3(0.0, 0.17, 0.0), color)
-			_add_loot_box(root, "AmuletGem", Vector3(0.13, 0.12, 0.08) * scale, Vector3(0.0, 0.25, -0.15 * scale), accent)
-		"badge", "coin":
-			_add_loot_cylinder(root, "Badge", 0.24 * scale, 0.08 * scale, Vector3(0.0, 0.16, 0.0), color)
-			_add_loot_cylinder(root, "BadgeMark", 0.12 * scale, 0.10 * scale, Vector3(0.0, 0.21, 0.0), accent)
-		"leaf":
-			_add_loot_box(root, "Leaf", Vector3(0.42, 0.06, 0.24) * scale, Vector3(0.0, 0.16, 0.0), color)
-			_add_loot_box(root, "Stem", Vector3(0.06, 0.08, 0.46) * scale, Vector3(0.0, 0.18, 0.0), accent)
-		"potion":
-			_add_loot_cylinder(root, "Bottle", 0.17 * scale, 0.32 * scale, Vector3(0.0, 0.26, 0.0), color)
-			_add_loot_box(root, "Cork", Vector3(0.14, 0.10, 0.14) * scale, Vector3(0.0, 0.48 * scale, 0.0), accent)
-		_:
-			_add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
-
-func _make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
-	var presentation: Dictionary = item_presentations.get(item_def_id, {})
-	var asset_id := str(presentation.get("3d_model", ""))
-	if asset_id == "":
-		return null
-	if asset_id.begins_with("fallback_equipment_"):
-		return null
-	var entry = asset_manifest.get(asset_id, null)
-	if typeof(entry) != TYPE_DICTIONARY:
-		return null
-	var runtime_path := str((entry as Dictionary).get("runtime_path", ""))
-	var packed = load(_res_path(runtime_path))
-	if packed == null or not (packed is PackedScene):
-		return null
-	var inst := (packed as PackedScene).instantiate() as Node3D
-	if inst == null:
-		return null
-	inst.name = "GroundModel_%s" % asset_id
-	inst.scale = Vector3.ONE * GROUND_EQUIPMENT_MODEL_SCALE
-	inst.position = Vector3(0.0, 0.12, 0.0)
-	inst.rotation_degrees = Vector3(90.0, 35.0, 0.0)
-	_apply_model_tint(inst, _ground_item_tint(rarity))
-	return inst
-
-func _ground_item_tint(rarity: String) -> Color:
-	match rarity.to_lower():
-		"magic":
-			return Color("#5aa7ff")
-		"rare":
-			return Color("#ffd75e")
-		"unique":
-			return Color("#ff9f52")
-		"set":
-			return Color("#55e66f")
-		_:
-			return Color("#d8d0bd")
-
-func _add_loot_rarity_background(parent: Node3D, color: Color, scale: float) -> void:
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(0.82, 0.04, 0.82) * maxf(scale, 0.85)
-	_add_loot_mesh(parent, "RarityBackground", mesh, Vector3(0.0, 0.045, 0.0), color)
-
-func _add_loot_label(parent: Node3D, text: String, scale: float, color: Color = Color("#f4ead8")) -> void:
-	if text == "":
-		return
-	var label := Label3D.new()
-	label.name = "LootLabel"
-	label.text = text
-	label.visible = false
-	label.position = Vector3(0.0, 0.58 * maxf(scale, 0.8), 0.0)
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
-	label.fixed_size = true
-	label.pixel_size = 0.0018
-	label.modulate = color
-	label.outline_modulate = Color(0.06, 0.045, 0.035, 0.92)
-	label.outline_size = 4
-	parent.add_child(label)
-
-func _add_loot_box(parent: Node3D, name: String, size: Vector3, position: Vector3, color: Color) -> void:
-	var mesh := BoxMesh.new()
-	mesh.size = size
-	_add_loot_mesh(parent, name, mesh, position, color)
-
-func _add_loot_cylinder(parent: Node3D, name: String, radius: float, height: float, position: Vector3, color: Color) -> void:
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = radius
-	mesh.bottom_radius = radius
-	mesh.height = height
-	mesh.radial_segments = 16
-	_add_loot_mesh(parent, name, mesh, position, color)
-
-func _add_loot_mesh(parent: Node3D, name: String, mesh: Mesh, position: Vector3, color: Color) -> void:
-	var node := MeshInstance3D.new()
-	node.name = name
-	node.mesh = mesh
-	node.position = position
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	node.material_override = mat
-	parent.add_child(node)
-
-func _loot_color(item_def_id: String) -> Color:
-	var def: Dictionary = item_rules.get(item_def_id, {})
-	var category := str(def.get("category", "equipment" if bool(def.get("equippable", false)) else "currency"))
-	match category:
-		"equipment":
-			return Color(0.62, 0.62, 0.62)
-		"quest":
-			return Color(0.2, 0.85, 0.35)
-		"consumable":
-			return Color(0.95, 0.15, 0.12)
-		_:
-			return Color(1.0, 0.85, 0.2)
-
 func _loot_label_color(e: Dictionary) -> Color:
-	var item_def_id := str(e.get("item_def_id", ""))
-	var def := _item_definition(item_def_id)
-	var category := str(def.get("category", "")).to_lower()
-	if item_def_id == "gold" or category == "currency":
-		return LOOT_LABEL_CATEGORY_COLORS["currency"]
-	if LOOT_LABEL_CATEGORY_COLORS.has(category):
-		return LOOT_LABEL_CATEGORY_COLORS[category]
-	var rarity := str(e.get("rarity", "common")).to_lower()
-	return LOOT_LABEL_RARITY_COLORS.get(rarity, LOOT_LABEL_RARITY_COLORS["common"])
-
-func _loot_label_text(e: Dictionary) -> String:
-	var item_def_id := str(e.get("item_def_id", ""))
-	var def := _item_definition(item_def_id)
-	var category := str(def.get("category", "")).to_lower()
-	if item_def_id == "gold" or category == "currency":
-		var amount := int(e.get("amount", 0))
-		if amount > 0:
-			return "%d gold" % amount
-		return "gold"
-	return _generic_loot_name(item_def_id)
-
-func _item_rarity_background(rarity: String) -> Color:
-	var key := rarity.to_lower()
-	return ITEM_RARITY_BACKGROUNDS.get(key, ITEM_RARITY_BACKGROUNDS["common"])
+	return _loot_factory.loot_label_color(e)
 
 func _item_definition(item_def_id: String) -> Dictionary:
-	return ItemRulesLoader.item_definition(item_def_id)
-
-func _generic_loot_name(item_def_id: String) -> String:
-	var def := _item_definition(item_def_id)
-	var slot := str(def.get("slot", ""))
-	match slot:
-		"main_hand":
-			var attack_mode := str(def.get("attack_mode", "melee"))
-			if attack_mode == "ranged":
-				return "Bow"
-			return "Sword"
-		"off_hand":
-			return "Shield"
-		"head":
-			return "Helm"
-		"chest":
-			return "Armor"
-		"gloves":
-			return "Gloves"
-		"belt":
-			return "Belt"
-		"boots":
-			return "Boots"
-		"amulet":
-			return "Amulet"
-		"ring":
-			return "Ring"
-	var category := str(def.get("category", ""))
-	match category:
-		"consumable":
-			return "Potion"
-		"currency":
-			return "Badge"
-		"quest":
-			return "Item"
-	return "Item"
+	return _loot_factory.item_definition(item_def_id)
 
 func _load_dungeon_generation() -> void:
 	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/dungeon_generation.v0.json")
@@ -5577,12 +4952,7 @@ func _load_ground_item_visual_data() -> void:
 	var manifest = _read_json(base.path_join("../assets/manifests/assets.v0.json"))
 	if typeof(manifest) == TYPE_DICTIONARY:
 		asset_manifest = manifest.get("assets", {})
-
-func _res_path(runtime_path: String) -> String:
-	var p := runtime_path
-	if p.begins_with("client/"):
-		p = p.substr("client/".length())
-	return "res://" + p
+	_loot_factory.configure(asset_manifest, item_presentations)
 
 func _move_projectile_node(rec: Dictionary, target_pos: Vector3) -> void:
 	var node := rec["node"] as Node3D
@@ -5596,422 +4966,12 @@ func _move_projectile_node(rec: Dictionary, target_pos: Vector3) -> void:
 		var old_tween = rec["move_tween"]
 		if is_instance_valid(old_tween):
 			old_tween.kill()
-	var duration := PROJECTILE_LERP_SECONDS
+	var duration := ClientConstants.PROJECTILE_LERP_SECONDS
 	if visual_replay_enabled:
 		duration = clampf(autoplay_step_delay * 0.35, 0.06, 0.18)
 	var tween := create_tween()
 	rec["move_tween"] = tween
 	tween.tween_property(node, "position", target_pos, duration).set_trans(Tween.TRANS_LINEAR)
-
-func _make_door_node() -> Node3D:
-	var root := Node3D.new()
-	root.name = "InteractableDoor"
-	var pivot := Node3D.new()
-	pivot.name = "DoorPivot"
-	pivot.position = Vector3(-0.5, 0.0, 0.0)
-	root.add_child(pivot)
-	var panel := MeshInstance3D.new()
-	panel.name = "DoorPanel"
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(1.0, 1.0, 0.25)
-	panel.mesh = mesh
-	panel.position = Vector3(0.5, 0.5, 0.0)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.55, 0.32, 0.15)
-	panel.material_override = mat
-	pivot.add_child(panel)
-	return root
-
-func _make_chest_node(def_id: String, elite_objective: bool = false, quest_reward: bool = false) -> Node3D:
-	var is_stash := def_id == "town_stash"
-	var is_unique_test := def_id == "town_unique_chest"
-	var root := Node3D.new()
-	root.name = "UniqueTestChest" if is_unique_test else ("TownStashChest" if is_stash else "TreasureChest")
-	var scale := 1.12 if is_stash else (1.08 if is_unique_test else 1.0)
-	var wood := Color("#5a2d7a") if is_unique_test else (Color("#6f3b18") if is_stash else Color("#744018"))
-	var dark_wood := Color("#30143f") if is_unique_test else (Color("#3c2111") if is_stash else Color("#4a2711"))
-	var metal := Color("#c77dff") if is_unique_test else (Color("#d1b15d") if is_stash else Color("#8d8f8f"))
-	var metal_dark := Color("#6f37a8") if is_unique_test else (Color("#6f5b2e") if is_stash else Color("#3d4143"))
-	var cloth := Color("#f0b8ff") if is_unique_test else (Color("#244e66") if is_stash else Color("#5a2017"))
-	var glow := Color("#d77dff") if is_unique_test else (Color("#f3d36b") if is_stash else Color("#f5b449"))
-
-	ChestPresentationScript.add_part(root, "ChestShadow", Vector3(1.28, 0.035, 0.82) * scale, Vector3(0.0, 0.018, 0.0), Color("#181715"))
-	ChestPresentationScript.add_part(root, "ChestBody", Vector3(1.08, 0.48, 0.70) * scale, Vector3(0.0, 0.29 * scale, 0.0), wood)
-	ChestPresentationScript.add_part(root, "ChestFrontPanel", Vector3(0.92, 0.30, 0.045) * scale, Vector3(0.0, 0.30 * scale, 0.374 * scale), dark_wood)
-	ChestPresentationScript.add_part(root, "ChestBackPanel", Vector3(0.92, 0.30, 0.045) * scale, Vector3(0.0, 0.30 * scale, -0.374 * scale), dark_wood)
-	ChestPresentationScript.add_part(root, "ChestLeftPanel", Vector3(0.045, 0.30, 0.56) * scale, Vector3(-0.564 * scale, 0.30 * scale, 0.0), dark_wood)
-	ChestPresentationScript.add_part(root, "ChestRightPanel", Vector3(0.045, 0.30, 0.56) * scale, Vector3(0.564 * scale, 0.30 * scale, 0.0), dark_wood)
-	ChestPresentationScript.add_part(root, "ChestFrontBand", Vector3(1.18, 0.08, 0.055) * scale, Vector3(0.0, 0.48 * scale, 0.405 * scale), metal)
-	ChestPresentationScript.add_part(root, "ChestBottomBand", Vector3(1.18, 0.075, 0.055) * scale, Vector3(0.0, 0.13 * scale, 0.405 * scale), metal_dark)
-	for x in [-0.42, 0.42]:
-		ChestPresentationScript.add_part(root, "ChestVerticalBand", Vector3(0.085, 0.54, 0.085) * scale, Vector3(x * scale, 0.33 * scale, 0.405 * scale), metal)
-	for x in [-0.43, 0.43]:
-		for z in [-0.28, 0.28]:
-			ChestPresentationScript.add_part(root, "ChestFoot", Vector3(0.22, 0.10, 0.16) * scale, Vector3(x * scale, 0.055 * scale, z * scale), metal_dark)
-
-	var lid_pivot := Node3D.new()
-	lid_pivot.name = "ChestLidPivot"
-	lid_pivot.position = Vector3(0.0, 0.56 * scale, -0.36 * scale)
-	root.add_child(lid_pivot)
-	ChestPresentationScript.add_part(lid_pivot, "ChestLid", Vector3(1.16, 0.30, 0.72) * scale, Vector3(0.0, 0.15 * scale, 0.36 * scale), wood)
-	ChestPresentationScript.add_part(lid_pivot, "ChestLidCrown", Vector3(0.92, 0.12, 0.58) * scale, Vector3(0.0, 0.33 * scale, 0.36 * scale), Color("#7b35b0") if is_unique_test else (Color("#8a4f20") if is_stash else Color("#8b511f")))
-	ChestPresentationScript.add_part(lid_pivot, "ChestLidFrontBand", Vector3(1.22, 0.08, 0.075) * scale, Vector3(0.0, 0.13 * scale, 0.74 * scale), metal)
-	for x in [-0.42, 0.42]:
-		ChestPresentationScript.add_part(lid_pivot, "ChestLidStrap", Vector3(0.075, 0.36, 0.80) * scale, Vector3(x * scale, 0.20 * scale, 0.36 * scale), metal)
-
-	ChestPresentationScript.add_part(root, "ChestLockPlate", Vector3(0.22, 0.24, 0.075) * scale, Vector3(0.0, 0.42 * scale, 0.452 * scale), metal)
-	ChestPresentationScript.add_part(root, "ChestLockSlot", Vector3(0.075, 0.11, 0.085) * scale, Vector3(0.0, 0.40 * scale, 0.502 * scale), metal_dark)
-	ChestPresentationScript.add_part(root, "ChestLeftHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(-0.64 * scale, 0.36 * scale, 0.0), metal)
-	ChestPresentationScript.add_part(root, "ChestRightHandle", Vector3(0.075, 0.22, 0.30) * scale, Vector3(0.64 * scale, 0.36 * scale, 0.0), metal)
-	if is_stash or is_unique_test:
-		ChestPresentationScript.add_part(root, "ChestStashCrest", Vector3(0.36, 0.12, 0.082) * scale, Vector3(0.0, 0.61 * scale, 0.456 * scale), cloth)
-
-	var inner := ChestPresentationScript.add_part(root, "ChestInnerGlow", Vector3(0.84, 0.045, 0.46) * scale, Vector3(0.0, 0.57 * scale, 0.02 * scale), glow)
-	var glow_mat := inner.material_override as StandardMaterial3D
-	glow_mat.emission_enabled = true
-	glow_mat.emission = glow
-	inner.visible = false
-	ChestPresentationScript.sync_objective_marker(root, elite_objective, false)
-	ChestPresentationScript.sync_quest_marker(root, quest_reward, false)
-	return root
-
-func _make_merchant_node(def_id: String) -> Node3D:
-	var is_mystery := def_id == "town_mystery_seller"
-	var root := Node3D.new()
-	root.name = "MysterySeller" if is_mystery else "ShopVendor"
-	var cloth := Color("#2b124a") if is_mystery else Color("#e2b92e")
-	var cloth_dark := Color("#150824") if is_mystery else Color("#8c6418")
-	var accent := Color("#7c4dff") if is_mystery else Color("#ffe37a")
-	var trim := Color("#c7a6ff") if is_mystery else Color("#f6d85c")
-	var wood := Color("#4b2a16")
-	var skin := Color("#c1845a") if is_mystery else Color("#c99666")
-	var glow := Color("#6f40ff") if is_mystery else Color("#ffd85a")
-
-	_add_merchant_box(root, "MerchantShadow", Vector3(1.35, 0.035, 0.92), Vector3(0.0, 0.018, 0.0), Color("#181715"))
-	_add_merchant_box(root, "CounterTop", Vector3(1.12, 0.18, 0.48), Vector3(0.0, 0.39, 0.31), wood)
-	_add_merchant_box(root, "CounterFront", Vector3(1.18, 0.36, 0.09), Vector3(0.0, 0.22, 0.57), cloth_dark)
-	_add_merchant_box(root, "CounterTrim", Vector3(1.24, 0.08, 0.10), Vector3(0.0, 0.44, 0.60), trim)
-	_add_merchant_box(root, "CounterLeftLeg", Vector3(0.12, 0.34, 0.12), Vector3(-0.50, 0.17, 0.36), wood)
-	_add_merchant_box(root, "CounterRightLeg", Vector3(0.12, 0.34, 0.12), Vector3(0.50, 0.17, 0.36), wood)
-
-	_add_merchant_box(root, "Body", Vector3(0.42, 0.66, 0.30), Vector3(0.0, 0.78, -0.05), cloth)
-	_add_merchant_box(root, "Belt", Vector3(0.48, 0.09, 0.34), Vector3(0.0, 0.62, -0.04), Color("#2f2117"))
-	_add_merchant_box(root, "Head", Vector3(0.32, 0.30, 0.30), Vector3(0.0, 1.28, -0.03), skin)
-	_add_merchant_box(root, "Nose", Vector3(0.08, 0.08, 0.08), Vector3(0.0, 1.27, 0.16), skin.lerp(Color.WHITE, 0.12))
-	_add_merchant_box(root, "LeftArm", Vector3(0.12, 0.44, 0.16), Vector3(-0.32, 0.78, 0.02), cloth_dark)
-	_add_merchant_box(root, "RightArm", Vector3(0.12, 0.44, 0.16), Vector3(0.32, 0.78, 0.02), cloth_dark)
-	_add_merchant_box(root, "LeftHand", Vector3(0.13, 0.10, 0.13), Vector3(-0.32, 0.53, 0.08), skin)
-	_add_merchant_box(root, "RightHand", Vector3(0.13, 0.10, 0.13), Vector3(0.32, 0.53, 0.08), skin)
-
-	if is_mystery:
-		_add_merchant_box(root, "Hood", Vector3(0.44, 0.22, 0.36), Vector3(0.0, 1.39, -0.02), cloth_dark)
-		_add_merchant_box(root, "HoodRim", Vector3(0.40, 0.08, 0.08), Vector3(0.0, 1.30, 0.18), accent)
-		_add_merchant_cylinder(root, "CrystalOrb", 0.16, 0.22, Vector3(0.34, 0.62, 0.43), glow, true)
-		_add_merchant_box(root, "MysterySign", Vector3(0.34, 0.24, 0.07), Vector3(-0.36, 0.67, 0.62), accent)
-	else:
-		_add_merchant_box(root, "HatBrim", Vector3(0.54, 0.08, 0.42), Vector3(0.0, 1.43, -0.02), accent)
-		_add_merchant_box(root, "HatCrown", Vector3(0.34, 0.22, 0.30), Vector3(0.0, 1.56, -0.02), cloth)
-		_add_merchant_box(root, "CoinStackA", Vector3(0.16, 0.08, 0.16), Vector3(-0.30, 0.54, 0.43), glow)
-		_add_merchant_box(root, "CoinStackB", Vector3(0.14, 0.14, 0.14), Vector3(-0.12, 0.57, 0.42), glow)
-		_add_merchant_box(root, "VendorSign", Vector3(0.34, 0.24, 0.07), Vector3(0.36, 0.67, 0.62), accent)
-	return root
-
-func _make_bishop_node() -> Node3D:
-	var root := Node3D.new()
-	root.name = "TownBishop"
-	var robe := Color("#b92d2d")
-	var robe_dark := Color("#621717")
-	var trim := Color("#f3d7a8")
-	var skin := Color("#c99666")
-	var gold_trim := Color("#d8a342")
-
-	_add_merchant_box(root, "BishopShadow", Vector3(0.92, 0.035, 0.78), Vector3(0.0, 0.018, 0.0), Color("#171313"))
-	_add_merchant_box(root, "RobeLower", Vector3(0.54, 0.62, 0.36), Vector3(0.0, 0.46, 0.0), robe_dark)
-	_add_merchant_box(root, "RobeUpper", Vector3(0.46, 0.58, 0.30), Vector3(0.0, 0.92, 0.0), robe)
-	_add_merchant_box(root, "Sash", Vector3(0.12, 0.68, 0.34), Vector3(0.0, 0.78, 0.02), trim)
-	_add_merchant_box(root, "Shoulders", Vector3(0.62, 0.12, 0.34), Vector3(0.0, 1.16, 0.0), robe_dark)
-	_add_merchant_box(root, "Head", Vector3(0.30, 0.30, 0.28), Vector3(0.0, 1.42, 0.0), skin)
-	_add_merchant_box(root, "MitreBase", Vector3(0.38, 0.16, 0.28), Vector3(0.0, 1.64, 0.0), robe)
-	_add_merchant_box(root, "MitrePeak", Vector3(0.24, 0.24, 0.20), Vector3(0.0, 1.84, 0.0), robe)
-	_add_merchant_box(root, "MitreTrim", Vector3(0.42, 0.06, 0.30), Vector3(0.0, 1.56, 0.0), trim)
-	_add_merchant_box(root, "LeftArm", Vector3(0.12, 0.50, 0.14), Vector3(-0.36, 0.86, 0.02), robe_dark)
-	_add_merchant_box(root, "RightArm", Vector3(0.12, 0.50, 0.14), Vector3(0.36, 0.86, 0.02), robe_dark)
-	_add_merchant_box(root, "LeftHand", Vector3(0.12, 0.10, 0.12), Vector3(-0.36, 0.56, 0.06), skin)
-	_add_merchant_box(root, "RightHand", Vector3(0.12, 0.10, 0.12), Vector3(0.36, 0.56, 0.06), skin)
-	_add_merchant_cylinder(root, "Staff", 0.035, 1.18, Vector3(0.55, 0.82, 0.02), Color("#5a351c"))
-	_add_merchant_cylinder(root, "StaffCrown", 0.11, 0.09, Vector3(0.55, 1.44, 0.02), gold_trim, true)
-	_add_merchant_box(root, "ServiceBook", Vector3(0.30, 0.08, 0.22), Vector3(-0.18, 0.58, 0.24), Color("#efe0bc"))
-	return root
-
-func _make_blacksmith_node() -> Node3D:
-	var root := Node3D.new()
-	root.name = "TownBlacksmith"
-	var apron := Color("#2f3f46")
-	var apron_dark := Color("#182429")
-	var ember := Color("#ff7a2f")
-	var metal := Color("#9da3a6")
-	var skin := Color("#b87955")
-
-	_add_merchant_box(root, "BlacksmithShadow", Vector3(1.42, 0.035, 0.82), Vector3(0.0, 0.018, 0.0), Color("#171513"))
-	_add_merchant_box(root, "AnvilBase", Vector3(0.72, 0.18, 0.46), Vector3(0.38, 0.18, 0.34), Color("#33383a"))
-	_add_merchant_box(root, "AnvilTop", Vector3(0.92, 0.16, 0.34), Vector3(0.38, 0.36, 0.34), metal)
-	_add_merchant_box(root, "ForgeBody", Vector3(0.58, 0.44, 0.50), Vector3(-0.46, 0.30, 0.28), Color("#4a2b17"))
-	_add_merchant_box(root, "ForgeMouth", Vector3(0.40, 0.22, 0.08), Vector3(-0.46, 0.32, 0.56), ember)
-	_add_merchant_box(root, "Body", Vector3(0.46, 0.66, 0.30), Vector3(0.0, 0.78, -0.06), apron)
-	_add_merchant_box(root, "Apron", Vector3(0.34, 0.58, 0.34), Vector3(0.0, 0.68, 0.08), apron_dark)
-	_add_merchant_box(root, "Head", Vector3(0.32, 0.30, 0.30), Vector3(0.0, 1.28, -0.04), skin)
-	_add_merchant_box(root, "Cap", Vector3(0.42, 0.12, 0.34), Vector3(0.0, 1.48, -0.04), Color("#4b5154"))
-	_add_merchant_box(root, "LeftArm", Vector3(0.13, 0.48, 0.16), Vector3(-0.35, 0.80, 0.02), skin)
-	_add_merchant_box(root, "RightArm", Vector3(0.13, 0.48, 0.16), Vector3(0.35, 0.80, 0.02), skin)
-	_add_merchant_box(root, "HammerHandle", Vector3(0.07, 0.42, 0.07), Vector3(0.53, 0.58, 0.26), Color("#5b3218"))
-	_add_merchant_box(root, "HammerHead", Vector3(0.28, 0.12, 0.14), Vector3(0.53, 0.82, 0.26), metal)
-	return root
-
-func _make_market_board_node() -> Node3D:
-	var root := Node3D.new()
-	root.name = "MarketBoard"
-	_add_merchant_box(root, "MarketBoardShadow", Vector3(1.70, 0.035, 0.52), Vector3(0.0, 0.018, 0.03), Color("#171513"))
-	_add_merchant_box(root, "MarketBoardLeftPost", Vector3(0.13, 1.24, 0.13), Vector3(-0.68, 0.62, 0.0), Color("#4a2b17"))
-	_add_merchant_box(root, "MarketBoardRightPost", Vector3(0.13, 1.24, 0.13), Vector3(0.68, 0.62, 0.0), Color("#4a2b17"))
-	_add_merchant_box(root, "MarketBoardPanel", Vector3(1.34, 0.82, 0.12), Vector3(0.0, 0.88, 0.02), Color("#6f431f"))
-	_add_merchant_box(root, "MarketBoardInset", Vector3(1.12, 0.58, 0.135), Vector3(0.0, 0.88, 0.09), Color("#2c2118"))
-	_add_merchant_box(root, "MarketBoardHeader", Vector3(1.44, 0.16, 0.14), Vector3(0.0, 1.38, 0.04), Color("#c99d4a"))
-	_add_merchant_box(root, "MarketBoardPaperA", Vector3(0.30, 0.36, 0.145), Vector3(-0.24, 0.83, 0.16), Color("#efe0bc"))
-	_add_merchant_box(root, "MarketBoardPaperB", Vector3(0.27, 0.30, 0.145), Vector3(0.22, 0.96, 0.16), Color("#d7c99e"))
-	_add_merchant_box(root, "MarketBoardSeal", Vector3(0.13, 0.13, 0.16), Vector3(0.48, 0.70, 0.17), Color("#b93131"))
-
-	root.add_child(_make_market_badge("IncomingBidBadge", "IncomingBidCount", Vector3(-0.58, 1.42, 0.20), Color("#4f2b12"), Color("#776d5e")))
-	root.add_child(_make_market_badge("PublishedListingBadge", "PublishedListingCount", Vector3(0.58, 1.42, 0.20), Color("#14324f"), Color("#776d5e")))
-	return root
-
-func make_town_preview_scene() -> Node3D:
-	var root := Node3D.new()
-	root.name = "TownPreview"
-
-	var ground := _make_ground_node()
-	ground.name = "TownPreviewGround"
-	ground.position = Vector3(11.5, -0.02, 11.5)
-	var ground_mesh := ground.mesh as PlaneMesh
-	if ground_mesh != null:
-		ground_mesh.size = Vector2(28.0, 22.0)
-	root.add_child(ground)
-
-	var service_entries := [
-		{"def_id": "stairs_down", "position": Vector3(11.0, 0.0, 8.0)},
-		{"def_id": "teleporter", "position": Vector3(2.0, 0.0, 12.0)},
-		{"def_id": "town_vendor", "position": Vector3(17.0, 0.0, 10.0)},
-		{"def_id": "town_mystery_seller", "position": Vector3(18.0, 0.0, 15.0)},
-		{"def_id": "town_stash", "position": Vector3(7.0, 0.0, 14.0)},
-		{"def_id": "town_bishop", "position": Vector3(15.0, 0.0, 6.0)},
-		{"def_id": "town_market_board", "position": Vector3(10.0, 0.0, 18.0)},
-		{"def_id": "town_blacksmith", "position": Vector3(6.0, 0.0, 10.0)},
-	]
-	for entry in service_entries:
-		var service := _make_entity_node({"type": "interactable", "interactable_def_id": str(entry["def_id"])})
-		service.name = "TownService_%s" % str(entry["def_id"])
-		service.position = entry["position"] as Vector3
-		root.add_child(service)
-
-	var cabin_a := _make_town_cabin_node("west")
-	cabin_a.name = "TownCabinWest"
-	cabin_a.position = Vector3(5.0, 0.0, 7.0)
-	cabin_a.rotation_degrees.y = -22.0
-	root.add_child(cabin_a)
-	var cabin_b := _make_town_cabin_node("east")
-	cabin_b.name = "TownCabinEast"
-	cabin_b.position = Vector3(21.0, 0.0, 12.5)
-	cabin_b.rotation_degrees.y = 18.0
-	root.add_child(cabin_b)
-
-	var fire := _make_town_campfire_node()
-	fire.position = Vector3(12.0, 0.0, 13.0)
-	root.add_child(fire)
-	return root
-
-func _make_town_cabin_node(variant: String = "plain") -> Node3D:
-	var root := Node3D.new()
-	root.name = "TownCabin"
-	var wood := Color("#6d3f1f")
-	var dark_wood := Color("#3b2113")
-	var roof := Color("#5b2b1d") if variant == "west" else Color("#69401f")
-	var straw := Color("#b18a4a")
-	_add_merchant_box(root, "CabinShadow", Vector3(2.45, 0.035, 1.85), Vector3(0.0, 0.018, 0.0), Color("#17130f"))
-	_add_merchant_box(root, "CabinBody", Vector3(1.78, 1.02, 1.28), Vector3(0.0, 0.54, 0.0), wood)
-	_add_merchant_box(root, "CabinFront", Vector3(1.86, 0.74, 0.08), Vector3(0.0, 0.46, 0.68), dark_wood)
-	_add_merchant_box(root, "CabinDoor", Vector3(0.42, 0.62, 0.10), Vector3(-0.36, 0.35, 0.74), Color("#2b1710"))
-	_add_merchant_box(root, "CabinWindow", Vector3(0.34, 0.30, 0.11), Vector3(0.38, 0.58, 0.75), Color("#d7ad58"))
-	_add_merchant_box(root, "CabinRoofA", Vector3(2.15, 0.34, 1.58), Vector3(0.0, 1.15, -0.14), roof)
-	_add_merchant_box(root, "CabinRoofRidge", Vector3(2.28, 0.18, 0.22), Vector3(0.0, 1.42, 0.0), straw)
-	for x in [-0.76, 0.0, 0.76]:
-		_add_merchant_box(root, "CabinWallLog", Vector3(0.08, 1.04, 1.36), Vector3(x, 0.56, 0.0), Color("#4f2d18"))
-	return root
-
-func _make_town_campfire_node() -> Node3D:
-	var root := Node3D.new()
-	root.name = "TownCampfire"
-	_add_merchant_cylinder(root, "FireStoneRing", 0.58, 0.08, Vector3(0.0, 0.04, 0.0), Color("#4e4d48"))
-	for i in range(6):
-		var angle := TAU * float(i) / 6.0
-		var stone := _add_merchant_box(root, "FireStone%d" % i, Vector3(0.20, 0.11, 0.16), Vector3(cos(angle) * 0.47, 0.10, sin(angle) * 0.47), Color("#777067"))
-		stone.rotation_degrees.y = rad_to_deg(angle)
-	for i in range(3):
-		var log := _add_merchant_box(root, "FireLog%d" % i, Vector3(0.72, 0.11, 0.16), Vector3(0.0, 0.17 + float(i) * 0.025, 0.0), Color("#4b2815"))
-		log.rotation_degrees.y = 60.0 * float(i)
-	var flame_outer := _add_merchant_cylinder(root, "FireFlameOuter", 0.24, 0.62, Vector3(0.0, 0.52, 0.0), Color("#ff7a1a"), true)
-	flame_outer.scale.x = 0.58
-	flame_outer.scale.z = 0.58
-	var flame_inner := _add_merchant_cylinder(root, "FireFlameInner", 0.14, 0.44, Vector3(0.0, 0.58, 0.0), Color("#ffd45a"), true)
-	flame_inner.scale.x = 0.52
-	flame_inner.scale.z = 0.52
-	var light := OmniLight3D.new()
-	light.name = "CampfireLight"
-	light.light_color = Color("#ff9b3d")
-	light.light_energy = 1.8
-	light.omni_range = 4.0
-	light.position = Vector3(0.0, 0.78, 0.0)
-	root.add_child(light)
-	return root
-
-func _make_market_badge(badge_name: String, count_name: String, position: Vector3, bg_color: Color, text_color: Color) -> Node3D:
-	var badge := Node3D.new()
-	badge.name = badge_name
-	badge.position = position
-	_add_merchant_box(badge, "BadgeBack", Vector3(0.34, 0.24, 0.055), Vector3.ZERO, bg_color)
-	var label := Label3D.new()
-	label.name = count_name
-	label.text = "0"
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.font_size = 42
-	label.modulate = text_color
-	label.outline_size = 8
-	label.outline_modulate = Color("#14110d")
-	label.position = Vector3(0.0, -0.055, 0.04)
-	label.pixel_size = 0.006
-	badge.add_child(label)
-	return badge
-
-func _add_merchant_box(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
-	var part := MeshInstance3D.new()
-	part.name = part_name
-	var mesh := BoxMesh.new()
-	mesh.size = size
-	part.mesh = mesh
-	part.position = position
-	part.material_override = _merchant_material(color)
-	parent.add_child(part)
-	return part
-
-func _add_merchant_cylinder(parent: Node3D, part_name: String, radius: float, height: float, position: Vector3, color: Color, emit: bool = false) -> MeshInstance3D:
-	var part := MeshInstance3D.new()
-	part.name = part_name
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = radius
-	mesh.bottom_radius = radius
-	mesh.height = height
-	mesh.radial_segments = 24
-	part.mesh = mesh
-	part.position = position
-	part.material_override = _merchant_material(color, emit)
-	parent.add_child(part)
-	return part
-
-func _merchant_material(color: Color, emit: bool = false) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	if emit:
-		mat.emission_enabled = true
-		mat.emission = color
-	return mat
-
-func _make_stair_node(def_id: String) -> Node3D:
-	var root := Node3D.new()
-	root.name = "Stairs_%s" % def_id
-	var is_down := def_id == "stairs_down"
-	if is_down:
-		_add_stair_box(root, "DownStoneFrame", Vector3(1.46, 0.16, 1.20), Vector3(0.0, 0.08, 0.0), _stair_base_color(def_id, "ready"))
-		_add_stair_box(root, "DownPitOpening", Vector3(1.02, 0.06, 0.76), Vector3(0.0, 0.185, -0.04), Color("#030507"))
-		_add_stair_box(root, "DownBackWall", Vector3(1.02, 0.38, 0.12), Vector3(0.0, 0.34, -0.46), Color("#10151c"))
-		_add_stair_box(root, "DownLeftWall", Vector3(0.12, 0.30, 0.76), Vector3(-0.57, 0.30, -0.04), Color("#18202a"))
-		for i in range(5):
-			var t := float(i) / 4.0
-			_add_stair_box(
-				root,
-				"DownStep%d" % i,
-				Vector3(0.84 - t * 0.12, 0.09, 0.16),
-				Vector3(0.0, 0.34 - t * 0.22, 0.28 - t * 0.54),
-				Color("#66707a").lerp(Color("#10151d"), t)
-			)
-		_add_stair_box(root, "DownThreshold", Vector3(1.20, 0.10, 0.14), Vector3(0.0, 0.24, 0.42), Color("#89909a"))
-	else:
-		_add_stair_box(root, "UpGroundPad", Vector3(1.42, 0.14, 1.14), Vector3(0.0, 0.07, 0.0), _stair_base_color(def_id, "ready"))
-		_add_stair_box(root, "UpHighLanding", Vector3(0.64, 0.16, 0.46), Vector3(0.0, 0.72, -0.45), Color("#d6cfaa"))
-		_add_stair_box(root, "UpBackWall", Vector3(0.78, 0.42, 0.12), Vector3(0.0, 0.54, -0.72), Color("#aaa78c"))
-		for i in range(5):
-			var t := float(i) / 4.0
-			_add_stair_box(
-				root,
-				"UpStep%d" % i,
-				Vector3(1.12 - t * 0.42, 0.12, 0.20),
-				Vector3(0.0, 0.19 + t * 0.45, 0.36 - t * 0.66),
-				Color("#7c817a").lerp(Color("#d3cda9"), t)
-			)
-	return root
-
-func _add_stair_box(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
-	var part := MeshInstance3D.new()
-	part.name = part_name
-	var mesh := BoxMesh.new()
-	mesh.size = size
-	part.mesh = mesh
-	part.position = position
-	part.material_override = _stair_material(color)
-	parent.add_child(part)
-	return part
-
-func _stair_base_color(def_id: String, state: String) -> Color:
-	if state == "locked" or state == "disabled":
-		return Color("#6b2e2e")
-	if def_id == "stairs_down":
-		return Color("#111821")
-	return Color("#666d68")
-
-func _stair_material(color: Color, glow: bool = false) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	if glow:
-		mat.emission_enabled = true
-		mat.emission = color
-	return mat
-
-func _make_teleporter_node() -> Node3D:
-	var root := Node3D.new()
-	root.name = "Teleporter"
-	var base := MeshInstance3D.new()
-	var base_mesh := CylinderMesh.new()
-	base_mesh.top_radius = 0.62
-	base_mesh.bottom_radius = 0.72
-	base_mesh.height = 0.16
-	base.mesh = base_mesh
-	base.position = Vector3(0.0, 0.08, 0.0)
-	var base_mat := StandardMaterial3D.new()
-	base_mat.albedo_color = Color(0.16, 0.19, 0.22)
-	base.material_override = base_mat
-	root.add_child(base)
-
-	var core := MeshInstance3D.new()
-	var core_mesh := CylinderMesh.new()
-	core_mesh.top_radius = 0.34
-	core_mesh.bottom_radius = 0.34
-	core_mesh.height = 0.42
-	core.mesh = core_mesh
-	core.position = Vector3(0.0, 0.32, 0.0)
-	var core_mat := StandardMaterial3D.new()
-	core_mat.albedo_color = Color(0.15, 0.62, 0.70)
-	core_mat.emission_enabled = true
-	core_mat.emission = Color(0.05, 0.55, 0.68)
-	core.material_override = core_mat
-	root.add_child(core)
-	return root
 
 func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, interactable_def_id: String = "") -> void:
 	var body := StaticBody3D.new()
@@ -6102,9 +5062,9 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 			return
 		var mat := StandardMaterial3D.new()
 		if state == "locked" or state == "disabled":
-			mat.albedo_color = _stair_base_color(def_id, state)
+			mat.albedo_color = TownNodeFactoryScript.stair_base_color(def_id, state)
 		else:
-			mat.albedo_color = _stair_base_color(def_id, state)
+			mat.albedo_color = TownNodeFactoryScript.stair_base_color(def_id, state)
 		base.material_override = mat
 
 # --- bot API (read-only state + intent dispatch) ----------------------------
@@ -6269,7 +5229,7 @@ func _bot_local_player_presentation() -> Dictionary:
 		"has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(player_anchor),
 		"holy_shield_aura_pulses": PlayerStatusEffectMarkers.active_holy_shield_aura_pulse_count(player_anchor),
 		"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(player_anchor),
-		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor), "base_tint": PLAYER_TINT.to_html(false),
+		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor), "base_tint": ClientConstants.PLAYER_TINT.to_html(false),
 		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
 		"animation": player_anim.get_debug_state() if player_anim != null else {},
 	}
@@ -6404,7 +5364,7 @@ func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
 		_close_gameplay_panels_for_movement()
 		_mark_local_player_walking()
 	client.send(intent_type, last_server_tick, payload)
-	_attack_cooldown = SEND_INTERVAL
+	_attack_cooldown = ClientConstants.SEND_INTERVAL
 
 func bot_click_entity_id(target_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -6418,7 +5378,7 @@ func bot_click_entity_id(target_id: String) -> void:
 		_activate_or_approach_interactable(target_id, rec)
 		return
 	_send_action_intent(target_id)
-	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else SEND_INTERVAL
+	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else ClientConstants.SEND_INTERVAL
 	if typ == "monster":
 		_start_basic_attack_recovery_ui(_attack_cooldown)
 

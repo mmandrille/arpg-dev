@@ -116,6 +116,7 @@
         "corpse_item_count": { "type": "integer", "minimum": 0 },
         "owner_id": { "$ref": "#/$defs/decimal_id" },
         "target_id": { "$ref": "#/$defs/decimal_id" },
+        "companion_stance": { "type": "string", "enum": ["assist", "defend", "passive"] },
         "remaining_ticks": { "type": "integer", "minimum": 0 },
         "total_ticks": { "type": "integer", "minimum": 0 },
         "projectile_def_id": { "type": "string" },
@@ -512,7 +513,8 @@
         "duration_ticks": { "type": "integer", "minimum": 0 },
         "telegraph": { "$ref": "#/$defs/boss_telegraph" },
         "hit_shape": { "$ref": "#/$defs/boss_hit_shape" },
-        "state": { "type": "string", "enum": ["closed", "open", "ready", "locked", "disabled"] }
+        "state": { "type": "string", "enum": ["closed", "open", "ready", "locked", "disabled"] },
+        "stance": { "type": "string", "enum": ["assist", "defend", "passive"] }
       },
       "allOf": [
         {
@@ -732,6 +734,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "target_entity_id", "service", "offer_id", "monster_def_id", "price", "total_gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "companion_stance_changed" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "stance", "amount"] }
         },
         {
           "if": {

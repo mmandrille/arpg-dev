@@ -6,7 +6,6 @@ import (
 	"strconv"
 )
 
-// Vec2 is a 2D position in scene units.
 type Vec2 struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
@@ -55,6 +54,7 @@ type EntityView struct {
 	CorpseItemCount            *int                    `json:"corpse_item_count,omitempty"`
 	OwnerID                    string                  `json:"owner_id,omitempty"`
 	TargetID                   string                  `json:"target_id,omitempty"`
+	CompanionStance            string                  `json:"companion_stance,omitempty"`
 	RemainingTicks             *int                    `json:"remaining_ticks,omitempty"`
 	TotalTicks                 *int                    `json:"total_ticks,omitempty"`
 	ProjectileDefID            string                  `json:"projectile_def_id,omitempty"`
@@ -460,6 +460,7 @@ type Event struct {
 	Telegraph            *BossTelegraphView      `json:"telegraph,omitempty"`
 	HitShape             *BossHitShapeView       `json:"hit_shape,omitempty"`
 	State                string                  `json:"state,omitempty"`
+	Stance               string                  `json:"stance,omitempty"`
 }
 
 // TeleporterDiscoveryView is the protocol view of a generated dungeon level's

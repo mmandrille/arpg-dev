@@ -92,6 +92,32 @@ func TestDecodeCastSkillIntent(t *testing.T) {
 	}
 }
 
+func TestDecodeCompanionCommandIntent(t *testing.T) {
+	in, ok := Decode(TypeCompanionCommand, "msg_companion_stance", "corr_companion_stance", json.RawMessage(`{"stance":"passive"}`))
+	if !ok {
+		t.Fatal("Decode companion_command_intent rejected valid payload")
+	}
+	if in.CompanionCommand == nil || in.CompanionCommand.Stance != "passive" {
+		t.Fatalf("decoded companion command = %+v", in.CompanionCommand)
+	}
+	if !IsClientIntent(TypeCompanionCommand) {
+		t.Fatal("companion_command_intent not marked as client intent")
+	}
+}
+
+func TestDecodeCompanionCommandIntentRejectsInvalidPayload(t *testing.T) {
+	for _, payload := range []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"stance":""}`),
+		json.RawMessage(`{"stance":"hold"}`),
+		json.RawMessage(`{"stance":1}`),
+	} {
+		if _, ok := Decode(TypeCompanionCommand, "msg_companion_stance", "", payload); ok {
+			t.Fatalf("Decode accepted invalid companion command payload %s", payload)
+		}
+	}
+}
+
 func TestDecodeSkillIntentsRejectInvalidPayload(t *testing.T) {
 	for _, payload := range []json.RawMessage{
 		json.RawMessage(`{}`),

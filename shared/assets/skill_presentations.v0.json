@@ -12,6 +12,17 @@
       "projectile_visual": "magic_bolt_projectile",
       "summary_key": "skill.magic_bolt.summary"
     },
+    "teleport": {
+      "icon": {
+        "label": "T",
+        "shape": "dash",
+        "color": "#6ad8ff",
+        "accent": "#e5fbff"
+      },
+      "summary": "Instant aimed blink",
+      "effect_visual": "teleport_blink",
+      "summary_key": "skill.teleport.summary"
+    },
     "ice_shard": {
       "icon": {
         "label": "I",

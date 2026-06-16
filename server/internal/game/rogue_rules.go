@@ -17,6 +17,20 @@ type SkillDashDef struct {
 	MaxDamageBonusPercent int     `json:"max_damage_bonus_percent"`
 }
 
+type SkillMobilityDef struct {
+	RangeBase            float64 `json:"range_base"`
+	RangePerRank         float64 `json:"range_per_rank"`
+	Mode                 string  `json:"mode"`
+	Visual               string  `json:"visual"`
+	DamagePercentBase    int     `json:"damage_percent_base"`
+	DamagePercentPerRank int     `json:"damage_percent_per_rank"`
+	ImpactRadius         float64 `json:"impact_radius"`
+	StunEffectID         string  `json:"stun_effect_id"`
+	StunDurationTicks    int     `json:"stun_duration_ticks"`
+	RootEffectID         string  `json:"root_effect_id"`
+	RootDurationTicks    int     `json:"root_duration_ticks"`
+}
+
 func validateRogueConeSkillPayload(skillID string, skill SkillDef) error {
 	if skill.Poison.DurationTicks > 0 &&
 		(skill.Poison.DamagePercentBase <= 0 || skill.Poison.DamagePercentPerRank < 0 || skill.Poison.MagicDurationTicksPerPoint < 0) {
@@ -26,6 +40,26 @@ func validateRogueConeSkillPayload(skillID string, skill SkillDef) error {
 		(skill.Dash.RangeBase <= 0 || skill.Dash.RangePerRank < 0 || skill.Dash.DamagePercentBase <= 0 ||
 			skill.Dash.DamagePercentPerMagic < 0 || skill.Dash.MaxDamageBonusPercent < 0) {
 		return fmt.Errorf("game: invalid rules skills.%s.dash: values must be valid", skillID)
+	}
+	if skill.Kind == "mobility" {
+		if skill.Mobility.RangeBase <= 0 || skill.Mobility.RangePerRank < 0 || skill.Mobility.Visual == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.mobility: range and visual must be valid", skillID)
+		}
+		switch skill.Mobility.Mode {
+		case "teleport", "leap", "charge", "disengage":
+		default:
+			return fmt.Errorf("game: invalid rules skills.%s.mobility.mode: unsupported %s", skillID, skill.Mobility.Mode)
+		}
+		if skill.Mobility.DamagePercentBase < 0 || skill.Mobility.DamagePercentPerRank < 0 || skill.Mobility.ImpactRadius < 0 ||
+			skill.Mobility.StunDurationTicks < 0 || skill.Mobility.RootDurationTicks < 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.mobility: effect values must be non-negative", skillID)
+		}
+		if skill.Mobility.StunDurationTicks > 0 && skill.Mobility.StunEffectID == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.mobility.stun_effect_id: required", skillID)
+		}
+		if skill.Mobility.RootDurationTicks > 0 && skill.Mobility.RootEffectID == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.mobility.root_effect_id: required", skillID)
+		}
 	}
 	return nil
 }

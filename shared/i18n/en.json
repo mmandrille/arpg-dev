@@ -53,6 +53,8 @@
     "stat.inventory_rows": "Inventory rows",
     "skill.magic_bolt.name": "Magic Bolt",
     "skill.magic_bolt.summary": "Projectile spell",
+    "skill.teleport.name": "Teleport",
+    "skill.teleport.summary": "Instant aimed blink",
     "skill.ice_shard.name": "Ice Shard",
     "skill.ice_shard.summary": "Cold shattering projectile",
     "skill.ligthing.name": "Ligthing",

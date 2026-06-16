@@ -223,5 +223,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v206** | `mercenary-hiring-board` | Complete (`make ci` green) | [`v206_spec-mercenary-hiring-board.md`](docs/specs/v206_spec-mercenary-hiring-board.md) | [`v206_2026-06-15-mercenary-hiring-board.md`](docs/plans/v206_2026-06-15-mercenary-hiring-board.md) | [`as-built`](docs/as-built/v206_mercenary-hiring-board.md) |
 | **v207** | `mercenary-roster-ui` | Complete (`make ci` green) | [`v207_spec-mercenary-roster-ui.md`](docs/specs/v207_spec-mercenary-roster-ui.md) | [`v207_2026-06-15-mercenary-roster-ui.md`](docs/plans/v207_2026-06-15-mercenary-roster-ui.md) | [`as-built`](docs/as-built/v207_mercenary-roster-ui.md) |
 | **v208** | `companion-stance-command` | Complete (`make ci` green) | [`v208_spec-companion-stance-command.md`](docs/specs/v208_spec-companion-stance-command.md) | [`v208_2026-06-16-companion-stance-command.md`](docs/plans/v208_2026-06-16-companion-stance-command.md) | [`as-built`](docs/as-built/v208_companion-stance-command.md) |
+| **v209** | `sorcerer-teleport` | Complete (`make ci` green) | [`v209_spec-sorcerer-teleport.md`](docs/specs/v209_spec-sorcerer-teleport.md) | [`v209_2026-06-16-sorcerer-teleport.md`](docs/plans/v209_2026-06-16-sorcerer-teleport.md) | [`as-built`](docs/as-built/v209_sorcerer-teleport.md) |
 
 ---

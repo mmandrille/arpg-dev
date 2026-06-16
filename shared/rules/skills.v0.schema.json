@@ -25,7 +25,7 @@
         "class": { "type": "string", "minLength": 1 },
         "damage_type": { "$ref": "#/$defs/damage_type" },
         "tree": { "$ref": "#/$defs/tree_position" },
-        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion"] },
+        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility"] },
         "max_rank": { "type": "integer", "minimum": 1 },
         "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
@@ -38,6 +38,7 @@
         "cone": { "$ref": "#/$defs/cone" },
         "poison": { "$ref": "#/$defs/poison" },
         "dash": { "$ref": "#/$defs/dash" },
+        "mobility": { "$ref": "#/$defs/mobility" },
         "slow": { "$ref": "#/$defs/slow" },
         "shatter": { "$ref": "#/$defs/shatter" },
         "chain": { "$ref": "#/$defs/chain" },
@@ -111,6 +112,13 @@
           "if": { "properties": { "kind": { "const": "revive_companion" } }, "required": ["kind"] },
           "then": {
             "required": ["revive"],
+            "properties": { "targeting": { "const": "direction_or_target" } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "mobility" } }, "required": ["kind"] },
+          "then": {
+            "required": ["mobility"],
             "properties": { "targeting": { "const": "direction_or_target" } }
           }
         }
@@ -319,6 +327,24 @@
         "damage_percent_base": { "type": "integer", "minimum": 1 },
         "damage_percent_per_magic": { "type": "integer", "minimum": 0 },
         "max_damage_bonus_percent": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "mobility": {
+      "type": "object",
+      "required": ["range_base", "range_per_rank", "mode", "visual"],
+      "additionalProperties": false,
+      "properties": {
+        "range_base": { "type": "number", "exclusiveMinimum": 0 },
+        "range_per_rank": { "type": "number", "minimum": 0 },
+        "mode": { "type": "string", "enum": ["teleport", "leap", "charge", "disengage"] },
+        "visual": { "type": "string", "minLength": 1 },
+        "damage_percent_base": { "type": "integer", "minimum": 0 },
+        "damage_percent_per_rank": { "type": "integer", "minimum": 0 },
+        "impact_radius": { "type": "number", "minimum": 0 },
+        "stun_effect_id": { "type": "string", "minLength": 1 },
+        "stun_duration_ticks": { "type": "integer", "minimum": 0 },
+        "root_effect_id": { "type": "string", "minLength": 1 },
+        "root_duration_ticks": { "type": "integer", "minimum": 0 }
       }
     },
     "slow": {

@@ -23,10 +23,10 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v208 — companion stance command |
+| **Latest completed slice** | v209 — sorcerer teleport |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-16 after v208 companion stance command |
-| **Next slice** | Selected autoloop queue complete; use `/next` for the next feature slice |
+| **CI gate** | `make ci` green on 2026-06-16 after v209 sorcerer teleport |
+| **Next slice** | Continue selected autoloop queue with v210 barbarian leap |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |
 

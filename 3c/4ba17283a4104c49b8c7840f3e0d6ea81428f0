@@ -1,0 +1,48 @@
+docs/as-built/v216_stash-material-wallet.md
+  s_1f673d2f0bd3d2::t_1eaec3de03ac63 1-17
+server/internal/inputdecode/inputdecode_test.go
+  s_1f673d2f0bd3d2::t_45f137b5dc3682 134-143
+server/internal/game/stash_material_wallet.go
+  s_1f673d2f0bd3d2::t_45f137b5dc3682 1-42
+server/internal/game/types.go
+  s_1f673d2f0bd3d2::t_a8bfb728fa5247 394,412
+server/internal/game/sim.go
+  s_1f673d2f0bd3d2::t_a8bfb728fa5247 378,772-810,836,901
+server/internal/game/stash_material_wallet_test.go
+  s_1f673d2f0bd3d2::t_2057348867d554 6,34,51-61
+  s_1f673d2f0bd3d2::t_45f137b5dc3682 1-5,7-33,35-50,62
+server/internal/inputdecode/inputdecode.go
+  s_1f673d2f0bd3d2::t_ba613b41757847 40-46,119,162,345-350
+docs/progress/slice-lifecycle.md
+  s_1f673d2f0bd3d2::t_1eaec3de03ac63 233
+shared/protocol/messages.v8.schema.json
+  s_1f673d2f0bd3d2::t_62923f8b09cc40 42,120
+PROGRESS.md
+  s_1f673d2f0bd3d2::t_1eaec3de03ac63 26,28-29
+shared/protocol/state_delta.v8.schema.json
+  s_1f673d2f0bd3d2::t_62923f8b09cc40 54,378,706-711
+docs/specs/v216_spec-stash-material-wallet.md
+  s_1f673d2f0bd3d2::t_1eaec3de03ac63 1-37
+server/internal/game/handlers.go
+  s_1f673d2f0bd3d2::t_a8bfb728fa5247 56
+shared/protocol/examples/stash_deposit_material_intent.json
+  s_1f673d2f0bd3d2::t_62923f8b09cc40 1-10
+docs/plans/v216_2026-06-16-stash-material-wallet.md
+  s_1f673d2f0bd3d2::t_1eaec3de03ac63 1-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3c4ba17283a4104c49b8c7840f3e0d6ea81428f0",
+  "prompts": {},
+  "sessions": {
+    "s_1f673d2f0bd3d2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecea2-8022-7922-bd04-83c0b6c32e45",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

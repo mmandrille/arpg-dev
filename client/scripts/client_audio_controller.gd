@@ -13,6 +13,10 @@ var sfx_volume: float = 0.8
 var last_cue: String = ""
 var cue_count: int = 0
 var boss_music_active: bool = false
+var boss_music_intensity: float = 0.0
+var boss_music_layer: String = "none"
+var last_boss_pattern_id: String = ""
+var last_boss_phase_kind: String = ""
 
 var _sfx_player: AudioStreamPlayer
 var _music_player: AudioStreamPlayer
@@ -77,8 +81,14 @@ func play_kill(is_boss: bool = false) -> void:
 	play_cue("boss_kill" if is_boss else "monster_kill")
 
 
-func play_boss_phase() -> void:
-	play_cue("boss_phase")
+func play_boss_phase(pattern_id: String = "", phase_kind: String = "") -> void:
+	var normalized_pattern := _normalize_boss_value(pattern_id)
+	var normalized_phase := _normalize_boss_value(phase_kind)
+	last_boss_pattern_id = normalized_pattern
+	last_boss_phase_kind = normalized_phase
+	boss_music_layer = _boss_music_layer(normalized_pattern, normalized_phase)
+	boss_music_intensity = _boss_music_intensity(boss_music_layer)
+	play_cue(_boss_phase_cue(normalized_pattern, normalized_phase))
 	start_boss_music()
 
 
@@ -95,6 +105,8 @@ func start_boss_music() -> void:
 
 func stop_boss_music() -> void:
 	boss_music_active = false
+	boss_music_intensity = 0.0
+	boss_music_layer = "none"
 	if _music_player != null:
 		_music_player.stop()
 
@@ -200,6 +212,16 @@ func _cue_frequency(cue: String) -> float:
 			return 90.0
 		"boss_phase":
 			return 115.0
+		"boss_telegraph":
+			return 128.0
+		"boss_active":
+			return 92.0
+		"boss_recovery":
+			return 180.0
+		"boss_summon":
+			return 196.0
+		"boss_ranged":
+			return 260.0
 		_:
 			return 440.0
 
@@ -210,10 +232,65 @@ func _cue_wave(cue: String) -> String:
 			return "noise"
 		"skill", "movement_skill", "heal":
 			return "up"
-		"player_damage", "monster_kill", "boss_kill", "boss_phase":
+		"player_damage", "monster_kill", "boss_kill", "boss_phase", "boss_active":
 			return "down"
+		"boss_telegraph", "boss_recovery", "boss_summon", "boss_ranged":
+			return "up"
 		_:
 			return "sine"
+
+
+func _boss_phase_cue(pattern_id: String, phase_kind: String) -> String:
+	if pattern_id.contains("summon"):
+		return "boss_summon"
+	if pattern_id.contains("lance") or pattern_id.contains("line") or pattern_id.contains("fan"):
+		return "boss_ranged"
+	match phase_kind:
+		"telegraph":
+			return "boss_telegraph"
+		"active":
+			return "boss_active"
+		"recovery":
+			return "boss_recovery"
+		_:
+			return "boss_phase"
+
+
+func _boss_music_layer(pattern_id: String, phase_kind: String) -> String:
+	var cue := _boss_phase_cue(pattern_id, phase_kind)
+	match cue:
+		"boss_summon":
+			return "summon"
+		"boss_ranged":
+			return "ranged"
+		"boss_telegraph":
+			return "windup"
+		"boss_active":
+			return "danger"
+		"boss_recovery":
+			return "release"
+		_:
+			return "steady"
+
+
+func _boss_music_intensity(layer: String) -> float:
+	match layer:
+		"summon":
+			return 0.86
+		"ranged":
+			return 0.78
+		"windup":
+			return 0.64
+		"danger":
+			return 1.0
+		"release":
+			return 0.34
+		_:
+			return 0.5
+
+
+func _normalize_boss_value(value: String) -> String:
+	return value.strip_edges().to_lower()
 
 
 func _normalize_cue(cue: String) -> String:

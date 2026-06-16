@@ -1,0 +1,14 @@
+client/scripts/main.gd
+  h_6c904e338a0e5a 82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "03441921c448d49141b20ff6ee66f8ce3c543998",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

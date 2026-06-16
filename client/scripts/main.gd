@@ -1267,7 +1267,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_last_boss_reward_status = "%s defeated" % (_boss_visuals.boss_health_bar_title(str(ev.get("boss_template_id", ""))) if _boss_visuals != null else "Boss")
 			continue
 		if event_type == "boss_phase_started" and entities.has(eid):
-			ClientAudioBridgeScript.boss_phase(audio_controller)
+			ClientAudioBridgeScript.boss_phase(audio_controller, ev)
 			if _boss_visuals != null:
 				_boss_visuals_context.last_server_tick = last_server_tick
 				_boss_visuals.apply_boss_phase_started(eid, ev)

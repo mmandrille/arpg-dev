@@ -96,9 +96,9 @@ static func kill(controller: ClientAudioController, is_boss: bool) -> void:
 		controller.play_kill(is_boss)
 
 
-static func boss_phase(controller: ClientAudioController) -> void:
+static func boss_phase(controller: ClientAudioController, ev: Dictionary = {}) -> void:
 	if controller != null:
-		controller.play_boss_phase()
+		controller.play_boss_phase(str(ev.get("pattern_id", "")), str(ev.get("phase_kind", "")))
 
 
 static func stop_boss_music(controller: ClientAudioController) -> void:

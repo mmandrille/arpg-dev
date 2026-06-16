@@ -54,6 +54,7 @@ const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
+const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
@@ -100,6 +101,7 @@ var right_click_skill_id: String = ""
 var skill_function_keys: Array = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
 var pending_skill_casts: Dictionary = {}
 var _channel_skill_input := ChannelSkillInputScript.new()
+var _charge_channel_visual := ChargeChannelVisualScript.new()
 var _last_holy_shield_aura_pulse_key: String = ""
 var item_rules: Dictionary:
 	get: return ItemRulesLoader.item_rules
@@ -1011,6 +1013,16 @@ func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
 		var event_type := str(ev.get("event_type", ""))
+		if eid == player_id and str(ev.get("skill_id", "")) == "charge":
+			if event_type == "skill_channel_started":
+				_start_charge_channel_visual(ev)
+				continue
+			if event_type == "skill_channel_updated":
+				_update_charge_channel_visual(ev)
+				continue
+			if event_type == "skill_channel_ended":
+				_stop_charge_channel_visual()
+				continue
 		if event_type == "skill_cooldown_started" and eid == player_id:
 			if skill_bar != null:
 				skill_bar.start_skill_cooldown(
@@ -1935,6 +1947,21 @@ func _finish_charge_visual() -> void:
 	local_charge_visual_active = false
 	if player_anchor != null:
 		player_anchor.position = predicted_pos
+
+func _start_charge_channel_visual(ev: Dictionary) -> void:
+	var direction := _vec2_from_dict(ev.get("direction", {}))
+	_charge_channel_visual.start(player_anchor, character_visual, direction)
+	_mark_local_player_walking()
+	_face_direction(direction)
+
+func _update_charge_channel_visual(ev: Dictionary) -> void:
+	var direction := _vec2_from_dict(ev.get("direction", {}))
+	_charge_channel_visual.update_direction(direction)
+	_mark_local_player_walking()
+	_face_direction(direction)
+
+func _stop_charge_channel_visual() -> void:
+	_charge_channel_visual.stop()
 
 func _skill_presentation_float(skill_id: String, field: String) -> float:
 	var presentation: Dictionary = SkillRulesLoaderScript.skill_presentation(skill_id)
@@ -5254,6 +5281,7 @@ func _bot_local_player_presentation() -> Dictionary:
 		"holy_shield_aura_pulses": PlayerStatusEffectMarkers.active_holy_shield_aura_pulse_count(player_anchor),
 		"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(player_anchor),
 		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor), "base_tint": ClientConstants.PLAYER_TINT.to_html(false),
+		"charge_channel_visual": _charge_channel_visual.get_debug_state(),
 		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
 		"animation": player_anim.get_debug_state() if player_anim != null else {},
 	}

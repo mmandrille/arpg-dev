@@ -1,0 +1,93 @@
+server/migrations/0026_character_item_weapon_sets.sql
+  s_a8770cc34038ef::t_0ab55d834d4688 10-55
+  s_a8770cc34038ef::t_22971375f64f09 1-9,56-68
+server/internal/game/sim_load.go
+  s_a8770cc34038ef::t_1348956ba53b71 15,51
+client/scripts/main.gd
+  h_6c904e338a0e5a 82
+  s_104edfe277a59e::t_1e1bbd43c3f507 135
+  s_104edfe277a59e::t_b7f2c6bc6a4552 1932,1936,1939,1945,1949-1953
+  s_104edfe277a59e::t_8c685b587e9e78 83
+  s_104edfe277a59e::t_6ca1f861fce62a 1644-1646
+  s_104edfe277a59e::t_50df5c263ab437 1088,1933-1935,1937-1938,1940-1944,1946-1948
+  s_104edfe277a59e::t_9b495e3fce0ed6 1335-1353,1355,1392-1394
+  s_104edfe277a59e::t_50dd92273e11db 983-985,992-998,1089
+client/tests/test_skill_rules_loader.gd
+  s_104edfe277a59e::t_d7575f8964f20e 73,75-76
+client/scripts/skill_icon.gd
+  s_104edfe277a59e::t_50df5c263ab437 44-47,54-55,160-199,259-278
+shared/assets/skill_presentations.v0.json
+  s_104edfe277a59e::t_50df5c263ab437 87,98-100,109-111
+client/scripts/character_stats_panel.gd
+  s_a8770cc34038ef::t_9fd8bb97d698cf 8,70,205-212
+client/tests/test_coop_client.gd
+  s_a8770cc34038ef::t_aaabd681b39cf6 532-535
+server/internal/store/repos.go
+  s_a8770cc34038ef::t_5c05e9a58104e1 791-797
+  s_a8770cc34038ef::t_be14d1e180e02a 695,709,731-732,738,743,767,778,780
+  s_a8770cc34038ef::t_2da1c65e394b53 1936-1937,1939,2089,2101
+  s_a8770cc34038ef::t_8e6b6eb5323cb5 1399,1404,1496-1497,1499,1501,1775-1776,1783
+server/internal/realtime/runner.go
+  s_a8770cc34038ef::t_0da38e1f6095f7 460,479,503
+  s_a8770cc34038ef::t_356474618afe7c 618-624
+server/internal/store/corpse.go
+  s_a8770cc34038ef::t_8ba5c5df665582 64,69,85-87,89
+server/internal/game/weapon_sets_test.go
+  s_a8770cc34038ef::t_9e0c832e4bed6f 50-60,62-70,72-73
+  s_a8770cc34038ef::t_8d331e921a493d 61,71,92-98
+server/internal/store/store_test.go
+  s_a8770cc34038ef::t_74f2eab1f9ef92 769
+  s_a8770cc34038ef::t_d5915fb31b2b76 569,594
+  s_a8770cc34038ef::t_04fca639068ddf 724,795
+shared/rules/skills.v0.json
+  s_104edfe277a59e::t_50df5c263ab437 459
+server/internal/game/mobility_skills_test.go
+  s_104edfe277a59e::t_d7575f8964f20e 35-36
+server/internal/realtime/session_loop.go
+  s_a8770cc34038ef::t_e523278b5f8e04 766,776,795
+server/internal/replay/replay_test.go
+  s_a8770cc34038ef::t_d70f4562086a31 1429
+server/internal/game/types.go
+  s_a8770cc34038ef::t_3ba055112516bf 563
+shared/assets/skill_presentations.v0.schema.json
+  s_104edfe277a59e::t_d7575f8964f20e 34,36,39
+tools/assets/skill_logo_sheet.py
+  s_104edfe277a59e::t_d31a3732a1b501 173-211,250-273
+server/internal/store/models.go
+  s_a8770cc34038ef::t_5be73ade744347 107
+server/internal/store/interfaces.go
+  s_a8770cc34038ef::t_1f4172d9ddc997 52
+server/internal/game/handlers.go
+  s_a8770cc34038ef::t_32018a64ecbe07 785,797,804,846
+server/internal/realtime/hub.go
+  s_a8770cc34038ef::t_867ea18a91d572 156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0e7ab7138e1b92f80d2612c42776d0de5b4da157",
+  "prompts": {},
+  "humans": {
+    "h_6c904e338a0e5a": {
+      "author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_104edfe277a59e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed09b-3e48-79a0-9b18-7347a9653df2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_a8770cc34038ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed073-156b-7a42-ba3c-3ba0f571d8a3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

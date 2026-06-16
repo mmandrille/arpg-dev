@@ -57,12 +57,14 @@ func TestBarbarianLeapMovesDamagesAndStunsLandingTargets(t *testing.T) {
 	}
 }
 
-func TestPaladinChargeMovesDamagesAndStunsEndpointTargets(t *testing.T) {
+func TestPaladinChargeMovesDamagesStunsAndPushesLineTargets(t *testing.T) {
 	sim := mobilitySkillSim(t, "paladin", "charge")
 	player := sim.activeLevel().entities[sim.playerID]
 	player.pos = Vec2{X: 2, Y: 2}
+	lineTarget := addRangerSkillMonster(sim, Vec2{X: 5, Y: 2}, 40)
 	endpoint := addRangerSkillMonster(sim, Vec2{X: 8, Y: 2}, 40)
 	far := addRangerSkillMonster(sim, Vec2{X: 11, Y: 2}, 40)
+	lineStartX := lineTarget.pos.X
 
 	cast := sim.Tick([]Input{{
 		MessageID:     "charge",
@@ -72,11 +74,17 @@ func TestPaladinChargeMovesDamagesAndStunsEndpointTargets(t *testing.T) {
 	}})
 
 	assertAck(t, cast, "charge")
-	if !hasEvent(cast, "skill_cast") || !hasSkillDamageEvent(cast, "charge") || !hasEvent(cast, "skill_effect_started") {
+	if !hasEvent(cast, "skill_cast") || !hasSkillDamageEvent(cast, "charge") || !hasEvent(cast, "skill_effect_started") || !hasEvent(cast, "monster_pushed") {
 		t.Fatalf("charge events = %+v", cast.Events)
+	}
+	if hasEvent(cast, "skill_cooldown_started") || len(skillCooldownUpdate(cast)) > 0 {
+		t.Fatalf("charge should not start cooldowns, events=%+v changes=%+v", cast.Events, cast.Changes)
 	}
 	if player.pos.X <= 2 {
 		t.Fatalf("charge player x = %.2f, want moved forward", player.pos.X)
+	}
+	if lineTarget.hp >= lineTarget.maxHP || !containsStringValue(lineTarget.effectIDs, "stun") || lineTarget.pos.X <= lineStartX {
+		t.Fatalf("line target hp/effects/pos = %d/%d %v %.2f, want damaged, stunned, and pushed", lineTarget.hp, lineTarget.maxHP, lineTarget.effectIDs, lineTarget.pos.X)
 	}
 	if endpoint.hp >= endpoint.maxHP || !containsStringValue(endpoint.effectIDs, "stun") {
 		t.Fatalf("endpoint hp/effects = %d/%d %v, want damaged and stunned", endpoint.hp, endpoint.maxHP, endpoint.effectIDs)

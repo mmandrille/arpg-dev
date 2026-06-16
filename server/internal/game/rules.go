@@ -2831,10 +2831,10 @@ func validateSkillRules(skills map[string]SkillDef, monsters map[string]MonsterD
 		if err := validateSkillKindPayload(id, skill, monsters); err != nil {
 			return err
 		}
-		if skill.Cooldown.Type != "attack_interval_multiplier" {
+		if skill.Cooldown.Type != "attack_interval_multiplier" && skill.Cooldown.Type != "none" {
 			return fmt.Errorf("game: invalid rules skills.%s.cooldown.type: unsupported %s", id, skill.Cooldown.Type)
 		}
-		if skill.Cooldown.Multiplier <= 0 {
+		if skill.Cooldown.Type == "attack_interval_multiplier" && skill.Cooldown.Multiplier <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.cooldown.multiplier: must be positive", id)
 		}
 		if skill.Cooldown.FlatTicks < 0 {

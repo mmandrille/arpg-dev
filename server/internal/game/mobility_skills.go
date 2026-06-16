@@ -33,7 +33,11 @@ func (s *Sim) handleMobilitySkillCast(in Input, res *TickResult, player *entity,
 	if def.Mobility.Mode == "disengage" {
 		impactPos = start
 	}
-	s.applyMobilityImpact(player, impactPos, skillID, def, rank, in.CorrelationID, res)
+	if def.Mobility.Mode == "charge" {
+		s.applyChargeLineImpact(player, start, end, dir, skillID, def, rank, in.CorrelationID, res)
+	} else {
+		s.applyMobilityImpact(player, impactPos, skillID, def, rank, in.CorrelationID, res)
+	}
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)
@@ -77,6 +81,76 @@ func (s *Sim) applyMobilityImpact(player *entity, impactPos Vec2, skillID string
 			s.applyMonsterRoot(target, player.id, skillID, SkillRootDef{EffectID: def.Mobility.RootEffectID, DurationTicks: def.Mobility.RootDurationTicks}, correlationID, res)
 		}
 	}
+}
+
+func (s *Sim) applyChargeLineImpact(player *entity, start Vec2, end Vec2, dir Vec2, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
+	impactRadius := def.Mobility.ImpactRadius
+	if impactRadius <= 0 {
+		return
+	}
+	damageRange := mobilityDamageRange(s.resolvePlayerAttackDamage(), def, rank)
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		target := s.activeLevel().entities[id]
+		if target == nil || target.kind != monsterEntity || target.hp <= 0 || distancePointToSegment(target.pos, start, end) > impactRadius {
+			continue
+		}
+		if damageRange.Max > 0 {
+			beforeEvents := len(res.Events)
+			s.damageMonsterByPlayerSkillTypedWithID(target, player.id, skillID, correlationID, res, damageRange, s.skillDamageType(def))
+			for i := beforeEvents; i < len(res.Events); i++ {
+				if res.Events[i].EventType == "monster_damaged" && res.Events[i].TargetEntityID == idStr(target.id) {
+					res.Events[i].SkillID = skillID
+				}
+			}
+		}
+		if target.hp > 0 && def.Mobility.StunDurationTicks > 0 {
+			s.applyMonsterRoot(target, player.id, skillID, SkillRootDef{EffectID: def.Mobility.StunEffectID, DurationTicks: def.Mobility.StunDurationTicks}, correlationID, res)
+		}
+		if target.hp > 0 {
+			s.pushMobilityTarget(player, target, dir, skillID, def, correlationID, res)
+		}
+	}
+}
+
+func (s *Sim) pushMobilityTarget(player *entity, target *entity, dir Vec2, skillID string, def SkillDef, correlationID string, res *TickResult) {
+	push := s.rollFloatRange(def.Mobility.PushMin, def.Mobility.PushMax)
+	if push <= 0 {
+		return
+	}
+	away := normalize(dir)
+	if away.X == 0 && away.Y == 0 {
+		away = normalize(Vec2{X: target.pos.X - player.pos.X, Y: target.pos.Y - player.pos.Y})
+	}
+	if away.X == 0 && away.Y == 0 {
+		away = Vec2{X: 1}
+	}
+	before := target.pos
+	target.pos = s.resolveMonsterMovement(target, Vec2{X: away.X * push, Y: away.Y * push})
+	if target.pos == before {
+		return
+	}
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+	res.Events = append(res.Events, Event{
+		EventType:      "monster_pushed",
+		EntityID:       idStr(target.id),
+		SourceEntityID: idStr(player.id),
+		TargetEntityID: idStr(target.id),
+		CorrelationID:  correlationID,
+		SkillID:        skillID,
+		Amount:         intPtr(int(math.Round(push))),
+	})
+}
+
+func distancePointToSegment(point Vec2, start Vec2, end Vec2) float64 {
+	segment := Vec2{X: end.X - start.X, Y: end.Y - start.Y}
+	lengthSq := segment.X*segment.X + segment.Y*segment.Y
+	if lengthSq <= 0 {
+		return distance(point, start)
+	}
+	t := ((point.X-start.X)*segment.X + (point.Y-start.Y)*segment.Y) / lengthSq
+	t = math.Max(0, math.Min(1, t))
+	closest := Vec2{X: start.X + segment.X*t, Y: start.Y + segment.Y*t}
+	return distance(point, closest)
 }
 
 func mobilityDamageRange(base DamageRange, def SkillDef, rank int) DamageRange {

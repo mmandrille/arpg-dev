@@ -338,9 +338,12 @@
         "range_per_rank": { "type": "number", "minimum": 0 },
         "mode": { "type": "string", "enum": ["teleport", "leap", "charge", "disengage"] },
         "visual": { "type": "string", "minLength": 1 },
+        "speed_tiles_per_second": { "type": "number", "exclusiveMinimum": 0 },
         "damage_percent_base": { "type": "integer", "minimum": 0 },
         "damage_percent_per_rank": { "type": "integer", "minimum": 0 },
         "impact_radius": { "type": "number", "minimum": 0 },
+        "push_min": { "type": "number", "minimum": 0 },
+        "push_max": { "type": "number", "minimum": 0 },
         "stun_effect_id": { "type": "string", "minLength": 1 },
         "stun_duration_ticks": { "type": "integer", "minimum": 0 },
         "root_effect_id": { "type": "string", "minLength": 1 },
@@ -462,15 +465,17 @@
     },
     "cooldown": {
       "type": "object",
-      "required": ["type", "multiplier"],
+      "required": ["type"],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "attack_interval_multiplier" },
+        "type": { "type": "string", "enum": ["attack_interval_multiplier", "none"] },
         "multiplier": { "type": "number", "exclusiveMinimum": 0 },
         "flat_ticks": { "type": "integer", "minimum": 0 },
         "fixed_ticks": { "type": "integer", "minimum": 0 },
         "magic_reduction_ticks_per_point": { "type": "integer", "minimum": 0 }
-      }
+      },
+      "if": { "properties": { "type": { "const": "attack_interval_multiplier" } }, "required": ["type"] },
+      "then": { "required": ["multiplier"] }
     }
   }
 }

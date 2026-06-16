@@ -101,6 +101,8 @@
       },
       "summary": "Jumping impact stun",
       "effect_visual": "leap_impact",
+      "visual_duration": 1.0,
+      "visual_height": 2.05,
       "summary_key": "skill.leap.summary"
     },
     "earthbreaker": {
@@ -123,6 +125,7 @@
       },
       "summary": "Area ally heal",
       "effect_visual": "healing_pulse",
+      "visual_radius": 4.0,
       "summary_key": "skill.heal.summary"
     },
     "charge": {

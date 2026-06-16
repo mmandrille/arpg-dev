@@ -1045,13 +1045,33 @@ func _compact_metadata_lines(lines: Array) -> Array:
 		if text.begins_with("Slot:"):
 			out.append(_metadata_tooltip_line(text))
 		elif text.begins_with("Set:"):
-			out.append({"text": text, "color": Color("#55e66f"), "font_size": TOOLTIP_META_FONT_SIZE})
+			out.append_array(_set_membership_tooltip_lines(text))
 		elif text.find("set bonus:") >= 0:
-			var active := text.find("(active)") >= 0
-			out.append({"text": text, "color": Color("#7df095") if active else Color("#7d8d7f"), "font_size": TOOLTIP_META_FONT_SIZE})
+			out.append_array(_set_bonus_tooltip_lines(text))
 		else:
 			out.append(line)
 	return out
+
+
+func _set_membership_tooltip_lines(text: String) -> Array:
+	var split_at := text.rfind(" (")
+	if split_at < 0:
+		return [{"text": text, "color": Color("#55e66f"), "font_size": TOOLTIP_META_FONT_SIZE}]
+	return [
+		{"text": text.substr(0, split_at), "color": Color("#55e66f"), "font_size": TOOLTIP_META_FONT_SIZE},
+		{"text": text.substr(split_at + 1), "color": Color("#55e66f"), "font_size": TOOLTIP_META_FONT_SIZE},
+	]
+
+
+func _set_bonus_tooltip_lines(text: String) -> Array:
+	var color := Color("#7df095") if text.find("(active)") >= 0 else Color("#7d8d7f")
+	var split_at := text.find(": ")
+	if split_at < 0:
+		return [{"text": text, "color": color, "font_size": TOOLTIP_META_FONT_SIZE}]
+	return [
+		{"text": text.substr(0, split_at + 1), "color": color, "font_size": TOOLTIP_META_FONT_SIZE},
+		{"text": text.substr(split_at + 2), "color": color, "font_size": TOOLTIP_META_FONT_SIZE},
+	]
 
 
 func _tooltip_text_lines(lines: Array) -> Array:

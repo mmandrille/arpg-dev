@@ -1,0 +1,82 @@
+server/internal/replay/replay_test.go
+  s_4e57aa710a1c1f::t_05996723aef32f 1374
+tools/bot/scenarios/client/32_town_bishop_respec_panel.json
+  s_4e57aa710a1c1f::t_6b22f3a288fd53 7,14,16
+server/internal/realtime/runner.go
+  s_4e57aa710a1c1f::t_020e8a11faa84b 411-416
+server/internal/inputdecode/inputdecode.go
+  s_4e57aa710a1c1f::t_5012acde6ee87a 36,155,308-313
+shared/protocol/session_snapshot.v8.schema.json
+  s_4e57aa710a1c1f::t_aa95bd4ca4892d 754-758
+client/scripts/bishop_panel.gd
+  s_4e57aa710a1c1f::t_6dfb3541ee8538 5,24,88,100-104,155-160,194,196-197,214-219,230-231
+  s_4e57aa710a1c1f::t_b2974629f06556 15
+server/internal/game/sim.go
+  s_4e57aa710a1c1f::t_260d9bf7d2a786 877-878
+  s_4e57aa710a1c1f::t_97200e0d3e794a 798
+docs/progress/slice-lifecycle.md
+  s_4e57aa710a1c1f::t_ec64ba5fc987ab 230
+client/scripts/main.gd
+  s_4e57aa710a1c1f::t_4d0273f4896137 3320,4527-4533
+  s_4e57aa710a1c1f::t_42202ad2125319 1258-1260
+  s_4e57aa710a1c1f::t_b2974629f06556 4281-4282
+shared/protocol/state_delta.v8.schema.json
+  s_4e57aa710a1c1f::t_aa95bd4ca4892d 705-709
+server/internal/store/interfaces.go
+  s_4e57aa710a1c1f::t_099c716f28ff4d 23
+docs/plans/v213_2026-06-16-bishop-account-revival.md
+  s_4e57aa710a1c1f::t_6e714c6a25643f 1-21
+docs/as-built/v213_bishop-account-revival.md
+  s_4e57aa710a1c1f::t_d99ecd16a73b0b 19-20
+  s_4e57aa710a1c1f::t_ec64ba5fc987ab 21
+  s_4e57aa710a1c1f::t_6e714c6a25643f 1-18,22-25
+docs/progress/slice-codename-index.md
+  s_4e57aa710a1c1f::t_6e714c6a25643f 205
+server/internal/store/character_revive.go
+  s_4e57aa710a1c1f::t_c88749a46d985b 1-19
+server/internal/store/character_revive_test.go
+  s_4e57aa710a1c1f::t_4037d70317688d 1-72
+tools/bot/scenarios/45_town_bishop_respec.json
+  s_4e57aa710a1c1f::t_6b22f3a288fd53 7,24,38-40
+server/internal/game/handlers.go
+  s_4e57aa710a1c1f::t_37bc0ecfbb874a 51
+server/internal/inputdecode/inputdecode_test.go
+  s_4e57aa710a1c1f::t_b60ca8deab1db0 283-295
+server/internal/game/bishop_revive.go
+  s_4e57aa710a1c1f::t_c88749a46d985b 1-26
+docs/specs/v213_spec-bishop-account-revival.md
+  s_4e57aa710a1c1f::t_6e714c6a25643f 1-38
+server/internal/realtime/session_loop.go
+  s_4e57aa710a1c1f::t_9f37c9b20ddb3f 625,675-679
+PROGRESS.md
+  s_4e57aa710a1c1f::t_ec64ba5fc987ab 28
+  s_4e57aa710a1c1f::t_6e714c6a25643f 26
+client/scripts/bot_scenario_runner.gd
+  s_4e57aa710a1c1f::t_43369d3c7c255e 944
+shared/rules/main_config.v0.json
+  s_4e57aa710a1c1f::t_aa95bd4ca4892d 7
+shared/protocol/messages.v8.schema.json
+  s_4e57aa710a1c1f::t_aa95bd4ca4892d 37,109
+server/internal/game/game_test.go
+  s_4e57aa710a1c1f::t_f35c73f2fa90fd 131
+server/internal/game/bishop_test.go
+  s_4e57aa710a1c1f::t_14f55309510054 146-149
+  s_4e57aa710a1c1f::t_f35c73f2fa90fd 56,87-88,106,111,131-145,150-154
+  s_4e57aa710a1c1f::t_42202ad2125319 50-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "119e01412a1b1c6d8c47c30b1a5b0ab0a04a9ece",
+  "prompts": {},
+  "sessions": {
+    "s_4e57aa710a1c1f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ece4a-9220-7c91-bf31-333e57a6cffa",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

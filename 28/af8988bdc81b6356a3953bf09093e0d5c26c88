@@ -1,0 +1,42 @@
+docs/as-built/v220_mercenary-death-loss.md
+  s_898d01ce740857::t_19fc693f198f04 1-42
+docs/specs/v220_spec-mercenary-death-loss.md
+  s_898d01ce740857::t_19fc693f198f04 4
+  s_898d01ce740857::t_6429081213f262 1-3,5-74
+tools/bot/scenarios/90_mercenary_death_loss.json
+  s_898d01ce740857::t_157646bad7954c 1-15,17-25
+  s_898d01ce740857::t_408da7a9de432c 16
+docs/progress/slice-lifecycle.md
+  s_898d01ce740857::t_19fc693f198f04 236
+server/internal/game/monster_companion_combat.go
+  s_898d01ce740857::t_a6b1a78df21515 1-56,58-59,61-96
+  s_898d01ce740857::t_1429ec34a87af4 57,60
+shared/rules/worlds.v0.json
+  s_898d01ce740857::t_157646bad7954c 905-913
+server/internal/game/mercenary_hiring_test.go
+  s_898d01ce740857::t_e73f33843f1f28 126-196,239-251
+server/internal/game/sim.go
+  s_898d01ce740857::t_a6b1a78df21515 3336-3337,3359-3363
+PROGRESS.md
+  s_898d01ce740857::t_19fc693f198f04 26,28-29,112
+docs/plans/v220_2026-06-16-mercenary-death-loss.md
+  s_898d01ce740857::t_19fc693f198f04 55,57,59,61,73-74,90-91,99-102
+  s_898d01ce740857::t_6429081213f262 1-34,38-54,56,58,60,62-72,75-89,92-98,103-104
+  s_898d01ce740857::t_a1d6160b574fce 35-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "28af8988bdc81b6356a3953bf09093e0d5c26c88",
+  "prompts": {},
+  "sessions": {
+    "s_898d01ce740857": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed1c5-b55c-76f1-8252-fcaf1d718185",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -146,7 +146,7 @@ guards their class ownership/prerequisite links, Godot skill UI tests cover the 
 lists, and protocol bot scenarios prove both new skills cast through the server-owned skill path.
 
 **The v170 engineering review gate is complete.** The review set starts at
-[`docs/reviews/20260614_v170-overview.md`](docs/reviews/20260614_v170-overview.md), with backend,
+[`docs/reviews/20260614_v170-overview.md`](../reviews/20260614_v170-overview.md), with backend,
 client, and shared/tooling companion reports. It records the v161-v170 feature-and-paydown batch at
 `main` commit `05804d77`, notes `make maintainability` passing with 33 grandfathered files / 65347
 lines and 37 legacy helper-global injections, and points the next batch toward `game_test.go`
@@ -211,7 +211,7 @@ population tests, keeps protocol/client behavior unchanged, and lowers the `sim.
 baseline from 7022 to 6836 lines.
 
 **The v160 engineering review gate is complete.** The new review set starts at
-[`docs/reviews/20260614_v160-overview.md`](docs/reviews/20260614_v160-overview.md), with backend,
+[`docs/reviews/20260614_v160-overview.md`](../reviews/20260614_v160-overview.md), with backend,
 client, and shared/tooling companion reports. It records the v151-v159 feature-and-paydown batch at
 `main` commit `4a46229e`, notes `make maintainability` passing with 33 grandfathered files / 65747
 lines and 37 legacy helper-global injections, and points the next batch toward dungeon population
@@ -264,7 +264,7 @@ file or receiving its whole namespace. The dedicated `run.py` split campaign is 
 future slice performs the real typed `BotContext` refactor.
 
 **The v150 engineering review gate is complete.** The new review set starts at
-[`docs/reviews/20260614_v150-overview.md`](docs/reviews/20260614_v150-overview.md), with backend,
+[`docs/reviews/20260614_v150-overview.md`](../reviews/20260614_v150-overview.md), with backend,
 client, and shared/tooling companion reports. It records the v141-v149 architecture paydown trend
 (`make maintainability`: 33 grandfathered files / 65592 lines, down from 68778 at v140) and points
 the next batch toward `game_test.go`, remaining `sim.go` domains, client/Python bot assertion
@@ -319,7 +319,7 @@ audit, summary, and market-only helper code into `server/internal/store/market_r
 loads focused store files first.
 
 **The v140 engineering review gate is complete.** The new review set starts at
-[`docs/reviews/20260613_v140-overview.md`](docs/reviews/20260613_v140-overview.md), with backend,
+[`docs/reviews/20260613_v140-overview.md`](../reviews/20260613_v140-overview.md), with backend,
 client, and shared/tooling companion reports. It clears the v140 cadence gate and points the next
 batch toward market store extraction, client bot facade/runner split, Python bot assertion split,
 and continued CODEMAP/ratchet discipline.

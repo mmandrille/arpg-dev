@@ -532,6 +532,7 @@ type SkillDef struct {
 	Cone         SkillConeDef        `json:"cone"`
 	Poison       SkillPoisonDef      `json:"poison"`
 	Dash         SkillDashDef        `json:"dash"`
+	Mobility     SkillMobilityDef    `json:"mobility"`
 	Slow         SkillSlowDef        `json:"slow"`
 	Shatter      SkillShatterDef     `json:"shatter"`
 	Chain        SkillChainDef       `json:"chain"`
@@ -541,14 +542,11 @@ type SkillDef struct {
 	Cooldown     SkillCooldownDef    `json:"cooldown"`
 }
 
-// SkillTreeDef positions a skill in a class skill tree.
 type SkillTreeDef struct {
 	Tier   int `json:"tier"`
 	Column int `json:"column"`
 }
 
-// SkillRequirementDef declares deterministic requirements for learning and
-// using a skill.
 type SkillRequirementDef struct {
 	Level        int                    `json:"level"`
 	LevelPerRank int                    `json:"level_per_rank"`
@@ -562,12 +560,10 @@ type SkillPrerequisiteDef struct {
 	Rank    int    `json:"rank"`
 }
 
-// SkillCostDef declares rank-scaled resource costs.
 type SkillCostDef struct {
 	Mana SkillRankValueDef `json:"mana"`
 }
 
-// SkillRankValueDef is a rank-scaled integer value. Rank 1 uses Base.
 type SkillRankValueDef struct {
 	Base    int `json:"base"`
 	PerRank int `json:"per_rank"`
@@ -2883,7 +2879,7 @@ func validateBuffSkillCooldown(skillID string, skill SkillDef, baseAttackInterva
 }
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion":
+	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility":
 		return true
 	default:
 		return false
@@ -2943,6 +2939,11 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 		return validateSummonCompanionSkillPayload(skillID, skill, monsters)
 	case "revive_companion":
 		return validateReviveCompanionSkillPayload(skillID, skill)
+	case "mobility":
+		if skill.Targeting != "direction_or_target" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for mobility", skillID, skill.Targeting)
+		}
+		return validateRogueConeSkillPayload(skillID, skill)
 	default:
 		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", skillID, skill.Kind)
 	}

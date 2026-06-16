@@ -789,7 +789,7 @@ func (s *Sim) handleEquip(in Input, res *TickResult) {
 		}
 	}
 
-	item.slot = in.Equip.Slot
+	item.slot = s.itemSlotAfterEquip(in.Equip.Slot, item)
 	item.equipped = true
 	s.setEquippedSlot(in.Equip.Slot, item.instanceID, weaponSet)
 
@@ -1256,6 +1256,8 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		s.handleSummonCompanionSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "revive_companion":
 		s.handleReviveCompanionSkillCast(in, res, player, skillID, def, rank, manaCost)
+	case "mobility":
+		s.handleMobilitySkillCast(in, res, player, skillID, def, rank, manaCost)
 	default:
 		res.reject(in.MessageID, "unsupported_skill_kind")
 	}

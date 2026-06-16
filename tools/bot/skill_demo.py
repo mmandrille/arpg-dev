@@ -92,6 +92,8 @@ def demo_category(skill: dict[str, Any]) -> str:
         return "attack"
     if kind == "cone_attack":
         return "attack"
+    if kind == "mobility":
+        return "mobility"
     if kind == "area_heal":
         return "heal"
     if kind == "self_buff":

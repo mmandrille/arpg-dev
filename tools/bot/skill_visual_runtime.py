@@ -131,7 +131,7 @@ def rank_assertion(entry: SkillDemoEntry, rank: int) -> dict[str, Any]:
 
 def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = []
-    if entry.kind == "cone_attack":
+    if entry.kind in {"cone_attack", "mobility"}:
         steps.extend([
             {"action": "move_until_player_position", "x": 7, "y": 5, "pathfind": True, "max_ticks": 220},
             {
@@ -140,12 +140,13 @@ def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
                 "direction": {"x": 1, "y": 0},
                 "event_type": "skill_cast",
             },
-            {
+        ])
+        if entry.kind == "cone_attack":
+            steps.append({
                 "action": "wait_until_assertion",
                 "assertion": {"type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1},
                 "timeout_s": 8,
-            },
-        ])
+            })
     elif entry.kind in {"projectile_attack", "cold_projectile_attack", "chain_projectile_attack"}:
         steps.extend([
             {"action": "move_until_player_position", "x": 4, "y": 5, "pathfind": True, "max_ticks": 220},

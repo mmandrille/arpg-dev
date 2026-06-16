@@ -71,6 +71,8 @@
     "skill.revive.summary": "Revive un monstruo abatido",
     "skill.magic_bolt.name": "Proyectil magico",
     "skill.magic_bolt.summary": "Hechizo de proyectil",
+    "skill.teleport.name": "Teletransporte",
+    "skill.teleport.summary": "Parpadeo instantaneo dirigido",
     "skill.rage.name": "Furia",
     "skill.rage.summary": "Mejora de FUE/VIT y tamano",
     "skill.earthbreaker.name": "Rompetierra",

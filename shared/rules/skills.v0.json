@@ -53,6 +53,45 @@
       },
       "name_key": "skill.magic_bolt.name"
     },
+    "teleport": {
+      "name": "Teleport",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 1,
+        "column": 2
+      },
+      "kind": "mobility",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 5
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "mobility": {
+        "range_base": 6,
+        "range_per_rank": 0.75,
+        "mode": "teleport",
+        "visual": "teleport_blink"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 6
+      },
+      "name_key": "skill.teleport.name"
+    },
     "ice_shard": {
       "name": "Ice Shard",
       "class": "sorcerer",

@@ -4,8 +4,9 @@ client/scripts/bot_controller.gd	742
 client/scripts/bot_scenario_runner.gd	1640
 client/scripts/character_select_panel.gd	642
 client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	6521
+client/scripts/main.gd	5634
 client/scripts/market_panel.gd	1059
+client/scripts/player_status_effect_markers.gd	646
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010
 client/scripts/stash_panel.gd	1155
@@ -14,12 +15,12 @@ client/tests/test_coop_client.gd	1519
 client/tests/test_golden.gd	784
 server/internal/game/dungeon_gen.go	1061
 server/internal/game/game_test.go	7888
-server/internal/game/handlers.go	1440
+server/internal/game/handlers.go	1469
 server/internal/game/rules.go	3250
 server/internal/game/shop.go	1221
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6583
-server/internal/game/types.go	695
+server/internal/game/sim.go	6611
+server/internal/game/types.go	721
 server/internal/http/auth_session_test.go	1501
 server/internal/http/ws_test.go	1482
 server/internal/realtime/runner.go	627

@@ -11,6 +11,11 @@ extends SceneTree
 
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
 const MainScript := preload("res://scripts/main.gd")
+const ClientConstantsScript := preload("res://scripts/client_constants.gd")
+const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
+const WallRendererScript := preload("res://scripts/wall_renderer.gd")
+const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
+const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 
 func _initialize() -> void:
 	var shared := ProjectSettings.globalize_path("res://").path_join("../shared")
@@ -280,7 +285,8 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		main.free()
 		return false
 
-	var gold_node := main._make_loot_node({"item_def_id": "gold", "rarity": "common", "amount": 7})
+	var loot_factory = LootNodeFactoryScript.new({}, ItemRulesLoader.item_presentations)
+	var gold_node: Node3D = loot_factory.make_loot_node({"item_def_id": "gold", "rarity": "common", "amount": 7})
 	var gold_label := gold_node.find_child("LootLabel", true, false) as Label3D
 	if gold_label == null or gold_label.modulate.to_html(false) != "ffd75e":
 		_fail("gold loot node label color mismatch")
@@ -295,8 +301,8 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 	gold_node.free()
 
 	var root_path := ProjectSettings.globalize_path("res://")
-	main.asset_manifest = _read(root_path.path_join("../assets/manifests/assets.v0.json"))["assets"]
-	var sword_node := main._make_loot_node({"item_def_id": "rusty_sword", "rarity": "magic"})
+	loot_factory.configure(_read(root_path.path_join("../assets/manifests/assets.v0.json"))["assets"], ItemRulesLoader.item_presentations)
+	var sword_node: Node3D = loot_factory.make_loot_node({"item_def_id": "rusty_sword", "rarity": "magic"})
 	var sword_model := sword_node.find_child("GroundModel_weapon_rusty_sword_v0", true, false) as Node3D
 	if sword_model == null:
 		_fail("equipment floor loot did not use manifest-backed ground model")
@@ -320,7 +326,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		return false
 	sword_node.free()
 
-	var armor_node := main._make_loot_node({"item_def_id": "cave_helm", "rarity": "rare"})
+	var armor_node: Node3D = loot_factory.make_loot_node({"item_def_id": "cave_helm", "rarity": "rare"})
 	if armor_node.find_child("GroundModel_fallback_equipment_head_v0", true, false) != null:
 		_fail("armor floor loot loaded fallback sword-backed model")
 		armor_node.free()
@@ -338,7 +344,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		return false
 	armor_node.free()
 
-	var shield_node := main._make_loot_node({"item_def_id": "cave_shield", "rarity": "magic"})
+	var shield_node: Node3D = loot_factory.make_loot_node({"item_def_id": "cave_shield", "rarity": "magic"})
 	if shield_node.find_child("GroundModel_fallback_equipment_off_hand_v0", true, false) != null:
 		_fail("shield floor loot loaded fallback sword-backed model")
 		shield_node.free()
@@ -566,48 +572,39 @@ func _verify_interactable_stair_models() -> bool:
 
 
 func _verify_ground_texture_selection() -> bool:
-	var main = MainScript.new()
-	if main._ground_texture_id_for_level(0) != MainScript.GROUND_TEXTURE_TOWN:
+	var ground_factory = GroundWallFactoryScript.new()
+	if ground_factory.ground_texture_id_for_level(0) != ClientConstantsScript.GROUND_TEXTURE_TOWN:
 		_fail("town level did not select grass ground texture")
-		main.free()
 		return false
 	for level in [-1, -2, -10, 1]:
-		if main._ground_texture_id_for_level(level) != MainScript.GROUND_TEXTURE_DUNGEON:
+		if ground_factory.ground_texture_id_for_level(level) != ClientConstantsScript.GROUND_TEXTURE_DUNGEON:
 			_fail("dungeon level %d did not select rock ground texture" % level)
-			main.free()
 			return false
-	var town_a: Color = main._ground_texel(MainScript.GROUND_TEXTURE_TOWN, 0, 0)
-	var town_b: Color = main._ground_texel(MainScript.GROUND_TEXTURE_TOWN, 17, 29)
-	var town_c: Color = main._ground_texel(MainScript.GROUND_TEXTURE_TOWN, 32, 32)
-	var rock_a: Color = main._ground_texel(MainScript.GROUND_TEXTURE_DUNGEON, 0, 0)
-	var rock_b: Color = main._ground_texel(MainScript.GROUND_TEXTURE_DUNGEON, 17, 29)
+	var town_a: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_TOWN, 0, 0)
+	var town_b: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_TOWN, 17, 29)
+	var town_c: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_TOWN, 32, 32)
+	var rock_a: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 0, 0)
+	var rock_b: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 17, 29)
 	if town_a == rock_a:
 		_fail("town and dungeon ground textures share the same base texel")
-		main.free()
 		return false
 	if town_a == town_b or rock_a == rock_b:
 		_fail("ground textures are flat colors")
-		main.free()
 		return false
 	if town_a == town_c or town_b == town_c:
 		_fail("town ground texture does not expose enough color variation")
-		main.free()
 		return false
-	var mat := main._ground_material_for_level(-1)
+	var mat: StandardMaterial3D = ground_factory.ground_material_for_level(-1)
 	if mat.albedo_texture == null:
 		_fail("dungeon ground material is missing its generated texture")
-		main.free()
 		return false
-	main.free()
 	return true
 
 
 func _verify_town_preview_props() -> bool:
-	var main = MainScript.new()
-	var town := main.make_town_preview_scene()
+	var town: Node3D = TownNodeFactoryScript.make_town_preview_scene()
 	if town == null:
 		_fail("town preview scene was not created")
-		main.free()
 		return false
 	var required := [
 		"TownPreviewGround", "TownService_town_vendor", "TownService_town_mystery_seller",
@@ -618,19 +615,16 @@ func _verify_town_preview_props() -> bool:
 		if town.find_child(str(node_name), true, false) == null:
 			_fail("town preview missing %s" % node_name)
 			town.free()
-			main.free()
 			return false
 	var fire := town.find_child("TownCampfire", true, false) as Node3D
 	if fire.find_child("CampfireLight", true, false) == null or fire.find_child("FireFlameInner", true, false) == null:
 		_fail("town campfire is missing light or flame parts")
 		town.free()
-		main.free()
 		return false
 	var cabin := town.find_child("TownCabinWest", true, false)
 	if cabin.find_child("CabinDoor", true, false) == null or cabin.find_child("CabinRoofRidge", true, false) == null:
 		_fail("town cabin is missing door or roof parts")
 		town.free()
-		main.free()
 		return false
 	var fire_pos := Vector2(fire.position.x, fire.position.z)
 	for node_name in required:
@@ -641,22 +635,20 @@ func _verify_town_preview_props() -> bool:
 		if distance < 5.0:
 			_fail("town preview %s is too close to campfire: %.2f" % [node_name, distance])
 			town.free()
-			main.free()
 			return false
 	town.free()
-	main.free()
 	return true
 
 
 func _verify_wall_texture_material() -> bool:
-	var main = MainScript.new()
-	var generated := main._make_wall_node({
+	var wall_renderer = WallRendererScript.new(null, GroundWallFactoryScript.new())
+	var generated: MeshInstance3D = wall_renderer.make_wall_node({
 		"id": "test_generated",
 		"position": {"x": 4.0, "y": 5.0},
 		"size": {"x": 8.0, "y": 2.0},
 		"source": "generated",
 	})
-	var perimeter := main._make_wall_node({
+	var perimeter: MeshInstance3D = wall_renderer.make_wall_node({
 		"id": "test_perimeter",
 		"position": {"x": 4.0, "y": 5.0},
 		"size": {"x": 8.0, "y": 2.0},
@@ -668,31 +660,27 @@ func _verify_wall_texture_material() -> bool:
 		_fail("generated cave wall material is missing its stone texture")
 		generated.free()
 		perimeter.free()
-		main.free()
 		return false
 	if perimeter_mat == null or perimeter_mat.albedo_texture == null:
 		_fail("perimeter cave wall material is missing its stone texture")
 		generated.free()
 		perimeter.free()
-		main.free()
 		return false
-	var wall_a: Color = main._wall_texel(MainScript.WALL_TEXTURE_CAVE, 0, 0)
-	var wall_b: Color = main._wall_texel(MainScript.WALL_TEXTURE_CAVE, 17, 19)
+	var wall_factory = GroundWallFactoryScript.new()
+	var wall_a: Color = wall_factory.wall_texel(ClientConstantsScript.WALL_TEXTURE_CAVE, 0, 0)
+	var wall_b: Color = wall_factory.wall_texel(ClientConstantsScript.WALL_TEXTURE_CAVE, 17, 19)
 	if wall_a == wall_b:
 		_fail("cave wall texture is flat")
 		generated.free()
 		perimeter.free()
-		main.free()
 		return false
 	if generated_mat.albedo_color == perimeter_mat.albedo_color:
 		_fail("generated and perimeter wall materials use the same tint")
 		generated.free()
 		perimeter.free()
-		main.free()
 		return false
 	generated.free()
 	perimeter.free()
-	main.free()
 	return true
 
 

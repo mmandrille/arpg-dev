@@ -1,6 +1,7 @@
 extends SceneTree
 
 const MainScript := preload("res://scripts/main.gd")
+const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
@@ -72,7 +73,7 @@ func _test_poison_status_tints_monster_until_end() -> void:
 	mesh.mesh = BoxMesh.new()
 	monster.add_child(mesh)
 	main.entities_root.add_child(monster)
-	var base_tint := MainScript.MONSTER_RARITY_TINTS["common"]
+	var base_tint := ClientConstantsScript.MONSTER_RARITY_TINTS["common"]
 	main.entities["2001"] = {
 		"node": monster,
 		"type": "monster",
@@ -84,7 +85,7 @@ func _test_poison_status_tints_monster_until_end() -> void:
 		"entity_id": "2001",
 		"skill_id": "poison_stab"
 	}], "changes": []})
-	_assert_eq("poison status tint active", _mesh_tint(mesh).to_html(false), MainScript.POISON_TINT.to_html(false))
+	_assert_eq("poison status tint active", _mesh_tint(mesh).to_html(false), ClientConstantsScript.POISON_TINT.to_html(false))
 	main._apply_delta({"events": [{
 		"event_type": "monster_damaged",
 		"entity_id": "2001",
@@ -95,7 +96,7 @@ func _test_poison_status_tints_monster_until_end() -> void:
 		"damage": 1
 	}], "changes": []})
 	var reaction_debug: Dictionary = (main.entities["2001"] as Dictionary).get("reaction").get_debug_state()
-	_assert_eq("poison reaction base tint", str(reaction_debug.get("base_tint", "")), MainScript.POISON_TINT.to_html(false))
+	_assert_eq("poison reaction base tint", str(reaction_debug.get("base_tint", "")), ClientConstantsScript.POISON_TINT.to_html(false))
 	main._apply_delta({"events": [{
 		"event_type": "skill_effect_ended",
 		"entity_id": "2001",

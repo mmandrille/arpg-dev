@@ -12,6 +12,7 @@ type PersistedItem struct {
 	ItemDefID   string
 	Slot        string
 	Equipped    bool
+	WeaponSet   int
 	RolledStats json.RawMessage
 }
 
@@ -47,7 +48,7 @@ func (s *Sim) LoadInventory(items []PersistedItem) {
 		it := &invItem{instanceID: id, itemDefID: p.ItemDefID, slot: p.Slot, equipped: p.Equipped, rollPayload: parseRollPayload(p.RolledStats)}
 		s.inventory = append(s.inventory, it)
 		if p.Equipped && p.Slot != "" {
-			s.setEquippedSlot(p.Slot, id, defaultWeaponSet)
+			s.setEquippedSlot(p.Slot, id, normalizeWeaponSetIndex(p.WeaponSet))
 		}
 		if id >= s.nextID {
 			s.nextID = id + 1

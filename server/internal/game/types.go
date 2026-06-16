@@ -560,6 +560,7 @@ type Change struct {
 	StashItemID      string
 	Slot             string
 	ItemInstanceID   *string // for equipped_update; nil marshals as null
+	WeaponSet        *int
 	ActiveWeaponSet  *int
 	WeaponSets       []WeaponSetView
 	SlotIndex        int

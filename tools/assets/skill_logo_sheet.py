@@ -170,6 +170,45 @@ def _shape_svg(shape: str, cx: float, cy: float, radius: float, fill: str, accen
             f'stroke="{html.escape(accent)}" stroke-width="1.6" stroke-linecap="round"/>',
         ]
         return _polygon(spike, fill, accent) + "\n" + "\n".join(facets)
+    if shape == "flame":
+        flame = [
+            (cx - radius * 0.12, cy + radius * 0.86),
+            (cx - radius * 0.58, cy + radius * 0.30),
+            (cx - radius * 0.34, cy - radius * 0.22),
+            (cx - radius * 0.08, cy - radius * 0.84),
+            (cx + radius * 0.16, cy - radius * 0.26),
+            (cx + radius * 0.48, cy - radius * 0.56),
+            (cx + radius * 0.38, cy + radius * 0.18),
+            (cx + radius * 0.14, cy + radius * 0.86),
+        ]
+        core = [
+            (cx - radius * 0.04, cy + radius * 0.60),
+            (cx - radius * 0.22, cy + radius * 0.18),
+            (cx + radius * 0.08, cy - radius * 0.28),
+            (cx + radius * 0.20, cy + radius * 0.26),
+        ]
+        return "\n".join([_polygon(flame, fill, accent), _polygon(core, accent, accent)])
+    if shape == "leap":
+        body = [
+            (cx - radius * 0.16, cy - radius * 0.68),
+            (cx + radius * 0.30, cy - radius * 0.36),
+            (cx + radius * 0.08, cy + radius * 0.02),
+            (cx - radius * 0.34, cy - radius * 0.18),
+        ]
+        return "\n".join(
+            [
+                f'<path d="M {cx - radius * 0.66:.2f} {cy + radius * 0.48:.2f} '
+                f'Q {cx:.2f} {cy - radius * 0.76:.2f} {cx + radius * 0.66:.2f} {cy + radius * 0.48:.2f}" '
+                f'fill="none" stroke="{html.escape(accent)}" stroke-width="3" stroke-linecap="round"/>',
+                f'<circle cx="{cx - radius * 0.66:.2f}" cy="{cy + radius * 0.48:.2f}" r="{radius * 0.16:.2f}" fill="{html.escape(fill)}"/>',
+                f'<circle cx="{cx + radius * 0.66:.2f}" cy="{cy + radius * 0.48:.2f}" r="{radius * 0.20:.2f}" fill="{html.escape(fill)}"/>',
+                _polygon(body, fill, accent),
+                f'<line x1="{cx - radius * 0.24:.2f}" y1="{cy:.2f}" x2="{cx - radius * 0.58:.2f}" y2="{cy + radius * 0.42:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="2.4" stroke-linecap="round"/>',
+                f'<line x1="{cx + radius * 0.02:.2f}" y1="{cy + radius * 0.04:.2f}" x2="{cx + radius * 0.46:.2f}" y2="{cy + radius * 0.42:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="2.4" stroke-linecap="round"/>',
+            ]
+        )
     if shape == "orb_projectile":
         streaks = []
         for i in range(3):
@@ -206,6 +245,32 @@ def _shape_svg(shape: str, cx: float, cy: float, radius: float, fill: str, accen
                 f'<circle cx="{cx - radius * 0.42:.2f}" cy="{cy - radius * 0.18:.2f}" r="{radius * 0.13:.2f}" fill="{html.escape(fill)}"/>',
                 f'<circle cx="{cx - radius * 0.62:.2f}" cy="{cy + radius * 0.10:.2f}" r="{radius * 0.09:.2f}" fill="{html.escape(accent)}"/>',
                 f'<circle cx="{cx - radius * 0.28:.2f}" cy="{cy - radius * 0.38:.2f}" r="{radius * 0.08:.2f}" fill="{html.escape(accent)}"/>',
+            ]
+        )
+    if shape == "quake":
+        hammer = [
+            (cx - radius * 0.20, cy - radius * 0.78),
+            (cx + radius * 0.58, cy - radius * 0.30),
+            (cx + radius * 0.36, cy + radius * 0.06),
+            (cx - radius * 0.42, cy - radius * 0.42),
+        ]
+        cracks = [
+            ((-0.74, 0.62), (-0.42, 0.38), (-0.18, 0.68)),
+            ((0.00, 0.62), (0.22, 0.34), (0.50, 0.66)),
+            ((0.34, 0.20), (0.60, 0.06), (0.78, 0.24)),
+        ]
+        crack_lines = []
+        for crack in cracks:
+            encoded = " ".join(f"{cx + x * radius:.2f},{cy + y * radius:.2f}" for x, y in crack)
+            crack_lines.append(
+                f'<polyline points="{encoded}" fill="none" stroke="{html.escape(accent)}" stroke-width="2" stroke-linecap="round"/>'
+            )
+        return "\n".join(
+            [
+                _polygon(hammer, fill, accent),
+                f'<line x1="{cx + radius * 0.14:.2f}" y1="{cy:.2f}" x2="{cx - radius * 0.42:.2f}" y2="{cy + radius * 0.66:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="4" stroke-linecap="round"/>',
+                *crack_lines,
             ]
         )
     if shape == "shield":

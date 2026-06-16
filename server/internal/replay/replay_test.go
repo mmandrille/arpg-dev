@@ -1426,7 +1426,7 @@ func (f *fakeRepo) AddCharacterItem(context.Context, store.CharacterItemInstance
 func (f *fakeRepo) SetCharacterItemLocation(context.Context, string, string, string, string) error {
 	return nil
 }
-func (f *fakeRepo) SetCharacterItemEquipped(context.Context, string, string, string, string, bool) error {
+func (f *fakeRepo) SetCharacterItemEquipped(context.Context, string, string, string, string, bool, int) error {
 	return nil
 }
 func (f *fakeRepo) RemoveCharacterItem(context.Context, string, string, string) error { return nil }

@@ -763,6 +763,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				Location:    location,
 				Slot:        c.Item.Slot,
 				Equipped:    c.Item.Equipped,
+				WeaponSet:   changeWeaponSet(c),
 				RolledStats: rolledStats,
 			}); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
@@ -772,7 +773,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.Item == nil {
 				continue
 			}
-			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped); err != nil {
+			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist inventory update", "error", err)
 			}
@@ -791,7 +792,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.ItemInstanceID == nil || c.Slot == "" {
 				continue
 			}
-			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID, c.Slot, true); err != nil {
+			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID, c.Slot, true, changeWeaponSet(c)); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist equipped update", "error", err)
 			}

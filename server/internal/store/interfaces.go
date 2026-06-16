@@ -49,7 +49,7 @@ type CharacterProgressionRepo interface {
 	ListCharacterItems(ctx context.Context, accountID, characterID string) ([]CharacterItemInstance, error)
 	AddCharacterItem(ctx context.Context, item CharacterItemInstance) error
 	SetCharacterItemLocation(ctx context.Context, accountID, characterID, itemInstanceID, location string) error
-	SetCharacterItemEquipped(ctx context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool) error
+	SetCharacterItemEquipped(ctx context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool, weaponSet int) error
 	RemoveCharacterItem(ctx context.Context, accountID, characterID, itemInstanceID string) error
 	ListAccountWaypoints(ctx context.Context, accountID, characterID string) ([]CharacterWaypoint, error)
 	AddAccountWaypoint(ctx context.Context, accountID string, level int) (bool, error)

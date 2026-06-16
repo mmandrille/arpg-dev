@@ -104,6 +104,7 @@ type CharacterItemInstance struct {
 	Location    string
 	Slot        string
 	Equipped    bool
+	WeaponSet   int
 	RolledStats json.RawMessage
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

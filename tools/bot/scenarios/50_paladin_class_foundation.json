@@ -29,15 +29,15 @@
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "heal", "rank": 1 }, "timeout_s": 3 },
     { "action": "cast_skill", "skill_id": "holy_shield", "target_self": true, "event_type": "skill_cast" },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "holy_shield", "rank": 1 }, "timeout_s": 3 },
-    { "action": "move", "direction": { "x": -1, "y": 0 }, "duration_ticks": 20 },
+    { "action": "move", "direction": { "x": -1, "y": 0 }, "duration_ticks": 10 },
     {
       "action": "channel_skill_path",
       "skill_id": "charge",
       "segments": [
-        { "direction": { "x": 1, "y": 0 }, "ticks": 12 },
-        { "direction": { "x": 0, "y": 1 }, "ticks": 8 },
-        { "direction": { "x": -1, "y": 0 }, "ticks": 8 },
-        { "direction": { "x": 0, "y": -1 }, "ticks": 8 }
+        { "direction": { "x": 1, "y": 0 }, "ticks": 4 },
+        { "direction": { "x": 0, "y": 1 }, "ticks": 3 },
+        { "direction": { "x": -1, "y": 0 }, "ticks": 3 },
+        { "direction": { "x": 0, "y": -1 }, "ticks": 3 }
       ]
     },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_channel_started", "skill_id": "charge", "rank": 1 }, "timeout_s": 3 },

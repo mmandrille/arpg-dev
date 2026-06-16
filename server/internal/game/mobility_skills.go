@@ -198,7 +198,7 @@ func (s *Sim) applyActiveSkillChannel(res *TickResult) bool {
 		s.stopChargeChannel(res, player, channel.skillID, channel.correlationID, "insufficient_mana")
 		return true
 	}
-	step := def.Mobility.SpeedTilesPerSecond * tickDuration
+	step := s.channelMovementStep(def)
 	if step <= 0 {
 		s.stopChargeChannel(res, player, channel.skillID, channel.correlationID, "blocked")
 		return true
@@ -213,6 +213,13 @@ func (s *Sim) applyActiveSkillChannel(res *TickResult) bool {
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	s.applyChargeLineImpactOnce(player, start, end, channel.dir, channel.skillID, def, channel.rank, channel.correlationID, channel.impactedMonsterIDs, res)
 	return true
+}
+
+func (s *Sim) channelMovementStep(def SkillDef) float64 {
+	if def.Mobility.SpeedMultiplier > 0 {
+		return s.playerMoveSpeed() * def.Mobility.SpeedMultiplier
+	}
+	return def.Mobility.SpeedTilesPerSecond * tickDuration
 }
 
 func (s *Sim) spendChannelMana(player *entity, channel *activeSkillChannel, res *TickResult) bool {

@@ -59,11 +59,14 @@ func TestBarbarianLeapMovesDamagesAndStunsLandingTargets(t *testing.T) {
 
 func TestPaladinChargeMovesDamagesStunsAndPushesLineTargets(t *testing.T) {
 	sim := mobilitySkillSim(t, "paladin", "charge")
+	def := sim.rules.Skills["charge"]
+	def.Mobility.ChannelManaPer10Sec = 200
+	sim.rules.Skills["charge"] = def
 	player := sim.activeLevel().entities[sim.playerID]
 	player.pos = Vec2{X: 2, Y: 2}
 	player.mana = player.maxMana
 	lineTarget := addRangerSkillMonster(sim, Vec2{X: 5, Y: 2}, 40)
-	turnTarget := addRangerSkillMonster(sim, Vec2{X: 6, Y: 5}, 40)
+	turnTarget := addRangerSkillMonster(sim, Vec2{X: 4.5, Y: 5}, 40)
 	far := addRangerSkillMonster(sim, Vec2{X: 11, Y: 8}, 40)
 	lineStartX := lineTarget.pos.X
 	startMana := player.mana
@@ -79,12 +82,7 @@ func TestPaladinChargeMovesDamagesStunsAndPushesLineTargets(t *testing.T) {
 		t.Fatalf("charge start events = %+v", start.Events)
 	}
 
-	var last TickResult
 	events := append([]Event{}, start.Events...)
-	for i := 0; i < 16; i++ {
-		last = sim.Tick(nil)
-		events = append(events, last.Events...)
-	}
 	update := sim.Tick([]Input{{
 		MessageID:     "charge_update",
 		CorrelationID: "corr_charge",
@@ -93,9 +91,9 @@ func TestPaladinChargeMovesDamagesStunsAndPushesLineTargets(t *testing.T) {
 	}})
 	assertAck(t, update, "charge_update")
 	events = append(events, update.Events...)
-	for i := 0; i < 16; i++ {
-		last = sim.Tick(nil)
-		events = append(events, last.Events...)
+	for i := 0; i < 2; i++ {
+		tick := sim.Tick(nil)
+		events = append(events, tick.Events...)
 	}
 	stop := sim.Tick([]Input{{
 		MessageID:     "charge_stop",
@@ -128,6 +126,27 @@ func TestPaladinChargeMovesDamagesStunsAndPushesLineTargets(t *testing.T) {
 	}
 	if far.hp != far.maxHP || containsStringValue(far.effectIDs, "stun") {
 		t.Fatalf("far hp/effects = %d/%d %v, want unaffected", far.hp, far.maxHP, far.effectIDs)
+	}
+}
+
+func TestPaladinChargeChannelSpeedScalesFromPlayerMoveSpeed(t *testing.T) {
+	sim := mobilitySkillSim(t, "paladin", "charge")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: 2, Y: 2}
+	def := sim.rules.Skills["charge"]
+	if def.Mobility.SpeedMultiplier != 2.5 {
+		t.Fatalf("charge speed multiplier = %.2f, want 2.5", def.Mobility.SpeedMultiplier)
+	}
+	start := player.pos
+	result := sim.Tick([]Input{{
+		MessageID:    "charge_start",
+		Type:         "channel_skill_intent",
+		ChannelSkill: &ChannelSkillIntent{SkillID: "charge", Phase: "start", Direction: &Vec2{X: 1}},
+	}})
+	assertAck(t, result, "charge_start")
+	want := start.X + sim.playerMoveSpeed()*def.Mobility.SpeedMultiplier
+	if player.pos.X != want {
+		t.Fatalf("charge x = %.2f, want %.2f from player speed %.2f * multiplier %.2f", player.pos.X, want, sim.playerMoveSpeed(), def.Mobility.SpeedMultiplier)
 	}
 }
 

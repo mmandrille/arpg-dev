@@ -1931,7 +1931,7 @@ func _play_charge_visual(ev: Dictionary, landing_override: Vector3 = Vector3.INF
 	var landing := landing_override if landing_override != Vector3.INF else predicted_pos
 	var start := Vector3(start_2d.x, landing.y, start_2d.y)
 	var distance_tiles: float = max(0.01, Vector2(start.x, start.z).distance_to(Vector2(landing.x, landing.z)))
-	var speed_tiles_per_second: float = _skill_mobility_float("charge", "speed_tiles_per_second")
+	var speed_tiles_per_second: float = ClientConstants.PLAYER_SPEED * _skill_mobility_float("charge", "speed_multiplier")
 	var duration: float = max(0.08, distance_tiles / speed_tiles_per_second)
 	local_charge_visual_active = true
 	player_anchor.position = start

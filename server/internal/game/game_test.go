@@ -2725,6 +2725,18 @@ func TestRogueOffhandWeaponEquipRules(t *testing.T) {
 	assertReject(t, twoHandResult, "two_hand_off", "wrong_slot")
 }
 
+func TestTwoHandedWeaponSummaryDisplaysBothHands(t *testing.T) {
+	sim := MustNewSim("sess_two_handed_summary", "two_handed_summary_seed", loadRules(t))
+	bow := addRolledInventoryItem(t, sim, 6140, "cave_bow", nil)
+	view := sim.itemView(bow)
+	if len(view.SummaryLines) == 0 || view.SummaryLines[0] != "Slot: Both hands" {
+		t.Fatalf("two-handed summary lines = %+v, want Slot: Both hands first", view.SummaryLines)
+	}
+	if got := displayEquipmentSlotName(mainHandSlot, "two_handed"); got != "Both hands" {
+		t.Fatalf("two-handed mystery slot label = %q, want Both hands", got)
+	}
+}
+
 func TestEquipmentRequirementsRejectAndPreview(t *testing.T) {
 	var golden struct {
 		TemplateID      string                     `json:"template_id"`

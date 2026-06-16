@@ -1,0 +1,42 @@
+docs/plans/v223_2026-06-16-unique-non-damage-skill-modifier.md
+  s_898d01ce740857::t_f03fcefefdced2 1-2,4-47,51-52,54-66,68-79,82-93,96-111,116-122,128-129
+  s_898d01ce740857::t_8da62e9ce8e789 3,48-50,53,67,80-81,94-95,112-115,123-127
+docs/as-built/v223_unique-non-damage-skill-modifier.md
+  s_898d01ce740857::t_8da62e9ce8e789 1-41
+shared/rules/unique_items.v0.json
+  s_898d01ce740857::t_cade61a680238a 48-61
+tools/bot/scenarios/91_unique_non_damage_skill_modifier.json
+  s_898d01ce740857::t_cade61a680238a 1-12,14-28
+  s_898d01ce740857::t_f567eccdd42d74 13
+docs/specs/v223_spec-unique-non-damage-skill-modifier.md
+  s_898d01ce740857::t_8da62e9ce8e789 3
+  s_898d01ce740857::t_f03fcefefdced2 1-2,4-72
+server/internal/game/unique_effects_test.go
+  s_898d01ce740857::t_cade61a680238a 400-437
+tools/bot/scenarios/client/40_unique_chest_client_proof.json
+  s_898d01ce740857::t_cade61a680238a 12,15-16
+docs/progress/slice-lifecycle.md
+  s_898d01ce740857::t_8da62e9ce8e789 239
+server/internal/game/unique_chest_test.go
+  s_898d01ce740857::t_cade61a680238a 127-133
+docs/progress/slice-codename-index.md
+  s_898d01ce740857::t_8da62e9ce8e789 209
+PROGRESS.md
+  s_898d01ce740857::t_8da62e9ce8e789 26,28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bc95b9623c0d6ebdae6db451b267484d9a932478",
+  "prompts": {},
+  "sessions": {
+    "s_898d01ce740857": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed1c5-b55c-76f1-8252-fcaf1d718185",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

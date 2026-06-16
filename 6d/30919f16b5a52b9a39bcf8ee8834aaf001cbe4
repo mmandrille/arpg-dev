@@ -1,0 +1,92 @@
+docs/as-built/v218_rogue-duelist-mark.md
+  s_1e3eba4a210da4::t_a552f3bb483b0c 1-10,12-20,22-32
+  s_1e3eba4a210da4::t_86e30d93663795 11,21
+tools/bot/test_skill_demo.py
+  s_1e3eba4a210da4::t_f56462814c055e 48-51
+client/scripts/rogue_mark_effect.gd.uid
+  s_1e3eba4a210da4::t_7b923db38b5443 1
+client/tests/test_skill_rules_loader.gd
+  s_1e3eba4a210da4::t_da73d8be41a2e5 55,93
+shared/rules/skills.v0.json
+  s_1e3eba4a210da4::t_57b13cdcd0f9f7 771-774,821-823,876-916
+server/internal/game/rogue_rules.go
+  s_1e3eba4a210da4::t_90f0c880c06635 6-11
+  s_1e3eba4a210da4::t_48c141c40fcc54 12,21-22,46-47,50-52,55,58-59
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_1e3eba4a210da4::t_c3735ec83ed73b 16,21-22,26,31-35,88,97
+  s_1e3eba4a210da4::t_d1e9931c58afe5 36
+server/internal/game/rules.go
+  s_1e3eba4a210da4::t_48c141c40fcc54 536,648-654,2890,2955-2959,2965-2977
+client/scripts/main.gd
+  s_1e3eba4a210da4::t_075f988464b620 4864,4960,5346
+server/internal/game/character_stats_test.go
+  s_1e3eba4a210da4::t_53a65698629f72 39-56
+server/internal/game/handlers.go
+  s_1e3eba4a210da4::t_48c141c40fcc54 1264-1265
+client/tests/test_status_effect_presentation.gd
+  s_1e3eba4a210da4::t_377311f9a95016 24,252,287-303,313-328
+  s_1e3eba4a210da4::t_27cfaf97e0e0ae 306,311
+  s_1e3eba4a210da4::t_8fc7c5d7bbd8da 304-305,307-310,312
+server/internal/game/sim_players.go
+  s_1e3eba4a210da4::t_ed86897703a330 348-351,410
+server/internal/game/rogue_skills_test.go
+  s_1e3eba4a210da4::t_515b7bfeaf76cc 207
+  s_1e3eba4a210da4::t_b3cfa02f1d062f 202-206,208-216
+  s_1e3eba4a210da4::t_d3d33920665dc0 105-199
+server/internal/game/game_test.go
+  s_1e3eba4a210da4::t_53a65698629f72 258-260
+server/internal/game/sim.go
+  s_1e3eba4a210da4::t_ed86897703a330 322,376,461,685,1027
+  s_1e3eba4a210da4::t_d5fb1c714888ee 1311,1339-1341,1359,1361,1373-1375
+docs/plans/v218_2026-06-16-rogue-duelist-mark.md
+  s_1e3eba4a210da4::t_7fc3894ffbf055 24,44
+  s_1e3eba4a210da4::t_a0a6f81631be9e 31-35,41-42,45
+  s_1e3eba4a210da4::t_27665f13902813 1-22,25-30,36-40,43,46
+  s_1e3eba4a210da4::t_4ea474b1831cd7 23
+tools/bot/skill_demo.py
+  s_1e3eba4a210da4::t_ed232b84a751f3 103-104
+shared/i18n/en.json
+  s_1e3eba4a210da4::t_57b13cdcd0f9f7 88-89
+shared/rules/skills.v0.schema.json
+  s_1e3eba4a210da4::t_57b13cdcd0f9f7 28,42,125-131,325-328,340-352
+client/tests/test_skills_panel.gd
+  s_1e3eba4a210da4::t_a949928487181a 175
+  s_1e3eba4a210da4::t_da73d8be41a2e5 179,183,189,277,292
+server/internal/game/rogue_skills.go
+  s_1e3eba4a210da4::t_90f0c880c06635 17-25
+  s_1e3eba4a210da4::t_18954a8f4b9203 16,26-27,39-49,208-210,268,272-308,348-349,372-374,378,396-469
+client/scripts/player_status_effect_markers.gd
+  s_1e3eba4a210da4::t_96c4e3daf9f3bb 12-14,24,108-111,118,192-201,203-207
+  s_1e3eba4a210da4::t_90054d1d9528e0 202,208
+  s_1e3eba4a210da4::t_d85c3d06567b51 3
+shared/i18n/es.json
+  s_1e3eba4a210da4::t_57b13cdcd0f9f7 90-91
+docs/specs/v218_spec-rogue-duelist-mark.md
+  s_1e3eba4a210da4::t_3d83898eb14970 22,46,59-62,78-79,84-85,87
+  s_1e3eba4a210da4::t_27665f13902813 1-21,23-45,47-58,63-77,80-83,86,88-93
+shared/golden/character_progression.json
+  s_1e3eba4a210da4::t_b9a12a0400ec4e 41,80,119,158,199,238,277
+client/scripts/rogue_mark_effect.gd
+  s_1e3eba4a210da4::t_31215705058f2f 6,12,21-22
+  s_1e3eba4a210da4::t_d10909cbaa744c 1-5,7-11,13-20
+shared/rules/character_progression.v0.json
+  s_1e3eba4a210da4::t_57b13cdcd0f9f7 507-513
+shared/assets/skill_presentations.v0.json
+  s_1e3eba4a210da4::t_57b13cdcd0f9f7 197-206
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "6d30919f16b5a52b9a39bcf8ee8834aaf001cbe4",
+  "prompts": {},
+  "sessions": {
+    "s_1e3eba4a210da4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed15c-1f5d-7b51-a946-5317aa8a36f1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

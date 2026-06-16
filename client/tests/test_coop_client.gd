@@ -21,6 +21,7 @@ const CompanionBarScript := preload("res://scripts/companion_bar.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
+const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -54,6 +55,7 @@ func _initialize() -> void:
 	_test_skill_function_key_selects_right_click_skill()
 	_test_learned_skill_auto_selects_right_click()
 	_test_skill_cast_payload_uses_direction_without_nearest_fallback()
+	_test_channel_skill_payload_requires_direction_until_stop()
 	_test_loss_popup_shows_for_dead_local_player()
 	_test_dead_character_rows_are_disabled()
 	_test_character_panel_modes_for_v45()
@@ -1443,6 +1445,18 @@ func _test_skill_cast_payload_uses_direction_without_nearest_fallback() -> void:
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()
+
+func _test_channel_skill_payload_requires_direction_until_stop() -> void:
+	var start := ChannelSkillInputScript.payload("charge", "start", Vector2(0.0, -2.0), Vector2(1.0, 0.0))
+	_assert_eq("channel start skill", str(start.get("skill_id", "")), "charge")
+	_assert_eq("channel start phase", str(start.get("phase", "")), "start")
+	var direction: Dictionary = start.get("direction", {})
+	_assert_float("channel start direction x", float(direction.get("x", 99.0)), 0.0)
+	_assert_float("channel start direction y", float(direction.get("y", 99.0)), -1.0)
+	var stop := ChannelSkillInputScript.payload("charge", "stop", Vector2.ZERO, Vector2(1.0, 0.0))
+	_assert_eq("channel stop omits direction", stop.has("direction"), false)
+	var invalid := ChannelSkillInputScript.payload("", "start", Vector2(1.0, 0.0), Vector2(1.0, 0.0))
+	_assert_eq("channel invalid empty", invalid.is_empty(), true)
 
 
 func _test_remote_player_delta_and_remove() -> void:

@@ -23,9 +23,9 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v216 — client context controllers |
+| **Latest completed slice** | v217 — paladin charge channeling protocol |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-16 after v216 client context controllers |
+| **CI gate** | `make ci` green on 2026-06-16 after v217 paladin charge channeling protocol |
 | **Next slice** | Run the due v210+ engineering review/refactor handoff, then choose the next feature slice |
 | **Last engineering review** | v200 — [`docs/reviews/20260615_v200-overview.md`](docs/reviews/20260615_v200-overview.md) (2026-06-15) |
 | **Next engineering review** | v210 after the next feature batch, once CI is green |

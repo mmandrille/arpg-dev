@@ -61,37 +61,83 @@ func TestPaladinChargeMovesDamagesStunsAndPushesLineTargets(t *testing.T) {
 	sim := mobilitySkillSim(t, "paladin", "charge")
 	player := sim.activeLevel().entities[sim.playerID]
 	player.pos = Vec2{X: 2, Y: 2}
+	player.mana = player.maxMana
 	lineTarget := addRangerSkillMonster(sim, Vec2{X: 5, Y: 2}, 40)
-	endpoint := addRangerSkillMonster(sim, Vec2{X: 8, Y: 2}, 40)
-	far := addRangerSkillMonster(sim, Vec2{X: 11, Y: 2}, 40)
+	turnTarget := addRangerSkillMonster(sim, Vec2{X: 6, Y: 5}, 40)
+	far := addRangerSkillMonster(sim, Vec2{X: 11, Y: 8}, 40)
 	lineStartX := lineTarget.pos.X
+	startMana := player.mana
 
-	cast := sim.Tick([]Input{{
-		MessageID:     "charge",
+	start := sim.Tick([]Input{{
+		MessageID:     "charge_start",
 		CorrelationID: "corr_charge",
-		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "charge", Direction: &Vec2{X: 1}},
+		Type:          "channel_skill_intent",
+		ChannelSkill:  &ChannelSkillIntent{SkillID: "charge", Phase: "start", Direction: &Vec2{X: 1}},
 	}})
-
-	assertAck(t, cast, "charge")
-	if !hasEvent(cast, "skill_cast") || !hasSkillDamageEvent(cast, "charge") || !hasEvent(cast, "skill_effect_started") || !hasEvent(cast, "monster_pushed") {
-		t.Fatalf("charge events = %+v", cast.Events)
+	assertAck(t, start, "charge_start")
+	if !hasEvent(start, "skill_channel_started") {
+		t.Fatalf("charge start events = %+v", start.Events)
 	}
-	if hasEvent(cast, "skill_cooldown_started") || len(skillCooldownUpdate(cast)) > 0 {
-		t.Fatalf("charge should not start cooldowns, events=%+v changes=%+v", cast.Events, cast.Changes)
+
+	var last TickResult
+	events := append([]Event{}, start.Events...)
+	for i := 0; i < 16; i++ {
+		last = sim.Tick(nil)
+		events = append(events, last.Events...)
+	}
+	update := sim.Tick([]Input{{
+		MessageID:     "charge_update",
+		CorrelationID: "corr_charge",
+		Type:          "channel_skill_intent",
+		ChannelSkill:  &ChannelSkillIntent{SkillID: "charge", Phase: "update", Direction: &Vec2{Y: 1}},
+	}})
+	assertAck(t, update, "charge_update")
+	events = append(events, update.Events...)
+	for i := 0; i < 16; i++ {
+		last = sim.Tick(nil)
+		events = append(events, last.Events...)
+	}
+	stop := sim.Tick([]Input{{
+		MessageID:     "charge_stop",
+		CorrelationID: "corr_charge",
+		Type:          "channel_skill_intent",
+		ChannelSkill:  &ChannelSkillIntent{SkillID: "charge", Phase: "stop"},
+	}})
+	assertAck(t, stop, "charge_stop")
+	events = append(events, stop.Events...)
+	if !hasEvent(stop, "skill_channel_ended") {
+		t.Fatalf("charge stop events = %+v", stop.Events)
+	}
+	if hasEvent(start, "skill_cooldown_started") || hasEvent(update, "skill_cooldown_started") || hasEvent(stop, "skill_cooldown_started") || len(skillCooldownUpdate(start)) > 0 || len(skillCooldownUpdate(update)) > 0 || len(skillCooldownUpdate(stop)) > 0 {
+		t.Fatalf("charge should not start cooldowns, start=%+v update=%+v stop=%+v", start.Events, update.Events, stop.Events)
 	}
 	if player.pos.X <= 2 {
 		t.Fatalf("charge player x = %.2f, want moved forward", player.pos.X)
 	}
-	if lineTarget.hp >= lineTarget.maxHP || !containsStringValue(lineTarget.effectIDs, "stun") || lineTarget.pos.X <= lineStartX {
-		t.Fatalf("line target hp/effects/pos = %d/%d %v %.2f, want damaged, stunned, and pushed", lineTarget.hp, lineTarget.maxHP, lineTarget.effectIDs, lineTarget.pos.X)
+	if player.pos.Y <= 2 {
+		t.Fatalf("charge player y = %.2f, want turned upward", player.pos.Y)
 	}
-	if endpoint.hp >= endpoint.maxHP || !containsStringValue(endpoint.effectIDs, "stun") {
-		t.Fatalf("endpoint hp/effects = %d/%d %v, want damaged and stunned", endpoint.hp, endpoint.maxHP, endpoint.effectIDs)
+	if player.mana >= startMana {
+		t.Fatalf("charge mana = %d, want spent below %d", player.mana, startMana)
+	}
+	if lineTarget.hp >= lineTarget.maxHP || lineTarget.pos.X <= lineStartX || !hasEventInSlice(events, "skill_effect_started") || !hasEventInSlice(events, "monster_pushed") {
+		t.Fatalf("line target hp/effects/pos/events = %d/%d %v %.2f %+v, want damaged, stunned, and pushed", lineTarget.hp, lineTarget.maxHP, lineTarget.effectIDs, lineTarget.pos.X, events)
+	}
+	if turnTarget.hp >= turnTarget.maxHP {
+		t.Fatalf("turn target hp/effects = %d/%d %v, want damaged", turnTarget.hp, turnTarget.maxHP, turnTarget.effectIDs)
 	}
 	if far.hp != far.maxHP || containsStringValue(far.effectIDs, "stun") {
 		t.Fatalf("far hp/effects = %d/%d %v, want unaffected", far.hp, far.maxHP, far.effectIDs)
 	}
+}
+
+func hasEventInSlice(events []Event, eventType string) bool {
+	for _, e := range events {
+		if e.EventType == eventType {
+			return true
+		}
+	}
+	return false
 }
 
 func TestRangerDisengageMovesAndSnaresStartTargets(t *testing.T) {

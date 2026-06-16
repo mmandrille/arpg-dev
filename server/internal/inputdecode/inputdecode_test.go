@@ -92,6 +92,39 @@ func TestDecodeCastSkillIntent(t *testing.T) {
 	}
 }
 
+func TestDecodeChannelSkillIntent(t *testing.T) {
+	start, ok := Decode(TypeChannelSkill, "msg_channel_start", "", json.RawMessage(`{"skill_id":"charge","phase":"start","direction":{"x":1,"y":0}}`))
+	if !ok {
+		t.Fatal("Decode channel_skill_intent rejected start payload")
+	}
+	if start.ChannelSkill == nil || start.ChannelSkill.SkillID != "charge" || start.ChannelSkill.Phase != "start" || start.ChannelSkill.Direction == nil || start.ChannelSkill.Direction.X != 1 {
+		t.Fatalf("decoded channel start = %+v", start.ChannelSkill)
+	}
+	stop, ok := Decode(TypeChannelSkill, "msg_channel_stop", "", json.RawMessage(`{"skill_id":"charge","phase":"stop"}`))
+	if !ok {
+		t.Fatal("Decode channel_skill_intent rejected stop payload")
+	}
+	if stop.ChannelSkill == nil || stop.ChannelSkill.Phase != "stop" || stop.ChannelSkill.Direction != nil {
+		t.Fatalf("decoded channel stop = %+v", stop.ChannelSkill)
+	}
+	if !IsClientIntent(TypeChannelSkill) {
+		t.Fatal("channel_skill_intent not marked as client intent")
+	}
+}
+
+func TestDecodeChannelSkillIntentRejectsInvalidPayload(t *testing.T) {
+	for _, payload := range []json.RawMessage{
+		json.RawMessage(`{}`),
+		json.RawMessage(`{"skill_id":"charge","phase":"start"}`),
+		json.RawMessage(`{"skill_id":"charge","phase":"stop","direction":{"x":1,"y":0}}`),
+		json.RawMessage(`{"skill_id":"charge","phase":"bad","direction":{"x":1,"y":0}}`),
+	} {
+		if _, ok := Decode(TypeChannelSkill, "msg_channel", "", payload); ok {
+			t.Fatalf("Decode accepted invalid channel payload %s", payload)
+		}
+	}
+}
+
 func TestDecodeCompanionCommandIntent(t *testing.T) {
 	in, ok := Decode(TypeCompanionCommand, "msg_companion_stance", "corr_companion_stance", json.RawMessage(`{"stance":"passive"}`))
 	if !ok {

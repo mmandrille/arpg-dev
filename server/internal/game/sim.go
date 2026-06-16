@@ -203,6 +203,16 @@ type autoNavState struct {
 	sourceCorrID  string
 }
 
+type activeSkillChannel struct {
+	skillID            string
+	rank               int
+	dir                Vec2
+	correlationID      string
+	manaPer10Seconds   int
+	manaAccumulator    int
+	impactedMonsterIDs map[uint64]bool
+}
+
 type wallObstacle struct {
 	pos         Vec2
 	size        Vec2
@@ -298,6 +308,7 @@ type playerState struct {
 	CurrentLevel          int
 	Move                  *activeMove
 	AutoNav               *autoNavState
+	ActiveChannel         *activeSkillChannel
 	Inventory             []*invItem
 	Equipped              map[string]uint64
 	WeaponSets            []map[string]uint64
@@ -789,6 +800,7 @@ type Input struct {
 	AllocateStat        *AllocateStatIntent
 	AllocateSkillPoint  *AllocateSkillPointIntent
 	CastSkill           *CastSkillIntent
+	ChannelSkill        *ChannelSkillIntent
 	SetSkillBindings    *SetSkillBindingsIntent
 	CompanionCommand    *CompanionCommandIntent
 	ShopBuy             *ShopBuyIntent
@@ -857,6 +869,11 @@ type (
 	CastSkillIntent struct {
 		SkillID   string
 		TargetID  string
+		Direction *Vec2
+	}
+	ChannelSkillIntent struct {
+		SkillID   string
+		Phase     string
 		Direction *Vec2
 	}
 	SetSkillBindingsIntent struct {
@@ -1006,7 +1023,9 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			s.advancePoisonDots(res)
 			s.advanceUniqueBurnDots(res)
 			s.advanceOffensiveUniqueEffectStates(res)
-			s.applyMovement(res)
+			if !s.applyActiveSkillChannel(res) {
+				s.applyMovement(res)
+			}
 			s.applyPlayerRegen(res)
 			s.savePlayer(ps)
 		}

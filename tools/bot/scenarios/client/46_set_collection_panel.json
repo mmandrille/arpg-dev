@@ -1,0 +1,31 @@
+{
+  "id": "set_collection_panel",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "set_collection_panel_204",
+  "title": "Set collection panel",
+  "description": "Open the debug unique chest, take one set piece, and verify inventory set collection progress.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_unique_chest" },
+    { "type": "wait_event", "event_type": "unique_chest_opened", "timeout_s": 15.0 },
+    { "type": "wait_stash_panel", "container_mode": "unique_chest", "at_least": 2, "timeout_s": 15.0 },
+    { "type": "select_stash_sort", "mode": "unique_chest_sets" },
+    { "type": "set_stash_search", "text": "Verdant Vanguard Blade" },
+    { "type": "wait_stash_panel", "container_mode": "unique_chest", "display_name": "Verdant Vanguard Blade", "equals": 1, "timeout_s": 15.0 },
+    { "type": "drag_stash_to_bag", "rolled": true, "stash_index": 0 },
+    { "type": "wait_event", "event_type": "unique_chest_item_taken", "timeout_s": 15.0 },
+    { "type": "wait_inventory_item", "item_def_id": "cave_blade", "timeout_s": 15.0 },
+    { "type": "press_key", "keycode": "KEY_I" },
+    {
+      "type": "assert_inventory_panel_details",
+      "set_collection_set": "Verdant Vanguard",
+      "set_owned_count": 1,
+      "set_equipped_count": 0,
+      "set_piece_name": "Verdant Vanguard Blade",
+      "set_piece_state": "owned",
+      "set_bonus_required": 2,
+      "set_bonus_active": false
+    }
+  ]
+}

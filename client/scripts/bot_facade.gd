@@ -64,6 +64,9 @@ static func set_stash_search(main, text: String) -> void:
 
 static func select_stash_sort(main, mode: String) -> void:
 	var panel = _member(main, "stash_panel")
+	if mode == "unique_chest_sets" and panel != null and panel.has_method("bot_select_unique_chest_tab"):
+		panel.bot_select_unique_chest_tab("sets")
+		return
 	if panel != null and panel.has_method("bot_select_sort_mode"):
 		panel.bot_select_sort_mode(mode)
 

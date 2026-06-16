@@ -218,5 +218,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v201** | `item-level-tooltip` | Complete (`make ci` green) | [`v201_spec-item-level-tooltip.md`](docs/specs/v201_spec-item-level-tooltip.md) | [`v201_2026-06-15-item-level-tooltip.md`](docs/plans/v201_2026-06-15-item-level-tooltip.md) | [`as-built`](docs/as-built/v201_item-level-tooltip.md) |
 | **v202** | `upgrade-resource-consumption` | Complete (`make ci` green) | [`v202_spec-upgrade-resource-consumption.md`](docs/specs/v202_spec-upgrade-resource-consumption.md) | [`v202_2026-06-15-upgrade-resource-consumption.md`](docs/plans/v202_2026-06-15-upgrade-resource-consumption.md) | [`as-built`](docs/as-built/v202_upgrade-resource-consumption.md) |
 | **v203** | `upgrade-pity-counter` | Complete (`make ci` green) | [`v203_spec-upgrade-pity-counter.md`](docs/specs/v203_spec-upgrade-pity-counter.md) | [`v203_2026-06-15-upgrade-pity-counter.md`](docs/plans/v203_2026-06-15-upgrade-pity-counter.md) | [`as-built`](docs/as-built/v203_upgrade-pity-counter.md) |
+| **v204** | `set-collection-panel` | Complete (`make ci` green) | [`v204_spec-set-collection-panel.md`](docs/specs/v204_spec-set-collection-panel.md) | [`v204_2026-06-15-set-collection-panel.md`](docs/plans/v204_2026-06-15-set-collection-panel.md) | [`as-built`](docs/as-built/v204_set-collection-panel.md) |
 
 ---

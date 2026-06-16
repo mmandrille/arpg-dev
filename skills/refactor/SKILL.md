@@ -1,40 +1,41 @@
 ---
 name: refactor
 description: >-
-  Run autonomous scorecard-driven repository improvement before engineering
+  Run autonomous scorecard-driven repository improvement after engineering
   review generation. Read the latest engineering review overview and companion
-  reports, identify minor architecture, maintainability, test, documentation,
-  and process paydown tasks that can improve every scorecard area toward 9+,
-  implement them as small verified commits without consuming slice numbers, and
-  stop when only feature work or major design decisions remain. Use when the
-  user runs $refactor, /refactor, asks to improve review scorecard areas, or
-  when a review is due before generating the fresh review set.
+  reports, classify every recommendation, identify minor architecture,
+  maintainability, test, documentation, and process paydown tasks that can
+  improve every scorecard area toward 9+, implement them as small verified
+  commits without consuming slice numbers, and stop when only feature work or
+  major design decisions remain. Use when the user runs $refactor, /refactor,
+  asks to improve review scorecard areas, or after $review writes fresh
+  recommendations.
 disable-model-invocation: true
 ---
 
-# $refactor — Scorecard Paydown Before Review
+# $refactor — Scorecard Paydown From Review Recommendations
 
 **Trigger:** `$refactor` or `/refactor`, optionally with a target such as `9+`, `v180`, or a
 specific scorecard area.
 
 Examples:
 
-- `$refactor` — read the latest review set, then make autonomous minor cleanup commits before the
-  next engineering review.
+- `$refactor` — read the latest review set, classify every recommendation, then make autonomous
+  minor cleanup commits.
 - `$refactor 9+` — keep improving review scorecard areas until every area appears plausibly at 9+
   or only major/product work remains.
 - `$refactor maintainability tests` — focus on those scorecard areas first, while still avoiding
   regressions in the rest.
 
-**Announce at start:** "Using the **refactor** skill to pay down review scorecard gaps with small verified commits before review generation."
+**Announce at start:** "Using the **refactor** skill to classify review recommendations and pay down scorecard gaps with small verified commits."
 
 ## Purpose
 
 Improve the engineering review scorecard without creating feature slices. This command is the
-autonomous quality-paydown step that runs before a fresh `$review` when review cadence is due.
+autonomous quality-paydown step that runs after a fresh `$review` when review cadence is due.
 
 ```text
-$refactor -> latest review overview + companions -> scorecard gap queue -> minor fix commit(s) -> stop -> $review
+$review -> latest review overview + companions -> $refactor all recommendations -> scorecard gap queue -> minor fix commit(s) -> stop
 ```
 
 The command targets the stable review scorecard areas:
@@ -109,15 +110,16 @@ Stop immediately and report the reason if any of these occur:
    and [`docs/CODEMAP.md`](../../docs/CODEMAP.md).
 2. Run `git status --short`; stop on ambiguous unrelated dirt.
 3. Record the current branch with `git branch --show-current`; stay on it.
-4. Locate the latest overview from `PROGRESS.md` → **Last engineering review**. If absent, choose the
-   newest `docs/reviews/*_v*-overview.md`.
+4. Locate the target overview from the command argument when provided. Otherwise use
+   `PROGRESS.md` → **Last engineering review**; if absent, choose the newest
+   `docs/reviews/*_v*-overview.md`.
 5. Read that overview plus its companion backend, client, and extras reports.
 6. Extract current scorecard areas, scores, top recommendations, and unresolved prior-review
    findings.
 
 ## Phase 1 — Build The Paydown Queue
 
-Create an internal queue of minor tasks from the latest review evidence.
+Create an internal queue from every recommendation in the latest review evidence.
 
 Prioritize:
 
@@ -133,6 +135,10 @@ For each candidate, classify it:
 - `future-slice`: player-facing or feature/system work for `$autoloop`.
 - `future-plan`: too broad or design-heavy for autonomous paydown.
 - `reject`: stale, already fixed, or no longer supported by current evidence.
+
+Every top-level recommendation in the overview and companion reports must receive one of these
+classifications. If a recommendation is too broad, classify the safe subset separately and mark the
+remainder as `future-plan` or `future-slice`.
 
 Do not ask the user to approve each minor task. Ask only if a decision would change product
 behavior, public contracts, or scope boundaries.
@@ -168,7 +174,7 @@ When no more safe minor commits remain:
 
 1. Run `git status --short`.
 2. If the final worktree is clean, report that `$refactor` is complete and the next step is
-   `$review`.
+   `$next` or `$autoloop` using any `future-slice` recommendations as input.
 3. If the final worktree is dirty because verification failed or a hard stop fired, report the exact
    files and stop condition.
 4. Summarize remaining `future-slice` and `future-plan` items so `$autoloop` or a later explicit

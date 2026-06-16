@@ -16,6 +16,12 @@ def handle_runtime_economy_assertion(state: Any, assertion: dict[str, Any], wher
     if typ == "stash_capacity":
         helpers["assert_stash_capacity"](state.stash_capacity, assertion, where, assert_count_matches)
         return True
+    if typ == "resource_wallet_count":
+        resource_id = str(assertion.get("resource_id", assertion.get("item_def_id", "")))
+        if not resource_id:
+            raise AssertionError(f"{where}: resource_wallet_count requires resource_id")
+        assert_count_matches(int(state.resource_wallet.get(resource_id, 0)), assertion, f"{where}: resource_wallet_count {resource_id}")
+        return True
     if typ == "shop_offer_count":
         offers = helpers["filtered_shop_offers"](state, assertion)
         assert_count_matches(len(offers), assertion, f"{where}: shop_offer_count", f": {offers}")

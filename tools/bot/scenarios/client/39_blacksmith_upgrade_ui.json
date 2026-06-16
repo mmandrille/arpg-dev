@@ -9,8 +9,8 @@
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_loot_count", "min_count": 7, "timeout_s": 10.0 },
     { "type": "click_loot_item", "item_def_id": "upgrade_shard" },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 1 },
+    { "type": "wait_event", "event_type": "resource_picked_up", "timeout_s": 15.0 },
+    { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },
     { "type": "click_loot_item", "rolled": true },
     { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
     { "type": "click_loot_item", "rolled": true },
@@ -41,10 +41,10 @@
     { "type": "wait_event", "event_type": "stash_gold_deposited", "timeout_s": 15.0 },
     { "type": "assert_stash_gold", "at_least": 100 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_blacksmith" },
-    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 0, "upgrade_enabled": true, "success_chance_percent": 100, "resource_item_def_id": "upgrade_shard", "resource_required_count": 1, "resource_inventory_count": 1, "pity_failure_count": 0, "pity_threshold": 2, "pity_guaranteed": false, "timeout_s": 15.0 },
+    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 0, "upgrade_enabled": true, "success_chance_percent": 100, "resource_item_def_id": "upgrade_shard", "resource_required_count": 1, "resource_wallet_count": 1, "pity_failure_count": 0, "pity_threshold": 2, "pity_guaranteed": false, "timeout_s": 15.0 },
     { "type": "click_blacksmith_upgrade", "item_def_id": "cave_blade" },
-    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "upgrade_enabled": false, "status_contains": "Upgraded", "timeout_s": 15.0 },
+    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "upgrade_enabled": false, "resource_wallet_count": 0, "status_contains": "Upgraded", "timeout_s": 15.0 },
     { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },
-    { "type": "assert_blacksmith_panel", "item_def_id": "cave_blade", "upgrade_enabled": false, "status_contains": "Upgraded" }
+    { "type": "assert_blacksmith_panel", "item_def_id": "cave_blade", "upgrade_enabled": false, "resource_wallet_count": 0, "status_contains": "Upgraded" }
   ]
 }

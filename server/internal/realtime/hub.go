@@ -227,6 +227,17 @@ func persistedStashItems(items []store.AccountStashItem) []game.PersistedStashIt
 	return out
 }
 
+func persistedResources(resources []store.AccountResourceAmount) []game.PersistedResourceAmount {
+	out := make([]game.PersistedResourceAmount, 0, len(resources))
+	for _, resource := range resources {
+		out = append(out, game.PersistedResourceAmount{
+			ResourceID: resource.ResourceID,
+			Amount:     resource.Amount,
+		})
+	}
+	return out
+}
+
 func storeShopStock(accountID, characterID string, items []game.PersistedShopStockItem) []store.CharacterShopStockItem {
 	out := make([]store.CharacterShopStockItem, 0, len(items))
 	for _, item := range items {

@@ -66,6 +66,9 @@ type CharacterProgressionRepo interface {
 	SetCharacterShopStockAvailable(ctx context.Context, accountID, characterID, shopID, offerID string, available bool) error
 	ListAccountStashItems(ctx context.Context, accountID string) ([]AccountStashItem, error)
 	GetOrCreateAccountStashGold(ctx context.Context, accountID string) (AccountStashGold, error)
+	ListAccountResources(ctx context.Context, accountID string) ([]AccountResourceAmount, error)
+	AddAccountResource(ctx context.Context, accountID, resourceID string, amount int) (AccountResourceAmount, error)
+	SpendAccountResource(ctx context.Context, accountID, resourceID string, amount int) (AccountResourceAmount, error)
 	TransferCharacterItemToAccountStash(ctx context.Context, accountID, characterID, itemInstanceID, stashItemID string) (AccountStashItem, error)
 	TransferAccountStashItemToCharacter(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID string) (CharacterItemInstance, error)
 	TransferAccountStashItemToCharacterWithPlacement(ctx context.Context, accountID, characterID, stashItemID, itemInstanceID, location, slot string, equipped bool) (CharacterItemInstance, error)
@@ -85,7 +88,7 @@ type CharacterProgressionRepo interface {
 	AcceptMarketOffer(ctx context.Context, sellerAccountID, listingID, offerID string) (MarketOffer, error)
 	ExpireMarketListings(ctx context.Context) (int, error)
 	GetMarketSummary(ctx context.Context, accountID string) (MarketSummary, error)
-	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, progression CharacterProgression) error
+	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, progression CharacterProgression) error
 	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshotForMember(ctx context.Context, sessionID, accountID, characterID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshots(ctx context.Context, sessionID string) ([]SessionStartSnapshot, error)

@@ -333,6 +333,7 @@ type playerState struct {
 	StashItems            []*stashItem
 	StashGold             int
 	StashCapacity         int
+	ResourceWallet        map[string]int
 	HPRegenCarry          float64
 	ManaRegenCarry        float64
 	NextBasicAttackTick   uint64
@@ -388,6 +389,7 @@ type Sim struct {
 	stashItems            []*stashItem
 	stashGold             int
 	stashCapacity         int
+	resourceWallet        map[string]int
 	corpses               map[string]*corpseState
 	hpRegenCarry          float64
 	manaRegenCarry        float64
@@ -467,6 +469,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		areaHealZones:         make(map[uint64]areaHealZoneState),
 		skillFunctionKeys:     make([]string, skillFunctionKeyCount),
 		shopStock:             make(map[string]*shopStockState),
+		resourceWallet:        make(map[string]int),
 		gold:                  progression.Gold,
 		stashCapacity:         defaultStashCapacity,
 	}
@@ -696,6 +699,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		StashItems:            s.stashItems,
 		StashGold:             s.stashGold,
 		StashCapacity:         s.stashCapacity,
+		ResourceWallet:        cloneIntMap(s.resourceWallet),
 	}
 
 	for _, preset := range world.Entities {
@@ -1660,6 +1664,10 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 			ackMessageID = in.MessageID
 		}
 		s.pickUpGoldForPlayer(e, s.playerID, in.CorrelationID, ackMessageID, res)
+		return
+	}
+	if s.isWalletResourceItem(e.itemDefID) {
+		s.pickUpWalletResource(e, in, res, ack)
 		return
 	}
 	itemDefID := e.itemDefID
@@ -6327,6 +6335,7 @@ func (s *Sim) Snapshot() Snapshot {
 		StashItems:        []StashItemView{},
 		StashGold:         0,
 		StashCapacity:     defaultStashCapacity,
+		ResourceWallet:    []ResourceAmountView{},
 		SkillProgression:  SkillProgressionView{Skills: []SkillProgressionSkillView{}},
 		SkillCooldowns:    []SkillCooldownView{},
 		SkillBindings:     SkillBindingsView{FunctionKeys: make([]string, skillFunctionKeyCount)},
@@ -6387,6 +6396,7 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		StashItems:            stashItems,
 		StashGold:             s.stashGold,
 		StashCapacity:         s.stashCapacity,
+		ResourceWallet:        s.ResourceWalletView(),
 		DiscoveredTeleporters: s.teleporterDiscoveryView(),
 		CharacterProgression:  s.CharacterProgressionView(),
 		SkillProgression:      s.SkillProgressionView(),

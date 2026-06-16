@@ -35,6 +35,12 @@ type PersistedStashItem struct {
 	RolledStats json.RawMessage
 }
 
+// PersistedResourceAmount is an account resource balance reloaded at session start.
+type PersistedResourceAmount struct {
+	ResourceID string
+	Amount     int
+}
+
 // LoadInventory restores persisted inventory into a fresh sim (used on resume).
 // The entity counter is advanced past any reloaded instance id so newly
 // allocated ids never collide with reloaded ones.
@@ -160,6 +166,19 @@ func (s *Sim) LoadAccountStash(items []PersistedStashItem, gold int, capacity in
 	}
 	s.stashGold = gold
 	s.stashCapacity = capacity
+	s.savePlayer(s.defaultPlayer())
+}
+
+// LoadResourceWallet restores account-owned resource balances into the active
+// player's private state.
+func (s *Sim) LoadResourceWallet(resources []PersistedResourceAmount) {
+	s.resourceWallet = make(map[string]int)
+	for _, resource := range resources {
+		if resource.ResourceID == "" || resource.Amount <= 0 {
+			continue
+		}
+		s.resourceWallet[resource.ResourceID] += resource.Amount
+	}
 	s.savePlayer(s.defaultPlayer())
 }
 
@@ -335,6 +354,17 @@ func (s *Sim) LoadAccountStashForPlayer(playerID uint64, items []PersistedStashI
 	}
 	s.usePlayer(ps)
 	s.LoadAccountStash(items, gold, capacity)
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
+}
+
+func (s *Sim) LoadResourceWalletForPlayer(playerID uint64, resources []PersistedResourceAmount) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	s.usePlayer(ps)
+	s.LoadResourceWallet(resources)
 	s.savePlayer(ps)
 	s.usePlayer(s.defaultPlayer())
 }

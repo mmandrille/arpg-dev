@@ -354,6 +354,7 @@ type progressionPersistRepo struct {
 	store.Repository
 	progressions []store.CharacterProgression
 	goldUpdates  []persistedGoldUpdate
+	resources    []store.AccountResourceAmount
 	events       []store.SessionEvent
 	items        []store.CharacterItemInstance
 }
@@ -372,6 +373,12 @@ func (r *progressionPersistRepo) UpsertCharacterProgression(_ context.Context, _
 func (r *progressionPersistRepo) SetCharacterGold(_ context.Context, accountID, characterID string, gold int) error {
 	r.goldUpdates = append(r.goldUpdates, persistedGoldUpdate{accountID: accountID, characterID: characterID, gold: gold})
 	return nil
+}
+
+func (r *progressionPersistRepo) AddAccountResource(_ context.Context, accountID, resourceID string, amount int) (store.AccountResourceAmount, error) {
+	resource := store.AccountResourceAmount{AccountID: accountID, ResourceID: resourceID, Amount: amount}
+	r.resources = append(r.resources, resource)
+	return resource, nil
 }
 
 func (r *progressionPersistRepo) AppendEvent(_ context.Context, event store.SessionEvent) error {

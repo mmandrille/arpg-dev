@@ -1,13 +1,11 @@
 package httpapi
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"math/big"
 	"net/http"
-	"sort"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
@@ -49,6 +47,7 @@ type upgradeAccountStashItemResponse struct {
 	Success           bool                     `json:"success"`
 	ResourceItemDefID string                   `json:"resource_item_def_id,omitempty"`
 	ResourceCount     int                      `json:"resource_count,omitempty"`
+	ResourceWallet    int                      `json:"resource_wallet"`
 }
 
 type upgradeInventoryItemResponse struct {
@@ -59,6 +58,7 @@ type upgradeInventoryItemResponse struct {
 	Success           bool                  `json:"success"`
 	ResourceItemDefID string                `json:"resource_item_def_id,omitempty"`
 	ResourceCount     int                   `json:"resource_count,omitempty"`
+	ResourceWallet    int                   `json:"resource_wallet"`
 }
 
 type upgradeInventoryItemRequest struct {
@@ -112,13 +112,15 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	resourceID, resourceCount := s.upgradeResourceConfig()
+	resourceWallet := 0
 	if resourceCount > 0 {
-		hasResource, err := s.characterHasItemCount(r.Context(), accountID, req.CharacterID, resourceID, resourceCount)
+		resources, err := s.store.ListAccountResources(r.Context(), accountID)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
 			return
 		}
-		if !hasResource {
+		resourceWallet = resourceAmount(resources, resourceID)
+		if resourceWallet < resourceCount {
 			writeError(w, http.StatusConflict, "missing_upgrade_resource", "upgrade resource is required")
 			return
 		}
@@ -155,10 +157,16 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	if resourceCount > 0 {
-		if err := s.consumeCharacterItemsByDef(r.Context(), accountID, req.CharacterID, resourceID, resourceCount); err != nil {
+		nextResource, err := s.store.SpendAccountResource(r.Context(), accountID, resourceID, resourceCount)
+		if errors.Is(err, store.ErrConflict) {
+			writeError(w, http.StatusConflict, "missing_upgrade_resource", "upgrade resource is required")
+			return
+		}
+		if err != nil {
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not consume upgrade resource")
 			return
 		}
+		resourceWallet = nextResource.Amount
 	}
 	writeJSON(w, http.StatusOK, upgradeInventoryItemResponse{
 		Item:              characterItemResponseFromStore(owned),
@@ -168,6 +176,7 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		Success:           success,
 		ResourceItemDefID: resourceID,
 		ResourceCount:     resourceCount,
+		ResourceWallet:    resourceWallet,
 	})
 }
 
@@ -211,50 +220,13 @@ func (s *Server) upgradeResourceConfig() (string, int) {
 	return s.rules.MainConfig.Gameplay.ItemUpgradeResourceID, s.rules.MainConfig.Gameplay.ItemUpgradeResourceCost
 }
 
-func (s *Server) characterHasItemCount(rctx context.Context, accountID string, characterID string, itemDefID string, count int) (bool, error) {
-	if count <= 0 {
-		return true, nil
-	}
-	items, err := s.store.ListCharacterItems(rctx, accountID, characterID)
-	if err != nil {
-		return false, err
-	}
-	found := 0
-	for _, item := range items {
-		if item.ItemDefID == itemDefID {
-			found++
-			if found >= count {
-				return true, nil
-			}
+func resourceAmount(resources []store.AccountResourceAmount, resourceID string) int {
+	for _, resource := range resources {
+		if resource.ResourceID == resourceID {
+			return resource.Amount
 		}
 	}
-	return false, nil
-}
-
-func (s *Server) consumeCharacterItemsByDef(rctx context.Context, accountID string, characterID string, itemDefID string, count int) error {
-	if count <= 0 {
-		return nil
-	}
-	items, err := s.store.ListCharacterItems(rctx, accountID, characterID)
-	if err != nil {
-		return err
-	}
-	ids := make([]string, 0, count)
-	for _, item := range items {
-		if item.ItemDefID == itemDefID {
-			ids = append(ids, item.ID)
-		}
-	}
-	if len(ids) < count {
-		return store.ErrConflict
-	}
-	sort.Strings(ids)
-	for i := 0; i < count; i++ {
-		if err := s.store.RemoveCharacterItem(rctx, accountID, characterID, ids[i]); err != nil {
-			return err
-		}
-	}
-	return nil
+	return 0
 }
 
 func upgradeSuccessRoll() (int, error) {

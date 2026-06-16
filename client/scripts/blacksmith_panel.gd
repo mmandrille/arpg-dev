@@ -23,6 +23,7 @@ var success_chance_percent: int = 100
 var pity_failure_threshold: int = 0
 var resource_item_def_id: String = ""
 var resource_count: int = 0
+var resource_wallet: Dictionary = {}
 var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
 var staged_item: Dictionary = {}
@@ -75,7 +76,7 @@ func _ready() -> void:
 	_build()
 	hide_display()
 
-func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int, next_stash_gold: int, config: Dictionary, status: String = "") -> void:
+func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int, next_stash_gold: int, config: Dictionary, status: String = "", next_resource_wallet: Dictionary = {}) -> void:
 	if _panel == null:
 		_build()
 	blacksmith_entity_id = entity_id
@@ -89,6 +90,7 @@ func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int,
 	pity_failure_threshold = int(config.get("item_upgrade_pity_failure_threshold", 0))
 	resource_item_def_id = str(config.get("item_upgrade_resource_item_def_id", ""))
 	resource_count = int(config.get("item_upgrade_resource_count", 0))
+	resource_wallet = next_resource_wallet.duplicate(true)
 	_status_label.text = status
 	_rebuild()
 	visible = true
@@ -107,10 +109,11 @@ func show_status(message: String, warning: bool = false) -> void:
 	_status_label.text = message
 	_status_label.add_theme_color_override("font_color", Color("#ffcf5a") if warning else Color("#9fd7ff"))
 
-func update_after_upgrade(item: Dictionary, next_gold: int, next_stash_gold: int, charged_cost: int, success: bool = true) -> void:
+func update_after_upgrade(item: Dictionary, next_gold: int, next_stash_gold: int, charged_cost: int, success: bool = true, next_resource_wallet: Dictionary = {}) -> void:
 	staged_item = item.duplicate(true)
 	gold = next_gold
 	stash_gold = next_stash_gold
+	resource_wallet = next_resource_wallet.duplicate(true)
 	show_status(("Upgraded for %d gold" if success else "Upgrade failed for %d gold") % charged_cost, not success)
 	_rebuild()
 
@@ -132,10 +135,10 @@ func get_debug_state() -> Dictionary:
 			"success_chance_percent": success_chance_percent,
 			"pity_failure_count": _pity_failure_count(staged_item),
 			"pity_threshold": pity_failure_threshold,
-			"pity_guaranteed": _pity_guaranteed(staged_item),
-			"resource_item_def_id": resource_item_def_id,
+		"pity_guaranteed": _pity_guaranteed(staged_item),
+		"resource_item_def_id": resource_item_def_id,
 		"resource_required_count": resource_count,
-		"resource_inventory_count": _resource_inventory_count(),
+		"resource_wallet_count": _resource_wallet_count(),
 		"item_count": inventory_items.size(),
 		"staged_item": staged_item.duplicate(true),
 		"staged_item_id": str(staged_item.get("item_instance_id", staged_item.get("stash_item_id", ""))),
@@ -259,7 +262,7 @@ func _preview_block() -> Control:
 	cost_row.add_child(cost_label)
 	box.add_child(cost_row)
 	if resource_count > 0:
-		var resource_label := _empty_label("%s: %d/%d" % [_resource_display_name(), _resource_inventory_count(), resource_count])
+		var resource_label := _empty_label("%s: %d/%d" % [_resource_display_name(), _resource_wallet_count(), resource_count])
 		resource_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		resource_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 		resource_label.add_theme_color_override("font_color", Color("#d8c8a8") if _has_upgrade_resource() else Color("#ff9f7a"))
@@ -350,20 +353,13 @@ func _is_upgrade_candidate(item: Dictionary) -> bool:
 
 
 func _has_upgrade_resource() -> bool:
-	return resource_count <= 0 or _resource_inventory_count() >= resource_count
+	return resource_count <= 0 or _resource_wallet_count() >= resource_count
 
 
-func _resource_inventory_count() -> int:
+func _resource_wallet_count() -> int:
 	if resource_count <= 0 or resource_item_def_id == "":
 		return 0
-	var total := 0
-	for value in inventory_items:
-		if typeof(value) != TYPE_DICTIONARY:
-			continue
-		var item := value as Dictionary
-		if str(item.get("item_def_id", "")) == resource_item_def_id:
-			total += 1
-	return total
+	return max(0, int(resource_wallet.get(resource_item_def_id, 0)))
 
 
 func _resource_display_name() -> String:

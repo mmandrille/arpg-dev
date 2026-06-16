@@ -47,6 +47,8 @@ const StatusEffectsBarScript := preload("res://scripts/status_effects_bar.gd")
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
+const ClientAudioControllerScript := preload("res://scripts/client_audio_controller.gd")
+const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
@@ -169,6 +171,7 @@ var main_menu: MainMenu
 var character_panel: CharacterSelectPanel
 var multiplayer_panel: MultiplayerSessionsPanel
 var settings_panel: SettingsPanel
+var audio_controller: ClientAudioController
 var pause_menu: PauseMenu
 var loss_popup: Control
 var gameplay_active: bool = false
@@ -252,6 +255,7 @@ func _ready() -> void:
 	client_settings.set_language(client_settings.language, false)
 	_loot_filter.set_mode_label(client_settings.loot_filter_mode)
 	client_settings.apply()
+	ClientAudioBridgeScript.apply_settings(audio_controller, client_settings)
 	_refresh_localized_texts()
 	_sync_status_text_visibility()
 	_sync_settings_panel()
@@ -566,30 +570,12 @@ func _start_listed_join_session(character_id: String) -> void:
 func _on_settings_from_main() -> void:
 	settings_return_target = "main"
 	main_menu.visible = false
-	if settings_panel != null:
-		settings_panel.show_settings(
-			ClientSettingsScript.size_label(client_settings.window_size),
-			client_settings.floating_combat_text,
-			client_settings.status_text,
-			client_settings.create_game_session_type,
-			client_settings.language,
-			client_settings.monster_health_bar_mode
-		)
-
+	ClientAudioBridgeScript.show_settings(settings_panel, client_settings)
 func _on_settings_from_pause() -> void:
 	settings_return_target = "pause"
 	if pause_menu != null:
 		pause_menu.hide_pause()
-	if settings_panel != null:
-		settings_panel.show_settings(
-			ClientSettingsScript.size_label(client_settings.window_size),
-			client_settings.floating_combat_text,
-			client_settings.status_text,
-			client_settings.create_game_session_type,
-			client_settings.language,
-			client_settings.monster_health_bar_mode
-		)
-
+	ClientAudioBridgeScript.show_settings(settings_panel, client_settings)
 func _on_settings_back() -> void:
 	if settings_panel != null:
 		settings_panel.hide_panel()
@@ -597,11 +583,9 @@ func _on_settings_back() -> void:
 		pause_menu.show_pause()
 	elif main_menu != null:
 		main_menu.show_menu()
-
 func _on_window_size_selected(label: String) -> void:
 	client_settings.set_window_size_label(label)
 	_sync_settings_panel()
-
 func _on_floating_combat_text_toggled(enabled: bool) -> void:
 	if client_settings == null:
 		return
@@ -634,12 +618,10 @@ func _on_monster_health_bar_mode_selected(mode: String) -> void:
 		_sync_settings_panel()
 		_refresh_monster_health_bar_visibility()
 
-
 func _on_companion_stance_requested(stance: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	client.send("companion_command_intent", last_server_tick, {"stance": stance})
-
 
 func _on_companion_bar_selected(_companion: Dictionary) -> void:
 	if mercenary_panel == null:
@@ -657,6 +639,7 @@ func _sync_settings_panel() -> void:
 		settings_panel.set_create_game_session_type(client_settings.create_game_session_type)
 		settings_panel.set_language(client_settings.language)
 		settings_panel.set_monster_health_bar_mode(client_settings.monster_health_bar_mode)
+		ClientAudioBridgeScript.sync_settings_panel(settings_panel, client_settings)
 
 func _refresh_localized_texts() -> void:
 	if main_menu != null:
@@ -714,6 +697,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		status_effects_bar.clear_effects()
 	loot_ids.clear()
 	monster_ids.clear()
+	ClientAudioBridgeScript.stop_boss_music(audio_controller)
 	interactable_ids.clear()
 	current_wall_layout = []
 	discovered_teleporters.clear()
@@ -1063,6 +1047,7 @@ func _apply_delta(p: Dictionary) -> void:
 					int(ev.get("total_ticks", 0))
 				)
 		if event_type == "skill_cast" and eid == player_id:
+			ClientAudioBridgeScript.skill(audio_controller, str(ev.get("skill_id", "")))
 			if skill_bar != null:
 				skill_bar.flash_cast()
 			if player_anim != null:
@@ -1092,6 +1077,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_show_skill_rejected_feedback(str(ev.get("reason", "")))
 			continue
 		if event_type == "player_healed":
+			ClientAudioBridgeScript.heal(audio_controller)
 			_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
 			if str(ev.get("skill_id", "")) == "heal":
 				_spawn_heal_rain(eid)
@@ -1161,6 +1147,7 @@ func _apply_delta(p: Dictionary) -> void:
 					_health_bar.update_mana(player_mana, player_max_mana, true)
 				continue
 			if event_type == "player_damaged":
+				ClientAudioBridgeScript.damage(audio_controller, eid == player_id)
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
 					_play_entity_reaction(eid, ev, "hit")
@@ -1181,6 +1168,7 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if ClientConstants.PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
 			if event_type == "player_damaged":
+				ClientAudioBridgeScript.damage(audio_controller, eid == player_id)
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
 					_play_entity_reaction(eid, ev, "hit")
@@ -1274,9 +1262,12 @@ func _apply_delta(p: Dictionary) -> void:
 				bishop_panel.show_status("Stat point gained")
 			continue
 		if event_type == "boss_killed":
+			ClientAudioBridgeScript.kill(audio_controller, true)
+			ClientAudioBridgeScript.stop_boss_music(audio_controller)
 			_last_boss_reward_status = "%s defeated" % (_boss_visuals.boss_health_bar_title(str(ev.get("boss_template_id", ""))) if _boss_visuals != null else "Boss")
 			continue
 		if event_type == "boss_phase_started" and entities.has(eid):
+			ClientAudioBridgeScript.boss_phase(audio_controller)
 			if _boss_visuals != null:
 				_boss_visuals_context.last_server_tick = last_server_tick
 				_boss_visuals.apply_boss_phase_started(eid, ev)
@@ -1292,16 +1283,20 @@ func _apply_delta(p: Dictionary) -> void:
 		if clip == null:
 			if event_type in ["attack_missed", "attack_blocked"]:
 				if str(ev.get("source_entity_id", "")) == player_id:
+					ClientAudioBridgeScript.attack(audio_controller)
 					_play_local_attack_animation_for_event(ev)
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			if str(ev.get("source_entity_id", "")) == player_id:
+				ClientAudioBridgeScript.attack(audio_controller)
 				_play_local_attack_animation_for_event(ev)
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
+			ClientAudioBridgeScript.damage(audio_controller, false)
 			_play_entity_reaction(eid, ev, "hit")
 		if event_type == "monster_killed":
+			ClientAudioBridgeScript.kill(audio_controller, false)
 			_remove_monster_health_bar(eid)
 			if entities.has(eid):
 				var dead_rec: Dictionary = entities[eid]
@@ -2387,6 +2382,7 @@ func _handle_input(delta: float) -> void:
 		_reconcile_player()
 		_mark_local_player_walking()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
+		ClientAudioBridgeScript.movement(audio_controller)
 		_send_cooldown = ClientConstants.SEND_INTERVAL
 
 	if _hold_input_allowed():
@@ -3352,6 +3348,9 @@ func _build_scene() -> void:
 	light.rotation_degrees = Vector3(-50, -40, 0)
 	add_child(light)
 
+	audio_controller = ClientAudioControllerScript.new()
+	add_child(audio_controller)
+
 	var ui := CanvasLayer.new()
 	ui.layer = 5
 	add_child(ui)
@@ -3496,6 +3495,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.create_game_session_type_selected.connect(_on_create_game_session_type_selected)
 	settings_panel.language_selected.connect(_on_language_selected)
 	settings_panel.monster_health_bar_mode_selected.connect(_on_monster_health_bar_mode_selected)
+	ClientAudioBridgeScript.connect_volume_signals(settings_panel, audio_controller, client_settings, Callable(self, "_sync_settings_panel"))
 	menu_layer.add_child(settings_panel)
 
 	pause_menu = PauseMenuScript.new()

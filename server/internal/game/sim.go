@@ -319,6 +319,7 @@ type playerState struct {
 	SkillCooldowns        map[string]skillCooldownState
 	SkillEffects          map[string]skillEffectState
 	PoisonDots            map[uint64]poisonDotState
+	RogueMarks            map[uint64]rogueMarkState
 	UniqueBurnDots        map[string]uniqueBurnDotState
 	UniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
 	UniqueHungerStacks    map[uint64]uniqueHungerStackState
@@ -372,6 +373,7 @@ type Sim struct {
 	skillCooldowns        map[string]skillCooldownState
 	skillEffects          map[string]skillEffectState
 	poisonDots            map[uint64]poisonDotState
+	rogueMarks            map[uint64]rogueMarkState
 	uniqueBurnDots        map[string]uniqueBurnDotState
 	uniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
 	uniqueHungerStacks    map[uint64]uniqueHungerStackState
@@ -456,6 +458,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		skillCooldowns:        make(map[string]skillCooldownState),
 		skillEffects:          make(map[string]skillEffectState),
 		poisonDots:            make(map[uint64]poisonDotState),
+		rogueMarks:            make(map[uint64]rogueMarkState),
 		uniqueBurnDots:        make(map[string]uniqueBurnDotState),
 		uniqueExecutionMarks:  make(map[uint64]uniqueExecutionMarkState),
 		uniqueHungerStacks:    make(map[uint64]uniqueHungerStackState),
@@ -679,6 +682,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
 		SkillEffects:          cloneSkillEffects(s.skillEffects),
 		PoisonDots:            clonePoisonDots(s.poisonDots),
+		RogueMarks:            cloneRogueMarks(s.rogueMarks),
 		UniqueBurnDots:        cloneUniqueBurnDots(s.uniqueBurnDots),
 		UniqueExecutionMarks:  cloneUniqueExecutionMarks(s.uniqueExecutionMarks),
 		UniqueHungerStacks:    cloneUniqueHungerStacks(s.uniqueHungerStacks),
@@ -1020,6 +1024,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 			s.usePlayer(ps)
 			res := resultFor(ps.CurrentLevel, ps.PlayerID)
 			s.expireSkillEffects(res)
+			s.advanceRogueMarks(res)
 			s.advancePoisonDots(res)
 			s.advanceUniqueBurnDots(res)
 			s.advanceOffensiveUniqueEffectStates(res)
@@ -1303,6 +1308,7 @@ func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string
 
 func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, damageType string, weaponSlot string) combatResolution {
 	damageRange = s.applyUniqueDamageBeforeHeroHit(target, playerID, damageRange)
+	damageRange = s.applyRogueMarkDamageBonus(target, damageRange)
 	attackerStats, _ := s.playerEffectiveCombatStats()
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
@@ -1330,6 +1336,9 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}
 	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: true})
+	if outcome.Damage > 0 {
+		s.tryPassiveExecute(target, playerID, corr, res)
+	}
 	if target.hp == 0 {
 		s.finishMonsterKill(target, playerID, corr, res)
 	}
@@ -1347,8 +1356,9 @@ func (s *Sim) damageMonsterByPlayerSkillTyped(target *entity, playerID uint64, c
 
 func (s *Sim) damageMonsterByPlayerSkillTypedWithID(target *entity, playerID uint64, skillID string, corr string, res *TickResult, damageRange DamageRange, damageType string) combatResolution {
 	damageRange = s.applyUniqueDamageBeforeHeroHit(target, playerID, damageRange)
+	damageRange = s.applyRogueMarkDamageBonus(target, s.applySkillDamageModifiers(playerID, skillID, damageRange))
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
-	outcome := s.resolveSkillDamage(defenderStats, s.applySkillDamageModifiers(playerID, skillID, damageRange))
+	outcome := s.resolveSkillDamage(defenderStats, damageRange)
 	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
 	target.hp -= outcome.Damage
 	if target.hp < 0 {
@@ -1360,6 +1370,9 @@ func (s *Sim) damageMonsterByPlayerSkillTypedWithID(target *entity, playerID uin
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}
 	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: false})
+	if outcome.Damage > 0 {
+		s.tryPassiveExecute(target, playerID, corr, res)
+	}
 	if target.hp == 0 {
 		s.finishMonsterKill(target, playerID, corr, res)
 	}

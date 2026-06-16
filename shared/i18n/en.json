@@ -85,6 +85,8 @@
     "skill.dash.summary": "Forward dash strike",
     "skill.shadow_flurry.name": "Shadow Flurry",
     "skill.shadow_flurry.summary": "Fast close flurry",
+    "skill.executioner.name": "Executioner",
+    "skill.executioner.summary": "Passive low-health execute",
     "skill.piercing_shot.name": "Piercing Shot",
     "skill.piercing_shot.summary": "Arrow that pierces enemies",
     "skill.disengage.name": "Disengage",

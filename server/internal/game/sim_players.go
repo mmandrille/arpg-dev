@@ -345,6 +345,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.poisonDots == nil {
 		s.poisonDots = make(map[uint64]poisonDotState)
 	}
+	s.rogueMarks = ps.RogueMarks
+	if s.rogueMarks == nil {
+		s.rogueMarks = make(map[uint64]rogueMarkState)
+	}
 	s.uniqueBurnDots = ps.UniqueBurnDots
 	if s.uniqueBurnDots == nil {
 		s.uniqueBurnDots = make(map[string]uniqueBurnDotState)
@@ -403,6 +407,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.SkillCooldowns = s.skillCooldowns
 	ps.SkillEffects = s.skillEffects
 	ps.PoisonDots = s.poisonDots
+	ps.RogueMarks = s.rogueMarks
 	ps.UniqueBurnDots = s.uniqueBurnDots
 	ps.UniqueExecutionMarks = s.uniqueExecutionMarks
 	ps.UniqueHungerStacks = s.uniqueHungerStacks

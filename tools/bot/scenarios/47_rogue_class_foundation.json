@@ -13,22 +13,27 @@
     "level": 6,
     "experience": 0,
     "unspent_stat_points": 0,
-    "unspent_skill_points": 3,
+    "unspent_skill_points": 4,
     "stats": { "str": 4, "dex": 12, "vit": 5, "magic": 4 },
     "skill_ranks": {}
   },
   "steps": [
-    { "action": "assert_skill_progression", "unspent_skill_points": 3, "skill_id": "poison_stab", "rank": 0, "max_rank": 5, "can_spend": true },
-    { "action": "assert_skill_progression", "unspent_skill_points": 3, "skill_id": "dash", "rank": 0, "max_rank": 5, "can_spend": true },
+    { "action": "assert_skill_progression", "unspent_skill_points": 4, "skill_id": "poison_stab", "rank": 0, "max_rank": 5, "can_spend": true },
+    { "action": "assert_skill_progression", "unspent_skill_points": 4, "skill_id": "dash", "rank": 0, "max_rank": 5, "can_spend": true },
     {
       "action": "allocate_skill_point",
       "skill_id": "dash",
-      "expect_skill_progression": { "unspent_skill_points": 2, "skill_id": "dash", "rank": 1, "max_rank": 5, "can_spend": true }
+      "expect_skill_progression": { "unspent_skill_points": 3, "skill_id": "dash", "rank": 1, "max_rank": 5, "can_spend": true }
     },
     {
       "action": "allocate_skill_point",
       "skill_id": "poison_stab",
-      "expect_skill_progression": { "unspent_skill_points": 1, "skill_id": "poison_stab", "rank": 1, "max_rank": 5, "can_spend": true }
+      "expect_skill_progression": { "unspent_skill_points": 2, "skill_id": "poison_stab", "rank": 1, "max_rank": 5, "can_spend": true }
+    },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "executioner",
+      "expect_skill_progression": { "unspent_skill_points": 1, "skill_id": "executioner", "rank": 1, "max_rank": 5, "can_spend": true }
     },
     {
       "action": "allocate_skill_point",
@@ -80,6 +85,7 @@
     { "type": "equipped_slot_def", "slot": "off_hand", "item_def_id": "starter_rogue_sword" },
     { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "dash", "rank": 1 },
     { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "poison_stab", "rank": 1 },
+    { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "executioner", "rank": 1 },
     { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "shadow_flurry", "rank": 1 },
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "poison_stab", "rank": 1 },
     { "type": "event_count", "event_type": "monster_damaged", "skill_id": "poison_stab", "min": 1 },
@@ -88,6 +94,7 @@
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "shadow_flurry", "rank": 1 },
     { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 },
     { "type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "poison_stab" },
+    { "type": "skill_progression", "skill_id": "executioner", "rank": 1, "max_rank": 5, "can_spend": false },
     { "type": "skill_progression", "skill_id": "shadow_flurry", "rank": 1, "max_rank": 5, "can_spend": false },
     { "type": "combat_event_seen", "event_type": "monster_damaged", "weapon_slot": "main_hand", "min_damage": 1 },
     { "type": "combat_event_seen", "weapon_slot": "off_hand" }

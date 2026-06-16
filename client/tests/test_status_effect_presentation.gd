@@ -21,6 +21,7 @@ func _initialize() -> void:
 	_test_unique_burn_started_and_ended_updates_monster_cue()
 	_test_pinning_root_started_and_ended_updates_monster_cue()
 	_test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge()
+	_test_rogue_mark_effect_id_updates_monster_skull()
 	_test_monster_death_clears_elite_aura_markers()
 	_test_potion_heal_uses_personal_effect()
 	_test_paladin_heal_uses_area_rain()
@@ -248,7 +249,7 @@ func _test_pinning_root_started_and_ended_updates_monster_cue() -> void:
 
 
 func _test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge() -> void:
-	for skill_id in ["leap", "charge"]:
+	for skill_id in ["leap", "charge", "dash"]:
 		var main = _make_main()
 		main.player_id = "1001"
 		main._upsert_entity({
@@ -281,6 +282,50 @@ func _test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge() -> v
 		_assert_true("%s stun marker removed" % skill_id, not bool(after.get("has_stun_effect", true)))
 		_assert_true("%s shared stun effect id removed" % skill_id, not (after.get("effect_ids", []) as Array).has("stun"))
 		_free_main(main)
+
+
+func _test_rogue_mark_effect_id_updates_monster_skull() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1002",
+		"type": "monster",
+		"position": {"x": 2.0, "y": 0.0},
+		"hp": 10,
+		"max_hp": 10,
+		"monster_def_id": "training_dummy",
+		"effect_ids": ["rogue_mark"],
+	})
+	var before: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+	_assert_true("rogue mark skull marker active", bool(before.get("has_rogue_mark_effect", false)))
+	var monster: Dictionary = main.entities.get("1002", {})
+	var node := monster.get("node", null) as Node3D
+	var marker := node.find_child("RogueMarkSkullEffect", false, false) as Node3D
+	_assert_true("rogue mark skull node exists", marker != null)
+	if marker != null:
+		_assert_float("rogue mark skull floats higher", marker.position.y, 3.05)
+		var skull := marker.find_child("RogueMarkSkull", false, false) as Label3D
+		_assert_true("rogue mark skull label exists", skull != null)
+		if skull != null:
+			_assert_eq("rogue mark skull text", skull.text, "☠")
+			_assert_eq("rogue mark skull font size", skull.font_size, 192)
+			_assert_eq("rogue mark skull color", skull.modulate.to_html(false), "ff140d")
+
+	main._apply_delta({"events": [], "changes": [{
+		"op": "entity_update",
+		"entity": {
+			"id": "1002",
+			"type": "monster",
+			"position": {"x": 2.0, "y": 0.0},
+			"hp": 10,
+			"max_hp": 10,
+			"monster_def_id": "training_dummy",
+			"effect_ids": [],
+		},
+	}]})
+	var after: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+	_assert_true("rogue mark skull marker removed", not bool(after.get("has_rogue_mark_effect", true)))
+	_free_main(main)
 
 
 func _test_monster_death_clears_elite_aura_markers() -> void:

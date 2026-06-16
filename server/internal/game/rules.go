@@ -533,6 +533,7 @@ type SkillDef struct {
 	Poison       SkillPoisonDef      `json:"poison"`
 	Dash         SkillDashDef        `json:"dash"`
 	Mobility     SkillMobilityDef    `json:"mobility"`
+	Execute      SkillExecuteDef     `json:"execute"`
 	Slow         SkillSlowDef        `json:"slow"`
 	Shatter      SkillShatterDef     `json:"shatter"`
 	Chain        SkillChainDef       `json:"chain"`
@@ -642,6 +643,13 @@ type SkillChainDef struct {
 	RangeMultiplier float64 `json:"range_multiplier"`
 	MaxJumps        int     `json:"max_jumps"`
 	Visual          string  `json:"visual"`
+}
+
+// SkillExecuteDef defines a passive low-health execute roll.
+type SkillExecuteDef struct {
+	ThresholdPercentBase    int `json:"threshold_percent_base"`
+	ThresholdPercentPerRank int `json:"threshold_percent_per_rank"`
+	ChancePercent           int `json:"chance_percent"`
 }
 
 // SkillEffectDef is a closed data contract for supported active-skill effects.
@@ -2879,7 +2887,7 @@ func validateBuffSkillCooldown(skillID string, skill SkillDef, baseAttackInterva
 }
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility":
+	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute":
 		return true
 	default:
 		return false
@@ -2944,9 +2952,29 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for mobility", skillID, skill.Targeting)
 		}
 		return validateRogueConeSkillPayload(skillID, skill)
+	case "passive_execute":
+		if skill.Targeting != "self" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for passive_execute", skillID, skill.Targeting)
+		}
+		return validatePassiveExecuteSkillPayload(skillID, skill)
 	default:
 		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", skillID, skill.Kind)
 	}
+}
+
+func validatePassiveExecuteSkillPayload(skillID string, skill SkillDef) error {
+	if skill.Execute.ThresholdPercentBase <= 0 || skill.Execute.ThresholdPercentBase > 100 ||
+		skill.Execute.ThresholdPercentPerRank < 0 || skill.Execute.ChancePercent <= 0 || skill.Execute.ChancePercent > 100 {
+		return fmt.Errorf("game: invalid rules skills.%s.execute: threshold and chance must be valid", skillID)
+	}
+	maxThreshold := skill.Execute.ThresholdPercentBase + skill.Execute.ThresholdPercentPerRank*(skill.MaxRank-1)
+	if maxThreshold > 100 {
+		return fmt.Errorf("game: invalid rules skills.%s.execute: max threshold must be <= 100", skillID)
+	}
+	if len(skill.Effects) > 0 || skill.Projectile.Range > 0 || skill.Cone.Range > 0 || skill.Dash.RangeBase > 0 || skill.Mobility.RangeBase > 0 {
+		return fmt.Errorf("game: invalid rules skills.%s: passive_execute does not support active payloads", skillID)
+	}
+	return nil
 }
 
 func validateProjectileSkillPayload(skillID string, skill SkillDef) error {

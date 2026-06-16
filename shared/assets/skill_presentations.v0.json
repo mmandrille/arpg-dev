@@ -194,6 +194,16 @@
       "effect_visual": "shadow_flurry",
       "summary_key": "skill.shadow_flurry.summary"
     },
+    "executioner": {
+      "icon": {
+        "label": "X",
+        "shape": "slash",
+        "color": "#d0d5dd",
+        "accent": "#ffffff"
+      },
+      "summary": "Passive low-health execute",
+      "summary_key": "skill.executioner.summary"
+    },
     "piercing_shot": {
       "icon": {
         "label": "P",

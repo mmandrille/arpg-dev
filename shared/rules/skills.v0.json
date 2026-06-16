@@ -768,7 +768,10 @@
         "damage_percent_base": 25,
         "damage_percent_per_rank": 10,
         "duration_ticks": 50,
-        "magic_duration_ticks_per_point": 2
+        "magic_duration_ticks_per_point": 2,
+        "mark_damage_bonus_percent": 25,
+        "mark_duration_ticks": 50,
+        "mark_effect_id": "rogue_mark"
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
@@ -815,7 +818,9 @@
         "range_per_rank": 1,
         "damage_percent_base": 50,
         "damage_percent_per_magic": 3,
-        "max_damage_bonus_percent": 50
+        "max_damage_bonus_percent": 50,
+        "stun_effect_id": "dash_stun",
+        "stun_duration_ticks": 15
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
@@ -867,6 +872,48 @@
         "multiplier": 1.8
       },
       "name_key": "skill.shadow_flurry.name"
+    },
+    "executioner": {
+      "name": "Executioner",
+      "class": "rogue",
+      "tree": {
+        "tier": 2,
+        "column": 2
+      },
+      "kind": "passive_execute",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "dex": 10
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "poison_stab",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "execute": {
+        "threshold_percent_base": 10,
+        "threshold_percent_per_rank": 5,
+        "chance_percent": 35
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.executioner.name"
     },
     "piercing_shot": {
       "name": "Piercing Shot",

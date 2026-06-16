@@ -25,7 +25,7 @@
         "class": { "type": "string", "minLength": 1 },
         "damage_type": { "$ref": "#/$defs/damage_type" },
         "tree": { "$ref": "#/$defs/tree_position" },
-        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility"] },
+        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute"] },
         "max_rank": { "type": "integer", "minimum": 1 },
         "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
@@ -39,6 +39,7 @@
         "poison": { "$ref": "#/$defs/poison" },
         "dash": { "$ref": "#/$defs/dash" },
         "mobility": { "$ref": "#/$defs/mobility" },
+        "execute": { "$ref": "#/$defs/execute" },
         "slow": { "$ref": "#/$defs/slow" },
         "shatter": { "$ref": "#/$defs/shatter" },
         "chain": { "$ref": "#/$defs/chain" },
@@ -120,6 +121,13 @@
           "then": {
             "required": ["mobility"],
             "properties": { "targeting": { "const": "direction_or_target" } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "passive_execute" } }, "required": ["kind"] },
+          "then": {
+            "required": ["execute"],
+            "properties": { "targeting": { "const": "self" } }
           }
         }
       ]
@@ -314,7 +322,10 @@
         "damage_percent_base": { "type": "integer", "minimum": 1 },
         "damage_percent_per_rank": { "type": "integer", "minimum": 0 },
         "duration_ticks": { "type": "integer", "minimum": 1 },
-        "magic_duration_ticks_per_point": { "type": "integer", "minimum": 0 }
+        "magic_duration_ticks_per_point": { "type": "integer", "minimum": 0 },
+        "mark_damage_bonus_percent": { "type": "integer", "minimum": 0 },
+        "mark_duration_ticks": { "type": "integer", "minimum": 0 },
+        "mark_effect_id": { "type": "string", "minLength": 1 }
       }
     },
     "dash": {
@@ -326,7 +337,19 @@
         "range_per_rank": { "type": "number", "minimum": 0 },
         "damage_percent_base": { "type": "integer", "minimum": 1 },
         "damage_percent_per_magic": { "type": "integer", "minimum": 0 },
-        "max_damage_bonus_percent": { "type": "integer", "minimum": 0 }
+        "max_damage_bonus_percent": { "type": "integer", "minimum": 0 },
+        "stun_effect_id": { "type": "string", "minLength": 1 },
+        "stun_duration_ticks": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "execute": {
+      "type": "object",
+      "required": ["threshold_percent_base", "threshold_percent_per_rank", "chance_percent"],
+      "additionalProperties": false,
+      "properties": {
+        "threshold_percent_base": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "threshold_percent_per_rank": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "chance_percent": { "type": "integer", "minimum": 1, "maximum": 100 }
       }
     },
     "mobility": {

@@ -6,21 +6,21 @@ description: >-
   a curated menu of 15 player-visible feature, game-improvement, or addition
   candidates. Batch blocking clarification questions across the selected queue,
   then execute an autonomous loop through next, spec, plan, execute, and finish
-  with committed slices. Use when the user runs $autoloop N, /autoloop N, or asks
-  Codex to curate and run multiple feature slices.
+  with committed slices. Use when the user runs $autoloop, /autoloop, provides
+  inline autoloop idea(s), or asks Codex to curate and run multiple feature slices.
 disable-model-invocation: true
 ---
 
 # $autoloop — Curated Autonomous Feature Slice Loop
 
-**Trigger:** `$autoloop {count}` or `/autoloop {count}`
+**Trigger:** `$autoloop` or `/autoloop`, optionally followed by inline idea text.
 
 Examples:
 
-- `$autoloop 1` — present 15 ideas, then complete one selected slice after the user picks.
-- `$autoloop 1 add a town healer` — treat the inline idea as selected and complete one slice if gates pass.
-- `$autoloop 5` — present 15 ideas, then complete five selected slices, stopping early only on a hard stop.
-- `$autoloop 12 idea A; idea B; ...` — treat the inline ideas as selected and complete up to twelve viable slices.
+- `$autoloop` — present 15 ideas, then complete every viable slice the user selects.
+- `$autoloop add a town healer` — treat the inline idea as selected and complete that slice if gates pass.
+- `$autoloop idea A; idea B; ...` — treat the inline ideas as selected and complete each viable selected slice.
+- `$autoloop show me options for ranged combat polish` — present focused ideas, then complete the viable ideas the user chooses in reply.
 
 **Announce at start:** "Using the **autoloop** skill to curate feature/gameplay slice ideas, then run an autonomous SDD loop after you choose."
 
@@ -32,8 +32,8 @@ shared contracts, bot proof, and client presentation as one vertical slice when
 the behavior reaches the player.
 
 If the user supplied idea text in the initial command, that text is the
-selection gate. If the command has only a count, present a menu and wait for the
-user to select:
+selection gate. If the command has no concrete selected idea text, present a
+menu and wait for the user to select:
 
 ```text
 $autoloop with idea -> order inline feature idea(s) -> batch questions -> $spec -> $plan -> $execute -> $finish
@@ -41,9 +41,10 @@ $autoloop without idea -> feature idea menu -> user picks -> order picks -> batc
 ```
 
 The initial `$autoloop` invocation authorizes preflight and idea discovery only
-when no idea text is provided. When idea text is provided after the count, that
-same invocation authorizes using the provided idea(s) as the selected queue,
-up to the requested slice count.
+when no idea text is provided. When concrete idea text is provided, that same
+invocation authorizes using the provided idea(s) as the selected queue. The
+number of slices to execute is the number of viable ideas in the selected queue,
+not a predeclared count.
 It does **not** authorize architecture cleanup, documentation cleanup,
 documentation reordering, scorecard paydown, repository-maintenance edits, or
 refactor-only work. If such work is detected, do not treat it as a pre-task or
@@ -57,23 +58,27 @@ gate emits questions, the user's answer authorizes continuing with those answers
 applied. It does **not** authorize pushing, branch creation, bypassing the final
 CI gate, or guessing through blockers.
 
-## Count handling
+## Selection handling
 
-1. Parse `{count}` as an integer.
-2. If missing, zero, negative, or not an integer, ask the user for a valid count.
-3. Do not impose a maximum cap. The requested count is the execution limit, even when it is large.
-4. If the initial command includes idea text after the count, do **not** show
-   the 15 idea menu. Treat the inline idea text as selected input and proceed
-   to ordering and the batch clarification gate.
-5. If no inline idea text is provided, show **15** slice ideas before execution,
-   regardless of the execution count.
-6. After inline idea parsing or user menu selection, set the execution target to the smaller of:
-   - the requested count, and
-   - the number of viable selected ideas.
-7. If the user selects more ideas than the execution target, order all selected ideas,
-   execute the first target-sized prefix, and report the rest as deferred.
-8. After the execution target is completed and committed, run the post-loop review/refactor handoff; stop
-   earlier only on a hard stop condition.
+1. Do not require, request, or wait for a numeric slice count.
+2. If the initial command includes concrete idea text, do **not** show the 15
+   idea menu. Treat the inline idea text as selected input and proceed to
+   ordering and the batch clarification gate.
+3. If no concrete inline idea text is provided, show **15** slice ideas before
+   execution, unless the user explicitly asks for a different menu size.
+4. After inline idea parsing or user menu selection, set the execution target to
+   the number of viable selected ideas.
+5. If the user selects one idea, execute one slice. If the user selects many
+   ideas, execute as many viable slices as they selected, in the ordered queue.
+6. If a selected idea must be split into multiple slices, include every obvious
+   split slice in the ordered queue and tell the user before execution. If the
+   split requires product/design judgment, stop and ask.
+7. If the user still provides a leading number from the old syntax, treat it as
+   a menu-size hint only when there is no inline idea text after it. Do not use
+   it as an execution limit. When there is inline idea text after a leading
+   number, ignore the number and parse the remaining text as selected input.
+8. After the selected queue is completed and committed, run the post-loop
+   review/refactor handoff; stop earlier only on a hard stop condition.
 
 ## Defaults for non-blocking choices
 
@@ -105,7 +110,7 @@ Stop immediately and report the reason if any of these occur:
    final post-loop `make ci` fails after reasonable diagnosis and focused fixes.
 5. A decision requires product/design judgment not covered by the defaults.
 6. Secrets, credentials, `.env`, or local-only artifacts appear in the diff or staged changes.
-7. Completing another slice would exceed the requested execution target.
+7. Completing another slice would go beyond the selected queue.
 8. No inline idea was provided and the user has not yet selected ideas from the generated menu.
 9. A selected idea is too vague, too large, or not verifiable enough to turn into a small slice.
 10. Batch clarification questions were emitted and the user has not answered them yet.
@@ -131,7 +136,7 @@ commands unless the user explicitly asks in a later message.
    - [`skills/execute/SKILL.md`](../execute/SKILL.md)
    - [`skills/finish/SKILL.md`](../finish/SKILL.md)
 6. If `PROGRESS.md` says an engineering review is due, record that `$review` and `$refactor`
-   should run after the requested feature loop completes. Do **not** stop the loop or replace a
+   should run after the selected feature loop completes. Do **not** stop the loop or replace a
    selected feature slice with review, refactor, or cleanup work solely because the review cadence
    is due.
 
@@ -139,7 +144,7 @@ commands unless the user explicitly asks in a later message.
 
 Before writing any spec, plan, or code:
 
-1. Determine whether the initial command includes idea text after the count.
+1. Determine whether the initial command includes concrete idea text.
    - If yes, treat that text as the selected idea input. If it clearly contains
      multiple ideas, split only on explicit separators such as numbered lines,
      semicolons, or separate paragraphs.
@@ -182,7 +187,8 @@ When selected ideas come from inline text or from a later menu reply:
    - smallest vertical proof next,
    - player-visible progress next,
    - bot/test proof clarity as a tie-breaker.
-4. Show the ordered execution queue and the execution target.
+4. Show the ordered execution queue and the execution target, which is the count
+   of viable selected ideas.
 5. Run the batch clarification gate below before beginning the per-slice loop.
 
 ## Phase 2 — Batch clarification gate
@@ -190,7 +196,7 @@ When selected ideas come from inline text or from a later menu reply:
 Before writing specs, plans, or code for selected ideas:
 
 1. Do a lightweight discovery pass for every viable selected idea:
-   - cover all ideas in the execution target,
+   - cover all ideas in the selected execution queue,
    - also cover deferred selected ideas when a question affects splitting, ordering, or future viability,
    - re-check `PROGRESS.md`, ADRs, existing specs/plans, open gaps, and bot/test proof needs.
 2. Anticipate the questions that would otherwise be raised later by `$next`, `$spec`, `$plan`,
@@ -212,7 +218,7 @@ Before writing specs, plans, or code for selected ideas:
 
 ## Per-slice loop
 
-Repeat over the clarified ordered selected queue until the execution target is complete or a
+Repeat over the clarified ordered selected queue until every selected viable idea is complete or a
 stop condition fires.
 
 ### 1. Discover
@@ -287,7 +293,7 @@ After each commit:
 
 1. Run `git status --short` and `git log -1 --oneline`.
 2. Write a concise continuation checkpoint in chat before any context clearing attempt:
-   - completed count and execution target,
+   - completed count and selected queue size,
    - current branch,
    - last commit hash and message,
    - current `git status --short`,
@@ -307,12 +313,12 @@ After each commit:
 After the checkpoint and optional context hygiene:
 
 1. If only unrelated pre-existing dirty changes remain, stop and report them.
-2. If the worktree is clean and the execution target is not reached, begin the next slice.
-3. If the worktree is clean and the execution target is reached, run the post-loop handoff below.
+2. If the worktree is clean and selected ideas remain, begin the next slice.
+3. If the worktree is clean and the selected queue is complete, run the post-loop handoff below.
 
 ### 8. Post-loop review/refactor handoff
 
-After all requested slices have completed and committed:
+After all selected slices have completed and committed:
 
 1. Re-read `PROGRESS.md`.
 2. Run `make ci` once for the completed batch before any review/refactor handoff. If it fails,
@@ -321,7 +327,7 @@ After all requested slices have completed and committed:
    small follow-up commit that clearly belongs to the autoloop batch.
 3. If the engineering-review cadence is due, run `$review` first to generate the fresh review set
    from the just-completed feature baseline. Treat the autoloop command as authorization for this
-   post-loop review only after the feature target is committed and the worktree is clean.
+   post-loop review only after the selected feature queue is committed and the worktree is clean.
 4. After `$review` writes the fresh overview and companion reports, run `$refactor` pointed at that
    new review. `$refactor` must classify every recommendation as `minor-commit`, `future-slice`,
    `future-plan`, or `reject`, and land only small verified cleanup commits.

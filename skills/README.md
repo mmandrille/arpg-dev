@@ -11,7 +11,7 @@ Canonical skill definitions for this repo. **Edit files here only** — tool-spe
 | [`finish/`](finish/SKILL.md) | `/finish` → consolidate PROGRESS, CI, `feat: vN:` commit |
 | [`review/`](review/SKILL.md) | `/review` or `$review` → write repo-wide engineering review docs |
 | [`showme/`](showme/SKILL.md) | `/showme` or `$showme` → focused Godot screenshot/live preview for visual tuning |
-| [`autoloop/`](autoloop/SKILL.md) | `$autoloop {count}` → repeat next/spec/plan/execute/finish for feature/gameplay slices only |
+| [`autoloop/`](autoloop/SKILL.md) | `$autoloop` → curate or accept feature/gameplay ideas, then run next/spec/plan/execute/finish for every viable slice the user selects |
 | [`refactor/`](refactor/SKILL.md) | `$refactor` → scorecard-driven minor cleanup commits before review generation |
 
 ## Discovery paths

@@ -7,6 +7,8 @@ const ICE_SLOW_EFFECT_ID := "ice_slow"
 const BURNING_EFFECT_ID := "everburning_wound"
 const ELITE_COMMAND_EFFECT_ID := "elite_command"
 const PINNING_ROOT_EFFECT_ID := "pinning_root"
+const STUN_EFFECT_ID := "stun"
+const STUN_SKILL_IDS := ["leap", "charge"]
 
 const HOLY_SHIELD_MARKER_NAME := "HolyShieldEffect"
 const SANCTUARY_MARKER_NAME := "SanctuaryDomeEffect"
@@ -15,6 +17,7 @@ const BURNING_MARKER_NAME := "BurningVisualEffect"
 const ELITE_COMMAND_MARKER_NAME := "EliteCommandVisualEffect"
 const ELITE_COMMAND_RADIUS_PREVIEW_NAME := "EliteCommandRadiusPreview"
 const PINNING_ROOT_MARKER_NAME := "PinningRootVisualEffect"
+const STUN_MARKER_NAME := "StunStarsVisualEffect"
 const HOLY_SHIELD_AURA_PULSE_NAME := "HolyShieldAuraPulse"
 const HOLY_SHIELD_TARGET_PULSE_NAME := "HolyShieldTargetPulse"
 const AURA_PULSE_SECONDS := 0.30
@@ -98,6 +101,15 @@ static func has_pinning_root_effect_id(effect_ids_value) -> bool:
 	return effect_ids.has(PINNING_ROOT_EFFECT_ID)
 
 
+static func is_stun_skill_id(skill_id: String) -> bool:
+	return STUN_SKILL_IDS.has(skill_id)
+
+
+static func has_stun_effect_id(effect_ids_value) -> bool:
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	return effect_ids.has(STUN_EFFECT_ID) or effect_ids.has("leap_stun") or effect_ids.has("charge_stun")
+
+
 static func sync_burning_effect(root: Node3D, active: bool) -> void:
 	if root == null:
 		return
@@ -150,6 +162,24 @@ static func sync_pinning_root_effect(root: Node3D, active: bool) -> void:
 
 static func has_pinning_root_effect(root: Node3D) -> bool:
 	return root != null and root.find_child(PINNING_ROOT_MARKER_NAME, false, false) != null
+
+
+static func sync_stun_effect(root: Node3D, active: bool) -> void:
+	if root == null:
+		return
+	var existing := root.find_child(STUN_MARKER_NAME, false, false) as Node3D
+	if not active:
+		if existing != null:
+			root.remove_child(existing)
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = make_stun_effect()
+		root.add_child(existing)
+
+
+static func has_stun_effect(root: Node3D) -> bool:
+	return root != null and root.find_child(STUN_MARKER_NAME, false, false) != null
 
 
 static func sync_elite_command_radius_preview(root: Node3D, active: bool, radius: float) -> void:
@@ -506,6 +536,45 @@ static func make_pinning_root_effect() -> Node3D:
 		stake.rotation_degrees.z = 16.0 * (1.0 if i % 2 == 0 else -1.0)
 		stake.material_override = root_mat
 		marker.add_child(stake)
+	return marker
+
+
+static func make_stun_effect() -> Node3D:
+	var marker := Node3D.new()
+	marker.name = STUN_MARKER_NAME
+	marker.position.y = 1.62
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.90, 0.22, 0.92)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.78, 0.12)
+	mat.emission_energy_multiplier = 3.2
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.no_depth_test = true
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	var orbit := Node3D.new()
+	orbit.name = "StunStarsOrbit"
+	marker.add_child(orbit)
+	for i in range(5):
+		var star := MeshInstance3D.new()
+		star.name = "StunStar%d" % i
+		var star_mesh := CylinderMesh.new()
+		star_mesh.top_radius = 0.13
+		star_mesh.bottom_radius = 0.13
+		star_mesh.height = 0.035
+		star_mesh.radial_segments = 5
+		star.mesh = star_mesh
+		var angle := float(i) * TAU / 5.0
+		star.position = Vector3(cos(angle) * 0.48, 0.07 * sin(angle * 2.0), sin(angle) * 0.48)
+		star.rotation_degrees = Vector3(90.0, 0.0, 36.0)
+		star.material_override = mat
+		orbit.add_child(star)
+
+	var tween := orbit.create_tween()
+	tween.set_loops()
+	tween.tween_property(orbit, "rotation:y", TAU, 0.95).from(0.0)
 	return marker
 
 

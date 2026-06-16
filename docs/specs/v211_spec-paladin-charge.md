@@ -22,7 +22,7 @@ Builds on v209 `mobility` skill support and v210 Leap proof. Asset/plugin decisi
 
 - `charge` is a Paladin mobility skill with data-driven range, impact radius, damage percent, stun duration, mana cost, cooldown, and presentation metadata.
 - Casting Charge moves the player to a collision-safe endpoint.
-- Monsters near the endpoint take server-authoritative damage and receive `charge_stun`.
+- Monsters near the endpoint take server-authoritative damage and receive the shared `stun` effect.
 - Paladin class-foundation bot coverage includes Charge.
 - Focused Go tests prove movement, damage, stun, and unaffected distant monsters.
 

@@ -20,6 +20,7 @@ func _initialize() -> void:
 	_test_sanctuary_started_and_ended_updates_local_dome()
 	_test_unique_burn_started_and_ended_updates_monster_cue()
 	_test_pinning_root_started_and_ended_updates_monster_cue()
+	_test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge()
 	_test_monster_death_clears_elite_aura_markers()
 	_test_potion_heal_uses_personal_effect()
 	_test_paladin_heal_uses_area_rain()
@@ -244,6 +245,42 @@ func _test_pinning_root_started_and_ended_updates_monster_cue() -> void:
 	_assert_true("monster pinning root marker removed", not bool(after.get("has_pinning_root_effect", true)))
 	_assert_true("monster pinning root effect id removed", not (after.get("effect_ids", []) as Array).has("pinning_root"))
 	_free_main(main)
+
+
+func _test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge() -> void:
+	for skill_id in ["leap", "charge"]:
+		var main = _make_main()
+		main.player_id = "1001"
+		main._upsert_entity({
+			"id": "1002",
+			"type": "monster",
+			"position": {"x": 2.0, "y": 0.0},
+			"hp": 10,
+			"max_hp": 10,
+			"monster_def_id": "training_dummy",
+		})
+		main._apply_delta({"events": [{
+			"event_type": "skill_effect_started",
+			"entity_id": "1002",
+			"source_entity_id": "1001",
+			"target_entity_id": "1002",
+			"skill_id": skill_id,
+		}], "changes": []})
+		var before: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+		_assert_true("%s stun marker active" % skill_id, bool(before.get("has_stun_effect", false)))
+		_assert_true("%s uses shared stun effect id" % skill_id, (before.get("effect_ids", []) as Array).has("stun"))
+
+		main._apply_delta({"events": [{
+			"event_type": "skill_effect_ended",
+			"entity_id": "1002",
+			"source_entity_id": "1001",
+			"target_entity_id": "1002",
+			"skill_id": skill_id,
+		}], "changes": []})
+		var after: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+		_assert_true("%s stun marker removed" % skill_id, not bool(after.get("has_stun_effect", true)))
+		_assert_true("%s shared stun effect id removed" % skill_id, not (after.get("effect_ids", []) as Array).has("stun"))
+		_free_main(main)
 
 
 func _test_monster_death_clears_elite_aura_markers() -> void:

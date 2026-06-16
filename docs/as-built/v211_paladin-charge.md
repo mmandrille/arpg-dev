@@ -5,7 +5,7 @@ Date: 2026-06-16
 ## What Shipped
 
 - Added `charge` as a Paladin mobility skill.
-- Charge moves to a server-authoritative collision-safe endpoint, damages monsters near the shield-smash endpoint, and applies `charge_stun`.
+- Charge moves to a server-authoritative collision-safe endpoint, damages monsters near the shield-smash endpoint, and applies the shared `stun` effect.
 - Added shared presentation/i18n metadata and Paladin class-foundation bot coverage.
 
 ## Proof

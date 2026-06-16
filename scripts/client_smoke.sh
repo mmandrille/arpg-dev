@@ -126,6 +126,7 @@ run_gate "GDScript directional attack input test" "[gdtest] PASS: test_direction
 # 2i. Shop panel render and intent payload test (server-independent; v41).
 run_gate "GDScript shop panel test" "[gdtest] PASS: test_shop_panel" res://tests/test_shop_panel.gd
 run_gate "GDScript blacksmith panel test" "[gdtest] PASS: test_blacksmith_panel" res://tests/test_blacksmith_panel.gd
+run_gate "GDScript set collection panel test" "[gdtest] PASS: test_set_collection_panel" res://tests/test_set_collection_panel.gd
 
 # 2j. Town service bridge routing test (server-independent; v127).
 run_gate "GDScript town service bridge test" "[gdtest] PASS: test_town_service_bridge" res://tests/test_town_service_bridge.gd

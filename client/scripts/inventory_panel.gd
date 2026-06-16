@@ -10,6 +10,7 @@ const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer_router.gd")
+const SetCollectionPanelScript := preload("res://scripts/set_collection_panel.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -81,6 +82,8 @@ var _equipment_slots: Dictionary = {}
 var _weapon_set_tabs: Array = []
 var _bag_grid: GridContainer
 var _gold_label: Label
+var _set_collection_button: Button
+var _set_collection_panel: SetCollectionPanel
 var _paper_doll_preview: Control
 var _drag_data: Dictionary = {}
 var _interactive: bool = true
@@ -329,6 +332,7 @@ func get_debug_state() -> Dictionary:
 			"name": _paper_doll_preview.name if _paper_doll_preview != null else "",
 			"visible": _paper_doll_preview.visible if _paper_doll_preview != null else false,
 		},
+		"set_collection": _set_collection_panel.get_debug_state() if _set_collection_panel != null else {},
 		"requirement_row_count": _requirement_row_count(),
 		"equip_preview_row_count": _equip_preview_row_count(),
 		"empty_slot_style": "gray_block",
@@ -480,12 +484,21 @@ func _build() -> void:
 	_bag_grid.add_theme_constant_override("h_separation", 6)
 	_bag_grid.add_theme_constant_override("v_separation", 6)
 	scroll.add_child(_bag_grid)
+	var footer := HBoxContainer.new()
+	footer.add_theme_constant_override("separation", 8)
+	right.add_child(footer)
 	_gold_label = Label.new()
 	_gold_label.text = "Gold: 0"
 	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_gold_label.add_theme_color_override("font_color", Color("#f4c84f"))
 	_gold_label.add_theme_font_size_override("font_size", 26)
-	right.add_child(_gold_label)
+	footer.add_child(_gold_label)
+	_set_collection_button = Button.new()
+	_set_collection_button.text = "Sets"
+	_set_collection_button.pressed.connect(_toggle_set_collection_panel)
+	footer.add_child(_set_collection_button)
+	_set_collection_panel = SetCollectionPanelScript.new()
+	body.add_child(_set_collection_panel)
 	_render()
 
 
@@ -512,7 +525,16 @@ func _render() -> void:
 		_bag_grid.add_child(slot)
 	if _gold_label != null:
 		_gold_label.text = "Gold: %d" % gold
+	if _set_collection_panel != null:
+		_set_collection_panel.set_items(inventory, equipped)
 	_position_gesture_hint()
+
+func _toggle_set_collection_panel() -> void:
+	if _set_collection_panel == null:
+		return
+	_set_collection_panel.visible = not _set_collection_panel.visible
+	_set_collection_panel.set_items(inventory, equipped)
+
 
 func _set_viewed_weapon_set(index: int) -> void:
 	viewed_weapon_set = clamp(index, 0, 1)

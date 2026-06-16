@@ -76,8 +76,8 @@ static func validate(step: Dictionary, stype: String, index: int) -> String:
 			return "client_steps[%d] (%s) requires text" % [index, stype]
 	if stype == "select_stash_sort":
 		var mode := str(step.get("mode", ""))
-		if not ["acquired", "name", "rarity", "slot"].has(mode):
-			return "client_steps[%d] (%s) requires mode acquired, name, rarity, or slot" % [index, stype]
+		if not ["acquired", "name", "rarity", "slot", "unique_chest_sets"].has(mode):
+			return "client_steps[%d] (%s) requires mode acquired, name, rarity, slot, or unique_chest_sets" % [index, stype]
 	if stype == "set_multiplayer_search":
 		if not step.has("text") and not step.has("text_env"):
 			return "client_steps[%d] (%s) requires text or text_env" % [index, stype]

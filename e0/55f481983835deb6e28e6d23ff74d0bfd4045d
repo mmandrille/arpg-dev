@@ -1,0 +1,48 @@
+server/internal/game/handlers.go
+  s_1f673d2f0bd3d2::t_3be6cdfa042176 47
+docs/as-built/v215_mercenary-equipment-stats.md
+  s_1f673d2f0bd3d2::t_2a0d9ed1a5723a 1-17
+shared/protocol/examples/mercenary_equip_intent.json
+  s_1f673d2f0bd3d2::t_b364816aba64b1 1-11
+docs/specs/v215_spec-mercenary-equipment-stats.md
+  s_1f673d2f0bd3d2::t_2a0d9ed1a5723a 1-38
+PROGRESS.md
+  s_1f673d2f0bd3d2::t_2a0d9ed1a5723a 26,28-29
+server/internal/inputdecode/inputdecode.go
+  s_1f673d2f0bd3d2::t_3be6cdfa042176 32,117-121,161,290-295
+server/internal/inputdecode/inputdecode_test.go
+  s_1f673d2f0bd3d2::t_1763cef1520cc8 121-133
+shared/protocol/state_delta.v8.schema.json
+  s_1f673d2f0bd3d2::t_b364816aba64b1 435,697-702
+shared/protocol/messages.v8.schema.json
+  s_1f673d2f0bd3d2::t_3be6cdfa042176 33,101-102,292-300
+server/internal/game/mercenary_equipment_test.go
+  s_1f673d2f0bd3d2::t_43d42ebd25a3b7 34
+  s_1f673d2f0bd3d2::t_1763cef1520cc8 1-33,35-70
+docs/plans/v215_2026-06-16-mercenary-equipment-stats.md
+  s_1f673d2f0bd3d2::t_2a0d9ed1a5723a 1-61
+docs/progress/slice-lifecycle.md
+  s_1f673d2f0bd3d2::t_2a0d9ed1a5723a 232
+server/internal/game/sim.go
+  s_1f673d2f0bd3d2::t_3be6cdfa042176 116,795,833-836
+server/internal/game/types.go
+  s_1f673d2f0bd3d2::t_1763cef1520cc8 427
+server/internal/game/mercenary_equipment.go
+  s_1f673d2f0bd3d2::t_2b1e14dfbd5fa0 1-100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e055f481983835deb6e28e6d23ff74d0bfd4045d",
+  "prompts": {},
+  "sessions": {
+    "s_1f673d2f0bd3d2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecea2-8022-7922-bd04-83c0b6c32e45",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

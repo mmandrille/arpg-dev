@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v242 — market board search and sort |
+| **Latest completed slice** | v243 — market item comparison |
 | **Active branch** | `main` |
-| **CI gate** | Focused v242 checks green on 2026-06-17; selected v241-v250 `$autoloop` batch `make ci` pending |
-| **Next slice** | v243 — market item comparison |
+| **CI gate** | Focused v243 checks green on 2026-06-17; selected v241-v250 `$autoloop` batch `make ci` pending |
+| **Next slice** | v244 — material wallet window |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
 | **Next engineering review** | After the selected v241-v250 `$autoloop` batch, once CI is green |
 

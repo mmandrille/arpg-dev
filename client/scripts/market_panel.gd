@@ -9,6 +9,7 @@ const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const MarketFilterControlsScript := preload("res://scripts/market_filter_controls.gd")
+const MarketItemComparisonScript := preload("res://scripts/market_item_comparison.gd")
 const MarketOfferRowsScript := preload("res://scripts/market_offer_rows.gd")
 const MarketListingRowsScript := preload("res://scripts/market_listing_rows.gd")
 const MarketRowFiltersScript := preload("res://scripts/market_row_filters.gd")
@@ -25,6 +26,7 @@ var market_entity_id: String = ""
 var account_id: String = ""
 var listings: Array = []
 var inventory_items: Array = []
+var equipped: Dictionary = {}
 var active_offers: Array = []
 var market_receipts: Array = []
 var selected_listing_id: String = ""
@@ -100,12 +102,13 @@ func _ready() -> void:
 	hide_display()
 
 
-func show_market(entity_id: String, next_listings: Array, next_stash_items: Array = [], next_account_id: String = "", status: String = "") -> void:
+func show_market(entity_id: String, next_listings: Array, next_stash_items: Array = [], next_account_id: String = "", status: String = "", next_equipped: Dictionary = {}) -> void:
 	if _panel == null:
 		_build()
 	market_entity_id = entity_id
 	listings = _dup_array(next_listings)
 	inventory_items = _dup_array(next_stash_items)
+	equipped = next_equipped.duplicate(true)
 	active_offers = []
 	market_receipts = []
 	account_id = next_account_id
@@ -507,6 +510,7 @@ func _listing_row(listing: Dictionary, mode: String) -> Control:
 		stat_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 		stat_label.add_theme_color_override("font_color", Color("#cfc3aa"))
 		box.add_child(stat_label)
+	MarketItemComparisonScript.add_row_labels(box, listing, inventory_items, equipped, DETAIL_FONT_SIZE)
 
 	if mode != "readonly":
 		var actions := HBoxContainer.new()
@@ -725,7 +729,7 @@ func _matching_inventory_item(stash_item_id: String = "", item_def_id: String = 
 
 
 func _debug_listing_rows(source: Array) -> Array:
-	return MarketListingRowsScript.debug_listing_rows(source, Callable(self, "_listing_stat_lines"))
+	return MarketItemComparisonScript.enrich_debug_listing_rows(MarketListingRowsScript.debug_listing_rows(source, Callable(self, "_listing_stat_lines")), source, inventory_items, equipped)
 
 
 func _visible_foreign_listings() -> Array:
@@ -907,7 +911,7 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		ItemRulesLoader.item_presentations,
 		_tooltip_lines(item),
 		_requirement_lines(item),
-		UniqueEffectTooltipScript.rich_lines_for_item(item),
+		MarketItemComparisonScript.entries_for_item(item, inventory_items, equipped) + UniqueEffectTooltipScript.rich_lines_for_item(item),
 		-1,
 		true,
 		MarketListingRowsScript.short_label(str(item.get("item_def_id", "")))

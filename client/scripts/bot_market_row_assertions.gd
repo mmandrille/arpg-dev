@@ -48,6 +48,10 @@ static func matching_listing_rows(step: Dictionary, state: Dictionary) -> Array:
 			continue
 		if step.has("expiration_contains") and not str(rec.get("expiration_label", "")).contains(str(step.get("expiration_contains", ""))):
 			continue
+		if step.has("comparison_at_least") and int(rec.get("comparison_count", 0)) < int(step.get("comparison_at_least", 0)):
+			continue
+		if step.has("comparison_contains") and not _comparison_lines_contain(rec, str(step.get("comparison_contains", ""))):
+			continue
 		if step.has("seller_owned") and bool(step.get("seller_owned", false)) != (str(rec.get("seller_account_id", "")) == str(panel.get("account_id", ""))):
 			continue
 		out.append(rec)
@@ -86,8 +90,18 @@ static func _filter_state_matches(step: Dictionary, state: Dictionary) -> bool:
 
 
 static func _has_listing_expectation(step: Dictionary) -> bool:
-	for key in ["equals", "at_least", "price_gold", "item_def_id", "rolled", "expiration_visible", "expiration_contains", "first_item_def_id", "listing_id", "seller_owned"]:
+	for key in ["equals", "at_least", "price_gold", "item_def_id", "rolled", "expiration_visible", "expiration_contains", "comparison_at_least", "comparison_contains", "first_item_def_id", "listing_id", "seller_owned"]:
 		if step.has(key):
+			return true
+	return false
+
+
+static func _comparison_lines_contain(row: Dictionary, needle: String) -> bool:
+	if needle == "":
+		return true
+	var lines: Array = row.get("comparison_lines", [])
+	for line in lines:
+		if str(line).findn(needle) >= 0:
 			return true
 	return false
 

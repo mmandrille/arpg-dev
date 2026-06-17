@@ -1,0 +1,27 @@
+.maintainability/extraction-coupling-baseline.tsv
+  s_93e7a5291ddc6c::t_baa014c2b03153 1
+tools/bot/state_ingest.py
+  s_93e7a5291ddc6c::t_b9e5730acb364d 5,7,10-13,16-17,19,107,197-198,246,253,262,276,285,298,311,335,346,357,368
+server/internal/game/game_test.go
+  s_93e7a5291ddc6c::t_28685b4d136215 131
+tools/bot/bot_context.py
+  s_93e7a5291ddc6c::t_b9e5730acb364d 19,31-41
+tools/bot/run.py
+  s_93e7a5291ddc6c::t_b9e5730acb364d 36,1831-1834,2205,2211,2217,2223,2229,2250,2256,2262,2268,2274,2280,2286,2292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "73773e1f65f489d9879cbc5d2db577c316dc7e15",
+  "prompts": {},
+  "sessions": {
+    "s_93e7a5291ddc6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed3d2-69d2-7ee2-8e68-16db0016a79d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

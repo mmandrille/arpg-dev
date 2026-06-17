@@ -90,4 +90,4 @@ make maintainability
 - [x] `cd server && go test ./internal/game -run 'AutoPickup|ResourceWallet' -count=1`
 - [x] `make bot-client scenario=39_blacksmith_upgrade_ui.json HEADLESS=1`
 - [x] `make maintainability`
-- [x] Batch-level `make ci` is deferred to `$autoloop` after the selected queue commits.
+- [x] Batch-level `make ci` passed after the selected v226-v232 `$autoloop` queue.

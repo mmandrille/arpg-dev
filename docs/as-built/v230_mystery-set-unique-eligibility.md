@@ -26,7 +26,7 @@ make maintainability
 
 All focused checks passed on 2026-06-16 during `$autoloop`. `make maintainability` printed a
 transient YARA sync warning from the backend, then passed the local ratchets. The enclosing
-batch-level `make ci` is deferred until the selected feature queue completes.
+batch-level `make ci` passed after the selected v226-v232 feature queue completed.
 
 Manual visual proof, if desired:
 

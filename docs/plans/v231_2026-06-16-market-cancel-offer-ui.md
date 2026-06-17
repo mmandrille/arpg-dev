@@ -86,4 +86,4 @@ Files:
 - [x] `make client-unit`
 - [x] `make bot-client scenario=48_market_cancel_listing_ui.json HEADLESS=1`
 - [x] `make maintainability`
-- [x] Batch-level `make ci` is deferred to `$autoloop` after the selected queue commits.
+- [x] Batch-level `make ci` passed after the selected v226-v232 `$autoloop` queue.

@@ -22,8 +22,8 @@ make bot-client scenario=49_mercenary_recovery_ui.json HEADLESS=1
 make maintainability
 ```
 
-All focused checks passed on 2026-06-16 during `$autoloop`. The enclosing batch-level `make ci` is
-deferred until the selected feature queue completes.
+All focused checks passed on 2026-06-16 during `$autoloop`. The enclosing batch-level `make ci`
+passed after the selected v226-v232 feature queue completed.
 
 Manual visual proof, if desired:
 

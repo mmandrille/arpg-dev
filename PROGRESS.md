@@ -25,7 +25,7 @@ Last updated: 2026-06-16
 |-------|-------|
 | **Latest completed slice** | v232 — mercenary recovery UI |
 | **Active branch** | `main` |
-| **CI gate** | Focused v232 checks green on 2026-06-16; batch `make ci` pending for `$autoloop` |
+| **CI gate** | `make ci` green after v226-v232 `$autoloop` batch on 2026-06-16 |
 | **Next slice** | TBD |
 | **Last engineering review** | v223 — [`docs/reviews/20260616_v223-overview.md`](docs/reviews/20260616_v223-overview.md) (2026-06-16) |
 | **Next engineering review** | v233 after the next feature batch, once CI is green |

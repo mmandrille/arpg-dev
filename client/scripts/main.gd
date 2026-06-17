@@ -1415,7 +1415,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 			rec["amount"] = int(e["amount"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "remaining_ticks", "total_ticks", "companion_stance"]:
+	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "combat_stats", "remaining_ticks", "total_ticks", "companion_stance"]:
 		if e.has(key):
 			rec[key] = e[key]
 	for key in ["corpse_character_id", "corpse_name", "corpse_level", "corpse_item_count"]:
@@ -2233,7 +2233,7 @@ func _sync_companion_bar() -> void:
 			"visual_model": str(rec.get("visual_model", "")),
 			"remaining_ticks": int(rec.get("remaining_ticks", 0)),
 			"total_ticks": int(rec.get("total_ticks", 0)),
-			"companion_stance": str(rec.get("companion_stance", "assist")),
+			"companion_stance": str(rec.get("companion_stance", "assist")), "combat_stats": (rec.get("combat_stats", {}) as Dictionary).duplicate(true),
 		})
 	companion_bar.set_companions(companions)
 	if mercenary_panel != null: mercenary_panel.set_companions(companions)

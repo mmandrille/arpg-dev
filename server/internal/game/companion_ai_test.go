@@ -33,8 +33,16 @@ func TestMercenaryFoundationCompanionAppearsWithOwnedStats(t *testing.T) {
 	if view.Type != companionEntity || view.OwnerID != idStr(sim.playerID) || view.MonsterDefID != "mercenary_guard" {
 		t.Fatalf("mercenary view = %+v", view)
 	}
-	if mercenary.hp != 12 || mercenary.monsterAttackDamage == nil || mercenary.monsterAttackDamage.Max != 3 {
-		t.Fatalf("mercenary stats hp=%d damage=%+v, want hp 12 damage max 3", mercenary.hp, mercenary.monsterAttackDamage)
+	def := sim.rules.Monsters["mercenary_guard"]
+	if mercenary.hp != def.MaxHP || mercenary.monsterAttackDamage == nil || *mercenary.monsterAttackDamage != *def.AttackDamage {
+		t.Fatalf("mercenary stats hp=%d damage=%+v, want hp %d damage %+v", mercenary.hp, mercenary.monsterAttackDamage, def.MaxHP, def.AttackDamage)
+	}
+	stats := view.CombatStats
+	if stats == nil || stats.DamageMin != def.AttackDamage.Min || stats.DamageMax != def.AttackDamage.Max ||
+		stats.AttackCooldownTicks != def.AttackCooldown || stats.Armor != float64(def.Armor) ||
+		stats.BlockPercent != float64(def.BlockPercent) || stats.HitChance != def.effectiveHitChance(sim.rules.Combat) ||
+		stats.CritChance != def.effectiveCritChance(sim.rules.Combat) {
+		t.Fatalf("mercenary combat stats view = %+v, want rules-backed stats for %+v", stats, def)
 	}
 }
 

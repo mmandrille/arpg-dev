@@ -118,6 +118,7 @@
         "owner_id": { "$ref": "#/$defs/decimal_id" },
         "target_id": { "$ref": "#/$defs/decimal_id" },
         "companion_stance": { "type": "string", "enum": ["assist", "defend", "passive"] },
+        "combat_stats": { "$ref": "#/$defs/companion_combat_stats" },
         "remaining_ticks": { "type": "integer", "minimum": 0 },
         "total_ticks": { "type": "integer", "minimum": 0 },
         "projectile_def_id": { "type": "string" },
@@ -844,6 +845,20 @@
         "remaining_ticks": { "type": "integer", "minimum": 0 },
         "telegraph": { "$ref": "#/$defs/boss_telegraph" },
         "hit_shape": { "$ref": "#/$defs/boss_hit_shape" }
+      }
+    },
+    "companion_combat_stats": {
+      "type": "object",
+      "required": ["damage_min", "damage_max", "attack_cooldown_ticks", "armor", "block_percent", "hit_chance", "crit_chance"],
+      "additionalProperties": false,
+      "properties": {
+        "damage_min": { "type": "integer", "minimum": 0 },
+        "damage_max": { "type": "integer", "minimum": 0 },
+        "attack_cooldown_ticks": { "type": "integer", "minimum": 0 },
+        "armor": { "type": "number" },
+        "block_percent": { "type": "number" },
+        "hit_chance": { "type": "number", "minimum": 0 },
+        "crit_chance": { "type": "number", "minimum": 0 }
       }
     },
     "boss_telegraph": {

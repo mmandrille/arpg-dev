@@ -214,6 +214,7 @@ v236_* = mystery-seller-silhouettes
 v237_* = material-wallet-details
 v238_* = blacksmith-recipe-selector
 v239_* = mercenary-stats-card
+v240_* = boss-portrait-panel
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

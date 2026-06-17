@@ -29,6 +29,9 @@ func _run() -> void:
 	_assert_eq("hp", int(state.get("hp", 0)), 18)
 	_assert_eq("max hp", int(state.get("max_hp", 0)), 24)
 	_assert_true("ratio is three quarters", absf(float(state.get("ratio", 0.0)) - 0.75) < 0.001)
+	_assert_true("portrait visible", bool(state.get("portrait_visible", false)))
+	_assert_eq("portrait kind", str(state.get("portrait_kind", "")), "cave_warden")
+	_assert_eq("portrait label", str(state.get("portrait_label", "")), "CW")
 
 	bar.show_boss("3001", "cave_warden", "Cave Warden", 30, 24)
 	state = bar.get_debug_state()
@@ -68,6 +71,7 @@ func _run() -> void:
 	bar.show_boss("3001", "cave_warden", "Cave Warden", -5, 0)
 	state = bar.get_debug_state()
 	_assert_false("dead boss hides", bool(state.get("visible", true)))
+	_assert_false("dead hides portrait", bool(state.get("portrait_visible", true)))
 	_assert_eq("dead hp clamps zero", int(state.get("hp", -1)), 0)
 	_assert_eq("invalid max hp clamps one", int(state.get("max_hp", 0)), 1)
 	_assert_eq("dead clears phase", str(state.get("phase_kind", "x")), "")
@@ -76,6 +80,7 @@ func _run() -> void:
 	state = bar.get_debug_state()
 	_assert_false("hide clears visibility", bool(state.get("visible", true)))
 	_assert_eq("hide clears boss id", str(state.get("boss_id", "x")), "")
+	_assert_eq("hide clears portrait kind", str(state.get("portrait_kind", "x")), "")
 
 	bar.queue_free()
 	print("[gdtest] PASS: test_boss_health_bar (%d passed, %d failed)" % [_pass_count, _fail_count])

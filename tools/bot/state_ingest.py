@@ -2,32 +2,21 @@ from __future__ import annotations
 
 from typing import Any
 
+from tools.bot.bot_context import StateIngestContext
 from tools.bot.bot_types import RuntimeState
+from tools.bot.runtime_queries import find_player
 
 
-def _require_helpers(helpers: dict[str, Any] | None) -> dict[str, Any]:
-    if helpers is None:
-        raise AssertionError("state ingest helpers require helper bindings")
-    return helpers
+def _require_context(ctx: StateIngestContext | None) -> StateIngestContext:
+    if ctx is None:
+        raise AssertionError("state ingest requires runtime context")
+    return ctx
 
 
-def ingest_message(m: dict[str, Any], state: RuntimeState, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    ingest_snapshot = helpers["ingest_snapshot"]
-    decay_skill_cooldowns = helpers["decay_skill_cooldowns"]
-    clear_active_level_state = helpers["clear_active_level_state"]
-    track_initial_entity_position = helpers["track_initial_entity_position"]
-    track_initial_monster_position = helpers["track_initial_monster_position"]
-    upsert_inventory = helpers["upsert_inventory"]
-    remove_inventory_item = helpers["remove_inventory_item"]
-    upsert_hotbar = helpers["upsert_hotbar"]
-    upsert_stash_item = helpers["upsert_stash_item"]
-    remove_stash_item = helpers["remove_stash_item"]
-    find_player = helpers["find_player"]
-    update_runtime_distances = helpers["update_runtime_distances"]
-    log = helpers["log"]
+def ingest_message(m: dict[str, Any], state: RuntimeState, ctx: StateIngestContext | None = None) -> None:
+    ctx = _require_context(ctx)
     if m.get("type") == "session_snapshot":
-        ingest_snapshot(m["payload"], state)
+        ingest_snapshot(m["payload"], state, ctx=ctx)
         return
     if m.get("type") == "intent_accepted":
         accepted_id = str(m.get("payload", {}).get("accepted_message_id", ""))
@@ -115,7 +104,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, helpers: dict[str, An
             entity = state.entities.get(str(ev.get("entity_id")))
             if entity is not None and entity.get("monster_def_id"):
                 state.killed_monster_def_ids.add(str(entity["monster_def_id"]))
-            log("monster killed at tick", p.get("server_tick"))
+            ctx.log("monster killed at tick", p.get("server_tick"))
         if event_type == "monster_damaged":
             entity = state.entities.get(str(ev.get("entity_id")))
             if entity is not None and entity.get("monster_def_id") and isinstance(ev.get("damage"), int):
@@ -205,12 +194,8 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, helpers: dict[str, An
     update_runtime_distances(state)
 
 
-def ingest_snapshot(payload: dict[str, Any], state: RuntimeState, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    parse_discovered_teleporters = helpers["parse_discovered_teleporters"]
-    track_initial_entity_position = helpers["track_initial_entity_position"]
-    track_initial_monster_position = helpers["track_initial_monster_position"]
-    update_runtime_distances = helpers["update_runtime_distances"]
+def ingest_snapshot(payload: dict[str, Any], state: RuntimeState, ctx: StateIngestContext | None = None) -> None:
+    _require_context(ctx)
     state.last_tick = max(state.last_tick, int(payload.get("server_tick", 0)))
     state.current_level = int(payload.get("current_level", 0))
     state.local_player_id = str(payload.get("local_player_id", state.local_player_id))
@@ -258,16 +243,14 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState, helpers: dict[
     update_runtime_distances(state)
 
 
-def parse_discovered_teleporters(payload: dict[str, Any], helpers: dict[str, Any] | None = None) -> dict[int, bool]:
-    helpers = _require_helpers(helpers)
+def parse_discovered_teleporters(payload: dict[str, Any]) -> dict[int, bool]:
     return {
         int(row["level"]): bool(row["discovered"])
         for row in payload.get("discovered_teleporters", [])
     }
 
 
-def upsert_hotbar(state: RuntimeState, slot_index: int, item_instance_id: Any, item: dict[str, Any] | None = None, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def upsert_hotbar(state: RuntimeState, slot_index: int, item_instance_id: Any, item: dict[str, Any] | None = None) -> None:
     while len(state.hotbar) <= slot_index:
         state.hotbar.append({"slot_index": len(state.hotbar), "item_instance_id": None})
     slot = {"slot_index": slot_index, "item_instance_id": item_instance_id}
@@ -276,8 +259,7 @@ def upsert_hotbar(state: RuntimeState, slot_index: int, item_instance_id: Any, i
     state.hotbar[slot_index] = slot
 
 
-def decay_skill_cooldowns(state: RuntimeState, ticks: int, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def decay_skill_cooldowns(state: RuntimeState, ticks: int) -> None:
     if ticks <= 0 or not state.skill_cooldowns:
         return
     next_rows: list[dict[str, Any]] = []
@@ -291,8 +273,7 @@ def decay_skill_cooldowns(state: RuntimeState, ticks: int, helpers: dict[str, An
     state.skill_cooldowns = next_rows
 
 
-def clear_active_level_state(state: RuntimeState, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def clear_active_level_state(state: RuntimeState) -> None:
     state.walls.clear()
     state.entities.clear()
     state.loot_ids.clear()
@@ -301,8 +282,7 @@ def clear_active_level_state(state: RuntimeState, helpers: dict[str, Any] | None
     state.initial_entity_positions.clear()
 
 
-def track_initial_entity_position(state: RuntimeState, entity: dict[str, Any], helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def track_initial_entity_position(state: RuntimeState, entity: dict[str, Any]) -> None:
     entity_id = str(entity.get("id", ""))
     if not entity_id or entity_id in state.initial_entity_positions:
         return
@@ -315,8 +295,7 @@ def track_initial_entity_position(state: RuntimeState, entity: dict[str, Any], h
     }
 
 
-def track_initial_monster_position(state: RuntimeState, entity: dict[str, Any], helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def track_initial_monster_position(state: RuntimeState, entity: dict[str, Any]) -> None:
     if entity.get("type") != "monster":
         return
     monster_def_id = str(entity.get("monster_def_id", ""))
@@ -329,9 +308,7 @@ def track_initial_monster_position(state: RuntimeState, entity: dict[str, Any], 
     }
 
 
-def update_runtime_distances(state: RuntimeState, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    find_player = helpers["find_player"]
+def update_runtime_distances(state: RuntimeState) -> None:
     player = find_player(state)
     if player is None:
         return
@@ -355,8 +332,7 @@ def update_runtime_distances(state: RuntimeState, helpers: dict[str, Any] | None
             state.min_player_monster_distance[monster_def_id] = dist
 
 
-def upsert_inventory(state: RuntimeState, item: dict[str, Any], helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def upsert_inventory(state: RuntimeState, item: dict[str, Any]) -> None:
     item_id = item["item_instance_id"]
     for i, current in enumerate(state.inventory):
         if current.get("item_instance_id") == item_id:
@@ -367,8 +343,7 @@ def upsert_inventory(state: RuntimeState, item: dict[str, Any], helpers: dict[st
     state.inventory.append(dict(item))
 
 
-def remove_inventory_item(state: RuntimeState, item_instance_id: str, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def remove_inventory_item(state: RuntimeState, item_instance_id: str) -> None:
     state.inventory = [
         item for item in state.inventory
         if str(item.get("item_instance_id")) != item_instance_id
@@ -379,8 +354,7 @@ def remove_inventory_item(state: RuntimeState, item_instance_id: str, helpers: d
         state.equipped_item_id = None
 
 
-def upsert_stash_item(state: RuntimeState, item: dict[str, Any], helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def upsert_stash_item(state: RuntimeState, item: dict[str, Any]) -> None:
     stash_item_id = str(item["stash_item_id"])
     for i, current in enumerate(state.stash_items):
         if str(current.get("stash_item_id")) == stash_item_id:
@@ -391,8 +365,7 @@ def upsert_stash_item(state: RuntimeState, item: dict[str, Any], helpers: dict[s
     state.stash_items.append(dict(item))
 
 
-def remove_stash_item(state: RuntimeState, stash_item_id: str, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
+def remove_stash_item(state: RuntimeState, stash_item_id: str) -> None:
     state.stash_items = [
         item for item in state.stash_items
         if str(item.get("stash_item_id")) != stash_item_id

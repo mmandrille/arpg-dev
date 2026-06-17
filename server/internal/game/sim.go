@@ -26,7 +26,6 @@ const (
 	monsterBehaviorChase           = "chase"
 	monsterAIModeIdle              = "idle"
 	monsterAIModeChase             = "chase"
-	monsterAIModeReturn            = "return"
 	interactableClosed             = "closed"
 	interactableOpen               = "open"
 	interactableReady              = "ready"
@@ -3243,9 +3242,6 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if !ok || def.AttackDamage == nil || def.AttackCooldown <= 0 {
 			continue
 		}
-		if monster.aiMode == monsterAIModeReturn {
-			continue
-		}
 		targetPlayer := s.eliteMinionAttackTarget(s.activeLevel(), monster)
 		if targetPlayer == nil {
 			continue
@@ -3344,10 +3340,11 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 	leashRadius := effectiveMonsterLeashRadius(def, nav)
 
 	if leashRadius > 0 && distPlayerFromSpawn > leashRadius {
-		if prevMode != monsterAIModeReturn {
+		if prevMode == monsterAIModeChase {
 			res.Events = append(res.Events, Event{EventType: "monster_leashed", EntityID: idStr(monster.id)})
 		}
-		monster.aiMode = monsterAIModeReturn
+		monster.aiMode = monsterAIModeIdle
+		monster.aiTargetPlayerID = 0
 
 		return
 	}
@@ -3369,18 +3366,6 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 		return
 	}
 
-	if distance(monster.pos, monster.spawnPos) <= nav.StopDistance {
-		monster.aiMode = monsterAIModeIdle
-
-		return
-	}
-
-	if prevMode == monsterAIModeReturn {
-		monster.aiMode = monsterAIModeReturn
-
-		return
-	}
-
 	monster.aiMode = monsterAIModeIdle
 }
 
@@ -3394,7 +3379,6 @@ func effectiveMonsterLeashRadius(def MonsterDef, nav NavigationRules) float64 {
 }
 
 func (s *Sim) monsterMovementGoal(monster *entity, player *entity, def MonsterDef) (Vec2, bool) {
-	nav := s.activeNav()
 	switch monster.aiMode {
 	case monsterAIModeChase:
 		if s.monsterInAttackRange(monster, player, def) {
@@ -3402,12 +3386,6 @@ func (s *Sim) monsterMovementGoal(monster *entity, player *entity, def MonsterDe
 		}
 
 		return s.findMonsterChaseGoal(monster, player, def)
-	case monsterAIModeReturn:
-		if distance(monster.pos, monster.spawnPos) <= nav.StopDistance {
-			return Vec2{}, false
-		}
-
-		return monster.spawnPos, true
 	default:
 		return Vec2{}, false
 	}

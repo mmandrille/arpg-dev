@@ -86,6 +86,7 @@ elite_objective_minimap_pin: headless Godot client descends to a deterministic e
 my_market_offers_panel: headless Godot client opens market board → loads My Offers → asserts an outgoing offer row for a foreign listing
 buyer_offer_cancel_ui: headless Godot client opens My Offers → cancels an outgoing offer → verifies the offer is canceled and the offered item returns to stash
 market_trade_receipts: headless Godot client cancels an outgoing market offer → opens Receipts → verifies the account-scoped `offer_canceled` receipt
+mystery_seller_silhouettes: headless Godot client opens the mystery seller → verifies concealed rows include safe slot-derived silhouette clues
 ```
 
 **Verify:**

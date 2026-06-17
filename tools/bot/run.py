@@ -2164,12 +2164,9 @@ async def wait_for_teleporter_discovery(ws, state: RuntimeState, level: int, loo
 
 def _wait_runtime_helpers() -> dict[str, Any]:
     return {
-        "assert_character_progression": assert_character_progression,
-        "assert_skill_progression": assert_skill_progression,
-        "assert_skill_cooldown": assert_skill_cooldown,
-        "assert_player_position": assert_player_position,
-        "ingest_message": ingest_message,
-        "pump_one": pump_one,
+        "assert_character_progression": assert_character_progression, "assert_skill_progression": assert_skill_progression,
+        "assert_skill_cooldown": assert_skill_cooldown, "assert_player_position": assert_player_position,
+        "ingest_message": ingest_message, "pump_one": pump_one,
     }
 
 
@@ -3321,49 +3318,49 @@ def run_verified_session(
 async def connect_coop_peer(base_url: str, token: str, sess: dict[str, Any], label: str, world_id: str) -> CoopPeer:
     from tools.bot.coop_runtime import connect_coop_peer as connect_coop_peer_impl
 
-    return await connect_coop_peer_impl(base_url, token, sess, label, world_id, helpers=globals())
+    return await connect_coop_peer_impl(base_url, token, sess, label, world_id, helpers=_coop_runtime_helpers())
 
 
 async def close_coop_peer(peer: CoopPeer) -> None:
     from tools.bot.coop_runtime import close_coop_peer as close_coop_peer_impl
 
-    await close_coop_peer_impl(peer, helpers=globals())
+    await close_coop_peer_impl(peer, helpers=_coop_runtime_helpers())
 
 
 async def pump_coop(peers: list[CoopPeer], timeout: float = 0.1) -> None:
     from tools.bot.coop_runtime import pump_coop as pump_coop_impl
 
-    await pump_coop_impl(peers, timeout, helpers=globals())
+    await pump_coop_impl(peers, timeout, helpers=_coop_runtime_helpers())
 
 
 async def wait_coop_until(peers: list[CoopPeer], label: str, predicate, timeout_s: float = SLICE_TIMEOUT_S) -> None:
     from tools.bot.coop_runtime import wait_coop_until as wait_coop_until_impl
 
-    await wait_coop_until_impl(peers, label, predicate, timeout_s, helpers=globals())
+    await wait_coop_until_impl(peers, label, predicate, timeout_s, helpers=_coop_runtime_helpers())
 
 
 async def send_coop_intent(peer: CoopPeer, msg_type: str, payload: dict[str, Any]) -> str:
     from tools.bot.coop_runtime import send_coop_intent as send_coop_intent_impl
 
-    return await send_coop_intent_impl(peer, msg_type, payload, helpers=globals())
+    return await send_coop_intent_impl(peer, msg_type, payload, helpers=_coop_runtime_helpers())
 
 
 async def wait_coop_accept(peers: list[CoopPeer], peer: CoopPeer, message_id: str) -> None:
     from tools.bot.coop_runtime import wait_coop_accept as wait_coop_accept_impl
 
-    await wait_coop_accept_impl(peers, peer, message_id, helpers=globals())
+    await wait_coop_accept_impl(peers, peer, message_id, helpers=_coop_runtime_helpers())
 
 
 def player_position(state: RuntimeState) -> dict[str, Any]:
     from tools.bot.coop_runtime import player_position as player_position_impl
 
-    return player_position_impl(state, helpers=globals())
+    return player_position_impl(state, helpers=_coop_runtime_helpers())
 
 
 def player_entity_ids(state: RuntimeState) -> set[str]:
     from tools.bot.coop_runtime import player_entity_ids as player_entity_ids_impl
 
-    return player_entity_ids_impl(state, helpers=globals())
+    return player_entity_ids_impl(state, helpers=_coop_runtime_helpers())
 
 
 def state_experience(state: RuntimeState) -> int:
@@ -3377,7 +3374,14 @@ def state_gold(state: RuntimeState) -> int:
 def assert_party_contains_roles(state: RuntimeState, where: str) -> None:
     from tools.bot.coop_runtime import assert_party_contains_roles as assert_party_contains_roles_impl
 
-    assert_party_contains_roles_impl(state, where, helpers=globals())
+    assert_party_contains_roles_impl(state, where, helpers=_coop_runtime_helpers())
+
+
+def _coop_runtime_helpers() -> dict[str, Any]:
+    return {
+        "auth": auth, "find_player": find_player, "ingest_message": ingest_message, "ingest_snapshot": ingest_snapshot,
+        "log": log, "pump_coop": pump_coop, "recv_json": recv_json, "wait_coop_until": wait_coop_until,
+    }
 
 
 def find_non_gold_loot(state: RuntimeState) -> dict[str, Any] | None:

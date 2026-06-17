@@ -5,6 +5,7 @@ const GLOOM_MULTIPLIER := 1.25
 const FALLBACK_WORLD_TO_SCREEN := 32.0
 const GLOOM_ALPHA := 0.52
 const DARKNESS_ALPHA := 1.0
+const SHADOW_EDGE_EPSILON := 0.08
 const SHADER_CODE := """
 shader_type canvas_item;
 render_mode blend_mix, unshaded;
@@ -33,6 +34,7 @@ void fragment() {
 var _camera: Camera3D
 var _target: Node3D
 var _rect: ColorRect
+var _shadow_root: Node2D
 var _material: ShaderMaterial
 var _active: bool = true
 var _light_radius: float = 0.0
@@ -40,6 +42,10 @@ var _gloom_radius: float = 0.0
 var _light_radius_px: float = 0.0
 var _gloom_radius_px: float = 0.0
 var _center_px := Vector2.ZERO
+var _wall_layout: Array = []
+var _shadow_polygons: Array = []
+var _shadow_debug: Array = []
+var _occluder_count: int = 0
 
 
 func _ready() -> void:
@@ -72,6 +78,17 @@ func set_light_radius(radius: float) -> void:
 	_update_shader()
 
 
+func set_wall_layout(walls: Array) -> void:
+	_wall_layout = []
+	for wall in walls:
+		if typeof(wall) != TYPE_DICTIONARY:
+			continue
+		var normalized := _normalized_wall(wall as Dictionary)
+		if not normalized.is_empty():
+			_wall_layout.append(normalized)
+	_update_shader()
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"enabled": visible,
@@ -82,6 +99,10 @@ func get_debug_state() -> Dictionary:
 		"gloom_radius_px": _gloom_radius_px,
 		"gloom_alpha": GLOOM_ALPHA,
 		"darkness_alpha": DARKNESS_ALPHA,
+		"wall_count": _wall_layout.size(),
+		"occluder_count": _occluder_count,
+		"shadow_count": _shadow_debug.size(),
+		"shadow_polygons": _shadow_debug.duplicate(true),
 		"center": {"x": _center_px.x, "y": _center_px.y},
 	}
 
@@ -104,6 +125,9 @@ func _ensure_rect() -> void:
 	_material.set_shader_parameter("darkness_color", Color(0.0, 0.0, 0.0, DARKNESS_ALPHA))
 	_rect.material = _material
 	add_child(_rect)
+	_shadow_root = Node2D.new()
+	_shadow_root.name = "FogLOSShadows"
+	add_child(_shadow_root)
 
 
 func _sync_visibility() -> void:
@@ -121,6 +145,7 @@ func _update_shader() -> void:
 	_material.set_shader_parameter("center_px", _center_px)
 	_material.set_shader_parameter("light_radius_px", _light_radius_px)
 	_material.set_shader_parameter("gloom_radius_px", _gloom_radius_px)
+	_update_shadows(viewport_size)
 
 
 func _project_target() -> Vector2:
@@ -137,3 +162,168 @@ func _projected_radius(world_radius: float) -> float:
 		var edge := _camera.unproject_position(_target.global_position + Vector3(world_radius, 0.0, 0.0))
 		return maxf(1.0, center.distance_to(edge))
 	return world_radius * FALLBACK_WORLD_TO_SCREEN
+
+
+func _update_shadows(viewport_size: Vector2) -> void:
+	_shadow_debug = []
+	_occluder_count = 0
+	if _shadow_root == null:
+		return
+	if not visible or _gloom_radius <= 0.0 or _wall_layout.is_empty():
+		_hide_shadow_polygons()
+		return
+	var hero_world := _target_world_position()
+	var polygons: Array = []
+	for wall in _wall_layout:
+		var poly := _shadow_polygon_for_wall(wall as Dictionary, hero_world, viewport_size)
+		if poly.size() < 4:
+			continue
+		_occluder_count += 1
+		polygons.append(poly)
+		_shadow_debug.append(_debug_shadow(poly))
+	_sync_shadow_polygons(polygons)
+
+
+func _sync_shadow_polygons(polygons: Array) -> void:
+	while _shadow_polygons.size() < polygons.size():
+		var node := Polygon2D.new()
+		node.color = Color(0.0, 0.0, 0.0, DARKNESS_ALPHA)
+		_shadow_root.add_child(node)
+		_shadow_polygons.append(node)
+	for i in range(_shadow_polygons.size()):
+		var node := _shadow_polygons[i] as Polygon2D
+		if i < polygons.size():
+			node.visible = true
+			node.polygon = PackedVector2Array(polygons[i])
+		else:
+			node.visible = false
+			node.polygon = PackedVector2Array()
+
+
+func _hide_shadow_polygons() -> void:
+	for node in _shadow_polygons:
+		var polygon := node as Polygon2D
+		polygon.visible = false
+		polygon.polygon = PackedVector2Array()
+
+
+func _shadow_polygon_for_wall(wall: Dictionary, hero_world: Vector2, viewport_size: Vector2) -> Array:
+	var center := Vector2(float(wall.get("x", 0.0)), float(wall.get("y", 0.0)))
+	var size := Vector2(float(wall.get("w", 0.0)), float(wall.get("h", 0.0)))
+	if size.x <= 0.0 or size.y <= 0.0:
+		return []
+	var wall_reach := size.length() * 0.5
+	if hero_world.distance_to(center) > _gloom_radius + wall_reach:
+		return []
+	if _point_inside_wall(hero_world, center, size):
+		return []
+	var tangent := _tangent_corners(hero_world, _wall_corners(center, size))
+	if tangent.size() < 2:
+		return []
+	var corner_a: Vector2 = tangent[0]
+	var corner_b: Vector2 = tangent[1]
+	var dir_a := (corner_a - hero_world).normalized()
+	var dir_b := (corner_b - hero_world).normalized()
+	if dir_a.length() <= 0.0 or dir_b.length() <= 0.0:
+		return []
+	var edge_offset := maxf(SHADOW_EDGE_EPSILON, minf(size.x, size.y))
+	var extend := maxf(_gloom_radius * 4.0, hero_world.distance_to(center) + viewport_size.length() / FALLBACK_WORLD_TO_SCREEN + wall_reach)
+	var start_a := corner_a + dir_a * edge_offset
+	var start_b := corner_b + dir_b * edge_offset
+	var end_a := hero_world + dir_a * extend
+	var end_b := hero_world + dir_b * extend
+	return [
+		_project_world_point(start_a),
+		_project_world_point(end_a),
+		_project_world_point(end_b),
+		_project_world_point(start_b),
+	]
+
+
+func _tangent_corners(hero_world: Vector2, corners: Array) -> Array:
+	var entries: Array = []
+	for corner in corners:
+		var point := corner as Vector2
+		entries.append({"angle": atan2(point.y - hero_world.y, point.x - hero_world.x), "corner": point})
+	entries.sort_custom(func(a, b): return float(a.get("angle", 0.0)) < float(b.get("angle", 0.0)))
+	var max_gap := -1.0
+	var gap_index := 0
+	for i in range(entries.size()):
+		var next_i := (i + 1) % entries.size()
+		var a := float(entries[i].get("angle", 0.0))
+		var b := float(entries[next_i].get("angle", 0.0))
+		var gap := b - a
+		if next_i == 0:
+			gap += TAU
+		if gap > max_gap:
+			max_gap = gap
+			gap_index = i
+	var first: Vector2 = entries[(gap_index + 1) % entries.size()].get("corner", Vector2.ZERO)
+	var second: Vector2 = entries[gap_index].get("corner", Vector2.ZERO)
+	if first.distance_to(second) <= 0.001:
+		return []
+	return [first, second]
+
+
+func _wall_corners(center: Vector2, size: Vector2) -> Array:
+	var half := size * 0.5
+	return [
+		Vector2(center.x - half.x, center.y - half.y),
+		Vector2(center.x + half.x, center.y - half.y),
+		Vector2(center.x + half.x, center.y + half.y),
+		Vector2(center.x - half.x, center.y + half.y),
+	]
+
+
+func _point_inside_wall(point: Vector2, center: Vector2, size: Vector2) -> bool:
+	var half := size * 0.5
+	return point.x >= center.x - half.x and point.x <= center.x + half.x and point.y >= center.y - half.y and point.y <= center.y + half.y
+
+
+func _project_world_point(world_point: Vector2) -> Vector2:
+	if _camera != null:
+		return _camera.unproject_position(Vector3(world_point.x, 0.0, world_point.y))
+	return _center_px + (world_point - _target_world_position()) * FALLBACK_WORLD_TO_SCREEN
+
+
+func _target_world_position() -> Vector2:
+	if _target != null:
+		return Vector2(_target.global_position.x, _target.global_position.z)
+	return Vector2.ZERO
+
+
+func _normalized_wall(wall: Dictionary) -> Dictionary:
+	var pos: Dictionary = wall.get("position", {})
+	var size: Dictionary = wall.get("size", {})
+	var w := float(size.get("x", 0.0))
+	var h := float(size.get("y", 0.0))
+	if w <= 0.0 or h <= 0.0:
+		return {}
+	return {
+		"x": float(pos.get("x", 0.0)),
+		"y": float(pos.get("y", 0.0)),
+		"w": w,
+		"h": h,
+	}
+
+
+func _debug_shadow(points: Array) -> Dictionary:
+	var min_p := points[0] as Vector2
+	var max_p := points[0] as Vector2
+	var serialized: Array = []
+	for point in points:
+		var p := point as Vector2
+		min_p.x = minf(min_p.x, p.x)
+		min_p.y = minf(min_p.y, p.y)
+		max_p.x = maxf(max_p.x, p.x)
+		max_p.y = maxf(max_p.y, p.y)
+		serialized.append({"x": p.x, "y": p.y})
+	return {
+		"points": serialized,
+		"bounds": {
+			"min_x": min_p.x,
+			"min_y": min_p.y,
+			"max_x": max_p.x,
+			"max_y": max_p.y,
+		},
+	}

@@ -93,6 +93,7 @@ blacksmith_recipe_selector: headless Godot client stages a blacksmith item → v
 mercenary_stats_card: headless Godot client hires a mercenary → verifies the companion panel stats card shows HP, stance, state, and id
 boss_portrait_panel: headless Godot client starts on the compact boss floor → verifies the Cave Warden boss portrait tile
 fog_of_war_overlay: headless Godot client enters the compact fog lab → verifies the fog overlay uses server-derived light and gloom radii
+fog_los_shadow_mask: headless Godot client enters collision_lab → verifies wall layouts produce fog LOS shadow masks
 ```
 
 **Verify:**

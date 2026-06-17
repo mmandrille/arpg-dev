@@ -73,6 +73,24 @@ static func debug_receipt_rows(receipts: Array) -> Array:
 			var rec := receipt as Dictionary
 			out.append({"action": str(rec.get("action", "")), "listing_id": str(rec.get("listing_id", "")), "offer_id": str(rec.get("offer_id", "")), "item_def_id": str(rec.get("item_def_id", "")), "stash_item_id": str(rec.get("stash_item_id", ""))})
 	return out
+static func debug_offer_rows(panel: MarketPanel, offers: Array) -> Array:
+	var rows: Array = []
+	for offer in offers:
+		if typeof(offer) != TYPE_DICTIONARY:
+			continue
+		var rec := offer as Dictionary
+		rows.append({
+			"offer_id": str(rec.get("offer_id", "")),
+			"listing_id": str(rec.get("listing_id", "")),
+			"bidder_account_id": str(rec.get("bidder_account_id", "")),
+			"status": str(rec.get("status", "")),
+			"listing_item_def_id": str(panel._offer_listing(rec).get("item_def_id", "")),
+			"listing_price_gold": int(panel._offer_listing(rec).get("price_gold", 0)),
+			"item_count": panel._offer_items(rec).size(),
+			"item_def_ids": panel._offer_item_def_ids(rec),
+			"item_slots": panel._debug_offer_item_slots(rec),
+		})
+	return rows
 static func _add_offer_text(panel: MarketPanel, info: VBoxContainer, offer: Dictionary, outgoing: bool) -> void:
 	var title := Label.new()
 	title.text = "%d item offer" % panel._offer_items(offer).size()

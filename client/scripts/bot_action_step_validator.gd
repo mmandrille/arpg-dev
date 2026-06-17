@@ -16,7 +16,8 @@ const STEP_TYPES_ACTION := [
 	"set_multiplayer_search", "select_multiplayer_sort",
 	"click_blacksmith_upgrade", "click_blacksmith_stage_item",
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
-	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer", "click_waypoint_level",
+	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
+	"set_market_search", "select_market_sort", "click_waypoint_level",
 ]
 
 
@@ -88,6 +89,13 @@ static func validate(step: Dictionary, stype: String, index: int) -> String:
 	if stype == "set_market_publish_price":
 		if int(step.get("price_gold", 0)) <= 0:
 			return "client_steps[%d] (%s) requires positive price_gold" % [index, stype]
+	if stype == "set_market_search":
+		if not step.has("text"):
+			return "client_steps[%d] (%s) requires text" % [index, stype]
+	if stype == "select_market_sort":
+		var mode := str(step.get("mode", ""))
+		if not ["default", "name", "price_low", "price_high", "status"].has(mode):
+			return "client_steps[%d] (%s) requires mode default, name, price_low, price_high, or status" % [index, stype]
 	if stype == "click_market_publish_item":
 		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("rolled"):
 			return "client_steps[%d] (%s) requires stash_item_id, item_def_id, or rolled" % [index, stype]

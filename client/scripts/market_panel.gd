@@ -8,8 +8,10 @@ signal staged_offer_items_changed(item_instance_ids: Array)
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const MarketFilterControlsScript := preload("res://scripts/market_filter_controls.gd")
 const MarketOfferRowsScript := preload("res://scripts/market_offer_rows.gd")
 const MarketListingRowsScript := preload("res://scripts/market_listing_rows.gd")
+const MarketRowFiltersScript := preload("res://scripts/market_row_filters.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const PANEL_SIZE := Vector2(640, 520)
@@ -36,6 +38,7 @@ var _tabs: TabContainer
 var _browse_rows: VBoxContainer
 var _publish_rows: VBoxContainer
 var _offer_rows: VBoxContainer
+var _filter_controls: HBoxContainer
 var _publish_price_spin: SpinBox
 var _publish_button: Button
 
@@ -170,6 +173,16 @@ func bot_set_publish_price(price_gold: int) -> void:
 	_publish_price_spin.value = max(1, price_gold)
 
 
+func bot_set_market_search(text: String) -> void:
+	if _filter_controls != null:
+		_filter_controls.bot_set_search(text)
+
+
+func bot_select_market_sort(mode: String) -> void:
+	if _filter_controls != null:
+		_filter_controls.bot_select_sort(mode)
+
+
 func bot_click_publish_stash_item(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:
 	var item := _matching_inventory_item(stash_item_id, item_def_id, rolled, stash_index)
 	if item.is_empty():
@@ -237,13 +250,20 @@ func show_receipts(receipts: Array, status: String = "") -> void:
 	MarketOfferRowsScript.show_receipts(self, receipts, status)
 
 func get_debug_state() -> Dictionary:
-	return {
+	var browse_listings := _visible_foreign_listings()
+	var owned := _visible_owned_listings()
+	var offers := _visible_market_offers()
+	var receipts := _visible_market_receipts()
+	var filter_state := _market_filter_debug_state()
+	var state := {
 		"visible": visible,
 		"market_entity_id": market_entity_id,
 		"account_id": account_id,
 		"listing_count": listings.size(),
-		"listing_rows": _debug_listing_rows(_foreign_listings()),
-		"owned_listing_rows": _debug_listing_rows(_owned_listings()),
+		"listing_rows": _debug_listing_rows(browse_listings),
+		"owned_listing_rows": _debug_listing_rows(owned),
+		"filtered_listing_count": browse_listings.size(),
+		"filtered_owned_listing_count": owned.size(),
 		"stash_item_count": inventory_items.size(),
 		"stash_rows": _debug_inventory_rows(),
 		"inventory_item_count": inventory_items.size(),
@@ -254,8 +274,10 @@ func get_debug_state() -> Dictionary:
 		"staged_offer_slots": _debug_staged_offer_slots(),
 		"offer_count": active_offers.size(),
 		"offer_view_mode": offer_view_mode,
-		"offer_rows": _debug_offer_rows(),
-		"receipt_rows": _debug_receipt_rows(),
+		"offer_rows": MarketOfferRowsScript.debug_offer_rows(self, offers),
+		"receipt_rows": MarketOfferRowsScript.debug_receipt_rows(receipts),
+		"filtered_offer_count": offers.size(),
+		"filtered_receipt_count": receipts.size(),
 		"publish_price_gold": _publish_price(),
 		"publish_price_width": int(_publish_price_spin.custom_minimum_size.x) if _publish_price_spin != null else 0,
 		"publish_button_width": int(_publish_button.custom_minimum_size.x) if _publish_button != null else 0,
@@ -269,6 +291,8 @@ func get_debug_state() -> Dictionary:
 		"tab": _tabs.current_tab if _tabs != null else -1,
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
+	state.merge(filter_state, true)
+	return state
 
 
 func stage_inventory_item(context: String, item: Dictionary, slot_index: int = -1) -> void:
@@ -323,6 +347,10 @@ func _build() -> void:
 	_status_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	_status_label.add_theme_color_override("font_color", Color("#9fd7ff"))
 	root.add_child(_status_label)
+
+	_filter_controls = MarketFilterControlsScript.new()
+	_filter_controls.filter_changed.connect(_rebuild_all)
+	root.add_child(_filter_controls)
 
 	_tabs = TabContainer.new()
 	_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -383,7 +411,7 @@ func _rebuild_browse_rows() -> void:
 	_clear_rows(_browse_rows)
 	_browse_rows.add_child(MarketOfferRowsScript.my_offers_button(self))
 	_browse_rows.add_child(MarketOfferRowsScript.receipts_button(self))
-	var browse_listings := _foreign_listings()
+	var browse_listings := _visible_foreign_listings()
 	if browse_listings.is_empty():
 		_browse_rows.add_child(_empty_label("No active listings"))
 		return
@@ -392,7 +420,7 @@ func _rebuild_browse_rows() -> void:
 
 func _rebuild_publish_rows() -> void:
 	_clear_rows(_publish_rows)
-	var owned := _owned_listings()
+	var owned := _visible_owned_listings()
 	for listing in owned:
 		_publish_rows.add_child(_listing_row(listing as Dictionary, "publish"))
 	_publish_rows.add_child(_stage_slot("publish", staged_publish_item, 0))
@@ -402,13 +430,14 @@ func _rebuild_publish_rows() -> void:
 func _rebuild_offer_rows() -> void:
 	_clear_rows(_offer_rows)
 	if offer_view_mode == "receipts":
-		MarketOfferRowsScript.rebuild_receipts(self, _offer_rows, market_receipts)
+		MarketOfferRowsScript.rebuild_receipts(self, _offer_rows, _visible_market_receipts())
 		return
 	if offer_view_mode == "outgoing":
-		if active_offers.is_empty():
+		var outgoing := _visible_market_offers()
+		if outgoing.is_empty():
 			_offer_rows.add_child(_empty_label("No outgoing offers"))
 			return
-		for offer in active_offers:
+		for offer in outgoing:
 			if typeof(offer) == TYPE_DICTIONARY:
 				_offer_rows.add_child(MarketOfferRowsScript.offer_row(self, offer as Dictionary, true))
 		return
@@ -418,10 +447,11 @@ func _rebuild_offer_rows() -> void:
 		return
 	_offer_rows.add_child(_listing_row(selected, "readonly"))
 	if str(selected.get("seller_account_id", "")) == account_id:
-		if active_offers.is_empty():
+		var incoming := _visible_market_offers()
+		if incoming.is_empty():
 			_offer_rows.add_child(_empty_label("No active offers"))
 			return
-		for offer in active_offers:
+		for offer in incoming:
 			if typeof(offer) == TYPE_DICTIONARY:
 				_offer_rows.add_child(MarketOfferRowsScript.offer_row(self, offer as Dictionary))
 		return
@@ -634,39 +664,12 @@ func _foreign_listings() -> Array:
 
 
 func _matching_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0, seller_owned: bool = false) -> Dictionary:
-	var matches: Array = []
-	for listing in listings:
-		if typeof(listing) != TYPE_DICTIONARY:
-			continue
-		var rec := listing as Dictionary
-		if seller_owned != (str(rec.get("seller_account_id", "")) == account_id):
-			continue
-		if listing_id != "" and str(rec.get("listing_id", "")) != listing_id:
-			continue
-		if item_def_id != "" and str(rec.get("item_def_id", "")) != item_def_id:
-			continue
-		if price_gold >= 0 and int(rec.get("price_gold", 0)) != price_gold:
-			continue
-		matches.append(rec)
-	if matches.is_empty():
-		return {}
-	var index = clampi(listing_index, 0, matches.size() - 1)
-	return (matches[index] as Dictionary).duplicate(true)
+	var source := _visible_owned_listings() if seller_owned else _visible_foreign_listings()
+	return MarketRowFiltersScript.matching_listing(source, listing_id, item_def_id, price_gold, listing_index)
 
 
 func _matching_offer(offer_id: String = "", offer_index: int = 0) -> Dictionary:
-	var matches: Array = []
-	for offer in active_offers:
-		if typeof(offer) != TYPE_DICTIONARY:
-			continue
-		var rec := offer as Dictionary
-		if offer_id != "" and str(rec.get("offer_id", "")) != offer_id:
-			continue
-		matches.append(rec)
-	if matches.is_empty():
-		return {}
-	var index = clampi(offer_index, 0, matches.size() - 1)
-	return (matches[index] as Dictionary).duplicate(true)
+	return MarketRowFiltersScript.matching_offer(_visible_market_offers(), offer_id, offer_index)
 
 
 func _publish_controls_row() -> Control:
@@ -725,6 +728,39 @@ func _debug_listing_rows(source: Array) -> Array:
 	return MarketListingRowsScript.debug_listing_rows(source, Callable(self, "_listing_stat_lines"))
 
 
+func _visible_foreign_listings() -> Array:
+	return MarketRowFiltersScript.filter_sort_listings(_foreign_listings(), _market_filter_query(), _market_sort_mode())
+
+
+func _visible_owned_listings() -> Array:
+	return MarketRowFiltersScript.filter_sort_listings(_owned_listings(), _market_filter_query(), _market_sort_mode())
+
+
+func _visible_market_offers() -> Array:
+	return MarketRowFiltersScript.filter_sort_offers(active_offers, _market_filter_query(), _market_sort_mode())
+
+
+func _visible_market_receipts() -> Array:
+	return MarketRowFiltersScript.filter_sort_receipts(market_receipts, _market_filter_query(), _market_sort_mode())
+
+
+func _market_filter_query() -> String:
+	return _filter_controls.query() if _filter_controls != null else ""
+
+
+func _market_sort_mode() -> String:
+	return _filter_controls.sort_mode() if _filter_controls != null else MarketFilterControlsScript.SORT_DEFAULT
+
+
+func _market_filter_debug_state() -> Dictionary:
+	return _filter_controls.debug_state() if _filter_controls != null else {
+		"market_filter_visible": false,
+		"market_search_text": "",
+		"market_sort_mode": MarketFilterControlsScript.SORT_DEFAULT,
+		"market_sort_options": MarketFilterControlsScript.SORT_MODES.duplicate(),
+	}
+
+
 func _apply_offer_tab_visibility() -> void:
 	if _tabs == null:
 		return
@@ -779,28 +815,6 @@ func _debug_staged_offer_slots() -> Array:
 		})
 	return slots
 
-
-func _debug_offer_rows() -> Array:
-	var rows: Array = []
-	for offer in active_offers:
-		if typeof(offer) != TYPE_DICTIONARY:
-			continue
-		var rec := offer as Dictionary
-		rows.append({
-			"offer_id": str(rec.get("offer_id", "")),
-			"listing_id": str(rec.get("listing_id", "")),
-			"bidder_account_id": str(rec.get("bidder_account_id", "")),
-			"status": str(rec.get("status", "")),
-			"listing_item_def_id": str(_offer_listing(rec).get("item_def_id", "")),
-			"listing_price_gold": int(_offer_listing(rec).get("price_gold", 0)),
-			"item_count": _offer_items(rec).size(),
-			"item_def_ids": _offer_item_def_ids(rec),
-			"item_slots": _debug_offer_item_slots(rec),
-		})
-	return rows
-
-func _debug_receipt_rows() -> Array:
-	return MarketOfferRowsScript.debug_receipt_rows(market_receipts)
 
 func _rows_centered(rows: VBoxContainer) -> bool:
 	if rows == null:
@@ -877,6 +891,10 @@ func _empty_label(text: String) -> Label:
 
 func _item_title(item: Dictionary) -> String:
 	return MarketListingRowsScript.item_title(item)
+
+
+func _listing_title(listing: Dictionary) -> String:
+	return MarketListingRowsScript.listing_title(listing)
 
 
 func _item_detail(item: Dictionary) -> String:

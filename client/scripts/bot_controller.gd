@@ -16,6 +16,7 @@
 class_name BotController
 extends Node
 
+const BotMarketActionsScript := preload("res://scripts/bot_market_actions.gd")
 const BotScenarioRunnerScript := preload("res://scripts/bot_scenario_runner.gd")
 
 var _runner: BotScenarioRunner
@@ -186,18 +187,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_set_multiplayer_search(action)
 		"select_multiplayer_sort":
 			_do_select_multiplayer_sort(action)
-		"set_market_publish_price":
-			_do_set_market_publish_price(action)
-		"click_market_publish_item":
-			_do_click_market_publish_item(action)
-		"click_market_purchase_listing":
-			_do_click_market_purchase_listing(action)
-		"click_market_view_offers":
-			_do_click_market_view_offers(action)
-		"click_market_cancel_listing":
-			_do_click_market_cancel_listing(action)
-		"click_market_accept_offer", "click_market_cancel_offer":
-			_do_click_market_offer_action(action)
+		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", \
+		"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", \
+		"click_market_cancel_offer", "set_market_search", "select_market_sort":
+			BotMarketActionsScript.dispatch(_main, action)
 
 
 func _do_press_key(keycode_str: String) -> void:
@@ -389,49 +382,6 @@ func _do_select_multiplayer_sort(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_select_multiplayer_sort"):
 		_main.bot_select_multiplayer_sort(str(action.get("mode", "recent")))
 
-
-func _do_set_market_publish_price(action: Dictionary) -> void:
-	if _main != null and _main.has_method("bot_set_market_publish_price"):
-		_main.bot_set_market_publish_price(int(action.get("price_gold", 1)))
-
-
-func _do_click_market_publish_item(action: Dictionary) -> void:
-	if _main != null and _main.has_method("bot_click_market_publish_item"):
-		_main.bot_click_market_publish_item(
-			str(action.get("stash_item_id", "")),
-			str(action.get("item_def_id", "")),
-			action.get("rolled", null),
-			int(action.get("stash_index", 0))
-		)
-
-
-func _do_click_market_purchase_listing(action: Dictionary) -> void:
-	if _main != null and _main.has_method("bot_click_market_purchase_listing"):
-		_main.bot_click_market_purchase_listing(
-			str(action.get("listing_id", "")),
-			str(action.get("item_def_id", "")),
-			int(action.get("price_gold", -1)),
-			int(action.get("listing_index", 0))
-		)
-
-
-func _do_click_market_view_offers(action: Dictionary) -> void:
-	if _main != null and _main.has_method("bot_click_market_view_offers"):
-		_main.bot_click_market_view_offers(
-			str(action.get("listing_id", "")),
-			str(action.get("item_def_id", "")),
-			int(action.get("price_gold", -1)),
-			int(action.get("listing_index", 0))
-		)
-
-
-func _do_click_market_cancel_listing(action: Dictionary) -> void:
-	if _main != null and _main.has_method("bot_click_market_cancel_listing"):
-		_main.bot_click_market_cancel_listing(str(action.get("listing_id", "")), str(action.get("item_def_id", "")), int(action.get("price_gold", -1)), int(action.get("listing_index", 0)))
-
-func _do_click_market_offer_action(action: Dictionary) -> void:
-	if _main != null and _main.has_method("bot_click_market_offer_action"):
-		_main.bot_click_market_offer_action("cancel_offer" if str(action.get("type", "")) == "click_market_cancel_offer" else "accept_offer", str(action.get("offer_id", "")), int(action.get("offer_index", 0)))
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
 # through the same client.send() as _try_action_at_mouse(). Ray-pick via
@@ -750,33 +700,10 @@ func _format_action(action: Dictionary) -> String:
 			return "set_stash_search text=%s" % str(action.get("text", ""))
 		"select_stash_sort":
 			return "select_stash_sort mode=%s" % str(action.get("mode", "acquired"))
-		"set_market_publish_price":
-			return "set_market_publish_price price=%s" % str(action.get("price_gold", 1))
-		"click_market_publish_item":
-			return "click_market_publish_item stash_item=%s item=%s rolled=%s stash_index=%s" % [
-				str(action.get("stash_item_id", "")),
-				str(action.get("item_def_id", "")),
-				str(action.get("rolled", "")),
-				str(action.get("stash_index", 0)),
-			]
-		"click_market_purchase_listing":
-			return "click_market_purchase_listing listing=%s item=%s price=%s index=%s" % [
-				str(action.get("listing_id", "")),
-				str(action.get("item_def_id", "")),
-				str(action.get("price_gold", "")),
-				str(action.get("listing_index", 0)),
-			]
-		"click_market_view_offers":
-			return "click_market_view_offers listing=%s item=%s price=%s index=%s" % [
-				str(action.get("listing_id", "")),
-				str(action.get("item_def_id", "")),
-				str(action.get("price_gold", "")),
-				str(action.get("listing_index", 0)),
-			]
-		"click_market_cancel_listing":
-			return "click_market_cancel_listing listing=%s item=%s price=%s index=%s" % [str(action.get("listing_id", "")), str(action.get("item_def_id", "")), str(action.get("price_gold", "")), str(action.get("listing_index", 0))]
-		"click_market_accept_offer", "click_market_cancel_offer":
-			return "%s offer=%s index=%s" % [str(action.get("type", "")), str(action.get("offer_id", "")), str(action.get("offer_index", 0))]
+		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", \
+		"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", \
+		"click_market_cancel_offer", "set_market_search", "select_market_sort":
+			return BotMarketActionsScript.summary(action)
 		"assign_hotbar_slot":
 			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
 				str(action.get("slot_index", "")),

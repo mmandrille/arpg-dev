@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v241 — market expiration countdown |
+| **Latest completed slice** | v242 — market board search and sort |
 | **Active branch** | `main` |
-| **CI gate** | Focused v241 checks green on 2026-06-17; selected v241-v250 `$autoloop` batch `make ci` pending |
-| **Next slice** | v242 — market board search and sort |
+| **CI gate** | Focused v242 checks green on 2026-06-17; selected v241-v250 `$autoloop` batch `make ci` pending |
+| **Next slice** | v243 — market item comparison |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
 | **Next engineering review** | After the selected v241-v250 `$autoloop` batch, once CI is green |
 

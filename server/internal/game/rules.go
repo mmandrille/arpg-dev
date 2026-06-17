@@ -933,7 +933,7 @@ func shopRarityAllowedByCap(rarity, maxRarity string) bool {
 }
 
 func shopRarityRank(rarity string) (int, bool) {
-	rank := map[string]int{"common": 0, "magic": 1, "rare": 2}
+	rank := map[string]int{"common": 0, "magic": 1, "rare": 2, "unique": 3, "set": 3}
 	out, ok := rank[rarity]
 	return out, ok
 }
@@ -2556,6 +2556,9 @@ func validateShopRules(r *Rules) error {
 		if pricing.RarityMultipliers["unique"] <= 0 {
 			return fmt.Errorf("game: invalid rules shops.%s.pricing.rarity_multipliers.unique: must be positive", shopID)
 		}
+		if pricing.RarityMultipliers["set"] <= 0 {
+			return fmt.Errorf("game: invalid rules shops.%s.pricing.rarity_multipliers.set: must be positive", shopID)
+		}
 		for templateID, template := range r.ItemTemplates {
 			if pricing.SlotBase[template.Slot] <= 0 {
 				return fmt.Errorf("game: invalid rules shops.%s.pricing.slot_base.%s: required by template %s", shopID, template.Slot, templateID)
@@ -2592,7 +2595,7 @@ func validateMysteryShopRules(r *Rules, shopID string, shop ShopDef) error {
 	}
 	maxRank, ok := shopRarityRank(mystery.MaxRarity)
 	if !ok || maxRank < 1 {
-		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.max_rarity: must be magic or rare", shopID)
+		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers.max_rarity: must be magic, rare, unique, or set", shopID)
 	}
 	if minRank > maxRank {
 		return fmt.Errorf("game: invalid rules shops.%s.mystery_offers: min_rarity must not exceed max_rarity", shopID)

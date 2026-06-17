@@ -71,7 +71,7 @@
         "source": { "type": "string", "enum": ["common_dungeon_mob"] },
         "source_depth_window": { "type": "integer", "minimum": 1, "maximum": 20 },
         "min_rarity": { "type": "string", "enum": ["magic", "rare"] },
-        "max_rarity": { "type": "string", "enum": ["magic", "rare"] },
+        "max_rarity": { "type": "string", "enum": ["magic", "rare", "unique", "set"] },
         "refresh_on": { "type": "string", "enum": ["new_non_town_waypoint"] },
         "price_multiplier": { "type": "number", "exclusiveMinimum": 1 },
         "reroll_cost": { "type": "integer", "minimum": 1 },
@@ -98,13 +98,14 @@
         "round_buy_to": { "type": "integer", "minimum": 1 },
         "rarity_multipliers": {
           "type": "object",
-          "required": ["common", "magic", "rare", "unique"],
+          "required": ["common", "magic", "rare", "unique", "set"],
           "additionalProperties": { "type": "number", "exclusiveMinimum": 0 },
           "properties": {
             "common": { "type": "number", "exclusiveMinimum": 0 },
             "magic": { "type": "number", "exclusiveMinimum": 0 },
             "rare": { "type": "number", "exclusiveMinimum": 0 },
-            "unique": { "type": "number", "exclusiveMinimum": 0 }
+            "unique": { "type": "number", "exclusiveMinimum": 0 },
+            "set": { "type": "number", "exclusiveMinimum": 0 }
           }
         },
         "slot_base": {

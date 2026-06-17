@@ -88,6 +88,7 @@ buyer_offer_cancel_ui: headless Godot client opens My Offers → cancels an outg
 market_trade_receipts: headless Godot client cancels an outgoing market offer → opens Receipts → verifies the account-scoped `offer_canceled` receipt
 mystery_seller_silhouettes: headless Godot client opens the mystery seller → verifies concealed rows include safe slot-derived silhouette clues
 material_wallet_details: headless Godot client auto-picks an upgrade shard → verifies the compact wallet tooltip includes catalog-backed details
+blacksmith_recipe_selector: headless Godot client stages a blacksmith item → verifies the active recipe appears in the preview
 ```
 
 **Verify:**

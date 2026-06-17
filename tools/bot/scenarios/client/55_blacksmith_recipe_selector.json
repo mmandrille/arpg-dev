@@ -1,0 +1,21 @@
+{
+  "id": "blacksmith_recipe_selector",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "v238_blacksmith_recipe_selector",
+  "title": "Blacksmith recipe selector",
+  "description": "Client stages an item at the blacksmith and verifies the active recipe appears in the preview.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_loot_count", "min_count": 7, "timeout_s": 10.0 },
+    { "type": "click_floor", "x": 12.0, "z": 10.0 },
+    { "type": "wait_player_near", "x": 12.0, "z": 10.0, "distance": 1.5, "timeout_s": 10.0 },
+    { "type": "wait_event", "event_type": "resource_picked_up", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "rolled": true },
+    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_blacksmith" },
+    { "type": "wait_blacksmith_panel", "item_count": 1, "resource_wallet_count": 1, "timeout_s": 15.0 },
+    { "type": "click_blacksmith_stage_item", "item_def_id": "cave_blade" },
+    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "preview_contains": ["Recipe: Upgrade Item", "Spend on attempt"], "timeout_s": 15.0 }
+  ]
+}

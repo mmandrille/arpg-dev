@@ -491,7 +491,7 @@ func _run() -> void:
 	_assert_eq("blacksmith wallet shard count", int(blacksmith_state.get("resource_wallet_count", 0)), 1)
 	var blacksmith_window_size: Dictionary = (blacksmith_state.get("window", {}) as Dictionary).get("minimum_size", {})
 	_assert_eq("blacksmith compact window width", int(blacksmith_window_size.get("x", 0)), 320)
-	_assert_eq("blacksmith compact window height", int(blacksmith_window_size.get("y", 0)), 254)
+	_assert_eq("blacksmith compact window height", int(blacksmith_window_size.get("y", 0)), 294)
 	var stage_size: Dictionary = blacksmith_state.get("stage_slot_size", {})
 	_assert_eq("blacksmith stage slot width", int(stage_size.get("x", 0)), 84)
 	_assert_eq("blacksmith stage slot height", int(stage_size.get("y", 0)), 84)

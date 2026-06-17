@@ -7,7 +7,7 @@ signal upgrade_inventory_requested(item_instance_id: String)
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
-const PANEL_SIZE := Vector2(320, 220)
+const PANEL_SIZE := Vector2(320, 260)
 const STAGE_SLOT_SIZE := Vector2(84, 84)
 const BODY_FONT_SIZE := 18
 const DETAIL_FONT_SIZE := 15
@@ -31,6 +31,7 @@ var staged_item: Dictionary = {}
 var _panel: DraggableWindow
 var _status_label: Label
 var _gold_label: Label
+var _recipe_selector: OptionButton
 var _rows: VBoxContainer
 
 class BlacksmithStageSlot:
@@ -147,6 +148,10 @@ func get_debug_state() -> Dictionary:
 		"resource_item_def_id": resource_item_def_id,
 		"resource_required_count": resource_count,
 		"resource_wallet_count": _resource_wallet_count(),
+		"recipe_selector_visible": _recipe_selector.visible if _recipe_selector != null else false,
+		"selected_recipe_id": _selected_recipe_id(),
+		"selected_recipe_label": _selected_recipe_label(),
+		"recipe_options": _recipe_options(),
 		"item_count": inventory_items.size(),
 		"staged_item": staged_item.duplicate(true),
 		"staged_item_id": str(staged_item.get("item_instance_id", staged_item.get("stash_item_id", ""))),
@@ -208,6 +213,8 @@ func _build() -> void:
 	_gold_label.add_theme_color_override("font_color", Color("#f4d481"))
 	root.add_child(_gold_label)
 
+	root.add_child(_recipe_selector_row())
+
 	_rows = VBoxContainer.new()
 	_rows.add_theme_constant_override("separation", 6)
 	_rows.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -216,6 +223,7 @@ func _build() -> void:
 
 func _rebuild() -> void:
 	_gold_label.text = "Gold: %d  Stash: %d" % [gold, stash_gold]
+	_sync_recipe_selector()
 	_clear_rows()
 	_rows.add_child(_stage_slot())
 	_rows.add_child(_preview_block())
@@ -392,7 +400,8 @@ func _next_cost(level: int) -> int:
 	return BlacksmithUpgradePreviewScript.next_cost(level, base_cost, growth_cost)
 
 func _upgrade_preview_lines(item: Dictionary) -> Array:
-	return BlacksmithUpgradePreviewScript.preview_lines(item, {
+	var lines: Array = ["Recipe: %s" % _selected_recipe_label()]
+	lines.append_array(BlacksmithUpgradePreviewScript.preview_lines(item, {
 		"base_cost": base_cost,
 		"growth_cost": growth_cost,
 		"max_level": max_level,
@@ -402,7 +411,52 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 		"resource_wallet_count": _resource_wallet_count(),
 		"resource_name": _resource_display_name(),
 		"wallet_gold": _wallet_gold(),
-	})
+	}))
+	return lines
+
+
+func _recipe_selector_row() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var label := Label.new()
+	label.text = "Recipe"
+	label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+	label.add_theme_color_override("font_color", Color("#d8c8a8"))
+	row.add_child(label)
+	_recipe_selector = OptionButton.new()
+	_recipe_selector.custom_minimum_size = Vector2(190, 30)
+	_recipe_selector.focus_mode = Control.FOCUS_NONE
+	row.add_child(_recipe_selector)
+	_sync_recipe_selector()
+	return row
+
+
+func _sync_recipe_selector() -> void:
+	if _recipe_selector == null:
+		return
+	_recipe_selector.clear()
+	for option in _recipe_options():
+		_recipe_selector.add_item(str((option as Dictionary).get("label", "")))
+	_recipe_selector.select(0)
+
+
+func _recipe_options() -> Array:
+	return [{
+		"id": "item_upgrade",
+		"label": "Upgrade Item",
+		"resource_item_def_id": resource_item_def_id,
+		"resource_required_count": resource_count,
+		"success_chance_percent": success_chance_percent,
+		"max_level": max_level,
+	}]
+
+
+func _selected_recipe_id() -> String:
+	return str((_recipe_options()[0] as Dictionary).get("id", ""))
+
+
+func _selected_recipe_label() -> String:
+	return str((_recipe_options()[0] as Dictionary).get("label", ""))
 
 
 func _item_title(item: Dictionary) -> String:

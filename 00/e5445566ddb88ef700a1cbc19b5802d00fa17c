@@ -1,0 +1,157 @@
+server/internal/realtime/fog_of_war_test.go
+  s_625324c6ca5fae::t_5610bb7efac032 13,58,66-67
+  s_625324c6ca5fae::t_a85e61d76c19ee 1-12,14-57,59-65,68-84,86-96
+  s_db4bb4f18f9cf6::t_eb5e41ccad97ca 85
+client/scripts/main.gd
+  s_625324c6ca5fae::t_a822872e5184be 3439,3814
+  s_625324c6ca5fae::t_ea4284dc68800f 222,3440-3441,5273
+server/internal/realtime/session_loop.go
+  s_625324c6ca5fae::t_bca1884e39472a 565,585
+tools/bot/client_market_preflight.py
+  s_db4bb4f18f9cf6::t_25f99599f88c90 77
+server/internal/game/affix_names.go
+  s_db4bb4f18f9cf6::t_f0c446cc77b82e 59-60
+server/internal/game/shop.go
+  s_db4bb4f18f9cf6::t_f0c446cc77b82e 923,970-971
+docs/plans/v253_2026-06-17-fog-of-war-radius.md
+  s_625324c6ca5fae::t_50ac3ae5653c3c 1-2,4-31,34-96,100,102-115,118,120,122,124-136,138,141-150,155,157-172,174,176,179-181,183-193,197-204,213-215
+  s_625324c6ca5fae::t_915292f232d0f2 211
+  s_625324c6ca5fae::t_9ef5791ecda236 212
+  s_625324c6ca5fae::t_ae909cd262f727 3,32-33,173,175,177-178,182,194-196,208,210
+  s_625324c6ca5fae::t_b4384a8af15da8 97-99,101,205
+  s_625324c6ca5fae::t_0545c36cb9867e 116-117,119,121,123,206
+  s_625324c6ca5fae::t_44b0dc46d072c5 137,139-140,207
+  s_625324c6ca5fae::t_0452868fd7ef8d 151-154,156,209
+shared/rules/character_progression.v0.schema.json
+  s_625324c6ca5fae::t_7c5412f9a61c8d 64-65,80-81,99,103
+shared/protocol/examples/state_delta.json
+  s_625324c6ca5fae::t_b52dc0b47959f9 64-65
+shared/protocol/state_delta.v8.schema.json
+  s_625324c6ca5fae::t_93a391e45f5779 839,855,875
+shared/rules/item_templates.v0.schema.json
+  s_625324c6ca5fae::t_80d8c8f3b27fab 107,117
+shared/rules/item_templates.v0.json
+  s_625324c6ca5fae::t_5d47f21dfe4501 322,341
+tools/validate_shared.py
+  s_625324c6ca5fae::t_ee222dc8867dcd 520,905,982
+server/internal/game/sim.go
+  s_db4bb4f18f9cf6::t_62ca5b618f45b3 368
+  s_db4bb4f18f9cf6::t_6de3299f20ce46 435-438
+  s_625324c6ca5fae::t_46d6aafd6bf3f6 342-343,5658,5722,6291
+  s_db4bb4f18f9cf6::t_d679d7ad155025 9,464
+  s_625324c6ca5fae::t_644e9eb56d091c 5835-5838
+  s_db4bb4f18f9cf6::t_f0c446cc77b82e 241,5700,5839-5842,5903,5923
+tools/bot/scenarios/client/67_fog_of_war_overlay.json
+  s_625324c6ca5fae::t_8620eb602d409c 1-13
+server/internal/game/derived_stats.go
+  s_db4bb4f18f9cf6::t_f0c446cc77b82e 21,45,72
+  s_db4bb4f18f9cf6::t_47459681bb5e50 75-85
+client/scripts/stat_labels.gd
+  s_625324c6ca5fae::t_947dfc05db398a 29
+tools/bot/bot_types.py
+  s_db4bb4f18f9cf6::t_9cc2f1ceec26d3 28
+docs/as-built/v253_fog-of-war-radius.md
+  s_625324c6ca5fae::t_915292f232d0f2 33,38-39
+  s_625324c6ca5fae::t_bf4722e7d966b3 1-32,34-37,40-53
+shared/golden/character_progression.json
+  s_625324c6ca5fae::t_9d1a6a42535dcb 46-47,86-87,126-127,166-167,208-209,248-249,288-289
+client/scripts/bot_assertion_handlers.gd
+  s_625324c6ca5fae::t_947dfc05db398a 35-36,310-323
+client/tests/test_fog_of_war_overlay.gd
+  s_625324c6ca5fae::t_4c416a44c9fd35 1-61
+docs/progress/slice-codename-index.md
+  s_625324c6ca5fae::t_05c52b7c1a23ae 219
+server/internal/game/fog_of_war_test.go
+  s_db4bb4f18f9cf6::t_7ab665ea021b64 84,151
+  s_db4bb4f18f9cf6::t_8025b88a73ae7d 133-145
+  s_db4bb4f18f9cf6::t_7b1b9a7766be7e 132
+  s_625324c6ca5fae::t_99199f585e9d50 73
+  s_db4bb4f18f9cf6::t_eb435da89c87d9 51,53-56,58
+  s_625324c6ca5fae::t_e7d5ac1dcd3fe1 1-50,62-72,74-83,85-127,146-150,152-164
+  s_db4bb4f18f9cf6::t_4d2e1656d89e1f 128-131
+  s_625324c6ca5fae::t_0d7b200af0947c 52,57,59-61
+server/internal/game/rules.go
+  s_db4bb4f18f9cf6::t_f0c446cc77b82e 166-168,1153-1155,3273
+  s_625324c6ca5fae::t_46d6aafd6bf3f6 1195
+shared/rules/character_progression.v0.json
+  s_625324c6ca5fae::t_d7cff6a306402b 12,22,32,42,52,549-552
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_db4bb4f18f9cf6::t_9cc2f1ceec26d3 7
+client/scripts/bot_step_catalog.gd
+  s_625324c6ca5fae::t_947dfc05db398a 35
+server/internal/game/fog_of_war.go
+  s_625324c6ca5fae::t_0e6cf2341bf0a9 1-32,37-153,157-230
+  s_db4bb4f18f9cf6::t_9df7fc86893828 33-36
+  s_db4bb4f18f9cf6::t_2714a07c1acb16 154
+  s_db4bb4f18f9cf6::t_24ee0d514ae603 155-156
+shared/rules/shops.v0.schema.json
+  s_625324c6ca5fae::t_ee222dc8867dcd 129,147
+server/internal/realtime/runner.go
+  s_625324c6ca5fae::t_bca1884e39472a 120,365-368
+shared/protocol/examples/session_snapshot.json
+  s_625324c6ca5fae::t_e15dcbc2898aec 90-91,94-102
+shared/golden/character_progression.v0.schema.json
+  s_db4bb4f18f9cf6::t_6f64cac5f1b58d 71-72,88-89
+tools/bot/scenarios/13_teleporter_lab.json
+  s_db4bb4f18f9cf6::t_9cc2f1ceec26d3 7
+tools/bot/run.py
+  s_db4bb4f18f9cf6::t_25f99599f88c90 3278
+  s_db4bb4f18f9cf6::t_9cc2f1ceec26d3 103-104,107,133,4175
+  s_db4bb4f18f9cf6::t_136933726b827d 695,1917,1952
+client/tests/test_fog_of_war_overlay.gd.uid
+  s_db4bb4f18f9cf6::t_f8a32a4d3dd599 1
+docs/progress/slice-lifecycle.md
+  s_625324c6ca5fae::t_bf4722e7d966b3 268
+tools/bot/scenarios/36_account_stash_storage.json
+  s_db4bb4f18f9cf6::t_9cc2f1ceec26d3 7
+docs/specs/v253_spec-fog-of-war-radius.md
+  s_625324c6ca5fae::t_ae909cd262f727 3,71
+  s_625324c6ca5fae::t_028f8e3682a5b7 1-2,4-70,72-84
+tools/bot/scenarios/92_fog_of_war_radius.json
+  s_625324c6ca5fae::t_38ea901e4fca30 1-25
+client/scripts/character_stats_panel.gd
+  s_625324c6ca5fae::t_947dfc05db398a 26
+shared/protocol/session_snapshot.v8.schema.json
+  s_625324c6ca5fae::t_cf5e7a6df1c9e9 342,358,378
+client/scripts/fog_of_war_overlay.gd.uid
+  s_db4bb4f18f9cf6::t_f8a32a4d3dd599 1
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_db4bb4f18f9cf6::t_186dc3c40c7b82 11
+  s_db4bb4f18f9cf6::t_2ef31ac941c87f 22
+tools/bot/scenarios/14_dungeon_monsters.json
+  s_db4bb4f18f9cf6::t_186dc3c40c7b82 11
+  s_db4bb4f18f9cf6::t_9cc2f1ceec26d3 6,9-10,14-15,21-22
+docs/progress/scenario-catalog.md
+  s_625324c6ca5fae::t_709ef202be3acc 55,95
+client/scripts/fog_of_war_overlay.gd
+  s_625324c6ca5fae::t_35dc6a5e7839db 1-133
+PROGRESS.md
+  s_625324c6ca5fae::t_f1c7d9abcc2e71 26,29,101-102,105-107
+  s_625324c6ca5fae::t_915292f232d0f2 28
+shared/rules/shops.v0.json
+  s_625324c6ca5fae::t_ee222dc8867dcd 68,147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "00e5445566ddb88ef700a1cbc19b5802d00fa17c",
+  "prompts": {},
+  "sessions": {
+    "s_625324c6ca5fae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed6ca-bd17-7cd0-b235-044f1bd04620",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_db4bb4f18f9cf6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed694-becd-7ac0-8318-b3af0e506be3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

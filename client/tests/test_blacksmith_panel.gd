@@ -40,7 +40,7 @@ func _run() -> void:
 	_assert_true("recipe selector visible", bool(state.get("recipe_selector_visible", false)))
 	_assert_eq("selected recipe id", str(state.get("selected_recipe_id", "")), "item_upgrade")
 	_assert_eq("selected recipe label", str(state.get("selected_recipe_label", "")), "Upgrade Item")
-	_assert_eq("recipe option count", (state.get("recipe_options", []) as Array).size(), 1)
+	_assert_eq("recipe option count", (state.get("recipe_options", []) as Array).size(), 2)
 	_assert_eq("pity threshold", int(state.get("pity_threshold", 0)), 2)
 	_assert_eq("pity failure count", int(state.get("pity_failure_count", 0)), 1)
 	_assert_false("pity not guaranteed before threshold", bool(state.get("pity_guaranteed", true)))
@@ -50,6 +50,23 @@ func _run() -> void:
 	_assert_true("preview shows failure result", _array_contains_text(state.get("preview_lines", []), "On failure: item unchanged; pity 1 -> 2 failures"))
 	_assert_true("preview shows attempt spend", _array_contains_text(state.get("preview_lines", []), "Spend on attempt: 100 gold, 1 Upgrade Shard"))
 	_assert_true("preview shows after attempt balance", _array_contains_text(state.get("preview_lines", []), "After attempt: 0 gold, 0 Upgrade Shard"))
+	panel.select_recipe("weapon_honing")
+	state = panel.get_debug_state()
+	_assert_eq("selected weapon recipe id", str(state.get("selected_recipe_id", "")), "weapon_honing")
+	_assert_eq("selected weapon recipe label", str(state.get("selected_recipe_label", "")), "Hone Weapon")
+	_assert_true("weapon recipe eligibility", _array_contains_text(state.get("preview_lines", []), "Eligible: Weapons only"))
+	var rows: Array = state.get("rows", [])
+	_assert_true("weapon recipe keeps bow enabled", bool((rows[0] as Dictionary).get("upgrade_enabled", false)))
+	var shield := item.duplicate(true)
+	shield["item_def_id"] = "cave_shield"
+	shield["item_template_id"] = "cave_shield"
+	shield["rolled_stats"] = {"armor": 2, "block_percent": 5}
+	panel.stage_inventory_item(shield)
+	state = panel.get_debug_state()
+	rows = state.get("rows", [])
+	_assert_false("weapon recipe disables shield", bool((rows[0] as Dictionary).get("upgrade_enabled", true)))
+	_assert_true("weapon recipe rejects shield preview", _array_contains_text(state.get("preview_lines", []), "Recipe cannot modify this item"))
+	panel.select_recipe("item_upgrade")
 
 	item["rolled_stats"] = {"item_level": 0, "damage_min": 1, "damage_max": 2, "upgrade_pity": {"failures": 2}}
 	panel.stage_inventory_item(item)

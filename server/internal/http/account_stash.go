@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"io"
 	"math/big"
 	"net/http"
 
@@ -14,6 +15,11 @@ func (s *Server) registerAccountStashRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/account-stash/items/{stash_item_id}/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeAccountStashItem)))
 	mux.Handle("POST /v0/account-stash/items/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeInventoryItem)))
 }
+
+const (
+	blacksmithRecipeItemUpgrade  = "item_upgrade"
+	blacksmithRecipeWeaponHoning = "weapon_honing"
+)
 
 type accountStashItemResponse struct {
 	StashItemID    string          `json:"stash_item_id"`
@@ -45,6 +51,7 @@ type upgradeAccountStashItemResponse struct {
 	StashGold         int                      `json:"stash_gold"`
 	CostGold          int                      `json:"cost_gold"`
 	Success           bool                     `json:"success"`
+	RecipeID          string                   `json:"recipe_id"`
 	ResourceItemDefID string                   `json:"resource_item_def_id,omitempty"`
 	ResourceCount     int                      `json:"resource_count,omitempty"`
 	ResourceWallet    int                      `json:"resource_wallet"`
@@ -56,14 +63,20 @@ type upgradeInventoryItemResponse struct {
 	StashGold         int                   `json:"stash_gold"`
 	CostGold          int                   `json:"cost_gold"`
 	Success           bool                  `json:"success"`
+	RecipeID          string                `json:"recipe_id"`
 	ResourceItemDefID string                `json:"resource_item_def_id,omitempty"`
 	ResourceCount     int                   `json:"resource_count,omitempty"`
 	ResourceWallet    int                   `json:"resource_wallet"`
 }
 
+type upgradeAccountStashItemRequest struct {
+	RecipeID string `json:"recipe_id"`
+}
+
 type upgradeInventoryItemRequest struct {
 	ItemInstanceID string `json:"item_instance_id"`
 	CharacterID    string `json:"character_id"`
+	RecipeID       string `json:"recipe_id"`
 }
 
 func (s *Server) handleUpgradeAccountStashItem(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +90,11 @@ func (s *Server) handleUpgradeAccountStashItem(w http.ResponseWriter, r *http.Re
 		writeError(w, http.StatusBadRequest, "invalid_stash_item", "stash_item_id is required")
 		return
 	}
-	s.upgradeAccountStashItem(w, r, accountID, "", stashItemID)
+	recipeID, ok := s.decodeUpgradeRecipeID(w, r)
+	if !ok {
+		return
+	}
+	s.upgradeAccountStashItem(w, r, accountID, "", stashItemID, recipeID)
 }
 
 func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +110,11 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 	}
 	if req.ItemInstanceID == "" || req.CharacterID == "" {
 		writeError(w, http.StatusBadRequest, "invalid_inventory_item", "item_instance_id and character_id are required")
+		return
+	}
+	recipeID := normalizeBlacksmithRecipeID(req.RecipeID)
+	if !s.validBlacksmithRecipe(recipeID) {
+		writeError(w, http.StatusBadRequest, "invalid_recipe", "unknown blacksmith recipe")
 		return
 	}
 	originalItems, err := s.store.ListCharacterItems(r.Context(), accountID, req.CharacterID)
@@ -138,7 +160,7 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not reserve inventory item")
 		return
 	}
-	item, characterGold, stashGold, chargedCost, success, err := s.upgradeAccountStashItemForRequest(r, accountID, req.CharacterID, stashItemID)
+	item, characterGold, stashGold, chargedCost, success, err := s.upgradeAccountStashItemForRequest(r, accountID, req.CharacterID, stashItemID, recipeID)
 	if err != nil {
 		s.writeUpgradeAccountStashError(w, err)
 		return
@@ -174,14 +196,19 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		StashGold:         stashGold,
 		CostGold:          chargedCost,
 		Success:           success,
+		RecipeID:          recipeID,
 		ResourceItemDefID: resourceID,
 		ResourceCount:     resourceCount,
 		ResourceWallet:    resourceWallet,
 	})
 }
 
-func (s *Server) upgradeAccountStashItem(w http.ResponseWriter, r *http.Request, accountID string, characterID string, stashItemID string) {
-	item, characterGold, stashGold, chargedCost, success, err := s.upgradeAccountStashItemForRequest(r, accountID, characterID, stashItemID)
+func (s *Server) upgradeAccountStashItem(w http.ResponseWriter, r *http.Request, accountID string, characterID string, stashItemID string, recipeID string) {
+	if !s.validBlacksmithRecipe(recipeID) {
+		writeError(w, http.StatusBadRequest, "invalid_recipe", "unknown blacksmith recipe")
+		return
+	}
+	item, characterGold, stashGold, chargedCost, success, err := s.upgradeAccountStashItemForRequest(r, accountID, characterID, stashItemID, recipeID)
 	if err != nil {
 		s.writeUpgradeAccountStashError(w, err)
 		return
@@ -192,14 +219,12 @@ func (s *Server) upgradeAccountStashItem(w http.ResponseWriter, r *http.Request,
 		StashGold: stashGold,
 		CostGold:  chargedCost,
 		Success:   success,
+		RecipeID:  recipeID,
 	})
 }
 
-func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID string, characterID string, stashItemID string) (store.AccountStashItem, int, int, int, bool, error) {
-	eligible := make(map[string]struct{}, len(s.rules.ItemTemplates))
-	for itemDefID := range s.rules.ItemTemplates {
-		eligible[itemDefID] = struct{}{}
-	}
+func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID string, characterID string, stashItemID string, recipeID string) (store.AccountStashItem, int, int, int, bool, error) {
+	eligible := s.eligibleBlacksmithItemDefs(recipeID)
 	cost := s.rules.MainConfig.Gameplay.ItemUpgradeCostGold
 	growth := s.rules.MainConfig.Gameplay.ItemUpgradeCostGrowth
 	maxLevel := s.rules.MainConfig.Gameplay.ItemUpgradeMaxLevel
@@ -211,6 +236,46 @@ func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID st
 	}
 	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, chance, roll, pityFailures, eligible)
 	return item, characterGold, stashGold, chargedCost, success, err
+}
+
+func (s *Server) decodeUpgradeRecipeID(w http.ResponseWriter, r *http.Request) (string, bool) {
+	var req upgradeAccountStashItemRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil && !errors.Is(err, io.EOF) {
+		writeError(w, http.StatusBadRequest, "invalid_json", "request body must be JSON")
+		return "", false
+	}
+	recipeID := normalizeBlacksmithRecipeID(req.RecipeID)
+	if !s.validBlacksmithRecipe(recipeID) {
+		writeError(w, http.StatusBadRequest, "invalid_recipe", "unknown blacksmith recipe")
+		return "", false
+	}
+	return recipeID, true
+}
+
+func normalizeBlacksmithRecipeID(recipeID string) string {
+	if recipeID == "" {
+		return blacksmithRecipeItemUpgrade
+	}
+	return recipeID
+}
+
+func (s *Server) validBlacksmithRecipe(recipeID string) bool {
+	return recipeID == blacksmithRecipeItemUpgrade || recipeID == blacksmithRecipeWeaponHoning
+}
+
+func (s *Server) eligibleBlacksmithItemDefs(recipeID string) map[string]struct{} {
+	eligible := make(map[string]struct{}, len(s.rules.ItemTemplates))
+	for itemDefID, def := range s.rules.ItemTemplates {
+		if recipeID == blacksmithRecipeWeaponHoning && !templateCanBeWeaponHoned(def.Slot, def.BaseStats) {
+			continue
+		}
+		eligible[itemDefID] = struct{}{}
+	}
+	return eligible
+}
+
+func templateCanBeWeaponHoned(slot string, baseStats map[string]int) bool {
+	return slot == "main_hand" && baseStats["damage_min"] > 0 && baseStats["damage_max"] > 0
 }
 
 func (s *Server) upgradeResourceConfig() (string, int) {

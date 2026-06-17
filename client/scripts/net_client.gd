@@ -396,18 +396,18 @@ func purchase_market_listing(listing_id: String) -> Dictionary:
 	return {"_error": str(r)}
 
 
-func upgrade_account_stash_item(stash_item_id: String) -> Dictionary:
+func upgrade_account_stash_item(stash_item_id: String, recipe_id: String = "item_upgrade") -> Dictionary:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/items/%s/upgrade" % stash_item_id,
-		["Authorization: Bearer " + token], "{}")
+		["Authorization: Bearer " + token], JSON.stringify({"recipe_id": recipe_id}))
 	if r.get("_code", 0) == 200 and r.has("body"):
 		return r["body"]
 	push_error("upgrade_account_stash_item failed: %s" % r)
 	return {"_error": str(r)}
 
 
-func upgrade_inventory_item(item_instance_id: String, p_character_id: String) -> Dictionary:
+func upgrade_inventory_item(item_instance_id: String, p_character_id: String, recipe_id: String = "item_upgrade") -> Dictionary:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/items/upgrade",
-		["Authorization: Bearer " + token], JSON.stringify({"item_instance_id": item_instance_id, "character_id": p_character_id}))
+		["Authorization: Bearer " + token], JSON.stringify({"item_instance_id": item_instance_id, "character_id": p_character_id, "recipe_id": recipe_id}))
 	if r.get("_code", 0) == 200 and r.has("body"):
 		return r["body"]
 	push_error("upgrade_inventory_item failed: %s" % r)

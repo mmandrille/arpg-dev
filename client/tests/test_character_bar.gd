@@ -13,6 +13,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await _test_resource_wallet_debug_state()
+	await _test_material_wallet_window_state()
 	print("[gdtest] PASS: test_character_bar (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -32,6 +33,32 @@ func _test_resource_wallet_debug_state() -> void:
 	state = bar.get_debug_state()
 	_assert_false("empty wallet hidden", bool(state.get("wallet_visible", true)))
 	_assert_eq("empty wallet details", (state.get("wallet_details", []) as Array).size(), 0)
+	bar.free()
+
+
+func _test_material_wallet_window_state() -> void:
+	var bar = CharacterBarScript.new()
+	get_root().add_child(bar)
+	await process_frame
+	bar.open_wallet_window()
+	var state := bar.get_debug_state()
+	_assert_false("empty wallet window hidden", bool((state.get("wallet_window", {}) as Dictionary).get("visible", true)))
+	bar.set_resource_wallet({"upgrade_shard": 2})
+	bar.open_wallet_window()
+	state = bar.get_debug_state()
+	var window: Dictionary = state.get("wallet_window", {})
+	_assert_true("wallet window visible", bool(window.get("visible", false)))
+	_assert_eq("wallet window row count", int(window.get("row_count", 0)), 1)
+	_assert_true("wallet window row text", str(window.get("text", "")).contains("Upgrade Shard x2"))
+	_assert_true("wallet window storage text", str(window.get("text", "")).contains("Stored account-wide"))
+	bar.set_resource_wallet({"upgrade_shard": 4})
+	state = bar.get_debug_state()
+	window = state.get("wallet_window", {})
+	_assert_true("wallet window refreshed", str(window.get("text", "")).contains("Upgrade Shard x4"))
+	bar.set_resource_wallet({"upgrade_shard": 0})
+	state = bar.get_debug_state()
+	window = state.get("wallet_window", {})
+	_assert_false("empty update closes wallet window", bool(window.get("visible", true)))
 	bar.free()
 
 

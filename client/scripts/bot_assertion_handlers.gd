@@ -338,4 +338,20 @@ static func _assert_resource_wallet_panel(runner, step: Dictionary, state: Dicti
 			str(step.get("tooltip_contains", "")), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
 		])
 		return false
+	var window: Dictionary = panel.get("wallet_window", {})
+	if step.has("window_visible") and bool(window.get("visible", false)) != bool(step.get("window_visible", true)):
+		runner._fail("assert_resource_wallet_panel window visible failed: want=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("window_visible", true)), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
+	if step.has("window_contains") and not str(window.get("text", "")).contains(str(step.get("window_contains", ""))):
+		runner._fail("assert_resource_wallet_panel window text failed: want contains=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("window_contains", "")), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
+	if step.has("window_row_count_at_least") and int(window.get("row_count", 0)) < int(step.get("window_row_count_at_least", 0)):
+		runner._fail("assert_resource_wallet_panel row count failed: want at least=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("window_row_count_at_least", 0)), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
 	return true

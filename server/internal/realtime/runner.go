@@ -117,7 +117,7 @@ func (r *runner) enqueue(env outEnvelope) {
 }
 
 func (r *runner) snapshotEnvelope() outEnvelope {
-	snap := r.sim.Snapshot()
+	snap := r.sim.SnapshotForPlayer(r.sim.DefaultPlayerID())
 	return outEnvelope{
 		Type:      typeSnapshot,
 		MessageID: ids.New("msg"),
@@ -362,6 +362,10 @@ func (r *runner) doTick() {
 	// State delta (only when something changed). Slices are coerced to non-nil
 	// so they marshal as [] not null, matching the state_delta schema.
 	for _, res := range results {
+		playerID := r.sim.DefaultPlayerID()
+		if playerID != 0 {
+			res = r.sim.FilterTickResultForPlayer(playerID, res)
+		}
 		if len(res.Changes) == 0 && len(res.Events) == 0 {
 			continue
 		}

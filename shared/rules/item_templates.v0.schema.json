@@ -104,6 +104,7 @@
         "skill_cooldown_reduction_percent": { "type": "integer", "minimum": 0, "maximum": 75 },
         "skill_mana_cost_reduction": { "type": "integer", "minimum": 0, "maximum": 20 },
         "magic_find_percent": { "type": "integer", "minimum": 0, "maximum": 500 },
+        "light_radius": { "type": "integer", "minimum": 0, "maximum": 20 },
         "hotbar_slots": { "type": "integer", "minimum": 2, "maximum": 10 },
         "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 }
       }
@@ -113,7 +114,7 @@
       "required": ["stat", "min", "max", "weight"],
       "additionalProperties": false,
       "properties": {
-        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "hotbar_slots", "inventory_rows"] },
+        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows"] },
         "min_rarity": { "type": "string", "enum": ["common", "magic", "rare", "unique", "set"] },
         "min": { "type": "integer" },
         "max": { "type": "integer" },

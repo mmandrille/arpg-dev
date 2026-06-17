@@ -61,7 +61,8 @@
         "max_hp",
         "max_mana",
         "health_regen_per_second",
-        "mana_regen_per_second"
+        "mana_regen_per_second",
+        "light_radius"
       ],
       "additionalProperties": false,
       "properties": {
@@ -76,7 +77,8 @@
         "max_hp": { "$ref": "#/$defs/derived_formula" },
         "max_mana": { "$ref": "#/$defs/derived_formula" },
         "health_regen_per_second": { "$ref": "#/$defs/derived_formula" },
-        "mana_regen_per_second": { "$ref": "#/$defs/derived_formula" }
+        "mana_regen_per_second": { "$ref": "#/$defs/derived_formula" },
+        "light_radius": { "$ref": "#/$defs/derived_formula" }
       }
     }
   },
@@ -94,10 +96,11 @@
     },
     "character_class": {
       "type": "object",
-      "required": ["name", "base_stats"],
+      "required": ["name", "light_radius", "base_stats"],
       "additionalProperties": false,
       "properties": {
         "name": { "type": "string", "minLength": 1 },
+        "light_radius": { "type": "number", "exclusiveMinimum": 0 },
         "base_stats": { "$ref": "#/$defs/base_stats" }
       }
     },

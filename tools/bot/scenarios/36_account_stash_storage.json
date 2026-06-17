@@ -4,6 +4,7 @@
   "seed": "town_vendor_gold_sink_1075",
   "title": "Account stash storage",
   "description": "Collect dungeon loot, return to town, deposit and withdraw a rolled item, then leave an item and gold in the account stash for reconnect and fresh-session persistence checks.",
+  "max_elapsed_s": 25.0,
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },

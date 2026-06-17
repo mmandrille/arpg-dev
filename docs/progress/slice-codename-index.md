@@ -216,6 +216,7 @@ v238_* = blacksmith-recipe-selector
 v239_* = mercenary-stats-card
 v240_* = boss-portrait-panel
 v252_* = expanded-dungeon-profile
+v253_* = fog-of-war-radius
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

@@ -87,9 +87,19 @@
       "max_hp": 10,
       "max_mana": 10,
       "health_regen_per_second": 0.1,
-      "mana_regen_per_second": 0.1
+      "mana_regen_per_second": 0.1,
+      "light_radius": 9
     },
     "stat_breakdowns": [
+      {
+        "key": "light_radius",
+        "value": 9,
+        "uncapped_value": 9,
+        "cap": null,
+        "sources": [
+          { "label": "Class light radius", "value": 9, "kind": "character_formula" }
+        ]
+      },
       {
         "key": "armor",
         "value": 6,

@@ -562,6 +562,7 @@ func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, i
 			}
 		}
 		events := filterEventsForClient(res.Events, res.ActorPlayerID, client.playerID)
+		events = l.sim.FilterEventsForPlayer(client.playerID, res.Level, events)
 		if level != res.Level {
 			if len(events) == 0 {
 				continue
@@ -581,6 +582,7 @@ func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, i
 			continue
 		}
 		changes := filterChangesForClient(res.Changes, res.ActorPlayerID, client.playerID)
+		changes = l.sim.FilterChangesForPlayer(client.playerID, res.Level, changes)
 		if len(changes) == 0 && len(events) == 0 {
 			continue
 		}

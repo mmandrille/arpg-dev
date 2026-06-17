@@ -1,0 +1,25 @@
+{
+  "id": "fog_of_war_radius",
+  "world_id": "combat_control_lab",
+  "seed": "fog_of_war_radius_seed",
+  "title": "Fog of war radius",
+  "description": "Class light radius hides a far monster until the hero scouts close enough to reveal it.",
+  "max_elapsed_s": 10.0,
+  "steps": [
+    { "action": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
+    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "alive": true, "equals": 0 },
+    { "action": "move_until_player_position", "x": 5, "y": 5, "tolerance": 0.2, "max_ticks": 120 },
+    {
+      "action": "wait_until_assertion",
+      "timeout_s": 2.0,
+      "assertion": { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "alive": true, "equals": 1 }
+    }
+  ],
+  "assertions": [
+    { "type": "character_progression", "derived_stats": { "light_radius": 9 } },
+    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "alive": true, "equals": 1 }
+  ],
+  "visual": {
+    "camera": { "x": 8, "y": 5, "zoom": 1.15 }
+  }
+}

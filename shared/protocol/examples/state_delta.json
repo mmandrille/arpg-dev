@@ -61,7 +61,8 @@
           "max_hp": 10,
           "max_mana": 10,
           "health_regen_per_second": 0.1,
-          "mana_regen_per_second": 0.1
+          "mana_regen_per_second": 0.1,
+          "light_radius": 9
         }
       }
     },

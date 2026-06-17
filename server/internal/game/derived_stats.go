@@ -18,6 +18,7 @@ type DerivedStatsView struct {
 	HealthRegenPerSecond float64 `json:"health_regen_per_second"`
 	ManaRegenPerSecond   float64 `json:"mana_regen_per_second"`
 	MagicFindPercent     float64 `json:"magic_find_percent"`
+	LightRadius          float64 `json:"light_radius"`
 }
 
 // DerivedStatsView returns the authoritative protocol view of combat/display stats.
@@ -41,6 +42,7 @@ func (s *Sim) DerivedStatsView() DerivedStatsView {
 		HealthRegenPerSecond: effective.HealthRegenPerSecond,
 		ManaRegenPerSecond:   effective.ManaRegenPerSecond,
 		MagicFindPercent:     effective.MagicFindPercent,
+		LightRadius:          effective.LightRadius,
 	}
 }
 
@@ -67,5 +69,17 @@ func (s *Sim) characterDerivedStatsView() DerivedStatsView {
 		HealthRegenPerSecond: eval("health_regen_per_second"),
 		ManaRegenPerSecond:   eval("mana_regen_per_second"),
 		MagicFindPercent:     0,
+		LightRadius:          s.characterClassLightRadius() + eval("light_radius"),
 	}
+}
+
+func (s *Sim) characterClassLightRadius() float64 {
+	if s == nil || s.rules == nil {
+		return 0
+	}
+	classDef, ok := s.rules.CharacterProgression.Classes[s.progression.CharacterClass]
+	if !ok {
+		return 0
+	}
+	return classDef.LightRadius
 }

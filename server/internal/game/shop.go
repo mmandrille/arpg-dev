@@ -920,7 +920,7 @@ func (s *Sim) statsForInventoryItem(item *invItem) map[string]int {
 }
 
 func shopStatOrder() []string {
-	return []string{"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "hotbar_slots", "inventory_rows"}
+	return []string{"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows"}
 }
 
 func displayStatName(stat string) string {
@@ -967,6 +967,8 @@ func displayStatName(stat string) string {
 		return "Skill mana cost reduction"
 	case "magic_find_percent":
 		return "Magic Find"
+	case "light_radius":
+		return "Light radius"
 	case "hotbar_slots":
 		return "Hotbar slots"
 	case "inventory_rows":

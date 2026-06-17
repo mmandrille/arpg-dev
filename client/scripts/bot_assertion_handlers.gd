@@ -32,6 +32,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_fog_of_war":
+			return _assert_fog_of_war(runner, step, state)
 		"assert_floating_combat_text_enabled":
 			return runner._assert_bool_value("assert_floating_combat_text_enabled", step, bool(state.get("floating_combat_text_enabled", false)), bool(step.get("enabled", true)))
 		"assert_damage_number":
@@ -302,6 +304,23 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+	return true
+
+
+static func _assert_fog_of_war(runner, step: Dictionary, state: Dictionary) -> bool:
+	var fog: Dictionary = state.get("fog_of_war", {})
+	for key in ["enabled", "active"]:
+		if step.has(key) and bool(fog.get(key, false)) != bool(step.get(key, true)):
+			runner._fail("assert_fog_of_war failed: %s want=%s got=%s fog=%s step=%d scenario=%s" % [
+				key, str(step.get(key, true)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+	for key in ["light_radius", "gloom_radius"]:
+		if step.has(key) and abs(float(fog.get(key, -999999.0)) - float(step.get(key, 0.0))) > float(step.get("tolerance", 0.001)):
+			runner._fail("assert_fog_of_war failed: %s want=%s got=%s fog=%s step=%d scenario=%s" % [
+				key, str(step.get(key, 0.0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
 	return true
 
 

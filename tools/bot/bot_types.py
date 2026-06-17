@@ -25,6 +25,7 @@ class Scenario:
     steps: list[dict[str, Any]]
     assertions: list[Any]
     fresh_session_checks: list[dict[str, Any]]
+    max_elapsed_s: float
     path: Path
 
 

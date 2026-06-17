@@ -56,6 +56,8 @@ func affixWordForStat(stat string) (string, int) {
 		return "Nimble", 50
 	case "magic_find_percent":
 		return "Fortunate", 48
+	case "light_radius":
+		return "Radiant", 47
 	case "inventory_rows", "hotbar_slots":
 		return "Traveler's", 45
 	default:

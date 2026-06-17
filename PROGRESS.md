@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-16
+Last updated: 2026-06-17
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v232 — mercenary recovery UI |
+| **Latest completed slice** | v233 — my market offers panel |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green after v226-v232 `$autoloop` batch on 2026-06-16 |
-| **Next slice** | TBD |
+| **CI gate** | Focused v233 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
+| **Next slice** | v234 — buyer offer cancel UI |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
 | **Next engineering review** | v242 after the next feature batches, once CI is green |
 

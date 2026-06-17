@@ -4371,13 +4371,14 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 			_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Listing purchased")
-	elif action == "list_offers":
-		result = client.list_market_offers(str(payload.get("listing_id", "")))
+	elif action == "list_offers" or action == "list_my_offers":
+		var mine := action == "list_my_offers"
+		result = client.list_my_market_offers() if mine else client.list_market_offers(str(payload.get("listing_id", "")))
 		if result.has("_error"):
-			if market_panel != null: market_panel.show_status("Could not load offers", true)
+			if market_panel != null: market_panel.show_status("Could not load my offers" if mine else "Could not load offers", true)
 			return
-		if market_panel != null:
-			market_panel.show_offers(str(payload.get("listing_id", "")), result.get("offers", []), "Active offers")
+		if market_panel != null and mine: market_panel.show_my_offers(result.get("offers", []), "My offers")
+		elif market_panel != null: market_panel.show_offers(str(payload.get("listing_id", "")), result.get("offers", []), "Active offers")
 		return
 	elif action == "accept_offer":
 		result = client.accept_market_offer(str(payload.get("listing_id", "")), str(payload.get("offer_id", "")))
@@ -5380,7 +5381,6 @@ func _sync_quest_journal() -> void:
 func _sync_elite_objective_tracker() -> void:
 	if elite_objective_tracker != null:
 		elite_objective_tracker.set_state(QuestEliteObjectiveStateScript.elite_tracker_state(entities))
-
 
 func _sync_elite_objective_minimap() -> void:
 	if elite_objective_minimap != null:

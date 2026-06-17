@@ -917,7 +917,7 @@ func _assert_market_listing_rows(step: Dictionary, state: Dictionary) -> bool:
 
 
 func _market_offer_rows_match(step: Dictionary, state: Dictionary) -> bool:
-	if not (step.has("offer_equals") or step.has("offer_at_least") or step.has("offer_item_def_id") or step.has("offer_status")):
+	if not (step.has("offer_equals") or step.has("offer_at_least") or step.has("offer_item_def_id") or step.has("listing_item_def_id") or step.has("offer_status")):
 		return true
 	var rows := _matching_market_offer_rows(step, state)
 	if step.has("offer_equals") and rows.size() != int(step.get("offer_equals", 0)):
@@ -1111,6 +1111,8 @@ func _matching_market_offer_rows(step: Dictionary, state: Dictionary) -> Array:
 		if step.has("offer_status") and str(rec.get("status", "")) != str(step.get("offer_status", "")):
 			continue
 		if step.has("offer_item_def_id") and not (rec.get("item_def_ids", []) as Array).has(str(step.get("offer_item_def_id", ""))):
+			continue
+		if step.has("listing_item_def_id") and str(rec.get("listing_item_def_id", "")) != str(step.get("listing_item_def_id", "")):
 			continue
 		out.append(rec)
 	return out

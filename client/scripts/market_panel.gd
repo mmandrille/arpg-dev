@@ -8,6 +8,7 @@ signal staged_offer_items_changed(item_instance_ids: Array)
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const MarketOfferRowsScript := preload("res://scripts/market_offer_rows.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const PANEL_SIZE := Vector2(640, 520)
@@ -25,6 +26,7 @@ var active_offers: Array = []
 var selected_listing_id: String = ""
 var staged_publish_item: Dictionary = {}
 var staged_offer_items: Array = []
+var offer_view_mode: String = ""
 var _offer_tab_visible: bool = false
 var _panel: DraggableWindow
 var _status_label: Label
@@ -113,6 +115,7 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 	staged_publish_item = {}
 	staged_offer_items = []
 	selected_listing_id = ""
+	offer_view_mode = ""
 	_offer_tab_visible = false
 	staged_offer_items_changed.emit([])
 	_status_label.text = status
@@ -144,6 +147,7 @@ func return_to_browse_after_offer() -> void:
 	if _tabs != null:
 		_tabs.current_tab = 0
 	_offer_tab_visible = false
+	offer_view_mode = ""
 	_apply_offer_tab_visibility()
 	inventory_context_requested.emit("")
 	_rebuild_offer_rows()
@@ -190,6 +194,9 @@ func bot_click_purchase_listing(listing_id: String = "", item_def_id: String = "
 
 
 func bot_click_view_offers(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
+	if listing_id == "__my_offers":
+		market_action_requested.emit("list_my_offers", {})
+		return
 	var listing := _matching_listing(listing_id, item_def_id, price_gold, listing_index, true)
 	if listing.is_empty():
 		show_status("No matching seller listing", true)
@@ -213,17 +220,25 @@ func bot_click_accept_offer(offer_id: String = "", offer_index: int = 0) -> void
 		return
 	market_action_requested.emit("accept_offer", {"listing_id": str(offer.get("listing_id", selected_listing_id)), "offer_id": str(offer.get("offer_id", ""))})
 
-
 func show_offers(listing_id: String, offers: Array, status: String = "") -> void:
 	selected_listing_id = listing_id
 	active_offers = _dup_array(offers)
-	if status != "":
-		_status_label.text = status
+	offer_view_mode = "incoming"
+	if status != "": _status_label.text = status
 	_offer_tab_visible = true
 	_apply_offer_tab_visibility()
 	_tabs.current_tab = 2
 	_rebuild_offer_rows()
 
+func show_my_offers(offers: Array, status: String = "") -> void:
+	selected_listing_id = ""
+	active_offers = _dup_array(offers)
+	offer_view_mode = "outgoing"
+	if status != "": _status_label.text = status
+	_offer_tab_visible = true
+	_apply_offer_tab_visibility()
+	_tabs.current_tab = 2
+	_rebuild_offer_rows()
 
 func get_debug_state() -> Dictionary:
 	return {
@@ -242,6 +257,7 @@ func get_debug_state() -> Dictionary:
 		"staged_offer_item_ids": _staged_offer_item_ids(),
 		"staged_offer_slots": _debug_staged_offer_slots(),
 		"offer_count": active_offers.size(),
+		"offer_view_mode": offer_view_mode,
 		"offer_rows": _debug_offer_rows(),
 		"publish_price_gold": _publish_price(),
 		"publish_price_width": int(_publish_price_spin.custom_minimum_size.x) if _publish_price_spin != null else 0,
@@ -368,13 +384,13 @@ func _rebuild_all() -> void:
 
 func _rebuild_browse_rows() -> void:
 	_clear_rows(_browse_rows)
+	_browse_rows.add_child(MarketOfferRowsScript.my_offers_button(self))
 	var browse_listings := _foreign_listings()
 	if browse_listings.is_empty():
 		_browse_rows.add_child(_empty_label("No active listings"))
 		return
 	for listing in browse_listings:
 		_browse_rows.add_child(_listing_row(listing as Dictionary, "browse"))
-
 
 func _rebuild_publish_rows() -> void:
 	_clear_rows(_publish_rows)
@@ -385,9 +401,16 @@ func _rebuild_publish_rows() -> void:
 	_publish_rows.add_child(_publish_controls_row())
 	_publish_rows.add_child(_empty_label("Double-click or drag an inventory item here"))
 
-
 func _rebuild_offer_rows() -> void:
 	_clear_rows(_offer_rows)
+	if offer_view_mode == "outgoing":
+		if active_offers.is_empty():
+			_offer_rows.add_child(_empty_label("No outgoing offers"))
+			return
+		for offer in active_offers:
+			if typeof(offer) == TYPE_DICTIONARY:
+				_offer_rows.add_child(MarketOfferRowsScript.offer_row(self, offer as Dictionary, true))
+		return
 	var selected := _selected_listing()
 	if selected.is_empty():
 		_offer_rows.add_child(_empty_label("Select another player's listing in Browse"))
@@ -399,7 +422,7 @@ func _rebuild_offer_rows() -> void:
 			return
 		for offer in active_offers:
 			if typeof(offer) == TYPE_DICTIONARY:
-				_offer_rows.add_child(_offer_row(offer as Dictionary))
+				_offer_rows.add_child(MarketOfferRowsScript.offer_row(self, offer as Dictionary))
 		return
 	_offer_rows.add_child(_offer_grid())
 	var offer_btn := Button.new()
@@ -454,7 +477,7 @@ func _listing_row(listing: Dictionary, mode: String) -> Control:
 			offers_btn.text = "View Offers"
 			offers_btn.custom_minimum_size = Vector2(136, 34)
 			offers_btn.pressed.connect(func() -> void:
-				selected_listing_id = str(listing.get("listing_id", ""))
+				selected_listing_id = str(listing.get("listing_id", "")); offer_view_mode = "incoming"
 				market_action_requested.emit("list_offers", {"listing_id": selected_listing_id})
 			)
 			actions.add_child(offers_btn)
@@ -479,6 +502,7 @@ func _listing_row(listing: Dictionary, mode: String) -> Control:
 			btn.custom_minimum_size = Vector2(136, 34)
 			btn.pressed.connect(func() -> void:
 				selected_listing_id = str(listing.get("listing_id", ""))
+				offer_view_mode = "make"
 				_offer_tab_visible = true
 				_apply_offer_tab_visibility()
 				_tabs.current_tab = 2
@@ -489,36 +513,6 @@ func _listing_row(listing: Dictionary, mode: String) -> Control:
 		box.add_child(actions)
 	return row
 
-
-func _offer_row(offer: Dictionary) -> Control:
-	var row := PanelContainer.new()
-	row.add_theme_stylebox_override("panel", _row_style())
-	var box := HBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	row.add_child(box)
-	var info := VBoxContainer.new()
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_child(info)
-	var title := Label.new()
-	title.text = "%d item offer" % _offer_items(offer).size()
-	title.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-	title.add_theme_color_override("font_color", Color("#e8dcc8"))
-	info.add_child(title)
-	var detail := Label.new()
-	detail.text = "Bidder %s" % str(offer.get("bidder_account_id", "")).substr(0, 10)
-	detail.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
-	detail.add_theme_color_override("font_color", Color("#b9aa8a"))
-	info.add_child(detail)
-	info.add_child(_offer_items_grid(_offer_items(offer)))
-	var btn := Button.new()
-	btn.text = "Accept"
-	btn.custom_minimum_size = Vector2(110, 38)
-	btn.disabled = str(offer.get("status", "active")) != "active"
-	btn.pressed.connect(func() -> void:
-		market_action_requested.emit("accept_offer", {"listing_id": str(offer.get("listing_id", selected_listing_id)), "offer_id": str(offer.get("offer_id", ""))})
-	)
-	box.add_child(btn)
-	return row
 
 
 func _stage_slot(context: String, item: Dictionary, slot_index: int) -> Control:
@@ -803,6 +797,8 @@ func _debug_offer_rows() -> Array:
 			"listing_id": str(rec.get("listing_id", "")),
 			"bidder_account_id": str(rec.get("bidder_account_id", "")),
 			"status": str(rec.get("status", "")),
+			"listing_item_def_id": str(_offer_listing(rec).get("item_def_id", "")),
+			"listing_price_gold": int(_offer_listing(rec).get("price_gold", 0)),
 			"item_count": _offer_items(rec).size(),
 			"item_def_ids": _offer_item_def_ids(rec),
 			"item_slots": _debug_offer_item_slots(rec),
@@ -831,6 +827,13 @@ func _rows_top_aligned(rows: VBoxContainer) -> bool:
 func _offer_items(offer: Dictionary) -> Array:
 	var items: Array = offer.get("items", [])
 	return items if items is Array else []
+
+func _offer_listing(offer: Dictionary) -> Dictionary:
+	var listing = offer.get("listing", {})
+	return (listing as Dictionary) if typeof(listing) == TYPE_DICTIONARY else {}
+
+func _outgoing_offer_detail(offer: Dictionary) -> String:
+	return "Status %s - %d gold listing" % [str(offer.get("status", "")).capitalize(), int(_offer_listing(offer).get("price_gold", 0))]
 
 
 func _offer_item_names(offer: Dictionary) -> String:
@@ -885,7 +888,6 @@ func _listing_title(listing: Dictionary) -> String:
 	if display != "":
 		return display
 	return str(listing.get("item_def_id", "Unknown item")).replace("_", " ").capitalize()
-
 
 func _item_title(item: Dictionary) -> String:
 	var display := str(item.get("display_name", ""))

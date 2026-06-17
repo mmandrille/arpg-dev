@@ -161,7 +161,8 @@ func TestDeleteCharacterRemovesProgressionAndSessions(t *testing.T) {
 		Stats:              store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
 		SkillRanks:         map[string]int{"magic_bolt": 0},
 	}
-	if _, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, remove.ID, defaultProgression); err != nil {
+	progression, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, remove.ID, defaultProgression)
+	if err != nil {
 		t.Fatalf("create progression: %v", err)
 	}
 	sess := store.Session{
@@ -175,7 +176,10 @@ func TestDeleteCharacterRemovesProgressionAndSessions(t *testing.T) {
 	if err := s.CreateSession(ctx, sess); err != nil {
 		t.Fatalf("create session: %v", err)
 	}
-
+	resources := []store.AccountResourceAmount{{AccountID: acct.ID, ResourceID: "delete_test_shard", Amount: 3}}
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, remove.ID, nil, nil, nil, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: acct.ID}, resources, progression); err != nil {
+		t.Fatalf("create session snapshot: %v", err)
+	}
 	if err := s.DeleteCharacter(ctx, acct.ID, remove.ID); err != nil {
 		t.Fatalf("delete character: %v", err)
 	}

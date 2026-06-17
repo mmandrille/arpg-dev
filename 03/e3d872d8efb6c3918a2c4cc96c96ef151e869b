@@ -1,0 +1,39 @@
+docs/as-built/v247_mercenary-combat-stats.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 30
+docs/progress/slice-lifecycle.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 257-266
+docs/as-built/v245_blacksmith-second-recipe.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 29
+docs/as-built/v243_market-item-comparison.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 31-32
+docs/as-built/v250_boss-specific-telegraph-decals.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 26
+docs/as-built/v242_market-board-search-and-sort.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 32-33
+docs/as-built/v241_market-expiration-countdown.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 31-32
+docs/as-built/v249_boss-reward-panel.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 30
+docs/as-built/v248_ranged-threats-hit-companions.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 28
+docs/as-built/v246_blacksmith-upgrade-history.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 27
+docs/as-built/v244_material-wallet-window.md
+  s_4fdff9fc96d196::t_288d67dd8a6ce1 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "03e3d872d8efb6c3918a2c4cc96c96ef151e869b",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

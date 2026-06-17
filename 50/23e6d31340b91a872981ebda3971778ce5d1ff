@@ -1,0 +1,52 @@
+shared/protocol/session_snapshot.v8.schema.json
+  s_4fdff9fc96d196::t_4478661a0e072e 121,850-861
+server/internal/game/sim.go
+  s_4fdff9fc96d196::t_ddbb509f1c7607 5538
+  s_4fdff9fc96d196::t_4478661a0e072e 5535-5537
+client/tests/test_mercenary_panel.gd
+  s_4fdff9fc96d196::t_75da4d093fae1c 39,50-53
+server/internal/game/companion_combat_stats_view.go
+  s_4fdff9fc96d196::t_ddbb509f1c7607 56-63
+  s_4fdff9fc96d196::t_c2e383a9436ece 30-45,50-53
+  s_4fdff9fc96d196::t_4478661a0e072e 1-29,46-49,54-55
+tools/bot/scenarios/client/64_mercenary_combat_stats.json
+  s_4fdff9fc96d196::t_75da4d093fae1c 1-24
+server/internal/store/repos.go
+  s_4fdff9fc96d196::t_62b6895fcb593e 449
+PROGRESS.md
+  s_4fdff9fc96d196::t_626f0f2a324388 26,28-29
+server/internal/game/companion_ai_test.go
+  s_4fdff9fc96d196::t_c2e383a9436ece 36-45
+docs/plans/v247_2026-06-17-mercenary-combat-stats.md
+  s_4fdff9fc96d196::t_49cb1e831cadec 1-2,4-29,31-37,41-42,45-59,61,64-77,81-93,95-97
+  s_4fdff9fc96d196::t_626f0f2a324388 3,30,38-40,43-44,60,62-63,78-80,94,98-102
+docs/as-built/v247_mercenary-combat-stats.md
+  s_4fdff9fc96d196::t_626f0f2a324388 1-41
+docs/progress/slice-lifecycle.md
+  s_4fdff9fc96d196::t_626f0f2a324388 263
+client/scripts/main.gd
+  s_4fdff9fc96d196::t_3a6b886c2102b9 1418,2236
+docs/specs/v247_spec-mercenary-combat-stats.md
+  s_4fdff9fc96d196::t_49cb1e831cadec 1-2,4-61
+  s_4fdff9fc96d196::t_626f0f2a324388 3
+server/internal/game/types.go
+  s_4fdff9fc96d196::t_4478661a0e072e 58
+client/scripts/mercenary_panel.gd
+  s_4fdff9fc96d196::t_75da4d093fae1c 285,289-320
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5023e6d31340b91a872981ebda3971778ce5d1ff",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

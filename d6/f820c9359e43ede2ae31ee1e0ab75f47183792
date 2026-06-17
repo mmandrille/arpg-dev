@@ -1,0 +1,51 @@
+tools/bot/scenarios/36_account_stash_storage.json
+  s_4453edc542d5e6::t_2ca067e11f2777 34
+  s_4453edc542d5e6::t_af348bb1b5c73a 3,6
+docs/as-built/v254_area-scaled-dungeon-density.md
+  s_4453edc542d5e6::t_0d7771d3cb9353 27-29,44
+  s_4453edc542d5e6::t_07ad646b525d73 10-11,13-14,16,20-26,39-43,45
+  s_4453edc542d5e6::t_1b1e97703c5a75 47,50
+docs/specs/v254_spec-area-scaled-dungeon-density.md
+  s_4453edc542d5e6::t_b1781f2fa8ac6d 63
+  s_4453edc542d5e6::t_07ad646b525d73 58-59,61
+  s_4453edc542d5e6::t_30db8278bb3c6f 60
+PROGRESS.md
+  s_4453edc542d5e6::t_1b1e97703c5a75 28
+shared/golden/dungeon_obstacles.json
+  s_4453edc542d5e6::t_93bfcff270ac64 5-8,11-15,19-26,31-38,43-50,55-62,67-74,80-87,93-100,106-113,119-204,210-235,238-243,246-251,254-257,259,262-267,270-275,278-283,286-291,294-299,302-313,315-323,326-331,334-340,342-345,347-353,355-393,395-401,403-407
+  s_4453edc542d5e6::t_432cb04f32a55b 9-10,236-237,244-245,252-253,258,260-261,268-269,276-277,284-285,292-293,300-301,314,324-325,332-333,341,346,354,394,402
+tools/bot/scenarios/client/44_elite_objective_hud.json
+  s_4453edc542d5e6::t_f32f7e4ed7758c 28
+.maintainability/file-size-baseline.tsv
+  s_4453edc542d5e6::t_07ad646b525d73 17
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_4453edc542d5e6::t_58f843c0b623af 1-132
+tools/bot/scenarios/13_teleporter_lab.json
+  s_4453edc542d5e6::t_2012392e86aaeb 7
+shared/rules/dungeon_generation.v0.json
+  s_4453edc542d5e6::t_52357349662915 25-26,71
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_4453edc542d5e6::t_f32f7e4ed7758c 5,8-14
+docs/plans/v254_2026-06-17-area-scaled-dungeon-density.md
+  s_4453edc542d5e6::t_0d7771d3cb9353 103-104,116,149
+  s_4453edc542d5e6::t_07ad646b525d73 34,42,101-102,111-115,117,144-148,150
+  s_4453edc542d5e6::t_1b1e97703c5a75 152,154-155
+docs/progress/slice-lifecycle.md
+  s_4453edc542d5e6::t_1b1e97703c5a75 269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d6f820c9359e43ede2ae31ee1e0ab75f47183792",
+  "prompts": {},
+  "sessions": {
+    "s_4453edc542d5e6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed720-932f-7c32-883f-902d235a5fbf",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

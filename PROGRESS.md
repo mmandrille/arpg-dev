@@ -27,8 +27,8 @@ Last updated: 2026-06-16
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green after v226-v232 `$autoloop` batch on 2026-06-16 |
 | **Next slice** | TBD |
-| **Last engineering review** | v223 — [`docs/reviews/20260616_v223-overview.md`](docs/reviews/20260616_v223-overview.md) (2026-06-16) |
-| **Next engineering review** | v233 after the next feature batch, once CI is green |
+| **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
+| **Next engineering review** | v242 after the next feature batches, once CI is green |
 
 
 ### Periodic engineering reviews
@@ -87,9 +87,9 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Companion tuning and monster-rarity validation need data/golden ownership.** The v223 review
-  keeps the v200 finding open: companion/elite follow tuning remains code-owned, and monster rarity
-  validation still pins tuning values in Go instead of a schema-backed catalog or named golden.
+- **Review follow-ups need data/tooling ownership.** The v232 review keeps companion/elite follow
+  tuning and monster-rarity validation open, and adds small process/tooling paydown for agent
+  review/refactor order plus the remaining `helpers=globals()` bot-runtime cluster.
 
 ### Other deferred items (from specs / ADRs)
 

@@ -1,0 +1,37 @@
+server/internal/game/companion_ai.go
+  s_93e7a5291ddc6c::t_b54c3d9d46062e 49,209,239-240,243-244,246-249,357,359,451,454
+shared/rules/main_config.v0.schema.json
+  s_93e7a5291ddc6c::t_b851f57def995c 13,27-30
+server/internal/game/mercenary_hiring.go
+  s_93e7a5291ddc6c::t_1e299a586b3388 89
+server/internal/game/elite_minion_ai.go
+  s_93e7a5291ddc6c::t_b54c3d9d46062e 45,61-62
+server/internal/game/companion_ai_test.go
+  s_93e7a5291ddc6c::t_284bcb37b55f39 75-97
+server/internal/game/rules.go
+  s_93e7a5291ddc6c::t_b851f57def995c 60-62,1006-1013
+shared/rules/main_config.v0.json
+  s_93e7a5291ddc6c::t_b851f57def995c 15-18
+server/internal/game/game_test.go
+  s_93e7a5291ddc6c::t_284bcb37b55f39 131-134
+tools/validate_main_config.py
+  s_93e7a5291ddc6c::t_284bcb37b55f39 52-60
+server/internal/game/ranger_skills_test.go
+  s_93e7a5291ddc6c::t_1e299a586b3388 179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "399c2d200377ccb0cd39e746440bce05a3e6c445",
+  "prompts": {},
+  "sessions": {
+    "s_93e7a5291ddc6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed3d2-69d2-7ee2-8e68-16db0016a79d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

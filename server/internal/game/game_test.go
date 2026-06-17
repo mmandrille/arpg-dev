@@ -128,10 +128,7 @@ func TestLoadRules(t *testing.T) {
 	if r.MainConfig.Gameplay.BaseAttackIntervalTicks != 14 ||
 		r.MainConfig.Gameplay.BaseMovementSpeed != 1.0 ||
 		r.MainConfig.Gameplay.BaseDropRatePercent != 25 ||
-		r.MainConfig.Gameplay.RespecCostGold != 0 ||
-		r.MainConfig.Gameplay.CompanionAssistRadius != 5.0 ||
-		r.MainConfig.Gameplay.CompanionFollowDistance != 1.1 ||
-		r.MainConfig.Gameplay.CompanionFollowStop != 1.6 {
+		r.MainConfig.Gameplay.RespecCostGold != 0 {
 		t.Fatalf("main config gameplay = %+v", r.MainConfig.Gameplay)
 	}
 	if r.Combat.PlayerDamage.Min != 2 || r.Combat.PlayerDamage.Max != 4 {

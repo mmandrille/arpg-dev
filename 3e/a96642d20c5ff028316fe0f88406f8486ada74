@@ -1,0 +1,40 @@
+docs/plans/v238_2026-06-17-blacksmith-recipe-selector.md
+  s_aa3e23b9c2eeb6::t_ae4737aa78a377 1-2,4-28,30-31,34-44,47,50-56,60-75,77-79
+  s_aa3e23b9c2eeb6::t_a952705b85284b 3,29,32-33,45-46,48-49,57-59,76,80-83
+docs/progress/slice-lifecycle.md
+  s_aa3e23b9c2eeb6::t_a952705b85284b 254
+tools/bot/scenarios/client/55_blacksmith_recipe_selector.json
+  s_aa3e23b9c2eeb6::t_fe9dde4b67f410 1-21
+client/tests/test_shop_panel.gd
+  s_aa3e23b9c2eeb6::t_fe9dde4b67f410 494
+docs/progress/scenario-catalog.md
+  s_aa3e23b9c2eeb6::t_a952705b85284b 91
+client/scripts/blacksmith_panel.gd
+  s_aa3e23b9c2eeb6::t_fe9dde4b67f410 10,34,151-154,216-217,226,403-404,414-459
+docs/as-built/v238_blacksmith-recipe-selector.md
+  s_aa3e23b9c2eeb6::t_a952705b85284b 1-40
+docs/progress/slice-codename-index.md
+  s_aa3e23b9c2eeb6::t_a952705b85284b 215
+PROGRESS.md
+  s_aa3e23b9c2eeb6::t_a952705b85284b 26,28-29
+docs/specs/v238_spec-blacksmith-recipe-selector.md
+  s_aa3e23b9c2eeb6::t_ae4737aa78a377 1-49
+client/tests/test_blacksmith_panel.gd
+  s_aa3e23b9c2eeb6::t_fe9dde4b67f410 40-43,47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3ea96642d20c5ff028316fe0f88406f8486ada74",
+  "prompts": {},
+  "sessions": {
+    "s_aa3e23b9c2eeb6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed3df-5c04-7483-9274-6021ae385ba4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

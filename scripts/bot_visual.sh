@@ -9,6 +9,7 @@ cd "$ROOT"
 # shellcheck source=quiet_helpers.sh
 source "$ROOT/scripts/quiet_helpers.sh"
 
+CLIENT_SCENARIOS_DIR="$ROOT/tools/bot/scenarios/client"
 GODOT="${GODOT:-godot}"
 GODOT_FLAGS="${GODOT_FLAGS:-}"
 DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
@@ -31,6 +32,34 @@ if ! command -v "$GODOT" >/dev/null 2>&1; then
   echo "[bot-visual] Godot runtime '$GODOT' not found on PATH."
   echo "[bot-visual] Install Godot $(cat "$ROOT/.godot-version") and re-run, or set GODOT=/path/to/godot."
   exit 1
+fi
+
+is_client_scenario_selection() {
+  local selection="$1"
+  local f bn
+  if [[ -f "$selection" ]]; then
+    case "$selection" in
+      "$CLIENT_SCENARIOS_DIR"/*.json|tools/bot/scenarios/client/*.json|*/tools/bot/scenarios/client/*.json)
+        return 0
+        ;;
+    esac
+    return 1
+  fi
+  while IFS= read -r -d '' f; do
+    bn="$(basename "$f" .json)"
+    if [[ "$bn" == "$selection" || "$bn.json" == "$selection" || "$bn" == *"_$selection" || "$bn" == "$selection"* ]]; then
+      return 0
+    fi
+  done < <(find "$CLIENT_SCENARIOS_DIR" -maxdepth 1 -name '*.json' -print0 | sort -z)
+  return 1
+}
+
+if [[ "$SCENARIO" != "all" ]] && is_client_scenario_selection "$SCENARIO"; then
+  echo "[bot-visual] '$SCENARIO' is a Godot client scenario; running visible client bot instead of protocol replay recording."
+  BOT_STEP_DELAY="${BOT_STEP_DELAY:-$AUTOPLAY_STEP_DELAY}" \
+    GODOT="$GODOT" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" DEBUG_TOKEN="$DEBUG_TOKEN" \
+    SCENARIO="$SCENARIO" HEADLESS="${HEADLESS:-0}" ./scripts/bot_client_local.sh
+  exit $?
 fi
 
 SERVER_PID=""

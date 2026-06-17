@@ -26,6 +26,7 @@ try:
         skill_presentation_entries,
         skill_rule_entries,
     )
+    from .dungeon_density import area_density_count, validate_area_count_formula, validate_area_range_formula
     from .validate_boss_patterns import validate_boss_patterns
     from .validate_i18n import validate_i18n_catalog, validate_locale_catalog
     from .validate_item_presentations import validate_item_presentations
@@ -39,6 +40,7 @@ except ImportError:  # pragma: no cover - direct script execution
         skill_presentation_entries,
         skill_rule_entries,
     )
+    from dungeon_density import area_density_count, validate_area_count_formula, validate_area_range_formula  # type: ignore[no-redef]
     from validate_boss_patterns import validate_boss_patterns  # type: ignore[no-redef]
     from validate_i18n import validate_i18n_catalog, validate_locale_catalog  # type: ignore[no-redef]
     from validate_item_presentations import validate_item_presentations  # type: ignore[no-redef]
@@ -455,7 +457,7 @@ def cross_checks(report: Report) -> None:
             report.ok(f"monster {mid} chase behavior is valid")
 
     monster_placement = dungeon_generation["monster_placement"]
-    monster_count = int(monster_placement["count"])
+    monster_count = area_density_count(monster_placement.get("population_formula", {}), dungeon_generation["floor_size"])
     pool = monster_placement.get("monster_pool", [])
     minimums = monster_placement.get("minimum_monsters", [])
     if monster_count > 0:
@@ -482,8 +484,9 @@ def cross_checks(report: Report) -> None:
         if pool and total_weight <= 0:
             report.fail("dungeon monster_pool", "total weight must be positive")
             failed_pool = True
-        if min_total > monster_count:
-            report.fail("dungeon minimum_monsters", f"total {min_total} exceeds count {monster_count}")
+        max_population = int(monster_placement.get("population_formula", {}).get("max", 0))
+        if min_total > max_population:
+            report.fail("dungeon minimum_monsters", f"total {min_total} exceeds max population {max_population}")
             failed_pool = True
         archer = monsters["monsters"].get("dungeon_archer")
         if archer is None or archer.get("attack_mode") != "ranged":
@@ -1250,9 +1253,17 @@ def cross_checks(report: Report) -> None:
     monster_placement = dungeon_generation.get("monster_placement", {})
     monster_id = monster_placement.get("monster_def_id")
     monster_def = monsters["monsters"].get(monster_id)
-    if monster_placement.get("count", -1) < 0:
-        report.fail("dungeon_generation monster_placement", "count must be non-negative")
-    elif monster_def is None:
+    population_formula_ok = validate_area_count_formula(
+        report,
+        "dungeon_generation monster_placement.population_formula",
+        monster_placement.get("population_formula", {}),
+    )
+    pack_formula_ok = validate_area_range_formula(
+        report,
+        "dungeon_generation monster_placement.pack_count_formula",
+        monster_placement.get("pack_count_formula", {}),
+    )
+    if monster_def is None:
         report.fail("dungeon_generation monster_placement", f"unknown monster_def_id {monster_id}")
     elif monster_def.get("behavior", "static") != "chase":
         report.fail("dungeon_generation monster_placement", f"{monster_id} must be a chase monster")
@@ -1262,7 +1273,7 @@ def cross_checks(report: Report) -> None:
         report.fail("dungeon_generation monster_placement", "min_spawn_distance must be positive")
     elif monster_placement.get("max_attempts", 0) <= 0:
         report.fail("dungeon_generation monster_placement", "max_attempts must be positive")
-    else:
+    elif population_formula_ok and pack_formula_ok:
         report.ok("dungeon_generation monster placement is valid")
     chest_placement = dungeon_generation.get("chest_placement", {})
     chest_interactable_id = chest_placement.get("interactable_def_id")
@@ -1309,7 +1320,7 @@ def cross_checks(report: Report) -> None:
     else:
         report.ok("dungeon_generation elite objective is valid")
     obstacle_generation = dungeon_generation.get("obstacle_generation", {})
-    target_group_count = obstacle_generation.get("target_group_count", {})
+    target_group_formula = obstacle_generation.get("target_group_count_formula", {})
     wall_segment = obstacle_generation.get("wall_segment", {})
     solid_block = obstacle_generation.get("solid_block", {})
     shape_weights = obstacle_generation.get("shape_weights", {})
@@ -1318,8 +1329,7 @@ def cross_checks(report: Report) -> None:
     if obstacle_generation.get("max_attempts", 0) <= 0:
         report.fail("dungeon_generation obstacle_generation", "max_attempts must be positive")
         obstacle_failed = True
-    elif target_group_count.get("min", -1) < 0 or target_group_count.get("max", -1) < target_group_count.get("min", 0):
-        report.fail("dungeon_generation obstacle_generation.target_group_count", "min/max range is invalid")
+    elif not validate_area_range_formula(report, "dungeon_generation obstacle_generation.target_group_count_formula", target_group_formula):
         obstacle_failed = True
     elif wall_segment.get("min_length", 0) <= 0 or wall_segment.get("max_length", 0) < wall_segment.get("min_length", 0):
         report.fail("dungeon_generation obstacle_generation.wall_segment", "min/max length range is invalid")

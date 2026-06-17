@@ -224,19 +224,21 @@ type TeleporterPlacementRules struct {
 }
 
 type MonsterPlacementRules struct {
-	Count            int                   `json:"count"`
-	MonsterDefID     string                `json:"monster_def_id"`
-	PackCount        IntRange              `json:"pack_count"`
-	PackSize         IntRange              `json:"pack_size"`
-	PackMemberRadius float64               `json:"pack_member_radius"`
-	PackComposition  PackCompositionRules  `json:"pack_composition"`
-	ElitePackChance  int                   `json:"elite_pack_chance_percent"`
-	EliteAura        *EliteAuraRules       `json:"elite_aura,omitempty"`
-	MonsterPool      []MonsterPoolEntry    `json:"monster_pool,omitempty"`
-	MinimumMonsters  []MinimumMonsterEntry `json:"minimum_monsters,omitempty"`
-	MarginFromWall   float64               `json:"margin_from_wall"`
-	MinSpawnDistance float64               `json:"min_spawn_distance"`
-	MaxAttempts      int                   `json:"max_attempts"`
+	Count             int                   `json:"-"`
+	MonsterDefID      string                `json:"monster_def_id"`
+	PopulationFormula AreaCountFormula      `json:"population_formula"`
+	PackCount         IntRange              `json:"-"`
+	PackCountFormula  AreaRangeFormula      `json:"pack_count_formula"`
+	PackSize          IntRange              `json:"pack_size"`
+	PackMemberRadius  float64               `json:"pack_member_radius"`
+	PackComposition   PackCompositionRules  `json:"pack_composition"`
+	ElitePackChance   int                   `json:"elite_pack_chance_percent"`
+	EliteAura         *EliteAuraRules       `json:"elite_aura,omitempty"`
+	MonsterPool       []MonsterPoolEntry    `json:"monster_pool,omitempty"`
+	MinimumMonsters   []MinimumMonsterEntry `json:"minimum_monsters,omitempty"`
+	MarginFromWall    float64               `json:"margin_from_wall"`
+	MinSpawnDistance  float64               `json:"min_spawn_distance"`
+	MaxAttempts       int                   `json:"max_attempts"`
 }
 
 type EliteAuraRules struct {
@@ -272,13 +274,14 @@ type ChestPlacementRules struct {
 }
 
 type ObstacleGenerationRules struct {
-	Enabled          bool                   `json:"enabled"`
-	MaxAttempts      int                    `json:"max_attempts"`
-	TargetGroupCount IntRange               `json:"target_group_count"`
-	WallSegment      WallSegmentRules       `json:"wall_segment"`
-	SolidBlock       SolidBlockRules        `json:"solid_block"`
-	ShapeWeights     ObstacleShapeWeights   `json:"shape_weights"`
-	Clearance        ObstacleClearanceRules `json:"clearance"`
+	Enabled                 bool                   `json:"enabled"`
+	MaxAttempts             int                    `json:"max_attempts"`
+	TargetGroupCount        IntRange               `json:"-"`
+	TargetGroupCountFormula AreaRangeFormula       `json:"target_group_count_formula"`
+	WallSegment             WallSegmentRules       `json:"wall_segment"`
+	SolidBlock              SolidBlockRules        `json:"solid_block"`
+	ShapeWeights            ObstacleShapeWeights   `json:"shape_weights"`
+	Clearance               ObstacleClearanceRules `json:"clearance"`
 }
 
 type IntRange struct {
@@ -1833,20 +1836,26 @@ func LoadRules(dir string) (*Rules, error) {
 	if dungeonGeneration.TeleporterPlacement.MaxAttempts <= 0 {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.teleporter_placement.max_attempts: must be positive")
 	}
-	if dungeonGeneration.MonsterPlacement.Count < 0 {
-		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.count: must be non-negative")
+	if err := validateAreaCountFormula("dungeon_generation.monster_placement.population_formula", dungeonGeneration.MonsterPlacement.PopulationFormula); err != nil {
+		return nil, err
 	}
-	if dungeonGeneration.MonsterPlacement.Count > 0 {
-		monsterID := dungeonGeneration.MonsterPlacement.MonsterDefID
-		monsterDef, ok := r.Monsters[monsterID]
-		if !ok {
-			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_def_id: unknown monster %s", monsterID)
-		}
-		if monsterDef.effectiveBehavior() != monsterBehaviorChase {
-			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_def_id: %s must use chase behavior", monsterID)
-		}
+	if err := validateAreaRangeFormula("dungeon_generation.monster_placement.pack_count_formula", dungeonGeneration.MonsterPlacement.PackCountFormula); err != nil {
+		return nil, err
 	}
-	if err := validateMonsterPlacementPool(dungeonGeneration.MonsterPlacement, r); err != nil {
+	monsterID := dungeonGeneration.MonsterPlacement.MonsterDefID
+	monsterDef, ok := r.Monsters[monsterID]
+	if !ok {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_def_id: unknown monster %s", monsterID)
+	}
+	if monsterDef.effectiveBehavior() != monsterBehaviorChase {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.monster_def_id: %s must use chase behavior", monsterID)
+	}
+	baseDungeonGeneration := DungeonGenerationRules{
+		FloorSize:          dungeonGeneration.FloorSize,
+		MonsterPlacement:   dungeonGeneration.MonsterPlacement,
+		ObstacleGeneration: dungeonGeneration.ObstacleGeneration,
+	}.withDensityForSize(dungeonGeneration.FloorSize)
+	if err := validateMonsterPlacementPool(baseDungeonGeneration.MonsterPlacement, r); err != nil {
 		return nil, err
 	}
 	if aura := dungeonGeneration.MonsterPlacement.EliteAura; aura != nil {
@@ -1898,6 +1907,9 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 	if err := validateEliteObjectiveRules(dungeonGeneration.EliteObjective, r); err != nil {
+		return nil, err
+	}
+	if err := validateAreaRangeFormula("dungeon_generation.obstacle_generation.target_group_count_formula", dungeonGeneration.ObstacleGeneration.TargetGroupCountFormula); err != nil {
 		return nil, err
 	}
 	if err := validateObstacleGenerationRules(dungeonGeneration.ObstacleGeneration, dungeonGeneration.FloorSize); err != nil {
@@ -1956,7 +1968,7 @@ func LoadRules(dir string) (*Rules, error) {
 		LevelNames:               dungeonGeneration.LevelNames,
 		DefaultLevelNameTemplate: dungeonGeneration.DefaultLevelNameTemplate,
 		monsterPackRoles:         monsterPackRoles,
-	}
+	}.withDensityForSize(dungeonGeneration.FloorSize)
 	if err := r.applyMainConfigDungeonMonsterDropRate(); err != nil {
 		return nil, err
 	}
@@ -2145,9 +2157,6 @@ func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
 func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFloorSize) error {
 	if o.MaxAttempts <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.max_attempts: must be positive")
-	}
-	if o.TargetGroupCount.Min < 0 || o.TargetGroupCount.Max < o.TargetGroupCount.Min {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.target_group_count: invalid min/max")
 	}
 	if o.WallSegment.MinLength <= 0 || o.WallSegment.MaxLength < o.WallSegment.MinLength {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.wall_segment: invalid min/max length")

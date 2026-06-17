@@ -95,6 +95,21 @@ func _test_boss_visuals() -> void:
 	var controller = BossVisualsControllerScript.new(ctx, null)
 	_assert_eq("active boss id", controller.active_boss_entity_id(), "boss_a")
 	_assert_eq("boss title", controller.boss_health_bar_title("cave_warden"), "Cave Warden")
+	var root := Node3D.new()
+	get_root().add_child(root)
+	var rec := {"node": root, "visual_scale": 1.0, "boss_phase": {"pattern_id": "stone_lance"}}
+	controller.sync_boss_telegraph_marker(rec, {"hit_shape": "line", "radius": 7.5, "width": 1.0, "to_color": "#79b8ff"})
+	_assert_eq("line marker shape", str(rec.get("telegraph_marker_shape", "")), "line")
+	_assert_true("line marker exists", root.find_child(ClientConstantsScript.BOSS_TELEGRAPH_MARKER_NAME, false, false) != null)
+	rec["boss_phase"] = {"pattern_id": "shard_fan"}
+	controller.sync_boss_telegraph_marker(rec, {"hit_shape": "cone", "radius": 5.8, "width": 70.0, "to_color": "#ffd166"})
+	_assert_eq("cone marker shape", str(rec.get("telegraph_marker_shape", "")), "cone")
+	rec["boss_phase"] = {"pattern_id": "summon_wolves"}
+	controller.sync_boss_telegraph_marker(rec, {"hit_shape": "circle", "radius": 3.2, "to_color": "#4fd18b"})
+	_assert_eq("summon marker shape", str(rec.get("telegraph_marker_shape", "")), "summon_circle")
+	controller.remove_boss_telegraph_marker(rec)
+	_assert_eq("marker cleanup", bool(rec.get("has_boss_telegraph_marker", true)), false)
+	root.queue_free()
 
 
 func _assert_eq(label: String, got, want) -> void:

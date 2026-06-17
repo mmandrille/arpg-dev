@@ -185,25 +185,25 @@ func sync_boss_telegraph_marker(rec: Dictionary, telegraph: Dictionary) -> void:
 		marker.position = Vector3(0.0, 0.035, 0.0)
 		node.add_child(marker)
 	var radius := maxf(0.1, float(telegraph.get("radius", 1.0)))
+	var width := maxf(0.1, float(telegraph.get("width", radius)))
 	var visual_scale := maxf(0.1, float(rec.get("visual_scale", 1.0)))
 	var local_radius := radius / visual_scale
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = local_radius
-	mesh.bottom_radius = local_radius
-	mesh.height = 0.035
-	mesh.radial_segments = 48
-	marker.mesh = mesh
+	var shape := boss_telegraph_marker_shape(rec, telegraph)
+	marker.mesh = boss_telegraph_marker_mesh(shape, local_radius, width / visual_scale)
 	var color := Color(str(telegraph.get("to_color", "#ff4a32")))
 	color.a = 0.34
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	marker.material_override = mat
 	rec["boss_telegraph_active"] = true
 	rec["telegraph_tint"] = color.to_html(false)
 	rec["has_boss_telegraph_marker"] = true
 	rec["telegraph_radius"] = radius
+	rec["telegraph_marker_shape"] = shape
+	rec["telegraph_marker_width"] = width
 	rec["telegraph_marker_color"] = color.to_html(false)
 
 func remove_boss_telegraph_marker(rec: Dictionary) -> void:
@@ -214,4 +214,57 @@ func remove_boss_telegraph_marker(rec: Dictionary) -> void:
 			marker.queue_free()
 	rec["has_boss_telegraph_marker"] = false
 	rec["telegraph_radius"] = 0.0
+	rec["telegraph_marker_shape"] = ""
+	rec["telegraph_marker_width"] = 0.0
 	rec["telegraph_marker_color"] = ""
+
+func boss_telegraph_marker_shape(rec: Dictionary, telegraph: Dictionary) -> String:
+	var phase: Dictionary = rec.get("boss_phase", {})
+	var pattern_id := str(phase.get("pattern_id", ""))
+	var hit_shape := str(telegraph.get("hit_shape", ""))
+	if pattern_id == "summon_wolves":
+		return "summon_circle"
+	if hit_shape in ["line", "cone", "melee_contact"]:
+		return hit_shape
+	var telegraph_type := str(telegraph.get("type", ""))
+	return telegraph_type if telegraph_type != "" else "circle"
+
+func boss_telegraph_marker_mesh(shape: String, local_radius: float, local_width: float) -> Mesh:
+	match shape:
+		"line":
+			var line := BoxMesh.new()
+			line.size = Vector3(maxf(0.1, local_width), 0.035, maxf(0.1, local_radius * 2.0))
+			return line
+		"cone":
+			return _cone_marker_mesh(local_radius, local_width)
+		"melee_contact":
+			return _circle_marker_mesh(local_radius, 12)
+		_:
+			return _circle_marker_mesh(local_radius, 48)
+
+func _circle_marker_mesh(local_radius: float, segments: int) -> CylinderMesh:
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = local_radius
+	mesh.bottom_radius = local_radius
+	mesh.height = 0.035
+	mesh.radial_segments = max(6, segments)
+	return mesh
+
+func _cone_marker_mesh(local_radius: float, width_degrees: float) -> ArrayMesh:
+	var half_angle := deg_to_rad(clampf(width_degrees, 10.0, 160.0) * 0.5)
+	var steps := 18
+	var vertices := PackedVector3Array()
+	var indices := PackedInt32Array()
+	vertices.append(Vector3.ZERO)
+	for i in range(steps + 1):
+		var t := -half_angle + (half_angle * 2.0 * float(i) / float(steps))
+		vertices.append(Vector3(sin(t) * local_radius, 0.0, cos(t) * local_radius))
+	for i in range(1, steps + 1):
+		indices.append_array(PackedInt32Array([0, i, i + 1]))
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh

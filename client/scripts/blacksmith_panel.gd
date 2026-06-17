@@ -6,6 +6,7 @@ signal upgrade_inventory_requested(item_instance_id: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
+const BlacksmithUpgradeHistoryScript := preload("res://scripts/blacksmith_upgrade_history.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const PANEL_SIZE := Vector2(320, 260)
 const STAGE_SLOT_SIZE := Vector2(84, 84)
@@ -35,6 +36,7 @@ var _panel: DraggableWindow
 var _status_label: Label
 var _gold_label: Label
 var _recipe_selector: OptionButton
+var _history_view: Control
 var _rows: VBoxContainer
 
 class BlacksmithStageSlot:
@@ -120,6 +122,7 @@ func update_after_upgrade(item: Dictionary, next_gold: int, next_stash_gold: int
 	stash_gold = next_stash_gold
 	resource_wallet = next_resource_wallet.duplicate(true)
 	show_status(("Upgraded for %d gold" if success else "Upgrade failed for %d gold") % charged_cost, not success)
+	_history_view.record_attempt(_selected_recipe_label(), _item_title(item), success, charged_cost)
 	_rebuild()
 
 func bot_click_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
@@ -179,6 +182,7 @@ func get_debug_state() -> Dictionary:
 		"stage_slot_centered": true,
 		"stage_icon_visible": not staged_item.is_empty(),
 		"preview_lines": _upgrade_preview_lines(staged_item) if not staged_item.is_empty() else [],
+		"upgrade_history": _history_view.get_debug_state() if _history_view != null else {},
 		"instruction_visible": false,
 		"rows": _debug_rows(),
 		"status": _status_label.text if _status_label != null else "",
@@ -240,6 +244,8 @@ func _build() -> void:
 	_rows.alignment = BoxContainer.ALIGNMENT_CENTER
 	_rows.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	root.add_child(_rows)
+	_history_view = BlacksmithUpgradeHistoryScript.new()
+	root.add_child(_history_view)
 
 func _rebuild() -> void:
 	_gold_label.text = "Gold: %d  Stash: %d" % [gold, stash_gold]

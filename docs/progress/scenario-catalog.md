@@ -89,6 +89,7 @@ market_trade_receipts: headless Godot client cancels an outgoing market offer �
 mystery_seller_silhouettes: headless Godot client opens the mystery seller → verifies concealed rows include safe slot-derived silhouette clues
 material_wallet_details: headless Godot client auto-picks an upgrade shard → verifies the compact wallet tooltip includes catalog-backed details
 blacksmith_recipe_selector: headless Godot client stages a blacksmith item → verifies the active recipe appears in the preview
+mercenary_stats_card: headless Godot client hires a mercenary → verifies the companion panel stats card shows HP, stance, state, and id
 ```
 
 **Verify:**

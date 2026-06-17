@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v238 — blacksmith recipe selector |
+| **Latest completed slice** | v239 — mercenary stats card |
 | **Active branch** | `main` |
-| **CI gate** | Focused v238 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
-| **Next slice** | v239 — mercenary stats card |
+| **CI gate** | Focused v239 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
+| **Next slice** | v240 — boss portrait panel |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
 | **Next engineering review** | v242 after the next feature batches, once CI is green |
 

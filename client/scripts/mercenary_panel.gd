@@ -26,6 +26,8 @@ var _status_label: Label
 var _stance_label: Label
 var _stance_buttons: Dictionary = {}
 var _roster_label: Label
+var _stats_card: PanelContainer
+var _stats_label: Label
 var _companions: Array = []
 
 
@@ -133,6 +135,9 @@ func get_debug_state() -> Dictionary:
 		"stance_buttons": _stance_button_debug(),
 		"hired_count": _companions.size(),
 		"hired_rows": _companions.duplicate(true),
+		"stats_card_visible": _stats_card.visible if _stats_card != null else false,
+		"stats_card_text": _stats_card_text(),
+		"stats_card_lines": _stats_card_lines(),
 		"status": _status_label.text if _status_label != null else "",
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
@@ -201,6 +206,15 @@ func _build() -> void:
 	_roster_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	_roster_label.add_theme_color_override("font_color", Color("#d9c8b5"))
 	root.add_child(_roster_label)
+
+	_stats_card = PanelContainer.new()
+	_stats_card.add_theme_stylebox_override("panel", _stats_card_style())
+	root.add_child(_stats_card)
+	_stats_label = Label.new()
+	_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_stats_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE - 1)
+	_stats_label.add_theme_color_override("font_color", Color("#e5d4bd"))
+	_stats_card.add_child(_stats_label)
 	_render()
 
 
@@ -236,6 +250,10 @@ func _render() -> void:
 					str(rec.get("id", "")),
 				])
 			_roster_label.text = "\n".join(lines)
+	if _stats_card != null and _stats_label != null:
+		var stats_lines := _stats_card_lines()
+		_stats_card.visible = not stats_lines.is_empty()
+		_stats_label.text = "\n".join(stats_lines)
 
 
 func _request_stance(stance: String) -> void:
@@ -253,6 +271,24 @@ func _display_name(id: String) -> String:
 	if id == "mercenary_guard":
 		return "Mercenary Guard"
 	return id.capitalize()
+
+
+func _stats_card_text() -> String:
+	return "\n".join(_stats_card_lines())
+
+
+func _stats_card_lines() -> Array:
+	if _companions.is_empty():
+		return []
+	var rec := _companions[0] as Dictionary
+	var stance := _normalize_stance(str(rec.get("companion_stance", selected_stance))).capitalize()
+	return [
+		_display_name(str(rec.get("monster_def_id", ""))),
+		"HP: %d/%d" % [int(rec.get("hp", 0)), int(rec.get("max_hp", 0))],
+		"Stance: %s" % stance,
+		"State: Active",
+		"ID: %s" % str(rec.get("id", "")),
+	]
 
 
 func _normalize_stance(stance: String) -> String:
@@ -291,4 +327,23 @@ func _panel_style() -> StyleBoxFlat:
 	style.content_margin_top = 12
 	style.content_margin_right = 12
 	style.content_margin_bottom = 12
+	return style
+
+
+func _stats_card_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("#202b34")
+	style.border_color = Color("#7f9bad")
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_left = 6
+	style.corner_radius_bottom_right = 6
+	style.content_margin_left = 8
+	style.content_margin_top = 7
+	style.content_margin_right = 8
+	style.content_margin_bottom = 7
 	return style

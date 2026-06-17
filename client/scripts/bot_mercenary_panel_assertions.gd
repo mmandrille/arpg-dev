@@ -18,11 +18,21 @@ static func matches(step: Dictionary, state: Dictionary) -> bool:
 		return false
 	if step.has("status_contains") and not str(panel.get("status", "")).contains(str(step.get("status_contains", ""))):
 		return false
+	if step.has("stats_card_contains") and not _contains_all(str(panel.get("stats_card_text", "")), step.get("stats_card_contains", [])):
+		return false
 	var companion_bar: Dictionary = state.get("companion_bar", {})
 	if step.has("companion_bar_count") and int(companion_bar.get("count", -1)) != int(step.get("companion_bar_count", 0)):
 		return false
 	if step.has("companion_icon_kind") and not _companion_bar_has_icon_kind(companion_bar, str(step.get("companion_icon_kind", ""))):
 		return false
+	return true
+
+
+static func _contains_all(text: String, expected: Variant) -> bool:
+	var needles: Array = expected if typeof(expected) == TYPE_ARRAY else [expected]
+	for needle in needles:
+		if not text.contains(str(needle)):
+			return false
 	return true
 
 

@@ -62,11 +62,12 @@ func TestRandomQuestRewardFloorPlacesReachableChest(t *testing.T) {
 	if questChest == nil {
 		t.Fatalf("level %d for seed %s missing quest reward chest: %+v", levelNum, seed, level.chests)
 	}
-	start := generatedReachabilityStart(rules, level)
-	if !generatedTargetReachableFrom(rules, level, start, questChest.pos) {
+	levelRules := rules.RulesForLevel(levelNum)
+	start := generatedReachabilityStart(levelRules, level)
+	if !generatedTargetReachableFrom(levelRules, level, start, questChest.pos) {
 		t.Fatalf("quest reward chest at %+v unreachable from %+v", questChest.pos, start)
 	}
-	if err := validateGeneratedDungeonReachability(rules, level); err != nil {
+	if err := validateGeneratedDungeonReachability(levelRules, level); err != nil {
 		t.Fatalf("level %d reachability: %v", levelNum, err)
 	}
 }

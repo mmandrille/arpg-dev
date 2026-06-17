@@ -1,0 +1,39 @@
+docs/as-built/v250_boss-specific-telegraph-decals.md
+  s_4fdff9fc96d196::t_2d3ff3b99233c8 1-37
+client/scripts/bot_scenario_runner.gd
+  s_4fdff9fc96d196::t_7942b09585a304 477
+docs/specs/v250_spec-boss-specific-telegraph-decals.md
+  s_4fdff9fc96d196::t_abc72194e5cb86 1-2,4-54
+  s_4fdff9fc96d196::t_2d3ff3b99233c8 3
+client/scripts/boss_visuals_controller.gd
+  s_4fdff9fc96d196::t_7942b09585a304 188,191-192,199,205-206,217-218,220-270
+docs/plans/v250_2026-06-17-boss-specific-telegraph-decals.md
+  s_4fdff9fc96d196::t_abc72194e5cb86 1-2,4-34,37-38,41-52,57-68,72-84,86-88
+  s_4fdff9fc96d196::t_2d3ff3b99233c8 3,35-36,39-40,53-56,69-71,85,89-92
+PROGRESS.md
+  s_4fdff9fc96d196::t_2d3ff3b99233c8 26,28-29
+client/tests/test_factories.gd
+  s_4fdff9fc96d196::t_7942b09585a304 98-112
+tools/bot/scenarios/client/66_boss_telegraph_decals.json
+  s_4fdff9fc96d196::t_7942b09585a304 1-57
+docs/progress/slice-lifecycle.md
+  s_4fdff9fc96d196::t_2d3ff3b99233c8 266
+client/scripts/main.gd
+  s_4fdff9fc96d196::t_7942b09585a304 5408
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2f929d09845526e0902e2cd630353b807b571a5a",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

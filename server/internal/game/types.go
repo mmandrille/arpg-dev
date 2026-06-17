@@ -55,6 +55,7 @@ type EntityView struct {
 	OwnerID                    string                  `json:"owner_id,omitempty"`
 	TargetID                   string                  `json:"target_id,omitempty"`
 	CompanionStance            string                  `json:"companion_stance,omitempty"`
+	CombatStats                *CombatStatsView        `json:"combat_stats,omitempty"`
 	RemainingTicks             *int                    `json:"remaining_ticks,omitempty"`
 	TotalTicks                 *int                    `json:"total_ticks,omitempty"`
 	ProjectileDefID            string                  `json:"projectile_def_id,omitempty"`

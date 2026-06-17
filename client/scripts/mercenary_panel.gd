@@ -282,13 +282,42 @@ func _stats_card_lines() -> Array:
 		return []
 	var rec := _companions[0] as Dictionary
 	var stance := _normalize_stance(str(rec.get("companion_stance", selected_stance))).capitalize()
-	return [
+	var lines := [
 		_display_name(str(rec.get("monster_def_id", ""))),
 		"HP: %d/%d" % [int(rec.get("hp", 0)), int(rec.get("max_hp", 0))],
-		"Stance: %s" % stance,
-		"State: Active",
-		"ID: %s" % str(rec.get("id", "")),
 	]
+	lines.append_array(_combat_stat_lines(rec))
+	lines.append("Stance: %s" % stance)
+	lines.append("State: Active")
+	lines.append("ID: %s" % str(rec.get("id", "")))
+	return lines
+
+
+func _combat_stat_lines(rec: Dictionary) -> Array:
+	var stats: Dictionary = rec.get("combat_stats", {})
+	if stats.is_empty():
+		return []
+	return [
+		"Damage: %d-%d" % [int(stats.get("damage_min", 0)), int(stats.get("damage_max", 0))],
+		"Attack: %d ticks" % int(stats.get("attack_cooldown_ticks", 0)),
+		"Defense: Armor %s, Block %s" % [_format_number(stats.get("armor", 0.0)), _format_percent(stats.get("block_percent", 0.0))],
+		"Accuracy: Hit %s, Crit %s" % [_format_chance(stats.get("hit_chance", 0.0)), _format_chance(stats.get("crit_chance", 0.0))],
+	]
+
+
+func _format_number(value: Variant) -> String:
+	var number := float(value)
+	if absf(number - roundf(number)) < 0.01:
+		return str(int(roundf(number)))
+	return "%.1f" % number
+
+
+func _format_percent(value: Variant) -> String:
+	return "%s%%" % _format_number(value)
+
+
+func _format_chance(value: Variant) -> String:
+	return "%d%%" % int(roundf(float(value) * 100.0))
 
 
 func _normalize_stance(stance: String) -> String:

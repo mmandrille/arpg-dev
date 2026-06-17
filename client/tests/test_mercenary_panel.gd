@@ -36,7 +36,7 @@ func _run() -> void:
 		"total_gold": 50,
 	})
 	panel.set_companions([
-		{"id": "2001", "monster_def_id": "mercenary_guard", "hp": 24, "max_hp": 30, "companion_stance": "defend"},
+		{"id": "2001", "monster_def_id": "mercenary_guard", "hp": 24, "max_hp": 30, "companion_stance": "defend", "combat_stats": {"damage_min": 1, "damage_max": 3, "attack_cooldown_ticks": 28, "armor": 1.0, "block_percent": 5.0, "hit_chance": 0.75, "crit_chance": 0.05}},
 		{"id": "wolf-1", "monster_def_id": "ranger_wolf", "hp": 10, "max_hp": 10},
 	])
 	state = panel.get_debug_state()
@@ -47,6 +47,10 @@ func _run() -> void:
 	_assert_true("stats card visible", bool(state.get("stats_card_visible", false)))
 	_assert_true("stats card names guard", str(state.get("stats_card_text", "")).contains("Mercenary Guard"))
 	_assert_true("stats card shows hp", str(state.get("stats_card_text", "")).contains("HP: 24/30"))
+	_assert_true("stats card shows damage", str(state.get("stats_card_text", "")).contains("Damage: 1-3"))
+	_assert_true("stats card shows attack cooldown", str(state.get("stats_card_text", "")).contains("Attack: 28 ticks"))
+	_assert_true("stats card shows defense", str(state.get("stats_card_text", "")).contains("Defense: Armor 1, Block 5%"))
+	_assert_true("stats card shows accuracy", str(state.get("stats_card_text", "")).contains("Accuracy: Hit 75%, Crit 5%"))
 	_assert_true("stats card shows stance", str(state.get("stats_card_text", "")).contains("Stance: Defend"))
 	_assert_true("stats card shows id", str(state.get("stats_card_text", "")).contains("ID: 2001"))
 	var rows: Array = state.get("hired_rows", [])

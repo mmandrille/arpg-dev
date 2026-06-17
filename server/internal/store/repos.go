@@ -440,13 +440,13 @@ func (s *Store) DeleteStaleEmptySessions(ctx context.Context, updatedBefore time
 		if len(sessionIDs) == 0 {
 			return nil
 		}
-
 		deletes := []string{
 			`DELETE FROM session_inputs WHERE session_id = ANY($1)`,
 			`DELETE FROM session_events WHERE session_id = ANY($1)`,
 			`DELETE FROM inventory_items WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_account_stash_items WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_account_stash_gold WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_account_resource_wallet WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_shop_stock WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_skill_preferences WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_skill_bindings WHERE session_id = ANY($1)`,

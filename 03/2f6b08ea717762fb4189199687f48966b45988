@@ -1,0 +1,37 @@
+client/scripts/mercenary_panel.gd
+  s_4608faa4e48f01::t_894087ff5a4eea 83-93
+docs/as-built/v232_mercenary-recovery-ui.md
+  s_4608faa4e48f01::t_371bebd3c9f3aa 1-39
+docs/progress/slice-lifecycle.md
+  s_4608faa4e48f01::t_371bebd3c9f3aa 248
+docs/plans/v232_2026-06-16-mercenary-recovery-ui.md
+  s_4608faa4e48f01::t_f31de082331225 1-2,4-31,34-37,39-50,52,54-60,63-70,72-74
+  s_4608faa4e48f01::t_371bebd3c9f3aa 3,32-33,38,51,53,61-62,71,75-79
+client/scripts/mercenary_panel_bridge.gd
+  s_4608faa4e48f01::t_894087ff5a4eea 38-45,57-58
+client/tests/test_mercenary_panel.gd
+  s_4608faa4e48f01::t_894087ff5a4eea 58-63
+tools/bot/scenarios/client/49_mercenary_recovery_ui.json
+  s_4608faa4e48f01::t_c7d2eb83f32393 1-40
+docs/specs/v232_spec-mercenary-recovery-ui.md
+  s_4608faa4e48f01::t_371bebd3c9f3aa 3
+  s_4608faa4e48f01::t_f31de082331225 1-2,4-70
+PROGRESS.md
+  s_4608faa4e48f01::t_371bebd3c9f3aa 26,28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "032f6b08ea717762fb4189199687f48966b45988",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

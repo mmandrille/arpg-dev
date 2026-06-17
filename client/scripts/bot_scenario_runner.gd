@@ -474,7 +474,7 @@ func _presentation_matches(step: Dictionary, state: Dictionary) -> bool:
 func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 	if step.has("entity_type") and str(rec.get("type", "")) != str(step.get("entity_type", "")):
 		return false
-	for key in ["id", "monster_def_id", "character_id", "visual_model", "base_tint"]:
+	for key in ["id", "monster_def_id", "character_id", "visual_model", "base_tint", "telegraph_marker_shape"]:
 		if step.has(key) and str(rec.get(key, "")) != str(step.get(key, "")):
 			return false
 	if step.has("hp") and int(rec.get("hp", -999999)) != int(step.get("hp", 0)):

@@ -5405,7 +5405,7 @@ func _bot_entities_presentation_debug() -> Array:
 			"is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
 			"boss_phase": rec.get("boss_phase", {}), "boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
 			"telegraph_tint": str(rec.get("telegraph_tint", "")), "has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
-			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)), "telegraph_marker_color": str(rec.get("telegraph_marker_color", "")),
+			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)), "telegraph_marker_color": str(rec.get("telegraph_marker_color", "")), "telegraph_marker_shape": str(rec.get("telegraph_marker_shape", "")),
 			"base_tint": str(rec.get("base_tint", "")), "has_bow_marker": bool(rec.get("has_bow_marker", false)), "effect_ids": rec.get("effect_ids", []),
 			"monster_pack_id": str(rec.get("monster_pack_id", "")), "monster_pack_leader": bool(rec.get("monster_pack_leader", false)),
 			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)),

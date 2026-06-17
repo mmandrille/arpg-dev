@@ -1,0 +1,42 @@
+.maintainability/file-size-baseline.tsv
+  s_4608faa4e48f01::t_93bb64aa9b8e9c 22
+server/internal/game/resource_wallet.go
+  s_4608faa4e48f01::t_b847b2a09498ca 7-10,12-31,37,40,44-45,50-51,53-54
+PROGRESS.md
+  s_4608faa4e48f01::t_60cb19e01a519b 26,28
+server/internal/game/gold_auto_pickup_test.go
+  s_4608faa4e48f01::t_f88054b0850c18 76-125,277-279
+docs/progress/slice-lifecycle.md
+  s_4608faa4e48f01::t_60cb19e01a519b 245
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_4608faa4e48f01::t_cd2cd71ebd7999 11-12
+server/internal/game/sim.go
+  s_4608faa4e48f01::t_ba0c68c6cda79e 1043
+docs/plans/v229_2026-06-16-material-auto-pickup.md
+  s_4608faa4e48f01::t_e1a50262853173 1-2,4-32,37-38,41-56,58,60-69,71-82,84-89
+  s_4608faa4e48f01::t_60cb19e01a519b 3,33-36,39-40,57,59,70,83,90-93
+docs/specs/v229_spec-material-auto-pickup.md
+  s_4608faa4e48f01::t_60cb19e01a519b 3
+  s_4608faa4e48f01::t_e1a50262853173 1-2,4-66
+server/internal/game/auto_pickup.go
+  s_4608faa4e48f01::t_ba0c68c6cda79e 3
+  s_4608faa4e48f01::t_b847b2a09498ca 1-2,4-88
+docs/as-built/v229_material-auto-pickup.md
+  s_4608faa4e48f01::t_60cb19e01a519b 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9b8e922e3297acd2b1f8aa03160aaa38d96bbeb1",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

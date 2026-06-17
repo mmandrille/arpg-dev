@@ -1430,6 +1430,15 @@ func (f *fakeRepo) SetCharacterItemEquipped(context.Context, string, string, str
 	return nil
 }
 func (f *fakeRepo) RemoveCharacterItem(context.Context, string, string, string) error { return nil }
+func (f *fakeRepo) UpsertSessionStartItem(context.Context, string, store.CharacterItemInstance) error {
+	return nil
+}
+func (f *fakeRepo) SetSessionStartItemEquipped(context.Context, string, string, string, string, string, bool, int) error {
+	return nil
+}
+func (f *fakeRepo) RemoveSessionStartItem(context.Context, string, string, string, string) error {
+	return nil
+}
 func (f *fakeRepo) ListAccountWaypoints(context.Context, string, string) ([]store.CharacterWaypoint, error) {
 	return nil, nil
 }

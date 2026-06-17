@@ -348,15 +348,22 @@ func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 	if got := repo.items[0]; got.ID != "2001" || got.ItemDefID != "cave_blade" || got.Location != store.ItemLocationInventory {
 		t.Fatalf("persisted item = %+v, want unique-chest-style inventory item", got)
 	}
+	if len(repo.sessionStartItems) != 1 {
+		t.Fatalf("persisted session start item count = %d, want mirrored non-stash-transfer add: %+v", len(repo.sessionStartItems), repo.sessionStartItems)
+	}
+	if got := repo.sessionStartItems[0]; got.ID != "2001" || got.ItemDefID != "cave_blade" || got.Location != store.ItemLocationInventory {
+		t.Fatalf("persisted session start item = %+v, want mirrored unique-chest-style inventory item", got)
+	}
 }
 
 type progressionPersistRepo struct {
 	store.Repository
-	progressions []store.CharacterProgression
-	goldUpdates  []persistedGoldUpdate
-	resources    []store.AccountResourceAmount
-	events       []store.SessionEvent
-	items        []store.CharacterItemInstance
+	progressions      []store.CharacterProgression
+	goldUpdates       []persistedGoldUpdate
+	resources         []store.AccountResourceAmount
+	events            []store.SessionEvent
+	items             []store.CharacterItemInstance
+	sessionStartItems []store.CharacterItemInstance
 }
 
 type persistedGoldUpdate struct {
@@ -388,6 +395,19 @@ func (r *progressionPersistRepo) AppendEvent(_ context.Context, event store.Sess
 
 func (r *progressionPersistRepo) AddCharacterItem(_ context.Context, item store.CharacterItemInstance) error {
 	r.items = append(r.items, item)
+	return nil
+}
+
+func (r *progressionPersistRepo) UpsertSessionStartItem(_ context.Context, _ string, item store.CharacterItemInstance) error {
+	r.sessionStartItems = append(r.sessionStartItems, item)
+	return nil
+}
+
+func (r *progressionPersistRepo) SetSessionStartItemEquipped(context.Context, string, string, string, string, string, bool, int) error {
+	return nil
+}
+
+func (r *progressionPersistRepo) RemoveSessionStartItem(context.Context, string, string, string, string) error {
 	return nil
 }
 

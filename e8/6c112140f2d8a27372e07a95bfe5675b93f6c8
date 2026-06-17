@@ -1,0 +1,53 @@
+tools/validate_shared.py
+  s_25e37a9cdf1cec::t_c1d0cbb05da6a0 1479-1480
+shared/rules/boss_templates.v0.schema.json
+  s_25e37a9cdf1cec::t_4c69da65dbf187 58
+shared/assets/monster_visuals.v0.json
+  s_25e37a9cdf1cec::t_4c69da65dbf187 143-149
+shared/assets/monster_visuals.v0.schema.json
+  s_25e37a9cdf1cec::t_4c69da65dbf187 22,28
+client/tests/test_animation.gd
+  s_25e37a9cdf1cec::t_42ceb46655c5a1 269,283,298-299
+  s_25e37a9cdf1cec::t_ae588c15771d84 276-280
+  s_25e37a9cdf1cec::t_03bed659a662b0 282
+client/scenes/boss_amon.tscn
+  s_25e37a9cdf1cec::t_4c3e840462006d 13-14
+  s_25e37a9cdf1cec::t_ae588c15771d84 1,4,8-12
+  s_25e37a9cdf1cec::t_4c69da65dbf187 2-3,5-7
+client/assets/monsters/boss_amon/amon.glb.import
+  s_25e37a9cdf1cec::t_35dc380b3aeab7 7,12,42
+  s_25e37a9cdf1cec::t_4c69da65dbf187 1-6,8-11,13-41
+client/animations/boss_amon_anims.tres
+  s_25e37a9cdf1cec::t_ae588c15771d84 1-75
+shared/golden/boss_floor_-5.json
+  s_25e37a9cdf1cec::t_c1d0cbb05da6a0 18,20
+assets/manifests/assets.v0.json
+  s_25e37a9cdf1cec::t_ae588c15771d84 270-272
+  s_25e37a9cdf1cec::t_4c69da65dbf187 261-269,273-274
+client/scripts/monster_visuals_loader.gd
+  s_25e37a9cdf1cec::t_4c69da65dbf187 29
+shared/rules/boss_templates.v0.json
+  s_25e37a9cdf1cec::t_4c69da65dbf187 16,18-19
+client/scripts/main.gd
+  s_25e37a9cdf1cec::t_4c69da65dbf187 69,4837-4838
+  s_25e37a9cdf1cec::t_5409a23f07cba8 1405,4842
+  s_25e37a9cdf1cec::t_ae588c15771d84 1272-1274,4843
+server/internal/game/rules.go
+  s_25e37a9cdf1cec::t_4c69da65dbf187 2455
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e86c112140f2d8a27372e07a95bfe5675b93f6c8",
+  "prompts": {},
+  "sessions": {
+    "s_25e37a9cdf1cec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed5e6-9298-7863-bf62-5f50b5a6bb1d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

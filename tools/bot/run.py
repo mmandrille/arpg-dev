@@ -2162,22 +2162,33 @@ async def wait_for_teleporter_discovery(ws, state: RuntimeState, level: int, loo
     await wait_for_teleporter_discovery_impl(ws, state, level, loop, ctx=_runtime_context())
 
 
+def _wait_runtime_helpers() -> dict[str, Any]:
+    return {
+        "assert_character_progression": assert_character_progression,
+        "assert_skill_progression": assert_skill_progression,
+        "assert_skill_cooldown": assert_skill_cooldown,
+        "assert_player_position": assert_player_position,
+        "ingest_message": ingest_message,
+        "pump_one": pump_one,
+    }
+
+
 async def wait_for_character_progression(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
     from tools.bot.wait_runtime import wait_for_character_progression as wait_for_character_progression_impl
 
-    await wait_for_character_progression_impl(ws, state, expected, loop, helpers=globals())
+    await wait_for_character_progression_impl(ws, state, expected, loop, helpers=_wait_runtime_helpers())
 
 
 async def wait_for_skill_progression(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
     from tools.bot.wait_runtime import wait_for_skill_progression as wait_for_skill_progression_impl
 
-    await wait_for_skill_progression_impl(ws, state, expected, loop, helpers=globals())
+    await wait_for_skill_progression_impl(ws, state, expected, loop, helpers=_wait_runtime_helpers())
 
 
 async def wait_for_skill_cooldown(ws, state: RuntimeState, expected: dict[str, Any], loop) -> None:
     from tools.bot.wait_runtime import wait_for_skill_cooldown as wait_for_skill_cooldown_impl
 
-    await wait_for_skill_cooldown_impl(ws, state, expected, loop, helpers=globals())
+    await wait_for_skill_cooldown_impl(ws, state, expected, loop, helpers=_wait_runtime_helpers())
 
 
 async def wait_for_player_position(
@@ -2190,13 +2201,13 @@ async def wait_for_player_position(
 ) -> None:
     from tools.bot.wait_runtime import wait_for_player_position as wait_for_player_position_impl
 
-    await wait_for_player_position_impl(ws, state, x, y, tolerance, loop, helpers=globals())
+    await wait_for_player_position_impl(ws, state, x, y, tolerance, loop, helpers=_wait_runtime_helpers())
 
 
 async def pump_one(ws, state: RuntimeState, timeout: float) -> None:
     from tools.bot.wait_runtime import pump_one as pump_one_impl
 
-    await pump_one_impl(ws, state, timeout, helpers=globals())
+    await pump_one_impl(ws, state, timeout, helpers=_wait_runtime_helpers())
 
 
 def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:

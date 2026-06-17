@@ -4733,17 +4733,17 @@ func _current_teleporter_record() -> Dictionary:
 	return {}
 
 func _render_world_walls(world_id: String) -> void:
-	current_wall_layout = []
 	_ensure_wall_renderer()
-	if _wall_renderer != null:
-		current_wall_layout = _wall_renderer.render_world_walls(world_id)
+	current_wall_layout = _wall_renderer.render_world_walls(world_id) if _wall_renderer != null else []
+	_sync_fog_wall_layout()
 
 func _render_wall_layout(walls: Array) -> void:
-	current_wall_layout = []
 	_ensure_wall_renderer()
-	if _wall_renderer != null:
-		current_wall_layout = _wall_renderer.render_wall_layout(walls)
+	current_wall_layout = _wall_renderer.render_wall_layout(walls) if _wall_renderer != null else []
+	_sync_fog_wall_layout()
 
+func _sync_fog_wall_layout() -> void:
+	if fog_overlay != null: fog_overlay.set_wall_layout(current_wall_layout)
 func _clear_wall_nodes() -> void:
 	_ensure_wall_renderer()
 	if _wall_renderer != null:

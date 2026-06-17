@@ -42,7 +42,7 @@ func (s *Sim) advanceEliteMinionMovement(minion *entity, leader *entity, def Mon
 
 	minion.aiTargetPlayerID = 0
 	minion.aiMode = monsterAIModeIdle
-	if distance(minion.pos, leader.pos) <= companionFollowStopRadius {
+	if distance(minion.pos, leader.pos) <= s.rules.MainConfig.Gameplay.CompanionFollowStop {
 		return true
 	}
 	goal := s.eliteMinionFollowGoal(minion, leader)
@@ -58,8 +58,8 @@ func (s *Sim) eliteMinionFollowGoal(minion *entity, leader *entity) Vec2 {
 	slotIndex := int(minion.id % 6)
 	angle := (math.Pi * 2 * float64(slotIndex)) / 6.0
 	goal := Vec2{
-		X: leader.pos.X + math.Cos(angle)*companionFollowDistance,
-		Y: leader.pos.Y + math.Sin(angle)*companionFollowDistance,
+		X: leader.pos.X + math.Cos(angle)*s.rules.MainConfig.Gameplay.CompanionFollowDistance,
+		Y: leader.pos.Y + math.Sin(angle)*s.rules.MainConfig.Gameplay.CompanionFollowDistance,
 	}
 	if s.positionInNavigationBounds(nav, goal) && !s.monsterPositionBlocked(goal, minion.id) {
 		return goal

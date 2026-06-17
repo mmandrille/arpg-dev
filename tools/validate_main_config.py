@@ -49,3 +49,12 @@ def validate_main_config_gameplay(
         report.fail("main_config gameplay", "item_upgrade_max_level must be positive")
     else:
         report.ok("main_config gameplay owns starter item upgrade tuning")
+
+    if float(main_gameplay.get("companion_assist_radius", 0)) <= 0:
+        report.fail("main_config gameplay", "companion_assist_radius must be positive")
+    elif float(main_gameplay.get("companion_follow_distance", 0)) <= 0:
+        report.fail("main_config gameplay", "companion_follow_distance must be positive")
+    elif float(main_gameplay.get("companion_follow_stop_radius", 0)) <= 0:
+        report.fail("main_config gameplay", "companion_follow_stop_radius must be positive")
+    else:
+        report.ok("main_config gameplay owns companion and elite-minion follow tuning")

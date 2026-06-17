@@ -16,7 +16,7 @@ real runtime/connection state.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Awaitable, Callable
+from typing import Any, Awaitable, Callable
 
 
 @dataclass(frozen=True)
@@ -28,3 +28,14 @@ class BotContext:
     """
 
     pump_one: Callable[..., Awaitable[None]]
+
+
+@dataclass(frozen=True)
+class StateIngestContext:
+    """Runtime services needed by state ingestion.
+
+    Most state-ingest helpers are pure mutations on RuntimeState. Logging stays
+    injected because the bot runner owns verbosity and output routing.
+    """
+
+    log: Callable[..., Any]

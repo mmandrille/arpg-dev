@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 // Rules is the in-memory form of the shared rules-as-data (shared/rules). The
@@ -57,6 +58,9 @@ type MainGameplayConfig struct {
 	ItemUpgradeResourceID   string  `json:"item_upgrade_resource_item_def_id"`
 	ItemUpgradeResourceCost int     `json:"item_upgrade_resource_count"`
 	MercenaryHireCostGold   int     `json:"mercenary_hire_cost_gold"`
+	CompanionAssistRadius   float64 `json:"companion_assist_radius"`
+	CompanionFollowDistance float64 `json:"companion_follow_distance"`
+	CompanionFollowStop     float64 `json:"companion_follow_stop_radius"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -999,6 +1003,15 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.ItemUpgradePityFailures < 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_pity_failure_threshold: must be non-negative")
+	}
+	if mainConfig.Gameplay.CompanionAssistRadius <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.companion_assist_radius: must be positive")
+	}
+	if mainConfig.Gameplay.CompanionFollowDistance <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.companion_follow_distance: must be positive")
+	}
+	if mainConfig.Gameplay.CompanionFollowStop <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.companion_follow_stop_radius: must be positive")
 	}
 	if err := validateMainGameplayEconomyConfig(mainConfig.Gameplay); err != nil {
 		return nil, err
@@ -2304,43 +2317,26 @@ func validateMonsterDepthScaling(s MonsterDepthScalingRules, combat Combat) erro
 }
 
 func validateMonsterRarities(rarities []MonsterRarityDef) error {
-	expectedIDs := []string{"common", "champion", "rare", "unique"}
-	expectedWeights := map[string]int{
-		"common":   100,
-		"champion": 15,
-		"rare":     6,
-		"unique":   3,
+	if len(rarities) == 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities: must not be empty")
 	}
-	expectedOffsets := map[string]int{
-		"common":   0,
-		"champion": 1,
-		"rare":     2,
-		"unique":   3,
-	}
-	expectedVisualScales := map[string]float64{
-		"common":   1.0,
-		"champion": 1.25,
-		"rare":     1.0,
-		"unique":   1.5,
-	}
-	expectedColors := map[string]string{
-		"common":   "#f2f2ec",
-		"champion": "#9fc7ff",
-		"rare":     "#ff9b9b",
-		"unique":   "#ffd978",
-	}
-	if len(rarities) != len(expectedIDs) {
-		return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities: expected exactly %d rarities", len(expectedIDs))
-	}
+	seen := map[string]bool{}
 	for idx, rarity := range rarities {
-		if rarity.ID != expectedIDs[idx] {
-			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].id: expected %s", idx, expectedIDs[idx])
+		if rarity.ID == "" || strings.ToLower(rarity.ID) != rarity.ID {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].id: must be stable lowercase", idx)
 		}
-		if rarity.Weight != expectedWeights[rarity.ID] {
-			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].weight: expected %d", idx, expectedWeights[rarity.ID])
+		if seen[rarity.ID] {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].id: duplicate %s", idx, rarity.ID)
 		}
-		if rarity.Color != expectedColors[rarity.ID] {
-			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].color: expected %s", idx, expectedColors[rarity.ID])
+		seen[rarity.ID] = true
+		if rarity.Weight <= 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].weight: must be positive", idx)
+		}
+		if len(rarity.Color) != 7 || rarity.Color[0] != '#' {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].color: must be #RRGGBB", idx)
+		}
+		if _, err := strconv.ParseUint(rarity.Color[1:], 16, 32); err != nil {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].color: must be hex", idx)
 		}
 		if rarity.HPMultiplier <= 0 {
 			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].hp_multiplier: must be positive", idx)
@@ -2369,11 +2365,11 @@ func validateMonsterRarities(rarities []MonsterRarityDef) error {
 		if rarity.AttackCooldownMultiplier <= 0 || rarity.AttackCooldownMultiplier > 1 {
 			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].attack_cooldown_multiplier: must be > 0 and <= 1", idx)
 		}
-		if rarity.LootDepthOffset != expectedOffsets[rarity.ID] {
-			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].loot_depth_offset: expected %d", idx, expectedOffsets[rarity.ID])
+		if rarity.LootDepthOffset < 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].loot_depth_offset: must be non-negative", idx)
 		}
-		if rarity.VisualScale != expectedVisualScales[rarity.ID] {
-			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].visual_scale: expected %.2f", idx, expectedVisualScales[rarity.ID])
+		if rarity.VisualScale <= 0 {
+			return fmt.Errorf("game: invalid rules dungeon_generation.monster_rarities[%d].visual_scale: must be positive", idx)
 		}
 	}
 	return nil

@@ -33,7 +33,7 @@ import websockets
 
 from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenario
 from tools.bot.protocol import make_envelope, to_ws_url
-from tools.bot.bot_context import BotContext
+from tools.bot.bot_context import BotContext, StateIngestContext
 from tools.bot.runtime_queries import dict_distance, event_matches, event_summary, find_player
 from tools.bot import skill_visual_runtime
 from tools.bot.debug_progression import debug_progression_body
@@ -1828,6 +1828,10 @@ def _runtime_context() -> BotContext:
     return BotContext(pump_one=pump_one)
 
 
+def _state_ingest_context() -> StateIngestContext:
+    return StateIngestContext(log=log)
+
+
 async def walk_toward(
     ws,
     session_id: str,
@@ -2198,31 +2202,31 @@ async def pump_one(ws, state: RuntimeState, timeout: float) -> None:
 def ingest_message(m: dict[str, Any], state: RuntimeState) -> None:
     from tools.bot.state_ingest import ingest_message as ingest_message_impl
 
-    ingest_message_impl(m, state, helpers=globals())
+    ingest_message_impl(m, state, ctx=_state_ingest_context())
 
 
 def ingest_snapshot(payload: dict[str, Any], state: RuntimeState) -> None:
     from tools.bot.state_ingest import ingest_snapshot as ingest_snapshot_impl
 
-    ingest_snapshot_impl(payload, state, helpers=globals())
+    ingest_snapshot_impl(payload, state, ctx=_state_ingest_context())
 
 
 def parse_discovered_teleporters(payload: dict[str, Any]) -> dict[int, bool]:
     from tools.bot.state_ingest import parse_discovered_teleporters as parse_discovered_teleporters_impl
 
-    return parse_discovered_teleporters_impl(payload, helpers=globals())
+    return parse_discovered_teleporters_impl(payload)
 
 
 def upsert_hotbar(state: RuntimeState, slot_index: int, item_instance_id: Any, item: dict[str, Any] | None = None) -> None:
     from tools.bot.state_ingest import upsert_hotbar as upsert_hotbar_impl
 
-    upsert_hotbar_impl(state, slot_index, item_instance_id, item, helpers=globals())
+    upsert_hotbar_impl(state, slot_index, item_instance_id, item)
 
 
 def decay_skill_cooldowns(state: RuntimeState, ticks: int) -> None:
     from tools.bot.state_ingest import decay_skill_cooldowns as decay_skill_cooldowns_impl
 
-    decay_skill_cooldowns_impl(state, ticks, helpers=globals())
+    decay_skill_cooldowns_impl(state, ticks)
 
 
 def hotbar_item_id(hotbar: list[dict[str, Any]], slot_index: int) -> str | None:
@@ -2243,49 +2247,49 @@ def find_hotbar_slot_by_item_def(hotbar: list[dict[str, Any]], item_def_id: str)
 def clear_active_level_state(state: RuntimeState) -> None:
     from tools.bot.state_ingest import clear_active_level_state as clear_active_level_state_impl
 
-    clear_active_level_state_impl(state, helpers=globals())
+    clear_active_level_state_impl(state)
 
 
 def track_initial_entity_position(state: RuntimeState, entity: dict[str, Any]) -> None:
     from tools.bot.state_ingest import track_initial_entity_position as track_initial_entity_position_impl
 
-    track_initial_entity_position_impl(state, entity, helpers=globals())
+    track_initial_entity_position_impl(state, entity)
 
 
 def track_initial_monster_position(state: RuntimeState, entity: dict[str, Any]) -> None:
     from tools.bot.state_ingest import track_initial_monster_position as track_initial_monster_position_impl
 
-    track_initial_monster_position_impl(state, entity, helpers=globals())
+    track_initial_monster_position_impl(state, entity)
 
 
 def update_runtime_distances(state: RuntimeState) -> None:
     from tools.bot.state_ingest import update_runtime_distances as update_runtime_distances_impl
 
-    update_runtime_distances_impl(state, helpers=globals())
+    update_runtime_distances_impl(state)
 
 
 def upsert_inventory(state: RuntimeState, item: dict[str, Any]) -> None:
     from tools.bot.state_ingest import upsert_inventory as upsert_inventory_impl
 
-    upsert_inventory_impl(state, item, helpers=globals())
+    upsert_inventory_impl(state, item)
 
 
 def remove_inventory_item(state: RuntimeState, item_instance_id: str) -> None:
     from tools.bot.state_ingest import remove_inventory_item as remove_inventory_item_impl
 
-    remove_inventory_item_impl(state, item_instance_id, helpers=globals())
+    remove_inventory_item_impl(state, item_instance_id)
 
 
 def upsert_stash_item(state: RuntimeState, item: dict[str, Any]) -> None:
     from tools.bot.state_ingest import upsert_stash_item as upsert_stash_item_impl
 
-    upsert_stash_item_impl(state, item, helpers=globals())
+    upsert_stash_item_impl(state, item)
 
 
 def remove_stash_item(state: RuntimeState, stash_item_id: str) -> None:
     from tools.bot.state_ingest import remove_stash_item as remove_stash_item_impl
 
-    remove_stash_item_impl(state, stash_item_id, helpers=globals())
+    remove_stash_item_impl(state, stash_item_id)
 
 
 def find_loot(state: RuntimeState, item_def_id: str) -> dict[str, Any] | None:

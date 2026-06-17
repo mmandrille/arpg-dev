@@ -78,6 +78,26 @@ func TestFogOfWarSnapshotHidesLivingMonstersOutsideLightRadius(t *testing.T) {
 	}
 }
 
+func TestFogOfWarSnapshotHidesLivingMonstersBehindWallsInsideLightRadius(t *testing.T) {
+	sim := newFogTestSim(t)
+	level := sim.activeLevel()
+	level.walls = append(level.walls, wallObstacle{pos: Vec2{X: 4, Y: 0}, size: Vec2{X: 1, Y: 4}, source: "generated"})
+	clear := addTestMonster(sim, monsterDefID, Vec2{X: 0, Y: 4}, 10)
+	blocked := addTestMonster(sim, monsterDefID, Vec2{X: 8, Y: 0}, 10)
+
+	snap := sim.SnapshotForPlayer(sim.playerID)
+	if !snapshotHasEntity(snap, idStr(clear.id)) {
+		t.Fatalf("snapshot missing unobstructed monster %d: %+v", clear.id, snap.Entities)
+	}
+	if snapshotHasEntity(snap, idStr(blocked.id)) {
+		t.Fatalf("snapshot leaked wall-occluded monster %d: %+v", blocked.id, snap.Entities)
+	}
+	visible := sim.players[sim.playerID].VisibleMonsterIDs
+	if !visible[clear.id] || visible[blocked.id] {
+		t.Fatalf("visible monster memory = %+v, want clear only", visible)
+	}
+}
+
 func TestFogOfWarDeltasRevealAndConcealIdleMonsters(t *testing.T) {
 	sim := newFogTestSim(t)
 	level := sim.activeLevel()
@@ -100,6 +120,23 @@ func TestFogOfWarDeltasRevealAndConcealIdleMonsters(t *testing.T) {
 	})}
 	if !hasEntityRemove(conceal, idStr(monster.id)) {
 		t.Fatalf("movement out of light radius did not remove monster %d: %+v", monster.id, conceal.Changes)
+	}
+}
+
+func TestFogOfWarDeltasRevealMonstersWhenWallLineOfSightClears(t *testing.T) {
+	sim := newFogTestSim(t)
+	level := sim.activeLevel()
+	player := level.entities[sim.playerID]
+	level.walls = append(level.walls, wallObstacle{pos: Vec2{X: 4, Y: 0}, size: Vec2{X: 1, Y: 4}, source: "generated"})
+	monster := addTestMonster(sim, monsterDefID, Vec2{X: 8, Y: 0}, 10)
+	sim.SnapshotForPlayer(sim.playerID)
+
+	level.walls = nil
+	reveal := TickResult{Changes: sim.FilterChangesForPlayer(sim.playerID, sim.currentLevel, []Change{
+		{Op: OpEntityUpdate, Entity: ptrEntityView(sim.entityView(player))},
+	})}
+	if !hasEntitySpawn(reveal, idStr(monster.id)) {
+		t.Fatalf("clearing wall line of sight did not spawn monster %d: %+v", monster.id, reveal.Changes)
 	}
 }
 
@@ -148,6 +185,7 @@ func newFogTestSim(t *testing.T) *Sim {
 			delete(level.entities, id)
 		}
 	}
+	level.walls = nil
 	player = level.entities[sim.playerID]
 	player.pos = Vec2{}
 	sim.syncCompatibilityFields()

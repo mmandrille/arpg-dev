@@ -9,13 +9,14 @@ Codename: fog-of-war-radius
 Introduce the first server-authoritative fog-of-war mechanic so dungeon play no longer gives the
 client perfect creature information for the entire level. Each hero receives a calculated
 `light_radius` derived from class baseline plus equipped item rolls. The server only reveals
-creatures inside the light radius, while the client presents three radial bands around the local
-hero: clear light, darker gloom, and total darkness.
+creatures inside the light radius and not behind rectangular wall obstacles, while the client
+presents three radial bands around the local hero: clear light, darker gloom, and total darkness.
 
 ## Non-goals
 
-- No wall, doorway, high-obstacle, or line-of-sight occlusion. Obstacles blocking enemy visibility
-  inside the light radius are deferred to a later slice.
+- No doorway, high-obstacle, non-rectangular, destructible, or explored-map occlusion. Rectangular
+  walls can block enemy visibility inside the light radius; richer obstacle semantics are deferred
+  to a later slice.
 - No durable explored-map memory across sessions or level revisits. This slice is radius-based
   current visibility only.
 - No stealth, scouting units, monster AI awareness changes, aggro tuning, minimap memory, or PvP
@@ -36,12 +37,14 @@ hero: clear light, darker gloom, and total darkness.
 - Recipient-scoped snapshots and state deltas include player, companion, loot, projectile, and
   interactable entities on the current level as before, but hide living monsters outside the
   recipient hero's light radius.
+- Living monsters inside the light radius are still hidden when a rectangular wall obstacle blocks
+  line of sight from the recipient hero to the monster.
 - A monster that moves from hidden to visible emits an entity spawn/update to that recipient; a
   monster that moves from visible to hidden emits an entity remove to that recipient.
 - Gloom extends from `light_radius` through `light_radius * 1.25`. Obstacles/walls in this band
   remain visible through the existing wall layout, but creatures are not revealed there.
 - The Godot client renders clear light around the local hero, a darker/greyed gloom band outside
-  it, and near-black total darkness beyond the gloom radius without hiding UI.
+  it, and opaque total darkness beyond the gloom radius without hiding UI.
 - Bot/client debug state exposes enough visibility/fog data to prove that far monsters are absent,
   near monsters are visible, and the client knows the current light/gloom radii.
 

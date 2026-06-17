@@ -4,9 +4,9 @@ Status: Complete
 Goal: Add radial, server-authoritative fog of war with class/item light radius and client gloom/darkness presentation.
 Architecture: Keep the authoritative sim truth unchanged, then derive recipient-scoped entity
 views for snapshots and deltas. Living monster visibility is filtered by the recipient player's
-effective `light_radius`; walls and non-creature entities remain visible so gloom can show
-obstacles without leaking creatures. Client fog is presentation-only and driven from the server's
-derived stat.
+effective `light_radius` and rectangular wall line-of-sight occlusion; walls and non-creature
+entities remain visible so gloom can show obstacles without leaking creatures. Client fog is
+presentation-only and driven from the server's derived stat.
 Tech stack: shared JSON/schema, Go simulation and realtime fanout, Python protocol bot, Godot
 client, docs.
 
@@ -14,7 +14,7 @@ client, docs.
 
 Builds on v252 expanded dungeon profiles, the current recipient-scoped co-op snapshot path, and
 existing generated wall rendering. This slice intentionally avoids durable exploration memory and
-wall line-of-sight blocking.
+richer doorway/high-obstacle line-of-sight blocking.
 
 Asset/plugin decision: reject external assets/plugins for this slice. Borrow existing in-repo
 Godot code-native overlay and primitive rendering patterns (`input_shadow_overlay.gd`, wall/entity
@@ -118,6 +118,8 @@ Files:
   equipped item rolls.
 - [x] Filter recipient snapshots so living monsters outside the light radius are omitted, while
   players, companions, loot, projectiles, interactables, and walls remain visible.
+- [x] Filter living monsters inside the light radius when rectangular wall obstacles block line of
+  sight from the recipient hero.
 - [x] Filter recipient deltas so hidden living monster updates are suppressed, visible transitions
   spawn/update, and hidden transitions remove previously visible monsters.
 - [x] Add focused tests for class baselines, equipped `light_radius`, hidden/visible snapshot
@@ -170,8 +172,8 @@ Files:
 - Modify: `client/scripts/bot_assertion_handlers.gd`
 - Add: `tools/bot/scenarios/client/67_fog_of_war_overlay.json`
 
-- [x] Render code-native clear/gloom/darkness bands around the local hero using the server-derived
-  light radius and `gloom_radius = light_radius * 1.25`.
+- [x] Render code-native clear/gloom/opaque-darkness bands around the local hero using the
+  server-derived light radius and `gloom_radius = light_radius * 1.25`.
 - [x] Keep the overlay out of UI layers and expose bot debug state with `enabled`,
   `light_radius`, and `gloom_radius`.
 - [x] Display `Light radius` in stat labels and the character stats derived panel.
@@ -193,8 +195,8 @@ Files:
 
 - [x] Mark the spec complete.
 - [x] Add v253 lifecycle and as-built notes.
-- [x] Update `PROGRESS.md` current status and defer wall line-of-sight blocking, durable explored
-  map memory, and production lighting/art.
+- [x] Update `PROGRESS.md` current status and defer durable explored map memory, richer
+  doorway/high-obstacle line-of-sight blocking, and production lighting/art.
 
 ```bash
 make maintainability

@@ -201,7 +201,22 @@ func (s *Sim) monsterVisibleByFog(ctx fogVisibilityContext, monster *entity) boo
 	if ctx.player == nil || monster == nil {
 		return false
 	}
-	return distance(ctx.player.pos, monster.pos) <= ctx.radius+meleeRangeEpsilon
+	if distance(ctx.player.pos, monster.pos) > ctx.radius+meleeRangeEpsilon {
+		return false
+	}
+	return !s.wallBlocksFogLineOfSight(ctx, monster)
+}
+
+func (s *Sim) wallBlocksFogLineOfSight(ctx fogVisibilityContext, monster *entity) bool {
+	if ctx.level == nil {
+		return false
+	}
+	for _, wall := range ctx.level.walls {
+		if _, ok := segmentIntersectsInflatedAABB(ctx.player.pos, monster.pos, wall.pos, wall.size, 0); ok {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Sim) eventReferencesHiddenMonster(ctx fogVisibilityContext, event Event) bool {

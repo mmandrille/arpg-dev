@@ -3,6 +3,8 @@ extends CanvasLayer
 
 const GLOOM_MULTIPLIER := 1.25
 const FALLBACK_WORLD_TO_SCREEN := 32.0
+const GLOOM_ALPHA := 0.52
+const DARKNESS_ALPHA := 1.0
 const SHADER_CODE := """
 shader_type canvas_item;
 render_mode blend_mix, unshaded;
@@ -12,7 +14,7 @@ uniform vec2 viewport_px = vec2(1.0, 1.0);
 uniform float light_radius_px = 0.0;
 uniform float gloom_radius_px = 0.0;
 uniform vec4 gloom_color : source_color = vec4(0.22, 0.24, 0.27, 0.52);
-uniform vec4 darkness_color : source_color = vec4(0.0, 0.0, 0.0, 0.90);
+uniform vec4 darkness_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 
 void fragment() {
 	vec2 pos = SCREEN_UV * viewport_px;
@@ -78,6 +80,8 @@ func get_debug_state() -> Dictionary:
 		"gloom_radius": _gloom_radius,
 		"light_radius_px": _light_radius_px,
 		"gloom_radius_px": _gloom_radius_px,
+		"gloom_alpha": GLOOM_ALPHA,
+		"darkness_alpha": DARKNESS_ALPHA,
 		"center": {"x": _center_px.x, "y": _center_px.y},
 	}
 
@@ -96,6 +100,8 @@ func _ensure_rect() -> void:
 	shader.code = SHADER_CODE
 	_material = ShaderMaterial.new()
 	_material.shader = shader
+	_material.set_shader_parameter("gloom_color", Color(0.22, 0.24, 0.27, GLOOM_ALPHA))
+	_material.set_shader_parameter("darkness_color", Color(0.0, 0.0, 0.0, DARKNESS_ALPHA))
 	_rect.material = _material
 	add_child(_rect)
 

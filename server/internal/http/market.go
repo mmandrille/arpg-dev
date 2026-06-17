@@ -17,6 +17,7 @@ func (s *Server) registerMarketRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/market/listings/{listing_id}/purchase", s.requireAuth(http.HandlerFunc(s.handlePurchaseMarketListing)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketListing)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleCreateMarketOffer)))
+	mux.Handle("GET /v0/market/offers/mine", s.requireAuth(http.HandlerFunc(s.handleListMyMarketOffers)))
 	mux.Handle("GET /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleListMarketOffers)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/accept", s.requireAuth(http.HandlerFunc(s.handleAcceptMarketOffer)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketOffer)))
@@ -58,6 +59,7 @@ type marketOfferResponse struct {
 	BidderAccountID string                    `json:"bidder_account_id"`
 	Status          string                    `json:"status"`
 	Items           []marketOfferItemResponse `json:"items"`
+	Listing         *marketListingResponse    `json:"listing,omitempty"`
 	CreatedAt       string                    `json:"created_at"`
 	UpdatedAt       string                    `json:"updated_at"`
 }
@@ -297,6 +299,24 @@ func (s *Server) handleListMarketOffers(w http.ResponseWriter, r *http.Request) 
 	writeJSON(w, http.StatusOK, listMarketOffersResponse{Offers: out})
 }
 
+func (s *Server) handleListMyMarketOffers(w http.ResponseWriter, r *http.Request) {
+	accountID, ok := accountFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "missing account")
+		return
+	}
+	offers, err := s.store.ListMarketOffersForBidder(r.Context(), accountID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not list market offers")
+		return
+	}
+	out := make([]marketOfferResponse, 0, len(offers))
+	for _, offer := range offers {
+		out = append(out, marketOfferResponseFromStore(offer))
+	}
+	writeJSON(w, http.StatusOK, listMarketOffersResponse{Offers: out})
+}
+
 func (s *Server) handleAcceptMarketOffer(w http.ResponseWriter, r *http.Request) {
 	accountID, ok := accountFromContext(r.Context())
 	if !ok {
@@ -396,7 +416,7 @@ func marketOfferResponseFromStore(offer store.MarketOffer) marketOfferResponse {
 			RolledStats: rolled,
 		})
 	}
-	return marketOfferResponse{
+	response := marketOfferResponse{
 		OfferID:         offer.ID,
 		ListingID:       offer.ListingID,
 		BidderAccountID: offer.BidderAccountID,
@@ -405,4 +425,9 @@ func marketOfferResponseFromStore(offer store.MarketOffer) marketOfferResponse {
 		CreatedAt:       offer.CreatedAt.UTC().Format(time.RFC3339Nano),
 		UpdatedAt:       offer.UpdatedAt.UTC().Format(time.RFC3339Nano),
 	}
+	if offer.Listing != nil {
+		listing := marketListingResponseFromStore(*offer.Listing)
+		response.Listing = &listing
+	}
+	return response
 }

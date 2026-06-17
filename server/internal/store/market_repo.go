@@ -277,6 +277,49 @@ func (s *Store) ListMarketOffersForSeller(ctx context.Context, sellerAccountID, 
 	return s.listMarketOffers(ctx, listingID)
 }
 
+func (s *Store) ListMarketOffersForBidder(ctx context.Context, bidderAccountID string) ([]MarketOffer, error) {
+	if _, err := s.ExpireMarketListings(ctx); err != nil {
+		return nil, err
+	}
+	rows, err := s.pool.Query(ctx,
+		`SELECT mo.id, mo.listing_id, mo.bidder_account_id, mo.status, mo.created_at, mo.updated_at, mo.accepted_at, mo.rejected_at, mo.canceled_at,
+		        ml.id, ml.seller_account_id, ml.stash_item_id, COALESCE(ml.source_character_id, ''), ml.item_def_id, ml.rolled_stats, ml.price_gold, ml.status, ml.expires_at, ml.created_at, ml.updated_at, ml.canceled_at, ml.accepted_at, ml.expired_at
+		 FROM market_offers mo
+		 JOIN market_listings ml ON ml.id = mo.listing_id
+		 WHERE mo.bidder_account_id = $1
+		 ORDER BY mo.created_at DESC, mo.id ASC`,
+		bidderAccountID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list bidder market offers: %w", err)
+	}
+	defer rows.Close()
+	var offers []MarketOffer
+	for rows.Next() {
+		var offer MarketOffer
+		var listing MarketListing
+		if err := rows.Scan(
+			&offer.ID, &offer.ListingID, &offer.BidderAccountID, &offer.Status, &offer.CreatedAt, &offer.UpdatedAt, &offer.AcceptedAt, &offer.RejectedAt, &offer.CanceledAt,
+			&listing.ID, &listing.SellerAccountID, &listing.StashItemID, &listing.SourceCharacterID, &listing.ItemDefID, &listing.RolledStats, &listing.PriceGold, &listing.Status, &listing.ExpiresAt, &listing.CreatedAt, &listing.UpdatedAt, &listing.CanceledAt, &listing.AcceptedAt, &listing.ExpiredAt,
+		); err != nil {
+			return nil, fmt.Errorf("store: scan bidder market offer: %w", err)
+		}
+		offer.Listing = &listing
+		offers = append(offers, offer)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("store: bidder market offer rows: %w", err)
+	}
+	for i := range offers {
+		items, err := s.listMarketOfferItems(ctx, offers[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		offers[i].Items = items
+	}
+	return offers, nil
+}
+
 func (s *Store) AcceptMarketOffer(ctx context.Context, sellerAccountID, listingID, offerID string) (MarketOffer, error) {
 	var accepted MarketOffer
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {

@@ -207,6 +207,7 @@ v217_* = paladin-charge-channeling-protocol
 v221_* = resource-wallet-foundation
 v222_* = upgrade-result-preview
 v223_* = unique-non-damage-skill-modifier
+v233_* = my-market-offers-panel
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

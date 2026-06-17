@@ -85,6 +85,7 @@ type CharacterProgressionRepo interface {
 	CreateMarketOffer(ctx context.Context, bidderAccountID, listingID, offerID string, stashItemIDs []string) (MarketOffer, error)
 	CancelMarketOffer(ctx context.Context, bidderAccountID, listingID, offerID string) (MarketOffer, error)
 	ListMarketOffersForSeller(ctx context.Context, sellerAccountID, listingID string) ([]MarketOffer, error)
+	ListMarketOffersForBidder(ctx context.Context, bidderAccountID string) ([]MarketOffer, error)
 	AcceptMarketOffer(ctx context.Context, sellerAccountID, listingID, offerID string) (MarketOffer, error)
 	ExpireMarketListings(ctx context.Context) (int, error)
 	GetMarketSummary(ctx context.Context, accountID string) (MarketSummary, error)

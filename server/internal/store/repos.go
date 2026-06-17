@@ -207,6 +207,7 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM inventory_items WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_account_stash_items WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_account_stash_gold WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_account_resource_wallet WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_shop_stock WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_skill_preferences WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_skill_bindings WHERE ` + sessionFilter, []any{accountID, characterID}},
@@ -2244,7 +2245,6 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	}
 	return snap, wpRows.Err()
 }
-
 // --- inputs -----------------------------------------------------------------
 
 func (s *Store) AppendInput(ctx context.Context, in SessionInput) error {

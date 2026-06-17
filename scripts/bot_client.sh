@@ -186,15 +186,19 @@ start_preflight() {
   local seed="$4"
   local metadata_file="$5"
   local log_file="$6"
-  local preflight_type host_email pid
+  local preflight_type host_email offer_email pid
   preflight_type="$(json_field "$scenario_path" "d.get('preflight', {}).get('type', '')")"
   if [[ -z "$preflight_type" ]]; then
     return 0
   fi
   if [[ "$preflight_type" == "market_listing" ]]; then
     host_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "${scenario_id}-seller")"
+    offer_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "${scenario_id}-bidder")"
     if [[ "$(json_field "$scenario_path" "d.get('preflight', {}).get('seller_is_client', False)")" == "True" ]]; then
       host_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "$scenario_id")"
+    fi
+    if [[ "$(json_field "$scenario_path" "d.get('preflight', {}).get('bidder_is_client', False)")" == "True" ]]; then
+      offer_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "$scenario_id")"
     fi
     echo "[bot-client $(_ts)] starting market preflight for $scenario_id email=$host_email"
     "$PYTHON" "$ROOT/tools/bot/client_market_preflight.py" \
@@ -208,7 +212,7 @@ start_preflight() {
       --metadata-file "$metadata_file" \
       --item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('item_def_id', 'cave_mail')")" \
       --price-gold "$(json_field "$scenario_path" "d.get('preflight', {}).get('price_gold', 37)")" \
-      --offer-email "$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "${scenario_id}-bidder")" \
+      --offer-email "$offer_email" \
       --offer-item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('offer_item_def_id', '')")" \
       >"$log_file" 2>&1
     echo "[bot-client $(_ts)] market preflight ready listing=$(metadata_field "$metadata_file" listing_id)"
@@ -338,10 +342,15 @@ run_scenario() {
   fi
 
   cleanup_preflights
-  cleanup_account_email "$email"
   if [[ -s "$preflight_metadata" ]]; then
     cleanup_account_email "$(metadata_field "$preflight_metadata" host_email)"
+    local bidder_email
+    bidder_email="$(metadata_field "$preflight_metadata" bidder_email)"
+    if [[ "$bidder_email" != "$email" ]]; then
+      cleanup_account_email "$bidder_email"
+    fi
   fi
+  cleanup_account_email "$email"
   rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
   local elapsed
   elapsed="$(python3 -c 'import sys,time; print(f"{time.monotonic() - float(sys.argv[1]):.2f}s")' "$started_ts")"

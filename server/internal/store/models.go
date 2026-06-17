@@ -193,6 +193,7 @@ type MarketOffer struct {
 	BidderAccountID string
 	Status          string
 	Items           []MarketOfferItem
+	Listing         *MarketListing
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	AcceptedAt      *time.Time

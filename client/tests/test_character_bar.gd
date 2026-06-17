@@ -12,7 +12,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	_test_resource_wallet_debug_state()
+	await _test_resource_wallet_debug_state()
 	print("[gdtest] PASS: test_character_bar (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -25,9 +25,13 @@ func _test_resource_wallet_debug_state() -> void:
 	var state := bar.get_debug_state()
 	_assert_true("wallet visible", bool(state.get("wallet_visible", false)))
 	_assert_eq("wallet text", str(state.get("wallet_text", "")), "Shard 2")
+	_assert_true("wallet tooltip name", str(state.get("wallet_tooltip", "")).contains("Upgrade Shard x2"))
+	_assert_true("wallet tooltip category", str(state.get("wallet_tooltip", "")).contains("Category: Currency"))
+	_assert_true("wallet tooltip storage", str(state.get("wallet_tooltip", "")).contains("Stored account-wide"))
 	bar.set_resource_wallet({"upgrade_shard": 0})
 	state = bar.get_debug_state()
 	_assert_false("empty wallet hidden", bool(state.get("wallet_visible", true)))
+	_assert_eq("empty wallet details", (state.get("wallet_details", []) as Array).size(), 0)
 	bar.free()
 
 

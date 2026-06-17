@@ -333,4 +333,9 @@ static func _assert_resource_wallet_panel(runner, step: Dictionary, state: Dicti
 			str(step.get("text_contains", "")), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
 		])
 		return false
+	if step.has("tooltip_contains") and not str(panel.get("wallet_tooltip", "")).contains(str(step.get("tooltip_contains", ""))):
+		runner._fail("assert_resource_wallet_panel tooltip failed: want contains=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("tooltip_contains", "")), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
 	return true

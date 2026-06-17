@@ -211,6 +211,7 @@ v233_* = my-market-offers-panel
 v234_* = buyer-offer-cancel-ui
 v235_* = market-trade-receipts
 v236_* = mystery-seller-silhouettes
+v237_* = material-wallet-details
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

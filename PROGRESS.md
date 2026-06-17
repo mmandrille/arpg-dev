@@ -88,8 +88,9 @@ Do **not** assume these are the next slice — they are documented backlog items
 ### Active review follow-ups
 
 - **Review follow-ups need data/tooling ownership.** The v232 review keeps companion/elite follow
-  tuning and monster-rarity validation open, and adds small process/tooling paydown for agent
-  review/refactor order plus the remaining `helpers=globals()` bot-runtime cluster.
+  tuning and monster-rarity validation open. `$refactor` fixed the review/refactor handoff docs,
+  clarified the standalone client-smoke harness, and reduced the remaining `helpers=globals()`
+  bot-runtime cluster to 27 calls.
 
 ### Other deferred items (from specs / ADRs)
 

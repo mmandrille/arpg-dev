@@ -90,6 +90,7 @@ mystery_seller_silhouettes: headless Godot client opens the mystery seller → v
 material_wallet_details: headless Godot client auto-picks an upgrade shard → verifies the compact wallet tooltip includes catalog-backed details
 blacksmith_recipe_selector: headless Godot client stages a blacksmith item → verifies the active recipe appears in the preview
 mercenary_stats_card: headless Godot client hires a mercenary → verifies the companion panel stats card shows HP, stance, state, and id
+boss_portrait_panel: headless Godot client starts on the compact boss floor → verifies the Cave Warden boss portrait tile
 ```
 
 **Verify:**

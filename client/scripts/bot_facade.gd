@@ -113,6 +113,22 @@ static func click_market_offer_action(main, action: String, offer_id: String = "
 		panel.bot_click_offer_action(action, offer_id, offer_index)
 
 
+static func click_market_accept_offer(main, offer_id: String = "", offer_index: int = 0) -> void:
+	var panel = _member(main, "market_panel")
+	if panel != null and panel.has_method("bot_click_accept_offer"):
+		panel.bot_click_accept_offer(offer_id, offer_index)
+		return
+	click_market_offer_action(main, "accept_offer", offer_id, offer_index)
+
+
+static func click_market_cancel_offer(main, offer_id: String = "", offer_index: int = 0) -> void:
+	var panel = _member(main, "market_panel")
+	if panel != null and panel.has_method("bot_click_cancel_offer"):
+		panel.bot_click_cancel_offer(offer_id, offer_index)
+		return
+	click_market_offer_action(main, "cancel_offer", offer_id, offer_index)
+
+
 static func assign_consumable_hotbar(main, slot_index: int, item_instance_id: String) -> void:
 	var bar = _member(main, "consumable_bar")
 	if bar != null and bar.has_method("assign_slot"):

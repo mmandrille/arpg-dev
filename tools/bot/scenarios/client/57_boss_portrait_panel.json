@@ -1,0 +1,22 @@
+{
+  "id": "boss_portrait_panel",
+  "runner": "godot_client",
+  "world_id": "boss_floor_gate_lab",
+  "seed": "v240_boss_portrait_panel",
+  "title": "Boss portrait panel",
+  "description": "Client starts on the compact boss floor and verifies the Cave Warden boss portrait tile.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    {
+      "type": "wait_boss_health_bar",
+      "visible": true,
+      "boss_template_id": "cave_warden",
+      "title": "Cave Warden",
+      "portrait_visible": true,
+      "portrait_kind": "cave_warden",
+      "portrait_label": "CW",
+      "hp_min": 1,
+      "timeout_s": 15.0
+    }
+  ]
+}

@@ -55,6 +55,12 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("selected stance follows event", str(state.get("selected_stance", "")), "passive")
 
+	panel.apply_lost_event({"target_entity_id": "2001", "monster_def_id": "mercenary_guard"})
+	state = panel.get_debug_state()
+	_assert_eq("lost clears hired id", str(state.get("hired_entity_id", "")), "")
+	_assert_eq("lost clears roster", int(state.get("hired_count", -1)), 0)
+	_assert_true("lost status names recovery", str(state.get("status", "")).contains("lost"))
+
 	panel.set_gold(30)
 	state = panel.get_debug_state()
 	_assert_false("affordability follows gold", bool(state.get("affordable", true)))

@@ -23,9 +23,9 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v231 — market cancel offer UI |
+| **Latest completed slice** | v232 — mercenary recovery UI |
 | **Active branch** | `main` |
-| **CI gate** | Focused v231 checks green on 2026-06-16; batch `make ci` pending for `$autoloop` |
+| **CI gate** | Focused v232 checks green on 2026-06-16; batch `make ci` pending for `$autoloop` |
 | **Next slice** | TBD |
 | **Last engineering review** | v223 — [`docs/reviews/20260616_v223-overview.md`](docs/reviews/20260616_v223-overview.md) (2026-06-16) |
 | **Next engineering review** | v233 after the next feature batch, once CI is green |

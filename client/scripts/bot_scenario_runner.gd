@@ -899,7 +899,7 @@ func _stash_item_count_matches(step: Dictionary, state: Dictionary) -> bool:
 
 
 func _market_listing_rows_match(step: Dictionary, state: Dictionary) -> bool:
-	if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled"):
+	if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled") and not step.has("expiration_visible") and not step.has("expiration_contains"):
 		return true
 	var rows := _matching_market_listing_rows(step, state)
 	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
@@ -1094,6 +1094,8 @@ func _matching_market_listing_rows(step: Dictionary, state: Dictionary) -> Array
 			continue
 		if step.has("price_gold") and int(rec.get("price_gold", 0)) != int(step.get("price_gold", 0)):
 			continue
+		if step.has("expiration_visible") and bool(rec.get("expiration_visible", false)) != bool(step.get("expiration_visible", false)): continue
+		if step.has("expiration_contains") and not str(rec.get("expiration_label", "")).contains(str(step.get("expiration_contains", ""))): continue
 		if step.has("seller_owned") and bool(step.get("seller_owned", false)) != (str(rec.get("seller_account_id", "")) == str(panel.get("account_id", ""))):
 			continue
 		out.append(rec)

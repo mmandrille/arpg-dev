@@ -23,12 +23,12 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v240 — boss portrait panel |
+| **Latest completed slice** | v241 — market expiration countdown |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-17 after selected v233-v240 `$autoloop` queue |
-| **Next slice** | v241 — next feature slice |
+| **CI gate** | Focused v241 checks green on 2026-06-17; selected v241-v250 `$autoloop` batch `make ci` pending |
+| **Next slice** | v242 — market board search and sort |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
-| **Next engineering review** | v242 after the next feature batches, once CI is green |
+| **Next engineering review** | After the selected v241-v250 `$autoloop` batch, once CI is green |
 
 
 ### Periodic engineering reviews

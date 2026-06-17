@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v233 — my market offers panel |
+| **Latest completed slice** | v234 — buyer offer cancel UI |
 | **Active branch** | `main` |
-| **CI gate** | Focused v233 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
-| **Next slice** | v234 — buyer offer cancel UI |
+| **CI gate** | Focused v234 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
+| **Next slice** | v235 — market trade receipts |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
 | **Next engineering review** | v242 after the next feature batches, once CI is green |
 

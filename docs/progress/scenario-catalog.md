@@ -84,6 +84,7 @@ unique_chest_client_proof: headless Godot client opens the purple unique chest a
 stash_search_and_sorting: headless Godot client opens stash → searches and sorts bag/stash rows → deposits/withdraws by stable server IDs
 elite_objective_minimap_pin: headless Godot client descends to a deterministic elite-objective floor → asserts compact minimap pin visibility and active debug state
 my_market_offers_panel: headless Godot client opens market board → loads My Offers → asserts an outgoing offer row for a foreign listing
+buyer_offer_cancel_ui: headless Godot client opens My Offers → cancels an outgoing offer → verifies the offer is canceled and the offered item returns to stash
 ```
 
 **Verify:**

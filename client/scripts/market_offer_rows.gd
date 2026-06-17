@@ -12,11 +12,11 @@ static func offer_row(panel: MarketPanel, offer: Dictionary, outgoing: bool = fa
 	_add_offer_text(panel, info, offer, outgoing)
 	info.add_child(panel._offer_items_grid(panel._offer_items(offer)))
 	var btn := Button.new()
-	btn.text = "Accept"
+	btn.text = "Cancel" if outgoing else "Accept"
 	btn.custom_minimum_size = Vector2(110, 38)
-	btn.disabled = outgoing or str(offer.get("status", "active")) != "active"
+	btn.disabled = str(offer.get("status", "active")) != "active"
 	btn.pressed.connect(func() -> void:
-		panel.market_action_requested.emit("accept_offer", {"listing_id": str(offer.get("listing_id", panel.selected_listing_id)), "offer_id": str(offer.get("offer_id", ""))})
+		panel.market_action_requested.emit("cancel_offer" if outgoing else "accept_offer", {"listing_id": str(offer.get("listing_id", panel.selected_listing_id)), "offer_id": str(offer.get("offer_id", ""))})
 	)
 	box.add_child(btn)
 	return row

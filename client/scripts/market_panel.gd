@@ -213,12 +213,12 @@ func bot_click_cancel_listing(listing_id: String = "", item_def_id: String = "",
 	_emit_cancel_listing_action(listing)
 
 
-func bot_click_accept_offer(offer_id: String = "", offer_index: int = 0) -> void:
+func bot_click_offer_action(action: String, offer_id: String = "", offer_index: int = 0) -> void:
 	var offer := _matching_offer(offer_id, offer_index)
 	if offer.is_empty():
 		show_status("No matching offer", true)
 		return
-	market_action_requested.emit("accept_offer", {"listing_id": str(offer.get("listing_id", selected_listing_id)), "offer_id": str(offer.get("offer_id", ""))})
+	market_action_requested.emit(action, {"listing_id": str(offer.get("listing_id", selected_listing_id)), "offer_id": str(offer.get("offer_id", ""))})
 
 func show_offers(listing_id: String, offers: Array, status: String = "") -> void:
 	selected_listing_id = listing_id

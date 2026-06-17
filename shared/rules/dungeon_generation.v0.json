@@ -22,8 +22,8 @@
   },
   "monster_placement": {
     "monster_def_id": "dungeon_mob",
-    "population_formula": { "area_per_unit": 240, "min": 21, "max": 40 },
-    "pack_count_formula": { "area_per_unit": 820, "min": 6, "max": 13, "spread": 1 },
+    "population_formula": { "area_per_unit": 280, "min": 20, "max": 36 },
+    "pack_count_formula": { "area_per_unit": 900, "min": 6, "max": 12, "spread": 1 },
     "pack_size": { "min": 2, "max": 5 },
     "pack_member_radius": 3.0,
     "pack_composition": { "frontline_min": 1, "ranged_max": 1 },
@@ -68,7 +68,7 @@
   "obstacle_generation": {
     "enabled": true,
     "max_attempts": 64,
-    "target_group_count_formula": { "area_per_unit": 640, "min": 7, "max": 16, "spread": 2 },
+    "target_group_count_formula": { "area_per_unit": 840, "min": 6, "max": 15, "spread": 1 },
     "wall_segment": {
       "min_length": 4,
       "max_length": 14,

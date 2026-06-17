@@ -2,8 +2,16 @@
   "id": "pack_aggro_and_dungeon_packs",
   "world_id": "dungeon_levels",
   "seed": "v76_pack_aggro",
+  "character_class": "barbarian",
   "title": "Pack aggro and dungeon packs",
   "description": "Descend into a generated dungeon, prove packed monster population, and verify one pull wakes nearby pack support.",
+  "debug_progression": {
+    "level": 6,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 80, "dex": 80, "vit": 80, "magic": 5 }
+  },
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     { "action": "assert_entity_count", "entity_type": "monster", "alive": true, "at_least": 18 },

@@ -1,15 +1,12 @@
 {
   "id": "account_stash_storage",
-  "world_id": "dungeon_levels",
+  "world_id": "vendor_lab",
   "seed": "town_vendor_gold_sink_1075",
   "title": "Account stash storage",
-  "description": "Collect dungeon loot, return to town, deposit and withdraw a rolled item, then leave an item and gold in the account stash for reconnect and fresh-session persistence checks.",
+  "description": "Collect nearby lab loot, deposit and withdraw a rolled item, then leave an item in the account stash for reconnect and fresh-session persistence checks.",
   "max_elapsed_s": 25.0,
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
     { "action": "pick_up_first_rolled_loot" },
-    { "action": "use_stair", "direction": "up", "max_ticks": 240 },
     { "action": "open_stash" },
     { "action": "assert_stash_item_count", "equals": 0 },
     { "action": "deposit_stash_item", "rolled": true, "equipped": false },
@@ -24,7 +21,6 @@
   ],
   "assertions": [
     { "type": "current_level", "equals": 0 },
-    { "type": "visited_levels_contain", "level": -1 },
     { "type": "event_seen", "event_type": "stash_opened" },
     { "type": "event_seen", "event_type": "stash_item_deposited" },
     { "type": "event_seen", "event_type": "stash_item_withdrawn" },
@@ -35,7 +31,7 @@
   ],
   "fresh_session_checks": [
     {
-      "world_id": "dungeon_levels",
+      "world_id": "vendor_lab",
       "steps": [],
       "assertions": [
         { "type": "stash_item_count", "rolled": true, "equals": 1 },

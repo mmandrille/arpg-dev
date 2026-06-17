@@ -2,82 +2,409 @@
   "seed": "v40_obstacles",
   "level": -2,
   "expected": {
-    "floor_size": { "width": 100, "height": 50 },
-    "minimum_wall_count": 9,
-    "minimum_generated_wall_count": 5,
-    "shape_families": ["line", "l"],
+    "floor_size": {
+      "width": 100,
+      "height": 50
+    },
+    "minimum_wall_count": 15,
+    "minimum_generated_wall_count": 11,
+    "shape_families": [
+      "l",
+      "line",
+      "t"
+    ],
     "walls": [
       {
         "id": "wall_-2_0000",
-        "position": { "x": 50, "y": -0.5 },
-        "size": { "x": 102, "y": 1 },
+        "position": {
+          "x": 50,
+          "y": -0.5
+        },
+        "size": {
+          "x": 102,
+          "y": 1
+        },
         "source": "perimeter"
       },
       {
         "id": "wall_-2_0001",
-        "position": { "x": 50, "y": 50.5 },
-        "size": { "x": 102, "y": 1 },
+        "position": {
+          "x": 50,
+          "y": 50.5
+        },
+        "size": {
+          "x": 102,
+          "y": 1
+        },
         "source": "perimeter"
       },
       {
         "id": "wall_-2_0002",
-        "position": { "x": -0.5, "y": 25 },
-        "size": { "x": 1, "y": 50 },
+        "position": {
+          "x": -0.5,
+          "y": 25
+        },
+        "size": {
+          "x": 1,
+          "y": 50
+        },
         "source": "perimeter"
       },
       {
         "id": "wall_-2_0003",
-        "position": { "x": 100.5, "y": 25 },
-        "size": { "x": 1, "y": 50 },
+        "position": {
+          "x": 100.5,
+          "y": 25
+        },
+        "size": {
+          "x": 1,
+          "y": 50
+        },
         "source": "perimeter"
       },
       {
         "id": "wall_-2_0004",
-        "position": { "x": 18, "y": 47 },
-        "size": { "x": 13, "y": 1 },
+        "position": {
+          "x": 18,
+          "y": 47
+        },
+        "size": {
+          "x": 13,
+          "y": 1
+        },
         "source": "generated",
         "shape_family": "line"
       },
       {
         "id": "wall_-2_0005",
-        "position": { "x": 87, "y": 10 },
-        "size": { "x": 7, "y": 1 },
+        "position": {
+          "x": 87,
+          "y": 10
+        },
+        "size": {
+          "x": 7,
+          "y": 1
+        },
         "source": "generated",
         "shape_family": "line"
       },
       {
         "id": "wall_-2_0006",
-        "position": { "x": 22.5, "y": 28 },
-        "size": { "x": 5, "y": 1 },
+        "position": {
+          "x": 22.5,
+          "y": 28
+        },
+        "size": {
+          "x": 5,
+          "y": 1
+        },
         "source": "generated",
         "shape_family": "l"
       },
       {
         "id": "wall_-2_0007",
-        "position": { "x": 25, "y": 25 },
-        "size": { "x": 1, "y": 6 },
+        "position": {
+          "x": 25,
+          "y": 25
+        },
+        "size": {
+          "x": 1,
+          "y": 6
+        },
         "source": "generated",
         "shape_family": "l"
       },
       {
         "id": "wall_-2_0008",
-        "position": { "x": 7, "y": 30 },
-        "size": { "x": 1, "y": 5 },
+        "position": {
+          "x": 7,
+          "y": 30
+        },
+        "size": {
+          "x": 1,
+          "y": 5
+        },
+        "source": "generated",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0009",
+        "position": {
+          "x": 57.5,
+          "y": 34
+        },
+        "size": {
+          "x": 5,
+          "y": 1
+        },
+        "source": "generated",
+        "shape_family": "l"
+      },
+      {
+        "id": "wall_-2_0010",
+        "position": {
+          "x": 60,
+          "y": 27.5
+        },
+        "size": {
+          "x": 1,
+          "y": 13
+        },
+        "source": "generated",
+        "shape_family": "l"
+      },
+      {
+        "id": "wall_-2_0011",
+        "position": {
+          "x": 59.5,
+          "y": 19
+        },
+        "size": {
+          "x": 7,
+          "y": 1
+        },
+        "source": "generated",
+        "shape_family": "t"
+      },
+      {
+        "id": "wall_-2_0012",
+        "position": {
+          "x": 65.5,
+          "y": 19
+        },
+        "size": {
+          "x": 5,
+          "y": 1
+        },
+        "source": "generated",
+        "shape_family": "t"
+      },
+      {
+        "id": "wall_-2_0013",
+        "position": {
+          "x": 63,
+          "y": 16.5
+        },
+        "size": {
+          "x": 1,
+          "y": 5
+        },
+        "source": "generated",
+        "shape_family": "t"
+      },
+      {
+        "id": "wall_-2_0014",
+        "position": {
+          "x": 49,
+          "y": 31
+        },
+        "size": {
+          "x": 10,
+          "y": 1
+        },
         "source": "generated",
         "shape_family": "line"
       }
     ],
     "reachable_targets": [
-      { "kind": "stairs_up", "position": { "x": 67, "y": 35 } },
-      { "kind": "stairs_down", "position": { "x": 88, "y": 15 } },
-      { "kind": "monster", "def_id": "dungeon_archer", "position": { "x": 92, "y": 7 } },
-      { "kind": "monster", "def_id": "dungeon_wolf", "position": { "x": 54, "y": 7 } },
-      { "kind": "monster", "def_id": "dungeon_bat", "position": { "x": 85, "y": 40 } },
-      { "kind": "monster", "def_id": "dungeon_wolf", "position": { "x": 87, "y": 41 } },
-      { "kind": "monster", "def_id": "dungeon_bat", "position": { "x": 72, "y": 16 } },
-      { "kind": "monster", "def_id": "dungeon_bat", "position": { "x": 15, "y": 27 } },
-      { "kind": "monster", "def_id": "dungeon_mob", "position": { "x": 77, "y": 43 } },
-      { "kind": "monster", "def_id": "dungeon_wolf", "position": { "x": 7, "y": 48 } }
+      {
+        "kind": "stairs_up",
+        "position": {
+          "x": 67,
+          "y": 35
+        }
+      },
+      {
+        "kind": "stairs_down",
+        "position": {
+          "x": 88,
+          "y": 15
+        }
+      },
+      {
+        "kind": "chest",
+        "def_id": "treasure_chest",
+        "position": {
+          "x": 60,
+          "y": 8
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_archer",
+        "position": {
+          "x": 88,
+          "y": 45
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 85.5,
+          "y": 45
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_bat",
+        "position": {
+          "x": 88,
+          "y": 42.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 7,
+          "y": 48
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_bat",
+        "position": {
+          "x": 9.5,
+          "y": 48
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_bat",
+        "position": {
+          "x": 7,
+          "y": 45.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 31,
+          "y": 39
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_wolf",
+        "position": {
+          "x": 31,
+          "y": 41.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_wolf",
+        "position": {
+          "x": 31,
+          "y": 36.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 84,
+          "y": 6
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_wolf",
+        "position": {
+          "x": 84,
+          "y": 3.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 81.5,
+          "y": 6
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 79,
+          "y": 6
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 81.5,
+          "y": 8.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 81,
+          "y": 41
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_bat",
+        "position": {
+          "x": 78.5,
+          "y": 41
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 81,
+          "y": 43.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 81,
+          "y": 38.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 83.5,
+          "y": 41
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 16,
+          "y": 33
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 13.5,
+          "y": 33
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_wolf",
+        "position": {
+          "x": 16,
+          "y": 30.5
+        }
+      }
     ]
   }
 }

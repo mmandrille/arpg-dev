@@ -25,7 +25,7 @@ Last updated: 2026-06-17
 |-------|-------|
 | **Latest completed slice** | v254 — area-scaled dungeon density |
 | **Active branch** | `main` |
-| **CI gate** | v254 focused verification green on 2026-06-17; final `$autoloop` batch `make ci` pending |
+| **CI gate** | v254 focused verification and full `make ci` green on 2026-06-17 |
 | **Next slice** | Next feature slice via `$next` / `$autoloop`, using the v250 review follow-ups and deferred fog/dungeon presentation work |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |

@@ -55,7 +55,12 @@ density increase, while all tuning remains in shared dungeon-generation data.
 - `make bot scenario=12_dungeon_levels`
 - `make bot scenario=14_dungeon_monsters`
 - `make bot scenario=28_reachable_dungeon_obstacles`
+- `make bot scenario=13_teleporter_lab`
+- `make bot scenario=42_pack_aggro_and_dungeon_packs`
+- `VERBOSE=1 make bot scenario=account_stash_storage`
+- `SCENARIO=44_elite_objective_hud HEADLESS=1 ./scripts/bot_client_local.sh`
 - `make maintainability`
+- `make ci`
 
 Manual visual proof, if desired after implementation:
 

@@ -5017,7 +5017,7 @@ func TestMonsterChaseOpenField(t *testing.T) {
 	}
 }
 
-func TestMonsterChaseLeashLastsAtLeastTwentyFiveTiles(t *testing.T) {
+func TestMonsterChaseLeashStopsInPlaceAfterConfiguredDistance(t *testing.T) {
 	rules := loadRules(t)
 	sim, err := NewSimWithWorld("sess", "01", rules, "chase_lab")
 	if err != nil {
@@ -5026,9 +5026,7 @@ func TestMonsterChaseLeashLastsAtLeastTwentyFiveTiles(t *testing.T) {
 	monster := firstEntityByKind(sim, monsterEntity)
 	player := sim.entities[sim.playerID]
 	def := rules.Monsters[monster.monsterDefID]
-	if def.LeashRadius >= minimumChaseLeashTiles*rules.Navigation.CellSize {
-		t.Fatalf("test requires a monster leash below the minimum; got %.3f", def.LeashRadius)
-	}
+	leashRadius := effectiveMonsterLeashRadius(def, rules.Navigation)
 
 	aggro := TickResult{}
 	player.pos = Vec2{X: monster.pos.X, Y: monster.pos.Y + def.AggroRadius - 1}
@@ -5038,19 +5036,23 @@ func TestMonsterChaseLeashLastsAtLeastTwentyFiveTiles(t *testing.T) {
 	}
 
 	prevMode := monster.aiMode
-	player.pos = Vec2{X: monster.spawnPos.X + minimumChaseLeashTiles*rules.Navigation.CellSize - 1, Y: monster.spawnPos.Y}
+	player.pos = Vec2{X: monster.spawnPos.X + leashRadius - 1, Y: monster.spawnPos.Y}
 	inside := TickResult{}
 	sim.updateMonsterAIMode(monster, player, def, prevMode, &inside)
-	if hasEvent(inside, "monster_leashed") || monster.aiMode != monsterAIModeChase {
-		t.Fatalf("monster leashed before 25 tiles: mode=%s events=%+v", monster.aiMode, inside.Events)
+	if hasEvent(inside, "monster_leashed") || monster.aiMode != monsterAIModeChase || monster.aiTargetPlayerID != sim.playerID {
+		t.Fatalf("monster leashed before configured radius: mode=%s target=%d events=%+v", monster.aiMode, monster.aiTargetPlayerID, inside.Events)
 	}
 
+	beforeLeashPos := monster.pos
 	prevMode = monster.aiMode
-	player.pos = Vec2{X: monster.spawnPos.X + minimumChaseLeashTiles*rules.Navigation.CellSize + 1, Y: monster.spawnPos.Y}
+	player.pos = Vec2{X: monster.spawnPos.X + leashRadius + 1, Y: monster.spawnPos.Y}
 	outside := TickResult{}
 	sim.updateMonsterAIMode(monster, player, def, prevMode, &outside)
-	if !hasEvent(outside, "monster_leashed") || monster.aiMode != monsterAIModeReturn {
-		t.Fatalf("monster did not leash after passing 25 tiles: mode=%s events=%+v", monster.aiMode, outside.Events)
+	if !hasEvent(outside, "monster_leashed") || monster.aiMode != monsterAIModeIdle || monster.aiTargetPlayerID != 0 {
+		t.Fatalf("monster did not stop after passing configured radius: mode=%s target=%d events=%+v", monster.aiMode, monster.aiTargetPlayerID, outside.Events)
+	}
+	if monster.pos != beforeLeashPos {
+		t.Fatalf("monster moved while leashing: before=%+v after=%+v", beforeLeashPos, monster.pos)
 	}
 }
 

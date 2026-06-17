@@ -134,7 +134,7 @@
       "behavior": "chase",
       "aggro_radius": 8,
       "assist_radius": 8,
-      "leash_radius": 8,
+      "leash_radius": 40,
       "move_speed": 0.392,
       "name_key": "monster.training_dummy_chase.name"
     },
@@ -152,7 +152,7 @@
       "behavior": "chase",
       "aggro_radius": 6,
       "assist_radius": 8,
-      "leash_radius": 10,
+      "leash_radius": 40,
       "move_speed": 0.392,
       "attack_damage": {
         "min": 1,
@@ -175,7 +175,7 @@
       "behavior": "chase",
       "aggro_radius": 6,
       "assist_radius": 8,
-      "leash_radius": 10,
+      "leash_radius": 40,
       "move_speed": 0.336,
       "attack_damage": {
         "min": 1,
@@ -205,7 +205,7 @@
       "behavior": "chase",
       "aggro_radius": 6,
       "assist_radius": 8,
-      "leash_radius": 10,
+      "leash_radius": 40,
       "move_speed": 0.392,
       "attack_damage": {
         "min": 1,
@@ -275,7 +275,7 @@
       "behavior": "chase",
       "aggro_radius": 6,
       "assist_radius": 8,
-      "leash_radius": 10,
+      "leash_radius": 40,
       "move_speed": 0.392,
       "attack_damage": {
         "min": 1,
@@ -301,7 +301,7 @@
       "behavior": "chase",
       "aggro_radius": 6,
       "assist_radius": 8,
-      "leash_radius": 10,
+      "leash_radius": 40,
       "move_speed": 0.336,
       "attack_damage": {
         "min": 1,
@@ -400,7 +400,7 @@
       "block_percent": 0,
       "behavior": "chase",
       "aggro_radius": 4,
-      "leash_radius": 6,
+      "leash_radius": 40,
       "move_speed": 0.392,
       "attack_damage": {
         "min": 2,
@@ -421,7 +421,7 @@
       "block_percent": 0,
       "behavior": "chase",
       "aggro_radius": 4,
-      "leash_radius": 6,
+      "leash_radius": 40,
       "move_speed": 0.392,
       "attack_damage": {
         "min": 2,

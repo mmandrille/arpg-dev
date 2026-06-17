@@ -1,0 +1,25 @@
+client/tests/test_net_client.gd
+  s_4fdff9fc96d196::t_35c7918ee77fea 1-64
+client/scripts/net_client.gd
+  s_4fdff9fc96d196::t_35c7918ee77fea 155-165
+client/tests/test_net_client.gd.uid
+  s_4fdff9fc96d196::t_a399aa42c7450f 1
+scripts/client_smoke.sh
+  s_4fdff9fc96d196::t_35c7918ee77fea 155,158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f454bf0b02ab3d1c0c10ec78f2046edd6d88ab77",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

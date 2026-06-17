@@ -91,6 +91,9 @@ type CharacterProgressionRepo interface {
 	ExpireMarketListings(ctx context.Context) (int, error)
 	GetMarketSummary(ctx context.Context, accountID string) (MarketSummary, error)
 	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, progression CharacterProgression) error
+	UpsertSessionStartItem(ctx context.Context, sessionID string, item CharacterItemInstance) error
+	SetSessionStartItemEquipped(ctx context.Context, sessionID, accountID, characterID, itemInstanceID, slot string, equipped bool, weaponSet int) error
+	RemoveSessionStartItem(ctx context.Context, sessionID, accountID, characterID, itemInstanceID string) error
 	LoadSessionStartSnapshot(ctx context.Context, sessionID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshotForMember(ctx context.Context, sessionID, accountID, characterID string) (SessionStartSnapshot, error)
 	LoadSessionStartSnapshots(ctx context.Context, sessionID string) ([]SessionStartSnapshot, error)

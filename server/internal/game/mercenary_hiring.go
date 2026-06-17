@@ -86,7 +86,7 @@ func (s *Sim) spawnHiredMercenary(owner *entity, res *TickResult) *entity {
 	s.pruneCompanionsForNewSpawn(owner.id, mercenaryHireSourceID, 1, res)
 	companion := &entity{
 		kind:                  companionEntity,
-		pos:                   companionSpawnPosition(owner),
+		pos:                   s.companionSpawnPosition(owner),
 		spawnPos:              owner.pos,
 		hp:                    def.MaxHP,
 		maxHP:                 def.MaxHP,

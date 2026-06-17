@@ -72,3 +72,26 @@ func TestCompanionFollowsOwnerAndDamagesMonster(t *testing.T) {
 		t.Fatalf("companion did not damage target: sawDamage=%v hp=%d start=%d companion=%+v target=%+v dist=%.3f target_id=%d", sawDamage, target.hp, startTargetHP, companion.pos, target.pos, distance(companion.pos, target.pos), companion.targetID)
 	}
 }
+
+func TestMainConfigCompanionFollowDistanceDrivesSpawnAndTravel(t *testing.T) {
+	rules := loadRulesWithMainGameplay(t, map[string]any{
+		"companion_follow_distance": 2.25,
+	})
+	sim, err := NewSimWithWorld("sess_companion_follow_config", "v232_companion_follow_config", rules, "companion_ai_lab")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	player := sim.entities[sim.playerID]
+	companion := firstEntityByKind(sim, companionEntity)
+	if player == nil || companion == nil {
+		t.Fatalf("setup player=%+v companion=%+v", player, companion)
+	}
+	spawn := sim.companionSpawnPosition(player)
+	if spawn.X != player.pos.X+2.25 || spawn.Y != player.pos.Y {
+		t.Fatalf("spawn position = %+v, player=%+v", spawn, player.pos)
+	}
+	travel := sim.companionTravelPosition(player.pos, 0)
+	if travel.X != player.pos.X+2.25 || travel.Y != player.pos.Y {
+		t.Fatalf("travel position = %+v, player=%+v", travel, player.pos)
+	}
+}

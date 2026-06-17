@@ -12,6 +12,9 @@
     "item_upgrade_pity_failure_threshold": 2,
     "item_upgrade_resource_item_def_id": "upgrade_shard",
     "item_upgrade_resource_count": 1,
-    "mercenary_hire_cost_gold": 75
+    "mercenary_hire_cost_gold": 75,
+    "companion_assist_radius": 5.0,
+    "companion_follow_distance": 1.1,
+    "companion_follow_stop_radius": 1.6
   }
 }

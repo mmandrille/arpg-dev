@@ -1,0 +1,44 @@
+client/scripts/main.gd
+  s_4608faa4e48f01::t_636a9df424acbe 858,920,5271
+client/scripts/client_audio_bridge.gd
+  s_4608faa4e48f01::t_f7a9f3d7781793 107-111
+client/tests/test_client_audio_controller.gd
+  s_4608faa4e48f01::t_f7a9f3d7781793 13,56-58,62,69-85
+docs/specs/v226_spec-dungeon-ambience-audio.md
+  s_4608faa4e48f01::t_a07402766489aa 1-2,4-59
+  s_4608faa4e48f01::t_268b2fc3f30869 3
+client/scripts/client_audio_controller.gd
+  s_4608faa4e48f01::t_f7a9f3d7781793 7,21-22,28,101,115-137,165-182,191-200,228-238
+client/scripts/bot_step_catalog.gd
+  s_4608faa4e48f01::t_636a9df424acbe 43
+PROGRESS.md
+  s_4608faa4e48f01::t_268b2fc3f30869 26,28
+docs/progress/slice-lifecycle.md
+  s_4608faa4e48f01::t_268b2fc3f30869 242
+docs/plans/v226_2026-06-16-dungeon-ambience-audio.md
+  s_4608faa4e48f01::t_a07402766489aa 1-31,33,35-37,39-51,53-64,66-77,79-84
+  s_4608faa4e48f01::t_200e38dac843d6 32,34,38,52,65,78,85-88
+client/scripts/bot_assertion_handlers.gd
+  s_4608faa4e48f01::t_e606b03d028b19 304-318
+  s_4608faa4e48f01::t_636a9df424acbe 140-141
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_4608faa4e48f01::t_636a9df424acbe 40-41
+docs/as-built/v226_dungeon-ambience-audio.md
+  s_4608faa4e48f01::t_268b2fc3f30869 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3d2ec481deb8e4e6c1a66866f28b09d57b462427",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

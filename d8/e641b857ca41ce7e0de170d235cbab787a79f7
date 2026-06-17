@@ -1,0 +1,37 @@
+PROGRESS.md
+  s_4608faa4e48f01::t_4b8c1c2266ccc8 26,28
+docs/progress/slice-lifecycle.md
+  s_4608faa4e48f01::t_4b8c1c2266ccc8 243
+docs/as-built/v227_skill-audio-cues.md
+  s_4608faa4e48f01::t_4b8c1c2266ccc8 1-37
+client/tests/test_client_audio_controller.gd
+  s_4608faa4e48f01::t_98badeddabfefd 42-46,53
+docs/plans/v227_2026-06-16-skill-audio-cues.md
+  s_4608faa4e48f01::t_4b8c1c2266ccc8 33,37,50,62,75,82-85
+  s_4608faa4e48f01::t_ac938c0bfbc59c 1-32,34-36,38-49,51-61,63-74,76-81
+client/scripts/bot_assertion_handlers.gd
+  s_4608faa4e48f01::t_98badeddabfefd 308
+docs/specs/v227_spec-skill-audio-cues.md
+  s_4608faa4e48f01::t_4b8c1c2266ccc8 3
+  s_4608faa4e48f01::t_ac938c0bfbc59c 1-2,4-55
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_4608faa4e48f01::t_98badeddabfefd 24
+client/scripts/client_audio_controller.gd
+  s_4608faa4e48f01::t_98badeddabfefd 23,69-70,134,265-272,305,315-330
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d8e641b857ca41ce7e0de170d235cbab787a79f7",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+tools/bot/runtime_queries.py
+  s_4608faa4e48f01::t_59618d7cee9606 30-112
+.maintainability/extraction-coupling-baseline.tsv
+  s_4608faa4e48f01::t_add84e68c8d8f4 1
+.maintainability/file-size-baseline.tsv
+  s_4608faa4e48f01::t_6120f64cc7d11c 33
+tools/bot/wait_runtime.py
+  s_4608faa4e48f01::t_59618d7cee9606 9
+  s_4608faa4e48f01::t_add84e68c8d8f4 69-70,94,96,121,123,143,145
+tools/bot/run.py
+  s_4608faa4e48f01::t_59618d7cee9606 37
+  s_4608faa4e48f01::t_add84e68c8d8f4 2005,2026,2042,2058
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "20f62303ff5ebae020000cd7f57a177d41f54af0",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

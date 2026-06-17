@@ -1,0 +1,48 @@
+.maintainability/file-size-baseline.tsv
+  s_4608faa4e48f01::t_4ae3bf492c438d 20
+server/internal/game/rules.go
+  s_4608faa4e48f01::t_0abac52b4fb213 936,2559-2561,2598
+docs/specs/v230_spec-mystery-set-unique-eligibility.md
+  s_4608faa4e48f01::t_a3fe8e05617d08 3,59
+  s_4608faa4e48f01::t_5c443424253e91 1-2,4-58,60-78
+docs/plans/v230_2026-06-16-mystery-set-unique-eligibility.md
+  s_4608faa4e48f01::t_43eaae3d9fb0b2 3,25,37-42,45
+  s_4608faa4e48f01::t_5c443424253e91 1-2,4-24,26-36,43-44,46,48-60,62,64-72,78-90,93-99
+  s_4608faa4e48f01::t_b118b6e47947ef 61,63,73-77,91-92,100-104
+  s_4608faa4e48f01::t_bd2c9c6731f641 47
+server/internal/game/mystery_shop.go
+  s_4608faa4e48f01::t_0abac52b4fb213 1-199
+PROGRESS.md
+  s_4608faa4e48f01::t_cd3f353085913a 26,28
+docs/progress/slice-lifecycle.md
+  s_4608faa4e48f01::t_cd3f353085913a 246
+shared/rules/shops.v0.schema.json
+  s_4608faa4e48f01::t_0abac52b4fb213 74,101,107-108
+server/internal/game/mystery_shop_test.go
+  s_4608faa4e48f01::t_de829b0cc4e94e 1-6,8-41,43-54,56-74,78-89
+  s_4608faa4e48f01::t_c89cdef1fa5e40 75-77
+  s_4608faa4e48f01::t_9352928efbe068 55
+  s_4608faa4e48f01::t_9373ae74cb9b7a 7,42
+docs/as-built/v230_mystery-set-unique-eligibility.md
+  s_4608faa4e48f01::t_cd3f353085913a 1-42
+shared/rules/shops.v0.json
+  s_4608faa4e48f01::t_4e1c94fbb63a7d 32-33
+  s_4608faa4e48f01::t_1efb554cd409ca 91
+  s_4608faa4e48f01::t_0abac52b4fb213 110-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9e395574207d52b2096e554f69623a41714b0ad9",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

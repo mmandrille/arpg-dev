@@ -21,6 +21,7 @@
     { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "enabled": true, "remaining_ticks": 0, "slot_text": "", "tooltip_contains": "Rage", "timeout_s": 5.0 },
     { "type": "use_skill_slot", "skill_id": "rage", "force_direct": true },
     { "type": "wait_event", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 5, "timeout_s": 5.0 },
+    { "type": "assert_audio_state", "last_skill_id": "rage", "last_cue": "skill_buff" },
     { "type": "wait_event", "event_type": "skill_cooldown_started", "skill_id": "rage", "timeout_s": 5.0 },
     { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "disabled": true, "remaining_ticks_min": 1, "slot_text": "", "timeout_s": 5.0 }
   ]

@@ -20,6 +20,7 @@ var last_boss_pattern_id: String = ""
 var last_boss_phase_kind: String = ""
 var ambient_zone: String = "none"
 var ambient_active: bool = false
+var last_skill_id: String = ""
 
 var _sfx_player: AudioStreamPlayer
 var _music_player: AudioStreamPlayer
@@ -65,12 +66,8 @@ func play_attack() -> void:
 
 
 func play_skill(skill_id: String = "") -> void:
-	if skill_id == "heal":
-		play_cue("heal")
-	elif skill_id == "leap" or skill_id == "charge" or skill_id == "earthbreaker":
-		play_cue("movement_skill")
-	else:
-		play_cue("skill")
+	last_skill_id = skill_id.strip_edges().to_lower()
+	play_cue(_skill_cue(last_skill_id))
 
 
 func play_heal() -> void:
@@ -134,6 +131,7 @@ func get_debug_state() -> Dictionary:
 		"last_boss_phase_kind": last_boss_phase_kind,
 		"ambient_zone": ambient_zone,
 		"ambient_active": ambient_active,
+		"last_skill_id": last_skill_id,
 	}
 
 
@@ -264,6 +262,14 @@ func _cue_frequency(cue: String) -> float:
 			return 310.0
 		"skill":
 			return 660.0
+		"skill_projectile":
+			return 700.0
+		"skill_buff":
+			return 470.0
+		"skill_protection":
+			return 560.0
+		"skill_revive":
+			return 820.0
 		"movement_skill":
 			return 520.0
 		"heal":
@@ -296,7 +302,7 @@ func _cue_wave(cue: String) -> String:
 	match cue:
 		"movement", "monster_damage":
 			return "noise"
-		"skill", "movement_skill", "heal":
+		"skill", "skill_projectile", "skill_buff", "skill_protection", "skill_revive", "movement_skill", "heal":
 			return "up"
 		"player_damage", "monster_kill", "boss_kill", "boss_phase", "boss_active":
 			return "down"
@@ -304,6 +310,24 @@ func _cue_wave(cue: String) -> String:
 			return "up"
 		_:
 			return "sine"
+
+
+func _skill_cue(skill_id: String) -> String:
+	match skill_id:
+		"heal":
+			return "heal"
+		"leap", "charge", "earthbreaker", "disengage", "teleport":
+			return "movement_skill"
+		"magic_bolt", "arcane_barrage", "poison_stab", "pinning_shot", "volley":
+			return "skill_projectile"
+		"rage", "duelist_mark":
+			return "skill_buff"
+		"holy_shield", "sanctuary":
+			return "skill_protection"
+		"revive":
+			return "skill_revive"
+		_:
+			return "skill"
 
 
 func _boss_phase_cue(pattern_id: String, phase_kind: String) -> String:

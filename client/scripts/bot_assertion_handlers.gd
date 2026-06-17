@@ -305,7 +305,7 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 
 static func _assert_audio_state(runner, step: Dictionary, state: Dictionary) -> bool:
 	var audio: Dictionary = state.get("audio", {})
-	for key in ["ambient_zone", "ambient_active", "boss_music_active", "boss_music_layer"]:
+	for key in ["ambient_zone", "ambient_active", "boss_music_active", "boss_music_layer", "last_cue", "last_skill_id"]:
 		if step.has(key) and audio.get(key, null) != step[key]:
 			runner._fail("assert_audio_state failed: key=%s want=%s got=%s audio=%s step=%d scenario=%s" % [
 				key, str(step[key]), str(audio.get(key, null)), str(audio), runner._step_index, str(runner.scenario.get("id", "?"))

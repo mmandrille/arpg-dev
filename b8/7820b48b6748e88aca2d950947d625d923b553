@@ -1,0 +1,42 @@
+docs/as-built/v239_mercenary-stats-card.md
+  s_aa3e23b9c2eeb6::t_99a0ae2e513984 1-36
+client/tests/test_mercenary_panel.gd
+  s_aa3e23b9c2eeb6::t_7672be9aa6522d 47-51,67
+docs/progress/slice-lifecycle.md
+  s_aa3e23b9c2eeb6::t_99a0ae2e513984 255
+docs/progress/scenario-catalog.md
+  s_aa3e23b9c2eeb6::t_99a0ae2e513984 92
+tools/bot/scenarios/client/56_mercenary_stats_card.json
+  s_aa3e23b9c2eeb6::t_7672be9aa6522d 1-24
+PROGRESS.md
+  s_aa3e23b9c2eeb6::t_99a0ae2e513984 26,28-29
+docs/plans/v239_2026-06-17-mercenary-stats-card.md
+  s_aa3e23b9c2eeb6::t_99a0ae2e513984 3,30,33-34,46-49,59-62,78,82-84
+  s_aa3e23b9c2eeb6::t_792c08a1840d02 1-2,4-29,31-32,35-45,50-58,63-77,79-81
+client/scripts/bot_step_catalog.gd
+  s_aa3e23b9c2eeb6::t_7672be9aa6522d 228
+client/scripts/bot_mercenary_panel_assertions.gd
+  s_aa3e23b9c2eeb6::t_7672be9aa6522d 21-22,31-35
+docs/specs/v239_spec-mercenary-stats-card.md
+  s_aa3e23b9c2eeb6::t_792c08a1840d02 1-49
+client/scripts/mercenary_panel.gd
+  s_aa3e23b9c2eeb6::t_7672be9aa6522d 29-30,138-140,209-217,253-256,276-293,331-348
+docs/progress/slice-codename-index.md
+  s_aa3e23b9c2eeb6::t_99a0ae2e513984 216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b87820b48b6748e88aca2d950947d625d923b553",
+  "prompts": {},
+  "sessions": {
+    "s_aa3e23b9c2eeb6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed3df-5c04-7483-9274-6021ae385ba4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

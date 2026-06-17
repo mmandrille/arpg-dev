@@ -1,0 +1,19 @@
+client/tests/test_delta_apply.gd
+  s_eebb6a37b07889::t_a179b49658e12d 16,29,106-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e929358b331c88bed8bcaf5659af78369feab065",
+  "prompts": {},
+  "sessions": {
+    "s_eebb6a37b07889": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed5d0-23b5-7c30-b075-6430496707e7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

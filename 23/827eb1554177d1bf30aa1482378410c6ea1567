@@ -1,0 +1,48 @@
+docs/as-built/v231_market-cancel-offer-ui.md
+  s_4608faa4e48f01::t_ebbad497bc96c3 1-42
+docs/plans/v231_2026-06-16-market-cancel-offer-ui.md
+  s_4608faa4e48f01::t_cbd752dd6d6169 1-2,4-33,39-42,44-56,59-67,71-79,81,83-85
+  s_4608faa4e48f01::t_ebbad497bc96c3 3,34-38,43,57-58,68-70,80,82,86-89
+client/scripts/net_client.gd
+  s_4608faa4e48f01::t_7124ac0cf98ef7 321-329
+client/scripts/bot_facade.gd
+  s_4608faa4e48f01::t_5ee3130852898a 104-109
+client/scripts/main.gd
+  s_4608faa4e48f01::t_565573efb1aa0b 4319,4323,4327,4331,4343,4354,4365,4377,4385,4391
+  s_4608faa4e48f01::t_bc37dd6657b349 4332-4339,5548-5549
+client/scripts/bot_scenario_runner.gd
+  s_4608faa4e48f01::t_ac1af33b010f7b 1627
+tools/bot/scenarios/client/48_market_cancel_listing_ui.json
+  s_4608faa4e48f01::t_f49d98f98450e1 1-27
+client/scripts/bot_step_catalog.gd
+  s_4608faa4e48f01::t_d58241534e84e8 61
+client/scripts/bot_controller.gd
+  s_4608faa4e48f01::t_00ba3afb98ebe9 197-198,428-431,776-777
+client/scripts/bot_action_step_validator.gd
+  s_4608faa4e48f01::t_d58241534e84e8 19,97
+PROGRESS.md
+  s_4608faa4e48f01::t_ebbad497bc96c3 26,28
+docs/progress/slice-lifecycle.md
+  s_4608faa4e48f01::t_ebbad497bc96c3 247
+docs/specs/v231_spec-market-cancel-offer-ui.md
+  s_4608faa4e48f01::t_cbd752dd6d6169 1-2,4-70
+  s_4608faa4e48f01::t_ebbad497bc96c3 3
+client/scripts/market_panel.gd
+  s_4608faa4e48f01::t_cfaefe8dc8d6b9 201-208,461-467,598-603
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "23827eb1554177d1bf30aa1482378410c6ea1567",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

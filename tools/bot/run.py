@@ -471,7 +471,10 @@ async def execute_step(
         await wait_for_accept(ws, state, env["message_id"], loop)
         return
 
-    if action == "set_companion_stance": from tools.bot.companion_commands import set_companion_stance; await set_companion_stance(ws, session_id, state, step, loop, globals()); return
+    if action == "set_companion_stance":
+        from tools.bot.companion_commands import set_companion_stance
+        await set_companion_stance(ws, session_id, state, step, loop, make_envelope, wait_for_accept, wait_for_reject)
+        return
 
     if action == "move_until_player_position":
         move_fn = move_to_position if bool(step.get("pathfind")) else walk_toward
@@ -1325,7 +1328,10 @@ async def execute_step(
         if isinstance(expected, dict):
             await wait_for_skill_cooldown(ws, state, expected, loop)
         return
-    if action == "channel_skill_path": from tools.bot.channel_skill import execute_channel_skill_path; await execute_channel_skill_path(ws, session_id, state, step, loop, globals()); return
+    if action == "channel_skill_path":
+        from tools.bot.channel_skill import execute_channel_skill_path
+        await execute_channel_skill_path(ws, session_id, state, step, loop, make_envelope, wait_for_accept, wait_for_matching_event, pump_one)
+        return
     if action == "assert_skill_progression":
         assert_skill_progression(state.skill_progression, step, "runtime protocol")
         return

@@ -6,16 +6,22 @@ import json
 from typing import Any
 
 
-async def execute_channel_skill_path(ws, session_id: str, state, step: dict[str, Any], loop, helpers: dict[str, Any]) -> None:
+async def execute_channel_skill_path(
+    ws,
+    session_id: str,
+    state,
+    step: dict[str, Any],
+    loop,
+    make_envelope,
+    wait_for_accept,
+    wait_for_matching_event,
+    pump_one,
+) -> None:
     skill_id = str(step.get("skill_id", "charge"))
     segments = step.get("segments", [])
     if not isinstance(segments, list) or not segments:
         raise AssertionError("channel_skill_path requires non-empty segments")
 
-    make_envelope = helpers["make_envelope"]
-    wait_for_accept = helpers["wait_for_accept"]
-    wait_for_matching_event = helpers["wait_for_matching_event"]
-    pump_one = helpers["pump_one"]
     event_start_index = len(state.events)
 
     first = segments[0]

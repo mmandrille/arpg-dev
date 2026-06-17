@@ -53,6 +53,7 @@ const STEP_TYPES_ACTION := [
 	"set_floating_combat_text", "select_create_game_type",
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
+	"open_resource_wallet_window",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
 	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort",
 	"set_multiplayer_search", "select_multiplayer_sort",

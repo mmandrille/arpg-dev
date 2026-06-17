@@ -161,6 +161,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_shop_reroll()
 		"click_shop_sell_item":
 			_do_click_shop_sell_item(action)
+		"open_resource_wallet_window":
+			_do_open_resource_wallet_window()
 		"click_waypoint_level":
 			_do_click_waypoint_level(action)
 		"drag_bag_to_stash":
@@ -296,6 +298,12 @@ func _do_click_shop_sell_item(action: Dictionary) -> void:
 			action.get("rolled", null),
 			int(action.get("bag_index", 0))
 		)
+
+
+func _do_open_resource_wallet_window() -> void:
+	var bar = _main.get("character_bar") if _main != null else null
+	if bar != null and bar.has_method("open_wallet_window"):
+		bar.open_wallet_window()
 
 
 func _do_click_waypoint_level(action: Dictionary) -> void:

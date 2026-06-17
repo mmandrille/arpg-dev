@@ -1,0 +1,25 @@
+docs/progress/slice-lifecycle.md
+  s_625324c6ca5fae::t_17f2e165ac3ae3 268
+docs/plans/v253_2026-06-17-fog-of-war-radius.md
+  s_625324c6ca5fae::t_17f2e165ac3ae3 213,215
+PROGRESS.md
+  s_625324c6ca5fae::t_17f2e165ac3ae3 28
+docs/as-built/v253_fog-of-war-radius.md
+  s_625324c6ca5fae::t_17f2e165ac3ae3 34,37-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "51cbe7d2e2be15d34be37b7c91796df4848721db",
+  "prompts": {},
+  "sessions": {
+    "s_625324c6ca5fae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed6ca-bd17-7cd0-b235-044f1bd04620",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

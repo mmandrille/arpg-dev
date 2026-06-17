@@ -29,8 +29,8 @@ make bot-client scenario=59_market_search_sort.json HEADLESS=1
 make maintainability
 ```
 
-All focused checks passed on 2026-06-17 during `$autoloop`. The enclosing batch-level `make ci` is
-deferred until the selected v241-v250 feature queue completes.
+All focused checks passed on 2026-06-17 during `$autoloop`. The selected v241-v250 batch-level
+`make ci` also passed on 2026-06-17 after v250.
 
 Manual visual proof, if desired:
 

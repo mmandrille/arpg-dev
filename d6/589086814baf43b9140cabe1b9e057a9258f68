@@ -1,0 +1,67 @@
+client/scripts/bot_step_catalog.gd
+  s_aa3e23b9c2eeb6::t_8a854d2e8bef9f 219
+docs/progress/slice-lifecycle.md
+  s_aa3e23b9c2eeb6::t_547eea36ddc0ec 251
+client/scripts/net_client.gd
+  s_aa3e23b9c2eeb6::t_fa41fe4443e4ef 364-370
+docs/specs/v235_spec-market-trade-receipts.md
+  s_aa3e23b9c2eeb6::t_c12c17637db20b 1-53
+server/internal/store/market_receipts.go
+  s_aa3e23b9c2eeb6::t_92223cdb6d2da8 1-36
+client/scripts/market_offer_rows.gd
+  s_aa3e23b9c2eeb6::t_24f85e0e818273 56-75
+  s_aa3e23b9c2eeb6::t_fa41fe4443e4ef 32-55
+client/scripts/market_panel.gd
+  s_aa3e23b9c2eeb6::t_7b07c460c067cd 26,115,244,266,393,412,414
+  s_aa3e23b9c2eeb6::t_24f85e0e818273 199-200,245,413,818
+  s_aa3e23b9c2eeb6::t_dbb2f60101a90c 817
+server/internal/store/interfaces.go
+  s_aa3e23b9c2eeb6::t_92223cdb6d2da8 89
+client/scripts/bot_market_receipt_assertions.gd
+  s_aa3e23b9c2eeb6::t_24f85e0e818273 1-26
+client/scripts/bot_wait_handlers.gd
+  s_aa3e23b9c2eeb6::t_24f85e0e818273 8,50
+client/scripts/bot_market_receipt_assertions.gd.uid
+  s_aa3e23b9c2eeb6::t_e005484688c225 1
+server/internal/store/market_receipts_test.go
+  s_aa3e23b9c2eeb6::t_92223cdb6d2da8 1-82
+docs/progress/scenario-catalog.md
+  s_aa3e23b9c2eeb6::t_547eea36ddc0ec 88
+tools/bot/scenarios/client/52_market_trade_receipts.json
+  s_aa3e23b9c2eeb6::t_404d7058ecc770 1-27
+PROGRESS.md
+  s_aa3e23b9c2eeb6::t_547eea36ddc0ec 26,28-29
+server/internal/http/market_receipts_test.go
+  s_aa3e23b9c2eeb6::t_92223cdb6d2da8 1-64
+client/scripts/main.gd
+  s_aa3e23b9c2eeb6::t_dbb2f60101a90c 4374-4375,4377,4379,4381-4382
+server/internal/http/market.go
+  s_aa3e23b9c2eeb6::t_92223cdb6d2da8 21
+server/internal/replay/replay_test.go
+  s_aa3e23b9c2eeb6::t_92223cdb6d2da8 1527-1532
+docs/as-built/v235_market-trade-receipts.md
+  s_aa3e23b9c2eeb6::t_547eea36ddc0ec 1-42
+docs/progress/slice-codename-index.md
+  s_aa3e23b9c2eeb6::t_547eea36ddc0ec 212
+server/internal/http/market_receipts.go
+  s_aa3e23b9c2eeb6::t_92223cdb6d2da8 1-80
+docs/plans/v235_2026-06-17-market-trade-receipts.md
+  s_aa3e23b9c2eeb6::t_c12c17637db20b 1-2,4-17,19,22-25,28-35,40-41,44-52,54,56-57,61-74,78-85,88-90,93-105,107-113
+  s_aa3e23b9c2eeb6::t_547eea36ddc0ec 3,18,20-21,26-27,36-39,42-43,53,55,58-60,75-77,86-87,91-92,106,114-119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d6589086814baf43b9140cabe1b9e057a9258f68",
+  "prompts": {},
+  "sessions": {
+    "s_aa3e23b9c2eeb6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed3df-5c04-7483-9274-6021ae385ba4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -141,6 +141,7 @@ run_gate "GDScript text catalog test" "[gdtest] PASS: test_text_catalog" res://t
 run_gate "GDScript enemy health bar settings test" "[gdtest] PASS: test_enemy_health_bar_settings" res://tests/test_enemy_health_bar_settings.gd
 run_gate "GDScript audio settings test" "[gdtest] PASS: test_audio_settings" res://tests/test_audio_settings.gd
 run_gate "GDScript client audio controller test" "[gdtest] PASS: test_client_audio_controller" res://tests/test_client_audio_controller.gd
+run_gate "GDScript character bar test" "[gdtest] PASS: test_character_bar" res://tests/test_character_bar.gd
 run_gate "GDScript skill rules loader test" "[gdtest] PASS: test_skill_rules_loader" res://tests/test_skill_rules_loader.gd
 run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://tests/test_skills_panel.gd
 run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/test_skill_bar.gd

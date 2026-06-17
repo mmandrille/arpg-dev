@@ -23,9 +23,9 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v227 — skill audio cues |
+| **Latest completed slice** | v228 — resource wallet panel |
 | **Active branch** | `main` |
-| **CI gate** | Focused v227 checks green on 2026-06-16; batch `make ci` pending for `$autoloop` |
+| **CI gate** | Focused v228 checks green on 2026-06-16; batch `make ci` pending for `$autoloop` |
 | **Next slice** | TBD |
 | **Last engineering review** | v223 — [`docs/reviews/20260616_v223-overview.md`](docs/reviews/20260616_v223-overview.md) (2026-06-16) |
 | **Next engineering review** | v233 after the next feature batch, once CI is green |

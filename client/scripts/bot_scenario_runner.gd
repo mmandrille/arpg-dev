@@ -343,10 +343,12 @@ func _boss_health_bar_matches(step: Dictionary, state: Dictionary) -> bool:
 	var bar: Dictionary = state.get("boss_health_bar", {})
 	if step.has("visible") and bool(bar.get("visible", false)) != bool(step.get("visible", true)):
 		return false
-	for key in ["boss_id", "boss_template_id", "title", "portrait_kind", "portrait_label"]:
+	for key in ["boss_id", "boss_template_id", "title", "portrait_kind", "portrait_label", "reward_boss_template_id", "reward_title", "reward_status", "reward_hint"]:
 		if step.has(key) and str(bar.get(key, "")) != str(step.get(key, "")):
 			return false
 	if step.has("portrait_visible") and bool(bar.get("portrait_visible", false)) != bool(step.get("portrait_visible", true)):
+		return false
+	if step.has("reward_panel_visible") and bool(bar.get("reward_panel_visible", false)) != bool(step.get("reward_panel_visible", true)):
 		return false
 	for key in ["hp", "max_hp", "phase_index", "duration_ticks"]:
 		if step.has(key) and int(bar.get(key, -999999)) != int(step.get(key, 0)):
@@ -375,7 +377,7 @@ func _boss_health_bar_matches(step: Dictionary, state: Dictionary) -> bool:
 
 func _boss_health_bar_expectation(step: Dictionary) -> Dictionary:
 	var out := {}
-	for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max", "phase_kind", "pattern_id", "phase_index", "duration_ticks", "remaining_ticks_min", "remaining_ticks_max", "phase_ratio_min", "phase_ratio_max", "portrait_visible", "portrait_kind", "portrait_label"]:
+	for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max", "phase_kind", "pattern_id", "phase_index", "duration_ticks", "remaining_ticks_min", "remaining_ticks_max", "phase_ratio_min", "phase_ratio_max", "portrait_visible", "portrait_kind", "portrait_label", "reward_panel_visible", "reward_boss_template_id", "reward_title", "reward_status", "reward_hint"]:
 		if step.has(key):
 			out[key] = step[key]
 	return out

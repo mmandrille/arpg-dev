@@ -257,10 +257,11 @@ start_preflight() {
 
 run_scenario() {
   local scenario_path="$1"
-  local scenario_id world_id seed debug_gold exit_code started_ts tmpfile preflight_metadata preflight_log expected_join_session
+  local scenario_id world_id seed debug_progression_json debug_gold exit_code started_ts tmpfile preflight_metadata preflight_log expected_join_session
   scenario_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('id','unknown'))")"
   world_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('world_id',''))")"
   seed="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('seed',''))")"
+  debug_progression_json="$(python3 -c "import json; d=json.load(open('$scenario_path')); p=d.get('debug_progression', {}); print(json.dumps(p, separators=(',', ':')) if p else '')")"
   debug_gold="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('debug_progression', {}).get('gold', ''))")"
   started_ts="$(python3 -c 'import time; print(time.monotonic())')"
   tmpfile="$(mktemp)"
@@ -295,6 +296,7 @@ run_scenario() {
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
       ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
       ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
+      ARPG_BOT_DEBUG_PROGRESSION="$debug_progression_json" \
       ARPG_BOT_DEBUG_GOLD="$debug_gold" \
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
@@ -312,6 +314,7 @@ run_scenario() {
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
       ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
       ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
+      ARPG_BOT_DEBUG_PROGRESSION="$debug_progression_json" \
       ARPG_BOT_DEBUG_GOLD="$debug_gold" \
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \

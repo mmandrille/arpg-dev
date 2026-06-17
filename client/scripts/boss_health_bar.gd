@@ -6,12 +6,17 @@ const PANEL_TOP := 58.0
 const BAR_SIZE := Vector2(350.0, 14.0)
 const PHASE_BAR_SIZE := Vector2(350.0, 6.0)
 const PORTRAIT_SIZE := Vector2(58.0, 58.0)
+const REWARD_PANEL_WIDTH := 390.0
 
 var _panel: PanelContainer
+var _reward_panel: PanelContainer
 var _portrait: Control
 var _title_label: Label
 var _hp_label: Label
 var _phase_label: Label
+var _reward_title_label: Label
+var _reward_status_label: Label
+var _reward_hint_label: Label
 var _phase_fill: ColorRect
 var _fill: ColorRect
 var _boss_id: String = ""
@@ -26,6 +31,10 @@ var _phase_index: int = -1
 var _duration_ticks: int = 0
 var _remaining_ticks: int = 0
 var _phase_ratio: float = 0.0
+var _reward_boss_template_id: String = ""
+var _reward_title: String = ""
+var _reward_status: String = ""
+var _reward_hint: String = ""
 
 
 func _ready() -> void:
@@ -37,18 +46,26 @@ func _ready() -> void:
 
 func show_boss(entity_id: String, boss_template_id: String, title: String, hp: int, max_hp: int) -> void:
 	_build()
+	_clear_reward_fields()
 	_boss_id = entity_id
 	_boss_template_id = boss_template_id
 	_title = title if title != "" else "Boss"
 	_max_hp = maxi(1, max_hp)
 	_hp = clampi(hp, 0, _max_hp)
 	_ratio = clampf(float(_hp) / float(_max_hp), 0.0, 1.0)
-	visible = _hp > 0
+	_panel.visible = _hp > 0
 	_update_display()
+	_update_reward_display()
+	_sync_root_visibility()
 	_sync_position()
 
 
 func hide_boss() -> void:
+	hide_live_boss()
+	clear_reward_status()
+
+
+func hide_live_boss() -> void:
 	_boss_id = ""
 	_boss_template_id = ""
 	_title = ""
@@ -56,8 +73,30 @@ func hide_boss() -> void:
 	_max_hp = 1
 	_ratio = 0.0
 	_clear_phase_fields()
-	visible = false
+	if _panel != null:
+		_panel.visible = false
 	_update_display()
+	_sync_root_visibility()
+
+
+func show_reward_status(boss_template_id: String, title: String, status: String, hint: String) -> void:
+	_build()
+	hide_live_boss()
+	_reward_boss_template_id = boss_template_id
+	_reward_title = title if title != "" else "Boss"
+	_reward_status = status
+	_reward_hint = hint
+	if _reward_panel != null:
+		_reward_panel.visible = _reward_status != ""
+	_update_reward_display()
+	_sync_root_visibility()
+	_sync_position()
+
+
+func clear_reward_status() -> void:
+	_clear_reward_fields()
+	_update_reward_display()
+	_sync_root_visibility()
 
 
 func set_phase_state(phase: Dictionary) -> void:
@@ -94,6 +133,11 @@ func get_debug_state() -> Dictionary:
 		"portrait_visible": visible and _boss_id != "",
 		"portrait_kind": _portrait_kind(),
 		"portrait_label": _portrait_label(),
+		"reward_panel_visible": _reward_visible(),
+		"reward_boss_template_id": _reward_boss_template_id,
+		"reward_title": _reward_title,
+		"reward_status": _reward_status,
+		"reward_hint": _reward_hint,
 	}
 
 
@@ -106,6 +150,7 @@ func _build() -> void:
 
 	_panel = PanelContainer.new()
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.visible = false
 	_panel.custom_minimum_size = Vector2(PANEL_WIDTH, 88.0)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.055, 0.045, 0.035, 0.92)
@@ -186,7 +231,49 @@ func _build() -> void:
 	_phase_fill.size = PHASE_BAR_SIZE
 	phase_bg.add_child(_phase_fill)
 
+	_reward_panel = PanelContainer.new()
+	_reward_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_reward_panel.visible = false
+	_reward_panel.custom_minimum_size = Vector2(REWARD_PANEL_WIDTH, 88.0)
+	var reward_style := StyleBoxFlat.new()
+	reward_style.bg_color = Color(0.055, 0.075, 0.055, 0.94)
+	reward_style.border_color = Color("#d4b36a")
+	reward_style.border_width_left = 1
+	reward_style.border_width_top = 1
+	reward_style.border_width_right = 1
+	reward_style.border_width_bottom = 1
+	reward_style.content_margin_left = 14
+	reward_style.content_margin_top = 9
+	reward_style.content_margin_right = 14
+	reward_style.content_margin_bottom = 10
+	_reward_panel.add_theme_stylebox_override("panel", reward_style)
+	add_child(_reward_panel)
+
+	var reward_root := VBoxContainer.new()
+	reward_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	reward_root.add_theme_constant_override("separation", 4)
+	_reward_panel.add_child(reward_root)
+
+	_reward_title_label = Label.new()
+	_reward_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_reward_title_label.add_theme_color_override("font_color", Color("#f3c251"))
+	_reward_title_label.add_theme_font_size_override("font_size", 15)
+	reward_root.add_child(_reward_title_label)
+
+	_reward_status_label = Label.new()
+	_reward_status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_reward_status_label.add_theme_color_override("font_color", Color("#e8dcc8"))
+	_reward_status_label.add_theme_font_size_override("font_size", 13)
+	reward_root.add_child(_reward_status_label)
+
+	_reward_hint_label = Label.new()
+	_reward_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_reward_hint_label.add_theme_color_override("font_color", Color("#9fd69f"))
+	_reward_hint_label.add_theme_font_size_override("font_size", 12)
+	reward_root.add_child(_reward_hint_label)
+
 	_update_display()
+	_update_reward_display()
 
 
 func _update_display() -> void:
@@ -226,11 +313,13 @@ func _update_display() -> void:
 
 
 func _sync_position() -> void:
-	if _panel == null:
+	if _panel == null or _reward_panel == null:
 		return
 	var viewport_size := get_viewport_rect().size
 	var x := maxf(8.0, (viewport_size.x - PANEL_WIDTH) * 0.5)
 	_panel.set_deferred("position", Vector2(x, PANEL_TOP))
+	var reward_x := maxf(8.0, (viewport_size.x - REWARD_PANEL_WIDTH) * 0.5)
+	_reward_panel.set_deferred("position", Vector2(reward_x, PANEL_TOP))
 
 
 func _clear_phase_fields() -> void:
@@ -240,6 +329,31 @@ func _clear_phase_fields() -> void:
 	_duration_ticks = 0
 	_remaining_ticks = 0
 	_phase_ratio = 0.0
+
+
+func _clear_reward_fields() -> void:
+	_reward_boss_template_id = ""
+	_reward_title = ""
+	_reward_status = ""
+	_reward_hint = ""
+	if _reward_panel != null:
+		_reward_panel.visible = false
+
+
+func _update_reward_display() -> void:
+	if _reward_title_label == null or _reward_status_label == null or _reward_hint_label == null:
+		return
+	_reward_title_label.text = _reward_title
+	_reward_status_label.text = _reward_status
+	_reward_hint_label.text = _reward_hint
+
+
+func _reward_visible() -> bool:
+	return _reward_panel != null and _reward_panel.visible and _reward_status != ""
+
+
+func _sync_root_visibility() -> void:
+	visible = (_panel != null and _panel.visible and _boss_id != "") or _reward_visible()
 
 
 func _phase_ratio_from_ticks(remaining_ticks: int, duration_ticks: int) -> float:

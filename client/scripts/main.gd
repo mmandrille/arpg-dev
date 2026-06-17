@@ -299,7 +299,7 @@ func _ready() -> void:
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
 	var requested_seed := _env("ARPG_SEED", "")
-	var requested_character_id := BotDebugProgressionSetupScript.prepare_character(client, _env("ARPG_DEBUG_TOKEN", "local-debug-token"), _env("ARPG_BOT_DEBUG_GOLD", "") if bot_client_run else "")
+	var requested_character_id := BotDebugProgressionSetupScript.prepare_character(client, _env("ARPG_DEBUG_TOKEN", "local-debug-token"), _env("ARPG_BOT_DEBUG_PROGRESSION", "") if bot_client_run else "", _env("ARPG_BOT_DEBUG_GOLD", "") if bot_client_run else "")
 	if requested_world_id == "" and not bot_client_run:
 		requested_world_id = "dungeon_levels"
 	if bot_client_run or resume_session_id != "" or _truthy_env("ARPG_AUTOSTART"):
@@ -1264,7 +1264,7 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "boss_killed":
 			ClientAudioBridgeScript.kill(audio_controller, true)
 			ClientAudioBridgeScript.stop_boss_music(audio_controller)
-			_last_boss_reward_status = "%s defeated" % (_boss_visuals.boss_health_bar_title(str(ev.get("boss_template_id", ""))) if _boss_visuals != null else "Boss")
+			_last_boss_reward_status = _boss_visuals.show_boss_reward_status(str(ev.get("boss_template_id", ""))) if _boss_visuals != null else "Boss defeated"
 			continue
 		if event_type == "boss_phase_started" and entities.has(eid):
 			ClientAudioBridgeScript.boss_phase(audio_controller, ev)
@@ -5338,7 +5338,7 @@ func _bot_entities_debug(live_monster_ids: Array) -> Array:
 			"id": str(id),
 			"type": str(rec.get("type", "")),
 			"monster_def_id": str(rec.get("monster_def_id", "")),
-			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)), "quest_reward": bool(rec.get("quest_reward", false)),
+			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)), "quest_reward": bool(rec.get("quest_reward", false)), "is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
 			"item_def_id": str(rec.get("item_def_id", "")),
 			"item_template_id": str(rec.get("item_template_id", "")),
 			"rarity": str(rec.get("rarity", "")),

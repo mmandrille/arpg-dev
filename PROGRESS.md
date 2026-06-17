@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v248 — ranged threats hit companions |
+| **Latest completed slice** | v249 — boss reward panel |
 | **Active branch** | `main` |
-| **CI gate** | Focused v248 checks green on 2026-06-17; selected v241-v250 `$autoloop` batch `make ci` pending |
-| **Next slice** | v249 — boss reward panel |
+| **CI gate** | Focused v249 checks green on 2026-06-17; selected v241-v250 `$autoloop` batch `make ci` pending |
+| **Next slice** | v250 — boss-specific telegraph decals |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
 | **Next engineering review** | After the selected v241-v250 `$autoloop` batch, once CI is green |
 

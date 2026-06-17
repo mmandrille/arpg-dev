@@ -19,7 +19,7 @@ func sync_boss_health_bar() -> void:
 		return
 	var boss_id := active_boss_entity_id()
 	if boss_id == "":
-		boss_health_bar.hide_boss()
+		boss_health_bar.hide_live_boss()
 		return
 	var rec: Dictionary = ctx.entities[boss_id]
 	var hp := int(rec.get("hp", 0))
@@ -96,6 +96,13 @@ func boss_health_bar_title(template_id: String) -> String:
 			continue
 		words.append(word.substr(0, 1).to_upper() + word.substr(1).to_lower())
 	return " ".join(words)
+
+func show_boss_reward_status(template_id: String) -> String:
+	var title := boss_health_bar_title(template_id)
+	var status := "%s defeated" % title
+	if boss_health_bar != null:
+		boss_health_bar.show_reward_status(template_id, title, status, "Exit unlocked - claim the boss chest")
+	return status
 
 func apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 	if ctx == null:

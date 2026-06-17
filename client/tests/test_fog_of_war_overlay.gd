@@ -28,6 +28,7 @@ func _test_progression_sets_light_and_gloom_radius() -> void:
 	_assert_eq("light radius", float(state.get("light_radius", 0.0)), 12.0)
 	_assert_eq("gloom radius", float(state.get("gloom_radius", 0.0)), 15.0)
 	_assert_true("screen light radius positive", float(state.get("light_radius_px", 0.0)) > 0.0)
+	_assert_eq("darkness alpha", float(state.get("darkness_alpha", 0.0)), 1.0)
 	overlay.free()
 
 

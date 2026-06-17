@@ -1,0 +1,27 @@
+PROGRESS.md
+  s_4fdff9fc96d196::t_c07d549373cd92 28-31,90-94
+docs/reviews/extras/20260617_v250-shared-tooling-and-process.md
+  s_4fdff9fc96d196::t_c07d549373cd92 1-88
+docs/reviews/backend/20260617_v250-backend.md
+  s_4fdff9fc96d196::t_c07d549373cd92 1-91
+docs/reviews/20260617_v250-overview.md
+  s_4fdff9fc96d196::t_c07d549373cd92 1-105
+docs/reviews/client/20260617_v250-client.md
+  s_4fdff9fc96d196::t_c07d549373cd92 1-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ba9c2cbc47804d57bbb1a9f79e7116c30b8cc711",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

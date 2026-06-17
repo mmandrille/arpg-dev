@@ -45,7 +45,7 @@ make gen-assets      # regenerate the committed runtime .glb files (deterministi
 make bot             # run the Python protocol bot end-to-end (server must be up)
 make bot-visual      # scripts/bot_visual.sh: server + Godot autoplay (see below)
 make replay SESSION_ID=<id>   # re-simulate and verify a recorded session
-make client-smoke    # Godot headless smoke (skips if Godot not installed)
+make client-smoke    # Godot headless smoke against a running TEST_BASE_URL server
 make ci              # full local CI suite
 ```
 

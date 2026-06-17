@@ -4,6 +4,7 @@ class_name ClientAudioController
 const SAMPLE_RATE := 22050
 const CUE_DURATION := 0.16
 const BOSS_MUSIC_DURATION := 2.4
+const AMBIENCE_DURATION := 2.8
 const MIN_VOLUME := 0.0
 const MAX_VOLUME := 1.0
 
@@ -17,11 +18,14 @@ var boss_music_intensity: float = 0.0
 var boss_music_layer: String = "none"
 var last_boss_pattern_id: String = ""
 var last_boss_phase_kind: String = ""
+var ambient_zone: String = "none"
+var ambient_active: bool = false
 
 var _sfx_player: AudioStreamPlayer
 var _music_player: AudioStreamPlayer
 var _cue_streams: Dictionary = {}
 var _music_stream: AudioStreamWAV
+var _ambient_streams: Dictionary = {}
 
 
 func _ready() -> void:
@@ -94,11 +98,10 @@ func play_boss_phase(pattern_id: String = "", phase_kind: String = "") -> void:
 
 func start_boss_music() -> void:
 	boss_music_active = true
+	ambient_active = false
 	if master_volume <= 0.0 or music_volume <= 0.0:
 		return
 	_ensure_players()
-	if _music_player.playing:
-		return
 	_music_player.stream = _boss_music_stream()
 	_music_player.play()
 
@@ -109,6 +112,29 @@ func stop_boss_music() -> void:
 	boss_music_layer = "none"
 	if _music_player != null:
 		_music_player.stop()
+	_resume_ambience()
+
+
+func set_ambient_level(level: int) -> void:
+	var next_zone := "town" if level == 0 else "dungeon"
+	if ambient_zone == next_zone and (ambient_active or boss_music_active):
+		return
+	ambient_zone = next_zone
+	_resume_ambience()
+
+
+func get_debug_state() -> Dictionary:
+	return {
+		"last_cue": last_cue,
+		"cue_count": cue_count,
+		"boss_music_active": boss_music_active,
+		"boss_music_intensity": boss_music_intensity,
+		"boss_music_layer": boss_music_layer,
+		"last_boss_pattern_id": last_boss_pattern_id,
+		"last_boss_phase_kind": last_boss_phase_kind,
+		"ambient_zone": ambient_zone,
+		"ambient_active": ambient_active,
+	}
 
 
 func _ensure_players() -> void:
@@ -136,11 +162,39 @@ func _boss_music_stream() -> AudioStreamWAV:
 	return _music_stream
 
 
+func _resume_ambience() -> void:
+	if boss_music_active or ambient_zone == "none":
+		ambient_active = false
+		return
+	ambient_active = true
+	if master_volume <= 0.0 or music_volume <= 0.0:
+		return
+	_ensure_players()
+	_music_player.stream = _ambient_stream(ambient_zone)
+	_music_player.play()
+
+
+func _ambient_stream(zone: String) -> AudioStreamWAV:
+	if not _ambient_streams.has(zone):
+		_ambient_streams[zone] = _make_ambient_stream(zone)
+	return _ambient_streams[zone]
+
+
 func _make_boss_music_stream() -> AudioStreamWAV:
 	var stream := _make_tone_stream(110.0, BOSS_MUSIC_DURATION, true, "boss")
 	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	stream.loop_begin = 0
 	stream.loop_end = int(BOSS_MUSIC_DURATION * SAMPLE_RATE)
+	return stream
+
+
+func _make_ambient_stream(zone: String) -> AudioStreamWAV:
+	var frequency := 72.0 if zone == "town" else 58.0
+	var wave := "town_ambience" if zone == "town" else "dungeon_ambience"
+	var stream := _make_tone_stream(frequency, AMBIENCE_DURATION, true, wave)
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_begin = 0
+	stream.loop_end = int(AMBIENCE_DURATION * SAMPLE_RATE)
 	return stream
 
 
@@ -170,6 +224,18 @@ func _sample_for_wave(wave: String, frequency: float, t: float) -> float:
 			+ sin(TAU * 82.41 * t) * 0.24
 			+ sin(TAU * 110.0 * t) * 0.18
 			+ sin(TAU * 146.83 * t) * 0.10
+		)
+	if wave == "town_ambience":
+		return (
+			sin(TAU * frequency * t) * 0.32
+			+ sin(TAU * (frequency * 1.5) * t) * 0.14
+			+ sin(TAU * 0.35 * t) * 0.10
+		)
+	if wave == "dungeon_ambience":
+		return (
+			sin(TAU * frequency * t) * 0.28
+			+ sin(TAU * (frequency * 0.5) * t) * 0.22
+			+ sin(TAU * (frequency * 2.01) * t) * 0.08
 		)
 	if wave == "noise":
 		return sin(TAU * frequency * t) * 0.45 + sin(TAU * frequency * 1.51 * t) * 0.35

@@ -104,3 +104,8 @@ static func boss_phase(controller: ClientAudioController, ev: Dictionary = {}) -
 static func stop_boss_music(controller: ClientAudioController) -> void:
 	if controller != null:
 		controller.stop_boss_music()
+
+
+static func ambience_for_level(controller: ClientAudioController, level: int) -> void:
+	if controller != null:
+		controller.set_ambient_level(level)

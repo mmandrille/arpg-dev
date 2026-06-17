@@ -66,6 +66,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	if levelNum >= 0 {
 		return generatedDungeonLevel{}, fmt.Errorf("game: invalid dungeon level %d", levelNum)
 	}
+	rules = rules.RulesForLevel(levelNum)
 	levelSeed := SeedToUint64(seed + "|" + strconv.Itoa(absInt(levelNum)))
 	rng := NewRNG(levelSeed)
 	chestRNG := NewRNG(SeedToUint64(seed + "|chest|" + strconv.Itoa(absInt(levelNum))))
@@ -1070,7 +1071,7 @@ func dungeonNavigation(global NavigationRules, gen DungeonGenerationRules) Navig
 
 func dungeonNavigationForLevel(global NavigationRules, gen DungeonGenerationRules, levelNum int) NavigationRules {
 	nav := global
-	size := gen.FloorSize
+	size := gen.RulesForLevel(levelNum).FloorSize
 	if isBossFloor(levelNum, gen) && gen.BossFloor.FloorSize.Width > 0 && gen.BossFloor.FloorSize.Height > 0 {
 		size = gen.BossFloor.FloorSize
 	}

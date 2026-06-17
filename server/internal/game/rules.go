@@ -130,6 +130,7 @@ type NavigationRules struct {
 // DungeonGenerationRules controls deterministic generated dungeon floors.
 type DungeonGenerationRules struct {
 	FloorSize                DungeonFloorSize         `json:"floor_size"`
+	FloorProfiles            []DungeonFloorProfile    `json:"floor_profiles"`
 	WallThickness            float64                  `json:"wall_thickness"`
 	PlayerSpawn              Vec2                     `json:"player_spawn"`
 	StairPlacement           StairPlacementRules      `json:"stair_placement"`
@@ -1783,6 +1784,7 @@ func LoadRules(dir string) (*Rules, error) {
 	var dungeonGeneration struct {
 		Version                  int                      `json:"version"`
 		FloorSize                DungeonFloorSize         `json:"floor_size"`
+		FloorProfiles            []DungeonFloorProfile    `json:"floor_profiles"`
 		WallThickness            float64                  `json:"wall_thickness"`
 		PlayerSpawn              Vec2                     `json:"player_spawn"`
 		StairPlacement           StairPlacementRules      `json:"stair_placement"`
@@ -1897,6 +1899,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateObstacleGenerationRules(dungeonGeneration.ObstacleGeneration, dungeonGeneration.FloorSize); err != nil {
 		return nil, err
 	}
+	if err := validateDungeonFloorProfiles(dungeonGeneration.FloorProfiles); err != nil {
+		return nil, err
+	}
 	if dungeonGeneration.LootBandNote == "" {
 		return nil, fmt.Errorf("game: invalid rules dungeon_generation.loot_band_note: required")
 	}
@@ -1929,6 +1934,7 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	r.DungeonGeneration = DungeonGenerationRules{
 		FloorSize:                dungeonGeneration.FloorSize,
+		FloorProfiles:            dungeonGeneration.FloorProfiles,
 		WallThickness:            dungeonGeneration.WallThickness,
 		PlayerSpawn:              dungeonGeneration.PlayerSpawn,
 		StairPlacement:           dungeonGeneration.StairPlacement,

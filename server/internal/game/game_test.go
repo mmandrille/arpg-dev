@@ -5823,9 +5823,9 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 		}
 	}
 	targets := generatedReachabilityTargets(level)
-	start := generatedReachabilityStart(rules.DungeonGeneration, level)
+	start := generatedReachabilityStart(rules.DungeonGeneration.RulesForLevel(level.levelNum), level)
 	for i, got := range targets {
-		if !generatedTargetReachableFrom(rules.DungeonGeneration, level, start, got.pos) {
+		if !generatedTargetReachableFrom(rules.DungeonGeneration.RulesForLevel(level.levelNum), level, start, got.pos) {
 			t.Fatalf("target %d %s at %+v unreachable from %+v", i, got.kind, got.pos, start)
 		}
 	}
@@ -5851,7 +5851,7 @@ func TestGeneratedDungeonTargetsReachable(t *testing.T) {
 		if err != nil {
 			t.Fatalf("level %d generate: %v", levelNum, err)
 		}
-		if err := validateGeneratedDungeonReachability(rules.DungeonGeneration, level); err != nil {
+		if err := validateGeneratedDungeonReachability(rules.DungeonGeneration.RulesForLevel(levelNum), level); err != nil {
 			t.Fatalf("level %d reachability: %v", levelNum, err)
 		}
 	}

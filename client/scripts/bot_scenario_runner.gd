@@ -1624,7 +1624,7 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort":
 			return "stash=%s" % str(step)
 		"wait_market_panel", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", \
-		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", "click_market_view_offers", "click_market_accept_offer":
+		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", "click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer":
 			return "market=%s" % str(step)
 		"wait_bishop_panel", "assert_bishop_panel", "assert_bishop_panel_visible", "click_bishop_respec":
 			return "bishop=%s" % str(step)

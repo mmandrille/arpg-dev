@@ -112,7 +112,6 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 	account_id = next_account_id
 	staged_publish_item = {}
 	staged_offer_items = []
-	active_offers = []
 	selected_listing_id = ""
 	_offer_tab_visible = false
 	staged_offer_items_changed.emit([])
@@ -197,6 +196,14 @@ func bot_click_view_offers(listing_id: String = "", item_def_id: String = "", pr
 		return
 	selected_listing_id = str(listing.get("listing_id", ""))
 	market_action_requested.emit("list_offers", {"listing_id": selected_listing_id})
+
+
+func bot_click_cancel_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
+	var listing := _matching_listing(listing_id, item_def_id, price_gold, listing_index, true)
+	if listing.is_empty():
+		show_status("No matching seller listing", true)
+		return
+	_emit_cancel_listing_action(listing)
 
 
 func bot_click_accept_offer(offer_id: String = "", offer_index: int = 0) -> void:
@@ -451,6 +458,13 @@ func _listing_row(listing: Dictionary, mode: String) -> Control:
 				market_action_requested.emit("list_offers", {"listing_id": selected_listing_id})
 			)
 			actions.add_child(offers_btn)
+			var cancel_btn := Button.new()
+			cancel_btn.text = "Cancel"
+			cancel_btn.custom_minimum_size = Vector2(110, 34)
+			cancel_btn.pressed.connect(func() -> void:
+				_emit_cancel_listing_action(listing)
+			)
+			actions.add_child(cancel_btn)
 		elif mode == "browse" and int(listing.get("price_gold", 0)) > 0:
 			var buy_btn := Button.new()
 			buy_btn.text = "Buy"
@@ -579,6 +593,14 @@ func _emit_purchase_action(listing: Dictionary) -> void:
 		show_status("Missing listing id", true)
 		return
 	market_action_requested.emit("purchase", {"listing_id": listing_id, "price_gold": int(listing.get("price_gold", 0))})
+
+
+func _emit_cancel_listing_action(listing: Dictionary) -> void:
+	var listing_id := str(listing.get("listing_id", ""))
+	if listing_id == "":
+		show_status("Missing listing id", true)
+		return
+	market_action_requested.emit("cancel_listing", {"listing_id": listing_id})
 
 
 func _selected_listing() -> Dictionary:

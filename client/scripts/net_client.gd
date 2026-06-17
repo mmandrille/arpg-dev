@@ -318,6 +318,15 @@ func create_market_listing_from_inventory(item_instance_id: String, p_character_
 	return {"_error": str(r)}
 
 
+func cancel_market_listing(listing_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/cancel" % listing_id,
+		["Authorization: Bearer " + token], "{}")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("cancel_market_listing failed: %s" % r)
+	return {"_error": str(r)}
+
+
 func create_market_offer(listing_id: String, stash_item_ids: Array) -> Dictionary:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/offers" % listing_id,
 		["Authorization: Bearer " + token], JSON.stringify({"stash_item_ids": stash_item_ids}))

@@ -385,6 +385,7 @@ func TestMonsterRarityGolden(t *testing.T) {
 			BlockPercentBonus        float64 `json:"block_percent_bonus"`
 			AttackCooldownMultiplier float64 `json:"attack_cooldown_multiplier"`
 			LootDepthOffset          int     `json:"loot_depth_offset"`
+			VisualScale              float64 `json:"visual_scale"`
 			Expected                 struct {
 				MaxHP               int         `json:"max_hp"`
 				AttackDamage        DamageRange `json:"attack_damage"`
@@ -411,8 +412,8 @@ func TestMonsterRarityGolden(t *testing.T) {
 		if !ok {
 			t.Fatalf("rarity %s missing", c.ID)
 		}
-		if rarity.Weight != c.Weight || rarity.Color != c.Color || rarity.LootDepthOffset != c.LootDepthOffset {
-			t.Fatalf("rarity %s = %+v, want golden weight/color/offset", c.ID, rarity)
+		if rarity.Weight != c.Weight || rarity.Color != c.Color || rarity.LootDepthOffset != c.LootDepthOffset || rarity.VisualScale != c.VisualScale {
+			t.Fatalf("rarity %s = %+v, want golden weight/color/offset/visual scale", c.ID, rarity)
 		}
 		if rarity.ArmorMultiplier != c.ArmorMultiplier || rarity.ArmorBonus != c.ArmorBonus || rarity.HitChanceBonus != c.HitChanceBonus || rarity.CritChanceBonus != c.CritChanceBonus || rarity.BlockPercentBonus != c.BlockPercentBonus || rarity.AttackCooldownMultiplier != c.AttackCooldownMultiplier {
 			t.Fatalf("rarity %s stat modifiers = %+v, want golden", c.ID, rarity)

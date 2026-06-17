@@ -1,0 +1,51 @@
+tools/dungeon_density.py
+  s_4453edc542d5e6::t_3fcf035a583d80 1-38
+server/internal/game/rules.go
+  s_4453edc542d5e6::t_91c1a7fe4bdc07 1839-1840,1842-1851,1853-1858,1912
+  s_4453edc542d5e6::t_a6f50d1924a976 229
+  s_4453edc542d5e6::t_2b5eec80f319d8 227-228,230-241,277-284
+  s_4453edc542d5e6::t_35983e64a9a746 1971
+PROGRESS.md
+  s_4453edc542d5e6::t_4583699732369e 26,28-29,102,107
+docs/plans/v254_2026-06-17-area-scaled-dungeon-density.md
+  s_4453edc542d5e6::t_2029d88e07c529 76-77,79,81,95,97-98
+  s_4453edc542d5e6::t_b1089427f38d0c 60,62,64
+  s_4453edc542d5e6::t_e996f50bce963f 40-42,45,99,127-132
+  s_4453edc542d5e6::t_bc06d4493a2840 1-2,4-39,43-44,46-59,61,63,65-75,78,80,82-94,96,100-116,120-126,133-135
+  s_4453edc542d5e6::t_4583699732369e 3,117-119
+docs/as-built/v254_area-scaled-dungeon-density.md
+  s_4453edc542d5e6::t_4583699732369e 1-44
+tools/validate_shared.py
+  s_4453edc542d5e6::t_38bd9aeeaa5ff0 29,43
+  s_4453edc542d5e6::t_959d8f4214a5a9 460,487-489
+  s_4453edc542d5e6::t_e3d13010e4d68a 1256-1266,1276,1323,1332
+shared/rules/dungeon_generation.v0.schema.json
+  s_4453edc542d5e6::t_3e81c9810df34c 67,71-72,150,160,366,376-397
+docs/progress/slice-lifecycle.md
+  s_4453edc542d5e6::t_4583699732369e 269
+server/internal/game/dungeon_profiles.go
+  s_4453edc542d5e6::t_cd4ac35aed78a0 3-6,9-24,31,38-64,86-109
+docs/specs/v254_spec-area-scaled-dungeon-density.md
+  s_4453edc542d5e6::t_4583699732369e 3
+  s_4453edc542d5e6::t_d3edd5948c6675 1-2,4-73
+server/internal/game/dungeon_profiles_test.go
+  s_4453edc542d5e6::t_fe179d98cde7d8 8-46
+shared/rules/dungeon_generation.v0.json
+  s_4453edc542d5e6::t_e7bfc8f623823c 8,25-26,71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "90349a3e6dc318cdc12581ba4553903d63a45400",
+  "prompts": {},
+  "sessions": {
+    "s_4453edc542d5e6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed720-932f-7c32-883f-902d235a5fbf",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -64,12 +64,12 @@
     },
     "monster_placement": {
       "type": "object",
-      "required": ["count", "monster_def_id", "pack_count", "pack_size", "pack_member_radius", "pack_composition", "elite_pack_chance_percent", "margin_from_wall", "min_spawn_distance", "max_attempts"],
+      "required": ["monster_def_id", "population_formula", "pack_count_formula", "pack_size", "pack_member_radius", "pack_composition", "elite_pack_chance_percent", "margin_from_wall", "min_spawn_distance", "max_attempts"],
       "additionalProperties": false,
       "properties": {
-        "count": { "type": "integer", "minimum": 0 },
         "monster_def_id": { "type": "string", "minLength": 1 },
-        "pack_count": { "$ref": "#/$defs/int_range" },
+        "population_formula": { "$ref": "#/$defs/area_count_formula" },
+        "pack_count_formula": { "$ref": "#/$defs/area_range_formula" },
         "pack_size": { "$ref": "#/$defs/int_range" },
         "pack_member_radius": { "type": "number", "exclusiveMinimum": 0 },
         "pack_composition": {
@@ -147,7 +147,7 @@
       "required": [
         "enabled",
         "max_attempts",
-        "target_group_count",
+        "target_group_count_formula",
         "wall_segment",
         "solid_block",
         "shape_weights",
@@ -157,7 +157,7 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "max_attempts": { "type": "integer", "minimum": 1 },
-        "target_group_count": { "$ref": "#/$defs/int_range" },
+        "target_group_count_formula": { "$ref": "#/$defs/area_range_formula" },
         "wall_segment": {
           "type": "object",
           "required": ["min_length", "max_length", "thickness"],
@@ -363,7 +363,7 @@
     },
     "floor_profile": {
       "type": "object",
-      "required": ["min_depth", "max_depth", "floor_size", "monster_count", "pack_count", "obstacle_group_count"],
+      "required": ["min_depth", "max_depth", "floor_size"],
       "additionalProperties": false,
       "properties": {
         "min_depth": { "type": "integer", "minimum": 1 },
@@ -373,10 +373,28 @@
             { "type": "null" }
           ]
         },
-        "floor_size": { "$ref": "#/$defs/floor_size" },
-        "monster_count": { "type": "integer", "minimum": 0 },
-        "pack_count": { "$ref": "#/$defs/int_range" },
-        "obstacle_group_count": { "$ref": "#/$defs/int_range" }
+        "floor_size": { "$ref": "#/$defs/floor_size" }
+      }
+    },
+    "area_count_formula": {
+      "type": "object",
+      "required": ["area_per_unit", "min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "area_per_unit": { "type": "number", "exclusiveMinimum": 0 },
+        "min": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "area_range_formula": {
+      "type": "object",
+      "required": ["area_per_unit", "min", "max", "spread"],
+      "additionalProperties": false,
+      "properties": {
+        "area_per_unit": { "type": "number", "exclusiveMinimum": 0 },
+        "min": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 0 },
+        "spread": { "type": "integer", "minimum": 0 }
       }
     },
     "int_range": {

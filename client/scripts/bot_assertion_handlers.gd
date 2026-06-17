@@ -137,6 +137,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_resource_wallet_panel":
+			return _assert_resource_wallet_panel(runner, step, state)
 		"assert_audio_state":
 			return _assert_audio_state(runner, step, state)
 		"assert_remote_player_count":
@@ -314,6 +316,21 @@ static func _assert_audio_state(runner, step: Dictionary, state: Dictionary) -> 
 	if step.has("boss_music_intensity_min") and float(audio.get("boss_music_intensity", 0.0)) < float(step.get("boss_music_intensity_min", 0.0)):
 		runner._fail("assert_audio_state failed: boss_music_intensity_min want=%s got=%s audio=%s step=%d scenario=%s" % [
 			str(step.get("boss_music_intensity_min", 0.0)), str(audio.get("boss_music_intensity", 0.0)), str(audio), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
+static func _assert_resource_wallet_panel(runner, step: Dictionary, state: Dictionary) -> bool:
+	var panel: Dictionary = state.get("character_bar", {})
+	if step.has("visible") and bool(panel.get("wallet_visible", false)) != bool(step.get("visible", true)):
+		runner._fail("assert_resource_wallet_panel visible failed: want=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("visible", true)), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
+	if step.has("text_contains") and not str(panel.get("wallet_text", "")).contains(str(step.get("text_contains", ""))):
+		runner._fail("assert_resource_wallet_panel text failed: want contains=%s panel=%s step=%d scenario=%s" % [
+			str(step.get("text_contains", "")), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
 		])
 		return false
 	return true

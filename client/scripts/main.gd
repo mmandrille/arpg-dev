@@ -1640,10 +1640,10 @@ func _refresh_inventory_ui() -> void:
 			blacksmith_panel.get_debug_state().get("status", ""),
 			resource_wallet
 		)
+	if character_bar != null: character_bar.set_resource_wallet(resource_wallet)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
-
 func _refresh_inventory_panel() -> void:
 	_refresh_inventory_ui()
 	if visual_replay_enabled:

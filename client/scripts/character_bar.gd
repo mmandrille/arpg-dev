@@ -8,9 +8,11 @@ var _progression: Dictionary = {}
 var _panel: PanelContainer
 var _slot: Button
 var _badge: Label
+var _wallet_label: Label
 var _cooldown_overlay: ColorRect
 var _attack_recovery_remaining: float = 0.0
 var _attack_recovery_total: float = 0.0
+var _resource_wallet: Dictionary = {}
 
 
 func _ready() -> void:
@@ -38,6 +40,11 @@ func set_progression(next_progression: Dictionary) -> void:
 	_render()
 
 
+func set_resource_wallet(next_wallet: Dictionary) -> void:
+	_resource_wallet = next_wallet.duplicate(true)
+	_render()
+
+
 func open_slot() -> void:
 	if not _interactive:
 		return
@@ -62,6 +69,9 @@ func get_debug_state() -> Dictionary:
 		"upgrade_badge_outline_size": _badge.label_settings.outline_size if _badge != null and _badge.label_settings != null else 0,
 		"slot_text": _slot.text if _slot != null else "",
 		"tooltip_text": _slot.tooltip_text if _slot != null else "",
+		"wallet_visible": _wallet_label.visible if _wallet_label != null else false,
+		"wallet_text": _wallet_label.text if _wallet_label != null else "",
+		"wallet_rows": _wallet_rows(),
 		"attack_recovery_remaining": _attack_recovery_remaining,
 		"attack_recovery_total": _attack_recovery_total,
 		"attack_recovery_fraction": _attack_recovery_fraction(),
@@ -110,6 +120,14 @@ func _build() -> void:
 	spacer.custom_minimum_size = Vector2(52, 6)
 	box.add_child(spacer)
 
+	_wallet_label = Label.new()
+	_wallet_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_wallet_label.add_theme_font_size_override("font_size", 13)
+	_wallet_label.add_theme_color_override("font_color", Color("#b8e6ff"))
+	_wallet_label.clip_text = true
+	_wallet_label.custom_minimum_size = Vector2(56, 18)
+	box.add_child(_wallet_label)
+
 	_position_panel()
 	_render()
 
@@ -132,6 +150,7 @@ func _render() -> void:
 		_cooldown_overlay.visible = fraction > 0.0
 		_cooldown_overlay.position = Vector2(0.0, slot_size.y * (1.0 - fraction))
 		_cooldown_overlay.size = Vector2(slot_size.x, slot_size.y * fraction)
+	_render_wallet()
 
 
 func _unspent_stat_points() -> int:
@@ -159,6 +178,33 @@ func _make_upgrade_badge() -> Label:
 	settings.outline_color = Color(0.0, 0.0, 0.0, 0.95)
 	badge.label_settings = settings
 	return badge
+
+
+func _render_wallet() -> void:
+	if _wallet_label == null:
+		return
+	var rows := _wallet_rows()
+	_wallet_label.visible = not rows.is_empty()
+	_wallet_label.text = "  ".join(rows)
+	_wallet_label.tooltip_text = "\n".join(rows)
+
+
+func _wallet_rows() -> Array:
+	var rows: Array = []
+	var keys: Array = _resource_wallet.keys()
+	keys.sort()
+	for key in keys:
+		var amount := int(_resource_wallet.get(key, 0))
+		if amount <= 0:
+			continue
+		rows.append("%s %d" % [_resource_label(str(key)), amount])
+	return rows
+
+
+func _resource_label(resource_id: String) -> String:
+	if resource_id == "upgrade_shard":
+		return "Shard"
+	return resource_id.replace("_", " ").capitalize()
 
 
 func _vec2_debug(v: Vector2) -> Dictionary:

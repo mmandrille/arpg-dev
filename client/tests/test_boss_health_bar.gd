@@ -82,6 +82,25 @@ func _run() -> void:
 	_assert_eq("hide clears boss id", str(state.get("boss_id", "x")), "")
 	_assert_eq("hide clears portrait kind", str(state.get("portrait_kind", "x")), "")
 
+	bar.show_reward_status("cave_warden", "Cave Warden", "Cave Warden defeated", "Exit unlocked - claim the boss chest")
+	state = bar.get_debug_state()
+	_assert_false("reward hides live boss bar", bool(state.get("visible", true)))
+	_assert_true("reward panel visible", bool(state.get("reward_panel_visible", false)))
+	_assert_eq("reward template", str(state.get("reward_boss_template_id", "")), "cave_warden")
+	_assert_eq("reward title", str(state.get("reward_title", "")), "Cave Warden")
+	_assert_eq("reward status", str(state.get("reward_status", "")), "Cave Warden defeated")
+	_assert_eq("reward hint", str(state.get("reward_hint", "")), "Exit unlocked - claim the boss chest")
+
+	bar.show_boss("3002", "cave_warden", "Cave Warden", 5, 10)
+	state = bar.get_debug_state()
+	_assert_true("new boss hides reward", bool(state.get("visible", false)))
+	_assert_false("reward clears on live boss", bool(state.get("reward_panel_visible", true)))
+
+	bar.show_reward_status("cave_warden", "Cave Warden", "Cave Warden defeated", "Exit unlocked - claim the boss chest")
+	bar.hide_boss()
+	state = bar.get_debug_state()
+	_assert_false("hide clears reward panel", bool(state.get("reward_panel_visible", true)))
+
 	bar.queue_free()
 	print("[gdtest] PASS: test_boss_health_bar (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)

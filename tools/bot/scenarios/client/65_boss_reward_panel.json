@@ -1,0 +1,47 @@
+{
+  "id": "boss_reward_panel",
+  "runner": "godot_client",
+  "world_id": "boss_floor_gate_lab",
+  "seed": "v249_boss_reward_panel",
+  "title": "Boss reward panel",
+  "description": "Client starts on the compact boss floor, kills Cave Warden, and verifies the post-kill reward panel.",
+  "debug_progression": {
+    "level": 1,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 200, "dex": 5, "vit": 80, "magic": 5 },
+    "skill_ranks": {}
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    {
+      "type": "wait_boss_health_bar",
+      "visible": true,
+      "boss_template_id": "cave_warden",
+      "title": "Cave Warden",
+      "hp_min": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "is_boss": true,
+      "event_type": "boss_killed",
+      "consume_event": true,
+      "retry_s": 0.25,
+      "timeout_s": 30.0
+    },
+    {
+      "type": "wait_boss_health_bar",
+      "visible": false,
+      "reward_panel_visible": true,
+      "reward_boss_template_id": "cave_warden",
+      "reward_title": "Cave Warden",
+      "reward_status": "Cave Warden defeated",
+      "reward_hint": "Exit unlocked - claim the boss chest",
+      "timeout_s": 5.0
+    },
+    { "type": "assert_boss_reward_status", "text": "Cave Warden defeated" }
+  ]
+}

@@ -177,7 +177,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 			return "client_steps[%d] (%s) requires positive ticks" % [index, stype]
 	if stype in ["wait_boss_health_bar", "assert_boss_health_bar"]:
 		var has_boss_bar_expectation := false
-		for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max", "phase_kind", "pattern_id", "phase_index", "duration_ticks", "remaining_ticks_min", "remaining_ticks_max", "phase_ratio_min", "phase_ratio_max", "portrait_visible", "portrait_kind", "portrait_label"]:
+		for key in ["visible", "boss_id", "boss_template_id", "title", "hp", "max_hp", "hp_min", "hp_max", "ratio_min", "ratio_max", "phase_kind", "pattern_id", "phase_index", "duration_ticks", "remaining_ticks_min", "remaining_ticks_max", "phase_ratio_min", "phase_ratio_max", "portrait_visible", "portrait_kind", "portrait_label", "reward_panel_visible", "reward_boss_template_id", "reward_title", "reward_status", "reward_hint"]:
 			if step.has(key):
 				has_boss_bar_expectation = true
 		if not has_boss_bar_expectation:

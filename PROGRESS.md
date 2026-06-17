@@ -25,10 +25,10 @@ Last updated: 2026-06-17
 |-------|-------|
 | **Latest completed slice** | v250 — boss-specific telegraph decals |
 | **Active branch** | `main` |
-| **CI gate** | Focused v250 checks green on 2026-06-17; selected v241-v250 `$autoloop` batch `make ci` pending |
-| **Next slice** | Engineering review and refactor after the v241-v250 `$autoloop` batch |
-| **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
-| **Next engineering review** | After the selected v241-v250 `$autoloop` batch, once CI is green |
+| **CI gate** | Selected v241-v250 `$autoloop` batch `make ci` green on 2026-06-17 (10m27s) |
+| **Next slice** | `$refactor` against the v250 review, then the next feature slice |
+| **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
+| **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |
 
 
 ### Periodic engineering reviews
@@ -87,10 +87,11 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review follow-ups need data/tooling ownership.** The v232 review keeps companion/elite follow
-  tuning and monster-rarity validation open. `$refactor` fixed the review/refactor handoff docs,
-  clarified the standalone client-smoke harness, and reduced the remaining `helpers=globals()`
-  bot-runtime cluster to 27 calls.
+- **Review follow-ups need docs/test/tooling ownership.** The v250 review asks `$refactor` to close
+  stale v241-v250 batch-CI proof wording, add focused client debug-progression unit coverage,
+  continue reducing the remaining 14 `helpers=globals()` bot-runtime injections, split the next
+  touched large coordinators/validators, and plan separate elite-minion follow-tuning rule names
+  when AI movement tuning is next in scope.
 
 ### Other deferred items (from specs / ADRs)
 

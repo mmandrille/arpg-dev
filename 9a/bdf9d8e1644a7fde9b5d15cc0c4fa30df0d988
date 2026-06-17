@@ -1,0 +1,40 @@
+server/internal/game/pathfind_test.go
+  s_693ad30fb8b125::t_88b4cdad48837c 64-80,90-98
+server/internal/game/handlers.go
+  s_693ad30fb8b125::t_63480f5058d708 143,172,184-185,1453,1464-1466
+server/internal/game/auto_nav_test.go
+  s_693ad30fb8b125::t_0ef9eaabf850d8 1-23
+server/internal/game/auto_nav.go
+  s_693ad30fb8b125::t_53afb0bf396ca6 1-35
+server/internal/game/sim.go
+  s_693ad30fb8b125::t_ade4c1d88d0955 3427-3429
+  s_693ad30fb8b125::t_eb0ac3ad65ed19 199-200,2780-2786
+server/internal/game/pathfind.go
+  s_693ad30fb8b125::t_00416dcb784612 142-144
+  s_693ad30fb8b125::t_a09a1314e9ff0d 10-11
+  s_693ad30fb8b125::t_8d1c21188a005f 8-9,12-13,19-23,37-38,41-43,47,50-51,53,55-58,61,64-65,68-69,71-73,121-134,148-178,180-183,190-203,205-206,208-209,211
+docs/plans/v251_2026-06-17-direct-auto-navigation.md
+  s_693ad30fb8b125::t_426b761b5e1500 1-2,4-12,14,17,19-32,37-43,46,48,53-58
+  s_693ad30fb8b125::t_5d79e4c734954f 3,18,33-36,44-45,47,49-52,59-65
+  s_693ad30fb8b125::t_88a53519df05e7 15-16
+  s_693ad30fb8b125::t_f480f0341c3a89 13
+docs/specs/v251_spec-direct-auto-navigation.md
+  s_693ad30fb8b125::t_426b761b5e1500 1-2,4-29,33-44
+  s_693ad30fb8b125::t_5d79e4c734954f 3,30-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9abdf9d8e1644a7fde9b5d15cc0c4fa30df0d988",
+  "prompts": {},
+  "sessions": {
+    "s_693ad30fb8b125": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed5d8-f289-7942-acb6-62e9b3d441ca",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

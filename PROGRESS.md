@@ -25,7 +25,7 @@ Last updated: 2026-06-17
 |-------|-------|
 | **Latest completed slice** | v253 — fog of war radius |
 | **Active branch** | `main` |
-| **CI gate** | v253 focused checks green on 2026-06-17 (`make validate-shared`, focused game/realtime Go tests, `make client-unit`, fog protocol/client bots, and the previously blocked protocol bot group: `teleporter_lab`, `dungeon_monsters`, `boss_floor_gate`, `account_stash_storage`, `pack_aggro_and_dungeon_packs`, `ranger_piercing_and_pinning_shots`); full `make ci` not rerun |
+| **CI gate** | v253 full `make ci` green on 2026-06-17 after the Magic Find scenario seed was refreshed for the expanded ring roll pool |
 | **Next slice** | Next feature slice via `$next` / `$autoloop`, using the v250 review follow-ups and deferred fog/dungeon presentation/obstacle work |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |

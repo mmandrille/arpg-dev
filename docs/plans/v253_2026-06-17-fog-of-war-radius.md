@@ -210,6 +210,6 @@ make maintainability
 - [x] `HEADLESS=1 make bot-visual scenario=67_fog_of_war_overlay`
 - [x] `make bot scenario=13_teleporter_lab,14_dungeon_monsters,24_boss_floor_gate,36_account_stash_storage,42_pack_aggro_and_dungeon_packs,59_ranger_piercing_and_pinning_shots`
 - [x] `make maintainability`
+- [x] `make ci`
 
-Autoloop batch note: do not run per-slice `make ci` unless focused verification is inadequate.
-`$autoloop` owns the final batch `make ci` after the selected queue is committed.
+Autoloop batch note: final batch `make ci` passed after the selected queue was committed.

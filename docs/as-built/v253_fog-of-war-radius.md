@@ -31,12 +31,12 @@ make client-unit
 make bot scenario=92_fog_of_war_radius
 HEADLESS=1 make bot-visual scenario=67_fog_of_war_overlay
 make bot scenario=13_teleporter_lab,14_dungeon_monsters,24_boss_floor_gate,36_account_stash_storage,42_pack_aggro_and_dungeon_packs,59_ranger_piercing_and_pinning_shots
+make ci
 ```
 
-All focused checks passed on 2026-06-17 during `$autoloop`.
-
-Full `make ci` was not rerun for this slice. The v252 baseline protocol bot catalog blockers listed
-above now pass as a selected group, but the full suite was intentionally left to the next batch gate.
+All focused checks and the final full `make ci` passed on 2026-06-17 during `$autoloop`. The final
+CI pass required refreshing `81_magic_find_stat` to a new deterministic ring seed after adding
+`light_radius` to the ring roll pool changed the old seed's rolled stats.
 
 Manual visual proof, if desired:
 

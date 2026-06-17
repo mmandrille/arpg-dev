@@ -34,7 +34,7 @@ import websockets
 from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenario
 from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot.bot_context import BotContext
-from tools.bot.runtime_queries import dict_distance, find_player
+from tools.bot.runtime_queries import dict_distance, event_matches, event_summary, find_player
 from tools.bot import skill_visual_runtime
 from tools.bot.debug_progression import debug_progression_body
 from tools.bot.stash_assertions import (
@@ -2002,7 +2002,7 @@ async def wait_for_reject(ws, state: RuntimeState, message_id: str, reason: str,
 async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, timeout_s: float = SLICE_TIMEOUT_S, start_index: int = 0) -> None:
     from tools.bot.wait_runtime import wait_for_event as wait_for_event_impl
 
-    await wait_for_event_impl(ws, state, event_type, loop, timeout_s=timeout_s, start_index=start_index, helpers=globals())
+    await wait_for_event_impl(ws, state, event_type, loop, timeout_s=timeout_s, start_index=start_index, ctx=_runtime_context())
 
 
 async def wait_for_matching_event(
@@ -2023,7 +2023,7 @@ async def wait_for_matching_event(
         loop,
         timeout_s=timeout_s,
         start_index=start_index,
-        helpers=globals(),
+        ctx=_runtime_context(),
     )
 
 
@@ -2039,7 +2039,7 @@ async def wait_for_shop_event(
     from tools.bot.wait_runtime import wait_for_shop_event as wait_for_shop_event_impl
 
     return await wait_for_shop_event_impl(
-        ws, state, event_type, loop, shop_id=shop_id, start_index=start_index, helpers=globals()
+        ws, state, event_type, loop, shop_id=shop_id, start_index=start_index, ctx=_runtime_context()
     )
 
 
@@ -2055,7 +2055,7 @@ async def wait_for_stash_event(
     from tools.bot.wait_runtime import wait_for_stash_event as wait_for_stash_event_impl
 
     return await wait_for_stash_event_impl(
-        ws, state, event_type, loop, stash_id=stash_id, start_index=start_index, helpers=globals()
+        ws, state, event_type, loop, stash_id=stash_id, start_index=start_index, ctx=_runtime_context()
     )
 
 
@@ -2096,89 +2096,6 @@ def combat_event_matches(event: dict[str, Any], expected: dict[str, Any], state:
     if not combat_event_entity_matches(event, expected, state, "target"):
         return False
     return True
-
-
-def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
-    for key in (
-        "event_type",
-        "entity_id",
-        "source_entity_id",
-        "target_entity_id",
-        "boss_template_id",
-        "skill_id",
-        "damage_type",
-        "pattern_id",
-        "phase_kind",
-        "reason",
-        "state",
-        "stance",
-        "service",
-    ):
-        if key in expected and str(event.get(key, "")) != str(expected[key]):
-            return False
-    for key in (
-        "phase_index",
-        "duration_ticks",
-        "from_level",
-        "to_level",
-        "rank",
-        "mana",
-        "heal",
-        "damage",
-        "raw_damage",
-        "mitigated_damage",
-        "amount",
-        "remaining_ticks",
-        "total_ticks",
-        "price",
-        "total_gold",
-        "unspent_stat_points",
-        "unspent_skill_points",
-    ):
-        if key in expected and int(event.get(key, -999999)) != int(expected[key]):
-            return False
-    if "affordable" in expected and bool(event.get("affordable", False)) != bool(expected["affordable"]):
-        return False
-    return True
-
-
-def event_summary(expected: dict[str, Any]) -> str:
-    parts = []
-    for key in (
-        "event_type",
-        "entity_id",
-        "source_entity_id",
-        "target_entity_id",
-        "boss_template_id",
-        "skill_id",
-        "damage_type",
-        "rank",
-        "mana",
-        "heal",
-        "damage",
-        "raw_damage",
-        "mitigated_damage",
-        "amount",
-        "remaining_ticks",
-        "total_ticks",
-        "pattern_id",
-        "phase_kind",
-        "phase_index",
-        "duration_ticks",
-        "reason",
-        "state",
-        "service",
-        "price",
-        "total_gold",
-        "unspent_stat_points",
-        "unspent_skill_points",
-        "affordable",
-        "from_level",
-        "to_level",
-    ):
-        if key in expected:
-            parts.append(f"{key}={expected[key]}")
-    return ", ".join(parts) or str(expected)
 
 
 def combat_event_entity_matches(

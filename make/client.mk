@@ -16,7 +16,7 @@ endif
 client-unit: ## Run Godot headless unit tests (quiet; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" CLIENT_UNIT_ONLY=1 ./scripts/client_smoke.sh
 
-client-smoke: ## Run Godot headless client smoke test (quiet; VERBOSE=1 for full logs)
+client-smoke: ## Run Godot headless smoke against a running TEST_BASE_URL server (quiet; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" BASE_URL="$(TEST_BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" ./scripts/client_smoke.sh
 
 skill-logo-sheet: tools ## Render current skill logos and labels to an SVG image

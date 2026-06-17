@@ -28,7 +28,7 @@ make test            # unit tests (quiet; add VERBOSE=1 for full logs)
 make test-go         # all Go tests  (`cd server && go test ./...`)
 make test-py         # Python unit tests (`pytest tools/`)
 make client-unit     # Godot headless unit tests (quiet; add VERBOSE=1 for full logs)
-make client-smoke    # Godot headless smoke + slice (quiet; add VERBOSE=1 for full logs)
+make client-smoke    # Godot headless smoke against a running TEST_BASE_URL server
 make ci              # full local CI suite (quiet; add VERBOSE=1 for full logs)
 make test-all        # test + ci + headless bot-visual (quiet; add VERBOSE=1 for full logs)
 

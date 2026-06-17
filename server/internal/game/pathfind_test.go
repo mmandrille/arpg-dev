@@ -61,6 +61,23 @@ func TestPlanPathUnequalAxesUsesDiagonalSteps(t *testing.T) {
 	}
 }
 
+func TestPlanPathCornerDetourKeepsStraightRuns(t *testing.T) {
+	nav := testNav()
+	blocked := func(gx, gy int) bool {
+		return gx == 2 && gy == 2
+	}
+	steps, ok := PlanPath(nav, Vec2{X: 0, Y: 0}, Vec2{X: 4, Y: 4}, blocked)
+	if !ok {
+		t.Fatal("PlanPath returned ok=false")
+	}
+	if len(steps) != 6 {
+		t.Fatalf("len(steps) = %d, want shortest detour length 6: %+v", len(steps), steps)
+	}
+	if got := pathTurnCount(steps); got > 3 {
+		t.Fatalf("turn count = %d, want a clean corner detour: %+v", got, steps)
+	}
+}
+
 func TestPlanPathUnreachable(t *testing.T) {
 	blocked := func(gx, gy int) bool {
 		return gx >= -1 && gx <= 1 && gy >= -1 && gy <= 1 && !(gx == 0 && gy == 0)
@@ -69,4 +86,14 @@ func TestPlanPathUnreachable(t *testing.T) {
 	if ok {
 		t.Fatal("PlanPath returned ok=true for unreachable goal")
 	}
+}
+
+func pathTurnCount(steps []Vec2) int {
+	turns := 0
+	for i := 1; i < len(steps); i++ {
+		if steps[i] != steps[i-1] {
+			turns++
+		}
+	}
+	return turns
 }

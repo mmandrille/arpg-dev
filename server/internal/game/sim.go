@@ -196,6 +196,8 @@ type activeMove struct {
 
 type autoNavState struct {
 	steps         []Vec2
+	goal          Vec2
+	hasGoal       bool
 	pendingAction *ActionIntent
 	pendingSkill  *CastSkillIntent
 	sourceMsgID   string
@@ -2775,6 +2777,13 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 
 func (s *Sim) finishAutoNav(res *TickResult) {
 	nav := s.activeLevel().autoNav
+	if nav != nil && nav.hasGoal {
+		if player := s.activeLevel().entities[s.playerID]; player != nil {
+			if s.continueAutoNavToGoal(player, res) {
+				return
+			}
+		}
+	}
 	s.clearAutoNav()
 	if nav == nil {
 		return
@@ -3413,6 +3422,9 @@ func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterD
 			continue
 		}
 		if len(steps) == 0 && distance(monster.pos, goal) > nav.CellSize+nav.StopDistance {
+			continue
+		}
+		if len(steps) > 0 && s.resolveMonsterMovement(monster, s.monsterMoveDelta(monster.pos, goal, steps, s.monsterMoveSpeed(monster, def, nav))) == monster.pos {
 			continue
 		}
 		monsterDst := distance(monster.pos, goal)

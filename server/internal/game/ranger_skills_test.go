@@ -176,7 +176,7 @@ func TestRangerBlackWolfCompanionFollowsAcrossLevelTravel(t *testing.T) {
 	if movedWolf.id != wolf.id || movedWolf.ownerID != player.id || movedWolf.sourceSkillID != "black_wolf_companion" {
 		t.Fatalf("moved wolf = %+v, want same owner/source/id %s", movedWolf, wolfID)
 	}
-	if distance(movedWolf.pos, sim.activeLevel().entities[sim.playerID].pos) > companionFollowStopRadius {
+	if distance(movedWolf.pos, sim.activeLevel().entities[sim.playerID].pos) > sim.rules.MainConfig.Gameplay.CompanionFollowStop {
 		t.Fatalf("moved wolf pos=%+v too far from player=%+v", movedWolf.pos, sim.activeLevel().entities[sim.playerID].pos)
 	}
 }

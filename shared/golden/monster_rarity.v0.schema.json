@@ -28,6 +28,7 @@
           "block_percent_bonus",
           "attack_cooldown_multiplier",
           "loot_depth_offset",
+          "visual_scale",
           "expected"
         ],
         "additionalProperties": false,
@@ -45,6 +46,7 @@
           "block_percent_bonus": { "type": "number", "minimum": 0 },
           "attack_cooldown_multiplier": { "type": "number", "exclusiveMinimum": 0 },
           "loot_depth_offset": { "type": "integer", "minimum": 0 },
+          "visual_scale": { "type": "number", "exclusiveMinimum": 0 },
           "expected": {
             "type": "object",
             "required": ["max_hp", "attack_damage", "armor", "hit_chance", "crit_chance", "block_percent", "attack_cooldown_ticks", "xp_reward"],

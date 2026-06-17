@@ -16,6 +16,7 @@
       "block_percent_bonus": 0,
       "attack_cooldown_multiplier": 1,
       "loot_depth_offset": 0,
+      "visual_scale": 1.0,
       "expected": {
         "max_hp": 4,
         "attack_damage": {
@@ -44,6 +45,7 @@
       "block_percent_bonus": 4,
       "attack_cooldown_multiplier": 0.9,
       "loot_depth_offset": 1,
+      "visual_scale": 1.25,
       "expected": {
         "max_hp": 7,
         "attack_damage": {
@@ -72,6 +74,7 @@
       "block_percent_bonus": 8,
       "attack_cooldown_multiplier": 0.82,
       "loot_depth_offset": 2,
+      "visual_scale": 1.0,
       "expected": {
         "max_hp": 10,
         "attack_damage": {
@@ -100,6 +103,7 @@
       "block_percent_bonus": 12,
       "attack_cooldown_multiplier": 0.75,
       "loot_depth_offset": 3,
+      "visual_scale": 1.5,
       "expected": {
         "max_hp": 16,
         "attack_damage": {

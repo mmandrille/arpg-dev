@@ -25,8 +25,8 @@ Last updated: 2026-06-17
 |-------|-------|
 | **Latest completed slice** | v250 — boss-specific telegraph decals |
 | **Active branch** | `main` |
-| **CI gate** | Selected v241-v250 `$autoloop` batch `make ci` green on 2026-06-17 (10m27s) |
-| **Next slice** | `$refactor` against the v250 review, then the next feature slice |
+| **CI gate** | Selected v241-v250 `$autoloop` batch `make ci` green on 2026-06-17 (10m27s); v250 `$refactor` targeted checks green |
+| **Next slice** | Next feature slice via `$next` / `$autoloop`, using the v250 review follow-ups |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |
 
@@ -87,11 +87,12 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review follow-ups need docs/test/tooling ownership.** The v250 review asks `$refactor` to close
-  stale v241-v250 batch-CI proof wording, add focused client debug-progression unit coverage,
-  continue reducing the remaining 14 `helpers=globals()` bot-runtime injections, split the next
-  touched large coordinators/validators, and plan separate elite-minion follow-tuning rule names
-  when AI movement tuning is next in scope.
+- **Review follow-ups remaining after v250 `$refactor`.** Stale v241-v250 batch-CI proof wording,
+  focused client debug-progression unit coverage, and the `helpers=globals()` bot-runtime baseline
+  are closed. Remaining review items are future-plan or future-slice scale: split the next touched
+  large coordinators/validators, plan separate elite-minion follow-tuning rule names when AI
+  movement tuning is next in scope, continue the tuning-friendly rule-test audit, and treat
+  production boss telegraph VFX/exact aim projection as planned feature work.
 
 ### Other deferred items (from specs / ADRs)
 

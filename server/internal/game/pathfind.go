@@ -5,9 +5,20 @@ import (
 	"math"
 )
 
+const (
+	pathStepScore     = 1000000
+	pathTurnScore     = 1
+	pathDiagonalBonus = 1000
+)
+
 type gridCell struct {
 	x int
 	y int
+}
+
+type pathState struct {
+	cell gridCell
+	dir  gridCell
 }
 
 // PlanPath returns one-tick direction steps from start to goal using 8-way A*.
@@ -23,50 +34,43 @@ func PlanPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bo
 
 	open := &pathPriorityQueue{}
 	heap.Init(open)
-	startNode := &pathNode{cell: startCell, g: 0, f: octile(startCell, goalCell), diagonals: 0}
+	startState := pathState{cell: startCell}
+	startNode := &pathNode{state: startState, cost: pathCost{}, fScore: pathHeuristic(startCell, goalCell)}
 	heap.Push(open, startNode)
 
-	best := map[gridCell]pathCost{startCell: {g: 0, diagonals: 0}}
-	cameFrom := map[gridCell]gridCell{}
-	closed := map[gridCell]bool{}
+	best := map[pathState]pathCost{startState: {}}
+	cameFrom := map[pathState]pathState{}
+	closed := map[pathState]bool{}
 
 	for open.Len() > 0 {
 		current := heap.Pop(open).(*pathNode)
-		if closed[current.cell] {
+		if closed[current.state] {
 			continue
 		}
-		if current.cell == goalCell {
-			return reconstructPath(nav, cameFrom, startCell, goalCell), true
+		if current.state.cell == goalCell {
+			return reconstructPath(cameFrom, startState, current.state), true
 		}
-		closed[current.cell] = true
+		closed[current.state] = true
 
-		for _, next := range neighbors(current.cell) {
-			if !cellInBounds(nav, next) || blocked(next.x, next.y) || closed[next] {
+		for _, next := range neighbors(current.state.cell) {
+			moveDir := gridCell{x: next.x - current.state.cell.x, y: next.y - current.state.cell.y}
+			nextState := pathState{cell: next, dir: moveDir}
+			if !cellInBounds(nav, next) || blocked(next.x, next.y) || closed[nextState] {
 				continue
 			}
-			dx := next.x - current.cell.x
-			dy := next.y - current.cell.y
-			if dx != 0 && dy != 0 && (blocked(current.cell.x+dx, current.cell.y) || blocked(current.cell.x, current.cell.y+dy)) {
+			if moveDir.x != 0 && moveDir.y != 0 && (blocked(current.state.cell.x+moveDir.x, current.state.cell.y) || blocked(current.state.cell.x, current.state.cell.y+moveDir.y)) {
 				continue
 			}
-			ng := current.g + 1
-			newDiagonals := current.diagonals
-			if dx != 0 && dy != 0 {
-				newDiagonals++
-			}
-			if prev, ok := best[next]; ok && ng > prev.g {
+			nextCost := current.cost.addMove(current.state.dir, moveDir)
+			if prev, ok := best[nextState]; ok && !nextCost.betterThan(prev) {
 				continue
 			}
-			if prev, ok := best[next]; ok && ng == prev.g && newDiagonals <= prev.diagonals {
-				continue
-			}
-			best[next] = pathCost{g: ng, diagonals: newDiagonals}
-			cameFrom[next] = current.cell
+			best[nextState] = nextCost
+			cameFrom[nextState] = current.state
 			heap.Push(open, &pathNode{
-				cell:      next,
-				g:         ng,
-				f:         ng + octile(next, goalCell),
-				diagonals: newDiagonals,
+				state:  nextState,
+				cost:   nextCost,
+				fScore: nextCost.score + pathHeuristic(next, goalCell),
 			})
 		}
 	}
@@ -114,20 +118,20 @@ func octile(a, b gridCell) int {
 	return dy
 }
 
-func reconstructPath(nav NavigationRules, cameFrom map[gridCell]gridCell, start, goal gridCell) []Vec2 {
-	cells := []gridCell{goal}
-	for cells[len(cells)-1] != start {
-		cells = append(cells, cameFrom[cells[len(cells)-1]])
+func pathHeuristic(a, b gridCell) int {
+	return octile(a, b) * (pathStepScore - pathDiagonalBonus)
+}
+
+func reconstructPath(cameFrom map[pathState]pathState, start, goal pathState) []Vec2 {
+	states := []pathState{goal}
+	for states[len(states)-1] != start {
+		states = append(states, cameFrom[states[len(states)-1]])
 	}
-	steps := make([]Vec2, 0, len(cells)-1)
-	for i := len(cells) - 1; i > 0; i-- {
-		from := cells[i]
-		to := cells[i-1]
-		dx := signInt(to.x - from.x)
-		dy := signInt(to.y - from.y)
-		step := Vec2{X: float64(dx), Y: float64(dy)}
-		if step.X != 0 || step.Y != 0 {
-			steps = append(steps, step)
+	steps := make([]Vec2, 0, len(states)-1)
+	for i := len(states) - 1; i > 0; i-- {
+		dir := states[i-1].dir
+		if dir.x != 0 || dir.y != 0 {
+			steps = append(steps, Vec2{X: float64(dir.x), Y: float64(dir.y)})
 		}
 	}
 
@@ -135,32 +139,76 @@ func reconstructPath(nav NavigationRules, cameFrom map[gridCell]gridCell, start,
 }
 
 type pathCost struct {
-	g         int
+	score     int
+	steps     int
+	turns     int
 	diagonals int
 }
 
+func (c pathCost) addMove(prevDir, nextDir gridCell) pathCost {
+	out := pathCost{
+		score:     c.score + pathStepScore,
+		steps:     c.steps + 1,
+		turns:     c.turns,
+		diagonals: c.diagonals,
+	}
+	if prevDir != (gridCell{}) && prevDir != nextDir {
+		out.score += pathTurnScore
+		out.turns++
+	}
+	if nextDir.x != 0 && nextDir.y != 0 {
+		out.score -= pathDiagonalBonus
+		out.diagonals++
+	}
+	return out
+}
+
+func (c pathCost) betterThan(other pathCost) bool {
+	if c.score != other.score {
+		return c.score < other.score
+	}
+	if c.steps != other.steps {
+		return c.steps < other.steps
+	}
+	if c.turns != other.turns {
+		return c.turns < other.turns
+	}
+	return c.diagonals > other.diagonals
+}
+
 type pathNode struct {
-	cell      gridCell
-	g         int
-	f         int
-	diagonals int
-	index     int
+	state  pathState
+	cost   pathCost
+	fScore int
+	index  int
 }
 
 type pathPriorityQueue []*pathNode
 
 func (pq pathPriorityQueue) Len() int { return len(pq) }
 func (pq pathPriorityQueue) Less(i, j int) bool {
-	if pq[i].f != pq[j].f {
-		return pq[i].f < pq[j].f
+	if pq[i].fScore != pq[j].fScore {
+		return pq[i].fScore < pq[j].fScore
 	}
-	if pq[i].diagonals != pq[j].diagonals {
-		return pq[i].diagonals > pq[j].diagonals
+	if pq[i].cost.score != pq[j].cost.score {
+		return pq[i].cost.score < pq[j].cost.score
 	}
-	if pq[i].cell.y != pq[j].cell.y {
-		return pq[i].cell.y < pq[j].cell.y
+	if pq[i].cost.turns != pq[j].cost.turns {
+		return pq[i].cost.turns < pq[j].cost.turns
 	}
-	return pq[i].cell.x < pq[j].cell.x
+	if pq[i].cost.diagonals != pq[j].cost.diagonals {
+		return pq[i].cost.diagonals > pq[j].cost.diagonals
+	}
+	if pq[i].state.cell.y != pq[j].state.cell.y {
+		return pq[i].state.cell.y < pq[j].state.cell.y
+	}
+	if pq[i].state.cell.x != pq[j].state.cell.x {
+		return pq[i].state.cell.x < pq[j].state.cell.x
+	}
+	if pq[i].state.dir.y != pq[j].state.dir.y {
+		return pq[i].state.dir.y < pq[j].state.dir.y
+	}
+	return pq[i].state.dir.x < pq[j].state.dir.x
 }
 func (pq pathPriorityQueue) Swap(i, j int) {
 	pq[i], pq[j] = pq[j], pq[i]

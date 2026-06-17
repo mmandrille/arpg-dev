@@ -140,7 +140,7 @@ func (s *Sim) handleMoveTo(in Input, res *TickResult) {
 		return
 	}
 	s.activeLevel().move = nil
-	s.activeLevel().autoNav = &autoNavState{steps: steps, sourceMsgID: in.MessageID, sourceCorrID: in.CorrelationID}
+	s.activeLevel().autoNav = &autoNavState{steps: steps, goal: in.MoveTo.Position, hasGoal: true, sourceMsgID: in.MessageID, sourceCorrID: in.CorrelationID}
 	res.ack(in.MessageID)
 }
 
@@ -169,7 +169,7 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 		return
 	}
 
-	_, steps, ok := s.findApproachGoal(target)
+	goal, steps, ok := s.findApproachGoal(target)
 	if !ok {
 		res.reject(in.MessageID, "no_path")
 		return
@@ -181,6 +181,8 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 	s.activeLevel().move = nil
 	s.activeLevel().autoNav = &autoNavState{
 		steps:         steps,
+		goal:          goal,
+		hasGoal:       true,
 		pendingAction: &ActionIntent{TargetID: in.Action.TargetID},
 		sourceMsgID:   in.MessageID,
 		sourceCorrID:  in.CorrelationID,
@@ -1448,7 +1450,7 @@ func (s *Sim) beginSkillAutoNav(in Input, res *TickResult, castRange float64, re
 		res.reject(in.MessageID, "invalid_target")
 		return
 	}
-	_, steps, ok := s.findSkillCastApproachGoal(target, castRange, requireClearShot)
+	goal, steps, ok := s.findSkillCastApproachGoal(target, castRange, requireClearShot)
 	if !ok {
 		res.reject(in.MessageID, "no_path")
 		return
@@ -1459,7 +1461,9 @@ func (s *Sim) beginSkillAutoNav(in Input, res *TickResult, castRange float64, re
 	}
 	s.activeLevel().move = nil
 	s.activeLevel().autoNav = &autoNavState{
-		steps: steps,
+		steps:   steps,
+		goal:    goal,
+		hasGoal: true,
 		pendingSkill: &CastSkillIntent{
 			SkillID:   in.CastSkill.SkillID,
 			TargetID:  in.CastSkill.TargetID,

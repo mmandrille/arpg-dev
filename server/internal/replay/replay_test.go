@@ -1524,6 +1524,12 @@ func (f *fakeRepo) CancelMarketOffer(context.Context, string, string, string) (s
 func (f *fakeRepo) ListMarketOffersForSeller(context.Context, string, string) ([]store.MarketOffer, error) {
 	return nil, nil
 }
+func (f *fakeRepo) ListMarketOffersForBidder(context.Context, string) ([]store.MarketOffer, error) {
+	return nil, nil
+}
+func (f *fakeRepo) ListMarketAuditRecordsForAccount(context.Context, string, int) ([]store.MarketAuditRecord, error) {
+	return nil, nil
+}
 func (f *fakeRepo) AcceptMarketOffer(context.Context, string, string, string) (store.MarketOffer, error) {
 	return store.MarketOffer{}, nil
 }

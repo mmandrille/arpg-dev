@@ -361,6 +361,13 @@ func list_my_market_offers() -> Dictionary:
 	push_error("list_my_market_offers failed: %s" % r)
 	return {"offers": [], "_error": str(r)}
 
+func list_market_receipts() -> Dictionary:
+	var r := _http(HTTPClient.METHOD_GET, "/v0/market/receipts/mine",
+		["Authorization: Bearer " + token], "")
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("list_market_receipts failed: %s" % r)
+	return {"receipts": [], "_error": str(r)}
 
 func accept_market_offer(listing_id: String, offer_id: String) -> Dictionary:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/market/listings/%s/offers/%s/accept" % [listing_id, offer_id],

@@ -209,6 +209,7 @@ v222_* = upgrade-result-preview
 v223_* = unique-non-damage-skill-modifier
 v233_* = my-market-offers-panel
 v234_* = buyer-offer-cancel-ui
+v235_* = market-trade-receipts
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

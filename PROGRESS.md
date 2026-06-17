@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v234 — buyer offer cancel UI |
+| **Latest completed slice** | v235 — market trade receipts |
 | **Active branch** | `main` |
-| **CI gate** | Focused v234 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
-| **Next slice** | v235 — market trade receipts |
+| **CI gate** | Focused v235 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
+| **Next slice** | v236 — mystery seller silhouettes |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
 | **Next engineering review** | v242 after the next feature batches, once CI is green |
 

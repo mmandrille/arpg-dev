@@ -5,6 +5,7 @@ const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journa
 const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_objective_assertions.gd")
 const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
+const BotMarketReceiptAssertionsScript := preload("res://scripts/bot_market_receipt_assertions.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -46,7 +47,7 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 		"wait_market_panel":
 			if not bool(state.get("market_panel_visible", false)):
 				return false
-			return runner._market_listing_rows_match(step, state) and runner._market_offer_rows_match(step, state)
+			return runner._market_listing_rows_match(step, state) and runner._market_offer_rows_match(step, state) and BotMarketReceiptAssertionsScript.matches(step, state)
 		"wait_bishop_panel":
 			if not bool(state.get("bishop_panel_visible", false)):
 				return false

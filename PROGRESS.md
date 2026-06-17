@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v236 — mystery seller silhouettes |
+| **Latest completed slice** | v237 — material wallet details |
 | **Active branch** | `main` |
-| **CI gate** | Focused v236 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
-| **Next slice** | v237 — material wallet details |
+| **CI gate** | Focused v237 verification green on 2026-06-17; batch `make ci` pending after selected v233-v240 `$autoloop` queue |
+| **Next slice** | v238 — blacksmith recipe selector |
 | **Last engineering review** | v232 — [`docs/reviews/20260616_v232-overview.md`](docs/reviews/20260616_v232-overview.md) (2026-06-16) |
 | **Next engineering review** | v242 after the next feature batches, once CI is green |
 

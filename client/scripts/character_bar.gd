@@ -16,6 +16,7 @@ var _resource_wallet: Dictionary = {}
 
 
 func _ready() -> void:
+	ItemRulesLoader.ensure_loaded()
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -71,7 +72,9 @@ func get_debug_state() -> Dictionary:
 		"tooltip_text": _slot.tooltip_text if _slot != null else "",
 		"wallet_visible": _wallet_label.visible if _wallet_label != null else false,
 		"wallet_text": _wallet_label.text if _wallet_label != null else "",
+		"wallet_tooltip": _wallet_label.tooltip_text if _wallet_label != null else "",
 		"wallet_rows": _wallet_rows(),
+		"wallet_details": _wallet_detail_lines(),
 		"attack_recovery_remaining": _attack_recovery_remaining,
 		"attack_recovery_total": _attack_recovery_total,
 		"attack_recovery_fraction": _attack_recovery_fraction(),
@@ -186,25 +189,58 @@ func _render_wallet() -> void:
 	var rows := _wallet_rows()
 	_wallet_label.visible = not rows.is_empty()
 	_wallet_label.text = "  ".join(rows)
-	_wallet_label.tooltip_text = "\n".join(rows)
+	_wallet_label.tooltip_text = "\n".join(_wallet_detail_lines())
 
 
 func _wallet_rows() -> Array:
 	var rows: Array = []
+	for key in _wallet_resource_keys():
+		var amount := int(_resource_wallet.get(key, 0))
+		rows.append("%s %d" % [_resource_label(str(key)), amount])
+	return rows
+
+
+func _wallet_detail_lines() -> Array:
+	var lines: Array = []
+	for key in _wallet_resource_keys():
+		var resource_id := str(key)
+		var amount := int(_resource_wallet.get(resource_id, 0))
+		lines.append("%s x%d" % [_resource_name(resource_id), amount])
+		var category := _resource_category(resource_id)
+		if category != "":
+			lines.append("Category: %s" % category)
+		lines.append("Stored account-wide")
+	return lines
+
+
+func _wallet_resource_keys() -> Array:
+	var out: Array = []
 	var keys: Array = _resource_wallet.keys()
 	keys.sort()
 	for key in keys:
 		var amount := int(_resource_wallet.get(key, 0))
 		if amount <= 0:
 			continue
-		rows.append("%s %d" % [_resource_label(str(key)), amount])
-	return rows
+		out.append(key)
+	return out
 
 
 func _resource_label(resource_id: String) -> String:
 	if resource_id == "upgrade_shard":
 		return "Shard"
+	return _resource_name(resource_id)
+
+
+func _resource_name(resource_id: String) -> String:
+	var def := ItemRulesLoader.item_definition(resource_id)
+	if def.has("name"):
+		return str(def.get("name", ""))
 	return resource_id.replace("_", " ").capitalize()
+
+
+func _resource_category(resource_id: String) -> String:
+	var def := ItemRulesLoader.item_definition(resource_id)
+	return str(def.get("category", "")).replace("_", " ").capitalize()
 
 
 func _vec2_debug(v: Vector2) -> Dictionary:

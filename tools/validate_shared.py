@@ -1399,21 +1399,7 @@ def cross_checks(report: Report) -> None:
                 report.fail("dungeon_generation monster_rarities", "must define common/champion/rare/unique exactly")
             else:
                 report.ok("dungeon_generation monster rarities are structurally valid")
-                required_visual_scales = {
-                    "common": 1.0,
-                    "champion": 1.25,
-                    "rare": 1.0,
-                    "unique": 1.5,
-                }
-                scale_mismatches = [
-                    f"{rarity_id}={rarity_by_id.get(rarity_id, {}).get('visual_scale')}"
-                    for rarity_id, expected in required_visual_scales.items()
-                    if rarity_by_id.get(rarity_id, {}).get("visual_scale") != expected
-                ]
-                if scale_mismatches:
-                    report.fail("dungeon_generation monster_rarities visual_scale", ", ".join(scale_mismatches))
-                else:
-                    report.ok("dungeon_generation monster rarity visual_scale matches v35")
+                report.ok("dungeon_generation monster rarities leave tuning values to monster_rarity golden")
     boss_floor = dungeon_generation.get("boss_floor", {})
     if boss_floor.get("cadence") != 5 or boss_floor.get("first_level") != -5:
         report.fail("boss_floor cadence", "cadence must be 5 and first_level must be -5")
@@ -1582,6 +1568,8 @@ def cross_checks(report: Report) -> None:
                 failed_monster_rarity_golden = True
                 break
             for field in (
+                "weight",
+                "color",
                 "hp_multiplier",
                 "damage_multiplier",
                 "xp_multiplier",
@@ -1591,6 +1579,8 @@ def cross_checks(report: Report) -> None:
                 "crit_chance_bonus",
                 "block_percent_bonus",
                 "attack_cooldown_multiplier",
+                "loot_depth_offset",
+                "visual_scale",
             ):
                 if golden_rarity[field] != rule_rarity[field]:
                     report.fail("monster_rarity golden", f"{rarity_id}.{field}: mismatch with dungeon_generation")

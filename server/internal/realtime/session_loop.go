@@ -772,20 +772,6 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist inventory add", "error", err)
 			}
-			if err := l.hub.store.UpsertSessionStartItem(ctx, l.sess.ID, store.CharacterItemInstance{
-				ID:          c.Item.ItemInstanceID,
-				AccountID:   changeMember.AccountID,
-				CharacterID: changeMember.CharacterID,
-				ItemDefID:   c.Item.ItemDefID,
-				Location:    location,
-				Slot:        c.Item.Slot,
-				Equipped:    c.Item.Equipped,
-				WeaponSet:   changeWeaponSet(c),
-				RolledStats: rolledStats,
-			}); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist session start inventory add", "error", err)
-			}
 		case game.OpInventoryUpdate:
 			if c.Item == nil {
 				continue
@@ -793,10 +779,6 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist inventory update", "error", err)
-			}
-			if err := l.hub.store.SetSessionStartItemEquipped(ctx, l.sess.ID, changeMember.AccountID, changeMember.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist session start inventory update", "error", err)
 			}
 		case game.OpInventoryRemove:
 			if c.ItemInstanceID == nil {
@@ -809,10 +791,6 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist inventory remove", "error", err)
 			}
-			if err := l.hub.store.RemoveSessionStartItem(ctx, l.sess.ID, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist session start inventory remove", "error", err)
-			}
 		case game.OpEquippedUpdate:
 			if c.ItemInstanceID == nil || c.Slot == "" {
 				continue
@@ -820,10 +798,6 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID, c.Slot, true, changeWeaponSet(c)); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist equipped update", "error", err)
-			}
-			if err := l.hub.store.SetSessionStartItemEquipped(ctx, l.sess.ID, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID, c.Slot, true, changeWeaponSet(c)); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist session start equipped update", "error", err)
 			}
 		case game.OpHotbarUpdate:
 			if err := l.hub.store.SetCharacterHotbarSlot(ctx, changeMember.AccountID, changeMember.CharacterID, c.SlotIndex, c.ItemInstanceID); err != nil {

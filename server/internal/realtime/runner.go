@@ -464,20 +464,6 @@ func (r *runner) persistTick(res game.TickResult) {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist inventory add", "error", err)
 			}
-			if err := r.store.UpsertSessionStartItem(ctx, r.sess.ID, store.CharacterItemInstance{
-				ID:          c.Item.ItemInstanceID,
-				AccountID:   r.sess.AccountID,
-				CharacterID: r.sess.CharacterID,
-				ItemDefID:   c.Item.ItemDefID,
-				Location:    location,
-				Slot:        c.Item.Slot,
-				Equipped:    c.Item.Equipped,
-				WeaponSet:   changeWeaponSet(c),
-				RolledStats: rolledStats,
-			}); err != nil {
-				r.metrics.PersistenceErrors.Inc()
-				r.log.Error("persist session start inventory add", "error", err)
-			}
 		case game.OpInventoryUpdate:
 			if c.Item == nil {
 				continue
@@ -493,10 +479,6 @@ func (r *runner) persistTick(res game.TickResult) {
 			if err := r.store.SetCharacterItemEquipped(ctx, r.sess.AccountID, r.sess.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist inventory update", "error", err)
-			}
-			if err := r.store.SetSessionStartItemEquipped(ctx, r.sess.ID, r.sess.AccountID, r.sess.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
-				r.metrics.PersistenceErrors.Inc()
-				r.log.Error("persist session start inventory update", "error", err)
 			}
 		case game.OpInventoryRemove:
 			if c.ItemInstanceID == nil {
@@ -514,10 +496,6 @@ func (r *runner) persistTick(res game.TickResult) {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist inventory remove", "error", err)
 			}
-			if err := r.store.RemoveSessionStartItem(ctx, r.sess.ID, r.sess.AccountID, r.sess.CharacterID, *c.ItemInstanceID); err != nil {
-				r.metrics.PersistenceErrors.Inc()
-				r.log.Error("persist session start inventory remove", "error", err)
-			}
 		case game.OpEquippedUpdate:
 			if c.ItemInstanceID == nil || c.Slot == "" {
 				continue
@@ -525,10 +503,6 @@ func (r *runner) persistTick(res game.TickResult) {
 			if err := r.store.SetCharacterItemEquipped(ctx, r.sess.AccountID, r.sess.CharacterID, *c.ItemInstanceID, c.Slot, true, changeWeaponSet(c)); err != nil {
 				r.metrics.PersistenceErrors.Inc()
 				r.log.Error("persist equipped update", "error", err)
-			}
-			if err := r.store.SetSessionStartItemEquipped(ctx, r.sess.ID, r.sess.AccountID, r.sess.CharacterID, *c.ItemInstanceID, c.Slot, true, changeWeaponSet(c)); err != nil {
-				r.metrics.PersistenceErrors.Inc()
-				r.log.Error("persist session start equipped update", "error", err)
 			}
 		case game.OpHotbarUpdate:
 			if err := r.store.SetCharacterHotbarSlot(ctx, r.sess.AccountID, r.sess.CharacterID, c.SlotIndex, c.ItemInstanceID); err != nil {
@@ -647,13 +621,6 @@ func less(a, b game.Input) bool {
 
 func isInventoryIntentType(t string) bool {
 	return t == inputdecode.TypeEquip || t == inputdecode.TypeUnequip || t == inputdecode.TypeDrop || t == inputdecode.TypeUse
-}
-
-func changeWeaponSet(c game.Change) int {
-	if c.WeaponSet == nil {
-		return 0
-	}
-	return *c.WeaponSet
 }
 
 func inventoryPayloadSummary(in game.Input) map[string]string {

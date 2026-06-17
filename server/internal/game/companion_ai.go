@@ -2,12 +2,6 @@ package game
 
 import "math"
 
-const (
-	companionAssistRadius     = 5.0
-	companionFollowDistance   = 1.1
-	companionFollowStopRadius = 1.6
-)
-
 func (s *Sim) newPresetMonsterOrCompanion(level *LevelState, preset WorldEntity, ownerID uint64) *entity {
 	def := s.rules.Monsters[preset.MonsterDefID]
 	monster := &entity{
@@ -52,7 +46,7 @@ func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, rank 
 	}
 	companion := &entity{
 		kind:                  companionEntity,
-		pos:                   companionSpawnPosition(owner),
+		pos:                   s.companionSpawnPosition(owner),
 		spawnPos:              owner.pos,
 		hp:                    hp,
 		maxHP:                 hp,
@@ -212,7 +206,7 @@ func (s *Sim) transferOwnedCompanionsToLevel(ownerID uint64, current, dest *Leve
 			continue
 		}
 		delete(current.entities, id)
-		companion.pos = companionTravelPosition(ownerPos, offsetIndex)
+		companion.pos = s.companionTravelPosition(ownerPos, offsetIndex)
 		companion.spawnPos = ownerPos
 		companion.targetID = 0
 		dest.entities[id] = companion
@@ -242,16 +236,17 @@ func scaleRevivedDamageRange(damage *DamageRange, percent int) *DamageRange {
 	}
 }
 
-func companionSpawnPosition(owner *entity) Vec2 {
-	return Vec2{X: owner.pos.X + companionFollowDistance, Y: owner.pos.Y}
+func (s *Sim) companionSpawnPosition(owner *entity) Vec2 {
+	return Vec2{X: owner.pos.X + s.rules.MainConfig.Gameplay.CompanionFollowDistance, Y: owner.pos.Y}
 }
 
-func companionTravelPosition(ownerPos Vec2, index int) Vec2 {
+func (s *Sim) companionTravelPosition(ownerPos Vec2, index int) Vec2 {
+	followDistance := s.rules.MainConfig.Gameplay.CompanionFollowDistance
 	offsets := []Vec2{
-		{X: companionFollowDistance, Y: 0},
-		{X: -companionFollowDistance, Y: 0},
-		{X: 0, Y: companionFollowDistance},
-		{X: 0, Y: -companionFollowDistance},
+		{X: followDistance, Y: 0},
+		{X: -followDistance, Y: 0},
+		{X: 0, Y: followDistance},
+		{X: 0, Y: -followDistance},
 	}
 	offset := offsets[index%len(offsets)]
 	ring := 1 + index/len(offsets)
@@ -359,9 +354,9 @@ func (s *Sim) validCompanionTarget(companion *entity, target *entity) bool {
 		return false
 	case CompanionStanceDefend:
 		owner := s.activeLevel().entities[companion.ownerID]
-		return owner != nil && owner.kind == playerEntity && owner.hp > 0 && distance(owner.pos, target.pos) <= companionAssistRadius
+		return owner != nil && owner.kind == playerEntity && owner.hp > 0 && distance(owner.pos, target.pos) <= s.rules.MainConfig.Gameplay.CompanionAssistRadius
 	default:
-		return distance(companion.pos, target.pos) <= companionAssistRadius
+		return distance(companion.pos, target.pos) <= s.rules.MainConfig.Gameplay.CompanionAssistRadius
 	}
 }
 
@@ -453,10 +448,10 @@ func (s *Sim) companionMovementGoal(companion *entity, owner *entity, target *en
 		}
 		return s.companionAttackGoal(companion, target, def)
 	}
-	if distance(companion.pos, owner.pos) <= companionFollowStopRadius {
+	if distance(companion.pos, owner.pos) <= s.rules.MainConfig.Gameplay.CompanionFollowStop {
 		return Vec2{}, false
 	}
-	return Vec2{X: owner.pos.X - companionFollowDistance, Y: owner.pos.Y}, true
+	return Vec2{X: owner.pos.X - s.rules.MainConfig.Gameplay.CompanionFollowDistance, Y: owner.pos.Y}, true
 }
 
 func (s *Sim) companionAttackGoal(companion *entity, target *entity, def MonsterDef) (Vec2, bool) {

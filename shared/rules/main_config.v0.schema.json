@@ -10,7 +10,7 @@
     "version": { "type": "integer", "const": 0 },
     "gameplay": {
       "type": "object",
-      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent", "respec_cost_gold", "item_upgrade_cost_gold", "item_upgrade_cost_growth_per_level", "item_upgrade_max_level", "item_upgrade_success_chance_percent", "item_upgrade_pity_failure_threshold", "item_upgrade_resource_item_def_id", "item_upgrade_resource_count", "mercenary_hire_cost_gold"],
+      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent", "respec_cost_gold", "item_upgrade_cost_gold", "item_upgrade_cost_growth_per_level", "item_upgrade_max_level", "item_upgrade_success_chance_percent", "item_upgrade_pity_failure_threshold", "item_upgrade_resource_item_def_id", "item_upgrade_resource_count", "mercenary_hire_cost_gold", "companion_assist_radius", "companion_follow_distance", "companion_follow_stop_radius"],
       "additionalProperties": false,
       "properties": {
         "base_attack_interval_ticks": { "type": "integer", "minimum": 1 },
@@ -24,7 +24,10 @@
         "item_upgrade_pity_failure_threshold": { "type": "integer", "minimum": 0 },
         "item_upgrade_resource_item_def_id": { "type": "string", "minLength": 1 },
         "item_upgrade_resource_count": { "type": "integer", "minimum": 0 },
-        "mercenary_hire_cost_gold": { "type": "integer", "minimum": 0 }
+        "mercenary_hire_cost_gold": { "type": "integer", "minimum": 0 },
+        "companion_assist_radius": { "type": "number", "exclusiveMinimum": 0 },
+        "companion_follow_distance": { "type": "number", "exclusiveMinimum": 0 },
+        "companion_follow_stop_radius": { "type": "number", "exclusiveMinimum": 0 }
       }
     }
   }

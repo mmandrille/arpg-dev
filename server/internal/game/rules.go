@@ -57,6 +57,9 @@ type MainGameplayConfig struct {
 	ItemUpgradeResourceID   string  `json:"item_upgrade_resource_item_def_id"`
 	ItemUpgradeResourceCost int     `json:"item_upgrade_resource_count"`
 	MercenaryHireCostGold   int     `json:"mercenary_hire_cost_gold"`
+	CompanionAssistRadius   float64 `json:"companion_assist_radius"`
+	CompanionFollowDistance float64 `json:"companion_follow_distance"`
+	CompanionFollowStop     float64 `json:"companion_follow_stop_radius"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -999,6 +1002,15 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.ItemUpgradePityFailures < 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_pity_failure_threshold: must be non-negative")
+	}
+	if mainConfig.Gameplay.CompanionAssistRadius <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.companion_assist_radius: must be positive")
+	}
+	if mainConfig.Gameplay.CompanionFollowDistance <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.companion_follow_distance: must be positive")
+	}
+	if mainConfig.Gameplay.CompanionFollowStop <= 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.companion_follow_stop_radius: must be positive")
 	}
 	if err := validateMainGameplayEconomyConfig(mainConfig.Gameplay); err != nil {
 		return nil, err

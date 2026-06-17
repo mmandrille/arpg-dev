@@ -1,0 +1,54 @@
+client/scripts/blacksmith_panel.gd
+  s_4fdff9fc96d196::t_08358b3d0e0caf 15-16,33
+  s_4fdff9fc96d196::t_ab9f11ec6f27bb 456,468,472,478-482,485-511
+  s_4fdff9fc96d196::t_0d9e66033504de 473-475
+  s_4fdff9fc96d196::t_4c8e7db42fa8f3 140-156,172
+  s_4fdff9fc96d196::t_c876648c0b49cd 315-317,383,427-430
+docs/as-built/v245_blacksmith-second-recipe.md
+  s_4fdff9fc96d196::t_c95e43bb4d4bcc 1-42
+docs/plans/v245_2026-06-17-blacksmith-second-recipe.md
+  s_4fdff9fc96d196::t_c8d484517262fb 1-2,4-40,44-45,49-60,65-78,84-97,100-113,115-117
+  s_4fdff9fc96d196::t_c95e43bb4d4bcc 3,41-43,46-48,61-64,79-83,98-99,114,118-123
+client/scripts/bot_step_catalog.gd
+  s_4fdff9fc96d196::t_b5757a51fa7ade 60
+PROGRESS.md
+  s_4fdff9fc96d196::t_c95e43bb4d4bcc 26,28-29
+client/scripts/net_client.gd
+  s_4fdff9fc96d196::t_f4864443b6f861 399,401,408,410
+server/internal/http/account_stash.go
+  s_4fdff9fc96d196::t_d06b645477cd28 7,19-23,54,66,72-75,79,93-97,115-119,163,199,206-211,222,226-227,241-278
+server/internal/http/blacksmith_recipe_test.go
+  s_4fdff9fc96d196::t_7d63df75e9c988 1-67
+docs/specs/v245_spec-blacksmith-second-recipe.md
+  s_4fdff9fc96d196::t_c95e43bb4d4bcc 3
+  s_4fdff9fc96d196::t_c8d484517262fb 1-2,4-66
+docs/progress/slice-lifecycle.md
+  s_4fdff9fc96d196::t_c95e43bb4d4bcc 261
+client/tests/test_blacksmith_panel.gd
+  s_4fdff9fc96d196::t_616bee9443435c 43,53-57,60-65,68-69
+  s_4fdff9fc96d196::t_ad023a37de7ce0 58-59,66-67
+client/scripts/bot_controller.gd
+  s_4fdff9fc96d196::t_b5757a51fa7ade 182-183,369-372
+client/scripts/main.gd
+  s_4fdff9fc96d196::t_f4864443b6f861 4492,4509
+tools/bot/scenarios/client/62_blacksmith_second_recipe.json
+  s_4fdff9fc96d196::t_6a4fd29e48b908 1-53
+client/scripts/bot_action_step_validator.gd
+  s_4fdff9fc96d196::t_b5757a51fa7ade 18,106-107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2408cd74561572cf5f4f0c0314fdb83338eff583",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -107,10 +107,10 @@ static func click_market_cancel_listing(main, listing_id: String = "", item_def_
 		panel.bot_click_cancel_listing(listing_id, item_def_id, price_gold, listing_index)
 
 
-static func click_market_accept_offer(main, offer_id: String = "", offer_index: int = 0) -> void:
+static func click_market_offer_action(main, action: String, offer_id: String = "", offer_index: int = 0) -> void:
 	var panel = _member(main, "market_panel")
-	if panel != null and panel.has_method("bot_click_accept_offer"):
-		panel.bot_click_accept_offer(offer_id, offer_index)
+	if panel != null and panel.has_method("bot_click_offer_action"):
+		panel.bot_click_offer_action(action, offer_id, offer_index)
 
 
 static func assign_consumable_hotbar(main, slot_index: int, item_instance_id: String) -> void:

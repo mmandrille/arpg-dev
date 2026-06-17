@@ -1,0 +1,28 @@
+{
+  "id": "buyer_offer_cancel_ui",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "buyer_offer_cancel_ui_234",
+  "title": "Buyer offer cancel UI",
+  "description": "Client opens My Offers as a bidder, cancels an outgoing offer, and verifies the offered item returns to stash.",
+  "preflight": {
+    "type": "market_listing",
+    "bidder_is_client": true,
+    "item_def_id": "cave_mail",
+    "price_gold": 49,
+    "offer_item_def_id": "cave_blade"
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
+    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 49, "at_least": 1, "timeout_s": 15.0 },
+    { "type": "click_market_view_offers", "listing_id": "__my_offers" },
+    { "type": "wait_market_panel", "listing_item_def_id": "cave_mail", "offer_item_def_id": "cave_blade", "offer_status": "active", "offer_at_least": 1, "timeout_s": 15.0 },
+    { "type": "click_market_cancel_offer", "offer_index": 0 },
+    { "type": "wait_market_panel", "listing_item_def_id": "cave_mail", "offer_item_def_id": "cave_blade", "offer_status": "canceled", "offer_at_least": 1, "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_stash" },
+    { "type": "wait_stash_panel", "item_def_id": "cave_blade", "equals": 1, "timeout_s": 15.0 },
+    { "type": "assert_stash_item_count", "item_def_id": "cave_blade", "equals": 1 }
+  ]
+}

@@ -4380,15 +4380,20 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		if market_panel != null and mine: market_panel.show_my_offers(result.get("offers", []), "My offers")
 		elif market_panel != null: market_panel.show_offers(str(payload.get("listing_id", "")), result.get("offers", []), "Active offers")
 		return
-	elif action == "accept_offer":
-		result = client.accept_market_offer(str(payload.get("listing_id", "")), str(payload.get("offer_id", "")))
+	elif action == "accept_offer" or action == "cancel_offer":
+		var cancel := action == "cancel_offer"
+		result = client.cancel_market_offer(str(payload.get("listing_id", "")), str(payload.get("offer_id", ""))) if cancel else client.accept_market_offer(str(payload.get("listing_id", "")), str(payload.get("offer_id", "")))
 		if result.has("_error"):
-			if market_panel != null: market_panel.show_status("Could not accept offer", true)
+			if market_panel != null: market_panel.show_status("Could not cancel offer" if cancel else "Could not accept offer", true)
 			return
 		for item in result.get("items", []):
 			if typeof(item) == TYPE_DICTIONARY:
 				_upsert_stash_item(item as Dictionary)
 		_refresh_inventory_ui()
+		if cancel:
+			var offers := client.list_my_market_offers()
+			if market_panel != null: market_panel.show_my_offers(offers.get("offers", []), "Offer canceled" if not offers.has("_error") else "Offer canceled; refresh failed")
+			return
 		if market_panel != null: market_panel.show_status("Offer accepted")
 	else:
 		return
@@ -5011,7 +5016,6 @@ func _set_entity_pinning_root(entity_id: String, active: bool) -> void:
 	var node := rec.get("node", null) as Node3D
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, active)
 
-
 func _set_entity_stun(entity_id: String, active: bool) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
 	if rec.is_empty():
@@ -5028,7 +5032,6 @@ func _set_entity_stun(entity_id: String, active: bool) -> void:
 	rec["effect_ids"] = effect_ids
 	var node := rec.get("node", null) as Node3D
 	PlayerStatusEffectMarkers.sync_stun_effect(node, active)
-
 
 func _apply_entity_status_tint(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
@@ -5188,7 +5191,6 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 		base.material_override = mat
 
 # --- bot API (read-only state + intent dispatch) ----------------------------
-
 func get_bot_state() -> Dictionary:
 	# Exclude dead monsters (hp==0) from monster_ids so assert_entity_removed
 	# treats a killed monster as "gone" even if the server hasn't sent entity_remove.
@@ -5387,7 +5389,6 @@ func _sync_elite_objective_minimap() -> void:
 		var pos := player_anchor.position if player_anchor != null else Vector3.ZERO
 		elite_objective_minimap.set_state(EliteObjectiveMinimapStateScript.from_entities(entities, pos))
 
-
 func _bot_entities_presentation_debug() -> Array:
 	var out: Array = []
 	for id in entities.keys():
@@ -5547,8 +5548,8 @@ func bot_click_market_view_offers(listing_id: String = "", item_def_id: String =
 	BotFacade.click_market_view_offers(self, listing_id, item_def_id, price_gold, listing_index)
 func bot_click_market_cancel_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
 	BotFacade.click_market_cancel_listing(self, listing_id, item_def_id, price_gold, listing_index)
-func bot_click_market_accept_offer(offer_id: String = "", offer_index: int = 0) -> void:
-	BotFacade.click_market_accept_offer(self, offer_id, offer_index)
+func bot_click_market_offer_action(action: String, offer_id: String = "", offer_index: int = 0) -> void:
+	BotFacade.click_market_offer_action(self, action, offer_id, offer_index)
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:
 	BotFacade.assign_consumable_hotbar(self, slot_index, item_instance_id)
 func bot_use_consumable_hotbar(slot_index: int) -> void:
@@ -5744,7 +5745,6 @@ func _sync_status_text_visibility() -> void:
 	if _debug_label == null:
 		return
 	_debug_label.visible = client_settings == null or client_settings.status_text
-
 func _debug(msg: String) -> void:
 	print("[client] ", msg)
 

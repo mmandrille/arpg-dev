@@ -2382,7 +2382,6 @@ func _handle_input(delta: float) -> void:
 		_reconcile_player()
 		_mark_local_player_walking()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
-		ClientAudioBridgeScript.movement(audio_controller)
 		_send_cooldown = ClientConstants.SEND_INTERVAL
 
 	if _hold_input_allowed():

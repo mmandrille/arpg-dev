@@ -1,0 +1,45 @@
+docs/specs/v236_spec-mystery-seller-silhouettes.md
+  s_aa3e23b9c2eeb6::t_3b6a68cc5804bf 1-51
+docs/progress/slice-lifecycle.md
+  s_aa3e23b9c2eeb6::t_9c9549d71fd81b 252
+PROGRESS.md
+  s_aa3e23b9c2eeb6::t_9c9549d71fd81b 26,28-29
+docs/plans/v236_2026-06-17-mystery-seller-silhouettes.md
+  s_aa3e23b9c2eeb6::t_3b6a68cc5804bf 1-2,4-18,21-29,32-33,35,37-47,52-58,62-76,78-80
+  s_aa3e23b9c2eeb6::t_9c9549d71fd81b 3,19-20,30-31,34,36,48-51,59-61,77,81-83
+client/scripts/mystery_silhouette_drawer.gd
+  s_aa3e23b9c2eeb6::t_f3b3403445bb95 1-54
+client/scripts/shop_panel.gd
+  s_aa3e23b9c2eeb6::t_f3b3403445bb95 8,393
+  s_aa3e23b9c2eeb6::t_046e33e5df3545 638,1038
+  s_aa3e23b9c2eeb6::t_de91a33af31466 1039-1040
+  s_aa3e23b9c2eeb6::t_6a394bea892cf7 397
+client/scripts/mystery_silhouette_drawer.gd.uid
+  s_aa3e23b9c2eeb6::t_026e6e63d37178 1
+docs/progress/slice-codename-index.md
+  s_aa3e23b9c2eeb6::t_9c9549d71fd81b 213
+tools/bot/scenarios/client/53_mystery_seller_silhouettes.json
+  s_aa3e23b9c2eeb6::t_080e6ca4d462ed 1-29
+client/tests/test_shop_panel.gd
+  s_aa3e23b9c2eeb6::t_db14cdd331b931 167,173
+docs/as-built/v236_mystery-seller-silhouettes.md
+  s_aa3e23b9c2eeb6::t_9c9549d71fd81b 1-38
+docs/progress/scenario-catalog.md
+  s_aa3e23b9c2eeb6::t_9c9549d71fd81b 89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "78d42ee4d7e59121fefa56bad191816da0c5be56",
+  "prompts": {},
+  "sessions": {
+    "s_aa3e23b9c2eeb6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed3df-5c04-7483-9274-6021ae385ba4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

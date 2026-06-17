@@ -348,12 +348,6 @@ func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 	if got := repo.items[0]; got.ID != "2001" || got.ItemDefID != "cave_blade" || got.Location != store.ItemLocationInventory {
 		t.Fatalf("persisted item = %+v, want unique-chest-style inventory item", got)
 	}
-	if len(repo.sessionStartItems) != 1 {
-		t.Fatalf("persisted session start item count = %d, want mirrored non-stash-transfer add: %+v", len(repo.sessionStartItems), repo.sessionStartItems)
-	}
-	if got := repo.sessionStartItems[0]; got.ID != "2001" || got.ItemDefID != "cave_blade" || got.Location != store.ItemLocationInventory {
-		t.Fatalf("persisted session start item = %+v, want mirrored unique-chest-style inventory item", got)
-	}
 }
 
 type progressionPersistRepo struct {

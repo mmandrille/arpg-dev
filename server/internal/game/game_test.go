@@ -5027,7 +5027,6 @@ func TestMonsterChaseLeashStopsInPlaceAfterConfiguredDistance(t *testing.T) {
 	player := sim.entities[sim.playerID]
 	def := rules.Monsters[monster.monsterDefID]
 	leashRadius := effectiveMonsterLeashRadius(def, rules.Navigation)
-
 	aggro := TickResult{}
 	player.pos = Vec2{X: monster.pos.X, Y: monster.pos.Y + def.AggroRadius - 1}
 	sim.updateMonsterAIMode(monster, player, def, monster.aiMode, &aggro)

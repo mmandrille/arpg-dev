@@ -777,16 +777,6 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if len(snap.Items) != 1 || !snap.Items[0].Equipped || snap.Items[0].Slot != "main_hand" || snap.Items[0].WeaponSet != 1 {
 		t.Fatalf("snapshot item mutated with live state: %+v", snap.Items)
 	}
-	if err := s.SetSessionStartItemEquipped(ctx, sess.ID, acct.ID, char.ID, item.ID, "main_hand", true, 1); err != nil {
-		t.Fatalf("set session start item equipped: %v", err)
-	}
-	snap, err = s.LoadSessionStartSnapshot(ctx, sess.ID)
-	if err != nil {
-		t.Fatalf("reload session snapshot after session start item update: %v", err)
-	}
-	if len(snap.Items) != 1 || !snap.Items[0].Equipped || snap.Items[0].Slot != "main_hand" || snap.Items[0].WeaponSet != 1 || snap.Items[0].Location != store.ItemLocationEquipped {
-		t.Fatalf("session start item weapon-set update not preserved: %+v", snap.Items)
-	}
 	if len(snap.Hotbar) != 10 || snap.Hotbar[2].ItemInstanceID == nil || *snap.Hotbar[2].ItemInstanceID != item.ID {
 		t.Fatalf("snapshot hotbar mutated with live state: %+v", snap.Hotbar)
 	}

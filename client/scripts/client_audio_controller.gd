@@ -96,11 +96,8 @@ func play_boss_phase(pattern_id: String = "", phase_kind: String = "") -> void:
 func start_boss_music() -> void:
 	boss_music_active = true
 	ambient_active = false
-	if master_volume <= 0.0 or music_volume <= 0.0:
-		return
 	_ensure_players()
-	_music_player.stream = _boss_music_stream()
-	_music_player.play()
+	_music_player.stop()
 
 
 func stop_boss_music() -> void:
@@ -165,11 +162,8 @@ func _resume_ambience() -> void:
 		ambient_active = false
 		return
 	ambient_active = true
-	if master_volume <= 0.0 or music_volume <= 0.0:
-		return
 	_ensure_players()
-	_music_player.stream = _ambient_stream(ambient_zone)
-	_music_player.play()
+	_music_player.stop()
 
 
 func _ambient_stream(zone: String) -> AudioStreamWAV:

@@ -854,6 +854,7 @@ func _test_client_settings_supported_size_labels() -> void:
 	_assert_true("settings include 1600x900", labels.has("1600x900"))
 	_assert_true("settings include 1920x1080", labels.has("1920x1080"))
 	_assert_true("settings include 2560x1440", labels.has("2560x1440"))
+	_assert_eq("settings default is largest size", ClientSettingsScript.DEFAULT_SIZE, Vector2i(2560, 1440))
 
 
 func _test_client_settings_parse_size_label() -> void:

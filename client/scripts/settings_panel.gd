@@ -36,6 +36,8 @@ var _master_volume_slider: HSlider
 var _music_volume_slider: HSlider
 var _sfx_volume_slider: HSlider
 var _back_button: Button
+var _panel: PanelContainer
+var _scroll: ScrollContainer
 
 
 func _ready() -> void:
@@ -64,6 +66,15 @@ func hide_panel() -> void:
 
 func _sync_viewport_size() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if _panel == null:
+		return
+	var viewport_size := get_viewport_rect().size if is_inside_tree() else Vector2(1280, 720)
+	var panel_width: float = minf(460.0, maxf(360.0, viewport_size.x - 32.0))
+	var panel_height: float = minf(660.0, maxf(360.0, viewport_size.y - 32.0))
+	_panel.offset_left = -panel_width * 0.5
+	_panel.offset_right = panel_width * 0.5
+	_panel.offset_top = -panel_height * 0.5
+	_panel.offset_bottom = panel_height * 0.5
 
 
 func set_selected_size_label(label: String) -> void:
@@ -119,29 +130,32 @@ func _build() -> void:
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(460, 680)
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.offset_left = -230
-	panel.offset_right = 230
-	panel.offset_top = -340
-	panel.offset_bottom = 340
-	add_child(panel)
+	_panel = PanelContainer.new()
+	_panel.custom_minimum_size = Vector2(360, 360)
+	_panel.set_anchors_preset(Control.PRESET_CENTER)
+	add_child(_panel)
+
+	_scroll = ScrollContainer.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.add_child(_scroll)
 
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
+	box.add_theme_constant_override("separation", 6)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.add_child(box)
 
 	_title = Label.new()
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title.add_theme_font_size_override("font_size", 45)
+	_title.add_theme_font_size_override("font_size", 34)
 	box.add_child(_title)
 
 	for label in ClientSettingsScript.supported_size_labels():
 		var button := Button.new()
 		button.text = label
-		button.custom_minimum_size = Vector2(320, 46)
-		button.add_theme_font_size_override("font_size", 39)
+		button.custom_minimum_size = Vector2(320, 36)
+		button.add_theme_font_size_override("font_size", 28)
 		button.pressed.connect(func() -> void:
 			size_selected.emit(label)
 		)
@@ -150,7 +164,7 @@ func _build() -> void:
 
 	_session_type_label = Label.new()
 	_session_type_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_session_type_label.add_theme_font_size_override("font_size", 30)
+	_session_type_label.add_theme_font_size_override("font_size", 23)
 	box.add_child(_session_type_label)
 
 	var session_type_row := HBoxContainer.new()
@@ -161,8 +175,8 @@ func _build() -> void:
 
 	_floating_toggle = CheckButton.new()
 	_floating_toggle.button_pressed = true
-	_floating_toggle.custom_minimum_size = Vector2(320, 42)
-	_floating_toggle.add_theme_font_size_override("font_size", 39)
+	_floating_toggle.custom_minimum_size = Vector2(320, 36)
+	_floating_toggle.add_theme_font_size_override("font_size", 28)
 	_floating_toggle.toggled.connect(func(enabled: bool) -> void:
 		floating_combat_text_toggled.emit(enabled)
 	)
@@ -170,8 +184,8 @@ func _build() -> void:
 
 	_status_text_toggle = CheckButton.new()
 	_status_text_toggle.button_pressed = true
-	_status_text_toggle.custom_minimum_size = Vector2(320, 42)
-	_status_text_toggle.add_theme_font_size_override("font_size", 39)
+	_status_text_toggle.custom_minimum_size = Vector2(320, 36)
+	_status_text_toggle.add_theme_font_size_override("font_size", 28)
 	_status_text_toggle.toggled.connect(func(enabled: bool) -> void:
 		status_text_toggled.emit(enabled)
 	)
@@ -179,7 +193,7 @@ func _build() -> void:
 
 	_monster_health_bar_label = Label.new()
 	_monster_health_bar_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_monster_health_bar_label.add_theme_font_size_override("font_size", 30)
+	_monster_health_bar_label.add_theme_font_size_override("font_size", 23)
 	box.add_child(_monster_health_bar_label)
 
 	var monster_health_bar_row := HBoxContainer.new()
@@ -203,7 +217,7 @@ func _build() -> void:
 
 	_language_label = Label.new()
 	_language_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_language_label.add_theme_font_size_override("font_size", 30)
+	_language_label.add_theme_font_size_override("font_size", 23)
 	box.add_child(_language_label)
 
 	var language_row := HBoxContainer.new()
@@ -213,18 +227,19 @@ func _build() -> void:
 	_add_language_button(language_row, "es")
 
 	_back_button = Button.new()
-	_back_button.custom_minimum_size = Vector2(320, 44)
-	_back_button.add_theme_font_size_override("font_size", 39)
+	_back_button.custom_minimum_size = Vector2(320, 36)
+	_back_button.add_theme_font_size_override("font_size", 28)
 	_back_button.pressed.connect(back_requested.emit)
 	box.add_child(_back_button)
 	refresh_texts()
+	_sync_viewport_size()
 
 
 func _add_session_type_button(parent: Control, label: String, session_type: String) -> void:
 	var button := Button.new()
 	button.text = label
-	button.custom_minimum_size = Vector2(154, 42)
-	button.add_theme_font_size_override("font_size", 34)
+	button.custom_minimum_size = Vector2(154, 36)
+	button.add_theme_font_size_override("font_size", 26)
 	button.pressed.connect(func() -> void:
 		create_game_session_type_selected.emit(session_type)
 	)
@@ -234,8 +249,8 @@ func _add_session_type_button(parent: Control, label: String, session_type: Stri
 
 func _add_language_button(parent: Control, language: String) -> void:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(154, 42)
-	button.add_theme_font_size_override("font_size", 34)
+	button.custom_minimum_size = Vector2(154, 36)
+	button.add_theme_font_size_override("font_size", 26)
 	button.pressed.connect(func() -> void:
 		language_selected.emit(language)
 	)
@@ -245,8 +260,8 @@ func _add_language_button(parent: Control, language: String) -> void:
 
 func _add_monster_health_bar_button(parent: Control, mode: String) -> void:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(154, 42)
-	button.add_theme_font_size_override("font_size", 34)
+	button.custom_minimum_size = Vector2(154, 36)
+	button.add_theme_font_size_override("font_size", 26)
 	button.pressed.connect(func() -> void:
 		monster_health_bar_mode_selected.emit(mode)
 	)
@@ -257,7 +272,7 @@ func _add_monster_health_bar_button(parent: Control, mode: String) -> void:
 func _add_slider_label(parent: Control) -> Label:
 	var label := Label.new()
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 26)
+	label.add_theme_font_size_override("font_size", 21)
 	parent.add_child(label)
 	return label
 
@@ -267,7 +282,8 @@ func _add_volume_slider(parent: Control, handler: Callable) -> HSlider:
 	slider.min_value = 0.0
 	slider.max_value = 1.0
 	slider.step = 0.05
-	slider.custom_minimum_size = Vector2(320, 28)
+	slider.custom_minimum_size = Vector2(320, 30)
+	slider.mouse_filter = Control.MOUSE_FILTER_STOP
 	slider.value_changed.connect(handler)
 	parent.add_child(slider)
 	return slider

@@ -1,0 +1,28 @@
+server/internal/game/rules.go
+  s_93e7a5291ddc6c::t_0a02e75f8da022 11
+  s_93e7a5291ddc6c::t_3d78f349190c78 2320-2321,2323,2325-2333,2335-2336,2338-2339,2368-2369,2371-2372
+server/internal/game/game_test.go
+  s_93e7a5291ddc6c::t_3d78f349190c78 388,415-416
+shared/golden/monster_rarity.json
+  s_93e7a5291ddc6c::t_3d78f349190c78 19,48,77,106
+tools/validate_shared.py
+  s_93e7a5291ddc6c::t_3d78f349190c78 1402,1571-1572,1582-1583
+shared/golden/monster_rarity.v0.schema.json
+  s_93e7a5291ddc6c::t_3d78f349190c78 31,49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e1dbf6f51838b7980c55a3abc329eaa35fc93f16",
+  "prompts": {},
+  "sessions": {
+    "s_93e7a5291ddc6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed3d2-69d2-7ee2-8e68-16db0016a79d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+scripts/bot_visual.sh
+  s_31eb8e97d92d7d::t_345d1828f1ffcc 12,37-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c6d9b7bdf2eca4c4f776c25585a09a9872317908",
+  "prompts": {},
+  "sessions": {
+    "s_31eb8e97d92d7d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2ce-e0c1-7eb1-bba8-c2aa1728f9e8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

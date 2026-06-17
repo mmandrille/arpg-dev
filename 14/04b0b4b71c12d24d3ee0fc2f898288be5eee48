@@ -1,0 +1,53 @@
+docs/as-built/v252_expanded-dungeon-profile.md
+  s_db4bb4f18f9cf6::t_0a2a742af41d80 1-30,36-40
+  s_db4bb4f18f9cf6::t_6628e41f1d27d5 31-35
+docs/progress/slice-lifecycle.md
+  s_db4bb4f18f9cf6::t_6628e41f1d27d5 267
+shared/rules/dungeon_generation.v0.schema.json
+  s_db4bb4f18f9cf6::t_adf0ed74642d3e 9,39-42,364-379
+shared/rules/dungeon_generation.v0.json
+  s_db4bb4f18f9cf6::t_adf0ed74642d3e 4-13
+docs/progress/slice-codename-index.md
+  s_db4bb4f18f9cf6::t_0a2a742af41d80 218
+PROGRESS.md
+  s_db4bb4f18f9cf6::t_0a2a742af41d80 26,29,107
+  s_db4bb4f18f9cf6::t_6628e41f1d27d5 28
+server/internal/game/dungeon_gen.go
+  s_db4bb4f18f9cf6::t_adf0ed74642d3e 69,1074
+server/internal/game/dungeon_profiles_test.go
+  s_db4bb4f18f9cf6::t_adf0ed74642d3e 1-8,10-33,35-49,51-52,54-59
+  s_db4bb4f18f9cf6::t_b6572be5b72938 50,53
+  s_db4bb4f18f9cf6::t_f57bb8ea4316f9 9,34
+server/internal/game/rules.go
+  s_db4bb4f18f9cf6::t_adf0ed74642d3e 133,1787,1902-1904,1937
+server/internal/game/dungeon_profiles.go
+  s_db4bb4f18f9cf6::t_adf0ed74642d3e 1-62
+server/internal/game/random_quest_floors_test.go
+  s_db4bb4f18f9cf6::t_79ee66dcb43cdc 65-67,70
+docs/plans/v252_2026-06-17-expanded-dungeon-profile.md
+  s_db4bb4f18f9cf6::t_0a2a742af41d80 3,40-43,46,60-63,76-79,92-94,109-111,119-123
+  s_db4bb4f18f9cf6::t_56b6bc35dd0235 1-2,4-39,44-45,47-59,64-75,80-91,95-108,112-118,124
+  s_db4bb4f18f9cf6::t_6628e41f1d27d5 125-129
+docs/specs/v252_spec-expanded-dungeon-profile.md
+  s_db4bb4f18f9cf6::t_56b6bc35dd0235 1-2,4-62
+  s_db4bb4f18f9cf6::t_0a2a742af41d80 3,63-64
+server/internal/game/game_test.go
+  s_db4bb4f18f9cf6::t_4d7f0503d9fc31 5826,5828
+  s_db4bb4f18f9cf6::t_79ee66dcb43cdc 5854
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "1404b0b4b71c12d24d3ee0fc2f898288be5eee48",
+  "prompts": {},
+  "sessions": {
+    "s_db4bb4f18f9cf6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed694-becd-7ac0-8318-b3af0e506be3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

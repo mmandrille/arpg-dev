@@ -4489,7 +4489,7 @@ func _hide_blacksmith_panel() -> void:
 func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
 	if client == null or stash_item_id == "":
 		return
-	var result := client.upgrade_account_stash_item(stash_item_id)
+	var result := client.upgrade_account_stash_item(stash_item_id, blacksmith_panel.selected_recipe_id() if blacksmith_panel != null and blacksmith_panel.has_method("selected_recipe_id") else "item_upgrade")
 	if result.has("_error"):
 		if blacksmith_panel != null:
 			blacksmith_panel.show_status("Could not upgrade item", true)
@@ -4506,7 +4506,7 @@ func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
 func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> void:
 	if client == null or item_instance_id == "":
 		return
-	var result := client.upgrade_inventory_item(item_instance_id, client.character_id)
+	var result := client.upgrade_inventory_item(item_instance_id, client.character_id, blacksmith_panel.selected_recipe_id() if blacksmith_panel != null and blacksmith_panel.has_method("selected_recipe_id") else "item_upgrade")
 	if result.has("_error"):
 		if blacksmith_panel != null:
 			blacksmith_panel.show_status("Could not upgrade item", true)

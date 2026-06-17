@@ -179,6 +179,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_blacksmith_upgrade(action)
 		"click_blacksmith_stage_item":
 			_do_click_blacksmith_stage_item(action)
+		"select_blacksmith_recipe":
+			_do_select_blacksmith_recipe(action)
 		"click_mercenary_stance":
 			_do_click_mercenary_stance(action)
 		"set_stash_search":
@@ -362,6 +364,12 @@ func _do_click_blacksmith_stage_item(action: Dictionary) -> void:
 			str(action.get("item_def_id", "")),
 			int(action.get("stash_index", 0))
 		)
+
+
+func _do_select_blacksmith_recipe(action: Dictionary) -> void:
+	var panel = _main.get("blacksmith_panel") if _main != null else null
+	if panel != null and panel.has_method("bot_select_recipe"):
+		panel.bot_select_recipe(str(action.get("recipe_id", "item_upgrade")))
 
 
 func _do_click_mercenary_stance(action: Dictionary) -> void:

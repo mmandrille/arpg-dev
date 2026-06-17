@@ -15,7 +15,7 @@ const STEP_TYPES_ACTION := [
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
 	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort",
 	"set_multiplayer_search", "select_multiplayer_sort",
-	"click_blacksmith_upgrade", "click_blacksmith_stage_item",
+	"click_blacksmith_upgrade", "click_blacksmith_stage_item", "select_blacksmith_recipe",
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
 	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
 	"set_market_search", "select_market_sort", "click_waypoint_level",
@@ -103,6 +103,8 @@ static func validate(step: Dictionary, stype: String, index: int) -> String:
 	if stype in ["click_blacksmith_upgrade", "click_blacksmith_stage_item"]:
 		if str(step.get("stash_item_id", "")) == "" and str(step.get("item_def_id", "")) == "":
 			return "client_steps[%d] (%s) requires stash_item_id or item_def_id" % [index, stype]
+	if stype == "select_blacksmith_recipe":
+		return _require_string(step, index, stype, "recipe_id")
 	if stype in ["click_market_purchase_listing", "click_market_cancel_listing"]:
 		if str(step.get("listing_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("price_gold"):
 			return "client_steps[%d] (%s) requires listing_id, item_def_id, or price_gold" % [index, stype]

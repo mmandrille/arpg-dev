@@ -8,7 +8,8 @@
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_loot_count", "min_count": 7, "timeout_s": 10.0 },
-    { "type": "click_loot_item", "item_def_id": "upgrade_shard" },
+    { "type": "click_floor", "x": 12.0, "z": 10.0 },
+    { "type": "wait_player_near", "x": 12.0, "z": 10.0, "distance": 1.5, "timeout_s": 10.0 },
     { "type": "wait_event", "event_type": "resource_picked_up", "timeout_s": 15.0 },
     { "type": "assert_resource_wallet_panel", "visible": true, "text_contains": "Shard 1" },
     { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },

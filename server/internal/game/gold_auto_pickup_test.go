@@ -73,6 +73,56 @@ func TestNonGoldLootDoesNotAutoPickup(t *testing.T) {
 	}
 }
 
+func TestResourceWalletAutoPickupWalkingIntoShard(t *testing.T) {
+	sim := MustNewSim("sess_resource_auto_town", "v229_resource_auto_town", loadRules(t))
+	player := sim.entities[sim.playerID]
+	shard := addTestWalletResourceLoot(sim, Vec2{X: player.pos.X + 2, Y: player.pos.Y})
+	resourceID := sim.rules.MainConfig.Gameplay.ItemUpgradeResourceID
+
+	results := sim.TickResults([]Input{{MessageID: "move_shard", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}}})
+
+	assertAckInResults(t, results, "move_shard")
+	if sim.entities[shard.id] != nil {
+		t.Fatalf("resource entity %d still present after auto-pickup", shard.id)
+	}
+	if got := sim.resourceWallet[resourceID]; got != 1 {
+		t.Fatalf("resource wallet %s = %d, want 1", resourceID, got)
+	}
+	if !hasEventInResults(results, "resource_picked_up") {
+		t.Fatalf("missing resource_picked_up in results: %+v", results)
+	}
+	if owners := changeOwnersForOpInResults(results, OpResourceWalletUpdate); !sameUint64Set(owners, []uint64{sim.playerID}) {
+		t.Fatalf("resource_wallet_update owners = %v, want player %d", owners, sim.playerID)
+	}
+}
+
+func TestResourceWalletAutoPickupCoopLowestPlayerIDWins(t *testing.T) {
+	rules := loadRules(t)
+	sim := MustNewSim("sess_resource_coop_winner", "v229_resource_coop_winner", rules)
+	hostID := sim.playerID
+	guestID, err := sim.AddGuestPlayer("acct_guest", "char_guest", "Guest", rules.DefaultCharacterProgressionState())
+	if err != nil {
+		t.Fatalf("add guest: %v", err)
+	}
+	shard := addTestWalletResourceLoot(sim, Vec2{X: 6, Y: 6})
+	resourceID := sim.rules.MainConfig.Gameplay.ItemUpgradeResourceID
+	sim.entities[hostID].pos = shard.pos
+	sim.entities[guestID].pos = shard.pos
+
+	results := sim.TickResults(nil)
+
+	if sim.players[hostID].ResourceWallet[resourceID] != 1 || sim.players[guestID].ResourceWallet[resourceID] != 0 {
+		t.Fatalf("coop resource wallet host=%d guest=%d, want host winner",
+			sim.players[hostID].ResourceWallet[resourceID], sim.players[guestID].ResourceWallet[resourceID])
+	}
+	if owners := changeOwnersForOpInResults(results, OpResourceWalletUpdate); !sameUint64Set(owners, []uint64{hostID}) {
+		t.Fatalf("coop resource_wallet_update owners = %v, want host %d", owners, hostID)
+	}
+	if !eventForEntityInResults(results, "resource_picked_up", hostID) {
+		t.Fatalf("coop resource pickup event missing host winner: %+v", results)
+	}
+}
+
 func TestManualGoldPickupStillWorksInRange(t *testing.T) {
 	sim := MustNewSim("sess_gold_manual", "v49_gold_manual", loadRules(t))
 	player := sim.entities[sim.playerID]
@@ -223,4 +273,8 @@ func addTestGoldLoot(sim *Sim, pos Vec2, amount int) *entity {
 	loot := addTestFloorLoot(sim, goldItemDefID, pos)
 	loot.goldAmount = amount
 	return loot
+}
+
+func addTestWalletResourceLoot(sim *Sim, pos Vec2) *entity {
+	return addTestFloorLoot(sim, sim.rules.MainConfig.Gameplay.ItemUpgradeResourceID, pos)
 }

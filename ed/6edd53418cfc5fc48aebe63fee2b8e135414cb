@@ -1,0 +1,34 @@
+PROGRESS.md
+  s_625324c6ca5fae::t_b63efa8290005a 107
+client/tests/test_fog_of_war_overlay.gd
+  s_625324c6ca5fae::t_68c1f06336778c 31
+client/scripts/fog_of_war_overlay.gd
+  s_625324c6ca5fae::t_e614bad21730f7 6-7,17,83-84,103-104
+docs/specs/v253_spec-fog-of-war-radius.md
+  s_625324c6ca5fae::t_67797621050778 12-13,17-19,40-41,47
+docs/plans/v253_2026-06-17-fog-of-war-radius.md
+  s_625324c6ca5fae::t_c819ed097b443f 7-9,17,121-122,175-176,198-199
+docs/as-built/v253_fog-of-war-radius.md
+  s_625324c6ca5fae::t_63fee4e246dd64 15-16,22,41-51,61-63
+server/internal/game/fog_of_war.go
+  s_625324c6ca5fae::t_6b6161bbdf97c7 204-219
+server/internal/game/fog_of_war_test.go
+  s_625324c6ca5fae::t_4502dc197cf6f3 81-100,126-139
+  s_625324c6ca5fae::t_beaf3d213d6fb8 188
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ed6edd53418cfc5fc48aebe63fee2b8e135414cb",
+  "prompts": {},
+  "sessions": {
+    "s_625324c6ca5fae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed6ca-bd17-7cd0-b235-044f1bd04620",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

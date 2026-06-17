@@ -1,0 +1,24 @@
+tools/bot/channel_skill.py
+  s_99321124d80e38::t_ef320d10850869 9-19
+tools/bot/run.py
+  s_99321124d80e38::t_90f34da2ac92ba 476-477,1333-1334
+  s_99321124d80e38::t_c36b6f095050a6 474-475,1331-1332
+tools/bot/companion_commands.py
+  s_99321124d80e38::t_ef320d10850869 9-19,28,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d047a76e049659fe575137818ed24fa5e5819933",
+  "prompts": {},
+  "sessions": {
+    "s_99321124d80e38": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed69b-de3f-75f0-bfba-3a8589a065c0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

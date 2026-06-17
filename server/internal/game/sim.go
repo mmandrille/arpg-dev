@@ -3275,7 +3275,7 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		monster.lastAttackTick = s.tick
 		monster.hasAttacked = true
 		if def.effectiveAttackMode() == attackModeRanged {
-			s.fireMonsterProjectile(monster, player, def, *attackDamage, res)
+			s.fireMonsterProjectile(monster, target, def, *attackDamage, res)
 			continue
 		}
 		if target.kind == companionEntity {
@@ -3286,8 +3286,8 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 	}
 }
 
-func (s *Sim) fireMonsterProjectile(monster *entity, player *entity, def MonsterDef, damageRange DamageRange, res *TickResult) {
-	dir := normalize(Vec2{X: player.pos.X - monster.pos.X, Y: player.pos.Y - monster.pos.Y})
+func (s *Sim) fireMonsterProjectile(monster *entity, target *entity, def MonsterDef, damageRange DamageRange, res *TickResult) {
+	dir := normalize(Vec2{X: target.pos.X - monster.pos.X, Y: target.pos.Y - monster.pos.Y})
 	if dir.X == 0 && dir.Y == 0 {
 		dir = Vec2{X: 1}
 	}
@@ -3295,7 +3295,7 @@ func (s *Sim) fireMonsterProjectile(monster *entity, player *entity, def Monster
 		kind:            projectileEntity,
 		pos:             monster.pos,
 		ownerID:         monster.id,
-		targetID:        player.id,
+		targetID:        target.id,
 		projectileDefID: def.ProjectileDefID,
 		dir:             dir,
 		speed:           def.ProjectileSpeed,
@@ -3650,6 +3650,7 @@ const (
 	projectileHitWall = iota
 	projectileHitInteractable
 	projectileHitMonster
+	projectileHitCompanion
 	projectileHitPlayer
 )
 
@@ -3699,6 +3700,13 @@ func (s *Sim) firstProjectileHit(p *entity, candidate Vec2) (projectileHit, bool
 			if t, ok := segmentIntersectsCircle(p.pos, candidate, e.pos, monsterRadius+projectileRadius); ok {
 				consider(projectileHit{t: t, category: projectileHitMonster, entityID: e.id})
 			}
+		case companionEntity:
+			if ownerKind != monsterEntity || e.hp <= 0 || e.id != p.targetID {
+				continue
+			}
+			if t, ok := segmentIntersectsCircle(p.pos, candidate, e.pos, monsterRadius+projectileRadius); ok {
+				consider(projectileHit{t: t, category: projectileHitCompanion, entityID: e.id})
+			}
 		case playerEntity:
 			if ownerKind != monsterEntity || e.hp <= 0 {
 				continue
@@ -3732,6 +3740,10 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 	}
 	if hit.category == projectileHitPlayer {
 		s.resolveMonsterProjectileHit(p, hit, res)
+		return
+	}
+	if hit.category == projectileHitCompanion {
+		s.resolveMonsterProjectileCompanionHit(p, hit, res)
 		return
 	}
 	if hit.category != projectileHitMonster {

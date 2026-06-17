@@ -6,10 +6,8 @@ func (s *Sim) monsterAttackTarget(monster *entity, player *entity, def MonsterDe
 	if monster == nil || player == nil || player.hp <= 0 {
 		return nil
 	}
-	if def.effectiveAttackMode() != attackModeRanged {
-		if companion := s.monsterEngagedCompanionTarget(monster, player, def); companion != nil {
-			return companion
-		}
+	if companion := s.monsterEngagedCompanionTarget(monster, player, def); companion != nil {
+		return companion
 	}
 	if s.monsterInAttackRange(monster, player, def) {
 		return player
@@ -93,4 +91,14 @@ func (s *Sim) finishCompanionDeath(companion *entity, killer *entity, res *TickR
 		OfferID:        mercenaryGuardOfferID,
 		MonsterDefID:   mercenaryGuardMonsterDefID,
 	})
+}
+
+func (s *Sim) resolveMonsterProjectileCompanionHit(p *entity, hit projectileHit, res *TickResult) {
+	owner := s.activeLevel().entities[p.ownerID]
+	target := s.activeLevel().entities[hit.entityID]
+	if owner == nil || owner.kind != monsterEntity || owner.hp <= 0 || target == nil || target.kind != companionEntity || target.hp <= 0 {
+		res.Events = append(res.Events, Event{EventType: "projectile_expired", CorrelationID: p.sourceCorrID})
+		return
+	}
+	s.damageCompanionByMonster(owner, target, p.damageRange, p.sourceCorrID, res)
 }

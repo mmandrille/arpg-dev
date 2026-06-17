@@ -152,7 +152,17 @@ func delete_character(character_id: String) -> bool:
 func set_debug_progression(debug_token: String, character_id: String, progression: Dictionary) -> bool:
 	if character_id == "":
 		return false
-	var body := {
+	var body := _debug_progression_body(progression)
+	var r := _http(HTTPClient.METHOD_PUT, "/v0/debug/characters/" + character_id + "/progression",
+		["Authorization: Bearer " + token, "X-Debug-Token: " + debug_token], JSON.stringify(body))
+	if r.get("_code", 0) == 200:
+		return true
+	push_error("set_debug_progression failed: %s" % r)
+	return false
+
+
+func _debug_progression_body(progression: Dictionary) -> Dictionary:
+	return {
 		"level": int(progression.get("level", 1)),
 		"experience": int(progression.get("experience", 0)),
 		"unspent_stat_points": int(progression.get("unspent_stat_points", 0)),
@@ -161,12 +171,6 @@ func set_debug_progression(debug_token: String, character_id: String, progressio
 		"gold": int(progression.get("gold", 0)),
 		"skill_ranks": _int_value_map(progression.get("skill_ranks", {})),
 	}
-	var r := _http(HTTPClient.METHOD_PUT, "/v0/debug/characters/" + character_id + "/progression",
-		["Authorization: Bearer " + token, "X-Debug-Token: " + debug_token], JSON.stringify(body))
-	if r.get("_code", 0) == 200:
-		return true
-	push_error("set_debug_progression failed: %s" % r)
-	return false
 
 
 func _int_value_map(raw) -> Dictionary:

@@ -80,6 +80,17 @@ func apply_stance_changed(ev: Dictionary) -> void:
 	_render()
 
 
+func apply_lost_event(ev: Dictionary) -> void:
+	var lost_id := str(ev.get("target_entity_id", ev.get("entity_id", "")))
+	if lost_id == "" or lost_id == hired_entity_id:
+		hired_entity_id = ""
+	_companions = []
+	if _status_label != null:
+		_status_label.text = "%s lost - hire a replacement" % _display_name(str(ev.get("monster_def_id", monster_def_id)))
+		_status_label.add_theme_color_override("font_color", Color("#ff9f7a"))
+	_render()
+
+
 func set_companions(next_companions: Array) -> void:
 	_companions = []
 	for companion in next_companions:

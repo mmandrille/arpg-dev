@@ -1,0 +1,40 @@
+client/scripts/blacksmith_panel.gd
+  s_4fdff9fc96d196::t_c23b50f7baaa61 9,39,125,185,247-248
+client/scripts/blacksmith_upgrade_history.gd
+  s_4fdff9fc96d196::t_c23b50f7baaa61 1-78
+tools/bot/scenarios/client/63_blacksmith_upgrade_history.json
+  s_4fdff9fc96d196::t_81dc1c045f5183 1-51
+client/tests/test_blacksmith_panel.gd
+  s_4fdff9fc96d196::t_704d632cf354d2 90-91
+  s_4fdff9fc96d196::t_649540a5082bef 41,79-89,92
+PROGRESS.md
+  s_4fdff9fc96d196::t_e8409c623dcc27 26,28-29
+client/scripts/blacksmith_upgrade_history.gd.uid
+  s_4fdff9fc96d196::t_7c04e5dff2e89b 1
+docs/as-built/v246_blacksmith-upgrade-history.md
+  s_4fdff9fc96d196::t_e8409c623dcc27 1-39
+docs/progress/slice-lifecycle.md
+  s_4fdff9fc96d196::t_e8409c623dcc27 262
+docs/plans/v246_2026-06-17-blacksmith-upgrade-history.md
+  s_4fdff9fc96d196::t_5417f3ee11389e 1-2,4-33,36-37,40-51,55-65,68-81,83-85
+  s_4fdff9fc96d196::t_e8409c623dcc27 3,34-35,38-39,52-54,66-67,82,86-89
+docs/specs/v246_spec-blacksmith-upgrade-history.md
+  s_4fdff9fc96d196::t_5417f3ee11389e 1-2,4-54
+  s_4fdff9fc96d196::t_e8409c623dcc27 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6f92889e2063af19ad06c6d7d313153321449cf1",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

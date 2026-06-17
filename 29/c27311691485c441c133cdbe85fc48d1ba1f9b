@@ -1,0 +1,23 @@
+CLAUDE.md
+  s_4608faa4e48f01::t_1335c26c009f4c 31
+README.md
+  s_4608faa4e48f01::t_1335c26c009f4c 48
+make/client.mk
+  s_4608faa4e48f01::t_1335c26c009f4c 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "29c27311691485c441c133cdbe85fc48d1ba1f9b",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

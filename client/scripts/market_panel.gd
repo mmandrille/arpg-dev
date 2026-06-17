@@ -9,6 +9,7 @@ const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const MarketOfferRowsScript := preload("res://scripts/market_offer_rows.gd")
+const MarketListingRowsScript := preload("res://scripts/market_listing_rows.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const PANEL_SIZE := Vector2(640, 520)
@@ -55,16 +56,7 @@ class MarketItemIcon:
 		draw_rect(Rect2(Vector2.ZERO, size), Color("#5c4a1f"), false, 1.0)
 		var def_id := str(item.get("item_def_id", ""))
 		var icon: Dictionary = presentations.get(def_id, {}).get("icon", {})
-		ItemIconDrawerScript.draw(self, Rect2(Vector2.ZERO, size), icon, str(icon.get("label", _short_label(def_id))), false, 0.38, 20)
-
-	func _short_label(def_id: String) -> String:
-		if def_id == "":
-			return "?"
-		var out := ""
-		for part in def_id.split("_"):
-			if str(part).length() > 0:
-				out += str(part).substr(0, 1).to_upper()
-		return out.substr(0, 3)
+		ItemIconDrawerScript.draw(self, Rect2(Vector2.ZERO, size), icon, str(icon.get("label", MarketListingRowsScript.short_label(def_id))), false, 0.38, 20)
 
 class MarketStageSlot:
 	extends Button
@@ -460,16 +452,24 @@ func _listing_row(listing: Dictionary, mode: String) -> Control:
 	outer.add_child(box)
 
 	var title := Label.new()
-	title.text = _listing_title(listing)
+	title.text = MarketListingRowsScript.listing_title(listing)
 	title.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	title.add_theme_color_override("font_color", _rarity_color(str(listing.get("rarity", "common"))))
 	box.add_child(title)
 
 	var detail := Label.new()
-	detail.text = "%d gold - seller %s" % [int(listing.get("price_gold", 0)), str(listing.get("seller_account_id", "")).substr(0, 10)]
+	detail.text = MarketListingRowsScript.seller_detail(listing)
 	detail.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	detail.add_theme_color_override("font_color", Color("#b9aa8a"))
 	box.add_child(detail)
+
+	var expiration_text := MarketListingRowsScript.expiration_label(listing)
+	if expiration_text != "":
+		var expiration := Label.new()
+		expiration.text = expiration_text
+		expiration.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
+		expiration.add_theme_color_override("font_color", Color("#c7b778"))
+		box.add_child(expiration)
 
 	for stat_line in _listing_stat_lines(listing):
 		var stat_label := Label.new()
@@ -722,22 +722,7 @@ func _matching_inventory_item(stash_item_id: String = "", item_def_id: String = 
 
 
 func _debug_listing_rows(source: Array) -> Array:
-	var rows: Array = []
-	for listing in source:
-		if typeof(listing) != TYPE_DICTIONARY:
-			continue
-		var rec := listing as Dictionary
-		rows.append({
-			"listing_id": str(rec.get("listing_id", "")),
-			"item_def_id": str(rec.get("item_def_id", "")),
-			"item_template_id": str(rec.get("item_template_id", "")),
-			"seller_account_id": str(rec.get("seller_account_id", "")),
-			"price_gold": int(rec.get("price_gold", 0)),
-			"visible_detail": "%d gold - seller %s" % [int(rec.get("price_gold", 0)), str(rec.get("seller_account_id", "")).substr(0, 10)],
-			"has_icon": str(rec.get("item_def_id", "")) != "",
-			"stat_lines": _listing_stat_lines(rec),
-		})
-	return rows
+	return MarketListingRowsScript.debug_listing_rows(source, Callable(self, "_listing_stat_lines"))
 
 
 func _apply_offer_tab_visibility() -> void:
@@ -890,27 +875,12 @@ func _empty_label(text: String) -> Label:
 	empty.add_theme_color_override("font_color", Color("#e8dcc8"))
 	return empty
 
-func _listing_title(listing: Dictionary) -> String:
-	var display := str(listing.get("display_name", ""))
-	if display != "":
-		return display
-	return str(listing.get("item_def_id", "Unknown item")).replace("_", " ").capitalize()
-
 func _item_title(item: Dictionary) -> String:
-	var display := str(item.get("display_name", ""))
-	if display != "":
-		return display
-	return str(item.get("item_def_id", "Unknown item")).replace("_", " ").capitalize()
+	return MarketListingRowsScript.item_title(item)
 
 
 func _item_detail(item: Dictionary) -> String:
-	var lines: Array = item.get("summary_lines", [])
-	if not lines.is_empty():
-		return str(lines[0])
-	var slot := str(item.get("slot", ""))
-	if slot != "":
-		return "Slot: %s" % slot.replace("_", " ")
-	return str(item.get("stash_item_id", ""))
+	return MarketListingRowsScript.item_detail(item)
 
 func _make_item_tooltip(item: Dictionary) -> Control:
 	var tooltip := ItemTooltipPanelScript.new()
@@ -922,7 +892,7 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		UniqueEffectTooltipScript.rich_lines_for_item(item),
 		-1,
 		true,
-		_short_label(str(item.get("item_def_id", "")))
+		MarketListingRowsScript.short_label(str(item.get("item_def_id", "")))
 	)
 	return tooltip
 
@@ -966,17 +936,7 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var def_id := str(item.get("item_def_id", ""))
 	var icon: Dictionary = ItemRulesLoader.item_presentations.get(def_id, {}).get("icon", {})
 	var rect := Rect2(Vector2.ZERO, slot.size)
-	ItemIconDrawerScript.draw(slot, rect, icon, str(icon.get("label", _short_label(def_id))), false, 0.24, 22)
-
-
-func _short_label(def_id: String) -> String:
-	if def_id == "":
-		return "?"
-	var out := ""
-	for part in def_id.split("_"):
-		if str(part).length() > 0:
-			out += str(part).substr(0, 1).to_upper()
-	return out.substr(0, 3)
+	ItemIconDrawerScript.draw(slot, rect, icon, str(icon.get("label", MarketListingRowsScript.short_label(def_id))), false, 0.24, 22)
 
 
 func _listing_stat_lines(item: Dictionary) -> Array:

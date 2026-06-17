@@ -216,7 +216,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
 	if stype in ["wait_market_panel", "assert_market_listing_rows"]:
-		if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled") and not step.has("offer_equals") and not step.has("offer_at_least") and not step.has("offer_item_def_id") and not step.has("listing_item_def_id") and not step.has("offer_status") and not step.has("receipt_action") and not step.has("receipt_at_least") and not step.has("receipt_equals"):
+		if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled") and not step.has("expiration_visible") and not step.has("expiration_contains") and not step.has("offer_equals") and not step.has("offer_at_least") and not step.has("offer_item_def_id") and not step.has("listing_item_def_id") and not step.has("offer_status") and not step.has("receipt_action") and not step.has("receipt_at_least") and not step.has("receipt_equals"):
 			return "client_steps[%d] (%s) requires a market listing expectation" % [index, stype]
 	if stype == "assert_market_offer_rows":
 		if not step.has("offer_equals") and not step.has("offer_at_least"):

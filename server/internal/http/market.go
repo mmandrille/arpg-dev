@@ -32,6 +32,7 @@ type marketListingResponse struct {
 	RolledStats     json.RawMessage           `json:"rolled_stats"`
 	PriceGold       int                       `json:"price_gold"`
 	Status          string                    `json:"status"`
+	ExpiresAt       string                    `json:"expires_at"`
 	CreatedAt       string                    `json:"created_at"`
 	UpdatedAt       string                    `json:"updated_at"`
 	DeliveredItem   *accountStashItemResponse `json:"delivered_item,omitempty"`
@@ -387,6 +388,7 @@ func marketListingResponseFromStore(listing store.MarketListing) marketListingRe
 		RolledStats:     rolled,
 		PriceGold:       listing.PriceGold,
 		Status:          listing.Status,
+		ExpiresAt:       listing.ExpiresAt.UTC().Format(time.RFC3339Nano),
 		CreatedAt:       listing.CreatedAt.UTC().Format(time.RFC3339Nano),
 		UpdatedAt:       listing.UpdatedAt.UTC().Format(time.RFC3339Nano),
 	}

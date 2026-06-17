@@ -17,7 +17,7 @@ server/internal/game/dungeon_gen.go	1061
 server/internal/game/game_test.go	7888
 server/internal/game/handlers.go	1469
 server/internal/game/rules.go	3303
-server/internal/game/shop.go	1221
+server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6572
 server/internal/game/types.go	721

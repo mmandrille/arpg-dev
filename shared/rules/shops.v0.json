@@ -29,7 +29,8 @@
           "common": 2.0,
           "magic": 3.2,
           "rare": 4.8,
-          "unique": 8.0
+          "unique": 8.0,
+          "set": 8.0
         },
         "slot_base": {
           "main_hand": 30,
@@ -87,7 +88,7 @@
         "source": "common_dungeon_mob",
         "source_depth_window": 5,
         "min_rarity": "magic",
-        "max_rarity": "rare",
+        "max_rarity": "unique",
         "refresh_on": "new_non_town_waypoint",
         "price_multiplier": 1.01,
         "reroll_cost": 50,
@@ -106,7 +107,8 @@
           "common": 1.0,
           "magic": 0.95,
           "rare": 1.1,
-          "unique": 2.0
+          "unique": 2.0,
+          "set": 2.0
         },
         "slot_base": {
           "main_hand": 30,

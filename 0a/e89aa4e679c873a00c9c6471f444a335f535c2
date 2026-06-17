@@ -1,0 +1,23 @@
+AGENTS.md
+  s_4608faa4e48f01::t_329b8fb56b9597 42,44
+CLAUDE.md
+  s_4608faa4e48f01::t_329b8fb56b9597 187
+skills/README.md
+  s_4608faa4e48f01::t_329b8fb56b9597 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0ae89aa4e679c873a00c9c6471f444a335f535c2",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

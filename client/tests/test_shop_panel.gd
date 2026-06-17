@@ -11,7 +11,6 @@ const StatLabels := preload("res://scripts/stat_labels.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
-
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -19,7 +18,6 @@ func _run() -> void:
 	var panel := ShopPanelScript.new()
 	root.add_child(panel)
 	await process_frame
-
 	var emitted: Array = []
 	panel.intent_requested.connect(func(intent_type: String, payload: Dictionary) -> void:
 		emitted.append({"type": intent_type, "payload": payload.duplicate(true)})
@@ -166,11 +164,13 @@ func _run() -> void:
 	var mystery_row := _row_for_offer(state.get("offer_rows", []), "mystery:wp:-3:ring:000")
 	_assert_true("mystery row concealed", bool(mystery_row.get("concealed", false)))
 	_assert_eq("mystery row label", str(mystery_row.get("mystery_label", "")), "Unidentified ring")
+	_assert_eq("mystery silhouette key", str(mystery_row.get("mystery_silhouette", "")), "ring")
 	_assert_eq("mystery identity hidden", int(mystery_row.get("identity_field_count", -1)), 0)
 	_assert_eq("mystery item def hidden", str(mystery_row.get("item_def_id", "")), "")
 	_assert_eq("mystery rarity hidden", str(mystery_row.get("rarity", "")), "")
 	_assert_eq("mystery source min", int(mystery_row.get("source_depth_min", 0)), 1)
 	_assert_eq("mystery source max", int(mystery_row.get("source_depth_max", 0)), 3)
+	_assert_true("mystery summary silhouette", _array_contains_text(mystery_row.get("summary_lines", []), "Silhouette: Ring"))
 	_assert_true("mystery summary source window", _array_contains_text(mystery_row.get("summary_lines", []), "Source depths: 1-3"))
 	_assert_eq("mystery no comparison", int(mystery_row.get("comparison_count", -1)), 0)
 	_assert_eq("mystery no requirements", int(mystery_row.get("requirement_count", -1)), 0)

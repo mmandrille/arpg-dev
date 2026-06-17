@@ -1,0 +1,29 @@
+{
+  "id": "mystery_seller_silhouettes",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "v236_mystery_silhouettes",
+  "title": "Mystery seller silhouettes",
+  "description": "Client opens the mystery seller and verifies concealed rows include safe slot-derived silhouette clues.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_loot_count", "min_count": 1, "timeout_s": 10.0 },
+    { "type": "click_loot_item", "rolled": true },
+    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "rolled": true },
+    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_vendor" },
+    { "type": "wait_shop_panel", "at_least": 3, "timeout_s": 15.0 },
+    { "type": "assert_shop_sell_rows", "rolled": true, "at_least": 2 },
+    { "type": "click_shop_sell_item", "rolled": true, "bag_index": 0 },
+    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
+    { "type": "click_shop_sell_item", "rolled": true, "bag_index": 0 },
+    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
+    { "type": "click_floor", "x": 16.0, "z": 11.0 },
+    { "type": "wait_player_near", "x": 16.0, "z": 11.0, "distance": 1.2, "timeout_s": 10.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mystery_seller" },
+    { "type": "wait_event", "event_type": "shop_opened", "shop_id": "town_mystery_seller", "timeout_s": 15.0 },
+    { "type": "wait_shop_panel", "equals": 9, "timeout_s": 15.0 },
+    { "type": "assert_shop_offer_details", "offer_kind": "mystery", "concealed": true, "equals": 9, "requires_slot": true, "requires_category": true, "requires_concealed": true, "requires_mystery_label": true, "forbids_item_identity": true, "summary_contains": "Silhouette:" }
+  ]
+}

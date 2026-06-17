@@ -5,6 +5,7 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const MysterySilhouetteDrawer := preload("res://scripts/mystery_silhouette_drawer.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const PANEL_SIZE := Vector2(360, 680)
@@ -389,12 +390,11 @@ func _draw_mystery_icon(slot: Control, item: Dictionary) -> void:
 	if not _offer_affordable(item):
 		color = color.darkened(0.35)
 		accent = accent.darkened(0.35)
-	slot.draw_arc(center + Vector2(0.0, -min_side * 0.02), min_side * 0.24, -0.9, 4.0, 24, color, 3.0, true)
-	slot.draw_circle(center + Vector2(0.0, min_side * 0.20), min_side * 0.035, accent)
+	MysterySilhouetteDrawer.draw(slot, center, min_side, item, color, accent)
 	var font := slot.get_theme_default_font()
 	var label := "?"
 	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE)
-	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.06), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE, Color("#f4ead8"))
+	slot.draw_string(font, center + Vector2(-text_size.x * 0.5, min_side * 0.11), label, HORIZONTAL_ALIGNMENT_LEFT, -1, ICON_FONT_SIZE, Color("#f4ead8"))
 	_draw_offer_price(slot, item)
 
 
@@ -635,6 +635,7 @@ func _debug_offer_rows() -> Array:
 			"source_depth_max": _source_depth_max(rec),
 			"concealed": mystery,
 			"mystery_label": _mystery_label(rec) if mystery else "",
+			"mystery_silhouette": MysterySilhouetteDrawer.key(rec) if mystery else "",
 			"identity_field_count": _identity_field_count(rec) if mystery else 0,
 			"summary_lines": _detail_lines(rec),
 			"comparison_count": _comparison_count(rec),
@@ -1034,6 +1035,9 @@ func _mystery_detail_lines(row: Dictionary) -> Array:
 	var category := _display_token(str(row.get("category", "")))
 	if category != "":
 		lines.append("Kind: %s" % category)
+	var silhouette := MysterySilhouetteDrawer.label(row)
+	if silhouette != "":
+		lines.append("Silhouette: %s" % silhouette)
 	var source := _source_window_line(row)
 	if source != "":
 		lines.append(source)

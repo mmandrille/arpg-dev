@@ -1,0 +1,45 @@
+client/scripts/market_item_comparison.gd.uid
+  s_4fdff9fc96d196::t_92bfaab0d5c3b2 1
+client/tests/test_market_item_comparison.gd.uid
+  s_4fdff9fc96d196::t_92bfaab0d5c3b2 1
+docs/plans/v243_2026-06-17-market-item-comparison.md
+  s_4fdff9fc96d196::t_054aa5174ae92a 1-86
+PROGRESS.md
+  s_4fdff9fc96d196::t_6fbce90d542e08 26,28-29
+client/scripts/bot_market_row_assertions.gd
+  s_4fdff9fc96d196::t_015cd4377db2b1 51-54,93,99-104
+client/tests/test_market_item_comparison.gd
+  s_4fdff9fc96d196::t_62c19e480cc3b7 1-101
+docs/as-built/v243_market-item-comparison.md
+  s_4fdff9fc96d196::t_6fbce90d542e08 1-45
+client/scripts/main.gd
+  s_4fdff9fc96d196::t_015cd4377db2b1 4309,4421
+client/scripts/bot_step_catalog.gd
+  s_4fdff9fc96d196::t_015cd4377db2b1 220
+docs/progress/slice-lifecycle.md
+  s_4fdff9fc96d196::t_6fbce90d542e08 259
+docs/specs/v243_spec-market-item-comparison.md
+  s_4fdff9fc96d196::t_054aa5174ae92a 1-63
+client/scripts/market_panel.gd
+  s_4fdff9fc96d196::t_015cd4377db2b1 12,29,105,111,513,732,914
+tools/bot/scenarios/client/60_market_item_comparison.json
+  s_4fdff9fc96d196::t_62c19e480cc3b7 1-20
+client/scripts/market_item_comparison.gd
+  s_4fdff9fc96d196::t_015cd4377db2b1 1-195
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8c4386f6e321e24a866ef3f68b482a4a8c8c546e",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

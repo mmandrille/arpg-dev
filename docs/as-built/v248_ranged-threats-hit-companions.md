@@ -25,7 +25,7 @@ make maintainability
 ```
 
 All focused checks passed on 2026-06-17 during `$autoloop`. The selected v241-v250 batch-level
-`make ci` remains deferred until the feature queue completes.
+`make ci` also passed on 2026-06-17 after v250.
 
 ## Scope limits
 

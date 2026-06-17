@@ -1,0 +1,73 @@
+client/scripts/bot_step_catalog.gd
+  s_aa3e23b9c2eeb6::t_8f3f4667b0c965 219
+client/scripts/net_client.gd
+  s_aa3e23b9c2eeb6::t_96c8e400f22a77 356-363
+client/scripts/market_offer_rows.gd
+  s_aa3e23b9c2eeb6::t_8d8d8b06d105f6 1-44
+server/internal/store/repos.go
+  s_aa3e23b9c2eeb6::t_d144461c4aaacc 210
+server/internal/store/store_test.go
+  s_aa3e23b9c2eeb6::t_d144461c4aaacc 179,181-182
+  s_aa3e23b9c2eeb6::t_241831d002363f 164-165,180
+server/internal/http/market.go
+  s_aa3e23b9c2eeb6::t_de09c218d0beda 20,62,302-319,419,428-432
+docs/progress/scenario-catalog.md
+  s_aa3e23b9c2eeb6::t_9aa4618b8f3ce1 86
+scripts/bot_client.sh
+  s_aa3e23b9c2eeb6::t_0466d281849614 189,196,200-202,215
+  s_aa3e23b9c2eeb6::t_d6429e5df53c4a 347-351,353
+client/scripts/market_panel.gd
+  s_aa3e23b9c2eeb6::t_3bff2005c494c0 237
+  s_aa3e23b9c2eeb6::t_5981e0a377e403 11,387,412,425
+  s_aa3e23b9c2eeb6::t_96c8e400f22a77 29,118,150,226,233-236,260,406-411,413,480,505,800-801,831-836
+  s_aa3e23b9c2eeb6::t_432107c66d6666 197-199
+  s_aa3e23b9c2eeb6::t_956c6ddad50075 227
+PROGRESS.md
+  s_aa3e23b9c2eeb6::t_9aa4618b8f3ce1 18,26,28-29
+tools/bot/scenarios/client/50_my_market_offers_panel.json
+  s_aa3e23b9c2eeb6::t_6ad18f787e2a2a 1-21,23-26
+  s_aa3e23b9c2eeb6::t_432107c66d6666 22
+server/internal/store/market_repo.go
+  s_aa3e23b9c2eeb6::t_de09c218d0beda 280-322
+client/scripts/bot_scenario_runner.gd
+  s_aa3e23b9c2eeb6::t_8f3f4667b0c965 1115-1116
+  s_aa3e23b9c2eeb6::t_143c1b57038ecd 920
+docs/as-built/v233_my-market-offers-panel.md
+  s_aa3e23b9c2eeb6::t_9aa4618b8f3ce1 1-43
+docs/progress/slice-lifecycle.md
+  s_aa3e23b9c2eeb6::t_9aa4618b8f3ce1 249
+docs/progress/slice-codename-index.md
+  s_aa3e23b9c2eeb6::t_9aa4618b8f3ce1 210
+server/internal/store/models.go
+  s_aa3e23b9c2eeb6::t_de09c218d0beda 196
+docs/plans/v233_2026-06-17-my-market-offers-panel.md
+  s_aa3e23b9c2eeb6::t_8ec760107443f0 1-2,4-33,38-39,41-53,57-58,61-70,74-88,92-103,105-111
+  s_aa3e23b9c2eeb6::t_9aa4618b8f3ce1 3,34-37,40,54-56,59-60,71-73,89-91,104,112-116
+tools/bot/client_market_preflight.py
+  s_aa3e23b9c2eeb6::t_d6429e5df53c4a 121-122
+docs/specs/v233_spec-my-market-offers-panel.md
+  s_aa3e23b9c2eeb6::t_8ec760107443f0 1-53
+client/scripts/market_offer_rows.gd.uid
+  s_aa3e23b9c2eeb6::t_8830b207e01eb2 1
+server/internal/store/interfaces.go
+  s_aa3e23b9c2eeb6::t_de09c218d0beda 88
+client/scripts/main.gd
+  s_aa3e23b9c2eeb6::t_956c6ddad50075 4380-4381
+  s_aa3e23b9c2eeb6::t_3bff2005c494c0 4374-4376,4378
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b631f373cbb461070ac9402fdf43ee5a28141735",
+  "prompts": {},
+  "sessions": {
+    "s_aa3e23b9c2eeb6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed3df-5c04-7483-9274-6021ae385ba4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

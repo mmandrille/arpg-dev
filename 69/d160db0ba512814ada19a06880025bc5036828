@@ -1,0 +1,19 @@
+tools/bot/scenarios/81_magic_find_stat.json
+  s_db4bb4f18f9cf6::t_8ccd490179157f 4,13,20,24,41,45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "69d160db0ba512814ada19a06880025bc5036828",
+  "prompts": {},
+  "sessions": {
+    "s_db4bb4f18f9cf6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed694-becd-7ac0-8318-b3af0e506be3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

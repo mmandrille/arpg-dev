@@ -1,0 +1,48 @@
+tools/bot/scenarios/client/58_market_expiration_countdown.json
+  s_4fdff9fc96d196::t_b0e85ead33d3fd 1-20
+client/scripts/bot_step_catalog.gd
+  s_4fdff9fc96d196::t_b0e85ead33d3fd 219
+client/tests/test_market_listing_rows.gd.uid
+  s_4fdff9fc96d196::t_76b063438bfdd6 1
+client/scripts/market_listing_rows.gd.uid
+  s_4fdff9fc96d196::t_76b063438bfdd6 1
+client/scripts/market_listing_rows.gd
+  s_4fdff9fc96d196::t_fe35fc776ddd06 1-87,90-104
+  s_4fdff9fc96d196::t_d70ef1878c530d 88-89
+server/internal/http/market.go
+  s_4fdff9fc96d196::t_fe35fc776ddd06 35,391
+docs/progress/slice-lifecycle.md
+  s_4fdff9fc96d196::t_29af1735a65941 257
+client/scripts/bot_scenario_runner.gd
+  s_4fdff9fc96d196::t_b0e85ead33d3fd 902,1097-1098
+client/tests/test_market_listing_rows.gd
+  s_4fdff9fc96d196::t_b0e85ead33d3fd 1-60
+docs/as-built/v241_market-expiration-countdown.md
+  s_4fdff9fc96d196::t_29af1735a65941 1-44
+docs/specs/v241_spec-market-expiration-countdown.md
+  s_4fdff9fc96d196::t_29af1735a65941 3,47
+  s_4fdff9fc96d196::t_9385f8c51dc16d 1-2,4-46,48-68
+docs/plans/v241_2026-06-17-market-expiration-countdown.md
+  s_4fdff9fc96d196::t_9385f8c51dc16d 1-23,25-36,41-42,44-55,57-66,68,73-74,76-85,88-101,104-110
+  s_4fdff9fc96d196::t_29af1735a65941 24,37-40,43,56,67,69-72,75,86-87,102-103,111-116
+client/scripts/market_panel.gd
+  s_4fdff9fc96d196::t_fe35fc776ddd06 12,59,455,461,466-473,725,879,883,895,939
+PROGRESS.md
+  s_4fdff9fc96d196::t_29af1735a65941 26,28-29,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "081921efc76396fa43faf734a03eaf136f2d0ecd",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

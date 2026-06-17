@@ -40,7 +40,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
-	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar",
+	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar", "assert_audio_state",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_mercenary_panel_visible", "assert_mercenary_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
 	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap",
 ]

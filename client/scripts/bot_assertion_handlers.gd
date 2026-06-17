@@ -137,6 +137,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_audio_state":
+			return _assert_audio_state(runner, step, state)
 		"assert_remote_player_count":
 			if not runner._remote_player_count_matches(step, state):
 				runner._fail("assert_remote_player_count failed: want=%s remote_player_ids=%s step=%d scenario=%s" % [
@@ -298,4 +300,20 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+	return true
+
+
+static func _assert_audio_state(runner, step: Dictionary, state: Dictionary) -> bool:
+	var audio: Dictionary = state.get("audio", {})
+	for key in ["ambient_zone", "ambient_active", "boss_music_active", "boss_music_layer"]:
+		if step.has(key) and audio.get(key, null) != step[key]:
+			runner._fail("assert_audio_state failed: key=%s want=%s got=%s audio=%s step=%d scenario=%s" % [
+				key, str(step[key]), str(audio.get(key, null)), str(audio), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+	if step.has("boss_music_intensity_min") and float(audio.get("boss_music_intensity", 0.0)) < float(step.get("boss_music_intensity_min", 0.0)):
+		runner._fail("assert_audio_state failed: boss_music_intensity_min want=%s got=%s audio=%s step=%d scenario=%s" % [
+			str(step.get("boss_music_intensity_min", 0.0)), str(audio.get("boss_music_intensity", 0.0)), str(audio), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
 	return true

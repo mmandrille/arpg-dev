@@ -37,6 +37,7 @@
       "phase_ratio_min": 0.01,
       "phase_ratio_max": 1.0,
       "timeout_s": 15.0
-    }
+    },
+    { "type": "assert_audio_state", "ambient_zone": "dungeon", "ambient_active": false, "boss_music_active": true, "boss_music_intensity_min": 0.3 }
   ]
 }

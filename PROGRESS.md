@@ -23,9 +23,9 @@ Last updated: 2026-06-16
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v225 — boss audio readability |
+| **Latest completed slice** | v226 — dungeon ambience audio |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green on 2026-06-16 after v225 |
+| **CI gate** | Focused v226 checks green on 2026-06-16; batch `make ci` pending for `$autoloop` |
 | **Next slice** | TBD |
 | **Last engineering review** | v223 — [`docs/reviews/20260616_v223-overview.md`](docs/reviews/20260616_v223-overview.md) (2026-06-16) |
 | **Next engineering review** | v233 after the next feature batch, once CI is green |

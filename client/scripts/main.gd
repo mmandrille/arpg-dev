@@ -853,9 +853,9 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		bishop_panel.show_status(reason.replace("_", " "), true)
 	elif blacksmith_panel != null and blacksmith_panel.visible:
 		blacksmith_panel.show_status(reason.replace("_", " "), true)
-
 func _apply_snapshot(p: Dictionary) -> void:
 	current_level = int(p.get("current_level", 0))
+	ClientAudioBridgeScript.ambience_for_level(audio_controller, current_level)
 	_update_ground_material()
 	var local_id := _snapshot_local_player_id(p)
 	if local_id != "":
@@ -913,11 +913,11 @@ func _apply_snapshot(p: Dictionary) -> void:
 		print("[bot-client] snapshot applied entities=%d monsters=%d loot=%d hp=%d" % [
 			entities.size(), monster_ids.size(), loot_ids.size(), player_hp
 		])
-
 func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
 		if str(ev.get("event_type", "")) == "level_changed":
 			current_level = int(ev.get("to_level", current_level))
+			ClientAudioBridgeScript.ambience_for_level(audio_controller, current_level)
 			_update_ground_material()
 			pending_interactable_action.clear()
 			pending_waypoint_travel = false
@@ -5268,6 +5268,7 @@ func get_bot_state() -> Dictionary:
 		"companion_bar": companion_bar.get_debug_state() if companion_bar != null else {"visible": false, "count": 0, "companions": []},
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
 		"boss_health_bar": boss_health_bar.get_debug_state() if boss_health_bar != null else {"visible": false},
+		"audio": audio_controller.get_debug_state() if audio_controller != null else {},
 		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},
 		"pending_events": _bot_pending_events.duplicate(true),
@@ -5299,7 +5300,6 @@ func get_bot_state() -> Dictionary:
 		"gameplay_active": gameplay_active,
 	}
 	return out
-
 func _wall_count_by_source(source: String) -> int:
 	var count := 0
 	for wall in current_wall_layout:

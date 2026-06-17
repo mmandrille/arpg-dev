@@ -1,0 +1,49 @@
+docs/progress/slice-lifecycle.md
+  s_4608faa4e48f01::t_d58dcb015fec3a 242-248
+docs/as-built/v228_resource-wallet-panel.md
+  s_4608faa4e48f01::t_8105583c2aadbc 23-24
+docs/as-built/v229_material-auto-pickup.md
+  s_4608faa4e48f01::t_8105583c2aadbc 28-29
+PROGRESS.md
+  s_4608faa4e48f01::t_d58dcb015fec3a 28
+docs/plans/v231_2026-06-16-market-cancel-offer-ui.md
+  s_4608faa4e48f01::t_8105583c2aadbc 89
+docs/plans/v226_2026-06-16-dungeon-ambience-audio.md
+  s_4608faa4e48f01::t_8105583c2aadbc 88
+docs/as-built/v227_skill-audio-cues.md
+  s_4608faa4e48f01::t_8105583c2aadbc 23-24
+docs/as-built/v231_market-cancel-offer-ui.md
+  s_4608faa4e48f01::t_8105583c2aadbc 27-28
+docs/plans/v232_2026-06-16-mercenary-recovery-ui.md
+  s_4608faa4e48f01::t_8105583c2aadbc 79
+docs/as-built/v232_mercenary-recovery-ui.md
+  s_4608faa4e48f01::t_8105583c2aadbc 25-26
+docs/plans/v228_2026-06-16-resource-wallet-panel.md
+  s_4608faa4e48f01::t_8105583c2aadbc 89
+docs/as-built/v226_dungeon-ambience-audio.md
+  s_4608faa4e48f01::t_8105583c2aadbc 24-25
+docs/as-built/v230_mystery-set-unique-eligibility.md
+  s_4608faa4e48f01::t_8105583c2aadbc 29
+docs/plans/v229_2026-06-16-material-auto-pickup.md
+  s_4608faa4e48f01::t_8105583c2aadbc 93
+docs/plans/v227_2026-06-16-skill-audio-cues.md
+  s_4608faa4e48f01::t_8105583c2aadbc 85
+docs/plans/v230_2026-06-16-mystery-set-unique-eligibility.md
+  s_4608faa4e48f01::t_8105583c2aadbc 104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cfae54ca028e2f2fed5b3856e4c7e33322a9c9d5",
+  "prompts": {},
+  "sessions": {
+    "s_4608faa4e48f01": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed2fe-caf1-7ec0-8cd6-eee45a630e39",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

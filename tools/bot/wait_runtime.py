@@ -6,6 +6,7 @@ from typing import Any
 
 from tools.bot.bot_context import BotContext
 from tools.bot.bot_types import RuntimeState
+from tools.bot.runtime_queries import event_matches, find_player
 
 SLICE_TIMEOUT_S = 20.0
 
@@ -65,10 +66,8 @@ async def wait_for_reject(ws, state: RuntimeState, message_id: str, reason: str,
         raise AssertionError(f"reject {message_id} reason={got}, want {reason}")
 
 
-async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, timeout_s: float = SLICE_TIMEOUT_S, start_index: int = 0, helpers: dict[str, Any] | None = None) -> None:
-    helpers = _require_helpers(helpers)
-    find_player = helpers["find_player"]
-    pump_one = helpers["pump_one"]
+async def wait_for_event(ws, state: RuntimeState, event_type: str, loop, *, timeout_s: float = SLICE_TIMEOUT_S, start_index: int = 0, helpers: dict[str, Any] | None = None, ctx: BotContext | None = None) -> None:
+    pump_one = _pump_one(ctx, helpers)
     deadline = loop.time() + timeout_s
     while not any(ev.get("event_type") == event_type for ev in state.events[start_index:]):
         if loop.time() > deadline:
@@ -92,11 +91,9 @@ async def wait_for_matching_event(
     timeout_s: float = SLICE_TIMEOUT_S,
     start_index: int = 0,
     helpers: dict[str, Any] | None = None,
+    ctx: BotContext | None = None,
 ) -> None:
-    helpers = _require_helpers(helpers)
-    event_matches = helpers["event_matches"]
-    find_player = helpers["find_player"]
-    pump_one = helpers["pump_one"]
+    pump_one = _pump_one(ctx, helpers)
     event_type = str(expected.get("event_type", ""))
     deadline = loop.time() + timeout_s
     while not any(event_matches(ev, expected) for ev in state.events[start_index:]):
@@ -121,9 +118,9 @@ async def wait_for_shop_event(
     shop_id: str = "town_vendor",
     start_index: int = 0,
     helpers: dict[str, Any] | None = None,
+    ctx: BotContext | None = None,
 ) -> dict[str, Any]:
-    helpers = _require_helpers(helpers)
-    pump_one = helpers["pump_one"]
+    pump_one = _pump_one(ctx, helpers)
     deadline = loop.time() + SLICE_TIMEOUT_S
     while True:
         for event in state.shop_events[start_index:]:
@@ -143,9 +140,9 @@ async def wait_for_stash_event(
     stash_id: str = "account_stash",
     start_index: int = 0,
     helpers: dict[str, Any] | None = None,
+    ctx: BotContext | None = None,
 ) -> dict[str, Any]:
-    helpers = _require_helpers(helpers)
-    pump_one = helpers["pump_one"]
+    pump_one = _pump_one(ctx, helpers)
     deadline = loop.time() + SLICE_TIMEOUT_S
     while True:
         for event in state.stash_events[start_index:]:

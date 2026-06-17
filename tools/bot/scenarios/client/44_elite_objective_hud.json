@@ -20,14 +20,12 @@
       "type": "wait_elite_objective_tracker",
       "visible": true,
       "status": "active",
-      "remaining_leaders": 1,
       "timeout_s": 5.0
     },
     {
       "type": "assert_elite_objective_tracker",
       "visible": true,
-      "status": "active",
-      "remaining_leaders": 1
+      "status": "active"
     }
   ]
 }

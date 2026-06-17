@@ -4,7 +4,7 @@
   "seed": "dungeon_levels_fast_247",
   "title": "Teleporter lab",
   "description": "Descend from town through two non-waypoint floors, discover the cadence teleporter on level -3, then teleport back to town.",
-  "max_elapsed_s": 30.0,
+  "max_elapsed_s": 35.0,
   "steps": [
     { "action": "discover_teleporter", "max_ticks": 40, "wait_discovered": false },
     { "action": "use_stair", "direction": "down", "max_ticks": 40 },

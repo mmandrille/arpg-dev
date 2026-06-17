@@ -1,0 +1,53 @@
+client/scripts/net_client.gd
+  s_4fdff9fc96d196::t_798f9b3f7429b4 160,162,172-179
+client/scripts/bot_debug_progression_setup.gd
+  s_4fdff9fc96d196::t_05c5323d8d3f62 5-7,16,20,24-32
+scripts/bot_client.sh
+  s_4fdff9fc96d196::t_05c5323d8d3f62 260,264,299,317
+client/scripts/main.gd
+  s_4fdff9fc96d196::t_05c5323d8d3f62 302
+  s_4fdff9fc96d196::t_829b9b3e8ed83d 1267
+  s_4fdff9fc96d196::t_d56bd077f0d7dc 5341
+client/scripts/boss_health_bar.gd
+  s_4fdff9fc96d196::t_829b9b3e8ed83d 9,12,17-19,34-37,49,56,58-59,64-68,76-77,79-99,136-140,153,234-274,276,316,321-322,334-356
+client/tests/test_boss_health_bar.gd
+  s_4fdff9fc96d196::t_829b9b3e8ed83d 85-103
+tools/bot/scenarios/client/65_boss_reward_panel.json
+  s_4fdff9fc96d196::t_829b9b3e8ed83d 1-7,16-47
+  s_4fdff9fc96d196::t_05c5323d8d3f62 8-15
+docs/plans/v249_2026-06-17-boss-reward-panel.md
+  s_4fdff9fc96d196::t_96d79e5c34e3b5 3,39-40,43-44,59-62,77-80,94,98-101
+  s_4fdff9fc96d196::t_75094363b3b33f 26,30,73-74
+  s_4fdff9fc96d196::t_7a823a6e7279cb 1-2,4-25,27-29,31-38,41-42,45-58,63-72,75-76,81-93,95-97
+docs/specs/v249_spec-boss-reward-panel.md
+  s_4fdff9fc96d196::t_7a823a6e7279cb 1-2,4-57
+  s_4fdff9fc96d196::t_96d79e5c34e3b5 3
+client/scripts/bot_scenario_runner.gd
+  s_4fdff9fc96d196::t_829b9b3e8ed83d 346,351-352,380
+PROGRESS.md
+  s_4fdff9fc96d196::t_96d79e5c34e3b5 26,28-29
+docs/as-built/v249_boss-reward-panel.md
+  s_4fdff9fc96d196::t_96d79e5c34e3b5 1-41
+docs/progress/slice-lifecycle.md
+  s_4fdff9fc96d196::t_96d79e5c34e3b5 265
+client/scripts/boss_visuals_controller.gd
+  s_4fdff9fc96d196::t_829b9b3e8ed83d 22,100-105
+client/scripts/bot_step_catalog.gd
+  s_4fdff9fc96d196::t_829b9b3e8ed83d 180
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "adcb52b8306b2f789c3dc983d3ffe2fe06bee4bb",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

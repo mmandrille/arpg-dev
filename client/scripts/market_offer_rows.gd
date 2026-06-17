@@ -29,6 +29,50 @@ static func my_offers_button(panel: MarketPanel) -> Control:
 	btn.pressed.connect(func() -> void: panel.market_action_requested.emit("list_my_offers", {}))
 	row.add_child(btn)
 	return row
+static func receipts_button(panel: MarketPanel) -> Control:
+	var row := HBoxContainer.new()
+	var btn := Button.new()
+	btn.text = "Receipts"
+	btn.custom_minimum_size = Vector2(136, 34)
+	btn.pressed.connect(func() -> void: panel.market_action_requested.emit("list_market_receipts", {}))
+	row.add_child(btn)
+	return row
+static func receipt_row(panel: MarketPanel, receipt: Dictionary) -> Control:
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", panel._row_style())
+	var info := VBoxContainer.new()
+	row.add_child(info)
+	var title := Label.new()
+	title.text = str(receipt.get("action", "")).replace("_", " ").capitalize()
+	title.add_theme_font_size_override("font_size", MarketPanel.BODY_FONT_SIZE)
+	title.add_theme_color_override("font_color", Color("#e8dcc8"))
+	info.add_child(title)
+	var detail := Label.new()
+	detail.text = "%s %s" % [str(receipt.get("item_def_id", "")).replace("_", " ").capitalize(), str(receipt.get("created_at", "")).substr(0, 19)]
+	detail.add_theme_font_size_override("font_size", MarketPanel.DETAIL_FONT_SIZE)
+	detail.add_theme_color_override("font_color", Color("#b9aa8a"))
+	info.add_child(detail)
+	return row
+static func show_receipts(panel: MarketPanel, receipts: Array, status: String = "") -> void:
+	panel.selected_listing_id = ""
+	panel.market_receipts = panel._dup_array(receipts)
+	panel.offer_view_mode = "receipts"
+	if status != "": panel._status_label.text = status
+	panel._offer_tab_visible = true; panel._apply_offer_tab_visibility(); panel._tabs.current_tab = 2; panel._rebuild_offer_rows()
+static func rebuild_receipts(panel: MarketPanel, rows: VBoxContainer, receipts: Array) -> void:
+	if receipts.is_empty():
+		rows.add_child(panel._empty_label("No receipts"))
+		return
+	for receipt in receipts:
+		if typeof(receipt) == TYPE_DICTIONARY:
+			rows.add_child(receipt_row(panel, receipt as Dictionary))
+static func debug_receipt_rows(receipts: Array) -> Array:
+	var out: Array = []
+	for receipt in receipts:
+		if typeof(receipt) == TYPE_DICTIONARY:
+			var rec := receipt as Dictionary
+			out.append({"action": str(rec.get("action", "")), "listing_id": str(rec.get("listing_id", "")), "offer_id": str(rec.get("offer_id", "")), "item_def_id": str(rec.get("item_def_id", "")), "stash_item_id": str(rec.get("stash_item_id", ""))})
+	return out
 static func _add_offer_text(panel: MarketPanel, info: VBoxContainer, offer: Dictionary, outgoing: bool) -> void:
 	var title := Label.new()
 	title.text = "%d item offer" % panel._offer_items(offer).size()

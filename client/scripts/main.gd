@@ -4371,13 +4371,15 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 			_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Listing purchased")
-	elif action == "list_offers" or action == "list_my_offers":
+	elif action == "list_offers" or action == "list_my_offers" or action == "list_market_receipts":
+		var receipts := action == "list_market_receipts"
 		var mine := action == "list_my_offers"
-		result = client.list_my_market_offers() if mine else client.list_market_offers(str(payload.get("listing_id", "")))
+		result = client.list_market_receipts() if receipts else (client.list_my_market_offers() if mine else client.list_market_offers(str(payload.get("listing_id", ""))))
 		if result.has("_error"):
-			if market_panel != null: market_panel.show_status("Could not load my offers" if mine else "Could not load offers", true)
+			if market_panel != null: market_panel.show_status("Could not load receipts" if receipts else ("Could not load my offers" if mine else "Could not load offers"), true)
 			return
-		if market_panel != null and mine: market_panel.show_my_offers(result.get("offers", []), "My offers")
+		if market_panel != null and receipts: market_panel.show_receipts(result.get("receipts", []), "Receipts")
+		elif market_panel != null and mine: market_panel.show_my_offers(result.get("offers", []), "My offers")
 		elif market_panel != null: market_panel.show_offers(str(payload.get("listing_id", "")), result.get("offers", []), "Active offers")
 		return
 	elif action == "accept_offer" or action == "cancel_offer":
@@ -5631,11 +5633,9 @@ func bot_consume_pending_event_at(index: int) -> void:
 	if index < 0 or index >= _bot_pending_events.size():
 		return
 	_bot_pending_events.remove_at(index)
-
 func bot_show_action_shadow(action: Dictionary, state: Dictionary) -> void:
 	if not bot_mode or input_shadow == null or DisplayServer.get_name() == "headless":
 		return
-
 	var stype := str(action.get("_type", action.get("type", "")))
 	match stype:
 		"press_key":

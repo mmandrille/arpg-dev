@@ -18,6 +18,7 @@ func (s *Server) registerMarketRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/market/listings/{listing_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketListing)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleCreateMarketOffer)))
 	mux.Handle("GET /v0/market/offers/mine", s.requireAuth(http.HandlerFunc(s.handleListMyMarketOffers)))
+	mux.Handle("GET /v0/market/receipts/mine", s.requireAuth(http.HandlerFunc(s.handleListMyMarketReceipts)))
 	mux.Handle("GET /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleListMarketOffers)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/accept", s.requireAuth(http.HandlerFunc(s.handleAcceptMarketOffer)))
 	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketOffer)))

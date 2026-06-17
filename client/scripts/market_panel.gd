@@ -23,6 +23,7 @@ var account_id: String = ""
 var listings: Array = []
 var inventory_items: Array = []
 var active_offers: Array = []
+var market_receipts: Array = []
 var selected_listing_id: String = ""
 var staged_publish_item: Dictionary = {}
 var staged_offer_items: Array = []
@@ -111,6 +112,7 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 	listings = _dup_array(next_listings)
 	inventory_items = _dup_array(next_stash_items)
 	active_offers = []
+	market_receipts = []
 	account_id = next_account_id
 	staged_publish_item = {}
 	staged_offer_items = []
@@ -194,9 +196,8 @@ func bot_click_purchase_listing(listing_id: String = "", item_def_id: String = "
 
 
 func bot_click_view_offers(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
-	if listing_id == "__my_offers":
-		market_action_requested.emit("list_my_offers", {})
-		return
+	if listing_id == "__my_offers": market_action_requested.emit("list_my_offers", {}); return
+	if listing_id == "__receipts": market_action_requested.emit("list_market_receipts", {}); return
 	var listing := _matching_listing(listing_id, item_def_id, price_gold, listing_index, true)
 	if listing.is_empty():
 		show_status("No matching seller listing", true)
@@ -240,6 +241,9 @@ func show_my_offers(offers: Array, status: String = "") -> void:
 	_tabs.current_tab = 2
 	_rebuild_offer_rows()
 
+func show_receipts(receipts: Array, status: String = "") -> void:
+	MarketOfferRowsScript.show_receipts(self, receipts, status)
+
 func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
@@ -259,6 +263,7 @@ func get_debug_state() -> Dictionary:
 		"offer_count": active_offers.size(),
 		"offer_view_mode": offer_view_mode,
 		"offer_rows": _debug_offer_rows(),
+		"receipt_rows": _debug_receipt_rows(),
 		"publish_price_gold": _publish_price(),
 		"publish_price_width": int(_publish_price_spin.custom_minimum_size.x) if _publish_price_spin != null else 0,
 		"publish_button_width": int(_publish_button.custom_minimum_size.x) if _publish_button != null else 0,
@@ -385,6 +390,7 @@ func _rebuild_all() -> void:
 func _rebuild_browse_rows() -> void:
 	_clear_rows(_browse_rows)
 	_browse_rows.add_child(MarketOfferRowsScript.my_offers_button(self))
+	_browse_rows.add_child(MarketOfferRowsScript.receipts_button(self))
 	var browse_listings := _foreign_listings()
 	if browse_listings.is_empty():
 		_browse_rows.add_child(_empty_label("No active listings"))
@@ -403,6 +409,9 @@ func _rebuild_publish_rows() -> void:
 
 func _rebuild_offer_rows() -> void:
 	_clear_rows(_offer_rows)
+	if offer_view_mode == "receipts":
+		MarketOfferRowsScript.rebuild_receipts(self, _offer_rows, market_receipts)
+		return
 	if offer_view_mode == "outgoing":
 		if active_offers.is_empty():
 			_offer_rows.add_child(_empty_label("No outgoing offers"))
@@ -805,6 +814,8 @@ func _debug_offer_rows() -> Array:
 		})
 	return rows
 
+func _debug_receipt_rows() -> Array:
+	return MarketOfferRowsScript.debug_receipt_rows(market_receipts)
 
 func _rows_centered(rows: VBoxContainer) -> bool:
 	if rows == null:
@@ -843,14 +854,12 @@ func _offer_item_names(offer: Dictionary) -> String:
 			names.append(_item_title(item as Dictionary))
 	return ", ".join(names)
 
-
 func _offer_item_def_ids(offer: Dictionary) -> Array:
 	var ids: Array = []
 	for item in _offer_items(offer):
 		if typeof(item) == TYPE_DICTIONARY:
 			ids.append(str((item as Dictionary).get("item_def_id", "")))
 	return ids
-
 
 func _debug_offer_item_slots(offer: Dictionary) -> Array:
 	var slots: Array = []
@@ -874,14 +883,12 @@ func _clear_rows(rows: VBoxContainer) -> void:
 	for child in rows.get_children():
 		child.queue_free()
 
-
 func _empty_label(text: String) -> Label:
 	var empty := Label.new()
 	empty.text = text
 	empty.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	empty.add_theme_color_override("font_color", Color("#e8dcc8"))
 	return empty
-
 
 func _listing_title(listing: Dictionary) -> String:
 	var display := str(listing.get("display_name", ""))
@@ -904,7 +911,6 @@ func _item_detail(item: Dictionary) -> String:
 	if slot != "":
 		return "Slot: %s" % slot.replace("_", " ")
 	return str(item.get("stash_item_id", ""))
-
 
 func _make_item_tooltip(item: Dictionary) -> Control:
 	var tooltip := ItemTooltipPanelScript.new()
@@ -990,7 +996,6 @@ func _listing_stat_lines(item: Dictionary) -> Array:
 			lines.append("Rolled %s: %s" % [StatLabels.display_name(stat), _signed_stat_value(stat, delta)])
 	return lines
 
-
 func _stat_int(value) -> int:
 	match typeof(value):
 		TYPE_INT:
@@ -1011,7 +1016,6 @@ func _item_base_stats(item: Dictionary) -> Dictionary:
 	var template: Dictionary = ItemRulesLoader.item_templates.get(template_id, {})
 	return (template.get("base_stats", {}) as Dictionary).duplicate(true) if typeof(template.get("base_stats", {})) == TYPE_DICTIONARY else {}
 
-
 func _item_requirements(item: Dictionary) -> Dictionary:
 	var requirements = item.get("requirements", {})
 	if typeof(requirements) == TYPE_DICTIONARY and not (requirements as Dictionary).is_empty():
@@ -1019,7 +1023,6 @@ func _item_requirements(item: Dictionary) -> Dictionary:
 	var template_id := str(item.get("item_template_id", item.get("item_def_id", "")))
 	var template: Dictionary = ItemRulesLoader.item_templates.get(template_id, {})
 	return (template.get("requirements", {}) as Dictionary).duplicate(true) if typeof(template.get("requirements", {})) == TYPE_DICTIONARY else {}
-
 
 func _ordered_stat_keys(stats: Dictionary) -> Array:
 	var order := ["damage_min", "damage_max", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "hotbar_slots", "inventory_rows", "str", "dex", "vit", "magic", "all_skills"]
@@ -1031,7 +1034,6 @@ func _ordered_stat_keys(stats: Dictionary) -> Array:
 		if not keys.has(str(stat)):
 			keys.append(str(stat))
 	return keys
-
 
 func _signed_stat_value(stat: String, value: int) -> String:
 	var suffix := "%" if stat in ["block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "skill_damage_percent", "skill_cooldown_reduction_percent"] else ""
@@ -1057,7 +1059,6 @@ func _row_style() -> StyleBoxFlat:
 	s.set_border_width_all(1)
 	s.set_content_margin_all(8)
 	return s
-
 
 func _stage_slot_style(rarity: String, hover: bool) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()

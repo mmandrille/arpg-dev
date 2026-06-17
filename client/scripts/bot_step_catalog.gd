@@ -58,7 +58,8 @@ const STEP_TYPES_ACTION := [
 	"set_multiplayer_search", "select_multiplayer_sort",
 	"click_blacksmith_upgrade", "click_blacksmith_stage_item", "click_mercenary_stance",
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
-	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer", "click_waypoint_level",
+	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
+	"set_market_search", "select_market_sort", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -216,7 +217,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
 	if stype in ["wait_market_panel", "assert_market_listing_rows"]:
-		if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled") and not step.has("expiration_visible") and not step.has("expiration_contains") and not step.has("offer_equals") and not step.has("offer_at_least") and not step.has("offer_item_def_id") and not step.has("listing_item_def_id") and not step.has("offer_status") and not step.has("receipt_action") and not step.has("receipt_at_least") and not step.has("receipt_equals"):
+		if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled") and not step.has("expiration_visible") and not step.has("expiration_contains") and not step.has("first_item_def_id") and not step.has("market_search_text") and not step.has("market_sort_mode") and not step.has("filtered_listing_count") and not step.has("filtered_owned_listing_count") and not step.has("filtered_offer_count") and not step.has("filtered_receipt_count") and not step.has("offer_equals") and not step.has("offer_at_least") and not step.has("offer_item_def_id") and not step.has("listing_item_def_id") and not step.has("offer_status") and not step.has("receipt_action") and not step.has("receipt_at_least") and not step.has("receipt_equals"):
 			return "client_steps[%d] (%s) requires a market listing expectation" % [index, stype]
 	if stype == "assert_market_offer_rows":
 		if not step.has("offer_equals") and not step.has("offer_at_least"):

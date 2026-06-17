@@ -8,6 +8,7 @@ const BotStepCatalogScript := preload("res://scripts/bot_step_catalog.gd")
 const BotWaitHandlersScript := preload("res://scripts/bot_wait_handlers.gd")
 const BotAssertionHandlersScript := preload("res://scripts/bot_assertion_handlers.gd")
 const BotActionHandlersScript := preload("res://scripts/bot_action_handlers.gd")
+const BotMarketRowAssertionsScript := preload("res://scripts/bot_market_row_assertions.gd")
 const BotWaitProgressLoggerScript := preload("res://scripts/bot_wait_progress_logger.gd")
 
 const STEP_TYPES_WAIT := BotStepCatalogScript.STEP_TYPES_WAIT
@@ -899,14 +900,7 @@ func _stash_item_count_matches(step: Dictionary, state: Dictionary) -> bool:
 
 
 func _market_listing_rows_match(step: Dictionary, state: Dictionary) -> bool:
-	if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled") and not step.has("expiration_visible") and not step.has("expiration_contains"):
-		return true
-	var rows := _matching_market_listing_rows(step, state)
-	if step.has("equals") and rows.size() != int(step.get("equals", 0)):
-		return false
-	if step.has("at_least") and rows.size() < int(step.get("at_least", 0)):
-		return false
-	return true
+	return BotMarketRowAssertionsScript.listing_rows_match(step, state)
 
 
 func _assert_market_listing_rows(step: Dictionary, state: Dictionary) -> bool:
@@ -919,14 +913,7 @@ func _assert_market_listing_rows(step: Dictionary, state: Dictionary) -> bool:
 
 
 func _market_offer_rows_match(step: Dictionary, state: Dictionary) -> bool:
-	if not (step.has("offer_equals") or step.has("offer_at_least") or step.has("offer_item_def_id") or step.has("listing_item_def_id") or step.has("offer_status")):
-		return true
-	var rows := _matching_market_offer_rows(step, state)
-	if step.has("offer_equals") and rows.size() != int(step.get("offer_equals", 0)):
-		return false
-	if step.has("offer_at_least") and rows.size() < int(step.get("offer_at_least", 0)):
-		return false
-	return true
+	return BotMarketRowAssertionsScript.offer_rows_match(step, state)
 
 
 func _assert_market_offer_rows(step: Dictionary, state: Dictionary) -> bool:
@@ -1077,49 +1064,11 @@ func _matching_blacksmith_rows(step: Dictionary, state: Dictionary) -> Array:
 
 
 func _matching_market_listing_rows(step: Dictionary, state: Dictionary) -> Array:
-	var panel: Dictionary = state.get("market_panel", {})
-	var rows: Array = panel.get("listing_rows", [])
-	if bool(step.get("seller_owned", false)):
-		rows = panel.get("owned_listing_rows", [])
-	var out: Array = []
-	for row in rows:
-		if typeof(row) != TYPE_DICTIONARY:
-			continue
-		var rec := row as Dictionary
-		if step.has("listing_id") and str(rec.get("listing_id", "")) != str(step.get("listing_id", "")):
-			continue
-		if step.has("item_def_id") and str(rec.get("item_def_id", "")) != str(step.get("item_def_id", "")):
-			continue
-		if step.has("rolled") and (str(rec.get("item_template_id", "")) != "") != bool(step.get("rolled", false)):
-			continue
-		if step.has("price_gold") and int(rec.get("price_gold", 0)) != int(step.get("price_gold", 0)):
-			continue
-		if step.has("expiration_visible") and bool(rec.get("expiration_visible", false)) != bool(step.get("expiration_visible", false)): continue
-		if step.has("expiration_contains") and not str(rec.get("expiration_label", "")).contains(str(step.get("expiration_contains", ""))): continue
-		if step.has("seller_owned") and bool(step.get("seller_owned", false)) != (str(rec.get("seller_account_id", "")) == str(panel.get("account_id", ""))):
-			continue
-		out.append(rec)
-	return out
+	return BotMarketRowAssertionsScript.matching_listing_rows(step, state)
 
 
 func _matching_market_offer_rows(step: Dictionary, state: Dictionary) -> Array:
-	var panel: Dictionary = state.get("market_panel", {})
-	var rows: Array = panel.get("offer_rows", [])
-	var out: Array = []
-	for row in rows:
-		if typeof(row) != TYPE_DICTIONARY:
-			continue
-		var rec := row as Dictionary
-		if step.has("offer_id") and str(rec.get("offer_id", "")) != str(step.get("offer_id", "")):
-			continue
-		if step.has("offer_status") and str(rec.get("status", "")) != str(step.get("offer_status", "")):
-			continue
-		if step.has("offer_item_def_id") and not (rec.get("item_def_ids", []) as Array).has(str(step.get("offer_item_def_id", ""))):
-			continue
-		if step.has("listing_item_def_id") and str(rec.get("listing_item_def_id", "")) != str(step.get("listing_item_def_id", "")):
-			continue
-		out.append(rec)
-	return out
+	return BotMarketRowAssertionsScript.matching_offer_rows(step, state)
 
 
 func _matching_shop_offer_rows(step: Dictionary, state: Dictionary) -> Array:
@@ -1630,7 +1579,7 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"click_stash_deposit_gold", "click_stash_withdraw_gold", "set_stash_search", "select_stash_sort":
 			return "stash=%s" % str(step)
 		"wait_market_panel", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", \
-		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", "click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer":
+		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", "click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer", "set_market_search", "select_market_sort":
 			return "market=%s" % str(step)
 		"wait_bishop_panel", "assert_bishop_panel", "assert_bishop_panel_visible", "click_bishop_respec":
 			return "bishop=%s" % str(step)

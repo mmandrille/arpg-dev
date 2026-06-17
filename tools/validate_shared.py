@@ -517,6 +517,7 @@ def cross_checks(report: Report) -> None:
         "max_mana",
         "health_regen_per_second",
         "mana_regen_per_second",
+        "light_radius",
     }
     progression_base_stats = character_progression["base_stats"]
     if set(progression_base_stats) != progression_stats:
@@ -901,7 +902,7 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"class weapon {item_id} is valid")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -978,7 +979,7 @@ def cross_checks(report: Report) -> None:
             continue
         seen_roll_stats = set()
         failed_roll = False
-        bounded_roll_stats = {"hit_chance": 100, "crit_chance": 100, "evade_chance": 100, "skill_cooldown_reduction_percent": 75, "skill_mana_cost_reduction": 20, "magic_find_percent": 500}
+        bounded_roll_stats = {"hit_chance": 100, "crit_chance": 100, "evade_chance": 100, "skill_cooldown_reduction_percent": 75, "skill_mana_cost_reduction": 20, "magic_find_percent": 500, "light_radius": 20}
         for roll in template["rollable_stats"]:
             stat = roll["stat"]
             seen_roll_stats.add(stat)

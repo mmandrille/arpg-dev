@@ -1,0 +1,13 @@
+{
+  "id": "fog_of_war_overlay",
+  "runner": "godot_client",
+  "world_id": "combat_control_lab",
+  "seed": "fog_of_war_overlay_seed",
+  "title": "Fog of war overlay",
+  "description": "Client renders the fog overlay from server-derived light radius and exposes bot debug radii.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
+    { "type": "assert_fog_of_war", "enabled": true, "light_radius": 9, "gloom_radius": 11.25 }
+  ]
+}

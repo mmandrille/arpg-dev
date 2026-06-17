@@ -74,6 +74,7 @@ def stash_item_for(
         ],
         assertions=[],
         fresh_session_checks=[],
+        max_elapsed_s=15.0,
         path=Path(__file__),
     )
     _session, state = run_verified_session(

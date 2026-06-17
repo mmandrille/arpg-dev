@@ -219,6 +219,7 @@ var character_info_name_label: Label
 var character_info_level_label: Label
 var character_info_area_label: Label
 var input_shadow: InputShadowOverlay
+var fog_overlay: FogOfWarOverlay
 var _health_bar: PlayerHealthBar
 var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
@@ -318,7 +319,6 @@ func _bot_uses_menu() -> bool:
 		or file_name.begins_with("20_menu_create_join_flow") \
 		or file_name.begins_with("21_join_game_listed_session") \
 		or file_name.begins_with("27_character_select_summaries")
-
 func _mount_bot_controller() -> void:
 	if input_shadow != null and DisplayServer.get_name() != "headless":
 		input_shadow.set_active(true)
@@ -326,7 +326,6 @@ func _mount_bot_controller() -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	var bot := preload("res://scripts/bot_controller.gd").new()
 	add_child(bot)
-
 func _start_automation_session(resume_session_id: String, requested_world_id: String, requested_seed: String, bot_client_run: bool, requested_character_id: String = "") -> bool:
 	if not client.create_session(resume_session_id, requested_world_id, requested_character_id, requested_seed):
 		if bot_client_run:
@@ -340,7 +339,6 @@ func _start_automation_session(resume_session_id: String, requested_world_id: St
 	if bot_client_run:
 		print("[bot-client] ws connect requested session=%s" % client.session_id)
 	return true
-
 func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
 	gameplay_active = true
@@ -356,7 +354,6 @@ func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	ready_sent = false
 	client.connect_ws()
 	_debug("connecting session %s" % client.session_id)
-
 func _show_main_menu() -> void:
 	_hide_all_menus()
 	gameplay_active = false
@@ -398,7 +395,6 @@ func _hide_all_menus() -> void:
 	if skills_panel != null:
 		skills_panel.hide_display()
 	_hide_character_info_panel()
-
 func _on_create_game_pressed() -> void:
 	character_flow = ClientConstants.CHARACTER_FLOW_CREATE_GAME
 	pending_join_session_id = ""
@@ -3440,6 +3436,9 @@ func _build_scene() -> void:
 	input_shadow = InputShadowOverlayScript.new()
 	add_child(input_shadow)
 	input_shadow.bind_camera(_camera)
+	fog_overlay = FogOfWarOverlay.new()
+	add_child(fog_overlay)
+	fog_overlay.bind(_camera, player_anchor)
 
 	damage_numbers_layer = CanvasLayer.new()
 	damage_numbers_layer.layer = 2
@@ -3812,6 +3811,7 @@ func _refresh_progression_ui() -> void:
 		character_bar.set_progression(character_progression)
 	if consumable_bar != null:
 		consumable_bar.set_character_progression(character_progression)
+	if fog_overlay != null: fog_overlay.set_progression(character_progression)
 
 func _refresh_skill_ui() -> void:
 	_auto_select_right_click_skill()
@@ -5270,6 +5270,7 @@ func get_bot_state() -> Dictionary:
 		"companion_bar": companion_bar.get_debug_state() if companion_bar != null else {"visible": false, "count": 0, "companions": []},
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
 		"boss_health_bar": boss_health_bar.get_debug_state() if boss_health_bar != null else {"visible": false},
+		"fog_of_war": fog_overlay.get_debug_state() if fog_overlay != null else {},
 		"audio": audio_controller.get_debug_state() if audio_controller != null else {},
 		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},

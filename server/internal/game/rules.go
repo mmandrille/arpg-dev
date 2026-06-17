@@ -163,8 +163,9 @@ type CharacterProgressionRules struct {
 }
 
 type CharacterClassDef struct {
-	Name      string        `json:"name"`
-	BaseStats BaseStatsView `json:"base_stats"`
+	Name        string        `json:"name"`
+	LightRadius float64       `json:"light_radius"`
+	BaseStats   BaseStatsView `json:"base_stats"`
 }
 
 // SkillPointRules controls deterministic skill-point grants on level-up.
@@ -1149,6 +1150,9 @@ func LoadRules(dir string) (*Rules, error) {
 		if classDef.Name == "" {
 			return nil, fmt.Errorf("game: invalid rules character_progression.classes.%s.name: required", id)
 		}
+		if classDef.LightRadius <= 0 {
+			return nil, fmt.Errorf("game: invalid rules character_progression.classes.%s.light_radius: must be positive", id)
+		}
 		if classDef.BaseStats.Str <= 0 || classDef.BaseStats.Dex <= 0 || classDef.BaseStats.Vit <= 0 || classDef.BaseStats.Magic <= 0 {
 			return nil, fmt.Errorf("game: invalid rules character_progression.classes.%s.base_stats: all stats must be positive", id)
 		}
@@ -1188,7 +1192,7 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules character_progression.experience_curve: missing level %d", level)
 		}
 	}
-	requiredDerived := []string{"damage_min", "damage_max", "armor", "attack_speed", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second"}
+	requiredDerived := []string{"damage_min", "damage_max", "armor", "attack_speed", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "light_radius"}
 	for _, key := range requiredDerived {
 		formula, ok := progression.DerivedStats[key]
 		if !ok {
@@ -3266,7 +3270,7 @@ func isSupportedRequirementStat(stat string) bool {
 
 func isSupportedItemStat(stat string) bool {
 	switch stat {
-	case "damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "hotbar_slots", "inventory_rows":
+	case "damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows":
 		return true
 	default:
 		return false

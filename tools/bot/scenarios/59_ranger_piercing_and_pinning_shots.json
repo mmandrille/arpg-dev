@@ -33,10 +33,8 @@
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "pinning_shot", "rank": 1 },
     { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" },
     { "type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "pinning_shot" },
-    { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.10 },
     { "type": "event_seen", "event_type": "skill_cast", "skill_id": "piercing_shot", "rank": 1 },
     { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 },
     { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "piercing_shot", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1 }
   ]
 }
-

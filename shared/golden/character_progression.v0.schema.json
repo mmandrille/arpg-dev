@@ -68,7 +68,8 @@
         "max_hp",
         "max_mana",
         "health_regen_per_second",
-        "mana_regen_per_second"
+        "mana_regen_per_second",
+        "light_radius"
       ],
       "additionalProperties": false,
       "properties": {
@@ -84,7 +85,8 @@
         "max_hp": { "type": "number" },
         "max_mana": { "type": "number" },
         "health_regen_per_second": { "type": "number" },
-        "mana_regen_per_second": { "type": "number" }
+        "mana_regen_per_second": { "type": "number" },
+        "light_radius": { "type": "number" }
       }
     }
   }

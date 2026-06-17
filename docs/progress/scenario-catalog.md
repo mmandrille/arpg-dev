@@ -52,6 +52,7 @@ sorcerer_arcane_barrage: Sorcerer casts Arcane Barrage and proves authoritative 
 paladin_sanctuary: Paladin casts Sanctuary and proves authoritative area defense effects
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
+fog_of_war_radius: compact combat-control lab → assert class `light_radius`, hide a far dungeon mob, move into scouting range, then reveal it
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
 ui_currency_and_mana_polish: pick up gold instead of reward badges, persist character wallet, and use/reject blue mana potions
 reachable_dungeon_obstacles: descend through generated dungeon floors → assert generated interior wall layout → route to loot beyond obstacles → prove replay
@@ -91,6 +92,7 @@ material_wallet_details: headless Godot client auto-picks an upgrade shard → v
 blacksmith_recipe_selector: headless Godot client stages a blacksmith item → verifies the active recipe appears in the preview
 mercenary_stats_card: headless Godot client hires a mercenary → verifies the companion panel stats card shows HP, stance, state, and id
 boss_portrait_panel: headless Godot client starts on the compact boss floor → verifies the Cave Warden boss portrait tile
+fog_of_war_overlay: headless Godot client enters the compact fog lab → verifies the fog overlay uses server-derived light and gloom radii
 ```
 
 **Verify:**

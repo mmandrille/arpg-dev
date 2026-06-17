@@ -339,7 +339,7 @@
     },
     "derived_stats": {
       "type": "object",
-      "required": ["damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second"],
+      "required": ["damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "light_radius"],
       "additionalProperties": false,
       "properties": {
         "damage_min": { "type": "number", "minimum": 0 },
@@ -355,6 +355,7 @@
         "max_mana": { "type": "number", "minimum": 0 },
         "health_regen_per_second": { "type": "number", "minimum": 0 },
         "mana_regen_per_second": { "type": "number", "minimum": 0 },
+        "light_radius": { "type": "number", "minimum": 0 },
         "magic_find_percent": { "type": "number", "minimum": 0 }
       }
     },
@@ -374,7 +375,7 @@
       "required": ["key", "value", "sources"],
       "additionalProperties": false,
       "properties": {
-        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "magic_find_percent", "block_percent"] },
+        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "magic_find_percent", "light_radius", "block_percent"] },
         "value": { "type": "number" },
         "uncapped_value": { "type": "number" },
         "cap": { "type": ["number", "null"] },

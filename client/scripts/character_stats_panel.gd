@@ -23,6 +23,7 @@ const DERIVED_LABELS := {
 	"max_mana": "Mana",
 	"health_regen_per_second": "HP regen /s",
 	"mana_regen_per_second": "Mana regen /s",
+	"light_radius": "Light radius",
 }
 const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance", "evade_chance"]
 const WHOLE_PERCENT_STATS := ["block_percent"]

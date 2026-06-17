@@ -6,6 +6,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -237,6 +238,7 @@ type effectiveCombatStats struct {
 	HealthRegenPerSecond float64
 	ManaRegenPerSecond   float64
 	MagicFindPercent     float64
+	LightRadius          float64
 }
 
 type combatResolution struct {
@@ -337,6 +339,8 @@ type playerState struct {
 	ResourceWallet        map[string]int
 	HPRegenCarry          float64
 	ManaRegenCarry        float64
+	FogVisibleLevel       int
+	VisibleMonsterIDs     map[uint64]bool
 	NextBasicAttackTick   uint64
 	NextOffHandAttackTick uint64
 }
@@ -361,6 +365,7 @@ type Sim struct {
 	levels                map[int]*LevelState
 	currentLevel          int
 	multiLevel            bool
+	fogOfWarEnabled       bool
 	entities              map[uint64]*entity
 	walls                 []wallObstacle
 	move                  *activeMove
@@ -427,6 +432,10 @@ func MustNewSim(sessionID, seed string, rules *Rules) *Sim {
 	return s
 }
 
+func fogOfWarEnabledForSeed(seed string) bool {
+	return strings.Contains(seed, "fog_of_war")
+}
+
 // NewSimWithWorld builds a fresh session from a deterministic world preset.
 func NewSimWithWorld(sessionID, seed string, rules *Rules, worldID string) (*Sim, error) {
 	return NewSimWithWorldProgression(sessionID, seed, rules, worldID, rules.DefaultCharacterProgressionState())
@@ -452,6 +461,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		levels:                make(map[int]*LevelState),
 		currentLevel:          levelZero,
 		multiLevel:            world.Mode == worldModeMultiLevel,
+		fogOfWarEnabled:       fogOfWarEnabledForSeed(seed),
 		equipped:              newEquippedMap(),
 		weaponSets:            newWeaponSetMaps(),
 		activeWeaponSet:       defaultWeaponSet,
@@ -5645,6 +5655,7 @@ func equipPreviewDeltas(current, preview effectiveCombatStats) []EquipPreviewDel
 		{"max_mana", current.MaxMana, preview.MaxMana},
 		{"health_regen_per_second", current.HealthRegenPerSecond, preview.HealthRegenPerSecond},
 		{"mana_regen_per_second", current.ManaRegenPerSecond, preview.ManaRegenPerSecond},
+		{"light_radius", current.LightRadius, preview.LightRadius},
 	}
 	deltas := []EquipPreviewDeltaView{}
 	for _, value := range values {
@@ -5686,6 +5697,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	healthRegen := character.HealthRegenPerSecond
 	manaRegen := character.ManaRegenPerSecond
 	magicFindPercent := 0.0
+	lightRadius := character.LightRadius
 	blockPercent := 0.0
 	weaponSpeed := 1.0
 	itemSpeedPercent := 0.0
@@ -5707,6 +5719,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	healthRegenSources := []StatBreakdownSourceView{{Label: "Vitality", Value: character.HealthRegenPerSecond, Kind: "character_formula"}}
 	manaRegenSources := []StatBreakdownSourceView{{Label: "Magic", Value: character.ManaRegenPerSecond, Kind: "character_formula"}}
 	magicFindSources := []StatBreakdownSourceView{}
+	lightRadiusSources := []StatBreakdownSourceView{{Label: "Class light radius", Value: character.LightRadius, Kind: "character_formula"}}
 	blockSources := []StatBreakdownSourceView{}
 	hitChanceSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.HitChance, Kind: "character_formula"}}
 	critChanceSources := []StatBreakdownSourceView{{Label: "Dexterity", Value: character.CritChance, Kind: "character_formula"}}
@@ -5819,6 +5832,14 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			magicFindPercent += float64(value)
 			magicFindSources = append(magicFindSources, StatBreakdownSourceView{Label: "Rolled Magic Find", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
+		if value := baseStats["light_radius"]; value != 0 {
+			lightRadius += float64(value)
+			lightRadiusSources = append(lightRadiusSources, StatBreakdownSourceView{Label: label, Value: float64(value), Kind: "equipment_base", ItemInstanceID: itemID})
+		}
+		if value := rolledStats["light_radius"]; value != 0 {
+			lightRadius += float64(value)
+			lightRadiusSources = append(lightRadiusSources, StatBreakdownSourceView{Label: "Rolled light radius", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
+		}
 	}
 	applySetCombatStats(s.equippedSetBonusStats(), &damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &hitChancePercent, &critChancePercent, &evadeChancePercent, &magicFindPercent, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources, &hitChanceSources, &critChanceSources, &evadeChanceSources, &magicFindSources)
 
@@ -5879,6 +5900,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		HealthRegenPerSecond: maxFloat(0, healthRegen),
 		ManaRegenPerSecond:   maxFloat(0, manaRegen),
 		MagicFindPercent:     maxFloat(0, magicFindPercent),
+		LightRadius:          maxFloat(0, lightRadius),
 	}
 	if effective.DamageMax < effective.DamageMin {
 		effective.DamageMax = effective.DamageMin
@@ -5898,6 +5920,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		{Key: "health_regen_per_second", Value: effective.HealthRegenPerSecond, UncappedValue: effective.HealthRegenPerSecond, Cap: nil, Sources: healthRegenSources},
 		{Key: "mana_regen_per_second", Value: effective.ManaRegenPerSecond, UncappedValue: effective.ManaRegenPerSecond, Cap: nil, Sources: manaRegenSources},
 		{Key: "magic_find_percent", Value: effective.MagicFindPercent, UncappedValue: effective.MagicFindPercent, Cap: nil, Sources: magicFindSources},
+		{Key: "light_radius", Value: effective.LightRadius, UncappedValue: effective.LightRadius, Cap: nil, Sources: lightRadiusSources},
 		{Key: "block_percent", Value: effective.BlockPercent, UncappedValue: uncappedBlock, Cap: floatPtr(blockCap), Sources: blockSources},
 	}
 	return effective, breakdowns
@@ -6265,12 +6288,7 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		return s.Snapshot()
 	}
 	s.usePlayer(ps)
-	ids := sortedEntityIDs(s.activeLevel().entities)
-
-	entities := make([]EntityView, 0, len(ids))
-	for _, id := range ids {
-		entities = append(entities, s.entityView(s.activeLevel().entities[id]))
-	}
+	entities := s.visibleEntityViewsForPlayer(ps)
 
 	inventory := make([]ItemView, 0, len(s.inventory))
 	for _, it := range s.inventory {

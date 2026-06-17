@@ -100,14 +100,12 @@ def log_wait_progress(label: str, loop, started_at: float, **details: Any) -> No
     log(*parts)
 
 
-def assert_scenario_elapsed_within_budget(scenario_id: str, elapsed_s: float) -> None:
-    if elapsed_s > MAX_SCENARIO_ELAPSED_S:
+def assert_scenario_elapsed_within_budget(scenario_id: str, elapsed_s: float, budget_s: float = MAX_SCENARIO_ELAPSED_S) -> None:
+    if elapsed_s > budget_s:
         raise TimeoutError(
             f"protocol bot scenario {scenario_id} took {elapsed_s:.2f}s; "
-            f"budget is {MAX_SCENARIO_ELAPSED_S:.2f}s. Shorten the scenario to its core proof."
+            f"budget is {budget_s:.2f}s. Shorten the scenario to its core proof."
         )
-
-
 
 
 def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
@@ -132,6 +130,7 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
             steps=list(raw.get("steps", [])),
             assertions=list(raw.get("assertions", [])),
             fresh_session_checks=list(raw.get("fresh_session_checks", [])),
+            max_elapsed_s=float(raw.get("max_elapsed_s", MAX_SCENARIO_ELAPSED_S)),
             path=path,
         ))
     if not scenarios:
@@ -693,6 +692,7 @@ async def execute_step(
                 is_boss=bool(step["is_boss"]) if step.get("is_boss") is not None else None,
                 target_id=str(step["target_id"]) if step.get("target_id") else None,
                 timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)),
+                action_interval_s=float(step.get("action_interval_s", 0.12)),
             )
             return
         target = resolve_target(state, step)
@@ -1905,7 +1905,6 @@ async def move_to_position(
 
     await move_to_position_impl(ws, session_id, state, target_pos, loop, max_ticks, stop_distance, ctx=_runtime_context())
 
-
 async def attack_until_monster_event(
     ws,
     session_id: str,
@@ -1915,7 +1914,7 @@ async def attack_until_monster_event(
     *,
     monster_def_id: str | None = None, rarity: str | None = None, is_boss: bool | None = None,
     monster_pack_leader: bool | None = None, target_id: str | None = None, timeout_s: float = SLICE_TIMEOUT_S,
-    fresh_event: bool = False,
+    fresh_event: bool = False, action_interval_s: float = 0.12,
 ) -> None:
     deadline = loop.time() + timeout_s; start_event_count = sum(1 for ev in state.events if ev.get("event_type") == event_type)
     skipped_ids: set[str] = set()
@@ -1950,7 +1949,7 @@ async def attack_until_monster_event(
         if current is not None and current.get("type") == "monster" and int(current.get("hp", 0)) <= 0:
             await pump_one(ws, state, timeout=0.1)
             continue
-        if loop.time() - last_action > 0.12:
+        if not pending_message_id and loop.time() - last_action > action_interval_s:
             env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": active_target_id})
             pending_message_id = str(env["message_id"])
             await ws.send(json.dumps(env))
@@ -3276,6 +3275,7 @@ def run_verified_session(
         steps=steps,
         assertions=assertions,
         fresh_session_checks=[],
+        max_elapsed_s=scenario.max_elapsed_s,
         path=scenario.path,
     )
     observed = asyncio.run(drive_scenario(base_url, token, sess, run_scenario))
@@ -4172,7 +4172,7 @@ def main() -> int:
                     observed = check_observed
                     log("fresh session check done", scenario.id, f"#{idx}")
                 scenario_elapsed = time.monotonic() - scenario_started
-                assert_scenario_elapsed_within_budget(scenario.id, scenario_elapsed)
+                assert_scenario_elapsed_within_budget(scenario.id, scenario_elapsed, scenario.max_elapsed_s)
                 log("scenario done", scenario.id, f"elapsed={scenario_elapsed:.2f}s")
             except Exception as exc:
                 scenario_elapsed = time.monotonic() - scenario_started

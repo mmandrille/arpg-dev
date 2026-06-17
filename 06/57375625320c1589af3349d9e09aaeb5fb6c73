@@ -1,0 +1,46 @@
+docs/plans/v255_2026-06-17-fog-los-shadow-mask.md
+  s_625324c6ca5fae::t_aa796c4bf701b9 84,86,88
+  s_625324c6ca5fae::t_be99888830d791 42-45,48,50,118-120
+  s_625324c6ca5fae::t_dbd3b476eb17a0 1-2,4-41,46-47,49,51-63,65,67,69,71,73-83,85,87,89-99,102,104-117,121-128,134-139
+  s_625324c6ca5fae::t_30e9fba66f11b5 100-101,103
+  s_625324c6ca5fae::t_04ac60215b696c 64,66,68,70,72
+  s_625324c6ca5fae::t_c0b6c7f25287c2 3,129-133
+docs/as-built/v255_fog-los-shadow-mask.md
+  s_625324c6ca5fae::t_fb9961810721cc 1-43
+PROGRESS.md
+  s_625324c6ca5fae::t_e1136347ee06f0 26,28,101,105-107
+docs/specs/v255_spec-fog-los-shadow-mask.md
+  s_625324c6ca5fae::t_ddf698612a7869 3
+  s_625324c6ca5fae::t_c7a2f332435806 1-2,4-94
+docs/progress/scenario-catalog.md
+  s_625324c6ca5fae::t_38b22ea3181d00 96
+docs/progress/slice-lifecycle.md
+  s_625324c6ca5fae::t_7720f32f0c248f 270
+client/scripts/main.gd
+  s_625324c6ca5fae::t_eaeb17b57e5eaa 4737-4738,4742-4743,4745-4746
+client/scripts/fog_of_war_overlay.gd
+  s_625324c6ca5fae::t_5fd3e6a2aa462c 261-263
+  s_625324c6ca5fae::t_b2363c17b2fed6 8,37,45-48,81-91,102-105,128-130,148,165-260,264-329
+client/tests/test_fog_of_war_overlay.gd
+  s_625324c6ca5fae::t_768156f6d8becd 15-17,35-83,94
+client/scripts/bot_assertion_handlers.gd
+  s_625324c6ca5fae::t_4519ad7add9968 324-335
+tools/bot/scenarios/client/68_fog_los_shadow_mask.json
+  s_625324c6ca5fae::t_5f93aef2cf42cc 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0657375625320c1589af3349d9e09aaeb5fb6c73",
+  "prompts": {},
+  "sessions": {
+    "s_625324c6ca5fae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed6ca-bd17-7cd0-b235-044f1bd04620",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

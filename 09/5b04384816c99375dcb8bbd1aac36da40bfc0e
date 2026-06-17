@@ -1,0 +1,21 @@
+.maintainability/extraction-coupling-baseline.tsv
+  s_4fdff9fc96d196::t_a562d474b3a8bd 1
+tools/bot/run.py
+  s_4fdff9fc96d196::t_a562d474b3a8bd 2165-2175,2179,2185,2191,2204,2210
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "095b04384816c99375dcb8bbd1aac36da40bfc0e",
+  "prompts": {},
+  "sessions": {
+    "s_4fdff9fc96d196": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed437-8a0c-7040-80b3-51ff67b81bac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

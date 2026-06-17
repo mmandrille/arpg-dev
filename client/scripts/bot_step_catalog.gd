@@ -58,7 +58,7 @@ const STEP_TYPES_ACTION := [
 	"set_multiplayer_search", "select_multiplayer_sort",
 	"click_blacksmith_upgrade", "click_blacksmith_stage_item", "click_mercenary_stance",
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
-	"click_market_view_offers", "click_market_accept_offer", "click_waypoint_level",
+	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_waypoint_level",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 

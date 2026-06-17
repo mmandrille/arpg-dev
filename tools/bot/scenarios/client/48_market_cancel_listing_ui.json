@@ -1,0 +1,27 @@
+{
+  "id": "market_cancel_listing_ui",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "market_cancel_listing_ui_231",
+  "title": "Market cancel listing UI",
+  "description": "Client opens the market board as a seller, cancels a preflight listing with an active bidder offer, and verifies the listed item returns to stash.",
+  "preflight": {
+    "type": "market_listing",
+    "seller_is_client": true,
+    "item_def_id": "cave_mail",
+    "price_gold": 43,
+    "offer_item_def_id": "cave_blade"
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
+    { "type": "wait_ticks", "ticks": 1, "timeout_s": 5.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
+    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 43, "seller_owned": true, "at_least": 1, "timeout_s": 15.0 },
+    { "type": "click_market_cancel_listing", "item_def_id": "cave_mail", "price_gold": 43 },
+    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 43, "seller_owned": true, "equals": 0, "timeout_s": 15.0 },
+    { "type": "assert_market_listing_rows", "item_def_id": "cave_mail", "price_gold": 43, "seller_owned": true, "equals": 0 },
+    { "type": "assert_stash_item_count", "item_def_id": "cave_mail", "equals": 1 }
+  ]
+}

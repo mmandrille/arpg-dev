@@ -194,6 +194,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_market_purchase_listing(action)
 		"click_market_view_offers":
 			_do_click_market_view_offers(action)
+		"click_market_cancel_listing":
+			_do_click_market_cancel_listing(action)
 		"click_market_accept_offer":
 			_do_click_market_accept_offer(action)
 
@@ -423,10 +425,13 @@ func _do_click_market_view_offers(action: Dictionary) -> void:
 		)
 
 
+func _do_click_market_cancel_listing(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_market_cancel_listing"):
+		_main.bot_click_market_cancel_listing(str(action.get("listing_id", "")), str(action.get("item_def_id", "")), int(action.get("price_gold", -1)), int(action.get("listing_index", 0)))
+
 func _do_click_market_accept_offer(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_click_market_accept_offer"):
 		_main.bot_click_market_accept_offer(str(action.get("offer_id", "")), int(action.get("offer_index", 0)))
-
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
 # through the same client.send() as _try_action_at_mouse(). Ray-pick via
@@ -768,6 +773,8 @@ func _format_action(action: Dictionary) -> String:
 				str(action.get("price_gold", "")),
 				str(action.get("listing_index", 0)),
 			]
+		"click_market_cancel_listing":
+			return "click_market_cancel_listing listing=%s item=%s price=%s index=%s" % [str(action.get("listing_id", "")), str(action.get("item_def_id", "")), str(action.get("price_gold", "")), str(action.get("listing_index", 0))]
 		"click_market_accept_offer":
 			return "click_market_accept_offer offer=%s index=%s" % [str(action.get("offer_id", "")), str(action.get("offer_index", 0))]
 		"assign_hotbar_slot":

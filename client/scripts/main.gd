@@ -4316,28 +4316,31 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 	if action == "publish":
 		result = client.create_market_listing(str(payload.get("stash_item_id", "")), int(payload.get("price_gold", 0)))
 		if result.has("_error"):
-			if market_panel != null:
-				market_panel.show_status("Could not publish item", true)
+			if market_panel != null: market_panel.show_status("Could not publish item", true)
 			return
 		_remove_market_stash_item(str(payload.get("stash_item_id", "")))
 		_refresh_inventory_ui()
-		if market_panel != null:
-			market_panel.show_status("Item published")
+		if market_panel != null: market_panel.show_status("Item published")
 	elif action == "publish_inventory":
 		result = client.create_market_listing_from_inventory(str(payload.get("item_instance_id", "")), client.character_id, int(payload.get("price_gold", 0)))
 		if result.has("_error"):
-			if market_panel != null:
-				market_panel.show_status("Could not publish item", true)
+			if market_panel != null: market_panel.show_status("Could not publish item", true)
 			return
 		_remove_inventory_item(str(payload.get("item_instance_id", "")))
 		_refresh_inventory_ui()
-		if market_panel != null:
-			market_panel.show_status("Item published")
+		if market_panel != null: market_panel.show_status("Item published")
+	elif action == "cancel_listing":
+		result = client.cancel_market_listing(str(payload.get("listing_id", "")))
+		if result.has("_error"):
+			if market_panel != null: market_panel.show_status("Could not cancel listing", true)
+			return
+		_upsert_stash_item(result)
+		_refresh_inventory_ui()
+		if market_panel != null: market_panel.show_status("Listing canceled")
 	elif action == "offer":
 		result = client.create_market_offer(str(payload.get("listing_id", "")), payload.get("stash_item_ids", []))
 		if result.has("_error"):
-			if market_panel != null:
-				market_panel.show_status("Could not make offer", true)
+			if market_panel != null: market_panel.show_status("Could not make offer", true)
 			return
 		for stash_item_id in payload.get("stash_item_ids", []):
 			_remove_market_stash_item(str(stash_item_id))
@@ -4348,8 +4351,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 	elif action == "offer_inventory":
 		result = client.create_market_offer_from_inventory(str(payload.get("listing_id", "")), payload.get("item_instance_ids", []), client.character_id)
 		if result.has("_error"):
-			if market_panel != null:
-				market_panel.show_status("Could not make offer", true)
+			if market_panel != null: market_panel.show_status("Could not make offer", true)
 			return
 		for item_instance_id in payload.get("item_instance_ids", []):
 			_remove_inventory_item(str(item_instance_id))
@@ -4360,8 +4362,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 	elif action == "purchase":
 		result = client.purchase_market_listing(str(payload.get("listing_id", "")))
 		if result.has("_error"):
-			if market_panel != null:
-				market_panel.show_status("Could not purchase listing", true)
+			if market_panel != null: market_panel.show_status("Could not purchase listing", true)
 			return
 		var delivered_item_raw = result.get("delivered_item", {})
 		var delivered_item: Dictionary = delivered_item_raw if typeof(delivered_item_raw) == TYPE_DICTIONARY else {}
@@ -4373,8 +4374,7 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 	elif action == "list_offers":
 		result = client.list_market_offers(str(payload.get("listing_id", "")))
 		if result.has("_error"):
-			if market_panel != null:
-				market_panel.show_status("Could not load offers", true)
+			if market_panel != null: market_panel.show_status("Could not load offers", true)
 			return
 		if market_panel != null:
 			market_panel.show_offers(str(payload.get("listing_id", "")), result.get("offers", []), "Active offers")
@@ -4382,15 +4382,13 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 	elif action == "accept_offer":
 		result = client.accept_market_offer(str(payload.get("listing_id", "")), str(payload.get("offer_id", "")))
 		if result.has("_error"):
-			if market_panel != null:
-				market_panel.show_status("Could not accept offer", true)
+			if market_panel != null: market_panel.show_status("Could not accept offer", true)
 			return
 		for item in result.get("items", []):
 			if typeof(item) == TYPE_DICTIONARY:
 				_upsert_stash_item(item as Dictionary)
 		_refresh_inventory_ui()
-		if market_panel != null:
-			market_panel.show_status("Offer accepted")
+		if market_panel != null: market_panel.show_status("Offer accepted")
 	else:
 		return
 	_refresh_market_panel_data()
@@ -5547,6 +5545,8 @@ func bot_click_market_purchase_listing(listing_id: String = "", item_def_id: Str
 	BotFacade.click_market_purchase_listing(self, listing_id, item_def_id, price_gold, listing_index)
 func bot_click_market_view_offers(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
 	BotFacade.click_market_view_offers(self, listing_id, item_def_id, price_gold, listing_index)
+func bot_click_market_cancel_listing(listing_id: String = "", item_def_id: String = "", price_gold: int = -1, listing_index: int = 0) -> void:
+	BotFacade.click_market_cancel_listing(self, listing_id, item_def_id, price_gold, listing_index)
 func bot_click_market_accept_offer(offer_id: String = "", offer_index: int = 0) -> void:
 	BotFacade.click_market_accept_offer(self, offer_id, offer_index)
 func bot_assign_consumable_hotbar(slot_index: int, item_instance_id: String) -> void:

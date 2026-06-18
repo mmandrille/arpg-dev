@@ -59,6 +59,21 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			level.questRewardChestIDs[e.id] = true
 		}
 	}
+	for _, door := range gen.doors {
+		def := s.rules.Interactables[door.defID]
+		state := def.InitialState
+		if door.state != "" {
+			state = door.state
+		}
+		e := &entity{
+			kind:              interactableEntity,
+			pos:               door.pos,
+			interactableDefID: door.defID,
+			state:             state,
+		}
+		e.id = s.alloc()
+		level.entities[e.id] = e
+	}
 	for _, generated := range gen.loot {
 		if _, ok := s.rules.Items[generated.itemDefID]; !ok {
 			return fmt.Errorf("game: generate dungeon level %d: unknown loot item %s", level.levelNum, generated.itemDefID)

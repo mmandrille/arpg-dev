@@ -16,6 +16,7 @@
         "minimum_generated_wall_count",
         "shape_families",
         "walls",
+        "doors",
         "reachable_targets"
       ],
       "additionalProperties": false,
@@ -33,6 +34,10 @@
           "type": "array",
           "minItems": 5,
           "items": { "$ref": "#/$defs/wall" }
+        },
+        "doors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reachable_target" }
         },
         "reachable_targets": {
           "type": "array",
@@ -87,7 +92,7 @@
       "required": ["kind", "position"],
       "additionalProperties": false,
       "properties": {
-        "kind": { "type": "string", "enum": ["player_spawn", "stairs_up", "stairs_down", "teleporter", "chest", "loot", "monster"] },
+        "kind": { "type": "string", "enum": ["player_spawn", "stairs_up", "stairs_down", "teleporter", "chest", "door", "loot", "monster"] },
         "def_id": { "type": "string", "minLength": 1 },
         "position": { "$ref": "#/$defs/vec2" }
       }

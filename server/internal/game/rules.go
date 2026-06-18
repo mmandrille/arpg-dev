@@ -281,6 +281,7 @@ type ObstacleGenerationRules struct {
 	WallSegment             WallSegmentRules       `json:"wall_segment"`
 	SolidBlock              SolidBlockRules        `json:"solid_block"`
 	ShapeWeights            ObstacleShapeWeights   `json:"shape_weights"`
+	Doors                   DoorGenerationRules    `json:"doors"`
 	Clearance               ObstacleClearanceRules `json:"clearance"`
 }
 
@@ -1913,6 +1914,9 @@ func LoadRules(dir string) (*Rules, error) {
 		return nil, err
 	}
 	if err := validateObstacleGenerationRules(dungeonGeneration.ObstacleGeneration, dungeonGeneration.FloorSize); err != nil {
+		return nil, err
+	}
+	if err := validateDoorGenerationRules(dungeonGeneration.ObstacleGeneration.Doors, r); err != nil {
 		return nil, err
 	}
 	if err := validateDungeonFloorProfiles(dungeonGeneration.FloorProfiles); err != nil {

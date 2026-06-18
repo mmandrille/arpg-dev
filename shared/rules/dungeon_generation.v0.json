@@ -110,6 +110,14 @@
       "t": 2,
       "block": 2
     },
+    "doors": {
+      "enabled": true,
+      "interactable_def_id": "wooden_door",
+      "max_count": 1,
+      "min_wall_length": 8,
+      "min_side_length": 2.0,
+      "gap_width": 1.0
+    },
     "clearance": {
       "player_spawn": 3.0,
       "stairs": 2.0,

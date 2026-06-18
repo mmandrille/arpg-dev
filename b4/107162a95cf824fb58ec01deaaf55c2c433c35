@@ -1,0 +1,24 @@
+client/tests/test_fog_of_war_overlay.gd
+  s_625324c6ca5fae::t_cb68843c4996ee 16,57-92,153-156
+client/scripts/fog_of_war_overlay.gd
+  s_625324c6ca5fae::t_8878786406a690 107-108
+  s_625324c6ca5fae::t_bcf75ea6afae62 9-10,233,240,243,287,289
+docs/as-built/v255_fog-los-shadow-mask.md
+  s_625324c6ca5fae::t_0037e5f066932d 19-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b4107162a95cf824fb58ec01deaaf55c2c433c35",
+  "prompts": {},
+  "sessions": {
+    "s_625324c6ca5fae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed6ca-bd17-7cd0-b235-044f1bd04620",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

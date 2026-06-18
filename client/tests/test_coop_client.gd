@@ -37,6 +37,8 @@ func _initialize() -> void:
 	_test_teardown_clears_wall_layout()
 	_test_preset_world_wall_fallback()
 	_test_local_player_model_front_faces_direction()
+	_test_combat_event_faces_source_toward_target()
+	_test_stationary_companion_faces_current_target()
 	_test_remote_player_delta_and_remove()
 	_test_multiple_remote_players_update_and_remove_independently()
 	_test_path_reject_clears_held_click_state()
@@ -728,6 +730,67 @@ func _test_local_player_model_front_faces_direction() -> void:
 	main.free()
 
 
+func _test_combat_event_faces_source_toward_target() -> void:
+	var main = _make_main()
+	var source := Node3D.new()
+	var target := Node3D.new()
+	source.position = Vector3.ZERO
+	target.position = Vector3(3.0, 0.0, 0.0)
+	main.entities_root.add_child(source)
+	main.entities_root.add_child(target)
+	main.entities["wolf"] = {"node": source, "type": "companion"}
+	main.entities["target"] = {"node": target, "type": "monster"}
+	main._face_event_source_toward_target({"source_entity_id": "wolf", "target_entity_id": "target"})
+	var front: Vector3 = source.transform.basis.z
+	front.y = 0.0
+	_assert_vec3("combat source faces target east", front.normalized(), Vector3(1.0, 0.0, 0.0))
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_stationary_companion_faces_current_target() -> void:
+	var main = _make_main()
+	main._upsert_entity({
+		"id": "target",
+		"type": "monster",
+		"monster_def_id": "combat_lab_soft_target",
+		"position": {"x": 2.0, "y": 0.0},
+		"hp": 5,
+		"max_hp": 5,
+	})
+	main._upsert_entity({
+		"id": "wolf",
+		"type": "companion",
+		"monster_def_id": "companion_black_wolf",
+		"visual_model": "monster_wolf",
+		"target_id": "target",
+		"position": {"x": 0.0, "y": 0.0},
+		"hp": 5,
+		"max_hp": 5,
+	})
+	main._upsert_entity({
+		"id": "wolf",
+		"type": "companion",
+		"monster_def_id": "companion_black_wolf",
+		"visual_model": "monster_wolf",
+		"target_id": "target",
+		"position": {"x": 0.0, "y": 0.0},
+		"hp": 5,
+		"max_hp": 5,
+	})
+	var rec: Dictionary = main.entities.get("wolf", {})
+	var wolf := rec.get("node", null) as Node3D
+	var front: Vector3 = wolf.transform.basis.z
+	front.y = 0.0
+	_assert_vec3("stationary companion faces current target", front.normalized(), Vector3(1.0, 0.0, 0.0))
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
 func _test_multiple_remote_players_update_and_remove_independently() -> void:
 	var main = _make_main()
 	main._apply_snapshot({
@@ -971,7 +1034,7 @@ func _test_local_companions_render_in_top_left_row() -> void:
 		"monster_def_id": "companion_black_wolf",
 		"hp": 3,
 		"max_hp": 5,
-		"visual_model": "monster_quadruped",
+		"visual_model": "monster_wolf",
 		"visual_tint": "#101014",
 		"position": {"x": 4.0, "y": 5.0},
 	})

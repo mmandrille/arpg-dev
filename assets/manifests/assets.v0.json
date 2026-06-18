@@ -233,6 +233,19 @@
         "sha256": "22fb9f8b6d770dae29caf0ec9bab7712668efcf05d2daa4de536d3cb0607970e"
       }
     },
+    "monster_wolf_v0": {
+      "type": "monster",
+      "source_path": "assets/monsters/wolf/wolf.glb",
+      "runtime_path": "client/assets/monsters/wolf/wolf.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "user-provided local GLB",
+        "license": "unconfirmed-user-provided",
+        "sha256": "a96db35755cc459ef36e8c99a1c08cae51d8e33e1dfd6245c52d42f11b47f706"
+      }
+    },
     "monster_tiny_flyer_v0": {
       "type": "monster",
       "source_path": "assets/monsters/tiny_flyer/monster_tiny_flyer.blend",

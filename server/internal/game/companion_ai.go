@@ -34,7 +34,6 @@ func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, rank 
 	statPercent := companionHeroStatPercent(def, rank)
 	hp := monsterDef.MaxHP
 	damage := monsterDef.AttackDamage
-	visualScale := def.Companion.VisualScale
 	if statPercent > 0 {
 		hp = scalePositiveInt(owner.maxHP, statPercent)
 		derived := s.DerivedStatsView()
@@ -42,7 +41,6 @@ func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, rank 
 			Min: scalePositiveInt(int(math.Round(derived.DamageMin)), statPercent),
 			Max: scalePositiveInt(int(math.Round(derived.DamageMax)), statPercent),
 		}
-		visualScale = float64(statPercent) / 100.0
 	}
 	companion := &entity{
 		kind:                  companionEntity,
@@ -60,7 +58,7 @@ func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, rank 
 		sourceSkillID:         skillID,
 		visualModel:           def.Companion.VisualModel,
 		visualTint:            def.Companion.VisualTint,
-		visualScale:           visualScale,
+		visualScale:           def.Companion.VisualScale,
 	}
 	companion.id = s.alloc()
 	level.entities[companion.id] = companion

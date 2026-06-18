@@ -1,0 +1,4 @@
+interface:
+  display_name: "3D Model Integration"
+  short_description: "Wire GLB models into ARPG visuals"
+  default_prompt: "Use $3dmodel to integrate this GLB into the ARPG client as a target visual replacement."

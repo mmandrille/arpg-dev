@@ -38,6 +38,7 @@ Canonical definitions live in [`skills/`](skills/README.md). Tool paths are syml
 | `/finish` | [`skills/finish/SKILL.md`](skills/finish/SKILL.md) | Consolidate `PROGRESS.md` + uncommitted changes → `make ci` green → commit `feat: v{N}: {title}` |
 | `/review {vN?}` | [`skills/review/SKILL.md`](skills/review/SKILL.md) | Analyze the full repo → write overview at `docs/reviews/YYYYMMDD_vN-overview.md` plus companion reports under `docs/reviews/{backend,client,extras}/` |
 | `/showme {gear\|inventory\|...}` | [`skills/showme/SKILL.md`](skills/showme/SKILL.md) | Open or capture a focused Godot client preview for fast visual feedback |
+| `$3dmodel {model task}` | [`skills/3dmodel/SKILL.md`](skills/3dmodel/SKILL.md) | Integrate supplied GLB/glTF models into the Godot client presentation path |
 | `/autoloop` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Curate or accept feature/gameplay ideas, then repeat `/next` → `/spec` → `/plan` → `/execute` → `/finish` for every viable slice selected |
 | `/refactor` | [`skills/refactor/SKILL.md`](skills/refactor/SKILL.md) | Read the latest review scorecard → make small verified cleanup commits until scorecard areas are 9+ or only major work remains |
 
@@ -49,7 +50,7 @@ Workflow: `/next` → `/spec` → `/plan` → `/execute` → `/finish`. When the
 |-------|-----------|--------|
 | **Cursor** | `.cursor/skills/` → `skills/` (committed symlink) | `/next`, `/spec`, `/plan`, `/execute`, `/finish`, `/review`, `/showme`, `/autoloop`, `/refactor` |
 | **Claude Code** | `.claude/skills/` → `skills/` (committed symlink) | same; `/reload-skills` after pull |
-| **Codex** | `skills/` in repo + run [`scripts/link-agent-skills.sh`](scripts/link-agent-skills.sh) once for `~/.codex/skills/` | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$review`, `$showme`, `$autoloop`, `$refactor` |
+| **Codex** | `skills/` in repo + run [`scripts/link-agent-skills.sh`](scripts/link-agent-skills.sh) once for `~/.codex/skills/` | `$next`, `$spec`, `$plan`, `$execute`, `$finish`, `$review`, `$showme`, `$3dmodel`, `$autoloop`, `$refactor` |
 
 Edit skills only under `skills/` — never duplicate into `.cursor/` or `.claude/`.
 

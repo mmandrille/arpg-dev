@@ -264,6 +264,7 @@ func _test_monster_scene() -> void:
 	for scene_path in [
 		"res://scenes/monster_dummy.tscn",
 		"res://scenes/monster_quadruped.tscn",
+		"res://scenes/monster_wolf.tscn",
 		"res://scenes/monster_tiny_flyer.tscn",
 		"res://scenes/monster_skeleton.tscn",
 	]:
@@ -275,6 +276,16 @@ func _test_monster_scene() -> void:
 		if ap != null:
 			for clip in ["idle", "walk", "hit", "death"]:
 				_assert(ap.has_animation(clip), "%s missing clip %s" % [scene_path, clip])
+			if scene_path == "res://scenes/monster_wolf.tscn":
+				var model_root := s.find_child("ModelRoot", false, false) as Node3D
+				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
+				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s ModelRoot should correct GLB nose to parent +Z, got y=%s" % [scene_path, model_root.rotation.y])
+				var wolf_model := s.find_child("WolfModel", true, false) as Node3D
+				_assert(wolf_model != null, "%s WolfModel missing" % scene_path)
+				ap.play("walk")
+				ap.seek(0.1375, true)
+				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
+				_assert(wolf_model.position.y > 0.0, "%s walk clip should bob WolfModel, got y=%s" % [scene_path, wolf_model.position.y])
 		s.free()
 		await process_frame
 
@@ -282,6 +293,8 @@ func _test_monster_scene() -> void:
 func _test_monster_visuals_catalog() -> void:
 	var wolf := MonsterVisualsLoaderScript.resolve("dungeon_wolf")
 	_assert(str(wolf.get("scene", "")) == "monster_quadruped", "dungeon_wolf scene = %s" % wolf.get("scene", ""))
+	var companion_wolf := MonsterVisualsLoaderScript.resolve("companion_black_wolf", "monster_wolf")
+	_assert(str(companion_wolf.get("scene", "")) == "monster_wolf", "companion_black_wolf scene = %s" % companion_wolf.get("scene", ""))
 	var bat := MonsterVisualsLoaderScript.resolve("dungeon_bat")
 	_assert(str(bat.get("scene", "")) == "monster_tiny_flyer", "dungeon_bat scene = %s" % bat.get("scene", ""))
 	_assert(float(bat.get("height_offset", 0.0)) > 0.0, "dungeon_bat must hover above ground")

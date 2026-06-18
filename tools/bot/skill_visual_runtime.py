@@ -204,13 +204,23 @@ def seed_skill_visual_character(
     rank: int,
     level: int,
 ) -> None:
+    payload = skill_visual_debug_progression(entry, rank, level)
+    resp = client.put(
+        f"/v0/debug/characters/{character_id}/progression",
+        headers={**ctx_auth(token), "X-Debug-Token": debug_token},
+        json=payload,
+    )
+    resp.raise_for_status()
+
+
+def skill_visual_debug_progression(entry: SkillDemoEntry, rank: int, level: int) -> dict[str, Any]:
     stats = base_stats_for_class(entry.class_id)
     for stat, required in skill_required_stats(entry.skill_id, rank).items():
         stats[stat] = max(stats.get(stat, 0), required)
     stats["magic"] = max(stats.get("magic", 0), magic_required_for_mana(skill_mana_cost(entry.skill_id, rank)))
     skill_ranks = skill_required_skill_ranks(entry.skill_id)
     skill_ranks[entry.skill_id] = rank
-    payload = {
+    return {
         "level": level,
         "experience": 0,
         "unspent_stat_points": 0,
@@ -223,12 +233,6 @@ def seed_skill_visual_character(
         },
         "skill_ranks": skill_ranks,
     }
-    resp = client.put(
-        f"/v0/debug/characters/{character_id}/progression",
-        headers={**ctx_auth(token), "X-Debug-Token": debug_token},
-        json=payload,
-    )
-    resp.raise_for_status()
 
 
 def ctx_auth(token: str) -> dict[str, str]:
@@ -374,9 +378,9 @@ def run_selected(ctx: dict[str, Any], args: Any, client: httpx.Client, scenario:
     scenario = runtime_scenario(scenario, entry)
     replay_email = ctx["scenario_email"](args.email, f"{scenario.id}-{entry.skill_id}-host")
     _, token = ctx["dev_login"](client, replay_email, args.dev_token)
-    host_character_id = ctx["ensure_character"](client, token, f"{entry.name} Visual Host", entry.class_id)
-    seed_skill_visual_character(client, token, args.debug_token, host_character_id, entry, rank, level)
     if targets_ally(entry):
+        host_character_id = ctx["ensure_character"](client, token, f"{entry.name} Visual Host", entry.class_id)
+        seed_skill_visual_character(client, token, args.debug_token, host_character_id, entry, rank, level)
         ally_email = ctx["scenario_email"](args.email, f"{scenario.id}-{entry.skill_id}-ally")
         _, ally_token = ctx["dev_login"](client, ally_email, args.dev_token)
         ally_character_id = ctx["ensure_character"](client, ally_token, f"{entry.name} Visual Ally")
@@ -403,5 +407,6 @@ def run_selected(ctx: dict[str, Any], args: Any, client: httpx.Client, scenario:
             steps=build_steps(entry),
             assertions=build_assertions(entry, rank),
             seed=scenario.seed,
+            debug_progression=skill_visual_debug_progression(entry, rank, level),
         )
     return scenario, replay_email, token, sess, observed

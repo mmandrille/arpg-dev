@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v255 — fog LOS shadow mask |
+| **Latest completed slice** | v256 — discovery minimap |
 | **Active branch** | `main` |
-| **CI gate** | v255 focused verification and full `make ci` green on 2026-06-17 |
-| **Next slice** | Next feature slice via `$next` / `$autoloop`, using the v250 review follow-ups and deferred fog/dungeon presentation work |
+| **CI gate** | v256 focused verification green on 2026-06-17; autoloop batch `make ci` pending |
+| **Next slice** | Next feature slice via `$next` / `$autoloop`; v256 leaves durable map memory and full-screen map overlay deferred |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |
 

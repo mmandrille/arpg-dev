@@ -31,7 +31,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_character_info_panel_visible", "assert_character_info",
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
 	"assert_skills_panel_visible", "assert_skill_progression",
-	"assert_skill_button_enabled", "assert_skill_bar",
+	"assert_skill_button_enabled", "assert_skill_bar", "assert_discovery_minimap",
 	"assert_fog_of_war",
 	"assert_hotbar_capacity", "assert_hotbar_slot_disabled",
 	"assert_inventory_capacity", "assert_bag_grid", "assert_paper_doll_layout",

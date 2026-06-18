@@ -34,6 +34,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return true
 		"assert_fog_of_war":
 			return _assert_fog_of_war(runner, step, state)
+		"assert_discovery_minimap":
+			return _assert_discovery_minimap(runner, step, state)
 		"assert_floating_combat_text_enabled":
 			return runner._assert_bool_value("assert_floating_combat_text_enabled", step, bool(state.get("floating_combat_text_enabled", false)), bool(step.get("enabled", true)))
 		"assert_damage_number":
@@ -333,6 +335,39 @@ static func _assert_fog_of_war(runner, step: Dictionary, state: Dictionary) -> b
 				key, str(step.get(key, 0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
 			])
 			return false
+	return true
+
+
+static func _assert_discovery_minimap(runner, step: Dictionary, state: Dictionary) -> bool:
+	var minimap: Dictionary = state.get("discovery_minimap", {})
+	for key in ["visible", "toggle_visible", "has_pin"]:
+		if step.has(key) and bool(minimap.get(key, false)) != bool(step.get(key, true)):
+			runner._fail("assert_discovery_minimap failed: %s want=%s got=%s minimap=%s step=%d scenario=%s" % [
+				key, str(step.get(key, true)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+	for key in ["map_size_x", "map_size_y", "explored_count", "wall_count"]:
+		var min_key := "%s_min" % key
+		if step.has(min_key) and int(minimap.get(key, 0)) < int(step.get(min_key, 0)):
+			runner._fail("assert_discovery_minimap failed: %s want_min=%s got=%s minimap=%s step=%d scenario=%s" % [
+				key, str(step.get(min_key, 0)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+		if step.has(key) and int(minimap.get(key, -999999)) != int(step.get(key, 0)):
+			runner._fail("assert_discovery_minimap failed: %s want=%s got=%s minimap=%s step=%d scenario=%s" % [
+				key, str(step.get(key, 0)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+	if step.has("panel_opacity_max") and float(minimap.get("panel_opacity", 1.0)) > float(step.get("panel_opacity_max", 1.0)):
+		runner._fail("assert_discovery_minimap failed: panel_opacity max want=%s got=%s minimap=%s step=%d scenario=%s" % [
+			str(step.get("panel_opacity_max", 1.0)), str(minimap.get("panel_opacity", null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
+	if step.has("panel_opacity_min") and float(minimap.get("panel_opacity", 0.0)) < float(step.get("panel_opacity_min", 0.0)):
+		runner._fail("assert_discovery_minimap failed: panel_opacity min want=%s got=%s minimap=%s step=%d scenario=%s" % [
+			str(step.get("panel_opacity_min", 0.0)), str(minimap.get("panel_opacity", null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
 	return true
 
 

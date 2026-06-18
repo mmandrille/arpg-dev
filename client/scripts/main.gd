@@ -38,8 +38,7 @@ const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const QuestJournalPanelScript := preload("res://scripts/quest_journal_panel.gd")
 const QuestEliteObjectiveStateScript := preload("res://scripts/quest_elite_objective_state.gd")
 const EliteObjectiveTrackerScript := preload("res://scripts/elite_objective_tracker.gd")
-const EliteObjectiveMinimapScript := preload("res://scripts/elite_objective_minimap.gd")
-const EliteObjectiveMinimapStateScript := preload("res://scripts/elite_objective_minimap_state.gd")
+const DiscoveryMinimapScript := preload("res://scripts/discovery_minimap.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const CompanionBarScript := preload("res://scripts/companion_bar.gd")
@@ -209,7 +208,7 @@ var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
 var quest_journal_panel: QuestJournalPanel
 var elite_objective_tracker: EliteObjectiveTracker
-var elite_objective_minimap: EliteObjectiveMinimap
+var discovery_minimap: DiscoveryMinimap
 var character_bar: Control
 var skill_bar: SkillBar
 var companion_bar: Control
@@ -901,7 +900,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_update_character_info_panel()
 	_sync_quest_journal()
 	_sync_elite_objective_tracker()
-	_sync_elite_objective_minimap()
+	_sync_discovery_minimap()
 	_refresh_market_board_summary()
 	_reconcile_player()
 	if bot_mode and not _bot_logged_snapshot:
@@ -1020,7 +1019,7 @@ func _apply_delta(p: Dictionary) -> void:
 	_refresh_inventory_ui()
 	_sync_quest_journal()
 	_sync_elite_objective_tracker()
-	_sync_elite_objective_minimap()
+	_sync_discovery_minimap()
 	var heal_cast_rain_correlations := _heal_cast_rain_correlations(p.get("events", []))
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
@@ -2295,6 +2294,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_raise_gameplay_windows()
 			get_viewport().set_input_as_handled()
 			return
+		if event.keycode == KEY_TAB or event.physical_keycode == KEY_TAB:
+			if discovery_minimap != null: discovery_minimap.toggle(); _sync_discovery_minimap()
+			get_viewport().set_input_as_handled()
+			return
 		if _is_character_info_key(event):
 			_toggle_character_info_panel()
 			get_viewport().set_input_as_handled()
@@ -3411,8 +3414,7 @@ func _build_scene() -> void:
 	ui.add_child(quest_journal_panel)
 	elite_objective_tracker = EliteObjectiveTrackerScript.new()
 	ui.add_child(elite_objective_tracker)
-	elite_objective_minimap = EliteObjectiveMinimapScript.new()
-	ui.add_child(elite_objective_minimap)
+	discovery_minimap = DiscoveryMinimapScript.new(); ui.add_child(discovery_minimap)
 	character_bar = CharacterBarScript.new()
 	character_bar.open_character_requested.connect(_open_character_panel_from_bar)
 	ui.add_child(character_bar)
@@ -3811,7 +3813,7 @@ func _refresh_progression_ui() -> void:
 		character_bar.set_progression(character_progression)
 	if consumable_bar != null:
 		consumable_bar.set_character_progression(character_progression)
-	if fog_overlay != null: fog_overlay.set_progression(character_progression)
+	if fog_overlay != null: fog_overlay.set_progression(character_progression); _sync_discovery_minimap()
 
 func _refresh_skill_ui() -> void:
 	_auto_select_right_click_skill()
@@ -4743,7 +4745,7 @@ func _render_wall_layout(walls: Array) -> void:
 	_sync_fog_wall_layout()
 
 func _sync_fog_wall_layout() -> void:
-	if fog_overlay != null: fog_overlay.set_wall_layout(current_wall_layout)
+	if fog_overlay != null: fog_overlay.set_wall_layout(current_wall_layout); _sync_discovery_minimap()
 func _clear_wall_nodes() -> void:
 	_ensure_wall_renderer()
 	if _wall_renderer != null:
@@ -5250,7 +5252,6 @@ func get_bot_state() -> Dictionary:
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"quest_journal_panel_visible": quest_journal_panel != null and quest_journal_panel.visible,
 		"elite_objective_tracker_visible": elite_objective_tracker != null and elite_objective_tracker.visible,
-		"elite_objective_minimap_visible": elite_objective_minimap != null and elite_objective_minimap.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
@@ -5264,7 +5265,7 @@ func get_bot_state() -> Dictionary:
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"quest_journal_panel": quest_journal_panel.get_debug_state() if quest_journal_panel != null else {},
 		"elite_objective_tracker": elite_objective_tracker.get_debug_state() if elite_objective_tracker != null else {},
-		"elite_objective_minimap": elite_objective_minimap.get_debug_state() if elite_objective_minimap != null else {},
+		"discovery_minimap": discovery_minimap.get_debug_state() if discovery_minimap != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
 		"companion_bar": companion_bar.get_debug_state() if companion_bar != null else {"visible": false, "count": 0, "companions": []},
@@ -5386,10 +5387,9 @@ func _sync_elite_objective_tracker() -> void:
 	if elite_objective_tracker != null:
 		elite_objective_tracker.set_state(QuestEliteObjectiveStateScript.elite_tracker_state(entities))
 
-func _sync_elite_objective_minimap() -> void:
-	if elite_objective_minimap != null:
-		var pos := player_anchor.position if player_anchor != null else Vector3.ZERO
-		elite_objective_minimap.set_state(EliteObjectiveMinimapStateScript.from_entities(entities, pos))
+func _sync_discovery_minimap() -> void:
+	if discovery_minimap == null: return
+	discovery_minimap.sync(current_level, player_anchor.position if player_anchor != null else Vector3.ZERO, float((character_progression.get("derived_stats", {}) as Dictionary).get("light_radius", 0.0)), current_wall_layout, entities)
 
 func _bot_entities_presentation_debug() -> Array:
 	var out: Array = []

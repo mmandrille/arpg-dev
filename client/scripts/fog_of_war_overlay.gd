@@ -27,8 +27,8 @@ uniform float organic_edge_seed = 41.0;
 uniform vec4 gloom_color : source_color = vec4(0.22, 0.24, 0.27, 0.52);
 uniform vec4 darkness_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 
-const float PI = 3.14159265359;
-const float TAU = 6.28318530718;
+const float ORGANIC_PI = 3.14159265359;
+const float ORGANIC_TAU = 6.28318530718;
 
 float hash1(float n) {
 	return fract(sin(n) * 43758.5453123);
@@ -45,7 +45,7 @@ float organic_edge(vec2 delta) {
 	if (organic_edge_px <= 0.0 || length(delta) <= 0.001) {
 		return 0.0;
 	}
-	float angle = (atan(delta.y, delta.x) + PI) / TAU;
+	float angle = (atan(delta.y, delta.x) + ORGANIC_PI) / ORGANIC_TAU;
 	float low = smooth_noise(angle * organic_edge_segments + organic_edge_seed);
 	float high = smooth_noise(angle * organic_edge_segments * 2.17 + organic_edge_seed * 3.31);
 	float combined = low * 0.72 + high * 0.28;

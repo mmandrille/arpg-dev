@@ -16,6 +16,7 @@ const DEFAULT_MONSTER_HEALTH_BAR_MODE := MONSTER_HEALTH_BAR_CONTEXTUAL
 const DEFAULT_MASTER_VOLUME := 0.8
 const DEFAULT_MUSIC_VOLUME := 0.0
 const DEFAULT_SFX_VOLUME := 0.8
+const DEFAULT_MAP_OPACITY := 0.68
 const SUPPORTED_LANGUAGES := ["en", "es"]
 const SUPPORTED_LOOT_FILTER_MODES := ["All", "Magic+", "Rare+", "Unique"]
 const SUPPORTED_MONSTER_HEALTH_BAR_MODES := [
@@ -44,6 +45,7 @@ var monster_health_bar_mode: String = DEFAULT_MONSTER_HEALTH_BAR_MODE
 var master_volume: float = DEFAULT_MASTER_VOLUME
 var music_volume: float = DEFAULT_MUSIC_VOLUME
 var sfx_volume: float = DEFAULT_SFX_VOLUME
+var map_opacity: float = DEFAULT_MAP_OPACITY
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -192,6 +194,12 @@ static func sfx_volume_from_data(data) -> float:
 	return normalize_volume((data as Dictionary).get("sfx_volume", DEFAULT_SFX_VOLUME), DEFAULT_SFX_VOLUME)
 
 
+static func map_opacity_from_data(data) -> float:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_MAP_OPACITY
+	return normalize_volume((data as Dictionary).get("map_opacity", DEFAULT_MAP_OPACITY), DEFAULT_MAP_OPACITY)
+
+
 func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
@@ -204,6 +212,7 @@ func load() -> void:
 		master_volume = DEFAULT_MASTER_VOLUME
 		music_volume = DEFAULT_MUSIC_VOLUME
 		sfx_volume = DEFAULT_SFX_VOLUME
+		map_opacity = DEFAULT_MAP_OPACITY
 		return
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
@@ -217,6 +226,7 @@ func load() -> void:
 	master_volume = master_volume_from_data(parsed)
 	music_volume = music_volume_from_data(parsed)
 	sfx_volume = sfx_volume_from_data(parsed)
+	map_opacity = map_opacity_from_data(parsed)
 
 
 func save() -> void:
@@ -238,6 +248,7 @@ func save() -> void:
 		"master_volume": master_volume,
 		"music_volume": music_volume,
 		"sfx_volume": sfx_volume,
+		"map_opacity": map_opacity,
 	}))
 
 
@@ -345,5 +356,11 @@ func set_music_volume(value: float, persist: bool = true) -> void:
 
 func set_sfx_volume(value: float, persist: bool = true) -> void:
 	sfx_volume = clampf(value, 0.0, 1.0)
+	if persist:
+		save()
+
+
+func set_map_opacity(value: float, persist: bool = true) -> void:
+	map_opacity = clampf(value, 0.0, 1.0)
 	if persist:
 		save()

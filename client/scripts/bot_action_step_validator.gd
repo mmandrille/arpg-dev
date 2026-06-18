@@ -8,7 +8,7 @@ const STEP_TYPES_ACTION := [
 	"drag_equipment_to_bag", "drag_bag_to_outside", "assign_hotbar_slot",
 	"use_hotbar_slot", "double_click_bag_item", "click_menu_button",
 	"enter_character_name", "select_character", "select_character_class", "select_window_size",
-	"set_floating_combat_text", "select_create_game_type",
+	"set_floating_combat_text", "set_map_opacity", "select_create_game_type",
 	"remember_session", "remember_player_position", "click_stat_button",
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"open_resource_wallet_window",
@@ -55,6 +55,8 @@ static func validate(step: Dictionary, stype: String, index: int) -> String:
 		return _require_string(step, index, stype, "class_id")
 	if stype == "select_window_size":
 		return _require_string(step, index, stype, "size")
+	if stype == "set_map_opacity" and not step.has("value"):
+		return "client_steps[%d] (%s) requires value" % [index, stype]
 	if stype == "click_stat_button":
 		return _require_string(step, index, stype, "stat")
 	if stype == "select_create_game_type":

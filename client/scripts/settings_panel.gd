@@ -14,6 +14,7 @@ signal monster_health_bar_mode_selected(mode: String)
 signal master_volume_changed(value: float)
 signal music_volume_changed(value: float)
 signal sfx_volume_changed(value: float)
+signal map_opacity_changed(value: float)
 
 var _buttons: Dictionary = {}
 var _session_type_buttons: Dictionary = {}
@@ -32,9 +33,11 @@ var _monster_health_bar_label: Label
 var _master_volume_label: Label
 var _music_volume_label: Label
 var _sfx_volume_label: Label
+var _map_opacity_label: Label
 var _master_volume_slider: HSlider
 var _music_volume_slider: HSlider
 var _sfx_volume_slider: HSlider
+var _map_opacity_slider: HSlider
 var _back_button: Button
 var _panel: PanelContainer
 var _scroll: ScrollContainer
@@ -48,7 +51,7 @@ func _ready() -> void:
 	visible = false
 
 
-func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE, master_volume: float = ClientSettingsScript.DEFAULT_MASTER_VOLUME, music_volume: float = ClientSettingsScript.DEFAULT_MUSIC_VOLUME, sfx_volume: float = ClientSettingsScript.DEFAULT_SFX_VOLUME) -> void:
+func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE, master_volume: float = ClientSettingsScript.DEFAULT_MASTER_VOLUME, music_volume: float = ClientSettingsScript.DEFAULT_MUSIC_VOLUME, sfx_volume: float = ClientSettingsScript.DEFAULT_SFX_VOLUME, map_opacity: float = ClientSettingsScript.DEFAULT_MAP_OPACITY) -> void:
 	_sync_viewport_size()
 	visible = true
 	set_selected_size_label(selected_label)
@@ -58,6 +61,7 @@ func show_settings(selected_label: String, floating_combat_text_enabled: bool = 
 	set_language(language)
 	set_monster_health_bar_mode(monster_health_bar_mode)
 	set_audio_volumes(master_volume, music_volume, sfx_volume)
+	set_map_opacity(map_opacity)
 
 
 func hide_panel() -> void:
@@ -122,6 +126,10 @@ func set_audio_volumes(master: float, music: float, sfx: float) -> void:
 	_set_slider_value(_master_volume_slider, master)
 	_set_slider_value(_music_volume_slider, music)
 	_set_slider_value(_sfx_volume_slider, sfx)
+
+
+func set_map_opacity(value: float) -> void:
+	_set_slider_value(_map_opacity_slider, 1.0 - value)
 
 
 func _build() -> void:
@@ -213,6 +221,10 @@ func _build() -> void:
 	_sfx_volume_label = _add_slider_label(box)
 	_sfx_volume_slider = _add_volume_slider(box, func(value: float) -> void:
 		sfx_volume_changed.emit(value)
+	)
+	_map_opacity_label = _add_slider_label(box)
+	_map_opacity_slider = _add_volume_slider(box, func(value: float) -> void:
+		map_opacity_changed.emit(1.0 - value)
 	)
 
 	_language_label = Label.new()
@@ -326,6 +338,8 @@ func refresh_texts() -> void:
 		_music_volume_label.text = TextCatalogScript.get_text("settings.music_volume", "Music volume")
 	if _sfx_volume_label != null:
 		_sfx_volume_label.text = TextCatalogScript.get_text("settings.sfx_volume", "SFX volume")
+	if _map_opacity_label != null:
+		_map_opacity_label.text = TextCatalogScript.get_text("settings.map_transparency", "Map transparency")
 	if _language_label != null:
 		_language_label.text = TextCatalogScript.get_text("settings.language", "Language")
 	if _back_button != null:

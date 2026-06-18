@@ -256,6 +256,7 @@ func _ready() -> void:
 	_loot_filter.set_mode_label(client_settings.loot_filter_mode)
 	client_settings.apply()
 	ClientAudioBridgeScript.apply_settings(audio_controller, client_settings)
+	if discovery_minimap != null: discovery_minimap.set_panel_opacity(client_settings.map_opacity)
 	_refresh_localized_texts()
 	_sync_status_text_visibility()
 	_sync_settings_panel()
@@ -612,6 +613,12 @@ func _on_monster_health_bar_mode_selected(mode: String) -> void:
 		client_settings.set_monster_health_bar_mode(mode)
 		_sync_settings_panel()
 		_refresh_monster_health_bar_visibility()
+
+func _on_map_opacity_changed(value: float) -> void:
+	if client_settings == null: return
+	client_settings.set_map_opacity(value)
+	if discovery_minimap != null: discovery_minimap.set_panel_opacity(client_settings.map_opacity)
+	_sync_settings_panel()
 
 func _on_companion_stance_requested(stance: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -3495,6 +3502,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.create_game_session_type_selected.connect(_on_create_game_session_type_selected)
 	settings_panel.language_selected.connect(_on_language_selected)
 	settings_panel.monster_health_bar_mode_selected.connect(_on_monster_health_bar_mode_selected)
+	settings_panel.map_opacity_changed.connect(_on_map_opacity_changed)
 	ClientAudioBridgeScript.connect_volume_signals(settings_panel, audio_controller, client_settings, Callable(self, "_sync_settings_panel"))
 	menu_layer.add_child(settings_panel)
 
@@ -5291,6 +5299,7 @@ func get_bot_state() -> Dictionary:
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
 		"status_text_enabled": client_settings != null and client_settings.status_text,
+		"map_opacity": client_settings.map_opacity if client_settings != null else ClientSettingsScript.DEFAULT_MAP_OPACITY,
 		"language": client_settings.language if client_settings != null else ClientSettingsScript.DEFAULT_LANGUAGE,
 		"boss_reward_status": _last_boss_reward_status,
 		"create_game_session_type": client_settings.create_game_session_type if client_settings != null else ClientSettingsScript.DEFAULT_CREATE_GAME_SESSION_TYPE,
@@ -5613,20 +5622,19 @@ func bot_click_menu_button(button: String) -> void:
 			_exit_game()
 
 func bot_enter_character_name(name: String) -> void:
-	if character_panel != null:
-		character_panel.set_name_text(name)
+	if character_panel != null: character_panel.set_name_text(name)
 func bot_select_character(index: int) -> void:
-	if character_panel != null:
-		character_panel.start_character_at_index(index)
+	if character_panel != null: character_panel.start_character_at_index(index)
 func bot_select_character_class(class_id: String) -> void:
-	if character_panel != null:
-		character_panel.select_class(class_id)
+	if character_panel != null: character_panel.select_class(class_id)
 func bot_select_window_size(size: String) -> void:
 	_on_window_size_selected(size)
 func bot_set_floating_combat_text(enabled: bool) -> void:
 	_on_floating_combat_text_toggled(enabled)
 func bot_select_create_game_type(session_type: String) -> void:
 	_on_create_game_session_type_selected(session_type)
+func bot_set_map_opacity(value: float) -> void:
+	_on_map_opacity_changed(value)
 func bot_select_language(language: String) -> void:
 	_on_language_selected(language)
 func bot_consume_pending_event_at(index: int) -> void:
@@ -5677,48 +5685,40 @@ func _bot_bag_item_id_for_def(item_def_id: String, state: Dictionary) -> String:
 	return ""
 
 func _bot_shadow_inventory_equip(item_instance_id: String) -> void:
-	if inventory_panel == null:
-		return
+	if inventory_panel == null: return
 	inventory_panel.ensure_display_visible()
 	_raise_gameplay_windows()
 	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
 	var to_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
-	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
-		return
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO: return
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag"]))
 
 func _bot_shadow_inventory_unequip() -> void:
-	if inventory_panel == null:
-		return
+	if inventory_panel == null: return
 	inventory_panel.ensure_display_visible()
 	_raise_gameplay_windows()
 	var from_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
 	var to_pos: Vector2 = inventory_panel.get_bag_area_screen_center()
-	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
-		return
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO: return
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "bag"]))
 
 func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
-	if inventory_panel == null:
-		return
+	if inventory_panel == null: return
 	inventory_panel.ensure_display_visible()
 	_raise_gameplay_windows()
 	var from_pos: Vector2 = inventory_panel.get_bag_item_screen_center(item_instance_id)
 	if from_pos == Vector2.ZERO:
 		from_pos = inventory_panel.get_weapon_slot_screen_center()
 	var to_pos: Vector2 = inventory_panel.get_drop_outside_screen_point()
-	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO:
-		return
+	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO: return
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "drop"]))
 
 # --- debug ------------------------------------------------------------------
 
 func _update_debug() -> void:
-	if _debug_label == null:
-		return
+	if _debug_label == null: return
 	_sync_status_text_visibility()
-	if not _debug_label.visible:
-		return
+	if not _debug_label.visible: return
 	var eq = equipped.get("main_hand", null)
 	var ws_state := "?"
 	if client != null:

@@ -55,6 +55,7 @@
     "settings.master_volume": "Volumen general",
     "settings.music_volume": "Volumen de musica",
     "settings.sfx_volume": "Volumen de efectos",
+    "settings.map_transparency": "Transparencia del mapa",
     "settings.session_type.coop": "Cooperativa",
     "settings.session_type.solo": "Solo",
     "settings.status_text": "Texto de estado",

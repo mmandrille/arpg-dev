@@ -9,7 +9,7 @@ const COMPACT_MAP_SIZE := Vector2(208, 208)
 const COMPACT_PANEL_SIZE := Vector2(216, 216)
 const FULLSCREEN_MAP_SIZE := Vector2(568, 568)
 const FULLSCREEN_PANEL_SIZE := Vector2(584, 584)
-const PANEL_OPACITY := 0.68
+const DEFAULT_PANEL_OPACITY := 0.68
 const FLOOR_COLOR := Color(0.32, 0.34, 0.32, 0.58)
 const WALL_COLOR := Color(0.18, 0.15, 0.11, 0.82)
 const GRID_COLOR := Color(1.0, 1.0, 1.0, 0.045)
@@ -26,6 +26,7 @@ var _state: Dictionary = _empty_state()
 var _state_tracker: DiscoveryMinimapState = DiscoveryMinimapStateScript.new()
 var _display_mode: String = MODE_HIDDEN
 var _session_key: String = ""
+var _panel_opacity: float = DEFAULT_PANEL_OPACITY
 
 
 func _ready() -> void:
@@ -87,6 +88,13 @@ func sync(level: int, player_position: Vector3, light_radius: float, walls: Arra
 	set_state(_state_tracker.update(level, player_position, light_radius, walls, entities))
 
 
+func set_panel_opacity(value: float) -> void:
+	_panel_opacity = clampf(value, 0.0, 1.0)
+	add_theme_stylebox_override("panel", _panel_style())
+	if _map != null:
+		_map.queue_redraw()
+
+
 func get_debug_state() -> Dictionary:
 	var objective: Dictionary = _state.get("objective", {})
 	var quest_path: Dictionary = _state.get("quest_path", {})
@@ -99,7 +107,7 @@ func get_debug_state() -> Dictionary:
 		"full_screen": _display_mode == MODE_FULLSCREEN,
 		"map_size_x": map_size.x,
 		"map_size_y": map_size.y,
-		"panel_opacity": PANEL_OPACITY,
+		"panel_opacity": _panel_opacity,
 		"session_key": _session_key,
 		"level": int(_state.get("level", 0)),
 		"explored_count": int(_state.get("explored_count", 0)),
@@ -164,7 +172,7 @@ func _apply_layout() -> void:
 func _draw_map() -> void:
 	var map_size := _current_map_size()
 	var rect := Rect2(Vector2.ZERO, map_size)
-	_map.draw_rect(rect, Color(0.024, 0.027, 0.024, PANEL_OPACITY), true)
+	_map.draw_rect(rect, Color(0.024, 0.027, 0.024, _panel_opacity), true)
 	for t in [0.25, 0.5, 0.75]:
 		var x := map_size.x * float(t)
 		var y := map_size.y * float(t)
@@ -353,7 +361,7 @@ static func _empty_quest_path() -> Dictionary:
 
 func _panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.035, 0.032, 0.026, PANEL_OPACITY)
+	style.bg_color = Color(0.035, 0.032, 0.026, _panel_opacity)
 	style.border_color = Color(0.46, 0.39, 0.27, 0.72)
 	style.border_width_left = 1
 	style.border_width_top = 1

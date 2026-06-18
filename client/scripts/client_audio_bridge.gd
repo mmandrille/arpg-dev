@@ -20,7 +20,8 @@ static func show_settings(panel: SettingsPanel, settings: ClientSettings) -> voi
 		settings.monster_health_bar_mode,
 		settings.master_volume,
 		settings.music_volume,
-		settings.sfx_volume
+		settings.sfx_volume,
+		settings.map_opacity
 	)
 
 
@@ -28,6 +29,7 @@ static func sync_settings_panel(panel: SettingsPanel, settings: ClientSettings) 
 	if panel == null or settings == null:
 		return
 	panel.set_audio_volumes(settings.master_volume, settings.music_volume, settings.sfx_volume)
+	panel.set_map_opacity(settings.map_opacity)
 
 
 static func set_master_volume(controller: ClientAudioController, settings: ClientSettings, value: float) -> void:

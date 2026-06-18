@@ -1554,6 +1554,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "character_panel=%s" % str(step)
 		"assert_create_game_type", "select_create_game_type":
 			return "session_type=%s" % str(step.get("session_type", ""))
+		"set_map_opacity":
+			return "value=%.2f" % float(step.get("value", 0.0))
 		"assert_current_session":
 			return "session=%s" % str(step)
 		"enter_character_name":

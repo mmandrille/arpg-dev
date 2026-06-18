@@ -5,6 +5,9 @@ func (s *Sim) monsterMovementLODActive() bool {
 	if nav.MonsterMovementLODUpdateIntervalTicks <= 1 {
 		return false
 	}
+	if s.overloadDegraded() {
+		return true
+	}
 	return s.activeLiveMonsterCount() >= nav.MonsterMovementLODMinLiveMonsters
 }
 
@@ -29,6 +32,9 @@ func (s *Sim) monsterMovementLODAllowsTick(monster *entity) bool {
 	}
 	if s.monsterMovementHighPrecision(monster) {
 		return true
+	}
+	if s.overloadDegraded() {
+		return false
 	}
 	interval := s.activeNav().MonsterMovementLODUpdateIntervalTicks
 	return (int(s.tick)+int(monster.id%uint64(interval)))%interval == 0

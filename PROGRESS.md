@@ -23,12 +23,12 @@ Last updated: 2026-06-18
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v270 — crowd movement LOD for many enemies |
+| **Latest completed slice** | v271 — multiplayer-ready room simulation guardrails |
 | **Active branch** | `main` |
-| **CI gate** | v270 focused verification green on 2026-06-18; selected autoloop batch `make ci` still pending |
-| **Next slice** | v271 — multiplayer-ready room simulation guardrails |
+| **CI gate** | v268-v271 selected autoloop batch `make ci` green on 2026-06-18 |
+| **Next slice** | engineering review for the v271 green baseline, then `$refactor` for minor paydown |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |
+| **Next engineering review** | Due now after v271 and green v268-v271 batch `make ci` |
 
 
 ### Periodic engineering reviews

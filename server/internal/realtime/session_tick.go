@@ -61,6 +61,17 @@ func (l *sessionLoop) doTick() {
 		l.fanoutResult(res, clients, inputTypes, levelsByPlayerID)
 		broadcastDuration += time.Since(broadcastStart)
 	}
+	totalDuration := time.Since(start)
+	guardrail := evaluateTickGuardrail(totalDuration)
+	if guardrail.OverBudget {
+		degradationApplied := false
+		l.mu.Lock()
+		if l.sim != nil && shouldApplyOverloadDegradation(counters) {
+			degradationApplied = l.sim.ApplyOverloadDegradation()
+		}
+		l.mu.Unlock()
+		logTickBudgetWarning(l.log, tick, totalDuration, guardrail, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, degradationApplied)
+	}
 	if l.perfDebug && time.Since(l.lastPerfLog) >= defaultPerfDebugInterval {
 		l.lastPerfLog = time.Now()
 		logBackendPerf(l.log, tick, start, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, profiler)

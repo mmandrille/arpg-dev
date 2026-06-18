@@ -133,6 +133,7 @@ type NavigationRules struct {
 	MonsterMovementLODMinLiveMonsters     int        `json:"monster_movement_lod_min_live_monsters"`
 	MonsterMovementLODNearDistance        float64    `json:"monster_movement_lod_near_distance"`
 	MonsterMovementLODUpdateIntervalTicks int        `json:"monster_movement_lod_update_interval_ticks"`
+	MonsterOverloadDegradeTicks           int        `json:"monster_overload_degrade_ticks"`
 }
 
 // DungeonGenerationRules controls deterministic generated dungeon floors.

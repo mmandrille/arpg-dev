@@ -29,6 +29,7 @@ Plan: [`docs/plans/v264_2026-06-18-organic-fog-silhouette.md`](../plans/v264_202
 
 ```bash
 make client-unit
+godot --headless --rendering-method gl_compatibility --path client --script res://tests/test_fog_of_war_overlay.gd
 HEADLESS=1 make bot-visual scenario=67_fog_of_war_overlay
 HEADLESS=1 make bot-visual scenario=68_fog_los_shadow_mask
 make maintainability

@@ -97,6 +97,7 @@ make maintainability
 ## Final Verification
 
 - [x] `make client-unit`
+- [x] `godot --headless --rendering-method gl_compatibility --path client --script res://tests/test_fog_of_war_overlay.gd`
 - [x] `HEADLESS=1 make bot-visual scenario=67_fog_of_war_overlay`
 - [x] `HEADLESS=1 make bot-visual scenario=68_fog_los_shadow_mask`
 - [x] `make maintainability`

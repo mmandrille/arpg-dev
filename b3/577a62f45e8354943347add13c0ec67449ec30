@@ -1,0 +1,83 @@
+server/internal/game/approach.go
+  s_8ac650870d633e::t_e11cb0715a5749 32
+docs/specs/v268_spec-crowded-lightning-perf-probe.md
+  s_8ac650870d633e::t_29c09813945270 1-2,4-45,47-49,51-52,54,56,59-61,63-100
+  s_8ac650870d633e::t_9803f2d062a084 3,46,50,53,55,57-58,62
+shared/i18n/en.json
+  s_8ac650870d633e::t_92339ee03d2558 125
+server/internal/game/companion_ai.go
+  s_8ac650870d633e::t_e11cb0715a5749 375
+docs/progress/scenario-catalog.md
+  s_8ac650870d633e::t_9803f2d062a084 56
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_9803f2d062a084 283
+server/internal/game/sim.go
+  s_8ac650870d633e::t_e11cb0715a5749 2964,2998,3313
+  s_8ac650870d633e::t_849807ca74a878 357-358
+server/internal/game/tick_results.go
+  s_8ac650870d633e::t_0badbc58e76009 1-118
+server/internal/realtime/session_tick.go
+  s_8ac650870d633e::t_9a0b9aa445719b 1-68
+shared/rules/worlds.v0.json
+  s_8ac650870d633e::t_92339ee03d2558 927-976
+tools/bot/test_protocol.py
+  s_8ac650870d633e::t_7392d35ea78460 129-143
+server/internal/realtime/perf_debug.go
+  s_8ac650870d633e::t_31cc130278971a 14-17,23-48,59-65,68-81
+shared/i18n/es.json
+  s_8ac650870d633e::t_92339ee03d2558 35
+server/internal/game/perf_debug.go
+  s_8ac650870d633e::t_cb7034e319e270 17-36,77-111
+tools/bot/scenarios/93_crowded_lightning_perf_probe.json
+  s_8ac650870d633e::t_3e7ad67b99004b 20,32
+  s_8ac650870d633e::t_937c6a5fb9d8c6 21,23,25
+  s_8ac650870d633e::t_92339ee03d2558 1-19,22,24,26-31,33-38
+server/internal/game/elite_minion_ai.go
+  s_8ac650870d633e::t_e11cb0715a5749 89
+  s_8ac650870d633e::t_9264f2de8a2c70 97
+server/internal/game/pathfind_test.go
+  s_8ac650870d633e::t_7392d35ea78460 30-40
+shared/rules/monsters.v0.json
+  s_8ac650870d633e::t_7f3034e5045314 313-329
+server/internal/game/handlers.go
+  s_8ac650870d633e::t_e11cb0715a5749 133
+scripts/bot_local.sh
+  s_8ac650870d633e::t_105e1fc0b0be8e 22,41
+docs/as-built/v268_crowded-lightning-perf-probe.md
+  s_8ac650870d633e::t_9803f2d062a084 1-60
+server/internal/realtime/perf_debug_test.go
+  s_8ac650870d633e::t_1208375b92276f 57
+  s_8ac650870d633e::t_7392d35ea78460 1-56,58-75
+docs/plans/v268_2026-06-18-crowded-lightning-perf-probe.md
+  s_8ac650870d633e::t_9803f2d062a084 3,24,28,31-32,34-35,38,41,52,56-57,60-61,65-68,81,85,88,90-93,103-105,108,112-115,134-136,144-149
+  s_8ac650870d633e::t_486eb9c1c7ae7e 1-2,4-23,25-27,29-30,33,36-37,39-40,42-51,53-55,58-59,62-64,69-80,82-84,86-87,89,94-102,106-107,109-111,116-133,137-143,150-151
+scripts/bot_visual.sh
+  s_8ac650870d633e::t_105e1fc0b0be8e 23,83,119,125
+  s_8ac650870d633e::t_a710fd1a856759 15-17
+.maintainability/file-size-baseline.tsv
+  s_8ac650870d633e::t_01952c3a73e9b6 7,14,22
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_9803f2d062a084 220
+make/agents.mk
+  s_8ac650870d633e::t_a710fd1a856759 8
+PROGRESS.md
+  s_8ac650870d633e::t_9803f2d062a084 26,28-29
+server/internal/game/pathfind.go
+  s_8ac650870d633e::t_fda659776f9d38 24-29,32-37,62-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "b3577a62f45e8354943347add13c0ec67449ec30",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

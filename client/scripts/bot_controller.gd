@@ -622,6 +622,7 @@ func _parse_keycode(name: String) -> Key:
 		"KEY_C": return KEY_C
 		"KEY_S": return KEY_S
 		"KEY_D": return KEY_D
+		"KEY_TAB": return KEY_TAB
 		"KEY_ESCAPE": return KEY_ESCAPE
 	return KEY_NONE
 

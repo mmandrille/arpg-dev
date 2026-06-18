@@ -1,0 +1,37 @@
+{
+  "id": "discovery_minimap_toggle",
+  "runner": "godot_client",
+  "world_id": "collision_lab",
+  "seed": "discovery_minimap_toggle_seed",
+  "title": "Discovery minimap toggle",
+  "description": "Client starts with the discovery minimap hidden, toggles it with TAB, and verifies explored map debug state.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
+    { "type": "wait_wall_layout", "current_level": 0, "at_least": 5, "timeout_s": 5.0 },
+    {
+      "type": "assert_discovery_minimap",
+      "visible": false,
+      "toggle_visible": false,
+      "map_size_x": 208,
+      "map_size_y": 208,
+      "explored_count_min": 1,
+      "panel_opacity_min": 0.45,
+      "panel_opacity_max": 0.8
+    },
+    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "assert_discovery_minimap",
+      "visible": true,
+      "toggle_visible": true,
+      "map_size_x": 208,
+      "map_size_y": 208,
+      "explored_count_min": 1,
+      "wall_count_min": 1,
+      "panel_opacity_min": 0.45,
+      "panel_opacity_max": 0.8
+    },
+    { "type": "press_key", "keycode": "KEY_TAB" },
+    { "type": "assert_discovery_minimap", "visible": false, "toggle_visible": false, "explored_count_min": 1 }
+  ]
+}

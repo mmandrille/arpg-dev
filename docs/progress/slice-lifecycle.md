@@ -268,5 +268,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v253** | `fog-of-war-radius` | Complete (`make ci` green) | [`v253_spec-fog-of-war-radius.md`](../specs/v253_spec-fog-of-war-radius.md) | [`v253_2026-06-17-fog-of-war-radius.md`](../plans/v253_2026-06-17-fog-of-war-radius.md) | [`as-built`](../as-built/v253_fog-of-war-radius.md) |
 | **v254** | `area-scaled-dungeon-density` | Complete (focused checks and full `make ci` green) | [`v254_spec-area-scaled-dungeon-density.md`](../specs/v254_spec-area-scaled-dungeon-density.md) | [`v254_2026-06-17-area-scaled-dungeon-density.md`](../plans/v254_2026-06-17-area-scaled-dungeon-density.md) | [`as-built`](../as-built/v254_area-scaled-dungeon-density.md) |
 | **v255** | `fog-los-shadow-mask` | Complete (`make ci` green) | [`v255_spec-fog-los-shadow-mask.md`](../specs/v255_spec-fog-los-shadow-mask.md) | [`v255_2026-06-17-fog-los-shadow-mask.md`](../plans/v255_2026-06-17-fog-los-shadow-mask.md) | [`as-built`](../as-built/v255_fog-los-shadow-mask.md) |
+| **v256** | `discovery-minimap` | Complete (focused checks green; batch `make ci` pending) | [`v256_spec-discovery-minimap.md`](../specs/v256_spec-discovery-minimap.md) | [`v256_2026-06-17-discovery-minimap.md`](../plans/v256_2026-06-17-discovery-minimap.md) | [`as-built`](../as-built/v256_discovery-minimap.md) |
 
 ---

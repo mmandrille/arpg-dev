@@ -352,6 +352,13 @@ static func _assert_discovery_minimap(runner, step: Dictionary, state: Dictionar
 				key, str(step.get(key, "")), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
 			])
 			return false
+	if step.has("session_key_present"):
+		var has_session := str(minimap.get("session_key", "")) != ""
+		if has_session != bool(step.get("session_key_present", true)):
+			runner._fail("assert_discovery_minimap failed: session_key_present want=%s got=%s minimap=%s step=%d scenario=%s" % [
+				str(step.get("session_key_present", true)), str(has_session), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
 	for key in ["map_size_x", "map_size_y", "explored_count", "wall_count", "marker_count", "service_marker_count", "stairs_marker_count", "waypoint_marker_count", "objective_marker_count"]:
 		var min_key := "%s_min" % key
 		if step.has(min_key) and int(minimap.get(key, 0)) < int(step.get(min_key, 0)):

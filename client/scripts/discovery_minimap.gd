@@ -7,6 +7,7 @@ const MODE_COMPACT := "compact"
 const MODE_FULLSCREEN := "fullscreen"
 const COMPACT_MAP_SIZE := Vector2(208, 208)
 const COMPACT_PANEL_SIZE := Vector2(216, 216)
+const COMPACT_PANEL_TOP_OFFSET := 44
 const FULLSCREEN_MAP_SIZE := Vector2(568, 568)
 const FULLSCREEN_PANEL_SIZE := Vector2(584, 584)
 const DEFAULT_PANEL_OPACITY := 0.68
@@ -162,9 +163,9 @@ func _apply_layout() -> void:
 	else:
 		set_anchors_preset(Control.PRESET_TOP_RIGHT)
 		offset_left = -234
-		offset_top = 18
+		offset_top = COMPACT_PANEL_TOP_OFFSET
 		offset_right = -18
-		offset_bottom = 234
+		offset_bottom = COMPACT_PANEL_TOP_OFFSET + COMPACT_PANEL_SIZE.y
 		z_index = 0
 	queue_redraw()
 

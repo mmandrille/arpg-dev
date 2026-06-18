@@ -1,0 +1,46 @@
+client/scripts/main.gd
+  s_3f81647aa19ad8::t_7f27d29c4007ff 65,4864-4865
+client/scripts/monster_visuals_loader.gd
+  s_3f81647aa19ad8::t_7f27d29c4007ff 29
+client/tests/test_animation.gd
+  s_3f81647aa19ad8::t_6408c8de56d691 303,306,309
+  s_3f81647aa19ad8::t_7f27d29c4007ff 266,300-302,304-305,307-308,310,316-318
+  s_3f81647aa19ad8::t_08f74e763b6242 290-299,321
+shared/assets/monster_visuals.v0.schema.json
+  s_3f81647aa19ad8::t_7f27d29c4007ff 22
+client/scenes/monster_quadruped.tscn
+  s_3f81647aa19ad8::t_08f74e763b6242 3-4,8-11,15
+  s_3f81647aa19ad8::t_0c665638e7b6be 12
+client/animations/monster_dark_purple_anims.tres
+  s_3f81647aa19ad8::t_7f27d29c4007ff 1-64
+client/assets/monsters/purple_fantasy/dark_purple_monster.glb.import
+  s_3f81647aa19ad8::t_5baae8e88bf37f 1-42
+client/scenes/monster_dark_purple.tscn
+  s_3f81647aa19ad8::t_7f27d29c4007ff 1-10,12-17
+  s_3f81647aa19ad8::t_6408c8de56d691 11
+client/assets/monsters/purple_fantasy/dark_purple_monster_0.png.import
+  s_3f81647aa19ad8::t_5baae8e88bf37f 1-43
+shared/assets/monster_visuals.v0.json
+  s_3f81647aa19ad8::t_7f27d29c4007ff 96-97
+assets/manifests/assets.v0.json
+  s_3f81647aa19ad8::t_08f74e763b6242 238-239,242,244-246
+  s_3f81647aa19ad8::t_7f27d29c4007ff 223-235
+client/animations/monster_quadruped_fox_anims.tres
+  s_3f81647aa19ad8::t_08f74e763b6242 1-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "73427c6bacc062a90b63fd444c868d01465da728",
+  "prompts": {},
+  "sessions": {
+    "s_3f81647aa19ad8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edc24-0ae7-7091-8339-1b00eeab8199",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+.gitignore
+  s_63b8b609a345ef::t_3b773b9085a736 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "06dd6df186283ece4bd96bc30cbee55c5c489812",
+  "prompts": {},
+  "sessions": {
+    "s_63b8b609a345ef": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fa391df9-c0a9-420e-9a5e-efdd609c1ebf",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

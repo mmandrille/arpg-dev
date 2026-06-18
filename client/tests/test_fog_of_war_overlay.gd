@@ -12,6 +12,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await _test_progression_sets_light_and_gloom_radius()
+	await _test_organic_edge_debug_state()
 	await _test_wall_layout_generates_shadow()
 	await _test_supplied_door_occluder_generates_shadow()
 	await _test_diagonal_wall_shadow_starts_near_visible_edge()
@@ -35,6 +36,20 @@ func _test_progression_sets_light_and_gloom_radius() -> void:
 	_assert_true("screen light radius positive", float(state.get("light_radius_px", 0.0)) > 0.0)
 	_assert_eq("darkness alpha", float(state.get("darkness_alpha", 0.0)), 1.0)
 	_assert_eq("no wall shadows", int(state.get("shadow_count", -1)), 0)
+	overlay.free()
+
+
+func _test_organic_edge_debug_state() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_true("organic edge enabled", bool(state.get("organic_edge_enabled", false)))
+	_assert_true("organic edge pixels positive", float(state.get("organic_edge_px", 0.0)) >= 5.0)
+	_assert_true("organic edge stays modest", float(state.get("organic_edge_px", 9999.0)) <= float(state.get("gloom_radius_px", 1.0)) * 0.10)
+	_assert_eq("organic edge segments", int(state.get("organic_edge_segments", 0)), 18)
 	overlay.free()
 
 
@@ -144,6 +159,8 @@ func _test_zero_radius_disables_overlay() -> void:
 	overlay.set_progression({"derived_stats": {"light_radius": 0}})
 	var state := overlay.get_debug_state()
 	_assert_false("zero radius disabled", bool(state.get("enabled", true)))
+	_assert_false("zero radius organic edge disabled", bool(state.get("organic_edge_enabled", true)))
+	_assert_eq("zero radius organic edge px", float(state.get("organic_edge_px", -1.0)), 0.0)
 	_assert_eq("zero radius shadows", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
 

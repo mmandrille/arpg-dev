@@ -311,19 +311,31 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 
 static func _assert_fog_of_war(runner, step: Dictionary, state: Dictionary) -> bool:
 	var fog: Dictionary = state.get("fog_of_war", {})
-	for key in ["enabled", "active"]:
+	for key in ["enabled", "active", "organic_edge_enabled"]:
 		if step.has(key) and bool(fog.get(key, false)) != bool(step.get(key, true)):
 			runner._fail("assert_fog_of_war failed: %s want=%s got=%s fog=%s step=%d scenario=%s" % [
 				key, str(step.get(key, true)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
 			])
 			return false
-	for key in ["light_radius", "gloom_radius"]:
+	for key in ["light_radius", "gloom_radius", "organic_edge_px"]:
+		var min_key := "%s_min" % key
+		var max_key := "%s_max" % key
+		if step.has(min_key) and float(fog.get(key, 0.0)) < float(step.get(min_key, 0.0)):
+			runner._fail("assert_fog_of_war failed: %s want_min=%s got=%s fog=%s step=%d scenario=%s" % [
+				key, str(step.get(min_key, 0.0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+		if step.has(max_key) and float(fog.get(key, 0.0)) > float(step.get(max_key, 0.0)):
+			runner._fail("assert_fog_of_war failed: %s want_max=%s got=%s fog=%s step=%d scenario=%s" % [
+				key, str(step.get(max_key, 0.0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
 		if step.has(key) and abs(float(fog.get(key, -999999.0)) - float(step.get(key, 0.0))) > float(step.get("tolerance", 0.001)):
 			runner._fail("assert_fog_of_war failed: %s want=%s got=%s fog=%s step=%d scenario=%s" % [
 				key, str(step.get(key, 0.0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
 			])
 			return false
-	for key in ["wall_count", "occluder_count", "shadow_count"]:
+	for key in ["wall_count", "occluder_count", "shadow_count", "organic_edge_segments"]:
 		var min_key := "%s_min" % key
 		if step.has(min_key) and int(fog.get(key, 0)) < int(step.get(min_key, 0)):
 			runner._fail("assert_fog_of_war failed: %s want_min=%s got=%s fog=%s step=%d scenario=%s" % [

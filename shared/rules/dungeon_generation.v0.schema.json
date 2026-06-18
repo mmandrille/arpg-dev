@@ -7,6 +7,7 @@
     "version",
     "floor_size",
     "floor_profiles",
+    "biome_palettes",
     "wall_thickness",
     "player_spawn",
     "stair_placement",
@@ -39,6 +40,11 @@
     "floor_profiles": {
       "type": "array",
       "items": { "$ref": "#/$defs/floor_profile" }
+    },
+    "biome_palettes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/biome_palette" }
     },
     "wall_thickness": { "type": "number", "exclusiveMinimum": 0 },
     "player_spawn": { "$ref": "#/$defs/position" },
@@ -376,6 +382,40 @@
         "floor_size": { "$ref": "#/$defs/floor_size" }
       }
     },
+    "biome_palette": {
+      "type": "object",
+      "required": [
+        "id",
+        "min_depth",
+        "max_depth",
+        "ground_low",
+        "ground_high",
+        "ground_crack",
+        "ground_highlight",
+        "wall_base",
+        "wall_mortar",
+        "wall_highlight"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "min_depth": { "type": "integer", "minimum": 1 },
+        "max_depth": {
+          "anyOf": [
+            { "type": "integer", "minimum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "ground_low": { "$ref": "#/$defs/hex_color" },
+        "ground_high": { "$ref": "#/$defs/hex_color" },
+        "ground_crack": { "$ref": "#/$defs/hex_color" },
+        "ground_highlight": { "$ref": "#/$defs/hex_color" },
+        "wall_base": { "$ref": "#/$defs/hex_color" },
+        "wall_mortar": { "$ref": "#/$defs/hex_color" },
+        "wall_highlight": { "$ref": "#/$defs/hex_color" }
+      }
+    },
+    "hex_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
     "area_count_formula": {
       "type": "object",
       "required": ["area_per_unit", "min", "max"],

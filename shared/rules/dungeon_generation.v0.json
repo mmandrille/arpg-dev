@@ -8,6 +8,32 @@
       "floor_size": { "width": 120, "height": 70 }
     }
   ],
+  "biome_palettes": [
+    {
+      "id": "shallow_cave",
+      "min_depth": 1,
+      "max_depth": 3,
+      "ground_low": "#34383c",
+      "ground_high": "#747067",
+      "ground_crack": "#24272b",
+      "ground_highlight": "#a19a8a",
+      "wall_base": "#393b3e",
+      "wall_mortar": "#17191c",
+      "wall_highlight": "#948b7c"
+    },
+    {
+      "id": "deep_vault",
+      "min_depth": 4,
+      "max_depth": null,
+      "ground_low": "#24353d",
+      "ground_high": "#47686f",
+      "ground_crack": "#142329",
+      "ground_highlight": "#7ea6a1",
+      "wall_base": "#25353b",
+      "wall_mortar": "#101a1f",
+      "wall_highlight": "#6e8b87"
+    }
+  ],
   "wall_thickness": 1.0,
   "player_spawn": { "x": 4, "y": 10 },
   "stair_placement": {

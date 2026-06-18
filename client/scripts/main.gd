@@ -3456,6 +3456,7 @@ func _build_scene() -> void:
 
 func _update_ground_material() -> void:
 	_ground_factory.update_ground_material(ground_node, current_level)
+	if _wall_renderer != null: _wall_renderer.set_level(current_level)
 
 func _setup_menu_layer() -> void:
 	menu_layer = CanvasLayer.new()

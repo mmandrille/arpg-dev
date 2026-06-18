@@ -585,6 +585,16 @@ func _verify_ground_texture_selection() -> bool:
 	var town_c: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_TOWN, 32, 32)
 	var rock_a: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 0, 0)
 	var rock_b: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 17, 29)
+	var shallow_palette: Dictionary = ground_factory.biome_palette_for_level(-1)
+	var deep_palette: Dictionary = ground_factory.biome_palette_for_level(-4)
+	if str(shallow_palette.get("id", "")) == str(deep_palette.get("id", "")):
+		_fail("dungeon biome palettes did not vary by depth")
+		return false
+	var shallow_rock: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 0, 0, shallow_palette)
+	var deep_rock: Color = ground_factory.ground_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 0, 0, deep_palette)
+	if shallow_rock == deep_rock:
+		_fail("dungeon biome palette did not change ground texels")
+		return false
 	if town_a == rock_a:
 		_fail("town and dungeon ground textures share the same base texel")
 		return false

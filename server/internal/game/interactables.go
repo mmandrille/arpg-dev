@@ -1,5 +1,7 @@
 package game
 
+import "math"
+
 func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack bool) {
 	if e.interactableDefID == teleporterDefID {
 		s.activateTeleporter(e, in, res, ack)
@@ -37,6 +39,15 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.openUniqueTestChest(e, in, res, ack)
 		return
 	}
+	if e.state == interactableOpen && s.hasClosedBarrier(e) {
+		e.state = interactableClosed
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(e))})
+		res.Events = append(res.Events, Event{EventType: "interactable_state_changed", EntityID: idStr(e.id), State: interactableClosed, CorrelationID: in.CorrelationID})
+		if ack {
+			res.ack(in.MessageID)
+		}
+		return
+	}
 	if e.state != interactableClosed {
 		res.reject(in.MessageID, "already_open")
 		return
@@ -56,6 +67,35 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 	if ack {
 		res.ack(in.MessageID)
 	}
+}
+
+func (s *Sim) hasClosedBarrier(e *entity) bool {
+	if e == nil || e.kind != interactableEntity {
+		return false
+	}
+	def, ok := s.rules.Interactables[e.interactableDefID]
+	return ok && def.BarrierWhenClosed != nil
+}
+
+func (s *Sim) closedBarrierApproachSideScore(playerPos Vec2, target *entity, goal Vec2) int {
+	if target == nil || target.state != interactableClosed || !s.hasClosedBarrier(target) {
+		return 0
+	}
+	def := s.rules.Interactables[target.interactableDefID]
+	barrier := def.BarrierWhenClosed.Size
+	playerDelta := playerPos.Y - target.pos.Y
+	goalDelta := goal.Y - target.pos.Y
+	if barrier.Y > barrier.X {
+		playerDelta = playerPos.X - target.pos.X
+		goalDelta = goal.X - target.pos.X
+	}
+	if math.Abs(playerDelta) <= 0.000001 || math.Abs(goalDelta) <= 0.000001 {
+		return 1
+	}
+	if (playerDelta < 0 && goalDelta < 0) || (playerDelta > 0 && goalDelta > 0) {
+		return 0
+	}
+	return 2
 }
 
 func (s *Sim) eliteObjectiveChestLocked(e *entity) bool {

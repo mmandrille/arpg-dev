@@ -23,9 +23,9 @@ Last updated: 2026-06-18
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v264 — organic fog silhouette |
+| **Latest completed slice** | v265 — door fog and toggle |
 | **Active branch** | `main` |
-| **CI gate** | v264 focused verification green on 2026-06-18; autoloop batch `make ci` pending |
+| **CI gate** | v264-v265 focused verification and batch `make ci` green on 2026-06-18 |
 | **Next slice** | Selected `$autoloop` queue complete; run batch `make ci`, then engineering review/refactor before more features |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |

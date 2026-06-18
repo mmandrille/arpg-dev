@@ -116,7 +116,7 @@
       "max_count": 1,
       "min_wall_length": 8,
       "min_side_length": 2.0,
-      "gap_width": 1.0
+      "gap_width": 1.6
     },
     "clearance": {
       "player_spawn": 3.0,

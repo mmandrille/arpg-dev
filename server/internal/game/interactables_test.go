@@ -43,6 +43,7 @@ func TestDoorLabClosedDoorPreventsPassageUntilActivated(t *testing.T) {
 	if got := sim.entities[sim.playerID].pos; got.X >= 4 {
 		t.Fatalf("player passed closed door: pos=%+v", got)
 	}
+	sim.entities[sim.playerID].pos = Vec2{X: 3, Y: 2}
 	open := sim.Tick([]Input{{MessageID: "open", CorrelationID: "corr_door", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
 	assertAck(t, open, "open")
 	if !hasEvent(open, "interactable_activated") {
@@ -64,6 +65,61 @@ func TestDoorLabClosedDoorPreventsPassageUntilActivated(t *testing.T) {
 	assertAck(t, pickup, "loot")
 	if !hasEvent(pickup, "item_picked_up") {
 		t.Fatalf("missing item_picked_up after door passage: %+v", pickup.Events)
+	}
+}
+
+func TestOpenDoorCanBeClosedAgain(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_door_toggle", "01", loadRules(t), "door_lab")
+	if err != nil {
+		t.Fatalf("door world: %v", err)
+	}
+	door := sim.findEntity("1002")
+	if door == nil {
+		t.Fatal("missing door")
+	}
+	sim.entities[sim.playerID].pos = Vec2{X: 3, Y: 2}
+	open := sim.Tick([]Input{{MessageID: "open", CorrelationID: "corr_open", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
+	assertAck(t, open, "open")
+	if door.state != interactableOpen {
+		t.Fatalf("door after open = %s, want open", door.state)
+	}
+	close := sim.Tick([]Input{{MessageID: "close", CorrelationID: "corr_close", Type: "action_intent", Action: &ActionIntent{TargetID: "1002"}}})
+	assertAck(t, close, "close")
+	if door.state != interactableClosed {
+		t.Fatalf("door after close = %s, want closed", door.state)
+	}
+	foundCloseEvent := false
+	for _, ev := range close.Events {
+		if ev.EventType == "interactable_state_changed" && ev.EntityID == "1002" && ev.State == interactableClosed {
+			foundCloseEvent = true
+			break
+		}
+	}
+	if !foundCloseEvent {
+		t.Fatalf("missing close state event: %+v", close.Events)
+	}
+}
+
+func TestClosedDoorAutoApproachPrefersPlayerSide(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_door_same_side", "01", loadRules(t), "door_lab")
+	if err != nil {
+		t.Fatalf("door world: %v", err)
+	}
+	door := sim.findEntity("1002")
+	if door == nil {
+		t.Fatal("missing door")
+	}
+	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 5.5, Y: 4.0}
+	goal, steps, ok := sim.findMeleeApproachGoal(door)
+	if !ok {
+		t.Fatal("findMeleeApproachGoal ok=false")
+	}
+	if len(steps) == 0 {
+		t.Fatal("findMeleeApproachGoal returned empty path")
+	}
+	if goal.Y <= door.pos.Y {
+		t.Fatalf("door approach goal = %+v, want same side above closed door at %+v", goal, door.pos)
 	}
 }
 

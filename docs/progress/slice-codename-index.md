@@ -219,6 +219,7 @@ v252_* = expanded-dungeon-profile
 v253_* = fog-of-war-radius
 v268_* = crowded-lightning-perf-probe
 v269_* = authoritative-navigation-budget
+v270_* = crowd-movement-lod
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

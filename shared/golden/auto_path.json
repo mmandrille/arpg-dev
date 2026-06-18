@@ -15,7 +15,10 @@
     "monster_path_nodes_per_tick": 1200,
     "monster_path_cache_ticks": 8,
     "monster_repath_throttle_ticks": 6,
-    "monster_repath_stagger_ticks": 4
+    "monster_repath_stagger_ticks": 4,
+    "monster_movement_lod_min_live_monsters": 24,
+    "monster_movement_lod_near_distance": 6,
+    "monster_movement_lod_update_interval_ticks": 5
   },
   "cases": [
     {

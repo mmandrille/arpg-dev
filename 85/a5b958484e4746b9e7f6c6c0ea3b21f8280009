@@ -1,0 +1,39 @@
+client/scripts/discovery_minimap_state.gd
+  s_1949fa109f68d0::t_8bb7d3fef167a8 7-16,32-34,45-48,136-203
+PROGRESS.md
+  s_1949fa109f68d0::t_b81039bb1c4ea6 26,28-29
+client/scripts/discovery_minimap.gd
+  s_1949fa109f68d0::t_8bb7d3fef167a8 19-21,72,84-88,146,185-221,255-256,259,274-276
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_b81039bb1c4ea6 273
+tools/bot/scenarios/client/71_minimap_points_of_interest.json
+  s_1949fa109f68d0::t_33c500aac296c7 1-32
+client/tests/test_discovery_minimap.gd
+  s_1949fa109f68d0::t_8bb7d3fef167a8 14,57-58,62-94,115-117,124-125
+docs/plans/v258_2026-06-18-minimap-points-of-interest.md
+  s_1949fa109f68d0::t_884ae0f881af57 1-2,4-36,40-41,43-55,61-71,74-87,91-98,102-108
+  s_1949fa109f68d0::t_b81039bb1c4ea6 3,37-39,42,56-60,72-73,88-90,99-101
+docs/specs/v258_spec-minimap-points-of-interest.md
+  s_1949fa109f68d0::t_884ae0f881af57 1-2,4-71
+  s_1949fa109f68d0::t_b81039bb1c4ea6 3
+client/scripts/bot_assertion_handlers.gd
+  s_1949fa109f68d0::t_8bb7d3fef167a8 355
+docs/as-built/v258_minimap-points-of-interest.md
+  s_1949fa109f68d0::t_b81039bb1c4ea6 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "85a5b958484e4746b9e7f6c6c0ea3b21f8280009",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

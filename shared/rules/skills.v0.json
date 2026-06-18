@@ -1149,9 +1149,9 @@
       },
       "companion": {
         "monster_def_id": "companion_black_wolf",
-        "visual_model": "monster_quadruped",
+        "visual_model": "monster_wolf",
         "visual_tint": "101014",
-        "visual_scale": 0.7,
+        "visual_scale": 1.05,
         "hero_stat_percent_base": 70,
         "hero_stat_percent_per_rank": 15,
         "limit": {

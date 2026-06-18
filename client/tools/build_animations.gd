@@ -14,6 +14,7 @@ func _initialize() -> void:
 		"res://assets/monsters/dummy/monster_dummy.glb",
 		"res://animations/monster_anims.tres",
 		_monster_clips())
+	_build_node_root("res://animations/wolf_anims.tres", "ModelRoot/WolfModel", _wolf_clips())
 	print("[build-anims] PASS")
 	quit(0)
 
@@ -49,6 +50,33 @@ func _make_anim(skel_path: String, spec: Dictionary) -> Animation:
 			var t: float = key[0]
 			var q := Quaternion.from_euler(Vector3(key[1] * DEG, key[2] * DEG, key[3] * DEG))
 			a.rotation_track_insert_key(ti, t, q)
+	return a
+
+func _build_node_root(out_path: String, node_path: String, clips: Dictionary) -> void:
+	var lib := AnimationLibrary.new()
+	for clip_name in clips:
+		lib.add_animation(clip_name, _make_node_anim(node_path, clips[clip_name]))
+	var err := ResourceSaver.save(lib, out_path)
+	if err != OK:
+		_fail("save %s failed: %d" % [out_path, err])
+		return
+	print("[build-anims] wrote %s (root-transform clips)" % out_path)
+
+func _make_node_anim(node_path: String, spec: Dictionary) -> Animation:
+	var a := Animation.new()
+	a.length = spec.get("length", 1.0)
+	a.loop_mode = Animation.LOOP_LINEAR if spec.get("loop", false) else Animation.LOOP_NONE
+	if spec.has("positions"):
+		var pi := a.add_track(Animation.TYPE_POSITION_3D)
+		a.track_set_path(pi, NodePath(node_path))
+		for key in spec["positions"]:
+			a.position_track_insert_key(pi, key[0], Vector3(key[1], key[2], key[3]))
+	if spec.has("rotations"):
+		var ri := a.add_track(Animation.TYPE_ROTATION_3D)
+		a.track_set_path(ri, NodePath(node_path))
+		for key in spec["rotations"]:
+			var q := Quaternion.from_euler(Vector3(key[1] * DEG, key[2] * DEG, key[3] * DEG))
+			a.rotation_track_insert_key(ri, key[0], q)
 	return a
 
 func _character_clips() -> Dictionary:
@@ -93,6 +121,41 @@ func _monster_clips() -> Dictionary:
 		"death": {"length": 0.6, "loop": false, "bones": {
 			"pivot": [[0.0, 0, 0, 0], [0.6, 0, 0, 88]],
 		}},
+	}
+
+func _wolf_clips() -> Dictionary:
+	return {
+		"idle": {"length": 1.0, "loop": true, "positions": [
+			[0.0, 0.0, 0.0, 0.0],
+			[0.5, 0.0, 0.025, 0.0],
+			[1.0, 0.0, 0.0, 0.0],
+		]},
+		"walk": {"length": 0.55, "loop": true, "positions": [
+			[0.0, 0.0, 0.0, 0.0],
+			[0.1375, 0.0, 0.055, 0.0],
+			[0.275, 0.0, 0.0, 0.0],
+			[0.4125, 0.0, 0.045, 0.0],
+			[0.55, 0.0, 0.0, 0.0],
+		], "rotations": [
+			[0.0, 0.0, 0.0, -4.0],
+			[0.1375, 0.0, 0.0, 4.0],
+			[0.275, 0.0, 0.0, -4.0],
+			[0.4125, 0.0, 0.0, 4.0],
+			[0.55, 0.0, 0.0, -4.0],
+		]},
+		"hit": {"length": 0.22, "loop": false, "positions": [
+			[0.0, 0.0, 0.0, 0.0],
+			[0.08, -0.08, 0.04, 0.0],
+			[0.22, 0.0, 0.0, 0.0],
+		], "rotations": [
+			[0.0, 0.0, 0.0, 0.0],
+			[0.08, 0.0, 0.0, 10.0],
+			[0.22, 0.0, 0.0, 0.0],
+		]},
+		"death": {"length": 0.5, "loop": false, "rotations": [
+			[0.0, 0.0, 0.0, 0.0],
+			[0.5, 0.0, 0.0, 82.0],
+		]},
 	}
 
 func _fail(msg: String) -> void:

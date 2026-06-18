@@ -1,0 +1,64 @@
+[gd_resource type="AnimationLibrary" format=3]
+
+[sub_resource type="Animation" id="Animation_5rckh"]
+length = 0.5
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ModelRoot/WolfModel")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.5, 1, 0, 0, 0.656059, 0.7547096)
+
+[sub_resource type="Animation" id="Animation_qnova"]
+length = 0.22
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ModelRoot/WolfModel")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.08, 1, -0.08, 0.04, 0, 0.22, 1, 0, 0, 0)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ModelRoot/WolfModel")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.08, 1, 0, 0, 0.08715574, 0.9961947, 0.22, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_3y3rv"]
+loop_mode = 1
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ModelRoot/WolfModel")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.5, 1, 0, 0.025, 0, 1, 1, 0, 0, 0)
+
+[sub_resource type="Animation" id="Animation_xcp7v"]
+length = 0.55
+loop_mode = 1
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ModelRoot/WolfModel")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.1375, 1, 0, 0.055, 0, 0.275, 1, 0, 0, 0, 0.4125, 1, 0, 0.045, 0, 0.55, 1, 0, 0, 0)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ModelRoot/WolfModel")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, -0.034899496, 0.99939084, 0.1375, 1, 0, 0, 0.034899496, 0.99939084, 0.275, 1, 0, 0, -0.034899496, 0.99939084, 0.4125, 1, 0, 0, 0.034899496, 0.99939084, 0.55, 1, 0, 0, -0.034899496, 0.99939084)
+
+[resource]
+_data = {
+&"death": SubResource("Animation_5rckh"),
+&"hit": SubResource("Animation_qnova"),
+&"idle": SubResource("Animation_3y3rv"),
+&"walk": SubResource("Animation_xcp7v")
+}

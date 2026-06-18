@@ -122,15 +122,15 @@ func TestRangerBlackWolfCompanionSummonsAndReplaces(t *testing.T) {
 		t.Fatalf("wolf owner/source = %d/%s, want %d/black_wolf_companion", firstWolf.ownerID, firstWolf.sourceSkillID, player.id)
 	}
 	view := sim.entityView(firstWolf)
-	if view.Type != companionEntity || view.MonsterDefID != "companion_black_wolf" || view.VisualModel != "monster_quadruped" || view.VisualTint != "101014" {
-		t.Fatalf("wolf view = %+v, want black quadruped companion", view)
+	if view.Type != companionEntity || view.MonsterDefID != "companion_black_wolf" || view.VisualModel != "monster_wolf" || view.VisualTint != "101014" {
+		t.Fatalf("wolf view = %+v, want black wolf companion", view)
 	}
 	percent := companionHeroStatPercent(sim.rules.Skills["black_wolf_companion"], sim.effectiveSkillRank("black_wolf_companion"))
 	if firstWolf.maxHP != scalePositiveInt(player.maxHP, percent) || firstWolf.monsterAttackDamage == nil {
 		t.Fatalf("wolf stats hp=%d damage=%+v percent=%d player=%+v", firstWolf.maxHP, firstWolf.monsterAttackDamage, percent, player)
 	}
-	if math.Abs(view.VisualScale-(float64(percent)/100.0)) > 1e-9 {
-		t.Fatalf("wolf visual_scale = %.2f, want %.2f", view.VisualScale, float64(percent)/100.0)
+	if math.Abs(view.VisualScale-sim.rules.Skills["black_wolf_companion"].Companion.VisualScale) > 1e-9 {
+		t.Fatalf("wolf visual_scale = %.2f, want configured %.2f", view.VisualScale, sim.rules.Skills["black_wolf_companion"].Companion.VisualScale)
 	}
 	if !hasEvent(firstCast, "skill_cast") || !hasEntitySpawn(firstCast, idStr(firstWolf.id)) {
 		t.Fatalf("first wolf cast changes/events = %+v / %+v", firstCast.Changes, firstCast.Events)

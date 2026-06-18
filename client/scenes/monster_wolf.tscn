@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/monsters/wolf/wolf.glb" id="1_glb"]
+[ext_resource type="AnimationLibrary" path="res://animations/wolf_anims.tres" id="2_anims"]
+
+[node name="MonsterWolf" type="Node3D"]
+
+[node name="ModelRoot" type="Node3D" parent="."]
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="WolfModel" parent="ModelRoot" instance=ExtResource("1_glb")]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("..")
+libraries = {
+"": ExtResource("2_anims")
+}

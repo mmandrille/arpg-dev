@@ -63,6 +63,7 @@ const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
 const MonsterQuadrupedScene := preload("res://scenes/monster_quadruped.tscn")
+const MonsterWolfScene := preload("res://scenes/monster_wolf.tscn")
 const MonsterTinyFlyerScene := preload("res://scenes/monster_tiny_flyer.tscn")
 const MonsterSkeletonScene := preload("res://scenes/monster_skeleton.tscn")
 var client: NetClient
@@ -1285,12 +1286,14 @@ func _apply_delta(p: Dictionary) -> void:
 		var clip = ClientConstants.MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
 			if event_type in ["attack_missed", "attack_blocked"]:
+				_face_event_source_toward_target(ev)
 				if str(ev.get("source_entity_id", "")) == player_id:
 					ClientAudioBridgeScript.attack(audio_controller)
 					_play_local_attack_animation_for_event(ev)
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
+			_face_event_source_toward_target(ev)
 			if str(ev.get("source_entity_id", "")) == player_id:
 				ClientAudioBridgeScript.attack(audio_controller)
 				_play_local_attack_animation_for_event(ev)
@@ -1460,6 +1463,8 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 			if moved and hp_val > 0:
 				rec["walk_linger"] = ClientConstants.WALK_ANIMATION_LINGER_SECONDS
 				_face_entity_direction(node, Vector2(server_pos.x - prev_pos.x, server_pos.z - prev_pos.z))
+			elif hp_val > 0 and str(rec.get("target_id", "")) != "":
+				_face_node_toward_entity(node, str(rec.get("target_id", "")))
 			rec["controller"].set_locomotion(float(rec.get("walk_linger", 0.0)) > 0.0 and hp_val > 0)
 		if rec["type"] == "player":
 			rec["hp"] = int(e.get("hp", rec.get("hp", ClientConstants.PLAYER_START_HP)))
@@ -2923,6 +2928,24 @@ func _face_entity_direction(node: Node3D, flat_dir: Vector2) -> void:
 		return
 	var facing := flat_dir.normalized()
 	node.rotation.y = atan2(facing.x, facing.y)
+
+func _face_event_source_toward_target(ev: Dictionary) -> void:
+	var source_id := str(ev.get("source_entity_id", ""))
+	var target_id := str(ev.get("target_entity_id", ""))
+	if source_id == "" or target_id == "" or source_id == target_id:
+		return
+	var source_node := _node_for_entity_id(source_id)
+	if source_node == null:
+		return
+	_face_node_toward_entity(source_node, target_id)
+
+func _face_node_toward_entity(source_node: Node3D, target_id: String) -> void:
+	var target_node := _node_for_entity_id(target_id)
+	if source_node == null or target_node == null:
+		return
+	var source_pos := _node_world_or_local_position(source_node)
+	var target_pos := _node_world_or_local_position(target_node)
+	_face_entity_direction(source_node, Vector2(target_pos.x - source_pos.x, target_pos.z - source_pos.z))
 
 func _camera_relative_flat_direction(input: Vector2) -> Vector2:
 	# WASD is screen-relative under the isometric camera, not world X/Z.
@@ -4839,6 +4862,8 @@ func _monster_scene_for_visual(scene_key: String) -> PackedScene:
 	match scene_key:
 		"monster_quadruped":
 			return MonsterQuadrupedScene
+		"monster_wolf":
+			return MonsterWolfScene
 		"monster_tiny_flyer":
 			return MonsterTinyFlyerScene
 		"monster_skeleton":

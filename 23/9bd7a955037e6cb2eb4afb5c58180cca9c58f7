@@ -1,0 +1,41 @@
+PROGRESS.md
+  s_1949fa109f68d0::t_f8990935b0c12c 18,26,28-29
+docs/specs/v257_spec-full-screen-map-overlay.md
+  s_1949fa109f68d0::t_f8990935b0c12c 3
+  s_1949fa109f68d0::t_729f4930f3b811 1-2,4-70
+client/scripts/bot_assertion_handlers.gd
+  s_1949fa109f68d0::t_d0b487d9fbcc58 349-352
+tools/bot/scenarios/client/69_discovery_minimap_toggle.json
+  s_1949fa109f68d0::t_8acbe2f9e30685 16,28,37-47
+docs/as-built/v257_full-screen-map-overlay.md
+  s_1949fa109f68d0::t_f8990935b0c12c 1-35
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_f8990935b0c12c 272
+tools/bot/scenarios/client/70_full_screen_map_overlay.json
+  s_1949fa109f68d0::t_8acbe2f9e30685 1-52
+docs/plans/v257_2026-06-18-full-screen-map-overlay.md
+  s_1949fa109f68d0::t_f8990935b0c12c 3,37-39,42,55-59,72-74,89-91,100-102
+  s_1949fa109f68d0::t_729f4930f3b811 1-2,4-36,40-41,43-54,60-71,75-88,92-99,103-109
+client/scripts/discovery_minimap.gd
+  s_1949fa109f68d0::t_d0b487d9fbcc58 5-11,23,31-40,44-51,58,68,71-75,101-123,127-128,131-134,138,169-172,177,182-184,192-200
+client/scripts/main.gd
+  s_1949fa109f68d0::t_d0b487d9fbcc58 2298
+client/tests/test_discovery_minimap.gd
+  s_1949fa109f68d0::t_d0b487d9fbcc58 15,89-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "239bd7a955037e6cb2eb4afb5c58180cca9c58f7",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -62,6 +62,7 @@ const ClassPresentationsLoaderScript := preload("res://scripts/class_presentatio
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
+const MonsterDarkPurpleScene := preload("res://scenes/monster_dark_purple.tscn")
 const MonsterQuadrupedScene := preload("res://scenes/monster_quadruped.tscn")
 const MonsterWolfScene := preload("res://scenes/monster_wolf.tscn")
 const MonsterTinyFlyerScene := preload("res://scenes/monster_tiny_flyer.tscn")
@@ -4860,6 +4861,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 
 func _monster_scene_for_visual(scene_key: String) -> PackedScene:
 	match scene_key:
+		"monster_dark_purple":
+			return MonsterDarkPurpleScene
 		"monster_quadruped":
 			return MonsterQuadrupedScene
 		"monster_wolf":

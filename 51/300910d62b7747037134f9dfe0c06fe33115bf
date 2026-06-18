@@ -1,0 +1,63 @@
+client/scripts/bot_action_step_validator.gd
+  s_1949fa109f68d0::t_9c73f4df6fa543 11,58-59
+client/tests/test_discovery_minimap.gd
+  s_1949fa109f68d0::t_55739bd622e87a 132,134
+  s_1949fa109f68d0::t_abe1d40c95e3ca 133,135
+shared/i18n/es.json
+  s_1949fa109f68d0::t_0c8eef776134bf 58
+shared/i18n/en.json
+  s_1949fa109f68d0::t_09505a5b6284e8 24
+docs/plans/v266_2026-06-18-map-transparency-setting.md
+  s_1949fa109f68d0::t_5ab99aacbca7ae 1-42
+tools/bot/scenarios/client/74_map_transparency_setting.json
+  s_1949fa109f68d0::t_db27aa60ec5879 1-35
+client/scripts/client_audio_bridge.gd
+  s_1949fa109f68d0::t_492172f21e14d6 23-24,32
+client/scripts/client_settings.gd
+  s_1949fa109f68d0::t_db0b3229bb6ffe 19,48,197-202,215,229,251,361-364
+client/scripts/discovery_minimap.gd
+  s_1949fa109f68d0::t_2df66ce22aa64c 12,29,91-97,110,175,364
+docs/specs/v266_spec-map-transparency-setting.md
+  s_1949fa109f68d0::t_af88c23d7c7c03 1-20,23-63
+  s_1949fa109f68d0::t_1d5d0559a9eb18 21-22
+PROGRESS.md
+  s_1949fa109f68d0::t_cc5b23303ee065 26,28-29
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_ed983f49763fcf 281
+client/scripts/main.gd
+  s_1949fa109f68d0::t_d150558786143c 259,618,5625,5627,5629
+  s_1949fa109f68d0::t_cb48d4e3272402 617,622,3505,5302,5636-5637
+  s_1949fa109f68d0::t_b133f3ff961eb7 619-621
+  s_1949fa109f68d0::t_048727ed408dd5 5688,5693,5697,5702,5706,5713,5719,5721
+client/scripts/bot_step_catalog.gd
+  s_1949fa109f68d0::t_383758b33f25de 54
+client/scripts/bot_scenario_runner.gd
+  s_1949fa109f68d0::t_016c7675926789 1557-1558
+client/tests/test_audio_settings.gd
+  s_1949fa109f68d0::t_0b1c05b46de116 65
+  s_1949fa109f68d0::t_2911c700c64ed6 16,25,29,39,45,51,61,67,76-81
+client/scripts/settings_panel.gd
+  s_1949fa109f68d0::t_904e04ffdae6c8 17,36,40,54,64,131,133-134,225-226,341-342
+  s_1949fa109f68d0::t_b2e2c49bbce736 132,227
+client/scripts/bot_controller.gd
+  s_1949fa109f68d0::t_21435c6dda88d5 147-148,244-246
+docs/as-built/v266_map-transparency-setting.md
+  s_1949fa109f68d0::t_620dbaf2018656 1-8,11-39
+  s_1949fa109f68d0::t_2434257447b0a9 9-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "51300910d62b7747037134f9dfe0c06fe33115bf",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

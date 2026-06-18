@@ -33,6 +33,12 @@ fi
 "$GODOT" --headless --path "$ROOT/client" --import >/dev/null 2>&1 || true
 
 CLIENT_PIDS=()
+prefix_output() {
+  local label="$1"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    printf '[%s] %s\n' "$label" "$line"
+  done
+}
 cleanup() {
   for pid in "${CLIENT_PIDS[@]:-}"; do
     kill "$pid" >/dev/null 2>&1 || true
@@ -47,7 +53,7 @@ for idx in $(seq 1 "$PLAY_CLIENTS"); do
     ARPG_BASE_URL="$BASE_URL" \
     ARPG_DEV_TOKEN="$DEV_TOKEN" \
     ARPG_EMAIL="$EMAIL" \
-    "$GODOT" --path "$ROOT/client" &
+    "$GODOT" --path "$ROOT/client" > >(prefix_output "client$idx") 2>&1 &
   CLIENT_PIDS+=("$!")
 done
 

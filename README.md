@@ -64,6 +64,8 @@ To play manually, run `make play`. It starts Postgres + the local server and ope
 the Godot main menu; create or continue a named character to start a fresh
 `dungeon_levels` session. Direct session startup is a dev override only:
 `ARPG_AUTOSTART=1 ARPG_WORLD_ID=dungeon_levels make play`.
+Backend and client logs stream to the same terminal with source prefixes such
+as `[backend]` and `[client1]`.
 
 For local co-op menu testing, pass a client count. Each client gets a distinct
 dev account and opens at the main menu; use Multiplayer to host or join listed

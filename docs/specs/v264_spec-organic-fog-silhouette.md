@@ -23,13 +23,16 @@ silhouette so the darkness reads more like uneven dungeon gloom than a clean UI 
 
 - The Godot fog overlay uses deterministic angular edge variation for the light/gloom/darkness
   transition instead of a perfectly circular distance boundary.
+- The transition from gloom into full darkness has a softened feather instead of an abrupt outer
+  cutoff.
 - The visual variation is presentation-only: debug light/gloom radii and server visibility semantics
   stay unchanged.
 - The organic edge is stable frame-to-frame for the same hero/camera state and does not flicker with
   wall shadow updates.
-- Existing LOS shadow polygons still render over the organic fog mask.
+- Existing LOS shadow polygons still render over the organic fog mask, with a gloomy underlay and
+  less-than-opaque dark core instead of a single full-black polygon.
 - Bot/debug state exposes that the organic edge is active plus its configured intensity/segment
-  values for scenario assertions.
+  values, darkness feather, and shadow gloom/core alpha values for scenario assertions.
 - Existing fog overlay and LOS shadow client bot scenarios continue to pass with added organic-edge
   assertions.
 

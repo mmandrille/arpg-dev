@@ -49,6 +49,8 @@ func _test_organic_edge_debug_state() -> void:
 	_assert_true("organic edge enabled", bool(state.get("organic_edge_enabled", false)))
 	_assert_true("organic edge pixels positive", float(state.get("organic_edge_px", 0.0)) >= 5.0)
 	_assert_true("organic edge stays modest", float(state.get("organic_edge_px", 9999.0)) <= float(state.get("gloom_radius_px", 1.0)) * 0.10)
+	_assert_true("darkness feather pixels positive", float(state.get("darkness_feather_px", 0.0)) >= 8.0)
+	_assert_true("darkness feather stays modest", float(state.get("darkness_feather_px", 9999.0)) <= float(state.get("gloom_radius_px", 1.0)) * 0.18)
 	_assert_eq("organic edge segments", int(state.get("organic_edge_segments", 0)), 18)
 	overlay.free()
 
@@ -64,6 +66,8 @@ func _test_wall_layout_generates_shadow() -> void:
 	_assert_eq("wall count", int(state.get("wall_count", 0)), 1)
 	_assert_eq("occluder count", int(state.get("occluder_count", 0)), 1)
 	_assert_eq("shadow count", int(state.get("shadow_count", 0)), 1)
+	_assert_true("shadow core is not full black", float(state.get("shadow_core_alpha", 1.0)) < 1.0)
+	_assert_true("shadow gloom underlay present", float(state.get("shadow_gloom_alpha", 0.0)) > 0.0)
 	var shadows: Array = state.get("shadow_polygons", [])
 	var first: Dictionary = shadows[0] if shadows.size() > 0 else {}
 	_assert_true("shadow has polygon points", (first.get("points", []) as Array).size() >= 4)
@@ -161,6 +165,7 @@ func _test_zero_radius_disables_overlay() -> void:
 	_assert_false("zero radius disabled", bool(state.get("enabled", true)))
 	_assert_false("zero radius organic edge disabled", bool(state.get("organic_edge_enabled", true)))
 	_assert_eq("zero radius organic edge px", float(state.get("organic_edge_px", -1.0)), 0.0)
+	_assert_eq("zero radius darkness feather px", float(state.get("darkness_feather_px", -1.0)), 0.0)
 	_assert_eq("zero radius shadows", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
 

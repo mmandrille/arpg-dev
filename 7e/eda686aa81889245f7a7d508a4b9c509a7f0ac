@@ -1,0 +1,20 @@
+tools/bot/skill_visual_runtime.py
+  s_22cd8cf3f4caf5::t_83c23072b814a1 207-213,223,382-383,410
+  s_22cd8cf3f4caf5::t_9b3865d05dd9cd 214-216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "7eeda686aa81889245f7a7d508a4b9c509a7f0ac",
+  "prompts": {},
+  "sessions": {
+    "s_22cd8cf3f4caf5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edc84-925b-7bf2-aed1-3777ce713050",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

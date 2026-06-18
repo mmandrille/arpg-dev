@@ -8,6 +8,14 @@
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 10.0 },
     { "type": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
-    { "type": "assert_fog_of_war", "enabled": true, "light_radius": 9, "gloom_radius": 11.25 }
+    {
+      "type": "assert_fog_of_war",
+      "enabled": true,
+      "light_radius": 9,
+      "gloom_radius": 11.25,
+      "organic_edge_enabled": true,
+      "organic_edge_px_min": 5,
+      "organic_edge_segments": 18
+    }
   ]
 }

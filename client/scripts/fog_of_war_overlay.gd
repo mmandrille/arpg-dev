@@ -8,6 +8,11 @@ const DARKNESS_ALPHA := 1.0
 const SHADOW_EDGE_EPSILON := 0.08
 const SHADOW_START_OFFSET := 0.16
 const SHADOW_WALL_HEIGHT := 1.0
+const ORGANIC_EDGE_WORLD_AMPLITUDE := 0.65
+const ORGANIC_EDGE_MIN_PX := 5.0
+const ORGANIC_EDGE_MAX_GLOOM_FRACTION := 0.10
+const ORGANIC_EDGE_SEGMENTS := 18.0
+const ORGANIC_EDGE_SEED := 41.0
 const SHADER_CODE := """
 shader_type canvas_item;
 render_mode blend_mix, unshaded;
@@ -16,16 +21,48 @@ uniform vec2 center_px = vec2(0.0, 0.0);
 uniform vec2 viewport_px = vec2(1.0, 1.0);
 uniform float light_radius_px = 0.0;
 uniform float gloom_radius_px = 0.0;
+uniform float organic_edge_px = 0.0;
+uniform float organic_edge_segments = 18.0;
+uniform float organic_edge_seed = 41.0;
 uniform vec4 gloom_color : source_color = vec4(0.22, 0.24, 0.27, 0.52);
 uniform vec4 darkness_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 
+const float PI = 3.14159265359;
+const float TAU = 6.28318530718;
+
+float hash1(float n) {
+	return fract(sin(n) * 43758.5453123);
+}
+
+float smooth_noise(float x) {
+	float i = floor(x);
+	float f = fract(x);
+	float u = f * f * (3.0 - 2.0 * f);
+	return mix(hash1(i), hash1(i + 1.0), u);
+}
+
+float organic_edge(vec2 delta) {
+	if (organic_edge_px <= 0.0 || length(delta) <= 0.001) {
+		return 0.0;
+	}
+	float angle = (atan(delta.y, delta.x) + PI) / TAU;
+	float low = smooth_noise(angle * organic_edge_segments + organic_edge_seed);
+	float high = smooth_noise(angle * organic_edge_segments * 2.17 + organic_edge_seed * 3.31);
+	float combined = low * 0.72 + high * 0.28;
+	return (combined - 0.5) * 2.0 * organic_edge_px;
+}
+
 void fragment() {
 	vec2 pos = SCREEN_UV * viewport_px;
-	float d = distance(pos, center_px);
-	if (d <= light_radius_px) {
+	vec2 delta = pos - center_px;
+	float d = length(delta);
+	float edge = organic_edge(delta);
+	float visual_light_radius = max(0.0, light_radius_px + edge * 0.45);
+	float visual_gloom_radius = max(visual_light_radius + 1.0, gloom_radius_px + edge);
+	if (d <= visual_light_radius) {
 		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
-	} else if (d <= gloom_radius_px) {
-		float t = smoothstep(light_radius_px, gloom_radius_px, d);
+	} else if (d <= visual_gloom_radius) {
+		float t = smoothstep(visual_light_radius, visual_gloom_radius, d);
 		COLOR = mix(gloom_color, darkness_color, t);
 	} else {
 		COLOR = darkness_color;
@@ -43,6 +80,7 @@ var _light_radius: float = 0.0
 var _gloom_radius: float = 0.0
 var _light_radius_px: float = 0.0
 var _gloom_radius_px: float = 0.0
+var _organic_edge_px: float = 0.0
 var _center_px := Vector2.ZERO
 var _wall_layout: Array = []
 var _extra_occluder_layout: Array = []
@@ -111,6 +149,10 @@ func get_debug_state() -> Dictionary:
 		"gloom_radius": _gloom_radius,
 		"light_radius_px": _light_radius_px,
 		"gloom_radius_px": _gloom_radius_px,
+		"organic_edge_enabled": _organic_edge_enabled(),
+		"organic_edge_px": _organic_edge_px,
+		"organic_edge_world_amplitude": ORGANIC_EDGE_WORLD_AMPLITUDE,
+		"organic_edge_segments": int(ORGANIC_EDGE_SEGMENTS),
 		"gloom_alpha": GLOOM_ALPHA,
 		"darkness_alpha": DARKNESS_ALPHA,
 		"wall_count": _wall_layout.size(),
@@ -140,6 +182,8 @@ func _ensure_rect() -> void:
 	_material.shader = shader
 	_material.set_shader_parameter("gloom_color", Color(0.22, 0.24, 0.27, GLOOM_ALPHA))
 	_material.set_shader_parameter("darkness_color", Color(0.0, 0.0, 0.0, DARKNESS_ALPHA))
+	_material.set_shader_parameter("organic_edge_segments", ORGANIC_EDGE_SEGMENTS)
+	_material.set_shader_parameter("organic_edge_seed", ORGANIC_EDGE_SEED)
 	_rect.material = _material
 	add_child(_rect)
 	_shadow_root = Node2D.new()
@@ -158,10 +202,12 @@ func _update_shader() -> void:
 	_center_px = _project_target()
 	_light_radius_px = _projected_radius(_light_radius)
 	_gloom_radius_px = _projected_radius(_gloom_radius)
+	_organic_edge_px = _organic_edge_pixel_radius()
 	_material.set_shader_parameter("viewport_px", viewport_size)
 	_material.set_shader_parameter("center_px", _center_px)
 	_material.set_shader_parameter("light_radius_px", _light_radius_px)
 	_material.set_shader_parameter("gloom_radius_px", _gloom_radius_px)
+	_material.set_shader_parameter("organic_edge_px", _organic_edge_px)
 	_update_shadows(viewport_size)
 
 
@@ -179,6 +225,18 @@ func _projected_radius(world_radius: float) -> float:
 		var edge := _camera.unproject_position(_target.global_position + Vector3(world_radius, 0.0, 0.0))
 		return maxf(1.0, center.distance_to(edge))
 	return world_radius * FALLBACK_WORLD_TO_SCREEN
+
+
+func _organic_edge_enabled() -> bool:
+	return _active and _light_radius > 0.0 and _organic_edge_px > 0.0
+
+
+func _organic_edge_pixel_radius() -> float:
+	if _light_radius <= 0.0 or _gloom_radius_px <= 0.0:
+		return 0.0
+	var projected := _projected_radius(ORGANIC_EDGE_WORLD_AMPLITUDE)
+	var max_edge := _gloom_radius_px * ORGANIC_EDGE_MAX_GLOOM_FRACTION
+	return clampf(projected, ORGANIC_EDGE_MIN_PX, max_edge)
 
 
 func _update_shadows(viewport_size: Vector2) -> void:

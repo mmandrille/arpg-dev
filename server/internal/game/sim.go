@@ -3084,40 +3084,6 @@ func (s *Sim) findSkillCastApproachGoal(target *entity, castRange float64, requi
 	return Vec2{}, nil, false
 }
 
-func (s *Sim) findMeleeApproachGoal(target *entity) (Vec2, []Vec2, bool) {
-	return s.findApproachGoalMatching(target, func(pos Vec2, target *entity) bool {
-		return meleeInRange(distance(pos, target.pos), s.playerMeleeReach(), s.targetInteractionRadius(target))
-	})
-}
-
-func (s *Sim) findApproachGoalMatching(target *entity, inRange func(Vec2, *entity) bool) (Vec2, []Vec2, bool) {
-	player := s.activeLevel().entities[s.playerID]
-	if player == nil {
-		return Vec2{}, nil, false
-	}
-	nav := s.activeNav()
-	targetCell := worldToGrid(nav, target.pos)
-	blocked := s.buildBlockedFn()
-	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
-	for radius := 0; radius <= maxRadius; radius++ {
-		candidates := ringCells(targetCell, radius)
-		for _, cell := range candidates {
-			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
-				continue
-			}
-			goal := gridToWorld(nav, cell)
-			if !inRange(goal, target) {
-				continue
-			}
-			steps, ok := PlanPath(nav, player.pos, goal, blocked)
-			if ok {
-				return goal, steps, true
-			}
-		}
-	}
-	return Vec2{}, nil, false
-}
-
 func ringCells(center gridCell, radius int) []gridCell {
 	if radius == 0 {
 		return []gridCell{center}
@@ -5040,6 +5006,9 @@ func (s *Sim) actionable(e *entity) bool {
 			return true
 		}
 		if s.serviceForInteractable(e) == uniqueTestChestService && e.state == interactableOpen {
+			return true
+		}
+		if e.state == interactableOpen && s.hasClosedBarrier(e) {
 			return true
 		}
 		return e.state == interactableClosed || (e.state == interactableReady && e.interactableDefID == teleporterDefID)

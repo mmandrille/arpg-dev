@@ -1178,8 +1178,8 @@ func _apply_delta(p: Dictionary) -> void:
 				else:
 					remote_ctrl.play_one_shot(remote_player_clip)
 			continue
-		if event_type == "interactable_activated" and entities.has(eid):
-			_set_interactable_state(eid, entities[eid], "open")
+		if (event_type == "interactable_activated" or event_type == "interactable_state_changed") and entities.has(eid):
+			_set_interactable_state(eid, entities[eid], "open" if event_type == "interactable_activated" else str(ev.get("state", "")))
 			continue
 		if event_type == "shop_opened":
 			_show_shop_panel(ev)
@@ -4743,9 +4743,9 @@ func _render_wall_layout(walls: Array) -> void:
 	_ensure_wall_renderer()
 	current_wall_layout = _wall_renderer.render_wall_layout(walls) if _wall_renderer != null else []
 	_sync_fog_wall_layout()
-
 func _sync_fog_wall_layout() -> void:
-	if fog_overlay != null: fog_overlay.set_wall_layout(current_wall_layout); _sync_discovery_minimap()
+	if fog_overlay != null: InteractableRulesLoader.sync_fog_overlay(fog_overlay, current_wall_layout, interactable_ids, entities)
+	_sync_discovery_minimap()
 func _clear_wall_nodes() -> void:
 	_ensure_wall_renderer()
 	if _wall_renderer != null:
@@ -5114,7 +5114,7 @@ func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, intera
 				box.size = Vector3(1.8, 0.75, 1.35)
 				shape.position = Vector3(0.0, 0.35, 0.0)
 			else:
-				box.size = Vector3(1.2, 1.2, 0.45)
+				box.size = InteractableRulesLoader.pick_collider_size(interactable_def_id)
 				shape.position = Vector3(0.0, 0.6, 0.0)
 		_:
 			box.size = Vector3(0.75, 0.75, 0.75)
@@ -5127,6 +5127,7 @@ func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String)
 	if rec.get("state", "") == state:
 		return
 	rec["state"] = state
+	if InteractableRulesLoader.has_barrier_when_closed(str(rec.get("interactable_def_id", ""))): _sync_fog_wall_layout()
 	var node := rec["node"] as Node3D
 	if node == null:
 		return
@@ -5143,7 +5144,6 @@ func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String)
 	var target_rot := deg_to_rad(90.0) if state == "open" else 0.0
 	var tween := create_tween()
 	tween.tween_property(pivot, "rotation:y", target_rot, 0.25)
-
 func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 	var node := rec.get("node", null) as Node3D
 	if node == null:

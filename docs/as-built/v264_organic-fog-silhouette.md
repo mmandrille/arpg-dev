@@ -38,8 +38,8 @@ HEADLESS=1 make bot-visual scenario=68_fog_los_shadow_mask
 make maintainability
 ```
 
-All focused commands passed on 2026-06-18. The selected autoloop batch `make ci` gate remains
-pending.
+All focused commands passed on 2026-06-18. The v264-v265 batch `make ci` gate passed on
+2026-06-18.
 
 Manual visual check:
 

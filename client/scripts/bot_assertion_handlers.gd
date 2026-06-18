@@ -335,7 +335,7 @@ static func _assert_fog_of_war(runner, step: Dictionary, state: Dictionary) -> b
 				key, str(step.get(key, 0.0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
 			])
 			return false
-	for key in ["wall_count", "occluder_count", "shadow_count", "organic_edge_segments"]:
+	for key in ["wall_count", "extra_occluder_count", "occluder_count", "shadow_count", "organic_edge_segments"]:
 		var min_key := "%s_min" % key
 		if step.has(min_key) and int(fog.get(key, 0)) < int(step.get(min_key, 0)):
 			runner._fail("assert_fog_of_war failed: %s want_min=%s got=%s fog=%s step=%d scenario=%s" % [

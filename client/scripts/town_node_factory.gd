@@ -3,20 +3,24 @@ extends RefCounted
 
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
+const InteractableRulesLoaderScript := preload("res://scripts/interactable_rules_loader.gd")
 
 static func make_door_node() -> Node3D:
+	var barrier := InteractableRulesLoaderScript.barrier_size("wooden_door")
+	var width := float(barrier.get("x", 1.0))
+	var depth := maxf(float(barrier.get("y", 0.25)), 0.25)
 	var root := Node3D.new()
 	root.name = "InteractableDoor"
 	var pivot := Node3D.new()
 	pivot.name = "DoorPivot"
-	pivot.position = Vector3(-0.5, 0.0, 0.0)
+	pivot.position = Vector3(-width * 0.5, 0.0, 0.0)
 	root.add_child(pivot)
 	var panel := MeshInstance3D.new()
 	panel.name = "DoorPanel"
 	var mesh := BoxMesh.new()
-	mesh.size = Vector3(1.0, 1.0, 0.25)
+	mesh.size = Vector3(width, 1.0, depth)
 	panel.mesh = mesh
-	panel.position = Vector3(0.5, 0.5, 0.0)
+	panel.position = Vector3(width * 0.5, 0.5, 0.0)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color(0.55, 0.32, 0.15)
 	panel.material_override = mat

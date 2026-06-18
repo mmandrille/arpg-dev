@@ -1,0 +1,67 @@
+shared/golden/auto_path.v0.schema.json
+  s_8ac650870d633e::t_ed2d35d952faad 12-23,40-45
+server/internal/game/pathfind.go
+  s_8ac650870d633e::t_b22f3c5068ad73 27-29,66-69
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_6c082393a9486f 284
+server/internal/game/monster_navigation_budget.go
+  s_8ac650870d633e::t_611739a0009714 77,82-93,101
+  s_8ac650870d633e::t_3bdcac6908f971 1-60,64-68,70-76,78-81,94-100,102-117
+  s_8ac650870d633e::t_8aecd61624f26d 61-63,69
+docs/specs/v269_spec-authoritative-navigation-budget.md
+  s_8ac650870d633e::t_bf3c8ef8b6fecb 1-2,4-67,71-78
+  s_8ac650870d633e::t_6c082393a9486f 3,68-70
+server/internal/game/perf_debug.go
+  s_8ac650870d633e::t_b22f3c5068ad73 85,98-101,107,111-113
+shared/rules/navigation.v0.json
+  s_8ac650870d633e::t_d28995f64b6c96 11-16
+docs/plans/v269_2026-06-18-authoritative-navigation-budget.md
+  s_8ac650870d633e::t_6c082393a9486f 3,43-46,65,68-69,84-89,107,109-110,119-124
+  s_8ac650870d633e::t_bf3c8ef8b6fecb 1-2,4-42,47-64,66-67,70-83,90-106,108,111-118,125-126
+shared/golden/auto_path.json
+  s_8ac650870d633e::t_628a878af755bf 13-18
+server/internal/game/rules.go
+  s_8ac650870d633e::t_d28995f64b6c96 124-132,1101-1102,1105
+server/internal/game/elite_minion_ai.go
+  s_8ac650870d633e::t_8a9b67ab1419d6 89
+server/internal/game/navigation_rules.go
+  s_8ac650870d633e::t_d28995f64b6c96 1-10,15-62
+  s_8ac650870d633e::t_ca6b038eef7b2c 11-14
+server/internal/game/monster_navigation_budget_test.go
+  s_8ac650870d633e::t_5cc1ce84461dff 1-45
+shared/golden/monster_chase.json
+  s_8ac650870d633e::t_628a878af755bf 15-20
+PROGRESS.md
+  s_8ac650870d633e::t_6c082393a9486f 26,28-29
+shared/rules/navigation.v0.schema.json
+  s_8ac650870d633e::t_d28995f64b6c96 6-17,34-39
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_6c082393a9486f 221
+server/internal/game/sim.go
+  s_8ac650870d633e::t_66b6dfc3a4fbfc 165-171
+  s_8ac650870d633e::t_ca6b038eef7b2c 359-365
+  s_8ac650870d633e::t_70a6246ccfa64f 3307-3312,3316,3320,3324-3326,3333-3334,3349,3356-3358,3361
+  s_8ac650870d633e::t_24d6b7c940c460 366-367
+shared/golden/monster_chase.v0.schema.json
+  s_8ac650870d633e::t_ed2d35d952faad 14-25,42-47
+docs/as-built/v269_authoritative-navigation-budget.md
+  s_8ac650870d633e::t_6c082393a9486f 1-57
+server/internal/game/pathfind_test.go
+  s_8ac650870d633e::t_5cc1ce84461dff 41-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "518aa3336cf628ca006dd3bd7859923604ced18b",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,11 +1,11 @@
 # --- Client -------------------------------------------------------------------
-.PHONY: client-unit client-smoke play play-remote skill-logo-sheet
+.PHONY: client-unit client-smoke play play-debug play-remote skill-logo-sheet
 SKILL_LOGO_SHEET_OUT := $(or $(OUT),.artifacts/skill-logo-sheet.svg)
-PLAY_CLIENTS_FROM_GOALS := $(firstword $(filter-out play play-remote,$(MAKECMDGOALS)))
+PLAY_CLIENTS_FROM_GOALS := $(firstword $(filter-out play play-debug play-remote,$(MAKECMDGOALS)))
 PLAY_CLIENTS ?= $(if $(PLAY_CLIENTS_FROM_GOALS),$(PLAY_CLIENTS_FROM_GOALS),1)
 PLAY_MAIL ?= $(mail)
 PLAY_MAIL_ENV := $(if $(PLAY_MAIL),ARPG_PLAY_EMAIL="$(PLAY_MAIL)",)
-ifneq ($(filter play play-remote,$(MAKECMDGOALS)),)
+ifneq ($(filter play play-debug play-remote,$(MAKECMDGOALS)),)
 ifneq ($(PLAY_CLIENTS_FROM_GOALS),)
 .PHONY: $(PLAY_CLIENTS_FROM_GOALS)
 $(PLAY_CLIENTS_FROM_GOALS):
@@ -25,6 +25,9 @@ skill-logo-sheet: tools ## Render current skill logos and labels to an SVG image
 
 play: db-up ## Play locally: use `mail=user@example.com` for one account, or `make play 3` for co-op
 	GODOT="$(GODOT)" ARPG_ADDR="$(PLAY_ADDR)" BASE_URL="$(PLAY_BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" $(PLAY_MAIL_ENV) ./scripts/play.sh
+
+play-debug: db-up ## Play locally with perf logs captured to /tmp/arpg-perf.log
+	ARPG_PERF_DEBUG=true GODOT="$(GODOT)" ARPG_ADDR="$(PLAY_ADDR)" BASE_URL="$(PLAY_BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" $(PLAY_MAIL_ENV) ./scripts/play.sh 2>&1 | tee /tmp/arpg-perf.log
 
 play-remote: ## Launch menu client(s) against an existing backend: `BASE_URL=https://... make play-remote 3`
 	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" ./scripts/play_remote.sh

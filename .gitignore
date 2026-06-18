@@ -29,3 +29,4 @@ server/arpg-replay
 
 /.artifacts
 /.claude/worktrees
+.DS_Store

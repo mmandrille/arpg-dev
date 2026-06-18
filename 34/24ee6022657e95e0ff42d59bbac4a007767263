@@ -1,0 +1,62 @@
+tools/bot/scenarios/client/45_elite_objective_minimap_pin.json
+  s_10773d1af6d077::t_56a23374783ec0 6-7,19,21,23,25-27
+client/scripts/bot_step_catalog.gd
+  s_10773d1af6d077::t_1f56c678822ace 34
+tools/bot/scenarios/client/69_discovery_minimap_toggle.json
+  s_10773d1af6d077::t_1f56c678822ace 1-37
+client/tests/test_discovery_minimap.gd.uid
+  s_10773d1af6d077::t_5d21c3b68e9381 1
+client/scripts/discovery_minimap_state.gd.uid
+  s_10773d1af6d077::t_5d21c3b68e9381 1
+docs/specs/v256_spec-discovery-minimap.md
+  s_10773d1af6d077::t_a0ab07b7956f1b 1-2,4-95
+  s_10773d1af6d077::t_292784e2b02840 3
+client/scripts/discovery_minimap.gd.uid
+  s_10773d1af6d077::t_5d21c3b68e9381 1
+client/scripts/bot_controller.gd
+  s_10773d1af6d077::t_54848d0cb81987 625
+PROGRESS.md
+  s_10773d1af6d077::t_292784e2b02840 26,28-29
+scripts/client_smoke.sh
+  s_10773d1af6d077::t_a9a0c23d2a9725 118
+client/scripts/bot_assertion_handlers.gd
+  s_10773d1af6d077::t_1f56c678822ace 37-38,341-370
+client/scripts/discovery_minimap_state.gd
+  s_10773d1af6d077::t_038f7945cc9302 1-125
+client/scripts/discovery_minimap.gd
+  s_10773d1af6d077::t_716bb03517c368 4,17,40-43
+  s_10773d1af6d077::t_65d1c65e8ea368 60
+  s_10773d1af6d077::t_038f7945cc9302 1-3,5-16,18-39,44-59,61-191
+client/scripts/main.gd
+  s_10773d1af6d077::t_d937a46a38f84c 3417,5391-5392
+  s_10773d1af6d077::t_716bb03517c368 2297-2298,3816,4748
+  s_10773d1af6d077::t_5f5efdf9060333 903,1022
+  s_10773d1af6d077::t_190fb29d0a6d7f 41,211
+  s_10773d1af6d077::t_3ad94c81b80ae1 5268,5390
+  s_10773d1af6d077::t_7e4912bb6a0754 2299-2300
+client/tests/test_discovery_minimap.gd
+  s_10773d1af6d077::t_db3a95801d1583 1-97
+docs/as-built/v256_discovery-minimap.md
+  s_10773d1af6d077::t_292784e2b02840 1-41
+docs/plans/v256_2026-06-17-discovery-minimap.md
+  s_10773d1af6d077::t_292784e2b02840 3,47-51,54-55,69,71,73,75,77,90-91,93,96,98,111-112,114,128-130,139-142
+  s_10773d1af6d077::t_d92304d72cc629 1-2,4-46,52-53,56-68,70,72,74,76,78-89,92,94-95,97,99-110,113,115-127,131-138,143-149
+docs/progress/slice-lifecycle.md
+  s_10773d1af6d077::t_292784e2b02840 271
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3424ee6022657e95e0ff42d59bbac4a007767263",
+  "prompts": {},
+  "sessions": {
+    "s_10773d1af6d077": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed880-8869-7983-86e9-7dfc15ab4470",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

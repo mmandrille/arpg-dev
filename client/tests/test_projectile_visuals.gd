@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_test_training_arrow_is_white_arrow_shape()
 	_test_ranger_projectiles_use_green_arrow_cues()
 	_test_magic_bolt_remains_blue_energy_bolt()
+	_test_ligthing_projectile_uses_yellow_energy_bolt()
 
 	print("[gdtest] PASS: test_projectile_visuals (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -65,6 +66,16 @@ func _test_magic_bolt_remains_blue_energy_bolt() -> void:
 	_assert_true("magic bolt energy exists", energy != null)
 	var mat := energy.material_override as StandardMaterial3D
 	_assert_true("magic bolt remains blue", mat.albedo_color.b > mat.albedo_color.r)
+	bolt.free()
+
+
+func _test_ligthing_projectile_uses_yellow_energy_bolt() -> void:
+	var bolt := ProjectileVisualsScript.make_node("ligthing_projectile")
+	_assert_true("ligthing has no arrow head", bolt.find_child("ArrowHead", false, false) == null)
+	var energy := bolt.find_child("EnergyBolt", false, false) as MeshInstance3D
+	_assert_true("ligthing energy exists", energy != null)
+	var mat := energy.material_override as StandardMaterial3D
+	_assert_true("ligthing projectile is yellow", mat.albedo_color.r > 0.9 and mat.albedo_color.g > 0.8 and mat.albedo_color.b < 0.4)
 	bolt.free()
 
 

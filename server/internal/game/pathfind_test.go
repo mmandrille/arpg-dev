@@ -38,6 +38,20 @@ func TestPlanPathWithStatsRecordsVisitedNodes(t *testing.T) {
 	}
 }
 
+func TestPlanPathWithStatsStopsAtNodeLimit(t *testing.T) {
+	stats := PathSearchStats{NodeLimit: 1}
+	_, ok := PlanPathWithStats(testNav(), Vec2{X: 0, Y: 0}, Vec2{X: 3, Y: 0}, func(_, _ int) bool { return false }, &stats)
+	if ok {
+		t.Fatal("PlanPathWithStats returned ok=true after node limit")
+	}
+	if !stats.LimitExceeded {
+		t.Fatal("LimitExceeded = false, want true")
+	}
+	if stats.NodesVisited <= stats.NodeLimit {
+		t.Fatalf("NodesVisited = %d, want over limit %d", stats.NodesVisited, stats.NodeLimit)
+	}
+}
+
 func TestPlanPathBlockedCellDetour(t *testing.T) {
 	blocked := func(gx, gy int) bool { return gx == 1 && gy == 0 }
 	steps, ok := PlanPath(testNav(), Vec2{X: 0, Y: 0}, Vec2{X: 3, Y: 0}, blocked)

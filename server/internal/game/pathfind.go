@@ -24,7 +24,9 @@ type pathState struct {
 // PathSearchStats records deterministic pathfinder work units. It intentionally
 // excludes wall-clock timing so authoritative game logic stays replay-safe.
 type PathSearchStats struct {
-	NodesVisited int
+	NodesVisited  int
+	NodeLimit     int
+	LimitExceeded bool
 }
 
 // PlanPath returns one-tick direction steps from start to goal using 8-way A*.
@@ -61,6 +63,10 @@ func PlanPathWithStats(nav NavigationRules, start, goal Vec2, blocked func(gx, g
 		}
 		if stats != nil {
 			stats.NodesVisited++
+			if stats.NodeLimit > 0 && stats.NodesVisited > stats.NodeLimit {
+				stats.LimitExceeded = true
+				return nil, false
+			}
 		}
 		if current.state.cell == goalCell {
 			return reconstructPath(cameFrom, startState, current.state), true

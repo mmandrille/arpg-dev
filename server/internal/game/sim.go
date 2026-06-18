@@ -162,6 +162,13 @@ type entity struct {
 	spawnPos              Vec2
 	aiMode                string
 	aiTargetPlayerID      uint64
+	navPath               []Vec2
+	navGoal               Vec2
+	navPathValid          bool
+	navPathCell           gridCell
+	navTargetPlayerID     uint64
+	navPathTick           uint64
+	navNextRepathTick     uint64
 	lastAttackTick        uint64
 	hasAttacked           bool
 }
@@ -349,13 +356,15 @@ type playerState struct {
 // Given the same seed and the same ordered inputs, it produces identical
 // outputs (entity ids, events, final state) on every run (ADR-0001 D8.1).
 type Sim struct {
-	sessionID     string
-	seed          string
-	rng           *RNG
-	rules         *Rules
-	gameplayDebug bool
-	tickPerf      PerfCounters
-	tickProfiler  TickProfiler
+	sessionID                   string
+	seed                        string
+	rng                         *RNG
+	rules                       *Rules
+	gameplayDebug               bool
+	tickPerf                    PerfCounters
+	tickProfiler                TickProfiler
+	monsterPathRequestsThisTick int
+	monsterPathNodesThisTick    int
 
 	tick               uint64
 	nextID             uint64
@@ -3295,22 +3304,34 @@ func (s *Sim) monsterMovementGoal(monster *entity, player *entity, def MonsterDe
 
 func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterDef) (Vec2, bool) {
 	nav := s.activeNav()
+	if goal, ok := s.cachedMonsterNavigationGoal(monster, player); ok {
+		return goal, true
+	}
+	if !s.monsterCanRepath(monster) {
+		return Vec2{}, false
+	}
 	candidates := s.monsterAttackSlotCandidates(monster, player, def)
 	var (
 		bestGoal       Vec2
+		bestSteps      []Vec2
 		bestPathLen    int
 		bestMonsterDst = math.MaxFloat64
 		found          bool
+		attempted      bool
 	)
 	blocked := s.buildMonsterBlockedFn(monster.id)
 	for _, goal := range candidates {
+		if !s.monsterPathBudgetAvailable() {
+			break
+		}
 		if !s.positionInNavigationBounds(nav, goal) || s.monsterPositionBlocked(goal, monster.id) {
 			continue
 		}
 		if def.effectiveAttackMode() == attackModeRanged && !s.hasClearMonsterRangedShot(goal, player) {
 			continue
 		}
-		steps, ok := s.planPath(nav, monster.pos, goal, blocked)
+		attempted = true
+		steps, ok := s.planMonsterPath(monster, nav, monster.pos, goal, blocked)
 		if !ok {
 			continue
 		}
@@ -3325,15 +3346,19 @@ func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterD
 			(len(steps) == bestPathLen && monsterDst < bestMonsterDst-1e-9) ||
 			(len(steps) == bestPathLen && math.Abs(monsterDst-bestMonsterDst) <= 1e-9 && vecLess(goal, bestGoal)) {
 			bestGoal = goal
+			bestSteps = steps
 			bestPathLen = len(steps)
 			bestMonsterDst = monsterDst
 			found = true
 		}
 	}
 	if !found {
+		if attempted || !s.monsterPathBudgetAvailable() {
+			s.scheduleMonsterRepath(monster)
+		}
 		return Vec2{}, false
 	}
-
+	s.cacheMonsterNavigationPath(monster, player.id, bestGoal, bestSteps)
 	return bestGoal, true
 }
 

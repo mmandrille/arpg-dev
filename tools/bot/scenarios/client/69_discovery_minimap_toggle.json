@@ -7,6 +7,7 @@
   "description": "Client starts with the discovery minimap hidden, toggles it with TAB, and verifies explored map debug state.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "set_map_opacity", "value": 0.68 },
     { "type": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
     { "type": "wait_wall_layout", "current_level": 0, "at_least": 5, "timeout_s": 5.0 },
     {

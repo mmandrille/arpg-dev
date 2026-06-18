@@ -365,13 +365,13 @@ type Sim struct {
 	tickProfiler                TickProfiler
 	monsterPathRequestsThisTick int
 	monsterPathNodesThisTick    int
-
-	tick               uint64
-	nextID             uint64
-	playerID           uint64
-	players            map[uint64]*playerState
-	goldRoll           uint64
-	nextAreaHealZoneID uint64
+	overloadDegradeUntilTick    uint64
+	tick                        uint64
+	nextID                      uint64
+	playerID                    uint64
+	players                     map[uint64]*playerState
+	goldRoll                    uint64
+	nextAreaHealZoneID          uint64
 
 	levels                map[int]*LevelState
 	currentLevel          int

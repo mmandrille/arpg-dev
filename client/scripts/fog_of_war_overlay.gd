@@ -8,9 +8,15 @@ const DARKNESS_ALPHA := 1.0
 const SHADOW_EDGE_EPSILON := 0.08
 const SHADOW_START_OFFSET := 0.16
 const SHADOW_WALL_HEIGHT := 1.0
+const SHADOW_GLOOM_COLOR := Color(0.10, 0.11, 0.13, 0.42)
+const SHADOW_CORE_COLOR := Color(0.0, 0.0, 0.0, 0.82)
+const SHADOW_GLOOM_SCALE := 1.035
 const ORGANIC_EDGE_WORLD_AMPLITUDE := 0.65
+const DARKNESS_FEATHER_WORLD := 1.15
 const ORGANIC_EDGE_MIN_PX := 5.0
+const DARKNESS_FEATHER_MIN_PX := 8.0
 const ORGANIC_EDGE_MAX_GLOOM_FRACTION := 0.10
+const DARKNESS_FEATHER_MAX_GLOOM_FRACTION := 0.18
 const ORGANIC_EDGE_SEGMENTS := 18.0
 const ORGANIC_EDGE_SEED := 41.0
 const SHADER_CODE := """
@@ -22,6 +28,7 @@ uniform vec2 viewport_px = vec2(1.0, 1.0);
 uniform float light_radius_px = 0.0;
 uniform float gloom_radius_px = 0.0;
 uniform float organic_edge_px = 0.0;
+uniform float darkness_feather_px = 0.0;
 uniform float organic_edge_segments = 18.0;
 uniform float organic_edge_seed = 41.0;
 uniform vec4 gloom_color : source_color = vec4(0.22, 0.24, 0.27, 0.52);
@@ -59,11 +66,17 @@ void fragment() {
 	float edge = organic_edge(delta);
 	float visual_light_radius = max(0.0, light_radius_px + edge * 0.45);
 	float visual_gloom_radius = max(visual_light_radius + 1.0, gloom_radius_px + edge);
+	float darkness_start_radius = max(visual_light_radius + 1.0, visual_gloom_radius - darkness_feather_px);
+	float visual_dark_radius = visual_gloom_radius + darkness_feather_px;
+	vec4 dense_gloom_color = vec4(gloom_color.rgb, min(gloom_color.a + 0.16, 0.78));
 	if (d <= visual_light_radius) {
 		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
-	} else if (d <= visual_gloom_radius) {
-		float t = smoothstep(visual_light_radius, visual_gloom_radius, d);
-		COLOR = mix(gloom_color, darkness_color, t);
+	} else if (d <= darkness_start_radius) {
+		float t = smoothstep(visual_light_radius, darkness_start_radius, d);
+		COLOR = mix(gloom_color, dense_gloom_color, t);
+	} else if (d <= visual_dark_radius) {
+		float t = smoothstep(darkness_start_radius, visual_dark_radius, d);
+		COLOR = mix(dense_gloom_color, darkness_color, t);
 	} else {
 		COLOR = darkness_color;
 	}
@@ -81,9 +94,11 @@ var _gloom_radius: float = 0.0
 var _light_radius_px: float = 0.0
 var _gloom_radius_px: float = 0.0
 var _organic_edge_px: float = 0.0
+var _darkness_feather_px: float = 0.0
 var _center_px := Vector2.ZERO
 var _wall_layout: Array = []
 var _extra_occluder_layout: Array = []
+var _shadow_gloom_polygons: Array = []
 var _shadow_polygons: Array = []
 var _shadow_debug: Array = []
 var _occluder_count: int = 0
@@ -151,10 +166,14 @@ func get_debug_state() -> Dictionary:
 		"gloom_radius_px": _gloom_radius_px,
 		"organic_edge_enabled": _organic_edge_enabled(),
 		"organic_edge_px": _organic_edge_px,
+		"darkness_feather_px": _darkness_feather_px,
 		"organic_edge_world_amplitude": ORGANIC_EDGE_WORLD_AMPLITUDE,
+		"darkness_feather_world": DARKNESS_FEATHER_WORLD,
 		"organic_edge_segments": int(ORGANIC_EDGE_SEGMENTS),
 		"gloom_alpha": GLOOM_ALPHA,
 		"darkness_alpha": DARKNESS_ALPHA,
+		"shadow_gloom_alpha": SHADOW_GLOOM_COLOR.a,
+		"shadow_core_alpha": SHADOW_CORE_COLOR.a,
 		"wall_count": _wall_layout.size(),
 		"extra_occluder_count": _extra_occluder_layout.size(),
 		"occluder_count": _occluder_count,
@@ -203,11 +222,13 @@ func _update_shader() -> void:
 	_light_radius_px = _projected_radius(_light_radius)
 	_gloom_radius_px = _projected_radius(_gloom_radius)
 	_organic_edge_px = _organic_edge_pixel_radius()
+	_darkness_feather_px = _darkness_feather_pixel_radius()
 	_material.set_shader_parameter("viewport_px", viewport_size)
 	_material.set_shader_parameter("center_px", _center_px)
 	_material.set_shader_parameter("light_radius_px", _light_radius_px)
 	_material.set_shader_parameter("gloom_radius_px", _gloom_radius_px)
 	_material.set_shader_parameter("organic_edge_px", _organic_edge_px)
+	_material.set_shader_parameter("darkness_feather_px", _darkness_feather_px)
 	_update_shadows(viewport_size)
 
 
@@ -239,6 +260,14 @@ func _organic_edge_pixel_radius() -> float:
 	return clampf(projected, ORGANIC_EDGE_MIN_PX, max_edge)
 
 
+func _darkness_feather_pixel_radius() -> float:
+	if _light_radius <= 0.0 or _gloom_radius_px <= 0.0:
+		return 0.0
+	var projected := _projected_radius(DARKNESS_FEATHER_WORLD)
+	var max_feather := _gloom_radius_px * DARKNESS_FEATHER_MAX_GLOOM_FRACTION
+	return clampf(projected, DARKNESS_FEATHER_MIN_PX, max_feather)
+
+
 func _update_shadows(viewport_size: Vector2) -> void:
 	_shadow_debug = []
 	_occluder_count = 0
@@ -261,11 +290,24 @@ func _update_shadows(viewport_size: Vector2) -> void:
 
 
 func _sync_shadow_polygons(polygons: Array) -> void:
+	while _shadow_gloom_polygons.size() < polygons.size():
+		var gloom_node := Polygon2D.new()
+		gloom_node.color = SHADOW_GLOOM_COLOR
+		_shadow_root.add_child(gloom_node)
+		_shadow_gloom_polygons.append(gloom_node)
 	while _shadow_polygons.size() < polygons.size():
 		var node := Polygon2D.new()
-		node.color = Color(0.0, 0.0, 0.0, DARKNESS_ALPHA)
+		node.color = SHADOW_CORE_COLOR
 		_shadow_root.add_child(node)
 		_shadow_polygons.append(node)
+	for i in range(_shadow_gloom_polygons.size()):
+		var gloom_node := _shadow_gloom_polygons[i] as Polygon2D
+		if i < polygons.size():
+			gloom_node.visible = true
+			gloom_node.polygon = PackedVector2Array(_expanded_polygon(polygons[i] as Array, SHADOW_GLOOM_SCALE))
+		else:
+			gloom_node.visible = false
+			gloom_node.polygon = PackedVector2Array()
 	for i in range(_shadow_polygons.size()):
 		var node := _shadow_polygons[i] as Polygon2D
 		if i < polygons.size():
@@ -277,10 +319,28 @@ func _sync_shadow_polygons(polygons: Array) -> void:
 
 
 func _hide_shadow_polygons() -> void:
+	for node in _shadow_gloom_polygons:
+		var gloom_polygon := node as Polygon2D
+		gloom_polygon.visible = false
+		gloom_polygon.polygon = PackedVector2Array()
 	for node in _shadow_polygons:
 		var polygon := node as Polygon2D
 		polygon.visible = false
 		polygon.polygon = PackedVector2Array()
+
+
+func _expanded_polygon(points: Array, scale: float) -> Array:
+	if points.is_empty():
+		return []
+	var center := Vector2.ZERO
+	for point in points:
+		center += point as Vector2
+	center /= float(points.size())
+	var out: Array = []
+	for point in points:
+		var p := point as Vector2
+		out.append(center + (p - center) * scale)
+	return out
 
 
 func _shadow_polygon_for_wall(wall: Dictionary, hero_world: Vector2, viewport_size: Vector2) -> Array:

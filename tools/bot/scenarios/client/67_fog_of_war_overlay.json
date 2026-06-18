@@ -15,6 +15,7 @@
       "gloom_radius": 11.25,
       "organic_edge_enabled": true,
       "organic_edge_px_min": 5,
+      "darkness_feather_px_min": 8,
       "organic_edge_segments": 18
     }
   ]

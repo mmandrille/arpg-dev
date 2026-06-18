@@ -8,12 +8,15 @@ Plan: [`docs/plans/v264_2026-06-18-organic-fog-silhouette.md`](../plans/v264_202
 
 - `FogOfWarOverlay` now offsets the visual light/gloom/darkness thresholds with deterministic
   angular noise, breaking the prior perfectly circular fog silhouette.
+- The outer gloom-to-darkness transition now has an explicit darkness feather to soften the cutoff
+  into full black.
 - Debug radii remain unchanged, so the organic edge is presentation-only and does not alter
   server-authoritative visibility or gameplay.
-- LOS shadow polygons from walls and closed-door occluders still render as opaque darkness above the
-  organic fog mask.
+- LOS shadow polygons from walls and closed-door occluders now render as a gloomy underlay plus a
+  softer dark core above the organic fog mask, avoiding a single flat full-black obstacle shadow.
 - Fog debug state exposes `organic_edge_enabled`, `organic_edge_px`,
-  `organic_edge_world_amplitude`, and `organic_edge_segments`.
+  `organic_edge_world_amplitude`, `darkness_feather_px`, `darkness_feather_world`,
+  `organic_edge_segments`, `shadow_gloom_alpha`, and `shadow_core_alpha`.
 - Existing fog client bot scenarios now assert that the organic edge is active while preserving
   light radius, gloom radius, and LOS shadow expectations.
 

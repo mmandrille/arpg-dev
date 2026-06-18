@@ -317,7 +317,7 @@ static func _assert_fog_of_war(runner, step: Dictionary, state: Dictionary) -> b
 				key, str(step.get(key, true)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
 			])
 			return false
-	for key in ["light_radius", "gloom_radius", "organic_edge_px"]:
+	for key in ["light_radius", "gloom_radius", "organic_edge_px", "darkness_feather_px", "shadow_core_alpha", "shadow_gloom_alpha"]:
 		var min_key := "%s_min" % key
 		var max_key := "%s_max" % key
 		if step.has(min_key) and float(fog.get(key, 0.0)) < float(step.get(min_key, 0.0)):

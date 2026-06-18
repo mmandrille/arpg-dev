@@ -16,7 +16,10 @@
       "gloom_radius": 11.25,
       "organic_edge_enabled": true,
       "organic_edge_px_min": 5,
+      "darkness_feather_px_min": 8,
       "organic_edge_segments": 18,
+      "shadow_core_alpha_max": 0.9,
+      "shadow_gloom_alpha_min": 0.3,
       "wall_count_min": 5,
       "occluder_count_min": 1,
       "shadow_count_min": 1

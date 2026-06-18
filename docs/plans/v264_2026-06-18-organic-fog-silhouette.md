@@ -3,9 +3,10 @@
 Status: Complete
 Goal: Make the fog-of-war light/gloom/darkness boundary organic instead of perfectly circular.
 Architecture: Extend the existing `FogOfWarOverlay` code-native shader with deterministic angular
-edge noise that offsets the visual light and gloom thresholds without changing server-authoritative
-radius values. Keep LOS shadow polygons as the opaque overlay layer above the organic mask, and
-expose debug fields for unit and bot assertions.
+edge noise and a darkness feather that offset the visual light/gloom/darkness thresholds without
+changing server-authoritative radius values. Keep LOS shadow polygons above the organic mask, but
+render them as a gloomy underlay plus softer dark core, and expose debug fields for unit and bot
+assertions.
 Tech stack: Godot GDScript/CanvasItem shader, client unit tests, client bot scenario assertions.
 
 ## Baseline and Shortcut Decision
@@ -56,8 +57,9 @@ Files:
 - Modify: `client/tests/test_fog_of_war_overlay.gd`
 
 - [x] Step 1.1: Add deterministic angular noise helpers to the CanvasItem shader.
-- [x] Step 1.2: Offset visual light/gloom thresholds while preserving debug radius values.
-- [x] Step 1.3: Expose organic-edge debug fields and add unit assertions.
+- [x] Step 1.2: Offset visual light/gloom/darkness thresholds while preserving debug radius values.
+- [x] Step 1.3: Add darkness feather and softer two-layer LOS shadows.
+- [x] Step 1.4: Expose organic-edge, feather, and shadow-alpha debug fields and add unit assertions.
 
 ```bash
 make client-unit
@@ -70,7 +72,8 @@ Files:
 - Modify: `tools/bot/scenarios/client/67_fog_of_war_overlay.json`
 - Modify: `tools/bot/scenarios/client/68_fog_los_shadow_mask.json`
 
-- [x] Step 2.1: Add fog debug assertions for `organic_edge_enabled`, edge pixels, and segment count.
+- [x] Step 2.1: Add fog debug assertions for `organic_edge_enabled`, edge pixels, feather pixels,
+  segment count, and shadow alpha values.
 - [x] Step 2.2: Update base fog and LOS shadow scenarios to assert organic edge data.
 
 ```bash

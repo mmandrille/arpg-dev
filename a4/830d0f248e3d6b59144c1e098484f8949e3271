@@ -1,0 +1,40 @@
+tools/bot/scenarios/client/68_fog_los_shadow_mask.json
+  s_1949fa109f68d0::t_efde5eaa06fd78 17-19
+client/tests/test_fog_of_war_overlay.gd
+  s_1949fa109f68d0::t_353d6cd2528d81 15,42-55,162-163
+docs/specs/v264_spec-organic-fog-silhouette.md
+  s_1949fa109f68d0::t_3dbf1f6bc87b13 1-2,4-76
+  s_1949fa109f68d0::t_02e6d19b1c5d06 3
+client/scripts/fog_of_war_overlay.gd
+  s_1949fa109f68d0::t_6345aea8cb13ba 11-15,24-26,30-54,57-62,64-65,83,152-155,185-186,205,210,230-239
+tools/bot/scenarios/client/67_fog_of_war_overlay.json
+  s_1949fa109f68d0::t_efde5eaa06fd78 11-19
+docs/plans/v264_2026-06-18-organic-fog-silhouette.md
+  s_1949fa109f68d0::t_02e6d19b1c5d06 3,41,58-60,73-74,89-91,99-101
+  s_1949fa109f68d0::t_3dbf1f6bc87b13 1-2,4-40,42-57,61-72,75-88,92-98,103
+  s_1949fa109f68d0::t_6c5428cf878384 102
+client/scripts/bot_assertion_handlers.gd
+  s_1949fa109f68d0::t_c1509506151f5d 314,320-332,338
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_02e6d19b1c5d06 279
+PROGRESS.md
+  s_1949fa109f68d0::t_02e6d19b1c5d06 26,28-29,105-106
+docs/as-built/v264_organic-fog-silhouette.md
+  s_1949fa109f68d0::t_02e6d19b1c5d06 1-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a4830d0f248e3d6b59144c1e098484f8949e3271",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

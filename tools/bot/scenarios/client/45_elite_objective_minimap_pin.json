@@ -22,8 +22,15 @@
       "visible": true,
       "toggle_visible": true,
       "has_pin": true,
+      "has_quest_path": true,
       "map_size_x": 208,
       "map_size_y": 208,
+      "quest_path_start_x": 0.5,
+      "quest_path_start_y": 0.5,
+      "quest_path_end_x_min": 0.08,
+      "quest_path_end_x_max": 0.92,
+      "quest_path_end_y_min": 0.08,
+      "quest_path_end_y_max": 0.92,
       "explored_count_min": 1
     }
   ]

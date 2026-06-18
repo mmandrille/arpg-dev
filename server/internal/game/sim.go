@@ -354,6 +354,8 @@ type Sim struct {
 	rng           *RNG
 	rules         *Rules
 	gameplayDebug bool
+	tickPerf      PerfCounters
+	tickProfiler  TickProfiler
 
 	tick               uint64
 	nextID             uint64
@@ -1006,99 +1008,6 @@ func (s *Sim) Tick(inputs []Input) TickResult {
 		}
 	}
 	return results[len(results)-1]
-}
-
-// TickResults processes current-tick inputs, applies continuous effects, and returns scoped results.
-func (s *Sim) TickResults(inputs []Input) []TickResult {
-	type resultKey struct {
-		level int
-		actor uint64
-	}
-	resultByKey := map[resultKey]*TickResult{}
-	var ordered []*TickResult
-	transitionThisTick := false
-	resultFor := func(level int, actor uint64) *TickResult {
-		key := resultKey{level: level, actor: actor}
-		if res := resultByKey[key]; res != nil {
-			return res
-		}
-		res := &TickResult{Tick: s.tick, Level: level, ActorPlayerID: actor, Changes: []Change{}, Events: []Event{}}
-		resultByKey[key] = res
-		ordered = append(ordered, res)
-		return res
-	}
-
-	for _, in := range inputs {
-		ps := s.playerForInput(in)
-		if ps == nil || !ps.Connected {
-			res := resultFor(s.currentLevel, 0)
-			res.reject(in.MessageID, "unknown_actor")
-			continue
-		}
-		s.usePlayer(ps)
-		res := resultFor(ps.CurrentLevel, ps.PlayerID)
-		if in.Type == "descend_intent" || in.Type == "ascend_intent" || in.Type == "teleport_intent" {
-			if arrival := s.handleLevelTravel(in, res); arrival != nil {
-				arrival.ActorPlayerID = ps.PlayerID
-				ordered = append(ordered, arrival)
-				transitionThisTick = true
-			}
-			s.savePlayer(ps)
-			continue
-		}
-		s.applyInput(in, res)
-		s.savePlayer(ps)
-	}
-
-	if !transitionThisTick {
-		for _, playerID := range sortedPlayerIDs(s.players) {
-			ps := s.players[playerID]
-			if ps == nil || !ps.Connected {
-				continue
-			}
-			s.usePlayer(ps)
-			res := resultFor(ps.CurrentLevel, ps.PlayerID)
-			s.expireSkillEffects(res)
-			s.advanceRogueMarks(res)
-			s.advancePoisonDots(res)
-			s.advanceUniqueBurnDots(res)
-			s.advanceOffensiveUniqueEffectStates(res)
-			if !s.applyActiveSkillChannel(res) {
-				s.applyMovement(res)
-			}
-			s.applyPlayerRegen(res)
-			s.savePlayer(ps)
-		}
-
-		s.advanceAreaHealZones(resultFor)
-		s.autoPickUpCurrencyLoot(resultFor)
-
-		for _, levelNum := range s.sortedLevelNums() {
-			s.currentLevel = levelNum
-			s.syncCompatibilityFields()
-			res := resultFor(levelNum, 0)
-			s.advanceMonsterMovement(res)
-			s.advanceCompanions(res)
-			s.advanceBossPhases(res)
-			s.advanceMonsterAttack(res)
-			s.advanceProjectiles(res)
-		}
-	}
-
-	s.tick++
-	s.usePlayer(s.defaultPlayer())
-
-	results := make([]TickResult, 0, len(ordered))
-	for _, res := range ordered {
-		if len(res.Changes) == 0 && len(res.Events) == 0 && len(res.Acks) == 0 && len(res.Rejects) == 0 {
-			continue
-		}
-		results = append(results, *res)
-	}
-	if len(results) == 0 {
-		return []TickResult{{Tick: s.tick - 1, Level: s.currentLevel, Changes: []Change{}, Events: []Event{}}}
-	}
-	return results
 }
 
 func (s *Sim) applyInput(in Input, res *TickResult) {
@@ -3052,7 +2961,7 @@ func (s *Sim) findRangedApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 			if !s.inActionRangeFrom(goal, target) || !s.hasClearRangedShot(goal, target) {
 				continue
 			}
-			steps, ok := PlanPath(nav, player.pos, goal, blocked)
+			steps, ok := s.planPath(nav, player.pos, goal, blocked)
 			if ok {
 				return goal, steps, true
 			}
@@ -3086,7 +2995,7 @@ func (s *Sim) findSkillCastApproachGoal(target *entity, castRange float64, requi
 			if requireClearShot && !s.hasClearRangedShot(goal, target) {
 				continue
 			}
-			steps, ok := PlanPath(nav, player.pos, goal, blocked)
+			steps, ok := s.planPath(nav, player.pos, goal, blocked)
 			if !ok {
 				continue
 			}
@@ -3401,7 +3310,7 @@ func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterD
 		if def.effectiveAttackMode() == attackModeRanged && !s.hasClearMonsterRangedShot(goal, player) {
 			continue
 		}
-		steps, ok := PlanPath(nav, monster.pos, goal, blocked)
+		steps, ok := s.planPath(nav, monster.pos, goal, blocked)
 		if !ok {
 			continue
 		}

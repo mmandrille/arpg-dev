@@ -126,6 +126,21 @@ def test_load_scenarios_discovers_vertical_slice():
     assert vertical.world_id == "vertical_slice"
 
 
+def test_load_scenarios_discovers_crowded_lightning_perf_probe():
+    scenarios = load_scenarios()
+    scenario = next(s for s in scenarios if s.id == "crowded_lightning_perf_probe")
+
+    assert scenario.world_id == "crowded_lightning_perf_probe"
+    assert scenario.character_class == "sorcerer"
+    assert scenario.max_elapsed_s == 30.0
+    assert scenario.debug_progression["skill_ranks"]["ligthing"] == 1
+    assert any(step.get("action") == "cast_skill" and step.get("skill_id") == "ligthing" for step in scenario.steps)
+    assert any(
+        assertion.get("type") == "entity_count" and assertion.get("monster_def_id") == "crowded_probe_chaser"
+        for assertion in scenario.assertions
+    )
+
+
 def test_load_scenarios_catalog_order():
     scenarios = load_scenarios()
 

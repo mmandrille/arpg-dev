@@ -53,6 +53,7 @@ paladin_sanctuary: Paladin casts Sanctuary and proves authoritative area defense
 inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pickup → equip capacity belt → fill expanded 20-capacity bag
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 fog_of_war_radius: compact combat-control lab → assert class `light_radius`, hide a far dungeon mob, move into scouting range, then reveal it
+crowded_lightning_perf_probe: crowded vault lab → assert 36 live chase monsters → repeatedly cast `ligthing` under perf debug → prove lightning damage and emit backend path/phase perf rows
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
 ui_currency_and_mana_polish: pick up gold instead of reward badges, persist character wallet, and use/reject blue mana potions
 reachable_dungeon_obstacles: descend through generated dungeon floors → assert generated interior wall layout → route to loot beyond obstacles → prove replay

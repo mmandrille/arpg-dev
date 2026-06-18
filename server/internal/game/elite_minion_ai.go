@@ -86,7 +86,7 @@ func (s *Sim) moveMonsterToPoint(monster *entity, def MonsterDef, goal Vec2, res
 	}
 	before := monster.pos
 	blocked := s.buildMonsterBlockedFn(monster.id)
-	steps, ok := PlanPath(nav, monster.pos, goal, blocked)
+	steps, ok := s.planPath(nav, monster.pos, goal, blocked)
 	if !ok || len(steps) == 0 {
 		if distance(monster.pos, goal) > nav.CellSize+nav.StopDistance {
 			return
@@ -94,6 +94,7 @@ func (s *Sim) moveMonsterToPoint(monster *entity, def MonsterDef, goal Vec2, res
 	}
 	monster.pos = s.resolveMonsterMovement(monster, s.monsterMoveDelta(monster.pos, goal, steps, moveSpeed))
 	if monster.pos != before {
+		s.recordMonsterMoved()
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(monster))})
 	}
 }

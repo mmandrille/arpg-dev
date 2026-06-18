@@ -2,8 +2,13 @@ class_name DiscoveryMinimap
 extends PanelContainer
 
 const DiscoveryMinimapStateScript := preload("res://scripts/discovery_minimap_state.gd")
-const MAP_SIZE := Vector2(208, 208)
-const PANEL_SIZE := Vector2(216, 216)
+const MODE_HIDDEN := "hidden"
+const MODE_COMPACT := "compact"
+const MODE_FULLSCREEN := "fullscreen"
+const COMPACT_MAP_SIZE := Vector2(208, 208)
+const COMPACT_PANEL_SIZE := Vector2(216, 216)
+const FULLSCREEN_MAP_SIZE := Vector2(568, 568)
+const FULLSCREEN_PANEL_SIZE := Vector2(584, 584)
 const PANEL_OPACITY := 0.68
 const FLOOR_COLOR := Color(0.32, 0.34, 0.32, 0.58)
 const WALL_COLOR := Color(0.18, 0.15, 0.11, 0.82)
@@ -15,7 +20,7 @@ const PIN_INNER_COLOR := Color("#ff7f50")
 var _map: Control
 var _state: Dictionary = _empty_state()
 var _state_tracker: DiscoveryMinimapState = DiscoveryMinimapStateScript.new()
-var _toggle_visible: bool = false
+var _display_mode: String = MODE_HIDDEN
 
 
 func _ready() -> void:
@@ -23,19 +28,34 @@ func _ready() -> void:
 
 
 func toggle() -> void:
-	set_toggle_visible(not _toggle_visible)
+	set_toggle_visible(_display_mode == MODE_HIDDEN)
+
+
+func cycle_display_mode() -> void:
+	if _display_mode == MODE_HIDDEN:
+		set_display_mode(MODE_COMPACT)
+	elif _display_mode == MODE_COMPACT:
+		set_display_mode(MODE_FULLSCREEN)
+	else:
+		set_display_mode(MODE_HIDDEN)
 
 
 func set_toggle_visible(enabled: bool) -> void:
-	_toggle_visible = enabled
-	_sync_visibility()
+	set_display_mode(MODE_COMPACT if enabled else MODE_HIDDEN)
+
+
+func set_display_mode(mode: String) -> void:
+	if mode != MODE_COMPACT and mode != MODE_FULLSCREEN:
+		mode = MODE_HIDDEN
+	_display_mode = mode
+	_apply_layout()
 
 
 func set_state(state: Dictionary) -> void:
 	_state = _normalized_state(state)
 	if _map == null:
 		_build()
-	_sync_visibility()
+	_apply_layout()
 	_map.queue_redraw()
 
 
@@ -45,11 +65,14 @@ func sync(level: int, player_position: Vector3, light_radius: float, walls: Arra
 
 func get_debug_state() -> Dictionary:
 	var objective: Dictionary = _state.get("objective", {})
+	var map_size := _current_map_size()
 	return {
 		"visible": visible,
-		"toggle_visible": _toggle_visible,
-		"map_size_x": MAP_SIZE.x,
-		"map_size_y": MAP_SIZE.y,
+		"toggle_visible": _display_mode != MODE_HIDDEN,
+		"display_mode": _display_mode,
+		"full_screen": _display_mode == MODE_FULLSCREEN,
+		"map_size_x": map_size.x,
+		"map_size_y": map_size.y,
 		"panel_opacity": PANEL_OPACITY,
 		"level": int(_state.get("level", 0)),
 		"explored_count": int(_state.get("explored_count", 0)),
@@ -68,36 +91,51 @@ func _build() -> void:
 	if _map != null:
 		return
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	offset_left = -234
-	offset_top = 18
-	offset_right = -18
-	offset_bottom = 234
-	custom_minimum_size = PANEL_SIZE
 	add_theme_stylebox_override("panel", _panel_style())
 	_map = Control.new()
-	_map.custom_minimum_size = MAP_SIZE
 	_map.draw.connect(_draw_map)
 	add_child(_map)
 	set_state(_state)
 
 
-func _sync_visibility() -> void:
-	visible = _toggle_visible
+func _apply_layout() -> void:
+	var panel_size := _current_panel_size()
+	var map_size := _current_map_size()
+	visible = _display_mode != MODE_HIDDEN
+	custom_minimum_size = panel_size
+	if _map != null:
+		_map.custom_minimum_size = map_size
+		_map.size = map_size
+	if _display_mode == MODE_FULLSCREEN:
+		set_anchors_preset(Control.PRESET_CENTER)
+		offset_left = -panel_size.x * 0.5
+		offset_top = -panel_size.y * 0.5
+		offset_right = panel_size.x * 0.5
+		offset_bottom = panel_size.y * 0.5
+		z_index = 80
+	else:
+		set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		offset_left = -234
+		offset_top = 18
+		offset_right = -18
+		offset_bottom = 234
+		z_index = 0
+	queue_redraw()
 
 
 func _draw_map() -> void:
-	var rect := Rect2(Vector2.ZERO, MAP_SIZE)
+	var map_size := _current_map_size()
+	var rect := Rect2(Vector2.ZERO, map_size)
 	_map.draw_rect(rect, Color(0.024, 0.027, 0.024, PANEL_OPACITY), true)
 	for t in [0.25, 0.5, 0.75]:
-		var x := MAP_SIZE.x * float(t)
-		var y := MAP_SIZE.y * float(t)
-		_map.draw_line(Vector2(x, 0), Vector2(x, MAP_SIZE.y), GRID_COLOR, 1.0)
-		_map.draw_line(Vector2(0, y), Vector2(MAP_SIZE.x, y), GRID_COLOR, 1.0)
+		var x := map_size.x * float(t)
+		var y := map_size.y * float(t)
+		_map.draw_line(Vector2(x, 0), Vector2(x, map_size.y), GRID_COLOR, 1.0)
+		_map.draw_line(Vector2(0, y), Vector2(map_size.x, y), GRID_COLOR, 1.0)
 	_draw_explored_cells()
 	_draw_walls()
 	_map.draw_rect(rect, Color(0.55, 0.48, 0.35, 0.52), false, 1.0)
-	_map.draw_circle(MAP_SIZE * 0.5, 5.0, PLAYER_COLOR)
+	_map.draw_circle(map_size * 0.5, 5.0 if _display_mode != MODE_FULLSCREEN else 7.0, PLAYER_COLOR)
 	_draw_objective_pin()
 
 
@@ -128,19 +166,22 @@ func _draw_objective_pin() -> void:
 	var objective: Dictionary = _state.get("objective", {})
 	if not bool(objective.get("has_pin", false)):
 		return
-	var pin := Vector2(float(objective.get("pin_x", 0.5)), float(objective.get("pin_y", 0.5))) * MAP_SIZE
-	_map.draw_circle(pin, 8.0, PIN_OUTER_COLOR)
-	_map.draw_circle(pin, 4.0, PIN_INNER_COLOR)
+	var pin := Vector2(float(objective.get("pin_x", 0.5)), float(objective.get("pin_y", 0.5))) * _current_map_size()
+	var radius := 8.0 if _display_mode != MODE_FULLSCREEN else 11.0
+	_map.draw_circle(pin, radius, PIN_OUTER_COLOR)
+	_map.draw_circle(pin, radius * 0.5, PIN_INNER_COLOR)
 
 
 func _world_to_map(world: Vector2) -> Vector2:
 	var player := Vector2(float(_state.get("player_x", 0.0)), float(_state.get("player_y", 0.0)))
-	return MAP_SIZE * 0.5 + (world - player) * _world_to_map_scale()
+	return _current_map_size() * 0.5 + (world - player) * _world_to_map_scale()
 
 
 func _world_to_map_scale() -> float:
 	var radius := maxf(1.0, float(_state.get("map_world_radius", 16.0)))
-	return MAP_SIZE.x / (radius * 2.0)
+	if _display_mode == MODE_FULLSCREEN:
+		radius *= 2.35
+	return _current_map_size().x / (radius * 2.0)
 
 
 func _cell_pixel_size() -> float:
@@ -148,7 +189,15 @@ func _cell_pixel_size() -> float:
 
 
 func _map_rect() -> Rect2:
-	return Rect2(Vector2.ZERO, MAP_SIZE)
+	return Rect2(Vector2.ZERO, _current_map_size())
+
+
+func _current_map_size() -> Vector2:
+	return FULLSCREEN_MAP_SIZE if _display_mode == MODE_FULLSCREEN else COMPACT_MAP_SIZE
+
+
+func _current_panel_size() -> Vector2:
+	return FULLSCREEN_PANEL_SIZE if _display_mode == MODE_FULLSCREEN else COMPACT_PANEL_SIZE
 
 
 func _normalized_state(state: Dictionary) -> Dictionary:

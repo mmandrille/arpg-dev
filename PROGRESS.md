@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-17
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v256 — discovery minimap |
+| **Latest completed slice** | v257 — full-screen map overlay |
 | **Active branch** | `main` |
-| **CI gate** | v256 focused verification green on 2026-06-17; autoloop batch `make ci` pending |
-| **Next slice** | Next feature slice via `$next` / `$autoloop`; v256 leaves durable map memory and full-screen map overlay deferred |
+| **CI gate** | v257 focused verification green on 2026-06-18; autoloop batch `make ci` pending |
+| **Next slice** | Continue selected `$autoloop` queue with minimap points of interest |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |
 

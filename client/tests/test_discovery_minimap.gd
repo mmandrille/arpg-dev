@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_test_state_is_scoped_by_level()
 	_test_wall_and_objective_debug()
 	_test_widget_defaults_toggle_size_and_opacity()
+	_test_widget_cycles_fullscreen_mode()
 	if _failures > 0:
 		quit(1)
 	print("[gdtest] PASS: test_discovery_minimap")
@@ -82,6 +83,30 @@ func _test_widget_defaults_toggle_size_and_opacity() -> void:
 	_assert_true("toggle visible", bool(visible_state.get("visible", false)))
 	_assert_eq("debug explored count", int(visible_state.get("explored_count", 0)), 1)
 	_assert_true("debug pin", bool(visible_state.get("has_pin", false)))
+	minimap.free()
+
+
+func _test_widget_cycles_fullscreen_mode() -> void:
+	var minimap: DiscoveryMinimap = DiscoveryMinimapScript.new()
+	get_root().add_child(minimap)
+	minimap._build()
+	_assert_eq("initial mode", str(minimap.get_debug_state().get("display_mode", "")), "hidden")
+	minimap.cycle_display_mode()
+	var compact := minimap.get_debug_state()
+	_assert_eq("compact mode", str(compact.get("display_mode", "")), "compact")
+	_assert_true("compact visible", bool(compact.get("visible", false)))
+	_assert_eq("compact width", int(compact.get("map_size_x", 0)), 208)
+	_assert_true("compact not fullscreen", not bool(compact.get("full_screen", true)))
+	minimap.cycle_display_mode()
+	var fullscreen := minimap.get_debug_state()
+	_assert_eq("fullscreen mode", str(fullscreen.get("display_mode", "")), "fullscreen")
+	_assert_true("fullscreen visible", bool(fullscreen.get("visible", false)))
+	_assert_true("fullscreen flag", bool(fullscreen.get("full_screen", false)))
+	_assert_true("fullscreen larger", int(fullscreen.get("map_size_x", 0)) > int(compact.get("map_size_x", 0)))
+	minimap.cycle_display_mode()
+	var hidden := minimap.get_debug_state()
+	_assert_eq("cycle hides", str(hidden.get("display_mode", "")), "hidden")
+	_assert_true("cycle hidden", not bool(hidden.get("visible", true)))
 	minimap.free()
 
 

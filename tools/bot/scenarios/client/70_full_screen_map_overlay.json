@@ -1,10 +1,10 @@
 {
-  "id": "discovery_minimap_toggle",
+  "id": "full_screen_map_overlay",
   "runner": "godot_client",
   "world_id": "collision_lab",
-  "seed": "discovery_minimap_toggle_seed",
-  "title": "Discovery minimap toggle",
-  "description": "Client starts with the discovery minimap hidden, toggles it with TAB, and verifies explored map debug state.",
+  "seed": "full_screen_map_overlay_seed",
+  "title": "Full-screen map overlay",
+  "description": "Client cycles discovery map modes with TAB and verifies the larger full-screen map overlay.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 10.0 },
     { "type": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
@@ -16,9 +16,7 @@
       "display_mode": "hidden",
       "map_size_x": 208,
       "map_size_y": 208,
-      "explored_count_min": 1,
-      "panel_opacity_min": 0.45,
-      "panel_opacity_max": 0.8
+      "explored_count_min": 1
     },
     { "type": "press_key", "keycode": "KEY_TAB" },
     {
@@ -29,9 +27,7 @@
       "map_size_x": 208,
       "map_size_y": 208,
       "explored_count_min": 1,
-      "wall_count_min": 1,
-      "panel_opacity_min": 0.45,
-      "panel_opacity_max": 0.8
+      "wall_count_min": 1
     },
     { "type": "press_key", "keycode": "KEY_TAB" },
     {
@@ -41,9 +37,16 @@
       "display_mode": "fullscreen",
       "map_size_x": 568,
       "map_size_y": 568,
-      "explored_count_min": 1
+      "explored_count_min": 1,
+      "wall_count_min": 1
     },
     { "type": "press_key", "keycode": "KEY_TAB" },
-    { "type": "assert_discovery_minimap", "visible": false, "toggle_visible": false, "display_mode": "hidden", "explored_count_min": 1 }
+    {
+      "type": "assert_discovery_minimap",
+      "visible": false,
+      "toggle_visible": false,
+      "display_mode": "hidden",
+      "explored_count_min": 1
+    }
   ]
 }

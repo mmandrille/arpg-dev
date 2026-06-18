@@ -2295,7 +2295,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		if event.keycode == KEY_TAB or event.physical_keycode == KEY_TAB:
-			if discovery_minimap != null: discovery_minimap.toggle(); _sync_discovery_minimap()
+			if discovery_minimap != null: discovery_minimap.cycle_display_mode(); _sync_discovery_minimap()
 			get_viewport().set_input_as_handled()
 			return
 		if _is_character_info_key(event):

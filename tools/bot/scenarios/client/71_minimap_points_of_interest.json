@@ -1,0 +1,32 @@
+{
+  "id": "minimap_points_of_interest",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "minimap_points_of_interest_seed",
+  "title": "Minimap points of interest",
+  "description": "Client opens the discovery map in a compact town-service lab and verifies discovered service markers.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_vendor", "timeout_s": 10.0 },
+    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "assert_discovery_minimap",
+      "visible": true,
+      "toggle_visible": true,
+      "display_mode": "compact",
+      "map_size_x": 208,
+      "map_size_y": 208,
+      "explored_count_min": 1,
+      "marker_count_min": 3,
+      "service_marker_count_min": 3
+    },
+    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "assert_discovery_minimap",
+      "visible": true,
+      "display_mode": "fullscreen",
+      "marker_count_min": 3,
+      "service_marker_count_min": 3
+    }
+  ]
+}

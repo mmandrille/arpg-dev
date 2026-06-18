@@ -23,10 +23,10 @@ Last updated: 2026-06-18
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v257 — full-screen map overlay |
+| **Latest completed slice** | v258 — minimap points of interest |
 | **Active branch** | `main` |
-| **CI gate** | v257 focused verification green on 2026-06-18; autoloop batch `make ci` pending |
-| **Next slice** | Continue selected `$autoloop` queue with minimap points of interest |
+| **CI gate** | v258 focused verification green on 2026-06-18; autoloop batch `make ci` pending |
+| **Next slice** | Continue selected `$autoloop` queue with active-session explored-map memory |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |
 

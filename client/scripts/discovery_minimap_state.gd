@@ -4,6 +4,16 @@ extends RefCounted
 const CELL_SIZE := 1.0
 const DEFAULT_LIGHT_RADIUS := 8.0
 const EDGE_PADDING := 0.08
+const SERVICE_DEFS := {
+	"town_vendor": "vendor",
+	"town_mystery_seller": "mystery",
+	"town_stash": "stash",
+	"town_bishop": "bishop",
+	"town_market_board": "market",
+	"town_blacksmith": "blacksmith",
+	"town_mercenary_board": "mercenary",
+	"town_unique_chest": "unique_chest",
+}
 
 var _explored_by_level: Dictionary = {}
 
@@ -19,6 +29,9 @@ func update(level: int, player_position: Vector3, light_radius: float, walls: Ar
 	_reveal_cells(cells, player, radius)
 	var normalized_walls := _normalized_walls(walls)
 	var known_walls := _known_walls(cells, normalized_walls)
+	var objective := _objective_pin(entities, player, radius)
+	var markers := _poi_markers(cells, entities, player, radius, objective)
+	var marker_counts := _marker_kind_counts(markers)
 	return {
 		"level": level,
 		"player_x": player.x,
@@ -29,7 +42,10 @@ func update(level: int, player_position: Vector3, light_radius: float, walls: Ar
 		"explored_count": cells.size(),
 		"walls": known_walls,
 		"wall_count": known_walls.size(),
-		"objective": _objective_pin(entities, player, radius),
+		"objective": objective,
+		"markers": markers,
+		"marker_count": markers.size(),
+		"marker_counts": marker_counts,
 	}
 
 
@@ -115,6 +131,76 @@ func _objective_pin(entities: Dictionary, player: Vector2, radius: float) -> Dic
 			"pin_y": clampf(0.5 + delta.y / (map_radius * 2.0), EDGE_PADDING, 1.0 - EDGE_PADDING),
 		}
 	return {"has_pin": false, "status": "hidden", "pin_x": 0.5, "pin_y": 0.5}
+
+
+func _poi_markers(cells: Dictionary, entities: Dictionary, player: Vector2, radius: float, objective: Dictionary) -> Array:
+	var out: Array = []
+	for rec_raw in entities.values():
+		var rec: Dictionary = rec_raw
+		if str(rec.get("type", "")) != "interactable":
+			continue
+		var def_id := str(rec.get("interactable_def_id", ""))
+		var marker := _interactable_marker(def_id)
+		if marker.is_empty():
+			continue
+		var node := rec.get("node", null) as Node3D
+		if node == null:
+			continue
+		var world := Vector2(node.position.x, node.position.z)
+		var cell := _world_cell(world)
+		if not cells.has(_cell_key(cell.x, cell.y)):
+			continue
+		var normalized := _normalized_marker_position(world, player, radius)
+		marker["x"] = normalized.x
+		marker["y"] = normalized.y
+		out.append(marker)
+	if bool(objective.get("has_pin", false)):
+		out.append({
+			"kind": "objective",
+			"label": "objective",
+			"x": float(objective.get("pin_x", 0.5)),
+			"y": float(objective.get("pin_y", 0.5)),
+		})
+	out.sort_custom(func(a, b):
+		var ak := str((a as Dictionary).get("kind", ""))
+		var bk := str((b as Dictionary).get("kind", ""))
+		if ak == bk:
+			return str((a as Dictionary).get("label", "")) < str((b as Dictionary).get("label", ""))
+		return ak < bk
+	)
+	return out
+
+
+func _interactable_marker(def_id: String) -> Dictionary:
+	if def_id == "stairs_down":
+		return {"kind": "stairs", "label": "down"}
+	if def_id == "stairs_up":
+		return {"kind": "stairs", "label": "up"}
+	if def_id == "teleporter":
+		return {"kind": "waypoint", "label": "waypoint"}
+	if SERVICE_DEFS.has(def_id):
+		return {"kind": "service", "label": str(SERVICE_DEFS[def_id])}
+	return {}
+
+
+func _normalized_marker_position(world: Vector2, player: Vector2, radius: float) -> Vector2:
+	var map_radius := maxf(radius * 1.75, 16.0)
+	var delta := world - player
+	return Vector2(
+		clampf(0.5 + delta.x / (map_radius * 2.0), EDGE_PADDING, 1.0 - EDGE_PADDING),
+		clampf(0.5 + delta.y / (map_radius * 2.0), EDGE_PADDING, 1.0 - EDGE_PADDING)
+	)
+
+
+func _marker_kind_counts(markers: Array) -> Dictionary:
+	var counts: Dictionary = {}
+	for raw in markers:
+		var marker := raw as Dictionary
+		var kind := str(marker.get("kind", ""))
+		if kind == "":
+			continue
+		counts[kind] = int(counts.get(kind, 0)) + 1
+	return counts
 
 
 func _world_cell(point: Vector2) -> Vector2i:

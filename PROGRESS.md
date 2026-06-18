@@ -23,10 +23,10 @@ Last updated: 2026-06-18
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v265 — door fog and toggle |
+| **Latest completed slice** | v266 — map transparency setting |
 | **Active branch** | `main` |
-| **CI gate** | v264-v265 focused verification and batch `make ci` green on 2026-06-18 |
-| **Next slice** | Selected `$autoloop` queue complete; run batch `make ci`, then engineering review/refactor before more features |
+| **CI gate** | v266 focused verification green on 2026-06-18; latest batch `make ci` green after v264-v265 |
+| **Next slice** | Engineering review/refactor before more features |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |
 

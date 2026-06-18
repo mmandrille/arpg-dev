@@ -129,6 +129,10 @@ func _test_widget_defaults_toggle_size_and_opacity() -> void:
 	_assert_eq("map height doubled", int(initial.get("map_size_y", 0)), 208)
 	var opacity := float(initial.get("panel_opacity", 1.0))
 	_assert_true("panel opacity transparent", opacity < 0.8 and opacity > 0.45)
+	minimap.set_panel_opacity(0.35)
+	_assert_true("panel opacity setting applies", absf(float(minimap.get_debug_state().get("panel_opacity", 1.0)) - 0.35) <= 0.001)
+	minimap.set_panel_opacity(1.3)
+	_assert_true("panel opacity clamps high", absf(float(minimap.get_debug_state().get("panel_opacity", 0.0)) - 1.0) <= 0.001)
 	minimap.set_state({
 		"level": 0,
 		"player_x": 0.0,

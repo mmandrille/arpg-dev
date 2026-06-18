@@ -1,0 +1,21 @@
+client/scripts/projectile_visuals.gd
+  s_22cd8cf3f4caf5::t_9c885372bb239f 95
+client/tests/test_projectile_visuals.gd
+  s_22cd8cf3f4caf5::t_a6ebbad013918d 16,72-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "3945414785cd88cbc2740cad46e2cf3acc5cf51d",
+  "prompts": {},
+  "sessions": {
+    "s_22cd8cf3f4caf5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edc84-925b-7bf2-aed1-3777ce713050",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

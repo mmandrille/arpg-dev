@@ -1,0 +1,57 @@
+shared/golden/auto_path.v0.schema.json
+  s_8ac650870d633e::t_bb7ca58e5fd22b 22-25,48-51
+shared/rules/navigation.v0.schema.json
+  s_8ac650870d633e::t_bb7ca58e5fd22b 16-19,42-45
+docs/as-built/v270_crowd-movement-lod.md
+  s_8ac650870d633e::t_028a77ae85bfe8 1-51
+PROGRESS.md
+  s_8ac650870d633e::t_028a77ae85bfe8 26,28-29
+server/internal/game/monster_movement_lod_test.go
+  s_8ac650870d633e::t_ed7ad70e2c9823 1-75
+server/internal/game/rules.go
+  s_8ac650870d633e::t_5d815f08b9ba1d 124-135
+docs/specs/v270_spec-crowd-movement-lod.md
+  s_8ac650870d633e::t_028a77ae85bfe8 3,60-62
+  s_8ac650870d633e::t_7d8b3880897407 1-2,4-59,63-69
+shared/golden/monster_chase.json
+  s_8ac650870d633e::t_4ec6c4b4d8c162 22-23
+  s_8ac650870d633e::t_bb7ca58e5fd22b 20-21
+server/internal/game/monster_navigation_budget.go
+  s_8ac650870d633e::t_ed7ad70e2c9823 15-17,40-42,80-82
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_028a77ae85bfe8 285
+server/internal/game/navigation_rules.go
+  s_8ac650870d633e::t_bb7ca58e5fd22b 54-62,73-75
+  s_8ac650870d633e::t_5d815f08b9ba1d 10-22,64-72
+shared/golden/monster_chase.v0.schema.json
+  s_8ac650870d633e::t_bb7ca58e5fd22b 24-27,50-53
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_028a77ae85bfe8 222
+docs/plans/v270_2026-06-18-crowd-movement-lod.md
+  s_8ac650870d633e::t_028a77ae85bfe8 3,38-41,62,65-66,81-82,84,86,102,104-105,114-118
+  s_8ac650870d633e::t_7d8b3880897407 1-2,4-37,42-61,63-64,67-80,83,85,87-101,103,106-113,119-120
+server/internal/game/monster_movement_lod.go
+  s_8ac650870d633e::t_ed7ad70e2c9823 1-56
+shared/golden/auto_path.json
+  s_8ac650870d633e::t_bb7ca58e5fd22b 18-19
+  s_8ac650870d633e::t_4ec6c4b4d8c162 20-21
+shared/rules/navigation.v0.json
+  s_8ac650870d633e::t_4ec6c4b4d8c162 18-19
+  s_8ac650870d633e::t_bb7ca58e5fd22b 16-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "79715ac83a374d30347c7aa19ce2116ace38c48b",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

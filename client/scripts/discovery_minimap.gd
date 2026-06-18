@@ -24,6 +24,7 @@ var _map: Control
 var _state: Dictionary = _empty_state()
 var _state_tracker: DiscoveryMinimapState = DiscoveryMinimapStateScript.new()
 var _display_mode: String = MODE_HIDDEN
+var _session_key: String = ""
 
 
 func _ready() -> void:
@@ -54,6 +55,25 @@ func set_display_mode(mode: String) -> void:
 	_apply_layout()
 
 
+func sync_session(session_key: String) -> void:
+	session_key = session_key.strip_edges()
+	if session_key == "":
+		return
+	if _session_key == session_key:
+		return
+	_session_key = session_key
+	_state_tracker.reset()
+	_state = _empty_state()
+	_apply_layout()
+
+
+func reset_session() -> void:
+	_session_key = ""
+	_state_tracker.reset()
+	_state = _empty_state()
+	_apply_layout()
+
+
 func set_state(state: Dictionary) -> void:
 	_state = _normalized_state(state)
 	if _map == null:
@@ -78,6 +98,7 @@ func get_debug_state() -> Dictionary:
 		"map_size_x": map_size.x,
 		"map_size_y": map_size.y,
 		"panel_opacity": PANEL_OPACITY,
+		"session_key": _session_key,
 		"level": int(_state.get("level", 0)),
 		"explored_count": int(_state.get("explored_count", 0)),
 		"wall_count": int(_state.get("wall_count", 0)),

@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_test_points_of_interest_markers()
 	_test_widget_defaults_toggle_size_and_opacity()
 	_test_widget_cycles_fullscreen_mode()
+	_test_widget_session_memory_scope()
 	if _failures > 0:
 		quit(1)
 	print("[gdtest] PASS: test_discovery_minimap")
@@ -148,6 +149,28 @@ func _test_widget_cycles_fullscreen_mode() -> void:
 	var hidden := minimap.get_debug_state()
 	_assert_eq("cycle hides", str(hidden.get("display_mode", "")), "hidden")
 	_assert_true("cycle hidden", not bool(hidden.get("visible", true)))
+	minimap.free()
+
+
+func _test_widget_session_memory_scope() -> void:
+	var minimap: DiscoveryMinimap = DiscoveryMinimapScript.new()
+	get_root().add_child(minimap)
+	minimap._build()
+	minimap.sync_session("sess_a")
+	minimap.sync(0, Vector3.ZERO, 4.0, [], {})
+	var first := minimap.get_debug_state()
+	_assert_eq("session key set", str(first.get("session_key", "")), "sess_a")
+	var first_count := int(first.get("explored_count", 0))
+	_assert_true("session explored", first_count > 0)
+	minimap.sync_session("sess_a")
+	minimap.cycle_display_mode()
+	minimap.sync(0, Vector3(4.0, 0.0, 0.0), 4.0, [], {})
+	var retained := minimap.get_debug_state()
+	_assert_true("same session retains and grows", int(retained.get("explored_count", 0)) > first_count)
+	minimap.sync_session("sess_b")
+	var reset := minimap.get_debug_state()
+	_assert_eq("new session key", str(reset.get("session_key", "")), "sess_b")
+	_assert_eq("new session resets explored", int(reset.get("explored_count", -1)), 0)
 	minimap.free()
 
 

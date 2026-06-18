@@ -709,10 +709,9 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	_bot_pending_events.clear()
 	_bot_logged_snapshot = false
 	_clear_level_entities()
-	if _boss_visuals != null:
-		_boss_visuals.hide_boss_health_bar()
-	if walls_root != null:
-		_clear_wall_nodes()
+	if _boss_visuals != null: _boss_visuals.hide_boss_health_bar()
+	if walls_root != null: _clear_wall_nodes()
+	if discovery_minimap != null: discovery_minimap.reset_session()
 	if resolver != null:
 		resolver.apply_snapshot({"inventory": [], "equipped": {}})
 	_refresh_inventory_ui()
@@ -850,11 +849,11 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		blacksmith_panel.show_status(reason.replace("_", " "), true)
 func _apply_snapshot(p: Dictionary) -> void:
 	current_level = int(p.get("current_level", 0))
+	if discovery_minimap != null: discovery_minimap.sync_session(str(p.get("session_id", client.session_id if client != null else "")))
 	ClientAudioBridgeScript.ambience_for_level(audio_controller, current_level)
 	_update_ground_material()
 	var local_id := _snapshot_local_player_id(p)
-	if local_id != "":
-		player_id = local_id
+	if local_id != "": player_id = local_id
 	party = p.get("party", [])
 	pending_interactable_action.clear()
 	pending_waypoint_travel = false

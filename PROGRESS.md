@@ -23,10 +23,10 @@ Last updated: 2026-06-18
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v269 — server-authoritative monster navigation budget |
+| **Latest completed slice** | v270 — crowd movement LOD for many enemies |
 | **Active branch** | `main` |
-| **CI gate** | v269 focused verification green on 2026-06-18; selected autoloop batch `make ci` still pending |
-| **Next slice** | v270 — crowd movement LOD for many enemies |
+| **CI gate** | v270 focused verification green on 2026-06-18; selected autoloop batch `make ci` still pending |
+| **Next slice** | v271 — multiplayer-ready room simulation guardrails |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
 | **Next engineering review** | After v260 or the next ~10 completed slices, once CI is green |
 

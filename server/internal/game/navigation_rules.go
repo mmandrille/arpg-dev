@@ -7,16 +7,19 @@ import (
 
 func loadNavigationRules(dir string) (NavigationRules, error) {
 	var navigation struct {
-		Version                    int        `json:"version"`
-		CellSize                   float64    `json:"cell_size"`
-		MaxAutoSteps               int        `json:"max_auto_steps"`
-		GridBounds                 GridBounds `json:"grid_bounds"`
-		StopDistance               float64    `json:"stop_distance"`
-		MonsterPathRequestsPerTick int        `json:"monster_path_requests_per_tick"`
-		MonsterPathNodesPerTick    int        `json:"monster_path_nodes_per_tick"`
-		MonsterPathCacheTicks      int        `json:"monster_path_cache_ticks"`
-		MonsterRepathThrottleTicks int        `json:"monster_repath_throttle_ticks"`
-		MonsterRepathStaggerTicks  int        `json:"monster_repath_stagger_ticks"`
+		Version                               int        `json:"version"`
+		CellSize                              float64    `json:"cell_size"`
+		MaxAutoSteps                          int        `json:"max_auto_steps"`
+		GridBounds                            GridBounds `json:"grid_bounds"`
+		StopDistance                          float64    `json:"stop_distance"`
+		MonsterPathRequestsPerTick            int        `json:"monster_path_requests_per_tick"`
+		MonsterPathNodesPerTick               int        `json:"monster_path_nodes_per_tick"`
+		MonsterPathCacheTicks                 int        `json:"monster_path_cache_ticks"`
+		MonsterRepathThrottleTicks            int        `json:"monster_repath_throttle_ticks"`
+		MonsterRepathStaggerTicks             int        `json:"monster_repath_stagger_ticks"`
+		MonsterMovementLODMinLiveMonsters     int        `json:"monster_movement_lod_min_live_monsters"`
+		MonsterMovementLODNearDistance        float64    `json:"monster_movement_lod_near_distance"`
+		MonsterMovementLODUpdateIntervalTicks int        `json:"monster_movement_lod_update_interval_ticks"`
 	}
 	if err := readJSON(filepath.Join(dir, "navigation.v0.json"), &navigation); err != nil {
 		return NavigationRules{}, err
@@ -48,15 +51,27 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 	if navigation.MonsterRepathStaggerTicks <= 0 {
 		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_repath_stagger_ticks: must be positive")
 	}
+	if navigation.MonsterMovementLODMinLiveMonsters <= 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_movement_lod_min_live_monsters: must be positive")
+	}
+	if navigation.MonsterMovementLODNearDistance < 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_movement_lod_near_distance: must be non-negative")
+	}
+	if navigation.MonsterMovementLODUpdateIntervalTicks <= 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_movement_lod_update_interval_ticks: must be positive")
+	}
 	return NavigationRules{
-		CellSize:                   navigation.CellSize,
-		MaxAutoSteps:               navigation.MaxAutoSteps,
-		GridBounds:                 navigation.GridBounds,
-		StopDistance:               navigation.StopDistance,
-		MonsterPathRequestsPerTick: navigation.MonsterPathRequestsPerTick,
-		MonsterPathNodesPerTick:    navigation.MonsterPathNodesPerTick,
-		MonsterPathCacheTicks:      navigation.MonsterPathCacheTicks,
-		MonsterRepathThrottleTicks: navigation.MonsterRepathThrottleTicks,
-		MonsterRepathStaggerTicks:  navigation.MonsterRepathStaggerTicks,
+		CellSize:                              navigation.CellSize,
+		MaxAutoSteps:                          navigation.MaxAutoSteps,
+		GridBounds:                            navigation.GridBounds,
+		StopDistance:                          navigation.StopDistance,
+		MonsterPathRequestsPerTick:            navigation.MonsterPathRequestsPerTick,
+		MonsterPathNodesPerTick:               navigation.MonsterPathNodesPerTick,
+		MonsterPathCacheTicks:                 navigation.MonsterPathCacheTicks,
+		MonsterRepathThrottleTicks:            navigation.MonsterRepathThrottleTicks,
+		MonsterRepathStaggerTicks:             navigation.MonsterRepathStaggerTicks,
+		MonsterMovementLODMinLiveMonsters:     navigation.MonsterMovementLODMinLiveMonsters,
+		MonsterMovementLODNearDistance:        navigation.MonsterMovementLODNearDistance,
+		MonsterMovementLODUpdateIntervalTicks: navigation.MonsterMovementLODUpdateIntervalTicks,
 	}, nil
 }

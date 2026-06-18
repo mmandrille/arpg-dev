@@ -121,15 +121,18 @@ func (r CoopPartyChallengeRules) Multiplier(partyCount int) float64 {
 
 // NavigationRules bounds server-owned auto-navigation.
 type NavigationRules struct {
-	CellSize                   float64    `json:"cell_size"`
-	MaxAutoSteps               int        `json:"max_auto_steps"`
-	GridBounds                 GridBounds `json:"grid_bounds"`
-	StopDistance               float64    `json:"stop_distance"`
-	MonsterPathRequestsPerTick int        `json:"monster_path_requests_per_tick"`
-	MonsterPathNodesPerTick    int        `json:"monster_path_nodes_per_tick"`
-	MonsterPathCacheTicks      int        `json:"monster_path_cache_ticks"`
-	MonsterRepathThrottleTicks int        `json:"monster_repath_throttle_ticks"`
-	MonsterRepathStaggerTicks  int        `json:"monster_repath_stagger_ticks"`
+	CellSize                              float64    `json:"cell_size"`
+	MaxAutoSteps                          int        `json:"max_auto_steps"`
+	GridBounds                            GridBounds `json:"grid_bounds"`
+	StopDistance                          float64    `json:"stop_distance"`
+	MonsterPathRequestsPerTick            int        `json:"monster_path_requests_per_tick"`
+	MonsterPathNodesPerTick               int        `json:"monster_path_nodes_per_tick"`
+	MonsterPathCacheTicks                 int        `json:"monster_path_cache_ticks"`
+	MonsterRepathThrottleTicks            int        `json:"monster_repath_throttle_ticks"`
+	MonsterRepathStaggerTicks             int        `json:"monster_repath_stagger_ticks"`
+	MonsterMovementLODMinLiveMonsters     int        `json:"monster_movement_lod_min_live_monsters"`
+	MonsterMovementLODNearDistance        float64    `json:"monster_movement_lod_near_distance"`
+	MonsterMovementLODUpdateIntervalTicks int        `json:"monster_movement_lod_update_interval_ticks"`
 }
 
 // DungeonGenerationRules controls deterministic generated dungeon floors.

@@ -13,7 +13,10 @@
     "monster_path_nodes_per_tick",
     "monster_path_cache_ticks",
     "monster_repath_throttle_ticks",
-    "monster_repath_stagger_ticks"
+    "monster_repath_stagger_ticks",
+    "monster_movement_lod_min_live_monsters",
+    "monster_movement_lod_near_distance",
+    "monster_movement_lod_update_interval_ticks"
   ],
   "additionalProperties": false,
   "properties": {
@@ -36,6 +39,9 @@
     "monster_path_nodes_per_tick": { "type": "integer", "minimum": 1 },
     "monster_path_cache_ticks": { "type": "integer", "minimum": 0 },
     "monster_repath_throttle_ticks": { "type": "integer", "minimum": 0 },
-    "monster_repath_stagger_ticks": { "type": "integer", "minimum": 1 }
+    "monster_repath_stagger_ticks": { "type": "integer", "minimum": 1 },
+    "monster_movement_lod_min_live_monsters": { "type": "integer", "minimum": 1 },
+    "monster_movement_lod_near_distance": { "type": "number", "minimum": 0 },
+    "monster_movement_lod_update_interval_ticks": { "type": "integer", "minimum": 1 }
   }
 }

@@ -12,6 +12,9 @@ func (s *Sim) monsterPathBudgetAvailable() bool {
 }
 
 func (s *Sim) monsterCanRepath(monster *entity) bool {
+	if !s.monsterMovementLODAllowsTick(monster) {
+		return false
+	}
 	return monster == nil || monster.navNextRepathTick <= s.tick
 }
 
@@ -34,6 +37,9 @@ func (s *Sim) planMonsterPath(monster *entity, nav NavigationRules, start, goal 
 }
 
 func (s *Sim) cachedMonsterNavigationGoal(monster *entity, player *entity) (Vec2, bool) {
+	if !s.monsterMovementLODAllowsTick(monster) {
+		return Vec2{}, false
+	}
 	if monster == nil || player == nil || !monster.navPathValid {
 		return Vec2{}, false
 	}
@@ -71,6 +77,9 @@ func (s *Sim) monsterPathForMovement(monster *entity, nav NavigationRules, goal 
 }
 
 func (s *Sim) cachedMonsterPathForGoal(monster *entity, goal Vec2) ([]Vec2, bool) {
+	if !s.monsterMovementLODAllowsTick(monster) {
+		return nil, false
+	}
 	if monster == nil || !monster.navPathValid || distance(monster.navGoal, goal) > 1e-9 {
 		return nil, false
 	}

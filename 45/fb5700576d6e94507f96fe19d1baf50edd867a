@@ -1,0 +1,62 @@
+server/internal/game/navigation_rules.go
+  s_8ac650870d633e::t_03d2a81d20e169 23,64-66,80
+shared/golden/auto_path.json
+  s_8ac650870d633e::t_03d2a81d20e169 21-22
+server/internal/game/rules.go
+  s_8ac650870d633e::t_03d2a81d20e169 136
+server/internal/game/monster_overload_guardrails_test.go
+  s_8ac650870d633e::t_1391096c9b86b2 1-44
+shared/rules/navigation.v0.schema.json
+  s_8ac650870d633e::t_03d2a81d20e169 19-20,46-47
+docs/plans/v271_2026-06-18-multiplayer-room-guardrails.md
+  s_8ac650870d633e::t_6c77f50c3f2506 3,34,36-37,56-58,71-73,75,89-91,103-105,114-118
+  s_8ac650870d633e::t_ba6ec912b0a23b 1-2,4-33,35,38-55,59-70,74,76-88,92-102,106-113,119-120
+shared/golden/monster_chase.v0.schema.json
+  s_8ac650870d633e::t_03d2a81d20e169 27-28,54-55
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_6c77f50c3f2506 223
+server/internal/game/sim.go
+  s_8ac650870d633e::t_97ec4c7e708cf1 369-374
+  s_8ac650870d633e::t_c887bb7d522c89 368
+server/internal/game/monster_movement_lod.go
+  s_8ac650870d633e::t_96b37f04601f8b 8-10,36-37
+server/internal/realtime/tick_guardrails_test.go
+  s_8ac650870d633e::t_fd3d2af9b53b5c 1-62
+shared/rules/navigation.v0.json
+  s_8ac650870d633e::t_03d2a81d20e169 19-20
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_6c77f50c3f2506 286
+shared/golden/auto_path.v0.schema.json
+  s_8ac650870d633e::t_03d2a81d20e169 25-26,52-53
+PROGRESS.md
+  s_8ac650870d633e::t_6c77f50c3f2506 26,28-29
+docs/as-built/v271_multiplayer-room-guardrails.md
+  s_8ac650870d633e::t_6c77f50c3f2506 1-58
+shared/golden/monster_chase.json
+  s_8ac650870d633e::t_03d2a81d20e169 23-24
+server/internal/game/monster_overload_guardrails.go
+  s_8ac650870d633e::t_c887bb7d522c89 1-19
+server/internal/realtime/tick_guardrails.go
+  s_8ac650870d633e::t_fd3d2af9b53b5c 1-58
+docs/specs/v271_spec-multiplayer-room-guardrails.md
+  s_8ac650870d633e::t_6c77f50c3f2506 3,61-63
+  s_8ac650870d633e::t_ba6ec912b0a23b 1-2,4-60,64-69
+server/internal/realtime/session_tick.go
+  s_8ac650870d633e::t_fd3d2af9b53b5c 64-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "45fb5700576d6e94507f96fe19d1baf50edd867a",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

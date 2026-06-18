@@ -16,6 +16,9 @@ const GRID_COLOR := Color(1.0, 1.0, 1.0, 0.045)
 const PLAYER_COLOR := Color("#8fe8a7")
 const PIN_OUTER_COLOR := Color("#f0dfbb")
 const PIN_INNER_COLOR := Color("#ff7f50")
+const SERVICE_MARKER_COLOR := Color("#87c7ff")
+const STAIRS_MARKER_COLOR := Color("#f2cc66")
+const WAYPOINT_MARKER_COLOR := Color("#b58cff")
 
 var _map: Control
 var _state: Dictionary = _empty_state()
@@ -66,6 +69,7 @@ func sync(level: int, player_position: Vector3, light_radius: float, walls: Arra
 func get_debug_state() -> Dictionary:
 	var objective: Dictionary = _state.get("objective", {})
 	var map_size := _current_map_size()
+	var marker_counts: Dictionary = _state.get("marker_counts", {})
 	return {
 		"visible": visible,
 		"toggle_visible": _display_mode != MODE_HIDDEN,
@@ -77,6 +81,11 @@ func get_debug_state() -> Dictionary:
 		"level": int(_state.get("level", 0)),
 		"explored_count": int(_state.get("explored_count", 0)),
 		"wall_count": int(_state.get("wall_count", 0)),
+		"marker_count": int(_state.get("marker_count", 0)),
+		"service_marker_count": int(marker_counts.get("service", 0)),
+		"stairs_marker_count": int(marker_counts.get("stairs", 0)),
+		"waypoint_marker_count": int(marker_counts.get("waypoint", 0)),
+		"objective_marker_count": int(marker_counts.get("objective", 0)),
 		"player_marker_x": 0.5,
 		"player_marker_y": 0.5,
 		"has_pin": bool(objective.get("has_pin", false)),
@@ -134,6 +143,7 @@ func _draw_map() -> void:
 		_map.draw_line(Vector2(0, y), Vector2(map_size.x, y), GRID_COLOR, 1.0)
 	_draw_explored_cells()
 	_draw_walls()
+	_draw_poi_markers()
 	_map.draw_rect(rect, Color(0.55, 0.48, 0.35, 0.52), false, 1.0)
 	_map.draw_circle(map_size * 0.5, 5.0 if _display_mode != MODE_FULLSCREEN else 7.0, PLAYER_COLOR)
 	_draw_objective_pin()
@@ -172,6 +182,43 @@ func _draw_objective_pin() -> void:
 	_map.draw_circle(pin, radius * 0.5, PIN_INNER_COLOR)
 
 
+func _draw_poi_markers() -> void:
+	var markers: Array = _state.get("markers", [])
+	for raw in markers:
+		var marker := raw as Dictionary
+		var kind := str(marker.get("kind", ""))
+		if kind == "objective":
+			continue
+		var center := Vector2(float(marker.get("x", 0.5)), float(marker.get("y", 0.5))) * _current_map_size()
+		var radius := 5.0 if _display_mode != MODE_FULLSCREEN else 7.0
+		match kind:
+			"stairs":
+				_draw_triangle_marker(center, radius, STAIRS_MARKER_COLOR)
+			"waypoint":
+				_draw_diamond_marker(center, radius, WAYPOINT_MARKER_COLOR)
+			"service":
+				_map.draw_rect(Rect2(center - Vector2(radius, radius), Vector2(radius * 2.0, radius * 2.0)), SERVICE_MARKER_COLOR, true)
+			_:
+				_map.draw_circle(center, radius, Color.WHITE)
+
+
+func _draw_triangle_marker(center: Vector2, radius: float, color: Color) -> void:
+	_map.draw_polygon([
+		center + Vector2(0, -radius),
+		center + Vector2(radius, radius),
+		center + Vector2(-radius, radius),
+	], [color])
+
+
+func _draw_diamond_marker(center: Vector2, radius: float, color: Color) -> void:
+	_map.draw_polygon([
+		center + Vector2(0, -radius),
+		center + Vector2(radius, 0),
+		center + Vector2(0, radius),
+		center + Vector2(-radius, 0),
+	], [color])
+
+
 func _world_to_map(world: Vector2) -> Vector2:
 	var player := Vector2(float(_state.get("player_x", 0.0)), float(_state.get("player_y", 0.0)))
 	return _current_map_size() * 0.5 + (world - player) * _world_to_map_scale()
@@ -205,8 +252,11 @@ func _normalized_state(state: Dictionary) -> Dictionary:
 	normalized["explored_cells"] = state.get("explored_cells", [])
 	normalized["walls"] = state.get("walls", [])
 	normalized["objective"] = state.get("objective", {"has_pin": false, "status": "hidden", "pin_x": 0.5, "pin_y": 0.5})
+	normalized["markers"] = state.get("markers", [])
+	normalized["marker_counts"] = state.get("marker_counts", {})
 	normalized["explored_count"] = int(state.get("explored_count", (normalized["explored_cells"] as Array).size()))
 	normalized["wall_count"] = int(state.get("wall_count", (normalized["walls"] as Array).size()))
+	normalized["marker_count"] = int(state.get("marker_count", (normalized["markers"] as Array).size()))
 	return normalized
 
 
@@ -221,6 +271,9 @@ static func _empty_state() -> Dictionary:
 		"explored_count": 0,
 		"walls": [],
 		"wall_count": 0,
+		"markers": [],
+		"marker_count": 0,
+		"marker_counts": {},
 		"objective": {"has_pin": false, "status": "hidden", "pin_x": 0.5, "pin_y": 0.5},
 	}
 

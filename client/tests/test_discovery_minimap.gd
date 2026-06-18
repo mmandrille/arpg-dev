@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_test_state_exploration_accumulates()
 	_test_state_is_scoped_by_level()
 	_test_wall_and_objective_debug()
+	_test_points_of_interest_markers()
 	_test_widget_defaults_toggle_size_and_opacity()
 	_test_widget_cycles_fullscreen_mode()
 	if _failures > 0:
@@ -53,7 +54,42 @@ func _test_wall_and_objective_debug() -> void:
 	var objective: Dictionary = mapped.get("objective", {})
 	_assert_true("objective has pin", bool(objective.get("has_pin", false)))
 	_assert_eq("objective active", str(objective.get("status", "")), "active")
+	var marker_counts: Dictionary = mapped.get("marker_counts", {})
+	_assert_eq("objective marker count", int(marker_counts.get("objective", 0)), 1)
 	chest.free()
+
+
+func _test_points_of_interest_markers() -> void:
+	var state: DiscoveryMinimapState = DiscoveryMinimapStateScript.new()
+	var stairs := Node3D.new()
+	stairs.position = Vector3(2.0, 0.0, 0.0)
+	var waypoint := Node3D.new()
+	waypoint.position = Vector3(3.0, 0.0, 0.0)
+	var service := Node3D.new()
+	service.position = Vector3(4.0, 0.0, 0.0)
+	var far_service := Node3D.new()
+	far_service.position = Vector3(50.0, 0.0, 0.0)
+	var mapped := state.update(
+		0,
+		Vector3.ZERO,
+		6.0,
+		[],
+		{
+			"stairs": {"type": "interactable", "interactable_def_id": "stairs_down", "node": stairs},
+			"waypoint": {"type": "interactable", "interactable_def_id": "teleporter", "node": waypoint},
+			"service": {"type": "interactable", "interactable_def_id": "town_vendor", "node": service},
+			"far_service": {"type": "interactable", "interactable_def_id": "town_stash", "node": far_service},
+		}
+	)
+	var counts: Dictionary = mapped.get("marker_counts", {})
+	_assert_eq("poi marker total", int(mapped.get("marker_count", 0)), 3)
+	_assert_eq("stairs marker", int(counts.get("stairs", 0)), 1)
+	_assert_eq("waypoint marker", int(counts.get("waypoint", 0)), 1)
+	_assert_eq("service marker", int(counts.get("service", 0)), 1)
+	stairs.free()
+	waypoint.free()
+	service.free()
+	far_service.free()
 
 
 func _test_widget_defaults_toggle_size_and_opacity() -> void:
@@ -76,12 +112,17 @@ func _test_widget_defaults_toggle_size_and_opacity() -> void:
 		"explored_count": 1,
 		"walls": [],
 		"wall_count": 0,
+		"markers": [{"kind": "service", "label": "vendor", "x": 0.55, "y": 0.5}],
+		"marker_count": 1,
+		"marker_counts": {"service": 1},
 		"objective": {"has_pin": true, "status": "active", "pin_x": 0.6, "pin_y": 0.4},
 	})
 	minimap.toggle()
 	var visible_state := minimap.get_debug_state()
 	_assert_true("toggle visible", bool(visible_state.get("visible", false)))
 	_assert_eq("debug explored count", int(visible_state.get("explored_count", 0)), 1)
+	_assert_eq("debug marker count", int(visible_state.get("marker_count", 0)), 1)
+	_assert_eq("debug service marker count", int(visible_state.get("service_marker_count", 0)), 1)
 	_assert_true("debug pin", bool(visible_state.get("has_pin", false)))
 	minimap.free()
 

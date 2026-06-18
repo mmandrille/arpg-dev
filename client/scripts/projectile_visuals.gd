@@ -92,7 +92,7 @@ static func _make_energy_projectile(projectile_def_id: String) -> Node3D:
 		mesh.size = Vector3(0.08, 0.08, 0.42)
 		color = Color(0.86, 0.98, 1.0)
 		emission = Color(0.45, 0.85, 1.0)
-	elif projectile_def_id == "ligthing":
+	elif projectile_def_id == "ligthing" or projectile_def_id == "ligthing_projectile":
 		mesh.size = Vector3(0.10, 0.10, 0.85)
 		color = Color(1.0, 0.94, 0.28)
 		emission = Color(1.0, 0.82, 0.12)

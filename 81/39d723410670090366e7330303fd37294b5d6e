@@ -1,0 +1,38 @@
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_d04e2bd5d62ea6 277
+docs/plans/v262_2026-06-18-doorway-los-occlusion.md
+  s_1949fa109f68d0::t_d04e2bd5d62ea6 3,40-41,44-45,58-60,72,74-75,89-91,100-103
+  s_1949fa109f68d0::t_daaf5746aa246e 1-2,4-39,42-43,46-57,61-71,73,76-88,92-99,104-109
+server/internal/game/fog_of_war_test.go
+  s_1949fa109f68d0::t_da43385c020b50 172-173
+  s_1949fa109f68d0::t_fabb569b7aa36d 143-171,174-181,234-244
+server/internal/game/fog_of_war.go
+  s_1949fa109f68d0::t_456b1c93a5b81a 207,210,219-231
+docs/specs/v262_spec-doorway-los-occlusion.md
+  s_1949fa109f68d0::t_daaf5746aa246e 1-2,4-64
+  s_1949fa109f68d0::t_d04e2bd5d62ea6 3
+client/scripts/fog_of_war_overlay.gd
+  s_1949fa109f68d0::t_88a903a3331879 48,89,95-105,117,189-190,195-196,313-322
+PROGRESS.md
+  s_1949fa109f68d0::t_d04e2bd5d62ea6 26,28-29,107
+client/tests/test_fog_of_war_overlay.gd
+  s_1949fa109f68d0::t_fbaa3111a91b30 16,58-69
+docs/as-built/v262_doorway-los-occlusion.md
+  s_1949fa109f68d0::t_d04e2bd5d62ea6 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8139d723410670090366e7330303fd37294b5d6e",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

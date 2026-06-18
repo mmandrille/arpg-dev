@@ -133,6 +133,48 @@ func TestAggroOnHitPropagatesToNearbyMonsterGroup(t *testing.T) {
 	}
 }
 
+func TestAggroOnHitTickCacheStillAllowsSeparateGroups(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_tick_cache_group_aggro", "tick_cache_group_aggro", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("dungeon world: %v", err)
+	}
+	level, err := sim.ensureDungeonLevel(-1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, candidate := range level.entities {
+		if candidate.kind == monsterEntity {
+			delete(level.entities, id)
+		}
+	}
+	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 2, Y: 5})
+	sim.syncCompatibilityFields()
+
+	first := addTestMonster(sim, "dungeon_mob", Vec2{X: 20, Y: 10}, 20)
+	firstNear := addTestMonster(sim, "dungeon_mob", Vec2{X: 25, Y: 10}, 20)
+	second := addTestMonster(sim, "dungeon_mob", Vec2{X: 60, Y: 10}, 20)
+	secondNear := addTestMonster(sim, "dungeon_mob", Vec2{X: 65, Y: 10}, 20)
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+
+	sim.aggroMonsterOnHit(first, sim.playerID, "corr_first_group", &res)
+	eventsAfterFirst := countEvents(res, "monster_aggro")
+	sim.aggroMonsterOnHit(firstNear, sim.playerID, "corr_first_group_repeat", &res)
+	if got := countEvents(res, "monster_aggro"); got != eventsAfterFirst {
+		t.Fatalf("repeat aggro in same group emitted new events: got %d want %d events=%+v", got, eventsAfterFirst, res.Events)
+	}
+
+	sim.aggroMonsterOnHit(second, sim.playerID, "corr_second_group", &res)
+	for _, monster := range []*entity{first, firstNear, second, secondNear} {
+		if monster.aiTargetPlayerID != sim.playerID || monster.aiMode != monsterAIModeChase {
+			t.Fatalf("monster %d target/mode = %d/%s, want %d/%s", monster.id, monster.aiTargetPlayerID, monster.aiMode, sim.playerID, monsterAIModeChase)
+		}
+		if !eventForEntity(res, "monster_aggro", monster.id) {
+			t.Fatalf("missing monster_aggro for %d in events %+v", monster.id, res.Events)
+		}
+	}
+}
+
 func TestAggroOnLethalHitPropagatesToNearbyMonsterGroup(t *testing.T) {
 	rules := loadRules(t)
 	sim, err := NewSimWithWorld("sess_lethal_group_aggro", "lethal_group_aggro", rules, "dungeon_levels")

@@ -45,16 +45,8 @@ func (s *Store) PurchaseMarketListing(ctx context.Context, buyerAccountID, listi
 		); err != nil {
 			return fmt.Errorf("store: credit market purchase seller gold: %w", err)
 		}
-		listedStats := listing.RolledStats
-		if len(listedStats) == 0 {
-			listedStats = []byte(`{}`)
-		}
-		if _, err := tx.Exec(ctx,
-			`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
-			 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
-			buyerAccountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, []byte(listedStats),
-		); err != nil {
-			return fmt.Errorf("store: deliver purchased listing to buyer stash: %w", err)
+		if err := insertAccountStashItemFromMarket(ctx, tx, buyerAccountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, listing.RolledStats, "store: deliver purchased listing to buyer stash"); err != nil {
+			return err
 		}
 		if err := refundActiveMarketOffers(ctx, tx, listingID, "store: refund purchased listing offers"); err != nil {
 			return err

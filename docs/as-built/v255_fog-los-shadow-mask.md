@@ -16,6 +16,8 @@ Date: 2026-06-17
 - Extended `assert_fog_of_war` with optional wall/occluder/shadow count expectations.
 - Added the `68_fog_los_shadow_mask` client bot scenario on `collision_lab` to prove a wall layout
   produces LOS shadows.
+- Follow-up: tightened the shadow start offset and projected the near mask edge from the primitive
+  wall mesh height so diagonal wall angles do not leave visible floor slivers behind obstacles.
 
 ## Proof
 

@@ -13,6 +13,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await _test_progression_sets_light_and_gloom_radius()
 	await _test_wall_layout_generates_shadow()
+	await _test_diagonal_wall_shadow_starts_near_visible_edge()
 	await _test_out_of_range_wall_skips_shadow()
 	await _test_multiple_walls_generate_multiple_shadows()
 	await _test_zero_radius_disables_overlay()
@@ -51,6 +52,42 @@ func _test_wall_layout_generates_shadow() -> void:
 	var first: Dictionary = shadows[0] if shadows.size() > 0 else {}
 	_assert_true("shadow has polygon points", (first.get("points", []) as Array).size() >= 4)
 	overlay.free()
+
+
+func _test_diagonal_wall_shadow_starts_near_visible_edge() -> void:
+	var target := Node3D.new()
+	target.position = Vector3(2.0, 0.0, 2.0)
+	get_root().add_child(target)
+	var camera := Camera3D.new()
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = 20.0
+	get_root().add_child(camera)
+	camera.current = true
+	camera.global_position = target.global_position + Vector3(9.0, 20.0, 15.0)
+	camera.look_at(target.global_position, Vector3.UP)
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.bind(camera, target)
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	overlay.set_wall_layout([{"position": {"x": 4.0, "y": 6.0}, "size": {"x": 1.0, "y": 6.0}}])
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_eq("diagonal shadow count", int(state.get("shadow_count", 0)), 1)
+	_assert_true("diagonal shadow small start offset", float(state.get("shadow_start_offset", 1.0)) <= 0.25)
+	_assert_eq("diagonal shadow wall height", float(state.get("shadow_wall_height", 0.0)), 1.0)
+	var shadows: Array = state.get("shadow_polygons", [])
+	var first: Dictionary = shadows[0] if shadows.size() > 0 else {}
+	var points: Array = first.get("points", [])
+	_assert_true("diagonal shadow has polygon points", points.size() >= 4)
+	if points.size() >= 4:
+		var near_a := _point_from_debug(points[0] as Dictionary)
+		var top_a := camera.unproject_position(Vector3(4.5, 1.0, 3.0))
+		var ground_a := camera.unproject_position(Vector3(4.5, 0.0, 3.0))
+		_assert_true("diagonal shadow starts from wall top silhouette", near_a.distance_to(top_a) < near_a.distance_to(ground_a))
+	overlay.free()
+	camera.free()
+	target.free()
 
 
 func _test_out_of_range_wall_skips_shadow() -> void:
@@ -113,3 +150,7 @@ func _assert_true(label: String, value: bool) -> void:
 
 func _assert_false(label: String, value: bool) -> void:
 	_assert_true(label, not value)
+
+
+func _point_from_debug(point: Dictionary) -> Vector2:
+	return Vector2(float(point.get("x", 0.0)), float(point.get("y", 0.0)))

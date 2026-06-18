@@ -1,0 +1,23 @@
+server/internal/store/market_purchase.go
+  s_1949fa109f68d0::t_d7148ec8e0d275 48-49
+server/internal/store/market_helpers.go
+  s_1949fa109f68d0::t_bc9fe0cb52d25b 79,83-86,92-93,95
+server/internal/store/market_repo.go
+  s_1949fa109f68d0::t_55a63a8add5f8d 115-116,419-420
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "776aeb3e1ad3ce33659a2604e9a8e794659bfa86",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

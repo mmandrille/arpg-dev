@@ -1,0 +1,19 @@
+make/client.mk
+  s_22cd8cf3f4caf5::t_800b87065ca681 2,4,8,29-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "f7a8a04964af3d4006c71a6622ff1010ed45b3a9",
+  "prompts": {},
+  "sessions": {
+    "s_22cd8cf3f4caf5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edc84-925b-7bf2-aed1-3777ce713050",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

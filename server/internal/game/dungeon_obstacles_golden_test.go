@@ -14,6 +14,7 @@ type dungeonObstaclesGolden struct {
 		MinimumGeneratedWallCount int                      `json:"minimum_generated_wall_count"`
 		ShapeFamilies             []string                 `json:"shape_families"`
 		Walls                     []dungeonObstacleWall    `json:"walls"`
+		Doors                     []dungeonReachableTarget `json:"doors"`
 		ReachableTargets          []dungeonReachableTarget `json:"reachable_targets"`
 	} `json:"expected"`
 }
@@ -80,6 +81,15 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 			t.Fatalf("missing shape family %s in %+v", want, shapeFamilies)
 		}
 	}
+	if len(level.doors) != len(golden.Expected.Doors) {
+		t.Fatalf("door count = %d, want golden %d", len(level.doors), len(golden.Expected.Doors))
+	}
+	for i, want := range golden.Expected.Doors {
+		got := level.doors[i]
+		if got.defID != want.DefID || got.pos != want.Position {
+			t.Fatalf("door %d = def %s pos %+v, want %+v", i, got.defID, got.pos, want)
+		}
+	}
 	start := generatedReachabilityStart(rules.DungeonGeneration.RulesForLevel(level.levelNum), level)
 	for i, got := range generatedReachabilityTargets(level) {
 		if !generatedTargetReachableFrom(rules.DungeonGeneration.RulesForLevel(level.levelNum), level, start, got.pos) {
@@ -107,6 +117,14 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 	golden.Expected.MinimumWallCount = len(level.walls)
 	golden.Expected.MinimumGeneratedWallCount = maxInt(0, len(level.walls)-4)
 	golden.Expected.ShapeFamilies = sortedStringKeys(shapeFamilies)
+	golden.Expected.Doors = nil
+	for _, door := range level.doors {
+		golden.Expected.Doors = append(golden.Expected.Doors, dungeonReachableTarget{
+			Kind:     "door",
+			DefID:    door.defID,
+			Position: door.pos,
+		})
+	}
 	golden.Expected.ReachableTargets = nil
 	for _, target := range generatedReachabilityTargets(level) {
 		kind, defID := goldenReachabilityKindAndDefID(target.kind)
@@ -127,6 +145,9 @@ func goldenReachabilityKindAndDefID(kind string) (string, string) {
 	}
 	if kind == stairsUpDefID || kind == stairsDownDefID || kind == teleporterDefID {
 		return kind, ""
+	}
+	if kind == woodenDoorDefID {
+		return "door", kind
 	}
 	return "chest", kind
 }

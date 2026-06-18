@@ -157,6 +157,7 @@
         "wall_segment",
         "solid_block",
         "shape_weights",
+        "doors",
         "clearance"
       ],
       "additionalProperties": false,
@@ -192,6 +193,19 @@
             "l": { "type": "integer", "minimum": 0 },
             "t": { "type": "integer", "minimum": 0 },
             "block": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "doors": {
+          "type": "object",
+          "required": ["enabled", "interactable_def_id", "max_count", "min_wall_length", "min_side_length", "gap_width"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "interactable_def_id": { "const": "wooden_door" },
+            "max_count": { "type": "integer", "minimum": 0 },
+            "min_wall_length": { "type": "integer", "minimum": 1 },
+            "min_side_length": { "type": "number", "exclusiveMinimum": 0 },
+            "gap_width": { "type": "number", "exclusiveMinimum": 0 }
           }
         },
         "clearance": {

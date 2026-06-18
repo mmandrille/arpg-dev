@@ -8,58 +8,6 @@ import (
 
 const championCommonMinionCount = 2
 
-type generatedDungeonLevel struct {
-	levelNum    int
-	walls       []wallObstacle
-	stairs      []generatedStair
-	teleporters []generatedTeleporter
-	chests      []generatedChest
-	monsters    []generatedMonster
-	loot        []generatedLoot
-}
-
-type generatedStair struct {
-	defID string
-	pos   Vec2
-	state string
-}
-
-type generatedTeleporter struct {
-	defID string
-	pos   Vec2
-	state string
-}
-
-type generatedChest struct {
-	defID          string
-	lootTable      string
-	pos            Vec2
-	questReward    bool
-	eliteObjective bool
-}
-
-type generatedLoot struct {
-	itemDefID string
-	pos       Vec2
-}
-
-type generatedMonster struct {
-	defID        string
-	packID       string
-	packLeader   bool
-	rarityID     string
-	bossTemplate string
-	isBoss       bool
-	visualModel  string
-	visualTint   string
-	visualScale  float64
-	lootTable    string
-	pos          Vec2
-	maxHP        int
-	attackDamage *DamageRange
-	xpReward     int
-}
-
 // GenerateDungeonLevel builds the deterministic non-player contents for one
 // dungeon floor. It uses a local per-level RNG stream and never consumes Sim.rng.
 func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRules) (generatedDungeonLevel, error) {
@@ -246,6 +194,14 @@ func (g generatedDungeonLevel) chestPositions() []Vec2 {
 	return positions
 }
 
+func (g generatedDungeonLevel) doorPositions() []Vec2 {
+	positions := make([]Vec2, 0, len(g.doors))
+	for _, door := range g.doors {
+		positions = append(positions, door.pos)
+	}
+	return positions
+}
+
 func perimeterWalls(size DungeonFloorSize, thickness float64) []wallObstacle {
 	half := thickness / 2
 	return []wallObstacle{
@@ -268,10 +224,17 @@ func placeDungeonObstacles(seed string, rules DungeonGenerationRules, out *gener
 		if !ok {
 			continue
 		}
-		out.walls = append(append([]wallObstacle(nil), baseWalls...), generated...)
-		if err := validateGeneratedDungeonReachability(rules, *out); err != nil {
+		candidate := *out
+		candidate.walls = append(append([]wallObstacle(nil), baseWalls...), generated...)
+		candidate.doors = nil
+		if err := validateGeneratedDungeonReachability(rules, candidate); err != nil {
 			continue
 		}
+		placeGeneratedDoors(seed, rules, &candidate)
+		if err := validateGeneratedDungeonReachability(rules, candidate); err != nil {
+			continue
+		}
+		*out = candidate
 		return nil
 	}
 	out.walls = baseWalls
@@ -961,6 +924,11 @@ func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out g
 			return true
 		}
 	}
+	for _, door := range out.doorPositions() {
+		if distance(pos, door) < interactableClearance {
+			return true
+		}
+	}
 	for _, monster := range out.monsters {
 		if distance(pos, monster.pos) < placement.MarginFromWall {
 			return true
@@ -990,7 +958,7 @@ type generatedReachabilityTarget struct {
 }
 
 func generatedReachabilityTargets(out generatedDungeonLevel) []generatedReachabilityTarget {
-	targets := make([]generatedReachabilityTarget, 0, len(out.stairs)+len(out.teleporters)+len(out.chests)+len(out.loot)+len(out.monsters))
+	targets := make([]generatedReachabilityTarget, 0, len(out.stairs)+len(out.teleporters)+len(out.chests)+len(out.doors)+len(out.loot)+len(out.monsters))
 	for _, stair := range out.stairs {
 		targets = append(targets, generatedReachabilityTarget{kind: stair.defID, pos: stair.pos})
 	}
@@ -999,6 +967,9 @@ func generatedReachabilityTargets(out generatedDungeonLevel) []generatedReachabi
 	}
 	for _, chest := range out.chests {
 		targets = append(targets, generatedReachabilityTarget{kind: chest.defID, pos: chest.pos})
+	}
+	for _, door := range out.doors {
+		targets = append(targets, generatedReachabilityTarget{kind: door.defID, pos: door.pos})
 	}
 	for _, loot := range out.loot {
 		targets = append(targets, generatedReachabilityTarget{kind: "loot:" + loot.itemDefID, pos: loot.pos})

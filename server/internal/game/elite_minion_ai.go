@@ -80,6 +80,11 @@ func (s *Sim) moveMonsterTowardGoal(monster *entity, player *entity, def Monster
 
 func (s *Sim) moveMonsterToPoint(monster *entity, def MonsterDef, goal Vec2, res *TickResult) {
 	nav := s.activeNav()
+	moveSpeed := s.monsterMoveSpeed(monster, def, nav)
+	if moveSpeed <= 0 {
+		return
+	}
+	before := monster.pos
 	blocked := s.buildMonsterBlockedFn(monster.id)
 	steps, ok := PlanPath(nav, monster.pos, goal, blocked)
 	if !ok || len(steps) == 0 {
@@ -87,8 +92,6 @@ func (s *Sim) moveMonsterToPoint(monster *entity, def MonsterDef, goal Vec2, res
 			return
 		}
 	}
-	moveSpeed := s.monsterMoveSpeed(monster, def, nav)
-	before := monster.pos
 	monster.pos = s.resolveMonsterMovement(monster, s.monsterMoveDelta(monster.pos, goal, steps, moveSpeed))
 	if monster.pos != before {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(monster))})

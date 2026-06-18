@@ -965,11 +965,31 @@ type TickResult struct {
 	Events        []Event
 	Acks          []Ack
 	Rejects       []Reject
+
+	aggroedMonsterIDs map[uint64]map[uint64]bool
 }
 
 func (r *TickResult) ack(id string) { r.Acks = append(r.Acks, Ack{MessageID: id}) }
 func (r *TickResult) reject(id, reason string) {
 	r.Rejects = append(r.Rejects, Reject{MessageID: id, Reason: reason})
+}
+func (r *TickResult) aggroAlreadyProcessed(playerID, monsterID uint64) bool {
+	if r == nil || r.aggroedMonsterIDs == nil {
+		return false
+	}
+	return r.aggroedMonsterIDs[playerID][monsterID]
+}
+func (r *TickResult) markAggroProcessed(playerID, monsterID uint64) {
+	if r == nil {
+		return
+	}
+	if r.aggroedMonsterIDs == nil {
+		r.aggroedMonsterIDs = map[uint64]map[uint64]bool{}
+	}
+	if r.aggroedMonsterIDs[playerID] == nil {
+		r.aggroedMonsterIDs[playerID] = map[uint64]bool{}
+	}
+	r.aggroedMonsterIDs[playerID][monsterID] = true
 }
 
 // Tick processes one authoritative tick and returns the normal single-level
@@ -3170,19 +3190,7 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		if distance(monster.pos, goal) <= nav.StopDistance && s.monsterInAttackRange(monster, player, def) {
 			continue
 		}
-		blocked := s.buildMonsterBlockedFn(monster.id)
-		steps, ok := PlanPath(nav, monster.pos, goal, blocked)
-		if !ok || len(steps) == 0 {
-			if distance(monster.pos, goal) > nav.CellSize+nav.StopDistance {
-				continue
-			}
-		}
-		moveSpeed := s.monsterMoveSpeed(monster, def, nav)
-		before := monster.pos
-		monster.pos = s.resolveMonsterMovement(monster, s.monsterMoveDelta(monster.pos, goal, steps, moveSpeed))
-		if monster.pos != before {
-			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(monster))})
-		}
+		s.moveMonsterToPoint(monster, def, goal, res)
 	}
 }
 
@@ -3385,6 +3393,7 @@ func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterD
 		bestMonsterDst = math.MaxFloat64
 		found          bool
 	)
+	blocked := s.buildMonsterBlockedFn(monster.id)
 	for _, goal := range candidates {
 		if !s.positionInNavigationBounds(nav, goal) || s.monsterPositionBlocked(goal, monster.id) {
 			continue
@@ -3392,7 +3401,6 @@ func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterD
 		if def.effectiveAttackMode() == attackModeRanged && !s.hasClearMonsterRangedShot(goal, player) {
 			continue
 		}
-		blocked := s.buildMonsterBlockedFn(monster.id)
 		steps, ok := PlanPath(nav, monster.pos, goal, blocked)
 		if !ok {
 			continue
@@ -3498,19 +3506,27 @@ func vecLess(a, b Vec2) bool {
 }
 
 func (s *Sim) buildMonsterBlockedFn(excludeMonsterID uint64) func(gx, gy int) bool {
+	nav := s.activeNav()
+	walls := s.activeWalls()
+	playerIDs := sortedPlayerIDs(s.players)
+	entityIDs := sortedEntityIDs(s.activeLevel().entities)
 	return func(gx, gy int) bool {
-		center := gridToWorld(s.activeNav(), gridCell{x: gx, y: gy})
-		return s.monsterPositionBlocked(center, excludeMonsterID)
+		center := gridToWorld(nav, gridCell{x: gx, y: gy})
+		return s.monsterPositionBlockedWithIDs(center, excludeMonsterID, walls, playerIDs, entityIDs)
 	}
 }
 
 func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
-	for _, wall := range s.activeWalls() {
+	return s.monsterPositionBlockedWithIDs(pos, excludeMonsterID, s.activeWalls(), sortedPlayerIDs(s.players), sortedEntityIDs(s.activeLevel().entities))
+}
+
+func (s *Sim) monsterPositionBlockedWithIDs(pos Vec2, excludeMonsterID uint64, walls []wallObstacle, playerIDs []uint64, entityIDs []uint64) bool {
+	for _, wall := range walls {
 		if circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
 			return true
 		}
 	}
-	for _, playerID := range sortedPlayerIDs(s.players) {
+	for _, playerID := range playerIDs {
 		ps := s.players[playerID]
 		if ps == nil || !ps.Connected || ps.CurrentLevel != s.currentLevel {
 			continue
@@ -3522,11 +3538,12 @@ func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
 			}
 		}
 	}
-	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+	level := s.activeLevel()
+	for _, id := range entityIDs {
 		if id == excludeMonsterID {
 			continue
 		}
-		e := s.activeLevel().entities[id]
+		e := level.entities[id]
 		if e == nil {
 			continue
 		}
@@ -3870,17 +3887,21 @@ func (s *Sim) aggroMonsterOnHit(monster *entity, playerID uint64, corr string, r
 	if monster == nil || monster.kind != monsterEntity || playerID == 0 {
 		return
 	}
+	if res.aggroAlreadyProcessed(playerID, monster.id) {
+		return
+	}
 	level := s.activeLevel()
 	player := level.entities[playerID]
+	entityIDs := sortedEntityIDs(level.entities)
 	queue := []*entity{monster}
-	queued := map[uint64]bool{monster.id: true}
+	res.markAggroProcessed(playerID, monster.id)
 	if player != nil && player.kind == playerEntity && player.hp > 0 {
-		for _, candidateID := range sortedEntityIDs(level.entities) {
+		for _, candidateID := range entityIDs {
 			candidate := level.entities[candidateID]
-			if candidate == nil || queued[candidate.id] || !s.canAggroAttackingPlayer(candidate, player) {
+			if candidate == nil || res.aggroAlreadyProcessed(playerID, candidate.id) || !s.canAggroAttackingPlayer(candidate, player) {
 				continue
 			}
-			queued[candidate.id] = true
+			res.markAggroProcessed(playerID, candidate.id)
 			queue = append(queue, candidate)
 		}
 	}
@@ -3893,12 +3914,12 @@ func (s *Sim) aggroMonsterOnHit(monster *entity, playerID uint64, corr string, r
 		if current.hp > 0 {
 			s.aggroSingleMonster(current, playerID, corr, res)
 		}
-		for _, candidateID := range sortedEntityIDs(level.entities) {
+		for _, candidateID := range entityIDs {
 			candidate := level.entities[candidateID]
-			if candidate == nil || queued[candidate.id] || !s.canJoinGroupAggro(current, candidate) {
+			if candidate == nil || res.aggroAlreadyProcessed(playerID, candidate.id) || !s.canJoinGroupAggro(current, candidate) {
 				continue
 			}
-			queued[candidate.id] = true
+			res.markAggroProcessed(playerID, candidate.id)
 			queue = append(queue, candidate)
 		}
 	}

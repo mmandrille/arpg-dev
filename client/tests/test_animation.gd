@@ -263,6 +263,7 @@ func _test_player_snapshot_death_pose() -> void:
 func _test_monster_scene() -> void:
 	for scene_path in [
 		"res://scenes/monster_dummy.tscn",
+		"res://scenes/monster_dark_purple.tscn",
 		"res://scenes/monster_quadruped.tscn",
 		"res://scenes/monster_wolf.tscn",
 		"res://scenes/monster_tiny_flyer.tscn",
@@ -286,13 +287,38 @@ func _test_monster_scene() -> void:
 				ap.seek(0.1375, true)
 				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
 				_assert(wolf_model.position.y > 0.0, "%s walk clip should bob WolfModel, got y=%s" % [scene_path, wolf_model.position.y])
+			if scene_path == "res://scenes/monster_quadruped.tscn":
+				var model_root := s.find_child("ModelRoot", false, false) as Node3D
+				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
+				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s ModelRoot should correct GLB nose to parent +Z, got y=%s" % [scene_path, model_root.rotation.y])
+				var quadruped_model := s.find_child("QuadrupedModel", true, false) as Node3D
+				_assert(quadruped_model != null, "%s QuadrupedModel missing" % scene_path)
+				ap.play("walk")
+				ap.seek(0.1375, true)
+				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
+				_assert(quadruped_model.position.y > 0.0, "%s walk clip should bob QuadrupedModel, got y=%s" % [scene_path, quadruped_model.position.y])
+			if scene_path == "res://scenes/monster_dark_purple.tscn":
+				var model_root := s.find_child("ModelRoot", false, false) as Node3D
+				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
+				_assert(absf(model_root.rotation.y) <= 0.001, "%s ModelRoot should face parent +Z after right-facing correction, got y=%s" % [scene_path, model_root.rotation.y])
+				var model := s.find_child("Model", true, false) as Node3D
+				_assert(model != null, "%s Model missing" % scene_path)
+				_assert(model.scale.is_equal_approx(Vector3(0.75, 0.75, 0.75)), "%s Model should be scaled to 75%%, got %s" % [scene_path, model.scale])
+				ap.play("walk")
+				ap.seek(0.1375, true)
+				_assert(absf(model_root.rotation.y) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
+				_assert(model.position.y > 0.0, "%s walk clip should bob Model, got y=%s" % [scene_path, model.position.y])
 		s.free()
 		await process_frame
 
 
 func _test_monster_visuals_catalog() -> void:
+	var mob := MonsterVisualsLoaderScript.resolve("dungeon_mob")
+	_assert(str(mob.get("scene", "")) == "monster_dark_purple", "dungeon_mob scene = %s" % mob.get("scene", ""))
+	_assert(str(mob.get("asset_id", "")) == "monster_dark_purple_v0", "dungeon_mob asset = %s" % mob.get("asset_id", ""))
 	var wolf := MonsterVisualsLoaderScript.resolve("dungeon_wolf")
 	_assert(str(wolf.get("scene", "")) == "monster_quadruped", "dungeon_wolf scene = %s" % wolf.get("scene", ""))
+	_assert(str(wolf.get("asset_id", "")) == "monster_quadruped_predator_v0", "dungeon_wolf asset = %s" % wolf.get("asset_id", ""))
 	var companion_wolf := MonsterVisualsLoaderScript.resolve("companion_black_wolf", "monster_wolf")
 	_assert(str(companion_wolf.get("scene", "")) == "monster_wolf", "companion_black_wolf scene = %s" % companion_wolf.get("scene", ""))
 	var bat := MonsterVisualsLoaderScript.resolve("dungeon_bat")

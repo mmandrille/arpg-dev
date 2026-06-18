@@ -93,8 +93,8 @@
       "animation_profile": "ground_biped"
     },
     "dungeon_mob": {
-      "asset_id": "monster_dummy_v0",
-      "scene": "monster_dummy",
+      "asset_id": "monster_dark_purple_v0",
+      "scene": "monster_dark_purple",
       "scale": 1.0,
       "height_offset": 0.0,
       "animation_profile": "ground_biped"

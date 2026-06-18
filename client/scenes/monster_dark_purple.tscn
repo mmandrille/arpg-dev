@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/monsters/purple_fantasy/dark_purple_monster.glb" id="1_glb"]
+[ext_resource type="AnimationLibrary" path="res://animations/monster_dark_purple_anims.tres" id="2_anims"]
+
+[node name="MonsterDarkPurple" type="Node3D"]
+
+[node name="ModelRoot" type="Node3D" parent="."]
+
+[node name="Model" parent="ModelRoot" instance=ExtResource("1_glb")]
+scale = Vector3(0.75, 0.75, 0.75)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("..")
+libraries = {
+"": ExtResource("2_anims")
+}

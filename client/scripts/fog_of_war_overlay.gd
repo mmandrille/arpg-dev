@@ -6,6 +6,8 @@ const FALLBACK_WORLD_TO_SCREEN := 32.0
 const GLOOM_ALPHA := 0.52
 const DARKNESS_ALPHA := 1.0
 const SHADOW_EDGE_EPSILON := 0.08
+const SHADOW_START_OFFSET := 0.16
+const SHADOW_WALL_HEIGHT := 1.0
 const SHADER_CODE := """
 shader_type canvas_item;
 render_mode blend_mix, unshaded;
@@ -102,6 +104,8 @@ func get_debug_state() -> Dictionary:
 		"wall_count": _wall_layout.size(),
 		"occluder_count": _occluder_count,
 		"shadow_count": _shadow_debug.size(),
+		"shadow_start_offset": SHADOW_START_OFFSET,
+		"shadow_wall_height": SHADOW_WALL_HEIGHT,
 		"shadow_polygons": _shadow_debug.duplicate(true),
 		"center": {"x": _center_px.x, "y": _center_px.y},
 	}
@@ -226,17 +230,17 @@ func _shadow_polygon_for_wall(wall: Dictionary, hero_world: Vector2, viewport_si
 	var dir_b := (corner_b - hero_world).normalized()
 	if dir_a.length() <= 0.0 or dir_b.length() <= 0.0:
 		return []
-	var edge_offset := maxf(SHADOW_EDGE_EPSILON, minf(size.x, size.y))
+	var edge_offset := clampf(SHADOW_START_OFFSET, SHADOW_EDGE_EPSILON, minf(size.x, size.y) * 0.5)
 	var extend := maxf(_gloom_radius * 4.0, hero_world.distance_to(center) + viewport_size.length() / FALLBACK_WORLD_TO_SCREEN + wall_reach)
 	var start_a := corner_a + dir_a * edge_offset
 	var start_b := corner_b + dir_b * edge_offset
 	var end_a := hero_world + dir_a * extend
 	var end_b := hero_world + dir_b * extend
 	return [
-		_project_world_point(start_a),
+		_project_world_point(start_a, SHADOW_WALL_HEIGHT),
 		_project_world_point(end_a),
 		_project_world_point(end_b),
-		_project_world_point(start_b),
+		_project_world_point(start_b, SHADOW_WALL_HEIGHT),
 	]
 
 
@@ -280,9 +284,9 @@ func _point_inside_wall(point: Vector2, center: Vector2, size: Vector2) -> bool:
 	return point.x >= center.x - half.x and point.x <= center.x + half.x and point.y >= center.y - half.y and point.y <= center.y + half.y
 
 
-func _project_world_point(world_point: Vector2) -> Vector2:
+func _project_world_point(world_point: Vector2, height: float = 0.0) -> Vector2:
 	if _camera != null:
-		return _camera.unproject_position(Vector3(world_point.x, 0.0, world_point.y))
+		return _camera.unproject_position(Vector3(world_point.x, height, world_point.y))
 	return _center_px + (world_point - _target_world_position()) * FALLBACK_WORLD_TO_SCREEN
 
 

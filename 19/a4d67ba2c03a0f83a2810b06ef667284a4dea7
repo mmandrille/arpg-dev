@@ -1,0 +1,23 @@
+scripts/play_remote.sh
+  s_1949fa109f68d0::t_11fccce5681fab 36-41,56
+README.md
+  s_1949fa109f68d0::t_48d3a1c0807a24 67-68
+scripts/play.sh
+  s_1949fa109f68d0::t_11fccce5681fab 33-46,63,71,95,107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "19a4d67ba2c03a0f83a2810b06ef667284a4dea7",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

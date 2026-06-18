@@ -1,0 +1,73 @@
+shared/rules/interactables.v0.json
+  s_1949fa109f68d0::t_1813f1ad1176c1 8
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_1908ed02065958 279-280
+client/scripts/town_node_factory.gd
+  s_1949fa109f68d0::t_1813f1ad1176c1 6,9-11,16,21,23
+server/internal/game/interactables_test.go
+  s_1949fa109f68d0::t_21c8b6398f1562 46,80
+  s_1949fa109f68d0::t_1813f1ad1176c1 71-79,81-102
+  s_1949fa109f68d0::t_e7ee86d506402d 103-125
+PROGRESS.md
+  s_1949fa109f68d0::t_1908ed02065958 28
+  s_1949fa109f68d0::t_95ad4080189dfc 26
+client/scripts/interactable_rules_loader.gd.uid
+  s_1949fa109f68d0::t_4602a7ca37741e 1
+client/scripts/bot_assertion_handlers.gd
+  s_1949fa109f68d0::t_1813f1ad1176c1 338
+server/internal/game/approach.go
+  s_1949fa109f68d0::t_ae5087eadbc8be 17,35-37
+  s_1949fa109f68d0::t_acb5dcedc5a097 1-16,18-34,38-51
+tools/bot/scenarios/client/73_door_fog_toggle.json
+  s_1949fa109f68d0::t_1813f1ad1176c1 1-21,23-30
+  s_1949fa109f68d0::t_88e438d6d3a5f9 22
+client/scripts/interactable_rules_loader.gd
+  s_1949fa109f68d0::t_1813f1ad1176c1 1-38,77-86
+  s_1949fa109f68d0::t_84d3e38bf275f1 39-76
+server/internal/game/interactables.go
+  s_1949fa109f68d0::t_ccd73f299d89af 3-4,78-98
+  s_1949fa109f68d0::t_1813f1ad1176c1 42-50,72-77
+client/scripts/main.gd
+  s_1949fa109f68d0::t_b08f59c67298af 1181-1182
+  s_1949fa109f68d0::t_1813f1ad1176c1 4748
+  s_1949fa109f68d0::t_bb61c612d11418 4747,5117,5130
+shared/rules/dungeon_generation.v0.json
+  s_1949fa109f68d0::t_1813f1ad1176c1 119
+client/scripts/bot_scenario_runner.gd
+  s_1949fa109f68d0::t_88e438d6d3a5f9 433-434
+shared/golden/dungeon_obstacles.json
+  s_1949fa109f68d0::t_2745fdc26f9754 198,202,211,215
+docs/plans/v265_2026-06-18-door-fog-and-toggle.md
+  s_1949fa109f68d0::t_95ad4080189dfc 3,29,31-32
+  s_1949fa109f68d0::t_debdd948190fa0 38
+  s_1949fa109f68d0::t_1813f1ad1176c1 1-2,4-15,17-27,30,33-37,39-42
+  s_1949fa109f68d0::t_1126f6f4b36a96 16,28
+docs/as-built/v265_door-fog-and-toggle.md
+  s_1949fa109f68d0::t_1908ed02065958 46-47
+  s_1949fa109f68d0::t_95ad4080189dfc 1-12,16-37,39-45
+  s_1949fa109f68d0::t_1126f6f4b36a96 13-15,38
+server/internal/game/sim.go
+  s_1949fa109f68d0::t_1813f1ad1176c1 5011-5013
+docs/as-built/v264_organic-fog-silhouette.md
+  s_1949fa109f68d0::t_1908ed02065958 41-42
+docs/specs/v265_spec-door-fog-and-toggle.md
+  s_1949fa109f68d0::t_1813f1ad1176c1 1-2,4-30,33-77
+  s_1949fa109f68d0::t_95ad4080189dfc 3
+  s_1949fa109f68d0::t_1126f6f4b36a96 31-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a3e2854c64f16442dff78673ae8abb79e36e9d1d",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

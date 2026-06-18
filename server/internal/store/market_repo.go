@@ -112,16 +112,8 @@ func (s *Store) CancelMarketListing(ctx context.Context, accountID, listingID st
 		if err := refundActiveMarketOffers(ctx, tx, listingID, "store: refund canceled listing offers"); err != nil {
 			return err
 		}
-		rolledStats := out.RolledStats
-		if len(rolledStats) == 0 {
-			rolledStats = []byte(`{}`)
-		}
-		if _, err := tx.Exec(ctx,
-			`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
-			 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
-			accountID, out.StashItemID, out.SourceCharacterID, out.ItemDefID, []byte(rolledStats),
-		); err != nil {
-			return fmt.Errorf("store: restore canceled listing to stash: %w", err)
+		if err := insertAccountStashItemFromMarket(ctx, tx, accountID, out.StashItemID, out.SourceCharacterID, out.ItemDefID, out.RolledStats, "store: restore canceled listing to stash"); err != nil {
+			return err
 		}
 		err = tx.QueryRow(ctx,
 			`UPDATE market_listings
@@ -424,16 +416,8 @@ func (s *Store) ExpireMarketListings(ctx context.Context) (int, error) {
 			if err := refundActiveMarketOffers(ctx, tx, listing.ID, "store: refund expired listing offers"); err != nil {
 				return err
 			}
-			rolledStats := listing.RolledStats
-			if len(rolledStats) == 0 {
-				rolledStats = []byte(`{}`)
-			}
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
-				 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
-				listing.SellerAccountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, []byte(rolledStats),
-			); err != nil {
-				return fmt.Errorf("store: restore expired listing to stash: %w", err)
+			if err := insertAccountStashItemFromMarket(ctx, tx, listing.SellerAccountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, listing.RolledStats, "store: restore expired listing to stash"); err != nil {
+				return err
 			}
 			if _, err := tx.Exec(ctx,
 				`UPDATE market_listings

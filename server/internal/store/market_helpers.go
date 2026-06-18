@@ -76,31 +76,23 @@ func listMarketOfferItemsForUpdate(ctx context.Context, tx pgx.Tx, offerID strin
 }
 
 func restoreOfferItemToAccountStash(ctx context.Context, tx pgx.Tx, accountID string, item MarketOfferItem) error {
-	rolledStats := item.RolledStats
-	if len(rolledStats) == 0 {
-		rolledStats = []byte(`{}`)
-	}
-	if _, err := tx.Exec(ctx,
-		`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
-		 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
-		accountID, item.StashItemID, item.SourceCharacterID, item.ItemDefID, []byte(rolledStats),
-	); err != nil {
-		return fmt.Errorf("store: restore offer item to account stash: %w", err)
-	}
-	return nil
+	return insertAccountStashItemFromMarket(ctx, tx, accountID, item.StashItemID, item.SourceCharacterID, item.ItemDefID, item.RolledStats, "store: restore offer item to account stash")
 }
 
 func deliverMarketListingItem(ctx context.Context, tx pgx.Tx, accountID string, listing MarketListing) error {
-	rolledStats := listing.RolledStats
+	return insertAccountStashItemFromMarket(ctx, tx, accountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, listing.RolledStats, "store: deliver accepted listing to bidder stash")
+}
+
+func insertAccountStashItemFromMarket(ctx context.Context, tx pgx.Tx, accountID, stashItemID, sourceCharacterID, itemDefID string, rolledStats []byte, label string) error {
 	if len(rolledStats) == 0 {
 		rolledStats = []byte(`{}`)
 	}
 	if _, err := tx.Exec(ctx,
 		`INSERT INTO account_stash_items (account_id, stash_item_id, source_character_id, item_def_id, rolled_stats)
-		 VALUES ($1, $2, NULLIF($3, ''), $4, $5::jsonb)`,
-		accountID, listing.StashItemID, listing.SourceCharacterID, listing.ItemDefID, []byte(rolledStats),
+		 VALUES ($1, $2, (SELECT id FROM characters WHERE account_id = $1 AND id = NULLIF($3, '') LIMIT 1), $4, $5::jsonb)`,
+		accountID, stashItemID, sourceCharacterID, itemDefID, []byte(rolledStats),
 	); err != nil {
-		return fmt.Errorf("store: deliver accepted listing to bidder stash: %w", err)
+		return fmt.Errorf("%s: %w", label, err)
 	}
 	return nil
 }

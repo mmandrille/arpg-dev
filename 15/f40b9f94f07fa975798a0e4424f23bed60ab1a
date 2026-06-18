@@ -1,0 +1,27 @@
+server/internal/game/elite_minion_ai.go
+  s_22cd8cf3f4caf5::t_0f9d8759f84a5f 83-87
+server/internal/game/combat_aggro_test.go
+  s_22cd8cf3f4caf5::t_a9d1c04203d1e1 136-177
+server/internal/game/sim.go
+  s_22cd8cf3f4caf5::t_8c1913ed47220b 3193
+  s_22cd8cf3f4caf5::t_5838b93d3b8cf2 3396
+  s_22cd8cf3f4caf5::t_332b03345da991 3890-3892,3895,3897,3899,3901,3904,3917,3919,3922
+  s_22cd8cf3f4caf5::t_70d395e04e85b6 3509-3512,3514-3515,3520-3524,3529,3541-3542,3546
+  s_22cd8cf3f4caf5::t_8a9f3bb6897da2 968-969,976-992
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "15f40b9f94f07fa975798a0e4424f23bed60ab1a",
+  "prompts": {},
+  "sessions": {
+    "s_22cd8cf3f4caf5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edc84-925b-7bf2-aed1-3777ce713050",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

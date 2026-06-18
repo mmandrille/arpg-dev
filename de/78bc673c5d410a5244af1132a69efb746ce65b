@@ -1,0 +1,44 @@
+client/scripts/main.gd
+  s_1949fa109f68d0::t_bc1b59c0ba2295 3459
+docs/as-built/v260_biome-color-palettes.md
+  s_1949fa109f68d0::t_1caaf8b5f0ed30 1-38
+docs/plans/v260_2026-06-18-biome-color-palettes.md
+  s_1949fa109f68d0::t_e6a8b0a0178380 1-2,4-39,43-44,46-57,61-74,80-92,96-103,107-113
+  s_1949fa109f68d0::t_1caaf8b5f0ed30 3,40-42,45,58-60,75-79,93-95,104-106
+shared/rules/dungeon_generation.v0.schema.json
+  s_1949fa109f68d0::t_bc1b59c0ba2295 10,44-48,385-418
+docs/specs/v260_spec-biome-color-palettes.md
+  s_1949fa109f68d0::t_e6a8b0a0178380 1-2,4-68
+  s_1949fa109f68d0::t_1caaf8b5f0ed30 3
+client/tests/test_item_visuals.gd
+  s_1949fa109f68d0::t_bc1b59c0ba2295 588-597
+client/tests/test_factories.gd
+  s_1949fa109f68d0::t_bc1b59c0ba2295 53,64
+client/scripts/ground_wall_factory.gd
+  s_1949fa109f68d0::t_59ba42d6d52696 108
+  s_1949fa109f68d0::t_bc1b59c0ba2295 8,32,34,41-44,48,50,53,69,71,73,76-79,83,85,88,96,98,100,102,104,106-107,109-137
+shared/rules/dungeon_generation.v0.json
+  s_1949fa109f68d0::t_bc1b59c0ba2295 11-36
+client/scripts/wall_renderer.gd
+  s_1949fa109f68d0::t_bc1b59c0ba2295 8,53-55,91-92
+PROGRESS.md
+  s_1949fa109f68d0::t_1caaf8b5f0ed30 26,28-29,107
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_1caaf8b5f0ed30 275
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "de78bc673c5d410a5244af1132a69efb746ce65b",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

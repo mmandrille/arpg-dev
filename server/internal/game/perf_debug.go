@@ -14,6 +14,26 @@ type PerfSnapshot struct {
 	Walls         int
 }
 
+const (
+	TickPhaseAI       = "ai"
+	TickPhaseCombat   = "combat"
+	TickPhasePathfind = "pathfind"
+)
+
+// TickProfiler is implemented by runtime callers that want wall-clock timing
+// around selected sim phases without importing time into the game package.
+type TickProfiler interface {
+	MeasureTickPhase(name string, fn func())
+}
+
+// PerfCounters records deterministic per-tick work units.
+type PerfCounters struct {
+	PathRequests     int
+	PathCacheHits    int
+	PathNodesVisited int
+	MonstersMoved    int
+}
+
 // PerfSnapshot returns counts for the current active level.
 func (s *Sim) PerfSnapshot() PerfSnapshot {
 	level := s.activeLevel()
@@ -53,4 +73,40 @@ func (s *Sim) PerfSnapshot() PerfSnapshot {
 		out.Entities++
 	}
 	return out
+}
+
+// PerfCounters returns deterministic work counters from the most recent tick.
+func (s *Sim) PerfCounters() PerfCounters {
+	return s.tickPerf
+}
+
+func (s *Sim) resetTickPerf() {
+	s.tickPerf = PerfCounters{}
+}
+
+func (s *Sim) withTickPhase(name string, fn func()) {
+	if s.tickProfiler == nil {
+		fn()
+		return
+	}
+	s.tickProfiler.MeasureTickPhase(name, fn)
+}
+
+func (s *Sim) planPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool) ([]Vec2, bool) {
+	stats := PathSearchStats{}
+	var (
+		steps []Vec2
+		ok    bool
+	)
+	run := func() {
+		steps, ok = PlanPathWithStats(nav, start, goal, blocked, &stats)
+	}
+	s.tickPerf.PathRequests++
+	s.withTickPhase(TickPhasePathfind, run)
+	s.tickPerf.PathNodesVisited += stats.NodesVisited
+	return steps, ok
+}
+
+func (s *Sim) recordMonsterMoved() {
+	s.tickPerf.MonstersMoved++
 }

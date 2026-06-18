@@ -29,7 +29,7 @@ func (s *Sim) findApproachGoalMatching(target *entity, inRange func(Vec2, *entit
 			if !inRange(goal, target) {
 				continue
 			}
-			steps, ok := PlanPath(nav, player.pos, goal, blocked)
+			steps, ok := s.planPath(nav, player.pos, goal, blocked)
 			if !ok {
 				continue
 			}

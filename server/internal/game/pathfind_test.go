@@ -27,6 +27,17 @@ func TestPlanPathOpenField(t *testing.T) {
 	}
 }
 
+func TestPlanPathWithStatsRecordsVisitedNodes(t *testing.T) {
+	stats := PathSearchStats{}
+	_, ok := PlanPathWithStats(testNav(), Vec2{X: 0, Y: 0}, Vec2{X: 3, Y: 0}, func(_, _ int) bool { return false }, &stats)
+	if !ok {
+		t.Fatal("PlanPathWithStats returned ok=false")
+	}
+	if stats.NodesVisited == 0 {
+		t.Fatal("NodesVisited = 0, want path search work recorded")
+	}
+}
+
 func TestPlanPathBlockedCellDetour(t *testing.T) {
 	blocked := func(gx, gy int) bool { return gx == 1 && gy == 0 }
 	steps, ok := PlanPath(testNav(), Vec2{X: 0, Y: 0}, Vec2{X: 3, Y: 0}, blocked)

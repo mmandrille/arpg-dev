@@ -130,7 +130,7 @@ func (s *Sim) handleMoveTo(in Input, res *TickResult) {
 		res.ack(in.MessageID)
 		return
 	}
-	steps, ok := PlanPath(s.activeNav(), player.pos, in.MoveTo.Position, s.buildBlockedFn())
+	steps, ok := s.planPath(s.activeNav(), player.pos, in.MoveTo.Position, s.buildBlockedFn())
 	if !ok {
 		res.reject(in.MessageID, "no_path")
 		return

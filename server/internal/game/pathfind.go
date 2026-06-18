@@ -21,8 +21,20 @@ type pathState struct {
 	dir  gridCell
 }
 
+// PathSearchStats records deterministic pathfinder work units. It intentionally
+// excludes wall-clock timing so authoritative game logic stays replay-safe.
+type PathSearchStats struct {
+	NodesVisited int
+}
+
 // PlanPath returns one-tick direction steps from start to goal using 8-way A*.
 func PlanPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool) ([]Vec2, bool) {
+	return PlanPathWithStats(nav, start, goal, blocked, nil)
+}
+
+// PlanPathWithStats returns one-tick direction steps and records deterministic
+// search counters when stats is provided.
+func PlanPathWithStats(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool, stats *PathSearchStats) ([]Vec2, bool) {
 	startCell := worldToGrid(nav, start)
 	goalCell := worldToGrid(nav, goal)
 	if !cellInBounds(nav, startCell) || !cellInBounds(nav, goalCell) || blocked(goalCell.x, goalCell.y) {
@@ -46,6 +58,9 @@ func PlanPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bo
 		current := heap.Pop(open).(*pathNode)
 		if closed[current.state] {
 			continue
+		}
+		if stats != nil {
+			stats.NodesVisited++
 		}
 		if current.state.cell == goalCell {
 			return reconstructPath(cameFrom, startState, current.state), true

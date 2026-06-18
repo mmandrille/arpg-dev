@@ -11,7 +11,18 @@
     "world_id": { "type": "string" },
     "navigation": {
       "type": "object",
-      "required": ["version", "cell_size", "max_auto_steps", "grid_bounds", "stop_distance"],
+      "required": [
+        "version",
+        "cell_size",
+        "max_auto_steps",
+        "grid_bounds",
+        "stop_distance",
+        "monster_path_requests_per_tick",
+        "monster_path_nodes_per_tick",
+        "monster_path_cache_ticks",
+        "monster_repath_throttle_ticks",
+        "monster_repath_stagger_ticks"
+      ],
       "additionalProperties": false,
       "properties": {
         "version": { "type": "integer", "const": 0 },
@@ -28,7 +39,12 @@
             "max_y": { "type": "integer" }
           }
         },
-        "stop_distance": { "type": "number", "minimum": 0 }
+        "stop_distance": { "type": "number", "minimum": 0 },
+        "monster_path_requests_per_tick": { "type": "integer", "minimum": 1 },
+        "monster_path_nodes_per_tick": { "type": "integer", "minimum": 1 },
+        "monster_path_cache_ticks": { "type": "integer", "minimum": 0 },
+        "monster_repath_throttle_ticks": { "type": "integer", "minimum": 0 },
+        "monster_repath_stagger_ticks": { "type": "integer", "minimum": 1 }
       }
     },
     "cases": {

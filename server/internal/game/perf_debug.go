@@ -82,6 +82,7 @@ func (s *Sim) PerfCounters() PerfCounters {
 
 func (s *Sim) resetTickPerf() {
 	s.tickPerf = PerfCounters{}
+	s.resetMonsterNavigationBudget()
 }
 
 func (s *Sim) withTickPhase(name string, fn func()) {
@@ -94,16 +95,22 @@ func (s *Sim) withTickPhase(name string, fn func()) {
 
 func (s *Sim) planPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool) ([]Vec2, bool) {
 	stats := PathSearchStats{}
+	return s.runPathSearch(nav, start, goal, blocked, &stats)
+}
+
+func (s *Sim) runPathSearch(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool, stats *PathSearchStats) ([]Vec2, bool) {
 	var (
 		steps []Vec2
 		ok    bool
 	)
 	run := func() {
-		steps, ok = PlanPathWithStats(nav, start, goal, blocked, &stats)
+		steps, ok = PlanPathWithStats(nav, start, goal, blocked, stats)
 	}
 	s.tickPerf.PathRequests++
 	s.withTickPhase(TickPhasePathfind, run)
-	s.tickPerf.PathNodesVisited += stats.NodesVisited
+	if stats != nil {
+		s.tickPerf.PathNodesVisited += stats.NodesVisited
+	}
 	return steps, ok
 }
 

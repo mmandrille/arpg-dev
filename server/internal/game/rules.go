@@ -121,10 +121,15 @@ func (r CoopPartyChallengeRules) Multiplier(partyCount int) float64 {
 
 // NavigationRules bounds server-owned auto-navigation.
 type NavigationRules struct {
-	CellSize     float64    `json:"cell_size"`
-	MaxAutoSteps int        `json:"max_auto_steps"`
-	GridBounds   GridBounds `json:"grid_bounds"`
-	StopDistance float64    `json:"stop_distance"`
+	CellSize                   float64    `json:"cell_size"`
+	MaxAutoSteps               int        `json:"max_auto_steps"`
+	GridBounds                 GridBounds `json:"grid_bounds"`
+	StopDistance               float64    `json:"stop_distance"`
+	MonsterPathRequestsPerTick int        `json:"monster_path_requests_per_tick"`
+	MonsterPathNodesPerTick    int        `json:"monster_path_nodes_per_tick"`
+	MonsterPathCacheTicks      int        `json:"monster_path_cache_ticks"`
+	MonsterRepathThrottleTicks int        `json:"monster_repath_throttle_ticks"`
+	MonsterRepathStaggerTicks  int        `json:"monster_repath_stagger_ticks"`
 }
 
 // DungeonGenerationRules controls deterministic generated dungeon floors.
@@ -1093,34 +1098,11 @@ func LoadRules(dir string) (*Rules, error) {
 		Coop:                    combat.Coop,
 	}
 
-	var navigation struct {
-		Version      int        `json:"version"`
-		CellSize     float64    `json:"cell_size"`
-		MaxAutoSteps int        `json:"max_auto_steps"`
-		GridBounds   GridBounds `json:"grid_bounds"`
-		StopDistance float64    `json:"stop_distance"`
-	}
-	if err := readJSON(filepath.Join(dir, "navigation.v0.json"), &navigation); err != nil {
+	navigation, err := loadNavigationRules(dir)
+	if err != nil {
 		return nil, err
 	}
-	if navigation.CellSize <= 0 {
-		return nil, fmt.Errorf("game: invalid rules navigation.cell_size: must be positive")
-	}
-	if navigation.MaxAutoSteps <= 0 {
-		return nil, fmt.Errorf("game: invalid rules navigation.max_auto_steps: must be positive")
-	}
-	if navigation.GridBounds.MaxX < navigation.GridBounds.MinX || navigation.GridBounds.MaxY < navigation.GridBounds.MinY {
-		return nil, fmt.Errorf("game: invalid rules navigation.grid_bounds: max must be >= min")
-	}
-	if navigation.StopDistance < 0 {
-		return nil, fmt.Errorf("game: invalid rules navigation.stop_distance: must be non-negative")
-	}
-	r.Navigation = NavigationRules{
-		CellSize:     navigation.CellSize,
-		MaxAutoSteps: navigation.MaxAutoSteps,
-		GridBounds:   navigation.GridBounds,
-		StopDistance: navigation.StopDistance,
-	}
+	r.Navigation = navigation
 
 	var progression struct {
 		Version         int                          `json:"version"`

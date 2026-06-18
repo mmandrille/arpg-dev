@@ -13,6 +13,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await _test_progression_sets_light_and_gloom_radius()
 	await _test_wall_layout_generates_shadow()
+	await _test_supplied_door_occluder_generates_shadow()
 	await _test_diagonal_wall_shadow_starts_near_visible_edge()
 	await _test_out_of_range_wall_skips_shadow()
 	await _test_multiple_walls_generate_multiple_shadows()
@@ -51,6 +52,21 @@ func _test_wall_layout_generates_shadow() -> void:
 	var shadows: Array = state.get("shadow_polygons", [])
 	var first: Dictionary = shadows[0] if shadows.size() > 0 else {}
 	_assert_true("shadow has polygon points", (first.get("points", []) as Array).size() >= 4)
+	overlay.free()
+
+
+func _test_supplied_door_occluder_generates_shadow() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	overlay.set_occluder_layout([{"position": {"x": 3.0, "y": 0.0}, "size": {"x": 1.0, "y": 0.25}}])
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_eq("door occluder leaves wall count", int(state.get("wall_count", -1)), 0)
+	_assert_eq("door extra occluder count", int(state.get("extra_occluder_count", 0)), 1)
+	_assert_eq("door occluder count", int(state.get("occluder_count", 0)), 1)
+	_assert_eq("door shadow count", int(state.get("shadow_count", 0)), 1)
 	overlay.free()
 
 

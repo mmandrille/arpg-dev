@@ -45,6 +45,7 @@ var _light_radius_px: float = 0.0
 var _gloom_radius_px: float = 0.0
 var _center_px := Vector2.ZERO
 var _wall_layout: Array = []
+var _extra_occluder_layout: Array = []
 var _shadow_polygons: Array = []
 var _shadow_debug: Array = []
 var _occluder_count: int = 0
@@ -85,9 +86,20 @@ func set_wall_layout(walls: Array) -> void:
 	for wall in walls:
 		if typeof(wall) != TYPE_DICTIONARY:
 			continue
-		var normalized := _normalized_wall(wall as Dictionary)
+		var normalized := _normalized_occluder(wall as Dictionary)
 		if not normalized.is_empty():
 			_wall_layout.append(normalized)
+	_update_shader()
+
+
+func set_occluder_layout(occluders: Array) -> void:
+	_extra_occluder_layout = []
+	for occluder in occluders:
+		if typeof(occluder) != TYPE_DICTIONARY:
+			continue
+		var normalized := _normalized_occluder(occluder as Dictionary)
+		if not normalized.is_empty():
+			_extra_occluder_layout.append(normalized)
 	_update_shader()
 
 
@@ -102,6 +114,7 @@ func get_debug_state() -> Dictionary:
 		"gloom_alpha": GLOOM_ALPHA,
 		"darkness_alpha": DARKNESS_ALPHA,
 		"wall_count": _wall_layout.size(),
+		"extra_occluder_count": _extra_occluder_layout.size(),
 		"occluder_count": _occluder_count,
 		"shadow_count": _shadow_debug.size(),
 		"shadow_start_offset": SHADOW_START_OFFSET,
@@ -173,13 +186,14 @@ func _update_shadows(viewport_size: Vector2) -> void:
 	_occluder_count = 0
 	if _shadow_root == null:
 		return
-	if not visible or _gloom_radius <= 0.0 or _wall_layout.is_empty():
+	var occluders := _combined_occluders()
+	if not visible or _gloom_radius <= 0.0 or occluders.is_empty():
 		_hide_shadow_polygons()
 		return
 	var hero_world := _target_world_position()
 	var polygons: Array = []
-	for wall in _wall_layout:
-		var poly := _shadow_polygon_for_wall(wall as Dictionary, hero_world, viewport_size)
+	for occluder in occluders:
+		var poly := _shadow_polygon_for_wall(occluder as Dictionary, hero_world, viewport_size)
 		if poly.size() < 4:
 			continue
 		_occluder_count += 1
@@ -296,9 +310,16 @@ func _target_world_position() -> Vector2:
 	return Vector2.ZERO
 
 
-func _normalized_wall(wall: Dictionary) -> Dictionary:
-	var pos: Dictionary = wall.get("position", {})
-	var size: Dictionary = wall.get("size", {})
+func _combined_occluders() -> Array:
+	var occluders := _wall_layout.duplicate()
+	for occluder in _extra_occluder_layout:
+		occluders.append(occluder)
+	return occluders
+
+
+func _normalized_occluder(occluder: Dictionary) -> Dictionary:
+	var pos: Dictionary = occluder.get("position", {})
+	var size: Dictionary = occluder.get("size", {})
 	var w := float(size.get("x", 0.0))
 	var h := float(size.get("y", 0.0))
 	if w <= 0.0 or h <= 0.0:

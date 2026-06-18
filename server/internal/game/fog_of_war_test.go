@@ -140,6 +140,45 @@ func TestFogOfWarDeltasRevealMonstersWhenWallLineOfSightClears(t *testing.T) {
 	}
 }
 
+func TestFogOfWarDeltasRevealMonstersWhenClosedDoorOpens(t *testing.T) {
+	sim := newFogTestSim(t)
+	level := sim.activeLevel()
+	player := level.entities[sim.playerID]
+	door := addFogTestInteractable(sim, woodenDoorDefID, Vec2{X: 4, Y: 0}, interactableClosed)
+	monster := addTestMonster(sim, monsterDefID, Vec2{X: 8, Y: 0}, 10)
+
+	snap := sim.SnapshotForPlayer(sim.playerID)
+	if snapshotHasEntity(snap, idStr(monster.id)) {
+		t.Fatalf("snapshot leaked closed-door-occluded monster %d: %+v", monster.id, snap.Entities)
+	}
+	if sim.players[sim.playerID].VisibleMonsterIDs[monster.id] {
+		t.Fatalf("visible monster memory contains closed-door-occluded monster %d", monster.id)
+	}
+
+	door.state = interactableOpen
+	reveal := TickResult{Changes: sim.FilterChangesForPlayer(sim.playerID, sim.currentLevel, []Change{
+		{Op: OpEntityUpdate, Entity: ptrEntityView(sim.entityView(player))},
+	})}
+	if !hasEntitySpawn(reveal, idStr(monster.id)) {
+		t.Fatalf("opening door line of sight did not spawn monster %d: %+v", monster.id, reveal.Changes)
+	}
+}
+
+func TestFogOfWarIgnoresOpenAndNonBarrierInteractables(t *testing.T) {
+	sim := newFogTestSim(t)
+	if def := sim.rules.Interactables[treasureChestDefID]; def.BarrierWhenClosed != nil {
+		t.Fatalf("%s unexpectedly has barrier_when_closed", treasureChestDefID)
+	}
+	addFogTestInteractable(sim, woodenDoorDefID, Vec2{X: 4, Y: 0}, interactableOpen)
+	addFogTestInteractable(sim, treasureChestDefID, Vec2{X: 4, Y: 0}, interactableClosed)
+	monster := addTestMonster(sim, monsterDefID, Vec2{X: 8, Y: 0}, 10)
+
+	snap := sim.SnapshotForPlayer(sim.playerID)
+	if !snapshotHasEntity(snap, idStr(monster.id)) {
+		t.Fatalf("snapshot hid monster behind open/non-barrier interactables %d: %+v", monster.id, snap.Entities)
+	}
+}
+
 func TestFogOfWarSuppressesHiddenMonsterChangesAndEvents(t *testing.T) {
 	sim := newFogTestSim(t)
 	radius := sim.CharacterProgressionView().DerivedStats.LightRadius
@@ -190,6 +229,19 @@ func newFogTestSim(t *testing.T) *Sim {
 	player.pos = Vec2{}
 	sim.syncCompatibilityFields()
 	return sim
+}
+
+func addFogTestInteractable(sim *Sim, defID string, pos Vec2, state string) *entity {
+	interactable := &entity{
+		id:                sim.alloc(),
+		kind:              interactableEntity,
+		pos:               pos,
+		interactableDefID: defID,
+		state:             state,
+	}
+	sim.activeLevel().entities[interactable.id] = interactable
+	sim.syncCompatibilityFields()
+	return interactable
 }
 
 func snapshotHasEntity(snap Snapshot, entityID string) bool {

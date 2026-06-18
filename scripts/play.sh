@@ -30,6 +30,20 @@ fi
 SERVER_PID=""
 CLIENT_PIDS=()
 SERVER_LOG="$(mktemp -t arpg-play-server.XXXXXX.log)"
+prefix_output() {
+  local label="$1"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    printf '[%s] %s\n' "$label" "$line"
+  done
+}
+prefix_and_log_output() {
+  local label="$1"
+  local log_file="$2"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    printf '%s\n' "$line" >>"$log_file"
+    printf '[%s] %s\n' "$label" "$line"
+  done
+}
 cleanup() {
   for pid in "${CLIENT_PIDS[@]:-}"; do
     kill "$pid" >/dev/null 2>&1 || true
@@ -46,7 +60,7 @@ echo "[play] starting server on $ADDR (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
   ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
   ARPG_RULES_DIR="$ROOT/shared/rules" \
-  "$SERVER_BIN" >"$SERVER_LOG" 2>&1 &
+  "$SERVER_BIN" > >(prefix_and_log_output backend "$SERVER_LOG") 2>&1 &
 SERVER_PID=$!
 
 echo "[play] waiting for server readiness..."
@@ -54,7 +68,7 @@ for i in $(seq 1 60); do
   if curl -fsS "$BASE_URL/readyz" >/dev/null 2>&1; then break; fi
   # Surface an early server crash instead of waiting the full timeout.
   if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-    echo "[play] server exited early; log:"; cat "$SERVER_LOG"; exit 1
+    echo "[play] server exited early; log: $SERVER_LOG"; exit 1
   fi
   sleep 1
 done
@@ -78,7 +92,7 @@ if (( PLAY_CLIENTS == 1 )); then
   [[ -n "${ARPG_WORLD_ID:-}" ]] && GODOT_ENV+=("ARPG_WORLD_ID=$ARPG_WORLD_ID")
   [[ -n "${ARPG_SESSION_ID:-}" ]] && GODOT_ENV+=("ARPG_SESSION_ID=$ARPG_SESSION_ID")
   env -u ARPG_AUTOSTART -u ARPG_WORLD_ID -u ARPG_SESSION_ID \
-    "${GODOT_ENV[@]}" "$GODOT" --path "$ROOT/client"
+    "${GODOT_ENV[@]}" "$GODOT" --path "$ROOT/client" > >(prefix_output client1) 2>&1
 else
   echo "[play] launching Godot clients — close all windows to stop the server."
   echo "[play] each client opens the main menu with a distinct dev account; use Multiplayer to host/join listed sessions."
@@ -90,7 +104,7 @@ else
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
       ARPG_EMAIL="$EMAIL" \
       ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
-      "$GODOT" --path "$ROOT/client" &
+      "$GODOT" --path "$ROOT/client" > >(prefix_output "client$idx") 2>&1 &
     CLIENT_PIDS+=("$!")
   done
   for pid in "${CLIENT_PIDS[@]}"; do

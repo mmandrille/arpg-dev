@@ -340,7 +340,7 @@ static func _assert_fog_of_war(runner, step: Dictionary, state: Dictionary) -> b
 
 static func _assert_discovery_minimap(runner, step: Dictionary, state: Dictionary) -> bool:
 	var minimap: Dictionary = state.get("discovery_minimap", {})
-	for key in ["visible", "toggle_visible", "has_pin"]:
+	for key in ["visible", "toggle_visible", "has_pin", "has_quest_path"]:
 		if step.has(key) and bool(minimap.get(key, false)) != bool(step.get(key, true)):
 			runner._fail("assert_discovery_minimap failed: %s want=%s got=%s minimap=%s step=%d scenario=%s" % [
 				key, str(step.get(key, true)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
@@ -369,6 +369,24 @@ static func _assert_discovery_minimap(runner, step: Dictionary, state: Dictionar
 		if step.has(key) and int(minimap.get(key, -999999)) != int(step.get(key, 0)):
 			runner._fail("assert_discovery_minimap failed: %s want=%s got=%s minimap=%s step=%d scenario=%s" % [
 				key, str(step.get(key, 0)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+	for key in ["pin_x", "pin_y", "quest_path_start_x", "quest_path_start_y", "quest_path_end_x", "quest_path_end_y", "quest_path_angle_radians"]:
+		var min_key := "%s_min" % key
+		var max_key := "%s_max" % key
+		if step.has(min_key) and float(minimap.get(key, 0.0)) < float(step.get(min_key, 0.0)):
+			runner._fail("assert_discovery_minimap failed: %s want_min=%s got=%s minimap=%s step=%d scenario=%s" % [
+				key, str(step.get(min_key, 0.0)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+		if step.has(max_key) and float(minimap.get(key, 0.0)) > float(step.get(max_key, 0.0)):
+			runner._fail("assert_discovery_minimap failed: %s want_max=%s got=%s minimap=%s step=%d scenario=%s" % [
+				key, str(step.get(max_key, 0.0)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+		if step.has(key) and not is_equal_approx(float(minimap.get(key, 0.0)), float(step.get(key, 0.0))):
+			runner._fail("assert_discovery_minimap failed: %s want=%s got=%s minimap=%s step=%d scenario=%s" % [
+				key, str(step.get(key, 0.0)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
 			])
 			return false
 	if step.has("panel_opacity_max") and float(minimap.get("panel_opacity", 1.0)) > float(step.get("panel_opacity_max", 1.0)):

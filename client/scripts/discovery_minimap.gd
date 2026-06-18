@@ -19,6 +19,7 @@ const PIN_INNER_COLOR := Color("#ff7f50")
 const SERVICE_MARKER_COLOR := Color("#87c7ff")
 const STAIRS_MARKER_COLOR := Color("#f2cc66")
 const WAYPOINT_MARKER_COLOR := Color("#b58cff")
+const QUEST_PATH_COLOR := Color("#f7e47d")
 
 var _map: Control
 var _state: Dictionary = _empty_state()
@@ -88,6 +89,7 @@ func sync(level: int, player_position: Vector3, light_radius: float, walls: Arra
 
 func get_debug_state() -> Dictionary:
 	var objective: Dictionary = _state.get("objective", {})
+	var quest_path: Dictionary = _state.get("quest_path", {})
 	var map_size := _current_map_size()
 	var marker_counts: Dictionary = _state.get("marker_counts", {})
 	return {
@@ -114,6 +116,12 @@ func get_debug_state() -> Dictionary:
 		"pin_status": str(objective.get("status", "hidden")),
 		"pin_x": float(objective.get("pin_x", 0.5)),
 		"pin_y": float(objective.get("pin_y", 0.5)),
+		"has_quest_path": bool(quest_path.get("has_marker", false)),
+		"quest_path_start_x": float(quest_path.get("start_x", 0.5)),
+		"quest_path_start_y": float(quest_path.get("start_y", 0.5)),
+		"quest_path_end_x": float(quest_path.get("end_x", 0.5)),
+		"quest_path_end_y": float(quest_path.get("end_y", 0.5)),
+		"quest_path_angle_radians": float(quest_path.get("angle_radians", 0.0)),
 	}
 
 
@@ -164,6 +172,7 @@ func _draw_map() -> void:
 		_map.draw_line(Vector2(0, y), Vector2(map_size.x, y), GRID_COLOR, 1.0)
 	_draw_explored_cells()
 	_draw_walls()
+	_draw_quest_path()
 	_draw_poi_markers()
 	_map.draw_rect(rect, Color(0.55, 0.48, 0.35, 0.52), false, 1.0)
 	_map.draw_circle(map_size * 0.5, 5.0 if _display_mode != MODE_FULLSCREEN else 7.0, PLAYER_COLOR)
@@ -223,6 +232,34 @@ func _draw_poi_markers() -> void:
 				_map.draw_circle(center, radius, Color.WHITE)
 
 
+func _draw_quest_path() -> void:
+	var quest_path: Dictionary = _state.get("quest_path", {})
+	if not bool(quest_path.get("has_marker", false)):
+		return
+	var start := Vector2(float(quest_path.get("start_x", 0.5)), float(quest_path.get("start_y", 0.5))) * _current_map_size()
+	var end := Vector2(float(quest_path.get("end_x", 0.5)), float(quest_path.get("end_y", 0.5))) * _current_map_size()
+	var delta := end - start
+	if delta.length() <= 1.0:
+		return
+	var dir := delta.normalized()
+	var start_gap := 12.0 if _display_mode != MODE_FULLSCREEN else 16.0
+	var end_gap := 12.0 if _display_mode != MODE_FULLSCREEN else 16.0
+	var line_start := start + dir * start_gap
+	var line_end := end - dir * end_gap
+	_map.draw_line(line_start, line_end, QUEST_PATH_COLOR, 2.5 if _display_mode != MODE_FULLSCREEN else 3.5)
+	_draw_arrow_marker(line_end, dir, QUEST_PATH_COLOR)
+
+
+func _draw_arrow_marker(center: Vector2, dir: Vector2, color: Color) -> void:
+	var radius := 6.0 if _display_mode != MODE_FULLSCREEN else 8.5
+	var side := Vector2(-dir.y, dir.x)
+	_map.draw_polygon([
+		center + dir * radius,
+		center - dir * radius * 0.8 + side * radius * 0.65,
+		center - dir * radius * 0.8 - side * radius * 0.65,
+	], [color])
+
+
 func _draw_triangle_marker(center: Vector2, radius: float, color: Color) -> void:
 	_map.draw_polygon([
 		center + Vector2(0, -radius),
@@ -273,6 +310,7 @@ func _normalized_state(state: Dictionary) -> Dictionary:
 	normalized["explored_cells"] = state.get("explored_cells", [])
 	normalized["walls"] = state.get("walls", [])
 	normalized["objective"] = state.get("objective", {"has_pin": false, "status": "hidden", "pin_x": 0.5, "pin_y": 0.5})
+	normalized["quest_path"] = state.get("quest_path", _empty_quest_path())
 	normalized["markers"] = state.get("markers", [])
 	normalized["marker_counts"] = state.get("marker_counts", {})
 	normalized["explored_count"] = int(state.get("explored_count", (normalized["explored_cells"] as Array).size()))
@@ -296,6 +334,20 @@ static func _empty_state() -> Dictionary:
 		"marker_count": 0,
 		"marker_counts": {},
 		"objective": {"has_pin": false, "status": "hidden", "pin_x": 0.5, "pin_y": 0.5},
+		"quest_path": _empty_quest_path(),
+	}
+
+
+static func _empty_quest_path() -> Dictionary:
+	return {
+		"has_marker": false,
+		"start_x": 0.5,
+		"start_y": 0.5,
+		"end_x": 0.5,
+		"end_y": 0.5,
+		"direction_x": 0.0,
+		"direction_y": 0.0,
+		"angle_radians": 0.0,
 	}
 
 

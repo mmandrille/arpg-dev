@@ -30,6 +30,7 @@ func update(level: int, player_position: Vector3, light_radius: float, walls: Ar
 	var normalized_walls := _normalized_walls(walls)
 	var known_walls := _known_walls(cells, normalized_walls)
 	var objective := _objective_pin(entities, player, radius)
+	var quest_path := _quest_path_marker(objective)
 	var markers := _poi_markers(cells, entities, player, radius, objective)
 	var marker_counts := _marker_kind_counts(markers)
 	return {
@@ -43,6 +44,7 @@ func update(level: int, player_position: Vector3, light_radius: float, walls: Ar
 		"walls": known_walls,
 		"wall_count": known_walls.size(),
 		"objective": objective,
+		"quest_path": quest_path,
 		"markers": markers,
 		"marker_count": markers.size(),
 		"marker_counts": marker_counts,
@@ -133,6 +135,27 @@ func _objective_pin(entities: Dictionary, player: Vector2, radius: float) -> Dic
 	return {"has_pin": false, "status": "hidden", "pin_x": 0.5, "pin_y": 0.5}
 
 
+func _quest_path_marker(objective: Dictionary) -> Dictionary:
+	if not bool(objective.get("has_pin", false)):
+		return _empty_quest_path()
+	var target := Vector2(float(objective.get("pin_x", 0.5)), float(objective.get("pin_y", 0.5)))
+	var start := Vector2(0.5, 0.5)
+	var delta := target - start
+	if delta.length() <= 0.001:
+		return _empty_quest_path()
+	var direction := delta.normalized()
+	return {
+		"has_marker": true,
+		"start_x": start.x,
+		"start_y": start.y,
+		"end_x": target.x,
+		"end_y": target.y,
+		"direction_x": direction.x,
+		"direction_y": direction.y,
+		"angle_radians": atan2(direction.y, direction.x),
+	}
+
+
 func _poi_markers(cells: Dictionary, entities: Dictionary, player: Vector2, radius: float, objective: Dictionary) -> Array:
 	var out: Array = []
 	for rec_raw in entities.values():
@@ -209,3 +232,16 @@ func _world_cell(point: Vector2) -> Vector2i:
 
 func _cell_key(x: int, y: int) -> String:
 	return "%d:%d" % [x, y]
+
+
+static func _empty_quest_path() -> Dictionary:
+	return {
+		"has_marker": false,
+		"start_x": 0.5,
+		"start_y": 0.5,
+		"end_x": 0.5,
+		"end_y": 0.5,
+		"direction_x": 0.0,
+		"direction_y": 0.0,
+		"angle_radians": 0.0,
+	}

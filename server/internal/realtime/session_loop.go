@@ -32,8 +32,10 @@ type sessionLoop struct {
 	received map[string]time.Time
 	seq      int64
 
-	done      chan struct{}
-	closeOnce sync.Once
+	done        chan struct{}
+	closeOnce   sync.Once
+	perfDebug   bool
+	lastPerfLog time.Time
 }
 
 type loopClient struct {
@@ -61,16 +63,17 @@ func newSessionLoop(ctx context.Context, h *Hub, sess store.Session) (*sessionLo
 		seq = meta.NextSequence
 	}
 	return &sessionLoop{
-		hub:      h,
-		sess:     sess,
-		sim:      sim,
-		log:      logging.Component(h.log, "realtime").With("session_id", sess.ID),
-		clients:  make(map[string]*loopClient),
-		buffer:   make(map[uint64][]game.Input),
-		seen:     seen,
-		received: make(map[string]time.Time),
-		seq:      seq,
-		done:     make(chan struct{}),
+		hub:       h,
+		sess:      sess,
+		sim:       sim,
+		log:       logging.Component(h.log, "realtime").With("session_id", sess.ID),
+		clients:   make(map[string]*loopClient),
+		buffer:    make(map[uint64][]game.Input),
+		seen:      seen,
+		received:  make(map[string]time.Time),
+		seq:       seq,
+		done:      make(chan struct{}),
+		perfDebug: perfDebugEnabled(),
 	}, nil
 }
 
@@ -87,7 +90,6 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		recon.Sim.SetGameplayDebug(h.gameplayDebug)
 		return recon.Sim, &recon.Metadata, nil
 	}
-
 	members, err := h.store.ListSessionMembers(ctx, sess.ID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("list members: %w", err)
@@ -113,7 +115,6 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		}
 		return members[i].CharacterID < members[j].CharacterID
 	})
-
 	host := members[0]
 	for _, member := range members {
 		if member.Role == store.SessionMemberHost {
@@ -151,7 +152,6 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, host.AccountID, host.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err
 	}
-
 	for _, member := range members {
 		if member.AccountID == host.AccountID && member.CharacterID == host.CharacterID {
 			continue
@@ -226,7 +226,6 @@ func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member s
 		sendCh:   make(chan outEnvelope, sendQueueSize),
 		done:     make(chan struct{}),
 	}
-
 	l.mu.Lock()
 	l.clients[client.key] = client
 	isCoopMember := isCoopSession(l.sess) ||
@@ -243,7 +242,6 @@ func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member s
 		l.sim.SetPlayerConnected(playerID, true)
 	}
 	l.mu.Unlock()
-
 	l.hub.metrics.WSConnections.Inc()
 	go client.writeLoop()
 	go client.readLoop()
@@ -509,7 +507,10 @@ func (l *sessionLoop) doTick() {
 	}
 	delete(l.buffer, tick)
 	sortInputs(inputs)
+	simStart := time.Now()
 	results := l.sim.TickResults(inputs)
+	simDuration := time.Since(simStart)
+	snapshot := l.sim.PerfSnapshot()
 	latencies := []time.Duration{}
 	for _, res := range results {
 		for _, ack := range res.Acks {
@@ -530,7 +531,6 @@ func (l *sessionLoop) doTick() {
 		}
 	}
 	l.mu.Unlock()
-
 	l.hub.metrics.TickDuration.Observe(time.Since(start).Seconds())
 	for _, latency := range latencies {
 		l.hub.metrics.MessageLatency.Observe(latency.Seconds())
@@ -539,6 +539,10 @@ func (l *sessionLoop) doTick() {
 	for _, res := range results {
 		eventSequence = l.persistTick(res, membersByPlayerID, eventSequence)
 		l.fanoutResult(res, clients, inputTypes, levelsByPlayerID)
+	}
+	if l.perfDebug && time.Since(l.lastPerfLog) >= defaultPerfDebugInterval {
+		l.lastPerfLog = time.Now()
+		logBackendPerf(l.log, tick, start, simDuration, len(inputs), results, len(clients), snapshot)
 	}
 }
 

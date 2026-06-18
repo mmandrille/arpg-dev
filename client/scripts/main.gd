@@ -164,6 +164,7 @@ var waypoint_rows: VBoxContainer
 var visual_replay_exit_timer: float = 0.0
 var visual_replay_show_inventory: bool = false
 var visual_replay_completion_hold_s: float = 0.5
+var _perf_debug_sampler := preload("res://scripts/perf_debug_sampler.gd").new()
 var client_settings: ClientSettings
 var menu_layer: CanvasLayer
 var main_menu: MainMenu
@@ -782,6 +783,7 @@ func _process(delta: float) -> void:
 		_update_facing_toward_mouse()
 	_refresh_monster_health_bar_visibility()
 	_update_debug()
+	_perf_debug_sampler.sample(delta, state, last_server_tick, reconciliation_delta, entities, monster_ids)
 
 # --- message handling -------------------------------------------------------
 
@@ -5742,12 +5744,10 @@ func _update_debug() -> void:
 		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis, boss_status]
 
 func _sync_status_text_visibility() -> void:
-	if _debug_label == null:
-		return
+	if _debug_label == null: return
 	_debug_label.visible = client_settings == null or client_settings.status_text
 func _debug(msg: String) -> void:
 	print("[client] ", msg)
-
 func _env(key: String, fallback: String) -> String:
 	var v := OS.get_environment(key)
 	return v if v != "" else fallback

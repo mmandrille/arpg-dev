@@ -1,0 +1,48 @@
+docs/as-built/v267_perf-debug-mode.md
+  s_1949fa109f68d0::t_84c42acb028fa1 12
+  s_1949fa109f68d0::t_e7dd821490b6b4 1-11,13-51
+server/internal/realtime/session_loop.go
+  s_1949fa109f68d0::t_d089b240cb2352 510,512
+  s_1949fa109f68d0::t_fe4a5ff67cbe15 35-38,76,513,543-545
+  s_1949fa109f68d0::t_826cc1fd47dcd7 73-75
+  s_1949fa109f68d0::t_26bef506ed6199 66-72
+client/scripts/perf_debug_sampler.gd
+  s_1949fa109f68d0::t_08b493abbf95be 23
+  s_1949fa109f68d0::t_fb533e4353fbfb 1-22,24-64
+server/internal/realtime/perf_debug.go
+  s_1949fa109f68d0::t_edcc1376bcc16a 1-40,42-52
+  s_1949fa109f68d0::t_167229f91964e1 41
+client/scripts/main.gd
+  s_1949fa109f68d0::t_25cb3ebaa7f1e5 167,786,5747
+PROGRESS.md
+  s_1949fa109f68d0::t_a936cfb0bbba14 26,28
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_d864e314e3c358 282
+client/scripts/perf_debug_sampler.gd.uid
+  s_1949fa109f68d0::t_aff56aa8632bc3 1
+docs/plans/v267_2026-06-18-perf-debug-mode.md
+  s_1949fa109f68d0::t_58843dcf883947 1-34
+scripts/play.sh
+  s_1949fa109f68d0::t_3fc6bb52ed1f0c 17,62,91,109
+server/internal/game/perf_debug.go
+  s_1949fa109f68d0::t_226f63d3dd88f0 1-56
+docs/specs/v267_spec-perf-debug-mode.md
+  s_1949fa109f68d0::t_79e3a4c353baae 23
+  s_1949fa109f68d0::t_d4592667f73d35 1-22,24-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "76c0a420a402e02a3d483f524133dfaa186a8f72",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

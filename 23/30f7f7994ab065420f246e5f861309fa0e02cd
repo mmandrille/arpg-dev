@@ -1,0 +1,59 @@
+server/internal/game/dungeon_door_rules.go
+  s_1949fa109f68d0::t_a88793e28e5115 1-42
+shared/golden/dungeon_obstacles.v0.schema.json
+  s_1949fa109f68d0::t_22b5b1ef3cc35b 19,38-41,95
+server/internal/game/dungeon_gen.go
+  s_1949fa109f68d0::t_6499041b5ab741 927-931,961,971-972
+  s_1949fa109f68d0::t_07f1390127410c 197-204
+  s_1949fa109f68d0::t_20f39e2f38468b 227-234,237
+server/internal/game/dungeon_doors_test.go
+  s_1949fa109f68d0::t_3d3690a4ddd462 1-64
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_1949fa109f68d0::t_bf003f5b29904d 10-11,19
+server/internal/game/rules.go
+  s_1949fa109f68d0::t_70f5ec5eb05d0d 284,1919
+server/internal/game/dungeon_generated_types.go
+  s_1949fa109f68d0::t_503990ab326600 1-60
+server/internal/game/dungeon_population.go
+  s_1949fa109f68d0::t_5dbb1f85428cc9 62-76
+shared/rules/dungeon_generation.v0.schema.json
+  s_1949fa109f68d0::t_fa2888d4cc2518 160,198-208
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_1949fa109f68d0::t_fd14efe05f5741 17,84-92,120-127,149-150
+PROGRESS.md
+  s_1949fa109f68d0::t_cdff37a43293fe 26,28-29,107
+docs/plans/v261_2026-06-18-generated-door-obstacles.md
+  s_1949fa109f68d0::t_b7f8470333d70a 78,99,126
+  s_1949fa109f68d0::t_cdff37a43293fe 3,48-50,53-55,70,72,74,90-92,94-95,113-115,125,127-128
+  s_1949fa109f68d0::t_9faddb8e0aee76 1-2,4-47,51-52,56-69,71,73,75-77,79-89,93,96-98,100-112,116-124,129-135
+docs/specs/v261_spec-generated-door-obstacles.md
+  s_1949fa109f68d0::t_cdff37a43293fe 3
+  s_1949fa109f68d0::t_b7f8470333d70a 62
+  s_1949fa109f68d0::t_9faddb8e0aee76 1-2,4-61,63-77
+server/internal/game/dungeon_doors.go
+  s_1949fa109f68d0::t_a88793e28e5115 1-63
+shared/golden/dungeon_obstacles.json
+  s_1949fa109f68d0::t_c46d4e712ee82e 9-10,198-211,215,222-231,255-260
+docs/as-built/v261_generated-door-obstacles.md
+  s_1949fa109f68d0::t_cdff37a43293fe 1-40
+shared/rules/dungeon_generation.v0.json
+  s_1949fa109f68d0::t_fa2888d4cc2518 113-120
+docs/progress/slice-lifecycle.md
+  s_1949fa109f68d0::t_cdff37a43293fe 276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2330f7f7994ab065420f246e5f861309fa0e02cd",
+  "prompts": {},
+  "sessions": {
+    "s_1949fa109f68d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad8-022d-7041-92dc-9cd57b87e3ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

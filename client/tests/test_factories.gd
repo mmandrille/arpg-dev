@@ -50,6 +50,7 @@ func _test_wall_renderer() -> void:
 	var root := Node3D.new()
 	get_root().add_child(root)
 	var renderer = WallRendererScript.new(root, GroundWallFactoryScript.new())
+	renderer.set_level(-4)
 	var walls := renderer.render_wall_layout([{
 		"id": "test_wall",
 		"position": {"x": 2.0, "y": 3.0},
@@ -60,6 +61,7 @@ func _test_wall_renderer() -> void:
 	_assert_eq("wall child count", root.get_child_count(), 1)
 	var wall := root.get_child(0) as MeshInstance3D
 	_assert_eq("wall child name", wall.name, "Wall_test_wall")
+	_assert_true("wall material has palette texture", (wall.material_override as StandardMaterial3D).albedo_texture != null)
 	root.queue_free()
 
 

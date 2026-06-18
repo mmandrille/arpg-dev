@@ -5,6 +5,7 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 
 var _walls_root: Node3D
 var _ground_factory: RefCounted
+var _current_level: int = 0
 
 func _init(walls_root: Node3D, ground_factory: RefCounted) -> void:
 	_walls_root = walls_root
@@ -49,6 +50,9 @@ func render_wall_layout(walls: Array) -> Array:
 			_walls_root.add_child(make_wall_node(normalized))
 	return current_wall_layout
 
+func set_level(level: int) -> void:
+	_current_level = level
+
 func clear_wall_nodes() -> void:
 	if _walls_root == null:
 		return
@@ -84,7 +88,8 @@ func make_wall_node(wall: Dictionary) -> MeshInstance3D:
 	node.mesh = mesh
 	node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
 	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = _ground_factory.make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE)
+	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
+	mat.albedo_texture = _ground_factory.make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.roughness = 0.96
 	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.0), max(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)

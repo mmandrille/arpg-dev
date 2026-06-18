@@ -5,6 +5,7 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 
 var ground_textures: Dictionary = {}
 var wall_textures: Dictionary = {}
+var _dungeon_generation: Dictionary = {}
 
 func make_ground_node(level: int) -> MeshInstance3D:
 	var node := MeshInstance3D.new()
@@ -28,26 +29,28 @@ func ground_texture_id_for_level(level: int) -> String:
 
 func ground_material_for_level(level: int) -> StandardMaterial3D:
 	var texture_id := ground_texture_id_for_level(level)
+	var palette := biome_palette_for_level(level)
 	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = make_ground_texture(texture_id)
+	mat.albedo_texture = make_ground_texture(texture_id, palette)
 	mat.albedo_color = Color.WHITE
 	mat.roughness = 0.92
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.uv1_scale = Vector3(28.0, 18.0, 1.0)
 	return mat
 
-func make_ground_texture(texture_id: String) -> ImageTexture:
-	if ground_textures.has(texture_id):
-		return ground_textures[texture_id] as ImageTexture
+func make_ground_texture(texture_id: String, palette: Dictionary = {}) -> ImageTexture:
+	var cache_key := "%s:%s" % [texture_id, str(palette.get("id", "default"))]
+	if ground_textures.has(cache_key):
+		return ground_textures[cache_key] as ImageTexture
 	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
 	for y in range(64):
 		for x in range(64):
-			image.set_pixel(x, y, ground_texel(texture_id, x, y))
+			image.set_pixel(x, y, ground_texel(texture_id, x, y, palette))
 	var texture := ImageTexture.create_from_image(image)
-	ground_textures[texture_id] = texture
+	ground_textures[cache_key] = texture
 	return texture
 
-func ground_texel(texture_id: String, x: int, y: int) -> Color:
+func ground_texel(texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
 	var n := int((x * 37 + y * 19 + ((x / 8) * 11) + ((y / 8) * 23)) % 17)
 	if texture_id == ClientConstantsScript.GROUND_TEXTURE_TOWN:
 		var base := Color("#2f6136").lerp(Color("#79aa58"), float(n) / 16.0)
@@ -63,25 +66,26 @@ func ground_texel(texture_id: String, x: int, y: int) -> Color:
 		if ((x / 8 + y / 8) % 5) == 0 and ((x * 13 + y * 17) % 19) < 3:
 			base = base.lerp(Color("#456f35"), 0.20)
 		return base
-	var rock := Color("#3c3f43").lerp(Color("#73706b"), float(n) / 16.0)
+	var rock := _palette_color(palette, "ground_low", Color("#3c3f43")).lerp(_palette_color(palette, "ground_high", Color("#73706b")), float(n) / 16.0)
 	if abs((x % 16) - (y % 16)) <= 1:
-		rock = rock.lerp(Color("#25282c"), 0.35)
+		rock = rock.lerp(_palette_color(palette, "ground_crack", Color("#25282c")), 0.35)
 	if ((x * 3 + y * 5) % 29) == 0:
-		rock = rock.lerp(Color("#a09a8e"), 0.28)
+		rock = rock.lerp(_palette_color(palette, "ground_highlight", Color("#a09a8e")), 0.28)
 	return rock
 
-func make_wall_texture(texture_id: String) -> ImageTexture:
-	if wall_textures.has(texture_id):
-		return wall_textures[texture_id] as ImageTexture
+func make_wall_texture(texture_id: String, palette: Dictionary = {}) -> ImageTexture:
+	var cache_key := "%s:%s" % [texture_id, str(palette.get("id", "default"))]
+	if wall_textures.has(cache_key):
+		return wall_textures[cache_key] as ImageTexture
 	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
 	for y in range(64):
 		for x in range(64):
-			image.set_pixel(x, y, wall_texel(texture_id, x, y))
+			image.set_pixel(x, y, wall_texel(texture_id, x, y, palette))
 	var texture := ImageTexture.create_from_image(image)
-	wall_textures[texture_id] = texture
+	wall_textures[cache_key] = texture
 	return texture
 
-func wall_texel(_texture_id: String, x: int, y: int) -> Color:
+func wall_texel(_texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
 	var brick_w := 16
 	var brick_h := 12
 	var row := int(y / brick_h)
@@ -89,13 +93,45 @@ func wall_texel(_texture_id: String, x: int, y: int) -> Color:
 	var local_x := int((x + offset) % brick_w)
 	var local_y := int(y % brick_h)
 	var noise := int((x * 29 + y * 43 + row * 17 + int((x + offset) / brick_w) * 13) % 23)
-	var stone := Color("#34363a").lerp(Color("#6b6255"), float(noise) / 22.0)
+	var stone := _palette_color(palette, "wall_base", Color("#34363a")).lerp(_palette_color(palette, "wall_highlight", Color("#6b6255")), float(noise) / 22.0)
 	if local_x <= 1 or local_y <= 1:
-		return stone.lerp(Color("#17191c"), 0.62)
+		return stone.lerp(_palette_color(palette, "wall_mortar", Color("#17191c")), 0.62)
 	if local_x >= brick_w - 2 or local_y >= brick_h - 2:
-		stone = stone.lerp(Color("#202226"), 0.34)
+		stone = stone.lerp(_palette_color(palette, "wall_mortar", Color("#202226")), 0.34)
 	if ((x * 5 + y * 7) % 31) == 0:
-		stone = stone.lerp(Color("#9b9386"), 0.32)
+		stone = stone.lerp(_palette_color(palette, "wall_highlight", Color("#9b9386")), 0.32)
 	if ((x - y) % 19) == 0:
-		stone = stone.lerp(Color("#22252a"), 0.30)
+		stone = stone.lerp(_palette_color(palette, "wall_mortar", Color("#22252a")), 0.30)
 	return stone
+
+func biome_palette_for_level(level: int) -> Dictionary:
+	var depth: int = abs(level)
+	if depth <= 0:
+		return {}
+	_ensure_dungeon_generation()
+	for raw in _dungeon_generation.get("biome_palettes", []):
+		var palette := raw as Dictionary
+		var min_depth := int(palette.get("min_depth", 1))
+		var max_value = palette.get("max_depth", null)
+		if depth < min_depth:
+			continue
+		if max_value != null and depth > int(max_value):
+			continue
+		return palette
+	return {}
+
+func _ensure_dungeon_generation() -> void:
+	if not _dungeon_generation.is_empty():
+		return
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/dungeon_generation.v0.json")
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		_dungeon_generation = parsed
+
+func _palette_color(palette: Dictionary, key: String, fallback: Color) -> Color:
+	if not palette.has(key):
+		return fallback
+	return Color(str(palette.get(key, "#" + fallback.to_html(false))))

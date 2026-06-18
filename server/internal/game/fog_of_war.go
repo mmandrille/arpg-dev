@@ -204,15 +204,31 @@ func (s *Sim) monsterVisibleByFog(ctx fogVisibilityContext, monster *entity) boo
 	if distance(ctx.player.pos, monster.pos) > ctx.radius+meleeRangeEpsilon {
 		return false
 	}
-	return !s.wallBlocksFogLineOfSight(ctx, monster)
+	return !s.blocksFogLineOfSight(ctx, monster)
 }
 
-func (s *Sim) wallBlocksFogLineOfSight(ctx fogVisibilityContext, monster *entity) bool {
+func (s *Sim) blocksFogLineOfSight(ctx fogVisibilityContext, monster *entity) bool {
 	if ctx.level == nil {
 		return false
 	}
 	for _, wall := range ctx.level.walls {
 		if _, ok := segmentIntersectsInflatedAABB(ctx.player.pos, monster.pos, wall.pos, wall.size, 0); ok {
+			return true
+		}
+	}
+	for _, id := range sortedEntityIDs(ctx.level.entities) {
+		e := ctx.level.entities[id]
+		if e == nil || e.id == ctx.player.id || e.id == monster.id {
+			continue
+		}
+		if e.kind != interactableEntity || e.state != interactableClosed {
+			continue
+		}
+		def, ok := s.rules.Interactables[e.interactableDefID]
+		if !ok || def.BarrierWhenClosed == nil {
+			continue
+		}
+		if _, ok := segmentIntersectsInflatedAABB(ctx.player.pos, monster.pos, e.pos, def.BarrierWhenClosed.Size, 0); ok {
 			return true
 		}
 	}

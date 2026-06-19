@@ -1,0 +1,38 @@
+server/internal/game/boss_summon_pattern_test.go
+  s_b9bc0033a850dd::t_4137d9aa7f1817 7-25,51-59,76,84,86-87,89,91-92,98,106
+  s_b9bc0033a850dd::t_1b78cf9268980c 61
+docs/plans/v283_2026-06-19-boss-summon-bats-and-hp.md
+  s_b9bc0033a850dd::t_a9ca4e50814cc2 3,32,49-51,63-65,80-82,86-88
+  s_b9bc0033a850dd::t_df50a2ea4d8f64 1-2,4-31,33-48,52-62,66-79,83-85,89-96
+server/internal/game/dungeon_population_test.go
+  s_b9bc0033a850dd::t_d7e5fd5b805821 43-44,62-66
+shared/rules/boss_patterns.v0.json
+  s_b9bc0033a850dd::t_d8a059ff1de322 160-184
+PROGRESS.md
+  s_b9bc0033a850dd::t_597aa216050680 26,28-29,31
+docs/specs/v283_spec-boss-summon-bats-and-hp.md
+  s_b9bc0033a850dd::t_df50a2ea4d8f64 1-2,4-57
+  s_b9bc0033a850dd::t_cd47e08ccdcb7e 3
+docs/as-built/v283_boss-summon-bats-and-hp.md
+  s_b9bc0033a850dd::t_6d88cce000f211 1-40
+docs/progress/slice-lifecycle.md
+  s_b9bc0033a850dd::t_22f4ef3969a393 298
+shared/rules/boss_templates.v0.json
+  s_b9bc0033a850dd::t_3c0e2aff1ac548 7-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f159059dde05dbf4d1af7d275bb198ef59dcee7f",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

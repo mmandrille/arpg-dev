@@ -289,5 +289,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v274** | `class-hero-models` | Complete (`make ci` green) | [`v274_spec-class-hero-models.md`](../specs/v274_spec-class-hero-models.md) | [`v274_2026-06-18-class-hero-models.md`](../plans/v274_2026-06-18-class-hero-models.md) | [`as-built`](../as-built/v274_class-hero-models.md) |
 | **v275** | `rigged-hero-models` | Complete (`make ci` green) | [`v275_spec-rigged-hero-models.md`](../specs/v275_spec-rigged-hero-models.md) | [`v275_2026-06-19-rigged-hero-models.md`](../plans/v275_2026-06-19-rigged-hero-models.md) | [`as-built`](../as-built/v275_rigged-hero-models.md) |
 | **v276** | `ranger-green-hood-model` | Complete (focused checks green) | [`v276_spec-ranger-green-hood-model.md`](../specs/v276_spec-ranger-green-hood-model.md) | [`v276_2026-06-19-ranger-green-hood-model.md`](../plans/v276_2026-06-19-ranger-green-hood-model.md) | [`as-built`](../as-built/v276_ranger-green-hood-model.md) |
+| **v277** | `tiny-flyer-bat-model` | Complete (focused checks green) | [`v277_spec-tiny-flyer-bat-model.md`](../specs/v277_spec-tiny-flyer-bat-model.md) | [`v277_2026-06-19-tiny-flyer-bat-model.md`](../plans/v277_2026-06-19-tiny-flyer-bat-model.md) | [`as-built`](../as-built/v277_tiny-flyer-bat-model.md) |
 
 ---

@@ -1,0 +1,92 @@
+[gd_resource type="AnimationLibrary" format=3]
+
+[sub_resource type="Animation" id="Animation_death"]
+length = 0.5
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ModelRoot/Model")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.5, 1, 0, 0, 0.656059, 0.7547096)
+
+[sub_resource type="Animation" id="Animation_hit"]
+length = 0.35
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ModelRoot/Model")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.12, 1, 0, 0, 0.12, 0.35, 1, 0, 0, 0)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ModelRoot/Model")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.12, 1, -0.06975647, 0, 0, 0.9975641, 0.35, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_idle"]
+loop_mode = 1
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ModelRoot/Model")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.5, 1, 0, 0.025, 0, 1, 1, 0, 0, 0)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ModelRoot/Model/Sketchfab_model/bat_fbx/Object_2/RootNode/BATRIG/Object_6/Skeleton3D:rechterVleugel_09")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0.057388, 0.02088, 0.017227, 0.997985, 0.25, 1, -0.304069, 0.01332, 0.023566, 0.952265, 0.5, 1, 0.411222, 0.025667, 0.0086, 0.911133, 0.75, 1, -0.304069, 0.01332, 0.023566, 0.952265, 1, 1, 0.057388, 0.02088, 0.017227, 0.997985)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("ModelRoot/Model/Sketchfab_model/bat_fbx/Object_2/RootNode/BATRIG/Object_6/Skeleton3D:linkerVleugel_013")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.057846, 0.021056, 0.017356, 0.997953, 0.25, 1, 0.411638, 0.025877, 0.008657, 0.910939, 0.5, 1, -0.30363, 0.013438, 0.023749, 0.952399, 0.75, 1, 0.411638, 0.025877, 0.008657, 0.910939, 1, 1, 0.057846, 0.021056, 0.017356, 0.997953)
+
+[sub_resource type="Animation" id="Animation_walk"]
+length = 0.55
+loop_mode = 1
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ModelRoot/Model")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.1375, 1, 0, 0.055, 0, 0.275, 1, 0, 0, 0, 0.4125, 1, 0, 0.045, 0, 0.55, 1, 0, 0, 0)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ModelRoot/Model")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, -0.034899496, 0.99939084, 0.1375, 1, 0, 0, 0.034899496, 0.99939084, 0.275, 1, 0, 0, -0.034899496, 0.99939084, 0.4125, 1, 0, 0, 0.034899496, 0.99939084, 0.55, 1, 0, 0, -0.034899496, 0.99939084)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("ModelRoot/Model/Sketchfab_model/bat_fbx/Object_2/RootNode/BATRIG/Object_6/Skeleton3D:rechterVleugel_09")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.057388, 0.02088, 0.017227, 0.997985, 0.1375, 1, -0.304069, 0.01332, 0.023566, 0.952265, 0.275, 1, 0.411222, 0.025667, 0.0086, 0.911133, 0.4125, 1, -0.304069, 0.01332, 0.023566, 0.952265, 0.55, 1, 0.057388, 0.02088, 0.017227, 0.997985)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("ModelRoot/Model/Sketchfab_model/bat_fbx/Object_2/RootNode/BATRIG/Object_6/Skeleton3D:linkerVleugel_013")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, 0.057846, 0.021056, 0.017356, 0.997953, 0.1375, 1, 0.411638, 0.025877, 0.008657, 0.910939, 0.275, 1, -0.30363, 0.013438, 0.023749, 0.952399, 0.4125, 1, 0.411638, 0.025877, 0.008657, 0.910939, 0.55, 1, 0.057846, 0.021056, 0.017356, 0.997953)
+
+[resource]
+_data = {
+&"death": SubResource("Animation_death"),
+&"hit": SubResource("Animation_hit"),
+&"idle": SubResource("Animation_idle"),
+&"walk": SubResource("Animation_walk")
+}

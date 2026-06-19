@@ -1,14 +1,17 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="PackedScene" path="res://assets/monsters/tiny_flyer/monster_tiny_flyer.glb" id="1_glb"]
-[ext_resource type="AnimationLibrary" path="res://animations/monster_anims.tres" id="2_anims"]
+[ext_resource type="AnimationLibrary" path="res://animations/monster_tiny_flyer_anims.tres" id="2_anims"]
 
 [node name="MonsterTinyFlyer" type="Node3D"]
 
-[node name="ModelRoot" parent="." instance=ExtResource("1_glb")]
-
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-root_node = NodePath("../ModelRoot")
+root_node = NodePath("..")
 libraries = {
 "": ExtResource("2_anims")
 }
+
+[node name="ModelRoot" type="Node3D" parent="."]
+
+[node name="Model" parent="ModelRoot" instance=ExtResource("1_glb")]
+scale = Vector3(0.56, 0.56, 0.56)

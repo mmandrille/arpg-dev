@@ -1,0 +1,75 @@
+tools/bot/scenarios/96_mercenary_offer_variants.json
+  s_58dbc51a4db222::t_999a952d0b7d8f 1-34
+docs/as-built/v289_mercenary-offer-variants.md
+  s_58dbc51a4db222::t_a0a8898784477f 1-56
+client/tests/test_mercenary_panel.gd
+  s_58dbc51a4db222::t_999a952d0b7d8f 78-93
+docs/progress/slice-codename-index.md
+  s_58dbc51a4db222::t_a0a8898784477f 235
+server/internal/game/mercenary_hiring.go
+  s_58dbc51a4db222::t_3858712fa4ec69 16-22,37-41,50-51,66,77-78,88,96,108
+  s_58dbc51a4db222::t_63e4fdb6b4cab8 7-8
+server/internal/game/mercenary_rules.go
+  s_58dbc51a4db222::t_8fb52ee65d5ad7 51
+  s_58dbc51a4db222::t_88361377846a00 1-27,37-39,41-50,55-76
+  s_58dbc51a4db222::t_63e4fdb6b4cab8 28-36,40,52-54
+shared/rules/mercenaries.v0.schema.json
+  s_58dbc51a4db222::t_5a42ab82aea16c 1-32
+shared/rules/mercenaries.v0.json
+  s_58dbc51a4db222::t_5a42ab82aea16c 1-13
+shared/i18n/es.json
+  s_58dbc51a4db222::t_5a42ab82aea16c 38
+shared/assets/model_preview_catalog.v0.json
+  s_58dbc51a4db222::t_14dfca60f32ad5 94
+server/internal/game/main_config_drop_rate.go
+  s_58dbc51a4db222::t_88361377846a00 1-40
+shared/rules/monsters.v0.json
+  s_58dbc51a4db222::t_5a42ab82aea16c 264-285
+server/internal/game/mercenary_hiring_test.go
+  s_58dbc51a4db222::t_ee397b472891e9 284,287,297,299
+  s_58dbc51a4db222::t_4f8def337f71e3 3-6,15-37,78-98,101-108,219-242,279-283,285-286,288-296
+  s_58dbc51a4db222::t_fa8340becd52b0 99-100
+PROGRESS.md
+  s_58dbc51a4db222::t_a0a8898784477f 26,28-29,116
+client/scripts/bot_scenario_runner.gd
+  s_58dbc51a4db222::t_999a952d0b7d8f 430
+docs/specs/v289_spec-mercenary-offer-variants.md
+  s_58dbc51a4db222::t_b190c31f13e942 1-2,4-82,84
+  s_58dbc51a4db222::t_a0a8898784477f 3,83,85-88
+shared/assets/monster_visuals.v0.json
+  s_58dbc51a4db222::t_5a42ab82aea16c 130-136
+server/internal/game/rules.go
+  s_58dbc51a4db222::t_88361377846a00 33,1619
+client/scripts/mercenary_panel.gd
+  s_58dbc51a4db222::t_999a952d0b7d8f 273-274
+tools/bot/runtime_queries.py
+  s_58dbc51a4db222::t_999a952d0b7d8f 47-48
+tools/bot/scenarios/client/69_mercenary_offer_variant_ui.json
+  s_58dbc51a4db222::t_999a952d0b7d8f 1-31
+server/internal/game/monster_companion_combat.go
+  s_58dbc51a4db222::t_fa8340becd52b0 82-86,95
+  s_58dbc51a4db222::t_3858712fa4ec69 96
+shared/i18n/en.json
+  s_58dbc51a4db222::t_5a42ab82aea16c 123
+docs/progress/slice-lifecycle.md
+  s_58dbc51a4db222::t_a0a8898784477f 304
+docs/plans/v289_2026-06-19-mercenary-offer-variants.md
+  s_58dbc51a4db222::t_141c22ce059b7b 1-2,4-52,55-57,60-79,82,85-104,108,112-126,130-145,148-163,166-168
+  s_58dbc51a4db222::t_a0a8898784477f 3,53-54,58-59,80-81,83-84,105-107,109-111,127-129,146-147,164-165,169-175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a47da1809e6b0c67ec1e8dbc6d79bfb5c77af24a",
+  "prompts": {},
+  "sessions": {
+    "s_58dbc51a4db222": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee093-c0ba-7701-a296-d74410bf5405",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

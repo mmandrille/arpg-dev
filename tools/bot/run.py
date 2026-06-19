@@ -31,6 +31,7 @@ from typing import Any
 import httpx
 import websockets
 
+from tools.bot.artifacts import clean_bot_run_artifacts, default_manifest_path, should_clean_bot_run_artifacts, write_manifest
 from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenario
 from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot.bot_context import BotContext, StateIngestContext
@@ -56,7 +57,6 @@ WALK_STOP_DISTANCE = 1.0
 WALK_MAX_TICKS = 40
 ROOT = Path(__file__).resolve().parent.parent.parent
 SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
-BOT_RUN_ARTIFACT_DIR = ROOT / ".artifacts" / "bot-runs"
 
 
 def load_known_world_ids() -> set[str]:
@@ -3143,6 +3143,22 @@ def assert_stat_breakdowns(actual: Any, expected_rows: list[dict[str, Any]], whe
             if str(kind) not in source_kinds:
                 raise AssertionError(f"{where}: stat_breakdown {key} missing source kind {kind}: {row}")
 
+
+def runtime_assertion_helpers() -> dict[str, Any]:
+    helpers = (
+        assert_count_matches, assert_equipped_sword, assert_player_damaged, assert_monster_dead,
+        assert_inventory_contains, assert_inventory_requirement_status, assert_loot_requirement_status,
+        assert_stash_item_count, assert_stash_gold, assert_stash_capacity, assert_stash_event,
+        assert_rolled_inventory_item, assert_rolled_inventory_any, assert_inventory_unique_effect_coverage,
+        assert_entity_count, assert_hotbar_slot, assert_character_progression, assert_skill_progression,
+        assert_skill_cooldown, assert_player_hp_equals, assert_player_max_hp_equals, event_matches,
+        event_summary, combat_event_matches, combat_event_summary, find_monster, find_player,
+        entity_matches_selector, filtered_shop_offers, assert_shop_detail_rows, filtered_shop_sell_appraisals,
+        filtered_shop_events, assert_shop_event_details,
+    )
+    return {helper.__name__: helper for helper in helpers}
+
+
 def run_assertions(
     assertions: list[Any],
     entities: list[dict],
@@ -3190,44 +3206,13 @@ def run_assertions(
         resource_wallet,
         skill_progression,
         skill_cooldowns,
-        globals(),
+        runtime_assertion_helpers(),
     )
 
 def run_runtime_assertions(assertions: list[Any], state: RuntimeState, where: str) -> None:
     from tools.bot.runtime_assertions import run_runtime_assertions as run_runtime_assertions_impl
 
-    run_runtime_assertions_impl(assertions, state, where, globals())
-
-
-def default_manifest_path() -> Path:
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    return BOT_RUN_ARTIFACT_DIR / f"{stamp}.json"
-
-
-def should_clean_bot_run_artifacts(manifest_path: Path) -> bool:
-    return manifest_path.parent.resolve() == BOT_RUN_ARTIFACT_DIR.resolve()
-
-
-def clean_bot_run_artifacts(artifact_dir: Path = BOT_RUN_ARTIFACT_DIR) -> int:
-    if not artifact_dir.exists():
-        return 0
-
-    removed = 0
-    for path in artifact_dir.glob("*.json"):
-        if path.is_file():
-            path.unlink()
-            removed += 1
-    return removed
-
-
-def write_manifest(path: Path, base_url: str, results: list[dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    body = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "base_url": base_url,
-        "scenarios": results,
-    }
-    path.write_text(json.dumps(body, indent=2) + "\n")
+    run_runtime_assertions_impl(assertions, state, where, runtime_assertion_helpers())
 
 
 def scenario_email(base_email: str, scenario_id: str) -> str:
@@ -4049,6 +4034,17 @@ async def run_gold_autopickup_shared_loot(
     return sess, host.state
 
 
+def skill_visual_runtime_context() -> dict[str, Any]:
+    helpers = (
+        wait_coop_until, send_coop_intent, wait_coop_accept, pump_coop, find_monster, create_coop_session,
+        connect_coop_peer, join_coop_session, player_entity_ids, move_coop_peer_to, close_coop_peer,
+        scenario_email, dev_login, ensure_character, run_verified_session,
+    )
+    ctx = {helper.__name__: helper for helper in helpers}
+    ctx["SLICE_TIMEOUT_S"] = SLICE_TIMEOUT_S
+    return ctx
+
+
 # --- main -------------------------------------------------------------------
 
 def main() -> int:
@@ -4081,7 +4077,7 @@ def main() -> int:
             log("scenario begin", scenario.id, "-", scenario.title, f"world={scenario.world_id}")
             try:
                 if scenario.id == "skill_visual":
-                    scenario, replay_email, token, sess, observed = skill_visual_runtime.run_selected(globals(), args, client, scenario)
+                    scenario, replay_email, token, sess, observed = skill_visual_runtime.run_selected(skill_visual_runtime_context(), args, client, scenario)
                 elif scenario.id == "true_coop_session":
                     replay_email = scenario_email(args.email, scenario.id + "-host")
                     guest_email = scenario_email(args.email, scenario.id + "-guest")

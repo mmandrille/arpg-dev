@@ -20,11 +20,11 @@
       "runtime_path": "client/assets/characters/barbarian/barbarian.glb",
       "format": "glb",
       "scale_unit": "meters",
-      "required_nodes": [],
+      "required_nodes": ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
       "provenance": {
-        "origin": "user-provided local GLB",
+        "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
         "license": "user-provided-unverified",
-        "sha256": "0a0baec644a3cbc3d37b5dfc1e210ee4693554ab1390d69bc23c89af9f2e79b2"
+        "sha256": "9d5b89c553e372bdb0877d23ca30d99604371efbac8899f3384166b5a7267247"
       }
     },
     "character_sorcerer_v0": {
@@ -33,11 +33,11 @@
       "runtime_path": "client/assets/characters/sorcerer/sorcerer.glb",
       "format": "glb",
       "scale_unit": "meters",
-      "required_nodes": [],
+      "required_nodes": ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
       "provenance": {
-        "origin": "user-provided local GLB",
+        "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
         "license": "user-provided-unverified",
-        "sha256": "853dee54b35b1d7c118b00821b745ae400aadff5deeb7e7f9a705c4c51fd5d2e"
+        "sha256": "08bbcef910f88539058b9720ce5bfa0b4549612efb1ad61330066319b62b9f02"
       }
     },
     "character_paladin_v0": {
@@ -46,11 +46,11 @@
       "runtime_path": "client/assets/characters/paladin/paladin.glb",
       "format": "glb",
       "scale_unit": "meters",
-      "required_nodes": [],
+      "required_nodes": ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
       "provenance": {
-        "origin": "user-provided local GLB",
+        "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
         "license": "user-provided-unverified",
-        "sha256": "cb863c28fa5678d0effb0eb8b4a460c9132e1750e4065ed03c8cc241bf3ba07b"
+        "sha256": "f386cd76730e1f920b954076c7d6c99710c68767eee63df4f43e882b1a5f18e4"
       }
     },
     "character_rogue_v0": {
@@ -59,11 +59,11 @@
       "runtime_path": "client/assets/characters/rogue/rogue.glb",
       "format": "glb",
       "scale_unit": "meters",
-      "required_nodes": [],
+      "required_nodes": ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
       "provenance": {
-        "origin": "user-provided local GLB",
+        "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
         "license": "user-provided-unverified",
-        "sha256": "e71798ca64da3dcd812aac51fa9589fcee3b9a787af7ee592d134930dfe88957"
+        "sha256": "972e18a4b10efdec029ba51912e4c800ab4696b43d6e5974a4c56b11975a504c"
       }
     },
     "character_ranger_v0": {

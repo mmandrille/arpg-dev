@@ -9,6 +9,7 @@ validate-assets: tools ## Validate the asset manifest, runtime .glb paths, and G
 
 gen-assets: tools ## Regenerate committed runtime .glb files (deterministic source-of-truth)
 	$(PY) tools/assets/gen_glb.py
+	$(PY) tools/assets/rig_hero_glbs.py
 
 gen-anims: ## Regenerate committed AnimationLibrary .tres clips (requires Godot)
 	$(GODOT) --headless --path client --import >/dev/null 2>&1 || true

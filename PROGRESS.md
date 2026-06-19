@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-18
+Last updated: 2026-06-19
 
 ---
 
@@ -23,12 +23,12 @@ Last updated: 2026-06-18
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v274 — class hero models |
+| **Latest completed slice** | v275 — rigged hero models |
 | **Active branch** | `main` |
-| **CI gate** | v274 full `make ci` green on 2026-06-18 |
+| **CI gate** | v275 full `make ci` green on 2026-06-19 |
 | **Next slice** | engineering review for the latest green baseline, then `$refactor` for minor paydown |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v274 full `make ci` |
+| **Next engineering review** | Due now after v275 full `make ci` |
 
 
 ### Periodic engineering reviews

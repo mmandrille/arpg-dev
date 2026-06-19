@@ -234,11 +234,10 @@ func _test_class_character_models() -> void:
 		get_root().add_child(model)
 		await process_frame
 		var skel := model.find_child("Skeleton3D", true, false) as Skeleton3D
+		_assert(skel != null, "%s model missing Skeleton3D" % class_id)
 		if skel != null:
 			for bone in ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"]:
 				_assert(skel.find_bone(bone) >= 0, "%s model missing bone %s" % [class_id, bone])
-		else:
-			_assert(_has_mesh_instance(model), "%s static model missing MeshInstance3D" % class_id)
 		model.free()
 		await process_frame
 		var character = (load("res://scenes/character.tscn") as PackedScene).instantiate() as Node3D
@@ -254,12 +253,25 @@ func _test_class_character_models() -> void:
 		class_model.position.y = float(resolved.get("height_offset", 0.0))
 		character.add_child(class_model)
 		character.move_child(class_model, 0)
+		var ap := character.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		if ap != null:
+			ap.root_node = NodePath("../ModelRoot")
 		character.call("_ensure_weapon_socket")
 		character.call("_ensure_fallback_sockets")
 		var right_sock := character.find_child("right_hand_socket", true, false)
 		var off_sock := character.find_child("off_hand_socket", true, false)
-		_assert(right_sock is Node3D, "%s replacement missing right_hand_socket" % class_id)
-		_assert(off_sock is Node3D, "%s replacement missing off_hand_socket" % class_id)
+		_assert(right_sock is BoneAttachment3D, "%s replacement right_hand_socket should bind to the rig" % class_id)
+		_assert(off_sock is BoneAttachment3D, "%s replacement off_hand_socket should bind to the rig" % class_id)
+		if right_sock is BoneAttachment3D:
+			_assert((right_sock as BoneAttachment3D).bone_name == "hand_r", "%s right hand socket bone mismatch" % class_id)
+		if off_sock is BoneAttachment3D:
+			_assert((off_sock as BoneAttachment3D).bone_name == "hand_l", "%s off hand socket bone mismatch" % class_id)
+		var class_skel := class_model.find_child("Skeleton3D", true, false) as Skeleton3D
+		_assert(class_skel != null, "%s replacement missing Skeleton3D" % class_id)
+		if ap != null and class_skel != null:
+			_assert_animation_rotates_bone(ap, class_skel, "walk", 0.4, "leg_l", class_id)
+			_assert_animation_rotates_bone(ap, class_skel, "attack", 0.12, "arm_r", class_id)
+			_assert_animation_rotates_bone(ap, class_skel, "attack_off_hand", 0.12, "arm_l", class_id)
 		if class_id == "paladin":
 			_assert(is_equal_approx(class_model.scale.x, 10.0), "paladin class scale not applied")
 		character.free()
@@ -268,13 +280,17 @@ func _test_class_character_models() -> void:
 	_assert(str(fallback.get("asset_id", "")) == "character_base_humanoid_v0", "unknown class should use base humanoid fallback: %s" % fallback)
 
 
-func _has_mesh_instance(node: Node) -> bool:
-	if node is MeshInstance3D:
-		return true
-	for child in node.get_children():
-		if _has_mesh_instance(child):
-			return true
-	return false
+func _assert_animation_rotates_bone(ap: AnimationPlayer, skel: Skeleton3D, clip: String, seconds: float, bone: String, class_id: String) -> void:
+	_assert(ap.has_animation(clip), "%s animation clip missing %s" % [class_id, clip])
+	var idx := skel.find_bone(bone)
+	_assert(idx >= 0, "%s animation bone missing %s" % [class_id, bone])
+	if idx < 0 or not ap.has_animation(clip):
+		return
+	ap.play(clip)
+	ap.seek(seconds, true)
+	var q := skel.get_bone_pose_rotation(idx)
+	var rotated := absf(q.x) + absf(q.y) + absf(q.z)
+	_assert(rotated > 0.01, "%s %s should rotate %s, got %s" % [class_id, clip, bone, q])
 
 
 func _test_player_snapshot_death_pose() -> void:

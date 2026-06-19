@@ -287,5 +287,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v272** | `performance-status-overlay` | Complete (focused checks and `make ci` green) | [`v272_spec-performance-status-overlay.md`](../specs/v272_spec-performance-status-overlay.md) | [`v272_2026-06-18-performance-status-overlay.md`](../plans/v272_2026-06-18-performance-status-overlay.md) | [`as-built`](../as-built/v272_performance-status-overlay.md) |
 | **v273** | `crocodile-archer-model` | Complete (focused checks green) | [`v273_spec-crocodile-archer-model.md`](../specs/v273_spec-crocodile-archer-model.md) | [`v273_2026-06-18-crocodile-archer-model.md`](../plans/v273_2026-06-18-crocodile-archer-model.md) | [`as-built`](../as-built/v273_crocodile-archer-model.md) |
 | **v274** | `class-hero-models` | Complete (`make ci` green) | [`v274_spec-class-hero-models.md`](../specs/v274_spec-class-hero-models.md) | [`v274_2026-06-18-class-hero-models.md`](../plans/v274_2026-06-18-class-hero-models.md) | [`as-built`](../as-built/v274_class-hero-models.md) |
+| **v275** | `rigged-hero-models` | Complete (`make ci` green) | [`v275_spec-rigged-hero-models.md`](../specs/v275_spec-rigged-hero-models.md) | [`v275_2026-06-19-rigged-hero-models.md`](../plans/v275_2026-06-19-rigged-hero-models.md) | [`as-built`](../as-built/v275_rigged-hero-models.md) |
 
 ---

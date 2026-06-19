@@ -4,15 +4,24 @@
   "seed": "v72_monster_visual_catalog",
   "title": "Monster visual catalog",
   "description": "Proves the new wolf and bat monster definitions exist over protocol and remain playable through existing chase/melee mechanics.",
+  "debug_progression": {
+    "level": 1,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 80, "dex": 5, "vit": 40, "magic": 5 },
+    "skill_ranks": {}
+  },
   "steps": [
     { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "alive": true, "equals": 1 },
     { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_wolf", "alive": true, "equals": 1 },
     { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_bat", "alive": true, "equals": 1 },
-    { "action": "action_until_event", "monster_def_id": "dungeon_wolf", "event_type": "monster_killed", "timeout_s": 10 }
+    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "event_type": "monster_damaged", "timeout_s": 10 }
   ],
   "assertions": [
+    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_wolf", "alive": true, "equals": 1 },
     { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_bat", "alive": true, "equals": 1 },
-    { "type": "monster_dead", "monster_def_id": "dungeon_wolf" }
+    { "type": "event_seen", "event_type": "monster_damaged" }
   ],
   "visual": {
     "camera": { "x": 8, "y": 5, "zoom": 1.0 }

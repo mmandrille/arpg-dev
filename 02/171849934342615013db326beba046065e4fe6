@@ -1,0 +1,43 @@
+tools/validate_shared.py
+  s_b9bc0033a850dd::t_a8c0f4af5cccf2 414,416,419-423
+PROGRESS.md
+  s_b9bc0033a850dd::t_e62d938254f5bd 26,28-29,31
+docs/plans/v281_2026-06-19-quadruped-pounce-behavior.md
+  s_b9bc0033a850dd::t_e62d938254f5bd 3,37,56-59,72-74,90-92,96-100
+  s_b9bc0033a850dd::t_c9694125d428b2 1-2,4-36,38-55,60-71,75-89,93-95,101-108
+server/internal/game/rules.go
+  s_b9bc0033a850dd::t_192696439225d3 1589-1590,1593-1594,1630-1641
+server/internal/game/monster_attack_style_test.go
+  s_b9bc0033a850dd::t_8a3bc3f004cff7 12-22,78-115,125-160
+server/internal/game/sim.go
+  s_b9bc0033a850dd::t_192696439225d3 51,4826
+shared/rules/monsters.v0.json
+  s_b9bc0033a850dd::t_192696439225d3 215-216
+docs/specs/v281_spec-quadruped-pounce-behavior.md
+  s_b9bc0033a850dd::t_c9694125d428b2 1-2,4-67
+  s_b9bc0033a850dd::t_e62d938254f5bd 3
+docs/progress/slice-lifecycle.md
+  s_b9bc0033a850dd::t_e62d938254f5bd 296
+client/scripts/main.gd
+  s_b9bc0033a850dd::t_192696439225d3 1739-1740,1751
+shared/rules/monsters.v0.schema.json
+  s_b9bc0033a850dd::t_192696439225d3 50
+docs/as-built/v281_quadruped-pounce-behavior.md
+  s_b9bc0033a850dd::t_e62d938254f5bd 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "02171849934342615013db326beba046065e4fe6",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

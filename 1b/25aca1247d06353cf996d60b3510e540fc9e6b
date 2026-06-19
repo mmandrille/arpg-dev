@@ -1,0 +1,33 @@
+client/tests/test_item_visuals.gd
+  s_b9bc0033a850dd::t_9855aba4503470 19,79
+server/internal/game/monster_attack_style.go
+  s_b9bc0033a850dd::t_e8e1425cfc44fc 1-40
+client/scripts/monster_attack_animation_events.gd
+  s_b9bc0033a850dd::t_7b86d2aa8a2b8a 1-15
+client/tests/item_visual_scale_probe.gd
+  s_b9bc0033a850dd::t_89015a28c0a698 1-45
+client/scripts/main.gd
+  s_b9bc0033a850dd::t_1afe8c1656a7d0 64,1187,1194,1210,1215
+client/tests/item_visual_scale_probe.gd.uid
+  s_b9bc0033a850dd::t_cb6761689a5d69 1
+client/scripts/monster_attack_animation_events.gd.uid
+  s_b9bc0033a850dd::t_cb6761689a5d69 1
+server/internal/game/rules.go
+  s_b9bc0033a850dd::t_97c69949f519bc 1610-1611
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1b25aca1247d06353cf996d60b3510e540fc9e6b",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

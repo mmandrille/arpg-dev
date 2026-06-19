@@ -12,7 +12,7 @@ rotation = Vector3(0, -1.5708, 0)
 scale = Vector3(2, 2, 2)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-root_node = NodePath("..")
+root_node = NodePath("../ModelRoot/QuadrupedModel")
 libraries = {
 "": ExtResource("2_anims")
 }

@@ -253,11 +253,11 @@
       "runtime_path": "client/assets/monsters/purple_fantasy/evil_fox_monster.glb",
       "format": "glb",
       "scale_unit": "meters",
-      "required_nodes": [],
+      "required_nodes": ["root", "spine", "head", "tail", "leg_fl", "leg_fr", "leg_bl", "leg_br"],
       "provenance": {
         "origin": "user-provided local GLB",
         "license": "unconfirmed-user-provided",
-        "sha256": "ee1b2c65ac359acf104e615df3cbbd6ab44522e2b34c8a15e4d8522fb2f0311a"
+        "sha256": "74fd71df9304f86d4c28d05819f35b3e76c4f77cc92d2343a92dbf8e32a56ff4"
       }
     },
     "monster_wolf_v0": {

@@ -264,6 +264,7 @@ func _test_monster_scene() -> void:
 	for scene_path in [
 		"res://scenes/monster_dummy.tscn",
 		"res://scenes/monster_dark_purple.tscn",
+		"res://scenes/monster_crocodile_archer.tscn",
 		"res://scenes/monster_quadruped.tscn",
 		"res://scenes/monster_wolf.tscn",
 		"res://scenes/monster_tiny_flyer.tscn",
@@ -308,6 +309,14 @@ func _test_monster_scene() -> void:
 				ap.seek(0.1375, true)
 				_assert(absf(model_root.rotation.y) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
 				_assert(model.position.y > 0.0, "%s walk clip should bob Model, got y=%s" % [scene_path, model.position.y])
+			if scene_path == "res://scenes/monster_crocodile_archer.tscn":
+				var marker := s.find_child("ArcherBowMarker", true, false) as Node3D
+				_assert(marker != null, "%s should expose the ranged archer marker" % scene_path)
+				var model := s.find_child("Model", true, false) as Node3D
+				_assert(model != null, "%s Model missing" % scene_path)
+				ap.play("walk")
+				ap.seek(0.1375, true)
+				_assert(model.position.y > 0.0, "%s walk clip should bob Model, got y=%s" % [scene_path, model.position.y])
 		s.free()
 		await process_frame
 
@@ -319,6 +328,9 @@ func _test_monster_visuals_catalog() -> void:
 	var wolf := MonsterVisualsLoaderScript.resolve("dungeon_wolf")
 	_assert(str(wolf.get("scene", "")) == "monster_quadruped", "dungeon_wolf scene = %s" % wolf.get("scene", ""))
 	_assert(str(wolf.get("asset_id", "")) == "monster_quadruped_predator_v0", "dungeon_wolf asset = %s" % wolf.get("asset_id", ""))
+	var archer := MonsterVisualsLoaderScript.resolve("dungeon_archer")
+	_assert(str(archer.get("scene", "")) == "monster_crocodile_archer", "dungeon_archer scene = %s" % archer.get("scene", ""))
+	_assert(str(archer.get("asset_id", "")) == "monster_crocodile_archer_v0", "dungeon_archer asset = %s" % archer.get("asset_id", ""))
 	var companion_wolf := MonsterVisualsLoaderScript.resolve("companion_black_wolf", "monster_wolf")
 	_assert(str(companion_wolf.get("scene", "")) == "monster_wolf", "companion_black_wolf scene = %s" % companion_wolf.get("scene", ""))
 	var bat := MonsterVisualsLoaderScript.resolve("dungeon_bat")

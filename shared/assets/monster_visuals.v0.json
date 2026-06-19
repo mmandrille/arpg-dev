@@ -100,8 +100,8 @@
       "animation_profile": "ground_biped"
     },
     "dungeon_archer": {
-      "asset_id": "monster_dummy_v0",
-      "scene": "monster_dummy",
+      "asset_id": "monster_crocodile_archer_v0",
+      "scene": "monster_crocodile_archer",
       "scale": 1.0,
       "height_offset": 0.0,
       "animation_profile": "ground_biped"

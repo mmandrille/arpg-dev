@@ -1,0 +1,32 @@
+client/scripts/bot_scenario_runner.gd
+  s_28ff1bdb2acafe::t_d1bc75fc35e0d1 1577-1578
+PROGRESS.md
+  s_28ff1bdb2acafe::t_03f07dc448af1e 28-29,90-96
+client/scripts/bot_step_catalog.gd
+  s_28ff1bdb2acafe::t_d1bc75fc35e0d1 16
+client/scripts/bot_assertion_handlers.gd
+  s_28ff1bdb2acafe::t_6f00aa5b4acfe0 312-315,317-326,330,335,337,339,343,345-346
+tools/bot/scenarios/client/49_mercenary_recovery_ui.json
+  s_28ff1bdb2acafe::t_6f00aa5b4acfe0 8-11
+tools/bot/scenarios/client/73_door_fog_toggle.json
+  s_28ff1bdb2acafe::t_6f00aa5b4acfe0 18,20-21,25,28-29
+client/scripts/bot_wait_handlers.gd
+  s_28ff1bdb2acafe::t_6f00aa5b4acfe0 9
+  s_28ff1bdb2acafe::t_d1bc75fc35e0d1 40-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "379ff87d34f07dd30f8d591a024c230a346895c9",
+  "prompts": {},
+  "sessions": {
+    "s_28ff1bdb2acafe": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee00a-72c5-7c00-845a-7f8ad232f812",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

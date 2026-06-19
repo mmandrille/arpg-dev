@@ -235,6 +235,7 @@ v288_* = market-notification-badge
 v289_* = mercenary-offer-variants
 v290_* = blacksmith-armor-recipe
 v291_* = quest-town-turn-in
+v292_* = badge-reward-foundation
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

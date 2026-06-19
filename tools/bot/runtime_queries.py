@@ -46,6 +46,7 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
         "service",
         "offer_id",
         "monster_def_id",
+        "resource_id",
     ):
         if key in expected and str(event.get(key, "")) != str(expected[key]):
             return False
@@ -67,6 +68,7 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
         "total_gold",
         "unspent_stat_points",
         "unspent_skill_points",
+        "level",
     ):
         if key in expected and int(event.get(key, -999999)) != int(expected[key]):
             return False

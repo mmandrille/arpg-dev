@@ -12,5 +12,6 @@ def debug_progression_body(progression: dict[str, Any]) -> dict[str, Any]:
         "unspent_skill_points": int(progression.get("unspent_skill_points", 0)),
         "stats": dict(progression.get("stats", {})),
         "gold": int(progression.get("gold", 0)),
+        "deepest_dungeon_depth": int(progression.get("deepest_dungeon_depth", 0)),
         "skill_ranks": dict(progression.get("skill_ranks", {})),
     }

@@ -170,6 +170,7 @@ func _debug_progression_body(progression: Dictionary) -> Dictionary:
 		"unspent_skill_points": int(progression.get("unspent_skill_points", 0)),
 		"stats": _int_value_map(progression.get("stats", {})),
 		"gold": int(progression.get("gold", 0)),
+		"deepest_dungeon_depth": int(progression.get("deepest_dungeon_depth", 0)),
 		"skill_ranks": _int_value_map(progression.get("skill_ranks", {})),
 	}
 

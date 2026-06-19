@@ -8,7 +8,11 @@
     "sorcerer_staff": { "name": "Sorcerer Staff", "category": "equipment", "slot": "main_hand", "equippable": true, "class_required": "sorcerer", "handedness": "two_handed", "occupies_hands": ["main_hand", "off_hand"], "attack_speed": 1.0, "damage": { "min": 4, "max": 6 }, "reach": 1.8 },
     "paladin_mace": { "name": "Paladin Mace", "category": "equipment", "slot": "main_hand", "equippable": true, "class_required": "paladin", "handedness": "one_handed", "occupies_hands": ["main_hand"], "attack_speed": 1.0, "damage": { "min": 4, "max": 6 }, "reach": 1.6 },
     "gold": { "name": "Gold", "category": "currency", "equippable": false, "gold": { "min": 6, "max": 12 } },
-    "upgrade_shard": { "name": "Upgrade Shard", "category": "currency", "equippable": false },
+    "upgrade_shard": { "name": "Upgrade Badge", "category": "currency", "equippable": false },
+    "respec_badge": { "name": "Respec Badge", "category": "currency", "equippable": false },
+    "stat_badge": { "name": "Stat Badge", "category": "currency", "equippable": false },
+    "skill_badge": { "name": "Skill Badge", "category": "currency", "equippable": false },
+    "resurrection_badge": { "name": "Resurrection Badge", "category": "currency", "equippable": false },
     "quest_leaf": { "name": "Quest Leaf", "category": "quest", "equippable": false },
     "red_potion": { "name": "Red Potion", "category": "consumable", "equippable": false, "heal": { "min": 5, "max": 5 } },
     "blue_potion": { "name": "Blue Potion", "category": "consumable", "equippable": false, "mana_restore": { "min": 5, "max": 5 } }

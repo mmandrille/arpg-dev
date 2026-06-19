@@ -2,17 +2,20 @@
 extends SceneTree
 
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
+const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
+var _sync_call_count: int = 0
 
 
 func _initialize() -> void:
 	_test_audio_settings_defaults_and_clamps()
 	_test_audio_settings_save_shape()
 	_test_settings_panel_audio_slider_sync()
+	_test_audio_slider_change_does_not_force_panel_resync()
 	_test_map_opacity_settings()
 	print("[gdtest] PASS: test_audio_settings (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -71,6 +74,30 @@ func _test_settings_panel_audio_slider_sync() -> void:
 	_assert_float("sfx slider updates", float(panel._sfx_volume_slider.value), 0.55)
 	TextCatalogScript.set_locale("en")
 	panel.free()
+
+
+func _test_audio_slider_change_does_not_force_panel_resync() -> void:
+	_sync_call_count = 0
+	var settings := ClientSettingsScript.new("user://unused-audio-slider-drag-test.json")
+	var panel = SettingsPanelScript.new()
+	get_root().add_child(panel)
+	panel._build()
+	panel.show_settings("1920x1080", true, true, "solo", "en", "contextual", 0.2, 0.3, 0.4, 0.65)
+	ClientAudioBridgeScript.connect_volume_signals(panel, null, settings, Callable(self, "_count_sync_call"))
+	panel.master_volume_changed.emit(0.75)
+	_assert_float("master drag updates settings", settings.master_volume, 0.75)
+	_assert_eq("master drag does not resync panel", _sync_call_count, 0)
+	panel.music_volume_changed.emit(0.55)
+	_assert_float("music drag updates settings", settings.music_volume, 0.55)
+	_assert_eq("music drag does not resync panel", _sync_call_count, 0)
+	panel.sfx_volume_changed.emit(0.35)
+	_assert_float("sfx drag updates settings", settings.sfx_volume, 0.35)
+	_assert_eq("sfx drag does not resync panel", _sync_call_count, 0)
+	panel.free()
+
+
+func _count_sync_call() -> void:
+	_sync_call_count += 1
 
 
 func _test_map_opacity_settings() -> void:

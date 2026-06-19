@@ -1,0 +1,19 @@
+{
+  "id": "archer_retreat_ai",
+  "world_id": "ranged_monster_retreat_lab",
+  "seed": "v286_archer_retreat_ai",
+  "title": "Archer retreat AI",
+  "description": "Start a dungeon archer too close to the player and prove it moves away before settling into ranged standoff.",
+  "steps": [
+    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "equals": 1 },
+    { "action": "wait_ticks", "ticks": 16 }
+  ],
+  "assertions": [
+    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "equals": 1 },
+    { "type": "monster_moved", "monster_def_id": "dungeon_archer", "min_distance": 1.0 },
+    { "type": "monster_within_player_distance", "monster_def_id": "dungeon_archer", "max_distance": 6.5 }
+  ],
+  "visual": {
+    "camera": { "x": 9, "y": 5, "zoom": 1.0 }
+  }
+}

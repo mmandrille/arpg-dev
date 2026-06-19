@@ -3288,20 +3288,20 @@ func effectiveMonsterLeashRadius(def MonsterDef, nav NavigationRules) float64 {
 
 	return maxFloat(def.LeashRadius, minimumRadius)
 }
-
 func (s *Sim) monsterMovementGoal(monster *entity, player *entity, def MonsterDef) (Vec2, bool) {
 	switch monster.aiMode {
 	case monsterAIModeChase:
+		if goal, ok := s.monsterRangedRetreatGoal(monster, player, def); ok {
+			return goal, true
+		}
 		if s.monsterInAttackRange(monster, player, def) {
 			return Vec2{}, false
 		}
-
 		return s.findMonsterChaseGoal(monster, player, def)
 	default:
 		return Vec2{}, false
 	}
 }
-
 func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterDef) (Vec2, bool) {
 	nav := s.activeNav()
 	if goal, ok := s.cachedMonsterNavigationGoal(monster, player); ok {

@@ -184,6 +184,7 @@
       "attack_cooldown_ticks": 50,
       "attack_mode": "ranged",
       "attack_range": 7,
+      "preferred_min_range": 3.5,
       "projectile_speed": 16,
       "projectile_def_id": "training_arrow",
       "name_key": "monster.dungeon_archer.name"

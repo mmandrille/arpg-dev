@@ -1,0 +1,21 @@
+client/scripts/fog_of_war_overlay.gd
+  s_ce64170ae50e3b::t_ac74713566b3d8 22-23,36,58,108-111,124,181-183,199-200,218,245,249-271
+client/tests/test_fog_of_war_overlay.gd
+  s_ce64170ae50e3b::t_cf72410cab0b94 16,59-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1c4114b295f961463ea9b5049ef516bea6a2fe01",
+  "prompts": {},
+  "sessions": {
+    "s_ce64170ae50e3b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee005-47f1-7aa1-937c-d523cc4e8180",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

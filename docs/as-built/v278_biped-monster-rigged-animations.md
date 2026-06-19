@@ -30,10 +30,8 @@ GODOT=/opt/homebrew/bin/godot make client-unit
 
 All focused checks above passed on 2026-06-19.
 
-`make maintainability` was attempted and failed on pre-existing unrelated ratchet debt in
-`client/scripts/main.gd`, `client/tests/test_item_visuals.gd`, and
-`skills/showme/scripts/visual_capture.gd`. The selected autoloop continues with focused slice
-verification; that ratchet debt is deferred to the post-loop `$refactor` pass requested by the user.
+Post-loop `$refactor` paid down the ratchet debt and the selected batch passed full `make ci` on
+2026-06-19.
 
 ## Boundaries
 

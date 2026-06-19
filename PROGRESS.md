@@ -25,10 +25,10 @@ Last updated: 2026-06-19
 |-------|-------|
 | **Latest completed slice** | v283 — boss summon bats and HP |
 | **Active branch** | `main` |
-| **CI gate** | v283 focused checks green on 2026-06-19; full batch gate/refactor pending; `make maintainability` currently blocked by pre-existing ratchet debt |
-| **Next slice** | Selected `$autoloop` queue complete; run batch verification and `$refactor` |
+| **CI gate** | v276-v283 focused checks green; post-loop `$refactor` complete; full `make ci` green on 2026-06-19 |
+| **Next slice** | Run `$review` for the post-v283 baseline, then continue with `$next`/`$autoloop` |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v275 full `make ci`; v276-v283 have focused proof; run after selected autoloop queue and batch `make ci` |
+| **Next engineering review** | Due now after v283 full `make ci`; write the fresh post-v283 review before the next feature batch |
 
 
 ### Periodic engineering reviews

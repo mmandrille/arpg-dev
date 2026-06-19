@@ -30,8 +30,8 @@ GODOT=/opt/homebrew/bin/godot make client-unit
 
 All focused checks above passed on 2026-06-19.
 
-`make maintainability` remains blocked by pre-existing unrelated ratchet debt identified during v278;
-the user explicitly directed the autoloop to continue and run `$refactor` after all selected slices.
+Post-loop `$refactor` paid down the ratchet debt and the selected batch passed full `make ci` on
+2026-06-19.
 
 ## Boundaries
 

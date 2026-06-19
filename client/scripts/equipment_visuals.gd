@@ -174,6 +174,7 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		inst = (packed as PackedScene).instantiate()
 	inst.name = asset_id
 	_apply_transform(inst, _local_transform_for_slot(slot, vis))
+	_apply_model_root_scale_compensation(inst, socket)
 	var rarity := str(item.get("rarity", "common")).to_lower()
 	var tint: Color = RARITY_TINTS.get(rarity, RARITY_TINTS["common"])
 	_apply_tint(inst, tint)
@@ -248,6 +249,35 @@ func _apply_transform(node: Node3D, t: Dictionary) -> void:
 	node.rotation_degrees = Vector3(r.get("x", 0.0), r.get("y", 0.0), r.get("z", 0.0))
 	var s = t.get("scale", {})
 	node.scale = Vector3(s.get("x", 1.0), s.get("y", 1.0), s.get("z", 1.0))
+
+
+func _apply_model_root_scale_compensation(node: Node3D, socket: Node) -> void:
+	var model_scale := _model_root_scale_for(socket)
+	node.position = Vector3(
+		node.position.x * _inverse_scale_component(model_scale.x),
+		node.position.y * _inverse_scale_component(model_scale.y),
+		node.position.z * _inverse_scale_component(model_scale.z)
+	)
+	node.scale = Vector3(
+		node.scale.x * _inverse_scale_component(model_scale.x),
+		node.scale.y * _inverse_scale_component(model_scale.y),
+		node.scale.z * _inverse_scale_component(model_scale.z)
+	)
+
+
+func _model_root_scale_for(node: Node) -> Vector3:
+	var current := node
+	while current != null and current != _mount_root:
+		if current is Node3D and str(current.name) == "ModelRoot":
+			return (current as Node3D).scale
+		current = current.get_parent()
+	return Vector3.ONE
+
+
+func _inverse_scale_component(value: float) -> float:
+	if absf(value) <= 0.0001:
+		return 1.0
+	return 1.0 / value
 
 
 func _apply_tint(root: Node, color: Color) -> void:

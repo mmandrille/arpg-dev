@@ -138,7 +138,7 @@ func generateBossDungeonLevel(seed string, levelNum int, rules DungeonGeneration
 	if len(boss.BossTemplatePool) == 0 {
 		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: missing boss template pool", levelNum)
 	}
-	templateID := boss.BossTemplatePool[0]
+	templateID := selectBossTemplateID(seed, levelNum, boss.BossTemplatePool)
 	out.monsters = append(out.monsters, generatedMonster{
 		defID:        rules.MonsterPlacement.MonsterDefID,
 		rarityID:     "unique",
@@ -168,6 +168,17 @@ func generateBossDungeonLevel(seed string, levelNum int, rules DungeonGeneration
 		})
 	}
 	return out, nil
+}
+
+func selectBossTemplateID(seed string, levelNum int, pool []string) string {
+	if len(pool) == 0 {
+		return ""
+	}
+	if len(pool) == 1 {
+		return pool[0]
+	}
+	rng := NewRNG(SeedToUint64(seed + "|boss_template_selection|" + strconv.Itoa(absInt(levelNum))))
+	return pool[rng.IntN(len(pool))]
 }
 
 func (g generatedDungeonLevel) stairPositions() []Vec2 {

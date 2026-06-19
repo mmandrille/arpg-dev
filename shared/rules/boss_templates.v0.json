@@ -18,6 +18,23 @@
         "scale": 2.0,
         "model_pool": ["monster_dummy", "monster_quadruped", "monster_tiny_flyer"]
       }
+    },
+    "crypt_matron": {
+      "name": "Crypt Matron",
+      "base_monster_def_id": "dungeon_undead",
+      "pattern_deck": ["summon_bats", "crystal_wall", "ground_slam", "stone_lance"],
+      "hp_multiplier": 10.0,
+      "damage_multiplier": 1.1,
+      "enrage": {
+        "health_ratio_threshold": 0.35,
+        "cooldown_multiplier": 0.65
+      },
+      "loot_table": "boss_drop_tier_1",
+      "visual": {
+        "model": "monster_skeleton",
+        "color": "#55e66f",
+        "scale": 2.2
+      }
     }
   }
 }

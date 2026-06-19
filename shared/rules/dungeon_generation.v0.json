@@ -134,7 +134,7 @@
     "monster_count": 2,
     "chest_interactable_def_id": "treasure_chest",
     "chest_loot_table": "boss_chest_drop_tier_1",
-    "boss_template_pool": ["cave_warden"],
+    "boss_template_pool": ["cave_warden", "crypt_matron"],
     "boss_spawn": { "x": 22, "y": 15 },
     "chest_position": { "x": 12, "y": 15 },
     "stairs_up_position": { "x": 4, "y": 15 },

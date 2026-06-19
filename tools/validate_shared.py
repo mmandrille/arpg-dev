@@ -1487,10 +1487,6 @@ def cross_checks(report: Report) -> None:
             if missing_patterns:
                 report.fail("boss template pattern deck", f"{template_id}: missing {missing_patterns}")
                 template_failed = True
-        visual = template.get("visual", {})
-        if not template_failed and (visual.get("model") != "current_humanoid_player" or visual.get("scale") != 2.0):
-            report.fail("boss template visual", f"{template_id}: v35 requires current_humanoid_player at 2.0 scale")
-            template_failed = True
         if not template_failed:
             report.ok(f"boss template {template_id} references valid rules")
 

@@ -47,7 +47,7 @@
             "required": ["model", "color", "scale"],
             "additionalProperties": false,
             "properties": {
-              "model": { "type": "string", "minLength": 1 },
+              "model": { "type": "string", "enum": ["current_humanoid_player", "monster_dummy", "monster_dark_purple", "monster_crocodile_archer", "monster_quadruped", "monster_wolf", "monster_tiny_flyer", "monster_skeleton"] },
               "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
               "scale": { "type": "number", "exclusiveMinimum": 0 },
               "model_pool": {
@@ -55,7 +55,7 @@
                 "minItems": 1,
                 "items": {
                   "type": "string",
-                  "enum": ["monster_dummy", "monster_quadruped", "monster_tiny_flyer"]
+                  "enum": ["monster_dummy", "monster_dark_purple", "monster_crocodile_archer", "monster_quadruped", "monster_wolf", "monster_tiny_flyer", "monster_skeleton"]
                 }
               }
             }

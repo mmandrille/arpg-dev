@@ -1,0 +1,55 @@
+server/internal/game/monster_ranged_positioning.go
+  s_58dbc51a4db222::t_859d8b344689af 24-25
+  s_58dbc51a4db222::t_00f945e9b078e8 42,46-58,60-78,81-94,96-102,105-112
+  s_58dbc51a4db222::t_e87fe947536bf9 18-23,26
+  s_58dbc51a4db222::t_7cc29223748e22 3-4,95,103-104
+  s_58dbc51a4db222::t_f7ae1a5a5fba09 5-17,27-41,43-45,59,79-80,113-114
+server/internal/game/ranged_monster_positioning_test.go
+  s_58dbc51a4db222::t_f7ae1a5a5fba09 52-90
+server/internal/game/rules.go
+  s_58dbc51a4db222::t_f7ae1a5a5fba09 732,1611-1613,1617-1618
+  s_58dbc51a4db222::t_cd0515e9007912 1584-1586
+shared/rules/monsters.v0.schema.json
+  s_58dbc51a4db222::t_f7ae1a5a5fba09 52
+docs/progress/slice-codename-index.md
+  s_58dbc51a4db222::t_851eba1bc4178d 232
+docs/progress/slice-lifecycle.md
+  s_58dbc51a4db222::t_851eba1bc4178d 301
+shared/rules/monsters.v0.json
+  s_58dbc51a4db222::t_f7ae1a5a5fba09 187
+docs/as-built/v286_archer-retreat-ai.md
+  s_58dbc51a4db222::t_851eba1bc4178d 1-51
+server/internal/game/sim.go
+  s_58dbc51a4db222::t_8e05a4511643f9 3294-3296
+docs/plans/v286_2026-06-19-archer-retreat-ai.md
+  s_58dbc51a4db222::t_3b64ceef995418 1-2,4-43,46-48,51-65,70-83,85,87,90-94,96-105,108,111-114,116-127,130-132
+  s_58dbc51a4db222::t_851eba1bc4178d 3,44-45,49-50,66-69,84,86,88-89,106-107,109-110,128-129,133-136
+  s_58dbc51a4db222::t_1c9a1ed8c26201 95,115
+docs/specs/v286_spec-archer-retreat-ai.md
+  s_58dbc51a4db222::t_851eba1bc4178d 3
+  s_58dbc51a4db222::t_3b64ceef995418 1-2,4-55,57-82
+  s_58dbc51a4db222::t_1c9a1ed8c26201 56
+tools/bot/scenarios/94_archer_retreat_ai.json
+  s_58dbc51a4db222::t_f7ae1a5a5fba09 1-19
+PROGRESS.md
+  s_58dbc51a4db222::t_851eba1bc4178d 26,29
+  s_58dbc51a4db222::t_d3c5e2aba88718 28
+shared/rules/worlds.v0.json
+  s_58dbc51a4db222::t_f7ae1a5a5fba09 679-688
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bb46b2e2e34987b0cf51ce96036639b643fb0423",
+  "prompts": {},
+  "sessions": {
+    "s_58dbc51a4db222": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee093-c0ba-7701-a296-d74410bf5405",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

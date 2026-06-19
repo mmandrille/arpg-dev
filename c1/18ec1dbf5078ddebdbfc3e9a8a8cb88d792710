@@ -1,0 +1,33 @@
+docs/as-built/v279_quadruped-pounce-animation-support.md
+  s_b9bc0033a850dd::t_27e60712cad5e8 33-34
+docs/progress/slice-lifecycle.md
+  s_b9bc0033a850dd::t_62f2ff112ffe40 293-298
+docs/as-built/v281_quadruped-pounce-behavior.md
+  s_b9bc0033a850dd::t_4c4f4c5ed8651f 30-31
+docs/as-built/v283_boss-summon-bats-and-hp.md
+  s_b9bc0033a850dd::t_df460b2d3a44fe 27-28
+PROGRESS.md
+  s_b9bc0033a850dd::t_6631cb54c4603c 28-29,31
+docs/as-built/v278_biped-monster-rigged-animations.md
+  s_b9bc0033a850dd::t_320d3823063bdd 33-34
+docs/as-built/v280_bat-dive-attack-behavior.md
+  s_b9bc0033a850dd::t_39ab6a79feeeb5 32-33
+docs/as-built/v282_rectangular-boss-pattern.md
+  s_b9bc0033a850dd::t_932b4e548bd3ba 31-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c118ec1dbf5078ddebdbfc3e9a8a8cb88d792710",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

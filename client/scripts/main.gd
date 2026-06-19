@@ -62,6 +62,7 @@ const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loade
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
+const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_text.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScenesByVisual := {
 	"monster_dummy": preload("res://scenes/monster_dummy.tscn"),
@@ -1711,22 +1712,13 @@ func _sync_camera_to_player() -> void:
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
 	var outcome := str(ev.get("outcome", ""))
 	var damage = ev.get("damage", null)
-	var skill_id := str(ev.get("skill_id", ""))
-	if outcome == "miss":
-		_show_damage_number(entity_id, Color(0.82, 0.86, 0.92), null, "", 0.0, "miss", "MISS")
+	var special := DamageTypeCombatTextScript.special_outcome(outcome)
+	if not special.is_empty():
+		_show_damage_number(entity_id, special.get("color", Color.WHITE), null, "", 0.0, str(special.get("variant", outcome)), str(special.get("text", "")))
 		return
-	if outcome == "block":
-		_show_damage_number(entity_id, Color(0.35, 0.78, 1.0), null, "", 0.0, "block", "BLOCK")
-		return
-	if outcome == "immune":
-		_show_damage_number(entity_id, Color(1.0, 0.86, 0.28), null, "", 0.0, "immune", "IMMUNE")
-		return
-	if skill_id == "poison_stab":
-		_show_damage_number(entity_id, Color("#55e66f"), damage, "", 0.0, "poison")
-		return
-	if outcome == "crit" or bool(ev.get("critical", false)):
-		var crit_damage := 0 if damage == null else int(damage)
-		_show_damage_number(entity_id, Color(1.0, 0.58, 0.22), crit_damage, "", 0.0, "crit", "%d!" % crit_damage)
+	var presentation := DamageTypeCombatTextScript.number_for_event(ev, default_color)
+	if not presentation.is_empty():
+		_show_damage_number(entity_id, presentation.get("color", default_color), presentation.get("amount", damage), "", 0.0, str(presentation.get("variant", "normal")), str(presentation.get("text", "")), str(presentation.get("damage_type", "")))
 		return
 	_show_damage_number(entity_id, default_color, damage)
 
@@ -1869,7 +1861,7 @@ func _enter_entity_terminal_death(entity_id: String, rec: Dictionary) -> void:
 	if reaction != null:
 		reaction.enter_death()
 
-func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0, variant: String = "normal", text_override: String = "") -> void:
+func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0, variant: String = "normal", text_override: String = "", damage_type: String = "") -> void:
 	if damage_numbers_layer == null or _camera == null:
 		return
 	if client_settings != null and not client_settings.floating_combat_text:
@@ -1892,7 +1884,7 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null, p
 	var pop := DamageNumberScript.new() as DamageNumber
 	damage_numbers_layer.add_child(pop)
 	var side := side_override if side_override != 0.0 else (-1.0 if entity_id == player_id else 1.0)
-	pop.setup(_camera, target, world_position, amount, color, side, prefix, variant, text_override)
+	pop.setup(_camera, target, world_position, amount, color, side, prefix, variant, text_override, damage_type)
 
 func _spawn_heal_rain(entity_id: String) -> void:
 	var target := _node_for_entity_id(entity_id)
@@ -5522,6 +5514,7 @@ func _bot_damage_numbers() -> Array:
 			out.append({
 				"text": pop.combat_text,
 				"variant": pop.combat_variant,
+				"damage_type": pop.combat_damage_type,
 				"color": pop.label_settings.font_color.to_html(false) if pop.label_settings != null else "",
 			})
 	return out

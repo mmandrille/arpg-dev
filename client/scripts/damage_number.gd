@@ -13,21 +13,23 @@ var _age := 0.0
 var _side_offset := 0.0
 var combat_text: String = ""
 var combat_variant: String = "normal"
+var combat_damage_type: String = ""
 
 
-func setup(camera: Camera3D, target: Node3D, world_position: Vector3, amount = null, color: Color = Color.WHITE, side: float = 1.0, prefix: String = "", variant: String = "normal", text_override: String = "") -> void:
+func setup(camera: Camera3D, target: Node3D, world_position: Vector3, amount = null, color: Color = Color.WHITE, side: float = 1.0, prefix: String = "", variant: String = "normal", text_override: String = "", damage_type: String = "") -> void:
 	_camera = camera
 	_target = target
 	_world_position = world_position
 	_side_offset = SIDE_PIXELS * side
 	combat_variant = variant
+	combat_damage_type = damage_type
 	combat_text = text_override if text_override != "" else prefix + str(int(amount))
 	text = combat_text
 	z_index = 100
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	custom_minimum_size = Vector2(76, 30)
+	custom_minimum_size = Vector2(maxf(76.0, float(combat_text.length()) * 18.0), 30)
 	size = custom_minimum_size
 	rotation = deg_to_rad(4.0 * side) if variant == "crit" else 0.0
 

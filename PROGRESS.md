@@ -23,10 +23,10 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v284 — model viewer tool |
+| **Latest completed slice** | v285 — damage type readability |
 | **Active branch** | `main` |
-| **CI gate** | Full `make ci` green on 2026-06-19 after v284 refactor; broad client bot sweep passed 74/74 including prior `mercenary_recovery_ui` and `door_fog_toggle` flakes |
-| **Next slice** | Run `$next` for the next feature batch; remaining review items are future-plan or feature-slice scale |
+| **CI gate** | v285 focused gates green on 2026-06-19 (`client-unit`, `bot-visual scenario=33_unique_burn_effect_live HEADLESS=1`, `make maintainability`); full autoloop-batch `make ci` pending after selected queue |
+| **Next slice** | v286 — archer retreat AI |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
 | **Next engineering review** | v294 target after a green full `make ci` and the next feature batch |
 

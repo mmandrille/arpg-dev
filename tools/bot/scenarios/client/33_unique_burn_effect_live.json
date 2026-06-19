@@ -35,6 +35,12 @@
       "skill_id": "everburning_wound",
       "damage_type": "fire",
       "timeout_s": 5.0
+    },
+    {
+      "type": "wait_damage_number",
+      "variant": "fire",
+      "damage_type": "fire",
+      "timeout_s": 2.0
     }
   ]
 }

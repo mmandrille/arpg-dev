@@ -1,0 +1,19 @@
+shared/assets/model_preview_catalog.v0.schema.json
+  s_28ff1bdb2acafe::t_b9a8f742790569 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0fe7c58469164c7aa9c8877bb1436ba98a1324cc",
+  "prompts": {},
+  "sessions": {
+    "s_28ff1bdb2acafe": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee00a-72c5-7c00-845a-7f8ad232f812",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

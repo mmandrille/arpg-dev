@@ -13,6 +13,8 @@ var _fail_count: int = 0
 
 func _initialize() -> void:
 	_test_poison_dot_shows_green_floating_text()
+	_test_fire_damage_type_shows_labeled_floating_text()
+	_test_critical_damage_type_keeps_crit_variant()
 	_test_poison_status_tints_monster_until_end()
 	_test_off_hand_combat_event_uses_off_hand_attack_clip()
 	_test_rogue_visual_replay_dwell_events()
@@ -32,18 +34,7 @@ func _make_main():
 
 
 func _test_poison_dot_shows_green_floating_text() -> void:
-	var main = _make_main()
-	main.player_id = "1001"
-	main.client_settings = ClientSettingsScript.new()
-	main.damage_numbers_layer = CanvasLayer.new()
-	main._camera = Camera3D.new()
-	var monster := Node3D.new()
-	monster.position = Vector3(4.0, 0.0, 4.0)
-	main.entities_root.add_child(monster)
-	main.entities["2001"] = {"node": monster, "type": "monster", "hp": 5}
-	root.add_child(main.damage_numbers_layer)
-	root.add_child(main._camera)
-	main._camera.look_at_from_position(Vector3(4.0, 12.0, 14.0), monster.position, Vector3.UP)
+	var main = _make_combat_text_main()
 	main._apply_delta({"events": [{
 		"event_type": "monster_damaged",
 		"entity_id": "2001",
@@ -51,23 +42,63 @@ func _test_poison_dot_shows_green_floating_text() -> void:
 		"source_entity_id": "1001",
 		"skill_id": "poison_stab",
 		"outcome": "hit",
+		"damage_type": "poison",
 		"damage": 2
 	}], "changes": []})
-	var numbers := main._bot_damage_numbers()
+	var numbers: Array = main._bot_damage_numbers()
 	_assert_eq("poison floating text count", numbers.size(), 1)
-	_assert_eq("poison floating text", str((numbers[0] as Dictionary).get("text", "")), "2")
+	_assert_eq("poison floating text", str((numbers[0] as Dictionary).get("text", "")), "POIS 2")
 	_assert_eq("poison floating text variant", str((numbers[0] as Dictionary).get("variant", "")), "poison")
+	_assert_eq("poison floating text damage type", str((numbers[0] as Dictionary).get("damage_type", "")), "poison")
 	_assert_eq("poison floating text color", str((numbers[0] as Dictionary).get("color", "")), "55e66f")
-	main.damage_numbers_layer.queue_free()
-	main._camera.queue_free()
-	main.player_anchor.queue_free()
-	main.entities_root.queue_free()
-	main.walls_root.queue_free()
-	main.free()
+	_free_combat_text_main(main)
+
+
+func _test_fire_damage_type_shows_labeled_floating_text() -> void:
+	var main = _make_combat_text_main()
+	main._apply_delta({"events": [{
+		"event_type": "monster_damaged",
+		"entity_id": "2001",
+		"target_entity_id": "2001",
+		"source_entity_id": "1001",
+		"outcome": "hit",
+		"damage_type": "fire",
+		"damage": 4
+	}], "changes": []})
+	var numbers: Array = main._bot_damage_numbers()
+	_assert_eq("fire floating text count", numbers.size(), 1)
+	_assert_eq("fire floating text", str((numbers[0] as Dictionary).get("text", "")), "FIRE 4")
+	_assert_eq("fire floating text variant", str((numbers[0] as Dictionary).get("variant", "")), "fire")
+	_assert_eq("fire floating text damage type", str((numbers[0] as Dictionary).get("damage_type", "")), "fire")
+	_assert_eq("fire floating text color", str((numbers[0] as Dictionary).get("color", "")), "ff7a2a")
+	_free_combat_text_main(main)
+
+
+func _test_critical_damage_type_keeps_crit_variant() -> void:
+	var main = _make_combat_text_main()
+	main._apply_delta({"events": [{
+		"event_type": "monster_damaged",
+		"entity_id": "2001",
+		"target_entity_id": "2001",
+		"source_entity_id": "1001",
+		"outcome": "crit",
+		"critical": true,
+		"damage_type": "lightning",
+		"damage": 7
+	}], "changes": []})
+	var numbers: Array = main._bot_damage_numbers()
+	_assert_eq("critical typed floating text count", numbers.size(), 1)
+	_assert_eq("critical typed floating text", str((numbers[0] as Dictionary).get("text", "")), "LIGHT 7!")
+	_assert_eq("critical typed floating text variant", str((numbers[0] as Dictionary).get("variant", "")), "crit")
+	_assert_eq("critical typed floating text damage type", str((numbers[0] as Dictionary).get("damage_type", "")), "lightning")
+	_assert_eq("critical typed floating text color", str((numbers[0] as Dictionary).get("color", "")), "ffe66d")
+	_free_combat_text_main(main)
 
 
 func _test_poison_status_tints_monster_until_end() -> void:
 	var main = _make_main()
+	main.player_anchor.queue_free()
+	main.player_anchor = null
 	var monster := Node3D.new()
 	var mesh := MeshInstance3D.new()
 	mesh.mesh = BoxMesh.new()
@@ -77,6 +108,7 @@ func _test_poison_status_tints_monster_until_end() -> void:
 	main.entities["2001"] = {
 		"node": monster,
 		"type": "monster",
+		"controller": null,
 		"base_tint": base_tint.to_html(false),
 		"reaction": ModelReactionControllerScript.new(monster, base_tint),
 	}
@@ -103,7 +135,6 @@ func _test_poison_status_tints_monster_until_end() -> void:
 		"skill_id": "poison_stab"
 	}], "changes": []})
 	_assert_eq("poison status tint restored", _mesh_tint(mesh).to_html(false), base_tint.to_html(false))
-	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()
@@ -147,6 +178,34 @@ func _test_rogue_visual_replay_dwell_events() -> void:
 	_assert_true("poison replay delay dwells", poison_delay > main.autoplay_step_delay)
 	_assert_true("off hand replay delay dwells", offhand_delay > main.autoplay_step_delay)
 	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _make_combat_text_main():
+	var main = _make_main()
+	main.player_id = "1001"
+	main.player_anchor.queue_free()
+	main.player_anchor = null
+	main.client_settings = ClientSettingsScript.new()
+	main.damage_numbers_layer = CanvasLayer.new()
+	main._camera = Camera3D.new()
+	var monster := Node3D.new()
+	monster.position = Vector3(4.0, 0.0, 4.0)
+	main.entities_root.add_child(monster)
+	main.entities["2001"] = {"node": monster, "type": "monster", "hp": 5, "controller": null}
+	root.add_child(main.damage_numbers_layer)
+	root.add_child(main._camera)
+	main._camera.look_at_from_position(Vector3(4.0, 12.0, 14.0), monster.position, Vector3.UP)
+	return main
+
+
+func _free_combat_text_main(main) -> void:
+	main.damage_numbers_layer.queue_free()
+	main._camera.queue_free()
+	if main.player_anchor != null:
+		main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()

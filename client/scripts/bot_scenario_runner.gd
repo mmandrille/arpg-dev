@@ -453,6 +453,8 @@ func _damage_number_matches(step: Dictionary, state: Dictionary) -> bool:
 			continue
 		if step.has("variant") and str(rec.get("variant", "")) != str(step.get("variant", "")):
 			continue
+		if step.has("damage_type") and str(rec.get("damage_type", "")) != str(step.get("damage_type", "")):
+			continue
 		return true
 	return false
 

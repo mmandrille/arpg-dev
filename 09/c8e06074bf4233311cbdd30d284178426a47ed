@@ -1,0 +1,71 @@
+shared/protocol/state_delta.v8.schema.json
+  s_8ac650870d633e::t_e368f84e99ac10 13-14,31-103
+shared/protocol/examples/state_delta.json
+  s_8ac650870d633e::t_e368f84e99ac10 4-38
+client/scripts/main.gd
+  s_8ac650870d633e::t_d9c96f2dbf7bab 51,235-236,804-806,808,867-873,937-939,3407-3412,5782
+  s_8ac650870d633e::t_2271c72cfb5afb 874,935
+server/internal/realtime/perf_debug_test.go
+  s_8ac650870d633e::t_e6fc69377d9a1e 66-112
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_183979b8f944c4 224
+client/scripts/performance_status_formatter.gd
+  s_8ac650870d633e::t_d9c96f2dbf7bab 1-49
+client/scripts/performance_status_formatter.gd.uid
+  s_8ac650870d633e::t_221bae8d277d6b 1
+server/internal/realtime/protocol.go
+  s_8ac650870d633e::t_e9de4902e8b582 78-110
+  s_8ac650870d633e::t_482d779e8eb005 71-77
+server/internal/realtime/session_loop.go
+  s_8ac650870d633e::t_572727be7aa4be 39,559-576
+  s_8ac650870d633e::t_e9de4902e8b582 35-38
+client/tests/test_coop_client.gd
+  s_8ac650870d633e::t_f288bb1cab7aba 70
+  s_8ac650870d633e::t_72169ddd2ede4e 465,474
+client/tests/test_net_client.gd
+  s_8ac650870d633e::t_f82752ba3125b5 16,62-68,105-112
+  s_8ac650870d633e::t_91fed95e12ea5b 7,17,69-104
+docs/plans/v272_2026-06-18-performance-status-overlay.md
+  s_8ac650870d633e::t_b34f787cdcc5b7 1-10,13,15,17,19,21-30
+  s_8ac650870d633e::t_183979b8f944c4 11-12,14,16,18,20
+client/scripts/net_client.gd
+  s_8ac650870d633e::t_d9c96f2dbf7bab 29,469,481-486
+server/internal/realtime/session_tick.go
+  s_8ac650870d633e::t_572727be7aa4be 21,63,76-79
+shared/i18n/es.json
+  s_8ac650870d633e::t_071262c93b175c 62
+PROGRESS.md
+  s_8ac650870d633e::t_592c5307ef6911 28,31
+  s_8ac650870d633e::t_183979b8f944c4 26,29
+docs/specs/v272_spec-performance-status-overlay.md
+  s_8ac650870d633e::t_b34f787cdcc5b7 1-68
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_592c5307ef6911 287
+server/internal/realtime/perf_debug.go
+  s_8ac650870d633e::t_482d779e8eb005 18-24,55-56,58-61,63-102,104-108,110-141
+docs/as-built/v272_performance-status-overlay.md
+  s_8ac650870d633e::t_183979b8f944c4 1-24,26-32
+  s_8ac650870d633e::t_592c5307ef6911 25
+shared/i18n/en.json
+  s_8ac650870d633e::t_071262c93b175c 25
+server/internal/realtime/session_loop_test.go
+  s_8ac650870d633e::t_9559ef146048ed 311-347
+client/scripts/settings_panel.gd
+  s_8ac650870d633e::t_071262c93b175c 332
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "09c8e06074bf4233311cbdd30d284178426a47ed",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

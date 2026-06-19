@@ -411,9 +411,16 @@ def cross_checks(report: Report) -> None:
         if attack_mode not in ("melee", "ranged"):
             report.fail("monster attack_mode", f"{mid}: invalid attack_mode {attack_mode}")
             continue
+        attack_style = str(mdef.get("attack_style", "melee"))
         if attack_mode == "melee":
-            if any(mdef.get(key) is not None for key in ("attack_range", "projectile_speed", "projectile_def_id")):
+            if any(mdef.get(key) is not None for key in ("projectile_speed", "projectile_def_id")):
                 report.fail("monster attack fields", f"{mid}: projectile fields only valid for ranged attacks")
+                continue
+            if mdef.get("attack_range") is not None and attack_style != "pounce":
+                report.fail("monster attack fields", f"{mid}: attack_range only valid for ranged or pounce attacks")
+                continue
+            if attack_style == "pounce" and float(mdef.get("attack_range", 0)) <= float(combat["unarmed_reach"]):
+                report.fail("monster pounce attack", f"{mid}: attack_range must exceed unarmed reach")
                 continue
         else:
             attack_damage = mdef.get("attack_damage")

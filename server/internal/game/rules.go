@@ -1586,10 +1586,12 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_cooldown_ticks: requires attack_damage", id)
 		}
 		attackMode := def.effectiveAttackMode()
+		behavior := def.effectiveBehavior()
+		attackStyle := def.effectiveAttackStyle()
 		switch attackMode {
 		case attackModeMelee:
-			if def.AttackRange > 0 {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_range: only valid for ranged attacks", id)
+			if def.AttackRange > 0 && attackStyle != monsterAttackStylePounce {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_range: only valid for ranged or pounce attacks", id)
 			}
 			if def.ProjectileSpeed > 0 {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s.projectile_speed: only valid for ranged attacks", id)
@@ -1613,8 +1615,6 @@ func LoadRules(dir string) (*Rules, error) {
 		default:
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_mode: %s", id, def.AttackMode)
 		}
-		behavior := def.effectiveBehavior()
-		attackStyle := def.effectiveAttackStyle()
 		switch attackStyle {
 		case monsterAttackStyleMelee:
 		case monsterAttackStyleDive:
@@ -1626,6 +1626,19 @@ func LoadRules(dir string) (*Rules, error) {
 			}
 			if def.AttackDamage == nil || def.AttackCooldown <= 0 {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: dive requires attack_damage and attack_cooldown_ticks", id)
+			}
+		case monsterAttackStylePounce:
+			if attackMode != attackModeMelee {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: pounce requires melee attack_mode", id)
+			}
+			if behavior != monsterBehaviorChase {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: pounce requires chase behavior", id)
+			}
+			if def.AttackDamage == nil || def.AttackCooldown <= 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: pounce requires attack_damage and attack_cooldown_ticks", id)
+			}
+			if def.AttackRange <= r.Combat.UnarmedReach {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_range: pounce reach must exceed melee reach", id)
 			}
 		default:
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: %s", id, def.AttackStyle)

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/model_preview_catalog.v0.schema.json",
+  "title": "Model preview catalog (v0)",
+  "description": "Generated preview catalog consumed by Python tooling and the Godot model viewer.",
+  "type": "object",
+  "required": ["version", "sources", "models"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "models": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "type", "runtime_path", "used_by", "scene", "scale", "height_offset"],
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": { "type": "string", "minLength": 1 },
+          "type": { "type": "string", "enum": ["character", "monster"] },
+          "runtime_path": { "type": "string", "minLength": 1 },
+          "used_by": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "scene": { "type": "string" },
+          "scale": { "type": "number", "exclusiveMinimum": 0 },
+          "height_offset": { "type": "number" }
+        }
+      }
+    }
+  }
+}

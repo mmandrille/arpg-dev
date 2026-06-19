@@ -1,0 +1,66 @@
+docs/progress/slice-lifecycle.md
+  s_58dbc51a4db222::t_a9ea6b93f4c180 306
+shared/rules/main_config.v0.json
+  s_58dbc51a4db222::t_968ce699c465f2 16-17
+PROGRESS.md
+  s_58dbc51a4db222::t_707144152b9097 26,28-29,102,106
+server/internal/game/main_config_validation.go
+  s_58dbc51a4db222::t_3fe6976f6d0640 12-17
+shared/rules/interactables.v0.json
+  s_58dbc51a4db222::t_968ce699c465f2 60-64
+shared/rules/main_config.v0.schema.json
+  s_58dbc51a4db222::t_968ce699c465f2 13,28-29
+docs/progress/slice-codename-index.md
+  s_58dbc51a4db222::t_a9ea6b93f4c180 237
+server/internal/game/quest_turn_in.go
+  s_58dbc51a4db222::t_422bb02afaba36 1-61
+tools/bot/scenarios/97_quest_town_turn_in.json
+  s_58dbc51a4db222::t_381d65a2da279a 1-19
+tools/validate_main_config.py
+  s_58dbc51a4db222::t_3fe6976f6d0640 53-59
+client/tests/test_quest_giver_visual.gd
+  s_58dbc51a4db222::t_c639928bdbc27f 1-29
+server/internal/game/rules.go
+  s_58dbc51a4db222::t_a8ca6bacb093d3 62-63,1760
+  s_58dbc51a4db222::t_d736811fb75d23 1280-1286
+shared/rules/worlds.v0.json
+  s_58dbc51a4db222::t_7d38e62d6df62e 632-636,754-759
+  s_58dbc51a4db222::t_1f6b62b2ade2f2 762-770
+docs/plans/v291_2026-06-19-quest-town-turn-in.md
+  s_58dbc51a4db222::t_291aee046742b5 3,39,52,54-56,75,77-78,94-95,97,99,112,114-116,122,132-134,136,161,163,167-177
+  s_58dbc51a4db222::t_394fafeead4ee8 41,130,142,148
+  s_58dbc51a4db222::t_88a478863c308e 1-2,4-38,40,42-51,53,57-74,76,79-93,96,98,100-111,113,117-121,123-129,131,135,137-141,143-147,149-160,162,164-166
+shared/rules/interactables.v0.schema.json
+  s_58dbc51a4db222::t_968ce699c465f2 23
+server/internal/game/interactables.go
+  s_58dbc51a4db222::t_422bb02afaba36 34-37
+client/scripts/town_node_factory.gd
+  s_58dbc51a4db222::t_0f60a5ccb53fe7 156-171,207,245-246
+tools/validate_shared.py
+  s_58dbc51a4db222::t_74375172ae2ab0 2599
+docs/as-built/v291_quest-town-turn-in.md
+  s_58dbc51a4db222::t_a9ea6b93f4c180 1-73
+docs/specs/v291_spec-quest-town-turn-in.md
+  s_58dbc51a4db222::t_394fafeead4ee8 47,60,67
+  s_58dbc51a4db222::t_88a478863c308e 1-2,4-44,48-57,59,61-66,68-81
+  s_58dbc51a4db222::t_dc3f6b04d09f49 3,45-46,58,82-86
+server/internal/game/quest_turn_in_test.go
+  s_58dbc51a4db222::t_1fbfe1da192c6c 47
+  s_58dbc51a4db222::t_faa1312a2296d3 1-46,48-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ddd8de3ef6294235c3674d30aa2aa832374fef9d",
+  "prompts": {},
+  "sessions": {
+    "s_58dbc51a4db222": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee093-c0ba-7701-a296-d74410bf5405",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

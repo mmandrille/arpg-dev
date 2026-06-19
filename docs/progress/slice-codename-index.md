@@ -226,6 +226,7 @@ v273_* = crocodile-archer-model
 v274_* = class-hero-models
 v275_* = rigged-hero-models
 v276_* = ranger-green-hood-model
+v277_* = tiny-flyer-bat-model
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

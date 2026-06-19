@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v276 — ranger green hood model |
+| **Latest completed slice** | v277 — tiny flyer bat model |
 | **Active branch** | `main` |
-| **CI gate** | v276 focused checks green on 2026-06-19; last full `make ci` green at v275 |
+| **CI gate** | v277 focused checks green on 2026-06-19; last full `make ci` green at v275 |
 | **Next slice** | engineering review for the latest green baseline, then `$refactor` for minor paydown |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v275 full `make ci`; v276 has focused asset/client proof |
+| **Next engineering review** | Due now after v275 full `make ci`; v276-v277 have focused asset/client proof |
 
 
 ### Periodic engineering reviews

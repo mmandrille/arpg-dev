@@ -272,6 +272,7 @@ static func make_market_badge(badge_name: String, count_name: String, position: 
 	var badge := Node3D.new()
 	badge.name = badge_name
 	badge.position = position
+	badge.visible = false
 	add_merchant_box(badge, "BadgeBack", Vector3(0.34, 0.24, 0.055), Vector3.ZERO, bg_color)
 	var label := Label3D.new()
 	label.name = count_name

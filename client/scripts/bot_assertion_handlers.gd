@@ -6,6 +6,7 @@ const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journa
 const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_objective_assertions.gd")
 const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
+const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -99,6 +100,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return runner._assert_stash_filter(step, state)
 		"assert_market_panel_visible":
 			return runner._assert_bool_state("assert_market_panel_visible", "market_panel_visible", step, state)
+		"assert_market_board_badges":
+			if not BotMarketBadgeAssertionsScript.matches(step, state):
+				runner._fail("assert_market_board_badges failed: want=%s badges=%s step=%d scenario=%s" % [
+					str(step), str(state.get("market_board_badges", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_market_listing_rows":
 			return runner._assert_market_listing_rows(step, state)
 		"assert_market_offer_rows":

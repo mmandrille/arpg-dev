@@ -30,6 +30,7 @@ const MercenaryPanelScript := preload("res://scripts/mercenary_panel.gd")
 const MercenaryPanelBridgeScript := preload("res://scripts/mercenary_panel_bridge.gd")
 const BotDebugProgressionSetupScript := preload("res://scripts/bot_debug_progression_setup.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
+const MarketBoardBadgesScript := preload("res://scripts/market_board_badges.gd")
 const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
 const TownServiceBridgeScript := preload("res://scripts/town_service_bridge.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
@@ -4524,14 +4525,18 @@ func _update_market_board_badges(incoming_bids: int, published_listings: int) ->
 		var node := rec.get("node", null) as Node3D
 		if node == null:
 			continue
-		var left := node.find_child("IncomingBidCount", true, false) as Label3D
-		var right := node.find_child("PublishedListingCount", true, false) as Label3D
-		if left != null:
-			left.text = str(incoming_bids)
-			left.modulate = Color("#ffcf5a") if incoming_bids > 0 else Color("#776d5e")
-		if right != null:
-			right.text = str(published_listings)
-			right.modulate = Color("#9fd7ff") if published_listings > 0 else Color("#776d5e")
+		MarketBoardBadgesScript.apply_to_board(node, incoming_bids, published_listings)
+
+func _market_board_badge_debug_state() -> Dictionary:
+	for id in interactable_ids:
+		var key := str(id)
+		if not entities.has(key): continue
+		var rec: Dictionary = entities[key]
+		if str(rec.get("interactable_def_id", "")) != "town_market_board": continue
+		var node := rec.get("node", null) as Node3D
+		if node != null:
+			return MarketBoardBadgesScript.debug_state(node)
+	return MarketBoardBadgesScript.empty_state()
 
 func _hide_market_panel() -> void:
 	if market_panel != null:
@@ -5319,6 +5324,7 @@ func get_bot_state() -> Dictionary:
 		"bishop_panel_visible": bishop_panel != null and bishop_panel.visible,
 		"mercenary_panel_visible": mercenary_panel != null and mercenary_panel.visible,
 		"market_panel_visible": market_panel != null and market_panel.visible,
+		"market_board_badges": _market_board_badge_debug_state(),
 		"blacksmith_panel_visible": blacksmith_panel != null and blacksmith_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,

@@ -13,6 +13,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await _test_progression_sets_light_and_gloom_radius()
 	await _test_organic_edge_debug_state()
+	await _test_organic_edge_rotates_only_while_target_moves()
 	await _test_wall_layout_generates_shadow()
 	await _test_supplied_door_occluder_generates_shadow()
 	await _test_diagonal_wall_shadow_starts_near_visible_edge()
@@ -53,6 +54,32 @@ func _test_organic_edge_debug_state() -> void:
 	_assert_true("darkness feather stays modest", float(state.get("darkness_feather_px", 9999.0)) <= float(state.get("gloom_radius_px", 1.0)) * 0.18)
 	_assert_eq("organic edge segments", int(state.get("organic_edge_segments", 0)), 18)
 	overlay.free()
+
+
+func _test_organic_edge_rotates_only_while_target_moves() -> void:
+	var target := Node3D.new()
+	get_root().add_child(target)
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.bind(null, target)
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	await process_frame
+	var initial_state := overlay.get_debug_state()
+	var initial_rotation := float(initial_state.get("organic_edge_rotation", -1.0))
+	_assert_false("edge rotation initially idle", bool(initial_state.get("organic_edge_rotation_active", true)))
+	target.position = Vector3(0.25, 0.0, 0.0)
+	await process_frame
+	var moving_state := overlay.get_debug_state()
+	var moving_rotation := float(moving_state.get("organic_edge_rotation", -1.0))
+	_assert_true("edge rotation active while target moves", bool(moving_state.get("organic_edge_rotation_active", false)))
+	_assert_true("edge rotation advances while target moves", moving_rotation > initial_rotation)
+	await process_frame
+	var idle_state := overlay.get_debug_state()
+	_assert_false("edge rotation idles after target stops", bool(idle_state.get("organic_edge_rotation_active", true)))
+	_assert_eq("edge rotation holds when target stops", float(idle_state.get("organic_edge_rotation", -1.0)), moving_rotation)
+	overlay.free()
+	target.free()
 
 
 func _test_wall_layout_generates_shadow() -> void:

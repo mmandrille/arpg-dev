@@ -3413,11 +3413,11 @@ func _build_scene() -> void:
 	add_child(ui)
 	gameplay_ui_layer = ui
 	_debug_label = Label.new()
-	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_debug_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_debug_label.offset_left = -560
-	_debug_label.offset_right = -12
-	_debug_label.offset_top = 72
+	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_debug_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_debug_label.offset_left = 12
+	_debug_label.offset_right = 560
+	_debug_label.offset_top = 12
 	_debug_label.offset_bottom = 260
 	ui.add_child(_debug_label)
 	_level_label = Label.new()

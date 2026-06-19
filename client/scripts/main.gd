@@ -5461,11 +5461,13 @@ func _bot_entities_presentation_debug() -> Array:
 	for id in entities.keys():
 		var rec: Dictionary = entities[id]
 		var node := rec.get("node", null) as Node3D
+		var node_pos := node.position if node != null else Vector3.ZERO
 		var reaction = rec.get("reaction", null)
 		var controller = rec.get("controller", null)
 		out.append({
 			"id": str(id), "type": str(rec.get("type", "")), "monster_def_id": str(rec.get("monster_def_id", "")),
 			"character_id": str(rec.get("character_id", "")), "visual_model": _visual_model_name(rec, node),
+			"position": {"x": node_pos.x, "z": node_pos.z},
 			"visual_scale": float(rec.get("visual_scale", 1.0)),
 			"is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
 			"boss_phase": rec.get("boss_phase", {}), "boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),

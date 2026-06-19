@@ -3,10 +3,19 @@
   "world_id": "ranged_monster_ai_lab",
   "seed": "v52_ranged_monster_ai_hit",
   "title": "Ranged monster AI",
-  "description": "Use the compact archer lab to prove dungeon_archer spawn and archer-sourced ranged combat. Generated dungeon archer placement remains covered by Go/client tests.",
+  "description": "Use the compact archer lab to prove dungeon_archer spawn, blocked-shot navigation, and archer-sourced ranged combat. Generated dungeon archer placement remains covered by Go/client tests.",
   "steps": [
     { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "at_least": 1 },
     { "action": "record_player_hp" },
+    {
+      "action": "wait_until_assertion",
+      "timeout_s": 10,
+      "assertion": {
+        "type": "monster_within_player_distance",
+        "monster_def_id": "dungeon_archer",
+        "max_distance": 3.75
+      }
+    },
     {
       "action": "wait_until_assertion",
       "timeout_s": 8,
@@ -23,6 +32,7 @@
     { "type": "current_level", "equals": 0 },
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "at_least": 1 },
+    { "type": "monster_within_player_distance", "monster_def_id": "dungeon_archer", "max_distance": 3.75 },
     {
       "type": "combat_event_seen",
       "event_type": "attack_missed",

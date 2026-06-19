@@ -1514,7 +1514,7 @@ func _log_step_begin(step: Dictionary, stype: String) -> void:
 
 func _step_detail(step: Dictionary, stype: String) -> String:
 	match stype:
-		"wait_entity", "click_entity", "click_entity_until_event", "assert_entity_removed":
+		"wait_entity", "wait_entity_near_player", "click_entity", "click_entity_until_event", "assert_entity_removed":
 			return "entity_type=%s" % str(step.get("entity_type", ""))
 		"wait_event", "click_entity_until_event":
 			return "event_type=%s entity_type=%s" % [

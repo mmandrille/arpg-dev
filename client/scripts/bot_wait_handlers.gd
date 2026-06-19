@@ -138,10 +138,31 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			var pz := float(pp.get("z", 0.0))
 			var dist := sqrt((px - tx) * (px - tx) + (pz - tz) * (pz - tz))
 			return dist <= max_dist
+		"wait_entity_near_player":
+			return _entity_near_player(runner, step, state)
 		"assert_entity_removed":
 			# Treated as a wait step: server entity_remove may arrive in a
 			# subsequent delta after the kill event. Times out via timeout_s.
 			var etype := str(step.get("entity_type", ""))
 			var eids: Array = state.get("%s_ids" % etype, [])
 			return eids.is_empty()
+	return false
+
+
+static func _entity_near_player(runner, step: Dictionary, state: Dictionary) -> bool:
+	var pp: Dictionary = state.get("player_pos", {})
+	var px := float(pp.get("x", 0.0))
+	var pz := float(pp.get("z", 0.0))
+	var max_dist := float(step.get("distance", 2.5))
+	for row in state.get("entities_presentation_debug", []):
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if not runner._presentation_row_matches(step, rec):
+			continue
+		var pos: Dictionary = rec.get("position", {})
+		var dx := float(pos.get("x", 0.0)) - px
+		var dz := float(pos.get("z", 0.0)) - pz
+		if sqrt(dx * dx + dz * dz) <= max_dist:
+			return true
 	return false

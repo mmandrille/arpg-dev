@@ -16,6 +16,7 @@ const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 const WallRendererScript := preload("res://scripts/wall_renderer.gd")
 const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
 const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
+const ScaleProbeScript := preload("res://tests/item_visual_scale_probe.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 
 func _initialize() -> void:
@@ -75,7 +76,7 @@ func _initialize() -> void:
 
 	if not _verify_equipped_fallback_resolver():
 		return
-	if not await _verify_scaled_class_model_keeps_equipment_scale():
+	if not await ScaleProbeScript.new().verify(self, MainScript, CharacterScene, ResolverScript, Callable(self, "_fail")):
 		return
 	if not _verify_off_hand_weapon_resolver():
 		return
@@ -257,50 +258,6 @@ func _verify_off_hand_weapon_resolver() -> bool:
 	mount.queue_free()
 	return true
 
-
-func _verify_scaled_class_model_keeps_equipment_scale() -> bool:
-	var main = MainScript.new()
-	var character = CharacterScene.instantiate() as Node3D
-	get_root().add_child(character)
-	await process_frame
-	main.character_visual = character
-	main.inventory = [
-		{"item_instance_id": "5001", "item_def_id": "starter_paladin_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
-		{"item_instance_id": "5002", "item_def_id": "starter_paladin_shield", "slot": "off_hand", "equipped": true, "rarity": "common"},
-	]
-	main.equipped = {"main_hand": "5001", "off_hand": "5002"}
-	main.resolver = ResolverScript.new(character)
-	main.resolver.apply_snapshot({"inventory": main.inventory, "equipped": main.equipped})
-	main.character_progression = {"character_class": "paladin"}
-	main.call("_apply_local_player_class_model")
-	var sword := character.find_child("weapon_rusty_sword_v0", true, false) as Node3D
-	var shield := character.find_child("fallback_equipment_off_hand_v0", true, false) as Node3D
-	if sword == null or shield == null:
-		_fail("paladin mounted equipment missing: sword=%s shield=%s" % [str(sword), str(shield)])
-		character.queue_free()
-		main.queue_free()
-		return false
-	await process_frame
-	var sword_scale := sword.global_transform.basis.get_scale()
-	var shield_scale := shield.global_transform.basis.get_scale()
-	if sword.global_position.y < 0.2:
-		_fail("paladin sword mounted below hand/floor after class scale compensation: %s local=%s" % [str(sword.global_position), str(sword.position)])
-		character.queue_free()
-		main.queue_free()
-		return false
-	if sword_scale.x > 1.2 or sword_scale.y > 1.2 or sword_scale.z > 1.2:
-		_fail("paladin sword inherited model scale: %s" % str(sword_scale))
-		character.queue_free()
-		main.queue_free()
-		return false
-	if shield_scale.x > 0.8 or shield_scale.y > 0.8 or shield_scale.z > 0.8:
-		_fail("paladin shield inherited model scale: %s" % str(shield_scale))
-		character.queue_free()
-		main.queue_free()
-		return false
-	character.queue_free()
-	main.queue_free()
-	return true
 
 func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dictionary, presentations: Dictionary) -> bool:
 	var main = MainScript.new()

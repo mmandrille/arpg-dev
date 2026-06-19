@@ -225,6 +225,7 @@ func _test_class_character_models() -> void:
 	for class_id in ["barbarian", "sorcerer", "paladin", "rogue"]:
 		var resolved := ClassPresentationsLoaderScript.resolve(class_id)
 		_assert(str(resolved.get("asset_id", "")) == "character_%s_v0" % class_id, "%s model asset mismatch: %s" % [class_id, resolved])
+		_assert(float(resolved.get("scale", 0.0)) > 0.0, "%s model scale should be positive" % class_id)
 		var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)
 		_assert(packed != null, "%s model packed scene missing" % class_id)
 		if packed == null:
@@ -233,14 +234,47 @@ func _test_class_character_models() -> void:
 		get_root().add_child(model)
 		await process_frame
 		var skel := model.find_child("Skeleton3D", true, false) as Skeleton3D
-		_assert(skel != null, "%s model missing Skeleton3D" % class_id)
 		if skel != null:
 			for bone in ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"]:
 				_assert(skel.find_bone(bone) >= 0, "%s model missing bone %s" % [class_id, bone])
+		else:
+			_assert(_has_mesh_instance(model), "%s static model missing MeshInstance3D" % class_id)
 		model.free()
+		await process_frame
+		var character = (load("res://scenes/character.tscn") as PackedScene).instantiate() as Node3D
+		get_root().add_child(character)
+		await process_frame
+		var old_model := character.find_child("ModelRoot", false, false) as Node
+		if old_model != null:
+			character.remove_child(old_model)
+			old_model.free()
+		var class_model := packed.instantiate() as Node3D
+		class_model.name = "ModelRoot"
+		class_model.scale = Vector3.ONE * float(resolved.get("scale", 1.0))
+		class_model.position.y = float(resolved.get("height_offset", 0.0))
+		character.add_child(class_model)
+		character.move_child(class_model, 0)
+		character.call("_ensure_weapon_socket")
+		character.call("_ensure_fallback_sockets")
+		var right_sock := character.find_child("right_hand_socket", true, false)
+		var off_sock := character.find_child("off_hand_socket", true, false)
+		_assert(right_sock is Node3D, "%s replacement missing right_hand_socket" % class_id)
+		_assert(off_sock is Node3D, "%s replacement missing off_hand_socket" % class_id)
+		if class_id == "paladin":
+			_assert(is_equal_approx(class_model.scale.x, 10.0), "paladin class scale not applied")
+		character.free()
 		await process_frame
 	var fallback := ClassPresentationsLoaderScript.resolve("necromancer")
 	_assert(str(fallback.get("asset_id", "")) == "character_base_humanoid_v0", "unknown class should use base humanoid fallback: %s" % fallback)
+
+
+func _has_mesh_instance(node: Node) -> bool:
+	if node is MeshInstance3D:
+		return true
+	for child in node.get_children():
+		if _has_mesh_instance(child):
+			return true
+	return false
 
 
 func _test_player_snapshot_death_pose() -> void:

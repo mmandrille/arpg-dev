@@ -7,6 +7,10 @@ const HAND_SOCKETS := {
 	"right_hand_socket": "hand_r",
 	"off_hand_socket": "hand_l",
 }
+const STATIC_HAND_SOCKET_POSITIONS := {
+	"right_hand_socket": Vector3(0.36, 0.92, 0.0),
+	"off_hand_socket": Vector3(-0.36, 0.92, 0.0),
+}
 const FALLBACK_SOCKETS := {
 	"head_socket": Vector3(0.0, 1.55, 0.0),
 	"chest_socket": Vector3(0.0, 1.08, 0.0),
@@ -27,7 +31,7 @@ func _ready() -> void:
 func _ensure_weapon_socket() -> void:
 	var skel := find_child("Skeleton3D", true, false) as Skeleton3D
 	if skel == null:
-		push_warning("[character] no Skeleton3D; cannot attach hand sockets")
+		_ensure_static_hand_sockets()
 		return
 	for socket_name in HAND_SOCKETS.keys():
 		if skel.find_child(str(socket_name), false, false) != null:
@@ -38,6 +42,16 @@ func _ensure_weapon_socket() -> void:
 		att.bone_name = str(HAND_SOCKETS[socket_name])
 		if att.bone_idx < 0:
 			push_warning("[character] bone %s not found on skeleton" % str(HAND_SOCKETS[socket_name]))
+
+
+func _ensure_static_hand_sockets() -> void:
+	for socket_name in STATIC_HAND_SOCKET_POSITIONS.keys():
+		if find_child(str(socket_name), true, false) != null:
+			continue
+		var socket := Node3D.new()
+		socket.name = str(socket_name)
+		socket.position = STATIC_HAND_SOCKET_POSITIONS[socket_name]
+		add_child(socket)
 
 
 func _ensure_fallback_sockets() -> void:

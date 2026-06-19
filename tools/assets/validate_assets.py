@@ -8,10 +8,12 @@ Engine-free checks over the asset manifest and the shared visual metadata:
   3. Every ``asset_id`` referenced by ``item_visuals`` resolves in the manifest.
   4. Equipment entries declare a ``slot`` matching the visuals that point at
      them, and each visual's ``asset_id`` resolves to an equipment entry.
-  5. Every character entry's ``required_nodes`` declares the hand mount bones
-     (``hand_r`` and ``hand_l``); runtime ``BoneAttachment3D`` sockets ride them.
-  6. Parse the GLB skin and hard-fail unless every declared ``required_nodes``
-     name is an actual skin joint (proves the GLB is rigged, not a stub).
+  5. Rigged character entries declare hand mount bones (``hand_r`` and
+     ``hand_l``). Static character entries may declare no required nodes and
+     rely on runtime fallback sockets.
+  6. Parse GLB skins and hard-fail unless every declared ``required_nodes``
+     name is an actual skin joint. Static entries with no required nodes skip
+     this rigged-skin check.
 
 Authoritative runtime socket/visibility truth lives in the Godot headless smoke,
 not here. Exit code is non-zero if anything fails. Run via ``make validate-assets``.
@@ -162,8 +164,9 @@ def validate(root: Path, report: Report) -> None:
             report.ok(f"{def_id} -> {vis['asset_id']} resolves to monster asset")
 
     # [5] character mount-bone coverage (spec §4.3): item_visuals names runtime
-    #     hand sockets, but the manifest required_nodes list rig joints. The hand
-    #     mount contract is satisfied when both hand bones are declared.
+    #     hand sockets. Rigged character assets satisfy that with hand bones;
+    #     explicitly static character assets rely on root-relative fallback
+    #     sockets created by the Godot character visual.
     print("[5] character mount-bone coverage")
     characters = {aid: e for aid, e in assets.items() if e["type"] == "character"}
     if not characters:
@@ -171,6 +174,9 @@ def validate(root: Path, report: Report) -> None:
     HAND_MOUNT_BONES = {"hand_r", "hand_l"}
     for asset_id, entry in sorted(characters.items()):
         declared = set(entry.get("required_nodes", []))
+        if not declared:
+            report.ok(f"{asset_id} declares static character fallback sockets")
+            continue
         missing = sorted(HAND_MOUNT_BONES - declared)
         if missing:
             report.fail(

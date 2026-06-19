@@ -42,6 +42,8 @@ static func resolve(class_id: String) -> Dictionary:
 		"asset_id": asset_id,
 		"runtime_path": runtime_path,
 		"scene_path": _res_path(runtime_path),
+		"scale": _positive_float(model.get("scale", 1.0), 1.0),
+		"height_offset": float(model.get("height_offset", 0.0)),
 	}
 
 
@@ -73,3 +75,10 @@ static func _res_path(runtime_path: String) -> String:
 	if p.begins_with("client/"):
 		p = p.substr("client/".length())
 	return "res://" + p
+
+
+static func _positive_float(value, fallback: float) -> float:
+	var parsed := float(value)
+	if parsed <= 0.0:
+		return fallback
+	return parsed

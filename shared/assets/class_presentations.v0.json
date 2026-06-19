@@ -3,19 +3,19 @@
   "classes": {
     "barbarian": {
       "icon": { "label": "B", "shape": "axe", "color": "#c85f3d", "accent": "#ffd9a8" },
-      "model": { "asset_id": "character_barbarian_v0" }
+      "model": { "asset_id": "character_barbarian_v0", "scale": 1.0 }
     },
     "sorcerer": {
       "icon": { "label": "S", "shape": "spark", "color": "#5e8cff", "accent": "#dce7ff" },
-      "model": { "asset_id": "character_sorcerer_v0" }
+      "model": { "asset_id": "character_sorcerer_v0", "scale": 1.0 }
     },
     "paladin": {
       "icon": { "label": "P", "shape": "shield", "color": "#d9b44a", "accent": "#fff3ba" },
-      "model": { "asset_id": "character_paladin_v0" }
+      "model": { "asset_id": "character_paladin_v0", "scale": 10.0 }
     },
     "rogue": {
       "icon": { "label": "R", "shape": "dagger", "color": "#3f8f6d", "accent": "#d7f2df" },
-      "model": { "asset_id": "character_rogue_v0" }
+      "model": { "asset_id": "character_rogue_v0", "scale": 1.0 }
     },
     "ranger": {
       "icon": { "label": "Ra", "shape": "bow", "color": "#2f8f4e", "accent": "#d6f2a8" },

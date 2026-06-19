@@ -1,0 +1,51 @@
+client/scripts/main.gd
+  s_44b7ee0e62767d::t_1b616e2dde95fa 4944-4945
+  s_44b7ee0e62767d::t_c9bb19594ca8ee 4949,4980-4983
+client/scripts/charge_channel_visual.gd
+  s_44b7ee0e62767d::t_15129062ea3744 109
+skills/showme/scripts/render_focus.py
+  s_44b7ee0e62767d::t_a3947f0f3e34a9 27,112-113
+skills/showme/scripts/visual_capture.gd
+  s_44b7ee0e62767d::t_664fc3852900ec 48,160-162,203-204,209-230
+  s_44b7ee0e62767d::t_c93adbcd21ce28 24-25
+  s_44b7ee0e62767d::t_ca7767cdf43af0 756
+client/scripts/equipment_visuals.gd
+  s_44b7ee0e62767d::t_8f0ba52be9b996 256-260
+  s_44b7ee0e62767d::t_59d4da41cc14d2 177,254-255,261-280
+client/tests/test_item_visuals.gd
+  s_44b7ee0e62767d::t_d8764fd867fc0f 79,260-261,264-265,276-280,282-285,291-293,295-298,300-301
+  s_44b7ee0e62767d::t_235dc82f987326 19,262-263,266-275,281,294,299,302
+  s_44b7ee0e62767d::t_c2604b3190314d 78
+  s_44b7ee0e62767d::t_d305b4a4c15465 286-290
+client/tests/test_animation.gd
+  s_44b7ee0e62767d::t_10b6f49483114d 270
+  s_8ac650870d633e::t_59e8bc1ca5bebf 225
+  s_8ac650870d633e::t_a7b2b499c32db9 269
+client/scripts/model_reaction_controller.gd
+  s_44b7ee0e62767d::t_b19e1e650cb3d6 150-154
+  s_44b7ee0e62767d::t_281ddeefac6c23 87-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "124f45e561f1243a95addfeac4224b7502999124",
+  "prompts": {},
+  "sessions": {
+    "s_44b7ee0e62767d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce5-2124-71f3-8fb7-d27b851dde01",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

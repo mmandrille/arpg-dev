@@ -1,0 +1,76 @@
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_6c77f50c3f2506 223
+server/internal/realtime/tick_guardrails_test.go
+  s_8ac650870d633e::t_6e6470a306f3df 24-43
+  s_8ac650870d633e::t_fd3d2af9b53b5c 1-23,44-82
+server/internal/realtime/tick_guardrails.go
+  s_8ac650870d633e::t_6e6470a306f3df 27-33
+  s_8ac650870d633e::t_fd3d2af9b53b5c 1-26,34-65
+shared/golden/auto_path.v0.schema.json
+  s_8ac650870d633e::t_03d2a81d20e169 25-26,52-53
+tools/bot/scenarios/client/11_combat_feedback.json
+  s_8ac650870d633e::t_b9f17ddcb7ff3d 46
+  s_8ac650870d633e::t_cd5d2d9eba06d4 41
+server/internal/game/sim.go
+  s_8ac650870d633e::t_c887bb7d522c89 368
+  s_8ac650870d633e::t_97ec4c7e708cf1 369-374
+server/internal/realtime/session_tick.go
+  s_8ac650870d633e::t_fd3d2af9b53b5c 64-68,70-74
+  s_8ac650870d633e::t_6e6470a306f3df 69
+shared/golden/monster_chase.json
+  s_8ac650870d633e::t_03d2a81d20e169 23-24
+tools/bot/scenarios/client/69_discovery_minimap_toggle.json
+  s_8ac650870d633e::t_832e7f7126adc9 10
+server/internal/game/monster_movement_lod.go
+  s_8ac650870d633e::t_96b37f04601f8b 8-10,36-37
+server/internal/game/navigation_rules.go
+  s_8ac650870d633e::t_03d2a81d20e169 23,64-66,80
+PROGRESS.md
+  s_8ac650870d633e::t_572d500384efd6 28-29,31
+  s_8ac650870d633e::t_6c77f50c3f2506 26
+docs/as-built/v271_multiplayer-room-guardrails.md
+  s_8ac650870d633e::t_0375d195cb1239 14-15,41-42,48-49,60-61
+  s_8ac650870d633e::t_572d500384efd6 62,65-67
+  s_8ac650870d633e::t_6c77f50c3f2506 1-13,16-40,43-47,50-59,63-64
+server/internal/game/monster_overload_guardrails_test.go
+  s_8ac650870d633e::t_1391096c9b86b2 1-44
+shared/golden/monster_chase.v0.schema.json
+  s_8ac650870d633e::t_03d2a81d20e169 27-28,54-55
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_572d500384efd6 283-286
+shared/golden/auto_path.json
+  s_8ac650870d633e::t_03d2a81d20e169 21-22
+shared/rules/navigation.v0.schema.json
+  s_8ac650870d633e::t_03d2a81d20e169 19-20,46-47
+docs/specs/v271_spec-multiplayer-room-guardrails.md
+  s_8ac650870d633e::t_ba6ec912b0a23b 1-2,4-28,31-62,66-71
+  s_8ac650870d633e::t_6c77f50c3f2506 3,63-65
+  s_8ac650870d633e::t_0375d195cb1239 29-30
+docs/plans/v271_2026-06-18-multiplayer-room-guardrails.md
+  s_8ac650870d633e::t_6c77f50c3f2506 3,34,36-37,56-58,71-73,75,89-90,104-106,115-119
+  s_8ac650870d633e::t_572d500384efd6 122-124
+  s_8ac650870d633e::t_ba6ec912b0a23b 1-2,4-33,35,38-55,59-70,74,76-88,93-103,107-114
+  s_8ac650870d633e::t_0375d195cb1239 91-92,120-121
+server/internal/game/rules.go
+  s_8ac650870d633e::t_03d2a81d20e169 136
+server/internal/game/monster_overload_guardrails.go
+  s_8ac650870d633e::t_c887bb7d522c89 1-19
+shared/rules/navigation.v0.json
+  s_8ac650870d633e::t_03d2a81d20e169 19-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bab6f492b2fbf7ea676912fd1816f7873c26b7c6",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

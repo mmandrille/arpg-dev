@@ -1,0 +1,46 @@
+server/internal/game/boss_rectangle_pattern_test.go
+  s_b9bc0033a850dd::t_b81e0a85c3daf8 1-31,33-68
+  s_b9bc0033a850dd::t_8e1a91fae4b530 32
+shared/rules/boss_templates.v0.json
+  s_b9bc0033a850dd::t_b81e0a85c3daf8 7
+shared/rules/boss_patterns.v0.json
+  s_b9bc0033a850dd::t_b81e0a85c3daf8 133-159
+docs/progress/slice-lifecycle.md
+  s_b9bc0033a850dd::t_9833e77fb6a4fa 297
+server/internal/game/boss_patterns.go
+  s_b9bc0033a850dd::t_b81e0a85c3daf8 330,370
+PROGRESS.md
+  s_b9bc0033a850dd::t_9833e77fb6a4fa 26,28-29,31
+docs/as-built/v282_rectangular-boss-pattern.md
+  s_b9bc0033a850dd::t_9833e77fb6a4fa 1-44
+server/internal/game/game_test.go
+  s_b9bc0033a850dd::t_9c3856bf6caef3 5346-5348,5350-5351,5354-5359,5362-5363
+docs/specs/v282_spec-rectangular-boss-pattern.md
+  s_b9bc0033a850dd::t_b5b3e32d2fed67 1-2,4-62
+  s_b9bc0033a850dd::t_9833e77fb6a4fa 3
+server/internal/game/boss_pattern_rules.go
+  s_b9bc0033a850dd::t_b81e0a85c3daf8 32
+client/scripts/boss_visuals_controller.gd
+  s_b9bc0033a850dd::t_b81e0a85c3daf8 227,238-241
+client/tests/test_factories.gd
+  s_b9bc0033a850dd::t_b81e0a85c3daf8 109-113
+docs/plans/v282_2026-06-19-rectangular-boss-pattern.md
+  s_b9bc0033a850dd::t_9833e77fb6a4fa 3,34,52-54,68-71,87-89,93-96
+  s_b9bc0033a850dd::t_b5b3e32d2fed67 1-2,4-33,35-51,55-67,72-86,90-92,97-104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9ae602f87fe33b37e0380c519d700423020d481b",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+client/tests/test_animation.gd
+  s_8ac650870d633e::t_d6265bb6689909 315-317,322
+server/internal/game/ranged_monster_positioning_test.go
+  s_8ac650870d633e::t_be132336dda212 1-51
+client/scripts/main.gd
+  s_8ac650870d633e::t_d6265bb6689909 5464,5470
+client/tests/test_bot_entity_distance.gd
+  s_8ac650870d633e::t_d6265bb6689909 1-55
+client/scripts/bot_step_catalog.gd
+  s_8ac650870d633e::t_d6265bb6689909 11,105,117-118
+client/scripts/bot_wait_handlers.gd
+  s_8ac650870d633e::t_d6265bb6689909 141-142,150-167
+client/scripts/bot_scenario_runner.gd
+  s_8ac650870d633e::t_d6265bb6689909 1517
+shared/rules/worlds.v0.json
+  s_8ac650870d633e::t_d6265bb6689909 672
+scripts/client_smoke.sh
+  s_8ac650870d633e::t_d6265bb6689909 107
+client/tests/test_bot_entity_distance.gd.uid
+  s_8ac650870d633e::t_c13c5f06a73d45 1
+tools/bot/scenarios/client/25_ranged_monster_ai.json
+  s_8ac650870d633e::t_d6265bb6689909 7,18-25
+client/scenes/monster_crocodile_archer.tscn
+  s_8ac650870d633e::t_d6265bb6689909 9
+docs/as-built/v273_crocodile-archer-model.md
+  s_8ac650870d633e::t_b78aa93944a342 21-22,31,42
+  s_8ac650870d633e::t_d6265bb6689909 18-20
+server/internal/game/sim.go
+  s_8ac650870d633e::t_0f51616b4ba03e 3356
+tools/bot/scenarios/38_ranged_monster_ai.json
+  s_8ac650870d633e::t_d6265bb6689909 6
+  s_8ac650870d633e::t_72fe306e30309a 12-18,35
+server/internal/game/monster_ranged_positioning.go
+  s_8ac650870d633e::t_1a640d7801c81e 3-15
+  s_8ac650870d633e::t_8e99caae05cf38 1-2,16-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cf74f06e8fcd038749173cf105f3e816ddca418c",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

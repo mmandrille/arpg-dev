@@ -233,6 +233,19 @@
         "sha256": "2228957b8422ff1f23a8f2786a1e9cf7b3cace0ee41789cabbb26c0c7d9b6ae8"
       }
     },
+    "monster_crocodile_archer_v0": {
+      "type": "monster",
+      "source_path": "assets/monsters/archer/crocodile_archer.glb",
+      "runtime_path": "client/assets/monsters/archer/crocodile_archer.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "user-provided local GLB",
+        "license": "unconfirmed-user-provided",
+        "sha256": "805043e8cb0d45269648d1b90a453231ebc13afe243d96f10cbd3337743d60df"
+      }
+    },
     "monster_quadruped_predator_v0": {
       "type": "monster",
       "source_path": "assets/monsters/purple_fantasy/evil_fox_monster.glb",

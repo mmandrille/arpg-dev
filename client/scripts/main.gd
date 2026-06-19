@@ -62,12 +62,15 @@ const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loade
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
-const MonsterDummyScene := preload("res://scenes/monster_dummy.tscn")
-const MonsterDarkPurpleScene := preload("res://scenes/monster_dark_purple.tscn")
-const MonsterQuadrupedScene := preload("res://scenes/monster_quadruped.tscn")
-const MonsterWolfScene := preload("res://scenes/monster_wolf.tscn")
-const MonsterTinyFlyerScene := preload("res://scenes/monster_tiny_flyer.tscn")
-const MonsterSkeletonScene := preload("res://scenes/monster_skeleton.tscn")
+const MonsterScenesByVisual := {
+	"monster_dummy": preload("res://scenes/monster_dummy.tscn"),
+	"monster_dark_purple": preload("res://scenes/monster_dark_purple.tscn"),
+	"monster_crocodile_archer": preload("res://scenes/monster_crocodile_archer.tscn"),
+	"monster_quadruped": preload("res://scenes/monster_quadruped.tscn"),
+	"monster_wolf": preload("res://scenes/monster_wolf.tscn"),
+	"monster_tiny_flyer": preload("res://scenes/monster_tiny_flyer.tscn"),
+	"monster_skeleton": preload("res://scenes/monster_skeleton.tscn"),
+}
 var client: NetClient
 var resolver: EquipmentVisualResolver
 var player_anim: AnimationController
@@ -4895,19 +4898,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	return _loot_factory.make_loot_node(e)
 
 func _monster_scene_for_visual(scene_key: String) -> PackedScene:
-	match scene_key:
-		"monster_dark_purple":
-			return MonsterDarkPurpleScene
-		"monster_quadruped":
-			return MonsterQuadrupedScene
-		"monster_wolf":
-			return MonsterWolfScene
-		"monster_tiny_flyer":
-			return MonsterTinyFlyerScene
-		"monster_skeleton":
-			return MonsterSkeletonScene
-		_:
-			return MonsterDummyScene
+	return MonsterScenesByVisual.get(scene_key, MonsterScenesByVisual["monster_dummy"]) as PackedScene
 
 func _make_remote_player_node(e: Dictionary) -> Node3D:
 	var root = CharacterScene.instantiate() as Node3D

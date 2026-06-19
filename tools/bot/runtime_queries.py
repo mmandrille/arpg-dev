@@ -62,6 +62,7 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
         "raw_damage",
         "mitigated_damage",
         "amount",
+        "resource_amount",
         "remaining_ticks",
         "total_ticks",
         "price",

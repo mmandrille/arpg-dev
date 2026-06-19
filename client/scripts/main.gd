@@ -1686,6 +1686,7 @@ func _refresh_inventory_ui() -> void:
 			blacksmith_panel.get_debug_state().get("status", ""),
 			resource_wallet
 		)
+	if bishop_panel != null and bishop_panel.visible: bishop_panel.set_resource_wallet(resource_wallet)
 	if character_bar != null: character_bar.set_resource_wallet(resource_wallet)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
@@ -4353,7 +4354,7 @@ func _show_bishop_panel(ev: Dictionary) -> void:
 		str(ev.get("service", "bishop")),
 		int(ev.get("price", 0)),
 		bool(ev.get("affordable", gold >= int(ev.get("price", 0)))),
-		gold
+		gold, resource_wallet
 	)
 	_raise_gameplay_windows()
 

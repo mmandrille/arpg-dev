@@ -6,6 +6,18 @@ func validateMainGameplayEconomyConfig(gameplay MainGameplayConfig) error {
 	if gameplay.ItemUpgradeResourceCost < 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_count: must be non-negative")
 	}
+	if gameplay.BishopRespecResourceCost < 0 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.bishop_respec_resource_count: must be non-negative")
+	}
+	if gameplay.BishopRespecResourceCost > 0 && gameplay.BishopRespecResourceID == "" {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.bishop_respec_resource_item_def_id: required when count is positive")
+	}
+	if gameplay.BishopReviveResourceCost < 0 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.bishop_revive_resource_count: must be non-negative")
+	}
+	if gameplay.BishopReviveResourceCost > 0 && gameplay.BishopReviveResourceID == "" {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.bishop_revive_resource_item_def_id: required when count is positive")
+	}
 	if gameplay.MercenaryHireCostGold < 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.mercenary_hire_cost_gold: must be non-negative")
 	}
@@ -47,6 +59,12 @@ func validateMainGameplayResourceItems(gameplay MainGameplayConfig, items map[st
 			return fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_item_def_id: unknown item %q", gameplay.ItemUpgradeResourceID)
 		}
 	}
+	if err := validateCurrencyResourceItem(items, gameplay.BishopRespecResourceID, gameplay.BishopRespecResourceCost, "bishop_respec_resource_item_def_id"); err != nil {
+		return err
+	}
+	if err := validateCurrencyResourceItem(items, gameplay.BishopReviveResourceID, gameplay.BishopReviveResourceCost, "bishop_revive_resource_item_def_id"); err != nil {
+		return err
+	}
 	turnInItem, ok := items[gameplay.QuestTurnInItemDefID]
 	if !ok {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_item_def_id: unknown item %q", gameplay.QuestTurnInItemDefID)
@@ -62,6 +80,20 @@ func validateMainGameplayResourceItems(gameplay MainGameplayConfig, items map[st
 		if item.Category != "currency" || item.Equippable {
 			return fmt.Errorf("game: invalid rules main_config.gameplay.badge_reward_rules[%d].resource_item_def_id: item %q must be a non-equippable currency", idx, rule.ResourceItemDefID)
 		}
+	}
+	return nil
+}
+
+func validateCurrencyResourceItem(items map[string]ItemDef, itemDefID string, count int, field string) error {
+	if count <= 0 {
+		return nil
+	}
+	item, ok := items[itemDefID]
+	if !ok {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.%s: unknown item %q", field, itemDefID)
+	}
+	if item.Category != "currency" || item.Equippable {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.%s: item %q must be a non-equippable currency", field, itemDefID)
 	}
 	return nil
 }

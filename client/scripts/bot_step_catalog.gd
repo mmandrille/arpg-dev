@@ -235,7 +235,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if not step.has("offer_equals") and not step.has("offer_at_least"):
 			return "client_steps[%d] (%s) requires offer_equals or offer_at_least" % [index, stype]
 	if stype in ["wait_bishop_panel", "assert_bishop_panel"]:
-		if not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("respec_enabled") and not step.has("service_id") and not step.has("visible") and not step.has("status_contains"):
+		if not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("respec_enabled") and not step.has("service_id") and not step.has("visible") and not step.has("status_contains") and not step.has("resource_item_def_id") and not step.has("resource_required_count") and not step.has("resource_wallet_count") and not step.has("revive_resource_item_def_id") and not step.has("revive_resource_required_count") and not step.has("revive_resource_wallet_count") and not step.has("respec_text_contains") and not step.has("revive_text_contains"):
 			return "client_steps[%d] (%s) requires a bishop panel expectation" % [index, stype]
 	if stype in ["wait_mercenary_panel", "assert_mercenary_panel"]:
 		if not step.has("visible") and not step.has("price") and not step.has("gold") and not step.has("affordable") and not step.has("service_id") and not step.has("offer_id") and not step.has("monster_def_id") and not step.has("hired_entity_id") and not step.has("hired_count") and not step.has("selected_stance") and not step.has("status_contains") and not step.has("stats_card_contains") and not step.has("companion_bar_count") and not step.has("companion_icon_kind"):

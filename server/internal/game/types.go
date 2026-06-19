@@ -449,6 +449,7 @@ type Event struct {
 	StashGold            *int                    `json:"stash_gold,omitempty"`
 	StashCapacity        *int                    `json:"stash_capacity,omitempty"`
 	ResourceID           string                  `json:"resource_id,omitempty"`
+	ResourceAmount       *int                    `json:"resource_amount,omitempty"`
 	CorpseCharacterID    string                  `json:"corpse_character_id,omitempty"`
 	CorpseName           string                  `json:"corpse_name,omitempty"`
 	CorpseItems          []ItemView              `json:"corpse_items,omitempty"`

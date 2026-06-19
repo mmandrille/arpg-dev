@@ -530,7 +530,7 @@ func _run() -> void:
 	_assert_false("blacksmith disables upgrade without shard", bool((missing_rows[0] as Dictionary).get("upgrade_enabled", true)))
 	blacksmith_panel._emit_upgrade(upgrade_item)
 	_assert_eq("blacksmith missing shard does not emit upgrade", blacksmith_emitted.size(), 1)
-	_assert_true("blacksmith missing shard status", str(blacksmith_panel.get_debug_state().get("status", "")).contains("Need 1 Upgrade Shard"))
+	_assert_true("blacksmith missing shard status", str(blacksmith_panel.get_debug_state().get("status", "")).contains("Need 1 Upgrade Badge"))
 	blacksmith_panel.hide_display()
 	blacksmith_state = blacksmith_panel.get_debug_state()
 	_assert_eq("blacksmith close returns staged item", str(blacksmith_state.get("staged_item_id", "")), "")

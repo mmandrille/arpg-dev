@@ -1,0 +1,50 @@
+server/internal/game/sim.go
+  s_b9bc0033a850dd::t_82f51eed2e3be8 49-50
+docs/plans/v280_2026-06-19-bat-dive-attack-behavior.md
+  s_b9bc0033a850dd::t_5e59c3d76ac112 3,39-40,58-60,63-64,72,74-76,79,89-90,92,107-109,113-117
+  s_b9bc0033a850dd::t_c3910bf9243817 1-2,4-38,41-57,61-62,65-71,73,77-78,80-88,91,93-106,110-112,118-125
+server/internal/game/monster_attack_style_test.go
+  s_b9bc0033a850dd::t_c349121caff5c1 1-110
+PROGRESS.md
+  s_b9bc0033a850dd::t_5e59c3d76ac112 26,28-29,31
+server/internal/game/types.go
+  s_b9bc0033a850dd::t_82f51eed2e3be8 434
+docs/progress/slice-lifecycle.md
+  s_b9bc0033a850dd::t_5e59c3d76ac112 295
+client/tests/test_animation.gd
+  s_b9bc0033a850dd::t_b7174a70af782e 403,430-438
+server/internal/game/rules.go
+  s_b9bc0033a850dd::t_82f51eed2e3be8 730,766-773,1617-1632
+client/animations/monster_tiny_flyer_anims.tres
+  s_b9bc0033a850dd::t_49233436bba5db 30-60,120
+server/internal/game/unique_survival_effects.go
+  s_b9bc0033a850dd::t_9b6eacac7f944d 16-17
+  s_b9bc0033a850dd::t_82f51eed2e3be8 25,30,39,52,57-71
+shared/rules/monsters.v0.json
+  s_b9bc0033a850dd::t_82f51eed2e3be8 285
+client/scripts/main.gd
+  s_b9bc0033a850dd::t_c3144231d76e86 1186,1193,1209,1214,1738-1750
+docs/as-built/v280_bat-dive-attack-behavior.md
+  s_b9bc0033a850dd::t_5e59c3d76ac112 1-44
+shared/rules/monsters.v0.schema.json
+  s_b9bc0033a850dd::t_82f51eed2e3be8 50
+docs/specs/v280_spec-bat-dive-attack-behavior.md
+  s_b9bc0033a850dd::t_5e59c3d76ac112 3,54-55
+  s_b9bc0033a850dd::t_c3910bf9243817 1-2,4-53,56-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fb070b29d531a74426881822d73dcadfece78928",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

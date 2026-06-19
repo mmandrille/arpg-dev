@@ -11,7 +11,7 @@
 scale = Vector3(0.75, 0.75, 0.75)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-root_node = NodePath("..")
+root_node = NodePath("../ModelRoot/Model")
 libraries = {
 "": ExtResource("2_anims")
 }

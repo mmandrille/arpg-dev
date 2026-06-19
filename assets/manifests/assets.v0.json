@@ -227,11 +227,11 @@
       "runtime_path": "client/assets/monsters/purple_fantasy/dark_purple_monster.glb",
       "format": "glb",
       "scale_unit": "meters",
-      "required_nodes": [],
+      "required_nodes": ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
       "provenance": {
         "origin": "user-provided local GLB",
         "license": "unconfirmed-user-provided",
-        "sha256": "2228957b8422ff1f23a8f2786a1e9cf7b3cace0ee41789cabbb26c0c7d9b6ae8"
+        "sha256": "aa5f968eb9b5f788fb0385b719331ec45e8cae929d2a49da935ffdb353185508"
       }
     },
     "monster_crocodile_archer_v0": {
@@ -240,11 +240,11 @@
       "runtime_path": "client/assets/monsters/archer/crocodile_archer.glb",
       "format": "glb",
       "scale_unit": "meters",
-      "required_nodes": [],
+      "required_nodes": ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
       "provenance": {
         "origin": "user-provided local GLB",
         "license": "unconfirmed-user-provided",
-        "sha256": "805043e8cb0d45269648d1b90a453231ebc13afe243d96f10cbd3337743d60df"
+        "sha256": "2f5a2c1c969f3398c0f3a21ea45e6e940fb0caa1e0f1e9f8e623b05eb724ed32"
       }
     },
     "monster_quadruped_predator_v0": {

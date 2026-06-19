@@ -1,62 +1,87 @@
 [gd_resource type="AnimationLibrary" format=3]
 
-[sub_resource type="Animation" id="Animation_hit"]
+[sub_resource type="Animation" id="Animation_attack"]
 length = 0.35
-tracks/0/type = "position_3d"
+tracks/0/type = "rotation_3d"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("ModelRoot/Model")
+tracks/0/path = NodePath("Skeleton3D:arm_r")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.12, 1, 0, 0, 0.12, 0.35, 1, 0, 0, 0)
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.12, 1, -0.42261827, 0, 0, 0.9063078, 0.35, 1, 0, 0, 0, 1)
 tracks/1/type = "rotation_3d"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("ModelRoot/Model")
+tracks/1/path = NodePath("Skeleton3D:spine")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
-tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.12, 1, -0.06975647, 0, 0, 0.9975641, 0.35, 1, 0, 0, 0, 1)
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.12, 1, 0, 0.08715574, 0, 0.9961947, 0.35, 1, 0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_hit"]
+length = 0.3
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Skeleton3D:spine")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.1, 1, -0.13052619, 0, 0, 0.9914449, 0.3, 1, 0, 0, 0, 1)
 
 [sub_resource type="Animation" id="Animation_death"]
 length = 0.5
 tracks/0/type = "rotation_3d"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("ModelRoot/Model")
+tracks/0/path = NodePath("Skeleton3D:spine")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.5, 1, 0, 0, 0.656059, 0.7547096)
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.5, 1, 0.6946584, 0, 0, 0.7193398)
 
 [sub_resource type="Animation" id="Animation_idle"]
 loop_mode = 1
-tracks/0/type = "position_3d"
+tracks/0/type = "rotation_3d"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("ModelRoot/Model")
+tracks/0/path = NodePath("Skeleton3D:spine")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.5, 1, 0, 0.025, 0, 1, 1, 0, 0, 0)
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1)
 
 [sub_resource type="Animation" id="Animation_walk"]
 length = 0.55
 loop_mode = 1
-tracks/0/type = "position_3d"
+tracks/0/type = "rotation_3d"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("ModelRoot/Model")
+tracks/0/path = NodePath("Skeleton3D:leg_l")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 0.1375, 1, 0, 0.055, 0, 0.275, 1, 0, 0, 0, 0.4125, 1, 0, 0.045, 0, 0.55, 1, 0, 0, 0)
+tracks/0/keys = PackedFloat32Array(0, 1, -0.17364818, 0, 0, 0.9848077, 0.1375, 1, 0.21643962, 0, 0, 0.976296, 0.275, 1, -0.17364818, 0, 0, 0.9848077, 0.4125, 1, 0.21643962, 0, 0, 0.976296, 0.55, 1, -0.17364818, 0, 0, 0.9848077)
 tracks/1/type = "rotation_3d"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("ModelRoot/Model")
+tracks/1/path = NodePath("Skeleton3D:leg_r")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
-tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, -0.034899496, 0.99939084, 0.1375, 1, 0, 0, 0.034899496, 0.99939084, 0.275, 1, 0, 0, -0.034899496, 0.99939084, 0.4125, 1, 0, 0, 0.034899496, 0.99939084, 0.55, 1, 0, 0, -0.034899496, 0.99939084)
+tracks/1/keys = PackedFloat32Array(0, 1, 0.21643962, 0, 0, 0.976296, 0.1375, 1, -0.17364818, 0, 0, 0.9848077, 0.275, 1, 0.21643962, 0, 0, 0.976296, 0.4125, 1, -0.17364818, 0, 0, 0.9848077, 0.55, 1, 0.21643962, 0, 0, 0.976296)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Skeleton3D:arm_l")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.08715574, 0, 0, 0.9961947, 0.1375, 1, -0.08715574, 0, 0, 0.9961947, 0.275, 1, 0.08715574, 0, 0, 0.9961947, 0.4125, 1, -0.08715574, 0, 0, 0.9961947, 0.55, 1, 0.08715574, 0, 0, 0.9961947)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Skeleton3D:arm_r")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, -0.08715574, 0, 0, 0.9961947, 0.1375, 1, 0.08715574, 0, 0, 0.9961947, 0.275, 1, -0.08715574, 0, 0, 0.9961947, 0.4125, 1, 0.08715574, 0, 0, 0.9961947, 0.55, 1, -0.08715574, 0, 0, 0.9961947)
 
 [resource]
 _data = {
+&"attack": SubResource("Animation_attack"),
 &"death": SubResource("Animation_death"),
 &"hit": SubResource("Animation_hit"),
 &"idle": SubResource("Animation_idle"),

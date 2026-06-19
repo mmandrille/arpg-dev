@@ -48,6 +48,7 @@ const (
 	attackModeRanged               = "ranged"
 	monsterAttackStyleMelee        = "melee"
 	monsterAttackStyleDive         = "dive"
+	monsterAttackStylePounce       = "pounce"
 	magicBoltSkillID               = "magic_bolt"
 	trainingArrowProjectileDefID   = "training_arrow"
 	goldItemDefID                  = "gold"
@@ -4820,6 +4821,9 @@ func (s *Sim) targetInteractionRadius(e *entity) float64 {
 
 func (s *Sim) monsterAttackReach(def MonsterDef) float64 {
 	if def.effectiveAttackMode() == attackModeRanged && def.AttackRange > 0 {
+		return def.AttackRange
+	}
+	if def.effectiveAttackStyle() == monsterAttackStylePounce && def.AttackRange > 0 {
 		return def.AttackRange
 	}
 	return s.rules.Combat.UnarmedReach

@@ -212,6 +212,8 @@
         "max": 2
       },
       "attack_cooldown_ticks": 21,
+      "attack_style": "pounce",
+      "attack_range": 2.35,
       "name_key": "monster.dungeon_wolf.name"
     },
     "companion_black_wolf": {

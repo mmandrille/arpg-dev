@@ -1736,7 +1736,8 @@ func _play_local_attack_animation_for_event(ev: Dictionary) -> void:
 	player_anim.play_one_shot("attack_off_hand" if weapon_slot == "off_hand" else "attack")
 
 func _play_source_monster_attack_animation_for_event(ev: Dictionary) -> void:
-	if str(ev.get("attack_style", "")) != "dive":
+	var attack_style := str(ev.get("attack_style", ""))
+	if attack_style != "dive" and attack_style != "pounce":
 		return
 	var source_id := str(ev.get("source_entity_id", ""))
 	if source_id == "" or not entities.has(source_id):
@@ -1747,7 +1748,7 @@ func _play_source_monster_attack_animation_for_event(ev: Dictionary) -> void:
 	var ctrl = source_rec.get("controller", null)
 	if ctrl == null:
 		return
-	ctrl.play_one_shot("dive")
+	ctrl.play_one_shot(attack_style)
 
 func _play_local_player_reaction_animation(clip: String) -> void:
 	if player_anim == null:

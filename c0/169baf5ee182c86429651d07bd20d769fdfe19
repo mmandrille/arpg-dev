@@ -1,0 +1,23 @@
+client/tests/test_animation.gd
+  s_8ac650870d633e::t_bf09f2f37523c1 317,322
+docs/as-built/v273_crocodile-archer-model.md
+  s_8ac650870d633e::t_1093a56ef12a51 18-20
+client/scenes/monster_crocodile_archer.tscn
+  s_8ac650870d633e::t_ec7ed89180d3c3 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c0169baf5ee182c86429651d07bd20d769fdfe19",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

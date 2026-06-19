@@ -17,6 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 REAL_SCHEMA = REPO_ROOT / "assets/manifests/assets.v0.schema.json"
 
 CHAR_GLB = "client/assets/characters/base_humanoid/base_humanoid.glb"
+STATIC_CHAR_GLB = "client/assets/characters/static_hero/static_hero.glb"
 SWORD_GLB = "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb"
 MONSTER_GLB = "client/assets/monsters/dummy/monster_dummy.glb"
 
@@ -222,6 +223,20 @@ def test_socket_coverage_failure(tmp_path):
         char_nodes=["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"],
     ))
     assert any("mount bone" in f for f in report.failures)
+
+
+def test_static_character_asset_allowed(tmp_path):
+    manifest = default_manifest()
+    manifest["assets"]["character_static_hero_v0"] = {
+        "type": "character",
+        "runtime_path": STATIC_CHAR_GLB,
+        "format": "glb",
+        "required_nodes": [],
+    }
+    root = build_root(tmp_path, manifest=manifest)
+    write(root / STATIC_CHAR_GLB, make_glb(["world", "Static Hero"]))
+    report = run(root)
+    assert report.failures == []
 
 
 def test_sha256_mismatch(tmp_path):

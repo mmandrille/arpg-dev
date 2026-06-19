@@ -4950,6 +4950,7 @@ func _apply_local_player_class_model() -> void:
 		player_anim = AnimationControllerScript.new(ap)
 
 func _apply_character_class_model(root: Node3D, class_id: String) -> void:
+	var resolved := ClassPresentationsLoaderScript.resolve(class_id)
 	var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)
 	if packed == null:
 		return
@@ -4961,6 +4962,8 @@ func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 	if model == null:
 		return
 	model.name = "ModelRoot"
+	model.scale = Vector3.ONE * float(resolved.get("scale", 1.0))
+	model.position.y = float(resolved.get("height_offset", 0.0))
 	root.add_child(model)
 	root.move_child(model, 0)
 	var ap := root.find_child("AnimationPlayer", true, false) as AnimationPlayer

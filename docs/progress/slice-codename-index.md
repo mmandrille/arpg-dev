@@ -223,6 +223,7 @@ v270_* = crowd-movement-lod
 v271_* = multiplayer-room-guardrails
 v272_* = performance-status-overlay
 v273_* = crocodile-archer-model
+v274_* = class-hero-models
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

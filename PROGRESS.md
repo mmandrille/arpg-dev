@@ -23,12 +23,12 @@ Last updated: 2026-06-18
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v273 — crocodile archer model |
+| **Latest completed slice** | v274 — class hero models |
 | **Active branch** | `main` |
-| **CI gate** | v273 focused checks green on 2026-06-18; last full `make ci` green at v272 |
+| **CI gate** | v274 full `make ci` green on 2026-06-18 |
 | **Next slice** | engineering review for the latest green baseline, then `$refactor` for minor paydown |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v272 full `make ci`; v273 has focused client/asset proof |
+| **Next engineering review** | Due now after v274 full `make ci` |
 
 
 ### Periodic engineering reviews

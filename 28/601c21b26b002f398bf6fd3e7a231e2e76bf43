@@ -1,0 +1,24 @@
+server/internal/game/weapon_set_handlers.go
+  s_44b7ee0e62767d::t_19e22caa3244c2 12-13
+client/tests/test_audio_settings.gd
+  s_44b7ee0e62767d::t_ff12bedd0bd466 5,11,18,79-86,88-89,91-92,94-100
+  s_44b7ee0e62767d::t_0a0199396af192 87,90,93
+server/internal/game/weapon_sets_test.go
+  s_44b7ee0e62767d::t_c996c1fada1fcf 37,51-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "28601c21b26b002f398bf6fd3e7a231e2e76bf43",
+  "prompts": {},
+  "sessions": {
+    "s_44b7ee0e62767d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce5-2124-71f3-8fb7-d27b851dde01",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

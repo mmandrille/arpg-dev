@@ -11,6 +11,7 @@ gen-assets: tools ## Regenerate committed runtime .glb files (deterministic sour
 	$(PY) tools/assets/gen_glb.py
 	$(PY) tools/assets/rig_hero_glbs.py
 	$(PY) tools/assets/rig_monster_glbs.py
+	$(PY) tools/assets/rig_quadruped_monster_glbs.py
 
 gen-anims: ## Regenerate committed AnimationLibrary .tres clips (requires Godot)
 	$(GODOT) --headless --path client --import >/dev/null 2>&1 || true

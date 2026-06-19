@@ -346,10 +346,20 @@ func _test_monster_scene() -> void:
 				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s ModelRoot should correct GLB nose to parent +Z, got y=%s" % [scene_path, model_root.rotation.y])
 				var quadruped_model := s.find_child("QuadrupedModel", true, false) as Node3D
 				_assert(quadruped_model != null, "%s QuadrupedModel missing" % scene_path)
+				var skel := s.find_child("Skeleton3D", true, false) as Skeleton3D
+				_assert_quadruped_monster_rig(skel, scene_path)
+				_assert(ap.has_animation("attack"), "%s missing clip attack" % scene_path)
+				_assert(ap.has_animation("pounce"), "%s missing clip pounce" % scene_path)
 				ap.play("walk")
 				ap.seek(0.1375, true)
 				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
-				_assert(quadruped_model.position.y > 0.0, "%s walk clip should bob QuadrupedModel, got y=%s" % [scene_path, quadruped_model.position.y])
+				if skel != null:
+					_assert_animation_rotates_bone(ap, skel, "walk", 0.1375, "leg_fl", scene_path)
+					_assert_animation_rotates_bone(ap, skel, "attack", 0.14, "head", scene_path)
+				ap.play("pounce")
+				ap.seek(0.2, true)
+				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s pounce clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
+				_assert(quadruped_model.position.y > 0.1 and quadruped_model.position.z < -0.1, "%s pounce should lift and lunge QuadrupedModel, got %s" % [scene_path, quadruped_model.position])
 			if scene_path == "res://scenes/monster_dark_purple.tscn":
 				var model_root := s.find_child("ModelRoot", false, false) as Node3D
 				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
@@ -447,6 +457,14 @@ func _assert_biped_monster_rig(skel: Skeleton3D, scene_path: String) -> void:
 		return
 	for bone in ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"]:
 		_assert(skel.find_bone(bone) >= 0, "%s missing biped bone %s" % [scene_path, bone])
+
+
+func _assert_quadruped_monster_rig(skel: Skeleton3D, scene_path: String) -> void:
+	_assert(skel != null, "%s missing Skeleton3D" % scene_path)
+	if skel == null:
+		return
+	for bone in ["root", "spine", "head", "tail", "leg_fl", "leg_fr", "leg_bl", "leg_br"]:
+		_assert(skel.find_bone(bone) >= 0, "%s missing quadruped bone %s" % [scene_path, bone])
 
 
 func _quat_delta(a: Quaternion, b: Quaternion) -> float:

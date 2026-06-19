@@ -3414,6 +3414,7 @@ func _build_scene() -> void:
 	gameplay_ui_layer = ui
 	_debug_label = Label.new()
 	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_debug_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_debug_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_debug_label.offset_left = 12
 	_debug_label.offset_right = 560

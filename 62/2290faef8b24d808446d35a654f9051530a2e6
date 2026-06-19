@@ -1,0 +1,49 @@
+docs/specs/v273_spec-crocodile-archer-model.md
+  s_8ac650870d633e::t_94ded318489626 1-42
+client/scripts/main.gd
+  s_8ac650870d633e::t_a43afa367aba29 65-73,4901
+client/tests/test_animation.gd
+  s_8ac650870d633e::t_a43afa367aba29 267,312-319,331-333
+assets/manifests/assets.v0.json
+  s_8ac650870d633e::t_a43afa367aba29 236-248
+PROGRESS.md
+  s_8ac650870d633e::t_94ded318489626 26,28-29,31,105
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_94ded318489626 225
+client/assets/monsters/archer/crocodile_archer_0.png.import
+  s_8ac650870d633e::t_2f0ac6aff41ad3 1-43
+client/scripts/monster_visuals_loader.gd
+  s_8ac650870d633e::t_a43afa367aba29 29
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_94ded318489626 288
+docs/plans/v273_2026-06-18-crocodile-archer-model.md
+  s_8ac650870d633e::t_94ded318489626 1-45
+shared/assets/monster_visuals.v0.json
+  s_8ac650870d633e::t_a43afa367aba29 103-104
+client/animations/monster_crocodile_archer_anims.tres
+  s_8ac650870d633e::t_a43afa367aba29 1-75
+shared/assets/monster_visuals.v0.schema.json
+  s_8ac650870d633e::t_a43afa367aba29 22
+docs/as-built/v273_crocodile-archer-model.md
+  s_8ac650870d633e::t_94ded318489626 1-38
+client/scenes/monster_crocodile_archer.tscn
+  s_8ac650870d633e::t_a43afa367aba29 1-18
+client/assets/monsters/archer/crocodile_archer.glb.import
+  s_8ac650870d633e::t_2f0ac6aff41ad3 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "622290faef8b24d808446d35a654f9051530a2e6",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

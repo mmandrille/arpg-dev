@@ -1,0 +1,64 @@
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_d79c2d364fae1d 291
+docs/as-built/v276_ranger-green-hood-model.md
+  s_8ac650870d633e::t_d79c2d364fae1d 1-17,20-44
+  s_8ac650870d633e::t_63ecf84d667f16 18-19
+assets/manifests/assets.v0.json
+  s_8ac650870d633e::t_bc73c27afbe8a8 71,77-79
+  s_8ac650870d633e::t_63ecf84d667f16 80
+tools/assets/test_rig_hero_glbs.py
+  s_8ac650870d633e::t_ffe4dd5d68f4b3 6
+  s_8ac650870d633e::t_37ffe665bac3d3 10-11,16,46,48-49,51,94-113
+  s_8ac650870d633e::t_59e8bc1ca5bebf 114-121
+client/assets/characters/ranger/ranger_3.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_d79c2d364fae1d 228
+client/assets/characters/ranger/ranger_5.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+client/assets/characters/ranger/ranger_2.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+tools/assets/rig_hero_glbs.py
+  s_8ac650870d633e::t_783f2be5b3a902 12,131-146,156-214,216-233,315,321-322,334,411-412
+  s_8ac650870d633e::t_59e8bc1ca5bebf 34-37
+  s_8ac650870d633e::t_21fe07f54487f8 43-44,215
+shared/assets/class_presentations.v0.json
+  s_8ac650870d633e::t_59e8bc1ca5bebf 22
+client/assets/characters/ranger/ranger_6.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+client/assets/characters/ranger/ranger_8.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+client/assets/characters/ranger/ranger_1.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+PROGRESS.md
+  s_8ac650870d633e::t_d79c2d364fae1d 26,28,31
+docs/plans/v276_2026-06-19-ranger-green-hood-model.md
+  s_8ac650870d633e::t_7268632549aace 1-17,20-21,23-37
+  s_8ac650870d633e::t_d79c2d364fae1d 22
+  s_8ac650870d633e::t_02e27da4cb23fb 18-19
+client/assets/characters/ranger/ranger_7.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+docs/specs/v276_spec-ranger-green-hood-model.md
+  s_8ac650870d633e::t_63ecf84d667f16 18-19,46
+  s_8ac650870d633e::t_7268632549aace 1-17,20-45,47-48
+client/assets/characters/ranger/ranger_0.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+client/assets/characters/ranger/ranger_4.png.import
+  s_8ac650870d633e::t_87eaa00f007bd8 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b1d2c79437453f1f211e7dc07c4a24fba5ad1a3e",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

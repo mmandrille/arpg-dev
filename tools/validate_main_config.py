@@ -50,6 +50,13 @@ def validate_main_config_gameplay(
     else:
         report.ok("main_config gameplay owns starter item upgrade tuning")
 
+    if not str(main_gameplay.get("quest_turn_in_item_def_id", "")):
+        report.fail("main_config gameplay", "quest_turn_in_item_def_id must be non-empty")
+    elif int(main_gameplay.get("quest_turn_in_reward_gold", -1)) < 0:
+        report.fail("main_config gameplay", "quest_turn_in_reward_gold must be non-negative")
+    else:
+        report.ok("main_config gameplay owns quest turn-in reward tuning")
+
     if float(main_gameplay.get("companion_assist_radius", 0)) <= 0:
         report.fail("main_config gameplay", "companion_assist_radius must be positive")
     elif float(main_gameplay.get("companion_follow_distance", 0)) <= 0:

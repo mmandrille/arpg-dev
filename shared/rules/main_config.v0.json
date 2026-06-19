@@ -13,6 +13,8 @@
     "item_upgrade_resource_item_def_id": "upgrade_shard",
     "item_upgrade_resource_count": 1,
     "mercenary_hire_cost_gold": 75,
+    "quest_turn_in_item_def_id": "quest_leaf",
+    "quest_turn_in_reward_gold": 25,
     "companion_assist_radius": 5.0,
     "companion_follow_distance": 1.1,
     "companion_follow_stop_radius": 1.6

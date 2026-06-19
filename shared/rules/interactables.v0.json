@@ -57,6 +57,11 @@
       "initial_state": "ready",
       "service": "blacksmith"
     },
+    "town_quest_giver": {
+      "name": "Quest Steward",
+      "initial_state": "ready",
+      "service": "quest_turn_in"
+    },
     "town_unique_chest": {
       "name": "Unique Test Chest",
       "initial_state": "ready",

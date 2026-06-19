@@ -1,0 +1,19 @@
+{
+  "id": "quest_town_turn_in",
+  "world_id": "quest_turn_in_lab",
+  "seed": "quest_town_turn_in_seed",
+  "title": "Quest town turn-in",
+  "description": "Pick up a Quest Leaf, click the town quest giver, and prove the server consumes the item for the configured gold reward.",
+  "steps": [
+    { "action": "pick_up_loot", "item_def_id": "quest_leaf" },
+    { "action": "assert_inventory_count", "item_def_id": "quest_leaf", "equals": 1 },
+    { "action": "action_entity", "interactable_def_id": "town_quest_giver", "event_type": "quest_turn_in_completed", "timeout_s": 10 },
+    { "action": "assert_inventory_count", "item_def_id": "quest_leaf", "equals": 0 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "item_picked_up", "item_def_id": "quest_leaf" },
+    { "type": "event_seen", "event_type": "quest_turn_in_completed", "service": "quest_turn_in", "amount": 1, "price": 25, "total_gold": 25 },
+    { "type": "inventory_count", "item_def_id": "quest_leaf", "equals": 0 },
+    { "type": "gold", "equals": 25 }
+  ]
+}

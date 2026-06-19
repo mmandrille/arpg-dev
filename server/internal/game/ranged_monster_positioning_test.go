@@ -49,3 +49,42 @@ func TestRangedMonsterBlockedShotRepositionsCloseBeforeFiring(t *testing.T) {
 		t.Fatalf("close ranged shot did not damage player: player=%+v archer=%+v damage=%+v", player, archer, damage)
 	}
 }
+
+func TestRangedMonsterRetreatsWhenPlayerIsTooClose(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim, err := NewSimWithWorld("sess_ranged_monster_retreat", "v286_ranged_retreat", rules, "ranged_monster_retreat_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	player := sim.entities[sim.playerID]
+	archer := findMonsterByDef(sim, "dungeon_archer")
+	if player == nil || archer == nil {
+		t.Fatalf("setup player=%+v archer=%+v", player, archer)
+	}
+	preferred := rules.Monsters["dungeon_archer"].PreferredMinRange
+	initialDistance := distance(player.pos, archer.pos)
+	if initialDistance >= preferred {
+		t.Fatalf("setup archer distance %.3f already >= preferred %.3f", initialDistance, preferred)
+	}
+
+	retreated := false
+	for i := 0; i < 40; i++ {
+		sim.Tick(nil)
+		if distance(player.pos, archer.pos) >= preferred-0.15 {
+			retreated = true
+			break
+		}
+	}
+	if !retreated {
+		t.Fatalf("archer did not retreat toward preferred range: initial=%.3f final=%.3f preferred=%.3f archer=%+v player=%+v", initialDistance, distance(player.pos, archer.pos), preferred, archer.pos, player.pos)
+	}
+	if distance(player.pos, archer.pos) <= initialDistance+0.75 {
+		t.Fatalf("archer did not materially increase range: initial=%.3f final=%.3f", initialDistance, distance(player.pos, archer.pos))
+	}
+	if distance(player.pos, archer.pos) > sim.monsterAttackReach(rules.Monsters["dungeon_archer"])+playerRadius+meleeRangeEpsilon {
+		t.Fatalf("archer retreated outside attack reach: player=%+v archer=%+v", player.pos, archer.pos)
+	}
+	if !sim.hasClearMonsterRangedShot(archer.pos, player) {
+		t.Fatalf("archer retreated to blocked shot: player=%+v archer=%+v", player.pos, archer.pos)
+	}
+}

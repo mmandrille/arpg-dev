@@ -23,10 +23,10 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v285 — damage type readability |
+| **Latest completed slice** | v286 — archer retreat AI |
 | **Active branch** | `main` |
-| **CI gate** | v285 focused gates green on 2026-06-19 (`client-unit`, `bot-visual scenario=33_unique_burn_effect_live HEADLESS=1`, `make maintainability`); full autoloop-batch `make ci` pending after selected queue |
-| **Next slice** | v286 — archer retreat AI |
+| **CI gate** | v286 focused gates green on 2026-06-19 (`cd server && go test ./internal/game -run 'TestRangedMonster'`, `validate-shared`, `bot scenario=archer_retreat_ai`, `make maintainability`); full autoloop-batch `make ci` pending after selected queue |
+| **Next slice** | v287 — second boss template |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
 | **Next engineering review** | v294 target after a green full `make ci` and the next feature batch |
 

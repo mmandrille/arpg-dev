@@ -729,6 +729,7 @@ type MonsterDef struct {
 	AttackMode        string             `json:"attack_mode,omitempty"`
 	AttackStyle       string             `json:"attack_style,omitempty"`
 	AttackRange       float64            `json:"attack_range,omitempty"`
+	PreferredMinRange float64            `json:"preferred_min_range,omitempty"`
 	ProjectileSpeed   float64            `json:"projectile_speed,omitempty"`
 	ProjectileDefID   string             `json:"projectile_def_id,omitempty"`
 	Behavior          string             `json:"behavior,omitempty"`
@@ -1580,6 +1581,9 @@ func LoadRules(dir string) (*Rules, error) {
 		attackMode := def.effectiveAttackMode()
 		behavior := def.effectiveBehavior()
 		attackStyle := def.effectiveAttackStyle()
+		if def.PreferredMinRange < 0 {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.preferred_min_range: must be non-negative", id)
+		}
 		switch attackMode {
 		case attackModeMelee:
 			if def.AttackRange > 0 && attackStyle != monsterAttackStylePounce {
@@ -1604,8 +1608,14 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.ProjectileDefID == "" {
 				return nil, fmt.Errorf("game: invalid rules monsters.%s.projectile_def_id: required for ranged attacks", id)
 			}
+			if def.PreferredMinRange > 0 && def.PreferredMinRange >= def.AttackRange {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.preferred_min_range: must be below attack_range", id)
+			}
 		default:
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_mode: %s", id, def.AttackMode)
+		}
+		if def.PreferredMinRange > 0 && attackMode != attackModeRanged {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.preferred_min_range: only valid for ranged attacks", id)
 		}
 		if err := validateMonsterAttackStyle(id, def, attackMode, behavior, r.Combat.UnarmedReach); err != nil {
 			return nil, err

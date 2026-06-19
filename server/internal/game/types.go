@@ -431,6 +431,7 @@ type Event struct {
 	Range                *float64                `json:"range,omitempty"`
 	AngleDegrees         *float64                `json:"angle_degrees,omitempty"`
 	WeaponSlot           string                  `json:"weapon_slot,omitempty"`
+	AttackStyle          string                  `json:"attack_style,omitempty"`
 	WeaponSet            *int                    `json:"weapon_set,omitempty"`
 	Reason               string                  `json:"reason,omitempty"`
 	ShopID               string                  `json:"shop_id,omitempty"`

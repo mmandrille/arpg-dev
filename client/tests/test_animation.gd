@@ -400,6 +400,7 @@ func _test_monster_scene() -> void:
 				var model := s.find_child("Model", true, false) as Node3D
 				_assert(model != null, "%s Model missing" % scene_path)
 				_assert(model.scale.is_equal_approx(Vector3(0.56, 0.56, 0.56)), "%s Model should apply bat source scale correction, got %s" % [scene_path, model.scale])
+				_assert(ap.has_animation("dive"), "%s missing clip dive" % scene_path)
 				var skel := s.find_child("Skeleton3D", true, false) as Skeleton3D
 				_assert(skel != null, "%s Skeleton3D missing" % scene_path)
 				var right_wing := -1
@@ -426,6 +427,15 @@ func _test_monster_scene() -> void:
 				ap.seek(0.1375, true)
 				_assert(absf(model_root.rotation.y) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
 				_assert(model.position.y > 0.0, "%s walk clip should bob Model, got y=%s" % [scene_path, model.position.y])
+				ap.play("dive")
+				ap.seek(0.16, true)
+				_assert(absf(model_root.rotation.y) <= 0.001, "%s dive clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
+				_assert(model.position.y > 0.1 and model.position.z < -0.1, "%s dive should lift and lunge Model, got %s" % [scene_path, model.position])
+				if skel != null and right_wing >= 0 and left_wing >= 0:
+					var right_dive := skel.get_bone_pose_rotation(right_wing)
+					var left_dive := skel.get_bone_pose_rotation(left_wing)
+					_assert(_quat_delta(right_rest, right_dive) > 0.1, "%s dive should flare right wing, got %s" % [scene_path, right_dive])
+					_assert(_quat_delta(left_rest, left_dive) > 0.1, "%s dive should flare left wing, got %s" % [scene_path, left_dive])
 		s.free()
 		await process_frame
 

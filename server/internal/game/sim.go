@@ -46,6 +46,8 @@ const (
 	worldModeMultiLevel            = "multi_level"
 	attackModeMelee                = "melee"
 	attackModeRanged               = "ranged"
+	monsterAttackStyleMelee        = "melee"
+	monsterAttackStyleDive         = "dive"
 	magicBoltSkillID               = "magic_bolt"
 	trainingArrowProjectileDefID   = "training_arrow"
 	goldItemDefID                  = "gold"

@@ -76,62 +76,12 @@ static func resolve(asset_id: String) -> Dictionary:
 
 static func catalog_rows() -> Array:
 	var root := ProjectSettings.globalize_path("res://")
-	var manifest := _read_json(root.path_join("../assets/manifests/assets.v0.json"))
-	var class_presentations := _read_json(root.path_join("../shared/assets/class_presentations.v0.json"))
-	var monster_visuals := _read_json(root.path_join("../shared/assets/monster_visuals.v0.json"))
-	var assets: Dictionary = manifest.get("assets", {})
-	var by_asset: Dictionary = {}
-
-	for class_id in (class_presentations.get("classes", {}) as Dictionary).keys():
-		var entry: Dictionary = class_presentations["classes"][class_id]
-		var model: Dictionary = entry.get("model", {})
-		var asset_id := str(model.get("asset_id", ""))
-		if asset_id == "":
-			continue
-		var row := _ensure_row(by_asset, assets, asset_id, "character")
-		if row.is_empty():
-			continue
-		row["used_by"].append(str(class_id))
-		row["class_id"] = str(class_id)
-		row["scale"] = _positive_float(model.get("scale", 1.0), 1.0)
-		row["height_offset"] = float(model.get("height_offset", 0.0))
-
-	for monster_def_id in (monster_visuals.get("monster_visuals", {}) as Dictionary).keys():
-		var entry: Dictionary = monster_visuals["monster_visuals"][monster_def_id]
-		var asset_id := str(entry.get("asset_id", ""))
-		if asset_id == "":
-			continue
-		var row := _ensure_row(by_asset, assets, asset_id, "monster")
-		if row.is_empty():
-			continue
-		row["used_by"].append(str(monster_def_id))
-		row["scene"] = str(entry.get("scene", ""))
-		row["scale"] = _positive_float(entry.get("scale", 1.0), 1.0)
-		row["height_offset"] = float(entry.get("height_offset", 0.0))
-
-	var rows: Array = by_asset.values()
+	var catalog := _read_json(root.path_join("../shared/assets/model_preview_catalog.v0.json"))
+	var rows: Array = catalog.get("models", [])
 	for row in rows:
 		row["used_by"].sort()
 	rows.sort_custom(func(a, b): return "%s:%s" % [a.get("type", ""), a.get("asset_id", "")] < "%s:%s" % [b.get("type", ""), b.get("asset_id", "")])
 	return rows
-
-
-static func _ensure_row(by_asset: Dictionary, assets: Dictionary, asset_id: String, expected_type: String) -> Dictionary:
-	var asset: Dictionary = assets.get(asset_id, {})
-	if str(asset.get("type", "")) != expected_type:
-		return {}
-	if not by_asset.has(asset_id):
-		by_asset[asset_id] = {
-			"asset_id": asset_id,
-			"type": expected_type,
-			"runtime_path": str(asset.get("runtime_path", "")),
-			"used_by": [],
-			"scene": "",
-			"class_id": "",
-			"scale": 1.0,
-			"height_offset": 0.0,
-		}
-	return by_asset[asset_id]
 
 
 func _instantiate_for_row(row: Dictionary) -> Node3D:
@@ -265,13 +215,6 @@ static func _res_path(runtime_path: String) -> String:
 	if p.begins_with("client/"):
 		p = p.substr("client/".length())
 	return "res://" + p
-
-
-static func _positive_float(value, fallback: float) -> float:
-	var parsed := float(value)
-	if parsed <= 0.0:
-		return fallback
-	return parsed
 
 
 func _fail(message: String) -> void:

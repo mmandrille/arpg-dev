@@ -102,6 +102,23 @@ def test_catalog_discovers_characters_and_monsters(tmp_path: Path) -> None:
     assert paladin.scale == 10.0
 
 
+def test_generated_catalog_round_trips_discovered_rows(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    path = model_catalog.write_generated_catalog(root)
+
+    assert path == root / model_catalog.GENERATED_CATALOG_REL
+    assert [row.asset_id for row in model_catalog.load_generated_catalog(root)] == [
+        "character_paladin_v0",
+        "monster_dummy_v0",
+        "monster_tiny_flyer_v0",
+    ]
+    assert model_catalog.generated_catalog_mismatch(root) == ""
+
+
+def test_repo_generated_catalog_matches_source_data() -> None:
+    assert model_catalog.generated_catalog_mismatch(model_catalog.ROOT) == ""
+
+
 def test_catalog_groups_multiple_used_by_labels(tmp_path: Path) -> None:
     dummy = model_catalog.resolve("monster_dummy_v0", _repo(tmp_path))
 

@@ -1,0 +1,155 @@
+{
+  "models": [
+    {
+      "asset_id": "character_barbarian_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/barbarian/barbarian.glb",
+      "scale": 1.0,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "barbarian"
+      ]
+    },
+    {
+      "asset_id": "character_paladin_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/paladin/paladin.glb",
+      "scale": 10.0,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "paladin"
+      ]
+    },
+    {
+      "asset_id": "character_ranger_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/ranger/ranger.glb",
+      "scale": 0.0092,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "ranger"
+      ]
+    },
+    {
+      "asset_id": "character_rogue_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/rogue/rogue.glb",
+      "scale": 1.0,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "rogue"
+      ]
+    },
+    {
+      "asset_id": "character_sorcerer_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/sorcerer/sorcerer.glb",
+      "scale": 1.0,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "sorcerer"
+      ]
+    },
+    {
+      "asset_id": "monster_crocodile_archer_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/monsters/archer/crocodile_archer.glb",
+      "scale": 1.0,
+      "scene": "monster_crocodile_archer",
+      "type": "monster",
+      "used_by": [
+        "dungeon_archer"
+      ]
+    },
+    {
+      "asset_id": "monster_dark_purple_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/monsters/purple_fantasy/dark_purple_monster.glb",
+      "scale": 1.0,
+      "scene": "monster_dark_purple",
+      "type": "monster",
+      "used_by": [
+        "dungeon_mob"
+      ]
+    },
+    {
+      "asset_id": "monster_dummy_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/monsters/dummy/monster_dummy.glb",
+      "scale": 1.0,
+      "scene": "monster_dummy",
+      "type": "monster",
+      "used_by": [
+        "combat_lab_armored_target",
+        "combat_lab_blocking_target",
+        "combat_lab_crit_attacker",
+        "combat_lab_miss_attacker",
+        "combat_lab_soft_target",
+        "mercenary_guard",
+        "skill_xp_level6_dummy",
+        "skill_xp_level7_dummy",
+        "training_dummy",
+        "training_dummy_chase",
+        "training_dummy_heal",
+        "training_dummy_path",
+        "training_dummy_ranged",
+        "training_dummy_reward"
+      ]
+    },
+    {
+      "asset_id": "monster_quadruped_predator_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/monsters/purple_fantasy/evil_fox_monster.glb",
+      "scale": 1.0,
+      "scene": "monster_quadruped",
+      "type": "monster",
+      "used_by": [
+        "dungeon_wolf"
+      ]
+    },
+    {
+      "asset_id": "monster_skeleton_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/monsters/skeleton/monster_skeleton.glb",
+      "scale": 1.0,
+      "scene": "monster_skeleton",
+      "type": "monster",
+      "used_by": [
+        "dungeon_undead"
+      ]
+    },
+    {
+      "asset_id": "monster_tiny_flyer_v0",
+      "height_offset": 0.9,
+      "runtime_path": "client/assets/monsters/tiny_flyer/monster_tiny_flyer.glb",
+      "scale": 0.7,
+      "scene": "monster_tiny_flyer",
+      "type": "monster",
+      "used_by": [
+        "dungeon_bat"
+      ]
+    },
+    {
+      "asset_id": "monster_wolf_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/monsters/wolf/wolf.glb",
+      "scale": 1.0,
+      "scene": "monster_wolf",
+      "type": "monster",
+      "used_by": [
+        "companion_black_wolf"
+      ]
+    }
+  ],
+  "sources": [
+    "assets/manifests/assets.v0.json",
+    "shared/assets/class_presentations.v0.json",
+    "shared/assets/monster_visuals.v0.json"
+  ],
+  "version": 0
+}

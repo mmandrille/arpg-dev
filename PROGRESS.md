@@ -89,11 +89,11 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 - **Review follow-ups remaining after v284 `$review`.** Full `make ci` is green again after
   stabilizing the broad client bot sweep failures seen in `mercenary_recovery_ui` and
-  `door_fog_toggle`. Remaining follow-ups: keep splitting the next touched large
-  coordinators/validators, add model-catalog parity coverage or one shared preview catalog, refresh
-  deferred combat/boss backlog wording after v280-v283 first-pass work, continue the
-  tuning-friendly rule-test audit, and resolve unverified local GLB provenance before production
-  distribution.
+  `door_fog_toggle`, and the model viewer now shares one generated preview catalog between Python
+  tooling and Godot. Remaining follow-ups: keep splitting the next touched large
+  coordinators/validators, refresh deferred combat/boss backlog wording after v280-v283 first-pass
+  work, continue the tuning-friendly rule-test audit, and resolve unverified local GLB provenance
+  before production distribution.
 
 ### Other deferred items (from specs / ADRs)
 

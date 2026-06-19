@@ -50,6 +50,16 @@ def validate_main_config_gameplay(
     else:
         report.ok("main_config gameplay owns starter item upgrade tuning")
 
+    for label in ("bishop_respec", "bishop_revive"):
+        resource_key = f"{label}_resource_item_def_id"
+        count_key = f"{label}_resource_count"
+        if int(main_gameplay.get(count_key, -1)) < 0:
+            report.fail("main_config gameplay", f"{count_key} must be non-negative")
+        elif int(main_gameplay.get(count_key, 0)) > 0 and not str(main_gameplay.get(resource_key, "")):
+            report.fail("main_config gameplay", f"{resource_key} must be non-empty when count is positive")
+        else:
+            report.ok("main_config gameplay owns bishop badge service costs")
+
     badge_rows = main_gameplay.get("badge_reward_rules", [])
     if not isinstance(badge_rows, list) or not badge_rows:
         report.fail("main_config gameplay", "badge_reward_rules must be a non-empty list")

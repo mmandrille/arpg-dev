@@ -16,6 +16,11 @@ var price: int = 0
 var affordable: bool = false
 var gold: int = 0
 var debug_enabled: bool = false
+var resource_wallet: Dictionary = {}
+var respec_resource_item_def_id: String = ""
+var respec_resource_count: int = 0
+var revive_resource_item_def_id: String = ""
+var revive_resource_count: int = 0
 
 var _panel: DraggableWindow
 var _title_label: Label
@@ -37,12 +42,14 @@ func _ready() -> void:
 	visible = false
 
 
-func show_bishop(next_entity_id: String, next_service_id: String, next_price: int, next_affordable: bool, next_gold: int) -> void:
+func show_bishop(next_entity_id: String, next_service_id: String, next_price: int, next_affordable: bool, next_gold: int, next_resource_wallet: Dictionary = {}) -> void:
 	bishop_entity_id = next_entity_id
 	service_id = next_service_id
 	price = max(0, next_price)
-	affordable = next_affordable
 	gold = max(0, next_gold)
+	resource_wallet = next_resource_wallet.duplicate(true)
+	_load_bishop_config()
+	affordable = next_affordable and _respec_cost_available()
 	if _status_label != null:
 		_status_label.text = ""
 	visible = true
@@ -51,7 +58,13 @@ func show_bishop(next_entity_id: String, next_service_id: String, next_price: in
 
 func set_gold(next_gold: int) -> void:
 	gold = max(0, next_gold)
-	affordable = gold >= price
+	affordable = _respec_cost_available()
+	_render()
+
+
+func set_resource_wallet(next_resource_wallet: Dictionary) -> void:
+	resource_wallet = next_resource_wallet.duplicate(true)
+	affordable = _respec_cost_available()
 	_render()
 
 
@@ -84,6 +97,14 @@ func get_debug_state() -> Dictionary:
 		"price": price,
 		"gold": gold,
 		"affordable": affordable,
+		"resource_item_def_id": respec_resource_item_def_id,
+		"resource_required_count": respec_resource_count,
+		"resource_wallet_count": _resource_wallet_count(respec_resource_item_def_id),
+		"revive_resource_item_def_id": revive_resource_item_def_id,
+		"revive_resource_required_count": revive_resource_count,
+		"revive_resource_wallet_count": _resource_wallet_count(revive_resource_item_def_id),
+		"respec_text": _respec_button.text if _respec_button != null else "",
+		"revive_all_text": _revive_all_button.text if _revive_all_button != null else "",
 		"respec_enabled": _respec_enabled(),
 		"revive_all_enabled": _revive_all_enabled(),
 		"debug_enabled": debug_enabled,
@@ -191,28 +212,34 @@ func _render() -> void:
 	if _body_label != null:
 		_body_label.text = "Restored health and mana."
 	if _respec_button != null:
-		_respec_button.text = "Respec" if price == 0 else "Respec - %d gold" % price
+		_respec_button.text = _service_button_text("Respec", price, respec_resource_item_def_id, respec_resource_count)
 		_respec_button.disabled = not _respec_enabled()
 	if _revive_all_button != null:
+		_revive_all_button.text = _service_button_text("Revive all", 0, revive_resource_item_def_id, revive_resource_count)
 		_revive_all_button.disabled = not _revive_all_enabled()
 	for button in [_debug_level_button, _debug_skill_button, _debug_stat_button]:
 		if button != null:
 			button.visible = debug_enabled
 			button.disabled = not _debug_action_enabled()
 	if _status_label != null and _status_label.text == "":
-		_status_label.text = "Gold: %d" % gold
+		_status_label.text = "Gold: %d | %s | %s" % [
+			gold,
+			_resource_requirement_text(respec_resource_item_def_id, respec_resource_count),
+			_resource_requirement_text(revive_resource_item_def_id, revive_resource_count),
+		]
 		_status_label.add_theme_color_override("font_color", Color("#d9c8b5"))
 
 
 func _emit_respec() -> void:
 	if not _respec_enabled():
-		show_status("Not enough gold", true)
+		show_status(_missing_cost_text(price, respec_resource_item_def_id, respec_resource_count), true)
 		return
 	respec_requested.emit(bishop_entity_id)
 
 
 func _emit_revive_all() -> void:
 	if not _revive_all_enabled():
+		show_status(_missing_cost_text(0, revive_resource_item_def_id, revive_resource_count), true)
 		return
 	revive_all_requested.emit(bishop_entity_id)
 
@@ -224,15 +251,85 @@ func _emit_debug(action: String) -> void:
 
 
 func _respec_enabled() -> bool:
-	return _interactive and visible and bishop_entity_id != "" and affordable and gold >= price
+	return _interactive and visible and bishop_entity_id != "" and affordable and _respec_cost_available()
 
 
 func _revive_all_enabled() -> bool:
-	return _interactive and visible and bishop_entity_id != ""
+	return _interactive and visible and bishop_entity_id != "" and _resource_available(revive_resource_item_def_id, revive_resource_count)
 
 
 func _debug_action_enabled() -> bool:
 	return _interactive and visible and bishop_entity_id != "" and debug_enabled
+
+
+func _load_bishop_config() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/main_config.v0.json")
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return
+	var parsed = JSON.parse_string(file.get_as_text())
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return
+	var gameplay: Dictionary = (parsed as Dictionary).get("gameplay", {})
+	respec_resource_item_def_id = str(gameplay.get("bishop_respec_resource_item_def_id", respec_resource_item_def_id))
+	respec_resource_count = max(0, int(gameplay.get("bishop_respec_resource_count", respec_resource_count)))
+	revive_resource_item_def_id = str(gameplay.get("bishop_revive_resource_item_def_id", revive_resource_item_def_id))
+	revive_resource_count = max(0, int(gameplay.get("bishop_revive_resource_count", revive_resource_count)))
+
+
+func _respec_cost_available() -> bool:
+	return gold >= price and _resource_available(respec_resource_item_def_id, respec_resource_count)
+
+
+func _resource_available(resource_id: String, required_count: int) -> bool:
+	return required_count <= 0 or _resource_wallet_count(resource_id) >= required_count
+
+
+func _resource_wallet_count(resource_id: String) -> int:
+	if resource_id == "":
+		return 0
+	return max(0, int(resource_wallet.get(resource_id, 0)))
+
+
+func _service_button_text(label: String, gold_cost: int, resource_id: String, required_count: int) -> String:
+	var costs: Array[String] = []
+	if gold_cost > 0:
+		costs.append("%d gold" % gold_cost)
+	if required_count > 0:
+		costs.append("%s x%d" % [_resource_label(resource_id), required_count])
+	if costs.is_empty():
+		return label
+	return "%s - %s" % [label, " + ".join(costs)]
+
+
+func _resource_requirement_text(resource_id: String, required_count: int) -> String:
+	if required_count <= 0:
+		return "No badge"
+	return "%s %d/%d" % [_resource_label(resource_id), _resource_wallet_count(resource_id), required_count]
+
+
+func _missing_cost_text(gold_cost: int, resource_id: String, required_count: int) -> String:
+	if gold < gold_cost:
+		return "Not enough gold"
+	if required_count > 0:
+		return "Need %s" % _resource_requirement_text(resource_id, required_count)
+	return "Unavailable"
+
+
+func _resource_label(resource_id: String) -> String:
+	match resource_id:
+		"respec_badge":
+			return "Respec"
+		"resurrection_badge":
+			return "Resurrect"
+		"stat_badge":
+			return "Stat"
+		"skill_badge":
+			return "Skill"
+		"upgrade_shard":
+			return "Upgrade"
+		_:
+			return resource_id.replace("_", " ").capitalize()
 
 
 func _reposition_panel() -> void:

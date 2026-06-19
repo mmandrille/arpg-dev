@@ -1,10 +1,10 @@
 {
   "id": "town_bishop_respec",
-  "world_id": "vendor_lab",
-  "seed": "v92_town_bishop_respec",
+  "world_id": "quest_turn_in_lab",
+  "seed": "v293_town_bishop_respec",
   "character_class": "sorcerer",
   "title": "Town bishop respec",
-  "description": "Open the town bishop service and perform a free full respec.",
+  "description": "Earn a respec badge from a quest turn-in, open the town bishop service, and spend the badge on a full respec.",
   "debug_progression": {
     "level": 6,
     "experience": 270,
@@ -12,16 +12,22 @@
     "unspent_skill_points": 0,
     "stats": { "str": 4, "dex": 6, "vit": 7, "magic": 12 },
     "gold": 300,
+    "deepest_dungeon_depth": 125,
     "skill_ranks": { "magic_bolt": 2, "ice_shard": 1 }
   },
   "steps": [
+    { "action": "pick_up_loot", "item_def_id": "quest_leaf" },
+    { "action": "assert_inventory_count", "item_def_id": "quest_leaf", "equals": 1 },
+    { "action": "action_entity", "interactable_def_id": "town_quest_giver", "event_type": "quest_turn_in_completed", "timeout_s": 10 },
+    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "respec_badge", "equals": 1 }, "timeout_s": 2 },
+    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "resurrection_badge", "equals": 1 }, "timeout_s": 2 },
     { "action": "open_bishop_service" },
     {
       "action": "respec_bishop",
       "expect_progression": {
         "level": 6,
         "unspent_stat_points": 15,
-        "gold": 300,
+        "gold": 325,
         "base_stats": { "str": 3, "dex": 5, "vit": 5, "magic": 5 }
       },
       "expect_skill_progression": {
@@ -32,14 +38,20 @@
         "can_spend": true
       }
     },
+    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "respec_badge", "equals": 0 }, "timeout_s": 2 },
     { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "ice_shard", "rank": 0, "max_rank": 5, "can_spend": false }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "bishop_service_opened", "service": "bishop", "price": 0, "affordable": true },
-    { "type": "event_seen", "event_type": "bishop_respec", "service": "bishop", "price": 0, "total_gold": 300, "unspent_stat_points": 15, "unspent_skill_points": 2 },
-    { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "gold": 300, "base_stats": { "str": 3, "dex": 5, "vit": 5, "magic": 5 } },
+    { "type": "event_seen", "event_type": "quest_turn_in_completed", "service": "quest_turn_in", "amount": 1, "price": 25, "total_gold": 325 },
+    { "type": "event_seen", "event_type": "badge_rewarded", "resource_id": "respec_badge", "amount": 1, "level": 125 },
+    { "type": "event_seen", "event_type": "badge_rewarded", "resource_id": "resurrection_badge", "amount": 1, "level": 125 },
+    { "type": "event_seen", "event_type": "bishop_service_opened", "service": "bishop", "price": 0, "affordable": true, "resource_id": "respec_badge", "resource_amount": 1 },
+    { "type": "event_seen", "event_type": "bishop_respec", "service": "bishop", "price": 0, "total_gold": 325, "resource_id": "respec_badge", "resource_amount": 1, "unspent_stat_points": 15, "unspent_skill_points": 2 },
+    { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "gold": 325, "base_stats": { "str": 3, "dex": 5, "vit": 5, "magic": 5 } },
     { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true },
-    { "type": "skill_cooldown", "skill_id": "magic_bolt", "absent": true }
+    { "type": "skill_cooldown", "skill_id": "magic_bolt", "absent": true },
+    { "type": "resource_wallet_count", "resource_id": "respec_badge", "equals": 0 },
+    { "type": "resource_wallet_count", "resource_id": "resurrection_badge", "equals": 1 }
   ],
   "visual": {
     "camera": { "x": 10, "y": 12, "zoom": 1.0 }

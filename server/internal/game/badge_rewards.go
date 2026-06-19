@@ -111,7 +111,25 @@ func (s *Sim) grantWalletResourceForPlayer(playerID uint64, resourceID string, a
 	if ps == nil {
 		return 0, false
 	}
-	restore := s.players[s.playerID]
+	current := s.players[s.playerID]
+	if current != nil && current.PlayerID == playerID {
+		if s.resourceWallet == nil {
+			s.resourceWallet = make(map[string]int)
+		}
+		s.resourceWallet[resourceID] += amount
+		balance := s.resourceWallet[resourceID]
+		res.Changes = append(res.Changes, Change{
+			Op:             OpResourceWalletUpdate,
+			OwnerPlayerID:  playerID,
+			ResourceID:     resourceID,
+			ResourceAmount: intPtr(balance),
+		})
+		s.savePlayer(current)
+		return balance, true
+	}
+	if current != nil {
+		s.savePlayer(current)
+	}
 	s.usePlayer(ps)
 	if s.resourceWallet == nil {
 		s.resourceWallet = make(map[string]int)
@@ -125,8 +143,8 @@ func (s *Sim) grantWalletResourceForPlayer(playerID uint64, resourceID string, a
 		ResourceAmount: intPtr(balance),
 	})
 	s.savePlayer(ps)
-	if restore != nil {
-		s.usePlayer(restore)
+	if current != nil {
+		s.usePlayer(current)
 	}
 	return balance, true
 }

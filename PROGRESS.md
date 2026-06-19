@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v292 — badge reward foundation |
+| **Latest completed slice** | v293 — bishop badge costs |
 | **Active branch** | `main` |
-| **CI gate** | v292 focused gates green on 2026-06-19 (`make validate-shared`, `go test ./internal/game -run 'BadgeReward\|QuestTurnIn\|ResourceWallet\|BossSpecial'`, `go test ./internal/http -run TestDebugCharacterProgression`, `test_material_wallet_badges.gd`, `test_character_bar.gd`, `bot scenario=98_badge_reward_foundation`, `bot-client scenario=76_badge_reward_wallet`, `make maintainability`); selected-batch `make ci` pending |
-| **Next slice** | v293 — bishop badge costs |
+| **CI gate** | v293 focused gates green on 2026-06-19 (`make validate-shared`, `go test ./internal/game -run 'Bishop\|MainConfig\|BadgeReward\|QuestTurnIn'`, `test_bishop_panel.gd`, `test_shop_panel.gd`, `test_blacksmith_panel.gd`, `bot scenario=45_town_bishop_respec`, `bot-client scenario=32_town_bishop_respec_panel`, `bot-client scenario=39_blacksmith_upgrade_ui`, `bot-client scenario=54_material_wallet_details`, `bot-client scenario=61_material_wallet_window`, `make maintainability`); full `make ci` attempted and red on residual non-v293 broad gates |
+| **Next slice** | v294 — full-CI residual stabilization before next feature/review work |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
-| **Next engineering review** | v294 target after a green full `make ci` and the next feature batch |
+| **Next engineering review** | v294 target after full-CI residuals are stabilized |
 
 
 ### Periodic engineering reviews
@@ -87,13 +87,14 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review follow-ups remaining after v284 `$review`.** Full `make ci` is green again after
-  stabilizing the broad client bot sweep failures seen in `mercenary_recovery_ui` and
-  `door_fog_toggle`, and the model viewer now shares one generated preview catalog between Python
-  tooling and Godot, and deferred combat/boss wording now distinguishes shipped first passes from
-  future polish. Remaining follow-ups are future-plan scale: keep splitting the next touched large
-  coordinators/validators, continue the tuning-friendly rule-test audit, and resolve unverified
-  local GLB provenance before production distribution.
+- **Full-CI residuals after v293.** Focused v293 badge/bishop gates are green, and the in-scope
+  `Upgrade Badge` label drift was fixed in wallet/blacksmith tests. Full `make ci` still needs a
+  stabilization pass before the next repo-wide green gate: `TestEliteMinionFollowsLeaderWithoutPassiveAggro`,
+  protocol `mercenary_hiring_board` / `mercenary_death_loss`, and older broad client combat/boss/
+  mercenary scenarios were red in the 2026-06-19 attempt.
+- **Review follow-ups remaining after v284 `$review`.** Remaining follow-ups are future-plan scale:
+  keep splitting the next touched large coordinators/validators, continue the tuning-friendly
+  rule-test audit, and resolve unverified local GLB provenance before production distribution.
 
 ### Other deferred items (from specs / ADRs)
 

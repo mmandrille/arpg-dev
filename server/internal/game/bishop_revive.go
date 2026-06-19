@@ -15,12 +15,20 @@ func (s *Sim) handleBishopReviveAll(in Input, res *TickResult) {
 		res.reject(in.MessageID, "player_dead")
 		return
 	}
+	resourceCost := s.bishopReviveResourceCost()
+	if !s.canPayBishopResourceCost(resourceCost) {
+		res.reject(in.MessageID, "missing_resource")
+		return
+	}
+	s.consumeBishopResourceCost(resourceCost, res)
 	res.Events = append(res.Events, Event{
-		EventType:     "bishop_revive_all",
-		EntityID:      idStr(bishopEntity.id),
-		CorrelationID: in.CorrelationID,
-		Service:       "bishop",
-		Amount:        intPtr(0),
+		EventType:      "bishop_revive_all",
+		EntityID:       idStr(bishopEntity.id),
+		CorrelationID:  in.CorrelationID,
+		Service:        "bishop",
+		Amount:         intPtr(0),
+		ResourceID:     resourceCost.ResourceID,
+		ResourceAmount: intPtr(resourceCost.Count),
 	})
 	res.ack(in.MessageID)
 }

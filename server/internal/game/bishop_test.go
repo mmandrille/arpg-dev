@@ -47,13 +47,14 @@ func TestBishopServiceRestoresResourcesOnOpen(t *testing.T) {
 		t.Fatalf("resources after bishop open hp/mana=%d/%d max=%d/%d", player.hp, player.mana, player.maxHP, player.maxMana)
 	}
 	ev := findEvent(open.Events, "bishop_service_opened")
-	wantAffordable := sim.gold >= sim.rules.MainConfig.Gameplay.RespecCostGold
-	if ev == nil || ev.Price == nil || *ev.Price != sim.rules.MainConfig.Gameplay.RespecCostGold || ev.Affordable == nil || *ev.Affordable != wantAffordable {
+	wantCost := sim.bishopRespecResourceCost()
+	wantAffordable := sim.gold >= sim.rules.MainConfig.Gameplay.RespecCostGold && sim.canPayBishopResourceCost(wantCost)
+	if ev == nil || ev.Price == nil || *ev.Price != sim.rules.MainConfig.Gameplay.RespecCostGold || ev.Affordable == nil || *ev.Affordable != wantAffordable || ev.ResourceID != wantCost.ResourceID || ev.ResourceAmount == nil || *ev.ResourceAmount != wantCost.Count {
 		t.Fatalf("bishop service event = %+v", ev)
 	}
 }
 
-func TestBishopRespecRefundsBuildForFree(t *testing.T) {
+func TestBishopRespecConsumesBadgeAndRefundsBuild(t *testing.T) {
 	sim, err := NewSimWithWorld("sess_bishop_respec", "v92_bishop_respec", loadRules(t), "vendor_lab")
 	if err != nil {
 		t.Fatal(err)
@@ -69,6 +70,7 @@ func TestBishopRespecRefundsBuildForFree(t *testing.T) {
 	sim.progression.SkillRanks = map[string]int{"magic_bolt": 2, "ice_shard": 1}
 	sim.progression.Gold = 300
 	sim.gold = 300
+	sim.resourceWallet["respec_badge"] = 1
 	player.maxHP = sCurrentMaxHP(t, sim)
 	player.maxMana = sim.currentMaxMana()
 	player.hp = 1
@@ -87,6 +89,9 @@ func TestBishopRespecRefundsBuildForFree(t *testing.T) {
 	if sim.gold != 300 || sim.progression.Gold != 300 {
 		t.Fatalf("gold after respec sim/progression=%d/%d, want 300", sim.gold, sim.progression.Gold)
 	}
+	if got := sim.resourceWallet["respec_badge"]; got != 0 {
+		t.Fatalf("respec badge after respec = %d, want 0", got)
+	}
 	wantStats := sim.rules.CharacterProgression.Classes["sorcerer"].BaseStats
 	if sim.progression.BaseStats != wantStats {
 		t.Fatalf("base stats after respec = %+v, want %+v", sim.progression.BaseStats, wantStats)
@@ -103,12 +108,52 @@ func TestBishopRespecRefundsBuildForFree(t *testing.T) {
 	if player.hp != player.maxHP || player.mana != player.maxMana {
 		t.Fatalf("resources after respec hp/mana=%d/%d max=%d/%d", player.hp, player.mana, player.maxHP, player.maxMana)
 	}
-	if ev := findEvent(respec.Events, "bishop_respec"); ev == nil || ev.Price == nil || *ev.Price != 0 || ev.TotalGold == nil || *ev.TotalGold != 300 {
+	if ev := findEvent(respec.Events, "bishop_respec"); ev == nil || ev.Price == nil || *ev.Price != 0 || ev.TotalGold == nil || *ev.TotalGold != 300 || ev.ResourceID != "respec_badge" || ev.ResourceAmount == nil || *ev.ResourceAmount != 1 {
 		t.Fatalf("bishop_respec event = %+v", ev)
+	}
+	assertResourceWalletUpdate(t, respec, "respec_badge", 0)
+}
+
+func TestBishopRespecPreservesEarnedQuestGold(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_respec_quest_gold", "v293_bishop_respec_quest_gold", loadRules(t), "quest_turn_in_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	giver := findInteractableByDefID(t, sim, "town_quest_giver")
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: giver.pos.X - 0.5, Y: giver.pos.Y}
+	sim.progression.Gold = 300
+	sim.progression.DeepestDungeonDepth = 125
+	sim.gold = 300
+	addStaticInventoryItem(sim, 29301, sim.rules.MainConfig.Gameplay.QuestTurnInItemDefID)
+	sim.savePlayer(sim.defaultPlayer())
+
+	turnIn := sim.Tick([]Input{{
+		MessageID: "turn_in_quest",
+		Type:      "action_intent",
+		Action:    &ActionIntent{TargetID: idStr(giver.id)},
+	}})
+	assertAck(t, turnIn, "turn_in_quest")
+	wantGold := 300 + sim.rules.MainConfig.Gameplay.QuestTurnInRewardGold
+	if sim.gold != wantGold || sim.resourceWallet["respec_badge"] != 1 {
+		t.Fatalf("quest turn-in gold/wallet = %d/%+v, want gold=%d respec_badge=1", sim.gold, sim.resourceWallet, wantGold)
+	}
+
+	player.pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	respec := sim.Tick([]Input{{
+		MessageID:    "respec_after_quest",
+		Type:         "bishop_respec_intent",
+		BishopRespec: &BishopRespecIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertAck(t, respec, "respec_after_quest")
+	if sim.gold != wantGold || sim.progression.Gold != wantGold {
+		t.Fatalf("gold after quest-funded respec sim/progression=%d/%d, want %d", sim.gold, sim.progression.Gold, wantGold)
 	}
 }
 
-func TestBishopRespecAllowsNoGold(t *testing.T) {
+func TestBishopRespecRequiresBadge(t *testing.T) {
 	sim, err := NewSimWithWorld("sess_bishop_poor", "v92_bishop_poor", loadRules(t), "vendor_lab")
 	if err != nil {
 		t.Fatal(err)
@@ -128,9 +173,9 @@ func TestBishopRespecAllowsNoGold(t *testing.T) {
 		BishopRespec: &BishopRespecIntent{BishopEntityID: idStr(bishop.id)},
 	}})
 
-	assertAck(t, respec, "poor_respec")
-	if sim.gold != 249 || sim.progression.BaseStats.Vit != sim.rules.CharacterProgression.BaseStats.Vit || len(sim.progression.SkillRanks) != 0 {
-		t.Fatalf("free respec state: gold=%d progression=%+v", sim.gold, sim.progression)
+	assertReject(t, respec, "poor_respec", "missing_resource")
+	if sim.gold != 249 || sim.progression.BaseStats.Vit == sim.rules.CharacterProgression.BaseStats.Vit || len(sim.progression.SkillRanks) == 0 {
+		t.Fatalf("rejected respec mutated state: gold=%d progression=%+v", sim.gold, sim.progression)
 	}
 }
 
@@ -141,6 +186,8 @@ func TestBishopReviveAllRequiresBishopRange(t *testing.T) {
 	}
 	bishop := findInteractableByDefID(t, sim, "town_bishop")
 	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	sim.resourceWallet["resurrection_badge"] = 1
+	sim.savePlayer(sim.defaultPlayer())
 
 	res := sim.Tick([]Input{{
 		MessageID:       "revive_all",
@@ -150,9 +197,30 @@ func TestBishopReviveAllRequiresBishopRange(t *testing.T) {
 	}})
 
 	assertAck(t, res, "revive_all")
-	if ev := findEvent(res.Events, "bishop_revive_all"); ev == nil || ev.Service != "bishop" || ev.Amount == nil || *ev.Amount != 0 {
+	if got := sim.resourceWallet["resurrection_badge"]; got != 0 {
+		t.Fatalf("resurrection badge after revive all = %d, want 0", got)
+	}
+	if ev := findEvent(res.Events, "bishop_revive_all"); ev == nil || ev.Service != "bishop" || ev.Amount == nil || *ev.Amount != 0 || ev.ResourceID != "resurrection_badge" || ev.ResourceAmount == nil || *ev.ResourceAmount != 1 {
 		t.Fatalf("bishop_revive_all event = %+v", ev)
 	}
+	assertResourceWalletUpdate(t, res, "resurrection_badge", 0)
+}
+
+func TestBishopReviveAllRequiresBadge(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_revive_badge_required", "v213_bishop_revive_badge_required", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+
+	res := sim.Tick([]Input{{
+		MessageID:       "revive_all_no_badge",
+		Type:            "bishop_revive_all_intent",
+		BishopReviveAll: &BishopReviveAllIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertReject(t, res, "revive_all_no_badge", "missing_resource")
 }
 
 func TestBishopDebugLevelRequiresGameplayDebug(t *testing.T) {
@@ -263,4 +331,14 @@ func findInteractableByDefID(t *testing.T, sim *Sim, defID string) *entity {
 func sCurrentMaxHP(t *testing.T, sim *Sim) int {
 	t.Helper()
 	return sim.currentMaxHP()
+}
+
+func assertResourceWalletUpdate(t *testing.T, res TickResult, resourceID string, amount int) {
+	t.Helper()
+	for _, change := range res.Changes {
+		if change.Op == OpResourceWalletUpdate && change.ResourceID == resourceID && change.ResourceAmount != nil && *change.ResourceAmount == amount {
+			return
+		}
+	}
+	t.Fatalf("missing resource wallet update %s=%d changes=%+v", resourceID, amount, res.Changes)
 }

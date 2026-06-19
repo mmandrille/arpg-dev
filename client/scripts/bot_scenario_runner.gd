@@ -432,7 +432,7 @@ func _event_matches(step: Dictionary, event) -> bool:
 			return false
 	if step.has("event_state") and str(ev.get("state", "")) != str(step.get("event_state", "")):
 		return false
-	for key in ["damage", "raw_damage", "mitigated_damage", "price", "total_gold", "level", "from_level", "to_level", "rank", "mana", "remaining_ticks", "total_ticks", "amount", "unspent_skill_points"]:
+	for key in ["damage", "raw_damage", "mitigated_damage", "price", "total_gold", "level", "from_level", "to_level", "rank", "mana", "remaining_ticks", "total_ticks", "amount", "resource_amount", "unspent_skill_points"]:
 		if step.has(key) and int(ev.get(key, -999999)) != int(step.get(key, 0)):
 			return false
 	if step.has("min_damage") and int(ev.get("damage", -999999)) < int(step.get("min_damage", 0)):
@@ -933,13 +933,21 @@ func _assert_market_offer_rows(step: Dictionary, state: Dictionary) -> bool:
 
 func _bishop_panel_matches(step: Dictionary, state: Dictionary) -> bool:
 	var panel: Dictionary = state.get("bishop_panel", {})
-	for key in ["price", "gold"]:
+	for key in ["price", "gold", "resource_required_count", "resource_wallet_count", "revive_resource_required_count", "revive_resource_wallet_count"]:
 		if step.has(key) and int(panel.get(key, -1)) != int(step.get(key, 0)):
 			return false
 	for key in ["affordable", "respec_enabled", "revive_all_enabled", "visible", "debug_enabled"]:
 		if step.has(key) and bool(panel.get(key, false)) != bool(step.get(key, false)):
 			return false
 	if step.has("service_id") and str(panel.get("service_id", "")) != str(step.get("service_id", "")):
+		return false
+	if step.has("resource_item_def_id") and str(panel.get("resource_item_def_id", "")) != str(step.get("resource_item_def_id", "")):
+		return false
+	if step.has("revive_resource_item_def_id") and str(panel.get("revive_resource_item_def_id", "")) != str(step.get("revive_resource_item_def_id", "")):
+		return false
+	if step.has("respec_text_contains") and not str(panel.get("respec_text", "")).contains(str(step.get("respec_text_contains", ""))):
+		return false
+	if step.has("revive_text_contains") and not str(panel.get("revive_all_text", "")).contains(str(step.get("revive_text_contains", ""))):
 		return false
 	if step.has("status_contains") and not str(panel.get("status", "")).contains(str(step.get("status_contains", ""))):
 		return false

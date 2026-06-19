@@ -1750,35 +1750,6 @@ func (s *Sim) openStash(e *entity, stashID string, in Input, res *TickResult, ac
 	}
 }
 
-func (s *Sim) openBishopService(e *entity, in Input, res *TickResult, ack bool) {
-	if e.state != interactableReady {
-		res.reject(in.MessageID, "not_actionable")
-		return
-	}
-	player := s.activeLevel().entities[s.playerID]
-	if player == nil || player.hp <= 0 {
-		res.reject(in.MessageID, "player_dead")
-		return
-	}
-	healed, restored := s.restorePlayerResources(player, res)
-	cost := s.respecCostGold()
-	affordable := s.gold >= cost
-	res.Events = append(res.Events, Event{
-		EventType:     "bishop_service_opened",
-		EntityID:      idStr(e.id),
-		CorrelationID: in.CorrelationID,
-		Service:       "bishop",
-		Heal:          intPtr(healed),
-		Mana:          intPtr(restored),
-		Price:         intPtr(cost),
-		Affordable:    boolPtr(affordable),
-		TotalGold:     intPtr(s.gold),
-	})
-	if ack {
-		res.ack(in.MessageID)
-	}
-}
-
 func (s *Sim) appendStashGoldChanges(res *TickResult, transferID string) {
 	res.Changes = append(res.Changes, Change{Op: OpStashGoldUpdate, StashGold: intPtr(s.stashGold), StashTransferID: transferID})
 	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold), StashTransferID: transferID})

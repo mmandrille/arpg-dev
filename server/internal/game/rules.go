@@ -47,24 +47,28 @@ type MainConfig struct {
 }
 
 type MainGameplayConfig struct {
-	BaseAttackIntervalTicks int               `json:"base_attack_interval_ticks"`
-	BaseMovementSpeed       float64           `json:"base_movement_speed"`
-	BaseDropRatePercent     int               `json:"base_drop_rate_percent"`
-	RespecCostGold          int               `json:"respec_cost_gold"`
-	ItemUpgradeCostGold     int               `json:"item_upgrade_cost_gold"`
-	ItemUpgradeCostGrowth   int               `json:"item_upgrade_cost_growth_per_level"`
-	ItemUpgradeMaxLevel     int               `json:"item_upgrade_max_level"`
-	ItemUpgradeSuccessPct   int               `json:"item_upgrade_success_chance_percent"`
-	ItemUpgradePityFailures int               `json:"item_upgrade_pity_failure_threshold"`
-	ItemUpgradeResourceID   string            `json:"item_upgrade_resource_item_def_id"`
-	ItemUpgradeResourceCost int               `json:"item_upgrade_resource_count"`
-	BadgeRewardRules        []BadgeRewardRule `json:"badge_reward_rules"`
-	MercenaryHireCostGold   int               `json:"mercenary_hire_cost_gold"`
-	QuestTurnInItemDefID    string            `json:"quest_turn_in_item_def_id"`
-	QuestTurnInRewardGold   int               `json:"quest_turn_in_reward_gold"`
-	CompanionAssistRadius   float64           `json:"companion_assist_radius"`
-	CompanionFollowDistance float64           `json:"companion_follow_distance"`
-	CompanionFollowStop     float64           `json:"companion_follow_stop_radius"`
+	BaseAttackIntervalTicks  int               `json:"base_attack_interval_ticks"`
+	BaseMovementSpeed        float64           `json:"base_movement_speed"`
+	BaseDropRatePercent      int               `json:"base_drop_rate_percent"`
+	RespecCostGold           int               `json:"respec_cost_gold"`
+	BishopRespecResourceID   string            `json:"bishop_respec_resource_item_def_id"`
+	BishopRespecResourceCost int               `json:"bishop_respec_resource_count"`
+	BishopReviveResourceID   string            `json:"bishop_revive_resource_item_def_id"`
+	BishopReviveResourceCost int               `json:"bishop_revive_resource_count"`
+	ItemUpgradeCostGold      int               `json:"item_upgrade_cost_gold"`
+	ItemUpgradeCostGrowth    int               `json:"item_upgrade_cost_growth_per_level"`
+	ItemUpgradeMaxLevel      int               `json:"item_upgrade_max_level"`
+	ItemUpgradeSuccessPct    int               `json:"item_upgrade_success_chance_percent"`
+	ItemUpgradePityFailures  int               `json:"item_upgrade_pity_failure_threshold"`
+	ItemUpgradeResourceID    string            `json:"item_upgrade_resource_item_def_id"`
+	ItemUpgradeResourceCost  int               `json:"item_upgrade_resource_count"`
+	BadgeRewardRules         []BadgeRewardRule `json:"badge_reward_rules"`
+	MercenaryHireCostGold    int               `json:"mercenary_hire_cost_gold"`
+	QuestTurnInItemDefID     string            `json:"quest_turn_in_item_def_id"`
+	QuestTurnInRewardGold    int               `json:"quest_turn_in_reward_gold"`
+	CompanionAssistRadius    float64           `json:"companion_assist_radius"`
+	CompanionFollowDistance  float64           `json:"companion_follow_distance"`
+	CompanionFollowStop      float64           `json:"companion_follow_stop_radius"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.

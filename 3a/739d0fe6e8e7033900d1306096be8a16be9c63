@@ -1,0 +1,48 @@
+docs/specs/v278_spec-biped-monster-rigged-animations.md
+  s_b9bc0033a850dd::t_0a80697d736310 3
+  s_b9bc0033a850dd::t_8396997b0114a2 1-2,4-63
+docs/plans/v278_2026-06-19-biped-monster-rigged-animations.md
+  s_b9bc0033a850dd::t_8396997b0114a2 1-2,4-36,38,41-42,44-49,55-63,67-79,84-97,101-107,113-114
+  s_b9bc0033a850dd::t_0a80697d736310 3,37,39-40,43,50-54,64-66,80-83,98-100,108-112
+PROGRESS.md
+  s_b9bc0033a850dd::t_0a80697d736310 26,28-29,31
+docs/progress/slice-lifecycle.md
+  s_b9bc0033a850dd::t_0a80697d736310 293
+tools/assets/test_rig_monster_glbs.py
+  s_b9bc0033a850dd::t_34fbc7c41561cb 1-16
+client/tests/test_animation.gd
+  s_b9bc0033a850dd::t_31f81d8111ddfe 360-362,366-368,377-379,383-385,444-449
+tools/assets/rig_monster_glbs.py
+  s_b9bc0033a850dd::t_34fbc7c41561cb 1-54
+assets/manifests/assets.v0.json
+  s_b9bc0033a850dd::t_8c175f1cb31b8e 230
+  s_b9bc0033a850dd::t_fd76af9b5f9c9d 234,243,247
+client/animations/monster_crocodile_archer_anims.tres
+  s_b9bc0033a850dd::t_25c9ac0e3d0849 5,8,11,15,18-25,32,35,42,45,49,52,55,60,63,66,70,73-87
+docs/as-built/v278_biped-monster-rigged-animations.md
+  s_b9bc0033a850dd::t_0a80697d736310 1-43
+client/animations/monster_dark_purple_anims.tres
+  s_b9bc0033a850dd::t_25c9ac0e3d0849 3,5,8,11,15,18-28,35,38,42,45,48,53,56,59,63,66-80,84
+make/shared.mk
+  s_b9bc0033a850dd::t_34fbc7c41561cb 13
+client/scenes/monster_crocodile_archer.tscn
+  s_b9bc0033a850dd::t_25c9ac0e3d0849 16
+client/scenes/monster_dark_purple.tscn
+  s_b9bc0033a850dd::t_25c9ac0e3d0849 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3a739d0fe6e8e7033900d1306096be8a16be9c63",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

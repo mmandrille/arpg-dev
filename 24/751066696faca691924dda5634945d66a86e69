@@ -1,0 +1,19 @@
+PROGRESS.md
+  s_28ff1bdb2acafe::t_3a89afa1da7b47 29,93-96,103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "24751066696faca691924dda5634945d66a86e69",
+  "prompts": {},
+  "sessions": {
+    "s_28ff1bdb2acafe": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee00a-72c5-7c00-845a-7f8ad232f812",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

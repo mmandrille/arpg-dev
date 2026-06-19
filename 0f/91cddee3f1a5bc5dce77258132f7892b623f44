@@ -1,0 +1,19 @@
+client/scripts/main.gd
+  s_8ac650870d633e::t_95c8c0d5fc97bb 3417
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0f91cddee3f1a5bc5dce77258132f7892b623f44",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

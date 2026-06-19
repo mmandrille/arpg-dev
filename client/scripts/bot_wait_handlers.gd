@@ -6,6 +6,7 @@ const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_obje
 const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 const BotMarketReceiptAssertionsScript := preload("res://scripts/bot_market_receipt_assertions.gd")
+const BotAssertionHandlersScript := preload("res://scripts/bot_assertion_handlers.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -36,6 +37,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return runner._presentation_matches(step, state)
 		"wait_wall_layout":
 			return runner._wall_layout_matches(step, state)
+		"wait_fog_of_war":
+			return BotAssertionHandlersScript.fog_of_war_matches(step, state)
 		"wait_shop_panel":
 			if not bool(state.get("shop_panel_visible", false)):
 				return false

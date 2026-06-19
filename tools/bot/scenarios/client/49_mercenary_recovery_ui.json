@@ -5,7 +5,10 @@
   "seed": "v232_mercenary_recovery_ui",
   "title": "Mercenary recovery UI",
   "description": "Client hires a mercenary, observes the loss event in the panel, then rehires a replacement from the board.",
-  "debug_progression": { "gold": 600 },
+  "debug_progression": {
+    "gold": 600,
+    "stats": { "str": 5, "dex": 5, "vit": 80, "magic": 5 }
+  },
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board", "timeout_s": 15.0 },

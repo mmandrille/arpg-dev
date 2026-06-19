@@ -1574,6 +1574,8 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 			return "presentation=%s" % str(step)
 		"wait_wall_layout", "assert_wall_layout":
 			return "wall_layout=%s" % str(step)
+		"wait_fog_of_war", "assert_fog_of_war":
+			return "fog_of_war=%s" % str(step)
 		"wait_shop_panel", "assert_shop_offer_count", "assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", \
 		"assert_shop_offer_details", "assert_shop_sell_details", \
 		"click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item":

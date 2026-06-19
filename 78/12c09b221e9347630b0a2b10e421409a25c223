@@ -1,0 +1,58 @@
+CLAUDE.md
+  s_975039409487b4::t_948dcfdc0096a3 42-44
+docs/as-built/v284_model-viewer-tool.md
+  s_975039409487b4::t_0f1596f918741c 1-58
+docs/progress/slice-codename-index.md
+  s_975039409487b4::t_0f1596f918741c 230
+client/tests/test_model_viewer.gd.uid
+  s_975039409487b4::t_22d5b381686e63 1
+tools/assets/model_catalog.py
+  s_975039409487b4::t_271f059d26852b 1-151
+docs/progress/slice-lifecycle.md
+  s_975039409487b4::t_0f1596f918741c 299
+client/tests/test_model_viewer.gd
+  s_975039409487b4::t_92ea2a98dc0a7b 4,19,23,27,33
+  s_975039409487b4::t_7aa938d2d6154e 34
+  s_975039409487b4::t_7ad9658c58a1fc 1-3,5-18,20-22,24-26,28-32,35-52
+client/scripts/model_viewer.gd
+  s_975039409487b4::t_7aa938d2d6154e 15,38-39
+  s_975039409487b4::t_57ca64e63a0c4a 1-14,16-37,40-280
+tools/assets/test_model_catalog.py
+  s_975039409487b4::t_271f059d26852b 1-127
+client/scenes/model_viewer.tscn
+  s_975039409487b4::t_57ca64e63a0c4a 1-18
+docs/plans/v284_2026-06-19-model-viewer-tool.md
+  s_975039409487b4::t_1044911e6dd256 165,167,169,171
+  s_975039409487b4::t_ef65c7d8a05a3c 137,139,141,143
+  s_975039409487b4::t_349c653aaf101e 190
+  s_975039409487b4::t_6450139b2cb19a 54-59,63,65,192,194,211-217
+  s_975039409487b4::t_089094ee6f62e5 1-53,60-62,64,66-79,81,83,85,88,90-104,106,108,110-111,113-115,117,119,121-136,138,140,142,144-164,166,168,170,172-189,191,193,195-210,218-224
+  s_975039409487b4::t_7547031eb58b29 80,82,84,86-87,89
+  s_975039409487b4::t_5e3592a879acfd 105,107,109,112,116,118,120
+docs/specs/v284_spec-model-viewer-tool.md
+  s_975039409487b4::t_205a3d26d063b6 1-151
+PROGRESS.md
+  s_975039409487b4::t_0f1596f918741c 26,28-29,31
+client/scripts/model_viewer.gd.uid
+  s_975039409487b4::t_22d5b381686e63 1
+scripts/client_smoke.sh
+  s_975039409487b4::t_7ad9658c58a1fc 104
+make/client.mk
+  s_975039409487b4::t_a812a31eef207f 2,26-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7812c09b221e9347630b0a2b10e421409a25c223",
+  "prompts": {},
+  "sessions": {
+    "s_975039409487b4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edffe-93b7-7ae3-a4a6-4851e2121560",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

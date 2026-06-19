@@ -309,45 +309,41 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 	return true
 
 
+static func fog_of_war_matches(step: Dictionary, state: Dictionary) -> bool:
+	return _fog_of_war_mismatch(step, state) == ""
+
+
 static func _assert_fog_of_war(runner, step: Dictionary, state: Dictionary) -> bool:
+	var mismatch := _fog_of_war_mismatch(step, state)
+	if mismatch != "":
+		runner._fail("assert_fog_of_war failed: %s step=%d scenario=%s" % [
+			mismatch, runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
+	return true
+
+
+static func _fog_of_war_mismatch(step: Dictionary, state: Dictionary) -> String:
 	var fog: Dictionary = state.get("fog_of_war", {})
 	for key in ["enabled", "active", "organic_edge_enabled"]:
 		if step.has(key) and bool(fog.get(key, false)) != bool(step.get(key, true)):
-			runner._fail("assert_fog_of_war failed: %s want=%s got=%s fog=%s step=%d scenario=%s" % [
-				key, str(step.get(key, true)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
-			])
-			return false
+			return "%s want=%s got=%s fog=%s" % [key, str(step.get(key, true)), str(fog.get(key, null)), str(fog)]
 	for key in ["light_radius", "gloom_radius", "organic_edge_px", "darkness_feather_px", "shadow_core_alpha", "shadow_gloom_alpha"]:
 		var min_key := "%s_min" % key
 		var max_key := "%s_max" % key
 		if step.has(min_key) and float(fog.get(key, 0.0)) < float(step.get(min_key, 0.0)):
-			runner._fail("assert_fog_of_war failed: %s want_min=%s got=%s fog=%s step=%d scenario=%s" % [
-				key, str(step.get(min_key, 0.0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
-			])
-			return false
+			return "%s want_min=%s got=%s fog=%s" % [key, str(step.get(min_key, 0.0)), str(fog.get(key, null)), str(fog)]
 		if step.has(max_key) and float(fog.get(key, 0.0)) > float(step.get(max_key, 0.0)):
-			runner._fail("assert_fog_of_war failed: %s want_max=%s got=%s fog=%s step=%d scenario=%s" % [
-				key, str(step.get(max_key, 0.0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
-			])
-			return false
+			return "%s want_max=%s got=%s fog=%s" % [key, str(step.get(max_key, 0.0)), str(fog.get(key, null)), str(fog)]
 		if step.has(key) and abs(float(fog.get(key, -999999.0)) - float(step.get(key, 0.0))) > float(step.get("tolerance", 0.001)):
-			runner._fail("assert_fog_of_war failed: %s want=%s got=%s fog=%s step=%d scenario=%s" % [
-				key, str(step.get(key, 0.0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
-			])
-			return false
+			return "%s want=%s got=%s fog=%s" % [key, str(step.get(key, 0.0)), str(fog.get(key, null)), str(fog)]
 	for key in ["wall_count", "extra_occluder_count", "occluder_count", "shadow_count", "organic_edge_segments"]:
 		var min_key := "%s_min" % key
 		if step.has(min_key) and int(fog.get(key, 0)) < int(step.get(min_key, 0)):
-			runner._fail("assert_fog_of_war failed: %s want_min=%s got=%s fog=%s step=%d scenario=%s" % [
-				key, str(step.get(min_key, 0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
-			])
-			return false
+			return "%s want_min=%s got=%s fog=%s" % [key, str(step.get(min_key, 0)), str(fog.get(key, null)), str(fog)]
 		if step.has(key) and int(fog.get(key, -999999)) != int(step.get(key, 0)):
-			runner._fail("assert_fog_of_war failed: %s want=%s got=%s fog=%s step=%d scenario=%s" % [
-				key, str(step.get(key, 0)), str(fog.get(key, null)), str(fog), runner._step_index, str(runner.scenario.get("id", "?"))
-			])
-			return false
-	return true
+			return "%s want=%s got=%s fog=%s" % [key, str(step.get(key, 0)), str(fog.get(key, null)), str(fog)]
+	return ""
 
 
 static func _assert_discovery_minimap(runner, step: Dictionary, state: Dictionary) -> bool:

@@ -7,14 +7,13 @@ signal upgrade_inventory_requested(item_instance_id: String)
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
 const BlacksmithUpgradeHistoryScript := preload("res://scripts/blacksmith_upgrade_history.gd")
+const BlacksmithRecipesScript := preload("res://scripts/blacksmith_recipes.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const PANEL_SIZE := Vector2(320, 260)
 const STAGE_SLOT_SIZE := Vector2(84, 84)
 const BODY_FONT_SIZE := 18
 const DETAIL_FONT_SIZE := 15
 const ICON_FONT_SIZE := 28
-const RECIPE_ITEM_UPGRADE := "item_upgrade"
-const RECIPE_WEAPON_HONING := "weapon_honing"
 
 var blacksmith_entity_id: String = ""
 var inventory_items: Array = []
@@ -31,7 +30,7 @@ var resource_wallet: Dictionary = {}
 var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
 var staged_item: Dictionary = {}
-var _selected_recipe_id: String = RECIPE_ITEM_UPGRADE
+var _selected_recipe_id: String = BlacksmithRecipesScript.RECIPE_ITEM_UPGRADE
 var _panel: DraggableWindow
 var _status_label: Label
 var _gold_label: Label
@@ -319,7 +318,7 @@ func _emit_upgrade(item: Dictionary) -> void:
 	var level := _item_level(item)
 	var cost := _next_cost(level)
 	if not _recipe_accepts_item(item):
-		show_status("%s needs a weapon" % _selected_recipe_label(), true)
+		show_status(BlacksmithRecipesScript.rejection_message(_selected_recipe_id), true)
 		return
 	if level >= max_level:
 		show_status("Item is already at max level", true)
@@ -475,46 +474,30 @@ func _sync_recipe_selector() -> void:
 
 
 func _recipe_options() -> Array:
-	return [
-		{"id": RECIPE_ITEM_UPGRADE, "label": "Upgrade Item", "eligibility": "Eligible: Equipment", "resource_item_def_id": resource_item_def_id, "resource_required_count": resource_count, "success_chance_percent": success_chance_percent, "max_level": max_level},
-		{"id": RECIPE_WEAPON_HONING, "label": "Hone Weapon", "eligibility": "Eligible: Weapons only", "resource_item_def_id": resource_item_def_id, "resource_required_count": resource_count, "success_chance_percent": success_chance_percent, "max_level": max_level},
-	]
+	return BlacksmithRecipesScript.options(resource_item_def_id, resource_count, success_chance_percent, max_level)
 
 
 func _selected_recipe_label() -> String:
-	for option in _recipe_options():
-		if str((option as Dictionary).get("id", "")) == _selected_recipe_id:
-			return str((option as Dictionary).get("label", ""))
-	return "Upgrade Item"
+	return BlacksmithRecipesScript.label(_selected_recipe_id)
 
 
 func _selected_recipe_eligibility() -> String:
-	for option in _recipe_options():
-		if str((option as Dictionary).get("id", "")) == _selected_recipe_id:
-			return str((option as Dictionary).get("eligibility", ""))
-	return ""
+	return BlacksmithRecipesScript.eligibility(_selected_recipe_id)
 
 
 func _recipe_ids() -> Array:
-	var ids: Array = []
-	for option in _recipe_options():
-		ids.append(str((option as Dictionary).get("id", "")))
-	return ids
+	return BlacksmithRecipesScript.ids()
 
 
 func _on_recipe_selected(index: int) -> void:
 	var options := _recipe_options()
 	if index >= 0 and index < options.size():
-		_selected_recipe_id = str((options[index] as Dictionary).get("id", RECIPE_ITEM_UPGRADE))
+		_selected_recipe_id = str((options[index] as Dictionary).get("id", BlacksmithRecipesScript.RECIPE_ITEM_UPGRADE))
 		_rebuild()
 
 
 func _recipe_accepts_item(item: Dictionary) -> bool:
-	if _selected_recipe_id != RECIPE_WEAPON_HONING:
-		return true
-	var def := ItemRulesLoader.item_definition(str(item.get("item_def_id", "")))
-	var stats: Dictionary = def.get("base_stats", {})
-	return str(def.get("slot", item.get("slot", ""))) == "main_hand" and int(stats.get("damage_min", 0)) > 0 and int(stats.get("damage_max", 0)) > 0
+	return BlacksmithRecipesScript.accepts_item(_selected_recipe_id, item)
 
 
 func _item_title(item: Dictionary) -> String:

@@ -10,7 +10,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
-func TestAccountStashItemUpgradeRouteHonorsRecipeID(t *testing.T) {
+func TestBlacksmithRecipeRouteHonorsRecipeID(t *testing.T) {
 	h, db := fullServerWithStore(t)
 	ctx := context.Background()
 	suffix := ids.Token()[:12]
@@ -59,6 +59,31 @@ func TestAccountStashItemUpgradeRouteHonorsRecipeID(t *testing.T) {
 	rec = postJSON(h, "/v0/account-stash/items/recipe_shield_stash_"+suffix+"/upgrade", token, map[string]string{"recipe_id": "weapon_honing"})
 	if rec.Code != http.StatusConflict {
 		t.Fatalf("shield weapon recipe status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = postJSON(h, "/v0/account-stash/items/recipe_blade_stash_"+suffix+"/upgrade", token, map[string]string{"recipe_id": "armor_reinforcement"})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("blade armor recipe status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = postJSON(h, "/v0/account-stash/items/recipe_shield_stash_"+suffix+"/upgrade", token, map[string]string{"recipe_id": "armor_reinforcement"})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("armor recipe status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var reinforced upgradeAccountStashItemResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &reinforced); err != nil {
+		t.Fatal(err)
+	}
+	if reinforced.RecipeID != "armor_reinforcement" || reinforced.CostGold != 100 || !reinforced.Success {
+		t.Fatalf("armor recipe response = %+v", reinforced)
+	}
+	var armorStats struct {
+		ItemLevel int `json:"item_level"`
+		Armor     int `json:"armor"`
+	}
+	if err := json.Unmarshal(reinforced.Item.RolledStats, &armorStats); err != nil {
+		t.Fatal(err)
+	}
+	if armorStats.ItemLevel != 1 || armorStats.Armor != 3 {
+		t.Fatalf("armor recipe stats = %+v", armorStats)
 	}
 	rec = postJSON(h, "/v0/account-stash/items/recipe_shield_stash_"+suffix+"/upgrade", token, map[string]string{"recipe_id": "unknown_recipe"})
 	if rec.Code != http.StatusBadRequest {

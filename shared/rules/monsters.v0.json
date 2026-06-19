@@ -261,6 +261,28 @@
       "attack_cooldown_ticks": 28,
       "name_key": "monster.mercenary_guard.name"
     },
+    "mercenary_scout": {
+      "name": "Mercenary Scout",
+      "max_hp": 8,
+      "loot_table": "no_drop",
+      "xp_reward": 0,
+      "hit_chance": 0.8,
+      "crit_chance": 0.08,
+      "crit_damage": 1.5,
+      "armor": 0,
+      "block_percent": 0,
+      "behavior": "chase",
+      "aggro_radius": 0.1,
+      "assist_radius": 5,
+      "leash_radius": 10,
+      "move_speed": 0.42,
+      "attack_damage": {
+        "min": 1,
+        "max": 2
+      },
+      "attack_cooldown_ticks": 18,
+      "name_key": "monster.mercenary_scout.name"
+    },
     "dungeon_bat": {
       "name": "Cave Bat",
       "max_hp": 4,

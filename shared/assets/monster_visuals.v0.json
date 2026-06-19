@@ -127,6 +127,13 @@
       "height_offset": 0.0,
       "animation_profile": "ground_biped"
     },
+    "mercenary_scout": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "monster_dummy",
+      "scale": 0.92,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
     "dungeon_bat": {
       "asset_id": "monster_tiny_flyer_v0",
       "scene": "monster_tiny_flyer",

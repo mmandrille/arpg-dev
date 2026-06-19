@@ -270,6 +270,8 @@ func _reposition_panel() -> void:
 func _display_name(id: String) -> String:
 	if id == "mercenary_guard":
 		return "Mercenary Guard"
+	if id == "mercenary_scout":
+		return "Mercenary Scout"
 	return id.capitalize()
 
 

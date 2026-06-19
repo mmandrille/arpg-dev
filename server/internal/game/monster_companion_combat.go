@@ -79,7 +79,11 @@ func (s *Sim) finishCompanionDeath(companion *entity, killer *entity, res *TickR
 	}
 	delete(s.activeLevel().entities, companion.id)
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(companion.id)})
-	if companion.sourceSkillID != mercenaryHireSourceID || companion.monsterDefID != mercenaryGuardMonsterDefID {
+	if companion.sourceSkillID != mercenaryHireSourceID || companion.monsterDefID == "" {
+		return
+	}
+	offer, ok := s.rules.Mercenaries.OfferByMonsterDefID(companion.monsterDefID)
+	if !ok {
 		return
 	}
 	res.Events = append(res.Events, Event{
@@ -88,8 +92,8 @@ func (s *Sim) finishCompanionDeath(companion *entity, killer *entity, res *TickR
 		SourceEntityID: idStr(entityID(killer)),
 		TargetEntityID: idStr(companion.id),
 		Service:        mercenaryService,
-		OfferID:        mercenaryGuardOfferID,
-		MonsterDefID:   mercenaryGuardMonsterDefID,
+		OfferID:        offer.OfferID,
+		MonsterDefID:   companion.monsterDefID,
 	})
 }
 

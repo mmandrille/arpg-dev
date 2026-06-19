@@ -4,11 +4,20 @@ const (
 	mercenaryService           = "mercenary"
 	mercenaryGuardOfferID      = "fixed:mercenary_guard"
 	mercenaryGuardMonsterDefID = "mercenary_guard"
+	mercenaryScoutOfferID      = "fixed:mercenary_scout"
+	mercenaryScoutMonsterDefID = "mercenary_scout"
 	mercenaryHireSourceID      = "mercenary_hire"
 )
 
 func (s *Sim) mercenaryHireCostGold() int {
 	return s.rules.MainConfig.Gameplay.MercenaryHireCostGold
+}
+
+func (s *Sim) selectedMercenaryOffer(board *entity) (MercenaryOfferDef, bool) {
+	if board == nil {
+		return MercenaryOfferDef{}, false
+	}
+	return s.rules.Mercenaries.SelectOffer(s.seed, idStr(board.id))
 }
 
 func (s *Sim) hireMercenaryFromBoard(board *entity, in Input, res *TickResult, ack bool) {
@@ -25,6 +34,11 @@ func (s *Sim) hireMercenaryFromBoard(board *entity, in Input, res *TickResult, a
 		res.reject(in.MessageID, "player_dead")
 		return
 	}
+	offer, ok := s.selectedMercenaryOffer(board)
+	if !ok {
+		res.reject(in.MessageID, "invalid_offer")
+		return
+	}
 
 	cost := s.mercenaryHireCostGold()
 	affordable := s.gold >= cost
@@ -33,8 +47,8 @@ func (s *Sim) hireMercenaryFromBoard(board *entity, in Input, res *TickResult, a
 		EntityID:      idStr(board.id),
 		CorrelationID: in.CorrelationID,
 		Service:       mercenaryService,
-		OfferID:       mercenaryGuardOfferID,
-		MonsterDefID:  mercenaryGuardMonsterDefID,
+		OfferID:       offer.OfferID,
+		MonsterDefID:  offer.MonsterDefID,
 		Price:         intPtr(cost),
 		Affordable:    boolPtr(affordable),
 		TotalGold:     intPtr(s.gold),
@@ -49,7 +63,7 @@ func (s *Sim) hireMercenaryFromBoard(board *entity, in Input, res *TickResult, a
 	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
 	s.appendCharacterProgressionUpdate(res)
 
-	companion := s.spawnHiredMercenary(player, res)
+	companion := s.spawnHiredMercenary(player, offer, res)
 	if companion == nil {
 		res.reject(in.MessageID, "invalid_offer")
 		return
@@ -60,8 +74,8 @@ func (s *Sim) hireMercenaryFromBoard(board *entity, in Input, res *TickResult, a
 		TargetEntityID: idStr(companion.id),
 		CorrelationID:  in.CorrelationID,
 		Service:        mercenaryService,
-		OfferID:        mercenaryGuardOfferID,
-		MonsterDefID:   mercenaryGuardMonsterDefID,
+		OfferID:        offer.OfferID,
+		MonsterDefID:   offer.MonsterDefID,
 		Price:          intPtr(cost),
 		TotalGold:      intPtr(s.gold),
 	})
@@ -71,7 +85,7 @@ func (s *Sim) hireMercenaryFromBoard(board *entity, in Input, res *TickResult, a
 	s.savePlayer(s.defaultPlayer())
 }
 
-func (s *Sim) spawnHiredMercenary(owner *entity, res *TickResult) *entity {
+func (s *Sim) spawnHiredMercenary(owner *entity, offer MercenaryOfferDef, res *TickResult) *entity {
 	if owner == nil {
 		return nil
 	}
@@ -79,7 +93,7 @@ func (s *Sim) spawnHiredMercenary(owner *entity, res *TickResult) *entity {
 	if level == nil {
 		return nil
 	}
-	def, ok := s.rules.Monsters[mercenaryGuardMonsterDefID]
+	def, ok := s.rules.Monsters[offer.MonsterDefID]
 	if !ok {
 		return nil
 	}
@@ -91,7 +105,7 @@ func (s *Sim) spawnHiredMercenary(owner *entity, res *TickResult) *entity {
 		hp:                    def.MaxHP,
 		maxHP:                 def.MaxHP,
 		ownerID:               owner.id,
-		monsterDefID:          mercenaryGuardMonsterDefID,
+		monsterDefID:          offer.MonsterDefID,
 		lootTable:             def.LootTable,
 		speed:                 def.MoveSpeed,
 		monsterAttackDamage:   def.AttackDamage,

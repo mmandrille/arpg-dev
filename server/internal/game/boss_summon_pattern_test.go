@@ -4,16 +4,25 @@ import "testing"
 
 func TestBossSummonedAddsValidation(t *testing.T) {
 	rules := loadRules(t)
-	pattern, ok := rules.BossPatterns["summon_wolves"]
-	if !ok {
-		t.Fatal("missing summon_wolves pattern")
+	cases := []struct {
+		patternID    string
+		monsterDefID string
+	}{
+		{patternID: "summon_wolves", monsterDefID: "dungeon_wolf"},
+		{patternID: "summon_bats", monsterDefID: "dungeon_bat"},
 	}
-	if len(pattern.Phases) < 2 {
-		t.Fatalf("summon_wolves phases = %d, want at least 2", len(pattern.Phases))
-	}
-	active := pattern.Phases[1]
-	if active.SummonMonsterDefID != "dungeon_wolf" || active.SummonCount <= 0 || active.SummonRadius <= 0 {
-		t.Fatalf("summon_wolves active phase = %+v, want wolf summon metadata", active)
+	for _, tc := range cases {
+		pattern, ok := rules.BossPatterns[tc.patternID]
+		if !ok {
+			t.Fatalf("missing %s pattern", tc.patternID)
+		}
+		if len(pattern.Phases) < 2 {
+			t.Fatalf("%s phases = %d, want at least 2", tc.patternID, len(pattern.Phases))
+		}
+		active := pattern.Phases[1]
+		if active.SummonMonsterDefID != tc.monsterDefID || active.SummonCount <= 0 || active.SummonRadius <= 0 {
+			t.Fatalf("%s active phase = %+v, want %s summon metadata", tc.patternID, active, tc.monsterDefID)
+		}
 	}
 
 	patterns := map[string]BossPatternDef{
@@ -39,8 +48,17 @@ func TestBossSummonedAddsValidation(t *testing.T) {
 }
 
 func TestBossSummonedAddsSpawnOnce(t *testing.T) {
+	assertBossSummonedAddsSpawnOnce(t, "summon_wolves", "dungeon_wolf", 260)
+}
+
+func TestBossSummonedBatAddsSpawnOnce(t *testing.T) {
+	assertBossSummonedAddsSpawnOnce(t, "summon_bats", "dungeon_bat", 420)
+}
+
+func assertBossSummonedAddsSpawnOnce(t *testing.T, patternID string, monsterDefID string, maxTicks int) {
+	t.Helper()
 	rules := loadRules(t)
-	sim, err := NewSimWithWorld("sess_boss_summons", "boss_floor_gate", rules, "dungeon_levels")
+	sim, err := NewSimWithWorld("sess_boss_summons_"+patternID, "boss_floor_gate", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +73,7 @@ func TestBossSummonedAddsSpawnOnce(t *testing.T) {
 	player := level.entities[sim.playerID]
 	player.pos = Vec2{X: boss.pos.X - 6, Y: boss.pos.Y}
 
-	waitForBossPatternStart(t, sim, "summon_wolves", 260)
+	waitForBossPatternStart(t, sim, patternID, maxTicks)
 	for guard := 0; guard < 80 && boss.bossPhaseKind != "active"; guard++ {
 		sim.Tick(nil)
 	}
@@ -63,21 +81,21 @@ func TestBossSummonedAddsSpawnOnce(t *testing.T) {
 		t.Fatalf("boss phase = %s, want active summon", boss.bossPhaseKind)
 	}
 
-	before := liveMonsterCount(level, "dungeon_wolf")
+	before := liveMonsterCount(level, monsterDefID)
 	res := sim.Tick(nil)
-	after := liveMonsterCount(level, "dungeon_wolf")
-	wantSummons := rules.BossPatterns["summon_wolves"].Phases[1].SummonCount
+	after := liveMonsterCount(level, monsterDefID)
+	wantSummons := rules.BossPatterns[patternID].Phases[1].SummonCount
 	if after-before != wantSummons {
-		t.Fatalf("wolf count before/after = %d/%d, want +%d", before, after, wantSummons)
+		t.Fatalf("%s count before/after = %d/%d, want +%d", monsterDefID, before, after, wantSummons)
 	}
-	if countMonsterSpawns(res, "dungeon_wolf") != wantSummons {
-		t.Fatalf("spawn changes = %+v, want %d wolf spawns", res.Changes, wantSummons)
+	if countMonsterSpawns(res, monsterDefID) != wantSummons {
+		t.Fatalf("spawn changes = %+v, want %d %s spawns", res.Changes, wantSummons, monsterDefID)
 	}
 	event := bossSummonedAddsEvent(res)
 	if event.EventType == "" {
 		t.Fatalf("missing boss_summoned_adds event: %+v", res.Events)
 	}
-	if event.EntityID != idStr(boss.id) || event.PatternID != "summon_wolves" || event.MonsterDefID != "dungeon_wolf" {
+	if event.EntityID != idStr(boss.id) || event.PatternID != patternID || event.MonsterDefID != monsterDefID {
 		t.Fatalf("summon event ids = %+v", event)
 	}
 	if event.Amount == nil || *event.Amount != wantSummons || event.Position == nil {
@@ -85,7 +103,7 @@ func TestBossSummonedAddsSpawnOnce(t *testing.T) {
 	}
 
 	next := sim.Tick(nil)
-	if countMonsterSpawns(next, "dungeon_wolf") != 0 || bossSummonedAddsEvent(next).EventType != "" {
+	if countMonsterSpawns(next, monsterDefID) != 0 || bossSummonedAddsEvent(next).EventType != "" {
 		t.Fatalf("summon phase fired more than once: changes=%+v events=%+v", next.Changes, next.Events)
 	}
 }

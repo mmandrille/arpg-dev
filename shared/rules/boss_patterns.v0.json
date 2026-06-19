@@ -157,6 +157,31 @@
         }
       ],
       "cooldown_ticks": 32
+    },
+    "summon_bats": {
+      "phases": [
+        {
+          "kind": "telegraph",
+          "duration_ticks": 24,
+          "telegraph_type": "circle",
+          "from_color": "#b77cff",
+          "to_color": "#9ad7ff",
+          "hit_shape": "circle",
+          "radius": 3.6
+        },
+        {
+          "kind": "active",
+          "duration_ticks": 3,
+          "summon_monster_def_id": "dungeon_bat",
+          "summon_count": 3,
+          "summon_radius": 3.6
+        },
+        {
+          "kind": "recovery",
+          "duration_ticks": 8
+        }
+      ],
+      "cooldown_ticks": 12
     }
   }
 }

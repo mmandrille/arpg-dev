@@ -40,7 +40,8 @@ func TestPopulateDungeonLevelPreservesBossAndRarityRuntimeState(t *testing.T) {
 		} `json:"expected"`
 	}
 	loadGolden(t, "boss_floor_-5.json", &golden)
-	sim, err := NewSimWithWorld("sess_population_boss", golden.Seed, loadRules(t), "dungeon_levels")
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_population_boss", golden.Seed, rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}
@@ -57,6 +58,12 @@ func TestPopulateDungeonLevelPreservesBossAndRarityRuntimeState(t *testing.T) {
 	}
 	if boss.visualModel != golden.Expected.Boss.VisualModel || boss.visualTint != golden.Expected.Boss.VisualColor || boss.visualScale != golden.Expected.Boss.VisualScale {
 		t.Fatalf("boss visual = model:%s tint:%s scale:%f, want %+v", boss.visualModel, boss.visualTint, boss.visualScale, golden.Expected.Boss)
+	}
+	template := rules.BossTemplates[golden.Expected.Boss.TemplateID]
+	base := rules.Monsters[golden.Expected.Boss.BaseMonsterDefID]
+	wantHP := roundPositive(float64(base.MaxHP) * template.HPMultiplier)
+	if boss.maxHP != wantHP {
+		t.Fatalf("boss max hp = %d, want base %d * multiplier %.2f = %d", boss.maxHP, base.MaxHP, template.HPMultiplier, wantHP)
 	}
 	if boss.maxHP <= 0 || boss.hp != boss.maxHP || boss.lootTable == "" || boss.bossPatternDeckIndex != 0 || boss.bossPatternID == "" {
 		t.Fatalf("boss runtime state incomplete: %+v", boss)

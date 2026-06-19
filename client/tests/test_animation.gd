@@ -5,6 +5,7 @@ const ControllerScript := preload("res://scripts/animation_controller.gd")
 const ReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
+const MainScript := preload("res://scripts/main.gd")
 
 
 var _failed: bool = false
@@ -42,6 +43,8 @@ func _initialize() -> void:
 	await _test_monster_scene()
 	if _failed: quit(1); return
 	_test_monster_visuals_catalog()
+	if _failed: quit(1); return
+	_test_revived_companion_corpse_tint()
 	if _failed: quit(1); return
 	print("[gdtest] PASS: animation controller + scenes")
 	quit(0)
@@ -459,6 +462,32 @@ func _test_monster_visuals_catalog() -> void:
 	_assert(str(undead.get("scene", "")) == "monster_skeleton", "dungeon_undead scene = %s" % undead.get("scene", ""))
 	var boss := MonsterVisualsLoaderScript.resolve("dungeon_mob", "monster_tiny_flyer")
 	_assert(str(boss.get("scene", "")) == "monster_tiny_flyer", "boss visual_model should select flyer scene")
+
+
+func _test_revived_companion_corpse_tint() -> void:
+	var main = MainScript.new()
+	var revived := main._make_entity_node({
+		"type": "companion",
+		"monster_def_id": "dungeon_wolf",
+		"visual_tint": "444441",
+	})
+	var mesh := _first_mesh(revived)
+	_assert(mesh != null, "revived companion visual did not create a mesh")
+	if mesh != null:
+		var mat := mesh.material_override as StandardMaterial3D
+		_assert(mat != null and mat.albedo_color.is_equal_approx(Color("#444441")), "revived companion tint should stay corpse grey")
+	revived.free()
+	main.free()
+
+
+func _first_mesh(node: Node) -> MeshInstance3D:
+	if node is MeshInstance3D:
+		return node as MeshInstance3D
+	for child in node.get_children():
+		var found := _first_mesh(child)
+		if found != null:
+			return found
+	return null
 
 
 func _assert_biped_monster_rig(skel: Skeleton3D, scene_path: String) -> void:

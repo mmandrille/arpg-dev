@@ -427,7 +427,7 @@ func _event_matches(step: Dictionary, event) -> bool:
 	if typeof(event) != TYPE_DICTIONARY:
 		return false
 	var ev := event as Dictionary
-	for key in ["outcome", "source_entity_id", "target_entity_id", "shop_id", "offer_id", "item_instance_id", "skill_id", "damage_type"]:
+	for key in ["outcome", "source_entity_id", "target_entity_id", "shop_id", "offer_id", "monster_def_id", "item_instance_id", "skill_id", "damage_type", "service"]:
 		if step.has(key) and str(ev.get(key, "")) != str(step.get(key, "")):
 			return false
 	if step.has("event_state") and str(ev.get("state", "")) != str(step.get("event_state", "")):

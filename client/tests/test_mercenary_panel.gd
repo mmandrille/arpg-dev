@@ -75,6 +75,22 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_false("affordability follows gold", bool(state.get("affordable", true)))
 
+	panel.show_board("board-2", "mercenary", "fixed:mercenary_scout", "mercenary_scout", 75, true, 125)
+	panel.apply_hired_event({
+		"target_entity_id": "2002",
+		"monster_def_id": "mercenary_scout",
+		"price": 75,
+		"total_gold": 50,
+	})
+	panel.set_companions([
+		{"id": "2002", "monster_def_id": "mercenary_scout", "hp": 8, "max_hp": 8, "companion_stance": "assist", "combat_stats": {"damage_min": 1, "damage_max": 2, "attack_cooldown_ticks": 18, "armor": 0.0, "block_percent": 0.0, "hit_chance": 0.8, "crit_chance": 0.08}},
+	])
+	state = panel.get_debug_state()
+	_assert_eq("scout offer id", str(state.get("offer_id", "")), "fixed:mercenary_scout")
+	_assert_eq("scout monster id", str(state.get("monster_def_id", "")), "mercenary_scout")
+	_assert_true("scout status display name", str(state.get("status", "")).contains("Mercenary Scout"))
+	_assert_true("scout stats display name", str(state.get("stats_card_text", "")).contains("Mercenary Scout"))
+
 	panel.queue_free()
 	print("[gdtest] PASS: test_mercenary_panel (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)

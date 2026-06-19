@@ -1,11 +1,37 @@
 package game
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestMercenaryHireCostRejectsNegativeConfig(t *testing.T) {
 	err := validateMainGameplayEconomyConfig(MainGameplayConfig{MercenaryHireCostGold: -1})
 	if err == nil {
 		t.Fatalf("negative mercenary hire cost was accepted")
+	}
+}
+
+func TestMercenaryRulesRejectInvalidOffers(t *testing.T) {
+	monsters := loadRules(t).Monsters
+	cases := []struct {
+		name   string
+		offers []MercenaryOfferDef
+	}{
+		{name: "empty"},
+		{name: "duplicate", offers: []MercenaryOfferDef{
+			{OfferID: mercenaryGuardOfferID, MonsterDefID: mercenaryGuardMonsterDefID},
+			{OfferID: mercenaryGuardOfferID, MonsterDefID: mercenaryScoutMonsterDefID},
+		}},
+		{name: "blank_monster", offers: []MercenaryOfferDef{{OfferID: "fixed:broken"}}},
+		{name: "unknown_monster", offers: []MercenaryOfferDef{{OfferID: "fixed:missing", MonsterDefID: "missing_mercenary"}}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := validateMercenaryOffers(tc.offers, monsters); err == nil {
+				t.Fatalf("invalid mercenary offers accepted: %+v", tc.offers)
+			}
+		})
 	}
 }
 
@@ -46,6 +72,37 @@ func TestMercenaryHiringSpendsGoldAndSpawnsCompanion(t *testing.T) {
 	def := sim.rules.Monsters[mercenaryGuardMonsterDefID]
 	if mercenary.hp != def.MaxHP || mercenary.maxHP != def.MaxHP || mercenary.monsterAttackDamage == nil || mercenary.monsterAttackDamage.Max != def.AttackDamage.Max {
 		t.Fatalf("mercenary stats hp=%d/%d damage=%+v, want hp %d damage %+v", mercenary.hp, mercenary.maxHP, mercenary.monsterAttackDamage, def.MaxHP, def.AttackDamage)
+	}
+}
+
+func TestMercenaryHiringSelectsScoutOffer(t *testing.T) {
+	sim, board := newMercenaryHiringSimForOffer(t, "v289_merc_hire_scout", mercenaryScoutMonsterDefID)
+	cost := sim.rules.MainConfig.Gameplay.MercenaryHireCostGold
+	sim.gold = cost
+	sim.progression.Gold = cost
+	sim.savePlayer(sim.defaultPlayer())
+
+	hire := sim.Tick([]Input{mercenaryHireInput(board, "hire_scout")})
+
+	assertAck(t, hire, "hire_scout")
+	opened := findEvent(hire.Events, "mercenary_board_opened")
+	if opened == nil || opened.OfferID != mercenaryScoutOfferID || opened.MonsterDefID != mercenaryScoutMonsterDefID ||
+		opened.Price == nil || *opened.Price != cost || opened.Affordable == nil || !*opened.Affordable {
+		t.Fatalf("scout mercenary_board_opened = %+v", opened)
+	}
+	hired := findEvent(hire.Events, "mercenary_hired")
+	mercenary := hiredMercenary(sim)
+	if hired == nil || mercenary == nil || hired.OfferID != mercenaryScoutOfferID ||
+		hired.MonsterDefID != mercenaryScoutMonsterDefID || hired.TargetEntityID != idStr(mercenary.id) {
+		t.Fatalf("scout mercenary_hired=%+v mercenary=%+v", hired, mercenary)
+	}
+	if mercenary.monsterDefID != mercenaryScoutMonsterDefID {
+		t.Fatalf("scout mercenary monster=%s", mercenary.monsterDefID)
+	}
+	def := sim.rules.Monsters[mercenaryScoutMonsterDefID]
+	if mercenary.hp != def.MaxHP || mercenary.monsterAttackCooldown != def.AttackCooldown ||
+		mercenary.monsterAttackDamage == nil || mercenary.monsterAttackDamage.Max != def.AttackDamage.Max {
+		t.Fatalf("scout mercenary stats hp=%d cooldown=%d damage=%+v, want def=%+v", mercenary.hp, mercenary.monsterAttackCooldown, mercenary.monsterAttackDamage, def)
 	}
 }
 
@@ -159,6 +216,30 @@ func TestMercenaryLossRemovesHireAndEmitsEvent(t *testing.T) {
 	}
 }
 
+func TestMercenaryLossUsesSelectedOfferMetadata(t *testing.T) {
+	sim, board := newMercenaryHiringSimForOffer(t, "v289_mercenary_scout_loss", mercenaryScoutMonsterDefID)
+	cost := sim.rules.MainConfig.Gameplay.MercenaryHireCostGold
+	sim.gold = cost
+	sim.progression.Gold = cost
+	sim.savePlayer(sim.defaultPlayer())
+	hire := sim.Tick([]Input{mercenaryHireInput(board, "hire_scout_for_loss")})
+	assertAck(t, hire, "hire_scout_for_loss")
+	mercenary := hiredMercenary(sim)
+	if mercenary == nil || mercenary.monsterDefID != mercenaryScoutMonsterDefID {
+		t.Fatalf("scout hire missing mercenary: %+v", mercenary)
+	}
+
+	res := &TickResult{}
+	attacker := mercenaryLossAttacker(sim, mercenary)
+	damage := mercenary.maxHP + int(mercenary.monsterArmor) + 1
+	sim.damageCompanionByMonster(attacker, mercenary, DamageRange{Min: damage, Max: damage}, "merc_scout_loss", res)
+
+	lost := findEvent(res.Events, "mercenary_lost")
+	if lost == nil || lost.OfferID != mercenaryScoutOfferID || lost.MonsterDefID != mercenaryScoutMonsterDefID {
+		t.Fatalf("scout mercenary_lost event = %+v", lost)
+	}
+}
+
 func TestMercenaryCanRehireAfterLoss(t *testing.T) {
 	sim, board := newMercenaryHiringSim(t, "v220_mercenary_rehire_after_loss")
 	cost := sim.rules.MainConfig.Gameplay.MercenaryHireCostGold
@@ -195,8 +276,27 @@ func TestMercenaryCanRehireAfterLoss(t *testing.T) {
 }
 
 func newMercenaryHiringSim(t *testing.T, seed string) (*Sim, *entity) {
+	return newMercenaryHiringSimForOffer(t, seed, mercenaryGuardMonsterDefID)
+}
+
+func newMercenaryHiringSimForOffer(t *testing.T, seedPrefix string, monsterDefID string) (*Sim, *entity) {
 	t.Helper()
-	sim, err := NewSimWithWorld("sess_mercenary_hiring", seed, loadRules(t), "mercenary_hiring_lab")
+	rules := loadRules(t)
+	for i := 0; i < 256; i++ {
+		seed := fmt.Sprintf("%s_%03d", seedPrefix, i)
+		sim, board := newMercenaryHiringSimWithSeed(t, seed, rules)
+		offer, ok := sim.selectedMercenaryOffer(board)
+		if ok && offer.MonsterDefID == monsterDefID {
+			return sim, board
+		}
+	}
+	t.Fatalf("no mercenary offer seed found for monster_def_id=%s prefix=%s", monsterDefID, seedPrefix)
+	return nil, nil
+}
+
+func newMercenaryHiringSimWithSeed(t *testing.T, seed string, rules *Rules) (*Sim, *entity) {
+	t.Helper()
+	sim, err := NewSimWithWorld("sess_mercenary_hiring", seed, rules, "mercenary_hiring_lab")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}

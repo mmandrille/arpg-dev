@@ -232,6 +232,7 @@ v285_* = damage-type-readability
 v286_* = archer-retreat-ai
 v287_* = second-boss-template
 v288_* = market-notification-badge
+v289_* = mercenary-offer-variants
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

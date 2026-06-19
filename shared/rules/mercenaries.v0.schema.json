@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/mercenaries.v0.schema.json",
+  "title": "Mercenary offer rules (v0)",
+  "type": "object",
+  "required": ["version", "offers"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "const": 0 },
+    "offers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["offer_id", "monster_def_id"],
+        "additionalProperties": false,
+        "properties": {
+          "offer_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9_:-]+$"
+          },
+          "monster_def_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9_]+$"
+          }
+        }
+      }
+    }
+  }
+}

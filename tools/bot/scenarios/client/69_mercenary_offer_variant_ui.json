@@ -1,0 +1,31 @@
+{
+  "id": "mercenary_offer_variant_ui",
+  "runner": "godot_client",
+  "world_id": "mercenary_hiring_lab",
+  "seed": "v289_mercenary_offer_variant_ui_000",
+  "title": "Mercenary offer variant UI",
+  "description": "Client opens the mercenary board on a seed that selects the scout offer and verifies the panel and companion HUD show the scout hire.",
+  "debug_progression": { "gold": 300 },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
+    { "type": "wait_event", "event_type": "mercenary_hired", "offer_id": "fixed:mercenary_scout", "monster_def_id": "mercenary_scout", "timeout_s": 15.0 },
+    {
+      "type": "wait_mercenary_panel",
+      "price": 75,
+      "gold": 225,
+      "affordable": true,
+      "service_id": "mercenary",
+      "offer_id": "fixed:mercenary_scout",
+      "monster_def_id": "mercenary_scout",
+      "hired_count": 1,
+      "selected_stance": "assist",
+      "status_contains": "Mercenary Scout",
+      "stats_card_contains": ["Mercenary Scout", "Damage:", "Attack:", "Stance: Assist"],
+      "companion_bar_count": 1,
+      "companion_icon_kind": "mercenary",
+      "timeout_s": 15.0
+    }
+  ]
+}

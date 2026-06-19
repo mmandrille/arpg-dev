@@ -1,0 +1,13 @@
+{
+  "version": 0,
+  "offers": [
+    {
+      "offer_id": "fixed:mercenary_guard",
+      "monster_def_id": "mercenary_guard"
+    },
+    {
+      "offer_id": "fixed:mercenary_scout",
+      "monster_def_id": "mercenary_scout"
+    }
+  ]
+}

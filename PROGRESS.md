@@ -23,10 +23,10 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v288 — market notification badge |
+| **Latest completed slice** | v289 — mercenary offer variants |
 | **Active branch** | `main` |
-| **CI gate** | v288 focused gates green on 2026-06-19 (`test_market_board_badges.gd`, `test_item_visuals.gd`, `bot-client scenario=68_market_notification_badge`, `make maintainability`); full autoloop-batch `make ci` pending after selected queue |
-| **Next slice** | v289 — mercenary offer variants |
+| **CI gate** | v289 focused gates green on 2026-06-19 (`make validate-shared`, `make validate-assets`, `go test ./internal/game -run TestMercenary`, `test_mercenary_panel.gd`, `bot scenario=96_mercenary_offer_variants`, `bot-client scenario=69_mercenary_offer_variant_ui`, `make maintainability`); full autoloop-batch `make ci` pending after selected queue |
+| **Next slice** | v290 — blacksmith armor recipe |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
 | **Next engineering review** | v294 target after a green full `make ci` and the next feature batch |
 
@@ -113,7 +113,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
 | Multiplayer | Matchmaking/lobby beyond backend-listed sessions, advanced active-session filtering/pagination/load-aware capacity controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49/v164 non-goals, ADR-0001, ADR-0014 |
-| Companions / AI | Hired mercenaries derived from other players' characters, durable mercenary roster/recovery rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, per-companion command UI, mercenary loot/XP/potion behavior | v206-v208/v220 non-goals, ADR-0010 |
+| Companions / AI | Hired mercenaries derived from other players' characters, multi-offer picker UI, per-offer pricing, durable mercenary roster/recovery rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, per-companion command UI, ranged mercenary AI, production mercenary variant art, mercenary loot/XP/potion behavior | v206-v208/v220/v289 non-goals, ADR-0010 |
 
 ### Curated autoloop candidates
 

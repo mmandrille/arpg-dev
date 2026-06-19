@@ -19,7 +19,7 @@
     },
     "ranger": {
       "icon": { "label": "Ra", "shape": "bow", "color": "#2f8f4e", "accent": "#d6f2a8" },
-      "model": { "asset_id": "character_ranger_v0" }
+      "model": { "asset_id": "character_ranger_v0", "scale": 0.0092 }
     }
   }
 }

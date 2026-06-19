@@ -1,0 +1,55 @@
+tools/bot/scenarios/client/33_unique_burn_effect_live.json
+  s_58dbc51a4db222::t_27e03de63642f4 38-43
+docs/specs/v285_spec-damage-type-readability.md
+  s_58dbc51a4db222::t_c4f3ec78daf266 63,69
+  s_58dbc51a4db222::t_b3ee79b709259e 1-2,4-62,64-68,70-84
+  s_58dbc51a4db222::t_7fb74b0c764170 3
+client/scripts/damage_number.gd
+  s_58dbc51a4db222::t_27e03de63642f4 16,19,25,32
+docs/progress/slice-lifecycle.md
+  s_58dbc51a4db222::t_7fb74b0c764170 300
+client/scripts/main.gd
+  s_58dbc51a4db222::t_ea139943401990 65,1719-1720
+  s_58dbc51a4db222::t_48b4824000a0ea 1715-1717,1721
+  s_58dbc51a4db222::t_27e03de63642f4 1864,1887,5517
+docs/plans/v285_2026-06-19-damage-type-readability.md
+  s_58dbc51a4db222::t_b3ee79b709259e 1-2,4-29,32-42,44,46-48,53-66,69,73-86,90-102,104,106,108-121,123,125-128,130-140,143-145
+  s_58dbc51a4db222::t_c4f3ec78daf266 129
+  s_58dbc51a4db222::t_4f3c218a59d984 68
+  s_58dbc51a4db222::t_7fb74b0c764170 3,30-31,43,45,49-52,67,70-72,87-89,103,105,107,122,124,141-142,146-149
+client/scripts/bot_scenario_runner.gd
+  s_58dbc51a4db222::t_27e03de63642f4 456-457
+client/scripts/damage_type_combat_text.gd
+  s_58dbc51a4db222::t_48b4824000a0ea 12-20
+  s_58dbc51a4db222::t_ea139943401990 1-11,21-60
+docs/as-built/v285_damage-type-readability.md
+  s_58dbc51a4db222::t_7fb74b0c764170 1-53
+client/tests/test_rogue_presentation.gd
+  s_58dbc51a4db222::t_27e03de63642f4 16-17,45,50,52,57-67,69-88,90-95,186-188,191-196,198-206
+  s_58dbc51a4db222::t_894e7533a21afb 48,68
+  s_58dbc51a4db222::t_d4cbe45dcfee33 89
+  s_58dbc51a4db222::t_b789a555094cd9 111,197
+  s_58dbc51a4db222::t_0c08fbaa335878 37,54,100-101,189-190,207-208
+PROGRESS.md
+  s_58dbc51a4db222::t_7fb74b0c764170 26,28-29
+client/scripts/damage_type_combat_text.gd.uid
+  s_58dbc51a4db222::t_4b73c2d58c5dcb 1
+docs/progress/slice-codename-index.md
+  s_58dbc51a4db222::t_7fb74b0c764170 231
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7f5e0157d1a787016c26b6bb8306b46d86ddf353",
+  "prompts": {},
+  "sessions": {
+    "s_58dbc51a4db222": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee093-c0ba-7701-a296-d74410bf5405",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

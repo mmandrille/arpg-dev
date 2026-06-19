@@ -1,0 +1,44 @@
+docs/plans/v275_2026-06-19-rigged-hero-models.md
+  s_8ac650870d633e::t_d79c8aa3f1a568 13-19
+  s_8ac650870d633e::t_5b993559857b12 1-12,20-29
+PROGRESS.md
+  s_8ac650870d633e::t_d79c8aa3f1a568 18,26
+  s_8ac650870d633e::t_8ab20da583b7dc 28,31
+make/shared.mk
+  s_8ac650870d633e::t_175e7f35ce1e64 12
+assets/manifests/assets.v0.json
+  s_8ac650870d633e::t_f4b71da3bb36dd 23,25,27,36,38,40,49,51,53,62,64,66
+client/tests/test_animation.gd
+  s_8ac650870d633e::t_c62a431c5f7408 237,256-258,263-274,283-293
+docs/progress/slice-lifecycle.md
+  s_8ac650870d633e::t_8ab20da583b7dc 290
+tools/assets/rig_hero_glbs.py
+  s_8ac650870d633e::t_5220ee0d9582a4 1-154,156-157,161,163-237,239-321
+  s_8ac650870d633e::t_d4c03de6967989 155,158-160,162,238
+docs/progress/slice-codename-index.md
+  s_8ac650870d633e::t_d79c8aa3f1a568 227
+docs/specs/v275_spec-rigged-hero-models.md
+  s_8ac650870d633e::t_5b993559857b12 1-43
+tools/assets/test_rig_hero_glbs.py
+  s_8ac650870d633e::t_5220ee0d9582a4 1-73,76-93
+  s_8ac650870d633e::t_d4c03de6967989 74-75
+docs/as-built/v275_rigged-hero-models.md
+  s_8ac650870d633e::t_d79c8aa3f1a568 1-30,32-43
+  s_8ac650870d633e::t_8ab20da583b7dc 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ac0dddfa2fc54809b4e9575de7f69359f7945902",
+  "prompts": {},
+  "sessions": {
+    "s_8ac650870d633e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edce3-2706-7220-ac94-4c0cb2d17d29",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

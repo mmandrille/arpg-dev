@@ -106,8 +106,8 @@ func _ensure_guard() -> void:
 	var rim_mesh := TorusMesh.new()
 	rim_mesh.inner_radius = 0.45
 	rim_mesh.outer_radius = 0.51
+	rim_mesh.rings = 8
 	rim_mesh.ring_segments = 32
-	rim_mesh.radial_segments = 8
 	rim.mesh = rim_mesh
 	rim.position = face.position + Vector3(0.0, 0.0, 0.015)
 	rim.rotation_degrees = Vector3(90.0, 0.0, 0.0)

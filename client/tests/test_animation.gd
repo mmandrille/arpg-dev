@@ -222,7 +222,7 @@ func _test_character_scene() -> void:
 
 
 func _test_class_character_models() -> void:
-	for class_id in ["barbarian", "sorcerer", "paladin", "rogue"]:
+	for class_id in ["barbarian", "sorcerer", "paladin", "rogue", "ranger"]:
 		var resolved := ClassPresentationsLoaderScript.resolve(class_id)
 		_assert(str(resolved.get("asset_id", "")) == "character_%s_v0" % class_id, "%s model asset mismatch: %s" % [class_id, resolved])
 		_assert(float(resolved.get("scale", 0.0)) > 0.0, "%s model scale should be positive" % class_id)
@@ -266,6 +266,8 @@ func _test_class_character_models() -> void:
 			_assert((right_sock as BoneAttachment3D).bone_name == "hand_r", "%s right hand socket bone mismatch" % class_id)
 		if off_sock is BoneAttachment3D:
 			_assert((off_sock as BoneAttachment3D).bone_name == "hand_l", "%s off hand socket bone mismatch" % class_id)
+		if right_sock is Node3D:
+			_assert((right_sock as Node3D).scale.is_equal_approx(Vector3.ONE), "%s right hand socket should keep authored bone scale, got %s" % [class_id, str((right_sock as Node3D).scale)])
 		var class_skel := class_model.find_child("Skeleton3D", true, false) as Skeleton3D
 		_assert(class_skel != null, "%s replacement missing Skeleton3D" % class_id)
 		if ap != null and class_skel != null:

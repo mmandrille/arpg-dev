@@ -84,6 +84,15 @@ func is_terminal() -> bool:
 	return _terminal
 
 
+func dispose() -> void:
+	_kill_tween(_hit_tween)
+	_kill_tween(_death_tween)
+	_hit_tween = null
+	_death_tween = null
+	_root = null
+	_base_mesh_colors.clear()
+
+
 func get_debug_state() -> Dictionary:
 	return {
 		"terminal": _terminal,
@@ -138,8 +147,11 @@ func _reaction_direction(source_position: Vector3, fallback_direction: Vector3) 
 func _apply_color_scale(scale: float) -> void:
 	for key in _base_mesh_colors.keys():
 		var rec: Dictionary = _base_mesh_colors[key]
-		var mesh_node := rec.get("node", null) as MeshInstance3D
-		if mesh_node == null or not is_instance_valid(mesh_node):
+		var raw_node = rec.get("node", null)
+		if raw_node == null or not is_instance_valid(raw_node):
+			continue
+		var mesh_node := raw_node as MeshInstance3D
+		if mesh_node == null:
 			continue
 		var mat := mesh_node.material_override as StandardMaterial3D
 		if mat == null:

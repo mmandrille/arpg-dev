@@ -24,6 +24,7 @@ def main() -> int:
     parser.add_argument("--focus", choices=["gear", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
+    parser.add_argument("--class-id", default="", help="Class id for gear focus, e.g. paladin.")
     parser.add_argument("--output", default="", help="PNG output path for screenshot mode.")
     parser.add_argument("--width", type=int, default=640)
     parser.add_argument("--height", type=int, default=480)
@@ -108,6 +109,8 @@ def main() -> int:
     ]
     if args.items:
         cmd += ["--items", args.items]
+    if args.class_id:
+        cmd += ["--class-id", args.class_id]
 
     print("[showme] running:", " ".join(cmd))
     result = subprocess.run(cmd, cwd=root)

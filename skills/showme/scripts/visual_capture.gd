@@ -21,6 +21,8 @@ const ITEM_SLOT := {
 	"cave_blade": "main_hand",
 	"starter_sorcerer_staff": "main_hand",
 	"starter_barbarian_axe": "main_hand",
+	"starter_paladin_sword": "main_hand",
+	"starter_paladin_shield": "off_hand",
 	"cave_greatsword": "main_hand",
 	"cave_war_sword": "main_hand",
 	"training_bow": "main_hand",
@@ -43,6 +45,7 @@ var _width := 640
 var _height := 480
 var _duration := 0.0
 var _items: Array = []
+var _class_id := ""
 var _subject: Node3D
 var _skills_panel: Control
 
@@ -154,6 +157,9 @@ func _parse_args() -> void:
 			"--items":
 				i += 1
 				_items = _split_items(str(args[i]))
+			"--class-id":
+				i += 1
+				_class_id = str(args[i]).strip_edges()
 		i += 1
 	if _output == "":
 		_output = ProjectSettings.globalize_path("res://").path_join("../.artifacts/showme/capture.png")
@@ -194,8 +200,34 @@ func _setup_gear() -> void:
 	_subject = character
 
 	await process_frame
+	if _class_id != "":
+		_apply_class_model(character, _class_id)
 	var resolver = EquipmentResolverScript.new(character)
 	resolver.apply_snapshot(_gear_snapshot(_items))
+
+
+func _apply_class_model(character: Node3D, class_id: String) -> void:
+	var resolved := ClassPresentationsLoaderScript.resolve(class_id)
+	var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)
+	if packed == null:
+		return
+	var old_model := character.find_child("ModelRoot", false, false) as Node
+	if old_model != null:
+		character.remove_child(old_model)
+		old_model.free()
+	var model := packed.instantiate() as Node3D
+	model.name = "ModelRoot"
+	model.scale = Vector3.ONE * float(resolved.get("scale", 1.0))
+	model.position.y = float(resolved.get("height_offset", 0.0))
+	character.add_child(model)
+	character.move_child(model, 0)
+	var ap := character.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap != null:
+		ap.root_node = NodePath("../ModelRoot")
+	if character.has_method("_ensure_weapon_socket"):
+		character.call("_ensure_weapon_socket")
+	if character.has_method("_ensure_fallback_sockets"):
+		character.call("_ensure_fallback_sockets")
 
 
 func _setup_inventory() -> void:
@@ -721,7 +753,7 @@ func _setup_heal_rain() -> void:
 		root.add_child(marker)
 
 	var effect = HealRainEffectScript.new()
-	effect.setup(MainScript.HEAL_RAIN_RADIUS)
+	effect.setup()
 	effect.position = Vector3.ZERO
 	root.add_child(effect)
 	_subject = root

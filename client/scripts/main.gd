@@ -4941,9 +4941,12 @@ func _apply_local_player_class_model() -> void:
 	if asset_id == "" or asset_id == _local_player_class_asset_id:
 		return
 	_local_player_class_asset_id = asset_id
+	if player_reaction != null:
+		player_reaction.dispose()
 	_apply_character_class_model(character_visual, class_id)
 	_apply_local_player_visual_scale(player_visual_scale)
 	_apply_model_tint(character_visual, ClientConstants.PLAYER_TINT)
+	_remount_local_equipment_visuals()
 	player_reaction = ModelReactionControllerScript.new(character_visual, ClientConstants.PLAYER_TINT)
 	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
@@ -4973,6 +4976,11 @@ func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 		root.call("_ensure_weapon_socket")
 	if root.has_method("_ensure_fallback_sockets"):
 		root.call("_ensure_fallback_sockets")
+
+func _remount_local_equipment_visuals() -> void:
+	if resolver == null:
+		return
+	resolver.apply_snapshot({"inventory": inventory, "equipped": equipped})
 
 func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	if e.has("monster_def_id"):

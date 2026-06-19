@@ -620,6 +620,15 @@ func _on_monster_health_bar_mode_selected(mode: String) -> void:
 		_sync_settings_panel()
 		_refresh_monster_health_bar_visibility()
 
+func _on_master_volume_changed(value: float) -> void:
+	ClientAudioBridgeScript.set_master_volume(audio_controller, client_settings, value)
+
+func _on_music_volume_changed(value: float) -> void:
+	ClientAudioBridgeScript.set_music_volume(audio_controller, client_settings, value)
+
+func _on_sfx_volume_changed(value: float) -> void:
+	ClientAudioBridgeScript.set_sfx_volume(audio_controller, client_settings, value)
+
 func _on_map_opacity_changed(value: float) -> void:
 	if client_settings == null: return
 	client_settings.set_map_opacity(value)
@@ -3551,8 +3560,10 @@ func _setup_menu_layer() -> void:
 	settings_panel.create_game_session_type_selected.connect(_on_create_game_session_type_selected)
 	settings_panel.language_selected.connect(_on_language_selected)
 	settings_panel.monster_health_bar_mode_selected.connect(_on_monster_health_bar_mode_selected)
+	settings_panel.master_volume_changed.connect(_on_master_volume_changed)
+	settings_panel.music_volume_changed.connect(_on_music_volume_changed)
+	settings_panel.sfx_volume_changed.connect(_on_sfx_volume_changed)
 	settings_panel.map_opacity_changed.connect(_on_map_opacity_changed)
-	ClientAudioBridgeScript.connect_volume_signals(settings_panel, audio_controller, client_settings, Callable(self, "_sync_settings_panel"))
 	menu_layer.add_child(settings_panel)
 
 	pause_menu = PauseMenuScript.new()

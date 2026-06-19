@@ -3,19 +3,19 @@ extends SceneTree
 
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
+const ClientAudioControllerScript := preload("res://scripts/client_audio_controller.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
-var _sync_call_count: int = 0
 
 
 func _initialize() -> void:
 	_test_audio_settings_defaults_and_clamps()
 	_test_audio_settings_save_shape()
 	_test_settings_panel_audio_slider_sync()
-	_test_audio_slider_change_does_not_force_panel_resync()
+	_test_audio_slider_change_applies_and_persists()
 	_test_map_opacity_settings()
 	print("[gdtest] PASS: test_audio_settings (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -76,28 +76,44 @@ func _test_settings_panel_audio_slider_sync() -> void:
 	panel.free()
 
 
-func _test_audio_slider_change_does_not_force_panel_resync() -> void:
-	_sync_call_count = 0
-	var settings := ClientSettingsScript.new("user://unused-audio-slider-drag-test.json")
+func _test_audio_slider_change_applies_and_persists() -> void:
+	var path := "user://test_audio_slider_change.json"
+	var absolute_path := ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(absolute_path)
+	var settings := ClientSettingsScript.new(path)
+	var controller = ClientAudioControllerScript.new()
 	var panel = SettingsPanelScript.new()
+	get_root().add_child(controller)
 	get_root().add_child(panel)
 	panel._build()
 	panel.show_settings("1920x1080", true, true, "solo", "en", "contextual", 0.2, 0.3, 0.4, 0.65)
-	ClientAudioBridgeScript.connect_volume_signals(panel, null, settings, Callable(self, "_count_sync_call"))
+	panel.master_volume_changed.connect(func(value: float) -> void:
+		ClientAudioBridgeScript.set_master_volume(controller, settings, value)
+	)
+	panel.music_volume_changed.connect(func(value: float) -> void:
+		ClientAudioBridgeScript.set_music_volume(controller, settings, value)
+	)
+	panel.sfx_volume_changed.connect(func(value: float) -> void:
+		ClientAudioBridgeScript.set_sfx_volume(controller, settings, value)
+	)
 	panel.master_volume_changed.emit(0.75)
 	_assert_float("master drag updates settings", settings.master_volume, 0.75)
-	_assert_eq("master drag does not resync panel", _sync_call_count, 0)
+	_assert_float("master drag updates controller", controller.master_volume, 0.75)
 	panel.music_volume_changed.emit(0.55)
 	_assert_float("music drag updates settings", settings.music_volume, 0.55)
-	_assert_eq("music drag does not resync panel", _sync_call_count, 0)
+	_assert_float("music drag updates controller", controller.music_volume, 0.55)
 	panel.sfx_volume_changed.emit(0.35)
 	_assert_float("sfx drag updates settings", settings.sfx_volume, 0.35)
-	_assert_eq("sfx drag does not resync panel", _sync_call_count, 0)
+	_assert_float("sfx drag updates controller", controller.sfx_volume, 0.35)
+	var reloaded := ClientSettingsScript.new(path)
+	reloaded.load()
+	_assert_float("slider master persists", reloaded.master_volume, 0.75)
+	_assert_float("slider music persists", reloaded.music_volume, 0.55)
+	_assert_float("slider sfx persists", reloaded.sfx_volume, 0.35)
 	panel.free()
-
-
-func _count_sync_call() -> void:
-	_sync_call_count += 1
+	controller.free()
+	DirAccess.remove_absolute(absolute_path)
 
 
 func _test_map_opacity_settings() -> void:

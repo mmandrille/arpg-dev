@@ -1,0 +1,92 @@
+docs/plans/v292_2026-06-19-badge-reward-foundation.md
+  s_b64d9a5e320ee3::t_b9fcf196f60927 3,56,59,61-64,68,88,91,93,112,114,116,118,120,122,139,141,157,159,185-186,194-201
+  s_b64d9a5e320ee3::t_b9e7b845df62d8 1-2,4-55,57-58,60,65-67,69-87,89-90,92,94-111,113,115,117,119,121,123-138,140,142-156,158,160-184,187-193,202-207
+client/tests/test_material_wallet_badges.gd
+  s_b64d9a5e320ee3::t_e031b38167a7a2 1-60
+server/internal/game/quest_turn_in.go
+  s_b64d9a5e320ee3::t_8b8da24d92bc0b 48
+server/internal/game/badge_rewards.go
+  s_b64d9a5e320ee3::t_bbf0ae411bcb46 86
+  s_b64d9a5e320ee3::t_af76076fac6497 7-10
+  s_b64d9a5e320ee3::t_3effea923967fc 1-6,11-85,87-132
+tools/bot/scenarios/client/76_badge_reward_wallet.json
+  s_b64d9a5e320ee3::t_10c15bb9ea3830 1-8,10-17,19-27
+  s_b64d9a5e320ee3::t_0041ea0542bd2b 9,18
+client/scripts/bot_scenario_runner.gd
+  s_b64d9a5e320ee3::t_623ad1667450a9 430
+shared/rules/items.v0.json
+  s_b64d9a5e320ee3::t_993c49b03bb42e 11-15
+client/scripts/net_client.gd
+  s_b64d9a5e320ee3::t_0ada9f573fc12d 173
+shared/assets/item_presentations.v0.schema.json
+  s_b64d9a5e320ee3::t_916cda7075affd 16,20
+client/scripts/item_icon_drawer.gd
+  s_b64d9a5e320ee3::t_916cda7075affd 38-39,127-130
+shared/rules/main_config.v0.schema.json
+  s_b64d9a5e320ee3::t_46d10d546acb9b 13,27-41
+docs/specs/v292_spec-badge-reward-foundation.md
+  s_b64d9a5e320ee3::t_d90b0ec5728ec0 1-2,4-53,56-60,63-71,75-105
+  s_b64d9a5e320ee3::t_b9fcf196f60927 3,54-55,61-62,72,74
+  s_b64d9a5e320ee3::t_f310547c529b57 73
+server/internal/game/resource_wallet.go
+  s_b64d9a5e320ee3::t_5fbc38b2fbc43c 4
+PROGRESS.md
+  s_b64d9a5e320ee3::t_b9fcf196f60927 26,28-29,104
+docs/progress/slice-lifecycle.md
+  s_b64d9a5e320ee3::t_b9fcf196f60927 307
+tools/bot/debug_progression.py
+  s_b64d9a5e320ee3::t_89b2262c0410da 15
+server/internal/http/inspect.go
+  s_b64d9a5e320ee3::t_b6442b279f39ac 25-30,32
+  s_b64d9a5e320ee3::t_89b2262c0410da 31,58,78
+server/internal/game/sim.go
+  s_b64d9a5e320ee3::t_5a639ad72a9377 1448,1455,1477
+tools/bot/scenarios/98_badge_reward_foundation.json
+  s_b64d9a5e320ee3::t_0041ea0542bd2b 8,14,24-28
+  s_b64d9a5e320ee3::t_3f61f1224bf55a 33
+  s_b64d9a5e320ee3::t_5d9e32015fdae8 1-7,9-13,15-23,29-32,34-35
+server/internal/game/badge_rewards_test.go
+  s_b64d9a5e320ee3::t_48d60575413f5c 1-127
+shared/rules/main_config.v0.json
+  s_b64d9a5e320ee3::t_9e40cc72ba905e 15-21
+docs/as-built/v292_badge-reward-foundation.md
+  s_b64d9a5e320ee3::t_b9fcf196f60927 1-70
+server/internal/game/main_config_validation.go
+  s_b64d9a5e320ee3::t_65e7d979eff698 18-65
+client/tests/test_character_bar.gd
+  s_b64d9a5e320ee3::t_b93bdabb5199b6 28-29,57
+  s_b64d9a5e320ee3::t_54f9e890ba6fcf 52
+shared/assets/item_presentations.v0.json
+  s_b64d9a5e320ee3::t_916cda7075affd 85-87,160-180
+tools/bot/runtime_queries.py
+  s_b64d9a5e320ee3::t_7afbee6cd8cacb 49,71
+client/tests/test_material_wallet_badges.gd.uid
+  s_b64d9a5e320ee3::t_3e88a23e89bc4a 1
+docs/progress/slice-codename-index.md
+  s_b64d9a5e320ee3::t_b9fcf196f60927 238
+client/scripts/character_bar.gd
+  s_b64d9a5e320ee3::t_39d1c90212f8ad 257-265
+server/internal/http/debug_progression_test.go
+  s_b64d9a5e320ee3::t_0e094fdf1014b8 1-36
+tools/validate_main_config.py
+  s_b64d9a5e320ee3::t_a81f4c4a6fc184 53-78
+server/internal/game/rules.go
+  s_b64d9a5e320ee3::t_af76076fac6497 50-67
+  s_b64d9a5e320ee3::t_0f62072412ea4d 1276-1277
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "8fd85ebb14118f506e0b215ca62c9faad743a490",
+  "prompts": {},
+  "sessions": {
+    "s_b64d9a5e320ee3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee1fd-336f-7122-90c0-0897292db205",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

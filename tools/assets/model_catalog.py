@@ -9,9 +9,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+GENERATED_CATALOG_REL = "shared/assets/model_preview_catalog.v0.json"
 MANIFEST_REL = "assets/manifests/assets.v0.json"
 CLASS_PRESENTATIONS_REL = "shared/assets/class_presentations.v0.json"
 MONSTER_VISUALS_REL = "shared/assets/monster_visuals.v0.json"
+CATALOG_SOURCES = [MANIFEST_REL, CLASS_PRESENTATIONS_REL, MONSTER_VISUALS_REL]
 
 
 @dataclass(frozen=True)
@@ -31,6 +33,31 @@ def load_json(path: Path) -> dict:
 
 
 def load_catalog(root: Path = ROOT) -> list[ModelRow]:
+    generated_path = root / GENERATED_CATALOG_REL
+    if generated_path.exists():
+        return load_generated_catalog(root)
+    return build_catalog(root)
+
+
+def load_generated_catalog(root: Path = ROOT) -> list[ModelRow]:
+    catalog = load_json(root / GENERATED_CATALOG_REL)
+    rows: list[ModelRow] = []
+    for raw in catalog.get("models", []):
+        if not isinstance(raw, dict):
+            continue
+        rows.append(ModelRow(
+            asset_id=str(raw.get("asset_id", "")),
+            asset_type=str(raw.get("type", "")),
+            runtime_path=str(raw.get("runtime_path", "")),
+            used_by=tuple(sorted(str(label) for label in raw.get("used_by", []))),
+            scene=str(raw.get("scene", "")),
+            scale=_positive_float(raw.get("scale", 1.0), 1.0),
+            height_offset=float(raw.get("height_offset", 0.0)),
+        ))
+    return sorted(rows, key=lambda row: (row.asset_type, row.asset_id))
+
+
+def build_catalog(root: Path = ROOT) -> list[ModelRow]:
     manifest = load_json(root / MANIFEST_REL)
     class_presentations = load_json(root / CLASS_PRESENTATIONS_REL)
     monster_visuals = load_json(root / MONSTER_VISUALS_REL)
@@ -93,6 +120,41 @@ def format_row(row: ModelRow) -> str:
     return f"{row.asset_id:<32} {row.runtime_path:<62} used_by={','.join(row.used_by)}"
 
 
+def generated_catalog_payload(root: Path = ROOT) -> dict:
+    return {
+        "version": 0,
+        "sources": CATALOG_SOURCES,
+        "models": [_row_to_dict(row) for row in build_catalog(root)],
+    }
+
+
+def write_generated_catalog(root: Path = ROOT) -> Path:
+    path = root / GENERATED_CATALOG_REL
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(generated_catalog_payload(root), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
+def generated_catalog_mismatch(root: Path = ROOT) -> str:
+    want = [_row_to_dict(row) for row in build_catalog(root)]
+    got = [_row_to_dict(row) for row in load_generated_catalog(root)]
+    if got != want:
+        return "generated model catalog is stale; run `make model-catalog-generate`"
+    return ""
+
+
+def _row_to_dict(row: ModelRow) -> dict:
+    return {
+        "asset_id": row.asset_id,
+        "height_offset": row.height_offset,
+        "runtime_path": row.runtime_path,
+        "scale": row.scale,
+        "scene": row.scene,
+        "type": row.asset_type,
+        "used_by": list(row.used_by),
+    }
+
+
 def _positive_float(value, fallback: float) -> float:
     try:
         parsed = float(value)
@@ -130,11 +192,25 @@ def _cmd_resolve(asset_id: str, root: Path, as_json: bool) -> int:
     return 0
 
 
+def _cmd_generate(root: Path, check: bool) -> int:
+    if check:
+        mismatch = generated_catalog_mismatch(root)
+        if mismatch != "":
+            print(mismatch, file=sys.stderr)
+            return 1
+        return 0
+    path = write_generated_catalog(root)
+    print(path.relative_to(root))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="List and resolve previewable model assets.")
     parser.add_argument("--root", type=Path, default=ROOT)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("list")
+    generate_parser = sub.add_parser("generate")
+    generate_parser.add_argument("--check", action="store_true")
     resolve_parser = sub.add_parser("resolve")
     resolve_parser.add_argument("asset_id")
     resolve_parser.add_argument("--json", action="store_true")
@@ -142,6 +218,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "list":
         return _cmd_list(args.root)
+    if args.command == "generate":
+        return _cmd_generate(args.root, args.check)
     if args.command == "resolve":
         return _cmd_resolve(args.asset_id, args.root, args.json)
     return 2

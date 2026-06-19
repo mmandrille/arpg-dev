@@ -1,5 +1,5 @@
 # --- Client -------------------------------------------------------------------
-.PHONY: client-unit client-smoke play play-debug play-remote skill-logo-sheet model-list model
+.PHONY: client-unit client-smoke play play-debug play-remote skill-logo-sheet model-catalog-generate model-list model
 SKILL_LOGO_SHEET_OUT := $(or $(OUT),.artifacts/skill-logo-sheet.svg)
 PLAY_CLIENTS_FROM_GOALS := $(firstword $(filter-out play play-debug play-remote,$(MAKECMDGOALS)))
 PLAY_CLIENTS ?= $(if $(PLAY_CLIENTS_FROM_GOALS),$(PLAY_CLIENTS_FROM_GOALS),1)
@@ -25,6 +25,9 @@ skill-logo-sheet: tools ## Render current skill logos and labels to an SVG image
 
 model-list: tools ## List previewable character/monster model asset IDs
 	@$(PY) -m tools.assets.model_catalog list
+
+model-catalog-generate: tools ## Regenerate the shared model preview catalog
+	@$(PY) -m tools.assets.model_catalog generate
 
 model: tools ## Preview a model: make model model=<asset_id> [CHECK=1]
 	@if [[ -z "$(model)" ]]; then echo "usage: make model model=<asset_id>"; echo "run: make model-list"; exit 2; fi

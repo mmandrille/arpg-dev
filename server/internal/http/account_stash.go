@@ -17,8 +17,9 @@ func (s *Server) registerAccountStashRoutes(mux *http.ServeMux) {
 }
 
 const (
-	blacksmithRecipeItemUpgrade  = "item_upgrade"
-	blacksmithRecipeWeaponHoning = "weapon_honing"
+	blacksmithRecipeItemUpgrade        = "item_upgrade"
+	blacksmithRecipeWeaponHoning       = "weapon_honing"
+	blacksmithRecipeArmorReinforcement = "armor_reinforcement"
 )
 
 type accountStashItemResponse struct {
@@ -260,13 +261,17 @@ func normalizeBlacksmithRecipeID(recipeID string) string {
 }
 
 func (s *Server) validBlacksmithRecipe(recipeID string) bool {
-	return recipeID == blacksmithRecipeItemUpgrade || recipeID == blacksmithRecipeWeaponHoning
+	return recipeID == blacksmithRecipeItemUpgrade || recipeID == blacksmithRecipeWeaponHoning ||
+		recipeID == blacksmithRecipeArmorReinforcement
 }
 
 func (s *Server) eligibleBlacksmithItemDefs(recipeID string) map[string]struct{} {
 	eligible := make(map[string]struct{}, len(s.rules.ItemTemplates))
 	for itemDefID, def := range s.rules.ItemTemplates {
 		if recipeID == blacksmithRecipeWeaponHoning && !templateCanBeWeaponHoned(def.Slot, def.BaseStats) {
+			continue
+		}
+		if recipeID == blacksmithRecipeArmorReinforcement && !templateCanBeArmorReinforced(def.Slot, def.BaseStats) {
 			continue
 		}
 		eligible[itemDefID] = struct{}{}
@@ -276,6 +281,18 @@ func (s *Server) eligibleBlacksmithItemDefs(recipeID string) map[string]struct{}
 
 func templateCanBeWeaponHoned(slot string, baseStats map[string]int) bool {
 	return slot == "main_hand" && baseStats["damage_min"] > 0 && baseStats["damage_max"] > 0
+}
+
+func templateCanBeArmorReinforced(slot string, baseStats map[string]int) bool {
+	if baseStats["armor"] <= 0 {
+		return false
+	}
+	switch slot {
+	case "off_hand", "head", "chest", "gloves", "belt", "boots":
+		return true
+	default:
+		return false
+	}
 }
 
 func (s *Server) upgradeResourceConfig() (string, int) {

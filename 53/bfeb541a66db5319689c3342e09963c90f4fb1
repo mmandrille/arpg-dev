@@ -1,0 +1,23 @@
+tools/bot/scenarios/41_monster_visual_catalog.json
+  s_b9bc0033a850dd::t_9125fc8968643e 24
+  s_b9bc0033a850dd::t_e445e7f45117a7 19,22
+  s_b9bc0033a850dd::t_e15f6b22393ef6 7-14
+shared/rules/worlds.v0.json
+  s_b9bc0033a850dd::t_9fbafbe761de7b 793-795
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "53bfeb541a66db5319689c3342e09963c90f4fb1",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

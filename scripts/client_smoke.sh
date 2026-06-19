@@ -101,6 +101,7 @@ run_gate "GDScript rig gate" "[rig-gate] PASS" res://tools/inspect_rig.gd
 
 # 2c. Animation controller + rigged scene test (server-independent).
 run_gate "GDScript animation test" "[gdtest] PASS: animation controller + scenes" res://tests/test_animation.gd
+run_gate "GDScript model viewer test" "[gdtest] PASS: test_model_viewer" res://tests/test_model_viewer.gd
 
 # 2d. Bot scenario runner unit tests (server-independent).
 run_gate "GDScript client bot unit test" "[gdtest] PASS: test_client_bot" res://tests/test_client_bot.gd

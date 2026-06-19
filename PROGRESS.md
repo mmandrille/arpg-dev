@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v283 — boss summon bats and HP |
+| **Latest completed slice** | v284 — model viewer tool |
 | **Active branch** | `main` |
-| **CI gate** | v276-v283 focused checks green; post-loop `$refactor` complete; full `make ci` green on 2026-06-19 |
-| **Next slice** | Run `$review` for the post-v283 baseline, then continue with `$next`/`$autoloop` |
+| **CI gate** | v284 focused checks green; full `make ci` green on 2026-06-19 |
+| **Next slice** | Run `$review` for the post-v284 baseline, then continue with `$next`/`$autoloop` |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v283 full `make ci`; write the fresh post-v283 review before the next feature batch |
+| **Next engineering review** | Due now after v284 full `make ci`; write the fresh post-v284 review before the next feature batch |
 
 
 ### Periodic engineering reviews

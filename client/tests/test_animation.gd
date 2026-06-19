@@ -357,10 +357,15 @@ func _test_monster_scene() -> void:
 				var model := s.find_child("Model", true, false) as Node3D
 				_assert(model != null, "%s Model missing" % scene_path)
 				_assert(model.scale.is_equal_approx(Vector3(0.75, 0.75, 0.75)), "%s Model should be scaled to 75%%, got %s" % [scene_path, model.scale])
+				var skel := s.find_child("Skeleton3D", true, false) as Skeleton3D
+				_assert_biped_monster_rig(skel, scene_path)
+				_assert(ap.has_animation("attack"), "%s missing clip attack" % scene_path)
 				ap.play("walk")
 				ap.seek(0.1375, true)
 				_assert(absf(model_root.rotation.y) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
-				_assert(model.position.y > 0.0, "%s walk clip should bob Model, got y=%s" % [scene_path, model.position.y])
+				if skel != null:
+					_assert_animation_rotates_bone(ap, skel, "walk", 0.1375, "leg_l", scene_path)
+					_assert_animation_rotates_bone(ap, skel, "attack", 0.12, "arm_r", scene_path)
 			if scene_path == "res://scenes/monster_crocodile_archer.tscn":
 				var marker := s.find_child("ArcherBowMarker", true, false) as Node3D
 				_assert(marker != null, "%s should expose the ranged archer marker" % scene_path)
@@ -369,10 +374,15 @@ func _test_monster_scene() -> void:
 				_assert(absf(model_root.rotation.y - PI * 0.5) <= 0.001, "%s ModelRoot should apply the 180-degree flipped yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
 				var model := s.find_child("Model", true, false) as Node3D
 				_assert(model != null, "%s Model missing" % scene_path)
+				var skel := s.find_child("Skeleton3D", true, false) as Skeleton3D
+				_assert_biped_monster_rig(skel, scene_path)
+				_assert(ap.has_animation("attack"), "%s missing clip attack" % scene_path)
 				ap.play("walk")
 				ap.seek(0.1375, true)
 				_assert(absf(model_root.rotation.y - PI * 0.5) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
-				_assert(model.position.y > 0.0, "%s walk clip should bob Model, got y=%s" % [scene_path, model.position.y])
+				if skel != null:
+					_assert_animation_rotates_bone(ap, skel, "walk", 0.1375, "leg_l", scene_path)
+					_assert_animation_rotates_bone(ap, skel, "attack", 0.12, "arm_l", scene_path)
 			if scene_path == "res://scenes/monster_tiny_flyer.tscn":
 				var model_root := s.find_child("ModelRoot", false, false) as Node3D
 				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
@@ -429,6 +439,14 @@ func _test_monster_visuals_catalog() -> void:
 	_assert(str(undead.get("scene", "")) == "monster_skeleton", "dungeon_undead scene = %s" % undead.get("scene", ""))
 	var boss := MonsterVisualsLoaderScript.resolve("dungeon_mob", "monster_tiny_flyer")
 	_assert(str(boss.get("scene", "")) == "monster_tiny_flyer", "boss visual_model should select flyer scene")
+
+
+func _assert_biped_monster_rig(skel: Skeleton3D, scene_path: String) -> void:
+	_assert(skel != null, "%s missing Skeleton3D" % scene_path)
+	if skel == null:
+		return
+	for bone in ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"]:
+		_assert(skel.find_bone(bone) >= 0, "%s missing biped bone %s" % [scene_path, bone])
 
 
 func _quat_delta(a: Quaternion, b: Quaternion) -> float:

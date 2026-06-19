@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v277 — tiny flyer bat model |
+| **Latest completed slice** | v278 — biped monster rigged animations |
 | **Active branch** | `main` |
-| **CI gate** | v277 focused checks green on 2026-06-19; last full `make ci` green at v275 |
-| **Next slice** | engineering review for the latest green baseline, then `$refactor` for minor paydown |
+| **CI gate** | v278 focused checks green on 2026-06-19; full `make ci` deferred until the selected autoloop batch completes; `make maintainability` currently blocked by pre-existing ratchet debt |
+| **Next slice** | v279 — quadruped pounce animation support, continuing the selected `$autoloop` queue |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v275 full `make ci`; v276-v277 have focused asset/client proof |
+| **Next engineering review** | Due now after v275 full `make ci`; v276-v278 have focused asset/client proof; run after selected autoloop queue and batch `make ci` |
 
 
 ### Periodic engineering reviews

@@ -552,7 +552,6 @@ TARGETS = {
     "client/assets/equipment/weapons/starter_axe/starter_axe.glb": starter_axe_glb,
     "client/assets/monsters/dummy/monster_dummy.glb": monster_dummy_glb,
     "client/assets/monsters/quadruped/monster_quadruped.glb": monster_quadruped_glb,
-    "client/assets/monsters/tiny_flyer/monster_tiny_flyer.glb": monster_tiny_flyer_glb,
     "client/assets/monsters/skeleton/monster_skeleton.glb": monster_skeleton_glb,
 }
 

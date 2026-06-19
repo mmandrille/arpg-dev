@@ -31,6 +31,10 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		s.openBlacksmithService(e, in, res, ack)
 		return
 	}
+	if service := s.serviceForInteractable(e); service == questTurnInService {
+		s.turnInTownQuest(e, in, res, ack)
+		return
+	}
 	if service := s.serviceForInteractable(e); service == uniqueTestChestService {
 		if !s.gameplayDebug {
 			res.reject(in.MessageID, "debug_disabled")

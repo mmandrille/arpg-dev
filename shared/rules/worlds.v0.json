@@ -629,6 +629,11 @@
           "type": "interactable",
           "interactable_def_id": "town_mercenary_board",
           "position": { "x": 12, "y": 18 }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_quest_giver",
+          "position": { "x": 13, "y": 7 }
         }
       ]
     },
@@ -746,7 +751,23 @@
         { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 14, "y": 11 } },
         { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 14, "y": 12 } },
         { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 14, "y": 13 } },
-        { "type": "loot", "item_def_id": "upgrade_shard", "position": { "x": 12, "y": 10 } }
+        { "type": "loot", "item_def_id": "upgrade_shard", "position": { "x": 12, "y": 10 } },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_quest_giver",
+          "position": { "x": 9, "y": 10 }
+        }
+      ]
+    },
+    "quest_turn_in_lab": {
+      "player": { "position": { "x": 2, "y": 5 } },
+      "entities": [
+        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 3, "y": 5 } },
+        { "type": "interactable", "interactable_def_id": "town_quest_giver", "position": { "x": 5, "y": 5 } },
+        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
+        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
+        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
       ]
     },
     "equipment_lab": {

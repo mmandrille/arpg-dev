@@ -59,6 +59,8 @@ type MainGameplayConfig struct {
 	ItemUpgradeResourceID   string  `json:"item_upgrade_resource_item_def_id"`
 	ItemUpgradeResourceCost int     `json:"item_upgrade_resource_count"`
 	MercenaryHireCostGold   int     `json:"mercenary_hire_cost_gold"`
+	QuestTurnInItemDefID    string  `json:"quest_turn_in_item_def_id"`
+	QuestTurnInRewardGold   int     `json:"quest_turn_in_reward_gold"`
 	CompanionAssistRadius   float64 `json:"companion_assist_radius"`
 	CompanionFollowDistance float64 `json:"companion_follow_distance"`
 	CompanionFollowStop     float64 `json:"companion_follow_stop_radius"`
@@ -1275,6 +1277,13 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_item_def_id: unknown item %q", mainConfig.Gameplay.ItemUpgradeResourceID)
 		}
 	}
+	turnInItem, ok := items.Items[mainConfig.Gameplay.QuestTurnInItemDefID]
+	if !ok {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_item_def_id: unknown item %q", mainConfig.Gameplay.QuestTurnInItemDefID)
+	}
+	if turnInItem.Category != "quest" {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_item_def_id: item %q must be category quest", mainConfig.Gameplay.QuestTurnInItemDefID)
+	}
 	r.Items = items.Items
 
 	var itemTemplates struct {
@@ -1748,7 +1757,7 @@ func LoadRules(dir string) (*Rules, error) {
 			if def.StashID != "" && def.StashID != "account_stash" {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.stash_id: unknown stash %s", id, def.StashID)
 			}
-			if def.Service != "" && def.Service != "bishop" && def.Service != "market" && def.Service != "mercenary" && def.Service != "blacksmith" && def.Service != uniqueTestChestService {
+			if def.Service != "" && def.Service != "bishop" && def.Service != "market" && def.Service != "mercenary" && def.Service != "blacksmith" && def.Service != uniqueTestChestService && def.Service != questTurnInService {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.service: unsupported service %s", id, def.Service)
 			}
 		default:

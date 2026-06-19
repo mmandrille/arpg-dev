@@ -1,0 +1,19 @@
+{
+  "id": "quest_town_turn_in",
+  "runner": "godot_client",
+  "world_id": "quest_turn_in_lab",
+  "seed": "quest_town_turn_in_client_seed",
+  "title": "Quest town turn-in",
+  "description": "Client picks up a Quest Leaf, clicks the town quest giver, and verifies the authoritative turn-in reward.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_quest_giver", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "loot", "item_def_id": "quest_leaf" },
+    { "type": "wait_event", "event_type": "item_picked_up", "item_def_id": "quest_leaf", "timeout_s": 15.0 },
+    { "type": "assert_inventory_count", "item_def_id": "quest_leaf", "equals": 1 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_quest_giver" },
+    { "type": "wait_event", "event_type": "quest_turn_in_completed", "service": "quest_turn_in", "amount": 1, "price": 25, "total_gold": 25, "timeout_s": 15.0 },
+    { "type": "assert_inventory_count", "item_def_id": "quest_leaf", "equals": 0 },
+    { "type": "assert_character_progression", "gold": 25 }
+  ]
+}

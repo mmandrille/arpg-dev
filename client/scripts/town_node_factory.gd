@@ -153,6 +153,22 @@ static func make_blacksmith_node() -> Node3D:
 	add_merchant_box(root, "HammerHead", Vector3(0.28, 0.12, 0.14), Vector3(0.53, 0.82, 0.26), Color("#9da3a6"))
 	return root
 
+static func make_quest_giver_node() -> Node3D:
+	var root := Node3D.new()
+	root.name = "QuestSteward"
+	add_merchant_box(root, "QuestStewardShadow", Vector3(1.02, 0.035, 0.74), Vector3(0.0, 0.018, 0.0), Color("#151713"))
+	add_merchant_box(root, "RobeLower", Vector3(0.52, 0.60, 0.34), Vector3(0.0, 0.44, 0.0), Color("#1f5c3a"))
+	add_merchant_box(root, "RobeUpper", Vector3(0.46, 0.56, 0.30), Vector3(0.0, 0.90, 0.0), Color("#2f7d4f"))
+	add_merchant_box(root, "Sash", Vector3(0.42, 0.08, 0.34), Vector3(0.0, 0.68, 0.02), Color("#d8c879"))
+	add_merchant_box(root, "Head", Vector3(0.30, 0.30, 0.28), Vector3(0.0, 1.34, 0.0), Color("#c99666"))
+	add_merchant_box(root, "Hood", Vector3(0.42, 0.18, 0.32), Vector3(0.0, 1.48, 0.0), Color("#1b4b32"))
+	add_merchant_box(root, "LeftArm", Vector3(0.12, 0.46, 0.14), Vector3(-0.34, 0.82, 0.04), Color("#1b4b32"))
+	add_merchant_box(root, "RightArm", Vector3(0.12, 0.46, 0.14), Vector3(0.34, 0.82, 0.04), Color("#1b4b32"))
+	add_merchant_box(root, "QuestScroll", Vector3(0.46, 0.08, 0.26), Vector3(0.0, 0.61, 0.28), Color("#efe0bc"))
+	add_merchant_box(root, "QuestSeal", Vector3(0.14, 0.05, 0.15), Vector3(0.18, 0.61, 0.43), Color("#b93131"))
+	add_merchant_cylinder(root, "QuestMarker", 0.12, 0.08, Vector3(0.0, 1.76, 0.0), Color("#6ee68b"), true)
+	return root
+
 static func make_market_board_node() -> Node3D:
 	var root := Node3D.new()
 	root.name = "MarketBoard"
@@ -188,6 +204,7 @@ static func make_town_preview_scene() -> Node3D:
 		{"def_id": "town_bishop", "position": Vector3(15.0, 0.0, 6.0)},
 		{"def_id": "town_market_board", "position": Vector3(10.0, 0.0, 18.0)},
 		{"def_id": "town_blacksmith", "position": Vector3(6.0, 0.0, 10.0)},
+		{"def_id": "town_quest_giver", "position": Vector3(13.0, 0.0, 7.0)},
 	]
 	for entry in service_entries:
 		var service := make_interactable_node(str(entry["def_id"]))
@@ -225,6 +242,8 @@ static func make_interactable_node(def_id: String, elite_objective: bool = false
 			return make_market_board_node()
 		"town_blacksmith":
 			return make_blacksmith_node()
+		"town_quest_giver":
+			return make_quest_giver_node()
 	return make_door_node()
 
 static func make_town_cabin_node(variant: String = "plain") -> Node3D:

@@ -1,0 +1,98 @@
+client/tests/test_blacksmith_panel.gd
+  s_b64d9a5e320ee3::t_7d84af9dd54f6d 52-53
+docs/specs/v293_spec-bishop-badge-costs.md
+  s_b64d9a5e320ee3::t_a6b0602a24d5e4 3
+  s_b64d9a5e320ee3::t_5a661d9dce7453 1-2,4-64,66-95
+  s_b64d9a5e320ee3::t_37573c4c950b3b 65
+tools/bot/runtime_queries.py
+  s_b64d9a5e320ee3::t_937fb0ae0741dc 65
+client/scripts/bishop_panel.gd
+  s_b64d9a5e320ee3::t_8535f8bbfbdbbf 19-23,45,50-52,61-67,100-107,215,218,225-229,235,242,254,258,265-332
+docs/progress/slice-lifecycle.md
+  s_b64d9a5e320ee3::t_7b26cfcc36409b 307
+  s_b64d9a5e320ee3::t_014685d072a550 308
+server/internal/game/rules.go
+  s_b64d9a5e320ee3::t_6d8b277d691cc2 50-71
+server/internal/game/bishop_test.go
+  s_b64d9a5e320ee3::t_178adb0bd98d75 50-52,73,92-94,111,114,156,176-178,189-190,200-203,206-223,335-343
+  s_b64d9a5e320ee3::t_52a7f1427148a5 117-153
+  s_b64d9a5e320ee3::t_0f04b8e6df6ef3 57
+docs/as-built/v293_bishop-badge-costs.md
+  s_b64d9a5e320ee3::t_256a4aadfea4cd 1-76
+tools/validate_main_config.py
+  s_b64d9a5e320ee3::t_628f75ef014ffc 53-62
+shared/rules/main_config.v0.json
+  s_b64d9a5e320ee3::t_628f75ef014ffc 8-11
+server/internal/game/bishop_revive.go
+  s_b64d9a5e320ee3::t_a41ef2dd71d622 18-23,25-31
+server/internal/game/main_config_validation.go
+  s_b64d9a5e320ee3::t_628f75ef014ffc 9-20,62-67,86-96
+server/internal/game/bishop_service.go
+  s_b64d9a5e320ee3::t_55cac1bc44ca2f 1-33
+tools/bot/scenarios/client/54_material_wallet_details.json
+  s_b64d9a5e320ee3::t_7d84af9dd54f6d 14
+tools/bot/scenarios/client/32_town_bishop_respec_panel.json
+  s_b64d9a5e320ee3::t_0f04b8e6df6ef3 4-5,7-10,13-19,21,23
+server/internal/game/badge_rewards.go
+  s_b64d9a5e320ee3::t_aa6b13dec9d3b5 114-132,146-147
+server/internal/game/types.go
+  s_b64d9a5e320ee3::t_937fb0ae0741dc 452
+client/tests/test_bishop_panel.gd.uid
+  s_b64d9a5e320ee3::t_af3c6b084d8dad 1
+client/tests/test_shop_panel.gd
+  s_b64d9a5e320ee3::t_7d84af9dd54f6d 533
+shared/rules/main_config.v0.schema.json
+  s_b64d9a5e320ee3::t_628f75ef014ffc 13,20-23
+client/scripts/bot_scenario_runner.gd
+  s_b64d9a5e320ee3::t_5de40562940e58 435
+  s_b64d9a5e320ee3::t_46fa14cab7a4d1 936,944-950
+server/internal/game/bishop_costs.go
+  s_b64d9a5e320ee3::t_12166b8767e324 1-55
+PROGRESS.md
+  s_b64d9a5e320ee3::t_b5ddaa26ba5d5d 26,28-29,31,90-97
+docs/progress/slice-codename-index.md
+  s_b64d9a5e320ee3::t_014685d072a550 239
+client/tests/test_bishop_panel.gd
+  s_b64d9a5e320ee3::t_05aa9a0052cadc 1-10,16,18-65
+  s_b64d9a5e320ee3::t_d341139b4b385b 11-15
+  s_b64d9a5e320ee3::t_4467ed80daf131 17
+docs/plans/v293_2026-06-19-bishop-badge-costs.md
+  s_b64d9a5e320ee3::t_1544db0f6942d2 202-204
+  s_b64d9a5e320ee3::t_37573c4c950b3b 57,59,61,122,196
+  s_b64d9a5e320ee3::t_5a661d9dce7453 1-2,4-56,58,60,62,65-67,69-85,87,90-108,110,112,114,117-121,123-132,135,137,139-156,158,161-185,188-194,201,205-208
+  s_b64d9a5e320ee3::t_a6b0602a24d5e4 3,63-64,68,86,88-89,109,111,113,115-116,133-134,136,138,157,159-160,186-187,195,197-200
+client/scripts/bot_step_catalog.gd
+  s_b64d9a5e320ee3::t_5b7005bc971f4f 238
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_b64d9a5e320ee3::t_7d84af9dd54f6d 14,48
+client/scripts/main.gd
+  s_b64d9a5e320ee3::t_d4f68b78541121 4357
+  s_b64d9a5e320ee3::t_0e9d9002caf560 1689
+shared/rules/worlds.v0.json
+  s_b64d9a5e320ee3::t_0f04b8e6df6ef3 767
+tools/bot/scenarios/client/61_material_wallet_window.json
+  s_b64d9a5e320ee3::t_7d84af9dd54f6d 14,16
+tools/bot/scenarios/45_town_bishop_respec.json
+  s_b64d9a5e320ee3::t_0c3a2d7f3ebae5 30,50
+  s_b64d9a5e320ee3::t_0f04b8e6df6ef3 3-4,7,15,19-23,41,45-49,52-54
+server/internal/game/bishop_respec.go
+  s_b64d9a5e320ee3::t_12166b8767e324 1-55
+.maintainability/file-size-baseline.tsv
+  s_b64d9a5e320ee3::t_f186a82c96de7d 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f401739cfe351b5533f545162657ad1621be2c77",
+  "prompts": {},
+  "sessions": {
+    "s_b64d9a5e320ee3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee1fd-336f-7122-90c0-0897292db205",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

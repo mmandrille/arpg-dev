@@ -1,0 +1,43 @@
+make/shared.mk
+  s_b9bc0033a850dd::t_e3747c575fe022 14
+docs/progress/slice-lifecycle.md
+  s_b9bc0033a850dd::t_4ff1b83defbb2a 294
+assets/manifests/assets.v0.json
+  s_b9bc0033a850dd::t_24d40c20e5e76a 256,260
+docs/as-built/v279_quadruped-pounce-animation-support.md
+  s_b9bc0033a850dd::t_4ff1b83defbb2a 1-40
+client/scenes/monster_quadruped.tscn
+  s_b9bc0033a850dd::t_4aba48d86ba535 15
+tools/assets/rig_quadruped_monster_glbs.py
+  s_b9bc0033a850dd::t_e3747c575fe022 1-158
+client/animations/monster_quadruped_fox_anims.tres
+  s_b9bc0033a850dd::t_4aba48d86ba535 8,11,15,18,21,25,28,31,36-83,87,90,94,97,101,105
+docs/plans/v279_2026-06-19-quadruped-pounce-animation-support.md
+  s_b9bc0033a850dd::t_4ff1b83defbb2a 3,37,56-57,71-72,87-89,93-97
+  s_b9bc0033a850dd::t_995f2f760081a3 1-2,4-36,38-55,58-70,73-86,90-92,98-99
+docs/specs/v279_spec-quadruped-pounce-animation-support.md
+  s_b9bc0033a850dd::t_4ff1b83defbb2a 3
+  s_b9bc0033a850dd::t_995f2f760081a3 1-2,4-56
+tools/assets/test_rig_quadruped_monster_glbs.py
+  s_b9bc0033a850dd::t_e3747c575fe022 1-17
+client/tests/test_animation.gd
+  s_b9bc0033a850dd::t_a418483fb64fa8 349-352,356-362,462-467
+PROGRESS.md
+  s_b9bc0033a850dd::t_4ff1b83defbb2a 26,28-29,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6f68891c42ad07a9f247da1756c359ff2c802448",
+  "prompts": {},
+  "sessions": {
+    "s_b9bc0033a850dd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede59-0e57-7112-8378-74f9581d05c3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

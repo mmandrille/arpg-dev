@@ -106,6 +106,11 @@ func _test_boss_visuals() -> void:
 	rec["boss_phase"] = {"pattern_id": "shard_fan"}
 	controller.sync_boss_telegraph_marker(rec, {"hit_shape": "cone", "radius": 5.8, "width": 70.0, "to_color": "#ffd166"})
 	_assert_eq("cone marker shape", str(rec.get("telegraph_marker_shape", "")), "cone")
+	rec["boss_phase"] = {"pattern_id": "crystal_wall"}
+	controller.sync_boss_telegraph_marker(rec, {"hit_shape": "rectangle", "radius": 4.8, "width": 2.0, "to_color": "#64f4ff"})
+	_assert_eq("rectangle marker shape", str(rec.get("telegraph_marker_shape", "")), "rectangle")
+	var marker := root.find_child(ClientConstantsScript.BOSS_TELEGRAPH_MARKER_NAME, false, false) as MeshInstance3D
+	_assert_true("rectangle marker mesh", marker != null and marker.mesh is BoxMesh)
 	rec["boss_phase"] = {"pattern_id": "summon_wolves"}
 	controller.sync_boss_telegraph_marker(rec, {"hit_shape": "circle", "radius": 3.2, "to_color": "#4fd18b"})
 	_assert_eq("summon marker shape", str(rec.get("telegraph_marker_shape", "")), "summon_circle")

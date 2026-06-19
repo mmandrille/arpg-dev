@@ -224,7 +224,7 @@ func boss_telegraph_marker_shape(rec: Dictionary, telegraph: Dictionary) -> Stri
 	var hit_shape := str(telegraph.get("hit_shape", ""))
 	if pattern_id == "summon_wolves":
 		return "summon_circle"
-	if hit_shape in ["line", "cone", "melee_contact"]:
+	if hit_shape in ["line", "cone", "melee_contact", "rectangle"]:
 		return hit_shape
 	var telegraph_type := str(telegraph.get("type", ""))
 	return telegraph_type if telegraph_type != "" else "circle"
@@ -235,6 +235,10 @@ func boss_telegraph_marker_mesh(shape: String, local_radius: float, local_width:
 			var line := BoxMesh.new()
 			line.size = Vector3(maxf(0.1, local_width), 0.035, maxf(0.1, local_radius * 2.0))
 			return line
+		"rectangle":
+			var rect := BoxMesh.new()
+			rect.size = Vector3(maxf(0.1, local_width), 0.035, maxf(0.1, local_radius))
+			return rect
 		"cone":
 			return _cone_marker_mesh(local_radius, local_width)
 		"melee_contact":

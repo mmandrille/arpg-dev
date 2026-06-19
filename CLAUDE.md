@@ -39,6 +39,9 @@ make validate-assets # validate asset manifest + runtime .glb files
 # Assets (regenerate deterministic committed files)
 make gen-assets      # regenerate runtime .glb files
 make gen-anims       # regenerate AnimationLibrary .tres clips (requires Godot)
+make model-list      # list previewable character/monster model asset IDs
+make model model=<asset_id>        # open a focused Godot preview for one model
+make model model=<asset_id> CHECK=1 # headless model-viewer load check
 
 # Replay
 make replay SESSION_ID=<id>   # re-simulate a recorded session and verify output

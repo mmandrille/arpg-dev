@@ -312,10 +312,14 @@ func _test_monster_scene() -> void:
 			if scene_path == "res://scenes/monster_crocodile_archer.tscn":
 				var marker := s.find_child("ArcherBowMarker", true, false) as Node3D
 				_assert(marker != null, "%s should expose the ranged archer marker" % scene_path)
+				var model_root := s.find_child("ModelRoot", false, false) as Node3D
+				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
+				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s ModelRoot should correct GLB left-facing axis to parent +Z, got y=%s" % [scene_path, model_root.rotation.y])
 				var model := s.find_child("Model", true, false) as Node3D
 				_assert(model != null, "%s Model missing" % scene_path)
 				ap.play("walk")
 				ap.seek(0.1375, true)
+				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
 				_assert(model.position.y > 0.0, "%s walk clip should bob Model, got y=%s" % [scene_path, model.position.y])
 		s.free()
 		await process_frame

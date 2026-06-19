@@ -8,7 +8,7 @@ const STEP_TYPES_WAIT := [
 	"wait_ws_open", "wait_entity", "wait_event", "wait_inventory_item",
 	"wait_inventory_count", "wait_loot_item", "wait_loot_count", "wait_hotbar_assigned",
 	"wait_hotbar_capacity",
-	"wait_player_near", "assert_entity_removed",
+	"wait_player_near", "wait_entity_near_player", "assert_entity_removed",
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
 	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 	"wait_skill_progression", "wait_skill_bar",
@@ -102,7 +102,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		var timeout = step.get("timeout_s", null)
 		if timeout == null or float(timeout) <= 0.0:
 			return "client_steps[%d] (%s) requires a positive timeout_s" % [index, stype]
-	if stype == "wait_entity" or stype == "assert_entity_removed":
+	if stype in ["wait_entity", "wait_entity_near_player", "assert_entity_removed"]:
 		if str(step.get("entity_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type" % [index, stype]
 	if stype == "wait_event":
@@ -114,6 +114,8 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "wait_player_near":
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]
+	if stype == "wait_entity_near_player" and (not step.has("distance") or float(step.get("distance", 0.0)) <= 0.0):
+		return "client_steps[%d] (%s) requires positive distance" % [index, stype]
 	if stype in ["wait_inventory_count", "assert_inventory_count"]:
 		if not step.has("equals"):
 			return "client_steps[%d] (%s) requires equals" % [index, stype]

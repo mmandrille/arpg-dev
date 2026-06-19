@@ -4,7 +4,7 @@
   "world_id": "ranged_monster_ai_lab",
   "seed": "v52_ranged_monster_ai",
   "title": "Client ranged monster AI",
-  "description": "Client opens a compact archer lab, verifies the dungeon archer bow marker, and observes an archer-driven attack event.",
+  "description": "Client opens a compact archer lab, verifies the dungeon archer bow marker, waits for the blocked archer to navigate closer for a clear shot, and observes an archer-driven attack event.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
@@ -15,6 +15,13 @@
       "has_bow_marker": true,
       "timeout_s": 10.0
     },
-    { "type": "wait_event", "event_type": "attack_missed", "consume_event": true, "timeout_s": 5.0 }
+    {
+      "type": "wait_entity_near_player",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_archer",
+      "distance": 3.75,
+      "timeout_s": 10.0
+    },
+    { "type": "wait_event", "event_type": "attack_missed", "consume_event": true, "timeout_s": 8.0 }
   ]
 }

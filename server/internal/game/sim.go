@@ -3353,10 +3353,7 @@ func (s *Sim) findMonsterChaseGoal(monster *entity, player *entity, def MonsterD
 		}
 	}
 	if !found {
-		if attempted || !s.monsterPathBudgetAvailable() {
-			s.scheduleMonsterRepath(monster)
-		}
-		return Vec2{}, false
+		return s.monsterFallbackChaseGoal(monster, player, def, blocked, attempted)
 	}
 	s.cacheMonsterNavigationPath(monster, player.id, bestGoal, bestSteps)
 	return bestGoal, true

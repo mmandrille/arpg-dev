@@ -1,0 +1,23 @@
+server/internal/game/companion_ai.go
+  s_131a67d4d907eb::t_51add9d817e79b 5-6,159
+server/internal/game/sorcerer_revive_test.go
+  s_131a67d4d907eb::t_c194254b6eea58 42-44
+client/tests/test_animation.gd
+  s_131a67d4d907eb::t_e449483d395fd2 8,47-48,467-490
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7495deecb45c428974e8bc171228bf345891666b",
+  "prompts": {},
+  "sessions": {
+    "s_131a67d4d907eb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede62-3cf4-7813-b895-b1aa4301ed1a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -15,9 +15,9 @@ Plan: [`docs/plans/v273_2026-06-18-crocodile-archer-model.md`](../plans/v273_202
   coordinator while adding the new scene.
 - The existing archer bow-marker client contract remains present so ranged monster visual bots still
   assert the regular ranged enemy.
-- A follow-up orientation fix rotates the imported crocodile body `-90` degrees on `ModelRoot`, and
-  the ranged monster client scenario now waits for the blocked archer to navigate closer before it
-  observes the shot.
+- Follow-up orientation fixes rotate the imported crocodile body through `ModelRoot`; the final
+  correction is a 180-degree flip from the first adjustment, and the ranged monster client scenario
+  waits for the blocked archer to navigate closer before it observes the shot.
 - Server-owned ranged monster chase now falls back to closer clear-shot cells when the normal
   max-range standoff slots are blocked or unreachable.
 

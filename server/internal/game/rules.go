@@ -47,23 +47,24 @@ type MainConfig struct {
 }
 
 type MainGameplayConfig struct {
-	BaseAttackIntervalTicks int     `json:"base_attack_interval_ticks"`
-	BaseMovementSpeed       float64 `json:"base_movement_speed"`
-	BaseDropRatePercent     int     `json:"base_drop_rate_percent"`
-	RespecCostGold          int     `json:"respec_cost_gold"`
-	ItemUpgradeCostGold     int     `json:"item_upgrade_cost_gold"`
-	ItemUpgradeCostGrowth   int     `json:"item_upgrade_cost_growth_per_level"`
-	ItemUpgradeMaxLevel     int     `json:"item_upgrade_max_level"`
-	ItemUpgradeSuccessPct   int     `json:"item_upgrade_success_chance_percent"`
-	ItemUpgradePityFailures int     `json:"item_upgrade_pity_failure_threshold"`
-	ItemUpgradeResourceID   string  `json:"item_upgrade_resource_item_def_id"`
-	ItemUpgradeResourceCost int     `json:"item_upgrade_resource_count"`
-	MercenaryHireCostGold   int     `json:"mercenary_hire_cost_gold"`
-	QuestTurnInItemDefID    string  `json:"quest_turn_in_item_def_id"`
-	QuestTurnInRewardGold   int     `json:"quest_turn_in_reward_gold"`
-	CompanionAssistRadius   float64 `json:"companion_assist_radius"`
-	CompanionFollowDistance float64 `json:"companion_follow_distance"`
-	CompanionFollowStop     float64 `json:"companion_follow_stop_radius"`
+	BaseAttackIntervalTicks int               `json:"base_attack_interval_ticks"`
+	BaseMovementSpeed       float64           `json:"base_movement_speed"`
+	BaseDropRatePercent     int               `json:"base_drop_rate_percent"`
+	RespecCostGold          int               `json:"respec_cost_gold"`
+	ItemUpgradeCostGold     int               `json:"item_upgrade_cost_gold"`
+	ItemUpgradeCostGrowth   int               `json:"item_upgrade_cost_growth_per_level"`
+	ItemUpgradeMaxLevel     int               `json:"item_upgrade_max_level"`
+	ItemUpgradeSuccessPct   int               `json:"item_upgrade_success_chance_percent"`
+	ItemUpgradePityFailures int               `json:"item_upgrade_pity_failure_threshold"`
+	ItemUpgradeResourceID   string            `json:"item_upgrade_resource_item_def_id"`
+	ItemUpgradeResourceCost int               `json:"item_upgrade_resource_count"`
+	BadgeRewardRules        []BadgeRewardRule `json:"badge_reward_rules"`
+	MercenaryHireCostGold   int               `json:"mercenary_hire_cost_gold"`
+	QuestTurnInItemDefID    string            `json:"quest_turn_in_item_def_id"`
+	QuestTurnInRewardGold   int               `json:"quest_turn_in_reward_gold"`
+	CompanionAssistRadius   float64           `json:"companion_assist_radius"`
+	CompanionFollowDistance float64           `json:"companion_follow_distance"`
+	CompanionFollowStop     float64           `json:"companion_follow_stop_radius"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -1272,17 +1273,8 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules items.%s.attack_mode: %s", id, def.AttackMode)
 		}
 	}
-	if mainConfig.Gameplay.ItemUpgradeResourceCost > 0 {
-		if _, ok := items.Items[mainConfig.Gameplay.ItemUpgradeResourceID]; !ok {
-			return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_item_def_id: unknown item %q", mainConfig.Gameplay.ItemUpgradeResourceID)
-		}
-	}
-	turnInItem, ok := items.Items[mainConfig.Gameplay.QuestTurnInItemDefID]
-	if !ok {
-		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_item_def_id: unknown item %q", mainConfig.Gameplay.QuestTurnInItemDefID)
-	}
-	if turnInItem.Category != "quest" {
-		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_item_def_id: item %q must be category quest", mainConfig.Gameplay.QuestTurnInItemDefID)
+	if err := validateMainGameplayResourceItems(mainConfig.Gameplay, items.Items); err != nil {
+		return nil, err
 	}
 	r.Items = items.Items
 

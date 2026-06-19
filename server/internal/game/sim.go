@@ -1445,14 +1445,14 @@ func (s *Sim) directionalMeleeTarget(dir Vec2) *entity {
 	}
 	return best
 }
-
-func (s *Sim) dropLoot(monster *entity, corr string, res *TickResult) {
+func (s *Sim) dropLoot(monster *entity, sourceID uint64, corr string, res *TickResult) {
 	drops := s.rules.LootDrops(monster.lootTable, s.rng)
 	s.spawnLootDrops(drops, monster.pos, s.targetInteractionRadius(monster), corr, res, goldRollContext{
 		levelNum:        s.activeLevel().levelNum,
 		monsterRarityID: monster.monsterRarityID,
 		magicFind:       true,
 	})
+	s.grantBossBadgeRewards(monster, sourceID, corr, res)
 }
 
 func (s *Sim) finishMonsterKill(monster *entity, sourceID uint64, corr string, res *TickResult) {
@@ -1474,7 +1474,7 @@ func (s *Sim) finishMonsterKill(monster *entity, sourceID uint64, corr string, r
 			CorrelationID:  corr,
 		})
 	}
-	s.dropLoot(monster, corr, res)
+	s.dropLoot(monster, sourceID, corr, res)
 	s.awardMonsterExperience(monster, sourceID, corr, res)
 	if monster.isBoss {
 		s.unlockBossFloorExits(corr, res)

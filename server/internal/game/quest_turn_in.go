@@ -45,6 +45,7 @@ func (s *Sim) turnInTownQuest(giver *entity, in Input, res *TickResult, ack bool
 		Price:          intPtr(rewardGold),
 		TotalGold:      intPtr(s.gold),
 	})
+	s.grantQuestTurnInBadgeRewards(giver, in.CorrelationID, res)
 	if ack {
 		res.ack(in.MessageID)
 	}

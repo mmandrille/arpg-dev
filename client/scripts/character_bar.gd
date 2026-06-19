@@ -254,7 +254,15 @@ func _wallet_resource_keys() -> Array:
 
 func _resource_label(resource_id: String) -> String:
 	if resource_id == "upgrade_shard":
-		return "Shard"
+		return "Upgrade"
+	if resource_id == "respec_badge":
+		return "Respec"
+	if resource_id == "stat_badge":
+		return "Stat"
+	if resource_id == "skill_badge":
+		return "Skill"
+	if resource_id == "resurrection_badge":
+		return "Resurrect"
 	return _resource_name(resource_id)
 
 

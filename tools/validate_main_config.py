@@ -50,6 +50,32 @@ def validate_main_config_gameplay(
     else:
         report.ok("main_config gameplay owns starter item upgrade tuning")
 
+    badge_rows = main_gameplay.get("badge_reward_rules", [])
+    if not isinstance(badge_rows, list) or not badge_rows:
+        report.fail("main_config gameplay", "badge_reward_rules must be a non-empty list")
+    else:
+        seen_badges: set[str] = set()
+        for idx, row in enumerate(badge_rows):
+            resource_id = str(row.get("resource_item_def_id", ""))
+            if not resource_id:
+                report.fail("main_config gameplay", f"badge_reward_rules[{idx}].resource_item_def_id must be non-empty")
+                break
+            if resource_id in seen_badges:
+                report.fail("main_config gameplay", f"badge_reward_rules[{idx}].resource_item_def_id duplicates {resource_id}")
+                break
+            seen_badges.add(resource_id)
+            if int(row.get("unlock_depth", 0)) <= 0:
+                report.fail("main_config gameplay", f"badge_reward_rules[{idx}].unlock_depth must be positive")
+                break
+            if int(row.get("base_chance_percent", -1)) < 0 or int(row.get("base_chance_percent", -1)) > 100:
+                report.fail("main_config gameplay", f"badge_reward_rules[{idx}].base_chance_percent must be within [0,100]")
+                break
+            if int(row.get("chance_per_depth_percent", -1)) < 0:
+                report.fail("main_config gameplay", f"badge_reward_rules[{idx}].chance_per_depth_percent must be non-negative")
+                break
+        else:
+            report.ok("main_config gameplay owns badge reward depth scaling")
+
     if not str(main_gameplay.get("quest_turn_in_item_def_id", "")):
         report.fail("main_config gameplay", "quest_turn_in_item_def_id must be non-empty")
     elif int(main_gameplay.get("quest_turn_in_reward_gold", -1)) < 0:

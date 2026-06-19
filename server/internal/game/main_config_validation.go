@@ -15,5 +15,53 @@ func validateMainGameplayEconomyConfig(gameplay MainGameplayConfig) error {
 	if gameplay.QuestTurnInRewardGold < 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_reward_gold: must be non-negative")
 	}
+	if len(gameplay.BadgeRewardRules) == 0 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.badge_reward_rules: must not be empty")
+	}
+	seen := map[string]bool{}
+	for idx, rule := range gameplay.BadgeRewardRules {
+		label := fmt.Sprintf("main_config.gameplay.badge_reward_rules[%d]", idx)
+		if rule.ResourceItemDefID == "" {
+			return fmt.Errorf("game: invalid rules %s.resource_item_def_id: must be non-empty", label)
+		}
+		if seen[rule.ResourceItemDefID] {
+			return fmt.Errorf("game: invalid rules %s.resource_item_def_id: duplicate resource %q", label, rule.ResourceItemDefID)
+		}
+		seen[rule.ResourceItemDefID] = true
+		if rule.UnlockDepth <= 0 {
+			return fmt.Errorf("game: invalid rules %s.unlock_depth: must be positive", label)
+		}
+		if rule.BaseChancePercent < 0 || rule.BaseChancePercent > 100 {
+			return fmt.Errorf("game: invalid rules %s.base_chance_percent: must be within [0,100]", label)
+		}
+		if rule.ChancePerDepthPercent < 0 {
+			return fmt.Errorf("game: invalid rules %s.chance_per_depth_percent: must be non-negative", label)
+		}
+	}
+	return nil
+}
+
+func validateMainGameplayResourceItems(gameplay MainGameplayConfig, items map[string]ItemDef) error {
+	if gameplay.ItemUpgradeResourceCost > 0 {
+		if _, ok := items[gameplay.ItemUpgradeResourceID]; !ok {
+			return fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_item_def_id: unknown item %q", gameplay.ItemUpgradeResourceID)
+		}
+	}
+	turnInItem, ok := items[gameplay.QuestTurnInItemDefID]
+	if !ok {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_item_def_id: unknown item %q", gameplay.QuestTurnInItemDefID)
+	}
+	if turnInItem.Category != "quest" {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_item_def_id: item %q must be category quest", gameplay.QuestTurnInItemDefID)
+	}
+	for idx, rule := range gameplay.BadgeRewardRules {
+		item, ok := items[rule.ResourceItemDefID]
+		if !ok {
+			return fmt.Errorf("game: invalid rules main_config.gameplay.badge_reward_rules[%d].resource_item_def_id: unknown item %q", idx, rule.ResourceItemDefID)
+		}
+		if item.Category != "currency" || item.Equippable {
+			return fmt.Errorf("game: invalid rules main_config.gameplay.badge_reward_rules[%d].resource_item_def_id: item %q must be a non-equippable currency", idx, rule.ResourceItemDefID)
+		}
+	}
 	return nil
 }

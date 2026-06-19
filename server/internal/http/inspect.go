@@ -22,13 +22,14 @@ func (s *Server) registerInspectRoutes(mux *http.ServeMux) {
 }
 
 type debugCharacterProgressionRequest struct {
-	Level              int                      `json:"level"`
-	Experience         int                      `json:"experience"`
-	UnspentStatPoints  int                      `json:"unspent_stat_points"`
-	UnspentSkillPoints int                      `json:"unspent_skill_points"`
-	Stats              store.CharacterBaseStats `json:"stats"`
-	Gold               int                      `json:"gold"`
-	SkillRanks         map[string]int           `json:"skill_ranks"`
+	Level               int                      `json:"level"`
+	Experience          int                      `json:"experience"`
+	UnspentStatPoints   int                      `json:"unspent_stat_points"`
+	UnspentSkillPoints  int                      `json:"unspent_skill_points"`
+	Stats               store.CharacterBaseStats `json:"stats"`
+	Gold                int                      `json:"gold"`
+	DeepestDungeonDepth int                      `json:"deepest_dungeon_depth"`
+	SkillRanks          map[string]int           `json:"skill_ranks"`
 }
 
 func (s *Server) handleDebugCharacterProgression(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +55,7 @@ func (s *Server) handleDebugCharacterProgression(w http.ResponseWriter, r *http.
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	if req.Level < 1 || req.Experience < 0 || req.UnspentStatPoints < 0 || req.UnspentSkillPoints < 0 || req.Gold < 0 {
+	if req.Level < 1 || req.Experience < 0 || req.UnspentStatPoints < 0 || req.UnspentSkillPoints < 0 || req.Gold < 0 || req.DeepestDungeonDepth < 0 {
 		writeError(w, http.StatusBadRequest, "invalid_progression", "progression values are out of range")
 		return
 	}
@@ -74,7 +75,7 @@ func (s *Server) handleDebugCharacterProgression(w http.ResponseWriter, r *http.
 		UnspentSkillPoints:  req.UnspentSkillPoints,
 		Stats:               req.Stats,
 		Gold:                req.Gold,
-		DeepestDungeonDepth: 0,
+		DeepestDungeonDepth: req.DeepestDungeonDepth,
 		SkillRanks:          req.SkillRanks,
 	}
 	if err := s.store.UpsertCharacterProgression(r.Context(), accountID, progression); err != nil {

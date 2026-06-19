@@ -35,6 +35,8 @@ static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label:
 			_draw_amulet(canvas, center, min_side, color, accent)
 		"coin":
 			_draw_coin(canvas, center, min_side, color, accent)
+		"badge":
+			_draw_badge(canvas, center, min_side, color, accent)
 		"leaf":
 			_draw_leaf(canvas, center, min_side, color, accent)
 		"potion":
@@ -120,6 +122,12 @@ static func _draw_amulet(canvas: Control, center: Vector2, min_side: float, colo
 static func _draw_coin(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
 	canvas.draw_circle(center, min_side * 0.24, color)
 	canvas.draw_arc(center, min_side * 0.17, 0.0, TAU, 22, accent, maxf(2.0, min_side * 0.035), true)
+
+
+static func _draw_badge(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
+	canvas.draw_circle(center, min_side * 0.25, color)
+	canvas.draw_arc(center, min_side * 0.18, 0.0, TAU, 24, accent, maxf(2.0, min_side * 0.035), true)
+	canvas.draw_circle(center, min_side * 0.08, accent)
 
 
 static func _draw_leaf(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:

@@ -25,10 +25,10 @@ Last updated: 2026-06-19
 |-------|-------|
 | **Latest completed slice** | v284 — model viewer tool |
 | **Active branch** | `main` |
-| **CI gate** | v284 focused checks green; full `make ci` green on 2026-06-19 |
-| **Next slice** | Run `$review` for the post-v284 baseline, then continue with `$next`/`$autoloop` |
-| **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v284 full `make ci`; write the fresh post-v284 review before the next feature batch |
+| **CI gate** | v284 shipped with full `make ci` green on 2026-06-19; review-time `make ci` failed in client bot step (`mercenary_recovery_ui`, `door_fog_toggle`) but both focused reruns passed |
+| **Next slice** | Run `$refactor` against the post-v284 review, prioritizing client bot full-suite stability before the next feature batch |
+| **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
+| **Next engineering review** | v294 target after a green full `make ci` and the next feature batch |
 
 
 ### Periodic engineering reviews
@@ -87,12 +87,13 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review follow-ups remaining after v250 `$refactor`.** Stale v241-v250 batch-CI proof wording,
-  focused client debug-progression unit coverage, and the `helpers=globals()` bot-runtime baseline
-  are closed. Remaining review items are future-plan or future-slice scale: split the next touched
-  large coordinators/validators, plan separate elite-minion follow-tuning rule names when AI
-  movement tuning is next in scope, continue the tuning-friendly rule-test audit, and treat
-  production boss telegraph VFX/exact aim projection as planned feature work.
+- **Review follow-ups remaining after v284 `$review`.** First priority is restoring a green full
+  `make ci` by stabilizing the broad client bot sweep failures seen in `mercenary_recovery_ui` and
+  `door_fog_toggle`; both passed focused reruns, so treat this as suite/order/timing hardening.
+  After that, keep splitting the next touched large coordinators/validators, add model-catalog
+  parity coverage or one shared preview catalog, refresh deferred combat/boss backlog wording after
+  v280-v283 first-pass work, continue the tuning-friendly rule-test audit, and resolve unverified
+  local GLB provenance before production distribution.
 
 ### Other deferred items (from specs / ADRs)
 

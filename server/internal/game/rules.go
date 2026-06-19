@@ -2476,7 +2476,7 @@ func validateBossTemplates(templates map[string]BossTemplateDef, r *Rules) error
 		}
 		for idx, model := range template.Visual.ModelPool {
 			switch model {
-			case "monster_dummy", "monster_quadruped", "monster_tiny_flyer":
+			case "monster_dummy", "monster_dark_purple", "monster_crocodile_archer", "monster_quadruped", "monster_wolf", "monster_tiny_flyer", "monster_skeleton":
 			default:
 				return fmt.Errorf("game: invalid rules boss_templates.%s.visual.model_pool[%d]: unknown model %s", templateID, idx, model)
 			}

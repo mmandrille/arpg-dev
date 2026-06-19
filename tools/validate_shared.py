@@ -58,11 +58,9 @@ CONTENT = SHARED / "content"
 I18N = SHARED / "i18n"
 ASSET_MANIFEST = ROOT / "assets" / "manifests" / "assets.v0.json"
 
-
 def load(path: Path):
     with path.open(encoding="utf-8") as fh:
         return json.load(fh)
-
 
 class Report:
     def __init__(self) -> None:
@@ -77,17 +75,14 @@ class Report:
         self.failures.append(f"{label}: {detail}")
         print(f"  FAIL {label}: {detail}")
 
-
 def adjacent_to(pos: dict, marker: dict, *, cell_size: float = 1.0) -> bool:
     dist = math.hypot(float(pos["x"]) - float(marker["x"]), float(pos["y"]) - float(marker["y"]))
     return dist > 1e-9 and dist <= math.sqrt(2) * cell_size + 1e-9
-
 
 def equipment_visual_slot_matches(rule_slot: str | None, visual_slot: str) -> bool:
     if rule_slot == "ring":
         return visual_slot in {"ring_left", "ring_right"}
     return rule_slot == visual_slot
-
 
 def schema_for(instance_path: Path) -> Path:
     """Map an instance file to the schema that should validate it."""
@@ -115,7 +110,6 @@ def schema_for(instance_path: Path) -> Path:
             return PROTOCOL / "state_delta.v8.schema.json"
         return PROTOCOL / "messages.v8.schema.json"
     raise ValueError(f"no schema mapping for {instance_path}")
-
 
 def iter_schemas() -> list[Path]:
     return sorted(SHARED.rglob("*.schema.json"))

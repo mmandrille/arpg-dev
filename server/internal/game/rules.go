@@ -763,14 +763,6 @@ func (d MonsterDef) effectiveAttackMode() string {
 	return d.AttackMode
 }
 
-func (d MonsterDef) effectiveAttackStyle() string {
-	if d.AttackStyle == "" {
-		return monsterAttackStyleMelee
-	}
-
-	return d.AttackStyle
-}
-
 func (d MonsterDef) effectiveMoveSpeed(nav NavigationRules) float64 {
 	if d.MoveSpeed > 0 {
 		return d.MoveSpeed
@@ -1615,33 +1607,8 @@ func LoadRules(dir string) (*Rules, error) {
 		default:
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_mode: %s", id, def.AttackMode)
 		}
-		switch attackStyle {
-		case monsterAttackStyleMelee:
-		case monsterAttackStyleDive:
-			if attackMode != attackModeMelee {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: dive requires melee attack_mode", id)
-			}
-			if behavior != monsterBehaviorChase {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: dive requires chase behavior", id)
-			}
-			if def.AttackDamage == nil || def.AttackCooldown <= 0 {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: dive requires attack_damage and attack_cooldown_ticks", id)
-			}
-		case monsterAttackStylePounce:
-			if attackMode != attackModeMelee {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: pounce requires melee attack_mode", id)
-			}
-			if behavior != monsterBehaviorChase {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: pounce requires chase behavior", id)
-			}
-			if def.AttackDamage == nil || def.AttackCooldown <= 0 {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: pounce requires attack_damage and attack_cooldown_ticks", id)
-			}
-			if def.AttackRange <= r.Combat.UnarmedReach {
-				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_range: pounce reach must exceed melee reach", id)
-			}
-		default:
-			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: %s", id, def.AttackStyle)
+		if err := validateMonsterAttackStyle(id, def, attackMode, behavior, r.Combat.UnarmedReach); err != nil {
+			return nil, err
 		}
 		switch behavior {
 		case monsterBehaviorStatic:

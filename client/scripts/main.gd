@@ -61,6 +61,7 @@ const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
+const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScenesByVisual := {
 	"monster_dummy": preload("res://scenes/monster_dummy.tscn"),
@@ -1183,14 +1184,14 @@ func _apply_delta(p: Dictionary) -> void:
 				continue
 			if event_type == "player_damaged":
 				ClientAudioBridgeScript.damage(audio_controller, eid == player_id)
-				_play_source_monster_attack_animation_for_event(ev)
+				MonsterAttackAnimationEventsScript.play_source_attack_for_event(ev, entities)
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
 					_play_entity_reaction(eid, ev, "hit")
 				if _health_bar != null:
 					_health_bar.update_hp(player_hp, player_max_hp)
 			if event_type == "player_killed":
-				_play_source_monster_attack_animation_for_event(ev)
+				MonsterAttackAnimationEventsScript.play_source_attack_for_event(ev, entities)
 				_play_entity_reaction(eid, ev, "death")
 				_show_loss_popup()
 			if event_type == "attack_missed":
@@ -1206,12 +1207,12 @@ func _apply_delta(p: Dictionary) -> void:
 		if ClientConstants.PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
 			if event_type == "player_damaged":
 				ClientAudioBridgeScript.damage(audio_controller, eid == player_id)
-				_play_source_monster_attack_animation_for_event(ev)
+				MonsterAttackAnimationEventsScript.play_source_attack_for_event(ev, entities)
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
 					_play_entity_reaction(eid, ev, "hit")
 			if event_type == "player_killed":
-				_play_source_monster_attack_animation_for_event(ev)
+				MonsterAttackAnimationEventsScript.play_source_attack_for_event(ev, entities)
 				var remote_dead: Dictionary = entities[eid]
 				remote_dead["hp"] = 0
 				_play_entity_reaction(eid, ev, "death")
@@ -1734,21 +1735,6 @@ func _play_local_attack_animation_for_event(ev: Dictionary) -> void:
 		return
 	var weapon_slot := str(ev.get("weapon_slot", "main_hand"))
 	player_anim.play_one_shot("attack_off_hand" if weapon_slot == "off_hand" else "attack")
-
-func _play_source_monster_attack_animation_for_event(ev: Dictionary) -> void:
-	var attack_style := str(ev.get("attack_style", ""))
-	if attack_style != "dive" and attack_style != "pounce":
-		return
-	var source_id := str(ev.get("source_entity_id", ""))
-	if source_id == "" or not entities.has(source_id):
-		return
-	var source_rec: Dictionary = entities[source_id]
-	if str(source_rec.get("type", "")) != "monster":
-		return
-	var ctrl = source_rec.get("controller", null)
-	if ctrl == null:
-		return
-	ctrl.play_one_shot(attack_style)
 
 func _play_local_player_reaction_animation(clip: String) -> void:
 	if player_anim == null:
@@ -5771,7 +5757,6 @@ func _bot_bag_item_id_for_def(item_def_id: String, state: Dictionary) -> String:
 			if str(equipped_weapon) != iid:
 				return iid
 	return ""
-
 func _bot_shadow_inventory_equip(item_instance_id: String) -> void:
 	if inventory_panel == null: return
 	inventory_panel.ensure_display_visible()
@@ -5780,7 +5765,6 @@ func _bot_shadow_inventory_equip(item_instance_id: String) -> void:
 	var to_pos: Vector2 = inventory_panel.get_weapon_slot_screen_center()
 	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO: return
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag"]))
-
 func _bot_shadow_inventory_unequip() -> void:
 	if inventory_panel == null: return
 	inventory_panel.ensure_display_visible()
@@ -5789,7 +5773,6 @@ func _bot_shadow_inventory_unequip() -> void:
 	var to_pos: Vector2 = inventory_panel.get_bag_area_screen_center()
 	if from_pos == Vector2.ZERO or to_pos == Vector2.ZERO: return
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "bag"]))
-
 func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
 	if inventory_panel == null: return
 	inventory_panel.ensure_display_visible()
@@ -5802,7 +5785,6 @@ func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
 	input_shadow.show_drag(from_pos, to_pos, PackedStringArray(["drag", "drop"]))
 
 # --- debug ------------------------------------------------------------------
-
 func _update_debug() -> void:
 	if _debug_label == null: return
 	_sync_status_text_visibility()
@@ -5816,20 +5798,16 @@ func _update_debug() -> void:
 			WebSocketPeer.STATE_CLOSED: ws_state = "closed"
 	var fps := int(round(Engine.get_frames_per_second()))
 	_debug_label.text = PerformanceStatusFormatterScript.format_status(fps, _last_ping_ms, ws_state, last_server_tick, current_level, last_performance_status)
-
 func _sync_status_text_visibility() -> void:
 	if _debug_label == null: return
 	_debug_label.visible = client_settings == null or client_settings.status_text
-
 func _debug(msg: String) -> void:
 	print("[client] ", msg)
 func _env(key: String, fallback: String) -> String:
 	var v := OS.get_environment(key)
 	return v if v != "" else fallback
-
 func _truthy_env(key: String) -> bool:
 	return _truthy_text(OS.get_environment(key))
-
 func _truthy_text(value: String) -> bool:
 	var v := value.to_lower()
 	return v in ["1", "true", "yes", "on"]

@@ -49,7 +49,6 @@ var _class_id := ""
 var _subject: Node3D
 var _skills_panel: Control
 
-
 func _initialize() -> void:
 	_parse_args()
 	DisplayServer.window_set_size(Vector2i(_width, _height))
@@ -122,12 +121,10 @@ func _initialize() -> void:
 	print("[showme] saved %s" % _output)
 	quit(0)
 
-
 func _process(delta: float) -> bool:
 	if _mode == "live" and _subject != null:
 		_subject.rotate_y(delta * 0.35)
 	return false
-
 
 func _parse_args() -> void:
 	_items = DEFAULT_GEAR_ITEMS.duplicate()
@@ -565,7 +562,6 @@ func _setup_vendors() -> void:
 	root.add_child(mystery)
 	_subject = root
 
-
 func _setup_monsters() -> void:
 	var root := Node3D.new()
 	root.name = "VisualFeedbackMonsters"
@@ -599,7 +595,6 @@ func _setup_monsters() -> void:
 		monster.position = Vector3(float(entry["x"]), 0.0, 0.0)
 		root.add_child(monster)
 	_subject = root
-
 
 func _setup_companions() -> void:
 	var main = MainScript.new()
@@ -681,7 +676,6 @@ func _setup_companions() -> void:
 			corpse_bar.set_process(false)
 			corpse_bar.position = Vector2(390.0, 180.0)
 	await process_frame
-
 
 func _setup_classes() -> void:
 	var root := Node3D.new()
@@ -1024,7 +1018,6 @@ func _market_stash_items() -> Array:
 		{"stash_item_id": "stash_9002", "item_def_id": "cave_ring", "item_template_id": "cave_ring", "display_name": "Rare Cave Ring", "rarity": "rare", "slot": "ring", "summary_lines": ["Slot: ring", "Maximum Health +4"]},
 		{"stash_item_id": "stash_9003", "item_def_id": "cave_mail", "item_template_id": "cave_mail", "display_name": "Common Cave Mail", "rarity": "common", "slot": "chest", "summary_lines": ["Slot: chest", "Armor +8"]},
 	]
-
 
 func _market_listings() -> Array:
 	return [

@@ -19,6 +19,8 @@ const ORGANIC_EDGE_MAX_GLOOM_FRACTION := 0.10
 const DARKNESS_FEATHER_MAX_GLOOM_FRACTION := 0.18
 const ORGANIC_EDGE_SEGMENTS := 18.0
 const ORGANIC_EDGE_SEED := 41.0
+const EDGE_ROTATION_CYCLES_PER_SECOND := 0.12
+const EDGE_ROTATION_MOVE_EPSILON := 0.006
 const SHADER_CODE := """
 shader_type canvas_item;
 render_mode blend_mix, unshaded;
@@ -31,6 +33,7 @@ uniform float organic_edge_px = 0.0;
 uniform float darkness_feather_px = 0.0;
 uniform float organic_edge_segments = 18.0;
 uniform float organic_edge_seed = 41.0;
+uniform float organic_edge_rotation = 0.0;
 uniform vec4 gloom_color : source_color = vec4(0.22, 0.24, 0.27, 0.52);
 uniform vec4 darkness_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 
@@ -52,7 +55,7 @@ float organic_edge(vec2 delta) {
 	if (organic_edge_px <= 0.0 || length(delta) <= 0.001) {
 		return 0.0;
 	}
-	float angle = (atan(delta.y, delta.x) + ORGANIC_PI) / ORGANIC_TAU;
+	float angle = fract((atan(delta.y, delta.x) + ORGANIC_PI) / ORGANIC_TAU + organic_edge_rotation);
 	float low = smooth_noise(angle * organic_edge_segments + organic_edge_seed);
 	float high = smooth_noise(angle * organic_edge_segments * 2.17 + organic_edge_seed * 3.31);
 	float combined = low * 0.72 + high * 0.28;
@@ -102,6 +105,10 @@ var _shadow_gloom_polygons: Array = []
 var _shadow_polygons: Array = []
 var _shadow_debug: Array = []
 var _occluder_count: int = 0
+var _edge_rotation: float = 0.0
+var _edge_rotation_active: bool = false
+var _has_last_target_world: bool = false
+var _last_target_world := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -114,6 +121,7 @@ func _ready() -> void:
 func bind(camera: Camera3D, target: Node3D) -> void:
 	_camera = camera
 	_target = target
+	_reset_motion_tracking()
 	_update_shader()
 
 
@@ -170,6 +178,9 @@ func get_debug_state() -> Dictionary:
 		"organic_edge_world_amplitude": ORGANIC_EDGE_WORLD_AMPLITUDE,
 		"darkness_feather_world": DARKNESS_FEATHER_WORLD,
 		"organic_edge_segments": int(ORGANIC_EDGE_SEGMENTS),
+		"organic_edge_rotation": _edge_rotation,
+		"organic_edge_rotation_active": _edge_rotation_active,
+		"organic_edge_rotation_cycles_per_second": EDGE_ROTATION_CYCLES_PER_SECOND,
 		"gloom_alpha": GLOOM_ALPHA,
 		"darkness_alpha": DARKNESS_ALPHA,
 		"shadow_gloom_alpha": SHADOW_GLOOM_COLOR.a,
@@ -185,7 +196,8 @@ func get_debug_state() -> Dictionary:
 	}
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_update_motion_phase(delta)
 	_update_shader()
 
 
@@ -203,6 +215,7 @@ func _ensure_rect() -> void:
 	_material.set_shader_parameter("darkness_color", Color(0.0, 0.0, 0.0, DARKNESS_ALPHA))
 	_material.set_shader_parameter("organic_edge_segments", ORGANIC_EDGE_SEGMENTS)
 	_material.set_shader_parameter("organic_edge_seed", ORGANIC_EDGE_SEED)
+	_material.set_shader_parameter("organic_edge_rotation", _edge_rotation)
 	_rect.material = _material
 	add_child(_rect)
 	_shadow_root = Node2D.new()
@@ -229,7 +242,33 @@ func _update_shader() -> void:
 	_material.set_shader_parameter("gloom_radius_px", _gloom_radius_px)
 	_material.set_shader_parameter("organic_edge_px", _organic_edge_px)
 	_material.set_shader_parameter("darkness_feather_px", _darkness_feather_px)
+	_material.set_shader_parameter("organic_edge_rotation", _edge_rotation)
 	_update_shadows(viewport_size)
+
+
+func _update_motion_phase(delta: float) -> void:
+	var current := _target_world_position()
+	if not visible:
+		_last_target_world = current
+		_has_last_target_world = true
+		_edge_rotation_active = false
+		return
+	if not _has_last_target_world:
+		_last_target_world = current
+		_has_last_target_world = true
+		_edge_rotation_active = false
+		return
+	var distance := current.distance_to(_last_target_world)
+	_last_target_world = current
+	_edge_rotation_active = distance > EDGE_ROTATION_MOVE_EPSILON
+	if _edge_rotation_active:
+		_edge_rotation = fposmod(_edge_rotation + maxf(0.0, delta) * EDGE_ROTATION_CYCLES_PER_SECOND, 1.0)
+
+
+func _reset_motion_tracking() -> void:
+	_has_last_target_world = false
+	_last_target_world = Vector2.ZERO
+	_edge_rotation_active = false
 
 
 func _project_target() -> Vector2:

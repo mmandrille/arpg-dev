@@ -9,6 +9,7 @@ can drive them.
 from __future__ import annotations
 
 import json
+import math
 import struct
 import sys
 from dataclasses import dataclass
@@ -30,11 +31,17 @@ HEROES = {
         "assets/characters/rogue/assasine.glb",
         "client/assets/characters/rogue/rogue.glb",
     ),
+    "ranger": (
+        "assets/characters/ranger/green_hood.glb",
+        "client/assets/characters/ranger/ranger.glb",
+    ),
     "sorcerer": (
         "assets/characters/sorcerer/mage.glb",
         "client/assets/characters/sorcerer/sorcerer.glb",
     ),
 }
+RANGER_REST_POSE_DEGREES = 82.0
+RANGER_REST_POSE_SHOULDER_RATIO = 0.12
 
 
 @dataclass(frozen=True)
@@ -121,6 +128,22 @@ def read_position_accessor(gltf: dict, bin_blob: bytes, accessor_index: int) -> 
     return out
 
 
+def write_vec3_accessor(gltf: dict, bin_buf: bytearray, accessor_index: int, values: list[tuple[float, float, float]]) -> None:
+    accessor = gltf["accessors"][accessor_index]
+    if accessor.get("componentType") != 5126 or accessor.get("type") != "VEC3":
+        raise ValueError(f"accessor {accessor_index} must be float VEC3")
+    if int(accessor["count"]) != len(values):
+        raise ValueError(f"accessor {accessor_index} count mismatch")
+    view = gltf["bufferViews"][accessor["bufferView"]]
+    elem_size = _component_size(5126) * _accessor_element_count(accessor)
+    stride = int(view.get("byteStride", elem_size))
+    start = int(view.get("byteOffset", 0)) + int(accessor.get("byteOffset", 0))
+    for i, value in enumerate(values):
+        struct.pack_into("<fff", bin_buf, start + i * stride, *value)
+    accessor["min"] = [min(v[i] for v in values) for i in range(3)]
+    accessor["max"] = [max(v[i] for v in values) for i in range(3)]
+
+
 def _bounds(positions_by_accessor: dict[int, list[tuple[float, float, float]]]) -> tuple[list[float], list[float]]:
     positions = [p for values in positions_by_accessor.values() for p in values]
     if not positions:
@@ -128,6 +151,84 @@ def _bounds(positions_by_accessor: dict[int, list[tuple[float, float, float]]]) 
     mins = [min(p[i] for p in positions) for i in range(3)]
     maxs = [max(p[i] for p in positions) for i in range(3)]
     return mins, maxs
+
+
+def _apply_ranger_rest_pose(gltf: dict, bin_buf: bytearray) -> None:
+    positions_by_accessor: dict[int, list[tuple[float, float, float]]] = {}
+    normal_accessors: list[tuple[int, int]] = []
+    for mesh in gltf.get("meshes", []):
+        for primitive in mesh.get("primitives", []):
+            attrs = primitive.get("attributes", {})
+            if "POSITION" not in attrs:
+                continue
+            position_accessor = int(attrs["POSITION"])
+            positions_by_accessor.setdefault(position_accessor, read_position_accessor(gltf, bytes(bin_buf), position_accessor))
+            if "NORMAL" in attrs:
+                normal_accessors.append((position_accessor, int(attrs["NORMAL"])))
+    mins, maxs = _bounds(positions_by_accessor)
+    angles_by_accessor: dict[int, list[float | None]] = {}
+    for accessor_index, positions in positions_by_accessor.items():
+        transformed: list[tuple[float, float, float]] = []
+        angles: list[float | None] = []
+        for pos in positions:
+            angle = _ranger_arm_fold_angle(pos, mins, maxs)
+            angles.append(angle)
+            transformed.append(_rotate_ranger_arm_position(pos, mins, maxs, angle) if angle is not None else pos)
+        angles_by_accessor[accessor_index] = angles
+        write_vec3_accessor(gltf, bin_buf, accessor_index, transformed)
+
+    for position_accessor, normal_accessor in normal_accessors:
+        angles = angles_by_accessor[position_accessor]
+        normals = read_position_accessor(gltf, bytes(bin_buf), normal_accessor)
+        if len(normals) != len(angles):
+            continue
+        transformed_normals = [
+            _rotate_xy_vec(normal, angle) if angle is not None else normal
+            for normal, angle in zip(normals, angles)
+        ]
+        write_vec3_accessor(gltf, bin_buf, normal_accessor, transformed_normals)
+
+
+def _ranger_arm_fold_angle(pos: tuple[float, float, float], mins: list[float], maxs: list[float]) -> float | None:
+    x, y, _z = pos
+    cx = (mins[0] + maxs[0]) * 0.5
+    width = max(maxs[0] - mins[0], 0.001)
+    height = max(maxs[1] - mins[1], 0.001)
+    yn = (y - mins[1]) / height
+    side = x - cx
+    if 0.60 <= yn <= 0.84 and abs(side) >= width * 0.20:
+        return -math.copysign(math.radians(RANGER_REST_POSE_DEGREES), side)
+    return None
+
+
+def _rotate_ranger_arm_position(
+    pos: tuple[float, float, float],
+    mins: list[float],
+    maxs: list[float],
+    angle: float,
+) -> tuple[float, float, float]:
+    x, y, z = pos
+    cx = (mins[0] + maxs[0]) * 0.5
+    width = max(maxs[0] - mins[0], 0.001)
+    height = max(maxs[1] - mins[1], 0.001)
+    side = 1.0 if x >= cx else -1.0
+    pivot = (cx + side * width * RANGER_REST_POSE_SHOULDER_RATIO, mins[1] + height * 0.76)
+    rx, ry = _rotate_xy((x, y), pivot, angle)
+    return (rx, ry, z)
+
+
+def _rotate_xy(point: tuple[float, float], pivot: tuple[float, float], angle: float) -> tuple[float, float]:
+    c = math.cos(angle)
+    s = math.sin(angle)
+    dx = point[0] - pivot[0]
+    dy = point[1] - pivot[1]
+    return (pivot[0] + dx * c - dy * s, pivot[1] + dx * s + dy * c)
+
+
+def _rotate_xy_vec(vec: tuple[float, float, float], angle: float) -> tuple[float, float, float]:
+    c = math.cos(angle)
+    s = math.sin(angle)
+    return (vec[0] * c - vec[1] * s, vec[0] * s + vec[1] * c, vec[2])
 
 
 def _joint_globals(mins: list[float], maxs: list[float]) -> list[tuple[float, float, float]]:
@@ -211,12 +312,14 @@ def _append_accessor(gltf: dict, accessor: dict) -> int:
     return len(gltf["accessors"]) - 1
 
 
-def rig_glb_bytes(data: bytes) -> bytes:
+def rig_glb_bytes(data: bytes, *, hero_id: str = "") -> bytes:
     parsed = parse_glb(data)
     gltf = parsed.gltf
     if gltf.get("skins"):
         raise ValueError("source GLB is already skinned")
     bin_buf = bytearray(parsed.bin_blob)
+    if hero_id == "ranger":
+        _apply_ranger_rest_pose(gltf, bin_buf)
 
     positions_by_accessor: dict[int, list[tuple[float, float, float]]] = {}
     primitives: list[dict] = []
@@ -228,7 +331,7 @@ def rig_glb_bytes(data: bytes) -> bytes:
             position_accessor = int(attrs["POSITION"])
             positions_by_accessor.setdefault(
                 position_accessor,
-                read_position_accessor(gltf, parsed.bin_blob, position_accessor),
+                read_position_accessor(gltf, bytes(bin_buf), position_accessor),
             )
             primitives.append(primitive)
     mins, maxs = _bounds(positions_by_accessor)
@@ -305,7 +408,8 @@ def rig_glb_bytes(data: bytes) -> bytes:
 
 def rig_file(source: Path, target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_bytes(rig_glb_bytes(source.read_bytes()))
+    hero_id = target.parent.name
+    target.write_bytes(rig_glb_bytes(source.read_bytes(), hero_id=hero_id))
 
 
 def main() -> int:

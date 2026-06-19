@@ -3,17 +3,17 @@ from __future__ import annotations
 import json
 import struct
 
-from tools.assets.rig_hero_glbs import REQUIRED_BONES, parse_glb, rig_glb_bytes
+from tools.assets.rig_hero_glbs import HEROES, REQUIRED_BONES, parse_glb, read_position_accessor, rig_glb_bytes
 from tools.assets.validate_assets import parse_glb_skin_joint_names
 
 
-def _minimal_static_glb() -> bytes:
-    positions = [
+def _minimal_static_glb(positions: list[tuple[float, float, float]] | None = None) -> bytes:
+    positions = positions or [
         (-0.5, 0.0, 0.0),
         (0.5, 0.0, 0.0),
         (0.0, 1.0, 0.0),
     ]
-    normals = [(0.0, 0.0, 1.0)] * 3
+    normals = [(0.0, 0.0, 1.0)] * len(positions)
     indices = [0, 1, 2]
     bin_buf = bytearray()
     pos_off = len(bin_buf)
@@ -43,12 +43,12 @@ def _minimal_static_glb() -> bytes:
             {
                 "bufferView": 0,
                 "componentType": 5126,
-                "count": 3,
+                "count": len(positions),
                 "type": "VEC3",
-                "min": [-0.5, 0.0, 0.0],
-                "max": [0.5, 1.0, 0.0],
+                "min": [min(p[i] for p in positions) for i in range(3)],
+                "max": [max(p[i] for p in positions) for i in range(3)],
             },
-            {"bufferView": 1, "componentType": 5126, "count": 3, "type": "VEC3"},
+            {"bufferView": 1, "componentType": 5126, "count": len(positions), "type": "VEC3"},
             {"bufferView": 2, "componentType": 5123, "count": 3, "type": "SCALAR"},
         ],
         "bufferViews": [
@@ -91,3 +91,31 @@ def test_rig_glb_bytes_rejects_already_skinned_source():
         assert "already skinned" in str(exc)
     else:
         raise AssertionError("expected already-skinned GLB to be rejected")
+
+
+def test_ranger_rest_pose_lowers_static_t_pose_arms():
+    out = rig_glb_bytes(
+        _minimal_static_glb([
+            (-10.0, 7.5, 0.0),
+            (10.0, 7.5, 0.0),
+            (0.0, 0.0, 0.0),
+            (0.0, 10.0, 0.0),
+        ]),
+        hero_id="ranger",
+    )
+    parsed = parse_glb(out)
+    accessor = parsed.gltf["meshes"][0]["primitives"][0]["attributes"]["POSITION"]
+    positions = read_position_accessor(parsed.gltf, parsed.bin_blob, accessor)
+    assert positions[0][1] < 4.0
+    assert positions[1][1] < 4.0
+    assert abs(positions[0][0]) < 7.0
+    assert abs(positions[1][0]) < 7.0
+    assert positions[2] == (0.0, 0.0, 0.0)
+
+
+def test_hero_rig_sources_include_all_class_models():
+    assert set(HEROES.keys()) == {"barbarian", "paladin", "rogue", "ranger", "sorcerer"}
+    assert HEROES["ranger"] == (
+        "assets/characters/ranger/green_hood.glb",
+        "client/assets/characters/ranger/ranger.glb",
+    )

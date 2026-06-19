@@ -1,0 +1,48 @@
+docs/specs/v287_spec-second-boss-template.md
+  s_58dbc51a4db222::t_2ed0651f6cc9c2 1-2,4-70,72
+  s_58dbc51a4db222::t_39b47b1bc3c439 3,71,73-76
+shared/rules/boss_templates.v0.json
+  s_58dbc51a4db222::t_d0997d6ac3a5b7 21-37
+server/internal/game/dungeon_gen.go
+  s_58dbc51a4db222::t_d0997d6ac3a5b7 141,173-181
+docs/progress/slice-codename-index.md
+  s_58dbc51a4db222::t_27310afa48397f 233
+shared/rules/dungeon_generation.v0.json
+  s_58dbc51a4db222::t_d0997d6ac3a5b7 137
+server/internal/game/boss_template_selection_test.go
+  s_58dbc51a4db222::t_d0997d6ac3a5b7 1-57
+tools/bot/scenarios/95_second_boss_template.json
+  s_58dbc51a4db222::t_d0997d6ac3a5b7 1-18,21-26,29-36
+  s_58dbc51a4db222::t_ced22c57e9fdec 19-20,27-28
+docs/as-built/v287_second-boss-template.md
+  s_58dbc51a4db222::t_6663784987cf55 1-15,18-52
+  s_58dbc51a4db222::t_7e7d9dbdf7945e 16-17
+docs/plans/v287_2026-06-19-second-boss-template.md
+  s_58dbc51a4db222::t_2519e622e73961 3,30,40-41,45,47,63,65-66,79,81,83,85-86,100-103,120-121,125-128
+  s_58dbc51a4db222::t_2ed0651f6cc9c2 1-2,4-29,31-39,42-44,46,48-62,64,67-78,80,82,84,87-99,104-119,122-124
+PROGRESS.md
+  s_58dbc51a4db222::t_16cc636440adb7 26,28-29,103
+docs/progress/slice-lifecycle.md
+  s_58dbc51a4db222::t_db7eb78a4ae88a 302
+server/internal/game/rules.go
+  s_58dbc51a4db222::t_3c80f8af4b9df5 2479
+shared/rules/boss_templates.v0.schema.json
+  s_58dbc51a4db222::t_c3f71762e7df6e 50
+  s_58dbc51a4db222::t_234619a8a01658 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "dae213ef8b1478978e22d733c56a48b3f364a308",
+  "prompts": {},
+  "sessions": {
+    "s_58dbc51a4db222": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee093-c0ba-7701-a296-d74410bf5405",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

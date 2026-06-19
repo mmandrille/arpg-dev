@@ -15,6 +15,13 @@ type backendTickProfiler struct {
 	phases map[string]time.Duration
 }
 
+type tickResultSummary struct {
+	Changes int
+	Events  int
+	Acks    int
+	Rejects int
+}
+
 func perfDebugEnabled() bool {
 	enabled, _ := strconv.ParseBool(os.Getenv("ARPG_PERF_DEBUG"))
 	return enabled
@@ -45,56 +52,92 @@ func durationMS(d time.Duration) float64 {
 	return float64(d.Microseconds()) / 1000.0
 }
 
-func logBackendPerf(log *slog.Logger, tick uint64, started time.Time, simDuration, persistDuration, broadcastDuration time.Duration, inputs int, results []game.TickResult, clients int, snapshot game.PerfSnapshot, counters game.PerfCounters, profiler *backendTickProfiler) {
-	changes := 0
-	events := 0
-	acks := 0
-	rejects := 0
+func summarizeTickResults(results []game.TickResult) tickResultSummary {
+	summary := tickResultSummary{}
 	for _, res := range results {
-		changes += len(res.Changes)
-		events += len(res.Events)
-		acks += len(res.Acks)
-		rejects += len(res.Rejects)
+		summary.Changes += len(res.Changes)
+		summary.Events += len(res.Events)
+		summary.Acks += len(res.Acks)
+		summary.Rejects += len(res.Rejects)
 	}
+	return summary
+}
+
+func buildPerformanceStatus(tick uint64, totalDuration, simDuration, persistDuration, broadcastDuration time.Duration, inputs int, results []game.TickResult, clients int, snapshot game.PerfSnapshot, counters game.PerfCounters, profiler *backendTickProfiler, degradationApplied bool) performanceStatusPayload {
+	summary := summarizeTickResults(results)
+	guardrail := evaluateTickGuardrail(totalDuration)
+	return performanceStatusPayload{
+		Tick:               tick,
+		TotalMS:            durationMS(totalDuration),
+		SimMS:              durationMS(simDuration),
+		AIMS:               durationMS(profiler.phaseDuration(game.TickPhaseAI)),
+		PathfindMS:         durationMS(profiler.phaseDuration(game.TickPhasePathfind)),
+		CombatMS:           durationMS(profiler.phaseDuration(game.TickPhaseCombat)),
+		BroadcastMS:        durationMS(broadcastDuration),
+		PersistMS:          durationMS(persistDuration),
+		PathRequests:       counters.PathRequests,
+		PathCacheHits:      counters.PathCacheHits,
+		PathNodesVisited:   counters.PathNodesVisited,
+		MonstersMoved:      counters.MonstersMoved,
+		TickBudgetMS:       durationMS(guardrail.Budget),
+		TickOverBudget:     guardrail.OverBudget,
+		TickOverrunMS:      durationMS(guardrail.Overrun),
+		DegradationApplied: degradationApplied,
+		Inputs:             inputs,
+		Results:            len(results),
+		Changes:            summary.Changes,
+		Events:             summary.Events,
+		Acks:               summary.Acks,
+		Rejects:            summary.Rejects,
+		Clients:            clients,
+		GameLevel:          snapshot.Level,
+		Entities:           snapshot.Entities,
+		Players:            snapshot.Players,
+		Monsters:           snapshot.Monsters,
+		LiveMonsters:       snapshot.LiveMonsters,
+		Companions:         snapshot.Companions,
+		Projectiles:        snapshot.Projectiles,
+		Loot:               snapshot.Loot,
+		Interactables:      snapshot.Interactables,
+		Walls:              snapshot.Walls,
+	}
+}
+
+func logBackendPerf(log *slog.Logger, tick uint64, started time.Time, simDuration, persistDuration, broadcastDuration time.Duration, inputs int, results []game.TickResult, clients int, snapshot game.PerfSnapshot, counters game.PerfCounters, profiler *backendTickProfiler) {
 	totalDuration := time.Since(started)
-	tickBudget := time.Second / tickHz
-	overrun := totalDuration - tickBudget
-	tickOverBudget := overrun > 0
-	if overrun < 0 {
-		overrun = 0
-	}
+	perf := buildPerformanceStatus(tick, totalDuration, simDuration, persistDuration, broadcastDuration, inputs, results, clients, snapshot, counters, profiler, false)
 	log.Info("backend_perf",
-		"tick", tick,
-		"total_ms", durationMS(totalDuration),
-		"sim_ms", durationMS(simDuration),
-		"ai_ms", durationMS(profiler.phaseDuration(game.TickPhaseAI)),
-		"pathfind_ms", durationMS(profiler.phaseDuration(game.TickPhasePathfind)),
-		"combat_ms", durationMS(profiler.phaseDuration(game.TickPhaseCombat)),
-		"broadcast_ms", durationMS(broadcastDuration),
-		"persist_ms", durationMS(persistDuration),
-		"path_requests", counters.PathRequests,
-		"path_cache_hits", counters.PathCacheHits,
-		"path_nodes_visited", counters.PathNodesVisited,
-		"monsters_moved", counters.MonstersMoved,
-		"tick_budget_ms", durationMS(tickBudget),
-		"tick_over_budget", tickOverBudget,
-		"tick_overrun_ms", durationMS(overrun),
-		"inputs", inputs,
-		"results", len(results),
-		"changes", changes,
-		"events", events,
-		"acks", acks,
-		"rejects", rejects,
-		"clients", clients,
-		"game_level", snapshot.Level,
-		"entities", snapshot.Entities,
-		"players", snapshot.Players,
-		"monsters", snapshot.Monsters,
-		"live_monsters", snapshot.LiveMonsters,
-		"companions", snapshot.Companions,
-		"projectiles", snapshot.Projectiles,
-		"loot", snapshot.Loot,
-		"interactables", snapshot.Interactables,
-		"walls", snapshot.Walls,
+		"tick", perf.Tick,
+		"total_ms", perf.TotalMS,
+		"sim_ms", perf.SimMS,
+		"ai_ms", perf.AIMS,
+		"pathfind_ms", perf.PathfindMS,
+		"combat_ms", perf.CombatMS,
+		"broadcast_ms", perf.BroadcastMS,
+		"persist_ms", perf.PersistMS,
+		"path_requests", perf.PathRequests,
+		"path_cache_hits", perf.PathCacheHits,
+		"path_nodes_visited", perf.PathNodesVisited,
+		"monsters_moved", perf.MonstersMoved,
+		"tick_budget_ms", perf.TickBudgetMS,
+		"tick_over_budget", perf.TickOverBudget,
+		"tick_overrun_ms", perf.TickOverrunMS,
+		"inputs", perf.Inputs,
+		"results", perf.Results,
+		"changes", perf.Changes,
+		"events", perf.Events,
+		"acks", perf.Acks,
+		"rejects", perf.Rejects,
+		"clients", perf.Clients,
+		"game_level", perf.GameLevel,
+		"entities", perf.Entities,
+		"players", perf.Players,
+		"monsters", perf.Monsters,
+		"live_monsters", perf.LiveMonsters,
+		"companions", perf.Companions,
+		"projectiles", perf.Projectiles,
+		"loot", perf.Loot,
+		"interactables", perf.Interactables,
+		"walls", perf.Walls,
 	)
 }

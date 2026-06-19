@@ -26,6 +26,7 @@ var ws_url: String = ""
 var _ws := WebSocketPeer.new()
 var _msg_counter: int = 0
 var _path_prefix: String = ""
+var _sent_message_msec: Dictionary = {}
 
 
 func _init(p_base_url: String) -> void:
@@ -465,6 +466,7 @@ func next_message_id() -> String:
 
 func send(msg_type: String, tick: int, payload: Dictionary) -> String:
 	var message_id := next_message_id()
+	_sent_message_msec[message_id] = Time.get_ticks_msec()
 	var env := {
 		"type": msg_type,
 		"message_id": message_id,
@@ -474,6 +476,14 @@ func send(msg_type: String, tick: int, payload: Dictionary) -> String:
 	}
 	_ws.send_text(JSON.stringify(env))
 	return message_id
+
+
+func consume_latency_ms(message_id: String) -> int:
+	if message_id == "" or not _sent_message_msec.has(message_id):
+		return -1
+	var sent_msec := int(_sent_message_msec.get(message_id, 0))
+	_sent_message_msec.erase(message_id)
+	return max(0, Time.get_ticks_msec() - sent_msec)
 
 
 func close() -> void:

@@ -329,7 +329,7 @@ func refresh_texts() -> void:
 	if _floating_toggle != null:
 		_floating_toggle.text = TextCatalogScript.get_text("settings.floating_combat_text", "Floating combat text")
 	if _status_text_toggle != null:
-		_status_text_toggle.text = TextCatalogScript.get_text("settings.status_text", "Status text")
+		_status_text_toggle.text = TextCatalogScript.get_text("settings.status_text", "Performance status")
 	if _monster_health_bar_label != null:
 		_monster_health_bar_label.text = TextCatalogScript.get_text("settings.enemy_health_bars", "Enemy health bars")
 	if _master_volume_label != null:

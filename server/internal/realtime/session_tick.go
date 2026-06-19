@@ -18,10 +18,7 @@ func (l *sessionLoop) doTick() {
 	delete(l.buffer, tick)
 	sortInputs(inputs)
 	simStart := time.Now()
-	var profiler *backendTickProfiler
-	if l.perfDebug {
-		profiler = newBackendTickProfiler()
-	}
+	profiler := newBackendTickProfiler()
 	results := l.sim.TickResultsProfiled(inputs, profiler)
 	simDuration := time.Since(simStart)
 	snapshot := l.sim.PerfSnapshot()
@@ -63,8 +60,8 @@ func (l *sessionLoop) doTick() {
 	}
 	totalDuration := time.Since(start)
 	guardrail := evaluateTickGuardrail(totalDuration)
+	degradationApplied := false
 	if guardrail.OverBudget {
-		degradationApplied := false
 		l.mu.Lock()
 		if l.sim != nil && shouldApplyOverloadDegradation(counters) {
 			degradationApplied = l.sim.ApplyOverloadDegradation()
@@ -75,5 +72,10 @@ func (l *sessionLoop) doTick() {
 	if l.perfDebug && time.Since(l.lastPerfLog) >= defaultPerfDebugInterval {
 		l.lastPerfLog = time.Now()
 		logBackendPerf(l.log, tick, start, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, profiler)
+	}
+	if time.Since(l.lastPerfStatus) >= defaultPerfDebugInterval {
+		l.lastPerfStatus = time.Now()
+		perf := buildPerformanceStatus(tick, totalDuration, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, profiler, degradationApplied)
+		l.fanoutPerformanceStatus(perf, clients, levelsByPlayerID)
 	}
 }

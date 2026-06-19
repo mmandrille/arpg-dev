@@ -63,6 +63,53 @@ func TestLogBackendPerfIncludesCrowdedCombatFields(t *testing.T) {
 	}
 }
 
+func TestBuildPerformanceStatusIncludesCrowdedCombatFields(t *testing.T) {
+	profiler := newBackendTickProfiler()
+	profiler.phases[game.TickPhaseAI] = 5 * time.Millisecond
+	profiler.phases[game.TickPhasePathfind] = 2 * time.Millisecond
+	profiler.phases[game.TickPhaseCombat] = 7 * time.Millisecond
+
+	perf := buildPerformanceStatus(
+		9,
+		140*time.Millisecond,
+		20*time.Millisecond,
+		3*time.Millisecond,
+		4*time.Millisecond,
+		2,
+		[]game.TickResult{{
+			Tick:    9,
+			Changes: []game.Change{{Op: game.OpEntityUpdate}, {Op: game.OpEntityRemove}},
+			Events:  []game.Event{{EventType: "monster_aggro"}},
+			Acks:    []game.Ack{{MessageID: "accepted"}},
+			Rejects: []game.Reject{{MessageID: "rejected", Reason: "invalid"}},
+		}},
+		3,
+		game.PerfSnapshot{Level: -3, Entities: 41, Players: 2, Monsters: 36, LiveMonsters: 34, Companions: 1, Projectiles: 1, Loot: 2, Interactables: 2, Walls: 9},
+		game.PerfCounters{PathRequests: 12, PathCacheHits: 5, PathNodesVisited: 345, MonstersMoved: 9},
+		profiler,
+		true,
+	)
+
+	if perf.Tick != 9 || !perf.TickOverBudget || perf.TickOverrunMS <= 0 {
+		t.Fatalf("tick budget fields = tick %d over %v overrun %.1f", perf.Tick, perf.TickOverBudget, perf.TickOverrunMS)
+	}
+	if perf.AIMS != 5 || perf.PathfindMS != 2 || perf.CombatMS != 7 || perf.PersistMS != 3 || perf.BroadcastMS != 4 {
+		t.Fatalf("phase timings = %+v", perf)
+	}
+	if perf.PathRequests != 12 || perf.PathCacheHits != 5 || perf.PathNodesVisited != 345 || perf.MonstersMoved != 9 {
+		t.Fatalf("path counters = %+v", perf)
+	}
+	if perf.Changes != 2 || perf.Events != 1 || perf.Acks != 1 || perf.Rejects != 1 || perf.Clients != 3 {
+		t.Fatalf("loop counters = %+v", perf)
+	}
+	if perf.GameLevel != -3 || perf.Entities != 41 || perf.Players != 2 || perf.LiveMonsters != 34 || perf.Walls != 9 {
+		t.Fatalf("room shape = %+v", perf)
+	}
+	if !perf.DegradationApplied {
+		t.Fatalf("degradation_applied = false, want true")
+	}
+}
+
 func assertJSONValue(t *testing.T, payload map[string]any, key string, want any) {
 	t.Helper()
 	got, ok := payload[key]

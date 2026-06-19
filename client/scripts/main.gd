@@ -48,6 +48,7 @@ const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const ClientAudioControllerScript := preload("res://scripts/client_audio_controller.gd")
 const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
+const PerformanceStatusFormatterScript := preload("res://scripts/performance_status_formatter.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
@@ -231,6 +232,8 @@ var _player_walk_linger: float = 0.0
 var _last_facing_direction := Vector2(1.0, 0.0)
 var _debug_label: Label
 var _level_label: Label
+var last_performance_status: Dictionary = {}
+var _last_ping_ms: int = -1
 var _camera: Camera3D
 var ground_node: MeshInstance3D
 var _ground_factory: GroundWallFactory = GroundWallFactory.new()
@@ -798,8 +801,11 @@ func _handle_message(env: Dictionary) -> void:
 		"state_delta":
 			_apply_delta(payload)
 		"intent_accepted":
-			pending_action_targets.erase(str(payload.get("accepted_message_id", "")))
+			var accepted_message_id := str(payload.get("accepted_message_id", ""))
+			_record_ping(accepted_message_id)
+			pending_action_targets.erase(accepted_message_id)
 		"intent_rejected":
+			_record_ping(str(payload.get("rejected_message_id", "")))
 			pending_interactable_action.clear()
 			pending_waypoint_travel = false
 			_handle_intent_rejected(payload)
@@ -858,6 +864,14 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		bishop_panel.show_status(reason.replace("_", " "), true)
 	elif blacksmith_panel != null and blacksmith_panel.visible:
 		blacksmith_panel.show_status(reason.replace("_", " "), true)
+
+func _record_ping(message_id: String) -> void:
+	if client == null:
+		return
+	var latency_ms := client.consume_latency_ms(message_id)
+	if latency_ms >= 0:
+		_last_ping_ms = latency_ms
+
 func _apply_snapshot(p: Dictionary) -> void:
 	current_level = int(p.get("current_level", 0))
 	if discovery_minimap != null: discovery_minimap.sync_session(str(p.get("session_id", client.session_id if client != null else "")))
@@ -918,7 +932,11 @@ func _apply_snapshot(p: Dictionary) -> void:
 		print("[bot-client] snapshot applied entities=%d monsters=%d loot=%d hp=%d" % [
 			entities.size(), monster_ids.size(), loot_ids.size(), player_hp
 		])
+
 func _apply_delta(p: Dictionary) -> void:
+	var perf_payload = p.get("performance", {})
+	if perf_payload is Dictionary:
+		last_performance_status = (perf_payload as Dictionary).duplicate(true)
 	for ev in p.get("events", []):
 		if str(ev.get("event_type", "")) == "level_changed":
 			current_level = int(ev.get("to_level", current_level))
@@ -3386,7 +3404,12 @@ func _build_scene() -> void:
 	add_child(ui)
 	gameplay_ui_layer = ui
 	_debug_label = Label.new()
-	_debug_label.position = Vector2(12, 12)
+	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_debug_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_debug_label.offset_left = -560
+	_debug_label.offset_right = -12
+	_debug_label.offset_top = 72
+	_debug_label.offset_bottom = 260
 	ui.add_child(_debug_label)
 	_level_label = Label.new()
 	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -5749,7 +5772,6 @@ func _update_debug() -> void:
 	if _debug_label == null: return
 	_sync_status_text_visibility()
 	if not _debug_label.visible: return
-	var eq = equipped.get("main_hand", null)
 	var ws_state := "?"
 	if client != null:
 		match client.ready_state():
@@ -5757,23 +5779,13 @@ func _update_debug() -> void:
 			WebSocketPeer.STATE_OPEN: ws_state = "open"
 			WebSocketPeer.STATE_CLOSING: ws_state = "closing"
 			WebSocketPeer.STATE_CLOSED: ws_state = "closed"
-	var weapon_vis := "none"
-	if resolver != null:
-		var w = resolver.get_debug_state()["equipped_visuals"]["weapon"]
-		if w != null:
-			weapon_vis = "%s(visible=%s)" % [w["asset_id"], w["visible"]]
-	var mode := "visual-replay:%d/%d %s" % [
-		min(visual_replay_index + 1, visual_replay_scenarios.size()),
-		visual_replay_scenarios.size(),
-		visual_replay_title,
-	] if visual_replay_enabled else ("bot-client" if bot_mode else ("visual-bot:%s" % autoplay_phase if autoplay_enabled else "manual"))
-	var boss_status := "\nboss=%s" % _last_boss_reward_status if _last_boss_reward_status != "" else ""
-	_debug_label.text = "ws=%s  tick=%d  mode=%s  recon_delta=%.2f\ninv=%d  entities=%d  equipped_weapon=%s\nweapon_visual=%s%s\nW/A/S/D move  LMB action  scroll zoom  I inventory  L loot filter" % [
-		ws_state, last_server_tick, mode, reconciliation_delta, inventory.size(), entities.size(), str(eq), weapon_vis, boss_status]
+	var fps := int(round(Engine.get_frames_per_second()))
+	_debug_label.text = PerformanceStatusFormatterScript.format_status(fps, _last_ping_ms, ws_state, last_server_tick, current_level, last_performance_status)
 
 func _sync_status_text_visibility() -> void:
 	if _debug_label == null: return
 	_debug_label.visible = client_settings == null or client_settings.status_text
+
 func _debug(msg: String) -> void:
 	print("[client] ", msg)
 func _env(key: String, fallback: String) -> String:

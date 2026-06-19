@@ -56,15 +56,12 @@ static func set_sfx_volume(controller: ClientAudioController, settings: ClientSe
 static func connect_volume_signals(panel: SettingsPanel, controller: ClientAudioController, settings: ClientSettings, sync_callable: Callable) -> void:
 	panel.master_volume_changed.connect(func(value: float) -> void:
 		set_master_volume(controller, settings, value)
-		sync_callable.call()
 	)
 	panel.music_volume_changed.connect(func(value: float) -> void:
 		set_music_volume(controller, settings, value)
-		sync_callable.call()
 	)
 	panel.sfx_volume_changed.connect(func(value: float) -> void:
 		set_sfx_volume(controller, settings, value)
-		sync_callable.call()
 	)
 
 

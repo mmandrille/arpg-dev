@@ -34,6 +34,7 @@ func TestWeaponSetEquipTargetsInactiveSetAndSwapUpdatesActiveHands(t *testing.T)
 	if !hasEvent(swap, "weapon_set_swapped") || !hasChangeOp(swap, OpWeaponSetUpdate) {
 		t.Fatalf("swap result missing event/change: %+v", swap)
 	}
+	assertEquippedUpdateWeaponSet(t, swap, mainHandSlot, set2)
 
 	snap := sim.Snapshot()
 	if snap.ActiveWeaponSet != 1 || len(snap.WeaponSets) != weaponSetCount {
@@ -45,6 +46,20 @@ func TestWeaponSetEquipTargetsInactiveSetAndSwapUpdatesActiveHands(t *testing.T)
 	if snap.WeaponSets[1].MainHand == nil || *snap.WeaponSets[1].MainHand != idStr(bow.instanceID) {
 		t.Fatalf("snapshot set 2 main hand = %+v, want bow", snap.WeaponSets[1].MainHand)
 	}
+}
+
+func assertEquippedUpdateWeaponSet(t *testing.T, res TickResult, slot string, want int) {
+	t.Helper()
+	for _, change := range res.Changes {
+		if change.Op != OpEquippedUpdate || change.Slot != slot || change.ItemInstanceID == nil {
+			continue
+		}
+		if change.WeaponSet == nil || *change.WeaponSet != want {
+			t.Fatalf("equipped_update %s weapon_set = %+v, want %d in changes %+v", slot, change.WeaponSet, want, res.Changes)
+		}
+		return
+	}
+	t.Fatalf("missing equipped_update for %s in changes %+v", slot, res.Changes)
 }
 
 func TestLoadInventoryRestoresPersistedWeaponSets(t *testing.T) {

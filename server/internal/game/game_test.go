@@ -5343,32 +5343,24 @@ func TestBossPatternDeckCycles(t *testing.T) {
 	if !hasBossPatternStart(first, "charged_melee") {
 		t.Fatalf("first boss phase events = %+v, want charged_melee start", first.Events)
 	}
-	if boss.bossPatternDeckIndex != 0 || boss.bossPatternID != "charged_melee" {
+	deck := rules.BossTemplates[boss.bossTemplateID].PatternDeck
+	if len(deck) == 0 || deck[0] != "charged_melee" {
+		t.Fatalf("boss deck = %+v, want charged_melee first", deck)
+	}
+	if boss.bossPatternDeckIndex != 0 || boss.bossPatternID != deck[0] {
 		t.Fatalf("initial boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
 	}
 
-	waitForBossPatternStart(t, sim, "stone_lance", 180)
-	if boss.bossPatternDeckIndex != 1 || boss.bossPatternID != "stone_lance" {
-		t.Fatalf("second boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
+	for index := 1; index < len(deck); index++ {
+		wantPattern := deck[index]
+		waitForBossPatternStart(t, sim, wantPattern, 260)
+		if boss.bossPatternDeckIndex != index || boss.bossPatternID != wantPattern {
+			t.Fatalf("boss deck state for %s = index %d pattern %s, want index %d", wantPattern, boss.bossPatternDeckIndex, boss.bossPatternID, index)
+		}
 	}
 
-	waitForBossPatternStart(t, sim, "summon_wolves", 220)
-	if boss.bossPatternDeckIndex != 2 || boss.bossPatternID != "summon_wolves" {
-		t.Fatalf("third boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
-	}
-
-	waitForBossPatternStart(t, sim, "shard_fan", 220)
-	if boss.bossPatternDeckIndex != 3 || boss.bossPatternID != "shard_fan" {
-		t.Fatalf("fourth boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
-	}
-
-	waitForBossPatternStart(t, sim, "ground_slam", 220)
-	if boss.bossPatternDeckIndex != 4 || boss.bossPatternID != "ground_slam" {
-		t.Fatalf("fifth boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
-	}
-
-	waitForBossPatternStart(t, sim, "charged_melee", 220)
-	if boss.bossPatternDeckIndex != 0 || boss.bossPatternID != "charged_melee" {
+	waitForBossPatternStart(t, sim, deck[0], 260)
+	if boss.bossPatternDeckIndex != 0 || boss.bossPatternID != deck[0] {
 		t.Fatalf("wrapped boss deck state = index %d pattern %s", boss.bossPatternDeckIndex, boss.bossPatternID)
 	}
 }

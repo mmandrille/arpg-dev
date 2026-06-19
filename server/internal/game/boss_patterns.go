@@ -327,7 +327,7 @@ func bossPhaseHitsPlayer(boss, player *entity, phase BossPatternPhase) bool {
 			return false
 		}
 		return distance(boss.pos, player.pos) <= phase.Radius
-	case "line":
+	case "line", "rectangle":
 		if phase.Radius <= 0 || phase.Width <= 0 || !boss.bossPhaseHasAim {
 			return false
 		}
@@ -367,7 +367,7 @@ func bossPhaseHitsPlayer(boss, player *entity, phase BossPatternPhase) bool {
 }
 
 func (s *Sim) captureBossPhaseAim(boss *entity, phase BossPatternPhase) {
-	if phase.HitShape != "line" && phase.Shape != "line" && phase.HitShape != "cone" && phase.Shape != "cone" {
+	if phase.HitShape != "line" && phase.Shape != "line" && phase.HitShape != "cone" && phase.Shape != "cone" && phase.HitShape != "rectangle" && phase.Shape != "rectangle" {
 		boss.bossPhaseHasAim = false
 		return
 	}

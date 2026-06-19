@@ -130,6 +130,33 @@
         }
       ],
       "cooldown_ticks": 24
+    },
+    "crystal_wall": {
+      "phases": [
+        {
+          "kind": "telegraph",
+          "duration_ticks": 30,
+          "telegraph_type": "rectangle",
+          "from_color": "#b77cff",
+          "to_color": "#64f4ff",
+          "hit_shape": "rectangle",
+          "radius": 4.8,
+          "width": 2.0
+        },
+        {
+          "kind": "active",
+          "duration_ticks": 5,
+          "shape": "rectangle",
+          "radius": 4.8,
+          "width": 2.0,
+          "damage": { "min": 3, "max": 6 }
+        },
+        {
+          "kind": "recovery",
+          "duration_ticks": 18
+        }
+      ],
+      "cooldown_ticks": 32
     }
   }
 }

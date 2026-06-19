@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v281 — quadruped pounce behavior |
+| **Latest completed slice** | v282 — rectangular boss pattern |
 | **Active branch** | `main` |
-| **CI gate** | v281 focused checks green on 2026-06-19; full `make ci` deferred until the selected autoloop batch completes; `make maintainability` currently blocked by pre-existing ratchet debt |
-| **Next slice** | v282 — extra boss pattern, continuing the selected `$autoloop` queue |
+| **CI gate** | v282 focused checks green on 2026-06-19; full `make ci` deferred until the selected autoloop batch completes; `make maintainability` currently blocked by pre-existing ratchet debt |
+| **Next slice** | v283 — boss summon phase plus 2x HP tuning, continuing the selected `$autoloop` queue |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v275 full `make ci`; v276-v281 have focused proof; run after selected autoloop queue and batch `make ci` |
+| **Next engineering review** | Due now after v275 full `make ci`; v276-v282 have focused proof; run after selected autoloop queue and batch `make ci` |
 
 
 ### Periodic engineering reviews

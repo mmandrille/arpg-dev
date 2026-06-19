@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v279 — quadruped pounce animation support |
+| **Latest completed slice** | v280 — bat dive attack behavior |
 | **Active branch** | `main` |
-| **CI gate** | v279 focused checks green on 2026-06-19; full `make ci` deferred until the selected autoloop batch completes; `make maintainability` currently blocked by pre-existing ratchet debt |
-| **Next slice** | v280 — bat dive attack behavior, continuing the selected `$autoloop` queue |
+| **CI gate** | v280 focused checks green on 2026-06-19; full `make ci` deferred until the selected autoloop batch completes; `make maintainability` currently blocked by pre-existing ratchet debt |
+| **Next slice** | v281 — quadruped pounce behavior, continuing the selected `$autoloop` queue |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v275 full `make ci`; v276-v279 have focused asset/client proof; run after selected autoloop queue and batch `make ci` |
+| **Next engineering review** | Due now after v275 full `make ci`; v276-v280 have focused proof; run after selected autoloop queue and batch `make ci` |
 
 
 ### Periodic engineering reviews

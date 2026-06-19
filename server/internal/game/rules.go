@@ -727,6 +727,7 @@ type MonsterDef struct {
 	AttackDamage      *DamageRange       `json:"attack_damage,omitempty"`
 	AttackCooldown    int                `json:"attack_cooldown_ticks,omitempty"`
 	AttackMode        string             `json:"attack_mode,omitempty"`
+	AttackStyle       string             `json:"attack_style,omitempty"`
 	AttackRange       float64            `json:"attack_range,omitempty"`
 	ProjectileSpeed   float64            `json:"projectile_speed,omitempty"`
 	ProjectileDefID   string             `json:"projectile_def_id,omitempty"`
@@ -760,6 +761,14 @@ func (d MonsterDef) effectiveAttackMode() string {
 	}
 
 	return d.AttackMode
+}
+
+func (d MonsterDef) effectiveAttackStyle() string {
+	if d.AttackStyle == "" {
+		return monsterAttackStyleMelee
+	}
+
+	return d.AttackStyle
 }
 
 func (d MonsterDef) effectiveMoveSpeed(nav NavigationRules) float64 {
@@ -1605,6 +1614,22 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_mode: %s", id, def.AttackMode)
 		}
 		behavior := def.effectiveBehavior()
+		attackStyle := def.effectiveAttackStyle()
+		switch attackStyle {
+		case monsterAttackStyleMelee:
+		case monsterAttackStyleDive:
+			if attackMode != attackModeMelee {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: dive requires melee attack_mode", id)
+			}
+			if behavior != monsterBehaviorChase {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: dive requires chase behavior", id)
+			}
+			if def.AttackDamage == nil || def.AttackCooldown <= 0 {
+				return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: dive requires attack_damage and attack_cooldown_ticks", id)
+			}
+		default:
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_style: %s", id, def.AttackStyle)
+		}
 		switch behavior {
 		case monsterBehaviorStatic:
 			if def.AggroRadius > 0 || def.AssistRadius > 0 || def.LeashRadius > 0 || def.MoveSpeed > 0 {

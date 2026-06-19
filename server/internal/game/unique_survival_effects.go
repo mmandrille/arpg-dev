@@ -13,7 +13,8 @@ const (
 )
 
 type uniqueIncomingDamageSource struct {
-	Projectile bool
+	Projectile         bool
+	MonsterAttackStyle string
 }
 
 type uniqueAshenReprisalState struct {
@@ -21,12 +22,12 @@ type uniqueAshenReprisalState struct {
 }
 
 func (s *Sim) damagePlayerByMonster(monster *entity, player *entity, damageRange DamageRange, corr string, res *TickResult) combatResolution {
-	return s.damagePlayerByMonsterWithSource(monster, player, damageRange, corr, res, uniqueIncomingDamageSource{})
+	return s.damagePlayerByMonsterWithSource(monster, player, damageRange, corr, res, uniqueIncomingDamageSource{MonsterAttackStyle: s.monsterCombatAttackStyle(monster)})
 }
 
 func (s *Sim) damagePlayerByMonsterWithSource(monster *entity, player *entity, damageRange DamageRange, corr string, res *TickResult, source uniqueIncomingDamageSource) combatResolution {
 	if outcome, immune := s.playerDamageImmunityOutcome(player); immune {
-		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
+		res.Events = append(res.Events, combatEventWithAttackStyle(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome, source.MonsterAttackStyle))
 		return outcome
 	}
 	damageRange = s.applyEliteAuraToMonsterDamage(monster, damageRange)
@@ -35,7 +36,7 @@ func (s *Sim) damagePlayerByMonsterWithSource(monster *entity, player *entity, d
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
 	if !outcome.Hit || outcome.Blocked {
 		s.triggerUniqueEffectsAfterPlayerAvoidedHit(player, monster, corr, res)
-		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
+		res.Events = append(res.Events, combatEventWithAttackStyle(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome, source.MonsterAttackStyle))
 		return outcome
 	}
 	outcome = s.applyUniqueEffectsBeforePlayerDamage(player, monster, corr, res, outcome, source)
@@ -48,9 +49,26 @@ func (s *Sim) damagePlayerByMonsterWithSource(monster *entity, player *entity, d
 	if player.hp == 0 {
 		eventType = "player_killed"
 	}
-	res.Events = append(res.Events, combatEvent(eventType, monster.id, player.id, corr, outcome))
+	res.Events = append(res.Events, combatEventWithAttackStyle(eventType, monster.id, player.id, corr, outcome, source.MonsterAttackStyle))
 	s.triggerUniqueEffectsAfterPlayerDamage(player, monster, corr, res, outcome)
 	return outcome
+}
+
+func (s *Sim) monsterCombatAttackStyle(monster *entity) string {
+	if monster == nil || monster.kind != monsterEntity {
+		return ""
+	}
+	def, ok := s.rules.Monsters[monster.monsterDefID]
+	if !ok || def.effectiveAttackStyle() == monsterAttackStyleMelee {
+		return ""
+	}
+	return def.effectiveAttackStyle()
+}
+
+func combatEventWithAttackStyle(eventType string, sourceID, targetID uint64, corr string, outcome combatResolution, attackStyle string) Event {
+	event := combatEvent(eventType, sourceID, targetID, corr, outcome)
+	event.AttackStyle = attackStyle
+	return event
 }
 
 func cloneUniqueAshenReprisals(in map[uint64]uniqueAshenReprisalState) map[uint64]uniqueAshenReprisalState {

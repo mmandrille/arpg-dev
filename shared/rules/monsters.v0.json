@@ -282,6 +282,7 @@
         "max": 2
       },
       "attack_cooldown_ticks": 21,
+      "attack_style": "dive",
       "name_key": "monster.dungeon_bat.name"
     },
     "dungeon_undead": {

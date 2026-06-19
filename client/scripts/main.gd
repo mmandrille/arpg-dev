@@ -1183,12 +1183,14 @@ func _apply_delta(p: Dictionary) -> void:
 				continue
 			if event_type == "player_damaged":
 				ClientAudioBridgeScript.damage(audio_controller, eid == player_id)
+				_play_source_monster_attack_animation_for_event(ev)
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
 					_play_entity_reaction(eid, ev, "hit")
 				if _health_bar != null:
 					_health_bar.update_hp(player_hp, player_max_hp)
 			if event_type == "player_killed":
+				_play_source_monster_attack_animation_for_event(ev)
 				_play_entity_reaction(eid, ev, "death")
 				_show_loss_popup()
 			if event_type == "attack_missed":
@@ -1204,10 +1206,12 @@ func _apply_delta(p: Dictionary) -> void:
 		if ClientConstants.PLAYER_EVENT_CLIPS.has(event_type) and entities.has(eid):
 			if event_type == "player_damaged":
 				ClientAudioBridgeScript.damage(audio_controller, eid == player_id)
+				_play_source_monster_attack_animation_for_event(ev)
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
 					_play_entity_reaction(eid, ev, "hit")
 			if event_type == "player_killed":
+				_play_source_monster_attack_animation_for_event(ev)
 				var remote_dead: Dictionary = entities[eid]
 				remote_dead["hp"] = 0
 				_play_entity_reaction(eid, ev, "death")
@@ -1730,6 +1734,20 @@ func _play_local_attack_animation_for_event(ev: Dictionary) -> void:
 		return
 	var weapon_slot := str(ev.get("weapon_slot", "main_hand"))
 	player_anim.play_one_shot("attack_off_hand" if weapon_slot == "off_hand" else "attack")
+
+func _play_source_monster_attack_animation_for_event(ev: Dictionary) -> void:
+	if str(ev.get("attack_style", "")) != "dive":
+		return
+	var source_id := str(ev.get("source_entity_id", ""))
+	if source_id == "" or not entities.has(source_id):
+		return
+	var source_rec: Dictionary = entities[source_id]
+	if str(source_rec.get("type", "")) != "monster":
+		return
+	var ctrl = source_rec.get("controller", null)
+	if ctrl == null:
+		return
+	ctrl.play_one_shot("dive")
 
 func _play_local_player_reaction_animation(clip: String) -> void:
 	if player_anim == null:

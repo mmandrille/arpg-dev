@@ -23,12 +23,12 @@ Last updated: 2026-06-18
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v271 — multiplayer-ready room simulation guardrails |
+| **Latest completed slice** | v272 — performance status overlay |
 | **Active branch** | `main` |
-| **CI gate** | v268-v271 selected autoloop batch `make ci` green on 2026-06-18 |
-| **Next slice** | engineering review for the v271 green baseline, then `$refactor` for minor paydown |
+| **CI gate** | v272 `make ci` green on 2026-06-18 |
+| **Next slice** | engineering review for the v272 green baseline, then `$refactor` for minor paydown |
 | **Last engineering review** | v250 — [`docs/reviews/20260617_v250-overview.md`](docs/reviews/20260617_v250-overview.md) (2026-06-17) |
-| **Next engineering review** | Due now after v271 and green v268-v271 batch `make ci` |
+| **Next engineering review** | Due now after v272 and green `make ci` |
 
 
 ### Periodic engineering reviews

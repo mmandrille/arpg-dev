@@ -32,10 +32,11 @@ type sessionLoop struct {
 	received map[string]time.Time
 	seq      int64
 
-	done        chan struct{}
-	closeOnce   sync.Once
-	perfDebug   bool
-	lastPerfLog time.Time
+	done           chan struct{}
+	closeOnce      sync.Once
+	perfDebug      bool
+	lastPerfLog    time.Time
+	lastPerfStatus time.Time
 }
 
 type loopClient struct {
@@ -550,6 +551,29 @@ func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, i
 				Level:      res.Level,
 				Changes:    changes,
 				Events:     events,
+			},
+		})
+	}
+}
+
+func (l *sessionLoop) fanoutPerformanceStatus(perf performanceStatusPayload, clients []*loopClient, levelsByPlayerID map[uint64]int) {
+	for _, client := range clients {
+		level, ok := levelsByPlayerID[client.playerID]
+		if !ok {
+			continue
+		}
+		perfPayload := perf
+		client.enqueue(outEnvelope{
+			Type:      typeStateDelta,
+			MessageID: ids.New("msg"),
+			SessionID: l.sess.ID,
+			Tick:      perf.Tick,
+			Payload: stateDeltaPayload{
+				ServerTick:  perf.Tick,
+				Level:       level,
+				Changes:     []game.Change{},
+				Events:      []game.Event{},
+				Performance: &perfPayload,
 			},
 		})
 	}

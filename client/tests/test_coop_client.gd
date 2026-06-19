@@ -67,7 +67,7 @@ func _initialize() -> void:
 	_test_multiplayer_sessions_panel_row_join_affordances()
 	_test_settings_panel_create_game_type_sync()
 	_test_client_settings_language_persistence()
-	_test_status_text_toggle_hides_left_debug_not_level_hud()
+	_test_status_text_toggle_hides_performance_status_not_level_hud()
 	_test_player_hud_identity_uses_character_name_and_level()
 	_test_character_stats_probability_values_use_percentages()
 	_test_character_stats_window_chrome()
@@ -462,7 +462,7 @@ func _test_client_settings_language_persistence() -> void:
 	_assert_eq("unsupported language normalizes", loaded.language, "en")
 
 
-func _test_status_text_toggle_hides_left_debug_not_level_hud() -> void:
+func _test_status_text_toggle_hides_performance_status_not_level_hud() -> void:
 	var main = _make_main()
 	main._debug_label = Label.new()
 	main._level_label = Label.new()
@@ -471,7 +471,7 @@ func _test_status_text_toggle_hides_left_debug_not_level_hud() -> void:
 	main.current_level = -3
 	main._update_level_hud()
 	main._update_debug()
-	_assert_true("status text off hides left debug label", not main._debug_label.visible)
+	_assert_true("status text off hides performance status label", not main._debug_label.visible)
 	_assert_true("status text off keeps right level visible", main._level_label.visible)
 	_assert_true("right level still shows dungeon depth", main._level_label.text.begins_with("Level 3"))
 	main._debug_label.free()

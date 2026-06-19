@@ -68,10 +68,46 @@ type (
 		Message string `json:"message"`
 	}
 	stateDeltaPayload struct {
-		ServerTick uint64        `json:"server_tick"`
-		Level      int           `json:"level"`
-		Changes    []game.Change `json:"changes"`
-		Events     []game.Event  `json:"events"`
+		ServerTick  uint64                    `json:"server_tick"`
+		Level       int                       `json:"level"`
+		Changes     []game.Change             `json:"changes"`
+		Events      []game.Event              `json:"events"`
+		Performance *performanceStatusPayload `json:"performance,omitempty"`
+	}
+	performanceStatusPayload struct {
+		Tick               uint64  `json:"tick"`
+		TotalMS            float64 `json:"total_ms"`
+		SimMS              float64 `json:"sim_ms"`
+		AIMS               float64 `json:"ai_ms"`
+		PathfindMS         float64 `json:"pathfind_ms"`
+		CombatMS           float64 `json:"combat_ms"`
+		BroadcastMS        float64 `json:"broadcast_ms"`
+		PersistMS          float64 `json:"persist_ms"`
+		PathRequests       int     `json:"path_requests"`
+		PathCacheHits      int     `json:"path_cache_hits"`
+		PathNodesVisited   int     `json:"path_nodes_visited"`
+		MonstersMoved      int     `json:"monsters_moved"`
+		TickBudgetMS       float64 `json:"tick_budget_ms"`
+		TickOverBudget     bool    `json:"tick_over_budget"`
+		TickOverrunMS      float64 `json:"tick_overrun_ms"`
+		DegradationApplied bool    `json:"degradation_applied"`
+		Inputs             int     `json:"inputs"`
+		Results            int     `json:"results"`
+		Changes            int     `json:"changes"`
+		Events             int     `json:"events"`
+		Acks               int     `json:"acks"`
+		Rejects            int     `json:"rejects"`
+		Clients            int     `json:"clients"`
+		GameLevel          int     `json:"game_level"`
+		Entities           int     `json:"entities"`
+		Players            int     `json:"players"`
+		Monsters           int     `json:"monsters"`
+		LiveMonsters       int     `json:"live_monsters"`
+		Companions         int     `json:"companions"`
+		Projectiles        int     `json:"projectiles"`
+		Loot               int     `json:"loot"`
+		Interactables      int     `json:"interactables"`
+		Walls              int     `json:"walls"`
 	}
 )
 

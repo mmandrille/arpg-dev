@@ -308,6 +308,43 @@ func TestGoldPickupDeltasUseExplicitOwner(t *testing.T) {
 	}
 }
 
+func TestFanoutPerformanceStatusSendsEmptyStateDeltaPerClientLevel(t *testing.T) {
+	hostID := uint64(1001)
+	guestID := uint64(1002)
+	host := &loopClient{playerID: hostID, sendCh: make(chan outEnvelope, 2), done: make(chan struct{})}
+	guest := &loopClient{playerID: guestID, sendCh: make(chan outEnvelope, 2), done: make(chan struct{})}
+	loop := &sessionLoop{sess: store.Session{ID: "sess_perf_status"}}
+	perf := performanceStatusPayload{
+		Tick:             12,
+		TotalMS:          18.4,
+		SimMS:            11.2,
+		PathRequests:     9,
+		PathCacheHits:    5,
+		PathNodesVisited: 142,
+		MonstersMoved:    12,
+		LiveMonsters:     34,
+		Monsters:         36,
+		Walls:            9,
+	}
+
+	loop.fanoutPerformanceStatus(perf, []*loopClient{host, guest}, map[uint64]int{
+		hostID:  0,
+		guestID: -3,
+	})
+
+	hostDelta := mustReceiveDelta(t, host)
+	if hostDelta.Level != 0 || len(hostDelta.Changes) != 0 || len(hostDelta.Events) != 0 {
+		t.Fatalf("host delta = %+v, want level 0 empty status delta", hostDelta)
+	}
+	if hostDelta.Performance == nil || hostDelta.Performance.PathRequests != 9 || hostDelta.Performance.LiveMonsters != 34 {
+		t.Fatalf("host performance = %+v", hostDelta.Performance)
+	}
+	guestDelta := mustReceiveDelta(t, guest)
+	if guestDelta.Level != -3 || guestDelta.Performance == nil || guestDelta.Performance.Tick != 12 {
+		t.Fatalf("guest delta = %+v", guestDelta)
+	}
+}
+
 func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 	repo := &progressionPersistRepo{}
 	loop := &sessionLoop{

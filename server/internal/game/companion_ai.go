@@ -2,6 +2,8 @@ package game
 
 import "math"
 
+const revivedCompanionCorpseVisualTint = "444441"
+
 func (s *Sim) newPresetMonsterOrCompanion(level *LevelState, preset WorldEntity, ownerID uint64) *entity {
 	def := s.rules.Monsters[preset.MonsterDefID]
 	monster := &entity{
@@ -154,7 +156,7 @@ func (s *Sim) reviveMonsterCompanion(owner *entity, target *entity, skillID stri
 		expiresTick:           s.tick + uint64(durationTicks) + 1,
 		totalDurationTicks:    durationTicks,
 		visualModel:           target.visualModel,
-		visualTint:            target.visualTint,
+		visualTint:            revivedCompanionCorpseVisualTint,
 		visualScale:           target.visualScale,
 	}
 	companion.id = s.alloc()

@@ -39,6 +39,9 @@ func TestSorcererReviveCreatesScaledCompanionFromDeadMonster(t *testing.T) {
 	if view.Type != companionEntity || view.MonsterDefID != "dungeon_wolf" || view.OwnerID != idStr(player.id) {
 		t.Fatalf("revived view = %+v, want owned dungeon_wolf companion", view)
 	}
+	if view.VisualTint != revivedCompanionCorpseVisualTint {
+		t.Fatalf("revived visual_tint = %q, want corpse tint %q", view.VisualTint, revivedCompanionCorpseVisualTint)
+	}
 	if view.RemainingTicks == nil || *view.RemainingTicks != 600 || view.TotalTicks == nil || *view.TotalTicks != 600 {
 		t.Fatalf("revived timer view = remaining %v total %v, want 600/600", view.RemainingTicks, view.TotalTicks)
 	}

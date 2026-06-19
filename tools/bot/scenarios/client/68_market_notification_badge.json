@@ -1,0 +1,25 @@
+{
+  "id": "market_notification_badge",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "market_notification_badge_288",
+  "title": "Market notification badge",
+  "description": "Client enters town as a seller with one active listing and incoming bidder offer, proves the market board badges before opening the panel, then opens the board.",
+  "preflight": {
+    "type": "market_listing",
+    "seller_is_client": true,
+    "item_def_id": "cave_mail",
+    "price_gold": 67,
+    "offer_item_def_id": "cave_blade"
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "wait_market_board_badges", "exists": true, "incoming_bids": 1, "published_listings": 1, "incoming_visible": true, "published_visible": true, "incoming_text": "1", "published_text": "1", "timeout_s": 15.0 },
+    { "type": "assert_market_board_badges", "incoming_bids": 1, "published_listings": 1, "incoming_visible": true, "published_visible": true },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
+    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 67, "seller_owned": true, "at_least": 1, "timeout_s": 15.0 },
+    { "type": "click_market_view_offers", "item_def_id": "cave_mail", "price_gold": 67 },
+    { "type": "wait_market_panel", "offer_item_def_id": "cave_blade", "offer_status": "active", "offer_at_least": 1, "timeout_s": 15.0 }
+  ]
+}

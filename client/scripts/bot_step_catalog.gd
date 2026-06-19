@@ -14,7 +14,7 @@ const STEP_TYPES_WAIT := [
 	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 	"wait_wall_layout", "wait_fog_of_war", "wait_shop_panel", "wait_stash_panel", "wait_market_panel", "wait_bishop_panel", "wait_mercenary_panel", "wait_blacksmith_panel",
-	"wait_boss_health_bar", "wait_remote_player_count",
+	"wait_market_board_badges", "wait_boss_health_bar", "wait_remote_player_count",
 	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker", "wait_elite_objective_minimap",
 ]
 const STEP_TYPES_ASSERT := [
@@ -41,7 +41,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
-	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar", "assert_audio_state", "assert_resource_wallet_panel",
+	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_board_badges", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar", "assert_audio_state", "assert_resource_wallet_panel",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_mercenary_panel_visible", "assert_mercenary_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
 	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap",
 ]
@@ -223,6 +223,14 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_market_panel", "assert_market_listing_rows"]:
 		if not step.has("equals") and not step.has("at_least") and not step.has("price_gold") and not step.has("item_def_id") and not step.has("rolled") and not step.has("expiration_visible") and not step.has("expiration_contains") and not step.has("comparison_at_least") and not step.has("comparison_contains") and not step.has("first_item_def_id") and not step.has("market_search_text") and not step.has("market_sort_mode") and not step.has("filtered_listing_count") and not step.has("filtered_owned_listing_count") and not step.has("filtered_offer_count") and not step.has("filtered_receipt_count") and not step.has("offer_equals") and not step.has("offer_at_least") and not step.has("offer_item_def_id") and not step.has("listing_item_def_id") and not step.has("offer_status") and not step.has("receipt_action") and not step.has("receipt_at_least") and not step.has("receipt_equals"):
 			return "client_steps[%d] (%s) requires a market listing expectation" % [index, stype]
+	if stype in ["wait_market_board_badges", "assert_market_board_badges"]:
+		var has_badge_expectation := false
+		for key in ["exists", "incoming_bids", "published_listings", "incoming_visible", "published_visible", "incoming_text", "published_text", "incoming_color", "published_color"]:
+			if step.has(key):
+				has_badge_expectation = true
+				break
+		if not has_badge_expectation:
+			return "client_steps[%d] (%s) requires a market badge expectation" % [index, stype]
 	if stype == "assert_market_offer_rows":
 		if not step.has("offer_equals") and not step.has("offer_at_least"):
 			return "client_steps[%d] (%s) requires offer_equals or offer_at_least" % [index, stype]

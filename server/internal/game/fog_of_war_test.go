@@ -128,6 +128,89 @@ func TestFogOfWarSnapshotShowsLivingMonstersBehindHoleInsideLightRadius(t *testi
 	}
 }
 
+func TestFogOfWarSnapshotHidesLivingMonstersBehindTallObstacleKindsInsideLightRadius(t *testing.T) {
+	for _, kind := range []string{obstacleKindRock, obstacleKindColumn} {
+		t.Run(kind, func(t *testing.T) {
+			sim := newFogTestSim(t)
+			level := sim.activeLevel()
+			level.walls = append(level.walls, wallObstacle{
+				pos:       Vec2{X: 4, Y: 0},
+				size:      Vec2{X: 1, Y: 4},
+				source:    "generated",
+				kind:      kind,
+				blocksLOS: boolPtr(true),
+			})
+			monster := addTestMonster(sim, monsterDefID, Vec2{X: 8, Y: 0}, 10)
+
+			snap := sim.SnapshotForPlayer(sim.playerID)
+			if snapshotHasEntity(snap, idStr(monster.id)) {
+				t.Fatalf("snapshot leaked %s-occluded monster %d: %+v", kind, monster.id, snap.Entities)
+			}
+			if sim.players[sim.playerID].VisibleMonsterIDs[monster.id] {
+				t.Fatalf("visible monster memory contains %s-occluded monster %d", kind, monster.id)
+			}
+		})
+	}
+}
+
+func TestFogOfWarSnapshotShowsLivingMonstersBehindLowRubbleInsideLightRadius(t *testing.T) {
+	sim := newFogTestSim(t)
+	level := sim.activeLevel()
+	level.walls = append(level.walls, wallObstacle{pos: Vec2{X: 4, Y: 0}, size: Vec2{X: 3, Y: 4}, source: "generated", kind: obstacleKindRubble})
+	monster := addTestMonster(sim, monsterDefID, Vec2{X: 8, Y: 0}, 10)
+
+	snap := sim.SnapshotForPlayer(sim.playerID)
+	if !snapshotHasEntity(snap, idStr(monster.id)) {
+		t.Fatalf("snapshot hid monster behind rubble %d: %+v", monster.id, snap.Entities)
+	}
+	if !sim.players[sim.playerID].VisibleMonsterIDs[monster.id] {
+		t.Fatalf("visible monster memory missing monster behind rubble %d", monster.id)
+	}
+}
+
+func TestFogOfWarDeltasRevealMonstersWhenTallObstacleLineOfSightClears(t *testing.T) {
+	sim := newFogTestSim(t)
+	level := sim.activeLevel()
+	player := level.entities[sim.playerID]
+	level.walls = append(level.walls, wallObstacle{
+		pos:       Vec2{X: 3.5, Y: 0},
+		size:      Vec2{X: 1, Y: 4},
+		source:    "preset",
+		kind:      obstacleKindColumn,
+		blocksLOS: boolPtr(true),
+	})
+	monster := addTestMonster(sim, monsterDefID, Vec2{X: 6, Y: 0}, 10)
+	sim.SnapshotForPlayer(sim.playerID)
+
+	player.pos = Vec2{X: 6, Y: 4}
+	reveal := TickResult{Changes: sim.FilterChangesForPlayer(sim.playerID, sim.currentLevel, []Change{
+		{Op: OpEntityUpdate, Entity: ptrEntityView(sim.entityView(player))},
+	})}
+	if !hasEntitySpawn(reveal, idStr(monster.id)) {
+		t.Fatalf("clearing tall obstacle line of sight did not spawn monster %d: %+v", monster.id, reveal.Changes)
+	}
+}
+
+func TestFogOfWarPresetLineOfSightBlockerLabHidesAndMarksTallWalls(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_los_blocker_lab", "fog_of_war_line_of_sight_blocker_seed", loadRules(t), "line_of_sight_blocker_lab")
+	if err != nil {
+		t.Fatalf("new line of sight blocker sim: %v", err)
+	}
+	snap := sim.SnapshotForPlayer(sim.playerID)
+	if snapshotEntityCountByMonsterDef(snap, monsterDefID) != 0 {
+		t.Fatalf("snapshot leaked occluded lab monster: %+v", snap.Entities)
+	}
+	if !snapshotHasLOSBlockingKind(snap, obstacleKindColumn) {
+		t.Fatalf("snapshot wall layout missing LOS-blocking column: %+v", snap.Walls)
+	}
+	if !snapshotHasLOSBlockingKind(snap, obstacleKindRock) {
+		t.Fatalf("snapshot wall layout missing LOS-blocking rock: %+v", snap.Walls)
+	}
+	if snapshotHasLOSBlockingKind(snap, obstacleKindRubble) {
+		t.Fatalf("snapshot wall layout marked rubble as LOS-blocking: %+v", snap.Walls)
+	}
+}
+
 func TestFogOfWarDeltasRevealAndConcealIdleMonsters(t *testing.T) {
 	sim := newFogTestSim(t)
 	level := sim.activeLevel()
@@ -277,6 +360,25 @@ func addFogTestInteractable(sim *Sim, defID string, pos Vec2, state string) *ent
 func snapshotHasEntity(snap Snapshot, entityID string) bool {
 	for _, entity := range snap.Entities {
 		if entity.ID == entityID {
+			return true
+		}
+	}
+	return false
+}
+
+func snapshotEntityCountByMonsterDef(snap Snapshot, monsterDefID string) int {
+	count := 0
+	for _, entity := range snap.Entities {
+		if entity.Type == monsterEntity && entity.MonsterDefID == monsterDefID {
+			count++
+		}
+	}
+	return count
+}
+
+func snapshotHasLOSBlockingKind(snap Snapshot, kind string) bool {
+	for _, wall := range snap.Walls {
+		if wall.Kind == kind && wall.BlocksLineOfSight != nil && *wall.BlocksLineOfSight {
 			return true
 		}
 	}

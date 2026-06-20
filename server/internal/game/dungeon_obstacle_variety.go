@@ -47,3 +47,12 @@ func solidObstacleBlocksProjectiles(kind string) bool {
 		return false
 	}
 }
+
+func solidObstacleLineOfSightOverride(kind string) *bool {
+	switch kind {
+	case obstacleKindRock, obstacleKindColumn:
+		return boolPtr(true)
+	default:
+		return nil
+	}
+}

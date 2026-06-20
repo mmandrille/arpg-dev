@@ -349,7 +349,6 @@ type ShopSellAppraisalView struct {
 	Comparison        *ShopComparisonView     `json:"comparison,omitempty"`
 }
 
-// HotbarSlotView is one fixed hotbar assignment in the protocol snapshot.
 type HotbarSlotView struct {
 	SlotIndex      int       `json:"slot_index"`
 	ItemInstanceID *string   `json:"item_instance_id"`
@@ -357,11 +356,12 @@ type HotbarSlotView struct {
 }
 
 type WallView struct {
-	ID       string `json:"id"`
-	Position Vec2   `json:"position"`
-	Size     Vec2   `json:"size"`
-	Source   string `json:"source,omitempty"`
-	Kind     string `json:"kind,omitempty"`
+	ID                string `json:"id"`
+	Position          Vec2   `json:"position"`
+	Size              Vec2   `json:"size"`
+	Source            string `json:"source,omitempty"`
+	Kind              string `json:"kind,omitempty"`
+	BlocksLineOfSight *bool  `json:"blocks_line_of_sight,omitempty"`
 }
 
 // BossPhaseView is the protocol view of an authoritative boss pattern phase.

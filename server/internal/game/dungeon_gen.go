@@ -341,6 +341,7 @@ func randomLineObstacle(rng *RNG, rules DungeonGenerationRules, kind string) []w
 		source:      "generated",
 		shapeFamily: "line",
 		kind:        kind,
+		blocksLOS:   solidObstacleLineOfSightOverride(kind),
 	}}
 }
 
@@ -358,8 +359,8 @@ func randomLObstacle(rng *RNG, rules DungeonGenerationRules, kind string) []wall
 		ySign = -1
 	}
 	return []wallObstacle{
-		{pos: Vec2{X: anchor.X + xSign*a/2, Y: anchor.Y}, size: Vec2{X: a, Y: t}, source: "generated", shapeFamily: "l", kind: kind},
-		{pos: Vec2{X: anchor.X + xSign*a, Y: anchor.Y + ySign*b/2}, size: Vec2{X: t, Y: b}, source: "generated", shapeFamily: "l", kind: kind},
+		{pos: Vec2{X: anchor.X + xSign*a/2, Y: anchor.Y}, size: Vec2{X: a, Y: t}, source: "generated", shapeFamily: "l", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
+		{pos: Vec2{X: anchor.X + xSign*a, Y: anchor.Y + ySign*b/2}, size: Vec2{X: t, Y: b}, source: "generated", shapeFamily: "l", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
 	}
 }
 
@@ -374,9 +375,9 @@ func randomTObstacle(rng *RNG, rules DungeonGenerationRules, kind string) []wall
 		stemSign = -1
 	}
 	return []wallObstacle{
-		{pos: Vec2{X: anchor.X - left/2, Y: anchor.Y}, size: Vec2{X: left, Y: t}, source: "generated", shapeFamily: "t", kind: kind},
-		{pos: Vec2{X: anchor.X + right/2, Y: anchor.Y}, size: Vec2{X: right, Y: t}, source: "generated", shapeFamily: "t", kind: kind},
-		{pos: Vec2{X: anchor.X, Y: anchor.Y + stemSign*stem/2}, size: Vec2{X: t, Y: stem}, source: "generated", shapeFamily: "t", kind: kind},
+		{pos: Vec2{X: anchor.X - left/2, Y: anchor.Y}, size: Vec2{X: left, Y: t}, source: "generated", shapeFamily: "t", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
+		{pos: Vec2{X: anchor.X + right/2, Y: anchor.Y}, size: Vec2{X: right, Y: t}, source: "generated", shapeFamily: "t", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
+		{pos: Vec2{X: anchor.X, Y: anchor.Y + stemSign*stem/2}, size: Vec2{X: t, Y: stem}, source: "generated", shapeFamily: "t", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
 	}
 }
 
@@ -391,6 +392,7 @@ func randomBlockObstacle(rng *RNG, rules DungeonGenerationRules, kind string) []
 		source:      "generated",
 		shapeFamily: "block",
 		kind:        kind,
+		blocksLOS:   solidObstacleLineOfSightOverride(kind),
 	}}
 }
 

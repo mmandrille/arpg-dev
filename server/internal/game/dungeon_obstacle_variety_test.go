@@ -47,8 +47,10 @@ func TestObstacleVarietySolidKindsAreHardBlockers(t *testing.T) {
 			if !obstacleBlocksProjectiles(wall) {
 				t.Fatalf("%s did not block projectiles", kind)
 			}
-			if obstacleBlocksLineOfSight(wall) {
-				t.Fatalf("%s blocked line of sight before LOS blocker slice", kind)
+			wantLOS := kind == obstacleKindRock || kind == obstacleKindColumn
+			wall.blocksLOS = solidObstacleLineOfSightOverride(kind)
+			if got := obstacleBlocksLineOfSight(wall); got != wantLOS {
+				t.Fatalf("%s line-of-sight blocking = %v, want %v", kind, got, wantLOS)
 			}
 			if (MonsterDef{NavigationTrait: monsterNavigationTraitFlying}).ignoresObstacleKind(kind) {
 				t.Fatalf("flying monster ignored solid obstacle kind %s", kind)

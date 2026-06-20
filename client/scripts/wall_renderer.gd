@@ -81,6 +81,8 @@ func normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 	var kind := str(wall.get("kind", "wall"))
 	if kind != "" and kind != "wall":
 		out["kind"] = kind
+	if wall.has("blocks_line_of_sight"):
+		out["blocks_line_of_sight"] = bool(wall.get("blocks_line_of_sight", false))
 	return out
 
 func make_wall_node(wall: Dictionary) -> Node3D:

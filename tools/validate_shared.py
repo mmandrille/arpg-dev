@@ -28,6 +28,7 @@ try:
     )
     from .dungeon_density import area_density_count, validate_area_count_formula, validate_area_range_formula
     from .validate_boss_patterns import validate_boss_patterns
+    from .validate_dungeon_goldens import validate_dungeon_obstacle_goldens
     from .validate_i18n import validate_i18n_catalog, validate_locale_catalog
     from .validate_item_presentations import validate_item_presentations
     from .validate_main_config import validate_main_config_gameplay
@@ -42,6 +43,7 @@ except ImportError:  # pragma: no cover - direct script execution
     )
     from dungeon_density import area_density_count, validate_area_count_formula, validate_area_range_formula  # type: ignore[no-redef]
     from validate_boss_patterns import validate_boss_patterns  # type: ignore[no-redef]
+    from validate_dungeon_goldens import validate_dungeon_obstacle_goldens  # type: ignore[no-redef]
     from validate_i18n import validate_i18n_catalog, validate_locale_catalog  # type: ignore[no-redef]
     from validate_item_presentations import validate_item_presentations  # type: ignore[no-redef]
     from validate_main_config import validate_main_config_gameplay  # type: ignore[no-redef]
@@ -1435,23 +1437,7 @@ def cross_checks(report: Report) -> None:
     if not boss_floor_failed:
         report.ok("boss_floor fixed placements fit 30 x 30 floor")
 
-    obstacle_expected = dungeon_obstacles_golden.get("expected", {})
-    obstacle_floor = obstacle_expected.get("floor_size", {})
-    obstacle_shapes = set(obstacle_expected.get("shape_families", []))
-    obstacle_walls = obstacle_expected.get("walls", [])
-    generated_walls = [wall for wall in obstacle_walls if wall.get("source") == "generated"]
-    if dungeon_obstacles_golden.get("level", 0) >= 0:
-        report.fail("dungeon_obstacles golden", "level must be a generated dungeon floor")
-    elif obstacle_floor != floor_size:
-        report.fail("dungeon_obstacles golden", "floor_size must match dungeon_generation floor_size")
-    elif len(obstacle_shapes) < 2:
-        report.fail("dungeon_obstacles golden", "must name at least two shape families")
-    elif obstacle_expected.get("minimum_generated_wall_count", 0) <= 0:
-        report.fail("dungeon_obstacles golden", "minimum_generated_wall_count must be positive")
-    elif len(generated_walls) > 0 and not obstacle_shapes.intersection({wall.get("shape_family") for wall in generated_walls}):
-        report.fail("dungeon_obstacles golden", "generated wall shape_family must be represented in shape_families")
-    else:
-        report.ok("dungeon_obstacles golden declares v40 wall-layout contract")
+    validate_dungeon_obstacle_goldens(report, dungeon_generation, dungeon_obstacles_golden)
 
     boss_chest_id = boss_floor.get("chest_interactable_def_id")
     boss_chest_table = boss_floor.get("chest_loot_table")

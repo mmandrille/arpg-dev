@@ -11,7 +11,8 @@ const SKILL_BLOCK_SIZE := Vector2(83, 83)
 const SKILL_ICON_SIZE := Vector2(62, 62)
 const SKILL_TREE_ORIGIN := Vector2(23, 70)
 const SKILL_TREE_SPACING := Vector2(96, 127)
-const SKILL_TREE_WIDTH := 395.0
+const SKILL_ACTIVE_TREE_WIDTH := 395.0
+const SKILL_TREE_WIDTH := 491.0
 const SKILL_TOOLTIP_SIZE := Vector2(218, 218)
 const SKILL_TOOLTIP_GAP := 8.0
 
@@ -408,9 +409,9 @@ func _sync_viewport_size() -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = DraggableWindowScript.new()
-	_panel.custom_minimum_size = Vector2(429, 650)
+	_panel.custom_minimum_size = Vector2(525, 650)
 	_panel.position = Vector2(362, 118)
-	_panel.configure("Skills", Vector2(395, 567))
+	_panel.configure("Skills", Vector2(491, 567))
 	_panel.set_layout_key("skills")
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _panel_style())
@@ -419,17 +420,17 @@ func _build() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 10)
-	root.custom_minimum_size = Vector2(395, 567)
+	root.custom_minimum_size = Vector2(491, 567)
 	_panel.set_content(root)
 
 	var tree := Control.new()
-	tree.custom_minimum_size = Vector2(395, 463)
+	tree.custom_minimum_size = Vector2(491, 463)
 	tree.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(tree)
 
 	var backdrop := ColorRect.new()
 	backdrop.color = Color("#151617")
-	backdrop.custom_minimum_size = Vector2(395, 463)
+	backdrop.custom_minimum_size = Vector2(491, 463)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tree.add_child(backdrop)
 
@@ -674,6 +675,8 @@ func _skill_block_position(skill_id: String) -> Vector2:
 	var tier := maxi(1, int(tree.get("tier", 1)))
 	var visible_ids := _visible_skill_ids()
 	var column := maxi(1, int(tree.get("column", 1)))
+	if _skill_is_passive_stat_bonus(skill_id):
+		return Vector2(SKILL_TREE_ORIGIN.x + (column - 1) * SKILL_TREE_SPACING.x, SKILL_TREE_ORIGIN.y + (tier - 1) * SKILL_TREE_SPACING.y)
 	if not visible_ids.is_empty():
 		var visible_index := visible_ids.find(skill_id)
 		if visible_index >= 0:
@@ -681,6 +684,8 @@ func _skill_block_position(skill_id: String) -> Vector2:
 	var row_ids: Array = []
 	for raw_skill_id in visible_ids:
 		var row_skill_id := str(raw_skill_id)
+		if _skill_is_passive_stat_bonus(row_skill_id):
+			continue
 		var row_tree: Dictionary = _skill_def(row_skill_id).get("tree", {})
 		if maxi(1, int(row_tree.get("tier", 1))) == tier:
 			row_ids.append(row_skill_id)
@@ -688,11 +693,15 @@ func _skill_block_position(skill_id: String) -> Vector2:
 	var centered_offset := 0.0
 	if row_count > 0:
 		var row_width := (float(row_count - 1) * SKILL_TREE_SPACING.x) + SKILL_BLOCK_SIZE.x
-		centered_offset = maxf(0.0, (SKILL_TREE_WIDTH - row_width) * 0.5)
+		centered_offset = maxf(0.0, (SKILL_ACTIVE_TREE_WIDTH - row_width) * 0.5)
 		var row_index := row_ids.find(skill_id)
 		if row_index >= 0:
 			column = row_index + 1
 	return Vector2(SKILL_TREE_ORIGIN.x + centered_offset + (column - 1) * SKILL_TREE_SPACING.x, SKILL_TREE_ORIGIN.y + (tier - 1) * SKILL_TREE_SPACING.y)
+
+
+func _skill_is_passive_stat_bonus(skill_id: String) -> bool:
+	return str(_skill_def(skill_id).get("kind", "")) == "passive_stat_bonus"
 
 
 func _skill_spend_enabled(skill_id: String) -> bool:

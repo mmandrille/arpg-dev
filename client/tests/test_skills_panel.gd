@@ -46,7 +46,7 @@ func _run() -> void:
 	panel.ensure_display_visible()
 	var state := panel.get_debug_state()
 	_assert_true("panel visible", bool(state.get("visible", false)))
-	_assert_eq("panel width is 30 percent larger", int(panel._panel.custom_minimum_size.x), 429)
+	_assert_eq("panel width includes passive column", int(panel._panel.custom_minimum_size.x), 525)
 	_assert_eq("panel height is 30 percent larger", int(panel._panel.custom_minimum_size.y), 650)
 	var window: Dictionary = state.get("window", {})
 	_assert_eq("skills window title", str(window.get("title", "")), "Skills")
@@ -104,9 +104,21 @@ func _run() -> void:
 	var arcane_focus_tooltip := SkillsPanelScript.tooltip_plain_body("arcane_focus", 0, panel.skill_progression, panel.character_progression)
 	_assert_true("passive tooltip includes passive summary", arcane_focus_tooltip.contains("Passive max mana boost"))
 	_assert_true("passive tooltip includes stat effect", arcane_focus_tooltip.contains("Max mana: +8%"))
+	_assert_passive_icon_shapes()
 	var arcane_state: Dictionary = (state.get("skills", {}) as Dictionary).get("arcane_focus", {})
 	_assert_eq("passive icon label from presentation", str(arcane_state.get("icon_label", "")), "A")
-	_assert_eq("passive icon shape from presentation", str(arcane_state.get("icon_shape", "")), "orb_projectile")
+	_assert_eq("passive icon shape from presentation", str(arcane_state.get("icon_shape", "")), "passive_arcane_focus")
+	var arcane_block := panel._skill_blocks.get("arcane_focus", null) as Control
+	var mana_block := panel._skill_blocks.get("mana_weaving", null) as Control
+	var dynamo_block := panel._skill_blocks.get("spell_dynamo", null) as Control
+	_assert_true("sorcerer passive row 1 block exists", arcane_block != null)
+	_assert_true("sorcerer passive row 2 block exists", mana_block != null)
+	_assert_true("sorcerer passive row 3 block exists", dynamo_block != null)
+	if arcane_block != null and mana_block != null and dynamo_block != null:
+		_assert_eq("sorcerer passive column row 1 x", int(arcane_block.position.x), 407)
+		_assert_eq("sorcerer passive column row 2 x", int(mana_block.position.x), 407)
+		_assert_eq("sorcerer passive column row 3 x", int(dynamo_block.position.x), 407)
+		_assert_true("sorcerer passive column sits at right edge", arcane_block.position.x + arcane_block.size.x <= 491.0)
 	panel.bot_leave_skill_tooltip()
 	state = panel.get_debug_state()
 	_assert_eq("tooltip leave clears hovered skill", str(state.get("hovered_skill_id", "")), "")
@@ -174,7 +186,11 @@ func _run() -> void:
 	_assert_true("paladin holy shield block exists", holy_shield_block != null)
 	if heal_block != null and holy_shield_block != null:
 		_assert_true("paladin third-column skill reflows into compact row", heal_block.position.x <= 240.0)
-		_assert_true("paladin fourth-column skill remains inside tree", holy_shield_block.position.x + holy_shield_block.size.x <= 395.0)
+		_assert_true("paladin fourth-column skill remains inside active tree", holy_shield_block.position.x + holy_shield_block.size.x <= 395.0)
+	var paladin_passive_block := panel._skill_blocks.get("vigilant_guard", null) as Control
+	_assert_true("paladin passive column block exists", paladin_passive_block != null)
+	if paladin_passive_block != null:
+		_assert_eq("paladin passive column stays fixed right", int(paladin_passive_block.position.x), 407)
 	_assert_eq("rankable paladin skill is highlighted", str(((state.get("skills", {}) as Dictionary).get("heal", {}) as Dictionary).get("visual_state", "")), "highlight")
 
 	panel.set_character_progression({
@@ -329,3 +345,26 @@ func _skill_mana_cost(skill_id: String, current_rank: int) -> int:
 	var cost: Dictionary = SkillRulesLoaderScript.skill_definition(skill_id).get("cost", {})
 	var mana: Dictionary = cost.get("mana", {})
 	return int(mana.get("base", 0)) + current_rank * int(mana.get("per_rank", 0))
+
+
+func _assert_passive_icon_shapes() -> void:
+	var expected := {
+		"arcane_focus": "passive_arcane_focus",
+		"mana_weaving": "passive_mana_weaving",
+		"spell_dynamo": "passive_spell_dynamo",
+		"iron_hide": "passive_iron_hide",
+		"battle_tempo": "passive_battle_tempo",
+		"crushing_force": "passive_crushing_force",
+		"vigilant_guard": "passive_vigilant_guard",
+		"faithful_bulwark": "passive_faithful_bulwark",
+		"consecrated_vitality": "passive_consecrated_vitality",
+		"quick_hands": "passive_quick_hands",
+		"killer_instinct": "passive_killer_instinct",
+		"evasive_footwork": "passive_evasive_footwork",
+		"trail_sense": "passive_trail_sense",
+		"precision_draw": "passive_precision_draw",
+		"deadeye": "passive_deadeye",
+	}
+	for skill_id in expected.keys():
+		var icon: Dictionary = SkillRulesLoaderScript.skill_presentation(str(skill_id)).get("icon", {})
+		_assert_eq("passive icon shape %s" % skill_id, str(icon.get("shape", "")), str(expected[skill_id]))

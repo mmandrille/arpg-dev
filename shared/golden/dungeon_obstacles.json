@@ -6,9 +6,10 @@
       "width": 100,
       "height": 50
     },
-    "minimum_wall_count": 18,
-    "minimum_generated_wall_count": 14,
+    "minimum_wall_count": 19,
+    "minimum_generated_wall_count": 15,
     "minimum_water_count": 2,
+    "minimum_hole_count": 1,
     "shape_families": [
       "l",
       "line",
@@ -246,6 +247,20 @@
         "source": "generated",
         "shape_family": "water",
         "kind": "water"
+      },
+      {
+        "id": "wall_-2_0018",
+        "position": {
+          "x": 14,
+          "y": 28
+        },
+        "size": {
+          "x": 5,
+          "y": 2
+        },
+        "source": "generated",
+        "shape_family": "hole",
+        "kind": "hole"
       }
     ],
     "doors": [

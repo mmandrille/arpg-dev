@@ -113,6 +113,21 @@ func TestFogOfWarSnapshotShowsLivingMonstersBehindWaterInsideLightRadius(t *test
 	}
 }
 
+func TestFogOfWarSnapshotShowsLivingMonstersBehindHoleInsideLightRadius(t *testing.T) {
+	sim := newFogTestSim(t)
+	level := sim.activeLevel()
+	level.walls = append(level.walls, wallObstacle{pos: Vec2{X: 4, Y: 0}, size: Vec2{X: 3, Y: 4}, source: "generated", kind: obstacleKindHole})
+	monster := addTestMonster(sim, monsterDefID, Vec2{X: 8, Y: 0}, 10)
+
+	snap := sim.SnapshotForPlayer(sim.playerID)
+	if !snapshotHasEntity(snap, idStr(monster.id)) {
+		t.Fatalf("snapshot hid monster behind hole %d: %+v", monster.id, snap.Entities)
+	}
+	if !sim.players[sim.playerID].VisibleMonsterIDs[monster.id] {
+		t.Fatalf("visible monster memory missing monster behind hole %d", monster.id)
+	}
+}
+
 func TestFogOfWarDeltasRevealAndConcealIdleMonsters(t *testing.T) {
 	sim := newFogTestSim(t)
 	level := sim.activeLevel()

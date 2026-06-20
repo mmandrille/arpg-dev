@@ -3,6 +3,7 @@ package game
 const (
 	obstacleKindWall  = "wall"
 	obstacleKindWater = "water"
+	obstacleKindHole  = "hole"
 )
 
 func (w wallObstacle) obstacleKind() string {
@@ -14,7 +15,7 @@ func (w wallObstacle) obstacleKind() string {
 
 func obstacleBlocksMovement(w wallObstacle) bool {
 	switch w.obstacleKind() {
-	case obstacleKindWater:
+	case obstacleKindWater, obstacleKindHole:
 		return true
 	default:
 		return true

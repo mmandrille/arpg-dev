@@ -63,6 +63,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		if err := placeDungeonWater(seed, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
+		if err := placeDungeonHoles(seed, rules, &out); err != nil {
+			return generatedDungeonLevel{}, err
+		}
 		if err := validateGeneratedDungeonReachability(rules, out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
@@ -96,6 +99,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, err
 	}
 	if err := placeDungeonWater(seed, rules, &out); err != nil {
+		return generatedDungeonLevel{}, err
+	}
+	if err := placeDungeonHoles(seed, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	if err := validateGeneratedDungeonReachability(rules, out); err != nil {

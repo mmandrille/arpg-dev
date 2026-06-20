@@ -16,7 +16,7 @@
           "position": { "x": 32, "y": 18 },
           "size": { "x": 1, "y": 10 },
           "source": "generated",
-          "kind": "water"
+          "kind": "hole"
         }
       ]
     },

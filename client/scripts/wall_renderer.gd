@@ -262,6 +262,7 @@ func _make_hole_node(wall: Dictionary) -> MeshInstance3D:
 	mat.roughness = 1.0
 	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.5), max(1.0, float(size.get("y", 1.0)) / 2.5), 1.0)
 	node.material_override = mat
+	_add_surface_overlay(node, "HoleParallaxBands", Vector2(mesh.size.x, mesh.size.y), Color("#353947"), 0.20, 0.018, 4)
 	return node
 
 func _make_water_node(wall: Dictionary) -> MeshInstance3D:
@@ -285,7 +286,34 @@ func _make_water_node(wall: Dictionary) -> MeshInstance3D:
 	mat.roughness = 0.82
 	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 3.0), max(1.0, float(size.get("y", 1.0)) / 3.0), 1.0)
 	node.material_override = mat
+	_add_surface_overlay(node, "WaterMotionBands", Vector2(mesh.size.x, mesh.size.y), Color("#b8eef5"), 0.28, 0.026, 5)
 	return node
+
+func _add_surface_overlay(parent: Node3D, overlay_name: String, size: Vector2, color: Color, alpha: float, y_offset: float, band_count: int) -> void:
+	var root := Node3D.new()
+	root.name = overlay_name
+	root.position.y = y_offset
+	for i in range(band_count):
+		var band := MeshInstance3D.new()
+		band.name = "Band_%d" % i
+		var mesh := PlaneMesh.new()
+		mesh.size = Vector2(maxf(0.12, size.x * 0.76), maxf(0.04, size.y * 0.08))
+		band.mesh = mesh
+		band.position = Vector3(0.0, 0.0, -size.y * 0.34 + (size.y * 0.68 * float(i) / maxf(1.0, float(band_count - 1))))
+		band.rotation_degrees.y = -10.0 + float(i % 3) * 10.0
+		band.material_override = _surface_overlay_material(color, alpha * (1.0 - float(i) * 0.08))
+		root.add_child(band)
+	parent.add_child(root)
+
+func _surface_overlay_material(color: Color, alpha: float) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(color.r, color.g, color.b, alpha)
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.emission_energy_multiplier = 0.22
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.no_depth_test = true
+	return mat
 
 func _read_json(path: String):
 	var f := FileAccess.open(path, FileAccess.READ)

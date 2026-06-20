@@ -6,14 +6,19 @@
       "width": 100,
       "height": 50
     },
-    "minimum_wall_count": 19,
-    "minimum_generated_wall_count": 15,
+    "minimum_wall_count": 16,
+    "minimum_generated_wall_count": 12,
     "minimum_water_count": 2,
     "minimum_hole_count": 1,
     "shape_families": [
+      "block",
       "l",
-      "line",
-      "t"
+      "line"
+    ],
+    "solid_kinds": [
+      "column",
+      "rock",
+      "rubble"
     ],
     "walls": [
       {
@@ -67,161 +72,145 @@
       {
         "id": "wall_-2_0004",
         "position": {
-          "x": 18,
-          "y": 47
+          "x": 72,
+          "y": 42
         },
         "size": {
-          "x": 13,
+          "x": 8,
           "y": 1
         },
         "source": "generated",
-        "shape_family": "line"
+        "shape_family": "line",
+        "kind": "rubble"
       },
       {
         "id": "wall_-2_0005",
         "position": {
-          "x": 87,
-          "y": 10
+          "x": 46,
+          "y": 34
         },
         "size": {
-          "x": 7,
-          "y": 1
+          "x": 1,
+          "y": 4
         },
         "source": "generated",
-        "shape_family": "line"
+        "shape_family": "line",
+        "kind": "rubble"
       },
       {
         "id": "wall_-2_0006",
         "position": {
-          "x": 22.5,
-          "y": 28
+          "x": 12.6,
+          "y": 15
         },
         "size": {
-          "x": 5,
+          "x": 5.2,
           "y": 1
         },
         "source": "generated",
-        "shape_family": "l"
+        "shape_family": "l",
+        "kind": "rock"
       },
       {
         "id": "wall_-2_0007",
         "position": {
-          "x": 25,
-          "y": 25
+          "x": 10,
+          "y": 20
         },
         "size": {
           "x": 1,
-          "y": 6
+          "y": 10
         },
         "source": "generated",
-        "shape_family": "l"
+        "shape_family": "l",
+        "kind": "rock"
       },
       {
         "id": "wall_-2_0008",
         "position": {
-          "x": 7,
-          "y": 30
+          "x": 72,
+          "y": 23
         },
         "size": {
-          "x": 1,
-          "y": 5
+          "x": 8,
+          "y": 1
         },
         "source": "generated",
-        "shape_family": "line"
+        "shape_family": "line",
+        "kind": "column"
       },
       {
         "id": "wall_-2_0009",
         "position": {
-          "x": 57.5,
-          "y": 34
+          "x": 45,
+          "y": 21
         },
         "size": {
-          "x": 5,
+          "x": 8,
           "y": 1
         },
         "source": "generated",
-        "shape_family": "l"
+        "shape_family": "line",
+        "kind": "column"
       },
       {
         "id": "wall_-2_0010",
         "position": {
-          "x": 60,
-          "y": 27.5
+          "x": 79,
+          "y": 21
         },
         "size": {
-          "x": 1,
-          "y": 13
+          "x": 5,
+          "y": 2
         },
         "source": "generated",
-        "shape_family": "l"
+        "shape_family": "block",
+        "kind": "rock"
       },
       {
         "id": "wall_-2_0011",
         "position": {
-          "x": 59.5,
-          "y": 19
+          "x": 85,
+          "y": 36
         },
         "size": {
-          "x": 7,
+          "x": 11,
           "y": 1
         },
         "source": "generated",
-        "shape_family": "t"
+        "shape_family": "line",
+        "kind": "rock"
       },
       {
         "id": "wall_-2_0012",
         "position": {
-          "x": 65.5,
-          "y": 19
+          "x": 19.400000000000002,
+          "y": 15
         },
         "size": {
-          "x": 5,
+          "x": 5.2,
           "y": 1
         },
         "source": "generated",
-        "shape_family": "t"
+        "shape_family": "l",
+        "kind": "rock"
       },
       {
         "id": "wall_-2_0013",
         "position": {
-          "x": 63,
-          "y": 16.5
+          "x": 53,
+          "y": 30
         },
         "size": {
-          "x": 1,
-          "y": 5
+          "x": 6,
+          "y": 3
         },
         "source": "generated",
-        "shape_family": "t"
+        "shape_family": "water",
+        "kind": "water"
       },
       {
         "id": "wall_-2_0014",
-        "position": {
-          "x": 46.1,
-          "y": 31
-        },
-        "size": {
-          "x": 4.2,
-          "y": 1
-        },
-        "source": "generated",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0015",
-        "position": {
-          "x": 51.9,
-          "y": 31
-        },
-        "size": {
-          "x": 4.2,
-          "y": 1
-        },
-        "source": "generated",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0016",
         "position": {
           "x": 38,
           "y": 39
@@ -235,21 +224,7 @@
         "kind": "water"
       },
       {
-        "id": "wall_-2_0017",
-        "position": {
-          "x": 88,
-          "y": 23
-        },
-        "size": {
-          "x": 9,
-          "y": 3
-        },
-        "source": "generated",
-        "shape_family": "water",
-        "kind": "water"
-      },
-      {
-        "id": "wall_-2_0018",
+        "id": "wall_-2_0015",
         "position": {
           "x": 14,
           "y": 28
@@ -268,8 +243,8 @@
         "kind": "door",
         "def_id": "wooden_door",
         "position": {
-          "x": 49,
-          "y": 31
+          "x": 16,
+          "y": 15
         }
       }
     ],
@@ -300,8 +275,8 @@
         "kind": "door",
         "def_id": "wooden_door",
         "position": {
-          "x": 49,
-          "y": 31
+          "x": 16,
+          "y": 15
         }
       },
       {
@@ -389,7 +364,7 @@
         "def_id": "dungeon_wolf",
         "position": {
           "x": 84,
-          "y": 3.5
+          "y": 8.5
         }
       },
       {

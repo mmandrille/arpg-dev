@@ -15,6 +15,7 @@ type dungeonObstaclesGolden struct {
 		MinimumWaterCount         int                      `json:"minimum_water_count"`
 		MinimumHoleCount          int                      `json:"minimum_hole_count"`
 		ShapeFamilies             []string                 `json:"shape_families"`
+		SolidKinds                []string                 `json:"solid_kinds"`
 		Walls                     []dungeonObstacleWall    `json:"walls"`
 		Doors                     []dungeonReachableTarget `json:"doors"`
 		ReachableTargets          []dungeonReachableTarget `json:"reachable_targets"`
@@ -62,6 +63,7 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 	waterCount := 0
 	holeCount := 0
 	shapeFamilies := map[string]bool{}
+	solidKinds := map[string]bool{}
 	for i, want := range golden.Expected.Walls {
 		got := level.walls[i]
 		if got.source == "generated" {
@@ -73,6 +75,9 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 				holeCount++
 			default:
 				shapeFamilies[got.shapeFamily] = true
+				if got.obstacleKind() != obstacleKindWall {
+					solidKinds[got.obstacleKind()] = true
+				}
 			}
 		}
 		if id := wallID(level.levelNum, i); id != want.ID {
@@ -103,6 +108,14 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 			t.Fatalf("missing shape family %s in %+v", want, shapeFamilies)
 		}
 	}
+	if len(solidKinds) != len(golden.Expected.SolidKinds) {
+		t.Fatalf("solid kinds = %+v, want %+v", solidKinds, golden.Expected.SolidKinds)
+	}
+	for _, want := range golden.Expected.SolidKinds {
+		if !solidKinds[want] {
+			t.Fatalf("missing solid kind %s in %+v", want, solidKinds)
+		}
+	}
 	if len(level.doors) != len(golden.Expected.Doors) {
 		t.Fatalf("door count = %d, want golden %d", len(level.doors), len(golden.Expected.Doors))
 	}
@@ -122,10 +135,11 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 
 func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, level generatedDungeonLevel) {
 	t.Helper()
-	golden.Expected.Walls = nil
+	golden.Expected.Walls = []dungeonObstacleWall{}
 	waterCount := 0
 	holeCount := 0
 	shapeFamilies := map[string]bool{}
+	solidKinds := map[string]bool{}
 	for i, wall := range level.walls {
 		row := dungeonObstacleWall{
 			ID:          wallID(level.levelNum, i),
@@ -146,6 +160,9 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 				holeCount++
 			default:
 				shapeFamilies[wall.shapeFamily] = true
+				if wall.obstacleKind() != obstacleKindWall {
+					solidKinds[wall.obstacleKind()] = true
+				}
 			}
 		}
 	}
@@ -154,7 +171,8 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 	golden.Expected.MinimumWaterCount = waterCount
 	golden.Expected.MinimumHoleCount = holeCount
 	golden.Expected.ShapeFamilies = sortedStringKeys(shapeFamilies)
-	golden.Expected.Doors = nil
+	golden.Expected.SolidKinds = sortedStringKeys(solidKinds)
+	golden.Expected.Doors = []dungeonReachableTarget{}
 	for _, door := range level.doors {
 		golden.Expected.Doors = append(golden.Expected.Doors, dungeonReachableTarget{
 			Kind:     "door",
@@ -162,7 +180,7 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 			Position: door.pos,
 		})
 	}
-	golden.Expected.ReachableTargets = nil
+	golden.Expected.ReachableTargets = []dungeonReachableTarget{}
 	for _, target := range generatedReachabilityTargets(level) {
 		kind, defID := goldenReachabilityKindAndDefID(target.kind)
 		golden.Expected.ReachableTargets = append(golden.Expected.ReachableTargets, dungeonReachableTarget{

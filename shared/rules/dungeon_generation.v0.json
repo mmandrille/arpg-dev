@@ -110,6 +110,12 @@
       "t": 2,
       "block": 2
     },
+    "solid_kind_weights": {
+      "wall": 5,
+      "rock": 2,
+      "column": 2,
+      "rubble": 2
+    },
     "doors": {
       "enabled": true,
       "interactable_def_id": "wooden_door",

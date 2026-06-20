@@ -1,9 +1,12 @@
 package game
 
 const (
-	obstacleKindWall  = "wall"
-	obstacleKindWater = "water"
-	obstacleKindHole  = "hole"
+	obstacleKindWall   = "wall"
+	obstacleKindWater  = "water"
+	obstacleKindHole   = "hole"
+	obstacleKindRock   = "rock"
+	obstacleKindColumn = "column"
+	obstacleKindRubble = "rubble"
 )
 
 func (w wallObstacle) obstacleKind() string {
@@ -23,7 +26,7 @@ func obstacleBlocksMovement(w wallObstacle) bool {
 }
 
 func obstacleBlocksProjectiles(w wallObstacle) bool {
-	return w.obstacleKind() == obstacleKindWall
+	return solidObstacleBlocksProjectiles(w.obstacleKind())
 }
 
 func obstacleBlocksLineOfSight(w wallObstacle) bool {

@@ -83,7 +83,7 @@ func normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 		out["kind"] = kind
 	return out
 
-func make_wall_node(wall: Dictionary) -> MeshInstance3D:
+func make_wall_node(wall: Dictionary) -> Node3D:
 	var pos: Dictionary = wall.get("position", {})
 	var size: Dictionary = wall.get("size", {})
 	match str(wall.get("kind", "wall")):
@@ -91,6 +91,12 @@ func make_wall_node(wall: Dictionary) -> MeshInstance3D:
 			return _make_water_node(wall)
 		"hole":
 			return _make_hole_node(wall)
+		"rock":
+			return _make_rock_node(wall)
+		"column":
+			return _make_column_node(wall)
+		"rubble":
+			return _make_rubble_node(wall)
 	var node := MeshInstance3D.new()
 	node.name = "Wall_%s" % str(wall.get("id", ""))
 	node.set_meta("wall_id", str(wall.get("id", "")))
@@ -115,6 +121,114 @@ func make_wall_node(wall: Dictionary) -> MeshInstance3D:
 			mat.albedo_color = Color(0.78, 0.80, 0.82)
 	node.material_override = mat
 	return node
+
+func _make_obstacle_root(wall: Dictionary, prefix: String, kind: String) -> Node3D:
+	var pos: Dictionary = wall.get("position", {})
+	var root := Node3D.new()
+	root.name = "%s_%s" % [prefix, str(wall.get("id", ""))]
+	root.set_meta("wall_id", str(wall.get("id", "")))
+	root.set_meta("source", str(wall.get("source", "")))
+	root.set_meta("kind", kind)
+	root.position = Vector3(float(pos.get("x", 0.0)), 0.0, float(pos.get("y", 0.0)))
+	return root
+
+func _make_obstacle_material(wall: Dictionary, kind: String) -> StandardMaterial3D:
+	var size: Dictionary = wall.get("size", {})
+	var mat := StandardMaterial3D.new()
+	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
+	if _ground_factory != null and _ground_factory.has_method("make_wall_texture"):
+		mat.albedo_texture = _ground_factory.make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.roughness = 0.98
+	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.0), max(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
+	match kind:
+		"rock":
+			mat.albedo_color = Color(0.56, 0.58, 0.55)
+		"column":
+			mat.albedo_color = Color(0.70, 0.68, 0.61)
+		"rubble":
+			mat.albedo_color = Color(0.50, 0.47, 0.42)
+		_:
+			mat.albedo_color = Color(0.72, 0.72, 0.68)
+	return mat
+
+func _add_mesh_child(root: Node3D, name: String, mesh: Mesh, material: Material, local_pos: Vector3, rotation_y: float = 0.0) -> MeshInstance3D:
+	var child := MeshInstance3D.new()
+	child.name = name
+	child.mesh = mesh
+	child.material_override = material
+	child.position = local_pos
+	child.rotation.y = rotation_y
+	root.add_child(child)
+	return child
+
+func _make_rock_node(wall: Dictionary) -> Node3D:
+	var size: Dictionary = wall.get("size", {})
+	var sx: float = maxf(0.5, float(size.get("x", 1.0)))
+	var sz: float = maxf(0.5, float(size.get("y", 1.0)))
+	var root: Node3D = _make_obstacle_root(wall, "Rock", "rock")
+	var mat: StandardMaterial3D = _make_obstacle_material(wall, "rock")
+	var offsets: Array[Vector3] = [
+		Vector3(-sx * 0.22, 0.26, -sz * 0.14),
+		Vector3(sx * 0.18, 0.22, sz * 0.08),
+		Vector3(0.0, 0.34, sz * 0.20),
+	]
+	var scales: Array[Vector3] = [
+		Vector3(maxf(0.32, sx * 0.48), 0.52, maxf(0.32, sz * 0.34)),
+		Vector3(maxf(0.28, sx * 0.38), 0.44, maxf(0.28, sz * 0.30)),
+		Vector3(maxf(0.24, sx * 0.30), 0.68, maxf(0.24, sz * 0.24)),
+	]
+	for i in offsets.size():
+		var mesh: BoxMesh = BoxMesh.new()
+		mesh.size = scales[i]
+		_add_mesh_child(root, "RockChunk_%d" % i, mesh, mat, offsets[i], float(i) * 0.63)
+	return root
+
+func _make_column_node(wall: Dictionary) -> Node3D:
+	var size: Dictionary = wall.get("size", {})
+	var sx: float = maxf(0.5, float(size.get("x", 1.0)))
+	var sz: float = maxf(0.5, float(size.get("y", 1.0)))
+	var root: Node3D = _make_obstacle_root(wall, "Column", "column")
+	var mat: StandardMaterial3D = _make_obstacle_material(wall, "column")
+	var horizontal: bool = sx >= sz
+	var long_extent: float = sx if horizontal else sz
+	var short_extent: float = sz if horizontal else sx
+	var count: int = max(1, int(floor(long_extent / 2.1)) + 1)
+	var step: float = long_extent / float(count)
+	var radius: float = maxf(0.18, minf(0.42, short_extent * 0.32))
+	for i in count:
+		var mesh: CylinderMesh = CylinderMesh.new()
+		mesh.top_radius = radius
+		mesh.bottom_radius = radius
+		mesh.height = 1.15
+		var along: float = -long_extent / 2.0 + step * (float(i) + 0.5)
+		var local_pos: Vector3 = Vector3(along, 0.58, 0.0) if horizontal else Vector3(0.0, 0.58, along)
+		_add_mesh_child(root, "ColumnPillar_%d" % i, mesh, mat, local_pos)
+	return root
+
+func _make_rubble_node(wall: Dictionary) -> Node3D:
+	var size: Dictionary = wall.get("size", {})
+	var sx: float = maxf(0.5, float(size.get("x", 1.0)))
+	var sz: float = maxf(0.5, float(size.get("y", 1.0)))
+	var root: Node3D = _make_obstacle_root(wall, "Rubble", "rubble")
+	var mat: StandardMaterial3D = _make_obstacle_material(wall, "rubble")
+	var offsets: Array[Vector3] = [
+		Vector3(-sx * 0.26, 0.12, -sz * 0.18),
+		Vector3(sx * 0.22, 0.10, -sz * 0.10),
+		Vector3(-sx * 0.06, 0.16, sz * 0.08),
+		Vector3(sx * 0.28, 0.11, sz * 0.22),
+		Vector3(-sx * 0.30, 0.09, sz * 0.20),
+	]
+	for i in offsets.size():
+		var mesh: BoxMesh = BoxMesh.new()
+		var mesh_size := Vector3(
+			maxf(0.20, sx * (0.18 + float(i % 2) * 0.06)),
+			0.18 + float(i % 3) * 0.05,
+			maxf(0.20, sz * (0.14 + float(i % 2) * 0.05))
+		)
+		mesh.size = mesh_size
+		_add_mesh_child(root, "RubbleChunk_%d" % i, mesh, mat, offsets[i], float(i) * 0.48)
+	return root
 
 func _make_hole_node(wall: Dictionary) -> MeshInstance3D:
 	var pos: Dictionary = wall.get("position", {})

@@ -36,7 +36,7 @@ func placeGeneratedDoors(seed string, rules DungeonGenerationRules, out *generat
 func generatedDoorWallCandidates(walls []wallObstacle, doors DoorGenerationRules) []int {
 	out := []int{}
 	for i, wall := range walls {
-		if wall.source != "generated" || wall.obstacleKind() != obstacleKindWall || math.Abs(wall.size.Y-doors.WallThickness) > 0.000001 {
+		if wall.source != "generated" || !solidObstacleBlocksProjectiles(wall.obstacleKind()) || math.Abs(wall.size.Y-doors.WallThickness) > 0.000001 {
 			continue
 		}
 		if wall.size.X < float64(doors.MinWallLength) || wall.size.X <= doors.GapWidth+2*doors.MinSideLength {

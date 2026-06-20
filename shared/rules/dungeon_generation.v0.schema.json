@@ -157,6 +157,7 @@
         "wall_segment",
         "solid_block",
         "shape_weights",
+        "solid_kind_weights",
         "doors",
         "water",
         "holes",
@@ -195,6 +196,17 @@
             "l": { "type": "integer", "minimum": 0 },
             "t": { "type": "integer", "minimum": 0 },
             "block": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "solid_kind_weights": {
+          "type": "object",
+          "required": ["wall", "rock", "column", "rubble"],
+          "additionalProperties": false,
+          "properties": {
+            "wall": { "type": "integer", "minimum": 0 },
+            "rock": { "type": "integer", "minimum": 0 },
+            "column": { "type": "integer", "minimum": 0 },
+            "rubble": { "type": "integer", "minimum": 0 }
           }
         },
         "doors": {

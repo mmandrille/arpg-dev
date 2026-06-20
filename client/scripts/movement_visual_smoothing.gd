@@ -1,10 +1,11 @@
 class_name MovementVisualSmoothing
 extends RefCounted
 
-const CATCH_UP_SPEED := 18.0
-const MAX_OFFSET := 0.70
-const RESET_DISTANCE := 1.50
-const SETTLE_EPSILON := 0.01
+const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
+const CATCH_UP_SPEED := CombatFeelConfigScript.MOVEMENT_SMOOTHING_CATCH_UP_SPEED
+const MAX_OFFSET := CombatFeelConfigScript.MOVEMENT_SMOOTHING_MAX_OFFSET
+const RESET_DISTANCE := CombatFeelConfigScript.MOVEMENT_SMOOTHING_RESET_DISTANCE
+const SETTLE_EPSILON := CombatFeelConfigScript.MOVEMENT_SMOOTHING_SETTLE_EPSILON
 
 var _has_anchor: bool = false
 var _last_anchor_position := Vector3.ZERO

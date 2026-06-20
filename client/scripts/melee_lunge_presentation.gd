@@ -1,10 +1,11 @@
 class_name MeleeLungePresentation
 extends RefCounted
 
+const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 const ATTACK_CLIPS := ["attack", "attack_off_hand"]
-const LUNGE_DISTANCE := 0.16
-const RECOVERY_SECONDS := 0.14
-const SETTLE_EPSILON := 0.01
+const LUNGE_DISTANCE := CombatFeelConfigScript.MELEE_LUNGE_DISTANCE
+const RECOVERY_SECONDS := CombatFeelConfigScript.MELEE_LUNGE_RECOVERY_SECONDS
+const SETTLE_EPSILON := CombatFeelConfigScript.MELEE_LUNGE_SETTLE_EPSILON
 const META_BASE_POSITION := "_melee_lunge_base_position"
 const META_TWEEN := "_melee_lunge_tween"
 const META_COUNT := "_melee_lunge_count"

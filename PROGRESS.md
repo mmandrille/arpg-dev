@@ -25,8 +25,8 @@ Last updated: 2026-06-20
 |-------|-------|
 | **Latest completed slice** | v301 — melee lunge / micro-step |
 | **Active branch** | `codex/autoloop-movement-fluidity` |
-| **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20; post-review refactor fixed the isolated-worktree `db-up` false-red path and `CI_ADDR=:18091 CI_BASE_URL=http://localhost:18091 make ci` passed end-to-end in 10m59s |
-| **Next slice** | Run `$refactor` against [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) |
+| **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20; post-review `db-up` refactor passed `CI_ADDR=:18091 CI_BASE_URL=http://localhost:18091 make ci` end-to-end in 10m59s, and the later feel-config refactor passed focused Godot helper tests, `test_client_bot`, and `make maintainability` |
+| **Next slice** | Use `$next` / `$autoloop` for the next feature batch, carrying forward the v301 review's future-plan items |
 | **Last engineering review** | v301 — [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) (2026-06-20) |
 | **Next engineering review** | Around v311, after the next feature batch and a green final proof |
 
@@ -87,11 +87,9 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v301 `$refactor` handoff in progress.** Classify and act on
-  [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md). The raw
-  `make ci` database-bootstrap false-red is fixed; remaining minor candidates are centralizing or
-  data-backing client presentation-feel constants and shrinking next-touched `main.gd`,
-  `bot_scenario_runner.gd`, `game_test.go`, and `validate_shared.py` paths.
+- **v301 `$refactor` minor paydown complete.** The raw `make ci` database-bootstrap false-red is
+  fixed, and client presentation-feel constants now have one code-owner module. Remaining review
+  recommendations are next-touched large-file paydown or future-plan/feature work.
 - **Review follow-ups remaining after v301 `$review`.** Future-plan/feature-scale items: resolve
   unverified local GLB provenance before production distribution, continue the tuning-friendly
   rule-test audit, and keep production combat VFX/audio/art polish as explicit feature slices.

@@ -5,6 +5,7 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 
 var ground_textures: Dictionary = {}
 var wall_textures: Dictionary = {}
+var water_textures: Dictionary = {}
 var _dungeon_generation: Dictionary = {}
 
 func make_ground_node(level: int) -> MeshInstance3D:
@@ -84,6 +85,29 @@ func make_wall_texture(texture_id: String, palette: Dictionary = {}) -> ImageTex
 	var texture := ImageTexture.create_from_image(image)
 	wall_textures[cache_key] = texture
 	return texture
+
+func make_water_texture(palette: Dictionary = {}) -> ImageTexture:
+	var cache_key := str(palette.get("id", "default"))
+	if water_textures.has(cache_key):
+		return water_textures[cache_key] as ImageTexture
+	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in range(64):
+		for x in range(64):
+			image.set_pixel(x, y, water_texel(x, y, palette))
+	var texture := ImageTexture.create_from_image(image)
+	water_textures[cache_key] = texture
+	return texture
+
+func water_texel(x: int, y: int, palette: Dictionary = {}) -> Color:
+	var low := _palette_color(palette, "water_low", Color("#1f5f7a"))
+	var high := _palette_color(palette, "water_high", Color("#5fa8bb"))
+	var ripple := int((x * 17 + y * 31 + ((x / 8) * 13) + ((y / 8) * 7)) % 19)
+	var water := low.lerp(high, float(ripple) / 18.0)
+	if abs((x % 16) - (y % 16)) <= 1:
+		water = water.lerp(_palette_color(palette, "water_foam", Color("#a9d8df")), 0.24)
+	if ((x * 11 + y * 5) % 37) == 0:
+		water = water.lerp(_palette_color(palette, "water_foam", Color("#c2eef1")), 0.34)
+	return water
 
 func wall_texel(_texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
 	var brick_w := 16

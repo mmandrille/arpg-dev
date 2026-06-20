@@ -158,6 +158,7 @@
         "solid_block",
         "shape_weights",
         "doors",
+        "water",
         "clearance"
       ],
       "additionalProperties": false,
@@ -206,6 +207,18 @@
             "min_wall_length": { "type": "integer", "minimum": 1 },
             "min_side_length": { "type": "number", "exclusiveMinimum": 0 },
             "gap_width": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        "water": {
+          "type": "object",
+          "required": ["enabled", "max_attempts", "target_count", "min_size", "max_size"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "max_attempts": { "type": "integer", "minimum": 1 },
+            "target_count": { "$ref": "#/$defs/int_range" },
+            "min_size": { "$ref": "#/$defs/positive_size" },
+            "max_size": { "$ref": "#/$defs/positive_size" }
           }
         },
         "clearance": {

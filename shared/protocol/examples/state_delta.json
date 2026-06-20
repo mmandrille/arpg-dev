@@ -50,7 +50,8 @@
           "id": "wall_0_0001",
           "position": { "x": 13, "y": 8 },
           "size": { "x": 6, "y": 1 },
-          "source": "generated"
+          "source": "generated",
+          "kind": "water"
         }
       ]
     },

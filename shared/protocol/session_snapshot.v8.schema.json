@@ -63,6 +63,7 @@
         "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
         "position": { "$ref": "#/$defs/vec2" },
         "size": { "$ref": "#/$defs/positive_vec2" },
+        "kind": { "type": "string", "enum": ["wall", "water"] },
         "source": { "type": "string", "enum": ["perimeter", "generated", "preset"] }
       }
     },

@@ -60,6 +60,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
+		if err := placeDungeonWater(seed, rules, &out); err != nil {
+			return generatedDungeonLevel{}, err
+		}
 		if err := validateGeneratedDungeonReachability(rules, out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
@@ -90,6 +93,9 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, err
 	}
 	if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, &out); err != nil {
+		return generatedDungeonLevel{}, err
+	}
+	if err := placeDungeonWater(seed, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	if err := validateGeneratedDungeonReachability(rules, out); err != nil {
@@ -946,7 +952,7 @@ func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out g
 		}
 	}
 	for _, wall := range out.walls {
-		if circleIntersectsAABB(pos, rules.ObstacleGeneration.Clearance.Monster, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, rules.ObstacleGeneration.Clearance.Monster, wall.pos, wall.size) {
 			return true
 		}
 	}
@@ -1031,7 +1037,7 @@ func generatedDungeonBlockedFn(nav NavigationRules, out generatedDungeonLevel) f
 	return func(gx, gy int) bool {
 		center := gridToWorld(nav, gridCell{x: gx, y: gy})
 		for _, wall := range out.walls {
-			if circleIntersectsAABB(center, playerRadius, wall.pos, wall.size) {
+			if obstacleBlocksMovement(wall) && circleIntersectsAABB(center, playerRadius, wall.pos, wall.size) {
 				return true
 			}
 		}

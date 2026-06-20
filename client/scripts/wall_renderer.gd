@@ -74,15 +74,21 @@ func normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 	}
 	if wall.has("source"):
 		out["source"] = str(wall.get("source", ""))
+	var kind := str(wall.get("kind", "wall"))
+	if kind != "" and kind != "wall":
+		out["kind"] = kind
 	return out
 
 func make_wall_node(wall: Dictionary) -> MeshInstance3D:
 	var pos: Dictionary = wall.get("position", {})
 	var size: Dictionary = wall.get("size", {})
+	if str(wall.get("kind", "wall")) == "water":
+		return _make_water_node(wall)
 	var node := MeshInstance3D.new()
 	node.name = "Wall_%s" % str(wall.get("id", ""))
 	node.set_meta("wall_id", str(wall.get("id", "")))
 	node.set_meta("source", str(wall.get("source", "")))
+	node.set_meta("kind", "wall")
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(float(size.get("x", 1.0)), 1.0, float(size.get("y", 1.0)))
 	node.mesh = mesh
@@ -100,6 +106,29 @@ func make_wall_node(wall: Dictionary) -> MeshInstance3D:
 			mat.albedo_color = Color(0.62, 0.64, 0.68)
 		_:
 			mat.albedo_color = Color(0.78, 0.80, 0.82)
+	node.material_override = mat
+	return node
+
+func _make_water_node(wall: Dictionary) -> MeshInstance3D:
+	var pos: Dictionary = wall.get("position", {})
+	var size: Dictionary = wall.get("size", {})
+	var node := MeshInstance3D.new()
+	node.name = "Water_%s" % str(wall.get("id", ""))
+	node.set_meta("wall_id", str(wall.get("id", "")))
+	node.set_meta("source", str(wall.get("source", "")))
+	node.set_meta("kind", "water")
+	var mesh := PlaneMesh.new()
+	mesh.size = Vector2(max(0.25, float(size.get("x", 1.0))), max(0.25, float(size.get("y", 1.0))))
+	node.mesh = mesh
+	node.position = Vector3(float(pos.get("x", 0.0)), 0.018, float(pos.get("y", 0.0)))
+	var mat := StandardMaterial3D.new()
+	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
+	if _ground_factory != null and _ground_factory.has_method("make_water_texture"):
+		mat.albedo_texture = _ground_factory.make_water_texture(palette)
+	mat.albedo_color = Color(0.85, 0.96, 1.0)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.roughness = 0.82
+	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 3.0), max(1.0, float(size.get("y", 1.0)) / 3.0), 1.0)
 	node.material_override = mat
 	return node
 

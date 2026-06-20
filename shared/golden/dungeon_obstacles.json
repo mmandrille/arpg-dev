@@ -6,8 +6,9 @@
       "width": 100,
       "height": 50
     },
-    "minimum_wall_count": 16,
-    "minimum_generated_wall_count": 12,
+    "minimum_wall_count": 18,
+    "minimum_generated_wall_count": 14,
+    "minimum_water_count": 2,
     "shape_families": [
       "l",
       "line",
@@ -217,6 +218,34 @@
         },
         "source": "generated",
         "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0016",
+        "position": {
+          "x": 38,
+          "y": 39
+        },
+        "size": {
+          "x": 8,
+          "y": 3
+        },
+        "source": "generated",
+        "shape_family": "water",
+        "kind": "water"
+      },
+      {
+        "id": "wall_-2_0017",
+        "position": {
+          "x": 88,
+          "y": 23
+        },
+        "size": {
+          "x": 9,
+          "y": 3
+        },
+        "source": "generated",
+        "shape_family": "water",
+        "kind": "water"
       }
     ],
     "doors": [

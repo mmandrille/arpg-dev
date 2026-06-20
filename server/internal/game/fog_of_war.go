@@ -212,6 +212,9 @@ func (s *Sim) blocksFogLineOfSight(ctx fogVisibilityContext, monster *entity) bo
 		return false
 	}
 	for _, wall := range ctx.level.walls {
+		if !obstacleBlocksLineOfSight(wall) {
+			continue
+		}
 		if _, ok := segmentIntersectsInflatedAABB(ctx.player.pos, monster.pos, wall.pos, wall.size, 0); ok {
 			return true
 		}

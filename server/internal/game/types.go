@@ -361,6 +361,7 @@ type WallView struct {
 	Position Vec2   `json:"position"`
 	Size     Vec2   `json:"size"`
 	Source   string `json:"source,omitempty"`
+	Kind     string `json:"kind,omitempty"`
 }
 
 // BossPhaseView is the protocol view of an authoritative boss pattern phase.

@@ -299,6 +299,7 @@ type ObstacleGenerationRules struct {
 	SolidBlock              SolidBlockRules        `json:"solid_block"`
 	ShapeWeights            ObstacleShapeWeights   `json:"shape_weights"`
 	Doors                   DoorGenerationRules    `json:"doors"`
+	Water                   WaterGenerationRules   `json:"water"`
 	Clearance               ObstacleClearanceRules `json:"clearance"`
 }
 
@@ -1892,6 +1893,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateDoorGenerationRules(dungeonGeneration.ObstacleGeneration.Doors, r); err != nil {
 		return nil, err
 	}
+	if err := validateWaterGenerationRules(dungeonGeneration.ObstacleGeneration.Water, dungeonGeneration.FloorSize); err != nil {
+		return nil, err
+	}
 	if err := validateDungeonFloorProfiles(dungeonGeneration.FloorProfiles); err != nil {
 		return nil, err
 	}
@@ -2166,6 +2170,9 @@ func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFlo
 		}
 	}
 	maxSpan := math.Max(float64(o.WallSegment.MaxLength), math.Max(o.SolidBlock.MaxSize.X, o.SolidBlock.MaxSize.Y))
+	if o.Water.Enabled {
+		maxSpan = math.Max(maxSpan, math.Max(o.Water.MaxSize.X, o.Water.MaxSize.Y))
+	}
 	if maxSpan >= math.Min(floor.Width, floor.Height) {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation: largest obstacle must fit inside floor")
 	}

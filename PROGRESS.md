@@ -26,9 +26,9 @@ Last updated: 2026-06-20
 | **Latest completed slice** | v301 — melee lunge / micro-step |
 | **Active branch** | `codex/autoloop-movement-fluidity` |
 | **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20 via CI-equivalent continuation: raw `make ci` steps 1-7 passed, step 8 `make db-up` was blocked by the existing healthy main-worktree `arpg-postgres` container, and protocol bot + replay, `SCENARIO=all` client bot (85 passed), `client_smoke`, and `make maintainability` passed against the existing DB with temporary servers |
-| **Next slice** | Post-loop handoff due — run fresh `$review`, then `$refactor` against that review |
-| **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
-| **Next engineering review** | Due now after the v301 Movement / Combat Fluidity batch proof |
+| **Next slice** | Run `$refactor` against [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) |
+| **Last engineering review** | v301 — [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) (2026-06-20) |
+| **Next engineering review** | Around v311, after the next feature batch and a green final proof |
 
 
 ### Periodic engineering reviews
@@ -87,13 +87,14 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review/refactor handoff due now.** v295-v301 completed the selected Movement / Combat Fluidity
-  feature batch. Raw `make ci` could not own the already-running main-worktree `arpg-postgres`
-  container, but the batch passed focused proofs plus a CI-equivalent continuation against the
-  existing healthy DB and temporary servers on 2026-06-20. Run fresh `$review`, then `$refactor`.
-- **Review follow-ups remaining after v284 `$review`.** Remaining follow-ups are future-plan scale:
-  keep splitting the next touched large coordinators/validators, continue the tuning-friendly
-  rule-test audit, and resolve unverified local GLB provenance before production distribution.
+- **v301 `$refactor` handoff due now.** Classify and act on
+  [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md). Best minor
+  candidates: make raw `make ci` database bootstrap worktree-safe, centralize or data-back client
+  presentation-feel constants, and keep shrinking next-touched `main.gd`, `bot_scenario_runner.gd`,
+  `game_test.go`, and `validate_shared.py` paths.
+- **Review follow-ups remaining after v301 `$review`.** Future-plan/feature-scale items: resolve
+  unverified local GLB provenance before production distribution, continue the tuning-friendly
+  rule-test audit, and keep production combat VFX/audio/art polish as explicit feature slices.
 
 ### Other deferred items (from specs / ADRs)
 

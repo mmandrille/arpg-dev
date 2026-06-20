@@ -36,6 +36,15 @@ static func attack_approach_point(player_anchor: Node3D, entities: Dictionary, i
 	return Vector3(target_position.x + away_from_target.x * stop_distance, 0.0, target_position.z + away_from_target.y * stop_distance)
 
 
+static func local_player_attack_mode(inventory: Array, equipped: Dictionary) -> String:
+	var item := _local_equipped_weapon_item(inventory, equipped)
+	if item.is_empty():
+		return "melee"
+	var def := _local_equipped_weapon_definition(item)
+	var mode := str(def.get("attack_mode", "melee"))
+	return mode if mode != "" else "melee"
+
+
 static func _local_player_attack_reach(inventory: Array, equipped: Dictionary) -> float:
 	var item := _local_equipped_weapon_item(inventory, equipped)
 	if item.is_empty():

@@ -76,6 +76,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_melee_lunge":
+			if not melee_lunge_matches(step, state):
+				runner._fail("assert_melee_lunge failed: want=%s got=%s step=%d scenario=%s" % [
+					str(step), str(_melee_lunge_state(state)), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_wall_layout":
 			if not runner._wall_layout_matches(step, state):
 				runner._fail("assert_wall_layout failed: want=%s wall_count=%d generated=%d non_perimeter=%d level=%d walls=%s step=%d scenario=%s" % [
@@ -464,6 +471,25 @@ static func command_retarget_grace_matches(step: Dictionary, state: Dictionary) 
 		if Vector2(gx, gz).distance_to(want) > float(step.get("distance_max", 0.05)):
 			return false
 	return step.has("active") or expected_kind != "" or step.has("queued_min") or step.has("replaced_min") or step.has("dispatched_min") or step.has("expired_min") or step.has("ground_x") or step.has("ground_z")
+
+
+static func melee_lunge_matches(step: Dictionary, state: Dictionary) -> bool:
+	var lunge := _melee_lunge_state(state)
+	if step.has("active") and bool(lunge.get("active", false)) != bool(step.get("active", false)):
+		return false
+	if step.has("count_min") and int(lunge.get("count", 0)) < int(step.get("count_min", 0)):
+		return false
+	if step.has("offset_min") and float(lunge.get("offset_length", 0.0)) < float(step.get("offset_min", 0.0)):
+		return false
+	if step.has("offset_max") and float(lunge.get("offset_length", 0.0)) > float(step.get("offset_max", 0.0)):
+		return false
+	return step.has("active") or step.has("count_min") or step.has("offset_min") or step.has("offset_max")
+
+
+static func _melee_lunge_state(state: Dictionary) -> Dictionary:
+	var local: Dictionary = state.get("local_player_presentation", {})
+	var animation: Dictionary = local.get("animation", {})
+	return animation.get("melee_lunge", {})
 
 
 static func _assert_audio_state(runner, step: Dictionary, state: Dictionary) -> bool:

@@ -1,0 +1,19 @@
+PROGRESS.md
+  s_719c59d1789d7e::t_160323b2c3fbd8 18,28-29,90-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c30cc82f1f5e2bb27e65a47ace71b59d48142637",
+  "prompts": {},
+  "sessions": {
+    "s_719c59d1789d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee231-6f1d-7402-b00b-73fb01b62c13",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

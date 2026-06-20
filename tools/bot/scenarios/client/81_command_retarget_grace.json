@@ -1,0 +1,16 @@
+{
+  "id": "command_retarget_grace",
+  "runner": "godot_client",
+  "world_id": "vertical_slice",
+  "seed": "retarget0001",
+  "title": "Command retarget grace: rapid floor clicks keep the latest destination",
+  "description": "Send rapid floor clicks during the local send throttle, verify the queued retarget replaces prior destinations and dispatches the final destination.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "click_floor", "x": -3.0, "z": 3.0 },
+    { "type": "click_floor", "x": 0.0, "z": 3.0 },
+    { "type": "click_floor", "x": 3.0, "z": 3.0 },
+    { "type": "wait_command_retarget_grace", "active": false, "kind": "floor", "last_dispatched": true, "dispatched_min": 1, "replaced_min": 1, "ground_x": 3.0, "ground_z": 3.0, "distance_max": 0.05, "timeout_s": 2.0 },
+    { "type": "wait_player_near", "x": 3.0, "z": 3.0, "distance": 2.5, "timeout_s": 10.0 }
+  ]
+}

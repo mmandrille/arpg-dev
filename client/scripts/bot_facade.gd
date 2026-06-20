@@ -237,6 +237,18 @@ static func dispatch_action(main, intent_type: String, payload: Dictionary) -> v
 	var client = _member(main, "client")
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or int(_member(main, "player_hp")) <= 0:
 		return
+	if intent_type == "move_to_intent" and float(_member(main, "_attack_cooldown")) > 0.0:
+		var position = payload.get("position", {})
+		var grace = _member(main, "_command_retarget_grace")
+		if typeof(position) == TYPE_DICTIONARY and grace != null and grace.has_method("queue_floor"):
+			if main.has_method("_clear_pending_attack_commands"):
+				main._clear_pending_attack_commands()
+			if main.has_method("_close_gameplay_panels_for_movement"):
+				main._close_gameplay_panels_for_movement()
+			if main.has_method("_mark_local_player_walking"):
+				main._mark_local_player_walking()
+			grace.queue_floor(Vector3(float(position.get("x", 0.0)), 0.0, float(position.get("y", 0.0))))
+			return
 	if main.has_method("_movement_intent_starts_motion") and main._movement_intent_starts_motion(intent_type, payload):
 		if main.has_method("_close_gameplay_panels_for_movement"):
 			main._close_gameplay_panels_for_movement()

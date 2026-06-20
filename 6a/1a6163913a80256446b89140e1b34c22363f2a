@@ -1,0 +1,53 @@
+docs/as-built/v301_melee-lunge-micro-step.md
+  s_95786de7ff0c5d::t_db1c8afe68a9a5 1-52
+client/scripts/combat_reach.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 39-47
+client/scripts/bot_assertion_handlers.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 79-85,476-492
+docs/progress/slice-lifecycle.md
+  s_95786de7ff0c5d::t_db1c8afe68a9a5 316
+client/scripts/melee_lunge_presentation.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 1-72
+client/scripts/animation_controller.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 17,36,40-41,74,87,89,92,94
+tools/bot/scenarios/client/82_melee_lunge_micro_step.json
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 1-16
+client/scripts/main.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 1343,1348,2634,2769,3043
+client/tests/test_melee_lunge_presentation.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 1-13,16-22,24-38,40-49,51-94
+  s_95786de7ff0c5d::t_f64e2019cfa4aa 14-15
+  s_95786de7ff0c5d::t_5daca0d0bfd0c1 23,39,50
+client/scripts/bot_step_catalog.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 16,41
+docs/plans/v301_2026-06-19-melee-lunge-micro-step.md
+  s_95786de7ff0c5d::t_db1c8afe68a9a5 3,45-46,60-64,73-75,84-85,102-104,108-115
+  s_95786de7ff0c5d::t_c55e543764d140 1-2,4-44,47-59,65-72,76-83,86-101,105-107,116-119
+client/scripts/bot_wait_handlers.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 43-44
+client/scripts/combat_local_attack_presentation.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 35,39,42,48,51,53
+docs/specs/v301_spec-melee-lunge-micro-step.md
+  s_95786de7ff0c5d::t_c55e543764d140 1-2,4-92
+  s_95786de7ff0c5d::t_db1c8afe68a9a5 3
+client/scripts/bot_facade.gd
+  s_95786de7ff0c5d::t_ffb3d2b4a16ea4 227
+PROGRESS.md
+  s_95786de7ff0c5d::t_db1c8afe68a9a5 26,28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6a1a6163913a80256446b89140e1b34c22363f2a",
+  "prompts": {},
+  "sessions": {
+    "s_95786de7ff0c5d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee232-5e77-7f93-9275-ba83ddfb9619",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

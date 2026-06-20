@@ -2152,56 +2152,6 @@ func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
 	return out
 }
 
-func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFloorSize) error {
-	if o.MaxAttempts <= 0 {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.max_attempts: must be positive")
-	}
-	if o.WallSegment.MinLength <= 0 || o.WallSegment.MaxLength < o.WallSegment.MinLength {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.wall_segment: invalid min/max length")
-	}
-	if o.WallSegment.Thickness <= 0 {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.wall_segment.thickness: must be positive")
-	}
-	if o.SolidBlock.MinSize.X <= 0 || o.SolidBlock.MinSize.Y <= 0 {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.solid_block.min_size: must be positive")
-	}
-	if o.SolidBlock.MaxSize.X < o.SolidBlock.MinSize.X || o.SolidBlock.MaxSize.Y < o.SolidBlock.MinSize.Y {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.solid_block: invalid min/max size")
-	}
-	if o.ShapeWeights.Line < 0 || o.ShapeWeights.L < 0 || o.ShapeWeights.T < 0 || o.ShapeWeights.Block < 0 {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.shape_weights: must be non-negative")
-	}
-	if o.ShapeWeights.total() <= 0 {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.shape_weights: at least one shape must be enabled")
-	}
-	if err := validateSolidObstacleKindWeights(o.SolidKindWeights); err != nil {
-		return err
-	}
-	for label, value := range map[string]float64{
-		"player_spawn": o.Clearance.PlayerSpawn,
-		"stairs":       o.Clearance.Stairs,
-		"teleporter":   o.Clearance.Teleporter,
-		"chest":        o.Clearance.Chest,
-		"monster":      o.Clearance.Monster,
-		"loot":         o.Clearance.Loot,
-	} {
-		if value < 0 {
-			return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.clearance.%s: must be non-negative", label)
-		}
-	}
-	maxSpan := math.Max(float64(o.WallSegment.MaxLength), math.Max(o.SolidBlock.MaxSize.X, o.SolidBlock.MaxSize.Y))
-	if o.Water.Enabled {
-		maxSpan = math.Max(maxSpan, math.Max(o.Water.MaxSize.X, o.Water.MaxSize.Y))
-	}
-	if o.Holes.Enabled {
-		maxSpan = math.Max(maxSpan, math.Max(o.Holes.MaxSize.X, o.Holes.MaxSize.Y))
-	}
-	if maxSpan >= math.Min(floor.Width, floor.Height) {
-		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation: largest obstacle must fit inside floor")
-	}
-	return nil
-}
-
 func validateMonsterPlacementPool(placement MonsterPlacementRules, r *Rules) error {
 	if placement.Count == 0 {
 		if len(placement.MonsterPool) > 0 || len(placement.MinimumMonsters) > 0 {

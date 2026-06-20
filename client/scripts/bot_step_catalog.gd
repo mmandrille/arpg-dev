@@ -46,7 +46,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap",
 ]
 const STEP_TYPES_ACTION := [
-	"press_key", "click_entity", "click_loot_item", "click_floor",
+	"press_key", "click_entity", "click_entity_buffered", "click_loot_item", "click_floor",
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_equipment_slot",
 	"drag_equipment_to_bag", "drag_bag_to_outside", "assign_hotbar_slot",
 	"use_hotbar_slot", "double_click_bag_item", "click_menu_button",
@@ -106,8 +106,8 @@ static func validate_step(step: Dictionary, index: int) -> String:
 		if str(step.get("entity_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type" % [index, stype]
 	if stype == "wait_event":
-		if str(step.get("event_type", "")) == "":
-			return "client_steps[%d] (%s) requires event_type" % [index, stype]
+		if str(step.get("event_type", "")) == "" and (not step.has("event_types") or typeof(step.get("event_types")) != TYPE_ARRAY or (step.get("event_types") as Array).is_empty()):
+			return "client_steps[%d] (%s) requires event_type or event_types" % [index, stype]
 	if stype == "click_entity_until_event":
 		if str(step.get("entity_type", "")) == "" or str(step.get("event_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type and event_type" % [index, stype]

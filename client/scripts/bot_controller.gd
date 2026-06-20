@@ -96,8 +96,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 	match stype:
 		"press_key":
 			_do_press_key(str(action.get("keycode", "")))
-		"click_entity":
-			_do_click_entity(action, state)
+		"click_entity", "click_entity_buffered":
+			_do_click_entity(action, state, stype == "click_entity_buffered")
 		"click_loot_item":
 			_do_click_loot_item(
 				str(action.get("item_def_id", "")),
@@ -415,9 +415,8 @@ func consume_pending_event_at(index: int) -> void:
 		_main.bot_consume_pending_event_at(index)
 
 
-func _do_click_entity(action: Dictionary, state: Dictionary) -> void:
-	if _main == null:
-		return
+func _do_click_entity(action: Dictionary, state: Dictionary, buffered: bool = false) -> void:
+	if _main == null: return
 	var entity_type := str(action.get("entity_type", ""))
 	var entity_index := int(action.get("entity_index", 0))
 	var ids_key := "%s_ids" % entity_type
@@ -431,7 +430,9 @@ func _do_click_entity(action: Dictionary, state: Dictionary) -> void:
 		printerr("[bot-client] click_entity: index %d out of range for %s" % [entity_index, entity_type])
 		return
 	var target_id := str(ids[entity_index])
-	if _main.has_method("bot_click_entity_id"):
+	if buffered and _main.has_method("bot_click_entity_buffered_id"):
+		_main.bot_click_entity_buffered_id(target_id)
+	elif _main.has_method("bot_click_entity_id"):
 		_main.bot_click_entity_id(target_id)
 	elif _main.has_method("bot_dispatch_action"):
 		_main.bot_dispatch_action("action_intent", {"target_id": target_id})

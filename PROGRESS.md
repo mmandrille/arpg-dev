@@ -25,7 +25,7 @@ Last updated: 2026-06-20
 |-------|-------|
 | **Latest completed slice** | v301 — melee lunge / micro-step |
 | **Active branch** | `codex/autoloop-movement-fluidity` |
-| **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20 via CI-equivalent continuation: raw `make ci` steps 1-7 passed, step 8 `make db-up` was blocked by the existing healthy main-worktree `arpg-postgres` container, and protocol bot + replay, `SCENARIO=all` client bot (85 passed), `client_smoke`, and `make maintainability` passed against the existing DB with temporary servers |
+| **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20; post-review refactor fixed the isolated-worktree `db-up` false-red path and `CI_ADDR=:18091 CI_BASE_URL=http://localhost:18091 make ci` passed end-to-end in 10m59s |
 | **Next slice** | Run `$refactor` against [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) |
 | **Last engineering review** | v301 — [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) (2026-06-20) |
 | **Next engineering review** | Around v311, after the next feature batch and a green final proof |
@@ -87,11 +87,11 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v301 `$refactor` handoff due now.** Classify and act on
-  [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md). Best minor
-  candidates: make raw `make ci` database bootstrap worktree-safe, centralize or data-back client
-  presentation-feel constants, and keep shrinking next-touched `main.gd`, `bot_scenario_runner.gd`,
-  `game_test.go`, and `validate_shared.py` paths.
+- **v301 `$refactor` handoff in progress.** Classify and act on
+  [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md). The raw
+  `make ci` database-bootstrap false-red is fixed; remaining minor candidates are centralizing or
+  data-backing client presentation-feel constants and shrinking next-touched `main.gd`,
+  `bot_scenario_runner.gd`, `game_test.go`, and `validate_shared.py` paths.
 - **Review follow-ups remaining after v301 `$review`.** Future-plan/feature-scale items: resolve
   unverified local GLB provenance before production distribution, continue the tuning-friendly
   rule-test audit, and keep production combat VFX/audio/art polish as explicit feature slices.

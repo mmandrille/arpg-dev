@@ -1,0 +1,43 @@
+docs/specs/v297_spec-client-side-windup-recovery-presentation.md
+  s_95786de7ff0c5d::t_c829ae9648e2ff 1-2,4-84
+  s_95786de7ff0c5d::t_a5d559fd24523f 3
+client/tests/test_sustained_input.gd
+  s_95786de7ff0c5d::t_3e6586cc2824c1 9,27-28,156-176
+client/scripts/main.gd
+  s_95786de7ff0c5d::t_2ff9fa39b34609 63,242
+  s_95786de7ff0c5d::t_504dc4ac622a42 1336,1341,2631,2761
+docs/plans/v297_2026-06-19-client-side-windup-recovery-presentation.md
+  s_95786de7ff0c5d::t_105ff50a88eec2 36-37,39
+  s_95786de7ff0c5d::t_c4a9c5fb96fa7a 47,49,51
+  s_95786de7ff0c5d::t_c829ae9648e2ff 1-2,4-35,38,40-46,48,50,52-58,61-75,79-81,87-90
+  s_95786de7ff0c5d::t_a5d559fd24523f 3,59-60,76-78,82-86
+client/scripts/combat_local_attack_presentation.gd.uid
+  s_95786de7ff0c5d::t_2ff9fa39b34609 1
+client/scripts/combat_local_attack_presentation.gd
+  s_95786de7ff0c5d::t_504dc4ac622a42 4,33-53
+  s_95786de7ff0c5d::t_2ff9fa39b34609 1-3,5-32,54-60
+docs/progress/slice-lifecycle.md
+  s_95786de7ff0c5d::t_a5d559fd24523f 312
+PROGRESS.md
+  s_95786de7ff0c5d::t_a5d559fd24523f 26,28-29
+docs/as-built/v297_client-side-windup-recovery-presentation.md
+  s_95786de7ff0c5d::t_a5d559fd24523f 1-52
+client/scripts/bot_facade.gd
+  s_95786de7ff0c5d::t_504dc4ac622a42 226-227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e3ce84d36305ce7cee434db9086f49de396c6e91",
+  "prompts": {},
+  "sessions": {
+    "s_95786de7ff0c5d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee232-5e77-7f93-9275-ba83ddfb9619",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

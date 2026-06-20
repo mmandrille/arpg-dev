@@ -20,7 +20,7 @@ server/internal/game/rules.go	3278
 server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6488
-server/internal/game/types.go	721
+server/internal/game/types.go	665
 server/internal/http/auth_session_test.go	1501
 server/internal/http/ws_test.go	1482
 server/internal/realtime/runner.go	627

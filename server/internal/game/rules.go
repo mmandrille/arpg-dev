@@ -955,6 +955,7 @@ type WorldEntity struct {
 	ItemTemplateID    string `json:"item_template_id,omitempty"`
 	InteractableDefID string `json:"interactable_def_id,omitempty"`
 	Kind              string `json:"kind,omitempty"`
+	BlocksLineOfSight *bool  `json:"blocks_line_of_sight,omitempty"`
 	Position          Vec2   `json:"position"`
 	Size              Vec2   `json:"size,omitempty"`
 }

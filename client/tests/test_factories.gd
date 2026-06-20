@@ -104,9 +104,11 @@ func _test_wall_renderer() -> void:
 		"size": {"x": 2.0, "y": 2.5},
 		"source": "generated",
 		"kind": "rock",
+		"blocks_line_of_sight": true,
 	}])
 	_assert_eq("rock layout count", rock_walls.size(), 1)
 	_assert_eq("rock layout kind", str((rock_walls[0] as Dictionary).get("kind", "")), "rock")
+	_assert_true("rock layout LOS metadata", bool((rock_walls[0] as Dictionary).get("blocks_line_of_sight", false)))
 	_assert_eq("rock child count", root.get_child_count(), 1)
 	var rock := root.get_child(0) as Node3D
 	_assert_eq("rock child name", rock.name, "Rock_test_rock")

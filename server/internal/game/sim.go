@@ -228,6 +228,7 @@ type wallObstacle struct {
 	source      string
 	shapeFamily string
 	kind        string
+	blocksLOS   *bool
 }
 
 type effectiveCombatStats struct {
@@ -744,7 +745,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			loot.id = s.alloc()
 			level.entities[loot.id] = loot
 		case wallEntity:
-			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size, kind: preset.Kind, source: "preset"})
+			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size, kind: preset.Kind, source: "preset", blocksLOS: preset.BlocksLineOfSight})
 		case interactableEntity:
 			def := s.rules.Interactables[preset.InteractableDefID]
 			if def.Service == uniqueTestChestService && !s.gameplayDebug {
@@ -6263,6 +6264,9 @@ func wallViewsForLevel(level *LevelState) []WallView {
 		}
 		if kind := wall.obstacleKind(); kind != obstacleKindWall {
 			view.Kind = kind
+		}
+		if wall.blocksLOS != nil {
+			view.BlocksLineOfSight = boolPtr(*wall.blocksLOS)
 		}
 		out = append(out, view)
 	}

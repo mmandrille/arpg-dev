@@ -30,5 +30,8 @@ func obstacleBlocksProjectiles(w wallObstacle) bool {
 }
 
 func obstacleBlocksLineOfSight(w wallObstacle) bool {
+	if w.blocksLOS != nil {
+		return *w.blocksLOS
+	}
 	return w.obstacleKind() == obstacleKindWall
 }

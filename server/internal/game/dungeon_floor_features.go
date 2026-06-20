@@ -45,6 +45,13 @@ func validateFloorFeatureRules(spec floorFeatureSpec, floor DungeonFloorSize) er
 	if r.MaxSize.X < r.MinSize.X || r.MaxSize.Y < r.MinSize.Y {
 		return fmt.Errorf("%s: invalid min/max size", base)
 	}
+	// randomFloorFeatureObstacle samples integer dimensions from
+	// [ceil(min), floor(max)]; a fractional band like min==max==2.5 collapses to an
+	// inverted integer range (ceil 3 > floor 2) that randomIntRange would silently
+	// clamp to a width outside the configured band. Reject it at load instead.
+	if int(math.Ceil(r.MinSize.X)) > int(math.Floor(r.MaxSize.X)) || int(math.Ceil(r.MinSize.Y)) > int(math.Floor(r.MaxSize.Y)) {
+		return fmt.Errorf("%s: size range has no satisfiable integer dimension", base)
+	}
 	maxSpan := math.Max(r.MaxSize.X, r.MaxSize.Y)
 	if maxSpan >= math.Min(floor.Width, floor.Height) {
 		return fmt.Errorf("%s: largest %s obstacle must fit inside floor", base, spec.kind)

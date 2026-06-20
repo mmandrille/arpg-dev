@@ -1,0 +1,93 @@
+server/internal/game/types.go
+  s_719c59d1789d7e::t_ab6f6dccac6a57 364
+server/internal/game/corpse.go
+  s_719c59d1789d7e::t_ab6f6dccac6a57 133
+server/internal/game/fog_of_war_test.go
+  s_719c59d1789d7e::t_3ba2b0167058de 101-115
+server/internal/game/rules.go
+  s_719c59d1789d7e::t_52aae3d050099f 1896-1898,2173-2175
+  s_719c59d1789d7e::t_f7ab95a6fb437f 302
+client/scripts/ground_wall_factory.gd
+  s_719c59d1789d7e::t_662fcac9ad1914 8,89-110
+shared/protocol/examples/session_snapshot.json
+  s_719c59d1789d7e::t_9e047ce131cc06 28-29
+shared/rules/dungeon_generation.v0.schema.json
+  s_719c59d1789d7e::t_90ed6f401b4cec 161,212-221
+server/internal/game/companion_ai.go
+  s_719c59d1789d7e::t_ab6f6dccac6a57 398
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_719c59d1789d7e::t_58edcc0f8e6ff0 15,29,61,67-71,76-81,87-89,118,121,127-131,133-137,142
+docs/as-built/v295_water-obstacles-foundation.md
+  s_719c59d1789d7e::t_f2342577dc63a2 1-39
+server/internal/game/rogue_skills.go
+  s_719c59d1789d7e::t_ab6f6dccac6a57 177
+server/internal/game/obstacle_blocking.go
+  s_719c59d1789d7e::t_f7ab95a6fb437f 1-30
+client/tests/test_fog_of_war_overlay.gd
+  s_719c59d1789d7e::t_3ba2b0167058de 18,105-115
+shared/protocol/examples/state_delta.json
+  s_719c59d1789d7e::t_9e047ce131cc06 53-54
+shared/protocol/examples/state_delta_level_transition.json
+  s_719c59d1789d7e::t_9e047ce131cc06 18-19
+PROGRESS.md
+  s_719c59d1789d7e::t_f2342577dc63a2 26-29,31,90-93
+server/internal/game/dungeon_gen.go
+  s_719c59d1789d7e::t_6b955a96830b27 63-65,98-100
+  s_719c59d1789d7e::t_91aacad4fdde86 955,1040
+shared/protocol/state_delta.v8.schema.json
+  s_719c59d1789d7e::t_90ed6f401b4cec 113
+tools/bot/runtime_assertions.py
+  s_719c59d1789d7e::t_272676f42b132d 106-108,380-382
+docs/specs/v295_spec-water-obstacles-foundation.md
+  s_719c59d1789d7e::t_cc62ac3005824f 1-2,4-117
+  s_719c59d1789d7e::t_f2342577dc63a2 3
+client/scripts/fog_of_war_overlay.gd
+  s_719c59d1789d7e::t_662fcac9ad1914 150-151
+server/internal/game/fog_of_war.go
+  s_719c59d1789d7e::t_ab6f6dccac6a57 215-217
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_719c59d1789d7e::t_272676f42b132d 10,19
+server/internal/game/sim_players.go
+  s_719c59d1789d7e::t_ab6f6dccac6a57 266
+server/internal/game/pathfind_test.go
+  s_719c59d1789d7e::t_3ba2b0167058de 71-95
+shared/rules/dungeon_generation.v0.json
+  s_719c59d1789d7e::t_90ed6f401b4cec 121-127
+shared/protocol/session_snapshot.v8.schema.json
+  s_719c59d1789d7e::t_90ed6f401b4cec 66
+server/internal/game/sim.go
+  s_719c59d1789d7e::t_0915031e8a05d4 230,1969,2759,2832,3428,3561-3563,4847-4849,4888-4890,6257,6262-6266
+docs/plans/v295_2026-06-19-water-obstacles-foundation.md
+  s_719c59d1789d7e::t_02dd20b5bf2238 25,39,41,60,75,119,127,129,137
+  s_719c59d1789d7e::t_f2342577dc63a2 3,27,51-56,59,78-80,95-99,113-115,131-133,149-151,161-167
+  s_719c59d1789d7e::t_bc5645b0191211 1-2,4-24,26,28-38,40,42-50,57-58,61-74,76-77,81-94,100-112,116-118,120-126,128,130,134-136,138-148,152-160,168-176
+client/tests/test_factories.gd
+  s_719c59d1789d7e::t_3ba2b0167058de 41,44,46,68-82
+client/scripts/wall_renderer.gd
+  s_719c59d1789d7e::t_662fcac9ad1914 77-79,85-86,91,112-131
+docs/progress/slice-lifecycle.md
+  s_719c59d1789d7e::t_f2342577dc63a2 310
+server/internal/game/dungeon_doors.go
+  s_719c59d1789d7e::t_ab6f6dccac6a57 39
+shared/golden/dungeon_obstacles.v0.schema.json
+  s_719c59d1789d7e::t_2b342c715652e1 17,28,89-90
+server/internal/game/dungeon_water.go
+  s_719c59d1789d7e::t_f7ab95a6fb437f 1-77,81-89,100-114
+  s_719c59d1789d7e::t_e75652352ec2e2 78-80,90-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d8a69cb81a22b91c4e550fe55707e15c23fdd859",
+  "prompts": {},
+  "sessions": {
+    "s_719c59d1789d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee231-6f1d-7402-b00b-73fb01b62c13",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

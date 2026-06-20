@@ -1,0 +1,25 @@
+client/scripts/bot_step_catalog.gd
+  s_3e1dcfc135bacf::t_6934eebb628ffa 242
+client/scripts/bot_wait_handlers.gd
+  s_3e1dcfc135bacf::t_1b81e00ae219c0 68-71
+tools/bot/scenarios/client/49_mercenary_recovery_ui.json
+  s_3e1dcfc135bacf::t_338efd1a399ca0 28
+client/scripts/mercenary_panel.gd
+  s_3e1dcfc135bacf::t_4b21e15f6aa9ab 61-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "d76c725e053eea17a95f955b02ce16f0c86dded3",
+  "prompts": {},
+  "sessions": {
+    "s_3e1dcfc135bacf": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "52a98535-09b0-4871-8160-a74b3a11e068",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

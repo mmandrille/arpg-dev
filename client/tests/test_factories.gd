@@ -98,6 +98,22 @@ func _test_wall_renderer() -> void:
 	_assert_eq("hole metadata kind", str(hole.get_meta("kind", "")), "hole")
 	_assert_true("hole mesh is plane", hole.mesh is PlaneMesh)
 	_assert_true("hole material has texture", (hole.material_override as StandardMaterial3D).albedo_texture != null)
+	var lab_walls := renderer.render_world_walls("flying_navigation_lab")
+	var lab_water_count := 0
+	var lab_hole_count := 0
+	for rendered_wall in lab_walls:
+		var rendered: Dictionary = rendered_wall
+		match str(rendered.get("kind", "wall")):
+			"water":
+				lab_water_count += 1
+			"hole":
+				lab_hole_count += 1
+	_assert_eq("flying lab wall layout count", lab_walls.size(), 6)
+	_assert_eq("flying lab water layout count", lab_water_count, 1)
+	_assert_eq("flying lab hole layout count", lab_hole_count, 1)
+	_assert_eq("flying lab child count", root.get_child_count(), 6)
+	_assert_true("flying lab water node exists", root.find_child("Water_flying_navigation_lab_wall_004", false, false) != null)
+	_assert_true("flying lab hole node exists", root.find_child("Hole_flying_navigation_lab_wall_005", false, false) != null)
 	root.queue_free()
 
 

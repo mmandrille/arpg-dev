@@ -743,6 +743,7 @@ type MonsterDef struct {
 	ProjectileSpeed   float64            `json:"projectile_speed,omitempty"`
 	ProjectileDefID   string             `json:"projectile_def_id,omitempty"`
 	Behavior          string             `json:"behavior,omitempty"`
+	NavigationTrait   string             `json:"navigation_trait,omitempty"`
 	PackRole          string             `json:"pack_role,omitempty"`
 	AggroRadius       float64            `json:"aggro_radius,omitempty"`
 	AssistRadius      float64            `json:"assist_radius,omitempty"`
@@ -952,6 +953,7 @@ type WorldEntity struct {
 	ItemDefID         string `json:"item_def_id,omitempty"`
 	ItemTemplateID    string `json:"item_template_id,omitempty"`
 	InteractableDefID string `json:"interactable_def_id,omitempty"`
+	Kind              string `json:"kind,omitempty"`
 	Position          Vec2   `json:"position"`
 	Size              Vec2   `json:"size,omitempty"`
 }
@@ -1552,6 +1554,9 @@ func LoadRules(dir string) (*Rules, error) {
 		attackMode := def.effectiveAttackMode()
 		behavior := def.effectiveBehavior()
 		attackStyle := def.effectiveAttackStyle()
+		if !validMonsterNavigationTrait(def.NavigationTrait) {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.navigation_trait: %s", id, def.NavigationTrait)
+		}
 		if def.PreferredMinRange < 0 {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.preferred_min_range: must be non-negative", id)
 		}
@@ -2006,6 +2011,9 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 		for i, entity := range world.Entities {
 			label := fmt.Sprintf("worlds.%s.entities[%d]", worldID, i)
+			if entity.Type != wallEntity && entity.Kind != "" {
+				return nil, fmt.Errorf("game: invalid rules %s.kind: only valid for wall entities", label)
+			}
 			switch entity.Type {
 			case monsterEntity, companionEntity:
 				if entity.MonsterDefID == "" {
@@ -2031,6 +2039,9 @@ func LoadRules(dir string) (*Rules, error) {
 			case wallEntity:
 				if entity.Size.X <= 0 || entity.Size.Y <= 0 {
 					return nil, fmt.Errorf("game: invalid rules %s: wall size must be positive", label)
+				}
+				if !validObstacleKind(entity.Kind) {
+					return nil, fmt.Errorf("game: invalid rules %s.kind: unsupported wall kind %s", label, entity.Kind)
 				}
 			case interactableEntity:
 				if entity.InteractableDefID == "" {

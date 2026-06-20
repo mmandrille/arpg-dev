@@ -1,0 +1,19 @@
+{
+  "id": "hit_stop_impact_flash",
+  "runner": "godot_client",
+  "world_id": "combat_control_lab",
+  "seed": "impactflash0001",
+  "title": "Hit stop / impact flash: authoritative hit triggers client impact feedback",
+  "description": "Equip the training bow, force an authoritative monster damage event, and verify the client reaction debug state records impact feedback.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "click_loot_item", "item_def_id": "training_bow" },
+    { "type": "wait_event", "event_type": "item_picked_up", "item_def_id": "training_bow", "timeout_s": 10.0 },
+    { "type": "drag_bag_to_weapon_slot", "item_def_id": "training_bow" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 10.0 },
+    { "type": "assert_equipped", "slot": "main_hand" },
+    { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "dungeon_mob", "timeout_s": 10.0 },
+    { "type": "click_entity_until_event", "entity_type": "monster", "monster_def_id": "dungeon_mob", "event_type": "monster_damaged", "retry_s": 0.25, "consume_event": true, "timeout_s": 10.0 },
+    { "type": "wait_entity_reaction", "entity_type": "monster", "monster_def_id": "dungeon_mob", "reaction": "hit", "impact_feedback_min": 1, "timeout_s": 3.0 }
+  ]
+}

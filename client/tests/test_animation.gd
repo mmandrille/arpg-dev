@@ -154,6 +154,8 @@ func _test_model_reaction_hit_restores() -> void:
 	await process_frame
 	var c = ReactionControllerScript.new(root, Color("#8fe8a7"))
 	c.play_hit(Vector3(1.0, 0.0, 0.0), Vector3.BACK)
+	_assert(int(c.get_debug_state().get("impact_feedback_count", 0)) == 1, "hit impact feedback count increments")
+	_assert(_reaction_mesh_color(root).b > Color("#8fe8a7").b, "hit impact flash brightens mesh")
 	await create_timer(0.50).timeout
 	var state: Dictionary = c.get_debug_state()
 	_assert(state["terminal"] == false, "hit reaction should not be terminal")
@@ -172,6 +174,7 @@ func _test_model_reaction_death_terminal() -> void:
 	c.play_hit(Vector3(1.0, 0.0, 0.0), Vector3.BACK)
 	c.enter_death(Vector3(1.0, 0.0, 0.0), Vector3.BACK)
 	c.play_hit(Vector3(-1.0, 0.0, 0.0), Vector3.FORWARD)
+	_assert(int(c.get_debug_state().get("impact_feedback_count", 0)) == 2, "death impact feedback count increments")
 	await create_timer(0.50).timeout
 	var state: Dictionary = c.get_debug_state()
 	_assert(state["terminal"] == true, "death reaction should be terminal")

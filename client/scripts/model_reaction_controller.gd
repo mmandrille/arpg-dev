@@ -2,8 +2,10 @@ extends RefCounted
 class_name ModelReactionController
 
 const HIT_LEAN_RADIANS := 0.22
+const HIT_STOP_SECONDS := 0.04
 const HIT_LEAN_SECONDS := 0.05
 const HIT_RESTORE_SECONDS := 0.12
+const HIT_FLASH_BLEND := 0.55
 const DEATH_LEAN_RADIANS := 1.35
 const DEATH_SECONDS := 0.18
 const HIT_DARKEN := 0.45
@@ -17,6 +19,7 @@ var _terminal: bool = false
 var _last_reaction: String = ""
 var _current_tint := Color.WHITE
 var _base_tint := Color.WHITE
+var _impact_feedback_count: int = 0
 var _hit_tween: Tween
 var _death_tween: Tween
 
@@ -45,11 +48,14 @@ func play_hit(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_direction: 
 	if _terminal or _root == null:
 		return
 	_last_reaction = "hit"
+	_impact_feedback_count += 1
 	_kill_tween(_hit_tween)
 	var direction := _reaction_direction(source_position, fallback_direction)
 	var target_rotation := _base_rotation + Vector3(direction.z * HIT_LEAN_RADIANS, 0.0, -direction.x * HIT_LEAN_RADIANS)
-	_apply_color_scale(HIT_DARKEN)
+	_apply_impact_flash()
 	_hit_tween = _root.create_tween()
+	_hit_tween.tween_interval(HIT_STOP_SECONDS)
+	_hit_tween.tween_callback(_apply_color_scale.bind(HIT_DARKEN))
 	_hit_tween.tween_property(_root, "rotation", target_rotation, HIT_LEAN_SECONDS)
 	_hit_tween.parallel().tween_method(_apply_color_scale, HIT_DARKEN, 1.0, HIT_LEAN_SECONDS + HIT_RESTORE_SECONDS)
 	_hit_tween.tween_property(_root, "rotation", _base_rotation, HIT_RESTORE_SECONDS)
@@ -61,12 +67,15 @@ func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_directio
 		return
 	_terminal = true
 	_last_reaction = "death"
+	_impact_feedback_count += 1
 	_kill_tween(_hit_tween)
 	_kill_tween(_death_tween)
 	var direction := _reaction_direction(source_position, fallback_direction)
 	var target_rotation := _base_rotation + Vector3(direction.z * DEATH_LEAN_RADIANS, 0.0, -direction.x * DEATH_LEAN_RADIANS)
-	_apply_color_scale(DEATH_DARKEN)
+	_apply_impact_flash()
 	_death_tween = _root.create_tween()
+	_death_tween.tween_interval(HIT_STOP_SECONDS)
+	_death_tween.tween_callback(_apply_color_scale.bind(DEATH_DARKEN))
 	_death_tween.tween_property(_root, "rotation", target_rotation, DEATH_SECONDS)
 
 
@@ -99,6 +108,7 @@ func get_debug_state() -> Dictionary:
 		"last_reaction": _last_reaction,
 		"base_tint": _base_tint.to_html(false),
 		"current_tint": _current_tint.to_html(false),
+		"impact_feedback_count": _impact_feedback_count,
 		"base_rotation": _vec_debug(_base_rotation),
 		"current_rotation": _vec_debug(_root.rotation if _root != null else Vector3.ZERO),
 		"mesh_count": _base_mesh_colors.size(),
@@ -159,6 +169,21 @@ func _apply_color_scale(scale: float) -> void:
 		var base: Color = rec.get("color", _base_tint)
 		mat.albedo_color = Color(base.r * scale, base.g * scale, base.b * scale, base.a)
 	_current_tint = Color(_base_tint.r * scale, _base_tint.g * scale, _base_tint.b * scale, _base_tint.a)
+
+
+func _apply_impact_flash() -> void:
+	for key in _base_mesh_colors.keys():
+		var rec: Dictionary = _base_mesh_colors[key]
+		var raw_node = rec.get("node", null)
+		if raw_node == null or not is_instance_valid(raw_node):
+			continue
+		var mesh_node := raw_node as MeshInstance3D
+		var mat := mesh_node.material_override as StandardMaterial3D
+		if mesh_node == null or mat == null:
+			continue
+		var base: Color = rec.get("color", _base_tint)
+		mat.albedo_color = base.lerp(Color.WHITE, HIT_FLASH_BLEND)
+	_current_tint = _base_tint.lerp(Color.WHITE, HIT_FLASH_BLEND)
 
 
 func _on_hit_finished() -> void:

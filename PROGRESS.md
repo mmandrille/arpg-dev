@@ -23,10 +23,10 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v297 — client-side windup / recovery presentation |
+| **Latest completed slice** | v298 — hit stop / impact flash |
 | **Active branch** | `codex/autoloop-movement-fluidity` |
-| **CI gate** | v297 focused proof green on 2026-06-19: sustained-input Godot tests, client bot unit tests, `77_input_buffering`, `78_attack_move_sticky_targeting`, and `make maintainability`; selected Movement / Combat Fluidity autoloop batch `make ci` pending |
-| **Next slice** | v298 — hit stop / impact flash |
+| **CI gate** | v298 focused proof green on 2026-06-19: animation Godot tests, client bot unit tests, `79_hit_stop_impact_flash`, `77_input_buffering`, `78_attack_move_sticky_targeting`, and `make maintainability`; selected Movement / Combat Fluidity autoloop batch `make ci` pending |
+| **Next slice** | v299 — movement acceleration smoothing |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
 | **Next engineering review** | After the selected Movement / Combat Fluidity feature batch completes and final `make ci` is green |
 

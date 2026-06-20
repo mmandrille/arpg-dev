@@ -410,6 +410,44 @@ func TestUniqueTestChestRepeatActivationReopensRemainingItems(t *testing.T) {
 	}
 }
 
+func TestUniqueTestChestBackfillsPersistedCatalogGaps(t *testing.T) {
+	t.Setenv("ARPG_GAMEPLAY_DEBUG", "true")
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_unique_test_chest_backfill", "unique_test_chest_seed", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	chest := findUniqueTestChest(t, sim)
+	sim.activeLevel().entities[sim.playerID].pos = chest.pos
+	catalog, ok := sim.uniqueTestChestItems()
+	if !ok || len(catalog) < 3 {
+		t.Fatalf("unique test chest catalog = %d ok=%v", len(catalog), ok)
+	}
+	sim.uniqueChests[chest.id] = &uniqueChestState{items: []*stashItem{{
+		stashItemID: sim.alloc(),
+		itemDefID:   catalog[0].itemDefID,
+		rollPayload: cloneRollPayload(catalog[0].rollPayload),
+	}}}
+
+	open := sim.Tick([]Input{{MessageID: "open_unique_chest_backfill", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(chest.id)}}})
+	assertAck(t, open, "open_unique_chest_backfill")
+	ev := findEvent(open.Events, "unique_chest_opened")
+	if ev == nil || len(ev.StashItems) != len(catalog) {
+		t.Fatalf("backfilled unique chest event count = %d want %d event=%+v", len(ev.StashItems), len(catalog), ev)
+	}
+	if len(sim.uniqueChests[chest.id].items) != len(catalog) {
+		t.Fatalf("persisted unique chest count = %d want %d", len(sim.uniqueChests[chest.id].items), len(catalog))
+	}
+	seen := map[string]bool{}
+	for _, item := range sim.uniqueChests[chest.id].items {
+		key := uniqueChestCatalogKey(item.itemDefID, item.rollPayload)
+		if seen[key] {
+			t.Fatalf("duplicate unique chest catalog key %s in %+v", key, sim.uniqueChests[chest.id].items)
+		}
+		seen[key] = true
+	}
+}
+
 func TestUniqueTestChestHiddenWhenGameplayDebugDisabled(t *testing.T) {
 	sim, err := NewSimWithWorld("sess_unique_test_chest_hidden", "unique_test_chest_seed", loadRules(t), "dungeon_levels")
 	if err != nil {

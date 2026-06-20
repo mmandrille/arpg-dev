@@ -8,6 +8,7 @@ const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const MysterySilhouetteDrawer := preload("res://scripts/mystery_silhouette_drawer.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const PANEL_SIZE := Vector2(360, 680)
 const VENDOR_COLUMNS := 5
 const VENDOR_ROWS := 10
@@ -64,6 +65,7 @@ var _status_label: Label
 var _vendor_grid: GridContainer
 var _buy_buttons: Dictionary = {}
 var _interactive: bool = true
+var _suppress_render_guard: bool = false
 
 
 class ShopSlotButton:
@@ -128,22 +130,24 @@ func _ready() -> void:
 
 
 func show_shop(next_shop_entity_id: String, next_shop_id: String, next_offers: Array, next_gold: int, next_inventory: Array, next_equipped: Dictionary, next_title: String = "Town Vendor", next_sell_appraisals: Array = []) -> void:
+	_suppress_render_guard = true
 	shop_entity_id = next_shop_entity_id
 	shop_id = next_shop_id
 	shop_title = next_title
 	offers = _dup_array(next_offers)
 	sell_appraisals = _dup_array(next_sell_appraisals)
 	set_inventory_state(next_inventory, next_equipped, next_gold)
+	_suppress_render_guard = false
 	visible = true
 	_apply_interaction_filters()
-	_render()
+	_render_if_changed()
 
 
 func apply_shop_refresh(next_offers: Array, next_sell_appraisals: Array) -> void:
 	offers = _dup_array(next_offers)
 	sell_appraisals = _dup_array(next_sell_appraisals)
 	_apply_interaction_filters()
-	_render()
+	_render_if_changed()
 
 
 func hide_display() -> void:
@@ -159,8 +163,18 @@ func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_
 	inventory = _dup_array(next_inventory)
 	equipped = next_equipped.duplicate(true)
 	gold = max(0, next_gold)
-	if _panel != null:
-		_render()
+	if _panel != null and not _suppress_render_guard:
+		_render_if_changed()
+
+
+func _render_if_changed() -> void:
+	if InventoryRenderGuardScript.should_render(self):
+		_render_and_mark()
+
+
+func _render_and_mark() -> void:
+	_render()
+	InventoryRenderGuardScript.mark_rendered(self)
 
 
 func show_status(text: String, error: bool = false) -> void:

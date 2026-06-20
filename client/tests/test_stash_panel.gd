@@ -6,6 +6,7 @@ const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer_router.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const MainScript := preload("res://scripts/main.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -226,7 +227,14 @@ func _run() -> void:
 		"unique_chest_entity_1",
 		[
 			{"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "unique_item_2", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Stormstring Bow", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "unique_item_3", "item_def_id": "cave_ring", "item_template_id": "cave_ring", "display_name": "Bloodbound Sigil", "rarity": "unique", "slot": "ring", "summary_lines": ["Slot: Ring"]},
+			{"stash_item_id": "unique_item_4", "item_def_id": "cave_amulet", "item_template_id": "cave_amulet", "display_name": "Lantern Amulet", "rarity": "unique", "slot": "amulet", "summary_lines": ["Slot: Amulet"]},
 			{"stash_item_id": "set_item_1", "item_def_id": "verdant_vanguard_blade", "item_template_id": "verdant_vanguard_blade", "display_name": "Verdant Vanguard Blade", "rarity": "set", "slot": "main_hand", "summary_lines": ["Slot: Main hand", "Set: Verdant Vanguard (2/5 equipped)", "2-piece set bonus: Armor +3 (active)", "3-piece set bonus: Max HP +8 (inactive)"]},
+			{"stash_item_id": "set_item_2", "item_def_id": "verdant_vanguard_helm", "item_template_id": "verdant_vanguard_helm", "display_name": "Verdant Vanguard Helm", "rarity": "set", "slot": "head", "summary_lines": ["Slot: Head"]},
+			{"stash_item_id": "set_item_3", "item_def_id": "stormrunner_covenant_bow", "item_template_id": "stormrunner_covenant_bow", "display_name": "Stormrunner Covenant Bow", "rarity": "set", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "set_item_4", "item_def_id": "stormrunner_covenant_mask", "item_template_id": "stormrunner_covenant_mask", "display_name": "Stormrunner Covenant Mask", "rarity": "set", "slot": "head", "summary_lines": ["Slot: Head"]},
+			{"stash_item_id": "set_item_5", "item_def_id": "stormrunner_covenant_loop", "item_template_id": "stormrunner_covenant_loop", "display_name": "Stormrunner Covenant Loop", "rarity": "set", "slot": "ring", "summary_lines": ["Slot: Ring"]},
 		],
 		inventory,
 		{},
@@ -241,16 +249,38 @@ func _run() -> void:
 	_assert_true("unique chest tabs visible", bool(state.get("unique_chest_tabs_visible", false)))
 	_assert_eq("unique chest starts on uniques tab", str(state.get("unique_chest_active_tab", "")), "uniques")
 	var unique_chest_counts: Dictionary = state.get("unique_chest_tab_counts", {})
-	_assert_eq("unique chest unique tab count", int(unique_chest_counts.get("uniques", 0)), 1)
-	_assert_eq("unique chest set tab count", int(unique_chest_counts.get("sets", 0)), 1)
-	_assert_eq("unique chest uniques tab filters items", int(state.get("filtered_stash_item_count", 0)), 1)
-	_assert_eq("unique chest uniques tab row", str((state.get("stash_rows", [])[0] as Dictionary).get("stash_item_id", "")), "unique_item_1")
+	_assert_eq("unique chest unique tab count", int(unique_chest_counts.get("uniques", 0)), 4)
+	_assert_eq("unique chest set tab count", int(unique_chest_counts.get("sets", 0)), 5)
+	_assert_eq("unique chest uniques tab filters items", int(state.get("filtered_stash_item_count", 0)), 4)
+	_assert_true("unique chest uniques tab includes first unique", _row_for_stash_id(state.get("stash_rows", []), "unique_item_1").size() > 0)
+	var main := MainScript.new()
+	main.stash_panel = panel
+	main.inventory = _dup_array(inventory)
+	main.equipped = {}
+	main.gold = 67
+	main.hotbar = []
+	main.stash_items = [
+		{"stash_item_id": "account_unique_1", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
+		{"stash_item_id": "account_unique_2", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
+		{"stash_item_id": "account_unique_3", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
+		{"stash_item_id": "account_set_1", "item_def_id": "cave_helm", "item_template_id": "cave_helm", "display_name": "Account Set", "rarity": "set"},
+		{"stash_item_id": "account_set_2", "item_def_id": "cave_helm", "item_template_id": "cave_helm", "display_name": "Account Set", "rarity": "set"},
+		{"stash_item_id": "account_set_3", "item_def_id": "cave_helm", "item_template_id": "cave_helm", "display_name": "Account Set", "rarity": "set"},
+		{"stash_item_id": "account_set_4", "item_def_id": "cave_helm", "item_template_id": "cave_helm", "display_name": "Account Set", "rarity": "set"},
+	]
+	main._refresh_inventory_ui()
+	state = panel.get_debug_state()
+	unique_chest_counts = state.get("unique_chest_tab_counts", {})
+	_assert_eq("inventory refresh preserves unique chest unique count", int(unique_chest_counts.get("uniques", 0)), 4)
+	_assert_eq("inventory refresh preserves unique chest set count", int(unique_chest_counts.get("sets", 0)), 5)
+	main.free()
 	panel.bot_select_unique_chest_tab("sets")
 	state = panel.get_debug_state()
 	_assert_eq("unique chest sets tab selected", str(state.get("unique_chest_active_tab", "")), "sets")
-	_assert_eq("unique chest sets tab filters items", int(state.get("filtered_stash_item_count", 0)), 1)
-	_assert_eq("unique chest sets tab row", str((state.get("stash_rows", [])[0] as Dictionary).get("stash_item_id", "")), "set_item_1")
-	var set_chest_tooltip := panel._make_item_tooltip(state.get("stash_rows", [])[0] as Dictionary)
+	_assert_eq("unique chest sets tab filters items", int(state.get("filtered_stash_item_count", 0)), 5)
+	var set_item_row := _row_for_stash_id(state.get("stash_rows", []), "set_item_1")
+	_assert_true("unique chest sets tab includes first set", set_item_row.size() > 0)
+	var set_chest_tooltip := panel._make_item_tooltip(set_item_row)
 	_assert_eq("unique chest set tooltip name is rarity green", set_chest_tooltip.debug_first_main_line_color(), "55e66f")
 	_assert_true("unique chest tooltip ignores mouse recursively", _all_controls_ignore_mouse(set_chest_tooltip))
 	var set_chest_texts: Array = set_chest_tooltip.debug_main_line_font_sizes()
@@ -353,6 +383,15 @@ func _array_contains_text(rows: Array, needle: String) -> bool:
 		if str(row).contains(needle):
 			return true
 	return false
+
+
+func _row_for_stash_id(rows: Variant, stash_item_id: String) -> Dictionary:
+	if typeof(rows) != TYPE_ARRAY:
+		return {}
+	for row in rows:
+		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("stash_item_id", "")) == stash_item_id:
+			return row as Dictionary
+	return {}
 
 
 func _all_controls_ignore_mouse(control: Control) -> bool:

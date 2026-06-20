@@ -23,9 +23,9 @@ Last updated: 2026-06-20
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v312 — client input and tooltip stability |
+| **Latest completed slice** | v313 — vendor and unique chest stability |
 | **Active branch** | `main` |
-| **CI gate** | v312 client checks green on 2026-06-20 (`godot --headless --path client --script res://tests/test_text_input_focus_guard.gd`, `godot --headless --path client --script res://tests/test_stash_panel.gd`, `godot --headless --path client --script res://tests/test_inventory_panel.gd`, `make client-unit`, `make maintainability`) |
+| **CI gate** | v313 checks green on 2026-06-20 (`cd server && go test ./internal/game -run UniqueTestChest -count=1`, `godot --headless --path client --script res://tests/test_shop_tooltip_stability.gd`, `godot --headless --path client --script res://tests/test_shop_panel.gd`, `godot --headless --path client --script res://tests/test_stash_panel.gd`, `make client-unit`, `make maintainability`) |
 | **Next slice** | Use `$next` / `$autoloop` for the next feature batch, carrying forward review future-plan items |
 | **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
 | **Next engineering review** | Around v318, after the next feature batch and a green final proof |

@@ -27,6 +27,7 @@ class ItemPreview:
 		item_presentations = next_presentations.duplicate(true)
 		fallback_label = next_fallback_label
 		dimmed = next_dimmed
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		custom_minimum_size = PREVIEW_SIZE
 		size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -58,19 +59,23 @@ class ItemPreview:
 
 func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, requirement_lines: Array, comparison_entries: Array, price: int = -1, affordable: bool = true, fallback_label: String = "") -> void:
 	_clear_children(self)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_theme_stylebox_override("panel", _tooltip_style())
 	var has_item := not item.is_empty()
 
 	var root := VBoxContainer.new()
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_theme_constant_override("separation", 4)
 	root.custom_minimum_size = Vector2(CONTENT_WIDTH, 0)
 	add_child(root)
 
 	var top_row := HBoxContainer.new()
+	top_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top_row.add_theme_constant_override("separation", PREVIEW_GAP)
 	root.add_child(top_row)
 
 	var main_stats := VBoxContainer.new()
+	main_stats.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	main_stats.add_theme_constant_override("separation", 2)
 	main_stats.custom_minimum_size = Vector2(MAIN_STAT_WIDTH if has_item else CONTENT_WIDTH, 0)
 	main_stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -106,10 +111,12 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 		root.add_child(_tooltip_spacer(FOOTER_TOP_GAP))
 		var footer := HBoxContainer.new()
 		footer.name = "GoldValueFooter"
+		footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		footer.add_theme_constant_override("separation", 0)
 		footer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var level_label := Label.new()
 		level_label.name = "ItemLevelLabel"
+		level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		level_label.text = level_text
 		level_label.custom_minimum_size = Vector2(LEVEL_WIDTH, 0)
 		level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -117,11 +124,13 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 		level_label.add_theme_font_size_override("font_size", REQUIREMENT_FONT_SIZE)
 		footer.add_child(level_label)
 		var spacer := Control.new()
+		spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		footer.add_child(spacer)
 		if price >= 0:
 			var price_label := Label.new()
 			price_label.name = "GoldValueLabel"
+			price_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			price_label.text = "%d gold" % price
 			price_label.custom_minimum_size = Vector2(PRICE_WIDTH, 0)
 			price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -189,6 +198,7 @@ func _first_main_line_label() -> Label:
 
 func _tooltip_label(text: String, color: Color, width: float = CONTENT_WIDTH, font_size: int = BODY_FONT_SIZE) -> Label:
 	var label := Label.new()
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(width, 0)
@@ -199,12 +209,14 @@ func _tooltip_label(text: String, color: Color, width: float = CONTENT_WIDTH, fo
 
 func _tooltip_spacer(height: int) -> Control:
 	var spacer := Control.new()
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	spacer.custom_minimum_size = Vector2(0, height)
 	return spacer
 
 
 func _tooltip_separator() -> ColorRect:
 	var separator := ColorRect.new()
+	separator.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	separator.color = Color("#6b5420")
 	separator.custom_minimum_size = Vector2(0, 1)
 	separator.size_flags_horizontal = Control.SIZE_EXPAND_FILL

@@ -11,6 +11,7 @@ const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer_router.gd")
 const SetCollectionPanelScript := preload("res://scripts/set_collection_panel.gd")
+const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -298,7 +299,7 @@ func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_
 	gold = max(0, next_gold)
 	_ensure_built()
 	_rendered_bag_slot_count = _target_bag_slot_count()
-	if _bag_grid != null:
+	if _bag_grid != null and InventoryRenderGuardScript.should_render(self):
 		_render()
 
 

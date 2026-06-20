@@ -3,6 +3,7 @@
 extends SceneTree
 
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -14,6 +15,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await _test_derived_stats_scroll_and_breakdown_tooltips()
+	_test_item_tooltip_ignores_mouse()
 	print("[gdtest] PASS: test_character_stats_panel (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -84,6 +86,18 @@ func _test_derived_stats_scroll_and_breakdown_tooltips() -> void:
 	_assert_true("tooltip puts formula elements on separate lines", block_tip.contains("+15% (Faithful Bulwark, Passive skill)\n+5% (Cave Shield)"))
 	_assert_true("tooltip includes capped final", block_tip.contains("= 75% (cap 75%)"))
 	panel.free()
+
+
+func _test_item_tooltip_ignores_mouse() -> void:
+	var tooltip := ItemTooltipPanelScript.new()
+	tooltip.setup({}, {}, ["Training Blade"], [], [])
+	_assert_eq("item tooltip ignores mouse", int(tooltip.mouse_filter), Control.MOUSE_FILTER_IGNORE)
+	var labels := tooltip.find_children("*", "Label", true, false)
+	var first_label := labels[0] as Label if not labels.is_empty() else null
+	_assert_true("item tooltip has label", first_label != null)
+	if first_label != null:
+		_assert_eq("item tooltip label ignores mouse", int(first_label.mouse_filter), Control.MOUSE_FILTER_IGNORE)
+	tooltip.free()
 
 
 func _assert_eq(label: String, got, expected) -> void:

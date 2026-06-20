@@ -61,6 +61,7 @@ const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
+const MovementVisualSmoothingScript := preload("res://scripts/movement_visual_smoothing.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
@@ -240,6 +241,7 @@ var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
 var _attack_buffer: CombatInputBuffer = CombatInputBufferScript.new()
 var _sticky_attack: CombatStickyTarget = CombatStickyTargetScript.new()
 var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttackPresentationScript.new()
+var _movement_visual_smoothing: MovementVisualSmoothing = MovementVisualSmoothingScript.new()
 var _movement_requires_fresh_input: bool = false
 var _player_walk_linger: float = 0.0
 var _last_facing_direction := Vector2(1.0, 0.0)
@@ -258,6 +260,7 @@ var _boss_visuals: BossVisualsController
 func _ready() -> void:
 	player_anchor = $World/PlayerAnchor
 	character_visual = $World/PlayerAnchor/CharacterVisual
+	_movement_visual_smoothing.reset(player_anchor, character_visual)
 	entities_root = $Entities
 	# Mount-root is injected (spec §4.8): the resolver finds the named socket
 	# within CharacterVisual, never via an absolute scene path.
@@ -765,6 +768,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	_hide_waypoint_panel()
 	if player_anchor != null:
 		player_anchor.position = Vector3.ZERO
+		_movement_visual_smoothing.reset(player_anchor, character_visual)
 	if clear_session and client != null:
 		client.session_id = ""
 		client.character_id = ""
@@ -807,6 +811,7 @@ func _process(delta: float) -> void:
 	_sync_actionable_panel_reach()
 	if player_anim != null:
 		player_anim.set_locomotion(_local_player_is_walking())
+	_movement_visual_smoothing.tick(delta, character_visual)
 	if not _user_input_blocked():
 		_update_facing_toward_mouse()
 	_refresh_monster_health_bar_visibility()
@@ -1433,6 +1438,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		predicted_pos = server_pos
 		if apply_local_player_position and not local_leap_visual_active and not local_charge_visual_active:
 			player_anchor.position = server_pos
+			_movement_visual_smoothing.preserve_after_anchor_move(player_anchor, character_visual)
 		if apply_local_player_position and prev_predicted_pos.distance_to(server_pos) > 0.001 and player_hp > 0:
 			_mark_local_player_walking()
 			_face_direction(Vector2(server_pos.x - prev_predicted_pos.x, server_pos.z - prev_predicted_pos.z))
@@ -1706,6 +1712,7 @@ func _reconcile_player() -> void:
 			_sync_camera_to_player()
 			return
 		player_anchor.position = predicted_pos
+		_movement_visual_smoothing.preserve_after_anchor_move(player_anchor, character_visual)
 		_sync_camera_to_player()
 
 func _sync_camera_to_player() -> void:
@@ -5300,6 +5307,7 @@ func get_bot_state() -> Dictionary:
 		"player_max_mana": player_max_mana,
 		"gold": gold,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
+		"movement_visual_smoothing": _movement_visual_smoothing.get_debug_state(character_visual),
 		"current_level": current_level,
 		"walls": current_wall_layout.duplicate(true),
 		"wall_count": current_wall_layout.size(),

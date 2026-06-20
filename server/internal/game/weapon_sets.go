@@ -110,6 +110,26 @@ func (s *Sim) clearEquippedItem(instanceID uint64) []string {
 	return sortedStringKeys(cleared)
 }
 
+func (s *Sim) itemEquippedInAnySlot(instanceID uint64) bool {
+	if instanceID == 0 {
+		return false
+	}
+	s.ensureWeaponSets()
+	for _, slot := range sortedStringKeys(s.equipped) {
+		if s.equipped[slot] == instanceID {
+			return true
+		}
+	}
+	for setIndex := range s.weaponSets {
+		for _, slot := range []string{mainHandSlot, offHandSlot} {
+			if s.weaponSets[setIndex][slot] == instanceID {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (s *Sim) weaponSetForEquipIntent(intent *EquipIntent) int {
 	if intent == nil || intent.WeaponSet == nil {
 		return s.activeWeaponSet

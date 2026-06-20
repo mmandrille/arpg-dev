@@ -472,6 +472,9 @@ func (r *runner) persistTick(res game.TickResult) {
 			if c.Item == nil {
 				continue
 			}
+			if changeRequiresExplicitWeaponSet(c) && !changeHasExplicitWeaponSet(c) {
+				continue
+			}
 			r.log.Debug("inventory_debug_change",
 				"tick", res.Tick,
 				"op", c.Op,

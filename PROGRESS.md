@@ -23,10 +23,10 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v300 — command retarget grace |
+| **Latest completed slice** | v301 — melee lunge / micro-step |
 | **Active branch** | `codex/autoloop-movement-fluidity` |
-| **CI gate** | v300 focused proof green on 2026-06-19: retarget-grace Godot unit tests, client bot unit tests, `81_command_retarget_grace`, `78_attack_move_sticky_targeting`, `80_movement_visual_smoothing`, and `make maintainability`; selected Movement / Combat Fluidity autoloop batch `make ci` pending |
-| **Next slice** | v301 — melee lunge / micro-step |
+| **CI gate** | v301 focused proof green on 2026-06-19: melee-lunge Godot unit tests, animation tests, client bot unit tests, `82_melee_lunge_micro_step`, `78_attack_move_sticky_targeting`, `80_movement_visual_smoothing`, `81_command_retarget_grace`, and `make maintainability`; selected Movement / Combat Fluidity autoloop batch `make ci` pending |
+| **Next slice** | Selected Movement / Combat Fluidity feature queue complete — run final batch `make ci`, then `$review`/`$refactor` handoff |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
 | **Next engineering review** | After the selected Movement / Combat Fluidity feature batch completes and final `make ci` is green |
 

@@ -14,6 +14,7 @@ var _terminal: bool = false
 var _terminal_clip: String = ""
 var _warnings: Array = []
 
+const MeleeLungePresentationScript := preload("res://scripts/melee_lunge_presentation.gd")
 const IDLE := "idle"
 const WALK := "walk"
 
@@ -32,11 +33,12 @@ func set_locomotion(is_moving: bool) -> void:
 	_play(WALK if is_moving else IDLE)
 
 
-func play_one_shot(name: String) -> void:
+func play_one_shot(name: String, attack_mode: String = "") -> void:
 	if _terminal:
 		return
 	_one_shot = name
-	_play(name)
+	if _play(name):
+		MeleeLungePresentationScript.start(_player, name, attack_mode)
 
 
 func enter_terminal(name: String) -> void:
@@ -69,6 +71,7 @@ func get_debug_state() -> Dictionary:
 		"terminal": _terminal,
 		"terminal_clip": _terminal_clip,
 		"is_moving": _moving,
+		"melee_lunge": MeleeLungePresentationScript.get_debug_state(_player),
 		"warnings": _warnings,
 	}
 
@@ -81,13 +84,14 @@ func _on_finished(name: String) -> void:
 		_play(WALK if _moving else IDLE)
 
 
-func _play(name: String) -> void:
+func _play(name: String) -> bool:
 	if _player == null:
-		return
+		return false
 	if not _player.has_animation(name):
 		_warn({"code": "unknown_clip", "clip": name})
-		return
+		return false
 	_player.play(name)
+	return true
 
 
 func _warn(entry: Dictionary) -> void:

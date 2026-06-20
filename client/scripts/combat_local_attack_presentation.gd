@@ -32,25 +32,25 @@ func consume_if_matches(ev: Dictionary, local_player_id: String) -> bool:
 	return true
 
 
-static func present_local_start(tracker: CombatLocalAttackPresentation, target: String, audio_controller, player_anim, weapon_slot: String = "main_hand") -> void:
+static func present_local_start(tracker: CombatLocalAttackPresentation, target: String, audio_controller, player_anim, weapon_slot: String = "main_hand", attack_mode: String = "") -> void:
 	if tracker != null:
 		tracker.start(target)
 	ClientAudioBridgeScript.attack(audio_controller)
-	_play_animation(player_anim, weapon_slot)
+	_play_animation(player_anim, weapon_slot, attack_mode)
 
 
-static func present_result(tracker: CombatLocalAttackPresentation, ev: Dictionary, local_player_id: String, audio_controller, player_anim) -> void:
+static func present_result(tracker: CombatLocalAttackPresentation, ev: Dictionary, local_player_id: String, audio_controller, player_anim, attack_mode: String = "") -> void:
 	if str(ev.get("source_entity_id", "")) != local_player_id:
 		return
 	if tracker != null and tracker.consume_if_matches(ev, local_player_id):
 		return
 	ClientAudioBridgeScript.attack(audio_controller)
-	_play_animation(player_anim, str(ev.get("weapon_slot", "main_hand")))
+	_play_animation(player_anim, str(ev.get("weapon_slot", "main_hand")), attack_mode)
 
 
-static func _play_animation(player_anim, weapon_slot: String = "main_hand") -> void:
+static func _play_animation(player_anim, weapon_slot: String = "main_hand", attack_mode: String = "") -> void:
 	if player_anim != null:
-		player_anim.play_one_shot("attack_off_hand" if weapon_slot == "off_hand" else "attack")
+		player_anim.play_one_shot("attack_off_hand" if weapon_slot == "off_hand" else "attack", attack_mode)
 
 
 func _target_for_event(ev: Dictionary) -> String:

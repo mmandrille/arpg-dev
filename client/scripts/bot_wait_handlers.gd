@@ -40,6 +40,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return BotAssertionHandlersScript.movement_visual_smoothing_matches(step, state)
 		"wait_command_retarget_grace":
 			return BotAssertionHandlersScript.command_retarget_grace_matches(step, state)
+		"wait_melee_lunge":
+			return BotAssertionHandlersScript.melee_lunge_matches(step, state)
 		"wait_wall_layout":
 			return runner._wall_layout_matches(step, state)
 		"wait_fog_of_war":

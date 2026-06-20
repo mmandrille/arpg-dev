@@ -147,7 +147,7 @@ func set_wall_layout(walls: Array) -> void:
 	for wall in walls:
 		if typeof(wall) != TYPE_DICTIONARY:
 			continue
-		if str((wall as Dictionary).get("kind", "wall")) == "water":
+		if str((wall as Dictionary).get("kind", "wall")) != "wall":
 			continue
 		var normalized := _normalized_occluder(wall as Dictionary)
 		if not normalized.is_empty():

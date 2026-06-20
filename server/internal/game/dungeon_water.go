@@ -75,7 +75,7 @@ func randomWaterObstacles(rng *RNG, rules DungeonGenerationRules, out generatedD
 			if !obstacleGroupAllowed([]wallObstacle{obstacle}, rules, out, generated) {
 				continue
 			}
-			if !waterClearsGeneratedDoors(obstacle, rules, out) {
+			if !floorFeatureClearsGeneratedDoors(obstacle, rules, out) {
 				continue
 			}
 			generated = append(generated, obstacle)
@@ -89,10 +89,10 @@ func randomWaterObstacles(rng *RNG, rules DungeonGenerationRules, out generatedD
 	return generated, true
 }
 
-func waterClearsGeneratedDoors(water wallObstacle, rules DungeonGenerationRules, out generatedDungeonLevel) bool {
+func floorFeatureClearsGeneratedDoors(feature wallObstacle, rules DungeonGenerationRules, out generatedDungeonLevel) bool {
 	clearance := maxFloat(0.75, rules.ObstacleGeneration.WallSegment.Thickness)
 	for _, door := range out.doors {
-		if circleIntersectsAABB(door.pos, clearance, water.pos, water.size) {
+		if circleIntersectsAABB(door.pos, clearance, feature.pos, feature.size) {
 			return false
 		}
 	}

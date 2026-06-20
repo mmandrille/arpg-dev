@@ -82,8 +82,11 @@ func normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 func make_wall_node(wall: Dictionary) -> MeshInstance3D:
 	var pos: Dictionary = wall.get("position", {})
 	var size: Dictionary = wall.get("size", {})
-	if str(wall.get("kind", "wall")) == "water":
-		return _make_water_node(wall)
+	match str(wall.get("kind", "wall")):
+		"water":
+			return _make_water_node(wall)
+		"hole":
+			return _make_hole_node(wall)
 	var node := MeshInstance3D.new()
 	node.name = "Wall_%s" % str(wall.get("id", ""))
 	node.set_meta("wall_id", str(wall.get("id", "")))
@@ -106,6 +109,29 @@ func make_wall_node(wall: Dictionary) -> MeshInstance3D:
 			mat.albedo_color = Color(0.62, 0.64, 0.68)
 		_:
 			mat.albedo_color = Color(0.78, 0.80, 0.82)
+	node.material_override = mat
+	return node
+
+func _make_hole_node(wall: Dictionary) -> MeshInstance3D:
+	var pos: Dictionary = wall.get("position", {})
+	var size: Dictionary = wall.get("size", {})
+	var node := MeshInstance3D.new()
+	node.name = "Hole_%s" % str(wall.get("id", ""))
+	node.set_meta("wall_id", str(wall.get("id", "")))
+	node.set_meta("source", str(wall.get("source", "")))
+	node.set_meta("kind", "hole")
+	var mesh := PlaneMesh.new()
+	mesh.size = Vector2(max(0.25, float(size.get("x", 1.0))), max(0.25, float(size.get("y", 1.0))))
+	node.mesh = mesh
+	node.position = Vector3(float(pos.get("x", 0.0)), 0.012, float(pos.get("y", 0.0)))
+	var mat := StandardMaterial3D.new()
+	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
+	if _ground_factory != null and _ground_factory.has_method("make_hole_texture"):
+		mat.albedo_texture = _ground_factory.make_hole_texture(palette)
+	mat.albedo_color = Color(0.74, 0.70, 0.65)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.roughness = 1.0
+	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.5), max(1.0, float(size.get("y", 1.0)) / 2.5), 1.0)
 	node.material_override = mat
 	return node
 

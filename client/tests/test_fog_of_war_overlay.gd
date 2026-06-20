@@ -16,6 +16,7 @@ func _run() -> void:
 	await _test_organic_edge_rotates_only_while_target_moves()
 	await _test_wall_layout_generates_shadow()
 	await _test_water_layout_skips_shadow()
+	await _test_hole_layout_skips_shadow()
 	await _test_supplied_door_occluder_generates_shadow()
 	await _test_diagonal_wall_shadow_starts_near_visible_edge()
 	await _test_out_of_range_wall_skips_shadow()
@@ -113,6 +114,20 @@ func _test_water_layout_skips_shadow() -> void:
 	_assert_eq("water wall count", int(state.get("wall_count", -1)), 0)
 	_assert_eq("water occluder count", int(state.get("occluder_count", -1)), 0)
 	_assert_eq("water shadow count", int(state.get("shadow_count", -1)), 0)
+	overlay.free()
+
+
+func _test_hole_layout_skips_shadow() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	overlay.set_wall_layout([{"kind": "hole", "position": {"x": 3.0, "y": 0.0}, "size": {"x": 3.0, "y": 3.0}}])
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_eq("hole wall count", int(state.get("wall_count", -1)), 0)
+	_assert_eq("hole occluder count", int(state.get("occluder_count", -1)), 0)
+	_assert_eq("hole shadow count", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
 
 

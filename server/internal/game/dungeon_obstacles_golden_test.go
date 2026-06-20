@@ -13,6 +13,7 @@ type dungeonObstaclesGolden struct {
 		MinimumWallCount          int                      `json:"minimum_wall_count"`
 		MinimumGeneratedWallCount int                      `json:"minimum_generated_wall_count"`
 		MinimumWaterCount         int                      `json:"minimum_water_count"`
+		MinimumHoleCount          int                      `json:"minimum_hole_count"`
 		ShapeFamilies             []string                 `json:"shape_families"`
 		Walls                     []dungeonObstacleWall    `json:"walls"`
 		Doors                     []dungeonReachableTarget `json:"doors"`
@@ -59,14 +60,18 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 	}
 	generatedCount := 0
 	waterCount := 0
+	holeCount := 0
 	shapeFamilies := map[string]bool{}
 	for i, want := range golden.Expected.Walls {
 		got := level.walls[i]
 		if got.source == "generated" {
 			generatedCount++
-			if got.obstacleKind() == obstacleKindWater {
+			switch got.obstacleKind() {
+			case obstacleKindWater:
 				waterCount++
-			} else {
+			case obstacleKindHole:
+				holeCount++
+			default:
 				shapeFamilies[got.shapeFamily] = true
 			}
 		}
@@ -86,6 +91,9 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 	}
 	if waterCount < golden.Expected.MinimumWaterCount {
 		t.Fatalf("water obstacles = %d, want at least %d", waterCount, golden.Expected.MinimumWaterCount)
+	}
+	if holeCount < golden.Expected.MinimumHoleCount {
+		t.Fatalf("hole obstacles = %d, want at least %d", holeCount, golden.Expected.MinimumHoleCount)
 	}
 	if len(shapeFamilies) != len(golden.Expected.ShapeFamilies) {
 		t.Fatalf("shape families = %+v, want %+v", shapeFamilies, golden.Expected.ShapeFamilies)
@@ -116,6 +124,7 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 	t.Helper()
 	golden.Expected.Walls = nil
 	waterCount := 0
+	holeCount := 0
 	shapeFamilies := map[string]bool{}
 	for i, wall := range level.walls {
 		row := dungeonObstacleWall{
@@ -130,9 +139,12 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 		}
 		golden.Expected.Walls = append(golden.Expected.Walls, row)
 		if wall.source == "generated" {
-			if wall.obstacleKind() == obstacleKindWater {
+			switch wall.obstacleKind() {
+			case obstacleKindWater:
 				waterCount++
-			} else {
+			case obstacleKindHole:
+				holeCount++
+			default:
 				shapeFamilies[wall.shapeFamily] = true
 			}
 		}
@@ -140,6 +152,7 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 	golden.Expected.MinimumWallCount = len(level.walls)
 	golden.Expected.MinimumGeneratedWallCount = maxInt(0, len(level.walls)-4)
 	golden.Expected.MinimumWaterCount = waterCount
+	golden.Expected.MinimumHoleCount = holeCount
 	golden.Expected.ShapeFamilies = sortedStringKeys(shapeFamilies)
 	golden.Expected.Doors = nil
 	for _, door := range level.doors {

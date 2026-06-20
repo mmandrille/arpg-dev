@@ -159,6 +159,7 @@
         "shape_weights",
         "doors",
         "water",
+        "holes",
         "clearance"
       ],
       "additionalProperties": false,
@@ -210,6 +211,18 @@
           }
         },
         "water": {
+          "type": "object",
+          "required": ["enabled", "max_attempts", "target_count", "min_size", "max_size"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "max_attempts": { "type": "integer", "minimum": 1 },
+            "target_count": { "$ref": "#/$defs/int_range" },
+            "min_size": { "$ref": "#/$defs/positive_size" },
+            "max_size": { "$ref": "#/$defs/positive_size" }
+          }
+        },
+        "holes": {
           "type": "object",
           "required": ["enabled", "max_attempts", "target_count", "min_size", "max_size"],
           "additionalProperties": false,

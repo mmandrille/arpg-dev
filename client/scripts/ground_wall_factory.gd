@@ -6,6 +6,7 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 var ground_textures: Dictionary = {}
 var wall_textures: Dictionary = {}
 var water_textures: Dictionary = {}
+var hole_textures: Dictionary = {}
 var _dungeon_generation: Dictionary = {}
 
 func make_ground_node(level: int) -> MeshInstance3D:
@@ -108,6 +109,31 @@ func water_texel(x: int, y: int, palette: Dictionary = {}) -> Color:
 	if ((x * 11 + y * 5) % 37) == 0:
 		water = water.lerp(_palette_color(palette, "water_foam", Color("#c2eef1")), 0.34)
 	return water
+
+func make_hole_texture(palette: Dictionary = {}) -> ImageTexture:
+	var cache_key := str(palette.get("id", "default"))
+	if hole_textures.has(cache_key):
+		return hole_textures[cache_key] as ImageTexture
+	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in range(64):
+		for x in range(64):
+			image.set_pixel(x, y, hole_texel(x, y, palette))
+	var texture := ImageTexture.create_from_image(image)
+	hole_textures[cache_key] = texture
+	return texture
+
+func hole_texel(x: int, y: int, palette: Dictionary = {}) -> Color:
+	var void_low := _palette_color(palette, "hole_low", Color("#090a0d"))
+	var void_high := _palette_color(palette, "hole_high", Color("#1b1d22"))
+	var edge := _palette_color(palette, "hole_edge", Color("#46413a"))
+	var noise := int((x * 23 + y * 41 + ((x / 8) * 19) + ((y / 8) * 11)) % 23)
+	var hole := void_low.lerp(void_high, float(noise) / 22.0)
+	var border: int = mini(mini(x, y), mini(63 - x, 63 - y))
+	if border < 7:
+		hole = hole.lerp(edge, 0.55 - float(border) * 0.06)
+	if abs((x % 18) - (y % 18)) <= 1:
+		hole = hole.lerp(_palette_color(palette, "hole_crack", Color("#26282d")), 0.24)
+	return hole
 
 func wall_texel(_texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
 	var brick_w := 16

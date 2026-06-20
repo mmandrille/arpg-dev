@@ -69,6 +69,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_command_retarget_grace":
+			if not command_retarget_grace_matches(step, state):
+				runner._fail("assert_command_retarget_grace failed: want=%s got=%s step=%d scenario=%s" % [
+					str(step), str(state.get("command_retarget_grace", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_wall_layout":
 			if not runner._wall_layout_matches(step, state):
 				runner._fail("assert_wall_layout failed: want=%s wall_count=%d generated=%d non_perimeter=%d level=%d walls=%s step=%d scenario=%s" % [
@@ -434,6 +441,29 @@ static func movement_visual_smoothing_matches(step: Dictionary, state: Dictionar
 	if step.has("offset_max") and float(smoothing.get("offset_length", 0.0)) > float(step.get("offset_max", 0.0)):
 		return false
 	return step.has("active") or step.has("offset_min") or step.has("offset_max")
+
+
+static func command_retarget_grace_matches(step: Dictionary, state: Dictionary) -> bool:
+	var grace: Dictionary = state.get("command_retarget_grace", {})
+	var use_last := bool(step.get("last_dispatched", false))
+	var expected_kind := str(step.get("kind", ""))
+	if step.has("active") and bool(grace.get("active", false)) != bool(step.get("active", false)):
+		return false
+	if expected_kind != "":
+		var got_kind := str(grace.get("last_dispatched_kind" if use_last else "kind", ""))
+		if got_kind != expected_kind:
+			return false
+	for key in ["queued", "replaced", "dispatched", "expired"]:
+		var want_key := "%s_min" % key
+		if step.has(want_key) and int(grace.get("%s_count" % key, 0)) < int(step.get(want_key, 0)):
+			return false
+	if step.has("ground_x") or step.has("ground_z"):
+		var gx := float(grace.get("last_dispatched_ground_x" if use_last else "ground_x", 0.0))
+		var gz := float(grace.get("last_dispatched_ground_z" if use_last else "ground_z", 0.0))
+		var want := Vector2(float(step.get("ground_x", gx)), float(step.get("ground_z", gz)))
+		if Vector2(gx, gz).distance_to(want) > float(step.get("distance_max", 0.05)):
+			return false
+	return step.has("active") or expected_kind != "" or step.has("queued_min") or step.has("replaced_min") or step.has("dispatched_min") or step.has("expired_min") or step.has("ground_x") or step.has("ground_z")
 
 
 static func _assert_audio_state(runner, step: Dictionary, state: Dictionary) -> bool:

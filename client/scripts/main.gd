@@ -62,6 +62,7 @@ const CombatReachScript := preload("res://scripts/combat_reach.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 const MovementVisualSmoothingScript := preload("res://scripts/movement_visual_smoothing.gd")
+const CommandRetargetGraceScript := preload("res://scripts/command_retarget_grace.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
@@ -242,6 +243,7 @@ var _attack_buffer: CombatInputBuffer = CombatInputBufferScript.new()
 var _sticky_attack: CombatStickyTarget = CombatStickyTargetScript.new()
 var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttackPresentationScript.new()
 var _movement_visual_smoothing: MovementVisualSmoothing = MovementVisualSmoothingScript.new()
+var _command_retarget_grace: CommandRetargetGrace = CommandRetargetGraceScript.new()
 var _movement_requires_fresh_input: bool = false
 var _player_walk_linger: float = 0.0
 var _last_facing_direction := Vector2(1.0, 0.0)
@@ -2282,7 +2284,6 @@ func _sync_companion_bar() -> void:
 	if mercenary_panel != null: mercenary_panel.set_companions(companions)
 
 # --- input + prediction -----------------------------------------------------
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		_sustained_click.clear()
@@ -2392,7 +2393,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			_stop_active_channel_skill()
 			get_viewport().set_input_as_handled()
 			return
-
 func _handle_input(delta: float) -> void:
 	_update_loot_hover_label()
 	if _input_locked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
@@ -2401,7 +2401,6 @@ func _handle_input(delta: float) -> void:
 		_clear_pending_attack_commands()
 		_stop_active_channel_skill()
 		return
-
 	_send_cooldown -= delta
 	_attack_cooldown -= delta
 	if player_hp <= 0:
@@ -2413,9 +2412,10 @@ func _handle_input(delta: float) -> void:
 	_tick_active_channel_skill(delta)
 	_tick_attack_buffer(delta)
 	_tick_sticky_attack()
+	if _command_retarget_grace.tick_and_dispatch(delta, _attack_cooldown, client, last_server_tick, Callable(self, "_close_gameplay_panels_for_movement"), Callable(self, "_mark_local_player_walking")):
+		_attack_cooldown = ClientConstants.SEND_INTERVAL
 	if bot_mode:
 		return
-
 	var input := Vector2.ZERO
 	if Input.is_key_pressed(KEY_W): input.y -= 1
 	if Input.is_key_pressed(KEY_S): input.y += 1
@@ -2426,7 +2426,6 @@ func _handle_input(delta: float) -> void:
 		input = Vector2.ZERO
 	elif input == Vector2.ZERO:
 		_movement_requires_fresh_input = false
-
 	if input != Vector2.ZERO and not _movement_requires_fresh_input and _send_cooldown <= 0.0:
 		var dir := _camera_relative_flat_direction(input)
 		_close_gameplay_panels_for_movement()
@@ -2436,16 +2435,13 @@ func _handle_input(delta: float) -> void:
 		_mark_local_player_walking()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
 		_send_cooldown = ClientConstants.SEND_INTERVAL
-
 	if _hold_input_allowed():
 		_tick_sustained_click()
 	elif _sustained_click.active:
 		_sustained_click.clear()
 		_clear_pending_attack_commands()
-
 func _is_inventory_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_I or event.physical_keycode == KEY_I or event.unicode == 105 or event.unicode == 73
-
 func _is_character_stats_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_C or event.physical_keycode == KEY_C or event.unicode == 99 or event.unicode == 67
 
@@ -2700,7 +2696,12 @@ func _resolve_click_at_mouse() -> Dictionary:
 
 func _execute_click_pick(pick: Dictionary) -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
-		if str(pick.get("kind", "")) == "monster":
+		if str(pick.get("kind", "")) == "floor":
+			_clear_pending_attack_commands()
+			_command_retarget_grace.queue_floor(pick.get("ground", Vector3.ZERO))
+			_close_gameplay_panels_for_movement()
+			_mark_local_player_walking()
+		elif str(pick.get("kind", "")) == "monster":
 			_defer_monster_click(str(pick.get("target_id", "")))
 		else:
 			_clear_pending_attack_commands()
@@ -5308,6 +5309,7 @@ func get_bot_state() -> Dictionary:
 		"gold": gold,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
 		"movement_visual_smoothing": _movement_visual_smoothing.get_debug_state(character_visual),
+		"command_retarget_grace": _command_retarget_grace.get_debug_state(),
 		"current_level": current_level,
 		"walls": current_wall_layout.duplicate(true),
 		"wall_count": current_wall_layout.size(),

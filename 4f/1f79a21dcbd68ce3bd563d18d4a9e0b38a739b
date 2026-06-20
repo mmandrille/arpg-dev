@@ -1,0 +1,25 @@
+docs/plans/v317_2026-06-20-water-hole-material-motion.md
+  s_cf8001387eb9d4::t_bc906b35d05ed2 1-49
+docs/specs/v317_spec-water-hole-material-motion.md
+  s_cf8001387eb9d4::t_bc906b35d05ed2 1-48
+client/tests/test_factories.gd
+  s_cf8001387eb9d4::t_bc906b35d05ed2 101,117
+client/scripts/wall_renderer.gd
+  s_cf8001387eb9d4::t_bc906b35d05ed2 265,289,292-316
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "4f1f79a21dcbd68ce3bd563d18d4a9e0b38a739b",
+  "prompts": {},
+  "sessions": {
+    "s_cf8001387eb9d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee67e-8c36-75c1-a4ae-3ec301cea725",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

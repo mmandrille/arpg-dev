@@ -1,0 +1,28 @@
+docs/reviews/backend/20260620_v308-backend.md
+  s_d8f19e6e03317d::t_6f2643e6364ec3 1-183
+docs/reviews/extras/20260620_v308-shared-tooling-and-process.md
+  s_d8f19e6e03317d::t_9c9fe5ea7ebf58 1-151
+docs/reviews/client/20260620_v308-client.md
+  s_d8f19e6e03317d::t_193826628985c6 1-160
+docs/reviews/20260620_v308-overview.md
+  s_d8f19e6e03317d::t_74525e60f7394b 1-149
+PROGRESS.md
+  s_d8f19e6e03317d::t_2ba050e3a0fee6 90-104
+  s_d8f19e6e03317d::t_517bc0569b93ce 30-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a590d4f54ef9779036f18627644737d4262216f5",
+  "prompts": {},
+  "sessions": {
+    "s_d8f19e6e03317d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b11ebf0-e533-4bb2-8b6f-5f9a06c89568",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

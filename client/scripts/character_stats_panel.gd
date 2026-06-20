@@ -34,8 +34,10 @@ class DerivedStatTooltipLabel:
 
 	func _make_custom_tooltip(for_text: String) -> Object:
 		var panel := PanelContainer.new()
+		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_theme_stylebox_override("panel", _tooltip_style())
 		var label := Label.new()
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		label.text = for_text
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.custom_minimum_size = Vector2(460, 0)

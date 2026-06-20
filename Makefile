@@ -8,6 +8,8 @@ PY := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 COMPOSE := docker-compose
 SERVER_DIR := $(ROOT)/server
+COMPOSE_PROJECT_NAME ?= arpg-dev
+export COMPOSE_PROJECT_NAME
 
 # Connection + runtime settings (override on the command line as needed).
 DATABASE_URL ?= postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable

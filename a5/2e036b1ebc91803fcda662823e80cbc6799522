@@ -1,0 +1,76 @@
+PROGRESS.md
+  s_719c59d1789d7e::t_47cd4d45fa6438 26,28-29,108
+tools/bot/scenarios/102_line_of_sight_blockers.json
+  s_719c59d1789d7e::t_bc3e52700b2350 18
+  s_719c59d1789d7e::t_036a9191250089 1-17,19-20
+server/internal/game/dungeon_obstacle_variety_test.go
+  s_719c59d1789d7e::t_9e81ab2796cce4 50-53
+tools/bot/scenarios/client/77_line_of_sight_blocker_shadow.json
+  s_719c59d1789d7e::t_036a9191250089 1-28
+shared/protocol/state_delta.v8.schema.json
+  s_719c59d1789d7e::t_5c2e6e5a25d997 114
+docs/progress/slice-lifecycle.md
+  s_719c59d1789d7e::t_47cd4d45fa6438 315
+shared/protocol/session_snapshot.v8.schema.json
+  s_719c59d1789d7e::t_5c2e6e5a25d997 67
+server/internal/game/types.go
+  s_719c59d1789d7e::t_216f63512e490b 359-364
+client/scripts/wall_renderer.gd
+  s_719c59d1789d7e::t_919f6b191e31d1 84-85
+client/scripts/fog_of_war_overlay.gd
+  s_719c59d1789d7e::t_919f6b191e31d1 150,479-482
+server/internal/game/rules.go
+  s_719c59d1789d7e::t_216f63512e490b 958
+docs/specs/v300_spec-line-of-sight-blockers.md
+  s_719c59d1789d7e::t_2deffb1b572e19 1-2,4-73,75-107
+  s_719c59d1789d7e::t_47cd4d45fa6438 3
+  s_719c59d1789d7e::t_036a9191250089 74
+shared/rules/worlds.v0.schema.json
+  s_719c59d1789d7e::t_725fc72dcd1b0b 56-57,70-71,87-88
+  s_719c59d1789d7e::t_5c2e6e5a25d997 42,116
+server/internal/game/obstacle_blocking.go
+  s_719c59d1789d7e::t_216f63512e490b 33-35
+server/internal/game/fog_of_war_test.go
+  s_719c59d1789d7e::t_9e81ab2796cce4 131-181,183-184,186-213,368-381
+  s_719c59d1789d7e::t_b9090d64ce8326 182
+  s_719c59d1789d7e::t_2efdc3cb6f3204 185
+shared/rules/worlds.v0.json
+  s_719c59d1789d7e::t_5c2e6e5a25d997 321-365,367-382
+  s_719c59d1789d7e::t_47bdba391de08d 366
+server/internal/game/dungeon_gen.go
+  s_719c59d1789d7e::t_216f63512e490b 344,362-363,378-380,395
+docs/plans/v300_2026-06-19-line-of-sight-blockers.md
+  s_719c59d1789d7e::t_b95c4ae8436d68 82-83
+  s_719c59d1789d7e::t_0a71fba30c8b1c 146-148
+  s_719c59d1789d7e::t_14de5ebc02e279 18,35,95,99-102,114-117
+  s_719c59d1789d7e::t_d53de11d72f88e 131-133
+  s_719c59d1789d7e::t_2deffb1b572e19 1-2,4-17,19-34,36-44,46-56,64-65,67-81,84-94,96-98,103-113,118-130,134-143,145,149-163,167-175,183-192
+  s_719c59d1789d7e::t_036a9191250089 45,144
+  s_719c59d1789d7e::t_47cd4d45fa6438 3,57-63,66,164-166,176-182
+server/internal/game/sim.go
+  s_719c59d1789d7e::t_216f63512e490b 231,748,6268-6269
+client/tests/test_fog_of_war_overlay.gd
+  s_719c59d1789d7e::t_919f6b191e31d1 18,21-22,109-123,152-176
+server/internal/game/dungeon_obstacle_variety.go
+  s_719c59d1789d7e::t_216f63512e490b 50-58
+client/tests/test_factories.gd
+  s_719c59d1789d7e::t_919f6b191e31d1 107,111
+docs/as-built/v300_line-of-sight-blockers.md
+  s_719c59d1789d7e::t_47cd4d45fa6438 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a52e036b1ebc91803fcda662823e80cbc6799522",
+  "prompts": {},
+  "sessions": {
+    "s_719c59d1789d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee231-6f1d-7402-b00b-73fb01b62c13",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -39,7 +39,22 @@
                   "quake",
                   "arrow",
                   "pin",
-                  "volley"
+                  "volley",
+                  "passive_arcane_focus",
+                  "passive_mana_weaving",
+                  "passive_spell_dynamo",
+                  "passive_iron_hide",
+                  "passive_battle_tempo",
+                  "passive_crushing_force",
+                  "passive_vigilant_guard",
+                  "passive_faithful_bulwark",
+                  "passive_consecrated_vitality",
+                  "passive_quick_hands",
+                  "passive_killer_instinct",
+                  "passive_evasive_footwork",
+                  "passive_trail_sense",
+                  "passive_precision_draw",
+                  "passive_deadeye"
                 ]
               },
               "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },

@@ -14,6 +14,8 @@ Plan: [`docs/plans/v309_2026-06-20-passive-skill-column.md`](../plans/v309_2026-
   - Paladin: Vigilant Guard, Faithful Bulwark, Consecrated Vitality.
   - Rogue: Quick Hands, Killer Instinct, Evasive Footwork.
   - Ranger: Trail Sense, Precision Draw, Deadeye.
+- Pinned passive nodes to a fixed right-side tree column instead of compact-centering them with active row nodes.
+- Added unique code-native passive icon shapes for all 15 passive nodes.
 - Applied learned passive bonuses to derived stats, passive stat totals used by skill modifiers, and stat breakdown rows with `passive_skill` source kind.
 - Updated skill-panel tooltips to show passive stat effects and verified code-native icon metadata.
 - Kept class-foundation scenario coverage scoped to scenario-relevant skills; passive stat-only nodes are covered by shared validation and focused Go tests.

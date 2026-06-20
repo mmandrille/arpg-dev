@@ -277,7 +277,7 @@
     "arcane_focus": {
       "icon": {
         "label": "A",
-        "shape": "orb_projectile",
+        "shape": "passive_arcane_focus",
         "color": "#7651d8",
         "accent": "#efe7ff"
       },
@@ -287,7 +287,7 @@
     "mana_weaving": {
       "icon": {
         "label": "W",
-        "shape": "bolt",
+        "shape": "passive_mana_weaving",
         "color": "#3f8cff",
         "accent": "#dff4ff"
       },
@@ -297,7 +297,7 @@
     "spell_dynamo": {
       "icon": {
         "label": "D",
-        "shape": "burst",
+        "shape": "passive_spell_dynamo",
         "color": "#9f6fff",
         "accent": "#fff2ff"
       },
@@ -307,7 +307,7 @@
     "iron_hide": {
       "icon": {
         "label": "I",
-        "shape": "shield",
+        "shape": "passive_iron_hide",
         "color": "#a43b31",
         "accent": "#ffd4bf"
       },
@@ -317,7 +317,7 @@
     "battle_tempo": {
       "icon": {
         "label": "B",
-        "shape": "flame",
+        "shape": "passive_battle_tempo",
         "color": "#cf4f3e",
         "accent": "#ffe0ad"
       },
@@ -327,7 +327,7 @@
     "crushing_force": {
       "icon": {
         "label": "F",
-        "shape": "quake",
+        "shape": "passive_crushing_force",
         "color": "#8b5a34",
         "accent": "#ffd68a"
       },
@@ -337,7 +337,7 @@
     "vigilant_guard": {
       "icon": {
         "label": "G",
-        "shape": "shield",
+        "shape": "passive_vigilant_guard",
         "color": "#d9a33f",
         "accent": "#fff1bd"
       },
@@ -347,7 +347,7 @@
     "faithful_bulwark": {
       "icon": {
         "label": "B",
-        "shape": "shield",
+        "shape": "passive_faithful_bulwark",
         "color": "#f0c23d",
         "accent": "#fff7b0"
       },
@@ -357,7 +357,7 @@
     "consecrated_vitality": {
       "icon": {
         "label": "V",
-        "shape": "heart",
+        "shape": "passive_consecrated_vitality",
         "color": "#74d6a1",
         "accent": "#e5fff0"
       },
@@ -367,7 +367,7 @@
     "quick_hands": {
       "icon": {
         "label": "Q",
-        "shape": "dash",
+        "shape": "passive_quick_hands",
         "color": "#55d5ff",
         "accent": "#e7fbff"
       },
@@ -377,7 +377,7 @@
     "killer_instinct": {
       "icon": {
         "label": "K",
-        "shape": "slash",
+        "shape": "passive_killer_instinct",
         "color": "#7c65ff",
         "accent": "#e8e0ff"
       },
@@ -387,7 +387,7 @@
     "evasive_footwork": {
       "icon": {
         "label": "E",
-        "shape": "dash",
+        "shape": "passive_evasive_footwork",
         "color": "#2dbd9f",
         "accent": "#d9fff5"
       },
@@ -397,7 +397,7 @@
     "trail_sense": {
       "icon": {
         "label": "T",
-        "shape": "pin",
+        "shape": "passive_trail_sense",
         "color": "#2fbf61",
         "accent": "#d7ffd6"
       },
@@ -407,7 +407,7 @@
     "precision_draw": {
       "icon": {
         "label": "P",
-        "shape": "arrow",
+        "shape": "passive_precision_draw",
         "color": "#53d7a2",
         "accent": "#e0fff0"
       },
@@ -417,7 +417,7 @@
     "deadeye": {
       "icon": {
         "label": "D",
-        "shape": "volley",
+        "shape": "passive_deadeye",
         "color": "#6bcf45",
         "accent": "#f4ffd1"
       },

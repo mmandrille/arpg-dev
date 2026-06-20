@@ -30,38 +30,150 @@ func _draw() -> void:
 	var center := rect.size * 0.5
 	var radius := min_side * 0.42
 	draw_circle(center, radius, Color(0.015, 0.014, 0.012, 0.92))
-	match shape:
-		"arrow":
-			_draw_arrow(center, radius)
-		"burst":
-			_draw_burst(center, radius)
-		"dash":
-			_draw_dash(center, radius)
-		"heart":
-			_draw_heart(center, radius)
-		"ice_spike":
-			_draw_ice_spike(center, radius)
-		"flame":
-			_draw_flame(center, radius)
-		"leap":
-			_draw_leap(center, radius)
-		"orb_projectile":
-			_draw_orb_projectile(center, radius)
-		"pin":
-			_draw_pin(center, radius)
-		"poison_dagger":
-			_draw_poison_dagger(center, radius)
-		"quake":
-			_draw_quake(center, radius)
-		"shield":
-			_draw_shield(center, radius)
-		"slash":
-			_draw_slash(center, radius)
-		"volley":
-			_draw_volley(center, radius)
-		_:
-			_draw_bolt(center, radius)
+	if _draw_passive_shape(center, radius):
+		pass
+	else:
+		match shape:
+			"arrow":
+				_draw_arrow(center, radius)
+			"burst":
+				_draw_burst(center, radius)
+			"dash":
+				_draw_dash(center, radius)
+			"heart":
+				_draw_heart(center, radius)
+			"ice_spike":
+				_draw_ice_spike(center, radius)
+			"flame":
+				_draw_flame(center, radius)
+			"leap":
+				_draw_leap(center, radius)
+			"orb_projectile":
+				_draw_orb_projectile(center, radius)
+			"pin":
+				_draw_pin(center, radius)
+			"poison_dagger":
+				_draw_poison_dagger(center, radius)
+			"quake":
+				_draw_quake(center, radius)
+			"shield":
+				_draw_shield(center, radius)
+			"slash":
+				_draw_slash(center, radius)
+			"volley":
+				_draw_volley(center, radius)
+			_:
+				_draw_bolt(center, radius)
 	draw_arc(center, radius, 0.0, TAU, 40, accent_color, 2.0, true)
+
+
+func _draw_passive_shape(center: Vector2, radius: float) -> bool:
+	match shape:
+		"passive_arcane_focus":
+			_draw_orb_projectile(center, radius)
+			draw_arc(center, radius * 0.72, PI * 0.12, PI * 1.22, 28, accent_color, 1.8, true)
+		"passive_mana_weaving":
+			for i in range(3):
+				var y := -radius * 0.42 + float(i) * radius * 0.36
+				_draw_wave(center + Vector2(0.0, y), radius * 0.72)
+		"passive_spell_dynamo":
+			_draw_burst(center, radius * 0.86)
+			draw_circle(center, radius * 0.26, Color(0.015, 0.014, 0.012, 0.92))
+			draw_arc(center, radius * 0.26, 0.0, TAU, 24, accent_color, 1.8, true)
+		"passive_iron_hide":
+			_draw_shield(center, radius)
+			for y in [-0.28, 0.02, 0.32]:
+				draw_line(center + Vector2(-radius * 0.34, radius * y), center + Vector2(radius * 0.34, radius * y), accent_color, 1.8, true)
+		"passive_battle_tempo":
+			for i in range(3):
+				var x := -radius * 0.44 + float(i) * radius * 0.36
+				_draw_chevron(center + Vector2(x, 0.0), radius * 0.26)
+			draw_line(center + Vector2(-radius * 0.68, radius * 0.58), center + Vector2(radius * 0.68, radius * 0.58), accent_color, 2.0, true)
+		"passive_crushing_force":
+			_draw_quake(center, radius)
+			draw_rect(Rect2(center + Vector2(-radius * 0.42, -radius * 0.60), Vector2(radius * 0.84, radius * 0.32)), fill_color)
+			draw_rect(Rect2(center + Vector2(-radius * 0.28, -radius * 0.30), Vector2(radius * 0.56, radius * 0.34)), fill_color)
+		"passive_vigilant_guard":
+			_draw_shield(center, radius)
+			_draw_eye(center + Vector2(0.0, -radius * 0.12), radius * 0.44)
+		"passive_faithful_bulwark":
+			for i in range(3):
+				draw_rect(Rect2(center + Vector2(-radius * 0.66 + float(i) * radius * 0.44, -radius * 0.62), Vector2(radius * 0.34, radius * 0.40)), fill_color)
+			draw_rect(Rect2(center + Vector2(-radius * 0.70, -radius * 0.16), Vector2(radius * 1.40, radius * 0.72)), fill_color)
+			draw_line(center + Vector2(-radius * 0.70, -radius * 0.16), center + Vector2(radius * 0.70, -radius * 0.16), accent_color, 2.0, true)
+		"passive_consecrated_vitality":
+			_draw_heart(center, radius)
+			draw_line(center + Vector2(0.0, -radius * 0.34), center + Vector2(0.0, radius * 0.34), accent_color, 3.0, true)
+			draw_line(center + Vector2(-radius * 0.28, 0.0), center + Vector2(radius * 0.28, 0.0), accent_color, 3.0, true)
+		"passive_quick_hands":
+			_draw_dash(center, radius)
+			for i in range(3):
+				draw_line(center + Vector2(-radius * 0.80, -radius * 0.44 + float(i) * radius * 0.34), center + Vector2(-radius * 0.38, -radius * 0.54 + float(i) * radius * 0.34), accent_color, 2.2, true)
+		"passive_killer_instinct":
+			_draw_target(center, radius * 0.72)
+			_draw_slash(center, radius * 0.92)
+		"passive_evasive_footwork":
+			_draw_footprint(center + Vector2(-radius * 0.24, radius * 0.18), radius * 0.34)
+			_draw_footprint(center + Vector2(radius * 0.26, -radius * 0.20), radius * 0.34)
+		"passive_trail_sense":
+			_draw_pin(center, radius)
+			draw_line(center + Vector2(0.0, -radius * 0.72), center + Vector2(0.0, radius * 0.72), accent_color, 1.6, true)
+			draw_line(center + Vector2(-radius * 0.72, 0.0), center + Vector2(radius * 0.72, 0.0), accent_color, 1.6, true)
+		"passive_precision_draw":
+			_draw_arrow(center, radius)
+			draw_arc(center + Vector2(-radius * 0.20, radius * 0.02), radius * 0.56, -PI * 0.45, PI * 0.45, 20, accent_color, 2.0, true)
+		"passive_deadeye":
+			_draw_target(center, radius * 0.76)
+			draw_line(center + Vector2(-radius * 0.82, radius * 0.58), center + Vector2(radius * 0.62, -radius * 0.48), fill_color, radius * 0.12, true)
+			draw_line(center + Vector2(-radius * 0.82, radius * 0.58), center + Vector2(radius * 0.62, -radius * 0.48), accent_color, radius * 0.04, true)
+		_:
+			return false
+	return true
+
+
+func _draw_wave(center: Vector2, width: float) -> void:
+	var points := PackedVector2Array()
+	for i in range(9):
+		var t := float(i) / 8.0
+		var x := -width * 0.5 + width * t
+		var y := sin(t * TAU) * width * 0.12
+		points.append(center + Vector2(x, y))
+	draw_polyline(points, fill_color, 4.0, false)
+	draw_polyline(points, accent_color, 1.6, false)
+
+
+func _draw_chevron(center: Vector2, radius: float) -> void:
+	var points := PackedVector2Array([
+		center + Vector2(-radius, -radius),
+		center + Vector2(radius * 0.20, 0.0),
+		center + Vector2(-radius, radius),
+	])
+	draw_polyline(points, fill_color, 5.0, false)
+	draw_polyline(points, accent_color, 1.8, false)
+
+
+func _draw_eye(center: Vector2, radius: float) -> void:
+	draw_arc(center, radius, PI * 0.05, PI * 0.95, 22, accent_color, 2.0, true)
+	draw_arc(center, radius, PI * 1.05, PI * 1.95, 22, accent_color, 2.0, true)
+	draw_circle(center, radius * 0.26, accent_color)
+
+
+func _draw_target(center: Vector2, radius: float) -> void:
+	for scale in [1.0, 0.58, 0.24]:
+		draw_arc(center, radius * scale, 0.0, TAU, 32, accent_color if scale < 1.0 else fill_color, 2.0, true)
+	draw_line(center + Vector2(-radius, 0.0), center + Vector2(radius, 0.0), accent_color, 1.6, true)
+	draw_line(center + Vector2(0.0, -radius), center + Vector2(0.0, radius), accent_color, 1.6, true)
+
+
+func _draw_footprint(center: Vector2, radius: float) -> void:
+	var sole := PackedVector2Array()
+	for i in range(18):
+		var t := TAU * float(i) / 18.0
+		sole.append(center + Vector2(cos(t) * radius * 0.30, sin(t) * radius * 0.46))
+	draw_colored_polygon(sole, fill_color)
+	draw_arc(center, radius * 0.46, 0.0, TAU, 18, accent_color, 1.8, true)
+	for i in range(3):
+		draw_circle(center + Vector2(-radius * 0.30 + float(i) * radius * 0.30, -radius * 0.62), radius * 0.10, accent_color)
 
 
 func _draw_bolt(center: Vector2, radius: float) -> void:

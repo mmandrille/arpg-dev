@@ -7,6 +7,7 @@ const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_obje
 const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
+const FLOAT_BOUND_EPSILON := 0.00001
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -411,12 +412,13 @@ static func _assert_discovery_minimap(runner, step: Dictionary, state: Dictionar
 	for key in ["pin_x", "pin_y", "quest_path_start_x", "quest_path_start_y", "quest_path_end_x", "quest_path_end_y", "quest_path_angle_radians"]:
 		var min_key := "%s_min" % key
 		var max_key := "%s_max" % key
-		if step.has(min_key) and float(minimap.get(key, 0.0)) < float(step.get(min_key, 0.0)):
+		var got := float(minimap.get(key, 0.0))
+		if step.has(min_key) and got < float(step.get(min_key, 0.0)) - FLOAT_BOUND_EPSILON:
 			runner._fail("assert_discovery_minimap failed: %s want_min=%s got=%s minimap=%s step=%d scenario=%s" % [
 				key, str(step.get(min_key, 0.0)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
 			])
 			return false
-		if step.has(max_key) and float(minimap.get(key, 0.0)) > float(step.get(max_key, 0.0)):
+		if step.has(max_key) and got > float(step.get(max_key, 0.0)) + FLOAT_BOUND_EPSILON:
 			runner._fail("assert_discovery_minimap failed: %s want_max=%s got=%s minimap=%s step=%d scenario=%s" % [
 				key, str(step.get(max_key, 0.0)), str(minimap.get(key, null)), str(minimap), runner._step_index, str(runner.scenario.get("id", "?"))
 			])

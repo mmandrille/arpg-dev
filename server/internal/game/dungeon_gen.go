@@ -60,6 +60,12 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
+		if err := placeDungeonWater(seed, rules, &out); err != nil {
+			return generatedDungeonLevel{}, err
+		}
+		if err := placeDungeonHoles(seed, rules, &out); err != nil {
+			return generatedDungeonLevel{}, err
+		}
 		if err := validateGeneratedDungeonReachability(rules, out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
@@ -90,6 +96,12 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generatedDungeonLevel{}, err
 	}
 	if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, &out); err != nil {
+		return generatedDungeonLevel{}, err
+	}
+	if err := placeDungeonWater(seed, rules, &out); err != nil {
+		return generatedDungeonLevel{}, err
+	}
+	if err := placeDungeonHoles(seed, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	if err := validateGeneratedDungeonReachability(rules, out); err != nil {
@@ -264,7 +276,8 @@ func randomObstacleGroups(rng *RNG, rules DungeonGenerationRules, out generatedD
 		placed := false
 		for try := 0; try < 32; try++ {
 			shape := chooseObstacleShape(rng, obstacles.ShapeWeights)
-			group := randomObstacleGroup(rng, rules, shape)
+			kind := chooseSolidObstacleKind(rng, obstacles.SolidKindWeights)
+			group := randomObstacleGroup(rng, rules, shape, kind)
 			if len(group) == 0 {
 				continue
 			}
@@ -299,22 +312,22 @@ func chooseObstacleShape(rng *RNG, weights ObstacleShapeWeights) string {
 	return "block"
 }
 
-func randomObstacleGroup(rng *RNG, rules DungeonGenerationRules, shape string) []wallObstacle {
+func randomObstacleGroup(rng *RNG, rules DungeonGenerationRules, shape string, kind string) []wallObstacle {
 	switch shape {
 	case "line":
-		return randomLineObstacle(rng, rules)
+		return randomLineObstacle(rng, rules, kind)
 	case "l":
-		return randomLObstacle(rng, rules)
+		return randomLObstacle(rng, rules, kind)
 	case "t":
-		return randomTObstacle(rng, rules)
+		return randomTObstacle(rng, rules, kind)
 	case "block":
-		return randomBlockObstacle(rng, rules)
+		return randomBlockObstacle(rng, rules, kind)
 	default:
 		return nil
 	}
 }
 
-func randomLineObstacle(rng *RNG, rules DungeonGenerationRules) []wallObstacle {
+func randomLineObstacle(rng *RNG, rules DungeonGenerationRules, kind string) []wallObstacle {
 	length := randomIntRange(rng, rules.ObstacleGeneration.WallSegment.MinLength, rules.ObstacleGeneration.WallSegment.MaxLength)
 	thickness := rules.ObstacleGeneration.WallSegment.Thickness
 	horizontal := rng.IntN(2) == 0
@@ -327,10 +340,12 @@ func randomLineObstacle(rng *RNG, rules DungeonGenerationRules) []wallObstacle {
 		size:        size,
 		source:      "generated",
 		shapeFamily: "line",
+		kind:        kind,
+		blocksLOS:   solidObstacleLineOfSightOverride(kind),
 	}}
 }
 
-func randomLObstacle(rng *RNG, rules DungeonGenerationRules) []wallObstacle {
+func randomLObstacle(rng *RNG, rules DungeonGenerationRules, kind string) []wallObstacle {
 	a := float64(randomIntRange(rng, rules.ObstacleGeneration.WallSegment.MinLength, rules.ObstacleGeneration.WallSegment.MaxLength))
 	b := float64(randomIntRange(rng, rules.ObstacleGeneration.WallSegment.MinLength, rules.ObstacleGeneration.WallSegment.MaxLength))
 	t := rules.ObstacleGeneration.WallSegment.Thickness
@@ -344,12 +359,12 @@ func randomLObstacle(rng *RNG, rules DungeonGenerationRules) []wallObstacle {
 		ySign = -1
 	}
 	return []wallObstacle{
-		{pos: Vec2{X: anchor.X + xSign*a/2, Y: anchor.Y}, size: Vec2{X: a, Y: t}, source: "generated", shapeFamily: "l"},
-		{pos: Vec2{X: anchor.X + xSign*a, Y: anchor.Y + ySign*b/2}, size: Vec2{X: t, Y: b}, source: "generated", shapeFamily: "l"},
+		{pos: Vec2{X: anchor.X + xSign*a/2, Y: anchor.Y}, size: Vec2{X: a, Y: t}, source: "generated", shapeFamily: "l", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
+		{pos: Vec2{X: anchor.X + xSign*a, Y: anchor.Y + ySign*b/2}, size: Vec2{X: t, Y: b}, source: "generated", shapeFamily: "l", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
 	}
 }
 
-func randomTObstacle(rng *RNG, rules DungeonGenerationRules) []wallObstacle {
+func randomTObstacle(rng *RNG, rules DungeonGenerationRules, kind string) []wallObstacle {
 	left := float64(randomIntRange(rng, rules.ObstacleGeneration.WallSegment.MinLength, rules.ObstacleGeneration.WallSegment.MaxLength/2))
 	right := float64(randomIntRange(rng, rules.ObstacleGeneration.WallSegment.MinLength, rules.ObstacleGeneration.WallSegment.MaxLength/2))
 	stem := float64(randomIntRange(rng, rules.ObstacleGeneration.WallSegment.MinLength, rules.ObstacleGeneration.WallSegment.MaxLength))
@@ -360,13 +375,13 @@ func randomTObstacle(rng *RNG, rules DungeonGenerationRules) []wallObstacle {
 		stemSign = -1
 	}
 	return []wallObstacle{
-		{pos: Vec2{X: anchor.X - left/2, Y: anchor.Y}, size: Vec2{X: left, Y: t}, source: "generated", shapeFamily: "t"},
-		{pos: Vec2{X: anchor.X + right/2, Y: anchor.Y}, size: Vec2{X: right, Y: t}, source: "generated", shapeFamily: "t"},
-		{pos: Vec2{X: anchor.X, Y: anchor.Y + stemSign*stem/2}, size: Vec2{X: t, Y: stem}, source: "generated", shapeFamily: "t"},
+		{pos: Vec2{X: anchor.X - left/2, Y: anchor.Y}, size: Vec2{X: left, Y: t}, source: "generated", shapeFamily: "t", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
+		{pos: Vec2{X: anchor.X + right/2, Y: anchor.Y}, size: Vec2{X: right, Y: t}, source: "generated", shapeFamily: "t", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
+		{pos: Vec2{X: anchor.X, Y: anchor.Y + stemSign*stem/2}, size: Vec2{X: t, Y: stem}, source: "generated", shapeFamily: "t", kind: kind, blocksLOS: solidObstacleLineOfSightOverride(kind)},
 	}
 }
 
-func randomBlockObstacle(rng *RNG, rules DungeonGenerationRules) []wallObstacle {
+func randomBlockObstacle(rng *RNG, rules DungeonGenerationRules, kind string) []wallObstacle {
 	block := rules.ObstacleGeneration.SolidBlock
 	width := float64(randomIntRange(rng, int(math.Ceil(block.MinSize.X)), int(math.Floor(block.MaxSize.X))))
 	height := float64(randomIntRange(rng, int(math.Ceil(block.MinSize.Y)), int(math.Floor(block.MaxSize.Y))))
@@ -376,6 +391,8 @@ func randomBlockObstacle(rng *RNG, rules DungeonGenerationRules) []wallObstacle 
 		size:        size,
 		source:      "generated",
 		shapeFamily: "block",
+		kind:        kind,
+		blocksLOS:   solidObstacleLineOfSightOverride(kind),
 	}}
 }
 
@@ -946,7 +963,7 @@ func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out g
 		}
 	}
 	for _, wall := range out.walls {
-		if circleIntersectsAABB(pos, rules.ObstacleGeneration.Clearance.Monster, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, rules.ObstacleGeneration.Clearance.Monster, wall.pos, wall.size) {
 			return true
 		}
 	}
@@ -1031,7 +1048,7 @@ func generatedDungeonBlockedFn(nav NavigationRules, out generatedDungeonLevel) f
 	return func(gx, gy int) bool {
 		center := gridToWorld(nav, gridCell{x: gx, y: gy})
 		for _, wall := range out.walls {
-			if circleIntersectsAABB(center, playerRadius, wall.pos, wall.size) {
+			if obstacleBlocksMovement(wall) && circleIntersectsAABB(center, playerRadius, wall.pos, wall.size) {
 				return true
 			}
 		}

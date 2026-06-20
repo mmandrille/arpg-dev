@@ -25,7 +25,8 @@
       "id": "wall_-1_0004",
       "position": { "x": 28, "y": 14 },
       "size": { "x": 8, "y": 1 },
-      "source": "generated"
+      "source": "generated",
+      "kind": "water"
     }
   ],
   "entities": [

@@ -395,7 +395,7 @@ func (s *Sim) buildCompanionBlockedFn(companion *entity) func(gx, gy int) bool {
 
 func (s *Sim) companionPositionBlocked(companion *entity, pos Vec2) bool {
 	for _, wall := range s.activeWalls() {
-		if circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
 			return true
 		}
 	}

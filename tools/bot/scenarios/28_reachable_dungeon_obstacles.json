@@ -7,6 +7,8 @@
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "source": "generated", "at_least": 1 }, "timeout_s": 5 },
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "water", "at_least": 1 }, "timeout_s": 5 },
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "hole", "at_least": 1 }, "timeout_s": 5 },
     { "action": "wait_until_assertion", "assertion": { "type": "non_perimeter_wall_exists" }, "timeout_s": 5 },
     { "action": "action_entity", "interactable_def_id": "wooden_door", "event_type": "interactable_activated" }
   ],
@@ -15,6 +17,8 @@
     { "type": "visited_levels_contain", "level": 0 },
     { "type": "visited_levels_contain", "level": -1 },
     { "type": "wall_count", "source": "generated", "at_least": 1 },
+    { "type": "wall_count", "kind": "water", "at_least": 1 },
+    { "type": "wall_count", "kind": "hole", "at_least": 1 },
     { "type": "non_perimeter_wall_exists" },
     { "type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open" },
     { "type": "event_seen", "event_type": "level_changed" }

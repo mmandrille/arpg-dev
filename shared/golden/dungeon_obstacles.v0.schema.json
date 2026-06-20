@@ -14,7 +14,10 @@
         "floor_size",
         "minimum_wall_count",
         "minimum_generated_wall_count",
+        "minimum_water_count",
+        "minimum_hole_count",
         "shape_families",
+        "solid_kinds",
         "walls",
         "doors",
         "reachable_targets"
@@ -24,10 +27,18 @@
         "floor_size": { "$ref": "#/$defs/size" },
         "minimum_wall_count": { "type": "integer", "minimum": 4 },
         "minimum_generated_wall_count": { "type": "integer", "minimum": 1 },
+        "minimum_water_count": { "type": "integer", "minimum": 0 },
+        "minimum_hole_count": { "type": "integer", "minimum": 0 },
         "shape_families": {
           "type": "array",
           "minItems": 2,
           "items": { "type": "string", "enum": ["line", "l", "t", "block"] },
+          "uniqueItems": true
+        },
+        "solid_kinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "enum": ["rock", "column", "rubble"] },
           "uniqueItems": true
         },
         "walls": {
@@ -84,7 +95,8 @@
         "position": { "$ref": "#/$defs/vec2" },
         "size": { "$ref": "#/$defs/wall_size" },
         "source": { "type": "string", "enum": ["perimeter", "generated"] },
-        "shape_family": { "type": "string", "enum": ["line", "l", "t", "block"] }
+        "shape_family": { "type": "string", "enum": ["line", "l", "t", "block", "water", "hole"] },
+        "kind": { "type": "string", "enum": ["wall", "water", "hole", "rock", "column", "rubble"] }
       }
     },
     "reachable_target": {

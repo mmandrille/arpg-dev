@@ -23,10 +23,10 @@ Last updated: 2026-06-20
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v301 — melee lunge / micro-step |
-| **Active branch** | `codex/autoloop-movement-fluidity` |
-| **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20; post-review `db-up` refactor passed `CI_ADDR=:18091 CI_BASE_URL=http://localhost:18091 make ci` end-to-end in 10m59s, and the later feel-config refactor passed focused Godot helper tests, `test_client_bot`, and `make maintainability` |
-| **Next slice** | Use `$next` / `$autoloop` for the next feature batch, carrying forward the v301 review's future-plan items |
+| **Latest completed slice** | v308 — wall/floor shader polish |
+| **Active branch** | `main` |
+| **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20; v302-v308 World Detail / Navigation isolated-batch proof green on 2026-06-20; merged `main` `make ci` green in 12m41s on 2026-06-20 |
+| **Next slice** | Use `$next` / `$autoloop` for the next feature batch, carrying forward review future-plan items |
 | **Last engineering review** | v301 — [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) (2026-06-20) |
 | **Next engineering review** | Around v311, after the next feature batch and a green final proof |
 
@@ -87,12 +87,13 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v301 `$refactor` minor paydown complete.** The raw `make ci` database-bootstrap false-red is
-  fixed, and client presentation-feel constants now have one code-owner module. Remaining review
-  recommendations are next-touched large-file paydown or future-plan/feature work.
-- **Review follow-ups remaining after v301 `$review`.** Future-plan/feature-scale items: resolve
-  unverified local GLB provenance before production distribution, continue the tuning-friendly
-  rule-test audit, and keep production combat VFX/audio/art polish as explicit feature slices.
+- **v301 `$review` / refactor handoffs complete.** Minor paydown commits landed for worktree-safe
+  database/compose startup, `go vet ./...` in CI, client presentation-feel constants, bot-scenario
+  budget guidance, and canonical status cleanup.
+- **Review follow-ups remaining after v301 `$review`.** Future-plan/feature-scale items: keep
+  splitting touched large coordinators/validators, continue the tuning-friendly rule-test audit,
+  resolve unverified local GLB provenance before production distribution, and keep production
+  combat/dungeon VFX, audio, and art polish as explicit feature slices.
 
 ### Other deferred items (from specs / ADRs)
 
@@ -104,7 +105,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Economy / trade | Gold/resource pricing beyond direct stash-gold listing prices, market restrictions for upgraded/bound/equipped/hotbar-assigned items, player-facing offer browser/cancel UI polish, market notification inbox/unread persistence/polling/realtime push beyond summary-refreshed board badges, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68/v111/v128/v129/v130/v288 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller/quest-giver art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production fog/visibility art, production chest art/animation/audio, production archer attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, quest-giver dialog/portrait/audio polish, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97/v172/v225/v253/v255/v264/v273/v291 non-goals, ADR-0013 |
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, production dungeon fog lighting/art pass beyond code-native radial/LOS/organic masks, minimap routefinding/click-to-navigate/legend/filter UI, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75/v225/v253/v255/v263/v264 non-goals, ADR-0009 |
-| Dungeon generation | Rivers/water obstacles, high-obstacle/non-rectangular fog line-of-sight blocking beyond current rectangular wall and closed-door occlusion, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final biome/difficulty balance beyond first area-density formulas | v40/v252/v253/v254/v255/v260/v261/v262 non-goals |
+| Dungeon generation | Non-rectangular/polygon fog line-of-sight blocking beyond current rectangular wall/tall-obstacle and closed-door occlusion, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final biome/difficulty balance beyond first area-density formulas | v40/v252/v253/v254/v255/v260/v261/v262/v295/v296/v297/v298/v299/v300 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up, v76/v77/v78 deferred |
 | Settings | Fullscreen, advanced audio options, controls remapping, accessibility options, graphics quality, language selection | v24/v224 non-goals |

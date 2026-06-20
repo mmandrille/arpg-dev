@@ -130,7 +130,7 @@ func (s *Sim) corpsePosition(level *LevelState, corpse *corpseState) Vec2 {
 
 func (s *Sim) positionBlockedOnLevel(level *LevelState, pos Vec2, radius float64) bool {
 	for _, wall := range level.walls {
-		if circleIntersectsAABB(pos, radius, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, radius, wall.pos, wall.size) {
 			return true
 		}
 	}

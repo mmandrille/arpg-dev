@@ -9,6 +9,79 @@ func mobilityRange(def SkillDef, rank int) float64 {
 	return def.Mobility.RangeBase + def.Mobility.RangePerRank*float64(rank-1)
 }
 
+type playerMobilityBlockKind int
+
+const (
+	playerMobilityNotBlocked playerMobilityBlockKind = iota
+	playerMobilityHardBlocked
+	playerMobilityIgnoredObstacle
+)
+
+func (s *Sim) resolveDashEndpoint(start Vec2, dir Vec2, dashRange float64) Vec2 {
+	return s.resolvePlayerMobilityEndpoint(start, dir, dashRange, SkillMobilityDef{})
+}
+
+func (s *Sim) resolveSkillMobilityEndpoint(start Vec2, dir Vec2, mobilityRange float64, mobility SkillMobilityDef) Vec2 {
+	return s.resolvePlayerMobilityEndpoint(start, dir, mobilityRange, mobility)
+}
+
+func (s *Sim) resolvePlayerMobilityEndpoint(start Vec2, dir Vec2, mobilityRange float64, mobility SkillMobilityDef) Vec2 {
+	dir = normalize(dir)
+	sweep := start
+	landing := start
+	steps := int(math.Ceil(mobilityRange / 0.25))
+	if steps < 1 {
+		steps = 1
+	}
+	step := mobilityRange / float64(steps)
+	for i := 0; i < steps; i++ {
+		candidate := Vec2{X: sweep.X + dir.X*step, Y: sweep.Y + dir.Y*step}
+		switch s.playerMobilityPositionBlockKind(candidate, mobility) {
+		case playerMobilityHardBlocked:
+			return landing
+		case playerMobilityIgnoredObstacle:
+			sweep = candidate
+		default:
+			sweep = candidate
+			landing = candidate
+		}
+	}
+	return landing
+}
+
+func (s *Sim) playerMobilityPositionBlockKind(pos Vec2, mobility SkillMobilityDef) playerMobilityBlockKind {
+	for _, wall := range s.activeWalls() {
+		if !obstacleBlocksMovement(wall) || !circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
+			continue
+		}
+		if skillMobilityIgnoresObstacleKind(mobility, wall.obstacleKind()) {
+			return playerMobilityIgnoredObstacle
+		}
+		return playerMobilityHardBlocked
+	}
+	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+		e := s.activeLevel().entities[id]
+		if e == nil || e.kind != interactableEntity || e.state != interactableClosed {
+			continue
+		}
+		if def, ok := s.rules.Interactables[e.interactableDefID]; ok && def.BarrierWhenClosed != nil {
+			if circleIntersectsAABB(pos, playerRadius, e.pos, def.BarrierWhenClosed.Size) {
+				return playerMobilityHardBlocked
+			}
+		}
+	}
+	return playerMobilityNotBlocked
+}
+
+func skillMobilityIgnoresObstacleKind(mobility SkillMobilityDef, kind string) bool {
+	for _, ignoredKind := range mobility.IgnoreObstacleKinds {
+		if kind == ignoredKind {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Sim) handleMobilitySkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
 	if def.Mobility.Mode == "charge" {
 		res.reject(in.MessageID, "use_channel_skill_intent")
@@ -20,7 +93,7 @@ func (s *Sim) handleMobilitySkillCast(in Input, res *TickResult, player *entity,
 		res.reject(in.MessageID, rejectReason)
 		return
 	}
-	end := s.resolveDashEndpoint(player.pos, dir, rng)
+	end := s.resolveSkillMobilityEndpoint(player.pos, dir, rng, def.Mobility)
 	if end == player.pos {
 		res.reject(in.MessageID, "blocked")
 		return
@@ -204,7 +277,7 @@ func (s *Sim) applyActiveSkillChannel(res *TickResult) bool {
 		return true
 	}
 	start := player.pos
-	end := s.resolveDashEndpoint(start, channel.dir, step)
+	end := s.resolveSkillMobilityEndpoint(start, channel.dir, step, def.Mobility)
 	if end == start {
 		s.stopChargeChannel(res, player, channel.skillID, channel.correlationID, "blocked")
 		return true

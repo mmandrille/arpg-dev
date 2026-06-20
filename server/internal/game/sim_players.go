@@ -263,7 +263,7 @@ func (s *Sim) spawnPositionBlocked(level *LevelState, pos Vec2) bool {
 		return true
 	}
 	for _, wall := range level.walls {
-		if circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
 			return true
 		}
 	}

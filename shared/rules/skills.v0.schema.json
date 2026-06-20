@@ -361,6 +361,11 @@
         "range_per_rank": { "type": "number", "minimum": 0 },
         "mode": { "type": "string", "enum": ["teleport", "leap", "charge", "disengage"] },
         "visual": { "type": "string", "minLength": 1 },
+        "ignore_obstacle_kinds": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["water", "hole"] },
+          "uniqueItems": true
+        },
         "speed_tiles_per_second": { "type": "number", "exclusiveMinimum": 0 },
         "speed_multiplier": { "type": "number", "exclusiveMinimum": 0 },
         "channel_mana_per_10_seconds": { "type": "integer", "minimum": 0 },

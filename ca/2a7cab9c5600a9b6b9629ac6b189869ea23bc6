@@ -1,0 +1,42 @@
+client/scripts/stat_labels.gd
+  s_4862b687328423::t_d5e53010f41b06 17,19,25,27,34,38,40
+server/internal/game/passive_skill_stats.go
+  s_4862b687328423::t_3f4a56150a9eae 90-97,114-130
+shared/i18n/es.json
+  s_4862b687328423::t_54414b49afcbb3 114,118,122,128,131,134,136,145,147,151,155,157,161,169
+shared/assets/skill_presentations.v0.json
+  s_4862b687328423::t_a39ce37e5c05d7 284,294,314,334,344,364,404
+shared/rules/skills.v0.schema.json
+  s_4862b687328423::t_c4136524528c0b 375,381,383,385,392,394,399-400
+server/internal/game/passive_skill_rules.go
+  s_4862b687328423::t_3f4a56150a9eae 27-28,30-33
+client/scripts/skill_passive_tooltip.gd
+  s_4862b687328423::t_d5e53010f41b06 30,44-45,48-49,52-53,56-57,68-69,72-73,84
+shared/i18n/en.json
+  s_4862b687328423::t_54414b49afcbb3 50,52,55,57,61,63,65,145,147,151,155,157,161,169
+server/internal/game/passive_skill_column_test.go
+  s_4862b687328423::t_bbc3d341f7c5b0 3-6,147-177
+shared/rules/skills.v0.json
+  s_4862b687328423::t_c4136524528c0b 1255,1296,1373,1455-1456,1491-1492,1573,1727-1728
+client/tests/test_skills_panel.gd
+  s_4862b687328423::t_bbc3d341f7c5b0 105-106
+server/internal/game/sim.go
+  s_4862b687328423::t_3f4a56150a9eae 5778
+  s_4862b687328423::t_c77cdda3ae9cde 5759,5771
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ca2a7cab9c5600a9b6b9629ac6b189869ea23bc6",
+  "prompts": {},
+  "sessions": {
+    "s_4862b687328423": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee40d-f779-7963-921d-4e4bc607a129",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

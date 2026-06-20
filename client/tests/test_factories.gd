@@ -47,6 +47,17 @@ func _test_ground_wall_factory() -> void:
 	_assert_eq("ground texture cache count", factory.ground_textures.size(), 2)
 	_assert_eq("water texture cache count", factory.water_textures.size(), 1)
 	_assert_eq("hole texture cache count", factory.hole_textures.size(), 1)
+	var town_mat := factory.ground_material_for_level(0)
+	var dungeon_mat := factory.ground_material_for_level(-1)
+	var dungeon_palette: Dictionary = factory.biome_palette_for_level(-1)
+	var dungeon_normal_a := factory.make_ground_normal_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, dungeon_palette)
+	var dungeon_normal_b := factory.make_ground_normal_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, dungeon_palette)
+	_assert_true("town ground normal remains disabled", not town_mat.normal_enabled)
+	_assert_true("dungeon ground normal enabled", dungeon_mat.normal_enabled)
+	_assert_true("dungeon ground normal texture exists", dungeon_mat.normal_texture != null)
+	_assert_true("dungeon ground normal cache stable", dungeon_normal_a == dungeon_normal_b)
+	_assert_eq("ground normal texture cache count", factory.ground_normal_textures.size(), 1)
+	_assert_true("dungeon ground normal texel varies", factory.ground_normal_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 0, 0, dungeon_palette) != factory.ground_normal_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 17, 11, dungeon_palette))
 	var ground := factory.make_ground_node(0)
 	_assert_eq("ground node name", ground.name, "Ground")
 	ground.queue_free()
@@ -55,7 +66,8 @@ func _test_ground_wall_factory() -> void:
 func _test_wall_renderer() -> void:
 	var root := Node3D.new()
 	get_root().add_child(root)
-	var renderer = WallRendererScript.new(root, GroundWallFactoryScript.new())
+	var ground_factory = GroundWallFactoryScript.new()
+	var renderer = WallRendererScript.new(root, ground_factory)
 	renderer.set_level(-4)
 	var walls := renderer.render_wall_layout([{
 		"id": "test_wall",
@@ -68,6 +80,9 @@ func _test_wall_renderer() -> void:
 	var wall := root.get_child(0) as MeshInstance3D
 	_assert_eq("wall child name", wall.name, "Wall_test_wall")
 	_assert_true("wall material has palette texture", (wall.material_override as StandardMaterial3D).albedo_texture != null)
+	_assert_true("wall material normal enabled", (wall.material_override as StandardMaterial3D).normal_enabled)
+	_assert_true("wall material has normal texture", (wall.material_override as StandardMaterial3D).normal_texture != null)
+	_assert_eq("wall normal texture cache count", ground_factory.wall_normal_textures.size(), 1)
 	var water_walls := renderer.render_wall_layout([{
 		"id": "test_water",
 		"position": {"x": 7.0, "y": 8.0},

@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v300 — line-of-sight blockers |
+| **Latest completed slice** | v301 — wall/floor shader polish |
 | **Active branch** | `codex/world-detail-navigation` |
-| **CI gate** | v300 focused autoloop gates green on 2026-06-19: `make validate-shared`, focused Go fog/obstacle/path tests, direct Godot fog overlay test, `make client-unit`, `line_of_sight_blockers` protocol bot via direct script, `line_of_sight_blocker_shadow` headless client bot via direct script, and `make maintainability`; final batch `make ci` pending |
-| **Next slice** | v301 — wall/floor shader polish from the selected World Detail/Navigation queue |
+| **CI gate** | v301 focused autoloop gates green on 2026-06-19: direct Godot factory test, `make client-unit`, `wall_floor_shader_polish` headless client bot via direct script, and `make maintainability`; final World Detail/Navigation batch `COMPOSE_PROJECT_NAME=arpg-dev make ci` green in the isolated worktree |
+| **Next slice** | Engineering review/refactor handoff is due before the next feature slice |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
-| **Next engineering review** | Due after the selected World Detail/Navigation autoloop queue completes and final batch `make ci` is green |
+| **Next engineering review** | Due now: selected World Detail/Navigation queue is complete and final batch `make ci` is green |
 
 
 ### Periodic engineering reviews
@@ -87,10 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review/refactor handoff due after selected World Detail/Navigation queue.** v294 restored the
-  full-CI baseline after the v293 residuals. The active `$autoloop` selected a feature queue while
-  AFK, so run the next repo-wide `$review` and `$refactor` pass after that selected queue completes
-  and its final batch `make ci` is green.
+- **Review/refactor handoff due now after selected World Detail/Navigation queue.** v294 restored
+  the full-CI baseline after the v293 residuals. v295-v301 completed the selected queue and the
+  final batch `make ci` is green, so run the next repo-wide `$review` and `$refactor` pass before
+  the next feature slice.
 - **Review follow-ups remaining after v284 `$review`.** Remaining follow-ups are future-plan scale:
   keep splitting the next touched large coordinators/validators, continue the tuning-friendly
   rule-test audit, and resolve unverified local GLB provenance before production distribution.

@@ -43,7 +43,7 @@ func TestBossFloorExcludesGeneratedDoors(t *testing.T) {
 }
 
 func TestGeneratedDungeonDoorsPopulateAsClosedInteractables(t *testing.T) {
-	sim := MustNewSim("v261_generated_doors", "01", loadRules(t))
+	sim := MustNewSim("v261_generated_doors", "v40_obstacles", loadRules(t))
 	level, err := sim.ensureDungeonLevel(-2)
 	if err != nil {
 		t.Fatalf("ensure dungeon: %v", err)

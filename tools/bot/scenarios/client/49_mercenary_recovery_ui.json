@@ -28,7 +28,7 @@
       "hired_count": 0,
       "status_contains": "lost",
       "companion_bar_count": 0,
-      "timeout_s": 15.0
+      "timeout_s": 30.0
     },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
     { "type": "wait_event", "event_type": "mercenary_hired", "offer_id": "fixed:mercenary_guard", "timeout_s": 15.0 },

@@ -1,0 +1,47 @@
+docs/as-built/v299_movement-acceleration-smoothing.md
+  s_95786de7ff0c5d::t_00dcfbe2f595d1 1-49
+client/tests/test_movement_visual_smoothing.gd
+  s_95786de7ff0c5d::t_3e4de0a949a663 1-76
+PROGRESS.md
+  s_95786de7ff0c5d::t_00dcfbe2f595d1 26,28-29
+client/scripts/movement_visual_smoothing.gd.uid
+  s_95786de7ff0c5d::t_3e4de0a949a663 1
+tools/bot/scenarios/client/80_movement_visual_smoothing.json
+  s_95786de7ff0c5d::t_3e4de0a949a663 1-15
+client/scripts/main.gd
+  s_95786de7ff0c5d::t_3e4de0a949a663 64,244,263,771,814,1441,1715,5310
+client/scripts/bot_wait_handlers.gd
+  s_95786de7ff0c5d::t_3e4de0a949a663 39-40
+docs/progress/slice-lifecycle.md
+  s_95786de7ff0c5d::t_00dcfbe2f595d1 314
+docs/plans/v299_2026-06-19-movement-acceleration-smoothing.md
+  s_95786de7ff0c5d::t_a004e32b6f329a 41,55-58
+  s_95786de7ff0c5d::t_a5a36c5ccc5985 66-69
+  s_95786de7ff0c5d::t_ac06a7e8952dc4 1-2,4-39,42-54,59-65,70-77,80-94,98-100,107-110
+  s_95786de7ff0c5d::t_00dcfbe2f595d1 3,40,78-79,95-97,101-106
+client/scripts/movement_visual_smoothing.gd
+  s_95786de7ff0c5d::t_3e4de0a949a663 1-71
+docs/specs/v299_spec-movement-acceleration-smoothing.md
+  s_95786de7ff0c5d::t_00dcfbe2f595d1 3
+  s_95786de7ff0c5d::t_ac06a7e8952dc4 1-2,4-82
+client/scripts/bot_step_catalog.gd
+  s_95786de7ff0c5d::t_3e4de0a949a663 16,41
+client/scripts/bot_assertion_handlers.gd
+  s_95786de7ff0c5d::t_3e4de0a949a663 65-71,428-436
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d8155641ffa53ae587f8f318eff4194d43dcc58b",
+  "prompts": {},
+  "sessions": {
+    "s_95786de7ff0c5d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee232-5e77-7f93-9275-ba83ddfb9619",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

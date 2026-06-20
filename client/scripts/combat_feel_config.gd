@@ -1,3 +1,11 @@
+## Client-only combat/movement "feel" tuning constants.
+##
+## These are presentation-feel values (input buffering, retarget grace, movement
+## smoothing, melee lunge) that never cross the wire — animation/feel is client-only
+## per ADR-0007. The Data-Driven Configuration Policy puts balance-sensitive tuning in
+## shared/rules/*.json by default; these are intentionally code-owned because they are
+## local presentation timing the server never reads. Keep server-authoritative gameplay
+## tuning (damage, speed, costs) out of this file.
 class_name CombatFeelConfig
 extends RefCounted
 

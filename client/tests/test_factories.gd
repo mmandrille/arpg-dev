@@ -98,6 +98,7 @@ func _test_wall_renderer() -> void:
 	_assert_eq("water metadata kind", str(water.get_meta("kind", "")), "water")
 	_assert_true("water mesh is plane", water.mesh is PlaneMesh)
 	_assert_true("water material has texture", (water.material_override as StandardMaterial3D).albedo_texture != null)
+	_assert_true("water motion overlay exists", water.find_child("WaterMotionBands", false, false) != null)
 	var hole_walls := renderer.render_wall_layout([{
 		"id": "test_hole",
 		"position": {"x": 9.0, "y": 4.0},
@@ -113,6 +114,7 @@ func _test_wall_renderer() -> void:
 	_assert_eq("hole metadata kind", str(hole.get_meta("kind", "")), "hole")
 	_assert_true("hole mesh is plane", hole.mesh is PlaneMesh)
 	_assert_true("hole material has texture", (hole.material_override as StandardMaterial3D).albedo_texture != null)
+	_assert_true("hole parallax overlay exists", hole.find_child("HoleParallaxBands", false, false) != null)
 	var rock_walls := renderer.render_wall_layout([{
 		"id": "test_rock",
 		"position": {"x": 3.0, "y": 6.0},

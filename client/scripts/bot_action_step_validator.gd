@@ -3,7 +3,7 @@ extends RefCounted
 
 const UNHANDLED := "__unhandled__"
 const STEP_TYPES_ACTION := [
-	"press_key", "click_entity", "click_loot_item", "click_floor",
+	"press_key", "click_entity", "click_entity_buffered", "click_loot_item", "click_floor",
 	"drag_bag_to_weapon_slot", "drag_weapon_to_bag", "drag_bag_to_equipment_slot",
 	"drag_equipment_to_bag", "drag_bag_to_outside", "assign_hotbar_slot",
 	"use_hotbar_slot", "double_click_bag_item", "click_menu_button",
@@ -27,7 +27,7 @@ static func validate(step: Dictionary, stype: String, index: int) -> String:
 		return UNHANDLED
 	if stype == "press_key":
 		return _require_string(step, index, stype, "keycode")
-	if stype == "click_entity":
+	if stype == "click_entity" or stype == "click_entity_buffered":
 		return _require_string(step, index, stype, "entity_type")
 	if stype == "click_loot_item":
 		if str(step.get("item_def_id", "")) == "" and not step.has("rolled"):

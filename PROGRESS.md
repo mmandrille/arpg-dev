@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v294 — full-CI residual stabilization |
-| **Active branch** | `main` |
-| **CI gate** | v294 full `make ci` green on 2026-06-19 after residual stabilization; focused proof included elite-minion Go tests, mercenary protocol scenarios, Godot client bot unit tests, and full `HEADLESS=1 make bot-client` |
-| **Next slice** | v295 — due repo-wide engineering review/refactor handoff before the next feature autoloop |
+| **Latest completed slice** | v295 — input buffering |
+| **Active branch** | `codex/autoloop-movement-fluidity` |
+| **CI gate** | v295 focused proof green on 2026-06-19: sustained-input Godot tests, client bot unit tests, `77_input_buffering`, `01_click_to_kill`, `05_click_to_move`, and `make maintainability`; selected Movement / Combat Fluidity autoloop batch `make ci` pending |
+| **Next slice** | v296 — attack move / sticky targeting |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
-| **Next engineering review** | v295 target now that full-CI residuals are stabilized |
+| **Next engineering review** | After the selected Movement / Combat Fluidity feature batch completes and final `make ci` is green |
 
 
 ### Periodic engineering reviews
@@ -87,9 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review/refactor handoff due after v294.** v294 restored the full-CI baseline after the v293
-  residuals. Run the next repo-wide `$review` and `$refactor` pass before starting another feature
-  autoloop so the scorecard reflects the current green baseline.
+- **Review/refactor handoff due after the selected Movement / Combat Fluidity feature batch.** v294
+  restored the full-CI baseline after the v293 residuals; this autoloop is intentionally using the
+  selected feature queue first, then must run one final `make ci` followed by the repo-wide
+  `$review` and `$refactor` pass.
 - **Review follow-ups remaining after v284 `$review`.** Remaining follow-ups are future-plan scale:
   keep splitting the next touched large coordinators/validators, continue the tuning-friendly
   rule-test audit, and resolve unverified local GLB provenance before production distribution.

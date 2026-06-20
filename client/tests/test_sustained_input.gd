@@ -3,6 +3,8 @@
 extends SceneTree
 
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
+const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
+const CombatReachScript := preload("res://scripts/combat_reach.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -17,6 +19,9 @@ func _initialize() -> void:
 	_test_should_stop_dead_monster()
 	_test_can_repeat_move_epsilon()
 	_test_clear_resets()
+	_test_attack_buffer_queue_replace_and_expire()
+	_test_attack_buffer_clear_guards()
+	_test_combat_reach_uses_equipped_weapon()
 
 	print("[gdtest] PASS: test_sustained_input (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -87,6 +92,58 @@ func _test_clear_resets() -> void:
 	_assert_false("clear deactivates", hold.active)
 	_assert_eq("clear mode", hold.mode, "")
 	_assert_eq("clear target", hold.target_id, "")
+
+
+func _test_attack_buffer_queue_replace_and_expire() -> void:
+	var buffer := CombatInputBufferScript.new()
+	buffer.queue_attack("1002", 0.30)
+	_assert_true("attack buffer active", buffer.active())
+	_assert_eq("attack buffer target", buffer.target_id, "1002")
+	buffer.queue_attack("1003", 0.30)
+	_assert_eq("attack buffer replaces target", buffer.target_id, "1003")
+	buffer.tick(0.10)
+	_assert_true("attack buffer remains before expiry", buffer.active())
+	buffer.tick(0.25)
+	_assert_false("attack buffer expires", buffer.active())
+	_assert_eq("attack buffer target cleared", buffer.target_id, "")
+
+
+func _test_attack_buffer_clear_guards() -> void:
+	var buffer := CombatInputBufferScript.new()
+	var entities := {
+		"1002": {"type": "monster", "hp": 3},
+		"1003": {"type": "monster", "hp": 0},
+		"loot": {"type": "loot", "hp": 1},
+	}
+	buffer.queue_attack("1002")
+	_assert_false("valid monster does not clear", buffer.should_clear(10, entities))
+	_assert_true("dead player clears buffer", buffer.should_clear(0, entities))
+	buffer.queue_attack("missing")
+	_assert_true("missing target clears buffer", buffer.should_clear(10, entities))
+	buffer.queue_attack("1003")
+	_assert_true("dead monster clears buffer", buffer.should_clear(10, entities))
+	buffer.queue_attack("loot")
+	_assert_true("non-monster target clears buffer", buffer.should_clear(10, entities))
+
+
+func _test_combat_reach_uses_equipped_weapon() -> void:
+	var player := Node3D.new()
+	player.position = Vector3(2.0, 0.0, 5.0)
+	var monster := Node3D.new()
+	monster.position = Vector3(13.0, 0.0, 5.0)
+	var entities := {
+		"1002": {"type": "monster", "hp": 10, "node": monster},
+	}
+	var inventory := [{
+		"item_instance_id": "1004",
+		"item_def_id": "training_bow",
+		"slot": "main_hand",
+		"equipped": true,
+	}]
+	var equipped := {"main_hand": "1004"}
+	_assert_true("equipped bow reach covers control lab target", CombatReachScript.target_in_local_attack_range(player, entities, inventory, equipped, "1002"))
+	player.free()
+	monster.free()
 
 
 func _assert_true(label: String, value: bool) -> void:

@@ -83,10 +83,11 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			var eids: Array = state.get("%s_ids" % etype, state.get("entities_by_type", {}).get(etype, []))
 			return eids.size() > 0
 		"wait_event":
-			var evtype := str(step.get("event_type", ""))
+			var evtypes := _event_types(step)
+			var event_step := _event_match_step(step, state)
 			var pending: Array = state.get("pending_events", [])
 			for i in range(pending.size()):
-				if str(pending[i].get("event_type", "")) == evtype and runner._event_matches(step, pending[i]):
+				if evtypes.has(str(pending[i].get("event_type", ""))) and runner._event_matches(event_step, pending[i]):
 					if runner._controller != null and runner._controller.has_method("consume_pending_event_at"):
 						runner._controller.consume_pending_event_at(i)
 					return true
@@ -156,6 +157,59 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			var eids: Array = state.get("%s_ids" % etype, [])
 			return eids.is_empty()
 	return false
+
+
+static func _event_types(step: Dictionary) -> Array:
+	var out: Array = []
+	if step.has("event_types") and typeof(step.get("event_types")) == TYPE_ARRAY:
+		for event_type in step.get("event_types", []):
+			out.append(str(event_type))
+	else:
+		out.append(str(step.get("event_type", "")))
+	return out
+
+
+static func _event_match_step(step: Dictionary, state: Dictionary) -> Dictionary:
+	var out := step.duplicate()
+	if bool(step.get("source_is_local_player", false)):
+		var local_player_id := str(state.get("local_player_id", ""))
+		if local_player_id != "":
+			out["source_entity_id"] = local_player_id
+	if bool(step.get("target_is_local_player", false)):
+		var local_player_id := str(state.get("local_player_id", ""))
+		if local_player_id != "":
+			out["target_entity_id"] = local_player_id
+	var target_entity_id := _selected_event_entity_id(step, state, "target")
+	if target_entity_id != "":
+		out["target_entity_id"] = target_entity_id
+	return out
+
+
+static func _selected_event_entity_id(step: Dictionary, state: Dictionary, prefix: String) -> String:
+	var entity_type := str(step.get("%s_entity_type" % prefix, ""))
+	if entity_type == "":
+		return ""
+	var monster_def_id := str(step.get("%s_monster_def_id" % prefix, ""))
+	var item_def_id := str(step.get("%s_item_def_id" % prefix, ""))
+	var interactable_def_id := str(step.get("%s_interactable_def_id" % prefix, ""))
+	var entity_index := int(step.get("%s_entity_index" % prefix, 0))
+	var matches: Array = []
+	for row in state.get("entities_debug", []):
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		if str(rec.get("type", "")) != entity_type:
+			continue
+		if monster_def_id != "" and str(rec.get("monster_def_id", "")) != monster_def_id:
+			continue
+		if item_def_id != "" and str(rec.get("item_def_id", "")) != item_def_id:
+			continue
+		if interactable_def_id != "" and str(rec.get("interactable_def_id", "")) != interactable_def_id:
+			continue
+		matches.append(str(rec.get("id", "")))
+	if entity_index < 0 or entity_index >= matches.size():
+		return ""
+	return str(matches[entity_index])
 
 
 static func _entity_near_player(runner, step: Dictionary, state: Dictionary) -> bool:

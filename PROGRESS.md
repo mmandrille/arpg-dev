@@ -27,8 +27,8 @@ Last updated: 2026-06-20
 | **Active branch** | `main` |
 | **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20; v302-v308 World Detail / Navigation isolated-batch proof green on 2026-06-20; merged `main` `make ci` green in 12m41s on 2026-06-20 |
 | **Next slice** | Use `$next` / `$autoloop` for the next feature batch, carrying forward review future-plan items |
-| **Last engineering review** | v301 — [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) (2026-06-20) |
-| **Next engineering review** | Around v311, after the next feature batch and a green final proof |
+| **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
+| **Next engineering review** | Around v318, after the next feature batch and a green final proof |
 
 
 ### Periodic engineering reviews
@@ -87,13 +87,21 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v301 `$review` / refactor handoffs complete.** Minor paydown commits landed for worktree-safe
-  database/compose startup, `go vet ./...` in CI, client presentation-feel constants, bot-scenario
-  budget guidance, and canonical status cleanup.
-- **Review follow-ups remaining after v301 `$review`.** Future-plan/feature-scale items: keep
-  splitting touched large coordinators/validators, continue the tuning-friendly rule-test audit,
-  resolve unverified local GLB provenance before production distribution, and keep production
-  combat/dungeon VFX, audio, and art polish as explicit feature slices.
+- **v308 `$review` complete; `$refactor` handoff pending.** Ad-hoc review at `e5862466` covering the
+  v302–v308 batch landed at [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md).
+  Lowest scorecard areas (refactor priority order): **Documentation (6.5)**, **Test quality (7.7)**,
+  **Maintainability (7.7)**. Confirmed v301 carry-overs: worktree-safe CI and presentation-feel config
+  owner **RESOLVED**; validator/coordinator splits and GLB provenance still **OPEN**.
+- **v308 `$refactor` minor-commit targets (from the review Top 10):** update `docs/CODEMAP.md` (omits
+  every new v302–v308 file) and strengthen `validate_codemap.py`; wire five orphan client unit tests into
+  `client_smoke.sh`; fix the dead `switch` in `obstacle_blocking.go`; reconcile the CLAUDE.md rule #12 vs
+  `run.py` scenario-budget contradiction; add the `dungeon_obstacles` golden↔generation `cross_checks()`;
+  de-duplicate `dungeon_water.go`/`dungeon_holes.go`; lower at-cap baselines (`rules.go`/`types.go`).
+- **v308 review future-plan/feature-scale items:** ADR-0008 addendum (or ADR-0015) for obstacle kinds +
+  navigation traits + LoS-gated fog; move "which solid kinds block LoS" into data; systematic
+  tuning-friendly rule-test audit; extract a domain out of `validate_shared.py`; resolve unverified local
+  GLB provenance before distribution; keep production combat/dungeon VFX/audio/art as explicit feature
+  slices with visual bot proof.
 
 ### Other deferred items (from specs / ADRs)
 

@@ -1,7 +1,8 @@
 class_name CombatInputBuffer
 extends RefCounted
 
-const DEFAULT_ATTACK_BUFFER_SECONDS := 0.45
+const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
+const DEFAULT_ATTACK_BUFFER_SECONDS := CombatFeelConfigScript.ATTACK_BUFFER_SECONDS
 
 var target_id: String = ""
 var remaining_seconds: float = 0.0

@@ -1,7 +1,8 @@
 class_name CommandRetargetGrace
 extends RefCounted
 
-const DEFAULT_GRACE_SECONDS := 0.22
+const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
+const DEFAULT_GRACE_SECONDS := CombatFeelConfigScript.COMMAND_RETARGET_GRACE_SECONDS
 
 var active: bool = false
 var kind: String = ""

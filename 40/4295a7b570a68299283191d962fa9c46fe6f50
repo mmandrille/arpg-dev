@@ -1,0 +1,26 @@
+server/internal/game/rules.go
+  s_d8f19e6e03317d::t_15f54bf144286f 294-302,305
+  s_d8f19e6e03317d::t_f063c776e69d75 303-304
+server/internal/game/dungeon_holes.go
+  s_d8f19e6e03317d::t_9e049e0b7d12e7 3-5,7-12,16-17,20-21
+server/internal/game/dungeon_water.go
+  s_d8f19e6e03317d::t_5fcfb62279b190 3-4,6-11,15-16,19-20
+server/internal/game/dungeon_floor_features.go
+  s_d8f19e6e03317d::t_8b6bfb6bf6ffc4 1-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "404295a7b570a68299283191d962fa9c46fe6f50",
+  "prompts": {},
+  "sessions": {
+    "s_d8f19e6e03317d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b11ebf0-e533-4bb2-8b6f-5f9a06c89568",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -154,5 +154,6 @@ func (s *Sim) equippedItemStatTotal(stat string) int {
 		total += baseStats[stat] + rolledStats[stat]
 	}
 	total += s.equippedSetBonusStats()[stat]
+	total += s.passiveSkillStatTotal(stat)
 	return total
 }

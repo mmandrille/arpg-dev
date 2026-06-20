@@ -460,7 +460,10 @@
         "range_per_rank": 0.5,
         "mode": "leap",
         "visual": "leap_impact",
-        "ignore_obstacle_kinds": ["water", "hole"],
+        "ignore_obstacle_kinds": [
+          "water",
+          "hole"
+        ],
         "damage_percent_base": 70,
         "damage_percent_per_rank": 10,
         "impact_radius": 2.25,
@@ -1223,6 +1226,600 @@
         "multiplier": 3.2
       },
       "name_key": "skill.split_arrow.name"
+    },
+    "arcane_focus": {
+      "name": "Arcane Focus",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 1,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "max_mana": {
+            "base": 8,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.arcane_focus.name"
+    },
+    "mana_weaving": {
+      "name": "Mana Weaving",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 2,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "arcane_focus",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "mana_regen_per_10_seconds": {
+            "base": 6,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.mana_weaving.name"
+    },
+    "spell_dynamo": {
+      "name": "Spell Dynamo",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 3,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "mana_weaving",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "skill_cooldown_reduction_percent": {
+            "base": 5,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.spell_dynamo.name"
+    },
+    "iron_hide": {
+      "name": "Iron Hide",
+      "class": "barbarian",
+      "tree": {
+        "tier": 1,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "max_hp": {
+            "base": 10,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.iron_hide.name"
+    },
+    "battle_tempo": {
+      "name": "Battle Tempo",
+      "class": "barbarian",
+      "tree": {
+        "tier": 2,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "iron_hide",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "attack_speed_percent": {
+            "base": 8,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.battle_tempo.name"
+    },
+    "crushing_force": {
+      "name": "Crushing Force",
+      "class": "barbarian",
+      "tree": {
+        "tier": 3,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "battle_tempo",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "damage_min": {
+            "base": 2,
+            "per_rank": 0
+          },
+          "damage_max": {
+            "base": 3,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.crushing_force.name"
+    },
+    "vigilant_guard": {
+      "name": "Vigilant Guard",
+      "class": "paladin",
+      "tree": {
+        "tier": 1,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "armor": {
+            "base": 4,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.vigilant_guard.name"
+    },
+    "faithful_bulwark": {
+      "name": "Faithful Bulwark",
+      "class": "paladin",
+      "tree": {
+        "tier": 2,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "vigilant_guard",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "block_percent": {
+            "base": 5,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.faithful_bulwark.name"
+    },
+    "consecrated_vitality": {
+      "name": "Consecrated Vitality",
+      "class": "paladin",
+      "tree": {
+        "tier": 3,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "faithful_bulwark",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "health_regen_per_10_seconds": {
+            "base": 8,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.consecrated_vitality.name"
+    },
+    "quick_hands": {
+      "name": "Quick Hands",
+      "class": "rogue",
+      "tree": {
+        "tier": 1,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "attack_speed_percent": {
+            "base": 6,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.quick_hands.name"
+    },
+    "killer_instinct": {
+      "name": "Killer Instinct",
+      "class": "rogue",
+      "tree": {
+        "tier": 2,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "quick_hands",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "crit_chance": {
+            "base": 5,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.killer_instinct.name"
+    },
+    "evasive_footwork": {
+      "name": "Evasive Footwork",
+      "class": "rogue",
+      "tree": {
+        "tier": 3,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "killer_instinct",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "evade_chance": {
+            "base": 6,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.evasive_footwork.name"
+    },
+    "trail_sense": {
+      "name": "Trail Sense",
+      "class": "ranger",
+      "tree": {
+        "tier": 1,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "light_radius": {
+            "base": 2,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.trail_sense.name"
+    },
+    "precision_draw": {
+      "name": "Precision Draw",
+      "class": "ranger",
+      "tree": {
+        "tier": 2,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "trail_sense",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "hit_chance": {
+            "base": 6,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.precision_draw.name"
+    },
+    "deadeye": {
+      "name": "Deadeye",
+      "class": "ranger",
+      "tree": {
+        "tier": 3,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "precision_draw",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "crit_chance": {
+            "base": 4,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.deadeye.name"
     }
   }
 }

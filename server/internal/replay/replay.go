@@ -682,7 +682,7 @@ func Verify(ctx context.Context, repo store.Repository, rules *game.Rules, sessi
 
 	if len(recon.DerivedEvents) != len(recorded) {
 		rep.Match = false
-		rep.Mismatch = fmt.Sprintf("event count: derived %d, recorded %d", len(recon.DerivedEvents), len(recorded))
+		rep.Mismatch = eventCountMismatch(recon.DerivedEvents, recorded)
 		return rep, nil
 	}
 	for i := range recon.DerivedEvents {
@@ -700,6 +700,27 @@ func Verify(ctx context.Context, repo store.Repository, rules *game.Rules, sessi
 		}
 	}
 	return rep, nil
+}
+
+func eventCountMismatch(derived []derivedEvent, recorded []store.SessionEvent) string {
+	base := fmt.Sprintf("event count: derived %d, recorded %d", len(derived), len(recorded))
+	limit := len(derived)
+	if len(recorded) < limit {
+		limit = len(recorded)
+	}
+	for i := 0; i < limit; i++ {
+		d, r := derived[i], recorded[i]
+		if d.EventType != r.EventType || d.Tick != r.Tick || d.Sequence != r.Sequence {
+			return fmt.Sprintf("%s; first mismatch at %d: derived (%s,t%d,s%d) recorded (%s,t%d,s%d)",
+				base, i, d.EventType, d.Tick, d.Sequence, r.EventType, r.Tick, r.Sequence)
+		}
+	}
+	if len(derived) > len(recorded) {
+		d := derived[len(recorded)]
+		return fmt.Sprintf("%s; first extra derived at %d: (%s,t%d,s%d)", base, len(recorded), d.EventType, d.Tick, d.Sequence)
+	}
+	r := recorded[len(derived)]
+	return fmt.Sprintf("%s; first extra recorded at %d: (%s,t%d,s%d)", base, len(derived), r.EventType, r.Tick, r.Sequence)
 }
 
 func jsonEqual(a, b []byte) bool {

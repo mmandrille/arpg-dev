@@ -19,6 +19,7 @@
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_phase_started", "pattern_id": "summon_bats", "phase_kind": "active" }, "timeout_s": 4 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_summoned_adds", "pattern_id": "summon_bats", "amount": 3 }, "timeout_s": 5 },
     { "action": "action_until_event", "is_boss": true, "event_type": "monster_killed", "timeout_s": 10 },
+    { "action": "wait_ticks", "ticks": 1 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_killed", "boss_template_id": "crypt_matron" }, "timeout_s": 2 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "interactable_state_changed" }, "timeout_s": 5 },
     { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "equals": 1 }

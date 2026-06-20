@@ -2,7 +2,7 @@
   "id": "boss_telegraph_decals",
   "runner": "godot_client",
   "world_id": "boss_floor_gate_lab",
-  "seed": "v250_boss_telegraph_decals",
+  "seed": "boss_floor_gate",
   "title": "Boss telegraph decals",
   "description": "Client starts on the compact boss floor and verifies Cave Warden line, summon-circle, and cone telegraph decal shapes.",
   "debug_progression": {

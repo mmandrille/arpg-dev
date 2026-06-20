@@ -1,0 +1,39 @@
+tools/bot/scenarios/client/79_hit_stop_impact_flash.json
+  s_95786de7ff0c5d::t_24f3ccdbaec624 1-19
+docs/progress/slice-lifecycle.md
+  s_95786de7ff0c5d::t_2620a61c603e05 313
+client/scripts/bot_scenario_runner.gd
+  s_95786de7ff0c5d::t_24f3ccdbaec624 529-530
+PROGRESS.md
+  s_95786de7ff0c5d::t_2620a61c603e05 26,28-29
+docs/plans/v298_2026-06-19-hit-stop-impact-flash.md
+  s_95786de7ff0c5d::t_65c6843e1e4d6c 1-2,4-50,55-61,63,65-73,76-90,94-96,103-106
+  s_95786de7ff0c5d::t_87176edecfeaf0 62,64
+  s_95786de7ff0c5d::t_5f26ffa80c5065 51-54
+  s_95786de7ff0c5d::t_2620a61c603e05 3,74-75,91-93,97-102
+docs/as-built/v298_hit-stop-impact-flash.md
+  s_95786de7ff0c5d::t_2620a61c603e05 1-49
+client/tests/test_animation.gd
+  s_95786de7ff0c5d::t_24f3ccdbaec624 157-158,177
+client/scripts/model_reaction_controller.gd
+  s_95786de7ff0c5d::t_24f3ccdbaec624 5,8,22,51,55,57-58,70,75,77-78,111,174-186
+docs/specs/v298_spec-hit-stop-impact-flash.md
+  s_95786de7ff0c5d::t_65c6843e1e4d6c 1-2,4-79
+  s_95786de7ff0c5d::t_2620a61c603e05 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "78eced17a84f3e641a266d4660f353cca79cc6fa",
+  "prompts": {},
+  "sessions": {
+    "s_95786de7ff0c5d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee232-5e77-7f93-9275-ba83ddfb9619",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

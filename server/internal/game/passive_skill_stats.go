@@ -87,6 +87,14 @@ func (s *Sim) applyPassiveCombatStats(
 	addPassivePercentStat(s, "evade_chance", evadeChancePercent, evadeChanceSources)
 	addPassiveStat(s, "magic_find_percent", 1, magicFindPercent, magicFindSources)
 	addPassiveStat(s, "light_radius", 1, lightRadius, lightRadiusSources)
+	applyPassiveMultiplierStat(s, "damage_percent", damageMin, damageMinSources)
+	applyPassiveMultiplierStat(s, "damage_percent", damageMax, damageMaxSources)
+	applyPassiveMultiplierStat(s, "armor_percent", armor, armorSources)
+	applyPassiveMultiplierStat(s, "max_hp_percent", maxHP, maxHPSources)
+	applyPassiveMultiplierStat(s, "max_mana_percent", maxMana, maxManaSources)
+	applyPassiveMultiplierStat(s, "health_regen_percent", healthRegen, healthRegenSources)
+	applyPassiveMultiplierStat(s, "mana_regen_percent", manaRegen, manaRegenSources)
+	applyPassiveMultiplierStat(s, "light_radius_percent", lightRadius, lightRadiusSources)
 }
 
 func addPassiveStat(s *Sim, stat string, scale float64, target *float64, sources *[]StatBreakdownSourceView) {
@@ -100,6 +108,26 @@ func addPassivePercentStat(s *Sim, stat string, target *float64, sources *[]Stat
 	if value, rows := s.passiveSkillStatSources(stat, 0.01); value != 0 {
 		*target += value * 100.0
 		*sources = append(*sources, rows...)
+	}
+}
+
+func applyPassiveMultiplierStat(s *Sim, stat string, target *float64, sources *[]StatBreakdownSourceView) {
+	_, rows := s.passiveSkillStatSources(stat, 1)
+	applyPercentSourceRows(target, sources, rows)
+}
+
+func applyPercentSourceRows(target *float64, sources *[]StatBreakdownSourceView, rows []StatBreakdownSourceView) {
+	if len(rows) == 0 {
+		return
+	}
+	base := *target
+	for _, row := range rows {
+		if row.Value <= 0 {
+			continue
+		}
+		row.Value = base * row.Value / 100.0
+		*target += row.Value
+		*sources = append(*sources, row)
 	}
 }
 

@@ -24,8 +24,12 @@ func validatePassiveStatSkillPayload(skillID string, skill SkillDef) error {
 }
 
 func isSupportedPassiveSkillStat(stat string) bool {
-	if stat == "all_skills" || stat == "hotbar_slots" || stat == "inventory_rows" {
+	switch stat {
+	case "all_skills", "hotbar_slots", "inventory_rows":
 		return false
+	case "damage_percent", "armor_percent", "max_hp_percent", "max_mana_percent", "health_regen_percent", "mana_regen_percent", "light_radius_percent":
+		return true
+	default:
+		return isSupportedItemStat(stat)
 	}
-	return isSupportedItemStat(stat)
 }

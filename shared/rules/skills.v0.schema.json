@@ -372,25 +372,32 @@
           "properties": {
             "damage_min": { "$ref": "#/$defs/rank_linear_integer" },
             "damage_max": { "$ref": "#/$defs/rank_linear_integer" },
+            "damage_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "str": { "$ref": "#/$defs/rank_linear_integer" },
             "dex": { "$ref": "#/$defs/rank_linear_integer" },
             "vit": { "$ref": "#/$defs/rank_linear_integer" },
             "magic": { "$ref": "#/$defs/rank_linear_integer" },
             "max_hp": { "$ref": "#/$defs/rank_linear_integer" },
+            "max_hp_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "max_mana": { "$ref": "#/$defs/rank_linear_integer" },
+            "max_mana_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "armor": { "$ref": "#/$defs/rank_linear_integer" },
+            "armor_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "block_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "attack_speed_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "hit_chance": { "$ref": "#/$defs/rank_linear_integer" },
             "crit_chance": { "$ref": "#/$defs/rank_linear_integer" },
             "evade_chance": { "$ref": "#/$defs/rank_linear_integer" },
             "health_regen_per_10_seconds": { "$ref": "#/$defs/rank_linear_integer" },
+            "health_regen_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "mana_regen_per_10_seconds": { "$ref": "#/$defs/rank_linear_integer" },
+            "mana_regen_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "skill_damage_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "skill_cooldown_reduction_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "skill_mana_cost_reduction": { "$ref": "#/$defs/rank_linear_integer" },
             "magic_find_percent": { "$ref": "#/$defs/rank_linear_integer" },
-            "light_radius": { "$ref": "#/$defs/rank_linear_integer" }
+            "light_radius": { "$ref": "#/$defs/rank_linear_integer" },
+            "light_radius_percent": { "$ref": "#/$defs/rank_linear_integer" }
           }
         }
       }

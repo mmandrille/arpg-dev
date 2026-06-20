@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestPassiveSkillColumnUnlocksByClassLevelAndPrerequisite(t *testing.T) {
 	rules := loadRules(t)
@@ -138,6 +141,40 @@ func TestPassiveSkillColumnAffectsDerivedStatsAndCannotCast(t *testing.T) {
 			}})
 			assertReject(t, castRejected, "cast_passive", "passive_skill_not_castable")
 		})
+	}
+}
+
+func TestPassiveSkillPercentStatsApplyAfterFlatStatsAndDoNotCompound(t *testing.T) {
+	rules := loadRules(t)
+	tempo := rules.Skills["battle_tempo"]
+	tempo.PassiveStats.Stats = map[string]SkillRankValueDef{
+		"max_hp_percent": {Base: 5, PerRank: 0},
+	}
+	rules.Skills["battle_tempo"] = tempo
+
+	state := rules.DefaultCharacterProgressionState()
+	state.CharacterClass = "barbarian"
+	state.Level = 10
+	state.BaseStats = rules.CharacterProgression.Classes["barbarian"].BaseStats
+	sim, err := NewSimWithWorldProgression("sess_passive_percent_order", "passive_percent_order_seed", rules, DefaultWorldID, state)
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+
+	ring := addRolledInventoryItem(t, sim, 7310, "cave_ring", map[string]int{"max_hp": 20})
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_hp_ring", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "equip_hp_ring")
+	flatOnly, _ := sim.playerEffectiveCombatStats()
+
+	sim.progression.SkillRanks["iron_hide"] = 1
+	sim.progression.SkillRanks["battle_tempo"] = 1
+	withPercent, _ := sim.playerEffectiveCombatStats()
+	want := flatOnly.MaxHP * 1.15
+	if math.Abs(withPercent.MaxHP-want) > 0.000001 {
+		t.Fatalf("max hp with passives = %v, want flat %v * summed percent 1.15 = %v", withPercent.MaxHP, flatOnly.MaxHP, want)
+	}
+	compounded := flatOnly.MaxHP * 1.10 * 1.05
+	if math.Abs(withPercent.MaxHP-compounded) < 0.000001 {
+		t.Fatalf("max hp compounded percent sources: got %v, compounded %v", withPercent.MaxHP, compounded)
 	}
 }
 

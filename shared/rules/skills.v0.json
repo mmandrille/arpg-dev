@@ -460,6 +460,7 @@
         "range_per_rank": 0.5,
         "mode": "leap",
         "visual": "leap_impact",
+        "ignore_obstacle_kinds": ["water", "hole"],
         "damage_percent_base": 70,
         "damage_percent_per_rank": 10,
         "impact_radius": 2.25,

@@ -233,6 +233,43 @@
         }
       ]
     },
+    "barbarian_leap_obstacle_lab": {
+      "player": { "position": { "x": 2, "y": 5 } },
+      "entities": [
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 0.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 8, "y": 9.5 },
+          "size": { "x": 16, "y": 1 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 0.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "position": { "x": 15.5, "y": 5 },
+          "size": { "x": 1, "y": 10 }
+        },
+        {
+          "type": "wall",
+          "kind": "water",
+          "position": { "x": 4, "y": 5 },
+          "size": { "x": 1, "y": 6 }
+        },
+        {
+          "type": "wall",
+          "kind": "hole",
+          "position": { "x": 5, "y": 5 },
+          "size": { "x": 1, "y": 6 }
+        }
+      ]
+    },
     "ranged_lab": {
       "player": { "position": { "x": 2, "y": 2 } },
       "entities": [

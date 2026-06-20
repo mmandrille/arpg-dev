@@ -154,44 +154,6 @@ func (s *Sim) dashTravelDistance(player *entity, dir Vec2, dashRange float64, ta
 	return travel
 }
 
-func (s *Sim) resolveDashEndpoint(start Vec2, dir Vec2, dashRange float64) Vec2 {
-	dir = normalize(dir)
-	end := start
-	steps := int(math.Ceil(dashRange / 0.25))
-	if steps < 1 {
-		steps = 1
-	}
-	step := dashRange / float64(steps)
-	for i := 0; i < steps; i++ {
-		candidate := Vec2{X: end.X + dir.X*step, Y: end.Y + dir.Y*step}
-		if s.playerDashPositionBlocked(candidate) {
-			return end
-		}
-		end = candidate
-	}
-	return end
-}
-
-func (s *Sim) playerDashPositionBlocked(pos Vec2) bool {
-	for _, wall := range s.activeWalls() {
-		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
-			return true
-		}
-	}
-	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
-		e := s.activeLevel().entities[id]
-		if e == nil || e.kind != interactableEntity || e.state != interactableClosed {
-			continue
-		}
-		if def, ok := s.rules.Interactables[e.interactableDefID]; ok && def.BarrierWhenClosed != nil {
-			if circleIntersectsAABB(pos, playerRadius, e.pos, def.BarrierWhenClosed.Size) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func (s *Sim) applyDashSkill(player *entity, skillID string, def SkillDef, rank int, targets []*entity, correlationID string, res *TickResult) {
 	damageRange := percentDamageRange(s.resolvePlayerAttackDamage(), s.dashDamagePercent(def, rank))
 	for _, target := range targets {

@@ -1,0 +1,25 @@
+tools/validate_shared.py
+  s_d8f19e6e03317d::t_79dfd2b2d9681e 46
+  s_d8f19e6e03317d::t_12a1f362df646a 31
+  s_d8f19e6e03317d::t_9817feb73b422d 1440
+tools/test_validate_dungeon_goldens.py
+  s_d8f19e6e03317d::t_59545d62a093dc 1-73
+tools/validate_dungeon_goldens.py
+  s_d8f19e6e03317d::t_ccdad0d38afb52 1-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "46d8385fcc866a0d725b63c37f4f3f22067ff46d",
+  "prompts": {},
+  "sessions": {
+    "s_d8f19e6e03317d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b11ebf0-e533-4bb2-8b6f-5f9a06c89568",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

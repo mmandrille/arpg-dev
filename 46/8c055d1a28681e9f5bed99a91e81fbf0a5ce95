@@ -1,0 +1,51 @@
+PROGRESS.md
+  s_719c59d1789d7e::t_8e65fe5d6ad9f4 28-29,31,90-93
+  s_719c59d1789d7e::t_b008eba0123f7e 26
+server/internal/game/dungeon_obstacle_variety.go
+  s_719c59d1789d7e::t_f532d8b38c0bde 12-13,56
+tools/bot/scenarios/client/78_wall_floor_shader_polish.json
+  s_719c59d1789d7e::t_f8e4432cb8e695 1-16
+server/internal/game/dungeon_doors_test.go
+  s_719c59d1789d7e::t_b564f21fabd5b7 46
+docs/as-built/v301_wall-floor-shader-polish.md
+  s_719c59d1789d7e::t_b008eba0123f7e 1-17,21-27,32-38
+  s_719c59d1789d7e::t_8e65fe5d6ad9f4 18-20,28-31,39-40
+client/scripts/wall_renderer.gd
+  s_719c59d1789d7e::t_f8e4432cb8e695 111-119,122-123,127,134
+client/tests/test_factories.gd
+  s_719c59d1789d7e::t_f8e4432cb8e695 50-60,69-70,83-85
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_719c59d1789d7e::t_d9b83ddbf0ecd2 26
+  s_719c59d1789d7e::t_d57a793762f519 5
+docs/plans/v301_2026-06-19-wall-floor-shader-polish.md
+  s_719c59d1789d7e::t_bff6d62be6d876 1-2,4-11,14-36,42-58,62-67,72-81,85-94,99-109,112-125,130-139,144-146,161-167
+  s_719c59d1789d7e::t_b008eba0123f7e 3,59-61,68-71,82-84,95-98,110-111,126-128,140-143
+  s_719c59d1789d7e::t_8e65fe5d6ad9f4 12-13,37-41,129,147-160
+client/scripts/ground_wall_factory.gd
+  s_719c59d1789d7e::t_f8e4432cb8e695 8-9,40,43-46,61-72,96-111,124-154,222-244,276-279
+client/scripts/bot_assertion_handlers.gd
+  s_719c59d1789d7e::t_d9b83ddbf0ecd2 10,394-395,400
+tools/bot/scenarios/client/49_mercenary_recovery_ui.json
+  s_719c59d1789d7e::t_f33acd19b69fb6 31
+docs/specs/v301_spec-wall-floor-shader-polish.md
+  s_719c59d1789d7e::t_bff6d62be6d876 1-2,4-86
+  s_719c59d1789d7e::t_b008eba0123f7e 3
+docs/progress/slice-lifecycle.md
+  s_719c59d1789d7e::t_8e65fe5d6ad9f4 310-316
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "468c055d1a28681e9f5bed99a91e81fbf0a5ce95",
+  "prompts": {},
+  "sessions": {
+    "s_719c59d1789d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee231-6f1d-7402-b00b-73fb01b62c13",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

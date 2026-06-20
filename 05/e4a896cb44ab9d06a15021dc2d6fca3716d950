@@ -1,0 +1,19 @@
+CLAUDE.md
+  s_d8f19e6e03317d::t_2085188c391f83 266-274
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "05e4a896cb44ab9d06a15021dc2d6fca3716d950",
+  "prompts": {},
+  "sessions": {
+    "s_d8f19e6e03317d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b11ebf0-e533-4bb2-8b6f-5f9a06c89568",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

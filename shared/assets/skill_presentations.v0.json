@@ -281,7 +281,7 @@
         "color": "#7651d8",
         "accent": "#efe7ff"
       },
-      "summary": "Passive max mana",
+      "summary": "Passive max mana boost",
       "summary_key": "skill.arcane_focus.summary"
     },
     "mana_weaving": {
@@ -291,7 +291,7 @@
         "color": "#3f8cff",
         "accent": "#dff4ff"
       },
-      "summary": "Passive mana regeneration",
+      "summary": "Passive mana regeneration boost",
       "summary_key": "skill.mana_weaving.summary"
     },
     "spell_dynamo": {
@@ -311,7 +311,7 @@
         "color": "#a43b31",
         "accent": "#ffd4bf"
       },
-      "summary": "Passive max HP",
+      "summary": "Passive max HP boost",
       "summary_key": "skill.iron_hide.summary"
     },
     "battle_tempo": {
@@ -331,7 +331,7 @@
         "color": "#8b5a34",
         "accent": "#ffd68a"
       },
-      "summary": "Passive weapon damage",
+      "summary": "Passive weapon damage boost",
       "summary_key": "skill.crushing_force.summary"
     },
     "vigilant_guard": {
@@ -341,7 +341,7 @@
         "color": "#d9a33f",
         "accent": "#fff1bd"
       },
-      "summary": "Passive armor",
+      "summary": "Passive armor boost",
       "summary_key": "skill.vigilant_guard.summary"
     },
     "faithful_bulwark": {
@@ -361,7 +361,7 @@
         "color": "#74d6a1",
         "accent": "#e5fff0"
       },
-      "summary": "Passive health regeneration",
+      "summary": "Passive health regeneration boost",
       "summary_key": "skill.consecrated_vitality.summary"
     },
     "quick_hands": {
@@ -401,7 +401,7 @@
         "color": "#2fbf61",
         "accent": "#d7ffd6"
       },
-      "summary": "Passive light radius",
+      "summary": "Passive light radius boost",
       "summary_key": "skill.trail_sense.summary"
     },
     "precision_draw": {

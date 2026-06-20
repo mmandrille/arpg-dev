@@ -5756,6 +5756,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 
 	s.applyPassiveCombatStats(&damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &hitChancePercent, &critChancePercent, &evadeChancePercent, &magicFindPercent, &lightRadius, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources, &hitChanceSources, &critChanceSources, &evadeChanceSources, &magicFindSources, &lightRadiusSources)
 
+	armorEffectPercentRows := []StatBreakdownSourceView{}
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]
 		if effect.TargetID != 0 && effect.TargetID != s.playerID {
@@ -5767,18 +5768,14 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		for _, stat := range effect.Stats {
 			switch stat {
 			case "armor":
-				bonus := math.Round(armor * float64(effect.Percent) / 100.0)
-				if bonus < 1 {
-					bonus = 1
-				}
-				armor += bonus
-				armorSources = append(armorSources, StatBreakdownSourceView{Label: s.skillEffectLabel(effect), Value: bonus, Kind: "skill_effect"})
+				armorEffectPercentRows = append(armorEffectPercentRows, StatBreakdownSourceView{Label: s.skillEffectLabel(effect), Value: float64(effect.Percent), Kind: "skill_effect"})
 			case "block_percent":
 				blockPercent += float64(effect.Percent)
 				blockSources = append(blockSources, StatBreakdownSourceView{Label: s.skillEffectLabel(effect), Value: float64(effect.Percent), Kind: "skill_effect"})
 			}
 		}
 	}
+	applyPercentSourceRows(&armor, &armorSources, armorEffectPercentRows)
 
 	uncappedBlock := blockPercent
 	blockCap := float64(s.rules.Combat.BlockCap)

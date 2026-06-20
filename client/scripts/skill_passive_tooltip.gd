@@ -27,7 +27,7 @@ static func passive_next_rank_lines(def: Dictionary, current_rank: int, next_ran
 
 static func passive_stat_value_text(stat: String, amount: int) -> String:
 	match stat:
-		"attack_speed_percent", "block_percent", "hit_chance", "crit_chance", "evade_chance", "skill_damage_percent", "skill_cooldown_reduction_percent", "magic_find_percent":
+		"attack_speed_percent", "block_percent", "hit_chance", "crit_chance", "evade_chance", "skill_damage_percent", "skill_cooldown_reduction_percent", "magic_find_percent", "damage_percent", "armor_percent", "max_hp_percent", "max_mana_percent", "health_regen_percent", "mana_regen_percent", "light_radius_percent":
 			return "%d%%" % amount
 		"health_regen_per_10_seconds", "mana_regen_per_10_seconds":
 			return "%.1f/s" % (float(amount) / 10.0)
@@ -41,12 +41,20 @@ static func passive_stat_label(stat: String) -> String:
 			return "Min damage"
 		"damage_max":
 			return "Max damage"
+		"damage_percent":
+			return "Damage"
 		"max_hp":
+			return "Max HP"
+		"max_hp_percent":
 			return "Max HP"
 		"max_mana":
 			return "Max mana"
+		"max_mana_percent":
+			return "Max mana"
 		"attack_speed_percent":
 			return "Attack speed"
+		"armor_percent":
+			return "Armor"
 		"block_percent":
 			return "Block"
 		"hit_chance":
@@ -57,7 +65,11 @@ static func passive_stat_label(stat: String) -> String:
 			return "Evade"
 		"health_regen_per_10_seconds":
 			return "Health regen"
+		"health_regen_percent":
+			return "Health regen"
 		"mana_regen_per_10_seconds":
+			return "Mana regen"
+		"mana_regen_percent":
 			return "Mana regen"
 		"skill_damage_percent":
 			return "Skill damage"
@@ -68,6 +80,8 @@ static func passive_stat_label(stat: String) -> String:
 		"magic_find_percent":
 			return "Magic Find"
 		"light_radius":
+			return "Light radius"
+		"light_radius_percent":
 			return "Light radius"
 		_:
 			return stat.replace("_", " ").capitalize()

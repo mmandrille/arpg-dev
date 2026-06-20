@@ -263,10 +263,15 @@ These rules emerged from paying down the god-file debt. Agents should follow the
    `c.get("key", default)`. Direct access crashes on partial/malformed server messages; `.get()`
    degrades gracefully and makes the malformed-delta test pass cleanly.
 
-9. **Headless unit tests avoid scene-tree ops.** Tests in `tests/` using `extends SceneTree`
-   can test pure state mutations on a `MainScript.new()` instance, but must not call paths that
-   access `$Node` children, `get_parent()`, or require `entities_root`/`_walls_root`/etc.
-   Those paths are covered indirectly by bot scenarios; unit tests cover state correctness.
+9. **Headless unit tests avoid `main.gd` scene-tree paths.** Tests in `tests/` using
+   `extends SceneTree` that exercise `MainScript.new()` test pure state mutations only; they must not
+   call paths that access `$Node` children, `get_parent()`, or require `entities_root`/`_walls_root`/etc.
+   Those `main.gd` paths are covered indirectly by bot scenarios; unit tests cover state correctness.
+   Exception — **node-render component tests** (e.g. `test_factories.gd`, `test_fog_of_war_overlay.gd`):
+   a test whose subject *is* a self-contained node may `add_child` that node and `await process_frame`
+   to exercise its rendering/geometry. This is an established, CI-gated pattern; the prohibition is
+   specifically about reaching into `main.gd`'s scene graph from a `MainScript.new()` state test.
+   Register every such test in `scripts/client_smoke.sh` so it actually runs.
 
 ### CI / process
 

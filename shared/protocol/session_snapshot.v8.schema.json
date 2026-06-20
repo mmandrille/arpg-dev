@@ -368,7 +368,7 @@
       "properties": {
         "label": { "type": "string", "minLength": 1 },
         "value": { "type": "number" },
-        "kind": { "type": "string", "enum": ["character_formula", "equipment_base", "equipment_roll", "cap", "clamp"] },
+        "kind": { "type": "string", "enum": ["base_stat", "character_formula", "equipment_base", "equipment_roll", "set_bonus", "skill_effect", "passive_skill", "buff", "debuff", "combat_rule", "derived", "cap", "clamp"] },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" }
       }
     },
@@ -377,7 +377,7 @@
       "required": ["key", "value", "sources"],
       "additionalProperties": false,
       "properties": {
-        "key": { "type": "string", "enum": ["damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "magic_find_percent", "light_radius", "block_percent"] },
+        "key": { "type": "string", "enum": ["str", "dex", "vit", "magic", "damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "magic_find_percent", "light_radius", "block_percent"] },
         "value": { "type": "number" },
         "uncapped_value": { "type": "number" },
         "cap": { "type": ["number", "null"] },
@@ -389,7 +389,7 @@
     },
     "character_progression": {
       "type": "object",
-      "required": ["level", "experience", "experience_to_next_level", "level_cap", "unspent_stat_points", "gold", "deepest_dungeon_depth", "base_stats", "derived_stats"],
+      "required": ["level", "experience", "experience_to_next_level", "level_cap", "unspent_stat_points", "gold", "deepest_dungeon_depth", "base_stats", "effective_base_stats", "derived_stats"],
       "additionalProperties": false,
       "properties": {
         "level": { "type": "integer", "minimum": 1 },
@@ -400,6 +400,7 @@
         "gold": { "type": "integer", "minimum": 0 },
         "deepest_dungeon_depth": { "type": "integer", "minimum": 0 },
         "base_stats": { "$ref": "#/$defs/base_stats" },
+        "effective_base_stats": { "$ref": "#/$defs/base_stats" },
         "derived_stats": { "$ref": "#/$defs/derived_stats" },
         "stat_breakdowns": {
           "type": "array",

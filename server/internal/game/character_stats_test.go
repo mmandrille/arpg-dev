@@ -36,6 +36,31 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	}
 }
 
+func TestCharacterProgressionViewEffectiveBaseStatsAndBreakdowns(t *testing.T) {
+	sim := MustNewSim("sess_effective_base_stat_breakdowns", "01", loadRules(t))
+	before := sim.CharacterProgressionView()
+	ring := addRolledInventoryItem(t, sim, 6403, "cave_ring", map[string]int{
+		"str": 10,
+		"vit": 8,
+	})
+	assertAck(t, sim.Tick([]Input{{MessageID: "ring", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "ring")
+
+	view := sim.CharacterProgressionView()
+	if view.EffectiveBaseStats.Str != before.BaseStats.Str+10 || view.EffectiveBaseStats.Vit != before.BaseStats.Vit+8 {
+		t.Fatalf("effective base stats = %+v, base before %+v", view.EffectiveBaseStats, before.BaseStats)
+	}
+	strRow := findStatBreakdown(view.StatBreakdowns, "str")
+	if strRow == nil || strRow.Value != float64(view.EffectiveBaseStats.Str) {
+		t.Fatalf("strength breakdown = %+v, effective stats %+v", strRow, view.EffectiveBaseStats)
+	}
+	if !statBreakdownHasSourceKind(*strRow, "base_stat") || !statBreakdownHasSourceKind(*strRow, "equipment_roll") {
+		t.Fatalf("strength breakdown missing base/equipment source: %+v", strRow)
+	}
+	if !statBreakdownHasItemSource(*strRow, idStr(ring.instanceID), sim.itemDisplayName(ring), 10) {
+		t.Fatalf("strength breakdown missing item name/value source: %+v", strRow)
+	}
+}
+
 func TestCritDamageUsesDexterityAsStandardDerivedStat(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	base := MustNewSim("sess_crit_damage_dex_base", "01", rules)
@@ -139,6 +164,15 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 func hasManaRegenEvent(res TickResult, entityID uint64, mana int) bool {
 	for _, event := range res.Events {
 		if event.EventType == "player_mana_regenerated" && event.EntityID == idStr(entityID) && event.Mana != nil && *event.Mana == mana {
+			return true
+		}
+	}
+	return false
+}
+
+func statBreakdownHasItemSource(row StatBreakdownView, itemID string, label string, value float64) bool {
+	for _, source := range row.Sources {
+		if source.ItemInstanceID == itemID && source.Label == label && source.Value == value {
 			return true
 		}
 	}

@@ -25,7 +25,20 @@ func _test_derived_stats_scroll_and_breakdown_tooltips() -> void:
 	root.add_child(panel)
 	await process_frame
 	panel.set_progression({
+		"base_stats": {
+			"str": 25,
+			"dex": 17,
+			"vit": 15,
+			"magic": 18,
+		},
+		"effective_base_stats": {
+			"str": 42,
+			"dex": 12,
+			"vit": 15,
+			"magic": 18,
+		},
 		"derived_stats": {
+			"damage_min": 13.4,
 			"hit_chance": 0.5,
 			"crit_chance": 0.06,
 			"block_percent": 75,
@@ -47,10 +60,44 @@ func _test_derived_stats_scroll_and_breakdown_tooltips() -> void:
 					{"label": "Block cap", "value": -11, "kind": "cap"},
 				],
 			},
+			{
+				"key": "str",
+				"value": 42,
+				"sources": [
+					{"label": "Base STR", "value": 25, "kind": "base_stat"},
+					{"label": "Cave Ring", "value": 17, "kind": "equipment_roll", "item_instance_id": "1007"},
+				],
+			},
+			{
+				"key": "damage_min",
+				"value": 13.4,
+				"sources": [
+					{"label": "Base damage", "value": 6, "kind": "character_formula"},
+					{"label": "Strength", "value": 7.4, "kind": "character_formula"},
+				],
+			},
 		],
 	})
 	var state: Dictionary = panel.get_debug_state()
+	_assert_eq("stats table columns", str(state.get("stat_columns", [])), str(["NAME", "BASE", "EFFECTIVE"]))
+	var stat_labels: Dictionary = state.get("stat_labels", {})
+	_assert_eq("strength shows base and effective value", str(stat_labels.get("str", "")), "STR  25 / 42")
+	var stat_mouse_filters: Dictionary = state.get("stat_mouse_filters", {})
+	_assert_eq("strength effective value accepts hover for tooltip", int(stat_mouse_filters.get("str", -1)), Control.MOUSE_FILTER_STOP)
+	var stat_styles: Dictionary = state.get("stat_effective_styles", {})
+	var str_style: Dictionary = stat_styles.get("str", {})
+	_assert_eq("boosted effective stat is green", str(str_style.get("color", "")), "8ee68e")
+	_assert_true("effective stat is visually bold", int(str_style.get("outline_size", 0)) >= 1)
+	var dex_style: Dictionary = stat_styles.get("dex", {})
+	_assert_eq("reduced effective stat is red", str(dex_style.get("color", "")), "ff8b7a")
+	var stat_tooltips: Dictionary = state.get("stat_tooltips", {})
+	var str_tip := str(stat_tooltips.get("str", ""))
+	_assert_true("strength tooltip uses formula title", str_tip.contains("STR formula:"))
+	_assert_true("strength tooltip includes base stat source", str_tip.contains("+25 (Base STR, Base stat)"))
+	_assert_true("strength tooltip includes item name only", str_tip.contains("+17 (Cave Ring)"))
+	_assert_true("strength tooltip includes final value", str_tip.contains("= 42"))
 	_assert_true("derived stats visible by default", bool(state.get("derived_open", false)))
+	_assert_eq("derived table columns", str(state.get("derived_columns", [])), str(["NAME", "VALUE"]))
 	_assert_eq("derived title text", str(state.get("derived_title", "")), "Derived")
 	_assert_false("derived title is not a button", bool(state.get("derived_title_is_button", true)))
 	var scroll: Dictionary = state.get("derived_scroll", {})
@@ -61,6 +108,7 @@ func _test_derived_stats_scroll_and_breakdown_tooltips() -> void:
 	_assert_eq("vertical scrollbar always shown", int(scroll.get("vertical_scroll_mode", -1)), ScrollContainer.SCROLL_MODE_SHOW_ALWAYS)
 	_assert_true("derived viewport fits six rows", float(scroll.get("viewport_height", 0.0)) >= 168.0)
 	var labels: Dictionary = state.get("derived_labels", {})
+	_assert_eq("damage min displays decimal", str(labels.get("damage_min", "")), "Damage min  13.4")
 	_assert_eq("hit chance displays percent", str(labels.get("hit_chance", "")), "Hit chance  50%")
 	_assert_eq("crit chance displays percent", str(labels.get("crit_chance", "")), "Crit chance  6%")
 	_assert_eq("block chance displays percent", str(labels.get("block_percent", "")), "Block  75%")
@@ -71,6 +119,8 @@ func _test_derived_stats_scroll_and_breakdown_tooltips() -> void:
 	_assert_eq("derived tooltip is opaque", float(tooltip_panel.get("background_alpha", 0.0)), 1.0)
 	var tooltips: Dictionary = state.get("derived_tooltips", {})
 	var block_tip := str(tooltips.get("block_percent", ""))
+	var damage_tip := str(tooltips.get("damage_min", ""))
+	_assert_true("derived character formula source includes effective stat value", damage_tip.contains("+7.4 (42 Strength, Character formula)"))
 	_assert_true("tooltip uses formula title", block_tip.contains("Block formula:"))
 	_assert_false("tooltip omits source section", block_tip.contains("Sources:"))
 	_assert_false("tooltip omits uncapped section", block_tip.contains("Uncapped:"))

@@ -239,6 +239,7 @@ type CharacterProgressionView struct {
 	Gold                  int                 `json:"gold"`
 	DeepestDungeonDepth   int                 `json:"deepest_dungeon_depth"`
 	BaseStats             BaseStatsView       `json:"base_stats"`
+	EffectiveBaseStats    BaseStatsView       `json:"effective_base_stats"`
 	DerivedStats          DerivedStatsView    `json:"derived_stats"`
 	StatBreakdowns        []StatBreakdownView `json:"stat_breakdowns,omitempty"`
 	SkillRanks            map[string]int      `json:"-"`

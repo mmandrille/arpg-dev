@@ -1,0 +1,38 @@
+client/scripts/inventory_render_guard.gd
+  s_d2a495bd24647f::t_1546e806a87fc7 1-42
+client/tests/test_character_stats_panel.gd
+  s_d2a495bd24647f::t_4bbbeecc27e720 6,18,91-94,97-100
+  s_d2a495bd24647f::t_4cfd254e5e133f 95-96
+scripts/client_smoke.sh
+  s_d2a495bd24647f::t_3ce5efd599f61c 137
+client/scripts/character_stats_panel.gd
+  s_d2a495bd24647f::t_4bbbeecc27e720 37,40
+client/scripts/item_tooltip_panel.gd
+  s_d2a495bd24647f::t_4bbbeecc27e720 30,62,67,73,78,114,119,127,133,201,212,219
+client/tests/test_inventory_panel.gd
+  s_d2a495bd24647f::t_7eed78aa825fc8 36,39-41,52-54
+  s_d2a495bd24647f::t_077cff92ed1a60 35
+  s_d2a495bd24647f::t_ba5bf34dcc5a9d 1-34,37-38,42-51,55-71
+client/scripts/inventory_render_guard.gd.uid
+  s_d2a495bd24647f::t_ba63379bdee871 1
+client/scripts/inventory_panel.gd
+  s_d2a495bd24647f::t_cc0169f3c11905 14,302
+client/tests/test_inventory_panel.gd.uid
+  s_d2a495bd24647f::t_8097a4e7269486 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a2861973a829ceef68eedc66d3fc123774db5123",
+  "prompts": {},
+  "sessions": {
+    "s_d2a495bd24647f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee5ed-3283-70a3-9878-2e0dc4b0f6af",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

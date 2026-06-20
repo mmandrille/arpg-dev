@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-19
+Last updated: 2026-06-20
 
 ---
 
@@ -25,8 +25,8 @@ Last updated: 2026-06-19
 |-------|-------|
 | **Latest completed slice** | v301 — wall/floor shader polish |
 | **Active branch** | `codex/world-detail-navigation` |
-| **CI gate** | v301 focused autoloop gates green on 2026-06-19: direct Godot factory test, `make client-unit`, `wall_floor_shader_polish` headless client bot via direct script, and `make maintainability`; final World Detail/Navigation batch `COMPOSE_PROJECT_NAME=arpg-dev make ci` green in the isolated worktree |
-| **Next slice** | Engineering review/refactor handoff is due before the next feature slice |
+| **CI gate** | v301 focused autoloop gates green on 2026-06-19: direct Godot factory test, `make client-unit`, `wall_floor_shader_polish` headless client bot via direct script, and `make maintainability`; final World Detail/Navigation batch `COMPOSE_PROJECT_NAME=arpg-dev make ci` green in the isolated worktree; v301 refactor `make ci` with `go vet ./...` green on 2026-06-20 |
+| **Next slice** | Ready for the next feature slice; v301 engineering review/refactor handoff is complete |
 | **Last engineering review** | v301 — [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) (2026-06-20) |
 | **Next engineering review** | Target after roughly v311, after the next feature/refactor batch and a green `make ci` |
 
@@ -87,14 +87,12 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Refactor handoff due from v301 `$review`.** The v301 review set is current and full CI is
-  green. Run `$refactor` against [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md)
-  before the next feature slice.
-- **Review follow-ups remaining after v301 `$review`.** Minor paydown candidates: make `make db-up`
-  / `make ci` worktree-safe without hidden `COMPOSE_PROJECT_NAME` knowledge, add `go vet ./...` to
-  CI, and add bot-scenario budget guidance. Future-plan scale: keep splitting touched large
-  coordinators/validators, continue the tuning-friendly rule-test audit, and resolve unverified
-  local GLB provenance before production distribution.
+- **v301 `$review` / `$refactor` handoff complete.** Minor paydown commits landed for worktree-safe
+  compose defaults, `go vet ./...` in CI, bot-scenario budget guidance, and this canonical handoff
+  cleanup.
+- **Review follow-ups remaining after v301 `$review`.** Future-plan scale: keep splitting touched
+  large coordinators/validators, continue the tuning-friendly rule-test audit, and resolve
+  unverified local GLB provenance before production distribution.
 
 ### Other deferred items (from specs / ADRs)
 

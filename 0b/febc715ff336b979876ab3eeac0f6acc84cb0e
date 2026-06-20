@@ -1,0 +1,70 @@
+client/scripts/ground_wall_factory.gd
+  s_719c59d1789d7e::t_bbdcf907ecd456 131
+  s_719c59d1789d7e::t_0d34cc21b471a2 9,113-130,132-136
+docs/plans/v296_2026-06-19-hazard-holes-chasms.md
+  s_719c59d1789d7e::t_e0613dc4bc3ce6 1-2,4-51,57-58,60-77,81-94,100-112,116-130,134-148,152-160,168-176
+  s_719c59d1789d7e::t_c17dca578e98f9 3,52-56,59,78-80,95-99,113-115,131-133,149-151,161-167
+shared/rules/dungeon_generation.v0.json
+  s_719c59d1789d7e::t_5ef1ddddc41efc 128-134
+server/internal/game/obstacle_blocking.go
+  s_719c59d1789d7e::t_01bca511565e71 6,18
+server/internal/game/dungeon_gen.go
+  s_719c59d1789d7e::t_01bca511565e71 66-68,104
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_719c59d1789d7e::t_6fb35e3b8a7391 16,63,69-70,72-74,95-97,127,142-143,145-147,155
+docs/progress/slice-lifecycle.md
+  s_719c59d1789d7e::t_c17dca578e98f9 311
+shared/rules/dungeon_generation.v0.schema.json
+  s_719c59d1789d7e::t_5ef1ddddc41efc 162,219-225
+client/scripts/wall_renderer.gd
+  s_719c59d1789d7e::t_0d34cc21b471a2 85-89,115-134
+PROGRESS.md
+  s_719c59d1789d7e::t_c17dca578e98f9 26,28-29,108
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_719c59d1789d7e::t_6a5c990a6884c9 11,21
+server/internal/game/dungeon_water.go
+  s_719c59d1789d7e::t_01bca511565e71 78,92,95
+docs/specs/v296_spec-hazard-holes-chasms.md
+  s_719c59d1789d7e::t_e0613dc4bc3ce6 1-2,4-116
+  s_719c59d1789d7e::t_c17dca578e98f9 3
+shared/protocol/state_delta.v8.schema.json
+  s_719c59d1789d7e::t_5ef1ddddc41efc 113
+shared/golden/dungeon_obstacles.v0.schema.json
+  s_719c59d1789d7e::t_5ef1ddddc41efc 18,30,91-92
+server/internal/game/pathfind_test.go
+  s_719c59d1789d7e::t_05f4a690c3fd63 96-120
+docs/as-built/v296_hazard-holes-chasms.md
+  s_719c59d1789d7e::t_c17dca578e98f9 1-41
+client/scripts/fog_of_war_overlay.gd
+  s_719c59d1789d7e::t_0d34cc21b471a2 150
+client/tests/test_fog_of_war_overlay.gd
+  s_719c59d1789d7e::t_3bfbdae1a59445 19,120-130
+shared/protocol/session_snapshot.v8.schema.json
+  s_719c59d1789d7e::t_5ef1ddddc41efc 66
+server/internal/game/fog_of_war_test.go
+  s_719c59d1789d7e::t_66a690c2c114e3 116-130
+server/internal/game/rules.go
+  s_719c59d1789d7e::t_352eac7e8268a3 303,1900-1902,2180-2181
+server/internal/game/dungeon_holes.go
+  s_719c59d1789d7e::t_352eac7e8268a3 1-104
+client/tests/test_factories.gd
+  s_719c59d1789d7e::t_3bfbdae1a59445 42,46,49,86-100
+shared/protocol/examples/state_delta_level_transition.json
+  s_719c59d1789d7e::t_6a5c990a6884c9 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0bfebc715ff336b979876ab3eeac0f6acc84cb0e",
+  "prompts": {},
+  "sessions": {
+    "s_719c59d1789d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee231-6f1d-7402-b00b-73fb01b62c13",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -174,7 +174,7 @@ func (s *Sim) resolveDashEndpoint(start Vec2, dir Vec2, dashRange float64) Vec2 
 
 func (s *Sim) playerDashPositionBlocked(pos Vec2) bool {
 	for _, wall := range s.activeWalls() {
-		if circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
 			return true
 		}
 	}

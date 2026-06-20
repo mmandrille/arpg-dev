@@ -103,6 +103,9 @@ def run_assertions(
             if assertion.get("source") is not None:
                 source = str(assertion["source"])
                 wall_rows = [wall for wall in wall_rows if str(wall.get("source", "")) == source]
+            if assertion.get("kind") is not None:
+                kind = str(assertion["kind"])
+                wall_rows = [wall for wall in wall_rows if str(wall.get("kind", "wall")) == kind]
             assert_count_matches(len(wall_rows), assertion, f"{where}: wall count", f": {wall_rows}")
         elif typ == "non_perimeter_wall_exists":
             wall_rows = list(walls or [])
@@ -374,6 +377,9 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
             if assertion.get("source") is not None:
                 source = str(assertion["source"])
                 walls = [wall for wall in walls if str(wall.get("source", "")) == source]
+            if assertion.get("kind") is not None:
+                kind = str(assertion["kind"])
+                walls = [wall for wall in walls if str(wall.get("kind", "wall")) == kind]
             assert_count_matches(len(walls), assertion, f"{where}: wall count", f": {walls}")
             continue
         if typ == "non_perimeter_wall_exists":

@@ -38,9 +38,12 @@ func _test_ground_wall_factory() -> void:
 	var factory = GroundWallFactoryScript.new()
 	var town_texture := factory.make_ground_texture(ClientConstantsScript.GROUND_TEXTURE_TOWN)
 	var dungeon_texture := factory.make_ground_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON)
+	var water_texture := factory.make_water_texture()
 	_assert_true("town ground texture exists", town_texture != null)
 	_assert_true("dungeon ground texture exists", dungeon_texture != null)
+	_assert_true("water texture exists", water_texture != null)
 	_assert_eq("ground texture cache count", factory.ground_textures.size(), 2)
+	_assert_eq("water texture cache count", factory.water_textures.size(), 1)
 	var ground := factory.make_ground_node(0)
 	_assert_eq("ground node name", ground.name, "Ground")
 	ground.queue_free()
@@ -62,6 +65,21 @@ func _test_wall_renderer() -> void:
 	var wall := root.get_child(0) as MeshInstance3D
 	_assert_eq("wall child name", wall.name, "Wall_test_wall")
 	_assert_true("wall material has palette texture", (wall.material_override as StandardMaterial3D).albedo_texture != null)
+	var water_walls := renderer.render_wall_layout([{
+		"id": "test_water",
+		"position": {"x": 7.0, "y": 8.0},
+		"size": {"x": 5.0, "y": 2.0},
+		"source": "generated",
+		"kind": "water",
+	}])
+	_assert_eq("water layout count", water_walls.size(), 1)
+	_assert_eq("water layout kind", str((water_walls[0] as Dictionary).get("kind", "")), "water")
+	_assert_eq("water child count", root.get_child_count(), 1)
+	var water := root.get_child(0) as MeshInstance3D
+	_assert_eq("water child name", water.name, "Water_test_water")
+	_assert_eq("water metadata kind", str(water.get_meta("kind", "")), "water")
+	_assert_true("water mesh is plane", water.mesh is PlaneMesh)
+	_assert_true("water material has texture", (water.material_override as StandardMaterial3D).albedo_texture != null)
 	root.queue_free()
 
 

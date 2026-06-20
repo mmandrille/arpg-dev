@@ -14,6 +14,7 @@
         "floor_size",
         "minimum_wall_count",
         "minimum_generated_wall_count",
+        "minimum_water_count",
         "shape_families",
         "walls",
         "doors",
@@ -24,6 +25,7 @@
         "floor_size": { "$ref": "#/$defs/size" },
         "minimum_wall_count": { "type": "integer", "minimum": 4 },
         "minimum_generated_wall_count": { "type": "integer", "minimum": 1 },
+        "minimum_water_count": { "type": "integer", "minimum": 0 },
         "shape_families": {
           "type": "array",
           "minItems": 2,
@@ -84,7 +86,8 @@
         "position": { "$ref": "#/$defs/vec2" },
         "size": { "$ref": "#/$defs/wall_size" },
         "source": { "type": "string", "enum": ["perimeter", "generated"] },
-        "shape_family": { "type": "string", "enum": ["line", "l", "t", "block"] }
+        "shape_family": { "type": "string", "enum": ["line", "l", "t", "block", "water"] },
+        "kind": { "type": "string", "enum": ["wall", "water"] }
       }
     },
     "reachable_target": {

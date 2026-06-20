@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v294 — full-CI residual stabilization |
-| **Active branch** | `main` |
-| **CI gate** | v294 full `make ci` green on 2026-06-19 after residual stabilization; focused proof included elite-minion Go tests, mercenary protocol scenarios, Godot client bot unit tests, and full `HEADLESS=1 make bot-client` |
-| **Next slice** | v295 — due repo-wide engineering review/refactor handoff before the next feature autoloop |
+| **Latest completed slice** | v295 — water obstacles foundation |
+| **Active branch** | `codex/world-detail-navigation` |
+| **CI gate** | v295 focused autoloop gates green on 2026-06-19: `make validate-shared`, focused Go obstacle/path/fog tests, `reachable_dungeon_obstacles` protocol bot via direct script, `make client-unit`, `dungeon_wall_rendering` headless client bot via direct script, and `make maintainability`; final batch `make ci` pending |
+| **Next slice** | v296 — hazard holes / chasms from the selected World Detail/Navigation queue |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
-| **Next engineering review** | v295 target now that full-CI residuals are stabilized |
+| **Next engineering review** | Due after the selected World Detail/Navigation autoloop queue completes and final batch `make ci` is green |
 
 
 ### Periodic engineering reviews
@@ -87,9 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review/refactor handoff due after v294.** v294 restored the full-CI baseline after the v293
-  residuals. Run the next repo-wide `$review` and `$refactor` pass before starting another feature
-  autoloop so the scorecard reflects the current green baseline.
+- **Review/refactor handoff due after selected World Detail/Navigation queue.** v294 restored the
+  full-CI baseline after the v293 residuals. The active `$autoloop` selected a feature queue while
+  AFK, so run the next repo-wide `$review` and `$refactor` pass after that selected queue completes
+  and its final batch `make ci` is green.
 - **Review follow-ups remaining after v284 `$review`.** Remaining follow-ups are future-plan scale:
   keep splitting the next touched large coordinators/validators, continue the tuning-friendly
   rule-test audit, and resolve unverified local GLB provenance before production distribution.

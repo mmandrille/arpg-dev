@@ -118,6 +118,13 @@
       "min_side_length": 2.0,
       "gap_width": 1.6
     },
+    "water": {
+      "enabled": true,
+      "max_attempts": 48,
+      "target_count": { "min": 1, "max": 2 },
+      "min_size": { "x": 4, "y": 2 },
+      "max_size": { "x": 9, "y": 3 }
+    },
     "clearance": {
       "player_spawn": 3.0,
       "stairs": 2.0,

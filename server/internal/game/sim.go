@@ -227,6 +227,7 @@ type wallObstacle struct {
 	size        Vec2
 	source      string
 	shapeFamily string
+	kind        string
 }
 
 type effectiveCombatStats struct {
@@ -1965,7 +1966,7 @@ func (s *Sim) travelArrivalBlocked(level *LevelState, pos Vec2, movingPlayerID u
 		return true
 	}
 	for _, wall := range level.walls {
-		if circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
 			return true
 		}
 	}
@@ -2755,7 +2756,7 @@ func (s *Sim) resolveMovement(pos, delta Vec2) Vec2 {
 
 func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 	for _, wall := range s.activeWalls() {
-		if circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, playerRadius, wall.pos, wall.size) {
 			return true
 		}
 	}
@@ -2828,7 +2829,7 @@ func (s *Sim) findAdjacentLootDropPosition(source Vec2, sourceRadius float64) (V
 
 func (s *Sim) lootDropBlocked(pos Vec2) bool {
 	for _, wall := range s.activeWalls() {
-		if circleIntersectsAABB(pos, lootInteractionRadius, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, lootInteractionRadius, wall.pos, wall.size) {
 			return true
 		}
 	}
@@ -3424,7 +3425,7 @@ func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
 
 func (s *Sim) monsterPositionBlockedWithIDs(pos Vec2, excludeMonsterID uint64, walls []wallObstacle, playerIDs []uint64, entityIDs []uint64) bool {
 	for _, wall := range walls {
-		if circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
+		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
 			return true
 		}
 	}
@@ -3557,6 +3558,9 @@ func (s *Sim) firstProjectileHit(p *entity, candidate Vec2) (projectileHit, bool
 		}
 	}
 	for _, wall := range s.activeWalls() {
+		if !obstacleBlocksProjectiles(wall) {
+			continue
+		}
 		if t, ok := segmentIntersectsInflatedAABB(p.pos, candidate, wall.pos, wall.size, projectileRadius); ok {
 			consider(projectileHit{t: t, category: projectileHitWall})
 		}
@@ -4840,6 +4844,9 @@ func (s *Sim) hasClearRangedShot(from Vec2, target *entity) bool {
 		return false
 	}
 	for _, wall := range s.activeWalls() {
+		if !obstacleBlocksProjectiles(wall) {
+			continue
+		}
 		if _, ok := segmentIntersectsInflatedAABB(from, target.pos, wall.pos, wall.size, projectileRadius); ok {
 			return false
 		}
@@ -4878,6 +4885,9 @@ func (s *Sim) hasClearMonsterRangedShot(from Vec2, target *entity) bool {
 		return false
 	}
 	for _, wall := range s.activeWalls() {
+		if !obstacleBlocksProjectiles(wall) {
+			continue
+		}
 		if _, ok := segmentIntersectsInflatedAABB(from, target.pos, wall.pos, wall.size, projectileRadius); ok {
 			return false
 		}
@@ -6244,12 +6254,16 @@ func wallViewsForLevel(level *LevelState) []WallView {
 		if source == "" {
 			source = "preset"
 		}
-		out = append(out, WallView{
+		view := WallView{
 			ID:       wallID(level.levelNum, i),
 			Position: wall.pos,
 			Size:     wall.size,
 			Source:   source,
-		})
+		}
+		if kind := wall.obstacleKind(); kind != obstacleKindWall {
+			view.Kind = kind
+		}
+		out = append(out, view)
 	}
 	return out
 }

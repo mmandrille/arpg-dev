@@ -164,6 +164,7 @@ run_gate "GDScript delta apply test" "[gdtest] PASS: test_delta_apply" res://tes
 # 2n. Loot label rarity filter unit tests (server-independent; v153).
 run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filter" res://tests/test_loot_label_filter.gd
 run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
+run_gate "GDScript loot node factory test" "[gdtest] PASS: test_loot_node_factory" res://tests/test_loot_node_factory.gd
 
 # 2o. World-detail render + combat-feel unit tests (server-independent; v295-v308).
 # These existed on disk but were never registered, so they ran zero times in CI.

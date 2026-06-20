@@ -1,0 +1,70 @@
+docs/plans/v299_2026-06-19-obstacle-variety-pack.md
+  s_719c59d1789d7e::t_95c1d3b13a4c0a 35,93
+  s_719c59d1789d7e::t_cc88b819010735 3,53-57,60,79-81,96-102,115-118,131-133,144-146,162-164,174-180
+  s_719c59d1789d7e::t_015c608eec518d 1-2,4-34,36-52,58-59,61-78,82-92,94-95,103-114,119-130,134-143,147-161,165-173,181-191
+shared/protocol/state_delta.v8.schema.json
+  s_719c59d1789d7e::t_80a1c2e0d80293 113
+server/internal/game/rules.go
+  s_719c59d1789d7e::t_d7270a95a68359 301-305,2176-2177
+shared/rules/worlds.v0.json
+  s_719c59d1789d7e::t_80a1c2e0d80293 273-320
+server/internal/game/dungeon_obstacle_variety.go
+  s_719c59d1789d7e::t_d7270a95a68359 1-49
+shared/rules/worlds.v0.schema.json
+  s_719c59d1789d7e::t_80a1c2e0d80293 41
+PROGRESS.md
+  s_719c59d1789d7e::t_cc88b819010735 26,28-29,108
+server/internal/game/obstacle_blocking.go
+  s_719c59d1789d7e::t_d7270a95a68359 4-9,29
+server/internal/game/dungeon_doors.go
+  s_719c59d1789d7e::t_95c1d3b13a4c0a 39
+server/internal/game/monster_navigation_traits.go
+  s_719c59d1789d7e::t_d7270a95a68359 63
+shared/rules/dungeon_generation.v0.schema.json
+  s_719c59d1789d7e::t_80a1c2e0d80293 160,201-209
+shared/protocol/session_snapshot.v8.schema.json
+  s_719c59d1789d7e::t_80a1c2e0d80293 66
+server/internal/game/dungeon_gen.go
+  s_719c59d1789d7e::t_d7270a95a68359 279-280,315,318,320,322,324,330,343,347,361-362,366,377-379,383,393
+docs/specs/v299_spec-obstacle-variety-pack.md
+  s_719c59d1789d7e::t_0dc3716153ec9d 1-2,4-66,69-70,72-112
+  s_719c59d1789d7e::t_95c1d3b13a4c0a 68
+  s_719c59d1789d7e::t_cc88b819010735 3
+  s_719c59d1789d7e::t_e0cdafa9af8c99 67,71
+client/scripts/wall_renderer.gd
+  s_719c59d1789d7e::t_a9a7a6d304f007 86,94-99,125-166,172-175,180-181,183-188,199,201-203,206-210,216-222,230-231
+  s_719c59d1789d7e::t_0ab2f4aca7dce6 167-171,176-179,182,189-198,200,204-205,211-215,223-229
+client/tests/test_factories.gd
+  s_719c59d1789d7e::t_f5e723583ff802 101-141,158-178
+docs/progress/slice-lifecycle.md
+  s_719c59d1789d7e::t_cc88b819010735 314
+shared/golden/dungeon_obstacles.v0.schema.json
+  s_719c59d1789d7e::t_80a1c2e0d80293 20,38-43,99
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_719c59d1789d7e::t_95c1d3b13a4c0a 138,175,183
+  s_719c59d1789d7e::t_03ed790e32a764 18,66,78-80,111-118,142,163-165,174
+docs/as-built/v299_obstacle-variety-pack.md
+  s_719c59d1789d7e::t_cc88b819010735 1-33
+server/internal/game/dungeon_obstacle_variety_test.go
+  s_719c59d1789d7e::t_03ed790e32a764 1-93
+tools/bot/scenarios/101_obstacle_variety_pack.json
+  s_719c59d1789d7e::t_9c949de6e45fe7 1-23
+shared/rules/dungeon_generation.v0.json
+  s_719c59d1789d7e::t_80a1c2e0d80293 113-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6c81a4c91a273464bd5fb2ace5a66cb59c6393c3",
+  "prompts": {},
+  "sessions": {
+    "s_719c59d1789d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee231-6f1d-7402-b00b-73fb01b62c13",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

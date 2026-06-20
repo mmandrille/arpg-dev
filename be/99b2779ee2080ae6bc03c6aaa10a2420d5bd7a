@@ -1,0 +1,68 @@
+shared/rules/skills.v0.json
+  s_4862b687328423::t_c1705540208429 463-466,1229-1822
+tools/validate_skills.py
+  s_4862b687328423::t_c1705540208429 106-168
+client/scripts/skill_passive_tooltip.gd
+  s_4862b687328423::t_c1705540208429 1-77
+docs/as-built/v309_passive-skill-column.md
+  s_4862b687328423::t_c1705540208429 1-18,20-27,30-31,33-38
+  s_4862b687328423::t_ff9e8bc58c34e4 29,32
+  s_4862b687328423::t_51901f38c55428 19,28
+docs/progress/slice-lifecycle.md
+  s_4862b687328423::t_ff9e8bc58c34e4 324
+server/internal/game/item_skill_stats.go
+  s_4862b687328423::t_c1705540208429 157
+server/internal/game/passive_skill_column_test.go
+  s_4862b687328423::t_c1705540208429 1-163
+server/internal/game/passive_skill_stats.go
+  s_4862b687328423::t_c1705540208429 1-115
+client/scripts/skills_panel.gd
+  s_4862b687328423::t_c1705540208429 7,56-57,103,768-769
+PROGRESS.md
+  s_4862b687328423::t_ff9e8bc58c34e4 28
+  s_4862b687328423::t_c1705540208429 26,110-111
+server/internal/game/handlers.go
+  s_4862b687328423::t_c1705540208429 1220
+shared/i18n/en.json
+  s_4862b687328423::t_c1705540208429 136-166
+docs/specs/v309_spec-passive-skill-column.md
+  s_4862b687328423::t_c1705540208429 1-56
+server/internal/game/passive_skill_rules.go
+  s_4862b687328423::t_c1705540208429 1-31
+server/internal/game/rules.go
+  s_4862b687328423::t_c1705540208429 548-574,686-690,2871,2941-2945,2960
+shared/i18n/es.json
+  s_4862b687328423::t_c1705540208429 136-166
+shared/assets/skill_presentations.v0.json
+  s_4862b687328423::t_c1705540208429 104,128,276-425
+shared/rules/skills.v0.schema.json
+  s_4862b687328423::t_c1705540208429 28,43,133-139,363-395
+tools/bot/class_foundation_coverage.py
+  s_4862b687328423::t_ccf65e4ffff23f 53-54
+client/scripts/skill_passive_tooltip.gd.uid
+  s_4862b687328423::t_c1705540208429 1
+client/tests/test_skills_panel.gd
+  s_4862b687328423::t_c1705540208429 63,66-72,104-109,160,164-167,191,194-198
+docs/plans/v309_2026-06-20-passive-skill-column.md
+  s_4862b687328423::t_51901f38c55428 29,115,123
+  s_4862b687328423::t_ff9e8bc58c34e4 125
+  s_4862b687328423::t_c1705540208429 1-28,30-114,116-122,124
+server/internal/game/sim.go
+  s_4862b687328423::t_c1705540208429 5133-5136,5757
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "be99b2779ee2080ae6bc03c6aaa10a2420d5bd7a",
+  "prompts": {},
+  "sessions": {
+    "s_4862b687328423": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee40d-f779-7963-921d-4e4bc607a129",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

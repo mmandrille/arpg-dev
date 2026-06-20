@@ -1,6 +1,8 @@
 class_name CombatReach
 extends RefCounted
 
+const APPROACH_STOP_MARGIN := 0.10
+
 
 static func target_in_local_attack_range(player_anchor: Node3D, entities: Dictionary, inventory: Array, equipped: Dictionary, target_id: String) -> bool:
 	if player_anchor == null or target_id == "" or not entities.has(target_id):
@@ -14,6 +16,24 @@ static func target_in_local_attack_range(player_anchor: Node3D, entities: Dictio
 	var flat := Vector2(target_position.x - player_position.x, target_position.z - player_position.z)
 	var reach := _local_player_attack_reach(inventory, equipped)
 	return flat.length() <= reach + _local_target_interaction_radius(rec) + ClientConstants.LOCAL_REACH_EPSILON
+
+
+static func attack_approach_point(player_anchor: Node3D, entities: Dictionary, inventory: Array, equipped: Dictionary, target_id: String, fallback_direction: Vector2 = Vector2.RIGHT) -> Vector3:
+	if player_anchor == null or target_id == "" or not entities.has(target_id):
+		return Vector3.ZERO
+	var rec: Dictionary = entities[target_id]
+	var target_node := rec.get("node", null) as Node3D
+	if target_node == null:
+		return Vector3.ZERO
+	var target_position := _node_world_or_local_position(target_node)
+	var player_position := _node_world_or_local_position(player_anchor)
+	var away_from_target := Vector2(player_position.x - target_position.x, player_position.z - target_position.z)
+	if away_from_target.length_squared() <= 0.0001:
+		away_from_target = fallback_direction.normalized()
+	else:
+		away_from_target = away_from_target.normalized()
+	var stop_distance := maxf(0.0, _local_player_attack_reach(inventory, equipped) + _local_target_interaction_radius(rec) - APPROACH_STOP_MARGIN)
+	return Vector3(target_position.x + away_from_target.x * stop_distance, 0.0, target_position.z + away_from_target.y * stop_distance)
 
 
 static func _local_player_attack_reach(inventory: Array, equipped: Dictionary) -> float:

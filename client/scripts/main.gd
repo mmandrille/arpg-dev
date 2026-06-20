@@ -59,6 +59,7 @@ const SustainedClickInputScript := preload("res://scripts/sustained_click_input.
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
 const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
+const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
@@ -236,6 +237,7 @@ var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
 var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
 var _attack_buffer: CombatInputBuffer = CombatInputBufferScript.new()
+var _sticky_attack: CombatStickyTarget = CombatStickyTargetScript.new()
 var _movement_requires_fresh_input: bool = false
 var _player_walk_linger: float = 0.0
 var _last_facing_direction := Vector2(1.0, 0.0)
@@ -728,7 +730,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	current_wall_layout = []
 	discovered_teleporters.clear()
 	pending_interactable_action.clear()
-	_attack_buffer.clear()
+	_clear_pending_attack_commands()
 	pending_waypoint_target_level = 0
 	pending_waypoint_travel = false
 	autoplay_enabled = false
@@ -2397,7 +2399,7 @@ func _handle_input(delta: float) -> void:
 	if _input_locked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		if _sustained_click.active:
 			_sustained_click.clear()
-		_attack_buffer.clear()
+		_clear_pending_attack_commands()
 		_stop_active_channel_skill()
 		return
 
@@ -2406,11 +2408,12 @@ func _handle_input(delta: float) -> void:
 	if player_hp <= 0:
 		if _sustained_click.active:
 			_sustained_click.clear()
-		_attack_buffer.clear()
+		_clear_pending_attack_commands()
 		_stop_active_channel_skill()
 		return
 	_tick_active_channel_skill(delta)
 	_tick_attack_buffer(delta)
+	_tick_sticky_attack()
 	if bot_mode:
 		return
 
@@ -2439,7 +2442,7 @@ func _handle_input(delta: float) -> void:
 		_tick_sustained_click()
 	elif _sustained_click.active:
 		_sustained_click.clear()
-		_attack_buffer.clear()
+		_clear_pending_attack_commands()
 
 func _is_inventory_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_I or event.physical_keycode == KEY_I or event.unicode == 105 or event.unicode == 73
@@ -2537,7 +2540,7 @@ func _begin_force_stand() -> void:
 	if not _hold_input_allowed() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	_sustained_click.clear()
-	_attack_buffer.clear()
+	_clear_pending_attack_commands()
 	_movement_requires_fresh_input = true
 	if player_anchor != null:
 		predicted_pos = player_anchor.global_position
@@ -2700,17 +2703,17 @@ func _resolve_click_at_mouse() -> Dictionary:
 func _execute_click_pick(pick: Dictionary) -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
 		if str(pick.get("kind", "")) == "monster":
-			_queue_attack_buffer(str(pick.get("target_id", "")))
+			_defer_monster_click(str(pick.get("target_id", "")))
 		else:
-			_attack_buffer.clear()
+			_clear_pending_attack_commands()
 		return
 	if _is_force_stand_held():
-		_attack_buffer.clear()
+		_clear_pending_attack_commands()
 		_start_directional_attack_hold()
 		return
 	var kind := str(pick.get("kind", ""))
 	if kind == "floor":
-		_attack_buffer.clear()
+		_clear_pending_attack_commands()
 		var ground: Vector3 = pick.get("ground", Vector3.ZERO)
 		_close_gameplay_panels_for_movement()
 		_mark_local_player_walking()
@@ -2732,37 +2735,33 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	var state := str(rec.get("state", ""))
 	var interactable_def_id := str(rec.get("interactable_def_id", ""))
 	if typ == "interactable" and _interactable_should_approach_before_action(interactable_def_id):
-		_attack_buffer.clear()
+		_clear_pending_attack_commands()
 		_activate_or_approach_interactable(target_id, rec)
 		return
 	if typ == "monster":
 		_try_dispatch_monster_attack(target_id, true)
 		return
-	_attack_buffer.clear()
+	_clear_pending_attack_commands()
 	if player_anim != null and typ == "interactable" and state == "closed" and _target_in_local_attack_range(target_id):
 		player_anim.play_one_shot("attack")
 	_send_action_intent(target_id)
 	_attack_cooldown = ClientConstants.SEND_INTERVAL
 
 func _try_dispatch_monster_attack(target_id: String, allow_buffer: bool) -> bool:
-	if target_id == "" or not entities.has(target_id):
+	if not _living_monster_target(target_id):
 		if allow_buffer:
-			_attack_buffer.clear()
+			_clear_pending_attack_commands()
 		return false
 	var rec: Dictionary = entities[target_id]
-	if str(rec.get("type", "")) != "monster" or int(rec.get("hp", 1)) <= 0:
-		if allow_buffer:
-			_attack_buffer.clear()
-		return false
 	if not _target_in_local_attack_range(target_id):
 		if allow_buffer:
-			_queue_attack_buffer(target_id)
+			_start_attack_move(target_id)
 		return false
 	_dispatch_monster_attack_now(target_id, rec)
 	return true
 
 func _dispatch_monster_attack_now(target_id: String, rec: Dictionary) -> void:
-	_attack_buffer.clear()
+	_clear_pending_attack_commands()
 	var target_node := rec.get("node", null) as Node3D
 	if target_node != null:
 		var flat := Vector2(target_node.global_position.x - player_anchor.global_position.x, target_node.global_position.z - player_anchor.global_position.z)
@@ -2773,17 +2772,36 @@ func _dispatch_monster_attack_now(target_id: String, rec: Dictionary) -> void:
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)
-
 func _queue_attack_buffer(target_id: String) -> void:
-	if target_id == "" or not entities.has(target_id):
-		_attack_buffer.clear()
-		return
-	var rec: Dictionary = entities[target_id]
-	if str(rec.get("type", "")) != "monster" or int(rec.get("hp", 1)) <= 0:
+	if not _living_monster_target(target_id):
 		_attack_buffer.clear()
 		return
 	_attack_buffer.queue_attack(target_id)
 
+func _defer_monster_click(target_id: String) -> void:
+	if _target_in_local_attack_range(target_id):
+		_sticky_attack.clear()
+		_queue_attack_buffer(target_id)
+	else:
+		_start_attack_move(target_id)
+func _start_attack_move(target_id: String) -> void:
+	if not _living_monster_target(target_id):
+		_clear_pending_attack_commands()
+		return
+	_attack_buffer.clear()
+	_sticky_attack.set_target(target_id)
+	var goal := CombatReachScript.attack_approach_point(player_anchor, entities, inventory, equipped, target_id, _last_facing_direction)
+	_close_gameplay_panels_for_movement()
+	_mark_local_player_walking()
+	client.send("move_to_intent", last_server_tick, {"position": {"x": goal.x, "y": goal.z}})
+	if _attack_cooldown <= 0.0:
+		_attack_cooldown = ClientConstants.SEND_INTERVAL
+
+func _clear_pending_attack_commands() -> void:
+	_attack_buffer.clear()
+	_sticky_attack.clear()
+func _living_monster_target(target_id: String) -> bool:
+	return target_id != "" and entities.has(target_id) and str(entities[target_id].get("type", "")) == "monster" and int(entities[target_id].get("hp", 1)) > 0
 func _target_in_local_attack_range(target_id: String) -> bool:
 	return CombatReachScript.target_in_local_attack_range(player_anchor, entities, inventory, equipped, target_id)
 
@@ -2815,6 +2833,15 @@ func _tick_attack_buffer(delta: float) -> void:
 	if _attack_cooldown > 0.0:
 		return
 	_try_dispatch_monster_attack(_attack_buffer.target_id, false)
+
+func _tick_sticky_attack() -> void:
+	if not _sticky_attack.active():
+		return
+	if _sticky_attack.should_clear(player_hp, entities):
+		_sticky_attack.clear()
+		return
+	if _attack_cooldown <= 0.0:
+		_try_dispatch_monster_attack(_sticky_attack.target_id, false)
 
 func _repeat_hold_attack() -> void:
 	var target_id := _sustained_click.target_id
@@ -5557,43 +5584,16 @@ func _bot_loot_label_debug() -> Array:
 	return out
 
 func bot_dispatch_action(intent_type: String, payload: Dictionary) -> void:
-	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
-		return
-	if _movement_intent_starts_motion(intent_type, payload):
-		_close_gameplay_panels_for_movement()
-		_mark_local_player_walking()
-	client.send(intent_type, last_server_tick, payload)
-	_attack_cooldown = ClientConstants.SEND_INTERVAL
+	BotFacade.dispatch_action(self, intent_type, payload)
 
 func bot_click_entity_id(target_id: String) -> void:
-	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
-		return
-	if target_id == "" or not entities.has(target_id):
-		return
-	var rec: Dictionary = entities[target_id]
-	var typ := str(rec.get("type", ""))
-	var interactable_def_id := str(rec.get("interactable_def_id", ""))
-	if typ == "interactable" and _interactable_should_approach_before_action(interactable_def_id):
-		_activate_or_approach_interactable(target_id, rec)
-		return
-	_send_action_intent(target_id)
-	_attack_cooldown = _basic_attack_cooldown_seconds() if typ == "monster" else ClientConstants.SEND_INTERVAL
-	if typ == "monster":
-		_start_basic_attack_recovery_ui(_attack_cooldown)
+	BotFacade.click_entity_id(self, target_id, false)
 
 func bot_click_entity_buffered_id(target_id: String) -> void:
-	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
-		return
-	if target_id == "" or not entities.has(target_id): return
-	if str(entities[target_id].get("type", "")) != "monster":
-		_attack_buffer.clear()
-		return
-	_execute_click_pick({"kind": "monster", "target_id": target_id})
+	BotFacade.click_entity_id(self, target_id, true)
 
 func bot_dispatch_inventory_intent(intent_type: String, payload: Dictionary) -> void:
-	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
-		return
-	client.send(intent_type, last_server_tick, payload)
+	BotFacade.dispatch_inventory_intent(self, intent_type, payload)
 
 func bot_click_shop_buy_offer(offer_id: String = "", offer_kind: String = "", offer_index: int = 0) -> void:
 	BotFacade.click_shop_buy_offer(self, offer_id, offer_kind, offer_index)

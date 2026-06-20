@@ -1,0 +1,44 @@
+docs/specs/v298_spec-barbarian-leap-obstacle-crossing.md
+  s_719c59d1789d7e::t_680723c5e19d0c 3
+  s_719c59d1789d7e::t_aabd20c1ea4760 1-2,4-89
+shared/rules/skills.v0.schema.json
+  s_719c59d1789d7e::t_8056ab4a250dca 364-368
+server/internal/game/mobility_obstacle_crossing_test.go
+  s_719c59d1789d7e::t_28706b84418d85 1-75
+tools/bot/scenarios/100_barbarian_leap_obstacle_crossing.json
+  s_719c59d1789d7e::t_9e3dbff19991c4 1-33
+docs/progress/slice-lifecycle.md
+  s_719c59d1789d7e::t_680723c5e19d0c 313
+docs/as-built/v298_barbarian-leap-obstacle-crossing.md
+  s_719c59d1789d7e::t_680723c5e19d0c 1-40
+PROGRESS.md
+  s_719c59d1789d7e::t_680723c5e19d0c 26,28-29,108
+server/internal/game/mobility_skills.go
+  s_719c59d1789d7e::t_790721da1ac250 12-84,96
+  s_719c59d1789d7e::t_114cfef147eea8 280
+server/internal/game/rogue_rules.go
+  s_719c59d1789d7e::t_7fe4ee6b4a2c47 30-42,76-81
+shared/rules/worlds.v0.json
+  s_719c59d1789d7e::t_107082d46f7453 236-258
+docs/plans/v298_2026-06-19-barbarian-leap-obstacle-crossing.md
+  s_719c59d1789d7e::t_d0725f12bee1ae 1-2,4-38,44-45,47-60,64-75,81-90,96-105,109-124,128-136,143-153
+  s_719c59d1789d7e::t_680723c5e19d0c 3,39-43,46,61-63,76-80,91-95,106-108,125-127,137-142
+shared/rules/skills.v0.json
+  s_719c59d1789d7e::t_7d3be13430806a 463
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d123dd05e80f60134b5438b513fdea106746e00f",
+  "prompts": {},
+  "sessions": {
+    "s_719c59d1789d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee231-6f1d-7402-b00b-73fb01b62c13",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -16,13 +16,12 @@ func (w wallObstacle) obstacleKind() string {
 	return w.kind
 }
 
+// obstacleBlocksMovement is the grounded baseline: every obstacle kind blocks
+// ground movement. Per-monster trait and per-skill exceptions (e.g. flying over
+// water/holes, barbarian leap ignoring kinds) live in monsterObstacleBlocksMovement
+// and skillMobilityIgnoresObstacleKind, not here.
 func obstacleBlocksMovement(w wallObstacle) bool {
-	switch w.obstacleKind() {
-	case obstacleKindWater, obstacleKindHole:
-		return true
-	default:
-		return true
-	}
+	return true
 }
 
 func obstacleBlocksProjectiles(w wallObstacle) bool {

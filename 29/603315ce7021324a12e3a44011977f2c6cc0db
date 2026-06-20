@@ -1,0 +1,32 @@
+client/scripts/skill_icon.gd
+  s_4862b687328423::t_4857d7755ac65e 33-70,72,74-92,94-96,98-128,130-168,174-176
+  s_4862b687328423::t_95d1e5fbd51d84 169-173
+docs/as-built/v309_passive-skill-column.md
+  s_4862b687328423::t_3d13ae32a4e921 17-18
+client/scripts/skills_panel.gd
+  s_4862b687328423::t_a1e770daa97317 14-15,412,414,423,427,433,678-679,687-688,696,703-704
+shared/assets/skill_presentations.v0.schema.json
+  s_4862b687328423::t_0a13d7570b57c6 42-57
+client/tests/test_skills_panel.gd
+  s_4862b687328423::t_0f0622fbac85a8 107,348-370
+  s_4862b687328423::t_c48321a09679f0 49,110-121,189-193
+shared/assets/skill_presentations.v0.json
+  s_4862b687328423::t_f1420f76bc822d 280,290,300,310
+  s_4862b687328423::t_0a13d7570b57c6 320,330,340,350,360,370,380,390,400,410,420
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "29603315ce7021324a12e3a44011977f2c6cc0db",
+  "prompts": {},
+  "sessions": {
+    "s_4862b687328423": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee40d-f779-7963-921d-4e4bc607a129",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -291,17 +291,18 @@ type ChestPlacementRules struct {
 }
 
 type ObstacleGenerationRules struct {
-	Enabled                 bool                   `json:"enabled"`
-	MaxAttempts             int                    `json:"max_attempts"`
-	TargetGroupCount        IntRange               `json:"-"`
-	TargetGroupCountFormula AreaRangeFormula       `json:"target_group_count_formula"`
-	WallSegment             WallSegmentRules       `json:"wall_segment"`
-	SolidBlock              SolidBlockRules        `json:"solid_block"`
-	ShapeWeights            ObstacleShapeWeights   `json:"shape_weights"`
-	Doors                   DoorGenerationRules    `json:"doors"`
-	Water                   WaterGenerationRules   `json:"water"`
-	Holes                   HoleGenerationRules    `json:"holes"`
-	Clearance               ObstacleClearanceRules `json:"clearance"`
+	Enabled                 bool                     `json:"enabled"`
+	MaxAttempts             int                      `json:"max_attempts"`
+	TargetGroupCount        IntRange                 `json:"-"`
+	TargetGroupCountFormula AreaRangeFormula         `json:"target_group_count_formula"`
+	WallSegment             WallSegmentRules         `json:"wall_segment"`
+	SolidBlock              SolidBlockRules          `json:"solid_block"`
+	ShapeWeights            ObstacleShapeWeights     `json:"shape_weights"`
+	SolidKindWeights        SolidObstacleKindWeights `json:"solid_kind_weights"`
+	Doors                   DoorGenerationRules      `json:"doors"`
+	Water                   WaterGenerationRules     `json:"water"`
+	Holes                   HoleGenerationRules      `json:"holes"`
+	Clearance               ObstacleClearanceRules   `json:"clearance"`
 }
 
 type IntRange struct {
@@ -2171,6 +2172,9 @@ func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFlo
 	}
 	if o.ShapeWeights.total() <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.shape_weights: at least one shape must be enabled")
+	}
+	if err := validateSolidObstacleKindWeights(o.SolidKindWeights); err != nil {
+		return err
 	}
 	for label, value := range map[string]float64{
 		"player_spawn": o.Clearance.PlayerSpawn,

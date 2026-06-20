@@ -98,6 +98,47 @@ func _test_wall_renderer() -> void:
 	_assert_eq("hole metadata kind", str(hole.get_meta("kind", "")), "hole")
 	_assert_true("hole mesh is plane", hole.mesh is PlaneMesh)
 	_assert_true("hole material has texture", (hole.material_override as StandardMaterial3D).albedo_texture != null)
+	var rock_walls := renderer.render_wall_layout([{
+		"id": "test_rock",
+		"position": {"x": 3.0, "y": 6.0},
+		"size": {"x": 2.0, "y": 2.5},
+		"source": "generated",
+		"kind": "rock",
+	}])
+	_assert_eq("rock layout count", rock_walls.size(), 1)
+	_assert_eq("rock layout kind", str((rock_walls[0] as Dictionary).get("kind", "")), "rock")
+	_assert_eq("rock child count", root.get_child_count(), 1)
+	var rock := root.get_child(0) as Node3D
+	_assert_eq("rock child name", rock.name, "Rock_test_rock")
+	_assert_eq("rock metadata kind", str(rock.get_meta("kind", "")), "rock")
+	_assert_true("rock has non-rectangular chunks", rock.get_child_count() >= 3)
+	var column_walls := renderer.render_wall_layout([{
+		"id": "test_column",
+		"position": {"x": 4.0, "y": 6.0},
+		"size": {"x": 1.2, "y": 5.0},
+		"source": "generated",
+		"kind": "column",
+	}])
+	_assert_eq("column layout count", column_walls.size(), 1)
+	_assert_eq("column layout kind", str((column_walls[0] as Dictionary).get("kind", "")), "column")
+	var column := root.get_child(0) as Node3D
+	_assert_eq("column child name", column.name, "Column_test_column")
+	_assert_eq("column metadata kind", str(column.get_meta("kind", "")), "column")
+	_assert_true("column has pillars", column.get_child_count() >= 2)
+	_assert_true("column first mesh is cylinder", (column.get_child(0) as MeshInstance3D).mesh is CylinderMesh)
+	var rubble_walls := renderer.render_wall_layout([{
+		"id": "test_rubble",
+		"position": {"x": 6.0, "y": 6.0},
+		"size": {"x": 3.0, "y": 2.0},
+		"source": "generated",
+		"kind": "rubble",
+	}])
+	_assert_eq("rubble layout count", rubble_walls.size(), 1)
+	_assert_eq("rubble layout kind", str((rubble_walls[0] as Dictionary).get("kind", "")), "rubble")
+	var rubble := root.get_child(0) as Node3D
+	_assert_eq("rubble child name", rubble.name, "Rubble_test_rubble")
+	_assert_eq("rubble metadata kind", str(rubble.get_meta("kind", "")), "rubble")
+	_assert_true("rubble has chunks", rubble.get_child_count() >= 5)
 	var lab_walls := renderer.render_world_walls("flying_navigation_lab")
 	var lab_water_count := 0
 	var lab_hole_count := 0
@@ -114,6 +155,27 @@ func _test_wall_renderer() -> void:
 	_assert_eq("flying lab child count", root.get_child_count(), 6)
 	_assert_true("flying lab water node exists", root.find_child("Water_flying_navigation_lab_wall_004", false, false) != null)
 	_assert_true("flying lab hole node exists", root.find_child("Hole_flying_navigation_lab_wall_005", false, false) != null)
+	var variety_walls := renderer.render_world_walls("obstacle_variety_lab")
+	var variety_rock_count := 0
+	var variety_column_count := 0
+	var variety_rubble_count := 0
+	for rendered_wall in variety_walls:
+		var rendered: Dictionary = rendered_wall
+		match str(rendered.get("kind", "wall")):
+			"rock":
+				variety_rock_count += 1
+			"column":
+				variety_column_count += 1
+			"rubble":
+				variety_rubble_count += 1
+	_assert_eq("variety lab wall layout count", variety_walls.size(), 7)
+	_assert_eq("variety lab rock layout count", variety_rock_count, 1)
+	_assert_eq("variety lab column layout count", variety_column_count, 1)
+	_assert_eq("variety lab rubble layout count", variety_rubble_count, 1)
+	_assert_eq("variety lab child count", root.get_child_count(), 7)
+	_assert_true("variety lab rock node exists", root.find_child("Rock_obstacle_variety_lab_wall_004", false, false) != null)
+	_assert_true("variety lab column node exists", root.find_child("Column_obstacle_variety_lab_wall_005", false, false) != null)
+	_assert_true("variety lab rubble node exists", root.find_child("Rubble_obstacle_variety_lab_wall_006", false, false) != null)
 	root.queue_free()
 
 

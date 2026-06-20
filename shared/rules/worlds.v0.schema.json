@@ -38,7 +38,7 @@
                 "item_def_id": { "type": "string" },
                 "item_template_id": { "type": "string" },
                 "interactable_def_id": { "type": "string" },
-                "kind": { "type": "string", "enum": ["wall", "water", "hole"] },
+                "kind": { "type": "string", "enum": ["wall", "water", "hole", "rock", "column", "rubble"] },
                 "position": { "$ref": "#/$defs/position" },
                 "size": { "$ref": "#/$defs/size" }
               },

@@ -60,6 +60,7 @@ const DirectionalAttackInputScript := preload("res://scripts/directional_attack_
 const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
+const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
@@ -238,6 +239,7 @@ var _attack_cooldown: float = 0.0
 var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
 var _attack_buffer: CombatInputBuffer = CombatInputBufferScript.new()
 var _sticky_attack: CombatStickyTarget = CombatStickyTargetScript.new()
+var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttackPresentationScript.new()
 var _movement_requires_fresh_input: bool = false
 var _player_walk_linger: float = 0.0
 var _last_facing_direction := Vector2(1.0, 0.0)
@@ -1331,16 +1333,12 @@ func _apply_delta(p: Dictionary) -> void:
 		if clip == null:
 			if event_type in ["attack_missed", "attack_blocked"]:
 				_face_event_source_toward_target(ev)
-				if str(ev.get("source_entity_id", "")) == player_id:
-					ClientAudioBridgeScript.attack(audio_controller)
-					_play_local_attack_animation_for_event(ev)
+				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim)
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			_face_event_source_toward_target(ev)
-			if str(ev.get("source_entity_id", "")) == player_id:
-				ClientAudioBridgeScript.attack(audio_controller)
-				_play_local_attack_animation_for_event(ev)
+			CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim)
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
 			ClientAudioBridgeScript.damage(audio_controller, false)
@@ -1729,12 +1727,6 @@ func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_colo
 		_show_damage_number(entity_id, presentation.get("color", default_color), presentation.get("amount", damage), "", 0.0, str(presentation.get("variant", "normal")), str(presentation.get("text", "")), str(presentation.get("damage_type", "")))
 		return
 	_show_damage_number(entity_id, default_color, damage)
-
-func _play_local_attack_animation_for_event(ev: Dictionary) -> void:
-	if player_anim == null:
-		return
-	var weapon_slot := str(ev.get("weapon_slot", "main_hand"))
-	player_anim.play_one_shot("attack_off_hand" if weapon_slot == "off_hand" else "attack")
 
 func _play_local_player_reaction_animation(clip: String) -> void:
 	if player_anim == null:
@@ -2635,9 +2627,8 @@ func _handle_autoplay(delta: float) -> void:
 			var aim := Vector2(to_target.x, to_target.z).normalized()
 			if aim != Vector2.ZERO:
 				_face_direction(aim)
-			if player_anim != null:
-				player_anim.play_one_shot("attack")
 			if autoplay_attack_cooldown <= 0.0:
+				CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim)
 				_send_action_intent(target_id)
 				autoplay_attack_cooldown = autoplay_step_delay
 			autoplay_timer = autoplay_step_delay
@@ -2767,8 +2758,7 @@ func _dispatch_monster_attack_now(target_id: String, rec: Dictionary) -> void:
 		var flat := Vector2(target_node.global_position.x - player_anchor.global_position.x, target_node.global_position.z - player_anchor.global_position.z)
 		if flat.length_squared() > 0.0001:
 			_face_direction(flat.normalized())
-	if player_anim != null:
-		player_anim.play_one_shot("attack")
+	CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim)
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)

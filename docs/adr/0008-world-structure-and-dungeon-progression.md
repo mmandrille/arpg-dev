@@ -177,3 +177,33 @@ These are additive protocol changes and require a schema version bump in `shared
 | [0001](0001-technology-stack.md) | D2 (authoritative server), D6 (shared rules), D8 (determinism) — all preserved; this ADR extends the Sim model without violating them |
 | [0006](0006-asset-pipeline.md) | Unaffected; asset pipeline applies equally to dungeon and town assets |
 | [0007](0007-animation-state-model.md) | Unaffected; animation remains client-only and event-driven regardless of level count |
+
+---
+
+## As-built addendum — World Detail & Navigation (v302–v308)
+
+The v302–v308 batch extended the generated world model under this ADR (D3 PCG, server
+authority). Recorded here because these are world-structure decisions ADR-0008 owns; they fit the
+existing model rather than replacing it. All tuning is data in `shared/rules/`; the server owns every
+outcome and the client renders only.
+
+- **Obstacle `kind` taxonomy.** Generated walls now carry a `kind`: `wall`, `water`, `hole`, `rock`,
+  `column`, `rubble`. Water and holes are hard-blocking floor hazards; `rock`/`column`/`rubble` are
+  solid variety obstacles. Weights live in `dungeon_generation.obstacle_generation.solid_kind_weights`;
+  water/hole sizing and counts in `obstacle_generation.water` / `.holes`. Placement is reachability-
+  validated (no unreachable down-stair). Server: `dungeon_floor_features.go`,
+  `dungeon_obstacle_variety.go`, `obstacle_blocking.go`. (v302, v303, v306)
+- **Per-monster navigation trait.** `monsters.v0.json` gains `navigation_trait` (`grounded` | `flying`);
+  flying monsters ignore water/hole blocking in both pathfinding and live movement via one shared
+  predicate (`monster_navigation_traits.go`, `sim.go`). (v304)
+- **Skill obstacle-crossing.** Mobility skills may declare `ignore_obstacle_kinds` (e.g. barbarian leap
+  ignores `water`/`hole`); the leap sweep stops at hard walls and rejects landing inside an ignored
+  obstacle (`mobility_skills.go`, `skills.v0.json`). (v305)
+- **Line-of-sight-gated fog.** Walls may set `blocks_line_of_sight`; the server computes monster
+  visibility through fog and only reveals what the player can see (`fog_of_war.go`). Render metadata
+  (`kind`, `blocks_line_of_sight`) is additive/optional on the existing `wall` protocol def — no version
+  bump, backward-compatible. (v300/v307)
+
+Deferred (still future ADR/slice work): non-rectangular/polygon LoS occlusion, destructible/secret
+obstacles, boss-floor obstacle generation, true flying gameplay/pathing beyond ground-ignore, and final
+biome/difficulty balance — see PROGRESS.md "Dungeon generation" open gaps.

@@ -14,9 +14,18 @@ dev-login → create session → move → attack training dummy → pick up loot
 After v4 the player **survives with reduced HP** (`hp < 10`). Monster dies; player may take retaliation
 each successful hit. After v7 this flow lives in `tools/bot/scenarios/01_vertical_slice.json`; additional
 scenario JSON files are automatically included in filename order in `make bot` and `make bot-visual`.
-Every protocol bot scenario has a hard **10.0 second** full-run budget. When a proof grows past
-that, shorten setup to the behavior under test with compact lab worlds or focused lower-level tests
-instead of waiting through unrelated traversal, farming, or natural timing loops.
+Protocol bot scenarios default to a **10.0 second** full-run budget. When a proof grows past that,
+shorten setup to the behavior under test with compact lab worlds or focused lower-level tests
+instead of waiting through unrelated traversal, farming, or natural timing loops. Use a larger
+scenario-level `max_elapsed_s` only when the generated-world route is the behavior under test, and
+pair it with explicit step-level budgets such as `max_ticks` or `timeout_s` so failures still point
+at the slow navigation or wait.
+
+For generated-route proofs, pin the `world_id` and `seed`, document why the route must stay
+generated, and keep a focused local proof command in the slice as-built notes. For client bot
+assertions over interpolated UI state, prefer semantic minima/maxima with a small practical range
+instead of exact fractional coordinates; exact float equality should be reserved for authored
+contracts where rounding is part of the behavior.
 
 The scenario catalog also includes:
 

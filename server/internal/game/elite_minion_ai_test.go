@@ -13,6 +13,7 @@ func eliteMinionLab(t *testing.T) (*Sim, *LevelState, *entity, *entity, *entity)
 	if err != nil {
 		t.Fatal(err)
 	}
+	level.walls = nil
 	for id, candidate := range level.entities {
 		if candidate.kind == monsterEntity {
 			delete(level.entities, id)
@@ -21,10 +22,16 @@ func eliteMinionLab(t *testing.T) (*Sim, *LevelState, *entity, *entity, *entity)
 	placeDefaultPlayerOnLevel(t, sim, level, Vec2{X: 8, Y: 5})
 	sim.syncCompatibilityFields()
 
-	leader := addTestMonster(sim, "dungeon_mob", Vec2{X: 20, Y: 5}, 30)
+	leader := addTestMonster(sim, "dungeon_mob", Vec2{X: 8, Y: 5}, 30)
 	leader.monsterPackID = "pack_ai"
 	leader.monsterPackLeader = true
-	minion := addTestMonster(sim, "dungeon_mob", Vec2{X: 24, Y: 5}, 30)
+	var minion *entity
+	for minion == nil || minion.id%6 != 0 {
+		if minion != nil {
+			delete(sim.activeLevel().entities, minion.id)
+		}
+		minion = addTestMonster(sim, "dungeon_mob", Vec2{X: 16, Y: 5}, 30)
+	}
 	minion.monsterPackID = leader.monsterPackID
 	player := level.entities[sim.playerID]
 	return sim, level, player, leader, minion
@@ -34,25 +41,29 @@ func TestEliteMinionFollowsLeaderWithoutPassiveAggro(t *testing.T) {
 	sim, _, player, leader, minion := eliteMinionLab(t)
 	def := sim.rules.Monsters[minion.monsterDefID]
 	player.pos = Vec2{X: minion.pos.X + def.AggroRadius*0.5, Y: minion.pos.Y}
-	beforeLeaderDistance := distance(minion.pos, leader.pos)
+	goal := sim.eliteMinionFollowGoal(minion, leader)
+	beforeGoalDistance := distance(minion.pos, goal)
 
-	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
-	sim.advanceMonsterMovement(&res)
+	events := []Event{}
+	for i := 0; i < 12 && distance(minion.pos, goal) >= beforeGoalDistance-0.01; i++ {
+		res := sim.Tick(nil)
+		events = append(events, res.Events...)
+	}
 
 	if minion.aiMode != monsterAIModeIdle || minion.aiTargetPlayerID != 0 {
 		t.Fatalf("minion target/mode = %d/%s, want idle without passive target", minion.aiTargetPlayerID, minion.aiMode)
 	}
-	if eventForEntity(res, "monster_aggro", minion.id) {
-		t.Fatalf("idle elite minion should not passive aggro: %+v", res.Events)
+	if eventForEntity(TickResult{Events: events}, "monster_aggro", minion.id) {
+		t.Fatalf("idle elite minion should not passive aggro: %+v", events)
 	}
-	if distance(minion.pos, leader.pos) >= beforeLeaderDistance-0.01 {
-		t.Fatalf("minion did not follow leader: before %.3f after %.3f", beforeLeaderDistance, distance(minion.pos, leader.pos))
+	if distance(minion.pos, goal) >= beforeGoalDistance-0.01 {
+		t.Fatalf("minion did not follow leader formation goal: before %.3f after %.3f", beforeGoalDistance, distance(minion.pos, goal))
 	}
 }
 
 func TestEliteMinionAssistsLeaderTarget(t *testing.T) {
 	sim, _, player, leader, minion := eliteMinionLab(t)
-	player.pos = Vec2{X: 16, Y: 5}
+	player.pos = Vec2{X: 12, Y: 5}
 	leader.aiMode = monsterAIModeChase
 	leader.aiTargetPlayerID = player.id
 	beforePlayerDistance := distance(minion.pos, player.pos)

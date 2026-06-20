@@ -23,12 +23,12 @@ Last updated: 2026-06-19
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v293 — bishop badge costs |
+| **Latest completed slice** | v294 — full-CI residual stabilization |
 | **Active branch** | `main` |
-| **CI gate** | v293 focused gates green on 2026-06-19 (`make validate-shared`, `go test ./internal/game -run 'Bishop\|MainConfig\|BadgeReward\|QuestTurnIn'`, `test_bishop_panel.gd`, `test_shop_panel.gd`, `test_blacksmith_panel.gd`, `bot scenario=45_town_bishop_respec`, `bot-client scenario=32_town_bishop_respec_panel`, `bot-client scenario=39_blacksmith_upgrade_ui`, `bot-client scenario=54_material_wallet_details`, `bot-client scenario=61_material_wallet_window`, `make maintainability`); full `make ci` attempted and red on residual non-v293 broad gates |
-| **Next slice** | v294 — full-CI residual stabilization before next feature/review work |
+| **CI gate** | v294 full `make ci` green on 2026-06-19 after residual stabilization; focused proof included elite-minion Go tests, mercenary protocol scenarios, Godot client bot unit tests, and full `HEADLESS=1 make bot-client` |
+| **Next slice** | v295 — due repo-wide engineering review/refactor handoff before the next feature autoloop |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
-| **Next engineering review** | v294 target after full-CI residuals are stabilized |
+| **Next engineering review** | v295 target now that full-CI residuals are stabilized |
 
 
 ### Periodic engineering reviews
@@ -87,11 +87,9 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Full-CI residuals after v293.** Focused v293 badge/bishop gates are green, and the in-scope
-  `Upgrade Badge` label drift was fixed in wallet/blacksmith tests. Full `make ci` still needs a
-  stabilization pass before the next repo-wide green gate: `TestEliteMinionFollowsLeaderWithoutPassiveAggro`,
-  protocol `mercenary_hiring_board` / `mercenary_death_loss`, and older broad client combat/boss/
-  mercenary scenarios were red in the 2026-06-19 attempt.
+- **Review/refactor handoff due after v294.** v294 restored the full-CI baseline after the v293
+  residuals. Run the next repo-wide `$review` and `$refactor` pass before starting another feature
+  autoloop so the scorecard reflects the current green baseline.
 - **Review follow-ups remaining after v284 `$review`.** Remaining follow-ups are future-plan scale:
   keep splitting the next touched large coordinators/validators, continue the tuning-friendly
   rule-test audit, and resolve unverified local GLB provenance before production distribution.

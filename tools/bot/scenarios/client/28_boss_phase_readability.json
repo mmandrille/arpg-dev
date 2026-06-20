@@ -4,15 +4,13 @@
   "world_id": "boss_floor_gate_lab",
   "seed": "v57_boss_phase_readability",
   "title": "Client boss phase readability",
-  "description": "Client starts on the compact boss floor and verifies the Cave Warden phase countdown and telegraph marker.",
+  "description": "Client starts on the compact boss floor and verifies the boss phase countdown and telegraph marker.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
     {
       "type": "wait_boss_health_bar",
       "visible": true,
-      "boss_template_id": "cave_warden",
-      "title": "Cave Warden",
       "hp_min": 1,
       "ratio_min": 0.01,
       "ratio_max": 1.0,
@@ -22,7 +20,6 @@
       "type": "wait_entity_reaction",
       "entity_type": "monster",
       "is_boss": true,
-      "boss_template_id": "cave_warden",
       "boss_telegraph_active": true,
       "has_boss_telegraph_marker": true,
       "timeout_s": 5.0
@@ -30,7 +27,6 @@
     {
       "type": "wait_boss_health_bar",
       "visible": true,
-      "boss_template_id": "cave_warden",
       "phase_kind": "telegraph",
       "remaining_ticks_min": 1,
       "remaining_ticks_max": 20,

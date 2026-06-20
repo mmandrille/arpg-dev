@@ -101,9 +101,12 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 		"click_entity_until_event":
 			var evtype := str(step.get("event_type", ""))
 			var pending: Array = state.get("pending_events", [])
+			var event_step := step.duplicate()
+			for selector_key in ["entity_type", "entity_index", "monster_def_id", "interactable_def_id", "item_def_id", "rarity", "state", "is_boss"]:
+				event_step.erase(selector_key)
 			for i in range(pending.size()):
 				var ev = pending[i]
-				if str(ev.get("event_type", "")) == evtype and runner._event_matches(step, ev):
+				if str(ev.get("event_type", "")) == evtype and runner._event_matches(event_step, ev):
 					if bool(step.get("consume_event", false)) and runner._controller != null and runner._controller.has_method("consume_pending_event_at"):
 						runner._controller.consume_pending_event_at(i)
 					return true

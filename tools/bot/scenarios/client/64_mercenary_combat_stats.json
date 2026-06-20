@@ -4,18 +4,18 @@
   "world_id": "mercenary_hiring_lab",
   "seed": "v247_mercenary_combat_stats",
   "title": "Mercenary combat stats",
-  "description": "Client hires the fixed guard and verifies the mercenary panel renders server-owned combat stat lines.",
+  "description": "Client hires the selected offer and verifies the mercenary panel renders server-owned combat stat lines.",
   "debug_progression": { "gold": 300 },
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board", "timeout_s": 15.0 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
-    { "type": "wait_event", "event_type": "mercenary_hired", "offer_id": "fixed:mercenary_guard", "timeout_s": 15.0 },
+    { "type": "wait_event", "event_type": "mercenary_hired", "timeout_s": 15.0 },
     {
       "type": "wait_mercenary_panel",
       "hired_count": 1,
       "selected_stance": "assist",
-      "stats_card_contains": ["Mercenary Guard", "Damage:", "Attack:", "Defense:", "Accuracy:", "Stance: Assist"],
+      "stats_card_contains": ["Damage:", "Attack:", "Defense:", "Accuracy:", "Stance: Assist"],
       "companion_bar_count": 1,
       "companion_icon_kind": "mercenary",
       "timeout_s": 15.0

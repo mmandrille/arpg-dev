@@ -1,0 +1,19 @@
+docs/CODEMAP.md
+  s_d8f19e6e03317d::t_cc19978f313d2a 15-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "303aca5605378c032cd3a19118cb65be51630232",
+  "prompts": {},
+  "sessions": {
+    "s_d8f19e6e03317d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b11ebf0-e533-4bb2-8b6f-5f9a06c89568",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

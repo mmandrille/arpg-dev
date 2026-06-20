@@ -201,7 +201,10 @@ This project uses Spec-Driven Development. Before touching code for any new feat
   implement the same small evaluator set. Never add executable logic to shared data files.
 - **Golden fixtures are cross-language contracts.** Any change to combat formulas or loot logic
   must update `shared/golden/` and both Go and GDScript golden tests. Use `make regen-golden`
-  after intentional formula changes (runs `go test -update -run Golden`).
+  after intentional formula changes (runs `go test -update -run Golden`). Cross-language applies to
+  formula/loot goldens consumed by both stacks; a few goldens are intentionally single-language —
+  e.g. `shared/golden/dungeon_obstacles.json` is a Go-only dungeon-layout *determinism* contract with
+  no GDScript consumer, which is valid replay-determinism locking under the Test Locking Policy.
   When writing golden update paths: normalize nil Go slices to `[]T{}` before `writeGolden` —
   Go `null` JSON breaks GDScript `as Array` casts.
 - **Protocol JSON schemas are versioned.** Changes to `shared/protocol/` require a schema version

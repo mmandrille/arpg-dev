@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+// dungeonObstaclesGolden mirrors shared/golden/dungeon_obstacles.json. Unlike the
+// formula/loot goldens, this is a Go-only dungeon-layout determinism contract (no
+// GDScript consumer): it pins exact generated wall coordinates/kinds for a fixed seed,
+// which is legitimate replay-determinism locking under the Test Locking Policy.
 type dungeonObstaclesGolden struct {
 	Seed     string `json:"seed"`
 	Level    int    `json:"level"`

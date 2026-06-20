@@ -1,0 +1,64 @@
+docs/specs/v312_spec-client-input-and-tooltip-stability.md
+  s_d2a495bd24647f::t_afeb76007df559 1-50
+client/scripts/stash_panel.gd
+  s_d2a495bd24647f::t_0b645ce2ba2c3f 11,162,184,202,210-214
+  s_d2a495bd24647f::t_694919ce47e425 75,151,159,166,181,188,199,209,228
+  s_d2a495bd24647f::t_a8f6ec5b7e6932 229,240
+  s_d2a495bd24647f::t_4f9905d07fa79e 330
+  s_d2a495bd24647f::t_9bd687ef50ffc8 215-220,405,893,901
+client/scripts/tooltip_mouse_guard.gd
+  s_d2a495bd24647f::t_7f03d210f00bd3 1-10
+client/tests/test_text_input_focus_guard.gd.uid
+  s_d2a495bd24647f::t_424981b2a998f4 1
+client/scripts/inventory_panel.gd
+  s_d2a495bd24647f::t_c55df3a16a0340 304
+client/scripts/item_tooltip_panel.gd
+  s_d2a495bd24647f::t_7f03d210f00bd3 8,142
+docs/progress/slice-lifecycle.md
+  s_d2a495bd24647f::t_11245a62220e60 327
+scripts/client_smoke.sh
+  s_d2a495bd24647f::t_3ad7980ab18dce 127
+client/tests/test_stash_panel.gd
+  s_d2a495bd24647f::t_8c9e0e2676ddd2 58,278
+  s_d2a495bd24647f::t_4aa267f97bcc28 59-62,255,279-282
+  s_d2a495bd24647f::t_ee1fd5388373e1 356-375
+client/scripts/tooltip_mouse_guard.gd.uid
+  s_d2a495bd24647f::t_424981b2a998f4 1
+docs/as-built/v312_client-input-and-tooltip-stability.md
+  s_d2a495bd24647f::t_afeb76007df559 1-24
+  s_d2a495bd24647f::t_f7f76e61714503 25
+client/scripts/text_input_focus_guard.gd.uid
+  s_d2a495bd24647f::t_424981b2a998f4 1
+PROGRESS.md
+  s_d2a495bd24647f::t_11245a62220e60 26,28
+client/scripts/text_input_focus_guard.gd
+  s_d2a495bd24647f::t_114ef72eadc322 1-9
+docs/plans/v312_2026-06-20-client-input-and-tooltip-stability.md
+  s_d2a495bd24647f::t_f7f76e61714503 52-53
+  s_d2a495bd24647f::t_afeb76007df559 1-51
+client/tests/test_text_input_focus_guard.gd
+  s_d2a495bd24647f::t_4e9e4f34e6cd34 1-32
+client/scripts/main.gd
+  s_d2a495bd24647f::t_c77597957743e8 2290,2421
+  s_d2a495bd24647f::t_114ef72eadc322 2291,2422
+client/scripts/inventory_render_guard.gd
+  s_d2a495bd24647f::t_35f3afa7cc1196 8-9
+  s_d2a495bd24647f::t_0b645ce2ba2c3f 31-42
+  s_d2a495bd24647f::t_c55df3a16a0340 7,10-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c7f506bf9373552297ce9127acec07f67141dc49",
+  "prompts": {},
+  "sessions": {
+    "s_d2a495bd24647f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee5ed-3283-70a3-9878-2e0dc4b0f6af",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

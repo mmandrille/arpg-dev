@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-19
+Last updated: 2026-06-20
 
 ---
 
@@ -25,10 +25,10 @@ Last updated: 2026-06-19
 |-------|-------|
 | **Latest completed slice** | v301 — melee lunge / micro-step |
 | **Active branch** | `codex/autoloop-movement-fluidity` |
-| **CI gate** | v301 focused proof green on 2026-06-19: melee-lunge Godot unit tests, animation tests, client bot unit tests, `82_melee_lunge_micro_step`, `78_attack_move_sticky_targeting`, `80_movement_visual_smoothing`, `81_command_retarget_grace`, and `make maintainability`; selected Movement / Combat Fluidity autoloop batch `make ci` pending |
-| **Next slice** | Selected Movement / Combat Fluidity feature queue complete — run final batch `make ci`, then `$review`/`$refactor` handoff |
+| **CI gate** | v301 Movement / Combat Fluidity batch final proof green on 2026-06-20 via CI-equivalent continuation: raw `make ci` steps 1-7 passed, step 8 `make db-up` was blocked by the existing healthy main-worktree `arpg-postgres` container, and protocol bot + replay, `SCENARIO=all` client bot (85 passed), `client_smoke`, and `make maintainability` passed against the existing DB with temporary servers |
+| **Next slice** | Post-loop handoff due — run fresh `$review`, then `$refactor` against that review |
 | **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
-| **Next engineering review** | After the selected Movement / Combat Fluidity feature batch completes and final `make ci` is green |
+| **Next engineering review** | Due now after the v301 Movement / Combat Fluidity batch proof |
 
 
 ### Periodic engineering reviews
@@ -87,10 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review/refactor handoff due after the selected Movement / Combat Fluidity feature batch.** v294
-  restored the full-CI baseline after the v293 residuals; this autoloop is intentionally using the
-  selected feature queue first, then must run one final `make ci` followed by the repo-wide
-  `$review` and `$refactor` pass.
+- **Review/refactor handoff due now.** v295-v301 completed the selected Movement / Combat Fluidity
+  feature batch. Raw `make ci` could not own the already-running main-worktree `arpg-postgres`
+  container, but the batch passed focused proofs plus a CI-equivalent continuation against the
+  existing healthy DB and temporary servers on 2026-06-20. Run fresh `$review`, then `$refactor`.
 - **Review follow-ups remaining after v284 `$review`.** Remaining follow-ups are future-plan scale:
   keep splitting the next touched large coordinators/validators, continue the tuning-friendly
   rule-test audit, and resolve unverified local GLB provenance before production distribution.

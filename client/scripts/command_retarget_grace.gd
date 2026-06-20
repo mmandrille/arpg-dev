@@ -47,12 +47,23 @@ func tick(delta: float) -> void:
 func pop_ready(local_cooldown: float) -> Dictionary:
 	if not active or remaining_seconds <= 0.0 or local_cooldown > 0.0:
 		return {}
-	var out := {"kind": kind, "ground": Vector3(ground.x, 0.0, ground.y)}
-	last_dispatched_kind = kind
-	last_dispatched_ground = ground
-	dispatched_count += 1
+	var command_ground := Vector3(ground.x, 0.0, ground.y)
+	var out := {"kind": kind, "ground": command_ground}
+	_record_dispatch(command_ground)
 	clear()
 	return out
+
+
+func dispatch_or_queue_floor(next_ground: Vector3, local_cooldown: float, client, last_server_tick: int, before_dispatch: Callable, mark_walking: Callable) -> bool:
+	if client == null:
+		return false
+	if local_cooldown > 0.0 and local_cooldown <= DEFAULT_GRACE_SECONDS:
+		_prepare_floor_command(before_dispatch, mark_walking)
+		queue_floor(next_ground)
+		return false
+	_record_dispatch(next_ground)
+	_send_floor(next_ground, client, last_server_tick, before_dispatch, mark_walking)
+	return true
 
 
 func tick_and_dispatch(delta: float, local_cooldown: float, client, last_server_tick: int, before_dispatch: Callable, mark_walking: Callable) -> bool:
@@ -62,12 +73,8 @@ func tick_and_dispatch(delta: float, local_cooldown: float, client, last_server_
 	var command := pop_ready(local_cooldown)
 	if command.is_empty():
 		return false
-	if before_dispatch.is_valid():
-		before_dispatch.call()
-	if mark_walking.is_valid():
-		mark_walking.call()
 	var command_ground: Vector3 = command.get("ground", Vector3.ZERO)
-	client.send("move_to_intent", last_server_tick, {"position": {"x": command_ground.x, "y": command_ground.z}})
+	_send_floor(command_ground, client, last_server_tick, before_dispatch, mark_walking)
 	return true
 
 
@@ -86,3 +93,21 @@ func get_debug_state() -> Dictionary:
 		"last_dispatched_ground_x": last_dispatched_ground.x,
 		"last_dispatched_ground_z": last_dispatched_ground.y,
 	}
+
+
+func _prepare_floor_command(before_dispatch: Callable, mark_walking: Callable) -> void:
+	if before_dispatch.is_valid():
+		before_dispatch.call()
+	if mark_walking.is_valid():
+		mark_walking.call()
+
+
+func _send_floor(command_ground: Vector3, client, last_server_tick: int, before_dispatch: Callable, mark_walking: Callable) -> void:
+	_prepare_floor_command(before_dispatch, mark_walking)
+	client.send("move_to_intent", last_server_tick, {"position": {"x": command_ground.x, "y": command_ground.z}})
+
+
+func _record_dispatch(command_ground: Vector3) -> void:
+	last_dispatched_kind = "floor"
+	last_dispatched_ground = Vector2(command_ground.x, command_ground.z)
+	dispatched_count += 1

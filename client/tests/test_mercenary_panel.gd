@@ -3,6 +3,7 @@
 extends SceneTree
 
 const MercenaryPanelScript := preload("res://scripts/mercenary_panel.gd")
+const MercenaryPanelBridgeScript := preload("res://scripts/mercenary_panel_bridge.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -75,6 +76,11 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_false("affordability follows gold", bool(state.get("affordable", true)))
 
+	var owner := BridgeOwnerStub.new()
+	owner.entities["2001"] = {"type": "companion"}
+	MercenaryPanelBridgeScript.apply_lost(owner, panel, {"target_entity_id": "2001", "monster_def_id": "mercenary_guard"})
+	_assert_eq("bridge removes stale lost companion", owner.removed_id, "2001")
+
 	panel.show_board("board-2", "mercenary", "fixed:mercenary_scout", "mercenary_scout", 75, true, 125)
 	panel.apply_hired_event({
 		"target_entity_id": "2002",
@@ -114,3 +120,18 @@ func _assert_true(label: String, value: bool) -> void:
 
 func _assert_false(label: String, value: bool) -> void:
 	_assert_true(label, not value)
+
+
+class BridgeOwnerStub:
+	var entities: Dictionary = {}
+	var removed_id: String = ""
+
+	func _remove_entity(id: String) -> void:
+		removed_id = id
+		entities.erase(id)
+
+	func _sync_companion_bar() -> void:
+		pass
+
+	func _raise_gameplay_windows() -> void:
+		pass

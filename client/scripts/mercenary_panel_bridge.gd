@@ -39,7 +39,11 @@ static func apply_lost(owner, panel: MercenaryPanel, ev: Dictionary) -> void:
 	if panel == null:
 		return
 	panel.apply_lost_event(ev)
-	owner._sync_companion_bar()
+	var lost_id := str(ev.get("target_entity_id", ev.get("entity_id", "")))
+	if lost_id != "" and owner.entities.has(lost_id):
+		owner._remove_entity(lost_id)
+	else:
+		owner._sync_companion_bar()
 	owner._raise_gameplay_windows()
 
 

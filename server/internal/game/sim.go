@@ -5067,6 +5067,7 @@ func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 		Gold:                  s.gold,
 		DeepestDungeonDepth:   s.progression.DeepestDungeonDepth,
 		BaseStats:             s.progression.BaseStats,
+		EffectiveBaseStats:    s.effectiveBaseStatsView(),
 		DerivedStats:          s.DerivedStatsView(),
 		StatBreakdowns:        s.StatBreakdownViews(),
 		SkillRanks:            cloneIntMap(s.progression.SkillRanks),
@@ -5265,6 +5266,7 @@ func progressionStatValue(stats BaseStatsView, stat string) float64 {
 
 func (s *Sim) StatBreakdownViews() []StatBreakdownView {
 	_, breakdowns := s.playerEffectiveCombatStats()
+	breakdowns = append(s.baseStatBreakdownViews(), breakdowns...)
 	return breakdowns
 }
 

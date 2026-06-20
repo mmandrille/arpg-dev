@@ -5,6 +5,7 @@ extends SceneTree
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
+const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -21,7 +22,9 @@ func _initialize() -> void:
 	_test_clear_resets()
 	_test_attack_buffer_queue_replace_and_expire()
 	_test_attack_buffer_clear_guards()
+	_test_sticky_target_replacement_and_clear_guards()
 	_test_combat_reach_uses_equipped_weapon()
+	_test_combat_reach_attack_approach_point()
 
 	print("[gdtest] PASS: test_sustained_input (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -126,6 +129,27 @@ func _test_attack_buffer_clear_guards() -> void:
 	_assert_true("non-monster target clears buffer", buffer.should_clear(10, entities))
 
 
+func _test_sticky_target_replacement_and_clear_guards() -> void:
+	var sticky := CombatStickyTargetScript.new()
+	var entities := {
+		"1002": {"type": "monster", "hp": 3},
+		"1003": {"type": "monster", "hp": 0},
+		"loot": {"type": "loot", "hp": 1},
+	}
+	sticky.set_target("1002")
+	_assert_true("sticky target active", sticky.active())
+	_assert_false("valid sticky target does not clear", sticky.should_clear(10, entities))
+	sticky.set_target("1003")
+	_assert_eq("sticky target replaces", sticky.target_id, "1003")
+	_assert_true("dead sticky target clears", sticky.should_clear(10, entities))
+	sticky.set_target("missing")
+	_assert_true("missing sticky target clears", sticky.should_clear(10, entities))
+	sticky.set_target("loot")
+	_assert_true("non-monster sticky target clears", sticky.should_clear(10, entities))
+	sticky.set_target("1002")
+	_assert_true("dead player clears sticky target", sticky.should_clear(0, entities))
+
+
 func _test_combat_reach_uses_equipped_weapon() -> void:
 	var player := Node3D.new()
 	player.position = Vector3(2.0, 0.0, 5.0)
@@ -142,6 +166,22 @@ func _test_combat_reach_uses_equipped_weapon() -> void:
 	}]
 	var equipped := {"main_hand": "1004"}
 	_assert_true("equipped bow reach covers control lab target", CombatReachScript.target_in_local_attack_range(player, entities, inventory, equipped, "1002"))
+	player.free()
+	monster.free()
+
+
+func _test_combat_reach_attack_approach_point() -> void:
+	var player := Node3D.new()
+	player.position = Vector3(2.0, 0.0, 5.0)
+	var monster := Node3D.new()
+	monster.position = Vector3(13.0, 0.0, 5.0)
+	var entities := {
+		"1002": {"type": "monster", "hp": 10, "node": monster},
+	}
+	var point := CombatReachScript.attack_approach_point(player, entities, [], {}, "1002")
+	_assert_true("approach point stops left of target", point.x < monster.position.x)
+	_assert_true("approach point stays on target lane", absf(point.z - monster.position.z) < 0.001)
+	_assert_true("approach point is inside unarmed reach", point.distance_to(monster.position) < ClientConstants.LOCAL_UNARMED_REACH + ClientConstants.LOCAL_MONSTER_RADIUS)
 	player.free()
 	monster.free()
 

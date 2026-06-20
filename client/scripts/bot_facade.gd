@@ -197,6 +197,63 @@ static func cast_skill_direction(main, skill_id: String = "", direction: Diction
 		main._send_skill_cast_intent(skill_id, "", dir)
 
 
+static func click_entity_id(main, target_id: String, buffered: bool = false) -> void:
+	if main == null:
+		return
+	var client = _member(main, "client")
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or int(_member(main, "player_hp")) <= 0:
+		return
+	var entities: Dictionary = _member(main, "entities")
+	if target_id == "" or not entities.has(target_id):
+		return
+	var rec: Dictionary = entities[target_id]
+	if buffered:
+		if str(rec.get("type", "")) != "monster":
+			var attack_buffer = _member(main, "_attack_buffer")
+			if attack_buffer != null and attack_buffer.has_method("clear"):
+				attack_buffer.clear()
+			return
+		if main.has_method("_execute_click_pick"):
+			main._execute_click_pick({"kind": "monster", "target_id": target_id})
+		return
+	var typ := str(rec.get("type", ""))
+	var interactable_def_id := str(rec.get("interactable_def_id", ""))
+	if typ == "interactable" and main.has_method("_interactable_should_approach_before_action") and main._interactable_should_approach_before_action(interactable_def_id):
+		if main.has_method("_activate_or_approach_interactable"):
+			main._activate_or_approach_interactable(target_id, rec)
+		return
+	if main.has_method("_send_action_intent"):
+		main._send_action_intent(target_id)
+	main.set("_attack_cooldown", main._basic_attack_cooldown_seconds() if typ == "monster" and main.has_method("_basic_attack_cooldown_seconds") else ClientConstants.SEND_INTERVAL)
+	if typ == "monster" and main.has_method("_start_basic_attack_recovery_ui"):
+		main._start_basic_attack_recovery_ui(float(_member(main, "_attack_cooldown")))
+
+
+static func dispatch_action(main, intent_type: String, payload: Dictionary) -> void:
+	if main == null:
+		return
+	var client = _member(main, "client")
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or int(_member(main, "player_hp")) <= 0:
+		return
+	if main.has_method("_movement_intent_starts_motion") and main._movement_intent_starts_motion(intent_type, payload):
+		if main.has_method("_close_gameplay_panels_for_movement"):
+			main._close_gameplay_panels_for_movement()
+		if main.has_method("_mark_local_player_walking"):
+			main._mark_local_player_walking()
+	client.send(intent_type, int(_member(main, "last_server_tick")), payload)
+	main.set("_attack_cooldown", ClientConstants.SEND_INTERVAL)
+
+
+static func dispatch_inventory_intent(main, intent_type: String, payload: Dictionary) -> void:
+	if main == null:
+		return
+	var client = _member(main, "client")
+	if main.has_method("_input_locked") and main._input_locked():
+		return
+	if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and int(_member(main, "player_hp")) > 0:
+		client.send(intent_type, int(_member(main, "last_server_tick")), payload)
+
+
 static func _member(owner, name: String):
 	if owner == null:
 		return null

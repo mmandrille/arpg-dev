@@ -1,0 +1,15 @@
+{
+  "id": "attack_move_sticky_targeting",
+  "runner": "godot_client",
+  "world_id": "combat_control_lab",
+  "seed": "attackmove0001",
+  "title": "Attack move: far monster click moves into range and attacks",
+  "description": "Click the dungeon mob from spawn, verify the client moves toward attack range, and observe a later authoritative combat event against that same target.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "dungeon_mob", "timeout_s": 10.0 },
+    { "type": "click_entity_buffered", "entity_type": "monster", "monster_def_id": "dungeon_mob" },
+    { "type": "wait_player_near", "x": 11.65, "z": 5.0, "distance": 1.0, "timeout_s": 12.0 },
+    { "type": "wait_event", "event_types": ["monster_damaged", "attack_missed"], "target_entity_type": "monster", "target_monster_def_id": "dungeon_mob", "timeout_s": 8.0 }
+  ]
+}

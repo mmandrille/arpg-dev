@@ -23,9 +23,9 @@ Last updated: 2026-06-20
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v309 — passive skill column |
+| **Latest completed slice** | v310 — derived stat breakdown UI |
 | **Active branch** | `main` |
-| **CI gate** | v309 focused checks and final main `make ci` green on 2026-06-20 (`make ci` in 13m28s) |
+| **CI gate** | v310 focused client checks green on 2026-06-20 (`godot --headless --path client --script res://tests/test_character_stats_panel.gd`, `make client-unit`, `make maintainability`) |
 | **Next slice** | Use `$next` / `$autoloop` for the next feature batch, carrying forward review future-plan items |
 | **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
 | **Next engineering review** | Around v318, after the next feature batch and a green final proof |

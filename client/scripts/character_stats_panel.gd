@@ -28,6 +28,41 @@ const DERIVED_LABELS := {
 const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance", "evade_chance"]
 const WHOLE_PERCENT_STATS := ["block_percent"]
 
+
+class DerivedStatTooltipLabel:
+	extends Label
+
+	func _make_custom_tooltip(for_text: String) -> Object:
+		var panel := PanelContainer.new()
+		panel.add_theme_stylebox_override("panel", _tooltip_style())
+		var label := Label.new()
+		label.text = for_text
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.custom_minimum_size = Vector2(460, 0)
+		label.add_theme_color_override("font_color", Color("#f3ead8"))
+		label.add_theme_font_size_override("font_size", 16)
+		panel.add_child(label)
+		return panel
+
+	func _tooltip_style() -> StyleBoxFlat:
+		var s := StyleBoxFlat.new()
+		s.bg_color = Color(0.055, 0.048, 0.038, 1.0)
+		s.border_color = Color("#b98a22")
+		s.border_width_left = 1
+		s.border_width_top = 1
+		s.border_width_right = 1
+		s.border_width_bottom = 1
+		s.corner_radius_top_left = 4
+		s.corner_radius_top_right = 4
+		s.corner_radius_bottom_left = 4
+		s.corner_radius_bottom_right = 4
+		s.content_margin_left = 10
+		s.content_margin_right = 10
+		s.content_margin_top = 8
+		s.content_margin_bottom = 8
+		return s
+
+
 var progression: Dictionary = {}
 var allocation_enabled: bool = false
 var _panel: DraggableWindow
@@ -37,9 +72,9 @@ var _points_label: Label
 var _stat_value_labels: Dictionary = {}
 var _stat_buttons: Dictionary = {}
 var _derived_labels: Dictionary = {}
-var _derived_toggle: Button
+var _derived_title: Label
+var _derived_scroll: ScrollContainer
 var _derived_container: VBoxContainer
-var _derived_open: bool = false
 var _hero_name: String = "Character"
 
 
@@ -91,20 +126,25 @@ func get_debug_state() -> Dictionary:
 		stat_buttons[stat] = {
 			"enabled": btn != null and not btn.disabled,
 			"disabled": btn == null or btn.disabled,
-		}
+	}
 	var derived_labels := {}
-	if _derived_open:
-		for key in _derived_labels.keys():
-			var label: Label = _derived_labels.get(key, null)
-			if label != null:
-				derived_labels[key] = label.text
+	for key in _derived_labels.keys():
+		var label: Label = _derived_labels.get(key, null)
+		if label != null:
+			derived_labels[key] = label.text
 	return {
 		"visible": visible,
 		"progression": progression.duplicate(true),
 		"allocation_enabled": allocation_enabled,
 		"stat_buttons": stat_buttons,
-		"derived_open": _derived_open,
+		"derived_open": true,
 		"derived_labels": derived_labels,
+		"derived_title": _derived_title.text if _derived_title != null else "",
+		"derived_title_is_button": false,
+		"derived_tooltips": _derived_tooltips_by_key(),
+		"derived_mouse_filters": _derived_mouse_filters_by_key(),
+		"derived_scroll": _derived_scroll_debug_state(),
+		"derived_tooltip_panel": _derived_tooltip_panel_debug_state(),
 		"stat_breakdowns": _breakdowns_by_key(),
 		"hero_name": _hero_name,
 		"window": _panel.get_debug_state() if _panel != null else {},
@@ -124,8 +164,7 @@ func bot_click_close() -> void:
 
 
 func bot_toggle_derived() -> void:
-	if _derived_toggle != null:
-		_derived_toggle.pressed.emit()
+	pass
 
 
 func bot_drag_window_by(delta: Vector2) -> void:
@@ -140,9 +179,9 @@ func _sync_viewport_size() -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = DraggableWindowScript.new()
-	_panel.custom_minimum_size = Vector2(330, 500)
+	_panel.custom_minimum_size = Vector2(330, 585)
 	_panel.position = Vector2(16, 118)
-	_panel.configure("Character", Vector2(304, 436))
+	_panel.configure("Character", Vector2(304, 520))
 	_panel.set_layout_key("character_stats")
 	_panel.add_theme_stylebox_override("panel", _panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -151,7 +190,7 @@ func _build() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
-	root.custom_minimum_size = Vector2(304, 436)
+	root.custom_minimum_size = Vector2(304, 520)
 	_panel.set_content(root)
 
 	_level_label = _value_label()
@@ -179,22 +218,29 @@ func _build() -> void:
 		_stat_buttons[stat] = btn
 		root.add_child(row)
 
-	_derived_toggle = Button.new()
-	_derived_toggle.text = "Derived"
-	_derived_toggle.tooltip_text = "Toggle derived stats"
-	_derived_toggle.focus_mode = Control.FOCUS_NONE
-	_derived_toggle.custom_minimum_size = Vector2(180, 28)
-	_derived_toggle.add_theme_font_size_override("font_size", 23)
-	_derived_toggle.add_theme_color_override("font_color", Color("#c9a227"))
-	_derived_toggle.pressed.connect(_toggle_derived_stats)
-	root.add_child(_derived_toggle)
+	_derived_title = _section_label("Derived")
+	_derived_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_derived_title.custom_minimum_size = Vector2(180, 28)
+	root.add_child(_derived_title)
+
+	_derived_scroll = ScrollContainer.new()
+	_derived_scroll.visible = true
+	_derived_scroll.custom_minimum_size = Vector2(304, 172)
+	_derived_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_derived_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_derived_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_derived_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	_derived_scroll.clip_contents = true
+	root.add_child(_derived_scroll)
 
 	_derived_container = VBoxContainer.new()
 	_derived_container.add_theme_constant_override("separation", 3)
-	_derived_container.visible = _derived_open
-	root.add_child(_derived_container)
+	_derived_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_derived_scroll.add_child(_derived_container)
 	for key in DERIVED_LABELS.keys():
-		var label := _value_label()
+		var label := _derived_value_label()
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
 		_derived_labels[key] = label
 		_derived_container.add_child(label)
 
@@ -203,7 +249,7 @@ func _build() -> void:
 
 func _sync_title() -> void:
 	if _panel != null:
-		_panel.configure(_title_text(), Vector2(304, 436))
+		_panel.configure(_title_text(), Vector2(304, 520))
 
 
 func _title_text() -> String:
@@ -227,10 +273,10 @@ func _render() -> void:
 		if label != null:
 			label.text = "%s  %d" % [StatLabels.display_name(stat), int(base.get(stat, 0))]
 	var derived: Dictionary = progression.get("derived_stats", {})
-	if _derived_toggle != null:
-		_derived_toggle.text = "Derived  %s" % ("-" if _derived_open else "+")
 	if _derived_container != null:
-		_derived_container.visible = _derived_open
+		_derived_container.visible = true
+	if _derived_scroll != null:
+		_derived_scroll.visible = true
 	for key in DERIVED_LABELS.keys():
 		var label: Label = _derived_labels.get(key, null)
 		if label != null:
@@ -241,11 +287,6 @@ func _render() -> void:
 
 func _on_stat_button_pressed(stat: String) -> void:
 	allocate_stat_requested.emit(stat)
-
-
-func _toggle_derived_stats() -> void:
-	_derived_open = not _derived_open
-	_render()
 
 
 func _render_buttons() -> void:
@@ -281,28 +322,160 @@ func _breakdowns_by_key() -> Dictionary:
 	return out
 
 
+func _derived_tooltips_by_key() -> Dictionary:
+	var out := {}
+	for key in _derived_labels.keys():
+		var label: Label = _derived_labels.get(key, null)
+		if label != null and label.tooltip_text != "":
+			out[key] = label.tooltip_text
+	return out
+
+
+func _derived_mouse_filters_by_key() -> Dictionary:
+	var out := {}
+	for key in _derived_labels.keys():
+		var label: Label = _derived_labels.get(key, null)
+		if label != null:
+			out[key] = int(label.mouse_filter)
+	return out
+
+
+func _derived_scroll_debug_state() -> Dictionary:
+	if _derived_scroll == null:
+		return {}
+	var bar := _derived_scroll.get_v_scroll_bar()
+	return {
+		"visible": _derived_scroll.visible,
+		"vertical_scroll_mode": int(_derived_scroll.vertical_scroll_mode),
+		"horizontal_scroll_mode": int(_derived_scroll.horizontal_scroll_mode),
+		"scrollbar_on_right": true,
+		"scrollbar_visible": bar != null and bar.visible,
+		"row_count": _derived_container.get_child_count() if _derived_container != null else 0,
+		"viewport_height": _derived_scroll.custom_minimum_size.y,
+	}
+
+
+func _derived_tooltip_panel_debug_state() -> Dictionary:
+	for key in _derived_labels.keys():
+		var label: Label = _derived_labels.get(key, null)
+		if label == null or label.tooltip_text == "":
+			continue
+		var tooltip = label._make_custom_tooltip(label.tooltip_text)
+		var panel := tooltip as PanelContainer
+		if panel == null:
+			return {"custom": false}
+		var style := panel.get_theme_stylebox("panel") as StyleBoxFlat
+		var alpha := style.bg_color.a if style != null else 0.0
+		panel.queue_free()
+		return {
+			"custom": true,
+			"background_alpha": alpha,
+		}
+	return {}
+
+
 func _breakdown_summary(key: String) -> String:
 	var rec: Dictionary = _breakdowns_by_key().get(key, {})
 	if rec.is_empty():
 		return ""
 	var parts: PackedStringArray = PackedStringArray()
 	var value := _format_stat_value(key, float(rec.get("value", 0.0)))
-	if rec.get("cap", null) != null:
-		parts.append("%s: %s (cap %s)" % [DERIVED_LABELS.get(key, key), value, _format_stat_value(key, float(rec.get("cap", 0.0)))])
-	else:
-		parts.append("%s: %s" % [DERIVED_LABELS.get(key, key), value])
+	parts.append("%s formula:" % DERIVED_LABELS.get(key, key))
 	var sources: Array = rec.get("sources", [])
+	var formula_terms := _source_formula_terms(key, sources, _item_names_by_instance_id(sources))
+	parts.append_array(formula_terms)
+	if rec.get("cap", null) != null:
+		parts.append("= %s (cap %s)" % [value, _format_stat_value(key, float(rec.get("cap", 0.0)))])
+	else:
+		parts.append("= %s" % value)
+	return "\n".join(parts)
+
+
+func _source_formula_terms(key: String, sources: Array, item_names_by_id: Dictionary) -> PackedStringArray:
+	var terms := PackedStringArray()
 	for source in sources:
 		if typeof(source) != TYPE_DICTIONARY:
 			continue
 		var source_rec := source as Dictionary
-		var label := str(source_rec.get("label", source_rec.get("kind", "")))
-		parts.append("%s %s" % [label, _format_stat_value(key, float(source_rec.get("value", 0.0)))])
-	return "\n".join(parts)
+		var source_text := _source_formula_source(source_rec, item_names_by_id)
+		terms.append("%s (%s)" % [_format_stat_delta(key, float(source_rec.get("value", 0.0))), source_text])
+	return terms
+
+
+func _item_names_by_instance_id(sources: Array) -> Dictionary:
+	var out := {}
+	for source in sources:
+		if typeof(source) != TYPE_DICTIONARY:
+			continue
+		var source_rec := source as Dictionary
+		var item_id := str(source_rec.get("item_instance_id", "")).strip_edges()
+		if item_id == "" or str(source_rec.get("kind", "")) != "equipment_base":
+			continue
+		var label := str(source_rec.get("label", "")).strip_edges()
+		if label != "":
+			out[item_id] = label
+	return out
+
+
+func _source_formula_source(source_rec: Dictionary, item_names_by_id: Dictionary) -> String:
+	var label := str(source_rec.get("label", source_rec.get("kind", ""))).strip_edges()
+	if label == "":
+		label = "Source"
+	var kind := str(source_rec.get("kind", "")).strip_edges()
+	var item_id := str(source_rec.get("item_instance_id", "")).strip_edges()
+	if item_id != "" and (kind == "equipment_base" or kind == "equipment_roll"):
+		return str(item_names_by_id.get(item_id, label))
+	var detail := label
+	var kind_label := _source_kind_label(kind)
+	if kind_label != "" and kind_label != "Source":
+		detail += ", %s" % kind_label
+	return detail
+
+
+func _source_kind_label(kind: String) -> String:
+	match kind:
+		"character_formula":
+			return "Character formula"
+		"equipment_base":
+			return "Item base"
+		"equipment_roll":
+			return "Item roll"
+		"skill_effect":
+			return "Skill effect"
+		"passive_skill":
+			return "Passive skill"
+		"set_bonus":
+			return "Set bonus"
+		"buff":
+			return "Buff"
+		"debuff":
+			return "Debuff"
+		"cap":
+			return "Cap"
+		"clamp":
+			return "Clamp"
+		_:
+			if kind == "":
+				return "Source"
+			return kind.replace("_", " ").capitalize()
+
+
+func _format_stat_delta(key: String, value: float) -> String:
+	var formatted := _format_stat_value(key, value)
+	if value > 0.0:
+		return "+%s" % formatted
+	return formatted
 
 
 func _value_label() -> Label:
 	var label := Label.new()
+	label.add_theme_color_override("font_color", Color("#d8c7a6"))
+	label.add_theme_font_size_override("font_size", 23)
+	return label
+
+
+func _derived_value_label() -> Label:
+	var label := DerivedStatTooltipLabel.new()
 	label.add_theme_color_override("font_color", Color("#d8c7a6"))
 	label.add_theme_font_size_override("font_size", 23)
 	return label

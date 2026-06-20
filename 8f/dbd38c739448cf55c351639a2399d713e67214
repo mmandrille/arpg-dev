@@ -1,0 +1,42 @@
+docs/as-built/v300_command-retarget-grace.md
+  s_95786de7ff0c5d::t_4044984075745a 13-14,20,40-47,57-58
+client/tests/test_mercenary_panel.gd
+  s_95786de7ff0c5d::t_fe99012889e454 6,83,123-137
+  s_95786de7ff0c5d::t_2a47987950b211 79-82
+client/tests/test_command_retarget_grace.gd
+  s_95786de7ff0c5d::t_11119ade5a0d8e 15,57-75
+docs/as-built/v301_melee-lunge-micro-step.md
+  s_95786de7ff0c5d::t_4044984075745a 42-46
+PROGRESS.md
+  s_95786de7ff0c5d::t_1af11ef912ac04 18
+  s_95786de7ff0c5d::t_4044984075745a 28-29,31,90-93
+client/scripts/bot_facade.gd
+  s_95786de7ff0c5d::t_89eac72fccd944 240
+  s_95786de7ff0c5d::t_11119ade5a0d8e 243,246-248
+docs/progress/slice-lifecycle.md
+  s_95786de7ff0c5d::t_4044984075745a 310-316
+client/scripts/main.gd
+  s_95786de7ff0c5d::t_11119ade5a0d8e 2416,2701-2702,2716-2717
+client/scripts/mercenary_panel_bridge.gd
+  s_95786de7ff0c5d::t_fe99012889e454 42-46
+client/scripts/command_retarget_grace.gd
+  s_95786de7ff0c5d::t_11119ade5a0d8e 50-52,57-68,77,96-113
+tools/bot/scenarios/client/81_command_retarget_grace.json
+  s_95786de7ff0c5d::t_89eac72fccd944 7,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8fdbd38c739448cf55c351639a2399d713e67214",
+  "prompts": {},
+  "sessions": {
+    "s_95786de7ff0c5d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee232-5e77-7f93-9275-ba83ddfb9619",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

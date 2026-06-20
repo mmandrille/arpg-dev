@@ -1,0 +1,60 @@
+client/tests/test_coop_client.gd
+  s_d2a495bd24647f::t_6d444e4f55bf2a 515
+PROGRESS.md
+  s_d2a495bd24647f::t_48e07e6dc5398e 26,28
+docs/specs/v310_spec-derived-stat-breakdown-ui.md
+  s_d2a495bd24647f::t_8e777d551ca9e8 14,25-26
+  s_d2a495bd24647f::t_4051d142bb01e4 1-2,4-13,15-24,28-40
+  s_d2a495bd24647f::t_a1d5a23fb38713 27
+  s_d2a495bd24647f::t_48e07e6dc5398e 3
+client/scripts/character_stats_panel.gd
+  s_d2a495bd24647f::t_af3dfe7692ff5b 145,182,184,193,228,243,252,331-339
+  s_d2a495bd24647f::t_29aadf20eca397 75,129,131-134,140,167,221-224,227,277,279
+  s_d2a495bd24647f::t_4051d142bb01e4 76,144,146,226,229-234,238-239,242,278,325-330,341-355,392-393,395,402-404,421-424,432-467
+  s_d2a495bd24647f::t_2dabbb16722b8d 143
+  s_d2a495bd24647f::t_86902fe13689ef 147,356-374
+  s_d2a495bd24647f::t_902269af107eea 142
+  s_d2a495bd24647f::t_3357f896b1796b 385,394,400,405-420,425-427
+  s_d2a495bd24647f::t_168f8c40254c0e 401
+  s_d2a495bd24647f::t_e62a5c430f5426 31-65,241,383,386,388,390,428-431,477-478
+scripts/client_smoke.sh
+  s_d2a495bd24647f::t_4051d142bb01e4 147
+client/tests/test_character_stats_panel.gd.uid
+  s_d2a495bd24647f::t_62d012d7c5143a 1
+docs/plans/v310_2026-06-20-derived-stat-breakdown-ui.md
+  s_d2a495bd24647f::t_4051d142bb01e4 1-2,4,6-9,11-26,28-33,37-43,46-48
+  s_d2a495bd24647f::t_507df4f06c79a2 5,10,27,36
+  s_d2a495bd24647f::t_8e777d551ca9e8 44
+  s_d2a495bd24647f::t_48e07e6dc5398e 3,34-35,45,49-51
+client/tests/test_character_stats_panel.gd
+  s_d2a495bd24647f::t_6d444e4f55bf2a 51
+  s_d2a495bd24647f::t_4051d142bb01e4 1-50,54-59,61-64,70-71,86-106
+  s_d2a495bd24647f::t_902269af107eea 52-53
+  s_d2a495bd24647f::t_3a7fb30fe6ac8c 60,65-66
+  s_d2a495bd24647f::t_12cfb1b2f99e30 67-69,72-75,80-83,85
+  s_d2a495bd24647f::t_3b9e9aa7faef13 76-79,84
+docs/as-built/v310_derived-stat-breakdown-ui.md
+  s_d2a495bd24647f::t_48e07e6dc5398e 3,11,13,17-23
+  s_d2a495bd24647f::t_4051d142bb01e4 1-2,4-7,14-16
+  s_d2a495bd24647f::t_a1d5a23fb38713 10,12
+  s_d2a495bd24647f::t_75dcd2c39f28c7 8
+  s_d2a495bd24647f::t_8e777d551ca9e8 9
+docs/progress/slice-lifecycle.md
+  s_d2a495bd24647f::t_48e07e6dc5398e 325
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1a409b9f1871ff0a784122d3fe82fbc1425d48b8",
+  "prompts": {},
+  "sessions": {
+    "s_d2a495bd24647f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee5ed-3283-70a3-9878-2e0dc4b0f6af",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

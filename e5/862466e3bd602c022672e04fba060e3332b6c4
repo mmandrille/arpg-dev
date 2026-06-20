@@ -1,0 +1,179 @@
+server/internal/game/sim.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 230-231,748,1970,2760,2833,3428,3430,3563-3565,4849-4851,4890-4892,6259,6264-6271
+docs/plans/v307_2026-06-19-line-of-sight-blockers.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-192
+docs/specs/v302_spec-water-obstacles-foundation.md
+  s_719c59d1789d7e::t_c8c4a08a0e7cc1 3
+  s_719c59d1789d7e::t_e491ea4c52756b 1-2,4-117
+shared/golden/dungeon_obstacles.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 11-12,14,16-21,75-76,79,83-84,89-90,93-94,97-98,103-104,107,111-112,117-118,122,125-126,131-132,135-136,139-140,145-146,149,153-154,159-160,163-164,167-168,173-174,177,181-182,187-188,191,195-196,201-202,205-206,209-210,215-216,219-220,223-224,229-230,233-234,237-238,246-247,278-279,367
+docs/as-built/v304_flying-navigation-trait.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-38
+Makefile
+  s_719c59d1789d7e::t_d36a1c4d03315d 11-12
+docs/as-built/v306_obstacle-variety-pack.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-33
+server/internal/game/dungeon_obstacle_variety.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-60
+scripts/ci.sh
+  s_719c59d1789d7e::t_d36a1c4d03315d 266-267
+docs/plans/v304_2026-06-19-flying-navigation-trait.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-157
+server/internal/game/mobility_skills.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 12-84,96,280
+tools/bot/scenarios/client/78_wall_floor_shader_polish.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-16
+shared/rules/worlds.v0.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 189-382
+docs/as-built/v303_hazard-holes-chasms.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-40
+  s_719c59d1789d7e::t_c8c4a08a0e7cc1 41
+tools/bot/scenarios/100_barbarian_leap_obstacle_crossing.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-33
+docs/as-built/v307_line-of-sight-blockers.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-33
+server/internal/game/fog_of_war_test.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 101-213,368-381
+server/internal/game/fog_of_war.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 215-217
+server/internal/game/rogue_rules.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 26-42,76-81
+server/internal/game/dungeon_gen.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 63-68,101-106,279-280,315,318,320,322,324,330,343-344,348,362-363,367,378-380,384,394-395,966,1051
+server/internal/game/types.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 359-364
+tools/bot/scenarios/client/49_mercenary_recovery_ui.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 31
+docs/as-built/v305_barbarian-leap-obstacle-crossing.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-40
+docs/plans/v306_2026-06-19-obstacle-variety-pack.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-191
+shared/protocol/examples/session_snapshot.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 28-29
+server/internal/game/dungeon_doors_test.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 46
+docs/as-built/v308_wall-floor-shader-polish.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-40
+server/internal/game/sim_players.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 266
+client/scripts/fog_of_war_overlay.gd
+  s_719c59d1789d7e::t_d36a1c4d03315d 150-151,479-482
+docs/plans/v308_2026-06-19-wall-floor-shader-polish.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-167
+shared/rules/dungeon_generation.v0.schema.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 160,162-163,201-211,225-246
+tools/bot/scenarios/102_line_of_sight_blockers.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-20
+shared/protocol/state_delta.v8.schema.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 113-114
+shared/rules/worlds.v0.schema.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 41-42,54-58,68-72,85-89,115-116
+shared/rules/skills.v0.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 463
+tools/bot/scenarios/client/77_line_of_sight_blocker_shadow.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-28
+client/scripts/ground_wall_factory.gd
+  s_719c59d1789d7e::t_d36a1c4d03315d 8-11,40,43-46,61-72,96-111,124-202,222-244,276-279
+server/internal/game/dungeon_water.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-114
+docs/plans/v305_2026-06-19-barbarian-leap-obstacle-crossing.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-153
+server/internal/game/dungeon_holes.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-104
+docs/specs/v303_spec-hazard-holes-chasms.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-116
+docs/specs/v308_spec-wall-floor-shader-polish.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-86
+server/internal/game/corpse.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 133
+PROGRESS.md
+  s_719c59d1789d7e::t_bc208462f62373 28
+tools/bot/scenarios/99_flying_navigation_trait.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-23
+docs/plans/v302_2026-06-19-water-obstacles-foundation.md
+  s_719c59d1789d7e::t_c8c4a08a0e7cc1 3
+  s_719c59d1789d7e::t_e491ea4c52756b 1-2,4-176
+docs/specs/v306_spec-obstacle-variety-pack.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-112
+server/internal/game/dungeon_doors.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 39
+client/scripts/bot_assertion_handlers.gd
+  s_719c59d1789d7e::t_d36a1c4d03315d 10,415-416,421
+tools/bot/scenarios/101_obstacle_variety_pack.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-23
+docs/specs/v304_spec-flying-navigation-trait.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-99
+docs/specs/v307_spec-line-of-sight-blockers.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-107
+shared/protocol/examples/state_delta_level_transition.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 18-19
+tools/bot/runtime_assertions.py
+  s_719c59d1789d7e::t_d36a1c4d03315d 106-108,380-382
+server/internal/game/companion_ai.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 398
+shared/rules/skills.v0.schema.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 364-368
+client/scripts/wall_renderer.gd
+  s_719c59d1789d7e::t_d36a1c4d03315d 32,37-41,81-85,88,91-101,106,111-119,122-123,127,134-286
+server/internal/game/pathfind_test.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 71-120
+docs/plans/v303_2026-06-19-hazard-holes-chasms.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-176
+docs/specs/v305_spec-barbarian-leap-obstacle-crossing.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-89
+shared/rules/monsters.v0.schema.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 56
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 5,26
+docs/as-built/v302_water-obstacles-foundation.md
+  s_719c59d1789d7e::t_e491ea4c52756b 1-38
+  s_719c59d1789d7e::t_c8c4a08a0e7cc1 39
+server/internal/game/obstacle_blocking.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-37
+server/internal/game/mobility_obstacle_crossing_test.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-75
+server/internal/game/monster_navigation_traits_test.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-85
+shared/protocol/session_snapshot.v8.schema.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 66-67
+server/internal/game/monster_navigation_traits.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-68
+client/tests/test_factories.gd
+  s_719c59d1789d7e::t_d36a1c4d03315d 41-42,45-46,48-60,69-70,83-195
+shared/rules/dungeon_generation.v0.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 113-118,127-139
+server/internal/game/dungeon_obstacle_variety_test.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 1-95
+shared/golden/dungeon_obstacles.v0.schema.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 17-18,20,30-31,38-43,98-99
+server/internal/game/rules.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 294-305,747,957-958,1559-1561,1904-1909,2016-2018,2045-2047,2177-2179,2193-2198
+client/tests/test_fog_of_war_overlay.gd
+  s_719c59d1789d7e::t_d36a1c4d03315d 18-22,109-176
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_719c59d1789d7e::t_d36a1c4d03315d 15-16,18,31,63-64,66,71-81,86-91,97-102,111-118,138-140,142,144,150-154,156-166,171-172,174-175,183
+shared/protocol/examples/state_delta.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 53-54
+shared/rules/monsters.v0.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 301
+docs/progress/scenario-catalog.md
+  s_719c59d1789d7e::t_d36a1c4d03315d 17-28
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_719c59d1789d7e::t_d36a1c4d03315d 10-11,20-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e5862466e3bd602c022672e04fba060e3332b6c4",
+  "prompts": {},
+  "sessions": {
+    "s_719c59d1789d7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee231-6f1d-7402-b00b-73fb01b62c13",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

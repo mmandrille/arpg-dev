@@ -274,8 +274,12 @@ These rules emerged from paying down the god-file debt. Agents should follow the
 11. **Trivials first, then structural splits, then infrastructure.** Safety bugs (bare ranges,
     missing guards) should land before monolith splits so the split is on proven-correct code.
 
-12. **Protocol bot scenarios stay under 10 seconds.** `tools/bot/run.py` fails any protocol bot
-    scenario whose full run exceeds 10.0 seconds. If a scenario drifts over budget, shorten it to
-    the contract it is really proving: use compact lab worlds, focused setup, or lower-level
-    Go/Python tests for exhaustive traversal/timing coverage instead of waiting through unrelated
-    dungeon walks or natural combat cycles.
+12. **Protocol bot scenarios default to a 10-second budget (15s hard ceiling).** `tools/bot/run.py`
+    fails any scenario whose full run exceeds its budget (`MAX_SCENARIO_ELAPSED_S = 15.0`; default and
+    per-scenario `max_elapsed_s` override at `tools/bot/run.py`). Keep scenarios at the 10.0s default;
+    raise `max_elapsed_s` toward the 15s ceiling **only** when the generated-world route is the
+    behavior under test, and pair it with step-level budgets (`max_ticks`/`timeout_s`) so failures
+    still point at the slow navigation or wait. Otherwise shorten to the contract it is really
+    proving: compact lab worlds, focused setup, or lower-level Go/Python tests for exhaustive
+    traversal/timing coverage instead of waiting through unrelated dungeon walks or combat cycles.
+    See `docs/progress/scenario-catalog.md`.

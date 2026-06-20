@@ -27,8 +27,8 @@ Last updated: 2026-06-19
 | **Active branch** | `codex/world-detail-navigation` |
 | **CI gate** | v301 focused autoloop gates green on 2026-06-19: direct Godot factory test, `make client-unit`, `wall_floor_shader_polish` headless client bot via direct script, and `make maintainability`; final World Detail/Navigation batch `COMPOSE_PROJECT_NAME=arpg-dev make ci` green in the isolated worktree |
 | **Next slice** | Engineering review/refactor handoff is due before the next feature slice |
-| **Last engineering review** | v284 — [`docs/reviews/20260619_v284-overview.md`](docs/reviews/20260619_v284-overview.md) (2026-06-19) |
-| **Next engineering review** | Due now: selected World Detail/Navigation queue is complete and final batch `make ci` is green |
+| **Last engineering review** | v301 — [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md) (2026-06-20) |
+| **Next engineering review** | Target after roughly v311, after the next feature/refactor batch and a green `make ci` |
 
 
 ### Periodic engineering reviews
@@ -87,13 +87,14 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **Review/refactor handoff due now after selected World Detail/Navigation queue.** v294 restored
-  the full-CI baseline after the v293 residuals. v295-v301 completed the selected queue and the
-  final batch `make ci` is green, so run the next repo-wide `$review` and `$refactor` pass before
-  the next feature slice.
-- **Review follow-ups remaining after v284 `$review`.** Remaining follow-ups are future-plan scale:
-  keep splitting the next touched large coordinators/validators, continue the tuning-friendly
-  rule-test audit, and resolve unverified local GLB provenance before production distribution.
+- **Refactor handoff due from v301 `$review`.** The v301 review set is current and full CI is
+  green. Run `$refactor` against [`docs/reviews/20260620_v301-overview.md`](docs/reviews/20260620_v301-overview.md)
+  before the next feature slice.
+- **Review follow-ups remaining after v301 `$review`.** Minor paydown candidates: make `make db-up`
+  / `make ci` worktree-safe without hidden `COMPOSE_PROJECT_NAME` knowledge, add `go vet ./...` to
+  CI, and add bot-scenario budget guidance. Future-plan scale: keep splitting touched large
+  coordinators/validators, continue the tuning-friendly rule-test audit, and resolve unverified
+  local GLB provenance before production distribution.
 
 ### Other deferred items (from specs / ADRs)
 

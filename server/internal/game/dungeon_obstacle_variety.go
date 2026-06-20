@@ -9,6 +9,8 @@ type SolidObstacleKindWeights struct {
 	Rubble int `json:"rubble"`
 }
 
+var solidObstacleLineOfSightTrue = true
+
 func (w SolidObstacleKindWeights) total() int {
 	return w.Wall + w.Rock + w.Column + w.Rubble
 }
@@ -51,7 +53,7 @@ func solidObstacleBlocksProjectiles(kind string) bool {
 func solidObstacleLineOfSightOverride(kind string) *bool {
 	switch kind {
 	case obstacleKindRock, obstacleKindColumn:
-		return boolPtr(true)
+		return &solidObstacleLineOfSightTrue
 	default:
 		return nil
 	}

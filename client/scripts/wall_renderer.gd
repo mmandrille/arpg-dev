@@ -108,21 +108,30 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 	mesh.size = Vector3(float(size.get("x", 1.0)), 1.0, float(size.get("y", 1.0)))
 	node.mesh = mesh
 	node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
+	var mat := _make_wall_material(wall)
+	node.material_override = mat
+	return node
+
+func _make_wall_material(wall: Dictionary) -> StandardMaterial3D:
+	var size: Dictionary = wall.get("size", {})
+	var source := str(wall.get("source", ""))
+	if _ground_factory != null and _ground_factory.has_method("wall_material_for_level"):
+		return _ground_factory.wall_material_for_level(_current_level, source, size)
 	var mat := StandardMaterial3D.new()
 	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
-	mat.albedo_texture = _ground_factory.make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+	if _ground_factory != null and _ground_factory.has_method("make_wall_texture"):
+		mat.albedo_texture = _ground_factory.make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.roughness = 0.96
 	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.0), max(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
-	match str(wall.get("source", "")):
+	match source:
 		"generated":
 			mat.albedo_color = Color(0.92, 0.86, 0.76)
 		"perimeter":
 			mat.albedo_color = Color(0.62, 0.64, 0.68)
 		_:
 			mat.albedo_color = Color(0.78, 0.80, 0.82)
-	node.material_override = mat
-	return node
+	return mat
 
 func _make_obstacle_root(wall: Dictionary, prefix: String, kind: String) -> Node3D:
 	var pos: Dictionary = wall.get("position", {})

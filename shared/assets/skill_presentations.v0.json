@@ -101,7 +101,7 @@
       },
       "summary": "Jumping impact stun",
       "effect_visual": "leap_impact",
-      "visual_duration": 1.0,
+      "visual_duration": 1,
       "visual_height": 2.05,
       "summary_key": "skill.leap.summary"
     },
@@ -125,7 +125,7 @@
       },
       "summary": "Area ally heal",
       "effect_visual": "healing_pulse",
-      "visual_radius": 4.0,
+      "visual_radius": 4,
       "summary_key": "skill.heal.summary"
     },
     "charge": {
@@ -273,6 +273,156 @@
       "projectile_visual": "split_arrow_projectile",
       "effect_visual": "split_arrow",
       "summary_key": "skill.split_arrow.summary"
+    },
+    "arcane_focus": {
+      "icon": {
+        "label": "A",
+        "shape": "orb_projectile",
+        "color": "#7651d8",
+        "accent": "#efe7ff"
+      },
+      "summary": "Passive max mana",
+      "summary_key": "skill.arcane_focus.summary"
+    },
+    "mana_weaving": {
+      "icon": {
+        "label": "W",
+        "shape": "bolt",
+        "color": "#3f8cff",
+        "accent": "#dff4ff"
+      },
+      "summary": "Passive mana regeneration",
+      "summary_key": "skill.mana_weaving.summary"
+    },
+    "spell_dynamo": {
+      "icon": {
+        "label": "D",
+        "shape": "burst",
+        "color": "#9f6fff",
+        "accent": "#fff2ff"
+      },
+      "summary": "Passive skill cooldown reduction",
+      "summary_key": "skill.spell_dynamo.summary"
+    },
+    "iron_hide": {
+      "icon": {
+        "label": "I",
+        "shape": "shield",
+        "color": "#a43b31",
+        "accent": "#ffd4bf"
+      },
+      "summary": "Passive max HP",
+      "summary_key": "skill.iron_hide.summary"
+    },
+    "battle_tempo": {
+      "icon": {
+        "label": "B",
+        "shape": "flame",
+        "color": "#cf4f3e",
+        "accent": "#ffe0ad"
+      },
+      "summary": "Passive attack speed",
+      "summary_key": "skill.battle_tempo.summary"
+    },
+    "crushing_force": {
+      "icon": {
+        "label": "F",
+        "shape": "quake",
+        "color": "#8b5a34",
+        "accent": "#ffd68a"
+      },
+      "summary": "Passive weapon damage",
+      "summary_key": "skill.crushing_force.summary"
+    },
+    "vigilant_guard": {
+      "icon": {
+        "label": "G",
+        "shape": "shield",
+        "color": "#d9a33f",
+        "accent": "#fff1bd"
+      },
+      "summary": "Passive armor",
+      "summary_key": "skill.vigilant_guard.summary"
+    },
+    "faithful_bulwark": {
+      "icon": {
+        "label": "B",
+        "shape": "shield",
+        "color": "#f0c23d",
+        "accent": "#fff7b0"
+      },
+      "summary": "Passive block chance",
+      "summary_key": "skill.faithful_bulwark.summary"
+    },
+    "consecrated_vitality": {
+      "icon": {
+        "label": "V",
+        "shape": "heart",
+        "color": "#74d6a1",
+        "accent": "#e5fff0"
+      },
+      "summary": "Passive health regeneration",
+      "summary_key": "skill.consecrated_vitality.summary"
+    },
+    "quick_hands": {
+      "icon": {
+        "label": "Q",
+        "shape": "dash",
+        "color": "#55d5ff",
+        "accent": "#e7fbff"
+      },
+      "summary": "Passive attack speed",
+      "summary_key": "skill.quick_hands.summary"
+    },
+    "killer_instinct": {
+      "icon": {
+        "label": "K",
+        "shape": "slash",
+        "color": "#7c65ff",
+        "accent": "#e8e0ff"
+      },
+      "summary": "Passive critical chance",
+      "summary_key": "skill.killer_instinct.summary"
+    },
+    "evasive_footwork": {
+      "icon": {
+        "label": "E",
+        "shape": "dash",
+        "color": "#2dbd9f",
+        "accent": "#d9fff5"
+      },
+      "summary": "Passive evade chance",
+      "summary_key": "skill.evasive_footwork.summary"
+    },
+    "trail_sense": {
+      "icon": {
+        "label": "T",
+        "shape": "pin",
+        "color": "#2fbf61",
+        "accent": "#d7ffd6"
+      },
+      "summary": "Passive light radius",
+      "summary_key": "skill.trail_sense.summary"
+    },
+    "precision_draw": {
+      "icon": {
+        "label": "P",
+        "shape": "arrow",
+        "color": "#53d7a2",
+        "accent": "#e0fff0"
+      },
+      "summary": "Passive hit chance",
+      "summary_key": "skill.precision_draw.summary"
+    },
+    "deadeye": {
+      "icon": {
+        "label": "D",
+        "shape": "volley",
+        "color": "#6bcf45",
+        "accent": "#f4ffd1"
+      },
+      "summary": "Passive critical chance",
+      "summary_key": "skill.deadeye.summary"
     }
   }
 }

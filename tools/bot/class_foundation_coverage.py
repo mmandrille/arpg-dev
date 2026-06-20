@@ -50,6 +50,8 @@ def load_skills_by_class(rules_dir: Path, class_ids: set[str]) -> dict[str, set[
     for skill_id, skill in skills.items():
         if not isinstance(skill, dict):
             continue
+        if skill.get("kind") == "passive_stat_bonus":
+            continue
         class_id = str(skill.get("class", ""))
         if class_id in by_class:
             by_class[class_id].add(str(skill_id))

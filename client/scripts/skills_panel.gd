@@ -4,6 +4,7 @@ extends Control
 signal allocate_skill_point_requested(skill_id: String)
 
 const SkillIconScript := preload("res://scripts/skill_icon.gd")
+const SkillPassiveTooltipScript := preload("res://scripts/skill_passive_tooltip.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 
 const SKILL_BLOCK_SIZE := Vector2(83, 83)
@@ -52,6 +53,8 @@ static func tooltip_plain_body(skill_id: String, rank: int, skill_progression: D
 	var text := summary
 	text += "\nMana: %d" % _static_skill_mana_cost(def, rank)
 	text += "\n%s" % _static_skill_cooldown_text(def)
+	for line in SkillPassiveTooltipScript.passive_stat_lines(def, maxi(rank, 1)):
+		text += "\n%s" % str(line)
 	var next_lines := tooltip_next_rank_lines(skill_id, rank)
 	for line in next_lines:
 		text += "\n%s" % str(line)
@@ -97,6 +100,7 @@ static func tooltip_next_rank_lines(skill_id: String, rank: int) -> Array:
 		if percent_now == percent_next:
 			continue
 		lines.append("%s: %d%% -> %d%%" % [_static_effect_label(rec), percent_now, percent_next])
+	lines.append_array(SkillPassiveTooltipScript.passive_next_rank_lines(def, current_rank, next_rank))
 	return lines
 
 
@@ -761,6 +765,8 @@ func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
 		_escape_bbcode("Mana: %d" % _skill_mana_cost(def, rank)),
 		_escape_bbcode(_skill_cooldown_text(def)),
 	]
+	for line in SkillPassiveTooltipScript.passive_stat_lines(def, maxi(rank, 1)):
+		lines.append(_escape_bbcode(str(line)))
 	var next_lines := tooltip_next_rank_lines(skill_id, rank)
 	for line in next_lines:
 		lines.append(_next_rank_rich_line(str(line)))

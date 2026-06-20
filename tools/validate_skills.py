@@ -103,6 +103,69 @@ def validate_skill_catalogs(
         else:
             report.ok("skill presentations cover skill rules")
 
+    passive_chains = {
+        "sorcerer": [
+            ("arcane_focus", 1, None),
+            ("mana_weaving", 5, "arcane_focus"),
+            ("spell_dynamo", 10, "mana_weaving"),
+        ],
+        "barbarian": [
+            ("iron_hide", 1, None),
+            ("battle_tempo", 5, "iron_hide"),
+            ("crushing_force", 10, "battle_tempo"),
+        ],
+        "paladin": [
+            ("vigilant_guard", 1, None),
+            ("faithful_bulwark", 5, "vigilant_guard"),
+            ("consecrated_vitality", 10, "faithful_bulwark"),
+        ],
+        "rogue": [
+            ("quick_hands", 1, None),
+            ("killer_instinct", 5, "quick_hands"),
+            ("evasive_footwork", 10, "killer_instinct"),
+        ],
+        "ranger": [
+            ("trail_sense", 1, None),
+            ("precision_draw", 5, "trail_sense"),
+            ("deadeye", 10, "precision_draw"),
+        ],
+    }
+    passive_errors = []
+    for class_id, rows in passive_chains.items():
+        for tier, (skill_id, level, prereq_id) in enumerate(rows, start=1):
+            skill = skills.get("skills", {}).get(skill_id)
+            if skill is None:
+                passive_errors.append(f"{skill_id}: missing")
+                continue
+            req = skill.get("requirements", {})
+            prereqs = req.get("skills", [])
+            expected_prereqs = [] if prereq_id is None else [{"skill_id": prereq_id, "rank": 1}]
+            if skill.get("class") != class_id:
+                passive_errors.append(f"{skill_id}: class {skill.get('class')} != {class_id}")
+            if skill.get("kind") != "passive_stat_bonus" or skill.get("targeting") != "self":
+                passive_errors.append(f"{skill_id}: must be self passive_stat_bonus")
+            if int(skill.get("max_rank", 0)) != 1:
+                passive_errors.append(f"{skill_id}: max_rank must be 1")
+            tree = skill.get("tree", {})
+            if int(tree.get("tier", 0)) != tier or int(tree.get("column", 0)) < 5:
+                passive_errors.append(f"{skill_id}: tree must be tier {tier} in the right-side column")
+            if int(req.get("level", 0)) != level or int(req.get("level_per_rank", -1)) != 0:
+                passive_errors.append(f"{skill_id}: level gate must be {level} with no per-rank scaling")
+            if req.get("stats", {}) != {} or req.get("stats_per_rank", {}) != {}:
+                passive_errors.append(f"{skill_id}: must not have stat requirements")
+            if prereqs != expected_prereqs:
+                passive_errors.append(f"{skill_id}: prereqs {prereqs} != {expected_prereqs}")
+            if not skill.get("passive_stats", {}).get("stats", {}):
+                passive_errors.append(f"{skill_id}: missing passive stat effect")
+            if skill.get("cost", {}).get("mana", {}) != {"base": 0, "per_rank": 0}:
+                passive_errors.append(f"{skill_id}: passive mana cost must be zero")
+            if skill.get("cooldown", {}) != {"type": "none"}:
+                passive_errors.append(f"{skill_id}: passive cooldown must be none")
+    if passive_errors:
+        report.fail("class passive column", "; ".join(passive_errors))
+    else:
+        report.ok("class passive column chains are valid")
+
     if magic_bolt is not None:
         for skill_id, skill in skills.get("skills", {}).items():
             for req in skill.get("requirements", {}).get("skills", []):

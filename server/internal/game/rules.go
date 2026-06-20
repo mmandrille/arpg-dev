@@ -545,32 +545,33 @@ type ItemTemplateDef struct {
 
 // SkillDef is a server-authoritative active skill definition.
 type SkillDef struct {
-	Name         string              `json:"name"`
-	Class        string              `json:"class"`
-	DamageType   string              `json:"damage_type,omitempty"`
-	Tree         SkillTreeDef        `json:"tree"`
-	Kind         string              `json:"kind"`
-	MaxRank      int                 `json:"max_rank"`
-	Targeting    string              `json:"targeting"`
-	Requirements SkillRequirementDef `json:"requirements"`
-	Cost         SkillCostDef        `json:"cost"`
-	Damage       SkillDamageDef      `json:"damage"`
-	Projectile   SkillProjectileDef  `json:"projectile"`
-	Pierce       SkillPierceDef      `json:"pierce"`
-	Root         SkillRootDef        `json:"root"`
-	Volley       SkillVolleyDef      `json:"volley"`
-	Cone         SkillConeDef        `json:"cone"`
-	Poison       SkillPoisonDef      `json:"poison"`
-	Dash         SkillDashDef        `json:"dash"`
-	Mobility     SkillMobilityDef    `json:"mobility"`
-	Execute      SkillExecuteDef     `json:"execute"`
-	Slow         SkillSlowDef        `json:"slow"`
-	Shatter      SkillShatterDef     `json:"shatter"`
-	Chain        SkillChainDef       `json:"chain"`
-	Companion    SkillCompanionDef   `json:"companion"`
-	Revive       SkillReviveDef      `json:"revive"`
-	Effects      []SkillEffectDef    `json:"effects"`
-	Cooldown     SkillCooldownDef    `json:"cooldown"`
+	Name         string               `json:"name"`
+	Class        string               `json:"class"`
+	DamageType   string               `json:"damage_type,omitempty"`
+	Tree         SkillTreeDef         `json:"tree"`
+	Kind         string               `json:"kind"`
+	MaxRank      int                  `json:"max_rank"`
+	Targeting    string               `json:"targeting"`
+	Requirements SkillRequirementDef  `json:"requirements"`
+	Cost         SkillCostDef         `json:"cost"`
+	Damage       SkillDamageDef       `json:"damage"`
+	Projectile   SkillProjectileDef   `json:"projectile"`
+	Pierce       SkillPierceDef       `json:"pierce"`
+	Root         SkillRootDef         `json:"root"`
+	Volley       SkillVolleyDef       `json:"volley"`
+	Cone         SkillConeDef         `json:"cone"`
+	Poison       SkillPoisonDef       `json:"poison"`
+	Dash         SkillDashDef         `json:"dash"`
+	Mobility     SkillMobilityDef     `json:"mobility"`
+	Execute      SkillExecuteDef      `json:"execute"`
+	PassiveStats SkillPassiveStatsDef `json:"passive_stats"`
+	Slow         SkillSlowDef         `json:"slow"`
+	Shatter      SkillShatterDef      `json:"shatter"`
+	Chain        SkillChainDef        `json:"chain"`
+	Companion    SkillCompanionDef    `json:"companion"`
+	Revive       SkillReviveDef       `json:"revive"`
+	Effects      []SkillEffectDef     `json:"effects"`
+	Cooldown     SkillCooldownDef     `json:"cooldown"`
 }
 
 type SkillTreeDef struct {
@@ -680,6 +681,11 @@ type SkillExecuteDef struct {
 	ThresholdPercentBase    int `json:"threshold_percent_base"`
 	ThresholdPercentPerRank int `json:"threshold_percent_per_rank"`
 	ChancePercent           int `json:"chance_percent"`
+}
+
+// SkillPassiveStatsDef defines always-on bonuses applied from learned ranks.
+type SkillPassiveStatsDef struct {
+	Stats map[string]SkillRankValueDef `json:"stats"`
 }
 
 // SkillEffectDef is a closed data contract for supported active-skill effects.
@@ -2862,7 +2868,7 @@ func validateBuffSkillCooldown(skillID string, skill SkillDef, baseAttackInterva
 }
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute":
+	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute", "passive_stat_bonus":
 		return true
 	default:
 		return false
@@ -2932,6 +2938,11 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for passive_execute", skillID, skill.Targeting)
 		}
 		return validatePassiveExecuteSkillPayload(skillID, skill)
+	case "passive_stat_bonus":
+		if skill.Targeting != "self" {
+			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for passive_stat_bonus", skillID, skill.Targeting)
+		}
+		return validatePassiveStatSkillPayload(skillID, skill)
 	default:
 		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", skillID, skill.Kind)
 	}
@@ -2946,7 +2957,7 @@ func validatePassiveExecuteSkillPayload(skillID string, skill SkillDef) error {
 	if maxThreshold > 100 {
 		return fmt.Errorf("game: invalid rules skills.%s.execute: max threshold must be <= 100", skillID)
 	}
-	if len(skill.Effects) > 0 || skill.Projectile.Range > 0 || skill.Cone.Range > 0 || skill.Dash.RangeBase > 0 || skill.Mobility.RangeBase > 0 {
+	if len(skill.Effects) > 0 || len(skill.PassiveStats.Stats) > 0 || skill.Projectile.Range > 0 || skill.Cone.Range > 0 || skill.Dash.RangeBase > 0 || skill.Mobility.RangeBase > 0 {
 		return fmt.Errorf("game: invalid rules skills.%s: passive_execute does not support active payloads", skillID)
 	}
 	return nil

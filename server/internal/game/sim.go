@@ -5130,6 +5130,10 @@ func (s *Sim) effectiveBaseStatsView() BaseStatsView {
 	stats.Dex += equipment.Dex
 	stats.Vit += equipment.Vit
 	stats.Magic += equipment.Magic
+	stats.Str += s.passiveSkillStatTotal("str")
+	stats.Dex += s.passiveSkillStatTotal("dex")
+	stats.Vit += s.passiveSkillStatTotal("vit")
+	stats.Magic += s.passiveSkillStatTotal("magic")
 	if len(s.skillEffects) == 0 {
 		return stats
 	}
@@ -5749,6 +5753,8 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		}
 	}
 	applySetCombatStats(s.equippedSetBonusStats(), &damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &hitChancePercent, &critChancePercent, &evadeChancePercent, &magicFindPercent, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources, &hitChanceSources, &critChanceSources, &evadeChanceSources, &magicFindSources)
+
+	s.applyPassiveCombatStats(&damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &hitChancePercent, &critChancePercent, &evadeChancePercent, &magicFindPercent, &lightRadius, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources, &hitChanceSources, &critChanceSources, &evadeChanceSources, &magicFindSources, &lightRadiusSources)
 
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]

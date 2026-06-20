@@ -161,6 +161,14 @@ run_gate "GDScript delta apply test" "[gdtest] PASS: test_delta_apply" res://tes
 run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filter" res://tests/test_loot_label_filter.gd
 run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
 
+# 2o. World-detail render + combat-feel unit tests (server-independent; v295-v308).
+# These existed on disk but were never registered, so they ran zero times in CI.
+run_gate "GDScript ground/wall factories test" "[gdtest] PASS: test_factories" res://tests/test_factories.gd
+run_gate "GDScript fog-of-war overlay test" "[gdtest] PASS: test_fog_of_war_overlay" res://tests/test_fog_of_war_overlay.gd
+run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement_visual_smoothing" res://tests/test_movement_visual_smoothing.gd
+run_gate "GDScript melee lunge presentation test" "[gdtest] PASS: test_melee_lunge_presentation" res://tests/test_melee_lunge_presentation.gd
+run_gate "GDScript command retarget grace test" "[gdtest] PASS: test_command_retarget_grace" res://tests/test_command_retarget_grace.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   finish_gates "client unit"
   echo "[client-unit] PASS"

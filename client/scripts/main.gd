@@ -1,7 +1,5 @@
-# Interactive client scene (ADR-0001 D3/D4): a thin renderer over the
-# authoritative server. The client predicts the player's movement locally and
-# reconciles to authoritative snapshots/deltas; the server owns all combat,
-# loot, and inventory outcomes. Visuals are placeholder primitives (slice v1).
+# Interactive client scene (ADR-0001 D3/D4): a thin renderer over the authoritative server.
+# The server owns combat, loot, inventory, and persistence outcomes.
 extends Node3D
 const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
 const NetClientScript := preload("res://scripts/net_client.gd")
@@ -18,6 +16,7 @@ const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const EnemyHealthBarVisibilityScript := preload("res://scripts/enemy_health_bar_visibility.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
+const ImpactSparksScript := preload("res://scripts/impact_sparks.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
@@ -1718,8 +1717,7 @@ func _reconcile_player() -> void:
 		_sync_camera_to_player()
 
 func _sync_camera_to_player() -> void:
-	if _camera == null or player_anchor == null:
-		return
+	if _camera == null or player_anchor == null: return
 	var target := player_anchor.global_position
 	_camera.global_position = target + ClientConstants.CAMERA_FOLLOW_OFFSET
 	_camera.look_at(target, Vector3.UP)
@@ -1734,20 +1732,24 @@ func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_colo
 	var presentation := DamageTypeCombatTextScript.number_for_event(ev, default_color)
 	if not presentation.is_empty():
 		_show_damage_number(entity_id, presentation.get("color", default_color), presentation.get("amount", damage), "", 0.0, str(presentation.get("variant", "normal")), str(presentation.get("text", "")), str(presentation.get("damage_type", "")))
+		_spawn_impact_sparks(entity_id, ev, presentation.get("color", default_color))
 		return
 	_show_damage_number(entity_id, default_color, damage)
+	_spawn_impact_sparks(entity_id, ev, default_color)
+
+func _spawn_impact_sparks(entity_id: String, ev: Dictionary, fallback_color: Color) -> void:
+	if not ImpactSparksScript.should_spawn(ev): return
+	var target := _node_for_entity_id(entity_id)
+	if target != null: target.add_child(ImpactSparksScript.make_node(ev, fallback_color))
 
 func _play_local_player_reaction_animation(clip: String) -> void:
-	if player_anim == null:
-		return
-	if clip == "hit" and player_anim.current_clip() in ["attack", "attack_off_hand"]:
-		return
+	if player_anim == null: return
+	if clip == "hit" and player_anim.current_clip() in ["attack", "attack_off_hand"]: return
 	player_anim.play_one_shot(clip)
 
 func _play_entity_reaction(entity_id: String, ev: Dictionary, reaction_name: String) -> void:
 	var reaction = _reaction_for_entity(entity_id)
-	if reaction == null:
-		return
+	if reaction == null: return
 	var source_pos := _source_position_for_event(ev)
 	var fallback := _fallback_reaction_direction(entity_id)
 	if reaction_name == "death":
@@ -1756,11 +1758,9 @@ func _play_entity_reaction(entity_id: String, ev: Dictionary, reaction_name: Str
 		reaction.play_hit(source_pos, fallback)
 
 func _reaction_for_entity(entity_id: String):
-	if entity_id == player_id:
-		return player_reaction
+	if entity_id == player_id: return player_reaction
 	if entities.has(entity_id):
-		var rec: Dictionary = entities[entity_id]
-		return rec.get("reaction", null)
+		return (entities[entity_id] as Dictionary).get("reaction", null)
 	return null
 
 func _source_position_for_event(ev: Dictionary) -> Vector3:

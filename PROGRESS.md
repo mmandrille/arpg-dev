@@ -23,10 +23,10 @@ Last updated: 2026-06-20
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v314 — loot pop rarity glow |
+| **Latest completed slice** | v315 — hit impact sparks |
 | **Active branch** | `main` |
-| **CI gate** | v314 focused checks green on 2026-06-20 (`godot --headless --path client --script res://tests/test_loot_node_factory.gd`, `make client-unit`, `make maintainability`); selected `$autoloop` batch `make ci` pending |
-| **Next slice** | Continue selected `$autoloop` look-and-feel batch with v315 — hit impact sparks |
+| **CI gate** | v315 focused checks green on 2026-06-20 (`godot --headless --path client --script res://tests/test_impact_sparks.gd`, `make client-unit`, `make maintainability`); selected `$autoloop` batch `make ci` pending |
+| **Next slice** | Continue selected `$autoloop` look-and-feel batch with v316 — monster death flourish |
 | **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
 | **Next engineering review** | After the selected v314-v328 look-and-feel batch and a green final proof |
 

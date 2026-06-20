@@ -301,6 +301,7 @@ func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_
 	_rendered_bag_slot_count = _target_bag_slot_count()
 	if _bag_grid != null and InventoryRenderGuardScript.should_render(self):
 		_render()
+		InventoryRenderGuardScript.mark_rendered(self)
 
 
 func get_debug_state() -> Dictionary:

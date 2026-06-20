@@ -4,7 +4,20 @@ const META_KEY := "inventory_render_state_key"
 
 
 static func should_render(panel: Object) -> bool:
-	var key := JSON.stringify(_stable({
+	var key := _state_key(panel)
+	var old := str(panel.get_meta(META_KEY, ""))
+	if key == old:
+		return false
+	panel.set_meta(META_KEY, key)
+	return true
+
+
+static func mark_rendered(panel: Object) -> void:
+	panel.set_meta(META_KEY, _state_key(panel))
+
+
+static func _state_key(panel: Object) -> String:
+	return JSON.stringify(_stable({
 		"inventory": panel.get("inventory"),
 		"equipped": panel.get("equipped"),
 		"active_weapon_set": panel.get("active_weapon_set"),
@@ -15,13 +28,21 @@ static func should_render(panel: Object) -> bool:
 		"inventory_rows": panel.get("inventory_rows"),
 		"inventory_capacity": panel.get("inventory_capacity"),
 		"gold": panel.get("gold"),
+		"stash_items": panel.get("stash_items"),
+		"stash_gold": panel.get("stash_gold"),
+		"stash_capacity": panel.get("stash_capacity"),
+		"stash_entity_id": panel.get("stash_entity_id"),
+		"stash_id": panel.get("stash_id"),
+		"stash_title": panel.get("stash_title"),
+		"container_mode": panel.get("container_mode"),
+		"container_label": panel.get("container_label"),
+		"interactive": panel.get("_interactive"),
+		"search_text": panel.get("_search_text"),
+		"sort_mode": panel.get("_sort_mode"),
+		"unique_chest_tab": panel.get("_unique_chest_tab"),
 		"market_context": panel.get("_market_context"),
 		"market_hidden_item_ids": panel.get("_market_hidden_item_ids"),
 	}))
-	if key == str(panel.get_meta(META_KEY, "")):
-		return false
-	panel.set_meta(META_KEY, key)
-	return true
 
 
 static func _stable(value: Variant) -> Variant:

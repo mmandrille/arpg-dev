@@ -58,7 +58,11 @@ func set_gold(next_gold: int) -> void:
 	gold = max(0, next_gold)
 	affordable = gold >= price
 	if _status_label != null and hired_entity_id == "":
-		_status_label.text = ""
+		# Do not wipe the post-loss recovery line; gold ticks would replace it with
+		# "Ready to hire" and break mercenary recovery UI / bot proofs.
+		var cur := _status_label.text
+		if not cur.to_lower().contains("lost"):
+			_status_label.text = ""
 	_render()
 
 

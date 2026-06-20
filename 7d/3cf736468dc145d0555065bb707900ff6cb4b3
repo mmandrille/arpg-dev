@@ -1,0 +1,78 @@
+shared/protocol/examples/session_snapshot.json
+  s_d2a495bd24647f::t_780dbd39fc9730 78
+docs/specs/v311_spec-character-base-stat-breakdown-ui.md
+  s_d2a495bd24647f::t_08caeeee56573d 3
+  s_d2a495bd24647f::t_b8173aa9860dc3 30-31
+  s_d2a495bd24647f::t_699765f5662896 1-2,4-27,32-49
+  s_d2a495bd24647f::t_ac18ae12a6a91b 28-29
+server/internal/game/base_stat_breakdowns.go
+  s_d2a495bd24647f::t_8f7437d6f75ee1 1-117
+docs/progress/slice-lifecycle.md
+  s_d2a495bd24647f::t_08caeeee56573d 326
+PROGRESS.md
+  s_d2a495bd24647f::t_7779f014c17f42 26,28
+server/internal/game/character_stats_test.go
+  s_d2a495bd24647f::t_69cdde3ec80953 173-181
+  s_d2a495bd24647f::t_6c2eb61b00ae69 39-63
+client/scripts/stat_tooltip_label.gd
+  s_d2a495bd24647f::t_b0fc98fda7f42e 1-3,7,9-21,37-55
+  s_d2a495bd24647f::t_c70872fe1f00b2 4-6,8,22-36
+docs/plans/v311_2026-06-20-character-base-stat-breakdown-ui.md
+  s_d2a495bd24647f::t_08caeeee56573d 3,34-37,45-46,50-55
+  s_d2a495bd24647f::t_ac18ae12a6a91b 23,41-42
+  s_d2a495bd24647f::t_b8173aa9860dc3 24,43-44
+  s_d2a495bd24647f::t_699765f5662896 1-2,4-22,25-33,38-40,47-49
+shared/protocol/examples/state_delta.json
+  s_d2a495bd24647f::t_780dbd39fc9730 87
+docs/as-built/v311_character-base-stat-breakdown-ui.md
+  s_d2a495bd24647f::t_b8173aa9860dc3 12-13
+  s_d2a495bd24647f::t_ac18ae12a6a91b 10-11
+  s_d2a495bd24647f::t_08caeeee56573d 1-9,14-27
+client/scripts/character_panel_styles.gd
+  s_d2a495bd24647f::t_d3a792c5506845 1-21
+server/internal/game/types.go
+  s_d2a495bd24647f::t_8f7437d6f75ee1 242
+client/tests/test_character_stats_panel.gd
+  s_d2a495bd24647f::t_fa2eed83809020 28-35,37-39,41,63-76,83-85,93-98,122
+  s_d2a495bd24647f::t_42e7dce6ecb91b 86-90
+  s_d2a495bd24647f::t_9df62d34350701 82,100
+  s_d2a495bd24647f::t_97fc86a4fec880 36,91-92
+  s_d2a495bd24647f::t_4f3225c53af7af 111,123
+client/scripts/stat_tooltip_label.gd.uid
+  s_d2a495bd24647f::t_9069bbd585e2a2 1
+shared/protocol/session_snapshot.v8.schema.json
+  s_d2a495bd24647f::t_c95023fff24415 371,380,392,403
+shared/protocol/state_delta.v8.schema.json
+  s_d2a495bd24647f::t_c95023fff24415 943,952,964,975
+client/scripts/character_panel_styles.gd.uid
+  s_d2a495bd24647f::t_43ce4d974845ea 1
+client/scripts/character_stats_panel.gd
+  s_d2a495bd24647f::t_e0985398799182 487-489
+  s_d2a495bd24647f::t_ab64d0e161eca0 40-41,43,102,104,110-112,124,130,189-195,198,200,203-204,209,218-219,227-231,248-254,256-257,259,261,290-291,296,298,300,306,308-311,313-314
+  s_d2a495bd24647f::t_d3a792c5506845 8,171
+  s_d2a495bd24647f::t_816b2bd18dfcd7 105,113
+  s_d2a495bd24647f::t_11141c8e050c46 107,114-117,125,205-208,292-294,297,299,301-302,362-363,371-372
+  s_d2a495bd24647f::t_e132b793241a7a 303
+  s_d2a495bd24647f::t_4f3225c53af7af 333-338
+  s_d2a495bd24647f::t_cc1463239f2135 106,108-109,123,126-127,199,201,287,360-361,364-370,373-377,436,465-466,469,484-486,497-498,525-548
+  s_d2a495bd24647f::t_b0fc98fda7f42e 7,573
+  s_d2a495bd24647f::t_22e59ea0734bad 565-571,579-583
+server/internal/game/sim.go
+  s_d2a495bd24647f::t_8f7437d6f75ee1 5070,5269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7d3cf736468dc145d0555065bb707900ff6cb4b3",
+  "prompts": {},
+  "sessions": {
+    "s_d2a495bd24647f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee5ed-3283-70a3-9878-2e0dc4b0f6af",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

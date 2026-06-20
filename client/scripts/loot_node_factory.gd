@@ -23,12 +23,15 @@ func make_loot_node(e: Dictionary) -> Node3D:
 	var color := Color(str(ground.get("color", "#" + loot_color(item_def_id).to_html(false))))
 	var accent := Color(str(ground.get("accent", "#f6e8b1")))
 	var scale := float(ground.get("scale", 1.0))
+	var rarity := str(e.get("rarity", "common"))
+	add_loot_rarity_glow(root, rarity, scale)
 	var model := make_ground_equipment_model(item_def_id, str(e.get("rarity", "common")))
 	if model != null:
 		root.add_child(model)
 	else:
-		add_loot_rarity_background(root, item_rarity_background(str(e.get("rarity", "common"))), scale)
+		add_loot_rarity_background(root, item_rarity_background(rarity), scale)
 		add_loot_primitive(root, shape, color, accent, scale)
+	add_loot_spawn_pop(root, rarity, scale)
 	add_loot_label(root, loot_label_text(e), scale, loot_label_color(e))
 	return root
 
@@ -117,6 +120,32 @@ func add_loot_rarity_background(parent: Node3D, color: Color, scale: float) -> v
 	mesh.size = Vector3(0.82, 0.04, 0.82) * maxf(scale, 0.85)
 	add_loot_mesh(parent, "RarityBackground", mesh, Vector3(0.0, 0.045, 0.0), color)
 
+func add_loot_rarity_glow(parent: Node3D, rarity: String, scale: float) -> void:
+	var mesh := TorusMesh.new()
+	mesh.inner_radius = 0.32 * maxf(scale, 0.85)
+	mesh.outer_radius = 0.43 * maxf(scale, 0.85)
+	mesh.ring_segments = 32
+	var node := MeshInstance3D.new()
+	node.name = "RarityGlow"
+	node.mesh = mesh
+	node.position = Vector3(0.0, 0.055, 0.0)
+	node.rotation_degrees.x = 90.0
+	node.material_override = _glow_material(item_rarity_background(rarity), 0.42)
+	parent.add_child(node)
+
+func add_loot_spawn_pop(parent: Node3D, rarity: String, scale: float) -> void:
+	var mesh := TorusMesh.new()
+	mesh.inner_radius = 0.48 * maxf(scale, 0.85)
+	mesh.outer_radius = 0.52 * maxf(scale, 0.85)
+	mesh.ring_segments = 28
+	var node := MeshInstance3D.new()
+	node.name = "SpawnPopRing"
+	node.mesh = mesh
+	node.position = Vector3(0.0, 0.095, 0.0)
+	node.rotation_degrees.x = 90.0
+	node.material_override = _glow_material(ground_item_tint(rarity), 0.28)
+	parent.add_child(node)
+
 func add_loot_label(parent: Node3D, text: String, scale: float, color: Color = Color("#f4ead8")) -> void:
 	if text == "":
 		return
@@ -156,6 +185,15 @@ func add_loot_mesh(parent: Node3D, node_name: String, mesh: Mesh, position: Vect
 	mat.albedo_color = color
 	node.material_override = mat
 	parent.add_child(node)
+
+func _glow_material(color: Color, alpha: float) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(color.r, color.g, color.b, alpha)
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.emission_energy_multiplier = 0.45
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	return mat
 
 func loot_color(item_def_id: String) -> Color:
 	var def: Dictionary = ItemRulesLoader.item_definition(item_def_id)

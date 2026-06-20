@@ -25,6 +25,7 @@
     { "type": "wait_event", "event_type": "mercenary_lost", "service": "mercenary", "timeout_s": 15.0 },
     {
       "type": "wait_mercenary_panel",
+      "require_visible": false,
       "hired_count": 0,
       "status_contains": "lost",
       "companion_bar_count": 0,

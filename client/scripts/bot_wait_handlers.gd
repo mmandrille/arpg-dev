@@ -65,7 +65,10 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				return false
 			return runner._bishop_panel_matches(step, state)
 		"wait_mercenary_panel":
-			if not bool(state.get("mercenary_panel_visible", false)):
+			# Default: panel must be visible (board/roster open). Set require_visible=false
+			# when asserting snapshot fields after gameplay auto-closed the window (e.g.
+			# _close_gameplay_panels_for_movement during combat) while state remains correct.
+			if bool(step.get("require_visible", true)) and not bool(state.get("mercenary_panel_visible", false)):
 				return false
 			return BotMercenaryPanelAssertionsScript.matches(step, state)
 		"wait_blacksmith_panel":

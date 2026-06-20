@@ -1,0 +1,59 @@
+docs/as-built/v294_full-ci-residual-stabilization.md
+  s_5013acc270a834::t_f0a48b26fee661 1-22,26-34,36-63
+  s_5013acc270a834::t_ac8fe11aec43d2 23-25,35
+server/internal/replay/replay.go
+  s_5013acc270a834::t_1426cb5666c444 685,705-723
+tools/bot/scenarios/client/66_boss_telegraph_decals.json
+  s_5013acc270a834::t_eb16d26caeeaf4 5
+client/scripts/bot_scenario_runner.gd
+  s_5013acc270a834::t_b88a9861e41bd7 430,433-435
+tools/bot/scenarios/client/26_boss_health_bar_ui.json
+  s_5013acc270a834::t_b88a9861e41bd7 7
+tools/bot/scenarios/88_mercenary_hiring_board.json
+  s_5013acc270a834::t_d43ca6efe7b813 13,19-20
+tools/bot/scenarios/client/64_mercenary_combat_stats.json
+  s_5013acc270a834::t_b88a9861e41bd7 7,13,18
+docs/plans/v294_2026-06-19-full-ci-residual-stabilization.md
+  s_5013acc270a834::t_f0a48b26fee661 1-28,35-43,45-55
+  s_5013acc270a834::t_ac8fe11aec43d2 29-34,44
+PROGRESS.md
+  s_5013acc270a834::t_f0a48b26fee661 26,28-29,31,90-92
+client/scripts/bot_wait_handlers.gd
+  s_5013acc270a834::t_5301d023aa06a8 104-106,109
+server/internal/game/elite_minion_ai_test.go
+  s_5013acc270a834::t_84d2c65e05a983 60
+  s_5013acc270a834::t_4d8a53848a1b68 44-45,59
+  s_5013acc270a834::t_7e74e9f5a5e6aa 25,33,66
+  s_5013acc270a834::t_bebf256953088e 28-32,34
+  s_5013acc270a834::t_d2f121177278a9 47-51,56-57
+  s_5013acc270a834::t_76733c824eb541 16
+tools/bot/scenarios/95_second_boss_template.json
+  s_5013acc270a834::t_36f79a927c4754 22
+docs/specs/v294_spec-full-ci-residual-stabilization.md
+  s_5013acc270a834::t_ac8fe11aec43d2 23-24,35
+  s_5013acc270a834::t_f0a48b26fee661 1-22,25-34,36-49
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_5013acc270a834::t_b88a9861e41bd7 7
+tools/bot/scenarios/90_mercenary_death_loss.json
+  s_5013acc270a834::t_d43ca6efe7b813 12,14,16,20
+tools/bot/scenarios/client/47_mercenary_roster_ui.json
+  s_5013acc270a834::t_b88a9861e41bd7 7,13
+docs/progress/slice-lifecycle.md
+  s_5013acc270a834::t_f0a48b26fee661 309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "eb6b8c099e62d42e43357dc35fffb4d646501455",
+  "prompts": {},
+  "sessions": {
+    "s_5013acc270a834": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee245-8677-7c63-8d55-7d31d1842236",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

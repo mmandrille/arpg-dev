@@ -263,8 +263,8 @@ ci_step "== 4/11 asset manifest + GLB validation ==" \
 ci_step "== 5/11 determinism lint ==" \
   "$RUN_QUIET" --label "determinism-lint" -- make lint-determinism
 
-ci_step "== 6/11 Go tests ==" \
-  "$RUN_QUIET" --label "go test ./..." -- bash -c 'cd server && go test ./...'
+ci_step "== 6/11 Go tests + vet ==" \
+  "$RUN_QUIET" --label "go test ./... && go vet ./..." -- bash -c 'cd server && go test ./... && go vet ./...'
 
 ci_step "== 7/11 Python unit checks ==" \
   bash -c "make tools >/dev/null && \"$RUN_QUIET\" --label 'pytest tools' -- \"$ROOT/.venv/bin/python\" -m pytest -q tools"

@@ -5,6 +5,10 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 
 var ground_textures: Dictionary = {}
 var wall_textures: Dictionary = {}
+var ground_normal_textures: Dictionary = {}
+var wall_normal_textures: Dictionary = {}
+var water_textures: Dictionary = {}
+var hole_textures: Dictionary = {}
 var _dungeon_generation: Dictionary = {}
 
 func make_ground_node(level: int) -> MeshInstance3D:
@@ -33,9 +37,13 @@ func ground_material_for_level(level: int) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = make_ground_texture(texture_id, palette)
 	mat.albedo_color = Color.WHITE
-	mat.roughness = 0.92
+	mat.roughness = 0.88 if level != 0 else 0.92
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.uv1_scale = Vector3(28.0, 18.0, 1.0)
+	if level != 0:
+		mat.normal_enabled = true
+		mat.normal_texture = make_ground_normal_texture(texture_id, palette)
+		mat.normal_scale = 0.18
 	return mat
 
 func make_ground_texture(texture_id: String, palette: Dictionary = {}) -> ImageTexture:
@@ -48,6 +56,18 @@ func make_ground_texture(texture_id: String, palette: Dictionary = {}) -> ImageT
 			image.set_pixel(x, y, ground_texel(texture_id, x, y, palette))
 	var texture := ImageTexture.create_from_image(image)
 	ground_textures[cache_key] = texture
+	return texture
+
+func make_ground_normal_texture(texture_id: String, palette: Dictionary = {}) -> ImageTexture:
+	var cache_key := "%s:%s" % [texture_id, str(palette.get("id", "default"))]
+	if ground_normal_textures.has(cache_key):
+		return ground_normal_textures[cache_key] as ImageTexture
+	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in range(64):
+		for x in range(64):
+			image.set_pixel(x, y, ground_normal_texel(texture_id, x, y, palette))
+	var texture := ImageTexture.create_from_image(image)
+	ground_normal_textures[cache_key] = texture
 	return texture
 
 func ground_texel(texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
@@ -73,6 +93,22 @@ func ground_texel(texture_id: String, x: int, y: int, palette: Dictionary = {}) 
 		rock = rock.lerp(_palette_color(palette, "ground_highlight", Color("#a09a8e")), 0.28)
 	return rock
 
+func ground_normal_texel(texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
+	var left := ground_detail_height(texture_id, (x + 63) % 64, y, palette)
+	var right := ground_detail_height(texture_id, (x + 1) % 64, y, palette)
+	var down := ground_detail_height(texture_id, x, (y + 63) % 64, palette)
+	var up := ground_detail_height(texture_id, x, (y + 1) % 64, palette)
+	return _normal_texel(right - left, up - down, 1.35)
+
+func ground_detail_height(texture_id: String, x: int, y: int, _palette: Dictionary = {}) -> float:
+	var n := float(int((x * 37 + y * 19 + ((x / 8) * 11) + ((y / 8) * 23)) % 17)) / 16.0
+	if texture_id == ClientConstantsScript.GROUND_TEXTURE_TOWN:
+		var dirt := 0.35 if int((x * 9 + y * 5 + ((x / 8) * 17) + ((y / 8) * 29)) % 41) < 8 else 0.0
+		return clampf(n * 0.38 + dirt, 0.0, 1.0)
+	var crack := 0.46 if abs((x % 16) - (y % 16)) <= 1 else 0.0
+	var highlight := 0.22 if ((x * 3 + y * 5) % 29) == 0 else 0.0
+	return clampf(0.42 + n * 0.34 - crack + highlight, 0.0, 1.0)
+
 func make_wall_texture(texture_id: String, palette: Dictionary = {}) -> ImageTexture:
 	var cache_key := "%s:%s" % [texture_id, str(palette.get("id", "default"))]
 	if wall_textures.has(cache_key):
@@ -84,6 +120,85 @@ func make_wall_texture(texture_id: String, palette: Dictionary = {}) -> ImageTex
 	var texture := ImageTexture.create_from_image(image)
 	wall_textures[cache_key] = texture
 	return texture
+
+func make_wall_normal_texture(texture_id: String, palette: Dictionary = {}) -> ImageTexture:
+	var cache_key := "%s:%s" % [texture_id, str(palette.get("id", "default"))]
+	if wall_normal_textures.has(cache_key):
+		return wall_normal_textures[cache_key] as ImageTexture
+	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in range(64):
+		for x in range(64):
+			image.set_pixel(x, y, wall_normal_texel(texture_id, x, y, palette))
+	var texture := ImageTexture.create_from_image(image)
+	wall_normal_textures[cache_key] = texture
+	return texture
+
+func wall_material_for_level(level: int, source: String, size: Dictionary) -> StandardMaterial3D:
+	var palette := biome_palette_for_level(level)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+	mat.normal_enabled = true
+	mat.normal_texture = make_wall_normal_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+	mat.normal_scale = 0.24
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.roughness = 0.94
+	mat.uv1_scale = Vector3(maxf(1.0, float(size.get("x", 1.0)) / 2.0), maxf(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
+	match source:
+		"generated":
+			mat.albedo_color = Color(0.92, 0.86, 0.76)
+		"perimeter":
+			mat.albedo_color = Color(0.62, 0.64, 0.68)
+		_:
+			mat.albedo_color = Color(0.78, 0.80, 0.82)
+	return mat
+
+func make_water_texture(palette: Dictionary = {}) -> ImageTexture:
+	var cache_key := str(palette.get("id", "default"))
+	if water_textures.has(cache_key):
+		return water_textures[cache_key] as ImageTexture
+	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in range(64):
+		for x in range(64):
+			image.set_pixel(x, y, water_texel(x, y, palette))
+	var texture := ImageTexture.create_from_image(image)
+	water_textures[cache_key] = texture
+	return texture
+
+func water_texel(x: int, y: int, palette: Dictionary = {}) -> Color:
+	var low := _palette_color(palette, "water_low", Color("#1f5f7a"))
+	var high := _palette_color(palette, "water_high", Color("#5fa8bb"))
+	var ripple := int((x * 17 + y * 31 + ((x / 8) * 13) + ((y / 8) * 7)) % 19)
+	var water := low.lerp(high, float(ripple) / 18.0)
+	if abs((x % 16) - (y % 16)) <= 1:
+		water = water.lerp(_palette_color(palette, "water_foam", Color("#a9d8df")), 0.24)
+	if ((x * 11 + y * 5) % 37) == 0:
+		water = water.lerp(_palette_color(palette, "water_foam", Color("#c2eef1")), 0.34)
+	return water
+
+func make_hole_texture(palette: Dictionary = {}) -> ImageTexture:
+	var cache_key := str(palette.get("id", "default"))
+	if hole_textures.has(cache_key):
+		return hole_textures[cache_key] as ImageTexture
+	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)
+	for y in range(64):
+		for x in range(64):
+			image.set_pixel(x, y, hole_texel(x, y, palette))
+	var texture := ImageTexture.create_from_image(image)
+	hole_textures[cache_key] = texture
+	return texture
+
+func hole_texel(x: int, y: int, palette: Dictionary = {}) -> Color:
+	var void_low := _palette_color(palette, "hole_low", Color("#090a0d"))
+	var void_high := _palette_color(palette, "hole_high", Color("#1b1d22"))
+	var edge := _palette_color(palette, "hole_edge", Color("#46413a"))
+	var noise := int((x * 23 + y * 41 + ((x / 8) * 19) + ((y / 8) * 11)) % 23)
+	var hole := void_low.lerp(void_high, float(noise) / 22.0)
+	var border: int = mini(mini(x, y), mini(63 - x, 63 - y))
+	if border < 7:
+		hole = hole.lerp(edge, 0.55 - float(border) * 0.06)
+	if abs((x % 18) - (y % 18)) <= 1:
+		hole = hole.lerp(_palette_color(palette, "hole_crack", Color("#26282d")), 0.24)
+	return hole
 
 func wall_texel(_texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
 	var brick_w := 16
@@ -103,6 +218,29 @@ func wall_texel(_texture_id: String, x: int, y: int, palette: Dictionary = {}) -
 	if ((x - y) % 19) == 0:
 		stone = stone.lerp(_palette_color(palette, "wall_mortar", Color("#22252a")), 0.30)
 	return stone
+
+func wall_normal_texel(_texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
+	var left := wall_detail_height((x + 63) % 64, y, palette)
+	var right := wall_detail_height((x + 1) % 64, y, palette)
+	var down := wall_detail_height(x, (y + 63) % 64, palette)
+	var up := wall_detail_height(x, (y + 1) % 64, palette)
+	return _normal_texel(right - left, up - down, 1.55)
+
+func wall_detail_height(x: int, y: int, _palette: Dictionary = {}) -> float:
+	var brick_w := 16
+	var brick_h := 12
+	var row := int(y / brick_h)
+	var offset := 8 if row % 2 == 1 else 0
+	var local_x := int((x + offset) % brick_w)
+	var local_y := int(y % brick_h)
+	var noise := float(int((x * 29 + y * 43 + row * 17 + int((x + offset) / brick_w) * 13) % 23)) / 22.0
+	if local_x <= 1 or local_y <= 1:
+		return 0.08
+	if local_x >= brick_w - 2 or local_y >= brick_h - 2:
+		return 0.26 + noise * 0.18
+	var chip := 0.18 if ((x * 5 + y * 7) % 31) == 0 else 0.0
+	var vein := 0.12 if ((x - y) % 19) == 0 else 0.0
+	return clampf(0.46 + noise * 0.32 + chip - vein, 0.0, 1.0)
 
 func biome_palette_for_level(level: int) -> Dictionary:
 	var depth: int = abs(level)
@@ -135,3 +273,7 @@ func _palette_color(palette: Dictionary, key: String, fallback: Color) -> Color:
 	if not palette.has(key):
 		return fallback
 	return Color(str(palette.get(key, "#" + fallback.to_html(false))))
+
+func _normal_texel(dx: float, dy: float, strength: float) -> Color:
+	var normal := Vector3(-dx * strength, -dy * strength, 1.0).normalized()
+	return Color(normal.x * 0.5 + 0.5, normal.y * 0.5 + 0.5, normal.z * 0.5 + 0.5)

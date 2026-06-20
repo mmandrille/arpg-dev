@@ -1,0 +1,20 @@
+{
+  "id": "line_of_sight_blockers",
+  "world_id": "line_of_sight_blocker_lab",
+  "seed": "v300_fog_of_war_line_of_sight_blockers",
+  "title": "Line-of-Sight Blockers",
+  "description": "A player starts within light radius of a monster hidden by a tall column/rock blocker, then moves to a clear angle and sees the monster appear.",
+  "steps": [
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "column", "at_least": 1 }, "timeout_s": 3 },
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "rock", "at_least": 1 }, "timeout_s": 3 },
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "rubble", "at_least": 1 }, "timeout_s": 3 },
+    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "training_dummy_reward", "equals": 0 },
+    { "action": "move_until_player_position", "x": 8, "y": 8, "pathfind": true, "tolerance": 0.5, "max_ticks": 240 },
+    { "action": "wait_until_assertion", "assertion": { "type": "entity_count", "entity_type": "monster", "monster_def_id": "training_dummy_reward", "at_least": 1 }, "timeout_s": 5 }
+  ],
+  "assertions": [
+    { "type": "wall_count", "kind": "column", "at_least": 1 },
+    { "type": "wall_count", "kind": "rock", "at_least": 1 },
+    { "type": "wall_count", "kind": "rubble", "at_least": 1 }
+  ]
+}

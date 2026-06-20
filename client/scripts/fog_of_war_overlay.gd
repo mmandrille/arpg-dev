@@ -147,6 +147,8 @@ func set_wall_layout(walls: Array) -> void:
 	for wall in walls:
 		if typeof(wall) != TYPE_DICTIONARY:
 			continue
+		if not _wall_blocks_line_of_sight(wall as Dictionary):
+			continue
 		var normalized := _normalized_occluder(wall as Dictionary)
 		if not normalized.is_empty():
 			_wall_layout.append(normalized)
@@ -472,6 +474,12 @@ func _combined_occluders() -> Array:
 	for occluder in _extra_occluder_layout:
 		occluders.append(occluder)
 	return occluders
+
+
+func _wall_blocks_line_of_sight(wall: Dictionary) -> bool:
+	if wall.has("blocks_line_of_sight"):
+		return bool(wall.get("blocks_line_of_sight", false))
+	return str(wall.get("kind", "wall")) == "wall"
 
 
 func _normalized_occluder(occluder: Dictionary) -> Dictionary:

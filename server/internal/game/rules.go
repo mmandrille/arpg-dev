@@ -291,15 +291,18 @@ type ChestPlacementRules struct {
 }
 
 type ObstacleGenerationRules struct {
-	Enabled                 bool                   `json:"enabled"`
-	MaxAttempts             int                    `json:"max_attempts"`
-	TargetGroupCount        IntRange               `json:"-"`
-	TargetGroupCountFormula AreaRangeFormula       `json:"target_group_count_formula"`
-	WallSegment             WallSegmentRules       `json:"wall_segment"`
-	SolidBlock              SolidBlockRules        `json:"solid_block"`
-	ShapeWeights            ObstacleShapeWeights   `json:"shape_weights"`
-	Doors                   DoorGenerationRules    `json:"doors"`
-	Clearance               ObstacleClearanceRules `json:"clearance"`
+	Enabled                 bool                     `json:"enabled"`
+	MaxAttempts             int                      `json:"max_attempts"`
+	TargetGroupCount        IntRange                 `json:"-"`
+	TargetGroupCountFormula AreaRangeFormula         `json:"target_group_count_formula"`
+	WallSegment             WallSegmentRules         `json:"wall_segment"`
+	SolidBlock              SolidBlockRules          `json:"solid_block"`
+	ShapeWeights            ObstacleShapeWeights     `json:"shape_weights"`
+	SolidKindWeights        SolidObstacleKindWeights `json:"solid_kind_weights"`
+	Doors                   DoorGenerationRules      `json:"doors"`
+	Water                   WaterGenerationRules     `json:"water"`
+	Holes                   HoleGenerationRules      `json:"holes"`
+	Clearance               ObstacleClearanceRules   `json:"clearance"`
 }
 
 type IntRange struct {
@@ -741,6 +744,7 @@ type MonsterDef struct {
 	ProjectileSpeed   float64            `json:"projectile_speed,omitempty"`
 	ProjectileDefID   string             `json:"projectile_def_id,omitempty"`
 	Behavior          string             `json:"behavior,omitempty"`
+	NavigationTrait   string             `json:"navigation_trait,omitempty"`
 	PackRole          string             `json:"pack_role,omitempty"`
 	AggroRadius       float64            `json:"aggro_radius,omitempty"`
 	AssistRadius      float64            `json:"assist_radius,omitempty"`
@@ -950,6 +954,8 @@ type WorldEntity struct {
 	ItemDefID         string `json:"item_def_id,omitempty"`
 	ItemTemplateID    string `json:"item_template_id,omitempty"`
 	InteractableDefID string `json:"interactable_def_id,omitempty"`
+	Kind              string `json:"kind,omitempty"`
+	BlocksLineOfSight *bool  `json:"blocks_line_of_sight,omitempty"`
 	Position          Vec2   `json:"position"`
 	Size              Vec2   `json:"size,omitempty"`
 }
@@ -1550,6 +1556,9 @@ func LoadRules(dir string) (*Rules, error) {
 		attackMode := def.effectiveAttackMode()
 		behavior := def.effectiveBehavior()
 		attackStyle := def.effectiveAttackStyle()
+		if !validMonsterNavigationTrait(def.NavigationTrait) {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.navigation_trait: %s", id, def.NavigationTrait)
+		}
 		if def.PreferredMinRange < 0 {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.preferred_min_range: must be non-negative", id)
 		}
@@ -1892,6 +1901,12 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateDoorGenerationRules(dungeonGeneration.ObstacleGeneration.Doors, r); err != nil {
 		return nil, err
 	}
+	if err := validateWaterGenerationRules(dungeonGeneration.ObstacleGeneration.Water, dungeonGeneration.FloorSize); err != nil {
+		return nil, err
+	}
+	if err := validateHoleGenerationRules(dungeonGeneration.ObstacleGeneration.Holes, dungeonGeneration.FloorSize); err != nil {
+		return nil, err
+	}
 	if err := validateDungeonFloorProfiles(dungeonGeneration.FloorProfiles); err != nil {
 		return nil, err
 	}
@@ -1998,6 +2013,9 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 		for i, entity := range world.Entities {
 			label := fmt.Sprintf("worlds.%s.entities[%d]", worldID, i)
+			if entity.Type != wallEntity && entity.Kind != "" {
+				return nil, fmt.Errorf("game: invalid rules %s.kind: only valid for wall entities", label)
+			}
 			switch entity.Type {
 			case monsterEntity, companionEntity:
 				if entity.MonsterDefID == "" {
@@ -2023,6 +2041,9 @@ func LoadRules(dir string) (*Rules, error) {
 			case wallEntity:
 				if entity.Size.X <= 0 || entity.Size.Y <= 0 {
 					return nil, fmt.Errorf("game: invalid rules %s: wall size must be positive", label)
+				}
+				if !validObstacleKind(entity.Kind) {
+					return nil, fmt.Errorf("game: invalid rules %s.kind: unsupported wall kind %s", label, entity.Kind)
 				}
 			case interactableEntity:
 				if entity.InteractableDefID == "" {
@@ -2153,6 +2174,9 @@ func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFlo
 	if o.ShapeWeights.total() <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.shape_weights: at least one shape must be enabled")
 	}
+	if err := validateSolidObstacleKindWeights(o.SolidKindWeights); err != nil {
+		return err
+	}
 	for label, value := range map[string]float64{
 		"player_spawn": o.Clearance.PlayerSpawn,
 		"stairs":       o.Clearance.Stairs,
@@ -2166,6 +2190,12 @@ func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFlo
 		}
 	}
 	maxSpan := math.Max(float64(o.WallSegment.MaxLength), math.Max(o.SolidBlock.MaxSize.X, o.SolidBlock.MaxSize.Y))
+	if o.Water.Enabled {
+		maxSpan = math.Max(maxSpan, math.Max(o.Water.MaxSize.X, o.Water.MaxSize.Y))
+	}
+	if o.Holes.Enabled {
+		maxSpan = math.Max(maxSpan, math.Max(o.Holes.MaxSize.X, o.Holes.MaxSize.Y))
+	}
 	if maxSpan >= math.Min(floor.Width, floor.Height) {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation: largest obstacle must fit inside floor")
 	}

@@ -38,6 +38,8 @@
                 "item_def_id": { "type": "string" },
                 "item_template_id": { "type": "string" },
                 "interactable_def_id": { "type": "string" },
+                "kind": { "type": "string", "enum": ["wall", "water", "hole", "rock", "column", "rubble"] },
+                "blocks_line_of_sight": { "type": "boolean" },
                 "position": { "$ref": "#/$defs/position" },
                 "size": { "$ref": "#/$defs/size" }
               },
@@ -49,7 +51,11 @@
                   },
                   "then": {
                     "required": ["monster_def_id"],
-                    "not": { "required": ["item_def_id"] }
+                    "not": { "anyOf": [
+                      { "required": ["item_def_id"] },
+                      { "required": ["kind"] },
+                      { "required": ["blocks_line_of_sight"] }
+                    ] }
                   }
                 },
                 {
@@ -59,7 +65,11 @@
                   },
                   "then": {
                     "required": ["monster_def_id"],
-                    "not": { "required": ["item_def_id"] }
+                    "not": { "anyOf": [
+                      { "required": ["item_def_id"] },
+                      { "required": ["kind"] },
+                      { "required": ["blocks_line_of_sight"] }
+                    ] }
                   }
                 },
                 {
@@ -72,7 +82,11 @@
                       { "required": ["item_def_id"] },
                       { "required": ["item_template_id"] }
                     ],
-                    "not": { "required": ["monster_def_id"] }
+                    "not": { "anyOf": [
+                      { "required": ["monster_def_id"] },
+                      { "required": ["kind"] },
+                      { "required": ["blocks_line_of_sight"] }
+                    ] }
                   }
                 },
                 {
@@ -98,6 +112,8 @@
                     "not": { "anyOf": [
                       { "required": ["monster_def_id"] },
                       { "required": ["item_def_id"] },
+                      { "required": ["kind"] },
+                      { "required": ["blocks_line_of_sight"] },
                       { "required": ["size"] }
                     ] }
                   }

@@ -110,6 +110,12 @@
       "t": 2,
       "block": 2
     },
+    "solid_kind_weights": {
+      "wall": 5,
+      "rock": 2,
+      "column": 2,
+      "rubble": 2
+    },
     "doors": {
       "enabled": true,
       "interactable_def_id": "wooden_door",
@@ -117,6 +123,20 @@
       "min_wall_length": 8,
       "min_side_length": 2.0,
       "gap_width": 1.6
+    },
+    "water": {
+      "enabled": true,
+      "max_attempts": 48,
+      "target_count": { "min": 1, "max": 2 },
+      "min_size": { "x": 4, "y": 2 },
+      "max_size": { "x": 9, "y": 3 }
+    },
+    "holes": {
+      "enabled": true,
+      "max_attempts": 48,
+      "target_count": { "min": 1, "max": 1 },
+      "min_size": { "x": 2, "y": 2 },
+      "max_size": { "x": 5, "y": 4 }
     },
     "clearance": {
       "player_spawn": 3.0,

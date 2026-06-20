@@ -298,6 +298,7 @@
       },
       "pack_role": "swarm",
       "behavior": "chase",
+      "navigation_trait": "flying",
       "aggro_radius": 6,
       "assist_radius": 8,
       "leash_radius": 40,

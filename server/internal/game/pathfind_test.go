@@ -68,6 +68,56 @@ func TestPlanPathBlockedCellDetour(t *testing.T) {
 	}
 }
 
+func TestPlanPathWaterObstacleDetour(t *testing.T) {
+	nav := testNav()
+	waterCells := map[gridCell]bool{
+		{x: 1, y: -1}: true,
+		{x: 1, y: 0}:  true,
+		{x: 1, y: 1}:  true,
+	}
+	blocked := func(gx, gy int) bool { return waterCells[gridCell{x: gx, y: gy}] }
+	steps, ok := PlanPath(nav, Vec2{X: 0, Y: 0}, Vec2{X: 3, Y: 0}, blocked)
+	if !ok {
+		t.Fatal("PlanPath returned ok=false around water")
+	}
+	if len(steps) <= 3 {
+		t.Fatalf("len(steps) = %d, want water detour longer than direct path: %+v", len(steps), steps)
+	}
+	pos := Vec2{}
+	for _, step := range steps {
+		pos.X += step.X
+		pos.Y += step.Y
+		if cell := worldToGrid(nav, pos); waterCells[cell] {
+			t.Fatalf("path entered water cell %+v via %+v", cell, steps)
+		}
+	}
+}
+
+func TestPlanPathHoleObstacleDetour(t *testing.T) {
+	nav := testNav()
+	holeCells := map[gridCell]bool{
+		{x: 1, y: -1}: true,
+		{x: 1, y: 0}:  true,
+		{x: 1, y: 1}:  true,
+	}
+	blocked := func(gx, gy int) bool { return holeCells[gridCell{x: gx, y: gy}] }
+	steps, ok := PlanPath(nav, Vec2{X: 0, Y: 0}, Vec2{X: 3, Y: 0}, blocked)
+	if !ok {
+		t.Fatal("PlanPath returned ok=false around hole")
+	}
+	if len(steps) <= 3 {
+		t.Fatalf("len(steps) = %d, want hole detour longer than direct path: %+v", len(steps), steps)
+	}
+	pos := Vec2{}
+	for _, step := range steps {
+		pos.X += step.X
+		pos.Y += step.Y
+		if cell := worldToGrid(nav, pos); holeCells[cell] {
+			t.Fatalf("path entered hole cell %+v via %+v", cell, steps)
+		}
+	}
+}
+
 func TestPlanPathUnequalAxesUsesDiagonalSteps(t *testing.T) {
 	nav := testNav()
 	nav.GridBounds = GridBounds{MinX: -10, MinY: -10, MaxX: 16, MaxY: 12}

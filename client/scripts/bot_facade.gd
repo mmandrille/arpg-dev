@@ -223,6 +223,8 @@ static func click_entity_id(main, target_id: String, buffered: bool = false) -> 
 			main._activate_or_approach_interactable(target_id, rec)
 		return
 	if main.has_method("_send_action_intent"):
+		if typ == "monster":
+			CombatLocalAttackPresentation.present_local_start(_member(main, "_local_attack_presentation"), target_id, _member(main, "audio_controller"), _member(main, "player_anim"))
 		main._send_action_intent(target_id)
 	main.set("_attack_cooldown", main._basic_attack_cooldown_seconds() if typ == "monster" and main.has_method("_basic_attack_cooldown_seconds") else ClientConstants.SEND_INTERVAL)
 	if typ == "monster" and main.has_method("_start_basic_attack_recovery_ui"):

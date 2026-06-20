@@ -6,6 +6,7 @@ const SustainedClickInputScript := preload("res://scripts/sustained_click_input.
 const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
+const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -23,6 +24,8 @@ func _initialize() -> void:
 	_test_attack_buffer_queue_replace_and_expire()
 	_test_attack_buffer_clear_guards()
 	_test_sticky_target_replacement_and_clear_guards()
+	_test_local_attack_presentation_matches_and_clears()
+	_test_local_attack_presentation_ignores_non_matches()
 	_test_combat_reach_uses_equipped_weapon()
 	_test_combat_reach_attack_approach_point()
 
@@ -148,6 +151,29 @@ func _test_sticky_target_replacement_and_clear_guards() -> void:
 	_assert_true("non-monster sticky target clears", sticky.should_clear(10, entities))
 	sticky.set_target("1002")
 	_assert_true("dead player clears sticky target", sticky.should_clear(0, entities))
+
+
+func _test_local_attack_presentation_matches_and_clears() -> void:
+	var presentation := CombatLocalAttackPresentationScript.new()
+	presentation.start("1002")
+	_assert_true("local attack presentation active", presentation.active())
+	_assert_true("local damage result consumes", presentation.consume_if_matches({"event_type": "monster_damaged", "source_entity_id": "p1", "entity_id": "1002"}, "p1"))
+	_assert_false("local attack presentation clears after consume", presentation.active())
+	presentation.start("1003")
+	presentation.start("1004")
+	_assert_eq("local attack presentation replaces target", presentation.target_id, "1004")
+	_assert_true("local miss target result consumes", presentation.consume_if_matches({"event_type": "attack_missed", "source_entity_id": "p1", "target_entity_id": "1004"}, "p1"))
+
+
+func _test_local_attack_presentation_ignores_non_matches() -> void:
+	var presentation := CombatLocalAttackPresentationScript.new()
+	presentation.start("1002")
+	_assert_false("remote source does not consume", presentation.consume_if_matches({"event_type": "monster_damaged", "source_entity_id": "p2", "entity_id": "1002"}, "p1"))
+	_assert_true("remote source leaves active", presentation.active())
+	_assert_false("wrong target does not consume", presentation.consume_if_matches({"event_type": "monster_killed", "source_entity_id": "p1", "entity_id": "1003"}, "p1"))
+	_assert_true("wrong target leaves active", presentation.active())
+	presentation.clear()
+	_assert_false("clear deactivates local presentation", presentation.active())
 
 
 func _test_combat_reach_uses_equipped_weapon() -> void:

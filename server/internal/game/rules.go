@@ -291,18 +291,18 @@ type ChestPlacementRules struct {
 }
 
 type ObstacleGenerationRules struct {
-	Enabled                 bool                     `json:"enabled"`
-	MaxAttempts             int                      `json:"max_attempts"`
-	TargetGroupCount        IntRange                 `json:"-"`
-	TargetGroupCountFormula AreaRangeFormula         `json:"target_group_count_formula"`
-	WallSegment             WallSegmentRules         `json:"wall_segment"`
-	SolidBlock              SolidBlockRules          `json:"solid_block"`
-	ShapeWeights            ObstacleShapeWeights     `json:"shape_weights"`
-	SolidKindWeights        SolidObstacleKindWeights `json:"solid_kind_weights"`
-	Doors                   DoorGenerationRules      `json:"doors"`
-	Water                   WaterGenerationRules     `json:"water"`
-	Holes                   HoleGenerationRules      `json:"holes"`
-	Clearance               ObstacleClearanceRules   `json:"clearance"`
+	Enabled                 bool                        `json:"enabled"`
+	MaxAttempts             int                         `json:"max_attempts"`
+	TargetGroupCount        IntRange                    `json:"-"`
+	TargetGroupCountFormula AreaRangeFormula            `json:"target_group_count_formula"`
+	WallSegment             WallSegmentRules            `json:"wall_segment"`
+	SolidBlock              SolidBlockRules             `json:"solid_block"`
+	ShapeWeights            ObstacleShapeWeights        `json:"shape_weights"`
+	SolidKindWeights        SolidObstacleKindWeights    `json:"solid_kind_weights"`
+	Doors                   DoorGenerationRules         `json:"doors"`
+	Water                   FloorFeatureGenerationRules `json:"water"`
+	Holes                   FloorFeatureGenerationRules `json:"holes"`
+	Clearance               ObstacleClearanceRules      `json:"clearance"`
 }
 
 type IntRange struct {

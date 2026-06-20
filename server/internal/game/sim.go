@@ -5386,6 +5386,7 @@ func (s *Sim) annotateRequirementStatus(requirements map[string]int, set func([]
 
 func (s *Sim) itemView(item *invItem) ItemView {
 	view := item.view()
+	view.Equipped = s.itemEquippedInAnySlot(item.instanceID)
 	s.annotateItemView(&view, item)
 	return view
 }

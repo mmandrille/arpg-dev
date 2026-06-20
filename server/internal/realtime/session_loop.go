@@ -756,6 +756,9 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.Item == nil {
 				continue
 			}
+			if changeRequiresExplicitWeaponSet(c) && !changeHasExplicitWeaponSet(c) {
+				continue
+			}
 			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist inventory update", "error", err)

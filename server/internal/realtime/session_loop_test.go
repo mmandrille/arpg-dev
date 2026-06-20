@@ -387,6 +387,48 @@ func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 	}
 }
 
+func TestHandInventoryUpdatePersistenceRequiresExplicitWeaponSet(t *testing.T) {
+	repo := &progressionPersistRepo{}
+	loop := &sessionLoop{
+		hub:  &Hub{store: repo},
+		sess: store.Session{ID: "sess_weapon_set_persist", AccountID: "acct_host", CharacterID: "char_host"},
+	}
+	set2 := 1
+	loop.persistTick(game.TickResult{
+		Tick:          12,
+		ActorPlayerID: 1001,
+		Changes: []game.Change{
+			{
+				Op: game.OpInventoryUpdate,
+				Item: &game.ItemView{
+					ItemInstanceID: "2001",
+					ItemDefID:      "cave_bow",
+					Slot:           "main_hand",
+					Equipped:       true,
+				},
+			},
+			{
+				Op:        game.OpInventoryUpdate,
+				WeaponSet: &set2,
+				Item: &game.ItemView{
+					ItemInstanceID: "2001",
+					ItemDefID:      "cave_bow",
+					Slot:           "main_hand",
+					Equipped:       true,
+				},
+			},
+		},
+	}, map[uint64]store.SessionMember{
+		1001: {AccountID: "acct_host", CharacterID: "char_host"},
+	}, 0)
+	if len(repo.equippedItems) != 1 {
+		t.Fatalf("persisted equipped updates = %d, want only explicit weapon-set update: %+v", len(repo.equippedItems), repo.equippedItems)
+	}
+	if got := repo.equippedItems[0]; got.itemInstanceID != "2001" || got.slot != "main_hand" || !got.equipped || got.weaponSet != 1 {
+		t.Fatalf("persisted equipped update = %+v, want bow in set 2", got)
+	}
+}
+
 type progressionPersistRepo struct {
 	store.Repository
 	progressions      []store.CharacterProgression
@@ -395,12 +437,22 @@ type progressionPersistRepo struct {
 	events            []store.SessionEvent
 	items             []store.CharacterItemInstance
 	sessionStartItems []store.CharacterItemInstance
+	equippedItems     []persistedEquippedUpdate
 }
 
 type persistedGoldUpdate struct {
 	accountID   string
 	characterID string
 	gold        int
+}
+
+type persistedEquippedUpdate struct {
+	accountID      string
+	characterID    string
+	itemInstanceID string
+	slot           string
+	equipped       bool
+	weaponSet      int
 }
 
 func (r *progressionPersistRepo) UpsertCharacterProgression(_ context.Context, _ string, progression store.CharacterProgression) error {
@@ -426,6 +478,13 @@ func (r *progressionPersistRepo) AppendEvent(_ context.Context, event store.Sess
 
 func (r *progressionPersistRepo) AddCharacterItem(_ context.Context, item store.CharacterItemInstance) error {
 	r.items = append(r.items, item)
+	return nil
+}
+
+func (r *progressionPersistRepo) SetCharacterItemEquipped(_ context.Context, accountID, characterID, itemInstanceID, slot string, equipped bool, weaponSet int) error {
+	r.equippedItems = append(r.equippedItems, persistedEquippedUpdate{
+		accountID: accountID, characterID: characterID, itemInstanceID: itemInstanceID, slot: slot, equipped: equipped, weaponSet: weaponSet,
+	})
 	return nil
 }
 

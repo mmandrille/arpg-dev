@@ -38,6 +38,7 @@
                 "item_def_id": { "type": "string" },
                 "item_template_id": { "type": "string" },
                 "interactable_def_id": { "type": "string" },
+                "kind": { "type": "string", "enum": ["wall", "water", "hole"] },
                 "position": { "$ref": "#/$defs/position" },
                 "size": { "$ref": "#/$defs/size" }
               },
@@ -49,7 +50,10 @@
                   },
                   "then": {
                     "required": ["monster_def_id"],
-                    "not": { "required": ["item_def_id"] }
+                    "not": { "anyOf": [
+                      { "required": ["item_def_id"] },
+                      { "required": ["kind"] }
+                    ] }
                   }
                 },
                 {
@@ -59,7 +63,10 @@
                   },
                   "then": {
                     "required": ["monster_def_id"],
-                    "not": { "required": ["item_def_id"] }
+                    "not": { "anyOf": [
+                      { "required": ["item_def_id"] },
+                      { "required": ["kind"] }
+                    ] }
                   }
                 },
                 {
@@ -72,7 +79,10 @@
                       { "required": ["item_def_id"] },
                       { "required": ["item_template_id"] }
                     ],
-                    "not": { "required": ["monster_def_id"] }
+                    "not": { "anyOf": [
+                      { "required": ["monster_def_id"] },
+                      { "required": ["kind"] }
+                    ] }
                   }
                 },
                 {
@@ -98,6 +108,7 @@
                     "not": { "anyOf": [
                       { "required": ["monster_def_id"] },
                       { "required": ["item_def_id"] },
+                      { "required": ["kind"] },
                       { "required": ["size"] }
                     ] }
                   }

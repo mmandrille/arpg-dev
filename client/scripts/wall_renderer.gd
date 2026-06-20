@@ -29,12 +29,16 @@ func render_world_walls(world_id: String) -> Array:
 			continue
 		var pos: Dictionary = entity.get("position", {})
 		var size: Dictionary = entity.get("size", {})
-		local_walls.append({
+		var wall := {
 			"id": "%s_wall_%03d" % [world_id, local_index],
 			"position": {"x": float(pos.get("x", 0.0)), "y": float(pos.get("y", 0.0))},
 			"size": {"x": float(size.get("x", 1.0)), "y": float(size.get("y", 1.0))},
 			"source": "preset",
-		})
+		}
+		var kind := str(entity.get("kind", "wall"))
+		if kind != "" and kind != "wall":
+			wall["kind"] = kind
+		local_walls.append(wall)
 		local_index += 1
 	return render_wall_layout(local_walls)
 

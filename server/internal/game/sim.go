@@ -744,7 +744,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			loot.id = s.alloc()
 			level.entities[loot.id] = loot
 		case wallEntity:
-			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size, source: "preset"})
+			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size, kind: preset.Kind, source: "preset"})
 		case interactableEntity:
 			def := s.rules.Interactables[preset.InteractableDefID]
 			if def.Service == uniqueTestChestService && !s.gameplayDebug {
@@ -3424,8 +3424,9 @@ func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
 }
 
 func (s *Sim) monsterPositionBlockedWithIDs(pos Vec2, excludeMonsterID uint64, walls []wallObstacle, playerIDs []uint64, entityIDs []uint64) bool {
+	monsterDef := s.monsterNavigationDef(excludeMonsterID)
 	for _, wall := range walls {
-		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
+		if monsterObstacleBlocksMovement(wall, monsterDef) && circleIntersectsAABB(pos, monsterRadius, wall.pos, wall.size) {
 			return true
 		}
 	}

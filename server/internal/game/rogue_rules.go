@@ -23,22 +23,23 @@ type SkillDashDef struct {
 }
 
 type SkillMobilityDef struct {
-	RangeBase            float64 `json:"range_base"`
-	RangePerRank         float64 `json:"range_per_rank"`
-	Mode                 string  `json:"mode"`
-	Visual               string  `json:"visual"`
-	SpeedTilesPerSecond  float64 `json:"speed_tiles_per_second"`
-	SpeedMultiplier      float64 `json:"speed_multiplier"`
-	ChannelManaPer10Sec  int     `json:"channel_mana_per_10_seconds"`
-	DamagePercentBase    int     `json:"damage_percent_base"`
-	DamagePercentPerRank int     `json:"damage_percent_per_rank"`
-	ImpactRadius         float64 `json:"impact_radius"`
-	PushMin              float64 `json:"push_min"`
-	PushMax              float64 `json:"push_max"`
-	StunEffectID         string  `json:"stun_effect_id"`
-	StunDurationTicks    int     `json:"stun_duration_ticks"`
-	RootEffectID         string  `json:"root_effect_id"`
-	RootDurationTicks    int     `json:"root_duration_ticks"`
+	RangeBase            float64  `json:"range_base"`
+	RangePerRank         float64  `json:"range_per_rank"`
+	Mode                 string   `json:"mode"`
+	Visual               string   `json:"visual"`
+	IgnoreObstacleKinds  []string `json:"ignore_obstacle_kinds,omitempty"`
+	SpeedTilesPerSecond  float64  `json:"speed_tiles_per_second"`
+	SpeedMultiplier      float64  `json:"speed_multiplier"`
+	ChannelManaPer10Sec  int      `json:"channel_mana_per_10_seconds"`
+	DamagePercentBase    int      `json:"damage_percent_base"`
+	DamagePercentPerRank int      `json:"damage_percent_per_rank"`
+	ImpactRadius         float64  `json:"impact_radius"`
+	PushMin              float64  `json:"push_min"`
+	PushMax              float64  `json:"push_max"`
+	StunEffectID         string   `json:"stun_effect_id"`
+	StunDurationTicks    int      `json:"stun_duration_ticks"`
+	RootEffectID         string   `json:"root_effect_id"`
+	RootDurationTicks    int      `json:"root_duration_ticks"`
 }
 
 func validateRogueConeSkillPayload(skillID string, skill SkillDef) error {
@@ -71,6 +72,13 @@ func validateRogueConeSkillPayload(skillID string, skill SkillDef) error {
 			skill.Mobility.PushMin < 0 || skill.Mobility.PushMax < skill.Mobility.PushMin ||
 			skill.Mobility.StunDurationTicks < 0 || skill.Mobility.RootDurationTicks < 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.mobility: effect values must be non-negative", skillID)
+		}
+		for _, kind := range skill.Mobility.IgnoreObstacleKinds {
+			switch kind {
+			case obstacleKindWater, obstacleKindHole:
+			default:
+				return fmt.Errorf("game: invalid rules skills.%s.mobility.ignore_obstacle_kinds: unsupported %s", skillID, kind)
+			}
 		}
 		if skill.Mobility.Mode == "charge" && skill.Mobility.SpeedMultiplier <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.mobility.speed_multiplier: required for charge", skillID)

@@ -8,6 +8,7 @@ const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const UniqueChestTabsScript := preload("res://scripts/unique_chest_tabs.gd")
+const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const PANEL_SIZE := Vector2(390, 520)
 const COLUMNS := 5
@@ -71,6 +72,7 @@ var _gold_amount_input: LineEdit
 var _gold_amount_ok_button: Button
 var _gold_amount_mode: String = ""
 var _interactive: bool = true
+var _suppress_render_guard: bool = false
 var _search_text: String = ""
 var _sort_mode: String = SORT_ACQUIRED
 var _unique_chest_tab: String = UniqueChestTabsScript.UNIQUES
@@ -146,6 +148,7 @@ func _ready() -> void:
 
 
 func show_stash(next_entity_id: String, next_stash_id: String, next_items: Array, next_stash_gold: int, next_capacity: int, next_inventory: Array, next_equipped: Dictionary, next_gold: int, next_hotbar: Array = [], next_title: String = "Account Stash") -> void:
+	_suppress_render_guard = true
 	stash_entity_id = next_entity_id
 	stash_id = next_stash_id
 	stash_title = next_title
@@ -153,12 +156,14 @@ func show_stash(next_entity_id: String, next_stash_id: String, next_items: Array
 	container_label = "Stash"
 	set_stash_state(next_items, next_stash_gold, next_capacity)
 	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
+	_suppress_render_guard = false
 	visible = true
 	_apply_interaction_filters()
-	_render()
+	_render_if_changed()
 
 
 func show_corpse(next_entity_id: String, corpse_name: String, corpse_items: Array, next_inventory: Array, next_equipped: Dictionary, next_gold: int, next_hotbar: Array = []) -> void:
+	_suppress_render_guard = true
 	stash_entity_id = next_entity_id
 	stash_id = "hero_corpse"
 	stash_title = "%s's Body" % corpse_name if corpse_name != "" else "Hero Body"
@@ -173,12 +178,14 @@ func show_corpse(next_entity_id: String, corpse_name: String, corpse_items: Arra
 		mapped_items.append(rec)
 	set_stash_state(mapped_items, 0, mapped_items.size())
 	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
+	_suppress_render_guard = false
 	visible = true
 	_apply_interaction_filters()
-	_render()
+	_render_if_changed()
 
 
 func show_unique_chest(next_entity_id: String, chest_items: Array, next_inventory: Array, next_equipped: Dictionary, next_gold: int, next_hotbar: Array = []) -> void:
+	_suppress_render_guard = true
 	var same_unique_chest := container_mode == "unique_chest" and stash_entity_id == next_entity_id
 	stash_entity_id = next_entity_id
 	stash_id = "unique_test_chest"
@@ -189,17 +196,28 @@ func show_unique_chest(next_entity_id: String, chest_items: Array, next_inventor
 		_unique_chest_tab = UniqueChestTabsScript.UNIQUES
 	set_stash_state(chest_items, 0, chest_items.size())
 	set_inventory_state(next_inventory, next_equipped, next_gold, next_hotbar)
+	_suppress_render_guard = false
 	visible = true
 	_apply_interaction_filters()
-	_render()
+	_render_if_changed()
 
 
 func set_stash_state(next_items: Array, next_stash_gold: int, next_capacity: int) -> void:
 	stash_items = _dup_array(next_items)
 	stash_gold = max(0, next_stash_gold)
 	stash_capacity = max(0, next_capacity)
-	if _panel != null:
-		_render()
+	if _panel != null and not _suppress_render_guard:
+		_render_if_changed()
+
+
+func _render_if_changed() -> void:
+	if InventoryRenderGuardScript.should_render(self):
+		_render_and_mark()
+
+
+func _render_and_mark() -> void:
+	_render()
+	InventoryRenderGuardScript.mark_rendered(self)
 
 
 func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_gold: int, next_hotbar: Array = []) -> void:
@@ -207,8 +225,8 @@ func set_inventory_state(next_inventory: Array, next_equipped: Dictionary, next_
 	equipped = next_equipped.duplicate(true)
 	hotbar = _dup_array(next_hotbar)
 	gold = max(0, next_gold)
-	if _panel != null:
-		_render()
+	if _panel != null and not _suppress_render_guard:
+		_render_if_changed()
 
 
 func hide_display() -> void:
@@ -219,7 +237,7 @@ func hide_display() -> void:
 func set_interactive(enabled: bool) -> void:
 	_interactive = enabled
 	_apply_interaction_filters()
-	_render()
+	_render_if_changed()
 
 
 func show_status(text: String, error: bool = false) -> void:
@@ -309,7 +327,7 @@ func bot_set_search_text(text: String) -> void:
 	if _search_field != null and _search_field.text != _search_text:
 		_search_field.text = _search_text
 	if _panel != null:
-		_render()
+		_render_and_mark()
 
 
 func bot_select_sort_mode(mode: String) -> void:
@@ -384,7 +402,7 @@ func _build() -> void:
 	_search_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_search_field.text_changed.connect(func(text: String) -> void:
 		_search_text = text.strip_edges()
-		_render()
+		_render_and_mark()
 	)
 	filters.add_child(_search_field)
 
@@ -872,7 +890,7 @@ func _set_sort_mode(mode: String) -> void:
 		if selected >= 0 and _sort_option.selected != selected:
 			_sort_option.select(selected)
 	if _panel != null:
-		_render()
+		_render_and_mark()
 
 
 func _set_unique_chest_tab(tab: String) -> void:
@@ -880,7 +898,7 @@ func _set_unique_chest_tab(tab: String) -> void:
 		return
 	_unique_chest_tab = tab
 	if _panel != null:
-		_render()
+		_render_and_mark()
 
 
 func _is_equipped_instance(item_instance_id: String) -> bool:

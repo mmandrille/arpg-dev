@@ -2287,6 +2287,8 @@ func _sync_companion_bar() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		_sustained_click.clear()
+	if event is InputEventKey and TextInputFocusGuard.has_text_input_focus(get_viewport()):
+		return
 	if event is InputEventKey and event.pressed and not event.echo and _is_escape_key(event):
 		_handle_escape()
 		get_viewport().set_input_as_handled()
@@ -2415,6 +2417,8 @@ func _handle_input(delta: float) -> void:
 	if _command_retarget_grace.tick_and_dispatch(delta, _attack_cooldown, client, last_server_tick, Callable(self, "_close_gameplay_panels_for_movement"), Callable(self, "_mark_local_player_walking")):
 		_attack_cooldown = maxf(_attack_cooldown, ClientConstants.SEND_INTERVAL)
 	if bot_mode:
+		return
+	if TextInputFocusGuard.has_text_input_focus(get_viewport()):
 		return
 	var input := Vector2.ZERO
 	if Input.is_key_pressed(KEY_W): input.y -= 1
@@ -2587,7 +2591,6 @@ func _user_input_blocked() -> bool:
 	# Replay/autoplay fully lock input. Bot mode blocks real mouse/WASD but still
 	# allows push_input() key events through _unhandled_input().
 	return _input_locked() or bot_mode
-
 func _menu_blocks_gameplay_input() -> bool:
 	return (main_menu != null and main_menu.visible) \
 		or (character_panel != null and character_panel.visible) \

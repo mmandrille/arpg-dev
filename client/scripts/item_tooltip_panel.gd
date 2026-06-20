@@ -5,6 +5,7 @@ const BODY_FONT_SIZE := 23
 const REQUIREMENT_FONT_SIZE := BODY_FONT_SIZE - 1
 const ICON_FONT_SIZE := 32
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const TooltipMouseGuardScript := preload("res://scripts/tooltip_mouse_guard.gd")
 const PREVIEW_SIZE := Vector2(96, 96)
 const PREVIEW_GAP := 8
 const CONTENT_WIDTH := 360.0
@@ -138,6 +139,7 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 			price_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 			footer.add_child(price_label)
 		root.add_child(footer)
+	TooltipMouseGuardScript.ignore_mouse(self)
 
 
 func debug_gold_value_text() -> String:

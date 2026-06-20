@@ -124,6 +124,7 @@ run_gate "GDScript sustained input test" "[gdtest] PASS: test_sustained_input" r
 
 # 2h. Force-stand directional attack helpers (server-independent; v37).
 run_gate "GDScript directional attack input test" "[gdtest] PASS: test_directional_attack_input" res://tests/test_directional_attack_input.gd
+run_gate "GDScript text input focus guard test" "[gdtest] PASS: test_text_input_focus_guard" res://tests/test_text_input_focus_guard.gd
 
 # 2i. Shop panel render and intent payload test (server-independent; v41).
 run_gate "GDScript shop panel test" "[gdtest] PASS: test_shop_panel" res://tests/test_shop_panel.gd

@@ -52,8 +52,12 @@ static func tooltip_plain_body(skill_id: String, rank: int, skill_progression: D
 	if summary == "":
 		summary = _static_kind_label(def)
 	var text := summary
-	text += "\nMana: %d" % _static_skill_mana_cost(def, rank)
-	text += "\n%s" % _static_skill_cooldown_text(def)
+	var mana_cost := _static_skill_mana_cost(def, rank)
+	if mana_cost > 0:
+		text += "\nMana: %d" % mana_cost
+	var cooldown_text := _static_skill_cooldown_text(def)
+	if cooldown_text != "":
+		text += "\n%s" % cooldown_text
 	for line in SkillPassiveTooltipScript.passive_stat_lines(def, maxi(rank, 1)):
 		text += "\n%s" % str(line)
 	var next_lines := tooltip_next_rank_lines(skill_id, rank)
@@ -245,7 +249,10 @@ static func _static_skill_cooldown_text(def: Dictionary) -> String:
 		if is_equal_approx(multiplier, roundf(multiplier)):
 			return "Cooldown: attack x%d%s" % [int(roundf(multiplier)), suffix]
 		return "Cooldown: attack x%.1f%s" % [multiplier, suffix]
-	return "Cooldown: %s" % str(cooldown.get("type", "none"))
+	var cooldown_type := str(cooldown.get("type", "none"))
+	if cooldown_type == "" or cooldown_type == "none":
+		return ""
+	return "Cooldown: %s" % cooldown_type
 
 
 static func _static_flat_cooldown_suffix(flat_ticks: int) -> String:
@@ -769,11 +776,13 @@ func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
 	var summary := SkillRulesLoader.skill_summary(skill_id)
 	if summary == "":
 		summary = _kind_label(def)
-	var lines: Array[String] = [
-		_escape_bbcode(summary),
-		_escape_bbcode("Mana: %d" % _skill_mana_cost(def, rank)),
-		_escape_bbcode(_skill_cooldown_text(def)),
-	]
+	var lines: Array[String] = [_escape_bbcode(summary)]
+	var mana_cost := _skill_mana_cost(def, rank)
+	if mana_cost > 0:
+		lines.append(_escape_bbcode("Mana: %d" % mana_cost))
+	var cooldown_text := _skill_cooldown_text(def)
+	if cooldown_text != "":
+		lines.append(_escape_bbcode(cooldown_text))
 	for line in SkillPassiveTooltipScript.passive_stat_lines(def, maxi(rank, 1)):
 		lines.append(_escape_bbcode(str(line)))
 	var next_lines := tooltip_next_rank_lines(skill_id, rank)
@@ -803,14 +812,7 @@ func _skill_mana_cost(def: Dictionary, rank: int) -> int:
 
 
 func _skill_cooldown_text(def: Dictionary) -> String:
-	var cooldown: Dictionary = def.get("cooldown", {})
-	if str(cooldown.get("type", "")) == "attack_interval_multiplier":
-		var multiplier := float(cooldown.get("multiplier", 1.0))
-		var suffix := _static_flat_cooldown_suffix(int(cooldown.get("flat_ticks", 0)))
-		if is_equal_approx(multiplier, roundf(multiplier)):
-			return "Cooldown: attack x%d%s" % [int(roundf(multiplier)), suffix]
-		return "Cooldown: attack x%.1f%s" % [multiplier, suffix]
-	return "Cooldown: %s" % str(cooldown.get("type", "none"))
+	return _static_skill_cooldown_text(def)
 
 
 func _requirement_lines(skill_id: String) -> Array:

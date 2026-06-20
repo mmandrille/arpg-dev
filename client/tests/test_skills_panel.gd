@@ -104,6 +104,8 @@ func _run() -> void:
 	var arcane_focus_tooltip := SkillsPanelScript.tooltip_plain_body("arcane_focus", 0, panel.skill_progression, panel.character_progression)
 	_assert_true("passive tooltip includes passive summary", arcane_focus_tooltip.contains("Passive max mana boost"))
 	_assert_true("passive tooltip includes stat effect", arcane_focus_tooltip.contains("Max mana: +8%"))
+	_assert_false("passive tooltip hides zero mana", arcane_focus_tooltip.contains("Mana: 0"))
+	_assert_false("passive tooltip hides none cooldown", arcane_focus_tooltip.contains("Cooldown: none"))
 	_assert_passive_icon_shapes()
 	var arcane_state: Dictionary = (state.get("skills", {}) as Dictionary).get("arcane_focus", {})
 	_assert_eq("passive icon label from presentation", str(arcane_state.get("icon_label", "")), "A")

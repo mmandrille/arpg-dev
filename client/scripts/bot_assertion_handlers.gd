@@ -62,6 +62,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_movement_visual_smoothing":
+			if not movement_visual_smoothing_matches(step, state):
+				runner._fail("assert_movement_visual_smoothing failed: want=%s got=%s step=%d scenario=%s" % [
+					str(step), str(state.get("movement_visual_smoothing", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_wall_layout":
 			if not runner._wall_layout_matches(step, state):
 				runner._fail("assert_wall_layout failed: want=%s wall_count=%d generated=%d non_perimeter=%d level=%d walls=%s step=%d scenario=%s" % [
@@ -416,6 +423,17 @@ static func _assert_discovery_minimap(runner, step: Dictionary, state: Dictionar
 		])
 		return false
 	return true
+
+
+static func movement_visual_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
+	var smoothing: Dictionary = state.get("movement_visual_smoothing", {})
+	if step.has("active") and bool(smoothing.get("active", false)) != bool(step.get("active", false)):
+		return false
+	if step.has("offset_min") and float(smoothing.get("offset_length", 0.0)) < float(step.get("offset_min", 0.0)):
+		return false
+	if step.has("offset_max") and float(smoothing.get("offset_length", 0.0)) > float(step.get("offset_max", 0.0)):
+		return false
+	return step.has("active") or step.has("offset_min") or step.has("offset_max")
 
 
 static func _assert_audio_state(runner, step: Dictionary, state: Dictionary) -> bool:

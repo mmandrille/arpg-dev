@@ -1,0 +1,15 @@
+{
+  "id": "movement_visual_smoothing",
+  "runner": "godot_client",
+  "world_id": "vertical_slice",
+  "seed": "movsmooth0001",
+  "title": "Movement visual smoothing: local visual offset eases around exact anchor movement",
+  "description": "Move across the lab, verify the local visual smoothing offset activates after authoritative movement and settles back near zero.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "click_floor", "x": 3.0, "z": 3.0 },
+    { "type": "wait_movement_visual_smoothing", "active": true, "offset_min": 0.02, "timeout_s": 5.0 },
+    { "type": "wait_player_near", "x": 3.0, "z": 3.0, "distance": 2.5, "timeout_s": 10.0 },
+    { "type": "wait_movement_visual_smoothing", "active": false, "offset_max": 0.02, "timeout_s": 5.0 }
+  ]
+}

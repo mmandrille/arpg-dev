@@ -36,6 +36,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return (state.get("damage_numbers", []) as Array).is_empty()
 		"wait_entity_reaction":
 			return runner._presentation_matches(step, state)
+		"wait_movement_visual_smoothing":
+			return BotAssertionHandlersScript.movement_visual_smoothing_matches(step, state)
 		"wait_wall_layout":
 			return runner._wall_layout_matches(step, state)
 		"wait_fog_of_war":

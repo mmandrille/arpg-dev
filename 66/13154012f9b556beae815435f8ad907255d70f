@@ -1,0 +1,37 @@
+docs/as-built/v314_loot-pop-rarity-glow.md
+  s_cf8001387eb9d4::t_bf75a946d78dcf 1-35
+docs/specs/v314_spec-loot-pop-rarity-glow.md
+  s_cf8001387eb9d4::t_bf75a946d78dcf 3
+  s_cf8001387eb9d4::t_8442dfeeeb14b5 1-2,4-49
+client/tests/test_loot_node_factory.gd
+  s_cf8001387eb9d4::t_8442dfeeeb14b5 1-58
+docs/progress/slice-lifecycle.md
+  s_cf8001387eb9d4::t_bf75a946d78dcf 329
+client/scripts/loot_node_factory.gd
+  s_cf8001387eb9d4::t_8442dfeeeb14b5 26-27,32,34,123-148,189-196
+scripts/client_smoke.sh
+  s_cf8001387eb9d4::t_8442dfeeeb14b5 167
+PROGRESS.md
+  s_cf8001387eb9d4::t_bf75a946d78dcf 26,28-29,31
+client/tests/test_loot_node_factory.gd.uid
+  s_cf8001387eb9d4::t_a4c67ee7d5196c 1
+docs/plans/v314_2026-06-20-loot-pop-rarity-glow.md
+  s_cf8001387eb9d4::t_8442dfeeeb14b5 1-2,4-39,44-46,50-51
+  s_cf8001387eb9d4::t_bf75a946d78dcf 3,40-43,47-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6613154012f9b556beae815435f8ad907255d70f",
+  "prompts": {},
+  "sessions": {
+    "s_cf8001387eb9d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee67e-8c36-75c1-a4ae-3ec301cea725",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

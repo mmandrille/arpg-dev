@@ -72,6 +72,11 @@ func (s *Sim) openUniqueTestChest(e *entity, in Input, res *TickResult, ack bool
 			})
 		}
 		s.uniqueChests[e.id] = state
+	} else if changed, ok := s.backfillUniqueTestChestState(state); !ok {
+		res.reject(in.MessageID, "invalid_target")
+		return
+	} else if changed {
+		s.savePlayer(s.defaultPlayer())
 	}
 	if e.state != interactableOpen {
 		e.state = interactableOpen
@@ -254,6 +259,49 @@ func (s *Sim) uniqueTestChestItems() ([]*invItem, bool) {
 	}
 	items = append(items, setItems...)
 	return items, true
+}
+
+func (s *Sim) backfillUniqueTestChestState(state *uniqueChestState) (bool, bool) {
+	if state == nil {
+		return false, true
+	}
+	catalog, ok := s.uniqueTestChestItems()
+	if !ok {
+		return false, false
+	}
+	seen := map[string]bool{}
+	for _, item := range state.items {
+		if item == nil {
+			continue
+		}
+		seen[uniqueChestCatalogKey(item.itemDefID, item.rollPayload)] = true
+	}
+	changed := false
+	for _, item := range catalog {
+		if item == nil {
+			continue
+		}
+		key := uniqueChestCatalogKey(item.itemDefID, item.rollPayload)
+		if seen[key] {
+			continue
+		}
+		state.items = append(state.items, &stashItem{
+			stashItemID: s.alloc(),
+			itemDefID:   item.itemDefID,
+			rollPayload: cloneRollPayload(item.rollPayload),
+		})
+		seen[key] = true
+		changed = true
+	}
+	return changed, true
+}
+
+func uniqueChestCatalogKey(itemDefID string, payload *ItemRollPayload) string {
+	if payload == nil {
+		return itemDefID + "|base"
+	}
+	effects := strings.Join(payload.EffectIDs, ",")
+	return itemDefID + "|" + payload.ItemTemplateID + "|" + payload.Rarity + "|" + payload.DisplayName + "|" + effects
 }
 
 func (r *Rules) namedUniqueChestItems() ([]*invItem, bool) {

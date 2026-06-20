@@ -40,6 +40,11 @@ static func _state_key(panel: Object) -> String:
 		"search_text": panel.get("_search_text"),
 		"sort_mode": panel.get("_sort_mode"),
 		"unique_chest_tab": panel.get("_unique_chest_tab"),
+		"shop_id": panel.get("shop_id"),
+		"shop_entity_id": panel.get("shop_entity_id"),
+		"shop_title": panel.get("shop_title"),
+		"offers": panel.get("offers"),
+		"sell_appraisals": panel.get("sell_appraisals"),
 		"market_context": panel.get("_market_context"),
 		"market_hidden_item_ids": panel.get("_market_hidden_item_ids"),
 	}))

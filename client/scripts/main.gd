@@ -1682,9 +1682,9 @@ func _refresh_inventory_ui() -> void:
 		inventory_panel.set_inventory_state(inventory, equipped, inventory_rows, inventory_capacity, gold, hotbar, hotbar_capacity, active_weapon_set, weapon_sets)
 	if shop_panel != null and shop_panel.visible:
 		shop_panel.set_inventory_state(inventory, equipped, gold)
-	if stash_panel != null:
+	if stash_panel != null and stash_panel.container_mode == "stash":
 		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
-		stash_panel.set_inventory_state(inventory, equipped, gold, hotbar)
+	if stash_panel != null: stash_panel.set_inventory_state(inventory, equipped, gold, hotbar)
 	if bishop_panel != null and bishop_panel.visible:
 		bishop_panel.set_gold(gold)
 	if mercenary_panel != null and mercenary_panel.visible: mercenary_panel.set_gold(gold)

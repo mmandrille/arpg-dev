@@ -39,6 +39,11 @@ ObjectDB/resource warnings after its PASS line but exits 0. The local bot script
 post-pass `cleanup_account.py` missing-`httpx` warning in this environment, but every scenario
 returned success.
 
+Batch proof on 2026-06-20 was completed via CI-equivalent continuation because raw `make ci` could
+not own the already-running main-worktree `arpg-postgres` container. Raw `make ci` steps 1-7 passed;
+protocol bot + replay, `SCENARIO=all` client bot (85 passed), headless `client_smoke`, and
+`make maintainability` passed against the existing healthy DB with temporary servers.
+
 ## Manual Visual Command
 
 ```bash

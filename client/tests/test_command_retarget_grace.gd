@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_test_latest_floor_retarget_replaces_prior()
 	_test_pop_ready_records_dispatched_target()
 	_test_grace_expires_before_long_cooldown()
+	_test_long_recovery_floor_click_dispatches_immediately()
 
 	print("[gdtest] PASS: test_command_retarget_grace (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -51,6 +52,27 @@ func _test_grace_expires_before_long_cooldown() -> void:
 	_assert_false("expired inactive", bool(state.get("active", true)))
 	_assert_eq("expired count", int(state.get("expired_count", 0)), 1)
 	_assert_true("expired cannot pop", grace.pop_ready(0.0).is_empty())
+
+
+func _test_long_recovery_floor_click_dispatches_immediately() -> void:
+	var grace := CommandRetargetGraceScript.new()
+	var client := FakeClient.new()
+	var sent := grace.dispatch_or_queue_floor(Vector3(8.0, 0.0, 9.0), CommandRetargetGraceScript.DEFAULT_GRACE_SECONDS + 0.10, client, 42, Callable(), Callable())
+	var state := grace.get_debug_state()
+	_assert_true("long recovery sends fresh floor click", sent)
+	_assert_false("long recovery does not queue stale floor click", bool(state.get("active", true)))
+	_assert_eq("long recovery sent count", client.sent.size(), 1)
+	_assert_eq("long recovery queued count", int(state.get("queued_count", -1)), 0)
+	_assert_eq("long recovery dispatched count", int(state.get("dispatched_count", 0)), 1)
+	_assert_approx("long recovery dispatched x", float(state.get("last_dispatched_ground_x", 0.0)), 8.0, 0.001)
+
+
+class FakeClient:
+	var sent: Array = []
+
+	func send(intent_type: String, last_server_tick: int, payload: Dictionary) -> String:
+		sent.append({"intent_type": intent_type, "last_server_tick": last_server_tick, "payload": payload})
+		return "msg"
 
 
 func _assert_true(label: String, value: bool) -> void:

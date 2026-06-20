@@ -2413,7 +2413,7 @@ func _handle_input(delta: float) -> void:
 	_tick_attack_buffer(delta)
 	_tick_sticky_attack()
 	if _command_retarget_grace.tick_and_dispatch(delta, _attack_cooldown, client, last_server_tick, Callable(self, "_close_gameplay_panels_for_movement"), Callable(self, "_mark_local_player_walking")):
-		_attack_cooldown = ClientConstants.SEND_INTERVAL
+		_attack_cooldown = maxf(_attack_cooldown, ClientConstants.SEND_INTERVAL)
 	if bot_mode:
 		return
 	var input := Vector2.ZERO
@@ -2698,9 +2698,8 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
 		if str(pick.get("kind", "")) == "floor":
 			_clear_pending_attack_commands()
-			_command_retarget_grace.queue_floor(pick.get("ground", Vector3.ZERO))
-			_close_gameplay_panels_for_movement()
-			_mark_local_player_walking()
+			if _command_retarget_grace.dispatch_or_queue_floor(pick.get("ground", Vector3.ZERO), _attack_cooldown, client, last_server_tick, Callable(self, "_close_gameplay_panels_for_movement"), Callable(self, "_mark_local_player_walking")):
+				_attack_cooldown = maxf(_attack_cooldown, ClientConstants.SEND_INTERVAL)
 		elif str(pick.get("kind", "")) == "monster":
 			_defer_monster_click(str(pick.get("target_id", "")))
 		else:
@@ -2714,10 +2713,8 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	if kind == "floor":
 		_clear_pending_attack_commands()
 		var ground: Vector3 = pick.get("ground", Vector3.ZERO)
-		_close_gameplay_panels_for_movement()
-		_mark_local_player_walking()
-		client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
-		_attack_cooldown = ClientConstants.SEND_INTERVAL
+		if _command_retarget_grace.dispatch_or_queue_floor(ground, _attack_cooldown, client, last_server_tick, Callable(self, "_close_gameplay_panels_for_movement"), Callable(self, "_mark_local_player_walking")):
+			_attack_cooldown = maxf(_attack_cooldown, ClientConstants.SEND_INTERVAL)
 		if _sustained_click.mode == "move":
 			_sustained_click.mark_move_sent(ground)
 		return

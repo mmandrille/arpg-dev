@@ -1,0 +1,35 @@
+server/internal/game/weapon_sets_test.go
+  s_d2a495bd24647f::t_8e4a6b45a9dbf5 89-126
+  s_d2a495bd24647f::t_8d98e2a689e172 127-158,178-179,182-220
+  s_d2a495bd24647f::t_4176c6a87cfdc5 180-181
+server/internal/game/sim.go
+  s_d2a495bd24647f::t_2f08eb52b91340 5389
+server/internal/realtime/change_helpers.go
+  s_d2a495bd24647f::t_fa89800abe2ea2 11-22
+server/internal/realtime/runner.go
+  s_d2a495bd24647f::t_5bc27cfbc418cb 475-477
+server/internal/realtime/session_loop.go
+  s_d2a495bd24647f::t_b479ab14ec9584 759-761
+server/internal/realtime/session_loop_test.go
+  s_d2a495bd24647f::t_9d0fdd42643f56 484-490
+  s_d2a495bd24647f::t_6abf66310df34a 390-431,440,449-455
+server/internal/game/weapon_sets.go
+  s_d2a495bd24647f::t_23b164d52d01ac 119
+  s_d2a495bd24647f::t_95faec1a757c7f 113-118,120-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2de5b7b60c1e52cdbd5b2ba693ea2e23a911fcea",
+  "prompts": {},
+  "sessions": {
+    "s_d2a495bd24647f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee5ed-3283-70a3-9878-2e0dc4b0f6af",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

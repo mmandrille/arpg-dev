@@ -1,0 +1,29 @@
+client/scripts/main.gd
+  s_bb3988203ea88a::t_a8a82eeb39a1f7 21
+  s_bb3988203ea88a::t_6bd36e191ff9b2 1730
+  s_bb3988203ea88a::t_7ca4466ebfcd0d 809-810
+client/tests/test_look_and_feel_polish.gd
+  s_bb3988203ea88a::t_0b4270e3a5e8bf 75-81
+  s_bb3988203ea88a::t_348e143ce6be26 117-118
+client/scripts/camera_impact_feedback.gd
+  s_bb3988203ea88a::t_45b97bcd0e5b53 8,11-12,16,23-32,34,38-41
+client/scripts/combat_event_presentation.gd
+  s_bb3988203ea88a::t_6d4500afe7ddac 27-28
+  s_bb3988203ea88a::t_2d31ae6567c951 87-88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1b50076b122781e9c70ed59fb8db09a8f55d2850",
+  "prompts": {},
+  "sessions": {
+    "s_bb3988203ea88a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b1ad7470-b412-4695-b160-d78b8b965d03",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

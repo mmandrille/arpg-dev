@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-20
+Last updated: 2026-06-23
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-20
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v316 — monster death flourish |
+| **Latest completed slice** | v317 — water hole material motion |
 | **Active branch** | `main` |
-| **CI gate** | v316 focused checks green on 2026-06-20 (`godot --headless --path client --script res://tests/test_animation.gd`, `make client-unit`, `make maintainability`); selected `$autoloop` batch `make ci` pending |
-| **Next slice** | Continue selected `$autoloop` look-and-feel batch with v317 — water/hole material motion |
+| **CI gate** | v317 focused checks green on 2026-06-23 (`godot --headless --path client --script res://tests/test_factories.gd`, `make client-unit`, `make maintainability`); selected `$autoloop` batch `make ci` pending |
+| **Next slice** | Continue selected `$autoloop` look-and-feel batch with v318 — dungeon depth lighting |
 | **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
 | **Next engineering review** | After the selected v314-v328 look-and-feel batch and a green final proof |
 

@@ -36,14 +36,14 @@ make maintainability
 
 ## Tasks
 
-- [ ] Add shimmer/parallax overlay mesh helpers to `WallRenderer`.
-- [ ] Assert overlays in `test_factories.gd`.
-- [ ] Update lifecycle docs and as-built proof.
+- [x] Add shimmer/parallax overlay mesh helpers to `WallRenderer`.
+- [x] Assert overlays in `test_factories.gd`.
+- [x] Update lifecycle docs and as-built proof.
 
 ## Verification
 
-- [ ] `godot --headless --path client --script res://tests/test_factories.gd`
-- [ ] `make client-unit`
-- [ ] `make maintainability`
+- [x] `godot --headless --path client --script res://tests/test_factories.gd`
+- [x] `make client-unit`
+- [x] `make maintainability`
 
 Final full `make ci` remains deferred to the enclosing `$autoloop` batch gate.

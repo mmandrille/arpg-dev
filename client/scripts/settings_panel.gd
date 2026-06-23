@@ -231,7 +231,6 @@ func _build() -> void:
 	camera_mode_row.add_theme_constant_override("separation", 8)
 	box.add_child(camera_mode_row)
 	_add_camera_mode_button(camera_mode_row, ClientSettingsScript.CAMERA_MODE_ISOMETRIC)
-	_add_camera_mode_button(camera_mode_row, ClientSettingsScript.CAMERA_MODE_THIRD_PERSON)
 	_add_camera_mode_button(camera_mode_row, ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
 
 	_master_volume_label = _add_slider_label(box)

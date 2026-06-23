@@ -11,12 +11,15 @@ const DEATH_SECONDS := 0.18
 const HIT_DARKEN := 0.45
 const DEATH_DARKEN := 0.28
 const DEATH_FLOURISH_COLOR := Color("#d9c089")
+const HIGHLIGHT_EMISSION := Color("#d4a017")
+const HIGHLIGHT_EMISSION_ENERGY := 0.35
 const UNRESOLVED_SOURCE := Vector3(1000000000000.0, 1000000000000.0, 1000000000000.0)
 
 var _root: Node3D
 var _base_rotation := Vector3.ZERO
 var _base_mesh_colors: Dictionary = {}
 var _terminal: bool = false
+var _highlighted: bool = false
 var _last_reaction: String = ""
 var _current_tint := Color.WHITE
 var _base_tint := Color.WHITE
@@ -45,6 +48,13 @@ func set_base_tint(color: Color) -> void:
 		_apply_color_scale(1.0)
 
 
+func set_highlight(on: bool) -> void:
+	if _terminal or _highlighted == on:
+		return
+	_highlighted = on
+	_sync_highlight_emission()
+
+
 func play_hit(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_direction: Vector3 = Vector3.BACK) -> void:
 	if _terminal or _root == null:
 		return
@@ -67,6 +77,7 @@ func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_directio
 	if _root == null:
 		return
 	_terminal = true
+	_highlighted = false
 	_last_reaction = "death"
 	_impact_feedback_count += 1
 	_kill_tween(_hit_tween)
@@ -83,6 +94,7 @@ func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_directio
 
 func reset_terminal() -> void:
 	_terminal = false
+	_highlighted = false
 	_last_reaction = ""
 	_kill_tween(_hit_tween)
 	_kill_tween(_death_tween)
@@ -97,6 +109,7 @@ func is_terminal() -> bool:
 
 
 func dispose() -> void:
+	_highlighted = false
 	_kill_tween(_hit_tween)
 	_kill_tween(_death_tween)
 	_hit_tween = null
@@ -108,6 +121,7 @@ func dispose() -> void:
 func get_debug_state() -> Dictionary:
 	return {
 		"terminal": _terminal,
+		"highlighted": _highlighted,
 		"last_reaction": _last_reaction,
 		"base_tint": _base_tint.to_html(false),
 		"current_tint": _current_tint.to_html(false),
@@ -172,6 +186,29 @@ func _apply_color_scale(scale: float) -> void:
 		var base: Color = rec.get("color", _base_tint)
 		mat.albedo_color = Color(base.r * scale, base.g * scale, base.b * scale, base.a)
 	_current_tint = Color(_base_tint.r * scale, _base_tint.g * scale, _base_tint.b * scale, _base_tint.a)
+	_sync_highlight_emission()
+
+
+func _sync_highlight_emission() -> void:
+	for key in _base_mesh_colors.keys():
+		var rec: Dictionary = _base_mesh_colors[key]
+		var raw_node = rec.get("node", null)
+		if raw_node == null or not is_instance_valid(raw_node):
+			continue
+		var mesh_node := raw_node as MeshInstance3D
+		if mesh_node == null:
+			continue
+		var mat := mesh_node.material_override as StandardMaterial3D
+		if mat == null:
+			continue
+		if _highlighted and not _terminal:
+			mat.emission_enabled = true
+			mat.emission = HIGHLIGHT_EMISSION
+			mat.emission_energy_multiplier = HIGHLIGHT_EMISSION_ENERGY
+		else:
+			mat.emission_enabled = false
+			mat.emission = Color.BLACK
+			mat.emission_energy_multiplier = 0.0
 
 
 func _apply_impact_flash() -> void:
@@ -233,6 +270,7 @@ func _on_hit_finished() -> void:
 	if _root != null:
 		_root.rotation = _base_rotation
 	_apply_color_scale(1.0)
+	_sync_highlight_emission()
 
 
 func _kill_tween(tween: Tween) -> void:

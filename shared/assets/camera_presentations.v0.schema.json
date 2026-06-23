@@ -10,7 +10,7 @@
     "version": { "const": 0 },
     "modes": {
       "type": "object",
-      "required": ["isometric", "third_person", "chest_view"],
+      "required": ["isometric", "chest_view"],
       "additionalProperties": {
         "$ref": "#/$defs/cameraMode"
       }

@@ -75,6 +75,8 @@ const PlayerCameraContextScript := preload("res://scripts/player_camera_context.
 const PlayerCameraControllerScript := preload("res://scripts/player_camera_controller.gd")
 const PerspectiveCombatInputScript := preload("res://scripts/perspective_combat_input.gd")
 const AimReticleOverlayScript := preload("res://scripts/aim_reticle_overlay.gd")
+const CrosshairTargetContextScript := preload("res://scripts/crosshair_target_context.gd")
+const CrosshairTargetSystemScript := preload("res://scripts/crosshair_target_system.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScenesByVisual := {
 	"monster_dummy": preload("res://scenes/monster_dummy.tscn"),
@@ -259,6 +261,7 @@ var _last_ping_ms: int = -1
 var _camera: Camera3D  # convenience alias — always equal to _camera_controller.get_gameplay_camera()
 var _camera_controller: PlayerCameraController
 var _aim_reticle: AimReticleOverlay
+var _crosshair_target  # CrosshairTargetSystem
 var _directional_light: DirectionalLight3D
 var _world_environment: WorldEnvironment
 var ground_node: MeshInstance3D
@@ -288,6 +291,7 @@ func _ready() -> void:
 	client_settings.set_language(client_settings.language, false)
 	_loot_filter.set_mode_label(client_settings.loot_filter_mode)
 	client_settings.apply()
+	_sync_camera_from_settings()
 	ClientAudioBridgeScript.apply_settings(audio_controller, client_settings)
 	if discovery_minimap != null: discovery_minimap.set_panel_opacity(client_settings.map_opacity)
 	_refresh_localized_texts()
@@ -375,7 +379,7 @@ func _start_automation_session(resume_session_id: String, requested_world_id: St
 func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
 	gameplay_active = true
-	_update_mouse_capture(); _update_reticle_visibility()
+	_sync_camera_from_settings()
 	current_world_id = client.world_id
 	current_wall_layout = []
 	_render_world_walls(client.world_id)
@@ -396,7 +400,7 @@ func _show_main_menu() -> void:
 		main_menu.show_menu()
 
 func _raise_gameplay_windows() -> void:
-	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, blacksmith_panel, character_stats_panel, skills_panel, quest_journal_panel, character_info_panel]:
+	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, blacksmith_panel, character_stats_panel, skills_panel, quest_journal_panel, character_info_panel, waypoint_panel]:
 		if panel != null and panel is CanvasItem:
 			(panel as CanvasItem).move_to_front()
 	_update_mouse_capture()
@@ -652,8 +656,18 @@ func _on_monster_health_bar_mode_selected(mode: String) -> void:
 func _on_camera_mode_selected(mode: String) -> void:
 	if client_settings == null: return
 	client_settings.set_camera_mode(mode)
-	if _camera_controller != null: _camera_controller.apply_mode(mode)
-	_sync_settings_panel(); _update_mouse_capture(); _update_reticle_visibility()
+	_sync_camera_from_settings()
+	_sync_settings_panel()
+
+func _sync_camera_from_settings() -> void:
+	if client_settings == null:
+		return
+	if _camera_controller != null:
+		_camera_controller.apply_mode(client_settings.camera_mode)
+	if fog_overlay != null:
+		fog_overlay.visible = client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC
+	_update_mouse_capture()
+	_update_reticle_visibility()
 
 func _on_master_volume_changed(value: float) -> void:
 	ClientAudioBridgeScript.set_master_volume(audio_controller, client_settings, value)
@@ -2405,6 +2419,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _is_camera_cycle_key(event) and not _menu_blocks_gameplay_input():
 			if client_settings != null: _on_camera_mode_selected(client_settings.cycle_camera_mode())
 			get_viewport().set_input_as_handled(); return
+		if _is_use_key(event) and not _menu_blocks_gameplay_input():
+			if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0 and _perspective_mode_active():
+				if _try_use_locked_target():
+					get_viewport().set_input_as_handled()
+					return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC:
 		if _camera_controller != null: _camera_controller.apply_mouse_motion((event as InputEventMouseMotion).relative)
 		get_viewport().set_input_as_handled()
@@ -2412,14 +2431,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
-					if client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC:
-						var _ad := PerspectiveCombatInputScript.flat_aim_direction(_camera, player_anchor)
-						_face_direction(_ad)
-						if player_anim != null:
-							player_anim.play_one_shot("attack", CombatReachScript.local_player_attack_mode(inventory, equipped))
-						client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(_ad))
-						_attack_cooldown = _basic_attack_cooldown_seconds()
-						_start_basic_attack_recovery_ui(_attack_cooldown)
+					if _perspective_mode_active():
+						_dispatch_perspective_directional_attack()
 						get_viewport().set_input_as_handled(); return
 					if _is_force_stand_held():
 						_start_directional_attack_hold()
@@ -2443,6 +2456,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 func _handle_input(delta: float) -> void:
 	_update_loot_hover_label()
+	if _crosshair_target != null:
+		_crosshair_target.tick_runtime(get_viewport(), get_world_3d(), inventory, equipped, client_settings, _input_locked())
 	if _input_locked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		if _sustained_click.active:
 			_sustained_click.clear()
@@ -2534,6 +2549,8 @@ func _close_gameplay_panels(except: String = "") -> void:
 		_hide_character_info_panel()
 	if except != "waypoint":
 		_hide_waypoint_panel()
+	_update_mouse_capture()
+	_update_reticle_visibility()
 
 func _close_gameplay_panels_for_movement() -> void:
 	_close_gameplay_panels()
@@ -2614,6 +2631,10 @@ func _handle_escape() -> void:
 	if pause_menu != null and pause_menu.visible:
 		_resume_from_pause()
 		return
+	if gameplay_active and _any_gameplay_panel_open():
+		_close_gameplay_panels()
+		_hide_inventory_if_no_actionable_panel()
+		return
 	if gameplay_active:
 		_show_pause_menu()
 
@@ -2643,8 +2664,34 @@ func _menu_blocks_gameplay_input() -> bool:
 	return (main_menu != null and main_menu.visible) or (character_panel != null and character_panel.visible) \
 		or (multiplayer_panel != null and multiplayer_panel.visible) or (settings_panel != null and settings_panel.visible) \
 		or (pause_menu != null and pause_menu.visible) or (loss_popup != null and loss_popup.visible) \
-		or (inventory_panel != null and inventory_panel.visible) or (character_stats_panel != null and character_stats_panel.visible) \
-		or (skills_panel != null and skills_panel.visible)
+		or _any_gameplay_panel_open()
+
+func _any_gameplay_panel_open() -> bool:
+	if inventory_panel != null and inventory_panel.visible:
+		return true
+	if shop_panel != null and shop_panel.visible:
+		return true
+	if stash_panel != null and stash_panel.visible:
+		return true
+	if bishop_panel != null and bishop_panel.visible:
+		return true
+	if market_panel != null and market_panel.visible:
+		return true
+	if blacksmith_panel != null and blacksmith_panel.visible:
+		return true
+	if mercenary_panel != null and mercenary_panel.visible:
+		return true
+	if character_stats_panel != null and character_stats_panel.visible:
+		return true
+	if skills_panel != null and skills_panel.visible:
+		return true
+	if quest_journal_panel != null and quest_journal_panel.visible:
+		return true
+	if character_info_panel != null and character_info_panel.visible:
+		return true
+	if waypoint_panel != null and waypoint_panel.visible:
+		return true
+	return false
 
 func _handle_autoplay(delta: float) -> void:
 	if client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
@@ -2918,6 +2965,30 @@ func _try_action_at_mouse() -> void:
 
 	_execute_click_pick(_resolve_click_at_mouse())
 
+func _perspective_mode_active() -> bool:
+	return client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
+
+func _is_use_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_E or event.physical_keycode == KEY_E or event.unicode == 101 or event.unicode == 69
+
+func _try_use_locked_target() -> bool:
+	if _crosshair_target == null:
+		return false
+	var pick: Dictionary = _crosshair_target.build_use_pick()
+	if pick.is_empty():
+		return false
+	_execute_click_pick(pick)
+	return true
+
+func _dispatch_perspective_directional_attack() -> void:
+	var aim_dir := PerspectiveCombatInputScript.flat_aim_direction(_camera, player_anchor)
+	_face_direction(aim_dir)
+	if player_anim != null:
+		player_anim.play_one_shot("attack", CombatReachScript.local_player_attack_mode(inventory, equipped))
+	client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(aim_dir))
+	_attack_cooldown = _basic_attack_cooldown_seconds()
+	_start_basic_attack_recovery_ui(_attack_cooldown)
+
 func _interactable_should_approach_before_action(interactable_def_id: String) -> bool:
 	return interactable_def_id in [
 		"hero_corpse",
@@ -3013,7 +3084,9 @@ func _face_direction(flat_dir: Vector2) -> void:
 		return
 	var facing := flat_dir.normalized()
 	_last_facing_direction = facing
-
+	# In chest_view the camera controller owns character_visual.rotation.y; skip the override.
+	if client_settings != null and client_settings.camera_mode == ClientSettings.CAMERA_MODE_CHEST_VIEW:
+		return
 	character_visual.rotation.y = atan2(facing.x, facing.y)
 
 func _face_entity_direction(node: Node3D, flat_dir: Vector2) -> void:
@@ -3067,6 +3140,10 @@ func _try_send_directional_attack() -> void:
 func _mouse_ground_point() -> Vector3:
 	if _camera_controller == null: return player_anchor.global_position if player_anchor != null else Vector3.ZERO
 	return _camera_controller.screen_to_ground_point(get_viewport().get_mouse_position(), get_viewport())
+
+func _center_ground_point() -> Vector3:
+	if _camera_controller == null: return player_anchor.global_position if player_anchor != null else Vector3.ZERO
+	return _camera_controller.center_ground_point(get_viewport())
 
 func _pick_entity_at_mouse() -> String:
 	if _camera_controller == null: return ""
@@ -3429,6 +3506,14 @@ func _build_scene() -> void:
 	add_child(ui)
 	gameplay_ui_layer = ui
 	_aim_reticle = AimReticleOverlayScript.new(); _aim_reticle.visible = false; ui.add_child(_aim_reticle)
+	_crosshair_target = CrosshairTargetSystemScript.new()
+	_crosshair_target.setup(CrosshairTargetContextScript.make(
+		_camera, player_anchor, entities, inventory, equipped, _aim_reticle,
+		Callable(self, "_target_in_local_attack_range"),
+		Callable(self, "_revive_hover_enabled"),
+		Callable(self, "_nearest_loot_at_ground"),
+		Callable(self, "_center_ground_point"),
+	))
 	_debug_label = Label.new()
 	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_debug_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3523,6 +3608,7 @@ func _build_scene() -> void:
 	fog_overlay = FogOfWarOverlay.new()
 	add_child(fog_overlay)
 	fog_overlay.bind(_camera, player_anchor)
+	fog_overlay.visible = (client_settings == null or client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC)
 
 	damage_numbers_layer = CanvasLayer.new()
 	damage_numbers_layer.layer = 2
@@ -4263,10 +4349,12 @@ func _show_waypoint_panel() -> void:
 	_close_gameplay_panels("waypoint")
 	_refresh_waypoint_panel()
 	waypoint_panel.visible = true
+	_raise_gameplay_windows()
 
 func _hide_waypoint_panel() -> void:
 	if waypoint_panel != null:
 		waypoint_panel.visible = false
+	_update_mouse_capture()
 
 func _show_shop_panel(ev: Dictionary) -> void:
 	if shop_panel == null:

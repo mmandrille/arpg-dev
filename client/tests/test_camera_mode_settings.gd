@@ -19,7 +19,7 @@ func _initialize() -> void:
 	_test_settings_cycle_modes()
 	_test_settings_save_load()
 	_test_controller_isometric_projection()
-	_test_controller_perspective_projection()
+	_test_controller_late_settings_mode_sync()
 	_test_settings_panel_camera_mode_button_sync()
 	_test_controller_isometric_mouse_capture_policy()
 	print("[gdtest] PASS: test_camera_mode_settings (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -39,9 +39,6 @@ func _test_loader_defaults_isometric() -> void:
 func _test_loader_perspective_modes() -> void:
 	CameraPresentationsLoaderScript.reset_for_tests()
 	CameraPresentationsLoaderScript.ensure_loaded()
-	var tp := CameraPresentationsLoaderScript.mode("third_person")
-	_assert_eq("third_person projection", tp.get("projection", ""), "perspective")
-	_assert_true("third_person spring_arm_length > 0", tp.get("spring_arm_length", 0.0) > 0.0)
 	var cv := CameraPresentationsLoaderScript.mode("chest_view")
 	_assert_eq("chest_view projection", cv.get("projection", ""), "perspective")
 	_assert_true("chest_view reticle enabled", cv.get("reticle_enabled", false) == true)
@@ -64,21 +61,19 @@ func _test_settings_cycle_modes() -> void:
 	var s := ClientSettingsScript.new("user://test_cycle_cam.json")
 	s.camera_mode = ClientSettingsScript.CAMERA_MODE_ISOMETRIC
 	var next1 := s.cycle_camera_mode()
-	_assert_eq("isometric cycles to third_person", next1, ClientSettingsScript.CAMERA_MODE_THIRD_PERSON)
+	_assert_eq("isometric cycles to chest_view", next1, ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
 	var next2 := s.cycle_camera_mode()
-	_assert_eq("third_person cycles to chest_view", next2, ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
-	var next3 := s.cycle_camera_mode()
-	_assert_eq("chest_view cycles back to isometric", next3, ClientSettingsScript.CAMERA_MODE_ISOMETRIC)
+	_assert_eq("chest_view cycles back to isometric", next2, ClientSettingsScript.CAMERA_MODE_ISOMETRIC)
 
 
 func _test_settings_save_load() -> void:
 	var path := "user://test_cam_save_load.json"
 	var s := ClientSettingsScript.new(path)
-	s.camera_mode = ClientSettingsScript.CAMERA_MODE_THIRD_PERSON
+	s.camera_mode = ClientSettingsScript.CAMERA_MODE_CHEST_VIEW
 	s.save()
 	var s2 := ClientSettingsScript.new(path)
 	s2.load()
-	_assert_eq("saved third_person persists after reload", s2.camera_mode, ClientSettingsScript.CAMERA_MODE_THIRD_PERSON)
+	_assert_eq("saved chest_view persists after reload", s2.camera_mode, ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
 
 
 func _test_controller_isometric_projection() -> void:
@@ -99,74 +94,56 @@ func _test_controller_isometric_projection() -> void:
 	CameraPresentationsLoaderScript.reset_for_tests()
 
 
-func _test_controller_perspective_projection() -> void:
+func _test_controller_late_settings_mode_sync() -> void:
 	CameraPresentationsLoaderScript.reset_for_tests()
+	var settings := ClientSettingsScript.new("user://test_late_cam_sync.json")
+	settings.camera_mode = ClientSettingsScript.CAMERA_MODE_CHEST_VIEW
 	var ctrl := PlayerCameraControllerScript.new()
 	var root := Node3D.new()
 	get_root().add_child(root)
-	var ctx := PlayerCameraContextScript.new()
-	ctx.player_anchor = root
+	var anchor := Node3D.new()
+	root.add_child(anchor)
+	var visual := Node3D.new()
+	anchor.add_child(visual)
+	var ctx := PlayerCameraContextScript.make(anchor, visual, null, Callable())
 	ctrl.setup(ctx, root)
-	ctrl.apply_mode("third_person")
-	var cam := ctrl.get_gameplay_camera()
-	_assert_true("controller third_person: camera is non-null", cam != null)
-	if cam != null:
-		_assert_eq("controller third_person: projection is perspective", cam.projection, Camera3D.PROJECTION_PERSPECTIVE)
+	_assert_eq("null settings default rig is isometric", ctrl.get_gameplay_camera().projection, Camera3D.PROJECTION_ORTHOGONAL)
+	ctrl.apply_mode(settings.camera_mode)
+	_assert_eq("late chest_view apply uses perspective projection", ctrl.get_gameplay_camera().projection, Camera3D.PROJECTION_PERSPECTIVE)
 	root.queue_free()
 	CameraPresentationsLoaderScript.reset_for_tests()
 
 
 func _test_settings_panel_camera_mode_button_sync() -> void:
-	# Task 6.2: Verify SettingsPanel.set_camera_mode() button sync for all three modes.
-	# This is a headless state-mutation test: create button dict, call set_camera_mode(),
+	# Verify SettingsPanel.set_camera_mode() button sync for both modes.
+	# Headless state-mutation test: create button dict, call set_camera_mode(),
 	# verify the correct button is disabled (state-based contract).
 	const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 
-	# Create three mock buttons.
 	var iso_button := Button.new()
-	var third_button := Button.new()
 	var chest_button := Button.new()
 
-	# Create a minimal panel instance and populate its button dict manually.
 	var panel := SettingsPanelScript.new()
 	panel._camera_mode_buttons[ClientSettingsScript.CAMERA_MODE_ISOMETRIC] = iso_button
-	panel._camera_mode_buttons[ClientSettingsScript.CAMERA_MODE_THIRD_PERSON] = third_button
 	panel._camera_mode_buttons[ClientSettingsScript.CAMERA_MODE_CHEST_VIEW] = chest_button
 
-	# Test isometric mode button sync
 	panel.set_camera_mode(ClientSettingsScript.CAMERA_MODE_ISOMETRIC)
 	_assert_true("isometric button disabled when mode is isometric", iso_button.disabled == true)
-	_assert_true("third_person button enabled when mode is isometric", third_button.disabled == false)
 	_assert_true("chest_view button enabled when mode is isometric", chest_button.disabled == false)
 
-	# Test third_person mode button sync
-	panel.set_camera_mode(ClientSettingsScript.CAMERA_MODE_THIRD_PERSON)
-	_assert_true("third_person button disabled when mode is third_person", third_button.disabled == true)
-	_assert_true("isometric button enabled when mode is third_person", iso_button.disabled == false)
-	_assert_true("chest_view button enabled when mode is third_person", chest_button.disabled == false)
-
-	# Test chest_view mode button sync
 	panel.set_camera_mode(ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
 	_assert_true("chest_view button disabled when mode is chest_view", chest_button.disabled == true)
 	_assert_true("isometric button enabled when mode is chest_view", iso_button.disabled == false)
-	_assert_true("third_person button enabled when mode is chest_view", third_button.disabled == false)
 
-	# Test normalize fallback: unknown mode normalizes to isometric, sync reflects that
+	# Unknown mode normalizes to isometric.
 	panel.set_camera_mode("unknown_mode_should_normalize")
 	_assert_true("normalized unknown mode disables isometric button", iso_button.disabled == true)
-	_assert_true("normalized unknown mode enables third_person button", third_button.disabled == false)
 	_assert_true("normalized unknown mode enables chest_view button", chest_button.disabled == false)
 
 
 func _test_controller_isometric_mouse_capture_policy() -> void:
-	# Task 6.4: Assert isometric mode keeps Input.MOUSE_MODE_VISIBLE policy.
-	# The game applies this policy in main.gd:_update_mouse_capture(), but the
-	# contract is that PlayerCameraController applies isometric (orthographic)
-	# projection, and the caller (main.gd) then decides to keep the mouse visible
-	# for isometric and captured for third_person/chest_view.
-	#
-	# This test verifies the camera mode configuration is orthographic for isometric,
-	# which is the prerequisite for the mouse capture policy applied by the caller.
+	# Isometric uses ORTHOGONAL; chest_view uses PERSPECTIVE.
+	# main.gd:_update_mouse_capture() gates mouse capture on this distinction.
 	CameraPresentationsLoaderScript.reset_for_tests()
 	var ctrl := PlayerCameraControllerScript.new()
 	var root := Node3D.new()
@@ -178,16 +155,13 @@ func _test_controller_isometric_mouse_capture_policy() -> void:
 	var cam := ctrl.get_gameplay_camera()
 	_assert_true("isometric camera is non-null", cam != null)
 	if cam != null:
-		_assert_eq("isometric camera projection is ORTHOGONAL (not PERSPECTIVE)", cam.projection, Camera3D.PROJECTION_ORTHOGONAL)
+		_assert_eq("isometric camera projection is ORTHOGONAL", cam.projection, Camera3D.PROJECTION_ORTHOGONAL)
 
-	# Verify that third_person uses PERSPECTIVE (opposite of isometric).
-	# This ensures the caller code that checks "camera_mode != CAMERA_MODE_ISOMETRIC"
-	# can reliably capture the mouse for perspective modes.
-	ctrl.apply_mode(ClientSettingsScript.CAMERA_MODE_THIRD_PERSON)
+	ctrl.apply_mode(ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
 	cam = ctrl.get_gameplay_camera()
-	_assert_true("third_person camera is non-null", cam != null)
+	_assert_true("chest_view camera is non-null", cam != null)
 	if cam != null:
-		_assert_eq("third_person camera projection is PERSPECTIVE (not ORTHOGONAL)", cam.projection, Camera3D.PROJECTION_PERSPECTIVE)
+		_assert_eq("chest_view camera projection is PERSPECTIVE", cam.projection, Camera3D.PROJECTION_PERSPECTIVE)
 
 	root.queue_free()
 	CameraPresentationsLoaderScript.reset_for_tests()

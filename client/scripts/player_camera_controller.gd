@@ -191,7 +191,13 @@ func _reset_perspective_angles() -> void:
 
 
 func _teardown_rig() -> void:
-	# Remove spring arm (and its child camera) if present from previous mode.
+	# Detach camera from spring arm if it was parented there, before freeing spring arm.
+	if _spring_arm != null:
+		if is_instance_valid(_camera) and _camera.get_parent() == _spring_arm:
+			_spring_arm.remove_child(_camera)
+			_scene_root.add_child(_camera)
+
+	# Remove spring arm if present from previous mode.
 	if _spring_arm != null:
 		if is_instance_valid(_spring_arm) and _spring_arm.is_inside_tree():
 			_spring_arm.get_parent().remove_child(_spring_arm)

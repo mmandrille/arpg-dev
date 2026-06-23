@@ -23,12 +23,12 @@ Last updated: 2026-06-23
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v328 — camera impact feedback (look-and-feel autoloop batch v314–v328) |
+| **Latest completed slice** | v329 — camera-mode-options |
 | **Active branch** | `main` |
-| **CI gate** | v322–v328 batch `make ci` green on 2026-06-23 |
-| **Next slice** | Run `$review` then `$refactor` (engineering review cadence due after v328) |
+| **CI gate** | v329 `make ci` green on 2026-06-23 |
+| **Next slice** | Run `$review` then `$refactor` (engineering review cadence due after v330) |
 | **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
-| **Next engineering review** | After the selected v314-v328 look-and-feel batch and a green final proof |
+| **Next engineering review** | After v330 ships and `make ci` is green (next milestone review due ~v340) |
 
 
 ### Periodic engineering reviews

@@ -1,0 +1,24 @@
+client/scripts/player_camera_controller.gd
+  s_13fb8c3954ab4d::t_f77bf3c8dcce2e 198-201
+  s_13fb8c3954ab4d::t_4eb65034da52fb 240
+  s_13fb8c3954ab4d::t_3e9ab42f16f13d 180-185
+  s_13fb8c3954ab4d::t_4a77318b34fc9d 42-44,51-53
+  s_13fb8c3954ab4d::t_3b02ede06f8947 27-28,31
+  s_13fb8c3954ab4d::t_4b302ad2671dfb 255,266-267
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7c3db68dbb08b4e43108afb0ef0bff8e0bc01f4e",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

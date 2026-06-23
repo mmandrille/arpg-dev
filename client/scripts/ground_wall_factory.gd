@@ -27,6 +27,8 @@ func update_ground_material(ground_node: MeshInstance3D, level: int) -> void:
 	if ground_node == null:
 		return
 	ground_node.material_override = ground_material_for_level(level)
+	if level == 0:
+		TownAmbientLife.attach_to_town(ground_node)
 
 func ground_texture_id_for_level(level: int) -> String:
 	return ClientConstantsScript.GROUND_TEXTURE_TOWN if level == 0 else ClientConstantsScript.GROUND_TEXTURE_DUNGEON

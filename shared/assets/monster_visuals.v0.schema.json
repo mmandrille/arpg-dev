@@ -26,7 +26,8 @@
           "animation_profile": {
             "type": "string",
             "enum": ["ground_biped", "ground_quadruped", "hover_flyer"]
-          }
+          },
+          "family_accent": { "type": "string", "pattern": "^[0-9a-fA-F]{6}$" }
         }
       }
     }

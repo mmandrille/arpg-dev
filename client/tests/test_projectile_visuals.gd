@@ -66,6 +66,7 @@ func _test_magic_bolt_remains_blue_energy_bolt() -> void:
 	_assert_true("magic bolt energy exists", energy != null)
 	var mat := energy.material_override as StandardMaterial3D
 	_assert_true("magic bolt remains blue", mat.albedo_color.b > mat.albedo_color.r)
+	_assert_true("magic bolt trail exists", bolt.find_child("ProjectileMotionTrail", false, false) != null)
 	bolt.free()
 
 

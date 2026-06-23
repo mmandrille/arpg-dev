@@ -44,7 +44,15 @@ static func resolve(class_id: String) -> Dictionary:
 		"scene_path": _res_path(runtime_path),
 		"scale": _positive_float(model.get("scale", 1.0), 1.0),
 		"height_offset": float(model.get("height_offset", 0.0)),
+		"idle_stance": entry.get("idle_stance", {}) if typeof(entry.get("idle_stance", {})) == TYPE_DICTIONARY else {},
 	}
+
+
+static func idle_stance_for_class(class_id: String) -> Dictionary:
+	var entry: Dictionary = _classes.get(class_id, {})
+	if typeof(entry.get("idle_stance", {})) == TYPE_DICTIONARY:
+		return (entry.get("idle_stance", {}) as Dictionary).duplicate(true)
+	return {}
 
 
 static func packed_scene_for_class(class_id: String) -> PackedScene:

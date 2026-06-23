@@ -1,0 +1,148 @@
+extends SceneTree
+
+const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
+const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
+const MonsterFamilyAccentScript := preload("res://scripts/monster_family_accent.gd")
+const TownAmbientLifeScript := preload("res://scripts/town_ambient_life.gd")
+const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
+const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
+const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+
+var _pass_count := 0
+var _fail_count := 0
+
+
+func _initialize() -> void:
+	ClassPresentationsLoaderScript.ensure_loaded()
+	_test_class_idle_stance()
+	_test_monster_family_accent()
+	_test_town_ambient_life()
+	_test_camera_impact_feedback()
+	_test_chest_open_burst()
+	_test_tooltip_rarity_border()
+	_test_combat_camera_binding()
+	_finish()
+
+
+func _test_class_idle_stance() -> void:
+	var model := Node3D.new()
+	ClassIdleStanceScript.apply_to_model(model, "warrior")
+	var stance: Dictionary = ClassPresentationsLoaderScript.idle_stance_for_class("warrior")
+	if not is_equal_approx(model.rotation_degrees.z, float(stance.get("lean_degrees", 0.0))):
+		_fail("class idle stance should apply lean")
+		model.free()
+		return
+	model.free()
+	_pass("class idle stance")
+
+
+func _test_monster_family_accent() -> void:
+	var node := Node3D.new()
+	MonsterFamilyAccentScript.sync_for_monster(node, "dungeon_wolf")
+	var marker := node.find_child("MonsterFamilyAccent", false, false)
+	if marker == null:
+		_fail("dungeon wolf should get family accent marker")
+		node.free()
+		return
+	MonsterFamilyAccentScript.sync_for_monster(node, "dungeon_mob")
+	if node.find_child("MonsterFamilyAccent", false, false) == null:
+		_fail("dungeon mob should get family accent marker")
+		node.free()
+		return
+	node.free()
+	_pass("monster family accent")
+
+
+func _test_town_ambient_life() -> void:
+	var root := Node3D.new()
+	TownAmbientLifeScript.attach_to_town(root)
+	var props := root.find_child("TownAmbientLife", false, false)
+	if props == null or props.get_child_count() < 3:
+		_fail("town ambient life should add silhouettes")
+		root.free()
+		return
+	TownAmbientLifeScript.attach_to_town(root)
+	if props.get_child_count() != 3:
+		_fail("town ambient life should attach once")
+		root.free()
+		return
+	root.free()
+	_pass("town ambient life")
+
+
+func _test_camera_impact_feedback() -> void:
+	var camera := Camera3D.new()
+	CameraImpactFeedbackScript.apply_from_damage(camera, 12, 40)
+	if camera.position == ClientConstants.CAMERA_FOLLOW_OFFSET:
+		_fail("camera impact should offset follow position")
+		camera.free()
+		return
+	CameraImpactFeedbackScript.decay(camera, 1.0)
+	camera.free()
+	_pass("camera impact feedback")
+
+
+func _test_chest_open_burst() -> void:
+	var chest := Node3D.new()
+	ChestPresentationScript.sync_open_burst(chest, true)
+	if chest.find_child("ChestOpenBurst", true, false) == null:
+		_fail("chest open should spawn burst marker")
+		chest.free()
+		return
+	chest.free()
+	_pass("chest open burst")
+
+
+func _test_tooltip_rarity_border() -> void:
+	if ItemTooltipPanelScript.border_width_for_rarity("common") != 1:
+		_fail("common tooltip should use thin border")
+		return
+	if ItemTooltipPanelScript.border_width_for_rarity("rare") < 2:
+		_fail("rare tooltip should use thicker rarity border")
+		return
+	_pass("tooltip rarity border")
+
+
+func _test_combat_camera_binding() -> void:
+	var camera := Camera3D.new()
+	CombatEventPresentationScript.bind_camera(camera, 50, 0.0)
+	CombatEventPresentationScript.show_combat_text_for_event(
+		"1001",
+		{"event_type": "player_damaged", "damage": 8},
+		Color.WHITE,
+		Callable(self, "_noop_damage"),
+		Callable(self, "_noop_node"),
+	)
+	if camera.position == ClientConstants.CAMERA_FOLLOW_OFFSET:
+		_fail("combat presentation should route player damage to camera")
+		camera.free()
+		return
+	camera.free()
+	_pass("combat camera binding")
+
+
+func _noop_damage(_entity_id: String, _color: Color, _amount = null, _prefix: String = "", _scale: float = 0.0, _variant: String = "", _text: String = "", _damage_type: String = "") -> void:
+	pass
+
+
+func _noop_node(_entity_id: String) -> Node3D:
+	return null
+
+
+func _pass(_label: String) -> void:
+	_pass_count += 1
+
+
+func _fail(label: String) -> void:
+	_fail_count += 1
+	push_error(label)
+
+
+func _finish() -> void:
+	if _fail_count == 0:
+		print("[gdtest] PASS: test_look_and_feel_polish (%d passed, %d failed)" % [_pass_count, _fail_count])
+		quit(0)
+		return
+	print("[gdtest] FAIL: test_look_and_feel_polish (%d passed, %d failed)" % [_pass_count, _fail_count])
+	quit(1)

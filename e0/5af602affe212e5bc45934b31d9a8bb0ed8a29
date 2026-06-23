@@ -1,0 +1,38 @@
+scripts/client_smoke.sh
+  s_430c3294a50024::t_3e63aa7e221e15 169
+client/scripts/combat_outcome_punch.gd
+  s_430c3294a50024::t_2a5ea4f75dda30 1-104
+docs/specs/v320_spec-critical-hit-punch.md
+  s_430c3294a50024::t_6c5b80e9fc31c6 1-36
+docs/as-built/v320_critical-hit-punch.md
+  s_430c3294a50024::t_1638dba3348ebf 1-26
+client/scripts/main.gd
+  s_430c3294a50024::t_d033d987d05d1f 19
+  s_430c3294a50024::t_c932c4f2496d15 1728
+  s_430c3294a50024::t_11611a325c51e6 3414
+  s_430c3294a50024::t_5f99ee26e60dba 3535
+client/tests/test_combat_outcome_punch.gd
+  s_430c3294a50024::t_ee5a038de23735 1-83
+PROGRESS.md
+  s_430c3294a50024::t_23205935f4ffe9 26,28-29
+docs/progress/slice-lifecycle.md
+  s_430c3294a50024::t_1a42676ce56e8a 335
+client/scripts/combat_event_presentation.gd
+  s_430c3294a50024::t_0757e6a386f5fa 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e05af602affe212e5bc45934b31d9a8bb0ed8a29",
+  "prompts": {},
+  "sessions": {
+    "s_430c3294a50024": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "42edd734-a00e-4ff2-896e-74c43d0c5702",
+        "model": "default"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,52 @@
+client/tests/test_camera_mode_settings.gd
+  s_13fb8c3954ab4d::t_01a60b637d27c2 1,7-8,20-21
+  s_13fb8c3954ab4d::t_25cb8de404ce5d 70-104
+client/scripts/player_camera_controller.gd
+  s_13fb8c3954ab4d::t_77f227a2965496 118-129
+  s_13fb8c3954ab4d::t_41f57807a66b08 242-243,251-252
+  s_13fb8c3954ab4d::t_5e29db3da4649a 1-18,20-23,25-35,37-93,148-241,244-250,253-254
+  s_13fb8c3954ab4d::t_b8d4ccb8869663 103-117,130-147
+  s_13fb8c3954ab4d::t_9d3c482661687f 19,24
+  s_13fb8c3954ab4d::t_f7859f499d58bf 36
+  s_13fb8c3954ab4d::t_0a0e50771bad54 94-102
+client/scripts/player_camera_context.gd
+  s_13fb8c3954ab4d::t_0b9dc51bb3f97c 13-17
+  s_13fb8c3954ab4d::t_c2c1b2a7bb0d12 1-5
+  s_13fb8c3954ab4d::t_e9facb95888ae4 12
+  s_13fb8c3954ab4d::t_05e20cb36057b3 6-11,18
+client/scripts/main.gd
+  s_13fb8c3954ab4d::t_468ed04989d5c1 3038
+  s_13fb8c3954ab4d::t_87558827fe87be 3039
+  s_13fb8c3954ab4d::t_79657f33b324fa 3042,3046,3048
+  s_13fb8c3954ab4d::t_955b7c05dbc36a 3043-3044
+  s_13fb8c3954ab4d::t_f063e5c0487b25 73-74
+  s_13fb8c3954ab4d::t_82ef9eb1458c2f 818
+  s_13fb8c3954ab4d::t_d5ec7b8ee21d2a 3014
+  s_13fb8c3954ab4d::t_6ab8ae32a4a6b8 3068,3070
+  s_13fb8c3954ab4d::t_7ffbfa26388241 3060
+  s_13fb8c3954ab4d::t_6a665a291c7ea8 2407,2409
+  s_13fb8c3954ab4d::t_e264bc10cef1f3 256-257
+  s_13fb8c3954ab4d::t_3d1ac345bcaa69 819,1753,1757
+  s_13fb8c3954ab4d::t_b78bca5f83d129 3381,3383
+  s_13fb8c3954ab4d::t_30f6a09cbb1fa3 2451
+  s_13fb8c3954ab4d::t_2b148129008a89 3382
+  s_13fb8c3954ab4d::t_c1f3d77aadef9e 647-650
+.maintainability/file-size-baseline.tsv
+  s_13fb8c3954ab4d::t_ec1fb7e114e444 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e0331c57a0a3d8e9cc77a6396ec2bc55268e80b2",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

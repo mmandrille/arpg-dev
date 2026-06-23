@@ -1,0 +1,49 @@
+{
+  "id": "camera_mode_setting",
+  "runner": "godot_client",
+  "world_id": "collision_lab",
+  "seed": "camera_mode_setting_seed",
+  "title": "Camera mode setting and V cycle",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    {
+      "type": "assert_camera_mode",
+      "mode": "isometric",
+      "projection": "orthogonal",
+      "mouse_captured": false
+    },
+    { "type": "press_key", "keycode": "KEY_ESCAPE" },
+    { "type": "wait_pause_menu", "timeout_s": 3.0 },
+    { "type": "click_menu_button", "button": "settings" },
+    { "type": "wait_settings_panel", "timeout_s": 3.0 },
+    { "type": "select_camera_mode", "mode": "third_person" },
+    {
+      "type": "assert_camera_mode",
+      "mode": "third_person",
+      "projection": "perspective",
+      "mouse_captured": false
+    },
+    { "type": "click_menu_button", "button": "back" },
+    { "type": "click_menu_button", "button": "resume" },
+    {
+      "type": "assert_camera_mode",
+      "mode": "third_person",
+      "projection": "perspective",
+      "mouse_captured": true
+    },
+    { "type": "press_key", "keycode": "KEY_V" },
+    {
+      "type": "assert_camera_mode",
+      "mode": "chest_view",
+      "projection": "perspective",
+      "mouse_captured": true
+    },
+    { "type": "press_key", "keycode": "KEY_V" },
+    {
+      "type": "assert_camera_mode",
+      "mode": "isometric",
+      "projection": "orthogonal",
+      "mouse_captured": false
+    }
+  ]
+}

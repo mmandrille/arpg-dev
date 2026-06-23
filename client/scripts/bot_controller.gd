@@ -193,6 +193,12 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_set_multiplayer_search(action)
 		"select_multiplayer_sort":
 			_do_select_multiplayer_sort(action)
+		"set_camera_mode":
+			if _main != null and _main.has_method("bot_set_camera_mode"):
+				_main.bot_set_camera_mode(str(action.get("mode", "isometric")))
+		"select_camera_mode":
+			if _main != null and _main.has_method("bot_select_camera_mode"):
+				_main.bot_select_camera_mode(str(action.get("mode", "isometric")))
 		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", \
 		"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", \
 		"click_market_cancel_offer", "set_market_search", "select_market_sort":
@@ -404,6 +410,8 @@ func _do_set_multiplayer_search(action: Dictionary) -> void:
 func _do_select_multiplayer_sort(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_select_multiplayer_sort"):
 		_main.bot_select_multiplayer_sort(str(action.get("mode", "recent")))
+
+
 
 
 # Headless fallback: dispatches action_intent directly via main.gd which routes
@@ -630,6 +638,7 @@ func _parse_keycode(name: String) -> Key:
 		"KEY_C": return KEY_C
 		"KEY_S": return KEY_S
 		"KEY_D": return KEY_D
+		"KEY_V": return KEY_V
 		"KEY_TAB": return KEY_TAB
 		"KEY_ESCAPE": return KEY_ESCAPE
 	return KEY_NONE

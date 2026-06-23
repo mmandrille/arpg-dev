@@ -316,6 +316,10 @@ func _add_camera_mode_button(parent: Control, mode: String) -> void:
 	parent.add_child(button)
 
 
+func bot_select_camera_mode(mode: String) -> void:
+	camera_mode_selected.emit(mode)
+
+
 func _add_slider_label(parent: Control) -> Label:
 	var label := Label.new()
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

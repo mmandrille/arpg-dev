@@ -5401,8 +5401,19 @@ func get_bot_state() -> Dictionary:
 		"current_session_mode": client.session_mode if client != null else "",
 		"current_session_listed": client.session_listed if client != null else false,
 		"gameplay_active": gameplay_active,
+		"camera_mode": client_settings.camera_mode if client_settings != null else "isometric",
+		"camera_projection": _camera_projection_for_bot(),
+		"mouse_captured": Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
 	}
 	return out
+func _camera_projection_for_bot() -> String:
+	if _camera_controller == null: return "orthogonal"
+	return "perspective" if _camera_controller.get_gameplay_camera().projection == Camera3D.PROJECTION_PERSPECTIVE else "orthogonal"
+func bot_set_camera_mode(mode: String) -> void:
+	_on_camera_mode_selected(mode)
+func bot_select_camera_mode(mode: String) -> void:
+	if settings_panel != null and settings_panel.has_method("bot_select_camera_mode"):
+		settings_panel.bot_select_camera_mode(mode)
 func _wall_count_by_source(source: String) -> int:
 	var count := 0
 	for wall in current_wall_layout:

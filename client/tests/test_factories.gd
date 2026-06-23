@@ -77,9 +77,16 @@ func _test_wall_renderer() -> void:
 		"source": "generated",
 	}])
 	_assert_eq("wall layout count", walls.size(), 1)
-	_assert_eq("wall child count", root.get_child_count(), 1)
+	_assert_eq("wall child count", root.get_child_count(), 2)
 	var wall := root.get_child(0) as MeshInstance3D
 	_assert_eq("wall child name", wall.name, "Wall_test_wall")
+	_assert_eq("dungeon wall height", (wall.mesh as BoxMesh).size.y, ground_factory.dungeon_ceiling_height())
+	var ceiling := root.get_node_or_null("DungeonCeiling") as MeshInstance3D
+	_assert_true("dungeon ceiling node exists", ceiling != null)
+	renderer.set_ceiling_visible(false)
+	_assert_true("dungeon ceiling can be hidden for isometric", not ceiling.visible)
+	renderer.set_ceiling_visible(true)
+	_assert_true("dungeon ceiling can be shown for perspective", ceiling.visible)
 	_assert_true("wall material has palette texture", (wall.material_override as StandardMaterial3D).albedo_texture != null)
 	_assert_true("wall material normal enabled", (wall.material_override as StandardMaterial3D).normal_enabled)
 	_assert_true("wall material has normal texture", (wall.material_override as StandardMaterial3D).normal_texture != null)
@@ -93,7 +100,7 @@ func _test_wall_renderer() -> void:
 	}])
 	_assert_eq("water layout count", water_walls.size(), 1)
 	_assert_eq("water layout kind", str((water_walls[0] as Dictionary).get("kind", "")), "water")
-	_assert_eq("water child count", root.get_child_count(), 1)
+	_assert_eq("water child count", root.get_child_count(), 2)
 	var water := root.get_child(0) as MeshInstance3D
 	_assert_eq("water child name", water.name, "Water_test_water")
 	_assert_eq("water metadata kind", str(water.get_meta("kind", "")), "water")
@@ -109,7 +116,7 @@ func _test_wall_renderer() -> void:
 	}])
 	_assert_eq("hole layout count", hole_walls.size(), 1)
 	_assert_eq("hole layout kind", str((hole_walls[0] as Dictionary).get("kind", "")), "hole")
-	_assert_eq("hole child count", root.get_child_count(), 1)
+	_assert_eq("hole child count", root.get_child_count(), 2)
 	var hole := root.get_child(0) as MeshInstance3D
 	_assert_eq("hole child name", hole.name, "Hole_test_hole")
 	_assert_eq("hole metadata kind", str(hole.get_meta("kind", "")), "hole")
@@ -127,7 +134,7 @@ func _test_wall_renderer() -> void:
 	_assert_eq("rock layout count", rock_walls.size(), 1)
 	_assert_eq("rock layout kind", str((rock_walls[0] as Dictionary).get("kind", "")), "rock")
 	_assert_true("rock layout LOS metadata", bool((rock_walls[0] as Dictionary).get("blocks_line_of_sight", false)))
-	_assert_eq("rock child count", root.get_child_count(), 1)
+	_assert_eq("rock child count", root.get_child_count(), 2)
 	var rock := root.get_child(0) as Node3D
 	_assert_eq("rock child name", rock.name, "Rock_test_rock")
 	_assert_eq("rock metadata kind", str(rock.get_meta("kind", "")), "rock")
@@ -159,6 +166,7 @@ func _test_wall_renderer() -> void:
 	_assert_eq("rubble child name", rubble.name, "Rubble_test_rubble")
 	_assert_eq("rubble metadata kind", str(rubble.get_meta("kind", "")), "rubble")
 	_assert_true("rubble has chunks", rubble.get_child_count() >= 5)
+	renderer.set_level(0)
 	var lab_walls := renderer.render_world_walls("flying_navigation_lab")
 	var lab_water_count := 0
 	var lab_hole_count := 0

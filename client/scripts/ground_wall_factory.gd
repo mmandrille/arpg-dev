@@ -135,7 +135,7 @@ func make_wall_normal_texture(texture_id: String, palette: Dictionary = {}) -> I
 	wall_normal_textures[cache_key] = texture
 	return texture
 
-func wall_material_for_level(level: int, source: String, size: Dictionary) -> StandardMaterial3D:
+func wall_material_for_level(level: int, source: String, size: Dictionary, wall_height: float = 1.0) -> StandardMaterial3D:
 	var palette := biome_palette_for_level(level)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
@@ -144,7 +144,7 @@ func wall_material_for_level(level: int, source: String, size: Dictionary) -> St
 	mat.normal_scale = 0.24
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.roughness = 0.94
-	mat.uv1_scale = Vector3(maxf(1.0, float(size.get("x", 1.0)) / 2.0), maxf(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
+	mat.uv1_scale = Vector3(maxf(1.0, float(size.get("x", 1.0)) / 2.0), maxf(1.0, wall_height / 2.0), 1.0)
 	match source:
 		"generated":
 			mat.albedo_color = Color(0.92, 0.86, 0.76)
@@ -259,6 +259,79 @@ func biome_palette_for_level(level: int) -> Dictionary:
 			continue
 		return palette
 	return {}
+
+
+func dungeon_ceiling_height() -> float:
+	_ensure_dungeon_generation()
+	return float(_dungeon_generation.get("ceiling_height", 4.0))
+
+
+func floor_size_for_level(level: int) -> Vector2:
+	_ensure_dungeon_generation()
+	if level >= 0:
+		return Vector2.ZERO
+	if _is_boss_floor(level):
+		var boss: Dictionary = _dungeon_generation.get("boss_floor", {})
+		var boss_size: Dictionary = boss.get("floor_size", {})
+		return Vector2(float(boss_size.get("width", 30.0)), float(boss_size.get("height", 30.0)))
+	var size: Dictionary = _dungeon_generation.get("floor_size", {})
+	var width := float(size.get("width", 100.0))
+	var height := float(size.get("height", 50.0))
+	var depth := absi(level)
+	for raw in _dungeon_generation.get("floor_profiles", []):
+		var profile := raw as Dictionary
+		var min_depth := int(profile.get("min_depth", 1))
+		var max_value = profile.get("max_depth", null)
+		if depth < min_depth:
+			continue
+		if max_value != null and depth > int(max_value):
+			continue
+		var profile_size: Dictionary = profile.get("floor_size", {})
+		width = float(profile_size.get("width", width))
+		height = float(profile_size.get("height", height))
+		break
+	return Vector2(width, height)
+
+
+func make_ceiling_node(level: int) -> MeshInstance3D:
+	var floor_size := floor_size_for_level(level)
+	var ceiling_height := dungeon_ceiling_height()
+	var node := MeshInstance3D.new()
+	node.name = "DungeonCeiling"
+	node.set_meta("kind", "ceiling")
+	var mesh := PlaneMesh.new()
+	mesh.size = floor_size
+	node.mesh = mesh
+	node.position = Vector3(floor_size.x * 0.5, ceiling_height, floor_size.y * 0.5)
+	node.rotation_degrees = Vector3(180.0, 0.0, 0.0)
+	node.material_override = ceiling_material_for_level(level)
+	return node
+
+
+func ceiling_material_for_level(level: int) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	var palette: Dictionary = biome_palette_for_level(level)
+	if palette.is_empty():
+		mat.albedo_color = Color(0.22, 0.24, 0.26)
+	else:
+		mat.albedo_color = _palette_color(palette, "wall_base", Color(0.22, 0.24, 0.26)).darkened(0.18)
+	if not palette.is_empty():
+		mat.albedo_texture = make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.roughness = 0.98
+	var floor_size := floor_size_for_level(level)
+	mat.uv1_scale = Vector3(maxf(1.0, floor_size.x / 8.0), maxf(1.0, floor_size.y / 8.0), 1.0)
+	return mat
+
+
+func _is_boss_floor(level: int) -> bool:
+	if level >= 0:
+		return false
+	var boss: Dictionary = _dungeon_generation.get("boss_floor", {})
+	var cadence := int(boss.get("cadence", 0))
+	if cadence <= 0:
+		return false
+	return absi(level) % cadence == 0
 
 func _ensure_dungeon_generation() -> void:
 	if not _dungeon_generation.is_empty():

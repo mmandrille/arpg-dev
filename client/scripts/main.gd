@@ -666,6 +666,7 @@ func _sync_camera_from_settings() -> void:
 		_camera_controller.apply_mode(client_settings.camera_mode)
 	if fog_overlay != null:
 		fog_overlay.set_active(client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC)
+	_sync_dungeon_ceiling_visibility()
 	_update_mouse_capture()
 	_update_reticle_visibility()
 
@@ -4924,16 +4925,27 @@ func _current_teleporter_record() -> Dictionary:
 
 func _render_world_walls(world_id: String) -> void:
 	_ensure_wall_renderer()
+	if _wall_renderer != null:
+		_wall_renderer.set_level(current_level)
 	current_wall_layout = _wall_renderer.render_world_walls(world_id) if _wall_renderer != null else []
 	_sync_fog_wall_layout()
 
 func _render_wall_layout(walls: Array) -> void:
 	_ensure_wall_renderer()
+	if _wall_renderer != null:
+		_wall_renderer.set_level(current_level)
 	current_wall_layout = _wall_renderer.render_wall_layout(walls) if _wall_renderer != null else []
 	_sync_fog_wall_layout()
 func _sync_fog_wall_layout() -> void:
 	if fog_overlay != null: InteractableRulesLoader.sync_fog_overlay(fog_overlay, current_wall_layout, interactable_ids, entities)
 	_sync_discovery_minimap()
+	_sync_dungeon_ceiling_visibility()
+
+func _sync_dungeon_ceiling_visibility() -> void:
+	if _wall_renderer == null or client_settings == null:
+		return
+	var show_ceiling := current_level < 0 and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
+	_wall_renderer.set_ceiling_visible(show_ceiling)
 func _clear_wall_nodes() -> void:
 	_ensure_wall_renderer()
 	if _wall_renderer != null:

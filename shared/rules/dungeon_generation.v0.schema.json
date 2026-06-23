@@ -9,6 +9,7 @@
     "floor_profiles",
     "biome_palettes",
     "wall_thickness",
+    "ceiling_height",
     "player_spawn",
     "stair_placement",
     "teleporter_placement",
@@ -47,6 +48,7 @@
       "items": { "$ref": "#/$defs/biome_palette" }
     },
     "wall_thickness": { "type": "number", "exclusiveMinimum": 0 },
+    "ceiling_height": { "type": "number", "minimum": 3.0, "maximum": 5.0 },
     "player_spawn": { "$ref": "#/$defs/position" },
     "stair_placement": {
       "type": "object",

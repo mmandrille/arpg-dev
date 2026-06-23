@@ -217,7 +217,7 @@ func _render() -> void:
 	_slot.tooltip_text = _tooltip_text(_current_skill_id())
 	if _slot_icon != null:
 		_slot_icon.visible = _rank > 0
-		_slot_icon.configure(_current_skill_id(), SkillRulesLoader.skill_presentation(_current_skill_id()))
+		_slot_icon.configure(_current_skill_id(), SkillRulesLoader.skill_presentation(_current_skill_id()), _rank)
 		_slot_icon.modulate = Color(0.38, 0.38, 0.38, 0.72) if _is_greyed() else Color.WHITE
 	if _mana_cost_label != null:
 		_mana_cost_label.visible = _rank > 0

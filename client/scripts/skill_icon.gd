@@ -1,6 +1,8 @@
 class_name SkillIcon
 extends Control
 
+const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
+
 var skill_id: String = ""
 var label_text: String = ""
 var shape: String = "bolt"
@@ -8,13 +10,22 @@ var fill_color := Color("#62b7ff")
 var accent_color := Color("#e8f7ff")
 
 
-func configure(next_skill_id: String, presentation: Dictionary) -> void:
+var rank: int = 0
+var accent_width: float = 2.0
+var glow_ring_count: int = 0
+
+
+func configure(next_skill_id: String, presentation: Dictionary, next_rank: int = 0) -> void:
 	skill_id = next_skill_id
+	rank = maxi(0, next_rank)
 	var icon: Dictionary = presentation.get("icon", {})
 	label_text = str(icon.get("label", next_skill_id.substr(0, 1).to_upper()))
 	shape = str(icon.get("shape", "bolt"))
 	fill_color = Color(str(icon.get("color", "#62b7ff")))
 	accent_color = Color(str(icon.get("accent", "#e8f7ff")))
+	var intensity: Dictionary = SkillRankIntensityScript.resolve(presentation, rank)
+	accent_width = float(intensity.get("accent_width", 2.0))
+	glow_ring_count = int(intensity.get("glow_ring_count", 0))
 	queue_redraw()
 
 
@@ -64,7 +75,11 @@ func _draw() -> void:
 				_draw_volley(center, radius)
 			_:
 				_draw_bolt(center, radius)
-	draw_arc(center, radius, 0.0, TAU, 40, accent_color, 2.0, true)
+	for i in range(glow_ring_count):
+		var ring_radius := radius * (0.58 - float(i) * 0.08)
+		var ring_alpha := clampf(0.22 - float(i) * 0.04, 0.06, 0.22)
+		draw_arc(center, ring_radius, 0.0, TAU, 32, Color(accent_color.r, accent_color.g, accent_color.b, ring_alpha), accent_width * 0.7, true)
+	draw_arc(center, radius, 0.0, TAU, 40, accent_color, accent_width, true)
 
 
 func _draw_passive_shape(center: Vector2, radius: float) -> bool:

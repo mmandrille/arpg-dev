@@ -1,0 +1,21 @@
+client/scripts/elite_aura_preview_sync.gd
+  s_610f74560b117e::t_7c01a99e0c4e6e 5-35
+client/scripts/main.gd
+  s_610f74560b117e::t_a2e5ff2fef603a 866
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "719da40c87ad79e11238ee0a2ca506aba5f9155b",
+  "prompts": {},
+  "sessions": {
+    "s_610f74560b117e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3bc1e7b9-ca0e-41be-8697-17f78093cdd6",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

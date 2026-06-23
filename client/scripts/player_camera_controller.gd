@@ -18,17 +18,17 @@ const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentat
 const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
 const PlayerCameraContextScript := preload("res://scripts/player_camera_context.gd")
 
-# Isometric follow offset (matches legacy ClientConstants.CAMERA_FOLLOW_OFFSET).
-const _ISO_OFFSET := Vector3(9.0, 20.0, 15.0)
-
 var _ctx  # PlayerCameraContext
 var _scene_root: Node3D
 
 var _camera: Camera3D
 var _spring_arm: SpringArm3D  # used only in third_person
 var _chest_socket_node: Node3D  # non-null when camera is parented to chest socket
+var _chest_socket_fallback: Node3D  # non-null when fallback node was created in _setup_chest_view
+var _shake_pivot: Node3D  # root pivot node for camera shake (parented to scene_root)
 var _current_mode: String = ""
 var _cfg: Dictionary = {}  # current mode data from CameraPresentationsLoader
+var _iso_offset: Vector3 = Vector3(9.0, 20.0, 15.0)  # isometric follow offset, read from data
 
 
 ## Must be called once before any other method.
@@ -39,10 +39,18 @@ func setup(ctx, scene_root: Node3D) -> void:  # ctx: PlayerCameraContext
 	_camera = Camera3D.new()
 	_camera.name = "PlayerCamera"
 	scene_root.add_child(_camera)
+	_shake_pivot = Node3D.new()
+	_shake_pivot.name = "CameraShakePivot"
+	scene_root.add_child(_shake_pivot)
 	var initial_mode: String = "isometric"
 	if ctx.client_settings != null:
 		initial_mode = ctx.client_settings.camera_mode
 	apply_mode(initial_mode)
+
+
+## Returns the pivot node used by CameraImpactFeedback for shake effects.
+func get_shake_pivot() -> Node3D:
+	return _shake_pivot
 
 
 ## Switch to a named mode; rebuilds the rig as needed.
@@ -169,6 +177,12 @@ func _teardown_rig() -> void:
 			_spring_arm.queue_free()
 		_spring_arm = null
 
+	# Free chest socket fallback node if one was created.
+	if _chest_socket_fallback != null:
+		if is_instance_valid(_chest_socket_fallback):
+			_chest_socket_fallback.queue_free()
+		_chest_socket_fallback = null
+
 	# Detach camera from chest socket if it was parented there.
 	if _chest_socket_node != null:
 		if is_instance_valid(_camera) and _camera.get_parent() == _chest_socket_node:
@@ -176,19 +190,15 @@ func _teardown_rig() -> void:
 			_scene_root.add_child(_camera)
 		_chest_socket_node = null
 
-	# Re-parent camera back to scene root if it ended up elsewhere.
-	if is_instance_valid(_camera) and _camera.get_parent() != _scene_root:
-		var p := _camera.get_parent()
-		if p != null:
-			p.remove_child(_camera)
-		_scene_root.add_child(_camera)
-
 
 func _setup_isometric() -> void:
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	var zoom_default: float = _cfg.get("zoom_default", 12.0)
 	_camera.size = zoom_default
-	_camera.position = _ISO_OFFSET
+	var raw_offset = _cfg.get("follow_offset", [])
+	if raw_offset is Array and raw_offset.size() >= 3 and (float(raw_offset[0]) != 0.0 or float(raw_offset[1]) != 0.0 or float(raw_offset[2]) != 0.0):
+		_iso_offset = Vector3(float(raw_offset[0]), float(raw_offset[1]), float(raw_offset[2]))
+	_camera.position = _iso_offset
 
 
 func _setup_third_person() -> void:
@@ -227,6 +237,7 @@ func _setup_chest_view() -> void:
 			_ctx.character_visual.add_child(fallback)
 		else:
 			_scene_root.add_child(fallback)
+		_chest_socket_fallback = fallback
 		socket = fallback
 	_chest_socket_node = socket
 	# Reparent camera to the socket.
@@ -241,7 +252,7 @@ func _setup_chest_view() -> void:
 func _sync_isometric() -> void:
 	var anchor := _ctx.player_anchor as Node3D
 	var target: Vector3 = anchor.global_position if anchor != null else Vector3.ZERO
-	_camera.global_position = target + _ISO_OFFSET + CameraImpactFeedbackScript.get_offset()
+	_camera.global_position = target + _iso_offset + CameraImpactFeedbackScript.get_offset()
 	_camera.look_at(target, Vector3.UP)
 
 
@@ -252,3 +263,5 @@ func _sync_third_person() -> void:
 	var target: Vector3 = anchor.global_position if anchor != null else Vector3.ZERO
 	# Position the spring arm above the player with shake applied.
 	_spring_arm.global_position = target + Vector3(0.0, 1.5, 0.0) + CameraImpactFeedbackScript.get_offset()
+	# Orient the spring arm to face the player so the camera points at the target.
+	_spring_arm.look_at(target, Vector3.UP)

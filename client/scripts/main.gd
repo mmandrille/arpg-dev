@@ -18,7 +18,6 @@ const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
-const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
@@ -71,6 +70,8 @@ const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loade
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
+const PlayerCameraContextScript := preload("res://scripts/player_camera_context.gd")
+const PlayerCameraControllerScript := preload("res://scripts/player_camera_controller.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScenesByVisual := {
 	"monster_dummy": preload("res://scenes/monster_dummy.tscn"),
@@ -252,7 +253,8 @@ var _debug_label: Label
 var _level_label: Label
 var last_performance_status: Dictionary = {}
 var _last_ping_ms: int = -1
-var _camera: Camera3D
+var _camera: Camera3D  # convenience alias — always equal to _camera_controller.get_gameplay_camera()
+var _camera_controller: PlayerCameraController
 var _directional_light: DirectionalLight3D
 var _world_environment: WorldEnvironment
 var ground_node: MeshInstance3D
@@ -642,10 +644,10 @@ func _on_monster_health_bar_mode_selected(mode: String) -> void:
 		_refresh_monster_health_bar_visibility()
 
 func _on_camera_mode_selected(mode: String) -> void:
-	if client_settings != null:
-		client_settings.set_camera_mode(mode)
-		# TODO Task 3: apply mode through camera controller
-		_sync_settings_panel()
+	if client_settings == null: return
+	client_settings.set_camera_mode(mode)
+	if _camera_controller != null: _camera_controller.apply_mode(mode)
+	_sync_settings_panel()
 
 func _on_master_volume_changed(value: float) -> void:
 	ClientAudioBridgeScript.set_master_volume(audio_controller, client_settings, value)
@@ -813,8 +815,8 @@ func _process(delta: float) -> void:
 	_try_complete_pending_waypoint_travel()
 	_tick_movement_animation_linger(delta)
 	CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta)
-	if gameplay_active and CameraImpactFeedbackScript.is_active():
-		_sync_camera_to_player()
+	if gameplay_active and CameraImpactFeedback.is_active():
+		if _camera_controller != null: _camera_controller.sync_to_player()
 
 	if visual_replay_enabled:
 		_handle_visual_replay(delta)
@@ -1748,17 +1750,11 @@ func _refresh_inventory_panel() -> void:
 func _reconcile_player() -> void:
 	if player_anchor != null:
 		if local_leap_visual_active:
-			_sync_camera_to_player()
+			if _camera_controller != null: _camera_controller.sync_to_player()
 			return
 		player_anchor.position = predicted_pos
 		_movement_visual_smoothing.preserve_after_anchor_move(player_anchor, character_visual)
-		_sync_camera_to_player()
-
-func _sync_camera_to_player() -> void:
-	if _camera == null or player_anchor == null: return
-	var target := player_anchor.global_position
-	_camera.global_position = target + ClientConstants.CAMERA_FOLLOW_OFFSET + CameraImpactFeedbackScript.get_offset()
-	_camera.look_at(target, Vector3.UP)
+		if _camera_controller != null: _camera_controller.sync_to_player()
 
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
 	CombatEventPresentationScript.show_combat_text_for_event(entity_id, ev, default_color, Callable(self, "_show_damage_number"), Callable(self, "_node_for_entity_id"))
@@ -2408,9 +2404,9 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 					return
 			MOUSE_BUTTON_WHEEL_UP:
-				_adjust_camera_zoom(-ClientConstants.CAMERA_ZOOM_STEP)
+				if _camera_controller != null: _camera_controller.adjust_zoom(-ClientConstants.CAMERA_ZOOM_STEP)
 			MOUSE_BUTTON_WHEEL_DOWN:
-				_adjust_camera_zoom(ClientConstants.CAMERA_ZOOM_STEP)
+				if _camera_controller != null: _camera_controller.adjust_zoom(ClientConstants.CAMERA_ZOOM_STEP)
 	if event is InputEventMouseButton and not event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			_stop_active_channel_skill()
@@ -2452,7 +2448,7 @@ func _handle_input(delta: float) -> void:
 	elif input == Vector2.ZERO:
 		_movement_requires_fresh_input = false
 	if input != Vector2.ZERO and not _movement_requires_fresh_input and _send_cooldown <= 0.0:
-		var dir := _camera_relative_flat_direction(input)
+		var dir := (_camera_controller.camera_relative_flat_direction(input) if _camera_controller != null else Vector2.ZERO)
 		_close_gameplay_panels_for_movement()
 		# Local prediction: move immediately for responsive feel.
 		predicted_pos += Vector3(dir.x, 0, dir.y) * ClientConstants.PLAYER_SPEED * ClientConstants.SEND_INTERVAL
@@ -3014,36 +3010,8 @@ func _face_node_toward_entity(source_node: Node3D, target_id: String) -> void:
 	var target_pos := _node_world_or_local_position(target_node)
 	_face_entity_direction(source_node, Vector2(target_pos.x - source_pos.x, target_pos.z - source_pos.z))
 
-func _camera_relative_flat_direction(input: Vector2) -> Vector2:
-	# WASD is screen-relative under the isometric camera, not world X/Z.
-	if _camera == null or input == Vector2.ZERO:
-		return Vector2.ZERO
-
-	var forward := -_camera.global_transform.basis.z
-	forward.y = 0.0
-	if forward.length_squared() < 0.0001:
-		return input.normalized()
-	forward = forward.normalized()
-
-	var right := _camera.global_transform.basis.x
-	right.y = 0.0
-	if right.length_squared() < 0.0001:
-		return input.normalized()
-	right = right.normalized()
-
-	var world := right * input.x - forward * input.y
-	return Vector2(world.x, world.z).normalized()
-
 func _aim_direction_from_mouse() -> Vector2:
-	if _camera == null or player_anchor == null:
-		return Vector2.ZERO
-
-	var ground := _mouse_ground_point()
-	var flat := Vector2(ground.x - player_anchor.global_position.x, ground.z - player_anchor.global_position.z)
-	if flat.length_squared() < 0.0001:
-		return Vector2.ZERO
-
-	return flat.normalized()
+	return _camera_controller.aim_direction_from_mouse(get_viewport()) if _camera_controller != null else Vector2.ZERO
 
 func _start_directional_attack_hold() -> void:
 	_sustained_click.begin_directional_attack()
@@ -3067,30 +3035,17 @@ func _try_send_directional_attack() -> void:
 	_start_basic_attack_recovery_ui(_attack_cooldown)
 
 func _mouse_ground_point() -> Vector3:
-	var mouse_pos := get_viewport().get_mouse_position()
-	var origin := _camera.project_ray_origin(mouse_pos)
-	var normal := _camera.project_ray_normal(mouse_pos)
-	if abs(normal.y) < 0.0001:
-		return player_anchor.global_position
-
-	var t := -origin.y / normal.y
-	if t < 0.0:
-		return player_anchor.global_position
-
-	return origin + normal * t
+	if _camera_controller == null: return player_anchor.global_position if player_anchor != null else Vector3.ZERO
+	return _camera_controller.screen_to_ground_point(get_viewport().get_mouse_position(), get_viewport())
 
 func _pick_entity_at_mouse() -> String:
-	if _camera == null:
-		return ""
-	var mouse_pos := get_viewport().get_mouse_position()
-	var origin := _camera.project_ray_origin(mouse_pos)
-	var normal := _camera.project_ray_normal(mouse_pos)
+	if _camera_controller == null: return ""
+	var ray := _camera_controller.mouse_ray(get_viewport())
+	var origin: Vector3 = ray[0]; var normal: Vector3 = ray[1]
 	var query := PhysicsRayQueryParameters3D.create(origin, origin + normal * 200.0)
-	query.collide_with_areas = true
-	query.collide_with_bodies = true
+	query.collide_with_areas = true; query.collide_with_bodies = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
-		return ""
+	if hit.is_empty(): return ""
 	var collider = hit.get("collider")
 	if collider != null and collider.has_meta("entity_id"):
 		var hit_entity_id := str(collider.get_meta("entity_id"))
@@ -3102,8 +3057,7 @@ func _pick_entity_at_mouse() -> String:
 	return ""
 
 func _is_dead_monster(entity_id: String) -> bool:
-	if not entities.has(entity_id):
-		return false
+	if not entities.has(entity_id): return false
 	var rec: Dictionary = entities[entity_id]
 	return str(rec.get("type", "")) == "monster" and int(rec.get("hp", 1)) <= 0
 
@@ -3111,11 +3065,9 @@ func _nearest_loot_at_ground(ground: Vector3) -> String:
 	var best_id := ""
 	var best_dist := 999999.0
 	for loot_id in loot_ids:
-		if not entities.has(loot_id):
-			continue
+		if not entities.has(loot_id): continue
 		var node := entities[loot_id]["node"] as Node3D
-		if node == null:
-			continue
+		if node == null: continue
 		var flat_dist := Vector2(node.global_position.x - ground.x, node.global_position.z - ground.z).length()
 		if flat_dist < best_dist:
 			best_dist = flat_dist
@@ -3273,12 +3225,6 @@ func _set_pickable(node: Node3D, pickable: bool) -> void:
 	body.collision_mask = 1 if pickable else 0
 	body.input_ray_pickable = pickable
 
-func _adjust_camera_zoom(delta_size: float) -> void:
-	if _camera == null:
-		return
-
-	_camera.size = clampf(_camera.size + delta_size, ClientConstants.CAMERA_ZOOM_MIN, ClientConstants.CAMERA_ZOOM_MAX)
-
 # --- visual replay playlist -------------------------------------------------
 
 func _load_visual_replay_manifest(path: String) -> bool:
@@ -3432,13 +3378,9 @@ func _build_scene() -> void:
 	ground_node = _ground_factory.make_ground_node(current_level)
 	add_child(ground_node)
 
-	_camera = Camera3D.new()
-	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	_camera.size = ClientConstants.CAMERA_ZOOM_DEFAULT
-	_camera.position = ClientConstants.CAMERA_FOLLOW_OFFSET
-	add_child(_camera)
-	# look_at requires the node to be inside the scene tree (Godot 4).
-	_sync_camera_to_player()
+	_camera_controller = PlayerCameraControllerScript.new()
+	_camera_controller.setup(PlayerCameraContextScript.make(player_anchor, character_visual, client_settings, Callable(self, "_input_locked")), self)
+	_camera = _camera_controller.get_gameplay_camera()
 
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -40, 0)

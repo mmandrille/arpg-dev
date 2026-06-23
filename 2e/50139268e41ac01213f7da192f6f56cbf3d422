@@ -1,0 +1,29 @@
+PROGRESS.md
+  s_13fb8c3954ab4d::t_362e7d3102b388 26,28-29,31
+docs/as-built/v329_camera-mode-options.md
+  s_13fb8c3954ab4d::t_f0a90ad59c72a4 1-62
+tools/bot/scenarios/client/83_camera_mode_setting.json
+  s_13fb8c3954ab4d::t_a2dc0529196cc6 9
+  s_13fb8c3954ab4d::t_7ded2f396f21ea 13,23,36,42
+  s_13fb8c3954ab4d::t_49eeabab7ffc39 30
+docs/progress/slice-lifecycle.md
+  s_13fb8c3954ab4d::t_ae929cf2f265b0 344
+client/scripts/player_camera_controller.gd
+  s_13fb8c3954ab4d::t_08d5fdc6af45ec 194-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2e50139268e41ac01213f7da192f6f56cbf3d422",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

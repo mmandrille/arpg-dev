@@ -25,7 +25,6 @@ var _camera: Camera3D
 var _spring_arm: SpringArm3D  # used only in third_person
 var _chest_socket_node: Node3D  # non-null when camera is parented to chest socket
 var _chest_socket_fallback: Node3D  # non-null when fallback node was created in _setup_chest_view
-var _shake_pivot: Node3D  # root pivot node for camera shake (parented to scene_root)
 var _current_mode: String = ""
 var _cfg: Dictionary = {}  # current mode data from CameraPresentationsLoader
 var _iso_offset: Vector3 = Vector3(9.0, 20.0, 15.0)  # isometric follow offset, read from data
@@ -41,18 +40,10 @@ func setup(ctx, scene_root: Node3D) -> void:  # ctx: PlayerCameraContext
 	_camera = Camera3D.new()
 	_camera.name = "PlayerCamera"
 	scene_root.add_child(_camera)
-	_shake_pivot = Node3D.new()
-	_shake_pivot.name = "CameraShakePivot"
-	scene_root.add_child(_shake_pivot)
 	var initial_mode: String = "isometric"
 	if ctx.client_settings != null:
 		initial_mode = ctx.client_settings.camera_mode
 	apply_mode(initial_mode)
-
-
-## Returns the pivot node used by CameraImpactFeedback for shake effects.
-func get_shake_pivot() -> Node3D:
-	return _shake_pivot
 
 
 ## Switch to a named mode; rebuilds the rig as needed.

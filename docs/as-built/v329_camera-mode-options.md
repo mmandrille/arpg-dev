@@ -13,7 +13,7 @@ Date: 2026-06-23
 ### Client
 - `CameraPresentationsLoader` — singleton that loads and caches camera presentation data.
 - `PlayerCameraContext` — typed context object passed to camera controller with player anchor, client settings, and chest socket reference.
-- `PlayerCameraController` — owns the camera rig lifecycle: creates one Camera3D at setup time, switches between three rigs (isometric orthographic, third_person SpringArm3D + perspective, chest_view parented to chest_socket) via `apply_mode()`, and routes sync calls to the active rig. Fixes: detaches camera from spring arm before freeing it during teardown to prevent use-after-free when cycling modes.
+- `PlayerCameraController` — owns the camera rig lifecycle: creates one Camera3D at setup time, switches between three rigs (isometric orthographic, third_person SpringArm3D + perspective, chest_view parented to chest_socket) via `apply_mode()`, and routes sync calls to the active rig. Fixes: detaches camera from spring arm before freeing it during teardown to prevent use-after-free when cycling modes. Camera shake offset is applied directly in `_sync_isometric` and `_sync_third_person` via `CameraImpactFeedbackScript.get_offset()`; chest_view has no camera shake (camera is parented to the chest socket node, so positioning is handled by the scene graph).
 - `PerspectiveCombatInput` — handles mouse-look (camera yaw/pitch with configurable bounds), WASD camera-relative movement, and center-ray aiming for perspective modes. Disabled in isometric.
 - `AimReticleOverlay` — renders a center-screen reticle when a perspective mode is active during gameplay.
 - `ClientSettings.camera_mode` — added persistent setting with cycle method; defaults to isometric.

@@ -1,9 +1,11 @@
-# Unit tests for CameraPresentationsLoader and ClientSettings camera mode.
+# Unit tests for CameraPresentationsLoader, ClientSettings camera mode, and PlayerCameraController.
 # Run via: godot --headless --rendering-method gl_compatibility --path client --script res://tests/test_camera_mode_settings.gd
 extends SceneTree
 
 const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
+const PlayerCameraContextScript := preload("res://scripts/player_camera_context.gd")
+const PlayerCameraControllerScript := preload("res://scripts/player_camera_controller.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -15,6 +17,8 @@ func _initialize() -> void:
 	_test_settings_normalize_unknown()
 	_test_settings_cycle_modes()
 	_test_settings_save_load()
+	_test_controller_isometric_projection()
+	_test_controller_perspective_projection()
 	print("[gdtest] PASS: test_camera_mode_settings (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -61,6 +65,41 @@ func _test_settings_save_load() -> void:
 	var s2 := ClientSettingsScript.new(path)
 	s2.load()
 	_assert_eq("saved third_person persists after reload", s2.camera_mode, ClientSettingsScript.CAMERA_MODE_THIRD_PERSON)
+
+
+func _test_controller_isometric_projection() -> void:
+	# Controller creates its own Camera3D — no scene-tree parent required for this check.
+	CameraPresentationsLoaderScript.reset_for_tests()
+	var ctrl := PlayerCameraControllerScript.new()
+	var root := Node3D.new()
+	get_root().add_child(root)
+	var ctx := PlayerCameraContextScript.new()
+	ctx.player_anchor = root
+	ctrl.setup(ctx, root)
+	ctrl.apply_mode("isometric")
+	var cam := ctrl.get_gameplay_camera()
+	_assert_true("controller isometric: camera is non-null", cam != null)
+	if cam != null:
+		_assert_eq("controller isometric: projection is orthogonal", cam.projection, Camera3D.PROJECTION_ORTHOGONAL)
+	root.queue_free()
+	CameraPresentationsLoaderScript.reset_for_tests()
+
+
+func _test_controller_perspective_projection() -> void:
+	CameraPresentationsLoaderScript.reset_for_tests()
+	var ctrl := PlayerCameraControllerScript.new()
+	var root := Node3D.new()
+	get_root().add_child(root)
+	var ctx := PlayerCameraContextScript.new()
+	ctx.player_anchor = root
+	ctrl.setup(ctx, root)
+	ctrl.apply_mode("third_person")
+	var cam := ctrl.get_gameplay_camera()
+	_assert_true("controller third_person: camera is non-null", cam != null)
+	if cam != null:
+		_assert_eq("controller third_person: projection is perspective", cam.projection, Camera3D.PROJECTION_PERSPECTIVE)
+	root.queue_free()
+	CameraPresentationsLoaderScript.reset_for_tests()
 
 
 func _assert_eq(label: String, got, expected) -> void:

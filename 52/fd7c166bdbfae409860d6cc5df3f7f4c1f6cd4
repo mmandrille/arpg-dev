@@ -1,0 +1,22 @@
+shared/rules/dungeon_generation.v0.json
+  s_610f74560b117e::t_cfd224a86f2394 120,122-123
+shared/golden/dungeon_obstacles.json
+  s_610f74560b117e::t_ab79c12a47e4dc 9,140-141,144-145,149,154,162,167-168,171,175,180-181,184-185,188,193-194,197,201,206-207,210-211,214,219-220,223-224,227,232-233,236-237,240,245-246,249,254,259-268,273-278,285,287-288,291-301,305,312,326,340,359-360,391-392,551-552,559-560,567-568
+  s_610f74560b117e::t_8c7d3526206dba 10,15-16,271,279-284,286,289-290,306-311,313-318,328-329,332-333,511-512,519-520,527-528,535-536,543-544
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "52fd7c166bdbfae409860d6cc5df3f7f4c1f6cd4",
+  "prompts": {},
+  "sessions": {
+    "s_610f74560b117e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3bc1e7b9-ca0e-41be-8697-17f78093cdd6",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

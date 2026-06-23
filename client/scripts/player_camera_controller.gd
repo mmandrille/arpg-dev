@@ -29,6 +29,8 @@ var _shake_pivot: Node3D  # root pivot node for camera shake (parented to scene_
 var _current_mode: String = ""
 var _cfg: Dictionary = {}  # current mode data from CameraPresentationsLoader
 var _iso_offset: Vector3 = Vector3(9.0, 20.0, 15.0)  # isometric follow offset, read from data
+var _yaw: float = 0.0    # horizontal orbit angle (radians) for perspective modes
+var _pitch: float = 0.0  # vertical orbit angle (radians) for perspective modes
 
 
 ## Must be called once before any other method.
@@ -135,6 +137,20 @@ func aim_direction_from_mouse(viewport: Viewport) -> Vector2:
 	return flat.normalized()
 
 
+## Apply mouse motion delta to orbit yaw/pitch for perspective camera modes.
+## delta is the raw InputEventMouseMotion.relative in pixels.
+func apply_mouse_motion(delta: Vector2) -> void:
+	if _current_mode == "isometric":
+		return
+	var sensitivity: float = _cfg.get("mouse_sensitivity", 0.003)
+	_yaw -= delta.x * sensitivity
+	_pitch -= delta.y * sensitivity
+	var pitch_min: float = deg_to_rad(_cfg.get("pitch_min_degrees", -60.0))
+	var pitch_max: float = deg_to_rad(_cfg.get("pitch_max_degrees", -5.0))
+	_pitch = clampf(_pitch, pitch_min, pitch_max)
+	_apply_perspective_rotation()
+
+
 ## Convert 2D input (WASD) into a flat world-space direction relative to camera orientation.
 func camera_relative_flat_direction(input: Vector2) -> Vector2:
 	if _camera == null or input == Vector2.ZERO:
@@ -167,6 +183,11 @@ func _setup_rig() -> void:
 			_setup_chest_view()
 		_:
 			_setup_isometric()
+
+
+func _reset_perspective_angles() -> void:
+	_yaw = 0.0
+	_pitch = deg_to_rad(_cfg.get("pitch_min_degrees", -60.0) * 0.5 + _cfg.get("pitch_max_degrees", -5.0) * 0.5)
 
 
 func _teardown_rig() -> void:
@@ -202,6 +223,7 @@ func _setup_isometric() -> void:
 
 
 func _setup_third_person() -> void:
+	_reset_perspective_angles()
 	_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 	var arm_length: float = _cfg.get("spring_arm_length", 6.0)
 	_spring_arm = SpringArm3D.new()
@@ -223,6 +245,7 @@ func _setup_third_person() -> void:
 
 
 func _setup_chest_view() -> void:
+	_reset_perspective_angles()
 	_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 	# Try to find the chest socket on character_visual.
 	var socket: Node3D = null
@@ -263,5 +286,15 @@ func _sync_third_person() -> void:
 	var target: Vector3 = anchor.global_position if anchor != null else Vector3.ZERO
 	# Position the spring arm above the player with shake applied.
 	_spring_arm.global_position = target + Vector3(0.0, 1.5, 0.0) + CameraImpactFeedbackScript.get_offset()
-	# Orient the spring arm to face the player so the camera points at the target.
-	_spring_arm.look_at(target, Vector3.UP)
+	# Apply yaw/pitch orbit angles accumulated via apply_mouse_motion.
+	_spring_arm.rotation = Vector3(_pitch, _yaw, 0.0)
+
+
+func _apply_perspective_rotation() -> void:
+	match _current_mode:
+		"third_person":
+			if _spring_arm != null:
+				_spring_arm.rotation = Vector3(_pitch, _yaw, 0.0)
+		"chest_view":
+			if _camera != null:
+				_camera.rotation = Vector3(_pitch, _yaw, 0.0)

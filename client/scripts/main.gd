@@ -72,6 +72,8 @@ const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
 const PlayerCameraContextScript := preload("res://scripts/player_camera_context.gd")
 const PlayerCameraControllerScript := preload("res://scripts/player_camera_controller.gd")
+const PerspectiveCombatInputScript := preload("res://scripts/perspective_combat_input.gd")
+const AimReticleOverlayScript := preload("res://scripts/aim_reticle_overlay.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScenesByVisual := {
 	"monster_dummy": preload("res://scenes/monster_dummy.tscn"),
@@ -255,6 +257,7 @@ var last_performance_status: Dictionary = {}
 var _last_ping_ms: int = -1
 var _camera: Camera3D  # convenience alias — always equal to _camera_controller.get_gameplay_camera()
 var _camera_controller: PlayerCameraController
+var _aim_reticle: AimReticleOverlay
 var _directional_light: DirectionalLight3D
 var _world_environment: WorldEnvironment
 var ground_node: MeshInstance3D
@@ -371,6 +374,7 @@ func _start_automation_session(resume_session_id: String, requested_world_id: St
 func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
 	gameplay_active = true
+	_update_mouse_capture(); _update_reticle_visibility()
 	current_world_id = client.world_id
 	current_wall_layout = []
 	_render_world_walls(client.world_id)
@@ -647,7 +651,7 @@ func _on_camera_mode_selected(mode: String) -> void:
 	if client_settings == null: return
 	client_settings.set_camera_mode(mode)
 	if _camera_controller != null: _camera_controller.apply_mode(mode)
-	_sync_settings_panel()
+	_sync_settings_panel(); _update_mouse_capture(); _update_reticle_visibility()
 
 func _on_master_volume_changed(value: float) -> void:
 	ClientAudioBridgeScript.set_master_volume(audio_controller, client_settings, value)
@@ -688,6 +692,14 @@ func _sync_settings_panel() -> void:
 		settings_panel.set_camera_mode(client_settings.camera_mode)
 		ClientAudioBridgeScript.sync_settings_panel(settings_panel, client_settings)
 
+func _update_mouse_capture() -> void:
+	var cap := gameplay_active and not _menu_blocks_gameplay_input() and client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if cap else Input.MOUSE_MODE_VISIBLE)
+func _update_reticle_visibility() -> void:
+	if _aim_reticle == null: return
+	CameraPresentationsLoaderScript.ensure_loaded()
+	var on := gameplay_active and client_settings != null and bool(CameraPresentationsLoaderScript.mode(client_settings.camera_mode).get("reticle_enabled", false))
+	_aim_reticle.visible = on
 func _refresh_localized_texts() -> void:
 	if main_menu != null:
 		main_menu.refresh_texts()
@@ -697,12 +709,11 @@ func _refresh_localized_texts() -> void:
 		settings_panel.refresh_texts()
 
 func _show_pause_menu() -> void:
-	if gameplay_active and pause_menu != null:
-		pause_menu.show_pause()
-
+	if gameplay_active and pause_menu != null: pause_menu.show_pause()
+	_update_mouse_capture()
 func _resume_from_pause() -> void:
-	if pause_menu != null:
-		pause_menu.hide_pause()
+	if pause_menu != null: pause_menu.hide_pause()
+	_update_mouse_capture()
 
 func _return_to_main_menu() -> void:
 	if client != null:
@@ -721,6 +732,7 @@ func _exit_game() -> void:
 
 func _teardown_gameplay_state(clear_session: bool) -> void:
 	gameplay_active = false
+	_update_mouse_capture(); _update_reticle_visibility()
 	ready_sent = false
 	player_id = ""
 	party = []
@@ -2388,10 +2400,20 @@ func _unhandled_input(event: InputEvent) -> void:
 			_update_level_hud()
 			get_viewport().set_input_as_handled()
 			return
+		if _is_camera_cycle_key(event):
+			if client_settings != null: _on_camera_mode_selected(client_settings.cycle_camera_mode())
+			get_viewport().set_input_as_handled(); return
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC:
+		if _camera_controller != null: _camera_controller.apply_mouse_motion((event as InputEventMouseMotion).relative)
+		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
+					if client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC:
+						var _ad := PerspectiveCombatInputScript.flat_aim_direction(_camera, player_anchor)
+						_face_direction(_ad); client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(_ad))
+						_attack_cooldown = _basic_attack_cooldown_seconds(); get_viewport().set_input_as_handled(); return
 					if _is_force_stand_held():
 						_start_directional_attack_hold()
 						get_viewport().set_input_as_handled()
@@ -2456,7 +2478,7 @@ func _handle_input(delta: float) -> void:
 		_mark_local_player_walking()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
 		_send_cooldown = ClientConstants.SEND_INTERVAL
-	if _hold_input_allowed():
+	if (client_settings == null or client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC) and _hold_input_allowed():
 		_tick_sustained_click()
 	elif _sustained_click.active:
 		_sustained_click.clear()
@@ -2477,6 +2499,8 @@ func _is_quest_journal_key(event: InputEventKey) -> bool:
 
 func _is_skill_slot_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_Q or event.physical_keycode == KEY_Q or event.unicode == 113 or event.unicode == 81
+func _is_camera_cycle_key(event: InputEventKey) -> bool:
+	return event.keycode == KEY_V or event.physical_keycode == KEY_V or event.unicode == 118 or event.unicode == 86
 
 func _close_gameplay_panels(except: String = "") -> void:
 	if not (except in ["inventory", "stats", "shop_with_inventory", "stash_with_inventory", "bishop", "mercenary", "market", "blacksmith"]) and inventory_panel != null:
@@ -3398,6 +3422,7 @@ func _build_scene() -> void:
 	ui.layer = 5
 	add_child(ui)
 	gameplay_ui_layer = ui
+	_aim_reticle = AimReticleOverlayScript.new(); _aim_reticle.visible = false; ui.add_child(_aim_reticle)
 	_debug_label = Label.new()
 	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_debug_label.mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -6,14 +6,14 @@
       "width": 100,
       "height": 50
     },
-    "minimum_wall_count": 21,
-    "minimum_generated_wall_count": 12,
+    "minimum_wall_count": 25,
+    "minimum_generated_wall_count": 16,
     "minimum_water_count": 2,
     "minimum_hole_count": 1,
     "shape_families": [
       "block",
-      "l",
-      "line"
+      "line",
+      "t"
     ],
     "solid_kinds": [
       "column",
@@ -137,21 +137,21 @@
       {
         "id": "wall_-2_0009",
         "position": {
-          "x": 46,
-          "y": 34
+          "x": 50,
+          "y": 18
         },
         "size": {
-          "x": 1,
-          "y": 4
+          "x": 6,
+          "y": 1
         },
         "source": "generated",
         "shape_family": "line",
-        "kind": "rubble"
+        "kind": "rock"
       },
       {
         "id": "wall_-2_0010",
         "position": {
-          "x": 72,
+          "x": 39,
           "y": 23
         },
         "size": {
@@ -159,31 +159,136 @@
           "y": 1
         },
         "source": "generated",
-        "shape_family": "line",
-        "kind": "column"
+        "shape_family": "t"
       },
       {
         "id": "wall_-2_0011",
         "position": {
-          "x": 45,
-          "y": 21
+          "x": 44.6,
+          "y": 23
+        },
+        "size": {
+          "x": 3.2,
+          "y": 1
+        },
+        "source": "generated",
+        "shape_family": "t"
+      },
+      {
+        "id": "wall_-2_0012",
+        "position": {
+          "x": 43,
+          "y": 26.5
+        },
+        "size": {
+          "x": 1,
+          "y": 7
+        },
+        "source": "generated",
+        "shape_family": "t"
+      },
+      {
+        "id": "wall_-2_0013",
+        "position": {
+          "x": 57,
+          "y": 23
         },
         "size": {
           "x": 8,
           "y": 1
         },
         "source": "generated",
+        "shape_family": "t"
+      },
+      {
+        "id": "wall_-2_0014",
+        "position": {
+          "x": 66,
+          "y": 23
+        },
+        "size": {
+          "x": 10,
+          "y": 1
+        },
+        "source": "generated",
+        "shape_family": "t"
+      },
+      {
+        "id": "wall_-2_0015",
+        "position": {
+          "x": 61,
+          "y": 28
+        },
+        "size": {
+          "x": 1,
+          "y": 10
+        },
+        "source": "generated",
+        "shape_family": "t"
+      },
+      {
+        "id": "wall_-2_0016",
+        "position": {
+          "x": 28,
+          "y": 4
+        },
+        "size": {
+          "x": 3,
+          "y": 2
+        },
+        "source": "generated",
+        "shape_family": "block"
+      },
+      {
+        "id": "wall_-2_0017",
+        "position": {
+          "x": 15,
+          "y": 38
+        },
+        "size": {
+          "x": 20,
+          "y": 1
+        },
+        "source": "generated",
         "shape_family": "line",
+        "kind": "rubble"
+      },
+      {
+        "id": "wall_-2_0018",
+        "position": {
+          "x": 82,
+          "y": 33
+        },
+        "size": {
+          "x": 2,
+          "y": 3
+        },
+        "source": "generated",
+        "shape_family": "block",
+        "kind": "rubble"
+      },
+      {
+        "id": "wall_-2_0019",
+        "position": {
+          "x": 26,
+          "y": 25
+        },
+        "size": {
+          "x": 3,
+          "y": 4
+        },
+        "source": "generated",
+        "shape_family": "block",
         "kind": "column"
       },
       {
-        "id": "wall_-2_0012",
+        "id": "wall_-2_0020",
         "position": {
-          "x": 79,
-          "y": 21
+          "x": 61,
+          "y": 6
         },
         "size": {
-          "x": 5,
+          "x": 4,
           "y": 2
         },
         "source": "generated",
@@ -191,76 +296,34 @@
         "kind": "rock"
       },
       {
-        "id": "wall_-2_0013",
+        "id": "wall_-2_0021",
         "position": {
-          "x": 10.5,
-          "y": 25
+          "x": 49.4,
+          "y": 23
         },
         "size": {
-          "x": 13,
+          "x": 3.2,
           "y": 1
         },
         "source": "generated",
-        "shape_family": "l",
-        "kind": "column"
+        "shape_family": "t"
       },
       {
-        "id": "wall_-2_0014",
+        "id": "wall_-2_0022",
         "position": {
-          "x": 4,
-          "y": 28.5
+          "x": 53,
+          "y": 30
         },
         "size": {
-          "x": 1,
-          "y": 7
+          "x": 6,
+          "y": 3
         },
         "source": "generated",
-        "shape_family": "l",
-        "kind": "column"
+        "shape_family": "water",
+        "kind": "water"
       },
       {
-        "id": "wall_-2_0015",
-        "position": {
-          "x": 81.85000000000001,
-          "y": 36
-        },
-        "size": {
-          "x": 4.7,
-          "y": 1
-        },
-        "source": "generated",
-        "shape_family": "line",
-        "kind": "rock"
-      },
-      {
-        "id": "wall_-2_0016",
-        "position": {
-          "x": 9,
-          "y": 35
-        },
-        "size": {
-          "x": 1,
-          "y": 6
-        },
-        "source": "generated",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0017",
-        "position": {
-          "x": 88.14999999999999,
-          "y": 36
-        },
-        "size": {
-          "x": 4.7,
-          "y": 1
-        },
-        "source": "generated",
-        "shape_family": "line",
-        "kind": "rock"
-      },
-      {
-        "id": "wall_-2_0018",
+        "id": "wall_-2_0023",
         "position": {
           "x": 88,
           "y": 23
@@ -274,21 +337,7 @@
         "kind": "water"
       },
       {
-        "id": "wall_-2_0019",
-        "position": {
-          "x": 7,
-          "y": 17
-        },
-        "size": {
-          "x": 7,
-          "y": 2
-        },
-        "source": "generated",
-        "shape_family": "water",
-        "kind": "water"
-      },
-      {
-        "id": "wall_-2_0020",
+        "id": "wall_-2_0024",
         "position": {
           "x": 14,
           "y": 28
@@ -307,8 +356,8 @@
         "kind": "door",
         "def_id": "wooden_door",
         "position": {
-          "x": 85,
-          "y": 36
+          "x": 47,
+          "y": 23
         }
       }
     ],
@@ -339,8 +388,8 @@
         "kind": "door",
         "def_id": "wooden_door",
         "position": {
-          "x": 85,
-          "y": 36
+          "x": 47,
+          "y": 23
         }
       },
       {
@@ -459,23 +508,47 @@
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 51,
-          "y": 33
+          "x": 81,
+          "y": 41
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_bat",
         "position": {
-          "x": 51,
-          "y": 30.5
+          "x": 78.5,
+          "y": 41
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 53.5,
+          "x": 81,
+          "y": 43.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 81,
+          "y": 38.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 83.5,
+          "y": 41
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 16,
           "y": 33
         }
       },
@@ -483,40 +556,16 @@
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 48.5,
+          "x": 13.5,
           "y": 33
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 51,
-          "y": 35.5
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 69,
-          "y": 29
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 69,
-          "y": 26.5
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_wolf",
         "position": {
-          "x": 66.5,
-          "y": 29
+          "x": 16,
+          "y": 30.5
         }
       }
     ]

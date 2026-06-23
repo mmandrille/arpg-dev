@@ -1,0 +1,27 @@
+server/internal/realtime/session_loop.go
+  s_05f191069585cd::t_bcb021bd8cf0a1 409
+server/internal/game/handlers.go
+  s_05f191069585cd::t_db5696820f77a7 1258-1272
+  s_05f191069585cd::t_fe1d8606f40458 1317
+client/scripts/main.gd
+  s_05f191069585cd::t_405a491422f303 1409-1426,1430-1432
+  s_05f191069585cd::t_a3c22088ecd783 1587-1589
+server/internal/game/game_test.go
+  s_05f191069585cd::t_afc3fe2d6998a8 1083-1092
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "49ad2ecaa8c631bfab1dd730b44261b6a7d43157",
+  "prompts": {},
+  "sessions": {
+    "s_05f191069585cd": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "78464e34-fab5-454d-a2ce-38a43112bdbf",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

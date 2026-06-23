@@ -10,6 +10,14 @@
       },
       "summary": "Projectile spell",
       "projectile_visual": "magic_bolt_projectile",
+      "rank_intensity": {
+        "accent_width_base": 2.0,
+        "accent_width_per_rank": 0.4,
+        "glow_ring_count_base": 0,
+        "glow_ring_count_per_rank": 1,
+        "cast_burst_scale_base": 0.82,
+        "cast_burst_scale_per_rank": 0.14
+      },
       "summary_key": "skill.magic_bolt.summary"
     },
     "teleport": {
@@ -78,6 +86,14 @@
         "accent": "#ffd4c9"
       },
       "summary": "Cone weapon attack",
+      "rank_intensity": {
+        "accent_width_base": 2.2,
+        "accent_width_per_rank": 0.3,
+        "glow_ring_count_base": 0,
+        "glow_ring_count_per_rank": 1,
+        "cast_burst_scale_base": 0.9,
+        "cast_burst_scale_per_rank": 0.1
+      },
       "effect_visual": "cleave_cone",
       "summary_key": "skill.cleave.summary"
     },

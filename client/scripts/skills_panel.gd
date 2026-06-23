@@ -469,7 +469,7 @@ func _build() -> void:
 		var icon = SkillIconScript.new()
 		icon.position = Vector2(10, 10)
 		icon.size = SKILL_ICON_SIZE
-		icon.configure(skill_id, _skill_presentation(skill_id))
+		icon.configure(skill_id, _skill_presentation(skill_id), 0)
 		skill_block.add_child(icon)
 		_skill_icons[skill_id] = icon
 
@@ -546,7 +546,7 @@ func _render() -> void:
 			block.add_theme_stylebox_override("panel", _skill_block_style(visual_state, selected or _right_click_skill_id == row_skill_id))
 		var icon = _skill_icons.get(row_skill_id, null)
 		if icon != null:
-			icon.configure(row_skill_id, _skill_presentation(row_skill_id))
+			icon.configure(row_skill_id, _skill_presentation(row_skill_id), row_rank)
 			icon.modulate = _skill_icon_modulate(visual_state, selected)
 		var assigned_key_label := _assigned_key_labels.get(row_skill_id, null) as Label
 		if assigned_key_label != null:

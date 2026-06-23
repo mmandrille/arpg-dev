@@ -16,6 +16,7 @@ const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const EnemyHealthBarVisibilityScript := preload("res://scripts/enemy_health_bar_visibility.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
+const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
@@ -1102,6 +1103,7 @@ func _apply_delta(p: Dictionary) -> void:
 				)
 		if event_type == "skill_cast" and eid == player_id:
 			ClientAudioBridgeScript.skill(audio_controller, str(ev.get("skill_id", "")))
+			SkillRankIntensityScript.spawn_cast_burst(character_visual, str(ev.get("skill_id", "")), int(ev.get("rank", 1)))
 			if skill_bar != null:
 				skill_bar.flash_cast()
 			if player_anim != null:

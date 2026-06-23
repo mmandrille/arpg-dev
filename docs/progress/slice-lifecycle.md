@@ -333,5 +333,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v318** | `dungeon-depth-lighting` | Complete (focused shared/client checks green; autoloop batch `make ci` pending) | [`v318_spec-dungeon-depth-lighting.md`](../specs/v318_spec-dungeon-depth-lighting.md) | [`v318_2026-06-23-dungeon-depth-lighting.md`](../plans/v318_2026-06-23-dungeon-depth-lighting.md) | [`as-built`](../as-built/v318_dungeon-depth-lighting.md) |
 | **v319** | `boss-arena-presence` | Complete (focused client checks green; autoloop batch `make ci` pending) | [`v319_spec-boss-arena-presence.md`](../specs/v319_spec-boss-arena-presence.md) | [`v319_2026-06-23-boss-arena-presence.md`](../plans/v319_2026-06-23-boss-arena-presence.md) | [`as-built`](../as-built/v319_boss-arena-presence.md) |
 | **v320** | `critical-hit-punch` | Complete (focused client checks green; autoloop batch `make ci` pending) | [`v320_spec-critical-hit-punch.md`](../specs/v320_spec-critical-hit-punch.md) | | [`as-built`](../as-built/v320_critical-hit-punch.md) |
+| **v321** | `skill-rank-vfx-intensity` | Complete (focused shared/client checks green; autoloop batch `make ci` pending) | [`v321_spec-skill-rank-vfx-intensity.md`](../specs/v321_spec-skill-rank-vfx-intensity.md) | | [`as-built`](../as-built/v321_skill-rank-vfx-intensity.md) |
 
 ---

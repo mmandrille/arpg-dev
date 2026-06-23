@@ -67,7 +67,19 @@
           "effect_visual": { "type": "string", "minLength": 1 },
           "visual_radius": { "type": "number", "exclusiveMinimum": 0 },
           "visual_duration": { "type": "number", "exclusiveMinimum": 0 },
-          "visual_height": { "type": "number", "minimum": 0 }
+          "visual_height": { "type": "number", "minimum": 0 },
+          "rank_intensity": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "accent_width_base": { "type": "number", "exclusiveMinimum": 0 },
+              "accent_width_per_rank": { "type": "number", "minimum": 0 },
+              "glow_ring_count_base": { "type": "integer", "minimum": 0 },
+              "glow_ring_count_per_rank": { "type": "integer", "minimum": 0 },
+              "cast_burst_scale_base": { "type": "number", "exclusiveMinimum": 0 },
+              "cast_burst_scale_per_rank": { "type": "number", "minimum": 0 }
+            }
+          }
         }
       }
     }

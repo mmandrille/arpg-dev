@@ -2,6 +2,7 @@ class_name BossVisualsController
 extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
+const BossArenaPresenceScript := preload("res://scripts/boss_arena_presence.gd")
 
 var ctx: RefCounted
 var boss_health_bar
@@ -31,6 +32,20 @@ func sync_boss_health_bar() -> void:
 		boss_health_bar.clear_phase_state()
 	else:
 		boss_health_bar.set_phase_state(phase)
+	sync_boss_arena_presence()
+
+func sync_boss_arena_presence() -> void:
+	if ctx == null:
+		return
+	var active_id := active_boss_entity_id()
+	for id in ctx.entities.keys():
+		var rec: Dictionary = ctx.entities[id]
+		if str(rec.get("type", "")) != "monster" or not bool(rec.get("is_boss", false)):
+			continue
+		if str(id) == active_id:
+			BossArenaPresenceScript.sync_for_record(rec)
+		else:
+			BossArenaPresenceScript.remove_for_record(rec)
 
 func advance_boss_phase_display(delta: float) -> void:
 	if ctx == null:
@@ -136,8 +151,9 @@ func apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 	else:
 		rec["boss_telegraph_active"] = false
 		remove_boss_telegraph_marker(rec)
-		if ctx.apply_entity_status_tint.is_valid():
-			ctx.apply_entity_status_tint.call(rec)
+	if ctx.apply_entity_status_tint.is_valid():
+		ctx.apply_entity_status_tint.call(rec)
+	sync_boss_arena_presence()
 	sync_boss_health_bar()
 
 func apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
@@ -151,6 +167,7 @@ func apply_boss_phase_ended(entity_id: String, _ev: Dictionary) -> void:
 	remove_boss_telegraph_marker(rec)
 	if ctx.apply_entity_status_tint.is_valid():
 		ctx.apply_entity_status_tint.call(rec)
+	sync_boss_arena_presence()
 	sync_boss_health_bar()
 
 func normalize_boss_phase_metadata(rec: Dictionary) -> void:

@@ -23,10 +23,10 @@ Last updated: 2026-06-23
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v318 — dungeon depth lighting |
+| **Latest completed slice** | v319 — boss arena presence |
 | **Active branch** | `main` |
-| **CI gate** | v318 focused checks green on 2026-06-23 (`make validate-shared`, `godot --headless --path client --script res://tests/test_dungeon_depth_lighting.gd`, `make client-unit`, `make maintainability`); selected `$autoloop` batch `make ci` pending |
-| **Next slice** | Continue selected `$autoloop` look-and-feel batch with v319 — boss arena presence |
+| **CI gate** | v319 focused checks green on 2026-06-23 (`godot --headless --path client --script res://tests/test_factories.gd`, `make client-unit`, `make maintainability`); selected `$autoloop` batch `make ci` pending |
+| **Next slice** | Continue selected `$autoloop` look-and-feel batch with v320 — critical hit punch |
 | **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
 | **Next engineering review** | After the selected v314-v328 look-and-feel batch and a green final proof |
 

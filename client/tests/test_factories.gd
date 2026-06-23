@@ -7,6 +7,7 @@ const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 const WallRendererScript := preload("res://scripts/wall_renderer.gd")
 const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
 const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
+const BossArenaPresenceScript := preload("res://scripts/boss_arena_presence.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
 
@@ -232,8 +233,14 @@ func _test_boss_visuals() -> void:
 	_assert_eq("boss title", controller.boss_health_bar_title("cave_warden"), "Cave Warden")
 	var root := Node3D.new()
 	get_root().add_child(root)
-	var rec := {"node": root, "visual_scale": 1.0, "boss_phase": {"pattern_id": "stone_lance"}}
+	ctx.entities["boss_a"]["node"] = root
+	ctx.entities["boss_a"]["visual_scale"] = 1.0
+	var rec: Dictionary = ctx.entities["boss_a"]
+	rec["boss_phase"] = {"pattern_id": "stone_lance"}
+	controller.sync_boss_arena_presence()
+	_assert_true("boss arena ring exists", root.find_child(BossArenaPresenceScript.MARKER_NAME, false, false) != null)
 	controller.sync_boss_telegraph_marker(rec, {"hit_shape": "line", "radius": 7.5, "width": 1.0, "to_color": "#79b8ff"})
+	_assert_true("telegraph and arena coexist", root.find_child(ClientConstantsScript.BOSS_TELEGRAPH_MARKER_NAME, false, false) != null and root.find_child(BossArenaPresenceScript.MARKER_NAME, false, false) != null)
 	_assert_eq("line marker shape", str(rec.get("telegraph_marker_shape", "")), "line")
 	_assert_true("line marker exists", root.find_child(ClientConstantsScript.BOSS_TELEGRAPH_MARKER_NAME, false, false) != null)
 	rec["boss_phase"] = {"pattern_id": "shard_fan"}
@@ -249,6 +256,8 @@ func _test_boss_visuals() -> void:
 	_assert_eq("summon marker shape", str(rec.get("telegraph_marker_shape", "")), "summon_circle")
 	controller.remove_boss_telegraph_marker(rec)
 	_assert_eq("marker cleanup", bool(rec.get("has_boss_telegraph_marker", true)), false)
+	BossArenaPresenceScript.remove_for_record(rec)
+	_assert_eq("arena cleanup", bool(rec.get("has_boss_arena_presence", true)), false)
 	root.queue_free()
 
 

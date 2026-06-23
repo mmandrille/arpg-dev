@@ -133,19 +133,28 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 			return _make_column_node(wall)
 		"rubble":
 			return _make_rubble_node(wall)
-	var node := MeshInstance3D.new()
-	node.name = "Wall_%s" % str(wall.get("id", ""))
-	node.set_meta("wall_id", str(wall.get("id", "")))
-	node.set_meta("source", str(wall.get("source", "")))
-	node.set_meta("kind", "wall")
 	var wall_height := _wall_height()
+	var sx := float(size.get("x", 1.0))
+	var sy := float(size.get("y", 1.0))
+	var body := StaticBody3D.new()
+	body.name = "Wall_%s" % str(wall.get("id", ""))
+	body.set_meta("wall_id", str(wall.get("id", "")))
+	body.set_meta("source", str(wall.get("source", "")))
+	body.set_meta("kind", "wall")
+	body.position = Vector3(float(pos.get("x", 0.0)), wall_height * 0.5, float(pos.get("y", 0.0)))
+	var shape_node := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(sx, wall_height, sy)
+	shape_node.shape = box
+	body.add_child(shape_node)
+	var node := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
-	mesh.size = Vector3(float(size.get("x", 1.0)), wall_height, float(size.get("y", 1.0)))
+	mesh.size = Vector3(sx, wall_height, sy)
 	node.mesh = mesh
-	node.position = Vector3(float(pos.get("x", 0.0)), wall_height * 0.5, float(pos.get("y", 0.0)))
 	var mat := _make_wall_material(wall, wall_height)
 	node.material_override = mat
-	return node
+	body.add_child(node)
+	return body
 
 func _make_wall_material(wall: Dictionary, wall_height: float = TOWN_WALL_HEIGHT) -> StandardMaterial3D:
 	var size: Dictionary = wall.get("size", {})

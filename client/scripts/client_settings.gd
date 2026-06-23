@@ -13,6 +13,15 @@ const DEFAULT_LOOT_FILTER_MODE := "All"
 const MONSTER_HEALTH_BAR_CONTEXTUAL := "contextual"
 const MONSTER_HEALTH_BAR_ALWAYS := "always"
 const DEFAULT_MONSTER_HEALTH_BAR_MODE := MONSTER_HEALTH_BAR_CONTEXTUAL
+const CAMERA_MODE_ISOMETRIC := "isometric"
+const CAMERA_MODE_THIRD_PERSON := "third_person"
+const CAMERA_MODE_CHEST_VIEW := "chest_view"
+const DEFAULT_CAMERA_MODE := CAMERA_MODE_ISOMETRIC
+const SUPPORTED_CAMERA_MODES := [
+	CAMERA_MODE_ISOMETRIC,
+	CAMERA_MODE_THIRD_PERSON,
+	CAMERA_MODE_CHEST_VIEW,
+]
 const DEFAULT_MASTER_VOLUME := 0.8
 const DEFAULT_MUSIC_VOLUME := 0.0
 const DEFAULT_SFX_VOLUME := 0.8
@@ -46,6 +55,7 @@ var master_volume: float = DEFAULT_MASTER_VOLUME
 var music_volume: float = DEFAULT_MUSIC_VOLUME
 var sfx_volume: float = DEFAULT_SFX_VOLUME
 var map_opacity: float = DEFAULT_MAP_OPACITY
+var camera_mode: String = DEFAULT_CAMERA_MODE
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -122,6 +132,13 @@ static func normalize_monster_health_bar_mode(mode: String) -> String:
 	return DEFAULT_MONSTER_HEALTH_BAR_MODE
 
 
+static func normalize_camera_mode(mode: String) -> String:
+	var normalized := mode.strip_edges().to_lower()
+	if normalized in SUPPORTED_CAMERA_MODES:
+		return normalized
+	return DEFAULT_CAMERA_MODE
+
+
 static func normalize_volume(value, fallback: float) -> float:
 	if typeof(value) != TYPE_FLOAT and typeof(value) != TYPE_INT:
 		return fallback
@@ -176,6 +193,12 @@ static func monster_health_bar_mode_from_data(data) -> String:
 	return normalize_monster_health_bar_mode(str((data as Dictionary).get("monster_health_bar_mode", DEFAULT_MONSTER_HEALTH_BAR_MODE)))
 
 
+static func camera_mode_from_data(data) -> String:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_CAMERA_MODE
+	return normalize_camera_mode(str((data as Dictionary).get("camera_mode", DEFAULT_CAMERA_MODE)))
+
+
 static func master_volume_from_data(data) -> float:
 	if typeof(data) != TYPE_DICTIONARY:
 		return DEFAULT_MASTER_VOLUME
@@ -209,6 +232,7 @@ func load() -> void:
 		language = DEFAULT_LANGUAGE
 		loot_filter_mode = DEFAULT_LOOT_FILTER_MODE
 		monster_health_bar_mode = DEFAULT_MONSTER_HEALTH_BAR_MODE
+		camera_mode = DEFAULT_CAMERA_MODE
 		master_volume = DEFAULT_MASTER_VOLUME
 		music_volume = DEFAULT_MUSIC_VOLUME
 		sfx_volume = DEFAULT_SFX_VOLUME
@@ -223,6 +247,7 @@ func load() -> void:
 	language = language_from_data(parsed)
 	loot_filter_mode = loot_filter_mode_from_data(parsed)
 	monster_health_bar_mode = monster_health_bar_mode_from_data(parsed)
+	camera_mode = camera_mode_from_data(parsed)
 	master_volume = master_volume_from_data(parsed)
 	music_volume = music_volume_from_data(parsed)
 	sfx_volume = sfx_volume_from_data(parsed)
@@ -245,6 +270,7 @@ func save() -> void:
 		"language": language,
 		"loot_filter_mode": loot_filter_mode,
 		"monster_health_bar_mode": monster_health_bar_mode,
+		"camera_mode": camera_mode,
 		"master_volume": master_volume,
 		"music_volume": music_volume,
 		"sfx_volume": sfx_volume,
@@ -332,6 +358,19 @@ func set_monster_health_bar_mode(mode: String, persist: bool = true) -> void:
 	monster_health_bar_mode = normalize_monster_health_bar_mode(mode)
 	if persist:
 		save()
+
+
+func set_camera_mode(mode: String, persist: bool = true) -> void:
+	camera_mode = normalize_camera_mode(mode)
+	if persist:
+		save()
+
+
+func cycle_camera_mode() -> String:
+	var idx := SUPPORTED_CAMERA_MODES.find(camera_mode)
+	camera_mode = SUPPORTED_CAMERA_MODES[(idx + 1) % SUPPORTED_CAMERA_MODES.size()]
+	save()
+	return camera_mode
 
 
 func set_audio_volumes(master: float, music: float, sfx: float, persist: bool = true) -> void:

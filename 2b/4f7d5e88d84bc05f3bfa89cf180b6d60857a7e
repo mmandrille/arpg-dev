@@ -1,0 +1,27 @@
+scripts/client_smoke.sh
+  s_13fb8c3954ab4d::t_c5d3fd01e162a5 200-202
+shared/assets/camera_presentations.v0.json
+  s_13fb8c3954ab4d::t_55e7170a5c7086 1-44
+client/scripts/camera_presentations_loader.gd
+  s_13fb8c3954ab4d::t_a0a88e7413a7f3 1-47
+client/tests/test_camera_mode_settings.gd
+  s_13fb8c3954ab4d::t_dc09c9813b325d 1-49
+shared/assets/camera_presentations.v0.schema.json
+  s_13fb8c3954ab4d::t_6e7d4f82af20b9 1-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2b4f7d5e88d84bc05f3bfa89cf180b6d60857a7e",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

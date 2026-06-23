@@ -1080,6 +1080,16 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_cooldown_started") {
 		t.Fatalf("missing cast/cooldown events: %+v", cast.Events)
 	}
+	var castEvent *Event
+	for i := range cast.Events {
+		if cast.Events[i].EventType == "skill_cast" {
+			castEvent = &cast.Events[i]
+			break
+		}
+	}
+	if castEvent == nil || castEvent.ProjectileDefID != "magic_bolt_projectile" || castEvent.Position == nil || castEvent.Direction == nil || castEvent.Range == nil {
+		t.Fatalf("magic bolt skill_cast = %+v, want projectile visual with position/direction/range", castEvent)
+	}
 	cooldowns := skillCooldownUpdate(cast)
 	expectedCooldown := sim.skillCooldownTicks(rules.Skills[magicBoltSkillID])
 	if len(cooldowns) != 1 || cooldowns[0].SkillID != magicBoltSkillID || cooldowns[0].RemainingTicks != expectedCooldown || cooldowns[0].TotalTicks != expectedCooldown {

@@ -24,8 +24,26 @@ if ! command -v "$GODOT" >/dev/null 2>&1; then
 fi
 
 echo "[client-smoke] Using Godot: $("$GODOT" --version 2>/dev/null | tail -1)"
+echo "[client-smoke] BASE_URL=${BASE_URL}"
 
 FAILED_GATES=()
+
+require_running_server() {
+  if curl -fsS "${BASE_URL}/readyz" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "[client-smoke] FAIL: no reachable server at BASE_URL=${BASE_URL} (/readyz)"
+  if [[ "${BASE_URL}" == "http://localhost:18081" ]] \
+      && curl -fsS "http://localhost:8888/readyz" >/dev/null 2>&1; then
+    echo "[client-smoke] Hint: a server is up on :8888 (make server default) but client-smoke uses TEST_BASE_URL :18081."
+    echo "[client-smoke] Either: TEST_BASE_URL=http://localhost:8888 make client-smoke"
+    echo "[client-smoke] Or:      make db-up && ARPG_ADDR=:18081 make server"
+  else
+    echo "[client-smoke] Start: make db-up && ARPG_ADDR=:18081 make server"
+  fi
+  exit 1
+}
 
 # Godot exits 0 even on a GDScript PARSE/load error when run via --script, so a
 # bare exit-code check could pass silently on a broken gate. run_gate captures
@@ -184,6 +202,8 @@ if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   echo "[client-unit] PASS"
   exit 0
 fi
+
+require_running_server
 
 # 3. Headless slice smoke against the running server.
 run_gate "headless slice smoke" "[smoke] PASS" res://scripts/smoke.gd

@@ -51,22 +51,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		if err := maybePlaceRandomQuestRewardChest(seed, rules, lootBand, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
-		if err := placeDungeonObstacles(seed, rules, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		if err := placeDungeonMonsters(rng, monsterDefRNG, rarityRNG, rules, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		if err := placeDungeonWater(seed, rules, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		if err := placeDungeonHoles(seed, rules, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		if err := validateGeneratedDungeonReachability(rules, out); err != nil {
+		if err := finalizeGeneratedDungeonLevel(seed, rng, monsterDefRNG, rarityRNG, eliteObjectiveRNG, rules, &out); err != nil {
 			return generatedDungeonLevel{}, err
 		}
 		return out, nil
@@ -89,22 +74,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 	if err := maybePlaceRandomQuestRewardChest(seed, rules, lootBand, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
-	if err := placeDungeonObstacles(seed, rules, &out); err != nil {
-		return generatedDungeonLevel{}, err
-	}
-	if err := placeDungeonMonsters(rng, monsterDefRNG, rarityRNG, rules, &out); err != nil {
-		return generatedDungeonLevel{}, err
-	}
-	if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, &out); err != nil {
-		return generatedDungeonLevel{}, err
-	}
-	if err := placeDungeonWater(seed, rules, &out); err != nil {
-		return generatedDungeonLevel{}, err
-	}
-	if err := placeDungeonHoles(seed, rules, &out); err != nil {
-		return generatedDungeonLevel{}, err
-	}
-	if err := validateGeneratedDungeonReachability(rules, out); err != nil {
+	if err := finalizeGeneratedDungeonLevel(seed, rng, monsterDefRNG, rarityRNG, eliteObjectiveRNG, rules, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	return out, nil

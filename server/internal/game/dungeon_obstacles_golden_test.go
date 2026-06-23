@@ -140,6 +140,7 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, level generatedDungeonLevel) {
 	t.Helper()
 	golden.Expected.Walls = []dungeonObstacleWall{}
+	generatedCount := 0
 	waterCount := 0
 	holeCount := 0
 	shapeFamilies := map[string]bool{}
@@ -157,6 +158,7 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 		}
 		golden.Expected.Walls = append(golden.Expected.Walls, row)
 		if wall.source == "generated" {
+			generatedCount++
 			switch wall.obstacleKind() {
 			case obstacleKindWater:
 				waterCount++
@@ -171,7 +173,7 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 		}
 	}
 	golden.Expected.MinimumWallCount = len(level.walls)
-	golden.Expected.MinimumGeneratedWallCount = maxInt(0, len(level.walls)-4)
+	golden.Expected.MinimumGeneratedWallCount = generatedCount
 	golden.Expected.MinimumWaterCount = waterCount
 	golden.Expected.MinimumHoleCount = holeCount
 	golden.Expected.ShapeFamilies = sortedStringKeys(shapeFamilies)

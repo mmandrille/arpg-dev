@@ -24,6 +24,49 @@ type AreaRangeFormula struct {
 	Spread      int     `json:"spread"`
 }
 
+type RoomLayoutRules struct {
+	Enabled             bool     `json:"enabled"`
+	MaxAttempts         int      `json:"max_attempts"`
+	HorizontalDividers  IntRange `json:"horizontal_dividers"`
+	VerticalDividers    IntRange `json:"vertical_dividers"`
+	MinDividersTotal    int      `json:"min_dividers_total"`
+	WallSpanRatioMin    float64  `json:"wall_span_ratio_min"`
+	WallSpanRatioMax    float64  `json:"wall_span_ratio_max"`
+	CorridorWidth       float64  `json:"corridor_width"`
+	MinGapSeparation    float64  `json:"min_gap_separation"`
+	CorridorsPerWallMin int      `json:"corridors_per_wall_min"`
+	CorridorsPerWallMax int      `json:"corridors_per_wall_max"`
+	MarginFromPerimeter float64  `json:"margin_from_perimeter"`
+}
+
+func validateRoomLayoutRules(r RoomLayoutRules) error {
+	if !r.Enabled {
+		return nil
+	}
+	if r.MaxAttempts <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_layout.max_attempts: must be positive")
+	}
+	if r.CorridorWidth <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_layout.corridor_width: must be positive")
+	}
+	if r.MinGapSeparation <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_layout.min_gap_separation: must be positive")
+	}
+	if r.WallSpanRatioMin <= 0 || r.WallSpanRatioMax > 1 || r.WallSpanRatioMax < r.WallSpanRatioMin {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_layout: wall_span_ratio_min/max must be in (0,1] with min <= max")
+	}
+	if r.CorridorsPerWallMin < 1 || r.CorridorsPerWallMax < r.CorridorsPerWallMin {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_layout.corridors_per_wall: min must be >= 1 and max >= min")
+	}
+	if r.HorizontalDividers.Min < 0 || r.VerticalDividers.Min < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_layout: divider mins must be non-negative")
+	}
+	if r.MinDividersTotal < 1 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_layout.min_dividers_total: must be >= 1")
+	}
+	return nil
+}
+
 func (d DungeonGenerationRules) RulesForLevel(levelNum int) DungeonGenerationRules {
 	if levelNum >= 0 || isBossFloor(levelNum, d) {
 		return d

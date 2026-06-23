@@ -37,6 +37,7 @@ func randomObjectiveChestPosition(rng *RNG, rules DungeonGenerationRules, object
 	if maxX < minX || maxY < minY {
 		return Vec2{}, false
 	}
+	monsterClearance := math.Max(rules.MonsterPlacement.MarginFromWall, rules.MonsterPlacement.PackMemberRadius*2)
 	for attempt := 0; attempt < objective.MaxAttempts; attempt++ {
 		pos := Vec2{
 			X: float64(minX + rng.IntN(maxX-minX+1)),
@@ -54,6 +55,15 @@ func randomObjectiveChestPosition(rng *RNG, rules DungeonGenerationRules, object
 		}
 		for _, chest := range out.chestPositions() {
 			if distance(pos, chest) < objective.MinStairDistance {
+				blocked = true
+				break
+			}
+		}
+		if blocked {
+			continue
+		}
+		for _, monster := range out.monsters {
+			if distance(pos, monster.pos) < monsterClearance {
 				blocked = true
 				break
 			}

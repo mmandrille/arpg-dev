@@ -94,7 +94,7 @@
         "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
         "position": { "$ref": "#/$defs/vec2" },
         "size": { "$ref": "#/$defs/wall_size" },
-        "source": { "type": "string", "enum": ["perimeter", "generated"] },
+        "source": { "type": "string", "enum": ["perimeter", "generated", "room_divider"] },
         "shape_family": { "type": "string", "enum": ["line", "l", "t", "block", "water", "hole"] },
         "kind": { "type": "string", "enum": ["wall", "water", "hole", "rock", "column", "rubble"] }
       }

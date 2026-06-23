@@ -16,6 +16,7 @@
     "monster_placement",
     "chest_placement",
     "elite_objective",
+    "room_layout",
     "obstacle_generation",
     "boss_floor",
     "monster_rarity_note",
@@ -148,6 +149,38 @@
         "loot_table": { "type": "string", "minLength": 1 },
         "min_stair_distance": { "type": "number", "exclusiveMinimum": 0 },
         "max_attempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "room_layout": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "max_attempts",
+        "horizontal_dividers",
+        "vertical_dividers",
+        "min_dividers_total",
+        "wall_span_ratio_min",
+        "wall_span_ratio_max",
+        "corridor_width",
+        "min_gap_separation",
+        "corridors_per_wall_min",
+        "corridors_per_wall_max",
+        "margin_from_perimeter"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "max_attempts": { "type": "integer", "minimum": 1 },
+        "horizontal_dividers": { "$ref": "#/$defs/int_range" },
+        "vertical_dividers": { "$ref": "#/$defs/int_range" },
+        "min_dividers_total": { "type": "integer", "minimum": 1 },
+        "wall_span_ratio_min": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "wall_span_ratio_max": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "corridor_width": { "type": "number", "exclusiveMinimum": 0 },
+        "min_gap_separation": { "type": "number", "exclusiveMinimum": 0 },
+        "corridors_per_wall_min": { "type": "integer", "minimum": 1 },
+        "corridors_per_wall_max": { "type": "integer", "minimum": 1 },
+        "margin_from_perimeter": { "type": "number", "minimum": 0 }
       }
     },
     "obstacle_generation": {

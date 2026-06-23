@@ -100,10 +100,24 @@
     "min_stair_distance": 4.0,
     "max_attempts": 32
   },
+  "room_layout": {
+    "enabled": true,
+    "max_attempts": 32,
+    "horizontal_dividers": { "min": 1, "max": 2 },
+    "vertical_dividers": { "min": 0, "max": 1 },
+    "min_dividers_total": 2,
+    "wall_span_ratio_min": 0.65,
+    "wall_span_ratio_max": 0.85,
+    "corridor_width": 2.0,
+    "min_gap_separation": 6.0,
+    "corridors_per_wall_min": 1,
+    "corridors_per_wall_max": 2,
+    "margin_from_perimeter": 5.0
+  },
   "obstacle_generation": {
     "enabled": true,
     "max_attempts": 64,
-    "target_group_count_formula": { "area_per_unit": 840, "min": 6, "max": 15, "spread": 1 },
+    "target_group_count_formula": { "area_per_unit": 840, "min": 6, "max": 25, "spread": 1 },
     "wall_segment": {
       "min_length": 4,
       "max_length": 14,

@@ -23,9 +23,9 @@ Last updated: 2026-06-23
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v329 — camera-mode-options |
+| **Latest completed slice** | v330 — dungeon-rooms |
 | **Active branch** | `main` |
-| **CI gate** | v329 `make ci` green on 2026-06-23 |
+| **CI gate** | v330 `make ci` green on 2026-06-23 |
 | **Next slice** | Run `$review` then `$refactor` (engineering review cadence due after v330) |
 | **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
 | **Next engineering review** | After v330 ships and `make ci` is green (next milestone review due ~v340) |

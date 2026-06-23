@@ -1,0 +1,21 @@
+client/scripts/client_audio_bridge.gd
+  s_13fb8c3954ab4d::t_80b09b30486efb 24-25
+.maintainability/file-size-baseline.tsv
+  s_13fb8c3954ab4d::t_8f824db6c383f1 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "89c44d39f16d85c490ef92aae06b83db2cd7acf3",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

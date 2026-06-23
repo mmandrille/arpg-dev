@@ -1,0 +1,22 @@
+make/client.mk
+  s_430c3294a50024::t_2041b54a5e5149 19
+scripts/client_smoke.sh
+  s_430c3294a50024::t_27f73beff19854 206-207
+  s_430c3294a50024::t_c1ed9fa88cdc37 27,31-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5c08f9942edc7b5a283fca0ff2126c76f6e9a1fc",
+  "prompts": {},
+  "sessions": {
+    "s_430c3294a50024": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "42edd734-a00e-4ff2-896e-74c43d0c5702",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

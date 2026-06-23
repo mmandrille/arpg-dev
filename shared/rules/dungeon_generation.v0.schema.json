@@ -464,7 +464,11 @@
         "ground_highlight": { "$ref": "#/$defs/hex_color" },
         "wall_base": { "$ref": "#/$defs/hex_color" },
         "wall_mortar": { "$ref": "#/$defs/hex_color" },
-        "wall_highlight": { "$ref": "#/$defs/hex_color" }
+        "wall_highlight": { "$ref": "#/$defs/hex_color" },
+        "directional_color": { "$ref": "#/$defs/hex_color" },
+        "directional_energy": { "type": "number", "exclusiveMinimum": 0 },
+        "ambient_color": { "$ref": "#/$defs/hex_color" },
+        "ambient_energy": { "type": "number", "minimum": 0 }
       }
     },
     "hex_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },

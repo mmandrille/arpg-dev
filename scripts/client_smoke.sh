@@ -170,6 +170,7 @@ run_gate "GDScript impact sparks test" "[gdtest] PASS: test_impact_sparks" res:/
 # 2o. World-detail render + combat-feel unit tests (server-independent; v295-v308).
 # These existed on disk but were never registered, so they ran zero times in CI.
 run_gate "GDScript ground/wall factories test" "[gdtest] PASS: test_factories" res://tests/test_factories.gd
+run_gate "GDScript dungeon depth lighting test" "[gdtest] PASS: test_dungeon_depth_lighting" res://tests/test_dungeon_depth_lighting.gd
 run_gate "GDScript fog-of-war overlay test" "[gdtest] PASS: test_fog_of_war_overlay" res://tests/test_fog_of_war_overlay.gd
 run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement_visual_smoothing" res://tests/test_movement_visual_smoothing.gd
 run_gate "GDScript melee lunge presentation test" "[gdtest] PASS: test_melee_lunge_presentation" res://tests/test_melee_lunge_presentation.gd

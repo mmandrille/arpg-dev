@@ -18,6 +18,7 @@ const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
+const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
@@ -805,6 +806,8 @@ func _process(delta: float) -> void:
 	_try_complete_pending_waypoint_travel()
 	_tick_movement_animation_linger(delta)
 	CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta)
+	if gameplay_active and CameraImpactFeedbackScript.is_active():
+		_sync_camera_to_player()
 
 	if visual_replay_enabled:
 		_handle_visual_replay(delta)
@@ -1724,7 +1727,7 @@ func _reconcile_player() -> void:
 func _sync_camera_to_player() -> void:
 	if _camera == null or player_anchor == null: return
 	var target := player_anchor.global_position
-	_camera.global_position = target + ClientConstants.CAMERA_FOLLOW_OFFSET
+	_camera.global_position = target + ClientConstants.CAMERA_FOLLOW_OFFSET + CameraImpactFeedbackScript.get_offset()
 	_camera.look_at(target, Vector3.UP)
 
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:

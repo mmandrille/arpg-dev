@@ -72,14 +72,14 @@ func _test_town_ambient_life() -> void:
 
 
 func _test_camera_impact_feedback() -> void:
-	var camera := Camera3D.new()
-	CameraImpactFeedbackScript.apply_from_damage(camera, 12, 40)
-	if camera.position == ClientConstants.CAMERA_FOLLOW_OFFSET:
-		_fail("camera impact should offset follow position")
-		camera.free()
+	CameraImpactFeedbackScript.apply_from_damage(12, 40)
+	if CameraImpactFeedbackScript.get_offset() == Vector3.ZERO:
+		_fail("camera impact should produce a shake offset")
 		return
-	CameraImpactFeedbackScript.decay(camera, 1.0)
-	camera.free()
+	CameraImpactFeedbackScript.decay(1.0)
+	if CameraImpactFeedbackScript.is_active():
+		_fail("camera impact should decay to rest")
+		return
 	_pass("camera impact feedback")
 
 
@@ -114,8 +114,8 @@ func _test_combat_camera_binding() -> void:
 		Callable(self, "_noop_damage"),
 		Callable(self, "_noop_node"),
 	)
-	if camera.position == ClientConstants.CAMERA_FOLLOW_OFFSET:
-		_fail("combat presentation should route player damage to camera")
+	if CameraImpactFeedbackScript.get_offset() == Vector3.ZERO:
+		_fail("combat presentation should route player damage to camera shake")
 		camera.free()
 		return
 	camera.free()

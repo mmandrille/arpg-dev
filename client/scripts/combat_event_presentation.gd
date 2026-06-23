@@ -24,8 +24,8 @@ static func show_combat_text_for_event(
 	show_damage_number: Callable,
 	node_for_entity_id: Callable,
 ) -> void:
-	if str(ev.get("event_type", "")) == "player_damaged" and _camera != null:
-		CameraImpactFeedbackScript.apply_from_damage(_camera, int(ev.get("damage", 0)), _max_hp)
+	if str(ev.get("event_type", "")) == "player_damaged":
+		CameraImpactFeedbackScript.apply_from_damage(int(ev.get("damage", 0)), _max_hp)
 	var outcome := str(ev.get("outcome", ""))
 	var damage = ev.get("damage", null)
 	var special := DamageTypeCombatTextScript.special_outcome(outcome)
@@ -84,5 +84,5 @@ static func spawn_impact_sparks(
 		target.add_child(ImpactSparksScript.make_node(ev, fallback_color))
 
 
-static func decay_camera(camera: Camera3D, delta: float) -> void:
-	CameraImpactFeedbackScript.decay(camera, delta)
+static func decay_camera(_camera: Camera3D, delta: float) -> void:
+	CameraImpactFeedbackScript.decay(delta)

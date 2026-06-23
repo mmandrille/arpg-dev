@@ -25,6 +25,7 @@ func _run() -> void:
 	await _test_out_of_range_wall_skips_shadow()
 	await _test_multiple_walls_generate_multiple_shadows()
 	await _test_zero_radius_disables_overlay()
+	await _test_set_active_false_survives_progression_update()
 	print("[gdtest] PASS: test_fog_of_war_overlay (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -270,6 +271,19 @@ func _test_zero_radius_disables_overlay() -> void:
 	_assert_eq("zero radius organic edge px", float(state.get("organic_edge_px", -1.0)), 0.0)
 	_assert_eq("zero radius darkness feather px", float(state.get("darkness_feather_px", -1.0)), 0.0)
 	_assert_eq("zero radius shadows", int(state.get("shadow_count", -1)), 0)
+	overlay.free()
+
+
+func _test_set_active_false_survives_progression_update() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_active(false)
+	overlay.set_progression({"derived_stats": {"light_radius": 12}})
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_false("inactive overlay stays hidden after progression", bool(state.get("enabled", true)))
+	_assert_eq("light radius still tracked while inactive", float(state.get("light_radius", 0.0)), 12.0)
 	overlay.free()
 
 

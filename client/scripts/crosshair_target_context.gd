@@ -13,6 +13,7 @@ var revive_hover_enabled: Callable    ## () -> bool
 var nearest_loot_at_ground: Callable  ## (ground: Vector3) -> String
 var center_ground_point: Callable     ## () -> Vector3
 var ray_pick_entity: Callable         ## optional (viewport, world) -> String; empty uses center ray
+var name_tag_parent: Node             ## CanvasLayer/Control parent for CrosshairTargetNameTag
 
 
 static func make(
@@ -26,7 +27,8 @@ static func make(
 	revive_hover: Callable,
 	nearest_loot: Callable,
 	ground_at_center: Callable,
-	ray_pick: Callable = Callable()
+	ray_pick: Callable = Callable(),
+	name_parent: Node = null
 ) -> RefCounted:
 	var ctx: RefCounted = load("res://scripts/crosshair_target_context.gd").new()
 	ctx.camera = cam
@@ -40,4 +42,5 @@ static func make(
 	ctx.nearest_loot_at_ground = nearest_loot
 	ctx.center_ground_point = ground_at_center
 	ctx.ray_pick_entity = ray_pick
+	ctx.name_tag_parent = name_parent
 	return ctx

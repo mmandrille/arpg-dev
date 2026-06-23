@@ -13,6 +13,7 @@ var _fail_count: int = 0
 
 func _initialize() -> void:
 	_test_loader_defaults_isometric()
+	_test_loader_perspective_modes()
 	_test_loader_unknown_mode_falls_back_to_isometric()
 	_test_settings_normalize_unknown()
 	_test_settings_cycle_modes()
@@ -33,6 +34,17 @@ func _test_loader_defaults_isometric() -> void:
 	_assert_eq("isometric projection is orthogonal", str(cfg.get("projection", "")), "orthogonal")
 	_assert_true("isometric reticle disabled", cfg.get("reticle_enabled", true) == false)
 	_assert_true("isometric zoom_default > 0", float(cfg.get("zoom_default", 0.0)) > 0.0)
+
+
+func _test_loader_perspective_modes() -> void:
+	CameraPresentationsLoaderScript.reset_for_tests()
+	CameraPresentationsLoaderScript.ensure_loaded()
+	var tp := CameraPresentationsLoaderScript.mode("third_person")
+	_assert_eq("third_person projection", tp.get("projection", ""), "perspective")
+	_assert_true("third_person spring_arm_length > 0", tp.get("spring_arm_length", 0.0) > 0.0)
+	var cv := CameraPresentationsLoaderScript.mode("chest_view")
+	_assert_eq("chest_view projection", cv.get("projection", ""), "perspective")
+	_assert_true("chest_view reticle enabled", cv.get("reticle_enabled", false) == true)
 
 
 func _test_loader_unknown_mode_falls_back_to_isometric() -> void:

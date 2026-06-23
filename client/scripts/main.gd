@@ -2414,8 +2414,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
 					if client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC:
 						var _ad := PerspectiveCombatInputScript.flat_aim_direction(_camera, player_anchor)
-						_face_direction(_ad); client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(_ad))
-						_attack_cooldown = _basic_attack_cooldown_seconds(); get_viewport().set_input_as_handled(); return
+						_face_direction(_ad)
+						if player_anim != null:
+							player_anim.play_one_shot("attack", CombatReachScript.local_player_attack_mode(inventory, equipped))
+						client.send("directional_attack_intent", last_server_tick, DirectionalAttackInputScript.payload(_ad))
+						_attack_cooldown = _basic_attack_cooldown_seconds()
+						_start_basic_attack_recovery_ui(_attack_cooldown)
+						get_viewport().set_input_as_handled(); return
 					if _is_force_stand_held():
 						_start_directional_attack_hold()
 						get_viewport().set_input_as_handled()
@@ -3107,7 +3112,7 @@ func _update_loot_hover_label() -> void:
 	loot_label_reveal_held = reveal_held
 
 	var next_hover := ""
-	if not _input_locked() and _camera != null:
+	if not _input_locked() and _camera != null and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		var target_id := _pick_entity_at_mouse()
 		if target_id != "" and _entity_uses_loot_label(target_id):
 			next_hover = target_id

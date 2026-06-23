@@ -1,0 +1,48 @@
+client/scripts/main.gd
+  s_13fb8c3954ab4d::t_3436e6b08f64dd 75-76
+  s_13fb8c3954ab4d::t_f6c195d211ce5e 2403
+  s_13fb8c3954ab4d::t_07bfaac0ff9664 2404-2405
+  s_13fb8c3954ab4d::t_bacd665c17caac 3425
+  s_13fb8c3954ab4d::t_4c634b96a66f8f 696-697,700-702
+  s_13fb8c3954ab4d::t_9f75d480fba824 713,716
+  s_13fb8c3954ab4d::t_f4d3e3bbaf0384 735
+  s_13fb8c3954ab4d::t_20596cd99b5c17 377
+  s_13fb8c3954ab4d::t_cec36717326250 654
+  s_13fb8c3954ab4d::t_997f0c98c0423d 2481
+  s_13fb8c3954ab4d::t_6c15012debebaa 2414-2416
+  s_13fb8c3954ab4d::t_c3ed2615e20fca 260
+  s_13fb8c3954ab4d::t_d09f859070b494 2413
+  s_13fb8c3954ab4d::t_a7fb4bf0da6c14 2406-2408
+  s_13fb8c3954ab4d::t_7385ef80d282dc 695,698-699
+  s_13fb8c3954ab4d::t_0fdf255e9e1213 712,715
+  s_13fb8c3954ab4d::t_0cbbd15efe16cc 2502-2503
+client/scripts/perspective_combat_input.gd
+  s_13fb8c3954ab4d::t_b79ea0bc784a0b 1-35
+client/scripts/aim_reticle_overlay.gd
+  s_13fb8c3954ab4d::t_227eff6601b860 1-43
+.maintainability/file-size-baseline.tsv
+  s_13fb8c3954ab4d::t_50a78447e0084d 7
+client/scripts/player_camera_controller.gd
+  s_13fb8c3954ab4d::t_f3f63ee22d3390 289-300
+  s_13fb8c3954ab4d::t_0057fc0b99f701 140-153
+  s_13fb8c3954ab4d::t_72d9fd3907539d 188-192
+  s_13fb8c3954ab4d::t_24c8cab31a4301 248
+  s_13fb8c3954ab4d::t_3634ed0ec64cab 32-33
+  s_13fb8c3954ab4d::t_37341f8ae4909d 226
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "90f718cb1bf2bd5cdc6f4d2caf140571fb5eff3e",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

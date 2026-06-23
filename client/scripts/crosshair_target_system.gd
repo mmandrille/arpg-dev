@@ -1,12 +1,13 @@
-## CrosshairTargetSystem — center-screen ray pick, reach lock, and entity highlight.
+## CrosshairTargetSystem — ray pick, reach lock, highlight, and name tag for actionable targets.
 ##
-## Used in perspective camera modes with reticle_enabled. When the crosshair
-## resolves a reachable entity, the reticle locks gold and the target highlights;
-## main.gd routes LMB to targeted actions instead of directional attack.
+## Perspective modes use the viewport center ray; isometric uses the mouse ray from context.
+## Reachable targets get the same gold highlight and name tag in every camera mode.
 class_name CrosshairTargetSystem
 extends RefCounted
 
 const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
+const CrosshairTargetNamesScript := preload("res://scripts/crosshair_target_names.gd")
+const CrosshairTargetNameTagScript := preload("res://scripts/crosshair_target_name_tag.gd")
 const PickTargetHighlightScript := preload("res://scripts/pick_target_highlight.gd")
 
 const RAY_LENGTH := 200.0
@@ -15,6 +16,8 @@ var _ctx  # CrosshairTargetContext
 var _locked_id := ""
 var _highlighted_id := ""
 var _highlight_kind := ""
+var _name_tag  # CrosshairTargetNameTag
+var _client_settings
 
 
 func setup(ctx) -> void:
@@ -35,12 +38,14 @@ static func perspective_reticle_active(client_settings) -> bool:
 	return bool(CameraPresentationsLoaderScript.mode(client_settings.camera_mode).get("reticle_enabled", false))
 
 
+static func uses_center_ray_pick(client_settings) -> bool:
+	return perspective_reticle_active(client_settings)
+
+
 func tick_runtime(viewport: Viewport, world: World3D, inv: Array, equip: Dictionary, client_settings, input_locked: bool) -> void:
 	sync_runtime(inv, equip)
-	if input_locked or not perspective_reticle_active(client_settings):
-		clear()
-		return
-	if world == null:
+	_client_settings = client_settings
+	if input_locked or client_settings == null:
 		clear()
 		return
 	tick(viewport, world)
@@ -58,15 +63,12 @@ func tick(viewport: Viewport, world: World3D) -> void:
 		clear()
 		return
 
-	var candidate := ""
-	if _ctx.ray_pick_entity.is_valid():
-		candidate = str(_ctx.ray_pick_entity.call(viewport, world))
-	else:
-		candidate = _pick_entity_at_center(viewport, world)
+	var candidate := _resolve_candidate(viewport, world)
 	var next_locked := ""
 	if candidate != "" and _target_in_reach(candidate):
 		next_locked = candidate
 	_set_locked(next_locked)
+	_sync_name_tag()
 
 
 func locked_target_id() -> String:
@@ -104,9 +106,54 @@ func _set_locked(target_id: String) -> void:
 	_clear_highlight()
 	_locked_id = target_id
 	if _ctx != null and _ctx.aim_reticle != null:
-		_ctx.aim_reticle.set_locked(target_id != "")
-	if target_id != "":
-		_apply_highlight(target_id)
+		_ctx.aim_reticle.set_locked(target_id != "" and perspective_reticle_active(_client_settings))
+	if target_id == "":
+		_hide_name_tag()
+		return
+	_apply_highlight(target_id)
+
+
+func _sync_name_tag() -> void:
+	if _locked_id == "" or _ctx == null:
+		_hide_name_tag()
+		return
+	if not _ctx.entities.has(_locked_id):
+		_hide_name_tag()
+		return
+	var rec: Dictionary = _ctx.entities[_locked_id]
+	var node := rec.get("node", null) as Node3D
+	var text := CrosshairTargetNamesScript.display_name(rec)
+	if node == null or text == "" or _ctx.camera == null or _ctx.name_tag_parent == null:
+		_hide_name_tag()
+		return
+	_ensure_name_tag()
+	_name_tag.attach_to(_ctx.name_tag_parent)
+	_name_tag.show_for(_ctx.camera, node, text)
+
+
+func _ensure_name_tag() -> void:
+	if _name_tag != null:
+		return
+	_name_tag = CrosshairTargetNameTagScript.new()
+
+
+func _hide_name_tag() -> void:
+	if _name_tag != null:
+		_name_tag.hide_tag()
+
+
+func get_name_tag_text() -> String:
+	return _name_tag.get_label_text() if _name_tag != null else ""
+
+
+func _resolve_candidate(viewport: Viewport, world: World3D) -> String:
+	if uses_center_ray_pick(_client_settings) and world != null:
+		return _pick_entity_at_center(viewport, world)
+	if _ctx != null and _ctx.ray_pick_entity.is_valid():
+		return str(_ctx.ray_pick_entity.call(viewport, world))
+	if world != null:
+		return _pick_entity_at_center(viewport, world)
+	return ""
 
 
 func _pick_entity_at_center(viewport: Viewport, world: World3D) -> String:

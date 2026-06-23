@@ -665,7 +665,7 @@ func _sync_camera_from_settings() -> void:
 	if _camera_controller != null:
 		_camera_controller.apply_mode(client_settings.camera_mode)
 	if fog_overlay != null:
-		fog_overlay.visible = client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC
+		fog_overlay.set_active(client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC)
 	_update_mouse_capture()
 	_update_reticle_visibility()
 
@@ -714,8 +714,11 @@ func _update_mouse_capture() -> void:
 func _update_reticle_visibility() -> void:
 	if _aim_reticle == null: return
 	CameraPresentationsLoaderScript.ensure_loaded()
-	var on := gameplay_active and client_settings != null and bool(CameraPresentationsLoaderScript.mode(client_settings.camera_mode).get("reticle_enabled", false))
+	var on := gameplay_active and client_settings != null and bool(CameraPresentationsLoaderScript.mode(client_settings.camera_mode).get("reticle_enabled", false)) and not _menu_blocks_gameplay_input()
 	_aim_reticle.visible = on
+	if on:
+		_aim_reticle.move_to_front()
+		_aim_reticle.queue_redraw()
 func _refresh_localized_texts() -> void:
 	if main_menu != null:
 		main_menu.refresh_texts()
@@ -2455,9 +2458,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 func _handle_input(delta: float) -> void:
-	_update_loot_hover_label()
 	if _crosshair_target != null:
 		_crosshair_target.tick_runtime(get_viewport(), get_world_3d(), inventory, equipped, client_settings, _input_locked())
+	_update_loot_hover_label()
 	if _input_locked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		if _sustained_click.active:
 			_sustained_click.clear()
@@ -2654,7 +2657,10 @@ func _skill_function_key_slot(event: InputEventKey) -> int:
 	return -1
 
 func _input_locked() -> bool:
-	return visual_replay_enabled or autoplay_enabled or _menu_blocks_gameplay_input()
+	return _automation_input_locked() or _menu_blocks_gameplay_input()
+
+func _automation_input_locked() -> bool:
+	return visual_replay_enabled or autoplay_enabled
 
 func _user_input_blocked() -> bool:
 	# Replay/autoplay fully lock input. Bot mode blocks real mouse/WASD but still
@@ -3163,6 +3169,16 @@ func _pick_entity_at_mouse() -> String:
 		return hit_entity_id
 	return ""
 
+func _crosshair_pick_entity(_viewport: Viewport, _world: World3D) -> String:
+	if _perspective_mode_active():
+		return ""
+	return _pick_entity_at_mouse()
+
+func _action_hover_target_id() -> String:
+	if _crosshair_target != null:
+		return _crosshair_target.locked_target_id()
+	return hovered_loot_id
+
 func _is_dead_monster(entity_id: String) -> bool:
 	if not entities.has(entity_id): return false
 	var rec: Dictionary = entities[entity_id]
@@ -3188,13 +3204,7 @@ func _update_loot_hover_label() -> void:
 	var reveal_changed := reveal_held != loot_label_reveal_held
 	loot_label_reveal_held = reveal_held
 
-	var next_hover := ""
-	if not _input_locked() and _camera != null and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		var target_id := _pick_entity_at_mouse()
-		if target_id != "" and _entity_uses_loot_label(target_id):
-			next_hover = target_id
-		else:
-			next_hover = _nearest_loot_at_ground(_mouse_ground_point())
+	var next_hover := _action_hover_target_id()
 	if next_hover == hovered_loot_id and not reveal_changed:
 		return
 	hovered_loot_id = next_hover
@@ -3204,9 +3214,10 @@ func _is_loot_label_reveal_held() -> bool:
 	return Input.is_key_pressed(KEY_ALT)
 
 func _refresh_loot_label_visibility() -> void:
+	var action_hover_id := _action_hover_target_id()
 	for label_id in _loot_label_entity_ids():
 		var id := str(label_id)
-		var highlighted := id == hovered_loot_id
+		var highlighted := id == action_hover_id
 		var rarity := str(entities.get(id, {}).get("rarity", "common"))
 		var allowed := _loot_filter.allows(rarity)
 		var revealed := loot_label_reveal_held and allowed
@@ -3256,13 +3267,9 @@ func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = f
 		label.modulate = _loot_filter.display_color(_loot_label_color(rec), highlighted)
 	var ring := _revive_hover_ring_node(loot_id)
 	if ring != null:
-		ring.visible = highlighted and _revive_hover_enabled()
+		ring.visible = false
 	if _is_dead_monster(loot_id):
-		if shown and highlighted and _revive_hover_enabled():
-			var rec: Dictionary = entities.get(loot_id, {})
-			_upsert_revive_corpse_status_bar(loot_id, rec.get("node", null) as Node3D, _monster_corpse_label_text(rec))
-		else:
-			_remove_revive_corpse_status_bar(loot_id)
+		_remove_revive_corpse_status_bar(loot_id)
 
 func _loot_label_node(loot_id: String) -> Label3D:
 	if loot_id == "" or not entities.has(loot_id):
@@ -3513,6 +3520,8 @@ func _build_scene() -> void:
 		Callable(self, "_revive_hover_enabled"),
 		Callable(self, "_nearest_loot_at_ground"),
 		Callable(self, "_center_ground_point"),
+		Callable(self, "_crosshair_pick_entity"),
+		gameplay_ui_layer,
 	))
 	_debug_label = Label.new()
 	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -3608,7 +3617,7 @@ func _build_scene() -> void:
 	fog_overlay = FogOfWarOverlay.new()
 	add_child(fog_overlay)
 	fog_overlay.bind(_camera, player_anchor)
-	fog_overlay.visible = (client_settings == null or client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC)
+	fog_overlay.set_active(client_settings == null or client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC)
 
 	damage_numbers_layer = CanvasLayer.new()
 	damage_numbers_layer.layer = 2
@@ -3740,7 +3749,7 @@ func _show_loss_popup() -> void:
 	loss_popup.visible = true
 
 func _on_inventory_intent_requested(intent_type: String, payload: Dictionary) -> void:
-	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+	if _automation_input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	if intent_type == "stash_equip_item_intent":
 		_send_stash_equip_item_intent(payload)
@@ -3808,18 +3817,14 @@ func _open_character_panel_from_bar() -> void:
 	_raise_gameplay_windows()
 
 func _stat_allocation_blocked() -> bool:
-	return visual_replay_enabled \
-		or autoplay_enabled \
-		or _menu_blocks_gameplay_input() \
+	return _automation_input_locked() \
 		or client == null \
 		or client.ready_state() != WebSocketPeer.STATE_OPEN \
 		or player_hp <= 0 \
 		or int(character_progression.get("unspent_stat_points", 0)) <= 0
 
 func _skill_allocation_blocked() -> bool:
-	return visual_replay_enabled \
-		or autoplay_enabled \
-		or _menu_blocks_gameplay_input() \
+	return _automation_input_locked() \
 		or client == null \
 		or client.ready_state() != WebSocketPeer.STATE_OPEN \
 		or player_hp <= 0 \
@@ -4078,8 +4083,10 @@ func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Ve
 			payload["target_id"] = player_id
 			return payload
 	var chosen_target := target_id
-	if skill_id == "revive" and chosen_target == "" and hovered_loot_id != "" and _is_dead_monster(hovered_loot_id):
-		chosen_target = hovered_loot_id
+	if skill_id == "revive" and chosen_target == "":
+		var hover_id := _action_hover_target_id()
+		if hover_id != "" and _is_dead_monster(hover_id):
+			chosen_target = hover_id
 	if chosen_target == "" and use_nearest_fallback:
 		chosen_target = _nearest_live_monster_id()
 	if chosen_target != "":
@@ -4867,7 +4874,7 @@ func _waypoint_row_text(level: int) -> String:
 	return "Level %d - %s%s" % [depth, _dungeon_level_name(level), state]
 
 func _on_waypoint_level_pressed(level: int) -> void:
-	if _input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
+	if _automation_input_locked() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
 		return
 	if level == current_level:
 		_hide_waypoint_panel()

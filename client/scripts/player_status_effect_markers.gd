@@ -490,7 +490,7 @@ static func make_elite_command_radius_preview(radius: float) -> Node3D:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.no_depth_test = true
+	mat.no_depth_test = false
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 
 	var ring := MeshInstance3D.new()

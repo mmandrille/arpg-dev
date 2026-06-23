@@ -78,8 +78,9 @@ func _test_wall_renderer() -> void:
 	}])
 	_assert_eq("wall layout count", walls.size(), 1)
 	_assert_eq("wall child count", root.get_child_count(), 2)
-	var wall := root.get_child(0) as MeshInstance3D
-	_assert_eq("wall child name", wall.name, "Wall_test_wall")
+	var wall_body := root.get_child(0) as StaticBody3D
+	_assert_eq("wall child name", wall_body.name, "Wall_test_wall")
+	var wall := wall_body.get_child(1) as MeshInstance3D
 	_assert_eq("dungeon wall height", (wall.mesh as BoxMesh).size.y, ground_factory.dungeon_ceiling_height())
 	var ceiling := root.get_node_or_null("DungeonCeiling") as MeshInstance3D
 	_assert_true("dungeon ceiling node exists", ceiling != null)

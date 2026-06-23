@@ -1,0 +1,23 @@
+client/scripts/player_status_effect_markers.gd
+  s_610f74560b117e::t_dafab8bbd0e377 493
+client/scripts/wall_renderer.gd
+  s_610f74560b117e::t_af66a27950c9d8 137-150,152,156-157
+client/tests/test_factories.gd
+  s_610f74560b117e::t_5be15fcd9d3672 81-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "20ef1f00915bb956c687829b4725ae9ce079635a",
+  "prompts": {},
+  "sessions": {
+    "s_610f74560b117e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3bc1e7b9-ca0e-41be-8697-17f78093cdd6",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

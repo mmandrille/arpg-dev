@@ -398,6 +398,7 @@ func _raise_gameplay_windows() -> void:
 	for panel in [inventory_panel, shop_panel, stash_panel, bishop_panel, market_panel, blacksmith_panel, character_stats_panel, skills_panel, quest_journal_panel, character_info_panel]:
 		if panel != null and panel is CanvasItem:
 			(panel as CanvasItem).move_to_front()
+	_update_mouse_capture()
 
 func _account_email() -> String:
 	if client == null:
@@ -2400,7 +2401,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_update_level_hud()
 			get_viewport().set_input_as_handled()
 			return
-		if _is_camera_cycle_key(event):
+		if _is_camera_cycle_key(event) and not _menu_blocks_gameplay_input():
 			if client_settings != null: _on_camera_mode_selected(client_settings.cycle_camera_mode())
 			get_viewport().set_input_as_handled(); return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC:
@@ -2633,12 +2634,11 @@ func _user_input_blocked() -> bool:
 	# allows push_input() key events through _unhandled_input().
 	return _input_locked() or bot_mode
 func _menu_blocks_gameplay_input() -> bool:
-	return (main_menu != null and main_menu.visible) \
-		or (character_panel != null and character_panel.visible) \
-		or (multiplayer_panel != null and multiplayer_panel.visible) \
-		or (settings_panel != null and settings_panel.visible) \
-		or (pause_menu != null and pause_menu.visible) \
-		or (loss_popup != null and loss_popup.visible)
+	return (main_menu != null and main_menu.visible) or (character_panel != null and character_panel.visible) \
+		or (multiplayer_panel != null and multiplayer_panel.visible) or (settings_panel != null and settings_panel.visible) \
+		or (pause_menu != null and pause_menu.visible) or (loss_popup != null and loss_popup.visible) \
+		or (inventory_panel != null and inventory_panel.visible) or (character_stats_panel != null and character_stats_panel.visible) \
+		or (skills_panel != null and skills_panel.visible)
 
 func _handle_autoplay(delta: float) -> void:
 	if client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:

@@ -1,0 +1,59 @@
+shared/rules/dungeon_generation.v0.json
+  s_610f74560b117e::t_3dae159988f91e 103-116,120
+docs/progress/slice-lifecycle.md
+  s_610f74560b117e::t_6e3414a6366a47 345
+server/internal/game/dungeon_gen.go
+  s_610f74560b117e::t_7b2271c73310c4 77
+  s_610f74560b117e::t_72827507f5786b 54
+shared/golden/dungeon_obstacles.json
+  s_610f74560b117e::t_93694a45cd6310 9,75-76,79,82-83,88-89,92-93,95-96,101-102,105,108-109,114-141,145,148-149,152,166,180,194,196-224,228,236,238-252,255,259,263,265-266,269,277,279-280,283-284,291,310-311,342-343,407,414-415,462-463,470-471,478-479,486-487,494-495,502-503,510-511,518-519
+server/internal/game/dungeon_room_layout_test.go
+  s_610f74560b117e::t_34e2bff98b98a4 1-132
+shared/golden/dungeon_obstacles.v0.schema.json
+  s_610f74560b117e::t_4323cace6a07e8 97
+docs/as-built/v330_dungeon-rooms.md
+  s_610f74560b117e::t_35b23d46054648 1-38
+.maintainability/file-size-baseline.tsv
+  s_610f74560b117e::t_755154c197fe73 16
+  s_610f74560b117e::t_663d8474c3ccc3 7
+server/internal/game/dungeon_room_layout.go
+  s_610f74560b117e::t_c694716b5e03e4 1-241
+server/internal/game/dungeon_elite_objective.go
+  s_610f74560b117e::t_1d804ca6c64afd 40,62-66
+server/internal/game/rules.go
+  s_610f74560b117e::t_49aa3b2104657a 1964
+  s_610f74560b117e::t_436cbd4387195f 158
+  s_610f74560b117e::t_82b9d2d4819500 1792
+  s_610f74560b117e::t_67d8c5056005ab 1903-1905
+shared/rules/dungeon_generation.v0.schema.json
+  s_610f74560b117e::t_7de35bdc9b0cec 19
+  s_610f74560b117e::t_aeb4dcdf19e01e 154-185
+server/internal/game/dungeon_profiles.go
+  s_610f74560b117e::t_b75cb45f8a5515 27-69
+PROGRESS.md
+  s_610f74560b117e::t_089591080943ff 26,28
+docs/plans/v330_2026-06-23-dungeon-rooms.md
+  s_610f74560b117e::t_52c1f958f028ce 50,64,81-82,94-96,112,121,131,143,150-151,164-169,182,186,192-194
+  s_610f74560b117e::t_2d70dbd152ee90 1-49,51-63,65-80,83-93,97-111,113-120,122-130,132-142,144-149,152-163,170-181,183-185,187-191,195-220
+docs/specs/v330_spec-dungeon-rooms.md
+  s_610f74560b117e::t_50bdf9b188ac81 1-135
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_610f74560b117e::t_fe3d83fd0eb67a 176
+  s_610f74560b117e::t_8f2c44b3dcf9c1 161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bc679eaff2b6527129742329387a64b5637dc1a2",
+  "prompts": {},
+  "sessions": {
+    "s_610f74560b117e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3bc1e7b9-ca0e-41be-8697-17f78093cdd6",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

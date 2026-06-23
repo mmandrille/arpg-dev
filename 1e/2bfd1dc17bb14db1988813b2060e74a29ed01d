@@ -1,0 +1,78 @@
+client/scripts/crosshair_target_system.gd
+  s_cd03e992143281::t_e8be7f1024fe52 66
+  s_cd03e992143281::t_a9746a1cab2fd0 71
+  s_cd03e992143281::t_f2b8c91b036069 1,3-4
+  s_cd03e992143281::t_3d6d16ea80c9cd 149-156
+  s_cd03e992143281::t_9cad34a6f893a9 41-44,47-48
+  s_cd03e992143281::t_fb5e24a74a0ef7 9-10
+  s_cd03e992143281::t_4ab94efba4cea2 109
+  s_cd03e992143281::t_187e429e973608 19
+  s_cd03e992143281::t_5988467f9bcce9 110-146
+  s_cd03e992143281::t_e383003838c333 20
+client/scripts/crosshair_target_names.gd
+  s_cd03e992143281::t_2d12c5c3b75a0f 1-63
+client/tests/test_crosshair_target_system.gd
+  s_cd03e992143281::t_77656816e6ed76 166-191,219-234,236-237
+  s_cd03e992143281::t_207e5f616608f2 110-122
+  s_cd03e992143281::t_dba32399aa052c 103
+  s_cd03e992143281::t_dc6fd2be6a10ee 7
+  s_cd03e992143281::t_5e71810350469f 9
+  s_cd03e992143281::t_9ee62b7c37a07f 28
+  s_cd03e992143281::t_45ece0cd317e39 192-218
+  s_cd03e992143281::t_9d07bfbfc55c8c 235
+  s_cd03e992143281::t_9cc3ca551d0530 32
+  s_cd03e992143281::t_86a299fb3e00bd 253,258-261,274
+  s_cd03e992143281::t_5bb5e4bae7e85c 99-100,102
+  s_cd03e992143281::t_417bcd9df57fed 31,33
+client/scripts/crosshair_target_context.gd
+  s_cd03e992143281::t_e12d40cbc85b02 16,30-31
+  s_cd03e992143281::t_507106bcfa6430 45
+scripts/client_smoke.sh
+  s_cd03e992143281::t_55f021580369c1 203
+client/scripts/crosshair_target_name_tag.gd
+  s_cd03e992143281::t_7aa7942372491d 1-46,49-51,55-114
+  s_cd03e992143281::t_f9c28ee7fc6c1a 47-48,52-54
+client/scripts/aim_reticle_overlay.gd
+  s_cd03e992143281::t_98bf416699c255 12-15
+  s_cd03e992143281::t_72b9f85059ae7d 33-56
+  s_cd03e992143281::t_b187c8eae1aed4 60,62-74
+client/tests/test_fog_of_war_overlay.gd
+  s_cd03e992143281::t_ac93d7c5effc99 28
+  s_cd03e992143281::t_7be59d308d49e7 277-289
+client/scripts/main.gd
+  s_cd03e992143281::t_6ae9be950759a9 3620
+  s_cd03e992143281::t_1d0bea156acc7f 668
+  s_cd03e992143281::t_80d599c00151d2 3207
+  s_cd03e992143281::t_d534df809e5925 3524
+  s_cd03e992143281::t_33f125712ee3e2 719-721
+  s_cd03e992143281::t_fb44107b2bee3f 717
+  s_cd03e992143281::t_71177b82280d44 2463
+  s_cd03e992143281::t_86f7571accdb46 3217,3220
+  s_cd03e992143281::t_04bb2dde180036 3523
+  s_cd03e992143281::t_70baf49e7119a4 3827
+  s_cd03e992143281::t_c730a68051519d 3752
+  s_cd03e992143281::t_32800d4bef0395 3820
+  s_cd03e992143281::t_099b276f6dee3f 4086-4089
+  s_cd03e992143281::t_93c2bf4df1ba0c 2660-2663
+  s_cd03e992143281::t_83b76fcf50e13d 3172-3181
+  s_cd03e992143281::t_8287345cf4ae49 4877
+  s_cd03e992143281::t_b1fd96c7d95c9f 3270,3272
+client/tests/test_panel_intent_input.gd
+  s_cd03e992143281::t_68dad4497d16b4 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "1e2bfd1dc17bb14db1988813b2060e74a29ed01d",
+  "prompts": {},
+  "sessions": {
+    "s_cd03e992143281": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7fc2899c-95af-4e14-9bf8-fe3baf4d233c",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

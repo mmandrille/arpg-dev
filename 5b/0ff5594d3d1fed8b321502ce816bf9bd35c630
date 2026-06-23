@@ -1,0 +1,41 @@
+client/scripts/bot_step_catalog.gd
+  s_13fb8c3954ab4d::t_9a0557b6e230bd 48
+  s_13fb8c3954ab4d::t_194127d789ea83 67
+  s_13fb8c3954ab4d::t_b842cc70b9de52 270-272
+client/scripts/bot_controller.gd
+  s_13fb8c3954ab4d::t_da1f6dc37db107 415-416
+  s_13fb8c3954ab4d::t_9c63dee4e68cfa 196,199
+  s_13fb8c3954ab4d::t_eff9cb4608a9bf 197-198,200-201
+  s_13fb8c3954ab4d::t_9c88e982ddfef0 641
+client/scripts/bot_action_step_validator.gd
+  s_13fb8c3954ab4d::t_6a68ea782d1890 22
+  s_13fb8c3954ab4d::t_04812dc1b0f5ae 111-112
+client/scripts/main.gd
+  s_13fb8c3954ab4d::t_77d4aa5e8d68cf 5404-5406,5409-5416
+tools/bot/scenarios/client/83_camera_mode_setting.json
+  s_13fb8c3954ab4d::t_61bb587278cfd0 1-49
+.maintainability/file-size-baseline.tsv
+  s_13fb8c3954ab4d::t_606d79f7b5aeaa 3
+  s_13fb8c3954ab4d::t_97a63359a072f4 7
+client/scripts/settings_panel.gd
+  s_13fb8c3954ab4d::t_69028164dfaab6 319-322
+client/scripts/bot_assertion_handlers.gd
+  s_13fb8c3954ab4d::t_583b27e7102430 549-575
+  s_13fb8c3954ab4d::t_21f7559e7f5bce 339-340
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5b0ff5594d3d1fed8b321502ce816bf9bd35c630",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

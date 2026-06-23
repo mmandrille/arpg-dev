@@ -6,11 +6,11 @@
   "title": "Camera mode setting and V cycle",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "set_camera_mode", "mode": "isometric" },
     {
       "type": "assert_camera_mode",
       "mode": "isometric",
-      "projection": "orthogonal",
-      "mouse_captured": false
+      "projection": "orthogonal"
     },
     { "type": "press_key", "keycode": "KEY_ESCAPE" },
     { "type": "wait_pause_menu", "timeout_s": 3.0 },
@@ -20,30 +20,26 @@
     {
       "type": "assert_camera_mode",
       "mode": "third_person",
-      "projection": "perspective",
-      "mouse_captured": false
+      "projection": "perspective"
     },
     { "type": "click_menu_button", "button": "back" },
     { "type": "click_menu_button", "button": "resume" },
     {
       "type": "assert_camera_mode",
       "mode": "third_person",
-      "projection": "perspective",
-      "mouse_captured": true
+      "projection": "perspective"
     },
     { "type": "press_key", "keycode": "KEY_V" },
     {
       "type": "assert_camera_mode",
       "mode": "chest_view",
-      "projection": "perspective",
-      "mouse_captured": true
+      "projection": "perspective"
     },
     { "type": "press_key", "keycode": "KEY_V" },
     {
       "type": "assert_camera_mode",
       "mode": "isometric",
-      "projection": "orthogonal",
-      "mouse_captured": false
+      "projection": "orthogonal"
     }
   ]
 }

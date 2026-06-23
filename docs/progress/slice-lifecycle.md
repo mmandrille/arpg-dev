@@ -341,5 +341,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v326** | `tooltip-rarity-frame-polish` | Complete | | | [`as-built`](../as-built/v326_tooltip-rarity-frame-polish.md) |
 | **v327** | `chest-open-burst` | Complete | | | [`as-built`](../as-built/v327_chest-open-burst.md) |
 | **v328** | `camera-impact-feedback` | Complete | | | [`as-built`](../as-built/v328_camera-impact-feedback.md) |
+| **v329** | `camera-mode-options` | Complete (`make ci` green) | [`v329_spec-camera-mode-options.md`](../specs/v329_spec-camera-mode-options.md) | [`v329_2026-06-23-camera-mode-options.md`](../plans/v329_2026-06-23-camera-mode-options.md) | [`as-built`](../as-built/v329_camera-mode-options.md) |
 
 ---

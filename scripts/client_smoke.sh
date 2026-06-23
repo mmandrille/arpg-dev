@@ -166,6 +166,7 @@ run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filte
 run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
 run_gate "GDScript loot node factory test" "[gdtest] PASS: test_loot_node_factory" res://tests/test_loot_node_factory.gd
 run_gate "GDScript impact sparks test" "[gdtest] PASS: test_impact_sparks" res://tests/test_impact_sparks.gd
+run_gate "GDScript combat outcome punch test" "[gdtest] PASS: test_combat_outcome_punch" res://tests/test_combat_outcome_punch.gd
 
 # 2o. World-detail render + combat-feel unit tests (server-independent; v295-v308).
 # These existed on disk but were never registered, so they ran zero times in CI.

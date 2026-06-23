@@ -16,7 +16,7 @@ const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const EnemyHealthBarVisibilityScript := preload("res://scripts/enemy_health_bar_visibility.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
-const ImpactSparksScript := preload("res://scripts/impact_sparks.gd")
+const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
@@ -69,7 +69,6 @@ const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loade
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
-const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_text.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScenesByVisual := {
 	"monster_dummy": preload("res://scenes/monster_dummy.tscn"),
@@ -1726,24 +1725,7 @@ func _sync_camera_to_player() -> void:
 	_camera.look_at(target, Vector3.UP)
 
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
-	var outcome := str(ev.get("outcome", ""))
-	var damage = ev.get("damage", null)
-	var special := DamageTypeCombatTextScript.special_outcome(outcome)
-	if not special.is_empty():
-		_show_damage_number(entity_id, special.get("color", Color.WHITE), null, "", 0.0, str(special.get("variant", outcome)), str(special.get("text", "")))
-		return
-	var presentation := DamageTypeCombatTextScript.number_for_event(ev, default_color)
-	if not presentation.is_empty():
-		_show_damage_number(entity_id, presentation.get("color", default_color), presentation.get("amount", damage), "", 0.0, str(presentation.get("variant", "normal")), str(presentation.get("text", "")), str(presentation.get("damage_type", "")))
-		_spawn_impact_sparks(entity_id, ev, presentation.get("color", default_color))
-		return
-	_show_damage_number(entity_id, default_color, damage)
-	_spawn_impact_sparks(entity_id, ev, default_color)
-
-func _spawn_impact_sparks(entity_id: String, ev: Dictionary, fallback_color: Color) -> void:
-	if not ImpactSparksScript.should_spawn(ev): return
-	var target := _node_for_entity_id(entity_id)
-	if target != null: target.add_child(ImpactSparksScript.make_node(ev, fallback_color))
+	CombatEventPresentationScript.show_combat_text_for_event(entity_id, ev, default_color, Callable(self, "_show_damage_number"), Callable(self, "_node_for_entity_id"))
 
 func _play_local_player_reaction_animation(clip: String) -> void:
 	if player_anim == null: return
@@ -3429,7 +3411,7 @@ func _build_scene() -> void:
 
 	_world_environment = WorldEnvironment.new()
 	add_child(_world_environment)
-	_update_depth_lighting()
+	DungeonDepthLightingScript.apply_for_level(current_level, _directional_light, _world_environment, _ground_factory)
 
 	audio_controller = ClientAudioControllerScript.new()
 	add_child(audio_controller)
@@ -3550,15 +3532,7 @@ func _update_ground_material() -> void:
 	_ground_factory.update_ground_material(ground_node, current_level)
 	if _wall_renderer != null:
 		_wall_renderer.set_level(current_level)
-	_update_depth_lighting()
-
-func _update_depth_lighting() -> void:
-	DungeonDepthLightingScript.apply_for_level(
-		current_level,
-		_directional_light,
-		_world_environment,
-		_ground_factory,
-	)
+	DungeonDepthLightingScript.apply_for_level(current_level, _directional_light, _world_environment, _ground_factory)
 
 func _setup_menu_layer() -> void:
 	menu_layer = CanvasLayer.new()

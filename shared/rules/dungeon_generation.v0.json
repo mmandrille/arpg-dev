@@ -117,10 +117,10 @@
   "obstacle_generation": {
     "enabled": true,
     "max_attempts": 64,
-    "target_group_count_formula": { "area_per_unit": 840, "min": 6, "max": 25, "spread": 1 },
+    "target_group_count_formula": { "area_per_unit": 625, "min": 8, "max": 32, "spread": 1 },
     "wall_segment": {
-      "min_length": 4,
-      "max_length": 14,
+      "min_length": 6,
+      "max_length": 20,
       "thickness": 1.0
     },
     "solid_block": {

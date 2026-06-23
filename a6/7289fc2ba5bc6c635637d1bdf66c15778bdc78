@@ -1,0 +1,22 @@
+client/scripts/main.gd
+  s_13fb8c3954ab4d::t_429eb67838db22 401
+  s_13fb8c3954ab4d::t_3a0840cfacbc36 2641
+  s_13fb8c3954ab4d::t_02d67d71673643 2637-2640
+  s_13fb8c3954ab4d::t_59b1451cbd8ff1 2404
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a67289fc2ba5bc6c635637d1bdf66c15778bdc78",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

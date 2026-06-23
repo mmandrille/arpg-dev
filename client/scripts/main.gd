@@ -641,6 +641,12 @@ func _on_monster_health_bar_mode_selected(mode: String) -> void:
 		_sync_settings_panel()
 		_refresh_monster_health_bar_visibility()
 
+func _on_camera_mode_selected(mode: String) -> void:
+	if client_settings != null:
+		client_settings.set_camera_mode(mode)
+		# TODO Task 3: apply mode through camera controller
+		_sync_settings_panel()
+
 func _on_master_volume_changed(value: float) -> void:
 	ClientAudioBridgeScript.set_master_volume(audio_controller, client_settings, value)
 
@@ -677,6 +683,7 @@ func _sync_settings_panel() -> void:
 		settings_panel.set_create_game_session_type(client_settings.create_game_session_type)
 		settings_panel.set_language(client_settings.language)
 		settings_panel.set_monster_health_bar_mode(client_settings.monster_health_bar_mode)
+		settings_panel.set_camera_mode(client_settings.camera_mode)
 		ClientAudioBridgeScript.sync_settings_panel(settings_panel, client_settings)
 
 func _refresh_localized_texts() -> void:
@@ -3600,6 +3607,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.create_game_session_type_selected.connect(_on_create_game_session_type_selected)
 	settings_panel.language_selected.connect(_on_language_selected)
 	settings_panel.monster_health_bar_mode_selected.connect(_on_monster_health_bar_mode_selected)
+	settings_panel.camera_mode_selected.connect(_on_camera_mode_selected)
 	settings_panel.master_volume_changed.connect(_on_master_volume_changed)
 	settings_panel.music_volume_changed.connect(_on_music_volume_changed)
 	settings_panel.sfx_volume_changed.connect(_on_sfx_volume_changed)

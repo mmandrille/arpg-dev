@@ -1,0 +1,49 @@
+client/scripts/main.gd
+  s_430c3294a50024::t_8df023d98553dd 19
+  s_430c3294a50024::t_0cf68767fef6e0 1106
+client/scripts/skill_icon.gd
+  s_430c3294a50024::t_66e0481f081920 4-5
+  s_430c3294a50024::t_ac88838399ca4e 13-18,20,27-28
+  s_430c3294a50024::t_a36e22bcf3df88 78-82
+  s_430c3294a50024::t_f2f42372143bf9 26
+shared/assets/skill_presentations.v0.schema.json
+  s_430c3294a50024::t_3e2c32b36fb4bd 70-82
+client/scripts/skill_rank_intensity.gd
+  s_430c3294a50024::t_8922a8e4f0d557 1-46
+scripts/client_smoke.sh
+  s_430c3294a50024::t_ea41192b9461e4 170
+shared/assets/skill_presentations.v0.json
+  s_430c3294a50024::t_8ca0f4410bcb66 13-20
+  s_430c3294a50024::t_4903eefe32b370 89-96
+client/scripts/skills_panel.gd
+  s_430c3294a50024::t_156d1fc4aa5b6b 472
+  s_430c3294a50024::t_751aab28f1dd6c 549
+client/tests/test_skill_rank_intensity.gd
+  s_430c3294a50024::t_4b74b9eef00ace 1-38,40-64,66-67
+  s_430c3294a50024::t_b4503c3347949d 39
+  s_430c3294a50024::t_79405f8e2567fa 65
+docs/as-built/v321_skill-rank-vfx-intensity.md
+  s_430c3294a50024::t_5e65275755c18e 1-19
+docs/progress/slice-lifecycle.md
+  s_430c3294a50024::t_e0b88e7587cd5b 336
+docs/specs/v321_spec-skill-rank-vfx-intensity.md
+  s_430c3294a50024::t_e42900fda4bdd6 1-7
+client/scripts/skill_bar.gd
+  s_430c3294a50024::t_017c3dc92d82f9 220
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7ce3bc1cea884d8fc4a7cc515320925c1bc19222",
+  "prompts": {},
+  "sessions": {
+    "s_430c3294a50024": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "42edd734-a00e-4ff2-896e-74c43d0c5702",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

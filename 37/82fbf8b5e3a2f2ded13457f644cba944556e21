@@ -1,0 +1,50 @@
+client/scripts/wall_renderer.gd
+  s_cd03e992143281::t_2f4263c2d35ad7 58
+  s_cd03e992143281::t_7bf4095370ac78 86-90
+  s_cd03e992143281::t_4b660af79cb2b1 141,143,145-146
+  s_cd03e992143281::t_59c41bb62ad3d1 150,154,161
+  s_cd03e992143281::t_65279f6d5a17ce 245,250,252
+  s_cd03e992143281::t_9ce9410deff2dd 9-11
+  s_cd03e992143281::t_4853a76e62cf22 64,66,73-85,91-99
+client/tests/test_factories.gd
+  s_cd03e992143281::t_d69748062e507b 103
+  s_cd03e992143281::t_8a437630f08cab 137
+  s_cd03e992143281::t_659bc86bc1f2b7 169
+  s_cd03e992143281::t_d720c4cee8820f 87
+  s_cd03e992143281::t_599012c0a469b4 84-86,88-89
+  s_cd03e992143281::t_3f4162a656c147 119
+  s_cd03e992143281::t_19f8e873e93890 80
+  s_cd03e992143281::t_61426ad09175cf 83
+client/scripts/main.gd
+  s_cd03e992143281::t_01569d8dedb4d7 669
+  s_cd03e992143281::t_47421318dd4c7b 4942-4948
+  s_cd03e992143281::t_ad5bd264199c8a 4928-4929,4935-4936
+shared/rules/dungeon_generation.v0.schema.json
+  s_cd03e992143281::t_9db7c06755f0af 12
+  s_cd03e992143281::t_f8675b73fa99f9 51
+shared/rules/dungeon_generation.v0.json
+  s_cd03e992143281::t_c82b90c6dc348e 46
+client/tests/test_coop_client.gd
+  s_cd03e992143281::t_4724478880243b 171,175-176
+  s_cd03e992143281::t_2b0f63c1776d01 215
+client/scripts/ground_wall_factory.gd
+  s_cd03e992143281::t_dab9c8a9b80d7a 138,147
+  s_cd03e992143281::t_d4ba0ab98639ce 263-317,319-335
+  s_cd03e992143281::t_90d30289d09207 318
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "3782fbf8b5e3a2f2ded13457f644cba944556e21",
+  "prompts": {},
+  "sessions": {
+    "s_cd03e992143281": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7fc2899c-95af-4e14-9bf8-fe3baf4d233c",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

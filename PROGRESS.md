@@ -23,10 +23,10 @@ Last updated: 2026-06-23
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v319 — boss arena presence |
+| **Latest completed slice** | v320 — critical hit punch |
 | **Active branch** | `main` |
-| **CI gate** | v319 focused checks green on 2026-06-23 (`godot --headless --path client --script res://tests/test_factories.gd`, `make client-unit`, `make maintainability`); selected `$autoloop` batch `make ci` pending |
-| **Next slice** | Continue selected `$autoloop` look-and-feel batch with v320 — critical hit punch |
+| **CI gate** | v320 focused checks green on 2026-06-23 (`godot --headless --path client --script res://tests/test_combat_outcome_punch.gd`, `make client-unit`, `make maintainability`); selected `$autoloop` batch `make ci` pending |
+| **Next slice** | Continue selected `$autoloop` look-and-feel batch with v321 — skill rank VFX intensity |
 | **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
 | **Next engineering review** | After the selected v314-v328 look-and-feel batch and a green final proof |
 

@@ -14,19 +14,6 @@
       "pitch_max_degrees": -90.0,
       "reticle_enabled": false
     },
-    "third_person": {
-      "projection": "perspective",
-      "zoom_default": 6.0,
-      "zoom_min": 3.0,
-      "zoom_max": 10.0,
-      "spring_arm_length": 6.0,
-      "shoulder_offset": [0.4, 0.2, 0.0],
-      "chest_forward_offset": 0.0,
-      "mouse_sensitivity": 0.003,
-      "pitch_min_degrees": -60.0,
-      "pitch_max_degrees": -5.0,
-      "reticle_enabled": true
-    },
     "chest_view": {
       "projection": "perspective",
       "zoom_default": 1.0,

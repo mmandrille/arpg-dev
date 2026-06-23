@@ -199,6 +199,7 @@ run_gate "GDScript command retarget grace test" "[gdtest] PASS: test_command_ret
 
 # 2p. Camera mode presentation loader unit tests (server-independent; v329).
 run_gate "GDScript camera mode settings test" "[gdtest] PASS: test_camera_mode_settings" res://tests/test_camera_mode_settings.gd
+run_gate "GDScript crosshair target system test" "[gdtest] PASS: test_crosshair_target_system" res://tests/test_crosshair_target_system.gd
 
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   finish_gates "client unit"

@@ -16,20 +16,14 @@
     { "type": "wait_pause_menu", "timeout_s": 3.0 },
     { "type": "click_menu_button", "button": "settings" },
     { "type": "wait_settings_panel", "timeout_s": 3.0 },
-    { "type": "select_camera_mode", "mode": "third_person" },
+    { "type": "select_camera_mode", "mode": "chest_view" },
     {
       "type": "assert_camera_mode",
-      "mode": "third_person",
+      "mode": "chest_view",
       "projection": "perspective"
     },
     { "type": "click_menu_button", "button": "back" },
     { "type": "click_menu_button", "button": "resume" },
-    {
-      "type": "assert_camera_mode",
-      "mode": "third_person",
-      "projection": "perspective"
-    },
-    { "type": "press_key", "keycode": "KEY_V" },
     {
       "type": "assert_camera_mode",
       "mode": "chest_view",
@@ -40,6 +34,12 @@
       "type": "assert_camera_mode",
       "mode": "isometric",
       "projection": "orthogonal"
+    },
+    { "type": "press_key", "keycode": "KEY_V" },
+    {
+      "type": "assert_camera_mode",
+      "mode": "chest_view",
+      "projection": "perspective"
     }
   ]
 }

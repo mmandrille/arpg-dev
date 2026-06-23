@@ -6,7 +6,7 @@
 ##
 ## Usage (any script — no autoload registration needed):
 ##   CameraPresentationsLoader.ensure_loaded()
-##   var cfg := CameraPresentationsLoader.mode("third_person")
+##   var cfg := CameraPresentationsLoader.mode("chest_view")
 class_name CameraPresentationsLoader
 extends RefCounted
 

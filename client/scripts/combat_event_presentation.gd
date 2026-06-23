@@ -5,6 +5,16 @@ extends RefCounted
 const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_text.gd")
 const ImpactSparksScript := preload("res://scripts/impact_sparks.gd")
 const CombatOutcomePunchScript := preload("res://scripts/combat_outcome_punch.gd")
+const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
+
+static var _camera: Camera3D = null
+static var _max_hp: int = 1
+
+
+static func bind_camera(camera: Camera3D, max_hp: int, delta: float) -> void:
+	_camera = camera
+	_max_hp = max_hp
+	decay_camera(camera, delta)
 
 
 static func show_combat_text_for_event(
@@ -14,6 +24,8 @@ static func show_combat_text_for_event(
 	show_damage_number: Callable,
 	node_for_entity_id: Callable,
 ) -> void:
+	if str(ev.get("event_type", "")) == "player_damaged" and _camera != null:
+		CameraImpactFeedbackScript.apply_from_damage(_camera, int(ev.get("damage", 0)), _max_hp)
 	var outcome := str(ev.get("outcome", ""))
 	var damage = ev.get("damage", null)
 	var special := DamageTypeCombatTextScript.special_outcome(outcome)
@@ -70,3 +82,7 @@ static func spawn_impact_sparks(
 	var target: Node3D = node_for_entity_id.call(entity_id)
 	if target != null:
 		target.add_child(ImpactSparksScript.make_node(ev, fallback_color))
+
+
+static func decay_camera(camera: Camera3D, delta: float) -> void:
+	CameraImpactFeedbackScript.decay(camera, delta)

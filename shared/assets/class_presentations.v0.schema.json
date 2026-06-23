@@ -36,6 +36,14 @@
               "scale": { "type": "number", "exclusiveMinimum": 0 },
               "height_offset": { "type": "number" }
             }
+          },
+          "idle_stance": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "scale": { "type": "number", "exclusiveMinimum": 0 },
+              "lean_degrees": { "type": "number" }
+            }
           }
         }
       }

@@ -224,6 +224,7 @@ static func make_town_preview_scene() -> Node3D:
 	var fire := make_town_campfire_node()
 	fire.position = Vector3(12.0, 0.0, 13.0)
 	root.add_child(fire)
+	TownAmbientLife.attach_to_town(root)
 	return root
 
 static func make_interactable_node(def_id: String, elite_objective: bool = false, quest_reward: bool = false) -> Node3D:

@@ -75,6 +75,7 @@ static func _make_arrow_projectile(color: Color, emission: Color, emission_energ
 		pin.rotation_degrees.x = 90.0
 		pin.material_override = mat
 		root.add_child(pin)
+	_add_motion_trail(root, color, emission, 0.72 if long_head else 0.58)
 	return root
 
 
@@ -105,7 +106,24 @@ static func _make_energy_projectile(projectile_def_id: String) -> Node3D:
 	shaft.position = Vector3(0.0, 0.35, 0.0)
 	shaft.material_override = _material(color, emission, 1.0)
 	root.add_child(shaft)
+	_add_motion_trail(root, color, emission, 0.64)
 	return root
+
+
+static func _add_motion_trail(root: Node3D, color: Color, emission: Color, length: float) -> void:
+	var trail_root := Node3D.new()
+	trail_root.name = "ProjectileMotionTrail"
+	root.add_child(trail_root)
+	for i in range(3):
+		var streak := MeshInstance3D.new()
+		streak.name = "TrailStreak_%d" % i
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(0.05 - float(i) * 0.01, 0.05 - float(i) * 0.01, length - float(i) * 0.14)
+		streak.mesh = mesh
+		streak.position = Vector3(0.0, 0.35, 0.24 + float(i) * 0.16)
+		var alpha := 0.34 - float(i) * 0.08
+		streak.material_override = _material(Color(color.r, color.g, color.b, alpha), emission, 0.7 - float(i) * 0.12)
+		trail_root.add_child(streak)
 
 
 static func _material(color: Color, emission: Color, emission_energy: float) -> StandardMaterial3D:

@@ -804,6 +804,7 @@ func _process(delta: float) -> void:
 	_try_complete_pending_interactable_action()
 	_try_complete_pending_waypoint_travel()
 	_tick_movement_animation_linger(delta)
+	CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta)
 
 	if visual_replay_enabled:
 		_handle_visual_replay(delta)
@@ -4980,6 +4981,7 @@ func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 	model.name = "ModelRoot"
 	model.scale = Vector3.ONE * float(resolved.get("scale", 1.0))
 	model.position.y = float(resolved.get("height_offset", 0.0))
+	ClassIdleStance.apply_to_model(model, class_id)
 	root.add_child(model)
 	root.move_child(model, 0)
 	var ap := root.find_child("AnimationPlayer", true, false) as AnimationPlayer
@@ -5043,6 +5045,7 @@ func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
 		existing = _make_archer_bow_marker()
 		root.add_child(existing)
 	_apply_archer_bow_material(existing)
+	MonsterFamilyAccent.sync_for_monster(root, monster_def_id)
 
 func _has_archer_bow_marker(root: Node3D) -> bool:
 	return root != null and root.find_child(ClientConstants.ARCHER_BOW_MARKER_NAME, true, false) != null
@@ -5240,6 +5243,8 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 	if def_id == "treasure_chest" or def_id == "town_stash" or def_id == "town_unique_chest":
 		ChestPresentationScript.sync_objective_marker(node, bool(rec.get("elite_objective", false)), state == "open")
 		ChestPresentationScript.sync_quest_marker(node, bool(rec.get("quest_reward", false)), state == "open")
+		if state == "open":
+			ChestPresentationScript.sync_open_burst(node, true)
 		var glow := node.find_child("ChestInnerGlow", true, false) as MeshInstance3D
 		if glow != null:
 			glow.visible = state == "open"

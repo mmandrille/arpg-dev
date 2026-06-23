@@ -334,5 +334,12 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v319** | `boss-arena-presence` | Complete (focused client checks green; autoloop batch `make ci` pending) | [`v319_spec-boss-arena-presence.md`](../specs/v319_spec-boss-arena-presence.md) | [`v319_2026-06-23-boss-arena-presence.md`](../plans/v319_2026-06-23-boss-arena-presence.md) | [`as-built`](../as-built/v319_boss-arena-presence.md) |
 | **v320** | `critical-hit-punch` | Complete (focused client checks green; autoloop batch `make ci` pending) | [`v320_spec-critical-hit-punch.md`](../specs/v320_spec-critical-hit-punch.md) | | [`as-built`](../as-built/v320_critical-hit-punch.md) |
 | **v321** | `skill-rank-vfx-intensity` | Complete (focused shared/client checks green; autoloop batch `make ci` pending) | [`v321_spec-skill-rank-vfx-intensity.md`](../specs/v321_spec-skill-rank-vfx-intensity.md) | | [`as-built`](../as-built/v321_skill-rank-vfx-intensity.md) |
+| **v322** | `projectile-trail-polish` | Complete | | | [`as-built`](../as-built/v322_projectile-trail-polish.md) |
+| **v323** | `class-idle-stance-polish` | Complete | | | [`as-built`](../as-built/v323_class-idle-stance-polish.md) |
+| **v324** | `monster-family-accents` | Complete | | | [`as-built`](../as-built/v324_monster-family-accents.md) |
+| **v325** | `town-ambient-life` | Complete | | | [`as-built`](../as-built/v325_town-ambient-life.md) |
+| **v326** | `tooltip-rarity-frame-polish` | Complete | | | [`as-built`](../as-built/v326_tooltip-rarity-frame-polish.md) |
+| **v327** | `chest-open-burst` | Complete | | | [`as-built`](../as-built/v327_chest-open-burst.md) |
+| **v328** | `camera-impact-feedback` | Complete | | | [`as-built`](../as-built/v328_camera-impact-feedback.md) |
 
 ---

@@ -97,21 +97,24 @@
       "scene": "monster_dark_purple",
       "scale": 1.0,
       "height_offset": 0.0,
-      "animation_profile": "ground_biped"
+      "animation_profile": "ground_biped",
+      "family_accent": "8b5cf6"
     },
     "dungeon_archer": {
       "asset_id": "monster_crocodile_archer_v0",
       "scene": "monster_crocodile_archer",
       "scale": 1.0,
       "height_offset": 0.0,
-      "animation_profile": "ground_biped"
+      "animation_profile": "ground_biped",
+      "family_accent": "34d399"
     },
     "dungeon_wolf": {
       "asset_id": "monster_quadruped_predator_v0",
       "scene": "monster_quadruped",
       "scale": 1.0,
       "height_offset": 0.0,
-      "animation_profile": "ground_quadruped"
+      "animation_profile": "ground_quadruped",
+      "family_accent": "c08457"
     },
     "companion_black_wolf": {
       "asset_id": "monster_wolf_v0",
@@ -139,7 +142,8 @@
       "scene": "monster_tiny_flyer",
       "scale": 0.7,
       "height_offset": 0.9,
-      "animation_profile": "hover_flyer"
+      "animation_profile": "hover_flyer",
+      "family_accent": "a78bfa"
     },
     "dungeon_undead": {
       "asset_id": "monster_skeleton_v0",

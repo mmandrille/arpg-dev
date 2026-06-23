@@ -5,6 +5,42 @@ const OBJECTIVE_MARKER_NAME := "EliteObjectiveMarker"
 const QUEST_MARKER_NAME := "QuestRewardMarker"
 
 
+const OPEN_BURST_NAME := "ChestOpenBurst"
+
+
+static func sync_open_burst(root: Node3D, opened: bool) -> void:
+	if root == null:
+		return
+	var burst := root.find_child(OPEN_BURST_NAME, true, false) as MeshInstance3D
+	if not opened:
+		if burst != null:
+			burst.queue_free()
+		return
+	if burst != null:
+		return
+	burst = MeshInstance3D.new()
+	burst.name = OPEN_BURST_NAME
+	var mesh := TorusMesh.new()
+	mesh.inner_radius = 0.42
+	mesh.outer_radius = 0.62
+	burst.mesh = mesh
+	burst.position = Vector3(0.0, 0.72, 0.0)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.86, 0.34, 0.42)
+	mat.emission_enabled = true
+	mat.emission = Color("#f0cf72")
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	burst.material_override = mat
+	root.add_child(burst)
+	if root.get_tree() != null:
+		var timer := root.get_tree().create_timer(0.42)
+		timer.timeout.connect(func() -> void:
+			if is_instance_valid(burst):
+				burst.queue_free()
+		)
+
+
 static func add_part(parent: Node3D, part_name: String, size: Vector3, position: Vector3, color: Color) -> MeshInstance3D:
 	var part := MeshInstance3D.new()
 	part.name = part_name

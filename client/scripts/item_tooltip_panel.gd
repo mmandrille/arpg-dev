@@ -2,6 +2,7 @@ class_name ItemTooltipPanel
 extends PanelContainer
 
 const BODY_FONT_SIZE := 23
+const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const REQUIREMENT_FONT_SIZE := BODY_FONT_SIZE - 1
 const ICON_FONT_SIZE := 32
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
@@ -61,7 +62,8 @@ class ItemPreview:
 func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, requirement_lines: Array, comparison_entries: Array, price: int = -1, affordable: bool = true, fallback_label: String = "") -> void:
 	_clear_children(self)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_theme_stylebox_override("panel", _tooltip_style())
+	var rarity := str(item.get("rarity", "common")).to_lower()
+	add_theme_stylebox_override("panel", _tooltip_style(rarity))
 	var has_item := not item.is_empty()
 
 	var root := VBoxContainer.new()
@@ -174,6 +176,21 @@ func debug_requirement_texts() -> Array:
 	return out
 
 
+static func border_width_for_rarity(rarity: String) -> int:
+	var temp := ItemTooltipPanel.new()
+	var style := temp._tooltip_style(rarity)
+
+	return style.border_width_left
+
+
+func debug_border_width() -> int:
+	var style := get_theme_stylebox("panel") as StyleBoxFlat
+	if style == null:
+		return 0
+
+	return style.border_width_left
+
+
 func debug_first_main_line_color() -> String:
 	var label := _first_main_line_label()
 	if label == null:
@@ -225,14 +242,16 @@ func _tooltip_separator() -> ColorRect:
 	return separator
 
 
-func _tooltip_style() -> StyleBoxFlat:
+func _tooltip_style(rarity: String = "common") -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = Color(0.07, 0.06, 0.05, 0.97)
-	s.border_color = Color("#8b6914")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
+	var border: Color = ClientConstantsScript.LOOT_LABEL_RARITY_COLORS.get(rarity.to_lower(), Color("#8b6914"))
+	s.border_color = border
+	var border_width: int = 2 if rarity.to_lower() in ["magic", "rare", "unique"] else 1
+	s.border_width_left = border_width
+	s.border_width_top = border_width
+	s.border_width_right = border_width
+	s.border_width_bottom = border_width
 	s.content_margin_left = 10
 	s.content_margin_top = 8
 	s.content_margin_right = 10

@@ -406,6 +406,7 @@ func (c *loopClient) enqueue(env outEnvelope) {
 	case <-c.done:
 	case c.sendCh <- env:
 	default:
+		c.loop.log.Warn("send queue full; closing connection", "session_id", c.loop.sess.ID, "player_id", c.playerID)
 		c.close()
 	}
 }

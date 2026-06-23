@@ -1255,6 +1255,21 @@ func (s *Sim) appendSkillCastEvent(res *TickResult, player *entity, skillID stri
 	res.Events = append(res.Events, event)
 }
 
+func (s *Sim) appendProjectileSkillCastEvent(res *TickResult, player *entity, skillID string, rank int, manaCost int, correlationID string, targetID uint64, dir Vec2, projectile SkillProjectileDef) {
+	visual := projectile.Visual
+	if visual == "" {
+		visual = skillID
+	}
+	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, correlationID, targetID, visual)
+	if len(res.Events) == 0 {
+		return
+	}
+	event := &res.Events[len(res.Events)-1]
+	event.Position = cloneVec2Ptr(&player.pos)
+	event.Direction = cloneVec2Ptr(&dir)
+	event.Range = floatPtr(projectile.Range)
+}
+
 func (s *Sim) appendConeSkillCastEvent(res *TickResult, player *entity, skillID string, rank int, manaCost int, correlationID string, targetID uint64, dir Vec2, cone SkillConeDef) {
 	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, correlationID, targetID, "")
 	if len(res.Events) == 0 {
@@ -1299,7 +1314,7 @@ func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entit
 	projectile := s.spawnSkillProjectile(player, skillID, def, rank, dir, targetID, in)
 	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(projectile))})
 	s.appendSkillCooldownUpdate(res)
-	s.appendSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, skillID)
+	s.appendProjectileSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, dir, def.Projectile)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
 	res.ack(in.MessageID)
 }

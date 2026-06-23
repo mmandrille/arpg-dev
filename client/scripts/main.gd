@@ -1406,9 +1406,30 @@ func _entity_position(e: Dictionary) -> Vector3:
 	var pos: Dictionary = e.get("position", {})
 	return Vector3(float(pos.get("x", 0.0)), 0.0, float(pos.get("y", 0.0)))
 
+func _is_skill_authored_projectile(projectile_def_id: String) -> bool:
+	if projectile_def_id == "":
+		return false
+	var def: Dictionary = SkillRulesLoaderScript.skill_definition(projectile_def_id)
+	if def.is_empty():
+		return false
+	var kind := str(def.get("kind", ""))
+	return kind in ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack"]
+
+func _track_skill_authored_projectile(id: String, e: Dictionary) -> void:
+	var rec: Dictionary = entities.get(id, {})
+	if rec.is_empty():
+		rec = {"node": null, "type": "projectile", "presentation": "skill_cast"}
+		entities[id] = rec
+	for key in ["owner_id", "target_id", "projectile_def_id"]:
+		if e.has(key):
+			rec[key] = e[key]
+
 func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> void:
 	var id := str(e["id"])
 	var server_pos := _entity_position(e)
+	if str(e.get("type", "")) == "projectile" and _is_skill_authored_projectile(str(e.get("projectile_def_id", ""))):
+		_track_skill_authored_projectile(id, e)
+		return
 	if e["type"] == "player" and (id == player_id or player_id == ""):
 		# The player is the humanoid under PlayerAnchor, not an entity-dict node.
 		player_id = id
@@ -1563,7 +1584,9 @@ func _remove_entity(id: String) -> void:
 			var tween = rec["move_tween"]
 			if is_instance_valid(tween):
 				tween.kill()
-		(entities[id]["node"] as Node3D).queue_free()
+		var node := rec.get("node", null) as Node3D
+		if node != null and is_instance_valid(node):
+			node.queue_free()
 		entities.erase(id)
 	_remove_monster_health_bar(id)
 	_remove_revive_corpse_status_bar(id)

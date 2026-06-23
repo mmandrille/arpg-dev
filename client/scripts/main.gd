@@ -48,6 +48,7 @@ const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const ClientAudioControllerScript := preload("res://scripts/client_audio_controller.gd")
 const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
+const DungeonDepthLightingScript := preload("res://scripts/dungeon_depth_lighting.gd")
 const PerformanceStatusFormatterScript := preload("res://scripts/performance_status_formatter.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
@@ -251,6 +252,8 @@ var _level_label: Label
 var last_performance_status: Dictionary = {}
 var _last_ping_ms: int = -1
 var _camera: Camera3D
+var _directional_light: DirectionalLight3D
+var _world_environment: WorldEnvironment
 var ground_node: MeshInstance3D
 var _ground_factory: GroundWallFactory = GroundWallFactory.new()
 var _wall_renderer: WallRenderer
@@ -3421,7 +3424,12 @@ func _build_scene() -> void:
 
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -40, 0)
+	_directional_light = light
 	add_child(light)
+
+	_world_environment = WorldEnvironment.new()
+	add_child(_world_environment)
+	_update_depth_lighting()
 
 	audio_controller = ClientAudioControllerScript.new()
 	add_child(audio_controller)
@@ -3540,7 +3548,17 @@ func _build_scene() -> void:
 
 func _update_ground_material() -> void:
 	_ground_factory.update_ground_material(ground_node, current_level)
-	if _wall_renderer != null: _wall_renderer.set_level(current_level)
+	if _wall_renderer != null:
+		_wall_renderer.set_level(current_level)
+	_update_depth_lighting()
+
+func _update_depth_lighting() -> void:
+	DungeonDepthLightingScript.apply_for_level(
+		current_level,
+		_directional_light,
+		_world_environment,
+		_ground_factory,
+	)
 
 func _setup_menu_layer() -> void:
 	menu_layer = CanvasLayer.new()

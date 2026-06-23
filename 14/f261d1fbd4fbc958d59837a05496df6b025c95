@@ -1,0 +1,39 @@
+PROGRESS.md
+  s_430c3294a50024::t_e84097c60ec0e6 26,28-29
+client/scripts/boss_visuals_controller.gd
+  s_430c3294a50024::t_27b3e7c35a96bc 154-156
+  s_430c3294a50024::t_7ba1359e51d1e1 5
+  s_430c3294a50024::t_7c521728bba810 35-48
+  s_430c3294a50024::t_02bc6aa5502320 170
+docs/as-built/v319_boss-arena-presence.md
+  s_430c3294a50024::t_8ea23d35144e98 1-32
+docs/progress/slice-lifecycle.md
+  s_430c3294a50024::t_cc52668afd39e1 334
+docs/specs/v319_spec-boss-arena-presence.md
+  s_430c3294a50024::t_6a1e89fff1fb31 1-49
+client/scripts/boss_arena_presence.gd
+  s_430c3294a50024::t_461400d06ebadc 1-74
+docs/plans/v319_2026-06-23-boss-arena-presence.md
+  s_430c3294a50024::t_ade3bfb170c991 1-19
+client/tests/test_factories.gd
+  s_430c3294a50024::t_e5760e3b5c0446 10
+  s_430c3294a50024::t_d2bedeb0640013 240-241,243
+  s_430c3294a50024::t_930818970e0a18 259-260
+  s_430c3294a50024::t_7e66ff35a163f2 236-239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "14f261d1fbd4fbc958d59837a05496df6b025c95",
+  "prompts": {},
+  "sessions": {
+    "s_430c3294a50024": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "42edd734-a00e-4ff2-896e-74c43d0c5702",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

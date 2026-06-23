@@ -43,6 +43,7 @@
     }
   ],
   "wall_thickness": 1.0,
+  "ceiling_height": 4.0,
   "player_spawn": { "x": 4, "y": 10 },
   "stair_placement": {
     "min_separation": 8.0,

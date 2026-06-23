@@ -6,6 +6,9 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 var _walls_root: Node3D
 var _ground_factory: RefCounted
 var _current_level: int = 0
+var _ceiling_node: MeshInstance3D
+
+const TOWN_WALL_HEIGHT := 1.0
 
 func _init(walls_root: Node3D, ground_factory: RefCounted) -> void:
 	_walls_root = walls_root
@@ -52,17 +55,48 @@ func render_wall_layout(walls: Array) -> Array:
 		current_wall_layout.append(normalized)
 		if _walls_root != null:
 			_walls_root.add_child(make_wall_node(normalized))
+	_sync_dungeon_ceiling()
 	return current_wall_layout
 
 func set_level(level: int) -> void:
 	_current_level = level
 
+
 func clear_wall_nodes() -> void:
+	_ceiling_node = null
 	if _walls_root == null:
 		return
 	for child in _walls_root.get_children():
 		_walls_root.remove_child(child)
 		child.queue_free()
+
+
+func _dungeon_presentation_active() -> bool:
+	return _current_level < 0
+
+
+func _wall_height() -> float:
+	if not _dungeon_presentation_active():
+		return TOWN_WALL_HEIGHT
+	if _ground_factory != null and _ground_factory.has_method("dungeon_ceiling_height"):
+		return maxf(TOWN_WALL_HEIGHT, float(_ground_factory.dungeon_ceiling_height()))
+	return 4.0
+
+
+func set_ceiling_visible(visible: bool) -> void:
+	if _ceiling_node != null:
+		_ceiling_node.visible = visible
+
+
+func _sync_dungeon_ceiling() -> void:
+	if _walls_root == null:
+		return
+	if not _dungeon_presentation_active():
+		return
+	if _ground_factory == null or not _ground_factory.has_method("make_ceiling_node"):
+		return
+	_ceiling_node = _ground_factory.make_ceiling_node(_current_level) as MeshInstance3D
+	_walls_root.add_child(_ceiling_node)
 
 func normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 	var pos: Dictionary = {}
@@ -104,26 +138,27 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 	node.set_meta("wall_id", str(wall.get("id", "")))
 	node.set_meta("source", str(wall.get("source", "")))
 	node.set_meta("kind", "wall")
+	var wall_height := _wall_height()
 	var mesh := BoxMesh.new()
-	mesh.size = Vector3(float(size.get("x", 1.0)), 1.0, float(size.get("y", 1.0)))
+	mesh.size = Vector3(float(size.get("x", 1.0)), wall_height, float(size.get("y", 1.0)))
 	node.mesh = mesh
-	node.position = Vector3(float(pos.get("x", 0.0)), 0.5, float(pos.get("y", 0.0)))
-	var mat := _make_wall_material(wall)
+	node.position = Vector3(float(pos.get("x", 0.0)), wall_height * 0.5, float(pos.get("y", 0.0)))
+	var mat := _make_wall_material(wall, wall_height)
 	node.material_override = mat
 	return node
 
-func _make_wall_material(wall: Dictionary) -> StandardMaterial3D:
+func _make_wall_material(wall: Dictionary, wall_height: float = TOWN_WALL_HEIGHT) -> StandardMaterial3D:
 	var size: Dictionary = wall.get("size", {})
 	var source := str(wall.get("source", ""))
 	if _ground_factory != null and _ground_factory.has_method("wall_material_for_level"):
-		return _ground_factory.wall_material_for_level(_current_level, source, size)
+		return _ground_factory.wall_material_for_level(_current_level, source, size, wall_height)
 	var mat := StandardMaterial3D.new()
 	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
 	if _ground_factory != null and _ground_factory.has_method("make_wall_texture"):
 		mat.albedo_texture = _ground_factory.make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.roughness = 0.96
-	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.0), max(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
+	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.0), max(1.0, wall_height / 2.0), 1.0)
 	match source:
 		"generated":
 			mat.albedo_color = Color(0.92, 0.86, 0.76)
@@ -207,13 +242,14 @@ func _make_column_node(wall: Dictionary) -> Node3D:
 	var count: int = max(1, int(floor(long_extent / 2.1)) + 1)
 	var step: float = long_extent / float(count)
 	var radius: float = maxf(0.18, minf(0.42, short_extent * 0.32))
+	var pillar_height := maxf(1.15, _wall_height() - 0.12)
 	for i in count:
 		var mesh: CylinderMesh = CylinderMesh.new()
 		mesh.top_radius = radius
 		mesh.bottom_radius = radius
-		mesh.height = 1.15
+		mesh.height = pillar_height
 		var along: float = -long_extent / 2.0 + step * (float(i) + 0.5)
-		var local_pos: Vector3 = Vector3(along, 0.58, 0.0) if horizontal else Vector3(0.0, 0.58, along)
+		var local_pos: Vector3 = Vector3(along, pillar_height * 0.5, 0.0) if horizontal else Vector3(0.0, pillar_height * 0.5, along)
 		_add_mesh_child(root, "ColumnPillar_%d" % i, mesh, mat, local_pos)
 	return root
 

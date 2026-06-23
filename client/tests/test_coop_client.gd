@@ -168,11 +168,12 @@ func _test_snapshot_wall_layout_rendering() -> void:
 		"hotbar": [],
 		"character_progression": {},
 	})
-	_assert_eq("snapshot wall nodes", main.walls_root.get_child_count(), 2)
+	_assert_eq("snapshot wall nodes", main.walls_root.get_child_count(), 3)
 	_assert_eq("snapshot wall layout count", main.current_wall_layout.size(), 2)
 	_assert_eq("snapshot generated wall count", int(main.get_bot_state().get("generated_wall_count", 0)), 1)
 	_assert_eq("snapshot wall metadata source", str(main.walls_root.get_child(1).get_meta("source", "")), "generated")
-	_assert_vec3("snapshot generated wall position", (main.walls_root.get_child(1) as Node3D).position, Vector3(12.0, 0.5, 8.0))
+	_assert_vec3("snapshot generated wall position", (main.walls_root.get_child(1) as Node3D).position, Vector3(12.0, 2.0, 8.0))
+	_assert_true("snapshot dungeon ceiling exists", main.walls_root.get_node_or_null("DungeonCeiling") != null)
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
@@ -211,7 +212,7 @@ func _test_delta_wall_layout_replacement() -> void:
 		],
 	})
 	_assert_eq("delta current level", main.current_level, -2)
-	_assert_eq("delta wall nodes replaced", main.walls_root.get_child_count(), 2)
+	_assert_eq("delta wall nodes replaced", main.walls_root.get_child_count(), 3)
 	_assert_eq("delta generated wall count", int(main.get_bot_state().get("generated_wall_count", 0)), 1)
 	_assert_eq("delta removed old wall", str(main.walls_root.get_child(0).get_meta("wall_id", "")), "wall_-2_0000")
 	_assert_true("delta entity spawned after wall update", main.entities.has("2001"))

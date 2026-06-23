@@ -1,0 +1,103 @@
+shared/assets/monster_visuals.v0.schema.json
+  s_430c3294a50024::t_6ad7ca5b0d4e5e 29-30
+client/scripts/combat_event_presentation.gd
+  s_430c3294a50024::t_f6d6978a68fad2 85-88
+  s_430c3294a50024::t_2b96de882ab30f 10-17,27-28
+  s_430c3294a50024::t_c3536a0a1bf1ee 8
+scripts/client_smoke.sh
+  s_430c3294a50024::t_c849cdfb64eed5 171
+docs/as-built/v322_projectile-trail-polish.md
+  s_430c3294a50024::t_a4cf432ff5984f 1-15
+client/scripts/monster_family_accent.gd
+  s_430c3294a50024::t_aaccac8bdebca0 1-34
+client/tests/test_projectile_visuals.gd
+  s_430c3294a50024::t_0e8cf09bdcc09e 69
+shared/assets/class_presentations.v0.json
+  s_430c3294a50024::t_de2ce434669131 6-7,11-12,16-17,21-22,26-27
+client/scripts/class_presentations_loader.gd
+  s_430c3294a50024::t_a05eb182f0cc7d 47,51-55
+client/scripts/camera_impact_feedback.gd
+  s_430c3294a50024::t_782e5ce0f27951 1-29
+client/scripts/town_ambient_life.gd
+  s_430c3294a50024::t_7a44154c9a0f28 1-30
+client/scripts/main.gd
+  s_430c3294a50024::t_20cc1f23eb425d 5246-5247
+  s_430c3294a50024::t_5ea6240139f2d4 807
+  s_430c3294a50024::t_937b64bb67aaf5 4984
+  s_430c3294a50024::t_2875a1ab1f3e24 5048
+client/scripts/town_ambient_life.gd.uid
+  s_430c3294a50024::t_f44435492b294d 1
+docs/as-built/v328_camera-impact-feedback.md
+  s_430c3294a50024::t_ad271d4a776f55 1-15
+client/scripts/monster_family_accent.gd.uid
+  s_430c3294a50024::t_f44435492b294d 1
+client/scripts/chest_presentation.gd
+  s_430c3294a50024::t_e16713c2070f8c 8-43
+client/scripts/class_idle_stance.gd.uid
+  s_430c3294a50024::t_f44435492b294d 1
+docs/as-built/v323_class-idle-stance-polish.md
+  s_430c3294a50024::t_90aa88cd8412b8 1-15
+docs/as-built/v327_chest-open-burst.md
+  s_430c3294a50024::t_ac1d3f6dd9ff0e 1-14
+client/scripts/class_idle_stance.gd
+  s_430c3294a50024::t_676f754e5a6e37 1-14
+client/tests/test_skill_rank_intensity.gd.uid
+  s_430c3294a50024::t_31ff35b591f883 1
+client/scripts/projectile_visuals.gd
+  s_430c3294a50024::t_1ddf71ff1ab453 109,113-126
+  s_430c3294a50024::t_57176c01daaafd 78
+shared/assets/monster_visuals.v0.json
+  s_430c3294a50024::t_4984ad7f512bf5 100-101,108-109,116-117
+  s_430c3294a50024::t_50adf36039b9af 145-146
+docs/as-built/v326_tooltip-rarity-frame-polish.md
+  s_430c3294a50024::t_7e73d83884edff 1-14
+PROGRESS.md
+  s_430c3294a50024::t_541ae2bb5449b3 26,28-29
+client/scripts/camera_impact_feedback.gd.uid
+  s_430c3294a50024::t_f44435492b294d 1
+client/scripts/ground_wall_factory.gd
+  s_430c3294a50024::t_ba77d12d0c7275 30-31
+docs/progress/slice-lifecycle.md
+  s_430c3294a50024::t_f06af6a21a7c96 337-343
+client/scripts/item_tooltip_panel.gd
+  s_430c3294a50024::t_248566b9fbdb46 245,249,251-254
+  s_430c3294a50024::t_44f3339de685db 180
+  s_430c3294a50024::t_d35e73ad317286 186-193
+  s_430c3294a50024::t_5eccba6290443f 181
+  s_430c3294a50024::t_583e9d8c4619a6 179,182-185
+  s_430c3294a50024::t_0c4924be5b4081 248,250
+  s_430c3294a50024::t_4a24257fb39786 5
+  s_430c3294a50024::t_30af0052e522b7 65-66
+shared/assets/class_presentations.v0.schema.json
+  s_430c3294a50024::t_963716848ddc42 39-46
+client/tests/test_look_and_feel_polish.gd
+  s_430c3294a50024::t_590c91a8efda4c 10
+  s_430c3294a50024::t_f26cb7b65c387a 1-9,11-22,24-96,107-148
+  s_430c3294a50024::t_4156d1edc2f3e9 98,101
+  s_430c3294a50024::t_7df44419b219a3 23
+  s_430c3294a50024::t_c7181ae7b195d6 97,99-100,102-106
+docs/as-built/v325_town-ambient-life.md
+  s_430c3294a50024::t_afa643a4276fb8 1-14
+docs/as-built/v324_monster-family-accents.md
+  s_430c3294a50024::t_10a51013085c77 1-15
+client/scripts/skill_rank_intensity.gd.uid
+  s_430c3294a50024::t_31ff35b591f883 1
+client/scripts/town_node_factory.gd
+  s_430c3294a50024::t_6cb91cf9d5161e 227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "994a5fcb90157f9ca13d9d26370eb42104bf3548",
+  "prompts": {},
+  "sessions": {
+    "s_430c3294a50024": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "42edd734-a00e-4ff2-896e-74c43d0c5702",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

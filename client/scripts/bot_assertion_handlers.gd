@@ -336,6 +336,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_camera_mode":
+			return _assert_camera_mode(runner, step, state)
 	return true
 
 
@@ -543,4 +545,31 @@ static func _assert_resource_wallet_panel(runner, step: Dictionary, state: Dicti
 			str(step.get("window_row_count_at_least", 0)), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))
 		])
 		return false
+	return true
+
+
+static func _assert_camera_mode(runner, step: Dictionary, state: Dictionary) -> bool:
+	var want_mode := str(step.get("mode", ""))
+	var got_mode := str(state.get("camera_mode", ""))
+	if want_mode != "" and got_mode != want_mode:
+		runner._fail("assert_camera_mode failed: mode want=%s got=%s step=%d scenario=%s" % [
+			want_mode, got_mode, runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
+	if step.has("projection"):
+		var want_proj := str(step.get("projection", ""))
+		var got_proj := str(state.get("camera_projection", ""))
+		if got_proj != want_proj:
+			runner._fail("assert_camera_mode failed: projection want=%s got=%s step=%d scenario=%s" % [
+				want_proj, got_proj, runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
+	if step.has("mouse_captured"):
+		var want_cap := bool(step.get("mouse_captured", false))
+		var got_cap := bool(state.get("mouse_captured", false))
+		if got_cap != want_cap:
+			runner._fail("assert_camera_mode failed: mouse_captured want=%s got=%s step=%d scenario=%s" % [
+				want_cap, got_cap, runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
 	return true

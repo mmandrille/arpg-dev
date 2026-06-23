@@ -45,6 +45,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_board_badges", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar", "assert_audio_state", "assert_resource_wallet_panel",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_mercenary_panel_visible", "assert_mercenary_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
 	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap",
+	"assert_camera_mode",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_entity_buffered", "click_loot_item", "click_floor",
@@ -63,6 +64,7 @@ const STEP_TYPES_ACTION := [
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
 	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
 	"set_market_search", "select_market_sort", "click_waypoint_level",
+	"set_camera_mode", "select_camera_mode",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -265,4 +267,7 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype in ["wait_remote_player_count", "assert_remote_player_count"]:
 		if not step.has("equals") and not step.has("at_least"):
 			return "client_steps[%d] (%s) requires equals or at_least" % [index, stype]
+	if stype == "assert_camera_mode":
+		if str(step.get("mode", "")) == "":
+			return "client_steps[%d] (%s) requires mode" % [index, stype]
 	return ""

@@ -1,0 +1,49 @@
+client/scripts/client_settings.gd
+  s_13fb8c3954ab4d::t_9348640dccecb0 58
+  s_13fb8c3954ab4d::t_b2cb8563d849ca 16-24
+  s_13fb8c3954ab4d::t_873d5bbc991f44 363-375
+  s_13fb8c3954ab4d::t_70f5376af6f924 273
+  s_13fb8c3954ab4d::t_d1aca1a5086008 250
+  s_13fb8c3954ab4d::t_1cdd1a0e9858f3 135-141
+  s_13fb8c3954ab4d::t_5b3eb2abcb66f2 235
+  s_13fb8c3954ab4d::t_ad9fe0bf6463df 196-201
+client/scripts/settings_panel.gd
+  s_13fb8c3954ab4d::t_310708bd834124 391-395
+  s_13fb8c3954ab4d::t_7f16771b666ff1 130-136
+  s_13fb8c3954ab4d::t_a9bb8a0f5bea1d 36
+  s_13fb8c3954ab4d::t_93d8463b20e1c9 308-318
+  s_13fb8c3954ab4d::t_076b99f7be2f64 24
+  s_13fb8c3954ab4d::t_86e32e9276b030 225-236
+  s_13fb8c3954ab4d::t_0d0c434e891075 14
+  s_13fb8c3954ab4d::t_1633d0837835be 29
+  s_13fb8c3954ab4d::t_cf3fd961343c1f 58,69
+shared/i18n/es.json
+  s_13fb8c3954ab4d::t_20774db7f0bad2 144-147
+client/tests/test_camera_mode_settings.gd
+  s_13fb8c3954ab4d::t_b0a4bee61319f1 40-65
+  s_13fb8c3954ab4d::t_5a9214263fe640 1,6,15-17
+shared/i18n/en.json
+  s_13fb8c3954ab4d::t_9acd70ceea5a45 144-147
+client/scripts/main.gd
+  s_13fb8c3954ab4d::t_20b4a337f04a4c 3610
+  s_13fb8c3954ab4d::t_aba5776b27ad26 644-649
+  s_13fb8c3954ab4d::t_87a0beb24bf439 686
+.maintainability/file-size-baseline.tsv
+  s_13fb8c3954ab4d::t_b1b73bb2175212 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "71bc2db39232e3a6a0713dd7467c55b6f678bfa4",
+  "prompts": {},
+  "sessions": {
+    "s_13fb8c3954ab4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb43ab75-e5f4-48cc-90e6-650160f11f5d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

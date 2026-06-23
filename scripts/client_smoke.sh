@@ -197,6 +197,9 @@ run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement
 run_gate "GDScript melee lunge presentation test" "[gdtest] PASS: test_melee_lunge_presentation" res://tests/test_melee_lunge_presentation.gd
 run_gate "GDScript command retarget grace test" "[gdtest] PASS: test_command_retarget_grace" res://tests/test_command_retarget_grace.gd
 
+# 2p. Camera mode presentation loader unit tests (server-independent; v329).
+run_gate "GDScript camera mode settings test" "[gdtest] PASS: test_camera_mode_settings" res://tests/test_camera_mode_settings.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   finish_gates "client unit"
   echo "[client-unit] PASS"

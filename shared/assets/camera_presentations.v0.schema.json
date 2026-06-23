@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/camera_presentations.v0.schema.json",
+  "title": "Camera presentation modes (v0)",
+  "description": "Client-only camera tuning per mode. No gameplay authority; pure rendering configuration.",
+  "type": "object",
+  "required": ["version", "modes"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "modes": {
+      "type": "object",
+      "required": ["isometric", "third_person", "chest_view"],
+      "additionalProperties": {
+        "$ref": "#/$defs/cameraMode"
+      }
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "cameraMode": {
+      "type": "object",
+      "required": [
+        "projection",
+        "zoom_default",
+        "zoom_min",
+        "zoom_max",
+        "shoulder_offset",
+        "chest_forward_offset",
+        "mouse_sensitivity",
+        "pitch_min_degrees",
+        "pitch_max_degrees",
+        "reticle_enabled"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "projection": {
+          "type": "string",
+          "enum": ["orthogonal", "perspective"]
+        },
+        "zoom_default": { "type": "number", "exclusiveMinimum": 0 },
+        "zoom_min": { "type": "number", "exclusiveMinimum": 0 },
+        "zoom_max": { "type": "number", "exclusiveMinimum": 0 },
+        "follow_offset": { "$ref": "#/$defs/vec3" },
+        "spring_arm_length": { "type": "number", "minimum": 0 },
+        "shoulder_offset": { "$ref": "#/$defs/vec3" },
+        "chest_forward_offset": { "type": "number" },
+        "mouse_sensitivity": { "type": "number", "minimum": 0 },
+        "pitch_min_degrees": { "type": "number" },
+        "pitch_max_degrees": { "type": "number" },
+        "reticle_enabled": { "type": "boolean" }
+      }
+    }
+  }
+}

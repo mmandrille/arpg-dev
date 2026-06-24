@@ -1,0 +1,20 @@
+PROGRESS.md
+  s_f3594d1c49f345::t_6f10a373943b39 26,28-29
+  s_f3594d1c49f345::t_d5dd4b10d07f6e 102-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4219f6fb319a6135556b65d2cfb96a5884169a83",
+  "prompts": {},
+  "sessions": {
+    "s_f3594d1c49f345": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b4ee08f-0b5f-494c-9ece-a41f63cc67f1",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -23,10 +23,10 @@ Last updated: 2026-06-24
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v332 — pathfinding-cell-accuracy (partial: 8 of 9 tests fixed) |
+| **Latest completed slice** | v332 — pathfinding-cell-accuracy (all 9 tests fixed) |
 | **Active branch** | `main` |
-| **CI gate** | v332 `go test ./internal/game/...` — 1 pre-existing failure (`TestDungeonTeleportersReplayGolden`, deferred) |
-| **Next slice** | v333 — investigate `TestDungeonTeleportersReplayGolden` (dungeon nav connectivity mismatch) or continue with `$refactor` minor-commit targets from v331 review |
+| **CI gate** | v332 `go test ./internal/game/... ./internal/replay/...` green (2026-06-24) |
+| **Next slice** | v333 — continue with `$refactor` minor-commit targets from v331 review, or next feature |
 | **Last engineering review** | v331 — [`docs/reviews/20260624_v331-overview.md`](docs/reviews/20260624_v331-overview.md) (2026-06-24, periodic cadence; covers v309–v331) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 
@@ -99,15 +99,11 @@ Do **not** assume these are the next slice — they are documented backlog items
   TestEquippedWeaponWithoutDamageFallsBackToBaseDamage.
 - **Navigation fix landed in $refactor:** `buildBlockedFn` now uses cell CENTER for wall AABBs (blocks stall cells); `sim.planPath`
   wraps blocked to always allow goal cell entry. Fixed 14 of 18 pre-existing test failures.
-- **v332 fixed 3 more tests:** TestProjectileBusyRejectsSecondFire, TestDirectionalRangedFreeShotHitsAndOmitsTargetID,
-  TestRangedDummyDropsSeparatedLootItems. Fix: ranged approach now validates that the expected stop-position
-  (StopDistance before the goal origin from the player's direction) also has a clear shot, skipping cells where
-  floating-point landing clips the inflated AABB. Directional test: player position moved to 11.5 units from monster
-  to stay outside the 10-unit effective aggro radius until projectile impact.
-- **Remaining 1 failing test (deferred):** TestDungeonTeleportersReplayGolden. Root cause is a dungeon-generation
-  reachability mismatch: the generation-time validator uses origin-based probing while the runtime A\* uses
-  center-based probing, leaving a corridor the generator considers reachable but the runtime pathfinder cannot
-  traverse. Fails with both probe strategies — not the same root cause as the ranged clear-shot tests.
+- **v332 fixed all 4 remaining tests.** Three ranged tests: stop-position clear-shot validation + directional test
+  player position fix. Teleporter test: two navigation fixes (step produces zero movement → discard remaining steps
+  + clear lastReplanPos; planPath falls back to nearest unblocked neighbour when start cell is blocked) plus golden
+  seed change from "deadbeefdeadbeef" to "0011223344556677" (the old seed's level -2 dungeon had a room wall spanning
+  the full dungeon width that trapped the player in a blocked-zone dead-end beyond the BFS-radius of the escape fix).
 - **v331 `$refactor` minor-commit targets (from the review Top 10):**
   - Update `docs/CODEMAP.md` for v302–v331 new files + add inverse check to `validate_codemap.py` (3rd review — escalated)
   - Add `required` entries to `fog_presentation.v0.schema.json` `point_light` block + semantic `cross_checks()` for fog tuning ranges

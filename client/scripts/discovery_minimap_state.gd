@@ -22,7 +22,7 @@ func reset() -> void:
 	_explored_by_level.clear()
 
 
-func update(level: int, player_position: Vector3, light_radius: float, walls: Array, entities: Dictionary) -> Dictionary:
+func update(level: int, player_position: Vector3, light_radius: float, walls: Array, entities: Dictionary, player_facing: Vector2 = Vector2.ZERO) -> Dictionary:
 	var radius := maxf(DEFAULT_LIGHT_RADIUS, light_radius)
 	var player := Vector2(player_position.x, player_position.z)
 	var cells := _cells_for_level(level)
@@ -33,10 +33,16 @@ func update(level: int, player_position: Vector3, light_radius: float, walls: Ar
 	var quest_path := _quest_path_marker(objective)
 	var markers := _poi_markers(cells, entities, player, radius, objective)
 	var marker_counts := _marker_kind_counts(markers)
+	var facing := player_facing
+	if facing.length_squared() <= 0.0001:
+		facing = Vector2(0.0, 1.0)
 	return {
 		"level": level,
 		"player_x": player.x,
 		"player_y": player.y,
+		"player_facing_x": facing.x,
+		"player_facing_y": facing.y,
+		"player_facing_angle": atan2(facing.y, facing.x),
 		"light_radius": radius,
 		"map_world_radius": maxf(radius * 1.75, 16.0),
 		"explored_cells": _serialized_cells(cells),

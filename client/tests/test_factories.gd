@@ -61,6 +61,9 @@ func _test_ground_wall_factory() -> void:
 	_assert_true("dungeon ground normal texel varies", factory.ground_normal_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 0, 0, dungeon_palette) != factory.ground_normal_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 17, 11, dungeon_palette))
 	var ground := factory.make_ground_node(0)
 	_assert_eq("ground node name", ground.name, "Ground")
+	var deep_layout: Dictionary = factory.dungeon_ground_layout(-6)
+	_assert_true("deep dungeon ground extends past floor width", float(deep_layout.get("size", Vector2.ZERO).x) > 120.0)
+	_assert_true("deep dungeon ground centered on floor", absf(float((deep_layout.get("center", Vector3.ZERO) as Vector3).x) - 60.0) <= 0.001)
 	ground.queue_free()
 
 
@@ -81,7 +84,7 @@ func _test_wall_renderer() -> void:
 	var wall_body := root.get_child(0) as StaticBody3D
 	_assert_eq("wall child name", wall_body.name, "Wall_test_wall")
 	var wall := wall_body.get_child(1) as MeshInstance3D
-	_assert_eq("dungeon wall height", (wall.mesh as BoxMesh).size.y, ground_factory.dungeon_ceiling_height())
+	_assert_true("dungeon wall height", absf((wall.mesh as BoxMesh).size.y - (ground_factory.dungeon_ceiling_height() + 0.08)) <= 0.001)
 	var ceiling := root.get_node_or_null("DungeonCeiling") as MeshInstance3D
 	_assert_true("dungeon ceiling node exists", ceiling != null)
 	renderer.set_ceiling_visible(false)

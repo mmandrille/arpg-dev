@@ -3,6 +3,7 @@ extends CanvasLayer
 
 const HeroVisibilityFieldScript := preload("res://scripts/hero_visibility_field.gd")
 const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
+const HeroLightSourceScript := preload("res://scripts/hero_light_source.gd")
 
 const FALLBACK_WORLD_TO_SCREEN := 32.0
 const ORGANIC_EDGE_MIN_PX := 5.0
@@ -188,6 +189,7 @@ func bind(camera: Camera3D, target: Node3D, character_visual: Node3D = null) -> 
 	_target = target
 	_character_visual = character_visual
 	_reset_motion_tracking()
+	_reparent_point_light()
 	_update_shader()
 	_setup_point_light()
 
@@ -283,6 +285,7 @@ func get_debug_state() -> Dictionary:
 		"shadow_polygons": _shadow_debug.duplicate(true),
 		"center": {"x": _center_px.x, "y": _center_px.y},
 		"hero_world": {"x": _target_world_position().x, "y": _target_world_position().y},
+		"hero_light_height": _hero_light_world_height(),
 	}
 
 
@@ -350,6 +353,7 @@ func _update_shader() -> void:
 	_material.set_shader_parameter("organic_edge_rotation", _edge_rotation)
 	_apply_perspective_shader_params()
 	_update_shadows(viewport_size)
+	_sync_point_light()
 
 
 func _apply_perspective_shader_params() -> void:
@@ -412,10 +416,14 @@ func _reset_motion_tracking() -> void:
 	_edge_rotation_active = false
 
 
+func _hero_light_world_height() -> float:
+	return HeroLightSourceScript.estimate_world_height(_character_visual, _target, FogPresentationLoaderScript.point_light())
+
+
 func _project_target() -> Vector2:
 	if _camera != null and _target != null:
-		var ground := Vector3(_target.global_position.x, 0.0, _target.global_position.z)
-		return _camera.unproject_position(ground)
+		var pos := _target.global_position
+		return _camera.unproject_position(Vector3(pos.x, _hero_light_world_height(), pos.z))
 
 	return get_viewport().get_visible_rect().size * 0.5 if get_viewport() != null else Vector2.ZERO
 
@@ -571,8 +579,22 @@ func _color_from_hex(hex: String, alpha: float) -> Color:
 	return Color(color.r, color.g, color.b, alpha)
 
 
+func _reparent_point_light() -> void:
+	if _point_light == null:
+		return
+	var parent := _character_visual if _character_visual != null else _target
+	if parent == null or _point_light.get_parent() == parent:
+		return
+	if _point_light.get_parent() != null:
+		_point_light.get_parent().remove_child(_point_light)
+	parent.add_child(_point_light)
+
+
 func _setup_point_light() -> void:
-	if _target == null or _point_light != null:
+	if _point_light != null:
+		return
+	var parent := _character_visual if _character_visual != null else _target
+	if parent == null:
 		return
 	var cfg: Dictionary = FogPresentationLoaderScript.point_light()
 	_point_light = OmniLight3D.new()
@@ -581,10 +603,12 @@ func _setup_point_light() -> void:
 	_point_light.omni_attenuation = float(cfg.get("attenuation", 1.5))
 	_point_light.light_color = Color(str(cfg.get("color", "#ffffff")))
 	_point_light.shadow_enabled = bool(cfg.get("shadow_enabled", false))
-	_point_light.position = Vector3(0.0, float(cfg.get("height_offset", 0.5)), 0.0)
+	_point_light.shadow_bias = float(cfg.get("shadow_bias", 0.08))
+	_point_light.shadow_normal_bias = float(cfg.get("shadow_normal_bias", 1.2))
+	_point_light.position = HeroLightSourceScript.local_light_position(_character_visual, cfg)
 	_point_light.omni_range = 0.0
 	_point_light.visible = false
-	_target.add_child(_point_light)
+	parent.add_child(_point_light)
 
 
 func _sync_point_light() -> void:
@@ -595,3 +619,6 @@ func _sync_point_light() -> void:
 	if active:
 		var cfg: Dictionary = FogPresentationLoaderScript.point_light()
 		_point_light.omni_range = maxf(0.1, _light_radius * float(cfg.get("range_multiplier", 1.0)))
+		_point_light.shadow_bias = float(cfg.get("shadow_bias", 0.08))
+		_point_light.shadow_normal_bias = float(cfg.get("shadow_normal_bias", 1.2))
+		_point_light.position = HeroLightSourceScript.local_light_position(_character_visual, cfg)

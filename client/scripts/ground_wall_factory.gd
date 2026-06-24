@@ -3,6 +3,10 @@ extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 
+const TOWN_GROUND_SIZE := Vector2(140.0, 90.0)
+const TOWN_GROUND_CENTER := Vector3(50.0, -0.02, 25.0)
+const DUNGEON_GROUND_MARGIN := 8.0
+
 var ground_textures: Dictionary = {}
 var wall_textures: Dictionary = {}
 var ground_normal_textures: Dictionary = {}
@@ -15,17 +19,50 @@ func make_ground_node(level: int) -> MeshInstance3D:
 	var node := MeshInstance3D.new()
 	node.name = "Ground"
 	var mesh := PlaneMesh.new()
-	mesh.size = Vector2(140.0, 90.0)
-	mesh.subdivide_width = 32
-	mesh.subdivide_depth = 20
 	node.mesh = mesh
-	node.position = Vector3(50.0, -0.02, 25.0)
+	configure_ground_node(node, level)
 	node.material_override = ground_material_for_level(level)
 	return node
+
+
+func configure_ground_node(ground_node: MeshInstance3D, level: int) -> void:
+	if ground_node == null:
+		return
+	var mesh := ground_node.mesh as PlaneMesh
+	if mesh == null:
+		return
+	if level >= 0:
+		mesh.size = TOWN_GROUND_SIZE
+		mesh.subdivide_width = 32
+		mesh.subdivide_depth = 20
+		ground_node.position = TOWN_GROUND_CENTER
+		return
+	var layout := dungeon_ground_layout(level)
+	mesh.size = layout.size
+	mesh.subdivide_width = maxi(8, int(layout.size.x / 4.0))
+	mesh.subdivide_depth = maxi(8, int(layout.size.y / 4.0))
+	ground_node.position = layout.center
+
+
+func dungeon_ground_layout(level: int) -> Dictionary:
+	var floor_size := floor_size_for_level(level)
+	var margin := DUNGEON_GROUND_MARGIN + wall_thickness()
+	var size := floor_size + Vector2(margin * 2.0, margin * 2.0)
+	return {
+		"size": size,
+		"center": Vector3(floor_size.x * 0.5, 0.0, floor_size.y * 0.5),
+	}
+
+
+func wall_thickness() -> float:
+	_ensure_dungeon_generation()
+	return maxf(0.1, float(_dungeon_generation.get("wall_thickness", 1.0)))
+
 
 func update_ground_material(ground_node: MeshInstance3D, level: int) -> void:
 	if ground_node == null:
 		return
+	configure_ground_node(ground_node, level)
 	ground_node.material_override = ground_material_for_level(level)
 	if level == 0:
 		TownAmbientLife.attach_to_town(ground_node)

@@ -147,8 +147,12 @@ static func _default_config() -> Dictionary:
 			"attenuation": 2.0,
 			"color": "#ffffff",
 			"range_multiplier": 1.0,
+			"height_fraction": 0.55,
+			"min_height": 0.75,
 			"height_offset": 2.0,
 			"shadow_enabled": true,
+			"shadow_bias": 0.08,
+			"shadow_normal_bias": 1.2,
 		},
 	}
 

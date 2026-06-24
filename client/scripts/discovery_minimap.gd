@@ -85,8 +85,8 @@ func set_state(state: Dictionary) -> void:
 	_map.queue_redraw()
 
 
-func sync(level: int, player_position: Vector3, light_radius: float, walls: Array, entities: Dictionary) -> void:
-	set_state(_state_tracker.update(level, player_position, light_radius, walls, entities))
+func sync(level: int, player_position: Vector3, light_radius: float, walls: Array, entities: Dictionary, player_facing: Vector2 = Vector2.ZERO) -> void:
+	set_state(_state_tracker.update(level, player_position, light_radius, walls, entities, player_facing))
 
 
 func set_panel_opacity(value: float) -> void:
@@ -120,6 +120,9 @@ func get_debug_state() -> Dictionary:
 		"objective_marker_count": int(marker_counts.get("objective", 0)),
 		"player_marker_x": 0.5,
 		"player_marker_y": 0.5,
+		"player_facing_x": float(_state.get("player_facing_x", 0.0)),
+		"player_facing_y": float(_state.get("player_facing_y", 1.0)),
+		"player_facing_angle": float(_state.get("player_facing_angle", 1.5708)),
 		"has_pin": bool(objective.get("has_pin", false)),
 		"status": str(objective.get("status", "hidden")),
 		"pin_status": str(objective.get("status", "hidden")),
@@ -184,7 +187,7 @@ func _draw_map() -> void:
 	_draw_quest_path()
 	_draw_poi_markers()
 	_map.draw_rect(rect, Color(0.55, 0.48, 0.35, 0.52), false, 1.0)
-	_map.draw_circle(map_size * 0.5, 5.0 if _display_mode != MODE_FULLSCREEN else 7.0, PLAYER_COLOR)
+	_draw_player_marker()
 	_draw_objective_pin()
 
 
@@ -209,6 +212,18 @@ func _draw_walls() -> void:
 		var wall_rect := Rect2(center - size * 0.5, size)
 		if _map_rect().intersects(wall_rect):
 			_map.draw_rect(wall_rect, WALL_COLOR, true)
+
+
+func _draw_player_marker() -> void:
+	var center := _current_map_size() * 0.5
+	var radius := 5.0 if _display_mode != MODE_FULLSCREEN else 7.0
+	var facing := Vector2(float(_state.get("player_facing_x", 0.0)), float(_state.get("player_facing_y", 1.0)))
+	if facing.length_squared() <= 0.0001:
+		facing = Vector2(0.0, 1.0)
+	else:
+		facing = facing.normalized()
+	_map.draw_circle(center, radius * 0.55, PLAYER_COLOR)
+	_draw_arrow_marker(center, facing, PLAYER_COLOR)
 
 
 func _draw_objective_pin() -> void:
@@ -333,6 +348,9 @@ static func _empty_state() -> Dictionary:
 		"level": 0,
 		"player_x": 0.0,
 		"player_y": 0.0,
+		"player_facing_x": 0.0,
+		"player_facing_y": 1.0,
+		"player_facing_angle": 1.57079632679,
 		"light_radius": 0.0,
 		"map_world_radius": 16.0,
 		"explored_cells": [],

@@ -3139,6 +3139,17 @@ func _face_event_source_toward_target(ev: Dictionary) -> void:
 	var target_id := str(ev.get("target_entity_id", ""))
 	if source_id == "" or target_id == "" or source_id == target_id:
 		return
+	if source_id == player_id:
+		# Local player facing must go through character_visual (not player_anchor) so
+		# that the chest_view guard in _face_direction fires and _yaw is not bypassed.
+		var target_node := _node_for_entity_id(target_id)
+		if target_node == null:
+			return
+		var target_pos := _node_world_or_local_position(target_node)
+		var flat := Vector2(target_pos.x - predicted_pos.x, target_pos.z - predicted_pos.z)
+		if flat.length_squared() > 0.0001:
+			_face_direction(flat.normalized())
+		return
 	var source_node := _node_for_entity_id(source_id)
 	if source_node == null:
 		return

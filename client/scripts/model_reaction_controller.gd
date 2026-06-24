@@ -62,14 +62,17 @@ func play_hit(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_direction: 
 	_impact_feedback_count += 1
 	_kill_tween(_hit_tween)
 	var direction := _reaction_direction(source_position, fallback_direction)
-	var target_rotation := _base_rotation + Vector3(direction.z * HIT_LEAN_RADIANS, 0.0, -direction.x * HIT_LEAN_RADIANS)
+	var target_x := _base_rotation.x + direction.z * HIT_LEAN_RADIANS
+	var target_z := _base_rotation.z - direction.x * HIT_LEAN_RADIANS
 	_apply_impact_flash()
 	_hit_tween = _root.create_tween()
 	_hit_tween.tween_interval(HIT_STOP_SECONDS)
 	_hit_tween.tween_callback(_apply_color_scale.bind(HIT_DARKEN))
-	_hit_tween.tween_property(_root, "rotation", target_rotation, HIT_LEAN_SECONDS)
+	_hit_tween.tween_property(_root, "rotation:x", target_x, HIT_LEAN_SECONDS)
+	_hit_tween.parallel().tween_property(_root, "rotation:z", target_z, HIT_LEAN_SECONDS)
 	_hit_tween.parallel().tween_method(_apply_color_scale, HIT_DARKEN, 1.0, HIT_LEAN_SECONDS + HIT_RESTORE_SECONDS)
-	_hit_tween.tween_property(_root, "rotation", _base_rotation, HIT_RESTORE_SECONDS)
+	_hit_tween.tween_property(_root, "rotation:x", _base_rotation.x, HIT_RESTORE_SECONDS)
+	_hit_tween.parallel().tween_property(_root, "rotation:z", _base_rotation.z, HIT_RESTORE_SECONDS)
 	_hit_tween.finished.connect(_on_hit_finished)
 
 
@@ -83,13 +86,15 @@ func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_directio
 	_kill_tween(_hit_tween)
 	_kill_tween(_death_tween)
 	var direction := _reaction_direction(source_position, fallback_direction)
-	var target_rotation := _base_rotation + Vector3(direction.z * DEATH_LEAN_RADIANS, 0.0, -direction.x * DEATH_LEAN_RADIANS)
+	var target_x := _base_rotation.x + direction.z * DEATH_LEAN_RADIANS
+	var target_z := _base_rotation.z - direction.x * DEATH_LEAN_RADIANS
 	_apply_impact_flash()
 	_add_death_flourish(direction)
 	_death_tween = _root.create_tween()
 	_death_tween.tween_interval(HIT_STOP_SECONDS)
 	_death_tween.tween_callback(_apply_color_scale.bind(DEATH_DARKEN))
-	_death_tween.tween_property(_root, "rotation", target_rotation, DEATH_SECONDS)
+	_death_tween.tween_property(_root, "rotation:x", target_x, DEATH_SECONDS)
+	_death_tween.parallel().tween_property(_root, "rotation:z", target_z, DEATH_SECONDS)
 
 
 func reset_terminal() -> void:
@@ -99,7 +104,8 @@ func reset_terminal() -> void:
 	_kill_tween(_hit_tween)
 	_kill_tween(_death_tween)
 	if _root != null:
-		_root.rotation = _base_rotation
+		_root.rotation.x = _base_rotation.x
+		_root.rotation.z = _base_rotation.z
 		_clear_death_flourish()
 	_apply_color_scale(1.0)
 
@@ -268,7 +274,8 @@ func _on_hit_finished() -> void:
 	if _terminal:
 		return
 	if _root != null:
-		_root.rotation = _base_rotation
+		_root.rotation.x = _base_rotation.x
+		_root.rotation.z = _base_rotation.z
 	_apply_color_scale(1.0)
 	_sync_highlight_emission()
 

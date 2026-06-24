@@ -1,0 +1,37 @@
+tools/validate_codemap.py
+  s_517a6303f090f7::t_3f2aa89ba2c94b 43-61,67-71
+docs/CODEMAP.md
+  s_517a6303f090f7::t_59b2c7dfe821f3 17
+  s_517a6303f090f7::t_88676af4ae8f1a 21
+  s_517a6303f090f7::t_a5b68cf235f804 16
+  s_517a6303f090f7::t_cc92d09b068108 9
+  s_517a6303f090f7::t_93cf6d03e414df 12
+  s_517a6303f090f7::t_2528c30f9ae755 29
+  s_517a6303f090f7::t_a56c7c7f6acd12 30,32-40
+  s_517a6303f090f7::t_694ba8228dc63f 15
+  s_517a6303f090f7::t_2a5dd68c7b3c9d 23
+  s_517a6303f090f7::t_b9fa1dfab8ed40 10
+  s_517a6303f090f7::t_17ed4e073fa19f 28
+  s_517a6303f090f7::t_44c33d433414bd 19
+  s_517a6303f090f7::t_ea2c9eb12bcda9 20
+  s_517a6303f090f7::t_d58b6ba59f5cd7 31
+  s_517a6303f090f7::t_2bea3738df4140 11
+  s_517a6303f090f7::t_c5d0d4cf67f4be 14
+  s_517a6303f090f7::t_d45fab7fab2d7e 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "7a6b186761d9f82b7685753d492f1f9003170550",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -68,6 +68,18 @@ func randomObjectiveChestPosition(rng *RNG, rules DungeonGenerationRules, object
 				break
 			}
 		}
+		if blocked {
+			continue
+		}
+		// Chest must not be placed within obstacle clearance of any blocking wall —
+		// obstacles are placed before this chest, so this check must happen here.
+		chestClearance := rules.ObstacleGeneration.Clearance.Chest
+		for _, wall := range out.walls {
+			if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, chestClearance, wall.pos, wall.size) {
+				blocked = true
+				break
+			}
+		}
 		if blocked || !generatedTargetReachable(rules, *out, pos) {
 			continue
 		}

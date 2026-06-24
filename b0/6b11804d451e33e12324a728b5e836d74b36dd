@@ -1,0 +1,28 @@
+docs/plans/v332_2026-06-24-pathfinding-cell-accuracy.md
+  s_517a6303f090f7::t_2addce401473a4 1-247
+docs/as-built/v332_pathfinding-cell-accuracy.md
+  s_f3594d1c49f345::t_82808b03d95af6 1-78
+docs/specs/v332_spec-pathfinding-cell-accuracy.md
+  s_517a6303f090f7::t_97245545fe2b2e 1-152
+docs/progress/slice-lifecycle.md
+  s_f3594d1c49f345::t_b18e7b7a6a9b72 346-347
+PROGRESS.md
+  s_f3594d1c49f345::t_df35f65c9a87c6 26,28-29
+  s_f3594d1c49f345::t_3a71ab1da4f460 102-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b06b11804d451e33e12324a728b5e836d74b36dd",
+  "prompts": {},
+  "sessions": {
+    "s_f3594d1c49f345": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b4ee08f-0b5f-494c-9ece-a41f63cc67f1",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

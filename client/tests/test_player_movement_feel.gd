@@ -15,6 +15,7 @@ func _initialize() -> void:
 	_test_direction_change_resets_ramp()
 	_test_small_correction_within_grace_does_not_reset()
 	_test_sharp_turn_always_resets()
+	_test_server_speed_overrides_config()
 	if _fail_count == 0:
 		print("[gdtest] PASS: test_player_movement_feel (%d passed, %d failed)" % [_pass_count, _fail_count])
 		quit(0)
@@ -102,6 +103,20 @@ func _test_sharp_turn_always_resets() -> void:
 		_fail("sharp turn should reset ramp", after_sharp, expected_min)
 		return
 	_pass("sharp turn always resets ramp")
+
+
+func _test_server_speed_overrides_config() -> void:
+	var feel := PlayerMovementFeelScript.new()
+	var custom_speed := 1.2  # tiles/tick, higher than config base
+	feel.set_server_speed(custom_speed)
+	# Hold direction past full ramp
+	for _i in range(25):
+		feel.effective_speed(Vector2.RIGHT, 0.2)
+	var at_full := feel.effective_speed(Vector2.RIGHT, 0.2)
+	if absf(at_full - custom_speed) > 0.001:
+		_fail("server speed override at full ramp", at_full, custom_speed)
+		return
+	_pass("set_server_speed overrides config base at full ramp")
 
 
 func _pass(label: String) -> void:

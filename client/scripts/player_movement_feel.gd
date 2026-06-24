@@ -5,6 +5,7 @@ const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
 
 var _hold_seconds: float = 0.0
 var _last_dir := Vector2.ZERO
+var _server_speed: float = 0.0  # tiles/tick from server derived_stats; 0 = use config fallback
 
 
 func reset() -> void:
@@ -40,8 +41,12 @@ func speed_multiplier(direction: Vector2, delta: float) -> float:
 	return ramp
 
 
+func set_server_speed(tiles_per_tick: float) -> void:
+	_server_speed = tiles_per_tick
+
+
 func effective_speed(direction: Vector2, delta: float) -> float:
-	var base_speed := MainConfigLoaderScript.base_movement_speed()
+	var base_speed := _server_speed if _server_speed > 0.0 else MainConfigLoaderScript.base_movement_speed()
 	return base_speed * speed_multiplier(direction, delta)
 
 

@@ -87,9 +87,12 @@ func TestReconstructFromInputsWithPassiveGoldAutoPickup(t *testing.T) {
 	rules.Monsters["training_dummy"] = dummy
 	rules.Combat.PlayerDamage = game.DamageRange{Min: 1, Max: 1}
 	rows := []store.SessionInput{
-		storedInput(t, "inp-step", "msg-step", 0, 0, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}),
-		storedInput(t, "inp-kill", "msg-kill", 1, 1, "action_intent", map[string]any{"target_id": "1002"}),
-		storedInput(t, "inp-step-after", "msg-step-after", 2, 2, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 1}),
+		// Move 2 ticks toward monster; with v332 momentum min-factor (0.6) each tick
+		// covers 0.75×0.6=0.45 units, reaching {10.9,5} — within approach distance.
+		storedInput(t, "inp-step", "msg-step", 0, 0, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 2}),
+		storedInput(t, "inp-kill", "msg-kill", 2, 2, "action_intent", map[string]any{"target_id": "1002"}),
+		// Walk 2 more ticks after kill to enter gold auto-pickup range.
+		storedInput(t, "inp-step-after", "msg-step-after", 3, 3, "move_intent", map[string]any{"direction": map[string]any{"x": 1, "y": 0}, "duration_ticks": 2}),
 	}
 	inputs, maxTick, err := StoredInputs(rows)
 	if err != nil {

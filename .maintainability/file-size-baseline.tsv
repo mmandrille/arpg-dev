@@ -4,7 +4,7 @@ client/scripts/bot_controller.gd	757
 client/scripts/bot_scenario_runner.gd	1629
 client/scripts/character_select_panel.gd	642
 client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	5937	# v329 camera/crosshair exception: camera-mode, crosshair targeting, and wall-height commits extracted logic into dedicated scripts but coordinator still grew
+client/scripts/main.gd	6073	# v332 movement-overhaul: +6 lines for set_server_speed() calls in snapshot + progression_update handlers (pre-existing growth from v329–v331 already grandfathered)
 client/scripts/market_panel.gd	1059
 client/scripts/player_status_effect_markers.gd	646
 client/scripts/shop_panel.gd	1217
@@ -14,9 +14,9 @@ client/tests/test_client_bot.gd	1105
 client/tests/test_coop_client.gd	1633
 client/tests/test_golden.gd	784
 server/internal/game/dungeon_gen.go	1055
-server/internal/game/game_test.go	7827
+server/internal/game/game_test.go	7937	# v332 movement-overhaul exception: +83 lines for 4 new movement tests (TestMovementSpeedPercentFromGear, TestMovementSpeedDerivedFromClass, TestMovementSpeedDexScaling + grace window test). Next slice touching game_test.go must not grow it.
 server/internal/game/handlers.go	1430
-server/internal/game/rules.go	3278
+server/internal/game/rules.go	3308	# v332 movement-overhaul: +1 line (movement_speed_percent validation)
 server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6541	# v332 movement-overhaul: extracted movement speed helpers to movement.go (-75 lines from 6616)

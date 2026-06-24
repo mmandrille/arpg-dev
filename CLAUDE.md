@@ -195,6 +195,11 @@ This project uses Spec-Driven Development. Before touching code for any new feat
    `docs/as-built/vN_<codename>.md` (what it proved).
 6. At ~10-slice milestones, write the repo-wide engineering review under `docs/reviews/` first, then run `$refactor` against that fresh scorecard for minor verified cleanup (see `PROGRESS.md` → **Periodic engineering reviews**).
 
+**Spec-gate exemption:** A slice that touches *only* client-side presentation (VFX, shaders, lighting
+parameters, material tuning, UI polish) and makes **no changes** to protocol, server state, shared
+rules, or golden fixtures may skip the formal spec/plan. The slice must still have an `as-built`
+summary and must not creep into feature or balance changes. When in doubt, write the spec.
+
 ## Key Invariants
 
 - **Determinism in the Go sim is non-negotiable.** No `time.Now()`, `rand.Intn()` without the

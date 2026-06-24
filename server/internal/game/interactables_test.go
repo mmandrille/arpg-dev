@@ -54,8 +54,10 @@ func TestDoorLabClosedDoorPreventsPassageUntilActivated(t *testing.T) {
 		t.Fatalf("door state = %+v, want open", door)
 	}
 
-	sim.Tick([]Input{{MessageID: "through", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 6}}})
-	for i := 0; i < 5; i++ {
+	// 9 ticks at min momentum speed (0.75×0.6=0.45/tick) reaches X=7.05 from {3,2},
+	// within loot interaction reach (1.0+0.35=1.35) of the loot at {8,2}.
+	sim.Tick([]Input{{MessageID: "through", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 9}}})
+	for i := 0; i < 8; i++ {
 		sim.Tick(nil)
 	}
 	if got := sim.entities[sim.playerID].pos; got.X <= 4 {

@@ -5,7 +5,9 @@ import "testing"
 func TestGoldAutoPickupWalkingIntoTownGold(t *testing.T) {
 	sim := MustNewSim("sess_gold_auto_town", "v49_gold_auto_town", loadRules(t))
 	player := sim.entities[sim.playerID]
-	gold := addTestGoldLoot(sim, Vec2{X: player.pos.X + 2, Y: player.pos.Y}, 7)
+	// Gold at 1.6 units east: beyond 1.5 reach before movement, within reach
+	// after one tick at min momentum speed (0.75×0.6=0.45/tick → 1.15 dist).
+	gold := addTestGoldLoot(sim, Vec2{X: player.pos.X + 1.6, Y: player.pos.Y}, 7)
 
 	results := sim.TickResults([]Input{{MessageID: "move_gold", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}}})
 
@@ -76,7 +78,7 @@ func TestNonGoldLootDoesNotAutoPickup(t *testing.T) {
 func TestResourceWalletAutoPickupWalkingIntoShard(t *testing.T) {
 	sim := MustNewSim("sess_resource_auto_town", "v229_resource_auto_town", loadRules(t))
 	player := sim.entities[sim.playerID]
-	shard := addTestWalletResourceLoot(sim, Vec2{X: player.pos.X + 2, Y: player.pos.Y})
+	shard := addTestWalletResourceLoot(sim, Vec2{X: player.pos.X + 1.6, Y: player.pos.Y})
 	resourceID := sim.rules.MainConfig.Gameplay.ItemUpgradeResourceID
 
 	results := sim.TickResults([]Input{{MessageID: "move_shard", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}}})

@@ -3016,17 +3016,39 @@ func (s *Sim) findRangedApproachGoal(target *entity) (Vec2, []Vec2, bool) {
 			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
 				continue
 			}
-			goal := gridToWorld(nav, cell)
-			if !s.inActionRangeFrom(goal, target) || !s.hasClearRangedShot(goal, target) {
+			origin := gridToWorld(nav, cell)
+			if !s.inActionRangeFrom(origin, target) || !s.hasClearRangedShot(origin, target) {
 				continue
 			}
-			steps, ok := s.planPath(nav, player.pos, goal, blocked)
+			// Also verify the expected approach stop-position (StopDistance before the
+			// origin, from the player's direction) has a clear shot.  When the origin
+			// sits exactly at an inflated-wall boundary the player stops just short of
+			// it, and that short stop position can clip the inflated AABB on fire.
+			if approachPos := s.rangedApproachStopPos(player.pos, origin); !s.hasClearRangedShot(approachPos, target) {
+				continue
+			}
+			steps, ok := s.planPath(nav, player.pos, origin, blocked)
 			if ok {
-				return goal, steps, true
+				return origin, steps, true
 			}
 		}
 	}
 	return Vec2{}, nil, false
+}
+
+// rangedApproachStopPos returns the position where the player is expected to
+// stop when approaching goal from from: StopDistance short of goal in the
+// from→goal direction.  Used to validate that the actual firing position (not
+// just the grid origin) has a clear ranged shot.
+func (s *Sim) rangedApproachStopPos(from, goal Vec2) Vec2 {
+	dx := from.X - goal.X
+	dy := from.Y - goal.Y
+	dist := math.Sqrt(dx*dx + dy*dy)
+	if dist < 1e-9 {
+		return goal
+	}
+	stop := s.activeNav().StopDistance
+	return Vec2{X: goal.X + dx/dist*stop, Y: goal.Y + dy/dist*stop}
 }
 
 func (s *Sim) findSkillCastApproachGoal(target *entity, castRange float64, requireClearShot bool) (Vec2, []Vec2, bool) {
@@ -3046,20 +3068,25 @@ func (s *Sim) findSkillCastApproachGoal(target *entity, castRange float64, requi
 			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
 				continue
 			}
-			goal := gridToWorld(nav, cell)
-			dist := distance(goal, target.pos)
+			origin := gridToWorld(nav, cell)
+			dist := distance(origin, target.pos)
 			if dist > castRange+meleeRangeEpsilon {
 				continue
 			}
-			if requireClearShot && !s.hasClearRangedShot(goal, target) {
+			if requireClearShot && !s.hasClearRangedShot(origin, target) {
 				continue
 			}
-			steps, ok := s.planPath(nav, player.pos, goal, blocked)
+			if requireClearShot {
+				if approachPos := s.rangedApproachStopPos(player.pos, origin); !s.hasClearRangedShot(approachPos, target) {
+					continue
+				}
+			}
+			steps, ok := s.planPath(nav, player.pos, origin, blocked)
 			if !ok {
 				continue
 			}
 			if dist > bestDistance+0.000001 || (math.Abs(dist-bestDistance) <= 0.000001 && (bestSteps == nil || len(steps) < bestStepCount)) {
-				bestGoal = goal
+				bestGoal = origin
 				bestSteps = steps
 				bestDistance = dist
 				bestStepCount = len(steps)

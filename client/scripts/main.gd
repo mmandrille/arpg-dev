@@ -2324,7 +2324,7 @@ func _refresh_monster_health_bar_visibility(entity_id: String = "") -> void:
 	for raw_id in ids:
 		var id := str(raw_id)
 		if monster_health_bars.has(id) and is_instance_valid(monster_health_bars[id]):
-			monster_health_bars[id].visible = EnemyHealthBarVisibilityScript.should_show(mode, id, hovered_id, pending_action_targets, pending_skill_casts)
+			monster_health_bars[id].visible = EnemyHealthBarVisibilityScript.should_show(mode, id, hovered_id, pending_action_targets, pending_skill_casts) and EnemyHealthBarVisibilityScript.perspective_visible(entities.get(id, {}).get("node", null), player_anchor.global_position, _is_perspective_camera_mode(), float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
 
 func _sync_companion_bar() -> void:
 	if companion_bar == null:

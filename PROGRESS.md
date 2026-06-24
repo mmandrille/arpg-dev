@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-23
+Last updated: 2026-06-24
 
 ---
 
@@ -27,8 +27,8 @@ Last updated: 2026-06-23
 | **Active branch** | `main` |
 | **CI gate** | v330 `make ci` green on 2026-06-23 (v331 runs pending) |
 | **Next slice** | Run `$review` then `$refactor` (engineering review cadence due after v330) |
-| **Last engineering review** | v308 — [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md) (2026-06-20, ad-hoc; covers the v302–v308 World Detail / Navigation batch) |
-| **Next engineering review** | After v330 ships and `make ci` is green (next milestone review due ~v340) |
+| **Last engineering review** | v331 — [`docs/reviews/20260624_v331-overview.md`](docs/reviews/20260624_v331-overview.md) (2026-06-24, periodic cadence; covers v309–v331) |
+| **Next engineering review** | After v340 ships and `make ci` is green |
 
 
 ### Periodic engineering reviews
@@ -87,21 +87,32 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v308 `$review` complete; `$refactor` handoff pending.** Ad-hoc review at `e5862466` covering the
-  v302–v308 batch landed at [`docs/reviews/20260620_v308-overview.md`](docs/reviews/20260620_v308-overview.md).
-  Lowest scorecard areas (refactor priority order): **Documentation (6.5)**, **Test quality (7.7)**,
-  **Maintainability (7.7)**. Confirmed v301 carry-overs: worktree-safe CI and presentation-feel config
-  owner **RESOLVED**; validator/coordinator splits and GLB provenance still **OPEN**.
-- **v308 `$refactor` minor-commit targets (from the review Top 10):** update `docs/CODEMAP.md` (omits
-  every new v302–v308 file) and strengthen `validate_codemap.py`; wire five orphan client unit tests into
-  `client_smoke.sh`; fix the dead `switch` in `obstacle_blocking.go`; reconcile the CLAUDE.md rule #12 vs
-  `run.py` scenario-budget contradiction; add the `dungeon_obstacles` golden↔generation `cross_checks()`;
-  de-duplicate `dungeon_water.go`/`dungeon_holes.go`; lower at-cap baselines (`rules.go`/`types.go`).
-- **v308 review future-plan/feature-scale items:** ADR-0008 addendum (or ADR-0015) for obstacle kinds +
-  navigation traits + LoS-gated fog; move "which solid kinds block LoS" into data; systematic
-  tuning-friendly rule-test audit; extract a domain out of `validate_shared.py`; resolve unverified local
-  GLB provenance before distribution; keep production combat/dungeon VFX/audio/art as explicit feature
-  slices with visual bot proof.
+- **v331 `$review` complete; `$refactor` handoff pending.** Periodic cadence review at `7057ecd4` covering
+  v309–v331 landed at [`docs/reviews/20260624_v331-overview.md`](docs/reviews/20260624_v331-overview.md).
+  Lowest scorecard areas (priority order): **Technical correctness (6.5 — test suite RED)**, **Cohesion (7.5)**,
+  **Maintainability (7.5)**. v308 carry-overs resolved: dead switch, water/hole duplication, dungeon-obstacles
+  cross-checks, budget contradiction, orphan test wiring. Still open: `CODEMAP.md` (3rd consecutive review).
+- **v331 CI status:** Partially fixed during `$refactor`. Reduced from 18 pre-existing failures to ~9. Fixed:
+  TestCollisionIgnoresDeadMonster, TestCollisionBlocksWallAndAllowsRoute, TestDungeonObstacleGeneration (production fix in
+  `dungeon_elite_objective.go`), TestGoldAutoPickupWalkingIntoTownGold, TestResourceWalletAutoPickupWalkingIntoShard,
+  TestDoorLabClosedDoorPreventsPassageUntilActivated, TestEquippedWeaponOneShotsRewardDummy,
+  TestEquippedWeaponWithoutDamageFallsBackToBaseDamage.
+- **Still failing (~9 tests):** TestRangedBlockedLineAutoMovesUntilClearThenFires, TestRangedAutoApproachThenFire, several
+  other ranged tests, TestActionIntentAutoApproachAndAttack, TestDungeonTeleportersReplayGolden. Root cause: `buildBlockedFn`
+  uses cell ORIGIN positions for pathfinding blocked checks, which incorrectly marks wall-adjacent cells as walkable; continuous
+  movement then stalls at wall boundaries. Proper fix: use cell center in `buildBlockedFn` without breaking door/interactable
+  approach (door barriers block center-position cells needed for approach). Needs a dedicated fix slice.
+- **v331 `$refactor` minor-commit targets (from the review Top 10):**
+  - Update `docs/CODEMAP.md` for v302–v331 new files + add inverse check to `validate_codemap.py` (3rd review — escalated)
+  - Add `required` entries to `fog_presentation.v0.schema.json` `point_light` block + semantic `cross_checks()` for fog tuning ranges
+  - Add `fog_of_war_overlay.gd` to maintainability baseline (or extract OmniLight3D management)
+  - Extract type clusters from `rules.go` into domain files (`dungeon_generation_rules.go`, etc.)
+  - Document v322–v328 spec-exemption pattern in CLAUDE.md
+  - Begin extracting movement-intent cluster from `main.gd`
+  - Write ADR for movement-speed formula (replay-determinism + bot-timing boundary)
+- **v331 review future-plan/feature-scale items:** Continue `sim.go` extraction via typed tick context;
+  extract a validation domain out of `validate_shared.py`; resolve unverified local GLB provenance before
+  distribution; keep production VFX/audio/art as explicit feature slices with visual bot proof.
 
 ### Other deferred items (from specs / ADRs)
 

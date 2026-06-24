@@ -1,0 +1,23 @@
+server/internal/game/combat_control_test.go
+  s_517a6303f090f7::t_6d9f1ba0c0498e 156,163
+  s_517a6303f090f7::t_d1035199588014 302
+  s_517a6303f090f7::t_1a695300884f9c 153-155,157-162,164
+  s_517a6303f090f7::t_41c0d82b898ce9 467
+  s_517a6303f090f7::t_566c331f487ec1 413
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "882b44e02d7b53de6b6bddbce1237b24fc1ab99e",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

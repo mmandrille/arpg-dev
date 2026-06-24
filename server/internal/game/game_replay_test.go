@@ -151,14 +151,17 @@ func appendMoveToAndAdvance(
 		},
 	})
 	sim.TickResults([]game.Input{(*inputs)[len(*inputs)-1].Input})
-	for guard := 0; guard < 2000; guard++ {
+	// Large tick budget: generated dungeon levels can have very winding paths,
+	// and navigation may re-plan multiple times to escape wall-pocket positions.
+	const navBudget = 30000
+	for guard := 0; guard < navBudget; guard++ {
 		player := snapshotEntityByID(sim.Snapshot(), "1001")
 		if player != nil && distance(player.Position, pos) <= replayInteractableReach(rules) {
 			break
 		}
 		tick++
 		sim.Tick(nil)
-		if guard == 1999 {
+		if guard == navBudget-1 {
 			t.Fatalf("player did not reach %+v; last pos %+v", pos, player)
 		}
 	}

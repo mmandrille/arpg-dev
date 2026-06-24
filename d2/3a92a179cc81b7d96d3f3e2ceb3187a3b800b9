@@ -1,0 +1,21 @@
+server/internal/game/perf_debug.go
+  s_f3594d1c49f345::t_425c7630ff61ea 109-134
+server/internal/game/sim.go
+  s_f3594d1c49f345::t_96896567ddf6a8 2731-2737
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d23a92a179cc81b7d96d3f3e2ceb3187a3b800b9",
+  "prompts": {},
+  "sessions": {
+    "s_f3594d1c49f345": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b4ee08f-0b5f-494c-9ece-a41f63cc67f1",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

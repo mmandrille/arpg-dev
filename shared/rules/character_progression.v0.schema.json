@@ -101,6 +101,7 @@
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "light_radius": { "type": "number", "exclusiveMinimum": 0 },
+        "base_movement_speed": { "type": "number", "exclusiveMinimum": 0 },
         "base_stats": { "$ref": "#/$defs/base_stats" }
       }
     },

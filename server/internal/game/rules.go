@@ -184,9 +184,10 @@ type CharacterProgressionRules struct {
 }
 
 type CharacterClassDef struct {
-	Name        string        `json:"name"`
-	LightRadius float64       `json:"light_radius"`
-	BaseStats   BaseStatsView `json:"base_stats"`
+	Name              string        `json:"name"`
+	LightRadius       float64       `json:"light_radius"`
+	BaseStats         BaseStatsView `json:"base_stats"`
+	BaseMovementSpeed float64       `json:"base_movement_speed"`
 }
 
 // SkillPointRules controls deterministic skill-point grants on level-up.

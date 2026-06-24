@@ -1,0 +1,152 @@
+docs/specs/v331_spec-hero-visibility-lighting.md
+  s_5f5d1f8f066806::t_81cce351efe104 1-149
+docs/plans/v331_2026-06-23-hero-visibility-lighting.md
+  s_5f5d1f8f066806::t_de65d40a3ae6d8 1-40,43-45,48-50,53-55,58-60,63-77
+  s_5f5d1f8f066806::t_a0aea5ae1ed91b 41-42,46-47,51-52,56-57,61-62
+client/scripts/dungeon_depth_lighting.gd
+  s_5f5d1f8f066806::t_4db9e4c612c72b 58-59,62-63,68-76
+tools/bot/scenarios/client/68_fog_los_shadow_mask.json
+  s_5f5d1f8f066806::t_2d4c8f75f83151 13
+  s_5f5d1f8f066806::t_382a2f044d6342 19
+  s_5f5d1f8f066806::t_c5c0301a995d34 20
+  s_5f5d1f8f066806::t_e91ff304175cee 4,10-12,18
+tools/bot/scenarios/client/83_camera_mode_setting.json
+  s_7b3c9450d494ca::t_96adf6c9718d91 66-67
+  s_5f5d1f8f066806::t_7459e0a4720beb 22-23
+  s_5f5d1f8f066806::t_f62b793496d74a 4,9-11,18-21,24,35-38,41-42,61-65,68
+  s_7b3c9450d494ca::t_ce472c240c21a9 39-40
+client/scripts/hero_visibility_field.gd.uid
+  s_5f5d1f8f066806::t_6c2fdbbca7471d 1
+client/scripts/main.gd
+  s_7b3c9450d494ca::t_4167809976c7f0 1691,5172
+  s_5f5d1f8f066806::t_3ddce7eaea2e0c 3642
+  s_7b3c9450d494ca::t_f49f44b08989fb 691
+  s_7b3c9450d494ca::t_a3740a16bf5f91 3641
+  s_5f5d1f8f066806::t_7ed30b2e15461c 668,673-690,692
+  s_5f5d1f8f066806::t_ce98af0b6b3116 72
+  s_5f5d1f8f066806::t_ec3baa58c2a00d 3661
+  s_5f5d1f8f066806::t_2882dff995ef66 4018-4021
+shared/assets/fog_presentation.v0.json
+  s_7b3c9450d494ca::t_7c9b6b9c44d5f3 43
+  s_7b3c9450d494ca::t_726c1b7678476c 12-13
+  s_7b3c9450d494ca::t_2aee8c0b5ff098 36
+  s_7b3c9450d494ca::t_20349e81cc0f73 37-38,41-42
+  s_7b3c9450d494ca::t_b6cb8230865f46 40
+  s_7b3c9450d494ca::t_73dc224705e8c5 11,14
+  s_5f5d1f8f066806::t_12046cbec54637 33-35
+  s_7b3c9450d494ca::t_d4d620b471579a 39,44
+  s_5f5d1f8f066806::t_c4c57f4b35860f 1-10,15-32,45-46
+shared/assets/fog_presentation.v0.schema.json
+  s_5f5d1f8f066806::t_1ec3fed3163da3 1-15,19-47,56-75,95-96,109-124
+  s_5f5d1f8f066806::t_fc8377af941097 16-18,76-79,81-88,90,94
+  s_7b3c9450d494ca::t_2b8097e9a6b07a 48-55
+  s_5f5d1f8f066806::t_ba07341fa0a66e 80,89,91-93
+  s_7b3c9450d494ca::t_4012c891af3c01 97-108
+client/scripts/bot_assertion_handlers.gd
+  s_5f5d1f8f066806::t_80c57274d832ae 360
+client/scripts/hero_visibility_field.gd
+  s_5f5d1f8f066806::t_6860a2d24ebdd0 1-249
+client/scripts/fog_of_war_overlay.gd
+  s_7b3c9450d494ca::t_317bfd6408ee8b 174
+  s_7b3c9450d494ca::t_dcde42c8a9b896 238-243
+  s_5f5d1f8f066806::t_832df4050e36f6 341
+  s_7b3c9450d494ca::t_d9188f93a7dca3 251-252
+  s_5f5d1f8f066806::t_0625042039f97a 358
+  s_5f5d1f8f066806::t_091d59ff9c6cfe 267
+  s_5f5d1f8f066806::t_101cd3b719932e 9,11,29,57,60
+  s_5f5d1f8f066806::t_dda795078034df 159
+  s_5f5d1f8f066806::t_287cbcf55ae1ef 113-120
+  s_7b3c9450d494ca::t_1505ca942f2637 198,204
+  s_5f5d1f8f066806::t_526ad1cde9f5cf 362-365
+  s_7b3c9450d494ca::t_f210ca723285e9 186,189
+  s_5f5d1f8f066806::t_09767f41f4ff35 35
+  s_7b3c9450d494ca::t_1d2d966a6be8b2 253
+  s_7b3c9450d494ca::t_0051d0927b0456 496-498
+  s_5f5d1f8f066806::t_ae2a8f26deb712 39
+  s_5f5d1f8f066806::t_8de70d351e7b22 334-335,338,342-346
+  s_5f5d1f8f066806::t_4a345700ac2d0c 436-444,449-454,456-460
+  s_7b3c9450d494ca::t_9dfe48b5a06e13 332
+  s_7b3c9450d494ca::t_7bc30c6ff3dcc7 131
+  s_7b3c9450d494ca::t_1cf7cfbb7a0a8f 132-134
+  s_5f5d1f8f066806::t_181ba50644711d 255
+  s_5f5d1f8f066806::t_a3243abf35a1ef 464-465,467
+  s_7b3c9450d494ca::t_4c303fcbf79afa 221
+  s_5f5d1f8f066806::t_f3e09e47226a5f 351,355-357,359-361,366-386
+  s_5f5d1f8f066806::t_d743bb6c2db1b7 88,93,99-104
+  s_5f5d1f8f066806::t_e3bfac432d492c 36-38
+  s_7b3c9450d494ca::t_9809e22aeb7469 173
+  s_7b3c9450d494ca::t_cd15cd48ad2ca6 192
+  s_5f5d1f8f066806::t_c058a42ccc2bca 16,19-23,26,30,43,56,67-87,89-92,94-98,105-106,108-109,112,121-130,135-141
+  s_5f5d1f8f066806::t_d4924a81e923f7 4-6,27-28,107,110,142-143,152-153,155,170-172,179-180,196,201-203,218,225,230,234-237,245-247,250,254,258-262,264,269-270,273-276,281-282,285,304,312-318,320,339-340,347-349,388-390,404,406,419,431,481-488,499-500,504-515,521,526,533,562,565-569,571
+  s_5f5d1f8f066806::t_dd0fca26dcadd4 417-418,427-429,468,473,475-476
+  s_5f5d1f8f066806::t_c725a0dd0ab44f 480
+  s_7b3c9450d494ca::t_196406132ab29b 205-208
+  s_5f5d1f8f066806::t_033fa4aeedcb6d 445-448,455
+  s_5f5d1f8f066806::t_8b223b5056b598 256
+  s_7b3c9450d494ca::t_fb2ddf71b2be81 574-597
+PROGRESS.md
+  s_7b3c9450d494ca::t_f2247a2d2186f7 26,28
+client/tests/test_dungeon_depth_lighting.gd
+  s_5f5d1f8f066806::t_0ae206077c4e90 67-81
+  s_5f5d1f8f066806::t_61b9d521206b5e 13
+client/scripts/fog_presentation_loader.gd.uid
+  s_5f5d1f8f066806::t_6c2fdbbca7471d 1
+client/scripts/elite_aura_preview_sync.gd
+  s_7b3c9450d494ca::t_2a6b5dca2bdf51 6-12,30-46
+tools/bot/scenarios/client/67_fog_of_war_overlay.json
+  s_5f5d1f8f066806::t_c5dd2e8aec3bbe 13
+  s_5f5d1f8f066806::t_8d09a6d7177a3f 20
+  s_5f5d1f8f066806::t_4f238e19137105 4,7,10-12,18
+  s_5f5d1f8f066806::t_cdd04c5b2f3fa2 19
+client/tests/test_fog_of_war_overlay.gd
+  s_5f5d1f8f066806::t_2d118127ea2795 295,303-304
+  s_5f5d1f8f066806::t_b9297d186480ea 49
+  s_7b3c9450d494ca::t_bc38da1ecda932 330-331
+  s_7b3c9450d494ca::t_ff4097a266c465 332
+  s_5f5d1f8f066806::t_777beddbedd2cd 335
+  s_5f5d1f8f066806::t_0d500e670ef835 48
+  s_5f5d1f8f066806::t_443a4ab9e3f228 296-302,305-309,347-360
+  s_5f5d1f8f066806::t_a9992befa32b73 310-329,336-338,342-346
+  s_5f5d1f8f066806::t_bfb29f48270022 339-341
+  s_5f5d1f8f066806::t_ecf5baf4ea86e0 30
+  s_5f5d1f8f066806::t_fa51e177fd5b36 29,31
+docs/as-built/v331_hero-visibility-lighting.md
+  s_7b3c9450d494ca::t_4211a0f376a6a8 1-101
+client/scripts/fog_presentation_loader.gd
+  s_7b3c9450d494ca::t_d352e82a422b18 53-60
+  s_5f5d1f8f066806::t_c200ec7dc06791 143
+  s_7b3c9450d494ca::t_353c6d9032d8e0 85-92
+  s_7b3c9450d494ca::t_b56d402f812a2b 121
+  s_7b3c9450d494ca::t_835137fd996fb1 145,148-149,152
+  s_5f5d1f8f066806::t_ba4e8cc19d8e1e 1-52,61-84,108-120,122-140,153-167
+  s_7b3c9450d494ca::t_1fa3f269f4fd1c 146,151
+  s_5f5d1f8f066806::t_28c05840793dd4 93-97,99-101,106-107
+  s_5f5d1f8f066806::t_2efb5682350763 141-142,144
+  s_7b3c9450d494ca::t_083ef9c8ee5f5a 147
+  s_5f5d1f8f066806::t_287b7d6c40fef4 98,102-105
+  s_7b3c9450d494ca::t_d84f70cc2b52a5 150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cdc3155c0714604dbe1912834e925ee01186a10c",
+  "prompts": {},
+  "sessions": {
+    "s_5f5d1f8f066806": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7d42c7bf-d826-4310-9621-4cb7f76cd8b5",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_7b3c9450d494ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b0eaf63b-542c-4c9d-8be8-9d1edbba8f8b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

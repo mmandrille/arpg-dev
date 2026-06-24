@@ -29,6 +29,7 @@ const DERIVED_LABELS := {
 }
 const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance", "evade_chance"]
 const WHOLE_PERCENT_STATS := ["block_percent"]
+const TILES_PER_TICK_STATS := ["movement_speed"]
 
 var progression: Dictionary = {}
 var allocation_enabled: bool = false
@@ -343,6 +344,8 @@ func _format_stat_value(key: String, value: float) -> String:
 		return "%s%%" % _format_number(value * 100.0)
 	if key in WHOLE_PERCENT_STATS:
 		return "%s%%" % _format_number(value)
+	if key in TILES_PER_TICK_STATS:
+		return "%.1f t/s" % (value * 10.0)
 	return _format_number(value)
 
 

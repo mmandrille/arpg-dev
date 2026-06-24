@@ -95,7 +95,18 @@ func (s *Sim) withTickPhase(name string, fn func()) {
 
 func (s *Sim) planPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool) ([]Vec2, bool) {
 	stats := PathSearchStats{}
-	return s.runPathSearch(nav, start, goal, blocked, &stats)
+	// Wrap blocked to allow the goal cell even when its center is inside a wall
+	// AABB. The player can physically be at the cell origin, and continueAutoNavToGoal
+	// covers the last stretch from the path endpoint to the exact goal position.
+	// This is runtime-only: dungeon generation uses PlanPath directly (strict check).
+	goalCell := worldToGrid(nav, goal)
+	goalAwareBlocked := func(gx, gy int) bool {
+		if gx == goalCell.x && gy == goalCell.y {
+			return false
+		}
+		return blocked(gx, gy)
+	}
+	return s.runPathSearch(nav, start, goal, goalAwareBlocked, &stats)
 }
 
 func (s *Sim) runPathSearch(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool, stats *PathSearchStats) ([]Vec2, bool) {

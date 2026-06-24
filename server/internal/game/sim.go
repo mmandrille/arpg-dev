@@ -204,14 +204,14 @@ type activeMove struct {
 }
 
 type autoNavState struct {
-	steps         []Vec2
-	goal          Vec2
-	hasGoal       bool
-	replanned     bool // true if a mid-path re-plan already fired; prevents re-plan loops
-	pendingAction *ActionIntent
-	pendingSkill  *CastSkillIntent
-	sourceMsgID   string
-	sourceCorrID  string
+	steps          []Vec2
+	goal           Vec2
+	hasGoal        bool
+	lastReplanPos  Vec2 // position where the last re-plan fired; zero before first re-plan
+	pendingAction  *ActionIntent
+	pendingSkill   *CastSkillIntent
+	sourceMsgID    string
+	sourceCorrID   string
 }
 
 type activeSkillChannel struct {
@@ -2741,16 +2741,17 @@ func (s *Sim) finishAutoNav(res *TickResult) {
 			if s.continueAutoNavToGoal(player, res) {
 				return
 			}
-			// When direct approach is blocked and no re-plan has fired yet,
-			// try re-planning from the current position to find a route around
-			// the obstacle (e.g. when diagonal drift ends path near a wall corner).
-			if !nav.replanned && distance(player.pos, nav.goal) > s.activeNav().StopDistance {
+			// Re-plan when the path ends but the goal is not yet reached.
+			// Guard: only re-plan if the player moved since the last re-plan
+			// (same position twice in a row means the path can't make progress).
+			if distance(player.pos, nav.goal) > s.activeNav().StopDistance &&
+				player.pos != nav.lastReplanPos {
 				if steps, ok := s.planPath(s.activeNav(), player.pos, nav.goal, s.buildBlockedFn()); ok && len(steps) > 0 {
 					s.activeLevel().autoNav = &autoNavState{
 						steps:         steps,
 						goal:          nav.goal,
 						hasGoal:       true,
-						replanned:     true,
+						lastReplanPos: player.pos,
 						pendingAction: nav.pendingAction,
 						pendingSkill:  nav.pendingSkill,
 						sourceMsgID:   nav.sourceMsgID,
@@ -2817,6 +2818,13 @@ func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 			return true
 		}
 	}
+	return s.playerDynamicBlocked(pos)
+}
+
+// playerDynamicBlocked reports whether pos is blocked by a dynamic entity
+// (live monster or closed-door barrier). Walls are not checked here so that
+// buildBlockedFn can use separate probe positions for walls vs. entities.
+func (s *Sim) playerDynamicBlocked(pos Vec2) bool {
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		e := s.activeLevel().entities[id]
 		if e.kind == monsterEntity && e.hp > 0 {
@@ -2967,9 +2975,22 @@ func (s *Sim) removeStashItemByID(id uint64) {
 }
 
 func (s *Sim) buildBlockedFn() func(gx, gy int) bool {
+	nav := s.activeNav()
 	return func(gx, gy int) bool {
-		center := gridToWorld(s.activeNav(), gridCell{x: gx, y: gy})
-		return s.playerPositionBlocked(center)
+		origin := gridToWorld(nav, gridCell{x: gx, y: gy})
+		// Probe static walls at cell center: a cell whose origin lies just
+		// outside a wall AABB may still have its center inside it. A* routing
+		// through such cells causes continuous movement to stall when the
+		// player's floating-point position drifts to the boundary.
+		center := Vec2{X: origin.X + nav.CellSize/2, Y: origin.Y + nav.CellSize/2}
+		for _, wall := range s.activeWalls() {
+			if obstacleBlocksMovement(wall) && circleIntersectsAABB(center, playerRadius, wall.pos, wall.size) {
+				return true
+			}
+		}
+		// Probe dynamic entities at cell origin (door barriers use origin so
+		// approach cells on the player's side of the door remain accessible).
+		return s.playerDynamicBlocked(origin)
 	}
 }
 

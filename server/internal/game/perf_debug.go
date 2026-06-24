@@ -106,7 +106,32 @@ func (s *Sim) planPath(nav NavigationRules, start, goal Vec2, blocked func(gx, g
 		}
 		return blocked(gx, gy)
 	}
-	return s.runPathSearch(nav, start, goal, goalAwareBlocked, &stats)
+	if steps, ok := s.runPathSearch(nav, start, goal, goalAwareBlocked, &stats); ok {
+		return steps, ok
+	}
+	// If A* fails from the exact start position (e.g. the player's continuous movement
+	// landed them inside a cell whose center is inside a wall, making that cell blocked
+	// and all its neighbors unreachable via the grid), try re-routing via the nearest
+	// unblocked neighbour cell.  This lets the player escape wall-pocket dead-ends that
+	// only arise from floating-point position drift rather than true map disconnection.
+	startCell := worldToGrid(nav, start)
+	if !goalAwareBlocked(startCell.x, startCell.y) {
+		return nil, false // start cell is navigable; the failure is real
+	}
+	for radius := 1; radius <= 3; radius++ {
+		for _, candidate := range ringCells(startCell, radius) {
+			if !cellInBounds(nav, candidate) || goalAwareBlocked(candidate.x, candidate.y) {
+				continue
+			}
+			altStart := gridToWorld(nav, candidate)
+			altStart.X += nav.CellSize / 2
+			altStart.Y += nav.CellSize / 2
+			if steps, ok := s.runPathSearch(nav, altStart, goal, goalAwareBlocked, &stats); ok {
+				return steps, ok
+			}
+		}
+	}
+	return nil, false
 }
 
 func (s *Sim) runPathSearch(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool, stats *PathSearchStats) ([]Vec2, bool) {

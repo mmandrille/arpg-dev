@@ -1,0 +1,24 @@
+client/scripts/model_reaction_controller.gd
+  s_6511a9fc17916b::t_55316133bd1c75 65-66,71-72,74-75
+  s_6511a9fc17916b::t_fb58083e223e1d 89-90,96-97
+  s_6511a9fc17916b::t_cc1b7539d5a0f5 107-108
+  s_6511a9fc17916b::t_bbf81fdeb64e3f 277-278
+client/scripts/main.gd
+  s_6511a9fc17916b::t_7bd0b775441c77 3142-3152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7057ecd4de054dbb4e71ac615f44db06790ee870",
+  "prompts": {},
+  "sessions": {
+    "s_6511a9fc17916b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bfc1e88c-b9bf-4806-98d5-887c565e66fa",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

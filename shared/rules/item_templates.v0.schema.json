@@ -95,6 +95,7 @@
         "armor": { "type": "integer", "minimum": 0 },
         "block_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
         "attack_speed_percent": { "type": "integer", "minimum": -75, "maximum": 100 },
+        "movement_speed_percent": { "type": "integer", "minimum": -50, "maximum": 100 },
         "hit_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
         "crit_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
         "evade_chance": { "type": "integer", "minimum": 0, "maximum": 100 },
@@ -114,7 +115,7 @@
       "required": ["stat", "min", "max", "weight"],
       "additionalProperties": false,
       "properties": {
-        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows"] },
+        "stat": { "type": "string", "enum": ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows", "movement_speed_percent"] },
         "min_rarity": { "type": "string", "enum": ["common", "magic", "rare", "unique", "set"] },
         "min": { "type": "integer" },
         "max": { "type": "integer" },
@@ -123,13 +124,13 @@
       "allOf": [
         {
           "if": {
-            "properties": { "stat": { "const": "attack_speed_percent" } },
+            "properties": { "stat": { "enum": ["attack_speed_percent", "movement_speed_percent"] } },
             "required": ["stat"]
           },
           "then": {
             "properties": {
-              "min": { "minimum": -50, "maximum": 50 },
-              "max": { "minimum": -50, "maximum": 50 }
+              "min": { "minimum": -50, "maximum": 100 },
+              "max": { "minimum": -50, "maximum": 100 }
             }
           },
           "else": {

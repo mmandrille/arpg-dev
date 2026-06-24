@@ -67,7 +67,8 @@
           "magic_find_percent": 4,
           "light_radius": 8,
           "hotbar_slots": 20,
-          "inventory_rows": 35
+          "inventory_rows": 35,
+          "movement_speed_percent": 4
         }
       }
     },
@@ -146,7 +147,8 @@
           "magic_find_percent": 4,
           "light_radius": 8,
           "hotbar_slots": 20,
-          "inventory_rows": 35
+          "inventory_rows": 35,
+          "movement_speed_percent": 4
         }
       }
     }

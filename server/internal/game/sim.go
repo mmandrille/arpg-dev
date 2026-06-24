@@ -249,6 +249,7 @@ type effectiveCombatStats struct {
 	ManaRegenPerSecond   float64
 	MagicFindPercent     float64
 	LightRadius          float64
+	MovementSpeedPercent float64
 }
 
 type combatResolution struct {
@@ -5677,6 +5678,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	hitChancePercent := character.HitChance * 100.0
 	critChancePercent := character.CritChance * 100.0
 	evadeChancePercent := 0.0
+	moveSpeedPercent := 0.0
 
 	damageMinSources := []StatBreakdownSourceView{
 		{Label: "Base damage", Value: float64(s.rules.Combat.PlayerDamage.Min), Kind: "character_formula"},
@@ -5789,6 +5791,9 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			itemSpeedPercent += float64(value)
 			attackSpeedSources = append(attackSpeedSources, StatBreakdownSourceView{Label: "Rolled attack speed", Value: float64(value), Kind: "equipment_roll", ItemInstanceID: itemID})
 		}
+		if value := rolledStats["movement_speed_percent"]; value != 0 {
+			moveSpeedPercent += float64(value)
+		}
 		if value := rolledStats["hit_chance"]; value != 0 {
 			hitChancePercent += float64(value)
 			hitChanceSources = append(hitChanceSources, StatBreakdownSourceView{Label: "Rolled hit chance", Value: float64(value) / 100.0, Kind: "equipment_roll", ItemInstanceID: itemID})
@@ -5873,6 +5878,7 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		ManaRegenPerSecond:   maxFloat(0, manaRegen),
 		MagicFindPercent:     maxFloat(0, magicFindPercent),
 		LightRadius:          maxFloat(0, lightRadius),
+		MovementSpeedPercent: moveSpeedPercent,
 	}
 	if effective.DamageMax < effective.DamageMin {
 		effective.DamageMax = effective.DamageMin

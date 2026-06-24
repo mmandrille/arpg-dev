@@ -1,0 +1,120 @@
+shared/rules/main_config.v0.schema.json
+  s_57f50e216c7540::t_eecd61a5eb68dd 18-19
+  s_57f50e216c7540::t_6dad8a905c1e3f 20
+scripts/client_smoke.sh
+  s_57f50e216c7540::t_8b1a7aa9b484cf 197
+server/internal/game/level.go
+  s_57f50e216c7540::t_2060678df1631f 12
+server/internal/game/handlers.go
+  s_57f50e216c7540::t_0e3497e4031f7d 81,87-91
+client/scripts/level_loading_overlay.gd.uid
+  s_57f50e216c7540::t_f9978a87f79b3e 1
+client/scripts/player_movement_feel.gd
+  s_57f50e216c7540::t_fac48eece399fc 1-46
+server/internal/game/rules.go
+  s_57f50e216c7540::t_7a64445b3bbc0b 996-998
+  s_57f50e216c7540::t_4a9a09e357498b 990-995
+  s_57f50e216c7540::t_8d0461bb6c6361 51-53
+  s_57f50e216c7540::t_0bc631edbc60eb 54
+client/scripts/main_config_loader.gd.uid
+  s_57f50e216c7540::t_f9978a87f79b3e 1
+client/scripts/combat_feel_config.gd
+  s_57f50e216c7540::t_5e4736ac7530c9 22
+server/internal/game/combat_aggro_test.go
+  s_57f50e216c7540::t_65c122a2614262 12-13
+  s_57f50e216c7540::t_2a41412b1b038d 14
+  s_57f50e216c7540::t_4c24c763a10caa 28,31-32
+  s_57f50e216c7540::t_3d389b39e86428 313-316,318-319
+server/internal/game/game_test.go
+  s_57f50e216c7540::t_d3094250a2378d 129
+  s_57f50e216c7540::t_3d1c4f35475679 4198
+  s_57f50e216c7540::t_f589be27d44db2 4191-4197,4199-4215
+  s_57f50e216c7540::t_c1ae0d91783387 4229,4231
+  s_57f50e216c7540::t_1f765e5c0cbaad 363-364
+  s_57f50e216c7540::t_1612bb5b0fd906 4232
+CLAUDE.md
+  s_7b3c9450d494ca::t_0d1788b5c54488 5-10
+client/tests/test_player_movement_feel.gd
+  s_57f50e216c7540::t_e9e0cf6a8427d3 1-68
+shared/rules/monsters.v0.json
+  s_57f50e216c7540::t_ceb7df738af429 154,177,208,303,330
+  s_57f50e216c7540::t_8f01c83ad2ef5f 136
+server/internal/game/sim.go
+  s_57f50e216c7540::t_f84e9a92e94003 2683-2690,2692-2712
+  s_57f50e216c7540::t_6e1c4e4e83d9bd 16
+  s_57f50e216c7540::t_5fd63b246443ff 2647-2648,2652-2653,2656,2658-2659,2661-2662,2664-2667
+  s_57f50e216c7540::t_8267b79d97d852 3295
+  s_57f50e216c7540::t_cfa1ae8ce54fd3 3919
+  s_57f50e216c7540::t_d5a51788100399 3930
+  s_57f50e216c7540::t_6c3f9fdddf84a7 2726-2735
+  s_57f50e216c7540::t_b53a3db6367ccd 2713-2725
+client/scripts/player_movement_feel.gd.uid
+  s_57f50e216c7540::t_f9978a87f79b3e 1
+client/scripts/level_loading_overlay.gd
+  s_57f50e216c7540::t_2cf8a550d4b681 1-15,18-60
+  s_57f50e216c7540::t_37eb1ae30c4317 16-17
+client/scripts/main_config_loader.gd
+  s_57f50e216c7540::t_94eae71535779c 1-39
+client/scripts/equipment_visuals.gd
+  s_57f50e216c7540::t_5cb82917409f26 149
+  s_57f50e216c7540::t_faf066d5bdfc71 80-83
+  s_57f50e216c7540::t_e9474ae546edc8 213-219
+  s_57f50e216c7540::t_710f30cc1415c1 54-55
+  s_57f50e216c7540::t_77ce36c065faac 97-105
+  s_57f50e216c7540::t_6492c1002fb766 16
+shared/rules/main_config.v0.json
+  s_57f50e216c7540::t_c5a6a9a4df7988 8
+  s_57f50e216c7540::t_547827004b9c1d 5-7
+client/scripts/main.gd
+  s_57f50e216c7540::t_9a0bfba8ae61bd 2635
+  s_57f50e216c7540::t_fc27f872a06450 4920
+  s_57f50e216c7540::t_8187ce9a463d47 922
+  s_57f50e216c7540::t_8ffcc13006b1f8 67-69
+  s_57f50e216c7540::t_d967933fb1c810 1101
+  s_57f50e216c7540::t_c9fde5ad5326c2 65
+  s_57f50e216c7540::t_0edc677481c1b7 3089,3094
+  s_57f50e216c7540::t_d7ad42a9e8b7f9 5149-5156,5158-5160,5175-5191,5202,5211-5212,5227,5232,5237-5241
+  s_57f50e216c7540::t_5aac237f3cf095 2518,2522,2524
+  s_57f50e216c7540::t_e9514259793545 851
+  s_57f50e216c7540::t_053bd241643669 261-262,264
+  s_57f50e216c7540::t_8ae73e26c02b54 5157,5161,5163-5173,5192-5201,5203-5210,5213-5226,5228-5231,5233,5235-5236
+  s_57f50e216c7540::t_e4622a5d865fd5 5174
+  s_57f50e216c7540::t_b031f7eba68e60 1055
+  s_57f50e216c7540::t_c444a050ecc034 2738-2739
+  s_57f50e216c7540::t_5e553bfbd9038d 5234
+  s_57f50e216c7540::t_15c6c07b7ca79f 3722-3727
+  s_57f50e216c7540::t_5777142a052e47 5554
+  s_57f50e216c7540::t_16e91a33905303 287
+  s_57f50e216c7540::t_d922ab3bf26eae 1063
+  s_57f50e216c7540::t_402f4160933292 4953
+  s_57f50e216c7540::t_43f039da5c2538 5162
+  s_57f50e216c7540::t_bef4cdb2ab4650 258-260
+  s_57f50e216c7540::t_2b08874d183ea1 263
+  s_57f50e216c7540::t_98c70c976da4d7 2087
+client/tests/test_player_movement_feel.gd.uid
+  s_57f50e216c7540::t_f9978a87f79b3e 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9c174afd9aed28c71e04d703730b6c5ab544a380",
+  "prompts": {},
+  "sessions": {
+    "s_57f50e216c7540": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2f0eb55a-1272-4657-bd5d-6b776498ab4e",
+        "model": "default"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    },
+    "s_7b3c9450d494ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b0eaf63b-542c-4c9d-8be8-9d1edbba8f8b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -1,10 +1,10 @@
 {
-  "seed": "deadbeefdeadbeef",
+  "seed": "0011223344556677",
   "world_id": "dungeon_levels",
   "description": "Pinned outcome after town descend to floor -3, discover the floor -3 teleporter, return to town, then teleport back to floor -3.",
   "discover_descend_teleport": {
     "expected_level": -3,
-    "expected_player_position": { "x": 61, "y": 22 },
+    "expected_player_position": { "x": 13, "y": 37 },
     "discovered_teleporters": [
       { "level": -3, "discovered": true },
       { "level": 0, "discovered": true }

@@ -1,0 +1,35 @@
+server/internal/game/rules.go
+  s_5999136ba3e683::t_23cd3203367651 3269
+shared/golden/shop_offers.json
+  s_5999136ba3e683::t_23cd3203367651 15,19-20,35,62,76-77,98-99,174-175,177,188-189,199,203,205,216-217
+shared/rules/item_templates.v0.json
+  s_5999136ba3e683::t_23cd3203367651 304-307,326-327,346-347
+shared/rules/item_templates.v0.schema.json
+  s_5999136ba3e683::t_23cd3203367651 98,118,127,132-133
+tools/validate_shared.py
+  s_5999136ba3e683::t_23cd3203367651 911,977,979,1005
+server/internal/game/game_test.go
+  s_5999136ba3e683::t_23cd3203367651 4242-4278
+server/internal/game/sim.go
+  s_5999136ba3e683::t_23cd3203367651 252,5681,5794-5796,5881
+shared/rules/shops.v0.json
+  s_5999136ba3e683::t_23cd3203367651 70-71,150-151
+server/internal/game/shop_test.go
+  s_5999136ba3e683::t_23cd3203367651 58,69,72-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0808ccf4216d40f7a86513d6392f7d75de286ade",
+  "prompts": {},
+  "sessions": {
+    "s_5999136ba3e683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06e74385-3d5d-401a-b315-2130eadbb2ac",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

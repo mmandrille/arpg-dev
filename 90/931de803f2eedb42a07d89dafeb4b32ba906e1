@@ -1,0 +1,25 @@
+server/internal/game/sim.go
+  s_517a6303f090f7::t_cb3a12fcf53116 2744-2761
+  s_517a6303f090f7::t_4be155b25f3aff 2718-2728
+  s_517a6303f090f7::t_2e4ef6795d2f28 210
+server/internal/game/auto_nav.go
+  s_517a6303f090f7::t_ca38ad81d3784c 22-36
+  s_517a6303f090f7::t_fe136a8f235906 37
+  s_517a6303f090f7::t_9232d04172fcee 3-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "90931de803f2eedb42a07d89dafeb4b32ba906e1",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

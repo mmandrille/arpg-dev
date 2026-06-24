@@ -343,5 +343,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v328** | `camera-impact-feedback` | Complete | | | [`as-built`](../as-built/v328_camera-impact-feedback.md) |
 | **v329** | `camera-mode-options` | Complete (`make ci` green) | [`v329_spec-camera-mode-options.md`](../specs/v329_spec-camera-mode-options.md) | [`v329_2026-06-23-camera-mode-options.md`](../plans/v329_2026-06-23-camera-mode-options.md) | [`as-built`](../as-built/v329_camera-mode-options.md) |
 | **v330** | `dungeon-rooms` | Complete (`make ci` green) | [`v330_spec-dungeon-rooms.md`](../specs/v330_spec-dungeon-rooms.md) | [`v330_2026-06-23-dungeon-rooms.md`](../plans/v330_2026-06-23-dungeon-rooms.md) | [`as-built`](../as-built/v330_dungeon-rooms.md) |
+| **v331** | `hero-visibility-lighting` | Complete (`make ci` green) | — | — | [`as-built`](../as-built/v331_hero-visibility-lighting.md) |
+| **v332** | `pathfinding-cell-accuracy` | Partial — 8 of 9 tests fixed; `TestDungeonTeleportersReplayGolden` deferred (separate root cause) | [`v332_spec-pathfinding-cell-accuracy.md`](../specs/v332_spec-pathfinding-cell-accuracy.md) | [`v332_2026-06-24-pathfinding-cell-accuracy.md`](../plans/v332_2026-06-24-pathfinding-cell-accuracy.md) | [`as-built`](../as-built/v332_pathfinding-cell-accuracy.md) |
 
 ---

@@ -1,0 +1,29 @@
+shared/rules/main_config.v0.schema.json
+  s_5999136ba3e683::t_9c735b2ce84d12 20
+client/scripts/player_movement_feel.gd
+  s_5999136ba3e683::t_9c735b2ce84d12 25-32
+client/scripts/main_config_loader.gd
+  s_5999136ba3e683::t_9c735b2ce84d12 34-38
+client/tests/test_player_movement_feel.gd
+  s_5999136ba3e683::t_9c735b2ce84d12 16-17,64,67-68,80-83,85-104
+  s_5999136ba3e683::t_43a1849619cb3e 105-106
+  s_5999136ba3e683::t_3bff067fd0e48e 65-66,69-79,84
+shared/rules/main_config.v0.json
+  s_5999136ba3e683::t_9c735b2ce84d12 7-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ac978e143d2b8cd6f8411adb6fea6e047ac76e1e",
+  "prompts": {},
+  "sessions": {
+    "s_5999136ba3e683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06e74385-3d5d-401a-b315-2130eadbb2ac",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

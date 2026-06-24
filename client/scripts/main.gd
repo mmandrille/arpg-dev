@@ -69,6 +69,7 @@ const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
+const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
 const PlayerCameraContextScript := preload("res://scripts/player_camera_context.gd")
@@ -664,11 +665,31 @@ func _sync_camera_from_settings() -> void:
 		return
 	if _camera_controller != null:
 		_camera_controller.apply_mode(client_settings.camera_mode)
-	if fog_overlay != null:
-		fog_overlay.set_active(client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC)
+	_sync_fog_and_dungeon_lighting()
 	_sync_dungeon_ceiling_visibility()
 	_update_mouse_capture()
 	_update_reticle_visibility()
+
+func _is_perspective_camera_mode() -> bool:
+	if client_settings == null:
+		return false
+
+	return client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
+
+func _sync_fog_and_dungeon_lighting() -> void:
+	var dungeon_fog := current_level < 0
+	if fog_overlay != null:
+		fog_overlay.set_active(dungeon_fog)
+		fog_overlay.set_perspective_camera(_is_perspective_camera_mode())
+	var suppress_ambient := fog_overlay != null and fog_overlay.should_suppress_ambient()
+	DungeonDepthLightingScript.apply_for_level(
+		current_level,
+		_directional_light,
+		_world_environment,
+		_ground_factory,
+		suppress_ambient,
+		fog_overlay.ambient_suppression_params() if suppress_ambient else {},
+	)
 
 func _on_master_volume_changed(value: float) -> void:
 	ClientAudioBridgeScript.set_master_volume(audio_controller, client_settings, value)
@@ -1667,7 +1688,7 @@ func _clear_elite_command_for_pack_if_leader_died(dead_rec: Dictionary) -> void:
 		if node != null:
 			PlayerStatusEffectMarkers.sync_elite_command_effect(node, false)
 			PlayerStatusEffectMarkers.sync_elite_command_radius_preview(node, false, 0.0)
-	EliteAuraPreviewSync.sync(entities, dungeon_generation)
+	EliteAuraPreviewSync.sync(entities, dungeon_generation, _is_perspective_camera_mode(), player_anchor.global_position, float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
 
 func _clear_level_entities() -> void:
 	for id in entities.keys():
@@ -3617,8 +3638,8 @@ func _build_scene() -> void:
 	input_shadow.bind_camera(_camera)
 	fog_overlay = FogOfWarOverlay.new()
 	add_child(fog_overlay)
-	fog_overlay.bind(_camera, player_anchor)
-	fog_overlay.set_active(client_settings == null or client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC)
+	fog_overlay.bind(_camera, player_anchor, character_visual)
+	_sync_fog_and_dungeon_lighting()
 
 	damage_numbers_layer = CanvasLayer.new()
 	damage_numbers_layer.layer = 2
@@ -3637,7 +3658,7 @@ func _update_ground_material() -> void:
 	_ground_factory.update_ground_material(ground_node, current_level)
 	if _wall_renderer != null:
 		_wall_renderer.set_level(current_level)
-	DungeonDepthLightingScript.apply_for_level(current_level, _directional_light, _world_environment, _ground_factory)
+	_sync_fog_and_dungeon_lighting()
 
 func _setup_menu_layer() -> void:
 	menu_layer = CanvasLayer.new()
@@ -3994,7 +4015,10 @@ func _refresh_progression_ui() -> void:
 		character_bar.set_progression(character_progression)
 	if consumable_bar != null:
 		consumable_bar.set_character_progression(character_progression)
-	if fog_overlay != null: fog_overlay.set_progression(character_progression); _sync_discovery_minimap()
+	if fog_overlay != null:
+		fog_overlay.set_progression(character_progression)
+		_sync_fog_and_dungeon_lighting()
+	_sync_discovery_minimap()
 
 func _refresh_skill_ui() -> void:
 	_auto_select_right_click_skill()
@@ -5145,7 +5169,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 		_boss_visuals_context.last_server_tick = last_server_tick
 		_boss_visuals.normalize_boss_phase_metadata(rec)
 		_boss_visuals.sync_boss_telegraph_marker_from_record(rec)
-	EliteAuraPreviewSync.sync(entities, dungeon_generation)
+	EliteAuraPreviewSync.sync(entities, dungeon_generation, _is_perspective_camera_mode(), player_anchor.global_position, float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
 
 func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
 	if root == null:

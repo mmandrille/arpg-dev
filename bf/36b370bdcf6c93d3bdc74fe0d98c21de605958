@@ -1,0 +1,21 @@
+CLAUDE.md
+  s_517a6303f090f7::t_f2b83d548f52d7 198-202
+docs/adr/0015-movement-speed-formula.md
+  s_517a6303f090f7::t_333d2c89042be5 1-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "bf36b370bdcf6c93d3bdc74fe0d98c21de605958",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

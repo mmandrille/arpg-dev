@@ -1,0 +1,26 @@
+shared/golden/character_progression.json
+  s_5999136ba3e683::t_bac584899affc6 284
+  s_5999136ba3e683::t_c705d8ca5ed246 42,82,122,162,204,244
+server/internal/game/rules.go
+  s_5999136ba3e683::t_fe3de68783f819 187-190
+shared/rules/character_progression.v0.schema.json
+  s_5999136ba3e683::t_fe3de68783f819 104
+shared/rules/character_progression.v0.json
+  s_5999136ba3e683::t_fe3de68783f819 13,24,35,46,57,526-529
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3f37fa9c12e35b6cb203b100147c7d086cd2af24",
+  "prompts": {},
+  "sessions": {
+    "s_5999136ba3e683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06e74385-3d5d-401a-b315-2130eadbb2ac",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

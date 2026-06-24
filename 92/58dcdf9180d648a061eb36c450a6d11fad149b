@@ -1,0 +1,24 @@
+client/scripts/main.gd
+  s_7b3c9450d494ca::t_ed6b65e2e08288 2327
+client/scripts/elite_aura_preview_sync.gd
+  s_7b3c9450d494ca::t_db4f12f2ff99ec 31
+  s_7b3c9450d494ca::t_6249cc7d9ac836 34,38,40-45,51-75
+client/scripts/enemy_health_bar_visibility.gd
+  s_7b3c9450d494ca::t_65cdcf494af14c 13-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9258dcdf9180d648a061eb36c450a6d11fad149b",
+  "prompts": {},
+  "sessions": {
+    "s_7b3c9450d494ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b0eaf63b-542c-4c9d-8be8-9d1edbba8f8b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

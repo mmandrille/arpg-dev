@@ -446,10 +446,17 @@ func _initialize() -> void:
 			elif key == "damage_max":
 				got += float(progression_combat_rules["player_damage"]["max"])
 			elif key == "movement_speed":
-				# movement_speed formula yields the DEX multiplier; scale by base_movement_speed
-				# to match the Go pipeline: playerEffectiveMovementSpeed = classBase * dex_mult * gear%
-				# Golden cases have no character class, so classBase = gameplay.base_movement_speed.
-				got *= progression_base_move_speed
+				# movement_speed formula yields the DEX multiplier; scale by classBase
+				# to match Go's playerEffectiveMovementSpeed = classBase * dex_mult * gear%
+				var _case_class := str(c.get("character_class", ""))
+				var _class_base := progression_base_move_speed
+				if _case_class != "":
+					var _classes := progression_rules.get("classes", {}) as Dictionary
+					if _classes.has(_case_class):
+						var _cms := float((_classes[_case_class] as Dictionary).get("base_movement_speed", 0.0))
+						if _cms > 0.0:
+							_class_base = _cms
+				got *= _class_base
 			var want := float(expected["derived_stats"][key])
 			if not is_equal_approx(got, want):
 				_fail("character_progression case %s %s got %.4f want %.4f" % [str(c["name"]), str(key), got, want])

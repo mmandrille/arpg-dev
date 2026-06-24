@@ -1,0 +1,19 @@
+server/internal/game/game_replay_test.go
+  s_f3594d1c49f345::t_476e99f9b207f5 154-157,164
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "512731814cd1fd58a50ca309dd979a2598d01369",
+  "prompts": {},
+  "sessions": {
+    "s_f3594d1c49f345": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b4ee08f-0b5f-494c-9ece-a41f63cc67f1",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

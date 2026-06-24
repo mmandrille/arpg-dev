@@ -1,0 +1,26 @@
+client/tests/test_golden.gd
+  s_5999136ba3e683::t_8478cacbba0e8e 432-433,448-452
+client/tests/test_player_movement_feel.gd
+  s_5999136ba3e683::t_ca6668668492b1 18,108-119
+  s_5999136ba3e683::t_6986057ae3ea0f 120-121
+client/scripts/player_movement_feel.gd
+  s_5999136ba3e683::t_ca6668668492b1 8,44-47,49
+client/scripts/main.gd
+  s_5999136ba3e683::t_ca6668668492b1 1026-1028,1132-1134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f8988103cc4a7c912f76e2fea9e9a9a79d12b3df",
+  "prompts": {},
+  "sessions": {
+    "s_5999136ba3e683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06e74385-3d5d-401a-b315-2130eadbb2ac",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

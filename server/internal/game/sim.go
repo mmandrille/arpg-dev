@@ -2728,6 +2728,13 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 	player.pos = s.resolveMovement(player.pos, delta)
 	if player.pos != before {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	} else {
+		// Step produced zero movement (wall blocked the planned direction).
+		// Discard remaining steps so finishAutoNav re-plans from the exact
+		// current position rather than executing steps designed for a position
+		// the player never reached.  Clears lastReplanPos so re-plan is allowed.
+		s.activeLevel().autoNav.steps = s.activeLevel().autoNav.steps[:0]
+		s.activeLevel().autoNav.lastReplanPos = Vec2{}
 	}
 	if len(s.activeLevel().autoNav.steps) == 0 {
 		s.finishAutoNav(res)

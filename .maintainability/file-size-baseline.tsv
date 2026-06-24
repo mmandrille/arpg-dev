@@ -19,7 +19,7 @@ server/internal/game/handlers.go	1430
 server/internal/game/rules.go	3278
 server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6488
+server/internal/game/sim.go	6541	# v332 movement-overhaul: extracted movement speed helpers to movement.go (-75 lines from 6616)
 server/internal/game/types.go	665
 server/internal/http/auth_session_test.go	1501
 server/internal/http/ws_test.go	1482

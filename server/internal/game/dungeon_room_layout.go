@@ -45,22 +45,24 @@ func placeRoomLayout(seed string, rules DungeonGenerationRules, out *generatedDu
 	}
 	for attempt := 0; attempt < r.MaxAttempts; attempt++ {
 		rng := NewRNG(SeedToUint64(seed + "|room_layout|" + strconv.Itoa(absInt(out.levelNum)) + "|" + strconv.Itoa(attempt)))
-		walls, ok := randomRoomDividers(rng, rules)
+		walls, corridorZones, ok := randomRoomDividers(rng, rules)
 		if !ok {
 			continue
 		}
 		candidate := *out
 		candidate.walls = append(append([]wallObstacle(nil), out.walls...), walls...)
+		candidate.corridorZones = append(append([]corridorZone(nil), out.corridorZones...), corridorZones...)
 		if err := validateGeneratedDungeonReachability(rules, candidate); err != nil {
 			continue
 		}
 		out.walls = candidate.walls
+		out.corridorZones = candidate.corridorZones
 		return nil
 	}
 	return fmt.Errorf("game: generate dungeon level %d: could not place room layout after %d attempts", out.levelNum, r.MaxAttempts)
 }
 
-func randomRoomDividers(rng *RNG, rules DungeonGenerationRules) ([]wallObstacle, bool) {
+func randomRoomDividers(rng *RNG, rules DungeonGenerationRules) ([]wallObstacle, []corridorZone, bool) {
 	r := rules.RoomLayout
 	nH := randomIntRange(rng, r.HorizontalDividers.Min, r.HorizontalDividers.Max)
 	nV := randomIntRange(rng, r.VerticalDividers.Min, r.VerticalDividers.Max)
@@ -68,24 +70,27 @@ func randomRoomDividers(rng *RNG, rules DungeonGenerationRules) ([]wallObstacle,
 		nH++
 	}
 	walls := make([]wallObstacle, 0, (nH+nV)*4)
+	zones := make([]corridorZone, 0, (nH+nV)*r.CorridorsPerWallMax)
 	for i := 0; i < nH; i++ {
-		segs, ok := randomHorizontalDivider(rng, rules)
+		segs, corridorZones, ok := randomHorizontalDivider(rng, rules)
 		if !ok {
-			return nil, false
+			return nil, nil, false
 		}
 		walls = append(walls, segs...)
+		zones = append(zones, corridorZones...)
 	}
 	for i := 0; i < nV; i++ {
-		segs, ok := randomVerticalDivider(rng, rules)
+		segs, corridorZones, ok := randomVerticalDivider(rng, rules)
 		if !ok {
-			return nil, false
+			return nil, nil, false
 		}
 		walls = append(walls, segs...)
+		zones = append(zones, corridorZones...)
 	}
-	return walls, true
+	return walls, zones, true
 }
 
-func randomHorizontalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObstacle, bool) {
+func randomHorizontalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObstacle, []corridorZone, bool) {
 	r := rules.RoomLayout
 	floor := rules.FloorSize
 	thickness := rules.WallThickness
@@ -94,13 +99,13 @@ func randomHorizontalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObst
 	spanMin := int(math.Ceil(r.WallSpanRatioMin * floor.Width))
 	spanMax := int(math.Floor(r.WallSpanRatioMax * floor.Width))
 	if spanMax < spanMin {
-		return nil, false
+		return nil, nil, false
 	}
 	spanLen := float64(randomIntRange(rng, spanMin, spanMax))
 
 	startRange := int(math.Floor(floor.Width - spanLen - 2*margin))
 	if startRange < 0 {
-		return nil, false
+		return nil, nil, false
 	}
 	startX := margin + float64(rng.IntN(startRange+1))
 	endX := startX + spanLen
@@ -108,20 +113,22 @@ func randomHorizontalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObst
 	yMin := int(math.Ceil(margin))
 	yMax := int(math.Floor(floor.Height - margin))
 	if yMax < yMin {
-		return nil, false
+		return nil, nil, false
 	}
 	y := float64(yMin + rng.IntN(yMax-yMin+1))
 
 	nGaps := randomIntRange(rng, r.CorridorsPerWallMin, r.CorridorsPerWallMax)
 	gapCenters, ok := randomDividerGapPositions(rng, startX, endX, r.CorridorWidth, r.MinGapSeparation, nGaps)
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
-	return wallSegmentsForHorizontalDivider(startX, endX, y, thickness, r.CorridorWidth, gapCenters), true
+	return wallSegmentsForHorizontalDivider(startX, endX, y, thickness, r.CorridorWidth, gapCenters),
+		corridorZonesForHorizontalGaps(gapCenters, y, r.CorridorWidth, thickness, rules.MonsterPlacement.PackMemberRadius),
+		true
 }
 
-func randomVerticalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObstacle, bool) {
+func randomVerticalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObstacle, []corridorZone, bool) {
 	r := rules.RoomLayout
 	floor := rules.FloorSize
 	thickness := rules.WallThickness
@@ -130,13 +137,13 @@ func randomVerticalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObstac
 	spanMin := int(math.Ceil(r.WallSpanRatioMin * floor.Height))
 	spanMax := int(math.Floor(r.WallSpanRatioMax * floor.Height))
 	if spanMax < spanMin {
-		return nil, false
+		return nil, nil, false
 	}
 	spanLen := float64(randomIntRange(rng, spanMin, spanMax))
 
 	startRange := int(math.Floor(floor.Height - spanLen - 2*margin))
 	if startRange < 0 {
-		return nil, false
+		return nil, nil, false
 	}
 	startY := margin + float64(rng.IntN(startRange+1))
 	endY := startY + spanLen
@@ -144,17 +151,55 @@ func randomVerticalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObstac
 	xMin := int(math.Ceil(margin))
 	xMax := int(math.Floor(floor.Width - margin))
 	if xMax < xMin {
-		return nil, false
+		return nil, nil, false
 	}
 	x := float64(xMin + rng.IntN(xMax-xMin+1))
 
 	nGaps := randomIntRange(rng, r.CorridorsPerWallMin, r.CorridorsPerWallMax)
 	gapCenters, ok := randomDividerGapPositions(rng, startY, endY, r.CorridorWidth, r.MinGapSeparation, nGaps)
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
-	return wallSegmentsForVerticalDivider(startY, endY, x, thickness, r.CorridorWidth, gapCenters), true
+	return wallSegmentsForVerticalDivider(startY, endY, x, thickness, r.CorridorWidth, gapCenters),
+		corridorZonesForVerticalGaps(gapCenters, x, r.CorridorWidth, thickness, rules.MonsterPlacement.PackMemberRadius),
+		true
+}
+
+func corridorZonesForHorizontalGaps(centers []float64, y, gapWidth, thickness, pad float64) []corridorZone {
+	zones := make([]corridorZone, 0, len(centers))
+	depth := maxFloat(gapWidth, thickness+2*pad)
+	for _, center := range centers {
+		zones = append(zones, corridorZone{
+			pos:  Vec2{X: center, Y: y},
+			size: Vec2{X: gapWidth + 2*pad, Y: depth},
+		})
+	}
+
+	return zones
+}
+
+func corridorZonesForVerticalGaps(centers []float64, x, gapWidth, thickness, pad float64) []corridorZone {
+	zones := make([]corridorZone, 0, len(centers))
+	width := maxFloat(gapWidth, thickness+2*pad)
+	for _, center := range centers {
+		zones = append(zones, corridorZone{
+			pos:  Vec2{X: x, Y: center},
+			size: Vec2{X: width, Y: gapWidth + 2*pad},
+		})
+	}
+
+	return zones
+}
+
+func generatedPositionInCorridorZone(pos Vec2, radius float64, out generatedDungeonLevel) bool {
+	for _, zone := range out.corridorZones {
+		if circleIntersectsAABB(pos, radius, zone.pos, zone.size) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // randomDividerGapPositions places nGaps corridor gaps within [spanStart, spanEnd].

@@ -1,9 +1,15 @@
 package game
 
+type corridorZone struct {
+	pos  Vec2
+	size Vec2
+}
+
 type generatedDungeonLevel struct {
-	levelNum    int
-	walls       []wallObstacle
-	stairs      []generatedStair
+	levelNum      int
+	walls         []wallObstacle
+	corridorZones []corridorZone
+	stairs        []generatedStair
 	teleporters []generatedTeleporter
 	chests      []generatedChest
 	doors       []generatedDoor

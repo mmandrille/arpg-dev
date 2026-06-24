@@ -3,11 +3,12 @@ package game
 import "fmt"
 
 type EliteObjectiveRules struct {
-	Enabled           bool    `json:"enabled"`
-	InteractableDefID string  `json:"interactable_def_id"`
-	LootTable         string  `json:"loot_table"`
-	MinStairDistance  float64 `json:"min_stair_distance"`
-	MaxAttempts       int     `json:"max_attempts"`
+	Enabled            bool    `json:"enabled"`
+	InteractableDefID  string  `json:"interactable_def_id"`
+	LootTable          string  `json:"loot_table"`
+	MinStairDistance   float64 `json:"min_stair_distance"`
+	RoomClusterRadius  float64 `json:"room_cluster_radius"`
+	MaxAttempts        int     `json:"max_attempts"`
 }
 
 func validateEliteObjectiveRules(objective EliteObjectiveRules, r *Rules) error {
@@ -29,6 +30,9 @@ func validateEliteObjectiveRules(objective EliteObjectiveRules, r *Rules) error 
 	}
 	if objective.MinStairDistance <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.elite_objective.min_stair_distance: must be positive")
+	}
+	if objective.RoomClusterRadius <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.elite_objective.room_cluster_radius: must be positive")
 	}
 	if objective.MaxAttempts <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.elite_objective.max_attempts: must be positive")

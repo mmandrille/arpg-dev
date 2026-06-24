@@ -98,6 +98,7 @@
     "interactable_def_id": "treasure_chest",
     "loot_table": "elite_objective_special_drop",
     "min_stair_distance": 4.0,
+    "room_cluster_radius": 12.0,
     "max_attempts": 32
   },
   "room_layout": {

@@ -17,6 +17,7 @@
         "base_movement_speed": { "type": "number", "exclusiveMinimum": 0 },
         "movement_acceleration_seconds": { "type": "number", "exclusiveMinimum": 0 },
         "movement_min_speed_factor": { "type": "number", "minimum": 0, "maximum": 1 },
+        "movement_direction_grace_seconds": { "type": "number", "minimum": 0 },
         "minimum_monster_aggro_radius": { "type": "number", "minimum": 0 },
         "base_drop_rate_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
         "respec_cost_gold": { "type": "integer", "minimum": 0 },

@@ -22,8 +22,14 @@ func speed_multiplier(direction: Vector2, delta: float) -> float:
 		on_stop()
 		return 0.0
 	var normalized := direction.normalized()
-	if _last_dir != Vector2.ZERO and normalized.dot(_last_dir) < 0.7:
-		_hold_seconds = 0.0
+	if _last_dir != Vector2.ZERO:
+		var dot := normalized.dot(_last_dir)
+		var grace := MainConfigLoaderScript.movement_direction_grace_seconds()
+		# Small correction (dot >= 0.5) after holding past grace window → no reset.
+		# Sharp turn (dot < 0.5) or not yet past grace → reset.
+		var is_small_correction := dot >= 0.5 and _hold_seconds >= grace
+		if not is_small_correction and dot < 0.7:
+			_hold_seconds = 0.0
 	_last_dir = normalized
 	_hold_seconds += maxf(delta, 0.0)
 	var accel_seconds := MainConfigLoaderScript.movement_acceleration_seconds()

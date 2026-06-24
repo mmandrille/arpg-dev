@@ -282,7 +282,9 @@ func TestDirectionalMeleeStopsMovementAndAcksEmptySwing(t *testing.T) {
 func TestDirectionalRangedFreeShotHitsAndOmitsTargetID(t *testing.T) {
 	sim := combatControlLabWithEquippedBow(t, rulesWithHitChance(t, 1.0), "cafebabecafebabe")
 	player := sim.entities[sim.playerID]
-	player.pos = Vec2{X: 3, Y: 5}
+	// Same Y as monster so A* approach is horizontal; 11.5 units keeps the monster
+	// outside effective aggro radius (10) until the projectile hits and triggers aggro.
+	player.pos = Vec2{X: 1.5, Y: 5}
 	monster := firstEntityByKind(sim, monsterEntity)
 	monster.hp = 20
 	monster.maxHP = 20

@@ -150,6 +150,18 @@ func TestProjectileBusyRejectsSecondFire(t *testing.T) {
 	monster := firstEntityByKind(sim, monsterEntity)
 	first := sim.Tick([]Input{{MessageID: "fire1", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
 	assertAck(t, first, "fire1")
+	// Wait for the approach to complete and the first projectile to spawn before
+	// testing the busy-rejection.  With wall-adjacent cells excluded from
+	// pathfinding, the approach goal is farther from the spawn point.
+	for i := 0; i < 100; i++ {
+		if firstEntityByKind(sim, projectileEntity) != nil {
+			break
+		}
+		sim.Tick(nil)
+	}
+	if firstEntityByKind(sim, projectileEntity) == nil {
+		t.Fatal("fire1 did not spawn projectile within 100 ticks")
+	}
 	second := sim.Tick([]Input{{MessageID: "fire2", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
 	assertReject(t, second, "fire2", "projectile_busy")
 }
@@ -287,7 +299,7 @@ func TestDirectionalRangedFreeShotHitsAndOmitsTargetID(t *testing.T) {
 	}
 
 	var impact TickResult
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 150; i++ {
 		impact = sim.Tick(nil)
 		if hasEvent(impact, "monster_damaged") || hasEvent(impact, "monster_killed") || hasEvent(impact, "attack_missed") {
 			break
@@ -398,7 +410,7 @@ func TestRangedDummyDropsSeparatedLootItems(t *testing.T) {
 	monster.hp = 1
 	r := sim.Tick([]Input{{MessageID: "kill", CorrelationID: "corr_kill", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
 	assertAck(t, r, "kill")
-	for i := 0; i < 20 && !hasEvent(r, "monster_killed"); i++ {
+	for i := 0; i < 150 && !hasEvent(r, "monster_killed"); i++ {
 		r = sim.Tick(nil)
 	}
 	if !hasEvent(r, "monster_killed") {
@@ -452,7 +464,7 @@ func TestRangedBowLootRequiresMeleeReach(t *testing.T) {
 	fire := sim.Tick([]Input{{MessageID: "kill", CorrelationID: "corr_kill", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
 	assertAck(t, fire, "kill")
 	var loot *entity
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 60; i++ {
 		r := sim.Tick(nil)
 		if hasEvent(r, "monster_killed") {
 			for _, c := range r.Changes {

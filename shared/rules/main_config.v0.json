@@ -7,6 +7,7 @@
     "movement_min_speed_factor": 0.6,
     "movement_direction_grace_seconds": 0.2,
     "minimum_monster_aggro_radius": 10,
+    "ranged_retreat_min_melee_engagement_seconds": 2.0,
     "base_drop_rate_percent": 25,
     "respec_cost_gold": 0,
     "bishop_respec_resource_item_def_id": "respec_badge",

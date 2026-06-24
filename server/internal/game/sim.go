@@ -172,6 +172,7 @@ type entity struct {
 	navNextRepathTick     uint64
 	lastAttackTick        uint64
 	hasAttacked           bool
+	rangedMeleeEngagedTick uint64
 }
 
 type invItem struct {
@@ -3185,6 +3186,7 @@ func (s *Sim) advanceMonsterMovement(res *TickResult) {
 		if monster.aiMode == monsterAIModeIdle {
 			continue
 		}
+		s.updateMonsterRangedMeleeEngagement(monster, player, def)
 		goal, hasGoal := s.monsterMovementGoal(monster, player, def)
 		if !hasGoal {
 			continue

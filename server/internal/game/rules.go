@@ -72,6 +72,7 @@ type MainGameplayConfig struct {
 	CompanionAssistRadius    float64           `json:"companion_assist_radius"`
 	CompanionFollowDistance  float64           `json:"companion_follow_distance"`
 	CompanionFollowStop      float64           `json:"companion_follow_stop_radius"`
+	RangedRetreatMinMeleeEngagementSeconds float64 `json:"ranged_retreat_min_melee_engagement_seconds"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -996,6 +997,9 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.MinimumMonsterAggroRadius < 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.minimum_monster_aggro_radius: must be non-negative")
+	}
+	if mainConfig.Gameplay.RangedRetreatMinMeleeEngagementSeconds < 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.ranged_retreat_min_melee_engagement_seconds: must be non-negative")
 	}
 	if mainConfig.Gameplay.BaseDropRatePercent < 0 || mainConfig.Gameplay.BaseDropRatePercent > 100 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.base_drop_rate_percent: must be within [0,100]")

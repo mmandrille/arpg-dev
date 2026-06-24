@@ -141,13 +141,14 @@
     },
     "elite_objective": {
       "type": "object",
-      "required": ["enabled", "interactable_def_id", "loot_table", "min_stair_distance", "max_attempts"],
+      "required": ["enabled", "interactable_def_id", "loot_table", "min_stair_distance", "room_cluster_radius", "max_attempts"],
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean" },
         "interactable_def_id": { "type": "string", "minLength": 1 },
         "loot_table": { "type": "string", "minLength": 1 },
         "min_stair_distance": { "type": "number", "exclusiveMinimum": 0 },
+        "room_cluster_radius": { "type": "number", "exclusiveMinimum": 0 },
         "max_attempts": { "type": "integer", "minimum": 1 }
       }
     },

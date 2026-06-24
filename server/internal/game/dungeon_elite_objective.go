@@ -38,10 +38,14 @@ func randomObjectiveChestPosition(rng *RNG, rules DungeonGenerationRules, object
 		return Vec2{}, false
 	}
 	monsterClearance := math.Max(rules.MonsterPlacement.MarginFromWall, rules.MonsterPlacement.PackMemberRadius*2)
-	for attempt := 0; attempt < objective.MaxAttempts; attempt++ {
-		pos := Vec2{
-			X: float64(minX + rng.IntN(maxX-minX+1)),
-			Y: float64(minY + rng.IntN(maxY-minY+1)),
+	leaderPos, hasLeader := elitePackLeaderPosition(*out)
+	clusterRadius := objective.RoomClusterRadius
+	tryPosition := func(pos Vec2, requireCluster bool) (Vec2, bool) {
+		if requireCluster && hasLeader && distance(pos, leaderPos) > clusterRadius {
+			return Vec2{}, false
+		}
+		if generatedPositionInCorridorZone(pos, rules.MonsterPlacement.PackMemberRadius, *out) {
+			return Vec2{}, false
 		}
 		blocked := false
 		for _, stair := range out.stairPositions() {
@@ -51,7 +55,7 @@ func randomObjectiveChestPosition(rng *RNG, rules DungeonGenerationRules, object
 			}
 		}
 		if blocked {
-			continue
+			return Vec2{}, false
 		}
 		for _, chest := range out.chestPositions() {
 			if distance(pos, chest) < objective.MinStairDistance {
@@ -60,7 +64,7 @@ func randomObjectiveChestPosition(rng *RNG, rules DungeonGenerationRules, object
 			}
 		}
 		if blocked {
-			continue
+			return Vec2{}, false
 		}
 		for _, monster := range out.monsters {
 			if distance(pos, monster.pos) < monsterClearance {
@@ -69,10 +73,8 @@ func randomObjectiveChestPosition(rng *RNG, rules DungeonGenerationRules, object
 			}
 		}
 		if blocked {
-			continue
+			return Vec2{}, false
 		}
-		// Chest must not be placed within obstacle clearance of any blocking wall —
-		// obstacles are placed before this chest, so this check must happen here.
 		chestClearance := rules.ObstacleGeneration.Clearance.Chest
 		for _, wall := range out.walls {
 			if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, chestClearance, wall.pos, wall.size) {
@@ -81,9 +83,47 @@ func randomObjectiveChestPosition(rng *RNG, rules DungeonGenerationRules, object
 			}
 		}
 		if blocked || !generatedTargetReachable(rules, *out, pos) {
-			continue
+			return Vec2{}, false
 		}
+
 		return pos, true
 	}
+	if hasLeader {
+		diameter := int(math.Ceil(clusterRadius * 2))
+		if diameter < 1 {
+			diameter = 1
+		}
+		for attempt := 0; attempt < objective.MaxAttempts; attempt++ {
+			offsetX := rng.IntN(diameter+1) - diameter/2
+			offsetY := rng.IntN(diameter+1) - diameter/2
+			pos := Vec2{X: leaderPos.X + float64(offsetX), Y: leaderPos.Y + float64(offsetY)}
+			if distance(pos, leaderPos) > clusterRadius {
+				continue
+			}
+			if placed, ok := tryPosition(pos, true); ok {
+				return placed, true
+			}
+		}
+	}
+	for attempt := 0; attempt < objective.MaxAttempts; attempt++ {
+		pos := Vec2{
+			X: float64(minX + rng.IntN(maxX-minX+1)),
+			Y: float64(minY + rng.IntN(maxY-minY+1)),
+		}
+		if placed, ok := tryPosition(pos, false); ok {
+			return placed, true
+		}
+	}
+
+	return Vec2{}, false
+}
+
+func elitePackLeaderPosition(out generatedDungeonLevel) (Vec2, bool) {
+	for _, monster := range out.monsters {
+		if monster.packLeader {
+			return monster.pos, true
+		}
+	}
+
 	return Vec2{}, false
 }

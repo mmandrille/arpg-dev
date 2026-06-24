@@ -130,3 +130,54 @@ func TestFinalizeGeneratedDungeonLevel_MonsterPresent(t *testing.T) {
 		}
 	}
 }
+
+func TestRoomSpawnAwareness_MonstersAvoidCorridors(t *testing.T) {
+	rules := loadRules(t)
+	packRadius := rules.DungeonGeneration.MonsterPlacement.PackMemberRadius
+	seeds := []string{"room_spawn_a", "room_spawn_b", "room_spawn_c"}
+	for _, seed := range seeds {
+		level, err := GenerateDungeonLevel(seed, -1, rules.DungeonGeneration)
+		if err != nil {
+			t.Fatalf("seed %s generate: %v", seed, err)
+		}
+		if len(level.corridorZones) == 0 {
+			t.Fatalf("seed %s: expected corridor zones when room layout enabled", seed)
+		}
+		for _, monster := range level.monsters {
+			if generatedPositionInCorridorZone(monster.pos, packRadius, level) {
+				t.Fatalf("seed %s monster %s at %+v overlaps corridor zone", seed, monster.defID, monster.pos)
+			}
+		}
+	}
+}
+
+func TestRoomSpawnAwareness_EliteChestClustersNearLeader(t *testing.T) {
+	rules := loadRules(t)
+	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
+	rules.DungeonGeneration.ChestPlacement.Enabled = false
+	clusterRadius := rules.DungeonGeneration.EliteObjective.RoomClusterRadius
+	level, err := GenerateDungeonLevel("room_spawn_elite_cluster", -1, rules.DungeonGeneration)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	leaderPos, ok := elitePackLeaderPosition(level)
+	if !ok {
+		t.Fatal("expected elite pack leader")
+	}
+	var objective *generatedChest
+	for i := range level.chests {
+		if level.chests[i].eliteObjective {
+			objective = &level.chests[i]
+			break
+		}
+	}
+	if objective == nil {
+		t.Fatalf("missing elite objective chest: %+v", level.chests)
+	}
+	if generatedPositionInCorridorZone(objective.pos, rules.DungeonGeneration.MonsterPlacement.PackMemberRadius, level) {
+		t.Fatalf("elite objective chest at %+v overlaps corridor", objective.pos)
+	}
+	if distance(objective.pos, leaderPos) > clusterRadius {
+		t.Fatalf("elite chest distance %.2f from leader at %+v, want <= %.2f", distance(objective.pos, leaderPos), leaderPos, clusterRadius)
+	}
+}

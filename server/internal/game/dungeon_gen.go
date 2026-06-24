@@ -937,6 +937,10 @@ func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out g
 			return true
 		}
 	}
+	if generatedPositionInCorridorZone(pos, placement.PackMemberRadius, out) {
+		return true
+	}
+
 	return false
 }
 

@@ -3016,6 +3016,48 @@ def cross_checks(report: Report) -> None:
         if not failed_unique_effects:
             report.ok("unique_effects ready effects define hooks, params, and valid item-type compatibility")
 
+    _validate_fog_presentation_ranges(report, load)
+
+
+def _validate_fog_presentation_ranges(report: "Report", load_json) -> None:
+    """Semantic range guard for fog_presentation tuning values.
+
+    A value that passes schema (e.g. falloff_power: 0.001 or energy: 0) can
+    black-screen the game or make the hero light invisible. These checks catch
+    the most likely misconfiguration before it reaches the client.
+    """
+    fog_path = ASSETS / "fog_presentation.v0.json"
+    if not fog_path.exists():
+        return
+    cfg = load_json(fog_path)
+
+    # Top-level scalar guards
+    fp = cfg.get("falloff_power", 2.0)
+    if not (0.5 <= fp <= 10.0):
+        report.fail("fog_presentation range", f"falloff_power={fp} is outside [0.5, 10.0]; values near 0 suppress all visibility")
+    else:
+        report.ok("fog_presentation falloff_power in range [0.5, 10.0]")
+
+    da = cfg.get("darkness_alpha", 1.0)
+    if not (0.0 <= da <= 1.0):
+        report.fail("fog_presentation range", f"darkness_alpha={da} is outside [0, 1]")
+    else:
+        report.ok("fog_presentation darkness_alpha in [0, 1]")
+
+    # point_light sub-block guards
+    pl = cfg.get("point_light", {})
+    energy = pl.get("energy", 0.0)
+    if energy <= 0.0 or energy > 20.0:
+        report.fail("fog_presentation range", f"point_light.energy={energy} is outside (0, 20]; zero makes the hero invisible in first-person")
+    else:
+        report.ok("fog_presentation point_light.energy in (0, 20]")
+
+    rm = pl.get("range_multiplier", 1.0)
+    if rm <= 0.0 or rm > 10.0:
+        report.fail("fog_presentation range", f"point_light.range_multiplier={rm} is outside (0, 10]; near-zero collapses the light radius")
+    else:
+        report.ok("fog_presentation point_light.range_multiplier in (0, 10]")
+
 
 def main() -> int:
     report = Report()

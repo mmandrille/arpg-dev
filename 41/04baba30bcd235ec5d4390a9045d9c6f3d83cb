@@ -1,0 +1,25 @@
+docs/reviews/backend/20260624_v331-backend.md
+  s_517a6303f090f7::t_5f3a2430aa5874 1-134
+docs/reviews/extras/20260624_v331-shared-tooling-and-process.md
+  s_517a6303f090f7::t_72b587a82204bf 1-117
+docs/reviews/20260624_v331-overview.md
+  s_517a6303f090f7::t_8cea16d2367fdb 1-172
+docs/reviews/client/20260624_v331-client.md
+  s_517a6303f090f7::t_605c8fdc9111af 1-98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "4104baba30bcd235ec5d4390a9045d9c6f3d83cb",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

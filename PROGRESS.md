@@ -23,10 +23,10 @@ Last updated: 2026-06-24
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v331 — hero-visibility-lighting |
+| **Latest completed slice** | v332 — pathfinding-cell-accuracy (partial: 8 of 9 tests fixed) |
 | **Active branch** | `main` |
-| **CI gate** | v330 `make ci` green on 2026-06-23 (v331 runs pending) |
-| **Next slice** | Run `$review` then `$refactor` (engineering review cadence due after v330) |
+| **CI gate** | v332 `go test ./internal/game/...` — 1 pre-existing failure (`TestDungeonTeleportersReplayGolden`, deferred) |
+| **Next slice** | v333 — investigate `TestDungeonTeleportersReplayGolden` (dungeon nav connectivity mismatch) or continue with `$refactor` minor-commit targets from v331 review |
 | **Last engineering review** | v331 — [`docs/reviews/20260624_v331-overview.md`](docs/reviews/20260624_v331-overview.md) (2026-06-24, periodic cadence; covers v309–v331) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 
@@ -99,9 +99,15 @@ Do **not** assume these are the next slice — they are documented backlog items
   TestEquippedWeaponWithoutDamageFallsBackToBaseDamage.
 - **Navigation fix landed in $refactor:** `buildBlockedFn` now uses cell CENTER for wall AABBs (blocks stall cells); `sim.planPath`
   wraps blocked to always allow goal cell entry. Fixed 14 of 18 pre-existing test failures.
-- **Remaining 4 failing tests (pre-existing):** TestProjectileBusyRejectsSecondFire, TestDirectionalRangedFreeShotHitsAndOmitsTargetID,
-  TestRangedDummyDropsSeparatedLootItems, TestDungeonTeleportersReplayGolden. Root cause: ranged-shot clear-shot detection from
-  the approach stop-position clips the inflated wall boundary by floating-point margin. Needs ranged-approach clear-shot margin fix.
+- **v332 fixed 3 more tests:** TestProjectileBusyRejectsSecondFire, TestDirectionalRangedFreeShotHitsAndOmitsTargetID,
+  TestRangedDummyDropsSeparatedLootItems. Fix: ranged approach now validates that the expected stop-position
+  (StopDistance before the goal origin from the player's direction) also has a clear shot, skipping cells where
+  floating-point landing clips the inflated AABB. Directional test: player position moved to 11.5 units from monster
+  to stay outside the 10-unit effective aggro radius until projectile impact.
+- **Remaining 1 failing test (deferred):** TestDungeonTeleportersReplayGolden. Root cause is a dungeon-generation
+  reachability mismatch: the generation-time validator uses origin-based probing while the runtime A\* uses
+  center-based probing, leaving a corridor the generator considers reachable but the runtime pathfinder cannot
+  traverse. Fails with both probe strategies — not the same root cause as the ranged clear-shot tests.
 - **v331 `$refactor` minor-commit targets (from the review Top 10):**
   - Update `docs/CODEMAP.md` for v302–v331 new files + add inverse check to `validate_codemap.py` (3rd review — escalated)
   - Add `required` entries to `fog_presentation.v0.schema.json` `point_light` block + semantic `cross_checks()` for fog tuning ranges

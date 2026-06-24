@@ -1,0 +1,28 @@
+shared/golden/character_progression.json
+  s_5999136ba3e683::t_5c097994f9e5d7 42,82,122,162,204,244,284
+server/internal/game/mobility_skills_test.go
+  s_5999136ba3e683::t_5c097994f9e5d7 3-6,151-152
+server/internal/game/sim.go
+  s_5999136ba3e683::t_5c097994f9e5d7 2678-2690,2695-2723
+server/internal/game/derived_stats.go
+  s_5999136ba3e683::t_5c097994f9e5d7 38
+server/internal/game/game_test.go
+  s_5999136ba3e683::t_6af68c4ca82f75 4322-4324
+  s_5999136ba3e683::t_5c097994f9e5d7 363,4191-4194,4231,4279-4321
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f1ae3a023c6c5f94f009ee8a15f0e50354416e4f",
+  "prompts": {},
+  "sessions": {
+    "s_5999136ba3e683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06e74385-3d5d-401a-b315-2130eadbb2ac",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

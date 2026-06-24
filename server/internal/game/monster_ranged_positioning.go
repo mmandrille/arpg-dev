@@ -2,9 +2,42 @@ package game
 
 import "math"
 
+const simTicksPerSecond = 10
+
+func (r *Rules) rangedRetreatMinMeleeEngagementTicks() uint64 {
+	seconds := r.MainConfig.Gameplay.RangedRetreatMinMeleeEngagementSeconds
+	if seconds <= 0 {
+		return 0
+	}
+
+	return uint64(math.Ceil(seconds * simTicksPerSecond))
+}
+
+func (s *Sim) updateMonsterRangedMeleeEngagement(monster *entity, player *entity, def MonsterDef) {
+	if def.effectiveAttackMode() != attackModeRanged || def.PreferredMinRange <= 0 || monster.aiMode != monsterAIModeChase {
+		monster.rangedMeleeEngagedTick = 0
+
+		return
+	}
+	if s.monsterInAttackRange(monster, player, def) {
+		if monster.rangedMeleeEngagedTick == 0 {
+			monster.rangedMeleeEngagedTick = s.tick
+		}
+
+		return
+	}
+	monster.rangedMeleeEngagedTick = 0
+}
+
 func (s *Sim) monsterRangedRetreatGoal(monster *entity, player *entity, def MonsterDef) (Vec2, bool) {
 	if def.effectiveAttackMode() != attackModeRanged || def.PreferredMinRange <= 0 {
 		return Vec2{}, false
+	}
+	minEngagementTicks := s.rules.rangedRetreatMinMeleeEngagementTicks()
+	if minEngagementTicks > 0 {
+		if monster.rangedMeleeEngagedTick == 0 || s.tick-monster.rangedMeleeEngagedTick < minEngagementTicks {
+			return Vec2{}, false
+		}
 	}
 	currentDistance := distance(monster.pos, player.pos)
 	preferredMin := maxFloat(def.PreferredMinRange, playerRadius+monsterRadius+0.05)

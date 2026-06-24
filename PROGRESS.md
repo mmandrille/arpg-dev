@@ -23,10 +23,10 @@ Last updated: 2026-06-24
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v332 — pathfinding-cell-accuracy (all 9 tests fixed) |
+| **Latest completed slice** | v334 — ranged-retreat-engagement |
 | **Active branch** | `main` |
-| **CI gate** | v332 `go test ./internal/game/... ./internal/replay/...` green (2026-06-24) |
-| **Next slice** | v333 — continue with `$refactor` minor-commit targets from v331 review, or next feature |
+| **CI gate** | v333–v334 focused `go test` + `make validate-shared` green (2026-06-24); batch `make ci` pending |
+| **Next slice** | TBD — `$refactor` minor-commit targets from v331 review, or next feature |
 | **Last engineering review** | v331 — [`docs/reviews/20260624_v331-overview.md`](docs/reviews/20260624_v331-overview.md) (2026-06-24, periodic cadence; covers v309–v331) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 

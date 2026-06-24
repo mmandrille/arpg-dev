@@ -68,7 +68,7 @@ func TestRangedMonsterRetreatsWhenPlayerIsTooClose(t *testing.T) {
 	}
 
 	retreated := false
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 80; i++ {
 		sim.Tick(nil)
 		if distance(player.pos, archer.pos) >= preferred-0.15 {
 			retreated = true
@@ -86,5 +86,29 @@ func TestRangedMonsterRetreatsWhenPlayerIsTooClose(t *testing.T) {
 	}
 	if !sim.hasClearMonsterRangedShot(archer.pos, player) {
 		t.Fatalf("archer retreated to blocked shot: player=%+v archer=%+v", player.pos, archer.pos)
+	}
+}
+
+func TestRangedMonsterRetreatRequiresMeleeEngagement(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim, err := NewSimWithWorld("sess_ranged_retreat_gate", "v334_retreat_gate", rules, "ranged_monster_retreat_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	player := sim.entities[sim.playerID]
+	archer := findMonsterByDef(sim, "dungeon_archer")
+	if player == nil || archer == nil {
+		t.Fatalf("setup player=%+v archer=%+v", player, archer)
+	}
+	minTicks := rules.rangedRetreatMinMeleeEngagementTicks()
+	if minTicks == 0 {
+		t.Fatal("expected positive ranged retreat engagement ticks from rules")
+	}
+	initialDistance := distance(player.pos, archer.pos)
+	for i := 0; i < int(minTicks)-1; i++ {
+		sim.Tick(nil)
+		if distance(player.pos, archer.pos) > initialDistance+0.5 {
+			t.Fatalf("archer retreated before engagement elapsed at tick %d: initial=%.3f now=%.3f", i+1, initialDistance, distance(player.pos, archer.pos))
+		}
 	}
 }

@@ -96,6 +96,7 @@
     },
     "point_light": {
       "type": "object",
+      "required": ["energy", "range_multiplier", "shadow_enabled", "color"],
       "additionalProperties": false,
       "properties": {
         "energy": { "type": "number", "minimum": 0 },

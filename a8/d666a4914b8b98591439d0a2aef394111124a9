@@ -1,0 +1,22 @@
+.maintainability/file-size-baseline.tsv
+  s_517a6303f090f7::t_a326def08d32c3 6
+  s_517a6303f090f7::t_bc42b8e5c535ec 30
+  s_517a6303f090f7::t_f1a8490f9bca77 23
+  s_517a6303f090f7::t_cd5e19baf3a56e 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "a8d666a4914b8b98591439d0a2aef394111124a9",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+server/internal/game/game_test.go
+  s_517a6303f090f7::t_958b46599b7389 4931-4933,4955-4957
+server/internal/game/combat_control_test.go
+  s_517a6303f090f7::t_0be651fe0d4466 376
+  s_517a6303f090f7::t_c5d168cd6d10d9 37,490
+  s_517a6303f090f7::t_62bdd2b57ea94e 520
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "f21e713595b15271b56c0630f0de1378e89d250d",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

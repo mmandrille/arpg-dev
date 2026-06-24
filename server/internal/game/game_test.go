@@ -1972,7 +1972,7 @@ func TestActionIntentAutoApproachAndAttack(t *testing.T) {
 	target := firstEntityByKind(sim, monsterEntity)
 	r := sim.Tick([]Input{{MessageID: "maze_action", CorrelationID: "corr_maze", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(target.id)}}})
 	assertAck(t, r, "maze_action")
-	for i := 0; i < 100 && target.hp > 0; i++ {
+	for i := 0; i < 200 && target.hp > 0; i++ {
 		sim.Tick(nil)
 	}
 	if target.hp != 0 {
@@ -4377,11 +4377,14 @@ func TestCollisionIgnoresDeadMonster(t *testing.T) {
 	sim.findEntity("1002").hp = 0
 
 	sim.entities[sim.playerID].pos = Vec2{X: 7, Y: 5}
-	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}}})
+	// Run enough ticks at min momentum (0.6×) to cross the dead monster's cell.
+	// With min speed 0.75*0.6=0.45/tick, 3 ticks = 1.35 units, crossing X=8.
+	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 3}}})
+	sim.Tick(nil)
 	sim.Tick(nil)
 
-	if got := sim.entities[sim.playerID].pos; got != (Vec2{X: 8, Y: 5}) {
-		t.Fatalf("player pos = %+v, want able to enter dead monster position", got)
+	if got := sim.entities[sim.playerID].pos; got.X <= 8 {
+		t.Fatalf("player pos = %+v, want able to enter dead monster position (X > 8)", got)
 	}
 }
 
@@ -4404,7 +4407,8 @@ func TestCollisionBlocksWallAndAllowsRoute(t *testing.T) {
 	}
 
 	sim.entities[sim.playerID].pos = Vec2{X: 2, Y: 2}
-	moveTicks(sim, "through_bottom_gap", Vec2{X: 1}, 5)
+	// 7 ticks × min speed (0.75×0.6=0.45/tick) = 3.15 east, reaching X≥5.
+	moveTicks(sim, "through_bottom_gap", Vec2{X: 1}, 7)
 	if got := sim.entities[sim.playerID].pos; got.X < 5 || got.Y > 3 {
 		t.Fatalf("player did not route through bottom gap: pos=%+v", got)
 	}

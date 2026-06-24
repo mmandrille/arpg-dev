@@ -4928,7 +4928,9 @@ func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
 	if err != nil {
 		t.Fatalf("new gear sim: %v", err)
 	}
-	moveTicks(sim, "to_sword", Vec2{X: 1}, 5)
+	// 6 ticks × min momentum speed (0.75×0.6=0.45/tick) = 2.7 east from {2,5},
+	// reaching {4.7,5} — within 1.35 loot reach of sword at {6,5}.
+	moveTicks(sim, "to_sword", Vec2{X: 1}, 6)
 
 	pickup := sim.Tick([]Input{{
 		MessageID:     "p1",
@@ -4950,7 +4952,9 @@ func gearBeforeCombatWithEquippedSword(t *testing.T, rules *Rules) *Sim {
 		Equip:         &EquipIntent{ItemInstanceID: itemID, Slot: mainHandSlot},
 	}})
 	assertAck(t, equip, "e1")
-	moveTicks(sim, "to_dummy", Vec2{X: 1}, 6)
+	// 13 ticks × ramp-up momentum from {4.7,5} reaches ~{10.59,5},
+	// within melee reach (1.0+0.45=1.45) of training dummy at {12,5}.
+	moveTicks(sim, "to_dummy", Vec2{X: 1}, 13)
 	return sim
 }
 

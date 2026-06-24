@@ -34,7 +34,7 @@ func TestRangedProjectileGolden(t *testing.T) {
 			}
 			var impact TickResult
 			resolved := false
-			for i := 0; i < 80; i++ {
+			for i := 0; i < 150; i++ {
 				r := sim.Tick(nil)
 				if len(r.Events) > 0 {
 					impact = r
@@ -373,7 +373,7 @@ func TestRangedAutoApproachThenFire(t *testing.T) {
 	assertAck(t, r, "far_fire")
 	sawProjectile := false
 	sawImpact := false
-	for i := 0; i < 80 && !sawImpact; i++ {
+	for i := 0; i < 150 && !sawImpact; i++ {
 		r := sim.Tick(nil)
 		for _, c := range r.Changes {
 			if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == projectileEntity {
@@ -487,7 +487,7 @@ func TestRangedBowLootRequiresMeleeReach(t *testing.T) {
 	}
 
 	picked := false
-	for i := 0; i < 80; i++ {
+	for i := 0; i < 150; i++ {
 		r := sim.Tick(nil)
 		if hasEvent(r, pickupEvent) {
 			picked = true
@@ -517,7 +517,7 @@ func TestRangedBlockedLineAutoMovesUntilClearThenFires(t *testing.T) {
 
 	sawProjectile := false
 	sawImpact := false
-	for i := 0; i < 80 && !sawImpact; i++ {
+	for i := 0; i < 300 && !sawImpact; i++ {
 		r := sim.Tick(nil)
 		for _, c := range r.Changes {
 			if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == projectileEntity {

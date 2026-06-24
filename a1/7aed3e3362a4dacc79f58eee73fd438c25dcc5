@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-06-23-movement-overhaul-design.md
+  s_5999136ba3e683::t_e5734904b8ccaa 1-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a17aed3e3362a4dacc79f58eee73fd438c25dcc5",
+  "prompts": {},
+  "sessions": {
+    "s_5999136ba3e683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06e74385-3d5d-401a-b315-2130eadbb2ac",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

@@ -681,7 +681,7 @@ def cross_checks(report: Report) -> None:
             value = min(value, float(formula["max"]))
         return round(value, 6)
 
-    def derived_stats_for(stats: dict) -> dict[str, float]:
+    def derived_stats_for(stats: dict, character_class: str = "") -> dict[str, float]:
         derived = {
             stat_id: evaluate_formula(character_progression["derived_stats"][stat_id], stats)
             for stat_id in sorted(character_progression["derived_stats"])
@@ -691,6 +691,15 @@ def cross_checks(report: Report) -> None:
         attack_speed = max(float(combat["min_effective_attack_speed"]), min(float(combat["max_effective_attack_speed"]), float(derived["attack_speed"])))
         derived["attack_speed"] = round(attack_speed, 6)
         derived["attack_interval_ticks"] = int(math.ceil(int(combat["base_attack_interval_ticks"]) / attack_speed))
+        # movement_speed formula yields a DEX multiplier; scale by class base speed
+        # to match Go's playerEffectiveMovementSpeed = classBase * dex_mult * gear%
+        class_base_speed = float(main_config["gameplay"].get("base_movement_speed", 1.0))
+        if character_class:
+            class_def = character_progression.get("classes", {}).get(character_class, {})
+            class_speed = float(class_def.get("base_movement_speed", 0.0))
+            if class_speed > 0.0:
+                class_base_speed = class_speed
+        derived["movement_speed"] = round(derived["movement_speed"] * class_base_speed, 6)
         return derived
 
     def expected_skill_points_for_level(level: int) -> int:
@@ -746,7 +755,7 @@ def cross_checks(report: Report) -> None:
                 report.fail("character_progression golden", f"{case['name']}: base stats mismatch")
                 failed_progression_golden = True
                 break
-            got_derived = derived_stats_for(stats)
+            got_derived = derived_stats_for(stats, character_class=str(case.get("character_class", "")))
             for stat_id, want in expected["derived_stats"].items():
                 got = got_derived[stat_id]
                 if not math.isclose(float(want), got, rel_tol=0, abs_tol=0.000001):

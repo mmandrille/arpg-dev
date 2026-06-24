@@ -1,0 +1,20 @@
+client/scripts/character_stats_panel.gd
+  s_5999136ba3e683::t_0a58117d85eab7 32
+  s_5999136ba3e683::t_9e9a633786d19e 347-348
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a4a8cd5477b0a080b3f09f818f759b562f754265",
+  "prompts": {},
+  "sessions": {
+    "s_5999136ba3e683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06e74385-3d5d-401a-b315-2130eadbb2ac",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

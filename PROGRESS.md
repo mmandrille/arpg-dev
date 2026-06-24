@@ -97,11 +97,11 @@ Do **not** assume these are the next slice — they are documented backlog items
   `dungeon_elite_objective.go`), TestGoldAutoPickupWalkingIntoTownGold, TestResourceWalletAutoPickupWalkingIntoShard,
   TestDoorLabClosedDoorPreventsPassageUntilActivated, TestEquippedWeaponOneShotsRewardDummy,
   TestEquippedWeaponWithoutDamageFallsBackToBaseDamage.
-- **Still failing (~9 tests):** TestRangedBlockedLineAutoMovesUntilClearThenFires, TestRangedAutoApproachThenFire, several
-  other ranged tests, TestActionIntentAutoApproachAndAttack, TestDungeonTeleportersReplayGolden. Root cause: `buildBlockedFn`
-  uses cell ORIGIN positions for pathfinding blocked checks, which incorrectly marks wall-adjacent cells as walkable; continuous
-  movement then stalls at wall boundaries. Proper fix: use cell center in `buildBlockedFn` without breaking door/interactable
-  approach (door barriers block center-position cells needed for approach). Needs a dedicated fix slice.
+- **Navigation fix landed in $refactor:** `buildBlockedFn` now uses cell CENTER for wall AABBs (blocks stall cells); `sim.planPath`
+  wraps blocked to always allow goal cell entry. Fixed 14 of 18 pre-existing test failures.
+- **Remaining 4 failing tests (pre-existing):** TestProjectileBusyRejectsSecondFire, TestDirectionalRangedFreeShotHitsAndOmitsTargetID,
+  TestRangedDummyDropsSeparatedLootItems, TestDungeonTeleportersReplayGolden. Root cause: ranged-shot clear-shot detection from
+  the approach stop-position clips the inflated wall boundary by floating-point margin. Needs ranged-approach clear-shot margin fix.
 - **v331 `$refactor` minor-commit targets (from the review Top 10):**
   - Update `docs/CODEMAP.md` for v302–v331 new files + add inverse check to `validate_codemap.py` (3rd review — escalated)
   - Add `required` entries to `fog_presentation.v0.schema.json` `point_light` block + semantic `cross_checks()` for fog tuning ranges

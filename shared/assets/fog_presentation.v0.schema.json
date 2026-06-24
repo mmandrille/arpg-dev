@@ -103,7 +103,20 @@
         "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
         "range_multiplier": { "type": "number", "exclusiveMinimum": 0 },
         "height_offset": { "type": "number", "minimum": 0 },
-        "shadow_enabled": { "type": "boolean" }
+        "height_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Vertical fraction of the hero mesh bounds used as the light source (0.55 ≈ chest)."
+        },
+        "min_height": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minimum light height above the anchor when mesh bounds are unavailable."
+        },
+        "shadow_enabled": { "type": "boolean" },
+        "shadow_bias": { "type": "number", "minimum": 0 },
+        "shadow_normal_bias": { "type": "number", "minimum": 0 }
       }
     },
     "shadow": {

@@ -5758,7 +5758,7 @@ func _sync_elite_objective_tracker() -> void:
 
 func _sync_discovery_minimap() -> void:
 	if discovery_minimap == null: return
-	discovery_minimap.sync(current_level, player_anchor.position if player_anchor != null else Vector3.ZERO, float((character_progression.get("derived_stats", {}) as Dictionary).get("light_radius", 0.0)), current_wall_layout, entities)
+	discovery_minimap.sync(current_level, player_anchor.position if player_anchor != null else Vector3.ZERO, float((character_progression.get("derived_stats", {}) as Dictionary).get("light_radius", 0.0)), current_wall_layout, entities, _last_facing_direction)
 
 func _bot_entities_presentation_debug() -> Array:
 	var out: Array = []

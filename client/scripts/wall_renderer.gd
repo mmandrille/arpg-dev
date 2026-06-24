@@ -9,6 +9,7 @@ var _current_level: int = 0
 var _ceiling_node: MeshInstance3D
 
 const TOWN_WALL_HEIGHT := 1.0
+const WALL_FLOOR_SEAM_OVERLAP := 0.08
 
 func _init(walls_root: Node3D, ground_factory: RefCounted) -> void:
 	_walls_root = walls_root
@@ -134,6 +135,8 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 		"rubble":
 			return _make_rubble_node(wall)
 	var wall_height := _wall_height()
+	var floor_overlap := WALL_FLOOR_SEAM_OVERLAP if _dungeon_presentation_active() else 0.0
+	var total_height := wall_height + floor_overlap
 	var sx := float(size.get("x", 1.0))
 	var sy := float(size.get("y", 1.0))
 	var body := StaticBody3D.new()
@@ -141,15 +144,19 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 	body.set_meta("wall_id", str(wall.get("id", "")))
 	body.set_meta("source", str(wall.get("source", "")))
 	body.set_meta("kind", "wall")
-	body.position = Vector3(float(pos.get("x", 0.0)), wall_height * 0.5, float(pos.get("y", 0.0)))
+	body.position = Vector3(
+		float(pos.get("x", 0.0)),
+		total_height * 0.5 - floor_overlap,
+		float(pos.get("y", 0.0)),
+	)
 	var shape_node := CollisionShape3D.new()
 	var box := BoxShape3D.new()
-	box.size = Vector3(sx, wall_height, sy)
+	box.size = Vector3(sx, total_height, sy)
 	shape_node.shape = box
 	body.add_child(shape_node)
 	var node := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
-	mesh.size = Vector3(sx, wall_height, sy)
+	mesh.size = Vector3(sx, total_height, sy)
 	node.mesh = mesh
 	var mat := _make_wall_material(wall, wall_height)
 	node.material_override = mat

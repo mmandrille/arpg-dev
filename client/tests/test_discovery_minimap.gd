@@ -9,6 +9,7 @@ var _failures: int = 0
 
 func _initialize() -> void:
 	_test_state_exploration_accumulates()
+	_test_state_defaults_facing_when_zero()
 	_test_state_is_scoped_by_level()
 	_test_wall_and_objective_debug()
 	_test_quest_path_inactive_without_active_objective()
@@ -24,11 +25,20 @@ func _initialize() -> void:
 
 func _test_state_exploration_accumulates() -> void:
 	var state: DiscoveryMinimapState = DiscoveryMinimapStateScript.new()
-	var first := state.update(0, Vector3.ZERO, 4.0, [], {})
+	var first := state.update(0, Vector3.ZERO, 4.0, [], {}, Vector2(1.0, 0.0))
 	var first_count := int(first.get("explored_count", 0))
 	_assert_true("initial explored cells", first_count > 0)
-	var second := state.update(0, Vector3(4.0, 0.0, 0.0), 4.0, [], {})
+	_assert_true("facing stored", absf(float(first.get("player_facing_x", 0.0)) - 1.0) <= 0.001)
+	var second := state.update(0, Vector3(4.0, 0.0, 0.0), 4.0, [], {}, Vector2(0.0, -1.0))
 	_assert_true("moving accumulates cells", int(second.get("explored_count", 0)) > first_count)
+
+	_assert_true("facing updates", float(second.get("player_facing_y", 0.0)) < -0.9)
+
+
+func _test_state_defaults_facing_when_zero() -> void:
+	var state: DiscoveryMinimapState = DiscoveryMinimapStateScript.new()
+	var mapped := state.update(0, Vector3.ZERO, 4.0, [], {}, Vector2.ZERO)
+	_assert_true("default facing y", float(mapped.get("player_facing_y", 0.0)) > 0.9)
 
 
 func _test_state_is_scoped_by_level() -> void:
@@ -137,6 +147,9 @@ func _test_widget_defaults_toggle_size_and_opacity() -> void:
 		"level": 0,
 		"player_x": 0.0,
 		"player_y": 0.0,
+		"player_facing_x": 1.0,
+		"player_facing_y": 0.0,
+		"player_facing_angle": 0.0,
 		"map_world_radius": 16.0,
 		"explored_cells": [{"x": 0, "y": 0}],
 		"explored_count": 1,
@@ -152,6 +165,7 @@ func _test_widget_defaults_toggle_size_and_opacity() -> void:
 	var visible_state := minimap.get_debug_state()
 	_assert_true("toggle visible", bool(visible_state.get("visible", false)))
 	_assert_eq("debug explored count", int(visible_state.get("explored_count", 0)), 1)
+	_assert_eq("debug facing x", float(visible_state.get("player_facing_x", 0.0)), 1.0)
 	_assert_eq("debug marker count", int(visible_state.get("marker_count", 0)), 1)
 	_assert_eq("debug service marker count", int(visible_state.get("service_marker_count", 0)), 1)
 	_assert_true("debug pin", bool(visible_state.get("has_pin", false)))

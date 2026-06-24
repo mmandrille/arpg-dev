@@ -908,7 +908,7 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"class weapon {item_id} is valid")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "movement_speed_percent"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -974,8 +974,9 @@ def cross_checks(report: Report) -> None:
         invalid_base_values = [
             stat for stat, value in base_stats.items()
             if (stat == "attack_speed_percent" and not -75 <= int(value) <= 100)
+            or (stat == "movement_speed_percent" and not -50 <= int(value) <= 100)
             or (stat in {"hit_chance", "crit_chance", "evade_chance"} and not 0 <= int(value) <= 100)
-            or (stat not in {"attack_speed_percent", "hit_chance", "crit_chance", "evade_chance"} and int(value) < 0)
+            or (stat not in {"attack_speed_percent", "movement_speed_percent", "hit_chance", "crit_chance", "evade_chance"} and int(value) < 0)
         ]
         if invalid_base_values:
             report.fail("item template base_stats", f"{template_id}: invalid value(s) for {invalid_base_values}")
@@ -1001,7 +1002,7 @@ def cross_checks(report: Report) -> None:
                 report.fail("item template rollable stat", f"{template_id}.{stat}: min/max must be within 0..{bounded_roll_stats[stat]}")
                 failed_roll = True
                 break
-            if stat != "attack_speed_percent" and roll["min"] < 0:
+            if stat not in {"attack_speed_percent", "movement_speed_percent"} and roll["min"] < 0:
                 report.fail("item template rollable stat", f"{template_id}.{stat}: min must be non-negative")
                 failed_roll = True
                 break

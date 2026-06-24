@@ -4239,6 +4239,43 @@ func TestMovement(t *testing.T) {
 	}
 }
 
+func TestMovementSpeedPercentFromGear(t *testing.T) {
+	sim := MustNewSim("sess_ms_gear", "seed1", loadRules(t))
+	baseline := sim.DerivedStatsView().MovementSpeed
+
+	// Give the player a cave_boots item with +15% movement speed rolled.
+	item := &invItem{
+		instanceID: 7700,
+		itemDefID:  "cave_boots",
+		slot:       "boots",
+		equipped:   true,
+		rollPayload: &ItemRollPayload{
+			ItemTemplateID: "cave_boots",
+			DisplayName:    "Boosted Cave Boots",
+			Rarity:         "magic",
+			Stats:          map[string]int{"armor": 1, "movement_speed_percent": 15},
+			Requirements:   map[string]int{"level": 1},
+			EffectIDs:      []string{},
+		},
+	}
+	sim.inventory = append(sim.inventory, item)
+	sim.equipped["boots"] = item.instanceID
+	sim.savePlayer(sim.defaultPlayer())
+
+	effective, _ := sim.playerEffectiveCombatStats()
+	if math.Abs(effective.MovementSpeedPercent-15) > 0.001 {
+		t.Fatalf("effectiveCombatStats.MovementSpeedPercent = %.4f, want 15.0", effective.MovementSpeedPercent)
+	}
+
+	boosted := sim.DerivedStatsView().MovementSpeed
+	wantFactor := 1.15
+	wantBoosted := baseline * wantFactor
+	if math.Abs(boosted-wantBoosted) > 0.001 {
+		t.Fatalf("movement_speed with +15%% boots = %.4f, want %.4f (baseline=%.4f)",
+			boosted, wantBoosted, baseline)
+	}
+}
+
 func TestTickResultSlicesNeverNil(t *testing.T) {
 	// A movement-only tick must still carry non-nil Changes/Events so the
 	// state_delta marshals arrays, not null (regression guard).

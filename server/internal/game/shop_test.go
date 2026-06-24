@@ -55,7 +55,7 @@ func TestShopPricingGolden(t *testing.T) {
 
 func TestShopGeneratedOfferGolden(t *testing.T) {
 	rules := loadRules(t)
-	var golden struct {
+	type shopOffersGolden struct {
 		ShopID      string `json:"shop_id"`
 		Seed        string `json:"seed"`
 		CharacterID string `json:"character_id"`
@@ -66,7 +66,23 @@ func TestShopGeneratedOfferGolden(t *testing.T) {
 			Expected            []shopOfferGolden `json:"expected"`
 		} `json:"cases"`
 	}
+	var golden shopOffersGolden
 	loadGolden(t, "shop_offers.json", &golden)
+
+	if *update {
+		for i, c := range golden.Cases {
+			sim := MustNewSim(golden.ShopID+"_"+c.Name, golden.Seed, rules)
+			offers := sim.generatedShopOffers(golden.ShopID, rules.Shops[golden.ShopID], golden.CharacterID, c.DeepestDungeonDepth)
+			got := make([]shopOfferGolden, 0, len(offers))
+			for _, offer := range offers {
+				got = append(got, shopOfferGoldenFromView(offer))
+			}
+			golden.Cases[i].ExpectedOfferCount = len(offers)
+			golden.Cases[i].Expected = got
+		}
+		writeGolden(t, "shop_offers.json", golden)
+		return
+	}
 
 	for _, c := range golden.Cases {
 		t.Run(c.Name, func(t *testing.T) {

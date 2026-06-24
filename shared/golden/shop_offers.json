@@ -12,12 +12,12 @@
           "offer_id": "generated:depth1:000",
           "kind": "generated",
           "item_template_id": "cave_boots",
-          "display_name": "Nimble Rare Cave Boots",
+          "display_name": "Mighty Rare Cave Boots",
           "rarity": "rare",
           "rolled_stats": {
             "armor": 1,
-            "dex": 3,
-            "str": 2
+            "dex": 2,
+            "str": 3
           },
           "buy_price": 315,
           "source": "common_dungeon_mob",
@@ -32,7 +32,7 @@
           "rolled_stats": {
             "armor": 1,
             "magic": 2,
-            "dex": 1
+            "str": 1
           },
           "buy_price": 160,
           "source": "common_dungeon_mob",
@@ -58,8 +58,8 @@
           "display_name": "Savage Magic Cave Bow",
           "rarity": "magic",
           "rolled_stats": {
-            "damage_min": 1,
             "damage_max": 4,
+            "damage_min": 1,
             "vit": 2
           },
           "buy_price": 335,
@@ -73,8 +73,8 @@
           "display_name": "Common Cave Blade",
           "rarity": "common",
           "rolled_stats": {
-            "damage_min": 3,
-            "damage_max": 4
+            "damage_max": 4,
+            "damage_min": 3
           },
           "buy_price": 220,
           "source": "common_dungeon_mob",
@@ -95,8 +95,8 @@
           "rarity": "magic",
           "rolled_stats": {
             "armor": 3,
-            "vit": 2,
-            "str": 3
+            "str": 3,
+            "vit": 2
           },
           "buy_price": 310,
           "source": "common_dungeon_mob",
@@ -171,9 +171,10 @@
           "display_name": "Common Cave Boots",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 3
+            "armor": 1,
+            "movement_speed_percent": 6
           },
-          "buy_price": 80,
+          "buy_price": 100,
           "source": "common_dungeon_mob",
           "depth": 3
         },
@@ -184,8 +185,8 @@
           "display_name": "Common Cave Bow",
           "rarity": "common",
           "rolled_stats": {
-            "damage_min": 2,
-            "damage_max": 2
+            "damage_max": 2,
+            "damage_min": 2
           },
           "buy_price": 150,
           "source": "common_dungeon_mob",
@@ -195,13 +196,13 @@
           "offer_id": "generated:depth3:002",
           "kind": "generated",
           "item_template_id": "cave_boots",
-          "display_name": "Nimble Magic Cave Boots",
+          "display_name": "Magic Cave Boots",
           "rarity": "magic",
           "rolled_stats": {
             "armor": 1,
-            "dex": 4
+            "movement_speed_percent": 16
           },
-          "buy_price": 185,
+          "buy_price": 285,
           "source": "common_dungeon_mob",
           "depth": 3
         },
@@ -212,8 +213,8 @@
           "display_name": "Common Cave Blade",
           "rarity": "common",
           "rolled_stats": {
-            "damage_min": 3,
-            "damage_max": 4
+            "damage_max": 4,
+            "damage_min": 3
           },
           "buy_price": 220,
           "source": "common_dungeon_mob",

@@ -1,0 +1,80 @@
+client/tests/test_discovery_minimap.gd
+  s_4273f65c96d00f::t_c841e3f42b8185 31-32
+  s_4273f65c96d00f::t_ec482a8975bd1d 12
+  s_4273f65c96d00f::t_adf790c8b582a1 150-152
+  s_4273f65c96d00f::t_245f32281c8a15 35-42
+  s_4273f65c96d00f::t_530b7fee3bf46f 28
+  s_4273f65c96d00f::t_a1e19f412b4478 168
+client/scripts/hero_light_source.gd.uid
+  s_4273f65c96d00f::t_1c3b91e9366df8 1
+client/tests/test_factories.gd
+  s_4273f65c96d00f::t_c899bb9d4ec579 87
+  s_4273f65c96d00f::t_7041f2c3071b18 64-66
+client/scripts/discovery_minimap_state.gd
+  s_4273f65c96d00f::t_e8918417e24d84 25
+  s_4273f65c96d00f::t_d5e0349fb060ea 36-38,43-45
+client/scripts/hero_light_source.gd
+  s_4273f65c96d00f::t_390a4ebc7de39b 74-92
+  s_4273f65c96d00f::t_dafdcf55d23c34 1-8,10-12,15-16,18-19,37-58,60-73,93-100
+  s_4273f65c96d00f::t_bc0b54eee9d554 14
+  s_4273f65c96d00f::t_2ecd93a5731810 9,13,17,20-36
+  s_4273f65c96d00f::t_c86b1952ceb4c1 59
+client/scripts/discovery_minimap.gd
+  s_4273f65c96d00f::t_57c3c5687b6c8b 351-353
+  s_4273f65c96d00f::t_0cce055b9aeb36 123-125
+  s_4273f65c96d00f::t_fef031a920a40d 190
+  s_4273f65c96d00f::t_6f2e2c2c02bfd0 217-228
+  s_4273f65c96d00f::t_4bce2f18b12f92 88-89
+shared/assets/fog_presentation.v0.schema.json
+  s_4273f65c96d00f::t_1b1cb2d358ffc5 117-119
+  s_4273f65c96d00f::t_cbab8250ec40ae 106-116
+shared/assets/fog_presentation.v0.json
+  s_4273f65c96d00f::t_680671d62000e5 46-48
+  s_4273f65c96d00f::t_8bdeda61718c01 43-44
+scripts/client_smoke.sh
+  s_4273f65c96d00f::t_2be8b842de05d2 196
+client/scripts/ground_wall_factory.gd
+  s_4273f65c96d00f::t_6a2a1b8334351a 6-9
+  s_4273f65c96d00f::t_1edc8a2aaf32fe 23,27-61,65
+client/scripts/fog_presentation_loader.gd
+  s_4273f65c96d00f::t_bbb166dbad338b 150-151
+  s_4273f65c96d00f::t_9fc9f5e8f9f964 154-155
+client/scripts/wall_renderer.gd
+  s_4273f65c96d00f::t_e4a31bef7fd642 138-139,147-151,154,159
+  s_4273f65c96d00f::t_ef7729900cf3e8 12
+client/tests/test_hero_light_source.gd
+  s_4273f65c96d00f::t_baf9502ade4344 13-14,22,34,37,41,56
+  s_4273f65c96d00f::t_f00698e86fe63a 1-8,16-21,23-30,32-33,35-36,38-40,42-52,54-55,57-63,65-74
+  s_4273f65c96d00f::t_fbb7eff2c47c0c 9-12,15,31,53,64
+client/scripts/fog_of_war_overlay.gd
+  s_4273f65c96d00f::t_4dc3297c5b1ca5 419-422,425-426
+  s_4273f65c96d00f::t_7e4d95ce1f5a79 192
+  s_4273f65c96d00f::t_dfeb616f664a3f 594-597,611
+  s_4273f65c96d00f::t_a978b7901df497 622-623
+  s_4273f65c96d00f::t_4077bd4e947308 356
+  s_4273f65c96d00f::t_7f2a7a443498cd 606-608
+  s_4273f65c96d00f::t_b85b6ce3eea7c1 582-592
+  s_4273f65c96d00f::t_8b08abb85a154f 288
+  s_4273f65c96d00f::t_9dac46f1cc2294 624
+  s_4273f65c96d00f::t_ffe2d5afd651e7 6
+client/scripts/main.gd
+  s_4273f65c96d00f::t_f33abab073451b 5761
+client/tests/test_hero_light_source.gd.uid
+  s_4273f65c96d00f::t_1c3b91e9366df8 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "aead9897249b17c35b09cbfccbdacf8310f24078",
+  "prompts": {},
+  "sessions": {
+    "s_4273f65c96d00f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "41b4efe1-cfec-4415-b0c9-bf46ca6b4a94",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

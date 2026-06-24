@@ -1,0 +1,47 @@
+server/internal/game/dungeon_elite_objective_rules.go
+  s_45d8e872daefaf::t_75e5f32a0193c5 6-11
+  s_45d8e872daefaf::t_6f5f8a9ce7be30 34-36
+docs/plans/v333_2026-06-24-room-spawn-awareness.md
+  s_45d8e872daefaf::t_5463937f5134cf 1-7,13-19
+  s_45d8e872daefaf::t_baf1091f3a4406 8-12
+server/internal/game/dungeon_room_layout.go
+  s_45d8e872daefaf::t_6f4ebc5d713812 102,140
+  s_45d8e872daefaf::t_8ad86d06e3425b 108,116,123,126-128,131
+  s_45d8e872daefaf::t_5870977c16936c 48,54
+  s_45d8e872daefaf::t_e85dc2d97accf7 146,154,161-199,202
+  s_45d8e872daefaf::t_4c9da0ae04c6f1 59
+  s_45d8e872daefaf::t_b6319c06fa7fb7 65,73,75,77,80,83,85,88,90,93
+server/internal/game/dungeon_gen.go
+  s_45d8e872daefaf::t_07ef9eafd56422 940-943
+server/internal/game/dungeon_generated_types.go
+  s_45d8e872daefaf::t_e096346333f2a9 3-7,9-12
+server/internal/game/dungeon_room_layout_test.go
+  s_45d8e872daefaf::t_5cfbb61768b41c 133-183
+shared/rules/dungeon_generation.v0.schema.json
+  s_45d8e872daefaf::t_d729055d726eb2 144,151
+shared/rules/dungeon_generation.v0.json
+  s_45d8e872daefaf::t_3dd3bbe71dce2d 101
+docs/as-built/v333_room-spawn-awareness.md
+  s_45d8e872daefaf::t_0146ad72e2ef42 1-23
+docs/specs/v333_spec-room-spawn-awareness.md
+  s_45d8e872daefaf::t_754ea6efa440ed 1-51
+server/internal/game/dungeon_elite_objective.go
+  s_45d8e872daefaf::t_c4c29a058090d6 41-48,58,67,76,86,88,95,106-127
+  s_45d8e872daefaf::t_2abdc390b11bcf 91-94,96-105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "49e22541fff025925138c7f4a8845da4f2053021",
+  "prompts": {},
+  "sessions": {
+    "s_45d8e872daefaf": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b6daa7ce-7315-4b97-b922-9033cf58729f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

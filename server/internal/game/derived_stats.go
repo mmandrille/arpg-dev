@@ -24,7 +24,6 @@ type DerivedStatsView struct {
 // DerivedStatsView returns the authoritative protocol view of combat/display stats.
 func (s *Sim) DerivedStatsView() DerivedStatsView {
 	effective, _ := s.playerEffectiveCombatStats()
-	character := s.characterDerivedStatsView()
 	return DerivedStatsView{
 		DamageMin:            effective.DamageMin,
 		DamageMax:            effective.DamageMax,
@@ -36,7 +35,7 @@ func (s *Sim) DerivedStatsView() DerivedStatsView {
 		CritChance:           effective.CritChance,
 		CritDamage:           effective.CritDamage,
 		EvadeChance:          effective.EvadeChance,
-		MovementSpeed:        character.MovementSpeed,
+		MovementSpeed:        s.playerEffectiveMovementSpeed(),
 		MaxHP:                effective.MaxHP,
 		MaxMana:              effective.MaxMana,
 		HealthRegenPerSecond: effective.HealthRegenPerSecond,

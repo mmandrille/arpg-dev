@@ -1,0 +1,22 @@
+.maintainability/file-size-baseline.tsv
+  s_5999136ba3e683::t_fe08af8dba4966 35
+tools/validate_shared.py
+  s_5999136ba3e683::t_66e130ab846b05 758
+  s_5999136ba3e683::t_0442cc96b02204 684,694-702
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "78ce845c63ae024ce074f8c54cd32d6f35bf0523",
+  "prompts": {},
+  "sessions": {
+    "s_5999136ba3e683": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06e74385-3d5d-401a-b315-2130eadbb2ac",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

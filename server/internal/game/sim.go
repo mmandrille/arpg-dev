@@ -207,6 +207,7 @@ type autoNavState struct {
 	steps         []Vec2
 	goal          Vec2
 	hasGoal       bool
+	replanned     bool // true if a mid-path re-plan already fired; prevents re-plan loops
 	pendingAction *ActionIntent
 	pendingSkill  *CastSkillIntent
 	sourceMsgID   string
@@ -2714,7 +2715,17 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 	before := player.pos
 	step := s.activeLevel().autoNav.steps[0]
 	s.activeLevel().autoNav.steps = s.activeLevel().autoNav.steps[1:]
-	player.pos = s.resolveMovement(player.pos, Vec2{X: step.X * s.playerMoveSpeed(), Y: step.Y * s.playerMoveSpeed()})
+	speed := s.playerMoveSpeed()
+	// Normalize the step direction so diagonal moves travel the same distance
+	// as cardinal moves (speed units/tick). Without normalization, diagonal
+	// steps ({±1,±1}) produce {speed*√2} displacement, causing position drift
+	// that lands the player on wall cell boundaries and stalls navigation.
+	mag := math.Sqrt(step.X*step.X + step.Y*step.Y)
+	if mag < 1e-9 {
+		mag = 1
+	}
+	delta := Vec2{X: step.X * speed / mag, Y: step.Y * speed / mag}
+	player.pos = s.resolveMovement(player.pos, delta)
 	if player.pos != before {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	}
@@ -2729,6 +2740,24 @@ func (s *Sim) finishAutoNav(res *TickResult) {
 		if player := s.activeLevel().entities[s.playerID]; player != nil {
 			if s.continueAutoNavToGoal(player, res) {
 				return
+			}
+			// When direct approach is blocked and no re-plan has fired yet,
+			// try re-planning from the current position to find a route around
+			// the obstacle (e.g. when diagonal drift ends path near a wall corner).
+			if !nav.replanned && distance(player.pos, nav.goal) > s.activeNav().StopDistance {
+				if steps, ok := s.planPath(s.activeNav(), player.pos, nav.goal, s.buildBlockedFn()); ok && len(steps) > 0 {
+					s.activeLevel().autoNav = &autoNavState{
+						steps:         steps,
+						goal:          nav.goal,
+						hasGoal:       true,
+						replanned:     true,
+						pendingAction: nav.pendingAction,
+						pendingSkill:  nav.pendingSkill,
+						sourceMsgID:   nav.sourceMsgID,
+						sourceCorrID:  nav.sourceCorrID,
+					}
+					return
+				}
 			}
 		}
 	}

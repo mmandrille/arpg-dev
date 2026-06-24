@@ -14,8 +14,10 @@ def validate_main_config_gameplay(
         report.fail("main_config gameplay", "base_attack_interval_ticks must be positive")
     elif float(main_gameplay.get("base_movement_speed", 0)) <= 0:
         report.fail("main_config gameplay", "base_movement_speed must be positive")
+    elif float(main_gameplay.get("minimum_monster_aggro_radius", -1)) < 0:
+        report.fail("main_config gameplay", "minimum_monster_aggro_radius must be non-negative")
     else:
-        report.ok("main_config gameplay owns attack cadence and movement speed")
+        report.ok("main_config gameplay owns attack cadence, movement speed, and monster aggro floor")
 
     def treasure_class_at_least_one_drop_rate(class_id: str) -> int | None:
         treasure_class = treasure_class_defs.get(class_id)

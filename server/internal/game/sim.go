@@ -13,6 +13,7 @@ const (
 	baseEntityID                   = 1001 // player=1001, monster=1002, loot=1003, item=1004 ...
 	playerStartHP                  = 10
 	defaultMoveSpeed               = 1.0
+	simulationTickHz               = 10.0
 	playerRadius                   = 0.45
 	monsterRadius                  = 0.45
 	monsterDefID                   = "training_dummy"
@@ -2643,22 +2644,27 @@ func (s *Sim) applyMovement(res *TickResult) {
 		s.applyAutoNav(res)
 		return
 	}
-	if s.activeLevel().move == nil || s.activeLevel().move.remaining <= 0 {
+	level := s.activeLevel()
+	if level.move == nil || level.move.remaining <= 0 {
 		return
 	}
 	if s.playerDead() {
-		s.activeLevel().move = nil
+		level.move = nil
+		level.moveMomentumTicks = 0
 		return
 	}
-	player := s.activeLevel().entities[s.playerID]
+	player := level.entities[s.playerID]
 	before := player.pos
+	level.moveMomentumTicks++
+	speed := s.playerMoveSpeed() * s.playerMoveMomentumMultiplier(level.moveMomentumTicks)
 	player.pos = s.resolveMovement(player.pos, Vec2{
-		X: s.activeLevel().move.dir.X * s.playerMoveSpeed(),
-		Y: s.activeLevel().move.dir.Y * s.playerMoveSpeed(),
+		X: level.move.dir.X * speed,
+		Y: level.move.dir.Y * speed,
 	})
-	s.activeLevel().move.remaining--
-	if s.activeLevel().move.remaining == 0 {
-		s.activeLevel().move = nil
+	level.move.remaining--
+	if level.move.remaining == 0 {
+		level.move = nil
+		level.moveMomentumTicks = 0
 	}
 	s.updatePilgrimMomentumMovement(player, player.pos != before, res)
 	if player.pos == before {
@@ -2672,6 +2678,59 @@ func (s *Sim) playerMoveSpeed() float64 {
 		return s.rules.MainConfig.Gameplay.BaseMovementSpeed
 	}
 	return defaultMoveSpeed
+}
+
+func (s *Sim) playerMoveMomentumMultiplier(heldTicks int) float64 {
+	if s.rules == nil || heldTicks <= 0 {
+		return 1
+	}
+	accelSeconds := s.rules.MainConfig.Gameplay.MovementAccelerationSeconds
+	if accelSeconds <= 0 {
+		return 1
+	}
+	wantTicks := int(accelSeconds * simulationTickHz)
+	if wantTicks < 1 {
+		wantTicks = 1
+	}
+	mult := float64(heldTicks) / float64(wantTicks)
+	if mult > 1 {
+		mult = 1
+	}
+	minFactor := s.rules.MainConfig.Gameplay.MovementMinSpeedFactor
+	if minFactor <= 0 || minFactor > 1 {
+		minFactor = 0.2
+	}
+	if mult < minFactor {
+		mult = minFactor
+	}
+	return mult
+}
+
+func dot2(a, b Vec2) float64 {
+	return a.X*b.X + a.Y*b.Y
+}
+
+func effectiveMonsterAggroRadius(def MonsterDef, rules *Rules) float64 {
+	radius := def.AggroRadius
+	if rules == nil {
+		return radius
+	}
+	minimum := rules.MainConfig.Gameplay.MinimumMonsterAggroRadius
+	if minimum <= 0 || radius < 1.0 || radius >= minimum {
+		return radius
+	}
+
+	return minimum
+}
+
+func effectiveMonsterAssistRadius(def MonsterDef, rules *Rules) float64 {
+	radius := def.effectiveAssistRadius()
+	aggro := effectiveMonsterAggroRadius(def, rules)
+	if radius < aggro {
+		return aggro
+	}
+
+	return radius
 }
 
 func (s *Sim) applyAutoNav(res *TickResult) {
@@ -3233,7 +3292,7 @@ func (s *Sim) updateMonsterAIMode(monster *entity, player *entity, def MonsterDe
 		return
 	}
 
-	if distPlayer <= def.AggroRadius {
+	if distPlayer <= effectiveMonsterAggroRadius(def, s.rules) {
 		if prevMode != monsterAIModeChase {
 			res.Events = append(res.Events, Event{EventType: "monster_aggro", EntityID: idStr(monster.id)})
 		}
@@ -3857,7 +3916,7 @@ func (s *Sim) canAggroAttackingPlayer(candidate, player *entity) bool {
 	if !ok || def.effectiveBehavior() != monsterBehaviorChase || def.effectiveAssistRadius() <= 0 {
 		return false
 	}
-	return distance(candidate.pos, player.pos) <= def.effectiveAssistRadius()
+	return distance(candidate.pos, player.pos) <= effectiveMonsterAssistRadius(def, s.rules)
 }
 
 func (s *Sim) canJoinGroupAggro(source, candidate *entity) bool {
@@ -3868,7 +3927,7 @@ func (s *Sim) canJoinGroupAggro(source, candidate *entity) bool {
 	if !ok || def.effectiveBehavior() != monsterBehaviorChase {
 		return false
 	}
-	radius := def.effectiveAssistRadius()
+	radius := effectiveMonsterAssistRadius(def, s.rules)
 	if radius <= 0 {
 		return false
 	}

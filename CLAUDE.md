@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with this repository.
 
+## Model policy
+
+Default to **claude-sonnet-4-6** (medium effort) for all tasks in this project.
+Escalate to a higher-power model only when explicitly asked or when the task clearly requires it
+(e.g. complex architecture decisions, large multi-file refactors). Always confirm before escalating.
+
 ## Project progress (read first)
 
 **Before any new feature or slice:** read [`PROGRESS.md`](PROGRESS.md) — **Current status**, **Open

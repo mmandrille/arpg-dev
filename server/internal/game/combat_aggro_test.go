@@ -2,6 +2,22 @@ package game
 
 import "testing"
 
+func TestEffectiveMonsterAggroRadiusFloor(t *testing.T) {
+	rules := loadRules(t)
+	rules.MainConfig.Gameplay.MinimumMonsterAggroRadius = 10
+	dungeon := rules.Monsters["dungeon_mob"]
+	if got := effectiveMonsterAggroRadius(dungeon, rules); got != 10 {
+		t.Fatalf("dungeon aggro radius = %.2f, want floor 10", got)
+	}
+	if got := effectiveMonsterAssistRadius(dungeon, rules); got != 12 {
+		t.Fatalf("dungeon assist radius = %.2f, want configured assist 12", got)
+	}
+	companion := rules.Monsters["companion_black_wolf"]
+	if got := effectiveMonsterAggroRadius(companion, rules); got != companion.AggroRadius {
+		t.Fatalf("companion aggro radius = %.2f, want unchanged %.2f", got, companion.AggroRadius)
+	}
+}
+
 func TestAggroOnHitDirectionalRangedMovesFromOutsidePassiveRadius(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	forceCharacterHitChance(rules, 1.0)
@@ -9,9 +25,11 @@ func TestAggroOnHitDirectionalRangedMovesFromOutsidePassiveRadius(t *testing.T) 
 	player := sim.entities[sim.playerID]
 	player.pos = Vec2{X: 3, Y: 5}
 	monster := firstEntityByKind(sim, monsterEntity)
+	monster.pos = Vec2{X: 14, Y: 5}
 	monster.hp = 20
 	monster.maxHP = 20
-	if distance(player.pos, monster.pos) <= sim.rules.Monsters[monster.monsterDefID].AggroRadius {
+	def := sim.rules.Monsters[monster.monsterDefID]
+	if distance(player.pos, monster.pos) <= effectiveMonsterAggroRadius(def, sim.rules) {
 		t.Fatalf("setup inside passive aggro radius: player=%+v monster=%+v", player.pos, monster.pos)
 	}
 
@@ -292,11 +310,13 @@ func TestAggroOnHitUsesAssistRadiusWithoutGrowingPassiveAggro(t *testing.T) {
 	sim.syncCompatibilityFields()
 
 	def := sim.rules.Monsters["dungeon_mob"]
-	if def.effectiveAssistRadius() <= def.AggroRadius {
-		t.Fatalf("test requires assist radius > aggro radius, got aggro %.2f assist %.2f", def.AggroRadius, def.effectiveAssistRadius())
+	aggroRadius := effectiveMonsterAggroRadius(def, sim.rules)
+	assistRadius := effectiveMonsterAssistRadius(def, sim.rules)
+	if assistRadius <= aggroRadius {
+		t.Fatalf("test requires assist radius > aggro radius, got aggro %.2f assist %.2f", aggroRadius, assistRadius)
 	}
-	primary := addTestMonster(sim, "dungeon_mob", Vec2{X: 20, Y: 10}, 20)
-	assistOnly := addTestMonster(sim, "dungeon_mob", Vec2{X: player.pos.X + def.AggroRadius + 1, Y: player.pos.Y}, 20)
+	primary := addTestMonster(sim, "dungeon_mob", Vec2{X: 18, Y: 5}, 20)
+	assistOnly := addTestMonster(sim, "dungeon_mob", Vec2{X: player.pos.X + aggroRadius + 1, Y: player.pos.Y}, 20)
 	outside := addTestMonster(sim, "dungeon_mob", Vec2{X: 45, Y: 10}, 20)
 
 	passive := TickResult{Tick: sim.tick, Level: sim.currentLevel}

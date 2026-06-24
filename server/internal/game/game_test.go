@@ -126,7 +126,7 @@ func writeGolden(t *testing.T, name string, v any) {
 func TestLoadRules(t *testing.T) {
 	r := loadRules(t)
 	if r.MainConfig.Gameplay.BaseAttackIntervalTicks != 14 ||
-		r.MainConfig.Gameplay.BaseMovementSpeed != 1.0 ||
+		r.MainConfig.Gameplay.BaseMovementSpeed != 0.75 ||
 		r.MainConfig.Gameplay.BaseDropRatePercent != 25 ||
 		r.MainConfig.Gameplay.RespecCostGold != 0 {
 		t.Fatalf("main config gameplay = %+v", r.MainConfig.Gameplay)
@@ -360,8 +360,8 @@ func TestMainConfigMovementSpeedDrivesPlayerMovement(t *testing.T) {
 	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1, Y: 0}, DurationTicks: 2}}})
 	sim.Tick(nil)
 	got := sim.entities[sim.playerID].pos
-	wantX := start.X + 1.0
-	if got.X != wantX || got.Y != start.Y {
+	wantX := start.X + movementDistanceForTicks(sim.rules, 2)
+	if math.Abs(got.X-wantX) > 0.0001 || got.Y != start.Y {
 		t.Fatalf("player pos = %+v, want x=%v", got, wantX)
 	}
 }
@@ -4188,6 +4188,31 @@ func countWallSource(walls []WallView, source string) int {
 
 // --- movement ---------------------------------------------------------------
 
+func movementDistanceForTicks(rules *Rules, ticks int) float64 {
+	base := rules.MainConfig.Gameplay.BaseMovementSpeed
+	accel := rules.MainConfig.Gameplay.MovementAccelerationSeconds
+	minFactor := rules.MainConfig.Gameplay.MovementMinSpeedFactor
+	if accel <= 0 {
+		return float64(ticks) * base
+	}
+	wantTicks := int(accel * simulationTickHz)
+	if wantTicks < 1 {
+		wantTicks = 1
+	}
+	total := 0.0
+	for held := 1; held <= ticks; held++ {
+		mult := float64(held) / float64(wantTicks)
+		if mult > 1 {
+			mult = 1
+		}
+		if mult < minFactor {
+			mult = minFactor
+		}
+		total += base * mult
+	}
+	return total
+}
+
 func TestMovement(t *testing.T) {
 	sim, err := NewSimWithWorld("sess_move", "abcd", loadRules(t), "gear_before_combat")
 	if err != nil {
@@ -4201,10 +4226,10 @@ func TestMovement(t *testing.T) {
 	}
 	sim.Tick(nil)
 	sim.Tick(nil)
-	// 3 ticks of configured input movement in +x.
+	// 3 ticks of configured input movement in +x (includes momentum ramp).
 	got := sim.entities[sim.playerID].pos
-	wantX := start.X + 3*sim.rules.MainConfig.Gameplay.BaseMovementSpeed
-	if got.X != wantX || got.Y != start.Y {
+	wantX := start.X + movementDistanceForTicks(sim.rules, 3)
+	if math.Abs(got.X-wantX) > 0.0001 || got.Y != start.Y {
 		t.Fatalf("player pos = %+v, want x=%v", got, wantX)
 	}
 	// Movement is exhausted; a 4th tick must not move.

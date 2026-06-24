@@ -48,7 +48,10 @@ type MainConfig struct {
 
 type MainGameplayConfig struct {
 	BaseAttackIntervalTicks  int               `json:"base_attack_interval_ticks"`
-	BaseMovementSpeed        float64           `json:"base_movement_speed"`
+	BaseMovementSpeed             float64           `json:"base_movement_speed"`
+	MovementAccelerationSeconds   float64           `json:"movement_acceleration_seconds"`
+	MovementMinSpeedFactor        float64           `json:"movement_min_speed_factor"`
+	MinimumMonsterAggroRadius     float64           `json:"minimum_monster_aggro_radius"`
 	BaseDropRatePercent      int               `json:"base_drop_rate_percent"`
 	RespecCostGold           int               `json:"respec_cost_gold"`
 	BishopRespecResourceID   string            `json:"bishop_respec_resource_item_def_id"`
@@ -983,6 +986,15 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.BaseMovementSpeed <= 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.base_movement_speed: must be positive")
+	}
+	if mainConfig.Gameplay.MovementAccelerationSeconds <= 0 {
+		mainConfig.Gameplay.MovementAccelerationSeconds = 2.0
+	}
+	if mainConfig.Gameplay.MovementMinSpeedFactor <= 0 || mainConfig.Gameplay.MovementMinSpeedFactor > 1 {
+		mainConfig.Gameplay.MovementMinSpeedFactor = 0.2
+	}
+	if mainConfig.Gameplay.MinimumMonsterAggroRadius < 0 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.minimum_monster_aggro_radius: must be non-negative")
 	}
 	if mainConfig.Gameplay.BaseDropRatePercent < 0 || mainConfig.Gameplay.BaseDropRatePercent > 100 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.base_drop_rate_percent: must be within [0,100]")

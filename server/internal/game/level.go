@@ -9,6 +9,7 @@ type LevelState struct {
 	questRewardChestIDs    map[uint64]bool
 	walls                  []wallObstacle
 	move                   *activeMove
+	moveMomentumTicks      int
 	autoNav                *autoNavState
 	activeChannel          *activeSkillChannel
 	nav                    *NavigationRules

@@ -133,7 +133,7 @@
       },
       "behavior": "chase",
       "aggro_radius": 8,
-      "assist_radius": 8,
+      "assist_radius": 12,
       "leash_radius": 40,
       "move_speed": 0.392,
       "name_key": "monster.training_dummy_chase.name"
@@ -151,7 +151,7 @@
       "pack_role": "frontline",
       "behavior": "chase",
       "aggro_radius": 6,
-      "assist_radius": 8,
+      "assist_radius": 12,
       "leash_radius": 40,
       "move_speed": 0.392,
       "attack_damage": {
@@ -174,7 +174,7 @@
       "pack_role": "ranged",
       "behavior": "chase",
       "aggro_radius": 6,
-      "assist_radius": 8,
+      "assist_radius": 12,
       "leash_radius": 40,
       "move_speed": 0.336,
       "attack_damage": {
@@ -205,7 +205,7 @@
       "pack_role": "flanker",
       "behavior": "chase",
       "aggro_radius": 6,
-      "assist_radius": 8,
+      "assist_radius": 12,
       "leash_radius": 40,
       "move_speed": 0.392,
       "attack_damage": {
@@ -300,7 +300,7 @@
       "behavior": "chase",
       "navigation_trait": "flying",
       "aggro_radius": 6,
-      "assist_radius": 8,
+      "assist_radius": 12,
       "leash_radius": 40,
       "move_speed": 0.392,
       "attack_damage": {
@@ -327,7 +327,7 @@
       "pack_role": "frontline",
       "behavior": "chase",
       "aggro_radius": 6,
-      "assist_radius": 8,
+      "assist_radius": 12,
       "leash_radius": 40,
       "move_speed": 0.336,
       "attack_damage": {

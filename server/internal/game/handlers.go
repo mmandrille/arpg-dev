@@ -78,12 +78,17 @@ func (s *Sim) handleMove(in Input, res *TickResult) {
 	}
 	if dir.X == 0 && dir.Y == 0 {
 		s.activeLevel().move = nil
+		s.activeLevel().moveMomentumTicks = 0
 		s.clearAutoNav()
 		res.ack(in.MessageID)
 		return
 	}
 	s.clearAutoNav()
-	s.activeLevel().move = &activeMove{dir: dir, remaining: dur}
+	level := s.activeLevel()
+	if level.move != nil && dot2(level.move.dir, dir) < 0.7 {
+		level.moveMomentumTicks = 0
+	}
+	level.move = &activeMove{dir: dir, remaining: dur}
 	res.ack(in.MessageID)
 }
 

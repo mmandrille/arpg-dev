@@ -62,7 +62,11 @@ const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
+const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 const MovementVisualSmoothingScript := preload("res://scripts/movement_visual_smoothing.gd")
+const PlayerMovementFeelScript := preload("res://scripts/player_movement_feel.gd")
+const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
+const LevelLoadingOverlayScript := preload("res://scripts/level_loading_overlay.gd")
 const CommandRetargetGraceScript := preload("res://scripts/command_retarget_grace.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
@@ -251,6 +255,13 @@ var _attack_buffer: CombatInputBuffer = CombatInputBufferScript.new()
 var _sticky_attack: CombatStickyTarget = CombatStickyTargetScript.new()
 var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttackPresentationScript.new()
 var _movement_visual_smoothing: MovementVisualSmoothing = MovementVisualSmoothingScript.new()
+var _player_movement_feel: PlayerMovementFeel = PlayerMovementFeelScript.new()
+var _level_loading_overlay: LevelLoadingOverlay
+var _level_loading_active: bool = false
+var _level_loading_walls_ready: bool = false
+var _level_loading_started_at: float = 0.0
+var _level_loading_traveling: bool = false
+var _pending_level_walls: Array = []
 var _command_retarget_grace: CommandRetargetGrace = CommandRetargetGraceScript.new()
 var _movement_requires_fresh_input: bool = false
 var _player_walk_linger: float = 0.0
@@ -273,6 +284,7 @@ var _boss_visuals_context: BossVisualsContext
 var _boss_visuals: BossVisualsController
 
 func _ready() -> void:
+	MainConfigLoaderScript.ensure_loaded()
 	player_anchor = $World/PlayerAnchor
 	character_visual = $World/PlayerAnchor/CharacterVisual
 	_movement_visual_smoothing.reset(player_anchor, character_visual)
@@ -836,6 +848,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	if player_anchor != null:
 		player_anchor.position = Vector3.ZERO
 		_movement_visual_smoothing.reset(player_anchor, character_visual)
+	_player_movement_feel.reset()
 	if clear_session and client != null:
 		client.session_id = ""
 		client.character_id = ""
@@ -906,6 +919,7 @@ func _handle_message(env: Dictionary) -> void:
 			_record_ping(str(payload.get("rejected_message_id", "")))
 			pending_interactable_action.clear()
 			pending_waypoint_travel = false
+			_cancel_level_loading()
 			_handle_intent_rejected(payload)
 			_debug("rejected: %s" % payload.get("reason", "?"))
 		"error":
@@ -1038,23 +1052,7 @@ func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
 		if str(ev.get("event_type", "")) == "level_changed":
 			current_level = int(ev.get("to_level", current_level))
-			ClientAudioBridgeScript.ambience_for_level(audio_controller, current_level)
-			_update_ground_material()
-			pending_interactable_action.clear()
-			pending_waypoint_travel = false
-			_clear_level_entities()
-			current_wall_layout = []
-			_clear_wall_nodes()
-			_update_level_hud()
-			_update_character_info_panel()
-			_hide_waypoint_panel()
-			_hide_shop_panel()
-			_hide_stash_panel()
-			_hide_bishop_panel()
-			_hide_market_panel()
-			_hide_blacksmith_panel()
-			if quest_journal_panel != null:
-				quest_journal_panel.hide_display()
+			_begin_level_loading(false)
 	var local_motion_skill_id := _local_player_motion_skill_id(p.get("events", []))
 	var local_motion_landing := Vector3.ZERO
 	var local_motion_has_landing := false
@@ -1062,7 +1060,7 @@ func _apply_delta(p: Dictionary) -> void:
 	for c in changes:
 		match c.get("op", ""):
 			"wall_layout_update":
-				_render_wall_layout(c.get("walls", []))
+				_queue_level_wall_layout(c.get("walls", []))
 			"entity_spawn", "entity_update":
 				var entity: Dictionary = c.get("entity", {})
 				if local_motion_skill_id != "" and _is_local_player_entity_update(entity):
@@ -1100,6 +1098,7 @@ func _apply_delta(p: Dictionary) -> void:
 			"weapon_set_update":
 				active_weapon_set = int(c.get("active_weapon_set", active_weapon_set))
 				weapon_sets = c.get("weapon_sets", weapon_sets)
+				_remount_local_equipment_visuals()
 			"hotbar_update":
 				if c.has("inventory_rows"):
 					inventory_rows = int(c.get("inventory_rows", inventory_rows))
@@ -2085,7 +2084,7 @@ func _play_charge_visual(ev: Dictionary, landing_override: Vector3 = Vector3.INF
 	var landing := landing_override if landing_override != Vector3.INF else predicted_pos
 	var start := Vector3(start_2d.x, landing.y, start_2d.y)
 	var distance_tiles: float = max(0.01, Vector2(start.x, start.z).distance_to(Vector2(landing.x, landing.z)))
-	var speed_tiles_per_second: float = ClientConstants.PLAYER_SPEED * _skill_mobility_float("charge", "speed_multiplier")
+	var speed_tiles_per_second: float = MainConfigLoaderScript.base_movement_speed() * _skill_mobility_float("charge", "speed_multiplier")
 	var duration: float = max(0.08, distance_tiles / speed_tiles_per_second)
 	local_charge_visual_active = true
 	player_anchor.position = start
@@ -2516,11 +2515,13 @@ func _handle_input(delta: float) -> void:
 		input = Vector2.ZERO
 	elif input == Vector2.ZERO:
 		_movement_requires_fresh_input = false
+		_player_movement_feel.on_stop()
 	if input != Vector2.ZERO and not _movement_requires_fresh_input and _send_cooldown <= 0.0:
 		var dir := (_camera_controller.camera_relative_flat_direction(input) if _camera_controller != null else Vector2.ZERO)
 		_close_gameplay_panels_for_movement()
+		var move_speed := _player_movement_feel.effective_speed(dir, delta)
 		# Local prediction: move immediately for responsive feel.
-		predicted_pos += Vector3(dir.x, 0, dir.y) * ClientConstants.PLAYER_SPEED * ClientConstants.SEND_INTERVAL
+		predicted_pos += Vector3(dir.x, 0, dir.y) * move_speed * ClientConstants.SEND_INTERVAL
 		_reconcile_player()
 		_mark_local_player_walking()
 		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
@@ -2631,6 +2632,7 @@ func _begin_force_stand() -> void:
 	_sustained_click.clear()
 	_clear_pending_attack_commands()
 	_movement_requires_fresh_input = true
+	_player_movement_feel.on_stop()
 	if player_anchor != null:
 		predicted_pos = player_anchor.global_position
 		_reconcile_player()
@@ -2733,7 +2735,8 @@ func _handle_autoplay(delta: float) -> void:
 		"move":
 			if not autoplay_move_sent:
 				var dir := Vector2(1, 0)
-				predicted_pos += Vector3(dir.x, 0, dir.y) * ClientConstants.PLAYER_SPEED * ClientConstants.SEND_INTERVAL
+				var move_speed := _player_movement_feel.effective_speed(dir, ClientConstants.SEND_INTERVAL)
+				predicted_pos += Vector3(dir.x, 0, dir.y) * move_speed * ClientConstants.SEND_INTERVAL
 				_reconcile_player()
 				_mark_local_player_walking()
 				client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
@@ -3083,10 +3086,12 @@ func _interactable_in_activation_range(rec: Dictionary) -> bool:
 func _activate_interactable_now(target_id: String, rec: Dictionary) -> void:
 	var interactable_def_id := str(rec.get("interactable_def_id", ""))
 	if interactable_def_id == "stairs_down":
+		_request_level_loading(current_level - 1, false)
 		client.send("descend_intent", last_server_tick, {})
 		_attack_cooldown = ClientConstants.SEND_INTERVAL
 		return
 	if interactable_def_id == "stairs_up":
+		_request_level_loading(current_level + 1, false)
 		client.send("ascend_intent", last_server_tick, {})
 		_attack_cooldown = ClientConstants.SEND_INTERVAL
 		return
@@ -3713,6 +3718,12 @@ func _setup_menu_layer() -> void:
 
 	loss_popup = _build_loss_popup()
 	menu_layer.add_child(loss_popup)
+
+	_level_loading_overlay = LevelLoadingOverlayScript.new()
+	var loading_layer := CanvasLayer.new()
+	loading_layer.layer = 20
+	loading_layer.add_child(_level_loading_overlay)
+	add_child(loading_layer)
 
 func _build_loss_popup() -> Control:
 	var root := Control.new()
@@ -4906,6 +4917,7 @@ func _on_waypoint_level_pressed(level: int) -> void:
 		return
 	var teleporter := _current_teleporter_record()
 	if teleporter.is_empty() or _interactable_in_activation_range(teleporter):
+		_request_level_loading(level, true)
 		client.send("teleport_intent", last_server_tick, {"target_level": level})
 	else:
 		var target_node := teleporter["node"] as Node3D
@@ -4938,6 +4950,7 @@ func _try_complete_pending_waypoint_travel() -> void:
 		return
 	var target_level := pending_waypoint_target_level
 	pending_waypoint_travel = false
+	_request_level_loading(target_level, true)
 	client.send("teleport_intent", last_server_tick, {"target_level": target_level})
 
 func _current_teleporter_record() -> Dictionary:
@@ -5133,7 +5146,99 @@ func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 func _remount_local_equipment_visuals() -> void:
 	if resolver == null:
 		return
-	resolver.apply_snapshot({"inventory": inventory, "equipped": equipped})
+	resolver.apply_snapshot({
+		"inventory": inventory,
+		"equipped": equipped,
+		"weapon_sets": weapon_sets,
+		"active_weapon_set": active_weapon_set,
+	})
+
+
+func _request_level_loading(target_level: int, traveling: bool) -> void:
+	if _level_loading_overlay == null:
+		return
+	_level_loading_active = true
+	_level_loading_walls_ready = false
+	_level_loading_traveling = traveling
+	_level_loading_started_at = Time.get_ticks_msec() / 1000.0
+	_pending_level_walls = []
+	_level_loading_overlay.show_for_level(target_level, _dungeon_level_name(target_level), traveling)
+
+
+func _begin_level_loading(traveling: bool) -> void:
+	if _level_loading_overlay == null:
+		return
+	if not _level_loading_active:
+		_request_level_loading(current_level, traveling)
+	else:
+		_level_loading_overlay.show_for_level(current_level, _dungeon_level_name(current_level), _level_loading_traveling)
+	ClientAudioBridgeScript.ambience_for_level(audio_controller, current_level)
+	_update_ground_material()
+	pending_interactable_action.clear()
+	pending_waypoint_travel = false
+	_clear_level_entities()
+	current_wall_layout = []
+	_clear_wall_nodes()
+	_update_level_hud()
+	_update_character_info_panel()
+	_hide_waypoint_panel()
+	_hide_shop_panel()
+	_hide_stash_panel()
+	_hide_bishop_panel()
+	_hide_market_panel()
+	_hide_blacksmith_panel()
+	if quest_journal_panel != null:
+		quest_journal_panel.hide_display()
+
+
+func _queue_level_wall_layout(walls: Array) -> void:
+	_pending_level_walls = walls
+	if _level_loading_active:
+		_level_loading_walls_ready = true
+		call_deferred("_apply_pending_level_walls")
+		return
+	_render_wall_layout(walls)
+
+
+func _apply_pending_level_walls() -> void:
+	if _pending_level_walls.is_empty():
+		_finish_level_loading_if_ready()
+		return
+	_render_wall_layout(_pending_level_walls)
+	_pending_level_walls = []
+	_finish_level_loading_if_ready()
+
+
+func _finish_level_loading_if_ready() -> void:
+	if not _level_loading_active:
+		return
+	_level_loading_walls_ready = true
+	_try_complete_level_loading()
+
+
+func _try_complete_level_loading() -> void:
+	if not _level_loading_active or not _level_loading_walls_ready or _level_loading_overlay == null:
+		return
+	var elapsed := (Time.get_ticks_msec() / 1000.0) - _level_loading_started_at
+	var min_display := CombatFeelConfigScript.LEVEL_LOADING_MIN_DISPLAY_SECONDS
+	if elapsed < min_display:
+		var timer := get_tree().create_timer(min_display - elapsed)
+		timer.timeout.connect(_try_complete_level_loading, CONNECT_ONE_SHOT)
+		return
+	_cancel_level_loading()
+
+
+func _cancel_level_loading() -> void:
+	_level_loading_active = false
+	_level_loading_walls_ready = false
+	_level_loading_traveling = false
+	_pending_level_walls = []
+	_hide_level_loading_overlay()
+
+
+func _hide_level_loading_overlay() -> void:
+	if _level_loading_overlay != null:
+		_level_loading_overlay.hide_overlay()
 
 func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	if e.has("monster_def_id"):
@@ -5446,6 +5551,7 @@ func get_bot_state() -> Dictionary:
 		"gold": gold,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
 		"movement_visual_smoothing": _movement_visual_smoothing.get_debug_state(character_visual),
+		"movement_feel": _player_movement_feel.get_debug_state(),
 		"command_retarget_grace": _command_retarget_grace.get_debug_state(),
 		"current_level": current_level,
 		"walls": current_wall_layout.duplicate(true),

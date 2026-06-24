@@ -13,6 +13,7 @@
 extends RefCounted
 class_name EquipmentVisualResolver
 
+const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
 const FALLBACK_ASSET_BY_SLOT := {
 	"head": "fallback_equipment_head_v0",
@@ -50,6 +51,8 @@ var _visuals: Dictionary = {}      # item_def_id -> visual metadata
 var _assets: Dictionary = {}       # asset_id -> manifest entry
 var _inventory: Dictionary = {}    # item_instance_id (String) -> inventory item Dictionary
 var _equipped: Dictionary = {}      # slot -> item_instance_id
+var _weapon_sets: Array = []
+var _active_weapon_set: int = 0
 var _mounted_nodes: Dictionary = {} # slot -> Node3D
 var _mounted_state: Dictionary = {} # slot -> debug state
 var _warnings: Array = []
@@ -74,6 +77,10 @@ func apply_snapshot(payload: Dictionary) -> void:
 	for slot in EQUIPMENT_SLOTS:
 		var item_id = equipped.get(str(slot), null)
 		_equipped[str(slot)] = str(item_id) if item_id != null else ""
+	_weapon_sets = []
+	for set_data in payload.get("weapon_sets", []):
+		_weapon_sets.append((set_data as Dictionary).duplicate(true))
+	_active_weapon_set = int(payload.get("active_weapon_set", 0))
 	_refresh_all()
 
 
@@ -85,6 +92,15 @@ func ingest_inventory_item(item: Dictionary) -> void:
 	for slot in _equipped.keys():
 		if str(_equipped.get(slot, "")) == item_id:
 			_refresh_slot(str(slot))
+
+
+func apply_weapon_set_update(active_weapon_set: int, weapon_sets: Array) -> void:
+	_active_weapon_set = clamp(active_weapon_set, 0, 1)
+	_weapon_sets = []
+	for set_data in weapon_sets:
+		_weapon_sets.append((set_data as Dictionary).duplicate(true))
+	_refresh_slot("main_hand")
+	_refresh_slot("off_hand")
 
 
 func apply_equipped_update(slot: String, item_instance_id) -> void:
@@ -130,7 +146,7 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 	_clear_mounted(slot)
 	_mounted_state.erase(slot)
 
-	var item_instance_id := str(_equipped.get(slot, ""))
+	var item_instance_id := _equipped_instance_id_for_slot(slot)
 	if item_instance_id == "":
 		return
 
@@ -192,6 +208,13 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		"visible": inst.visible,
 		"procedural_fallback": procedural_fallback != null,
 	}
+
+
+func _equipped_instance_id_for_slot(slot: String) -> String:
+	if slot == "main_hand" or slot == "off_hand":
+		var item_id = WeaponSetTabsScript.hand_equipped_id(_weapon_sets, _equipped, _active_weapon_set, slot)
+		return str(item_id) if item_id != null else ""
+	return str(_equipped.get(slot, ""))
 
 
 func _visual_for(def_id: String, slot: String) -> Dictionary:

@@ -1,5 +1,7 @@
 package game
 
+import "math"
+
 func (s *Sim) continueAutoNavToGoal(player *entity, res *TickResult) bool {
 	nav := s.activeLevel().autoNav
 	if nav == nil || !nav.hasGoal {
@@ -16,6 +18,22 @@ func (s *Sim) continueAutoNavToGoal(player *entity, res *TickResult) bool {
 	player.pos = s.resolveMovement(player.pos, delta)
 	if player.pos != before {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+	}
+	if player.pos != before {
+		// If the player moved, check if progress toward the goal is negligible.
+		// When the Y-only fallback slides the player perpendicular to the goal
+		// (Zeno convergence), the dot product of movement direction and goal
+		// direction approaches 0. Treat this as stuck to trigger a re-plan.
+		moved := Vec2{X: player.pos.X - before.X, Y: player.pos.Y - before.Y}
+		movedDist := math.Sqrt(moved.X*moved.X + moved.Y*moved.Y)
+		toGoal := Vec2{X: nav.goal.X - before.X, Y: nav.goal.Y - before.Y}
+		goalDist := math.Sqrt(toGoal.X*toGoal.X + toGoal.Y*toGoal.Y)
+		if movedDist > 1e-9 && goalDist > 1e-9 {
+			dot := (moved.X*toGoal.X + moved.Y*toGoal.Y) / (movedDist * goalDist)
+			if dot < 0.1 { // nearly perpendicular to goal direction — sliding, not approaching
+				return false
+			}
+		}
 	}
 	return player.pos != before && distance(player.pos, nav.goal) > s.activeNav().StopDistance
 }

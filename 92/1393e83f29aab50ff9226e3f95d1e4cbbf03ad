@@ -1,0 +1,24 @@
+PROGRESS.md
+  s_517a6303f090f7::t_d773920972bebf 18
+  s_517a6303f090f7::t_ff801c7c707a9a 30-31
+  s_517a6303f090f7::t_8e8bffc215df45 90-94,105-115
+  s_517a6303f090f7::t_26482ae97495be 95-104
+server/internal/replay/replay_test.go
+  s_517a6303f090f7::t_4b73ae3583b071 90-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "921393e83f29aab50ff9226e3f95d1e4cbbf03ad",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

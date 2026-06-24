@@ -28,22 +28,51 @@ static func sync(
 		var active := int(rec.get("hp", 1)) > 0 and bool(rec.get("monster_pack_leader", false)) and pack_id != "" and active_pack_ids.has(pack_id)
 		PlayerStatusEffectMarkers.sync_elite_command_radius_preview(rec.get("node", null) as Node3D, active, radius)
 	if perspective and light_radius > 0.0:
-		_cull_far_aura_markers(entities, hero_pos, light_radius)
+		_cull_occluded_markers(entities, hero_pos, light_radius)
 
 
-static func _cull_far_aura_markers(entities: Dictionary, hero_pos: Vector3, light_radius: float) -> void:
+static func _cull_occluded_markers(entities: Dictionary, hero_pos: Vector3, light_radius: float) -> void:
 	for id in entities.keys():
 		var rec: Dictionary = entities[id]
 		var node := rec.get("node", null) as Node3D
-		if node == null or hero_pos.distance_to(node.global_position) <= light_radius:
+		if node == null:
 			continue
-		for marker_name in [
-			PlayerStatusEffectMarkers.ELITE_COMMAND_RADIUS_PREVIEW_NAME,
-			PlayerStatusEffectMarkers.ELITE_COMMAND_MARKER_NAME,
-		]:
+		var entity_pos := node.global_position
+		var in_range := hero_pos.distance_to(entity_pos) <= light_radius
+		var in_los := in_range and not _wall_blocks_los(node, hero_pos, entity_pos)
+		if in_los:
+			continue
+		for marker_name in _all_marker_names():
 			var marker := node.find_child(marker_name, false, false)
 			if marker != null:
 				marker.visible = false
+
+
+static func _wall_blocks_los(ref_node: Node3D, from_pos: Vector3, to_pos: Vector3) -> bool:
+	var world := ref_node.get_world_3d()
+	if world == null:
+		return false
+	var space := world.direct_space_state
+	if space == null:
+		return false
+	var eye := Vector3(0.0, 1.0, 0.0)
+	var params := PhysicsRayQueryParameters3D.create(from_pos + eye, to_pos + eye)
+	params.collision_mask = 1
+	return not space.intersect_ray(params).is_empty()
+
+
+static func _all_marker_names() -> Array:
+	return [
+		PlayerStatusEffectMarkers.HOLY_SHIELD_MARKER_NAME,
+		PlayerStatusEffectMarkers.SANCTUARY_MARKER_NAME,
+		PlayerStatusEffectMarkers.RAGE_MARKER_NAME,
+		PlayerStatusEffectMarkers.BURNING_MARKER_NAME,
+		PlayerStatusEffectMarkers.ELITE_COMMAND_MARKER_NAME,
+		PlayerStatusEffectMarkers.ELITE_COMMAND_RADIUS_PREVIEW_NAME,
+		PlayerStatusEffectMarkers.PINNING_ROOT_MARKER_NAME,
+		PlayerStatusEffectMarkers.STUN_MARKER_NAME,
+		PlayerStatusEffectMarkers.ROGUE_MARK_MARKER_NAME,
+	]
 
 
 static func _aura_radius(dungeon_generation: Dictionary) -> float:

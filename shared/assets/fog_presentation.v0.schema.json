@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/fog_presentation.v0.schema.json",
+  "title": "Fog presentation (v0)",
+  "description": "Client-only fog/darkness compositor tuning. No gameplay authority.",
+  "type": "object",
+  "required": [
+    "version",
+    "falloff_power",
+    "edge_feather_world",
+    "shadow_reach_multiplier",
+    "darkness_alpha",
+    "ambient_suppression",
+    "organic_edge"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "falloff_power": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Inverse-power exponent for hero light falloff (2.0 ≈ inverse-square feel)."
+    },
+    "edge_feather_world": {
+      "type": "number",
+      "minimum": 0,
+      "description": "World-units feather beyond light_radius before full black."
+    },
+    "shadow_reach_multiplier": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "LOS shadow polygon reach = light_radius * multiplier (replaces legacy gloom band)."
+    },
+    "darkness_alpha": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "ambient_suppression": {
+      "type": "object",
+      "required": ["directional_scale", "ambient_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "directional_scale": { "type": "number", "minimum": 0, "maximum": 1 },
+        "ambient_scale": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "perspective_ambient_suppression": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "directional_scale": { "type": "number", "minimum": 0, "maximum": 1 },
+        "ambient_scale": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "organic_edge": {
+      "type": "object",
+      "required": [
+        "world_amplitude",
+        "segments",
+        "seed",
+        "rotation_cycles_per_second",
+        "rotation_move_epsilon",
+        "enabled_isometric",
+        "enabled_perspective"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "world_amplitude": { "type": "number", "minimum": 0 },
+        "segments": { "type": "number", "exclusiveMinimum": 0 },
+        "seed": { "type": "number" },
+        "rotation_cycles_per_second": { "type": "number", "minimum": 0 },
+        "rotation_move_epsilon": { "type": "number", "minimum": 0 },
+        "enabled_isometric": { "type": "boolean" },
+        "enabled_perspective": { "type": "boolean" }
+      }
+    },
+    "perspective": {
+      "type": "object",
+      "required": ["sample_heights", "height_sample_max_ground_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "sample_heights": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "type": "number", "minimum": 0 }
+        },
+        "height_sample_max_ground_scale": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 4.0,
+          "description": "Only apply extra height samples when ground XZ distance is between light_radius and light_radius * this scale."
+        }
+      }
+    },
+    "point_light": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "energy": { "type": "number", "minimum": 0 },
+        "attenuation": { "type": "number", "minimum": 0 },
+        "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "range_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "height_offset": { "type": "number", "minimum": 0 },
+        "shadow_enabled": { "type": "boolean" }
+      }
+    },
+    "shadow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "edge_epsilon": { "type": "number", "minimum": 0 },
+        "start_offset": { "type": "number", "minimum": 0 },
+        "wall_height": { "type": "number", "minimum": 0 },
+        "gloom_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "gloom_alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+        "core_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "core_alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+        "gloom_scale": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}

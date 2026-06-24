@@ -26,6 +26,9 @@ func _run() -> void:
 	await _test_multiple_walls_generate_multiple_shadows()
 	await _test_zero_radius_disables_overlay()
 	await _test_set_active_false_survives_progression_update()
+	await _test_hero_centered_falloff_debug_state()
+	await _test_perspective_world_ground_falloff()
+	await _test_perspective_disables_organic_edge()
 	print("[gdtest] PASS: test_fog_of_war_overlay (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -42,6 +45,8 @@ func _test_progression_sets_light_and_gloom_radius() -> void:
 	_assert_eq("gloom radius", float(state.get("gloom_radius", 0.0)), 15.0)
 	_assert_true("screen light radius positive", float(state.get("light_radius_px", 0.0)) > 0.0)
 	_assert_eq("darkness alpha", float(state.get("darkness_alpha", 0.0)), 1.0)
+	_assert_true("hero centered falloff", bool(state.get("hero_centered_falloff", false)))
+	_assert_false("world space visibility in isometric", bool(state.get("world_space_visibility", true)))
 	_assert_eq("no wall shadows", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
 
@@ -284,6 +289,72 @@ func _test_set_active_false_survives_progression_update() -> void:
 	var state := overlay.get_debug_state()
 	_assert_false("inactive overlay stays hidden after progression", bool(state.get("enabled", true)))
 	_assert_eq("light radius still tracked while inactive", float(state.get("light_radius", 0.0)), 12.0)
+	overlay.free()
+
+
+func _test_hero_centered_falloff_debug_state() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_active(true)
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_true("hero centered falloff flag", bool(state.get("hero_centered_falloff", false)))
+	_assert_false("world space visibility disabled", bool(state.get("world_space_visibility", true)))
+	_assert_true("falloff power positive", float(state.get("falloff_power", 0.0)) > 0.0)
+	_assert_true("edge feather world positive", float(state.get("edge_feather_world", 0.0)) > 0.0)
+	overlay.free()
+
+
+func _test_perspective_world_ground_falloff() -> void:
+	var target := Node3D.new()
+	target.position = Vector3(5.0, 0.0, 5.0)
+	get_root().add_child(target)
+	var camera := Camera3D.new()
+	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	camera.fov = 70.0
+	get_root().add_child(camera)
+	camera.current = true
+	camera.global_position = target.global_position + Vector3(0.0, 1.4, 0.0)
+	camera.look_at(target.global_position + Vector3(0.0, 1.2, 8.0), Vector3.UP)
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.bind(camera, target)
+	overlay.set_active(true)
+	overlay.set_perspective_camera(true)
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_true("perspective world visibility", bool(state.get("world_space_visibility", false)))
+	_assert_false("perspective hero centered falloff", bool(state.get("hero_centered_falloff", true)))
+	_assert_eq("perspective falloff mode", str(state.get("falloff_mode", "")), "point_light")
+	var heights: Array = state.get("perspective_sample_heights", [])
+	_assert_true("perspective multi-height sampling", heights.size() >= 2)
+	_assert_true("perspective height gate scale", float(state.get("height_sample_max_ground_scale", 0.0)) >= 1.0)
+	var viewport := get_root().get_viewport().get_visible_rect().size
+	var center_ground := overlay.ground_xz_at_screen(viewport * 0.5)
+	var hero := Vector2(5.0, 5.0)
+	_assert_true("center ray resolves ground", is_finite(center_ground.x) and is_finite(center_ground.y))
+	_assert_true("center ray not pushed to far sentinel", center_ground.distance_to(hero) < 500.0)
+	_assert_true("center ray reaches forward floor", center_ground.y > hero.y)
+	overlay.free()
+	camera.free()
+	target.free()
+
+
+func _test_perspective_disables_organic_edge() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_active(true)
+	overlay.set_perspective_camera(true)
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_false("perspective organic edge disabled", bool(state.get("organic_edge_enabled", true)))
+	_assert_eq("perspective organic edge px", float(state.get("organic_edge_px", -1.0)), 0.0)
 	overlay.free()
 
 

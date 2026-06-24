@@ -55,11 +55,25 @@ static func apply_for_level(
 	directional: DirectionalLight3D,
 	world_environment: WorldEnvironment,
 	factory: GroundWallFactory,
+	suppress_for_fog: bool = false,
+	fog_suppression: Dictionary = {},
 ) -> Dictionary:
 	var profile := profile_for_level(level, factory)
+	if suppress_for_fog and level < 0:
+		profile = apply_fog_suppression(profile, fog_suppression)
 	apply_profile(profile, directional, world_environment)
 
 	return profile
+
+
+static func apply_fog_suppression(profile: Dictionary, fog_suppression: Dictionary) -> Dictionary:
+	var out := profile.duplicate(true)
+	var directional_scale := float(fog_suppression.get("directional_scale", 0.35))
+	var ambient_scale := float(fog_suppression.get("ambient_scale", 0.12))
+	out["directional_energy"] = float(out.get("directional_energy", 1.0)) * directional_scale
+	out["ambient_energy"] = float(out.get("ambient_energy", 0.30)) * ambient_scale
+
+	return out
 
 static func _color_from_hex(hex: String) -> Color:
 	var normalized := hex.strip_edges()

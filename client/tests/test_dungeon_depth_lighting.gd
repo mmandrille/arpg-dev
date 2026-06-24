@@ -10,6 +10,7 @@ func _initialize() -> void:
 	_test_town_profile_is_warm()
 	_test_shallow_and_deep_profiles_differ()
 	_test_apply_updates_scene_lights()
+	_test_fog_suppression_scales_energy()
 	_finish()
 
 func _test_town_profile_is_warm() -> void:
@@ -62,6 +63,21 @@ func _test_apply_updates_scene_lights() -> void:
 		_fail("ambient light energy did not apply")
 		return
 	_pass("scene lights apply profile")
+
+func _test_fog_suppression_scales_energy() -> void:
+	var factory := GroundWallFactoryScript.new()
+	var base: Dictionary = DungeonDepthLightingScript.profile_for_level(-2, factory)
+	var suppressed: Dictionary = DungeonDepthLightingScript.apply_fog_suppression(
+		base,
+		{"directional_scale": 0.5, "ambient_scale": 0.25},
+	)
+	if float(suppressed.get("directional_energy", 0.0)) >= float(base.get("directional_energy", 0.0)):
+		_fail("fog suppression must lower directional energy")
+		return
+	if float(suppressed.get("ambient_energy", 0.0)) >= float(base.get("ambient_energy", 0.0)):
+		_fail("fog suppression must lower ambient energy")
+		return
+	_pass("fog suppression scales profile")
 
 func _pass(label: String) -> void:
 	_pass_count += 1

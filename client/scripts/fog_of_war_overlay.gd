@@ -1,44 +1,46 @@
 class_name FogOfWarOverlay
 extends CanvasLayer
 
-const GLOOM_MULTIPLIER := 1.25
+const HeroVisibilityFieldScript := preload("res://scripts/hero_visibility_field.gd")
+const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
+
 const FALLBACK_WORLD_TO_SCREEN := 32.0
-const GLOOM_ALPHA := 0.52
-const DARKNESS_ALPHA := 1.0
-const SHADOW_EDGE_EPSILON := 0.08
-const SHADOW_START_OFFSET := 0.16
-const SHADOW_WALL_HEIGHT := 1.0
-const SHADOW_GLOOM_COLOR := Color(0.10, 0.11, 0.13, 0.42)
-const SHADOW_CORE_COLOR := Color(0.0, 0.0, 0.0, 0.82)
-const SHADOW_GLOOM_SCALE := 1.035
-const ORGANIC_EDGE_WORLD_AMPLITUDE := 0.65
-const DARKNESS_FEATHER_WORLD := 1.15
 const ORGANIC_EDGE_MIN_PX := 5.0
+const ORGANIC_EDGE_MAX_RADIUS_FRACTION := 0.10
 const DARKNESS_FEATHER_MIN_PX := 8.0
-const ORGANIC_EDGE_MAX_GLOOM_FRACTION := 0.10
-const DARKNESS_FEATHER_MAX_GLOOM_FRACTION := 0.18
-const ORGANIC_EDGE_SEGMENTS := 18.0
-const ORGANIC_EDGE_SEED := 41.0
-const EDGE_ROTATION_CYCLES_PER_SECOND := 0.12
-const EDGE_ROTATION_MOVE_EPSILON := 0.006
+const DARKNESS_FEATHER_MAX_RADIUS_FRACTION := 0.18
 const SHADER_CODE := """
 shader_type canvas_item;
 render_mode blend_mix, unshaded;
 
+uniform float perspective_mode = 0.0;
 uniform vec2 center_px = vec2(0.0, 0.0);
 uniform vec2 viewport_px = vec2(1.0, 1.0);
+uniform vec2 hero_world_xz = vec2(0.0, 0.0);
+uniform vec3 camera_origin = vec3(0.0, 0.0, 0.0);
+uniform mat4 inv_projection;
+uniform mat4 inv_view;
+uniform float light_radius = 0.0;
 uniform float light_radius_px = 0.0;
-uniform float gloom_radius_px = 0.0;
-uniform float organic_edge_px = 0.0;
 uniform float darkness_feather_px = 0.0;
+uniform float edge_feather_world = 1.15;
+uniform float falloff_power = 2.0;
+uniform float darkness_alpha = 1.0;
+uniform float organic_edge_px = 0.0;
+uniform float organic_edge_amp_world = 0.0;
 uniform float organic_edge_segments = 18.0;
 uniform float organic_edge_seed = 41.0;
 uniform float organic_edge_rotation = 0.0;
-uniform vec4 gloom_color : source_color = vec4(0.22, 0.24, 0.27, 0.52);
 uniform vec4 darkness_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+uniform float sample_height_count = 1.0;
+uniform float sample_height_1 = 1.25;
+uniform float sample_height_2 = 2.5;
+uniform float sample_height_3 = 3.75;
+uniform float height_sample_max_ground_scale = 2.0;
 
 const float ORGANIC_PI = 3.14159265359;
 const float ORGANIC_TAU = 6.28318530718;
+const float FAR_WORLD_DIST = 100000.0;
 
 float hash1(float n) {
 	return fract(sin(n) * 43758.5453123);
@@ -51,38 +53,94 @@ float smooth_noise(float x) {
 	return mix(hash1(i), hash1(i + 1.0), u);
 }
 
-float organic_edge(vec2 delta) {
-	if (organic_edge_px <= 0.0 || length(delta) <= 0.001) {
+float organic_edge_screen(vec2 delta_px) {
+	if (organic_edge_px <= 0.0 || length(delta_px) <= 0.001) {
 		return 0.0;
 	}
-	float angle = fract((atan(delta.y, delta.x) + ORGANIC_PI) / ORGANIC_TAU + organic_edge_rotation);
+	float angle = fract((atan(delta_px.y, delta_px.x) + ORGANIC_PI) / ORGANIC_TAU + organic_edge_rotation);
 	float low = smooth_noise(angle * organic_edge_segments + organic_edge_seed);
 	float high = smooth_noise(angle * organic_edge_segments * 2.17 + organic_edge_seed * 3.31);
 	float combined = low * 0.72 + high * 0.28;
 	return (combined - 0.5) * 2.0 * organic_edge_px;
 }
 
-void fragment() {
-	vec2 pos = SCREEN_UV * viewport_px;
-	vec2 delta = pos - center_px;
-	float d = length(delta);
-	float edge = organic_edge(delta);
-	float visual_light_radius = max(0.0, light_radius_px + edge * 0.45);
-	float visual_gloom_radius = max(visual_light_radius + 1.0, gloom_radius_px + edge);
-	float darkness_start_radius = max(visual_light_radius + 1.0, visual_gloom_radius - darkness_feather_px);
-	float visual_dark_radius = visual_gloom_radius + darkness_feather_px;
-	vec4 dense_gloom_color = vec4(gloom_color.rgb, min(gloom_color.a + 0.16, 0.78));
-	if (d <= visual_light_radius) {
-		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
-	} else if (d <= darkness_start_radius) {
-		float t = smoothstep(visual_light_radius, darkness_start_radius, d);
-		COLOR = mix(gloom_color, dense_gloom_color, t);
-	} else if (d <= visual_dark_radius) {
-		float t = smoothstep(darkness_start_radius, visual_dark_radius, d);
-		COLOR = mix(dense_gloom_color, darkness_color, t);
-	} else {
-		COLOR = darkness_color;
+float organic_edge_world(vec2 delta_xz) {
+	if (organic_edge_amp_world <= 0.0 || length(delta_xz) <= 0.001) {
+		return 0.0;
 	}
+	float angle = fract((atan(delta_xz.y, delta_xz.x) + ORGANIC_PI) / ORGANIC_TAU + organic_edge_rotation);
+	float low = smooth_noise(angle * organic_edge_segments + organic_edge_seed);
+	float high = smooth_noise(angle * organic_edge_segments * 2.17 + organic_edge_seed * 3.31);
+	float combined = low * 0.72 + high * 0.28;
+	return (combined - 0.5) * 2.0 * organic_edge_amp_world;
+}
+
+vec3 world_ray_direction(vec2 screen_px) {
+	vec2 uv = screen_px / viewport_px;
+	uv.y = 1.0 - uv.y;
+	vec2 ndc = uv * 2.0 - 1.0;
+	vec4 view = inv_projection * vec4(ndc, 1.0, 1.0);
+	view.xyz /= view.w;
+	vec3 dir_view = normalize(view.xyz);
+	return normalize((inv_view * vec4(dir_view, 0.0)).xyz);
+}
+
+vec2 plane_xz_at_height(vec2 screen_px, float plane_y) {
+	vec3 dir = world_ray_direction(screen_px);
+	if (abs(dir.y) <= 0.0001) {
+		return hero_world_xz + vec2(FAR_WORLD_DIST, 0.0);
+	}
+	float t = (plane_y - camera_origin.y) / dir.y;
+	if (t < 0.0) {
+		return hero_world_xz + vec2(FAR_WORLD_DIST, 0.0);
+	}
+	vec3 hit = camera_origin + dir * t;
+	return hit.xz;
+}
+
+vec2 ground_xz_at_screen(vec2 screen_px) {
+	return plane_xz_at_height(screen_px, 0.0);
+}
+
+float visibility_from_distance(float dist, float effective_radius, float feather) {
+	float normalized = dist / max(0.001, effective_radius);
+	float visibility = clamp(1.0 - pow(normalized, falloff_power), 0.0, 1.0);
+	if (dist > effective_radius) {
+		float feather_t = smoothstep(effective_radius, effective_radius + max(0.001, feather), dist);
+		visibility = mix(visibility, 0.0, feather_t);
+	}
+	return visibility;
+}
+
+float visibility_at_world_xz(vec2 world_xz) {
+	vec2 delta_xz = world_xz - hero_world_xz;
+	float dist = length(delta_xz);
+	float edge = organic_edge_world(delta_xz);
+	float effective_radius = max(0.001, light_radius + edge * 0.45);
+	return visibility_from_distance(dist, effective_radius, edge_feather_world);
+}
+
+float visibility_isometric(vec2 screen_px) {
+	vec2 delta_px = screen_px - center_px;
+	float d = length(delta_px);
+	float edge = organic_edge_screen(delta_px);
+	float effective_radius_px = max(1.0, light_radius_px + edge * 0.45);
+	return visibility_from_distance(d, effective_radius_px, darkness_feather_px);
+}
+
+float visibility_perspective(vec2 screen_px) {
+	// Canvas fog is transparent in perspective mode — OmniLight3D on the hero provides
+	// the physical distance falloff. Shadow polygons (drawn above this rect) handle LOS.
+	return 1.0;
+}
+
+void fragment() {
+	vec2 screen_px = SCREEN_UV * viewport_px;
+	float visibility = perspective_mode > 0.5
+		? visibility_perspective(screen_px)
+		: visibility_isometric(screen_px);
+	float alpha = (1.0 - visibility) * darkness_alpha;
+	COLOR = vec4(darkness_color.rgb, alpha);
 }
 """
 
@@ -91,14 +149,14 @@ var _target: Node3D
 var _rect: ColorRect
 var _shadow_root: Node2D
 var _material: ShaderMaterial
-var _active: bool = true
+var _dungeon_active: bool = true
+var _perspective_camera: bool = false
 var _light_radius: float = 0.0
-var _gloom_radius: float = 0.0
-var _light_radius_px: float = 0.0
-var _gloom_radius_px: float = 0.0
-var _organic_edge_px: float = 0.0
-var _darkness_feather_px: float = 0.0
+var _shadow_reach: float = 0.0
 var _center_px := Vector2.ZERO
+var _light_radius_px: float = 0.0
+var _darkness_feather_px: float = 0.0
+var _organic_edge_px: float = 0.0
 var _wall_layout: Array = []
 var _extra_occluder_layout: Array = []
 var _shadow_gloom_polygons: Array = []
@@ -109,25 +167,45 @@ var _edge_rotation: float = 0.0
 var _edge_rotation_active: bool = false
 var _has_last_target_world: bool = false
 var _last_target_world := Vector2.ZERO
+var _shadow_gloom_color := Color(0.10, 0.11, 0.13, 0.42)
+var _shadow_core_color := Color(0.0, 0.0, 0.0, 0.82)
+var _shadow_gloom_scale := 1.035
+var _point_light: OmniLight3D
+var _character_visual: Node3D
 
 
 func _ready() -> void:
 	layer = 0
+	FogPresentationLoaderScript.ensure_loaded()
+	_load_shadow_colors()
 	_ensure_rect()
 	set_process(true)
 	_sync_visibility()
 
 
-func bind(camera: Camera3D, target: Node3D) -> void:
+func bind(camera: Camera3D, target: Node3D, character_visual: Node3D = null) -> void:
 	_camera = camera
 	_target = target
+	_character_visual = character_visual
 	_reset_motion_tracking()
 	_update_shader()
+	_setup_point_light()
 
 
 func set_active(active: bool) -> void:
-	_active = active
+	_dungeon_active = active
 	_sync_visibility()
+	_sync_point_light()
+
+
+func set_perspective_camera(perspective: bool) -> void:
+	_perspective_camera = perspective
+	_update_shader()
+	_sync_point_light()
+	if _character_visual != null:
+		var mode := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if not perspective else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		for node in _character_visual.find_children("*", "GeometryInstance3D", true, false):
+			(node as GeometryInstance3D).cast_shadow = mode
 
 
 func set_progression(progression: Dictionary) -> void:
@@ -137,64 +215,74 @@ func set_progression(progression: Dictionary) -> void:
 
 func set_light_radius(radius: float) -> void:
 	_light_radius = maxf(0.0, radius)
-	_gloom_radius = _light_radius * GLOOM_MULTIPLIER
+	_shadow_reach = _light_radius * FogPresentationLoaderScript.shadow_reach_multiplier()
 	_sync_visibility()
 	_update_shader()
+	_sync_point_light()
 
 
 func set_wall_layout(walls: Array) -> void:
-	_wall_layout = []
-	for wall in walls:
-		if typeof(wall) != TYPE_DICTIONARY:
-			continue
-		if not _wall_blocks_line_of_sight(wall as Dictionary):
-			continue
-		var normalized := _normalized_occluder(wall as Dictionary)
-		if not normalized.is_empty():
-			_wall_layout.append(normalized)
+	_wall_layout = HeroVisibilityFieldScript.normalize_wall_layout(walls)
 	_update_shader()
 
 
 func set_occluder_layout(occluders: Array) -> void:
-	_extra_occluder_layout = []
-	for occluder in occluders:
-		if typeof(occluder) != TYPE_DICTIONARY:
-			continue
-		var normalized := _normalized_occluder(occluder as Dictionary)
-		if not normalized.is_empty():
-			_extra_occluder_layout.append(normalized)
+	_extra_occluder_layout = HeroVisibilityFieldScript.normalize_occluder_layout(occluders)
 	_update_shader()
 
 
+func should_suppress_ambient() -> bool:
+	return visible and _dungeon_active and _light_radius > 0.0
+
+
+func ambient_suppression_params() -> Dictionary:
+	if _perspective_camera:
+		return FogPresentationLoaderScript.perspective_ambient_suppression()
+	return FogPresentationLoaderScript.ambient_suppression()
+
+
 func get_debug_state() -> Dictionary:
+	var organic_cfg: Dictionary = FogPresentationLoaderScript.organic_edge()
+	var shadow_cfg: Dictionary = FogPresentationLoaderScript.shadow()
+
 	return {
 		"enabled": visible,
-		"active": _active,
+		"active": _dungeon_active,
+		"hero_centered_falloff": not _perspective_camera,
+		"world_space_visibility": _perspective_camera,
+		"falloff_mode": "point_light" if _perspective_camera else "screen_hero",
+		"perspective_camera": _perspective_camera,
+		"perspective_sample_heights": _perspective_sample_heights(),
+		"height_sample_max_ground_scale": FogPresentationLoaderScript.height_sample_max_ground_scale(),
 		"light_radius": _light_radius,
-		"gloom_radius": _gloom_radius,
+		"gloom_radius": _shadow_reach,
+		"shadow_reach": _shadow_reach,
+		"falloff_power": FogPresentationLoaderScript.falloff_power(),
+		"edge_feather_world": FogPresentationLoaderScript.edge_feather_world(),
+		"shadow_reach_multiplier": FogPresentationLoaderScript.shadow_reach_multiplier(),
 		"light_radius_px": _light_radius_px,
-		"gloom_radius_px": _gloom_radius_px,
+		"gloom_radius_px": _projected_radius(_shadow_reach),
 		"organic_edge_enabled": _organic_edge_enabled(),
 		"organic_edge_px": _organic_edge_px,
+		"organic_edge_world_amplitude": _organic_edge_world_amplitude(),
 		"darkness_feather_px": _darkness_feather_px,
-		"organic_edge_world_amplitude": ORGANIC_EDGE_WORLD_AMPLITUDE,
-		"darkness_feather_world": DARKNESS_FEATHER_WORLD,
-		"organic_edge_segments": int(ORGANIC_EDGE_SEGMENTS),
+		"darkness_feather_world": FogPresentationLoaderScript.edge_feather_world(),
+		"organic_edge_segments": int(organic_cfg.get("segments", 18.0)),
 		"organic_edge_rotation": _edge_rotation,
 		"organic_edge_rotation_active": _edge_rotation_active,
-		"organic_edge_rotation_cycles_per_second": EDGE_ROTATION_CYCLES_PER_SECOND,
-		"gloom_alpha": GLOOM_ALPHA,
-		"darkness_alpha": DARKNESS_ALPHA,
-		"shadow_gloom_alpha": SHADOW_GLOOM_COLOR.a,
-		"shadow_core_alpha": SHADOW_CORE_COLOR.a,
+		"organic_edge_rotation_cycles_per_second": float(organic_cfg.get("rotation_cycles_per_second", 0.12)),
+		"darkness_alpha": FogPresentationLoaderScript.darkness_alpha(),
+		"shadow_gloom_alpha": _shadow_gloom_color.a,
+		"shadow_core_alpha": _shadow_core_color.a,
 		"wall_count": _wall_layout.size(),
 		"extra_occluder_count": _extra_occluder_layout.size(),
 		"occluder_count": _occluder_count,
 		"shadow_count": _shadow_debug.size(),
-		"shadow_start_offset": SHADOW_START_OFFSET,
-		"shadow_wall_height": SHADOW_WALL_HEIGHT,
+		"shadow_start_offset": float(shadow_cfg.get("start_offset", 0.16)),
+		"shadow_wall_height": float(shadow_cfg.get("wall_height", 1.0)),
 		"shadow_polygons": _shadow_debug.duplicate(true),
 		"center": {"x": _center_px.x, "y": _center_px.y},
+		"hero_world": {"x": _target_world_position().x, "y": _target_world_position().y},
 	}
 
 
@@ -213,11 +301,7 @@ func _ensure_rect() -> void:
 	shader.code = SHADER_CODE
 	_material = ShaderMaterial.new()
 	_material.shader = shader
-	_material.set_shader_parameter("gloom_color", Color(0.22, 0.24, 0.27, GLOOM_ALPHA))
-	_material.set_shader_parameter("darkness_color", Color(0.0, 0.0, 0.0, DARKNESS_ALPHA))
-	_material.set_shader_parameter("organic_edge_segments", ORGANIC_EDGE_SEGMENTS)
-	_material.set_shader_parameter("organic_edge_seed", ORGANIC_EDGE_SEED)
-	_material.set_shader_parameter("organic_edge_rotation", _edge_rotation)
+	_material.set_shader_parameter("darkness_color", Color(0.0, 0.0, 0.0, FogPresentationLoaderScript.darkness_alpha()))
 	_rect.material = _material
 	add_child(_rect)
 	_shadow_root = Node2D.new()
@@ -225,8 +309,15 @@ func _ensure_rect() -> void:
 	add_child(_shadow_root)
 
 
+func _load_shadow_colors() -> void:
+	var shadow_cfg: Dictionary = FogPresentationLoaderScript.shadow()
+	_shadow_gloom_color = _color_from_hex(str(shadow_cfg.get("gloom_color", "#1a1c21")), float(shadow_cfg.get("gloom_alpha", 0.42)))
+	_shadow_core_color = _color_from_hex(str(shadow_cfg.get("core_color", "#000000")), float(shadow_cfg.get("core_alpha", 0.82)))
+	_shadow_gloom_scale = float(shadow_cfg.get("gloom_scale", 1.035))
+
+
 func _sync_visibility() -> void:
-	visible = _active and _light_radius > 0.0
+	visible = _dungeon_active and _light_radius > 0.0
 
 
 func _update_shader() -> void:
@@ -235,20 +326,68 @@ func _update_shader() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size if get_viewport() != null else Vector2(1.0, 1.0)
 	_center_px = _project_target()
 	_light_radius_px = _projected_radius(_light_radius)
-	_gloom_radius_px = _projected_radius(_gloom_radius)
 	_organic_edge_px = _organic_edge_pixel_radius()
 	_darkness_feather_px = _darkness_feather_pixel_radius()
 	_material.set_shader_parameter("viewport_px", viewport_size)
+	_material.set_shader_parameter("perspective_mode", 1.0 if _perspective_camera else 0.0)
 	_material.set_shader_parameter("center_px", _center_px)
+	_material.set_shader_parameter("hero_world_xz", _target_world_position())
+	_material.set_shader_parameter("light_radius", _light_radius)
 	_material.set_shader_parameter("light_radius_px", _light_radius_px)
-	_material.set_shader_parameter("gloom_radius_px", _gloom_radius_px)
-	_material.set_shader_parameter("organic_edge_px", _organic_edge_px)
 	_material.set_shader_parameter("darkness_feather_px", _darkness_feather_px)
+	_material.set_shader_parameter("edge_feather_world", FogPresentationLoaderScript.edge_feather_world())
+	_material.set_shader_parameter("falloff_power", FogPresentationLoaderScript.falloff_power())
+	_material.set_shader_parameter("darkness_alpha", FogPresentationLoaderScript.darkness_alpha())
+	_material.set_shader_parameter("organic_edge_px", _organic_edge_px)
+	_material.set_shader_parameter("organic_edge_amp_world", _organic_edge_world_amplitude())
+	if _camera != null and _perspective_camera:
+		_material.set_shader_parameter("camera_origin", _camera.global_position)
+		_material.set_shader_parameter("inv_projection", _camera.get_camera_projection().inverse())
+		_material.set_shader_parameter("inv_view", _camera.get_global_transform().affine_inverse())
+	var organic_cfg: Dictionary = FogPresentationLoaderScript.organic_edge()
+	_material.set_shader_parameter("organic_edge_segments", float(organic_cfg.get("segments", 18.0)))
+	_material.set_shader_parameter("organic_edge_seed", float(organic_cfg.get("seed", 41.0)))
 	_material.set_shader_parameter("organic_edge_rotation", _edge_rotation)
+	_apply_perspective_shader_params()
 	_update_shadows(viewport_size)
 
 
+func _apply_perspective_shader_params() -> void:
+	var heights := _perspective_sample_heights()
+	var count := heights.size()
+	_material.set_shader_parameter("sample_height_count", float(count))
+	_material.set_shader_parameter("sample_height_1", float(heights[1]) if count > 1 else 0.0)
+	_material.set_shader_parameter("sample_height_2", float(heights[2]) if count > 2 else 0.0)
+	_material.set_shader_parameter("sample_height_3", float(heights[3]) if count > 3 else 0.0)
+	_material.set_shader_parameter(
+		"height_sample_max_ground_scale",
+		FogPresentationLoaderScript.height_sample_max_ground_scale(),
+	)
+
+
+func _perspective_sample_heights() -> Array:
+	var cfg: Dictionary = FogPresentationLoaderScript.perspective()
+	var raw: Array = cfg.get("sample_heights", [0.0])
+	var heights: Array = []
+	for value in raw:
+		heights.append(maxf(0.0, float(value)))
+	if heights.is_empty():
+		heights.append(0.0)
+	heights.sort()
+	var deduped: Array = []
+	for height in heights:
+		if deduped.is_empty() or absf(float(deduped[-1]) - float(height)) > 0.001:
+			deduped.append(height)
+	if deduped.size() > 4:
+		deduped = deduped.slice(0, 4)
+
+	return deduped
+
+
 func _update_motion_phase(delta: float) -> void:
+	var organic_cfg: Dictionary = FogPresentationLoaderScript.organic_edge()
+	var move_epsilon := float(organic_cfg.get("rotation_move_epsilon", 0.006))
+	var rotation_speed := float(organic_cfg.get("rotation_cycles_per_second", 0.12))
 	var current := _target_world_position()
 	if not visible:
 		_last_target_world = current
@@ -262,9 +401,9 @@ func _update_motion_phase(delta: float) -> void:
 		return
 	var distance := current.distance_to(_last_target_world)
 	_last_target_world = current
-	_edge_rotation_active = distance > EDGE_ROTATION_MOVE_EPSILON
+	_edge_rotation_active = distance > move_epsilon
 	if _edge_rotation_active:
-		_edge_rotation = fposmod(_edge_rotation + maxf(0.0, delta) * EDGE_ROTATION_CYCLES_PER_SECOND, 1.0)
+		_edge_rotation = fposmod(_edge_rotation + maxf(0.0, delta) * rotation_speed, 1.0)
 
 
 func _reset_motion_tracking() -> void:
@@ -275,7 +414,9 @@ func _reset_motion_tracking() -> void:
 
 func _project_target() -> Vector2:
 	if _camera != null and _target != null:
-		return _camera.unproject_position(_target.global_position)
+		var ground := Vector3(_target.global_position.x, 0.0, _target.global_position.z)
+		return _camera.unproject_position(ground)
+
 	return get_viewport().get_visible_rect().size * 0.5 if get_viewport() != null else Vector2.ZERO
 
 
@@ -283,30 +424,68 @@ func _projected_radius(world_radius: float) -> float:
 	if world_radius <= 0.0:
 		return 0.0
 	if _camera != null and _target != null:
-		var center := _camera.unproject_position(_target.global_position)
-		var edge := _camera.unproject_position(_target.global_position + Vector3(world_radius, 0.0, 0.0))
+		var ground := Vector3(_target.global_position.x, 0.0, _target.global_position.z)
+		var center := _camera.unproject_position(ground)
+		var edge := _camera.unproject_position(ground + Vector3(world_radius, 0.0, 0.0))
 		return maxf(1.0, center.distance_to(edge))
+
 	return world_radius * FALLBACK_WORLD_TO_SCREEN
 
 
 func _organic_edge_enabled() -> bool:
-	return _active and _light_radius > 0.0 and _organic_edge_px > 0.0
+	if not visible or _light_radius <= 0.0:
+		return false
+	if _perspective_camera:
+		return _organic_edge_world_amplitude() > 0.0
+
+	return _organic_edge_px > 0.0
+
+
+func ground_xz_at_screen(screen_pos: Vector2) -> Vector2:
+	return plane_xz_at_screen(screen_pos, 0.0)
+
+
+func plane_xz_at_screen(screen_pos: Vector2, plane_y: float) -> Vector2:
+	if _camera == null:
+		return _target_world_position()
+	var ray_origin := _camera.project_ray_origin(screen_pos)
+	var ray_dir := _camera.project_ray_normal(screen_pos)
+	if absf(ray_dir.y) <= 0.0001:
+		return _target_world_position() + Vector2(1e6, 0.0)
+	var t := (plane_y - ray_origin.y) / ray_dir.y
+	if t < 0.0:
+		return _target_world_position() + Vector2(1e6, 0.0)
+	var hit := ray_origin + ray_dir * t
+
+	return Vector2(hit.x, hit.z)
 
 
 func _organic_edge_pixel_radius() -> float:
-	if _light_radius <= 0.0 or _gloom_radius_px <= 0.0:
+	var amplitude := _organic_edge_world_amplitude()
+	if _light_radius <= 0.0 or _light_radius_px <= 0.0 or amplitude <= 0.0:
 		return 0.0
-	var projected := _projected_radius(ORGANIC_EDGE_WORLD_AMPLITUDE)
-	var max_edge := _gloom_radius_px * ORGANIC_EDGE_MAX_GLOOM_FRACTION
+	var projected := _projected_radius(amplitude)
+	var max_edge := _light_radius_px * ORGANIC_EDGE_MAX_RADIUS_FRACTION
 	return clampf(projected, ORGANIC_EDGE_MIN_PX, max_edge)
 
 
 func _darkness_feather_pixel_radius() -> float:
-	if _light_radius <= 0.0 or _gloom_radius_px <= 0.0:
+	if _light_radius <= 0.0 or _light_radius_px <= 0.0:
 		return 0.0
-	var projected := _projected_radius(DARKNESS_FEATHER_WORLD)
-	var max_feather := _gloom_radius_px * DARKNESS_FEATHER_MAX_GLOOM_FRACTION
+	var projected := _projected_radius(FogPresentationLoaderScript.edge_feather_world())
+	var max_feather := _light_radius_px * DARKNESS_FEATHER_MAX_RADIUS_FRACTION
 	return clampf(projected, DARKNESS_FEATHER_MIN_PX, max_feather)
+
+
+func _organic_edge_world_amplitude() -> float:
+	if not visible or _light_radius <= 0.0:
+		return 0.0
+	var organic_cfg: Dictionary = FogPresentationLoaderScript.organic_edge()
+	var enabled := bool(organic_cfg.get("enabled_perspective", false)) if _perspective_camera else bool(organic_cfg.get("enabled_isometric", true))
+	if not enabled:
+		return 0.0
+
+	return float(organic_cfg.get("world_amplitude", 0.65))
 
 
 func _update_shadows(viewport_size: Vector2) -> void:
@@ -314,38 +493,44 @@ func _update_shadows(viewport_size: Vector2) -> void:
 	_occluder_count = 0
 	if _shadow_root == null:
 		return
-	var occluders := _combined_occluders()
-	if not visible or _gloom_radius <= 0.0 or occluders.is_empty():
+	if _perspective_camera:
+		_hide_shadow_polygons()
+		return
+	var occluders := HeroVisibilityFieldScript.combined_occluders(_wall_layout, _extra_occluder_layout)
+	if not visible or _shadow_reach <= 0.0 or occluders.is_empty():
 		_hide_shadow_polygons()
 		return
 	var hero_world := _target_world_position()
-	var polygons: Array = []
-	for occluder in occluders:
-		var poly := _shadow_polygon_for_wall(occluder as Dictionary, hero_world, viewport_size)
-		if poly.size() < 4:
-			continue
-		_occluder_count += 1
-		polygons.append(poly)
-		_shadow_debug.append(_debug_shadow(poly))
-	_sync_shadow_polygons(polygons)
+	var built := HeroVisibilityFieldScript.build_shadow_polygons(
+		_camera,
+		hero_world,
+		_shadow_reach,
+		viewport_size,
+		occluders,
+		FogPresentationLoaderScript.shadow(),
+		_center_px,
+	)
+	_occluder_count = int(built.get("occluder_count", 0))
+	_shadow_debug = built.get("debug", [])
+	_sync_shadow_polygons(built.get("polygons", []))
 
 
 func _sync_shadow_polygons(polygons: Array) -> void:
 	while _shadow_gloom_polygons.size() < polygons.size():
 		var gloom_node := Polygon2D.new()
-		gloom_node.color = SHADOW_GLOOM_COLOR
+		gloom_node.color = _shadow_gloom_color
 		_shadow_root.add_child(gloom_node)
 		_shadow_gloom_polygons.append(gloom_node)
 	while _shadow_polygons.size() < polygons.size():
 		var node := Polygon2D.new()
-		node.color = SHADOW_CORE_COLOR
+		node.color = _shadow_core_color
 		_shadow_root.add_child(node)
 		_shadow_polygons.append(node)
 	for i in range(_shadow_gloom_polygons.size()):
 		var gloom_node := _shadow_gloom_polygons[i] as Polygon2D
 		if i < polygons.size():
 			gloom_node.visible = true
-			gloom_node.polygon = PackedVector2Array(_expanded_polygon(polygons[i] as Array, SHADOW_GLOOM_SCALE))
+			gloom_node.polygon = PackedVector2Array(HeroVisibilityFieldScript.expanded_polygon(polygons[i] as Array, _shadow_gloom_scale))
 		else:
 			gloom_node.visible = false
 			gloom_node.polygon = PackedVector2Array()
@@ -370,150 +555,43 @@ func _hide_shadow_polygons() -> void:
 		polygon.polygon = PackedVector2Array()
 
 
-func _expanded_polygon(points: Array, scale: float) -> Array:
-	if points.is_empty():
-		return []
-	var center := Vector2.ZERO
-	for point in points:
-		center += point as Vector2
-	center /= float(points.size())
-	var out: Array = []
-	for point in points:
-		var p := point as Vector2
-		out.append(center + (p - center) * scale)
-	return out
-
-
-func _shadow_polygon_for_wall(wall: Dictionary, hero_world: Vector2, viewport_size: Vector2) -> Array:
-	var center := Vector2(float(wall.get("x", 0.0)), float(wall.get("y", 0.0)))
-	var size := Vector2(float(wall.get("w", 0.0)), float(wall.get("h", 0.0)))
-	if size.x <= 0.0 or size.y <= 0.0:
-		return []
-	var wall_reach := size.length() * 0.5
-	if hero_world.distance_to(center) > _gloom_radius + wall_reach:
-		return []
-	if _point_inside_wall(hero_world, center, size):
-		return []
-	var tangent := _tangent_corners(hero_world, _wall_corners(center, size))
-	if tangent.size() < 2:
-		return []
-	var corner_a: Vector2 = tangent[0]
-	var corner_b: Vector2 = tangent[1]
-	var dir_a := (corner_a - hero_world).normalized()
-	var dir_b := (corner_b - hero_world).normalized()
-	if dir_a.length() <= 0.0 or dir_b.length() <= 0.0:
-		return []
-	var edge_offset := clampf(SHADOW_START_OFFSET, SHADOW_EDGE_EPSILON, minf(size.x, size.y) * 0.5)
-	var extend := maxf(_gloom_radius * 4.0, hero_world.distance_to(center) + viewport_size.length() / FALLBACK_WORLD_TO_SCREEN + wall_reach)
-	var start_a := corner_a + dir_a * edge_offset
-	var start_b := corner_b + dir_b * edge_offset
-	var end_a := hero_world + dir_a * extend
-	var end_b := hero_world + dir_b * extend
-	return [
-		_project_world_point(start_a, SHADOW_WALL_HEIGHT),
-		_project_world_point(end_a),
-		_project_world_point(end_b),
-		_project_world_point(start_b, SHADOW_WALL_HEIGHT),
-	]
-
-
-func _tangent_corners(hero_world: Vector2, corners: Array) -> Array:
-	var entries: Array = []
-	for corner in corners:
-		var point := corner as Vector2
-		entries.append({"angle": atan2(point.y - hero_world.y, point.x - hero_world.x), "corner": point})
-	entries.sort_custom(func(a, b): return float(a.get("angle", 0.0)) < float(b.get("angle", 0.0)))
-	var max_gap := -1.0
-	var gap_index := 0
-	for i in range(entries.size()):
-		var next_i := (i + 1) % entries.size()
-		var a := float(entries[i].get("angle", 0.0))
-		var b := float(entries[next_i].get("angle", 0.0))
-		var gap := b - a
-		if next_i == 0:
-			gap += TAU
-		if gap > max_gap:
-			max_gap = gap
-			gap_index = i
-	var first: Vector2 = entries[(gap_index + 1) % entries.size()].get("corner", Vector2.ZERO)
-	var second: Vector2 = entries[gap_index].get("corner", Vector2.ZERO)
-	if first.distance_to(second) <= 0.001:
-		return []
-	return [first, second]
-
-
-func _wall_corners(center: Vector2, size: Vector2) -> Array:
-	var half := size * 0.5
-	return [
-		Vector2(center.x - half.x, center.y - half.y),
-		Vector2(center.x + half.x, center.y - half.y),
-		Vector2(center.x + half.x, center.y + half.y),
-		Vector2(center.x - half.x, center.y + half.y),
-	]
-
-
-func _point_inside_wall(point: Vector2, center: Vector2, size: Vector2) -> bool:
-	var half := size * 0.5
-	return point.x >= center.x - half.x and point.x <= center.x + half.x and point.y >= center.y - half.y and point.y <= center.y + half.y
-
-
-func _project_world_point(world_point: Vector2, height: float = 0.0) -> Vector2:
-	if _camera != null:
-		return _camera.unproject_position(Vector3(world_point.x, height, world_point.y))
-	return _center_px + (world_point - _target_world_position()) * FALLBACK_WORLD_TO_SCREEN
-
-
 func _target_world_position() -> Vector2:
 	if _target != null:
 		return Vector2(_target.global_position.x, _target.global_position.z)
+
 	return Vector2.ZERO
 
 
-func _combined_occluders() -> Array:
-	var occluders := _wall_layout.duplicate()
-	for occluder in _extra_occluder_layout:
-		occluders.append(occluder)
-	return occluders
+func _color_from_hex(hex: String, alpha: float) -> Color:
+	var normalized := hex.strip_edges()
+	if not normalized.begins_with("#"):
+		normalized = "#" + normalized
+	var color := Color(normalized)
+
+	return Color(color.r, color.g, color.b, alpha)
 
 
-func _wall_blocks_line_of_sight(wall: Dictionary) -> bool:
-	if wall.has("blocks_line_of_sight"):
-		return bool(wall.get("blocks_line_of_sight", false))
-	return str(wall.get("kind", "wall")) == "wall"
+func _setup_point_light() -> void:
+	if _target == null or _point_light != null:
+		return
+	var cfg: Dictionary = FogPresentationLoaderScript.point_light()
+	_point_light = OmniLight3D.new()
+	_point_light.name = "HeroPointLight"
+	_point_light.light_energy = float(cfg.get("energy", 2.0))
+	_point_light.omni_attenuation = float(cfg.get("attenuation", 1.5))
+	_point_light.light_color = Color(str(cfg.get("color", "#ffffff")))
+	_point_light.shadow_enabled = bool(cfg.get("shadow_enabled", false))
+	_point_light.position = Vector3(0.0, float(cfg.get("height_offset", 0.5)), 0.0)
+	_point_light.omni_range = 0.0
+	_point_light.visible = false
+	_target.add_child(_point_light)
 
 
-func _normalized_occluder(occluder: Dictionary) -> Dictionary:
-	var pos: Dictionary = occluder.get("position", {})
-	var size: Dictionary = occluder.get("size", {})
-	var w := float(size.get("x", 0.0))
-	var h := float(size.get("y", 0.0))
-	if w <= 0.0 or h <= 0.0:
-		return {}
-	return {
-		"x": float(pos.get("x", 0.0)),
-		"y": float(pos.get("y", 0.0)),
-		"w": w,
-		"h": h,
-	}
-
-
-func _debug_shadow(points: Array) -> Dictionary:
-	var min_p := points[0] as Vector2
-	var max_p := points[0] as Vector2
-	var serialized: Array = []
-	for point in points:
-		var p := point as Vector2
-		min_p.x = minf(min_p.x, p.x)
-		min_p.y = minf(min_p.y, p.y)
-		max_p.x = maxf(max_p.x, p.x)
-		max_p.y = maxf(max_p.y, p.y)
-		serialized.append({"x": p.x, "y": p.y})
-	return {
-		"points": serialized,
-		"bounds": {
-			"min_x": min_p.x,
-			"min_y": min_p.y,
-			"max_x": max_p.x,
-			"max_y": max_p.y,
-		},
-	}
+func _sync_point_light() -> void:
+	if _point_light == null:
+		return
+	var active := _dungeon_active and _perspective_camera and _light_radius > 0.0
+	_point_light.visible = active
+	if active:
+		var cfg: Dictionary = FogPresentationLoaderScript.point_light()
+		_point_light.omni_range = maxf(0.1, _light_radius * float(cfg.get("range_multiplier", 1.0)))

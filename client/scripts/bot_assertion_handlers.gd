@@ -357,7 +357,7 @@ static func _assert_fog_of_war(runner, step: Dictionary, state: Dictionary) -> b
 
 static func _fog_of_war_mismatch(step: Dictionary, state: Dictionary) -> String:
 	var fog: Dictionary = state.get("fog_of_war", {})
-	for key in ["enabled", "active", "organic_edge_enabled"]:
+	for key in ["enabled", "active", "organic_edge_enabled", "hero_centered_falloff", "world_space_visibility", "perspective_camera"]:
 		if step.has(key) and bool(fog.get(key, false)) != bool(step.get(key, true)):
 			return "%s want=%s got=%s fog=%s" % [key, str(step.get(key, true)), str(fog.get(key, null)), str(fog)]
 	for key in ["light_radius", "gloom_radius", "organic_edge_px", "darkness_feather_px", "shadow_core_alpha", "shadow_gloom_alpha"]:

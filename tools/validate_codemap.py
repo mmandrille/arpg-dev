@@ -40,12 +40,36 @@ def validate_codemap(path: Path, root: Path = ROOT) -> list[str]:
     return errors
 
 
+def check_unlisted_files(repo_root: Path, codemap_text: str) -> list[str]:
+    """Return paths for game/*.go (non-test) and client/scripts/*.gd not mentioned in CODEMAP."""
+    errors: list[str] = []
+
+    game_dir = repo_root / "server" / "internal" / "game"
+    for f in sorted(game_dir.glob("*.go")):
+        if f.name.endswith("_test.go"):
+            continue
+        if f.name not in codemap_text:
+            errors.append(f"unlisted in CODEMAP: server/internal/game/{f.name}")
+
+    scripts_dir = repo_root / "client" / "scripts"
+    for f in sorted(scripts_dir.glob("*.gd")):
+        if f.name not in codemap_text:
+            errors.append(f"unlisted in CODEMAP: client/scripts/{f.name}")
+
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate docs/CODEMAP.md path references.")
     parser.add_argument("codemap", nargs="?", default=str(DEFAULT_CODEMAP))
     args = parser.parse_args()
 
-    errors = validate_codemap(Path(args.codemap))
+    codemap_path = Path(args.codemap)
+    codemap_text = codemap_path.read_text()
+
+    errors = validate_codemap(codemap_path)
+    errors += check_unlisted_files(ROOT, codemap_text)
+
     if errors:
         for error in errors:
             print(error, file=sys.stderr)

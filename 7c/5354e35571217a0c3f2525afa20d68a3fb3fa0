@@ -1,0 +1,26 @@
+server/internal/game/gold_auto_pickup_test.go
+  s_517a6303f090f7::t_aa3e6633157ba7 8-10
+  s_517a6303f090f7::t_e216c97cae3baa 81
+server/internal/game/interactables_test.go
+  s_517a6303f090f7::t_1625d6681443be 57-60
+server/internal/game/game_test.go
+  s_517a6303f090f7::t_7cce14d8e60cd5 4410-4411
+  s_517a6303f090f7::t_bebfba12f9494e 1975
+  s_517a6303f090f7::t_3c1af971240b0f 4380-4383,4386-4387
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7c5354e35571217a0c3f2525afa20d68a3fb3fa0",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

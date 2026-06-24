@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestSorcererTeleportMovesWithoutDamage(t *testing.T) {
 	sim := mobilitySkillSim(t, "sorcerer", "teleport")
@@ -145,8 +148,8 @@ func TestPaladinChargeChannelSpeedScalesFromPlayerMoveSpeed(t *testing.T) {
 	}})
 	assertAck(t, result, "charge_start")
 	want := start.X + sim.playerMoveSpeed()*def.Mobility.SpeedMultiplier
-	if player.pos.X != want {
-		t.Fatalf("charge x = %.2f, want %.2f from player speed %.2f * multiplier %.2f", player.pos.X, want, sim.playerMoveSpeed(), def.Mobility.SpeedMultiplier)
+	if math.Abs(player.pos.X-want) > 0.001 {
+		t.Fatalf("charge x = %.4f, want %.4f from player speed %.4f * multiplier %.2f", player.pos.X, want, sim.playerMoveSpeed(), def.Mobility.SpeedMultiplier)
 	}
 }
 

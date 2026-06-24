@@ -360,7 +360,7 @@ func TestMainConfigMovementSpeedDrivesPlayerMovement(t *testing.T) {
 	sim.Tick([]Input{{MessageID: "m", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1, Y: 0}, DurationTicks: 2}}})
 	sim.Tick(nil)
 	got := sim.entities[sim.playerID].pos
-	wantX := start.X + movementDistanceForTicks(sim.rules, 2)
+	wantX := start.X + movementDistanceForTicks(sim, 2)
 	if math.Abs(got.X-wantX) > 0.0001 || got.Y != start.Y {
 		t.Fatalf("player pos = %+v, want x=%v", got, wantX)
 	}
@@ -4188,10 +4188,10 @@ func countWallSource(walls []WallView, source string) int {
 
 // --- movement ---------------------------------------------------------------
 
-func movementDistanceForTicks(rules *Rules, ticks int) float64 {
-	base := rules.MainConfig.Gameplay.BaseMovementSpeed
-	accel := rules.MainConfig.Gameplay.MovementAccelerationSeconds
-	minFactor := rules.MainConfig.Gameplay.MovementMinSpeedFactor
+func movementDistanceForTicks(sim *Sim, ticks int) float64 {
+	base := sim.DerivedStatsView().MovementSpeed
+	accel := sim.rules.MainConfig.Gameplay.MovementAccelerationSeconds
+	minFactor := sim.rules.MainConfig.Gameplay.MovementMinSpeedFactor
 	if accel <= 0 {
 		return float64(ticks) * base
 	}
@@ -4228,7 +4228,7 @@ func TestMovement(t *testing.T) {
 	sim.Tick(nil)
 	// 3 ticks of configured input movement in +x (includes momentum ramp).
 	got := sim.entities[sim.playerID].pos
-	wantX := start.X + movementDistanceForTicks(sim.rules, 3)
+	wantX := start.X + movementDistanceForTicks(sim, 3)
 	if math.Abs(got.X-wantX) > 0.0001 || got.Y != start.Y {
 		t.Fatalf("player pos = %+v, want x=%v", got, wantX)
 	}
@@ -4273,6 +4273,52 @@ func TestMovementSpeedPercentFromGear(t *testing.T) {
 	if math.Abs(boosted-wantBoosted) > 0.001 {
 		t.Fatalf("movement_speed with +15%% boots = %.4f, want %.4f (baseline=%.4f)",
 			boosted, wantBoosted, baseline)
+	}
+}
+
+func TestMovementSpeedDerivedFromClass(t *testing.T) {
+	// Rogue should be faster than paladin at equal progression.
+	rogueRules := loadRules(t)
+	rogueProgression := rogueRules.DefaultCharacterProgressionState()
+	rogueProgression.CharacterClass = "rogue"
+	rogueProgression.BaseStats = rogueRules.CharacterProgression.Classes["rogue"].BaseStats
+	rogueSim, err := NewSimWithWorldProgression("sess_rogue", "r1", rogueRules, "collision_lab", rogueProgression)
+	if err != nil {
+		t.Fatalf("rogue sim: %v", err)
+	}
+
+	paladinRules := loadRules(t)
+	paladinProgression := paladinRules.DefaultCharacterProgressionState()
+	paladinProgression.CharacterClass = "paladin"
+	paladinProgression.BaseStats = paladinRules.CharacterProgression.Classes["paladin"].BaseStats
+	paladinSim, err := NewSimWithWorldProgression("sess_paladin", "p1", paladinRules, "collision_lab", paladinProgression)
+	if err != nil {
+		t.Fatalf("paladin sim: %v", err)
+	}
+
+	rogueSpeed := rogueSim.DerivedStatsView().MovementSpeed
+	paladinSpeed := paladinSim.DerivedStatsView().MovementSpeed
+	if rogueSpeed <= paladinSpeed {
+		t.Fatalf("rogue speed %.4f should exceed paladin speed %.4f", rogueSpeed, paladinSpeed)
+	}
+}
+
+func TestMovementSpeedDexScaling(t *testing.T) {
+	sim := MustNewSim("sess_dex", "d1", loadRules(t))
+	lowDex := sim.DerivedStatsView().MovementSpeed
+	baseDex := sim.progression.BaseStats.Dex
+
+	sim.progression.BaseStats.Dex += 100
+	highDex := sim.DerivedStatsView().MovementSpeed
+
+	if highDex <= lowDex {
+		t.Fatalf("100 extra DEX should increase movement speed: got %.4f (was %.4f)", highDex, lowDex)
+	}
+	// 100 DEX → +10% (per_dex = 0.001), so highDex ≈ lowDex * (1.0 + (baseDex+100)*0.001) / (1.0 + baseDex*0.001)
+	expectedRatio := (1.0 + float64(baseDex+100)*0.001) / (1.0 + float64(baseDex)*0.001)
+	actualRatio := highDex / lowDex
+	if math.Abs(actualRatio-expectedRatio) > 0.01 {
+		t.Fatalf("DEX speed ratio = %.4f, want ~%.4f", actualRatio, expectedRatio)
 	}
 }
 

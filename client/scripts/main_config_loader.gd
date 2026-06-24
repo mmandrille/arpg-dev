@@ -31,6 +31,11 @@ static func movement_min_speed_factor() -> float:
 	return float(gameplay.get("movement_min_speed_factor", 0.2))
 
 
+static func movement_direction_grace_seconds() -> float:
+	ensure_loaded()
+	return float(gameplay.get("movement_direction_grace_seconds", 0.2))
+
+
 static func _read_json(path: String):
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:

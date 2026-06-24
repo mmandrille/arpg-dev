@@ -1,0 +1,40 @@
+server/internal/game/monster_ranged_positioning.go
+  s_45d8e872daefaf::t_3b61538ec1bc70 5-31,36-40
+server/internal/game/ranged_monster_positioning_test.go
+  s_45d8e872daefaf::t_e5cb20304c15c9 114
+  s_45d8e872daefaf::t_99b69f838b2a48 71,91-113
+shared/rules/main_config.v0.schema.json
+  s_45d8e872daefaf::t_efab5fc7d258e0 22
+PROGRESS.md
+  s_45d8e872daefaf::t_abdfa0bd432996 26,28-29
+server/internal/game/rules.go
+  s_45d8e872daefaf::t_859a45e4509c5f 75
+  s_45d8e872daefaf::t_455a9db7bbfdc4 1001-1003
+docs/specs/v334_spec-ranged-retreat-engagement.md
+  s_45d8e872daefaf::t_b1fea03543bf11 1-40
+server/internal/game/sim.go
+  s_45d8e872daefaf::t_aa7cf56d6169fa 3189
+  s_45d8e872daefaf::t_75cffda66755c4 175
+docs/progress/slice-lifecycle.md
+  s_45d8e872daefaf::t_f5fdf078a7ed1c 347-349
+docs/as-built/v334_ranged-retreat-engagement.md
+  s_45d8e872daefaf::t_6c7ac79902a403 1-23
+shared/rules/main_config.v0.json
+  s_45d8e872daefaf::t_cea570c332266f 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f163a714354caa86283c868df076a341d85b6e5a",
+  "prompts": {},
+  "sessions": {
+    "s_45d8e872daefaf": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b6daa7ce-7315-4b97-b922-9033cf58729f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

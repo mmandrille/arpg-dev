@@ -1,0 +1,21 @@
+tools/validate_shared.py
+  s_517a6303f090f7::t_fd361d505c1081 3019-3060
+shared/assets/fog_presentation.v0.schema.json
+  s_517a6303f090f7::t_17103280d2cadd 99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "ee7663019240fd9dc42a1f999ac795fd2e600368",
+  "prompts": {},
+  "sessions": {
+    "s_517a6303f090f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78201759-03f9-417e-8750-03791ceff870",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

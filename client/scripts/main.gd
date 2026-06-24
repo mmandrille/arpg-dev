@@ -1023,6 +1023,9 @@ func _apply_snapshot(p: Dictionary) -> void:
 	hotbar_capacity = int(p.get("hotbar_capacity", 2))
 	hotbar = p.get("hotbar", [])
 	character_progression = p.get("character_progression", {})
+	var _ms_snap := float((character_progression.get("derived_stats", {}) as Dictionary).get("movement_speed", 0.0))
+	if _ms_snap > 0.0:
+		_player_movement_feel.set_server_speed(_ms_snap)
 	skill_progression = p.get("skill_progression", {})
 	skill_cooldowns = p.get("skill_cooldowns", [])
 	_apply_skill_bindings(p.get("skill_bindings", {}))
@@ -1126,6 +1129,9 @@ func _apply_delta(p: Dictionary) -> void:
 					_show_waypoint_panel()
 			"character_progression_update":
 				character_progression = c.get("character_progression", {})
+				var _ms_upd := float((character_progression.get("derived_stats", {}) as Dictionary).get("movement_speed", 0.0))
+				if _ms_upd > 0.0:
+					_player_movement_feel.set_server_speed(_ms_upd)
 				_apply_local_player_class_model()
 				_refresh_progression_ui()
 				_refresh_player_hud_identity()

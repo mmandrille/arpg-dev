@@ -429,6 +429,8 @@ func _initialize() -> void:
 	var progression_rules := _read(shared.path_join("rules/character_progression.v0.json"))
 	var progression_golden := _read(shared.path_join("golden/character_progression.json"))
 	var progression_combat_rules := _read(shared.path_join("rules/combat.v0.json"))
+	var progression_main_config := _read(shared.path_join("rules/main_config.v0.json"))
+	var progression_base_move_speed := float((progression_main_config.get("gameplay", {}) as Dictionary).get("base_movement_speed", 1.0))
 	if progression_rules["base_stats"] != progression_golden["base_stats"]:
 		_fail("character_progression base stats mismatch")
 		return
@@ -443,6 +445,11 @@ func _initialize() -> void:
 				got += float(progression_combat_rules["player_damage"]["min"])
 			elif key == "damage_max":
 				got += float(progression_combat_rules["player_damage"]["max"])
+			elif key == "movement_speed":
+				# movement_speed formula yields the DEX multiplier; scale by base_movement_speed
+				# to match the Go pipeline: playerEffectiveMovementSpeed = classBase * dex_mult * gear%
+				# Golden cases have no character class, so classBase = gameplay.base_movement_speed.
+				got *= progression_base_move_speed
 			var want := float(expected["derived_stats"][key])
 			if not is_equal_approx(got, want):
 				_fail("character_progression case %s %s got %.4f want %.4f" % [str(c["name"]), str(key), got, want])

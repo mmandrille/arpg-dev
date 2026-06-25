@@ -17,6 +17,17 @@ static func set_highlight(root: Node3D, on: bool) -> void:
 		_clear_node(root)
 
 
+static func clear_all() -> void:
+	while not _mesh_states.is_empty():
+		var key = _mesh_states.keys()[0]
+		var rec: Dictionary = _mesh_states[key]
+		var mesh_node := rec.get("node", null) as MeshInstance3D
+		if mesh_node != null and is_instance_valid(mesh_node):
+			_restore_mesh(mesh_node)
+		else:
+			_mesh_states.erase(key)
+
+
 static func _apply_node(node: Node) -> void:
 	if node is MeshInstance3D:
 		_apply_mesh(node as MeshInstance3D)

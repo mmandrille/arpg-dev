@@ -17,6 +17,12 @@ static func bind_camera(camera: Camera3D, max_hp: int, delta: float) -> void:
 	decay_camera(camera, delta)
 
 
+static func clear_session() -> void:
+	_camera = null
+	_max_hp = 1
+	CameraImpactFeedbackScript.reset_session()
+
+
 static func show_combat_text_for_event(
 	entity_id: String,
 	ev: Dictionary,

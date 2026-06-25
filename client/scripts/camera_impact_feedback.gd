@@ -39,3 +39,8 @@ static func decay(delta: float) -> void:
 		return
 	if previous_strength > 0.0:
 		_shake_offset *= _shake_strength / previous_strength
+
+
+static func reset_session() -> void:
+	_shake_strength = 0.0
+	_shake_offset = Vector3.ZERO

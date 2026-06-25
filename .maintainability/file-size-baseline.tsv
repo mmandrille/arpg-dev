@@ -5,7 +5,7 @@ client/scripts/bot_scenario_runner.gd	1629
 client/scripts/character_select_panel.gd	642
 client/scripts/fog_of_war_overlay.gd	624	# v331 hero-visibility-lighting: grew past 600 adding OmniLight3D lifecycle for perspective hero light. Extract light node management in a future slice.
 client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	6132	# v334 client-bot: bot panel toggle bypass, lab fog at town level, bot exit cleanup
+client/scripts/main.gd	6143	# $refactor v334: extracted bot_presentation_debug.gd + discovery minimap sync helper
 client/scripts/market_panel.gd	1059
 client/scripts/player_status_effect_markers.gd	646
 client/scripts/shop_panel.gd	1217

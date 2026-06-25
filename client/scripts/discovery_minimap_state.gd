@@ -251,3 +251,19 @@ static func _empty_quest_path() -> Dictionary:
 		"direction_y": 0.0,
 		"angle_radians": 0.0,
 	}
+
+
+static func sync_to_panel(
+	panel,
+	level: int,
+	player_anchor: Node3D,
+	character_progression: Dictionary,
+	wall_layout: Array,
+	entities: Dictionary,
+	player_facing: Vector2,
+) -> void:
+	if panel == null:
+		return
+	var light_radius := float((character_progression.get("derived_stats", {}) as Dictionary).get("light_radius", 0.0))
+	var player_pos := player_anchor.position if player_anchor != null else Vector3.ZERO
+	panel.sync(level, player_pos, light_radius, wall_layout, entities, player_facing)

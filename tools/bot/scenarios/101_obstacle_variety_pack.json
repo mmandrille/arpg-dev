@@ -8,7 +8,7 @@
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "rock", "at_least": 1 }, "timeout_s": 3 },
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "column", "at_least": 1 }, "timeout_s": 3 },
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "rubble", "at_least": 1 }, "timeout_s": 3 },
-    { "action": "action_entity", "item_def_id": "quest_leaf", "event_type": "item_picked_up" }
+    { "action": "pick_up_loot", "item_def_id": "quest_leaf", "max_ticks": 400 }
   ],
   "assertions": [
     { "type": "wall_count", "kind": "rock", "at_least": 1 },

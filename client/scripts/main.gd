@@ -2675,7 +2675,7 @@ func _handle_escape() -> void:
 	if pause_menu != null and pause_menu.visible:
 		_resume_from_pause()
 		return
-	if gameplay_active and _any_gameplay_panel_open():
+	if gameplay_active and _any_gameplay_panel_open() and not bot_mode:
 		_close_gameplay_panels()
 		_hide_inventory_if_no_actionable_panel()
 		return
@@ -3892,6 +3892,7 @@ func _open_character_panel_from_bar() -> void:
 
 func _stat_allocation_blocked() -> bool:
 	return _automation_input_locked() \
+		or (pause_menu != null and pause_menu.visible) \
 		or client == null \
 		or client.ready_state() != WebSocketPeer.STATE_OPEN \
 		or player_hp <= 0 \
@@ -3919,7 +3920,7 @@ func _skill_cast_block_reason(skill_id: String = "") -> String:
 		return "visual_replay"
 	if autoplay_enabled:
 		return "autoplay"
-	if _menu_blocks_gameplay_input():
+	if _menu_blocks_gameplay_input() and not bot_mode:
 		return "menu_open"
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		return "not_connected"

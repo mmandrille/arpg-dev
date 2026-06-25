@@ -25,7 +25,7 @@ async def walk_toward(
     *,
     ctx: BotContext,
 ) -> None:
-    if state.world_id == "dungeon_levels" or state.current_level < 0:
+    if state.world_id == "dungeon_levels" or state.current_level < 0 or str(state.world_id).endswith("_lab"):
         await move_to_position(ws, session_id, state, target_pos, loop, max_ticks=max_ticks, stop_distance=stop_distance, ctx=ctx)
         return
     for _ in range(max_ticks):

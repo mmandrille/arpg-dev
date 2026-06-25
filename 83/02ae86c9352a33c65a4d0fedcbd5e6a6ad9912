@@ -1,0 +1,41 @@
+client/scripts/camera_impact_feedback.gd
+  s_380f8b8e8f46a2::t_875ab66f64feca 42-46
+client/scripts/main.gd
+  s_380f8b8e8f46a2::t_75466791f7087d 5576-5577
+  s_380f8b8e8f46a2::t_0ccb125ab13206 5574-5575,5579-5580
+  s_380f8b8e8f46a2::t_902ddf26fa0196 5572-5573
+  s_380f8b8e8f46a2::t_845f23c4446964 3669-3672
+  s_380f8b8e8f46a2::t_0c38e810a953bc 5562-5571,5581-5597
+  s_380f8b8e8f46a2::t_8a2174cd4ea18c 21
+  s_380f8b8e8f46a2::t_7ab6a2810f0487 789
+  s_380f8b8e8f46a2::t_08abab706323ff 5578
+client/scripts/combat_event_presentation.gd
+  s_380f8b8e8f46a2::t_c2dfcd16322872 20-25
+client/scripts/pick_target_highlight.gd
+  s_380f8b8e8f46a2::t_031d42bfb5df40 20-30
+client/tests/test_client_bot.gd
+  s_380f8b8e8f46a2::t_b66eb79e6ee9a6 8
+  s_380f8b8e8f46a2::t_1df3c7979f7b95 73
+  s_380f8b8e8f46a2::t_2dc22362202296 797-818
+client/scripts/bot_controller.gd
+  s_380f8b8e8f46a2::t_31b8293aed8634 767-770
+  s_380f8b8e8f46a2::t_da0c3a7e3413c0 79-80,84
+  s_380f8b8e8f46a2::t_e8e947b612ef3f 25
+  s_380f8b8e8f46a2::t_4ee4b4b6bd0b95 757-766
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8302ae86c9352a33c65a4d0fedcbd5e6a6ad9912",
+  "prompts": {},
+  "sessions": {
+    "s_380f8b8e8f46a2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "46175922-6dbb-4c45-af8a-71a85c3b6aa7",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

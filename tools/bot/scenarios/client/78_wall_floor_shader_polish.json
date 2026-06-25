@@ -2,7 +2,7 @@
   "id": "wall_floor_shader_polish",
   "runner": "godot_client",
   "world_id": "generated_wall_lab",
-  "seed": "v301_wall_floor_shader_polish",
+  "seed": "wall_seed_00",
   "title": "Wall/floor shader polish",
   "description": "Client renders generated dungeon floors and cave walls with the polished material path across a stairs-down transition.",
   "client_steps": [

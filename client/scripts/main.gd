@@ -18,6 +18,7 @@ const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
+const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_text.gd")
 const PickTargetHighlightScript := preload("res://scripts/pick_target_highlight.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
@@ -166,6 +167,8 @@ var item_to_equip: String = ""
 var bot_mode: bool = false
 var _bot_logged_snapshot: bool = false
 var _bot_pending_events: Array = []
+var _bot_damage_number_history: Array = []
+const BOT_DAMAGE_NUMBER_HISTORY_S := 3.0
 var autoplay_enabled: bool = false
 var autoplay_phase: String = "idle"
 var autoplay_timer: float = 0.0
@@ -827,6 +830,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	autoplay_pickup_sent = false
 	autoplay_equip_sent = false
 	_bot_pending_events.clear()
+	_bot_damage_number_history.clear()
 	_bot_logged_snapshot = false
 	_clear_level_entities()
 	if _boss_visuals != null: _boss_visuals.hide_boss_health_bar()
@@ -1459,7 +1463,12 @@ func _apply_delta(p: Dictionary) -> void:
 			ctrl.play_one_shot(clip)
 	if bot_mode:
 		for ev in p.get("events", []):
-			_bot_pending_events.append(ev)
+			if ev is Dictionary:
+				var tagged := (ev as Dictionary).duplicate(true)
+				tagged["_bot_seen_tick"] = last_server_tick
+				_bot_pending_events.append(tagged)
+			else:
+				_bot_pending_events.append(ev)
 	if _boss_visuals != null:
 		_boss_visuals_context.last_server_tick = last_server_tick
 		_boss_visuals.sync_boss_health_bar()
@@ -1980,6 +1989,8 @@ func _show_damage_number(entity_id: String, color: Color, event_damage = null, p
 	damage_numbers_layer.add_child(pop)
 	var side := side_override if side_override != 0.0 else (-1.0 if entity_id == player_id else 1.0)
 	pop.setup(_camera, target, world_position, amount, color, side, prefix, variant, text_override, damage_type)
+	if bot_mode:
+		_record_bot_damage_number(pop)
 
 func _spawn_heal_rain(entity_id: String) -> void:
 	var target := _node_for_entity_id(entity_id)
@@ -3082,8 +3093,9 @@ func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> v
 		return
 	_close_gameplay_panels_for_movement()
 	_mark_local_player_walking()
+	var move_goal := _interactable_move_goal(target_node.global_position)
 	client.send("move_to_intent", last_server_tick, {
-		"position": {"x": target_node.global_position.x, "y": target_node.global_position.z},
+		"position": {"x": move_goal.x, "y": move_goal.y},
 	})
 	_attack_cooldown = ClientConstants.SEND_INTERVAL
 
@@ -3111,6 +3123,17 @@ func _interactable_in_activation_range(rec: Dictionary) -> bool:
 		target_pos.z - player_pos.z
 	)
 	return flat.length() <= ClientConstants.INTERACTABLE_ACTIVATION_RANGE
+
+func _interactable_move_goal(target_pos: Vector3) -> Vector2:
+	if player_anchor == null:
+		return Vector2(target_pos.x, target_pos.z)
+	var player_pos := _node_world_or_local_position(player_anchor)
+	var flat := Vector2(target_pos.x - player_pos.x, target_pos.z - player_pos.z)
+	var stop := ClientConstants.INTERACTABLE_ACTIVATION_RANGE * 0.85
+	if flat.length() <= stop:
+		return Vector2(target_pos.x, target_pos.z)
+	var dir := flat.normalized()
+	return Vector2(target_pos.x, target_pos.z) - dir * stop
 
 func _activate_interactable_now(target_id: String, rec: Dictionary) -> void:
 	var interactable_def_id := str(rec.get("interactable_def_id", ""))
@@ -5713,7 +5736,8 @@ func get_bot_state() -> Dictionary:
 		"language": client_settings.language if client_settings != null else ClientSettingsScript.DEFAULT_LANGUAGE,
 		"boss_reward_status": _last_boss_reward_status,
 		"create_game_session_type": client_settings.create_game_session_type if client_settings != null else ClientSettingsScript.DEFAULT_CREATE_GAME_SESSION_TYPE,
-		"damage_numbers": _bot_damage_numbers(),
+		"damage_numbers": _bot_active_damage_numbers(),
+		"recent_damage_numbers": _bot_recent_damage_numbers(),
 		"known_characters": character_panel.known_characters() if character_panel != null else [],
 		"multiplayer_panel": multiplayer_panel.get_debug_state() if multiplayer_panel != null else {},
 		"join_game_selected_session_id": pending_join_session_id if pending_join_session_id != "" else (str(multiplayer_panel.get_debug_state().get("selected_session_id", "")) if multiplayer_panel != null else ""),
@@ -5861,20 +5885,59 @@ func _visual_model_name(rec: Dictionary, node: Node3D) -> String:
 		return "primitive"
 	return ""
 
-func _bot_damage_numbers() -> Array:
+func _bot_active_damage_numbers() -> Array:
 	var out: Array = []
 	if damage_numbers_layer == null:
 		return out
 	for child in damage_numbers_layer.get_children():
 		if child is DamageNumber:
-			var pop := child as DamageNumber
-			out.append({
-				"text": pop.combat_text,
-				"variant": pop.combat_variant,
-				"damage_type": pop.combat_damage_type,
-				"color": pop.label_settings.font_color.to_html(false) if pop.label_settings != null else "",
-			})
+			out.append(_bot_damage_number_entry(child as DamageNumber))
 	return out
+
+func _bot_damage_numbers() -> Array:
+	return _bot_recent_damage_numbers()
+
+func _bot_recent_damage_numbers() -> Array:
+	var out := _bot_active_damage_numbers()
+	_prune_bot_damage_number_history()
+	var seen: Dictionary = {}
+	for entry in out:
+		seen[_bot_damage_number_key(entry)] = true
+	for entry in _bot_damage_number_history:
+		var key := _bot_damage_number_key(entry)
+		if seen.has(key):
+			continue
+		seen[key] = true
+		out.append((entry as Dictionary).duplicate(true))
+	return out
+
+func _bot_damage_number_entry(pop: DamageNumber) -> Dictionary:
+	return {
+		"text": pop.combat_text,
+		"variant": pop.combat_variant,
+		"damage_type": pop.combat_damage_type,
+		"color": pop.label_settings.font_color.to_html(false) if pop.label_settings != null else "",
+	}
+
+func _bot_damage_number_key(entry: Dictionary) -> String:
+	return "%s|%s|%s" % [str(entry.get("variant", "")), str(entry.get("text", "")), str(entry.get("damage_type", ""))]
+
+func _record_bot_damage_number(pop: DamageNumber) -> void:
+	var entry := _bot_damage_number_entry(pop)
+	entry["expires_at"] = Time.get_ticks_msec() / 1000.0 + BOT_DAMAGE_NUMBER_HISTORY_S
+	_bot_damage_number_history.append(entry)
+
+func _prune_bot_damage_number_history() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	var kept: Array = []
+	for entry in _bot_damage_number_history:
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		if float((entry as Dictionary).get("expires_at", 0.0)) >= now:
+			var copy := (entry as Dictionary).duplicate(true)
+			copy.erase("expires_at")
+			kept.append(copy)
+	_bot_damage_number_history = kept
 
 func _bot_loot_presentations() -> Dictionary:
 	var out := {}
@@ -6046,7 +6109,38 @@ func bot_select_language(language: String) -> void:
 func bot_consume_pending_event_at(index: int) -> void:
 	if index < 0 or index >= _bot_pending_events.size():
 		return
+	var ev = _bot_pending_events[index]
+	if ev is Dictionary:
+		_record_bot_damage_number_for_event(ev as Dictionary)
 	_bot_pending_events.remove_at(index)
+
+func _record_bot_damage_number_for_event(ev: Dictionary) -> void:
+	if not bot_mode:
+		return
+	var event_type := str(ev.get("event_type", ""))
+	if event_type not in ["monster_damaged", "player_damaged", "attack_missed"]:
+		return
+	var default_color := Color(1.0, 0.32, 0.2) if event_type == "player_damaged" else Color.WHITE
+	var outcome := str(ev.get("outcome", ""))
+	var special := DamageTypeCombatTextScript.special_outcome(outcome)
+	var entry: Dictionary = {}
+	if not special.is_empty():
+		entry = {
+			"variant": str(special.get("variant", outcome)),
+			"text": str(special.get("text", "")),
+			"damage_type": "",
+		}
+	else:
+		var presentation := DamageTypeCombatTextScript.number_for_event(ev, default_color)
+		if presentation.is_empty():
+			return
+		entry = {
+			"variant": str(presentation.get("variant", "normal")),
+			"text": str(presentation.get("text", "")),
+			"damage_type": str(presentation.get("damage_type", "")),
+		}
+	entry["expires_at"] = Time.get_ticks_msec() / 1000.0 + BOT_DAMAGE_NUMBER_HISTORY_S
+	_bot_damage_number_history.append(entry)
 func bot_show_action_shadow(action: Dictionary, state: Dictionary) -> void:
 	if not bot_mode or input_shadow == null or DisplayServer.get_name() == "headless":
 		return

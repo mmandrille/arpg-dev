@@ -23,10 +23,10 @@ Last updated: 2026-06-25
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v334 — ranged-retreat-engagement |
+| **Latest completed slice** | v337 — sim-tick-context (implementation; batch `make ci` pending) |
 | **Active branch** | `main` |
-| **CI gate** | v333–v334 focused `go test` + `make validate-shared` green (2026-06-24); batch `make ci` pending |
-| **Next slice** | TBD — fix `main.gd` maintainability ratchet, land wall-floor WIP, or next feature |
+| **CI gate** | Steps 1–7 green (maintainability, validate-shared, go test, pytest, client-unit movement presenter); full `make ci` blocked by protocol-bot session 500s + client-bot hang on fresh Colima (2026-06-25) |
+| **Next slice** | TBD — stabilize `make ci` on this host, then next feature or further coordinator paydown |
 | **Last engineering review** | v334 — [`docs/reviews/20260625_v334-overview.md`](docs/reviews/20260625_v334-overview.md) (2026-06-25, ad hoc; covers v332–v334 + post-v331 stabilization) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 
@@ -92,10 +92,8 @@ Do **not** assume these are the next slice — they are documented backlog items
   `go test ./...` green. Lowest scorecard area now **Maintainability (7.0 — `main.gd` ratchet FAIL at 6,239 lines)**.
 - **v331 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema `required` + semantic guards, fog overlay
   baseline, ADR-0015, CLAUDE.md spec-gate exemption, v332 navigation/test repairs.
-- **v334 `$refactor` still open:** Extract movement-intent or wall-floor cluster from `main.gd` (blocked while WIP dirty);
-  extract `DungeonGenerationRules` cluster from `rules.go`; land `wall_floor_lab_nav_test.go` with scenario 78.
-- **v334 future-plan items:** Typed `sim.go` tick context; `validate_shared.py` validation-domain extraction; full `make ci`
-  proof and PROGRESS CI gate update.
+- **v334 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema/guards, fog overlay baseline, ADR-0015, bot presentation debug extraction, dungeon generation rules split, movement-input presenter, wall-floor lab nav test + scenario 78 proof, sim tick context starter.
+- **v334 future-plan items:** `validate_shared.py` validation-domain extraction; deeper `sim.go` coordinator paydown beyond tick context.
 
 ### Other deferred items (from specs / ADRs)
 

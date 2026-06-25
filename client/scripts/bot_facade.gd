@@ -247,7 +247,7 @@ static func dispatch_action(main, intent_type: String, payload: Dictionary) -> v
 			if sent:
 				main.set("_attack_cooldown", maxf(float(_member(main, "_attack_cooldown")), ClientConstants.SEND_INTERVAL))
 			return
-	if main.has_method("_movement_intent_starts_motion") and main._movement_intent_starts_motion(intent_type, payload):
+	if main.has_method("_movement_intent_starts_motion") and MovementInputPresenterScript.intent_starts_motion(intent_type, payload):
 		if main.has_method("_close_gameplay_panels_for_movement"):
 			main._close_gameplay_panels_for_movement()
 		if main.has_method("_mark_local_player_walking"):

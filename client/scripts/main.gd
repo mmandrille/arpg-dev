@@ -18,6 +18,7 @@ const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
+const PickTargetHighlightScript := preload("res://scripts/pick_target_highlight.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
@@ -785,6 +786,7 @@ func _exit_game() -> void:
 
 func _teardown_gameplay_state(clear_session: bool) -> void:
 	gameplay_active = false
+	_clear_presentation_session_state()
 	_update_mouse_capture(); _update_reticle_visibility()
 	ready_sent = false
 	player_id = ""
@@ -857,6 +859,15 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		client.session_mode = ""
 		client.session_listed = false
 		client.ws_url = ""
+
+
+func _clear_presentation_session_state() -> void:
+	PickTargetHighlightScript.clear_all()
+	CombatEventPresentationScript.clear_session()
+	if EarthbreakerJump.active_tween != null:
+		EarthbreakerJump.active_tween.kill()
+		EarthbreakerJump.active_tween = null
+
 
 func _process(delta: float) -> void:
 	if client == null:
@@ -3655,9 +3666,10 @@ func _build_scene() -> void:
 	_raise_gameplay_windows()
 	_setup_menu_layer()
 
-	input_shadow = InputShadowOverlayScript.new()
-	add_child(input_shadow)
-	input_shadow.bind_camera(_camera)
+	if DisplayServer.get_name() != "headless":
+		input_shadow = InputShadowOverlayScript.new()
+		add_child(input_shadow)
+		input_shadow.bind_camera(_camera)
 	fog_overlay = FogOfWarOverlay.new()
 	add_child(fog_overlay)
 	fog_overlay.bind(_camera, player_anchor, character_visual)
@@ -5547,6 +5559,42 @@ func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
 		base.material_override = mat
 
 # --- bot API (read-only state + intent dispatch) ----------------------------
+
+func bot_prepare_exit() -> void:
+	set_process(false)
+	set_physics_process(false)
+	if client != null:
+		if gameplay_active and client.session_id != "":
+			client.end_session()
+		client.close()
+	_teardown_gameplay_state(true)
+	_free_canvas_layers_for_exit()
+
+
+func bot_finish_exit(exit_code: int) -> void:
+	bot_prepare_exit()
+	get_tree().create_timer(0.1).timeout.connect(func() -> void:
+		get_tree().quit(exit_code)
+	, CONNECT_ONE_SHOT)
+
+
+func _free_canvas_layers_for_exit() -> void:
+	var layers: Array[CanvasLayer] = []
+	for child in get_children():
+		if child is CanvasLayer:
+			layers.append(child as CanvasLayer)
+
+	for layer in layers:
+		layer.free()
+
+	input_shadow = null
+	fog_overlay = null
+	damage_numbers_layer = null
+	health_bars_layer = null
+	menu_layer = null
+	gameplay_ui_layer = null
+
+
 func get_bot_state() -> Dictionary:
 	# Exclude dead monsters (hp==0) from monster_ids so assert_entity_removed
 	# treats a killed monster as "gone" even if the server hasn't sent entity_remove.

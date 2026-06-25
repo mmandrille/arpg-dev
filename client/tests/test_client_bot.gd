@@ -5,6 +5,7 @@ extends SceneTree
 
 const BotScenarioRunnerScript := preload("res://scripts/bot_scenario_runner.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
+const MainScript := preload("res://scripts/main.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -69,6 +70,7 @@ func _initialize() -> void:
 	_test_stash_assertions()
 	_test_boss_health_bar_step_types_load()
 	_test_boss_health_bar_assertions()
+	_test_bot_prepare_exit_frees_canvas_layers()
 
 	print("[gdtest] PASS: test_client_bot (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -790,6 +792,28 @@ func _test_boss_health_bar_assertions() -> void:
 	for _i in range(2):
 		runner.tick(0.016, state)
 	_assert_true("boss health bar assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_bot_prepare_exit_frees_canvas_layers() -> void:
+	var main = MainScript.new()
+	get_root().add_child(main)
+	var layer_a := CanvasLayer.new()
+	var layer_b := CanvasLayer.new()
+	main.add_child(layer_a)
+	main.add_child(layer_b)
+	var canvas_children := 0
+	for child in main.get_children():
+		if child is CanvasLayer:
+			canvas_children += 1
+	_assert_eq("precondition canvas layers", canvas_children, 2)
+	main.bot_prepare_exit()
+	canvas_children = 0
+	for child in main.get_children():
+		if child is CanvasLayer:
+			canvas_children += 1
+	_assert_eq("bot_prepare_exit frees canvas layers", canvas_children, 0)
+	_assert_eq("fog_overlay ref cleared", main.fog_overlay, null)
+	main.free()
 
 
 func _test_timeout_failure_message_format() -> void:

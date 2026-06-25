@@ -22,6 +22,7 @@ const BotScenarioRunnerScript := preload("res://scripts/bot_scenario_runner.gd")
 var _runner: BotScenarioRunner
 var _scenario_id: String = ""
 var _main = null  # main.gd node (parent)
+var _shutdown_pending: bool = false
 
 
 func _ready() -> void:
@@ -75,13 +76,12 @@ func _process(delta: float) -> void:
 		_execute_action(action, state)
 
 	if done:
-		if _runner.passed():
+		var exit_code := 0 if _runner.passed() else 1
+		if exit_code == 0:
 			print("[bot-client] PASS %s" % _scenario_id)
-			get_tree().quit(0)
 		else:
 			printerr("[bot-client] FAIL %s -- %s" % [_scenario_id, _runner.failure_message()])
-			get_tree().quit(1)
-
+		_request_shutdown(exit_code)
 
 func _get_state() -> Dictionary:
 	if _main == null or not _main.has_method("get_bot_state"):
@@ -754,4 +754,17 @@ func _format_action(action: Dictionary) -> String:
 
 func _fail_startup(msg: String) -> void:
 	printerr("[bot-client] FAIL startup -- %s" % msg)
-	get_tree().quit(1)
+	_request_shutdown(1)
+
+
+func _request_shutdown(exit_code: int) -> void:
+	if _shutdown_pending:
+		return
+
+	_shutdown_pending = true
+	_runner = null
+	set_process(false)
+	if _main != null and _main.has_method("bot_finish_exit"):
+		_main.bot_finish_exit(exit_code)
+	else:
+		get_tree().quit(exit_code)

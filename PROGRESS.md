@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-24
+Last updated: 2026-06-25
 
 ---
 
@@ -26,8 +26,8 @@ Last updated: 2026-06-24
 | **Latest completed slice** | v334 — ranged-retreat-engagement |
 | **Active branch** | `main` |
 | **CI gate** | v333–v334 focused `go test` + `make validate-shared` green (2026-06-24); batch `make ci` pending |
-| **Next slice** | TBD — `$refactor` minor-commit targets from v331 review, or next feature |
-| **Last engineering review** | v331 — [`docs/reviews/20260624_v331-overview.md`](docs/reviews/20260624_v331-overview.md) (2026-06-24, periodic cadence; covers v309–v331) |
+| **Next slice** | TBD — fix `main.gd` maintainability ratchet, land wall-floor WIP, or next feature |
+| **Last engineering review** | v334 — [`docs/reviews/20260625_v334-overview.md`](docs/reviews/20260625_v334-overview.md) (2026-06-25, ad hoc; covers v332–v334 + post-v331 stabilization) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 
 
@@ -87,34 +87,15 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v331 `$review` complete; `$refactor` handoff pending.** Periodic cadence review at `7057ecd4` covering
-  v309–v331 landed at [`docs/reviews/20260624_v331-overview.md`](docs/reviews/20260624_v331-overview.md).
-  Lowest scorecard areas (priority order): **Technical correctness (6.5 — test suite RED)**, **Cohesion (7.5)**,
-  **Maintainability (7.5)**. v308 carry-overs resolved: dead switch, water/hole duplication, dungeon-obstacles
-  cross-checks, budget contradiction, orphan test wiring. Still open: `CODEMAP.md` (3rd consecutive review).
-- **v331 CI status:** Partially fixed during `$refactor`. Reduced from 18 pre-existing failures to ~9. Fixed:
-  TestCollisionIgnoresDeadMonster, TestCollisionBlocksWallAndAllowsRoute, TestDungeonObstacleGeneration (production fix in
-  `dungeon_elite_objective.go`), TestGoldAutoPickupWalkingIntoTownGold, TestResourceWalletAutoPickupWalkingIntoShard,
-  TestDoorLabClosedDoorPreventsPassageUntilActivated, TestEquippedWeaponOneShotsRewardDummy,
-  TestEquippedWeaponWithoutDamageFallsBackToBaseDamage.
-- **Navigation fix landed in $refactor:** `buildBlockedFn` now uses cell CENTER for wall AABBs (blocks stall cells); `sim.planPath`
-  wraps blocked to always allow goal cell entry. Fixed 14 of 18 pre-existing test failures.
-- **v332 fixed all 4 remaining tests.** Three ranged tests: stop-position clear-shot validation + directional test
-  player position fix. Teleporter test: two navigation fixes (step produces zero movement → discard remaining steps
-  + clear lastReplanPos; planPath falls back to nearest unblocked neighbour when start cell is blocked) plus golden
-  seed change from "deadbeefdeadbeef" to "0011223344556677" (the old seed's level -2 dungeon had a room wall spanning
-  the full dungeon width that trapped the player in a blocked-zone dead-end beyond the BFS-radius of the escape fix).
-- **v331 `$refactor` minor-commit targets (from the review Top 10):**
-  - Update `docs/CODEMAP.md` for v302–v331 new files + add inverse check to `validate_codemap.py` (3rd review — escalated)
-  - Add `required` entries to `fog_presentation.v0.schema.json` `point_light` block + semantic `cross_checks()` for fog tuning ranges
-  - Add `fog_of_war_overlay.gd` to maintainability baseline (or extract OmniLight3D management)
-  - Extract type clusters from `rules.go` into domain files (`dungeon_generation_rules.go`, etc.)
-  - Document v322–v328 spec-exemption pattern in CLAUDE.md
-  - Begin extracting movement-intent cluster from `main.gd`
-  - Write ADR for movement-speed formula (replay-determinism + bot-timing boundary)
-- **v331 review future-plan/feature-scale items:** Continue `sim.go` extraction via typed tick context;
-  extract a validation domain out of `validate_shared.py`; resolve unverified local GLB provenance before
-  distribution; keep production VFX/audio/art as explicit feature slices with visual bot proof.
+- **v334 `$review` complete (ad hoc at `9d02179b`).** Overview:
+  [`docs/reviews/20260625_v334-overview.md`](docs/reviews/20260625_v334-overview.md). v331 blocker cleared:
+  `go test ./...` green. Lowest scorecard area now **Maintainability (7.0 — `main.gd` ratchet FAIL at 6,239 lines)**.
+- **v331 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema `required` + semantic guards, fog overlay
+  baseline, ADR-0015, CLAUDE.md spec-gate exemption, v332 navigation/test repairs.
+- **v334 `$refactor` still open:** Extract movement-intent or wall-floor cluster from `main.gd` (blocked while WIP dirty);
+  extract `DungeonGenerationRules` cluster from `rules.go`; land `wall_floor_lab_nav_test.go` with scenario 78.
+- **v334 future-plan items:** Typed `sim.go` tick context; `validate_shared.py` validation-domain extraction; full `make ci`
+  proof and PROGRESS CI gate update.
 
 ### Other deferred items (from specs / ADRs)
 

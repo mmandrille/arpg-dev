@@ -1,0 +1,22 @@
+server/internal/game/dungeon_generation_rules.go
+  s_b632b11788b427::t_4bd336f6cc8154 1-267
+docs/CODEMAP.md
+  s_b632b11788b427::t_41b4c8215a9f02 28
+  s_b632b11788b427::t_3a1bcf6c6603e9 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "41966b8b3517c8be2177dcb4563c105284c8d905",
+  "prompts": {},
+  "sessions": {
+    "s_b632b11788b427": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "496f4843-2d55-40ec-8e09-284b923c5cc9",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

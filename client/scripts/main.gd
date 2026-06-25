@@ -7,6 +7,7 @@ const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
+const BotPresentationDebugScript := preload("res://scripts/bot_presentation_debug.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_markers.gd")
@@ -42,6 +43,7 @@ const QuestJournalPanelScript := preload("res://scripts/quest_journal_panel.gd")
 const QuestEliteObjectiveStateScript := preload("res://scripts/quest_elite_objective_state.gd")
 const EliteObjectiveTrackerScript := preload("res://scripts/elite_objective_tracker.gd")
 const DiscoveryMinimapScript := preload("res://scripts/discovery_minimap.gd")
+const DiscoveryMinimapStateScript := preload("res://scripts/discovery_minimap_state.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
 const SkillBarScript := preload("res://scripts/skill_bar.gd")
 const CompanionBarScript := preload("res://scripts/companion_bar.gd")
@@ -5673,9 +5675,16 @@ func get_bot_state() -> Dictionary:
 		"stash_capacity": stash_capacity,
 		"resource_wallet": resource_wallet.duplicate(true),
 		"monster_ids": live_monster_ids,
-		"entities_debug": _bot_entities_debug(live_monster_ids),
-		"local_player_presentation": _bot_local_player_presentation(),
-		"entities_presentation_debug": _bot_entities_presentation_debug(),
+		"entities_debug": BotPresentationDebugScript.entities_debug(entities, live_monster_ids),
+		"local_player_presentation": BotPresentationDebugScript.local_player_presentation(
+			player_id,
+			player_visual_scale,
+			player_anchor,
+			_charge_channel_visual,
+			player_reaction,
+			player_anim,
+		),
+		"entities_presentation_debug": BotPresentationDebugScript.entities_presentation_debug(entities),
 		"loot_ids": loot_ids.duplicate(),
 		"loot": _bot_loot_debug(),
 		"loot_labels": _bot_loot_label_debug(),
@@ -5783,48 +5792,6 @@ func _remote_player_ids() -> Array:
 	out.sort()
 	return out
 
-func _bot_entities_debug(live_monster_ids: Array) -> Array:
-	var out: Array = []
-	for id in entities.keys():
-		var rec: Dictionary = entities[id]
-		if str(rec.get("type", "")) == "monster" and not live_monster_ids.has(id):
-			continue
-		out.append({
-			"id": str(id),
-			"type": str(rec.get("type", "")),
-			"monster_def_id": str(rec.get("monster_def_id", "")),
-			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)), "quest_reward": bool(rec.get("quest_reward", false)), "is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
-			"item_def_id": str(rec.get("item_def_id", "")),
-			"item_template_id": str(rec.get("item_template_id", "")),
-			"rarity": str(rec.get("rarity", "")),
-			"state": str(rec.get("state", "")),
-		})
-	return out
-
-func _bot_local_player_presentation() -> Dictionary:
-	return {
-		"id": player_id, "type": "player", "visual_model": "character", "visual_scale": player_visual_scale,
-		"effect_ids": _local_player_effect_ids(),
-		"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(player_anchor),
-		"has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(player_anchor),
-		"holy_shield_aura_pulses": PlayerStatusEffectMarkers.active_holy_shield_aura_pulse_count(player_anchor),
-		"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(player_anchor),
-		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor), "base_tint": ClientConstants.PLAYER_TINT.to_html(false),
-		"charge_channel_visual": _charge_channel_visual.get_debug_state(),
-		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
-		"animation": player_anim.get_debug_state() if player_anim != null else {},
-	}
-
-func _local_player_effect_ids() -> Array:
-	var out := []
-	if player_anchor == null:
-		return out
-	if PlayerStatusEffectMarkers.has_holy_shield_effect(player_anchor):
-		out.append(PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID)
-	if PlayerStatusEffectMarkers.has_sanctuary_effect(player_anchor):
-		out.append(PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID)
-	return out
-
 func _character_info_debug_state() -> Dictionary:
 	return {
 		"visible": character_info_panel != null and character_info_panel.visible,
@@ -5842,88 +5809,25 @@ func _sync_elite_objective_tracker() -> void:
 		elite_objective_tracker.set_state(QuestEliteObjectiveStateScript.elite_tracker_state(entities))
 
 func _sync_discovery_minimap() -> void:
-	if discovery_minimap == null: return
-	discovery_minimap.sync(current_level, player_anchor.position if player_anchor != null else Vector3.ZERO, float((character_progression.get("derived_stats", {}) as Dictionary).get("light_radius", 0.0)), current_wall_layout, entities, _last_facing_direction)
-
-func _bot_entities_presentation_debug() -> Array:
-	var out: Array = []
-	for id in entities.keys():
-		var rec: Dictionary = entities[id]
-		var node := rec.get("node", null) as Node3D
-		var node_pos := node.position if node != null else Vector3.ZERO
-		var reaction = rec.get("reaction", null)
-		var controller = rec.get("controller", null)
-		out.append({
-			"id": str(id), "type": str(rec.get("type", "")), "monster_def_id": str(rec.get("monster_def_id", "")),
-			"character_id": str(rec.get("character_id", "")), "visual_model": _visual_model_name(rec, node),
-			"position": {"x": node_pos.x, "z": node_pos.z},
-			"visual_scale": float(rec.get("visual_scale", 1.0)),
-			"is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
-			"boss_phase": rec.get("boss_phase", {}), "boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
-			"telegraph_tint": str(rec.get("telegraph_tint", "")), "has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
-			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)), "telegraph_marker_color": str(rec.get("telegraph_marker_color", "")), "telegraph_marker_shape": str(rec.get("telegraph_marker_shape", "")),
-			"base_tint": str(rec.get("base_tint", "")), "has_bow_marker": bool(rec.get("has_bow_marker", false)), "effect_ids": rec.get("effect_ids", []),
-			"monster_pack_id": str(rec.get("monster_pack_id", "")), "monster_pack_leader": bool(rec.get("monster_pack_leader", false)),
-			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)),
-			"quest_reward": bool(rec.get("quest_reward", false)), "has_objective_marker": ChestPresentationScript.has_objective_marker(node), "has_quest_marker": ChestPresentationScript.has_quest_marker(node),
-			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node), "has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(node),
-			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node), "has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
-			"has_pinning_root_effect": PlayerStatusEffectMarkers.has_pinning_root_effect(node), "has_stun_effect": PlayerStatusEffectMarkers.has_stun_effect(node),
-			"has_rogue_mark_effect": PlayerStatusEffectMarkers.has_rogue_mark_effect(node),
-			"has_elite_command_radius_preview": PlayerStatusEffectMarkers.has_elite_command_radius_preview(node), "elite_command_radius_preview": PlayerStatusEffectMarkers.elite_command_radius_preview_value(node),
-			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node), "hp": int(rec.get("hp", 1)),
-			"reaction": reaction.get_debug_state() if reaction != null else {}, "animation": controller.get_debug_state() if controller != null else {},
-		})
-	return out
-
-func _visual_model_name(rec: Dictionary, node: Node3D) -> String:
-	if str(rec.get("visual_model", "")) != "":
-		return str(rec.get("visual_model", ""))
-	if node != null and node.find_child("ModelRoot", true, false) != null:
-		return "character"
-	if str(rec.get("type", "")) == "player":
-		return "primitive"
-	return ""
-
-func _bot_active_damage_numbers() -> Array:
-	var out: Array = []
-	if damage_numbers_layer == null:
-		return out
-	for child in damage_numbers_layer.get_children():
-		if child is DamageNumber:
-			out.append(_bot_damage_number_entry(child as DamageNumber))
-	return out
+	DiscoveryMinimapStateScript.sync_to_panel(
+		discovery_minimap,
+		current_level,
+		player_anchor,
+		character_progression,
+		current_wall_layout,
+		entities,
+		_last_facing_direction,
+	)
 
 func _bot_damage_numbers() -> Array:
-	return _bot_recent_damage_numbers()
-
-func _bot_recent_damage_numbers() -> Array:
-	var out := _bot_active_damage_numbers()
-	_prune_bot_damage_number_history()
-	var seen: Dictionary = {}
-	for entry in out:
-		seen[_bot_damage_number_key(entry)] = true
-	for entry in _bot_damage_number_history:
-		var key := _bot_damage_number_key(entry)
-		if seen.has(key):
-			continue
-		seen[key] = true
-		out.append((entry as Dictionary).duplicate(true))
-	return out
-
-func _bot_damage_number_entry(pop: DamageNumber) -> Dictionary:
-	return {
-		"text": pop.combat_text,
-		"variant": pop.combat_variant,
-		"damage_type": pop.combat_damage_type,
-		"color": pop.label_settings.font_color.to_html(false) if pop.label_settings != null else "",
-	}
-
-func _bot_damage_number_key(entry: Dictionary) -> String:
-	return "%s|%s|%s" % [str(entry.get("variant", "")), str(entry.get("text", "")), str(entry.get("damage_type", ""))]
+	return BotPresentationDebugScript.recent_damage_numbers(
+		damage_numbers_layer,
+		_bot_damage_number_history,
+		_prune_bot_damage_number_history,
+	)
 
 func _record_bot_damage_number(pop: DamageNumber) -> void:
-	var entry := _bot_damage_number_entry(pop)
+	var entry := BotPresentationDebugScript.damage_number_entry(pop)
 	entry["expires_at"] = Time.get_ticks_msec() / 1000.0 + BOT_DAMAGE_NUMBER_HISTORY_S
 	_bot_damage_number_history.append(entry)
 

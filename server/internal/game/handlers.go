@@ -145,7 +145,7 @@ func (s *Sim) handleMoveTo(in Input, res *TickResult) {
 		return
 	}
 	s.activeLevel().move = nil
-	s.activeLevel().autoNav = &autoNavState{steps: steps, goal: in.MoveTo.Position, hasGoal: true, sourceMsgID: in.MessageID, sourceCorrID: in.CorrelationID}
+	s.activeLevel().autoNav = s.newAutoNavState(steps, in.MoveTo.Position, nil, nil, in.MessageID, in.CorrelationID)
 	res.ack(in.MessageID)
 }
 
@@ -183,15 +183,17 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 		res.reject(in.MessageID, "path_too_long")
 		return
 	}
-	s.activeLevel().move = nil
-	s.activeLevel().autoNav = &autoNavState{
-		steps:         steps,
-		goal:          goal,
-		hasGoal:       true,
-		pendingAction: &ActionIntent{TargetID: in.Action.TargetID},
-		sourceMsgID:   in.MessageID,
-		sourceCorrID:  in.CorrelationID,
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil {
+		res.reject(in.MessageID, "player_dead")
+		return
 	}
+	s.activeLevel().move = nil
+	s.activeLevel().autoNav = s.newAutoNavState(
+		steps, goal,
+		&ActionIntent{TargetID: in.Action.TargetID}, nil,
+		in.MessageID, in.CorrelationID,
+	)
 	res.ack(in.MessageID)
 }
 
@@ -1433,18 +1435,20 @@ func (s *Sim) beginSkillAutoNav(in Input, res *TickResult, castRange float64, re
 		res.reject(in.MessageID, "path_too_long")
 		return
 	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
 	s.activeLevel().move = nil
-	s.activeLevel().autoNav = &autoNavState{
-		steps:   steps,
-		goal:    goal,
-		hasGoal: true,
-		pendingSkill: &CastSkillIntent{
+	s.activeLevel().autoNav = s.newAutoNavState(
+		steps, goal, nil,
+		&CastSkillIntent{
 			SkillID:   in.CastSkill.SkillID,
 			TargetID:  in.CastSkill.TargetID,
 			Direction: cloneVec2Ptr(in.CastSkill.Direction),
 		},
-		sourceMsgID:  in.MessageID,
-		sourceCorrID: in.CorrelationID,
-	}
+		in.MessageID, in.CorrelationID,
+	)
 	res.ack(in.MessageID)
 }

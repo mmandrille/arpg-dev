@@ -2,6 +2,20 @@ package game
 
 import "math"
 
+const maxAutoNavReplans = 8
+
+func (s *Sim) newAutoNavState(steps []Vec2, goal Vec2, pendingAction *ActionIntent, pendingSkill *CastSkillIntent, sourceMsgID, sourceCorrID string) *autoNavState {
+	return &autoNavState{
+		steps:          steps,
+		goal:           goal,
+		hasGoal:        true,
+		pendingAction:  pendingAction,
+		pendingSkill:   pendingSkill,
+		sourceMsgID:    sourceMsgID,
+		sourceCorrID:   sourceCorrID,
+	}
+}
+
 func (s *Sim) continueAutoNavToGoal(player *entity, res *TickResult) bool {
 	nav := s.activeLevel().autoNav
 	if nav == nil || !nav.hasGoal {

@@ -3017,6 +3017,39 @@ def cross_checks(report: Report) -> None:
             report.ok("unique_effects ready effects define hooks, params, and valid item-type compatibility")
 
     _validate_fog_presentation_ranges(report, load)
+    _validate_camera_fog_mode_alignment(report, load)
+
+
+def _validate_camera_fog_mode_alignment(report: "Report", load_json) -> None:
+    """Ensure fog organic-edge toggles align with declared camera presentation modes."""
+    camera_path = ASSETS / "camera_presentations.v0.json"
+    fog_path = ASSETS / "fog_presentation.v0.json"
+    if not camera_path.exists() or not fog_path.exists():
+        return
+
+    camera_modes = load_json(camera_path).get("modes", {})
+    organic = load_json(fog_path).get("organic_edge", {})
+    perspective_modes = [
+        mode_id
+        for mode_id, cfg in camera_modes.items()
+        if str(cfg.get("projection", "")).lower() == "perspective"
+    ]
+
+    if organic.get("enabled_isometric", True) and "isometric" not in camera_modes:
+        report.fail(
+            "camera/fog alignment",
+            "fog_presentation.organic_edge.enabled_isometric is true but camera_presentations has no isometric mode",
+        )
+    else:
+        report.ok("fog organic_edge isometric toggle matches camera_presentations.isometric")
+
+    if organic.get("enabled_perspective", False) and not perspective_modes:
+        report.fail(
+            "camera/fog alignment",
+            "fog_presentation.organic_edge.enabled_perspective is true but camera_presentations has no perspective mode",
+        )
+    else:
+        report.ok("fog organic_edge perspective toggle matches camera_presentations perspective modes")
 
 
 def _validate_fog_presentation_ranges(report: "Report", load_json) -> None:

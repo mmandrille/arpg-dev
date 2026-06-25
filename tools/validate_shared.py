@@ -33,7 +33,7 @@ try:
     from .validate_item_presentations import validate_item_presentations
     from .validate_main_config import validate_main_config_gameplay
     from .validate_skills import validate_skill_catalogs
-    from .validate_unique_items import validate_unique_items_catalog
+    from .validate_fog_presentation import validate_camera_fog_mode_alignment, validate_fog_presentation_ranges
 except ImportError:  # pragma: no cover - direct script execution
     from content_manifest import (  # type: ignore[no-redef]
         ManifestError,
@@ -49,6 +49,7 @@ except ImportError:  # pragma: no cover - direct script execution
     from validate_main_config import validate_main_config_gameplay  # type: ignore[no-redef]
     from validate_skills import validate_skill_catalogs  # type: ignore[no-redef]
     from validate_unique_items import validate_unique_items_catalog  # type: ignore[no-redef]
+    from validate_fog_presentation import validate_camera_fog_mode_alignment, validate_fog_presentation_ranges  # type: ignore[no-redef]
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = ROOT / "shared"
@@ -3016,80 +3017,8 @@ def cross_checks(report: Report) -> None:
         if not failed_unique_effects:
             report.ok("unique_effects ready effects define hooks, params, and valid item-type compatibility")
 
-    _validate_fog_presentation_ranges(report, load)
-    _validate_camera_fog_mode_alignment(report, load)
-
-
-def _validate_camera_fog_mode_alignment(report: "Report", load_json) -> None:
-    """Ensure fog organic-edge toggles align with declared camera presentation modes."""
-    camera_path = ASSETS / "camera_presentations.v0.json"
-    fog_path = ASSETS / "fog_presentation.v0.json"
-    if not camera_path.exists() or not fog_path.exists():
-        return
-
-    camera_modes = load_json(camera_path).get("modes", {})
-    organic = load_json(fog_path).get("organic_edge", {})
-    perspective_modes = [
-        mode_id
-        for mode_id, cfg in camera_modes.items()
-        if str(cfg.get("projection", "")).lower() == "perspective"
-    ]
-
-    if organic.get("enabled_isometric", True) and "isometric" not in camera_modes:
-        report.fail(
-            "camera/fog alignment",
-            "fog_presentation.organic_edge.enabled_isometric is true but camera_presentations has no isometric mode",
-        )
-    else:
-        report.ok("fog organic_edge isometric toggle matches camera_presentations.isometric")
-
-    if organic.get("enabled_perspective", False) and not perspective_modes:
-        report.fail(
-            "camera/fog alignment",
-            "fog_presentation.organic_edge.enabled_perspective is true but camera_presentations has no perspective mode",
-        )
-    else:
-        report.ok("fog organic_edge perspective toggle matches camera_presentations perspective modes")
-
-
-def _validate_fog_presentation_ranges(report: "Report", load_json) -> None:
-    """Semantic range guard for fog_presentation tuning values.
-
-    A value that passes schema (e.g. falloff_power: 0.001 or energy: 0) can
-    black-screen the game or make the hero light invisible. These checks catch
-    the most likely misconfiguration before it reaches the client.
-    """
-    fog_path = ASSETS / "fog_presentation.v0.json"
-    if not fog_path.exists():
-        return
-    cfg = load_json(fog_path)
-
-    # Top-level scalar guards
-    fp = cfg.get("falloff_power", 2.0)
-    if not (0.5 <= fp <= 10.0):
-        report.fail("fog_presentation range", f"falloff_power={fp} is outside [0.5, 10.0]; values near 0 suppress all visibility")
-    else:
-        report.ok("fog_presentation falloff_power in range [0.5, 10.0]")
-
-    da = cfg.get("darkness_alpha", 1.0)
-    if not (0.0 <= da <= 1.0):
-        report.fail("fog_presentation range", f"darkness_alpha={da} is outside [0, 1]")
-    else:
-        report.ok("fog_presentation darkness_alpha in [0, 1]")
-
-    # point_light sub-block guards
-    pl = cfg.get("point_light", {})
-    energy = pl.get("energy", 0.0)
-    if energy <= 0.0 or energy > 20.0:
-        report.fail("fog_presentation range", f"point_light.energy={energy} is outside (0, 20]; zero makes the hero invisible in first-person")
-    else:
-        report.ok("fog_presentation point_light.energy in (0, 20]")
-
-    rm = pl.get("range_multiplier", 1.0)
-    if rm <= 0.0 or rm > 10.0:
-        report.fail("fog_presentation range", f"point_light.range_multiplier={rm} is outside (0, 10]; near-zero collapses the light radius")
-    else:
-        report.ok("fog_presentation point_light.range_multiplier in (0, 10]")
+    validate_fog_presentation_ranges(report, load, ASSETS)
+    validate_camera_fog_mode_alignment(report, load, ASSETS)
 
 
 def main() -> int:

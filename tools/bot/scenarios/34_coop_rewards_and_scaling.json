@@ -2,6 +2,7 @@
   "id": "coop_rewards_and_scaling",
   "world_id": "coop_reward_lab",
   "seed": "v48-coop-rewards-and-scaling",
+  "max_elapsed_s": 34.0,
   "peer_count": 3,
   "title": "Co-op rewards and scaling",
   "description": "Three-account compact co-op proof for nearby shared XP, out-of-range XP exclusion, replay, and fresh-session persistence. Different-level exclusion remains covered by Go tests.",

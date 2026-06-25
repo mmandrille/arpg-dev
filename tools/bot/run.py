@@ -899,7 +899,10 @@ async def execute_step(
                 max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
             )
             return
-        await walk_toward(ws, session_id, state, target["position"], loop, stop_distance=stop_distance, max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)))
+        max_ticks = int(step.get("max_ticks", WALK_MAX_TICKS))
+        if state.world_id == "dungeon_levels" or state.current_level < 0:
+            max_ticks = derived_walk_max_ticks(state, target["position"], max_ticks)
+        await walk_toward(ws, session_id, state, target["position"], loop, stop_distance=stop_distance, max_ticks=max_ticks)
         return
 
     if action == "use_stair":
@@ -989,7 +992,7 @@ async def execute_step(
         if use_pathfind is None:
             use_pathfind = True
         stop_distance = float(step.get("stop_distance", WALK_STOP_DISTANCE))
-        max_ticks = int(step.get("max_ticks", WALK_MAX_TICKS))
+        max_ticks = greedy_walk_max_ticks(state, monster["position"], int(step.get("max_ticks", WALK_MAX_TICKS)))
         if bool(use_pathfind):
             await move_until_entity_in_range(
                 ws,
@@ -1896,6 +1899,12 @@ def derived_walk_max_ticks(state: RuntimeState, target_pos: dict[str, Any], requ
     from tools.bot.movement_runtime import derived_walk_max_ticks as derived_walk_max_ticks_impl
 
     return derived_walk_max_ticks_impl(state, target_pos, requested)
+
+
+def greedy_walk_max_ticks(state: RuntimeState, target_pos: dict[str, Any], requested: int) -> int:
+    from tools.bot.movement_runtime import greedy_walk_max_ticks as greedy_walk_max_ticks_impl
+
+    return greedy_walk_max_ticks_impl(state, target_pos, requested)
 
 
 async def move_to_position(

@@ -73,3 +73,22 @@ def test_wait_for_player_move_uses_stub_context() -> None:
     # Player already differs from `before`, so it returns True without pumping.
     assert asyncio.run(drive()) is True
     assert pumped["count"] == 0
+
+
+def test_uses_pathfind_walk_only_for_dungeon_and_obstacle_labs() -> None:
+    from tools.bot.bot_types import RuntimeState
+    from tools.bot.movement_runtime import uses_pathfind_walk
+
+    dungeon = RuntimeState(world_id="dungeon_levels", current_level=0)
+    floor = RuntimeState(world_id="dungeon_levels", current_level=-1)
+    obstacle = RuntimeState(world_id="obstacle_variety_lab", current_level=0)
+    vendor = RuntimeState(world_id="vendor_lab", current_level=0)
+    combat = RuntimeState(world_id="combat_stat_lab", current_level=0)
+    gear = RuntimeState(world_id="gear_before_combat", current_level=0)
+
+    assert uses_pathfind_walk(dungeon) is True
+    assert uses_pathfind_walk(floor) is True
+    assert uses_pathfind_walk(obstacle) is True
+    assert uses_pathfind_walk(vendor) is False
+    assert uses_pathfind_walk(combat) is False
+    assert uses_pathfind_walk(gear) is False

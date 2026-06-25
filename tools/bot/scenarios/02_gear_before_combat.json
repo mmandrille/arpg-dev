@@ -1,6 +1,7 @@
 {
   "id": "gear_before_combat",
   "world_id": "gear_before_combat",
+  "max_elapsed_s": 23.0,
   "title": "Gear before combat",
   "description": "Walk to an initial sword, equip it, kill the reward dummy, pick up gold, and verify replay state.",
   "steps": [

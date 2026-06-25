@@ -205,14 +205,16 @@ type activeMove struct {
 }
 
 type autoNavState struct {
-	steps          []Vec2
-	goal           Vec2
-	hasGoal        bool
-	lastReplanPos  Vec2 // position where the last re-plan fired; zero before first re-plan
-	pendingAction  *ActionIntent
-	pendingSkill   *CastSkillIntent
-	sourceMsgID    string
-	sourceCorrID   string
+	steps              []Vec2
+	goal               Vec2
+	hasGoal            bool
+	lastReplanPos      Vec2 // position where the last re-plan fired; zero before first re-plan
+	pathStepsExhausted bool // set when the queued path was fully consumed without a blocked step
+	replanAttempts     int
+	pendingAction      *ActionIntent
+	pendingSkill       *CastSkillIntent
+	sourceMsgID        string
+	sourceCorrID       string
 }
 
 type activeSkillChannel struct {
@@ -2712,20 +2714,21 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 		s.finishAutoNav(res)
 		return
 	}
+	nav := s.activeLevel().autoNav
 	player := s.activeLevel().entities[s.playerID]
 	before := player.pos
-	step := s.activeLevel().autoNav.steps[0]
-	s.activeLevel().autoNav.steps = s.activeLevel().autoNav.steps[1:]
-	speed := s.playerMoveSpeed()
-	// Normalize the step direction so diagonal moves travel the same distance
-	// as cardinal moves (speed units/tick). Without normalization, diagonal
-	// steps ({±1,±1}) produce {speed*√2} displacement, causing position drift
-	// that lands the player on wall cell boundaries and stalls navigation.
+	step := nav.steps[0]
+	nav.steps = nav.steps[1:]
+	navDist := s.activeNav().CellSize
+	// Grid path steps represent one-cell transitions. Use cell_size as the step
+	// magnitude so each tick advances one grid cell even when player move speed
+	// is below cell_size (e.g. 0.75 vs 1.0). Normalize diagonals to cell_size
+	// total displacement so corner-cutting does not drift into wall pockets.
 	mag := math.Sqrt(step.X*step.X + step.Y*step.Y)
 	if mag < 1e-9 {
 		mag = 1
 	}
-	delta := Vec2{X: step.X * speed / mag, Y: step.Y * speed / mag}
+	delta := Vec2{X: step.X * navDist / mag, Y: step.Y * navDist / mag}
 	player.pos = s.resolveMovement(player.pos, delta)
 	if player.pos != before {
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
@@ -2734,10 +2737,12 @@ func (s *Sim) applyAutoNav(res *TickResult) {
 		// Discard remaining steps so finishAutoNav re-plans from the exact
 		// current position rather than executing steps designed for a position
 		// the player never reached.  Clears lastReplanPos so re-plan is allowed.
-		s.activeLevel().autoNav.steps = s.activeLevel().autoNav.steps[:0]
-		s.activeLevel().autoNav.lastReplanPos = Vec2{}
+		nav.steps = nav.steps[:0]
+		nav.pathStepsExhausted = false
+		nav.lastReplanPos = Vec2{}
 	}
-	if len(s.activeLevel().autoNav.steps) == 0 {
+	if len(nav.steps) == 0 {
+		nav.pathStepsExhausted = true
 		s.finishAutoNav(res)
 	}
 }
@@ -2750,21 +2755,21 @@ func (s *Sim) finishAutoNav(res *TickResult) {
 				return
 			}
 			// Re-plan when the path ends but the goal is not yet reached.
-			// Guard: only re-plan if the player moved since the last re-plan
-			// (same position twice in a row means the path can't make progress).
-			if distance(player.pos, nav.goal) > s.activeNav().StopDistance &&
-				player.pos != nav.lastReplanPos {
+			// Allow another attempt when the queued path was fully walked, even if
+			// the player returned to the same position, but cap attempts to avoid
+			// infinite loops on unreachable goals.
+			canReplan := nav.replanAttempts < maxAutoNavReplans &&
+				(player.pos != nav.lastReplanPos || nav.pathStepsExhausted)
+			if distance(player.pos, nav.goal) > s.activeNav().StopDistance && canReplan {
 				if steps, ok := s.planPath(s.activeNav(), player.pos, nav.goal, s.buildBlockedFn()); ok && len(steps) > 0 {
-					s.activeLevel().autoNav = &autoNavState{
-						steps:         steps,
-						goal:          nav.goal,
-						hasGoal:       true,
-						lastReplanPos: player.pos,
-						pendingAction: nav.pendingAction,
-						pendingSkill:  nav.pendingSkill,
-						sourceMsgID:   nav.sourceMsgID,
-						sourceCorrID:  nav.sourceCorrID,
-					}
+					next := s.newAutoNavState(
+						steps, nav.goal,
+						nav.pendingAction, nav.pendingSkill,
+						nav.sourceMsgID, nav.sourceCorrID,
+					)
+					next.lastReplanPos = player.pos
+					next.replanAttempts = nav.replanAttempts + 1
+					s.activeLevel().autoNav = next
 					return
 				}
 			}

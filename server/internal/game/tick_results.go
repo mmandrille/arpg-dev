@@ -14,38 +14,22 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 	defer func() {
 		s.tickProfiler = previousProfiler
 	}()
-	type resultKey struct {
-		level int
-		actor uint64
-	}
-	resultByKey := map[resultKey]*TickResult{}
-	var ordered []*TickResult
-	transitionThisTick := false
-	resultFor := func(level int, actor uint64) *TickResult {
-		key := resultKey{level: level, actor: actor}
-		if res := resultByKey[key]; res != nil {
-			return res
-		}
-		res := &TickResult{Tick: s.tick, Level: level, ActorPlayerID: actor, Changes: []Change{}, Events: []Event{}}
-		resultByKey[key] = res
-		ordered = append(ordered, res)
-		return res
-	}
+	ctx := newSimTickCtx(s)
 
 	for _, in := range inputs {
 		ps := s.playerForInput(in)
 		if ps == nil || !ps.Connected {
-			res := resultFor(s.currentLevel, 0)
+			res := ctx.resultFor(s.currentLevel, 0)
 			res.reject(in.MessageID, "unknown_actor")
 			continue
 		}
 		s.usePlayer(ps)
-		res := resultFor(ps.CurrentLevel, ps.PlayerID)
+		res := ctx.resultFor(ps.CurrentLevel, ps.PlayerID)
 		if in.Type == "descend_intent" || in.Type == "ascend_intent" || in.Type == "teleport_intent" {
 			if arrival := s.handleLevelTravel(in, res); arrival != nil {
 				arrival.ActorPlayerID = ps.PlayerID
-				ordered = append(ordered, arrival)
-				transitionThisTick = true
+				ctx.ordered = append(ctx.ordered, arrival)
+				ctx.markTransition()
 			}
 			s.savePlayer(ps)
 			continue
@@ -56,14 +40,14 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 		s.savePlayer(ps)
 	}
 
-	if !transitionThisTick {
+	if !ctx.transitionThisTick {
 		for _, playerID := range sortedPlayerIDs(s.players) {
 			ps := s.players[playerID]
 			if ps == nil || !ps.Connected {
 				continue
 			}
 			s.usePlayer(ps)
-			res := resultFor(ps.CurrentLevel, ps.PlayerID)
+			res := ctx.resultFor(ps.CurrentLevel, ps.PlayerID)
 			channelActive := false
 			s.withTickPhase(TickPhaseCombat, func() {
 				s.expireSkillEffects(res)
@@ -81,14 +65,14 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 		}
 
 		s.withTickPhase(TickPhaseCombat, func() {
-			s.advanceAreaHealZones(resultFor)
-			s.autoPickUpCurrencyLoot(resultFor)
+			s.advanceAreaHealZones(ctx.resultFor)
+			s.autoPickUpCurrencyLoot(ctx.resultFor)
 		})
 
 		for _, levelNum := range s.sortedLevelNums() {
 			s.currentLevel = levelNum
 			s.syncCompatibilityFields()
-			res := resultFor(levelNum, 0)
+			res := ctx.resultFor(levelNum, 0)
 			s.withTickPhase(TickPhaseAI, func() {
 				s.advanceMonsterMovement(res)
 				s.advanceCompanions(res)
@@ -101,18 +85,5 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 		}
 	}
 
-	s.tick++
-	s.usePlayer(s.defaultPlayer())
-
-	results := make([]TickResult, 0, len(ordered))
-	for _, res := range ordered {
-		if len(res.Changes) == 0 && len(res.Events) == 0 && len(res.Acks) == 0 && len(res.Rejects) == 0 {
-			continue
-		}
-		results = append(results, *res)
-	}
-	if len(results) == 0 {
-		return []TickResult{{Tick: s.tick - 1, Level: s.currentLevel, Changes: []Change{}, Events: []Event{}}}
-	}
-	return results
+	return ctx.finalizeResults()
 }

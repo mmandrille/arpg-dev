@@ -346,6 +346,9 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v331** | `hero-visibility-lighting` | Complete (`make ci` green) | — | — | [`as-built`](../as-built/v331_hero-visibility-lighting.md) |
 | **v332** | `pathfinding-cell-accuracy` | Complete (`make ci` green) | [`v332_spec-pathfinding-cell-accuracy.md`](../specs/v332_spec-pathfinding-cell-accuracy.md) | [`v332_2026-06-24-pathfinding-cell-accuracy.md`](../plans/v332_2026-06-24-pathfinding-cell-accuracy.md) | [`as-built`](../as-built/v332_pathfinding-cell-accuracy.md) |
 | **v333** | `room-spawn-awareness` | Complete (focused checks green; autoloop batch `make ci` pending) | [`v333_spec-room-spawn-awareness.md`](../specs/v333_spec-room-spawn-awareness.md) | [`v333_2026-06-24-room-spawn-awareness.md`](../plans/v333_2026-06-24-room-spawn-awareness.md) | [`as-built`](../as-built/v333_room-spawn-awareness.md) |
-| **v334** | `ranged-retreat-engagement` | Complete (focused checks green; autoloop batch `make ci` pending) | [`v334_spec-ranged-retreat-engagement.md`](../specs/v334_spec-ranged-retreat-engagement.md) | — | [`as-built`](../as-built/v334_ranged-retreat-engagement.md) |
+| **v334** | `ranged-retreat-engagement` | Complete (focused checks green; batch `make ci` pending) | [`v334_spec-ranged-retreat-engagement.md`](../specs/v334_spec-ranged-retreat-engagement.md) | — | [`as-built`](../as-built/v334_ranged-retreat-engagement.md) |
+| **v335** | `movement-input-presenter` | Complete (focused checks green; batch `make ci` pending) | — | — | [`as-built`](../as-built/v335_movement-input-presenter.md) |
+| **v336** | `wall-floor-lab-nav` | Complete (focused checks green; batch `make ci` pending) | [`v308_spec-wall-floor-shader-polish.md`](../specs/v308_spec-wall-floor-shader-polish.md) | [`v308_2026-06-19-wall-floor-shader-polish.md`](../plans/v308_2026-06-19-wall-floor-shader-polish.md) | [`as-built`](../as-built/v336_wall-floor-lab-nav.md) |
+| **v337** | `sim-tick-context` | Complete (focused checks green; batch `make ci` pending) | — | — | [`as-built`](../as-built/v337_sim-tick-context.md) |
 
 ---

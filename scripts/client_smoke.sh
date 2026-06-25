@@ -198,6 +198,7 @@ run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement
 run_gate "GDScript player movement feel test" "[gdtest] PASS: test_player_movement_feel" res://tests/test_player_movement_feel.gd
 run_gate "GDScript melee lunge presentation test" "[gdtest] PASS: test_melee_lunge_presentation" res://tests/test_melee_lunge_presentation.gd
 run_gate "GDScript command retarget grace test" "[gdtest] PASS: test_command_retarget_grace" res://tests/test_command_retarget_grace.gd
+run_gate "GDScript movement input presenter test" "[gdtest] PASS: test_movement_input_presenter" res://tests/test_movement_input_presenter.gd
 
 # 2p. Camera mode presentation loader unit tests (server-independent; v329).
 run_gate "GDScript camera mode settings test" "[gdtest] PASS: test_camera_mode_settings" res://tests/test_camera_mode_settings.gd

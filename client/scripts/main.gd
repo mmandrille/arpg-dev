@@ -69,6 +69,7 @@ const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local
 const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 const MovementVisualSmoothingScript := preload("res://scripts/movement_visual_smoothing.gd")
 const PlayerMovementFeelScript := preload("res://scripts/player_movement_feel.gd")
+const MovementInputPresenterScript := preload("res://scripts/movement_input_presenter.gd")
 const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
 const LevelLoadingOverlayScript := preload("res://scripts/level_loading_overlay.gd")
 const CommandRetargetGraceScript := preload("res://scripts/command_retarget_grace.gd")
@@ -269,8 +270,7 @@ var _level_loading_started_at: float = 0.0
 var _level_loading_traveling: bool = false
 var _pending_level_walls: Array = []
 var _command_retarget_grace: CommandRetargetGrace = CommandRetargetGraceScript.new()
-var _movement_requires_fresh_input: bool = false
-var _player_walk_linger: float = 0.0
+var _movement_input: MovementInputPresenter = MovementInputPresenterScript.new()
 var _last_facing_direction := Vector2(1.0, 0.0)
 var _debug_label: Label
 var _level_label: Label
@@ -910,7 +910,7 @@ func _process(delta: float) -> void:
 	_sync_waypoint_panel_reach()
 	_sync_actionable_panel_reach()
 	if player_anim != null:
-		player_anim.set_locomotion(_local_player_is_walking())
+		player_anim.set_locomotion(_movement_input.local_player_is_walking(client, player_hp, _user_input_blocked()))
 	_movement_visual_smoothing.tick(delta, character_visual)
 	if not _user_input_blocked():
 		_update_facing_toward_mouse()
@@ -2540,22 +2540,25 @@ func _handle_input(delta: float) -> void:
 	if Input.is_key_pressed(KEY_S): input.y += 1
 	if Input.is_key_pressed(KEY_A): input.x -= 1
 	if Input.is_key_pressed(KEY_D): input.x += 1
-	if _is_force_stand_held():
-		_movement_requires_fresh_input = true
+	if MovementInputPresenterScript.is_force_stand_held():
+		_movement_input.apply_force_stand_hold()
 		input = Vector2.ZERO
 	elif input == Vector2.ZERO:
-		_movement_requires_fresh_input = false
+		_movement_input.on_keyboard_released()
 		_player_movement_feel.on_stop()
-	if input != Vector2.ZERO and not _movement_requires_fresh_input and _send_cooldown <= 0.0:
-		var dir := (_camera_controller.camera_relative_flat_direction(input) if _camera_controller != null else Vector2.ZERO)
-		_close_gameplay_panels_for_movement()
-		var move_speed := _player_movement_feel.effective_speed(dir, delta)
-		# Local prediction: move immediately for responsive feel.
-		predicted_pos += Vector3(dir.x, 0, dir.y) * move_speed * ClientConstants.SEND_INTERVAL
-		_reconcile_player()
-		_mark_local_player_walking()
-		client.send("move_intent", last_server_tick, {"direction": {"x": dir.x, "y": dir.y}, "duration_ticks": 2})
-		_send_cooldown = ClientConstants.SEND_INTERVAL
+	_send_cooldown = _movement_input.try_send_keyboard_move(
+		input,
+		delta,
+		_send_cooldown,
+		client,
+		last_server_tick,
+		player_hp,
+		_camera_controller,
+		_player_movement_feel,
+		Callable(self, "_close_gameplay_panels_for_movement"),
+		Callable(self, "_predict_keyboard_move"),
+		Callable(self, "_mark_local_player_walking"),
+	)
 	if (client_settings == null or client_settings.camera_mode == ClientSettings.CAMERA_MODE_ISOMETRIC) and _hold_input_allowed():
 		_tick_sustained_click()
 	elif _sustained_click.active:
@@ -2612,40 +2615,17 @@ func _close_gameplay_panels_for_movement() -> void:
 	_close_gameplay_panels()
 
 func _movement_intent_starts_motion(intent_type: String, payload: Dictionary) -> bool:
-	if intent_type == "move_to_intent":
-		return true
-	if intent_type != "move_intent":
-		return false
-	var direction = payload.get("direction", {})
-	if typeof(direction) != TYPE_DICTIONARY:
-		return false
-	return absf(float(direction.get("x", 0.0))) > 0.0001 or absf(float(direction.get("y", 0.0))) > 0.0001
+	return MovementInputPresenterScript.intent_starts_motion(intent_type, payload)
 
 func _mark_local_player_walking() -> void:
-	_player_walk_linger = ClientConstants.WALK_ANIMATION_LINGER_SECONDS
+	_movement_input.mark_walking()
 
-func _local_player_is_walking() -> bool:
-	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN:
-		return false
-	if player_hp <= 0 or _user_input_blocked() or _is_force_stand_held() or _movement_requires_fresh_input:
-		return false
-	if _player_walk_linger > 0.0:
-		return true
-	return Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_A) \
-		or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_D)
+func _predict_keyboard_move(dir: Vector2, move_speed: float) -> void:
+	predicted_pos += Vector3(dir.x, 0, dir.y) * move_speed * ClientConstants.SEND_INTERVAL
+	_reconcile_player()
 
 func _tick_movement_animation_linger(delta: float) -> void:
-	_player_walk_linger = maxf(0.0, _player_walk_linger - delta)
-	for id in entities.keys():
-		var rec: Dictionary = entities[id]
-		if not rec.has("walk_linger"):
-			continue
-		rec["walk_linger"] = maxf(0.0, float(rec.get("walk_linger", 0.0)) - delta)
-		var ctrl = rec.get("controller", null)
-		if ctrl == null:
-			continue
-		var hp := int(rec.get("hp", 1))
-		ctrl.set_locomotion(float(rec.get("walk_linger", 0.0)) > 0.0 and hp > 0)
+	_movement_input.tick_walk_linger(delta, entities)
 
 func _is_escape_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_ESCAPE or event.physical_keycode == KEY_ESCAPE
@@ -2654,24 +2634,28 @@ func _is_force_stand_key(event: InputEventKey) -> bool:
 	return event.keycode == KEY_SHIFT or event.physical_keycode == KEY_SHIFT
 
 func _is_force_stand_held() -> bool:
-	return Input.is_key_pressed(KEY_SHIFT)
+	return MovementInputPresenterScript.is_force_stand_held()
 
 func _begin_force_stand() -> void:
-	if not _hold_input_allowed() or client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
-		return
 	_sustained_click.clear()
-	_clear_pending_attack_commands()
-	_movement_requires_fresh_input = true
-	_player_movement_feel.on_stop()
+	_movement_input.begin_force_stand(
+		_hold_input_allowed(),
+		client,
+		player_hp,
+		player_anchor,
+		Callable(_player_movement_feel, "on_stop"),
+		Callable(self, "_clear_pending_attack_commands"),
+		Callable(self, "_reconcile_force_stand_anchor"),
+		last_server_tick,
+	)
+
+func _reconcile_force_stand_anchor() -> void:
 	if player_anchor != null:
 		predicted_pos = player_anchor.global_position
-		_reconcile_player()
-	_send_stop_movement_intent()
+	_reconcile_player()
 
 func _send_stop_movement_intent() -> void:
-	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or player_hp <= 0:
-		return
-	client.send("move_intent", last_server_tick, {"direction": {"x": 0, "y": 0}, "duration_ticks": 1})
+	MovementInputPresenterScript.send_stop_intent(client, last_server_tick, player_hp)
 
 func _handle_escape() -> void:
 	if settings_panel != null and settings_panel.visible:

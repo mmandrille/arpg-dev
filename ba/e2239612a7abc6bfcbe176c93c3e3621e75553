@@ -1,0 +1,31 @@
+tools/bot/scenarios/101_obstacle_variety_pack.json
+  s_45d8e872daefaf::t_d9341c943e907e 11
+client/scripts/main.gd
+  s_45d8e872daefaf::t_eaf426f4ce7771 3895
+  s_45d8e872daefaf::t_ab1adf002603d5 2678
+  s_45d8e872daefaf::t_3b3e101fefdfaa 3923
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_45d8e872daefaf::t_ae804c9ff76281 27-28
+tools/bot/scenarios/81_magic_find_stat.json
+  s_45d8e872daefaf::t_8628820e328303 4,18,22,38,42
+.maintainability/file-size-baseline.tsv
+  s_45d8e872daefaf::t_dc7f3fb1e23aeb 34
+tools/bot/movement_runtime.py
+  s_45d8e872daefaf::t_c75704bf6573df 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bae2239612a7abc6bfcbe176c93c3e3621e75553",
+  "prompts": {},
+  "sessions": {
+    "s_45d8e872daefaf": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b6daa7ce-7315-4b97-b922-9033cf58729f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

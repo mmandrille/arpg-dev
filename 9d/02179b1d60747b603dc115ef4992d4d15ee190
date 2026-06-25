@@ -1,0 +1,53 @@
+tools/bot/test_movement_runtime.py
+  s_36635b5eb56200::t_e6cbaff8173a77 76-94
+server/internal/game/vendor_lab_nav_test.go
+  s_36635b5eb56200::t_a6e10be1e4af99 1-20
+tools/bot/run.py
+  s_36635b5eb56200::t_1a225026520a18 1904-1909
+  s_36635b5eb56200::t_e8dcdd442a36bb 902-905
+  s_36635b5eb56200::t_72a0102e758a33 995
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_36635b5eb56200::t_e6f78a55e7470a 5
+tools/bot/scenarios/34_coop_rewards_and_scaling.json
+  s_36635b5eb56200::t_1944805a5feae1 5
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_36635b5eb56200::t_47a49235efa548 5
+tools/bot/scenarios/35_gold_autopickup_shared_loot.json
+  s_36635b5eb56200::t_bd931c7c4447e2 5
+shared/golden/monster_chase.json
+  s_36635b5eb56200::t_1429b51fab8783 12-13
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_36635b5eb56200::t_52f13ea108c454 5
+tools/bot/movement_runtime.py
+  s_36635b5eb56200::t_c9673e275501e4 109
+  s_36635b5eb56200::t_df4b3caf72120e 43
+  s_36635b5eb56200::t_11f60910df0572 210-225
+  s_36635b5eb56200::t_78c1bad51317b1 106-108
+  s_36635b5eb56200::t_2ee9792a505835 16-30
+tools/bot/scenarios/02_gear_before_combat.json
+  s_36635b5eb56200::t_5c91f3d5e7b1ef 4
+tools/bot/scenarios/26_combat_control_and_boss_ai_fixes.json
+  s_36635b5eb56200::t_bf93c8823d75e2 5
+shared/golden/auto_path.json
+  s_36635b5eb56200::t_d7fd749f0e4615 10-11
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_36635b5eb56200::t_054ffae0e39fad 5
+shared/rules/navigation.v0.json
+  s_36635b5eb56200::t_7eb114a100ecff 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9d02179b1d60747b603dc115ef4992d4d15ee190",
+  "prompts": {},
+  "sessions": {
+    "s_36635b5eb56200": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0cfa2cf3-bdf8-4c29-b1f2-1fb412a60768",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

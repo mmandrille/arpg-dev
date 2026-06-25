@@ -2,6 +2,7 @@
   "id": "combat_control_and_boss_ai_fixes",
   "world_id": "combat_control_lab",
   "seed": "combatcontrol0002",
+  "max_elapsed_s": 23.0,
   "title": "Combat control and boss AI fixes",
   "description": "Equip the training bow, fire a targetless directional shot, and prove the damaged dungeon mob aggros and moves toward the player.",
   "steps": [

@@ -13,6 +13,21 @@ SLICE_TIMEOUT_S = 20.0
 WALK_STOP_DISTANCE = 1.0
 WALK_MAX_TICKS = 40
 
+# Compact lab worlds with open corridors use greedy move_intent walking. Only
+# labs that route around static obstacles during pick_up_loot / walk_toward need
+# server pathfinding via move_to_intent.
+PATHFIND_WALK_WORLD_IDS = frozenset({
+    "obstacle_variety_lab",
+})
+
+
+def uses_pathfind_walk(state: RuntimeState) -> bool:
+    return (
+        state.world_id == "dungeon_levels"
+        or state.current_level < 0
+        or state.world_id in PATHFIND_WALK_WORLD_IDS
+    )
+
 
 async def walk_toward(
     ws,
@@ -25,7 +40,7 @@ async def walk_toward(
     *,
     ctx: BotContext,
 ) -> None:
-    if state.world_id == "dungeon_levels" or state.current_level < 0 or str(state.world_id).endswith("_lab"):
+    if uses_pathfind_walk(state):
         await move_to_position(ws, session_id, state, target_pos, loop, max_ticks=max_ticks, stop_distance=stop_distance, ctx=ctx)
         return
     for _ in range(max_ticks):
@@ -88,6 +103,10 @@ async def move_until_entity_in_range(
     max_ticks: int = WALK_MAX_TICKS,
     ctx: BotContext,
 ) -> None:
+    target = state.entities.get(target_id)
+    if target is None:
+        raise AssertionError(f"move_until_entity_in_range: target vanished: {target_id}")
+    max_ticks = greedy_walk_max_ticks(state, target["position"], max_ticks)
     last_error: Exception | None = None
     attempts = max(1, max_ticks // 20)
     for _ in range(attempts):
@@ -186,6 +205,22 @@ def derived_walk_max_ticks(
     dy = abs(float(target_pos.get("y", 0.0)) - float(player_pos.get("y", 0.0)))
     distance_ticks = int(max(dx, dy) * 20) + 160
     return max(requested, distance_ticks, WALK_MAX_TICKS)
+
+
+def greedy_walk_max_ticks(
+    state: RuntimeState,
+    target_pos: dict[str, Any],
+    requested: int,
+) -> int:
+    player = find_player(state)
+    if player is None:
+        return max(requested, WALK_MAX_TICKS)
+    player_pos = player.get("position", {})
+    span = max(
+        abs(float(target_pos.get("x", 0.0)) - float(player_pos.get("x", 0.0))),
+        abs(float(target_pos.get("y", 0.0)) - float(player_pos.get("y", 0.0))),
+    )
+    return max(requested, WALK_MAX_TICKS, int(span * 5) + 15)
 
 
 async def move_to_position(

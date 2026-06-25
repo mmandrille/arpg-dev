@@ -2,6 +2,7 @@
   "id": "pack_aggro_and_dungeon_packs",
   "world_id": "dungeon_levels",
   "seed": "v76_pack_aggro",
+  "max_elapsed_s": 32.0,
   "character_class": "barbarian",
   "title": "Pack aggro and dungeon packs",
   "description": "Descend into a generated dungeon, prove packed monster population, and verify one pull wakes nearby pack support.",

@@ -9,8 +9,8 @@
     "grid_bounds": {
       "min_x": -2,
       "min_y": -2,
-      "max_x": 16,
-      "max_y": 12
+      "max_x": 20,
+      "max_y": 16
     },
     "stop_distance": 0.25,
     "monster_path_requests_per_tick": 40,

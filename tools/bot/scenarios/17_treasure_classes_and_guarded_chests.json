@@ -2,6 +2,7 @@
   "id": "treasure_classes_and_guarded_chests",
   "world_id": "dungeon_levels",
   "seed": "chest_fast_69",
+  "max_elapsed_s": 18.0,
   "title": "Treasure classes and guarded chests",
   "description": "Pinned dungeon seed generates a guarded chest floor with enough dungeon mobs for loot attempts, at least one closed chest, multi-attempt mob loot, chest loot, pickup, state, reconnect, replay, and fresh-session persistence.",
   "steps": [

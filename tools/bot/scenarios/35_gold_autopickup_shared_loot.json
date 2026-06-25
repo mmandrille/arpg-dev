@@ -2,6 +2,7 @@
   "id": "gold_autopickup_shared_loot",
   "world_id": "coop_loot_lab",
   "seed": "v49-gold-autopickup-shared-loot",
+  "max_elapsed_s": 23.0,
   "peer_count": 2,
   "title": "Gold auto-pickup and shared loot",
   "description": "Two-account compact co-op proof for shared floor gold, automatic gold pickup, winner-private wallet updates, click-required item loot, persistence, and replay.",

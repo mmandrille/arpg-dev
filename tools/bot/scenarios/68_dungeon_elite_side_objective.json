@@ -2,7 +2,7 @@
   "id": "dungeon_elite_side_objective",
   "world_id": "dungeon_levels",
   "seed": "v161_fast_objective_0018",
-  "max_elapsed_s": 45.0,
+  "max_elapsed_s": 52.0,
   "character_class": "barbarian",
   "title": "Dungeon elite side objective",
   "description": "Pinned generated floor includes a side-objective reward chest that rejects while the generated elite objective is incomplete, then opens after the objective is cleared.",

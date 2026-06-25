@@ -1,0 +1,26 @@
+tools/validate_fog_presentation.py
+  s_b632b11788b427::t_292840db17bdfe 1-69
+.maintainability/file-size-baseline.tsv
+  s_b632b11788b427::t_ae5506ad0379a9 36
+  s_b632b11788b427::t_d4eefdc9fe8087 20
+tools/validate_shared.py
+  s_b632b11788b427::t_8ef940c5a30f60 52
+  s_b632b11788b427::t_d3bd1df7682d11 3020-3021
+  s_b632b11788b427::t_72f201a53aebcf 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "352893d7413bcf81e3406c48df9c5d29ddaf1070",
+  "prompts": {},
+  "sessions": {
+    "s_b632b11788b427": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "496f4843-2d55-40ec-8e09-284b923c5cc9",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

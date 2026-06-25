@@ -1,0 +1,61 @@
+docs/progress/slice-lifecycle.md
+  s_9b51da3986e539::t_2e124762cc3fa1 350-352
+  s_9b51da3986e539::t_803d2f8f5e8a26 349
+PROGRESS.md
+  s_9b51da3986e539::t_f49d361dbb23c2 95-96
+  s_9b51da3986e539::t_177d8482ea96f0 26,28-29
+client/scripts/bot_facade.gd
+  s_9b51da3986e539::t_494a93d2cbaa0f 250
+scripts/client_smoke.sh
+  s_9b51da3986e539::t_741501244a6c79 201
+client/tests/test_movement_input_presenter.gd.uid
+  s_9b51da3986e539::t_7b495235a1bf94 1
+server/internal/game/sim_tick_context.go
+  s_9b51da3986e539::t_70af6c03d94937 1-61
+client/scripts/movement_input_presenter.gd
+  s_9b51da3986e539::t_7e3008229138d2 1-110,114-115,117-122
+  s_9b51da3986e539::t_b5381f0a68766c 111-113,116
+docs/as-built/v336_wall-floor-lab-nav.md
+  s_9b51da3986e539::t_fff276cd5d0cf5 1-20
+.maintainability/file-size-baseline.tsv
+  s_9b51da3986e539::t_3079954edc9b1a 8
+client/scripts/main.gd
+  s_9b51da3986e539::t_aaebcfd5847cb9 2543-2544,2547,2549-2561
+  s_9b51da3986e539::t_0b485b2a834e70 2618,2621,2623-2625,2628
+  s_9b51da3986e539::t_7215f4cc13c197 913
+  s_9b51da3986e539::t_80b5b8218aba6a 72
+  s_9b51da3986e539::t_44738cc04f887f 273
+  s_9b51da3986e539::t_02bc5e0259e673 2637,2641-2652,2655,2658
+server/internal/game/tick_results.go
+  s_9b51da3986e539::t_bf2b5e287f8648 17,22,27,31-32,43,50,68-69,75,88
+client/tests/test_movement_input_presenter.gd
+  s_9b51da3986e539::t_6a2a863db4ca8f 1-65
+client/scripts/bot_presentation_debug.gd.uid
+  s_9b51da3986e539::t_7b495235a1bf94 1
+docs/as-built/v337_sim-tick-context.md
+  s_9b51da3986e539::t_1daf88003bf7ac 1-20
+docs/CODEMAP.md
+  s_9b51da3986e539::t_e9f5fc9ebf86d5 19
+  s_9b51da3986e539::t_67a2bc1a062445 15
+  s_9b51da3986e539::t_e9ced1d094df6a 18
+docs/as-built/v335_movement-input-presenter.md
+  s_9b51da3986e539::t_d826ee759e0c29 1-21
+client/scripts/movement_input_presenter.gd.uid
+  s_9b51da3986e539::t_7b495235a1bf94 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2d5042073468d255be5989ad646fa86e99f49acc",
+  "prompts": {},
+  "sessions": {
+    "s_9b51da3986e539": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2420cd3f-eb98-4348-8ccd-fc8abbe45d9f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

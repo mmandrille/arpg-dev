@@ -1,0 +1,22 @@
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_5c6e9c1845a28a::t_c42c43660ee2ff 7
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_5c6e9c1845a28a::t_13056fef31da62 7
+  s_5c6e9c1845a28a::t_3689b3d7c55506 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a858c9d7d622b3d93596467337c38b9b3af339d2",
+  "prompts": {},
+  "sessions": {
+    "s_5c6e9c1845a28a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0d867260-c358-45bd-9b24-d7dba273a35e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

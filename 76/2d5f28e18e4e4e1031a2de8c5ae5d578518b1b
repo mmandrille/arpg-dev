@@ -1,0 +1,21 @@
+tools/test_validate_main_config.py
+  s_c168242f71c84b::t_afbe722f1826d9 1-122
+tools/validate_shared.py
+  s_c168242f71c84b::t_663c1581476a53 3020-3052
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "762d5f28e18e4e4e1031a2de8c5ae5d578518b1b",
+  "prompts": {},
+  "sessions": {
+    "s_c168242f71c84b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8667618e-6ec1-447a-976c-f4d940058e40",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -215,6 +215,11 @@ func _do_press_key(keycode_str: String) -> void:
 	event.pressed = true
 	event.echo = false
 	get_viewport().push_input(event)
+	var release := InputEventKey.new()
+	release.keycode = kc
+	release.pressed = false
+	release.echo = false
+	get_viewport().push_input(release)
 
 
 func _do_click_menu_button(button: String) -> void:

@@ -690,7 +690,7 @@ func _is_perspective_camera_mode() -> bool:
 	return client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
 
 func _sync_fog_and_dungeon_lighting() -> void:
-	var dungeon_fog := current_level < 0
+	var dungeon_fog := current_level < 0 or _lab_world_fog_at_town_level()
 	if fog_overlay != null:
 		fog_overlay.set_active(dungeon_fog)
 		fog_overlay.set_perspective_camera(_is_perspective_camera_mode())
@@ -2379,7 +2379,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_escape()
 		get_viewport().set_input_as_handled()
 		return
-	if _input_locked():
+	if _input_locked() and not _bot_allows_panel_toggle_key(event):
 		return
 	if bot_mode and not (event is InputEventKey):
 		return
@@ -2699,6 +2699,18 @@ func _skill_function_key_slot(event: InputEventKey) -> int:
 
 func _input_locked() -> bool:
 	return _automation_input_locked() or _menu_blocks_gameplay_input()
+
+func _bot_allows_panel_toggle_key(event: InputEvent) -> bool:
+	if not bot_mode or not (event is InputEventKey):
+		return false
+	var key_event := event as InputEventKey
+	if not key_event.pressed or key_event.echo:
+		return false
+	return _is_inventory_key(key_event) or _is_character_stats_key(key_event) or _is_skills_key(key_event) \
+		or _is_character_info_key(key_event)
+
+func _lab_world_fog_at_town_level() -> bool:
+	return current_level == 0 and not current_wall_layout.is_empty()
 
 func _automation_input_locked() -> bool:
 	return visual_replay_enabled or autoplay_enabled

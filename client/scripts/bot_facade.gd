@@ -260,7 +260,7 @@ static func dispatch_inventory_intent(main, intent_type: String, payload: Dictio
 	if main == null:
 		return
 	var client = _member(main, "client")
-	if main.has_method("_input_locked") and main._input_locked():
+	if main.has_method("_input_locked") and main._input_locked() and not bool(_member(main, "bot_mode")):
 		return
 	if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and int(_member(main, "player_hp")) > 0:
 		client.send(intent_type, int(_member(main, "last_server_tick")), payload)

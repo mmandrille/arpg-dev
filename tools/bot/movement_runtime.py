@@ -25,7 +25,7 @@ async def walk_toward(
     *,
     ctx: BotContext,
 ) -> None:
-    if state.world_id == "dungeon_levels" and state.current_level < 0:
+    if state.world_id == "dungeon_levels" or state.current_level < 0:
         await move_to_position(ws, session_id, state, target_pos, loop, max_ticks=max_ticks, stop_distance=stop_distance, ctx=ctx)
         return
     for _ in range(max_ticks):
@@ -59,6 +59,18 @@ async def walk_toward(
             if await wait_for_player_move_or_accept(ws, state, before, env["message_id"], loop, ctx=ctx):
                 moved = True
                 break
+            if env["message_id"] in state.accepted_message_ids:
+                accept_deadline = loop.time() + 2.0
+                while loop.time() < accept_deadline:
+                    player = find_player(state)
+                    if player is not None:
+                        pos = player["position"]
+                        if pos.get("x") != before.get("x") or pos.get("y") != before.get("y"):
+                            moved = True
+                            break
+                    await ctx.pump_one(ws, state, timeout=0.05)
+                if moved:
+                    break
         if moved:
             continue
 

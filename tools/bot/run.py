@@ -919,7 +919,7 @@ async def execute_step(
             "x": float(target_pos.get("x", "nan")),
             "y": float(target_pos.get("y", "nan")),
         }
-        await walk_toward(
+        await move_to_position(
             ws,
             session_id,
             state,
@@ -944,7 +944,7 @@ async def execute_step(
         target = find_interactable(state, "teleporter")
         if target is None:
             raise AssertionError(f"discover_teleporter: missing teleporter on level {state.current_level}")
-        await walk_toward(
+        await move_to_position(
             ws,
             session_id,
             state,
@@ -985,15 +985,20 @@ async def execute_step(
         monster = find_monster(state, str(step["monster_def_id"]))
         if monster is None:
             raise AssertionError(f"walk_to_monster: monster not found: {step}")
-        if bool(step.get("pathfind")):
-            await move_to_position(
+        use_pathfind = step.get("pathfind")
+        if use_pathfind is None:
+            use_pathfind = True
+        stop_distance = float(step.get("stop_distance", WALK_STOP_DISTANCE))
+        max_ticks = int(step.get("max_ticks", WALK_MAX_TICKS))
+        if bool(use_pathfind):
+            await move_until_entity_in_range(
                 ws,
                 session_id,
                 state,
-                monster["position"],
+                monster["id"],
                 loop,
-                max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
-                stop_distance=float(step.get("stop_distance", WALK_STOP_DISTANCE)),
+                stop_distance=stop_distance,
+                max_ticks=max_ticks,
             )
             return
         await walk_toward(
@@ -1002,7 +1007,8 @@ async def execute_step(
             state,
             monster["position"],
             loop,
-            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+            max_ticks=max_ticks,
+            stop_distance=stop_distance,
         )
         return
 

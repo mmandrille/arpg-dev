@@ -1,0 +1,30 @@
+.maintainability/file-size-baseline.tsv
+  s_b632b11788b427::t_afdf12029fb8d3 8
+client/scripts/bot_presentation_debug.gd
+  s_b632b11788b427::t_868f830c1aef79 1-5,59-142
+  s_b632b11788b427::t_488640358fbc67 6-58
+client/scripts/main.gd
+  s_b632b11788b427::t_01e85cf073f6bd 5678-5686
+  s_b632b11788b427::t_4c949f1a764083 10
+  s_b632b11788b427::t_01a58a142edf78 46
+  s_b632b11788b427::t_d7b989e3fda4ed 5687
+  s_b632b11788b427::t_e896d66bc0226f 5812-5820,5823-5827,5830
+client/scripts/discovery_minimap_state.gd
+  s_b632b11788b427::t_cb6348406889d5 254-269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "998f4b2ecdeacd34e6fd223cfcb15d3d4d38fb85",
+  "prompts": {},
+  "sessions": {
+    "s_b632b11788b427": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "496f4843-2d55-40ec-8e09-284b923c5cc9",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

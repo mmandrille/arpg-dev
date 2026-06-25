@@ -1,0 +1,38 @@
+server/internal/game/obstacle_variety_nav_test.go
+  s_5c6e9c1845a28a::t_a0e1dfecc2a409 1-2,4-45,47-53,55-57,60-61
+  s_5c6e9c1845a28a::t_cdc832165fbaca 3
+  s_5c6e9c1845a28a::t_36b92f9036903f 46,54,58-59
+server/internal/game/auto_nav.go
+  s_5c6e9c1845a28a::t_3786374b7b383e 7
+  s_5c6e9c1845a28a::t_98b07d1ced91a8 5-6
+  s_5c6e9c1845a28a::t_63eda1f7fd5439 8-18
+server/internal/game/handlers.go
+  s_5c6e9c1845a28a::t_63eda1f7fd5439 186-189,191-192,194-196,1438-1442,1444,1446,1451-1452
+  s_5c6e9c1845a28a::t_a6cba1d1f9b1b5 1445
+  s_5c6e9c1845a28a::t_2973797e9f35bf 193
+  s_5c6e9c1845a28a::t_c62e182ce2d1ae 148
+server/internal/game/sim.go
+  s_5c6e9c1845a28a::t_baa5429d1f4814 2758-2763,2765,2770-2772
+  s_5c6e9c1845a28a::t_1e88a7526d2ba3 2741
+  s_5c6e9c1845a28a::t_9d2ecb9de18e9f 2721-2726,2731,2745
+  s_5c6e9c1845a28a::t_03965efe41266f 211-212
+  s_5c6e9c1845a28a::t_63eda1f7fd5439 2717,2720,2740,2742,2744,2767-2769
+  s_5c6e9c1845a28a::t_1a71dcfe686993 2766
+  s_5c6e9c1845a28a::t_9f17178a225e20 208-210,213-217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0e2efc22bc69547155f54a1a0d6fbb395289dccc",
+  "prompts": {},
+  "sessions": {
+    "s_5c6e9c1845a28a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0d867260-c358-45bd-9b24-d7dba273a35e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

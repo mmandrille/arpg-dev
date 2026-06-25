@@ -1,0 +1,56 @@
+tools/bot/scenarios/client/73_door_fog_toggle.json
+  s_45d8e872daefaf::t_593ba284f86db9 10
+tools/bot/scenarios/13_teleporter_lab.json
+  s_45d8e872daefaf::t_c6256f0bb579ae 7
+tools/bot/movement_runtime.py
+  s_45d8e872daefaf::t_1b8b064e0057c3 28
+  s_45d8e872daefaf::t_644e4c97433aad 62-73
+client/scripts/main.gd
+  s_45d8e872daefaf::t_4bfb440cf1bd45 693
+  s_45d8e872daefaf::t_fc26ac12dd9d29 2382
+  s_45d8e872daefaf::t_ede8633ffefec7 2703-2714
+client/scripts/bot_controller.gd
+  s_45d8e872daefaf::t_38d8d631f968f5 218-222
+tools/bot/scenarios/client/77_line_of_sight_blocker_shadow.json
+  s_45d8e872daefaf::t_dd18870bf9e0c7 10
+client/tests/test_golden.gd
+  s_45d8e872daefaf::t_62e74ad32ff38a 249
+  s_45d8e872daefaf::t_ab12c32f6ba688 213,219,225,228
+.maintainability/file-size-baseline.tsv
+  s_45d8e872daefaf::t_cf47a1e72dd8ee 8
+  s_45d8e872daefaf::t_77721a05998746 14
+  s_45d8e872daefaf::t_319a2ff46fbe7b 23
+tools/bot/scenarios/94_archer_retreat_ai.json
+  s_45d8e872daefaf::t_ff694512ab744c 9
+client/scripts/bot_facade.gd
+  s_45d8e872daefaf::t_48fcb2793c8134 263
+tools/bot/scenarios/03_collision_lab.json
+  s_45d8e872daefaf::t_0d8a7349abf27a 10-12,17-18
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_45d8e872daefaf::t_3e5c2a5380793d 14,16-18
+  s_45d8e872daefaf::t_1018c584dffc26 26
+  s_45d8e872daefaf::t_a1eecca14e819d 25
+  s_45d8e872daefaf::t_6a4024e1b2d527 15
+  s_45d8e872daefaf::t_2649a395a30a56 28
+tools/bot/run.py
+  s_45d8e872daefaf::t_286f6c1fa7c917 947
+  s_45d8e872daefaf::t_34bff05bba73ee 988-990
+  s_45d8e872daefaf::t_d65bee2bbe6896 922
+  s_45d8e872daefaf::t_e98d66c1cb17ff 991-994,998,1000-1001,1010-1011
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "97b99fb28033a31fd19f2c607ecbbeefb0b01121",
+  "prompts": {},
+  "sessions": {
+    "s_45d8e872daefaf": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b6daa7ce-7315-4b97-b922-9033cf58729f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

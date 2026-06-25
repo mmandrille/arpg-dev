@@ -1,0 +1,29 @@
+docs/reviews/backend/20260625_v334-backend.md
+  s_c168242f71c84b::t_4a4984015c625a 1-75
+docs/reviews/extras/20260625_v334-shared-tooling-and-process.md
+  s_c168242f71c84b::t_96190f665e33c5 1-79
+docs/reviews/20260625_v334-overview.md
+  s_c168242f71c84b::t_a75524c1b2111c 1-89
+PROGRESS.md
+  s_c168242f71c84b::t_202f662f86474d 18
+  s_c168242f71c84b::t_730d198c9bce76 29-30
+  s_c168242f71c84b::t_0b6f4a3e2d9d57 90-98
+docs/reviews/client/20260625_v334-client.md
+  s_c168242f71c84b::t_d2c238174ecbe8 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "329026b936488fabd366490a5139eeaf4ec38282",
+  "prompts": {},
+  "sessions": {
+    "s_c168242f71c84b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8667618e-6ec1-447a-976c-f4d940058e40",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

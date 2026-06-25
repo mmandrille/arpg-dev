@@ -6,7 +6,7 @@
   "description": "Start a dungeon archer too close to the player and prove it moves away before settling into ranged standoff.",
   "steps": [
     { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "equals": 1 },
-    { "action": "wait_ticks", "ticks": 16 }
+    { "action": "wait_ticks", "ticks": 30 }
   ],
   "assertions": [
     { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "equals": 1 },

@@ -7,16 +7,15 @@
     {
       "action": "move_until_player_position",
       "x": 7,
-      "y": 2
-    },
-    {
-      "action": "walk_to_monster",
-      "monster_def_id": "training_dummy_reward"
+      "y": 2,
+      "pathfind": true,
+      "max_ticks": 120
     },
     {
       "action": "action_until_event",
       "monster_def_id": "training_dummy_reward",
-      "event_type": "monster_killed"
+      "event_type": "monster_killed",
+      "timeout_s": 20.0
     }
   ],
   "assertions": [

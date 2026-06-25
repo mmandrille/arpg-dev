@@ -7,6 +7,7 @@
   "description": "Closed doors contribute a fog occluder, opening removes it, and clicking the open door closes it again.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "set_camera_mode", "mode": "isometric" },
     {
       "type": "assert_fog_of_war",
       "enabled": true,

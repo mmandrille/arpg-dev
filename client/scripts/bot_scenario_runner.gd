@@ -87,6 +87,7 @@ func tick(delta: float, state: Dictionary) -> bool:
 
 	if not _step_begin_logged:
 		_log_step_begin(step, stype)
+		_memory["step_start_tick"] = int(state.get("last_tick", 0))
 		_step_begin_logged = true
 
 	var timeout_s := float(step.get("timeout_s", 0.0))
@@ -448,7 +449,7 @@ func _event_matches(step: Dictionary, event) -> bool:
 
 
 func _damage_number_matches(step: Dictionary, state: Dictionary) -> bool:
-	var numbers: Array = state.get("damage_numbers", [])
+	var numbers: Array = state.get("recent_damage_numbers", state.get("damage_numbers", []))
 	for number in numbers:
 		if typeof(number) != TYPE_DICTIONARY:
 			continue

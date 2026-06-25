@@ -18,6 +18,24 @@
     {
       "type": "click_entity_until_event",
       "entity_type": "monster",
+      "monster_def_id": "training_dummy_reward",
+      "event_type": "monster_killed",
+      "consume_event": true,
+      "retry_s": 0.25,
+      "timeout_s": 25.0
+    },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "monster_def_id": "training_dummy_reward",
+      "reaction": "death",
+      "terminal": true,
+      "hp": 0,
+      "timeout_s": 3.0
+    },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
       "monster_def_id": "combat_lab_soft_target",
       "event_type": "monster_damaged",
       "outcome": "hit",
@@ -48,24 +66,6 @@
       "reaction": "hit",
       "terminal": false,
       "timeout_s": 2.0
-    },
-    {
-      "type": "click_entity_until_event",
-      "entity_type": "monster",
-      "monster_def_id": "training_dummy_reward",
-      "event_type": "monster_killed",
-      "consume_event": true,
-      "retry_s": 0.25,
-      "timeout_s": 15.0
-    },
-    {
-      "type": "wait_entity_reaction",
-      "entity_type": "monster",
-      "monster_def_id": "training_dummy_reward",
-      "reaction": "death",
-      "terminal": true,
-      "hp": 0,
-      "timeout_s": 3.0
     }
   ]
 }

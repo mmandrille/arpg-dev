@@ -96,7 +96,10 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			var event_step := _event_match_step(step, state)
 			var pending: Array = state.get("pending_events", [])
 			for i in range(pending.size()):
-				if evtypes.has(str(pending[i].get("event_type", ""))) and runner._event_matches(event_step, pending[i]):
+				var ev = pending[i]
+				if typeof(ev) != TYPE_DICTIONARY or not _event_since_step_start(runner, ev):
+					continue
+				if evtypes.has(str(ev.get("event_type", ""))) and runner._event_matches(event_step, ev):
 					if runner._controller != null and runner._controller.has_method("consume_pending_event_at"):
 						runner._controller.consume_pending_event_at(i)
 					return true
@@ -116,6 +119,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				event_step.erase(selector_key)
 			for i in range(pending.size()):
 				var ev = pending[i]
+				if typeof(ev) != TYPE_DICTIONARY or not _event_since_step_start(runner, ev):
+					continue
 				if str(ev.get("event_type", "")) == evtype and runner._event_matches(event_step, ev):
 					if bool(step.get("consume_event", false)) and runner._controller != null and runner._controller.has_method("consume_pending_event_at"):
 						runner._controller.consume_pending_event_at(i)
@@ -166,6 +171,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			var eids: Array = state.get("%s_ids" % etype, [])
 			return eids.is_empty()
 	return false
+
+
+static func _event_since_step_start(runner, ev: Dictionary) -> bool:
+	if not runner._memory.has("step_start_tick"):
+		return true
+
+	return int(ev.get("_bot_seen_tick", -1)) >= int(runner._memory.get("step_start_tick", 0))
 
 
 static func _event_types(step: Dictionary) -> Array:

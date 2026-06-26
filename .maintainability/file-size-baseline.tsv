@@ -34,4 +34,3 @@ skills/showme/scripts/visual_capture.gd	1016
 tools/bot/run.py	4237	# v334 CI fix: use_stair/discover_teleporter move_to_position, walk_to_monster pathfind default
 tools/bot/test_protocol.py	1400
 tools/validate_shared.py	3038	# $refactor v334: extracted validate_fog_presentation.py
-client/tests/test_item_visuals.gd	710

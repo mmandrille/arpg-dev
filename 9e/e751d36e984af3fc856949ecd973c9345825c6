@@ -1,0 +1,101 @@
+client/assets/monsters/fantasy_creature_5.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_13.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_18.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_17.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/characters/sorcerer_0.png.import
+  s_25e37a9cdf1cec::t_b6ee9c6a1e844d 1-43
+client/assets/monsters/fantasy_creature_10.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/equipment/weapons/fantasy_greatsword_1.png.import
+  s_25e37a9cdf1cec::t_b6ee9c6a1e844d 1-43
+client/assets/equipment/weapons/starter_axe/fantasy_nordic_axe_1.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_6.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/equipment/weapons/starter_axe/fantasy_nordic_axe_3.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/equipment/weapons/starter_axe/fantasy_nordic_axe_2.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_1.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/equipment/weapons/starter_axe/fantasy_nordic_axe.glb.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-42
+client/assets/monsters/fantasy_creature_11.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_19.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/animated_crow__3d_animal_model_0.png.import
+  s_05d5e6aa8fd731::t_c072e8cad6e390 1-43
+client/assets/monsters/fantasy_creature_9.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_14.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_12.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/characters/sorcerer.glb.import
+  s_25e37a9cdf1cec::t_b6ee9c6a1e844d 1-42
+client/assets/monsters/fantasy_creature_4.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/bat_1.png.import
+  s_05d5e6aa8fd731::t_c072e8cad6e390 1-43
+client/assets/monsters/bat.glb.import
+  s_05d5e6aa8fd731::t_c072e8cad6e390 1-42
+client/assets/monsters/bat_2.png.import
+  s_05d5e6aa8fd731::t_c072e8cad6e390 1-43
+client/assets/equipment/weapons/starter_axe/fantasy_nordic_axe_0.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_3.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_8.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/equipment/weapons/fantasy_greatsword_0.png.import
+  s_25e37a9cdf1cec::t_b6ee9c6a1e844d 1-43
+client/assets/monsters/fantasy_creature_7.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_16.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/animated_crow__3d_animal_model.glb.import
+  s_05d5e6aa8fd731::t_c072e8cad6e390 1-42
+client/assets/equipment/weapons/fantasy_greatsword.glb.import
+  s_25e37a9cdf1cec::t_b6ee9c6a1e844d 1-42
+client/assets/monsters/bat_0.png.import
+  s_05d5e6aa8fd731::t_c072e8cad6e390 1-43
+client/assets/monsters/fantasy_creature_0.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_20.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature.glb.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-42
+client/assets/monsters/fantasy_creature_15.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+client/assets/monsters/fantasy_creature_2.png.import
+  s_05d5e6aa8fd731::t_c5292aed9c6213 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9ee751d36e984af3fc856949ecd973c9345825c6",
+  "prompts": {},
+  "sessions": {
+    "s_05d5e6aa8fd731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d3fe9e6-9bd8-4c49-8e7b-285d8eb2314a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_25e37a9cdf1cec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed5e6-9298-7863-bf62-5f50b5a6bb1d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille_meli <marcos.mandrille+meli@mercadolibre.com>"
+    }
+  }
+}

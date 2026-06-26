@@ -1488,6 +1488,8 @@ func _apply_delta(p: Dictionary) -> void:
 			ctrl.enter_terminal("death")
 		else:
 			ctrl.play_one_shot(clip)
+	if _delta_needs_fog_resync(p):
+		_sync_fog_wall_layout()
 	if bot_mode:
 		for ev in p.get("events", []):
 			if ev is Dictionary:
@@ -5070,10 +5072,27 @@ func _render_wall_layout(walls: Array) -> void:
 	current_wall_layout = _wall_renderer.render_wall_layout(walls) if _wall_renderer != null else []
 	_sync_fog_wall_layout()
 func _sync_fog_wall_layout() -> void:
-	if fog_overlay != null: InteractableRulesLoader.sync_fog_overlay(fog_overlay, current_wall_layout, interactable_ids, entities)
+	if fog_overlay != null:
+		InteractableRulesLoader.sync_fog_overlay(fog_overlay, current_wall_layout, interactable_ids, entities)
 	DungeonRoomFloorTint.sync(ground_node, _ground_factory, current_level, current_wall_layout, entities)
 	_sync_discovery_minimap()
 	_sync_dungeon_ceiling_visibility()
+
+func _delta_needs_fog_resync(p: Dictionary) -> bool:
+	if fog_overlay == null or not (current_level < 0 or _lab_world_fog_at_town_level()):
+		return false
+	for c in p.get("changes", []):
+		match str(c.get("op", "")):
+			"wall_layout_update":
+				return true
+			"entity_spawn", "entity_update":
+				var entity: Dictionary = c.get("entity", {})
+				if str(entity.get("type", "")) == "interactable":
+					return true
+	for ev in p.get("events", []):
+		if str(ev.get("event_type", "")) in ["interactable_activated", "interactable_state_changed"]:
+			return true
+	return false
 
 func _sync_dungeon_ceiling_visibility() -> void:
 	if _wall_renderer == null or client_settings == null:
@@ -5562,10 +5581,14 @@ func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, intera
 	node.add_child(body)
 
 func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String) -> void:
-	if rec.get("state", "") == state:
+	var has_barrier := InteractableRulesLoader.has_barrier_when_closed(str(rec.get("interactable_def_id", "")))
+	var state_changed := str(rec.get("state", "")) != state
+	if state_changed:
+		rec["state"] = state
+	if has_barrier:
+		_sync_fog_wall_layout()
+	if not state_changed:
 		return
-	rec["state"] = state
-	if InteractableRulesLoader.has_barrier_when_closed(str(rec.get("interactable_def_id", ""))): _sync_fog_wall_layout()
 	var node := rec["node"] as Node3D
 	if node == null:
 		return

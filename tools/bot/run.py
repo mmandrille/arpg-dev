@@ -35,6 +35,7 @@ from tools.bot.artifacts import clean_bot_run_artifacts, default_manifest_path, 
 from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenario
 from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot.bot_context import BotContext, StateIngestContext
+from tools.bot.coop_gold_staging import stage_peers_for_same_tick_gold_pickup
 from tools.bot.runtime_queries import dict_distance, event_matches, event_summary, find_player
 from tools.bot import skill_visual_runtime
 from tools.bot.ci_pack import CI_SELECTOR, select_pack_scenarios
@@ -998,7 +999,11 @@ async def execute_step(
         if use_pathfind is None:
             use_pathfind = True
         stop_distance = float(step.get("stop_distance", WALK_STOP_DISTANCE))
-        max_ticks = greedy_walk_max_ticks(state, monster["position"], int(step.get("max_ticks", WALK_MAX_TICKS)))
+        max_ticks = derived_walk_max_ticks(
+            state,
+            monster["position"],
+            int(step.get("max_ticks", WALK_MAX_TICKS)),
+        )
         if bool(use_pathfind):
             await move_until_entity_in_range(
                 ws,
@@ -1072,13 +1077,18 @@ async def execute_step(
                 return
             raise AssertionError(f"pick_up_loot: loot not found for item_def_id={item_def_id}")
         deadline = loop.time() + SLICE_TIMEOUT_S
-        await walk_toward(
+        walk_ticks = derived_walk_max_ticks(
+            state,
+            loot["position"],
+            int(step.get("max_ticks", WALK_MAX_TICKS)),
+        )
+        await move_to_position(
             ws,
             session_id,
             state,
             loot["position"],
             loop,
-            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+            max_ticks=walk_ticks,
         )
         loot_id = str(loot["id"])
         await ws.send(json.dumps(make_envelope(
@@ -3427,29 +3437,6 @@ def entity_visible_as_loot(state: RuntimeState, entity_id: str, item_def_id: str
     return True
 
 
-def dominant_step_direction(from_pos: dict[str, Any], to_pos: dict[str, Any]) -> dict[str, int]:
-    dx = float(to_pos["x"]) - float(from_pos["x"])
-    dy = float(to_pos["y"]) - float(from_pos["y"])
-    if abs(dx) >= abs(dy):
-        return {"x": 1 if dx >= 0 else -1, "y": 0}
-    return {"x": 0, "y": 1 if dy >= 0 else -1}
-
-
-async def stage_peers_for_same_tick_gold_pickup(peers: list[CoopPeer], host: CoopPeer, guest: CoopPeer, gold: dict[str, Any]) -> dict[str, int]:
-    gold_pos = dict(gold["position"])
-    direction = dominant_step_direction(player_position(host.state), gold_pos)
-    stage_pos = {
-        "x": float(gold_pos["x"]) - float(direction["x"]) * 2.0,
-        "y": float(gold_pos["y"]) - float(direction["y"]) * 2.0,
-    }
-    await move_coop_peer_to(peers, host, stage_pos, stop_distance=0.25, max_ticks=320)
-    await move_coop_peer_to(peers, guest, stage_pos, stop_distance=0.25, max_ticks=320)
-    gold_id = str(gold["id"])
-    if not entity_visible_as_loot(host.state, gold_id, "gold") or not entity_visible_as_loot(guest.state, gold_id, "gold"):
-        raise AssertionError(f"gold {gold_id} was consumed before same-tick staging")
-    return direction
-
-
 async def open_chest_for_non_gold_loot(peers: list[CoopPeer], host: CoopPeer) -> dict[str, Any] | None:
     chest = find_interactable(host.state, "treasure_chest")
     if chest is None or str(chest.get("state", "closed")) == "open":
@@ -3489,6 +3476,7 @@ async def try_move_coop_peer_to(
         raise AssertionError(f"{peer.label}: missing local player")
     if dict_distance(player["position"], target_pos) <= stop_distance:
         return True
+    max_ticks = derived_walk_max_ticks(peer.state, target_pos, max_ticks)
     message_id = await send_coop_intent(peer, "move_to_intent", {"position": target_pos})
     await wait_coop_until(
         peers,
@@ -3583,7 +3571,7 @@ async def coop_attack_until_kill(
             if companion.state.current_level != attacker.state.current_level:
                 continue
             if dict_distance(player_position(companion.state), monster["position"]) > 6.0:
-                await move_coop_peer_near(peers, companion, monster["position"], offsets=companion_offsets, stop_distance=1.4, max_ticks=180)
+                await move_coop_peer_near(peers, companion, monster["position"], offsets=companion_offsets, stop_distance=1.4, max_ticks=derived_walk_max_ticks(companion.state, monster["position"], 180))
         if loop.time() - last_action >= 0.12:
             message_id = await send_coop_intent(attacker, "action_intent", {"target_id": str(monster["id"])})
             await wait_coop_until(
@@ -3845,8 +3833,8 @@ async def run_coop_rewards_and_scaling(
         monster_pos = dict(monster["position"])
         approach_offsets = [(-1.5, 0.0), (1.5, 0.0), (0.0, -1.5), (0.0, 1.5), (-2.5, 0.0), (2.5, 0.0)]
         nearby_offsets = [(-4.0, 0.0), (4.0, 0.0), (0.0, -4.0), (0.0, 4.0), (-3.0, 0.0), (3.0, 0.0)]
-        await move_coop_peer_near(reward_peers, nearby, monster_pos, offsets=nearby_offsets, stop_distance=1.2, max_ticks=260)
-        await move_coop_peer_near(reward_peers, host, monster_pos, offsets=approach_offsets, stop_distance=1.0, max_ticks=260)
+        await move_coop_peer_near(reward_peers, nearby, monster_pos, offsets=nearby_offsets, stop_distance=1.2, max_ticks=derived_walk_max_ticks(host.state, monster_pos, 260))
+        await move_coop_peer_near(reward_peers, host, monster_pos, offsets=approach_offsets, stop_distance=1.0, max_ticks=derived_walk_max_ticks(host.state, monster_pos, 260))
         if dict_distance(player_position(nearby.state), monster_pos) > 10.0:
             raise AssertionError(f"nearby guest too far from monster: {player_position(nearby.state)} monster={monster_pos}")
 
@@ -3855,7 +3843,7 @@ async def run_coop_rewards_and_scaling(
         before_excluded_xp = state_experience(excluded.state)
         expected_xp = monster_xp_reward(monster_def_id)
 
-        await coop_attack_until_kill(reward_peers, nearby, monster_def_id, companions=[host])
+        await coop_attack_until_kill(reward_peers, host, monster_def_id, companions=[nearby])
         await wait_coop_until(
             peers,
             "shared xp applied to nearby only",
@@ -3999,7 +3987,12 @@ async def run_gold_autopickup_shared_loot(
 
         before_host_gold = state_gold(host.state)
         before_guest_gold = state_gold(guest.state)
-        direction = await stage_peers_for_same_tick_gold_pickup(peers, host, guest, gold)
+        direction = await stage_peers_for_same_tick_gold_pickup(
+            peers, host, guest, gold,
+            move_coop_peer_to=move_coop_peer_to,
+            player_position=player_position,
+            entity_visible_as_loot=entity_visible_as_loot,
+        )
         host_msg = await send_coop_intent(host, "move_intent", {"direction": direction, "duration_ticks": 1})
         guest_msg = await send_coop_intent(guest, "move_intent", {"direction": direction, "duration_ticks": 1})
         await wait_coop_accept(peers, host, host_msg)

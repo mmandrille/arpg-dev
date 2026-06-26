@@ -106,7 +106,7 @@ async def move_until_entity_in_range(
     target = state.entities.get(target_id)
     if target is None:
         raise AssertionError(f"move_until_entity_in_range: target vanished: {target_id}")
-    max_ticks = greedy_walk_max_ticks(state, target["position"], max_ticks)
+    max_ticks = derived_walk_max_ticks(state, target["position"], max_ticks)
     last_error: Exception | None = None
     attempts = max(1, max_ticks // 20)
     for _ in range(attempts):

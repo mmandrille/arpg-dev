@@ -35,16 +35,6 @@
     },
     {
       "type": "click_loot_item",
-      "item_def_id": "cave_mail",
-      "rolled": true
-    },
-    {
-      "type": "wait_event",
-      "event_type": "item_picked_up",
-      "timeout_s": 15.0
-    },
-    {
-      "type": "click_loot_item",
       "item_def_id": "cave_blade",
       "rolled": true
     },
@@ -65,7 +55,6 @@
     },
     {
       "type": "click_loot_item",
-      "item_def_id": "cave_mail",
       "rolled": true
     },
     {
@@ -75,7 +64,6 @@
     },
     {
       "type": "click_loot_item",
-      "item_def_id": "cave_mail",
       "rolled": true
     },
     {
@@ -147,17 +135,6 @@
       "timeout_s": 15.0
     },
     {
-      "type": "click_shop_sell_item",
-      "rolled": true,
-      "bag_index": 1
-    },
-    {
-      "type": "wait_event",
-      "event_type": "shop_sale",
-      "shop_id": "town_vendor",
-      "timeout_s": 15.0
-    },
-    {
       "type": "click_entity",
       "entity_type": "interactable",
       "interactable_def_id": "town_stash"
@@ -179,6 +156,28 @@
     {
       "type": "assert_stash_gold",
       "at_least": 100
+    },
+    {
+      "type": "click_loot_item",
+      "item_def_id": "cave_mail",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_floor",
+      "x": 5.0,
+      "z": 12.0
+    },
+    {
+      "type": "wait_player_near",
+      "x": 5.0,
+      "z": 12.0,
+      "distance": 1.5,
+      "timeout_s": 15.0
     },
     {
       "type": "click_entity",

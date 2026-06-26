@@ -22,7 +22,7 @@
     },
     {
       "action": "move_until_player_position",
-      "x": 6,
+      "x": 5.5,
       "y": 5,
       "tolerance": 0.2,
       "max_ticks": 120

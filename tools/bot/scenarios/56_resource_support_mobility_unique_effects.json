@@ -1,6 +1,7 @@
 {
   "id": "resource_support_mobility_unique_effects",
   "ci_tier": "extended",
+  "max_elapsed_s": 45.0,
   "world_id": "unique_momentum_lab",
   "seed": "00000000000000b1",
   "title": "Resource support mobility unique effects",
@@ -18,8 +19,9 @@
     {
       "action": "walk_to_monster",
       "monster_def_id": "combat_lab_soft_target",
+      "pathfind": false,
       "stop_distance": 1.2,
-      "max_ticks": 120
+      "max_ticks": 80
     },
     {
       "action": "wait_until_assertion",

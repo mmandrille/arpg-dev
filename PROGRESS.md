@@ -23,12 +23,12 @@ Last updated: 2026-06-26
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v349 — movement-tick-smoothing |
+| **Latest completed slice** | v350 — ci-full-green |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green (v348–v349 batch + smoke/boss_floor_gate stabilization) |
-| **Next slice** | TBD |
-| **Last engineering review** | v337 — [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md) (2026-06-25, ad hoc; covers v335–v337 + post-v334 `$refactor` completion) |
-| **Next engineering review** | After v340 ships and `make ci` is green |
+| **CI gate** | `make ci` green; `make ci-full` green (all 15 extended scenarios recovered at v350) |
+| **Next slice** | TBD — run `/next` to select from open gaps |
+| **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
+| **Next engineering review** | After ~v359 ships |
 
 
 ### Periodic engineering reviews
@@ -36,7 +36,7 @@ Last updated: 2026-06-26
 Every **~10 completed slices**, pause for a repo-wide engineering review under [`docs/reviews/`](docs/reviews/).
 Use the milestone slice number in filenames and headings (e.g. v50, v60, v70 — v60 is the latest pass).
 
-**When to write:** after the milestone slice ships and `make ci` is green. Run `$review` first to
+**When to write:** after the milestone slice ships and `make ci-full` is green. Run `$review` first to
 generate the fresh scorecard and ranked recommendations from the current baseline. Then run
 `$refactor` pointed at that new review so every recommendation is classified and the minor,
 verified architecture/maintainability/test/docs/process paydown commits land before `/next`
@@ -87,8 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v337 `$review` complete (ad hoc at `da9a47b4`).** Overview:
-  [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md). v334 maintainability ratchet breach **resolved** (`make maintainability` green). Lowest scorecard areas now **internal cohesion (7.5)** and **batch `make ci` (pending)**.
+- **v349 `$review` complete (official cadence at `82422216`).** Overview:
+  [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md). Failure inventory for `$refactor`:
+  [`docs/reviews/20260626_v349-ci-full-failures.md`](docs/reviews/20260626_v349-ci-full-failures.md) (**15 extended scenarios** — 12 protocol + 3 client). All 15 recovered at v350; `make ci-full` now green.
+- **v337 `$review` (ad hoc).** [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md). Maintainability ratchet breach resolved; coordinator paydown items largely still open.
 - **v334 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema/guards, fog overlay baseline, ADR-0015, bot presentation debug extraction, dungeon generation rules split, movement-input presenter, wall-floor lab nav test + scenario 78 proof, sim tick context starter, item-visual probe extraction, fog validator unit tests.
 - **v337 future-plan items:** `sim.go` phase-helper paydown via `simTickCtx`; quarantine `realtime/runner.go`; `validate_shared.py` validation-domain extraction; `main.gd` attack-move cluster extraction (9-line headroom).
 

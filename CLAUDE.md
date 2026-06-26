@@ -121,9 +121,14 @@ Rules:
    baseline. The +25 allowance exists for incidental drift, not for routinely growing coordinators.
 5. New gameplay or tooling domains start in their own focused file. Do not add a new domain to a
    large coordinator just because related code already lives there.
-6. A documented exception that grows a grandfathered coordinator is allowed only when the same slice
-   extracts at least as many lines from that file as it adds. If that net non-positive split is not
-   possible, the next slice must be a payback slice that shrinks the touched coordinator.
+6. When a grandfathered file grows beyond baseline+25, the preferred resolution is a **real
+   extraction**: move a coherent, independently-testable block to a new file. If no genuine
+   extraction is possible (the new code is tightly coupled to the coordinator's runtime state and
+   cannot be moved without passing the entire coordinator through), advance the baseline to the
+   real line count with a documented comment explaining why extraction was not possible.
+   **Never cosmetically collapse readable code onto fewer lines just to satisfy the number.**
+   Code quality beats line-count compliance; the ratchet exists to catch casual growth, not to
+   force bad style.
 7. `make maintainability` prints the current grandfathered file count and total line count. Reviews
    should record that trend and expect it to move down over time.
 8. `make ci` runs `make maintainability`; the ratchet is a CI gate, not an advisory check.

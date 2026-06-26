@@ -1,0 +1,59 @@
+PROGRESS.md
+  s_8ed6bbb9654539::t_fd8fe0ffcb232b 110
+  s_8ed6bbb9654539::t_7c389288ae2506 26,29
+docs/plans/v351_2026-06-26-window-display-mode.md
+  s_8ed6bbb9654539::t_26fc75bc90d387 1-7,13-19
+  s_8ed6bbb9654539::t_058c44992dd664 8-12
+client/scripts/client_audio_bridge.gd
+  s_8ed6bbb9654539::t_d8a5c073c9823d 26-27
+docs/progress/slice-lifecycle.md
+  s_8ed6bbb9654539::t_1bcad176d7f025 366
+client/scripts/settings_panel.gd
+  s_8ed6bbb9654539::t_ad48e02db0ca1c 16
+  s_8ed6bbb9654539::t_a85ce7d38ffd92 28
+  s_8ed6bbb9654539::t_910e0233eb8284 472-476
+  s_8ed6bbb9654539::t_e06775f97b0257 375-385
+  s_8ed6bbb9654539::t_9ef658a1329173 43
+  s_8ed6bbb9654539::t_23557bbe6d6bb6 65,78
+  s_8ed6bbb9654539::t_68a05c75a2eb63 197-208
+  s_8ed6bbb9654539::t_5b0e2c59c12775 153-159
+docs/specs/v351_spec-window-display-mode.md
+  s_8ed6bbb9654539::t_0738fb655cd07a 3
+  s_8ed6bbb9654539::t_722fb6eae9bc3b 1-2,4-56
+docs/as-built/v351_window-display-mode.md
+  s_8ed6bbb9654539::t_8c125dd355d371 1-27
+client/scripts/main.gd
+  s_8ed6bbb9654539::t_585655e3dd91fa 696-703
+  s_8ed6bbb9654539::t_a201bb28df54c4 776
+  s_8ed6bbb9654539::t_7275c2474b6c9c 5813
+  s_8ed6bbb9654539::t_050363955547bf 3812
+scripts/client_smoke.sh
+  s_8ed6bbb9654539::t_935a348fddec90 238
+client/tests/test_window_display_mode_settings.gd
+  s_8ed6bbb9654539::t_524f6d5988f553 1-92
+client/scripts/client_settings.gd
+  s_8ed6bbb9654539::t_09605065b7e636 22-25
+  s_8ed6bbb9654539::t_6865853e949fa2 281-286,290
+  s_8ed6bbb9654539::t_f070a4852cddb9 357-365
+  s_8ed6bbb9654539::t_3e71644cf80efb 393-400
+  s_8ed6bbb9654539::t_01089ac8a34ed4 332
+  s_8ed6bbb9654539::t_a6087840f3a80c 55-59,63
+  s_8ed6bbb9654539::t_47001d4a11f81f 307
+  s_8ed6bbb9654539::t_9eae311a1c8c81 174-190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b488f0b0260c5427f8db1f512890b4890d54fa94",
+  "prompts": {},
+  "sessions": {
+    "s_8ed6bbb9654539": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e5f01841-0a66-4643-af7e-0c0ac864342e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

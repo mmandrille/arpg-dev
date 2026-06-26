@@ -1,0 +1,58 @@
+client/tests/test_look_and_feel_polish.gd
+  s_eadb426cf44485::t_7c0bd1b7aeec2f 166-185
+  s_eadb426cf44485::t_9e62359c756064 11
+  s_eadb426cf44485::t_c75efbb2325d6c 28
+client/scripts/main.gd
+  s_eadb426cf44485::t_356d16773ae231 1177-1179
+  s_eadb426cf44485::t_73e66cd906bdc9 85
+PROGRESS.md
+  s_eadb426cf44485::t_0c01dd9c3b176c 26,28-29
+server/internal/game/tick_results.go
+  s_eadb426cf44485::t_983e5a58cd69f9 82
+docs/specs/v345_spec-monster-melee-windup-cue.md
+  s_eadb426cf44485::t_4d36e758f84fe9 1-19
+shared/rules/monsters.v0.json
+  s_eadb426cf44485::t_2c05aa1c473884 162
+docs/as-built/v345_monster-melee-windup-cue.md
+  s_eadb426cf44485::t_f5cca209aa8288 1-9
+docs/progress/slice-lifecycle.md
+  s_eadb426cf44485::t_bec93f04c42945 360
+shared/rules/monsters.v0.schema.json
+  s_eadb426cf44485::t_5440611b8b8207 49
+server/internal/game/monster_melee_windup_test.go
+  s_eadb426cf44485::t_030475851cc038 1-68
+server/internal/game/rules.go
+  s_eadb426cf44485::t_5ef71d9f18ee2d 489
+  s_eadb426cf44485::t_677d568c1800eb 1363-1371
+server/internal/game/sim.go
+  s_eadb426cf44485::t_b57a5a2e4e7008 175-177
+  s_eadb426cf44485::t_f0c81d65119376 3270-3272
+  s_eadb426cf44485::t_c4ed3e821dbf96 3285-3287
+docs/CODEMAP.md
+  s_eadb426cf44485::t_d42bb7c660688b 19
+  s_eadb426cf44485::t_e19e6968b5524c 37
+shared/protocol/state_delta.v8.schema.json
+  s_eadb426cf44485::t_2ee807c98a8121 615-619
+client/scripts/monster_melee_windup_marker.gd
+  s_eadb426cf44485::t_733b499a83fd7f 1-58
+server/internal/game/monster_attack_style_test.go
+  s_eadb426cf44485::t_c7f6899a21e7a4 36
+server/internal/game/monster_melee_windup.go
+  s_eadb426cf44485::t_d196243ddd4bdd 1-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "312844cbeeed01a16388d97e1f2f474a79144494",
+  "prompts": {},
+  "sessions": {
+    "s_eadb426cf44485": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "680f333d-4f88-4d95-817d-0cae25b2c56d",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

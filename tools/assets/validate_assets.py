@@ -88,6 +88,31 @@ def sha256_of(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def manifest_client_asset_paths(root: Path, assets: dict) -> set[str]:
+    """Paths under client/assets that are allowed: manifest GLBs plus Godot sidecars."""
+    allowed: set[str] = set()
+    for entry in assets.values():
+        rel = entry.get("runtime_path", "")
+        if not rel or not rel.startswith("client/assets/"):
+            continue
+        allowed.add(rel)
+        allowed.add(rel + ".import")
+        parent = (root / rel).parent
+        stem = Path(rel).stem
+        if not parent.is_dir():
+            continue
+        for child in parent.iterdir():
+            name = child.name
+            if name.startswith(stem + "_") and child.suffix in {".png", ".jpg"}:
+                sidecar = str(child.relative_to(root)).replace("\\", "/")
+                allowed.add(sidecar)
+                sidecar_import = root / f"{sidecar}.import"
+                if sidecar_import.is_file():
+                    allowed.add(f"{sidecar}.import")
+
+    return allowed
+
+
 def validate(root: Path, report: Report) -> None:
     manifest_path = root / MANIFEST_REL
     schema_path = root / MANIFEST_SCHEMA_REL
@@ -206,6 +231,25 @@ def validate(root: Path, report: Report) -> None:
             report.fail("glb joint", f"{asset_id}: required_nodes not skin joints: {absent}")
         else:
             report.ok(f"{asset_id} GLB skin includes joints {required}")
+
+    # [7] Reject unmanifested client/assets GLB/texture/import sidecars so local
+    # Godot imports cannot accumulate outside the asset pipeline.
+    print("[7] client/assets orphan check")
+    allowed_paths = manifest_client_asset_paths(root, assets)
+    client_assets = root / "client" / "assets"
+    orphans: list[str] = []
+    if client_assets.is_dir():
+        for path in sorted(client_assets.rglob("*")):
+            if not path.is_file() or path.suffix not in {".glb", ".png", ".jpg", ".import"}:
+                continue
+            rel = str(path.relative_to(root)).replace("\\", "/")
+            if rel not in allowed_paths:
+                orphans.append(rel)
+    if orphans:
+        for rel in orphans:
+            report.fail("orphan client asset", rel)
+    else:
+        report.ok("no orphan client/assets GLB or import sidecars")
 
 
 def main() -> int:

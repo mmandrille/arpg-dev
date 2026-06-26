@@ -25,7 +25,7 @@ Last updated: 2026-06-26
 |-------|-------|
 | **Latest completed slice** | v349 — movement-tick-smoothing |
 | **Active branch** | `main` |
-| **CI gate** | v349 focused checks green; batch `make ci` pending autoloop close-out |
+| **CI gate** | `make ci` green (v348–v349 batch + smoke/boss_floor_gate stabilization) |
 | **Next slice** | TBD |
 | **Last engineering review** | v337 — [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md) (2026-06-25, ad hoc; covers v335–v337 + post-v334 `$refactor` completion) |
 | **Next engineering review** | After v340 ships and `make ci` is green |

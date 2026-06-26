@@ -6,7 +6,8 @@ description: >-
   runs /review or $review, asks for the next periodic engineering review, or
   asks for a full-repo architecture/maintainability review document set. When a
   periodic review is due, this skill writes the fresh review first so $refactor
-  can classify and act on all current recommendations afterward.
+  can classify and act on all current recommendations afterward. Requires
+  make ci-full (full scenario matrix, not the fast make ci pack) as the CI gate.
 ---
 
 # /review — Repo-wide Engineering Review
@@ -32,7 +33,9 @@ the new overview so every recommendation is classified and safe minor paydown co
 3. **Record the baseline.** Every review file must state date, scope, branch/commit, and whether the worktree was clean.
 4. **Use file:line citations for concrete issues.** Prefer `path:line` references for bugs, drift, and refactor targets.
 5. **Separate facts from recommendations.** Issue sections describe observed risk; ranked recommendation sections say what to do next.
-6. **If tests or checks are not run, say so in the review and final response.**
+6. **If tests or checks are not run, say so in the review and final response.** Official periodic
+   reviews must record `make ci-full` pass/fail; do not claim a CI-backed review without it unless
+   the user explicitly waived full CI and you documented why.
 
 ## Phase 0 — Baseline
 
@@ -82,14 +85,29 @@ git rev-parse --abbrev-ref HEAD
 git rev-parse --short HEAD
 git log -1 --oneline
 rg --files
-make validate-shared
-cd server && go test ./... && go vet ./...
-.venv/bin/pytest tools
-make client-unit
-make client-smoke
 ```
 
-Run `make ci` when the review is the official cadence gate or when the user asks for a CI-backed review. If a command is unavailable, too slow, or fails for reasons unrelated to the review, continue and record the exact limitation.
+**CI gate (required for official cadence and CI-backed reviews):** run the **full** scenario matrix, not the fast merge pack:
+
+```bash
+make ci-full    # ~20+ min; all protocol + client bot scenarios + unit gates + headless smoke
+```
+
+Use `VERBOSE=1 make ci-full` when diagnosing failures. Do **not** substitute `make ci` for the review
+gate — `make ci` is the fast development/merge pack only; periodic reviews must exercise extended
+scenarios too.
+
+Record the exact `make ci-full` outcome (pass/fail, duration, failing step/scenario) in the overview
+**Git baseline** or a short **Verification** note. If `make ci-full` is unavailable, too slow for the
+environment, or fails for reasons unrelated to the review baseline, continue writing the review but
+state the limitation explicitly in the final response and overview.
+
+Optional spot-checks while reading code (do not replace `make ci-full`):
+
+```bash
+make validate-shared
+make maintainability
+```
 
 If multi-agent/subagent tools are available, use independent specialist audits to reduce blind spots:
 
@@ -171,6 +189,7 @@ Required shape:
 **Reviewer:** ...
 **Scope:** Whole repo — ...
 **Git baseline:** ...
+**Verification:** `make ci-full` — pass/fail, duration, and any failing step/scenario (required for periodic reviews).
 **Companion reports:**
 - [`backend/{YYYYMMDD}_vN-backend.md`](backend/{YYYYMMDD}_vN-backend.md) — Go authoritative server
 - [`client/{YYYYMMDD}_vN-client.md`](client/{YYYYMMDD}_vN-client.md) — Godot thin client
@@ -226,6 +245,6 @@ End with:
 
 1. Files written or updated.
 2. Baseline reviewed.
-3. Verification commands run and outcomes.
+3. Verification commands run and outcomes (`make ci-full` required for CI-backed reviews).
 4. Whether `PROGRESS.md` cadence fields were updated.
 5. Suggested next action, usually `$next` using the review findings as input.

@@ -321,3 +321,10 @@ def test_required_node_not_a_skin_joint_fails(tmp_path):
     root = build_root(tmp_path, manifest=manifest, char_nodes=["root", "hand_r"])
     report = run(root)
     assert any("not skin joints" in f or "not_a_joint" in f for f in report.failures)
+
+
+def test_orphan_client_asset_fails(tmp_path):
+    root = build_root(tmp_path)
+    write(root / "client/assets/monsters/bat.glb", make_glb(["root"]))
+    report = run(root)
+    assert any("orphan client asset" in f for f in report.failures)

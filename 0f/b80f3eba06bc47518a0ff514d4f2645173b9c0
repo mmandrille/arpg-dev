@@ -1,0 +1,37 @@
+client/tests/item_visual_equipment_probe.gd.uid
+  s_eadb426cf44485::t_eb71dad9b06415 1
+docs/reviews/client/20260625_v337-client.md
+  s_2bb65a4c54dbf4::t_680c7921a86f06 1-98
+docs/reviews/20260625_v337-overview.md
+  s_2bb65a4c54dbf4::t_dba665f6e4d3a7 1-90
+docs/reviews/backend/20260625_v337-backend.md
+  s_2bb65a4c54dbf4::t_b82980b59af9a7 1-101
+docs/reviews/extras/20260625_v337-shared-tooling-and-process.md
+  s_2bb65a4c54dbf4::t_3849cb550b07e1 1-99
+client/tests/item_visual_interactable_probe.gd.uid
+  s_eadb426cf44485::t_eb71dad9b06415 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0fb80f3eba06bc47518a0ff514d4f2645173b9c0",
+  "prompts": {},
+  "sessions": {
+    "s_2bb65a4c54dbf4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9659a475-58e9-4ce9-a633-162bc8ed99c5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_eadb426cf44485": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "680f333d-4f88-4d95-817d-0cae25b2c56d",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

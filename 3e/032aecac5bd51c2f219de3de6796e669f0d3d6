@@ -1,0 +1,22 @@
+tools/bot/scenarios/client/84_entity_tick_smoothing.json
+  s_05d5e6aa8fd731::t_0332a858f11e63 3
+shared/golden/monster_rarity.json
+  s_05d5e6aa8fd731::t_b24037992f3314 174
+  s_05d5e6aa8fd731::t_89a44c82cca6aa 158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3e032aecac5bd51c2f219de3de6796e669f0d3d6",
+  "prompts": {},
+  "sessions": {
+    "s_05d5e6aa8fd731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d3fe9e6-9bd8-4c49-8e7b-285d8eb2314a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

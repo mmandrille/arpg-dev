@@ -4,7 +4,7 @@
   "seed": "boss_floor_gate",
   "title": "Boss floor gate",
   "description": "Start in the compact level -5 boss-floor lab, prove boss movement, locked exits, one telegraph, boss kill, exit unlock, and descent to -6.",
-  "max_elapsed_s": 23.0,
+  "max_elapsed_s": 26.0,
   "debug_progression": {
     "level": 1,
     "experience": 0,

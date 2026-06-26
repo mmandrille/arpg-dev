@@ -933,7 +933,6 @@ func _process(delta: float) -> void:
 	if player_anim != null:
 		player_anim.set_locomotion(_movement_input.local_player_is_walking(client, player_hp, _user_input_blocked()))
 	_movement_visual_smoothing.tick(delta, character_visual)
-	_entity_tick_smoothing.tick_player(player_anchor, delta)
 	_entity_tick_smoothing.tick_entities(entities, delta)
 	if not _user_input_blocked():
 		_update_facing_toward_mouse()
@@ -1582,7 +1581,6 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
 		if apply_local_player_position and not local_leap_visual_active and not local_charge_visual_active:
-			_entity_tick_smoothing.apply_player_authoritative(player_anchor, server_pos)
 			_movement_visual_smoothing.preserve_after_anchor_move(player_anchor, character_visual)
 		if apply_local_player_position and prev_predicted_pos.distance_to(server_pos) > 0.001 and player_hp > 0:
 			_mark_local_player_walking()

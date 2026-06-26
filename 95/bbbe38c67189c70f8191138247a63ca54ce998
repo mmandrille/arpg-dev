@@ -1,0 +1,138 @@
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_05d5e6aa8fd731::t_a775d2c0d33109 6
+tools/bot/scenarios/client/73_door_fog_toggle.json
+  s_2fdc8a07389731::t_561152b5316a1a 19,22-23,26,29-32,43,46-49
+  s_2fdc8a07389731::t_ef4c4089e7431f 59
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_05d5e6aa8fd731::t_912b627ae4e920 6
+docs/reviews/client/20260626_v349-client.md
+  s_05d5e6aa8fd731::t_872ff3623f1e01 1-74
+tools/bot/scenarios/55_survival_reactive_unique_effects.json
+  s_05d5e6aa8fd731::t_57c4b4bc040b95 6
+  s_05d5e6aa8fd731::t_2bba24469ee330 5
+  s_05d5e6aa8fd731::t_5ec23030abdc73 4
+tools/bot/scenarios/54_offensive_unique_effects.json
+  s_05d5e6aa8fd731::t_6087d4c5abfc9d 4,8,12,16,31
+  s_05d5e6aa8fd731::t_a0331ea8a4a12a 6
+CLAUDE.md
+  s_1fa10c9a9b7c4f::t_cfff7d6fef2433 124-131
+tools/bot/scenarios/22_combat_stat_effects.json
+  s_2fdc8a07389731::t_6be7e76e5a1bf6 68,72-73
+  s_2fdc8a07389731::t_500dcba5f1d897 60,69-71,75
+  s_2fdc8a07389731::t_92071032e368cb 61-67,74
+docs/progress/slice-codename-index.md
+  s_1fa10c9a9b7c4f::t_8de1a1e5e3f501 240
+docs/reviews/extras/20260626_v349-shared-tooling-and-process.md
+  s_05d5e6aa8fd731::t_01fe8ab7ed550b 1-66
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_05d5e6aa8fd731::t_b49cd3a082750f 6
+tools/bot/scenarios/86_mercenary_foundation.json
+  s_05d5e6aa8fd731::t_74f3f73060f01b 25
+PROGRESS.md
+  s_05d5e6aa8fd731::t_99cd0ac1d5e405 39
+  s_1fa10c9a9b7c4f::t_f482051e606e23 92
+  s_05d5e6aa8fd731::t_415451a57c0412 91
+  s_1fa10c9a9b7c4f::t_468b1d251232c0 26,28-31
+  s_05d5e6aa8fd731::t_b3e6a15d6455ad 90,93
+.maintainability/file-size-baseline.tsv
+  s_1fa10c9a9b7c4f::t_f83e90c0e38b62 8
+server/internal/game/companion_ai.go
+  s_05d5e6aa8fd731::t_8fdb0d5648abd8 23
+docs/reviews/20260626_v349-ci-full-failures.md
+  s_05d5e6aa8fd731::t_2f0e0a761a3b5a 1-101
+docs/reviews/20260626_v349-overview.md
+  s_05d5e6aa8fd731::t_29bf4be34f1b09 87,91-118
+  s_05d5e6aa8fd731::t_dfabf9668afd0a 1-86,88-90
+docs/reviews/backend/20260626_v349-backend.md
+  s_05d5e6aa8fd731::t_233aa1c5b8eb1b 1-63
+client/scripts/main.gd
+  s_1fa10c9a9b7c4f::t_38826dda1aa713 5075-5076,5082-5083,5086-5087,5089-5091,5093-5094
+  s_7b967139b528b4::t_1d424c6da66f38 1491-1492,5081,5084-5085,5088,5092,5095,5585
+  s_1fa10c9a9b7c4f::t_1df1af9f4b2319 5584,5586-5590
+shared/rules/worlds.v0.json
+  s_05d5e6aa8fd731::t_e03b9919c978ef 493-527
+  s_05d5e6aa8fd731::t_055ec230e171e2 1200
+  s_05d5e6aa8fd731::t_737fedf41a6109 1145
+  s_2fdc8a07389731::t_2137916525c409 609
+  s_05d5e6aa8fd731::t_61858a61383cdf 528-567
+tools/bot/coop_gold_staging.py
+  s_05d5e6aa8fd731::t_394c64aa90432a 1-46
+tools/bot/scenarios/client/79_wall_floor_dungeon_rollout.json
+  s_05d5e6aa8fd731::t_196de9ea8f155c 11-16
+tools/bot/run.py
+  s_05d5e6aa8fd731::t_352c34afe46cc5 3990-3995
+  s_05d5e6aa8fd731::t_080b1966fd3350 38
+  s_05d5e6aa8fd731::t_eee91710960638 1002-1006
+  s_05d5e6aa8fd731::t_084a1008fe2ec0 3574
+  s_05d5e6aa8fd731::t_7d0ab50e177e22 1080-1085,1091
+  s_05d5e6aa8fd731::t_fbce3c64b037fc 3836-3837,3846
+  s_05d5e6aa8fd731::t_0daabc155b0222 3479
+tools/bot/scenarios/56_resource_support_mobility_unique_effects.json
+  s_05d5e6aa8fd731::t_edc0b108b64222 22,24
+  s_05d5e6aa8fd731::t_cebd7e32c36a41 4
+tools/bot/scenarios/client/70_blacksmith_armor_recipe.json
+  s_05d5e6aa8fd731::t_dfcb0980ea3d88 181
+  s_05d5e6aa8fd731::t_6254859ae3cba4 161-180
+docs/specs/v350_spec-ci-full-green.md
+  s_05d5e6aa8fd731::t_171a385ef640a4 1-110
+docs/progress/slice-lifecycle.md
+  s_1fa10c9a9b7c4f::t_35e843b5b03169 365
+tools/bot/movement_runtime.py
+  s_05d5e6aa8fd731::t_e28d148d92e502 109
+docs/as-built/v350_ci-full-green.md
+  s_1fa10c9a9b7c4f::t_4001fbed75c99e 1-98
+docs/plans/v350_2026-06-26-ci-full-green.md
+  s_05d5e6aa8fd731::t_0288f3498449d0 249-251
+  s_05d5e6aa8fd731::t_d5d05ab839291a 286
+  s_05d5e6aa8fd731::t_29d67e0965991a 130-132
+  s_1fa10c9a9b7c4f::t_891965750c7a41 292-294
+  s_05d5e6aa8fd731::t_5c2c3e21dc5fb9 211-213
+  s_05d5e6aa8fd731::t_a33d4c64a04a92 173-175
+  s_05d5e6aa8fd731::t_4768501180a57b 193-195
+  s_05d5e6aa8fd731::t_6cba0a36cda0a3 96-98
+  s_05d5e6aa8fd731::t_549b56744a322f 229-231
+  s_05d5e6aa8fd731::t_d66975447a180f 274
+  s_05d5e6aa8fd731::t_872278fa22276e 1-95,99-115,119-129,133-151,155-172,176-192,196-210,214-228,232-248,252-273,275-285,287-291,295-316
+  s_05d5e6aa8fd731::t_4853c132f48178 116-118
+  s_05d5e6aa8fd731::t_d5b5fae58f6078 152-154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "95bbbe38c67189c70f8191138247a63ca54ce998",
+  "prompts": {},
+  "sessions": {
+    "s_05d5e6aa8fd731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d3fe9e6-9bd8-4c49-8e7b-285d8eb2314a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_1fa10c9a9b7c4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2e610246-891f-4e30-a723-7bbe0119c151",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_2fdc8a07389731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e2b9f1af-dd0c-4bbb-8a92-86519421f84f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_7b967139b528b4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a19c9423-7a46-431c-95f5-acf01313110a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

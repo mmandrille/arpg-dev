@@ -172,6 +172,9 @@ type entity struct {
 	navNextRepathTick     uint64
 	lastAttackTick        uint64
 	hasAttacked           bool
+	attackWindupRemaining int
+	attackWindupTargetID  uint64
+	attackWindupDamage    DamageRange
 	rangedMeleeEngagedTick uint64
 }
 
@@ -3264,6 +3267,9 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if monster.hasAttacked && s.tick-monster.lastAttackTick < uint64(attackCooldown) {
 			continue
 		}
+		if monster.attackWindupRemaining > 0 {
+			continue
+		}
 		attackDamage := def.AttackDamage
 		if monster.monsterAttackDamage != nil {
 			attackDamage = monster.monsterAttackDamage
@@ -3274,6 +3280,9 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		monster.hasAttacked = true
 		if def.effectiveAttackMode() == attackModeRanged {
 			s.fireMonsterProjectile(monster, target, def, *attackDamage, res)
+			continue
+		}
+		if s.tryStartMonsterMeleeWindup(monster, target, def, *attackDamage, res) {
 			continue
 		}
 		if target.kind == companionEntity {

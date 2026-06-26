@@ -486,6 +486,7 @@ type MonsterDef struct {
 	RetaliationDamage *DamageRange       `json:"retaliation_damage,omitempty"`
 	AttackDamage      *DamageRange       `json:"attack_damage,omitempty"`
 	AttackCooldown    int                `json:"attack_cooldown_ticks,omitempty"`
+	AttackWindupTicks int                `json:"attack_windup_ticks,omitempty"`
 	AttackMode        string             `json:"attack_mode,omitempty"`
 	AttackStyle       string             `json:"attack_style,omitempty"`
 	AttackRange       float64            `json:"attack_range,omitempty"`
@@ -1358,6 +1359,15 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 		if err := validateMonsterAttackStyle(id, def, attackMode, behavior, r.Combat.UnarmedReach); err != nil {
 			return nil, err
+		}
+		if def.AttackWindupTicks < 0 {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_windup_ticks: must be non-negative", id)
+		}
+		if def.AttackWindupTicks > 0 && attackStyle != monsterAttackStyleMelee {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_windup_ticks: only valid for melee attack_style", id)
+		}
+		if def.AttackWindupTicks > 0 && attackMode != attackModeMelee {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_windup_ticks: only valid for melee attack_mode", id)
 		}
 		switch behavior {
 		case monsterBehaviorStatic:

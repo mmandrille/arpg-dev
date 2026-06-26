@@ -79,6 +79,7 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 			})
 			s.withTickPhase(TickPhaseCombat, func() {
 				s.advanceBossPhases(res)
+				s.advanceMonsterMeleeWindups(res)
 				s.advanceMonsterAttack(res)
 				s.advanceProjectiles(res)
 			})

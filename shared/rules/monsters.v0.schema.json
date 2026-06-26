@@ -46,6 +46,7 @@
               }
             },
             "attack_cooldown_ticks": { "type": "integer", "minimum": 1 },
+            "attack_windup_ticks": { "type": "integer", "minimum": 0 },
             "attack_mode": { "type": "string", "enum": ["melee", "ranged"] },
             "attack_style": { "type": "string", "enum": ["melee", "dive", "pounce"] },
             "attack_range": { "type": "number", "exclusiveMinimum": 0 },

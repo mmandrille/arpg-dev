@@ -357,5 +357,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v342** | `dungeon-ambient-motes` | Complete (focused checks green; autoloop batch `make ci` pending) | [`v342_spec-dungeon-ambient-motes.md`](../specs/v342_spec-dungeon-ambient-motes.md) | — | [`as-built`](../as-built/v342_dungeon-ambient-motes.md) |
 | **v343** | `player-damage-vignette` | Complete (client-unit green) | — | — | [`as-built`](../as-built/v343_player-damage-vignette.md) |
 | **v344** | `skill-cooldown-ready-pulse` | Complete (client-unit green) | — | — | [`as-built`](../as-built/v344_skill-cooldown-ready-pulse.md) |
+| **v345** | `monster-melee-windup-cue` | Complete (focused checks green) | [`v345_spec-monster-melee-windup-cue.md`](../specs/v345_spec-monster-melee-windup-cue.md) | — | [`as-built`](../as-built/v345_monster-melee-windup-cue.md) |
 
 ---

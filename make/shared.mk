@@ -14,5 +14,5 @@ gen-assets: tools ## Regenerate committed runtime .glb files (deterministic sour
 	$(PY) tools/assets/rig_quadruped_monster_glbs.py
 
 gen-anims: ## Regenerate committed AnimationLibrary .tres clips (requires Godot)
-	$(GODOT) --headless --path client --import >/dev/null 2>&1 || true
-	$(GODOT) --headless --path client --script res://tools/build_animations.gd
+	$(GODOT) --headless --rendering-method gl_compatibility --path client --import >/dev/null 2>&1 || true
+	$(GODOT) --headless --rendering-method gl_compatibility --path client --script res://tools/build_animations.gd

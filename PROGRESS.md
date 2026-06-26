@@ -23,10 +23,10 @@ Last updated: 2026-06-26
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v347 — dungeon-render-performance |
+| **Latest completed slice** | v348 — forward-plus-renderer |
 | **Active branch** | `main` |
-| **CI gate** | v347 focused checks green; full `make ci` pending on `/finish` |
-| **Next slice** | v348 forward-plus renderer (deferred from v347) or movement smoothing (v349) |
+| **CI gate** | v348 focused checks green; batch `make ci` pending autoloop close-out |
+| **Next slice** | v349 movement-tick-smoothing |
 | **Last engineering review** | v337 — [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md) (2026-06-25, ad hoc; covers v335–v337 + post-v334 `$refactor` completion) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 

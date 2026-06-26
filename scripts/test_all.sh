@@ -25,7 +25,7 @@ echo "== test-all 2/3: CI integration (make ci) =="
 make ci
 
 echo "== test-all 3/3: headless bot-visual (make bot-visual) =="
-GODOT_FLAGS="${GODOT_FLAGS:---headless}" \
+GODOT_FLAGS="${GODOT_FLAGS:---headless --rendering-method gl_compatibility}" \
 ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE="${ARPG_VISUAL_REPLAY_EXIT_ON_COMPLETE:-1}" \
 make bot-visual
 

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/movement_presentation.v0.schema.json",
+  "title": "Movement presentation (v0)",
+  "description": "Client-only movement presentation tuning. No gameplay authority.",
+  "type": "object",
+  "required": ["version", "tick_smoothing"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "tick_smoothing": {
+      "type": "object",
+      "required": ["enabled", "snapshot_interval_seconds", "snap_distance"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "snapshot_interval_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1.0,
+          "description": "Interpolation duration between 10 Hz authoritative snapshots."
+        },
+        "snap_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "World-units delta above which display snaps instead of lerping."
+        }
+      }
+    }
+  }
+}

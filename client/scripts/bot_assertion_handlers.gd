@@ -70,6 +70,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_entity_tick_smoothing":
+			if not entity_tick_smoothing_matches(step, state):
+				runner._fail("assert_entity_tick_smoothing failed: want=%s got=%s step=%d scenario=%s" % [
+					str(step), str(state.get("entity_tick_smoothing", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_command_retarget_grace":
 			if not command_retarget_grace_matches(step, state):
 				runner._fail("assert_command_retarget_grace failed: want=%s got=%s step=%d scenario=%s" % [
@@ -452,6 +459,15 @@ static func movement_visual_smoothing_matches(step: Dictionary, state: Dictionar
 	if step.has("offset_max") and float(smoothing.get("offset_length", 0.0)) > float(step.get("offset_max", 0.0)):
 		return false
 	return step.has("active") or step.has("offset_min") or step.has("offset_max")
+
+
+static func entity_tick_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
+	var smoothing: Dictionary = state.get("entity_tick_smoothing", {})
+	if step.has("active") and bool(smoothing.get("active", false)) != bool(step.get("active", false)):
+		return false
+	if step.has("segment_distance_min") and float(smoothing.get("segment_distance", 0.0)) < float(step.get("segment_distance_min", 0.0)):
+		return false
+	return step.has("active") or step.has("segment_distance_min")
 
 
 static func command_retarget_grace_matches(step: Dictionary, state: Dictionary) -> bool:

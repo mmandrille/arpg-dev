@@ -7,6 +7,7 @@ const TownAmbientLifeScript := preload("res://scripts/town_ambient_life.gd")
 const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
+const PlayerDamageVignetteScript := preload("res://scripts/player_damage_vignette.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 
 var _pass_count := 0
@@ -22,6 +23,7 @@ func _initialize() -> void:
 	_test_chest_open_burst()
 	_test_tooltip_rarity_border()
 	_test_combat_camera_binding()
+	_test_player_damage_vignette()
 	_finish()
 
 
@@ -120,6 +122,43 @@ func _test_combat_camera_binding() -> void:
 		return
 	camera.free()
 	_pass("combat camera binding")
+
+
+func _test_player_damage_vignette() -> void:
+	var root := Node.new()
+	PlayerDamageVignetteScript.attach(root)
+	PlayerDamageVignetteScript.pulse(10, 50)
+	if PlayerDamageVignetteScript.debug_strength() <= 0.0:
+		_fail("player damage vignette should pulse on local damage")
+		root.free()
+		return
+	CombatEventPresentationScript.bind_camera(Camera3D.new(), 50, 0.0, "p1")
+	CombatEventPresentationScript.show_combat_text_for_event(
+		"p2",
+		{"event_type": "player_damaged", "damage": 12},
+		Color.WHITE,
+		Callable(self, "_noop_damage"),
+		Callable(self, "_noop_node"),
+	)
+	var before := PlayerDamageVignetteScript.debug_strength()
+	CombatEventPresentationScript.show_combat_text_for_event(
+		"p1",
+		{"event_type": "player_damaged", "damage": 12},
+		Color.WHITE,
+		Callable(self, "_noop_damage"),
+		Callable(self, "_noop_node"),
+	)
+	if PlayerDamageVignetteScript.debug_strength() <= before:
+		_fail("player damage vignette should only pulse for local player")
+		root.free()
+		return
+	PlayerDamageVignetteScript.reset_session()
+	if PlayerDamageVignetteScript.debug_strength() != 0.0:
+		_fail("player damage vignette should reset on session clear")
+		root.free()
+		return
+	root.free()
+	_pass("player damage vignette")
 
 
 func _noop_damage(_entity_id: String, _color: Color, _amount = null, _prefix: String = "", _scale: float = 0.0, _variant: String = "", _text: String = "", _damage_type: String = "") -> void:

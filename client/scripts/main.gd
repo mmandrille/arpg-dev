@@ -19,6 +19,7 @@ const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
+const PlayerDamageVignetteScript := preload("res://scripts/player_damage_vignette.gd")
 const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_text.gd")
 const PickTargetHighlightScript := preload("res://scripts/pick_target_highlight.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
@@ -897,7 +898,7 @@ func _process(delta: float) -> void:
 	_try_complete_pending_interactable_action()
 	_try_complete_pending_waypoint_travel()
 	_tick_movement_animation_linger(delta)
-	CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta)
+	CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta, player_id)
 	if gameplay_active and CameraImpactFeedback.is_active():
 		if _camera_controller != null: _camera_controller.sync_to_player()
 
@@ -3590,6 +3591,7 @@ func _build_scene() -> void:
 	ui.layer = 5
 	add_child(ui)
 	gameplay_ui_layer = ui
+	PlayerDamageVignetteScript.attach(self)
 	_aim_reticle = AimReticleOverlayScript.new(); _aim_reticle.visible = false; ui.add_child(_aim_reticle)
 	_crosshair_target = CrosshairTargetSystemScript.new()
 	_crosshair_target.setup(CrosshairTargetContextScript.make(

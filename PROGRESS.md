@@ -23,10 +23,10 @@ Last updated: 2026-06-25
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v342 — dungeon-ambient-motes (autoloop batch; focused verification green) |
+| **Latest completed slice** | v344 — skill-cooldown-ready-pulse (autoloop batch; client-unit green) |
 | **Active branch** | `main` |
-| **CI gate** | Focused autoloop batch green (`validate-shared`, `client-unit`, `maintainability`, depth-pressure Go test); full `make ci` pending on this host |
-| **Next slice** | TBD |
+| **CI gate** | v343–v344 client-unit green; full `make ci` pending on this host |
+| **Next slice** | v345 monster-melee-windup-cue (in progress) |
 | **Last engineering review** | v337 — [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md) (2026-06-25, ad hoc; covers v335–v337 + post-v334 `$refactor` completion) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 

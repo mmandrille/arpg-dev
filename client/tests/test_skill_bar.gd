@@ -144,6 +144,11 @@ func _run() -> void:
 	_assert_eq("stale cooldown update does not start idle visual", int(state.get("remaining_ticks", -1)), 0)
 	_assert_false("stale cooldown update keeps idle visual hidden", bool(state.get("cooldown_visible", true)))
 
+	bar.start_skill_cooldown("magic_bolt", 2, 2)
+	bar._process(0.25)
+	state = bar.get_debug_state()
+	_assert_true("cooldown ready pulse fires", bool(state.get("ready_pulse_active", false)))
+
 	bar.queue_free()
 	print("[gdtest] PASS: test_skill_bar (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)

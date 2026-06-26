@@ -6,21 +6,27 @@ const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_te
 const ImpactSparksScript := preload("res://scripts/impact_sparks.gd")
 const CombatOutcomePunchScript := preload("res://scripts/combat_outcome_punch.gd")
 const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
+const PlayerDamageVignetteScript := preload("res://scripts/player_damage_vignette.gd")
 
 static var _camera: Camera3D = null
 static var _max_hp: int = 1
+static var _local_player_id: String = ""
 
 
-static func bind_camera(camera: Camera3D, max_hp: int, delta: float) -> void:
+static func bind_camera(camera: Camera3D, max_hp: int, delta: float, local_player_id: String = "") -> void:
 	_camera = camera
 	_max_hp = max_hp
+	if local_player_id != "":
+		_local_player_id = local_player_id
 	decay_camera(camera, delta)
 
 
 static func clear_session() -> void:
 	_camera = null
 	_max_hp = 1
+	_local_player_id = ""
 	CameraImpactFeedbackScript.reset_session()
+	PlayerDamageVignetteScript.reset_session()
 
 
 static func show_combat_text_for_event(
@@ -32,6 +38,8 @@ static func show_combat_text_for_event(
 ) -> void:
 	if str(ev.get("event_type", "")) == "player_damaged":
 		CameraImpactFeedbackScript.apply_from_damage(int(ev.get("damage", 0)), _max_hp)
+		if entity_id == _local_player_id:
+			PlayerDamageVignetteScript.pulse(int(ev.get("damage", 0)), _max_hp)
 	var outcome := str(ev.get("outcome", ""))
 	var damage = ev.get("damage", null)
 	var special := DamageTypeCombatTextScript.special_outcome(outcome)

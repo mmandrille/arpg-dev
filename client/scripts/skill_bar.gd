@@ -27,6 +27,7 @@ var _mana_cost_label: Label
 var _cooldown: ProgressBar
 var _flash_timer: float = 0.0
 var _flash_color := Color("#f0dfbb")
+var _ready_pulse_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -40,13 +41,19 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	var previous_remaining := _remaining_ticks
 	if _remaining_ticks > 0.0:
 		_remaining_ticks = maxf(0.0, _remaining_ticks - (delta / TICK_DURATION_S))
+		if previous_remaining > 0.0 and _remaining_ticks <= 0.0:
+			flash_ready()
 		_render()
 	if _flash_timer > 0.0:
 		_flash_timer = maxf(0.0, _flash_timer - delta)
 		if _slot != null and _flash_timer <= 0.0:
 			_slot.modulate = Color.WHITE
+	if _ready_pulse_timer > 0.0:
+		_ready_pulse_timer = maxf(0.0, _ready_pulse_timer - delta)
+		_render_panel_ready_pulse()
 
 
 func set_skill_progression(next_progression: Dictionary) -> void:
@@ -118,6 +125,11 @@ func flash_rejected() -> void:
 	_flash(Color("#dd5b48"))
 
 
+func flash_ready() -> void:
+	_ready_pulse_timer = 0.35
+	_flash(Color("#8df5c4"))
+
+
 func use_slot() -> void:
 	if not _cast_enabled():
 		return
@@ -148,6 +160,7 @@ func get_debug_state() -> Dictionary:
 		"total_ticks": _total_ticks,
 		"cooldown_fraction": _cooldown_fraction(),
 		"cooldown_visible": _cooldown.visible if _cooldown != null else false,
+		"ready_pulse_active": _ready_pulse_timer > 0.0,
 		"slot_text": _slot.text if _slot != null else "",
 		"icon_shape": _slot_icon.shape if _slot_icon != null else "",
 		"tooltip_text": _slot.tooltip_text if _slot != null else "",
@@ -311,6 +324,19 @@ func _flash(color: Color) -> void:
 	_flash_color = color
 	_flash_timer = 0.2
 	_slot.modulate = _flash_color
+
+
+func _render_panel_ready_pulse() -> void:
+	if _panel == null:
+		return
+	var style := _panel.get_theme_stylebox("panel") as StyleBoxFlat
+	if style == null:
+		return
+	if _ready_pulse_timer > 0.0:
+		var t := _ready_pulse_timer / 0.35
+		style.border_color = Color("#8df5c4").lerp(Color("#5c4a1f"), 1.0 - t)
+	else:
+		style.border_color = Color("#5c4a1f")
 
 
 func _make_upgrade_badge() -> Label:

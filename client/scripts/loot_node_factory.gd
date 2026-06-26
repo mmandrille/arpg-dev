@@ -32,6 +32,7 @@ func make_loot_node(e: Dictionary) -> Node3D:
 		add_loot_rarity_background(root, item_rarity_background(rarity), scale)
 		add_loot_primitive(root, shape, color, accent, scale)
 	add_loot_spawn_pop(root, rarity, scale)
+	add_loot_pickup_beam(root, rarity, scale)
 	add_loot_label(root, loot_label_text(e), scale, loot_label_color(e))
 	return root
 
@@ -130,7 +131,24 @@ func add_loot_rarity_glow(parent: Node3D, rarity: String, scale: float) -> void:
 	node.mesh = mesh
 	node.position = Vector3(0.0, 0.055, 0.0)
 	node.rotation_degrees.x = 90.0
-	node.material_override = _glow_material(item_rarity_background(rarity), 0.42)
+	var intensity := _rarity_glow_intensity(rarity)
+	node.material_override = _glow_material(item_rarity_background(rarity), intensity)
+	parent.add_child(node)
+
+
+func add_loot_pickup_beam(parent: Node3D, rarity: String, scale: float) -> void:
+	if not _rarity_has_pickup_beam(rarity):
+		return
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = 0.03 * maxf(scale, 0.85)
+	mesh.bottom_radius = 0.05 * maxf(scale, 0.85)
+	mesh.height = 0.42 * maxf(scale, 0.85)
+	mesh.radial_segments = 10
+	var node := MeshInstance3D.new()
+	node.name = "PickupBeam"
+	node.mesh = mesh
+	node.position = Vector3(0.0, 0.24 * maxf(scale, 0.85), 0.0)
+	node.material_override = _glow_material(ground_item_tint(rarity), _rarity_beam_intensity(rarity))
 	parent.add_child(node)
 
 func add_loot_spawn_pop(parent: Node3D, rarity: String, scale: float) -> void:
@@ -191,9 +209,43 @@ func _glow_material(color: Color, alpha: float) -> StandardMaterial3D:
 	mat.albedo_color = Color(color.r, color.g, color.b, alpha)
 	mat.emission_enabled = true
 	mat.emission = color
-	mat.emission_energy_multiplier = 0.45
+	mat.emission_energy_multiplier = 0.45 + alpha * 0.35
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	return mat
+
+
+func _rarity_glow_intensity(rarity: String) -> float:
+	match rarity.to_lower():
+		"magic":
+			return 0.55
+		"rare":
+			return 0.72
+		"unique":
+			return 0.92
+		"set":
+			return 0.85
+		_:
+			return 0.42
+
+
+func _rarity_beam_intensity(rarity: String) -> float:
+	match rarity.to_lower():
+		"rare":
+			return 0.34
+		"unique":
+			return 0.48
+		"set":
+			return 0.42
+		_:
+			return 0.0
+
+
+func _rarity_has_pickup_beam(rarity: String) -> bool:
+	match rarity.to_lower():
+		"rare", "unique", "set":
+			return true
+		_:
+			return false
 
 func loot_color(item_def_id: String) -> Color:
 	var def: Dictionary = ItemRulesLoader.item_definition(item_def_id)

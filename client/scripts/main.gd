@@ -3341,7 +3341,8 @@ func _set_loot_label_visible(loot_id: String, shown: bool, highlighted: bool = f
 	if label != null:
 		label.visible = shown
 		var rec: Dictionary = entities.get(loot_id, {})
-		label.modulate = _loot_filter.display_color(_loot_label_color(rec), highlighted)
+		var category := _loot_label_category(rec)
+		label.modulate = _loot_filter.display_color(_loot_label_color(rec), highlighted, category)
 	var ring := _revive_hover_ring_node(loot_id)
 	if ring != null:
 		ring.visible = false
@@ -5027,6 +5028,7 @@ func _render_wall_layout(walls: Array) -> void:
 	_sync_fog_wall_layout()
 func _sync_fog_wall_layout() -> void:
 	if fog_overlay != null: InteractableRulesLoader.sync_fog_overlay(fog_overlay, current_wall_layout, interactable_ids, entities)
+	DungeonRoomFloorTint.sync(ground_node, _ground_factory, current_level, current_wall_layout, entities)
 	_sync_discovery_minimap()
 	_sync_dungeon_ceiling_visibility()
 
@@ -5449,6 +5451,13 @@ func _apply_model_tint(root: Node, color: Color) -> void:
 
 func _loot_label_color(e: Dictionary) -> Color:
 	return _loot_factory.loot_label_color(e)
+
+func _loot_label_category(e: Dictionary) -> String:
+	var item_def_id := str(e.get("item_def_id", ""))
+	var def := _item_definition(item_def_id)
+	if item_def_id == "gold":
+		return "currency"
+	return str(def.get("category", "")).to_lower()
 
 func _item_definition(item_def_id: String) -> Dictionary:
 	return _loot_factory.item_definition(item_def_id)

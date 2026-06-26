@@ -23,11 +23,11 @@ Last updated: 2026-06-25
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v337 — sim-tick-context (implementation; batch `make ci` pending) |
+| **Latest completed slice** | v342 — dungeon-ambient-motes (autoloop batch; focused verification green) |
 | **Active branch** | `main` |
-| **CI gate** | Steps 1–7 green (maintainability, validate-shared, go test, pytest, client-unit movement presenter); full `make ci` blocked by protocol-bot session 500s + client-bot hang on fresh Colima (2026-06-25) |
-| **Next slice** | TBD — stabilize `make ci` on this host, then next feature or further coordinator paydown |
-| **Last engineering review** | v334 — [`docs/reviews/20260625_v334-overview.md`](docs/reviews/20260625_v334-overview.md) (2026-06-25, ad hoc; covers v332–v334 + post-v331 stabilization) |
+| **CI gate** | Focused autoloop batch green (`validate-shared`, `client-unit`, `maintainability`, depth-pressure Go test); full `make ci` pending on this host |
+| **Next slice** | TBD |
+| **Last engineering review** | v337 — [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md) (2026-06-25, ad hoc; covers v335–v337 + post-v334 `$refactor` completion) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 
 
@@ -87,13 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v334 `$review` complete (ad hoc at `9d02179b`).** Overview:
-  [`docs/reviews/20260625_v334-overview.md`](docs/reviews/20260625_v334-overview.md). v331 blocker cleared:
-  `go test ./...` green. Lowest scorecard area now **Maintainability (7.0 — `main.gd` ratchet FAIL at 6,239 lines)**.
-- **v331 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema `required` + semantic guards, fog overlay
-  baseline, ADR-0015, CLAUDE.md spec-gate exemption, v332 navigation/test repairs.
-- **v334 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema/guards, fog overlay baseline, ADR-0015, bot presentation debug extraction, dungeon generation rules split, movement-input presenter, wall-floor lab nav test + scenario 78 proof, sim tick context starter.
-- **v334 future-plan items:** `validate_shared.py` validation-domain extraction; deeper `sim.go` coordinator paydown beyond tick context.
+- **v337 `$review` complete (ad hoc at `da9a47b4`).** Overview:
+  [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md). v334 maintainability ratchet breach **resolved** (`make maintainability` green). Lowest scorecard areas now **internal cohesion (7.5)** and **batch `make ci` (pending)**.
+- **v334 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema/guards, fog overlay baseline, ADR-0015, bot presentation debug extraction, dungeon generation rules split, movement-input presenter, wall-floor lab nav test + scenario 78 proof, sim tick context starter, item-visual probe extraction, fog validator unit tests.
+- **v337 future-plan items:** `sim.go` phase-helper paydown via `simTickCtx`; quarantine `realtime/runner.go`; `validate_shared.py` validation-domain extraction; `main.gd` attack-move cluster extraction (9-line headroom).
 
 ### Other deferred items (from specs / ADRs)
 

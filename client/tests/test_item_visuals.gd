@@ -268,8 +268,8 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		loot_b.free()
 		main.free()
 		return false
-	if label_a.modulate.to_html(false) != "ffd75e":
-		_fail("hovered loot label did not use full item color")
+	if label_a.modulate.to_html(false) != "ffffff":
+		_fail("hovered currency loot label did not use white highlight")
 		loot_a.free()
 		loot_b.free()
 		main.free()
@@ -283,8 +283,8 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		main.free()
 		return false
 	var label_b_full := main._loot_label_color({"item_def_id": "cave_blade"})
-	if label_a.modulate.to_html(false) != "ffd75e":
-		_fail("ALT-hovered loot label did not stay highlighted")
+	if label_a.modulate.to_html(false) != "ffffff":
+		_fail("ALT-hovered currency loot label did not stay white")
 		loot_a.free()
 		loot_b.free()
 		main.free()

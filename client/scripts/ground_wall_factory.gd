@@ -66,6 +66,9 @@ func update_ground_material(ground_node: MeshInstance3D, level: int) -> void:
 	ground_node.material_override = ground_material_for_level(level)
 	if level == 0:
 		TownAmbientLife.attach_to_town(ground_node)
+	else:
+		var floor_size := floor_size_for_level(level)
+		DungeonAmbientMotes.sync(ground_node, level, floor_size)
 
 func ground_texture_id_for_level(level: int) -> String:
 	return ClientConstantsScript.GROUND_TEXTURE_TOWN if level == 0 else ClientConstantsScript.GROUND_TEXTURE_DUNGEON
@@ -185,10 +188,34 @@ func wall_material_for_level(level: int, source: String, size: Dictionary, wall_
 	match source:
 		"generated":
 			mat.albedo_color = Color(0.92, 0.86, 0.76)
+		"room_divider":
+			mat.albedo_color = Color(0.84, 0.78, 0.70)
 		"perimeter":
 			mat.albedo_color = Color(0.62, 0.64, 0.68)
 		_:
 			mat.albedo_color = Color(0.78, 0.80, 0.82)
+	return mat
+
+
+func obstacle_material_for_level(level: int, kind: String, size: Dictionary) -> StandardMaterial3D:
+	var palette := biome_palette_for_level(level)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+	mat.normal_enabled = true
+	mat.normal_texture = make_wall_normal_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+	mat.normal_scale = 0.20
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.roughness = 0.98
+	mat.uv1_scale = Vector3(maxf(1.0, float(size.get("x", 1.0)) / 2.0), maxf(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
+	match kind:
+		"rock":
+			mat.albedo_color = Color(0.56, 0.58, 0.55)
+		"column":
+			mat.albedo_color = Color(0.70, 0.68, 0.61)
+		"rubble":
+			mat.albedo_color = Color(0.50, 0.47, 0.42)
+		_:
+			mat.albedo_color = Color(0.72, 0.72, 0.68)
 	return mat
 
 func make_water_texture(palette: Dictionary = {}) -> ImageTexture:
@@ -354,6 +381,9 @@ func ceiling_material_for_level(level: int) -> StandardMaterial3D:
 		mat.albedo_color = _palette_color(palette, "wall_base", Color(0.22, 0.24, 0.26)).darkened(0.18)
 	if not palette.is_empty():
 		mat.albedo_texture = make_wall_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+		mat.normal_enabled = true
+		mat.normal_texture = make_wall_normal_texture(ClientConstantsScript.WALL_TEXTURE_CAVE, palette)
+		mat.normal_scale = 0.16
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.roughness = 0.98
 	var floor_size := floor_size_for_level(level)

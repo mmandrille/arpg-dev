@@ -1,19 +1,53 @@
 {
   "id": "unique_skill_modifier",
+  "ci_tier": "extended",
   "world_id": "dungeon_levels",
   "seed": "unique_skill_modifier_seed",
   "title": "Unique skill modifier",
   "description": "Open the purple town unique chest and prove the skill-modifying named unique can be taken into inventory.",
   "steps": [
-    { "action": "move_until_player_position", "x": 6, "y": 7, "tolerance": 1.0, "pathfind": true, "max_ticks": 160 },
-    { "action": "action_entity", "interactable_def_id": "town_unique_chest", "target_id": "1010", "allow_missing_target": true, "event_type": "unique_chest_opened", "timeout_s": 10 },
-    { "action": "take_unique_chest_item", "interactable_def_id": "town_unique_chest", "chest_entity_id": "1010", "display_name": "Conduit Staff" },
-    { "action": "assert_inventory_count", "display_name": "Conduit Staff", "equals": 1 }
+    {
+      "action": "move_until_player_position",
+      "x": 6,
+      "y": 7,
+      "tolerance": 1.0,
+      "pathfind": true,
+      "max_ticks": 160
+    },
+    {
+      "action": "action_entity",
+      "interactable_def_id": "town_unique_chest",
+      "target_id": "1010",
+      "allow_missing_target": true,
+      "event_type": "unique_chest_opened",
+      "timeout_s": 10
+    },
+    {
+      "action": "take_unique_chest_item",
+      "interactable_def_id": "town_unique_chest",
+      "chest_entity_id": "1010",
+      "display_name": "Conduit Staff"
+    },
+    {
+      "action": "assert_inventory_count",
+      "display_name": "Conduit Staff",
+      "equals": 1
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "unique_chest_opened" },
-    { "type": "event_seen", "event_type": "unique_chest_item_taken" },
-    { "type": "inventory_count", "display_name": "Conduit Staff", "equals": 1 }
+    {
+      "type": "event_seen",
+      "event_type": "unique_chest_opened"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "unique_chest_item_taken"
+    },
+    {
+      "type": "inventory_count",
+      "display_name": "Conduit Staff",
+      "equals": 1
+    }
   ],
   "fresh_session_checks": []
 }

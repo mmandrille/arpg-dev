@@ -1,5 +1,6 @@
 {
   "id": "town_bishop_respec_panel",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "quest_turn_in_lab",
   "seed": "v293_client_bishop_respec",
@@ -9,17 +10,99 @@
     "deepest_dungeon_depth": 125
   },
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_quest_giver", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "loot", "item_def_id": "quest_leaf" },
-    { "type": "wait_event", "event_type": "item_picked_up", "item_def_id": "quest_leaf", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_quest_giver" },
-    { "type": "wait_event", "event_type": "quest_turn_in_completed", "service": "quest_turn_in", "amount": 1, "price": 25, "total_gold": 25, "timeout_s": 15.0 },
-    { "type": "wait_event", "event_type": "badge_rewarded", "resource_id": "respec_badge", "amount": 1, "level": 125, "timeout_s": 15.0 },
-    { "type": "wait_event", "event_type": "badge_rewarded", "resource_id": "resurrection_badge", "amount": 1, "level": 125, "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_bishop" },
-    { "type": "wait_bishop_panel", "price": 0, "affordable": true, "respec_enabled": true, "revive_all_enabled": true, "debug_enabled": true, "resource_item_def_id": "respec_badge", "resource_required_count": 1, "resource_wallet_count": 1, "revive_resource_item_def_id": "resurrection_badge", "revive_resource_required_count": 1, "revive_resource_wallet_count": 1, "respec_text_contains": "Respec x1", "revive_text_contains": "Resurrect x1", "timeout_s": 15.0 },
-    { "type": "assert_bishop_panel_visible", "visible": true },
-    { "type": "assert_bishop_panel", "price": 0, "service_id": "bishop", "affordable": true, "respec_enabled": true, "revive_all_enabled": true, "debug_enabled": true, "resource_item_def_id": "respec_badge", "resource_required_count": 1, "resource_wallet_count": 1, "revive_resource_item_def_id": "resurrection_badge", "revive_resource_required_count": 1, "revive_resource_wallet_count": 1, "respec_text_contains": "Respec x1", "revive_text_contains": "Resurrect x1" }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_quest_giver",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "loot",
+      "item_def_id": "quest_leaf"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "item_def_id": "quest_leaf",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_quest_giver"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "quest_turn_in_completed",
+      "service": "quest_turn_in",
+      "amount": 1,
+      "price": 25,
+      "total_gold": 25,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "badge_rewarded",
+      "resource_id": "respec_badge",
+      "amount": 1,
+      "level": 125,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "badge_rewarded",
+      "resource_id": "resurrection_badge",
+      "amount": 1,
+      "level": 125,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_bishop"
+    },
+    {
+      "type": "wait_bishop_panel",
+      "price": 0,
+      "affordable": true,
+      "respec_enabled": true,
+      "revive_all_enabled": true,
+      "debug_enabled": true,
+      "resource_item_def_id": "respec_badge",
+      "resource_required_count": 1,
+      "resource_wallet_count": 1,
+      "revive_resource_item_def_id": "resurrection_badge",
+      "revive_resource_required_count": 1,
+      "revive_resource_wallet_count": 1,
+      "respec_text_contains": "Respec x1",
+      "revive_text_contains": "Resurrect x1",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_bishop_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_bishop_panel",
+      "price": 0,
+      "service_id": "bishop",
+      "affordable": true,
+      "respec_enabled": true,
+      "revive_all_enabled": true,
+      "debug_enabled": true,
+      "resource_item_def_id": "respec_badge",
+      "resource_required_count": 1,
+      "resource_wallet_count": 1,
+      "revive_resource_item_def_id": "resurrection_badge",
+      "revive_resource_required_count": 1,
+      "revive_resource_wallet_count": 1,
+      "respec_text_contains": "Respec x1",
+      "revive_text_contains": "Resurrect x1"
+    }
   ]
 }

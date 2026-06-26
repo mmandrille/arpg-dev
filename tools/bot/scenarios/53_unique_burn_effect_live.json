@@ -1,12 +1,20 @@
 {
   "id": "unique_burn_effect_live",
+  "ci_tier": "extended",
   "world_id": "unique_burn_lab",
   "seed": "00000000000001d8",
   "title": "Unique burn effect live",
   "description": "Pick up a deterministic unique cave blade, equip it, hit a lab target, and prove Everburning Wound applies fire burn ticks.",
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_blade"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_blade",
+      "slot": "main_hand"
+    },
     {
       "action": "action_until_combat_event",
       "monster_def_id": "combat_lab_soft_target",
@@ -17,18 +25,42 @@
     },
     {
       "action": "wait_until_assertion",
-      "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "everburning_wound" },
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_started",
+        "skill_id": "everburning_wound"
+      },
       "timeout_s": 3
     },
     {
       "action": "wait_until_assertion",
-      "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "everburning_wound", "damage_type": "fire", "min_damage": 1 },
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "skill_id": "everburning_wound",
+        "damage_type": "fire",
+        "min_damage": 1
+      },
       "timeout_s": 3
     }
   ],
   "assertions": [
-    { "type": "inventory_contains", "item_def_id": "cave_blade", "equipped": true },
-    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "everburning_wound" },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "everburning_wound", "damage_type": "fire", "min_damage": 1 }
+    {
+      "type": "inventory_contains",
+      "item_def_id": "cave_blade",
+      "equipped": true
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "everburning_wound"
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "skill_id": "everburning_wound",
+      "damage_type": "fire",
+      "min_damage": 1
+    }
   ]
 }

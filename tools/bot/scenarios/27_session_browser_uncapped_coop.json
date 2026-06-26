@@ -1,5 +1,6 @@
 {
   "id": "session_browser_uncapped_coop",
+  "ci_tier": "extended",
   "world_id": "dungeon_levels",
   "seed": "v38-session-browser-uncapped-coop",
   "peer_count": 3,

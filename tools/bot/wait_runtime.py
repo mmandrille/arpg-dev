@@ -250,4 +250,13 @@ async def pump_one(ws, state: RuntimeState, timeout: float, helpers: dict[str, A
         msg = await asyncio.wait_for(ws.recv(), timeout=timeout)
     except asyncio.TimeoutError:
         return
-    ingest_message(json.loads(msg), state)
+    payload = json.loads(msg)
+    ingest_message(payload, state)
+    if payload.get("type") != "state_delta":
+        return
+    for _ in range(8):
+        try:
+            follow_up = await asyncio.wait_for(ws.recv(), timeout=0)
+        except asyncio.TimeoutError:
+            break
+        ingest_message(json.loads(follow_up), state)

@@ -1,6 +1,8 @@
 class_name BotFacade
 extends RefCounted
 
+const MovementInputPresenterScript := preload("res://scripts/movement_input_presenter.gd")
+
 
 static func click_shop_buy_offer(main, offer_id: String = "", offer_kind: String = "", offer_index: int = 0) -> void:
 	var panel = _member(main, "shop_panel")

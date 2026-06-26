@@ -77,6 +77,11 @@ When working on features or changes that involve visual effects and a client bot
 
 Do **not** repeatedly run the full suite by default. Reserve `make ci` for the final pre-commit proof when the change is broad enough to justify it, when targeted tests leave meaningful integration risk, or when the user explicitly asks for full CI.
 
+**CI pack curation:** `make ci` runs only `tools/bot/ci_pack.json`. New scenarios default to
+`"ci_tier": "extended"`; add to the pack only for merge-blocking coverage not already gated elsewhere,
+and keep pack size stable by demoting redundant or slow scenarios when promoting new ones. See
+`.cursor/rules/ci-pack-maintenance.mdc`.
+
 ## Data-driven gameplay and tests
 
 Gameplay and presentation tuning belongs in shared data, not hardcoded implementation constants. Before adding or changing any tunable value, check whether it can live in `shared/rules/main_config.v0.json`, another `shared/rules/*.json` catalog, or a schema-backed content/asset file. Values such as attack speed, movement speed, animation duration/speed/height/radius, drop chance, loot weights, monster stats, class stats, skill costs/cooldowns, shop pricing, XP curves, and generated-content budgets must be configurable unless the slice explicitly documents why code ownership is required. Never write a literal tuning value into code when an existing or new data-driven field can own it.

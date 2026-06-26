@@ -1,5 +1,6 @@
 {
   "id": "barbarian_leap_obstacle_crossing",
+  "ci_tier": "extended",
   "world_id": "barbarian_leap_obstacle_lab",
   "seed": "v298_barbarian_leap_obstacle_crossing",
   "character_class": "barbarian",
@@ -10,24 +11,90 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 8, "dex": 5, "vit": 8, "magic": 5 },
-    "skill_ranks": { "leap": 1 }
+    "stats": {
+      "str": 8,
+      "dex": 5,
+      "vit": 8,
+      "magic": 5
+    },
+    "skill_ranks": {
+      "leap": 1
+    }
   },
   "steps": [
-    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "water", "at_least": 1 }, "timeout_s": 3 },
-    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "hole", "at_least": 1 }, "timeout_s": 3 },
-    { "action": "cast_skill", "skill_id": "leap", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "leap", "rank": 1 }, "timeout_s": 3 },
-    { "action": "assert_player_position", "x": 10, "y": 5, "tolerance": 0.4 }
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "wall_count",
+        "kind": "water",
+        "at_least": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "wall_count",
+        "kind": "hole",
+        "at_least": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "leap",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "leap",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "assert_player_position",
+      "x": 10,
+      "y": 5,
+      "tolerance": 0.4
+    }
   ],
   "assertions": [
-    { "type": "wall_count", "kind": "water", "at_least": 1 },
-    { "type": "wall_count", "kind": "hole", "at_least": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "leap", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "leap" }
+    {
+      "type": "wall_count",
+      "kind": "water",
+      "at_least": 1
+    },
+    {
+      "type": "wall_count",
+      "kind": "hole",
+      "at_least": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "leap",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cooldown_started",
+      "skill_id": "leap"
+    }
   ],
   "visual": {
-    "camera": { "x": 6, "y": 5, "zoom": 1.0 },
+    "camera": {
+      "x": 6,
+      "y": 5,
+      "zoom": 1.0
+    },
     "post_complete_hold_s": 2.0
   }
 }

@@ -1,33 +1,119 @@
 {
   "id": "client_full_equipment",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "equipment_lab",
   "title": "Client full equipment and belt hotbar",
   "description": "Open the paper-doll inventory, equip named slots through the client bot path, assign a disabled hotbar slot, expand it with a belt, and use the enabled slot.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 15, "timeout_s": 15.0 },
-    { "type": "click_loot_item", "item_def_id": "cave_blade" },
-    { "type": "wait_inventory_item", "item_def_id": "cave_blade", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "item_def_id": "cave_belt" },
-    { "type": "wait_inventory_item", "item_def_id": "cave_belt", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "item_def_id": "red_potion" },
-    { "type": "wait_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion", "timeout_s": 15.0 },
-    { "type": "press_key", "keycode": "KEY_I" },
-    { "type": "assert_panel_visible", "visible": true },
-    { "type": "drag_bag_to_equipment_slot", "item_def_id": "cave_blade", "slot": "main_hand" },
-    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
-    { "type": "assert_equipped", "slot": "main_hand" },
-    { "type": "assert_hotbar_capacity", "equals": 2 },
-    { "type": "assert_hotbar_slot_disabled", "slot_index": 2 },
-    { "type": "use_hotbar_slot", "slot_index": 2 },
-    { "type": "assert_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion" },
-    { "type": "drag_bag_to_equipment_slot", "item_def_id": "cave_belt", "slot": "belt" },
-    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
-    { "type": "assert_equipped", "slot": "belt" },
-    { "type": "wait_hotbar_capacity", "at_least": 3, "timeout_s": 15.0 },
-    { "type": "assert_hotbar_assigned", "slot_index": 0, "item_def_id": "red_potion" },
-    { "type": "use_hotbar_slot", "slot_index": 0 },
-    { "type": "assert_inventory_count", "item_def_id": "red_potion", "equals": 0 }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 15,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "item_def_id": "cave_blade"
+    },
+    {
+      "type": "wait_inventory_item",
+      "item_def_id": "cave_blade",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "item_def_id": "cave_belt"
+    },
+    {
+      "type": "wait_inventory_item",
+      "item_def_id": "cave_belt",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "item_def_id": "red_potion"
+    },
+    {
+      "type": "wait_hotbar_assigned",
+      "slot_index": 0,
+      "item_def_id": "red_potion",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_I"
+    },
+    {
+      "type": "assert_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "drag_bag_to_equipment_slot",
+      "item_def_id": "cave_blade",
+      "slot": "main_hand"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_equipped",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_equipped",
+      "slot": "main_hand"
+    },
+    {
+      "type": "assert_hotbar_capacity",
+      "equals": 2
+    },
+    {
+      "type": "assert_hotbar_slot_disabled",
+      "slot_index": 2
+    },
+    {
+      "type": "use_hotbar_slot",
+      "slot_index": 2
+    },
+    {
+      "type": "assert_hotbar_assigned",
+      "slot_index": 0,
+      "item_def_id": "red_potion"
+    },
+    {
+      "type": "drag_bag_to_equipment_slot",
+      "item_def_id": "cave_belt",
+      "slot": "belt"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_equipped",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_equipped",
+      "slot": "belt"
+    },
+    {
+      "type": "wait_hotbar_capacity",
+      "at_least": 3,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_hotbar_assigned",
+      "slot_index": 0,
+      "item_def_id": "red_potion"
+    },
+    {
+      "type": "use_hotbar_slot",
+      "slot_index": 0
+    },
+    {
+      "type": "assert_inventory_count",
+      "item_def_id": "red_potion",
+      "equals": 0
+    }
   ]
 }

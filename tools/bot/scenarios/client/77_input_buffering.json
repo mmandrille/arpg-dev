@@ -1,22 +1,79 @@
 {
   "id": "input_buffering",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "combat_control_lab",
   "seed": "inputbuffer0001",
   "title": "Input buffering: monster click during recovery is sent later",
   "description": "Equip the training bow, click the target, click again during local recovery, and prove the buffered click produces a later authoritative combat event.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "click_loot_item", "item_def_id": "training_bow" },
-    { "type": "wait_event", "event_type": "item_picked_up", "item_def_id": "training_bow", "timeout_s": 10.0 },
-    { "type": "drag_bag_to_weapon_slot", "item_def_id": "training_bow" },
-    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 10.0 },
-    { "type": "assert_equipped", "slot": "main_hand" },
-    { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "dungeon_mob", "timeout_s": 10.0 },
-    { "type": "click_entity_buffered", "entity_type": "monster", "monster_def_id": "dungeon_mob" },
-    { "type": "wait_event", "event_types": ["monster_damaged", "attack_missed"], "target_entity_type": "monster", "target_monster_def_id": "dungeon_mob", "timeout_s": 5.0 },
-    { "type": "wait_ticks", "ticks": 10, "timeout_s": 5.0 },
-    { "type": "click_entity_buffered", "entity_type": "monster", "monster_def_id": "dungeon_mob" },
-    { "type": "wait_event", "event_types": ["monster_damaged", "attack_missed"], "target_entity_type": "monster", "target_monster_def_id": "dungeon_mob", "timeout_s": 5.0 }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_loot_item",
+      "item_def_id": "training_bow"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "item_def_id": "training_bow",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "drag_bag_to_weapon_slot",
+      "item_def_id": "training_bow"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_equipped",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_equipped",
+      "slot": "main_hand"
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_entity_buffered",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob"
+    },
+    {
+      "type": "wait_event",
+      "event_types": [
+        "monster_damaged",
+        "attack_missed"
+      ],
+      "target_entity_type": "monster",
+      "target_monster_def_id": "dungeon_mob",
+      "timeout_s": 5.0
+    },
+    {
+      "type": "wait_ticks",
+      "ticks": 10,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "click_entity_buffered",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob"
+    },
+    {
+      "type": "wait_event",
+      "event_types": [
+        "monster_damaged",
+        "attack_missed"
+      ],
+      "target_entity_type": "monster",
+      "target_monster_def_id": "dungeon_mob",
+      "timeout_s": 5.0
+    }
   ]
 }

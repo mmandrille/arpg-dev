@@ -1,5 +1,6 @@
 {
   "id": "rogue_shadow_flurry",
+  "ci_tier": "extended",
   "world_id": "skill_progression_lab",
   "seed": "v154_rogue_shadow_flurry",
   "character_class": "rogue",
@@ -10,20 +11,66 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 4, "dex": 12, "vit": 5, "magic": 4 },
-    "skill_ranks": { "dash": 1, "shadow_flurry": 1 }
+    "stats": {
+      "str": 4,
+      "dex": 12,
+      "vit": 5,
+      "magic": 4
+    },
+    "skill_ranks": {
+      "dash": 1,
+      "shadow_flurry": 1
+    }
   },
   "steps": [
-    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "shadow_flurry", "rank": 1, "max_rank": "from_rules", "can_spend": false },
-    { "action": "cast_skill", "skill_id": "shadow_flurry", "monster_def_id": "skill_xp_level7_dummy", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 }, "timeout_s": 3 }
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 0,
+      "skill_id": "shadow_flurry",
+      "rank": 1,
+      "max_rank": "from_rules",
+      "can_spend": false
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "shadow_flurry",
+      "monster_def_id": "skill_xp_level7_dummy",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "shadow_flurry", "rank": 1, "mana": 4 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 },
-    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "shadow_flurry" }
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "shadow_flurry",
+      "rank": 1,
+      "mana": 4
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "min_damage": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cooldown_started",
+      "skill_id": "shadow_flurry"
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.0
+    }
   }
 }

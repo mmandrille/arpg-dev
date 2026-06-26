@@ -1,5 +1,6 @@
 {
   "id": "market_search_sort",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "market_search_sort_242",
@@ -11,18 +12,78 @@
     "price_gold": 61
   },
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
-    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 61, "at_least": 1, "timeout_s": 15.0 },
-    { "type": "set_market_search", "text": "mail" },
-    { "type": "wait_market_panel", "market_search_text": "mail", "item_def_id": "cave_mail", "price_gold": 61, "at_least": 1, "timeout_s": 15.0 },
-    { "type": "select_market_sort", "mode": "price_high" },
-    { "type": "wait_market_panel", "market_search_text": "mail", "market_sort_mode": "price_high", "item_def_id": "cave_mail", "price_gold": 61, "at_least": 1, "timeout_s": 15.0 },
-    { "type": "set_market_search", "text": "notfound" },
-    { "type": "wait_market_panel", "market_search_text": "notfound", "filtered_listing_count": 0, "equals": 0, "timeout_s": 15.0 },
-    { "type": "set_market_search", "text": "" },
-    { "type": "select_market_sort", "mode": "name" },
-    { "type": "assert_market_listing_rows", "market_search_text": "", "market_sort_mode": "name", "item_def_id": "cave_mail", "price_gold": 61, "at_least": 1 }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_market_board"
+    },
+    {
+      "type": "wait_market_panel",
+      "item_def_id": "cave_mail",
+      "price_gold": 61,
+      "at_least": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "set_market_search",
+      "text": "mail"
+    },
+    {
+      "type": "wait_market_panel",
+      "market_search_text": "mail",
+      "item_def_id": "cave_mail",
+      "price_gold": 61,
+      "at_least": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "select_market_sort",
+      "mode": "price_high"
+    },
+    {
+      "type": "wait_market_panel",
+      "market_search_text": "mail",
+      "market_sort_mode": "price_high",
+      "item_def_id": "cave_mail",
+      "price_gold": 61,
+      "at_least": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "set_market_search",
+      "text": "notfound"
+    },
+    {
+      "type": "wait_market_panel",
+      "market_search_text": "notfound",
+      "filtered_listing_count": 0,
+      "equals": 0,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "set_market_search",
+      "text": ""
+    },
+    {
+      "type": "select_market_sort",
+      "mode": "name"
+    },
+    {
+      "type": "assert_market_listing_rows",
+      "market_search_text": "",
+      "market_sort_mode": "name",
+      "item_def_id": "cave_mail",
+      "price_gold": 61,
+      "at_least": 1
+    }
   ]
 }

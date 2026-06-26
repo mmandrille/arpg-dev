@@ -1,12 +1,17 @@
 {
   "id": "barbarian_class_foundation",
+  "ci_tier": "extended",
   "world_id": "skill_progression_lab",
   "seed": "barbarian_class_foundation_seed",
   "character_class": "barbarian",
   "title": "Barbarian class foundation",
   "description": "Create a Barbarian, prove starter axe, move into combat, leap, rage, attack three times, cleave a lab target, and finish with Earthbreaker.",
   "visual": {
-    "camera": { "x": 8, "y": 5, "zoom": 1.0 },
+    "camera": {
+      "x": 8,
+      "y": 5,
+      "zoom": 1.0
+    },
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
@@ -14,34 +19,174 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 12, "dex": 20, "vit": 10, "magic": 20 },
-    "skill_ranks": { "rage": 1, "leap": 1, "cleave": 1, "earthbreaker": 1 }
+    "stats": {
+      "str": 12,
+      "dex": 20,
+      "vit": 10,
+      "magic": 20
+    },
+    "skill_ranks": {
+      "rage": 1,
+      "leap": 1,
+      "cleave": 1,
+      "earthbreaker": 1
+    }
   },
   "steps": [
-    { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_barbarian_axe" },
-    { "action": "assert_equipped_slot_empty", "slot": "off_hand" },
-    { "action": "move", "direction": { "x": 1, "y": 0 }, "duration_ticks": 6 },
-    { "action": "cast_skill", "skill_id": "leap", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "leap", "rank": 1 }, "timeout_s": 3 },
-    { "action": "cast_skill", "skill_id": "rage", "target_self": true, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "rage", "rank": 1 }, "timeout_s": 3 },
-    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "event_type": "monster_damaged", "weapon_slot": "main_hand", "target_monster_def_id": "combat_lab_soft_target" },
-    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "event_type": "monster_damaged", "weapon_slot": "main_hand", "target_monster_def_id": "combat_lab_soft_target" },
-    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "event_type": "monster_damaged", "weapon_slot": "main_hand", "target_monster_def_id": "combat_lab_soft_target" },
-    { "action": "cast_skill", "skill_id": "cleave", "monster_def_id": "combat_lab_soft_target", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "cleave", "rank": 1 }, "timeout_s": 3 },
-    { "action": "cast_skill", "skill_id": "earthbreaker", "monster_def_id": "skill_xp_level7_dummy", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 }, "timeout_s": 3 }
+    {
+      "action": "assert_equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_barbarian_axe"
+    },
+    {
+      "action": "assert_equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "action": "move",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "duration_ticks": 6
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "leap",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "leap",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "rage",
+      "target_self": true,
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "rage",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "combat_lab_soft_target"
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "combat_lab_soft_target"
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "combat_lab_soft_target"
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "cleave",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "cleave",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "earthbreaker",
+      "monster_def_id": "skill_xp_level7_dummy",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    }
   ],
   "assertions": [
-    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_barbarian_axe" },
-    { "type": "equipped_slot_empty", "slot": "off_hand" },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "leap", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "rage", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "rage" },
-    { "type": "event_count", "event_type": "monster_damaged", "weapon_slot": "main_hand", "min": 3 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "cleave", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "earthbreaker", "rank": 1 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 }
+    {
+      "type": "equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_barbarian_axe"
+    },
+    {
+      "type": "equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "leap",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "rage",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "rage"
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "min": 3
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "cleave",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "earthbreaker",
+      "rank": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "min_damage": 1
+    }
   ]
 }

@@ -1,13 +1,21 @@
 {
   "id": "client_boss_phase_readability",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "boss_floor_gate_lab",
   "seed": "v57_boss_phase_readability",
   "title": "Client boss phase readability",
   "description": "Client starts on the compact boss floor and verifies the boss phase countdown and telegraph marker.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "timeout_s": 15.0
+    },
     {
       "type": "wait_boss_health_bar",
       "visible": true,
@@ -34,6 +42,12 @@
       "phase_ratio_max": 1.0,
       "timeout_s": 15.0
     },
-    { "type": "assert_audio_state", "ambient_zone": "dungeon", "ambient_active": false, "boss_music_active": true, "boss_music_intensity_min": 0.3 }
+    {
+      "type": "assert_audio_state",
+      "ambient_zone": "dungeon",
+      "ambient_active": false,
+      "boss_music_active": true,
+      "boss_music_intensity_min": 0.3
+    }
   ]
 }

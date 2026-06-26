@@ -1,14 +1,26 @@
 {
   "id": "elite_objective_hud",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "seed": "v161_fast_objective_0018",
   "title": "Elite objective HUD",
   "description": "Client descends to a deterministic elite-objective floor and verifies the compact HUD tracker shows the active leader-clear objective.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "stairs_down"
+    },
     {
       "type": "wait_entity_reaction",
       "entity_type": "interactable",

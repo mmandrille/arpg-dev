@@ -1,15 +1,31 @@
 {
   "id": "elite_aura_readability",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "seed": "v112_pack_metadata",
   "title": "Elite aura readability",
   "description": "Client descends into a generated dungeon and verifies server-owned elite command aura state renders on a buffed pack follower.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
-    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 20.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "stairs_down"
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "timeout_s": 20.0
+    },
     {
       "type": "wait_entity_reaction",
       "entity_type": "monster",

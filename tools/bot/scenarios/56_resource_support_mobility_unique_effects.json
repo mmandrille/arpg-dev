@@ -1,16 +1,33 @@
 {
   "id": "resource_support_mobility_unique_effects",
+  "ci_tier": "extended",
   "world_id": "unique_momentum_lab",
   "seed": "00000000000000b1",
   "title": "Resource support mobility unique effects",
   "description": "Pick up a deterministic Pilgrim's Momentum blade, move long enough to charge it, and prove the charge is visible over the live protocol.",
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
-    { "action": "walk_to_monster", "monster_def_id": "combat_lab_soft_target", "stop_distance": 1.2, "max_ticks": 120 },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_blade"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_blade",
+      "slot": "main_hand"
+    },
+    {
+      "action": "walk_to_monster",
+      "monster_def_id": "combat_lab_soft_target",
+      "stop_distance": 1.2,
+      "max_ticks": 120
+    },
     {
       "action": "wait_until_assertion",
-      "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pilgrims_momentum" },
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_started",
+        "skill_id": "pilgrims_momentum"
+      },
       "timeout_s": 3
     },
     {
@@ -22,8 +39,20 @@
     }
   ],
   "assertions": [
-    { "type": "inventory_contains", "item_def_id": "cave_blade", "equipped": true },
-    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pilgrims_momentum" },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "outcome": "hit" }
+    {
+      "type": "inventory_contains",
+      "item_def_id": "cave_blade",
+      "equipped": true
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "pilgrims_momentum"
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "outcome": "hit"
+    }
   ]
 }

@@ -1,5 +1,6 @@
 {
   "id": "badge_reward_foundation",
+  "ci_tier": "extended",
   "world_id": "quest_turn_in_lab",
   "seed": "badge_reward_foundation_seed",
   "title": "Badge reward foundation",
@@ -8,28 +9,151 @@
     "deepest_dungeon_depth": 125
   },
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "quest_leaf" },
-    { "action": "assert_inventory_count", "item_def_id": "quest_leaf", "equals": 1 },
-    { "action": "action_entity", "interactable_def_id": "town_quest_giver", "event_type": "quest_turn_in_completed", "timeout_s": 10 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "badge_rewarded", "resource_id": "upgrade_shard", "amount": 1, "level": 125 }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "upgrade_shard", "equals": 1 }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "respec_badge", "equals": 1 }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "stat_badge", "equals": 1 }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "skill_badge", "equals": 1 }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "resource_wallet_count", "resource_id": "resurrection_badge", "equals": 1 }, "timeout_s": 2 },
-    { "action": "assert_inventory_count", "item_def_id": "quest_leaf", "equals": 0 }
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "quest_leaf"
+    },
+    {
+      "action": "assert_inventory_count",
+      "item_def_id": "quest_leaf",
+      "equals": 1
+    },
+    {
+      "action": "action_entity",
+      "interactable_def_id": "town_quest_giver",
+      "event_type": "quest_turn_in_completed",
+      "timeout_s": 10
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "badge_rewarded",
+        "resource_id": "upgrade_shard",
+        "amount": 1,
+        "level": 125
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "resource_wallet_count",
+        "resource_id": "upgrade_shard",
+        "equals": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "resource_wallet_count",
+        "resource_id": "respec_badge",
+        "equals": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "resource_wallet_count",
+        "resource_id": "stat_badge",
+        "equals": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "resource_wallet_count",
+        "resource_id": "skill_badge",
+        "equals": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "resource_wallet_count",
+        "resource_id": "resurrection_badge",
+        "equals": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "assert_inventory_count",
+      "item_def_id": "quest_leaf",
+      "equals": 0
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "quest_turn_in_completed", "service": "quest_turn_in", "amount": 1, "price": 25, "total_gold": 25 },
-    { "type": "event_seen", "event_type": "badge_rewarded", "resource_id": "upgrade_shard", "amount": 1, "level": 125 },
-    { "type": "event_seen", "event_type": "badge_rewarded", "resource_id": "respec_badge", "amount": 1, "level": 125 },
-    { "type": "event_seen", "event_type": "badge_rewarded", "resource_id": "stat_badge", "amount": 1, "level": 125 },
-    { "type": "event_seen", "event_type": "badge_rewarded", "resource_id": "skill_badge", "amount": 1, "level": 125 },
-    { "type": "event_seen", "event_type": "badge_rewarded", "resource_id": "resurrection_badge", "amount": 1, "level": 125 },
-    { "type": "resource_wallet_count", "resource_id": "upgrade_shard", "equals": 1 },
-    { "type": "resource_wallet_count", "resource_id": "respec_badge", "equals": 1 },
-    { "type": "resource_wallet_count", "resource_id": "stat_badge", "equals": 1 },
-    { "type": "resource_wallet_count", "resource_id": "skill_badge", "equals": 1 },
-    { "type": "resource_wallet_count", "resource_id": "resurrection_badge", "equals": 1 }
+    {
+      "type": "event_seen",
+      "event_type": "quest_turn_in_completed",
+      "service": "quest_turn_in",
+      "amount": 1,
+      "price": 25,
+      "total_gold": 25
+    },
+    {
+      "type": "event_seen",
+      "event_type": "badge_rewarded",
+      "resource_id": "upgrade_shard",
+      "amount": 1,
+      "level": 125
+    },
+    {
+      "type": "event_seen",
+      "event_type": "badge_rewarded",
+      "resource_id": "respec_badge",
+      "amount": 1,
+      "level": 125
+    },
+    {
+      "type": "event_seen",
+      "event_type": "badge_rewarded",
+      "resource_id": "stat_badge",
+      "amount": 1,
+      "level": 125
+    },
+    {
+      "type": "event_seen",
+      "event_type": "badge_rewarded",
+      "resource_id": "skill_badge",
+      "amount": 1,
+      "level": 125
+    },
+    {
+      "type": "event_seen",
+      "event_type": "badge_rewarded",
+      "resource_id": "resurrection_badge",
+      "amount": 1,
+      "level": 125
+    },
+    {
+      "type": "resource_wallet_count",
+      "resource_id": "upgrade_shard",
+      "equals": 1
+    },
+    {
+      "type": "resource_wallet_count",
+      "resource_id": "respec_badge",
+      "equals": 1
+    },
+    {
+      "type": "resource_wallet_count",
+      "resource_id": "stat_badge",
+      "equals": 1
+    },
+    {
+      "type": "resource_wallet_count",
+      "resource_id": "skill_badge",
+      "equals": 1
+    },
+    {
+      "type": "resource_wallet_count",
+      "resource_id": "resurrection_badge",
+      "equals": 1
+    }
   ]
 }

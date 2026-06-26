@@ -1,5 +1,6 @@
 {
   "id": "monster_visual_catalog",
+  "ci_tier": "extended",
   "world_id": "monster_visual_catalog_lab",
   "seed": "v72_monster_visual_catalog",
   "title": "Monster visual catalog",
@@ -9,21 +10,68 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 80, "dex": 5, "vit": 40, "magic": 5 },
+    "stats": {
+      "str": 80,
+      "dex": 5,
+      "vit": 40,
+      "magic": 5
+    },
     "skill_ranks": {}
   },
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "alive": true, "equals": 1 },
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_wolf", "alive": true, "equals": 1 },
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_bat", "alive": true, "equals": 1 },
-    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "event_type": "monster_damaged", "timeout_s": 10 }
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_wolf",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_bat",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "action_until_event",
+      "monster_def_id": "dungeon_mob",
+      "event_type": "monster_damaged",
+      "timeout_s": 10
+    }
   ],
   "assertions": [
-    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_wolf", "alive": true, "equals": 1 },
-    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_bat", "alive": true, "equals": 1 },
-    { "type": "event_seen", "event_type": "monster_damaged" }
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_wolf",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_bat",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_damaged"
+    }
   ],
   "visual": {
-    "camera": { "x": 8, "y": 5, "zoom": 1.0 }
+    "camera": {
+      "x": 8,
+      "y": 5,
+      "zoom": 1.0
+    }
   }
 }

@@ -21,7 +21,8 @@
     },
     {
       "action": "walk_to_monster",
-      "monster_def_id": "training_dummy_reward"
+      "monster_def_id": "training_dummy_reward",
+      "pathfind": false
     },
     {
       "action": "action_until_event",

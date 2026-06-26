@@ -7,7 +7,7 @@
   "steps": [
     { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "combat_lab_crit_attacker", "alive": true, "equals": 1 },
     { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "combat_lab_soft_target", "alive": true, "equals": 1 },
-    { "action": "move_until_player_position", "x": 6, "y": 5, "tolerance": 0.2, "max_ticks": 120 },
+    { "action": "move_until_player_position", "x": 5.5, "y": 5, "tolerance": 0.2, "max_ticks": 120 },
     { "action": "wait_ticks", "ticks": 95 }
   ],
   "assertions": [

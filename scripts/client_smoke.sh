@@ -28,6 +28,25 @@ echo "[client-smoke] BASE_URL=${BASE_URL}"
 
 FAILED_GATES=()
 
+run_godot_gate_with_timeout() {
+  local timeout_s="$1"
+  local log_file="$2"
+  shift 2
+  local pid waited=0
+  "$@" >"$log_file" 2>&1 &
+  pid=$!
+  while kill -0 "$pid" >/dev/null 2>&1; do
+    if (( waited >= timeout_s )); then
+      kill "$pid" >/dev/null 2>&1 || true
+      wait "$pid" >/dev/null 2>&1 || true
+      return 124
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  wait "$pid"
+}
+
 require_running_server() {
   if curl -fsS "${BASE_URL}/readyz" >/dev/null 2>&1; then
     return 0
@@ -51,16 +70,24 @@ require_running_server() {
 # recording a clear failure if it does not.
 run_gate() {
   local label="$1" sentinel="$2" script="$3"
-  local gate_log gate_started elapsed
+  local gate_log gate_started elapsed timeout_s="${CLIENT_SMOKE_GATE_TIMEOUT_S:-180}"
   gate_log="$(mktemp -t arpg-client-gate.XXXXXX.log)"
 
   echo "[client-smoke] running $label"
   gate_started=$SECONDS
   set +e
-  "$GODOT" --headless --path "$CLIENT_DIR" --script "$script" >"$gate_log" 2>&1
+  run_godot_gate_with_timeout "$timeout_s" "$gate_log" "$GODOT" --headless --path "$CLIENT_DIR" --script "$script"
   local status=$?
   set -e
   elapsed=$((SECONDS - gate_started))
+
+  if [[ $status -eq 124 ]]; then
+    echo "FAILED: $label (timed out after ${timeout_s}s)"
+    show_log "$gate_log" "$label"
+    FAILED_GATES+=("$label")
+    rm -f "$gate_log"
+    return 0
+  fi
 
   if [[ $status -ne 0 ]]; then
     echo "FAILED: $label (exit $status, elapsed=${elapsed}s)"

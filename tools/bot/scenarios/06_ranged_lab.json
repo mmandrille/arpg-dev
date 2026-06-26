@@ -1,11 +1,20 @@
 {
   "id": "ranged_lab",
+  "ci_tier": "extended",
   "world_id": "ranged_lab",
   "title": "Ranged lab",
   "description": "Equip the training bow, click from a wall-blocked upper lane, auto-reposition for a clear shot, and kill without entering melee range.",
   "steps": [
-    { "action": "action_entity", "item_def_id": "training_bow", "event_type": "item_picked_up" },
-    { "action": "equip_inventory_item", "item_def_id": "training_bow", "slot": "main_hand" },
+    {
+      "action": "action_entity",
+      "item_def_id": "training_bow",
+      "event_type": "item_picked_up"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "training_bow",
+      "slot": "main_hand"
+    },
     {
       "action": "move_until_player_position",
       "x": 2,
@@ -16,19 +25,44 @@
       "monster_def_id": "training_dummy_ranged",
       "event_type": "monster_killed"
     },
-    { "action": "action_entity", "item_def_id": "quest_leaf", "event_type": "item_picked_up" },
-    { "action": "action_entity", "item_def_id": "red_potion", "event_type": "item_picked_up" },
+    {
+      "action": "action_entity",
+      "item_def_id": "quest_leaf",
+      "event_type": "item_picked_up"
+    },
+    {
+      "action": "action_entity",
+      "item_def_id": "red_potion",
+      "event_type": "item_picked_up"
+    },
     {
       "action": "wait_until_assertion",
-      "assertion": { "type": "event_seen", "event_type": "gold_picked_up" },
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "gold_picked_up"
+      },
       "timeout_s": 5
     }
   ],
   "assertions": [
-    { "type": "monster_dead", "monster_def_id": "training_dummy_ranged" },
-    { "type": "gold", "at_least": 6 },
-    { "type": "inventory_contains", "item_def_id": "quest_leaf", "equipped": false },
-    { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" },
+    {
+      "type": "monster_dead",
+      "monster_def_id": "training_dummy_ranged"
+    },
+    {
+      "type": "gold",
+      "at_least": 6
+    },
+    {
+      "type": "inventory_contains",
+      "item_def_id": "quest_leaf",
+      "equipped": false
+    },
+    {
+      "type": "hotbar_slot",
+      "slot_index": 0,
+      "item_def_id": "red_potion"
+    },
     {
       "type": "player_never_in_melee_range_of",
       "monster_def_id": "training_dummy_ranged",

@@ -1,17 +1,40 @@
 {
   "id": "unique_burn_effect_live",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "unique_burn_lab",
   "seed": "00000000000001d8",
   "title": "Unique burn effect live",
   "description": "Client equips a deterministic unique cave blade and verifies the target shows the burning cue after Everburning Wound starts.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 1, "timeout_s": 15.0 },
-    { "type": "click_loot_item", "item_def_id": "cave_blade" },
-    { "type": "wait_inventory_item", "item_def_id": "cave_blade", "timeout_s": 15.0 },
-    { "type": "drag_bag_to_equipment_slot", "item_def_id": "cave_blade", "slot": "main_hand" },
-    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "item_def_id": "cave_blade"
+    },
+    {
+      "type": "wait_inventory_item",
+      "item_def_id": "cave_blade",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "drag_bag_to_equipment_slot",
+      "item_def_id": "cave_blade",
+      "slot": "main_hand"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_equipped",
+      "timeout_s": 15.0
+    },
     {
       "type": "click_entity_until_event",
       "entity_type": "monster",

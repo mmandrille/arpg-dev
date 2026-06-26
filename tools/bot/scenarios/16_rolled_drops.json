@@ -1,27 +1,45 @@
 {
   "id": "rolled_drops",
+  "ci_tier": "extended",
   "world_id": "equipment_lab",
   "seed": "facefeed00000016",
   "title": "Rolled drops",
   "description": "Pick up deterministic rolled equipment, equip it, then prove rolled metadata survives state, reconnect, replay, and a fresh same-account session.",
   "steps": [
-    { "action": "pick_up_first_rolled_loot" },
-    { "action": "equip_last_inventory_item" }
+    {
+      "action": "pick_up_first_rolled_loot"
+    },
+    {
+      "action": "equip_last_inventory_item"
+    }
   ],
   "assertions": [
-    { "type": "current_level", "equals": 0 },
-    { "type": "rolled_inventory_any", "equipped": true }
+    {
+      "type": "current_level",
+      "equals": 0
+    },
+    {
+      "type": "rolled_inventory_any",
+      "equipped": true
+    }
   ],
   "fresh_session_checks": [
     {
       "world_id": "equipment_lab",
       "steps": [],
       "assertions": [
-        { "type": "rolled_inventory_any", "equipped": true }
+        {
+          "type": "rolled_inventory_any",
+          "equipped": true
+        }
       ]
     }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.1 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.1
+    }
   }
 }

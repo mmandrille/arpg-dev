@@ -1,16 +1,50 @@
 {
   "id": "melee_lunge_micro_step",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "combat_control_lab",
   "seed": "lungemicro01",
   "title": "Melee lunge micro-step: legal melee swing offsets and recovers model root",
   "description": "Click a melee target from outside range, let attack-move bring the player into range, then verify the local melee lunge activates and settles without changing gameplay position.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "dungeon_mob", "timeout_s": 10.0 },
-    { "type": "click_entity_buffered", "entity_type": "monster", "monster_def_id": "dungeon_mob" },
-    { "type": "wait_melee_lunge", "active": true, "count_min": 1, "offset_min": 0.04, "timeout_s": 12.0 },
-    { "type": "wait_event", "event_types": ["monster_damaged", "attack_missed"], "target_entity_type": "monster", "target_monster_def_id": "dungeon_mob", "timeout_s": 8.0 },
-    { "type": "wait_melee_lunge", "active": false, "count_min": 1, "offset_max": 0.02, "timeout_s": 2.0 }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_entity_buffered",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob"
+    },
+    {
+      "type": "wait_melee_lunge",
+      "active": true,
+      "count_min": 1,
+      "offset_min": 0.04,
+      "timeout_s": 12.0
+    },
+    {
+      "type": "wait_event",
+      "event_types": [
+        "monster_damaged",
+        "attack_missed"
+      ],
+      "target_entity_type": "monster",
+      "target_monster_def_id": "dungeon_mob",
+      "timeout_s": 8.0
+    },
+    {
+      "type": "wait_melee_lunge",
+      "active": false,
+      "count_min": 1,
+      "offset_max": 0.02,
+      "timeout_s": 2.0
+    }
   ]
 }

@@ -1,14 +1,26 @@
 {
   "id": "quest_journal_foundation",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "seed": "v155_bot_quest_0015",
   "title": "Quest journal foundation",
   "description": "Client descends to a deterministic random quest reward floor, opens the quest journal, and verifies the reward chest objective is listed.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "stairs_down"
+    },
     {
       "type": "wait_entity_reaction",
       "entity_type": "interactable",
@@ -16,7 +28,10 @@
       "quest_reward": true,
       "timeout_s": 20.0
     },
-    { "type": "press_key", "keycode": "KEY_J" },
+    {
+      "type": "press_key",
+      "keycode": "KEY_J"
+    },
     {
       "type": "wait_quest_journal",
       "visible": true,

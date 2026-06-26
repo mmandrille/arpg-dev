@@ -60,7 +60,17 @@ scenario_email() {
 
 # Collect scenario files to run.
 declare -a SCENARIO_FILES=()
-if [[ "$SCENARIO" == "all" ]]; then
+if [[ "$SCENARIO" == "ci" ]]; then
+  PYTHON_BIN="${PYTHON:-$ROOT/.venv/bin/python}"
+  if [[ ! -x "$PYTHON_BIN" ]]; then
+    PYTHON_BIN="python3"
+  fi
+  while IFS= read -r f; do
+    [[ -n "$f" ]] && SCENARIO_FILES+=("$f")
+  done < <(
+    cd "$ROOT" && "$PYTHON_BIN" -c "from tools.bot.ci_pack import resolve_client_pack_paths; print('\n'.join(str(p) for p in resolve_client_pack_paths()))"
+  )
+elif [[ "$SCENARIO" == "all" ]]; then
   while IFS= read -r -d '' f; do
     SCENARIO_FILES+=("$f")
   done < <(find "$SCENARIOS_DIR" -maxdepth 1 -name '*.json' -print0 | sort -z)
@@ -168,6 +178,59 @@ metadata_field() {
   python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get(sys.argv[2], ''))" "$path" "$key"
 }
 
+scenario_timeout_s() {
+  local path="$1"
+  python3 -c "
+import json, sys
+data = json.load(open(sys.argv[1]))
+steps = data.get('client_steps', [])
+step_budget = sum(max(0.0, float(step.get('timeout_s', 0) or 0)) for step in steps)
+explicit = float(data.get('max_elapsed_s', 0) or 0)
+if explicit > 0:
+    print(int(explicit))
+else:
+  # Step timeouts + setup/teardown slack; cap long UI scenarios without blocking CI forever.
+    print(max(90, min(int(step_budget) + 60, 300)))
+" "$path"
+}
+
+validate_godot_project_load() {
+  local tmp
+  tmp="$(mktemp)"
+  if ! "$GODOT" --headless --path "$CLIENT_DIR" --quit-after 1 >"$tmp" 2>&1; then
+    echo "[bot-client] FAIL: Godot project failed to start" >&2
+    show_log "$tmp" "godot project load"
+    rm -f "$tmp"
+    exit 1
+  fi
+  if grep -qE "Parse Error|Failed to load script" "$tmp"; then
+    echo "[bot-client] FAIL: Godot script parse/load error" >&2
+    show_log "$tmp" "godot project load"
+    rm -f "$tmp"
+    exit 1
+  fi
+  rm -f "$tmp"
+}
+
+run_godot_with_timeout() {
+  local timeout_s="$1"
+  local log_file="$2"
+  shift 2
+  local pid waited=0
+  "$@" >"$log_file" 2>&1 &
+  pid=$!
+  while kill -0 "$pid" >/dev/null 2>&1; do
+    if (( waited >= timeout_s )); then
+      kill "$pid" >/dev/null 2>&1 || true
+      wait "$pid" >/dev/null 2>&1 || true
+      return 124
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  wait "$pid"
+}
+
 cleanup_account_email() {
   local email="$1"
   if [[ -z "$email" ]]; then
@@ -255,6 +318,8 @@ start_preflight() {
   return 1
 }
 
+validate_godot_project_load
+
 run_scenario() {
   local scenario_path="$1"
   local scenario_id world_id seed debug_progression_json debug_gold exit_code started_ts tmpfile preflight_metadata preflight_log expected_join_session
@@ -268,8 +333,10 @@ run_scenario() {
   preflight_metadata="$(mktemp)"
   preflight_log="$(mktemp)"
 
+  local scenario_timeout
+  scenario_timeout="$(scenario_timeout_s "$scenario_path")"
   if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
-    echo "RUNNING: client bot scenario $scenario_id"
+    echo "RUNNING: client bot scenario $scenario_id (budget=${scenario_timeout}s)"
   else
     echo "[bot-client $(_ts)] running scenario: $scenario_id (world=$world_id file=$(basename "$scenario_path"))"
   fi
@@ -288,7 +355,8 @@ run_scenario() {
   fi
   [[ "$HEADLESS" == "1" ]] && godot_flags="--headless $godot_flags"
   if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
-    ARPG_BOT_CLIENT=1 \
+    run_godot_with_timeout "$scenario_timeout" "$tmpfile" env \
+      ARPG_BOT_CLIENT=1 \
       ARPG_BOT_SCENARIO="$scenario_path" \
       ARPG_WORLD_ID="$world_id" \
       ARPG_SEED="$seed" \
@@ -301,12 +369,13 @@ run_scenario() {
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
-      "$GODOT" $godot_flags --path "$CLIENT_DIR" >"$tmpfile" 2>&1
+      "$GODOT" $godot_flags --path "$CLIENT_DIR"
     exit_code=$?
   else
-    echo "[bot-client $(_ts)] launching Godot for $scenario_id..."
+    echo "[bot-client $(_ts)] launching Godot for $scenario_id (budget=${scenario_timeout}s)..."
     local launch_started=$SECONDS
-    ARPG_BOT_CLIENT=1 \
+    run_godot_with_timeout "$scenario_timeout" "$tmpfile" env \
+      ARPG_BOT_CLIENT=1 \
       ARPG_BOT_SCENARIO="$scenario_path" \
       ARPG_WORLD_ID="$world_id" \
       ARPG_SEED="$seed" \
@@ -319,9 +388,19 @@ run_scenario() {
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
-      "$GODOT" $godot_flags --path "$CLIENT_DIR" 2>&1 | tee "$tmpfile"
-    exit_code=${PIPESTATUS[0]}
+      "$GODOT" $godot_flags --path "$CLIENT_DIR"
+    exit_code=$?
     echo "[bot-client $(_ts)] Godot process exited code=$exit_code launch_elapsed=$((SECONDS - launch_started))s"
+  fi
+
+  if [[ $exit_code -eq 124 ]]; then
+    echo "[bot-client] FAIL $scenario_id -- timed out after ${scenario_timeout}s" >&2
+    if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
+      show_log "$tmpfile" "$scenario_id"
+    fi
+    rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
+    cleanup_preflights
+    return 1
   fi
 
   if [[ $exit_code -ne 0 ]]; then

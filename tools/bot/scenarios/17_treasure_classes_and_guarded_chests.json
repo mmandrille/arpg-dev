@@ -1,28 +1,89 @@
 {
   "id": "treasure_classes_and_guarded_chests",
+  "ci_tier": "extended",
   "world_id": "dungeon_levels",
   "seed": "chest_fast_69",
   "max_elapsed_s": 18.0,
   "title": "Treasure classes and guarded chests",
   "description": "Pinned dungeon seed generates a guarded chest floor with enough dungeon mobs for loot attempts, at least one closed chest, multi-attempt mob loot, chest loot, pickup, state, reconnect, replay, and fresh-session persistence.",
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 40 },
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "at_least": 2 },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "at_least": 1 },
-    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 1, "timeout_s": 60 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated" },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 }
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 40
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "at_least": 2
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "state": "closed",
+      "at_least": 1
+    },
+    {
+      "action": "kill_monsters",
+      "monster_def_id": "dungeon_mob",
+      "count": 1,
+      "timeout_s": 60
+    },
+    {
+      "action": "action_entity",
+      "interactable_def_id": "treasure_chest",
+      "event_type": "interactable_activated"
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "state": "open",
+      "at_least": 1
+    }
   ],
   "assertions": [
-    { "type": "current_level", "equals": -1 },
-    { "type": "visited_levels_contain", "level": 0 },
-    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "dungeon_mob", "at_least": 2 },
-    { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 },
-    { "type": "event_seen", "event_type": "monster_killed" },
-    { "type": "event_seen", "event_type": "interactable_activated" },
-    { "type": "event_seen", "event_type": "loot_dropped" }
+    {
+      "type": "current_level",
+      "equals": -1
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": 0
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "at_least": 2
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "state": "open",
+      "at_least": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_killed"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "interactable_activated"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "loot_dropped"
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.1 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.1
+    }
   }
 }

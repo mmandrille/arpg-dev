@@ -1,14 +1,26 @@
 {
   "id": "active_session_map_memory",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "collision_lab",
   "seed": "active_session_map_memory_seed",
   "title": "Active-session map memory",
   "description": "Client scopes discovery map memory to the active session and keeps explored data while cycling map modes.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "wait_wall_layout", "current_level": 0, "at_least": 5, "timeout_s": 5.0 },
-    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": 0,
+      "at_least": 5,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_TAB"
+    },
     {
       "type": "assert_discovery_minimap",
       "visible": true,
@@ -16,7 +28,10 @@
       "session_key_present": true,
       "explored_count_min": 1
     },
-    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "press_key",
+      "keycode": "KEY_TAB"
+    },
     {
       "type": "assert_discovery_minimap",
       "visible": true,

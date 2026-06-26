@@ -1,5 +1,6 @@
 {
   "id": "class_starter_loadout",
+  "ci_tier": "extended",
   "world_id": "vertical_slice",
   "seed": "class_starter_loadout_seed",
   "character_class": "sorcerer",
@@ -7,7 +8,14 @@
   "description": "Create a sorcerer and prove the starter staff and empty offhand arrive through the normal inventory snapshot.",
   "steps": [],
   "assertions": [
-    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_sorcerer_staff" },
-    { "type": "equipped_slot_empty", "slot": "off_hand" }
+    {
+      "type": "equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_sorcerer_staff"
+    },
+    {
+      "type": "equipped_slot_empty",
+      "slot": "off_hand"
+    }
   ]
 }

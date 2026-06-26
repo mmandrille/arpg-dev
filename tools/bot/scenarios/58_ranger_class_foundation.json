@@ -1,12 +1,17 @@
 {
   "id": "ranger_class_foundation",
+  "ci_tier": "extended",
   "world_id": "ranger_showcase_lab",
   "seed": "ranger_class_foundation_seed",
   "character_class": "ranger",
   "title": "Ranger class foundation",
   "description": "Create a Ranger, prove starter bow and ranged class stats, then use Disengage, Pinning Shot, Piercing Shot, Volley, and Split Arrow across the class lab pack.",
   "visual": {
-    "camera": { "x": 6, "y": 5, "zoom": 1.0 },
+    "camera": {
+      "x": 6,
+      "y": 5,
+      "zoom": 1.0
+    },
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
@@ -14,40 +19,215 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 4, "dex": 14, "vit": 5, "magic": 20 },
-    "skill_ranks": { "piercing_shot": 1, "disengage": 1, "pinning_shot": 1, "volley": 1, "black_wolf_companion": 1, "split_arrow": 1 }
+    "stats": {
+      "str": 4,
+      "dex": 14,
+      "vit": 5,
+      "magic": 20
+    },
+    "skill_ranks": {
+      "piercing_shot": 1,
+      "disengage": 1,
+      "pinning_shot": 1,
+      "volley": 1,
+      "black_wolf_companion": 1,
+      "split_arrow": 1
+    }
   },
   "steps": [
-    { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
-    { "action": "assert_equipped_slot_empty", "slot": "off_hand" },
-    { "action": "cast_skill", "skill_id": "disengage", "direction": { "x": -1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "disengage", "rank": 1 }, "timeout_s": 3 },
-    { "action": "cast_skill", "skill_id": "pinning_shot", "monster_def_id": "combat_lab_soft_target", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" }, "timeout_s": 3 },
-    { "action": "wait_ticks", "ticks": 8 },
-    { "action": "cast_skill", "skill_id": "piercing_shot", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 }, "timeout_s": 3 },
-    { "action": "wait_ticks", "ticks": 20 },
-    { "action": "cast_skill", "skill_id": "volley", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 2 }, "timeout_s": 3 },
-    { "action": "wait_ticks", "ticks": 80 },
-    { "action": "cast_skill", "skill_id": "split_arrow", "monster_def_id": "combat_lab_soft_target", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "split_arrow", "min_damage": 1 }, "timeout_s": 3 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "pinning_shot" }, "timeout_s": 6 }
+    {
+      "action": "assert_equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_ranger_bow"
+    },
+    {
+      "action": "assert_equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "disengage",
+      "direction": {
+        "x": -1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "disengage",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "pinning_shot",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_started",
+        "skill_id": "pinning_shot"
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 8
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "piercing_shot",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_count",
+        "event_type": "monster_damaged",
+        "skill_id": "piercing_shot",
+        "min": 2
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 20
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "volley",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_count",
+        "event_type": "monster_damaged",
+        "skill_id": "volley",
+        "min": 2
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 80
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "split_arrow",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "skill_id": "split_arrow",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_ended",
+        "skill_id": "pinning_shot"
+      },
+      "timeout_s": 6
+    }
   ],
   "assertions": [
-    { "type": "character_progression", "str": 4, "dex": 14, "vit": 5, "magic": 20 },
-    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
-    { "type": "equipped_slot_empty", "slot": "off_hand" },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "disengage", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "pinning_shot", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" },
-    { "type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "pinning_shot" },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "piercing_shot", "rank": 1 },
-    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "volley", "rank": 1 },
-    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 2 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "split_arrow", "rank": 1 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "split_arrow", "min_damage": 1 }
+    {
+      "type": "character_progression",
+      "str": 4,
+      "dex": 14,
+      "vit": 5,
+      "magic": 20
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_ranger_bow"
+    },
+    {
+      "type": "equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "disengage",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "pinning_shot",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "pinning_shot"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_ended",
+      "skill_id": "pinning_shot"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "piercing_shot",
+      "rank": 1
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_damaged",
+      "skill_id": "piercing_shot",
+      "min": 2
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "volley",
+      "rank": 1
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_damaged",
+      "skill_id": "volley",
+      "min": 2
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "split_arrow",
+      "rank": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "skill_id": "split_arrow",
+      "min_damage": 1
+    }
   ]
 }

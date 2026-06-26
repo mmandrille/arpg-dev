@@ -1,35 +1,134 @@
 {
   "id": "shop_stock_lifecycle",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "town_vendor_gold_sink_1075",
   "title": "Shop stock lifecycle",
   "description": "Client keeps the shop panel open while buyback rows and purchase refreshes are applied from server-authored shop events.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 1, "timeout_s": 10.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_vendor" },
-    { "type": "wait_shop_panel", "equals": 7, "timeout_s": 15.0 },
-    { "type": "assert_shop_panel_visible", "visible": true },
-    { "type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2 },
-    { "type": "assert_shop_offer_count", "offer_kind": "generated", "equals": 5 },
-    { "type": "click_shop_sell_item", "rolled": true },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "assert_shop_offer_count", "offer_kind": "buyback", "equals": 1 },
-    { "type": "click_shop_buy_offer", "offer_id": "fixed:red_potion" },
-    { "type": "wait_event", "event_type": "shop_purchase", "shop_id": "town_vendor", "offer_id": "fixed:red_potion", "timeout_s": 15.0 },
-    { "type": "assert_shop_offer_count", "offer_kind": "generated", "equals": 5 },
-    { "type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2 },
-    { "type": "assert_shop_offer_count", "offer_kind": "buyback", "equals": 1 },
-    { "type": "click_shop_sell_item", "item_def_id": "red_potion" },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "assert_shop_offer_count", "offer_kind": "buyback", "equals": 2 },
-    { "type": "click_shop_buy_offer", "offer_kind": "buyback", "offer_index": 0 },
-    { "type": "wait_event", "event_type": "shop_purchase", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "assert_shop_offer_count", "offer_kind": "buyback", "equals": 1 },
-    { "type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2 },
-    { "type": "assert_shop_panel_visible", "visible": true }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 1,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_vendor"
+    },
+    {
+      "type": "wait_shop_panel",
+      "equals": 7,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "fixed",
+      "equals": 2
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "generated",
+      "equals": 5
+    },
+    {
+      "type": "click_shop_sell_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "buyback",
+      "equals": 1
+    },
+    {
+      "type": "click_shop_buy_offer",
+      "offer_id": "fixed:red_potion"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_purchase",
+      "shop_id": "town_vendor",
+      "offer_id": "fixed:red_potion",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "generated",
+      "equals": 5
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "fixed",
+      "equals": 2
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "buyback",
+      "equals": 1
+    },
+    {
+      "type": "click_shop_sell_item",
+      "item_def_id": "red_potion"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "buyback",
+      "equals": 2
+    },
+    {
+      "type": "click_shop_buy_offer",
+      "offer_kind": "buyback",
+      "offer_index": 0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_purchase",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "buyback",
+      "equals": 1
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "fixed",
+      "equals": 2
+    },
+    {
+      "type": "assert_shop_panel_visible",
+      "visible": true
+    }
   ]
 }

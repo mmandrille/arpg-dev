@@ -1,5 +1,6 @@
 {
   "id": "crowded_lightning_perf_probe",
+  "ci_tier": "extended",
   "world_id": "crowded_lightning_perf_probe",
   "seed": "crowded_lightning_perf_probe_seed",
   "character_class": "sorcerer",
@@ -11,28 +12,123 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 3, "dex": 5, "vit": 40, "magic": 20 },
-    "skill_ranks": { "magic_bolt": 1, "ligthing": 1 }
+    "stats": {
+      "str": 3,
+      "dex": 5,
+      "vit": 40,
+      "magic": 20
+    },
+    "skill_ranks": {
+      "magic_bolt": 1,
+      "ligthing": 1
+    }
   },
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "crowded_probe_chaser", "alive": true, "at_least": 30 },
-    { "action": "cast_skill", "skill_id": "ligthing", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "damage_type": "lightning", "target_monster_def_id": "crowded_probe_chaser", "min_damage": 1 }, "timeout_s": 3 },
-    { "action": "wait_ticks", "ticks": 45 },
-    { "action": "cast_skill", "skill_id": "ligthing", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_ticks", "ticks": 45 },
-    { "action": "cast_skill", "skill_id": "ligthing", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_ticks", "ticks": 45 },
-    { "action": "cast_skill", "skill_id": "ligthing", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "entity_count", "entity_type": "monster", "monster_def_id": "crowded_probe_chaser", "alive": true, "at_least": 25 }, "timeout_s": 3 }
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 30
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "damage_type": "lightning",
+        "target_monster_def_id": "crowded_probe_chaser",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "monster",
+        "monster_def_id": "crowded_probe_chaser",
+        "alive": true,
+        "at_least": 25
+      },
+      "timeout_s": 3
+    }
   ],
   "assertions": [
-    { "type": "entity_count", "entity_type": "monster", "monster_def_id": "crowded_probe_chaser", "alive": true, "at_least": 25 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "ligthing" },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "damage_type": "lightning", "target_monster_def_id": "crowded_probe_chaser", "min_damage": 1 }
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 25
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "ligthing"
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "lightning",
+      "target_monster_def_id": "crowded_probe_chaser",
+      "min_damage": 1
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 8, "zoom": 0.9 },
+    "camera": {
+      "x": 16,
+      "y": 8,
+      "zoom": 0.9
+    },
     "post_complete_hold_s": 3.0
   }
 }

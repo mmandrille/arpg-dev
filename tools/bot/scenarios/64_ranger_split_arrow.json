@@ -1,5 +1,6 @@
 {
   "id": "ranger_split_arrow",
+  "ci_tier": "extended",
   "world_id": "ranger_showcase_lab",
   "seed": "v154_ranger_split_arrow",
   "character_class": "ranger",
@@ -10,24 +11,83 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 4, "dex": 14, "vit": 5, "magic": 4 },
-    "skill_ranks": { "piercing_shot": 1, "volley": 1, "split_arrow": 1 }
+    "stats": {
+      "str": 4,
+      "dex": 14,
+      "vit": 5,
+      "magic": 4
+    },
+    "skill_ranks": {
+      "piercing_shot": 1,
+      "volley": 1,
+      "split_arrow": 1
+    }
   },
   "steps": [
-    { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
-    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "split_arrow", "rank": 1, "max_rank": "from_rules", "can_spend": false },
-    { "action": "cast_skill", "skill_id": "split_arrow", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "split_arrow", "min_damage": 1 }, "timeout_s": 3 }
+    {
+      "action": "assert_equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_ranger_bow"
+    },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 0,
+      "skill_id": "split_arrow",
+      "rank": 1,
+      "max_rank": "from_rules",
+      "can_spend": false
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "split_arrow",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "skill_id": "split_arrow",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    }
   ],
   "assertions": [
-    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow" },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "split_arrow", "rank": 1, "mana": 5 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "split_arrow", "min_damage": 1 },
-    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "split_arrow" }
+    {
+      "type": "equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_ranger_bow"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "split_arrow",
+      "rank": 1,
+      "mana": 5
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "skill_id": "split_arrow",
+      "min_damage": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cooldown_started",
+      "skill_id": "split_arrow"
+    }
   ],
   "visual": {
-    "camera": { "x": 8, "y": 5, "zoom": 1.0 },
+    "camera": {
+      "x": 8,
+      "y": 5,
+      "zoom": 1.0
+    },
     "post_complete_hold_s": 3.0
   }
 }
-

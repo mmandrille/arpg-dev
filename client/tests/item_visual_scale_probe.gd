@@ -1,10 +1,20 @@
 extends RefCounted
 
-func verify(tree: SceneTree, main_script: Script, character_scene: PackedScene, resolver_script: Script, fail: Callable) -> bool:
+# Sync scale probe helpers for test_item_visuals.gd. Frame advancement must happen
+# on the SceneTree test runner (await process_frame); awaiting inside RefCounted
+# coroutines from _initialize can deadlock headless --script runs.
+
+
+func prepare(
+	tree: SceneTree,
+	main_script: Script,
+	character_scene: PackedScene,
+	resolver_script: Script,
+	fail: Callable,
+) -> Dictionary:
 	var main = main_script.new()
 	var character = character_scene.instantiate() as Node3D
 	tree.get_root().add_child(character)
-	await tree.process_frame
 	main.character_visual = character
 	main.inventory = [
 		{"item_instance_id": "5001", "item_def_id": "starter_paladin_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
@@ -21,8 +31,17 @@ func verify(tree: SceneTree, main_script: Script, character_scene: PackedScene, 
 		fail.call("paladin mounted equipment missing: sword=%s shield=%s" % [str(sword), str(shield)])
 		character.queue_free()
 		main.queue_free()
+		return {}
+	return {"main": main, "character": character, "sword": sword, "shield": shield}
+
+
+func verify_transforms(ctx: Dictionary, fail: Callable) -> bool:
+	if ctx.is_empty():
 		return false
-	await tree.process_frame
+	var character: Node3D = ctx.get("character")
+	var main = ctx.get("main")
+	var sword: Node3D = ctx.get("sword")
+	var shield: Node3D = ctx.get("shield")
 	var sword_scale := sword.global_transform.basis.get_scale()
 	var shield_scale := shield.global_transform.basis.get_scale()
 	if sword.global_position.y < 0.2:

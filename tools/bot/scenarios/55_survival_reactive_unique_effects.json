@@ -1,22 +1,51 @@
 {
   "id": "survival_reactive_unique_effects",
+  "ci_tier": "extended",
   "world_id": "combat_stat_lab",
   "seed": "0000000000000193",
   "title": "Survival reactive unique effects",
   "description": "Pick up a deterministic Ashen Reprisal shield, equip it, and prove a guaranteed avoided hit primes the reactive effect through the live protocol.",
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "cave_shield" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" },
-    { "action": "move_until_in_range", "monster_def_id": "combat_lab_miss_attacker", "stop_distance": 3.5, "max_ticks": 220 },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_shield"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_shield",
+      "slot": "off_hand"
+    },
+    {
+      "action": "move_until_in_range",
+      "monster_def_id": "combat_lab_miss_attacker",
+      "stop_distance": 3.5,
+      "max_ticks": 220
+    },
     {
       "action": "wait_until_assertion",
-      "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "ashen_reprisal" },
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_started",
+        "skill_id": "ashen_reprisal"
+      },
       "timeout_s": 8
     }
   ],
   "assertions": [
-    { "type": "inventory_contains", "item_def_id": "cave_shield", "equipped": true },
-    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "ashen_reprisal" },
-    { "type": "combat_event_seen", "event_type": "attack_missed", "outcome": "miss" }
+    {
+      "type": "inventory_contains",
+      "item_def_id": "cave_shield",
+      "equipped": true
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "ashen_reprisal"
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "attack_missed",
+      "outcome": "miss"
+    }
   ]
 }

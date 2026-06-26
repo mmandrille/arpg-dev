@@ -1,0 +1,43 @@
+{
+  "description": "Curated integration pack for make ci (~5-7 min target). All other scenarios must set ci_tier=extended.",
+  "protocol": [
+    "vertical_slice",
+    "gear_before_combat",
+    "collision_lab",
+    "door_lab",
+    "dungeon_levels",
+    "combat_stat_effects",
+    "true_coop_session",
+    "town_vendor_gold_sink",
+    "account_stash_storage",
+    "mystery_seller_core",
+    "ranged_monster_ai",
+    "paladin_class_foundation",
+    "damage_types_and_resistances",
+    "companion_ai_foundation",
+    "fog_of_war_radius",
+    "boss_floor_gate",
+    "elite_minion_pack_ai",
+    "line_of_sight_blockers",
+    "quest_town_turn_in",
+    "archer_retreat_ai",
+    "reachable_dungeon_obstacles",
+    "obstacle_variety_pack"
+  ],
+  "client": [
+    "click_to_kill",
+    "inventory_equip_unequip",
+    "click_to_move",
+    "dungeon_wall_rendering",
+    "wall_floor_shader_polish",
+    "fog_of_war_overlay",
+    "market_board_ui",
+    "market_purchase_ui",
+    "join_game_listed_session",
+    "client_combat_feedback",
+    "model_reaction_polish",
+    "mercenary_roster_ui",
+    "account_stash_panel",
+    "movement_visual_smoothing"
+  ]
+}

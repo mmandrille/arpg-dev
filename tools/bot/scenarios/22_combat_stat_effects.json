@@ -2,6 +2,7 @@
   "id": "combat_stat_effects",
   "world_id": "combat_stat_lab",
   "seed": "facefeed00000031",
+  "debug_progression": { "level": 12 },
   "title": "Combat stat effects and feedback",
   "description": "Equip rolled gear, verify stat breakdowns over protocol, and observe miss, crit, block, minimum-damage, and projectile combat event metadata.",
   "steps": [
@@ -26,7 +27,7 @@
         }
       ]
     },
-    { "action": "walk_to_monster", "monster_def_id": "combat_lab_armored_target" },
+    { "action": "move_until_player_position", "x": 7, "y": 4, "pathfind": true, "tolerance": 0.35, "max_ticks": 60 },
     {
       "action": "action_until_combat_event",
       "monster_def_id": "combat_lab_armored_target",
@@ -36,7 +37,7 @@
       "blocked": false,
       "critical": false
     },
-    { "action": "walk_to_monster", "monster_def_id": "combat_lab_blocking_target" },
+    { "action": "move_until_player_position", "x": 9.2, "y": 6, "pathfind": true, "tolerance": 0.6, "max_ticks": 60 },
     {
       "action": "action_until_combat_event",
       "monster_def_id": "combat_lab_blocking_target",
@@ -59,12 +60,11 @@
     { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
     { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" },
     {
-      "action": "move_until_player_position",
-      "x": 13,
-      "y": 8,
-      "pathfind": true,
-      "max_ticks": 120,
-      "tolerance": 2.0
+      "action": "walk_to_monster",
+      "monster_def_id": "combat_lab_crit_attacker",
+      "pathfind": false,
+      "stop_distance": 3.5,
+      "max_ticks": 40
     },
     {
       "action": "wait_for_combat_event",

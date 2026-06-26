@@ -1,27 +1,69 @@
 {
   "id": "dungeon_monsters",
+  "ci_tier": "extended",
   "world_id": "dungeon_levels",
   "seed": "b8df85479acf246f2cbf097da6d6e641",
   "title": "Dungeon monsters",
   "description": "Generated dungeon mobs spawn, aggro, and take combat input after descent.",
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 40 },
-    { "action": "assert_entity_count", "entity_type": "monster", "alive": true, "at_least": 18 },
-    { "action": "move_until_in_range", "monster_def_id": "dungeon_mob", "stop_distance": 7.5, "max_ticks": 240 },
-    { "action": "action_until_event", "monster_def_id": "dungeon_mob", "event_type": "monster_damaged", "timeout_s": 20, "action_interval_s": 0.75 },
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 40
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "alive": true,
+      "at_least": 18
+    },
+    {
+      "action": "move_until_in_range",
+      "monster_def_id": "dungeon_mob",
+      "stop_distance": 7.5,
+      "max_ticks": 240
+    },
+    {
+      "action": "action_until_event",
+      "monster_def_id": "dungeon_mob",
+      "event_type": "monster_damaged",
+      "timeout_s": 20,
+      "action_interval_s": 0.75
+    },
     {
       "action": "wait_until_assertion",
       "timeout_s": 5.0,
-      "assertion": { "type": "event_count", "event_type": "monster_aggro", "at_least": 1 }
+      "assertion": {
+        "type": "event_count",
+        "event_type": "monster_aggro",
+        "at_least": 1
+      }
     }
   ],
   "assertions": [
-    { "type": "current_level", "equals": -1 },
-    { "type": "visited_levels_contain", "level": 0 },
-    { "type": "event_seen", "event_type": "monster_damaged" },
-    { "type": "event_count", "event_type": "monster_aggro", "at_least": 1 }
+    {
+      "type": "current_level",
+      "equals": -1
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": 0
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_damaged"
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_aggro",
+      "at_least": 1
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.1 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.1
+    }
   }
 }

@@ -1,18 +1,56 @@
 {
   "id": "unique_chest_client_proof",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "seed": "unique_chest_client_proof_136",
   "title": "Unique chest client proof",
   "description": "Client opens the purple town unique chest and verifies named unique rows expose readable effect summaries.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_unique_chest" },
-    { "type": "wait_event", "event_type": "unique_chest_opened", "timeout_s": 15.0 },
-    { "type": "wait_stash_panel", "container_mode": "unique_chest", "at_least": 3, "timeout_s": 15.0 },
-    { "type": "assert_stash_panel_visible", "visible": true },
-    { "type": "assert_stash_item_count", "container_mode": "unique_chest", "display_name": "Embercall Blade", "summary_contains": "All hero damage applies burn", "equals": 1 },
-    { "type": "assert_stash_item_count", "container_mode": "unique_chest", "display_name": "Stormstring Bow", "summary_contains": "Basic attacks have a 25% chance to chain lightning", "equals": 1 },
-    { "type": "assert_stash_item_count", "container_mode": "unique_chest", "display_name": "Bloodbound Sigil", "summary_contains": "When the hero lacks enough mana for a skill", "equals": 1 }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_unique_chest"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "unique_chest_opened",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_stash_panel",
+      "container_mode": "unique_chest",
+      "at_least": 3,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_stash_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_stash_item_count",
+      "container_mode": "unique_chest",
+      "display_name": "Embercall Blade",
+      "summary_contains": "All hero damage applies burn",
+      "equals": 1
+    },
+    {
+      "type": "assert_stash_item_count",
+      "container_mode": "unique_chest",
+      "display_name": "Stormstring Bow",
+      "summary_contains": "Basic attacks have a 25% chance to chain lightning",
+      "equals": 1
+    },
+    {
+      "type": "assert_stash_item_count",
+      "container_mode": "unique_chest",
+      "display_name": "Bloodbound Sigil",
+      "summary_contains": "When the hero lacks enough mana for a skill",
+      "equals": 1
+    }
   ]
 }

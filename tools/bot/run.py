@@ -37,6 +37,7 @@ from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot.bot_context import BotContext, StateIngestContext
 from tools.bot.runtime_queries import dict_distance, event_matches, event_summary, find_player
 from tools.bot import skill_visual_runtime
+from tools.bot.ci_pack import CI_SELECTOR, select_pack_scenarios
 from tools.bot.debug_progression import debug_progression_body
 from tools.bot.stash_assertions import (
     assert_stash_capacity,
@@ -141,6 +142,8 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
 
 
 def select_scenarios(scenarios: list[Scenario], selected: str) -> list[Scenario]:
+    if selected == CI_SELECTOR:
+        return select_pack_scenarios(scenarios, "protocol")
     if selected == "all":
         return [scenario for scenario in scenarios if scenario.id != "skill_visual"]
     wanted = {normalize_scenario_selector(part.strip()) for part in selected.split(",") if part.strip()}
@@ -383,6 +386,9 @@ async def drive_scenario(base_url: str, token: str, sess: dict[str, Any], scenar
             log("equipped item", state.equipped_item_id, "- scenario complete over protocol")
         else:
             log("scenario complete over protocol")
+        drain_deadline = loop.time() + 1.0
+        while loop.time() < drain_deadline:
+            await pump_one(ws, state, timeout=0.1)
         return state
 
 
@@ -4068,7 +4074,7 @@ def main() -> int:
     parser.add_argument("--dev-token", default="local-dev-token")
     parser.add_argument("--debug-token", default="local-debug-token")
     parser.add_argument("--email", default="bot@example.test")
-    parser.add_argument("--scenario", default="all", help="scenario id, comma-separated ids, or all")
+    parser.add_argument("--scenario", default="all", help="scenario id, ci pack, comma-separated ids, or all")
     parser.add_argument("--list-scenarios", action="store_true")
     parser.add_argument("--write-manifest", type=Path)
     parser.add_argument("--print-session-id", action="store_true")

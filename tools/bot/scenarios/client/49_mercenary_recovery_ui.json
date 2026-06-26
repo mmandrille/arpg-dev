@@ -1,5 +1,6 @@
 {
   "id": "mercenary_recovery_ui",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "mercenary_death_loss_lab",
   "seed": "v232_mercenary_recovery_ui",
@@ -7,13 +8,35 @@
   "description": "Client hires a mercenary, observes the loss event in the panel, then rehires a replacement from the board.",
   "debug_progression": {
     "gold": 600,
-    "stats": { "str": 5, "dex": 5, "vit": 80, "magic": 5 }
+    "stats": {
+      "str": 5,
+      "dex": 5,
+      "vit": 80,
+      "magic": 5
+    }
   },
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
-    { "type": "wait_event", "event_type": "mercenary_hired", "offer_id": "fixed:mercenary_guard", "timeout_s": 15.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_mercenary_board",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_mercenary_board"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "mercenary_hired",
+      "offer_id": "fixed:mercenary_guard",
+      "timeout_s": 15.0
+    },
     {
       "type": "wait_mercenary_panel",
       "hired_count": 1,
@@ -22,7 +45,12 @@
       "companion_icon_kind": "mercenary",
       "timeout_s": 15.0
     },
-    { "type": "wait_event", "event_type": "mercenary_lost", "service": "mercenary", "timeout_s": 15.0 },
+    {
+      "type": "wait_event",
+      "event_type": "mercenary_lost",
+      "service": "mercenary",
+      "timeout_s": 15.0
+    },
     {
       "type": "wait_mercenary_panel",
       "require_visible": false,
@@ -31,8 +59,17 @@
       "companion_bar_count": 0,
       "timeout_s": 30.0
     },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
-    { "type": "wait_event", "event_type": "mercenary_hired", "offer_id": "fixed:mercenary_guard", "timeout_s": 15.0 },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_mercenary_board"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "mercenary_hired",
+      "offer_id": "fixed:mercenary_guard",
+      "timeout_s": 15.0
+    },
     {
       "type": "assert_mercenary_panel",
       "hired_count": 1,

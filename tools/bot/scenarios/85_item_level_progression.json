@@ -1,11 +1,15 @@
 {
   "id": "item_level_progression",
+  "ci_tier": "extended",
   "world_id": "equipment_lab",
   "seed": "v196-item-level-progression",
   "title": "Item level progression",
   "description": "Pick up deterministic rolled equipment and assert that the authoritative item_level field is carried into inventory.",
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "cave_blade" }
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_blade"
+    }
   ],
   "assertions": [
     {
@@ -16,6 +20,10 @@
     }
   ],
   "visual": {
-    "camera": { "x": 6, "y": 5, "zoom": 1.0 }
+    "camera": {
+      "x": 6,
+      "y": 5,
+      "zoom": 1.0
+    }
   }
 }

@@ -1,25 +1,51 @@
 {
   "id": "equipment_requirements_and_preview",
+  "ci_tier": "extended",
   "world_id": "requirements_lab",
   "seed": "facefeed00000043",
   "title": "Equipment requirements and preview",
   "description": "Pick up requirement-gated gear, prove server-authored requirement status and equip preview, reject unmet equip, then level and allocate STR to equip successfully.",
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "cave_war_sword" },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_war_sword"
+    },
     {
       "action": "assert_inventory_requirement_status",
       "item_def_id": "cave_war_sword",
       "requirements_met": false,
       "preview_slot": "main_hand",
       "preview_requirements_met": false,
-      "preview_delta_stats": ["damage_max"],
+      "preview_delta_stats": [
+        "damage_max"
+      ],
       "status": [
-        { "stat": "level", "required": 2, "current": 1, "met": false },
-        { "stat": "str", "required": 6, "current": 5, "met": false }
+        {
+          "stat": "level",
+          "required": 2,
+          "current": 1,
+          "met": false
+        },
+        {
+          "stat": "str",
+          "required": 6,
+          "current": 5,
+          "met": false
+        }
       ]
     },
-    { "action": "equip_inventory_item", "item_def_id": "cave_war_sword", "slot": "main_hand", "expect_reject": "requirements_not_met" },
-    { "action": "kill_monsters", "monster_def_id": "dungeon_mob", "count": 4, "timeout_s": 30 },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_war_sword",
+      "slot": "main_hand",
+      "expect_reject": "requirements_not_met"
+    },
+    {
+      "action": "kill_monsters",
+      "monster_def_id": "dungeon_mob",
+      "count": 4,
+      "timeout_s": 30
+    },
     {
       "action": "assert_character_progression",
       "level": 2,
@@ -43,17 +69,46 @@
       "preview_slot": "main_hand",
       "preview_requirements_met": true,
       "status": [
-        { "stat": "level", "required": 2, "current": 2, "met": true },
-        { "stat": "str", "required": 6, "current": 6, "met": true }
+        {
+          "stat": "level",
+          "required": 2,
+          "current": 2,
+          "met": true
+        },
+        {
+          "stat": "str",
+          "required": 6,
+          "current": 6,
+          "met": true
+        }
       ]
     },
-    { "action": "equip_inventory_item", "item_def_id": "cave_war_sword", "slot": "main_hand" }
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_war_sword",
+      "slot": "main_hand"
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "character_leveled" },
-    { "type": "event_seen", "event_type": "stat_allocated" },
-    { "type": "character_progression", "level": 2, "unspent_stat_points": 2, "str": 6 },
-    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_war_sword" },
+    {
+      "type": "event_seen",
+      "event_type": "character_leveled"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "stat_allocated"
+    },
+    {
+      "type": "character_progression",
+      "level": 2,
+      "unspent_stat_points": 2,
+      "str": 6
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "cave_war_sword"
+    },
     {
       "type": "inventory_requirement_status",
       "item_def_id": "cave_war_sword",
@@ -62,8 +117,18 @@
       "preview_slot": "main_hand",
       "preview_requirements_met": true,
       "status": [
-        { "stat": "level", "required": 2, "current": 2, "met": true },
-        { "stat": "str", "required": 6, "current": 6, "met": true }
+        {
+          "stat": "level",
+          "required": 2,
+          "current": 2,
+          "met": true
+        },
+        {
+          "stat": "str",
+          "required": 6,
+          "current": 6,
+          "met": true
+        }
       ]
     }
   ],
@@ -72,8 +137,17 @@
       "world_id": "requirements_lab",
       "steps": [],
       "assertions": [
-        { "type": "character_progression", "level": 2, "unspent_stat_points": 2, "str": 6 },
-        { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_war_sword" },
+        {
+          "type": "character_progression",
+          "level": 2,
+          "unspent_stat_points": 2,
+          "str": 6
+        },
+        {
+          "type": "equipped_slot_def",
+          "slot": "main_hand",
+          "item_def_id": "cave_war_sword"
+        },
         {
           "type": "inventory_requirement_status",
           "item_def_id": "cave_war_sword",
@@ -82,14 +156,28 @@
           "preview_slot": "main_hand",
           "preview_requirements_met": true,
           "status": [
-            { "stat": "level", "required": 2, "current": 2, "met": true },
-            { "stat": "str", "required": 6, "current": 6, "met": true }
+            {
+              "stat": "level",
+              "required": 2,
+              "current": 2,
+              "met": true
+            },
+            {
+              "stat": "str",
+              "required": 6,
+              "current": 6,
+              "met": true
+            }
           ]
         }
       ]
     }
   ],
   "visual": {
-    "camera": { "x": 5, "y": 5, "zoom": 1.15 }
+    "camera": {
+      "x": 5,
+      "y": 5,
+      "zoom": 1.15
+    }
   }
 }

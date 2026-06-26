@@ -1,21 +1,47 @@
 {
   "id": "mercenary_stats_card",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "mercenary_hiring_lab",
   "seed": "v239_mercenary_stats_card",
   "title": "Mercenary stats card",
   "description": "Client hires the fixed guard and verifies the mercenary panel renders a compact stats card.",
-  "debug_progression": { "gold": 300 },
+  "debug_progression": {
+    "gold": 300
+  },
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
-    { "type": "wait_event", "event_type": "mercenary_hired", "offer_id": "fixed:mercenary_guard", "timeout_s": 15.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_mercenary_board",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_mercenary_board"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "mercenary_hired",
+      "offer_id": "fixed:mercenary_guard",
+      "timeout_s": 15.0
+    },
     {
       "type": "wait_mercenary_panel",
       "hired_count": 1,
       "selected_stance": "assist",
-      "stats_card_contains": ["Mercenary Guard", "HP:", "Stance: Assist", "State: Active", "ID:"],
+      "stats_card_contains": [
+        "Mercenary Guard",
+        "HP:",
+        "Stance: Assist",
+        "State: Active",
+        "ID:"
+      ],
       "companion_bar_count": 1,
       "companion_icon_kind": "mercenary",
       "timeout_s": 15.0

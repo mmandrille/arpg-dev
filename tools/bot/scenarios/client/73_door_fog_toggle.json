@@ -1,27 +1,53 @@
 {
   "id": "door_fog_toggle",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "door_lab",
   "seed": "door_fog_of_war_toggle_seed",
   "title": "Door fog toggle",
   "description": "Closed doors contribute a fog occluder, opening removes it, and clicking the open door closes it again.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "set_camera_mode", "mode": "isometric" },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "isometric"
+    },
     {
       "type": "assert_fog_of_war",
       "enabled": true,
       "extra_occluder_count": 1,
       "shadow_count_min": 1
     },
-    { "type": "click_entity_until_event", "entity_type": "interactable", "interactable_def_id": "wooden_door", "state": "closed", "event_type": "interactable_activated", "consume_event": true, "retry_s": 0.25, "timeout_s": 10.0 },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "interactable",
+      "interactable_def_id": "wooden_door",
+      "state": "closed",
+      "event_type": "interactable_activated",
+      "consume_event": true,
+      "retry_s": 0.25,
+      "timeout_s": 10.0
+    },
     {
       "type": "wait_fog_of_war",
       "enabled": true,
       "extra_occluder_count": 0,
       "timeout_s": 5.0
     },
-    { "type": "click_entity_until_event", "entity_type": "interactable", "interactable_def_id": "wooden_door", "state": "open", "event_type": "interactable_state_changed", "event_state": "closed", "consume_event": true, "retry_s": 0.25, "timeout_s": 10.0 },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "interactable",
+      "interactable_def_id": "wooden_door",
+      "state": "open",
+      "event_type": "interactable_state_changed",
+      "event_state": "closed",
+      "consume_event": true,
+      "retry_s": 0.25,
+      "timeout_s": 10.0
+    },
     {
       "type": "wait_fog_of_war",
       "enabled": true,

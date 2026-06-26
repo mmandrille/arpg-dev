@@ -1,35 +1,169 @@
 {
   "id": "client_skill_points_and_magic_bolt",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "skill_progression_lab",
   "seed": "v70_client_barbarian_rage",
   "title": "Client skill points and Rage",
   "description": "Client uses a compact skill lab to prove the default barbarian can spend Rage, sees only class skills in the skill tree, casts from the skill bar, and observes cooldown state.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "assert_skill_progression", "unspent_skill_points": 1, "skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": true },
-    { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "skill_xp_level6_dummy", "timeout_s": 10.0 },
-    { "type": "click_entity_until_event", "entity_type": "monster", "monster_def_id": "skill_xp_level6_dummy", "event_type": "monster_killed", "consume_event": true, "retry_s": 0.25, "timeout_s": 20.0 },
-    { "type": "wait_character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 10 }, "player_max_hp": 10, "timeout_s": 8.0 },
-    { "type": "press_key", "keycode": "KEY_C" },
-    { "type": "assert_character_stats_panel_visible", "visible": true },
-    { "type": "click_stat_button", "stat": "str" },
-    { "type": "click_stat_button", "stat": "vit" },
-    { "type": "wait_character_progression", "str": 6, "vit": 6, "timeout_s": 5.0 },
-    { "type": "wait_skill_progression", "unspent_skill_points": 2, "skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": true, "timeout_s": 5.0 },
-    { "type": "wait_skill_progression", "unspent_skill_points": 2, "skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false, "timeout_s": 5.0 },
-    { "type": "press_key", "keycode": "KEY_K" },
-    { "type": "assert_skills_panel_visible", "visible": true },
-    { "type": "assert_skill_button_enabled", "skill_id": "rage", "enabled": true, "requirements_met": true, "skill_name": "Rage", "tooltip_contains": "Mana: 5" },
-    { "type": "click_skill_button", "skill_id": "rage" },
-    { "type": "wait_skill_progression", "unspent_skill_points": 1, "skill_id": "rage", "rank": 1, "max_rank": 5, "can_spend": true, "timeout_s": 5.0 },
-    { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "remaining_ticks": 0, "slot_text": "", "tooltip_contains": "Rage", "timeout_s": 10.0 },
-    { "type": "press_key", "keycode": "KEY_K" },
-    { "type": "assert_skills_panel_visible", "visible": false },
-    { "type": "use_skill_slot", "skill_id": "rage", "force_direct": true },
-    { "type": "wait_event", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 5, "timeout_s": 15.0 },
-    { "type": "assert_audio_state", "last_skill_id": "rage", "last_cue": "skill_buff" },
-    { "type": "wait_event", "event_type": "skill_cooldown_started", "skill_id": "rage", "timeout_s": 5.0 },
-    { "type": "wait_skill_bar", "skill_id": "rage", "rank": 1, "disabled": true, "remaining_ticks_min": 1, "slot_text": "", "timeout_s": 5.0 }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_skill_progression",
+      "unspent_skill_points": 1,
+      "skill_id": "rage",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": true
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "monster_def_id": "skill_xp_level6_dummy",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "skill_xp_level6_dummy",
+      "event_type": "monster_killed",
+      "consume_event": true,
+      "retry_s": 0.25,
+      "timeout_s": 20.0
+    },
+    {
+      "type": "wait_character_progression",
+      "level": 6,
+      "unspent_stat_points": 15,
+      "magic": 5,
+      "derived_stats": {
+        "max_hp": 10,
+        "max_mana": 10
+      },
+      "player_max_hp": 10,
+      "timeout_s": 8.0
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_C"
+    },
+    {
+      "type": "assert_character_stats_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "click_stat_button",
+      "stat": "str"
+    },
+    {
+      "type": "click_stat_button",
+      "stat": "vit"
+    },
+    {
+      "type": "wait_character_progression",
+      "str": 6,
+      "vit": 6,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "wait_skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "rage",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": true,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "wait_skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "magic_bolt",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": false,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_K"
+    },
+    {
+      "type": "assert_skills_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_skill_button_enabled",
+      "skill_id": "rage",
+      "enabled": true,
+      "requirements_met": true,
+      "skill_name": "Rage",
+      "tooltip_contains": "Mana: 5"
+    },
+    {
+      "type": "click_skill_button",
+      "skill_id": "rage"
+    },
+    {
+      "type": "wait_skill_progression",
+      "unspent_skill_points": 1,
+      "skill_id": "rage",
+      "rank": 1,
+      "max_rank": 5,
+      "can_spend": true,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "wait_skill_bar",
+      "skill_id": "rage",
+      "rank": 1,
+      "remaining_ticks": 0,
+      "slot_text": "",
+      "tooltip_contains": "Rage",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_K"
+    },
+    {
+      "type": "assert_skills_panel_visible",
+      "visible": false
+    },
+    {
+      "type": "use_skill_slot",
+      "skill_id": "rage",
+      "force_direct": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "skill_cast",
+      "skill_id": "rage",
+      "rank": 1,
+      "mana": 5,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_audio_state",
+      "last_skill_id": "rage",
+      "last_cue": "skill_buff"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "skill_cooldown_started",
+      "skill_id": "rage",
+      "timeout_s": 5.0
+    },
+    {
+      "type": "wait_skill_bar",
+      "skill_id": "rage",
+      "rank": 1,
+      "disabled": true,
+      "remaining_ticks_min": 1,
+      "slot_text": "",
+      "timeout_s": 5.0
+    }
   ]
 }

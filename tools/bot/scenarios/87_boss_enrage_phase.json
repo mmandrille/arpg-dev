@@ -1,5 +1,6 @@
 {
   "id": "boss_enrage_phase",
+  "ci_tier": "extended",
   "world_id": "boss_floor_gate_lab",
   "seed": "boss_enrage_phase",
   "title": "Boss enrage phase",
@@ -9,18 +10,50 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 45, "dex": 12, "vit": 120, "magic": 5 },
+    "stats": {
+      "str": 45,
+      "dex": 12,
+      "vit": 120,
+      "magic": 5
+    },
     "skill_ranks": {}
   },
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "monster", "is_boss": true, "boss_template_id": "cave_warden", "equals": 1 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_phase_started", "phase_kind": "telegraph" }, "timeout_s": 3 },
-    { "action": "action_until_event", "is_boss": true, "event_type": "boss_enraged", "timeout_s": 12 }
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "is_boss": true,
+      "boss_template_id": "cave_warden",
+      "equals": 1
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "boss_phase_started",
+        "phase_kind": "telegraph"
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "action_until_event",
+      "is_boss": true,
+      "event_type": "boss_enraged",
+      "timeout_s": 12
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "boss_enraged", "boss_template_id": "cave_warden" }
+    {
+      "type": "event_seen",
+      "event_type": "boss_enraged",
+      "boss_template_id": "cave_warden"
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 15, "zoom": 1.15 }
+    "camera": {
+      "x": 16,
+      "y": 15,
+      "zoom": 1.15
+    }
   }
 }

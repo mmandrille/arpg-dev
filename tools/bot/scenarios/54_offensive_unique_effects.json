@@ -1,12 +1,20 @@
 {
   "id": "offensive_unique_effects",
+  "ci_tier": "extended",
   "world_id": "combat_stat_lab",
   "seed": "00000000000003a1",
   "title": "Offensive unique effects",
   "description": "Pick up a deterministic unique cave blade, equip it, and prove Stormbound Echo chains lightning through the normal protocol path.",
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_blade"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_blade",
+      "slot": "main_hand"
+    },
     {
       "action": "action_until_combat_event",
       "monster_def_id": "combat_lab_soft_target",
@@ -17,7 +25,17 @@
     }
   ],
   "assertions": [
-    { "type": "inventory_contains", "item_def_id": "cave_blade", "equipped": true },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "stormbound_echo", "damage_type": "lightning", "min_damage": 1 }
+    {
+      "type": "inventory_contains",
+      "item_def_id": "cave_blade",
+      "equipped": true
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "skill_id": "stormbound_echo",
+      "damage_type": "lightning",
+      "min_damage": 1
+    }
   ]
 }

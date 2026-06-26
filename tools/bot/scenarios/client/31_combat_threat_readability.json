@@ -1,15 +1,29 @@
 {
   "id": "combat_threat_readability",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "generated_wall_lab",
   "seed": "v76_pack_aggro",
   "title": "Combat threat readability",
   "description": "Client opens a generated dungeon pack and verifies monster aggro produces readable threat floating text.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "set_floating_combat_text", "enabled": true },
-    { "type": "assert_floating_combat_text_enabled", "enabled": true },
-    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "set_floating_combat_text",
+      "enabled": true
+    },
+    {
+      "type": "assert_floating_combat_text_enabled",
+      "enabled": true
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "timeout_s": 15.0
+    },
     {
       "type": "click_entity_until_event",
       "entity_type": "monster",
@@ -19,6 +33,11 @@
       "retry_s": 0.25,
       "timeout_s": 20.0
     },
-    { "type": "wait_damage_number", "variant": "threat", "text": "AGGRO", "timeout_s": 2.0 }
+    {
+      "type": "wait_damage_number",
+      "variant": "threat",
+      "text": "AGGRO",
+      "timeout_s": 2.0
+    }
   ]
 }

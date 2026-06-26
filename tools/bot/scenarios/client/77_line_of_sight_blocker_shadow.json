@@ -1,15 +1,32 @@
 {
   "id": "line_of_sight_blocker_shadow",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "line_of_sight_blocker_lab",
   "seed": "v300_fog_of_war_line_of_sight_blocker_shadow",
   "title": "Line-of-Sight Blocker Shadow",
   "description": "Client renders fog shadows from explicit column/rock LOS blockers while low rubble, water, and holes remain non-occluding layout rows.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "set_camera_mode", "mode": "isometric" },
-    { "type": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
-    { "type": "wait_wall_layout", "current_level": 0, "at_least": 9, "timeout_s": 5.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "isometric"
+    },
+    {
+      "type": "assert_character_progression",
+      "derived_stats": {
+        "light_radius": 9
+      }
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": 0,
+      "at_least": 9,
+      "timeout_s": 5.0
+    },
     {
       "type": "assert_fog_of_war",
       "enabled": true,

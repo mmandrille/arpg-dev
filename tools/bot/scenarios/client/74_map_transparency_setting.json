@@ -1,16 +1,36 @@
 {
   "id": "map_transparency_setting",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "collision_lab",
   "seed": "map_transparency_setting_seed",
   "title": "Map transparency setting",
   "description": "Client applies the local map opacity setting and verifies the discovery map overlay uses it.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
-    { "type": "wait_wall_layout", "current_level": 0, "at_least": 5, "timeout_s": 5.0 },
-    { "type": "set_map_opacity", "value": 0.35 },
-    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_character_progression",
+      "derived_stats": {
+        "light_radius": 9
+      }
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": 0,
+      "at_least": 5,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "set_map_opacity",
+      "value": 0.35
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_TAB"
+    },
     {
       "type": "assert_discovery_minimap",
       "visible": true,
@@ -21,7 +41,10 @@
       "explored_count_min": 1,
       "wall_count_min": 1
     },
-    { "type": "set_map_opacity", "value": 0.85 },
+    {
+      "type": "set_map_opacity",
+      "value": 0.85
+    },
     {
       "type": "assert_discovery_minimap",
       "visible": true,

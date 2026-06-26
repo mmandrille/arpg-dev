@@ -1,31 +1,80 @@
 {
   "id": "paladin_heal_skill",
+  "ci_tier": "extended",
   "world_id": "skill_progression_lab",
   "seed": "v70_paladin_heal_skill",
   "character_class": "paladin",
   "title": "Paladin Heal skill",
   "description": "Use a compact skill lab to prove the paladin can learn Heal and retains it into a fresh heal lab session.",
   "steps": [
-    { "action": "attack_until_event", "monster_def_id": "skill_xp_level6_dummy", "event_type": "monster_killed", "timeout_s": 20 },
-    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": true },
-    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false },
+    {
+      "action": "attack_until_event",
+      "monster_def_id": "skill_xp_level6_dummy",
+      "event_type": "monster_killed",
+      "timeout_s": 20
+    },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "heal",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": true
+    },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "magic_bolt",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": false
+    },
     {
       "action": "allocate_skill_point",
       "skill_id": "heal",
-      "expect_skill_progression": { "unspent_skill_points": 1, "skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false }
+      "expect_skill_progression": {
+        "unspent_skill_points": 1,
+        "skill_id": "heal",
+        "rank": 1,
+        "max_rank": 5,
+        "can_spend": false
+      }
     }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "heal", "rank": 1 },
-    { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": false }
+    {
+      "type": "event_seen",
+      "event_type": "skill_rank_updated",
+      "skill_id": "heal",
+      "rank": 1
+    },
+    {
+      "type": "skill_progression",
+      "unspent_skill_points": 1,
+      "skill_id": "heal",
+      "rank": 1,
+      "max_rank": 5,
+      "can_spend": false
+    },
+    {
+      "type": "skill_progression",
+      "unspent_skill_points": 1,
+      "skill_id": "magic_bolt",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": false
+    }
   ],
   "fresh_session_checks": [
     {
       "world_id": "heal_lab",
       "seed": "v70_paladin_heal_fresh",
       "steps": [
-        { "action": "attack_until_event", "monster_def_id": "training_dummy_heal", "event_type": "monster_killed" },
+        {
+          "action": "attack_until_event",
+          "monster_def_id": "training_dummy_heal",
+          "event_type": "monster_killed"
+        },
         {
           "action": "cast_skill",
           "skill_id": "heal",
@@ -34,14 +83,39 @@
         }
       ],
       "assertions": [
-        { "type": "event_seen", "event_type": "skill_cast", "skill_id": "heal", "rank": 1 },
-        { "type": "event_seen", "event_type": "player_healed", "skill_id": "heal", "heal": 3 },
-        { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "heal" },
-        { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false }
+        {
+          "type": "event_seen",
+          "event_type": "skill_cast",
+          "skill_id": "heal",
+          "rank": 1
+        },
+        {
+          "type": "event_seen",
+          "event_type": "player_healed",
+          "skill_id": "heal",
+          "heal": 3
+        },
+        {
+          "type": "event_seen",
+          "event_type": "skill_cooldown_started",
+          "skill_id": "heal"
+        },
+        {
+          "type": "skill_progression",
+          "unspent_skill_points": 1,
+          "skill_id": "heal",
+          "rank": 1,
+          "max_rank": 5,
+          "can_spend": false
+        }
       ]
     }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.0
+    }
   }
 }

@@ -1,5 +1,6 @@
 {
   "id": "market_item_comparison",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "market_item_comparison_243",
@@ -11,10 +12,36 @@
     "price_gold": 63
   },
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
-    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 63, "comparison_at_least": 1, "comparison_contains": "Armor", "at_least": 1, "timeout_s": 15.0 },
-    { "type": "assert_market_listing_rows", "item_def_id": "cave_mail", "price_gold": 63, "comparison_at_least": 1, "comparison_contains": "Armor", "at_least": 1 }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_market_board"
+    },
+    {
+      "type": "wait_market_panel",
+      "item_def_id": "cave_mail",
+      "price_gold": 63,
+      "comparison_at_least": 1,
+      "comparison_contains": "Armor",
+      "at_least": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_market_listing_rows",
+      "item_def_id": "cave_mail",
+      "price_gold": 63,
+      "comparison_at_least": 1,
+      "comparison_contains": "Armor",
+      "at_least": 1
+    }
   ]
 }

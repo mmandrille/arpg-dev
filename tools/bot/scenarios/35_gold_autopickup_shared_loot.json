@@ -1,5 +1,6 @@
 {
   "id": "gold_autopickup_shared_loot",
+  "ci_tier": "extended",
   "world_id": "coop_loot_lab",
   "seed": "v49-gold-autopickup-shared-loot",
   "max_elapsed_s": 23.0,

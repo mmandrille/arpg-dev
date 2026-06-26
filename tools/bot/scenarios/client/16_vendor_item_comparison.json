@@ -1,30 +1,126 @@
 {
   "id": "vendor_item_comparison",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "town_vendor_gold_sink_1075",
   "title": "Vendor item comparison",
   "description": "Client opens the town vendor and verifies buy/sell rows expose server-authored summaries, prices, and comparison details.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 1, "timeout_s": 10.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_vendor" },
-    { "type": "wait_shop_panel", "at_least": 3, "timeout_s": 15.0 },
-    { "type": "assert_shop_panel_visible", "visible": true },
-    { "type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2 },
-    { "type": "assert_shop_offer_count", "offer_kind": "generated", "at_least": 1 },
-    { "type": "assert_shop_offer_details", "offer_kind": "fixed", "equals": 2, "requires_summary": true, "requires_price": true, "requires_category": true, "summary_contains": "Restores" },
-    { "type": "assert_shop_offer_details", "offer_kind": "generated", "at_least": 1, "requires_summary": true, "requires_price": true, "requires_slot": true, "requires_comparison": true, "requires_requirement_status": true, "summary_contains": "Slot:" },
-    { "type": "assert_shop_sell_rows", "rolled": true, "at_least": 1 },
-    { "type": "assert_shop_sell_details", "rolled": true, "at_least": 1, "requires_summary": true, "requires_price": true, "requires_slot": true, "requires_comparison": true, "requires_requirement_status": true, "requires_equip_preview": true, "summary_contains": "Slot:" },
-    { "type": "click_shop_sell_item", "rolled": true },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true },
-    { "type": "click_shop_buy_offer", "offer_id": "fixed:red_potion" },
-    { "type": "wait_event", "event_type": "shop_purchase", "shop_id": "town_vendor", "offer_id": "fixed:red_potion", "timeout_s": 15.0 },
-    { "type": "wait_inventory_count", "item_def_id": "red_potion", "equals": 1, "timeout_s": 15.0 },
-    { "type": "assert_shop_panel_visible", "visible": true }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 1,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_vendor"
+    },
+    {
+      "type": "wait_shop_panel",
+      "at_least": 3,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "fixed",
+      "equals": 2
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "generated",
+      "at_least": 1
+    },
+    {
+      "type": "assert_shop_offer_details",
+      "offer_kind": "fixed",
+      "equals": 2,
+      "requires_summary": true,
+      "requires_price": true,
+      "requires_category": true,
+      "summary_contains": "Restores"
+    },
+    {
+      "type": "assert_shop_offer_details",
+      "offer_kind": "generated",
+      "at_least": 1,
+      "requires_summary": true,
+      "requires_price": true,
+      "requires_slot": true,
+      "requires_comparison": true,
+      "requires_requirement_status": true,
+      "summary_contains": "Slot:"
+    },
+    {
+      "type": "assert_shop_sell_rows",
+      "rolled": true,
+      "at_least": 1
+    },
+    {
+      "type": "assert_shop_sell_details",
+      "rolled": true,
+      "at_least": 1,
+      "requires_summary": true,
+      "requires_price": true,
+      "requires_slot": true,
+      "requires_comparison": true,
+      "requires_requirement_status": true,
+      "requires_equip_preview": true,
+      "summary_contains": "Slot:"
+    },
+    {
+      "type": "click_shop_sell_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_buy_button",
+      "offer_id": "fixed:red_potion",
+      "enabled": true
+    },
+    {
+      "type": "click_shop_buy_offer",
+      "offer_id": "fixed:red_potion"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_purchase",
+      "shop_id": "town_vendor",
+      "offer_id": "fixed:red_potion",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_inventory_count",
+      "item_def_id": "red_potion",
+      "equals": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_panel_visible",
+      "visible": true
+    }
   ]
 }

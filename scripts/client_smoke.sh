@@ -11,6 +11,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLIENT_DIR="$ROOT/client"
 # shellcheck source=quiet_helpers.sh
 source "$ROOT/scripts/quiet_helpers.sh"
+# shellcheck source=godot_ci_flags.sh
+source "$ROOT/scripts/godot_ci_flags.sh"
 
 export BASE_URL="${BASE_URL:-http://localhost:8888}"
 export DEV_TOKEN="${DEV_TOKEN:-local-dev-token}"
@@ -76,7 +78,8 @@ run_gate() {
   echo "[client-smoke] running $label"
   gate_started=$SECONDS
   set +e
-  run_godot_gate_with_timeout "$timeout_s" "$gate_log" "$GODOT" --headless --path "$CLIENT_DIR" --script "$script"
+  # shellcheck disable=SC2086
+  run_godot_gate_with_timeout "$timeout_s" "$gate_log" "$GODOT" $GODOT_HEADLESS_FLAGS --path "$CLIENT_DIR" --script "$script"
   local status=$?
   set -e
   elapsed=$((SECONDS - gate_started))
@@ -131,7 +134,8 @@ finish_gates() {
 # Import resources once so headless --script runs cleanly.
 echo "[client-smoke] running Godot asset import"
 import_started=$SECONDS
-"$GODOT" --headless --path "$CLIENT_DIR" --import >/dev/null 2>&1 || true
+# shellcheck disable=SC2086
+"$GODOT" $GODOT_HEADLESS_FLAGS --path "$CLIENT_DIR" --import >/dev/null 2>&1 || true
 echo "OK: Godot asset import ($((SECONDS - import_started))s)"
 
 # 1. GDScript golden-fixture test (server-independent; ADR D6 / acceptance #7).

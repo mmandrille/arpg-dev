@@ -8,12 +8,14 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 # shellcheck source=quiet_helpers.sh
 source "$ROOT/scripts/quiet_helpers.sh"
+# shellcheck source=godot_ci_flags.sh
+source "$ROOT/scripts/godot_ci_flags.sh"
 
 CLIENT_SCENARIOS_DIR="$ROOT/tools/bot/scenarios/client"
 GODOT="${GODOT:-godot}"
 GODOT_FLAGS="${GODOT_FLAGS:-}"
 if [[ "${HEADLESS:-0}" == "1" && "$GODOT_FLAGS" != *"--headless"* ]]; then
-  GODOT_FLAGS="--headless $GODOT_FLAGS"
+  GODOT_FLAGS="$GODOT_HEADLESS_FLAGS $GODOT_FLAGS"
 fi
 DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
 ADDR="${ARPG_ADDR:-:8888}"
@@ -109,7 +111,7 @@ fi
 echo "[bot-visual] recording bot scenario selection '$SCENARIO' (manifest: $MANIFEST)..."
 "$RUN_QUIET" --label "protocol bot recording ($SCENARIO)" -- "${recording_args[@]}"
 
-"$RUN_QUIET" --label "Godot asset import" -- bash -c '"$1" --headless --path "$2/client" --import || true' _ "$GODOT" "$ROOT"
+"$RUN_QUIET" --label "Godot asset import" -- bash -c 'source "$0" && "$1" $GODOT_HEADLESS_FLAGS --path "$2/client" --import || true' "$ROOT/scripts/godot_ci_flags.sh" "$GODOT" "$ROOT"
 
 echo "[bot-visual] launching Godot visual replay playlist."
 echo "[bot-visual] AUTOPLAY_STEP_DELAY=$AUTOPLAY_STEP_DELAY; EXIT_ON_COMPLETE=$EXIT_ON_COMPLETE."

@@ -11,6 +11,8 @@ CLIENT_DIR="$ROOT/client"
 SCENARIOS_DIR="$ROOT/tools/bot/scenarios/client"
 # shellcheck source=quiet_helpers.sh
 source "$ROOT/scripts/quiet_helpers.sh"
+# shellcheck source=godot_ci_flags.sh
+source "$ROOT/scripts/godot_ci_flags.sh"
 
 GODOT="${GODOT:-godot}"
 PYTHON="${PYTHON:-$ROOT/.venv/bin/python}"
@@ -136,11 +138,13 @@ fi
 
 # Import once before the scenario loop so headless --path runs cleanly.
 if is_quiet_mode; then
-  "$RUN_QUIET" --label "Godot asset import" -- bash -c '"$1" --headless --path "$2" --import || true' _ "$GODOT" "$CLIENT_DIR"
+  # shellcheck disable=SC2086
+  "$RUN_QUIET" --label "Godot asset import" -- bash -c 'source "$0" && "$1" $GODOT_HEADLESS_FLAGS --path "$2" --import || true' "$ROOT/scripts/godot_ci_flags.sh" "$GODOT" "$CLIENT_DIR"
 else
   echo "[bot-client $(_ts)] Godot asset import starting (can take 30-90s on cold cache)..."
   import_started=$SECONDS
-  if "$GODOT" --headless --path "$CLIENT_DIR" --import; then
+  # shellcheck disable=SC2086
+  if "$GODOT" $GODOT_HEADLESS_FLAGS --path "$CLIENT_DIR" --import; then
     echo "[bot-client $(_ts)] Godot asset import done elapsed=$((SECONDS - import_started))s"
   else
     echo "[bot-client $(_ts)] Godot asset import finished with warnings elapsed=$((SECONDS - import_started))s" >&2
@@ -197,7 +201,8 @@ else:
 validate_godot_project_load() {
   local tmp
   tmp="$(mktemp)"
-  if ! "$GODOT" --headless --path "$CLIENT_DIR" --quit-after 1 >"$tmp" 2>&1; then
+  # shellcheck disable=SC2086
+  if ! "$GODOT" $GODOT_HEADLESS_FLAGS --path "$CLIENT_DIR" --quit-after 1 >"$tmp" 2>&1; then
     echo "[bot-client] FAIL: Godot project failed to start" >&2
     show_log "$tmp" "godot project load"
     rm -f "$tmp"
@@ -353,7 +358,7 @@ run_scenario() {
   if [[ -s "$preflight_metadata" ]]; then
     expected_join_session="$(metadata_field "$preflight_metadata" session_id)"
   fi
-  [[ "$HEADLESS" == "1" ]] && godot_flags="--headless $godot_flags"
+  [[ "$HEADLESS" == "1" ]] && godot_flags="$GODOT_HEADLESS_FLAGS --resolution 1280x720"
   if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
     run_godot_with_timeout "$scenario_timeout" "$tmpfile" env \
       ARPG_BOT_CLIENT=1 \

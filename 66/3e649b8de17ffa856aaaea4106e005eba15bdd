@@ -1,0 +1,23 @@
+skills/review/SKILL.md
+  s_05d5e6aa8fd731::t_74481156ad71be 90-110
+  s_05d5e6aa8fd731::t_165a1c4fb404d0 248
+  s_05d5e6aa8fd731::t_768990fbb675c9 36-38
+  s_05d5e6aa8fd731::t_041d3de1d5b4ed 9-10
+  s_05d5e6aa8fd731::t_81cf6c99bd40a4 192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "663e649b8de17ffa856aaaea4106e005eba15bdd",
+  "prompts": {},
+  "sessions": {
+    "s_05d5e6aa8fd731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d3fe9e6-9bd8-4c49-8e7b-285d8eb2314a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

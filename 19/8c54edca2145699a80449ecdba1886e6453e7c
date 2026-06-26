@@ -1,0 +1,120 @@
+client/scripts/fog_of_war_overlay.gd
+  s_1b27bf61fe5c38::t_0d47279f0eaa47 304-307
+  s_1b27bf61fe5c38::t_42f59309e017d6 6
+  s_1b27bf61fe5c38::t_a329a19b93137c 223-226
+  s_1b27bf61fe5c38::t_2eaaeaead2db71 206-207
+  s_1b27bf61fe5c38::t_46fe2718b9b804 235,241,245-248
+  s_1b27bf61fe5c38::t_7050c81c1c2d03 312
+  s_1b27bf61fe5c38::t_eb989f87f7df57 177
+  s_1b27bf61fe5c38::t_cc56191a92ce7b 532
+shared/assets/fog_presentation.v0.schema.json
+  s_1b27bf61fe5c38::t_e263af00460753 56-69
+client/tests/test_camera_mode_settings.gd
+  s_1b27bf61fe5c38::t_3816857cfd5347 21
+  s_1b27bf61fe5c38::t_cbbe291dc50c34 80-93
+docs/as-built/v347_dungeon-render-performance.md
+  s_e68179bd0fcaf7::t_5fa781dea8255d 1-19,32-69
+  s_e68179bd0fcaf7::t_33257c377f581d 20-31
+client/scripts/fog_presentation_loader.gd
+  s_1b27bf61fe5c38::t_6370994c941477 134-138
+  s_1b27bf61fe5c38::t_14f4425dab69ee 77-88
+shared/assets/fog_presentation.v0.json
+  s_1b27bf61fe5c38::t_0831c1f52ce092 15-19
+docs/specs/v347_spec-dungeon-render-performance.md
+  s_e68179bd0fcaf7::t_87aab3a5ff590a 1-2,4-208
+  s_e68179bd0fcaf7::t_05dd96cb533d84 3
+PROGRESS.md
+  s_e68179bd0fcaf7::t_f5f395bd1eb07b 18,26,28-29
+client/scripts/fog_los_shadow_cache.gd.uid
+  s_1b27bf61fe5c38::t_74dfffa914d28e 1
+docs/plans/v347_2026-06-26-dungeon-render-performance.md
+  s_e68179bd0fcaf7::t_b523d3d33d58dd 43-44
+  s_e68179bd0fcaf7::t_8ce61233fa4433 203-206
+  s_e68179bd0fcaf7::t_588ab27bf0dd55 73-74,88,93-95,108-112,127-128,131-133,146-148,161-162,198-199
+  s_e68179bd0fcaf7::t_57da836b6dd8ac 208-210
+  s_e68179bd0fcaf7::t_474612efeb9be6 211
+  s_e68179bd0fcaf7::t_0c0fc3326dc0ca 69
+  s_e68179bd0fcaf7::t_4205458ffdbee7 207
+  s_e68179bd0fcaf7::t_57b5af58a9d408 1-42,45-68,70-72,75-87,89-92,96-107,113-126,129-130,134-145,149-160,163-197,200-202,212-220
+client/scripts/client_graphics_bridge.gd
+  s_1b27bf61fe5c38::t_94f732a2bf855e 1-26
+.maintainability/file-size-baseline.tsv
+  s_1b27bf61fe5c38::t_47b535ee8115d8 6
+  s_1b27bf61fe5c38::t_7784d4e766ae5c 8
+  s_1b27bf61fe5c38::t_7b08749ae4dd4f 15
+client/scripts/client_audio_bridge.gd
+  s_1b27bf61fe5c38::t_be45d99304ef31 25-26
+tools/validate_fog_presentation.py
+  s_1b27bf61fe5c38::t_3d640ee004b657 39-60
+client/tests/test_fog_los_shadow_cache.gd
+  s_1b27bf61fe5c38::t_967a16249150b9 1-117
+docs/progress/scenario-catalog.md
+  s_1b27bf61fe5c38::t_33c399c6c73db3 82
+client/scripts/client_graphics_bridge.gd.uid
+  s_1b27bf61fe5c38::t_74dfffa914d28e 1
+docs/progress/slice-lifecycle.md
+  s_e68179bd0fcaf7::t_c68dc2401589b1 362
+client/tests/test_fog_los_shadow_cache.gd.uid
+  s_1b27bf61fe5c38::t_74dfffa914d28e 1
+scripts/client_smoke.sh
+  s_1b27bf61fe5c38::t_e63af219822583 223
+client/scripts/main.gd
+  s_1b27bf61fe5c38::t_c0f79ba0fcc887 764
+  s_1b27bf61fe5c38::t_4a289b334ba96c 685-695
+  s_1b27bf61fe5c38::t_17c98ff8813a6c 317
+  s_1b27bf61fe5c38::t_6a556d78410cdb 57
+  s_1b27bf61fe5c38::t_b6d7b0196b3fd1 3792
+client/scripts/fog_los_shadow_cache.gd
+  s_1b27bf61fe5c38::t_884c3d8643f2ac 1-101
+client/scripts/settings_panel.gd
+  s_1b27bf61fe5c38::t_075b90f53ec7aa 433-437
+  s_1b27bf61fe5c38::t_05b7c6cd3f07a5 74
+  s_1b27bf61fe5c38::t_82e260d80bce0e 248-258
+  s_1b27bf61fe5c38::t_0b222f9ce17c58 32
+  s_1b27bf61fe5c38::t_dc172eac221410 26
+  s_1b27bf61fe5c38::t_a8430c7f3e3026 15
+  s_1b27bf61fe5c38::t_9e217e05f2f3f9 62
+  s_1b27bf61fe5c38::t_59e5346104edd7 142-148
+  s_1b27bf61fe5c38::t_63973e27059d3c 341-351
+  s_1b27bf61fe5c38::t_a64547d06e239d 40
+client/tests/test_fog_of_war_overlay.gd
+  s_1b27bf61fe5c38::t_2d76a2dc0d43f9 32-33
+  s_1b27bf61fe5c38::t_606563e643c2be 363-394
+docs/CODEMAP.md
+  s_1b27bf61fe5c38::t_4208d623677b9b 16
+client/scripts/client_settings.gd
+  s_1b27bf61fe5c38::t_e6030a35a70981 312-317,319
+  s_1b27bf61fe5c38::t_07947e8fb7102a 406-413
+  s_1b27bf61fe5c38::t_3f9551f256df8f 65
+  s_1b27bf61fe5c38::t_60123e25c0ce98 19-22
+  s_1b27bf61fe5c38::t_1e8c121dfa6fe0 47-50
+  s_1b27bf61fe5c38::t_1e6245642fb850 224-229
+  s_1b27bf61fe5c38::t_fb79171da55668 149-163
+  s_1b27bf61fe5c38::t_e8862915216944 264
+  s_1b27bf61fe5c38::t_5f785d24a2adf8 280
+  s_1b27bf61fe5c38::t_996a4d5d363485 304
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "198c54edca2145699a80449ecdba1886e6453e7c",
+  "prompts": {},
+  "sessions": {
+    "s_1b27bf61fe5c38": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "cbbd4327-4881-4b28-b0e1-2c095b7b352a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_e68179bd0fcaf7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a11cfc3-f2d4-40a6-9320-5fc86c621f2f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+tools/test_validate_fog_presentation.py
+  s_2bb65a4c54dbf4::t_392f8daa6c7b48 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "da9a47b428ab0df55dfeed128b247d5dc1b0c9c2",
+  "prompts": {},
+  "sessions": {
+    "s_2bb65a4c54dbf4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9659a475-58e9-4ce9-a633-162bc8ed99c5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -74,6 +74,18 @@ static func organic_edge() -> Dictionary:
 	return value
 
 
+static func shadow_cache() -> Dictionary:
+	var value: Dictionary = config().get("shadow_cache", {})
+	if typeof(value) != TYPE_DICTIONARY:
+		return {
+			"move_epsilon": 0.006,
+			"viewport_size_epsilon_px": 1.0,
+			"performance_min_rebuild_interval_frames": 3,
+		}
+
+	return value
+
+
 static func shadow() -> Dictionary:
 	var value: Dictionary = config().get("shadow", {})
 	if typeof(value) != TYPE_DICTIONARY:
@@ -119,6 +131,11 @@ static func _default_config() -> Dictionary:
 		"darkness_alpha": 1.0,
 		"ambient_suppression": {"directional_scale": 0.35, "ambient_scale": 0.12},
 		"perspective_ambient_suppression": {"directional_scale": 0.0, "ambient_scale": 0.0},
+		"shadow_cache": {
+			"move_epsilon": 0.006,
+			"viewport_size_epsilon_px": 1.0,
+			"performance_min_rebuild_interval_frames": 3,
+		},
 		"organic_edge": {
 			"world_amplitude": 0.65,
 			"segments": 18.0,

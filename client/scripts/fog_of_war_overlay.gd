@@ -3,6 +3,7 @@ extends CanvasLayer
 
 const HeroVisibilityFieldScript := preload("res://scripts/hero_visibility_field.gd")
 const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
+const FogLosShadowCacheScript := preload("res://scripts/fog_los_shadow_cache.gd")
 const HeroLightSourceScript := preload("res://scripts/hero_light_source.gd")
 
 const FALLBACK_WORLD_TO_SCREEN := 32.0
@@ -173,6 +174,7 @@ var _shadow_core_color := Color(0.0, 0.0, 0.0, 0.82)
 var _shadow_gloom_scale := 1.035
 var _point_light: OmniLight3D
 var _character_visual: Node3D
+var _shadow_cache: FogLosShadowCacheScript = FogLosShadowCacheScript.new()
 
 
 func _ready() -> void:
@@ -201,6 +203,8 @@ func set_active(active: bool) -> void:
 
 
 func set_perspective_camera(perspective: bool) -> void:
+	if _perspective_camera != perspective:
+		_shadow_cache.hard_invalidate()
 	_perspective_camera = perspective
 	_update_shader()
 	_sync_point_light()
@@ -216,7 +220,10 @@ func set_progression(progression: Dictionary) -> void:
 
 
 func set_light_radius(radius: float) -> void:
-	_light_radius = maxf(0.0, radius)
+	var next_radius := maxf(0.0, radius)
+	if not is_equal_approx(_light_radius, next_radius):
+		_shadow_cache.hard_invalidate()
+	_light_radius = next_radius
 	_shadow_reach = _light_radius * FogPresentationLoaderScript.shadow_reach_multiplier()
 	_sync_visibility()
 	_update_shader()
@@ -225,12 +232,20 @@ func set_light_radius(radius: float) -> void:
 
 func set_wall_layout(walls: Array) -> void:
 	_wall_layout = HeroVisibilityFieldScript.normalize_wall_layout(walls)
+	_shadow_cache.hard_invalidate()
 	_update_shader()
 
 
 func set_occluder_layout(occluders: Array) -> void:
 	_extra_occluder_layout = HeroVisibilityFieldScript.normalize_occluder_layout(occluders)
+	_shadow_cache.hard_invalidate()
 	_update_shader()
+
+
+func set_performance_throttle(enabled: bool) -> void:
+	var cache_cfg: Dictionary = FogPresentationLoaderScript.shadow_cache()
+	var frames := int(cache_cfg.get("performance_min_rebuild_interval_frames", 3)) if enabled else 0
+	_shadow_cache.set_performance_throttle_frames(frames)
 
 
 func should_suppress_ambient() -> bool:
@@ -286,10 +301,15 @@ func get_debug_state() -> Dictionary:
 		"center": {"x": _center_px.x, "y": _center_px.y},
 		"hero_world": {"x": _target_world_position().x, "y": _target_world_position().y},
 		"hero_light_height": _hero_light_world_height(),
+		"shadow_cache_valid": _shadow_cache.is_valid(),
+		"shadow_cache_hits": _shadow_cache.cache_hits,
+		"shadow_rebuild_count": _shadow_cache.rebuild_count,
+		"shadow_cache_last_rebuild_reason": _shadow_cache.last_rebuild_reason,
 	}
 
 
 func _process(delta: float) -> void:
+	_shadow_cache.tick_frame()
 	_update_motion_phase(delta)
 	_update_shader()
 
@@ -509,7 +529,7 @@ func _update_shadows(viewport_size: Vector2) -> void:
 		_hide_shadow_polygons()
 		return
 	var hero_world := _target_world_position()
-	var built := HeroVisibilityFieldScript.build_shadow_polygons(
+	var built := _shadow_cache.resolve(
 		_camera,
 		hero_world,
 		_shadow_reach,

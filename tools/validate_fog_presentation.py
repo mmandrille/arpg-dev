@@ -36,6 +36,28 @@ def validate_fog_presentation_ranges(report: Any, load_json: Callable[[Path], di
     else:
         report.ok("fog_presentation point_light.range_multiplier in (0, 10]")
 
+    sc = cfg.get("shadow_cache", {})
+    move_eps = sc.get("move_epsilon", 0.006)
+    if not (0.0 <= move_eps <= 1.0):
+        report.fail("fog_presentation range", f"shadow_cache.move_epsilon={move_eps} is outside [0, 1]")
+    else:
+        report.ok("fog_presentation shadow_cache.move_epsilon in [0, 1]")
+
+    viewport_eps = sc.get("viewport_size_epsilon_px", 1.0)
+    if not (0.0 <= viewport_eps <= 64.0):
+        report.fail("fog_presentation range", f"shadow_cache.viewport_size_epsilon_px={viewport_eps} is outside [0, 64]")
+    else:
+        report.ok("fog_presentation shadow_cache.viewport_size_epsilon_px in [0, 64]")
+
+    throttle = sc.get("performance_min_rebuild_interval_frames", 3)
+    if not isinstance(throttle, int) or throttle < 0 or throttle > 60:
+        report.fail(
+            "fog_presentation range",
+            f"shadow_cache.performance_min_rebuild_interval_frames={throttle} is outside [0, 60]",
+        )
+    else:
+        report.ok("fog_presentation shadow_cache.performance_min_rebuild_interval_frames in [0, 60]")
+
 
 def validate_camera_fog_mode_alignment(report: Any, load_json: Callable[[Path], dict], assets_dir: Path) -> None:
     """Ensure fog organic-edge toggles align with declared camera presentation modes."""

@@ -54,6 +54,7 @@ const InputShadowOverlayScript := preload("res://scripts/input_shadow_overlay.gd
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const ClientAudioControllerScript := preload("res://scripts/client_audio_controller.gd")
 const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
+const ClientGraphicsBridgeScript := preload("res://scripts/client_graphics_bridge.gd")
 const DungeonDepthLightingScript := preload("res://scripts/dungeon_depth_lighting.gd")
 const PerformanceStatusFormatterScript := preload("res://scripts/performance_status_formatter.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
@@ -313,6 +314,7 @@ func _ready() -> void:
 	_loot_filter.set_mode_label(client_settings.loot_filter_mode)
 	client_settings.apply()
 	_sync_camera_from_settings()
+	_sync_fog_performance_throttle()
 	ClientAudioBridgeScript.apply_settings(audio_controller, client_settings)
 	if discovery_minimap != null: discovery_minimap.set_panel_opacity(client_settings.map_opacity)
 	_refresh_localized_texts()
@@ -680,6 +682,17 @@ func _on_camera_mode_selected(mode: String) -> void:
 	_sync_camera_from_settings()
 	_sync_settings_panel()
 
+func _on_graphics_quality_selected(quality: String) -> void:
+	ClientGraphicsBridgeScript.apply_graphics_quality_selected(
+		fog_overlay,
+		client_settings,
+		quality,
+		Callable(self, "_sync_settings_panel"),
+	)
+
+func _sync_fog_performance_throttle() -> void:
+	ClientGraphicsBridgeScript.sync_fog_performance_throttle(fog_overlay, client_settings)
+
 func _sync_camera_from_settings() -> void:
 	if client_settings == null:
 		return
@@ -748,6 +761,7 @@ func _sync_settings_panel() -> void:
 		settings_panel.set_language(client_settings.language)
 		settings_panel.set_monster_health_bar_mode(client_settings.monster_health_bar_mode)
 		settings_panel.set_camera_mode(client_settings.camera_mode)
+		settings_panel.set_graphics_quality(client_settings.graphics_quality)
 		ClientAudioBridgeScript.sync_settings_panel(settings_panel, client_settings)
 
 func _update_mouse_capture() -> void:
@@ -3775,6 +3789,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.language_selected.connect(_on_language_selected)
 	settings_panel.monster_health_bar_mode_selected.connect(_on_monster_health_bar_mode_selected)
 	settings_panel.camera_mode_selected.connect(_on_camera_mode_selected)
+	settings_panel.graphics_quality_selected.connect(_on_graphics_quality_selected)
 	settings_panel.master_volume_changed.connect(_on_master_volume_changed)
 	settings_panel.music_volume_changed.connect(_on_music_volume_changed)
 	settings_panel.sfx_volume_changed.connect(_on_sfx_volume_changed)

@@ -53,6 +53,20 @@
         "ambient_scale": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     },
+    "shadow_cache": {
+      "type": "object",
+      "required": [
+        "move_epsilon",
+        "viewport_size_epsilon_px",
+        "performance_min_rebuild_interval_frames"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "move_epsilon": { "type": "number", "minimum": 0 },
+        "viewport_size_epsilon_px": { "type": "number", "minimum": 0 },
+        "performance_min_rebuild_interval_frames": { "type": "integer", "minimum": 0 }
+      }
+    },
     "organic_edge": {
       "type": "object",
       "required": [

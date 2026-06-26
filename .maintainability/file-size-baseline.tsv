@@ -3,16 +3,16 @@
 client/scripts/bot_controller.gd	757
 client/scripts/bot_scenario_runner.gd	1629
 client/scripts/character_select_panel.gd	642
-client/scripts/fog_of_war_overlay.gd	624	# v331 hero-visibility-lighting: grew past 600 adding OmniLight3D lifecycle for perspective hero light. Extract light node management in a future slice.
+client/scripts/fog_of_war_overlay.gd	644	# v347 dungeon-render-performance: shadow cache integration
 client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	6127	# v335: extracted movement_input_presenter.gd
+client/scripts/main.gd	6187	# v347: graphics quality preset wiring
 client/scripts/market_panel.gd	1059
 client/scripts/player_status_effect_markers.gd	646
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010
 client/scripts/stash_panel.gd	1155
 client/tests/test_client_bot.gd	1153	# v334 client-bot: bot exit cleanup helpers
-client/tests/test_coop_client.gd	1633
+client/tests/test_coop_client.gd	1669
 client/tests/test_golden.gd	784
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7937	# v332 movement-overhaul exception: +83 lines for 4 new movement tests (TestMovementSpeedPercentFromGear, TestMovementSpeedDerivedFromClass, TestMovementSpeedDexScaling + grace window test). Next slice touching game_test.go must not grow it.

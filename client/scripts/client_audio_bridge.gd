@@ -22,7 +22,8 @@ static func show_settings(panel: SettingsPanel, settings: ClientSettings) -> voi
 		settings.music_volume,
 		settings.sfx_volume,
 		settings.map_opacity,
-		settings.camera_mode
+		settings.camera_mode,
+		settings.graphics_quality
 	)
 
 

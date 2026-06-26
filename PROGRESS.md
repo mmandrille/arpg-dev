@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-25
+Last updated: 2026-06-26
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-25
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v346 — quadruped-pounce-telegraph |
+| **Latest completed slice** | v347 — dungeon-render-performance |
 | **Active branch** | `main` |
-| **CI gate** | v343–v345 focused checks green; full `make ci` pending on this host |
-| **Next slice** | TBD (autoloop: bat-hover-swarm, quadruped-pounce-telegraph, fog-aware-aggro, …) |
+| **CI gate** | v347 focused checks green; full `make ci` pending on `/finish` |
+| **Next slice** | v348 forward-plus renderer (deferred from v347) or movement smoothing (v349) |
 | **Last engineering review** | v337 — [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md) (2026-06-25, ad hoc; covers v335–v337 + post-v334 `$refactor` completion) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 

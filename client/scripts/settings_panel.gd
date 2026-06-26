@@ -12,6 +12,7 @@ signal create_game_session_type_selected(session_type: String)
 signal language_selected(language: String)
 signal monster_health_bar_mode_selected(mode: String)
 signal camera_mode_selected(mode: String)
+signal graphics_quality_selected(mode: String)
 signal master_volume_changed(value: float)
 signal music_volume_changed(value: float)
 signal sfx_volume_changed(value: float)
@@ -22,11 +23,13 @@ var _session_type_buttons: Dictionary = {}
 var _language_buttons: Dictionary = {}
 var _monster_health_bar_buttons: Dictionary = {}
 var _camera_mode_buttons: Dictionary = {}
+var _graphics_quality_buttons: Dictionary = {}
 var _selected_label: String = ""
 var _selected_session_type: String = "coop"
 var _selected_language: String = "en"
 var _selected_monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE
 var _selected_camera_mode: String = ClientSettingsScript.DEFAULT_CAMERA_MODE
+var _selected_graphics_quality: String = ClientSettingsScript.DEFAULT_GRAPHICS_QUALITY
 var _floating_toggle: CheckButton
 var _status_text_toggle: CheckButton
 var _title: Label
@@ -34,6 +37,7 @@ var _session_type_label: Label
 var _language_label: Label
 var _monster_health_bar_label: Label
 var _camera_mode_label: Label
+var _graphics_quality_label: Label
 var _master_volume_label: Label
 var _music_volume_label: Label
 var _sfx_volume_label: Label
@@ -55,7 +59,7 @@ func _ready() -> void:
 	visible = false
 
 
-func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE, master_volume: float = ClientSettingsScript.DEFAULT_MASTER_VOLUME, music_volume: float = ClientSettingsScript.DEFAULT_MUSIC_VOLUME, sfx_volume: float = ClientSettingsScript.DEFAULT_SFX_VOLUME, map_opacity: float = ClientSettingsScript.DEFAULT_MAP_OPACITY, camera_mode: String = ClientSettingsScript.DEFAULT_CAMERA_MODE) -> void:
+func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE, master_volume: float = ClientSettingsScript.DEFAULT_MASTER_VOLUME, music_volume: float = ClientSettingsScript.DEFAULT_MUSIC_VOLUME, sfx_volume: float = ClientSettingsScript.DEFAULT_SFX_VOLUME, map_opacity: float = ClientSettingsScript.DEFAULT_MAP_OPACITY, camera_mode: String = ClientSettingsScript.DEFAULT_CAMERA_MODE, graphics_quality: String = ClientSettingsScript.DEFAULT_GRAPHICS_QUALITY) -> void:
 	_sync_viewport_size()
 	visible = true
 	set_selected_size_label(selected_label)
@@ -67,6 +71,7 @@ func show_settings(selected_label: String, floating_combat_text_enabled: bool = 
 	set_audio_volumes(master_volume, music_volume, sfx_volume)
 	set_map_opacity(map_opacity)
 	set_camera_mode(camera_mode)
+	set_graphics_quality(graphics_quality)
 
 
 func hide_panel() -> void:
@@ -132,6 +137,13 @@ func set_camera_mode(mode: String) -> void:
 	for key in _camera_mode_buttons.keys():
 		var button: Button = _camera_mode_buttons[key]
 		button.disabled = str(key) == _selected_camera_mode
+
+
+func set_graphics_quality(quality: String) -> void:
+	_selected_graphics_quality = ClientSettingsScript.normalize_graphics_quality(quality)
+	for key in _graphics_quality_buttons.keys():
+		var button: Button = _graphics_quality_buttons[key]
+		button.disabled = str(key) == _selected_graphics_quality
 
 
 func set_audio_volumes(master: float, music: float, sfx: float) -> void:
@@ -233,6 +245,17 @@ func _build() -> void:
 	_add_camera_mode_button(camera_mode_row, ClientSettingsScript.CAMERA_MODE_ISOMETRIC)
 	_add_camera_mode_button(camera_mode_row, ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
 
+	_graphics_quality_label = Label.new()
+	_graphics_quality_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_graphics_quality_label.add_theme_font_size_override("font_size", 23)
+	box.add_child(_graphics_quality_label)
+
+	var graphics_quality_row := HBoxContainer.new()
+	graphics_quality_row.add_theme_constant_override("separation", 8)
+	box.add_child(graphics_quality_row)
+	_add_graphics_quality_button(graphics_quality_row, ClientSettingsScript.GRAPHICS_QUALITY_BALANCED)
+	_add_graphics_quality_button(graphics_quality_row, ClientSettingsScript.GRAPHICS_QUALITY_PERFORMANCE)
+
 	_master_volume_label = _add_slider_label(box)
 	_master_volume_slider = _add_volume_slider(box, func(value: float) -> void:
 		master_volume_changed.emit(value)
@@ -312,6 +335,17 @@ func _add_camera_mode_button(parent: Control, mode: String) -> void:
 		camera_mode_selected.emit(mode)
 	)
 	_camera_mode_buttons[mode] = button
+	parent.add_child(button)
+
+
+func _add_graphics_quality_button(parent: Control, quality: String) -> void:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(154, 36)
+	button.add_theme_font_size_override("font_size", 22)
+	button.pressed.connect(func() -> void:
+		graphics_quality_selected.emit(quality)
+	)
+	_graphics_quality_buttons[quality] = button
 	parent.add_child(button)
 
 
@@ -396,3 +430,8 @@ func refresh_texts() -> void:
 	for key in _camera_mode_buttons.keys():
 		var cam_button: Button = _camera_mode_buttons[key]
 		cam_button.text = TextCatalogScript.get_text("settings.camera_mode.%s" % str(key), str(key))
+	if _graphics_quality_label != null:
+		_graphics_quality_label.text = TextCatalogScript.get_text("settings.graphics_quality", "Graphics Quality")
+	for key in _graphics_quality_buttons.keys():
+		var quality_button: Button = _graphics_quality_buttons[key]
+		quality_button.text = ClientSettingsScript.graphics_quality_label(str(key))

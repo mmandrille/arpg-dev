@@ -16,6 +16,10 @@ const DEFAULT_MONSTER_HEALTH_BAR_MODE := MONSTER_HEALTH_BAR_CONTEXTUAL
 const CAMERA_MODE_ISOMETRIC := "isometric"
 const CAMERA_MODE_CHEST_VIEW := "chest_view"
 const DEFAULT_CAMERA_MODE := CAMERA_MODE_ISOMETRIC
+const GRAPHICS_QUALITY_BALANCED := "balanced"
+const GRAPHICS_QUALITY_PERFORMANCE := "performance"
+const DEFAULT_GRAPHICS_QUALITY := GRAPHICS_QUALITY_BALANCED
+const PERFORMANCE_WINDOW_SIZE := Vector2i(1920, 1080)
 const SUPPORTED_CAMERA_MODES := [
 	CAMERA_MODE_ISOMETRIC,
 	CAMERA_MODE_CHEST_VIEW,
@@ -40,6 +44,10 @@ const SUPPORTED_CREATE_GAME_SESSION_TYPES := [
 	CREATE_GAME_SESSION_TYPE_COOP,
 	CREATE_GAME_SESSION_TYPE_SOLO,
 ]
+const SUPPORTED_GRAPHICS_QUALITIES := [
+	GRAPHICS_QUALITY_BALANCED,
+	GRAPHICS_QUALITY_PERFORMANCE,
+]
 
 var path: String = "user://settings.json"
 var window_size: Vector2i = DEFAULT_SIZE
@@ -54,6 +62,7 @@ var music_volume: float = DEFAULT_MUSIC_VOLUME
 var sfx_volume: float = DEFAULT_SFX_VOLUME
 var map_opacity: float = DEFAULT_MAP_OPACITY
 var camera_mode: String = DEFAULT_CAMERA_MODE
+var graphics_quality: String = DEFAULT_GRAPHICS_QUALITY
 
 
 func _init(settings_path: String = "user://settings.json") -> void:
@@ -137,6 +146,21 @@ static func normalize_camera_mode(mode: String) -> String:
 	return DEFAULT_CAMERA_MODE
 
 
+static func normalize_graphics_quality(quality: String) -> String:
+	var normalized := quality.strip_edges().to_lower()
+	if normalized in SUPPORTED_GRAPHICS_QUALITIES:
+		return normalized
+	return DEFAULT_GRAPHICS_QUALITY
+
+
+static func graphics_quality_label(quality: String) -> String:
+	match normalize_graphics_quality(quality):
+		GRAPHICS_QUALITY_PERFORMANCE:
+			return TextCatalogScript.get_text("settings.graphics_quality.performance", "Performance")
+		_:
+			return TextCatalogScript.get_text("settings.graphics_quality.balanced", "Balanced")
+
+
 static func normalize_volume(value, fallback: float) -> float:
 	if typeof(value) != TYPE_FLOAT and typeof(value) != TYPE_INT:
 		return fallback
@@ -197,6 +221,12 @@ static func camera_mode_from_data(data) -> String:
 	return normalize_camera_mode(str((data as Dictionary).get("camera_mode", DEFAULT_CAMERA_MODE)))
 
 
+static func graphics_quality_from_data(data) -> String:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_GRAPHICS_QUALITY
+	return normalize_graphics_quality(str((data as Dictionary).get("graphics_quality", DEFAULT_GRAPHICS_QUALITY)))
+
+
 static func master_volume_from_data(data) -> float:
 	if typeof(data) != TYPE_DICTIONARY:
 		return DEFAULT_MASTER_VOLUME
@@ -231,6 +261,7 @@ func load() -> void:
 		loot_filter_mode = DEFAULT_LOOT_FILTER_MODE
 		monster_health_bar_mode = DEFAULT_MONSTER_HEALTH_BAR_MODE
 		camera_mode = DEFAULT_CAMERA_MODE
+		graphics_quality = DEFAULT_GRAPHICS_QUALITY
 		master_volume = DEFAULT_MASTER_VOLUME
 		music_volume = DEFAULT_MUSIC_VOLUME
 		sfx_volume = DEFAULT_SFX_VOLUME
@@ -246,6 +277,7 @@ func load() -> void:
 	loot_filter_mode = loot_filter_mode_from_data(parsed)
 	monster_health_bar_mode = monster_health_bar_mode_from_data(parsed)
 	camera_mode = camera_mode_from_data(parsed)
+	graphics_quality = graphics_quality_from_data(parsed)
 	master_volume = master_volume_from_data(parsed)
 	music_volume = music_volume_from_data(parsed)
 	sfx_volume = sfx_volume_from_data(parsed)
@@ -269,6 +301,7 @@ func save() -> void:
 		"loot_filter_mode": loot_filter_mode,
 		"monster_health_bar_mode": monster_health_bar_mode,
 		"camera_mode": camera_mode,
+		"graphics_quality": graphics_quality,
 		"master_volume": master_volume,
 		"music_volume": music_volume,
 		"sfx_volume": sfx_volume,
@@ -276,8 +309,14 @@ func save() -> void:
 	}))
 
 
+func effective_window_size() -> Vector2i:
+	if graphics_quality == GRAPHICS_QUALITY_PERFORMANCE:
+		return PERFORMANCE_WINDOW_SIZE
+	return window_size
+
+
 func apply() -> void:
-	var target_size := _fit_size_to_screen(window_size)
+	var target_size := _fit_size_to_screen(effective_window_size())
 	DisplayServer.window_set_min_size(SUPPORTED_SIZES[0])
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	DisplayServer.window_set_size(target_size)
@@ -360,6 +399,14 @@ func set_monster_health_bar_mode(mode: String, persist: bool = true) -> void:
 
 func set_camera_mode(mode: String, persist: bool = true) -> void:
 	camera_mode = normalize_camera_mode(mode)
+	if persist:
+		save()
+
+
+func set_graphics_quality(quality: String, persist: bool = true, apply_now: bool = true) -> void:
+	graphics_quality = normalize_graphics_quality(quality)
+	if apply_now:
+		apply()
 	if persist:
 		save()
 

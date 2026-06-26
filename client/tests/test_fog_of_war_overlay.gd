@@ -29,6 +29,8 @@ func _run() -> void:
 	await _test_hero_centered_falloff_debug_state()
 	await _test_perspective_world_ground_falloff()
 	await _test_perspective_disables_organic_edge()
+	await _test_shadow_cache_hit_on_static_frames()
+	await _test_shadow_cache_layout_invalidation()
 	print("[gdtest] PASS: test_fog_of_war_overlay (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -355,6 +357,38 @@ func _test_perspective_disables_organic_edge() -> void:
 	var state := overlay.get_debug_state()
 	_assert_false("perspective organic edge disabled", bool(state.get("organic_edge_enabled", true)))
 	_assert_eq("perspective organic edge px", float(state.get("organic_edge_px", -1.0)), 0.0)
+	overlay.free()
+
+
+func _test_shadow_cache_hit_on_static_frames() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	overlay.set_wall_layout([{"position": {"x": 3.0, "y": 0.0}, "size": {"x": 1.0, "y": 3.0}}])
+	await process_frame
+	var first := overlay.get_debug_state()
+	_assert_eq("first shadow rebuild count", int(first.get("shadow_rebuild_count", 0)), 1)
+	await process_frame
+	var second := overlay.get_debug_state()
+	_assert_eq("second shadow rebuild count", int(second.get("shadow_rebuild_count", 0)), 1)
+	_assert_true("shadow cache hit recorded", int(second.get("shadow_cache_hits", 0)) >= 1)
+	_assert_true("shadow cache valid", bool(second.get("shadow_cache_valid", false)))
+	overlay.free()
+
+
+func _test_shadow_cache_layout_invalidation() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	overlay.set_wall_layout([{"position": {"x": 3.0, "y": 0.0}, "size": {"x": 1.0, "y": 3.0}}])
+	await process_frame
+	overlay.set_wall_layout([{"position": {"x": 4.0, "y": 0.0}, "size": {"x": 1.0, "y": 3.0}}])
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_eq("layout change rebuild count", int(state.get("shadow_rebuild_count", 0)), 2)
+	_assert_eq("layout change reason", str(state.get("shadow_cache_last_rebuild_reason", "")), "hard_invalidate")
 	overlay.free()
 
 

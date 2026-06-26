@@ -18,6 +18,7 @@ func _initialize() -> void:
 	_test_settings_normalize_unknown()
 	_test_settings_cycle_modes()
 	_test_settings_save_load()
+	_test_settings_graphics_quality_from_data_and_save()
 	_test_controller_isometric_projection()
 	_test_controller_late_settings_mode_sync()
 	_test_settings_panel_camera_mode_button_sync()
@@ -74,6 +75,20 @@ func _test_settings_save_load() -> void:
 	var s2 := ClientSettingsScript.new(path)
 	s2.load()
 	_assert_eq("saved chest_view persists after reload", s2.camera_mode, ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
+
+
+func _test_settings_graphics_quality_from_data_and_save() -> void:
+	var normalized := ClientSettingsScript.normalize_graphics_quality("PERFORMANCE")
+	_assert_eq("unknown graphics quality normalizes to balanced", ClientSettingsScript.normalize_graphics_quality("bogus"), ClientSettingsScript.GRAPHICS_QUALITY_BALANCED)
+	_assert_eq("performance quality normalizes", normalized, ClientSettingsScript.GRAPHICS_QUALITY_PERFORMANCE)
+	var path := "user://test_graphics_quality_save_load.json"
+	var s := ClientSettingsScript.new(path)
+	s.graphics_quality = ClientSettingsScript.GRAPHICS_QUALITY_PERFORMANCE
+	s.save()
+	var s2 := ClientSettingsScript.new(path)
+	s2.load()
+	_assert_eq("saved performance quality persists", s2.graphics_quality, ClientSettingsScript.GRAPHICS_QUALITY_PERFORMANCE)
+	_assert_eq("performance effective window size", s2.effective_window_size(), ClientSettingsScript.PERFORMANCE_WINDOW_SIZE)
 
 
 func _test_controller_isometric_projection() -> void:

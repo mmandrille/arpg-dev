@@ -1,0 +1,68 @@
+client/scripts/entity_tick_smoothing.gd
+  s_05d5e6aa8fd731::t_6c754a7ccd2f9d 1-71
+shared/assets/movement_presentation.v0.json
+  s_05d5e6aa8fd731::t_555760d9fa105e 1-8
+client/tests/test_entity_tick_smoothing.gd
+  s_05d5e6aa8fd731::t_141e8ee3755ee0 1-65
+client/scripts/bot_step_catalog.gd
+  s_05d5e6aa8fd731::t_f60431dd8214c1 16
+  s_05d5e6aa8fd731::t_93e256d41c832a 41
+client/scripts/main.gd
+  s_05d5e6aa8fd731::t_3fb91c00d769db 269
+  s_05d5e6aa8fd731::t_7bdcd7ee04cb68 73
+  s_05d5e6aa8fd731::t_bfffeacf073571 302,879
+  s_05d5e6aa8fd731::t_7565c995ca8d98 1585
+  s_05d5e6aa8fd731::t_4a7fcb8b3c3a51 878
+  s_05d5e6aa8fd731::t_12dce0edc2d1f0 1657
+  s_05d5e6aa8fd731::t_c00d1d4ab73c08 1651,1654
+  s_05d5e6aa8fd731::t_f93c23c433a448 5692
+  s_05d5e6aa8fd731::t_3217abb10aab88 936-937
+client/scripts/bot_assertion_handlers.gd
+  s_05d5e6aa8fd731::t_9f58318aeccfa8 73-79
+  s_05d5e6aa8fd731::t_1b316835cc532f 464-472
+docs/progress/slice-lifecycle.md
+  s_05d5e6aa8fd731::t_cccf5e9673c36e 364
+PROGRESS.md
+  s_05d5e6aa8fd731::t_c109423790e4eb 26,28-29
+client/scripts/movement_presentation_loader.gd
+  s_05d5e6aa8fd731::t_807a836176ee96 1-37
+docs/plans/v349_2026-06-26-movement-tick-smoothing.md
+  s_05d5e6aa8fd731::t_889b58e40e0bbd 34
+  s_05d5e6aa8fd731::t_4631b817beca2a 61-63
+  s_05d5e6aa8fd731::t_76c5fb485e7d5a 1-33,35-40,43-48,50-60
+  s_05d5e6aa8fd731::t_eb487afff24463 41-42
+  s_05d5e6aa8fd731::t_69874dbe227a08 49
+docs/as-built/v349_movement-tick-smoothing.md
+  s_05d5e6aa8fd731::t_ad8fe0929aa0e4 1-33
+client/scripts/bot_wait_handlers.gd
+  s_05d5e6aa8fd731::t_21c521735114f0 41-42
+scripts/client_smoke.sh
+  s_05d5e6aa8fd731::t_fbeef22de355b4 230
+docs/specs/v349_spec-movement-tick-smoothing.md
+  s_05d5e6aa8fd731::t_06049eb44a87cc 1-2,4-61
+  s_05d5e6aa8fd731::t_5955cc801aded8 3
+tools/bot/scenarios/client/84_entity_tick_smoothing.json
+  s_05d5e6aa8fd731::t_c767ad2eb82938 1-15
+docs/CODEMAP.md
+  s_05d5e6aa8fd731::t_67dd2ce62aeb6f 18
+client/scripts/entity_tick_smoothing_runtime.gd
+  s_05d5e6aa8fd731::t_36a9bef97067a9 1-95
+shared/assets/movement_presentation.v0.schema.json
+  s_05d5e6aa8fd731::t_e481a44c5490f6 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "14fe059694fc3acc59c1ac596cf0a7d981f2247d",
+  "prompts": {},
+  "sessions": {
+    "s_05d5e6aa8fd731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d3fe9e6-9bd8-4c49-8e7b-285d8eb2314a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

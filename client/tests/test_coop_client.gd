@@ -57,6 +57,7 @@ func _initialize() -> void:
 	_test_expired_skill_cooldown_not_restored_by_left_click_refresh()
 	_test_character_bar_opens_stats_panel()
 	_test_skill_function_key_selects_right_click_skill()
+	_test_skill_function_key_assigns_while_skills_panel_open()
 	_test_learned_skill_auto_selects_right_click()
 	_test_skill_cast_payload_uses_direction_without_nearest_fallback()
 	_test_channel_skill_payload_requires_direction_until_stop()
@@ -1473,6 +1474,44 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	_assert_eq("snapshot restores Shift+F1 skill binding", str(main.skill_function_keys[8]), "magic_bolt")
 	_assert_eq("snapshot restores right click skill", main.right_click_skill_id, "heal")
 	main.skill_bar.queue_free()
+	main.free()
+
+
+func _test_skill_function_key_assigns_while_skills_panel_open() -> void:
+	var main = MainScript.new()
+	main.skills_panel = SkillsPanelScript.new()
+	root.add_child(main.skills_panel)
+	main.skills_panel.visible = true
+	main.skill_progression = {
+		"unspent_skill_points": 0,
+		"skills": [
+			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false},
+			{"skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false},
+		],
+	}
+	main.skills_panel.set_skill_progression(main.skill_progression)
+	_assert_true("skills panel open locks gameplay input", main._input_locked())
+	main.skills_panel.bot_hover_skill("magic_bolt")
+	var event := InputEventKey.new()
+	event.keycode = KEY_F1
+	event.pressed = true
+	main._unhandled_input(event)
+	_assert_eq("F1 assigns hovered skill while skills panel open", str(main.skill_function_keys[0]), "magic_bolt")
+	main.skills_panel.bot_hover_skill("heal")
+	event.keycode = KEY_F2
+	main._unhandled_input(event)
+	_assert_eq("F2 assigns hovered skill while skills panel open", str(main.skill_function_keys[1]), "heal")
+	main.right_click_skill_id = ""
+	main.skill_function_keys[0] = "magic_bolt"
+	main.inventory_panel = InventoryPanelScript.new()
+	main.inventory_panel.visible = true
+	main.skills_panel.visible = false
+	_assert_true("inventory panel locks gameplay input", main._input_locked())
+	event.keycode = KEY_F1
+	main._unhandled_input(event)
+	_assert_eq("inventory panel blocks F-key skill selection", main.right_click_skill_id, "")
+	main.skills_panel.queue_free()
+	main.inventory_panel.free()
 	main.free()
 
 

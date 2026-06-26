@@ -2398,7 +2398,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_escape()
 		get_viewport().set_input_as_handled()
 		return
-	if _input_locked() and not _bot_allows_panel_toggle_key(event):
+	if _input_locked() and not _bot_allows_panel_toggle_key(event) and not _allows_skill_function_key_while_panel_open(event):
 		return
 	if bot_mode and not (event is InputEventKey):
 		return
@@ -2711,6 +2711,17 @@ func _bot_allows_panel_toggle_key(event: InputEvent) -> bool:
 		return false
 	return _is_inventory_key(key_event) or _is_character_stats_key(key_event) or _is_skills_key(key_event) \
 		or _is_character_info_key(key_event)
+
+func _allows_skill_function_key_while_panel_open(event: InputEvent) -> bool:
+	if skills_panel == null or not skills_panel.visible:
+		return false
+	if not (event is InputEventKey):
+		return false
+	var key_event := event as InputEventKey
+	if not key_event.pressed or key_event.echo:
+		return false
+
+	return _skill_function_key_slot(key_event) >= 0
 
 func _lab_world_fog_at_town_level() -> bool:
 	return current_level == 0 and not current_wall_layout.is_empty()

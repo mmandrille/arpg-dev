@@ -1,0 +1,25 @@
+client/tests/test_animation.gd
+  s_7b967139b528b4::t_e9cca0e1d0f6fa 500
+  s_7b967139b528b4::t_561f558ba8f2b6 474-475,482-499,501-502
+  s_7b967139b528b4::t_4d460d1f934e47 47-48
+  s_7b967139b528b4::t_bf39209905559b 476-481
+client/scripts/main.gd
+  s_7b967139b528b4::t_00951eca8ec4d9 1631-1635
+  s_7b967139b528b4::t_4b6c65933013eb 5540,5547,5549
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cd01b12b9141eeb1fa16ce8145b09787752e8289",
+  "prompts": {},
+  "sessions": {
+    "s_7b967139b528b4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a19c9423-7a46-431c-95f5-acf01313110a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -235,6 +235,7 @@ run_gate "GDScript movement input presenter test" "[gdtest] PASS: test_movement_
 
 # 2p. Camera mode presentation loader unit tests (server-independent; v329).
 run_gate "GDScript camera mode settings test" "[gdtest] PASS: test_camera_mode_settings" res://tests/test_camera_mode_settings.gd
+run_gate "GDScript window display mode settings test" "[gdtest] PASS: test_window_display_mode_settings" res://tests/test_window_display_mode_settings.gd
 run_gate "GDScript crosshair target system test" "[gdtest] PASS: test_crosshair_target_system" res://tests/test_crosshair_target_system.gd
 run_gate "GDScript panel intent input test" "[gdtest] PASS: test_panel_intent_input" res://tests/test_panel_intent_input.gd
 

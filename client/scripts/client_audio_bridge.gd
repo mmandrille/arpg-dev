@@ -23,7 +23,8 @@ static func show_settings(panel: SettingsPanel, settings: ClientSettings) -> voi
 		settings.sfx_volume,
 		settings.map_opacity,
 		settings.camera_mode,
-		settings.graphics_quality
+		settings.graphics_quality,
+		settings.window_mode
 	)
 
 

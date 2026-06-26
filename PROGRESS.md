@@ -23,10 +23,10 @@ Last updated: 2026-06-26
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v350 — ci-full-green |
+| **Latest completed slice** | v351 — window-display-mode |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green; `make ci-full` green (all 15 extended scenarios recovered at v350) |
-| **Next slice** | TBD — run `/next` to select from open gaps |
+| **Next slice** | v352 — projectile-tick-smoothing (autoloop queue) |
 | **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
 | **Next engineering review** | After ~v359 ships |
 
@@ -107,7 +107,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Dungeon generation | Non-rectangular/polygon fog line-of-sight blocking beyond current rectangular wall/tall-obstacle and closed-door occlusion, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final biome/difficulty balance beyond first area-density formulas | v40/v252/v253/v254/v255/v260/v261/v262/v295/v296/v297/v298/v299/v300 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up, v76/v77/v78 deferred |
-| Settings | Fullscreen, advanced audio options, controls remapping, accessibility options, graphics quality, language selection | v24/v224 non-goals |
+| Settings | Controls remapping, accessibility options, language selection | v24/v224 non-goals; v351 shipped windowed/fullscreen/windowed-fullscreen display mode in `user://settings.json` |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |

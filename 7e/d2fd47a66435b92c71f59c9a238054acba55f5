@@ -1,0 +1,25 @@
+client/scripts/bot_wait_handlers.gd
+  s_fb401d7e5f18dd::t_eea6ec67a1b690 179-180
+client/scripts/main.gd
+  s_fb401d7e5f18dd::t_ea9d325a82a4a0 2356-2357
+  s_fb401d7e5f18dd::t_3f4018f7e4073d 5807-5817
+  s_fb401d7e5f18dd::t_10e4b7893a382a 5818-5821
+client/tests/test_coop_client.gd
+  s_fb401d7e5f18dd::t_3f1091a867e613 175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7ed2fd47a66435b92c71f59c9a238054acba55f5",
+  "prompts": {},
+  "sessions": {
+    "s_fb401d7e5f18dd": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "298a01b8-b3a0-4414-b660-747ea41f9c4b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

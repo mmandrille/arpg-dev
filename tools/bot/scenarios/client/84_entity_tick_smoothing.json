@@ -1,5 +1,6 @@
 {
   "id": "entity_tick_smoothing",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vertical_slice",
   "seed": "ticksmooth01",

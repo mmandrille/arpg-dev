@@ -1,5 +1,5 @@
 # --- CI -----------------------------------------------------------------------
-.PHONY: maintainability check-progress-dashboard ci
+.PHONY: maintainability check-progress-dashboard ci ci-full
 maintainability: ## Run maintainability ratchet checks
 	./scripts/check-file-size-ratchet.sh
 	python3 ./scripts/check-extraction-coupling-ratchet.py
@@ -8,5 +8,8 @@ maintainability: ## Run maintainability ratchet checks
 check-progress-dashboard: ## Validate PROGRESS.md dashboard and progress archive links
 	./scripts/check-progress-dashboard.sh
 
-ci: ## Run the full local CI suite (quiet; VERBOSE=1 for full logs)
-	ARPG_ADDR="$(CI_ADDR)" BASE_URL="$(CI_BASE_URL)" ./scripts/ci.sh
+ci: ## Run the fast local CI suite (ci scenario pack; quiet; VERBOSE=1 for full logs)
+	ARPG_CI_SCENARIO=ci ARPG_ADDR="$(CI_ADDR)" BASE_URL="$(CI_BASE_URL)" ./scripts/ci.sh
+
+ci-full: ## Run the full scenario matrix (all protocol + client bots; ~20+ min)
+	ARPG_CI_SCENARIO=all ARPG_ADDR="$(CI_ADDR)" BASE_URL="$(CI_BASE_URL)" ./scripts/ci.sh

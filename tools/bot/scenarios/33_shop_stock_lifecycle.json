@@ -1,48 +1,164 @@
 {
   "id": "shop_stock_lifecycle",
+  "ci_tier": "extended",
   "world_id": "vendor_lab",
   "seed": "town_vendor_gold_sink_1075",
   "title": "Shop stock lifecycle",
   "description": "Open compact vendor stock, use buyback during the visit, and prove generated stock persists while buyback is cleared in the next session.",
   "steps": [
-    { "action": "pick_up_first_rolled_loot" },
-    { "action": "open_shop" },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 },
-    { "action": "assert_shop_offer_details", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5, "requires_slot": true, "requires_category": true },
-    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1 },
-    { "action": "buy_shop_offer", "shop_id": "town_vendor", "offer_id": "fixed:red_potion" },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "fixed", "equals": 2 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1 },
-    { "action": "sell_inventory_item", "item_def_id": "red_potion", "equipped": false },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 2 },
-    { "action": "buy_shop_offer", "shop_id": "town_vendor", "offer_kind": "buyback", "offer_index": 0 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1 }
+    {
+      "action": "pick_up_first_rolled_loot"
+    },
+    {
+      "action": "open_shop"
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "fixed",
+      "equals": 2
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "generated",
+      "equals": 5
+    },
+    {
+      "action": "assert_shop_offer_details",
+      "shop_id": "town_vendor",
+      "offer_kind": "generated",
+      "equals": 5,
+      "requires_slot": true,
+      "requires_category": true
+    },
+    {
+      "action": "sell_inventory_item",
+      "rolled": true,
+      "equipped": false
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "buyback",
+      "equals": 1
+    },
+    {
+      "action": "buy_shop_offer",
+      "shop_id": "town_vendor",
+      "offer_id": "fixed:red_potion"
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "generated",
+      "equals": 5
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "fixed",
+      "equals": 2
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "buyback",
+      "equals": 1
+    },
+    {
+      "action": "sell_inventory_item",
+      "item_def_id": "red_potion",
+      "equipped": false
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "buyback",
+      "equals": 2
+    },
+    {
+      "action": "buy_shop_offer",
+      "shop_id": "town_vendor",
+      "offer_kind": "buyback",
+      "offer_index": 0
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "buyback",
+      "equals": 1
+    }
   ],
   "assertions": [
-    { "type": "current_level", "equals": 0 },
-    { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 1 },
-    { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 },
-    { "type": "shop_event", "event_type": "shop_purchase", "at_least": 2 },
-    { "type": "shop_event", "event_type": "shop_sale", "at_least": 2 }
+    {
+      "type": "current_level",
+      "equals": 0
+    },
+    {
+      "type": "shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "buyback",
+      "equals": 1
+    },
+    {
+      "type": "shop_offer_count",
+      "shop_id": "town_vendor",
+      "offer_kind": "generated",
+      "equals": 5
+    },
+    {
+      "type": "shop_event",
+      "event_type": "shop_purchase",
+      "at_least": 2
+    },
+    {
+      "type": "shop_event",
+      "event_type": "shop_sale",
+      "at_least": 2
+    }
   ],
   "fresh_session_checks": [
     {
       "world_id": "vendor_lab",
       "steps": [
-        { "action": "open_shop" },
-        { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 0 },
-        { "action": "assert_shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 }
+        {
+          "action": "open_shop"
+        },
+        {
+          "action": "assert_shop_offer_count",
+          "shop_id": "town_vendor",
+          "offer_kind": "buyback",
+          "equals": 0
+        },
+        {
+          "action": "assert_shop_offer_count",
+          "shop_id": "town_vendor",
+          "offer_kind": "generated",
+          "equals": 5
+        }
       ],
       "assertions": [
-        { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "buyback", "equals": 0 },
-        { "type": "shop_offer_count", "shop_id": "town_vendor", "offer_kind": "generated", "equals": 5 }
+        {
+          "type": "shop_offer_count",
+          "shop_id": "town_vendor",
+          "offer_kind": "buyback",
+          "equals": 0
+        },
+        {
+          "type": "shop_offer_count",
+          "shop_id": "town_vendor",
+          "offer_kind": "generated",
+          "equals": 5
+        }
       ]
     }
   ],
   "visual": {
-    "camera": { "x": 6, "y": 12, "zoom": 1.1 }
+    "camera": {
+      "x": 6,
+      "y": 12,
+      "zoom": 1.1
+    }
   }
 }

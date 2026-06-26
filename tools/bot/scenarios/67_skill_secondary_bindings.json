@@ -1,23 +1,50 @@
 {
   "id": "skill_secondary_bindings",
+  "ci_tier": "extended",
   "world_id": "vertical_slice",
   "seed": "v157_skill_secondary_bindings",
   "title": "Skill secondary bindings",
   "description": "Authoritative skill binding array supports primary F1-F8 and secondary Shift+F1-Shift+F8 slots.",
   "visual": {
-    "camera": { "x": 10, "y": 7, "zoom": 1.0 },
+    "camera": {
+      "x": 10,
+      "y": 7,
+      "zoom": 1.0
+    },
     "post_complete_hold_s": 4.0
   },
   "steps": [
     {
       "action": "set_skill_bindings",
-      "function_keys": ["magic_bolt", "heal", "", "", "", "", "", "", "cleave", "dash", "", "", "", "", "", ""],
+      "function_keys": [
+        "magic_bolt",
+        "heal",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "cleave",
+        "dash",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
       "right_click_skill_id": "heal"
     },
     {
       "action": "assert_skill_bindings",
       "length": 16,
-      "slots": { "0": "magic_bolt", "1": "heal", "8": "cleave", "9": "dash" },
+      "slots": {
+        "0": "magic_bolt",
+        "1": "heal",
+        "8": "cleave",
+        "9": "dash"
+      },
       "right_click_skill_id": "heal"
     }
   ],
@@ -27,16 +54,27 @@
         {
           "action": "assert_skill_bindings",
           "length": 16,
-          "slots": { "0": "magic_bolt", "1": "heal", "8": "cleave", "9": "dash" },
+          "slots": {
+            "0": "magic_bolt",
+            "1": "heal",
+            "8": "cleave",
+            "9": "dash"
+          },
           "right_click_skill_id": "heal"
         }
       ],
       "assertions": [
-        { "type": "current_level", "equals": 0 }
+        {
+          "type": "current_level",
+          "equals": 0
+        }
       ]
     }
   ],
   "assertions": [
-    { "type": "current_level", "equals": 0 }
+    {
+      "type": "current_level",
+      "equals": 0
+    }
   ]
 }

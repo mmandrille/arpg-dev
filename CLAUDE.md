@@ -35,7 +35,8 @@ make test-go         # all Go tests  (`cd server && go test ./...`)
 make test-py         # Python unit tests (`pytest tools/`)
 make client-unit     # Godot headless unit tests (quiet; add VERBOSE=1 for full logs)
 make client-smoke    # Godot headless smoke against a running TEST_BASE_URL server
-make ci              # full local CI suite (quiet; add VERBOSE=1 for full logs)
+make ci              # fast local CI (ci scenario pack; quiet; add VERBOSE=1 for full logs)
+make ci-full         # full scenario matrix CI (~20+ min; quiet; add VERBOSE=1 for full logs)
 make test-all        # test + ci + headless bot-visual (quiet; add VERBOSE=1 for full logs)
 
 # Shared contracts
@@ -59,7 +60,10 @@ make replay SESSION_ID=<id>   # re-simulate a recorded session and verify output
 
 **Override env vars on the command line:**
 ```bash
-VERBOSE=1 make ci                       # full CI logs (also: V=1)
+VERBOSE=1 make ci                       # fast CI logs (also: V=1)
+VERBOSE=1 make ci-full                  # full matrix CI logs
+make bot scenario=ci                    # protocol bot ci pack only
+make bot-client SCENARIO=ci HEADLESS=1  # client bot ci pack only
 AUTOPLAY_STEP_DELAY=0.8 make bot-visual   # slower playback
 GODOT=/path/to/godot make bot-visual
 SESSION_ID=abc123 make replay

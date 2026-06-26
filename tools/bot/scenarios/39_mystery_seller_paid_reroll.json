@@ -1,32 +1,69 @@
 {
   "id": "mystery_seller_paid_reroll",
+  "ci_tier": "extended",
   "world_id": "vendor_lab",
   "seed": "v64_mystery_reroll_0504",
   "title": "Mystery seller paid reroll",
   "description": "Fund a mystery seller visit, pay to reroll concealed stock, then buy from the refreshed mystery offer set.",
   "steps": [
-    { "action": "pick_up_first_rolled_loot" },
-    { "action": "pick_up_first_rolled_loot" },
-    { "action": "pick_up_first_rolled_loot" },
-    { "action": "open_shop" },
-    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
-    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
-    { "action": "sell_inventory_item", "rolled": true, "equipped": false },
+    {
+      "action": "pick_up_first_rolled_loot"
+    },
+    {
+      "action": "pick_up_first_rolled_loot"
+    },
+    {
+      "action": "pick_up_first_rolled_loot"
+    },
+    {
+      "action": "open_shop"
+    },
+    {
+      "action": "sell_inventory_item",
+      "rolled": true,
+      "equipped": false
+    },
+    {
+      "action": "sell_inventory_item",
+      "rolled": true,
+      "equipped": false
+    },
+    {
+      "action": "sell_inventory_item",
+      "rolled": true,
+      "equipped": false
+    },
     {
       "action": "open_shop",
       "shop_id": "town_mystery_seller",
       "interactable_def_id": "town_mystery_seller",
       "max_ticks": 160
     },
-    { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "concealed": true, "equals": 9 },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_mystery_seller",
+      "offer_kind": "mystery",
+      "concealed": true,
+      "equals": 9
+    },
     {
       "action": "reroll_shop",
       "shop_id": "town_mystery_seller",
       "interactable_def_id": "town_mystery_seller",
       "offer_kind": "mystery"
     },
-    { "action": "assert_gold_changed", "direction": "decrease", "by_at_least": 50 },
-    { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "concealed": true, "equals": 9 },
+    {
+      "action": "assert_gold_changed",
+      "direction": "decrease",
+      "by_at_least": 50
+    },
+    {
+      "action": "assert_shop_offer_count",
+      "shop_id": "town_mystery_seller",
+      "offer_kind": "mystery",
+      "concealed": true,
+      "equals": 9
+    },
     {
       "action": "assert_shop_event",
       "shop_id": "town_mystery_seller",
@@ -35,8 +72,16 @@
     }
   ],
   "assertions": [
-    { "type": "current_level", "equals": 0 },
-    { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 9 },
+    {
+      "type": "current_level",
+      "equals": 0
+    },
+    {
+      "type": "shop_offer_count",
+      "shop_id": "town_mystery_seller",
+      "offer_kind": "mystery",
+      "equals": 9
+    },
     {
       "type": "shop_event",
       "shop_id": "town_mystery_seller",
@@ -54,14 +99,28 @@
           "interactable_def_id": "town_mystery_seller",
           "max_ticks": 160
         },
-        { "action": "assert_shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 9 }
+        {
+          "action": "assert_shop_offer_count",
+          "shop_id": "town_mystery_seller",
+          "offer_kind": "mystery",
+          "equals": 9
+        }
       ],
       "assertions": [
-        { "type": "shop_offer_count", "shop_id": "town_mystery_seller", "offer_kind": "mystery", "equals": 9 }
+        {
+          "type": "shop_offer_count",
+          "shop_id": "town_mystery_seller",
+          "offer_kind": "mystery",
+          "equals": 9
+        }
       ]
     }
   ],
   "visual": {
-    "camera": { "x": 17, "y": 12, "zoom": 1.1 }
+    "camera": {
+      "x": 17,
+      "y": 12,
+      "zoom": 1.1
+    }
   }
 }

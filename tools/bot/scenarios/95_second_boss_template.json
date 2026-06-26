@@ -1,5 +1,6 @@
 {
   "id": "second_boss_template",
+  "ci_tier": "extended",
   "world_id": "boss_floor_gate_lab",
   "seed": "second_boss_template",
   "title": "Second boss template",
@@ -10,28 +11,119 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 220, "dex": 5, "vit": 90, "magic": 5 },
+    "stats": {
+      "str": 220,
+      "dex": 5,
+      "vit": 90,
+      "magic": 5
+    },
     "skill_ranks": {}
   },
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "monster", "is_boss": true, "boss_template_id": "crypt_matron", "monster_def_id": "dungeon_undead", "visual_model": "monster_skeleton", "visual_scale": 2.2, "equals": 1 },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "stairs_down", "state": "locked", "equals": 1 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_phase_started", "pattern_id": "summon_bats", "phase_kind": "active" }, "timeout_s": 4 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_summoned_adds", "pattern_id": "summon_bats", "amount": 3 }, "timeout_s": 5 },
-    { "action": "action_until_event", "is_boss": true, "event_type": "monster_killed", "timeout_s": 10 },
-    { "action": "wait_ticks", "ticks": 1 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_killed", "boss_template_id": "crypt_matron" }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "interactable_state_changed" }, "timeout_s": 5 },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "stairs_down", "state": "ready", "equals": 1 }
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "is_boss": true,
+      "boss_template_id": "crypt_matron",
+      "monster_def_id": "dungeon_undead",
+      "visual_model": "monster_skeleton",
+      "visual_scale": 2.2,
+      "equals": 1
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "stairs_down",
+      "state": "locked",
+      "equals": 1
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "boss_phase_started",
+        "pattern_id": "summon_bats",
+        "phase_kind": "active"
+      },
+      "timeout_s": 4
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "boss_summoned_adds",
+        "pattern_id": "summon_bats",
+        "amount": 3
+      },
+      "timeout_s": 5
+    },
+    {
+      "action": "action_until_event",
+      "is_boss": true,
+      "event_type": "monster_killed",
+      "timeout_s": 10
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 1
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "boss_killed",
+        "boss_template_id": "crypt_matron"
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "interactable_state_changed"
+      },
+      "timeout_s": 5
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "stairs_down",
+      "state": "ready",
+      "equals": 1
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "boss_phase_started", "pattern_id": "summon_bats", "phase_kind": "active" },
-    { "type": "event_seen", "event_type": "boss_summoned_adds", "pattern_id": "summon_bats", "amount": 3 },
-    { "type": "event_seen", "event_type": "monster_killed" },
-    { "type": "event_seen", "event_type": "boss_killed", "boss_template_id": "crypt_matron" },
-    { "type": "event_seen", "event_type": "interactable_state_changed" }
+    {
+      "type": "event_seen",
+      "event_type": "boss_phase_started",
+      "pattern_id": "summon_bats",
+      "phase_kind": "active"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "boss_summoned_adds",
+      "pattern_id": "summon_bats",
+      "amount": 3
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_killed"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "boss_killed",
+      "boss_template_id": "crypt_matron"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "interactable_state_changed"
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 15, "zoom": 1.15 }
+    "camera": {
+      "x": 16,
+      "y": 15,
+      "zoom": 1.15
+    }
   }
 }

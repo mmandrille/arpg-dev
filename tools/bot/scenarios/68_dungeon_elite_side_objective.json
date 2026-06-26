@@ -1,5 +1,6 @@
 {
   "id": "dungeon_elite_side_objective",
+  "ci_tier": "extended",
   "world_id": "dungeon_levels",
   "seed": "v161_fast_objective_0018",
   "max_elapsed_s": 52.0,
@@ -11,31 +12,101 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 80, "dex": 80, "vit": 80, "magic": 5 }
+    "stats": {
+      "str": 80,
+      "dex": 80,
+      "vit": 80,
+      "magic": 5
+    }
   },
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 120
+    },
     {
       "action": "wait_until_assertion",
       "timeout_s": 10,
-      "assertion": { "type": "entity_count", "entity_type": "monster", "alive": true, "monster_pack_leader": true, "at_least": 1 }
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "monster",
+        "alive": true,
+        "monster_pack_leader": true,
+        "at_least": 1
+      }
     },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "closed", "at_least": 1 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "expect_reject": "elite_objective_incomplete" },
-    { "action": "kill_monsters", "monster_pack_leader": true, "timeout_s": 60 },
-    { "action": "move_until_in_range", "interactable_def_id": "treasure_chest", "stop_distance": 1.2, "max_ticks": 900 },
-    { "action": "action_entity", "interactable_def_id": "treasure_chest", "event_type": "interactable_activated", "timeout_s": 30 },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 }
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "state": "closed",
+      "at_least": 1
+    },
+    {
+      "action": "action_entity",
+      "interactable_def_id": "treasure_chest",
+      "expect_reject": "elite_objective_incomplete"
+    },
+    {
+      "action": "kill_monsters",
+      "monster_pack_leader": true,
+      "timeout_s": 60
+    },
+    {
+      "action": "move_until_in_range",
+      "interactable_def_id": "treasure_chest",
+      "stop_distance": 1.2,
+      "max_ticks": 900
+    },
+    {
+      "action": "action_entity",
+      "interactable_def_id": "treasure_chest",
+      "event_type": "interactable_activated",
+      "timeout_s": 30
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "state": "open",
+      "at_least": 1
+    }
   ],
   "assertions": [
-    { "type": "current_level", "equals": -1 },
-    { "type": "visited_levels_contain", "level": 0 },
-    { "type": "visited_levels_contain", "level": -1 },
-    { "type": "entity_count", "entity_type": "interactable", "interactable_def_id": "treasure_chest", "state": "open", "at_least": 1 },
-    { "type": "event_seen", "event_type": "interactable_activated" },
-    { "type": "event_seen", "event_type": "loot_dropped" }
+    {
+      "type": "current_level",
+      "equals": -1
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": 0
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": -1
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "treasure_chest",
+      "state": "open",
+      "at_least": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "interactable_activated"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "loot_dropped"
+    }
   ],
   "visual": {
-    "camera": { "x": 42, "y": 24, "zoom": 0.85 }
+    "camera": {
+      "x": 42,
+      "y": 24,
+      "zoom": 0.85
+    }
   }
 }

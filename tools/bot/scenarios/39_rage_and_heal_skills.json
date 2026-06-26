@@ -1,20 +1,50 @@
 {
   "id": "rage_and_heal_skills",
+  "ci_tier": "extended",
   "world_id": "skill_progression_lab",
   "seed": "v61_rage_skill",
   "character_class": "barbarian",
   "title": "Rage skill",
   "description": "Use a compact skill lab to prove the barbarian can learn and cast Rage while non-barbarian skill access is blocked by class gates.",
   "steps": [
-    { "action": "attack_until_event", "monster_def_id": "skill_xp_level7_dummy", "event_type": "monster_killed", "timeout_s": 20 },
-    { "action": "assert_skill_progression", "unspent_skill_points": 3, "skill_id": "rage", "rank": 0, "max_rank": "from_rules", "can_spend": true },
-    { "action": "assert_skill_progression", "unspent_skill_points": 3, "skill_id": "heal", "rank": 0, "max_rank": "from_rules", "can_spend": false },
+    {
+      "action": "attack_until_event",
+      "monster_def_id": "skill_xp_level7_dummy",
+      "event_type": "monster_killed",
+      "timeout_s": 20
+    },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 3,
+      "skill_id": "rage",
+      "rank": 0,
+      "max_rank": "from_rules",
+      "can_spend": true
+    },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 3,
+      "skill_id": "heal",
+      "rank": 0,
+      "max_rank": "from_rules",
+      "can_spend": false
+    },
     {
       "action": "allocate_skill_point",
       "skill_id": "rage",
-      "expect_skill_progression": { "unspent_skill_points": 2, "skill_id": "rage", "rank": 1, "max_rank": "from_rules", "can_spend": false }
+      "expect_skill_progression": {
+        "unspent_skill_points": 2,
+        "skill_id": "rage",
+        "rank": 1,
+        "max_rank": "from_rules",
+        "can_spend": false
+      }
     },
-    { "action": "allocate_skill_point", "skill_id": "heal", "expect_reject": "skill_class_not_allowed" },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "heal",
+      "expect_reject": "skill_class_not_allowed"
+    },
     {
       "action": "cast_skill",
       "skill_id": "rage",
@@ -23,15 +53,58 @@
     }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "rage", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "rage", "rank": 1, "mana": 5 },
-    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "rage", "amount": 10, "remaining_ticks": 450, "total_ticks": 450 },
-    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "rage" },
-    { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "rage", "rank": 1, "max_rank": "from_rules", "can_spend": false },
-    { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "heal", "rank": 0, "max_rank": "from_rules", "can_spend": false },
-    { "type": "player_max_hp_equals", "equals": 11 }
+    {
+      "type": "event_seen",
+      "event_type": "skill_rank_updated",
+      "skill_id": "rage",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "rage",
+      "rank": 1,
+      "mana": 5
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "rage",
+      "amount": 10,
+      "remaining_ticks": 450,
+      "total_ticks": 450
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cooldown_started",
+      "skill_id": "rage"
+    },
+    {
+      "type": "skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "rage",
+      "rank": 1,
+      "max_rank": "from_rules",
+      "can_spend": false
+    },
+    {
+      "type": "skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "heal",
+      "rank": 0,
+      "max_rank": "from_rules",
+      "can_spend": false
+    },
+    {
+      "type": "player_max_hp_equals",
+      "equals": 11
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.0
+    }
   }
 }

@@ -1,5 +1,6 @@
 {
   "id": "path_maze",
+  "ci_tier": "extended",
   "world_id": "path_maze",
   "title": "Path maze",
   "description": "Entity actions auto-path through a wall maze and kill the target.",
@@ -11,6 +12,9 @@
     }
   ],
   "assertions": [
-    { "type": "monster_dead", "monster_def_id": "training_dummy_path" }
+    {
+      "type": "monster_dead",
+      "monster_def_id": "training_dummy_path"
+    }
   ]
 }

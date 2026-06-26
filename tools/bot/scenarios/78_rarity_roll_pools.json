@@ -1,11 +1,14 @@
 {
   "id": "rarity_roll_pools",
+  "ci_tier": "extended",
   "world_id": "unique_drop_lab",
   "seed": "00000000000001d8",
   "title": "Rarity roll pools",
   "description": "Pick up a deterministic unique rolled item and prove higher-rarity roll counts and inherited stat pools over protocol.",
   "steps": [
-    { "action": "pick_up_first_rolled_loot" },
+    {
+      "action": "pick_up_first_rolled_loot"
+    },
     {
       "action": "assert_rolled_inventory_item",
       "item_def_id": "cave_blade",
@@ -13,15 +16,32 @@
       "rarity": "unique",
       "stat_count_min": 3,
       "stat_count_max": 5,
-      "stat_keys": ["damage_min", "damage_max", "hit_chance", "magic"],
-      "effect_ids": ["everburning_wound"]
+      "stat_keys": [
+        "damage_min",
+        "damage_max",
+        "hit_chance",
+        "magic"
+      ],
+      "effect_ids": [
+        "everburning_wound"
+      ]
     }
   ],
   "assertions": [
-    { "type": "current_level", "equals": 0 },
-    { "type": "rolled_inventory_any", "equipped": false }
+    {
+      "type": "current_level",
+      "equals": 0
+    },
+    {
+      "type": "rolled_inventory_any",
+      "equipped": false
+    }
   ],
   "visual": {
-    "camera": { "x": 12, "y": 9, "zoom": 1.1 }
+    "camera": {
+      "x": 12,
+      "y": 9,
+      "zoom": 1.1
+    }
   }
 }

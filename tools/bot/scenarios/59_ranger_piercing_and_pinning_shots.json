@@ -1,12 +1,17 @@
 {
   "id": "ranger_piercing_and_pinning_shots",
+  "ci_tier": "extended",
   "world_id": "ranger_skill_lab",
   "seed": "ranger_piercing_and_pinning_shots_seed",
   "character_class": "ranger",
   "title": "Ranger Piercing and Pinning Shots",
   "description": "Ranger casts Pinning Shot to root a chase target, then Piercing Shot through lined-up monsters.",
   "visual": {
-    "camera": { "x": 8, "y": 5, "zoom": 1.0 },
+    "camera": {
+      "x": 8,
+      "y": 5,
+      "zoom": 1.0
+    },
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
@@ -14,27 +19,130 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 4, "dex": 12, "vit": 5, "magic": 3 },
-    "skill_ranks": { "piercing_shot": 1, "pinning_shot": 1 }
+    "stats": {
+      "str": 4,
+      "dex": 12,
+      "vit": 5,
+      "magic": 3
+    },
+    "skill_ranks": {
+      "piercing_shot": 1,
+      "pinning_shot": 1
+    }
   },
   "steps": [
-    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "piercing_shot", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "pinning_shot", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "action": "cast_skill", "skill_id": "pinning_shot", "monster_def_id": "training_dummy_chase", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" }, "timeout_s": 3 },
-    { "action": "wait_ticks", "ticks": 8 },
-    { "action": "wait_until_assertion", "assertion": { "type": "monster_near_spawn", "monster_def_id": "training_dummy_chase", "max_distance_from_spawn": 0.05 }, "timeout_s": 1 },
-    { "action": "wait_ticks", "ticks": 30 },
-    { "action": "wait_until_assertion", "assertion": { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.10 }, "timeout_s": 4 },
-    { "action": "cast_skill", "skill_id": "piercing_shot", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 }, "timeout_s": 3 }
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 0,
+      "skill_id": "piercing_shot",
+      "rank": 1,
+      "max_rank": 5,
+      "can_spend": false
+    },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 0,
+      "skill_id": "pinning_shot",
+      "rank": 1,
+      "max_rank": 5,
+      "can_spend": false
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "pinning_shot",
+      "monster_def_id": "training_dummy_chase",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_started",
+        "skill_id": "pinning_shot"
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 8
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "monster_near_spawn",
+        "monster_def_id": "training_dummy_chase",
+        "max_distance_from_spawn": 0.05
+      },
+      "timeout_s": 1
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 30
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "monster_moved",
+        "monster_def_id": "training_dummy_chase",
+        "min_distance": 0.1
+      },
+      "timeout_s": 4
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "piercing_shot",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_count",
+        "event_type": "monster_damaged",
+        "skill_id": "piercing_shot",
+        "min": 2
+      },
+      "timeout_s": 3
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "pinning_shot", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot" },
-    { "type": "event_seen", "event_type": "skill_effect_ended", "skill_id": "pinning_shot" },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "piercing_shot", "rank": 1 },
-    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "piercing_shot", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1 }
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "pinning_shot",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "pinning_shot"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_ended",
+      "skill_id": "pinning_shot"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "piercing_shot",
+      "rank": 1
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_damaged",
+      "skill_id": "piercing_shot",
+      "min": 2
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "skill_id": "piercing_shot",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "min_damage": 1
+    }
   ]
 }

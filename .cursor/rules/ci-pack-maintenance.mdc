@@ -1,0 +1,82 @@
+---
+description: Keep tools/bot/ci_pack.json lean — gate only necessary integration, control CI time
+alwaysApply: true
+---
+
+# CI pack maintenance
+
+`make ci` runs the curated pack in `tools/bot/ci_pack.json` (~22 protocol + ~14 client scenarios).
+`make ci-full` runs the full matrix. Agents must **actively curate** the pack so merge CI stays fast
+while still covering real regressions.
+
+## Non-negotiable classification
+
+Every scenario file must be exactly one of:
+
+1. **Pack member** — listed in `tools/bot/ci_pack.json` (no `ci_tier` field in the JSON), or
+2. **Extended** — `"ci_tier": "extended"` in the scenario JSON (runs only in `make ci-full`).
+
+`validate_ci_pack()` in CI step 7 enforces this. Pack members must **not** also set `ci_tier`.
+
+## Default for new scenarios
+
+- **Extended by default.** New end-to-end proofs start as `"ci_tier": "extended"` unless the slice
+  explicitly needs merge-gate coverage.
+- Add to the pack only when the scenario protects a **high-value, merge-blocking** contract that is
+  not already covered by another pack scenario.
+
+## When to add to the pack
+
+Add (or promote from extended) when **all** apply:
+
+- The behavior is **user-visible or protocol-authoritative** and would block a release if broken.
+- Failure would **not** be caught by unit tests, goldens, or an existing pack scenario.
+- The scenario is **stable** (no flaky waits, no full-dungeon walks unless that is the contract).
+- Runtime is reasonable for a fast gate (prefer compact lab worlds; respect the 10s scenario budget).
+
+Prefer **one representative scenario per domain** over many near-duplicates (e.g. one combat/UI
+proof per feature area, not every class variant).
+
+## When to remove or demote
+
+Remove from the pack (set `"ci_tier": "extended"` and delete from `ci_pack.json`) when:
+
+- Coverage is **redundant** with another pack scenario.
+- The feature moved to **lower-level tests** (Go/GDScript/pytest) and the bot proof is optional.
+- The scenario is **slow or flaky** and blocks CI without proportional value.
+- The feature is **deprecated** or behind extended-only workflows (perf probes, visual polish-only).
+
+When demoting, do **not** leave the scenario unclassified.
+
+## Keep pack size stable (budget-neutral curation)
+
+Treat the pack as a **fixed time budget**, not a growing checklist:
+
+- Adding a scenario to the pack should usually **pair with removing or demoting** another unless
+  the slice is tiny and the new proof is clearly higher priority.
+- After changing the pack, sanity-check: `make bot scenario=ci` and
+  `make bot-client SCENARIO=ci HEADLESS=1` (or the specific scenario you touched).
+- Run `make ci-full` before large scenario reshuffles or when demoting something that was the only
+  gate for a domain.
+
+## Slice checklist (scenarios in scope)
+
+When a plan includes bot scenarios:
+
+1. Classify every new/changed scenario (pack vs extended).
+2. If promoting to pack, state **what** you demoted or why the budget still fits.
+3. Run `python3 -c "from tools.bot.ci_pack import validate_ci_pack; validate_ci_pack()"` and
+   `.venv/bin/pytest tools/test_ci_pack.py -q`.
+4. Update `docs/progress/scenario-catalog.md` only when pack membership or tier policy meaningfully
+   changes (not for every extended-only scenario).
+
+## Commands
+
+```bash
+make ci                                    # fast pack (merge gate)
+make ci-full                               # full matrix
+make bot scenario=ci                       # protocol pack
+make bot-client SCENARIO=ci HEADLESS=1   # client pack
+```
+
+Reference: `tools/bot/ci_pack.py`, `docs/progress/scenario-catalog.md`.

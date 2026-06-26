@@ -1,18 +1,27 @@
 {
   "id": "skill_points_and_magic_bolt",
+  "ci_tier": "extended",
   "world_id": "skill_progression_lab",
   "seed": "v44_skill_points_magic_bolt",
   "character_class": "sorcerer",
   "title": "Skill points and Magic Bolt",
   "description": "Use a compact skill lab to level, learn/cast Magic Bolt at magic 5, reject rank 2 and recast during cooldown, recover, and verify state/reconnect/replay/fresh persistence.",
   "steps": [
-    { "action": "attack_until_event", "monster_def_id": "skill_xp_level6_dummy", "event_type": "monster_killed", "timeout_s": 20 },
+    {
+      "action": "attack_until_event",
+      "monster_def_id": "skill_xp_level6_dummy",
+      "event_type": "monster_killed",
+      "timeout_s": 20
+    },
     {
       "action": "assert_character_progression",
       "level": 6,
       "unspent_stat_points": 15,
       "magic": 5,
-      "derived_stats": { "max_hp": 10, "max_mana": 12 }
+      "derived_stats": {
+        "max_hp": 10,
+        "max_mana": 12
+      }
     },
     {
       "action": "assert_skill_progression",
@@ -33,8 +42,16 @@
         "can_spend": false
       }
     },
-    { "action": "allocate_skill_point", "skill_id": "magic_bolt", "expect_reject": "skill_requirements_not_met" },
-    { "action": "move_until_in_range", "monster_def_id": "combat_lab_soft_target", "stop_distance": 7.5 },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "magic_bolt",
+      "expect_reject": "skill_requirements_not_met"
+    },
+    {
+      "action": "move_until_in_range",
+      "monster_def_id": "combat_lab_soft_target",
+      "stop_distance": 7.5
+    },
     {
       "action": "cast_skill",
       "skill_id": "magic_bolt",
@@ -43,47 +60,146 @@
     },
     {
       "action": "wait_until_assertion",
-      "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 4 },
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 4
+      },
       "timeout_s": 8
     },
-    { "action": "cast_skill", "skill_id": "magic_bolt", "direction": { "x": 1, "y": 0 }, "expect_reject": "skill_on_cooldown" },
-    { "action": "wait_ticks", "ticks": 32 },
-    { "action": "assert_skill_cooldown", "skill_id": "magic_bolt", "absent": true },
     {
       "action": "cast_skill",
       "skill_id": "magic_bolt",
-      "direction": { "x": 1, "y": 0 },
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "expect_reject": "skill_on_cooldown"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 32
+    },
+    {
+      "action": "assert_skill_cooldown",
+      "skill_id": "magic_bolt",
+      "absent": true
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "magic_bolt",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
       "event_type": "skill_cast"
     }
   ],
   "assertions": [
-    { "type": "current_level", "equals": 0 },
-    { "type": "visited_levels_contain", "level": 0 },
-    { "type": "event_seen", "event_type": "experience_gained" },
-    { "type": "event_seen", "event_type": "character_leveled" },
-    { "type": "event_seen", "event_type": "skill_point_gained" },
-    { "type": "event_seen", "event_type": "skill_rank_updated" },
-    { "type": "event_seen", "event_type": "skill_cast" },
-    { "type": "event_seen", "event_type": "skill_cooldown_started" },
-    { "type": "event_seen", "event_type": "skill_cooldown_rejected" },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 4 },
-    { "type": "monster_damage_at_least", "monster_def_id": "combat_lab_soft_target", "damage": 4 },
-    { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 12 } },
-    { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "magic_bolt", "rank": 1, "max_rank": "from_rules", "can_spend": false },
-    { "type": "player_max_hp_equals", "equals": 10 }
+    {
+      "type": "current_level",
+      "equals": 0
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": 0
+    },
+    {
+      "type": "event_seen",
+      "event_type": "experience_gained"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "character_leveled"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_point_gained"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_rank_updated"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cooldown_started"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cooldown_rejected"
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "min_damage": 4
+    },
+    {
+      "type": "monster_damage_at_least",
+      "monster_def_id": "combat_lab_soft_target",
+      "damage": 4
+    },
+    {
+      "type": "character_progression",
+      "level": 6,
+      "unspent_stat_points": 15,
+      "magic": 5,
+      "derived_stats": {
+        "max_hp": 10,
+        "max_mana": 12
+      }
+    },
+    {
+      "type": "skill_progression",
+      "unspent_skill_points": 1,
+      "skill_id": "magic_bolt",
+      "rank": 1,
+      "max_rank": "from_rules",
+      "can_spend": false
+    },
+    {
+      "type": "player_max_hp_equals",
+      "equals": 10
+    }
   ],
   "fresh_session_checks": [
     {
       "world_id": "dungeon_levels",
       "steps": [],
       "assertions": [
-        { "type": "character_progression", "level": 6, "unspent_stat_points": 15, "magic": 5, "derived_stats": { "max_hp": 10, "max_mana": 12 } },
-        { "type": "skill_progression", "unspent_skill_points": 1, "skill_id": "magic_bolt", "rank": 1, "max_rank": "from_rules", "can_spend": false },
-        { "type": "player_max_hp_equals", "equals": 10 }
+        {
+          "type": "character_progression",
+          "level": 6,
+          "unspent_stat_points": 15,
+          "magic": 5,
+          "derived_stats": {
+            "max_hp": 10,
+            "max_mana": 12
+          }
+        },
+        {
+          "type": "skill_progression",
+          "unspent_skill_points": 1,
+          "skill_id": "magic_bolt",
+          "rank": 1,
+          "max_rank": "from_rules",
+          "can_spend": false
+        },
+        {
+          "type": "player_max_hp_equals",
+          "equals": 10
+        }
       ]
     }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.0
+    }
   }
 }

@@ -1,17 +1,38 @@
 {
   "id": "client_equipment_requirements_and_preview",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "requirements_lab",
   "seed": "facefeed00000043",
   "title": "Client equipment requirements and preview",
   "description": "Pick up requirement-gated gear and verify the inventory panel exposes server-authored requirement status and equip preview rows.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 1, "timeout_s": 15.0 },
-    { "type": "click_loot_item", "item_def_id": "cave_war_sword" },
-    { "type": "wait_inventory_item", "item_def_id": "cave_war_sword", "timeout_s": 15.0 },
-    { "type": "press_key", "keycode": "KEY_I" },
-    { "type": "assert_panel_visible", "visible": true },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "item_def_id": "cave_war_sword"
+    },
+    {
+      "type": "wait_inventory_item",
+      "item_def_id": "cave_war_sword",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_I"
+    },
+    {
+      "type": "assert_panel_visible",
+      "visible": true
+    },
     {
       "type": "assert_inventory_panel_details",
       "visible": true,
@@ -20,6 +41,9 @@
       "requirement_rows_at_least": 2,
       "equip_preview_rows_at_least": 1
     },
-    { "type": "assert_inventory_presentation", "item_def_id": "cave_war_sword" }
+    {
+      "type": "assert_inventory_presentation",
+      "item_def_id": "cave_war_sword"
+    }
   ]
 }

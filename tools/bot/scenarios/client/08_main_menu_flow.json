@@ -1,26 +1,70 @@
 {
   "id": "main_menu_flow",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "title": "Main menu, Create Game, pause, and character reuse",
   "description": "Drives the v45 player-facing menu shell: root Create/Join labels, settings, choose-or-create character creation, listed co-op Create Game, pause input lock, Return to Main Menu, and existing-character Create Game reuse.",
   "client_steps": [
-    { "type": "wait_main_menu", "timeout_s": 10.0 },
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 10.0
+    },
     {
       "type": "assert_main_menu_actions",
-      "labels": ["Create Game", "Join Game", "Settings", "Exit"],
-      "actions": ["create_game", "join_game", "settings", "exit"]
+      "labels": [
+        "Create Game",
+        "Join Game",
+        "Settings",
+        "Exit"
+      ],
+      "actions": [
+        "create_game",
+        "join_game",
+        "settings",
+        "exit"
+      ]
     },
-    { "type": "click_menu_button", "button": "settings" },
-    { "type": "wait_settings_panel", "timeout_s": 3.0 },
-    { "type": "select_create_game_type", "session_type": "coop" },
-    { "type": "assert_create_game_type", "session_type": "coop" },
-    { "type": "select_window_size", "size": "1600x900" },
-    { "type": "assert_settings_panel_visible", "visible": true },
-    { "type": "click_menu_button", "button": "back" },
-    { "type": "wait_main_menu", "timeout_s": 3.0 },
-    { "type": "click_menu_button", "button": "create_game" },
-    { "type": "wait_character_panel", "timeout_s": 3.0 },
+    {
+      "type": "click_menu_button",
+      "button": "settings"
+    },
+    {
+      "type": "wait_settings_panel",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "select_create_game_type",
+      "session_type": "coop"
+    },
+    {
+      "type": "assert_create_game_type",
+      "session_type": "coop"
+    },
+    {
+      "type": "select_window_size",
+      "size": "1600x900"
+    },
+    {
+      "type": "assert_settings_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "click_menu_button",
+      "button": "back"
+    },
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "click_menu_button",
+      "button": "create_game"
+    },
+    {
+      "type": "wait_character_panel",
+      "timeout_s": 3.0
+    },
     {
       "type": "assert_character_panel",
       "mode": "choose_or_create",
@@ -29,30 +73,88 @@
       "create_button_visible": true,
       "empty_visible": false
     },
-    { "type": "click_menu_button", "button": "create_character" },
+    {
+      "type": "click_menu_button",
+      "button": "create_character"
+    },
     {
       "type": "assert_character_panel",
       "name_field_visible": true,
       "create_button_visible": true
     },
-    { "type": "enter_character_name", "name": "Bot Hero 45" },
-    { "type": "click_menu_button", "button": "confirm_character_create" },
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "assert_current_session", "exists": true, "mode": "coop", "listed": true },
-    { "type": "remember_session" },
-    { "type": "press_key", "keycode": "KEY_ESCAPE" },
-    { "type": "wait_pause_menu", "timeout_s": 3.0 },
-    { "type": "remember_player_position" },
-    { "type": "click_floor", "x": 3.0, "z": 3.0 },
-    { "type": "assert_player_position_unchanged", "tolerance": 0.01 },
-    { "type": "click_menu_button", "button": "resume" },
-    { "type": "assert_pause_menu_visible", "visible": false },
-    { "type": "press_key", "keycode": "KEY_ESCAPE" },
-    { "type": "wait_pause_menu", "timeout_s": 3.0 },
-    { "type": "click_menu_button", "button": "return_to_main_menu" },
-    { "type": "wait_main_menu", "timeout_s": 5.0 },
-    { "type": "click_menu_button", "button": "create_game" },
-    { "type": "wait_character_panel", "timeout_s": 5.0 },
+    {
+      "type": "enter_character_name",
+      "name": "Bot Hero 45"
+    },
+    {
+      "type": "click_menu_button",
+      "button": "confirm_character_create"
+    },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_current_session",
+      "exists": true,
+      "mode": "coop",
+      "listed": true
+    },
+    {
+      "type": "remember_session"
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_ESCAPE"
+    },
+    {
+      "type": "wait_pause_menu",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "remember_player_position"
+    },
+    {
+      "type": "click_floor",
+      "x": 3.0,
+      "z": 3.0
+    },
+    {
+      "type": "assert_player_position_unchanged",
+      "tolerance": 0.01
+    },
+    {
+      "type": "click_menu_button",
+      "button": "resume"
+    },
+    {
+      "type": "assert_pause_menu_visible",
+      "visible": false
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_ESCAPE"
+    },
+    {
+      "type": "wait_pause_menu",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "click_menu_button",
+      "button": "return_to_main_menu"
+    },
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 5.0
+    },
+    {
+      "type": "click_menu_button",
+      "button": "create_game"
+    },
+    {
+      "type": "wait_character_panel",
+      "timeout_s": 5.0
+    },
     {
       "type": "assert_character_panel",
       "mode": "choose_or_create",
@@ -60,9 +162,22 @@
       "name_field_visible": false,
       "create_button_visible": true
     },
-    { "type": "select_character", "index": 0 },
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "assert_current_session", "exists": true, "mode": "coop", "listed": true },
-    { "type": "assert_session_changed" }
+    {
+      "type": "select_character",
+      "index": 0
+    },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_current_session",
+      "exists": true,
+      "mode": "coop",
+      "listed": true
+    },
+    {
+      "type": "assert_session_changed"
+    }
   ]
 }

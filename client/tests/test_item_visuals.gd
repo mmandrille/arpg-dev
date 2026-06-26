@@ -20,6 +20,10 @@ const ScaleProbeScript := preload("res://tests/item_visual_scale_probe.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 
 func _initialize() -> void:
+	await _run_all()
+
+
+func _run_all() -> void:
 	var shared := ProjectSettings.globalize_path("res://").path_join("../shared")
 	var assets := ProjectSettings.globalize_path("res://").path_join("../assets")
 
@@ -76,7 +80,12 @@ func _initialize() -> void:
 
 	if not _verify_equipped_fallback_resolver():
 		return
-	if not await ScaleProbeScript.new().verify(self, MainScript, CharacterScene, ResolverScript, Callable(self, "_fail")):
+	var scale_ctx := ScaleProbeScript.new().prepare(self, MainScript, CharacterScene, ResolverScript, Callable(self, "_fail"))
+	if scale_ctx.is_empty():
+		return
+	await process_frame
+	await process_frame
+	if not ScaleProbeScript.new().verify_transforms(scale_ctx, Callable(self, "_fail")):
 		return
 	if not _verify_off_hand_weapon_resolver():
 		return
@@ -424,7 +433,6 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 
 func _verify_interactable_chest_models() -> bool:
 	var main = MainScript.new()
-	get_root().add_child(main)
 	var stash := main._make_entity_node({"type": "interactable", "interactable_def_id": "town_stash"})
 	var chest := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest"})
 	var objective := main._make_entity_node({"type": "interactable", "interactable_def_id": "treasure_chest", "elite_objective": true})
@@ -460,24 +468,24 @@ func _verify_interactable_chest_models() -> bool:
 		objective.free()
 		main.free()
 		return false
-	main.add_child(chest)
-	main._set_interactable_state("chest_1", {"node": chest, "interactable_def_id": "treasure_chest", "state": "closed"}, "open")
+	get_root().add_child(chest)
+	main._apply_interactable_state_tint({"node": chest, "interactable_def_id": "treasure_chest", "elite_objective": false, "quest_reward": false}, "open")
 	if not glow.visible:
 		_fail("opened treasure chest did not reveal inner glow")
 		stash.free()
 		main.free()
 		return false
 	var objective_marker := objective.find_child("EliteObjectiveMarker", true, false) as MeshInstance3D
-	main.add_child(objective)
-	main._set_interactable_state("objective_chest_1", {"node": objective, "interactable_def_id": "treasure_chest", "elite_objective": true, "state": "closed"}, "open")
+	get_root().add_child(objective)
+	main._apply_interactable_state_tint({"node": objective, "interactable_def_id": "treasure_chest", "elite_objective": true, "quest_reward": false, "state": "closed"}, "open")
 	if objective_marker == null or not objective_marker.visible:
 		_fail("opened objective treasure chest did not keep marker visible")
 		stash.free()
 		main.free()
 		return false
 	var quest_marker := quest.find_child("QuestRewardMarker", true, false) as MeshInstance3D
-	main.add_child(quest)
-	main._set_interactable_state("quest_chest_1", {"node": quest, "interactable_def_id": "treasure_chest", "quest_reward": true, "state": "closed"}, "open")
+	get_root().add_child(quest)
+	main._apply_interactable_state_tint({"node": quest, "interactable_def_id": "treasure_chest", "elite_objective": false, "quest_reward": true, "state": "closed"}, "open")
 	if quest_marker == null or not quest_marker.visible:
 		_fail("opened quest reward treasure chest did not keep marker visible")
 		stash.free()
@@ -657,46 +665,60 @@ func _verify_town_preview_props() -> bool:
 
 func _verify_wall_texture_material() -> bool:
 	var wall_renderer = WallRendererScript.new(null, GroundWallFactoryScript.new())
-	var generated: MeshInstance3D = wall_renderer.make_wall_node({
+	var generated_body := wall_renderer.make_wall_node({
 		"id": "test_generated",
 		"position": {"x": 4.0, "y": 5.0},
 		"size": {"x": 8.0, "y": 2.0},
 		"source": "generated",
 	})
-	var perimeter: MeshInstance3D = wall_renderer.make_wall_node({
+	var perimeter_body := wall_renderer.make_wall_node({
 		"id": "test_perimeter",
 		"position": {"x": 4.0, "y": 5.0},
 		"size": {"x": 8.0, "y": 2.0},
 		"source": "perimeter",
 	})
+	var generated := _wall_mesh_from_body(generated_body)
+	var perimeter := _wall_mesh_from_body(perimeter_body)
+	if generated == null or perimeter == null:
+		_fail("wall renderer did not create mesh children")
+		generated_body.free()
+		perimeter_body.free()
+		return false
 	var generated_mat := generated.material_override as StandardMaterial3D
 	var perimeter_mat := perimeter.material_override as StandardMaterial3D
 	if generated_mat == null or generated_mat.albedo_texture == null:
 		_fail("generated cave wall material is missing its stone texture")
-		generated.free()
-		perimeter.free()
+		generated_body.free()
+		perimeter_body.free()
 		return false
 	if perimeter_mat == null or perimeter_mat.albedo_texture == null:
 		_fail("perimeter cave wall material is missing its stone texture")
-		generated.free()
-		perimeter.free()
+		generated_body.free()
+		perimeter_body.free()
 		return false
 	var wall_factory = GroundWallFactoryScript.new()
 	var wall_a: Color = wall_factory.wall_texel(ClientConstantsScript.WALL_TEXTURE_CAVE, 0, 0)
 	var wall_b: Color = wall_factory.wall_texel(ClientConstantsScript.WALL_TEXTURE_CAVE, 17, 19)
 	if wall_a == wall_b:
 		_fail("cave wall texture is flat")
-		generated.free()
-		perimeter.free()
+		generated_body.free()
+		perimeter_body.free()
 		return false
 	if generated_mat.albedo_color == perimeter_mat.albedo_color:
 		_fail("generated and perimeter wall materials use the same tint")
-		generated.free()
-		perimeter.free()
+		generated_body.free()
+		perimeter_body.free()
 		return false
-	generated.free()
-	perimeter.free()
+	generated_body.free()
+	perimeter_body.free()
 	return true
+
+
+func _wall_mesh_from_body(body: Node3D) -> MeshInstance3D:
+	for child in body.get_children():
+		if child is MeshInstance3D:
+			return child as MeshInstance3D
+	return null
 
 
 func _make_mount_root() -> Node3D:

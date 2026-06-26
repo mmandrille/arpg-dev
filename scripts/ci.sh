@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Local CI aggregation for the first playable vertical slice.
 # Runs all steps regardless of failures, then reports a summary.
+# Default ARPG_CI_SCENARIO=ci runs tools/bot/ci_pack.json (~22 protocol + ~14 client).
+# Use ARPG_CI_SCENARIO=all or `make ci-full` for the full scenario matrix.
 # Quiet by default — VERBOSE=1 (or V=1) for full output.
 set -uo pipefail
 
@@ -15,6 +17,7 @@ BASE_URL="${BASE_URL:-http://localhost:8888}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-local-dev-token}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-local-debug-token}"
 GAMEPLAY_DEBUG="${ARPG_GAMEPLAY_DEBUG:-true}"
+CI_SCENARIO="${ARPG_CI_SCENARIO:-ci}"
 
 SERVER_PID=""
 SERVER_LOG="$(mktemp -t arpg-ci-server.XXXXXX.log)"
@@ -267,7 +270,7 @@ ci_step "== 6/11 Go tests + vet ==" \
   "$RUN_QUIET" --label "go test ./... && go vet ./..." -- bash -c 'cd server && go test ./... && go vet ./...'
 
 ci_step "== 7/11 Python unit checks ==" \
-  bash -c "make tools >/dev/null && \"$RUN_QUIET\" --label 'pytest tools' -- \"$ROOT/.venv/bin/python\" -m pytest -q tools"
+  bash -c "make tools >/dev/null && \"$RUN_QUIET\" --label 'pytest tools' -- \"$ROOT/.venv/bin/python\" -m pytest -q tools && \"$ROOT/.venv/bin/python\" -c 'from tools.bot.ci_pack import validate_ci_pack; validate_ci_pack()'"
 
 # ── Server-dependent steps ────────────────────────────────────────────────────
 
@@ -329,13 +332,14 @@ fi
 
 if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
   # Step 9: protocol bot + replay
-  begin_step "== 9/11 protocol bot + replay =="
+  begin_step "== 9/11 protocol bot + replay (SCENARIO=$CI_SCENARIO) =="
   BOT_LOG="$(mktemp -t arpg-ci-bot.XXXXXX.log)"
   step9_failed=0
   step9_failure_details=()
   set +e
   SESSION_ID="$("$ROOT/.venv/bin/python" -m tools.bot.run \
     --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
+    --scenario "$CI_SCENARIO" \
     --print-session-id 2> >(stream_bot_progress "$BOT_LOG" >&2))"
   bot_status=$?
   set +e
@@ -390,7 +394,7 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
   # Steps 10-11: Godot
   ci_captured_step "== 10/11 Godot client bot scenarios ==" client_bot_failure_detail \
     env GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
-      SCENARIO=all HEADLESS=1 ./scripts/bot_client.sh
+      SCENARIO="$CI_SCENARIO" HEADLESS=1 ./scripts/bot_client.sh
 
   ci_captured_step "== 11/11 Godot headless smoke (optional) ==" client_smoke_failure_detail \
     env GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \

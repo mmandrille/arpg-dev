@@ -1,5 +1,6 @@
 {
   "id": "skill_visual",
+  "ci_tier": "extended",
   "world_id": "skill_visual_lab",
   "seed": "skill_visual",
   "title": "Skill Visual",
@@ -7,7 +8,11 @@
   "steps": [],
   "assertions": [],
   "visual": {
-    "camera": { "x": 16, "y": 8, "zoom": 1.0 },
+    "camera": {
+      "x": 16,
+      "y": 8,
+      "zoom": 1.0
+    },
     "post_complete_hold_s": 3.0
   }
 }

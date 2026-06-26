@@ -1,13 +1,24 @@
 {
   "id": "chase_maze",
+  "ci_tier": "extended",
   "world_id": "chase_maze",
   "title": "Chase maze",
   "description": "Monster pathfinds through a wall maze toward a stationary player.",
   "steps": [
-    { "action": "wait_ticks", "ticks": 80 }
+    {
+      "action": "wait_ticks",
+      "ticks": 80
+    }
   ],
   "assertions": [
-    { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 2.0 },
-    { "type": "event_seen", "event_type": "monster_aggro" }
+    {
+      "type": "monster_moved",
+      "monster_def_id": "training_dummy_chase",
+      "min_distance": 2.0
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_aggro"
+    }
   ]
 }

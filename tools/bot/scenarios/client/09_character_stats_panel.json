@@ -1,41 +1,182 @@
 {
   "id": "character_stats_panel",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "character_stats_lab",
   "seed": "38b98b6062fac372bd0a9d4f6495c1da",
   "title": "Character stats panel and XP bar",
   "description": "Client opens the stats panel, proves XP/level state reaches the UI, allocates VIT through the + button, and verifies pause disables allocation.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "assert_character_progression", "level": 1, "experience": 0, "unspent_stat_points": 0, "vit": 5, "derived_stats": { "max_hp": 10 }, "player_max_hp": 10 },
-    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 10.0 },
-    { "type": "click_entity_until_event", "entity_type": "monster", "monster_def_id": "stats_panel_dummy", "event_type": "monster_killed", "retry_s": 0.25, "timeout_s": 15.0 },
-    { "type": "wait_event", "event_type": "monster_killed", "timeout_s": 1.0 },
-    { "type": "wait_character_progression", "level": 2, "experience": 30, "unspent_stat_points": 3, "vit": 5, "derived_stats": { "max_hp": 10 }, "player_max_hp": 10, "timeout_s": 5.0 },
-    { "type": "press_key", "keycode": "KEY_P" },
-    { "type": "assert_character_info_panel_visible", "visible": true },
-    { "type": "assert_character_info", "name": "Hero", "level": 2, "area": "Town" },
-    { "type": "press_key", "keycode": "KEY_C" },
-    { "type": "assert_character_stats_panel_visible", "visible": true },
-    { "type": "assert_stat_button_enabled", "stat": "vit", "enabled": true },
-    { "type": "press_key", "keycode": "KEY_I" },
-    { "type": "assert_panel_visible", "visible": true },
-    { "type": "assert_character_stats_panel_visible", "visible": true },
-    { "type": "press_key", "keycode": "KEY_I" },
-    { "type": "assert_panel_visible", "visible": false },
-    { "type": "assert_character_stats_panel_visible", "visible": true },
-    { "type": "assert_xp_bar", "level": 2, "experience": 30, "progress_min": 0.31, "progress_max": 0.32 },
-    { "type": "press_key", "keycode": "KEY_ESCAPE" },
-    { "type": "wait_pause_menu", "timeout_s": 3.0 },
-    { "type": "assert_stat_button_enabled", "stat": "vit", "enabled": false },
-    { "type": "click_stat_button", "stat": "vit" },
-    { "type": "assert_character_progression", "level": 2, "experience": 30, "unspent_stat_points": 3, "vit": 5, "derived_stats": { "max_hp": 10 }, "player_max_hp": 10 },
-    { "type": "click_menu_button", "button": "resume" },
-    { "type": "assert_pause_menu_visible", "visible": false },
-    { "type": "assert_stat_button_enabled", "stat": "vit", "enabled": true },
-    { "type": "click_stat_button", "stat": "vit" },
-    { "type": "wait_character_progression", "level": 2, "experience": 30, "unspent_stat_points": 2, "vit": 6, "derived_stats": { "max_hp": 11 }, "player_max_hp": 11, "timeout_s": 5.0 },
-    { "type": "assert_character_stats_panel_visible", "visible": true },
-    { "type": "assert_xp_bar", "level": 2, "experience": 30, "progress_min": 0.31, "progress_max": 0.32 }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_character_progression",
+      "level": 1,
+      "experience": 0,
+      "unspent_stat_points": 0,
+      "vit": 5,
+      "derived_stats": {
+        "max_hp": 10
+      },
+      "player_max_hp": 10
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "stats_panel_dummy",
+      "event_type": "monster_killed",
+      "retry_s": 0.25,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "monster_killed",
+      "timeout_s": 1.0
+    },
+    {
+      "type": "wait_character_progression",
+      "level": 2,
+      "experience": 30,
+      "unspent_stat_points": 3,
+      "vit": 5,
+      "derived_stats": {
+        "max_hp": 10
+      },
+      "player_max_hp": 10,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_P"
+    },
+    {
+      "type": "assert_character_info_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_character_info",
+      "name": "Hero",
+      "level": 2,
+      "area": "Town"
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_C"
+    },
+    {
+      "type": "assert_character_stats_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_stat_button_enabled",
+      "stat": "vit",
+      "enabled": true
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_I"
+    },
+    {
+      "type": "assert_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_character_stats_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_I"
+    },
+    {
+      "type": "assert_panel_visible",
+      "visible": false
+    },
+    {
+      "type": "assert_character_stats_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_xp_bar",
+      "level": 2,
+      "experience": 30,
+      "progress_min": 0.31,
+      "progress_max": 0.32
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_ESCAPE"
+    },
+    {
+      "type": "wait_pause_menu",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "assert_stat_button_enabled",
+      "stat": "vit",
+      "enabled": false
+    },
+    {
+      "type": "click_stat_button",
+      "stat": "vit"
+    },
+    {
+      "type": "assert_character_progression",
+      "level": 2,
+      "experience": 30,
+      "unspent_stat_points": 3,
+      "vit": 5,
+      "derived_stats": {
+        "max_hp": 10
+      },
+      "player_max_hp": 10
+    },
+    {
+      "type": "click_menu_button",
+      "button": "resume"
+    },
+    {
+      "type": "assert_pause_menu_visible",
+      "visible": false
+    },
+    {
+      "type": "assert_stat_button_enabled",
+      "stat": "vit",
+      "enabled": true
+    },
+    {
+      "type": "click_stat_button",
+      "stat": "vit"
+    },
+    {
+      "type": "wait_character_progression",
+      "level": 2,
+      "experience": 30,
+      "unspent_stat_points": 2,
+      "vit": 6,
+      "derived_stats": {
+        "max_hp": 11
+      },
+      "player_max_hp": 11,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "assert_character_stats_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_xp_bar",
+      "level": 2,
+      "experience": 30,
+      "progress_min": 0.31,
+      "progress_max": 0.32
+    }
   ]
 }

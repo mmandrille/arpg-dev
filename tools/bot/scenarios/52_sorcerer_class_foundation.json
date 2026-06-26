@@ -1,12 +1,17 @@
 {
   "id": "sorcerer_class_foundation",
+  "ci_tier": "extended",
   "world_id": "damage_types_lab",
   "seed": "sorcerer_class_foundation_seed",
   "character_class": "sorcerer",
   "title": "Sorcerer class foundation",
   "description": "Create a Sorcerer, prove starter staff, reposition, land three staff attacks, and seed all current Sorcerer skills while casting the lower-row trio.",
   "visual": {
-    "camera": { "x": 8, "y": 5, "zoom": 1.0 },
+    "camera": {
+      "x": 8,
+      "y": 5,
+      "zoom": 1.0
+    },
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
@@ -14,38 +19,209 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 4, "dex": 20, "vit": 5, "magic": 20 },
-    "skill_ranks": { "magic_bolt": 1, "teleport": 1, "ice_shard": 1, "ligthing": 1, "arcane_barrage": 1, "revive": 1 }
+    "stats": {
+      "str": 4,
+      "dex": 20,
+      "vit": 5,
+      "magic": 20
+    },
+    "skill_ranks": {
+      "magic_bolt": 1,
+      "teleport": 1,
+      "ice_shard": 1,
+      "ligthing": 1,
+      "arcane_barrage": 1,
+      "revive": 1
+    }
   },
   "steps": [
-    { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_sorcerer_staff" },
-    { "action": "assert_equipped_slot_empty", "slot": "off_hand" },
-    { "action": "move", "direction": { "x": 1, "y": 0 }, "duration_ticks": 6 },
-    { "action": "cast_skill", "skill_id": "teleport", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "teleport", "rank": 1 }, "timeout_s": 3 },
-    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "event_type": "monster_damaged", "weapon_slot": "main_hand", "target_monster_def_id": "combat_lab_soft_target" },
-    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "event_type": "monster_damaged", "weapon_slot": "main_hand", "target_monster_def_id": "combat_lab_soft_target" },
-    { "action": "action_until_combat_event", "monster_def_id": "combat_lab_soft_target", "event_type": "monster_damaged", "weapon_slot": "main_hand", "target_monster_def_id": "combat_lab_soft_target" },
-    { "action": "cast_skill", "skill_id": "magic_bolt", "monster_def_id": "combat_lab_soft_target", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "magic_bolt", "rank": 1 }, "timeout_s": 3 },
-    { "action": "wait_for_combat_event", "event_type": "monster_damaged", "damage_type": "force", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1 },
-    { "action": "cast_skill", "skill_id": "ice_shard", "monster_def_id": "combat_lab_lightning_resistant", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "ice_shard", "rank": 1 }, "timeout_s": 3 },
-    { "action": "wait_for_combat_event", "event_type": "monster_damaged", "damage_type": "cold", "target_monster_def_id": "combat_lab_lightning_resistant", "min_damage": 1 },
-    { "action": "cast_skill", "skill_id": "ligthing", "monster_def_id": "combat_lab_lightning_weak", "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "ligthing", "rank": 1 }, "timeout_s": 3 },
-    { "action": "wait_for_combat_event", "event_type": "monster_damaged", "damage_type": "lightning", "target_monster_def_id": "combat_lab_lightning_weak", "min_damage": 1 }
+    {
+      "action": "assert_equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_sorcerer_staff"
+    },
+    {
+      "action": "assert_equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "action": "move",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "duration_ticks": 6
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "teleport",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "teleport",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "combat_lab_soft_target"
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "combat_lab_soft_target"
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "combat_lab_soft_target"
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "magic_bolt",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "magic_bolt",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_for_combat_event",
+      "event_type": "monster_damaged",
+      "damage_type": "force",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "min_damage": 1
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ice_shard",
+      "monster_def_id": "combat_lab_lightning_resistant",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "ice_shard",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_for_combat_event",
+      "event_type": "monster_damaged",
+      "damage_type": "cold",
+      "target_monster_def_id": "combat_lab_lightning_resistant",
+      "min_damage": 1
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "monster_def_id": "combat_lab_lightning_weak",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "ligthing",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_for_combat_event",
+      "event_type": "monster_damaged",
+      "damage_type": "lightning",
+      "target_monster_def_id": "combat_lab_lightning_weak",
+      "min_damage": 1
+    }
   ],
   "assertions": [
-    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_sorcerer_staff" },
-    { "type": "equipped_slot_empty", "slot": "off_hand" },
-    { "type": "event_count", "event_type": "monster_damaged", "weapon_slot": "main_hand", "min": 3 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "teleport", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "magic_bolt", "rank": 1 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "damage_type": "force", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "ice_shard", "rank": 1 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "damage_type": "cold", "target_monster_def_id": "combat_lab_lightning_resistant", "min_damage": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "ligthing", "rank": 1 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "damage_type": "lightning", "target_monster_def_id": "combat_lab_lightning_weak", "min_damage": 1 }
+    {
+      "type": "equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "starter_sorcerer_staff"
+    },
+    {
+      "type": "equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "min": 3
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "teleport",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "magic_bolt",
+      "rank": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "force",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "min_damage": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "ice_shard",
+      "rank": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "cold",
+      "target_monster_def_id": "combat_lab_lightning_resistant",
+      "min_damage": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "ligthing",
+      "rank": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "lightning",
+      "target_monster_def_id": "combat_lab_lightning_weak",
+      "min_damage": 1
+    }
   ]
 }

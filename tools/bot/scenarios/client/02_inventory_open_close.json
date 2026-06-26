@@ -1,14 +1,30 @@
 {
   "id": "inventory_open_close",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "inventory_lab",
   "title": "Inventory open/close: KEY_I toggle",
   "description": "Bot presses KEY_I through _unhandled_input(), asserts panel visible, presses again, asserts panel hidden.",
   "client_steps": [
-    { "type": "wait_ws_open",       "timeout_s": 10.0 },
-    { "type": "press_key",          "keycode": "KEY_I" },
-    { "type": "assert_panel_visible", "visible": true },
-    { "type": "press_key",          "keycode": "KEY_I" },
-    { "type": "assert_panel_visible", "visible": false }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_I"
+    },
+    {
+      "type": "assert_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "press_key",
+      "keycode": "KEY_I"
+    },
+    {
+      "type": "assert_panel_visible",
+      "visible": false
+    }
   ]
 }

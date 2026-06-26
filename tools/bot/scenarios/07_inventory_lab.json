@@ -1,5 +1,6 @@
 {
   "id": "inventory_lab",
+  "ci_tier": "extended",
   "world_id": "inventory_lab",
   "title": "Inventory lab",
   "description": "Pickup, equip, unequip, drop, re-pickup, and re-equip via inventory intents.",
@@ -7,15 +8,42 @@
     "inventory_panel": true
   },
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "rusty_sword" },
-    { "action": "equip_inventory_item", "item_def_id": "rusty_sword", "slot": "main_hand" },
-    { "action": "unequip_slot", "slot": "main_hand" },
-    { "action": "drop_inventory_item", "item_def_id": "rusty_sword" },
-    { "action": "pick_up_loot", "item_def_id": "rusty_sword" },
-    { "action": "equip_inventory_item", "item_def_id": "rusty_sword", "slot": "main_hand" }
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "rusty_sword"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "rusty_sword",
+      "slot": "main_hand"
+    },
+    {
+      "action": "unequip_slot",
+      "slot": "main_hand"
+    },
+    {
+      "action": "drop_inventory_item",
+      "item_def_id": "rusty_sword"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "rusty_sword"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "rusty_sword",
+      "slot": "main_hand"
+    }
   ],
   "assertions": [
-    { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-    { "type": "equipped_weapon_def", "item_def_id": "rusty_sword" }
+    {
+      "type": "inventory_contains",
+      "item_def_id": "rusty_sword",
+      "equipped": true
+    },
+    {
+      "type": "equipped_weapon_def",
+      "item_def_id": "rusty_sword"
+    }
   ]
 }

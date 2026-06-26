@@ -1,5 +1,6 @@
 {
   "id": "chase_lab",
+  "ci_tier": "extended",
   "world_id": "chase_lab",
   "title": "Chase lab",
   "description": "A chase monster closes distance while the player stands still.",
@@ -15,12 +16,19 @@
     }
   ],
   "assertions": [
-    { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.5 },
+    {
+      "type": "monster_moved",
+      "monster_def_id": "training_dummy_chase",
+      "min_distance": 0.5
+    },
     {
       "type": "monster_within_player_distance",
       "monster_def_id": "training_dummy_chase",
       "max_distance": 1.5
     },
-    { "type": "event_seen", "event_type": "monster_aggro" }
+    {
+      "type": "event_seen",
+      "event_type": "monster_aggro"
+    }
   ]
 }

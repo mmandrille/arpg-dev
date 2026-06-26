@@ -1,22 +1,92 @@
 {
   "id": "companion_stance_command",
+  "ci_tier": "extended",
   "world_id": "mercenary_hiring_lab",
   "seed": "v208_companion_stance_command",
   "title": "Companion stance command",
   "description": "Hires a mercenary, commands passive and assist stances, and proves stance state plus returned combat behavior over the protocol.",
-  "debug_progression": { "gold": 300 },
+  "debug_progression": {
+    "gold": 300
+  },
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board", "state": "ready", "equals": 1 },
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "combat_lab_soft_target", "alive": true, "equals": 1 },
-    { "action": "action_entity", "interactable_def_id": "town_mercenary_board", "event_type": "mercenary_hired" },
-    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "mercenary_guard", "companion_stance": "assist", "alive": true, "equals": 1 },
-    { "action": "set_companion_stance", "stance": "passive" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "companion_stance_changed", "stance": "passive", "amount": 1 }, "timeout_s": 3 },
-    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "mercenary_guard", "companion_stance": "passive", "alive": true, "equals": 1 },
-    { "action": "set_companion_stance", "stance": "assist" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "companion_stance_changed", "stance": "assist", "amount": 1 }, "timeout_s": 3 },
-    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "mercenary_guard", "companion_stance": "assist", "alive": true, "equals": 1 },
-    { "action": "move_until_player_position", "x": 6, "y": 5, "tolerance": 0.2, "max_ticks": 120 },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_mercenary_board",
+      "state": "ready",
+      "equals": 1
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_soft_target",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "action_entity",
+      "interactable_def_id": "town_mercenary_board",
+      "event_type": "mercenary_hired"
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "companion",
+      "monster_def_id": "mercenary_guard",
+      "companion_stance": "assist",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "set_companion_stance",
+      "stance": "passive"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "companion_stance_changed",
+        "stance": "passive",
+        "amount": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "companion",
+      "monster_def_id": "mercenary_guard",
+      "companion_stance": "passive",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "set_companion_stance",
+      "stance": "assist"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "companion_stance_changed",
+        "stance": "assist",
+        "amount": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "companion",
+      "monster_def_id": "mercenary_guard",
+      "companion_stance": "assist",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "move_until_player_position",
+      "x": 6,
+      "y": 5,
+      "tolerance": 0.2,
+      "max_ticks": 120
+    },
     {
       "action": "wait_for_combat_event",
       "event_type": "monster_damaged",
@@ -29,9 +99,26 @@
     }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "companion_stance_changed", "stance": "passive", "amount": 1 },
-    { "type": "event_seen", "event_type": "companion_stance_changed", "stance": "assist", "amount": 1 },
-    { "type": "entity_count", "entity_type": "companion", "monster_def_id": "mercenary_guard", "companion_stance": "assist", "alive": true, "equals": 1 },
+    {
+      "type": "event_seen",
+      "event_type": "companion_stance_changed",
+      "stance": "passive",
+      "amount": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "companion_stance_changed",
+      "stance": "assist",
+      "amount": 1
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "companion",
+      "monster_def_id": "mercenary_guard",
+      "companion_stance": "assist",
+      "alive": true,
+      "equals": 1
+    },
     {
       "type": "combat_event_seen",
       "event_type": "monster_damaged",
@@ -43,6 +130,10 @@
     }
   ],
   "visual": {
-    "camera": { "x": 6, "y": 5, "zoom": 1.0 }
+    "camera": {
+      "x": 6,
+      "y": 5,
+      "zoom": 1.0
+    }
   }
 }

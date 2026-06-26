@@ -1,5 +1,6 @@
 {
   "id": "companion_rank_scaling_and_limits",
+  "ci_tier": "extended",
   "world_id": "companion_rank_scaling_lab",
   "seed": "v185_companion_rank_scaling_and_limits",
   "character_class": "sorcerer",
@@ -10,23 +11,118 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 3, "dex": 5, "vit": 5, "magic": 18 },
-    "skill_ranks": { "magic_bolt": 1, "revive": 4 }
+    "stats": {
+      "str": 3,
+      "dex": 5,
+      "vit": 5,
+      "magic": 18
+    },
+    "skill_ranks": {
+      "magic_bolt": 1,
+      "revive": 4
+    }
   },
   "steps": [
-    { "action": "assert_skill_progression", "unspent_skill_points": 0, "skill_id": "revive", "rank": 4, "max_rank": "from_rules", "can_spend": false },
-    { "action": "attack_until_event", "monster_def_id": "dungeon_wolf", "event_type": "monster_killed", "fresh_event": true, "timeout_s": 10 },
-    { "action": "cast_skill", "skill_id": "revive", "monster_def_id": "dungeon_wolf", "alive": false, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "entity_count", "entity_type": "companion", "monster_def_id": "dungeon_wolf", "alive": true, "max_hp": 4, "equals": 1 }, "timeout_s": 2 },
-    { "action": "attack_until_event", "monster_def_id": "dungeon_wolf", "event_type": "monster_killed", "fresh_event": true, "timeout_s": 10 },
-    { "action": "wait_ticks", "ticks": 100 },
-    { "action": "cast_skill", "skill_id": "revive", "monster_def_id": "dungeon_wolf", "alive": false, "event_type": "skill_cast" },
-    { "action": "wait_until_assertion", "assertion": { "type": "entity_count", "entity_type": "companion", "monster_def_id": "dungeon_wolf", "alive": true, "max_hp": 4, "equals": 2 }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "combat_event_seen", "event_type": "monster_damaged", "source_entity_type": "companion", "source_monster_def_id": "dungeon_wolf", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1 }, "timeout_s": 6 }
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 0,
+      "skill_id": "revive",
+      "rank": 4,
+      "max_rank": "from_rules",
+      "can_spend": false
+    },
+    {
+      "action": "attack_until_event",
+      "monster_def_id": "dungeon_wolf",
+      "event_type": "monster_killed",
+      "fresh_event": true,
+      "timeout_s": 10
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "revive",
+      "monster_def_id": "dungeon_wolf",
+      "alive": false,
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "companion",
+        "monster_def_id": "dungeon_wolf",
+        "alive": true,
+        "max_hp": 4,
+        "equals": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "attack_until_event",
+      "monster_def_id": "dungeon_wolf",
+      "event_type": "monster_killed",
+      "fresh_event": true,
+      "timeout_s": 10
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 100
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "revive",
+      "monster_def_id": "dungeon_wolf",
+      "alive": false,
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "companion",
+        "monster_def_id": "dungeon_wolf",
+        "alive": true,
+        "max_hp": 4,
+        "equals": 2
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "source_entity_type": "companion",
+        "source_monster_def_id": "dungeon_wolf",
+        "target_monster_def_id": "combat_lab_soft_target",
+        "min_damage": 1
+      },
+      "timeout_s": 6
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "revive", "rank": 4, "mana": 6 },
-    { "type": "entity_count", "entity_type": "companion", "monster_def_id": "dungeon_wolf", "alive": true, "max_hp": 4, "equals": 2 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "source_entity_type": "companion", "source_monster_def_id": "dungeon_wolf", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1 }
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "revive",
+      "rank": 4,
+      "mana": 6
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "companion",
+      "monster_def_id": "dungeon_wolf",
+      "alive": true,
+      "max_hp": 4,
+      "equals": 2
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "source_entity_type": "companion",
+      "source_monster_def_id": "dungeon_wolf",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "min_damage": 1
+    }
   ]
 }

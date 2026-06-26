@@ -1,18 +1,53 @@
 {
   "id": "material_wallet_details",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "v237_material_wallet_details",
   "title": "Material wallet details",
   "description": "Client auto-picks the upgrade shard and verifies the HUD wallet exposes readable material details.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 7, "timeout_s": 10.0 },
-    { "type": "click_floor", "x": 12.0, "z": 10.0 },
-    { "type": "wait_player_near", "x": 12.0, "z": 10.0, "distance": 1.5, "timeout_s": 10.0 },
-    { "type": "wait_event", "event_type": "resource_picked_up", "timeout_s": 15.0 },
-    { "type": "assert_resource_wallet_panel", "visible": true, "text_contains": "Upgrade 1", "tooltip_contains": "Upgrade Badge x1" },
-    { "type": "assert_resource_wallet_panel", "visible": true, "tooltip_contains": "Category: Currency" },
-    { "type": "assert_resource_wallet_panel", "visible": true, "tooltip_contains": "Stored account-wide" }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 7,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_floor",
+      "x": 12.0,
+      "z": 10.0
+    },
+    {
+      "type": "wait_player_near",
+      "x": 12.0,
+      "z": 10.0,
+      "distance": 1.5,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "resource_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_resource_wallet_panel",
+      "visible": true,
+      "text_contains": "Upgrade 1",
+      "tooltip_contains": "Upgrade Badge x1"
+    },
+    {
+      "type": "assert_resource_wallet_panel",
+      "visible": true,
+      "tooltip_contains": "Category: Currency"
+    },
+    {
+      "type": "assert_resource_wallet_panel",
+      "visible": true,
+      "tooltip_contains": "Stored account-wide"
+    }
   ]
 }

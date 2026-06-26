@@ -1,15 +1,35 @@
 {
   "id": "camera_mode_setting",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "seed": "camera_mode_setting_seed",
   "title": "Camera mode setting and V cycle",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
-    { "type": "wait_wall_layout", "current_level": -1, "at_least": 1, "timeout_s": 15.0 },
-    { "type": "set_camera_mode", "mode": "isometric" },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "stairs_down"
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": -1,
+      "at_least": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "isometric"
+    },
     {
       "type": "assert_camera_mode",
       "mode": "isometric",
@@ -22,11 +42,26 @@
       "hero_centered_falloff": true,
       "world_space_visibility": false
     },
-    { "type": "press_key", "keycode": "KEY_ESCAPE" },
-    { "type": "wait_pause_menu", "timeout_s": 3.0 },
-    { "type": "click_menu_button", "button": "settings" },
-    { "type": "wait_settings_panel", "timeout_s": 3.0 },
-    { "type": "select_camera_mode", "mode": "chest_view" },
+    {
+      "type": "press_key",
+      "keycode": "KEY_ESCAPE"
+    },
+    {
+      "type": "wait_pause_menu",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "click_menu_button",
+      "button": "settings"
+    },
+    {
+      "type": "wait_settings_panel",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "select_camera_mode",
+      "mode": "chest_view"
+    },
     {
       "type": "assert_camera_mode",
       "mode": "chest_view",
@@ -40,20 +75,32 @@
       "hero_centered_falloff": false,
       "organic_edge_enabled": false
     },
-    { "type": "click_menu_button", "button": "back" },
-    { "type": "click_menu_button", "button": "resume" },
+    {
+      "type": "click_menu_button",
+      "button": "back"
+    },
+    {
+      "type": "click_menu_button",
+      "button": "resume"
+    },
     {
       "type": "assert_camera_mode",
       "mode": "chest_view",
       "projection": "perspective"
     },
-    { "type": "press_key", "keycode": "KEY_V" },
+    {
+      "type": "press_key",
+      "keycode": "KEY_V"
+    },
     {
       "type": "assert_camera_mode",
       "mode": "isometric",
       "projection": "orthogonal"
     },
-    { "type": "press_key", "keycode": "KEY_V" },
+    {
+      "type": "press_key",
+      "keycode": "KEY_V"
+    },
     {
       "type": "assert_camera_mode",
       "mode": "chest_view",

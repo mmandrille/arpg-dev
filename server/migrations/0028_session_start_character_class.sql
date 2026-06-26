@@ -1,4 +1,4 @@
--- 0018_session_start_character_class: freeze class identity with session-start progression.
+-- 0028_session_start_character_class: freeze class identity with session-start progression.
 
 ALTER TABLE session_start_character_progression
     ADD COLUMN IF NOT EXISTS character_class TEXT NOT NULL DEFAULT 'barbarian';

@@ -1,37 +1,121 @@
 {
   "id": "teleporter_lab",
+  "ci_tier": "extended",
   "world_id": "dungeon_levels",
   "seed": "dungeon_levels_fast_247",
   "title": "Teleporter lab",
   "description": "Descend from town through two non-waypoint floors, discover the cadence teleporter on level -3, then teleport back to town.",
   "max_elapsed_s": 80.0,
   "steps": [
-    { "action": "discover_teleporter", "max_ticks": 40, "wait_discovered": false },
-    { "action": "use_stair", "direction": "down", "max_ticks": 40 },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "teleporter", "equals": 0 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 400 },
-    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "teleporter", "equals": 0 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 400 },
-    { "action": "discover_teleporter", "max_ticks": 400 },
-    { "action": "assert_teleporter_discovered", "level": 0, "discovered": true },
-    { "action": "assert_teleporter_discovered", "level": -3, "discovered": true },
-    { "action": "teleport_to_level", "target_level": 0 },
-    { "action": "assert_player_at_discovered_teleporter", "level": 0, "tolerance": 0.001 }
+    {
+      "action": "discover_teleporter",
+      "max_ticks": 40,
+      "wait_discovered": false
+    },
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 40
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "teleporter",
+      "equals": 0
+    },
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 400
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "interactable",
+      "interactable_def_id": "teleporter",
+      "equals": 0
+    },
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 400
+    },
+    {
+      "action": "discover_teleporter",
+      "max_ticks": 400
+    },
+    {
+      "action": "assert_teleporter_discovered",
+      "level": 0,
+      "discovered": true
+    },
+    {
+      "action": "assert_teleporter_discovered",
+      "level": -3,
+      "discovered": true
+    },
+    {
+      "action": "teleport_to_level",
+      "target_level": 0
+    },
+    {
+      "action": "assert_player_at_discovered_teleporter",
+      "level": 0,
+      "tolerance": 0.001
+    }
   ],
   "assertions": [
-    { "type": "current_level", "equals": 0 },
-    { "type": "visited_levels_contain", "level": 0 },
-    { "type": "visited_levels_contain", "level": -1 },
-    { "type": "visited_levels_contain", "level": -2 },
-    { "type": "visited_levels_contain", "level": -3 },
-    { "type": "teleporter_list_contains", "level": 0 },
-    { "type": "teleporter_list_contains", "level": -3 },
-    { "type": "teleporter_discovered", "level": 0, "discovered": true },
-    { "type": "teleporter_discovered", "level": -3, "discovered": true },
-    { "type": "event_seen", "event_type": "teleporter_discovered" },
-    { "type": "event_seen", "event_type": "level_changed" }
+    {
+      "type": "current_level",
+      "equals": 0
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": 0
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": -1
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": -2
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": -3
+    },
+    {
+      "type": "teleporter_list_contains",
+      "level": 0
+    },
+    {
+      "type": "teleporter_list_contains",
+      "level": -3
+    },
+    {
+      "type": "teleporter_discovered",
+      "level": 0,
+      "discovered": true
+    },
+    {
+      "type": "teleporter_discovered",
+      "level": -3,
+      "discovered": true
+    },
+    {
+      "type": "event_seen",
+      "event_type": "teleporter_discovered"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "level_changed"
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.1 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.1
+    }
   }
 }

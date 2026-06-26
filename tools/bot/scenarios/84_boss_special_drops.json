@@ -1,5 +1,6 @@
 {
   "id": "boss_special_drops",
+  "ci_tier": "extended",
   "world_id": "boss_floor_gate_lab",
   "seed": "boss_special_drops",
   "title": "Boss special drops",
@@ -9,25 +10,106 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 200, "dex": 5, "vit": 80, "magic": 5 },
+    "stats": {
+      "str": 200,
+      "dex": 5,
+      "vit": 80,
+      "magic": 5
+    },
     "skill_ranks": {}
   },
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "monster", "is_boss": true, "boss_template_id": "cave_warden", "equals": 1 },
-    { "action": "action_until_event", "is_boss": true, "event_type": "monster_killed", "timeout_s": 8 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "boss_killed", "boss_template_id": "cave_warden" }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "entity_count", "entity_type": "loot", "display_name": "Conduit Staff", "rarity": "unique", "equals": 1 }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "entity_count", "entity_type": "loot", "display_name": "Stormrunner Covenant Bow", "rarity": "set", "equals": 1 }, "timeout_s": 2 },
-    { "action": "wait_until_assertion", "assertion": { "type": "entity_count", "entity_type": "loot", "item_template_id": "cave_amulet", "at_least": 1 }, "timeout_s": 2 }
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "is_boss": true,
+      "boss_template_id": "cave_warden",
+      "equals": 1
+    },
+    {
+      "action": "action_until_event",
+      "is_boss": true,
+      "event_type": "monster_killed",
+      "timeout_s": 8
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "boss_killed",
+        "boss_template_id": "cave_warden"
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "loot",
+        "display_name": "Conduit Staff",
+        "rarity": "unique",
+        "equals": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "loot",
+        "display_name": "Stormrunner Covenant Bow",
+        "rarity": "set",
+        "equals": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "loot",
+        "item_template_id": "cave_amulet",
+        "at_least": 1
+      },
+      "timeout_s": 2
+    }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "monster_killed" },
-    { "type": "event_seen", "event_type": "boss_killed", "boss_template_id": "cave_warden" },
-    { "type": "entity_count", "entity_type": "loot", "display_name": "Conduit Staff", "rarity": "unique", "equals": 1 },
-    { "type": "entity_count", "entity_type": "loot", "display_name": "Stormrunner Covenant Bow", "rarity": "set", "equals": 1 },
-    { "type": "entity_count", "entity_type": "loot", "item_template_id": "cave_amulet", "at_least": 1 }
+    {
+      "type": "event_seen",
+      "event_type": "monster_killed"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "boss_killed",
+      "boss_template_id": "cave_warden"
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "loot",
+      "display_name": "Conduit Staff",
+      "rarity": "unique",
+      "equals": 1
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "loot",
+      "display_name": "Stormrunner Covenant Bow",
+      "rarity": "set",
+      "equals": 1
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "loot",
+      "item_template_id": "cave_amulet",
+      "at_least": 1
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 15, "zoom": 1.15 }
+    "camera": {
+      "x": 16,
+      "y": 15,
+      "zoom": 1.15
+    }
   }
 }

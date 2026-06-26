@@ -1,32 +1,94 @@
 {
   "id": "menu_create_join_flow",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "title": "Menu Create Game and Join Game flow",
   "description": "Focused v45 proof for Join Game list-first state, Settings Create Game Type persistence, Solo Create Game through choose-or-create, and existing-character reuse.",
   "client_steps": [
-    { "type": "wait_main_menu", "timeout_s": 10.0 },
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 10.0
+    },
     {
       "type": "assert_main_menu_actions",
-      "labels": ["Create Game", "Join Game", "Settings", "Exit"],
-      "actions": ["create_game", "join_game", "settings", "exit"]
+      "labels": [
+        "Create Game",
+        "Join Game",
+        "Settings",
+        "Exit"
+      ],
+      "actions": [
+        "create_game",
+        "join_game",
+        "settings",
+        "exit"
+      ]
     },
-    { "type": "click_menu_button", "button": "join_game" },
-    { "type": "wait_multiplayer_panel", "timeout_s": 5.0 },
-    { "type": "assert_multiplayer_panel_visible", "visible": true },
-    { "type": "assert_multiplayer_session_rows", "selected": false },
-    { "type": "click_menu_button", "button": "back" },
-    { "type": "wait_main_menu", "timeout_s": 3.0 },
-    { "type": "click_menu_button", "button": "settings" },
-    { "type": "wait_settings_panel", "timeout_s": 3.0 },
-    { "type": "select_create_game_type", "session_type": "coop" },
-    { "type": "assert_create_game_type", "session_type": "coop" },
-    { "type": "select_create_game_type", "session_type": "solo" },
-    { "type": "assert_create_game_type", "session_type": "solo" },
-    { "type": "click_menu_button", "button": "back" },
-    { "type": "wait_main_menu", "timeout_s": 3.0 },
-    { "type": "click_menu_button", "button": "create_game" },
-    { "type": "wait_character_panel", "timeout_s": 3.0 },
+    {
+      "type": "click_menu_button",
+      "button": "join_game"
+    },
+    {
+      "type": "wait_multiplayer_panel",
+      "timeout_s": 5.0
+    },
+    {
+      "type": "assert_multiplayer_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_multiplayer_session_rows",
+      "selected": false
+    },
+    {
+      "type": "click_menu_button",
+      "button": "back"
+    },
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "click_menu_button",
+      "button": "settings"
+    },
+    {
+      "type": "wait_settings_panel",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "select_create_game_type",
+      "session_type": "coop"
+    },
+    {
+      "type": "assert_create_game_type",
+      "session_type": "coop"
+    },
+    {
+      "type": "select_create_game_type",
+      "session_type": "solo"
+    },
+    {
+      "type": "assert_create_game_type",
+      "session_type": "solo"
+    },
+    {
+      "type": "click_menu_button",
+      "button": "back"
+    },
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "click_menu_button",
+      "button": "create_game"
+    },
+    {
+      "type": "wait_character_panel",
+      "timeout_s": 3.0
+    },
     {
       "type": "assert_character_panel",
       "mode": "choose_or_create",
@@ -35,7 +97,10 @@
       "create_button_visible": true,
       "empty_visible": false
     },
-    { "type": "click_menu_button", "button": "create_character" },
+    {
+      "type": "click_menu_button",
+      "button": "create_character"
+    },
     {
       "type": "assert_character_panel",
       "name_field_visible": true,
@@ -43,21 +108,55 @@
       "class_picker_visible": true,
       "selected_class": "barbarian"
     },
-    { "type": "select_character_class", "class_id": "sorcerer" },
+    {
+      "type": "select_character_class",
+      "class_id": "sorcerer"
+    },
     {
       "type": "assert_character_panel",
       "selected_class": "sorcerer"
     },
-    { "type": "enter_character_name", "name": "Bot Solo 45" },
-    { "type": "click_menu_button", "button": "confirm_character_create" },
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "assert_current_session", "exists": true, "mode": "solo", "listed": false },
-    { "type": "remember_session" },
-    { "type": "click_menu_button", "button": "return_to_main_menu" },
-    { "type": "wait_main_menu", "timeout_s": 5.0 },
-    { "type": "assert_create_game_type", "session_type": "solo" },
-    { "type": "click_menu_button", "button": "create_game" },
-    { "type": "wait_character_panel", "timeout_s": 5.0 },
+    {
+      "type": "enter_character_name",
+      "name": "Bot Solo 45"
+    },
+    {
+      "type": "click_menu_button",
+      "button": "confirm_character_create"
+    },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_current_session",
+      "exists": true,
+      "mode": "solo",
+      "listed": false
+    },
+    {
+      "type": "remember_session"
+    },
+    {
+      "type": "click_menu_button",
+      "button": "return_to_main_menu"
+    },
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 5.0
+    },
+    {
+      "type": "assert_create_game_type",
+      "session_type": "solo"
+    },
+    {
+      "type": "click_menu_button",
+      "button": "create_game"
+    },
+    {
+      "type": "wait_character_panel",
+      "timeout_s": 5.0
+    },
     {
       "type": "assert_character_panel",
       "mode": "choose_or_create",
@@ -66,9 +165,22 @@
       "create_button_visible": true,
       "row_character_class": "sorcerer"
     },
-    { "type": "select_character", "index": 0 },
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "assert_current_session", "exists": true, "mode": "solo", "listed": false },
-    { "type": "assert_session_changed" }
+    {
+      "type": "select_character",
+      "index": 0
+    },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_current_session",
+      "exists": true,
+      "mode": "solo",
+      "listed": false
+    },
+    {
+      "type": "assert_session_changed"
+    }
   ]
 }

@@ -1,23 +1,72 @@
 {
   "id": "flying_navigation_trait",
+  "ci_tier": "extended",
   "world_id": "flying_navigation_lab",
   "seed": "v297_flying_navigation_trait",
   "title": "Flying navigation trait",
   "description": "A cave bat closes through preset water and hole blockers that remain normal obstacles for grounded monsters.",
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_bat", "alive": true, "equals": 1 },
-    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "water", "at_least": 1 }, "timeout_s": 3 },
-    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "hole", "at_least": 1 }, "timeout_s": 3 },
-    { "action": "wait_ticks", "ticks": 50 }
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_bat",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "wall_count",
+        "kind": "water",
+        "at_least": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "wall_count",
+        "kind": "hole",
+        "at_least": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 50
+    }
   ],
   "assertions": [
-    { "type": "wall_count", "kind": "water", "at_least": 1 },
-    { "type": "wall_count", "kind": "hole", "at_least": 1 },
-    { "type": "monster_moved", "monster_def_id": "dungeon_bat", "min_distance": 2.0 },
-    { "type": "monster_within_player_distance", "monster_def_id": "dungeon_bat", "max_distance": 2.5 },
-    { "type": "event_seen", "event_type": "monster_aggro" }
+    {
+      "type": "wall_count",
+      "kind": "water",
+      "at_least": 1
+    },
+    {
+      "type": "wall_count",
+      "kind": "hole",
+      "at_least": 1
+    },
+    {
+      "type": "monster_moved",
+      "monster_def_id": "dungeon_bat",
+      "min_distance": 2.0
+    },
+    {
+      "type": "monster_within_player_distance",
+      "monster_def_id": "dungeon_bat",
+      "max_distance": 2.5
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_aggro"
+    }
   ],
   "visual": {
-    "camera": { "x": 5, "y": 5, "zoom": 1.0 }
+    "camera": {
+      "x": 5,
+      "y": 5,
+      "zoom": 1.0
+    }
   }
 }

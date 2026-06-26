@@ -1,22 +1,54 @@
 {
   "id": "monster_rarity_loot_scaling",
+  "ci_tier": "extended",
   "world_id": "dungeon_levels",
   "seed": "v30_monster_rarity",
   "max_elapsed_s": 28.0,
   "title": "Monster rarity combat",
   "description": "Descend into the seeded depth-2 dungeon floor and assert a champion generated monster rarity over protocol.",
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 80 },
-    { "action": "use_stair", "direction": "down", "max_ticks": 80 },
-    { "action": "assert_entity_count", "entity_type": "monster", "rarity": "champion", "at_least": 1 }
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 80
+    },
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 80
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "rarity": "champion",
+      "at_least": 1
+    }
   ],
   "assertions": [
-    { "type": "current_level", "equals": -2 },
-    { "type": "visited_levels_contain", "level": 0 },
-    { "type": "visited_levels_contain", "level": -1 },
-    { "type": "entity_count", "entity_type": "monster", "rarity": "champion", "at_least": 1 }
+    {
+      "type": "current_level",
+      "equals": -2
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": 0
+    },
+    {
+      "type": "visited_levels_contain",
+      "level": -1
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "rarity": "champion",
+      "at_least": 1
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.0
+    }
   }
 }

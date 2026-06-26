@@ -1,14 +1,28 @@
 {
   "id": "full_screen_map_overlay",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "collision_lab",
   "seed": "full_screen_map_overlay_seed",
   "title": "Full-screen map overlay",
   "description": "Client cycles discovery map modes with TAB and verifies the larger full-screen map overlay.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 10.0 },
-    { "type": "assert_character_progression", "derived_stats": { "light_radius": 9 } },
-    { "type": "wait_wall_layout", "current_level": 0, "at_least": 5, "timeout_s": 5.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_character_progression",
+      "derived_stats": {
+        "light_radius": 9
+      }
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": 0,
+      "at_least": 5,
+      "timeout_s": 5.0
+    },
     {
       "type": "assert_discovery_minimap",
       "visible": false,
@@ -18,7 +32,10 @@
       "map_size_y": 208,
       "explored_count_min": 1
     },
-    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "press_key",
+      "keycode": "KEY_TAB"
+    },
     {
       "type": "assert_discovery_minimap",
       "visible": true,
@@ -29,7 +46,10 @@
       "explored_count_min": 1,
       "wall_count_min": 1
     },
-    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "press_key",
+      "keycode": "KEY_TAB"
+    },
     {
       "type": "assert_discovery_minimap",
       "visible": true,
@@ -40,7 +60,10 @@
       "explored_count_min": 1,
       "wall_count_min": 1
     },
-    { "type": "press_key", "keycode": "KEY_TAB" },
+    {
+      "type": "press_key",
+      "keycode": "KEY_TAB"
+    },
     {
       "type": "assert_discovery_minimap",
       "visible": false,

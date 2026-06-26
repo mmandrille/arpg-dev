@@ -1,12 +1,25 @@
 {
   "id": "ranged_threats_hit_companions",
+  "ci_tier": "extended",
   "world_id": "ranged_companion_target_lab",
   "seed": "v248_ranged_threats_hit_companions",
   "title": "Ranged threats hit companions",
   "description": "A dungeon archer targets an engaged companion and resolves a companion combat event.",
   "steps": [
-    { "action": "assert_entity_count", "entity_type": "companion", "monster_def_id": "combat_lab_soft_target", "alive": true, "equals": 1 },
-    { "action": "assert_entity_count", "entity_type": "monster", "monster_def_id": "dungeon_archer", "alive": true, "equals": 1 },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "companion",
+      "monster_def_id": "combat_lab_soft_target",
+      "alive": true,
+      "equals": 1
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_archer",
+      "alive": true,
+      "equals": 1
+    },
     {
       "action": "wait_until_assertion",
       "timeout_s": 8,
@@ -27,6 +40,10 @@
     }
   ],
   "visual": {
-    "camera": { "x": 7, "y": 5, "zoom": 1.0 }
+    "camera": {
+      "x": 7,
+      "y": 5,
+      "zoom": 1.0
+    }
   }
 }

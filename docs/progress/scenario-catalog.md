@@ -3,6 +3,22 @@
 Reference catalog for protocol bot and client bot scenarios. Read when adding or debugging
 end-to-end proofs — not required for routine slice startup.
 
+## CI tiers (`make ci` vs full matrix)
+
+`make ci` runs the curated pack in [`tools/bot/ci_pack.json`](../../tools/bot/ci_pack.json)
+(~22 protocol + ~14 client scenarios) via `SCENARIO=ci`. Target: representative integration in
+~5–7 minutes alongside unit tests, not every end-to-end proof on every run.
+
+`make ci-full` and `make bot` / `make bot-client SCENARIO=all` run the full discovered matrix.
+
+When adding a scenario:
+
+1. Put it in `ci_pack.json` if it should gate every merge, **or**
+2. Set `"ci_tier": "extended"` in the scenario JSON for release/nightly-only coverage.
+
+`tools/test_ci_pack.py` enforces that every scenario file is either in the pack or tagged
+`extended`. Agent curation policy: `.cursor/rules/ci-pack-maintenance.mdc`. `skill_visual` stays extended and is excluded from `SCENARIO=all` protocol runs.
+
 ## Scripted vertical slice flow (bot + smoke)
 
 Every slice keeps this loop working unless the spec explicitly changes it:

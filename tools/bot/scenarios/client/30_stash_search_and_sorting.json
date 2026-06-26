@@ -1,39 +1,151 @@
 {
   "id": "stash_search_and_sorting",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "v65_stash_search_0504",
   "title": "Stash search and sorting",
   "description": "Client deposits several rolled items, filters stash rows by search text, changes sort mode, and withdraws from the filtered view.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 1, "timeout_s": 10.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_stash" },
-    { "type": "wait_stash_panel", "equals": 0, "timeout_s": 15.0 },
-    { "type": "drag_bag_to_stash", "rolled": true, "bag_index": 0 },
-    { "type": "wait_event", "event_type": "stash_item_deposited", "timeout_s": 15.0 },
-    { "type": "drag_bag_to_stash", "rolled": true, "bag_index": 0 },
-    { "type": "wait_event", "event_type": "stash_item_deposited", "timeout_s": 15.0 },
-    { "type": "drag_bag_to_stash", "rolled": true, "bag_index": 0 },
-    { "type": "wait_event", "event_type": "stash_item_deposited", "timeout_s": 15.0 },
-    { "type": "wait_stash_panel", "rolled": true, "equals": 3, "timeout_s": 15.0 },
-    { "type": "select_stash_sort", "mode": "name" },
-    { "type": "assert_stash_filter", "sort_mode": "name", "filtered_equals": 3 },
-    { "type": "set_stash_search", "text": "blade" },
-    { "type": "assert_stash_filter", "search_text": "blade", "sort_mode": "name", "filtered_equals": 1, "first_item_def_id": "cave_blade" },
-    { "type": "select_stash_sort", "mode": "rarity" },
-    { "type": "assert_stash_filter", "search_text": "blade", "sort_mode": "rarity", "filtered_equals": 1 },
-    { "type": "drag_stash_to_bag", "rolled": true, "stash_index": 0 },
-    { "type": "wait_event", "event_type": "stash_item_withdrawn", "timeout_s": 15.0 },
-    { "type": "assert_stash_item_count", "rolled": true, "equals": 0 },
-    { "type": "set_stash_search", "text": "" },
-    { "type": "assert_stash_item_count", "rolled": true, "equals": 2 },
-    { "type": "assert_stash_panel_visible", "visible": true }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 1,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_stash"
+    },
+    {
+      "type": "wait_stash_panel",
+      "equals": 0,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "drag_bag_to_stash",
+      "rolled": true,
+      "bag_index": 0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "stash_item_deposited",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "drag_bag_to_stash",
+      "rolled": true,
+      "bag_index": 0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "stash_item_deposited",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "drag_bag_to_stash",
+      "rolled": true,
+      "bag_index": 0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "stash_item_deposited",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_stash_panel",
+      "rolled": true,
+      "equals": 3,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "select_stash_sort",
+      "mode": "name"
+    },
+    {
+      "type": "assert_stash_filter",
+      "sort_mode": "name",
+      "filtered_equals": 3
+    },
+    {
+      "type": "set_stash_search",
+      "text": "blade"
+    },
+    {
+      "type": "assert_stash_filter",
+      "search_text": "blade",
+      "sort_mode": "name",
+      "filtered_equals": 1,
+      "first_item_def_id": "cave_blade"
+    },
+    {
+      "type": "select_stash_sort",
+      "mode": "rarity"
+    },
+    {
+      "type": "assert_stash_filter",
+      "search_text": "blade",
+      "sort_mode": "rarity",
+      "filtered_equals": 1
+    },
+    {
+      "type": "drag_stash_to_bag",
+      "rolled": true,
+      "stash_index": 0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "stash_item_withdrawn",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_stash_item_count",
+      "rolled": true,
+      "equals": 0
+    },
+    {
+      "type": "set_stash_search",
+      "text": ""
+    },
+    {
+      "type": "assert_stash_item_count",
+      "rolled": true,
+      "equals": 2
+    },
+    {
+      "type": "assert_stash_panel_visible",
+      "visible": true
+    }
   ]
 }

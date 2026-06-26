@@ -1,5 +1,6 @@
 {
   "id": "leash_lab",
+  "ci_tier": "extended",
   "world_id": "leash_lab",
   "title": "Leash lab",
   "description": "A chase monster aggros and moves under slower standard speed.",
@@ -7,11 +8,22 @@
     {
       "action": "wait_until_assertion",
       "timeout_s": 5.0,
-      "assertion": { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.5 }
+      "assertion": {
+        "type": "monster_moved",
+        "monster_def_id": "training_dummy_chase",
+        "min_distance": 0.5
+      }
     }
   ],
   "assertions": [
-    { "type": "monster_moved", "monster_def_id": "training_dummy_chase", "min_distance": 0.5 },
-    { "type": "event_seen", "event_type": "monster_aggro" }
+    {
+      "type": "monster_moved",
+      "monster_def_id": "training_dummy_chase",
+      "min_distance": 0.5
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_aggro"
+    }
   ]
 }

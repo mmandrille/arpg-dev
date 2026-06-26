@@ -1,5 +1,6 @@
 {
   "id": "boss_telegraph_decals",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "boss_floor_gate_lab",
   "seed": "boss_floor_gate",
@@ -10,11 +11,19 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 5, "dex": 5, "vit": 80, "magic": 5 },
+    "stats": {
+      "str": 5,
+      "dex": 5,
+      "vit": 80,
+      "magic": 5
+    },
     "skill_ranks": {}
   },
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
     {
       "type": "wait_boss_health_bar",
       "visible": true,

@@ -1,43 +1,97 @@
 {
   "id": "character_persistence",
+  "ci_tier": "extended",
   "world_id": "gear_before_combat",
   "title": "Character persistence",
   "description": "Pick up and equip durable gear, then prove same-account fresh sessions load inventory/equipment. Destructive use/drop removal and waypoint persistence are covered by dedicated tests to keep this scenario short.",
   "steps": [
-    { "action": "walk_to_loot", "item_def_id": "rusty_sword" },
-    { "action": "action_entity", "item_def_id": "rusty_sword", "event_type": "item_picked_up" },
-    { "action": "equip_inventory_item", "item_def_id": "rusty_sword", "slot": "main_hand" }
+    {
+      "action": "walk_to_loot",
+      "item_def_id": "rusty_sword"
+    },
+    {
+      "action": "action_entity",
+      "item_def_id": "rusty_sword",
+      "event_type": "item_picked_up"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "rusty_sword",
+      "slot": "main_hand"
+    }
   ],
   "assertions": [
-    { "type": "inventory_count", "equals": 1 },
-    { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-    { "type": "equipped_weapon_def", "item_def_id": "rusty_sword" }
+    {
+      "type": "inventory_count",
+      "equals": 1
+    },
+    {
+      "type": "inventory_contains",
+      "item_def_id": "rusty_sword",
+      "equipped": true
+    },
+    {
+      "type": "equipped_weapon_def",
+      "item_def_id": "rusty_sword"
+    }
   ],
   "fresh_session_checks": [
     {
       "world_id": "dungeon_levels",
       "steps": [
-        { "action": "assert_inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-        { "action": "assert_equipped_weapon_def", "item_def_id": "rusty_sword" }
+        {
+          "action": "assert_inventory_contains",
+          "item_def_id": "rusty_sword",
+          "equipped": true
+        },
+        {
+          "action": "assert_equipped_weapon_def",
+          "item_def_id": "rusty_sword"
+        }
       ],
       "assertions": [
-        { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-        { "type": "equipped_weapon_def", "item_def_id": "rusty_sword" }
+        {
+          "type": "inventory_contains",
+          "item_def_id": "rusty_sword",
+          "equipped": true
+        },
+        {
+          "type": "equipped_weapon_def",
+          "item_def_id": "rusty_sword"
+        }
       ]
     },
     {
       "world_id": "dungeon_levels",
       "steps": [
-        { "action": "assert_inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-        { "action": "assert_equipped_weapon_def", "item_def_id": "rusty_sword" }
+        {
+          "action": "assert_inventory_contains",
+          "item_def_id": "rusty_sword",
+          "equipped": true
+        },
+        {
+          "action": "assert_equipped_weapon_def",
+          "item_def_id": "rusty_sword"
+        }
       ],
       "assertions": [
-        { "type": "inventory_contains", "item_def_id": "rusty_sword", "equipped": true },
-        { "type": "equipped_weapon_def", "item_def_id": "rusty_sword" }
+        {
+          "type": "inventory_contains",
+          "item_def_id": "rusty_sword",
+          "equipped": true
+        },
+        {
+          "type": "equipped_weapon_def",
+          "item_def_id": "rusty_sword"
+        }
       ]
     }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.1 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.1
+    }
   }
 }

@@ -1,55 +1,252 @@
 {
   "id": "blacksmith_upgrade_ui",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "blacksmith_upgrade_ui_118",
   "title": "Blacksmith upgrade UI",
   "description": "Client funds stash gold, keeps a rolled item in inventory, opens the blacksmith, upgrades once, and observes the upgraded staged item.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 7, "timeout_s": 10.0 },
-    { "type": "click_floor", "x": 12.0, "z": 10.0 },
-    { "type": "wait_player_near", "x": 12.0, "z": 10.0, "distance": 1.5, "timeout_s": 10.0 },
-    { "type": "wait_event", "event_type": "resource_picked_up", "timeout_s": 15.0 },
-    { "type": "assert_resource_wallet_panel", "visible": true, "text_contains": "Upgrade 1" },
-    { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_vendor" },
-    { "type": "wait_shop_panel", "at_least": 3, "timeout_s": 15.0 },
-    { "type": "click_shop_sell_item", "rolled": true, "bag_index": 1 },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "click_shop_sell_item", "rolled": true, "bag_index": 1 },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "click_shop_sell_item", "rolled": true, "bag_index": 1 },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "click_shop_sell_item", "rolled": true, "bag_index": 1 },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "click_shop_sell_item", "rolled": true, "bag_index": 1 },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_stash" },
-    { "type": "wait_stash_panel", "at_least": 0, "timeout_s": 15.0 },
-    { "type": "click_stash_deposit_gold", "amount": 100 },
-    { "type": "wait_event", "event_type": "stash_gold_deposited", "timeout_s": 15.0 },
-    { "type": "assert_stash_gold", "at_least": 100 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_blacksmith" },
-    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 0, "upgrade_enabled": true, "success_chance_percent": 100, "resource_item_def_id": "upgrade_shard", "resource_required_count": 1, "resource_wallet_count": 1, "pity_failure_count": 0, "pity_threshold": 2, "pity_guaranteed": false, "timeout_s": 15.0 },
-    { "type": "click_blacksmith_stage_item", "item_def_id": "cave_blade" },
-    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "item_level": 0, "upgrade_enabled": true, "preview_contains": ["On success: Level 0 -> 1", "Spend on attempt: 100 gold, 1 Upgrade Badge", "After attempt: 200 gold, 0 Upgrade Badge"], "timeout_s": 15.0 },
-    { "type": "click_blacksmith_upgrade", "item_def_id": "cave_blade" },
-    { "type": "wait_blacksmith_panel", "item_def_id": "cave_blade", "upgrade_enabled": false, "resource_wallet_count": 0, "status_contains": "Upgraded", "timeout_s": 15.0 },
-    { "type": "assert_resource_wallet_panel", "visible": false },
-    { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },
-    { "type": "assert_blacksmith_panel", "item_def_id": "cave_blade", "upgrade_enabled": false, "resource_wallet_count": 0, "status_contains": "Upgraded" }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 7,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_floor",
+      "x": 12.0,
+      "z": 10.0
+    },
+    {
+      "type": "wait_player_near",
+      "x": 12.0,
+      "z": 10.0,
+      "distance": 1.5,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_event",
+      "event_type": "resource_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_resource_wallet_panel",
+      "visible": true,
+      "text_contains": "Upgrade 1"
+    },
+    {
+      "type": "assert_inventory_count",
+      "item_def_id": "upgrade_shard",
+      "equals": 0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_vendor"
+    },
+    {
+      "type": "wait_shop_panel",
+      "at_least": 3,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_shop_sell_item",
+      "rolled": true,
+      "bag_index": 1
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_shop_sell_item",
+      "rolled": true,
+      "bag_index": 1
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_shop_sell_item",
+      "rolled": true,
+      "bag_index": 1
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_shop_sell_item",
+      "rolled": true,
+      "bag_index": 1
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_shop_sell_item",
+      "rolled": true,
+      "bag_index": 1
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_stash"
+    },
+    {
+      "type": "wait_stash_panel",
+      "at_least": 0,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_stash_deposit_gold",
+      "amount": 100
+    },
+    {
+      "type": "wait_event",
+      "event_type": "stash_gold_deposited",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_stash_gold",
+      "at_least": 100
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_blacksmith"
+    },
+    {
+      "type": "wait_blacksmith_panel",
+      "item_def_id": "cave_blade",
+      "item_level": 0,
+      "upgrade_enabled": true,
+      "success_chance_percent": 100,
+      "resource_item_def_id": "upgrade_shard",
+      "resource_required_count": 1,
+      "resource_wallet_count": 1,
+      "pity_failure_count": 0,
+      "pity_threshold": 2,
+      "pity_guaranteed": false,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_blacksmith_stage_item",
+      "item_def_id": "cave_blade"
+    },
+    {
+      "type": "wait_blacksmith_panel",
+      "item_def_id": "cave_blade",
+      "item_level": 0,
+      "upgrade_enabled": true,
+      "preview_contains": [
+        "On success: Level 0 -> 1",
+        "Spend on attempt: 100 gold, 1 Upgrade Badge",
+        "After attempt: 200 gold, 0 Upgrade Badge"
+      ],
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_blacksmith_upgrade",
+      "item_def_id": "cave_blade"
+    },
+    {
+      "type": "wait_blacksmith_panel",
+      "item_def_id": "cave_blade",
+      "upgrade_enabled": false,
+      "resource_wallet_count": 0,
+      "status_contains": "Upgraded",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_resource_wallet_panel",
+      "visible": false
+    },
+    {
+      "type": "assert_inventory_count",
+      "item_def_id": "upgrade_shard",
+      "equals": 0
+    },
+    {
+      "type": "assert_blacksmith_panel",
+      "item_def_id": "cave_blade",
+      "upgrade_enabled": false,
+      "resource_wallet_count": 0,
+      "status_contains": "Upgraded"
+    }
   ]
 }

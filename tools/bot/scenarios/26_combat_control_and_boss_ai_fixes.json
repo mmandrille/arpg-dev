@@ -1,16 +1,41 @@
 {
   "id": "combat_control_and_boss_ai_fixes",
+  "ci_tier": "extended",
   "world_id": "combat_control_lab",
   "seed": "combatcontrol0002",
   "max_elapsed_s": 23.0,
   "title": "Combat control and boss AI fixes",
   "description": "Equip the training bow, fire a targetless directional shot, and prove the damaged dungeon mob aggros and moves toward the player.",
   "steps": [
-    { "action": "action_entity", "item_def_id": "training_bow", "event_type": "item_picked_up" },
-    { "action": "equip_inventory_item", "item_def_id": "training_bow", "slot": "main_hand" },
-    { "action": "move_until_player_position", "x": 3, "y": 5, "tolerance": 0.1 },
-    { "action": "directional_attack", "monster_def_id": "dungeon_mob", "event_type": "monster_damaged" },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "monster_aggro" }, "timeout_s": 5 },
+    {
+      "action": "action_entity",
+      "item_def_id": "training_bow",
+      "event_type": "item_picked_up"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "training_bow",
+      "slot": "main_hand"
+    },
+    {
+      "action": "move_until_player_position",
+      "x": 3,
+      "y": 5,
+      "tolerance": 0.1
+    },
+    {
+      "action": "directional_attack",
+      "monster_def_id": "dungeon_mob",
+      "event_type": "monster_damaged"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "monster_aggro"
+      },
+      "timeout_s": 5
+    },
     {
       "action": "wait_until_assertion",
       "assertion": {
@@ -23,9 +48,19 @@
     }
   ],
   "assertions": [
-    { "type": "inventory_contains", "item_def_id": "training_bow", "equipped": true },
-    { "type": "event_seen", "event_type": "monster_damaged" },
-    { "type": "event_seen", "event_type": "monster_aggro" },
+    {
+      "type": "inventory_contains",
+      "item_def_id": "training_bow",
+      "equipped": true
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_damaged"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_aggro"
+    },
     {
       "type": "entity_moved",
       "entity_type": "monster",

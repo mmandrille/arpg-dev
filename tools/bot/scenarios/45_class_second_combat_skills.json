@@ -1,5 +1,6 @@
 {
   "id": "class_second_combat_skills",
+  "ci_tier": "extended",
   "world_id": "skill_progression_lab",
   "seed": "v89_class_second_combat_skills",
   "character_class": "barbarian",
@@ -10,18 +11,47 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 2,
-    "stats": { "str": 5, "dex": 5, "vit": 5, "magic": 5 },
+    "stats": {
+      "str": 5,
+      "dex": 5,
+      "vit": 5,
+      "magic": 5
+    },
     "skill_ranks": {}
   },
   "steps": [
-    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "cleave", "rank": 0, "max_rank": 5, "can_spend": true },
-    { "action": "assert_skill_progression", "unspent_skill_points": 2, "skill_id": "ice_shard", "rank": 0, "max_rank": 5, "can_spend": false },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "cleave",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": true
+    },
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "ice_shard",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": false
+    },
     {
       "action": "allocate_skill_point",
       "skill_id": "cleave",
-      "expect_skill_progression": { "unspent_skill_points": 1, "skill_id": "cleave", "rank": 1, "max_rank": 5, "can_spend": false }
+      "expect_skill_progression": {
+        "unspent_skill_points": 1,
+        "skill_id": "cleave",
+        "rank": 1,
+        "max_rank": 5,
+        "can_spend": false
+      }
     },
-    { "action": "allocate_skill_point", "skill_id": "ice_shard", "expect_reject": "skill_class_not_allowed" },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "ice_shard",
+      "expect_reject": "skill_class_not_allowed"
+    },
     {
       "action": "cast_skill",
       "skill_id": "cleave",
@@ -30,14 +60,51 @@
     }
   ],
   "assertions": [
-    { "type": "event_seen", "event_type": "skill_rank_updated", "skill_id": "cleave", "rank": 1 },
-    { "type": "event_seen", "event_type": "skill_cast", "skill_id": "cleave", "rank": 1, "mana": 4 },
-    { "type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1 },
-    { "type": "event_seen", "event_type": "skill_cooldown_started", "skill_id": "cleave" },
-    { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "cleave", "rank": 1, "max_rank": 5, "can_spend": false },
-    { "type": "skill_progression", "unspent_skill_points": 2, "skill_id": "ice_shard", "rank": 0, "max_rank": 5, "can_spend": false }
+    {
+      "type": "event_seen",
+      "event_type": "skill_rank_updated",
+      "skill_id": "cleave",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "cleave",
+      "rank": 1,
+      "mana": 4
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "min_damage": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cooldown_started",
+      "skill_id": "cleave"
+    },
+    {
+      "type": "skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "cleave",
+      "rank": 1,
+      "max_rank": 5,
+      "can_spend": false
+    },
+    {
+      "type": "skill_progression",
+      "unspent_skill_points": 2,
+      "skill_id": "ice_shard",
+      "rank": 0,
+      "max_rank": 5,
+      "can_spend": false
+    }
   ],
   "visual": {
-    "camera": { "x": 16, "y": 10, "zoom": 1.0 }
+    "camera": {
+      "x": 16,
+      "y": 10,
+      "zoom": 1.0
+    }
   }
 }

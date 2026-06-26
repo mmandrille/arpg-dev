@@ -1,5 +1,6 @@
 {
   "id": "coop_rewards_and_scaling",
+  "ci_tier": "extended",
   "world_id": "coop_reward_lab",
   "seed": "v48-coop-rewards-and-scaling",
   "max_elapsed_s": 34.0,

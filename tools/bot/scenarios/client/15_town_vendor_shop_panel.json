@@ -1,27 +1,94 @@
 {
   "id": "town_vendor_shop_panel",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "town_vendor_gold_sink_1075",
   "title": "Town vendor shop panel",
   "description": "Client opens the compact vendor lab, verifies fixed and generated offer rows, sells rolled loot, then buys a red potion through the shop panel.",
   "client_steps": [
-    { "type": "wait_ws_open", "timeout_s": 15.0 },
-    { "type": "wait_loot_count", "min_count": 1, "timeout_s": 10.0 },
-    { "type": "click_loot_item", "rolled": true },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 15.0 },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_vendor" },
-    { "type": "wait_shop_panel", "at_least": 3, "timeout_s": 15.0 },
-    { "type": "assert_shop_panel_visible", "visible": true },
-    { "type": "assert_shop_offer_count", "offer_kind": "fixed", "equals": 2 },
-    { "type": "assert_shop_offer_count", "offer_kind": "generated", "at_least": 1 },
-    { "type": "assert_shop_sell_rows", "rolled": true, "at_least": 1 },
-    { "type": "click_shop_sell_item", "rolled": true },
-    { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "assert_shop_buy_button", "offer_id": "fixed:red_potion", "enabled": true },
-    { "type": "click_shop_buy_offer", "offer_id": "fixed:red_potion" },
-    { "type": "wait_event", "event_type": "shop_purchase", "shop_id": "town_vendor", "offer_id": "fixed:red_potion", "timeout_s": 15.0 },
-    { "type": "wait_inventory_count", "item_def_id": "red_potion", "equals": 1, "timeout_s": 15.0 },
-    { "type": "assert_shop_panel_visible", "visible": true }
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_loot_count",
+      "min_count": 1,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_vendor"
+    },
+    {
+      "type": "wait_shop_panel",
+      "at_least": 3,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_panel_visible",
+      "visible": true
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "fixed",
+      "equals": 2
+    },
+    {
+      "type": "assert_shop_offer_count",
+      "offer_kind": "generated",
+      "at_least": 1
+    },
+    {
+      "type": "assert_shop_sell_rows",
+      "rolled": true,
+      "at_least": 1
+    },
+    {
+      "type": "click_shop_sell_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_sale",
+      "shop_id": "town_vendor",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_buy_button",
+      "offer_id": "fixed:red_potion",
+      "enabled": true
+    },
+    {
+      "type": "click_shop_buy_offer",
+      "offer_id": "fixed:red_potion"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "shop_purchase",
+      "shop_id": "town_vendor",
+      "offer_id": "fixed:red_potion",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_inventory_count",
+      "item_def_id": "red_potion",
+      "equals": 1,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_shop_panel_visible",
+      "visible": true
+    }
   ]
 }

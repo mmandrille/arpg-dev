@@ -1,75 +1,284 @@
 {
   "id": "full_equipment",
+  "ci_tier": "extended",
   "world_id": "equipment_lab",
   "seed": "facefeed00000028",
   "title": "Full equipment and belt hotbar",
   "description": "Collect rolled equipment, prove paper-doll slots, hand occupancy, belt-gated hotbar assignment, reconnect, replay, and fresh-session persistence.",
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
-    { "action": "pick_up_loot", "item_def_id": "cave_shield" },
-    { "action": "pick_up_loot", "item_def_id": "cave_greatsword" },
-    { "action": "pick_up_loot", "item_def_id": "cave_bow" },
-    { "action": "pick_up_loot", "item_def_id": "cave_helm" },
-    { "action": "pick_up_loot", "item_def_id": "cave_mail" },
-    { "action": "pick_up_loot", "item_def_id": "cave_gloves" },
-    { "action": "pick_up_loot", "item_def_id": "cave_belt" },
-    { "action": "pick_up_loot", "item_def_id": "cave_boots" },
-    { "action": "pick_up_loot", "item_def_id": "cave_amulet" },
-    { "action": "pick_up_loot", "item_def_id": "cave_ring" },
-    { "action": "pick_up_loot", "item_def_id": "cave_ring", "bag_index": 1 },
-    { "action": "pick_up_loot", "item_def_id": "red_potion" },
-    { "action": "pick_up_loot", "item_def_id": "red_potion", "bag_index": 1 },
-    { "action": "pick_up_loot", "item_def_id": "red_potion", "bag_index": 2 },
-    { "action": "equip_inventory_item", "item_def_id": "cave_helm", "slot": "head" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_mail", "slot": "chest" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_gloves", "slot": "gloves" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_boots", "slot": "boots" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_amulet", "slot": "amulet" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_ring", "slot": "ring_left" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_ring", "bag_index": 1, "slot": "ring_right" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_greatsword", "slot": "main_hand" },
-    { "action": "assert_equipped_slot_empty", "slot": "off_hand" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_bow", "slot": "main_hand" },
-    { "action": "assert_equipped_slot_empty", "slot": "off_hand" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_belt", "slot": "belt" },
-    { "action": "assert_hotbar_capacity", "equals": 6 },
-    { "action": "assign_hotbar", "slot_index": 0, "item_def_id": "red_potion" },
-    { "action": "assign_hotbar", "slot_index": 2, "item_def_id": "red_potion" },
-    { "action": "assign_hotbar", "slot_index": 5, "item_def_id": "red_potion" },
-    { "action": "unequip_slot", "slot": "belt" },
-    { "action": "assert_hotbar_capacity", "equals": 2 },
-    { "action": "use_hotbar_slot", "slot_index": 5, "expect_reject": "hotbar_slot_disabled" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_belt", "slot": "belt" },
-    { "action": "assert_hotbar_capacity", "equals": 6 },
-    { "action": "use_hotbar_slot", "slot_index": 5, "expect_reject": "already_full_hp" }
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_blade"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_shield"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_greatsword"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_bow"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_helm"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_mail"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_gloves"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_belt"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_boots"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_amulet"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_ring"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_ring",
+      "bag_index": 1
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "red_potion"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "red_potion",
+      "bag_index": 1
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "red_potion",
+      "bag_index": 2
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_helm",
+      "slot": "head"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_mail",
+      "slot": "chest"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_gloves",
+      "slot": "gloves"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_boots",
+      "slot": "boots"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_amulet",
+      "slot": "amulet"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_ring",
+      "slot": "ring_left"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_ring",
+      "bag_index": 1,
+      "slot": "ring_right"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_blade",
+      "slot": "main_hand"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_shield",
+      "slot": "off_hand"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_greatsword",
+      "slot": "main_hand"
+    },
+    {
+      "action": "assert_equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_bow",
+      "slot": "main_hand"
+    },
+    {
+      "action": "assert_equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_belt",
+      "slot": "belt"
+    },
+    {
+      "action": "assert_hotbar_capacity",
+      "equals": 6
+    },
+    {
+      "action": "assign_hotbar",
+      "slot_index": 0,
+      "item_def_id": "red_potion"
+    },
+    {
+      "action": "assign_hotbar",
+      "slot_index": 2,
+      "item_def_id": "red_potion"
+    },
+    {
+      "action": "assign_hotbar",
+      "slot_index": 5,
+      "item_def_id": "red_potion"
+    },
+    {
+      "action": "unequip_slot",
+      "slot": "belt"
+    },
+    {
+      "action": "assert_hotbar_capacity",
+      "equals": 2
+    },
+    {
+      "action": "use_hotbar_slot",
+      "slot_index": 5,
+      "expect_reject": "hotbar_slot_disabled"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_belt",
+      "slot": "belt"
+    },
+    {
+      "action": "assert_hotbar_capacity",
+      "equals": 6
+    },
+    {
+      "action": "use_hotbar_slot",
+      "slot_index": 5,
+      "expect_reject": "already_full_hp"
+    }
   ],
   "assertions": [
-    { "type": "equipped_slot_def", "slot": "head", "item_def_id": "cave_helm" },
-    { "type": "equipped_slot_def", "slot": "chest", "item_def_id": "cave_mail" },
-    { "type": "equipped_slot_def", "slot": "gloves", "item_def_id": "cave_gloves" },
-    { "type": "equipped_slot_def", "slot": "boots", "item_def_id": "cave_boots" },
-    { "type": "equipped_slot_def", "slot": "amulet", "item_def_id": "cave_amulet" },
-    { "type": "equipped_slot_def", "slot": "ring_left", "item_def_id": "cave_ring" },
-    { "type": "equipped_slot_def", "slot": "ring_right", "item_def_id": "cave_ring" },
-    { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_bow" },
-    { "type": "equipped_slot_empty", "slot": "off_hand" },
-    { "type": "equipped_slot_def", "slot": "belt", "item_def_id": "cave_belt" },
-    { "type": "hotbar_capacity", "equals": 6 },
-    { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" },
-    { "type": "hotbar_slot", "slot_index": 2, "item_def_id": "red_potion" },
-    { "type": "hotbar_slot", "slot_index": 5, "item_def_id": "red_potion" }
+    {
+      "type": "equipped_slot_def",
+      "slot": "head",
+      "item_def_id": "cave_helm"
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "chest",
+      "item_def_id": "cave_mail"
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "gloves",
+      "item_def_id": "cave_gloves"
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "boots",
+      "item_def_id": "cave_boots"
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "amulet",
+      "item_def_id": "cave_amulet"
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "ring_left",
+      "item_def_id": "cave_ring"
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "ring_right",
+      "item_def_id": "cave_ring"
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "main_hand",
+      "item_def_id": "cave_bow"
+    },
+    {
+      "type": "equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "type": "equipped_slot_def",
+      "slot": "belt",
+      "item_def_id": "cave_belt"
+    },
+    {
+      "type": "hotbar_capacity",
+      "equals": 6
+    },
+    {
+      "type": "hotbar_slot",
+      "slot_index": 0,
+      "item_def_id": "red_potion"
+    },
+    {
+      "type": "hotbar_slot",
+      "slot_index": 2,
+      "item_def_id": "red_potion"
+    },
+    {
+      "type": "hotbar_slot",
+      "slot_index": 5,
+      "item_def_id": "red_potion"
+    }
   ],
   "fresh_session_checks": [
     {
       "world_id": "equipment_lab",
       "steps": [],
       "assertions": [
-        { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "cave_bow" },
-        { "type": "equipped_slot_def", "slot": "belt", "item_def_id": "cave_belt" },
-        { "type": "hotbar_capacity", "equals": 6 },
-        { "type": "hotbar_slot", "slot_index": 0, "item_def_id": "red_potion" }
+        {
+          "type": "equipped_slot_def",
+          "slot": "main_hand",
+          "item_def_id": "cave_bow"
+        },
+        {
+          "type": "equipped_slot_def",
+          "slot": "belt",
+          "item_def_id": "cave_belt"
+        },
+        {
+          "type": "hotbar_capacity",
+          "equals": 6
+        },
+        {
+          "type": "hotbar_slot",
+          "slot_index": 0,
+          "item_def_id": "red_potion"
+        }
       ]
     }
   ]

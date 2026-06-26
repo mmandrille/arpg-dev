@@ -1,0 +1,40 @@
+server/internal/game/monster_melee_windup.go
+  s_eadb426cf44485::t_8cc9a32f9195e6 37-39
+  s_eadb426cf44485::t_8d026c3e7dd0b1 55
+shared/rules/monsters.v0.json
+  s_eadb426cf44485::t_c39927557f6597 219
+server/internal/game/monster_attack_style_test.go
+  s_eadb426cf44485::t_58e53ed1834f53 85
+server/internal/game/monster_melee_windup_test.go
+  s_eadb426cf44485::t_0c6add60124105 60-92
+client/scripts/monster_melee_windup_marker.gd
+  s_eadb426cf44485::t_4b1695fdb42464 15-16
+  s_eadb426cf44485::t_fee0547317a616 30,35-37,43
+docs/progress/slice-lifecycle.md
+  s_eadb426cf44485::t_680118e7b776a2 361
+PROGRESS.md
+  s_eadb426cf44485::t_fdd20a653026a9 26
+client/tests/test_look_and_feel_polish.gd
+  s_eadb426cf44485::t_028c0a1f60bfdf 169,172
+  s_eadb426cf44485::t_0b603909cae081 171
+server/internal/game/rules.go
+  s_eadb426cf44485::t_711e83025b32b5 1366-1367
+docs/as-built/v346_quadruped-pounce-telegraph.md
+  s_eadb426cf44485::t_457ba2c1259e45 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "dc64731e498362c3be813155fad39d96c5d2a52b",
+  "prompts": {},
+  "sessions": {
+    "s_eadb426cf44485": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "680f333d-4f88-4d95-817d-0cae25b2c56d",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

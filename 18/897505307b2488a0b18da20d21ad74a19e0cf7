@@ -1,0 +1,19 @@
+tools/bot/scenarios/client/84_entity_tick_smoothing.json
+  s_f11cfc5f937b37::t_6f916c14139683 7-8,12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "18897505307b2488a0b18da20d21ad74a19e0cf7",
+  "prompts": {},
+  "sessions": {
+    "s_f11cfc5f937b37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b21a890-15bf-4209-8af3-8c68f14e5cff",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

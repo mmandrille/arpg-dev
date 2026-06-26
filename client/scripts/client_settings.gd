@@ -19,6 +19,10 @@ const DEFAULT_CAMERA_MODE := CAMERA_MODE_ISOMETRIC
 const GRAPHICS_QUALITY_BALANCED := "balanced"
 const GRAPHICS_QUALITY_PERFORMANCE := "performance"
 const DEFAULT_GRAPHICS_QUALITY := GRAPHICS_QUALITY_BALANCED
+const WINDOW_MODE_WINDOWED := "windowed"
+const WINDOW_MODE_FULLSCREEN := "fullscreen"
+const WINDOW_MODE_WINDOWED_FULLSCREEN := "windowed_fullscreen"
+const DEFAULT_WINDOW_MODE := WINDOW_MODE_WINDOWED
 const PERFORMANCE_WINDOW_SIZE := Vector2i(1920, 1080)
 const SUPPORTED_CAMERA_MODES := [
 	CAMERA_MODE_ISOMETRIC,
@@ -48,9 +52,15 @@ const SUPPORTED_GRAPHICS_QUALITIES := [
 	GRAPHICS_QUALITY_BALANCED,
 	GRAPHICS_QUALITY_PERFORMANCE,
 ]
+const SUPPORTED_WINDOW_MODES := [
+	WINDOW_MODE_WINDOWED,
+	WINDOW_MODE_FULLSCREEN,
+	WINDOW_MODE_WINDOWED_FULLSCREEN,
+]
 
 var path: String = "user://settings.json"
 var window_size: Vector2i = DEFAULT_SIZE
+var window_mode: String = DEFAULT_WINDOW_MODE
 var floating_combat_text: bool = true
 var status_text: bool = true
 var create_game_session_type: String = DEFAULT_CREATE_GAME_SESSION_TYPE
@@ -161,6 +171,23 @@ static func graphics_quality_label(quality: String) -> String:
 			return TextCatalogScript.get_text("settings.graphics_quality.balanced", "Balanced")
 
 
+static func normalize_window_mode(mode: String) -> String:
+	var normalized := mode.strip_edges().to_lower()
+	if normalized in SUPPORTED_WINDOW_MODES:
+		return normalized
+	return DEFAULT_WINDOW_MODE
+
+
+static func window_mode_label(mode: String) -> String:
+	match normalize_window_mode(mode):
+		WINDOW_MODE_FULLSCREEN:
+			return TextCatalogScript.get_text("settings.window_mode.fullscreen", "Fullscreen")
+		WINDOW_MODE_WINDOWED_FULLSCREEN:
+			return TextCatalogScript.get_text("settings.window_mode.windowed_fullscreen", "Windowed Fullscreen")
+		_:
+			return TextCatalogScript.get_text("settings.window_mode.windowed", "Windowed")
+
+
 static func normalize_volume(value, fallback: float) -> float:
 	if typeof(value) != TYPE_FLOAT and typeof(value) != TYPE_INT:
 		return fallback
@@ -251,9 +278,16 @@ static func map_opacity_from_data(data) -> float:
 	return normalize_volume((data as Dictionary).get("map_opacity", DEFAULT_MAP_OPACITY), DEFAULT_MAP_OPACITY)
 
 
+static func window_mode_from_data(data) -> String:
+	if typeof(data) != TYPE_DICTIONARY:
+		return DEFAULT_WINDOW_MODE
+	return normalize_window_mode(str((data as Dictionary).get("window_mode", DEFAULT_WINDOW_MODE)))
+
+
 func load() -> void:
 	if not FileAccess.file_exists(path):
 		window_size = DEFAULT_SIZE
+		window_mode = DEFAULT_WINDOW_MODE
 		floating_combat_text = true
 		status_text = true
 		create_game_session_type = DEFAULT_CREATE_GAME_SESSION_TYPE
@@ -270,6 +304,7 @@ func load() -> void:
 	var text := FileAccess.get_file_as_string(path)
 	var parsed = JSON.parse_string(text)
 	window_size = size_from_data(parsed)
+	window_mode = window_mode_from_data(parsed)
 	floating_combat_text = floating_combat_text_from_data(parsed)
 	status_text = status_text_from_data(parsed)
 	create_game_session_type = create_game_session_type_from_data(parsed)
@@ -294,6 +329,7 @@ func save() -> void:
 			"width": window_size.x,
 			"height": window_size.y,
 		},
+		"window_mode": window_mode,
 		"floating_combat_text": floating_combat_text,
 		"status_text": status_text,
 		"create_game_session_type": create_game_session_type,
@@ -318,9 +354,15 @@ func effective_window_size() -> Vector2i:
 func apply() -> void:
 	var target_size := _fit_size_to_screen(effective_window_size())
 	DisplayServer.window_set_min_size(SUPPORTED_SIZES[0])
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-	DisplayServer.window_set_size(target_size)
-	_center_window(target_size)
+	match normalize_window_mode(window_mode):
+		WINDOW_MODE_FULLSCREEN:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		WINDOW_MODE_WINDOWED_FULLSCREEN:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+		_:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			DisplayServer.window_set_size(target_size)
+			_center_window(target_size)
 
 
 static func _fit_size_to_screen(size: Vector2i) -> Vector2i:
@@ -346,6 +388,14 @@ static func _center_window(target_size: Vector2i) -> void:
 		maxi(0, int((screen_size.y - target_size.y) / 2))
 	)
 	DisplayServer.window_set_position(centered)
+
+
+func set_window_mode(mode: String, persist: bool = true, apply_now: bool = true) -> void:
+	window_mode = normalize_window_mode(mode)
+	if apply_now:
+		apply()
+	if persist:
+		save()
 
 
 func set_window_size(size: Vector2i, persist: bool = true, apply_now: bool = true) -> void:

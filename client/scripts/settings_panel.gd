@@ -13,6 +13,7 @@ signal language_selected(language: String)
 signal monster_health_bar_mode_selected(mode: String)
 signal camera_mode_selected(mode: String)
 signal graphics_quality_selected(mode: String)
+signal window_mode_selected(mode: String)
 signal master_volume_changed(value: float)
 signal music_volume_changed(value: float)
 signal sfx_volume_changed(value: float)
@@ -24,6 +25,7 @@ var _language_buttons: Dictionary = {}
 var _monster_health_bar_buttons: Dictionary = {}
 var _camera_mode_buttons: Dictionary = {}
 var _graphics_quality_buttons: Dictionary = {}
+var _window_mode_buttons: Dictionary = {}
 var _selected_label: String = ""
 var _selected_session_type: String = "coop"
 var _selected_language: String = "en"
@@ -38,6 +40,7 @@ var _language_label: Label
 var _monster_health_bar_label: Label
 var _camera_mode_label: Label
 var _graphics_quality_label: Label
+var _window_mode_label: Label
 var _master_volume_label: Label
 var _music_volume_label: Label
 var _sfx_volume_label: Label
@@ -59,7 +62,7 @@ func _ready() -> void:
 	visible = false
 
 
-func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE, master_volume: float = ClientSettingsScript.DEFAULT_MASTER_VOLUME, music_volume: float = ClientSettingsScript.DEFAULT_MUSIC_VOLUME, sfx_volume: float = ClientSettingsScript.DEFAULT_SFX_VOLUME, map_opacity: float = ClientSettingsScript.DEFAULT_MAP_OPACITY, camera_mode: String = ClientSettingsScript.DEFAULT_CAMERA_MODE, graphics_quality: String = ClientSettingsScript.DEFAULT_GRAPHICS_QUALITY) -> void:
+func show_settings(selected_label: String, floating_combat_text_enabled: bool = true, status_text_enabled: bool = true, create_game_session_type: String = "coop", language: String = "en", monster_health_bar_mode: String = ClientSettingsScript.DEFAULT_MONSTER_HEALTH_BAR_MODE, master_volume: float = ClientSettingsScript.DEFAULT_MASTER_VOLUME, music_volume: float = ClientSettingsScript.DEFAULT_MUSIC_VOLUME, sfx_volume: float = ClientSettingsScript.DEFAULT_SFX_VOLUME, map_opacity: float = ClientSettingsScript.DEFAULT_MAP_OPACITY, camera_mode: String = ClientSettingsScript.DEFAULT_CAMERA_MODE, graphics_quality: String = ClientSettingsScript.DEFAULT_GRAPHICS_QUALITY, window_mode: String = ClientSettingsScript.DEFAULT_WINDOW_MODE) -> void:
 	_sync_viewport_size()
 	visible = true
 	set_selected_size_label(selected_label)
@@ -72,6 +75,7 @@ func show_settings(selected_label: String, floating_combat_text_enabled: bool = 
 	set_map_opacity(map_opacity)
 	set_camera_mode(camera_mode)
 	set_graphics_quality(graphics_quality)
+	set_window_mode(window_mode)
 
 
 func hide_panel() -> void:
@@ -146,6 +150,13 @@ func set_graphics_quality(quality: String) -> void:
 		button.disabled = str(key) == _selected_graphics_quality
 
 
+func set_window_mode(mode: String) -> void:
+	var normalized := ClientSettingsScript.normalize_window_mode(mode)
+	for key in _window_mode_buttons.keys():
+		var button: Button = _window_mode_buttons[key]
+		button.disabled = str(key) == normalized
+
+
 func set_audio_volumes(master: float, music: float, sfx: float) -> void:
 	_set_slider_value(_master_volume_slider, master)
 	_set_slider_value(_music_volume_slider, music)
@@ -182,6 +193,18 @@ func _build() -> void:
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.add_theme_font_size_override("font_size", 34)
 	box.add_child(_title)
+
+	_window_mode_label = Label.new()
+	_window_mode_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_window_mode_label.add_theme_font_size_override("font_size", 23)
+	box.add_child(_window_mode_label)
+
+	var window_mode_row := HBoxContainer.new()
+	window_mode_row.add_theme_constant_override("separation", 8)
+	box.add_child(window_mode_row)
+	_add_window_mode_button(window_mode_row, ClientSettingsScript.WINDOW_MODE_WINDOWED)
+	_add_window_mode_button(window_mode_row, ClientSettingsScript.WINDOW_MODE_FULLSCREEN)
+	_add_window_mode_button(window_mode_row, ClientSettingsScript.WINDOW_MODE_WINDOWED_FULLSCREEN)
 
 	for label in ClientSettingsScript.supported_size_labels():
 		var button := Button.new()
@@ -349,6 +372,17 @@ func _add_graphics_quality_button(parent: Control, quality: String) -> void:
 	parent.add_child(button)
 
 
+func _add_window_mode_button(parent: Control, mode: String) -> void:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(100, 36)
+	button.add_theme_font_size_override("font_size", 20)
+	button.pressed.connect(func() -> void:
+		window_mode_selected.emit(mode)
+	)
+	_window_mode_buttons[mode] = button
+	parent.add_child(button)
+
+
 func bot_select_camera_mode(mode: String) -> void:
 	camera_mode_selected.emit(mode)
 
@@ -435,3 +469,8 @@ func refresh_texts() -> void:
 	for key in _graphics_quality_buttons.keys():
 		var quality_button: Button = _graphics_quality_buttons[key]
 		quality_button.text = ClientSettingsScript.graphics_quality_label(str(key))
+	if _window_mode_label != null:
+		_window_mode_label.text = TextCatalogScript.get_text("settings.window_mode", "Display Mode")
+	for key in _window_mode_buttons.keys():
+		var window_button: Button = _window_mode_buttons[key]
+		window_button.text = ClientSettingsScript.window_mode_label(str(key))

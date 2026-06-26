@@ -693,6 +693,14 @@ func _on_graphics_quality_selected(quality: String) -> void:
 		Callable(self, "_sync_settings_panel"),
 	)
 
+
+func _on_window_mode_selected(mode: String) -> void:
+	if client_settings == null:
+		return
+	client_settings.set_window_mode(mode)
+	_sync_settings_panel()
+
+
 func _sync_fog_performance_throttle() -> void:
 	ClientGraphicsBridgeScript.sync_fog_performance_throttle(fog_overlay, client_settings)
 
@@ -765,6 +773,7 @@ func _sync_settings_panel() -> void:
 		settings_panel.set_monster_health_bar_mode(client_settings.monster_health_bar_mode)
 		settings_panel.set_camera_mode(client_settings.camera_mode)
 		settings_panel.set_graphics_quality(client_settings.graphics_quality)
+		settings_panel.set_window_mode(client_settings.window_mode)
 		ClientAudioBridgeScript.sync_settings_panel(settings_panel, client_settings)
 
 func _update_mouse_capture() -> void:
@@ -3800,6 +3809,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.monster_health_bar_mode_selected.connect(_on_monster_health_bar_mode_selected)
 	settings_panel.camera_mode_selected.connect(_on_camera_mode_selected)
 	settings_panel.graphics_quality_selected.connect(_on_graphics_quality_selected)
+	settings_panel.window_mode_selected.connect(_on_window_mode_selected)
 	settings_panel.master_volume_changed.connect(_on_master_volume_changed)
 	settings_panel.music_volume_changed.connect(_on_music_volume_changed)
 	settings_panel.sfx_volume_changed.connect(_on_sfx_volume_changed)
@@ -5800,6 +5810,7 @@ func get_bot_state() -> Dictionary:
 		"pause_menu_visible": pause_menu != null and pause_menu.visible,
 		"loss_popup_visible": loss_popup != null and loss_popup.visible,
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
+		"window_mode": client_settings.window_mode if client_settings != null else ClientSettingsScript.DEFAULT_WINDOW_MODE,
 		"floating_combat_text_enabled": client_settings != null and client_settings.floating_combat_text,
 		"status_text_enabled": client_settings != null and client_settings.status_text,
 		"map_opacity": client_settings.map_opacity if client_settings != null else ClientSettingsScript.DEFAULT_MAP_OPACITY,

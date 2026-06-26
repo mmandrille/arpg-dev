@@ -82,6 +82,7 @@ func TestWolfPounceAttackStyleExtendsMeleeReach(t *testing.T) {
 	wolfDef.HitChance = floatPtr(1)
 	wolfDef.AttackDamage = &DamageRange{Min: 1, Max: 1}
 	wolfDef.AttackCooldown = 1
+	wolfDef.AttackWindupTicks = 0
 	rules.Monsters["dungeon_wolf"] = wolfDef
 
 	sim, err := NewSimWithWorld("sess_wolf_pounce_attack_style", "01", rules, "inventory_lab")

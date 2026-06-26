@@ -1363,8 +1363,8 @@ func LoadRules(dir string) (*Rules, error) {
 		if def.AttackWindupTicks < 0 {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_windup_ticks: must be non-negative", id)
 		}
-		if def.AttackWindupTicks > 0 && attackStyle != monsterAttackStyleMelee {
-			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_windup_ticks: only valid for melee attack_style", id)
+		if def.AttackWindupTicks > 0 && attackStyle != monsterAttackStyleMelee && attackStyle != monsterAttackStylePounce {
+			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_windup_ticks: only valid for melee or pounce attack_style", id)
 		}
 		if def.AttackWindupTicks > 0 && attackMode != attackModeMelee {
 			return nil, fmt.Errorf("game: invalid rules monsters.%s.attack_windup_ticks: only valid for melee attack_mode", id)

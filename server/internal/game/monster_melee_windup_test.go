@@ -57,6 +57,39 @@ func TestDungeonMobMeleeWindupDelaysDamage(t *testing.T) {
 	}
 }
 
+func TestWolfPounceWindupDelaysDamage(t *testing.T) {
+	rules := loadRules(t)
+	wolfDef := rules.Monsters["dungeon_wolf"]
+	wolfDef.HitChance = floatPtr(1)
+	wolfDef.AttackDamage = &DamageRange{Min: 2, Max: 2}
+	wolfDef.AttackCooldown = 30
+	wolfDef.AttackWindupTicks = 5
+	rules.Monsters["dungeon_wolf"] = wolfDef
+
+	sim, err := NewSimWithWorld("sess_wolf_pounce_windup", "01", rules, "inventory_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, candidate := range sim.activeLevel().entities {
+		if candidate.kind == monsterEntity {
+			delete(sim.activeLevel().entities, id)
+		}
+	}
+	player := sim.entities[sim.playerID]
+	player.pos = Vec2{X: 5, Y: 5}
+	player.hp = playerStartHP
+	wolfDistance := rules.Combat.UnarmedReach + playerRadius + 0.35
+
+	wolf := addTestMonster(sim, "dungeon_wolf", Vec2{X: player.pos.X + wolfDistance, Y: player.pos.Y}, rules.Monsters["dungeon_wolf"].MaxHP)
+	wolf.aiMode = monsterAIModeChase
+	start := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+	sim.advanceMonsterAttack(&start)
+	windup := firstEventByType(start, "monster_attack_windup")
+	if windup == nil || windup.AttackStyle != monsterAttackStylePounce {
+		t.Fatalf("start events = %+v, want pounce windup", start.Events)
+	}
+}
+
 func firstEventByType(r TickResult, eventType string) *Event {
 	for idx := range r.Events {
 		event := &r.Events[idx]

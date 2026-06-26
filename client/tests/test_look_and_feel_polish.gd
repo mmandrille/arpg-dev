@@ -166,9 +166,10 @@ func _test_player_damage_vignette() -> void:
 func _test_monster_melee_windup_marker() -> void:
 	var monster := Node3D.new()
 	var rec := {"node": monster, "type": "monster"}
+	var entities := {"9002": rec}
 	MonsterMeleeWindupMarkerScript.sync_from_event(
-		{"source_entity_id": "9001", "total_ticks": 8},
-		{"9001": rec},
+		{"source_entity_id": "9002", "total_ticks": 10, "attack_style": "pounce"},
+		entities,
 	)
 	if not bool(rec.get("has_melee_windup_marker", false)):
 		_fail("melee windup should attach marker")

@@ -34,7 +34,9 @@ func (s *Sim) tryStartMonsterMeleeWindup(monster *entity, target *entity, def Mo
 		return false
 	}
 	if def.effectiveAttackStyle() != monsterAttackStyleMelee || def.effectiveAttackMode() != attackModeMelee {
-		return false
+		if def.effectiveAttackStyle() != monsterAttackStylePounce || def.effectiveAttackMode() != attackModeMelee {
+			return false
+		}
 	}
 	if monster.attackWindupRemaining > 0 {
 		return true
@@ -50,6 +52,7 @@ func (s *Sim) tryStartMonsterMeleeWindup(monster *entity, target *entity, def Mo
 		TargetEntityID: strconv.FormatUint(target.id, 10),
 		RemainingTicks: &remaining,
 		TotalTicks:     &total,
+		AttackStyle:    def.effectiveAttackStyle(),
 	})
 
 	return true

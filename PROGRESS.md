@@ -23,7 +23,7 @@ Last updated: 2026-06-25
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v345 — monster-melee-windup-cue (focused verification green) |
+| **Latest completed slice** | v346 — quadruped-pounce-telegraph |
 | **Active branch** | `main` |
 | **CI gate** | v343–v345 focused checks green; full `make ci` pending on this host |
 | **Next slice** | TBD (autoloop: bat-hover-swarm, quadruped-pounce-telegraph, fog-aware-aggro, …) |

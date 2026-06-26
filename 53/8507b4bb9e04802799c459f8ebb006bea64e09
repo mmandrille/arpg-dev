@@ -1,0 +1,113 @@
+docs/specs/v341_spec-loot-beam-rarity-tier.md
+  s_eadb426cf44485::t_690e21a01f05d5 1-15
+client/tests/test_loot_node_factory.gd
+  s_eadb426cf44485::t_b5bffcc059da5f 13
+  s_eadb426cf44485::t_701fedbc33e9bf 46-60
+shared/golden/monster_rarity.json
+  s_eadb426cf44485::t_b0db64b251b444 79,82
+  s_eadb426cf44485::t_f5487f2d861d50 108,110
+docs/specs/v339_spec-room-type-floor-tint.md
+  s_eadb426cf44485::t_3e321403c862e9 1-15
+docs/specs/v342_spec-dungeon-ambient-motes.md
+  s_eadb426cf44485::t_c0f03bfa656af2 1-15
+docs/as-built/v340_depth-combat-pressure.md
+  s_eadb426cf44485::t_2c98026c21e8d7 1-5
+client/scripts/dungeon_ambient_motes.gd
+  s_eadb426cf44485::t_d53cd5d413d326 1-63
+client/scripts/loot_label_filter.gd
+  s_eadb426cf44485::t_45bcaceeb0b424 22-26
+client/scripts/dungeon_ambient_motes.gd.uid
+  s_eadb426cf44485::t_eb71dad9b06415 1
+docs/as-built/v338_wall-floor-dungeon-rollout.md
+  s_eadb426cf44485::t_80575b7694c585 1-5
+tools/bot/scenarios/client/79_wall_floor_dungeon_rollout.json
+  s_eadb426cf44485::t_f9fe3e9a318cc2 1-15
+docs/specs/v338_spec-wall-floor-dungeon-rollout.md
+  s_eadb426cf44485::t_1063f0d9af4d2d 1-41
+client/scripts/dungeon_room_floor_tint.gd.uid
+  s_eadb426cf44485::t_eb71dad9b06415 1
+docs/progress/slice-lifecycle.md
+  s_eadb426cf44485::t_55f8aed6dd1ff3 353-357
+docs/specs/v340_spec-depth-combat-pressure.md
+  s_eadb426cf44485::t_8d68d937f809ca 1-15
+docs/as-built/v339_room-type-floor-tint.md
+  s_eadb426cf44485::t_bc3010dd8f17b5 1-5
+PROGRESS.md
+  s_eadb426cf44485::t_77723838d21a2a 26,28-29
+  s_2bb65a4c54dbf4::t_ee3382b473b64a 30
+  s_2bb65a4c54dbf4::t_48ed181e5bf486 90-93
+client/scripts/loot_node_factory.gd
+  s_eadb426cf44485::t_4963be1825c122 35
+  s_eadb426cf44485::t_12ff544216f422 212,216-248
+  s_eadb426cf44485::t_c2aabe0b836954 134-151
+shared/rules/dungeon_generation.v0.json
+  s_eadb426cf44485::t_164e84dd8a7dca 191-192
+  s_eadb426cf44485::t_cfa8333a40d71d 200
+client/scripts/dungeon_room_floor_tint.gd
+  s_eadb426cf44485::t_ed83bc2762c80f 1-131
+client/tests/test_factories.gd
+  s_eadb426cf44485::t_98bf287c361213 13
+  s_eadb426cf44485::t_52d3e6511b8122 285-309,311-314
+  s_eadb426cf44485::t_6b5d0826eb7319 310
+  s_eadb426cf44485::t_d3174467ad58fe 14
+  s_eadb426cf44485::t_440718b9d2c0df 93-95
+  s_eadb426cf44485::t_044e35306bb644 152-154
+  s_eadb426cf44485::t_8ad09c9e415b08 27
+shared/assets/dungeon_room_presentation.v0.schema.json
+  s_eadb426cf44485::t_b4c2b57eac77fe 1-39
+client/tests/test_loot_label_filter.gd
+  s_eadb426cf44485::t_e58451fa63aa48 24
+  s_eadb426cf44485::t_4e4112fe2cc654 117-124
+docs/CODEMAP.md
+  s_eadb426cf44485::t_26535950c0edde 15
+client/tests/test_item_visuals.gd
+  s_eadb426cf44485::t_1ecd46b611b4bc 286-287
+  s_eadb426cf44485::t_63cccf389ad065 271-272
+docs/as-built/v342_dungeon-ambient-motes.md
+  s_eadb426cf44485::t_e7795fa96edea1 1-7
+server/internal/game/monster_depth_pressure_test.go
+  s_eadb426cf44485::t_b380d3985590e3 6
+  s_eadb426cf44485::t_b48a3c8e2c43e0 1-5,7-31
+docs/as-built/v341_loot-beam-rarity-tier.md
+  s_eadb426cf44485::t_221889743a58b4 1-7
+client/scripts/dungeon_room_presentation_loader.gd.uid
+  s_eadb426cf44485::t_eb71dad9b06415 1
+client/scripts/ground_wall_factory.gd
+  s_eadb426cf44485::t_bf866871fa2a36 69-71
+  s_eadb426cf44485::t_8595d8f66b6230 384-386
+  s_eadb426cf44485::t_3136e7f3ca44fb 191-192,199-218
+client/scripts/wall_renderer.gd
+  s_eadb426cf44485::t_b4d584b83fb8a9 199-200
+client/scripts/main.gd
+  s_eadb426cf44485::t_661695e1fbddf7 3344-3345
+  s_eadb426cf44485::t_3cb23626b02305 5031
+  s_eadb426cf44485::t_f3e2f376af6e31 5455-5461
+client/scripts/dungeon_room_presentation_loader.gd
+  s_eadb426cf44485::t_9856d2b2105fad 1-68
+shared/assets/dungeon_room_presentation.v0.json
+  s_eadb426cf44485::t_7025183bc50f5f 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "538507b4bb9e04802799c459f8ebb006bea64e09",
+  "prompts": {},
+  "sessions": {
+    "s_2bb65a4c54dbf4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9659a475-58e9-4ce9-a633-162bc8ed99c5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_eadb426cf44485": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "680f333d-4f88-4d95-817d-0cae25b2c56d",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

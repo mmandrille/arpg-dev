@@ -44,6 +44,8 @@ func _initialize() -> void:
 	if _failed: quit(1); return
 	_test_monster_visuals_catalog()
 	if _failed: quit(1); return
+	_test_flying_monster_pick_collider_height()
+	if _failed: quit(1); return
 	_test_revived_companion_corpse_tint()
 	if _failed: quit(1); return
 	print("[gdtest] PASS: animation controller + scenes")
@@ -467,6 +469,35 @@ func _test_monster_visuals_catalog() -> void:
 	_assert(str(undead.get("scene", "")) == "monster_skeleton", "dungeon_undead scene = %s" % undead.get("scene", ""))
 	var boss := MonsterVisualsLoaderScript.resolve("dungeon_mob", "monster_tiny_flyer")
 	_assert(str(boss.get("scene", "")) == "monster_tiny_flyer", "boss visual_model should select flyer scene")
+
+
+func _test_flying_monster_pick_collider_height() -> void:
+	var main = MainScript.new()
+	main.player_anchor = Node3D.new()
+	main.entities_root = Node3D.new()
+	main.walls_root = Node3D.new()
+	get_root().add_child(main.player_anchor)
+	get_root().add_child(main.entities_root)
+	get_root().add_child(main.walls_root)
+	main._upsert_entity({
+		"id": "2901",
+		"type": "monster",
+		"monster_def_id": "dungeon_bat",
+		"hp": 5,
+		"max_hp": 5,
+		"position": {"x": 3.0, "y": 4.0},
+	})
+	var node := (main.entities.get("2901", {}) as Dictionary).get("node", null) as Node3D
+	var pick_body := node.get_node_or_null("PickBody") as StaticBody3D if node != null else null
+	var shape := pick_body.get_child(0) as CollisionShape3D if pick_body != null and pick_body.get_child_count() > 0 else null
+	var hover := float(MonsterVisualsLoaderScript.resolve("dungeon_bat").get("height_offset", 0.0))
+	_assert(shape != null and hover > 0.0, "flying monster pick collider should exist with hover offset")
+	if shape != null:
+		_assert(absf(shape.position.y - (1.1 + hover)) < 0.001, "flying monster pick collider y = %s want %s" % [shape.position.y, 1.1 + hover])
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.queue_free()
 
 
 func _test_revived_companion_corpse_tint() -> void:

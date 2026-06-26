@@ -1628,7 +1628,11 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		entities[id] = rec
 		var new_node := rec["node"] as Node3D
 		if e["type"] != "projectile" and e["type"] != "player":
-			_attach_pick_collider(new_node, id, str(e["type"]), str(rec.get("interactable_def_id", "")))
+			var pick_height_offset := 0.0
+			if e["type"] == "monster" or e["type"] == "companion":
+				var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
+				pick_height_offset = float(visual.get("height_offset", 0.0))
+			_attach_pick_collider(new_node, id, str(e["type"]), str(rec.get("interactable_def_id", "")), pick_height_offset)
 		if str(rec.get("interactable_def_id", "")) == "hero_corpse":
 			_set_loot_label_visible(id, loot_label_reveal_held or id == hovered_loot_id, id == hovered_loot_id)
 	if e["type"] == "loot" and not loot_ids.has(id):
@@ -5533,16 +5537,16 @@ func _move_projectile_node(rec: Dictionary, target_pos: Vector3) -> void:
 	rec["move_tween"] = tween
 	tween.tween_property(node, "position", target_pos, duration).set_trans(Tween.TRANS_LINEAR)
 
-func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, interactable_def_id: String = "") -> void:
+func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, interactable_def_id: String = "", height_offset: float = 0.0) -> void:
 	var body := StaticBody3D.new()
 	body.name = "PickBody"
 	body.set_meta("entity_id", entity_id)
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	match kind:
-		"monster":
+		"monster", "companion":
 			box.size = Vector3(1.8, 2.2, 1.8)
-			shape.position = Vector3(0.0, 1.1, 0.0)
+			shape.position = Vector3(0.0, 1.1 + maxf(0.0, height_offset), 0.0)
 		"interactable":
 			if interactable_def_id == "hero_corpse":
 				box.size = Vector3(1.8, 0.75, 1.35)

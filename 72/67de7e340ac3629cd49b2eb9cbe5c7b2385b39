@@ -1,0 +1,26 @@
+client/scripts/main.gd
+  s_faaba01f1b928b::t_1d5c6099c0a182 2401
+  s_faaba01f1b928b::t_4817c9071c41db 2715-2725
+client/tests/test_coop_client.gd
+  s_faaba01f1b928b::t_61ddb3e4c799fd 1505
+  s_faaba01f1b928b::t_0e36b6e7e83746 1493
+  s_faaba01f1b928b::t_b4f0d4a76b76aa 60
+  s_faaba01f1b928b::t_1c33c36077b612 1504,1509
+  s_faaba01f1b928b::t_ac264633824d08 1480-1492,1494-1503,1506-1508,1510-1517
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7267de7e340ac3629cd49b2eb9cbe5c7b2385b39",
+  "prompts": {},
+  "sessions": {
+    "s_faaba01f1b928b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7a36a5a4-55c4-4df4-b4b4-d2846707c6c2",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

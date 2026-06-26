@@ -155,7 +155,7 @@
           "index": 0,
           "rarity": "unique",
           "loot_table": "dungeon_mob_drop_depth_3_plus",
-          "max_hp": 13,
+          "max_hp": 14,
           "attack_damage": {
             "min": 2,
             "max": 2
@@ -171,7 +171,7 @@
           "index": 1,
           "rarity": "common",
           "loot_table": "dungeon_mob_drop_depth_2",
-          "max_hp": 4,
+          "max_hp": 5,
           "attack_damage": {
             "min": 1,
             "max": 2

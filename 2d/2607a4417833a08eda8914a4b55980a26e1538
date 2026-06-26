@@ -1,0 +1,26 @@
+client/tests/item_visual_equipment_probe.gd
+  s_2bb65a4c54dbf4::t_777702e0a7de9d 1-156
+client/tests/test_item_visuals.gd
+  s_2bb65a4c54dbf4::t_cee2f532704f7d 20-21
+  s_2bb65a4c54dbf4::t_1a5766e3fa3b25 96-97,99,101,103
+  s_2bb65a4c54dbf4::t_b4270a553d3a3a 83
+  s_2bb65a4c54dbf4::t_98a4b244177e9f 92
+client/tests/item_visual_interactable_probe.gd
+  s_2bb65a4c54dbf4::t_e39f5ac418860c 1-165
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2d2607a4417833a08eda8914a4b55980a26e1538",
+  "prompts": {},
+  "sessions": {
+    "s_2bb65a4c54dbf4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9659a475-58e9-4ce9-a633-162bc8ed99c5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -612,6 +612,13 @@
         },
         {
           "if": {
+            "properties": { "event_type": { "const": "monster_attack_windup" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["source_entity_id", "target_entity_id", "remaining_ticks", "total_ticks"] }
+        },
+        {
+          "if": {
             "properties": { "event_type": { "const": "level_changed" } },
             "required": ["event_type"]
           },

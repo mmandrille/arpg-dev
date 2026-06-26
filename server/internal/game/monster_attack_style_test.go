@@ -33,6 +33,7 @@ func TestBatDiveAttackStyleIsEmittedForDirectPlayerDamage(t *testing.T) {
 	mobDef.HitChance = floatPtr(1)
 	mobDef.AttackDamage = &DamageRange{Min: 1, Max: 1}
 	mobDef.AttackCooldown = 1
+	mobDef.AttackWindupTicks = 0
 	rules.Monsters["dungeon_mob"] = mobDef
 
 	sim, err := NewSimWithWorld("sess_bat_dive_attack_style", "01", rules, "inventory_lab")

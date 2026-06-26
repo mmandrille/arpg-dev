@@ -159,6 +159,7 @@
         "max": 2
       },
       "attack_cooldown_ticks": 21,
+      "attack_windup_ticks": 8,
       "name_key": "monster.dungeon_mob.name"
     },
     "dungeon_archer": {

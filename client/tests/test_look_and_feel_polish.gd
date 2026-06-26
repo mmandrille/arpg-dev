@@ -8,6 +8,7 @@ const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedbac
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
 const PlayerDamageVignetteScript := preload("res://scripts/player_damage_vignette.gd")
+const MonsterMeleeWindupMarkerScript := preload("res://scripts/monster_melee_windup_marker.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 
 var _pass_count := 0
@@ -24,6 +25,7 @@ func _initialize() -> void:
 	_test_tooltip_rarity_border()
 	_test_combat_camera_binding()
 	_test_player_damage_vignette()
+	_test_monster_melee_windup_marker()
 	_finish()
 
 
@@ -159,6 +161,26 @@ func _test_player_damage_vignette() -> void:
 		return
 	root.free()
 	_pass("player damage vignette")
+
+
+func _test_monster_melee_windup_marker() -> void:
+	var monster := Node3D.new()
+	var rec := {"node": monster, "type": "monster"}
+	MonsterMeleeWindupMarkerScript.sync_from_event(
+		{"source_entity_id": "9001", "total_ticks": 8},
+		{"9001": rec},
+	)
+	if not bool(rec.get("has_melee_windup_marker", false)):
+		_fail("melee windup should attach marker")
+		monster.free()
+		return
+	MonsterMeleeWindupMarkerScript.clear_for_record(rec)
+	if bool(rec.get("has_melee_windup_marker", true)):
+		_fail("melee windup marker should clear")
+		monster.free()
+		return
+	monster.free()
+	_pass("monster melee windup marker")
 
 
 func _noop_damage(_entity_id: String, _color: Color, _amount = null, _prefix: String = "", _scale: float = 0.0, _variant: String = "", _text: String = "", _damage_type: String = "") -> void:

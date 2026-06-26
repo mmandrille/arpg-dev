@@ -82,6 +82,7 @@ const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentat
 const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
+const MonsterMeleeWindupMarkerScript := preload("res://scripts/monster_melee_windup_marker.gd")
 const PlayerCameraContextScript := preload("res://scripts/player_camera_context.gd")
 const PlayerCameraControllerScript := preload("res://scripts/player_camera_controller.gd")
 const PerspectiveCombatInputScript := preload("res://scripts/perspective_combat_input.gd")
@@ -1173,6 +1174,9 @@ func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
 		var event_type := str(ev.get("event_type", ""))
+		if event_type == "monster_attack_windup":
+			MonsterMeleeWindupMarkerScript.sync_from_event(ev, entities)
+			continue
 		if eid == player_id and str(ev.get("skill_id", "")) == "charge":
 			if event_type == "skill_channel_started":
 				_start_charge_channel_visual(ev)

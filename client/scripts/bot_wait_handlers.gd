@@ -176,6 +176,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 static func _event_since_step_start(runner, ev: Dictionary) -> bool:
 	if not runner._memory.has("step_start_tick"):
 		return true
+	if not ev.has("_bot_seen_tick"):
+		return true
 
 	return int(ev.get("_bot_seen_tick", -1)) >= int(runner._memory.get("step_start_tick", 0))
 

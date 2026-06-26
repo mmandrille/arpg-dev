@@ -2353,7 +2353,8 @@ func _refresh_monster_health_bar_visibility(entity_id: String = "") -> void:
 	for raw_id in ids:
 		var id := str(raw_id)
 		if monster_health_bars.has(id) and is_instance_valid(monster_health_bars[id]):
-			monster_health_bars[id].visible = EnemyHealthBarVisibilityScript.should_show(mode, id, hovered_id, pending_action_targets, pending_skill_casts) and EnemyHealthBarVisibilityScript.perspective_visible(entities.get(id, {}).get("node", null), player_anchor.global_position, _is_perspective_camera_mode(), float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
+			var hero_pos := player_anchor.global_position if player_anchor != null else Vector3.ZERO
+			monster_health_bars[id].visible = EnemyHealthBarVisibilityScript.should_show(mode, id, hovered_id, pending_action_targets, pending_skill_casts) and EnemyHealthBarVisibilityScript.perspective_visible(entities.get(id, {}).get("node", null), hero_pos, _is_perspective_camera_mode(), float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
 
 func _sync_companion_bar() -> void:
 	if companion_bar == null:
@@ -5802,6 +5803,21 @@ func _sync_discovery_minimap() -> void:
 		entities,
 		_last_facing_direction,
 	)
+
+func _bot_local_player_presentation() -> Dictionary:
+	return BotPresentationDebugScript.local_player_presentation(
+		player_id,
+		player_visual_scale,
+		player_anchor,
+		_charge_channel_visual,
+		player_reaction,
+		player_anim,
+	)
+
+
+func _bot_entities_presentation_debug() -> Array:
+	return BotPresentationDebugScript.entities_presentation_debug(entities)
+
 
 func _bot_damage_numbers() -> Array:
 	return BotPresentationDebugScript.recent_damage_numbers(

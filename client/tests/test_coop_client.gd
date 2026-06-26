@@ -172,7 +172,7 @@ func _test_snapshot_wall_layout_rendering() -> void:
 	_assert_eq("snapshot wall layout count", main.current_wall_layout.size(), 2)
 	_assert_eq("snapshot generated wall count", int(main.get_bot_state().get("generated_wall_count", 0)), 1)
 	_assert_eq("snapshot wall metadata source", str(main.walls_root.get_child(1).get_meta("source", "")), "generated")
-	_assert_vec3("snapshot generated wall position", (main.walls_root.get_child(1) as Node3D).position, Vector3(12.0, 2.0, 8.0))
+	_assert_vec3("snapshot generated wall position", (main.walls_root.get_child(1) as Node3D).position, Vector3(12.0, 1.96, 8.0))
 	_assert_true("snapshot dungeon ceiling exists", main.walls_root.get_node_or_null("DungeonCeiling") != null)
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()

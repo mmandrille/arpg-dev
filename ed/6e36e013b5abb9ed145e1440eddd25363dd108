@@ -1,0 +1,36 @@
+client/scripts/main.gd
+  s_a99f5bc3e44dd5::t_eed81f94533354 3017-3019
+  s_a99f5bc3e44dd5::t_3655b8415fb794 5525-5526
+tools/bot/scenarios/103_dungeon_combat_perf_probe.json
+  s_e68179bd0fcaf7::t_751fa206ca1c6b 76,86,96
+  s_e68179bd0fcaf7::t_a618a45d5c5a9d 47,58
+  s_e68179bd0fcaf7::t_d2549c6203ece0 71,81,91
+  s_e68179bd0fcaf7::t_484b82342bc596 1-8,10-46,48-57,59-70,72-75,77-80,82-85,87-90,92-95,97-147
+  s_e68179bd0fcaf7::t_5cb7bc0ec27ec2 9
+client/scripts/pick_target_highlight.gd
+  s_a99f5bc3e44dd5::t_0c31fce884df9f 5-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ed6e36e013b5abb9ed145e1440eddd25363dd108",
+  "prompts": {},
+  "sessions": {
+    "s_a99f5bc3e44dd5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2bcf28ab-0898-4172-94cf-092571f82779",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_e68179bd0fcaf7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a11cfc3-f2d4-40a6-9320-5fc86c621f2f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

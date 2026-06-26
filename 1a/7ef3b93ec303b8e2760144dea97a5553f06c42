@@ -1,0 +1,19 @@
+PROGRESS.md
+  s_05d5e6aa8fd731::t_492ba80f6e2ef1 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1a7ef3b93ec303b8e2760144dea97a5553f06c42",
+  "prompts": {},
+  "sessions": {
+    "s_05d5e6aa8fd731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d3fe9e6-9bd8-4c49-8e7b-285d8eb2314a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

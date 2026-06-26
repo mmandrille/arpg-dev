@@ -3014,6 +3014,9 @@ func _repeat_hold_attack() -> void:
 	if target_id == "" or not entities.has(target_id):
 		_sustained_click.clear()
 		return
+	if not _target_in_local_attack_range(target_id):
+		_start_attack_move(target_id)
+		return
 	_try_dispatch_monster_attack(target_id, false)
 
 func _repeat_hold_move() -> void:
@@ -5519,8 +5522,8 @@ func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, intera
 	var box := BoxShape3D.new()
 	match kind:
 		"monster":
-			box.size = Vector3(1.0, 1.6, 1.0)
-			shape.position = Vector3(0.0, 0.8, 0.0)
+			box.size = Vector3(1.8, 2.2, 1.8)
+			shape.position = Vector3(0.0, 1.1, 0.0)
 		"interactable":
 			if interactable_def_id == "hero_corpse":
 				box.size = Vector3(1.8, 0.75, 1.35)

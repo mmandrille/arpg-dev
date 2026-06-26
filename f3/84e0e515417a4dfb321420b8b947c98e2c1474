@@ -1,0 +1,50 @@
+client/scripts/combat_event_presentation.gd
+  s_eadb426cf44485::t_67029f0331745e 9,13,16,19-20,27,29
+  s_eadb426cf44485::t_c4c1459160d4f9 41-42
+client/scripts/main.gd
+  s_eadb426cf44485::t_55a450be795215 22
+  s_eadb426cf44485::t_d99905e6d029cb 3594
+  s_eadb426cf44485::t_540033f4e7aee2 901
+client/scripts/player_damage_vignette.gd
+  s_eadb426cf44485::t_8cbf959773cb8d 1-93
+client/scripts/player_damage_vignette.gd.uid
+  s_eadb426cf44485::t_e007c2945f15ed 1
+docs/CODEMAP.md
+  s_eadb426cf44485::t_8beae5d54795b7 19
+PROGRESS.md
+  s_eadb426cf44485::t_93eb001f760f1a 26,28-29
+client/tests/test_skill_bar.gd
+  s_eadb426cf44485::t_21d0dc415faaee 147-151
+docs/as-built/v343_player-damage-vignette.md
+  s_eadb426cf44485::t_f83e7f79ed3670 1-5
+client/tests/test_look_and_feel_polish.gd
+  s_eadb426cf44485::t_55a3ffae45bcf5 10
+  s_eadb426cf44485::t_8b05607fdcd58c 127-163
+  s_eadb426cf44485::t_6a444ce42363b3 26
+docs/as-built/v344_skill-cooldown-ready-pulse.md
+  s_eadb426cf44485::t_e469296465fea2 1-5
+docs/progress/slice-lifecycle.md
+  s_eadb426cf44485::t_674931dc56856d 358-359
+client/scripts/skill_bar.gd
+  s_eadb426cf44485::t_d6049526861462 128-132
+  s_eadb426cf44485::t_2dbcbaa0793a7d 163
+  s_eadb426cf44485::t_41a899a118ba01 329-341
+  s_eadb426cf44485::t_c8529201ab2c7d 30
+  s_eadb426cf44485::t_63ab06a43e4abe 44,47-48,54-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f384e0e515417a4dfb321420b8b947c98e2c1474",
+  "prompts": {},
+  "sessions": {
+    "s_eadb426cf44485": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "680f333d-4f88-4d95-817d-0cae25b2c56d",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

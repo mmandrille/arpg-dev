@@ -1,0 +1,147 @@
+{
+  "id": "dungeon_combat_perf_probe",
+  "ci_tier": "extended",
+  "world_id": "dungeon_levels",
+  "seed": "v76_pack_aggro",
+  "character_class": "sorcerer",
+  "title": "Dungeon Combat Perf Probe",
+  "description": "Descend into a generated D1 dungeon with packed mobs, pull aggro, and repeatedly cast Ligthing during sustained combat for client/backend perf sampling.",
+  "max_elapsed_s": 55.0,
+  "debug_progression": {
+    "level": 12,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 3,
+      "dex": 5,
+      "vit": 40,
+      "magic": 20
+    },
+    "skill_ranks": {
+      "magic_bolt": 1,
+      "ligthing": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "use_stair",
+      "direction": "down",
+      "max_ticks": 120
+    },
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "alive": true,
+      "at_least": 10
+    },
+    {
+      "action": "move_until_in_range",
+      "monster_def_id": "dungeon_mob",
+      "stop_distance": 7.5,
+      "max_ticks": 240
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "monster_def_id": "dungeon_mob",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "damage_type": "lightning",
+        "min_damage": 1
+      },
+      "timeout_s": 8
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_count",
+        "event_type": "monster_aggro",
+        "at_least": 2
+      },
+      "timeout_s": 8
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "monster_def_id": "dungeon_mob",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "monster_def_id": "dungeon_mob",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "monster_def_id": "dungeon_mob",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "monster",
+        "monster_def_id": "dungeon_mob",
+        "alive": true,
+        "at_least": 8
+      },
+      "timeout_s": 3
+    }
+  ],
+  "assertions": [
+    {
+      "type": "current_level",
+      "equals": -1
+    },
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "alive": true,
+      "at_least": 10
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_aggro",
+      "at_least": 2
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "ligthing"
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "lightning",
+      "min_damage": 1
+    }
+  ],
+  "visual": {
+    "camera": {
+      "x": 42,
+      "y": 24,
+      "zoom": 0.85
+    },
+    "post_complete_hold_s": 5.0
+  }
+}

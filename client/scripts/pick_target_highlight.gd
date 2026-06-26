@@ -2,8 +2,8 @@
 class_name PickTargetHighlight
 extends RefCounted
 
-const HIGHLIGHT_EMISSION := Color("#d4a017")
-const HIGHLIGHT_EMISSION_ENERGY := 0.4
+const HIGHLIGHT_EMISSION := Color("#ffffff")
+const HIGHLIGHT_EMISSION_ENERGY := 0.6
 
 static var _mesh_states: Dictionary = {}
 

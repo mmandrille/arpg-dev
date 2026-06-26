@@ -1,0 +1,420 @@
+tools/bot/scenarios/96_mercenary_offer_variants.json
+  s_9b51da3986e539::t_2750931618b64f 3,8-10,12-60,63-82,94-98
+tools/bot/scenarios/client/50_my_market_offers_panel.json
+  s_9b51da3986e539::t_2750931618b64f 3,17-66
+tools/bot/scenarios/client/58_market_expiration_countdown.json
+  s_9b51da3986e539::t_2750931618b64f 3,15-45
+server/migrations/migrations_test.go
+  s_9b51da3986e539::t_99f48aa53c422c 1-42
+tools/bot/scenarios/13_teleporter_lab.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-64,67-112,115-119
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-25,28-45,48-52
+tools/bot/scenarios/81_magic_find_stat.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-12,17-24,28-30,35-37,47-49,54-56,61-63
+tools/bot/scenarios/86_mercenary_foundation.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-33,36-48,60-64
+tools/bot/scenarios/client/65_boss_reward_panel.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-19,23-26,54-57
+tools/bot/scenarios/client/71_minimap_points_of_interest.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-23,35-37
+tools/bot/scenarios/56_resource_support_mobility_unique_effects.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-23,26-30,42-56
+tools/bot/scenarios/client/33_unique_burn_effect_live.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-37
+tools/bot/scenarios/client/68_fog_los_shadow_mask.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-39
+tools/bot/scenarios/99_flying_navigation_trait.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-37,40-63,66-70
+tools/bot/scenarios/65_random_quest_reward_floor.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-32,35-61,64-68
+tools/bot/scenarios/client/38_market_active_offer_ui.json
+  s_9b51da3986e539::t_2750931618b64f 3,17-90
+tools/bot/scenarios/client/76_badge_reward_wallet.json
+  s_9b51da3986e539::t_2750931618b64f 3,13-91
+.cursor/rules/ci-pack-maintenance.mdc
+  s_9b51da3986e539::t_80e3cd4dedf714 1-32,34-82
+  s_9b51da3986e539::t_62be6e6dbc5e4c 33
+docs/progress/scenario-catalog.md
+  s_9b51da3986e539::t_988826f95cbe2d 6-19,21
+  s_9b51da3986e539::t_4b787f11ac8d43 20
+tools/bot/scenarios/73_companion_ai_foundation.json
+  s_35943f94512aa9::t_51436960d6307a 10
+scripts/client_smoke.sh
+  s_9b51da3986e539::t_d23a0eca5f54dc 73,79,84-90
+  s_9b51da3986e539::t_6b74d67dca6987 31-49
+tools/bot/scenarios/25_inventory_capacity_and_paper_doll.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-143,146-170
+tools/bot/scenarios/64_ranger_split_arrow.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-24,27-58,61-83,86-90
+tools/bot/scenarios/client/64_mercenary_combat_stats.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-11,13-32,37-43
+tools/bot/scenarios/54_offensive_unique_effects.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-17,28-39
+tools/bot/scenarios/client/74_map_transparency_setting.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-33,44-46
+tools/test_ci_pack.py
+  s_9b51da3986e539::t_fd6c2f0508d065 1-32
+server/migrations/0028_session_start_character_class.sql
+  s_9b51da3986e539::t_b6083e4780ce68 1
+tools/bot/scenarios/client/10_full_equipment.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-117
+server/internal/game/companion_ai_test.go
+  s_35943f94512aa9::t_26fe6b19f3ca3b 129-130
+  s_35943f94512aa9::t_86cccf542de9db 49-50,57,60,70-71
+  s_35943f94512aa9::t_14678ee533b4d6 75-107
+  s_35943f94512aa9::t_2d5dbbd2ff73ec 51-56,58-59,61-69,72-74
+  s_35943f94512aa9::t_3e313bcaa845c4 108-128,131-157
+tools/bot/scenarios/79_live_rare_combat_affixes.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-26,34-37,43-46,52-54,59-62,75-78,84-87,93-95,100-103
+tools/bot/scenarios/client/57_boss_portrait_panel.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-13
+tools/bot/scenarios/client/27_character_select_summaries.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-20
+tools/bot/scenarios/client/78_attack_move_sticky_targeting.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-41
+tools/bot/scenarios/59_ranger_piercing_and_pinning_shots.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-31,34-109,112-146
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_9b51da3986e539::t_2750931618b64f 3,15-20,23-27,31-74,77-103,106-110
+tools/bot/scenarios/69_sorcerer_arcane_barrage.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-24,27-53,56-73,76-80
+tools/bot/scenarios/26_combat_control_and_boss_ai_fixes.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-38,51-63
+tools/bot/scenarios/client/15_town_vendor_shop_panel.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-92
+make/ci.mk
+  s_9b51da3986e539::t_722522dbb739b5 2,11-15
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-45,48-80,83-87
+tools/bot/scenarios/client/34_elite_aura_readability.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-28
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_9b51da3986e539::t_2750931618b64f 3,15-20,23-46,50-54,58-84,87-91
+tools/bot/scenarios/20_dungeon_equipment_drops.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-14,17-24,31-34,39-43
+tools/bot/scenarios/31_equipment_requirements_and_preview.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-12,19-21,23-34,37-48,72-83,86-90,93-111,120-131,140-150,159-170,177-181
+tools/bot/scenarios/client/16_vendor_item_comparison.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-124
+tools/bot/scenarios/client/63_blacksmith_upgrade_history.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-224
+tools/bot/scenarios/client/66_boss_telegraph_decals.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-19,23-26
+tools/bot/scenarios/18_character_stats_and_leveling.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-13,19-21,31-33,36-41,47-49,53-85,92-104,109-113
+tools/bot/scenarios/client/53_mystery_seller_silhouettes.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-113
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-33,36-139,142-190
+client/scripts/bot_facade.gd
+  s_9b51da3986e539::t_6bd4568045d44e 4-5
+tools/bot/scenarios/client/18_town_floor_click_to_move.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-29
+tools/bot/scenarios/91_unique_non_damage_skill_modifier.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-30,37-43,48-60
+tools/bot/scenarios/14_dungeon_monsters.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-32,36-40,44-60,63-67
+CLAUDE.md
+  s_9b51da3986e539::t_9e2d7b25aa532a 38-39
+  s_9b51da3986e539::t_3090b43fc921b6 63-66
+client/tests/item_visual_scale_probe.gd
+  s_9b51da3986e539::t_9b303440a2ce8d 3-14,34-39,41-44
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-35,38-163,166-225
+tools/bot/scenarios/45_town_bishop_respec.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-19,22-25,28-63,70-75,85-101,104-180,183-187
+tools/bot/scenarios/35_gold_autopickup_shared_loot.json
+  s_9b51da3986e539::t_2750931618b64f 3
+tools/bot/scenarios/93_crowded_lightning_perf_probe.json
+  s_9b51da3986e539::t_2750931618b64f 3,15-24,27-103,106-124,127-131
+tools/bot/scenarios/client/28_boss_phase_readability.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-18,45-51
+tools/bot/scenarios/40_paladin_heal_skill.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-31,35-41,45-66,73-77,86-110,115-119
+tools/bot/scenarios/100_barbarian_leap_obstacle_crossing.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-22,25-67,70-90,93-97
+tools/bot/scenarios/client/13_inventory_paper_doll.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-44,47-58,61-84
+tools/bot/scenarios/client/41_objective_chest_presentation.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-23
+tools/bot/scenarios/client/70_full_screen_map_overlay.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-25,35-38,49-52,63-65
+tools/bot/scenarios/89_companion_stance_command.json
+  s_9b51da3986e539::t_2750931618b64f 3,8-10,12-89,102-121,133-137
+tools/bot/scenarios/57_live_unique_drops_all_effects.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-11,17-23,27-34
+tools/bot/scenarios/02_gear_before_combat.json
+  s_35943f94512aa9::t_f6c785ec86beeb 24-25
+tools/bot/scenarios/71_mana_regeneration.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-22,25-51,54-65,68-72
+tools/bot/scenarios/75_sorcerer_revive_companion.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-31,34-88,91-117
+tools/bot/scenarios/61_purple_town_unique_chest.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-13,17-43,46-58
+tools/bot/scenarios/82_unique_skill_modifier.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-35,38-50
+tools/bot/scenarios/client/40_unique_chest_client_proof.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-54
+tools/bot/scenarios/client/54_material_wallet_details.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-51
+tools/bot/scenarios/client/43_quest_journal_foundation.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-23,31-33
+tools/bot/scenarios/client/25_ranged_monster_ai.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-18,33-38
+tools/bot/scenarios/client/79_hit_stop_impact_flash.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-59
+tools/bot/scenarios/45_class_second_combat_skills.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-19,23-38,42-53,63-101,104-108
+tools/bot/scenarios/22_combat_stat_effects.json
+  s_35943f94512aa9::t_7d600179456ec0 63-64,66-67
+  s_35943f94512aa9::t_1bf5dcfba4e137 40
+  s_35943f94512aa9::t_b12543bfc08e22 30
+  s_35943f94512aa9::t_8cc61446188280 5
+  s_35943f94512aa9::t_1ea278e6ef9f9e 65
+tools/bot/scenarios/client/49_mercenary_recovery_ui.json
+  s_9b51da3986e539::t_2750931618b64f 3,11-16,19-39,48-53,62-71
+tools/bot/scenarios/client/51_buyer_offer_cancel_ui.json
+  s_9b51da3986e539::t_2750931618b64f 3,17-77
+tools/bot/scenarios/95_second_boss_template.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-19,23-93,96-120,123-127
+tools/bot/scenarios/client/77_input_buffering.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-77
+tools/bot/scenarios/client/07_town_teleporter_auto_approach.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-49
+tools/bot/scenarios/46_class_starter_loadout.json
+  s_9b51da3986e539::t_2750931618b64f 3,11-19
+tools/bot/run.py
+  s_35943f94512aa9::t_33b1e984bac977 389-391
+  s_9b51da3986e539::t_ad8c42a4a0bc3d 40
+  s_9b51da3986e539::t_ae97be1a4f1ed1 4077
+  s_9b51da3986e539::t_cc44e58b2a9590 145-146
+tools/bot/scenarios/15_character_persistence.json
+  s_9b51da3986e539::t_2750931618b64f 3,8-21,24-36,42-50,53-61,67-75,78-86,91-95
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-167
+tools/bot/scenarios/client/69_mercenary_offer_variant_ui.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-11,13-34,46-51
+tools/bot/scenarios/43_paladin_holy_shield.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-31,35-41,51-92
+tools/bot/scenarios/91_ranged_threats_hit_companions.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-22,43-47
+tools/bot/scenarios/09_chase_lab.json
+  s_9b51da3986e539::t_2750931618b64f 3,19-23,29-32
+tools/bot/scenarios/67_skill_secondary_bindings.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-13,19-36,42-47,57-62,67-70,75-78
+tools/bot/scenarios/client/11_combat_feedback.json
+  s_9b51da3986e539::t_2750931618b64f 10-63,67-81,84-208
+tools/bot/scenarios/client/20_menu_create_join_flow.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-12,15-91,100-103,111-114,119-159,168-184
+tools/bot/scenarios/client/56_mercenary_stats_card.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-11,13-33,38-44
+tools/bot/scenarios/10_chase_maze.json
+  s_9b51da3986e539::t_2750931618b64f 3,8-11,14-22
+tools/bot/scenarios/39_mystery_seller_paid_reroll.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-35,42-48,55-66,75-84,102-107,110-115,120-124
+tools/bot/scenarios/client/08_main_menu_flow.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-12,15-67,76-79,85-157,165-181
+tools/bot/scenarios/client/26_boss_health_bar_ui.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-18
+tools/bot/scenarios/44_skill_visual.json
+  s_9b51da3986e539::t_2750931618b64f 3,11-15
+docs/CODEMAP.md
+  s_35943f94512aa9::t_7f02b8e04ccc2f 11
+  s_9b51da3986e539::t_3fcad66d9f96e3 28
+  s_35943f94512aa9::t_215c60605e0b5c 9
+tools/bot/scenarios/client/59_market_search_sort.json
+  s_9b51da3986e539::t_2750931618b64f 3,15-87
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-31,35-46,56-101,104-108
+tools/bot/scenarios/client/37_elite_aura_radius_preview.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-28
+tools/bot/scenarios/62_barbarian_earthbreaker.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-23,26-48,51-67,70-74
+tools/bot/scenarios/70_paladin_sanctuary.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-23,26-48,51-77,80-84
+tools/bot/scenarios/60_ranger_volley_and_visual_showcase.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-32,35-117,120-159
+tools/bot/scenarios/client/69_discovery_minimap_toggle.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-29,41-44,57-60,70-80
+tools/bot/scenarios/client/73_door_fog_toggle.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-17,24-33,40-49
+tools/bot/scenarios/client/31_combat_threat_readability.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-26,36-41
+tools/bot/scenarios/49_undead_skeleton_poison_immunity.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-30,41-46,49-52,55-82
+tools/bot/scenarios/client/68_market_notification_badge.json
+  s_9b51da3986e539::t_2750931618b64f 3,17-68
+tools/bot/scenarios/06_ranged_lab.json
+  s_9b51da3986e539::t_2750931618b64f 3,8-17,28-37,40-43,48-65
+tools/bot/scenarios/16_rolled_drops.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-14,17-24,31-34,39-43
+tools/bot/scenarios/33_shop_stock_lifecycle.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-91,94-119,125-139,142-153,158-162
+tools/bot/scenarios/client/32_town_bishop_respec_panel.json
+  s_9b51da3986e539::t_2750931618b64f 3,13-106
+tools/bot/scenarios/client/70_blacksmith_armor_recipe.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-238
+tools/bot/scenarios/client/72_active_session_map_memory.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-23,31-33
+tools/bot/scenarios/client/62_blacksmith_second_recipe.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-233
+tools/bot/scenarios/76_companion_rank_scaling_and_limits.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-23,26-101,104-126
+tools/bot/scenarios/63_rogue_shadow_flurry.json
+  s_9b51da3986e539::t_2750931618b64f 3,14-23,26-48,51-67,70-74
+tools/bot/scenarios/53_unique_burn_effect_live.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-17,28-32,37-43,48-64
+tools/bot/ci_pack.py
+  s_9b51da3986e539::t_d722f9736ca43f 87,94
+  s_9b51da3986e539::t_e38d8977aaf16e 1-86,88-93,95-108
+tools/bot/scenarios/90_mercenary_death_loss.json
+  s_9b51da3986e539::t_2750931618b64f 3,8-10,12-66,69-79,82-86
+tools/bot/scenarios/client/02_inventory_open_close.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-28
+tools/bot/scenarios/client/45_elite_objective_minimap_pin.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-23,31-33
+tools/bot/scenarios/11_leash_lab.json
+  s_9b51da3986e539::t_2750931618b64f 3,11-15,19-27
+tools/bot/scenarios/98_badge_reward_foundation.json
+  s_9b51da3986e539::t_2750931618b64f 3,12-87,90-157
+tools/bot/scenarios/05_path_maze.json
+  s_9b51da3986e539::t_2750931618b64f 3,15-18
+tools/bot/scenarios/34_coop_rewards_and_scaling.json
+  s_9b51da3986e539::t_2750931618b64f 3
+tools/bot/scenarios/87_boss_enrage_phase.json
+  s_9b51da3986e539::t_2750931618b64f 3,13-18,22-43,46-50,53-57
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-250
+AGENTS.md
+  s_9b51da3986e539::t_389c8680664811 80-84
+tools/bot/scenarios/client/42_quest_reward_chest_presentation.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-23
+tools/bot/ci_pack.json
+  s_9b51da3986e539::t_4512bbbaacdf22 1-36,38-43
+  s_9b51da3986e539::t_d68cb932c58179 37
+tools/bot/scenarios/83_second_set_package.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-35,38-50
+tools/bot/wait_runtime.py
+  s_35943f94512aa9::t_c31fdef75cdb32 256-258,260-261
+  s_35943f94512aa9::t_bcc8477bbdb2ea 253-255,259,262
+tools/bot/scenarios/client/06_use_potion_hotbar.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-104
+client/scripts/main.gd
+  s_9b51da3986e539::t_39b9d5bd424385 5732-5733
+tools/bot/scenarios/client/81_command_retarget_grace.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-46
+tools/bot/scenarios/66_weapon_set_swap_and_tabs.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-62,65-73,76-80
+tools/bot/scenarios/30_vendor_appraisal_quotes.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-86,89-125,128-132
+tools/bot/scenarios/08_heal_lab.json
+  s_9b51da3986e539::t_2750931618b64f 3,8-39,42-54
+tools/bot/scenarios/88_mercenary_hiring_board.json
+  s_9b51da3986e539::t_2750931618b64f 3,8-10,12-57,60-75,86-90
+tools/bot/scenarios/19_full_equipment.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-186,189-256,263-281
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-15,21-24,45-54,63-67,73-94,99-166,173-194,199-203
+tools/bot/scenarios/client/46_set_collection_panel.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-63
+tools/bot/scenarios/client/82_melee_lunge_micro_step.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-48
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-35,38-155,158-231
+scripts/ci.sh
+  s_9b51da3986e539::t_93a551d3d0e7d4 4-5
+  s_9b51da3986e539::t_64600f0070c736 335
+  s_9b51da3986e539::t_3e36d96749cf3a 342
+  s_9b51da3986e539::t_11b1e0bf153519 20
+  s_9b51da3986e539::t_3d6db5c6731938 273
+  s_9b51da3986e539::t_5834cf98a524ba 397
+tools/bot/scenarios/80_skill_affix_rolls.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-13,19-22,31-34
+tools/bot/scenarios/85_item_level_progression.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-12,23-27
+tools/bot/scenarios/client/09_character_stats_panel.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-180
+tools/bot/scenarios/client/83_camera_mode_setting.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-32,45-64,78-85,91-94,100-102
+tools/bot/scenarios/78_rarity_roll_pools.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-11,19-27,31-38,41-45
+tools/bot/scenarios/72_upgrade_resource_drop.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-60,63-85,88-92
+tools/bot/scenarios/84_boss_special_drops.json
+  s_9b51da3986e539::t_2750931618b64f 3,13-18,22-75,78-106,109-113
+tools/bot/scenarios/client/30_stash_search_and_sorting.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-149
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-27,31-46,50-56,61-67,72-78,83-89,99-103,110-112,119-121,126-130,133-161,164-168,173-277
+tools/bot/scenarios/client/52_market_trade_receipts.json
+  s_9b51da3986e539::t_2750931618b64f 3,17-69
+tools/bot/scenarios/client/60_market_item_comparison.json
+  s_9b51da3986e539::t_2750931618b64f 3,15-45
+tools/bot/scenarios/client/77_line_of_sight_blocker_shadow.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-29
+tools/bot/scenarios/client/61_material_wallet_window.json
+  s_9b51da3986e539::t_2750931618b64f 4,10-57
+scripts/bot_client.sh
+  s_9b51da3986e539::t_30885b77bed70f 64-71
+  s_9b51da3986e539::t_63b108af309186 321-322
+  s_9b51da3986e539::t_13e6c44050d587 336-337,339
+  s_9b51da3986e539::t_19f98988b975c1 181-233
+  s_9b51da3986e539::t_bdfd7aa715a2c9 63,72-73
+  s_9b51da3986e539::t_e0abecb197645c 358-359,372,375,377-378,391-392,396-403
+tools/bot/scenarios/client/29_mystery_seller_paid_reroll.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-145
+tools/bot/scenarios/client/22_shop_stock_lifecycle.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-132
+tools/bot/scenarios/client/17_equipment_requirements_and_preview.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-35,44-47
+tools/bot/scenarios/client/44_elite_objective_hud.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-23
+tools/bot/scenarios/client/55_blacksmith_recipe_selector.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-68
+tools/bot/scenarios/client/04_inventory_lab_drop_item.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-71
+tools/bot/scenarios/07_inventory_lab.json
+  s_9b51da3986e539::t_2750931618b64f 3,11-36,39-47
+client/tests/test_item_visuals.gd
+  s_9b51da3986e539::t_fe1e8d2afbea86 23-26
+  s_9b51da3986e539::t_dcdb229157d09d 479-480
+  s_9b51da3986e539::t_5aa3c2c69da41a 487-488
+  s_9b51da3986e539::t_0ef9abe9248c92 471-472
+  s_9b51da3986e539::t_66dea46f25875c 668,674,680-686,691-692,696-697,704-705,709-710,712-713,717-721
+  s_9b51da3986e539::t_63f8f8ec97201e 83-88
+tools/bot/scenarios/55_survival_reactive_unique_effects.json
+  s_9b51da3986e539::t_2750931618b64f 3,9-23,26-30,35-49
+tools/bot/scenarios/41_monster_visual_catalog.json
+  s_9b51da3986e539::t_2750931618b64f 3,13-18,22-48,51-68,71-75
+tools/bot/scenarios/27_session_browser_uncapped_coop.json
+  s_9b51da3986e539::t_2750931618b64f 3
+tools/bot/scenarios/74_ranger_wolf_companion.json
+  s_9b51da3986e539::t_2750931618b64f 3,10-14,22-31,34-85,88-121
+tools/bot/scenarios/client/48_market_cancel_listing_ui.json
+  s_9b51da3986e539::t_2750931618b64f 3,17-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "56253b29de36a29d1e31e12c3978e717a1cba0de",
+  "prompts": {},
+  "sessions": {
+    "s_35943f94512aa9": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ee86b451-06f4-456a-8f6a-0c5ce5c21540",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_9b51da3986e539": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2420cd3f-eb98-4348-8ccd-fc8abbe45d9f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

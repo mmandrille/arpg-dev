@@ -1,0 +1,20 @@
+{
+  "version": 0,
+  "room_archetypes": {
+    "combat": { "floor_tint": "#6b6058", "alpha": 0.14 },
+    "corridor": { "floor_tint": "#5a6670", "alpha": 0.10 },
+    "rest": { "floor_tint": "#5f6a58", "alpha": 0.12 },
+    "treasure": { "floor_tint": "#8a7340", "alpha": 0.20 }
+  },
+  "treasure_radius": 6.0,
+  "corridor_max_span": 8.0,
+  "ambient_motes": {
+    "count_min": 6,
+    "count_max": 18,
+    "depth_per_level": 2,
+    "color": "#c8b8a0",
+    "alpha": 0.35,
+    "height": 0.55,
+    "radius": 0.06
+  }
+}

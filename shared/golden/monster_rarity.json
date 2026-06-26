@@ -76,10 +76,10 @@
       "loot_depth_offset": 2,
       "visual_scale": 1.0,
       "expected": {
-        "max_hp": 10,
+        "max_hp": 11,
         "attack_damage": {
           "min": 2,
-          "max": 3
+          "max": 4
         },
         "armor": 3,
         "hit_chance": 0.62,
@@ -105,9 +105,9 @@
       "loot_depth_offset": 3,
       "visual_scale": 1.5,
       "expected": {
-        "max_hp": 16,
+        "max_hp": 18,
         "attack_damage": {
-          "min": 2,
+          "min": 3,
           "max": 5
         },
         "armor": 7,

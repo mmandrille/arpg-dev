@@ -19,9 +19,11 @@ var _threshold: int = 0
 
 
 ## Dim a label's base color when it is revealed-but-not-hovered, so the hovered
-## label stands out. Moved here from main.gd so loot-label display policy lives
-## in one focused, unit-testable place.
-func display_color(base: Color, highlighted: bool) -> Color:
+## label stands out. Currency labels use white while highlighted so gold text
+## does not read like unique-rarity loot.
+func display_color(base: Color, highlighted: bool, category: String = "") -> Color:
+	if highlighted and category.to_lower() == "currency":
+		return Color.WHITE
 	if highlighted:
 		return base
 	return Color(

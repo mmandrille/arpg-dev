@@ -196,6 +196,8 @@ func _make_obstacle_root(wall: Dictionary, prefix: String, kind: String) -> Node
 
 func _make_obstacle_material(wall: Dictionary, kind: String) -> StandardMaterial3D:
 	var size: Dictionary = wall.get("size", {})
+	if _ground_factory != null and _ground_factory.has_method("obstacle_material_for_level"):
+		return _ground_factory.obstacle_material_for_level(_current_level, kind, size)
 	var mat := StandardMaterial3D.new()
 	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
 	if _ground_factory != null and _ground_factory.has_method("make_wall_texture"):

@@ -350,5 +350,10 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v335** | `movement-input-presenter` | Complete (focused checks green; batch `make ci` pending) | — | — | [`as-built`](../as-built/v335_movement-input-presenter.md) |
 | **v336** | `wall-floor-lab-nav` | Complete (focused checks green; batch `make ci` pending) | [`v308_spec-wall-floor-shader-polish.md`](../specs/v308_spec-wall-floor-shader-polish.md) | [`v308_2026-06-19-wall-floor-shader-polish.md`](../plans/v308_2026-06-19-wall-floor-shader-polish.md) | [`as-built`](../as-built/v336_wall-floor-lab-nav.md) |
 | **v337** | `sim-tick-context` | Complete (focused checks green; batch `make ci` pending) | — | — | [`as-built`](../as-built/v337_sim-tick-context.md) |
+| **v338** | `wall-floor-dungeon-rollout` | Complete (focused checks green; autoloop batch `make ci` pending) | [`v338_spec-wall-floor-dungeon-rollout.md`](../specs/v338_spec-wall-floor-dungeon-rollout.md) | — | [`as-built`](../as-built/v338_wall-floor-dungeon-rollout.md) |
+| **v339** | `room-type-floor-tint` | Complete (focused checks green; autoloop batch `make ci` pending) | [`v339_spec-room-type-floor-tint.md`](../specs/v339_spec-room-type-floor-tint.md) | — | [`as-built`](../as-built/v339_room-type-floor-tint.md) |
+| **v340** | `depth-combat-pressure` | Complete (focused checks green; autoloop batch `make ci` pending) | [`v340_spec-depth-combat-pressure.md`](../specs/v340_spec-depth-combat-pressure.md) | — | [`as-built`](../as-built/v340_depth-combat-pressure.md) |
+| **v341** | `loot-beam-rarity-tier` | Complete (focused checks green; autoloop batch `make ci` pending) | [`v341_spec-loot-beam-rarity-tier.md`](../specs/v341_spec-loot-beam-rarity-tier.md) | — | [`as-built`](../as-built/v341_loot-beam-rarity-tier.md) |
+| **v342** | `dungeon-ambient-motes` | Complete (focused checks green; autoloop batch `make ci` pending) | [`v342_spec-dungeon-ambient-motes.md`](../specs/v342_spec-dungeon-ambient-motes.md) | — | [`as-built`](../as-built/v342_dungeon-ambient-motes.md) |
 
 ---

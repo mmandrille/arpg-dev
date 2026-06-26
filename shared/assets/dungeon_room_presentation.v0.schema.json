@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/dungeon_room_presentation.v0.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "room_archetypes", "treasure_radius", "corridor_max_span", "ambient_motes"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 0 },
+    "treasure_radius": { "type": "number", "minimum": 0 },
+    "corridor_max_span": { "type": "number", "minimum": 0 },
+    "room_archetypes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["floor_tint", "alpha"],
+        "additionalProperties": false,
+        "properties": {
+          "floor_tint": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+          "alpha": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "ambient_motes": {
+      "type": "object",
+      "required": ["count_min", "count_max", "depth_per_level", "color", "alpha", "height", "radius"],
+      "additionalProperties": false,
+      "properties": {
+        "count_min": { "type": "integer", "minimum": 0 },
+        "count_max": { "type": "integer", "minimum": 0 },
+        "depth_per_level": { "type": "integer", "minimum": 0 },
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+        "height": { "type": "number", "minimum": 0 },
+        "radius": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

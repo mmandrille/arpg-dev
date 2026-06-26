@@ -21,6 +21,7 @@ func _initialize() -> void:
 	_test_off_ladder_always_allowed()
 	_test_case_insensitive()
 	_test_display_color_dims_unhighlighted()
+	_test_display_color_currency_highlight_is_white()
 
 	if _fail == 0:
 		print("[gdtest] PASS: test_loot_label_filter (%d assertions)" % _pass)
@@ -113,3 +114,11 @@ func _test_display_color_dims_unhighlighted() -> void:
 	_check(dimmed != base, "unhighlighted label is dimmed")
 	_check(is_equal_approx(dimmed.r, base.r * 0.58), "dim factor applied to r")
 	_check(is_equal_approx(dimmed.a, base.a), "alpha preserved when dimming")
+
+
+func _test_display_color_currency_highlight_is_white() -> void:
+	var f := LootLabelFilterScript.new()
+	var gold := Color("#ffd75e")
+	var highlighted: Color = f.display_color(gold, true, "currency")
+	_check(highlighted == Color.WHITE, "highlighted currency label uses white")
+	_check(f.display_color(gold, true, "equipment") == gold, "highlighted equipment keeps base color")

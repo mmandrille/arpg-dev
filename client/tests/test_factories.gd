@@ -10,6 +10,8 @@ const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 const BossArenaPresenceScript := preload("res://scripts/boss_arena_presence.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
+const DungeonRoomFloorTintScript := preload("res://scripts/dungeon_room_floor_tint.gd")
+const DungeonAmbientMotesScript := preload("res://scripts/dungeon_ambient_motes.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -22,6 +24,7 @@ func _initialize() -> void:
 	_test_loot_node_factory()
 	_test_town_node_factory()
 	_test_boss_visuals()
+	_test_dungeon_room_floor_tint()
 
 	if _fail_count > 0:
 		print("[gdtest] FAIL: test_factories (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -87,6 +90,9 @@ func _test_wall_renderer() -> void:
 	_assert_true("dungeon wall height", absf((wall.mesh as BoxMesh).size.y - (ground_factory.dungeon_ceiling_height() + 0.08)) <= 0.001)
 	var ceiling := root.get_node_or_null("DungeonCeiling") as MeshInstance3D
 	_assert_true("dungeon ceiling node exists", ceiling != null)
+	var ceiling_mat := ceiling.material_override as StandardMaterial3D
+	_assert_true("dungeon ceiling normal enabled", ceiling_mat.normal_enabled)
+	_assert_true("dungeon ceiling normal texture exists", ceiling_mat.normal_texture != null)
 	renderer.set_ceiling_visible(false)
 	_assert_true("dungeon ceiling can be hidden for isometric", not ceiling.visible)
 	renderer.set_ceiling_visible(true)
@@ -143,6 +149,9 @@ func _test_wall_renderer() -> void:
 	_assert_eq("rock child name", rock.name, "Rock_test_rock")
 	_assert_eq("rock metadata kind", str(rock.get_meta("kind", "")), "rock")
 	_assert_true("rock has non-rectangular chunks", rock.get_child_count() >= 3)
+	var rock_mat := (rock.get_child(0) as MeshInstance3D).material_override as StandardMaterial3D
+	_assert_true("rock obstacle normal enabled", rock_mat.normal_enabled)
+	_assert_true("rock obstacle normal texture exists", rock_mat.normal_texture != null)
 	var column_walls := renderer.render_wall_layout([{
 		"id": "test_column",
 		"position": {"x": 4.0, "y": 6.0},
@@ -271,6 +280,36 @@ func _test_boss_visuals() -> void:
 	BossArenaPresenceScript.remove_for_record(rec)
 	_assert_eq("arena cleanup", bool(rec.get("has_boss_arena_presence", true)), false)
 	root.queue_free()
+
+
+func _test_dungeon_room_floor_tint() -> void:
+	var ground_factory = GroundWallFactoryScript.new()
+	var ground := ground_factory.make_ground_node(-2)
+	get_root().add_child(ground)
+	var walls := [
+		{"id": "divider_h", "position": {"x": 50.0, "y": 25.0}, "size": {"x": 80.0, "y": 1.0}, "source": "room_divider"},
+		{"id": "divider_v", "position": {"x": 50.0, "y": 25.0}, "size": {"x": 1.0, "y": 40.0}, "source": "room_divider"},
+	]
+	var entities := {
+		"chest_1": {
+			"type": "interactable",
+			"interactable_def_id": "treasure_chest",
+			"position": {"x": 20.0, "y": 20.0},
+		},
+	}
+	DungeonRoomFloorTintScript.sync(ground, ground_factory, -2, walls, entities)
+	var tint_root := ground.get_node_or_null("DungeonRoomFloorTint")
+	_assert_true("room tint root exists", tint_root != null)
+	if tint_root != null:
+		_assert_true("room tint overlays created", tint_root.get_child_count() >= 2)
+		var treasure_found := false
+		for child in tint_root.get_children():
+			if str(child.name).begins_with("RoomTint_treasure"):
+				treasure_found = true
+		_assert_true("treasure room tint present", treasure_found)
+	DungeonAmbientMotesScript.sync(ground, -2, ground_factory.floor_size_for_level(-2))
+	_assert_true("ambient motes root exists", ground.get_node_or_null("DungeonAmbientMotes") != null)
+	ground.queue_free()
 
 
 func _assert_eq(label: String, got, want) -> void:

@@ -57,6 +57,22 @@
       "blocked": false,
       "critical": false
     },
+    {
+      "action": "walk_to_monster",
+      "monster_def_id": "combat_lab_miss_attacker",
+      "pathfind": true,
+      "stop_distance": 3.5,
+      "max_ticks": 60
+    },
+    {
+      "action": "wait_for_combat_event",
+      "event_type": "attack_missed",
+      "outcome": "miss",
+      "blocked": false,
+      "critical": false,
+      "source_monster_def_id": "combat_lab_miss_attacker",
+      "timeout_s": 10.0
+    },
     { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
     { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" },
     {

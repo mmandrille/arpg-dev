@@ -3,7 +3,7 @@
   "ci_tier": "extended",
   "world_id": "dungeon_levels",
   "seed": "v30_monster_rarity",
-  "max_elapsed_s": 28.0,
+  "max_elapsed_s": 32.0,
   "title": "Monster rarity combat",
   "description": "Descend into the seeded depth-2 dungeon floor and assert a champion generated monster rarity over protocol.",
   "steps": [

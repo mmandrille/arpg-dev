@@ -20,6 +20,7 @@ func (s *Sim) newPresetMonsterOrCompanion(level *LevelState, preset WorldEntity,
 		monster.ownerID = ownerID
 		monster.monsterAttackDamage = def.AttackDamage
 		monster.monsterAttackCooldown = def.AttackCooldown
+		monster.speed = def.MoveSpeed
 		return monster
 	}
 	s.applyPartyHPScale(level, monster)

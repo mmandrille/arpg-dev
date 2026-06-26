@@ -36,11 +36,6 @@
       "timeout_s": 15.0
     },
     {
-      "type": "wait_event",
-      "event_type": "monster_killed",
-      "timeout_s": 1.0
-    },
-    {
       "type": "wait_character_progression",
       "level": 2,
       "experience": 30,

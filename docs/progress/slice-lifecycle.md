@@ -362,5 +362,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v347** | `dungeon-render-performance` | Complete (focused checks green) | — | — | [`as-built`](../as-built/v347_dungeon-render-performance.md) |
 | **v348** | `forward-plus-renderer` | Complete (focused checks green) | [`spec`](../specs/v348_spec-forward-plus-renderer.md) | [`plan`](../plans/v348_2026-06-26-forward-plus-renderer.md) | [`as-built`](../as-built/v348_forward-plus-renderer.md) |
 | **v349** | `movement-tick-smoothing` | Complete (focused checks green) | [`spec`](../specs/v349_spec-movement-tick-smoothing.md) | [`plan`](../plans/v349_2026-06-26-movement-tick-smoothing.md) | [`as-built`](../as-built/v349_movement-tick-smoothing.md) |
+| **v350** | `ci-full-green` | Complete (`make ci-full` green) | [`spec`](../specs/v350_spec-ci-full-green.md) | [`plan`](../plans/v350_2026-06-26-ci-full-green.md) | [`as-built`](../as-built/v350_ci-full-green.md) |
 
 ---

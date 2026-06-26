@@ -1,8 +1,9 @@
 {
   "id": "survival_reactive_unique_effects",
   "ci_tier": "extended",
-  "world_id": "combat_stat_lab",
-  "seed": "0000000000000193",
+  "world_id": "unique_reprisal_lab",
+  "seed": "173",
+  "debug_progression": { "level": 12 },
   "title": "Survival reactive unique effects",
   "description": "Pick up a deterministic Ashen Reprisal shield, equip it, and prove a guaranteed avoided hit primes the reactive effect through the live protocol.",
   "steps": [

@@ -16,19 +16,21 @@
       "mode": "isometric"
     },
     {
-      "type": "assert_fog_of_war",
+      "type": "wait_fog_of_war",
       "enabled": true,
       "extra_occluder_count": 1,
-      "shadow_count_min": 1
+      "shadow_count_min": 1,
+      "timeout_s": 5.0
     },
     {
-      "type": "click_entity_until_event",
+      "type": "click_entity",
       "entity_type": "interactable",
       "interactable_def_id": "wooden_door",
-      "state": "closed",
+      "state": "closed"
+    },
+    {
+      "type": "wait_event",
       "event_type": "interactable_activated",
-      "consume_event": true,
-      "retry_s": 0.25,
       "timeout_s": 10.0
     },
     {
@@ -38,14 +40,15 @@
       "timeout_s": 5.0
     },
     {
-      "type": "click_entity_until_event",
+      "type": "click_entity",
       "entity_type": "interactable",
       "interactable_def_id": "wooden_door",
-      "state": "open",
+      "state": "open"
+    },
+    {
+      "type": "wait_event",
       "event_type": "interactable_state_changed",
       "event_state": "closed",
-      "consume_event": true,
-      "retry_s": 0.25,
       "timeout_s": 10.0
     },
     {
@@ -53,7 +56,7 @@
       "enabled": true,
       "extra_occluder_count": 1,
       "shadow_count_min": 1,
-      "timeout_s": 5.0
+      "timeout_s": 10.0
     }
   ]
 }

@@ -70,6 +70,7 @@ const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 const MovementVisualSmoothingScript := preload("res://scripts/movement_visual_smoothing.gd")
+const EntityTickSmoothingRuntimeScript := preload("res://scripts/entity_tick_smoothing_runtime.gd")
 const PlayerMovementFeelScript := preload("res://scripts/player_movement_feel.gd")
 const MovementInputPresenterScript := preload("res://scripts/movement_input_presenter.gd")
 const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
@@ -265,6 +266,7 @@ var _attack_buffer: CombatInputBuffer = CombatInputBufferScript.new()
 var _sticky_attack: CombatStickyTarget = CombatStickyTargetScript.new()
 var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttackPresentationScript.new()
 var _movement_visual_smoothing: MovementVisualSmoothing = MovementVisualSmoothingScript.new()
+var _entity_tick_smoothing: EntityTickSmoothingRuntime = EntityTickSmoothingRuntimeScript.new()
 var _player_movement_feel: PlayerMovementFeel = PlayerMovementFeelScript.new()
 var _level_loading_overlay: LevelLoadingOverlay
 var _level_loading_active: bool = false
@@ -297,6 +299,7 @@ func _ready() -> void:
 	player_anchor = $World/PlayerAnchor
 	character_visual = $World/PlayerAnchor/CharacterVisual
 	_movement_visual_smoothing.reset(player_anchor, character_visual)
+	_entity_tick_smoothing.player_smoothing().reset(player_anchor.position)
 	entities_root = $Entities
 	# Mount-root is injected (spec §4.8): the resolver finds the named socket
 	# within CharacterVisual, never via an absolute scene path.
@@ -872,6 +875,8 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	if player_anchor != null:
 		player_anchor.position = Vector3.ZERO
 		_movement_visual_smoothing.reset(player_anchor, character_visual)
+		_entity_tick_smoothing.player_smoothing().reset(player_anchor.position)
+	_entity_tick_smoothing.player_smoothing().reset(player_anchor.position)
 	_player_movement_feel.reset()
 	if clear_session and client != null:
 		client.session_id = ""
@@ -928,6 +933,8 @@ func _process(delta: float) -> void:
 	if player_anim != null:
 		player_anim.set_locomotion(_movement_input.local_player_is_walking(client, player_hp, _user_input_blocked()))
 	_movement_visual_smoothing.tick(delta, character_visual)
+	_entity_tick_smoothing.tick_player(player_anchor, delta)
+	_entity_tick_smoothing.tick_entities(entities, delta)
 	if not _user_input_blocked():
 		_update_facing_toward_mouse()
 	_refresh_monster_health_bar_visibility()
@@ -1575,7 +1582,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
 		if apply_local_player_position and not local_leap_visual_active and not local_charge_visual_active:
-			player_anchor.position = server_pos
+			_entity_tick_smoothing.apply_player_authoritative(player_anchor, server_pos)
 			_movement_visual_smoothing.preserve_after_anchor_move(player_anchor, character_visual)
 		if apply_local_player_position and prev_predicted_pos.distance_to(server_pos) > 0.001 and player_hp > 0:
 			_mark_local_player_walking()
@@ -1641,14 +1648,13 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		_move_projectile_node(rec, server_pos)
 	else:
 		var node := rec["node"] as Node3D
-		var prev_pos := node.position
-		node.position = server_pos
+		var segment_distance := _entity_tick_smoothing.apply_entity_authoritative(rec, node, server_pos, is_new)
 		if _entity_type_uses_combat_presentation(str(rec["type"])) and rec["controller"] != null and not is_new:
 			var hp_val := int(e.get("hp", rec.get("hp", 1)))
-			var moved := prev_pos.distance_to(server_pos) > 0.001
+			var moved := segment_distance > 0.001
 			if moved and hp_val > 0:
 				rec["walk_linger"] = ClientConstants.WALK_ANIMATION_LINGER_SECONDS
-				_face_entity_direction(node, Vector2(server_pos.x - prev_pos.x, server_pos.z - prev_pos.z))
+				_face_entity_direction(node, Vector2(server_pos.x - node.position.x, server_pos.z - node.position.z))
 			elif hp_val > 0 and str(rec.get("target_id", "")) != "":
 				_face_node_toward_entity(node, str(rec.get("target_id", "")))
 			rec["controller"].set_locomotion(float(rec.get("walk_linger", 0.0)) > 0.0 and hp_val > 0)
@@ -5683,6 +5689,7 @@ func get_bot_state() -> Dictionary:
 		"gold": gold,
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
 		"movement_visual_smoothing": _movement_visual_smoothing.get_debug_state(character_visual),
+		"entity_tick_smoothing": _entity_tick_smoothing.get_player_debug_state(),
 		"movement_feel": _player_movement_feel.get_debug_state(),
 		"command_retarget_grace": _command_retarget_grace.get_debug_state(),
 		"current_level": current_level,

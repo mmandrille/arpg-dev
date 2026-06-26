@@ -23,10 +23,10 @@ Last updated: 2026-06-26
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v348 — forward-plus-renderer |
+| **Latest completed slice** | v349 — movement-tick-smoothing |
 | **Active branch** | `main` |
-| **CI gate** | v348 focused checks green; batch `make ci` pending autoloop close-out |
-| **Next slice** | v349 movement-tick-smoothing |
+| **CI gate** | v349 focused checks green; batch `make ci` pending autoloop close-out |
+| **Next slice** | TBD |
 | **Last engineering review** | v337 — [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md) (2026-06-25, ad hoc; covers v335–v337 + post-v334 `$refactor` completion) |
 | **Next engineering review** | After v340 ships and `make ci` is green |
 

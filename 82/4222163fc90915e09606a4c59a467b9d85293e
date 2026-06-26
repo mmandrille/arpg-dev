@@ -1,0 +1,25 @@
+tools/assets/validate_assets.py
+  s_05d5e6aa8fd731::t_39bd50eb5579fa 91-115
+  s_05d5e6aa8fd731::t_b4fec1f423e25b 235-239,241-245,253
+  s_05d5e6aa8fd731::t_c79ef2666c6d03 240,246-252
+tools/assets/test_validate_assets.py
+  s_05d5e6aa8fd731::t_19bac129d30ec5 324-330
+assets/monsters/quadruped/README.md
+  s_05d5e6aa8fd731::t_aacf2f1241f4e1 3,5-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "824222163fc90915e09606a4c59a467b9d85293e",
+  "prompts": {},
+  "sessions": {
+    "s_05d5e6aa8fd731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d3fe9e6-9bd8-4c49-8e7b-285d8eb2314a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

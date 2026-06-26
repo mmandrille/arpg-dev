@@ -1,0 +1,28 @@
+tools/bot/scenarios/24_boss_floor_gate.json
+  s_05d5e6aa8fd731::t_04a32d2b7d5ed2 7
+client/scripts/smoke.gd
+  s_05d5e6aa8fd731::t_38b5d7560d5ab2 266-268,273-274,276-280
+  s_05d5e6aa8fd731::t_59790dd0717da3 358-359,362,366-367,369-371
+  s_05d5e6aa8fd731::t_824493357b2da4 305-308,313-315,318-331,335-336,338-340,344
+  s_05d5e6aa8fd731::t_b609650e48c273 148
+  s_05d5e6aa8fd731::t_00e31aabb4b129 300-304,309-312,316-317
+  s_05d5e6aa8fd731::t_03c2934c80eab8 360-361,363-365,368,372
+  s_05d5e6aa8fd731::t_07b6a7da369948 147,149-156
+  s_05d5e6aa8fd731::t_3fb963cb91e8b1 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5dc2706c344ffdad70d65e7ffbeb1144d678db2a",
+  "prompts": {},
+  "sessions": {
+    "s_05d5e6aa8fd731": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d3fe9e6-9bd8-4c49-8e7b-285d8eb2314a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

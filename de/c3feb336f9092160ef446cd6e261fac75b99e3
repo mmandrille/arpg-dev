@@ -1,0 +1,71 @@
+docs/plans/v354_2026-06-26-dungeon-torch-lights.md
+  s_8ed6bbb9654539::t_e88484bd0709cb 1-20
+docs/as-built/v354_dungeon-torch-lights.md
+  s_8ed6bbb9654539::t_e0d04305ae3d4f 1-26
+client/scripts/dungeon_torch_lights.gd
+  s_8ed6bbb9654539::t_bee30e2a173bd1 1-133
+client/scripts/bot_step_catalog.gd
+  s_8ed6bbb9654539::t_7c14cea3803e9d 41
+  s_8ed6bbb9654539::t_297ac66f339ece 16
+client/tests/test_dungeon_torch_placement.gd
+  s_8ed6bbb9654539::t_cdb90d736a5172 1-62
+client/scripts/bot_wait_handlers.gd
+  s_8ed6bbb9654539::t_2f3f7772a77df6 47-48
+shared/assets/dungeon_torch_presentation.v0.json
+  s_8ed6bbb9654539::t_360b422aa2b2bb 1-16
+client/scripts/dungeon_torch_placement.gd
+  s_8ed6bbb9654539::t_4927da8020c359 1-91
+tools/bot/scenarios/client/87_dungeon_torch_lights.json
+  s_8ed6bbb9654539::t_1d0203664ef9d0 1-45
+client/scripts/dungeon_torch_presentation_loader.gd
+  s_8ed6bbb9654539::t_76592260da7b3a 1-60
+PROGRESS.md
+  s_8ed6bbb9654539::t_bfbe9372232dd5 26,29
+docs/CODEMAP.md
+  s_8ed6bbb9654539::t_a1265bc46c12bf 16
+docs/progress/slice-lifecycle.md
+  s_8ed6bbb9654539::t_d376681901128b 369
+docs/specs/v354_spec-dungeon-torch-lights.md
+  s_8ed6bbb9654539::t_facca72eae9b0b 1-33
+client/scripts/fog_of_war_overlay.gd
+  s_8ed6bbb9654539::t_80d3f64687c1c7 265-270
+  s_8ed6bbb9654539::t_36900b5382e99e 408
+  s_8ed6bbb9654539::t_0ad219c03f0fcd 414-426
+  s_8ed6bbb9654539::t_2b70467bb73b9f 125-143,151-154
+  s_8ed6bbb9654539::t_2956507f82809d 340-341
+  s_8ed6bbb9654539::t_d4afd191e23b9a 188-189
+  s_8ed6bbb9654539::t_84be80f0c4ba85 36-38
+client/scripts/wall_renderer.gd
+  s_8ed6bbb9654539::t_84382e62ea992f 75-78
+client/scripts/bot_assertion_handlers.gd
+  s_8ed6bbb9654539::t_14e8c97085874a 400
+  s_8ed6bbb9654539::t_d9ee00b6126732 497-508
+  s_8ed6bbb9654539::t_9114a8f80781b3 94-100
+shared/assets/dungeon_torch_presentation.v0.schema.json
+  s_8ed6bbb9654539::t_79e5f7ed34db3f 1-40
+client/scripts/main.gd
+  s_8ed6bbb9654539::t_9cc7d1ef589c0a 5068,5073-5082,5084-5087
+  s_8ed6bbb9654539::t_50529d2328046d 5083
+  s_8ed6bbb9654539::t_e9c1c979bad61d 5710
+  s_8ed6bbb9654539::t_a2b9a9cc185eed 3742-3746
+  s_8ed6bbb9654539::t_b59903280e6526 271
+  s_8ed6bbb9654539::t_0d381ae9f128c4 75
+scripts/client_smoke.sh
+  s_8ed6bbb9654539::t_a803bb4b8462ac 233
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "dec3feb336f9092160ef446cd6e261fac75b99e3",
+  "prompts": {},
+  "sessions": {
+    "s_8ed6bbb9654539": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e5f01841-0a66-4643-af7e-0c0ac864342e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

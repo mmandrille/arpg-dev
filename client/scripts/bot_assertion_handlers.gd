@@ -84,6 +84,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_mobility_skill_smoothing":
+			if not mobility_skill_smoothing_matches(step, state):
+				runner._fail("assert_mobility_skill_smoothing failed: want=%s got=%s step=%d scenario=%s" % [
+					str(step), str(state.get("mobility_skill_smoothing", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_command_retarget_grace":
 			if not command_retarget_grace_matches(step, state):
 				runner._fail("assert_command_retarget_grace failed: want=%s got=%s step=%d scenario=%s" % [
@@ -474,6 +481,18 @@ static func entity_tick_smoothing_matches(step: Dictionary, state: Dictionary) -
 
 static func projectile_tick_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
 	return _tick_smoothing_state_matches(step, state.get("projectile_tick_smoothing", {}))
+
+
+static func mobility_skill_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
+	return _mobility_smoothing_state_matches(step, state.get("mobility_skill_smoothing", {}))
+
+
+static func _mobility_smoothing_state_matches(step: Dictionary, smoothing: Dictionary) -> bool:
+	if step.has("active") and bool(smoothing.get("active", false)) != bool(step.get("active", false)):
+		return false
+	if step.has("skill_id") and str(smoothing.get("skill_id", "")) != str(step.get("skill_id", "")):
+		return false
+	return step.has("active") or step.has("skill_id")
 
 
 static func _tick_smoothing_state_matches(step: Dictionary, smoothing: Dictionary) -> bool:

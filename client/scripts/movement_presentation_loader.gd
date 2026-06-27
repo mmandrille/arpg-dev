@@ -4,6 +4,7 @@ extends RefCounted
 
 static var _loaded: bool = false
 static var _tick_smoothing: Dictionary = {}
+static var _mobility_smoothing: Dictionary = {}
 
 
 static func ensure_loaded() -> void:
@@ -25,6 +26,9 @@ static func ensure_loaded() -> void:
 	var tick_smoothing = parsed.get("tick_smoothing", {})
 	if typeof(tick_smoothing) == TYPE_DICTIONARY:
 		_tick_smoothing = tick_smoothing
+	var mobility_smoothing = parsed.get("mobility_smoothing", {})
+	if typeof(mobility_smoothing) == TYPE_DICTIONARY:
+		_mobility_smoothing = mobility_smoothing
 
 
 static func tick_smoothing() -> Dictionary:
@@ -32,6 +36,12 @@ static func tick_smoothing() -> Dictionary:
 	return _tick_smoothing
 
 
+static func mobility_smoothing() -> Dictionary:
+	ensure_loaded()
+	return _mobility_smoothing
+
+
 static func reset_for_tests() -> void:
 	_loaded = false
 	_tick_smoothing = {}
+	_mobility_smoothing = {}

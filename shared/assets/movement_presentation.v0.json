@@ -6,5 +6,10 @@
     "snap_distance": 2.0,
     "projectiles_enabled": true,
     "projectile_snap_distance": 8.0
+  },
+  "mobility_smoothing": {
+    "enabled": true,
+    "teleport_duration_seconds": 0.12,
+    "teleport_travel_duration_seconds": 0.18
   }
 }

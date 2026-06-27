@@ -1,0 +1,49 @@
+{
+  "id": "mobility_skill_smoothing",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "barbarian_leap_obstacle_lab",
+  "seed": "v298_barbarian_leap_obstacle_crossing",
+  "title": "Mobility skill smoothing: leap presentation active then settles",
+  "description": "Cast Leap in the compact barbarian lab and verify mobility presentation activates then settles.",
+  "debug_progression": {
+    "level": 2,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 8,
+      "dex": 5,
+      "vit": 8,
+      "magic": 5
+    },
+    "skill_ranks": {
+      "leap": 1
+    }
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    {
+      "type": "wait_wall_layout",
+      "at_least": 6,
+      "timeout_s": 8.0
+    },
+    {
+      "type": "use_skill_slot",
+      "skill_id": "leap",
+      "force_direct": true,
+      "direction": { "x": 1.0, "y": 0.0 }
+    },
+    {
+      "type": "wait_mobility_skill_smoothing",
+      "active": true,
+      "skill_id": "leap",
+      "timeout_s": 8.0
+    },
+    {
+      "type": "wait_mobility_skill_smoothing",
+      "active": false,
+      "timeout_s": 6.0
+    }
+  ]
+}

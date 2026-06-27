@@ -4,7 +4,7 @@
   "title": "Movement presentation (v0)",
   "description": "Client-only movement presentation tuning. No gameplay authority.",
   "type": "object",
-  "required": ["version", "tick_smoothing"],
+  "required": ["version", "tick_smoothing", "mobility_smoothing"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
@@ -33,6 +33,24 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "Snap threshold for fast-moving projectiles; defaults to snap_distance when omitted."
+        }
+      }
+    },
+    "mobility_smoothing": {
+      "type": "object",
+      "required": ["enabled", "teleport_duration_seconds", "teleport_travel_duration_seconds"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "teleport_duration_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1.0
+        },
+        "teleport_travel_duration_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2.0
         }
       }
     }

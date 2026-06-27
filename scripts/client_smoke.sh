@@ -229,6 +229,7 @@ run_gate "GDScript hero light source test" "[gdtest] PASS: test_hero_light_sourc
 run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement_visual_smoothing" res://tests/test_movement_visual_smoothing.gd
 run_gate "GDScript entity tick smoothing test" "[gdtest] PASS: test_entity_tick_smoothing" res://tests/test_entity_tick_smoothing.gd
 run_gate "GDScript projectile tick smoothing test" "[gdtest] PASS: test_projectile_tick_smoothing" res://tests/test_projectile_tick_smoothing.gd
+run_gate "GDScript mobility skill presentation test" "[gdtest] PASS: test_mobility_skill_presentation" res://tests/test_mobility_skill_presentation.gd
 run_gate "GDScript player movement feel test" "[gdtest] PASS: test_player_movement_feel" res://tests/test_player_movement_feel.gd
 run_gate "GDScript melee lunge presentation test" "[gdtest] PASS: test_melee_lunge_presentation" res://tests/test_melee_lunge_presentation.gd
 run_gate "GDScript command retarget grace test" "[gdtest] PASS: test_command_retarget_grace" res://tests/test_command_retarget_grace.gd

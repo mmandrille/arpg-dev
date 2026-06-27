@@ -8,6 +8,7 @@ const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_
 const BotMarketReceiptAssertionsScript := preload("res://scripts/bot_market_receipt_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 const BotAssertionHandlersScript := preload("res://scripts/bot_assertion_handlers.gd")
+const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
@@ -43,9 +44,9 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 		"wait_projectile_tick_smoothing":
 			return BotAssertionHandlersScript.projectile_tick_smoothing_matches(step, state)
 		"wait_mobility_skill_smoothing":
-			return BotAssertionHandlersScript.mobility_skill_smoothing_matches(step, state)
+			return BotPresentationAssertionsScript.mobility_skill_smoothing_matches(step, state)
 		"wait_dungeon_torch_lights":
-			return BotAssertionHandlersScript.dungeon_torch_lights_matches(step, state)
+			return BotPresentationAssertionsScript.dungeon_torch_lights_matches(step, state)
 		"wait_command_retarget_grace":
 			return BotAssertionHandlersScript.command_retarget_grace_matches(step, state)
 		"wait_melee_lunge":

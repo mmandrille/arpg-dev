@@ -17,6 +17,7 @@ func _initialize() -> void:
 	_test_holy_shield_beats_rage()
 	_test_rage_personal_radius()
 	_test_elite_command_radius_preview_uses_dungeon_radius()
+	_test_carrier_core_light_brighter_than_area_wash()
 	_test_no_aura_removes_light()
 	print("[gdtest] PASS: test_aura_soft_lights (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
@@ -81,14 +82,30 @@ func _test_elite_command_radius_preview_uses_dungeon_radius() -> void:
 	root.queue_free()
 
 
+func _test_carrier_core_light_brighter_than_area_wash() -> void:
+	var root := Node3D.new()
+	get_root().add_child(root)
+	AuraSoftLightsScript.sync_aura(root, AuraSoftLightsScript.build_state([], "hero", {"rage_active": true}))
+	var area := root.find_child(AuraSoftLightsScript.AURA_LIGHT_NAME, false, false) as OmniLight3D
+	var core := root.find_child(AuraSoftLightsScript.AURA_CORE_LIGHT_NAME, false, false) as OmniLight3D
+	_assert_true("rage area light exists", area != null)
+	_assert_true("rage core light exists", core != null)
+	if area != null and core != null:
+		_assert_true("core brighter than area wash", core.light_energy > area.light_energy)
+		_assert_true("core tighter than area wash", core.omni_range < area.omni_range)
+	root.queue_free()
+
+
 func _test_no_aura_removes_light() -> void:
 	var root := Node3D.new()
 	get_root().add_child(root)
 	AuraSoftLightsScript.sync_aura(root, AuraSoftLightsScript.build_state(["elite_command"], "monster", {}))
 	_assert_true("elite command light active", AuraSoftLightsScript.has_elite_command_effect(root))
+	_assert_true("elite command core light active", root.find_child(AuraSoftLightsScript.AURA_CORE_LIGHT_NAME, false, false) != null)
 	AuraSoftLightsScript.sync_aura(root, AuraSoftLightsScript.build_state([], "monster", {}))
 	_assert_eq("aura cleared", AuraSoftLightsScript.active_aura_id(root), "")
-	_assert_true("light removed", root.find_child(AuraSoftLightsScript.AURA_LIGHT_NAME, false, false) == null)
+	_assert_true("area light removed", root.find_child(AuraSoftLightsScript.AURA_LIGHT_NAME, false, false) == null)
+	_assert_true("core light removed", root.find_child(AuraSoftLightsScript.AURA_CORE_LIGHT_NAME, false, false) == null)
 	root.queue_free()
 
 

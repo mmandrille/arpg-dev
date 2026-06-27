@@ -23,6 +23,7 @@
       "type": "number",
       "exclusiveMinimum": 0
     },
+    "carrier_core": { "$ref": "#/$defs/carrier_core" },
     "auras": {
       "type": "object",
       "minProperties": 1,
@@ -34,6 +35,24 @@
     }
   },
   "$defs": {
+    "carrier_core": {
+      "type": "object",
+      "required": [
+        "radius",
+        "energy_multiplier",
+        "attenuation",
+        "height_offset",
+        "light_specular"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "energy_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "attenuation": { "type": "number", "exclusiveMinimum": 0 },
+        "height_offset": { "type": "number" },
+        "light_specular": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
     "multiplier_block": {
       "type": "object",
       "required": ["energy_multiplier", "range_multiplier"],

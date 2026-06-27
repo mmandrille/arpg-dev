@@ -12,6 +12,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await _test_progression_sets_light_and_gloom_radius()
+	await _test_deferred_refresh_after_bind()
 	await _test_organic_edge_debug_state()
 	await _test_organic_edge_rotates_only_while_target_moves()
 	await _test_wall_layout_generates_shadow()
@@ -51,6 +52,33 @@ func _test_progression_sets_light_and_gloom_radius() -> void:
 	_assert_false("world space visibility in isometric", bool(state.get("world_space_visibility", true)))
 	_assert_eq("no wall shadows", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
+
+
+func _test_deferred_refresh_after_bind() -> void:
+	var camera := Camera3D.new()
+	get_root().add_child(camera)
+	camera.current = true
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = 12.0
+	camera.position = Vector3(9.0, 20.0, 15.0)
+	var target := Node3D.new()
+	get_root().add_child(target)
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.bind(camera, target)
+	overlay.set_active(true)
+	overlay.set_perspective_camera(false)
+	overlay.set_progression({"derived_stats": {"light_radius": 12}})
+	await process_frame
+	overlay.refresh()
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_true("overlay enabled after deferred refresh", bool(state.get("enabled", false)))
+	_assert_true("screen light radius positive after refresh", float(state.get("light_radius_px", 0.0)) > 0.0)
+	overlay.free()
+	camera.free()
+	target.free()
 
 
 func _test_organic_edge_debug_state() -> void:

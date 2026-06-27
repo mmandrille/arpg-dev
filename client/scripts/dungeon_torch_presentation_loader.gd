@@ -37,18 +37,22 @@ static func config() -> Dictionary:
 static func _default_config() -> Dictionary:
 	return {
 		"enabled": true,
-		"spacing": 10.0,
-		"wall_inset": 1.2,
-		"edge_margin": 2.0,
-		"max_count": 8,
+		"wall_segment_tiles": 10.0,
+		"torches_per_segment_min": 0,
+		"torches_per_segment_max": 2,
+		"wall_inset": 0.55,
+		"wall_end_margin": 0.75,
+		"max_shader_torches": 32,
 		"mount_height_fraction": 0.72,
-		"fog_light_radius": 4.5,
-		"omni_range": 4.5,
-		"omni_energy": 1.35,
+		"fog_light_radius": 5.0,
+		"torch_feather_world": 0.35,
+		"omni_light_enabled": false,
+		"omni_range": 5.0,
+		"omni_energy": 0.85,
 		"light_color": "#ff9b3d",
 		"flame_color": "#ff7a1a",
 		"flame_emission_color": "#ffd45a",
-		"flame_emission_energy": 2.4,
+		"flame_emission_energy": 3.2,
 	}
 
 

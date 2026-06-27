@@ -1,0 +1,48 @@
+{
+  "id": "torch_walk_visual",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "dungeon_torch_lights_seed",
+  "title": "Torch walk visual: walk near dungeon walls to see 20-tile torch light halos",
+  "description": "Descends to level -1, then walks the player along perimeter walls. With wall_segment_tiles=20 and torches_per_segment_min=1, one torch appears every 20 wall tiles. Each torch punches a circular halo through the fog.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "stairs_down"
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": -1,
+      "at_least": 4,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_dungeon_torch_lights",
+      "active": true,
+      "min_count": 2,
+      "timeout_s": 8.0
+    },
+    { "type": "click_floor", "x": 5.0, "z": 5.0 },
+    { "type": "wait_player_near", "x": 5.0, "z": 5.0, "distance": 4.0, "timeout_s": 15.0 },
+    { "type": "click_floor", "x": 50.0, "z": 5.0 },
+    { "type": "wait_player_near", "x": 50.0, "z": 5.0, "distance": 4.0, "timeout_s": 30.0 },
+    { "type": "click_floor", "x": 90.0, "z": 5.0 },
+    { "type": "wait_player_near", "x": 90.0, "z": 5.0, "distance": 4.0, "timeout_s": 30.0 },
+    { "type": "click_floor", "x": 90.0, "z": 40.0 },
+    { "type": "wait_player_near", "x": 90.0, "z": 40.0, "distance": 4.0, "timeout_s": 30.0 },
+    {
+      "type": "assert_fog_of_war",
+      "enabled": true,
+      "active": true,
+      "torch_count_min": 2
+    }
+  ]
+}

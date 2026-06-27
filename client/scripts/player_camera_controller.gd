@@ -37,6 +37,7 @@ func setup(ctx, scene_root: Node3D) -> void:  # ctx: PlayerCameraContext
 	_scene_root = scene_root
 	_camera = Camera3D.new()
 	_camera.name = "PlayerCamera"
+	_camera.current = true
 	scene_root.add_child(_camera)
 	var initial_mode: String = "isometric"
 	if ctx.client_settings != null:

@@ -1,0 +1,75 @@
+client/tests/test_fog_of_war_overlay.gd
+  s_8ed6bbb9654539::t_35d48019709be5 57-83
+  s_8ed6bbb9654539::t_4c8b93ed353405 15
+client/scripts/fog_of_war_overlay.gd
+  s_ffe185887dd031::t_4c43da7fb186bc 284
+  s_8ed6bbb9654539::t_46ece9237619fd 34
+  s_8ed6bbb9654539::t_d4643fda090e3c 49,59,69-75
+  s_ffe185887dd031::t_020a7c7916325f 288-289
+  s_8ed6bbb9654539::t_f667c2621f447c 118,121
+  s_ffe185887dd031::t_cd58754475f151 202
+  s_8ed6bbb9654539::t_c9c454137731bf 235-263,267
+  s_8ed6bbb9654539::t_2027f30a87f370 315-321
+  s_ffe185887dd031::t_dfa3e516651dac 300-313
+client/scripts/dungeon_torch_lights.gd
+  s_8ed6bbb9654539::t_cc9715a91dab9e 28
+  s_8ed6bbb9654539::t_aa322c89efe444 65-66
+  s_8ed6bbb9654539::t_cf904623b1f12f 75
+  s_ffe185887dd031::t_fc8b91c2b499b3 104-105,109,115,117-119,123-125,133
+  s_8ed6bbb9654539::t_1ced1f95ad4954 43,51-55
+  s_8ed6bbb9654539::t_9025ac7e3cb997 135-143
+client/scripts/fog_torch_support.gd
+  s_8ed6bbb9654539::t_3b515964f2dc90 5,8-14,17-18,20,23-24,28-44
+client/scripts/dungeon_torch_placement.gd
+  s_8ed6bbb9654539::t_4a46a152386048 1,5,8,11-18,23,25-65,67-103,105,108,118
+shared/assets/dungeon_torch_presentation.v0.json
+  s_ffe185887dd031::t_f503c72b6af662 13,15
+  s_ffe185887dd031::t_b9dd1acca4d784 11
+  s_ffe185887dd031::t_00fd2a190cb92a 19-24
+  s_ffe185887dd031::t_a73bec8449a351 4-6
+  s_8ed6bbb9654539::t_9d483b4015b5c6 7-9,12
+client/tests/test_dungeon_torch_placement.gd
+  s_8ed6bbb9654539::t_bfc51dd3512194 12-14,20,22-23,25-34,37,39,41-70,75,77
+tools/bot/scenarios/client/88_torch_walk_visual.json
+  s_ffe185887dd031::t_3ea62daf13a7e3 5,7-8,11-46
+  s_ffe185887dd031::t_2293568deb8d26 1-4,6,9-10,47-48
+client/scripts/player_camera_controller.gd
+  s_8ed6bbb9654539::t_1aefd64dbd080f 40
+tools/bot/scenarios/client/87_dungeon_torch_lights.json
+  s_ffe185887dd031::t_b0092c77d641d7 8
+  s_8ed6bbb9654539::t_f722c4846ae816 7
+client/scripts/fog_of_war_shader.gd
+  s_ffe185887dd031::t_c4b548f7495326 113-114,116
+  s_8ed6bbb9654539::t_fa7dbbca710a3c 135,141
+  s_8ed6bbb9654539::t_a68939eb51f2f4 30,32
+  s_ffe185887dd031::t_eb4b286f153662 100-112,117
+client/scripts/dungeon_torch_presentation_loader.gd
+  s_8ed6bbb9654539::t_d3b7c742c4aefe 40-45,47-51,55
+shared/assets/dungeon_torch_presentation.v0.schema.json
+  s_8ed6bbb9654539::t_afa1a284c9169a 10-12,14-15,18-19,31-33,35-36,39-40
+  s_ffe185887dd031::t_66010716455dc5 46-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c41a43fd1bf25913677b351ad23cc1a300b7dcad",
+  "prompts": {},
+  "sessions": {
+    "s_8ed6bbb9654539": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e5f01841-0a66-4643-af7e-0c0ac864342e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_ffe185887dd031": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aff761b3-b9f6-4256-b99c-b351bf1d2078",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

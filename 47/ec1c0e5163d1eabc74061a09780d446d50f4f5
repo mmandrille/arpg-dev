@@ -1,0 +1,34 @@
+.maintainability/file-size-baseline.tsv
+  s_1fa10c9a9b7c4f::t_3d81068b6075b3 3
+  s_1fa10c9a9b7c4f::t_30520b60135b9d 9
+client/scripts/main.gd
+  s_1fa10c9a9b7c4f::t_48fabcf98ec62e 5109
+  s_1fa10c9a9b7c4f::t_c83d26f3e497d8 3655,3660
+  s_1fa10c9a9b7c4f::t_b0fd6c8703f63f 6162-6183
+PROGRESS.md
+  s_8ed6bbb9654539::t_62a7036445f67a 26,29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "47ec1c0e5163d1eabc74061a09780d446d50f4f5",
+  "prompts": {},
+  "sessions": {
+    "s_1fa10c9a9b7c4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2e610246-891f-4e30-a723-7bbe0119c151",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_8ed6bbb9654539": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e5f01841-0a66-4643-af7e-0c0ac864342e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

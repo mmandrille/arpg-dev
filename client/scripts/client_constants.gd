@@ -69,7 +69,6 @@ const CAMERA_ZOOM_STEP := 1.5
 const CAMERA_ZOOM_MIN := 8.0
 const CAMERA_ZOOM_MAX := 40.0
 const CAMERA_FOLLOW_OFFSET := Vector3(9.0, 20.0, 15.0)
-const PROJECTILE_LERP_SECONDS := 0.10
 const GROUND_TEXTURE_TOWN := "town_grass"
 const GROUND_TEXTURE_DUNGEON := "dungeon_rock"
 const WALL_TEXTURE_CAVE := "cave_wall"

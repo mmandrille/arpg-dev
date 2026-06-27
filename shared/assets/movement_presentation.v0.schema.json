@@ -24,6 +24,15 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "World-units delta above which display snaps instead of lerping."
+        },
+        "projectiles_enabled": {
+          "type": "boolean",
+          "description": "When true, authoritative projectile entities use tick smoothing."
+        },
+        "projectile_snap_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Snap threshold for fast-moving projectiles; defaults to snap_distance when omitted."
         }
       }
     }

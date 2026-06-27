@@ -1,0 +1,36 @@
+{
+  "id": "projectile_tick_smoothing",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "ranged_monster_ai_lab",
+  "seed": "v52_ranged_monster_ai",
+  "title": "Projectile tick smoothing: authoritative projectiles interpolate between snapshots",
+  "description": "Stand in an archer lab while a dungeon archer closes range and fires. Verify projectile nodes use tick smoothing between authoritative updates.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_archer",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_entity_near_player",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_archer",
+      "distance": 3.75,
+      "timeout_s": 12.0
+    },
+    {
+      "type": "wait_projectile_tick_smoothing",
+      "active": true,
+      "segment_distance_min": 0.01,
+      "timeout_s": 12.0
+    },
+    {
+      "type": "wait_projectile_tick_smoothing",
+      "active": false,
+      "timeout_s": 5.0
+    }
+  ]
+}

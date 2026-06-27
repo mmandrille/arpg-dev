@@ -4,7 +4,6 @@ client/scripts/bot_assertion_handlers.gd	605	# v352: projectile-tick-smoothing a
 client/scripts/bot_controller.gd	757
 client/scripts/bot_scenario_runner.gd	1629
 client/scripts/character_select_panel.gd	642
-client/scripts/fog_of_war_overlay.gd	644	# v347 dungeon-render-performance: shadow cache integration
 client/scripts/inventory_panel.gd	1556
 client/scripts/main.gd	6193	# v350+UI: perf-status merged into level label (right side); net reduction from removing _debug_label
 client/scripts/market_panel.gd	1059

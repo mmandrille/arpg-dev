@@ -8,15 +8,17 @@ const LoaderScript := preload("res://scripts/dungeon_torch_presentation_loader.g
 var _parent: Node3D
 var _root: Node3D
 var _fog_overlay: FogOfWarOverlay
-var _wall_height_fn: Callable
+var _ground_factory: GroundWallFactory
+var _wall_renderer: WallRenderer
 var _active := false
 var _positions: Array = []
 
 
-func _init(parent: Node3D, fog_overlay: FogOfWarOverlay, wall_height_fn: Callable = Callable()) -> void:
+func _init(parent: Node3D, fog_overlay: FogOfWarOverlay, ground_factory: GroundWallFactory, wall_renderer: WallRenderer) -> void:
 	_parent = parent
 	_fog_overlay = fog_overlay
-	_wall_height_fn = wall_height_fn
+	_ground_factory = ground_factory
+	_wall_renderer = wall_renderer
 
 
 func sync(level: int, walls: Array, dungeon_active: bool) -> void:
@@ -41,7 +43,7 @@ func sync(level: int, walls: Array, dungeon_active: bool) -> void:
 			_fog_overlay.set_torch_lights([], 0.0)
 
 		return
-	var wall_height := float(_wall_height_fn.call()) if _wall_height_fn.is_valid() else 3.5
+	var wall_height := _mount_wall_height()
 	var mount_height := wall_height * float(cfg.get("mount_height_fraction", 0.72))
 	for i in placements.size():
 		_spawn_torch(i, placements[i] as Vector2, mount_height, cfg)
@@ -131,3 +133,12 @@ func _spawn_torch(index: int, xz: Vector2, mount_height: float, cfg: Dictionary)
 	light.position = Vector3(0.0, 0.12, 0.0)
 	torch.add_child(light)
 	_root.add_child(torch)
+
+
+func _mount_wall_height() -> float:
+	if _wall_renderer != null:
+		return maxf(1.0, _wall_renderer.wall_height())
+	if _ground_factory != null and _ground_factory.has_method("dungeon_ceiling_height"):
+		return maxf(1.0, float(_ground_factory.dungeon_ceiling_height()))
+
+	return 4.0

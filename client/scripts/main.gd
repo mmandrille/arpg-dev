@@ -3739,11 +3739,7 @@ func _build_scene() -> void:
 	walls_root.name = "StaticWalls"
 	add_child(walls_root)
 	_wall_renderer = WallRenderer.new(walls_root, _ground_factory)
-	_dungeon_torch_lights = DungeonTorchLightsScript.new(
-		walls_root,
-		fog_overlay,
-		Callable(self, "_dungeon_wall_height_for_torches"),
-	)
+	_dungeon_torch_lights = DungeonTorchLightsScript.new(walls_root, fog_overlay, _ground_factory, _wall_renderer)
 
 func _update_ground_material() -> void:
 	_ground_factory.update_ground_material(ground_node, current_level)
@@ -5065,26 +5061,11 @@ func _render_wall_layout(walls: Array) -> void:
 func _sync_fog_wall_layout() -> void:
 	if fog_overlay != null:
 		InteractableRulesLoader.sync_fog_overlay(fog_overlay, current_wall_layout, interactable_ids, entities)
-	_sync_dungeon_torch_lights()
+	if _dungeon_torch_lights != null:
+		_dungeon_torch_lights.sync(current_level, current_wall_layout, current_level < 0 or _lab_world_fog_at_town_level())
 	DungeonRoomFloorTint.sync(ground_node, _ground_factory, current_level, current_wall_layout, entities)
 	_sync_discovery_minimap()
 	_sync_dungeon_ceiling_visibility()
-
-
-func _sync_dungeon_torch_lights() -> void:
-	if _dungeon_torch_lights == null:
-		return
-	var dungeon_fog := current_level < 0 or _lab_world_fog_at_town_level()
-	_dungeon_torch_lights.sync(current_level, current_wall_layout, dungeon_fog)
-
-
-func _dungeon_wall_height_for_torches() -> float:
-	if _wall_renderer != null:
-		return maxf(1.0, _wall_renderer.wall_height())
-	if _ground_factory != null and _ground_factory.has_method("dungeon_ceiling_height"):
-		return maxf(1.0, float(_ground_factory.dungeon_ceiling_height()))
-
-	return 4.0
 
 func _delta_needs_fog_resync(p: Dictionary) -> bool:
 	if fog_overlay == null or not (current_level < 0 or _lab_world_fog_at_town_level()):

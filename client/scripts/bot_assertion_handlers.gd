@@ -7,6 +7,7 @@ const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_obje
 const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
+const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
 const FLOAT_BOUND_EPSILON := 0.00001
 
 
@@ -85,14 +86,14 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				return false
 			return true
 		"assert_mobility_skill_smoothing":
-			if not mobility_skill_smoothing_matches(step, state):
+			if not BotPresentationAssertionsScript.mobility_skill_smoothing_matches(step, state):
 				runner._fail("assert_mobility_skill_smoothing failed: want=%s got=%s step=%d scenario=%s" % [
 					str(step), str(state.get("mobility_skill_smoothing", {})), runner._step_index, str(runner.scenario.get("id", "?"))
 				])
 				return false
 			return true
 		"assert_dungeon_torch_lights":
-			if not dungeon_torch_lights_matches(step, state):
+			if not BotPresentationAssertionsScript.dungeon_torch_lights_matches(step, state):
 				runner._fail("assert_dungeon_torch_lights failed: want=%s got=%s step=%d scenario=%s" % [
 					str(step), str(state.get("dungeon_torch_lights", {})), runner._step_index, str(runner.scenario.get("id", "?"))
 				])
@@ -488,30 +489,6 @@ static func entity_tick_smoothing_matches(step: Dictionary, state: Dictionary) -
 
 static func projectile_tick_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
 	return _tick_smoothing_state_matches(step, state.get("projectile_tick_smoothing", {}))
-
-
-static func mobility_skill_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
-	return _mobility_smoothing_state_matches(step, state.get("mobility_skill_smoothing", {}))
-
-
-static func dungeon_torch_lights_matches(step: Dictionary, state: Dictionary) -> bool:
-	var torches: Dictionary = state.get("dungeon_torch_lights", {})
-	if step.has("active") and bool(torches.get("active", false)) != bool(step.get("active", false)):
-		return false
-	if step.has("min_count") and int(torches.get("count", 0)) < int(step.get("min_count", 0)):
-		return false
-	if step.has("count") and int(torches.get("count", 0)) != int(step.get("count", 0)):
-		return false
-
-	return step.has("active") or step.has("min_count") or step.has("count")
-
-
-static func _mobility_smoothing_state_matches(step: Dictionary, smoothing: Dictionary) -> bool:
-	if step.has("active") and bool(smoothing.get("active", false)) != bool(step.get("active", false)):
-		return false
-	if step.has("skill_id") and str(smoothing.get("skill_id", "")) != str(step.get("skill_id", "")):
-		return false
-	return step.has("active") or step.has("skill_id")
 
 
 static func _tick_smoothing_state_matches(step: Dictionary, smoothing: Dictionary) -> bool:

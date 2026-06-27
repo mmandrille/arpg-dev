@@ -4,8 +4,8 @@
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "seed": "dungeon_torch_lights_seed",
-  "title": "Dungeon torch lights: perimeter torches mount in generated dungeons",
-  "description": "Descend one floor and verify client mounts perimeter wall torches with fog punch-through debug.",
+  "title": "Dungeon torch lights: wall torches with tight fog punch-through",
+  "description": "Descend one floor and verify client mounts wall torches (1 per 20 wall tiles) with radius-5 fog illumination pools.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 10.0 },
     {

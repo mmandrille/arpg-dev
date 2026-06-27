@@ -27,8 +27,9 @@ uniform float organic_edge_segments = 18.0;
 uniform float organic_edge_seed = 41.0;
 uniform float organic_edge_rotation = 0.0;
 uniform int torch_count = 0;
-uniform vec2 torch_world_xz[8];
+uniform vec2 torch_world_xz[32];
 uniform float torch_light_radius = 0.0;
+uniform float torch_feather_world = 0.35;
 uniform vec4 darkness_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 uniform float sample_height_count = 1.0;
 uniform float sample_height_1 = 1.25;
@@ -96,8 +97,24 @@ vec2 plane_xz_at_height(vec2 screen_px, float plane_y) {
 	return hit.xz;
 }
 
+// Precomputed by GDScript each frame: inverse Jacobian of the isometric projection.
+// iso_world_x_per_px.xy = (dworld_x/dpx_x, dworld_x/dpx_y)
+// iso_world_z_per_px.xy = (dworld_z/dpx_x, dworld_z/dpx_y)
+uniform vec2 iso_world_x_per_px = vec2(0.0);
+uniform vec2 iso_world_z_per_px = vec2(0.0);
+
+vec2 ground_xz_isometric(vec2 screen_px) {
+	if (length(iso_world_x_per_px) < 0.0001) { return hero_world_xz; }
+	vec2 d = screen_px - center_px;
+	return vec2(
+		hero_world_xz.x + dot(d, iso_world_x_per_px),
+		hero_world_xz.y + dot(d, iso_world_z_per_px)
+	);
+}
+
 vec2 ground_xz_at_screen(vec2 screen_px) {
-	return plane_xz_at_height(screen_px, 0.0);
+	if (perspective_mode > 0.5) { return plane_xz_at_height(screen_px, 0.0); }
+	return ground_xz_isometric(screen_px);
 }
 
 float visibility_from_distance(float dist, float effective_radius, float feather) {
@@ -115,13 +132,13 @@ float torch_visibility_at_world_xz(vec2 world_xz) {
 		return 0.0;
 	}
 	float best = 0.0;
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 32; i++) {
 		if (i >= torch_count) {
 			break;
 		}
 		vec2 delta = world_xz - torch_world_xz[i];
 		float dist = length(delta);
-		best = max(best, visibility_from_distance(dist, torch_light_radius, edge_feather_world * 0.55));
+		best = max(best, visibility_from_distance(dist, torch_light_radius, torch_feather_world));
 	}
 	return best;
 }

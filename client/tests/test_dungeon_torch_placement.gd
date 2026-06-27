@@ -9,40 +9,72 @@ var _fail_count: int = 0
 
 
 func _initialize() -> void:
-	_test_perimeter_walls_produce_placements()
-	_test_respects_max_count()
+	_test_wall_segments_spawn_bounded_torches()
+	_test_deterministic_per_level()
+	_test_respects_shader_cap()
 	_test_disabled_config_returns_empty()
 	print("[gdtest] PASS: test_dungeon_torch_placement (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
 
-func _test_perimeter_walls_produce_placements() -> void:
+func _test_wall_segments_spawn_bounded_torches() -> void:
 	var walls := [
-		{"source": "perimeter", "kind": "wall", "position": {"x": 50, "y": -0.5}, "size": {"x": 100, "y": 1}},
-		{"source": "perimeter", "kind": "wall", "position": {"x": 50, "y": 50.5}, "size": {"x": 100, "y": 1}},
-		{"source": "perimeter", "kind": "wall", "position": {"x": -0.5, "y": 25}, "size": {"x": 1, "y": 50}},
-		{"source": "perimeter", "kind": "wall", "position": {"x": 100.5, "y": 25}, "size": {"x": 1, "y": 50}},
+		{"id": "north", "source": "perimeter", "kind": "wall", "position": {"x": 50, "y": -0.5}, "size": {"x": 100, "y": 1}},
+		{"id": "gen_a", "source": "generated", "kind": "wall", "position": {"x": 20, "y": 20}, "size": {"x": 12, "y": 1}},
 	]
-	var placements := PlacementScript.placements_from_walls(walls, {"enabled": true, "spacing": 10.0, "max_count": 8})
-	_assert_true("perimeter walls produce torches", placements.size() >= 4)
+	var cfg := {
+		"enabled": true,
+		"wall_segment_tiles": 10.0,
+		"torches_per_segment_min": 0,
+		"torches_per_segment_max": 2,
+		"max_shader_torches": 32,
+	}
+	var placements := PlacementScript.placements_from_walls(walls, cfg, -1)
+	_assert_true("solid walls can spawn torches", placements.size() >= 1)
+	_assert_true("torch count stays within segment budget", placements.size() <= 24)
 
 
-func _test_respects_max_count() -> void:
+func _test_deterministic_per_level() -> void:
 	var walls := [
-		{"source": "perimeter", "kind": "wall", "position": {"x": 50, "y": -0.5}, "size": {"x": 100, "y": 1}},
-		{"source": "perimeter", "kind": "wall", "position": {"x": 50, "y": 50.5}, "size": {"x": 100, "y": 1}},
-		{"source": "perimeter", "kind": "wall", "position": {"x": -0.5, "y": 25}, "size": {"x": 1, "y": 50}},
-		{"source": "perimeter", "kind": "wall", "position": {"x": 100.5, "y": 25}, "size": {"x": 1, "y": 50}},
+		{"id": "north", "source": "perimeter", "kind": "wall", "position": {"x": 50, "y": -0.5}, "size": {"x": 40, "y": 1}},
 	]
-	var placements := PlacementScript.placements_from_walls(walls, {"enabled": true, "spacing": 4.0, "max_count": 4})
-	_assert_eq("max_count caps torch placements", placements.size(), 4)
+	var cfg := {
+		"enabled": true,
+		"wall_segment_tiles": 10.0,
+		"torches_per_segment_min": 0,
+		"torches_per_segment_max": 2,
+		"max_shader_torches": 32,
+	}
+	var first := PlacementScript.placements_from_walls(walls, cfg, -1)
+	var second := PlacementScript.placements_from_walls(walls, cfg, -1)
+	var other_level := PlacementScript.placements_from_walls(walls, cfg, -2)
+	_assert_eq("same level yields stable torch layout", str(first), str(second))
+	_assert_true("level changes can change torch layout", str(first) != str(other_level) or first.is_empty())
+
+
+func _test_respects_shader_cap() -> void:
+	var walls := [
+		{"id": "north", "source": "perimeter", "kind": "wall", "position": {"x": 50, "y": -0.5}, "size": {"x": 200, "y": 1}},
+	]
+	var placements := PlacementScript.placements_from_walls(
+		walls,
+		{
+			"enabled": true,
+			"wall_segment_tiles": 5.0,
+			"torches_per_segment_min": 2,
+			"torches_per_segment_max": 2,
+			"max_shader_torches": 6,
+		},
+		-1,
+	)
+	_assert_eq("shader cap limits torch placements", placements.size(), 6)
 
 
 func _test_disabled_config_returns_empty() -> void:
 	var walls := [
-		{"source": "perimeter", "kind": "wall", "position": {"x": 50, "y": -0.5}, "size": {"x": 100, "y": 1}},
+		{"id": "north", "source": "perimeter", "kind": "wall", "position": {"x": 50, "y": -0.5}, "size": {"x": 100, "y": 1}},
 	]
-	var placements := PlacementScript.placements_from_walls(walls, {"enabled": false})
+	var placements := PlacementScript.placements_from_walls(walls, {"enabled": false}, -1)
 	_assert_eq("disabled config yields no torches", placements.size(), 0)
 
 

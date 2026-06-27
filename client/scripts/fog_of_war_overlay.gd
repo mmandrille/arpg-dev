@@ -31,6 +31,7 @@ var _wall_layout: Array = []
 var _extra_occluder_layout: Array = []
 var _torch_positions: Array = []
 var _torch_light_radius: float = 0.0
+var _torch_feather_world: float = 0.35
 var _shadow_gloom_polygons: Array = []
 var _shadow_polygons: Array = []
 var _shadow_debug: Array = []
@@ -45,6 +46,7 @@ var _shadow_gloom_scale := 1.035
 var _point_light: OmniLight3D
 var _character_visual: Node3D
 var _shadow_cache: FogLosShadowCacheScript = FogLosShadowCacheScript.new()
+var _viewport_size_changed_connected := false
 
 
 func _ready() -> void:
@@ -54,6 +56,7 @@ func _ready() -> void:
 	_ensure_rect()
 	set_process(true)
 	_sync_visibility()
+	_connect_viewport_size_changed()
 
 
 func bind(camera: Camera3D, target: Node3D, character_visual: Node3D = null) -> void:
@@ -62,8 +65,14 @@ func bind(camera: Camera3D, target: Node3D, character_visual: Node3D = null) -> 
 	_character_visual = character_visual
 	_reset_motion_tracking()
 	_reparent_point_light()
-	_update_shader()
 	_setup_point_light()
+	call_deferred("refresh")
+
+
+func refresh() -> void:
+	_sync_visibility()
+	_update_shader()
+	_sync_point_light()
 
 
 func set_active(active: bool) -> void:
@@ -106,9 +115,10 @@ func set_wall_layout(walls: Array) -> void:
 	_update_shader()
 
 
-func set_torch_lights(positions: Array, light_radius: float) -> void:
+func set_torch_lights(positions: Array, light_radius: float, feather_world: float = 0.35) -> void:
 	_torch_positions = positions.duplicate()
 	_torch_light_radius = maxf(0.0, light_radius)
+	_torch_feather_world = maxf(0.0, feather_world)
 	_update_shader()
 
 
@@ -189,6 +199,7 @@ func get_debug_state() -> Dictionary:
 func _process(delta: float) -> void:
 	_shadow_cache.tick_frame()
 	_update_motion_phase(delta)
+	_sync_visibility()
 	_update_shader()
 
 
@@ -221,10 +232,39 @@ func _sync_visibility() -> void:
 	visible = _dungeon_active and _light_radius > 0.0
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_SIZE_CHANGED:
+		call_deferred("refresh")
+
+
+func _connect_viewport_size_changed() -> void:
+	if _viewport_size_changed_connected:
+		return
+	var viewport := get_viewport()
+	if viewport == null:
+		return
+	if not viewport.size_changed.is_connected(_on_viewport_size_changed):
+		viewport.size_changed.connect(_on_viewport_size_changed)
+	_viewport_size_changed_connected = true
+
+
+func _on_viewport_size_changed() -> void:
+	_shadow_cache.hard_invalidate()
+	refresh()
+
+
+func _viewport_shader_size() -> Vector2:
+	if get_viewport() == null:
+		return Vector2(1.0, 1.0)
+	var viewport_size := get_viewport().get_visible_rect().size
+
+	return Vector2(maxf(1.0, viewport_size.x), maxf(1.0, viewport_size.y))
+
+
 func _update_shader() -> void:
 	if _material == null:
 		return
-	var viewport_size := get_viewport().get_visible_rect().size if get_viewport() != null else Vector2(1.0, 1.0)
+	var viewport_size := _viewport_shader_size()
 	_center_px = _project_target()
 	_light_radius_px = _projected_radius(_light_radius)
 	_organic_edge_px = _organic_edge_pixel_radius()
@@ -241,10 +281,12 @@ func _update_shader() -> void:
 	_material.set_shader_parameter("darkness_alpha", FogPresentationLoaderScript.darkness_alpha())
 	_material.set_shader_parameter("organic_edge_px", _organic_edge_px)
 	_material.set_shader_parameter("organic_edge_amp_world", _organic_edge_world_amplitude())
-	if _camera != null and _perspective_camera:
+	if _camera != null:
 		_material.set_shader_parameter("camera_origin", _camera.global_position)
 		_material.set_shader_parameter("inv_projection", _camera.get_camera_projection().inverse())
 		_material.set_shader_parameter("inv_view", _camera.get_global_transform().affine_inverse())
+		if not _perspective_camera:
+			_sync_iso_world_mapping()
 	var organic_cfg: Dictionary = FogPresentationLoaderScript.organic_edge()
 	_material.set_shader_parameter("organic_edge_segments", float(organic_cfg.get("segments", 18.0)))
 	_material.set_shader_parameter("organic_edge_seed", float(organic_cfg.get("seed", 41.0)))
@@ -255,8 +297,28 @@ func _update_shader() -> void:
 	_sync_point_light()
 
 
+func _sync_iso_world_mapping() -> void:
+	var ground := Vector3(_target.global_position.x, 0.0, _target.global_position.z)
+	var s0 := _camera.unproject_position(ground)
+	var sx := _camera.unproject_position(ground + Vector3(1.0, 0.0, 0.0))
+	var sz := _camera.unproject_position(ground + Vector3(0.0, 0.0, 1.0))
+	var dx := sx - s0
+	var dz := sz - s0
+	var det := dx.x * dz.y - dx.y * dz.x
+	if absf(det) < 0.0001:
+		return
+	_material.set_shader_parameter("iso_world_x_per_px", Vector2(dz.y, -dz.x) / det)
+	_material.set_shader_parameter("iso_world_z_per_px", Vector2(-dx.y, dx.x) / det)
+
+
 func _apply_torch_shader_params() -> void:
-	FogTorchSupportScript.apply_shader_params(_material, _torch_positions, _torch_light_radius)
+	FogTorchSupportScript.apply_shader_params(
+		_material,
+		_torch_positions,
+		_target_world_position(),
+		_torch_light_radius,
+		_torch_feather_world,
+	)
 
 
 func _apply_perspective_shader_params() -> void:

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/dungeon_torch_presentation.v0.schema.json",
+  "title": "Dungeon torch presentation (v0)",
+  "description": "Client-only dungeon wall torch placement and lighting tuning.",
+  "type": "object",
+  "required": [
+    "version",
+    "enabled",
+    "spacing",
+    "wall_inset",
+    "edge_margin",
+    "max_count",
+    "mount_height_fraction",
+    "fog_light_radius",
+    "omni_range",
+    "omni_energy",
+    "light_color",
+    "flame_color",
+    "flame_emission_color",
+    "flame_emission_energy"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "enabled": { "type": "boolean" },
+    "spacing": { "type": "number", "exclusiveMinimum": 0 },
+    "wall_inset": { "type": "number", "minimum": 0 },
+    "edge_margin": { "type": "number", "minimum": 0 },
+    "max_count": { "type": "integer", "minimum": 1, "maximum": 8 },
+    "mount_height_fraction": { "type": "number", "exclusiveMinimum": 0, "maximum": 1.0 },
+    "fog_light_radius": { "type": "number", "exclusiveMinimum": 0 },
+    "omni_range": { "type": "number", "exclusiveMinimum": 0 },
+    "omni_energy": { "type": "number", "exclusiveMinimum": 0 },
+    "light_color": { "type": "string", "minLength": 1 },
+    "flame_color": { "type": "string", "minLength": 1 },
+    "flame_emission_color": { "type": "string", "minLength": 1 },
+    "flame_emission_energy": { "type": "number", "exclusiveMinimum": 0 }
+  }
+}

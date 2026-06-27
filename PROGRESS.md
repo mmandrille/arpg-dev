@@ -23,10 +23,10 @@ Last updated: 2026-06-26
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v353 — mobility-skill-smoothing |
+| **Latest completed slice** | v354 — dungeon-torch-lights |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green; `make ci-full` green (all 15 extended scenarios recovered at v350) |
-| **Next slice** | v354 — dungeon-torch-lights (autoloop queue) |
+| **Next slice** | Autoloop batch complete — run `/finish` consolidation or `/next` for new work |
 | **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
 | **Next engineering review** | After ~v359 ships |
 

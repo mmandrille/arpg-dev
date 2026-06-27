@@ -72,6 +72,10 @@ func clear_wall_nodes() -> void:
 		child.queue_free()
 
 
+func wall_height() -> float:
+	return _wall_height()
+
+
 func _dungeon_presentation_active() -> bool:
 	return _current_level < 0
 

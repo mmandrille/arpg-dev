@@ -1,11 +1,12 @@
 # Grandfathered source/test/tool files above the 600-line target.
 # Format: path<TAB>baseline_line_count
+client/scripts/bot_assertion_handlers.gd	605	# v352: projectile-tick-smoothing added 5 lines; all assertions tightly coupled to bot step handler domain
 client/scripts/bot_controller.gd	757
 client/scripts/bot_scenario_runner.gd	1629
 client/scripts/character_select_panel.gd	642
 client/scripts/fog_of_war_overlay.gd	644	# v347 dungeon-render-performance: shadow cache integration
 client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	6219	# v350: fog-resync wiring (_delta_needs_fog_resync + _set_interactable_state barrier trigger); no extractable block without passing main.gd coordinator state
+client/scripts/main.gd	6193	# v350+UI: perf-status merged into level label (right side); net reduction from removing _debug_label
 client/scripts/market_panel.gd	1059
 client/scripts/player_status_effect_markers.gd	646
 client/scripts/shop_panel.gd	1217

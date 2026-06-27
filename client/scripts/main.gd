@@ -277,7 +277,6 @@ var _pending_level_walls: Array = []
 var _command_retarget_grace: CommandRetargetGrace = CommandRetargetGraceScript.new()
 var _movement_input: MovementInputPresenter = MovementInputPresenterScript.new()
 var _last_facing_direction := Vector2(1.0, 0.0)
-var _debug_label: Label
 var _level_label: Label
 var last_performance_status: Dictionary = {}
 var _last_ping_ms: int = -1
@@ -321,7 +320,6 @@ func _ready() -> void:
 	ClientAudioBridgeScript.apply_settings(audio_controller, client_settings)
 	if discovery_minimap != null: discovery_minimap.set_panel_opacity(client_settings.map_opacity)
 	_refresh_localized_texts()
-	_sync_status_text_visibility()
 	_sync_settings_panel()
 	ItemRulesLoader.ensure_loaded()
 	SkillRulesLoader.ensure_loaded()
@@ -658,7 +656,6 @@ func _on_status_text_toggled(enabled: bool) -> void:
 		return
 	client_settings.set_status_text(enabled)
 	_sync_settings_panel()
-	_sync_status_text_visibility()
 
 func _on_create_game_session_type_selected(session_type: String) -> void:
 	if client_settings == null:
@@ -3653,23 +3650,14 @@ func _build_scene() -> void:
 		Callable(self, "_crosshair_pick_entity"),
 		gameplay_ui_layer,
 	))
-	_debug_label = Label.new()
-	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_debug_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_debug_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	_debug_label.offset_left = 12
-	_debug_label.offset_right = 560
-	_debug_label.offset_top = 12
-	_debug_label.offset_bottom = 260
-	ui.add_child(_debug_label)
 	_level_label = Label.new()
 	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_level_label.position = Vector2(0, 12)
+	_level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_level_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_level_label.offset_left = -460
 	_level_label.offset_right = -12
 	_level_label.offset_top = 12
-	_level_label.offset_bottom = 64
+	_level_label.offset_bottom = 500
 	ui.add_child(_level_label)
 	_update_level_hud()
 	boss_health_bar = BossHealthBarScript.new()
@@ -5118,20 +5106,7 @@ func _ensure_wall_renderer() -> void:
 		_wall_renderer = WallRenderer.new(walls_root, _ground_factory)
 
 func _update_level_hud() -> void:
-	if _level_label == null:
-		return
-	var lines: Array[String] = []
-	if current_level == 0:
-		lines.append("Town")
-	else:
-		var depth: int = abs(current_level)
-		lines.append("Level %d - %s" % [depth, _dungeon_level_name(current_level)])
-	if client != null and client.session_id != "" and (client.session_mode == "coop" or client.session_listed):
-		lines.append("Session %s" % client.session_id)
-	if _loot_filter.is_active():
-		lines.append("Loot: " + _loot_filter.mode_label())
-	_level_label.visible = lines.size() > 0
-	_level_label.text = "\n".join(lines)
+	_update_debug()
 
 func _dungeon_level_name(level: int) -> String:
 	var names: Dictionary = dungeon_generation.get("level_names", {})
@@ -6184,21 +6159,28 @@ func _bot_shadow_inventory_drop(item_instance_id: String) -> void:
 
 # --- debug ------------------------------------------------------------------
 func _update_debug() -> void:
-	if _debug_label == null: return
-	_sync_status_text_visibility()
-	if not _debug_label.visible: return
-	var ws_state := "?"
-	if client != null:
-		match client.ready_state():
-			WebSocketPeer.STATE_CONNECTING: ws_state = "connecting"
-			WebSocketPeer.STATE_OPEN: ws_state = "open"
-			WebSocketPeer.STATE_CLOSING: ws_state = "closing"
-			WebSocketPeer.STATE_CLOSED: ws_state = "closed"
-	var fps := int(round(Engine.get_frames_per_second()))
-	_debug_label.text = PerformanceStatusFormatterScript.format_status(fps, _last_ping_ms, ws_state, last_server_tick, current_level, last_performance_status)
-func _sync_status_text_visibility() -> void:
-	if _debug_label == null: return
-	_debug_label.visible = client_settings == null or client_settings.status_text
+	if _level_label == null: return
+	var lines: Array[String] = []
+	if current_level == 0:
+		lines.append("Town")
+	else:
+		lines.append("Level %d - %s" % [abs(current_level), _dungeon_level_name(current_level)])
+	if client != null and client.session_id != "" and (client.session_mode == "coop" or client.session_listed):
+		lines.append("Session %s" % client.session_id)
+	if _loot_filter.is_active():
+		lines.append("Loot: " + _loot_filter.mode_label())
+	if client_settings == null or client_settings.status_text:
+		var ws_state := "?"
+		if client != null:
+			match client.ready_state():
+				WebSocketPeer.STATE_CONNECTING: ws_state = "connecting"
+				WebSocketPeer.STATE_OPEN: ws_state = "open"
+				WebSocketPeer.STATE_CLOSING: ws_state = "closing"
+				WebSocketPeer.STATE_CLOSED: ws_state = "closed"
+		var fps := int(round(Engine.get_frames_per_second()))
+		lines.append(PerformanceStatusFormatterScript.format_status(fps, _last_ping_ms, ws_state, last_server_tick, current_level, last_performance_status))
+	_level_label.visible = lines.size() > 0
+	_level_label.text = "\n".join(lines)
 func _debug(msg: String) -> void:
 	print("[client] ", msg)
 func _env(key: String, fallback: String) -> String:

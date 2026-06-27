@@ -1,0 +1,50 @@
+client/scripts/aura_soft_lights.gd
+  s_66aec73de6fa91::t_a6f449ee54c166 299-312
+  s_66aec73de6fa91::t_689f6de8f11d85 278-289
+  s_66aec73de6fa91::t_685025972e6ac5 29,32-35,40-57
+  s_66aec73de6fa91::t_5fb7d866845268 313,317-321,326
+  s_66aec73de6fa91::t_cdc812b0fd5b3f 15
+  s_66aec73de6fa91::t_41c3e227d5e2b3 58-59
+shared/assets/aura_light_presentation.v0.schema.json
+  s_66aec73de6fa91::t_db3f45f6cefe36 26
+  s_66aec73de6fa91::t_9eadcc1db726df 38-55
+shared/assets/aura_light_presentation.v0.json
+  s_66aec73de6fa91::t_c019d1629a2645 21-23
+  s_66aec73de6fa91::t_e418f2aca0dfdb 61-63
+  s_66aec73de6fa91::t_294cdf60cfa1d6 113
+  s_66aec73de6fa91::t_7de218c5051f3d 94,99-101
+  s_66aec73de6fa91::t_c7efb7b6307246 10
+  s_66aec73de6fa91::t_e8f10fa0e4bbed 70-71,74-75,80-82
+  s_66aec73de6fa91::t_f980a5f08c1fd1 41-43
+  s_66aec73de6fa91::t_da2ea6704a3c4b 11-17
+tools/bot/scenarios/client/89_aura_soft_lights.json
+  s_66aec73de6fa91::t_c17e81312ff549 69-70
+client/tests/test_aura_soft_lights.gd
+  s_66aec73de6fa91::t_8c776af27fa54e 85-98
+  s_66aec73de6fa91::t_97a8d2a2a32d63 104,107-108
+  s_66aec73de6fa91::t_feac1370e2cfd5 20
+client/scripts/aura_light_presentation_loader.gd
+  s_66aec73de6fa91::t_b606a6ffc6f4bd 81
+  s_66aec73de6fa91::t_303786d30efeb7 82-88
+  s_66aec73de6fa91::t_aa02263dd33328 54
+  s_66aec73de6fa91::t_faa3a5f4dace2e 57-62
+  s_66aec73de6fa91::t_828ccee3b54e64 55-56
+docs/as-built/v355_aura-soft-lights.md
+  s_66aec73de6fa91::t_ad6bb23025890a 20-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "722b28c4e4dc8c00ab2316edf3e4f616854e6197",
+  "prompts": {},
+  "sessions": {
+    "s_66aec73de6fa91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "050554c9-5bb2-4043-93cc-df94fd5683a1",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

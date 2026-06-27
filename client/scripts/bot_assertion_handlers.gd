@@ -91,6 +91,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_dungeon_torch_lights":
+			if not dungeon_torch_lights_matches(step, state):
+				runner._fail("assert_dungeon_torch_lights failed: want=%s got=%s step=%d scenario=%s" % [
+					str(step), str(state.get("dungeon_torch_lights", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_command_retarget_grace":
 			if not command_retarget_grace_matches(step, state):
 				runner._fail("assert_command_retarget_grace failed: want=%s got=%s step=%d scenario=%s" % [
@@ -390,7 +397,7 @@ static func _fog_of_war_mismatch(step: Dictionary, state: Dictionary) -> String:
 			return "%s want_max=%s got=%s fog=%s" % [key, str(step.get(max_key, 0.0)), str(fog.get(key, null)), str(fog)]
 		if step.has(key) and abs(float(fog.get(key, -999999.0)) - float(step.get(key, 0.0))) > float(step.get("tolerance", 0.001)):
 			return "%s want=%s got=%s fog=%s" % [key, str(step.get(key, 0.0)), str(fog.get(key, null)), str(fog)]
-	for key in ["wall_count", "extra_occluder_count", "occluder_count", "shadow_count", "organic_edge_segments"]:
+	for key in ["wall_count", "extra_occluder_count", "occluder_count", "shadow_count", "organic_edge_segments", "torch_count"]:
 		var min_key := "%s_min" % key
 		if step.has(min_key) and int(fog.get(key, 0)) < int(step.get(min_key, 0)):
 			return "%s want_min=%s got=%s fog=%s" % [key, str(step.get(min_key, 0)), str(fog.get(key, null)), str(fog)]
@@ -485,6 +492,18 @@ static func projectile_tick_smoothing_matches(step: Dictionary, state: Dictionar
 
 static func mobility_skill_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
 	return _mobility_smoothing_state_matches(step, state.get("mobility_skill_smoothing", {}))
+
+
+static func dungeon_torch_lights_matches(step: Dictionary, state: Dictionary) -> bool:
+	var torches: Dictionary = state.get("dungeon_torch_lights", {})
+	if step.has("active") and bool(torches.get("active", false)) != bool(step.get("active", false)):
+		return false
+	if step.has("min_count") and int(torches.get("count", 0)) < int(step.get("min_count", 0)):
+		return false
+	if step.has("count") and int(torches.get("count", 0)) != int(step.get("count", 0)):
+		return false
+
+	return step.has("active") or step.has("min_count") or step.has("count")
 
 
 static func _mobility_smoothing_state_matches(step: Dictionary, smoothing: Dictionary) -> bool:

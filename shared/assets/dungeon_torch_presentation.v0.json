@@ -1,0 +1,16 @@
+{
+  "version": 0,
+  "enabled": true,
+  "spacing": 10.0,
+  "wall_inset": 1.2,
+  "edge_margin": 2.0,
+  "max_count": 8,
+  "mount_height_fraction": 0.72,
+  "fog_light_radius": 4.5,
+  "omni_range": 4.5,
+  "omni_energy": 1.35,
+  "light_color": "#ff9b3d",
+  "flame_color": "#ff7a1a",
+  "flame_emission_color": "#ffd45a",
+  "flame_emission_energy": 2.4
+}

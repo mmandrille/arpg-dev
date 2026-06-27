@@ -72,6 +72,7 @@ const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 const MovementVisualSmoothingScript := preload("res://scripts/movement_visual_smoothing.gd")
 const EntityTickSmoothingRuntimeScript := preload("res://scripts/entity_tick_smoothing_runtime.gd")
 const MobilitySkillPresentationScript := preload("res://scripts/mobility_skill_presentation.gd")
+const DungeonTorchLightsScript := preload("res://scripts/dungeon_torch_lights.gd")
 const PlayerMovementFeelScript := preload("res://scripts/player_movement_feel.gd")
 const MovementInputPresenterScript := preload("res://scripts/movement_input_presenter.gd")
 const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
@@ -267,6 +268,7 @@ var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttac
 var _movement_visual_smoothing: MovementVisualSmoothing = MovementVisualSmoothingScript.new()
 var _entity_tick_smoothing: EntityTickSmoothingRuntime = EntityTickSmoothingRuntimeScript.new()
 var _mobility_presentation: MobilitySkillPresentation = MobilitySkillPresentationScript.new()
+var _dungeon_torch_lights: DungeonTorchLights
 var _level_travel_origin_pos := Vector3.ZERO
 var _pending_travel_reveal: bool = false
 var _player_movement_feel: PlayerMovementFeel = PlayerMovementFeelScript.new()
@@ -3737,6 +3739,11 @@ func _build_scene() -> void:
 	walls_root.name = "StaticWalls"
 	add_child(walls_root)
 	_wall_renderer = WallRenderer.new(walls_root, _ground_factory)
+	_dungeon_torch_lights = DungeonTorchLightsScript.new(
+		walls_root,
+		fog_overlay,
+		Callable(self, "_dungeon_wall_height_for_torches"),
+	)
 
 func _update_ground_material() -> void:
 	_ground_factory.update_ground_material(ground_node, current_level)
@@ -5058,9 +5065,26 @@ func _render_wall_layout(walls: Array) -> void:
 func _sync_fog_wall_layout() -> void:
 	if fog_overlay != null:
 		InteractableRulesLoader.sync_fog_overlay(fog_overlay, current_wall_layout, interactable_ids, entities)
+	_sync_dungeon_torch_lights()
 	DungeonRoomFloorTint.sync(ground_node, _ground_factory, current_level, current_wall_layout, entities)
 	_sync_discovery_minimap()
 	_sync_dungeon_ceiling_visibility()
+
+
+func _sync_dungeon_torch_lights() -> void:
+	if _dungeon_torch_lights == null:
+		return
+	var dungeon_fog := current_level < 0 or _lab_world_fog_at_town_level()
+	_dungeon_torch_lights.sync(current_level, current_wall_layout, dungeon_fog)
+
+
+func _dungeon_wall_height_for_torches() -> float:
+	if _wall_renderer != null:
+		return maxf(1.0, _wall_renderer.wall_height())
+	if _ground_factory != null and _ground_factory.has_method("dungeon_ceiling_height"):
+		return maxf(1.0, float(_ground_factory.dungeon_ceiling_height()))
+
+	return 4.0
 
 func _delta_needs_fog_resync(p: Dictionary) -> bool:
 	if fog_overlay == null or not (current_level < 0 or _lab_world_fog_at_town_level()):
@@ -5683,6 +5707,7 @@ func get_bot_state() -> Dictionary:
 		"entity_tick_smoothing": _entity_tick_smoothing.get_player_debug_state(),
 		"projectile_tick_smoothing": _entity_tick_smoothing.get_active_projectile_debug_state(entities),
 		"mobility_skill_smoothing": _mobility_presentation.get_debug_state(),
+		"dungeon_torch_lights": _dungeon_torch_lights.get_debug_state() if _dungeon_torch_lights != null else {},
 		"movement_feel": _player_movement_feel.get_debug_state(),
 		"command_retarget_grace": _command_retarget_grace.get_debug_state(),
 		"current_level": current_level,

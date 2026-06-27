@@ -33,6 +33,9 @@ uniform float organic_edge_amp_world = 0.0;
 uniform float organic_edge_segments = 18.0;
 uniform float organic_edge_seed = 41.0;
 uniform float organic_edge_rotation = 0.0;
+uniform int torch_count = 0;
+uniform vec2 torch_world_xz[8];
+uniform float torch_light_radius = 0.0;
 uniform vec4 darkness_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 uniform float sample_height_count = 1.0;
 uniform float sample_height_1 = 1.25;
@@ -119,7 +122,25 @@ float visibility_at_world_xz(vec2 world_xz) {
 	float dist = length(delta_xz);
 	float edge = organic_edge_world(delta_xz);
 	float effective_radius = max(0.001, light_radius + edge * 0.45);
-	return visibility_from_distance(dist, effective_radius, edge_feather_world);
+	float hero_vis = visibility_from_distance(dist, effective_radius, edge_feather_world);
+	float torch_vis = torch_visibility_at_world_xz(world_xz);
+	return max(hero_vis, torch_vis);
+}
+
+float torch_visibility_at_world_xz(vec2 world_xz) {
+	if (torch_count <= 0 || torch_light_radius <= 0.0) {
+		return 0.0;
+	}
+	float best = 0.0;
+	for (int i = 0; i < 8; i++) {
+		if (i >= torch_count) {
+			break;
+		}
+		vec2 delta = world_xz - torch_world_xz[i];
+		float dist = length(delta);
+		best = max(best, visibility_from_distance(dist, torch_light_radius, edge_feather_world * 0.55));
+	}
+	return best;
 }
 
 float visibility_isometric(vec2 screen_px) {
@@ -127,7 +148,10 @@ float visibility_isometric(vec2 screen_px) {
 	float d = length(delta_px);
 	float edge = organic_edge_screen(delta_px);
 	float effective_radius_px = max(1.0, light_radius_px + edge * 0.45);
-	return visibility_from_distance(d, effective_radius_px, darkness_feather_px);
+	float hero_vis = visibility_from_distance(d, effective_radius_px, darkness_feather_px);
+	vec2 world_xz = ground_xz_at_screen(screen_px);
+	float torch_vis = torch_visibility_at_world_xz(world_xz);
+	return max(hero_vis, torch_vis);
 }
 
 float visibility_perspective(vec2 screen_px) {
@@ -161,6 +185,8 @@ var _darkness_feather_px: float = 0.0
 var _organic_edge_px: float = 0.0
 var _wall_layout: Array = []
 var _extra_occluder_layout: Array = []
+var _torch_positions: Array = []
+var _torch_light_radius: float = 0.0
 var _shadow_gloom_polygons: Array = []
 var _shadow_polygons: Array = []
 var _shadow_debug: Array = []
@@ -236,6 +262,12 @@ func set_wall_layout(walls: Array) -> void:
 	_update_shader()
 
 
+func set_torch_lights(positions: Array, light_radius: float) -> void:
+	_torch_positions = positions.duplicate()
+	_torch_light_radius = maxf(0.0, light_radius)
+	_update_shader()
+
+
 func set_occluder_layout(occluders: Array) -> void:
 	_extra_occluder_layout = HeroVisibilityFieldScript.normalize_occluder_layout(occluders)
 	_shadow_cache.hard_invalidate()
@@ -305,6 +337,8 @@ func get_debug_state() -> Dictionary:
 		"shadow_cache_hits": _shadow_cache.cache_hits,
 		"shadow_rebuild_count": _shadow_cache.rebuild_count,
 		"shadow_cache_last_rebuild_reason": _shadow_cache.last_rebuild_reason,
+		"torch_count": _torch_positions.size(),
+		"torch_light_radius": _torch_light_radius,
 	}
 
 
@@ -371,9 +405,23 @@ func _update_shader() -> void:
 	_material.set_shader_parameter("organic_edge_segments", float(organic_cfg.get("segments", 18.0)))
 	_material.set_shader_parameter("organic_edge_seed", float(organic_cfg.get("seed", 41.0)))
 	_material.set_shader_parameter("organic_edge_rotation", _edge_rotation)
+	_apply_torch_shader_params()
 	_apply_perspective_shader_params()
 	_update_shadows(viewport_size)
 	_sync_point_light()
+
+
+func _apply_torch_shader_params() -> void:
+	var count := mini(_torch_positions.size(), 8)
+	_material.set_shader_parameter("torch_count", count)
+	_material.set_shader_parameter("torch_light_radius", _torch_light_radius)
+	var packed: Array[Vector2] = []
+	for i in range(8):
+		if i < count:
+			packed.append(_torch_positions[i] as Vector2)
+		else:
+			packed.append(Vector2.ZERO)
+	_material.set_shader_parameter("torch_world_xz", packed)
 
 
 func _apply_perspective_shader_params() -> void:

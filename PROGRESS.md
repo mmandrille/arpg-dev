@@ -23,10 +23,10 @@ Last updated: 2026-06-26
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v351 — window-display-mode |
+| **Latest completed slice** | v352 — projectile-tick-smoothing |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green; `make ci-full` green (all 15 extended scenarios recovered at v350) |
-| **Next slice** | v352 — projectile-tick-smoothing (autoloop queue) |
+| **Next slice** | v353 — mobility-skill-smoothing (autoloop queue) |
 | **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
 | **Next engineering review** | After ~v359 ships |
 

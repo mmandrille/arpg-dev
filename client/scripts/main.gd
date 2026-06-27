@@ -313,13 +313,13 @@ func _ready() -> void:
 	_apply_model_tint(character_visual, ClientConstants.PLAYER_TINT)
 	player_reaction = ModelReactionControllerScript.new(character_visual, ClientConstants.PLAYER_TINT)
 	gameplay_debug_enabled = _truthy_env("ARPG_GAMEPLAY_DEBUG")
-	_build_scene()
-	_mobility_presentation.bind_owner(self)
 	client_settings = ClientSettingsScript.new()
 	client_settings.load()
 	client_settings.set_language(client_settings.language, false)
-	_loot_filter.set_mode_label(client_settings.loot_filter_mode)
 	client_settings.apply()
+	_build_scene()
+	_mobility_presentation.bind_owner(self)
+	_loot_filter.set_mode_label(client_settings.loot_filter_mode)
 	_sync_camera_from_settings()
 	_sync_fog_performance_throttle()
 	ClientAudioBridgeScript.apply_settings(audio_controller, client_settings)
@@ -409,6 +409,7 @@ func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
 	gameplay_active = true
 	_sync_camera_from_settings()
+	call_deferred("_refresh_fog_presentation")
 	current_world_id = client.world_id
 	current_wall_layout = []
 	_render_world_walls(client.world_id)
@@ -711,10 +712,18 @@ func _sync_camera_from_settings() -> void:
 		return
 	if _camera_controller != null:
 		_camera_controller.apply_mode(client_settings.camera_mode)
-	_sync_fog_and_dungeon_lighting()
+	_refresh_fog_presentation()
 	_sync_dungeon_ceiling_visibility()
 	_update_mouse_capture()
 	_update_reticle_visibility()
+
+
+func _refresh_fog_presentation() -> void:
+	if _camera_controller != null:
+		_camera_controller.sync_to_player()
+	if fog_overlay != null:
+		fog_overlay.refresh()
+	_sync_fog_and_dungeon_lighting()
 
 func _is_perspective_camera_mode() -> bool:
 	if client_settings == null:
@@ -1092,6 +1101,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_sync_discovery_minimap()
 	_refresh_market_board_summary()
 	_reconcile_player()
+	call_deferred("_refresh_fog_presentation")
 	if bot_mode and not _bot_logged_snapshot:
 		_bot_logged_snapshot = true
 		print("[bot-client] snapshot applied entities=%d monsters=%d loot=%d hp=%d" % [
@@ -2416,7 +2426,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_escape()
 		get_viewport().set_input_as_handled()
 		return
-	if _input_locked() and not _bot_allows_panel_toggle_key(event) and not _allows_skill_function_key_while_panel_open(event):
+	if event is InputEventKey and _input_locked() and not _bot_allows_panel_toggle_key(event) and not _allows_skill_function_key_while_panel_open(event):
+		return
+	if not (event is InputEventKey) and _world_pointer_input_blocked():
 		return
 	if bot_mode and not (event is InputEventKey):
 		return
@@ -2536,7 +2548,7 @@ func _handle_input(delta: float) -> void:
 	if _crosshair_target != null:
 		_crosshair_target.tick_runtime(get_viewport(), get_world_3d(), inventory, equipped, client_settings, _input_locked())
 	_update_loot_hover_label()
-	if _input_locked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
+	if _world_pointer_input_blocked() or client.ready_state() != WebSocketPeer.STATE_OPEN:
 		if _sustained_click.active:
 			_sustained_click.clear()
 		_clear_pending_attack_commands()
@@ -2557,7 +2569,7 @@ func _handle_input(delta: float) -> void:
 		_attack_cooldown = maxf(_attack_cooldown, ClientConstants.SEND_INTERVAL)
 	if bot_mode:
 		return
-	if TextInputFocusGuard.has_text_input_focus(get_viewport()):
+	if _keyboard_movement_blocked():
 		return
 	var input := Vector2.ZERO
 	if Input.is_key_pressed(KEY_W): input.y -= 1
@@ -2751,11 +2763,19 @@ func _user_input_blocked() -> bool:
 	# Replay/autoplay fully lock input. Bot mode blocks real mouse/WASD but still
 	# allows push_input() key events through _unhandled_input().
 	return _input_locked() or bot_mode
-func _menu_blocks_gameplay_input() -> bool:
+func _modal_menu_blocks_gameplay_input() -> bool:
 	return (main_menu != null and main_menu.visible) or (character_panel != null and character_panel.visible) \
 		or (multiplayer_panel != null and multiplayer_panel.visible) or (settings_panel != null and settings_panel.visible) \
-		or (pause_menu != null and pause_menu.visible) or (loss_popup != null and loss_popup.visible) \
-		or _any_gameplay_panel_open()
+		or (pause_menu != null and pause_menu.visible) or (loss_popup != null and loss_popup.visible)
+
+func _menu_blocks_gameplay_input() -> bool:
+	return _modal_menu_blocks_gameplay_input() or _any_gameplay_panel_open()
+
+func _world_pointer_input_blocked() -> bool:
+	return _automation_input_locked() or _modal_menu_blocks_gameplay_input()
+
+func _keyboard_movement_blocked() -> bool:
+	return _world_pointer_input_blocked() or TextInputFocusGuard.has_text_input_focus(get_viewport())
 
 func _any_gameplay_panel_open() -> bool:
 	if inventory_panel != null and inventory_panel.visible:
@@ -2849,23 +2869,7 @@ func _handle_autoplay(delta: float) -> void:
 			return
 
 func _hold_input_allowed() -> bool:
-	if _input_locked() or bot_mode:
-		return false
-
-	if inventory_panel != null and inventory_panel.visible:
-		return false
-	if shop_panel != null and shop_panel.visible:
-		return false
-	if character_stats_panel != null and character_stats_panel.visible:
-		return false
-	if skills_panel != null and skills_panel.visible:
-		return false
-	if character_info_panel != null and character_info_panel.visible:
-		return false
-	if waypoint_panel != null and waypoint_panel.visible:
-		return false
-
-	return true
+	return not _world_pointer_input_blocked() and not bot_mode
 
 func _resolve_click_at_mouse() -> Dictionary:
 	var target_id := _pick_entity_at_mouse()

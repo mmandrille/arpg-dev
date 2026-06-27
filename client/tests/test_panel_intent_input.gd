@@ -20,8 +20,10 @@ func _test_open_panel_blocks_world_input_not_panel_intents() -> void:
 	var panel := InventoryPanelScript.new()
 	panel.visible = true
 	main.inventory_panel = panel
-	_assert_true("open panel blocks world input", main._input_locked())
+	_assert_true("open panel blocks keyboard gameplay input", main._input_locked())
 	_assert_false("open panel does not block panel intents", main._automation_input_locked())
+	_assert_false("open panel allows world pointer input", main._world_pointer_input_blocked())
+	_assert_false("open panel allows keyboard movement without text focus", main._keyboard_movement_blocked())
 	main.free()
 	panel.free()
 

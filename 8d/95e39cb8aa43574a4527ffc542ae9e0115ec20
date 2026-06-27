@@ -1,0 +1,56 @@
+docs/specs/v352_spec-projectile-tick-smoothing.md
+  s_8ed6bbb9654539::t_e41c2bf08f38f9 3
+  s_8ed6bbb9654539::t_1d1d4823892a59 1-2,4-54
+shared/assets/movement_presentation.v0.schema.json
+  s_8ed6bbb9654539::t_811e513eaf22e0 27-35
+shared/assets/movement_presentation.v0.json
+  s_8ed6bbb9654539::t_fd3009405fbd7d 6-8
+client/scripts/bot_step_catalog.gd
+  s_8ed6bbb9654539::t_fea7b0bbb16dd2 16
+  s_8ed6bbb9654539::t_97ee3e7c4fd1b3 41
+client/scripts/bot_wait_handlers.gd
+  s_8ed6bbb9654539::t_22739e7fd7eed8 43-44
+docs/as-built/v352_projectile-tick-smoothing.md
+  s_8ed6bbb9654539::t_655c35af046549 1-27
+client/scripts/entity_tick_smoothing_runtime.gd
+  s_8ed6bbb9654539::t_4d11a4c9aa46e6 154-158,167-171
+  s_8ed6bbb9654539::t_4fd93e60631610 23,26
+  s_8ed6bbb9654539::t_97685710ab78d7 39,41,44,46-47,51-67
+  s_8ed6bbb9654539::t_ef6edbeed7851a 117,119-140,145-153,159-166
+  s_8ed6bbb9654539::t_7b28fd5479eb88 9,12
+client/scripts/main.gd
+  s_8ed6bbb9654539::t_83ef62158116e1 1657-1660
+  s_8ed6bbb9654539::t_24ce67ed8c0326 5708
+scripts/client_smoke.sh
+  s_8ed6bbb9654539::t_f4c893c4c33beb 231
+docs/plans/v352_2026-06-26-projectile-tick-smoothing.md
+  s_8ed6bbb9654539::t_181ff2fac5466d 8-12
+  s_8ed6bbb9654539::t_c8faede3ebdbd7 1-7,13-20
+client/tests/test_projectile_tick_smoothing.gd
+  s_8ed6bbb9654539::t_3e262323bf3dd8 39,43,56,59,61
+  s_8ed6bbb9654539::t_537e153054a7e0 1-29,31-38,40-42,44-55,57-58,60,62-93
+  s_8ed6bbb9654539::t_35e865341082bd 30
+client/scripts/bot_assertion_handlers.gd
+  s_8ed6bbb9654539::t_ea9972d700062b 472-479
+  s_8ed6bbb9654539::t_04bb841ae5657e 80-86
+tools/bot/scenarios/client/85_projectile_tick_smoothing.json
+  s_8ed6bbb9654539::t_c75e6d5505adf9 1-36
+docs/progress/slice-lifecycle.md
+  s_8ed6bbb9654539::t_9adeea8344ef33 367
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8d95e39cb8aa43574a4527ffc542ae9e0115ec20",
+  "prompts": {},
+  "sessions": {
+    "s_8ed6bbb9654539": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e5f01841-0a66-4643-af7e-0c0ac864342e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

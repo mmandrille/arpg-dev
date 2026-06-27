@@ -1,0 +1,74 @@
+{
+  "id": "aura_soft_lights",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "generated_wall_lab",
+  "seed": "v112_pack_metadata",
+  "title": "Aura soft lights",
+  "description": "Starts directly in a fogged dungeon level, casts Rage on the hero, and verifies red player aura plus cyan elite-command soft lights on nearby pack followers.",
+  "debug_progression": {
+    "level": 6,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 12,
+      "dex": 5,
+      "vit": 10,
+      "magic": 5
+    },
+    "skill_ranks": {
+      "rage": 1
+    }
+  },
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": -1,
+      "at_least": 4,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_fog_of_war",
+      "enabled": true,
+      "active": true
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "timeout_s": 20.0
+    },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "has_elite_command_effect": true,
+      "active_aura_id": "elite_command",
+      "timeout_s": 20.0
+    },
+    {
+      "type": "use_skill_slot",
+      "skill_id": "rage",
+      "force_direct": true
+    },
+    {
+      "type": "wait_entity_reaction",
+      "local_player": true,
+      "active_aura_id": "rage",
+      "has_rage_effect": true,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "has_elite_command_effect": true,
+      "active_aura_id": "elite_command",
+      "aura_light_range_min": 1.0,
+      "aura_light_range_max": 1.3,
+      "timeout_s": 10.0
+    }
+  ]
+}

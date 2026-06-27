@@ -3,6 +3,7 @@ extends RefCounted
 
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_markers.gd")
+const AuraSoftLightsScript := preload("res://scripts/aura_soft_lights.gd")
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 
 
@@ -49,8 +50,12 @@ static func local_player_presentation(
 		"effect_ids": local_player_effect_ids(player_anchor),
 		"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(player_anchor),
 		"has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(player_anchor),
-		"holy_shield_aura_pulses": PlayerStatusEffectMarkers.active_holy_shield_aura_pulse_count(player_anchor),
-		"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(player_anchor),
+		"active_aura_id": AuraSoftLightsScript.active_aura_id(player_anchor),
+		"aura_light_range": AuraSoftLightsScript.aura_light_range(player_anchor),
+		"aura_light_color": AuraSoftLightsScript.aura_light_color(player_anchor),
+		"holy_shield_cast_pulses": AuraSoftLightsScript.active_holy_shield_cast_pulse_count(player_anchor),
+		"holy_shield_aura_pulses": AuraSoftLightsScript.active_holy_shield_cast_pulse_count(player_anchor),
+		"holy_shield_target_pulses": AuraSoftLightsScript.active_holy_shield_target_pulse_count(player_anchor),
 		"has_rage_effect": PlayerStatusEffectMarkers.has_rage_effect(player_anchor), "base_tint": ClientConstantsScript.PLAYER_TINT.to_html(false),
 		"charge_channel_visual": charge_channel_visual.get_debug_state(),
 		"reaction": player_reaction.get_debug_state() if player_reaction != null else {},
@@ -80,11 +85,14 @@ static func entities_presentation_debug(entities: Dictionary) -> Array:
 			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)),
 			"quest_reward": bool(rec.get("quest_reward", false)), "has_objective_marker": ChestPresentationScript.has_objective_marker(node), "has_quest_marker": ChestPresentationScript.has_quest_marker(node),
 			"has_holy_shield_effect": PlayerStatusEffectMarkers.has_holy_shield_effect(node), "has_sanctuary_effect": PlayerStatusEffectMarkers.has_sanctuary_effect(node),
+			"active_aura_id": AuraSoftLightsScript.active_aura_id(node),
+			"aura_light_range": AuraSoftLightsScript.aura_light_range(node),
+			"aura_light_color": AuraSoftLightsScript.aura_light_color(node),
 			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node), "has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
 			"has_pinning_root_effect": PlayerStatusEffectMarkers.has_pinning_root_effect(node), "has_stun_effect": PlayerStatusEffectMarkers.has_stun_effect(node),
 			"has_rogue_mark_effect": PlayerStatusEffectMarkers.has_rogue_mark_effect(node),
 			"has_elite_command_radius_preview": PlayerStatusEffectMarkers.has_elite_command_radius_preview(node), "elite_command_radius_preview": PlayerStatusEffectMarkers.elite_command_radius_preview_value(node),
-			"holy_shield_target_pulses": PlayerStatusEffectMarkers.active_holy_shield_target_pulse_count(node), "hp": int(rec.get("hp", 1)),
+			"holy_shield_target_pulses": AuraSoftLightsScript.active_holy_shield_target_pulse_count(node), "hp": int(rec.get("hp", 1)),
 			"reaction": reaction.get_debug_state() if reaction != null else {}, "animation": controller.get_debug_state() if controller != null else {},
 		})
 	return out

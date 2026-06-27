@@ -490,11 +490,20 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 		return false
 	if step.has("has_bow_marker") and bool(rec.get("has_bow_marker", false)) != bool(step.get("has_bow_marker", false)):
 		return false
-	if step.has("has_burning_effect") and bool(rec.get("has_burning_effect", false)) != bool(step.get("has_burning_effect", false)):
+	for flag in [
+		"has_burning_effect",
+		"has_elite_command_effect",
+		"has_elite_command_radius_preview",
+		"has_rage_effect",
+		"has_holy_shield_effect",
+	]:
+		if step.has(flag) and bool(rec.get(flag, false)) != bool(step.get(flag, false)):
+			return false
+	if step.has("active_aura_id") and str(rec.get("active_aura_id", "")) != str(step.get("active_aura_id", "")):
 		return false
-	if step.has("has_elite_command_effect") and bool(rec.get("has_elite_command_effect", false)) != bool(step.get("has_elite_command_effect", false)):
+	if step.has("aura_light_range_min") and float(rec.get("aura_light_range", -1.0)) < float(step.get("aura_light_range_min", 0.0)):
 		return false
-	if step.has("has_elite_command_radius_preview") and bool(rec.get("has_elite_command_radius_preview", false)) != bool(step.get("has_elite_command_radius_preview", false)):
+	if step.has("aura_light_range_max") and float(rec.get("aura_light_range", 999999.0)) > float(step.get("aura_light_range_max", 0.0)):
 		return false
 	if step.has("elite_command_radius_min") and float(rec.get("elite_command_radius_preview", -1.0)) < float(step.get("elite_command_radius_min", 0.0)):
 		return false

@@ -202,6 +202,7 @@ run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://t
 run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/test_skill_bar.gd
 run_gate "GDScript status effects bar test" "[gdtest] PASS: test_status_effects_bar" res://tests/test_status_effects_bar.gd
 run_gate "GDScript status effect presentation test" "[gdtest] PASS: test_status_effect_presentation" res://tests/test_status_effect_presentation.gd
+run_gate "GDScript aura soft lights test" "[gdtest] PASS: test_aura_soft_lights" res://tests/test_aura_soft_lights.gd
 
 # 2l. Boss health bar render/state test (server-independent; v53).
 run_gate "GDScript boss health bar test" "[gdtest] PASS: test_boss_health_bar" res://tests/test_boss_health_bar.gd

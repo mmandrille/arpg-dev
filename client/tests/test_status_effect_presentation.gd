@@ -7,6 +7,8 @@ const MainScript := preload("res://scripts/main.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
+const AuraSoftLightsScript := preload("res://scripts/aura_soft_lights.gd")
+const AuraLightPresentationLoaderScript := preload("res://scripts/aura_light_presentation_loader.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -50,6 +52,7 @@ func _test_rage_effect_started_drives_world_aura() -> void:
 	main._apply_delta({"events": [{"event_type": "skill_effect_started", "entity_id": "1001", "skill_id": "rage", "amount": 25}], "changes": []})
 	var local_state := main._bot_local_player_presentation()
 	_assert_true("local rage marker active", bool(local_state.get("has_rage_effect", false)))
+	_assert_eq("local rage aura id", str(local_state.get("active_aura_id", "")), "rage")
 	_assert_float("local rage visual scale active", float(local_state.get("visual_scale", 0.0)), 1.25)
 
 	main._apply_delta({"events": [{"event_type": "skill_effect_ended", "entity_id": "1001", "skill_id": "rage"}], "changes": []})
@@ -102,8 +105,8 @@ func _test_holy_shield_started_blinks_models_in_range() -> void:
 		"correlation_id": "corr_holy_shield_blink",
 	}], "changes": []})
 	var local_state := main._bot_local_player_presentation()
-	_assert_eq("local holy shield aura pulse", int(local_state.get("holy_shield_aura_pulses", 0)), 1)
-	_assert_eq("local holy shield target pulse", int(local_state.get("holy_shield_target_pulses", 0)), 1)
+	_assert_eq("local holy shield cast pulse", int(local_state.get("holy_shield_cast_pulses", 0)), 1)
+	_assert_eq("local holy shield ally pulse", int(local_state.get("holy_shield_target_pulses", 0)), 1)
 	var remote_state: Array = main._bot_entities_presentation_debug()
 	var near_pulses := -1
 	var far_pulses := -1
@@ -151,14 +154,13 @@ func _test_sanctuary_started_and_ended_updates_local_dome() -> void:
 	var local_state := main._bot_local_player_presentation()
 	_assert_true("local sanctuary dome active", bool(local_state.get("has_sanctuary_effect", false)))
 	_assert_true("local sanctuary effect id visible", (local_state.get("effect_ids", []) as Array).has("sanctuary"))
-	var marker := main.player_anchor.find_child("SanctuaryDomeEffect", false, false) as Node3D
-	var dome := marker.find_child("SanctuaryDome", false, false) as MeshInstance3D
-	var ground := marker.find_child("SanctuaryGround", false, false) as MeshInstance3D
+	var light := main.player_anchor.find_child(AuraSoftLightsScript.AURA_LIGHT_NAME, false, false) as OmniLight3D
+	_assert_true("sanctuary aura light exists", light != null)
 	var expected_radius := _skill_effect_radius("sanctuary", 5.0)
-	_assert_float("sanctuary dome radius follows skill rule", (dome.mesh as SphereMesh).radius, expected_radius)
-	_assert_float("sanctuary ground top radius follows skill rule", (ground.mesh as CylinderMesh).top_radius, expected_radius)
-	_assert_float("sanctuary ground bottom radius follows skill rule", (ground.mesh as CylinderMesh).bottom_radius, expected_radius)
-	_assert_float("sanctuary dome alpha is subtle", (dome.material_override as StandardMaterial3D).albedo_color.a, 0.10)
+	if light != null:
+		_assert_float("sanctuary light range follows skill rule", light.omni_range, expected_radius)
+		var entry := AuraLightPresentationLoaderScript.aura_entry("sanctuary")
+		_assert_eq("sanctuary light color token", light.light_color.to_html(false), Color(str(entry.get("light_color", "#ffffff"))).to_html(false))
 
 	main._apply_delta({"events": [{"event_type": "skill_effect_ended", "entity_id": "1001", "skill_id": "sanctuary"}], "changes": []})
 	local_state = main._bot_local_player_presentation()
@@ -352,12 +354,15 @@ func _test_monster_death_clears_elite_aura_markers() -> void:
 		"effect_ids": ["elite_command"],
 		"monster_pack_id": "pack_1",
 	})
+	main._load_dungeon_generation()
+	main._sync_elite_aura_preview()
 	var rows: Array = main._bot_entities_presentation_debug()
 	var before: Dictionary = _presentation_row(rows, "1002")
 	var minion_before: Dictionary = _presentation_row(rows, "1003")
-	_assert_true("elite command marker active before death", bool(before.get("has_elite_command_effect", false)))
-	_assert_true("elite command radius active before death", bool(before.get("has_elite_command_radius_preview", false)))
+	_assert_true("elite leader radius preview active before death", bool(before.get("has_elite_command_radius_preview", false)))
+	_assert_eq("elite leader preview aura id", str(before.get("active_aura_id", "")), "elite_command_radius_preview")
 	_assert_true("elite minion command marker active before leader death", bool(minion_before.get("has_elite_command_effect", false)))
+	_assert_eq("elite minion aura id", str(minion_before.get("active_aura_id", "")), "elite_command")
 
 	main.entities["1002"]["reaction"] = null
 	main._apply_delta({"events": [{

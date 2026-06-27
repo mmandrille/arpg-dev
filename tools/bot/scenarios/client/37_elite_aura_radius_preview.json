@@ -37,6 +37,7 @@
       "entity_type": "monster",
       "monster_pack_leader": true,
       "has_elite_command_radius_preview": true,
+      "active_aura_id": "elite_command_radius_preview",
       "elite_command_radius_min": 3.9,
       "elite_command_radius_max": 4.1,
       "timeout_s": 10.0

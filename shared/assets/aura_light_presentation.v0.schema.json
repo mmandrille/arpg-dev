@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/aura_light_presentation.v0.schema.json",
+  "title": "Aura light presentation (v0)",
+  "description": "Client-only hero/monster aura OmniLight3D tuning and priority.",
+  "type": "object",
+  "required": [
+    "version",
+    "priority",
+    "presentation_personal_radius",
+    "auras",
+    "cast_pulse"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "priority": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "presentation_personal_radius": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "auras": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/aura_entry" }
+    },
+    "cast_pulse": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/cast_pulse_entry" }
+    }
+  },
+  "$defs": {
+    "multiplier_block": {
+      "type": "object",
+      "required": ["energy_multiplier", "range_multiplier"],
+      "additionalProperties": false,
+      "properties": {
+        "energy_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "range_multiplier": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "radius_source": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "skill_effect_radius",
+            "presentation_personal_radius",
+            "dungeon_elite_aura_radius"
+          ]
+        },
+        "skill_id": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "skill_effect_radius" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["skill_id"] }
+        }
+      ]
+    },
+    "aura_entry": {
+      "type": "object",
+      "required": [
+        "light_color",
+        "omni_energy",
+        "omni_attenuation",
+        "height_offset",
+        "shadow_enabled",
+        "radius_source"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "light_color": { "type": "string", "minLength": 1 },
+        "omni_energy": { "type": "number", "exclusiveMinimum": 0 },
+        "omni_attenuation": { "type": "number", "exclusiveMinimum": 0 },
+        "light_specular": { "type": "number", "minimum": 0, "maximum": 1 },
+        "height_offset": { "type": "number" },
+        "shadow_enabled": { "type": "boolean" },
+        "radius_source": { "$ref": "#/$defs/radius_source" },
+        "hero": { "$ref": "#/$defs/multiplier_block" },
+        "monster": { "$ref": "#/$defs/multiplier_block" }
+      }
+    },
+    "cast_pulse_entry": {
+      "type": "object",
+      "required": [
+        "duration_s",
+        "energy_peak_multiplier",
+        "range_peak_multiplier",
+        "target_energy_bump"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "duration_s": { "type": "number", "exclusiveMinimum": 0 },
+        "energy_peak_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "range_peak_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "target_energy_bump": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}

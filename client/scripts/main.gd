@@ -11,6 +11,7 @@ const BotPresentationDebugScript := preload("res://scripts/bot_presentation_debu
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_markers.gd")
+const AuraSoftLights := preload("res://scripts/aura_soft_lights.gd")
 const EliteAuraPreviewSync := preload("res://scripts/elite_aura_preview_sync.gd")
 const ProjectileVisualsScript := preload("res://scripts/projectile_visuals.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
@@ -142,6 +143,7 @@ var pending_skill_casts: Dictionary = {}
 var _channel_skill_input := ChannelSkillInputScript.new()
 var _charge_channel_visual := ChargeChannelVisualScript.new()
 var _last_holy_shield_aura_pulse_key: String = ""
+var _local_player_rage_active := false
 var item_rules: Dictionary:
 	get: return ItemRulesLoader.item_rules
 	set(v): ItemRulesLoader.item_rules = v
@@ -1308,20 +1310,22 @@ func _apply_delta(p: Dictionary) -> void:
 				status_effects_bar.start_effect(ev)
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.RAGE_EFFECT_ID:
 				_apply_local_player_visual_scale(1.0 + float(ev.get("amount", 0)) / 100.0)
-				PlayerStatusEffectMarkers.sync_rage_effect(player_anchor, true)
+				_local_player_rage_active = true
+				_sync_local_hero_aura(AuraSoftLights.local_player_effect_ids(entities, player_id), true)
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID:
-				PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, [PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID], _sanctuary_radius())
+				_sync_local_hero_aura([PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID], _local_player_rage_active)
 			continue
 		if event_type == "skill_effect_ended" and eid == player_id:
 			if status_effects_bar != null:
 				status_effects_bar.end_effect(str(ev.get("skill_id", "")))
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.RAGE_EFFECT_ID:
 				_apply_local_player_visual_scale(1.0)
-				PlayerStatusEffectMarkers.sync_rage_effect(player_anchor, false)
+				_local_player_rage_active = false
+				_sync_local_hero_aura(AuraSoftLights.local_player_effect_ids(entities, player_id), false)
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
-				PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, [])
+				_sync_local_hero_aura([], _local_player_rage_active)
 			if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.SANCTUARY_EFFECT_ID:
-				PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, [])
+				_sync_local_hero_aura([], _local_player_rage_active)
 			continue
 		if visual_replay_enabled and inventory_panel != null:
 			var hint: Variant = INVENTORY_REPLAY_EVENT_HINTS.get(event_type, null)
@@ -1634,8 +1638,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		if e.has("visual_scale"):
 			_apply_local_player_visual_scale(float(e["visual_scale"]))
 		if e.has("effect_ids"):
-			PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, e.get("effect_ids", []))
-			PlayerStatusEffectMarkers.sync_sanctuary_effect(player_anchor, e.get("effect_ids", []), _sanctuary_radius())
+			_sync_local_hero_aura(e.get("effect_ids", []), _local_player_rage_active)
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		var prev_predicted_pos := predicted_pos
 		# Reconcile: snap prediction back toward authoritative truth.
@@ -1783,12 +1786,11 @@ func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
 	if node == null:
 		return
-	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, [])
+	var entity_kind := "monster" if str(rec.get("type", "")) == "monster" else "hero"
+	AuraSoftLights.sync_aura(node, AuraSoftLights.build_state([], entity_kind))
 	PlayerStatusEffectMarkers.sync_burning_effect(node, false)
-	PlayerStatusEffectMarkers.sync_elite_command_effect(node, false)
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, false)
 	PlayerStatusEffectMarkers.sync_stun_effect(node, false)
-	PlayerStatusEffectMarkers.sync_elite_command_radius_preview(node, false, 0.0)
 
 func _clear_elite_command_for_pack_if_leader_died(dead_rec: Dictionary) -> void:
 	if not bool(dead_rec.get("monster_pack_leader", false)):
@@ -1802,9 +1804,9 @@ func _clear_elite_command_for_pack_if_leader_died(dead_rec: Dictionary) -> void:
 			continue
 		var node := rec.get("node", null) as Node3D
 		if node != null:
-			PlayerStatusEffectMarkers.sync_elite_command_effect(node, false)
-			PlayerStatusEffectMarkers.sync_elite_command_radius_preview(node, false, 0.0)
-	EliteAuraPreviewSync.sync(entities, dungeon_generation, _is_perspective_camera_mode(), player_anchor.global_position, float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
+			rec["effect_ids"] = AuraSoftLights.strip_elite_command_effect_ids(rec.get("effect_ids", []))
+			AuraSoftLights.sync_monster_aura_from_record(rec, _sanctuary_radius(), _holy_shield_aura_radius())
+		_sync_elite_aura_preview()
 
 func _clear_level_entities() -> void:
 	for id in entities.keys():
@@ -2000,7 +2002,7 @@ func _pulse_holy_shield_aura(ev: Dictionary) -> void:
 		return
 	_last_holy_shield_aura_pulse_key = pulse_key
 	var radius := _holy_shield_aura_radius()
-	PlayerStatusEffectMarkers.pulse_holy_shield_aura(source_root, _entity_roots_in_radius(source_root, radius), radius)
+	AuraSoftLights.pulse_holy_shield_cast(source_root, _entity_roots_in_radius(source_root, radius), radius)
 
 func _entity_root_for_id(entity_id: String) -> Node3D:
 	if entity_id == player_id:
@@ -2024,6 +2026,22 @@ func _entity_roots_in_radius(center_root: Node3D, radius: float) -> Array:
 			roots.append(node)
 	return roots
 
+func _sync_local_hero_aura(effect_ids_value, rage_active: bool = false) -> void:
+	AuraSoftLights.sync_hero_aura(player_anchor, effect_ids_value, rage_active, _sanctuary_radius(), _holy_shield_aura_radius())
+
+
+func _sync_elite_aura_preview() -> void:
+	EliteAuraPreviewSync.sync_session(
+		entities,
+		dungeon_generation,
+		_is_perspective_camera_mode(),
+		player_anchor,
+		float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)),
+		_sanctuary_radius(),
+		_holy_shield_aura_radius(),
+	)
+
+
 func _holy_shield_aura_radius() -> float:
 	return _skill_effect_radius(PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID, 5.0)
 
@@ -2041,9 +2059,10 @@ func _skill_effect_radius(skill_id: String, fallback: float) -> float:
 func _on_status_effect_expired(skill_id: String) -> void:
 	if skill_id == PlayerStatusEffectMarkers.RAGE_EFFECT_ID:
 		_apply_local_player_visual_scale(1.0)
-		PlayerStatusEffectMarkers.sync_rage_effect(player_anchor, false)
+		_local_player_rage_active = false
+		_sync_local_hero_aura(AuraSoftLights.local_player_effect_ids(entities, player_id), false)
 	if skill_id == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
-		PlayerStatusEffectMarkers.sync_holy_shield_effect(player_anchor, [])
+		_sync_local_hero_aura([], _local_player_rage_active)
 
 func _flat_distance(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
@@ -5373,10 +5392,18 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	_sync_archer_bow_marker(node, str(rec.get("monster_def_id", "")))
 	rec["has_bow_marker"] = _has_archer_bow_marker(node)
 	var alive := int(rec.get("hp", 1)) > 0
-	PlayerStatusEffectMarkers.sync_holy_shield_effect(node, rec.get("effect_ids", []) if alive else [])
-	PlayerStatusEffectMarkers.sync_sanctuary_effect(node, rec.get("effect_ids", []) if alive else [], _sanctuary_radius())
+	var entity_id := str(e.get("id", ""))
+	if str(rec.get("type", "")) == "player":
+		AuraSoftLights.sync_hero_aura(
+			node,
+			rec.get("effect_ids", []) if alive else [],
+			_local_player_rage_active and alive and entity_id == player_id,
+			_sanctuary_radius(),
+			_holy_shield_aura_radius(),
+		)
+	elif str(rec.get("type", "")) == "monster":
+		AuraSoftLights.sync_monster_aura_from_record(rec, _sanctuary_radius(), _holy_shield_aura_radius())
 	PlayerStatusEffectMarkers.sync_burning_effect(node, alive and PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
-	PlayerStatusEffectMarkers.sync_elite_command_effect(node, alive and PlayerStatusEffectMarkers.has_elite_command_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, alive and PlayerStatusEffectMarkers.has_pinning_root_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_stun_effect(node, alive and PlayerStatusEffectMarkers.has_stun_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_rogue_mark_effect(node, alive and PlayerStatusEffectMarkers.has_rogue_mark_effect_id(rec.get("effect_ids", [])))
@@ -5384,7 +5411,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 		_boss_visuals_context.last_server_tick = last_server_tick
 		_boss_visuals.normalize_boss_phase_metadata(rec)
 		_boss_visuals.sync_boss_telegraph_marker_from_record(rec)
-	EliteAuraPreviewSync.sync(entities, dungeon_generation, _is_perspective_camera_mode(), player_anchor.global_position, float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
+		_sync_elite_aura_preview()
 
 func _sync_archer_bow_marker(root: Node3D, monster_def_id: String) -> void:
 	if root == null:

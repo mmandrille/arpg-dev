@@ -1,0 +1,118 @@
+{
+  "version": 0,
+  "priority": [
+    "sanctuary",
+    "holy_shield",
+    "rage",
+    "elite_command_radius_preview",
+    "elite_command"
+  ],
+  "presentation_personal_radius": 1.15,
+  "auras": {
+    "sanctuary": {
+      "light_color": "#ffe850",
+      "omni_energy": 0.3,
+      "omni_attenuation": 0.55,
+      "light_specular": 0.3,
+      "height_offset": 0.55,
+      "shadow_enabled": false,
+      "radius_source": {
+        "type": "skill_effect_radius",
+        "skill_id": "sanctuary"
+      },
+      "hero": {
+        "energy_multiplier": 1.0,
+        "range_multiplier": 1.0
+      },
+      "monster": {
+        "energy_multiplier": 0.85,
+        "range_multiplier": 1.0
+      }
+    },
+    "holy_shield": {
+      "light_color": "#ffd45a",
+      "omni_energy": 0.28,
+      "omni_attenuation": 0.55,
+      "light_specular": 0.0,
+      "height_offset": 0.45,
+      "shadow_enabled": false,
+      "radius_source": {
+        "type": "skill_effect_radius",
+        "skill_id": "holy_shield"
+      },
+      "hero": {
+        "energy_multiplier": 1.0,
+        "range_multiplier": 1.0
+      },
+      "monster": {
+        "energy_multiplier": 0.85,
+        "range_multiplier": 1.0
+      }
+    },
+    "rage": {
+      "light_color": "#ff3a12",
+      "omni_energy": 0.34,
+      "omni_attenuation": 0.6,
+      "light_specular": 0.0,
+      "height_offset": 0.35,
+      "shadow_enabled": false,
+      "radius_source": {
+        "type": "presentation_personal_radius"
+      },
+      "hero": {
+        "energy_multiplier": 1.0,
+        "range_multiplier": 1.0
+      },
+      "monster": {
+        "energy_multiplier": 0.9,
+        "range_multiplier": 1.0
+      }
+    },
+    "elite_command": {
+      "light_color": "#5cc8ff",
+      "omni_energy": 0.32,
+      "omni_attenuation": 0.58,
+      "light_specular": 0.0,
+      "height_offset": 0.4,
+      "shadow_enabled": false,
+      "radius_source": {
+        "type": "presentation_personal_radius"
+      },
+      "hero": {
+        "energy_multiplier": 1.0,
+        "range_multiplier": 1.0
+      },
+      "monster": {
+        "energy_multiplier": 1.0,
+        "range_multiplier": 1.0
+      }
+    },
+    "elite_command_radius_preview": {
+      "light_color": "#4ab0f0",
+      "omni_energy": 0.2,
+      "omni_attenuation": 0.48,
+      "light_specular": 0.0,
+      "height_offset": 0.08,
+      "shadow_enabled": false,
+      "radius_source": {
+        "type": "dungeon_elite_aura_radius"
+      },
+      "hero": {
+        "energy_multiplier": 1.0,
+        "range_multiplier": 1.0
+      },
+      "monster": {
+        "energy_multiplier": 1.0,
+        "range_multiplier": 1.0
+      }
+    }
+  },
+  "cast_pulse": {
+    "holy_shield": {
+      "duration_s": 0.5,
+      "energy_peak_multiplier": 1.45,
+      "range_peak_multiplier": 1.08,
+      "target_energy_bump": 1.12
+    }
+  }
+}

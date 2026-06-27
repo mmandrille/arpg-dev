@@ -1,6 +1,32 @@
 extends RefCounted
 
+const AuraSoftLightsScript := preload("res://scripts/aura_soft_lights.gd")
 const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_markers.gd")
+
+const AURA_LIGHT_NAME := AuraSoftLightsScript.AURA_LIGHT_NAME
+
+
+static func sync_session(
+	entities: Dictionary,
+	dungeon_generation: Dictionary,
+	perspective: bool,
+	player_anchor: Node3D,
+	light_radius: float,
+	sanctuary_radius: float,
+	holy_shield_radius: float,
+) -> void:
+	var hero_pos := Vector3.ZERO
+	if player_anchor != null:
+		hero_pos = player_anchor.global_position if player_anchor.is_inside_tree() else player_anchor.position
+	sync(
+		entities,
+		dungeon_generation,
+		perspective,
+		hero_pos,
+		light_radius,
+		sanctuary_radius,
+		holy_shield_radius,
+	)
 
 
 static func sync(
@@ -9,8 +35,10 @@ static func sync(
 	perspective: bool = false,
 	hero_pos: Vector3 = Vector3.ZERO,
 	light_radius: float = 0.0,
+	sanctuary_radius: float = 5.0,
+	holy_shield_radius: float = 5.0,
 ) -> void:
-	var radius := _aura_radius(dungeon_generation)
+	var elite_radius := _aura_radius(dungeon_generation)
 	var active_pack_ids: Dictionary = {}
 	for id in entities.keys():
 		var rec: Dictionary = entities[id]
@@ -24,9 +52,26 @@ static func sync(
 		var rec: Dictionary = entities[id]
 		if str(rec.get("type", "")) != "monster":
 			continue
+		if not bool(rec.get("monster_pack_leader", false)):
+			continue
+		var node := rec.get("node", null) as Node3D
+		if node == null:
+			continue
 		var pack_id := str(rec.get("monster_pack_id", ""))
-		var active := int(rec.get("hp", 1)) > 0 and bool(rec.get("monster_pack_leader", false)) and pack_id != "" and active_pack_ids.has(pack_id)
-		PlayerStatusEffectMarkers.sync_elite_command_radius_preview(rec.get("node", null) as Node3D, active, radius)
+		var alive := int(rec.get("hp", 1)) > 0
+		var preview_active := alive and pack_id != "" and active_pack_ids.has(pack_id)
+		var state := AuraSoftLightsScript.build_state(
+			rec.get("effect_ids", []) if alive else [],
+			"monster",
+			{
+				"monster_pack_leader": true,
+				"elite_radius_preview_active": preview_active,
+				"elite_aura_radius": elite_radius,
+				"sanctuary_radius": sanctuary_radius,
+				"holy_shield_radius": holy_shield_radius,
+			},
+		)
+		AuraSoftLightsScript.sync_aura(node, state)
 	if perspective and light_radius > 0.0:
 		_cull_occluded_markers(entities, hero_pos, light_radius)
 
@@ -63,12 +108,8 @@ static func _wall_blocks_los(ref_node: Node3D, from_pos: Vector3, to_pos: Vector
 
 static func _all_marker_names() -> Array:
 	return [
-		PlayerStatusEffectMarkers.HOLY_SHIELD_MARKER_NAME,
-		PlayerStatusEffectMarkers.SANCTUARY_MARKER_NAME,
-		PlayerStatusEffectMarkers.RAGE_MARKER_NAME,
+		AURA_LIGHT_NAME,
 		PlayerStatusEffectMarkers.BURNING_MARKER_NAME,
-		PlayerStatusEffectMarkers.ELITE_COMMAND_MARKER_NAME,
-		PlayerStatusEffectMarkers.ELITE_COMMAND_RADIUS_PREVIEW_NAME,
 		PlayerStatusEffectMarkers.PINNING_ROOT_MARKER_NAME,
 		PlayerStatusEffectMarkers.STUN_MARKER_NAME,
 		PlayerStatusEffectMarkers.ROGUE_MARK_MARKER_NAME,

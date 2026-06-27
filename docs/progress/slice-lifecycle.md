@@ -364,5 +364,6 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v349** | `movement-tick-smoothing` | Complete (focused checks green) | [`spec`](../specs/v349_spec-movement-tick-smoothing.md) | [`plan`](../plans/v349_2026-06-26-movement-tick-smoothing.md) | [`as-built`](../as-built/v349_movement-tick-smoothing.md) |
 | **v350** | `ci-full-green` | Complete (`make ci-full` green) | [`spec`](../specs/v350_spec-ci-full-green.md) | [`plan`](../plans/v350_2026-06-26-ci-full-green.md) | [`as-built`](../as-built/v350_ci-full-green.md) |
 | **v351** | `window-display-mode` | Complete (client-unit green; autoloop batch `make ci` pending) | [`spec`](../specs/v351_spec-window-display-mode.md) | [`plan`](../plans/v351_2026-06-26-window-display-mode.md) | [`as-built`](../as-built/v351_window-display-mode.md) |
+| **v352** | `projectile-tick-smoothing` | Complete (focused checks green; autoloop batch `make ci` pending) | [`spec`](../specs/v352_spec-projectile-tick-smoothing.md) | [`plan`](../plans/v352_2026-06-26-projectile-tick-smoothing.md) | [`as-built`](../as-built/v352_projectile-tick-smoothing.md) |
 
 ---

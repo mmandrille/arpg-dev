@@ -1654,11 +1654,10 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 	if e["type"] == "interactable" and not interactable_ids.has(id):
 		interactable_ids.append(id)
 	if rec["type"] == "projectile":
-		if is_new:
-			(rec["node"] as Node3D).position = server_pos
-			rec["last_server_pos"] = server_pos
-			return
-		_move_projectile_node(rec, server_pos)
+		var node := rec["node"] as Node3D
+		_entity_tick_smoothing.apply_projectile_authoritative(rec, node, server_pos, is_new)
+		rec["last_server_pos"] = server_pos
+		return
 	else:
 		var node := rec["node"] as Node3D
 		var segment_distance := _entity_tick_smoothing.apply_entity_authoritative(rec, node, server_pos, is_new)
@@ -5547,25 +5546,6 @@ func _load_ground_item_visual_data() -> void:
 		asset_manifest = manifest.get("assets", {})
 	_loot_factory.configure(asset_manifest, item_presentations)
 
-func _move_projectile_node(rec: Dictionary, target_pos: Vector3) -> void:
-	var node := rec["node"] as Node3D
-	if node == null:
-		return
-	var from := node.position
-	var flat := Vector2(target_pos.x - from.x, target_pos.z - from.z)
-	if flat.length_squared() > 0.0001:
-		node.look_at(Vector3(target_pos.x, from.y, target_pos.z), Vector3.UP)
-	if rec.has("move_tween"):
-		var old_tween = rec["move_tween"]
-		if is_instance_valid(old_tween):
-			old_tween.kill()
-	var duration := ClientConstants.PROJECTILE_LERP_SECONDS
-	if visual_replay_enabled:
-		duration = clampf(autoplay_step_delay * 0.35, 0.06, 0.18)
-	var tween := create_tween()
-	rec["move_tween"] = tween
-	tween.tween_property(node, "position", target_pos, duration).set_trans(Tween.TRANS_LINEAR)
-
 func _attach_pick_collider(node: Node3D, entity_id: String, kind: String, interactable_def_id: String = "", height_offset: float = 0.0) -> void:
 	var body := StaticBody3D.new()
 	body.name = "PickBody"
@@ -5725,6 +5705,7 @@ func get_bot_state() -> Dictionary:
 		"player_pos": {"x": predicted_pos.x, "z": predicted_pos.z},
 		"movement_visual_smoothing": _movement_visual_smoothing.get_debug_state(character_visual),
 		"entity_tick_smoothing": _entity_tick_smoothing.get_player_debug_state(),
+		"projectile_tick_smoothing": _entity_tick_smoothing.get_active_projectile_debug_state(entities),
 		"movement_feel": _player_movement_feel.get_debug_state(),
 		"command_retarget_grace": _command_retarget_grace.get_debug_state(),
 		"current_level": current_level,

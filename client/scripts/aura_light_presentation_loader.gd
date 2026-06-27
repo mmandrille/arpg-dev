@@ -51,7 +51,15 @@ static func priority_list() -> Array:
 static func presentation_personal_radius() -> float:
 	ensure_loaded()
 
-	return float(_config.get("presentation_personal_radius", 1.15))
+	return float(_config.get("presentation_personal_radius", 2.6))
+
+
+static func carrier_core_config() -> Dictionary:
+	ensure_loaded()
+	var core = _config.get("carrier_core", {})
+	if core is Dictionary:
+		return (core as Dictionary).duplicate(true)
+	return {}
 
 
 static func cast_pulse(aura_id: String) -> Dictionary:
@@ -70,7 +78,14 @@ static func _default_config() -> Dictionary:
 			"elite_command_radius_preview",
 			"elite_command",
 		],
-		"presentation_personal_radius": 1.15,
+		"presentation_personal_radius": 2.6,
+		"carrier_core": {
+			"radius": 1.05,
+			"energy_multiplier": 2.35,
+			"attenuation": 1.3,
+			"height_offset": 0.48,
+			"light_specular": 0.2,
+		},
 		"auras": {},
 		"cast_pulse": {},
 	}

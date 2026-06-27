@@ -17,6 +17,8 @@ Date: 2026-06-26
 - Bot debug exposes `active_aura_id`, `aura_light_range`, and `aura_light_color`.
 - Aura lights use low energy, soft falloff, and zero specular so they **tint** the floor/entities
   inside their radius instead of brightly illuminating them.
+- A shared **carrier core** omni (tight radius, higher energy) highlights the aura source entity
+  while the outer wash keeps the wider area tint.
 
 ## Proof
 

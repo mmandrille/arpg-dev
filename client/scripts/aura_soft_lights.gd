@@ -12,6 +12,7 @@ const ELITE_COMMAND_EFFECT_ID := "elite_command"
 const ELITE_COMMAND_RADIUS_PREVIEW_ID := "elite_command_radius_preview"
 
 const AURA_LIGHT_NAME := "AuraSoftLight"
+const AURA_CORE_LIGHT_NAME := "AuraSoftLightCore"
 const META_ACTIVE_AURA_ID := "active_aura_id"
 const META_AURA_LIGHT_RANGE := "aura_light_range"
 const CAST_PULSE_META := "holy_shield_cast_pulses"
@@ -23,21 +24,37 @@ static func sync_aura(root: Node3D, state: Dictionary) -> void:
 		return
 	LoaderScript.ensure_loaded()
 	var aura_id := _resolve_active_aura(state)
-	var existing := root.find_child(AURA_LIGHT_NAME, false, false) as OmniLight3D
 	if aura_id == "":
 		_clear_aura_meta(root)
-		if existing != null:
-			root.remove_child(existing)
-			existing.queue_free()
+		_remove_aura_lights(root)
 		return
 	var radius := _resolve_radius(aura_id, state)
-	if existing == null:
-		existing = OmniLight3D.new()
-		existing.name = AURA_LIGHT_NAME
-		root.add_child(existing)
-	_apply_light_config(existing, aura_id, state, radius)
+	var area_light := _ensure_aura_light(root, AURA_LIGHT_NAME)
+	_apply_light_config(area_light, aura_id, state, radius)
+	var core_light := _ensure_aura_light(root, AURA_CORE_LIGHT_NAME)
+	_apply_carrier_core_config(core_light, aura_id, area_light.light_energy)
 	root.set_meta(META_ACTIVE_AURA_ID, aura_id)
 	root.set_meta(META_AURA_LIGHT_RANGE, radius)
+
+
+static func _ensure_aura_light(root: Node3D, light_name: String) -> OmniLight3D:
+	var existing := root.find_child(light_name, false, false) as OmniLight3D
+	if existing != null:
+		return existing
+	existing = OmniLight3D.new()
+	existing.name = light_name
+	root.add_child(existing)
+
+	return existing
+
+
+static func _remove_aura_lights(root: Node3D) -> void:
+	for light_name in [AURA_LIGHT_NAME, AURA_CORE_LIGHT_NAME]:
+		var light := root.find_child(light_name, false, false) as OmniLight3D
+		if light == null:
+			continue
+		root.remove_child(light)
+		light.queue_free()
 
 
 static func pulse_holy_shield_cast(source_root: Node3D, affected_roots: Array, radius: float) -> void:
@@ -258,6 +275,18 @@ static func _apply_light_config(light: OmniLight3D, aura_id: String, state: Dict
 	light.shadow_enabled = bool(entry.get("shadow_enabled", false))
 
 
+static func _apply_carrier_core_config(light: OmniLight3D, aura_id: String, area_energy: float) -> void:
+	var entry := LoaderScript.aura_entry(aura_id)
+	var core := LoaderScript.carrier_core_config()
+	light.light_color = Color(str(entry.get("light_color", "#ffffff")))
+	light.light_energy = area_energy * float(core.get("energy_multiplier", 2.35))
+	light.light_specular = float(core.get("light_specular", 0.2))
+	light.omni_range = maxf(float(core.get("radius", 1.05)), 0.5)
+	light.omni_attenuation = float(core.get("attenuation", 1.3))
+	light.position.y = float(core.get("height_offset", 0.48))
+	light.shadow_enabled = false
+
+
 static func _pulse_light(
 	root: Node3D,
 	radius: float,
@@ -267,34 +296,34 @@ static func _pulse_light(
 	energy_peak: float,
 	range_peak: float,
 ) -> void:
-	var light := root.find_child(AURA_LIGHT_NAME, false, false) as OmniLight3D
-	var created := false
-	if light == null:
-		light = OmniLight3D.new()
-		light.name = AURA_LIGHT_NAME
-		root.add_child(light)
-		_apply_light_config(light, aura_id, {"entity_kind": entity_kind}, radius)
-		created = true
-	var base_energy := light.light_energy
-	var base_range := light.omni_range
-	var tween := root.create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(light, "light_energy", base_energy * energy_peak, duration * 0.45)
-	tween.tween_property(light, "omni_range", base_range * range_peak, duration * 0.45)
-	tween.chain().set_parallel(true)
-	tween.tween_property(light, "light_energy", base_energy, duration * 0.55)
-	tween.tween_property(light, "omni_range", base_range, duration * 0.55)
-	if created:
-		tween.chain().tween_callback(light.queue_free)
+	var had_lights := root.find_child(AURA_LIGHT_NAME, false, false) != null
+	if not had_lights:
+		var area_light := _ensure_aura_light(root, AURA_LIGHT_NAME)
+		_apply_light_config(area_light, aura_id, {"entity_kind": entity_kind}, radius)
+		_apply_carrier_core_config(
+			_ensure_aura_light(root, AURA_CORE_LIGHT_NAME),
+			aura_id,
+			area_light.light_energy,
+		)
+	_pulse_existing_light(root, duration, energy_peak, range_peak)
+	if not had_lights and root.is_inside_tree():
+		root.get_tree().create_timer(duration).timeout.connect(
+			func() -> void: _remove_aura_lights(root),
+			CONNECT_ONE_SHOT,
+		)
 
 
 static func _pulse_existing_light(root: Node3D, duration: float, energy_peak: float, range_peak: float) -> void:
-	var light := root.find_child(AURA_LIGHT_NAME, false, false) as OmniLight3D
+	for light_name in [AURA_LIGHT_NAME, AURA_CORE_LIGHT_NAME]:
+		_pulse_single_light(root.find_child(light_name, false, false) as OmniLight3D, duration, energy_peak, range_peak)
+
+
+static func _pulse_single_light(light: OmniLight3D, duration: float, energy_peak: float, range_peak: float) -> void:
 	if light == null:
 		return
 	var base_energy := light.light_energy
 	var base_range := light.omni_range
-	var tween := root.create_tween()
+	var tween := light.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(light, "light_energy", base_energy * energy_peak, duration * 0.45)
 	tween.tween_property(light, "omni_range", base_range * range_peak, duration * 0.45)

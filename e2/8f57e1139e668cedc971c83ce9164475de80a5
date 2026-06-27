@@ -1,0 +1,71 @@
+docs/specs/v353_spec-mobility-skill-smoothing.md
+  s_8ed6bbb9654539::t_867d71ad464cd7 1-2,4-51
+  s_8ed6bbb9654539::t_b74396ff5ea74c 3
+client/scripts/bot_step_catalog.gd
+  s_8ed6bbb9654539::t_631eb7df723f45 41
+  s_8ed6bbb9654539::t_89999181c12fc6 16
+scripts/client_smoke.sh
+  s_8ed6bbb9654539::t_32a65e4fb56719 232
+client/scripts/bot_assertion_handlers.gd
+  s_8ed6bbb9654539::t_77da1a1e9d4189 87-93
+  s_8ed6bbb9654539::t_29e3db9785d00b 486-497
+tools/bot/scenarios/client/86_mobility_skill_smoothing.json
+  s_8ed6bbb9654539::t_0020d902daab28 27-29
+  s_8ed6bbb9654539::t_1b2260899b7773 1-26,30-49
+client/tests/test_mobility_skill_presentation.gd
+  s_8ed6bbb9654539::t_17233949cb076a 9,14-15,42,51,53-54,56-57,62,70-76
+  s_8ed6bbb9654539::t_ecccc3cf4bcca4 1-8,10-13,16-41,43-50,52,55,58-61,63-69,77-98
+PROGRESS.md
+  s_8ed6bbb9654539::t_f39bd94910c083 26,29
+client/scripts/bot_wait_handlers.gd
+  s_8ed6bbb9654539::t_c0326abdda4a35 45-46
+docs/plans/v353_2026-06-26-mobility-skill-smoothing.md
+  s_8ed6bbb9654539::t_aa34da026fa56d 1-20
+client/scripts/movement_presentation_loader.gd
+  s_8ed6bbb9654539::t_5e12bcc5578f8d 29-31,39-43,47
+  s_8ed6bbb9654539::t_efa3c2975b113a 7
+docs/as-built/v353_mobility-skill-smoothing.md
+  s_8ed6bbb9654539::t_9a42403b222320 1-29
+shared/assets/movement_presentation.v0.json
+  s_8ed6bbb9654539::t_1ecef615a96b16 9-13
+client/scripts/mobility_skill_presentation.gd
+  s_8ed6bbb9654539::t_c4e181ecc9752d 1-218
+client/scripts/main.gd
+  s_8ed6bbb9654539::t_d37cc5245038a7 5322-5323,5327,5330-5337
+  s_8ed6bbb9654539::t_b1f438d746c25b 1235
+  s_8ed6bbb9654539::t_fcf9acd6ebe170 1107-1108,1116-1119
+  s_8ed6bbb9654539::t_0d9e1228eec416 1700,1702
+  s_8ed6bbb9654539::t_caad8befea69be 74
+  s_8ed6bbb9654539::t_81542775804121 269-271
+  s_8ed6bbb9654539::t_240a4010e1d668 1631
+  s_8ed6bbb9654539::t_ffca79a3bce2a5 1701
+  s_8ed6bbb9654539::t_044ced5caf6d3f 1512-1513,1518-1562
+  s_8ed6bbb9654539::t_e7b682ebd976b5 1748
+  s_8ed6bbb9654539::t_d15b5c6ad7b7a8 5247-5249
+  s_8ed6bbb9654539::t_397efbb88e16cb 1909
+  s_8ed6bbb9654539::t_0da15475276824 5685
+  s_8ed6bbb9654539::t_cf1d57b06a6aec 315
+docs/CODEMAP.md
+  s_8ed6bbb9654539::t_62043939c63083 18
+shared/assets/movement_presentation.v0.schema.json
+  s_8ed6bbb9654539::t_557256defcbc75 38-55
+  s_8ed6bbb9654539::t_26861523c79c26 7
+docs/progress/slice-lifecycle.md
+  s_8ed6bbb9654539::t_9573ef1f7db1c4 368
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e28f57e1139e668cedc971c83ce9164475de80a5",
+  "prompts": {},
+  "sessions": {
+    "s_8ed6bbb9654539": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e5f01841-0a66-4643-af7e-0c0ac864342e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

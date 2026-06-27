@@ -1,0 +1,134 @@
+shared/assets/aura_light_presentation.v0.json
+  s_66aec73de6fa91::t_117fc8cb82713a 34-36
+  s_66aec73de6fa91::t_10d787874f1820 54-56
+  s_66aec73de6fa91::t_0e9e6d7241df74 92-94
+  h_e5f15a920467af 16,112
+  s_66aec73de6fa91::t_f25a38f4c21799 113-115
+  s_66aec73de6fa91::t_9f8ccf31a9080a 63,73-75
+  s_66aec73de6fa91::t_d1a1cd4ef05694 1-13,17-33,37-53,57-62,64-72,76-91,95-111,116-118
+  s_66aec73de6fa91::t_e2fd92da064044 14-15
+client/tests/test_status_effect_presentation.gd
+  s_66aec73de6fa91::t_cc7ea382174479 357-358
+  s_66aec73de6fa91::t_ded35a1bb247b9 363
+  s_66aec73de6fa91::t_a9e9793b1cd0d6 362,365
+  s_66aec73de6fa91::t_e78e600065d421 157-158,160-163
+  s_66aec73de6fa91::t_8257431f077947 10-11
+  s_66aec73de6fa91::t_a7c631cb4b297e 55
+  s_66aec73de6fa91::t_a0cbe6ba5aa4d5 108-109
+docs/specs/v355_spec-aura-soft-lights.md
+  s_52196fa764d6d5::t_f6aadc27d5235a 1-169
+client/scripts/aura_light_presentation_loader.gd
+  s_66aec73de6fa91::t_5fa35b43c69d29 1-84
+client/scripts/bot_presentation_debug.gd
+  s_66aec73de6fa91::t_6d47c22e4cd54a 53-58
+  s_66aec73de6fa91::t_36d2a19dac3f51 95
+  s_66aec73de6fa91::t_0ec2a4db977332 6
+  s_66aec73de6fa91::t_6b17af23b1d3b9 88-90
+shared/assets/aura_light_presentation.v0.schema.json
+  s_66aec73de6fa91::t_447d1bc2b9b3a0 86
+  s_66aec73de6fa91::t_f9b24ffca4fb1d 1-85,87-111
+tools/bot/scenarios/client/89_aura_soft_lights.json
+  s_66aec73de6fa91::t_9a4e553d26ce38 1-4,7,24-26,28-29,34-35,39-40,44-45,63-65,72-74
+  s_66aec73de6fa91::t_23a5e8dc3c30f6 5,8-23,33,50-62,67-70
+  s_66aec73de6fa91::t_c5160d3448b33b 6,27,30-32,36-37,41-43,46-49,66,71
+  s_66aec73de6fa91::t_f1ef6265dcb36f 38
+.maintainability/file-size-baseline.tsv
+  s_66aec73de6fa91::t_ee3ed22525fd45 5
+  s_66aec73de6fa91::t_ef2272df4d3df0 8
+client/tests/test_aura_soft_lights.gd
+  s_66aec73de6fa91::t_992d09ac9f5ded 1-116
+tools/bot/scenarios/client/34_elite_aura_readability.json
+  s_66aec73de6fa91::t_6f019263f38f78 33
+tools/bot/scenarios/client/37_elite_aura_radius_preview.json
+  s_66aec73de6fa91::t_16dd2378de0f3b 40
+client/scripts/aura_soft_lights.gd
+  s_66aec73de6fa91::t_a2e44206a38115 116
+  s_66aec73de6fa91::t_95e61751747f3e 174-175,185-189
+  s_66aec73de6fa91::t_c12e5131c4790b 133-154,156-173
+  s_66aec73de6fa91::t_62512c23b46f8c 47
+  s_66aec73de6fa91::t_486f2d50209864 7-12
+  s_66aec73de6fa91::t_c15c8757efe27d 254
+  s_66aec73de6fa91::t_9f1f9d919b2aee 112,222-224
+  s_66aec73de6fa91::t_0d8a17898f063d 108,210-212,234,312
+  s_66aec73de6fa91::t_74b72d534b5d23 65
+  s_66aec73de6fa91::t_d9e0d05fc186c2 221
+  s_66aec73de6fa91::t_3155a3510e3679 176-184
+  s_66aec73de6fa91::t_8290cc5915e69f 1-6,13-46,48-56,58-64,66-99,101-103,105-107,109-111,113-115,117-132,155,190-209,219-220,225-233,235,237-253,255-311,313-335
+  s_66aec73de6fa91::t_94f718f2d51648 57,104,213-215,236
+  s_66aec73de6fa91::t_a5b8bc0c4d2808 100,216-218
+PROGRESS.md
+  s_66aec73de6fa91::t_d26f53d639b532 26,29
+  s_66aec73de6fa91::t_42e7f730093e43 18
+scripts/client_smoke.sh
+  s_66aec73de6fa91::t_2461380715f563 205
+client/scripts/elite_aura_preview_sync.gd
+  s_66aec73de6fa91::t_6d27519005748b 55-56,62,67
+  s_66aec73de6fa91::t_b095ee775558d1 3,6-8,38-39,41,57-59,61,63-66,68-74,111
+  s_66aec73de6fa91::t_d852fd495e2326 9-30
+docs/CODEMAP.md
+  s_66aec73de6fa91::t_e2daf8f7b8684e 19
+  s_66aec73de6fa91::t_9026a1c9a44ef0 21
+docs/progress/slice-lifecycle.md
+  s_66aec73de6fa91::t_a68daaa9dbfbe3 369-370
+client/scripts/bot_scenario_runner.gd
+  s_66aec73de6fa91::t_922784a5319348 502,504,506
+  s_66aec73de6fa91::t_497cde2ab15c29 493-501
+docs/plans/v355_2026-06-26-aura-soft-lights.md
+  s_66aec73de6fa91::t_e30d3a37385a7e 80
+  s_52196fa764d6d5::t_b7649a78d1e424 1-79,81-242
+client/scripts/player_status_effect_markers.gd
+  s_66aec73de6fa91::t_fde85c0724e718 4-5,24-25,28-29,32-33,36-37,40-41,44-53,80,143,299
+client/scripts/main.gd
+  s_66aec73de6fa91::t_767739d824e792 146
+  s_66aec73de6fa91::t_7b99f57254583f 1809,5414
+  s_66aec73de6fa91::t_10da86be16cac3 1324,1326,1328
+  s_66aec73de6fa91::t_97eeae77d56f24 2063,2065
+  s_66aec73de6fa91::t_c8ec89bca2f171 2029-2033,2043-2044
+  s_66aec73de6fa91::t_5b77627869fe28 2005
+  s_66aec73de6fa91::t_60f46350fb4ac8 1314,1316
+  s_66aec73de6fa91::t_1edc6bbe239ac7 1641
+  s_66aec73de6fa91::t_19a8df5ce12af5 2034-2042
+  s_66aec73de6fa91::t_d89c80594b593d 1807-1808
+  s_66aec73de6fa91::t_197cc9bb7e02ff 5396,5404
+  s_66aec73de6fa91::t_b83d2d2ff393c4 14
+  s_66aec73de6fa91::t_6b24c1e6a8e3e6 2062
+  s_66aec73de6fa91::t_d0f3a0eb9490c7 5395,5398-5400,5403
+  s_66aec73de6fa91::t_ab40f533d710b8 1313
+  s_66aec73de6fa91::t_ee4680a0c4af15 1323
+  s_66aec73de6fa91::t_d076ae9e392169 5397,5401-5402,5405
+  s_66aec73de6fa91::t_f9eb28168c22aa 1789-1790
+docs/as-built/v355_aura-soft-lights.md
+  s_66aec73de6fa91::t_3a490a1d84f30b 1-17,20-30,40-47
+  s_66aec73de6fa91::t_615a82cf48a55b 35
+  s_66aec73de6fa91::t_14f3cebf6a7bc7 18-19
+  s_66aec73de6fa91::t_c75190a8271c15 31-34,36-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2416bd69809748b8d30044f09af51cab3677fe42",
+  "prompts": {},
+  "humans": {
+    "h_e5f15a920467af": {
+      "author": "mmandrille <mmandrille@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_52196fa764d6d5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "828d6edf-cd28-4272-bb3b-ae63251ffe83",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_66aec73de6fa91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "050554c9-5bb2-4043-93cc-df94fd5683a1",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

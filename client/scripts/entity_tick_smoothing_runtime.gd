@@ -165,7 +165,4 @@ static func _face_projectile_motion(node: Node3D, from: Vector3, to: Vector3) ->
 	if flat.length_squared() <= 0.0001:
 		return
 	var look_target := Vector3(to.x, from.y, to.z)
-	if node.is_inside_tree():
-		node.look_at(look_target, Vector3.UP)
-	else:
-		node.look_at_from_position(from, look_target, Vector3.UP)
+	node.look_at_from_position(from, look_target, Vector3.UP)

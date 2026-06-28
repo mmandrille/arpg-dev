@@ -26,8 +26,12 @@ func (s *Sim) planMonsterPath(monster *entity, nav NavigationRules, start, goal 
 	if remainingNodes <= 0 {
 		return nil, false
 	}
+	nodeLimit := remainingNodes
+	if nav.MonsterPathNodesPerSearch > 0 && nav.MonsterPathNodesPerSearch < nodeLimit {
+		nodeLimit = nav.MonsterPathNodesPerSearch
+	}
 	s.monsterPathRequestsThisTick++
-	stats := PathSearchStats{NodeLimit: remainingNodes}
+	stats := PathSearchStats{NodeLimit: nodeLimit}
 	steps, ok := s.runPathSearch(nav, start, goal, blocked, &stats)
 	s.monsterPathNodesThisTick += stats.NodesVisited
 	if stats.LimitExceeded {

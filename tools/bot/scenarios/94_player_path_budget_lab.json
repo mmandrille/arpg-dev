@@ -1,0 +1,15 @@
+{
+  "id": "player_path_budget_lab",
+  "ci_tier": "extended",
+  "world_id": "player_path_budget_lab",
+  "seed": "v356_player_path_budget",
+  "title": "Player path budget lab",
+  "description": "Melee attack on a monster behind a center wall rejects no_path without unbounded pathfinding.",
+  "steps": [
+    {
+      "action": "action_entity",
+      "monster_def_id": "dungeon_mob",
+      "expect_reject": "no_path"
+    }
+  ]
+}

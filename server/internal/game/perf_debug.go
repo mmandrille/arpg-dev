@@ -83,6 +83,7 @@ func (s *Sim) PerfCounters() PerfCounters {
 func (s *Sim) resetTickPerf() {
 	s.tickPerf = PerfCounters{}
 	s.resetMonsterNavigationBudget()
+	s.resetPlayerNavigationBudget()
 }
 
 func (s *Sim) withTickPhase(name string, fn func()) {
@@ -94,11 +95,15 @@ func (s *Sim) withTickPhase(name string, fn func()) {
 }
 
 func (s *Sim) planPath(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool) ([]Vec2, bool) {
+	steps, ok, _ := s.planPathWithNodeLimit(nav, start, goal, blocked, 0)
+	return steps, ok
+}
+
+func (s *Sim) planPathWithNodeLimit(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool, nodeLimit int) ([]Vec2, bool, PathSearchStats) {
 	stats := PathSearchStats{}
-	// Wrap blocked to allow the goal cell even when its center is inside a wall
-	// AABB. The player can physically be at the cell origin, and continueAutoNavToGoal
-	// covers the last stretch from the path endpoint to the exact goal position.
-	// This is runtime-only: dungeon generation uses PlanPath directly (strict check).
+	if nodeLimit > 0 {
+		stats.NodeLimit = nodeLimit
+	}
 	goalCell := worldToGrid(nav, goal)
 	goalAwareBlocked := func(gx, gy int) bool {
 		if gx == goalCell.x && gy == goalCell.y {
@@ -106,20 +111,22 @@ func (s *Sim) planPath(nav NavigationRules, start, goal Vec2, blocked func(gx, g
 		}
 		return blocked(gx, gy)
 	}
-	if steps, ok := s.runPathSearch(nav, start, goal, goalAwareBlocked, &stats); ok {
-		return steps, ok
+	steps, ok := s.runPathSearch(nav, start, goal, goalAwareBlocked, &stats)
+	if ok {
+		return steps, ok, stats
 	}
-	// If A* fails from the exact start position (e.g. the player's continuous movement
-	// landed them inside a cell whose center is inside a wall, making that cell blocked
-	// and all its neighbors unreachable via the grid), try re-routing via the nearest
-	// unblocked neighbour cell.  This lets the player escape wall-pocket dead-ends that
-	// only arise from floating-point position drift rather than true map disconnection.
 	startCell := worldToGrid(nav, start)
-	if !goalAwareBlocked(startCell.x, startCell.y) {
-		return nil, false // start cell is navigable; the failure is real
+	if stats.LimitExceeded {
+		stats.NodesVisited = 0
+		stats.LimitExceeded = false
+	} else if !goalAwareBlocked(startCell.x, startCell.y) {
+		return nil, false, stats
 	}
 	for radius := 1; radius <= 3; radius++ {
 		for _, candidate := range ringCells(startCell, radius) {
+			if stats.LimitExceeded {
+				return nil, false, stats
+			}
 			if !cellInBounds(nav, candidate) || goalAwareBlocked(candidate.x, candidate.y) {
 				continue
 			}
@@ -127,11 +134,15 @@ func (s *Sim) planPath(nav NavigationRules, start, goal Vec2, blocked func(gx, g
 			altStart.X += nav.CellSize / 2
 			altStart.Y += nav.CellSize / 2
 			if steps, ok := s.runPathSearch(nav, altStart, goal, goalAwareBlocked, &stats); ok {
-				return steps, ok
+				return steps, ok, stats
+			}
+			if stats.LimitExceeded {
+				return nil, false, stats
 			}
 		}
 	}
-	return nil, false
+
+	return nil, false, stats
 }
 
 func (s *Sim) runPathSearch(nav NavigationRules, start, goal Vec2, blocked func(gx, gy int) bool, stats *PathSearchStats) ([]Vec2, bool) {
@@ -147,6 +158,7 @@ func (s *Sim) runPathSearch(nav NavigationRules, start, goal Vec2, blocked func(
 	if stats != nil {
 		s.tickPerf.PathNodesVisited += stats.NodesVisited
 	}
+
 	return steps, ok
 }
 

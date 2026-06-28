@@ -4421,6 +4421,8 @@ func TestChestSeed22AllMonstersApproachable(t *testing.T) {
 	}
 	descendFromCurrentLevel(t, sim, "descend")
 	player := sim.entities[sim.playerID]
+	nav := sim.activeNav()
+	blocked := sim.buildBlockedFn()
 	reachableMonsters := []*entity{}
 	unreachableMonsters := []*entity{}
 	for _, id := range sortedEntityIDs(sim.activeLevel().entities) {
@@ -4428,14 +4430,14 @@ func TestChestSeed22AllMonstersApproachable(t *testing.T) {
 		if e.kind != monsterEntity || e.hp <= 0 {
 			continue
 		}
-		_, steps, ok := sim.findApproachGoal(e)
+		_, ok := sim.planPath(nav, player.pos, e.pos, blocked)
 		if !ok {
 			unreachableMonsters = append(unreachableMonsters, e)
 			t.Logf("unreachable monster %d pos=%+v player=%+v", id, e.pos, player.pos)
 			continue
 		}
 		reachableMonsters = append(reachableMonsters, e)
-		t.Logf("monster %d pos=%+v steps=%d", id, e.pos, len(steps))
+		t.Logf("monster %d pos=%+v reachable", id, e.pos)
 	}
 	for _, blocked := range unreachableMonsters {
 		def := sim.rules.Monsters[blocked.monsterDefID]

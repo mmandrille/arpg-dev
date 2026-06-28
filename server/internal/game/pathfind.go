@@ -63,13 +63,13 @@ func PlanPathWithStats(nav NavigationRules, start, goal Vec2, blocked func(gx, g
 		}
 		if stats != nil {
 			stats.NodesVisited++
-			if stats.NodeLimit > 0 && stats.NodesVisited > stats.NodeLimit {
-				stats.LimitExceeded = true
-				return nil, false
-			}
 		}
 		if current.state.cell == goalCell {
 			return reconstructPath(cameFrom, startState, current.state), true
+		}
+		if stats != nil && stats.NodeLimit > 0 && stats.NodesVisited > stats.NodeLimit {
+			stats.LimitExceeded = true
+			return nil, false
 		}
 		closed[current.state] = true
 

@@ -135,9 +135,14 @@ func (r CoopPartyChallengeRules) Multiplier(partyCount int) float64 {
 type NavigationRules struct {
 	CellSize                              float64    `json:"cell_size"`
 	MaxAutoSteps                          int        `json:"max_auto_steps"`
+	PathPlanningHorizonSeconds            float64    `json:"path_planning_horizon_seconds"`
+	PlayerMaxAutoSteps                    int        `json:"player_max_auto_steps"`
+	PlayerPathNodesPerSearch              int        `json:"player_path_nodes_per_search"`
+	PlayerPathNodesPerTick                int        `json:"player_path_nodes_per_tick"`
 	GridBounds                            GridBounds `json:"grid_bounds"`
 	StopDistance                          float64    `json:"stop_distance"`
 	MonsterPathRequestsPerTick            int        `json:"monster_path_requests_per_tick"`
+	MonsterPathNodesPerSearch             int        `json:"monster_path_nodes_per_search"`
 	MonsterPathNodesPerTick               int        `json:"monster_path_nodes_per_tick"`
 	MonsterPathCacheTicks                 int        `json:"monster_path_cache_ticks"`
 	MonsterRepathThrottleTicks            int        `json:"monster_repath_throttle_ticks"`

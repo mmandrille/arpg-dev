@@ -830,6 +830,7 @@ func _test_path_reject_clears_held_click_state() -> void:
 	main.pending_action_targets["msg-no-path"] = {"target_id": "2001"}
 	main._handle_intent_rejected({"rejected_message_id": "msg-no-path", "reason": "no_path"})
 	_assert_true("no_path clears sustained click", not main._sustained_click.active)
+	_assert_true("no_path clears sticky attack", not main._sticky_attack.active())
 	_assert_true("no_path clears pending interactable action", main.pending_interactable_action.is_empty())
 	_assert_true("no_path removes pending action target", not main.pending_action_targets.has("msg-no-path"))
 	main.player_anchor.queue_free()

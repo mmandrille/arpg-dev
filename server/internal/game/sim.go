@@ -376,6 +376,7 @@ type Sim struct {
 	tickProfiler                TickProfiler
 	monsterPathRequestsThisTick int
 	monsterPathNodesThisTick    int
+	playerPathNodesThisTick     int
 	overloadDegradeUntilTick    uint64
 	tick                        uint64
 	nextID                      uint64
@@ -2764,7 +2765,7 @@ func (s *Sim) finishAutoNav(res *TickResult) {
 			canReplan := nav.replanAttempts < maxAutoNavReplans &&
 				(player.pos != nav.lastReplanPos || nav.pathStepsExhausted)
 			if distance(player.pos, nav.goal) > s.activeNav().StopDistance && canReplan {
-				if steps, ok := s.planPath(s.activeNav(), player.pos, nav.goal, s.buildBlockedFn()); ok && len(steps) > 0 {
+				if steps, ok := s.planPlayerPath(s.activeNav(), player.pos, nav.goal, s.buildBlockedFn()); ok && len(steps) > 0 {
 					next := s.newAutoNavState(
 						steps, nav.goal,
 						nav.pendingAction, nav.pendingSkill,
@@ -3008,111 +3009,6 @@ func (s *Sim) buildBlockedFn() func(gx, gy int) bool {
 		// approach cells on the player's side of the door remain accessible).
 		return s.playerDynamicBlocked(origin)
 	}
-}
-
-func (s *Sim) findApproachGoal(target *entity) (Vec2, []Vec2, bool) {
-	if target.kind == monsterEntity && s.playerAttackMode() == attackModeRanged {
-		return s.findRangedApproachGoal(target)
-	}
-	return s.findMeleeApproachGoal(target)
-}
-
-func (s *Sim) findRangedApproachGoal(target *entity) (Vec2, []Vec2, bool) {
-	player := s.activeLevel().entities[s.playerID]
-	if player == nil {
-		return Vec2{}, nil, false
-	}
-	nav := s.activeNav()
-	playerCell := worldToGrid(nav, player.pos)
-	blocked := s.buildBlockedFn()
-	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
-	for radius := 0; radius <= maxRadius; radius++ {
-		candidates := ringCells(playerCell, radius)
-		for _, cell := range candidates {
-			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
-				continue
-			}
-			origin := gridToWorld(nav, cell)
-			if !s.inActionRangeFrom(origin, target) || !s.hasClearRangedShot(origin, target) {
-				continue
-			}
-			// Also verify the expected approach stop-position (StopDistance before the
-			// origin, from the player's direction) has a clear shot.  When the origin
-			// sits exactly at an inflated-wall boundary the player stops just short of
-			// it, and that short stop position can clip the inflated AABB on fire.
-			if approachPos := s.rangedApproachStopPos(player.pos, origin); !s.hasClearRangedShot(approachPos, target) {
-				continue
-			}
-			steps, ok := s.planPath(nav, player.pos, origin, blocked)
-			if ok {
-				return origin, steps, true
-			}
-		}
-	}
-	return Vec2{}, nil, false
-}
-
-// rangedApproachStopPos returns the position where the player is expected to
-// stop when approaching goal from from: StopDistance short of goal in the
-// from→goal direction.  Used to validate that the actual firing position (not
-// just the grid origin) has a clear ranged shot.
-func (s *Sim) rangedApproachStopPos(from, goal Vec2) Vec2 {
-	dx := from.X - goal.X
-	dy := from.Y - goal.Y
-	dist := math.Sqrt(dx*dx + dy*dy)
-	if dist < 1e-9 {
-		return goal
-	}
-	stop := s.activeNav().StopDistance
-	return Vec2{X: goal.X + dx/dist*stop, Y: goal.Y + dy/dist*stop}
-}
-
-func (s *Sim) findSkillCastApproachGoal(target *entity, castRange float64, requireClearShot bool) (Vec2, []Vec2, bool) {
-	player := s.activeLevel().entities[s.playerID]
-	if player == nil || target == nil {
-		return Vec2{}, nil, false
-	}
-	nav := s.activeNav()
-	blocked := s.buildBlockedFn()
-	bestGoal := Vec2{}
-	bestSteps := []Vec2(nil)
-	bestDistance := -1.0
-	bestStepCount := 0
-	maxRadius := maxInt(nav.GridBounds.MaxX-nav.GridBounds.MinX, nav.GridBounds.MaxY-nav.GridBounds.MinY) + 1
-	for radius := maxRadius; radius >= 0; radius-- {
-		for _, cell := range ringCells(worldToGrid(nav, target.pos), radius) {
-			if !cellInBounds(nav, cell) || blocked(cell.x, cell.y) {
-				continue
-			}
-			origin := gridToWorld(nav, cell)
-			dist := distance(origin, target.pos)
-			if dist > castRange+meleeRangeEpsilon {
-				continue
-			}
-			if requireClearShot && !s.hasClearRangedShot(origin, target) {
-				continue
-			}
-			if requireClearShot {
-				if approachPos := s.rangedApproachStopPos(player.pos, origin); !s.hasClearRangedShot(approachPos, target) {
-					continue
-				}
-			}
-			steps, ok := s.planPath(nav, player.pos, origin, blocked)
-			if !ok {
-				continue
-			}
-			if dist > bestDistance+0.000001 || (math.Abs(dist-bestDistance) <= 0.000001 && (bestSteps == nil || len(steps) < bestStepCount)) {
-				bestGoal = origin
-				bestSteps = steps
-				bestDistance = dist
-				bestStepCount = len(steps)
-			}
-		}
-		if bestSteps != nil {
-			return bestGoal, bestSteps, true
-		}
-	}
-	return Vec2{}, nil, false
 }
 
 func ringCells(center gridCell, radius int) []gridCell {

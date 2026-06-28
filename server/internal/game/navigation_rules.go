@@ -10,9 +10,14 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 		Version                               int        `json:"version"`
 		CellSize                              float64    `json:"cell_size"`
 		MaxAutoSteps                          int        `json:"max_auto_steps"`
+		PathPlanningHorizonSeconds            float64    `json:"path_planning_horizon_seconds"`
+		PlayerMaxAutoSteps                    int        `json:"player_max_auto_steps"`
+		PlayerPathNodesPerSearch              int        `json:"player_path_nodes_per_search"`
+		PlayerPathNodesPerTick                int        `json:"player_path_nodes_per_tick"`
 		GridBounds                            GridBounds `json:"grid_bounds"`
 		StopDistance                          float64    `json:"stop_distance"`
 		MonsterPathRequestsPerTick            int        `json:"monster_path_requests_per_tick"`
+		MonsterPathNodesPerSearch             int        `json:"monster_path_nodes_per_search"`
 		MonsterPathNodesPerTick               int        `json:"monster_path_nodes_per_tick"`
 		MonsterPathCacheTicks                 int        `json:"monster_path_cache_ticks"`
 		MonsterRepathThrottleTicks            int        `json:"monster_repath_throttle_ticks"`
@@ -31,6 +36,18 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 	if navigation.MaxAutoSteps <= 0 {
 		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.max_auto_steps: must be positive")
 	}
+	if navigation.PathPlanningHorizonSeconds <= 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.path_planning_horizon_seconds: must be positive")
+	}
+	if navigation.PlayerMaxAutoSteps <= 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.player_max_auto_steps: must be positive")
+	}
+	if navigation.PlayerPathNodesPerSearch <= 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.player_path_nodes_per_search: must be positive")
+	}
+	if navigation.PlayerPathNodesPerTick <= 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.player_path_nodes_per_tick: must be positive")
+	}
 	if navigation.GridBounds.MaxX < navigation.GridBounds.MinX || navigation.GridBounds.MaxY < navigation.GridBounds.MinY {
 		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.grid_bounds: max must be >= min")
 	}
@@ -39,6 +56,9 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 	}
 	if navigation.MonsterPathRequestsPerTick <= 0 {
 		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_path_requests_per_tick: must be positive")
+	}
+	if navigation.MonsterPathNodesPerSearch <= 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_path_nodes_per_search: must be positive")
 	}
 	if navigation.MonsterPathNodesPerTick <= 0 {
 		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_path_nodes_per_tick: must be positive")
@@ -67,9 +87,14 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 	return NavigationRules{
 		CellSize:                              navigation.CellSize,
 		MaxAutoSteps:                          navigation.MaxAutoSteps,
+		PathPlanningHorizonSeconds:            navigation.PathPlanningHorizonSeconds,
+		PlayerMaxAutoSteps:                    navigation.PlayerMaxAutoSteps,
+		PlayerPathNodesPerSearch:              navigation.PlayerPathNodesPerSearch,
+		PlayerPathNodesPerTick:                navigation.PlayerPathNodesPerTick,
 		GridBounds:                            navigation.GridBounds,
 		StopDistance:                          navigation.StopDistance,
 		MonsterPathRequestsPerTick:            navigation.MonsterPathRequestsPerTick,
+		MonsterPathNodesPerSearch:             navigation.MonsterPathNodesPerSearch,
 		MonsterPathNodesPerTick:               navigation.MonsterPathNodesPerTick,
 		MonsterPathCacheTicks:                 navigation.MonsterPathCacheTicks,
 		MonsterRepathThrottleTicks:            navigation.MonsterRepathThrottleTicks,

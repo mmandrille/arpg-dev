@@ -170,6 +170,7 @@ run_gate "GDScript discovery minimap test" "[gdtest] PASS: test_discovery_minima
 
 # 2g. Sustained click hold state (server-independent; v27).
 run_gate "GDScript sustained input test" "[gdtest] PASS: test_sustained_input" res://tests/test_sustained_input.gd
+run_gate "GDScript path reject backoff test" "[gdtest] PASS: test_path_reject_backoff" res://tests/test_path_reject_backoff.gd
 
 # 2h. Force-stand directional attack helpers (server-independent; v37).
 run_gate "GDScript directional attack input test" "[gdtest] PASS: test_directional_attack_input" res://tests/test_directional_attack_input.gd

@@ -1,0 +1,43 @@
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_6ebf631e48dcfc::t_1ad1633a766f69 6
+  s_6ebf631e48dcfc::t_036eb7dc838408 55
+tools/bot/test_protocol.py
+  s_6ebf631e48dcfc::t_7b1e499ac01554 539-541
+tools/bot/run.py
+  s_6ebf631e48dcfc::t_7754e6acd02427 819-831
+  s_6ebf631e48dcfc::t_e60cf7239097a0 832
+tools/bot/action_runtime.py
+  s_6ebf631e48dcfc::t_6446b23b8c73e6 1-2,4-32,34-48
+  s_6ebf631e48dcfc::t_d32e3aeae652e9 3,33
+tools/bot/scenarios/91_unique_non_damage_skill_modifier.json
+  s_6ebf631e48dcfc::t_8fe4eb7babedd0 4
+tools/bot/scenarios/61_purple_town_unique_chest.json
+  s_6ebf631e48dcfc::t_14d14005de7464 4
+shared/rules/worlds.v0.json
+  s_6ebf631e48dcfc::t_baea1d94284ce3 1404
+  s_6ebf631e48dcfc::t_1a981a0a8b1aaf 2718-2719
+tools/bot/scenarios/83_second_set_package.json
+  s_6ebf631e48dcfc::t_e5fea4de29790c 4
+tools/bot/scenarios/client/07_town_teleporter_auto_approach.json
+  s_6ebf631e48dcfc::t_9de470b36ce139 25
+tools/bot/scenarios/client/11_combat_feedback.json
+  s_6ebf631e48dcfc::t_9d15e3577d830d 207
+tools/bot/scenarios/82_unique_skill_modifier.json
+  s_6ebf631e48dcfc::t_2f73a80a111853 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "44429e3184c01413a72af6d4c4699f6b4e865ff2",
+  "prompts": {},
+  "sessions": {
+    "s_6ebf631e48dcfc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8d07f1bd-5fa9-472b-91e1-b95b858249ce",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

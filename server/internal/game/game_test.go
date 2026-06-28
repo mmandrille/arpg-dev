@@ -1807,7 +1807,7 @@ func TestNewSimWithWorldSpawnsPresets(t *testing.T) {
 	}
 	assertEntity(t, rsnap, "1001", playerEntity, "", "", Vec2{X: 2, Y: 2})
 	assertEntity(t, rsnap, "1002", lootEntity, "", "training_bow", Vec2{X: 3, Y: 2})
-	assertEntity(t, rsnap, "1003", monsterEntity, "training_dummy_ranged", "", Vec2{X: 12, Y: 5})
+	assertEntity(t, rsnap, "1003", monsterEntity, "training_dummy_ranged", "", Vec2{X: 8, Y: 5})
 }
 
 func TestNewSimReturnsDefaultWorldError(t *testing.T) {

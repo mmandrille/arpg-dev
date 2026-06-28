@@ -1,0 +1,151 @@
+client/tests/test_golden.gd
+  s_c59e75f414be00::t_0e0b9ebfaa7a45 204,207
+client/scripts/main.gd
+  s_c59e75f414be00::t_c784afab793c90 1047
+  s_c59e75f414be00::t_e5ee7fb2a558c3 741,753
+  s_c59e75f414be00::t_ad79e0ea5b4e1b 5736
+  s_c59e75f414be00::t_51d834fc208e33 1048
+  s_c59e75f414be00::t_2b986653205149 291
+  s_c59e75f414be00::t_c2cc1935edcf2b 1022
+shared/golden/dungeon_stairs.json
+  s_c59e75f414be00::t_5194dfc0edf2c8 25
+  s_c59e75f414be00::t_ae7a4a0cfd32d6 5-6
+client/scripts/dungeon_depth_lighting.gd
+  s_c59e75f414be00::t_b2202ca0c3e97e 5,14-15,18-20,60,62-63
+server/internal/game/game_test.go
+  s_c59e75f414be00::t_50ceb93bb655bc 6934-6936
+docs/plans/v357_2026-06-27-town-night-perimeter.md
+  s_c59e75f414be00::t_cd3fba18a0e62e 284-289
+  s_c59e75f414be00::t_982f3400c318af 3
+  s_c59e75f414be00::t_d3f5711067af03 279-280
+  s_c59e75f414be00::t_e4da753fa339bd 1-2,4-278,281-283,290-303
+client/scripts/bot_wait_handlers.gd
+  s_c59e75f414be00::t_27b3280c633052 11
+  s_c59e75f414be00::t_4c5adb26fe92b3 60
+  s_c59e75f414be00::t_8e00a3bc8eddb2 59
+docs/specs/v357_spec-town-night-perimeter.md
+  s_c59e75f414be00::t_19e6e558b357ad 3
+  s_c59e75f414be00::t_06d27ed091bf32 1-2,4-177
+server/internal/game/sim.go
+  s_c59e75f414be00::t_96b51e28377e5d 758-762
+tools/bot/scenarios/61_purple_town_unique_chest.json
+  s_c59e75f414be00::t_4aa2eeca649c43 10-11
+  s_c59e75f414be00::t_b0552da54cf12b 19-20
+client/scripts/wall_renderer.gd
+  s_c59e75f414be00::t_751d51bafddc02 141-142
+  s_c59e75f414be00::t_f0ce93555226d5 172-205
+client/scripts/town_presentation_loader.gd.uid
+  s_c59e75f414be00::t_c9b7d23ad225be 1
+.maintainability/file-size-baseline.tsv
+  s_c59e75f414be00::t_9c68ed0bf77997 8
+  s_c59e75f414be00::t_0b83e567a3bcc2 3
+docs/as-built/v357_town-night-perimeter.md
+  s_c59e75f414be00::t_a62169851d9654 1-43
+shared/rules/interactables.v0.schema.json
+  s_c59e75f414be00::t_9f3d1835e732e4 31-34,54-61,64
+  s_c59e75f414be00::t_83ea06541ab30c 62-63
+tools/bot/scenarios/client/90_town_night_perimeter.json
+  s_c59e75f414be00::t_1d068b7d2a9ac2 60-62
+  s_c59e75f414be00::t_0d5a84b4e1b4b6 1-37,50-59,63-68,71-77
+  s_c59e75f414be00::t_cecc439f2f7f84 69-70
+  s_c59e75f414be00::t_8d334cd4cd9094 38-49
+client/scripts/town_node_factory.gd
+  s_c59e75f414be00::t_af712549fd6674 209
+  s_c59e75f414be00::t_81eb52244d842e 199-208
+  s_c59e75f414be00::t_ee423840b72ddc 250-251
+  s_c59e75f414be00::t_f9486725b3cd66 218,223,227
+docs/CODEMAP.md
+  s_c59e75f414be00::t_4259066431caea 23
+  s_c59e75f414be00::t_dd2b2ba8d7313f 28
+  s_c59e75f414be00::t_1b39dd9730e89c 29
+client/tests/test_town_night_lighting.gd.uid
+  s_c59e75f414be00::t_c9b7d23ad225be 1
+server/internal/game/obstacle_blocking.go
+  s_c59e75f414be00::t_48686638f99271 5
+  s_c59e75f414be00::t_b0a40bb4e889e8 36-37
+shared/rules/worlds.v0.json
+  s_c59e75f414be00::t_9b769cfd2d9f20 5-10,15-18,22-29,33-40,44-51,55-62,67-72,77-80,85-88,92-99,103-110,114-121,125-132,137-142,147-150,154-161,165-172,176-183,187-194,198-205,210-215,220-223,227-234,238-245,249-256,260-267,271-278,283-286,291-296,301-304,308-315,319-326,330-337,341-348,352-359,363-370,374-381,386-391,396-399,404-407,411-418,422-429,433-440,444-451,456-463,468-475,480-485,489-496,500-507,511-518,522-529,534-541,546-553,558-563,568-571,575-582,586-593,597-604,608-615,620-627,632-639,644-651,656-661,666-669,673-680,684-691,695-702,706-713,719-726,732-739,744-751,756-763,768-775,780-785,790-793,798-801,805-812,816-823,827-834,838-845,849-856,861-866,871-874,879-882,886-893,897-904,908-915,919-926,931-936,941-944,948-955,959-966,970-977,981-988,992-999,1004-1009,1014-1017,1022-1025,1029-1036,1040-1047,1051-1058,1062-1069,1074-1079,1084-1087,1092-1095,1099-1106,1110-1117,1121-1128,1132-1139,1144-1149,1154-1157,1162-1165,1170-1173,1177-1184,1188-1195,1199-1206,1210-1217,1222-1227,1232-1235,1240-1243,1248-1251,1256-1259,1264-1267,1272-1275,1280-1283,1288-1291,1296-1299,1303-1310,1314-1321,1325-1332,1336-1343,1348-1353,1358-1361,1366-1371,1376-1379,1384-1389,1394-1397,1402-1405,1410-1413,1418-1421,1426-1429,1434-1439,1444-1447,1452-1455,1460-1463,1468-1473,1478-1481,1486-1491,1496-1499,1504-1507,1512-1515,1520-1523,1528-1533,1538-1541,1545-1552,1556-1563,1567-1574,1578-1585,1590-1595,1600-1603,1607-1614,1618-1625,1629-1636,1640-1647,1651-1658,1662-1669,1673-1680,1685-1690,1695-1698,1702-1709,1713-1720,1724-1731,1735-1742,1748-1753,1755-2114,2117-2121,2125-2129,2133-2137,2141-2145,2150-2153,2158-2161,2165-2169,2173-2177,2181-2193,2198-2201,2205-2209,2216-2221,2227-2232,2236-2241,2243-2294,2298-2303,2305-2364,2368-2373,2375-2437,2441-2446,2448-2499,2503-2508,2510-2569,2573-2578,2583-2586,2591-2594,2599-2602,2607-2610,2615-2618,2623-2626,2631-2634,2639-2698,2703-2706,2711-2716,2718-2959,2963-2968,2970-3021,3025-3030,3032-3115,3119-3124,3126-3193,3197-3202,3204-3255,3259-3264,3266-3341,3345-3350,3352-3443,3447-3452,3454-3654,3656-3723,3727-3732,3734-3793,3797-3802,3804-3863,3867-3872,3874-3933,3937-3942,3944-4003,4007-4012,4014-4400,4404-4409,4411-4578
+docs/progress/slice-lifecycle.md
+  s_c59e75f414be00::t_2ebbea0186a129 371
+shared/rules/interactables.v0.json
+  s_c59e75f414be00::t_7ea3c826b7eca7 11-14,16-18
+  s_c59e75f414be00::t_de241a10d9a93b 15
+client/scripts/ground_wall_factory.gd
+  s_c59e75f414be00::t_f6b821b9e248b2 8
+  s_c59e75f414be00::t_5bb657118bfda4 196-197,201-202,204-208
+  s_c59e75f414be00::t_ccb6199c817b18 203
+  s_c59e75f414be00::t_f906536ed56aa4 209
+client/scripts/bot_assertion_handlers.gd
+  s_c59e75f414be00::t_7cdcf4d2769fc3 42
+  s_c59e75f414be00::t_b41f035219f432 11
+  s_c59e75f414be00::t_2b230f03318054 41
+client/scripts/client_constants.gd
+  s_c59e75f414be00::t_2226c85eafc14c 24
+server/internal/game/rules.go
+  s_c59e75f414be00::t_6162e2f5cdffe9 1507-1509
+  s_c59e75f414be00::t_f238d490cf8f37 473
+client/tests/test_fog_of_war_overlay.gd
+  s_c59e75f414be00::t_978ef3e8426859 19
+  s_c59e75f414be00::t_fea3c398f6a14c 146-156
+  s_c59e75f414be00::t_24251a8f720098 144-145
+shared/assets/town_presentation.v0.json
+  s_c59e75f414be00::t_0d3ea1a3776a7c 1-17
+client/scripts/town_presentation_loader.gd
+  s_c59e75f414be00::t_523873e956e15f 1-57
+client/tests/test_town_night_lighting.gd
+  s_c59e75f414be00::t_064fb9f4ff80d2 1-35,37-52,54-55,57
+  s_c59e75f414be00::t_b135aead3a4077 36
+  s_c59e75f414be00::t_a47ac7a63001f6 53,56
+server/internal/game/interactables.go
+  s_c59e75f414be00::t_16f4bd5b52e9d0 55-60
+server/internal/game/dungeon_obstacle_variety.go
+  s_c59e75f414be00::t_7f060b7e36622b 49
+client/tests/test_coop_client.gd
+  s_c59e75f414be00::t_b9acb1bfff7299 853-862
+  s_c59e75f414be00::t_be36cf16872de2 46
+tools/bot/scenarios/client/18_town_floor_click_to_move.json
+  s_c59e75f414be00::t_e76f613dbad56b 20,25
+tools/assets/gen_town_perimeter.py
+  s_c59e75f414be00::t_33caeb0be8272e 1-97
+server/internal/game/monster_navigation_traits.go
+  s_c59e75f414be00::t_77bd5f8428a718 63
+scripts/client_smoke.sh
+  s_c59e75f414be00::t_69f787fb06a87e 228
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_c59e75f414be00::t_70a39e4a6110d6 3,6,13,21
+  s_c59e75f414be00::t_1e8460934449cc 7
+client/scripts/bot_intent_reject_assertions.gd
+  s_c59e75f414be00::t_90d0f91b5e3be6 1-24
+shared/assets/town_presentation.v0.schema.json
+  s_c59e75f414be00::t_e8b497bf6e3e12 1-51
+client/scripts/bot_intent_reject_assertions.gd.uid
+  s_c59e75f414be00::t_82ff250752097e 1
+client/scripts/bot_step_catalog.gd
+  s_c59e75f414be00::t_994830a8abcb23 36
+  s_c59e75f414be00::t_8fdf7054455290 17
+client/scripts/hero_visibility_field.gd
+  s_c59e75f414be00::t_ce47f65d7c9e3f 12-14
+shared/rules/worlds.v0.schema.json
+  s_c59e75f414be00::t_2348c860925f1e 41
+PROGRESS.md
+  s_c59e75f414be00::t_132e9497307c78 26,28
+server/internal/game/town_perimeter_test.go
+  s_c59e75f414be00::t_127f1a62c8152b 1-24,28,35-70
+  s_c59e75f414be00::t_d91ebc0f9474c4 25-27,29-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "0f8693f0af15f97580b71f89c1a71bb9c24d7341",
+  "prompts": {},
+  "sessions": {
+    "s_c59e75f414be00": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7df61bcf-ccb4-4311-b93d-948feb86d3df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

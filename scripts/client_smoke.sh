@@ -233,6 +233,7 @@ run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement
 run_gate "GDScript entity tick smoothing test" "[gdtest] PASS: test_entity_tick_smoothing" res://tests/test_entity_tick_smoothing.gd
 run_gate "GDScript combat feel presentation loader test" "[gdtest] PASS: test_combat_feel_presentation_loader" res://tests/test_combat_feel_presentation_loader.gd
 run_gate "GDScript loot tick smoothing test" "[gdtest] PASS: test_loot_tick_smoothing" res://tests/test_loot_tick_smoothing.gd
+run_gate "GDScript interactable tick smoothing test" "[gdtest] PASS: test_interactable_tick_smoothing" res://tests/test_interactable_tick_smoothing.gd
 run_gate "GDScript projectile tick smoothing test" "[gdtest] PASS: test_projectile_tick_smoothing" res://tests/test_projectile_tick_smoothing.gd
 run_gate "GDScript mobility skill presentation test" "[gdtest] PASS: test_mobility_skill_presentation" res://tests/test_mobility_skill_presentation.gd
 run_gate "GDScript dungeon torch placement test" "[gdtest] PASS: test_dungeon_torch_placement" res://tests/test_dungeon_torch_placement.gd

@@ -8,10 +8,12 @@ var _player_smoothing: EntityTickSmoothing
 var _enabled := true
 var _projectiles_enabled := true
 var _loot_enabled := true
+var _interactables_enabled := true
 var _duration := 0.1
 var _snap_distance := 2.0
 var _projectile_snap_distance := 8.0
 var _loot_snap_distance := 2.0
+var _interactable_snap_distance := 2.0
 var _config_loaded := false
 
 
@@ -24,10 +26,12 @@ func ensure_config() -> void:
 	_enabled = bool(cfg.get("enabled", true))
 	_projectiles_enabled = bool(cfg.get("projectiles_enabled", true))
 	_loot_enabled = bool(cfg.get("loot_enabled", true))
+	_interactables_enabled = bool(cfg.get("interactables_enabled", true))
 	_duration = float(cfg.get("snapshot_interval_seconds", 0.1))
 	_snap_distance = float(cfg.get("snap_distance", 2.0))
 	_projectile_snap_distance = float(cfg.get("projectile_snap_distance", _snap_distance))
 	_loot_snap_distance = float(cfg.get("loot_snap_distance", _snap_distance))
+	_interactable_snap_distance = float(cfg.get("interactable_snap_distance", _snap_distance))
 	if _player_smoothing != null:
 		_player_smoothing.configure(_duration, _snap_distance)
 
@@ -89,6 +93,23 @@ func apply_loot_authoritative(rec: Dictionary, node: Node3D, target: Vector3, is
 	ensure_config()
 	var smoothing := smoothing_for_rec(rec, _loot_snap_distance)
 	if is_new or not _enabled or not _loot_enabled:
+		smoothing.reset(target)
+		node.position = target
+		return 0.0
+	var prev := node.position
+	smoothing.begin_segment(target, prev)
+	if not smoothing.is_active():
+		node.position = target
+		return smoothing.last_segment_distance()
+	return smoothing.last_segment_distance()
+
+
+func apply_interactable_authoritative(rec: Dictionary, node: Node3D, target: Vector3, is_new: bool) -> float:
+	if node == null:
+		return 0.0
+	ensure_config()
+	var smoothing := smoothing_for_rec(rec, _interactable_snap_distance)
+	if is_new or not _enabled or not _interactables_enabled:
 		smoothing.reset(target)
 		node.position = target
 		return 0.0
@@ -163,6 +184,10 @@ func get_active_projectile_debug_state(entities: Dictionary) -> Dictionary:
 
 func get_active_loot_debug_state(entities: Dictionary) -> Dictionary:
 	return _get_active_type_debug_state(entities, "loot")
+
+
+func get_active_interactable_debug_state(entities: Dictionary) -> Dictionary:
+	return _get_active_type_debug_state(entities, "interactable")
 
 
 func get_player_debug_state() -> Dictionary:

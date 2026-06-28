@@ -13,7 +13,7 @@ const STEP_TYPES_WAIT := [
 	"wait_multiplayer_panel", "wait_settings_panel", "wait_pause_menu", "wait_character_progression",
 	"wait_skill_progression", "wait_skill_bar",
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
-	"wait_movement_visual_smoothing", "wait_entity_tick_smoothing", "wait_projectile_tick_smoothing", "wait_mobility_skill_smoothing", "wait_dungeon_torch_lights", "wait_command_retarget_grace", "wait_melee_lunge",
+	"wait_movement_visual_smoothing", "wait_entity_tick_smoothing", "wait_projectile_tick_smoothing", "wait_loot_tick_smoothing", "wait_interactable_tick_smoothing", "wait_mobility_skill_smoothing", "wait_dungeon_torch_lights", "wait_command_retarget_grace", "wait_melee_lunge",
 	"wait_wall_layout", "wait_fog_of_war", "wait_intent_rejected", "wait_shop_panel", "wait_stash_panel", "wait_market_panel", "wait_bishop_panel", "wait_mercenary_panel", "wait_blacksmith_panel",
 	"wait_market_board_badges", "wait_boss_health_bar", "wait_remote_player_count",
 	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker", "wait_elite_objective_minimap",

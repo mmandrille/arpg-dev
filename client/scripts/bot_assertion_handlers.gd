@@ -494,6 +494,14 @@ static func projectile_tick_smoothing_matches(step: Dictionary, state: Dictionar
 	return _tick_smoothing_state_matches(step, state.get("projectile_tick_smoothing", {}))
 
 
+static func loot_tick_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
+	return _tick_smoothing_state_matches(step, state.get("loot_tick_smoothing", {}))
+
+
+static func interactable_tick_smoothing_matches(step: Dictionary, state: Dictionary) -> bool:
+	return _tick_smoothing_state_matches(step, state.get("interactable_tick_smoothing", {}))
+
+
 static func _tick_smoothing_state_matches(step: Dictionary, smoothing: Dictionary) -> bool:
 	if step.has("active") and bool(smoothing.get("active", false)) != bool(step.get("active", false)):
 		return false

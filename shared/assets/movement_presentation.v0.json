@@ -5,7 +5,11 @@
     "snapshot_interval_seconds": 0.1,
     "snap_distance": 2.0,
     "projectiles_enabled": true,
-    "projectile_snap_distance": 8.0
+    "projectile_snap_distance": 8.0,
+    "loot_enabled": true,
+    "loot_snap_distance": 2.0,
+    "interactables_enabled": true,
+    "interactable_snap_distance": 2.0
   },
   "mobility_smoothing": {
     "enabled": true,

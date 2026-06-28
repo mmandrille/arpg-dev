@@ -1729,6 +1729,9 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		_entity_tick_smoothing.apply_projectile_authoritative(rec, node, server_pos, is_new)
 		rec["last_server_pos"] = server_pos
 		return
+	elif rec["type"] == "loot":
+		var loot_node := rec["node"] as Node3D
+		_entity_tick_smoothing.apply_loot_authoritative(rec, loot_node, server_pos, is_new)
 	else:
 		var node := rec["node"] as Node3D
 		var segment_distance := 0.0
@@ -5742,6 +5745,7 @@ func get_bot_state() -> Dictionary:
 		"movement_visual_smoothing": _movement_visual_smoothing.get_debug_state(character_visual),
 		"entity_tick_smoothing": _entity_tick_smoothing.get_player_debug_state(),
 		"projectile_tick_smoothing": _entity_tick_smoothing.get_active_projectile_debug_state(entities),
+		"loot_tick_smoothing": _entity_tick_smoothing.get_active_loot_debug_state(entities),
 		"mobility_skill_smoothing": _mobility_presentation.get_debug_state(),
 		"dungeon_torch_lights": _dungeon_torch_lights.get_debug_state() if _dungeon_torch_lights != null else {},
 		"movement_feel": _player_movement_feel.get_debug_state(),

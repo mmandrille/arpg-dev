@@ -1,0 +1,33 @@
+client/scripts/entity_tick_smoothing_runtime.gd
+  s_7749608524bd5c::t_273730d66a8450 29,34
+  s_7749608524bd5c::t_833788ec68f017 11,16
+  s_7749608524bd5c::t_1333730dd2c841 189-192
+  s_7749608524bd5c::t_a56a678380bb1d 107-123
+client/scripts/main.gd
+  s_7749608524bd5c::t_b4ec45d943b606 5752
+  s_7749608524bd5c::t_2a7523325e4bbe 1735-1737
+scripts/client_smoke.sh
+  s_7749608524bd5c::t_8bda0bbefb4516 236
+client/tests/test_interactable_tick_smoothing.gd
+  s_7749608524bd5c::t_fa932346c852e9 1-32
+tools/bot/scenarios/client/87_interactable_tick_smoothing.json
+  s_7749608524bd5c::t_94ef44d570aee4 1-14
+docs/as-built/v361_interactable-tick-smoothing.md
+  s_7749608524bd5c::t_5fc882a4bbf2c6 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "4655fdb04032315c1a808c08238ac1edbdabd224",
+  "prompts": {},
+  "sessions": {
+    "s_7749608524bd5c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b83caa91-7dea-4a79-a4c6-22402b53d4b5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

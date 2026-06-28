@@ -1,0 +1,37 @@
+shared/rules/main_config.v0.json
+  s_7749608524bd5c::t_14cf753d23db27 4
+shared/golden/skill_points_and_magic_bolt.json
+  s_7749608524bd5c::t_a1ba651fd307d0 62-63,71-72
+  s_7749608524bd5c::t_f3dd3a1db7b7bf 44-45
+  s_7749608524bd5c::t_6c02d3e706febc 34
+  s_7749608524bd5c::t_0e7523d901a8f6 53-54
+server/internal/game/game_test.go
+  s_7749608524bd5c::t_5bfce6350106d3 128
+shared/golden/character_progression.json
+  s_7749608524bd5c::t_3bc16397771eed 280
+  s_7749608524bd5c::t_a412be68f60950 38,78,118,158,200,240
+shared/rules/combat.v0.json
+  s_7749608524bd5c::t_c548a1faeba960 8
+docs/as-built/v363_basic-attack-cooldown-tuning.md
+  s_7749608524bd5c::t_46fdf364d7a926 1-16
+PROGRESS.md
+  s_7749608524bd5c::t_91923a851c57b2 26,31
+docs/progress/slice-lifecycle.md
+  s_7749608524bd5c::t_3177360c6d26d1 374-377
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "2eee578f666af8aa8875099c2855e5f1c77563a3",
+  "prompts": {},
+  "sessions": {
+    "s_7749608524bd5c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b83caa91-7dea-4a79-a4c6-22402b53d4b5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

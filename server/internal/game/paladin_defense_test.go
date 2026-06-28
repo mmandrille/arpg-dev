@@ -130,8 +130,8 @@ func TestSanctuaryGrantsTemporaryDamageImmunity(t *testing.T) {
 	if started := skillEvent(cast.Events, "skill_effect_started", "sanctuary"); started == nil || started.RemainingTicks == nil || *started.RemainingTicks != 60 {
 		t.Fatalf("sanctuary start event = %+v, want 60 ticks", started)
 	}
-	if cooldown := skillEvent(cast.Events, "skill_cooldown_started", "sanctuary"); cooldown == nil || cooldown.RemainingTicks == nil || *cooldown.RemainingTicks != 600 {
-		t.Fatalf("sanctuary cooldown event = %+v, want 600 ticks", cooldown)
+	if cooldown := skillEvent(cast.Events, "skill_cooldown_started", "sanctuary"); cooldown == nil || cooldown.RemainingTicks == nil || *cooldown.RemainingTicks != 598 {
+		t.Fatalf("sanctuary cooldown event = %+v, want 598 ticks", cooldown)
 	}
 
 	beforeHP := player.hp

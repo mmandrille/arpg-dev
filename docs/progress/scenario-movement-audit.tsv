@@ -196,7 +196,9 @@ client/81_command_retarget_grace.json	command_retarget_grace	godot_client	extend
 client/82_melee_lunge_micro_step.json	melee_lunge_micro_step	godot_client	extended	contract	0	0		
 client/83_camera_mode_setting.json	camera_mode_setting	godot_client	extended	contract	0	0		
 client/84_entity_tick_smoothing.json	entity_tick_smoothing	godot_client	extended	contract	2	2		
-client/85_projectile_tick_smoothing.json	projectile_tick_smoothing	godot_client	extended	contract	0	0		
+client/85_projectile_tick_smoothing.json	projectile_tick_smoothing	godot_client	extended	contract	0	0
+client/86_loot_tick_smoothing.json	loot_tick_smoothing	godot_client	extended	contract	0	0
+client/87_interactable_tick_smoothing.json	interactable_tick_smoothing	godot_client	extended	contract	0	0		
 client/86_mobility_skill_smoothing.json	mobility_skill_smoothing	godot_client	extended	contract	0	0		
 client/87_dungeon_torch_lights.json	dungeon_torch_lights	godot_client	extended	contract	0	0		
 client/88_torch_walk_visual.json	torch_walk_visual	godot_client	extended	contract	8	8		

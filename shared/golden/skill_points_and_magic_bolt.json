@@ -31,7 +31,7 @@
     ]
   },
   "attack_speed": {
-    "base_attack_interval_ticks": 14,
+    "base_attack_interval_ticks": 12,
     "min_effective_attack_speed": 0.25,
     "max_effective_attack_speed": 3,
     "cases": [
@@ -41,8 +41,8 @@
         "weapon_attack_speed": 1,
         "item_attack_speed_percent": 0,
         "expected_effective_attack_speed": 1.28125,
-        "expected_attack_interval_ticks": 11,
-        "expected_magic_bolt_cooldown_ticks": 22
+        "expected_attack_interval_ticks": 10,
+        "expected_magic_bolt_cooldown_ticks": 20
       },
       {
         "name": "greatsword_slow",
@@ -50,8 +50,8 @@
         "weapon_attack_speed": 0.7,
         "item_attack_speed_percent": 0,
         "expected_effective_attack_speed": 0.896875,
-        "expected_attack_interval_ticks": 16,
-        "expected_magic_bolt_cooldown_ticks": 32
+        "expected_attack_interval_ticks": 14,
+        "expected_magic_bolt_cooldown_ticks": 28
       },
       {
         "name": "positive_speed_item",
@@ -59,8 +59,8 @@
         "weapon_attack_speed": 1,
         "item_attack_speed_percent": 10,
         "expected_effective_attack_speed": 1.409375,
-        "expected_attack_interval_ticks": 10,
-        "expected_magic_bolt_cooldown_ticks": 20
+        "expected_attack_interval_ticks": 9,
+        "expected_magic_bolt_cooldown_ticks": 18
       },
       {
         "name": "negative_speed_item",
@@ -68,8 +68,8 @@
         "weapon_attack_speed": 1,
         "item_attack_speed_percent": -20,
         "expected_effective_attack_speed": 1.025,
-        "expected_attack_interval_ticks": 14,
-        "expected_magic_bolt_cooldown_ticks": 28
+        "expected_attack_interval_ticks": 12,
+        "expected_magic_bolt_cooldown_ticks": 24
       }
     ]
   },

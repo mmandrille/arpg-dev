@@ -125,7 +125,7 @@ func writeGolden(t *testing.T, name string, v any) {
 // --- rules ------------------------------------------------------------------
 func TestLoadRules(t *testing.T) {
 	r := loadRules(t)
-	if r.MainConfig.Gameplay.BaseAttackIntervalTicks != 14 ||
+	if r.MainConfig.Gameplay.BaseAttackIntervalTicks != 12 ||
 		r.MainConfig.Gameplay.BaseMovementSpeed != 0.75 ||
 		r.MainConfig.Gameplay.BaseDropRatePercent != 25 ||
 		r.MainConfig.Gameplay.RespecCostGold != 0 {

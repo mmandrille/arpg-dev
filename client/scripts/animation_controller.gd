@@ -33,10 +33,12 @@ func set_locomotion(is_moving: bool) -> void:
 	_play(WALK if is_moving else IDLE)
 
 
-func play_one_shot(name: String, attack_mode: String = "") -> void:
+func play_one_shot(name: String, attack_mode: String = "", speed_scale: float = 1.0) -> void:
 	if _terminal:
 		return
 	_one_shot = name
+	if _player != null:
+		_player.speed_scale = maxf(speed_scale, 0.01)
 	if _play(name):
 		MeleeLungePresentationScript.start(_player, name, attack_mode)
 
@@ -81,6 +83,8 @@ func _on_finished(name: String) -> void:
 		return
 	if name == _one_shot:
 		_one_shot = ""
+		if _player != null:
+			_player.speed_scale = 1.0
 		_play(WALK if _moving else IDLE)
 
 

@@ -24,7 +24,7 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 19_full_equipment.json	full_equipment	protocol	extended	contract	0	0		
 20_dungeon_equipment_drops.json	dungeon_equipment_drops	protocol	extended	contract	0	0		
 21_monster_rarity_loot_scaling.json	monster_rarity_loot_scaling	protocol	extended	contract	0	0		
-22_combat_stat_effects.json	combat_stat_effects	protocol	pack	setup-eliminable	4	4		
+22_combat_stat_effects.json	combat_stat_effects	protocol	pack	setup-eliminable	3	3		
 23_true_coop_session.json	true_coop_session	protocol	pack	contract	0	0		
 24_boss_floor_gate.json	boss_floor_gate	protocol	pack	contract	2	2		
 25_inventory_capacity_and_paper_doll.json	inventory_capacity_and_paper_doll	protocol	extended	setup-eliminable	1	1		

@@ -1,0 +1,33 @@
+client/tests/test_combat_feel_presentation_loader.gd.uid
+  s_7749608524bd5c::t_7b57fe0b68280e 1
+docs/progress/scenario-movement-audit.tsv
+  s_7749608524bd5c::t_4a779a702b4d9b 27
+tools/bot/scenarios/22_combat_stat_effects.json
+  s_7749608524bd5c::t_3cf544a14d1809 77
+client/scripts/combat_feel_presentation_loader.gd.uid
+  s_7749608524bd5c::t_7b57fe0b68280e 1
+client/tests/test_attack_animation_scaling.gd.uid
+  s_7749608524bd5c::t_ceda9e4f8b3b24 1
+client/tests/test_interactable_tick_smoothing.gd.uid
+  s_7749608524bd5c::t_cdab92b8969516 1
+client/scripts/attack_animation_scaling.gd.uid
+  s_7749608524bd5c::t_ceda9e4f8b3b24 1
+client/tests/test_loot_tick_smoothing.gd.uid
+  s_7749608524bd5c::t_a1d513927808c8 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "258ee72371ad99c11738b654ae243af0f7d8e0f1",
+  "prompts": {},
+  "sessions": {
+    "s_7749608524bd5c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b83caa91-7dea-4a79-a4c6-22402b53d4b5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1401,7 +1401,7 @@
           "monster_def_id": "skill_xp_level7_dummy",
           "position": {
             "x": 4,
-            "y": 6
+            "y": 12
           }
         },
         {
@@ -2715,8 +2715,8 @@
           "type": "loot",
           "item_def_id": "upgrade_shard",
           "position": {
-            "x": 13,
-            "y": 12
+            "x": 18,
+            "y": 14
           }
         },
         {

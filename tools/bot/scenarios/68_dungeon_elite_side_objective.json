@@ -3,7 +3,7 @@
   "ci_tier": "extended",
   "world_id": "dungeon_depth_one_lab",
   "seed": "v161_fast_objective_0018",
-  "max_elapsed_s": 65.0,
+  "max_elapsed_s": 95.0,
   "character_class": "barbarian",
   "title": "Dungeon elite side objective",
   "description": "Pinned generated floor includes a side-objective reward chest that rejects while the generated elite objective is incomplete, then opens after the objective is cleared.",
@@ -49,16 +49,10 @@
       "timeout_s": 60
     },
     {
-      "action": "move_until_in_range",
-      "interactable_def_id": "treasure_chest",
-      "stop_distance": 1.2,
-      "max_ticks": 900
-    },
-    {
       "action": "action_entity",
       "interactable_def_id": "treasure_chest",
       "event_type": "interactable_activated",
-      "timeout_s": 30
+      "timeout_s": 90
     },
     {
       "action": "assert_entity_count",

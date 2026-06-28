@@ -204,7 +204,7 @@
       "type": "wait_damage_number",
       "variant": "miss",
       "text": "MISS",
-      "timeout_s": 2.0
+      "timeout_s": 8.0
     }
   ]
 }

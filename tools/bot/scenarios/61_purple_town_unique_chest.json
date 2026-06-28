@@ -1,7 +1,7 @@
 {
   "id": "purple_town_unique_chest",
   "ci_tier": "extended",
-  "world_id": "dungeon_levels",
+  "world_id": "vendor_lab",
   "seed": "purple_town_unique_chest_seed",
   "title": "Purple town unique chest",
   "description": "Open the purple town test chest and prove a selected unique can be dragged into inventory.",
@@ -15,25 +15,14 @@
   },
   "steps": [
     {
-      "action": "move_until_player_position",
-      "x": 8,
-      "y": 10,
-      "tolerance": 1.0,
-      "pathfind": true,
-      "max_ticks": 160
-    },
-    {
       "action": "action_entity",
       "interactable_def_id": "town_unique_chest",
-      "target_id": "1010",
-      "allow_missing_target": true,
       "event_type": "unique_chest_opened",
       "timeout_s": 10
     },
     {
       "action": "take_unique_chest_item",
       "interactable_def_id": "town_unique_chest",
-      "chest_entity_id": "1010",
       "display_name": "Embercall Blade"
     },
     {

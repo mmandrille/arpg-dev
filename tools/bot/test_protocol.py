@@ -536,9 +536,9 @@ def test_load_scenarios_discovers_ranger_volley_and_visual_showcase():
 def test_load_scenarios_discovers_purple_town_unique_chest():
     scenarios = load_scenarios()
     chest = next(s for s in scenarios if s.id == "purple_town_unique_chest")
-    assert chest.world_id == "dungeon_levels"
-    assert chest.steps[0].get("action") == "move_until_player_position"
-    assert chest.steps[1].get("interactable_def_id") == "town_unique_chest"
+    assert chest.world_id == "vendor_lab"
+    assert chest.steps[0].get("action") == "action_entity"
+    assert chest.steps[0].get("interactable_def_id") == "town_unique_chest"
     assert {"type": "event_seen", "event_type": "unique_chest_opened"} in chest.assertions
     assert {"type": "event_seen", "event_type": "unique_chest_item_taken"} in chest.assertions
     assert {"type": "inventory_count", "display_name": "Embercall Blade", "equals": 1} in chest.assertions

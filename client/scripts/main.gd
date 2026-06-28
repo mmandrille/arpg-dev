@@ -3157,10 +3157,6 @@ func _activate_or_approach_interactable(target_id: String, rec: Dictionary) -> v
 		"target_id": target_id,
 		"interactable_def_id": interactable_def_id,
 	}
-	if interactable_def_id == "teleporter":
-		_send_action_intent(target_id)
-		_attack_cooldown = ClientConstants.SEND_INTERVAL
-		return
 	var target_node := rec["node"] as Node3D
 	if target_node == null:
 		pending_interactable_action.clear()

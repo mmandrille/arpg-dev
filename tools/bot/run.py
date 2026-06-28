@@ -816,7 +816,20 @@ async def execute_step(
             return
         event_type = step.get("event_type")
         if event_type:
-            await wait_for_event(ws, state, str(event_type), loop, timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)))
+            from tools.bot.action_runtime import wait_for_event_with_action_retries as wait_for_event_with_action_retries_impl
+
+            await wait_for_event_with_action_retries_impl(
+                ws,
+                state,
+                session_id,
+                target_id=str(target["id"]),
+                event_type=str(event_type),
+                timeout_s=float(step.get("timeout_s", SLICE_TIMEOUT_S)),
+                loop=loop,
+                make_envelope=make_envelope,
+                wait_for_accept=wait_for_accept,
+                pump_one=pump_one,
+            )
         return
 
     if action == "kill_monsters":

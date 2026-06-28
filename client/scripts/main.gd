@@ -5361,7 +5361,7 @@ func _try_complete_level_loading() -> void:
 	if not _level_loading_active or not _level_loading_walls_ready or _level_loading_overlay == null:
 		return
 	var elapsed := (Time.get_ticks_msec() / 1000.0) - _level_loading_started_at
-	var min_display := CombatFeelConfigScript.LEVEL_LOADING_MIN_DISPLAY_SECONDS
+	var min_display := CombatFeelConfigScript.level_loading_min_display_seconds()
 	if elapsed < min_display:
 		var timer := get_tree().create_timer(min_display - elapsed)
 		timer.timeout.connect(_try_complete_level_loading, CONNECT_ONE_SHOT)

@@ -23,7 +23,7 @@ Last updated: 2026-06-28
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v358 — scenario-movement-decoupling |
+| **Latest completed slice** | v359 — presentation-feel-catalog |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green (2026-06-28) |
 | **Next slice** | Run `/next` for new work |

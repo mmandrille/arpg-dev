@@ -3,6 +3,7 @@
 extends SceneTree
 
 const CommandRetargetGraceScript := preload("res://scripts/command_retarget_grace.gd")
+const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -57,7 +58,7 @@ func _test_grace_expires_before_long_cooldown() -> void:
 func _test_long_recovery_floor_click_dispatches_immediately() -> void:
 	var grace := CommandRetargetGraceScript.new()
 	var client := FakeClient.new()
-	var sent := grace.dispatch_or_queue_floor(Vector3(8.0, 0.0, 9.0), CommandRetargetGraceScript.DEFAULT_GRACE_SECONDS + 0.10, client, 42, Callable(), Callable())
+	var sent := grace.dispatch_or_queue_floor(Vector3(8.0, 0.0, 9.0), CombatFeelConfigScript.command_retarget_grace_seconds() + 0.10, client, 42, Callable(), Callable())
 	var state := grace.get_debug_state()
 	_assert_true("long recovery sends fresh floor click", sent)
 	_assert_false("long recovery does not queue stale floor click", bool(state.get("active", true)))

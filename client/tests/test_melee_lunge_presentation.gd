@@ -3,6 +3,7 @@
 extends SceneTree
 
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
+const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 const MeleeLungePresentationScript := preload("res://scripts/melee_lunge_presentation.gd")
 
 var _pass_count: int = 0
@@ -27,7 +28,7 @@ func _test_melee_attack_lunges_and_recovers() -> void:
 	_assert_true("melee lunge active", bool(lunge.get("active", false)))
 	_assert_eq("melee lunge count", int(lunge.get("count", 0)), 1)
 	_assert_true("melee lunge offset", float(lunge.get("offset_z", 0.0)) > 0.05)
-	await create_timer(MeleeLungePresentationScript.RECOVERY_SECONDS + 0.05).timeout
+	await create_timer(CombatFeelConfigScript.melee_lunge_recovery_seconds() + 0.05).timeout
 	lunge = controller.get_debug_state().get("melee_lunge", {})
 	_assert_false("melee lunge recovers", bool(lunge.get("active", true)))
 	_assert_true("melee lunge offset settled", float(lunge.get("offset_length", 1.0)) <= 0.02)

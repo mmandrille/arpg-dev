@@ -2,7 +2,6 @@ class_name CommandRetargetGrace
 extends RefCounted
 
 const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
-const DEFAULT_GRACE_SECONDS := CombatFeelConfigScript.COMMAND_RETARGET_GRACE_SECONDS
 
 var active: bool = false
 var kind: String = ""
@@ -23,7 +22,9 @@ func clear() -> void:
 	remaining_seconds = 0.0
 
 
-func queue_floor(next_ground: Vector3, duration_seconds: float = DEFAULT_GRACE_SECONDS) -> void:
+func queue_floor(next_ground: Vector3, duration_seconds: float = -1.0) -> void:
+	if duration_seconds <= 0.0:
+		duration_seconds = CombatFeelConfigScript.command_retarget_grace_seconds()
 	if duration_seconds <= 0.0:
 		clear()
 		return
@@ -58,7 +59,7 @@ func pop_ready(local_cooldown: float) -> Dictionary:
 func dispatch_or_queue_floor(next_ground: Vector3, local_cooldown: float, client, last_server_tick: int, before_dispatch: Callable, mark_walking: Callable) -> bool:
 	if client == null:
 		return false
-	if local_cooldown > 0.0 and local_cooldown <= DEFAULT_GRACE_SECONDS:
+	if local_cooldown > 0.0 and local_cooldown <= CombatFeelConfigScript.command_retarget_grace_seconds():
 		_prepare_floor_command(before_dispatch, mark_walking)
 		queue_floor(next_ground)
 		return false

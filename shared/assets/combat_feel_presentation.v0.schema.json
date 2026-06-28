@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/combat_feel_presentation.v0.schema.json",
+  "title": "Combat feel presentation (v0)",
+  "description": "Client-only combat and movement feel tuning. No gameplay authority.",
+  "type": "object",
+  "required": [
+    "version",
+    "input_buffer_seconds",
+    "command_retarget_grace_seconds",
+    "movement_smoothing",
+    "melee_lunge",
+    "level_loading_min_display_seconds"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "input_buffer_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 2.0
+    },
+    "command_retarget_grace_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 2.0
+    },
+    "movement_smoothing": {
+      "type": "object",
+      "required": ["catch_up_speed", "max_offset", "reset_distance", "settle_epsilon"],
+      "additionalProperties": false,
+      "properties": {
+        "catch_up_speed": { "type": "number", "exclusiveMinimum": 0 },
+        "max_offset": { "type": "number", "exclusiveMinimum": 0 },
+        "reset_distance": { "type": "number", "exclusiveMinimum": 0 },
+        "settle_epsilon": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "melee_lunge": {
+      "type": "object",
+      "required": ["distance", "recovery_seconds", "settle_epsilon"],
+      "additionalProperties": false,
+      "properties": {
+        "distance": { "type": "number", "exclusiveMinimum": 0 },
+        "recovery_seconds": { "type": "number", "exclusiveMinimum": 0 },
+        "settle_epsilon": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "level_loading_min_display_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 5.0
+    }
+  }
+}

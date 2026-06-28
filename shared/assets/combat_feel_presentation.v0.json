@@ -13,5 +13,11 @@
     "recovery_seconds": 0.14,
     "settle_epsilon": 0.01
   },
-  "level_loading_min_display_seconds": 0.55
+  "level_loading_min_display_seconds": 0.55,
+  "attack_animation": {
+    "enabled": true,
+    "baseline_attack_speed": 1.0,
+    "min_speed_scale": 0.75,
+    "max_speed_scale": 2.5
+  }
 }

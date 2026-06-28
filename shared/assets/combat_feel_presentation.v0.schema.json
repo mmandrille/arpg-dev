@@ -50,6 +50,17 @@
       "type": "number",
       "exclusiveMinimum": 0,
       "maximum": 5.0
+    },
+    "attack_animation": {
+      "type": "object",
+      "required": ["enabled", "baseline_attack_speed", "min_speed_scale", "max_speed_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "baseline_attack_speed": { "type": "number", "exclusiveMinimum": 0 },
+        "min_speed_scale": { "type": "number", "exclusiveMinimum": 0 },
+        "max_speed_scale": { "type": "number", "exclusiveMinimum": 0 }
+      }
     }
   }
 }

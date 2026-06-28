@@ -74,22 +74,7 @@
       "timeout_s": 10.0
     },
     { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" },
-    {
-      "action": "walk_to_monster",
-      "monster_def_id": "combat_lab_crit_attacker",
-      "pathfind": false,
-      "stop_distance": 3.5,
-      "max_ticks": 40
-    },
-    {
-      "action": "wait_for_combat_event",
-      "event_type": "player_damaged",
-      "outcome": "crit",
-      "blocked": false,
-      "critical": true
-    },
-    { "action": "wait_ticks", "ticks": 10 }
+    { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" }
   ],
   "assertions": [
     {

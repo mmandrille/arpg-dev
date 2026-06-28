@@ -1,12 +1,12 @@
 {
   "id": "pack_aggro_and_dungeon_packs",
   "ci_tier": "extended",
-  "world_id": "dungeon_levels",
+  "world_id": "dungeon_depth_one_lab",
   "seed": "v76_pack_aggro",
   "max_elapsed_s": 36.0,
   "character_class": "barbarian",
   "title": "Pack aggro and dungeon packs",
-  "description": "Descend into a generated dungeon, prove packed monster population, and verify one pull wakes nearby pack support.",
+  "description": "On a generated dungeon floor, prove packed monster population and verify one pull wakes nearby pack support.",
   "debug_progression": {
     "level": 6,
     "experience": 0,
@@ -20,11 +20,6 @@
     }
   },
   "steps": [
-    {
-      "action": "use_stair",
-      "direction": "down",
-      "max_ticks": 120
-    },
     {
       "action": "assert_entity_count",
       "entity_type": "monster",
@@ -58,14 +53,6 @@
     {
       "type": "current_level",
       "equals": -1
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": 0
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": -1
     },
     {
       "type": "entity_count",

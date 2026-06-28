@@ -17,11 +17,6 @@
       "slot": "main_hand"
     },
     {
-      "action": "move_until_player_position",
-      "x": 2,
-      "y": 8
-    },
-    {
       "action": "action_until_event",
       "monster_def_id": "training_dummy_ranged",
       "event_type": "monster_killed"

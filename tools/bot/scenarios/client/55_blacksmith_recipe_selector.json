@@ -17,16 +17,8 @@
       "timeout_s": 10.0
     },
     {
-      "type": "click_floor",
-      "x": 12.0,
-      "z": 10.0
-    },
-    {
-      "type": "wait_player_near",
-      "x": 12.0,
-      "z": 10.0,
-      "distance": 1.5,
-      "timeout_s": 10.0
+      "type": "click_loot_item",
+      "item_def_id": "upgrade_shard"
     },
     {
       "type": "wait_event",

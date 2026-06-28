@@ -1,20 +1,13 @@
 {
   "id": "wall_floor_dungeon_rollout",
   "runner": "godot_client",
-  "world_id": "dungeon_levels",
+  "world_id": "generated_wall_lab",
   "seed": "dungeon_levels_fast_247",
   "title": "Wall/floor dungeon rollout",
-  "description": "Client renders polished dungeon floor/wall materials on the standard town-to-dungeon descent route.",
+  "description": "Client renders polished dungeon floor/wall materials on a generated depth-1 dungeon floor.",
   "ci_tier": "extended",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 10.0 },
-    {
-      "type": "wait_entity",
-      "entity_type": "interactable",
-      "interactable_def_id": "stairs_down",
-      "timeout_s": 15.0
-    },
-    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
     { "type": "wait_wall_layout", "current_level": -1, "at_least": 8, "generated_at_least": 4, "non_perimeter_at_least": 1, "timeout_s": 15.0 },
     { "type": "assert_wall_layout", "current_level": -1, "generated_at_least": 4, "non_perimeter_at_least": 1 }
   ]

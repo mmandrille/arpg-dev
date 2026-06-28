@@ -1,6 +1,6 @@
 {
   "id": "elite_minion_pack_ai",
-  "world_id": "dungeon_levels",
+  "world_id": "dungeon_depth_one_lab",
   "seed": "v161_fast_objective_0018",
   "character_class": "barbarian",
   "title": "Elite minion pack AI",
@@ -13,7 +13,6 @@
     "stats": { "str": 80, "dex": 80, "vit": 80, "magic": 5 }
   },
   "steps": [
-    { "action": "use_stair", "direction": "down", "max_ticks": 120 },
     {
       "action": "wait_until_assertion",
       "timeout_s": 10,
@@ -35,8 +34,6 @@
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },
-    { "type": "visited_levels_contain", "level": 0 },
-    { "type": "visited_levels_contain", "level": -1 },
     { "type": "event_seen", "event_type": "monster_damaged" },
     { "type": "combat_event_seen", "event_type": "player_damaged", "source_entity_type": "monster", "source_monster_pack_leader": false, "min_damage": 1 }
   ],

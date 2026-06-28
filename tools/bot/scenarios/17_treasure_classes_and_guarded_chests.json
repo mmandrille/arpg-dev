@@ -50,10 +50,6 @@
       "equals": -1
     },
     {
-      "type": "visited_levels_contain",
-      "level": 0
-    },
-    {
       "type": "entity_count",
       "entity_type": "monster",
       "monster_def_id": "dungeon_mob",

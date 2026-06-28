@@ -48,11 +48,6 @@
       "expect_reject": "skill_requirements_not_met"
     },
     {
-      "action": "move_until_in_range",
-      "monster_def_id": "combat_lab_soft_target",
-      "stop_distance": 7.5
-    },
-    {
       "action": "cast_skill",
       "skill_id": "magic_bolt",
       "monster_def_id": "combat_lab_soft_target",

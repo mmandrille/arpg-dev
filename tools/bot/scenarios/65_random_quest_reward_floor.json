@@ -1,16 +1,11 @@
 {
   "id": "random_quest_reward_floor",
   "ci_tier": "extended",
-  "world_id": "dungeon_levels",
+  "world_id": "dungeon_depth_one_lab",
   "seed": "v155_bot_quest_0015",
   "title": "Random quest reward floor",
   "description": "Pinned dungeon seed reaches a deterministic random quest reward floor with at least one reward chest, then opens it through the normal chest loot path.",
   "steps": [
-    {
-      "action": "use_stair",
-      "direction": "down",
-      "max_ticks": 120
-    },
     {
       "action": "assert_entity_count",
       "entity_type": "interactable",
@@ -35,14 +30,6 @@
     {
       "type": "current_level",
       "equals": -1
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": 0
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": -1
     },
     {
       "type": "entity_count",

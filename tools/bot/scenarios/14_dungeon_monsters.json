@@ -1,16 +1,11 @@
 {
   "id": "dungeon_monsters",
   "ci_tier": "extended",
-  "world_id": "dungeon_levels",
+  "world_id": "dungeon_depth_one_lab",
   "seed": "b8df85479acf246f2cbf097da6d6e641",
   "title": "Dungeon monsters",
-  "description": "Generated dungeon mobs spawn, aggro, and take combat input after descent.",
+  "description": "Generated dungeon mobs spawn, aggro, and take combat input on a depth-1 floor.",
   "steps": [
-    {
-      "action": "use_stair",
-      "direction": "down",
-      "max_ticks": 40
-    },
     {
       "action": "assert_entity_count",
       "entity_type": "monster",
@@ -44,10 +39,6 @@
     {
       "type": "current_level",
       "equals": -1
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": 0
     },
     {
       "type": "event_seen",

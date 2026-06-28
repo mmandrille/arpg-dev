@@ -136,4 +136,35 @@ make bot-visual              # optional — record all bot scenarios and watch r
 make bot-visual scenario=07_inventory_lab.json  # optional — replay one scenario by file name or id
 ```
 
+## Movement budget (v358)
+
+Bot scenarios must not include **incidental navigation** — travel that exists only to reach a
+feature under test. When path budgets, town layout, or movement tuning change, unrelated proofs
+should still pass.
+
+**Remediation order** (when movement is not the contract):
+
+1. Relocate to a lab world with spawn-adjacent entities (`vendor_lab`, `character_stats_lab`, etc.).
+2. Set `start_level` on a dedicated lab in `shared/rules/worlds.v0.json` when depth matters but
+   stair traversal does not (`monster_rarity_lab`, `dungeon_depth_one_lab`, `boss_floor_gate_lab`).
+3. `teleport_to_level` when multi-floor state is needed and teleporter discovery is not under test.
+4. `debug_progression` to skip grind walks and depth gates.
+5. Replace `walk_to_*` with `action_until_*`, `kill_monsters`, `pick_up_loot`, or `click_entity` /
+   `interactable_def_id`.
+6. Client bot: prefer `click_entity` over `click_floor` + `wait_player_near` when auto-approach is
+   not the contract.
+7. Delete strict duplicates only when another scenario or lower-level test owns the same proof.
+
+**Movement-contract allowlist** — these scenario ids may keep pathing / level-transition steps as
+part of their proof: `vertical_slice`, `gear_before_combat`, `path_maze`, `chase_lab`, `chase_maze`,
+`leash_lab`, `dungeon_levels`, `teleporter_lab`, `collision_lab`, `reachable_dungeon_obstacles`,
+`player_path_budget_lab`, `boss_floor_gate`, `flying_navigation_trait`, `line_of_sight_blockers`,
+`fog_of_war_radius`, `companion_ai_foundation`, `resource_support_mobility_unique_effects`, plus client
+`click_to_move`, `town_floor_click_to_move`, `town_teleporter_auto_approach`,
+`attack_move_sticky_targeting`, `movement_visual_smoothing`, `entity_tick_smoothing`,
+`mobility_skill_smoothing`, `melee_lunge_micro_step`, `torch_walk_visual`.
+
+Committed audit inventory: [`scenario-movement-audit.tsv`](scenario-movement-audit.tsv). Regenerate
+with `python -m tools.bot.scenario_movement_audit`; gate with `pytest tools/test_scenario_movement_audit.py`.
+
 ---

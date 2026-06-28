@@ -2,7 +2,6 @@ class_name CombatInputBuffer
 extends RefCounted
 
 const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
-const DEFAULT_ATTACK_BUFFER_SECONDS := CombatFeelConfigScript.ATTACK_BUFFER_SECONDS
 
 var target_id: String = ""
 var remaining_seconds: float = 0.0
@@ -12,7 +11,9 @@ func active() -> bool:
 	return target_id != "" and remaining_seconds > 0.0
 
 
-func queue_attack(target: String, duration_seconds: float = DEFAULT_ATTACK_BUFFER_SECONDS) -> void:
+func queue_attack(target: String, duration_seconds: float = -1.0) -> void:
+	if duration_seconds <= 0.0:
+		duration_seconds = CombatFeelConfigScript.attack_buffer_seconds()
 	if target == "" or duration_seconds <= 0.0:
 		clear()
 		return

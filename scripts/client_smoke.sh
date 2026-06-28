@@ -231,6 +231,7 @@ run_gate "GDScript fog LOS shadow cache test" "[gdtest] PASS: test_fog_los_shado
 run_gate "GDScript hero light source test" "[gdtest] PASS: test_hero_light_source" res://tests/test_hero_light_source.gd
 run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement_visual_smoothing" res://tests/test_movement_visual_smoothing.gd
 run_gate "GDScript entity tick smoothing test" "[gdtest] PASS: test_entity_tick_smoothing" res://tests/test_entity_tick_smoothing.gd
+run_gate "GDScript combat feel presentation loader test" "[gdtest] PASS: test_combat_feel_presentation_loader" res://tests/test_combat_feel_presentation_loader.gd
 run_gate "GDScript projectile tick smoothing test" "[gdtest] PASS: test_projectile_tick_smoothing" res://tests/test_projectile_tick_smoothing.gd
 run_gate "GDScript mobility skill presentation test" "[gdtest] PASS: test_mobility_skill_presentation" res://tests/test_mobility_skill_presentation.gd
 run_gate "GDScript dungeon torch placement test" "[gdtest] PASS: test_dungeon_torch_placement" res://tests/test_dungeon_torch_placement.gd

@@ -1,0 +1,17 @@
+{
+  "version": 0,
+  "input_buffer_seconds": 0.45,
+  "command_retarget_grace_seconds": 0.22,
+  "movement_smoothing": {
+    "catch_up_speed": 18.0,
+    "max_offset": 0.7,
+    "reset_distance": 1.5,
+    "settle_epsilon": 0.01
+  },
+  "melee_lunge": {
+    "distance": 0.16,
+    "recovery_seconds": 0.14,
+    "settle_epsilon": 0.01
+  },
+  "level_loading_min_display_seconds": 0.55
+}

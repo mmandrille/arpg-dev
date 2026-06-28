@@ -1,0 +1,113 @@
+docs/as-built/v358_scenario-movement-decoupling.md
+  s_fc18d6763eb053::t_48103aa7cd4a46 1-57,60-67
+  s_fc18d6763eb053::t_f879f69527cdcd 58-59
+docs/CODEMAP.md
+  s_fc18d6763eb053::t_be383ef53d963d 28
+tools/bot/scenarios/client/62_blacksmith_second_recipe.json
+  s_fc18d6763eb053::t_9edcc0d1536e75 20-21
+tools/bot/scenario_movement_audit.py
+  s_fc18d6763eb053::t_dd793de6cd18a5 1-16,47-91,93-105,107-117,119-208,213-214,216-221,223-227,235-237,239-257,259,266-280,282-293,295-296,298-303,305-306,308,321,335,340-354,356-358,360,367,376-378,380-383,391-400
+  s_fc18d6763eb053::t_21c0beacda0020 92,106
+  s_fc18d6763eb053::t_fd6bbd06f2d901 118
+  s_fc18d6763eb053::t_0864b9bc35937f 281
+  s_fc18d6763eb053::t_7fd864a6ca11c4 17-46
+  s_fc18d6763eb053::t_2ab85b09e9be7d 258,260-265
+  s_fc18d6763eb053::t_519a185c815609 311,325
+  s_fc18d6763eb053::t_37b8a0ea6c4294 209-212,215,222,238
+  s_fc18d6763eb053::t_f374ec541bc351 307
+  s_fc18d6763eb053::t_586b6ba62d7a44 355,359,361-366,368-375,379,384-390
+  s_fc18d6763eb053::t_86e5294a926592 228-234
+  s_fc18d6763eb053::t_d7b43ddd223d9b 294,297
+  s_fc18d6763eb053::t_25c249b6b5e3f2 304,309-310,312-320,322-324,326-334,336-339
+tools/bot/scenarios/88_mercenary_hiring_board.json
+  s_fc18d6763eb053::t_cd67512f247153 49
+tools/bot/scenarios/client/54_material_wallet_details.json
+  s_fc18d6763eb053::t_e184018f39b3af 20-21
+tools/bot/scenarios/103_dungeon_combat_perf_probe.json
+  s_fc18d6763eb053::t_47a182f90efa74 4
+docs/progress/scenario-movement-audit.tsv
+  s_fc18d6763eb053::t_bf74f479fbe116 22,68,75
+  s_fc18d6763eb053::t_7996fd4718cacf 1-21,23-67,69-74,76-204
+tools/bot/scenarios/65_random_quest_reward_floor.json
+  s_fc18d6763eb053::t_04237dc94ab732 4
+tools/bot/scenarios/client/63_blacksmith_upgrade_history.json
+  s_fc18d6763eb053::t_c724ddf8d43407 20-21
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_fc18d6763eb053::t_e08667c348d0d0 4
+tools/bot/scenarios/client/79_wall_floor_dungeon_rollout.json
+  s_fc18d6763eb053::t_4033579df130f0 4,7
+PROGRESS.md
+  s_fc18d6763eb053::t_0211213b3384a6 26
+docs/progress/slice-lifecycle.md
+  s_fc18d6763eb053::t_14b3f3477eb263 372
+CLAUDE.md
+  s_fc18d6763eb053::t_7b9e07a2049c43 92-98
+tools/bot/scenarios/14_dungeon_monsters.json
+  s_fc18d6763eb053::t_be87daacffd180 4,7
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_fc18d6763eb053::t_0eb5167306aeae 20-21
+tools/bot/scenarios/client/55_blacksmith_recipe_selector.json
+  s_fc18d6763eb053::t_96c11db7b7b345 20-21
+docs/plans/v358_2026-06-28-scenario-movement-decoupling.md
+  s_d9050d84685710::t_1a901236993570 1-111,114-116,119-135,140-150,155-165,169-184,188-199,204-219,223-235,238,240-248,252-260,266-287
+  s_fc18d6763eb053::t_c73d5d5505a603 236-237,239
+  s_fc18d6763eb053::t_7c7db1214bc828 265
+  s_fc18d6763eb053::t_b0ef1002e5f46f 112-113,117-118,136-139,151-154,166-168,185-187,200-203,220-222,249-251,261-264
+tools/bot/scenarios/21_monster_rarity_loot_scaling.json
+  s_fc18d6763eb053::t_2704fe4950963f 4,8
+tools/bot/scenarios/client/53_mystery_seller_silhouettes.json
+  s_fc18d6763eb053::t_53d33095ae7de4 75-77
+tools/bot/scenarios/42_pack_aggro_and_dungeon_packs.json
+  s_fc18d6763eb053::t_1e123009f56b4e 4,9
+shared/rules/worlds.v0.json
+  s_fc18d6763eb053::t_779fc38568e60b 799
+  s_fc18d6763eb053::t_63b46c396719e5 2235-2256
+  s_fc18d6763eb053::t_ee78432f6e5ded 1411,1419
+  s_fc18d6763eb053::t_723105524be2c5 3908
+  s_fc18d6763eb053::t_5af0614659baca 1093
+  s_fc18d6763eb053::t_b24d16aaaabcce 2718-2719
+tools/bot/scenarios/77_elite_minion_pack_ai.json
+  s_fc18d6763eb053::t_73ae1f9b057700 3
+tools/bot/scenarios/client/61_material_wallet_window.json
+  s_fc18d6763eb053::t_2cfc3f4e615963 20-21
+docs/specs/v358_spec-scenario-movement-decoupling.md
+  s_d9050d84685710::t_5839d9ca6c3318 1-234
+tools/test_scenario_movement_audit.py
+  s_fc18d6763eb053::t_79e4969b3e826c 1-38,40,42-47
+  s_fc18d6763eb053::t_39602577a6bcc7 39,41
+docs/progress/scenario-catalog.md
+  s_fc18d6763eb053::t_ba423098df593c 139-169
+tools/bot/test_protocol.py
+  s_fc18d6763eb053::t_b5b975db37d098 540
+  s_fc18d6763eb053::t_f58d23112275eb 541
+tools/bot/scenarios/96_mercenary_offer_variants.json
+  s_fc18d6763eb053::t_92c74f7c1b6b47 52
+tools/bot/scenarios/client/70_blacksmith_armor_recipe.json
+  s_fc18d6763eb053::t_c7c0b45c77083d 20-21
+tools/bot/scenarios/client/29_mystery_seller_paid_reroll.json
+  s_fc18d6763eb053::t_a049a058c63533 90-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "f4135bc1309bf31477f9c7fb0edb725bf3ca2097",
+  "prompts": {},
+  "sessions": {
+    "s_d9050d84685710": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "79c47417-dbee-4dd3-a3e4-0659d7553f34",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_fc18d6763eb053": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "49988106-9757-4ab9-b9a5-bd3539c9e385",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

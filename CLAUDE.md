@@ -89,6 +89,13 @@ Examples:
 - Movement speed: prefer "monster moves closer / leashes within a timeout derived from current
   rules" over "position equals X after exactly N ticks" unless fixed-tick stepping is the feature.
 
+**Bot scenario movement setup (v358):** Incidental navigation in bot scenarios is forbidden unless the
+scenario id is on the movement-contract allowlist in `docs/progress/scenario-catalog.md`. Do not open
+a proof with `use_stair`, `walk_to_*`, `move_until_*`, `teleport_to_level`, or client
+`click_floor` + `wait_player_near` setup when a lab world, `start_level`, `debug_progression`, or
+`click_entity` can place the player at the feature under test. Audit inventory:
+`docs/progress/scenario-movement-audit.tsv`; gate: `pytest tools/test_scenario_movement_audit.py`.
+
 ## Data-Driven Configuration Policy
 
 Gameplay tuning must be data-driven by default. Before adding or changing any balance-sensitive

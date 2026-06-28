@@ -87,16 +87,9 @@
       "timeout_s": 15.0
     },
     {
-      "type": "click_floor",
-      "x": 16.0,
-      "z": 11.0
-    },
-    {
-      "type": "wait_player_near",
-      "x": 16.0,
-      "z": 11.0,
-      "distance": 1.2,
-      "timeout_s": 10.0
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_mystery_seller"
     },
     {
       "type": "click_entity",

@@ -796,7 +796,7 @@
           "type": "monster",
           "monster_def_id": "training_dummy_ranged",
           "position": {
-            "x": 12,
+            "x": 8,
             "y": 5
           }
         },
@@ -1090,7 +1090,7 @@
           "type": "monster",
           "monster_def_id": "combat_lab_miss_attacker",
           "position": {
-            "x": 8,
+            "x": 4,
             "y": 5
           }
         },
@@ -1408,7 +1408,7 @@
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
           "position": {
-            "x": 8,
+            "x": 6,
             "y": 5
           }
         },
@@ -1416,7 +1416,7 @@
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
           "position": {
-            "x": 10,
+            "x": 7,
             "y": 5
           }
         },
@@ -2232,6 +2232,28 @@
       },
       "entities": []
     },
+    "monster_rarity_lab": {
+      "mode": "multi_level",
+      "start_level": -2,
+      "player": {
+        "position": {
+          "x": 26,
+          "y": 15
+        }
+      },
+      "entities": []
+    },
+    "dungeon_depth_one_lab": {
+      "mode": "multi_level",
+      "start_level": -1,
+      "player": {
+        "position": {
+          "x": 26,
+          "y": 15
+        }
+      },
+      "entities": []
+    },
     "coop_reward_lab": {
       "player": {
         "position": {
@@ -2693,8 +2715,8 @@
           "type": "loot",
           "item_def_id": "upgrade_shard",
           "position": {
-            "x": 12,
-            "y": 10
+            "x": 13,
+            "y": 12
           }
         },
         {
@@ -3883,7 +3905,7 @@
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
           "position": {
-            "x": 8.2,
+            "x": 5.5,
             "y": 5
           }
         },

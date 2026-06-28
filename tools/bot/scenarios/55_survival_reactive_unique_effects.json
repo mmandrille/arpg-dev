@@ -17,12 +17,6 @@
       "slot": "off_hand"
     },
     {
-      "action": "move_until_in_range",
-      "monster_def_id": "combat_lab_miss_attacker",
-      "stop_distance": 3.5,
-      "max_ticks": 220
-    },
-    {
       "action": "wait_until_assertion",
       "assertion": {
         "type": "event_seen",

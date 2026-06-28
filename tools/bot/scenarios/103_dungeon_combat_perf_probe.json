@@ -1,7 +1,7 @@
 {
   "id": "dungeon_combat_perf_probe",
   "ci_tier": "extended",
-  "world_id": "dungeon_levels",
+  "world_id": "dungeon_depth_one_lab",
   "seed": "v76_pack_aggro",
   "character_class": "sorcerer",
   "title": "Dungeon Combat Perf Probe",
@@ -24,11 +24,6 @@
     }
   },
   "steps": [
-    {
-      "action": "use_stair",
-      "direction": "down",
-      "max_ticks": 120
-    },
     {
       "action": "assert_entity_count",
       "entity_type": "monster",

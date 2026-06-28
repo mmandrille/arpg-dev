@@ -1,22 +1,12 @@
 {
   "id": "monster_rarity_loot_scaling",
   "ci_tier": "extended",
-  "world_id": "dungeon_levels",
+  "world_id": "monster_rarity_lab",
   "seed": "v30_monster_rarity",
   "max_elapsed_s": 32.0,
   "title": "Monster rarity combat",
-  "description": "Descend into the seeded depth-2 dungeon floor and assert a champion generated monster rarity over protocol.",
+  "description": "Start on a seeded depth-2 dungeon floor and assert a champion generated monster rarity over protocol.",
   "steps": [
-    {
-      "action": "use_stair",
-      "direction": "down",
-      "max_ticks": 80
-    },
-    {
-      "action": "use_stair",
-      "direction": "down",
-      "max_ticks": 80
-    },
     {
       "action": "assert_entity_count",
       "entity_type": "monster",
@@ -28,14 +18,6 @@
     {
       "type": "current_level",
       "equals": -2
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": 0
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": -1
     },
     {
       "type": "entity_count",

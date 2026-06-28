@@ -45,15 +45,8 @@
       "equals": 1
     },
     {
-      "action": "move_until_player_position",
-      "x": 6,
-      "y": 5,
-      "tolerance": 0.2,
-      "max_ticks": 120
-    },
-    {
       "action": "wait_ticks",
-      "ticks": 95
+      "ticks": 120
     }
   ],
   "assertions": [

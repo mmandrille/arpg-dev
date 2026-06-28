@@ -19,8 +19,6 @@
     { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
     { "type": "click_shop_sell_item", "rolled": true, "bag_index": 0 },
     { "type": "wait_event", "event_type": "shop_sale", "shop_id": "town_vendor", "timeout_s": 15.0 },
-    { "type": "click_floor", "x": 16.0, "z": 11.0 },
-    { "type": "wait_player_near", "x": 16.0, "z": 11.0, "distance": 1.2, "timeout_s": 10.0 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mystery_seller" },
     { "type": "wait_event", "event_type": "shop_opened", "shop_id": "town_mystery_seller", "timeout_s": 15.0 },
     { "type": "wait_shop_panel", "equals": 9, "timeout_s": 15.0 },

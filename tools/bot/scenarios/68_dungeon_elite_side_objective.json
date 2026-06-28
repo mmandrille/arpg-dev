@@ -1,7 +1,7 @@
 {
   "id": "dungeon_elite_side_objective",
   "ci_tier": "extended",
-  "world_id": "dungeon_levels",
+  "world_id": "dungeon_depth_one_lab",
   "seed": "v161_fast_objective_0018",
   "max_elapsed_s": 65.0,
   "character_class": "barbarian",
@@ -20,11 +20,6 @@
     }
   },
   "steps": [
-    {
-      "action": "use_stair",
-      "direction": "down",
-      "max_ticks": 120
-    },
     {
       "action": "wait_until_assertion",
       "timeout_s": 10,
@@ -77,14 +72,6 @@
     {
       "type": "current_level",
       "equals": -1
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": 0
-    },
-    {
-      "type": "visited_levels_contain",
-      "level": -1
     },
     {
       "type": "entity_count",

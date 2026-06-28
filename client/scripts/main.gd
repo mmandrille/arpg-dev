@@ -68,6 +68,7 @@ const DirectionalAttackInputScript := preload("res://scripts/directional_attack_
 const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
+const PathRejectBackoffScript := preload("res://scripts/path_reject_backoff.gd")
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 const MovementVisualSmoothingScript := preload("res://scripts/movement_visual_smoothing.gd")
@@ -266,6 +267,7 @@ var _attack_cooldown: float = 0.0
 var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
 var _attack_buffer: CombatInputBuffer = CombatInputBufferScript.new()
 var _sticky_attack: CombatStickyTarget = CombatStickyTargetScript.new()
+var _path_reject_backoff: PathRejectBackoff = PathRejectBackoffScript.new()
 var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttackPresentationScript.new()
 var _movement_visual_smoothing: MovementVisualSmoothing = MovementVisualSmoothingScript.new()
 var _entity_tick_smoothing: EntityTickSmoothingRuntime = EntityTickSmoothingRuntimeScript.new()
@@ -1020,8 +1022,19 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		pending_action_targets.erase(message_id)
 		pending_skill_casts.erase(message_id)
 	if reason == "no_path" or reason == "path_too_long":
+		var sustained_mode := _sustained_click.mode
+		var sustained_target := _sustained_click.target_id
+		var sustained_ground := _sustained_click.last_ground
+		var reject_target_id := str(pending.get("target_id", sustained_target))
 		_sustained_click.clear()
 		pending_interactable_action.clear()
+		_sticky_attack.clear()
+		var now_ms := Time.get_ticks_msec()
+		var backoff_ms := int(ClientConstants.PATH_REJECT_BACKOFF_S * 1000.0)
+		if reject_target_id != "":
+			_path_reject_backoff.note_target_reject(reject_target_id, now_ms, backoff_ms)
+		elif sustained_mode == "move":
+			_path_reject_backoff.note_goal_reject(sustained_ground, now_ms, backoff_ms)
 	if reason == "inventory_full":
 		var target_id := str(pending.get("target_id", ""))
 		_show_inventory_full_text(target_id)
@@ -2336,6 +2349,8 @@ func _show_bag_full_cant_unequip_text() -> void:
 func _send_action_intent(target_id: String) -> void:
 	if client == null or target_id == "":
 		return
+	if _path_reject_backoff.blocks_target(target_id, Time.get_ticks_msec()):
+		return
 	var message_id := client.send("action_intent", last_server_tick, {"target_id": target_id})
 	pending_action_targets[message_id] = {"target_id": target_id}
 
@@ -2924,6 +2939,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 	var kind := str(pick.get("kind", ""))
 	if kind == "floor":
 		_clear_pending_attack_commands()
+		_path_reject_backoff.clear()
 		var ground: Vector3 = pick.get("ground", Vector3.ZERO)
 		if _command_retarget_grace.dispatch_or_queue_floor(ground, _attack_cooldown, client, last_server_tick, Callable(self, "_close_gameplay_panels_for_movement"), Callable(self, "_mark_local_player_walking")):
 			_attack_cooldown = maxf(_attack_cooldown, ClientConstants.SEND_INTERVAL)
@@ -2947,6 +2963,7 @@ func _execute_click_pick(pick: Dictionary) -> void:
 		_activate_or_approach_interactable(target_id, rec)
 		return
 	if typ == "monster":
+		_path_reject_backoff.clear_target(target_id)
 		_try_dispatch_monster_attack(target_id, true)
 		return
 	_clear_pending_attack_commands()
@@ -2995,9 +3012,13 @@ func _start_attack_move(target_id: String) -> void:
 	if not _living_monster_target(target_id):
 		_clear_pending_attack_commands()
 		return
+	if _path_reject_backoff.blocks_target(target_id, Time.get_ticks_msec()):
+		return
 	_attack_buffer.clear()
 	_sticky_attack.set_target(target_id)
 	var goal := CombatReachScript.attack_approach_point(player_anchor, entities, inventory, equipped, target_id, _last_facing_direction)
+	if _path_reject_backoff.blocks_goal(Vector2(goal.x, goal.z), Time.get_ticks_msec()):
+		return
 	_close_gameplay_panels_for_movement()
 	_mark_local_player_walking()
 	client.send("move_to_intent", last_server_tick, {"position": {"x": goal.x, "y": goal.z}})

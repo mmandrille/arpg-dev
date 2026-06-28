@@ -375,7 +375,7 @@ func (s *Sim) advanceCompanionMovement(companion *entity, owner *entity, target 
 	if target == nil {
 		blocked := s.buildCompanionBlockedFn(companion)
 		var pathOK bool
-		steps, pathOK = s.planPath(nav, companion.pos, goal, blocked)
+		steps, pathOK = s.planPlayerPath(nav, companion.pos, goal, blocked)
 		if !pathOK && distance(companion.pos, goal) > nav.CellSize+nav.StopDistance {
 			return
 		}

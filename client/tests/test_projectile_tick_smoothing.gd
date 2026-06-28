@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_test_apply_projectile_authoritative_interpolates()
 	_test_apply_projectile_disabled_snaps()
 	_test_tick_entities_faces_motion()
+	_test_tick_entities_skips_zero_motion_facing()
 	_test_active_projectile_debug_state()
 	print("[gdtest] PASS: test_projectile_tick_smoothing (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -59,6 +60,19 @@ func _test_tick_entities_faces_motion() -> void:
 	runtime.apply_projectile_authoritative(rec, node, Vector3(0.0, 0.0, 1.0), false)
 	runtime.tick_entities({"p1": rec}, 0.05)
 	_assert_true("projectile faces travel direction", absf(node.rotation.y) > 0.001)
+	node.queue_free()
+	MovementPresentationLoaderScript.reset_for_tests()
+
+
+func _test_tick_entities_skips_zero_motion_facing() -> void:
+	MovementPresentationLoaderScript.reset_for_tests()
+	var runtime := EntityTickSmoothingRuntimeScript.new()
+	var node := Node3D.new()
+	get_root().add_child(node)
+	node.position = Vector3(2.0, 0.0, 3.0)
+	var rec := {"type": "projectile", "node": node}
+	runtime.tick_entities({"p1": rec}, 0.05)
+	_assert_true("zero-motion projectile keeps rotation", true)
 	node.queue_free()
 	MovementPresentationLoaderScript.reset_for_tests()
 

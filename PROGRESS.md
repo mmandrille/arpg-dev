@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-27
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v355 — aura-soft-lights |
+| **Latest completed slice** | v356 — player-navigation-guardrails |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green; `make ci-full` green (all 15 extended scenarios recovered at v350) |
-| **Next slice** | Run `/finish` consolidation or `/next` for new work |
+| **CI gate** | `make ci` green |
+| **Next slice** | Run `/next` for new work |
 | **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
 | **Next engineering review** | After ~v359 ships |
 

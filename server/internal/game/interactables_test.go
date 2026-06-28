@@ -167,3 +167,30 @@ func TestTreasureChestOpensOnceAndDropsLoot(t *testing.T) {
 		t.Fatalf("reopen changed loot count = %d, want %d", got, afterLoot)
 	}
 }
+
+func TestV40ObstaclesWoodenDoorActionAcks(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_v40_door", "v40_obstacles", loadRules(t), "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	descendFromCurrentLevel(t, sim, "descend")
+	var door *entity
+	for _, e := range sim.activeLevel().entities {
+		if e != nil && e.kind == interactableEntity && e.interactableDefID == woodenDoorDefID {
+			door = e
+			break
+		}
+	}
+	if door == nil {
+		t.Fatal("wooden_door not found on generated floor")
+	}
+	sim.resetPlayerNavigationBudget()
+	res := sim.Tick([]Input{{
+		MessageID: "msg-4",
+		Type:      "action_intent",
+		Action:    &ActionIntent{TargetID: idStr(door.id)},
+	}})
+	if len(res.Rejects) > 0 {
+		t.Fatalf("door action rejected: %+v", res.Rejects)
+	}
+}

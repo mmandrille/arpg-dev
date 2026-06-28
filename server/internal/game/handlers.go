@@ -135,12 +135,12 @@ func (s *Sim) handleMoveTo(in Input, res *TickResult) {
 		res.ack(in.MessageID)
 		return
 	}
-	steps, ok := s.planPath(s.activeNav(), player.pos, in.MoveTo.Position, s.buildBlockedFn())
+	steps, ok := s.planPlayerPath(s.activeNav(), player.pos, in.MoveTo.Position, s.buildBlockedFn())
 	if !ok {
 		res.reject(in.MessageID, "no_path")
 		return
 	}
-	if len(steps) > s.activeNav().MaxAutoSteps {
+	if len(steps) > s.activeNav().PlayerMaxAutoSteps {
 		res.reject(in.MessageID, "path_too_long")
 		return
 	}
@@ -179,7 +179,11 @@ func (s *Sim) handleAction(in Input, res *TickResult) {
 		res.reject(in.MessageID, "no_path")
 		return
 	}
-	if len(steps) > s.activeNav().MaxAutoSteps {
+	maxAllowed := s.activeNav().PlayerMaxAutoSteps
+	if target.kind == interactableEntity && s.activeNav().MaxAutoSteps > maxAllowed {
+		maxAllowed = s.activeNav().MaxAutoSteps
+	}
+	if len(steps) > maxAllowed {
 		res.reject(in.MessageID, "path_too_long")
 		return
 	}
@@ -1431,7 +1435,7 @@ func (s *Sim) beginSkillAutoNav(in Input, res *TickResult, castRange float64, re
 		res.reject(in.MessageID, "no_path")
 		return
 	}
-	if len(steps) > s.activeNav().MaxAutoSteps {
+	if len(steps) > s.activeNav().PlayerMaxAutoSteps {
 		res.reject(in.MessageID, "path_too_long")
 		return
 	}

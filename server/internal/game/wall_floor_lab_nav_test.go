@@ -2,6 +2,15 @@ package game
 
 import "testing"
 
+func TestGeneratedWallLabStairsOffsetMoveGoalV40(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_wall_v40", "v40_obstacles", rules, "generated_wall_lab")
+	if err != nil {
+		t.Fatalf("world: %v", err)
+	}
+	assertStairsDescendReachable(t, sim)
+}
+
 func TestGeneratedWallLabStairsOffsetMoveGoal(t *testing.T) {
 	rules := loadRules(t)
 	sim, err := NewSimWithWorld("sess_wall_floor_offset", "wall_seed_00", rules, "generated_wall_lab")

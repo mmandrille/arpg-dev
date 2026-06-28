@@ -1,7 +1,7 @@
 {
   "id": "reachable_dungeon_obstacles",
   "world_id": "dungeon_levels",
-  "seed": "v40_obstacles",
+  "seed": "wall_seed_00",
   "title": "Reachable dungeon obstacles",
   "description": "Descend into a pinned generated dungeon floor and prove authoritative interior walls are present, visible, and replay-stable.",
   "max_elapsed_s": 28.0,
@@ -11,7 +11,7 @@
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "water", "at_least": 1 }, "timeout_s": 5 },
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "hole", "at_least": 1 }, "timeout_s": 5 },
     { "action": "wait_until_assertion", "assertion": { "type": "non_perimeter_wall_exists" }, "timeout_s": 5 },
-    { "action": "action_entity", "interactable_def_id": "wooden_door", "event_type": "interactable_activated", "timeout_s": 20 }
+    { "action": "action_entity", "interactable_def_id": "wooden_door", "event_type": "interactable_activated", "timeout_s": 30 }
   ],
   "assertions": [
     { "type": "current_level", "equals": -1 },

@@ -1,0 +1,45 @@
+client/scripts/main.gd
+  s_7749608524bd5c::t_ee2183077d2814 5748
+  s_7749608524bd5c::t_c382dfe44879e7 1732-1734
+client/scripts/bot_wait_handlers.gd
+  s_7749608524bd5c::t_a63faa941ab87a 47-50
+client/scripts/entity_tick_smoothing_runtime.gd
+  s_7749608524bd5c::t_4fd63b8f78aa03 164-167,172-189
+  s_7749608524bd5c::t_980d3d7e24c594 26,30
+  s_7749608524bd5c::t_8e5c9c029295ad 86-102
+  s_7749608524bd5c::t_9fc2e021b43cca 10,14
+  s_7749608524bd5c::t_3f66a82fe8356a 190-191
+docs/as-built/v360_loot-tick-smoothing.md
+  s_7749608524bd5c::t_abb86b82e6ca80 1-17
+shared/assets/movement_presentation.v0.schema.json
+  s_7749608524bd5c::t_535a59f21db69d 36-53
+client/tests/test_loot_tick_smoothing.gd
+  s_7749608524bd5c::t_5207e2b54de417 1-22,25-32
+  s_7749608524bd5c::t_7430a59428c87e 23-24
+shared/assets/movement_presentation.v0.json
+  s_7749608524bd5c::t_78a813dfdc3a34 8-12
+client/scripts/bot_assertion_handlers.gd
+  s_7749608524bd5c::t_bb25b4d0bc0686 497-504
+client/scripts/bot_step_catalog.gd
+  s_7749608524bd5c::t_8cf3a78bd7fe0f 16
+tools/bot/scenarios/client/86_loot_tick_smoothing.json
+  s_7749608524bd5c::t_ed080b85994cc3 1-16
+scripts/client_smoke.sh
+  s_7749608524bd5c::t_d792a2bf287514 235
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "3afb65691fe8d00ffa03fe3f327a45704c80939e",
+  "prompts": {},
+  "sessions": {
+    "s_7749608524bd5c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b83caa91-7dea-4a79-a4c6-22402b53d4b5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

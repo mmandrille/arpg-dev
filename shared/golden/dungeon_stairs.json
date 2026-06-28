@@ -2,8 +2,8 @@
   "seed": "0011223344556677",
   "levels": {
     "0": {
-      "stairs_down": { "x": 11, "y": 8 },
-      "teleporter": { "x": 2, "y": 12 }
+      "stairs_down": { "x": 11, "y": 12 },
+      "teleporter": { "x": 12, "y": 12 }
     },
     "-1": {
       "stairs_up": { "x": 4, "y": 10 },
@@ -22,6 +22,6 @@
   },
   "descend_then_ascend": {
     "expected_level": 0,
-    "expected_player_position": { "x": 12, "y": 8 }
+    "expected_player_position": { "x": 11, "y": 12 }
   }
 }

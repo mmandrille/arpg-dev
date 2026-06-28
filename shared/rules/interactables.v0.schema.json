@@ -28,6 +28,10 @@
             "properties": {
               "size": { "$ref": "#/$defs/size" }
             }
+          },
+          "locked_exit_reason": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
           }
         },
         "allOf": [
@@ -44,6 +48,17 @@
                   { "required": ["stash_id"] },
                   { "required": ["service"] }
                 ]
+              }
+            }
+          },
+          {
+            "if": {
+              "required": ["locked_exit_reason"]
+            },
+            "then": {
+              "required": ["initial_state", "barrier_when_closed"],
+              "properties": {
+                "initial_state": { "const": "closed" }
               }
             }
           },

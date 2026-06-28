@@ -46,7 +46,7 @@ func chooseSolidObstacleKind(rng *RNG, weights SolidObstacleKindWeights) string 
 
 func solidObstacleBlocksProjectiles(kind string) bool {
 	switch kind {
-	case obstacleKindWall, obstacleKindRock, obstacleKindColumn, obstacleKindRubble:
+	case obstacleKindWall, obstacleKindWood, obstacleKindRock, obstacleKindColumn, obstacleKindRubble:
 		return true
 	default:
 		return false

@@ -16,6 +16,7 @@ func _run() -> void:
 	await _test_organic_edge_debug_state()
 	await _test_organic_edge_rotates_only_while_target_moves()
 	await _test_wall_layout_generates_shadow()
+	await _test_wood_wall_generates_shadow()
 	await _test_tall_obstacle_layout_generates_shadow()
 	await _test_water_layout_skips_shadow()
 	await _test_hole_layout_skips_shadow()
@@ -139,6 +140,19 @@ func _test_wall_layout_generates_shadow() -> void:
 	var shadows: Array = state.get("shadow_polygons", [])
 	var first: Dictionary = shadows[0] if shadows.size() > 0 else {}
 	_assert_true("shadow has polygon points", (first.get("points", []) as Array).size() >= 4)
+	overlay.free()
+
+
+func _test_wood_wall_generates_shadow() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_progression({"derived_stats": {"light_radius": 9}})
+	overlay.set_wall_layout([{"kind": "wood", "position": {"x": 3.0, "y": 0.0}, "size": {"x": 1.0, "y": 3.0}}])
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_eq("wood wall count", int(state.get("wall_count", 0)), 1)
+	_assert_eq("wood occluder count", int(state.get("occluder_count", 0)), 1)
 	overlay.free()
 
 

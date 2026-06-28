@@ -288,6 +288,7 @@ var _last_facing_direction := Vector2(1.0, 0.0)
 var _level_label: Label
 var last_performance_status: Dictionary = {}
 var _last_ping_ms: int = -1
+var _last_intent_reject_reason: String = ""
 var _camera: Camera3D  # convenience alias — always equal to _camera_controller.get_gameplay_camera()
 var _camera_controller: PlayerCameraController
 var _aim_reticle: AimReticleOverlay
@@ -737,6 +738,7 @@ func _is_perspective_camera_mode() -> bool:
 
 func _sync_fog_and_dungeon_lighting() -> void:
 	var dungeon_fog := current_level < 0 or _lab_world_fog_at_town_level()
+	var town_fog_active := current_level == 0 and _lab_world_fog_at_town_level()
 	if fog_overlay != null:
 		fog_overlay.set_active(dungeon_fog)
 		fog_overlay.set_perspective_camera(_is_perspective_camera_mode())
@@ -748,6 +750,7 @@ func _sync_fog_and_dungeon_lighting() -> void:
 		_ground_factory,
 		suppress_ambient,
 		fog_overlay.ambient_suppression_params() if suppress_ambient else {},
+		town_fog_active,
 	)
 
 func _on_master_volume_changed(value: float) -> void:
@@ -1016,6 +1019,7 @@ func _event_subject_entity_id(ev: Dictionary) -> String:
 func _handle_intent_rejected(payload: Dictionary) -> void:
 	var message_id := str(payload.get("rejected_message_id", ""))
 	var reason := str(payload.get("reason", ""))
+	_last_intent_reject_reason = reason
 	var pending: Dictionary = pending_action_targets.get(message_id, {})
 	var was_skill_cast := pending_skill_casts.has(message_id)
 	if message_id != "":
@@ -1040,6 +1044,8 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 		_show_inventory_full_text(target_id)
 	elif reason == "capacity_would_overflow":
 		_show_bag_full_cant_unequip_text()
+	elif reason == "town_exit_locked":
+		_show_damage_number(player_id, Color("#ffcf5a"), null, "", 0.0, "inventory", ClientConstants.TOWN_EXIT_LOCKED_TEXT)
 	elif was_skill_cast or _is_skill_reject_reason(reason):
 		_show_skill_rejected_feedback(reason)
 	elif shop_panel != null and shop_panel.visible:
@@ -5727,6 +5733,7 @@ func get_bot_state() -> Dictionary:
 	var out := {
 		"ws_open": client != null and client.ready_state() == WebSocketPeer.STATE_OPEN,
 		"last_tick": last_server_tick,
+		"last_intent_reject_reason": _last_intent_reject_reason,
 		"local_player_id": player_id,
 		"party": party.duplicate(true),
 		"remote_player_ids": _remote_player_ids(),

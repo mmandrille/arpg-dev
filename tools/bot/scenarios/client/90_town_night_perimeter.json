@@ -1,0 +1,77 @@
+{
+  "id": "town_night_perimeter",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "town_night_perimeter_seed",
+  "title": "Town night perimeter",
+  "description": "Town uses dungeon fog at level 0, blocks exit via locked south gate, and keeps services reachable.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    {
+      "type": "wait_wall_layout",
+      "current_level": 0,
+      "at_least": 24,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "assert_fog_of_war",
+      "enabled": true,
+      "active": true,
+      "wall_count_min": 24
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_exit_gate"
+    },
+    {
+      "type": "wait_intent_rejected",
+      "reason": "town_exit_locked",
+      "timeout_s": 8.0
+    },
+    {
+      "type": "assert_intent_rejected",
+      "reason": "town_exit_locked"
+    },
+    {
+      "type": "click_floor",
+      "x": 19.0,
+      "z": 12.0
+    },
+    {
+      "type": "wait_player_near",
+      "x": 19.0,
+      "z": 12.0,
+      "distance": 1.5,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_vendor"
+    },
+    {
+      "type": "wait_shop_panel",
+      "timeout_s": 10.0,
+      "at_least": 1
+    },
+    {
+      "type": "remember_player_position"
+    },
+    {
+      "type": "click_floor",
+      "x": 11.0,
+      "z": 29.0
+    },
+    {
+      "type": "wait_ticks",
+      "ticks": 20,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "assert_player_position_unchanged",
+      "tolerance": 2.5
+    }
+  ]
+}

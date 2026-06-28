@@ -368,6 +368,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v353** | `mobility-skill-smoothing` | Complete (focused checks green; autoloop batch `make ci` pending) | [`spec`](../specs/v353_spec-mobility-skill-smoothing.md) | [`plan`](../plans/v353_2026-06-26-mobility-skill-smoothing.md) | [`as-built`](../as-built/v353_mobility-skill-smoothing.md) |
 | **v354** | `dungeon-torch-lights` | Complete (`make ci` green) | [`spec`](../specs/v354_spec-dungeon-torch-lights.md) | [`plan`](../plans/v354_2026-06-26-dungeon-torch-lights.md) | [`as-built`](../as-built/v354_dungeon-torch-lights.md) |
 | **v356** | `player-navigation-guardrails` | Complete (`make ci` green) | [`spec`](../specs/v356_spec-player-navigation-guardrails.md) | [`plan`](../plans/v356_2026-06-27-player-navigation-guardrails.md) | [`as-built`](../as-built/v356_player-navigation-guardrails.md) |
+| **v357** | `town-night-perimeter` | Complete (`make ci` green) | [`spec`](../specs/v357_spec-town-night-perimeter.md) | [`plan`](../plans/v357_2026-06-27-town-night-perimeter.md) | [`as-built`](../as-built/v357_town-night-perimeter.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

@@ -1,11 +1,8 @@
-## Client-only dungeon depth / hub lighting profiles.
-##
-## Presentation-only mood lighting derived from shared biome palette depth bands.
-## Does not change fog, line-of-sight, light-radius gameplay, or server authority.
 class_name DungeonDepthLighting
 extends RefCounted
 
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
+const TownPresentationLoaderScript := preload("res://scripts/town_presentation_loader.gd")
 
 const TOWN_PROFILE := {
 	"directional_color": "#fff0dc",
@@ -14,9 +11,12 @@ const TOWN_PROFILE := {
 	"ambient_energy": 0.38,
 }
 
-static func profile_for_level(level: int, factory: GroundWallFactory) -> Dictionary:
-	if level >= 0:
+static func profile_for_level(level: int, factory: GroundWallFactory, town_fog_active: bool = false) -> Dictionary:
+	if level >= 0 and not town_fog_active:
 		return TOWN_PROFILE.duplicate(true)
+
+	if level >= 0 and town_fog_active:
+		return TownPresentationLoaderScript.night_lighting()
 
 	var palette: Dictionary = factory.biome_palette_for_level(level) if factory != null else {}
 	var fallback_directional := str(palette.get("wall_highlight", "#948b7c"))
@@ -57,9 +57,10 @@ static func apply_for_level(
 	factory: GroundWallFactory,
 	suppress_for_fog: bool = false,
 	fog_suppression: Dictionary = {},
+	town_fog_active: bool = false,
 ) -> Dictionary:
-	var profile := profile_for_level(level, factory)
-	if suppress_for_fog and level < 0:
+	var profile := profile_for_level(level, factory, town_fog_active)
+	if suppress_for_fog:
 		profile = apply_fog_suppression(profile, fog_suppression)
 	apply_profile(profile, directional, world_environment)
 

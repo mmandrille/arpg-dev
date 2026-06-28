@@ -8,6 +8,7 @@ const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_eli
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
+const BotIntentRejectAssertionsScript := preload("res://scripts/bot_intent_reject_assertions.gd")
 const FLOAT_BOUND_EPSILON := 0.00001
 
 
@@ -37,6 +38,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return true
 		"assert_fog_of_war":
 			return _assert_fog_of_war(runner, step, state)
+		"assert_intent_rejected":
+			return BotIntentRejectAssertionsScript.assert_step(runner, step, state)
 		"assert_discovery_minimap":
 			return _assert_discovery_minimap(runner, step, state)
 		"assert_floating_combat_text_enabled":

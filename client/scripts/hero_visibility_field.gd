@@ -9,7 +9,9 @@ static func wall_blocks_line_of_sight(wall: Dictionary) -> bool:
 	if wall.has("blocks_line_of_sight"):
 		return bool(wall.get("blocks_line_of_sight", false))
 
-	return str(wall.get("kind", "wall")) == "wall"
+	var kind := str(wall.get("kind", "wall"))
+
+	return kind == "wall" or kind == "wood"
 
 
 static func normalized_occluder(occluder: Dictionary) -> Dictionary:

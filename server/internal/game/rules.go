@@ -470,6 +470,7 @@ type InteractableDef struct {
 	StashID           string               `json:"stash_id,omitempty"`
 	Service           string               `json:"service,omitempty"`
 	BarrierWhenClosed *InteractableBarrier `json:"barrier_when_closed,omitempty"`
+	LockedExitReason  string               `json:"locked_exit_reason,omitempty"`
 }
 
 // InteractableBarrier is the closed-state movement blocker for an interactable.
@@ -1502,6 +1503,9 @@ func LoadRules(dir string) (*Rules, error) {
 			}
 			if def.BarrierWhenClosed != nil && (def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0) {
 				return nil, fmt.Errorf("game: invalid rules interactables.%s.barrier_when_closed.size: must be positive", id)
+			}
+			if def.LockedExitReason != "" && def.BarrierWhenClosed == nil {
+				return nil, fmt.Errorf("game: invalid rules interactables.%s.locked_exit_reason: requires barrier_when_closed", id)
 			}
 		case interactableReady, interactableLocked, interactableDisabled:
 			if def.BarrierWhenClosed != nil {

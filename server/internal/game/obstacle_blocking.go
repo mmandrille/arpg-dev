@@ -2,6 +2,7 @@ package game
 
 const (
 	obstacleKindWall   = "wall"
+	obstacleKindWood   = "wood"
 	obstacleKindWater  = "water"
 	obstacleKindHole   = "hole"
 	obstacleKindRock   = "rock"
@@ -32,5 +33,6 @@ func obstacleBlocksLineOfSight(w wallObstacle) bool {
 	if w.blocksLOS != nil {
 		return *w.blocksLOS
 	}
-	return w.obstacleKind() == obstacleKindWall
+	kind := w.obstacleKind()
+	return kind == obstacleKindWall || kind == obstacleKindWood
 }

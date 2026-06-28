@@ -52,6 +52,12 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		}
 		return
 	}
+	if e.state == interactableClosed {
+		if def, ok := s.rules.Interactables[e.interactableDefID]; ok && def.LockedExitReason != "" {
+			res.reject(in.MessageID, def.LockedExitReason)
+			return
+		}
+	}
 	if e.state != interactableClosed {
 		res.reject(in.MessageID, "already_open")
 		return

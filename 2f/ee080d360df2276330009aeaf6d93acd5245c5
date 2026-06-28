@@ -1,0 +1,23 @@
+server/internal/game/game_test.go
+  s_7749608524bd5c::t_c9a94805053864 1810
+server/internal/game/paladin_defense_test.go
+  s_7749608524bd5c::t_b3b4ad28ca07fa 133-134
+docs/progress/scenario-movement-audit.tsv
+  s_7749608524bd5c::t_2ef99550af526c 199-201
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "2fee080d360df2276330009aeaf6d93acd5245c5",
+  "prompts": {},
+  "sessions": {
+    "s_7749608524bd5c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b83caa91-7dea-4a79-a4c6-22402b53d4b5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

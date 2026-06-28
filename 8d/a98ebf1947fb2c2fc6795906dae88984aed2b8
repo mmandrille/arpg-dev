@@ -1,0 +1,167 @@
+shared/rules/navigation.v0.json
+  s_eb288c4bf738dd::t_ae701ece0c3546 8
+  s_eb288c4bf738dd::t_2006d725b58468 5-7,17-18
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_eb288c4bf738dd::t_53f4634dc0c27e 14
+  s_eb288c4bf738dd::t_44cf8a1ac1d646 4
+docs/plans/v356_2026-06-27-player-navigation-guardrails.md
+  s_eb288c4bf738dd::t_5c4f2ff4e2afbf 107
+  s_eb288c4bf738dd::t_d11c0ee3006a9e 3-103,110-233
+  s_eb288c4bf738dd::t_878c39f342cbb1 234
+  s_eb288c4bf738dd::t_9804faf0263757 1-2
+  s_eb288c4bf738dd::t_41313825336ae3 104-106
+  s_eb288c4bf738dd::t_c3f70a61e9e9cd 108-109
+  s_eb288c4bf738dd::t_fbffb5fa09bcf6 235-237
+.maintainability/file-size-baseline.tsv
+  s_eb288c4bf738dd::t_a34520ae4a036d 22
+  s_eb288c4bf738dd::t_583be7af97d528 18
+server/internal/game/perf_debug.go
+  s_eb288c4bf738dd::t_17592323ca1782 120-122
+  s_eb288c4bf738dd::t_ad7b82541efc15 86,98-102,104-106,114-116,119,123,127-129,137-140,144-145,161
+client/scripts/entity_tick_smoothing_runtime.gd
+  s_eb288c4bf738dd::t_b4fb3a337bad63 168
+client/scripts/client_constants.gd
+  s_eb288c4bf738dd::t_b4fb3a337bad63 63
+shared/golden/auto_path.v0.schema.json
+  s_eb288c4bf738dd::t_b4fb3a337bad63 16-19,37-40,54
+docs/progress/slice-lifecycle.md
+  s_eb288c4bf738dd::t_e93a73d2c02b1e 370
+server/internal/game/sim.go
+  s_eb288c4bf738dd::t_228ffce877c8b6 379
+  s_eb288c4bf738dd::t_a93db7f741ab91 2768
+server/internal/game/interactables_test.go
+  s_eb288c4bf738dd::t_bc4ea3c77f32d4 170-196
+shared/rules/navigation.v0.schema.json
+  s_eb288c4bf738dd::t_b4fb3a337bad63 10-13,17,32-35,49
+server/internal/game/monster_navigation_budget.go
+  s_eb288c4bf738dd::t_b4fb3a337bad63 29-32,34
+client/tests/test_coop_client.gd
+  s_eb288c4bf738dd::t_b4fb3a337bad63 833
+client/scripts/main.gd
+  s_eb288c4bf738dd::t_b4fb3a337bad63 71,270,1025-1028,1031-1037,2352-2353,2942,2966,3015-3016,3020-3021
+server/internal/game/pathfind.go
+  s_eb288c4bf738dd::t_d99688398ef284 70-72
+  s_eb288c4bf738dd::t_3340e6f0eacca3 73
+docs/specs/v356_spec-player-navigation-guardrails.md
+  s_eb288c4bf738dd::t_5900833ae9a0ac 3
+  s_eb288c4bf738dd::t_9a0cdd8af8f0f9 88-89
+  s_eb288c4bf738dd::t_9ccaaffd4b9fe9 65,75,78-86,93-115
+  s_eb288c4bf738dd::t_92e84cdd177e77 168
+  s_eb288c4bf738dd::t_8346b986e5317e 70-71
+  s_eb288c4bf738dd::t_1db7749c4d4ef7 76-77
+  s_eb288c4bf738dd::t_42832c0234d4d3 1-2
+  s_eb288c4bf738dd::t_e0c9a02ff64a75 4-6,62-64
+  s_eb288c4bf738dd::t_cc961395c9d580 66-69
+  s_eb288c4bf738dd::t_05127590e36192 72-74
+  s_eb288c4bf738dd::t_930f921d4769a9 87
+  s_eb288c4bf738dd::t_07e23ef316d64a 90-92
+  s_eb288c4bf738dd::t_c0df33f3d19746 116-118,165-167
+  s_eb288c4bf738dd::t_a7fafeeca73872 169-171
+server/internal/game/rules.go
+  s_eb288c4bf738dd::t_b4fb3a337bad63 138-141,145
+server/internal/game/companion_ai.go
+  s_eb288c4bf738dd::t_b4fb3a337bad63 378
+scripts/client_smoke.sh
+  s_eb288c4bf738dd::t_b4fb3a337bad63 173
+docs/as-built/v356_player-navigation-guardrails.md
+  s_eb288c4bf738dd::t_ef0854ca699465 12-20,22-45
+  s_eb288c4bf738dd::t_28309982fc1a67 21
+  s_eb288c4bf738dd::t_419ef38e9b7a8b 9-11
+  s_eb288c4bf738dd::t_d3c2f4b5f2ca40 46
+docs/CODEMAP.md
+  s_eb288c4bf738dd::t_b4fb3a337bad63 17
+shared/golden/monster_chase.json
+  s_eb288c4bf738dd::t_f7bdb7f2e40097 9-11,21-22
+  s_eb288c4bf738dd::t_2b2dce1c411eab 12
+PROGRESS.md
+  s_eb288c4bf738dd::t_f2b5e7de129e1c 18
+  s_eb288c4bf738dd::t_f2227e6c4787ea 28
+  s_eb288c4bf738dd::t_ddde3d3594d238 26,29
+shared/rules/worlds.v0.json
+  s_eb288c4bf738dd::t_b4fb3a337bad63 458-492
+shared/golden/auto_path.json
+  s_eb288c4bf738dd::t_cd8b3de5d44e6c 10
+  s_eb288c4bf738dd::t_9c9c8ffa20cbec 7-9,19-20
+server/internal/game/player_navigation_budget.go
+  s_eb288c4bf738dd::t_733ee1acc19670 58-61,63-66
+  s_eb288c4bf738dd::t_719ff9853dc5b0 77-95
+  s_eb288c4bf738dd::t_1a1bedb05cf614 1-12,28,43-44,56-57,67-70,72-74,76
+  s_eb288c4bf738dd::t_0f1db2cb36f1a3 62
+  s_eb288c4bf738dd::t_5d1407948bce95 13-27,29-32,38-42,45-55,71,75
+  s_eb288c4bf738dd::t_d29636b1e4173e 34
+  s_eb288c4bf738dd::t_3b3072b4d70d69 33,35-37
+server/internal/game/navigation_rules.go
+  s_eb288c4bf738dd::t_b4fb3a337bad63 13-16,20,39-50,60-62,90-93,97
+server/internal/game/wall_floor_lab_nav_test.go
+  s_eb288c4bf738dd::t_1b41a87aec46be 5-13
+server/internal/game/player_navigation_budget_test.go
+  s_eb288c4bf738dd::t_11b0e2068831f8 22,25-27
+  s_eb288c4bf738dd::t_1d088f250ecd81 1-15,18-20,28-44,47-69,72-80,82-84,86,92-99
+  s_eb288c4bf738dd::t_fca9ebdde855ff 45-46
+  s_eb288c4bf738dd::t_c242a265e2feb9 87-91
+  s_eb288c4bf738dd::t_914e56c41d1c2a 16-17,21
+  s_eb288c4bf738dd::t_3670d1d2cfd35f 81,85
+  s_eb288c4bf738dd::t_e25d3debfb081c 23-24
+  s_eb288c4bf738dd::t_785e175cc02262 70-71
+server/internal/game/game_test.go
+  s_eb288c4bf738dd::t_1fac27170dc16e 4424-4425,4433,4440
+client/tests/test_projectile_tick_smoothing.gd
+  s_eb288c4bf738dd::t_b4fb3a337bad63 15,67-75,77
+  s_eb288c4bf738dd::t_ba3865d7d045aa 76,78-79
+server/internal/game/handlers.go
+  s_eb288c4bf738dd::t_2b18944f1b4e20 182-186
+  s_eb288c4bf738dd::t_b4fb3a337bad63 138,143,1438
+server/internal/game/approach.go
+  s_eb288c4bf738dd::t_8ebc9c5e07f0f5 61
+  s_eb288c4bf738dd::t_a3e302670c8553 82-86
+  s_eb288c4bf738dd::t_b17eacc4cc0e18 87-88,91-113,115-121,137-138,140-146,148-186,188-204
+  s_eb288c4bf738dd::t_99ad0f81349bbf 69-71
+  s_eb288c4bf738dd::t_cc43c08b9c09d1 30,35
+  s_eb288c4bf738dd::t_d2814ff11ebb9d 3-6
+  s_eb288c4bf738dd::t_14830163141f45 125-127
+  s_eb288c4bf738dd::t_94d1d4f50d0c36 7-14
+  s_eb288c4bf738dd::t_1a96b3b58849e7 49
+  s_eb288c4bf738dd::t_48a355aa6ec3cd 46-48,51-53
+  s_eb288c4bf738dd::t_64cd65a8eb5023 79-81,122-124,128-136
+  s_eb288c4bf738dd::t_ab901833fe0490 32,34,37
+  s_eb288c4bf738dd::t_eb604c54edc8c5 139,147
+  s_eb288c4bf738dd::t_efc4dee843f8fc 205-225
+  s_eb288c4bf738dd::t_7f782b6552e81c 36,38
+  s_eb288c4bf738dd::t_34b1b284315a6b 31,33,39
+  s_eb288c4bf738dd::t_034812d7a8ecdf 29
+  s_eb288c4bf738dd::t_77982d993f5000 114,187
+shared/golden/monster_chase.v0.schema.json
+  s_eb288c4bf738dd::t_b4fb3a337bad63 18-21,25,40-43,57
+client/scripts/path_reject_backoff.gd
+  s_66aec73de6fa91::t_87c1b83db48258 1-43
+client/scripts/path_reject_backoff.gd.uid
+  s_66aec73de6fa91::t_b2fd4765f78d33 1
+client/tests/test_path_reject_backoff.gd.uid
+  s_eb288c4bf738dd::t_a33e3156a2ad93 1
+tools/bot/scenarios/94_player_path_budget_lab.json
+  s_66aec73de6fa91::t_892a53b420108c 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "8da98ebf1947fb2c2fc6795906dae88984aed2b8",
+  "prompts": {},
+  "sessions": {
+    "s_66aec73de6fa91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "050554c9-5bb2-4043-93cc-df94fd5683a1",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_eb288c4bf738dd": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9c4403ad-85eb-4ccf-964b-a4be8007b454",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

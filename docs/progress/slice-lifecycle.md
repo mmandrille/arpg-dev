@@ -371,6 +371,10 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v357** | `town-night-perimeter` | Complete (`make ci` green) | [`spec`](../specs/v357_spec-town-night-perimeter.md) | [`plan`](../plans/v357_2026-06-27-town-night-perimeter.md) | [`as-built`](../as-built/v357_town-night-perimeter.md) |
 | **v358** | `scenario-movement-decoupling` | Complete (`make ci-full` green) | [`spec`](../specs/v358_spec-scenario-movement-decoupling.md) | [`plan`](../plans/v358_2026-06-28-scenario-movement-decoupling.md) | [`as-built`](../as-built/v358_scenario-movement-decoupling.md) |
 | **v359** | `presentation-feel-catalog` | Complete (focused checks green) | [`spec`](../specs/v359_spec-presentation-feel-catalog.md) | — | [`as-built`](../as-built/v359_presentation-feel-catalog.md) |
+| **v360** | `loot-tick-smoothing` | Complete (focused checks green) | — | — | [`as-built`](../as-built/v360_loot-tick-smoothing.md) |
+| **v361** | `interactable-tick-smoothing` | Complete (focused checks green) | — | — | [`as-built`](../as-built/v361_interactable-tick-smoothing.md) |
+| **v362** | `attack-speed-animation-scaling` | Complete (focused checks green) | — | — | [`as-built`](../as-built/v362_attack-speed-animation-scaling.md) |
+| **v363** | `basic-attack-cooldown-tuning` | Complete (focused checks green) | — | — | [`as-built`](../as-built/v363_basic-attack-cooldown-tuning.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

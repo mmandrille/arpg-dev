@@ -1,7 +1,7 @@
 {
   "version": 0,
   "gameplay": {
-    "base_attack_interval_ticks": 14,
+    "base_attack_interval_ticks": 12,
     "base_movement_speed": 0.75,
     "movement_acceleration_seconds": 2.0,
     "movement_min_speed_factor": 0.6,

@@ -23,12 +23,12 @@ Last updated: 2026-06-28
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v359 — presentation-feel-catalog |
+| **Latest completed slice** | v363 — basic-attack-cooldown-tuning |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green (2026-06-28) |
 | **Next slice** | Run `/next` for new work |
 | **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
-| **Next engineering review** | After ~v359 ships |
+| **Next engineering review** | Due now (~v359 milestone passed) |
 
 
 ### Periodic engineering reviews

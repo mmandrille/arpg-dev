@@ -196,15 +196,17 @@ static func make_town_preview_scene() -> Node3D:
 		ground_mesh.size = Vector2(28.0, 22.0)
 	root.add_child(ground)
 	var service_entries := [
-		{"def_id": "stairs_down", "position": Vector3(11.0, 0.0, 8.0)},
-		{"def_id": "teleporter", "position": Vector3(2.0, 0.0, 12.0)},
-		{"def_id": "town_vendor", "position": Vector3(17.0, 0.0, 10.0)},
-		{"def_id": "town_mystery_seller", "position": Vector3(18.0, 0.0, 15.0)},
-		{"def_id": "town_stash", "position": Vector3(7.0, 0.0, 14.0)},
-		{"def_id": "town_bishop", "position": Vector3(15.0, 0.0, 6.0)},
-		{"def_id": "town_market_board", "position": Vector3(10.0, 0.0, 18.0)},
-		{"def_id": "town_blacksmith", "position": Vector3(6.0, 0.0, 10.0)},
-		{"def_id": "town_quest_giver", "position": Vector3(13.0, 0.0, 7.0)},
+		{"def_id": "stairs_down", "position": Vector3(11.0, 0.0, 12.0)},
+		{"def_id": "teleporter", "position": Vector3(12.0, 0.0, 12.0)},
+		{"def_id": "town_blacksmith", "position": Vector3(5.0, 0.0, 12.0)},
+		{"def_id": "town_stash", "position": Vector3(6.0, 0.0, 8.0)},
+		{"def_id": "town_bishop", "position": Vector3(16.0, 0.0, 8.0)},
+		{"def_id": "town_quest_giver", "position": Vector3(11.0, 0.0, 5.0)},
+		{"def_id": "town_vendor", "position": Vector3(20.0, 0.0, 12.0)},
+		{"def_id": "town_mystery_seller", "position": Vector3(18.0, 0.0, 17.0)},
+		{"def_id": "town_market_board", "position": Vector3(7.0, 0.0, 18.0)},
+		{"def_id": "town_mercenary_board", "position": Vector3(11.0, 0.0, 20.0)},
+		{"def_id": "town_exit_gate", "position": Vector3(11.0, 0.0, 27.0)},
 	]
 	for entry in service_entries:
 		var service := make_interactable_node(str(entry["def_id"]))
@@ -213,16 +215,16 @@ static func make_town_preview_scene() -> Node3D:
 		root.add_child(service)
 	var cabin_a := make_town_cabin_node("west")
 	cabin_a.name = "TownCabinWest"
-	cabin_a.position = Vector3(5.0, 0.0, 7.0)
+	cabin_a.position = Vector3(4.0, 0.0, 16.0)
 	cabin_a.rotation_degrees.y = -22.0
 	root.add_child(cabin_a)
 	var cabin_b := make_town_cabin_node("east")
 	cabin_b.name = "TownCabinEast"
-	cabin_b.position = Vector3(21.0, 0.0, 12.5)
+	cabin_b.position = Vector3(22.0, 0.0, 16.0)
 	cabin_b.rotation_degrees.y = 18.0
 	root.add_child(cabin_b)
 	var fire := make_town_campfire_node()
-	fire.position = Vector3(12.0, 0.0, 13.0)
+	fire.position = Vector3(11.0, 0.0, 14.0)
 	root.add_child(fire)
 	TownAmbientLife.attach_to_town(root)
 	return root
@@ -245,6 +247,8 @@ static func make_interactable_node(def_id: String, elite_objective: bool = false
 			return make_blacksmith_node()
 		"town_quest_giver":
 			return make_quest_giver_node()
+		"town_exit_gate":
+			return make_door_node()
 	return make_door_node()
 
 static func make_town_cabin_node(variant: String = "plain") -> Node3D:

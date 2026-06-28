@@ -1,0 +1,17 @@
+{
+  "version": 0,
+  "center": { "x": 11.0, "y": 12.0 },
+  "radius_m": 15.0,
+  "segment_count": 32,
+  "gate_heading": "south",
+  "gate_gap_segments": 2,
+  "wall_kind": "wood",
+  "wall_thickness": 0.5,
+  "gate_position": { "x": 11.0, "y": 27.0 },
+  "night_lighting": {
+    "directional_color": "#948b7c",
+    "directional_energy": 1.0,
+    "ambient_color": "#393b3e",
+    "ambient_energy": 0.30
+  }
+}

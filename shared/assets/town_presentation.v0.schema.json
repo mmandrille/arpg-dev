@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/town_presentation.v0.schema.json",
+  "title": "Town presentation (v0)",
+  "description": "Client and tooling tuning for level-0 town perimeter and night mood.",
+  "type": "object",
+  "required": [
+    "version",
+    "center",
+    "radius_m",
+    "segment_count",
+    "gate_heading",
+    "gate_gap_segments",
+    "wall_kind",
+    "wall_thickness",
+    "gate_position"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "center": { "$ref": "#/$defs/position" },
+    "radius_m": { "type": "number", "exclusiveMinimum": 0 },
+    "segment_count": { "type": "integer", "minimum": 8, "maximum": 128 },
+    "gate_heading": { "type": "string", "enum": ["south", "north", "east", "west"] },
+    "gate_gap_segments": { "type": "integer", "minimum": 1, "maximum": 8 },
+    "wall_kind": { "type": "string", "enum": ["wood", "wall"] },
+    "wall_thickness": { "type": "number", "exclusiveMinimum": 0 },
+    "gate_position": { "$ref": "#/$defs/position" },
+    "night_lighting": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "directional_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "directional_energy": { "type": "number", "minimum": 0 },
+        "ambient_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "ambient_energy": { "type": "number", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

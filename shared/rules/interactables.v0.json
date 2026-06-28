@@ -8,6 +8,14 @@
         "size": { "x": 1.6, "y": 0.25 }
       }
     },
+    "town_exit_gate": {
+      "name": "Town Gate",
+      "initial_state": "closed",
+      "barrier_when_closed": {
+        "size": { "x": 5.5, "y": 0.5 }
+      },
+      "locked_exit_reason": "town_exit_locked"
+    },
     "treasure_chest": {
       "name": "Treasure Chest",
       "initial_state": "closed"

@@ -5,6 +5,7 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 
 const TOWN_GROUND_SIZE := Vector2(140.0, 90.0)
 const TOWN_GROUND_CENTER := Vector3(50.0, -0.02, 25.0)
+const TOWN_PERIMETER_WALL_HEIGHT := 1.0
 const DUNGEON_GROUND_MARGIN := 8.0
 
 var ground_textures: Dictionary = {}
@@ -192,8 +193,19 @@ func wall_material_for_level(level: int, source: String, size: Dictionary, wall_
 			mat.albedo_color = Color(0.84, 0.78, 0.70)
 		"perimeter":
 			mat.albedo_color = Color(0.62, 0.64, 0.68)
+		"town_perimeter":
+			return town_perimeter_wall_material(size, wall_height)
 		_:
 			mat.albedo_color = Color(0.78, 0.80, 0.82)
+	return mat
+
+
+func town_perimeter_wall_material(size: Dictionary, wall_height: float = TOWN_PERIMETER_WALL_HEIGHT) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("#6d3f1f")
+	mat.roughness = 0.92
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.uv1_scale = Vector3(maxf(1.0, float(size.get("x", 1.0)) / 1.5), maxf(1.0, wall_height / 1.5), 1.0)
 	return mat
 
 

@@ -8,6 +8,7 @@ const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_
 const BotMarketReceiptAssertionsScript := preload("res://scripts/bot_market_receipt_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 const BotAssertionHandlersScript := preload("res://scripts/bot_assertion_handlers.gd")
+const BotIntentRejectAssertionsScript := preload("res://scripts/bot_intent_reject_assertions.gd")
 const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
 
 
@@ -55,6 +56,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return runner._wall_layout_matches(step, state)
 		"wait_fog_of_war":
 			return BotAssertionHandlersScript.fog_of_war_matches(step, state)
+		"wait_intent_rejected":
+			return BotIntentRejectAssertionsScript.matches(step, state)
 		"wait_shop_panel":
 			if not bool(state.get("shop_panel_visible", false)):
 				return false

@@ -755,7 +755,11 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			loot.id = s.alloc()
 			level.entities[loot.id] = loot
 		case wallEntity:
-			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size, kind: preset.Kind, source: "preset", blocksLOS: preset.BlocksLineOfSight})
+			source := "preset"
+			if preset.Kind == obstacleKindWood {
+				source = "town_perimeter"
+			}
+			level.walls = append(level.walls, wallObstacle{pos: preset.Position, size: preset.Size, kind: preset.Kind, source: source, blocksLOS: preset.BlocksLineOfSight})
 		case interactableEntity:
 			def := s.rules.Interactables[preset.InteractableDefID]
 			if def.Service == uniqueTestChestService && !s.gameplayDebug {

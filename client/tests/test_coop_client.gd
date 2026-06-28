@@ -43,6 +43,7 @@ func _initialize() -> void:
 	_test_multiple_remote_players_update_and_remove_independently()
 	_test_path_reject_clears_held_click_state()
 	_test_capacity_reject_shows_bag_full_unequip_message()
+	_test_town_exit_locked_reject_tracks_reason()
 	_test_no_mana_reject_shows_floating_text()
 	_test_skill_cooldown_reject_shows_floating_text()
 	_test_monster_aggro_shows_threat_floating_text()
@@ -843,6 +844,16 @@ func _test_capacity_reject_shows_bag_full_unequip_message() -> void:
 	var main = _make_main()
 	main._handle_intent_rejected({"rejected_message_id": "msg-capacity", "reason": "capacity_would_overflow"})
 	_assert_eq("capacity overflow hint text", main._last_inventory_feedback_text, ClientConstantsScript.BAG_FULL_CANT_UNEQUIP_TEXT)
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_town_exit_locked_reject_tracks_reason() -> void:
+	var main = _make_main()
+	main._handle_intent_rejected({"rejected_message_id": "msg-town-exit", "reason": "town_exit_locked"})
+	_assert_eq("town exit reject reason", main._last_intent_reject_reason, "town_exit_locked")
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

@@ -17,12 +17,12 @@
     },
     {
       "type": "click_floor",
-      "x": 4.0,
+      "x": 11.0,
       "z": 16.0
     },
     {
       "type": "wait_player_near",
-      "x": 4.0,
+      "x": 11.0,
       "z": 16.0,
       "distance": 1.5,
       "timeout_s": 10.0

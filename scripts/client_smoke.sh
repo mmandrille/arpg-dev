@@ -225,6 +225,7 @@ run_gate "GDScript look-and-feel polish test" "[gdtest] PASS: test_look_and_feel
 # These existed on disk but were never registered, so they ran zero times in CI.
 run_gate "GDScript ground/wall factories test" "[gdtest] PASS: test_factories" res://tests/test_factories.gd
 run_gate "GDScript dungeon depth lighting test" "[gdtest] PASS: test_dungeon_depth_lighting" res://tests/test_dungeon_depth_lighting.gd
+run_gate "GDScript town night lighting test" "[gdtest] PASS: test_town_night_lighting" res://tests/test_town_night_lighting.gd
 run_gate "GDScript fog-of-war overlay test" "[gdtest] PASS: test_fog_of_war_overlay" res://tests/test_fog_of_war_overlay.gd
 run_gate "GDScript fog LOS shadow cache test" "[gdtest] PASS: test_fog_los_shadow_cache" res://tests/test_fog_los_shadow_cache.gd
 run_gate "GDScript hero light source test" "[gdtest] PASS: test_hero_light_source" res://tests/test_hero_light_source.gd

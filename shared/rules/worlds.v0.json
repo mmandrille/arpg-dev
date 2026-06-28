@@ -2,1339 +2,4580 @@
   "version": 0,
   "worlds": {
     "vertical_slice": {
-      "player": { "position": { "x": 10, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 10,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy",
-          "position": { "x": 12, "y": 5 }
+          "position": {
+            "x": 12,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "gear_before_combat": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_def_id": "rusty_sword",
-          "position": { "x": 6, "y": 5 }
+          "position": {
+            "x": 6,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "training_dummy_reward",
-          "position": { "x": 12, "y": 5 }
+          "position": {
+            "x": 12,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "collision_lab": {
-      "player": { "position": { "x": 2, "y": 2 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 2
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy_reward",
-          "position": { "x": 8, "y": 5 }
+          "position": {
+            "x": 8,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 4, "y": 6 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 4,
+            "y": 6
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         }
       ]
     },
     "door_lab": {
-      "player": { "position": { "x": 2, "y": 2 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 2
+        }
+      },
       "entities": [
         {
           "type": "interactable",
           "interactable_def_id": "wooden_door",
-          "position": { "x": 4, "y": 2 }
+          "position": {
+            "x": 4,
+            "y": 2
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 4, "y": 6 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 4,
+            "y": 6
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         },
         {
           "type": "loot",
           "item_def_id": "quest_leaf",
-          "position": { "x": 8, "y": 2 }
+          "position": {
+            "x": 8,
+            "y": 2
+          }
         }
       ]
     },
     "path_maze": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy_path",
-          "position": { "x": 12, "y": 5 }
+          "position": {
+            "x": 12,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 4, "y": 6 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 4,
+            "y": 6
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 7, "y": 3.5 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 7,
+            "y": 3.5
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 10, "y": 6 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 10,
+            "y": 6
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         }
       ]
     },
     "flying_navigation_lab": {
-      "player": { "position": { "x": 7.25, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 7.25,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "dungeon_bat",
-          "position": { "x": 2.4, "y": 5 }
+          "position": {
+            "x": 2.4,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "dungeon_mob",
-          "position": { "x": 2.4, "y": 7.5 }
+          "position": {
+            "x": 2.4,
+            "y": 7.5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
           "kind": "water",
-          "position": { "x": 4, "y": 5 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 4,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         },
         {
           "type": "wall",
           "kind": "hole",
-          "position": { "x": 5, "y": 5 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         }
       ]
     },
     "barbarian_leap_obstacle_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
           "kind": "water",
-          "position": { "x": 4, "y": 5 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 4,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         },
         {
           "type": "wall",
           "kind": "hole",
-          "position": { "x": 5, "y": 5 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         }
       ]
     },
     "obstacle_variety_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_def_id": "quest_leaf",
-          "position": { "x": 13, "y": 5 }
+          "position": {
+            "x": 13,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
           "kind": "rock",
-          "position": { "x": 5, "y": 5 },
-          "size": { "x": 1.2, "y": 5 }
+          "position": {
+            "x": 5,
+            "y": 5
+          },
+          "size": {
+            "x": 1.2,
+            "y": 5
+          }
         },
         {
           "type": "wall",
           "kind": "column",
-          "position": { "x": 7, "y": 5 },
-          "size": { "x": 1.2, "y": 5 }
+          "position": {
+            "x": 7,
+            "y": 5
+          },
+          "size": {
+            "x": 1.2,
+            "y": 5
+          }
         },
         {
           "type": "wall",
           "kind": "rubble",
-          "position": { "x": 9, "y": 5 },
-          "size": { "x": 1.2, "y": 5 }
+          "position": {
+            "x": 9,
+            "y": 5
+          },
+          "size": {
+            "x": 1.2,
+            "y": 5
+          }
         }
       ]
     },
     "line_of_sight_blocker_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy_reward",
-          "position": { "x": 9, "y": 5 }
+          "position": {
+            "x": 9,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
           "kind": "column",
           "blocks_line_of_sight": true,
-          "position": { "x": 5, "y": 5 },
-          "size": { "x": 1.2, "y": 3 }
+          "position": {
+            "x": 5,
+            "y": 5
+          },
+          "size": {
+            "x": 1.2,
+            "y": 3
+          }
         },
         {
           "type": "wall",
           "kind": "rock",
           "blocks_line_of_sight": true,
-          "position": { "x": 5, "y": 2.4 },
-          "size": { "x": 1.2, "y": 1.2 }
+          "position": {
+            "x": 5,
+            "y": 2.4
+          },
+          "size": {
+            "x": 1.2,
+            "y": 1.2
+          }
         },
         {
           "type": "wall",
           "kind": "rubble",
-          "position": { "x": 12.8, "y": 8 },
-          "size": { "x": 1.2, "y": 1.2 }
+          "position": {
+            "x": 12.8,
+            "y": 8
+          },
+          "size": {
+            "x": 1.2,
+            "y": 1.2
+          }
         },
         {
           "type": "wall",
           "kind": "water",
-          "position": { "x": 11.5, "y": 3 },
-          "size": { "x": 1.2, "y": 2 }
+          "position": {
+            "x": 11.5,
+            "y": 3
+          },
+          "size": {
+            "x": 1.2,
+            "y": 2
+          }
         },
         {
           "type": "wall",
           "kind": "hole",
-          "position": { "x": 11.5, "y": 7 },
-          "size": { "x": 1.2, "y": 2 }
+          "position": {
+            "x": 11.5,
+            "y": 7
+          },
+          "size": {
+            "x": 1.2,
+            "y": 2
+          }
         }
       ]
     },
     "ranged_lab": {
-      "player": { "position": { "x": 2, "y": 2 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 2
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_def_id": "training_bow",
-          "position": { "x": 3, "y": 2 }
+          "position": {
+            "x": 3,
+            "y": 2
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "training_dummy_ranged",
-          "position": { "x": 12, "y": 5 }
+          "position": {
+            "x": 12,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 5, "y": 6 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 5,
+            "y": 6
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         }
       ]
     },
     "combat_control_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_def_id": "training_bow",
-          "position": { "x": 3, "y": 5 }
+          "position": {
+            "x": 3,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "dungeon_mob",
-          "position": { "x": 13, "y": 5 }
+          "position": {
+            "x": 13,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "player_path_budget_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "dungeon_mob",
-          "position": { "x": 13, "y": 5 }
+          "position": {
+            "x": 13,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 8,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "unique_burn_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_template_id": "cave_blade",
-          "position": { "x": 3, "y": 5 }
+          "position": {
+            "x": 3,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
-          "position": { "x": 6, "y": 5 }
+          "position": {
+            "x": 6,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "unique_reprisal_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_template_id": "cave_shield",
-          "position": { "x": 3, "y": 5 }
+          "position": {
+            "x": 3,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_miss_attacker",
-          "position": { "x": 8, "y": 5 }
+          "position": {
+            "x": 8,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "unique_offensive_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_template_id": "cave_bow",
-          "position": { "x": 3, "y": 5 }
+          "position": {
+            "x": 3,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
-          "position": { "x": 6, "y": 5 }
+          "position": {
+            "x": 6,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
-          "position": { "x": 7.5, "y": 5 }
+          "position": {
+            "x": 7.5,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "combat_stat_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_template_id": "cave_blade",
-          "position": { "x": 3, "y": 5 }
+          "position": {
+            "x": 3,
+            "y": 5
+          }
         },
         {
           "type": "loot",
           "item_template_id": "cave_shield",
-          "position": { "x": 3, "y": 6 }
+          "position": {
+            "x": 3,
+            "y": 6
+          }
         },
         {
           "type": "loot",
           "item_template_id": "cave_bow",
-          "position": { "x": 3, "y": 4 }
+          "position": {
+            "x": 3,
+            "y": 4
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
-          "position": { "x": 6, "y": 5 }
+          "position": {
+            "x": 6,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_armored_target",
-          "position": { "x": 8, "y": 4 }
+          "position": {
+            "x": 8,
+            "y": 4
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_blocking_target",
-          "position": { "x": 10, "y": 6 }
+          "position": {
+            "x": 10,
+            "y": 6
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_crit_attacker",
-          "position": { "x": 14, "y": 8 }
+          "position": {
+            "x": 14,
+            "y": 8
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_miss_attacker",
-          "position": { "x": 6, "y": 8 }
+          "position": {
+            "x": 6,
+            "y": 8
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "training_dummy_reward",
-          "position": { "x": 5, "y": 8 }
+          "position": {
+            "x": 5,
+            "y": 8
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "inventory_lab": {
-      "player": { "position": { "x": 4, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "loot",
           "item_def_id": "rusty_sword",
-          "position": { "x": 5, "y": 5 }
+          "position": {
+            "x": 5,
+            "y": 5
+          }
         }
       ]
     },
     "heal_lab": {
-      "player": { "position": { "x": 6, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 6,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy_heal",
-          "position": { "x": 7, "y": 5 }
+          "position": {
+            "x": 7,
+            "y": 5
+          }
         }
       ]
     },
     "skill_progression_lab": {
-      "player": { "position": { "x": 4, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "skill_xp_level6_dummy",
-          "position": { "x": 5, "y": 5 }
+          "position": {
+            "x": 5,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "skill_xp_level7_dummy",
-          "position": { "x": 4, "y": 6 }
+          "position": {
+            "x": 4,
+            "y": 6
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
-          "position": { "x": 8, "y": 5 }
+          "position": {
+            "x": 8,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
-          "position": { "x": 10, "y": 5 }
+          "position": {
+            "x": 10,
+            "y": 5
+          }
         },
         {
           "type": "loot",
           "item_template_id": "starter_sorcerer_staff",
-          "position": { "x": 4, "y": 4 }
+          "position": {
+            "x": 4,
+            "y": 4
+          }
         }
       ]
     },
     "damage_types_lab": {
-      "player": { "position": { "x": 4, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "combat_lab_lightning_resistant",
-          "position": { "x": 8, "y": 4 }
+          "position": {
+            "x": 8,
+            "y": 4
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
-          "position": { "x": 8, "y": 5 }
+          "position": {
+            "x": 8,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_lightning_weak",
-          "position": { "x": 8, "y": 6 }
+          "position": {
+            "x": 8,
+            "y": 6
+          }
         }
       ]
     },
     "undead_skeleton_poison_immunity": {
-      "player": { "position": { "x": 4, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "dungeon_undead",
-          "position": { "x": 5.2, "y": 5 }
+          "position": {
+            "x": 5.2,
+            "y": 5
+          }
         }
       ]
     },
     "skill_visual_lab": {
-      "player": { "position": { "x": 4, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "skill_xp_level6_dummy",
-          "position": { "x": 10, "y": 5 }
+          "position": {
+            "x": 10,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "skill_xp_level7_dummy",
-          "position": { "x": 10, "y": 6 }
+          "position": {
+            "x": 10,
+            "y": 6
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
-          "position": { "x": 24, "y": 5 }
+          "position": {
+            "x": 24,
+            "y": 5
+          }
         },
         {
           "type": "monster",
           "monster_def_id": "training_dummy_heal",
-          "position": { "x": 4, "y": 10 }
+          "position": {
+            "x": 4,
+            "y": 10
+          }
         }
       ]
     },
     "chase_lab": {
-      "player": { "position": { "x": 4, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy_chase",
-          "position": { "x": 12, "y": 5 }
+          "position": {
+            "x": 12,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "chase_maze": {
-      "player": { "position": { "x": 9, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 9,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy_chase",
-          "position": { "x": 2, "y": 5 }
+          "position": {
+            "x": 2,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 4, "y": 6 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 4,
+            "y": 6
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 7, "y": 3.5 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 7,
+            "y": 3.5
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 10, "y": 6 },
-          "size": { "x": 1, "y": 6 }
+          "position": {
+            "x": 10,
+            "y": 6
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
         }
       ]
     },
     "leash_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
         {
           "type": "monster",
           "monster_def_id": "training_dummy_chase",
-          "position": { "x": 4, "y": 5 }
+          "position": {
+            "x": 4,
+            "y": 5
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 0.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 8, "y": 9.5 },
-          "size": { "x": 16, "y": 1 }
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 0.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         },
         {
           "type": "wall",
-          "position": { "x": 15.5, "y": 5 },
-          "size": { "x": 1, "y": 10 }
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
         }
       ]
     },
     "dungeon_levels": {
       "mode": "multi_level",
-      "player": { "position": { "x": 4, "y": 10 } },
+      "player": {
+        "position": {
+          "x": 11,
+          "y": 18
+        }
+      },
       "entities": [
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 25.9278,
+            "y": 13.4703
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 25.3541,
+            "y": 16.3543
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 24.2288,
+            "y": 19.071
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 22.5952,
+            "y": 21.5159
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 20.5159,
+            "y": 23.5952
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 18.071,
+            "y": 25.2288
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 15.3543,
+            "y": 26.3541
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 6.6457,
+            "y": 26.3541
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 3.929,
+            "y": 25.2288
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 1.4841,
+            "y": 23.5952
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": -0.5952,
+            "y": 21.5159
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": -2.2288,
+            "y": 19.071
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": -3.3541,
+            "y": 16.3543
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": -3.9278,
+            "y": 13.4703
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": -3.9278,
+            "y": 10.5297
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": -3.3541,
+            "y": 7.6457
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": -2.2288,
+            "y": 4.929
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": -0.5952,
+            "y": 2.4841
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 1.4841,
+            "y": 0.4048
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 3.929,
+            "y": -1.2288
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 6.6457,
+            "y": -2.3541
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 9.5297,
+            "y": -2.9278
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 12.4703,
+            "y": -2.9278
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 15.3543,
+            "y": -2.3541
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 18.071,
+            "y": -1.2288
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 20.5159,
+            "y": 0.4048
+          },
+          "size": {
+            "x": 0.5,
+            "y": 2.9452
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 22.5952,
+            "y": 2.4841
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 24.2288,
+            "y": 4.929
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 25.3541,
+            "y": 7.6457
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "wall",
+          "kind": "wood",
+          "position": {
+            "x": 25.9278,
+            "y": 10.5297
+          },
+          "size": {
+            "x": 2.9452,
+            "y": 0.5
+          }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_exit_gate",
+          "position": {
+            "x": 11.0,
+            "y": 27.0
+          }
+        },
         {
           "type": "interactable",
           "interactable_def_id": "stairs_down",
-          "position": { "x": 11, "y": 8 }
+          "position": {
+            "x": 11,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "teleporter",
-          "position": { "x": 2, "y": 12 }
-        },
-        {
-          "type": "interactable",
-          "interactable_def_id": "town_vendor",
-          "position": { "x": 17, "y": 10 }
-        },
-        {
-          "type": "interactable",
-          "interactable_def_id": "town_mystery_seller",
-          "position": { "x": 18, "y": 15 }
-        },
-        {
-          "type": "interactable",
-          "interactable_def_id": "town_stash",
-          "position": { "x": 7, "y": 14 }
-        },
-        {
-          "type": "interactable",
-          "interactable_def_id": "town_bishop",
-          "position": { "x": 15, "y": 6 }
-        },
-        {
-          "type": "interactable",
-          "interactable_def_id": "town_market_board",
-          "position": { "x": 10, "y": 18 }
+          "position": {
+            "x": 12,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_blacksmith",
-          "position": { "x": 6, "y": 10 }
+          "position": {
+            "x": 5,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
-          "interactable_def_id": "town_unique_chest",
-          "position": { "x": 6, "y": 7 }
+          "interactable_def_id": "town_stash",
+          "position": {
+            "x": 6,
+            "y": 8
+          }
         },
         {
           "type": "interactable",
-          "interactable_def_id": "town_mercenary_board",
-          "position": { "x": 12, "y": 18 }
+          "interactable_def_id": "town_bishop",
+          "position": {
+            "x": 16,
+            "y": 8
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_quest_giver",
-          "position": { "x": 13, "y": 7 }
+          "position": {
+            "x": 11,
+            "y": 5
+          }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_vendor",
+          "position": {
+            "x": 20,
+            "y": 12
+          }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_mystery_seller",
+          "position": {
+            "x": 18,
+            "y": 17
+          }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_market_board",
+          "position": {
+            "x": 7,
+            "y": 18
+          }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_mercenary_board",
+          "position": {
+            "x": 11,
+            "y": 20
+          }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_unique_chest",
+          "position": {
+            "x": 8,
+            "y": 10
+          }
         }
       ]
     },
     "boss_floor_gate_lab": {
       "mode": "multi_level",
       "start_level": -5,
-      "player": { "position": { "x": 26, "y": 15 } },
+      "player": {
+        "position": {
+          "x": 26,
+          "y": 15
+        }
+      },
       "entities": []
     },
     "generated_wall_lab": {
       "mode": "multi_level",
       "start_level": -1,
-      "player": { "position": { "x": 26, "y": 15 } },
+      "player": {
+        "position": {
+          "x": 26,
+          "y": 15
+        }
+      },
       "entities": []
     },
     "coop_reward_lab": {
-      "player": { "position": { "x": 13, "y": 8 } },
+      "player": {
+        "position": {
+          "x": 13,
+          "y": 8
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 15, "y": 8 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_mob",
+          "position": {
+            "x": 15,
+            "y": 8
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "coop_loot_lab": {
-      "player": { "position": { "x": 4, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "loot", "item_def_id": "gold", "position": { "x": 6, "y": 5 } },
-        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 8, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "loot",
+          "item_def_id": "gold",
+          "position": {
+            "x": 6,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_blade",
+          "position": {
+            "x": 8,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "ranged_monster_ai_lab": {
-      "player": { "position": { "x": 6, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 6,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "dungeon_archer", "position": { "x": 10, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 5 }, "size": { "x": 0.8, "y": 2.0 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_archer",
+          "position": {
+            "x": 10,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 5
+          },
+          "size": {
+            "x": 0.8,
+            "y": 2.0
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "ranged_monster_retreat_lab": {
-      "player": { "position": { "x": 6, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 6,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "dungeon_archer", "position": { "x": 7.2, "y": 5 } },
-        { "type": "wall", "position": { "x": 10, "y": 0.5 }, "size": { "x": 20, "y": 1 } },
-        { "type": "wall", "position": { "x": 10, "y": 9.5 }, "size": { "x": 20, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 19.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_archer",
+          "position": {
+            "x": 7.2,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 10,
+            "y": 0.5
+          },
+          "size": {
+            "x": 20,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 10,
+            "y": 9.5
+          },
+          "size": {
+            "x": 20,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 19.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "ranged_companion_target_lab": {
-      "player": { "position": { "x": 4, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "companion", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.8, "y": 5 } },
-        { "type": "monster", "monster_def_id": "dungeon_archer", "position": { "x": 10, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "companion",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8.8,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_archer",
+          "position": {
+            "x": 10,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "vendor_lab": {
-      "player": { "position": { "x": 12, "y": 12 } },
+      "player": {
+        "position": {
+          "x": 12,
+          "y": 12
+        }
+      },
       "entities": [
         {
           "type": "interactable",
           "interactable_def_id": "town_vendor",
-          "position": { "x": 15, "y": 12 }
+          "position": {
+            "x": 15,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_mystery_seller",
-          "position": { "x": 17, "y": 12 }
+          "position": {
+            "x": 17,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_stash",
-          "position": { "x": 11, "y": 12 }
+          "position": {
+            "x": 11,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_bishop",
-          "position": { "x": 9, "y": 12 }
+          "position": {
+            "x": 9,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_market_board",
-          "position": { "x": 7, "y": 12 }
+          "position": {
+            "x": 7,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_mercenary_board",
-          "position": { "x": 7, "y": 10 }
+          "position": {
+            "x": 7,
+            "y": 10
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_blacksmith",
-          "position": { "x": 5, "y": 12 }
+          "position": {
+            "x": 5,
+            "y": 12
+          }
         },
         {
           "type": "interactable",
           "interactable_def_id": "town_unique_chest",
-          "position": { "x": 5, "y": 10 }
+          "position": {
+            "x": 5,
+            "y": 10
+          }
         },
-        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 13, "y": 11 } },
-        { "type": "loot", "item_template_id": "cave_greatsword", "position": { "x": 13, "y": 12 } },
-        { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 13, "y": 13 } },
-        { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 14, "y": 11 } },
-        { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 14, "y": 12 } },
-        { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 14, "y": 13 } },
-        { "type": "loot", "item_def_id": "upgrade_shard", "position": { "x": 12, "y": 10 } },
+        {
+          "type": "loot",
+          "item_template_id": "cave_blade",
+          "position": {
+            "x": 13,
+            "y": 11
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_greatsword",
+          "position": {
+            "x": 13,
+            "y": 12
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_mail",
+          "position": {
+            "x": 13,
+            "y": 13
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_mail",
+          "position": {
+            "x": 14,
+            "y": 11
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_mail",
+          "position": {
+            "x": 14,
+            "y": 12
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_mail",
+          "position": {
+            "x": 14,
+            "y": 13
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "upgrade_shard",
+          "position": {
+            "x": 12,
+            "y": 10
+          }
+        },
         {
           "type": "interactable",
           "interactable_def_id": "town_quest_giver",
-          "position": { "x": 9, "y": 10 }
+          "position": {
+            "x": 9,
+            "y": 10
+          }
         }
       ]
     },
     "quest_turn_in_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 3, "y": 5 } },
-        { "type": "interactable", "interactable_def_id": "town_quest_giver", "position": { "x": 5, "y": 5 } },
-        { "type": "interactable", "interactable_def_id": "town_bishop", "position": { "x": 7, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_quest_giver",
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        },
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_bishop",
+          "position": {
+            "x": 7,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "equipment_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 3, "y": 4 } },
-        { "type": "loot", "item_template_id": "cave_shield", "position": { "x": 4, "y": 4 } },
-        { "type": "loot", "item_template_id": "cave_greatsword", "position": { "x": 5, "y": 4 } },
-        { "type": "loot", "item_template_id": "cave_bow", "position": { "x": 6, "y": 4 } },
-        { "type": "loot", "item_template_id": "cave_helm", "position": { "x": 3, "y": 6 } },
-        { "type": "loot", "item_template_id": "cave_mail", "position": { "x": 4, "y": 6 } },
-        { "type": "loot", "item_template_id": "cave_gloves", "position": { "x": 5, "y": 6 } },
-        { "type": "loot", "item_template_id": "cave_belt", "position": { "x": 6, "y": 6 } },
-        { "type": "loot", "item_template_id": "cave_boots", "position": { "x": 7, "y": 6 } },
-        { "type": "loot", "item_template_id": "cave_ring", "position": { "x": 8, "y": 4 } },
-        { "type": "loot", "item_template_id": "cave_ring", "position": { "x": 8, "y": 6 } },
-        { "type": "loot", "item_template_id": "cave_amulet", "position": { "x": 9, "y": 5 } },
-        { "type": "loot", "item_def_id": "red_potion", "position": { "x": 10, "y": 4 } },
-        { "type": "loot", "item_def_id": "red_potion", "position": { "x": 10, "y": 5 } },
-        { "type": "loot", "item_def_id": "red_potion", "position": { "x": 10, "y": 6 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "loot",
+          "item_template_id": "cave_blade",
+          "position": {
+            "x": 3,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_shield",
+          "position": {
+            "x": 4,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_greatsword",
+          "position": {
+            "x": 5,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_bow",
+          "position": {
+            "x": 6,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_helm",
+          "position": {
+            "x": 3,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_mail",
+          "position": {
+            "x": 4,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_gloves",
+          "position": {
+            "x": 5,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_belt",
+          "position": {
+            "x": 6,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_boots",
+          "position": {
+            "x": 7,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_ring",
+          "position": {
+            "x": 8,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_ring",
+          "position": {
+            "x": 8,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_amulet",
+          "position": {
+            "x": 9,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "red_potion",
+          "position": {
+            "x": 10,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "red_potion",
+          "position": {
+            "x": 10,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "red_potion",
+          "position": {
+            "x": 10,
+            "y": 6
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "unique_drop_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 3, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "loot",
+          "item_template_id": "cave_blade",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "requirements_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "loot", "item_template_id": "cave_war_sword", "position": { "x": 3, "y": 5 } },
-        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 7, "y": 4 } },
-        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 7, "y": 6 } },
-        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 10, "y": 4 } },
-        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 10, "y": 6 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "loot",
+          "item_template_id": "cave_war_sword",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_mob",
+          "position": {
+            "x": 7,
+            "y": 4
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_mob",
+          "position": {
+            "x": 7,
+            "y": 6
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_mob",
+          "position": {
+            "x": 10,
+            "y": 4
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_mob",
+          "position": {
+            "x": 10,
+            "y": 6
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "monster_visual_catalog_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "dungeon_mob", "position": { "x": 3.5, "y": 5 } },
-        { "type": "monster", "monster_def_id": "dungeon_wolf", "position": { "x": 8.5, "y": 4.5 } },
-        { "type": "monster", "monster_def_id": "dungeon_bat", "position": { "x": 8.5, "y": 5.5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_mob",
+          "position": {
+            "x": 3.5,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_wolf",
+          "position": {
+            "x": 8.5,
+            "y": 4.5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_bat",
+          "position": {
+            "x": 8.5,
+            "y": 5.5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "character_stats_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "stats_panel_dummy", "position": { "x": 7, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "stats_panel_dummy",
+          "position": {
+            "x": 7,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "ranger_skill_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "training_dummy_chase", "position": { "x": 8, "y": 4 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 6, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 12, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "training_dummy_chase",
+          "position": {
+            "x": 8,
+            "y": 4
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 6,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8.2,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 12,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "ranger_showcase_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "training_dummy_chase", "position": { "x": 8, "y": 4 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 6, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 12, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8, "y": 3 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8, "y": 7 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "training_dummy_chase",
+          "position": {
+            "x": 8,
+            "y": 4
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 6,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8.2,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 12,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8,
+            "y": 3
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8,
+            "y": 7
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "unique_momentum_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 3, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 14, "y": 5 } },
-        { "type": "wall", "position": { "x": 15, "y": 0.5 }, "size": { "x": 30, "y": 1 } },
-        { "type": "wall", "position": { "x": 15, "y": 9.5 }, "size": { "x": 30, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 29.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "loot",
+          "item_template_id": "cave_blade",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 14,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15,
+            "y": 0.5
+          },
+          "size": {
+            "x": 30,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15,
+            "y": 9.5
+          },
+          "size": {
+            "x": 30,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 29.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "ranger_wolf_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 7.5, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 7.5,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "revive_companion_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "dungeon_wolf", "position": { "x": 4, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_wolf",
+          "position": {
+            "x": 4,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8.2,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "companion_rank_scaling_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "dungeon_wolf", "position": { "x": 4, "y": 5 } },
-        { "type": "monster", "monster_def_id": "dungeon_wolf", "position": { "x": 5.4, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 7.2, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_wolf",
+          "position": {
+            "x": 4,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_wolf",
+          "position": {
+            "x": 5.4,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 7.2,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "companion_ai_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "companion", "monster_def_id": "combat_lab_crit_attacker", "position": { "x": 2.8, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "companion",
+          "monster_def_id": "combat_lab_crit_attacker",
+          "position": {
+            "x": 2.8,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8.2,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "mercenary_foundation_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "companion", "monster_def_id": "mercenary_guard", "position": { "x": 2.8, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 7.5, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "companion",
+          "monster_def_id": "mercenary_guard",
+          "position": {
+            "x": 2.8,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 7.5,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "mercenary_hiring_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "interactable", "interactable_def_id": "town_mercenary_board", "position": { "x": 3, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_soft_target", "position": { "x": 8.2, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_mercenary_board",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8.2,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "mercenary_death_loss_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "interactable", "interactable_def_id": "town_mercenary_board", "position": { "x": 3, "y": 5 } },
-        { "type": "monster", "monster_def_id": "combat_lab_crit_attacker", "position": { "x": 5, "y": 5 } },
-        { "type": "wall", "position": { "x": 8, "y": 0.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 8, "y": 9.5 }, "size": { "x": 16, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 5 }, "size": { "x": 1, "y": 10 } },
-        { "type": "wall", "position": { "x": 15.5, "y": 5 }, "size": { "x": 1, "y": 10 } }
+        {
+          "type": "interactable",
+          "interactable_def_id": "town_mercenary_board",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_crit_attacker",
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
       ]
     },
     "crowded_lightning_perf_probe": {
-      "player": { "position": { "x": 4, "y": 8 } },
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 8
+        }
+      },
       "entities": [
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 7, "y": 3 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 7, "y": 5 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 7, "y": 7 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 7, "y": 8 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 7, "y": 10 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 7, "y": 12 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 12, "y": 3 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 12, "y": 5 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 12, "y": 7 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 12, "y": 8 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 12, "y": 10 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 12, "y": 12 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 15, "y": 3 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 15, "y": 5 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 15, "y": 7 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 15, "y": 8 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 15, "y": 10 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 15, "y": 12 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 18, "y": 3 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 18, "y": 5 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 18, "y": 7 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 18, "y": 8 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 18, "y": 10 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 18, "y": 12 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 23, "y": 3 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 23, "y": 5 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 23, "y": 7 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 23, "y": 8 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 23, "y": 10 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 23, "y": 12 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 27, "y": 3 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 27, "y": 5 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 27, "y": 7 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 27, "y": 8 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 27, "y": 10 } },
-        { "type": "monster", "monster_def_id": "crowded_probe_chaser", "position": { "x": 27, "y": 12 } },
-        { "type": "wall", "position": { "x": 16, "y": 0.5 }, "size": { "x": 32, "y": 1 } },
-        { "type": "wall", "position": { "x": 16, "y": 15.5 }, "size": { "x": 32, "y": 1 } },
-        { "type": "wall", "position": { "x": 0.5, "y": 8 }, "size": { "x": 1, "y": 16 } },
-        { "type": "wall", "position": { "x": 31.5, "y": 8 }, "size": { "x": 1, "y": 16 } },
-        { "type": "wall", "position": { "x": 10, "y": 4 }, "size": { "x": 1, "y": 5 } },
-        { "type": "wall", "position": { "x": 10, "y": 12 }, "size": { "x": 1, "y": 5 } },
-        { "type": "wall", "position": { "x": 16, "y": 8 }, "size": { "x": 1, "y": 6 } },
-        { "type": "wall", "position": { "x": 22, "y": 4 }, "size": { "x": 1, "y": 5 } },
-        { "type": "wall", "position": { "x": 22, "y": 12 }, "size": { "x": 1, "y": 5 } }
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 7,
+            "y": 3
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 7,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 7,
+            "y": 7
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 7,
+            "y": 8
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 7,
+            "y": 10
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 7,
+            "y": 12
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 12,
+            "y": 3
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 12,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 12,
+            "y": 7
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 12,
+            "y": 8
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 12,
+            "y": 10
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 12,
+            "y": 12
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 15,
+            "y": 3
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 15,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 15,
+            "y": 7
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 15,
+            "y": 8
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 15,
+            "y": 10
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 15,
+            "y": 12
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 18,
+            "y": 3
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 18,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 18,
+            "y": 7
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 18,
+            "y": 8
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 18,
+            "y": 10
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 18,
+            "y": 12
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 23,
+            "y": 3
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 23,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 23,
+            "y": 7
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 23,
+            "y": 8
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 23,
+            "y": 10
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 23,
+            "y": 12
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 27,
+            "y": 3
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 27,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 27,
+            "y": 7
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 27,
+            "y": 8
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 27,
+            "y": 10
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "crowded_probe_chaser",
+          "position": {
+            "x": 27,
+            "y": 12
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 16,
+            "y": 0.5
+          },
+          "size": {
+            "x": 32,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 16,
+            "y": 15.5
+          },
+          "size": {
+            "x": 32,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 8
+          },
+          "size": {
+            "x": 1,
+            "y": 16
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 31.5,
+            "y": 8
+          },
+          "size": {
+            "x": 1,
+            "y": 16
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 10,
+            "y": 4
+          },
+          "size": {
+            "x": 1,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 10,
+            "y": 12
+          },
+          "size": {
+            "x": 1,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 16,
+            "y": 8
+          },
+          "size": {
+            "x": 1,
+            "y": 6
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 22,
+            "y": 4
+          },
+          "size": {
+            "x": 1,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 22,
+            "y": 12
+          },
+          "size": {
+            "x": 1,
+            "y": 5
+          }
+        }
       ]
     },
     "inventory_capacity_lab": {
-      "player": { "position": { "x": 2, "y": 5 } },
+      "player": {
+        "position": {
+          "x": 2,
+          "y": 5
+        }
+      },
       "entities": [
-        { "type": "loot", "item_template_id": "cave_pack_belt", "position": { "x": 3, "y": 5 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 4, "y": 3 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 5, "y": 3 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 6, "y": 3 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 7, "y": 3 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 8, "y": 3 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 4, "y": 4 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 5, "y": 4 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 6, "y": 4 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 7, "y": 4 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 8, "y": 4 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 4, "y": 5 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 5, "y": 5 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 6, "y": 5 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 7, "y": 5 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 8, "y": 5 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 4, "y": 6 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 5, "y": 6 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 6, "y": 6 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 7, "y": 6 } },
-        { "type": "loot", "item_def_id": "quest_leaf", "position": { "x": 8, "y": 6 } }
+        {
+          "type": "loot",
+          "item_template_id": "cave_pack_belt",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 4,
+            "y": 3
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 5,
+            "y": 3
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 6,
+            "y": 3
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 7,
+            "y": 3
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 8,
+            "y": 3
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 4,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 5,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 6,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 7,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 8,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 4,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 6,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 7,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 8,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 4,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 5,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 6,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 7,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "quest_leaf",
+          "position": {
+            "x": 8,
+            "y": 6
+          }
+        }
       ]
     }
   }

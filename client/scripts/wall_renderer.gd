@@ -138,6 +138,8 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 			return _make_column_node(wall)
 		"rubble":
 			return _make_rubble_node(wall)
+		"wood":
+			return _make_wood_palisade_node(wall)
 	var wall_height := _wall_height()
 	var floor_overlap := WALL_FLOOR_SEAM_OVERLAP if _dungeon_presentation_active() else 0.0
 	var total_height := wall_height + floor_overlap
@@ -166,6 +168,40 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 	node.material_override = mat
 	body.add_child(node)
 	return body
+
+func _make_wood_palisade_node(wall: Dictionary) -> Node3D:
+	var pos: Dictionary = wall.get("position", {})
+	var size: Dictionary = wall.get("size", {})
+	var wall_height := TOWN_WALL_HEIGHT
+	var sx := float(size.get("x", 1.0))
+	var sy := float(size.get("y", 1.0))
+	var body := StaticBody3D.new()
+	body.name = "Wall_%s" % str(wall.get("id", ""))
+	body.set_meta("wall_id", str(wall.get("id", "")))
+	body.set_meta("source", str(wall.get("source", "town_perimeter")))
+	body.set_meta("kind", "wood")
+	body.position = Vector3(float(pos.get("x", 0.0)), wall_height * 0.5, float(pos.get("y", 0.0)))
+	var shape_node := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(sx, wall_height, sy)
+	shape_node.shape = box
+	body.add_child(shape_node)
+	var node := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(sx, wall_height, sy)
+	node.mesh = mesh
+	node.material_override = _make_wood_wall_material(size, wall_height)
+	body.add_child(node)
+	return body
+
+func _make_wood_wall_material(size: Dictionary, wall_height: float) -> StandardMaterial3D:
+	if _ground_factory != null and _ground_factory.has_method("town_perimeter_wall_material"):
+		return _ground_factory.town_perimeter_wall_material(size, wall_height)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("#6d3f1f")
+	mat.roughness = 0.92
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	return mat
 
 func _make_wall_material(wall: Dictionary, wall_height: float = TOWN_WALL_HEIGHT) -> StandardMaterial3D:
 	var size: Dictionary = wall.get("size", {})

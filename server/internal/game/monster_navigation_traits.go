@@ -60,7 +60,7 @@ func validMonsterNavigationTrait(trait string) bool {
 
 func validObstacleKind(kind string) bool {
 	switch kind {
-	case "", obstacleKindWall, obstacleKindWater, obstacleKindHole, obstacleKindRock, obstacleKindColumn, obstacleKindRubble:
+	case "", obstacleKindWall, obstacleKindWood, obstacleKindWater, obstacleKindHole, obstacleKindRock, obstacleKindColumn, obstacleKindRubble:
 		return true
 	default:
 		return false

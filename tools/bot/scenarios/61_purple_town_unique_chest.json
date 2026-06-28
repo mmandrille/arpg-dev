@@ -7,8 +7,8 @@
   "description": "Open the purple town test chest and prove a selected unique can be dragged into inventory.",
   "visual": {
     "camera": {
-      "x": 6,
-      "y": 7,
+      "x": 8,
+      "y": 10,
       "zoom": 1.0
     },
     "post_complete_hold_s": 3.0
@@ -16,8 +16,8 @@
   "steps": [
     {
       "action": "move_until_player_position",
-      "x": 6,
-      "y": 7,
+      "x": 8,
+      "y": 10,
       "tolerance": 1.0,
       "pathfind": true,
       "max_ticks": 160

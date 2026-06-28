@@ -44,6 +44,10 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return BotAssertionHandlersScript.entity_tick_smoothing_matches(step, state)
 		"wait_projectile_tick_smoothing":
 			return BotAssertionHandlersScript.projectile_tick_smoothing_matches(step, state)
+		"wait_loot_tick_smoothing":
+			return BotAssertionHandlersScript.loot_tick_smoothing_matches(step, state)
+		"wait_interactable_tick_smoothing":
+			return BotAssertionHandlersScript.interactable_tick_smoothing_matches(step, state)
 		"wait_mobility_skill_smoothing":
 			return BotPresentationAssertionsScript.mobility_skill_smoothing_matches(step, state)
 		"wait_dungeon_torch_lights":

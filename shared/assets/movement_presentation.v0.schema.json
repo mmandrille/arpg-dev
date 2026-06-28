@@ -33,6 +33,24 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "Snap threshold for fast-moving projectiles; defaults to snap_distance when omitted."
+        },
+        "loot_enabled": {
+          "type": "boolean",
+          "description": "When true, authoritative loot entities use tick smoothing."
+        },
+        "loot_snap_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Snap threshold for loot nodes."
+        },
+        "interactables_enabled": {
+          "type": "boolean",
+          "description": "When true, authoritative interactable entities use tick smoothing."
+        },
+        "interactable_snap_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Snap threshold for interactable nodes."
         }
       }
     },

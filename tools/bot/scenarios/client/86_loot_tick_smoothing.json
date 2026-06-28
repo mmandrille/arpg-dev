@@ -1,0 +1,16 @@
+{
+  "id": "loot_tick_smoothing",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "vertical_slice",
+  "seed": "lootsmooth01",
+  "title": "Loot tick smoothing: ground loot registers smoothing state",
+  "description": "Kill the lab monster and verify loot entities expose tick-smoothing debug state.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "click_entity", "entity_type": "monster", "timeout_s": 10.0 },
+    { "type": "wait_event", "event_type": "monster_killed", "timeout_s": 10.0 },
+    { "type": "wait_entity", "entity_type": "loot", "timeout_s": 10.0 },
+    { "type": "wait_loot_tick_smoothing", "active": false, "timeout_s": 5.0 }
+  ]
+}

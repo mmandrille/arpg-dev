@@ -1,0 +1,42 @@
+shared/assets/movement_presentation.v0.json
+  s_d1d00018dddc4e::t_efb3a00258d3a3 12-18
+docs/as-built/v368_remote-adaptive-smoothing.md
+  s_d1d00018dddc4e::t_6bb45caa52671b 1-14
+docs/specs/v368_spec-remote-adaptive-smoothing.md
+  s_d1d00018dddc4e::t_b5637eade0ab49 1-31
+docs/progress/slice-lifecycle.md
+  s_d1d00018dddc4e::t_9882d5957750d7 381-382
+client/scripts/entity_tick_smoothing_runtime.gd
+  s_d1d00018dddc4e::t_83f10dfd62e31e 17-20
+  s_d1d00018dddc4e::t_a9e6be5ed035a9 39-44
+  s_d1d00018dddc4e::t_2fc134ed2d88eb 134,144-152
+PROGRESS.md
+  s_d1d00018dddc4e::t_a354bcdc04e936 26
+client/tests/test_entity_tick_smoothing.gd
+  s_d1d00018dddc4e::t_50688a1a19e97e 49-54
+  s_d1d00018dddc4e::t_eb5b9004ae1e52 14
+  s_d1d00018dddc4e::t_a48be4106011c5 55-56
+shared/assets/movement_presentation.v0.schema.json
+  s_d1d00018dddc4e::t_1d95100f227552 54-64
+client/scripts/entity_tick_smoothing.gd
+  s_d1d00018dddc4e::t_52a027bd59c7ae 69
+  s_d1d00018dddc4e::t_7e7c3f51cb1b06 16-17
+  s_d1d00018dddc4e::t_375fa6e32e2260 30,36
+  s_d1d00018dddc4e::t_79dbe534a34bae 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "d909011f3c55f3eb0316ba3e0523b55485716733",
+  "prompts": {},
+  "sessions": {
+    "s_d1d00018dddc4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6af99e8d-44ff-43ed-99db-33f614d2484e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

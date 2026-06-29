@@ -45,6 +45,8 @@ func _test_format_snapshot() -> void:
 	var formatted := PerfPhaseTimerScript.format_snapshot()
 	_assert_true("format includes delta", formatted.find("delta=") >= 0)
 	_assert_true("format includes entities", formatted.find("entities=") >= 0)
+	var ranked := PerfPhaseTimerScript.format_snapshot(true)
+	_assert_true("ranked puts largest phase first", ranked.begins_with("entities="))
 
 
 func _assert_eq(label: String, got, want) -> void:

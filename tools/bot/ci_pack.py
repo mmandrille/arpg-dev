@@ -11,6 +11,7 @@ PROTOCOL_SCENARIOS_DIR = Path(__file__).resolve().parent / "scenarios"
 CLIENT_SCENARIOS_DIR = PROTOCOL_SCENARIOS_DIR / "client"
 CI_SELECTOR = "ci"
 EXTENDED_TIER = "extended"
+BENCHMARK_TIER = "benchmark"
 
 
 def load_ci_pack() -> dict[str, Any]:
@@ -99,10 +100,10 @@ def validate_ci_pack() -> None:
             if raw.get("ci_tier") == EXTENDED_TIER:
                 raise ValueError(f"{path}: ci pack member must not set ci_tier=extended")
             continue
-        if raw.get("ci_tier") != EXTENDED_TIER:
+        if raw.get("ci_tier") not in {EXTENDED_TIER, BENCHMARK_TIER}:
             unassigned.append(scenario_id)
     if unassigned:
         raise ValueError(
             "scenario(s) must be listed in tools/bot/ci_pack.json or set "
-            f'"ci_tier": "{EXTENDED_TIER}": {", ".join(sorted(unassigned))}'
+            f'"ci_tier": "{EXTENDED_TIER}" or "{BENCHMARK_TIER}": {", ".join(sorted(unassigned))}'
         )

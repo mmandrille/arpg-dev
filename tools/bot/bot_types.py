@@ -26,6 +26,7 @@ class Scenario:
     assertions: list[Any]
     fresh_session_checks: list[dict[str, Any]]
     max_elapsed_s: float
+    ci_tier: str
     path: Path
 
 

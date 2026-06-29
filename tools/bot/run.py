@@ -133,6 +133,7 @@ def load_scenarios(scenario_dir: Path = SCENARIO_DIR) -> list[Scenario]:
             assertions=list(raw.get("assertions", [])),
             fresh_session_checks=list(raw.get("fresh_session_checks", [])),
             max_elapsed_s=float(raw.get("max_elapsed_s", MAX_SCENARIO_ELAPSED_S)),
+            ci_tier=str(raw.get("ci_tier", "")),
             path=path,
         ))
     if not scenarios:
@@ -146,7 +147,12 @@ def select_scenarios(scenarios: list[Scenario], selected: str) -> list[Scenario]
     if selected == CI_SELECTOR:
         return select_pack_scenarios(scenarios, "protocol")
     if selected == "all":
-        return [scenario for scenario in scenarios if scenario.id != "skill_visual"]
+        return [scenario for scenario in scenarios if scenario.id != "skill_visual" and scenario.ci_tier != "benchmark"]
+    if selected == "benchmark":
+        found = [s for s in scenarios if s.ci_tier == "benchmark"]
+        if not found:
+            raise ValueError("no scenarios with ci_tier=benchmark found")
+        return found
     wanted = {normalize_scenario_selector(part.strip()) for part in selected.split(",") if part.strip()}
     found = [s for s in scenarios if scenario_matches_selector(s, wanted)]
     matched: set[str] = set()
@@ -3305,6 +3311,7 @@ def run_verified_session(
         assertions=assertions,
         fresh_session_checks=[],
         max_elapsed_s=scenario.max_elapsed_s,
+        ci_tier=scenario.ci_tier,
         path=scenario.path,
     )
     observed = asyncio.run(drive_scenario(base_url, token, sess, run_scenario))

@@ -23,7 +23,7 @@ Last updated: 2026-06-28
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v363 — basic-attack-cooldown-tuning |
+| **Latest completed slice** | v364 — monster-lod-retune |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green (2026-06-28) |
 | **Next slice** | Run `/next` for new work |

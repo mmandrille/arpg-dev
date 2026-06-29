@@ -73,3 +73,37 @@ func TestMovementLODDoesNotAffectSmallFightsOrImportantMonsters(t *testing.T) {
 		t.Fatal("important far monster was not kept high precision")
 	}
 }
+
+func TestMovementLODRetuneKeepsMeaningfulHighPrecisionShare(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_movement_lod_retune", "movement_lod_retune_seed", rules, "crowded_lightning_perf_probe")
+	if err != nil {
+		t.Fatalf("world: %v", err)
+	}
+	if !sim.monsterMovementLODActive() {
+		t.Fatal("movement LOD inactive in crowded probe after retune")
+	}
+
+	live := sim.activeLiveMonsterCount()
+	if live < rules.Navigation.MonsterMovementLODMinLiveMonsters {
+		t.Fatalf("live monsters = %d, want >= lod threshold %d", live, rules.Navigation.MonsterMovementLODMinLiveMonsters)
+	}
+
+	highPrecision := 0
+	for _, id := range sortedEntityIDs(sim.activeLevel().entities) {
+		monster := sim.activeLevel().entities[id]
+		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
+			continue
+		}
+		if sim.monsterMovementHighPrecision(monster) {
+			highPrecision++
+		}
+	}
+	minShare := live / 5
+	if minShare < 1 {
+		minShare = 1
+	}
+	if highPrecision < minShare {
+		t.Fatalf("high precision monsters = %d, want at least %d of %d live", highPrecision, minShare, live)
+	}
+}

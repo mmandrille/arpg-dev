@@ -35,7 +35,8 @@
         "mouse_sensitivity",
         "pitch_min_degrees",
         "pitch_max_degrees",
-        "reticle_enabled"
+        "reticle_enabled",
+        "follow_damping_seconds"
       ],
       "additionalProperties": false,
       "properties": {
@@ -53,7 +54,12 @@
         "mouse_sensitivity": { "type": "number", "minimum": 0 },
         "pitch_min_degrees": { "type": "number" },
         "pitch_max_degrees": { "type": "number" },
-        "reticle_enabled": { "type": "boolean" }
+        "reticle_enabled": { "type": "boolean" },
+        "follow_damping_seconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Exponential follow time constant in seconds; 0 snaps instantly."
+        }
       }
     }
   }

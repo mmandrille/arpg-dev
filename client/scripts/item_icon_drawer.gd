@@ -15,6 +15,10 @@ static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label:
 	match shape:
 		"blade":
 			_draw_blade(canvas, center, min_side, color, accent)
+		"greatsword":
+			_draw_greatsword(canvas, center, min_side, color, accent)
+		"staff":
+			_draw_staff(canvas, center, min_side, color, accent)
 		"bow":
 			_draw_bow(canvas, center, min_side, color, accent)
 		"shield":
@@ -50,6 +54,29 @@ static func _draw_blade(canvas: Control, center: Vector2, min_side: float, color
 	var b := center + Vector2(min_side * 0.24, -min_side * 0.24)
 	canvas.draw_line(a, b, color, maxf(4.0, min_side * 0.09), true)
 	canvas.draw_line(a + Vector2(-min_side * 0.07, min_side * 0.07), a + Vector2(min_side * 0.10, -min_side * 0.10), accent, maxf(3.0, min_side * 0.065), true)
+
+
+static func _draw_greatsword(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
+	var tip := center + Vector2(min_side * 0.28, -min_side * 0.30)
+	var guard := center + Vector2(-min_side * 0.08, min_side * 0.10)
+	var pommel := center + Vector2(-min_side * 0.24, min_side * 0.28)
+	canvas.draw_line(guard, tip, color, maxf(4.5, min_side * 0.10), true)
+	canvas.draw_line(pommel, guard, accent, maxf(3.5, min_side * 0.075), true)
+	canvas.draw_line(
+		guard + Vector2(-min_side * 0.18, min_side * 0.02),
+		guard + Vector2(min_side * 0.10, -min_side * 0.02),
+		accent,
+		maxf(3.0, min_side * 0.06),
+		true
+	)
+
+
+static func _draw_staff(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
+	var top := center + Vector2(0.0, -min_side * 0.30)
+	var bottom := center + Vector2(0.0, min_side * 0.28)
+	canvas.draw_line(bottom, top, color, maxf(3.5, min_side * 0.07), true)
+	canvas.draw_circle(top + Vector2(0.0, -min_side * 0.04), min_side * 0.10, accent)
+	canvas.draw_circle(top + Vector2(0.0, -min_side * 0.04), min_side * 0.05, color)
 
 
 static func _draw_bow(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:

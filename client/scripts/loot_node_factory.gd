@@ -41,6 +41,13 @@ func add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color
 		"blade":
 			add_loot_box(root, "Blade", Vector3(0.12, 0.08, 0.78) * scale, Vector3(0.0, 0.20, 0.0), color)
 			add_loot_box(root, "Grip", Vector3(0.34, 0.10, 0.10) * scale, Vector3(0.0, 0.16, 0.34 * scale), accent)
+		"greatsword":
+			add_loot_box(root, "GreatBlade", Vector3(0.14, 0.08, 1.02) * scale, Vector3(0.0, 0.24, 0.0), color)
+			add_loot_box(root, "GreatGuard", Vector3(0.52, 0.08, 0.10) * scale, Vector3(0.0, 0.18, 0.38 * scale), accent)
+			add_loot_box(root, "GreatGrip", Vector3(0.12, 0.10, 0.34) * scale, Vector3(0.0, 0.16, 0.62 * scale), accent)
+		"staff":
+			add_loot_box(root, "StaffShaft", Vector3(0.08, 0.08, 0.92) * scale, Vector3(0.0, 0.22, 0.0), color)
+			add_loot_cylinder(root, "StaffOrb", 0.14 * scale, 0.12 * scale, Vector3(0.0, 0.58 * scale, 0.0), accent)
 		"bow":
 			add_loot_box(root, "BowTop", Vector3(0.10, 0.08, 0.42) * scale, Vector3(0.14 * scale, 0.20, -0.18 * scale), color)
 			add_loot_box(root, "BowBottom", Vector3(0.10, 0.08, 0.42) * scale, Vector3(-0.14 * scale, 0.20, 0.18 * scale), color)
@@ -280,6 +287,12 @@ func loot_label_text(e: Dictionary) -> String:
 		if amount > 0:
 			return "%d gold" % amount
 		return "gold"
+	var display_name := str(e.get("display_name", "")).strip_edges()
+	if display_name != "":
+		return display_name
+	var rule_name := str(def.get("name", "")).strip_edges()
+	if rule_name != "":
+		return rule_name
 	return generic_loot_name(item_def_id)
 
 func item_rarity_background(rarity: String) -> Color:
@@ -291,6 +304,34 @@ func item_definition(item_def_id: String) -> Dictionary:
 
 func generic_loot_name(item_def_id: String) -> String:
 	var def := item_definition(item_def_id)
+	var item_type := str(def.get("item_type", "")).to_lower()
+	match item_type:
+		"sword":
+			return "Sword"
+		"greatsword":
+			return "Greatsword"
+		"staff":
+			return "Staff"
+		"axe":
+			return "Axe"
+		"bow":
+			return "Bow"
+		"shield":
+			return "Shield"
+		"helm":
+			return "Helm"
+		"chest":
+			return "Armor"
+		"gloves":
+			return "Gloves"
+		"belt":
+			return "Belt"
+		"boots":
+			return "Boots"
+		"ring":
+			return "Ring"
+		"amulet":
+			return "Amulet"
 	var slot := str(def.get("slot", ""))
 	match slot:
 		"main_hand":

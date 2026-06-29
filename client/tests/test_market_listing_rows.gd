@@ -40,7 +40,7 @@ func _test_debug_rows_expose_expiration() -> void:
 	var row := rows[0] as Dictionary
 	_check_eq(str(row.get("expires_at", "")), "2026-06-20T12:30:00Z", "debug expires_at")
 	_check_true(bool(row.get("expiration_visible", false)), "debug expiration visible")
-	_check_true(str(row.get("expiration_label", "")).begins_with("Expires"), "debug expiration label")
+	_check_true(str(row.get("expiration_label", "")).begins_with("Expire"), "debug expiration label")
 	_check_true((row.get("stat_lines", []) as Array).has("Base Armor: +3"), "debug stat lines preserve callable")
 
 

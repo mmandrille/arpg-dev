@@ -250,6 +250,16 @@ run_gate "GDScript window display mode settings test" "[gdtest] PASS: test_windo
 run_gate "GDScript crosshair target system test" "[gdtest] PASS: test_crosshair_target_system" res://tests/test_crosshair_target_system.gd
 run_gate "GDScript panel intent input test" "[gdtest] PASS: test_panel_intent_input" res://tests/test_panel_intent_input.gd
 
+# 2q. Market/bishop/material/quest panel unit tests (server-independent; v384 review orphans).
+run_gate "GDScript bishop panel test" "[gdtest] PASS: test_bishop_panel" res://tests/test_bishop_panel.gd
+run_gate "GDScript material wallet badges test" "[gdtest] PASS: test_material_wallet_badges" res://tests/test_material_wallet_badges.gd
+run_gate "GDScript market board badges test" "[gdtest] PASS: test_market_board_badges" res://tests/test_market_board_badges.gd
+run_gate "GDScript market search sort test" "[gdtest] PASS: test_market_search_sort" res://tests/test_market_search_sort.gd
+run_gate "GDScript market item comparison test" "[gdtest] PASS: test_market_item_comparison" res://tests/test_market_item_comparison.gd
+run_gate "GDScript market listing rows test" "[gdtest] PASS: test_market_listing_rows" res://tests/test_market_listing_rows.gd
+run_gate "GDScript quest giver visual test" "[gdtest] PASS: quest giver visual" res://tests/test_quest_giver_visual.gd
+run_gate "GDScript elite objective minimap test" "[gdtest] PASS: test_elite_objective_minimap" res://tests/test_elite_objective_minimap.gd
+
 if [[ "${CLIENT_UNIT_ONLY:-}" == "1" ]]; then
   finish_gates "client unit"
   echo "[client-unit] PASS"

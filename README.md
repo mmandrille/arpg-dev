@@ -17,6 +17,7 @@ server/   Go realtime game server + platform services (auth, sessions, persisten
 shared/   data contracts: protocol schemas, rules-as-data, cross-language golden fixtures
 tools/    Python protocol bot + replay verification wrapper + shared schema validator
 docs/     ADRs, specs, plans, as-built (per-slice summaries), reviews (~every 10 slices)
+docs/performance/  performance tools reference (metrics, probes, agent workflow)
 PROGRESS.md  slice lifecycle and current status (repo root — read before new work)
 ```
 
@@ -87,6 +88,12 @@ BASE_URL=https://your-backend.example make play-remote 3
 
 Headless cross-language golden checks (including `retaliation_damage.json`) run in
 `make client-smoke` via `client/tests/test_golden.gd`.
+
+### Performance analysis
+
+Opt-in instrumentation for client frame breakdown, backend tick timing, and crowded stress
+scenarios is documented in [`docs/performance/tools.md`](docs/performance/tools.md).
+Quick capture: `make play-debug` (logs to `/tmp/arpg-perf.log`) or `ARPG_PERF_DEBUG=1 make play`.
 
 Typical first run:
 

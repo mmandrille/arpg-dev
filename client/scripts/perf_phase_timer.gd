@@ -32,11 +32,16 @@ static func snapshot_ms() -> Dictionary:
 	return _phases_ms.duplicate()
 
 
-static func format_snapshot() -> String:
+static func format_snapshot(rank_by_value: bool = false) -> String:
 	if _phases_ms.is_empty():
 		return ""
 	var keys: Array = _phases_ms.keys()
-	keys.sort()
+	if rank_by_value:
+		keys.sort_custom(func(a: String, b: String) -> bool:
+			return float(_phases_ms[a]) > float(_phases_ms[b])
+		)
+	else:
+		keys.sort()
 	var parts: PackedStringArray = []
 	for key in keys:
 		parts.append("%s=%.2f" % [str(key), float(_phases_ms[key])])

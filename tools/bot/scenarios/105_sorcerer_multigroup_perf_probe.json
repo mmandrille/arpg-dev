@@ -1,0 +1,329 @@
+{
+  "id": "sorcerer_multigroup_perf_probe",
+  "ci_tier": "benchmark",
+  "world_id": "crowded_lightning_perf_probe",
+  "seed": "sorcerer_multigroup_perf_probe_seed",
+  "character_class": "sorcerer",
+  "title": "Sorcerer Multigroup Perf Probe",
+  "description": "Sorcerer pulls 3+ groups in a dungeon vault, rotates 5 skills (ligthing, ice_shard, magic_bolt, arcane_barrage, teleport), flees left under full-pack chase, teleports through the horde, re-engages right groups. Exercises: multi-group pathfind under chase, projectile fanout, teleport reconciliation, client delta/upsert flood, and all perf phase buckets under sustained load.",
+  "max_elapsed_s": 65.0,
+  "debug_progression": {
+    "level": 12,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 3,
+      "dex": 5,
+      "vit": 40,
+      "magic": 30
+    },
+    "skill_ranks": {
+      "magic_bolt": 1,
+      "teleport": 1,
+      "ice_shard": 1,
+      "ligthing": 1,
+      "arcane_barrage": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 30
+    },
+
+    {
+      "action": "move_until_in_range",
+      "monster_def_id": "crowded_probe_chaser",
+      "stop_distance": 5.5,
+      "max_ticks": 60
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "damage_type": "lightning",
+        "target_monster_def_id": "crowded_probe_chaser",
+        "min_damage": 1
+      },
+      "timeout_s": 4
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "ice_shard",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "damage_type": "cold",
+        "target_monster_def_id": "crowded_probe_chaser",
+        "min_damage": 1
+      },
+      "timeout_s": 4
+    },
+
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_count",
+        "event_type": "monster_aggro",
+        "at_least": 2
+      },
+      "timeout_s": 6
+    },
+
+    {
+      "action": "wait_ticks",
+      "ticks": 15
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "magic_bolt",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 8
+    },
+
+    {
+      "action": "move",
+      "direction": { "x": -1, "y": 0 },
+      "duration_ticks": 25
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 12
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "ice_shard",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 12
+    },
+
+    {
+      "action": "move",
+      "direction": { "x": -1, "y": 0 },
+      "duration_ticks": 10
+    },
+
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_count",
+        "event_type": "monster_aggro",
+        "at_least": 4
+      },
+      "timeout_s": 8
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "teleport",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "teleport"
+      },
+      "timeout_s": 3
+    },
+
+    {
+      "action": "wait_ticks",
+      "ticks": 15
+    },
+
+    {
+      "action": "move",
+      "direction": { "x": 1, "y": 0 },
+      "duration_ticks": 30
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "arcane_barrage",
+      "direction": { "x": -1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "skill_id": "arcane_barrage",
+        "min_damage": 1
+      },
+      "timeout_s": 4
+    },
+
+    {
+      "action": "wait_ticks",
+      "ticks": 20
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "ligthing",
+      "direction": { "x": -1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 12
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "ice_shard",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 12
+    },
+
+    {
+      "action": "move",
+      "direction": { "x": -1, "y": 0 },
+      "duration_ticks": 20
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "magic_bolt",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+
+    {
+      "action": "wait_ticks",
+      "ticks": 30
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "magic_bolt",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 20
+    },
+
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "monster",
+        "monster_def_id": "crowded_probe_chaser",
+        "alive": true,
+        "at_least": 22
+      },
+      "timeout_s": 3
+    }
+  ],
+  "assertions": [
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 22
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_aggro",
+      "at_least": 4
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "ligthing"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "ice_shard"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "magic_bolt"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "arcane_barrage"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "teleport"
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "lightning",
+      "target_monster_def_id": "crowded_probe_chaser",
+      "min_damage": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "cold",
+      "target_monster_def_id": "crowded_probe_chaser",
+      "min_damage": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "skill_id": "arcane_barrage",
+      "min_damage": 1
+    }
+  ],
+  "visual": {
+    "camera": {
+      "x": 16,
+      "y": 8,
+      "zoom": 0.8
+    },
+    "post_complete_hold_s": 5.0
+  }
+}

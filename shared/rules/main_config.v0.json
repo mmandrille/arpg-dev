@@ -47,6 +47,8 @@
   "client_perf": {
     "reconciliation_backpressure_threshold": 1.5,
     "windup_marker_max_concurrent": 12,
-    "projectile_visible_cap": 16
+    "projectile_visible_cap": 16,
+    "delta_ui_sync_interval_ticks": 3,
+    "delta_minimap_sync_interval_ticks": 2
   }
 }

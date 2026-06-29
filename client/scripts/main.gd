@@ -70,6 +70,8 @@ const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
 const AttackMoveInputCoordinatorScript := preload("res://scripts/attack_move_input_coordinator.gd")
 const DeltaFrameCoalesceScript := preload("res://scripts/delta_frame_coalesce.gd")
+const DeltaUiSyncGateScript := preload("res://scripts/delta_ui_sync_gate.gd")
+const LocalPlayerAuthoritativeSyncScript := preload("res://scripts/local_player_authoritative_sync.gd")
 const ReconciliationBackpressureScript := preload("res://scripts/reconciliation_backpressure.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const PathRejectBackoffScript := preload("res://scripts/path_reject_backoff.gd")
@@ -152,6 +154,7 @@ var _channel_skill_input := ChannelSkillInputScript.new()
 var _charge_channel_visual := ChargeChannelVisualScript.new()
 var _last_holy_shield_aura_pulse_key: String = ""
 var _local_player_rage_active := false
+var _local_player_effect_ids: Array = []
 var item_rules: Dictionary:
 	get: return ItemRulesLoader.item_rules
 	set(v): ItemRulesLoader.item_rules = v
@@ -278,6 +281,7 @@ var _path_reject_backoff: PathRejectBackoff = PathRejectBackoffScript.new()
 var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttackPresentationScript.new()
 var _movement_visual_smoothing: MovementVisualSmoothing = MovementVisualSmoothingScript.new()
 var _entity_tick_smoothing: EntityTickSmoothingRuntime = EntityTickSmoothingRuntimeScript.new()
+var _delta_ui_sync_gate: DeltaUiSyncGate = DeltaUiSyncGateScript.new()
 var _mobility_presentation: MobilitySkillPresentation = MobilitySkillPresentationScript.new()
 var _dungeon_torch_lights: DungeonTorchLights
 var _level_travel_origin_pos := Vector3.ZERO
@@ -1145,6 +1149,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_refresh_player_hud_identity()
 	if resolver != null:
 		resolver.apply_snapshot(p)
+	_delta_ui_sync_gate.reset_from_snapshot()
 	_refresh_inventory_ui()
 	_refresh_progression_ui()
 	_refresh_skill_ui()
@@ -1163,6 +1168,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 
 func _apply_delta(p: Dictionary) -> void:
 	var delta_start := Time.get_ticks_usec()
+	var phase_start := delta_start
 	var perf_payload = p.get("performance", {})
 	if perf_payload is Dictionary:
 		last_performance_status = (perf_payload as Dictionary).duplicate(true)
@@ -1172,13 +1178,17 @@ func _apply_delta(p: Dictionary) -> void:
 			_begin_level_loading(false)
 	var mobility_skills := _mobility_skills_by_entity(p.get("events", []))
 	var mobility_landings := {}
+	PerfPhaseTimerScript.measure_usec("d_prep", phase_start)
+	phase_start = Time.get_ticks_usec()
 	var changes: Array = p.get("changes", [])
 	for c in changes:
 		match c.get("op", ""):
 			"wall_layout_update":
 				_queue_level_wall_layout(c.get("walls", []))
+				_delta_ui_sync_gate.mark_minimap_dirty()
 			"entity_spawn", "entity_update":
 				var entity: Dictionary = c.get("entity", {})
+				_delta_ui_sync_gate.mark_entity_change(str(c.get("op", "")), entity)
 				var entity_id := str(entity.get("id", ""))
 				if mobility_skills.has(entity_id):
 					mobility_landings[entity_id] = _entity_position(entity)
@@ -1187,19 +1197,23 @@ func _apply_delta(p: Dictionary) -> void:
 				else:
 					_upsert_entity(entity)
 			"entity_remove":
+				_delta_ui_sync_gate.mark_entity_removed()
 				_remove_entity(str(c.get("entity_id", "")))
 			"inventory_add":
 				var inv_item: Dictionary = c.get("item", {})
 				inventory.append(inv_item)
+				_delta_ui_sync_gate.mark_inventory_dirty()
 				if resolver != null:
 					resolver.ingest_inventory_item(inv_item)
 			"inventory_update":
 				var upd_item: Dictionary = c.get("item", {})
 				_update_inventory_item(upd_item)
+				_delta_ui_sync_gate.mark_inventory_dirty()
 				if resolver != null:
 					resolver.ingest_inventory_item(upd_item)
 			"inventory_remove":
 				_remove_inventory_item(str(c.get("item_instance_id", "")))
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"equipped_update":
 				var slot := str(c.get("slot", ""))
 				if not slot.is_empty():
@@ -1214,37 +1228,47 @@ func _apply_delta(p: Dictionary) -> void:
 					hotbar_capacity = int(c.get("hotbar_capacity", hotbar_capacity))
 					if consumable_bar != null:
 						consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"weapon_set_update":
 				active_weapon_set = int(c.get("active_weapon_set", active_weapon_set))
 				weapon_sets = c.get("weapon_sets", weapon_sets)
 				_remount_local_equipment_visuals()
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"hotbar_update":
 				if c.has("inventory_rows"):
 					inventory_rows = int(c.get("inventory_rows", inventory_rows))
 				if c.has("inventory_capacity"):
 					inventory_capacity = int(c.get("inventory_capacity", inventory_capacity))
 				_apply_hotbar_update(int(c.get("slot_index", -1)), c.get("item_instance_id"), c.get("item", {}))
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"gold_update":
 				gold = int(c.get("gold", gold))
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"stash_item_add":
 				_upsert_stash_item(c.get("item", {}))
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"stash_item_remove":
 				_remove_stash_item(str(c.get("stash_item_id", "")))
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"stash_gold_update":
 				stash_gold = int(c.get("stash_gold", stash_gold))
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"resource_wallet_update":
 				var resource_id := str(c.get("resource_id", ""))
 				if resource_id != "":
 					resource_wallet[resource_id] = max(0, int(c.get("amount", resource_wallet.get(resource_id, 0))))
+				_delta_ui_sync_gate.mark_inventory_dirty()
 			"teleporter_discovery_update":
 				var discovered_level := int(c.get("level", 0))
 				var discovered := bool(c.get("discovered", false))
 				discovered_teleporters[discovered_level] = discovered
+				_delta_ui_sync_gate.mark_minimap_dirty()
 				_refresh_waypoint_panel()
 				if discovered and discovered_level == current_level:
 					_show_waypoint_panel()
 			"character_progression_update":
 				character_progression = c.get("character_progression", {})
+				_delta_ui_sync_gate.mark_minimap_dirty()
 				var _ms_upd := float((character_progression.get("derived_stats", {}) as Dictionary).get("movement_speed", 0.0))
 				if _ms_upd > 0.0:
 					_player_movement_feel.set_server_speed(_ms_upd)
@@ -1263,10 +1287,11 @@ func _apply_delta(p: Dictionary) -> void:
 				_refresh_skill_ui()
 			_:
 				pass
-	_refresh_inventory_ui()
-	_sync_quest_journal()
-	_sync_elite_objective_tracker()
-	_sync_discovery_minimap()
+	PerfPhaseTimerScript.measure_usec("d_chg", phase_start)
+	phase_start = Time.get_ticks_usec()
+	_apply_delta_ui_sync()
+	PerfPhaseTimerScript.measure_usec("d_ui", phase_start)
+	phase_start = Time.get_ticks_usec()
 	var heal_cast_rain_correlations := _heal_cast_rain_correlations(p.get("events", []))
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
@@ -1564,8 +1589,12 @@ func _apply_delta(p: Dictionary) -> void:
 			ctrl.enter_terminal("death")
 		else:
 			ctrl.play_one_shot(clip)
+	PerfPhaseTimerScript.measure_usec("d_evt", phase_start)
+	phase_start = Time.get_ticks_usec()
 	if _delta_needs_fog_resync(p):
 		_sync_fog_wall_layout()
+	PerfPhaseTimerScript.measure_usec("d_dfog", phase_start)
+	phase_start = Time.get_ticks_usec()
 	if bot_mode:
 		for ev in p.get("events", []):
 			if ev is Dictionary:
@@ -1574,10 +1603,15 @@ func _apply_delta(p: Dictionary) -> void:
 				_bot_pending_events.append(tagged)
 			else:
 				_bot_pending_events.append(ev)
+	PerfPhaseTimerScript.measure_usec("d_bot", phase_start)
+	phase_start = Time.get_ticks_usec()
 	if _boss_visuals != null:
 		_boss_visuals_context.last_server_tick = last_server_tick
 		_boss_visuals.sync_boss_health_bar()
+	PerfPhaseTimerScript.measure_usec("d_boss", phase_start)
+	phase_start = Time.get_ticks_usec()
 	_reconcile_player()
+	PerfPhaseTimerScript.measure_usec("d_recon", phase_start)
 	PerfPhaseTimerScript.measure_usec("delta", delta_start)
 
 
@@ -1658,43 +1692,67 @@ func _track_skill_authored_projectile(id: String, e: Dictionary) -> void:
 		if e.has(key):
 			rec[key] = e[key]
 
+func _record_upsert_timing(start_usec: int, entity_type: String) -> void:
+	PerfPhaseTimerScript.measure_usec("d_upsert", start_usec)
+	if entity_type == "monster":
+		PerfPhaseTimerScript.measure_usec("d_upsert_m", start_usec)
+	elif entity_type == "player":
+		PerfPhaseTimerScript.measure_usec("d_upsert_player", start_usec)
+
+
 func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> void:
+	var upsert_start := Time.get_ticks_usec()
+	var entity_type := str(e.get("type", ""))
 	var id := str(e["id"])
 	var server_pos := _entity_position(e)
-	if str(e.get("type", "")) == "projectile" and _is_skill_authored_projectile(str(e.get("projectile_def_id", ""))):
+	if entity_type == "projectile" and _is_skill_authored_projectile(str(e.get("projectile_def_id", ""))):
 		_track_skill_authored_projectile(id, e)
+		_record_upsert_timing(upsert_start, entity_type)
 		return
 	if e["type"] == "player" and (id == player_id or player_id == ""):
 		# The player is the humanoid under PlayerAnchor, not an entity-dict node.
 		player_id = id
 		if e.has("hp"):
-			player_hp = int(e["hp"])
-			if e.has("max_hp"):
-				player_max_hp = int(e["max_hp"])
-			if _health_bar != null:
-				_health_bar.update_hp(player_hp, player_max_hp)
-			if player_hp <= 0:
-				if player_anim != null:
-					player_anim.enter_terminal("death")
-				if player_reaction != null:
-					player_reaction.enter_death()
-				_show_loss_popup()
+			var new_hp := int(e["hp"])
+			var new_max_hp := int(e.get("max_hp", player_max_hp))
+			if LocalPlayerAuthoritativeSyncScript.hp_changed(e, player_hp, player_max_hp):
+				player_hp = new_hp
+				player_max_hp = new_max_hp
+				if _health_bar != null:
+					_health_bar.update_hp(player_hp, player_max_hp)
+				if player_hp <= 0:
+					if player_anim != null:
+						player_anim.enter_terminal("death")
+					if player_reaction != null:
+						player_reaction.enter_death()
+					_show_loss_popup()
+				else:
+					if player_anim != null and player_anim.is_terminal():
+						player_anim.reset_terminal()
+					if player_reaction != null and player_reaction.is_terminal():
+						player_reaction.reset_terminal()
 			else:
-				if player_anim != null and player_anim.is_terminal():
-					player_anim.reset_terminal()
-				if player_reaction != null and player_reaction.is_terminal():
-					player_reaction.reset_terminal()
+				player_hp = new_hp
+				player_max_hp = new_max_hp
 		if e.has("mana"):
-			player_mana = int(e["mana"])
-			if e.has("max_mana"):
-				player_max_mana = int(e["max_mana"])
-			if _health_bar != null:
-				_health_bar.update_mana(player_mana, player_max_mana)
-			_refresh_skill_ui()
-		if e.has("visual_scale"):
+			var new_mana := int(e["mana"])
+			var new_max_mana := int(e.get("max_mana", player_max_mana))
+			if LocalPlayerAuthoritativeSyncScript.mana_changed(e, player_mana, player_max_mana):
+				player_mana = new_mana
+				player_max_mana = new_max_mana
+				if _health_bar != null:
+					_health_bar.update_mana(player_mana, player_max_mana)
+				_refresh_skill_ui()
+			else:
+				player_mana = new_mana
+				player_max_mana = new_max_mana
+		if e.has("visual_scale") and LocalPlayerAuthoritativeSyncScript.visual_scale_changed(e, player_visual_scale):
 			_apply_local_player_visual_scale(float(e["visual_scale"]))
 		if e.has("effect_ids"):
-			_sync_local_hero_aura(e.get("effect_ids", []), _local_player_rage_active)
+			var incoming_effects: Array = e.get("effect_ids", [])
+			if LocalPlayerAuthoritativeSyncScript.effect_ids_changed(incoming_effects, _local_player_effect_ids):
+				_local_player_effect_ids = incoming_effects.duplicate()
+				_sync_local_hero_aura(_local_player_effect_ids, _local_player_rage_active)
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
 		_apply_reconciliation_backpressure()
 		var prev_predicted_pos := predicted_pos
@@ -1705,6 +1763,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		if apply_local_player_position and prev_predicted_pos.distance_to(server_pos) > 0.001 and player_hp > 0:
 			_mark_local_player_walking()
 			_face_direction(Vector2(server_pos.x - prev_predicted_pos.x, server_pos.z - prev_predicted_pos.z))
+		_record_upsert_timing(upsert_start, entity_type)
 		return
 	var rec: Dictionary
 	var is_new := false
@@ -1772,6 +1831,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		rec["last_server_pos"] = server_pos
 		if player_anchor != null:
 			ProjectilePresentationCapScript.apply(entities, player_anchor.global_position)
+		_record_upsert_timing(upsert_start, entity_type)
 		return
 	elif rec["type"] == "loot":
 		var loot_node := rec["node"] as Node3D
@@ -1820,6 +1880,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 			_ensure_dead_monster_revive_label(id, rec)
 			_enter_entity_terminal_death(id, rec)
 	_sync_companion_bar()
+	_record_upsert_timing(upsert_start, entity_type)
 
 func _remove_entity(id: String) -> void:
 	if str(pending_interactable_action.get("target_id", "")) == id:
@@ -5950,6 +6011,23 @@ func _sync_discovery_minimap() -> void:
 		entities,
 		_last_facing_direction,
 	)
+
+func _apply_delta_ui_sync() -> void:
+	MainConfigLoaderScript.ensure_loaded()
+	_delta_ui_sync_gate.on_delta_tick()
+	var ui_interval := MainConfigLoaderScript.delta_ui_sync_interval_ticks()
+	var minimap_interval := MainConfigLoaderScript.delta_minimap_sync_interval_ticks()
+	var sync_inventory := _delta_ui_sync_gate.should_sync_inventory(ui_interval)
+	var sync_quest := _delta_ui_sync_gate.should_sync_quest_tracker(ui_interval)
+	var sync_minimap := _delta_ui_sync_gate.should_sync_minimap(minimap_interval)
+	if sync_inventory:
+		_refresh_inventory_ui()
+	if sync_quest:
+		_sync_quest_journal()
+		_sync_elite_objective_tracker()
+	if sync_minimap:
+		_sync_discovery_minimap()
+	_delta_ui_sync_gate.note_synced(sync_inventory, sync_quest, sync_minimap)
 
 func _bot_local_player_presentation() -> Dictionary:
 	return BotPresentationDebugScript.local_player_presentation(

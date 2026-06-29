@@ -52,6 +52,16 @@ static func projectile_visible_cap() -> int:
 	return int(client_perf.get("projectile_visible_cap", 16))
 
 
+static func delta_ui_sync_interval_ticks() -> int:
+	ensure_loaded()
+	return int(client_perf.get("delta_ui_sync_interval_ticks", 3))
+
+
+static func delta_minimap_sync_interval_ticks() -> int:
+	ensure_loaded()
+	return int(client_perf.get("delta_minimap_sync_interval_ticks", 2))
+
+
 static func reset_for_tests() -> void:
 	_loaded = false
 	gameplay = {}

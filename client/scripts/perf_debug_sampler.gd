@@ -27,7 +27,7 @@ func sample(delta: float, ready_state: int, tick: int, reconciliation_delta: flo
 	var avg_frame_ms: float = (_elapsed / float(max(1, _frames))) * 1000.0
 	var phase_suffix := ""
 	if enabled:
-		phase_suffix = " " + PerfPhaseTimerScript.format_snapshot()
+		phase_suffix = " " + PerfPhaseTimerScript.format_snapshot(true)
 		PerfPhaseTimerScript.reset_frame()
 	print("[client-perf] fps=%d avg_frame_ms=%.2f process_ms=%.2f physics_ms=%.2f tick=%d ws=%d recon_delta=%.3f entities=%d monsters=%d live_monsters=%d projectiles=%d loot=%d interactables=%d nodes=%d objects=%d draw_calls=%d primitives=%d%s" % [
 		int(Engine.get_frames_per_second()),

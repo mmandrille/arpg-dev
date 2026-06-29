@@ -79,7 +79,9 @@
       "properties": {
         "reconciliation_backpressure_threshold": { "type": "number", "exclusiveMinimum": 0 },
         "windup_marker_max_concurrent": { "type": "integer", "minimum": 1 },
-        "projectile_visible_cap": { "type": "integer", "minimum": 1 }
+        "projectile_visible_cap": { "type": "integer", "minimum": 1 },
+        "delta_ui_sync_interval_ticks": { "type": "integer", "minimum": 1 },
+        "delta_minimap_sync_interval_ticks": { "type": "integer", "minimum": 1 }
       }
     }
   }

@@ -233,6 +233,8 @@ run_gate "GDScript entity presentation LOD test" "[gdtest] PASS: test_entity_pre
 run_gate "GDScript projectile presentation cap test" "[gdtest] PASS: test_projectile_presentation_cap" res://tests/test_projectile_presentation_cap.gd
 run_gate "GDScript delta frame coalesce test" "[gdtest] PASS: test_delta_frame_coalesce" res://tests/test_delta_frame_coalesce.gd
 run_gate "GDScript reconciliation backpressure test" "[gdtest] PASS: test_reconciliation_backpressure" res://tests/test_reconciliation_backpressure.gd
+run_gate "GDScript local player authoritative sync test" "[gdtest] PASS: test_local_player_authoritative_sync" res://tests/test_local_player_authoritative_sync.gd
+run_gate "GDScript delta UI sync gate test" "[gdtest] PASS: test_delta_ui_sync_gate" res://tests/test_delta_ui_sync_gate.gd
 run_gate "GDScript hero light source test" "[gdtest] PASS: test_hero_light_source" res://tests/test_hero_light_source.gd
 run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement_visual_smoothing" res://tests/test_movement_visual_smoothing.gd
 run_gate "GDScript entity tick smoothing test" "[gdtest] PASS: test_entity_tick_smoothing" res://tests/test_entity_tick_smoothing.gd

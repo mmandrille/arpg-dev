@@ -1,0 +1,225 @@
+{
+  "id": "paladin_charge_loop_perf_probe",
+  "ci_tier": "benchmark",
+  "world_id": "crowded_lightning_perf_probe",
+  "seed": "paladin_charge_loop_perf_probe_seed",
+  "character_class": "paladin",
+  "title": "Paladin Charge Loop Perf Probe",
+  "description": "Paladin opens with Holy Shield then drives through 36 converging chasers in a back-and-forth charge loop for ~15 seconds. Each charge is a single directional burst (right then left, alternating) so the paladin punches through the crowd repeatedly from both sides — pushing, stunning, and re-engaging the same pack. Exercises: sustained charge hit-detection against a dense crowd, stun-push fanout and requeue per impact, monster re-pathfind after knockback, server combat phase under repeated charge reactivation, and Holy Shield armor/block stat application.",
+  "max_elapsed_s": 45.0,
+  "debug_progression": {
+    "level": 12,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 20,
+      "dex": 5,
+      "vit": 35,
+      "magic": 15
+    },
+    "skill_ranks": {
+      "charge": 1,
+      "holy_shield": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 30
+    },
+
+    {
+      "action": "move_until_in_range",
+      "monster_def_id": "crowded_probe_chaser",
+      "stop_distance": 5.5,
+      "max_ticks": 60
+    },
+
+    {
+      "action": "cast_skill",
+      "skill_id": "holy_shield",
+      "target_self": true,
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_started",
+        "skill_id": "holy_shield"
+      },
+      "timeout_s": 3
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": 1, "y": 0 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": -1, "y": 0 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": 1, "y": 0 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": -1, "y": 0 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": 0, "y": 1 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": 1, "y": 0 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": -1, "y": 0 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": 0, "y": -1 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": 1, "y": 0 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 10
+    },
+
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [{ "direction": { "x": -1, "y": 0 }, "ticks": 4 }]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 20
+    },
+
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "monster",
+        "monster_def_id": "crowded_probe_chaser",
+        "alive": true,
+        "at_least": 22
+      },
+      "timeout_s": 3
+    }
+  ],
+  "assertions": [
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 22
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "holy_shield",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "holy_shield"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_channel_started",
+      "skill_id": "charge",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_channel_ended",
+      "skill_id": "charge"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "monster_pushed",
+      "skill_id": "charge"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "charge"
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_pushed",
+      "skill_id": "charge",
+      "min": 15
+    }
+  ],
+  "visual": {
+    "camera": {
+      "x": 16,
+      "y": 8,
+      "zoom": 0.9
+    },
+    "post_complete_hold_s": 4.0
+  }
+}

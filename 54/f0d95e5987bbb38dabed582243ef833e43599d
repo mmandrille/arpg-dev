@@ -1,0 +1,29 @@
+PROGRESS.md
+  s_32b5cd0861b9bc::t_bd2fcbdb88cba7 90-94
+  s_32b5cd0861b9bc::t_7be6f7a6b1a4c6 30-31
+docs/reviews/extras/20260629_v384-shared-tooling-and-process.md
+  s_32b5cd0861b9bc::t_e403b1ceb463c3 1-76
+docs/reviews/20260629_v384-overview.md
+  s_32b5cd0861b9bc::t_2b907801ead82b 1-99
+docs/reviews/backend/20260629_v384-backend.md
+  s_32b5cd0861b9bc::t_96895b58a6ccc4 1-2,4-87
+  s_32b5cd0861b9bc::t_e2c7683655f0e8 3
+docs/reviews/client/20260629_v384-client.md
+  s_32b5cd0861b9bc::t_a5759b8e53a537 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "54f0d95e5987bbb38dabed582243ef833e43599d",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

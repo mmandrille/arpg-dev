@@ -81,6 +81,7 @@ func _run() -> void:
 	_assert_eq("arcane barrage presentation label", str(SkillRulesLoaderScript.skill_presentation("arcane_barrage").get("icon", {}).get("label", "")), "A")
 	_assert_eq("arcane barrage projectile presentation", str(SkillRulesLoaderScript.skill_presentation("arcane_barrage").get("projectile_visual", "")), "arcane_barrage_projectile")
 	_assert_eq("heal presentation label", str(SkillRulesLoaderScript.skill_presentation("heal").get("icon", {}).get("label", "")), "H")
+	_assert_eq("charge presentation shape", str(SkillRulesLoaderScript.skill_presentation("charge").get("icon", {}).get("shape", "")), "shield_charge")
 	_assert_eq("holy shield presentation label", str(SkillRulesLoaderScript.skill_presentation("holy_shield").get("icon", {}).get("label", "")), "S")
 	_assert_eq("holy shield presentation shape", str(SkillRulesLoaderScript.skill_presentation("holy_shield").get("icon", {}).get("shape", "")), "shield")
 	_assert_eq("sanctuary presentation label", str(SkillRulesLoaderScript.skill_presentation("sanctuary").get("icon", {}).get("label", "")), "T")

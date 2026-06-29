@@ -147,9 +147,9 @@
     "charge": {
       "icon": {
         "label": "C",
-        "shape": "shield",
-        "color": "#d9a33f",
-        "accent": "#fff1bd"
+        "shape": "shield_charge",
+        "color": "#d45828",
+        "accent": "#ffb87a"
       },
       "summary": "Shield rush stun",
       "effect_visual": "charge_smash",

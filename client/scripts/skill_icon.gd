@@ -69,6 +69,8 @@ func _draw() -> void:
 				_draw_quake(center, radius)
 			"shield":
 				_draw_shield(center, radius)
+			"shield_charge":
+				_draw_shield_charge(center, radius)
 			"slash":
 				_draw_slash(center, radius)
 			"volley":
@@ -403,6 +405,39 @@ func _draw_quake(center: Vector2, radius: float) -> void:
 		for p in crack:
 			points.append(center + p * radius)
 		draw_polyline(points, accent_color, 2.0, false)
+
+
+func _draw_shield_charge(center: Vector2, radius: float) -> void:
+	var shield := PackedVector2Array([
+		center + Vector2(radius * 0.74, -radius * 0.50),
+		center + Vector2(radius * 0.90, -radius * 0.06),
+		center + Vector2(radius * 0.64, radius * 0.40),
+		center + Vector2(radius * 0.16, radius * 0.60),
+		center + Vector2(-radius * 0.24, radius * 0.14),
+		center + Vector2(-radius * 0.10, -radius * 0.36),
+	])
+	draw_colored_polygon(shield, fill_color)
+	draw_polyline(shield, accent_color, 2.0, true)
+	draw_line(
+		center + Vector2(-radius * 0.08, -radius * 0.30),
+		center + Vector2(radius * 0.58, radius * 0.34),
+		accent_color,
+		2.4,
+		true
+	)
+	for i in range(4):
+		var y := -radius * 0.34 + float(i) * radius * 0.22
+		draw_line(
+			center + Vector2(-radius * 0.84, y),
+			center + Vector2(-radius * 0.40, y - radius * 0.08),
+			accent_color,
+			2.2,
+			true
+		)
+	var impact := center + Vector2(radius * 0.82, -radius * 0.28)
+	for angle in [-0.55, -0.18, 0.20, 0.58]:
+		var tip := impact + Vector2(cos(angle), sin(angle)) * radius * 0.22
+		draw_line(impact, tip, accent_color, 2.6, true)
 
 
 func _draw_shield(center: Vector2, radius: float) -> void:

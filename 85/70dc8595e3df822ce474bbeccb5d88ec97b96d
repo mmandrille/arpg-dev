@@ -1,0 +1,21 @@
+docs/progress/scenario-movement-audit.tsv
+  s_e017cda95f90cb::t_299c1cc68c3730 91
+server/internal/game/set_items_test.go
+  s_e017cda95f90cb::t_834cb958603618 1-241
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "8570dc8595e3df822ce474bbeccb5d88ec97b96d",
+  "prompts": {},
+  "sessions": {
+    "s_e017cda95f90cb": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fb591b0f-9107-4395-80d3-bfb6a8c825aa",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

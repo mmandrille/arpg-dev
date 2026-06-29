@@ -273,6 +273,40 @@ def _shape_svg(shape: str, cx: float, cy: float, radius: float, fill: str, accen
                 *crack_lines,
             ]
         )
+    if shape == "shield_charge":
+        shield = [
+            (cx + radius * 0.74, cy - radius * 0.50),
+            (cx + radius * 0.90, cy - radius * 0.06),
+            (cx + radius * 0.64, cy + radius * 0.40),
+            (cx + radius * 0.16, cy + radius * 0.60),
+            (cx - radius * 0.24, cy + radius * 0.14),
+            (cx - radius * 0.10, cy - radius * 0.36),
+        ]
+        streaks = []
+        for i in range(4):
+            y = cy - radius * 0.34 + i * radius * 0.22
+            streaks.append(
+                f'<line x1="{cx - radius * 0.84:.2f}" y1="{y:.2f}" '
+                f'x2="{cx - radius * 0.40:.2f}" y2="{y - radius * 0.08:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="2.2" stroke-linecap="round"/>'
+            )
+        impact_x = cx + radius * 0.82
+        impact_y = cy - radius * 0.28
+        spikes = []
+        for angle in (-0.55, -0.18, 0.20, 0.58):
+            tip_x = impact_x + math.cos(angle) * radius * 0.22
+            tip_y = impact_y + math.sin(angle) * radius * 0.22
+            spikes.append(
+                f'<line x1="{impact_x:.2f}" y1="{impact_y:.2f}" '
+                f'x2="{tip_x:.2f}" y2="{tip_y:.2f}" '
+                f'stroke="{html.escape(accent)}" stroke-width="2.6" stroke-linecap="round"/>'
+            )
+        slash = (
+            f'<line x1="{cx - radius * 0.08:.2f}" y1="{cy - radius * 0.30:.2f}" '
+            f'x2="{cx + radius * 0.58:.2f}" y2="{cy + radius * 0.34:.2f}" '
+            f'stroke="{html.escape(accent)}" stroke-width="2.4" stroke-linecap="round"/>'
+        )
+        return "\n".join([_polygon(shield, fill, accent), slash, *streaks, *spikes])
     if shape == "shield":
         points = [
             (cx, cy - radius * 0.86),

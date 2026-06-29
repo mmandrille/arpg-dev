@@ -3080,54 +3080,6 @@ func circleIntersectsAABB(center Vec2, radius float64, rectCenter Vec2, rectSize
 	return dx*dx+dy*dy < radius*radius-1e-9
 }
 
-func (s *Sim) advanceMonsterMovement(res *TickResult) {
-	nav := s.activeNav()
-	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
-		monster := s.activeLevel().entities[id]
-		if monster == nil || monster.kind != monsterEntity || monster.hp <= 0 {
-			continue
-		}
-		def, ok := s.rules.Monsters[monster.monsterDefID]
-		if !ok || def.effectiveBehavior() != monsterBehaviorChase {
-			continue
-		}
-		if monster.isBoss && monster.bossPhaseKind == "active" {
-			continue
-		}
-		if leader := s.eliteMinionLeader(monster); leader != nil {
-			s.advanceEliteMinionMovement(monster, leader, def, res)
-			continue
-		}
-		targetPlayer := s.nearestLivingPlayerForMonster(s.activeLevel(), monster)
-		if targetPlayer == nil {
-			continue
-		}
-		player := s.activeLevel().entities[targetPlayer.PlayerID]
-		if player == nil {
-			continue
-		}
-		s.usePlayer(targetPlayer)
-		prevMode := monster.aiMode
-		if monster.isBoss {
-			monster.aiMode = monsterAIModeChase
-		} else {
-			s.updateMonsterAIMode(monster, player, def, prevMode, res)
-		}
-		if monster.aiMode == monsterAIModeIdle {
-			continue
-		}
-		s.updateMonsterRangedMeleeEngagement(monster, player, def)
-		goal, hasGoal := s.monsterMovementGoal(monster, player, def)
-		if !hasGoal {
-			continue
-		}
-		if distance(monster.pos, goal) <= nav.StopDistance && s.monsterInAttackRange(monster, player, def) {
-			continue
-		}
-		s.moveMonsterToPoint(monster, def, goal, res)
-	}
-}
-
 func (s *Sim) monsterMoveSpeed(monster *entity, def MonsterDef, nav NavigationRules) float64 {
 	speed := def.effectiveMoveSpeed(nav)
 	if monster == nil || speed <= 0 {

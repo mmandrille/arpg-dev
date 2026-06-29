@@ -25,7 +25,7 @@ Last updated: 2026-06-29
 |-------|-------|
 | **Latest completed slice** | v384 — persist-combat-defer |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green (2026-06-29 post v384) |
+| **CI gate** | `make ci` + `make ci-full` green (2026-06-29 post v384 review paydown) |
 | **Next slice** | Run `/next` for new work |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |
@@ -88,7 +88,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 ### Active review follow-ups
 
 - **v384 `$review` complete (official cadence at `625f5600`).** Overview:
-  [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md). `make ci-full` **failed** (22m03s, 2026-06-29): **3 extended scenarios** — `companion_rank_scaling_and_limits` (protocol), `client_skill_points_and_magic_bolt`, `interactable_tick_smoothing` (client). v349's 15-failure cohort passed in same run (v350 recovery holds). Run `$refactor` against v384 recommendations.
+  [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md). All ten review recommendations closed (2026-06-29 paydown): ci-full scenario fixes, attack-move extraction, `runner.go` removal, orphan smoke tests, sim movement paydown, perf unit tests, as-built backfill, fog schema, `PROGRESS` sync. **`make ci` and `make ci-full` green** on paydown branch.
 - **v349 `$review` (superseded by v384).** Overview:
   [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md). Failure inventory:
   [`docs/reviews/20260626_v349-ci-full-failures.md`](docs/reviews/20260626_v349-ci-full-failures.md). All 15 recovered at v350.

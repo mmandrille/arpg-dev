@@ -68,6 +68,9 @@ const SustainedClickInputScript := preload("res://scripts/sustained_click_input.
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
 const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
+const AttackMoveInputCoordinatorScript := preload("res://scripts/attack_move_input_coordinator.gd")
+const DeltaFrameCoalesceScript := preload("res://scripts/delta_frame_coalesce.gd")
+const ReconciliationBackpressureScript := preload("res://scripts/reconciliation_backpressure.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const PathRejectBackoffScript := preload("res://scripts/path_reject_backoff.gd")
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
@@ -1015,21 +1018,8 @@ func _handle_message(env: Dictionary) -> void:
 func _flush_pending_deltas() -> void:
 	if _pending_delta_payloads.is_empty():
 		return
-	var merged_events: Array = []
-	var merged_changes: Array = []
-	var merged_perf: Dictionary = {}
-	for payload in _pending_delta_payloads:
-		if payload is Dictionary:
-			var p: Dictionary = payload
-			merged_events.append_array(p.get("events", []))
-			merged_changes.append_array(p.get("changes", []))
-			if p.has("performance") and p.get("performance") is Dictionary:
-				merged_perf = (p.get("performance") as Dictionary).duplicate(true)
-	_apply_delta({
-		"events": merged_events,
-		"changes": merged_changes,
-		"performance": merged_perf,
-	})
+	var merged := DeltaFrameCoalesceScript.merge_pending(_pending_delta_payloads)
+	_apply_delta(merged)
 	_pending_delta_payloads.clear()
 
 func _envelope_payload(env: Dictionary) -> Dictionary:
@@ -2064,6 +2054,8 @@ func _entity_world_position(entity_id: String) -> Vector3:
 	return ModelReactionControllerScript.UNRESOLVED_SOURCE
 
 func _node_world_or_local_position(node: Node3D) -> Vector3:
+	if node == null:
+		return Vector3.ZERO
 	if node.is_inside_tree():
 		return node.global_position
 	return node.position
@@ -3076,103 +3068,38 @@ func _dispatch_monster_attack_now(target_id: String, rec: Dictionary) -> void:
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)
 func _queue_attack_buffer(target_id: String) -> void:
-	if not _living_monster_target(target_id):
-		_attack_buffer.clear()
-		return
-	_attack_buffer.queue_attack(target_id)
+	AttackMoveInputCoordinatorScript.queue_attack_buffer(self, target_id)
 
 func _defer_monster_click(target_id: String) -> void:
-	if _target_in_local_attack_range(target_id):
-		_sticky_attack.clear()
-		_queue_attack_buffer(target_id)
-	else:
-		_start_attack_move(target_id)
+	AttackMoveInputCoordinatorScript.defer_monster_click(self, target_id)
+
 func _start_attack_move(target_id: String) -> void:
-	if not _living_monster_target(target_id):
-		_clear_pending_attack_commands()
-		return
-	if _path_reject_backoff.blocks_target(target_id, Time.get_ticks_msec()):
-		return
-	_attack_buffer.clear()
-	_sticky_attack.set_target(target_id)
-	var goal := CombatReachScript.attack_approach_point(player_anchor, entities, inventory, equipped, target_id, _last_facing_direction)
-	if _path_reject_backoff.blocks_goal(Vector2(goal.x, goal.z), Time.get_ticks_msec()):
-		return
-	_close_gameplay_panels_for_movement()
-	_mark_local_player_walking()
-	client.send("move_to_intent", last_server_tick, {"position": {"x": goal.x, "y": goal.z}})
-	if _attack_cooldown <= 0.0:
-		_attack_cooldown = ClientConstants.SEND_INTERVAL
+	AttackMoveInputCoordinatorScript.start_attack_move(self, target_id)
 
 func _clear_pending_attack_commands() -> void:
-	_attack_buffer.clear()
-	_sticky_attack.clear()
+	AttackMoveInputCoordinatorScript.clear_pending_attack_commands(self)
+
 func _living_monster_target(target_id: String) -> bool:
-	return target_id != "" and entities.has(target_id) and str(entities[target_id].get("type", "")) == "monster" and int(entities[target_id].get("hp", 1)) > 0
+	return AttackMoveInputCoordinatorScript.living_monster_target(entities, target_id)
+
 func _target_in_local_attack_range(target_id: String) -> bool:
-	return CombatReachScript.target_in_local_attack_range(player_anchor, entities, inventory, equipped, target_id)
+	return CombatReachScript.target_in_local_attack_range(
+		player_anchor, entities, inventory, equipped, target_id)
 
 func _tick_sustained_click() -> void:
-	if not _sustained_click.active:
-		return
-
-	if _attack_cooldown > 0.0:
-		return
-
-	if _sustained_click.should_stop(player_hp, entities):
-		_sustained_click.clear()
-		return
-
-	if _sustained_click.mode == "attack":
-		_repeat_hold_attack()
-	elif _sustained_click.mode == "directional_attack":
-		_repeat_directional_attack()
-	elif _sustained_click.mode == "move":
-		_repeat_hold_move()
+	AttackMoveInputCoordinatorScript.tick_sustained_click(self)
 
 func _tick_attack_buffer(delta: float) -> void:
-	_attack_buffer.tick(delta)
-	if not _attack_buffer.active():
-		return
-	if _attack_buffer.should_clear(player_hp, entities):
-		_attack_buffer.clear()
-		return
-	if _attack_cooldown > 0.0:
-		return
-	_try_dispatch_monster_attack(_attack_buffer.target_id, false)
+	AttackMoveInputCoordinatorScript.tick_attack_buffer(self, delta)
 
 func _tick_sticky_attack() -> void:
-	if not _sticky_attack.active():
-		return
-	if _sticky_attack.should_clear(player_hp, entities):
-		_sticky_attack.clear()
-		return
-	if _attack_cooldown <= 0.0:
-		_try_dispatch_monster_attack(_sticky_attack.target_id, false)
+	AttackMoveInputCoordinatorScript.tick_sticky_attack(self)
 
 func _repeat_hold_attack() -> void:
-	var target_id := _sustained_click.target_id
-	if target_id == "" or not entities.has(target_id):
-		_sustained_click.clear()
-		return
-	if not _target_in_local_attack_range(target_id):
-		_start_attack_move(target_id)
-		return
-	_try_dispatch_monster_attack(target_id, false)
+	AttackMoveInputCoordinatorScript.repeat_hold_attack(self)
 
 func _repeat_hold_move() -> void:
-	if _is_force_stand_held():
-		_sustained_click.clear()
-		return
-	var ground := _mouse_ground_point()
-	if not _sustained_click.can_repeat_move(ground):
-		return
-
-	_close_gameplay_panels_for_movement()
-	_mark_local_player_walking()
-	client.send("move_to_intent", last_server_tick, {"position": {"x": ground.x, "y": ground.z}})
-	_sustained_click.mark_move_sent(ground)
-	_attack_cooldown = ClientConstants.SEND_INTERVAL
+	AttackMoveInputCoordinatorScript.repeat_hold_move(self)
 
 func _try_action_at_mouse() -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
@@ -3447,8 +3374,10 @@ func _is_loot_label_reveal_held() -> bool:
 	return Input.is_key_pressed(KEY_ALT)
 
 func _apply_reconciliation_backpressure() -> void:
-	var threshold := MainConfigLoaderScript.reconciliation_backpressure_threshold()
-	if reconciliation_delta < threshold:
+	if not ReconciliationBackpressureScript.should_clear_pending_targets(
+		reconciliation_delta,
+		MainConfigLoaderScript.reconciliation_backpressure_threshold(),
+	):
 		return
 	_stop_charge_channel_visual()
 	pending_action_targets.clear()
@@ -3458,7 +3387,7 @@ func _refresh_loot_label_visibility() -> void:
 	var crowd_min := int(rules.get("crowd_cull_min_loot", 12))
 	var max_labels := int(rules.get("max_visible_labels", 8))
 	var combat_radius := float(rules.get("combat_radius", 10.0))
-	var hero_pos := player_anchor.global_position if player_anchor != null else Vector3.ZERO
+	var hero_pos := _node_world_or_local_position(player_anchor)
 	var label_ids: Array = _loot_label_entity_ids()
 	var use_crowd_cull := label_ids.size() >= crowd_min
 	var nearest_allowed: Dictionary = {}
@@ -3471,7 +3400,8 @@ func _refresh_loot_label_visibility() -> void:
 			var node := entities[id].get("node", null) as Node3D
 			if node == null:
 				continue
-			var dist := Vector2(node.global_position.x - hero_pos.x, node.global_position.z - hero_pos.z).length()
+			var node_pos := _node_world_or_local_position(node)
+			var dist := Vector2(node_pos.x - hero_pos.x, node_pos.z - hero_pos.z).length()
 			ranked.append({"id": id, "dist": dist})
 		ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 			return float(a.get("dist", 0.0)) < float(b.get("dist", 0.0))

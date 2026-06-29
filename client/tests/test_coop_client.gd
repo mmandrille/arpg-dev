@@ -81,11 +81,12 @@ func _initialize() -> void:
 	_test_local_companions_render_in_top_left_row()
 	_test_revive_hover_reveals_dead_monster_corpse_label()
 
-	print("[gdtest] PASS: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 	if _fail_count > 0:
+		print("[gdtest] FAIL: test_coop_client (%d passed, %d failed)" % [_pass_count, _fail_count])
 		quit(1)
-	else:
-		quit(0)
+
+	print("[gdtest] PASS: test_coop_client (%d assertions)" % _pass_count)
+	quit(0)
 
 
 func _make_main():
@@ -1292,19 +1293,24 @@ func _test_holy_shield_effect_ids_drive_world_shine() -> void:
 
 
 func _test_local_attack_range_uses_equipped_reach() -> void:
+	const CombatReachScript := preload("res://scripts/combat_reach.gd")
+	const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 	var main = _make_main()
 	main.player_id = "1001"
 	main.player_anchor.position = Vector3.ZERO
 	var near := Node3D.new()
-	near.position = Vector3(1.95, 0.0, 0.0)
 	var far := Node3D.new()
-	far.position = Vector3(2.10, 0.0, 0.0)
 	main.entities_root.add_child(near)
 	main.entities_root.add_child(far)
 	main.inventory = [{"item_instance_id": "sword_1", "item_def_id": "rusty_sword"}]
 	main.equipped = {"main_hand": "sword_1"}
 	main.entities["near"] = {"node": near, "type": "monster", "hp": 3}
 	main.entities["far"] = {"node": far, "type": "monster", "hp": 3}
+	var reach := CombatReachScript._local_player_attack_reach(main.inventory, main.equipped)
+	var inside_dist := reach + ClientConstantsScript.LOCAL_MONSTER_RADIUS * 0.5
+	var outside_dist := reach + ClientConstantsScript.LOCAL_MONSTER_RADIUS + 0.25
+	near.position = Vector3(inside_dist, 0.0, 0.0)
+	far.position = Vector3(outside_dist, 0.0, 0.0)
 	_assert_true("near monster is inside equipped sword reach", main._target_in_local_attack_range("near"))
 	_assert_true("far monster is outside equipped sword reach", not main._target_in_local_attack_range("far"))
 	main.player_anchor.queue_free()

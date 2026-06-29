@@ -6,7 +6,7 @@ client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait 
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	642
 client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	6361	# v384: combat exploration perf batch (delta coalesce, recon backpressure, LOD caps); coordinator extraction deferred
+client/scripts/main.gd	6293	# v384 review paydown: attack-move coordinator + delta/recon helpers extracted
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010
@@ -20,7 +20,7 @@ server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: inter
 server/internal/game/rules.go	3049	# $refactor v334: extracted dungeon_generation_rules.go type cluster
 server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6563	# v381: tick collision cache fields + playerDynamicBlocked nil guard
+server/internal/game/sim.go	6515	# v384 review paydown: advanceMonsterMovement -> sim_tick_monster_movement.go
 server/internal/game/types.go	665
 server/internal/http/auth_session_test.go	1501
 server/internal/http/ws_test.go	1482

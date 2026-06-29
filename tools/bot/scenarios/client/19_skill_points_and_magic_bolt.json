@@ -151,12 +151,6 @@
       "last_cue": "skill_buff"
     },
     {
-      "type": "wait_event",
-      "event_type": "skill_cooldown_started",
-      "skill_id": "rage",
-      "timeout_s": 5.0
-    },
-    {
       "type": "wait_skill_bar",
       "skill_id": "rage",
       "rank": 1,

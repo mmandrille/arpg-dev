@@ -2,7 +2,7 @@
   "id": "interactable_tick_smoothing",
   "ci_tier": "extended",
   "runner": "godot_client",
-  "world_id": "vertical_slice",
+  "world_id": "dungeon_levels",
   "seed": "intsmooth01",
   "title": "Interactable tick smoothing: service nodes register smoothing state",
   "description": "Verify town interactables expose tick-smoothing debug state on connect.",

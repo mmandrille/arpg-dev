@@ -13,6 +13,7 @@ const ORGANIC_EDGE_MAX_RADIUS_FRACTION := 0.10
 const DARKNESS_FEATHER_MIN_PX := 8.0
 const DARKNESS_FEATHER_MAX_RADIUS_FRACTION := 0.18
 const FogOfWarShaderScript := preload("res://scripts/fog_of_war_shader.gd")
+const PerfPhaseTimerScript := preload("res://scripts/perf_phase_timer.gd")
 
 var _camera: Camera3D
 var _target: Node3D
@@ -197,10 +198,12 @@ func get_debug_state() -> Dictionary:
 
 
 func _process(delta: float) -> void:
+	var fog_start := Time.get_ticks_usec()
 	_shadow_cache.tick_frame()
 	_update_motion_phase(delta)
 	_sync_visibility()
 	_update_shader()
+	PerfPhaseTimerScript.measure_usec("fog", fog_start)
 
 
 func _ensure_rect() -> void:

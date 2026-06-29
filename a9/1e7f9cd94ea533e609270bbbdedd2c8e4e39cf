@@ -1,0 +1,21 @@
+scripts/client_smoke.sh
+  s_32b5cd0861b9bc::t_475b2176cfc5a8 253-262
+client/tests/test_market_listing_rows.gd
+  s_32b5cd0861b9bc::t_f02d1da22fa388 43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "a91e7f9cd94ea533e609270bbbdedd2c8e4e39cf",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

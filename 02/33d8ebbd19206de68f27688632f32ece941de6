@@ -1,0 +1,54 @@
+docs/plans/v366_2026-06-28-path-cache-effectiveness.md
+  s_d1d00018dddc4e::t_ea9ada93904b74 1-8
+PROGRESS.md
+  s_d1d00018dddc4e::t_3ccc42c066cc74 26
+docs/specs/v366_spec-path-cache-effectiveness.md
+  s_d1d00018dddc4e::t_2ae1c8e13b9736 1-30
+shared/rules/navigation.v0.schema.json
+  s_d1d00018dddc4e::t_a3c8e5f9771452 22
+  s_d1d00018dddc4e::t_44625ba43d2e4b 55
+docs/progress/slice-lifecycle.md
+  s_d1d00018dddc4e::t_7d850451a2e4d2 380
+server/internal/game/monster_navigation_budget.go
+  s_d1d00018dddc4e::t_46fcee35b0677f 87,95-104
+  s_d1d00018dddc4e::t_016b279d5f56fe 105-106
+server/internal/game/navigation_rules.go
+  s_d1d00018dddc4e::t_053d9b5696d410 76-78
+  s_d1d00018dddc4e::t_44526477698a9f 106
+  s_d1d00018dddc4e::t_24cd045b592a92 25
+server/internal/game/monster_navigation_budget_test.go
+  s_d1d00018dddc4e::t_d13b20cadce220 63-85
+  s_d1d00018dddc4e::t_242bad12063de9 86-88
+docs/as-built/v366_path-cache-effectiveness.md
+  s_d1d00018dddc4e::t_443e571585ae75 1-15
+server/internal/game/rules.go
+  s_d1d00018dddc4e::t_e7efbae1b7dff2 150
+shared/golden/monster_chase.v0.schema.json
+  s_d1d00018dddc4e::t_5833b351a6f4a4 63
+  s_d1d00018dddc4e::t_709dea1c27e84d 30
+shared/golden/auto_path.v0.schema.json
+  s_d1d00018dddc4e::t_644467907f5fa5 27
+  s_d1d00018dddc4e::t_e50c5cc74fdd4b 60
+shared/golden/auto_path.json
+  s_d1d00018dddc4e::t_2ccd5071db70df 21-22,24
+shared/golden/monster_chase.json
+  s_d1d00018dddc4e::t_4c6be62f844db7 23-24,26
+shared/rules/navigation.v0.json
+  s_d1d00018dddc4e::t_6245ac15a1c872 19-20,22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "0233d8ebbd19206de68f27688632f32ece941de6",
+  "prompts": {},
+  "sessions": {
+    "s_d1d00018dddc4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6af99e8d-44ff-43ed-99db-33f614d2484e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+server/internal/game/shop.go
+  s_c98f2e75dd2566::t_e79f12cf96db3b 605,645
+  s_c98f2e75dd2566::t_f18894135b345c 95
+  s_c98f2e75dd2566::t_332767280c1f34 446
+  s_c98f2e75dd2566::t_af0c984fac2017 757
+  s_c98f2e75dd2566::t_e8b20de272a48d 167
+server/internal/game/sim.go
+  s_c98f2e75dd2566::t_203b812c5b9b24 5476
+  s_c98f2e75dd2566::t_4755c6a9785be4 5440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "b8a901a160d81bf0861edf2a6a79012e6e82a0f2",
+  "prompts": {},
+  "sessions": {
+    "s_c98f2e75dd2566": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e93b7094-4981-44ba-b142-42abb27dc2cd",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

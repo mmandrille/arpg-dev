@@ -23,7 +23,7 @@ Last updated: 2026-06-28
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v364 — monster-lod-retune |
+| **Latest completed slice** | v365 — path-budget-retune |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green (2026-06-28) |
 | **Next slice** | Run `/next` for new work |

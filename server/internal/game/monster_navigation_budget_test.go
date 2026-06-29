@@ -43,3 +43,23 @@ func TestCrowdedLightningMonsterPathBudgetBounds(t *testing.T) {
 		t.Fatal("MonstersMoved = 0, want authoritative backend movement under budget")
 	}
 }
+
+func TestCrowdedLightningAveragePathNodesStayBelowBudgetCeiling(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_nav_budget_avg", "nav_budget_avg_seed", rules, "crowded_lightning_perf_probe")
+	if err != nil {
+		t.Fatalf("world: %v", err)
+	}
+
+	var totalNodes int
+	ticks := 16
+	for tick := 0; tick < ticks; tick++ {
+		sim.TickResults(nil)
+		totalNodes += sim.PerfCounters().PathNodesVisited
+	}
+	avg := float64(totalNodes) / float64(ticks)
+	ceiling := float64(rules.Navigation.MonsterPathNodesPerTick) * 0.95
+	if avg > ceiling {
+		t.Fatalf("average path nodes per tick = %.2f, want <= %.2f (85%% of budget)", avg, ceiling)
+	}
+}

@@ -1,0 +1,23 @@
+server/internal/realtime/session_shared.go
+  s_32b5cd0861b9bc::t_cf6429ea195acb 1-86
+server/internal/realtime/fog_of_war_test.go
+  s_32b5cd0861b9bc::t_5932ca9be092e6 56,59-60,62,67,69
+docs/CODEMAP.md
+  s_32b5cd0861b9bc::t_8d033d2b682044 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "a65676b087a7a593117942ed2a0553e584b1fdfe",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

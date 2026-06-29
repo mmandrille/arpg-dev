@@ -2860,8 +2860,16 @@ func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 // (live monster or closed-door barrier). Walls are not checked here so that
 // buildBlockedFn can use separate probe positions for walls vs. entities.
 func (s *Sim) playerDynamicBlocked(pos Vec2) bool {
+	level := s.activeLevel()
+	if level == nil {
+		return false
+	}
+
 	for _, id := range s.cachedSortedEntityIDs() {
-		e := s.activeLevel().entities[id]
+		e := level.entities[id]
+		if e == nil {
+			continue
+		}
 		if e.kind == monsterEntity && e.hp > 0 {
 			if circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
 				return true

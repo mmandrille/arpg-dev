@@ -25,7 +25,7 @@ Last updated: 2026-06-29
 |-------|-------|
 | **Latest completed slice** | v369 — wayfarers-accord-set |
 | **Active branch** | `main` |
-| **CI gate** | focused verification green (2026-06-29 post v369; batch `make ci` pending autoloop handoff) |
+| **CI gate** | `make ci` green (2026-06-29 post v369) |
 | **Next slice** | Run `/next` for new work |
 | **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
 | **Next engineering review** | Due now (~v359 milestone passed) |

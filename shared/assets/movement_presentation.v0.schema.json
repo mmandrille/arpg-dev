@@ -51,6 +51,17 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "Snap threshold for interactable nodes."
+        },
+        "remote_adaptive": {
+          "type": "object",
+          "required": ["enabled", "min_duration_seconds", "max_duration_seconds", "distance_per_second"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "min_duration_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 1.0 },
+            "max_duration_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 1.0 },
+            "distance_per_second": { "type": "number", "exclusiveMinimum": 0 }
+          }
         }
       }
     },

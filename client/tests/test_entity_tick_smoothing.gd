@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_test_begin_segment_interpolates()
 	_test_large_delta_snaps()
 	_test_advance_settles()
+	_test_adaptive_segment_duration()
 
 	print("[gdtest] PASS: test_entity_tick_smoothing (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -43,6 +44,14 @@ func _test_advance_settles() -> void:
 	_assert_false("settled inactive", smoothing.is_active())
 	var settled := smoothing.advance(0.0)
 	_assert_approx("settled at target", settled.x, 0.5, 0.001)
+
+
+func _test_adaptive_segment_duration() -> void:
+	var smoothing := EntityTickSmoothingScript.new()
+	smoothing.configure(0.1, 2.0)
+	smoothing.begin_segment(Vector3(1.0, 0.0, 0.0), Vector3.ZERO, 0.12)
+	var debug := smoothing.get_debug_state()
+	_assert_approx("adaptive duration applied", float(debug.get("segment_duration", 0.0)), 0.12, 0.001)
 
 
 func _assert_true(label: String, value: bool) -> void:

@@ -6,13 +6,15 @@ var _to := Vector3.ZERO
 var _display := Vector3.ZERO
 var _elapsed := 0.0
 var _duration := 0.1
+var _base_duration := 0.1
 var _snap_distance := 2.0
 var _active := false
 var _last_segment_distance := 0.0
 
 
 func configure(duration: float, snap_distance: float) -> void:
-	_duration = maxf(duration, 0.001)
+	_base_duration = maxf(duration, 0.001)
+	_duration = _base_duration
 	_snap_distance = snap_distance
 
 
@@ -25,12 +27,13 @@ func reset(pos: Vector3) -> void:
 	_last_segment_distance = 0.0
 
 
-func begin_segment(target: Vector3, current: Vector3) -> void:
+func begin_segment(target: Vector3, current: Vector3, duration_override: float = -1.0) -> void:
 	var flat_delta := Vector2(target.x - current.x, target.z - current.z).length()
 	_last_segment_distance = flat_delta
 	if flat_delta >= _snap_distance or flat_delta <= 0.001:
 		reset(target)
 		return
+	_duration = _base_duration if duration_override < 0.0 else maxf(duration_override, 0.001)
 	_from = current
 	_to = target
 	_display = current
@@ -63,6 +66,7 @@ func get_debug_state() -> Dictionary:
 		"active": _active,
 		"elapsed": _elapsed,
 		"duration": _duration,
+		"segment_duration": _duration,
 		"segment_distance": _last_segment_distance,
 		"display_x": _display.x,
 		"display_z": _display.z,

@@ -9,7 +9,13 @@
     "loot_enabled": true,
     "loot_snap_distance": 2.0,
     "interactables_enabled": true,
-    "interactable_snap_distance": 2.0
+    "interactable_snap_distance": 2.0,
+    "remote_adaptive": {
+      "enabled": true,
+      "min_duration_seconds": 0.08,
+      "max_duration_seconds": 0.14,
+      "distance_per_second": 8.0
+    }
   },
   "mobility_smoothing": {
     "enabled": true,

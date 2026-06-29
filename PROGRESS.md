@@ -27,8 +27,8 @@ Last updated: 2026-06-29
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green (2026-06-29 post v384) |
 | **Next slice** | Run `/next` for new work |
-| **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
-| **Next engineering review** | Due now (~v359 milestone passed) |
+| **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
+| **Next engineering review** | ~v394 milestone |
 
 
 ### Periodic engineering reviews
@@ -87,9 +87,11 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v349 `$review` complete (official cadence at `82422216`).** Overview:
-  [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md). Failure inventory for `$refactor`:
-  [`docs/reviews/20260626_v349-ci-full-failures.md`](docs/reviews/20260626_v349-ci-full-failures.md) (**15 extended scenarios** — 12 protocol + 3 client). All 15 recovered at v350; `make ci-full` now green.
+- **v384 `$review` complete (official cadence at `625f5600`).** Overview:
+  [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md). `make ci-full` **failed** (22m03s, 2026-06-29): **3 extended scenarios** — `companion_rank_scaling_and_limits` (protocol), `client_skill_points_and_magic_bolt`, `interactable_tick_smoothing` (client). v349's 15-failure cohort passed in same run (v350 recovery holds). Run `$refactor` against v384 recommendations.
+- **v349 `$review` (superseded by v384).** Overview:
+  [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md). Failure inventory:
+  [`docs/reviews/20260626_v349-ci-full-failures.md`](docs/reviews/20260626_v349-ci-full-failures.md). All 15 recovered at v350.
 - **v337 `$review` (ad hoc).** [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md). Maintainability ratchet breach resolved; coordinator paydown items largely still open.
 - **v334 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema/guards, fog overlay baseline, ADR-0015, bot presentation debug extraction, dungeon generation rules split, movement-input presenter, wall-floor lab nav test + scenario 78 proof, sim tick context starter, item-visual probe extraction, fog validator unit tests.
 - **v337 future-plan items:** `sim.go` phase-helper paydown via `simTickCtx`; quarantine `realtime/runner.go`; `validate_shared.py` validation-domain extraction; `main.gd` attack-move cluster extraction (9-line headroom).

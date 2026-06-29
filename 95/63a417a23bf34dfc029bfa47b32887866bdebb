@@ -1,0 +1,79 @@
+client/scripts/main_config_loader.gd
+  s_2fef7f2ffd79bc::t_b25293a932e8a1 55-64
+scripts/client_smoke.sh
+  s_2fef7f2ffd79bc::t_eff5aee507229b 236-237
+client/scripts/local_player_authoritative_sync.gd
+  s_2fef7f2ffd79bc::t_c43d40bc4472ae 1-33
+client/tests/test_local_player_authoritative_sync.gd
+  s_2fef7f2ffd79bc::t_508ac80ac4b3fd 1-38
+client/tests/test_delta_ui_sync_gate.gd.uid
+  s_2fef7f2ffd79bc::t_0584232cea4ee8 1
+client/tests/test_local_player_authoritative_sync.gd.uid
+  s_2fef7f2ffd79bc::t_0584232cea4ee8 1
+client/scripts/delta_ui_sync_gate.gd
+  s_2fef7f2ffd79bc::t_8295c19ed86ea9 1-70
+client/scripts/local_player_authoritative_sync.gd.uid
+  s_2fef7f2ffd79bc::t_0584232cea4ee8 1
+client/tests/test_delta_ui_sync_gate.gd
+  s_2fef7f2ffd79bc::t_091d88f9e9b7d8 1-11,14-50
+  s_2fef7f2ffd79bc::t_c564928d00efc2 12-13
+client/scripts/delta_ui_sync_gate.gd.uid
+  s_2fef7f2ffd79bc::t_0584232cea4ee8 1
+client/scripts/main.gd
+  s_2fef7f2ffd79bc::t_abf7f4e6a355bb 1695-1698,1701-1702,1704-1705,1708,1710
+  s_2fef7f2ffd79bc::t_6908d9c4d3b937 1766
+  s_2fef7f2ffd79bc::t_308def649773ba 1883
+  s_2fef7f2ffd79bc::t_b4be0c35082618 1271
+  s_2fef7f2ffd79bc::t_1325706a8083fa 1152
+  s_2fef7f2ffd79bc::t_0a0fc7104a1230 1716-1733,1735-1736,1738-1749,1752-1755
+  s_2fef7f2ffd79bc::t_9ac01f459b3a6c 1699-1700
+  s_2fef7f2ffd79bc::t_10e29a0b43e746 6015-6031
+  s_2fef7f2ffd79bc::t_5b8b33c270069a 1290-1291,1293-1294
+  s_2fef7f2ffd79bc::t_411e64e52a5b0b 284
+  s_2fef7f2ffd79bc::t_4ee65cc37c26db 1606-1607,1611-1612,1614
+  s_2fef7f2ffd79bc::t_75cfdeb84ecb42 157
+  s_2fef7f2ffd79bc::t_c196171b1fab2f 1200,1205
+  s_2fef7f2ffd79bc::t_c7387c37d50e5b 1211
+  s_2fef7f2ffd79bc::t_44a6c2581d672d 1231,1236,1243,1246,1249,1252,1255,1260,1265
+  s_2fef7f2ffd79bc::t_05a85f58d3d323 1216
+  s_2fef7f2ffd79bc::t_5da8106955bcfb 1834
+  s_2fef7f2ffd79bc::t_32db806f13a9ac 1292
+  s_2fef7f2ffd79bc::t_7eb59b96e5c77c 73-74
+  s_2fef7f2ffd79bc::t_1848154012e1ed 1171,1181-1182
+  s_2fef7f2ffd79bc::t_cc87c6eb34b614 1188,1191
+  s_2fef7f2ffd79bc::t_be2693d6ace68c 1592-1593,1596-1597
+client/scripts/perf_debug_sampler.gd
+  s_2fef7f2ffd79bc::t_a16e91eb73ff4f 30
+docs/CODEMAP.md
+  s_2fef7f2ffd79bc::t_d71be71b01496e 17
+  s_2fef7f2ffd79bc::t_2aee3e1108a979 40
+shared/rules/main_config.v0.json
+  s_2fef7f2ffd79bc::t_5d72a5df6e36cf 50-52
+client/tests/test_perf_phase_timer.gd
+  s_2fef7f2ffd79bc::t_c862337bb86b43 48-49
+README.md
+  s_2fef7f2ffd79bc::t_76e0a99a5abb06 20
+  s_2fef7f2ffd79bc::t_c65db56290ccb0 92-97
+shared/rules/main_config.v0.schema.json
+  s_2fef7f2ffd79bc::t_94c9f7d7945c70 82-84
+docs/performance/tools.md
+  s_2fef7f2ffd79bc::t_71f4bab8e42c5c 1-244
+client/scripts/perf_phase_timer.gd
+  s_2fef7f2ffd79bc::t_960ab4c02a8105 35,39-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9563a417a23bf34dfc029bfa47b32887866bdebb",
+  "prompts": {},
+  "sessions": {
+    "s_2fef7f2ffd79bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8c05f4eb-876b-424e-8b79-ac8a4edf0fd0",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

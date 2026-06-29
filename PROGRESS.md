@@ -25,7 +25,7 @@ Last updated: 2026-06-28
 |-------|-------|
 | **Latest completed slice** | v368 — remote-adaptive-smoothing |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green (2026-06-28) |
+| **CI gate** | `make ci` green (2026-06-28 post v364–v368 batch) |
 | **Next slice** | Run `/next` for new work |
 | **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
 | **Next engineering review** | Due now (~v359 milestone passed) |

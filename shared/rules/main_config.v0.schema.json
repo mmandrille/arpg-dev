@@ -55,6 +55,32 @@
         "companion_follow_distance": { "type": "number", "exclusiveMinimum": 0 },
         "companion_follow_stop_radius": { "type": "number", "exclusiveMinimum": 0 }
       }
+    },
+    "presentation_lod": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_live_monsters": { "type": "integer", "minimum": 1 },
+        "distance_threshold": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "loot_labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "crowd_cull_min_loot": { "type": "integer", "minimum": 0 },
+        "max_visible_labels": { "type": "integer", "minimum": 1 },
+        "combat_radius": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "client_perf": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reconciliation_backpressure_threshold": { "type": "number", "exclusiveMinimum": 0 },
+        "windup_marker_max_concurrent": { "type": "integer", "minimum": 1 },
+        "projectile_visible_cap": { "type": "integer", "minimum": 1 }
+      }
     }
   }
 }

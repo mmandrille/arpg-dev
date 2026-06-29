@@ -23,7 +23,7 @@ Last updated: 2026-06-29
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v370 — client-perf-breakdown |
+| **Latest completed slice** | v384 — persist-combat-defer |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green (2026-06-29 post v369) |
 | **Next slice** | Run `/next` for new work |

@@ -17,6 +17,10 @@
     "viewport_size_epsilon_px": 1.0,
     "performance_min_rebuild_interval_frames": 3
   },
+  "combat_crowd_shader_throttle": {
+    "live_monster_threshold": 24,
+    "shader_update_min_interval_frames": 2
+  },
   "organic_edge": {
     "world_amplitude": 0.65,
     "segments": 18.0,

@@ -3,12 +3,14 @@ package realtime
 import (
 	"time"
 
+	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
 func (l *sessionLoop) doTick() {
 	start := time.Now()
 	l.mu.Lock()
+	l.flushDeferredPersist()
 	tick := l.sim.CurrentTick()
 	inputs := l.buffer[tick]
 	inputTypes := make(map[string]string, len(inputs))
@@ -23,6 +25,7 @@ func (l *sessionLoop) doTick() {
 	simDuration := time.Since(simStart)
 	snapshot := l.sim.PerfSnapshot()
 	counters := l.sim.PerfCounters()
+	nav := l.sim.ActiveNavigationRules()
 	latencies := []time.Duration{}
 	for _, res := range results {
 		for _, ack := range res.Acks {
@@ -50,9 +53,11 @@ func (l *sessionLoop) doTick() {
 	eventSequence := int64(0)
 	persistDuration := time.Duration(0)
 	broadcastDuration := time.Duration(0)
+	simGuardrail := evaluateTickGuardrail(simDuration)
+	deferNonCritical := simGuardrail.OverBudget
 	for _, res := range results {
 		persistStart := time.Now()
-		eventSequence = l.persistTick(res, membersByPlayerID, eventSequence)
+		eventSequence = l.persistTick(res, membersByPlayerID, eventSequence, deferNonCritical)
 		persistDuration += time.Since(persistStart)
 		broadcastStart := time.Now()
 		l.fanoutResult(res, clients, inputTypes, levelsByPlayerID)
@@ -60,14 +65,24 @@ func (l *sessionLoop) doTick() {
 	}
 	totalDuration := time.Since(start)
 	guardrail := evaluateTickGuardrail(totalDuration)
+	combatBudget := game.CombatPhaseBudgetForTick()
 	degradationApplied := false
 	if guardrail.OverBudget {
 		l.mu.Lock()
-		if l.sim != nil && shouldApplyOverloadDegradation(counters) {
+		if l.sim != nil && shouldApplyOverloadDegradation(counters, snapshot, nav) {
 			degradationApplied = l.sim.ApplyOverloadDegradation()
+		}
+		if l.sim != nil {
+			l.sim.SetCombatMovementThrottle(degradationApplied || combatPhaseOverBudget(profiler, combatBudget))
 		}
 		l.mu.Unlock()
 		logTickBudgetWarning(l.log, tick, totalDuration, guardrail, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, degradationApplied)
+	} else {
+		l.mu.Lock()
+		if l.sim != nil {
+			l.sim.SetCombatMovementThrottle(combatPhaseOverBudget(profiler, combatBudget))
+		}
+		l.mu.Unlock()
 	}
 	if l.perfDebug && time.Since(l.lastPerfLog) >= defaultPerfDebugInterval {
 		l.lastPerfLog = time.Now()

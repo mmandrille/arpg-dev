@@ -79,6 +79,7 @@ inventory_capacity_and_paper_doll: fill base 15-capacity bag → reject full pic
 combat_control_and_boss_ai_fixes: equip training bow → fire directional free shot → prove damage, group aggro, and monster movement
 fog_of_war_radius: compact combat-control lab → assert class `light_radius`, hide a far dungeon mob, move into scouting range, then reveal it
 crowded_lightning_perf_probe: crowded vault lab → assert 36 live chase monsters → repeatedly cast `ligthing` under perf debug → prove lightning damage and emit backend path/phase perf rows
+crowded_melee_perf_probe: crowded vault lab → Paladin melee + `charge` channel in 36-monster room → extended perf probe for melee combat pressure (`ARPG_PERF_DEBUG=1 make bot-visual scenario=crowded_melee_perf_probe`)
 dungeon_combat_perf_probe: generated D1 descent on `dungeon_levels` → assert ≥10 live monsters and ≥2 aggro events → cast `ligthing` ≥4 times with lightning damage observed → extended perf sampling (`ARPG_PERF_DEBUG=1 make bot-visual scenario=dungeon_combat_perf_probe`); pre-v347 rendered combat baseline on probe host was median ~53 FPS / floor ~36 FPS
 session_browser_uncapped_coop: host creates listed co-op → two peers join from active list → prove three-player visibility, disconnect/reconnect, and replay
 ui_currency_and_mana_polish: pick up gold instead of reward badges, persist character wallet, and use/reject blue mana potions

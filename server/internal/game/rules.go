@@ -152,6 +152,7 @@ type NavigationRules struct {
 	MonsterMovementLODNearDistance        float64    `json:"monster_movement_lod_near_distance"`
 	MonsterMovementLODUpdateIntervalTicks int        `json:"monster_movement_lod_update_interval_ticks"`
 	MonsterOverloadDegradeTicks           int        `json:"monster_overload_degrade_ticks"`
+	MonsterOverloadLiveMonsterThreshold   int        `json:"monster_overload_live_monster_threshold"`
 }
 
 // CharacterProgressionRules controls XP thresholds, level-up points, base

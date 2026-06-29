@@ -27,6 +27,7 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 		MonsterMovementLODNearDistance        float64    `json:"monster_movement_lod_near_distance"`
 		MonsterMovementLODUpdateIntervalTicks int        `json:"monster_movement_lod_update_interval_ticks"`
 		MonsterOverloadDegradeTicks           int        `json:"monster_overload_degrade_ticks"`
+		MonsterOverloadLiveMonsterThreshold   int        `json:"monster_overload_live_monster_threshold"`
 	}
 	if err := readJSON(filepath.Join(dir, "navigation.v0.json"), &navigation); err != nil {
 		return NavigationRules{}, err
@@ -88,6 +89,9 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 	if navigation.MonsterOverloadDegradeTicks < 0 {
 		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_overload_degrade_ticks: must be non-negative")
 	}
+	if navigation.MonsterOverloadLiveMonsterThreshold <= 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_overload_live_monster_threshold: must be positive")
+	}
 	return NavigationRules{
 		CellSize:                              navigation.CellSize,
 		MaxAutoSteps:                          navigation.MaxAutoSteps,
@@ -108,5 +112,6 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 		MonsterMovementLODNearDistance:        navigation.MonsterMovementLODNearDistance,
 		MonsterMovementLODUpdateIntervalTicks: navigation.MonsterMovementLODUpdateIntervalTicks,
 		MonsterOverloadDegradeTicks:           navigation.MonsterOverloadDegradeTicks,
+		MonsterOverloadLiveMonsterThreshold:   navigation.MonsterOverloadLiveMonsterThreshold,
 	}, nil
 }

@@ -86,6 +86,17 @@ static func shadow_cache() -> Dictionary:
 	return value
 
 
+static func combat_crowd_shader_throttle() -> Dictionary:
+	var value: Dictionary = config().get("combat_crowd_shader_throttle", {})
+	if typeof(value) != TYPE_DICTIONARY:
+		return {
+			"live_monster_threshold": 24,
+			"shader_update_min_interval_frames": 2,
+		}
+
+	return value
+
+
 static func shadow() -> Dictionary:
 	var value: Dictionary = config().get("shadow", {})
 	if typeof(value) != TYPE_DICTIONARY:
@@ -135,6 +146,10 @@ static func _default_config() -> Dictionary:
 			"move_epsilon": 0.006,
 			"viewport_size_epsilon_px": 1.0,
 			"performance_min_rebuild_interval_frames": 3,
+		},
+		"combat_crowd_shader_throttle": {
+			"live_monster_threshold": 24,
+			"shader_update_min_interval_frames": 2,
 		},
 		"organic_edge": {
 			"world_amplitude": 0.65,

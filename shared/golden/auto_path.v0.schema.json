@@ -28,7 +28,8 @@
         "monster_movement_lod_min_live_monsters",
         "monster_movement_lod_near_distance",
         "monster_movement_lod_update_interval_ticks",
-        "monster_overload_degrade_ticks"
+        "monster_overload_degrade_ticks",
+        "monster_overload_live_monster_threshold"
       ],
       "additionalProperties": false,
       "properties": {
@@ -61,7 +62,8 @@
         "monster_movement_lod_min_live_monsters": { "type": "integer", "minimum": 1 },
         "monster_movement_lod_near_distance": { "type": "number", "minimum": 0 },
         "monster_movement_lod_update_interval_ticks": { "type": "integer", "minimum": 1 },
-        "monster_overload_degrade_ticks": { "type": "integer", "minimum": 0 }
+        "monster_overload_degrade_ticks": { "type": "integer", "minimum": 0 },
+        "monster_overload_live_monster_threshold": { "type": "integer", "minimum": 0 }
       }
     },
     "cases": {

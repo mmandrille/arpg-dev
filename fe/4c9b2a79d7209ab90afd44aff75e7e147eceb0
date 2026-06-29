@@ -1,0 +1,40 @@
+client/scripts/main.gd
+  s_d1d00018dddc4e::t_ab6bf4978351df 1745-1746
+  s_d1d00018dddc4e::t_a23ee9bd0aeff8 950-951
+shared/assets/camera_presentations.v0.json
+  s_d1d00018dddc4e::t_3df18080710593 29-30
+  s_d1d00018dddc4e::t_59bd207efaffb7 15-16
+client/scripts/player_camera_controller.gd
+  s_d1d00018dddc4e::t_1cf60ad19d0089 31
+  s_d1d00018dddc4e::t_6bc5fe0b6cda99 58
+  s_d1d00018dddc4e::t_36bf07b32a3f86 68,73-78
+  s_d1d00018dddc4e::t_3b94386028cc5d 251,254-261
+  s_d1d00018dddc4e::t_eb95c0bb2dc0e4 79-80
+shared/assets/camera_presentations.v0.schema.json
+  s_d1d00018dddc4e::t_3526c2daf24a78 38-39
+  s_d1d00018dddc4e::t_79d60f72fe7d83 57-62
+docs/specs/v367_spec-camera-follow-damping.md
+  s_d1d00018dddc4e::t_334772a81c3970 1-29
+docs/as-built/v367_camera-follow-damping.md
+  s_d1d00018dddc4e::t_80695017e320d9 1-14
+client/tests/test_camera_mode_settings.gd
+  s_d1d00018dddc4e::t_80e265f9df2106 26
+  s_d1d00018dddc4e::t_c39510d430624f 186-191
+  s_d1d00018dddc4e::t_9706c8a06a3c12 192-193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "fe4c9b2a79d7209ab90afd44aff75e7e147eceb0",
+  "prompts": {},
+  "sessions": {
+    "s_d1d00018dddc4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6af99e8d-44ff-43ed-99db-33f614d2484e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

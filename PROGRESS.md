@@ -23,7 +23,7 @@ Last updated: 2026-06-28
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v366 — path-cache-effectiveness |
+| **Latest completed slice** | v368 — remote-adaptive-smoothing |
 | **Active branch** | `main` |
 | **CI gate** | `make ci` green (2026-06-28) |
 | **Next slice** | Run `/next` for new work |

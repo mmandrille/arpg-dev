@@ -14,6 +14,10 @@ var _snap_distance := 2.0
 var _projectile_snap_distance := 8.0
 var _loot_snap_distance := 2.0
 var _interactable_snap_distance := 2.0
+var _remote_adaptive_enabled := false
+var _remote_adaptive_min := 0.08
+var _remote_adaptive_max := 0.14
+var _remote_adaptive_distance_per_second := 8.0
 var _config_loaded := false
 
 
@@ -32,6 +36,12 @@ func ensure_config() -> void:
 	_projectile_snap_distance = float(cfg.get("projectile_snap_distance", _snap_distance))
 	_loot_snap_distance = float(cfg.get("loot_snap_distance", _snap_distance))
 	_interactable_snap_distance = float(cfg.get("interactable_snap_distance", _snap_distance))
+	var remote_cfg = cfg.get("remote_adaptive", {})
+	if typeof(remote_cfg) == TYPE_DICTIONARY:
+		_remote_adaptive_enabled = bool(remote_cfg.get("enabled", false))
+		_remote_adaptive_min = float(remote_cfg.get("min_duration_seconds", _remote_adaptive_min))
+		_remote_adaptive_max = float(remote_cfg.get("max_duration_seconds", _remote_adaptive_max))
+		_remote_adaptive_distance_per_second = float(remote_cfg.get("distance_per_second", _remote_adaptive_distance_per_second))
 	if _player_smoothing != null:
 		_player_smoothing.configure(_duration, _snap_distance)
 
@@ -121,7 +131,7 @@ func apply_interactable_authoritative(rec: Dictionary, node: Node3D, target: Vec
 	return smoothing.last_segment_distance()
 
 
-func apply_entity_authoritative(rec: Dictionary, node: Node3D, target: Vector3, is_new: bool) -> float:
+func apply_entity_authoritative(rec: Dictionary, node: Node3D, target: Vector3, is_new: bool, remote_adaptive: bool = false) -> float:
 	if node == null:
 		return 0.0
 	ensure_config()
@@ -131,7 +141,15 @@ func apply_entity_authoritative(rec: Dictionary, node: Node3D, target: Vector3, 
 		node.position = target
 		return 0.0
 	var prev := node.position
-	smoothing.begin_segment(target, prev)
+	var duration_override := -1.0
+	if remote_adaptive and _remote_adaptive_enabled:
+		var flat_delta := Vector2(target.x - prev.x, target.z - prev.z).length()
+		duration_override = clampf(
+			flat_delta / maxf(_remote_adaptive_distance_per_second, 0.001),
+			_remote_adaptive_min,
+			_remote_adaptive_max,
+		)
+	smoothing.begin_segment(target, prev, duration_override)
 	if not smoothing.is_active():
 		node.position = target
 		return smoothing.last_segment_distance()

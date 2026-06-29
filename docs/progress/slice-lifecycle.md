@@ -378,6 +378,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v364** | `monster-lod-retune` | Complete (focused checks green) | [`spec`](../specs/v364_spec-monster-lod-retune.md) | [`plan`](../plans/v364_2026-06-28-monster-lod-retune.md) | [`as-built`](../as-built/v364_monster-lod-retune.md) |
 | **v365** | `path-budget-retune` | Complete (focused checks green) | [`spec`](../specs/v365_spec-path-budget-retune.md) | [`plan`](../plans/v365_2026-06-28-path-budget-retune.md) | [`as-built`](../as-built/v365_path-budget-retune.md) |
 | **v366** | `path-cache-effectiveness` | Complete (focused checks green) | [`spec`](../specs/v366_spec-path-cache-effectiveness.md) | [`plan`](../plans/v366_2026-06-28-path-cache-effectiveness.md) | [`as-built`](../as-built/v366_path-cache-effectiveness.md) |
+| **v367** | `camera-follow-damping` | Complete (focused checks green) | [`spec`](../specs/v367_spec-camera-follow-damping.md) | — | [`as-built`](../as-built/v367_camera-follow-damping.md) |
+| **v368** | `remote-adaptive-smoothing` | Complete (focused checks green) | [`spec`](../specs/v368_spec-remote-adaptive-smoothing.md) | — | [`as-built`](../as-built/v368_remote-adaptive-smoothing.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

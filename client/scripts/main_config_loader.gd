@@ -23,13 +23,13 @@ static func ensure_loaded() -> void:
 		client_perf = root.get("client_perf", {})
 
 
-static func presentation_lod() -> Dictionary:
+static func presentation_lod_rules() -> Dictionary:
 	ensure_loaded()
 	return presentation_lod
 
 
 static func presentation_lod_distance_threshold() -> float:
-	return float(presentation_lod().get("distance_threshold", 14.0))
+	return float(presentation_lod_rules().get("distance_threshold", 14.0))
 
 
 static func loot_label_rules() -> Dictionary:

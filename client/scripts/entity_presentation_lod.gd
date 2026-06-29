@@ -7,7 +7,7 @@ static var _lod_state: Dictionary = {}
 
 
 static func should_apply(live_monster_count: int) -> bool:
-	var cfg := MainConfigLoaderScript.presentation_lod()
+	var cfg := MainConfigLoaderScript.presentation_lod_rules()
 	return live_monster_count >= int(cfg.get("min_live_monsters", 24))
 
 

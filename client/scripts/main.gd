@@ -386,6 +386,11 @@ func _ready() -> void:
 	var requested_character_id := BotDebugProgressionSetupScript.prepare_character(client, _env("ARPG_DEBUG_TOKEN", "local-debug-token"), _env("ARPG_BOT_DEBUG_PROGRESSION", "") if bot_client_run else "", _env("ARPG_BOT_DEBUG_GOLD", "") if bot_client_run else "")
 	if requested_world_id == "" and not bot_client_run:
 		requested_world_id = "dungeon_levels"
+	var join_session_id := _env("ARPG_JOIN_SESSION_ID", "")
+	if join_session_id != "":
+		if not _start_join_session(join_session_id, requested_character_id):
+			return
+		return
 	if bot_client_run or resume_session_id != "" or _truthy_env("ARPG_AUTOSTART"):
 		if not _start_automation_session(resume_session_id, requested_world_id, requested_seed, bot_client_run, requested_character_id):
 			return
@@ -421,6 +426,25 @@ func _start_automation_session(resume_session_id: String, requested_world_id: St
 	_begin_gameplay_connection(_truthy_env("ARPG_AUTOPLAY"))
 	if bot_client_run:
 		print("[bot-client] ws connect requested session=%s" % client.session_id)
+	return true
+func _start_join_session(join_session_id: String, character_id: String) -> bool:
+	var char_id := character_id
+	if char_id == "":
+		# prepare_character returns "" when no debug progression is requested.
+		# For the benchmark observer, find or create a plain character.
+		var chars := client.list_characters()
+		if chars.size() > 0 and typeof(chars[0]) == TYPE_DICTIONARY:
+			char_id = str((chars[0] as Dictionary).get("character_id", ""))
+		if char_id == "":
+			var created := client.create_character("Benchmark Observer")
+			char_id = str(created.get("character_id", ""))
+	if char_id == "":
+		_debug("benchmark join failed: could not get or create a character")
+		return false
+	if not client.join_listed_session(join_session_id, char_id):
+		_debug("benchmark join failed for session=%s" % join_session_id)
+		return false
+	_begin_gameplay_connection(false)
 	return true
 func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
@@ -1840,7 +1864,11 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		var interactable_node := rec["node"] as Node3D
 		_entity_tick_smoothing.apply_interactable_authoritative(rec, interactable_node, server_pos, is_new)
 	else:
-		var node := rec["node"] as Node3D
+		var raw_node = rec.get("node", null)
+		if not is_instance_valid(raw_node):
+			_record_upsert_timing(upsert_start, entity_type)
+			return
+		var node := raw_node as Node3D
 		var segment_distance := 0.0
 		if not (rec["type"] == "player" and _mobility_presentation.is_active(id)):
 			var use_adaptive: bool = id != player_id and str(rec["type"]) in ["player", "monster", "companion"]
@@ -1941,7 +1969,9 @@ func _clear_elite_command_for_pack_if_leader_died(dead_rec: Dictionary) -> void:
 
 func _clear_level_entities() -> void:
 	for id in entities.keys():
-		(entities[id]["node"] as Node3D).queue_free()
+		var node_ref = entities[id].get("node", null)
+		if is_instance_valid(node_ref):
+			(node_ref as Node3D).queue_free()
 	entities.clear()
 	for id in monster_health_bars.keys():
 		var bar = monster_health_bars[id]

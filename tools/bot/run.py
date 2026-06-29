@@ -3285,6 +3285,9 @@ def run_verified_session(
     assertions: list[Any],
     seed: str = "",
     debug_progression: dict[str, Any] | None = None,
+    session_id_file: Path | None = None,
+    listed_coop: bool = False,
+    skip_replay: bool = False,
 ) -> tuple[dict[str, Any], RuntimeState]:
     active_debug_progression = scenario.debug_progression if debug_progression is None else debug_progression
     character_id = ""
@@ -3293,7 +3296,12 @@ def run_verified_session(
         character_id = ensure_character(client, token, character_name, scenario.character_class)
     if active_debug_progression:
         seed_debug_progression(client, token, debug_token, character_id, active_debug_progression)
-    sess = create_session(client, token, world_id, seed, character_id)
+    if listed_coop and character_id:
+        sess = create_listed_coop_session(client, token, world_id, character_id, seed)
+    else:
+        sess = create_session(client, token, world_id, seed, character_id)
+    if session_id_file is not None:
+        session_id_file.write_text(sess["session_id"])
     session_id = sess["session_id"]
     log("session created", session_id, f"seed={sess.get('seed')}")
 
@@ -3349,11 +3357,14 @@ def run_verified_session(
     asyncio.run(check_persistence(base_url, token, session_id, observed.item_id, assertions))
     log("phase reconnect done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 
-    phase_started = time.monotonic()
-    replay = fetch_replay(client, token, debug_token, session_id)
-    if not replay.get("match", False):
-        raise AssertionError(f"replay mismatch for {session_id}: {replay.get('mismatch')}")
-    log("phase replay done", f"elapsed={time.monotonic() - phase_started:.2f}s", session_id)
+    if not skip_replay:
+        phase_started = time.monotonic()
+        replay = fetch_replay(client, token, debug_token, session_id)
+        if not replay.get("match", False):
+            raise AssertionError(f"replay mismatch for {session_id}: {replay.get('mismatch')}")
+        log("phase replay done", f"elapsed={time.monotonic() - phase_started:.2f}s", session_id)
+    else:
+        log("phase replay skipped (--skip-replay)", session_id)
     return sess, observed
 
 
@@ -4090,8 +4101,13 @@ def main() -> int:
     parser.add_argument("--scenario", default="all", help="scenario id, ci pack, comma-separated ids, or all")
     parser.add_argument("--list-scenarios", action="store_true")
     parser.add_argument("--write-manifest", type=Path)
+    parser.add_argument("--write-session-id", type=Path, metavar="FILE",
+        help="Write session ID to FILE immediately after creation; enables listed-coop mode for use with concurrent Godot benchmark client")
     parser.add_argument("--print-session-id", action="store_true")
     parser.add_argument("--cleanup-characters", action="store_true")
+    parser.add_argument("--skip-replay", action="store_true",
+        help="Skip the deterministic replay check after driving the scenario. "
+             "Use for benchmark scenarios where replay determinism is not the goal.")
     args = parser.parse_args()
 
     scenarios = load_scenarios()
@@ -4181,6 +4197,9 @@ def main() -> int:
                         client=client, base_url=args.base_url, token=token, debug_token=args.debug_token,
                         scenario=scenario, world_id=scenario.world_id, steps=scenario.steps,
                         assertions=scenario.assertions, seed=scenario.seed,
+                        session_id_file=args.write_session_id,
+                        listed_coop=args.write_session_id is not None,
+                        skip_replay=args.skip_replay,
                     )
                 session_id = sess["session_id"]
                 last_session_id = session_id

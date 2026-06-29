@@ -16,11 +16,43 @@ new metrics, probes, or debug hooks.
 | Goal | Command |
 |------|---------|
 | Interactive play with perf logs (tee to file) | `make play-debug` → `/tmp/arpg-perf.log` |
+| **Analyze a real play session** | `make perf-analyze LOG=/tmp/arpg-perf.log` |
 | Same, explicit env | `ARPG_PERF_DEBUG=1 make play` |
 | Protocol bot + backend perf | `ARPG_PERF_DEBUG=1 make bot scenario=<id>` |
 | Godot replay + perf | `ARPG_PERF_DEBUG=1 HEADLESS=1 make bot-visual scenario=<id>` |
 | In-game overlay (no log parsing) | Settings → **Performance status** (client panel) |
 | **Full benchmark suite + report** | `make benchmark` |
+
+### How `make benchmark` works — live concurrent session
+
+The benchmark runs the **protocol bot and Godot client simultaneously on the same live session**:
+
+1. Server starts with `ARPG_PERF_DEBUG=1`.
+2. For each benchmark scenario, the bot creates a listed co-op session and writes the session ID to a temp file.
+3. Three seconds later, Godot launches and joins the same session as a second player (`ARPG_JOIN_SESSION_ID`).
+4. The bot drives the scenario (combat, spells, movement). Godot renders what it sees in real-time.
+5. When the bot finishes, Godot is closed. The server log and Godot's stdout are combined into the report.
+
+This captures real `[client-perf]` FPS under actual server load — not a replay. The CLIENT section of
+the report shows what a second player sees while the first player (bot) is actively fighting.
+
+**To measure your own play session:** use `make play-debug`, reproduce the slow scenario for 2–3 minutes,
+then `make perf-analyze LOG=/tmp/arpg-perf.log`.
+
+### What to look for in real play logs
+
+The `perf-analyze` report CLIENT section calls out the metrics that explain low FPS:
+
+| Metric | What it means when high |
+|--------|------------------------|
+| `p5 fps` | Worst-tail FPS — the "20 fps" you're feeling |
+| `fog ms` | Fog-of-war shader update cost; grows with dungeon area revealed |
+| `d_upsert_player` | Local player state upsert; spikes when inventory/quest/reconciliation triggers |
+| `d_chg` | Full entity change loop; grows with entity count in delta |
+| `draw_calls` | Scene complexity; high in dense dungeons with many wall segments |
+| `d_recon` | Player reconciliation backpressure; high when input lags behind server |
+
+Correlate spikes: when `p5 fps` drops, check which phase is highest on the same sample line.
 
 **Master switch:** `ARPG_PERF_DEBUG=1` (or `true` / `yes` / `on`). Wired through `scripts/play.sh`,
 `scripts/bot_local.sh`, `scripts/bot_visual.sh`, and `scripts/benchmark.sh` to **both** Go server
@@ -227,14 +259,16 @@ nodes visited), entity load (monsters moved, changes, events, clients).
 
 | Scenario ID | File | Focus |
 |-------------|------|-------|
-| `sorcerer_multigroup_perf_probe` | `tools/bot/scenarios/105_sorcerer_multigroup_perf_probe.json` | 5-skill sorcerer: flee/chase cycle, teleport escape, multi-group pathfind, projectile fanout |
-| `paladin_charge_loop_perf_probe` | `tools/bot/scenarios/106_paladin_charge_loop_perf_probe.json` | Paladin Holy Shield + 10 charge passes through 36 chasers: push/stun fanout, monster re-pathfind after knockback, sustained melee combat phase |
+| `sorcerer_multigroup_perf_probe` | `tools/bot/scenarios/105_sorcerer_multigroup_perf_probe.json` | Sorcerer vs 18 dungeon_mob + 12 dungeon_undead + 6 dungeon_wolf (real 3D models, ~360k primitives); flee/chase, 3-skill rotation — **coop+Godot observer** |
+| `paladin_charge_loop_perf_probe` | `tools/bot/scenarios/106_paladin_charge_loop_perf_probe.json` | Paladin Holy Shield + 10 charge passes through same 36 real-model enemies (~398k primitives): push/stun fanout, quadruped/skeleton mix — **coop+Godot observer** |
+| `sorcerer_dungeon_perf_probe` | `tools/bot/scenarios/107_sorcerer_dungeon_perf_probe.json` | Sorcerer in a generated D1 dungeon: approach packs, rotate 3 skills for 40s — server-side only (`benchmark_solo_session: true`; dungeon world requires solo session) |
 
 **Adding a benchmark scenario**
 
-1. Set `"ci_tier": "benchmark"` in the JSON — the scenario is automatically discovered by `make benchmark` and the report generator. No other registration needed.
-2. Prefer the `crowded_lightning_perf_probe` world or another compact lab world with pinned seed.
-3. Add a row to the table above and [Changelog](#changelog).
+1. Set `"ci_tier": "benchmark"` in the JSON — automatically discovered by `make benchmark`. No other registration needed.
+2. Prefer a compact lab world with pinned seed for coop+Godot scenarios (e.g. `crowded_lightning_perf_probe`).
+3. For multi-level dungeon worlds (`dungeon_depth_one_lab` etc.): also set `"benchmark_solo_session": true`. This runs the bot in solo mode (correct dungeon spawning) and skips the Godot observer; only server-side metrics are captured.
+4. Add a row to the table above and [Changelog](#changelog).
 
 **Adding an extended perf probe**
 

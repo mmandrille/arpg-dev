@@ -170,7 +170,10 @@ func tick_entities(entities: Dictionary, delta: float) -> void:
 	for rec in entities.values():
 		if typeof(rec) != TYPE_DICTIONARY:
 			continue
-		var node := rec.get("node", null) as Node3D
+		var raw_node = rec.get("node", null)
+		if not is_instance_valid(raw_node):
+			continue
+		var node := raw_node as Node3D
 		var smoothing := rec.get("tick_smoothing", null) as EntityTickSmoothing
 		if node == null or smoothing == null:
 			continue

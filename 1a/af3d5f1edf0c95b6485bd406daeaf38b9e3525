@@ -1,0 +1,62 @@
+docs/performance/tools.md
+  s_2fef7f2ffd79bc::t_71f4bab8e42c5c 1-22,24-25,28-165,173-184,193-201,209,238,240,244-268,272-295
+  s_b22b4b1498eed5::t_30a75812f7b2be 186-192,202-208,210-230,232-237,239,241-243
+  s_b22b4b1498eed5::t_f3e99866c250f9 231
+  s_b22b4b1498eed5::t_96a9fd3f597874 269
+  s_b22b4b1498eed5::t_ea0c084fd22963 270-271
+  s_b22b4b1498eed5::t_2b153628f3e41e 166-172
+  s_b22b4b1498eed5::t_7877bfe7d86009 23,26-27
+tools/bot/benchmark_report.py
+  s_b22b4b1498eed5::t_7fd135ec0678cb 177
+  s_b22b4b1498eed5::t_9912184ef2715c 1-76,78-79,81-176,178-274
+  s_b22b4b1498eed5::t_2dbdb083be1112 77,80
+tools/bot/run.py
+  s_b22b4b1498eed5::t_8ea81260bacbf7 136
+  s_b22b4b1498eed5::t_4c6c2f91228e66 151-155
+  s_b22b4b1498eed5::t_6c383d8af9ee7a 3314
+  s_b22b4b1498eed5::t_7455e4c2100521 150
+make/ci.mk
+  s_b22b4b1498eed5::t_16f1426441d7d3 16-18
+  s_b22b4b1498eed5::t_45a0131be4473f 1-2
+tools/bot/scenarios/105_sorcerer_multigroup_perf_probe.json
+  s_b22b4b1498eed5::t_d47ad633e93126 3
+  s_b22b4b1498eed5::t_ddd24e1ea96827 241
+  s_b22b4b1498eed5::t_6f9fd07d59a521 1-2,4-18,20-240,242-329
+  s_b22b4b1498eed5::t_c7b89b2e69e81e 19
+tools/bot/bot_types.py
+  s_b22b4b1498eed5::t_03d15bcfe50d2a 29
+tools/bot/scenarios/106_paladin_charge_loop_perf_probe.json
+  s_b22b4b1498eed5::t_104eaaed9da021 1-7,9-58,104,106-110,112-114,116-120,122-124,126-130,132-134,136-140,142-144,146-150,152-225
+  s_b22b4b1498eed5::t_c02f4aa742074e 8,59-103,105,111,115,121,125,131,135,141,145,151
+tools/bot/ci_pack.py
+  s_b22b4b1498eed5::t_1f633644165bba 103,108
+  s_b22b4b1498eed5::t_4e4323fd10d087 14
+scripts/benchmark.sh
+  s_b22b4b1498eed5::t_0739030fa49c11 129
+  s_b22b4b1498eed5::t_7637e0023a5201 1,3,14-22,25-34,36,38-43,45-46,56-62,65-122,126-127,157-172,174
+  s_b22b4b1498eed5::t_9998b8d5b388af 2,4-13,23-24,35,37,44,47-55,63-64,123-125,128,130-156,173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1aaf3d5f1edf0c95b6485bd406daeaf38b9e3525",
+  "prompts": {},
+  "sessions": {
+    "s_2fef7f2ffd79bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8c05f4eb-876b-424e-8b79-ac8a4edf0fd0",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_b22b4b1498eed5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2cc69a7d-d278-4ca3-a79d-367349aba9b6",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": null
+    }
+  }
+}

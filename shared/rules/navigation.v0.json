@@ -18,7 +18,7 @@
   "monster_path_nodes_per_tick": 500,
   "monster_path_cache_ticks": 12,
   "monster_repath_throttle_ticks": 8,
-  "monster_repath_stagger_ticks": 6,
+  "monster_repath_stagger_ticks": 4,
   "monster_overload_live_monster_threshold": 28,
   "monster_path_cache_goal_tolerance": 1.0,
   "monster_movement_lod_min_live_monsters": 20,

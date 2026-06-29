@@ -99,7 +99,8 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 91_ranged_threats_hit_companions.json	ranged_threats_hit_companions	protocol	extended	contract	0	0		
 91_unique_non_damage_skill_modifier.json	unique_non_damage_skill_modifier	protocol	extended	setup-eliminable	1	1		
 92_fog_of_war_radius.json	fog_of_war_radius	protocol	pack	contract	1	1		
-93_crowded_lightning_perf_probe.json	crowded_lightning_perf_probe	protocol	extended	contract	0	0		
+93_crowded_lightning_perf_probe.json	crowded_lightning_perf_probe	protocol	extended	contract	0	0
+104_crowded_melee_perf_probe.json	crowded_melee_perf_probe	protocol	extended	contract	0	0		
 94_archer_retreat_ai.json	archer_retreat_ai	protocol	pack	contract	0	0		
 94_player_path_budget_lab.json	player_path_budget_lab	protocol	extended	contract	0	0		
 95_second_boss_template.json	second_boss_template	protocol	extended	contract	0	0		

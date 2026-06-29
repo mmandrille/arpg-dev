@@ -3,9 +3,10 @@
 client/scripts/bot_assertion_handlers.gd	623	# v357: intent-reject assertions extracted to bot_intent_reject_assertions.gd
 client/scripts/bot_controller.gd	757
 client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait filters consolidated into flag loop
+client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	642
 client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	6260	# v357: town night fog wiring + intent reject reason for locked gate (extraction deferred; tightly coupled to _handle_intent_rejected)
+client/scripts/main.gd	6361	# v384: combat exploration perf batch (delta coalesce, recon backpressure, LOD caps); coordinator extraction deferred
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010
@@ -19,7 +20,7 @@ server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: inter
 server/internal/game/rules.go	3049	# $refactor v334: extracted dungeon_generation_rules.go type cluster
 server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6537	# v356 player-navigation-guardrails: approach helpers extracted to approach.go
+server/internal/game/sim.go	6563	# v381: tick collision cache fields + playerDynamicBlocked nil guard
 server/internal/game/types.go	665
 server/internal/http/auth_session_test.go	1501
 server/internal/http/ws_test.go	1482
@@ -31,5 +32,5 @@ server/internal/store/repos.go	2315
 server/internal/store/store_test.go	1645
 skills/showme/scripts/visual_capture.gd	1016
 tools/bot/run.py	4237	# v334 CI fix: use_stair/discover_teleporter move_to_position, walk_to_monster pathfind default
-tools/bot/test_protocol.py	1400
+tools/bot/test_protocol.py	1434
 tools/validate_shared.py	3038	# $refactor v334: extracted validate_fog_presentation.py

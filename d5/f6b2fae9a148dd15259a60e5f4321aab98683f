@@ -1,0 +1,36 @@
+shared/golden/auto_path.json
+  s_d1d00018dddc4e::t_7aae1cd38d18d5 18-20
+server/internal/game/monster_navigation_budget_test.go
+  s_d1d00018dddc4e::t_a7c63da88950e8 46-60,62-65
+  s_d1d00018dddc4e::t_7c4b6bfa67efcb 61
+docs/progress/slice-lifecycle.md
+  s_d1d00018dddc4e::t_b7300bbe01ee97 379
+shared/golden/monster_chase.json
+  s_d1d00018dddc4e::t_ca8a9d38b9bfb6 20-22
+docs/specs/v365_spec-path-budget-retune.md
+  s_d1d00018dddc4e::t_60026fec70f8c5 1-32
+docs/plans/v365_2026-06-28-path-budget-retune.md
+  s_d1d00018dddc4e::t_580b4a457b93f1 1-17
+docs/as-built/v365_path-budget-retune.md
+  s_d1d00018dddc4e::t_7143f0cea90e26 1-17
+PROGRESS.md
+  s_d1d00018dddc4e::t_aca7fed0bbeba0 26
+shared/rules/navigation.v0.json
+  s_d1d00018dddc4e::t_75c4872ad189a9 16-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "d5f6b2fae9a148dd15259a60e5f4321aab98683f",
+  "prompts": {},
+  "sessions": {
+    "s_d1d00018dddc4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6af99e8d-44ff-43ed-99db-33f614d2484e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

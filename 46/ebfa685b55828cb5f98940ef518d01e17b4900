@@ -1,0 +1,26 @@
+shared/golden/auto_path.json
+  s_32b5cd0861b9bc::t_fda429be367972 18
+client/scripts/main.gd
+  s_32b5cd0861b9bc::t_d4a040a15940a2 1590-1592
+  s_32b5cd0861b9bc::t_a722aac7dff514 5
+shared/golden/monster_chase.json
+  s_32b5cd0861b9bc::t_b66eddcaac235c 20
+shared/rules/navigation.v0.json
+  s_32b5cd0861b9bc::t_c0d30131ddbb2d 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "46ebfa685b55828cb5f98940ef518d01e17b4900",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

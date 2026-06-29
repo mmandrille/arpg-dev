@@ -1,0 +1,34 @@
+server/internal/game/sim.go
+  s_32b5cd0861b9bc::t_abb08fa6f2cb9e 2863-2867,2869-2872
+shared/rules/navigation.v0.json
+  s_32b5cd0861b9bc::t_3521d6e70bd95c 21
+shared/golden/monster_chase.json
+  s_32b5cd0861b9bc::t_697bc84aeb16bf 25
+PROGRESS.md
+  s_32b5cd0861b9bc::t_1578b291e3016c 28
+shared/golden/auto_path.json
+  s_32b5cd0861b9bc::t_20e764e0679ea0 23
+.maintainability/file-size-baseline.tsv
+  s_32b5cd0861b9bc::t_1de62868bd2fc9 6
+  s_32b5cd0861b9bc::t_dc61ba865e69ff 23
+  s_32b5cd0861b9bc::t_d6953e2a762218 35
+  s_32b5cd0861b9bc::t_f9a68edf509498 9
+docs/progress/scenario-movement-audit.tsv
+  s_32b5cd0861b9bc::t_1d1776f23bc9b7 102-103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "b46e5c6833fd7744403dc346f634c0f8c113d5d3",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

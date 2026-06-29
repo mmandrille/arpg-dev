@@ -106,6 +106,59 @@
         "stats": { "all_skills": 1, "skill_damage_percent": 15, "magic_find_percent": 20 }
       },
       "status": "ready"
+    },
+    "wayfarers_accord": {
+      "id": "wayfarers_accord",
+      "enabled": true,
+      "display_name": "Wayfarer's Accord",
+      "rarity": "set",
+      "items": [
+        {
+          "id": "wayfarers_accord_hood",
+          "base_template_id": "cave_helm",
+          "display_name": "Wayfarer's Accord Hood",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 4, "vit": 1, "max_hp": 3 }
+        },
+        {
+          "id": "wayfarers_accord_robes",
+          "base_template_id": "cave_mail",
+          "display_name": "Wayfarer's Accord Robes",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 7, "magic": 1, "max_mana": 4 }
+        },
+        {
+          "id": "wayfarers_accord_bindings",
+          "base_template_id": "cave_gloves",
+          "display_name": "Wayfarer's Accord Bindings",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 3, "dex": 1, "attack_speed_percent": 5 }
+        },
+        {
+          "id": "wayfarers_accord_treads",
+          "base_template_id": "cave_boots",
+          "display_name": "Wayfarer's Accord Treads",
+          "minimum_level": 5,
+          "fixed_stats": { "armor": 3, "str": 1, "max_hp": 4 }
+        },
+        {
+          "id": "wayfarers_accord_pendant",
+          "base_template_id": "cave_amulet",
+          "display_name": "Wayfarer's Accord Pendant",
+          "minimum_level": 5,
+          "fixed_stats": { "max_mana": 5, "magic": 1, "max_hp": 3 }
+        }
+      ],
+      "piece_bonuses": [
+        { "required_pieces": 2, "stats": { "str": 1, "dex": 1, "vit": 1, "magic": 1 } },
+        { "required_pieces": 3, "stats": { "max_hp": 10, "max_mana": 8 } },
+        { "required_pieces": 4, "stats": { "skill_damage_percent": 10 } }
+      ],
+      "full_set_bonus": {
+        "required_pieces": 5,
+        "stats": { "all_skills": 1, "skill_cooldown_reduction_percent": 5, "health_regen_per_10_seconds": 5 }
+      },
+      "status": "ready"
     }
   }
 }

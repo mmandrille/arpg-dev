@@ -1,0 +1,42 @@
+{
+  "id": "wayfarers_accord_set",
+  "ci_tier": "extended",
+  "world_id": "vendor_lab",
+  "seed": "wayfarers_accord_set_seed",
+  "title": "Wayfarer's Accord set",
+  "description": "Open the purple town unique chest and prove the class-agnostic Wayfarer's Accord set can be taken into inventory.",
+  "steps": [
+    {
+      "action": "action_entity",
+      "interactable_def_id": "town_unique_chest",
+      "event_type": "unique_chest_opened",
+      "timeout_s": 10
+    },
+    {
+      "action": "take_unique_chest_item",
+      "interactable_def_id": "town_unique_chest",
+      "display_name": "Wayfarer's Accord Pendant"
+    },
+    {
+      "action": "assert_inventory_count",
+      "display_name": "Wayfarer's Accord Pendant",
+      "equals": 1
+    }
+  ],
+  "assertions": [
+    {
+      "type": "event_seen",
+      "event_type": "unique_chest_opened"
+    },
+    {
+      "type": "event_seen",
+      "event_type": "unique_chest_item_taken"
+    },
+    {
+      "type": "inventory_count",
+      "display_name": "Wayfarer's Accord Pendant",
+      "equals": 1
+    }
+  ],
+  "fresh_session_checks": []
+}

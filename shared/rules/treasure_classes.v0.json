@@ -265,7 +265,12 @@
             { "set_item_id": "stormrunner_covenant_mask", "weight": 1 },
             { "set_item_id": "stormrunner_covenant_grips", "weight": 1 },
             { "set_item_id": "stormrunner_covenant_treads", "weight": 1 },
-            { "set_item_id": "stormrunner_covenant_loop", "weight": 1 }
+            { "set_item_id": "stormrunner_covenant_loop", "weight": 1 },
+            { "set_item_id": "wayfarers_accord_hood", "weight": 1 },
+            { "set_item_id": "wayfarers_accord_robes", "weight": 1 },
+            { "set_item_id": "wayfarers_accord_bindings", "weight": 1 },
+            { "set_item_id": "wayfarers_accord_treads", "weight": 1 },
+            { "set_item_id": "wayfarers_accord_pendant", "weight": 1 }
           ]
         },
         {

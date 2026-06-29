@@ -24,11 +24,25 @@ func evaluateTickGuardrail(total time.Duration) tickGuardrailDecision {
 	return tickGuardrailDecision{OverBudget: true, Budget: budget, Overrun: overrun}
 }
 
-func shouldApplyOverloadDegradation(counters game.PerfCounters) bool {
+func shouldApplyOverloadDegradation(counters game.PerfCounters, snapshot game.PerfSnapshot, nav game.NavigationRules) bool {
+	if counters.PathNodesVisited >= nav.MonsterPathNodesPerTick {
+		return true
+	}
+	if snapshot.LiveMonsters >= nav.MonsterOverloadLiveMonsterThreshold && counters.PathRequests > 0 {
+		return true
+	}
+
 	return counters.PathRequests > 0 ||
 		counters.PathCacheHits > 0 ||
 		counters.PathNodesVisited > 0 ||
 		counters.MonstersMoved > 0
+}
+
+func combatPhaseOverBudget(profiler *backendTickProfiler, budget time.Duration) bool {
+	if profiler == nil {
+		return false
+	}
+	return profiler.phaseDuration(game.TickPhaseCombat) > budget
 }
 
 func logTickBudgetWarning(log *slog.Logger, tick uint64, total time.Duration, decision tickGuardrailDecision, simDuration, persistDuration, broadcastDuration time.Duration, inputs int, results []game.TickResult, clients int, snapshot game.PerfSnapshot, counters game.PerfCounters, degradationApplied bool) {

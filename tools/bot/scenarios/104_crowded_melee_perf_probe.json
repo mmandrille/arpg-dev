@@ -1,0 +1,116 @@
+{
+  "id": "crowded_melee_perf_probe",
+  "ci_tier": "extended",
+  "world_id": "crowded_lightning_perf_probe",
+  "seed": "crowded_melee_perf_probe_seed",
+  "character_class": "paladin",
+  "title": "Crowded Melee Perf Probe",
+  "description": "Crowded vault lab with 36 chase monsters; Paladin melee attacks and Charge channeling under perf debug.",
+  "max_elapsed_s": 30.0,
+  "debug_progression": {
+    "level": 12,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 20,
+      "dex": 8,
+      "vit": 40,
+      "magic": 3
+    },
+    "skill_ranks": {
+      "charge": 1,
+      "heal": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 30
+    },
+    {
+      "action": "channel_skill_path",
+      "skill_id": "charge",
+      "segments": [
+        { "direction": { "x": 1, "y": 0 }, "ticks": 6 }
+      ]
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 15
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "crowded_probe_chaser",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "crowded_probe_chaser"
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "crowded_probe_chaser",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "crowded_probe_chaser"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "crowded_probe_chaser",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "target_monster_def_id": "crowded_probe_chaser"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "monster",
+        "monster_def_id": "crowded_probe_chaser",
+        "alive": true,
+        "at_least": 25
+      },
+      "timeout_s": 3
+    }
+  ],
+  "assertions": [
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 25
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_channel_started",
+      "skill_id": "charge",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_channel_ended",
+      "skill_id": "charge"
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_damaged",
+      "weapon_slot": "main_hand",
+      "min": 3
+    }
+  ],
+  "visual": {
+    "camera": {
+      "x": 16,
+      "y": 8,
+      "zoom": 0.9
+    },
+    "post_complete_hold_s": 3.0
+  }
+}

@@ -90,6 +90,8 @@ const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loa
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
 const MonsterMeleeWindupMarkerScript := preload("res://scripts/monster_melee_windup_marker.gd")
+const EntityPresentationLodScript := preload("res://scripts/entity_presentation_lod.gd")
+const ProjectilePresentationCapScript := preload("res://scripts/projectile_presentation_cap.gd")
 const PlayerCameraContextScript := preload("res://scripts/player_camera_context.gd")
 const PlayerCameraControllerScript := preload("res://scripts/player_camera_controller.gd")
 const PerspectiveCombatInputScript := preload("res://scripts/perspective_combat_input.gd")
@@ -288,6 +290,7 @@ var _movement_input: MovementInputPresenter = MovementInputPresenterScript.new()
 var _last_facing_direction := Vector2(1.0, 0.0)
 var _level_label: Label
 var last_performance_status: Dictionary = {}
+var _pending_delta_payloads: Array = []
 var _last_ping_ms: int = -1
 var _last_intent_reject_reason: String = ""
 var _camera: Camera3D  # convenience alias — always equal to _camera_controller.get_gameplay_camera()
@@ -936,6 +939,7 @@ func _process(delta: float) -> void:
 		ready_sent = true
 
 	if gameplay_active or visual_replay_enabled:
+		_flush_pending_deltas()
 		var net_start := Time.get_ticks_usec()
 		for env in client.poll():
 			_handle_message(env)
@@ -971,6 +975,13 @@ func _process(delta: float) -> void:
 	if not _user_input_blocked():
 		_update_facing_toward_mouse()
 	_refresh_monster_health_bar_visibility()
+	if gameplay_active and monster_ids.size() > 0:
+		var hero_pos := player_anchor.global_position if player_anchor != null else Vector3.ZERO
+		EntityPresentationLodScript.refresh_monsters(entities, monster_ids, hero_pos)
+		ProjectilePresentationCapScript.apply(entities, hero_pos)
+		if fog_overlay != null:
+			var live_monsters := int(last_performance_status.get("live_monsters", monster_ids.size()))
+			fog_overlay.set_live_monster_count(live_monsters)
 	_update_debug()
 	_perf_debug_sampler.sample(delta, state, last_server_tick, reconciliation_delta, entities, monster_ids)
 
@@ -983,7 +994,7 @@ func _handle_message(env: Dictionary) -> void:
 		"session_snapshot":
 			_apply_snapshot(payload)
 		"state_delta":
-			_apply_delta(payload)
+			_pending_delta_payloads.append(payload.duplicate(true))
 		"intent_accepted":
 			var accepted_message_id := str(payload.get("accepted_message_id", ""))
 			_record_ping(accepted_message_id)
@@ -999,6 +1010,26 @@ func _handle_message(env: Dictionary) -> void:
 			_debug("error: %s" % payload.get("message", "?"))
 		_:
 			push_warning("_handle_message: unknown server message type '%s'" % env.get("type", ""))
+
+func _flush_pending_deltas() -> void:
+	if _pending_delta_payloads.is_empty():
+		return
+	var merged_events: Array = []
+	var merged_changes: Array = []
+	var merged_perf: Dictionary = {}
+	for payload in _pending_delta_payloads:
+		if payload is Dictionary:
+			var p: Dictionary = payload
+			merged_events.append_array(p.get("events", []))
+			merged_changes.append_array(p.get("changes", []))
+			if p.has("performance") and p.get("performance") is Dictionary:
+				merged_perf = (p.get("performance") as Dictionary).duplicate(true)
+	_apply_delta({
+		"events": merged_events,
+		"changes": merged_changes,
+		"performance": merged_perf,
+	})
+	_pending_delta_payloads.clear()
 
 func _envelope_payload(env: Dictionary) -> Dictionary:
 	var payload = env.get("payload", {})
@@ -1049,6 +1080,9 @@ func _handle_intent_rejected(payload: Dictionary) -> void:
 	if reason == "inventory_full":
 		var target_id := str(pending.get("target_id", ""))
 		_show_inventory_full_text(target_id)
+	elif reason == "channel_not_active":
+		_stop_charge_channel_visual()
+		_show_skill_rejected_feedback(reason)
 	elif reason == "capacity_would_overflow":
 		_show_bag_full_cant_unequip_text()
 	elif reason == "town_exit_locked":
@@ -1245,7 +1279,7 @@ func _apply_delta(p: Dictionary) -> void:
 		var eid := _event_subject_entity_id(ev)
 		var event_type := str(ev.get("event_type", ""))
 		if event_type == "monster_attack_windup":
-			MonsterMeleeWindupMarkerScript.sync_from_event(ev, entities)
+			MonsterMeleeWindupMarkerScript.sync_from_event(ev, entities, player_anchor.global_position if player_anchor != null else Vector3.ZERO)
 			continue
 		if eid == player_id and str(ev.get("skill_id", "")) == "charge":
 			if event_type == "skill_channel_started":
@@ -1666,6 +1700,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		if e.has("effect_ids"):
 			_sync_local_hero_aura(e.get("effect_ids", []), _local_player_rage_active)
 		reconciliation_delta = predicted_pos.distance_to(server_pos)
+		_apply_reconciliation_backpressure()
 		var prev_predicted_pos := predicted_pos
 		# Reconcile: snap prediction back toward authoritative truth.
 		predicted_pos = server_pos
@@ -1729,12 +1764,18 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		_refresh_loot_label_visibility()
 	if e["type"] == "monster" and not monster_ids.has(id):
 		monster_ids.append(id)
+		var monster_node := rec.get("node", null) as Node3D
+		if monster_node != null and player_anchor != null:
+			var dist_sq := Vector2(monster_node.global_position.x - player_anchor.global_position.x, monster_node.global_position.z - player_anchor.global_position.z).length_squared()
+			EntityPresentationLodScript.apply_monster(monster_node, dist_sq, monster_ids.size())
 	if e["type"] == "interactable" and not interactable_ids.has(id):
 		interactable_ids.append(id)
 	if rec["type"] == "projectile":
 		var node := rec["node"] as Node3D
 		_entity_tick_smoothing.apply_projectile_authoritative(rec, node, server_pos, is_new)
 		rec["last_server_pos"] = server_pos
+		if player_anchor != null:
+			ProjectilePresentationCapScript.apply(entities, player_anchor.global_position)
 		return
 	elif rec["type"] == "loot":
 		var loot_node := rec["node"] as Node3D
@@ -3399,7 +3440,40 @@ func _update_loot_hover_label() -> void:
 func _is_loot_label_reveal_held() -> bool:
 	return Input.is_key_pressed(KEY_ALT)
 
+func _apply_reconciliation_backpressure() -> void:
+	var threshold := MainConfigLoaderScript.reconciliation_backpressure_threshold()
+	if reconciliation_delta < threshold:
+		return
+	_stop_charge_channel_visual()
+	pending_action_targets.clear()
+
 func _refresh_loot_label_visibility() -> void:
+	var rules := MainConfigLoaderScript.loot_label_rules()
+	var crowd_min := int(rules.get("crowd_cull_min_loot", 12))
+	var max_labels := int(rules.get("max_visible_labels", 8))
+	var combat_radius := float(rules.get("combat_radius", 10.0))
+	var hero_pos := player_anchor.global_position if player_anchor != null else Vector3.ZERO
+	var label_ids: Array = _loot_label_entity_ids()
+	var use_crowd_cull := label_ids.size() >= crowd_min
+	var nearest_allowed: Dictionary = {}
+	if use_crowd_cull:
+		var ranked: Array = []
+		for label_id in label_ids:
+			var id := str(label_id)
+			if not entities.has(id):
+				continue
+			var node := entities[id].get("node", null) as Node3D
+			if node == null:
+				continue
+			var dist := Vector2(node.global_position.x - hero_pos.x, node.global_position.z - hero_pos.z).length()
+			ranked.append({"id": id, "dist": dist})
+		ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return float(a.get("dist", 0.0)) < float(b.get("dist", 0.0))
+		)
+		for i in range(mini(ranked.size(), max_labels)):
+			var entry: Dictionary = ranked[i]
+			if float(entry.get("dist", 999.0)) <= combat_radius:
+				nearest_allowed[str(entry.get("id", ""))] = true
 	var action_hover_id := _action_hover_target_id()
 	for label_id in _loot_label_entity_ids():
 		var id := str(label_id)
@@ -3407,6 +3481,9 @@ func _refresh_loot_label_visibility() -> void:
 		var rarity := str(entities.get(id, {}).get("rarity", "common"))
 		var allowed := _loot_filter.allows(rarity)
 		var revealed := loot_label_reveal_held and allowed
+		if use_crowd_cull and not nearest_allowed.has(id) and not highlighted:
+			revealed = false
+			highlighted = false
 		if str(entities.get(id, {}).get("type", "")) == "loot":
 			var node := entities[id].get("node", null) as Node3D
 			if node != null:

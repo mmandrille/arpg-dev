@@ -74,7 +74,7 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 			s.syncCompatibilityFields()
 			res := ctx.resultFor(levelNum, 0)
 			s.withTickPhase(TickPhaseAI, func() {
-				s.advanceMonsterMovement(res)
+				s.advanceMonsterMovementBudgeted(res)
 				s.advanceCompanions(res)
 			})
 			s.withTickPhase(TickPhaseCombat, func() {

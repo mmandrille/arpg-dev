@@ -22,8 +22,22 @@ func TestEvaluateTickGuardrail(t *testing.T) {
 }
 
 func TestShouldApplyOverloadDegradationRequiresRoomPressure(t *testing.T) {
-	if shouldApplyOverloadDegradation(game.PerfCounters{}) {
+	nav := game.NavigationRules{
+		MonsterPathNodesPerTick:             500,
+		MonsterOverloadLiveMonsterThreshold: 28,
+	}
+	if shouldApplyOverloadDegradation(game.PerfCounters{}, game.PerfSnapshot{}, nav) {
 		t.Fatalf("empty counters should not apply overload degradation")
+	}
+	if !shouldApplyOverloadDegradation(game.PerfCounters{PathNodesVisited: 500}, game.PerfSnapshot{}, nav) {
+		t.Fatal("path node budget exhaustion should apply overload degradation")
+	}
+	if !shouldApplyOverloadDegradation(
+		game.PerfCounters{PathRequests: 1},
+		game.PerfSnapshot{LiveMonsters: 30},
+		nav,
+	) {
+		t.Fatal("crowded room with path requests should apply overload degradation")
 	}
 	cases := []struct {
 		name     string
@@ -35,7 +49,7 @@ func TestShouldApplyOverloadDegradationRequiresRoomPressure(t *testing.T) {
 		{name: "monsters moved", counters: game.PerfCounters{MonstersMoved: 1}},
 	}
 	for _, tc := range cases {
-		if !shouldApplyOverloadDegradation(tc.counters) {
+		if !shouldApplyOverloadDegradation(tc.counters, game.PerfSnapshot{}, nav) {
 			t.Fatalf("%s should apply overload degradation", tc.name)
 		}
 	}

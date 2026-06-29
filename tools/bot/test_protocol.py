@@ -141,6 +141,21 @@ def test_load_scenarios_discovers_crowded_lightning_perf_probe():
     )
 
 
+def test_load_scenarios_discovers_crowded_melee_perf_probe():
+    scenarios = load_scenarios()
+    scenario = next(s for s in scenarios if s.id == "crowded_melee_perf_probe")
+
+    assert scenario.world_id == "crowded_lightning_perf_probe"
+    assert scenario.character_class == "paladin"
+    assert scenario.max_elapsed_s == 30.0
+    assert scenario.debug_progression["skill_ranks"]["charge"] == 1
+    assert any(step.get("action") == "channel_skill_path" and step.get("skill_id") == "charge" for step in scenario.steps)
+    assert any(
+        step.get("action") == "action_until_combat_event" and step.get("weapon_slot") == "main_hand"
+        for step in scenario.steps
+    )
+
+
 def test_load_scenarios_catalog_order():
     scenarios = load_scenarios()
 

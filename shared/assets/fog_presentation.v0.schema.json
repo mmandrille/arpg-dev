@@ -67,6 +67,15 @@
         "performance_min_rebuild_interval_frames": { "type": "integer", "minimum": 0 }
       }
     },
+    "combat_crowd_shader_throttle": {
+      "type": "object",
+      "required": ["live_monster_threshold", "shader_update_min_interval_frames"],
+      "additionalProperties": false,
+      "properties": {
+        "live_monster_threshold": { "type": "integer", "minimum": 0 },
+        "shader_update_min_interval_frames": { "type": "integer", "minimum": 1 }
+      }
+    },
     "organic_edge": {
       "type": "object",
       "required": [

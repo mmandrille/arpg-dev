@@ -33,6 +33,7 @@ func _run() -> void:
 	await _test_perspective_disables_organic_edge()
 	await _test_shadow_cache_hit_on_static_frames()
 	await _test_shadow_cache_layout_invalidation()
+	await _test_combat_crowd_shader_throttle()
 	print("[gdtest] PASS: test_fog_of_war_overlay (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -431,6 +432,24 @@ func _test_shadow_cache_layout_invalidation() -> void:
 	var state := overlay.get_debug_state()
 	_assert_eq("layout change rebuild count", int(state.get("shadow_rebuild_count", 0)), 2)
 	_assert_eq("layout change reason", str(state.get("shadow_cache_last_rebuild_reason", "")), "hard_invalidate")
+	overlay.free()
+
+
+func _test_combat_crowd_shader_throttle() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_live_monster_count(30)
+	overlay.set_progression({"derived_stats": {"light_radius": 12}})
+	overlay.set_active(true)
+	await process_frame
+	var rebuild_before := int(overlay.get_debug_state().get("shadow_rebuild_count", 0))
+	await process_frame
+	await process_frame
+	var rebuild_after := int(overlay.get_debug_state().get("shadow_rebuild_count", 0))
+	_assert_eq("crowd throttle limits shader rebuilds", rebuild_after, rebuild_before)
+	overlay.set_live_monster_count(0)
+	await process_frame
 	overlay.free()
 
 

@@ -48,6 +48,8 @@ var _point_light: OmniLight3D
 var _character_visual: Node3D
 var _shadow_cache: FogLosShadowCacheScript = FogLosShadowCacheScript.new()
 var _viewport_size_changed_connected := false
+var _live_monster_count: int = 0
+var _shader_update_frame_counter: int = 0
 
 
 func _ready() -> void:
@@ -133,6 +135,21 @@ func set_performance_throttle(enabled: bool) -> void:
 	var cache_cfg: Dictionary = FogPresentationLoaderScript.shadow_cache()
 	var frames := int(cache_cfg.get("performance_min_rebuild_interval_frames", 3)) if enabled else 0
 	_shadow_cache.set_performance_throttle_frames(frames)
+
+
+func set_live_monster_count(count: int) -> void:
+	_live_monster_count = maxi(0, count)
+
+
+func _shader_update_throttled() -> bool:
+	var cfg: Dictionary = FogPresentationLoaderScript.combat_crowd_shader_throttle()
+	var threshold := int(cfg.get("live_monster_threshold", 24))
+	var interval := int(cfg.get("shader_update_min_interval_frames", 2))
+	if _live_monster_count < threshold or interval <= 1:
+		_shader_update_frame_counter = 0
+		return false
+	_shader_update_frame_counter += 1
+	return (_shader_update_frame_counter % interval) != 0
 
 
 func should_suppress_ambient() -> bool:
@@ -266,6 +283,8 @@ func _viewport_shader_size() -> Vector2:
 
 func _update_shader() -> void:
 	if _material == null:
+		return
+	if _shader_update_throttled():
 		return
 	var viewport_size := _viewport_shader_size()
 	_center_px = _project_target()

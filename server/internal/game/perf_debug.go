@@ -84,6 +84,7 @@ func (s *Sim) resetTickPerf() {
 	s.tickPerf = PerfCounters{}
 	s.resetMonsterNavigationBudget()
 	s.resetPlayerNavigationBudget()
+	s.resetTickCollisionCache()
 }
 
 func (s *Sim) withTickPhase(name string, fn func()) {

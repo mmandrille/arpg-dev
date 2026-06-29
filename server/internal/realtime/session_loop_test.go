@@ -219,7 +219,7 @@ func TestProgressionDeltasUseExplicitOwner(t *testing.T) {
 	}, map[uint64]store.SessionMember{
 		actorID: {AccountID: "acct_host", CharacterID: "char_host"},
 		ownerID: {AccountID: "acct_guest", CharacterID: "char_guest"},
-	}, 0)
+	}, 0, false)
 	if len(repo.progressions) != 1 {
 		t.Fatalf("persisted progressions = %d, want 1", len(repo.progressions))
 	}
@@ -295,7 +295,7 @@ func TestGoldPickupDeltasUseExplicitOwner(t *testing.T) {
 	persistLoop.persistTick(result, map[uint64]store.SessionMember{
 		hostID:  {AccountID: "acct_host", CharacterID: "char_host"},
 		guestID: {AccountID: "acct_guest", CharacterID: "char_guest"},
-	}, 0)
+	}, 0, false)
 	if len(repo.goldUpdates) != 1 {
 		t.Fatalf("persisted gold updates = %d, want 1", len(repo.goldUpdates))
 	}
@@ -378,7 +378,7 @@ func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 		},
 	}, map[uint64]store.SessionMember{
 		1001: {AccountID: "acct_host", CharacterID: "char_host"},
-	}, 0)
+	}, 0, false)
 	if len(repo.items) != 1 {
 		t.Fatalf("persisted item count = %d, want only non-stash-transfer add: %+v", len(repo.items), repo.items)
 	}
@@ -420,7 +420,7 @@ func TestHandInventoryUpdatePersistenceRequiresExplicitWeaponSet(t *testing.T) {
 		},
 	}, map[uint64]store.SessionMember{
 		1001: {AccountID: "acct_host", CharacterID: "char_host"},
-	}, 0)
+	}, 0, false)
 	if len(repo.equippedItems) != 1 {
 		t.Fatalf("persisted equipped updates = %d, want only explicit weapon-set update: %+v", len(repo.equippedItems), repo.equippedItems)
 	}
@@ -560,4 +560,33 @@ func hasLevelChanged(results []game.TickResult) bool {
 		}
 	}
 	return false
+}
+
+func TestPersistTickDefersNonCriticalChangesWhenRequested(t *testing.T) {
+	repo := &progressionPersistRepo{}
+	loop := &sessionLoop{
+		hub:  &Hub{store: repo},
+		sess: store.Session{ID: "sess_defer_persist", AccountID: "acct_host", CharacterID: "char_host"},
+	}
+	progression := game.CharacterProgressionView{Level: 3, Experience: 10}
+	loop.persistTick(game.TickResult{
+		Tick:          3,
+		ActorPlayerID: 1001,
+		Changes: []game.Change{{
+			Op:          game.OpCharacterProgressionUpdate,
+			Progression: &progression,
+		}},
+	}, map[uint64]store.SessionMember{
+		1001: {AccountID: "acct_host", CharacterID: "char_host"},
+	}, 0, true)
+	if len(repo.progressions) != 0 {
+		t.Fatalf("deferred progression should not persist immediately, got %d", len(repo.progressions))
+	}
+	if len(loop.deferredPersistChanges) != 1 {
+		t.Fatalf("deferred queue = %d, want 1", len(loop.deferredPersistChanges))
+	}
+	loop.flushDeferredPersist()
+	if len(repo.progressions) != 1 {
+		t.Fatalf("flushed progression should persist, got %d", len(repo.progressions))
+	}
 }

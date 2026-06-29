@@ -378,6 +378,8 @@ type Sim struct {
 	monsterPathNodesThisTick    int
 	playerPathNodesThisTick     int
 	overloadDegradeUntilTick    uint64
+	combatMovementThrottled     bool
+	tickCollisionCache          tickCollisionCache
 	tick                        uint64
 	nextID                      uint64
 	playerID                    uint64
@@ -1199,6 +1201,11 @@ func (s *Sim) activeNav() NavigationRules {
 		return s.rules.Navigation
 	}
 	return *level.nav
+}
+
+// ActiveNavigationRules exposes navigation tuning for realtime guardrails.
+func (s *Sim) ActiveNavigationRules() NavigationRules {
+	return s.activeNav()
 }
 
 func (s *Sim) activeWalls() []wallObstacle {
@@ -2853,7 +2860,7 @@ func (s *Sim) playerPositionBlocked(pos Vec2) bool {
 // (live monster or closed-door barrier). Walls are not checked here so that
 // buildBlockedFn can use separate probe positions for walls vs. entities.
 func (s *Sim) playerDynamicBlocked(pos Vec2) bool {
-	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
+	for _, id := range s.cachedSortedEntityIDs() {
 		e := s.activeLevel().entities[id]
 		if e.kind == monsterEntity && e.hp > 0 {
 			if circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
@@ -3446,8 +3453,8 @@ func vecLess(a, b Vec2) bool {
 func (s *Sim) buildMonsterBlockedFn(excludeMonsterID uint64) func(gx, gy int) bool {
 	nav := s.activeNav()
 	walls := s.activeWalls()
-	playerIDs := sortedPlayerIDs(s.players)
-	entityIDs := sortedEntityIDs(s.activeLevel().entities)
+	playerIDs := s.cachedSortedPlayerIDs()
+	entityIDs := s.cachedSortedEntityIDs()
 	return func(gx, gy int) bool {
 		center := gridToWorld(nav, gridCell{x: gx, y: gy})
 		return s.monsterPositionBlockedWithIDs(center, excludeMonsterID, walls, playerIDs, entityIDs)
@@ -3455,7 +3462,7 @@ func (s *Sim) buildMonsterBlockedFn(excludeMonsterID uint64) func(gx, gy int) bo
 }
 
 func (s *Sim) monsterPositionBlocked(pos Vec2, excludeMonsterID uint64) bool {
-	return s.monsterPositionBlockedWithIDs(pos, excludeMonsterID, s.activeWalls(), sortedPlayerIDs(s.players), sortedEntityIDs(s.activeLevel().entities))
+	return s.monsterPositionBlockedWithIDs(pos, excludeMonsterID, s.activeWalls(), s.cachedSortedPlayerIDs(), s.cachedSortedEntityIDs())
 }
 
 func (s *Sim) monsterPositionBlockedWithIDs(pos Vec2, excludeMonsterID uint64, walls []wallObstacle, playerIDs []uint64, entityIDs []uint64) bool {

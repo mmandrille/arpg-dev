@@ -37,6 +37,8 @@ type sessionLoop struct {
 	perfDebug      bool
 	lastPerfLog    time.Time
 	lastPerfStatus time.Time
+
+	deferredPersistChanges []deferredPersistChange
 }
 
 type loopClient struct {
@@ -621,7 +623,7 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 	return out
 }
 
-func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uint64]store.SessionMember, eventSequence int64) int64 {
+func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uint64]store.SessionMember, eventSequence int64, deferNonCritical bool) int64 {
 	ctx := context.Background()
 	member := store.SessionMember{
 		AccountID:   l.sess.AccountID,
@@ -825,17 +827,29 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				}
 			}
 		case game.OpShopStockReplace:
+			if deferNonCritical {
+				l.deferredPersistChanges = append(l.deferredPersistChanges, deferredPersistChange{change: c, member: changeMember})
+				continue
+			}
 			if err := l.hub.store.ReplaceCharacterShopStock(ctx, changeMember.AccountID, changeMember.CharacterID, c.ShopID, c.RefreshKey, storeShopStock(changeMember.AccountID, changeMember.CharacterID, c.ShopStock)); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist shop stock replace", "shop_id", c.ShopID, "error", err)
 			}
 		case game.OpShopStockAvailability:
+			if deferNonCritical {
+				l.deferredPersistChanges = append(l.deferredPersistChanges, deferredPersistChange{change: c, member: changeMember})
+				continue
+			}
 			if err := l.hub.store.SetCharacterShopStockAvailable(ctx, changeMember.AccountID, changeMember.CharacterID, c.ShopID, c.OfferID, c.Available); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist shop stock availability", "shop_id", c.ShopID, "offer_id", c.OfferID, "error", err)
 			}
 		case game.OpCharacterProgressionUpdate:
 			if c.Progression == nil {
+				continue
+			}
+			if deferNonCritical {
+				l.deferredPersistChanges = append(l.deferredPersistChanges, deferredPersistChange{change: c, member: changeMember})
 				continue
 			}
 			if err := l.hub.store.UpsertCharacterProgression(ctx, changeMember.AccountID, storeProgressionFromView(changeMember.AccountID, changeMember.CharacterID, *c.Progression)); err != nil {

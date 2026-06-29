@@ -535,6 +535,8 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 			}
 		}
 		s.syncCompatibilityFields()
+		s.seedUniqueTestChests()
+
 		return s, nil
 	}
 
@@ -545,6 +547,8 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 	}
 
 	s.syncCompatibilityFields()
+	s.seedUniqueTestChests()
+
 	return s, nil
 }
 
@@ -811,6 +815,9 @@ func (s *Sim) CurrentTick() uint64 { return s.tick }
 // SetGameplayDebug enables local development-only gameplay conveniences.
 func (s *Sim) SetGameplayDebug(enabled bool) {
 	s.gameplayDebug = enabled
+	if enabled {
+		s.seedUniqueTestChests()
+	}
 }
 
 func gameplayDebugEnabledFromEnv() bool {

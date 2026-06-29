@@ -183,14 +183,14 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 	}
 }
 
-func TestUniqueTestChestDeterministicPayloadOrder(t *testing.T) {
+func TestUniqueTestChestSameSeedProducesIdenticalCatalog(t *testing.T) {
 	t.Setenv("ARPG_GAMEPLAY_DEBUG", "true")
 	rules := loadRules(t)
 	simA, err := NewSimWithWorld("sess_unique_test_chest_a", "seed_a", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim a: %v", err)
 	}
-	simB, err := NewSimWithWorld("sess_unique_test_chest_b", "seed_b", rules, "dungeon_levels")
+	simB, err := NewSimWithWorld("sess_unique_test_chest_b", "seed_a", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim b: %v", err)
 	}
@@ -227,6 +227,57 @@ func TestUniqueTestChestDeterministicPayloadOrder(t *testing.T) {
 		if unique.Enabled && unique.Status == "ready" && namedCounts[unique.DisplayName] != 1 {
 			t.Fatalf("named unique %s count = %d, want 1; all=%+v", unique.DisplayName, namedCounts[unique.DisplayName], namedCounts)
 		}
+	}
+}
+
+func TestUniqueTestChestEffectRollsVaryBySessionSeed(t *testing.T) {
+	t.Setenv("ARPG_GAMEPLAY_DEBUG", "true")
+	rules := loadRules(t)
+	collectEffectTemplates := func(seed string) []string {
+		sim, err := NewSimWithWorld("sess_unique_test_chest_roll_"+seed, seed, rules, "dungeon_levels")
+		if err != nil {
+			t.Fatalf("new sim %s: %v", seed, err)
+		}
+		items, ok := sim.uniqueTestChestItems()
+		if !ok {
+			t.Fatalf("unique chest items failed for seed %s", seed)
+		}
+		out := []string{}
+		for _, item := range items {
+			payload := item.rollPayload
+			if payload == nil || payload.Rarity != "unique" || len(payload.EffectIDs) != 1 {
+				continue
+			}
+			if payloadNamedUniqueID(rules, payload.DisplayName) != "" {
+				continue
+			}
+			out = append(out, payload.ItemTemplateID)
+		}
+		return out
+	}
+
+	a := collectEffectTemplates("unique_chest_roll_seed_a")
+	b := collectEffectTemplates("unique_chest_roll_seed_b")
+	if len(a) == 0 || len(a) != len(b) {
+		t.Fatalf("effect template rolls = %d and %d, want matching non-zero counts", len(a), len(b))
+	}
+	if reflect.DeepEqual(a, b) {
+		t.Fatalf("expected different compatible template rolls for different session seeds")
+	}
+}
+
+func TestUniqueTestChestSeededAtSessionStart(t *testing.T) {
+	t.Setenv("ARPG_GAMEPLAY_DEBUG", "true")
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_unique_test_chest_seeded", "unique_test_chest_seed", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	chest := findUniqueTestChest(t, sim)
+	state := sim.uniqueChests[chest.id]
+	wantAmount := enabledUniqueEffectCount(rules) + enabledNamedUniqueCount(rules) + enabledSetItemCount(rules)
+	if state == nil || len(state.items) != wantAmount {
+		t.Fatalf("seeded chest count = %d, want %d; state=%+v", len(state.items), wantAmount, state)
 	}
 }
 

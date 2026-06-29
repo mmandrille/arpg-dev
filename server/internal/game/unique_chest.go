@@ -228,6 +228,45 @@ func restoreUniqueChestItems(items map[uint64][]*stashItem) map[uint64]*uniqueCh
 	return out
 }
 
+func (s *Sim) seedUniqueTestChests() {
+	if !s.gameplayDebug {
+		return
+	}
+
+	items, ok := s.uniqueTestChestItems()
+	if !ok {
+		return
+	}
+
+	for _, level := range s.levels {
+		for _, e := range level.entities {
+			if e == nil || e.kind != interactableEntity {
+				continue
+			}
+
+			if s.serviceForInteractable(e) != uniqueTestChestService {
+				continue
+			}
+
+			state := s.uniqueChests[e.id]
+			if state != nil && len(state.items) > 0 {
+				continue
+			}
+
+			state = &uniqueChestState{items: make([]*stashItem, 0, len(items))}
+			for _, item := range items {
+				state.items = append(state.items, &stashItem{
+					stashItemID: s.alloc(),
+					itemDefID:   item.itemDefID,
+					rollPayload: cloneRollPayload(item.rollPayload),
+				})
+			}
+
+			s.uniqueChests[e.id] = state
+		}
+	}
+}
+
 func (s *Sim) uniqueTestChestItems() ([]*invItem, bool) {
 	items := []*invItem{}
 	for _, effectID := range sortedStringKeys(s.rules.UniqueEffects) {
@@ -235,7 +274,7 @@ func (s *Sim) uniqueTestChestItems() ([]*invItem, bool) {
 		if !effect.Enabled || effect.Status != "ready" {
 			continue
 		}
-		templateID, ok := s.rules.firstUniqueChestTemplate(effect)
+		templateID, ok := s.rules.rollUniqueChestTemplateForEffect(s.seed, effectID, effect)
 		if !ok {
 			return nil, false
 		}
@@ -323,14 +362,27 @@ func (r *Rules) namedUniqueChestItems() ([]*invItem, bool) {
 	return items, true
 }
 
-func (r *Rules) firstUniqueChestTemplate(effect UniqueEffectDef) (string, bool) {
+func (r *Rules) compatibleUniqueChestTemplateIDs(effect UniqueEffectDef) []string {
+	out := []string{}
 	for _, templateID := range sortedStringKeys(r.ItemTemplates) {
 		template := r.ItemTemplates[templateID]
 		if uniqueChestEffectCompatible(effect, template.ItemType) {
-			return templateID, true
+			out = append(out, templateID)
 		}
 	}
-	return "", false
+
+	return out
+}
+
+func (r *Rules) rollUniqueChestTemplateForEffect(sessionSeed, effectID string, effect UniqueEffectDef) (string, bool) {
+	compatible := r.compatibleUniqueChestTemplateIDs(effect)
+	if len(compatible) == 0 {
+		return "", false
+	}
+
+	rng := NewRNG(SeedToUint64(sessionSeed + "|unique_chest|" + effectID))
+
+	return compatible[rng.IntN(len(compatible))], true
 }
 
 func (r *Rules) uniqueChestPayload(templateID string, effectID string) (ItemRollPayload, bool) {

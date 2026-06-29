@@ -1,0 +1,39 @@
+shared/golden/auto_path.json
+  s_d1d00018dddc4e::t_9e59cba9489532 24,26
+  s_d1d00018dddc4e::t_51db6a509cf7bd 25
+shared/golden/monster_chase.json
+  s_d1d00018dddc4e::t_c7869ecddf6e88 26,28
+  s_d1d00018dddc4e::t_353bef2df7709c 27
+docs/as-built/v364_monster-lod-retune.md
+  s_d1d00018dddc4e::t_eca3d8de7e2d85 1-21
+docs/progress/slice-lifecycle.md
+  s_d1d00018dddc4e::t_55aa26abd9db9c 378
+shared/rules/navigation.v0.json
+  s_d1d00018dddc4e::t_32cfc0199b66aa 22,24
+  s_d1d00018dddc4e::t_0b965cefb5d2cb 23
+docs/plans/v364_2026-06-28-monster-lod-retune.md
+  s_d1d00018dddc4e::t_e22660077d58f9 6-10
+  s_d1d00018dddc4e::t_fe123d20f5940b 1-5,11-18
+server/internal/game/monster_movement_lod_test.go
+  s_d1d00018dddc4e::t_c0b7387ec535e0 76-109
+docs/specs/v364_spec-monster-lod-retune.md
+  s_d1d00018dddc4e::t_6c541d5a982cf4 1-47
+PROGRESS.md
+  s_d1d00018dddc4e::t_52f25bcb691e6c 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "20db4940053cbddf6444e788efb250fc1a057237",
+  "prompts": {},
+  "sessions": {
+    "s_d1d00018dddc4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6af99e8d-44ff-43ed-99db-33f614d2484e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

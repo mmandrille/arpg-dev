@@ -1,0 +1,21 @@
+client/scripts/main_config_loader.gd
+  s_32b5cd0861b9bc::t_be50a45341c00f 26,32
+client/scripts/entity_presentation_lod.gd
+  s_32b5cd0861b9bc::t_8defef8bb19d3e 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "625f5600c876bac6a2702b2a534a6d5d79d3997f",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

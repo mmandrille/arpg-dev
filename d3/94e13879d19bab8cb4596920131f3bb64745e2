@@ -1,0 +1,19 @@
+client/scripts/main.gd
+  s_d1d00018dddc4e::t_e78e7ed2dbdb94 1745
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "d394e13879d19bab8cb4596920131f3bb64745e2",
+  "prompts": {},
+  "sessions": {
+    "s_d1d00018dddc4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6af99e8d-44ff-43ed-99db-33f614d2484e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

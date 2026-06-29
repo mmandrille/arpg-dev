@@ -88,6 +88,7 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 81_magic_find_stat.json	magic_find_stat	protocol	extended	contract	0	0		
 82_unique_skill_modifier.json	unique_skill_modifier	protocol	extended	setup-eliminable	1	1		
 83_second_set_package.json	second_set_package	protocol	extended	setup-eliminable	1	1		
+84_wayfarers_accord_set.json	wayfarers_accord_set	protocol	extended	setup-eliminable	1	1		
 84_boss_special_drops.json	boss_special_drops	protocol	extended	contract	0	0		
 85_item_level_progression.json	item_level_progression	protocol	extended	contract	0	0		
 86_mercenary_foundation.json	mercenary_foundation	protocol	extended	setup-eliminable	1	1		

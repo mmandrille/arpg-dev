@@ -1,0 +1,39 @@
+server/internal/game/unique_chest_test.go
+  s_e017cda95f90cb::t_a64d986aba4162 437-485,487-506
+  s_e017cda95f90cb::t_9a5e134a912380 486
+docs/progress/slice-lifecycle.md
+  s_e017cda95f90cb::t_0fba7656aac84a 383
+docs/specs/v369_spec-wayfarers-accord-set.md
+  s_e017cda95f90cb::t_8c124665c7cc41 3
+  s_e017cda95f90cb::t_d4e1f9111e0bb7 1-2,4-53
+PROGRESS.md
+  s_e017cda95f90cb::t_58f236c6a774e4 26,28
+  s_e017cda95f90cb::t_2d6ff269fe82e1 18
+docs/as-built/v369_wayfarers-accord-set.md
+  s_e017cda95f90cb::t_00573d516b1dc6 1-26
+docs/plans/v369_2026-06-29-wayfarers-accord-set.md
+  s_e017cda95f90cb::t_e481cc3ea1e46a 29-31,35-36,40-41,45-46,50-51
+  s_e017cda95f90cb::t_52f937975127c7 1-28,32-34,37-39,42-44,47-49
+tools/bot/scenarios/84_wayfarers_accord_set.json
+  s_e017cda95f90cb::t_56b5d423c5926a 1-42
+shared/rules/set_items.v0.json
+  s_e017cda95f90cb::t_dbba4c60d5240b 109-161
+shared/rules/treasure_classes.v0.json
+  s_e017cda95f90cb::t_121186949a5344 268-273
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "d2aa96bb74fe9c938de34e7f76bf89cd709c5de5",
+  "prompts": {},
+  "sessions": {
+    "s_e017cda95f90cb": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fb591b0f-9107-4395-80d3-bfb6a8c825aa",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

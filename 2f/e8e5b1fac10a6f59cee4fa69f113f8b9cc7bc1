@@ -1,0 +1,21 @@
+client/tests/test_delta_apply.gd
+  s_32b5cd0861b9bc::t_bd37db683d472d 229-230
+client/scripts/main.gd
+  s_32b5cd0861b9bc::t_46d4fe8e4724b5 1214-1218
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "2fe8e5b1fac10a6f59cee4fa69f113f8b9cc7bc1",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

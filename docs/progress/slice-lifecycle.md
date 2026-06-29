@@ -377,6 +377,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v363** | `basic-attack-cooldown-tuning` | Complete (focused checks green) | — | — | [`as-built`](../as-built/v363_basic-attack-cooldown-tuning.md) |
 | **v364** | `monster-lod-retune` | Complete (focused checks green) | [`spec`](../specs/v364_spec-monster-lod-retune.md) | [`plan`](../plans/v364_2026-06-28-monster-lod-retune.md) | [`as-built`](../as-built/v364_monster-lod-retune.md) |
 | **v365** | `path-budget-retune` | Complete (focused checks green) | [`spec`](../specs/v365_spec-path-budget-retune.md) | [`plan`](../plans/v365_2026-06-28-path-budget-retune.md) | [`as-built`](../as-built/v365_path-budget-retune.md) |
+| **v366** | `path-cache-effectiveness` | Complete (focused checks green) | [`spec`](../specs/v366_spec-path-cache-effectiveness.md) | [`plan`](../plans/v366_2026-06-28-path-cache-effectiveness.md) | [`as-built`](../as-built/v366_path-cache-effectiveness.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

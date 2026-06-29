@@ -60,6 +60,31 @@ func TestCrowdedLightningAveragePathNodesStayBelowBudgetCeiling(t *testing.T) {
 	avg := float64(totalNodes) / float64(ticks)
 	ceiling := float64(rules.Navigation.MonsterPathNodesPerTick) * 0.95
 	if avg > ceiling {
-		t.Fatalf("average path nodes per tick = %.2f, want <= %.2f (85%% of budget)", avg, ceiling)
+		t.Fatalf("average path nodes per tick = %.2f, want <= %.2f (95%% of budget)", avg, ceiling)
+	}
+}
+
+func TestCrowdedLightningPathCacheHitsMeetRequests(t *testing.T) {
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_path_cache", "path_cache_seed", rules, "crowded_lightning_perf_probe")
+	if err != nil {
+		t.Fatalf("world: %v", err)
+	}
+
+	var totalCacheHits int
+	var totalPathRequests int
+	ticks := 32
+	for tick := 0; tick < ticks; tick++ {
+		sim.TickResults(nil)
+		counters := sim.PerfCounters()
+		totalCacheHits += counters.PathCacheHits
+		totalPathRequests += counters.PathRequests
+	}
+	if totalPathRequests == 0 {
+		t.Fatal("path requests = 0, want crowded combat pathfinding activity")
+	}
+	minHits := totalPathRequests * 9 / 10
+	if totalCacheHits < minHits {
+		t.Fatalf("path cache hits = %d, want >= 90%% of path requests (%d)", totalCacheHits, minHits)
 	}
 }

@@ -84,12 +84,24 @@ func (s *Sim) cachedMonsterPathForGoal(monster *entity, goal Vec2) ([]Vec2, bool
 	if !s.monsterMovementLODAllowsTick(monster) {
 		return nil, false
 	}
-	if monster == nil || !monster.navPathValid || distance(monster.navGoal, goal) > 1e-9 {
+	if monster == nil || !monster.navPathValid || !s.monsterPathGoalMatchesCached(monster, goal) {
 		return nil, false
 	}
 	s.advanceCachedMonsterPath(monster)
 	s.tickPerf.PathCacheHits++
 	return monster.navPath, true
+}
+
+func (s *Sim) monsterPathGoalMatchesCached(monster *entity, goal Vec2) bool {
+	if monster == nil {
+		return false
+	}
+	tolerance := s.activeNav().MonsterPathCacheGoalTolerance
+	if tolerance <= 0 {
+		return distance(monster.navGoal, goal) <= 1e-9
+	}
+
+	return distance(monster.navGoal, goal) <= tolerance
 }
 
 func (s *Sim) advanceCachedMonsterPath(monster *entity) {

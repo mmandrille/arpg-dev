@@ -947,6 +947,8 @@ func _process(delta: float) -> void:
 	_try_complete_pending_waypoint_travel()
 	_tick_movement_animation_linger(delta)
 	CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta, player_id)
+	if gameplay_active and _camera_controller != null:
+		_camera_controller.tick_follow(delta)
 	if gameplay_active and CameraImpactFeedback.is_active():
 		if _camera_controller != null: _camera_controller.sync_to_player()
 
@@ -1740,7 +1742,8 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		var node := rec["node"] as Node3D
 		var segment_distance := 0.0
 		if not (rec["type"] == "player" and _mobility_presentation.is_active(id)):
-			segment_distance = _entity_tick_smoothing.apply_entity_authoritative(rec, node, server_pos, is_new)
+			var use_adaptive := id != player_id and rec["type"] in ["player", "monster", "companion"]
+			segment_distance = _entity_tick_smoothing.apply_entity_authoritative(rec, node, server_pos, is_new, use_adaptive)
 		if _entity_type_uses_combat_presentation(str(rec["type"])) and rec["controller"] != null and not is_new:
 			var hp_val := int(e.get("hp", rec.get("hp", 1)))
 			var moved := segment_distance > 0.001

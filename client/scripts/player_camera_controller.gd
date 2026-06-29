@@ -28,6 +28,7 @@ var _cfg: Dictionary = {}  # current mode data from CameraPresentationsLoader
 var _iso_offset: Vector3 = Vector3(9.0, 20.0, 15.0)  # isometric follow offset, read from data
 var _yaw: float = 0.0    # horizontal orbit angle (radians) for perspective modes
 var _pitch: float = 0.0  # vertical orbit angle (radians) for perspective modes
+var _follow_initialized := false
 
 
 ## Must be called once before any other method.
@@ -54,6 +55,7 @@ func apply_mode(mode: String) -> void:
 	CameraPresentationsLoaderScript.ensure_loaded()
 	_cfg = CameraPresentationsLoaderScript.mode(mode)
 	_setup_rig()
+	_follow_initialized = false
 	sync_to_player()
 
 
@@ -63,9 +65,17 @@ func sync_to_player() -> void:
 		return
 	match _current_mode:
 		"isometric":
-			_sync_isometric()
+			_sync_isometric(0.0, true)
 		"chest_view":
 			_sync_chest_view()
+
+
+## Smooth isometric follow; call every frame during gameplay.
+func tick_follow(delta: float) -> void:
+	if _camera == null or _ctx == null or _ctx.player_anchor == null:
+		return
+	if _current_mode == "isometric":
+		_sync_isometric(delta, false)
 
 
 ## Zoom handler: isometric adjusts camera.size.
@@ -238,10 +248,17 @@ func _setup_chest_view() -> void:
 	_camera.rotation_degrees = Vector3.ZERO
 
 
-func _sync_isometric() -> void:
+func _sync_isometric(delta: float, snap: bool) -> void:
 	var anchor := _ctx.player_anchor as Node3D
 	var target: Vector3 = anchor.global_position if anchor != null else Vector3.ZERO
-	_camera.global_position = target + _iso_offset + CameraImpactFeedbackScript.get_offset()
+	var desired: Vector3 = target + _iso_offset + CameraImpactFeedbackScript.get_offset()
+	var damping: float = float(_cfg.get("follow_damping_seconds", 0.0))
+	if snap or damping <= 0.0 or not _follow_initialized:
+		_camera.global_position = desired
+		_follow_initialized = true
+	else:
+		var alpha := 1.0 - exp(-maxf(delta, 0.0) / damping)
+		_camera.global_position = _camera.global_position.lerp(desired, alpha)
 	_camera.look_at(target, Vector3.UP)
 
 

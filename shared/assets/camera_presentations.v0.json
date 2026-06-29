@@ -12,7 +12,8 @@
       "mouse_sensitivity": 0.0,
       "pitch_min_degrees": -90.0,
       "pitch_max_degrees": -90.0,
-      "reticle_enabled": false
+      "reticle_enabled": false,
+      "follow_damping_seconds": 0.12
     },
     "chest_view": {
       "projection": "perspective",
@@ -25,7 +26,8 @@
       "mouse_sensitivity": 0.003,
       "pitch_min_degrees": -70.0,
       "pitch_max_degrees": 10.0,
-      "reticle_enabled": true
+      "reticle_enabled": true,
+      "follow_damping_seconds": 0.0
     }
   }
 }

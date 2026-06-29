@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_test_controller_late_settings_mode_sync()
 	_test_settings_panel_camera_mode_button_sync()
 	_test_controller_isometric_mouse_capture_policy()
+	_test_loader_isometric_follow_damping_config()
 	print("[gdtest] PASS: test_camera_mode_settings (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -180,6 +181,14 @@ func _test_controller_isometric_mouse_capture_policy() -> void:
 
 	root.queue_free()
 	CameraPresentationsLoaderScript.reset_for_tests()
+
+
+func _test_loader_isometric_follow_damping_config() -> void:
+	CameraPresentationsLoaderScript.reset_for_tests()
+	CameraPresentationsLoaderScript.ensure_loaded()
+	var cfg := CameraPresentationsLoaderScript.mode("isometric")
+	_assert_true("isometric follow_damping_seconds configured", float(cfg.get("follow_damping_seconds", 0.0)) > 0.0)
+	_assert_eq("chest_view follow_damping_seconds disabled", float(CameraPresentationsLoaderScript.mode("chest_view").get("follow_damping_seconds", -1.0)), 0.0)
 
 
 func _assert_eq(label: String, got, expected) -> void:

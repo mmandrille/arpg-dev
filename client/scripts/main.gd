@@ -2,6 +2,7 @@
 # The server owns combat, loot, inventory, and persistence outcomes.
 extends Node3D
 const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
+const NetClientScript := preload("res://scripts/net_client.gd")
 const PerfPhaseTimerScript := preload("res://scripts/perf_phase_timer.gd")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
@@ -1586,6 +1587,9 @@ func _apply_delta(p: Dictionary) -> void:
 		_boss_visuals.sync_boss_health_bar()
 	_reconcile_player()
 	PerfPhaseTimerScript.measure_usec("delta", delta_start)
+
+
+func _mobility_skills_by_entity(events: Array) -> Dictionary:
 	var out := {}
 	for raw in events:
 		if not (raw is Dictionary):

@@ -1,0 +1,32 @@
+client/tests/test_factories.gd
+  s_90531129389748::t_948aa911ce7169 228-233
+  s_90531129389748::t_e885da6bb17216 234
+shared/assets/item_presentations.v0.schema.json
+  s_90531129389748::t_758b64b0f39239 16,20
+shared/assets/item_presentations.v0.json
+  s_90531129389748::t_806952f137b61f 10-11
+  s_90531129389748::t_a392320f2df06a 20-21
+client/scripts/loot_node_factory.gd
+  s_90531129389748::t_6a6d4432de04ca 290-295
+  s_90531129389748::t_dee3c306668a8d 44-50
+  s_90531129389748::t_8d1ce5692beb51 307-334
+client/scripts/item_icon_drawer.gd
+  s_90531129389748::t_3daf00a5cff1eb 18-21
+  s_90531129389748::t_d92420c70e308c 59-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "e217a17378b890b319cc6160d0aa2c947c7e7067",
+  "prompts": {},
+  "sessions": {
+    "s_90531129389748": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "be77ff07-f989-49ca-8119-871b7fafa51e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

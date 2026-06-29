@@ -381,6 +381,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v367** | `camera-follow-damping` | Complete (focused checks green) | [`spec`](../specs/v367_spec-camera-follow-damping.md) | — | [`as-built`](../as-built/v367_camera-follow-damping.md) |
 | **v368** | `remote-adaptive-smoothing` | Complete (focused checks green) | [`spec`](../specs/v368_spec-remote-adaptive-smoothing.md) | — | [`as-built`](../as-built/v368_remote-adaptive-smoothing.md) |
 | **v369** | `wayfarers-accord-set` | Complete (focused checks green) | [`spec`](../specs/v369_spec-wayfarers-accord-set.md) | [`plan`](../plans/v369_2026-06-29-wayfarers-accord-set.md) | [`as-built`](../as-built/v369_wayfarers-accord-set.md) |
+| **v370** | `client-perf-breakdown` | Complete (focused checks green) | [`spec`](../specs/v370_spec-client-perf-breakdown.md) | [`plan`](../plans/v370_2026-06-29-client-perf-breakdown.md) | [`as-built`](../as-built/v370_client-perf-breakdown.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

@@ -2,7 +2,7 @@
 # The server owns combat, loot, inventory, and persistence outcomes.
 extends Node3D
 const WaypointPanelConfig := preload("res://scripts/waypoint_panel_config.gd")
-const NetClientScript := preload("res://scripts/net_client.gd")
+const PerfPhaseTimerScript := preload("res://scripts/perf_phase_timer.gd")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
@@ -936,8 +936,10 @@ func _process(delta: float) -> void:
 		ready_sent = true
 
 	if gameplay_active or visual_replay_enabled:
+		var net_start := Time.get_ticks_usec()
 		for env in client.poll():
 			_handle_message(env)
+		PerfPhaseTimerScript.measure_usec("net_poll", net_start)
 		if _boss_visuals != null:
 			_boss_visuals_context.last_server_tick = last_server_tick
 			_boss_visuals.advance_boss_phase_display(delta)
@@ -963,7 +965,9 @@ func _process(delta: float) -> void:
 	if player_anim != null:
 		player_anim.set_locomotion(_movement_input.local_player_is_walking(client, player_hp, _user_input_blocked()))
 	_movement_visual_smoothing.tick(delta, character_visual)
+	var entity_smooth_start := Time.get_ticks_usec()
 	_entity_tick_smoothing.tick_entities(entities, delta)
+	PerfPhaseTimerScript.measure_usec("entities", entity_smooth_start)
 	if not _user_input_blocked():
 		_update_facing_toward_mouse()
 	_refresh_monster_health_bar_visibility()
@@ -1133,6 +1137,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 		])
 
 func _apply_delta(p: Dictionary) -> void:
+	var delta_start := Time.get_ticks_usec()
 	var perf_payload = p.get("performance", {})
 	if perf_payload is Dictionary:
 		last_performance_status = (perf_payload as Dictionary).duplicate(true)
@@ -1546,8 +1551,7 @@ func _apply_delta(p: Dictionary) -> void:
 		_boss_visuals_context.last_server_tick = last_server_tick
 		_boss_visuals.sync_boss_health_bar()
 	_reconcile_player()
-
-func _mobility_skills_by_entity(events: Array) -> Dictionary:
+	PerfPhaseTimerScript.measure_usec("delta", delta_start)
 	var out := {}
 	for raw in events:
 		if not (raw is Dictionary):

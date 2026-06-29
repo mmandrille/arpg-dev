@@ -228,6 +228,7 @@ run_gate "GDScript dungeon depth lighting test" "[gdtest] PASS: test_dungeon_dep
 run_gate "GDScript town night lighting test" "[gdtest] PASS: test_town_night_lighting" res://tests/test_town_night_lighting.gd
 run_gate "GDScript fog-of-war overlay test" "[gdtest] PASS: test_fog_of_war_overlay" res://tests/test_fog_of_war_overlay.gd
 run_gate "GDScript fog LOS shadow cache test" "[gdtest] PASS: test_fog_los_shadow_cache" res://tests/test_fog_los_shadow_cache.gd
+run_gate "GDScript perf phase timer test" "[gdtest] PASS: test_perf_phase_timer" res://tests/test_perf_phase_timer.gd
 run_gate "GDScript hero light source test" "[gdtest] PASS: test_hero_light_source" res://tests/test_hero_light_source.gd
 run_gate "GDScript movement visual smoothing test" "[gdtest] PASS: test_movement_visual_smoothing" res://tests/test_movement_visual_smoothing.gd
 run_gate "GDScript entity tick smoothing test" "[gdtest] PASS: test_entity_tick_smoothing" res://tests/test_entity_tick_smoothing.gd

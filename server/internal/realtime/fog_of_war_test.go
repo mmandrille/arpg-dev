@@ -53,18 +53,20 @@ func TestFogOfWarFanoutKeepsNearMonsterDeltas(t *testing.T) {
 	}
 }
 
-func TestFogOfWarRunnerSnapshotUsesRecipientScope(t *testing.T) {
+func TestFogOfWarSessionSnapshotUsesRecipientScope(t *testing.T) {
 	sim := mustRealtimeSim(t, "combat_control_lab")
 	monsterID := "1003"
-	r := &runner{sim: sim, sess: store.Session{ID: "sess_fog_runner"}}
+	hostID := sim.DefaultPlayerID()
+	loop := &sessionLoop{sess: store.Session{ID: "sess_fog_snapshot"}, sim: sim}
 
-	env := r.snapshotEnvelope()
+	env := loop.snapshotEnvelope(hostID)
 	snap, ok := env.Payload.(game.Snapshot)
 	if !ok {
 		t.Fatalf("snapshot payload type = %T, want game.Snapshot", env.Payload)
 	}
+
 	if snapshotContainsEntity(snap, monsterID) {
-		t.Fatalf("runner snapshot leaked hidden monster %s: %+v", monsterID, snap.Entities)
+		t.Fatalf("session snapshot leaked hidden monster %s: %+v", monsterID, snap.Entities)
 	}
 }
 

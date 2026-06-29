@@ -24,7 +24,6 @@ server/internal/game/sim.go	6563	# v381: tick collision cache fields + playerDyn
 server/internal/game/types.go	665
 server/internal/http/auth_session_test.go	1501
 server/internal/http/ws_test.go	1482
-server/internal/realtime/runner.go	627
 server/internal/realtime/session_loop.go	924
 server/internal/replay/replay.go	722
 server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating passive gold auto-pickup test for v332 momentum

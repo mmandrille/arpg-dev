@@ -1,0 +1,78 @@
+client/tests/test_delta_frame_coalesce.gd
+  s_32b5cd0861b9bc::t_3e561317e2a8ba 1-48
+docs/as-built/v376_loot-label-crowd-cull.md
+  s_32b5cd0861b9bc::t_582f4bceda6465 1,5-7,13
+client/scripts/main.gd
+  s_32b5cd0861b9bc::t_a63d1bbce83f82 3377-3380
+  s_32b5cd0861b9bc::t_6caad8dcd08646 71-73
+  s_32b5cd0861b9bc::t_f0861593bfb496 3390,3403-3404
+  s_32b5cd0861b9bc::t_6a5cc7823ebb44 1021-1022
+  s_32b5cd0861b9bc::t_daacf8c93b35ba 2057-2058
+  s_32b5cd0861b9bc::t_922145cfa78f60 3071,3074-3075,3077,3080-3081,3083-3084,3090,3093,3096,3099,3102
+  s_32b5cd0861b9bc::t_fbed188273481a 3086-3087
+server/internal/game/sim_tick_monster_movement.go
+  s_32b5cd0861b9bc::t_5423b72eef59e3 1-58
+client/scripts/reconciliation_backpressure.gd
+  s_32b5cd0861b9bc::t_77d7510e46b006 1-6
+docs/as-built/v375_projectile-presentation-cap.md
+  s_32b5cd0861b9bc::t_7eb59664e73228 1,5-7,12-13
+docs/as-built/v377_delta-frame-coalesce.md
+  s_32b5cd0861b9bc::t_527799fdd8e280 1,5-7,12-13
+client/tests/test_reconciliation_backpressure.gd
+  s_32b5cd0861b9bc::t_be423b73baca9d 1-38
+client/tests/test_projectile_presentation_cap.gd
+  s_32b5cd0861b9bc::t_63865290321d10 1-69
+docs/as-built/v372_fog-combat-throttle.md
+  s_32b5cd0861b9bc::t_9ff5d2ff81956d 1,5-7,12-13
+docs/as-built/v373_monster-visual-lod.md
+  s_32b5cd0861b9bc::t_177deeffdafc96 1,5-7,12-13
+client/scripts/delta_frame_coalesce.gd
+  s_32b5cd0861b9bc::t_f1d662780ec426 1-20
+docs/as-built/v378_recon-backpressure.md
+  s_32b5cd0861b9bc::t_bc73aef0ce885a 1,5-7,12-13
+.maintainability/file-size-baseline.tsv
+  s_32b5cd0861b9bc::t_93c67e70cfccc1 23
+  s_32b5cd0861b9bc::t_c47c5e391500f5 9
+client/tests/test_entity_presentation_lod.gd
+  s_32b5cd0861b9bc::t_b60d36844affd4 1-49
+scripts/client_smoke.sh
+  s_32b5cd0861b9bc::t_9666484888433e 232-235
+docs/CODEMAP.md
+  s_32b5cd0861b9bc::t_f2cfde40801d99 17
+PROGRESS.md
+  s_32b5cd0861b9bc::t_be4e947ace5126 28
+  s_32b5cd0861b9bc::t_e1f89ac3a6122c 91
+client/tests/test_coop_client.gd
+  s_32b5cd0861b9bc::t_182096bde41052 85,87-89
+  s_32b5cd0861b9bc::t_13cc0378a02991 1296-1297,1309-1313
+docs/reviews/20260629_v384-overview.md
+  s_32b5cd0861b9bc::t_efd5169d5a063d 100-126
+server/internal/game/combat_tick_budget.go
+  s_32b5cd0861b9bc::t_4410fc783e3905 30-31
+client/scripts/attack_move_input_coordinator.gd
+  s_32b5cd0861b9bc::t_eb3adf3239ae25 1-108,110-122,124-130
+  s_32b5cd0861b9bc::t_683da7d0b6c41e 109
+  s_32b5cd0861b9bc::t_37062afbe713a4 123
+docs/as-built/v374_combat-vfx-budget.md
+  s_32b5cd0861b9bc::t_60ebf17af4762a 1,5-7,13-14
+tools/bot/scenarios/client/87_interactable_tick_smoothing.json
+  s_32b5cd0861b9bc::t_d6f15382329fe1 5
+tools/bot/scenarios/76_companion_rank_scaling_and_limits.json
+  s_32b5cd0861b9bc::t_70d20d67178d78 69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8e741e0edf4ae9085e0e01421d137dcebec6465b",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

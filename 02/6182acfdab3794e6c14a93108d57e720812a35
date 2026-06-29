@@ -1,0 +1,47 @@
+client/scripts/main.gd
+  s_32b5cd0861b9bc::t_e83ffcd20dbc77 1140
+  s_32b5cd0861b9bc::t_5abd9c75d889a2 939,942
+  s_32b5cd0861b9bc::t_8b01b1f7413257 5
+  s_32b5cd0861b9bc::t_10610c6e954230 1554
+  s_32b5cd0861b9bc::t_70724e200de93b 968,970
+docs/specs/v370_spec-client-perf-breakdown.md
+  s_32b5cd0861b9bc::t_ca6d871feb397b 1-36
+docs/progress/slice-lifecycle.md
+  s_32b5cd0861b9bc::t_78ae0069d6c1c1 384
+client/tests/test_perf_phase_timer.gd
+  s_32b5cd0861b9bc::t_2734f59a5103b7 1-68
+docs/plans/v370_2026-06-29-client-perf-breakdown.md
+  s_32b5cd0861b9bc::t_14256bd50391c7 1-12
+docs/as-built/v370_client-perf-breakdown.md
+  s_32b5cd0861b9bc::t_c63edd895994d7 1-14
+client/scripts/fog_of_war_overlay.gd
+  s_32b5cd0861b9bc::t_74c42835c5116b 16
+  s_32b5cd0861b9bc::t_5d020a8ac6dccb 201,206
+PROGRESS.md
+  s_32b5cd0861b9bc::t_389142dd741739 26
+scripts/client_smoke.sh
+  s_32b5cd0861b9bc::t_8ebc3132d0e1a2 231
+client/scripts/perf_debug_sampler.gd
+  s_32b5cd0861b9bc::t_e90be5de6432b2 50
+  s_32b5cd0861b9bc::t_50cdd6927e90b4 15-16
+  s_32b5cd0861b9bc::t_e3a206d7aa8bfc 28-32
+  s_32b5cd0861b9bc::t_5a69be55b9bf7f 4-5
+client/scripts/perf_phase_timer.gd
+  s_32b5cd0861b9bc::t_d5baefc5a7d602 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "026182acfdab3794e6c14a93108d57e720812a35",
+  "prompts": {},
+  "sessions": {
+    "s_32b5cd0861b9bc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "88f02bb4-70d9-42b3-940b-f5f0a6ea833f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

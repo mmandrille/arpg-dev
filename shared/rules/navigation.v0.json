@@ -13,9 +13,9 @@
     "max_y": 16
   },
   "stop_distance": 0.25,
-  "monster_path_requests_per_tick": 40,
-  "monster_path_nodes_per_search": 360,
-  "monster_path_nodes_per_tick": 600,
+  "monster_path_requests_per_tick": 34,
+  "monster_path_nodes_per_search": 300,
+  "monster_path_nodes_per_tick": 500,
   "monster_path_cache_ticks": 8,
   "monster_repath_throttle_ticks": 6,
   "monster_repath_stagger_ticks": 4,

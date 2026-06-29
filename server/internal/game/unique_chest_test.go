@@ -434,6 +434,76 @@ func TestSecondSetPackagePayloadsAndBonuses(t *testing.T) {
 	}
 }
 
+func TestWayfarersAccordSetPayloadsAndBonuses(t *testing.T) {
+	rules := loadRules(t)
+	if len(rules.SetCatalogs) < 3 {
+		t.Fatalf("set catalog count = %d, want at least 3", len(rules.SetCatalogs))
+	}
+	payload, ok := rules.setItemPayload("wayfarers_accord_pendant")
+	if !ok {
+		t.Fatal("wayfarers setItemPayload returned false")
+	}
+	if payload.Rarity != "set" || payload.DisplayName != "Wayfarer's Accord Pendant" || payload.ItemTemplateID != "cave_amulet" {
+		t.Fatalf("wayfarers payload identity = %+v", payload)
+	}
+	if payload.Stats["max_mana"] != 5 || payload.Stats["magic"] != 1 || payload.Stats["max_hp"] != 3 || payload.Requirements["level"] != 5 {
+		t.Fatalf("wayfarers payload fields = %+v", payload)
+	}
+
+	sim := MustNewSim("sess_wayfarers_accord", "wayfarers_accord_seed", rules)
+	sim.progression.Level = 5
+	sim.progression.BaseStats.Magic = 8
+	sim.progression.SkillRanks["magic_bolt"] = 1
+	addSetItemToInventory(t, sim, "wayfarers_accord_hood", 9301)
+	addSetItemToInventory(t, sim, "wayfarers_accord_robes", 9302)
+	addSetItemToInventory(t, sim, "wayfarers_accord_bindings", 9303)
+	addSetItemToInventory(t, sim, "wayfarers_accord_treads", 9304)
+	addSetItemToInventory(t, sim, "wayfarers_accord_pendant", 9305)
+
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_hood", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9301", Slot: "head"}}}), "equip_hood")
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_robes", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9302", Slot: "chest"}}}), "equip_robes")
+	twoPiece := sim.equippedSetBonusStats()
+	if twoPiece["str"] != 1 || twoPiece["dex"] != 1 || twoPiece["vit"] != 1 || twoPiece["magic"] != 1 || twoPiece["max_hp"] != 0 {
+		t.Fatalf("wayfarers two-piece stats = %+v", twoPiece)
+	}
+	hoodView := sim.itemView(sim.findItemByID(9301))
+	if !containsShopString(hoodView.SummaryLines, "Set: Wayfarer's Accord (2/5 equipped)") ||
+		!containsShopString(hoodView.SummaryLines, "2-piece set bonus: Strength +1, Dexterity +1, Vitality +1, Magic +1 (active)") ||
+		!containsShopString(hoodView.SummaryLines, "5-piece set bonus: All skills +1, HP regen / 10s +5, Skill cooldown reduction +5% (inactive)") {
+		t.Fatalf("wayfarers two-piece summary lines = %+v", hoodView.SummaryLines)
+	}
+
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_bindings", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9303", Slot: "gloves"}}}), "equip_bindings")
+	threePiece := sim.equippedSetBonusStats()
+	if threePiece["max_hp"] != 10 || threePiece["max_mana"] != 8 || threePiece["skill_damage_percent"] != 0 {
+		t.Fatalf("wayfarers three-piece stats = %+v", threePiece)
+	}
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_treads", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9304", Slot: "boots"}}}), "equip_treads")
+	fourPiece := sim.equippedSetBonusStats()
+	if fourPiece["skill_damage_percent"] != 10 || fourPiece["all_skills"] != 0 {
+		t.Fatalf("wayfarers four-piece stats = %+v", fourPiece)
+	}
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_pendant", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: "9305", Slot: "amulet"}}}), "equip_pendant")
+	full := sim.equippedSetBonusStats()
+	if full["all_skills"] != 1 || full["skill_cooldown_reduction_percent"] != 5 || full["health_regen_per_10_seconds"] != 5 || full["skill_damage_percent"] != 10 {
+		t.Fatalf("wayfarers full set stats = %+v", full)
+	}
+	pendantView := sim.itemView(sim.findItemByID(9305))
+	if !containsShopString(pendantView.SummaryLines, "Set: Wayfarer's Accord (5/5 equipped)") ||
+		!containsShopString(pendantView.SummaryLines, "5-piece set bonus: All skills +1, HP regen / 10s +5, Skill cooldown reduction +5% (active)") {
+		t.Fatalf("wayfarers full summary lines = %+v", pendantView.SummaryLines)
+	}
+	if sim.effectiveSkillRank("magic_bolt") != 2 {
+		t.Fatalf("effective magic_bolt rank = %d, want 2", sim.effectiveSkillRank("magic_bolt"))
+	}
+	if sim.equippedItemStatTotal("skill_damage_percent") != 10 {
+		t.Fatalf("skill damage bonus = %d, want 10", sim.equippedItemStatTotal("skill_damage_percent"))
+	}
+	if regen := findStatBreakdown(sim.StatBreakdownViews(), "health_regen_per_second"); regen == nil || !statBreakdownHasSourceKind(*regen, "set_bonus") {
+		t.Fatalf("wayfarers health regen breakdown missing set bonus: %+v", sim.StatBreakdownViews())
+	}
+}
+
 func TestUniqueTestChestRepeatActivationReopensRemainingItems(t *testing.T) {
 	t.Setenv("ARPG_GAMEPLAY_DEBUG", "true")
 	rules := loadRules(t)

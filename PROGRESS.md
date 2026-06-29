@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-28
+Last updated: 2026-06-29
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-06-28
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v368 — remote-adaptive-smoothing |
+| **Latest completed slice** | v369 — wayfarers-accord-set |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green (2026-06-28 post v364–v368 batch) |
+| **CI gate** | focused verification green (2026-06-29 post v369; batch `make ci` pending autoloop handoff) |
 | **Next slice** | Run `/next` for new work |
 | **Last engineering review** | v349 — [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md) (2026-06-26; official cadence) |
 | **Next engineering review** | Due now (~v359 milestone passed) |

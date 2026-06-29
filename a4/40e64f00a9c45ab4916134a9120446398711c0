@@ -1,0 +1,28 @@
+shared/assets/skill_presentations.v0.json
+  s_6347e3fb702c71::t_5c1501f0f58537 150-152
+client/tests/test_skill_rules_loader.gd
+  s_6347e3fb702c71::t_4612a1204cb761 84
+client/scripts/skill_icon.gd
+  s_6347e3fb702c71::t_238030d161f1ea 410-442
+  s_6347e3fb702c71::t_dc6315792ce646 72-73
+tools/assets/skill_logo_sheet.py
+  s_6347e3fb702c71::t_2bc0fa03390429 276-309
+shared/assets/skill_presentations.v0.schema.json
+  s_6347e3fb702c71::t_1dcad7af420686 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "a440e64f00a9c45ab4916134a9120446398711c0",
+  "prompts": {},
+  "sessions": {
+    "s_6347e3fb702c71": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0da46ea6-c7d3-447f-afe3-1da193ac0bbc",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

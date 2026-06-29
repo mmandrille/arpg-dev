@@ -22,6 +22,7 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 		MonsterPathCacheTicks                 int        `json:"monster_path_cache_ticks"`
 		MonsterRepathThrottleTicks            int        `json:"monster_repath_throttle_ticks"`
 		MonsterRepathStaggerTicks             int        `json:"monster_repath_stagger_ticks"`
+		MonsterPathCacheGoalTolerance         float64    `json:"monster_path_cache_goal_tolerance"`
 		MonsterMovementLODMinLiveMonsters     int        `json:"monster_movement_lod_min_live_monsters"`
 		MonsterMovementLODNearDistance        float64    `json:"monster_movement_lod_near_distance"`
 		MonsterMovementLODUpdateIntervalTicks int        `json:"monster_movement_lod_update_interval_ticks"`
@@ -72,6 +73,9 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 	if navigation.MonsterRepathStaggerTicks <= 0 {
 		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_repath_stagger_ticks: must be positive")
 	}
+	if navigation.MonsterPathCacheGoalTolerance < 0 {
+		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_path_cache_goal_tolerance: must be non-negative")
+	}
 	if navigation.MonsterMovementLODMinLiveMonsters <= 0 {
 		return NavigationRules{}, fmt.Errorf("game: invalid rules navigation.monster_movement_lod_min_live_monsters: must be positive")
 	}
@@ -99,6 +103,7 @@ func loadNavigationRules(dir string) (NavigationRules, error) {
 		MonsterPathCacheTicks:                 navigation.MonsterPathCacheTicks,
 		MonsterRepathThrottleTicks:            navigation.MonsterRepathThrottleTicks,
 		MonsterRepathStaggerTicks:             navigation.MonsterRepathStaggerTicks,
+		MonsterPathCacheGoalTolerance:         navigation.MonsterPathCacheGoalTolerance,
 		MonsterMovementLODMinLiveMonsters:     navigation.MonsterMovementLODMinLiveMonsters,
 		MonsterMovementLODNearDistance:        navigation.MonsterMovementLODNearDistance,
 		MonsterMovementLODUpdateIntervalTicks: navigation.MonsterMovementLODUpdateIntervalTicks,

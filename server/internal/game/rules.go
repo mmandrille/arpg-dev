@@ -147,6 +147,7 @@ type NavigationRules struct {
 	MonsterPathCacheTicks                 int        `json:"monster_path_cache_ticks"`
 	MonsterRepathThrottleTicks            int        `json:"monster_repath_throttle_ticks"`
 	MonsterRepathStaggerTicks             int        `json:"monster_repath_stagger_ticks"`
+	MonsterPathCacheGoalTolerance         float64    `json:"monster_path_cache_goal_tolerance"`
 	MonsterMovementLODMinLiveMonsters     int        `json:"monster_movement_lod_min_live_monsters"`
 	MonsterMovementLODNearDistance        float64    `json:"monster_movement_lod_near_distance"`
 	MonsterMovementLODUpdateIntervalTicks int        `json:"monster_movement_lod_update_interval_ticks"`

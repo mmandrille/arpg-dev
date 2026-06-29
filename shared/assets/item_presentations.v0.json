@@ -7,8 +7,8 @@
       "3d_model": "weapon_rusty_sword_v0"
     },
     "greatsword": {
-      "icon": { "shape": "blade", "color": "#9a8f86", "accent": "#f0d7a0", "label": "2H" },
-      "ground": { "shape": "blade", "color": "#9a8f86", "accent": "#f0d7a0", "scale": 1.1 },
+      "icon": { "shape": "greatsword", "color": "#9a8f86", "accent": "#f0d7a0", "label": "2H" },
+      "ground": { "shape": "greatsword", "color": "#9a8f86", "accent": "#f0d7a0", "scale": 1.1 },
       "3d_model": "weapon_rusty_sword_v0"
     },
     "axe": {
@@ -17,8 +17,8 @@
       "3d_model": "weapon_starter_axe_v0"
     },
     "staff": {
-      "icon": { "shape": "blade", "color": "#5e8fd6", "accent": "#d8f0ff", "label": "St" },
-      "ground": { "shape": "blade", "color": "#5e8fd6", "accent": "#d8f0ff", "scale": 1.1 },
+      "icon": { "shape": "staff", "color": "#5e8fd6", "accent": "#d8f0ff", "label": "St" },
+      "ground": { "shape": "staff", "color": "#5e8fd6", "accent": "#d8f0ff", "scale": 1.1 },
       "3d_model": "weapon_starter_staff_v0"
     },
     "bow": {

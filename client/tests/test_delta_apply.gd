@@ -226,6 +226,8 @@ func _test_malformed_delta_does_not_crash() -> void:
 	m._apply_delta({"changes": [{"op": "gold_update"}]})
 	m._apply_delta({"changes": [{"op": "inventory_add"}]})
 	m._apply_delta({"changes": [{"op": "unknown_op", "data": "x"}]})
+	m._apply_delta({"changes": [{"op": "equipped_update", "item_instance_id": "ii_x"}]})
+	_assert_eq("malformed equipped_update without slot does not crash", true, true)
 	_assert_eq("malformed delta does not crash", true, true)
 
 

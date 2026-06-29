@@ -1211,9 +1211,11 @@ func _apply_delta(p: Dictionary) -> void:
 			"inventory_remove":
 				_remove_inventory_item(str(c.get("item_instance_id", "")))
 			"equipped_update":
-				equipped[c["slot"]] = c.get("item_instance_id")
-				if resolver != null:
-					resolver.apply_equipped_update(c["slot"], c.get("item_instance_id"))
+				var slot := str(c.get("slot", ""))
+				if not slot.is_empty():
+					equipped[slot] = c.get("item_instance_id")
+					if resolver != null:
+						resolver.apply_equipped_update(slot, c.get("item_instance_id"))
 				if c.has("inventory_rows"):
 					inventory_rows = int(c.get("inventory_rows", inventory_rows))
 				if c.has("inventory_capacity"):

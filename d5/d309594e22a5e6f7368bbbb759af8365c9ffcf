@@ -1,0 +1,26 @@
+server/internal/game/unique_chest_test.go
+  s_90531129389748::t_ca7f72285e3d58 186,193,233-282
+  s_90531129389748::t_2e7675112d15e9 283
+server/internal/game/sim.go
+  s_90531129389748::t_0f00234cd8c4f2 818-820
+  s_90531129389748::t_13a35e5df57163 538-539,550-551
+server/internal/game/unique_chest.go
+  s_90531129389748::t_b5ccfbbaf0e554 231-269,277
+  s_90531129389748::t_5e4981234f8743 365-366,370,373-385
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "d5d309594e22a5e6f7368bbbb759af8365c9ffcf",
+  "prompts": {},
+  "sessions": {
+    "s_90531129389748": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "be77ff07-f989-49ca-8119-871b7fafa51e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

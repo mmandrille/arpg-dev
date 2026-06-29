@@ -11,7 +11,8 @@
     "shadow_reach_multiplier",
     "darkness_alpha",
     "ambient_suppression",
-    "organic_edge"
+    "organic_edge",
+    "point_light"
   ],
   "additionalProperties": false,
   "properties": {

@@ -1742,7 +1742,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		var node := rec["node"] as Node3D
 		var segment_distance := 0.0
 		if not (rec["type"] == "player" and _mobility_presentation.is_active(id)):
-			var use_adaptive := id != player_id and rec["type"] in ["player", "monster", "companion"]
+			var use_adaptive: bool = id != player_id and str(rec["type"]) in ["player", "monster", "companion"]
 			segment_distance = _entity_tick_smoothing.apply_entity_authoritative(rec, node, server_pos, is_new, use_adaptive)
 		if _entity_type_uses_combat_presentation(str(rec["type"])) and rec["controller"] != null and not is_new:
 			var hp_val := int(e.get("hp", rec.get("hp", 1)))

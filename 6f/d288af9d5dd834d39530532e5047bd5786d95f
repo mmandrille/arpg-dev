@@ -1,0 +1,248 @@
+PROGRESS.md
+  s_27608ade6c1d08::t_cdc65f9d7f7d41 18,26,28
+docs/as-built/v390_leveled-upgrade-shards.md
+  s_8f0ab804a5a8f6::t_92253d42824f72 1-33
+server/internal/store/interfaces.go
+  s_8f0ab804a5a8f6::t_1331bee0736e5a 83-86
+server/internal/game/upgrade_shard_drops_test.go
+  s_27608ade6c1d08::t_3eec86a9ae1d60 1-41
+server/internal/http/upgrade_shard_test_helpers_test.go
+  s_27608ade6c1d08::t_e6a897cfb78a82 1-64
+.maintainability/file-size-baseline.tsv
+  s_27608ade6c1d08::t_5ca2739052f8cd 26
+  s_27608ade6c1d08::t_a468ee72e6c818 10
+  s_27608ade6c1d08::t_319b1271e37efc 5
+  s_27608ade6c1d08::t_706a48746a2055 32
+  s_27608ade6c1d08::t_87541c61cc39e6 3
+client/scripts/bishop_panel.gd
+  s_27608ade6c1d08::t_f8c2c5ed2d0985 33
+  s_27608ade6c1d08::t_fda6c7dbecac95 9
+  s_27608ade6c1d08::t_7ab3d1fad27ce3 227
+  s_27608ade6c1d08::t_eec0bca90e0904 201-206
+server/internal/game/rules.go
+  s_8f0ab804a5a8f6::t_284630b1f4986e 68-70
+client/scripts/blacksmith_upgrade_preview.gd
+  s_8f0ab804a5a8f6::t_854d09b5501065 63,69
+  s_8f0ab804a5a8f6::t_7c847761c4ea12 68
+  s_8f0ab804a5a8f6::t_06647595f3c9da 86-88
+  s_8f0ab804a5a8f6::t_7b97af936467e8 15-36
+  s_8f0ab804a5a8f6::t_f2993ab0aac314 104,106
+client/scripts/net_client.gd
+  s_8f0ab804a5a8f6::t_20a8b49f8140cb 433-441
+docs/specs/v390_spec-leveled-upgrade-shards.md
+  s_27608ade6c1d08::t_121e4a7be1e62e 1-90
+docs/progress/slice-lifecycle.md
+  s_27608ade6c1d08::t_d51e039be50a52 404
+client/tests/test_blacksmith_panel.gd
+  s_27608ade6c1d08::t_405cea78a196ad 60-61
+  s_27608ade6c1d08::t_7cdba236d9776a 39-44
+server/internal/http/account_stash.go
+  s_8f0ab804a5a8f6::t_350aa747bc94d7 72-76
+  s_8f0ab804a5a8f6::t_638bcc452a2ed7 18
+  s_8f0ab804a5a8f6::t_ad2b8da8dba835 196-198,201,203,206,209-218
+  s_8f0ab804a5a8f6::t_561057f90e9ad6 144-145,147,152-159
+  s_8f0ab804a5a8f6::t_d9b827731e7873 251-283
+  s_8f0ab804a5a8f6::t_eb260a15f1bc1f 378-424
+  s_8f0ab804a5a8f6::t_8b550a09c351fa 58-62
+server/internal/http/auth_session_test.go
+  s_27608ade6c1d08::t_07277985a9f419 629,637
+  s_27608ade6c1d08::t_eff4f62ea12bb2 602-604,613
+  s_27608ade6c1d08::t_14fcebfe2ae37e 674,678
+  s_27608ade6c1d08::t_aa4e8ccbe3e7f0 675
+  s_27608ade6c1d08::t_3d2bd3b54ab9d2 703-707,709-710
+  s_27608ade6c1d08::t_35cf45634fb872 690
+  s_27608ade6c1d08::t_023e8ae5b84e59 658
+client/scripts/blacksmith_merge_panel.gd.uid
+  s_27608ade6c1d08::t_7f0b70ec1d0fff 1
+docs/plans/v390_2026-06-30-leveled-upgrade-shards.md
+  s_8f0ab804a5a8f6::t_b6f51d35a1e719 1-24
+client/scripts/bot_step_catalog.gd
+  s_8f0ab804a5a8f6::t_5aee121e7c4cdc 63
+server/internal/game/upgrade_shard_items_sell_test.go
+  s_27608ade6c1d08::t_b90fdb5587db00 1-21
+client/tests/test_material_wallet_badges.gd
+  s_27608ade6c1d08::t_e8c7ce2f7b415e 25,29,36,38
+server/internal/inputdecode/inputdecode.go
+  s_27608ade6c1d08::t_e142ccb8ac66e8 360-365
+  s_27608ade6c1d08::t_b3c5a185e19736 40-41
+  s_27608ade6c1d08::t_5d2814639158a4 162
+shared/assets/item_presentations.v0.json
+  s_8f0ab804a5a8f6::t_e8b2b467037767 181
+  s_8f0ab804a5a8f6::t_17ba24fb9ed0a2 178-180,182
+tools/bot/scenarios/client/blacksmith_shard_merge.json
+  s_8f0ab804a5a8f6::t_186789217c32c6 28
+  s_8f0ab804a5a8f6::t_e4eb8985b0f154 1-3,6-7,29-30
+  s_8f0ab804a5a8f6::t_99da21d81d4f28 4-5,8-27
+tools/bot/scenarios/upgrade_shard_level_drop.json
+  s_27608ade6c1d08::t_61129af3c60b5b 4,6-7,11,17-19,24,26,31-33,35,42-47
+  s_8f0ab804a5a8f6::t_f16931056b9079 1-3,5,8-10,12-16,20-23,25,27-30,34,36-41,48-50
+client/scripts/blacksmith_merge_panel.gd
+  s_8f0ab804a5a8f6::t_d995303f3f4df1 48-53
+  s_8f0ab804a5a8f6::t_027570d4232b3a 1-47,54-193
+server/internal/game/upgrade_shard_items.go
+  s_8f0ab804a5a8f6::t_30679a697027d6 1-97,106,176
+  s_27608ade6c1d08::t_1ae7d185d6a3ae 98-105,107-175
+server/internal/game/interactables.go
+  s_8f0ab804a5a8f6::t_add4c6423d0d38 76
+server/internal/http/account_stash_merge.go
+  s_8f0ab804a5a8f6::t_6fa3f47c873577 7-8
+  s_8f0ab804a5a8f6::t_1dccfba23d62ca 1-6,9-52
+server/internal/store/upgrade_options_test.go
+  s_27608ade6c1d08::t_e9b0b61b69df94 10-14,16,21-26
+server/internal/game/bishop_debug.go
+  s_27608ade6c1d08::t_9a6964c48bba5e 53-94
+server/internal/game/badge_rewards.go
+  s_8f0ab804a5a8f6::t_ac1745b25839d1 38-40,51,64,79,85-87,92-96,115-152
+shared/rules/loot_tables.v0.json
+  s_8f0ab804a5a8f6::t_2db5e2d575bbfb 15
+shared/rules/worlds.v0.json
+  s_8f0ab804a5a8f6::t_3da06b892b2670 2781-2795
+server/internal/game/main_config_validation.go
+  s_8f0ab804a5a8f6::t_055db3f15d19d8 9-17
+  s_8f0ab804a5a8f6::t_385458610446d4 89-90
+  s_8f0ab804a5a8f6::t_2bdf015ea5221f 91
+client/scripts/blacksmith_panel.gd
+  s_8f0ab804a5a8f6::t_f269ef2893ebdb 337
+  s_8f0ab804a5a8f6::t_248f9a54e12a68 271-279,284,286-293
+  s_27608ade6c1d08::t_f980fd46e3085e 298
+  s_8f0ab804a5a8f6::t_73ba8151f7e346 202
+  s_8f0ab804a5a8f6::t_c1da16db9bbeb4 461-463,467,469-471,473-475,480
+  s_27608ade6c1d08::t_59a736d61ce51a 12
+  s_8f0ab804a5a8f6::t_b42d62c879bbab 13
+  s_8f0ab804a5a8f6::t_948b27cc834c9d 368
+  s_27608ade6c1d08::t_e4b87cbb187bf7 354-355
+  s_8f0ab804a5a8f6::t_3fc63aaa9d5929 430
+  s_27608ade6c1d08::t_3d6ed5dde87a04 464,468,472,476,484
+  s_8f0ab804a5a8f6::t_812f535a89eaca 498-499
+  s_8f0ab804a5a8f6::t_47d64e2eb53161 44-45
+  s_8f0ab804a5a8f6::t_3f651567ab5601 152-168
+  s_27608ade6c1d08::t_0b5d3e2a043606 200-201
+  s_8f0ab804a5a8f6::t_c43bc23126c586 6
+  s_8f0ab804a5a8f6::t_820d537b5ce57e 297
+  s_27608ade6c1d08::t_9f83eff954aee3 379
+  s_8f0ab804a5a8f6::t_35dd6907c9aedb 441
+  s_8f0ab804a5a8f6::t_f5126039015b56 516-518
+client/scripts/material_wallet_panel.gd
+  s_8f0ab804a5a8f6::t_00695ee6697fe9 157-158
+server/internal/store/upgrade_shard_test_helpers_test.go
+  s_27608ade6c1d08::t_e6a897cfb78a82 1-61
+server/internal/store/store_test.go
+  s_27608ade6c1d08::t_14cddcc459ff06 1201-1203
+  s_27608ade6c1d08::t_c413ac7fdb1079 1100-1103,1110-1111
+  s_27608ade6c1d08::t_3f674920734d12 1198,1210-1211
+  s_27608ade6c1d08::t_a2d7f0250b6857 1169
+  s_27608ade6c1d08::t_be2482d8b21e91 1187
+  s_27608ade6c1d08::t_dd57e63027718e 1124-1125,1132-1133
+  s_27608ade6c1d08::t_5a8fc2aa414894 1167-1168,1170
+  s_27608ade6c1d08::t_5fd67211fc8ed1 1144
+shared/rules/items.v0.json
+  s_8f0ab804a5a8f6::t_7e6aaab1b0aafd 11
+server/internal/store/repos.go
+  s_8f0ab804a5a8f6::t_26571e99ec3617 1505-1506,1510-1511
+  s_8f0ab804a5a8f6::t_8be0822cad46fc 1571-1573
+server/internal/game/upgrade_shard_drops.go
+  s_27608ade6c1d08::t_3ec91296457927 36-46,59-60
+  s_8f0ab804a5a8f6::t_62492b1b14f5ee 1-35,47-57,61
+  s_8f0ab804a5a8f6::t_ddfaebbfae8eb9 58
+server/internal/store/upgrade_depth_cap_test.go
+  s_27608ade6c1d08::t_bba36c32c08eb6 45-47
+docs/CODEMAP.md
+  s_8f0ab804a5a8f6::t_0848ef2e0f12ba 34
+  s_8f0ab804a5a8f6::t_8adcad129e6362 23
+skills/showme/scripts/visual_capture.gd
+  s_27608ade6c1d08::t_14c2beb4aa0ff7 15
+  s_27608ade6c1d08::t_9cf52353b15905 332,335-336
+client/tests/test_character_bar.gd
+  s_27608ade6c1d08::t_9d1fd07e1390ba 46,52,54,57-58
+  s_27608ade6c1d08::t_318810402dd97d 25,28-29
+server/internal/game/bishop_test.go
+  s_27608ade6c1d08::t_aac0754157a7e1 320-367,369-378
+  s_27608ade6c1d08::t_2777191a54ba5d 368
+client/scripts/character_bar.gd
+  s_8f0ab804a5a8f6::t_c1ffc501c16329 259
+  s_8f0ab804a5a8f6::t_faf06cc16322d8 248-249
+server/internal/game/sim_load.go
+  s_27608ade6c1d08::t_de0097bbf33f15 185-201
+  s_8f0ab804a5a8f6::t_8b8c7956621943 207-228,230-231
+  s_27608ade6c1d08::t_bf287167a9822a 229,232
+client/scripts/blacksmith_shard_inventory.gd
+  s_27608ade6c1d08::t_334d6c5b8715b8 1-46
+server/internal/game/resource_wallet.go
+  s_8f0ab804a5a8f6::t_e91e96f58a0d50 4-11
+client/tests/test_shop_panel.gd
+  s_27608ade6c1d08::t_2bd679e1402361 531
+shared/rules/main_config.v0.json
+  s_8f0ab804a5a8f6::t_d8bbefa9f2f561 24-26
+client/scripts/bot_facade.gd
+  s_8f0ab804a5a8f6::t_6fd2a4dbd7c40d 61-78
+client/scripts/bot_controller.gd
+  s_8f0ab804a5a8f6::t_d2e0b026930bba 399-413
+  s_8f0ab804a5a8f6::t_538dd7ee7f9179 186-191
+server/internal/game/upgrade_shard_items_test.go
+  s_27608ade6c1d08::t_c8d54bab1c1f45 1-22
+server/internal/game/handlers.go
+  s_27608ade6c1d08::t_dcb424bde96187 55-56
+server/internal/inputdecode/inputdecode_test.go
+  s_27608ade6c1d08::t_a82575c1b24d59 288
+  s_27608ade6c1d08::t_54db25b6590fbc 312-315
+server/internal/http/blacksmith_recipe_test.go
+  s_27608ade6c1d08::t_9f38e3f8373a9e 19
+  s_27608ade6c1d08::t_c5df566706dab4 72,81
+  s_27608ade6c1d08::t_75ed630ba3aedc 38-42,51
+  s_27608ade6c1d08::t_8c4eba00c4ce0a 35
+server/internal/store/account_resources.go
+  s_8f0ab804a5a8f6::t_c0169851fe0fb2 43-45
+server/internal/store/upgrade_chance_test.go
+  s_27608ade6c1d08::t_8ac1ca32d59b44 131-132
+  s_27608ade6c1d08::t_17c812d15b8efb 102-103,105-106
+  s_27608ade6c1d08::t_ec44ef727608d4 40-43,50-51
+  s_27608ade6c1d08::t_d258613f7c3505 6
+  s_27608ade6c1d08::t_3b7005eee9a061 113
+  s_27608ade6c1d08::t_4399f3ce9fb066 123-124
+client/scripts/main.gd
+  s_8f0ab804a5a8f6::t_c7720203fa7fa4 6145-6150
+  s_8f0ab804a5a8f6::t_029edc4c263640 4940
+  s_8f0ab804a5a8f6::t_94671c8b19c4b4 4998
+  s_27608ade6c1d08::t_f39269f18495ef 5075-5076
+  s_8f0ab804a5a8f6::t_394d1c85549e1e 4962
+  s_8f0ab804a5a8f6::t_dce277ad06f0cb 4977,4981,4984-4988,4991-4997,4999-5003,5005-5007,5009-5036
+  s_8f0ab804a5a8f6::t_784e98eb0bff18 4989-4990
+  s_27608ade6c1d08::t_fcb87ccc424137 1563,1568,1570-1572
+  s_8f0ab804a5a8f6::t_88513180883c26 3834
+server/internal/store/upgrade_shard_store.go
+  s_8f0ab804a5a8f6::t_37821b4df61d9e 1-279
+tools/bot/scenarios/72_upgrade_resource_drop.json
+  s_27608ade6c1d08::t_ce76f21565e1ab 4-7,12,17-18,26,31-33,35,42,47
+shared/rules/main_config.v0.schema.json
+  s_8f0ab804a5a8f6::t_ca2a4c929eccc0 36-38
+  s_8f0ab804a5a8f6::t_e30596518e4ff3 13
+server/internal/game/sim.go
+  s_8f0ab804a5a8f6::t_21cfdbfd2811de 1493-1498
+  s_27608ade6c1d08::t_3e169369332dd0 872-873
+  s_8f0ab804a5a8f6::t_80743afde85e5a 754-756
+  s_27608ade6c1d08::t_e6f5d6742f160a 965-967
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6fd288af9d5dd834d39530532e5047bd5786d95f",
+  "prompts": {},
+  "sessions": {
+    "s_27608ade6c1d08": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "143819c6-22a4-4ac2-9ca5-c19ce7b856e5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_8f0ab804a5a8f6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6486e1df-6a0f-4e95-ba68-beaa323754f7",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

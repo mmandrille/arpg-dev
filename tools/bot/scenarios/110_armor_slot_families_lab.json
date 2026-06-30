@@ -1,0 +1,68 @@
+{
+  "id": "armor_slot_families_lab",
+  "ci_tier": "extended",
+  "world_id": "armor_slot_families_lab",
+  "seed": "v388_armor_lab_2",
+  "character_class": "sorcerer",
+  "debug_progression": {
+    "level": 3,
+    "unspent_stat_points": 5,
+    "stats": { "magic": 5 }
+  },
+  "title": "Armor slot families lab",
+  "description": "Prove tiara magic requirement, tiara skill-affix rolls, and full-plate rolled movement penalties versus chainmail.",
+  "steps": [
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_tiara"
+    },
+    {
+      "action": "assert_inventory_requirement_status",
+      "item_def_id": "cave_tiara",
+      "requirements_met": false,
+      "status": [
+        {
+          "stat": "magic",
+          "required": 8,
+          "current": 5,
+          "met": false
+        }
+      ]
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "cave_tiara",
+      "item_template_id": "cave_tiara",
+      "stat_keys": ["skill_damage_percent"]
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_tiara",
+      "slot": "head",
+      "expect_reject": "requirements_not_met"
+    },
+    {
+      "action": "allocate_stat",
+      "stat": "magic",
+      "points": 3,
+      "expect_progression": {
+        "magic": 8
+      }
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_tiara",
+      "slot": "head"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_full_plate"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "cave_full_plate",
+      "item_template_id": "cave_full_plate",
+      "stat_keys": ["movement_speed_percent"]
+    }
+  ]
+}

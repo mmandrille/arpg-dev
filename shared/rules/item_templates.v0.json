@@ -456,6 +456,127 @@
         { "class": "sorcerer", "stat": "max_mana_percent", "min": 8, "max": 12 }
       ],
       "effect_pool": []
+    },
+    "cave_leather_cap": {
+      "name": "Leather Cap",
+      "category": "equipment",
+      "item_type": "helm",
+      "slot": "head",
+      "equippable": true,
+      "requirements": { "level": 1, "dex": 5 },
+      "base_stats": { "armor": 0 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 0, "max": 1, "weight": 1 },
+        { "stat": "dex", "min": 1, "max": 3, "weight": 3, "min_rarity": "magic" },
+        { "stat": "evade_chance", "min": 3, "max": 8, "weight": 2, "min_rarity": "rare" }
+      ],
+      "effect_pool": []
+    },
+    "cave_tiara": {
+      "name": "Cave Tiara",
+      "category": "equipment",
+      "item_type": "helm",
+      "slot": "head",
+      "equippable": true,
+      "requirements": { "level": 1, "magic": 8 },
+      "base_stats": { "armor": 0 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 0, "max": 1, "weight": 1 },
+        { "stat": "skill_damage_percent", "min": 5, "max": 15, "weight": 4 },
+        { "stat": "skill_cooldown_reduction_percent", "min": 5, "max": 12, "weight": 3, "min_rarity": "magic" },
+        { "stat": "skill_mana_cost_reduction", "min": 1, "max": 2, "weight": 2, "min_rarity": "magic" },
+        { "stat": "max_mana", "min": 1, "max": 4, "weight": 2, "min_rarity": "magic" }
+      ],
+      "effect_pool": []
+    },
+    "cave_leather_vest": {
+      "name": "Leather Vest",
+      "category": "equipment",
+      "item_type": "chest",
+      "slot": "chest",
+      "equippable": true,
+      "requirements": { "level": 1, "dex": 5 },
+      "base_stats": { "armor": 1 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 0, "max": 1, "weight": 1 },
+        { "stat": "movement_speed_percent", "min": 3, "max": 12, "weight": 4 },
+        { "stat": "evade_chance", "min": 3, "max": 8, "weight": 2, "min_rarity": "rare" }
+      ],
+      "effect_pool": []
+    },
+    "cave_full_plate": {
+      "name": "Full Plate",
+      "category": "equipment",
+      "item_type": "chest",
+      "slot": "chest",
+      "equippable": true,
+      "requirements": { "level": 1, "str": 6 },
+      "base_stats": { "armor": 6 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 1, "max": 3, "weight": 2 },
+        { "stat": "movement_speed_percent", "min": -25, "max": -10, "weight": 5 }
+      ],
+      "effect_pool": []
+    },
+    "cave_cloth_wraps": {
+      "name": "Cloth Wraps",
+      "category": "equipment",
+      "item_type": "gloves",
+      "slot": "gloves",
+      "equippable": true,
+      "requirements": { "level": 1, "magic": 5 },
+      "base_stats": { "armor": 0 },
+      "rollable_stats": [
+        { "stat": "skill_damage_percent", "min": 5, "max": 12, "weight": 3 },
+        { "stat": "skill_mana_cost_reduction", "min": 1, "max": 2, "weight": 3, "min_rarity": "magic" },
+        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 3, "weight": 2, "min_rarity": "magic" },
+        { "stat": "armor", "min": 0, "max": 1, "weight": 1 }
+      ],
+      "effect_pool": []
+    },
+    "cave_gauntlets": {
+      "name": "Cave Gauntlets",
+      "category": "equipment",
+      "item_type": "gloves",
+      "slot": "gloves",
+      "equippable": true,
+      "requirements": { "level": 1, "str": 7 },
+      "base_stats": { "armor": 3 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 1, "max": 2, "weight": 2 },
+        { "stat": "attack_speed_percent", "min": -15, "max": -5, "weight": 4 },
+        { "stat": "block_percent", "min": 1, "max": 4, "weight": 1, "min_rarity": "rare" }
+      ],
+      "effect_pool": []
+    },
+    "cave_soft_boots": {
+      "name": "Soft Boots",
+      "category": "equipment",
+      "item_type": "boots",
+      "slot": "boots",
+      "equippable": true,
+      "requirements": { "level": 1, "dex": 5 },
+      "base_stats": { "armor": 0 },
+      "rollable_stats": [
+        { "stat": "movement_speed_percent", "min": 8, "max": 20, "weight": 5 },
+        { "stat": "armor", "min": 0, "max": 1, "weight": 1 },
+        { "stat": "evade_chance", "min": 3, "max": 8, "weight": 2, "min_rarity": "rare" }
+      ],
+      "effect_pool": []
+    },
+    "cave_plate_boots": {
+      "name": "Plate Boots",
+      "category": "equipment",
+      "item_type": "boots",
+      "slot": "boots",
+      "equippable": true,
+      "requirements": { "level": 1, "str": 7 },
+      "base_stats": { "armor": 2 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 1, "max": 2, "weight": 2 },
+        { "stat": "movement_speed_percent", "min": -20, "max": -8, "weight": 4 }
+      ],
+      "effect_pool": []
     }
   }
 }

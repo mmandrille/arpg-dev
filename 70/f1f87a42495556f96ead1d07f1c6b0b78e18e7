@@ -1,0 +1,37 @@
+shared/rules/item_templates.v0.json
+  s_77ad4f80d2b8e7::t_6ba1dc3fe5ae15 88
+  s_77ad4f80d2b8e7::t_3c774d6ba77855 122,124-125
+  s_77ad4f80d2b8e7::t_4803cd4e426394 207
+shared/rules/items.v0.json
+  s_325610c56bb100::t_82a5af083ac75c 5-6,8
+server/internal/game/sim.go
+  s_325610c56bb100::t_82a5af083ac75c 52,1430,1448-1472
+client/scripts/projectile_visuals.gd
+  s_325610c56bb100::t_82a5af083ac75c 7-8,22-41
+client/tests/test_projectile_visuals.gd
+  s_325610c56bb100::t_82a5af083ac75c 14,37-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "70f1f87a42495556f96ead1d07f1c6b0b78e18e7",
+  "prompts": {},
+  "sessions": {
+    "s_325610c56bb100": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3dd1aeb3-186a-4d17-95ae-7f6c7df693ba",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_77ad4f80d2b8e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "da43d82c-1a99-4c2a-aa79-397ff4de8e48",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

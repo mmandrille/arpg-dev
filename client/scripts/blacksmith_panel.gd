@@ -27,6 +27,8 @@ var pity_failure_threshold: int = 0
 var resource_item_def_id: String = ""
 var resource_count: int = 0
 var resource_wallet: Dictionary = {}
+var deepest_dungeon_depth: int = 0
+var item_level_levels_per_tier: int = 10
 var item_presentations: Dictionary:
 	get: return ItemRulesLoader.item_presentations
 var staged_item: Dictionary = {}
@@ -96,6 +98,8 @@ func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int,
 	pity_failure_threshold = int(config.get("item_upgrade_pity_failure_threshold", 0))
 	resource_item_def_id = str(config.get("item_upgrade_resource_item_def_id", ""))
 	resource_count = int(config.get("item_upgrade_resource_count", 0))
+	deepest_dungeon_depth = int(config.get("deepest_dungeon_depth", deepest_dungeon_depth))
+	item_level_levels_per_tier = int(config.get("item_level_levels_per_tier", item_level_levels_per_tier))
 	resource_wallet = next_resource_wallet.duplicate(true)
 	_status_label.text = status
 	_rebuild()
@@ -385,7 +389,20 @@ func _debug_row(item: Dictionary) -> Dictionary:
 
 func _upgrade_enabled(item: Dictionary) -> bool:
 	var level := _item_level(item)
-	return _is_upgrade_candidate(item) and _recipe_accepts_item(item) and level < max_level and _wallet_gold() >= _next_cost(level) and _has_upgrade_resource()
+	var depth_cap := _max_item_level_for_deepest_depth()
+	var effective_max := max_level
+	if depth_cap > 0:
+		effective_max = min(max_level, depth_cap)
+	return _is_upgrade_candidate(item) and _recipe_accepts_item(item) and level < effective_max and _wallet_gold() >= _next_cost(level) and _has_upgrade_resource()
+
+
+func _max_item_level_for_deepest_depth() -> int:
+	var depth := max(0, deepest_dungeon_depth)
+	if depth < 1:
+		return 1
+	var levels_per_tier := max(1, item_level_levels_per_tier)
+	var tier := depth / levels_per_tier
+	return max(1, tier)
 
 
 func _is_upgrade_candidate(item: Dictionary) -> bool:
@@ -437,6 +454,8 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 		"base_cost": base_cost,
 		"growth_cost": growth_cost,
 		"max_level": max_level,
+		"deepest_dungeon_depth": deepest_dungeon_depth,
+		"item_level_levels_per_tier": item_level_levels_per_tier,
 		"success_chance_percent": success_chance_percent,
 		"pity_failure_threshold": pity_failure_threshold,
 		"resource_count": resource_count,

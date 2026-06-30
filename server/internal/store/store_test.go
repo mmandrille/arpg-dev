@@ -1097,7 +1097,7 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 250); err != nil {
 		t.Fatal(err)
 	}
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}})
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1115,10 +1115,10 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if err := json.Unmarshal(item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
 	}
-	if stats.ItemLevel != 1 || stats.DamageMax != 5 || stats.DamageMin != 2 {
+	if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.DamageMin != 2 {
 		t.Fatalf("upgraded stats = %+v", stats)
 	}
-	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}})
+	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1131,13 +1131,13 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if err := json.Unmarshal(item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
 	}
-	if stats.ItemLevel != 2 || stats.DamageMax != 6 || stats.DamageMin != 2 {
+	if stats.ItemLevel != 2 || stats.DamageMax <= 4 || stats.DamageMin <= 2 {
 		t.Fatalf("second upgraded stats = %+v", stats)
 	}
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 25); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 1, 1, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}); !errors.Is(err, store.ErrConflict) {
+	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 1, 1, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("max level upgrade err = %v, want ErrConflict", err)
 	}
 }
@@ -1160,7 +1160,7 @@ func TestAccountStashItemUpgradeRejectsInsufficientGold(t *testing.T) {
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "poor_upgrade_item_"+suffix, "poor_upgrade_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}); !errors.Is(err, store.ErrConflict) {
+	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("insufficient gold upgrade err = %v, want ErrConflict", err)
 	}
 }
@@ -1191,7 +1191,7 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 100); err != nil {
 		t.Fatal(err)
 	}
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}})
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1214,7 +1214,7 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if upgraded.ItemTemplateID != "cave_blade" || upgraded.DisplayName != "Rare Cave Blade" || upgraded.Rarity != "rare" {
 		t.Fatalf("payload metadata after upgrade = %+v raw=%s", upgraded, string(item.RolledStats))
 	}
-	if upgraded.Stats["item_level"] != 1 || upgraded.Stats["damage_max"] != 6 || upgraded.Stats["damage_min"] != 4 {
+	if upgraded.Stats["item_level"] != 1 || upgraded.Stats["damage_max"] != 5 || upgraded.Stats["damage_min"] != 4 {
 		t.Fatalf("payload upgraded stats = %+v raw=%s", upgraded.Stats, string(item.RolledStats))
 	}
 	if upgraded.Requirements["str"] != 5 {

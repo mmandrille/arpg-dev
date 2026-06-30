@@ -4982,11 +4982,19 @@ func _apply_upgrade_resource_wallet_response(result: Dictionary) -> void:
 	resource_wallet[resource_id] = max(0, int(result.get("resource_wallet", 0)))
 
 func _blacksmith_config() -> Dictionary:
+	var config := {}
 	var path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/main_config.v0.json")
 	var parsed = _read_json(path)
 	if typeof(parsed) == TYPE_DICTIONARY:
-		return (parsed as Dictionary).get("gameplay", {})
-	return {}
+		config = ((parsed as Dictionary).get("gameplay", {}) as Dictionary).duplicate(true)
+	config["deepest_dungeon_depth"] = int(character_progression.get("deepest_dungeon_depth", 0))
+	var dungeon_path := ProjectSettings.globalize_path("res://").path_join("../shared/rules/dungeon_generation.v0.json")
+	var dungeon_parsed = _read_json(dungeon_path)
+	if typeof(dungeon_parsed) == TYPE_DICTIONARY:
+		var tiers = (dungeon_parsed as Dictionary).get("item_level_tiers", {})
+		if typeof(tiers) == TYPE_DICTIONARY:
+			config["item_level_levels_per_tier"] = int((tiers as Dictionary).get("levels_per_tier", 10))
+	return config
 
 func _on_bishop_respec_requested(bishop_entity_id: String) -> void:
 	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "":

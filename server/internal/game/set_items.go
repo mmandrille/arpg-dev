@@ -99,15 +99,18 @@ func (r *Rules) setItemPayload(setItemID string) (ItemRollPayload, bool) {
 	if setItem.Piece.MinimumLevel > requirements["level"] {
 		requirements["level"] = setItem.Piece.MinimumLevel
 	}
-	return ItemRollPayload{
+	itemLevel := MaxItemLevelForDepth(maxInt(1, requirements["level"]), r.DungeonGeneration.ItemLevelTiers)
+	payload := ItemRollPayload{
 		ItemTemplateID: setItem.Piece.BaseTemplateID,
 		DisplayName:    setItem.Piece.DisplayName,
 		Rarity:         "set",
-		ItemLevel:      itemLevelForSourceDepth(requirements["level"]),
+		ItemLevel:      1,
 		Stats:          stats,
 		Requirements:   requirements,
 		EffectIDs:      []string{},
-	}, true
+	}
+
+	return FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers), true
 }
 
 func (r *Rules) setChestItems() ([]*invItem, bool) {

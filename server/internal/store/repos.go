@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 )
 
 // ErrNotFound is returned when a requested row does not exist.
@@ -1502,12 +1502,12 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 	return result.characterGold, result.stashGold, nil
 }
 
-func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, bool, error) {
-	item, _, stashGold, chargedCost, success, err := s.UpgradeAccountStashItemWithWallet(ctx, accountID, "", stashItemID, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold, eligibleItemDefs)
+func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, bool, error) {
+	item, _, stashGold, chargedCost, success, err := s.UpgradeAccountStashItemWithWallet(ctx, accountID, "", stashItemID, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold, eligibleItemDefs, upgradeOpts)
 	return item, stashGold, chargedCost, success, err
 }
 
-func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}) (AccountStashItem, int, int, int, bool, error) {
+func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, int, bool, error) {
 	if baseCostGold < 0 || costGrowthPerLevel < 0 || maxLevel <= 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 || pityFailureThreshold < 0 {
 		return AccountStashItem{}, 0, 0, 0, false, ErrConflict
 	}
@@ -1565,6 +1565,10 @@ func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID
 		if err != nil {
 			return err
 		}
+		effectiveMaxLevel := game.EffectiveItemUpgradeMaxLevel(maxLevel, upgradeOpts.MaxItemLevelDepth)
+		if currentLevel >= effectiveMaxLevel {
+			return ErrConflict
+		}
 		chargedCost = baseCostGold + currentLevel*costGrowthPerLevel
 		if characterGold+stashGold < chargedCost {
 			return ErrConflict
@@ -1601,9 +1605,9 @@ func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID
 		}
 		var nextStats []byte
 		if success {
-			nextStats, err = upgradedRolledStats(item.RolledStats, maxLevel)
+			nextStats, err = game.UpgradeRolledStatsJSON(item.RolledStats, maxLevel, upgradeOpts)
 			if err != nil {
-				return err
+				return ErrConflict
 			}
 			nextStats, err = rolledStatsWithUpgradePityFailures(nextStats, 0)
 		} else {
@@ -1636,41 +1640,6 @@ func rolledStatsItemLevel(raw json.RawMessage) (int, error) {
 	}
 	stats := upgradeStatsMap(payload)
 	return numericStatValue(stats["item_level"]), nil
-}
-
-func upgradedRolledStats(raw json.RawMessage, maxLevel int) ([]byte, error) {
-	payload := map[string]any{}
-	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &payload); err != nil {
-			return nil, fmt.Errorf("store: decode rolled stats for upgrade: %w", err)
-		}
-	}
-	stats := upgradeStatsMap(payload)
-	level := numericStatValue(stats["item_level"])
-	if level >= maxLevel {
-		return nil, ErrConflict
-	}
-	keys := make([]string, 0, len(stats))
-	for key, value := range stats {
-		if key == "item_level" {
-			continue
-		}
-		if _, ok := numericStatValueOK(value); ok {
-			keys = append(keys, key)
-		}
-	}
-	sort.Strings(keys)
-	if len(keys) == 0 {
-		return nil, ErrConflict
-	}
-	current, _ := numericStatValueOK(stats[keys[0]])
-	stats[keys[0]] = current + 1
-	stats["item_level"] = level + 1
-	out, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("store: encode upgraded rolled stats: %w", err)
-	}
-	return out, nil
 }
 
 func upgradeStatsMap(payload map[string]any) map[string]any {

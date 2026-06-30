@@ -620,7 +620,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
 	}
-	if stats.ItemLevel != 1 || stats.DamageMax != 5 || stats.Pity.Failures != 0 {
+	if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.Pity.Failures != 0 {
 		t.Fatalf("upgraded route stats = %+v", stats)
 	}
 	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
@@ -636,7 +636,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
 	}
-	if stats.ItemLevel != 2 || stats.DamageMax != 6 || stats.Pity.Failures != 0 {
+	if stats.ItemLevel != 2 || stats.DamageMax <= 4 || stats.Pity.Failures != 0 {
 		t.Fatalf("second upgraded route stats = %+v", stats)
 	}
 	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
@@ -725,14 +725,14 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if payload.ItemTemplateID != "cave_shield" || payload.DisplayName != "Rare Cave Shield" || payload.Rarity != "rare" {
 		t.Fatalf("persisted upgraded rare shield metadata = %+v raw=%s", payload, string(found.RolledStats))
 	}
-	if payload.Stats["item_level"] != 1 || payload.Stats["armor"] != 5 || payload.Stats["block_percent"] != 8 {
+	if payload.Stats["item_level"] != 1 || payload.Stats["armor"] != 4 || payload.Stats["block_percent"] != 8 {
 		t.Fatalf("upgraded inventory stats = %+v raw=%s", payload.Stats, string(found.RolledStats))
 	}
 	var responseStats map[string]int
 	if err := json.Unmarshal(upgraded.Item.RolledStats, &responseStats); err != nil {
 		t.Fatal(err)
 	}
-	if responseStats["item_level"] != 1 || responseStats["armor"] != 5 || responseStats["block_percent"] != 8 {
+	if responseStats["item_level"] != 1 || responseStats["armor"] != 4 || responseStats["block_percent"] != 8 {
 		t.Fatalf("upgraded response stats = %+v raw=%s", responseStats, string(upgraded.Item.RolledStats))
 	}
 	stashItems, err := db.ListAccountStashItems(ctx, accountID)

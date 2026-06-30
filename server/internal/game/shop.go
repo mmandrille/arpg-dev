@@ -1005,11 +1005,15 @@ func (offer ShopOfferView) inventoryItem(instanceID uint64) *invItem {
 		equipped:   false,
 	}
 	if offer.ItemTemplateID != "" {
+		itemLevel := offer.ItemLevel
+		if itemLevel < 1 {
+			itemLevel = 1
+		}
 		item.rollPayload = &ItemRollPayload{
 			ItemTemplateID: offer.ItemTemplateID,
 			DisplayName:    offer.DisplayName,
 			Rarity:         offer.Rarity,
-			ItemLevel:      itemLevelForSourceDepth(offer.ItemLevel),
+			ItemLevel:      itemLevel,
 			Stats:          cloneIntMap(offer.RolledStats),
 			Requirements:   cloneIntMap(offer.Requirements),
 			EffectIDs:      cloneStringSlice(offer.EffectIDs),

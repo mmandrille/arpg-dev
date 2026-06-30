@@ -30,6 +30,12 @@ static func pity_guaranteed(item: Dictionary, pity_failure_threshold: int) -> bo
 
 static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	var max_level := int(context.get("max_level", 0))
+	var deepest_depth := int(context.get("deepest_dungeon_depth", 0))
+	var levels_per_tier := max(1, int(context.get("item_level_levels_per_tier", 10)))
+	var depth_cap := _max_item_level_for_depth(deepest_depth, levels_per_tier)
+	var effective_max := max_level
+	if depth_cap > 0:
+		effective_max = min(max_level, depth_cap)
 	var success_chance_percent := int(context.get("success_chance_percent", 100))
 	var pity_failure_threshold := int(context.get("pity_failure_threshold", 0))
 	var resource_count := int(context.get("resource_count", 0))
@@ -44,22 +50,16 @@ static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	var stats := _summary_stat_map(item)
 	if stats.is_empty():
 		stats = _stats_map(item)
-	if level >= max_level:
+	if level >= effective_max:
+		if depth_cap > 0 and level >= depth_cap and level < max_level:
+			return ["Reach deeper dungeon depth to upgrade further"]
 		return ["Max level reached"]
 	var guaranteed := pity_guaranteed(item, pity_failure_threshold)
 	lines.append("Success chance: %d%%" % success_chance_percent)
 	if pity_failure_threshold > 0:
 		lines.append("Next upgrade guaranteed" if guaranteed else "Pity: %d/%d failures" % [pity_failure_count(item), pity_failure_threshold])
-	lines.append("On success: Level %d -> %d" % [level, min(max_level, level + 1)])
-	for key in _ordered_upgrade_stat_keys(stats):
-		var current := int(stats.get(key, 0))
-		var next := current
-		if str(key) == "item_level":
-			next = min(max_level, level + 1)
-		elif current > 0:
-			next = current + 1
-		if next != current:
-			lines.append("%s: %d -> %d" % [_display_stat(str(key)), current, next])
+	lines.append("On success: Level %d -> %d" % [level, min(effective_max, level + 1)])
+	lines.append("Stats rescale to the next item tier")
 	if _failure_possible(success_chance_percent, guaranteed):
 		lines.append(_failure_line(item, pity_failure_threshold))
 	lines.append(_spend_line(cost, resource_count, resource_name))
@@ -191,3 +191,10 @@ static func _display_stat(stat: String) -> String:
 			return "Item level"
 		_:
 			return stat.replace("_", " ").capitalize()
+
+
+static func _max_item_level_for_depth(depth: int, levels_per_tier: int) -> int:
+	if depth < 1:
+		return 1
+	var tier := depth / max(1, levels_per_tier)
+	return max(1, tier)

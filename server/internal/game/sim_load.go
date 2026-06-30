@@ -207,7 +207,7 @@ func cloneRollPayload(in *ItemRollPayload) *ItemRollPayload {
 		ItemTemplateID: in.ItemTemplateID,
 		DisplayName:    in.DisplayName,
 		Rarity:         in.Rarity,
-		ItemLevel:      itemLevelForSourceDepth(in.ItemLevel),
+		ItemLevel:      in.ItemLevel,
 		Stats:          cloneIntMap(in.Stats),
 		Requirements:   cloneIntMap(in.Requirements),
 		EffectIDs:      cloneStringSlice(in.EffectIDs),

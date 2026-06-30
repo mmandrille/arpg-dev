@@ -12,12 +12,12 @@
           "offer_id": "generated:depth1:000",
           "kind": "generated",
           "item_template_id": "cave_boots",
-          "display_name": "Mighty Rare Cave Boots",
+          "display_name": "Vigorous Rare Cave Boots",
           "rarity": "rare",
           "rolled_stats": {
             "armor": 1,
-            "dex": 2,
-            "str": 3
+            "str": 3,
+            "vit": 2
           },
           "buy_price": 315,
           "source": "common_dungeon_mob",
@@ -27,12 +27,12 @@
           "offer_id": "generated:depth1:001",
           "kind": "generated",
           "item_template_id": "cave_boots",
-          "display_name": "Mystic Magic Cave Boots",
+          "display_name": "Vigorous Magic Cave Boots",
           "rarity": "magic",
           "rolled_stats": {
             "armor": 1,
             "magic": 2,
-            "str": 1
+            "vit": 1
           },
           "buy_price": 160,
           "source": "common_dungeon_mob",
@@ -45,9 +45,10 @@
           "display_name": "Common Cave Helm",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 3
+            "armor": 1,
+            "vit": 2
           },
-          "buy_price": 85,
+          "buy_price": 90,
           "source": "common_dungeon_mob",
           "depth": 1
         },
@@ -91,12 +92,11 @@
           "offer_id": "generated:depth2:000",
           "kind": "generated",
           "item_template_id": "cave_mail",
-          "display_name": "Vigorous Magic Cave Mail",
+          "display_name": "Mighty Magic Cave Mail",
           "rarity": "magic",
           "rolled_stats": {
             "armor": 3,
-            "str": 3,
-            "vit": 2
+            "str": 5
           },
           "buy_price": 310,
           "source": "common_dungeon_mob",
@@ -109,9 +109,10 @@
           "display_name": "Common Cave Mail",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 5
+            "armor": 3,
+            "max_hp": 5
           },
-          "buy_price": 140,
+          "buy_price": 165,
           "source": "common_dungeon_mob",
           "depth": 2
         },
@@ -151,9 +152,10 @@
           "display_name": "Common Cave Mail",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 7
+            "armor": 3,
+            "max_hp": 5
           },
-          "buy_price": 170,
+          "buy_price": 165,
           "source": "common_dungeon_mob",
           "depth": 2
         }
@@ -227,10 +229,10 @@
           "display_name": "Common Cave Gloves",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 2,
-            "attack_speed_percent": 5
+            "armor": 1,
+            "attack_speed_percent": 12
           },
-          "buy_price": 95,
+          "buy_price": 125,
           "source": "common_dungeon_mob",
           "depth": 3
         }

@@ -1576,6 +1576,7 @@ func LoadRules(dir string) (*Rules, error) {
 		BossFloor                BossFloorRules           `json:"boss_floor"`
 		MonsterRarityNote        string                   `json:"monster_rarity_note"`
 		MonsterDepthScaling      MonsterDepthScalingRules `json:"monster_depth_scaling"`
+		ItemLevelTiers           ItemLevelTierRules       `json:"item_level_tiers"`
 		MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
 		LootBandNote             string                   `json:"loot_band_note"`
 		LootBands                []DungeonLootBand        `json:"loot_bands"`
@@ -1712,6 +1713,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateMonsterDepthScaling(dungeonGeneration.MonsterDepthScaling, r.Combat); err != nil {
 		return nil, err
 	}
+	if dungeonGeneration.ItemLevelTiers.LevelsPerTier < 1 {
+		return nil, fmt.Errorf("game: invalid rules dungeon_generation.item_level_tiers.levels_per_tier: must be positive")
+	}
 	if err := validateMonsterRarities(dungeonGeneration.MonsterRarities); err != nil {
 		return nil, err
 	}
@@ -1748,6 +1752,7 @@ func LoadRules(dir string) (*Rules, error) {
 		BossFloor:                dungeonGeneration.BossFloor,
 		MonsterRarityNote:        dungeonGeneration.MonsterRarityNote,
 		MonsterDepthScaling:      dungeonGeneration.MonsterDepthScaling,
+		ItemLevelTiers:           dungeonGeneration.ItemLevelTiers,
 		MonsterRarities:          dungeonGeneration.MonsterRarities,
 		LootBandNote:             dungeonGeneration.LootBandNote,
 		LootBands:                dungeonGeneration.LootBands,

@@ -36,7 +36,7 @@ func TestAccountStashItemUpgradeFailureSpendsGoldWithoutStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 100); err != nil {
 		t.Fatal(err)
 	}
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 0, map[string]struct{}{"cave_blade": {}})
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestAccountStashItemUpgradePityGuaranteesSuccess(t *testing.T) {
 		} `json:"upgrade_pity"`
 	}
 	for attempt := 1; attempt <= 2; attempt++ {
-		item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 2, map[string]struct{}{"cave_blade": {}})
+		item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 2, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -113,7 +113,7 @@ func TestAccountStashItemUpgradePityGuaranteesSuccess(t *testing.T) {
 			t.Fatalf("attempt %d stats = %+v", attempt, stats)
 		}
 	}
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 2, map[string]struct{}{"cave_blade": {}})
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 2, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}

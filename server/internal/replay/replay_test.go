@@ -1509,10 +1509,10 @@ func (f *fakeRepo) AddAccountResource(context.Context, string, string, int) (sto
 func (f *fakeRepo) SpendAccountResource(context.Context, string, string, int) (store.AccountResourceAmount, error) {
 	return store.AccountResourceAmount{}, nil
 }
-func (f *fakeRepo) UpgradeAccountStashItem(context.Context, string, string, int, int, int, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, bool, error) {
+func (f *fakeRepo) UpgradeAccountStashItem(context.Context, string, string, int, int, int, int, int, int, map[string]struct{}, game.ItemUpgradeOptions) (store.AccountStashItem, int, int, bool, error) {
 	return store.AccountStashItem{}, 0, 0, true, nil
 }
-func (f *fakeRepo) UpgradeAccountStashItemWithWallet(context.Context, string, string, string, int, int, int, int, int, int, map[string]struct{}) (store.AccountStashItem, int, int, int, bool, error) {
+func (f *fakeRepo) UpgradeAccountStashItemWithWallet(context.Context, string, string, string, int, int, int, int, int, int, map[string]struct{}, game.ItemUpgradeOptions) (store.AccountStashItem, int, int, int, bool, error) {
 	return store.AccountStashItem{}, 0, 0, 0, true, nil
 }
 func (f *fakeRepo) ListActiveMarketListings(context.Context) ([]store.MarketListing, error) {

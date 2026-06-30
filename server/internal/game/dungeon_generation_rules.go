@@ -19,6 +19,7 @@ type DungeonGenerationRules struct {
 	BossFloor                BossFloorRules           `json:"boss_floor"`
 	MonsterRarityNote        string                   `json:"monster_rarity_note"`
 	MonsterDepthScaling      MonsterDepthScalingRules `json:"monster_depth_scaling"`
+	ItemLevelTiers           ItemLevelTierRules       `json:"item_level_tiers"`
 	MonsterRarities          []MonsterRarityDef       `json:"monster_rarities"`
 	LootBandNote             string                   `json:"loot_band_note"`
 	LootBands                []DungeonLootBand        `json:"loot_bands"`

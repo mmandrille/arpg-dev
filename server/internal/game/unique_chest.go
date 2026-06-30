@@ -394,15 +394,18 @@ func (r *Rules) uniqueChestPayload(templateID string, effectID string) (ItemRoll
 	if !ok || !effect.Enabled || effect.Status != "ready" || !uniqueChestEffectCompatible(effect, template.ItemType) {
 		return ItemRollPayload{}, false
 	}
-	return ItemRollPayload{
+	itemLevel := MaxItemLevelForDepth(maxInt(1, template.Requirements["level"]), r.DungeonGeneration.ItemLevelTiers)
+	payload := ItemRollPayload{
 		ItemTemplateID: templateID,
 		DisplayName:    uniqueItemDisplayName(template, effect),
 		Rarity:         "unique",
-		ItemLevel:      itemLevelForSourceDepth(template.Requirements["level"]),
+		ItemLevel:      1,
 		Stats:          cloneIntMap(template.BaseStats),
 		Requirements:   cloneIntMap(template.Requirements),
 		EffectIDs:      []string{effectID},
-	}, true
+	}
+
+	return FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers), true
 }
 
 func (r *Rules) namedUniquePayload(uniqueID string) (ItemRollPayload, bool) {
@@ -431,15 +434,18 @@ func (r *Rules) namedUniquePayload(uniqueID string) (ItemRollPayload, bool) {
 	if unique.MinimumLevel > requirements["level"] {
 		requirements["level"] = unique.MinimumLevel
 	}
-	return ItemRollPayload{
+	itemLevel := MaxItemLevelForDepth(maxInt(1, requirements["level"]), r.DungeonGeneration.ItemLevelTiers)
+	payload := ItemRollPayload{
 		ItemTemplateID: unique.BaseTemplateID,
 		DisplayName:    unique.DisplayName,
 		Rarity:         "unique",
-		ItemLevel:      itemLevelForSourceDepth(requirements["level"]),
+		ItemLevel:      1,
 		Stats:          stats,
 		Requirements:   requirements,
 		EffectIDs:      cloneStringSlice(unique.FixedEffectIDs),
-	}, true
+	}
+
+	return FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers), true
 }
 
 func uniqueChestEffectCompatible(effect UniqueEffectDef, itemType string) bool {

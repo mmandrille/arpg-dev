@@ -35,7 +35,7 @@
         "properties": {
           "name": { "type": "string", "minLength": 1 },
           "category": { "type": "string", "enum": ["equipment"] },
-          "item_type": { "type": "string", "enum": ["sword", "greatsword", "axe", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet"] },
+          "item_type": { "type": "string", "enum": ["sword", "greatsword", "axe", "staff", "bow", "shield", "dagger", "war_hammer", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet"] },
           "slot": {
             "type": "string",
             "enum": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring", "main_hand", "off_hand"]
@@ -62,6 +62,11 @@
             "type": "array",
             "items": { "type": "string", "minLength": 1 },
             "uniqueItems": true
+          },
+          "class_affinities": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/class_affinity" },
+            "uniqueItems": false
           }
         }
       }
@@ -137,6 +142,38 @@
             "properties": {
               "min": { "minimum": 0 },
               "max": { "minimum": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "class_affinity": {
+      "type": "object",
+      "required": ["class", "stat", "min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "class": { "type": "string", "enum": ["barbarian", "sorcerer", "paladin", "rogue", "ranger"] },
+        "stat": { "type": "string", "enum": ["damage_percent", "attack_speed_percent", "reach_percent", "max_mana_percent"] },
+        "min": { "type": "integer" },
+        "max": { "type": "integer" },
+        "mode": { "type": "string", "enum": ["penalty_if_not_class"] }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "stat": { "const": "attack_speed_percent" } },
+            "required": ["stat"]
+          },
+          "then": {
+            "properties": {
+              "min": { "minimum": -75, "maximum": 100 },
+              "max": { "minimum": -75, "maximum": 100 }
+            }
+          },
+          "else": {
+            "properties": {
+              "min": { "minimum": 0, "maximum": 100 },
+              "max": { "minimum": 0, "maximum": 100 }
             }
           }
         }

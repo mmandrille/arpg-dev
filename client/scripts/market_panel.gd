@@ -8,6 +8,7 @@ signal staged_offer_items_changed(item_instance_ids: Array)
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const ClassAffinityTooltipScript := preload("res://scripts/class_affinity_tooltip.gd")
 const MarketFilterControlsScript := preload("res://scripts/market_filter_controls.gd")
 const MarketItemComparisonScript := preload("res://scripts/market_item_comparison.gd")
 const MarketOfferRowsScript := preload("res://scripts/market_offer_rows.gd")
@@ -32,6 +33,7 @@ var market_receipts: Array = []
 var selected_listing_id: String = ""
 var staged_publish_item: Dictionary = {}
 var staged_offer_items: Array = []
+var viewer_character_class: String = ""
 var offer_view_mode: String = ""
 var _offer_tab_visible: bool = false
 var _panel: DraggableWindow
@@ -102,7 +104,7 @@ func _ready() -> void:
 	hide_display()
 
 
-func show_market(entity_id: String, next_listings: Array, next_stash_items: Array = [], next_account_id: String = "", status: String = "", next_equipped: Dictionary = {}) -> void:
+func show_market(entity_id: String, next_listings: Array, next_stash_items: Array = [], next_account_id: String = "", status: String = "", next_equipped: Dictionary = {}, next_character_class: String = "") -> void:
 	if _panel == null:
 		_build()
 	market_entity_id = entity_id
@@ -112,6 +114,7 @@ func show_market(entity_id: String, next_listings: Array, next_stash_items: Arra
 	active_offers = []
 	market_receipts = []
 	account_id = next_account_id
+	viewer_character_class = next_character_class
 	staged_publish_item = {}
 	staged_offer_items = []
 	selected_listing_id = ""
@@ -914,7 +917,8 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		MarketItemComparisonScript.entries_for_item(item, inventory_items, equipped) + UniqueEffectTooltipScript.rich_lines_for_item(item),
 		-1,
 		true,
-		MarketListingRowsScript.short_label(str(item.get("item_def_id", "")))
+		MarketListingRowsScript.short_label(str(item.get("item_def_id", ""))),
+		ClassAffinityTooltipScript.lines_for_item(item, _viewer_character_class())
 	)
 	return tooltip
 
@@ -1032,6 +1036,10 @@ func _rarity_color(rarity: String) -> Color:
 			return Color("#ffb26b")
 		_:
 			return Color("#e8dcc8")
+
+
+func _viewer_character_class() -> String:
+	return viewer_character_class
 
 
 func _row_style() -> StyleBoxFlat:

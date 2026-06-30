@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-29 (v386 skill-weapon-damage-scaling)
+Last updated: 2026-06-29 (v387 class-weapon-affinities)
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-29 (v386 skill-weapon-damage-scaling)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v386 — skill-weapon-damage-scaling |
+| **Latest completed slice** | v387 — class-weapon-affinities |
 | **Active branch** | `main` |
-| **CI gate** | focused verification green for v386; final batch `make ci` pending v387 |
-| **Next slice** | v387 class-weapon-affinities (in progress) |
+| **CI gate** | focused verification green for v386–v387; final batch `make ci` pending |
+| **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |
 

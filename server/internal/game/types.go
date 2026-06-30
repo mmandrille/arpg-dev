@@ -41,9 +41,10 @@ type EntityView struct {
 	ItemLevel                  int                     `json:"item_level,omitempty"`
 	RolledStats                map[string]int          `json:"rolled_stats,omitempty"`
 	Requirements               map[string]int          `json:"requirements,omitempty"`
-	RequirementStatus          []RequirementStatusView `json:"requirement_status,omitempty"`
-	RequirementsMet            *bool                   `json:"requirements_met,omitempty"`
-	EquipPreview               *EquipPreviewView       `json:"equip_preview,omitempty"`
+	RequirementStatus          []RequirementStatusView   `json:"requirement_status,omitempty"`
+	RequirementsMet            *bool                     `json:"requirements_met,omitempty"`
+	ClassAffinityStatus        []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	EquipPreview               *EquipPreviewView         `json:"equip_preview,omitempty"`
 	EffectIDs                  []string                `json:"effect_ids,omitempty"`
 	InteractableDefID          string                  `json:"interactable_def_id,omitempty"`
 	EliteObjective             bool                    `json:"elite_objective,omitempty"`
@@ -72,13 +73,14 @@ type ItemView struct {
 	ItemLevel         int                     `json:"item_level,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
 	Requirements      map[string]int          `json:"requirements,omitempty"`
-	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
-	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
-	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
-	EffectIDs         []string                `json:"effect_ids,omitempty"`
-	SummaryLines      []string                `json:"summary_lines,omitempty"`
-	Slot              string                  `json:"slot"`
-	Equipped          bool                    `json:"equipped"`
+	RequirementStatus    []RequirementStatusView    `json:"requirement_status,omitempty"`
+	RequirementsMet      *bool                      `json:"requirements_met,omitempty"`
+	ClassAffinityStatus  []ClassAffinityStatusView  `json:"class_affinity_status,omitempty"`
+	EquipPreview         *EquipPreviewView          `json:"equip_preview,omitempty"`
+	EffectIDs            []string                   `json:"effect_ids,omitempty"`
+	SummaryLines         []string                   `json:"summary_lines,omitempty"`
+	Slot                 string                     `json:"slot"`
+	Equipped             bool                       `json:"equipped"`
 }
 
 // StashItemView is the protocol view of an account-stash item.
@@ -91,11 +93,12 @@ type StashItemView struct {
 	ItemLevel         int                     `json:"item_level,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
 	Requirements      map[string]int          `json:"requirements,omitempty"`
-	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
-	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
-	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
-	EffectIDs         []string                `json:"effect_ids,omitempty"`
-	SummaryLines      []string                `json:"summary_lines,omitempty"`
+	RequirementStatus   []RequirementStatusView   `json:"requirement_status,omitempty"`
+	RequirementsMet     *bool                     `json:"requirements_met,omitempty"`
+	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	EquipPreview        *EquipPreviewView         `json:"equip_preview,omitempty"`
+	EffectIDs           []string                  `json:"effect_ids,omitempty"`
+	SummaryLines        []string                  `json:"summary_lines,omitempty"`
 }
 
 // ResourceAmountView is an account-wide material/resource balance.
@@ -111,8 +114,9 @@ type ItemRollPayload struct {
 	Rarity         string         `json:"rarity"`
 	ItemLevel      int            `json:"item_level"`
 	Stats          map[string]int `json:"stats"`
-	Requirements   map[string]int `json:"requirements"`
-	EffectIDs      []string       `json:"effect_ids"`
+	Requirements    map[string]int      `json:"requirements"`
+	EffectIDs       []string            `json:"effect_ids"`
+	ClassAffinities []ClassAffinityRoll `json:"class_affinities,omitempty"`
 }
 
 func (p ItemRollPayload) itemViewFields(v *ItemView) {

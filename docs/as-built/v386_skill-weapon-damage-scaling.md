@@ -21,4 +21,4 @@
 
 ## Deferred
 
-- Class weapon affinities (v387).
+- Production art for affinity weapon families.

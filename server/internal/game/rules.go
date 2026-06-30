@@ -290,8 +290,9 @@ type ItemTemplateDef struct {
 	ProjectileSpeed float64           `json:"projectile_speed,omitempty"`
 	Requirements    map[string]int    `json:"requirements"`
 	BaseStats       map[string]int    `json:"base_stats"`
-	RollableStats   []RollableStatDef `json:"rollable_stats"`
-	EffectPool      []string          `json:"effect_pool"`
+	RollableStats   []RollableStatDef  `json:"rollable_stats"`
+	ClassAffinities []ClassAffinityDef `json:"class_affinities,omitempty"`
+	EffectPool      []string           `json:"effect_pool"`
 }
 
 // SkillDef is a server-authoritative active skill definition.
@@ -1162,6 +1163,20 @@ func LoadRules(dir string) (*Rules, error) {
 		if !seen["damage_min"] || !seen["damage_max"] {
 			if isWeaponTemplate {
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats: damage_min and damage_max are required", id)
+			}
+		}
+		for i, affinity := range def.ClassAffinities {
+			if _, ok := r.CharacterProgression.Classes[affinity.Class]; !ok {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.class_affinities[%d].class: unknown class %s", id, i, affinity.Class)
+			}
+			if !isSupportedClassAffinityStat(affinity.Stat) {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.class_affinities[%d].stat: unsupported stat %s", id, i, affinity.Stat)
+			}
+			if affinity.Max < affinity.Min {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.class_affinities[%d]: max must be >= min", id, i)
+			}
+			if affinity.Mode != "" && affinity.Mode != "penalty_if_not_class" {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.class_affinities[%d].mode: %s", id, i, affinity.Mode)
 			}
 		}
 		itemTemplates.Templates[id] = def
@@ -3038,6 +3053,15 @@ func isSupportedRequirementStat(stat string) bool {
 func isSupportedItemStat(stat string) bool {
 	switch stat {
 	case "damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows", "movement_speed_percent":
+		return true
+	default:
+		return false
+	}
+}
+
+func isSupportedClassAffinityStat(stat string) bool {
+	switch stat {
+	case "damage_percent", "attack_speed_percent", "reach_percent", "max_mana_percent":
 		return true
 	default:
 		return false

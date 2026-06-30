@@ -203,7 +203,7 @@ func cloneRollPayload(in *ItemRollPayload) *ItemRollPayload {
 	if in == nil {
 		return nil
 	}
-	return &ItemRollPayload{
+	out := &ItemRollPayload{
 		ItemTemplateID: in.ItemTemplateID,
 		DisplayName:    in.DisplayName,
 		Rarity:         in.Rarity,
@@ -212,6 +212,12 @@ func cloneRollPayload(in *ItemRollPayload) *ItemRollPayload {
 		Requirements:   cloneIntMap(in.Requirements),
 		EffectIDs:      cloneStringSlice(in.EffectIDs),
 	}
+	if len(in.ClassAffinities) > 0 {
+		out.ClassAffinities = make([]ClassAffinityRoll, len(in.ClassAffinities))
+		copy(out.ClassAffinities, in.ClassAffinities)
+	}
+
+	return out
 }
 
 func cloneIntMap(in map[string]int) map[string]int {

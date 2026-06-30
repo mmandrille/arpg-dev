@@ -35,13 +35,14 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 		displayName = r.affixDisplayName(template, rarityID, stats)
 	}
 	return ItemRollPayload{
-		ItemTemplateID: templateID,
-		DisplayName:    displayName,
-		Rarity:         rarityID,
-		ItemLevel:      itemLevelForSourceDepth(sourceDepth),
-		Stats:          stats,
-		Requirements:   cloneIntMap(template.Requirements),
-		EffectIDs:      effectIDs,
+		ItemTemplateID:  templateID,
+		DisplayName:     displayName,
+		Rarity:          rarityID,
+		ItemLevel:       itemLevelForSourceDepth(sourceDepth),
+		Stats:           stats,
+		Requirements:    cloneIntMap(template.Requirements),
+		EffectIDs:       effectIDs,
+		ClassAffinities: rollClassAffinities(template.ClassAffinities, rng),
 	}, true
 }
 

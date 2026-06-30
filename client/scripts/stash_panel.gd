@@ -6,6 +6,7 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const ClassAffinityTooltipScript := preload("res://scripts/class_affinity_tooltip.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const UniqueChestTabsScript := preload("res://scripts/unique_chest_tabs.gd")
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
@@ -600,7 +601,8 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		UniqueEffectTooltipScript.rich_lines_for_item(item),
 		-1,
 		true,
-		_short_label(str(item.get("item_def_id", "")))
+		_short_label(str(item.get("item_def_id", ""))),
+		ClassAffinityTooltipScript.lines_for_item(item)
 	)
 	return tooltip
 

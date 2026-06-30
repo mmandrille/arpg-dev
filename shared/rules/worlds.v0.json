@@ -1427,6 +1427,30 @@
             "x": 4,
             "y": 4
           }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "affinity_rogue_dagger",
+          "position": {
+            "x": 3,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "affinity_barbarian_war_hammer",
+          "position": {
+            "x": 5,
+            "y": 4
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "affinity_heraldic_shield",
+          "position": {
+            "x": 3,
+            "y": 6
+          }
         }
       ]
     },

@@ -587,19 +587,20 @@ func (s *Sim) shopSellAppraisalView(item *invItem, sellPrice int) ShopSellApprai
 		category = def.Category
 	}
 	return ShopSellAppraisalView{
-		ItemInstanceID:    view.ItemInstanceID,
-		ItemDefID:         view.ItemDefID,
-		ItemTemplateID:    view.ItemTemplateID,
-		DisplayName:       s.displayNameForItem(item),
-		Rarity:            view.Rarity,
-		ItemLevel:         view.ItemLevel,
-		Slot:              view.Slot,
-		Category:          category,
-		RolledStats:       view.RolledStats,
-		Requirements:      view.Requirements,
-		RequirementStatus: view.RequirementStatus,
-		RequirementsMet:   view.RequirementsMet,
-		EquipPreview:      view.EquipPreview,
+		ItemInstanceID:      view.ItemInstanceID,
+		ItemDefID:           view.ItemDefID,
+		ItemTemplateID:      view.ItemTemplateID,
+		DisplayName:         s.displayNameForItem(item),
+		Rarity:              view.Rarity,
+		ItemLevel:           view.ItemLevel,
+		Slot:                view.Slot,
+		Category:            category,
+		RolledStats:         view.RolledStats,
+		Requirements:        view.Requirements,
+		RequirementStatus:   view.RequirementStatus,
+		RequirementsMet:     view.RequirementsMet,
+		ClassAffinityStatus: view.ClassAffinityStatus,
+		EquipPreview:        view.EquipPreview,
 		EffectIDs:         view.EffectIDs,
 		SellPrice:         sellPrice,
 		SummaryLines:      s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID])),
@@ -720,6 +721,11 @@ func (s *Sim) annotateShopOfferView(view *ShopOfferView, item *invItem) {
 		view.RequirementStatus = status
 		view.RequirementsMet = met
 	})
+	if item.rollPayload != nil {
+		s.annotateClassAffinityStatus(item.rollPayload, func(status []ClassAffinityStatusView) {
+			view.ClassAffinityStatus = status
+		})
+	}
 	if preview := s.equipPreviewForItem(item, view.Slot); preview != nil {
 		view.EquipPreview = preview
 	}

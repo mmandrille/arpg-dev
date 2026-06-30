@@ -59,7 +59,7 @@ class ItemPreview:
 		return out.substr(0, 3)
 
 
-func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, requirement_lines: Array, comparison_entries: Array, price: int = -1, affordable: bool = true, fallback_label: String = "") -> void:
+func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, requirement_lines: Array, comparison_entries: Array, price: int = -1, affordable: bool = true, fallback_label: String = "", affinity_lines: Array = []) -> void:
 	_clear_children(self)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var rarity := str(item.get("rarity", "common")).to_lower()
@@ -98,6 +98,11 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 		root.add_child(_tooltip_spacer(8))
 		root.add_child(_tooltip_label("Requirements", Color("#c9a227")))
 		for line in visible_requirement_lines:
+			root.add_child(_tooltip_label(_entry_text(line), _entry_color(line, Color("#d8c7a6")), CONTENT_WIDTH, REQUIREMENT_FONT_SIZE))
+	if not affinity_lines.is_empty():
+		root.add_child(_tooltip_spacer(8))
+		root.add_child(_tooltip_label("Class affinity", Color("#c9a227")))
+		for line in affinity_lines:
 			root.add_child(_tooltip_label(_entry_text(line), _entry_color(line, Color("#d8c7a6")), CONTENT_WIDTH, REQUIREMENT_FONT_SIZE))
 	if not comparison_entries.is_empty():
 		root.add_child(_tooltip_spacer(6))

@@ -250,6 +250,56 @@
         "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 90.0 },
         "scale": { "x": 0.16, "y": 0.16, "z": 0.16 }
       }
+    },
+    "affinity_rogue_dagger": {
+      "asset_id": "weapon_rusty_sword_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": -0.08, "z": 0.0 },
+        "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.72, "y": 0.72, "z": 0.72 }
+      }
+    },
+    "affinity_barbarian_war_hammer": {
+      "asset_id": "weapon_starter_axe_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": -0.16, "z": 0.0 },
+        "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.18, "y": 1.18, "z": 1.18 }
+      }
+    },
+    "affinity_heraldic_shield": {
+      "asset_id": "fallback_equipment_off_hand_v0",
+      "slot": "off_hand",
+      "mount_socket": "off_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
+      }
+    },
+    "affinity_compound_bow": {
+      "asset_id": "weapon_training_bow_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.05, "y": 1.05, "z": 1.05 }
+      }
+    },
+    "affinity_sorcerer_staff": {
+      "asset_id": "weapon_starter_staff_v0",
+      "slot": "main_hand",
+      "mount_socket": "right_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": -0.18, "z": 0.0 },
+        "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 1.05, "y": 1.05, "z": 1.05 }
+      }
     }
   }
 }

@@ -25,7 +25,7 @@ Last updated: 2026-06-30 (v388 armor-slot-families)
 |-------|-------|
 | **Latest completed slice** | v388 — armor-slot-families |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` pending post-v388 batch gate |
+| **CI gate** | `make ci` green 2026-06-30 (v388) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |

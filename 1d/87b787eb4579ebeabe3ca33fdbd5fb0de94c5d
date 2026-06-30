@@ -1,0 +1,212 @@
+server/internal/game/resource_loot_drops_test.go
+  s_1e9bffd09b0e6a::t_f6d0757acdf7c6 7,9-10,26,28,31-35,37,41-54
+client/scripts/blacksmith_panel_actions.gd
+  s_029ce3df06db3c::t_41d46b0acd2adb 1-120
+client/scripts/blacksmith_panel.gd
+  s_029ce3df06db3c::t_aafb156582474a 14
+  s_1e9bffd09b0e6a::t_a891a9f3af7622 177-189
+  s_1e9bffd09b0e6a::t_cfe80eae1aeddb 308
+  s_1e9bffd09b0e6a::t_75ab75f7dd5714 315,317-318
+  s_1e9bffd09b0e6a::t_fa4163fcc8e4b4 364-365
+  s_029ce3df06db3c::t_700b33a1eada15 376-391,397,400-402,404,406-410,412
+  s_1e9bffd09b0e6a::t_93a926a4232919 5-6
+  s_1e9bffd09b0e6a::t_43d923d0de1ade 392-396,398-399,405
+  s_029ce3df06db3c::t_5b99550df08a3a 454,459,463,468
+  s_1e9bffd09b0e6a::t_9cc9ca8369c93a 458
+  s_1e9bffd09b0e6a::t_345d4ea838912b 462,466-467,469-471,475
+  s_029ce3df06db3c::t_389ec914e0c3e1 511
+  s_1e9bffd09b0e6a::t_dae06917e1ec9d 578-579
+  s_1e9bffd09b0e6a::t_0b4467c7bc633a 559
+server/internal/game/gold_auto_pickup_test.go
+  s_029ce3df06db3c::t_1cbb63fbcb7621 281
+  s_029ce3df06db3c::t_7a4d9a7df4b9b0 109-112
+  s_029ce3df06db3c::t_862d2e490f3146 78,81-82,84,86-88
+server/internal/http/account_stash_merge.go
+  s_1e9bffd09b0e6a::t_3e69c72aa9e1a0 19-29,32-84
+client/scripts/net_client.gd
+  s_1e9bffd09b0e6a::t_e437a206db31ba 433-450
+server/internal/game/rules.go
+  s_1e9bffd09b0e6a::t_aa0b1163977049 68
+tools/bot/scenarios/client/blacksmith_renew_item.json
+  s_029ce3df06db3c::t_646dc35953afe6 17,29
+  s_029ce3df06db3c::t_eaf3f401699b9c 12,14,18,24,26,30
+  s_1e9bffd09b0e6a::t_ef61f34c600546 2,6-8,10,19-22,31-32
+  s_029ce3df06db3c::t_b546b93ed3c217 33
+server/internal/game/resource_loot_drops.go
+  s_1e9bffd09b0e6a::t_62e1547eb58f4a 3,6-11,14-29,33-46,52-100,104,109-114,117-118,131-141,149-156
+server/internal/inputdecode/inputdecode.go
+  s_1e9bffd09b0e6a::t_45b909285be350 163
+  s_1e9bffd09b0e6a::t_0dfa25c8bbf07b 42
+  s_1e9bffd09b0e6a::t_ad2270db280e08 367-372
+client/scripts/blacksmith_shard_inventory.gd
+  s_1e9bffd09b0e6a::t_190dc1f909cb5f 5-9,33,39-42,44,50-51
+server/internal/game/handlers.go
+  s_1e9bffd09b0e6a::t_2e1780872d9b38 57
+client/scripts/main.gd
+  s_1e9bffd09b0e6a::t_3fd1caea985739 1563
+  s_1e9bffd09b0e6a::t_874d403d123058 5015
+  s_1e9bffd09b0e6a::t_deae2fa95f0c79 5072-5073
+  s_1e9bffd09b0e6a::t_7f2c92c8eec519 4948-4949,4951,4954,4959-4960,4964-4985
+  s_1e9bffd09b0e6a::t_e48d83238fa4ed 6140-6142
+  s_1e9bffd09b0e6a::t_562dc2a6659f3f 3833
+client/scripts/bot_facade.gd
+  s_1e9bffd09b0e6a::t_45064b3cb831d5 55-60
+docs/as-built/v391_renew-stones.md
+  s_029ce3df06db3c::t_0320deec0b1f74 31-33
+  s_1e9bffd09b0e6a::t_c1d9a6c3ded02a 1-30
+client/scripts/blacksmith_panel_actions.gd.uid
+  s_029ce3df06db3c::t_a9c0e4aa04ecab 1
+server/internal/game/bishop_debug.go
+  s_1e9bffd09b0e6a::t_6d3e7aa45ebcfb 95-136
+client/tests/test_shop_panel.gd
+  s_1e9bffd09b0e6a::t_75e80fa7dbec17 484-489
+tools/bot/scenarios/client/blacksmith_shard_merge.json
+  s_1e9bffd09b0e6a::t_aa766f0e8b45e4 6-8,23
+server/internal/http/account_stash.go
+  s_1e9bffd09b0e6a::t_e5dc6457af15a1 158
+  s_1e9bffd09b0e6a::t_b540273c07f6c8 23-24
+  s_1e9bffd09b0e6a::t_fe0a7ca5ec4cc3 18
+  s_1e9bffd09b0e6a::t_01387bbcad9cc2 328,333
+  s_1e9bffd09b0e6a::t_79dc1129e2c3a8 206
+  s_1e9bffd09b0e6a::t_c53bd0a533149a 377,383,393
+client/scripts/bishop_panel.gd
+  s_1e9bffd09b0e6a::t_784718d32956de 34
+  s_1e9bffd09b0e6a::t_9df6d804c7d8f4 234
+  s_1e9bffd09b0e6a::t_8e85bd9ef7a979 208-213
+server/internal/game/badge_rewards_test.go
+  s_029ce3df06db3c::t_690129076fd24b 103,106-107
+client/tests/test_blacksmith_panel.gd
+  s_1e9bffd09b0e6a::t_ebb395c23f23e0 1-2,40,42-46,49,52,54,56-58,60
+client/scripts/blacksmith_merge_panel.gd
+  s_1e9bffd09b0e6a::t_4d39aca8e1eba8 4,9,20-21,25-28,32,64,110,112,123,128-131,135-136,149,151-152,154,165-166,168-170,177,183-185,192
+server/internal/game/combat_control_test.go
+  s_029ce3df06db3c::t_8f115c7562d652 423-428,430,439-449
+server/internal/http/blacksmith_renew_test.go
+  s_1e9bffd09b0e6a::t_847cc357a6b463 9,14,18-19,24-25,28-29,32,35-39,41,43-44,47-48,50-51,53-61,64,67,70-74
+shared/assets/item_presentations.v0.json
+  s_1e9bffd09b0e6a::t_f0c44299976931 183-187
+server/internal/game/renew_stone_items.go
+  s_1e9bffd09b0e6a::t_8b82b3aefee6fd 1-76
+docs/plans/v391_2026-06-30-renew-stones.md
+  s_1e9bffd09b0e6a::t_999b81025db0bf 1-27
+server/internal/replay/replay_test.go
+  s_029ce3df06db3c::t_c670ac3c6e96c4 1518-1530
+server/internal/game/item_reroll.go
+  s_1e9bffd09b0e6a::t_159604377899ee 175,179
+  s_1e9bffd09b0e6a::t_e0b3861d4af6ef 1-77,79-174,176-178,180-183
+  s_1e9bffd09b0e6a::t_e993c890899fba 78
+server/internal/store/interfaces.go
+  s_1e9bffd09b0e6a::t_6136cf304d00c6 88-89
+  s_1e9bffd09b0e6a::t_89b28a0ace26e2 5
+shared/rules/worlds.v0.json
+  s_029ce3df06db3c::t_726cbdbb6a4193 2797-2803
+server/internal/store/upgrade_shard_store.go
+  s_1e9bffd09b0e6a::t_713ff4c6875111 83,97-98,100
+  s_1e9bffd09b0e6a::t_970049c69aa32b 150
+  s_1e9bffd09b0e6a::t_a48960fa8996d0 90
+  s_1e9bffd09b0e6a::t_606c5c00e22169 93
+  s_1e9bffd09b0e6a::t_b3d57a7e9e1f98 119-128,132,137
+server/internal/game/sim.go
+  s_1e9bffd09b0e6a::t_03a9633faff3b4 1501-1502
+  s_1e9bffd09b0e6a::t_d000f87e88508c 877
+  s_1e9bffd09b0e6a::t_57f8ae8af6030c 757-759
+  s_1e9bffd09b0e6a::t_e7f925392e4800 972-974
+server/internal/store/leveled_consumable_store.go
+  s_1e9bffd09b0e6a::t_e8a71bf3b72303 8
+  s_1e9bffd09b0e6a::t_2f985d73ba0f9a 55
+  s_1e9bffd09b0e6a::t_bca098eaeceab5 210
+  s_1e9bffd09b0e6a::t_115668cd58c056 107
+  s_1e9bffd09b0e6a::t_28b19582aaa4c6 1-7,9-54,56-106,108-209,211-362
+docs/CODEMAP.md
+  s_1e9bffd09b0e6a::t_25dd07798655fc 34
+  s_029ce3df06db3c::t_4fb75df9406845 23
+server/internal/store/account_resources_test.go
+  s_1e9bffd09b0e6a::t_192968a2a7569d 39
+  s_1e9bffd09b0e6a::t_92174db10737e3 32
+  s_1e9bffd09b0e6a::t_89933619d6db41 43
+  s_1e9bffd09b0e6a::t_131e104fa1d450 50
+  s_1e9bffd09b0e6a::t_965e2b8d9b035d 53
+  s_1e9bffd09b0e6a::t_1b3f95419f3d65 61-62
+  s_1e9bffd09b0e6a::t_4c84c285633616 25
+client/tests/test_material_wallet_badges.gd
+  s_1e9bffd09b0e6a::t_85d5970150a222 60-63
+shared/rules/main_config.v0.json
+  s_1e9bffd09b0e6a::t_439e9184b6b34e 24-35
+client/scripts/bot_step_catalog.gd
+  s_1e9bffd09b0e6a::t_213be29635cca1 61
+server/internal/game/bishop_test.go
+  s_1e9bffd09b0e6a::t_1d94aee114045a 368-395
+docs/progress/slice-lifecycle.md
+  s_029ce3df06db3c::t_169029e1988dd4 404
+  s_029ce3df06db3c::t_645ba197b96e2f 405
+PROGRESS.md
+  s_029ce3df06db3c::t_b91c7f12534e14 28
+  s_029ce3df06db3c::t_c44c9647f9a441 18,26
+server/internal/game/item_reroll_test.go
+  s_1e9bffd09b0e6a::t_fb3ecb7edda306 1-13,15-20,23-24,26-68
+  s_1e9bffd09b0e6a::t_264a148e88fea4 14,21-22,25
+client/scripts/bot_controller.gd
+  s_1e9bffd09b0e6a::t_521a7a8693f826 754-755
+  s_1e9bffd09b0e6a::t_feda489def8b5e 180-181
+  s_1e9bffd09b0e6a::t_0deb3adf455926 376-380
+docs/specs/v391_spec-renew-stones.md
+  s_029ce3df06db3c::t_803430b3af84f1 3
+  s_029ce3df06db3c::t_0812e256e62919 1-2,4-76
+client/scripts/blacksmith_recipes.gd
+  s_1e9bffd09b0e6a::t_7cf952c8f1d70d 4
+  s_1e9bffd09b0e6a::t_b29c19b6906838 6,9,11-12,17,22-23,30-31,38-39,45-60
+.maintainability/file-size-baseline.tsv
+  s_029ce3df06db3c::t_244269c20de6a0 24
+  s_029ce3df06db3c::t_4272db4a6934f0 3
+server/internal/game/badge_rewards.go
+  s_029ce3df06db3c::t_a3f7b956b07d16 121-122,124,129
+  s_029ce3df06db3c::t_dde15b1a4eb8d8 149
+shared/rules/main_config.v0.schema.json
+  s_1e9bffd09b0e6a::t_47ac591c8450b3 13
+  s_1e9bffd09b0e6a::t_c8be5609dc0032 36-61
+server/internal/game/main_config_validation.go
+  s_1e9bffd09b0e6a::t_9bb410044e6e7d 9-10
+  s_1e9bffd09b0e6a::t_888ab6fa814e76 59-95
+  s_1e9bffd09b0e6a::t_2fd54234dc10f9 115-119
+shared/rules/items.v0.json
+  s_1e9bffd09b0e6a::t_1c4e9e564b7f5b 12
+tools/bot/scenarios/resource_loot_pool_drop.json
+  s_1e9bffd09b0e6a::t_5de685cbc19cec 15-16,20
+  s_029ce3df06db3c::t_ef08451c2a984a 5-7,10-12,17-19,21,24-26,31-33,35,38-40,43-45,50-52,55-57
+  s_1e9bffd09b0e6a::t_3bb0427986a3b3 2,8,29-30,34,46-48
+server/internal/game/interactables.go
+  s_1e9bffd09b0e6a::t_34d7b9671b3921 76-77
+client/scripts/bot_scenario_runner.gd
+  s_1e9bffd09b0e6a::t_199a44922a6c69 1618
+client/scripts/bot_action_step_validator.gd
+  s_1e9bffd09b0e6a::t_ebe6852d52a4ea 16
+docs/progress/scenario-movement-audit.tsv
+  s_029ce3df06db3c::t_d46c4c95233d0c 178-179
+  s_029ce3df06db3c::t_f9e2807158ff77 80-81
+server/internal/http/account_stash_renew.go
+  s_1e9bffd09b0e6a::t_1c363801eb3011 1-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1d87b787eb4579ebeabe3ca33fdbd5fb0de94c5d",
+  "prompts": {},
+  "sessions": {
+    "s_029ce3df06db3c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "65b01da4-21e0-47f3-8da9-220ab6781b97",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_1e9bffd09b0e6a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "cd38428d-21b0-44fb-acfa-cf95320e0987",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

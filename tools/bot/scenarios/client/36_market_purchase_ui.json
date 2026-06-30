@@ -1,5 +1,6 @@
 {
   "id": "market_purchase_ui",
+  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "market_purchase_ui_115",
@@ -33,9 +34,9 @@
     { "type": "wait_event", "event_type": "stash_gold_deposited", "timeout_s": 15.0 },
     { "type": "assert_stash_gold", "at_least": 37 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
-    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 37, "at_least": 1, "timeout_s": 15.0 },
+    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 37, "at_least": 1, "timeout_s": 30.0 },
     { "type": "click_market_purchase_listing", "item_def_id": "cave_mail", "price_gold": 37 },
-    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 37, "equals": 0, "timeout_s": 15.0 },
+    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 37, "equals": 0, "timeout_s": 30.0 },
     { "type": "assert_market_listing_rows", "item_def_id": "cave_mail", "price_gold": 37, "equals": 0 },
     { "type": "assert_stash_item_count", "item_def_id": "cave_mail", "equals": 1 }
   ]

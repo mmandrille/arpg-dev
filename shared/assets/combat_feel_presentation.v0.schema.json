@@ -61,6 +61,14 @@
         "min_speed_scale": { "type": "number", "exclusiveMinimum": 0 },
         "max_speed_scale": { "type": "number", "exclusiveMinimum": 0 }
       }
+    },
+    "enemy_impact_feedback": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
     }
   }
 }

@@ -63,6 +63,9 @@
       }
     }
   },
+  "level_up": {
+    "restore_hp_and_mana": true
+  },
   "points_per_level": 3,
   "skill_points": {
     "points_per_grant": 1,

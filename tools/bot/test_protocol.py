@@ -447,8 +447,13 @@ def test_load_scenarios_dungeon_levels_returns_to_matching_stair():
 
 def test_select_scenarios_all_returns_catalog_order():
     scenarios = load_scenarios()
+    expected = [
+        scenario
+        for scenario in scenarios
+        if scenario.id != "skill_visual" and scenario.ci_tier != "benchmark"
+    ]
 
-    assert select_scenarios(scenarios, "all") == [scenario for scenario in scenarios if scenario.id != "skill_visual"]
+    assert select_scenarios(scenarios, "all") == expected
 
 
 def test_select_scenarios_accepts_file_name_and_stem():

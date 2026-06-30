@@ -396,6 +396,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v382** | `combat-tick-budget` | Complete | [`spec`](../specs/v382_spec-combat-tick-budget.md) | [`plan`](../plans/v382_2026-06-29-combat-tick-budget.md) | [`as-built`](../as-built/v382_combat-tick-budget.md) |
 | **v383** | `charge-lag-recovery` | Complete | [`spec`](../specs/v383_spec-charge-lag-recovery.md) | [`plan`](../plans/v383_2026-06-29-charge-lag-recovery.md) | [`as-built`](../as-built/v383_charge-lag-recovery.md) |
 | **v384** | `persist-combat-defer` | Complete | [`spec`](../specs/v384_spec-persist-combat-defer.md) | [`plan`](../plans/v384_2026-06-29-persist-combat-defer.md) | [`as-built`](../as-built/v384_persist-combat-defer.md) |
+| **v385** | `gameplay-feel-polish` | Complete (`make ci` green) | — (autoloop feel batch) | — | [`as-built`](../as-built/v385_gameplay-feel-polish.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

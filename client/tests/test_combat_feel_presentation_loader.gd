@@ -22,6 +22,7 @@ func _test_catalog_loads_positive_values() -> void:
 	CombatFeelPresentationLoaderScript.ensure_loaded()
 	_assert_true("input buffer positive", CombatFeelPresentationLoaderScript.input_buffer_seconds() > 0.0)
 	_assert_true("movement smoothing has catch_up_speed", CombatFeelPresentationLoaderScript.movement_smoothing().has("catch_up_speed"))
+	_assert_false("enemy impact disabled by default", CombatFeelPresentationLoaderScript.enemy_impact_feedback_enabled())
 
 
 func _test_config_facade_matches_loader() -> void:
@@ -36,6 +37,10 @@ func _assert_true(label: String, value: bool) -> void:
 	else:
 		_fail_count += 1
 		push_error("[gdtest] FAIL: %s" % label)
+
+
+func _assert_false(label: String, value: bool) -> void:
+	_assert_true(label, not value)
 
 
 func _assert_approx(label: String, got: float, want: float, tolerance: float) -> void:

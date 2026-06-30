@@ -89,6 +89,11 @@ static func level_loading_min_display_seconds() -> float:
 	return LEVEL_LOADING_MIN_DISPLAY_SECONDS
 
 
+static func enemy_impact_feedback_enabled() -> bool:
+	ensure_loaded()
+	return CombatFeelPresentationLoaderScript.enemy_impact_feedback_enabled()
+
+
 static func reset_for_tests() -> void:
 	_initialized = false
 	CombatFeelPresentationLoaderScript.reset_for_tests()

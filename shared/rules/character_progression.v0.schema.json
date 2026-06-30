@@ -25,6 +25,14 @@
         "first_grant_level": { "type": "integer", "minimum": 1 }
       }
     },
+    "level_up": {
+      "type": "object",
+      "required": ["restore_hp_and_mana"],
+      "additionalProperties": false,
+      "properties": {
+        "restore_hp_and_mana": { "type": "boolean" }
+      }
+    },
     "level_cap": { "type": "integer", "minimum": 2 },
     "experience_curve": {
       "type": "object",

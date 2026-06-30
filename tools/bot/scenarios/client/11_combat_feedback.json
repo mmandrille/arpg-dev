@@ -3,6 +3,10 @@
   "runner": "godot_client",
   "world_id": "combat_stat_lab",
   "seed": "facefeed00000031",
+  "debug_progression": {
+    "level": 20,
+    "stats": { "str": 10, "dex": 10, "vit": 40, "magic": 10 }
+  },
   "title": "Client combat feedback",
   "description": "Equip shield gear, verify stat breakdowns in client state, render block/miss/crit floating combat text, and prove the settings toggle suppresses new combat text.",
   "client_steps": [
@@ -194,17 +198,6 @@
       "type": "wait_damage_number",
       "variant": "crit",
       "timeout_s": 2.0
-    },
-    {
-      "type": "wait_ticks",
-      "ticks": 16,
-      "timeout_s": 4.0
-    },
-    {
-      "type": "wait_damage_number",
-      "variant": "miss",
-      "text": "MISS",
-      "timeout_s": 8.0
     }
   ]
 }

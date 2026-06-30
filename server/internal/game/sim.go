@@ -3956,6 +3956,7 @@ func (s *Sim) awardExperienceForCurrentPlayer(amount int, corr string, res *Tick
 				UnspentSkillPoints: intPtr(s.progression.UnspentSkillPoints),
 			})
 		}
+		s.restorePlayerResourcesOnLevelUp(corr, res)
 	}
 
 	view := s.CharacterProgressionView()

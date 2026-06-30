@@ -11,6 +11,20 @@ const PlayerDamageVignetteScript := preload("res://scripts/player_damage_vignett
 static var _camera: Camera3D = null
 static var _max_hp: int = 1
 static var _local_player_id: String = ""
+static var _entity_impact_allowed: Callable = Callable()
+
+
+static func configure_entity_impact_gate(gate: Callable) -> void:
+	_entity_impact_allowed = gate
+
+
+static func clear_session() -> void:
+	_camera = null
+	_max_hp = 1
+	_local_player_id = ""
+	_entity_impact_allowed = Callable()
+	CameraImpactFeedbackScript.reset_session()
+	PlayerDamageVignetteScript.reset_session()
 
 
 static func bind_camera(camera: Camera3D, max_hp: int, delta: float, local_player_id: String = "") -> void:
@@ -19,14 +33,6 @@ static func bind_camera(camera: Camera3D, max_hp: int, delta: float, local_playe
 	if local_player_id != "":
 		_local_player_id = local_player_id
 	decay_camera(camera, delta)
-
-
-static func clear_session() -> void:
-	_camera = null
-	_max_hp = 1
-	_local_player_id = ""
-	CameraImpactFeedbackScript.reset_session()
-	PlayerDamageVignetteScript.reset_session()
 
 
 static func show_combat_text_for_event(
@@ -78,6 +84,8 @@ static func show_combat_text_for_event(
 
 
 static func spawn_outcome_punch(entity_id: String, ev: Dictionary, node_for_entity_id: Callable) -> void:
+	if not _entity_impact_allowed_for(entity_id):
+		return
 	if not CombatOutcomePunchScript.should_spawn(ev):
 		return
 	var target: Node3D = node_for_entity_id.call(entity_id)
@@ -91,11 +99,19 @@ static func spawn_impact_sparks(
 	fallback_color: Color,
 	node_for_entity_id: Callable,
 ) -> void:
+	if not _entity_impact_allowed_for(entity_id):
+		return
 	if not ImpactSparksScript.should_spawn(ev):
 		return
 	var target: Node3D = node_for_entity_id.call(entity_id)
 	if target != null:
 		target.add_child(ImpactSparksScript.make_node(ev, fallback_color))
+
+
+static func _entity_impact_allowed_for(entity_id: String) -> bool:
+	if _entity_impact_allowed.is_valid():
+		return bool(_entity_impact_allowed.call(entity_id))
+	return true
 
 
 static func decay_camera(_camera: Camera3D, delta: float) -> void:

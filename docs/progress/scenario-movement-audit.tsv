@@ -101,6 +101,9 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 92_fog_of_war_radius.json	fog_of_war_radius	protocol	pack	contract	1	1		
 93_crowded_lightning_perf_probe.json	crowded_lightning_perf_probe	protocol	extended	contract	0	0
 104_crowded_melee_perf_probe.json	crowded_melee_perf_probe	protocol	extended	contract	0	0		
+105_sorcerer_multigroup_perf_probe.json	sorcerer_multigroup_perf_probe	protocol	benchmark	contract	5	5		
+106_paladin_charge_loop_perf_probe.json	paladin_charge_loop_perf_probe	protocol	benchmark	contract	1	1		
+107_sorcerer_dungeon_perf_probe.json	sorcerer_dungeon_perf_probe	protocol	benchmark	contract	1	1		
 94_archer_retreat_ai.json	archer_retreat_ai	protocol	pack	contract	0	0		
 94_player_path_budget_lab.json	player_path_budget_lab	protocol	extended	contract	0	0		
 95_second_boss_template.json	second_boss_template	protocol	extended	contract	0	0		

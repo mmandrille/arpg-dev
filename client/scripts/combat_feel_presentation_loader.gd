@@ -9,6 +9,7 @@ static var _movement_smoothing: Dictionary = {}
 static var _melee_lunge: Dictionary = {}
 static var _level_loading_min_display_seconds: float = 0.55
 static var _attack_animation: Dictionary = {}
+static var _enemy_impact_feedback_enabled: bool = true
 
 
 static func ensure_loaded() -> void:
@@ -39,6 +40,9 @@ static func ensure_loaded() -> void:
 	var attack_animation = parsed.get("attack_animation", {})
 	if typeof(attack_animation) == TYPE_DICTIONARY:
 		_attack_animation = attack_animation
+	var enemy_impact = parsed.get("enemy_impact_feedback", {})
+	if typeof(enemy_impact) == TYPE_DICTIONARY:
+		_enemy_impact_feedback_enabled = bool(enemy_impact.get("enabled", _enemy_impact_feedback_enabled))
 
 
 static func input_buffer_seconds() -> float:
@@ -71,6 +75,11 @@ static func attack_animation() -> Dictionary:
 	return _attack_animation
 
 
+static func enemy_impact_feedback_enabled() -> bool:
+	ensure_loaded()
+	return _enemy_impact_feedback_enabled
+
+
 static func reset_for_tests() -> void:
 	_loaded = false
 	_input_buffer_seconds = 0.45
@@ -79,3 +88,4 @@ static func reset_for_tests() -> void:
 	_melee_lunge = {}
 	_level_loading_min_display_seconds = 0.55
 	_attack_animation = {}
+	_enemy_impact_feedback_enabled = true

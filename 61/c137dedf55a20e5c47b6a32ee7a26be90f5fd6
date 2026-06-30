@@ -1,0 +1,31 @@
+server/internal/game/class_item_affinities.go
+  s_61582feb25210f::t_cd36c31ac67119 215-242
+server/internal/game/game_test.go
+  s_61582feb25210f::t_07c528858d7c80 310
+client/scripts/skills_panel.gd
+  s_61582feb25210f::t_8868c7cbc7ae4e 90,96-99
+client/scripts/inventory_panel.gd
+  s_61582feb25210f::t_249c2a0c1cc6ed 686
+server/internal/game/rules.go
+  s_61582feb25210f::t_26e9f84b2f7bab 1168-1169
+docs/progress/scenario-movement-audit.tsv
+  s_61582feb25210f::t_6e5a18a9d06316 212-213
+PROGRESS.md
+  s_61582feb25210f::t_19d4be3a91406a 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "61c137dedf55a20e5c47b6a32ee7a26be90f5fd6",
+  "prompts": {},
+  "sessions": {
+    "s_61582feb25210f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "609578d2-ce93-42c6-857d-67434e7d3989",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

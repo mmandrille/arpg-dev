@@ -252,7 +252,7 @@ func _run() -> void:
 	panel.bot_hover_skill("magic_bolt")
 	state = panel.get_debug_state()
 	var rank_one_magic_tooltip := str(((state.get("skills", {}) as Dictionary).get("magic_bolt", {}) as Dictionary).get("tooltip_body", ""))
-	_assert_true("rank 1 tooltip includes next-rank damage", rank_one_magic_tooltip.contains("Damage: 6-9 -> 7-10"))
+	_assert_true("rank 1 tooltip includes next-rank damage", rank_one_magic_tooltip.contains("Weapon damage: 300%-225% -> 350%-250%"))
 	panel.set_skill_bindings(["", "magic_bolt", "", "", "", "", "", "", "heal", "", "", "", "", "", "", ""], "magic_bolt")
 	state = panel.get_debug_state()
 	_assert_eq("assigned key shown", str(state.get("assigned_key", "")), "F2")

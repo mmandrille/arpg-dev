@@ -1626,12 +1626,12 @@ func TestMagicStatScalesSkillDamageHealAndArea(t *testing.T) {
 	base := MustNewSim("sess_magic_skill_base", "01", rules)
 	base.progression.CharacterClass = "sorcerer"
 	base.progression.BaseStats.Magic = skillStatRequirementForRank(magicBolt, "magic", 1)
-	baseRange := base.scaleSkillDamageForMagic(magicBolt, 1, skillDamageRange(magicBolt, 1))
+	baseRange := base.scaleSkillDamageForMagic(magicBolt, 1, base.skillDamageRange(magicBolt, 1))
 
 	scaled := MustNewSim("sess_magic_skill_scaled", "01", rules)
 	scaled.progression.CharacterClass = "sorcerer"
 	scaled.progression.BaseStats.Magic = skillStatRequirementForRank(magicBolt, "magic", 1) + 50
-	scaledRange := scaled.scaleSkillDamageForMagic(magicBolt, 1, skillDamageRange(magicBolt, 1))
+	scaledRange := scaled.scaleSkillDamageForMagic(magicBolt, 1, scaled.skillDamageRange(magicBolt, 1))
 
 	if scaledRange.Min <= baseRange.Min || scaledRange.Max <= baseRange.Max {
 		t.Fatalf("magic-scaled skill damage = %+v, want above base %+v", scaledRange, baseRange)
@@ -1698,6 +1698,31 @@ func TestStrengthDamageBonusAdjustsMeleeDamageRange(t *testing.T) {
 	}
 	if got := strong.resolvePlayerAttackDamage(); got != (DamageRange{Min: 3, Max: 6}) {
 		t.Fatalf("strong damage range = %+v, want {3 6}", got)
+	}
+}
+
+func TestSkillProjectileDamageScalesWithWeapon(t *testing.T) {
+	rules := loadRules(t)
+	magicBolt := rules.Skills[magicBoltSkillID]
+
+	unarmed := MustNewSim("sess_skill_weapon_unarmed", "01", rules)
+	unarmed.progression.CharacterClass = "sorcerer"
+	unarmed.progression.SkillRanks[magicBoltSkillID] = 1
+	unarmed.equipped[mainHandSlot] = 0
+
+	armed := MustNewSim("sess_skill_weapon_staff", "01", rules)
+	armed.progression.CharacterClass = "sorcerer"
+	armed.progression.SkillRanks[magicBoltSkillID] = 1
+	staff := addRolledInventoryItem(t, armed, 8801, "starter_sorcerer_staff", map[string]int{
+		"damage_min": 8,
+		"damage_max": 12,
+	})
+	armed.equipped[mainHandSlot] = staff.instanceID
+
+	unarmedRange := unarmed.skillDamageRange(magicBolt, 1)
+	armedRange := armed.skillDamageRange(magicBolt, 1)
+	if armedRange.Min <= unarmedRange.Min || armedRange.Max <= unarmedRange.Max {
+		t.Fatalf("skill weapon scaling = unarmed %+v armed %+v", unarmedRange, armedRange)
 	}
 }
 

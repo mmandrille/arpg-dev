@@ -1377,7 +1377,7 @@ func _apply_delta(p: Dictionary) -> void:
 				_health_bar.update_hp(player_hp, player_max_hp, true)
 			continue
 		if event_type == "character_leveled" and eid == player_id:
-			GameplayFeedbackPresentationScript.handle_character_leveled(self, audio_controller, player_anchor, Callable(self, "_node_world_or_local_position"))
+			GameplayFeedbackPresentationScript.handle_character_leveled(self, player_id, audio_controller, player_anchor, Callable(self, "_node_world_or_local_position"))
 			continue
 		if event_type == "skill_effect_started" and str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
 			_pulse_holy_shield_aura(ev)
@@ -2206,7 +2206,7 @@ func _enter_entity_terminal_death(entity_id: String, rec: Dictionary) -> void:
 func _show_damage_number(entity_id: String, color: Color, event_damage = null, prefix: String = "", side_override: float = 0.0, variant: String = "normal", text_override: String = "", damage_type: String = "") -> void:
 	if damage_numbers_layer == null or _camera == null:
 		return
-	if client_settings != null and not client_settings.floating_combat_text:
+	if variant != "level_up" and client_settings != null and not client_settings.floating_combat_text:
 		return
 	if event_damage == null and text_override == "":
 		return

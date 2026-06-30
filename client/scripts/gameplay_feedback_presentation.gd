@@ -48,10 +48,20 @@ static func handle_player_mana_restored(main: Node, ev: Dictionary, entity_id: S
 		main.call("_show_damage_number", entity_id, Color("#54c7f3"), ev.get("mana", null), "+", 1.0)
 
 
-static func handle_character_leveled(main: Node, audio_controller: Node, player_anchor: Node3D, world_pos_fn: Callable) -> void:
+static func handle_character_leveled(main: Node, player_id: String, audio_controller: Node, player_anchor: Node3D, world_pos_fn: Callable) -> void:
 	if player_anchor == null:
 		return
 	LevelUpBurstScript.spawn(main, world_pos_fn.call(player_anchor))
+	main.call(
+		"_show_damage_number",
+		player_id,
+		Color("#ffe08a"),
+		null,
+		"",
+		0.0,
+		"level_up",
+		"Level Up!",
+	)
 	ClientAudioBridgeScript.heal(audio_controller)
 
 

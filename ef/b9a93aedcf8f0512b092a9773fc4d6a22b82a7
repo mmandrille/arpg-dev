@@ -1,0 +1,19 @@
+PROGRESS.md
+  s_325610c56bb100::t_98365d54867740 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "efb9a93aedcf8f0512b092a9773fc4d6a22b82a7",
+  "prompts": {},
+  "sessions": {
+    "s_325610c56bb100": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3dd1aeb3-186a-4d17-95ae-7f6c7df693ba",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -599,6 +599,9 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 250); err != nil {
 		t.Fatal(err)
 	}
+	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
+	sellPrice := httpTestItemSellPrice(t, "cave_blade", bladeRolled)
+	addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, "route_upgrade_shard_1_"+suffix, 1)
 	rec := postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("upgrade status = %d body=%s", rec.Code, rec.Body.String())
@@ -607,7 +610,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.StashGold != 150 || upgraded.CostGold != 100 || !upgraded.Success {
+	if upgraded.StashGold != 250-sellPrice || upgraded.CostGold != sellPrice || !upgraded.Success {
 		t.Fatalf("upgrade balances = %+v", upgraded)
 	}
 	var stats struct {
@@ -623,6 +626,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.Pity.Failures != 0 {
 		t.Fatalf("upgraded route stats = %+v", stats)
 	}
+	addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, "route_upgrade_shard_2_"+suffix, 2)
 	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("second upgrade status = %d body=%s", rec.Code, rec.Body.String())
@@ -630,7 +634,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.StashGold != 0 || upgraded.CostGold != 150 || !upgraded.Success {
+	if upgraded.StashGold != 250-2*sellPrice || upgraded.CostGold != sellPrice || !upgraded.Success {
 		t.Fatalf("second upgrade balances = %+v", upgraded)
 	}
 	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
@@ -651,7 +655,7 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	suffix := ids.Token()[:12]
 	accountID, token := loginEmail(t, h, "inventory-upgrade+"+suffix+"@example.test")
 	char := createCharacter(t, h, token, "Inventory Upgrade Hero")
-	prog := store.CharacterProgression{AccountID: accountID, CharacterID: char.CharacterID, CharacterClass: "barbarian", Level: 1, Gold: 100, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
+	prog := store.CharacterProgression{AccountID: accountID, CharacterID: char.CharacterID, CharacterClass: "barbarian", Level: 1, Gold: 500, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
 	if err := db.UpsertCharacterProgression(ctx, accountID, prog); err != nil {
 		t.Fatal(err)
 	}
@@ -667,12 +671,11 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if rec.Code != http.StatusConflict {
 		t.Fatalf("missing-resource inventory upgrade status = %d body=%s", rec.Code, rec.Body.String())
 	}
-	if _, err := db.AddAccountResource(ctx, accountID, "upgrade_shard", 1); err != nil {
+	addHTTPUpgradeShardInventory(t, db, ctx, accountID, char.CharacterID, "inventory_upgrade_shard_"+suffix, 1)
+	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 400); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 40); err != nil {
-		t.Fatal(err)
-	}
+	sellPrice := httpTestItemSellPrice(t, "cave_shield", json.RawMessage(rareShield))
 	rec = postJSON(h, "/v0/account-stash/items/upgrade", token, map[string]string{
 		"item_instance_id": itemID,
 		"character_id":     char.CharacterID,
@@ -684,7 +687,7 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.Item.ItemInstanceID != itemID || !upgraded.Item.Equipped || upgraded.Item.Slot != "off_hand" || upgraded.Gold != 0 || upgraded.StashGold != 0 || upgraded.CostGold != 100 || upgraded.ResourceItemDefID != "upgrade_shard" || upgraded.ResourceCount != 1 || upgraded.ResourceWallet != 0 {
+	if upgraded.Item.ItemInstanceID != itemID || !upgraded.Item.Equipped || upgraded.Item.Slot != "off_hand" || upgraded.Gold+upgraded.StashGold != 500-sellPrice || upgraded.CostGold != sellPrice || upgraded.ResourceItemDefID != "upgrade_shard" || upgraded.ResourceCount != 1 || upgraded.ResourceRequiredLevel != 1 || upgraded.ResourceInventoryCount != 0 {
 		t.Fatalf("inventory upgrade response = %+v", upgraded)
 	}
 	if upgraded.Item.ItemDefID != "cave_shield" || upgraded.Item.ItemTemplateID != "cave_shield" || upgraded.Item.DisplayName != "Rare Cave Shield" || upgraded.Item.Rarity != "rare" {
@@ -697,12 +700,14 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if !characterItemsContain(items, itemID) {
 		t.Fatalf("upgraded item missing from character after inventory upgrade = %+v", items)
 	}
-	resources, err := db.ListAccountResources(ctx, accountID)
-	if err != nil {
-		t.Fatal(err)
+	shardLeft := false
+	for _, item := range items {
+		if item.ItemDefID == "upgrade_shard" {
+			shardLeft = true
+		}
 	}
-	if got := resourceAmount(resources, "upgrade_shard"); got != 0 {
-		t.Fatalf("upgrade shard wallet after upgrade = %d, want 0: %+v", got, resources)
+	if shardLeft {
+		t.Fatalf("upgrade shard should be consumed from inventory: %+v", items)
 	}
 	var found store.CharacterItemInstance
 	for _, item := range items {

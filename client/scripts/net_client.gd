@@ -430,6 +430,15 @@ func upgrade_inventory_item(item_instance_id: String, p_character_id: String, re
 	return {"_error": str(r)}
 
 
+func merge_upgrade_shards(stash_item_ids: Array) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/upgrade-shards/merge",
+		["Authorization: Bearer " + token], JSON.stringify({"stash_item_ids": stash_item_ids}))
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("merge_upgrade_shards failed: %s" % r)
+	return {"_error": str(r)}
+
+
 # --- WebSocket --------------------------------------------------------------
 
 func connect_ws() -> void:

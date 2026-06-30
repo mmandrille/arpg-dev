@@ -1560,13 +1560,16 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "bishop_revive_all" and bishop_panel != null and bishop_panel.visible:
 			bishop_panel.show_status("Account heroes revived")
 			continue
-		if event_type in ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained"] and bishop_panel != null and bishop_panel.visible:
+		if event_type in ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained", "bishop_debug_upgrade_shard_dropped"] and bishop_panel != null and bishop_panel.visible:
 			if event_type == "bishop_debug_level_gained":
 				bishop_panel.show_status("Level gained")
 			elif event_type == "bishop_debug_skill_point_gained":
 				bishop_panel.show_status("Skill point gained")
-			else:
+			elif event_type == "bishop_debug_stat_point_gained":
 				bishop_panel.show_status("Stat point gained")
+			else:
+				var shard_level := int(ev.get("amount", 1))
+				bishop_panel.show_status("Dropped level %d upgrade shard" % shard_level)
 			continue
 		if event_type == "boss_killed":
 			ClientAudioBridgeScript.kill(audio_controller, true)
@@ -3828,6 +3831,7 @@ func _build_scene() -> void:
 	blacksmith_panel = BlacksmithPanelScript.new()
 	blacksmith_panel.upgrade_requested.connect(_on_blacksmith_upgrade_requested)
 	blacksmith_panel.upgrade_inventory_requested.connect(_on_blacksmith_inventory_upgrade_requested)
+	blacksmith_panel.merge_requested.connect(_on_blacksmith_merge_requested)
 	ui.add_child(blacksmith_panel)
 	consumable_bar = ConsumableBarScript.new()
 	consumable_bar.intent_requested.connect(_on_inventory_intent_requested)
@@ -4933,7 +4937,7 @@ func _show_blacksmith_panel(ev: Dictionary) -> void:
 	stash_items = ev.get("stash_items", stash_items)
 	stash_gold = int(ev.get("stash_gold", stash_gold))
 	stash_capacity = int(ev.get("stash_capacity", stash_capacity))
-	blacksmith_panel.show_blacksmith(next_entity_id, inventory, gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade", resource_wallet)
+	blacksmith_panel.show_blacksmith(next_entity_id, _blacksmith_inventory_items(), gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade", resource_wallet)
 	_raise_gameplay_windows()
 
 func _hide_blacksmith_panel() -> void:
@@ -4955,6 +4959,7 @@ func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
 	_upsert_stash_item(item)
 	if blacksmith_panel != null:
 		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)), resource_wallet)
+		_refresh_blacksmith_panel()
 	if stash_panel != null and stash_panel.visible:
 		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
 
@@ -4969,17 +4974,66 @@ func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> voi
 	var item: Dictionary = result.get("item", {})
 	gold = int(result.get("gold", gold))
 	stash_gold = int(result.get("stash_gold", stash_gold))
-	_apply_upgrade_resource_wallet_response(result)
+	_apply_upgrade_resource_response(result)
 	_update_inventory_item(item)
 	if blacksmith_panel != null:
 		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)), resource_wallet)
+		_refresh_blacksmith_panel()
 	_refresh_inventory_ui()
 
-func _apply_upgrade_resource_wallet_response(result: Dictionary) -> void:
-	var resource_id := str(result.get("resource_item_def_id", ""))
-	if resource_id == "" or not result.has("resource_wallet"):
+func _on_blacksmith_merge_requested(stash_item_ids: Array) -> void:
+	if client == null or stash_item_ids.is_empty():
 		return
-	resource_wallet[resource_id] = max(0, int(result.get("resource_wallet", 0)))
+	var result := client.merge_upgrade_shards(stash_item_ids)
+	if result.has("_error"):
+		if blacksmith_panel != null:
+			blacksmith_panel.show_status("Could not merge shards", true)
+		return
+	for stash_item_id in stash_item_ids:
+		_remove_stash_item(str(stash_item_id))
+	var merged: Dictionary = result.get("item", {})
+	if not merged.is_empty():
+		_upsert_stash_item(merged)
+	if blacksmith_panel != null:
+		blacksmith_panel.show_status("Merged into level %d shard" % int(merged.get("rolled_stats", {}).get("item_level", 1)))
+		_refresh_blacksmith_panel()
+	if stash_panel != null and stash_panel.visible:
+		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
+
+func _apply_upgrade_resource_response(result: Dictionary) -> void:
+	var resource_id := str(result.get("resource_item_def_id", ""))
+	if resource_id == "":
+		return
+	if result.has("resource_inventory_count"):
+		return
+	if result.has("resource_wallet"):
+		resource_wallet[resource_id] = max(0, int(result.get("resource_wallet", 0)))
+
+func _blacksmith_inventory_items() -> Array:
+	var out: Array = inventory.duplicate(true)
+	for item in stash_items:
+		if typeof(item) != TYPE_DICTIONARY:
+			continue
+		if str((item as Dictionary).get("item_def_id", "")) != "upgrade_shard":
+			continue
+		out.append(item)
+	return out
+
+func _refresh_blacksmith_panel() -> void:
+	if blacksmith_panel == null or not blacksmith_panel.visible:
+		return
+	blacksmith_panel.show_blacksmith(
+		blacksmith_panel.blacksmith_entity_id,
+		_blacksmith_inventory_items(),
+		gold,
+		stash_gold,
+		_blacksmith_config(),
+		"",
+		resource_wallet
+	)
+
+func _apply_upgrade_resource_wallet_response(result: Dictionary) -> void:
+	_apply_upgrade_resource_response(result)
 
 func _blacksmith_config() -> Dictionary:
 	var config := {}
@@ -5018,6 +5072,8 @@ func _on_bishop_debug_requested(action: String, bishop_entity_id: String) -> voi
 			client.send("bishop_debug_skill_point_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 		"stat_point":
 			client.send("bishop_debug_stat_point_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+		"drop_upgrade_shard":
+			client.send("bishop_debug_drop_upgrade_shard_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 
 func _shop_title(next_shop_id: String) -> String:
 	match next_shop_id:
@@ -6086,6 +6142,12 @@ func bot_click_bishop_respec() -> void:
 	BotFacade.click_bishop_respec(self)
 func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	BotFacade.click_blacksmith_upgrade(self, stash_item_id, item_def_id, stash_index)
+func bot_select_blacksmith_tab(tab_name: String = "Merge") -> void:
+	BotFacade.select_blacksmith_tab(self, tab_name)
+func bot_fill_blacksmith_merge(count: int = 3) -> void:
+	BotFacade.fill_blacksmith_merge(self, count)
+func bot_click_blacksmith_merge() -> void:
+	BotFacade.click_blacksmith_merge(self)
 func bot_click_mercenary_stance(stance: String = "assist") -> void:
 	BotFacade.click_mercenary_stance(self, stance)
 func bot_set_stash_search(text: String) -> void:

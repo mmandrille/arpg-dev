@@ -285,6 +285,7 @@ func TestDecodeBishopDebugIntents(t *testing.T) {
 		{typ: TypeBishopDebugLevel, want: "level"},
 		{typ: TypeBishopDebugSkill, want: "skill"},
 		{typ: TypeBishopDebugStat, want: "stat"},
+		{typ: TypeBishopDebugDropUpgradeShard, want: "drop_shard"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.typ, func(t *testing.T) {
@@ -307,6 +308,10 @@ func TestDecodeBishopDebugIntents(t *testing.T) {
 			case "stat":
 				if in.BishopDebugStat == nil || in.BishopDebugStat.BishopEntityID != "1013" {
 					t.Fatalf("decoded bishop debug stat = %+v", in.BishopDebugStat)
+				}
+			case "drop_shard":
+				if in.BishopDebugDropUpgradeShard == nil || in.BishopDebugDropUpgradeShard.BishopEntityID != "1013" {
+					t.Fatalf("decoded bishop debug drop shard = %+v", in.BishopDebugDropUpgradeShard)
 				}
 			}
 		})

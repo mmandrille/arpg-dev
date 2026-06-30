@@ -40,6 +40,9 @@ func (s *Store) GetOrCreateAccountStashGold(ctx context.Context, accountID strin
 }
 
 func (s *Store) ListAccountResources(ctx context.Context, accountID string) ([]AccountResourceAmount, error) {
+	if err := s.MigrateUpgradeShardWalletToStash(ctx, accountID); err != nil {
+		return nil, err
+	}
 	rows, err := s.pool.Query(ctx,
 		`SELECT account_id, resource_id, amount, created_at, updated_at
 		 FROM account_resource_wallet

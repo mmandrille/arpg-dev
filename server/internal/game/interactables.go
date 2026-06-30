@@ -73,6 +73,7 @@ func (s *Sim) activateInteractable(e *entity, in Input, res *TickResult, ack boo
 		drops := s.rules.LootDrops(e.lootTable, s.rng)
 		drops = append(drops, LootDrop{ItemDefID: goldItemDefID})
 		s.spawnLootDrops(drops, e.pos, s.targetInteractionRadius(e), in.CorrelationID, res, goldRollContext{levelNum: s.activeLevel().levelNum})
+		s.tryDropUpgradeShard(e.pos, s.targetInteractionRadius(e), absInt(s.activeLevel().levelNum), upgradeShardDropChest, in.CorrelationID, res)
 	}
 	if ack {
 		res.ack(in.MessageID)

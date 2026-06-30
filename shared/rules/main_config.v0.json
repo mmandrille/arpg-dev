@@ -21,6 +21,9 @@
     "item_upgrade_pity_failure_threshold": 2,
     "item_upgrade_resource_item_def_id": "upgrade_shard",
     "item_upgrade_resource_count": 1,
+    "upgrade_shard_enemy_drop_chance_percent": 1,
+    "upgrade_shard_chest_drop_chance_percent": 2,
+    "upgrade_shard_boss_drop_chance_percent": 3,
     "badge_reward_rules": [
       { "resource_item_def_id": "upgrade_shard", "unlock_depth": 10, "base_chance_percent": 25, "chance_per_depth_percent": 1 },
       { "resource_item_def_id": "respec_badge", "unlock_depth": 20, "base_chance_percent": 25, "chance_per_depth_percent": 1 },

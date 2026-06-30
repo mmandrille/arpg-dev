@@ -182,12 +182,54 @@ func (s *Sim) LoadResourceWallet(resources []PersistedResourceAmount) {
 	s.savePlayer(s.defaultPlayer())
 }
 
+func isUpgradeShardOnlyRolledStats(raw json.RawMessage) bool {
+	var keys map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &keys); err != nil {
+		return false
+	}
+	for key := range keys {
+		switch key {
+		case "item_level", "item_template_id", "display_name", "rarity", "stats", "requirements", "effect_ids":
+			continue
+		default:
+			return false
+		}
+	}
+
+	return keys["item_level"] != nil
+}
+
 func parseRollPayload(raw json.RawMessage) *ItemRollPayload {
 	if len(raw) == 0 || string(raw) == "{}" {
 		return nil
 	}
 	var payload ItemRollPayload
-	if err := json.Unmarshal(raw, &payload); err != nil || payload.ItemTemplateID == "" {
+	if err := json.Unmarshal(raw, &payload); err != nil {
+		return nil
+	}
+	if payload.ItemTemplateID == UpgradeShardItemDefID {
+		if payload.ItemLevel < 1 {
+			payload.ItemLevel = 1
+		}
+		if payload.Stats == nil {
+			payload.Stats = map[string]int{"item_level": payload.ItemLevel}
+		}
+		if payload.Stats["item_level"] < 1 {
+			payload.Stats["item_level"] = payload.ItemLevel
+		}
+		if payload.DisplayName == "" {
+			payload.DisplayName = "Upgrade Shard"
+		}
+		return &payload
+	}
+	if payload.ItemTemplateID == "" {
+		var flat struct {
+			ItemLevel int `json:"item_level"`
+		}
+		if json.Unmarshal(raw, &flat) == nil && flat.ItemLevel > 0 && isUpgradeShardOnlyRolledStats(raw) {
+			return NewUpgradeShardRollPayload(flat.ItemLevel)
+		}
+
 		return nil
 	}
 	if payload.ItemLevel < 1 {

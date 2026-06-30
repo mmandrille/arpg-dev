@@ -317,6 +317,65 @@ func TestBishopDebugPointsGrantOnePoint(t *testing.T) {
 	}
 }
 
+func TestBishopDebugDropUpgradeShardRequiresGameplayDebug(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_debug_shard_disabled", "v_bishop_debug_shard_disabled", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+
+	res := sim.Tick([]Input{{
+		MessageID:                   "debug_shard_disabled",
+		Type:                        "bishop_debug_drop_upgrade_shard_intent",
+		BishopDebugDropUpgradeShard: &BishopDebugDropUpgradeShardIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertReject(t, res, "debug_shard_disabled", "debug_disabled")
+}
+
+func TestBishopDebugDropUpgradeShardSpawnsLoot(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_debug_shard", "v_bishop_debug_shard", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.SetGameplayDebug(true)
+	sim.progression.DeepestDungeonDepth = 20
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	startLoot := countEntitiesByType(sim, lootEntity)
+
+	res := sim.Tick([]Input{{
+		MessageID:                   "debug_shard",
+		CorrelationID:               "corr_debug_shard",
+		Type:                        "bishop_debug_drop_upgrade_shard_intent",
+		BishopDebugDropUpgradeShard: &BishopDebugDropUpgradeShardIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertAck(t, res, "debug_shard")
+	if countEntitiesByType(sim, lootEntity) != startLoot+1 {
+		t.Fatalf("loot entities = %d, want %d", countEntitiesByType(sim, lootEntity), startLoot+1)
+	}
+	ev := findEvent(res.Events, "bishop_debug_upgrade_shard_dropped")
+	if ev == nil || ev.TargetEntityID == "" || ev.Amount == nil || *ev.Amount < 1 {
+		t.Fatalf("bishop_debug_upgrade_shard_dropped event = %+v", ev)
+	}
+	if findEvent(res.Events, "loot_dropped") == nil {
+		t.Fatalf("missing loot_dropped: %+v", res.Events)
+	}
+}
+
+func countEntitiesByType(sim *Sim, kind string) int {
+	count := 0
+	for _, e := range sim.activeLevel().entities {
+		if e.kind == kind {
+			count++
+		}
+	}
+
+	return count
+}
+
 func findInteractableByDefID(t *testing.T, sim *Sim, defID string) *entity {
 	t.Helper()
 	for _, e := range sim.activeLevel().entities {

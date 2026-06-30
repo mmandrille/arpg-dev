@@ -12,8 +12,28 @@ static func item_level(item: Dictionary) -> int:
 	return 0
 
 
-static func next_cost(level: int, base_cost: int, growth_cost: int) -> int:
-	return base_cost + level * growth_cost
+static func shard_level(item: Dictionary) -> int:
+	var rolled = item.get("rolled_stats", {})
+	if typeof(rolled) != TYPE_DICTIONARY:
+		return 1
+	var payload := rolled as Dictionary
+	if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
+		return maxi(1, int((payload.get("stats", {}) as Dictionary).get("item_level", 1)))
+	return maxi(1, int(payload.get("item_level", 1)))
+
+
+static func upgrade_sell_price(item: Dictionary) -> int:
+	for key in ["sell_price", "buy_price", "gold_value", "value"]:
+		if item.has(key):
+			return max(0, int(item.get(key, 0)))
+	return 0
+
+
+static func next_cost(item: Dictionary, base_cost: int, growth_cost: int) -> int:
+	var sell_price := upgrade_sell_price(item)
+	if sell_price > 0:
+		return sell_price
+	return base_cost + item_level(item) * growth_cost
 
 
 static func pity_failure_count(item: Dictionary) -> int:
@@ -40,12 +60,13 @@ static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	var pity_failure_threshold := int(context.get("pity_failure_threshold", 0))
 	var resource_count := int(context.get("resource_count", 0))
 	var wallet_gold := int(context.get("wallet_gold", 0))
-	var resource_wallet_count := int(context.get("resource_wallet_count", 0))
+	var resource_inventory_count := int(context.get("resource_inventory_count", context.get("resource_wallet_count", 0)))
 	var resource_name := str(context.get("resource_name", "resource"))
 	var base_cost := int(context.get("base_cost", 0))
 	var growth_cost := int(context.get("growth_cost", 0))
 	var level := item_level(item)
-	var cost := next_cost(level, base_cost, growth_cost)
+	var resource_required_level := int(context.get("resource_required_level", level + 1))
+	var cost := next_cost(item, base_cost, growth_cost)
 	var lines: Array = []
 	var stats := _summary_stat_map(item)
 	if stats.is_empty():
@@ -62,9 +83,9 @@ static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	lines.append("Stats rescale to the next item tier")
 	if _failure_possible(success_chance_percent, guaranteed):
 		lines.append(_failure_line(item, pity_failure_threshold))
-	lines.append(_spend_line(cost, resource_count, resource_name))
-	if wallet_gold >= cost and (resource_count <= 0 or resource_wallet_count >= resource_count):
-		lines.append(_after_attempt_line(wallet_gold - cost, resource_wallet_count - resource_count, resource_count, resource_name))
+	lines.append(_spend_line(cost, resource_count, resource_name, resource_required_level))
+	if wallet_gold >= cost and (resource_count <= 0 or resource_inventory_count >= resource_count):
+		lines.append(_after_attempt_line(wallet_gold - cost, resource_inventory_count - resource_count, resource_count, resource_name))
 	return lines
 
 
@@ -80,9 +101,9 @@ static func _failure_line(item: Dictionary, pity_failure_threshold: int) -> Stri
 	return "On failure: item unchanged; pity %d -> %d failures" % [current, next]
 
 
-static func _spend_line(cost: int, resource_count: int, resource_name: String) -> String:
+static func _spend_line(cost: int, resource_count: int, resource_name: String, resource_required_level: int) -> String:
 	if resource_count > 0:
-		return "Spend on attempt: %d gold, %d %s" % [cost, resource_count, resource_name]
+		return "Spend on attempt: %d gold, %d %s (Lv%d+)" % [cost, resource_count, resource_name, resource_required_level]
 	return "Spend on attempt: %d gold" % cost
 
 

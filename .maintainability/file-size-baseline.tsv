@@ -1,12 +1,13 @@
 # Grandfathered source/test/tool files above the 600-line target.
 # Format: path<TAB>baseline_line_count
+client/scripts/blacksmith_panel.gd	656	# v390: merge tab + shard inventory extracted to blacksmith_shard_inventory.gd
 client/scripts/bot_assertion_handlers.gd	623	# v357: intent-reject assertions extracted to bot_intent_reject_assertions.gd
-client/scripts/bot_controller.gd	757
+client/scripts/bot_controller.gd	796	# v390: blacksmith merge tab bot steps
 client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait filters consolidated into flag loop
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	642
 client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	6316	# v385 gameplay-feel: gameplay_feedback + interactable_state + loot hover extractions
+client/scripts/main.gd	6381	# v390: upgrade shard merge HTTP wiring
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010
@@ -22,13 +23,13 @@ server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6516	# v385: restorePlayerResourcesOnLevelUp -> level_up_resources.go
 server/internal/game/types.go	665
-server/internal/http/auth_session_test.go	1501
+server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482
 server/internal/realtime/session_loop.go	924
 server/internal/replay/replay.go	722
 server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating passive gold auto-pickup test for v332 momentum
 server/internal/store/repos.go	2315
-server/internal/store/store_test.go	1645
+server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store test setup
 skills/showme/scripts/visual_capture.gd	1016
 tools/bot/run.py	4284	# pre-existing drift; not modified v385 gameplay-feel batch
 tools/bot/test_protocol.py	1434

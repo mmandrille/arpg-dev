@@ -6,7 +6,7 @@ signal revive_all_requested(bishop_entity_id: String)
 signal debug_requested(action: String, bishop_entity_id: String)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
-const PANEL_SIZE := Vector2(320, 360)
+const PANEL_SIZE := Vector2(320, 400)
 const TITLE_FONT_SIZE := 29
 const BODY_FONT_SIZE := 20
 
@@ -30,6 +30,7 @@ var _revive_all_button: Button
 var _debug_level_button: Button
 var _debug_skill_button: Button
 var _debug_stat_button: Button
+var _debug_drop_shard_button: Button
 var _status_label: Label
 var _interactive: bool = true
 
@@ -197,6 +198,12 @@ func _build() -> void:
 	_debug_stat_button.pressed.connect(func() -> void: _emit_debug("stat_point"))
 	root.add_child(_debug_stat_button)
 
+	_debug_drop_shard_button = Button.new()
+	_debug_drop_shard_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
+	_debug_drop_shard_button.text = "Debug: drop an upgrade shard"
+	_debug_drop_shard_button.pressed.connect(func() -> void: _emit_debug("drop_upgrade_shard"))
+	root.add_child(_debug_drop_shard_button)
+
 	_status_label = Label.new()
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE - 2)
@@ -217,7 +224,7 @@ func _render() -> void:
 	if _revive_all_button != null:
 		_revive_all_button.text = _service_button_text("Revive all", 0, revive_resource_item_def_id, revive_resource_count)
 		_revive_all_button.disabled = not _revive_all_enabled()
-	for button in [_debug_level_button, _debug_skill_button, _debug_stat_button]:
+	for button in [_debug_level_button, _debug_skill_button, _debug_stat_button, _debug_drop_shard_button]:
 		if button != null:
 			button.visible = debug_enabled
 			button.disabled = not _debug_action_enabled()

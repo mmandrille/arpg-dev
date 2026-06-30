@@ -35,6 +35,9 @@ func (r *Rules) isBadgeRewardResourceItem(itemDefID string) bool {
 	if r == nil || itemDefID == "" {
 		return false
 	}
+	if itemDefID == r.MainConfig.Gameplay.ItemUpgradeResourceID {
+		return false
+	}
 	for _, rule := range r.MainConfig.Gameplay.BadgeRewardRules {
 		if rule.ResourceItemDefID == itemDefID {
 			return true
@@ -45,7 +48,7 @@ func (r *Rules) isBadgeRewardResourceItem(itemDefID string) bool {
 
 func (s *Sim) grantQuestTurnInBadgeRewards(giver *entity, corr string, res *TickResult) {
 	source := badgeRewardSource{EntityID: idStr(giver.id), Service: questTurnInService}
-	s.grantBadgeRewardsForDepth(s.progression.DeepestDungeonDepth, s.playerID, source, corr, res)
+	s.grantBadgeRewardsForDepth(s.progression.DeepestDungeonDepth, s.playerID, source, corr, res, false)
 }
 
 func (s *Sim) grantBossBadgeRewards(monster *entity, sourceID uint64, corr string, res *TickResult) {
@@ -58,7 +61,7 @@ func (s *Sim) grantBossBadgeRewards(monster *entity, sourceID uint64, corr strin
 		SourceEntityID: idStr(sourceID),
 		BossTemplateID: monster.bossTemplateID,
 	}
-	s.grantBadgeRewardsForDepth(depth, s.badgeRewardPlayerIDForSource(sourceID), source, corr, res)
+	s.grantBadgeRewardsForDepth(depth, s.badgeRewardPlayerIDForSource(sourceID), source, corr, res, true)
 }
 
 func (s *Sim) badgeRewardPlayerIDForSource(sourceID uint64) uint64 {
@@ -73,18 +76,24 @@ func (s *Sim) badgeRewardPlayerIDForSource(sourceID uint64) uint64 {
 	return s.playerID
 }
 
-func (s *Sim) grantBadgeRewardsForDepth(depth int, playerID uint64, source badgeRewardSource, corr string, res *TickResult) int {
+func (s *Sim) grantBadgeRewardsForDepth(depth int, playerID uint64, source badgeRewardSource, corr string, res *TickResult, bossSource bool) int {
 	if depth <= 0 || s.rules == nil {
 		return 0
 	}
 	granted := 0
 	for _, rule := range s.rules.MainConfig.Gameplay.BadgeRewardRules {
+		if bossSource && rule.ResourceItemDefID == s.rules.MainConfig.Gameplay.ItemUpgradeResourceID {
+			continue
+		}
 		chance := badgeRewardChancePercent(rule, depth)
 		if chance <= 0 || s.rng.IntN(100) >= chance {
 			continue
 		}
-		_, ok := s.grantWalletResourceForPlayer(playerID, rule.ResourceItemDefID, 1, res)
-		if !ok {
+		if rule.ResourceItemDefID == UpgradeShardItemDefID {
+			if !s.grantUpgradeShardItemForPlayer(playerID, depth, source, corr, res) {
+				continue
+			}
+		} else if _, ok := s.grantWalletResourceForPlayer(playerID, rule.ResourceItemDefID, 1, res); !ok {
 			continue
 		}
 		res.Events = append(res.Events, Event{
@@ -101,6 +110,46 @@ func (s *Sim) grantBadgeRewardsForDepth(depth int, playerID uint64, source badge
 		granted++
 	}
 	return granted
+}
+
+func (s *Sim) grantUpgradeShardItemForPlayer(playerID uint64, depth int, source badgeRewardSource, corr string, res *TickResult) bool {
+	ps := s.players[playerID]
+	if ps == nil {
+		return false
+	}
+	current := s.players[s.playerID]
+	if current != nil && current.PlayerID != playerID {
+		s.savePlayer(current)
+	}
+	s.usePlayer(ps)
+
+	level := RollItemLevel(s.rng, depth, s.rules.DungeonGeneration.ItemLevelTiers)
+	if s.bagOccupancyCount()+1 > s.inventoryCapacity() {
+		if current != nil {
+			s.usePlayer(current)
+		}
+		return false
+	}
+
+	item := &invItem{
+		instanceID:  s.alloc(),
+		itemDefID:   UpgradeShardItemDefID,
+		rollPayload: NewUpgradeShardRollPayload(level),
+	}
+	s.inventory = append(s.inventory, item)
+	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
+	res.Events = append(res.Events, Event{
+		EventType:      "item_picked_up",
+		EntityID:       idStr(playerID),
+		CorrelationID:  corr,
+		ItemInstanceID: idStr(item.instanceID),
+	})
+	s.savePlayer(ps)
+	if current != nil && current.PlayerID != playerID {
+		s.usePlayer(current)
+	}
+
+	return true
 }
 
 func (s *Sim) grantWalletResourceForPlayer(playerID uint64, resourceID string, amount int, res *TickResult) (int, bool) {

@@ -36,7 +36,12 @@ func _run() -> void:
 		"rarity": "common",
 		"rolled_stats": {"damage_min": 1, "damage_max": 2, "upgrade_pity": {"failures": 1}},
 	}
-	panel.show_blacksmith("smith-1", [item], 100, 0, config, "Choose", {"upgrade_shard": 1})
+	var shard := {
+		"stash_item_id": "shard1",
+		"item_def_id": "upgrade_shard",
+		"rolled_stats": {"item_level": 1},
+	}
+	panel.show_blacksmith("smith-1", [item, shard], 100, 0, config, "Choose", {})
 	panel.stage_inventory_item(item)
 	var state := panel.get_debug_state()
 	_assert_true("recipe selector visible", bool(state.get("recipe_selector_visible", false)))
@@ -52,8 +57,8 @@ func _run() -> void:
 	_assert_true("preview shows success result", _array_contains_text(state.get("preview_lines", []), "On success: Level 0 -> 1"))
 	_assert_true("preview shows tier rescale", _array_contains_text(state.get("preview_lines", []), "Stats rescale to the next item tier"))
 	_assert_true("preview shows failure result", _array_contains_text(state.get("preview_lines", []), "On failure: item unchanged; pity 1 -> 2 failures"))
-	_assert_true("preview shows attempt spend", _array_contains_text(state.get("preview_lines", []), "Spend on attempt: 100 gold, 1 Upgrade Badge"))
-	_assert_true("preview shows after attempt balance", _array_contains_text(state.get("preview_lines", []), "After attempt: 0 gold, 0 Upgrade Badge"))
+	_assert_true("preview shows attempt spend", _array_contains_text(state.get("preview_lines", []), "Spend on attempt: 100 gold, 1 Upgrade Shard (Lv1+)"))
+	_assert_true("preview shows after attempt balance", _array_contains_text(state.get("preview_lines", []), "After attempt: 0 gold, 0 Upgrade Shard"))
 	panel.select_recipe("weapon_honing")
 	state = panel.get_debug_state()
 	_assert_eq("selected weapon recipe id", str(state.get("selected_recipe_id", "")), "weapon_honing")

@@ -1,0 +1,30 @@
+{
+  "id": "blacksmith_shard_merge",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "v390_blacksmith_shard_merge",
+  "title": "Blacksmith shard merge",
+  "description": "Pick up three upgrade shards, deposit them to stash, open the blacksmith merge tab, and merge into one higher-level shard.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_loot_count", "min_count": 9, "timeout_s": 10.0 },
+    { "type": "click_loot_item", "item_def_id": "upgrade_shard" },
+    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
+    { "type": "click_loot_item", "item_def_id": "upgrade_shard" },
+    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
+    { "type": "click_loot_item", "item_def_id": "upgrade_shard" },
+    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
+    { "type": "click_entity", "entity_type": "interactable", "entity_index": 5 },
+    { "type": "wait_stash_panel", "timeout_s": 10.0 },
+    { "type": "drag_bag_to_stash", "item_def_id": "upgrade_shard", "bag_index": 0 },
+    { "type": "drag_bag_to_stash", "item_def_id": "upgrade_shard", "bag_index": 0 },
+    { "type": "drag_bag_to_stash", "item_def_id": "upgrade_shard", "bag_index": 0 },
+    { "type": "click_entity", "entity_type": "interactable", "entity_index": 6 },
+    { "type": "wait_blacksmith_panel", "timeout_s": 10.0 },
+    { "type": "select_blacksmith_tab", "tab": "Merge" },
+    { "type": "fill_blacksmith_merge", "count": 3 },
+    { "type": "click_blacksmith_merge" },
+    { "type": "assert_stash_item_count", "item_def_id": "upgrade_shard", "at_least": 1 }
+  ]
+}

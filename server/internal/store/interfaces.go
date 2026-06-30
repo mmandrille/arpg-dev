@@ -80,8 +80,10 @@ type CharacterProgressionRepo interface {
 	TransferAccountStashGoldToCharacter(ctx context.Context, accountID, characterID string, amount int) (characterGold int, stashGold int, err error)
 	ListRecoverableCharacterCorpses(ctx context.Context, accountID, excludeCharacterID string) ([]CharacterCorpse, error)
 	TransferCorpseItemToCharacter(ctx context.Context, accountID, corpseCharacterID, targetCharacterID, corpseItemID, newItemID string) (CharacterItemInstance, error)
-	UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, bool, error)
-	UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, int, bool, error)
+	UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, bool, error)
+	UpgradeAccountStashItemWithShard(ctx context.Context, accountID, characterID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, int, bool, error)
+	MigrateUpgradeShardWalletToStash(ctx context.Context, accountID string) error
+	MergeUpgradeShards(ctx context.Context, accountID string, stashItemIDs []string) (AccountStashItem, error)
 	ListActiveMarketListings(ctx context.Context) ([]MarketListing, error)
 	CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string, priceGold int) (MarketListing, error)
 	CancelMarketListing(ctx context.Context, accountID, listingID string) (MarketListing, error)

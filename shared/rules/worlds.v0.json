@@ -2778,6 +2778,22 @@
           }
         },
         {
+          "type": "loot",
+          "item_def_id": "upgrade_shard",
+          "position": {
+            "x": 19,
+            "y": 14
+          }
+        },
+        {
+          "type": "loot",
+          "item_def_id": "upgrade_shard",
+          "position": {
+            "x": 20,
+            "y": 14
+          }
+        },
+        {
           "type": "interactable",
           "interactable_def_id": "town_quest_giver",
           "position": {

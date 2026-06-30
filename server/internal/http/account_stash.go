@@ -15,6 +15,7 @@ import (
 func (s *Server) registerAccountStashRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/account-stash/items/{stash_item_id}/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeAccountStashItem)))
 	mux.Handle("POST /v0/account-stash/items/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeInventoryItem)))
+	s.registerAccountStashMergeRoutes(mux)
 }
 
 const (
@@ -54,9 +55,11 @@ type upgradeAccountStashItemResponse struct {
 	CostGold          int                      `json:"cost_gold"`
 	Success           bool                     `json:"success"`
 	RecipeID          string                   `json:"recipe_id"`
-	ResourceItemDefID string                   `json:"resource_item_def_id,omitempty"`
-	ResourceCount     int                      `json:"resource_count,omitempty"`
-	ResourceWallet    int                      `json:"resource_wallet"`
+	ResourceItemDefID      string                   `json:"resource_item_def_id,omitempty"`
+	ResourceCount          int                      `json:"resource_count,omitempty"`
+	ResourceRequiredLevel  int                      `json:"resource_required_level,omitempty"`
+	ResourceInventoryCount int                      `json:"resource_inventory_count,omitempty"`
+	ResourceWallet         int                      `json:"resource_wallet,omitempty"`
 }
 
 type upgradeInventoryItemResponse struct {
@@ -66,9 +69,11 @@ type upgradeInventoryItemResponse struct {
 	CostGold          int                   `json:"cost_gold"`
 	Success           bool                  `json:"success"`
 	RecipeID          string                `json:"recipe_id"`
-	ResourceItemDefID string                `json:"resource_item_def_id,omitempty"`
-	ResourceCount     int                   `json:"resource_count,omitempty"`
-	ResourceWallet    int                   `json:"resource_wallet"`
+	ResourceItemDefID      string                `json:"resource_item_def_id,omitempty"`
+	ResourceCount          int                   `json:"resource_count,omitempty"`
+	ResourceRequiredLevel  int                   `json:"resource_required_level,omitempty"`
+	ResourceInventoryCount int                   `json:"resource_inventory_count,omitempty"`
+	ResourceWallet         int                   `json:"resource_wallet,omitempty"`
 }
 
 type upgradeAccountStashItemRequest struct {
@@ -136,15 +141,22 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	resourceID, resourceCount := s.upgradeResourceConfig()
-	resourceWallet := 0
+	resourceRequiredLevel := 0
+	resourceInventoryCount := 0
 	if resourceCount > 0 {
-		resources, err := s.store.ListAccountResources(r.Context(), accountID)
+		stashItems, err := s.store.ListAccountStashItems(r.Context(), accountID)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
 			return
 		}
-		resourceWallet = resourceAmount(resources, resourceID)
-		if resourceWallet < resourceCount {
+		currentLevel, err := rolledStatsItemLevelHTTP(originalItem.RolledStats)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect item level")
+			return
+		}
+		resourceRequiredLevel = currentLevel + 1
+		resourceInventoryCount = countQualifyingUpgradeShards(stashItems, originalItems, resourceID, resourceRequiredLevel)
+		if resourceInventoryCount < resourceCount {
 			writeError(w, http.StatusConflict, "missing_upgrade_resource", "upgrade resource is required")
 			return
 		}
@@ -181,27 +193,29 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	if resourceCount > 0 {
-		nextResource, err := s.store.SpendAccountResource(r.Context(), accountID, resourceID, resourceCount)
-		if errors.Is(err, store.ErrConflict) {
-			writeError(w, http.StatusConflict, "missing_upgrade_resource", "upgrade resource is required")
-			return
-		}
+		stashItems, err := s.store.ListAccountStashItems(r.Context(), accountID)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, "internal_error", "could not consume upgrade resource")
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
 			return
 		}
-		resourceWallet = nextResource.Amount
+		items, err := s.store.ListCharacterItems(r.Context(), accountID, req.CharacterID)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
+			return
+		}
+		resourceInventoryCount = countQualifyingUpgradeShards(stashItems, items, resourceID, resourceRequiredLevel)
 	}
 	writeJSON(w, http.StatusOK, upgradeInventoryItemResponse{
-		Item:              characterItemResponseFromStore(owned),
-		Gold:              characterGold,
-		StashGold:         stashGold,
-		CostGold:          chargedCost,
-		Success:           success,
-		RecipeID:          recipeID,
-		ResourceItemDefID: resourceID,
-		ResourceCount:     resourceCount,
-		ResourceWallet:    resourceWallet,
+		Item:                   characterItemResponseFromStore(owned),
+		Gold:                   characterGold,
+		StashGold:              stashGold,
+		CostGold:               chargedCost,
+		Success:                success,
+		RecipeID:               recipeID,
+		ResourceItemDefID:      resourceID,
+		ResourceCount:          resourceCount,
+		ResourceRequiredLevel:  resourceRequiredLevel,
+		ResourceInventoryCount: resourceInventoryCount,
 	})
 }
 
@@ -227,8 +241,6 @@ func (s *Server) upgradeAccountStashItem(w http.ResponseWriter, r *http.Request,
 
 func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID string, characterID string, stashItemID string, recipeID string) (store.AccountStashItem, int, int, int, bool, error) {
 	eligible := s.eligibleBlacksmithItemDefs(recipeID)
-	cost := s.rules.MainConfig.Gameplay.ItemUpgradeCostGold
-	growth := s.rules.MainConfig.Gameplay.ItemUpgradeCostGrowth
 	maxLevel := s.rules.MainConfig.Gameplay.ItemUpgradeMaxLevel
 	chance := s.rules.MainConfig.Gameplay.ItemUpgradeSuccessPct
 	pityFailures := s.rules.MainConfig.Gameplay.ItemUpgradePityFailures
@@ -236,7 +248,39 @@ func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID st
 	if err != nil {
 		return store.AccountStashItem{}, 0, 0, 0, false, err
 	}
-	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, chance, roll, pityFailures, eligible, s.itemUpgradeOptions(r, accountID, characterID))
+
+	stashItems, err := s.store.ListAccountStashItems(r.Context(), accountID)
+	if err != nil {
+		return store.AccountStashItem{}, 0, 0, 0, false, err
+	}
+	var target store.AccountStashItem
+	for _, item := range stashItems {
+		if item.StashItemID == stashItemID {
+			target = item
+			break
+		}
+	}
+	if target.StashItemID == "" {
+		return store.AccountStashItem{}, 0, 0, 0, false, store.ErrNotFound
+	}
+
+	chargedCost, ok := game.DefaultItemSellPrice(s.rules, target.ItemDefID, target.RolledStats)
+	if !ok || chargedCost <= 0 {
+		return store.AccountStashItem{}, 0, 0, 0, false, store.ErrConflict
+	}
+
+	currentLevel, err := rolledStatsItemLevelHTTP(target.RolledStats)
+	if err != nil {
+		return store.AccountStashItem{}, 0, 0, 0, false, err
+	}
+	minShardLevel := currentLevel + 1
+
+	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithShard(
+		r.Context(), accountID, characterID, stashItemID,
+		chargedCost, maxLevel, chance, roll, pityFailures, minShardLevel,
+		eligible, s.itemUpgradeOptions(r, accountID, characterID),
+	)
+
 	return item, characterGold, stashGold, chargedCost, success, err
 }
 
@@ -329,6 +373,53 @@ func resourceAmount(resources []store.AccountResourceAmount, resourceID string) 
 		}
 	}
 	return 0
+}
+
+func rolledStatsItemLevelHTTP(raw json.RawMessage) (int, error) {
+	payload := map[string]any{}
+	if len(raw) > 0 {
+		if err := json.Unmarshal(raw, &payload); err != nil {
+			return 0, err
+		}
+	}
+	stats := payload
+	if nested, ok := payload["stats"].(map[string]any); ok {
+		stats = nested
+	}
+	if value, ok := stats["item_level"]; ok {
+		switch v := value.(type) {
+		case float64:
+			return int(v), nil
+		case int:
+			return v, nil
+		}
+	}
+	return 0, nil
+}
+
+func countQualifyingUpgradeShards(stashItems []store.AccountStashItem, inventoryItems []store.CharacterItemInstance, resourceID string, minLevel int) int {
+	count := 0
+	for _, item := range stashItems {
+		if item.ItemDefID != resourceID {
+			continue
+		}
+		level, err := game.UpgradeShardLevelFromRaw(item.RolledStats)
+		if err != nil || level < minLevel {
+			continue
+		}
+		count++
+	}
+	for _, item := range inventoryItems {
+		if item.ItemDefID != resourceID {
+			continue
+		}
+		level, err := game.UpgradeShardLevelFromRaw(item.RolledStats)
+		if err != nil || level < minLevel {
+			continue
+		}
+		count++
+	}
+	return count
 }
 
 func upgradeSuccessRoll() (int, error) {

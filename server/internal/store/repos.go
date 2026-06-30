@@ -1502,19 +1502,18 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 	return result.characterGold, result.stashGold, nil
 }
 
-func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, bool, error) {
-	item, _, stashGold, chargedCost, success, err := s.UpgradeAccountStashItemWithWallet(ctx, accountID, "", stashItemID, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold, eligibleItemDefs, upgradeOpts)
+func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, bool, error) {
+	item, _, stashGold, _, success, err := s.UpgradeAccountStashItemWithShard(ctx, accountID, "", stashItemID, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel, eligibleItemDefs, upgradeOpts)
 	return item, stashGold, chargedCost, success, err
 }
 
-func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID, characterID, stashItemID string, baseCostGold, costGrowthPerLevel, maxLevel, successChancePercent, successRoll, pityFailureThreshold int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, int, bool, error) {
-	if baseCostGold < 0 || costGrowthPerLevel < 0 || maxLevel <= 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 || pityFailureThreshold < 0 {
+func (s *Store) UpgradeAccountStashItemWithShard(ctx context.Context, accountID, characterID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, int, bool, error) {
+	if chargedCost < 0 || maxLevel <= 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 || pityFailureThreshold < 0 || minShardLevel < 1 {
 		return AccountStashItem{}, 0, 0, 0, false, ErrConflict
 	}
 	var out AccountStashItem
 	var characterGold int
 	var stashGold int
-	var chargedCost int
 	var success bool
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
 		if _, err := tx.Exec(ctx,
@@ -1569,7 +1568,9 @@ func (s *Store) UpgradeAccountStashItemWithWallet(ctx context.Context, accountID
 		if currentLevel >= effectiveMaxLevel {
 			return ErrConflict
 		}
-		chargedCost = baseCostGold + currentLevel*costGrowthPerLevel
+		if err := spendUpgradeShardInTx(ctx, tx, accountID, characterID, currentLevel+1); err != nil {
+			return err
+		}
 		if characterGold+stashGold < chargedCost {
 			return ErrConflict
 		}

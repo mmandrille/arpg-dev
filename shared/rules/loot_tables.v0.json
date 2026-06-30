@@ -12,11 +12,10 @@
       ]
     },
     "ranged_multi_drop": {
-      "drops": ["gold", "quest_leaf", "upgrade_shard", "red_potion", "blue_potion"],
+      "drops": ["gold", "quest_leaf", "red_potion", "blue_potion"],
       "entries": [
         { "item_def_id": "gold", "weight": 1 },
         { "item_def_id": "quest_leaf", "weight": 1 },
-        { "item_def_id": "upgrade_shard", "weight": 1 },
         { "item_def_id": "red_potion", "weight": 1 },
         { "item_def_id": "blue_potion", "weight": 1 }
       ]

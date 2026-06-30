@@ -7,10 +7,18 @@
     "cave_bow",
     "cave_shield",
     "cave_helm",
+    "cave_leather_cap",
+    "cave_tiara",
     "cave_mail",
+    "cave_leather_vest",
+    "cave_full_plate",
     "cave_gloves",
+    "cave_cloth_wraps",
+    "cave_gauntlets",
     "cave_belt",
     "cave_boots",
+    "cave_soft_boots",
+    "cave_plate_boots",
     "cave_ring",
     "cave_amulet"
   ],
@@ -49,7 +57,7 @@
       "treasure_class_id": "dungeon_mob_tc_depth_3_plus",
       "seed": "v29_dungeon_mob_tc_depth_3_plus_41",
       "expected_drops": [
-        { "item_template_id": "cave_mail" }
+        { "item_template_id": "cave_blade" }
       ]
     },
     {

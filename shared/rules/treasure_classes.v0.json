@@ -303,10 +303,18 @@
             { "item_template_id": "cave_bow", "weight": 1 },
             { "item_template_id": "cave_shield", "weight": 1 },
             { "item_template_id": "cave_helm", "weight": 1 },
+            { "item_template_id": "cave_leather_cap", "weight": 1 },
+            { "item_template_id": "cave_tiara", "weight": 1 },
             { "item_template_id": "cave_mail", "weight": 1 },
+            { "item_template_id": "cave_leather_vest", "weight": 1 },
+            { "item_template_id": "cave_full_plate", "weight": 1 },
             { "item_template_id": "cave_gloves", "weight": 1 },
+            { "item_template_id": "cave_cloth_wraps", "weight": 1 },
+            { "item_template_id": "cave_gauntlets", "weight": 1 },
             { "item_template_id": "cave_belt", "weight": 1 },
             { "item_template_id": "cave_boots", "weight": 1 },
+            { "item_template_id": "cave_soft_boots", "weight": 1 },
+            { "item_template_id": "cave_plate_boots", "weight": 1 },
             { "item_template_id": "cave_ring", "weight": 1 },
             { "item_template_id": "cave_amulet", "weight": 1 }
           ]

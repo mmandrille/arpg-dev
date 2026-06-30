@@ -1,0 +1,114 @@
+server/internal/store/repos.go
+  s_325610c56bb100::t_0026c5dcb2de90 1568-1571
+  s_325610c56bb100::t_acb4b461cda703 1505-1506,1510
+  s_325610c56bb100::t_8a3c759f25363c 11
+  s_325610c56bb100::t_073270fae1b0c9 1608,1610
+server/internal/game/depth_scaling.go
+  s_325610c56bb100::t_4903d3b969a9e4 1-72,76-94,98-134
+  s_325610c56bb100::t_f4bf290481545b 95-97
+  s_325610c56bb100::t_882e48afb53505 73-75
+server/internal/game/set_items.go
+  s_325610c56bb100::t_8569274c6cc623 102-103,107,111-113
+tools/bot/scenarios/89_tiered_item_level_drops.json
+  s_325610c56bb100::t_ac99f990da45d8 1-29
+docs/specs/v389_spec-tiered-item-level-scaling.md
+  s_325610c56bb100::t_48197bdd760422 1-66
+server/internal/game/unique_chest.go
+  s_325610c56bb100::t_790b71a7ce39ba 437-438,442,446-448
+  s_325610c56bb100::t_dc7141ebc84a75 397-398,402,406-408
+docs/as-built/v389_tiered-item-level-scaling.md
+  s_325610c56bb100::t_fb63527dcda22b 1-32
+server/internal/replay/replay_test.go
+  s_325610c56bb100::t_443b9546a86b10 1512,1515
+server/internal/game/item_level_scaling_test.go
+  s_325610c56bb100::t_ee3544c18b2a1d 1-78,86-104
+  s_325610c56bb100::t_9a0da8c7c178ac 79-85
+server/internal/store/upgrade_chance_test.go
+  s_325610c56bb100::t_4cb68779269aaa 116
+  s_325610c56bb100::t_818d3faa29d142 39
+  s_325610c56bb100::t_9e2dd1431f33eb 99
+server/internal/game/shop.go
+  s_325610c56bb100::t_a198fa4c27e46c 1008-1011,1016
+server/internal/game/rules.go
+  s_325610c56bb100::t_c254744c98ee6d 1579
+  s_325610c56bb100::t_4ae8b2baabef39 1716-1718
+  s_325610c56bb100::t_af600d8bdc760a 1755
+server/internal/game/sim_load.go
+  s_325610c56bb100::t_bbae8ba8131ef0 210
+server/internal/store/upgrade_options_test.go
+  s_325610c56bb100::t_39c126036733e0 1-29
+PROGRESS.md
+  s_325610c56bb100::t_feb4617b719f53 18,26,28
+docs/CODEMAP.md
+  s_325610c56bb100::t_9ee927f083b841 20
+client/scripts/main.gd
+  s_325610c56bb100::t_71cbe334b0a8ca 4985,4989-4997
+docs/plans/v389_2026-06-30-tiered-item-level-scaling.md
+  s_325610c56bb100::t_39f90e48e47841 1-101
+server/internal/game/item_rolls.go
+  s_325610c56bb100::t_3d1158185aae55 39,43,49-50
+  s_325610c56bb100::t_25811e3a982167 13-14,16
+server/internal/game/item_rarity_test.go
+  s_325610c56bb100::t_2d2598985edc10 73-74,78-80
+server/internal/http/auth_session_test.go
+  s_325610c56bb100::t_9bb243ff193bc4 623
+  s_325610c56bb100::t_ce8720fa5d5915 639
+  s_325610c56bb100::t_6ac9cb2beb9da3 728,735
+server/internal/http/blacksmith_recipe_test.go
+  s_325610c56bb100::t_7da2fc0fff515b 56
+  s_325610c56bb100::t_b71d5bc1f2163b 85
+server/internal/game/dungeon_population.go
+  s_325610c56bb100::t_a249e32ce98053 187,190,198
+server/internal/store/interfaces.go
+  s_325610c56bb100::t_b2714ad416b865 83-84
+  s_325610c56bb100::t_89186a62615930 3-7
+server/internal/game/dungeon_generation_rules.go
+  s_325610c56bb100::t_51d65f5dcb085b 22
+shared/rules/dungeon_generation.v0.schema.json
+  s_325610c56bb100::t_7635f78c4b7db0 24
+  s_325610c56bb100::t_2c3824f914b183 372-379
+shared/rules/dungeon_generation.v0.json
+  s_325610c56bb100::t_c92d09e6bccaee 203-205
+server/internal/store/upgrade_depth_cap_test.go
+  s_325610c56bb100::t_03014fcf4c42be 1-49
+server/internal/game/item_level_scaling.go
+  s_325610c56bb100::t_9d15693604e14e 1-90
+server/internal/game/item_roll_upgrade.go
+  s_325610c56bb100::t_907d8ebd167b57 1-148
+server/internal/store/store_test.go
+  s_325610c56bb100::t_070ff6e9fdcdb2 1134
+  s_325610c56bb100::t_adcea68231e9d7 1140
+  s_325610c56bb100::t_71a4ddb78d6451 1163
+  s_325610c56bb100::t_0efd09503e76e4 1194
+  s_325610c56bb100::t_013b25aac94920 1217
+  s_325610c56bb100::t_72f97a02ae9cd5 1118,1121
+  s_325610c56bb100::t_50ff2406c3d5b8 1100
+server/internal/http/account_stash.go
+  s_325610c56bb100::t_920509f7646c14 11
+  s_325610c56bb100::t_58fe05f1e6ef00 239,243-259
+client/scripts/blacksmith_panel.gd
+  s_325610c56bb100::t_d925f92a61a741 30-31
+  s_325610c56bb100::t_3dffbd3f2fa5bd 392-405
+  s_325610c56bb100::t_acb44e54a6f5d9 101-102
+  s_325610c56bb100::t_c052a6e4165ef6 457-458
+client/scripts/blacksmith_upgrade_preview.gd
+  s_325610c56bb100::t_9be75519c41a3b 53-55,61-62
+  s_325610c56bb100::t_dd85e441c19e30 33-38
+  s_325610c56bb100::t_588ce174d07cb7 194-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6fe6804b13707fe27166bf275d7884523028f7eb",
+  "prompts": {},
+  "sessions": {
+    "s_325610c56bb100": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3dd1aeb3-186a-4d17-95ae-7f6c7df693ba",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "skill_weapon_damage_scaling",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v386_skill_weapon_damage_scaling",
+  "character_class": "sorcerer",
+  "debug_progression": {
+    "level": 6,
+    "unspent_skill_points": 0,
+    "stats": { "magic": 15 },
+    "skill_ranks": { "magic_bolt": 1 }
+  },
+  "title": "Skill weapon damage scaling",
+  "description": "Magic Bolt damage rises after equipping a stronger staff than fighting unarmed.",
+  "steps": [
+    {
+      "action": "unequip_slot",
+      "slot": "main_hand"
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "magic_bolt",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 6
+      },
+      "timeout_s": 8
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 32
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "starter_sorcerer_staff"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "starter_sorcerer_staff",
+      "slot": "main_hand"
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "magic_bolt",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 8
+      },
+      "timeout_s": 8
+    }
+  ]
+}

@@ -161,11 +161,11 @@
               "mana_cost": { "type": "integer", "minimum": 0 },
               "damage": {
                 "type": "object",
-                "required": ["min", "max"],
+                "required": ["min_percent", "max_percent"],
                 "additionalProperties": false,
                 "properties": {
-                  "min": { "type": "integer", "minimum": 0 },
-                  "max": { "type": "integer", "minimum": 0 }
+                  "min_percent": { "type": "integer", "minimum": 1 },
+                  "max_percent": { "type": "integer", "minimum": 1 }
                 }
               }
             }

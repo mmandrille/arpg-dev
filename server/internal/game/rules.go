@@ -2748,11 +2748,17 @@ func validatePassiveExecuteSkillPayload(skillID string, skill SkillDef) error {
 }
 
 func validateProjectileSkillPayload(skillID string, skill SkillDef) error {
-	if skill.Damage.Type != "rank_linear_range" {
+	switch skill.Damage.Type {
+	case "", "rank_linear_range":
+		if skill.Damage.MinBase < 0 || skill.Damage.MaxBase < skill.Damage.MinBase {
+			return fmt.Errorf("game: invalid rules skills.%s.damage: base damage must be valid", skillID)
+		}
+	case "weapon_multiplier_range":
+		if skill.Damage.MinBase < 1 || skill.Damage.MaxBase < 1 {
+			return fmt.Errorf("game: invalid rules skills.%s.damage: weapon multiplier percents must be positive", skillID)
+		}
+	default:
 		return fmt.Errorf("game: invalid rules skills.%s.damage.type: unsupported %s", skillID, skill.Damage.Type)
-	}
-	if skill.Damage.MinBase < 0 || skill.Damage.MaxBase < skill.Damage.MinBase {
-		return fmt.Errorf("game: invalid rules skills.%s.damage: base damage must be valid", skillID)
 	}
 	if skill.Damage.MinPerRank < 0 || skill.Damage.MaxPerRank < 0 {
 		return fmt.Errorf("game: invalid rules skills.%s.damage: per-rank damage must be non-negative", skillID)

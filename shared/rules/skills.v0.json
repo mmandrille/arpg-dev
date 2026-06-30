@@ -30,11 +30,11 @@
         }
       },
       "damage": {
-        "type": "rank_linear_range",
-        "min_base": 6,
-        "max_base": 9,
-        "min_per_rank": 1,
-        "max_per_rank": 1,
+        "type": "weapon_multiplier_range",
+        "min_base": 300,
+        "max_base": 225,
+        "min_per_rank": 50,
+        "max_per_rank": 25,
         "magic_scaling": {
           "stat": "magic",
           "percent_per_point": 1,
@@ -126,11 +126,11 @@
         }
       },
       "damage": {
-        "type": "rank_linear_range",
-        "min_base": 3,
-        "max_base": 5,
-        "min_per_rank": 1,
-        "max_per_rank": 1,
+        "type": "weapon_multiplier_range",
+        "min_base": 150,
+        "max_base": 125,
+        "min_per_rank": 50,
+        "max_per_rank": 25,
         "magic_scaling": {
           "stat": "magic",
           "percent_per_point": 1,
@@ -196,11 +196,11 @@
         }
       },
       "damage": {
-        "type": "rank_linear_range",
-        "min_base": 3,
-        "max_base": 6,
-        "min_per_rank": 1,
-        "max_per_rank": 1,
+        "type": "weapon_multiplier_range",
+        "min_base": 150,
+        "max_base": 150,
+        "min_per_rank": 50,
+        "max_per_rank": 25,
         "magic_scaling": {
           "stat": "magic",
           "percent_per_point": 1,
@@ -259,11 +259,11 @@
         }
       },
       "damage": {
-        "type": "rank_linear_range",
-        "min_base": 8,
-        "max_base": 11,
-        "min_per_rank": 2,
-        "max_per_rank": 2,
+        "type": "weapon_multiplier_range",
+        "min_base": 400,
+        "max_base": 275,
+        "min_per_rank": 100,
+        "max_per_rank": 50,
         "magic_scaling": {
           "stat": "magic",
           "percent_per_point": 1,
@@ -948,11 +948,11 @@
         }
       },
       "damage": {
-        "type": "rank_linear_range",
-        "min_base": 3,
-        "max_base": 5,
-        "min_per_rank": 1,
-        "max_per_rank": 1
+        "type": "weapon_multiplier_range",
+        "min_base": 150,
+        "max_base": 125,
+        "min_per_rank": 50,
+        "max_per_rank": 25
       },
       "projectile": {
         "range": 16,
@@ -1048,11 +1048,11 @@
         }
       },
       "damage": {
-        "type": "rank_linear_range",
-        "min_base": 2,
-        "max_base": 4,
-        "min_per_rank": 1,
-        "max_per_rank": 1
+        "type": "weapon_multiplier_range",
+        "min_base": 100,
+        "max_base": 100,
+        "min_per_rank": 50,
+        "max_per_rank": 25
       },
       "projectile": {
         "range": 15,
@@ -1103,11 +1103,11 @@
         }
       },
       "damage": {
-        "type": "rank_linear_range",
-        "min_base": 2,
-        "max_base": 4,
-        "min_per_rank": 1,
-        "max_per_rank": 1
+        "type": "weapon_multiplier_range",
+        "min_base": 100,
+        "max_base": 100,
+        "min_per_rank": 50,
+        "max_per_rank": 25
       },
       "projectile": {
         "range": 14,
@@ -1206,11 +1206,11 @@
         }
       },
       "damage": {
-        "type": "rank_linear_range",
-        "min_base": 4,
-        "max_base": 6,
-        "min_per_rank": 1,
-        "max_per_rank": 1
+        "type": "weapon_multiplier_range",
+        "min_base": 200,
+        "max_base": 150,
+        "min_per_rank": 50,
+        "max_per_rank": 25
       },
       "projectile": {
         "range": 17,

@@ -535,7 +535,7 @@ func _initialize() -> void:
 			_fail("skill golden rank %d mana mismatch" % rank)
 			return
 		var expected_damage: Dictionary = c["damage"]
-		if _skill_damage_min(magic_bolt, rank) != int(expected_damage["min"]) or _skill_damage_max(magic_bolt, rank) != int(expected_damage["max"]):
+		if _skill_damage_min(magic_bolt, rank) != int(expected_damage["min_percent"]) or _skill_damage_max(magic_bolt, rank) != int(expected_damage["max_percent"]):
 			_fail("skill golden rank %d damage mismatch" % rank)
 			return
 
@@ -771,8 +771,7 @@ func _skill_damage_min(skill: Dictionary, rank: int) -> int:
 
 func _skill_damage_max(skill: Dictionary, rank: int) -> int:
 	var damage: Dictionary = skill["damage"]
-	var min_damage := _skill_damage_min(skill, rank)
-	return maxi(min_damage, int(damage["max_base"]) + int(damage["max_per_rank"]) * maxi(0, rank - 1))
+	return maxi(0, int(damage["max_base"]) + int(damage["max_per_rank"]) * maxi(0, rank - 1))
 
 
 func _eval_progression_formula(formula: Dictionary, stats: Dictionary) -> float:

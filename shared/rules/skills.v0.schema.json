@@ -30,7 +30,7 @@
         "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
         "cost": { "$ref": "#/$defs/cost" },
-        "damage": { "$ref": "#/$defs/rank_linear_damage" },
+        "damage": { "$ref": "#/$defs/skill_damage" },
         "projectile": { "$ref": "#/$defs/projectile" },
         "pierce": { "$ref": "#/$defs/pierce" },
         "root": { "$ref": "#/$defs/root" },
@@ -213,6 +213,12 @@
         "per_rank": { "type": "integer", "minimum": 0 }
       }
     },
+    "skill_damage": {
+      "oneOf": [
+        { "$ref": "#/$defs/rank_linear_damage" },
+        { "$ref": "#/$defs/weapon_multiplier_damage" }
+      ]
+    },
     "rank_linear_damage": {
       "type": "object",
       "required": ["type", "min_base", "max_base", "min_per_rank", "max_per_rank"],
@@ -221,6 +227,19 @@
         "type": { "const": "rank_linear_range" },
         "min_base": { "type": "integer", "minimum": 0 },
         "max_base": { "type": "integer", "minimum": 0 },
+        "min_per_rank": { "type": "integer", "minimum": 0 },
+        "max_per_rank": { "type": "integer", "minimum": 0 },
+        "magic_scaling": { "$ref": "#/$defs/magic_scaling" }
+      }
+    },
+    "weapon_multiplier_damage": {
+      "type": "object",
+      "required": ["type", "min_base", "max_base", "min_per_rank", "max_per_rank"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "weapon_multiplier_range" },
+        "min_base": { "type": "integer", "minimum": 1 },
+        "max_base": { "type": "integer", "minimum": 1 },
         "min_per_rank": { "type": "integer", "minimum": 0 },
         "max_per_rank": { "type": "integer", "minimum": 0 },
         "magic_scaling": { "$ref": "#/$defs/magic_scaling" }

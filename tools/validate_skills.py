@@ -74,15 +74,15 @@ def validate_skill_catalogs(
         report.fail("skills magic_bolt", "cooldown multiplier must be positive")
     else:
         dmg = magic_bolt["damage"]
-        if dmg.get("type") != "rank_linear_range":
-            report.fail("skills magic_bolt damage", "damage type must be rank_linear_range")
+        if dmg.get("type") != "weapon_multiplier_range":
+            report.fail("skills magic_bolt damage", "damage type must be weapon_multiplier_range")
         else:
             rank_one_min = int(dmg["min_base"])
             rank_one_max = int(dmg["max_base"])
             rank_max_min = rank_one_min + int(dmg["min_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
             rank_max_max = rank_one_max + int(dmg["max_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
-            if rank_one_max < rank_one_min or rank_max_max < rank_max_min:
-                report.fail("skills magic_bolt damage", "damage max must be >= min at every rank")
+            if rank_one_min < 1 or rank_one_max < 1 or rank_max_min < 1 or rank_max_max < 1:
+                report.fail("skills magic_bolt damage", "weapon multiplier percents must be positive at every rank")
             else:
                 report.ok("skills magic_bolt declarative tuning is valid")
 
@@ -282,8 +282,8 @@ def validate_skill_catalogs(
                 break
             mana_cost = int(cost["base"]) + int(cost["per_rank"]) * (rank - 1)
             damage = {
-                "min": int(dmg["min_base"]) + int(dmg["min_per_rank"]) * (rank - 1),
-                "max": int(dmg["max_base"]) + int(dmg["max_per_rank"]) * (rank - 1),
+                "min_percent": int(dmg["min_base"]) + int(dmg["min_per_rank"]) * (rank - 1),
+                "max_percent": int(dmg["max_base"]) + int(dmg["max_per_rank"]) * (rank - 1),
             }
             if int(case["mana_cost"]) != mana_cost or case["damage"] != damage:
                 report.fail("skill_points golden skill", f"rank {rank}: mana/damage mismatch")

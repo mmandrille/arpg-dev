@@ -2244,21 +2244,6 @@ func skillManaCost(def SkillDef, rank int) int {
 	return cost
 }
 
-func skillDamageRange(def SkillDef, rank int) DamageRange {
-	if rank < 1 {
-		rank = 1
-	}
-	minDamage := def.Damage.MinBase + def.Damage.MinPerRank*(rank-1)
-	maxDamage := def.Damage.MaxBase + def.Damage.MaxPerRank*(rank-1)
-	if minDamage < 0 {
-		minDamage = 0
-	}
-	if maxDamage < minDamage {
-		maxDamage = minDamage
-	}
-	return DamageRange{Min: minDamage, Max: maxDamage}
-}
-
 func (s *Sim) skillCastDirection(def SkillDef, cast *CastSkillIntent, player *entity) (Vec2, uint64, string) {
 	return s.skillCastDirectionWithRange(def, cast, player, def.Projectile.Range)
 }
@@ -2298,7 +2283,7 @@ func (s *Sim) skillCastDirectionWithRange(def SkillDef, cast *CastSkillIntent, p
 }
 
 func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef, rank int, dir Vec2, targetID uint64, in Input) *entity {
-	damageRange := s.scaleSkillDamageForMagic(def, rank, skillDamageRange(def, rank))
+	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRange(def, rank))
 	projectile := &entity{
 		kind:             projectileEntity,
 		pos:              player.pos,

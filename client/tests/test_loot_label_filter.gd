@@ -109,7 +109,7 @@ func _test_case_insensitive() -> void:
 func _test_display_color_dims_unhighlighted() -> void:
 	var f := LootLabelFilterScript.new()
 	var base := Color(0.8, 0.6, 0.4, 1.0)
-	_check(f.display_color(base, true) == base, "highlighted label keeps full color")
+	_check(f.display_color(base, true, "", "magic").to_html(false) == "93c5fd", "highlighted label uses rarity color")
 	var dimmed: Color = f.display_color(base, false)
 	_check(dimmed != base, "unhighlighted label is dimmed")
 	_check(is_equal_approx(dimmed.r, base.r * 0.58), "dim factor applied to r")
@@ -121,4 +121,4 @@ func _test_display_color_currency_highlight_is_white() -> void:
 	var gold := Color("#ffd75e")
 	var highlighted: Color = f.display_color(gold, true, "currency")
 	_check(highlighted == Color.WHITE, "highlighted currency label uses white")
-	_check(f.display_color(gold, true, "equipment") == gold, "highlighted equipment keeps base color")
+	_check(f.display_color(gold, true, "equipment", "common") == Color.WHITE, "highlighted common equipment uses white rarity highlight")

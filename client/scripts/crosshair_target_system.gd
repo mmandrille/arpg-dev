@@ -1,11 +1,12 @@
 ## CrosshairTargetSystem — ray pick, reach lock, highlight, and name tag for actionable targets.
 ##
 ## Perspective modes use the viewport center ray; isometric uses the mouse ray from context.
-## Reachable targets get the same gold highlight and name tag in every camera mode.
+## Reachable targets get a rarity-colored highlight and name tag in every camera mode.
 class_name CrosshairTargetSystem
 extends RefCounted
 
 const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
+const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const CrosshairTargetNamesScript := preload("res://scripts/crosshair_target_names.gd")
 const CrosshairTargetNameTagScript := preload("res://scripts/crosshair_target_name_tag.gd")
 const PickTargetHighlightScript := preload("res://scripts/pick_target_highlight.gd")
@@ -123,12 +124,13 @@ func _sync_name_tag() -> void:
 	var rec: Dictionary = _ctx.entities[_locked_id]
 	var node := rec.get("node", null) as Node3D
 	var text := CrosshairTargetNamesScript.display_name(rec)
+	var accent := _highlight_color_for(rec)
 	if node == null or text == "" or _ctx.camera == null or _ctx.name_tag_parent == null:
 		_hide_name_tag()
 		return
 	_ensure_name_tag()
 	_name_tag.attach_to(_ctx.name_tag_parent)
-	_name_tag.show_for(_ctx.camera, node, text)
+	_name_tag.show_for(_ctx.camera, node, text, accent)
 
 
 func _ensure_name_tag() -> void:
@@ -200,19 +202,24 @@ func _reaction_for(entity_id: String):
 	return _ctx.entities[entity_id].get("reaction", null)
 
 
+func _highlight_color_for(rec: Dictionary) -> Color:
+	return ClientConstantsScript.target_highlight_color(str(rec.get("type", "")), str(rec.get("rarity", "common")))
+
+
 func _apply_highlight(entity_id: String) -> void:
 	if _ctx == null or not _ctx.entities.has(entity_id):
 		return
 	var rec: Dictionary = _ctx.entities[entity_id]
 	var typ := str(rec.get("type", ""))
+	var highlight_color := _highlight_color_for(rec)
 	var reaction = _reaction_for(entity_id)
 	if reaction != null:
-		reaction.set_highlight(true)
+		reaction.set_highlight(true, highlight_color)
 		_highlight_kind = "reaction"
 	elif typ in ["interactable", "loot"]:
 		var node := rec.get("node", null) as Node3D
 		if node != null:
-			PickTargetHighlightScript.set_highlight(node, true)
+			PickTargetHighlightScript.set_highlight(node, true, highlight_color)
 			_highlight_kind = "node"
 	else:
 		return

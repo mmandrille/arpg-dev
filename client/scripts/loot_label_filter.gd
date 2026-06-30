@@ -11,6 +11,8 @@ extends RefCounted
 ## Threshold cycles All -> Magic+ -> Rare+ -> Unique. Rarities not on the ladder
 ## (currency, quest, consumable, unknown) are never hidden.
 
+const ClientConstantsScript := preload("res://scripts/client_constants.gd")
+
 const RARITY_ORDER: Array[String] = ["common", "magic", "rare", "unique"]
 const MODE_LABELS: Array[String] = ["All", "Magic+", "Rare+", "Unique"]
 const REVEAL_DIM_FACTOR: float = 0.58
@@ -21,11 +23,11 @@ var _threshold: int = 0
 ## Dim a label's base color when it is revealed-but-not-hovered, so the hovered
 ## label stands out. Currency labels use white while highlighted so gold text
 ## does not read like unique-rarity loot.
-func display_color(base: Color, highlighted: bool, category: String = "") -> Color:
+func display_color(base: Color, highlighted: bool, category: String = "", rarity: String = "common") -> Color:
 	if highlighted and category.to_lower() == "currency":
 		return Color.WHITE
 	if highlighted:
-		return base
+		return ClientConstantsScript.target_highlight_color("loot", rarity)
 	return Color(
 		base.r * REVEAL_DIM_FACTOR,
 		base.g * REVEAL_DIM_FACTOR,

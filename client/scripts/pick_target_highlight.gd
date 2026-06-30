@@ -2,17 +2,16 @@
 class_name PickTargetHighlight
 extends RefCounted
 
-const HIGHLIGHT_EMISSION := Color("#ffffff")
 const HIGHLIGHT_EMISSION_ENERGY := 0.6
 
 static var _mesh_states: Dictionary = {}
 
 
-static func set_highlight(root: Node3D, on: bool) -> void:
+static func set_highlight(root: Node3D, on: bool, color: Color = Color.WHITE) -> void:
 	if root == null:
 		return
 	if on:
-		_apply_node(root)
+		_apply_node(root, color)
 	else:
 		_clear_node(root)
 
@@ -28,11 +27,11 @@ static func clear_all() -> void:
 			_mesh_states.erase(key)
 
 
-static func _apply_node(node: Node) -> void:
+static func _apply_node(node: Node, color: Color) -> void:
 	if node is MeshInstance3D:
-		_apply_mesh(node as MeshInstance3D)
+		_apply_mesh(node as MeshInstance3D, color)
 	for child in node.get_children():
-		_apply_node(child)
+		_apply_node(child, color)
 
 
 static func _clear_node(node: Node) -> void:
@@ -42,7 +41,7 @@ static func _clear_node(node: Node) -> void:
 		_clear_node(child)
 
 
-static func _apply_mesh(mesh_node: MeshInstance3D) -> void:
+static func _apply_mesh(mesh_node: MeshInstance3D, color: Color) -> void:
 	var key := mesh_node.get_instance_id()
 	if not _mesh_states.has(key):
 		var mat := _material_for(mesh_node)
@@ -57,7 +56,7 @@ static func _apply_mesh(mesh_node: MeshInstance3D) -> void:
 	if mat == null:
 		return
 	mat.emission_enabled = true
-	mat.emission = HIGHLIGHT_EMISSION
+	mat.emission = color
 	mat.emission_energy_multiplier = HIGHLIGHT_EMISSION_ENERGY
 
 

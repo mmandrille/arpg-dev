@@ -1,0 +1,45 @@
+client/scripts/crosshair_target_name_tag.gd
+  s_a1f21dc0f5c9c9::t_13fd366aecaf1e 28,33-35
+  s_a1f21dc0f5c9c9::t_0224a54c675c67 84
+  s_a1f21dc0f5c9c9::t_276757205cfb76 93
+client/scripts/pick_target_highlight.gd
+  s_a1f21dc0f5c9c9::t_059b7d1a913d5e 44
+  s_a1f21dc0f5c9c9::t_585a6703bb8da0 10,14
+  s_a1f21dc0f5c9c9::t_c6a3221a893387 30,32,34
+  s_a1f21dc0f5c9c9::t_86d56600824ae9 59
+client/scripts/main.gd
+  s_a1f21dc0f5c9c9::t_9a48d67e7d7b18 3558
+client/scripts/client_constants.gd
+  s_a1f21dc0f5c9c9::t_e6eb0261ef8c62 51-74
+client/scripts/model_reaction_controller.gd
+  s_a1f21dc0f5c9c9::t_be2346f40aa4b3 22
+  s_a1f21dc0f5c9c9::t_0deac37443702a 51-57
+  s_a1f21dc0f5c9c9::t_27eaa40de29f58 217
+client/scripts/crosshair_target_system.gd
+  s_a1f21dc0f5c9c9::t_9fc6dcba620361 4
+  s_a1f21dc0f5c9c9::t_076a85dab52b0c 127,133
+  s_a1f21dc0f5c9c9::t_9ac7241e540ee6 205-208,214,217,222
+  s_a1f21dc0f5c9c9::t_66c9e7df7dbf44 9
+client/tests/test_loot_label_filter.gd
+  s_a1f21dc0f5c9c9::t_2c8f7bccdf5520 112
+  s_a1f21dc0f5c9c9::t_d63fc1450af0b0 124
+client/scripts/loot_label_filter.gd
+  s_a1f21dc0f5c9c9::t_452fc5bf5d1992 14-15
+  s_a1f21dc0f5c9c9::t_3bf34aa4b32f81 26,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7d8477f6d842f736ed7032c66e353e02fe3db6a5",
+  "prompts": {},
+  "sessions": {
+    "s_a1f21dc0f5c9c9": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bb4bb3be-c772-4b61-9b2d-5fa31b8a842d",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

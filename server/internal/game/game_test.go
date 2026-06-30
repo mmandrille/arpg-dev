@@ -323,12 +323,28 @@ func TestItemTemplateFamilyStatRequirements(t *testing.T) {
 		if !template.Equippable {
 			continue
 		}
+		if template.Requirements["level"] < 1 {
+			t.Fatalf("template %s requirements = %+v, want level requirement", templateID, template.Requirements)
+		}
+		armorTypes := map[string]bool{
+			"helm": true, "chest": true, "gloves": true, "belt": true, "boots": true,
+		}
+		if armorTypes[template.ItemType] {
+			hasStat := false
+			for _, stat := range []string{"str", "dex", "magic", "vit"} {
+				if template.Requirements[stat] >= 1 {
+					hasStat = true
+					break
+				}
+			}
+			if !hasStat {
+				t.Fatalf("template %s item_type %s requirements = %+v, want a class stat requirement", templateID, template.ItemType, template.Requirements)
+			}
+			continue
+		}
 		stat, ok := expectedByType[template.ItemType]
 		if !ok {
 			t.Fatalf("template %s has unmapped item_type %q", templateID, template.ItemType)
-		}
-		if template.Requirements["level"] < 1 {
-			t.Fatalf("template %s requirements = %+v, want level requirement", templateID, template.Requirements)
 		}
 		if template.Requirements[stat] < 1 {
 			t.Fatalf("template %s item_type %s requirements = %+v, want %s requirement", templateID, template.ItemType, template.Requirements, stat)

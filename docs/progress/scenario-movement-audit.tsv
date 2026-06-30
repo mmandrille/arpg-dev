@@ -211,3 +211,4 @@ client/89_aura_soft_lights.json	aura_soft_lights	godot_client	extended	contract	
 client/90_town_night_perimeter.json	town_night_perimeter	godot_client	extended	setup-eliminable	3	3		
 108_skill_weapon_damage_scaling.json	skill_weapon_damage_scaling	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
 109_class_weapon_affinities_lab.json	class_weapon_affinities_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
+110_armor_slot_families_lab.json	armor_slot_families_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup

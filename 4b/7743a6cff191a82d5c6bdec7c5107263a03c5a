@@ -1,0 +1,22 @@
+docs/progress/scenario-movement-audit.tsv
+  s_9e3f0b142afb4e::t_079a9c90e4cdf6 214
+shared/golden/dungeon_equipment_drops.json
+  s_9e3f0b142afb4e::t_f47468f4d49639 10-11,13-14,16-17,20-21
+  s_9e3f0b142afb4e::t_194805ac05461b 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4b7743a6cff191a82d5c6bdec7c5107263a03c5a",
+  "prompts": {},
+  "sessions": {
+    "s_9e3f0b142afb4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8e2b2de-7759-442e-ad45-b730d5031331",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

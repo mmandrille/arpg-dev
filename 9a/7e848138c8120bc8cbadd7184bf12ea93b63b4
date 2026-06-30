@@ -1,0 +1,33 @@
+client/scripts/blacksmith_panel.gd
+  s_325610c56bb100::t_4730453d9fd8a8 395
+  s_325610c56bb100::t_7f6abe537c136f 400,403-405
+client/tests/test_blacksmith_panel.gd
+  s_325610c56bb100::t_56019a7a165b13 28-29
+  s_325610c56bb100::t_e900430aff340f 53
+client/scripts/blacksmith_upgrade_preview.gd
+  s_325610c56bb100::t_675af944805b84 32-36,38
+  s_325610c56bb100::t_a2c80f764c3c11 79
+  s_325610c56bb100::t_b43aab520d7f68 199-202
+  s_325610c56bb100::t_50686ea68d5389 61
+client/tests/test_shop_panel.gd
+  s_325610c56bb100::t_29cd5b5dfb4fa5 500,507,516
+  s_325610c56bb100::t_a09f2008617657 483
+server/internal/game/player_projectile.go
+  s_325610c56bb100::t_eb0dc31a6564ff 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9a7e848138c8120bc8cbadd7184bf12ea93b63b4",
+  "prompts": {},
+  "sessions": {
+    "s_325610c56bb100": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3dd1aeb3-186a-4d17-95ae-7f6c7df693ba",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

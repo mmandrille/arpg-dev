@@ -1,0 +1,128 @@
+client/scripts/combat_feel_config.gd
+  s_225867510fdacb::t_02074b7470d611 92-96
+server/internal/game/level_up_resources.go
+  s_225867510fdacb::t_5fc0e72e6ef4fa 1-38
+docs/progress/slice-lifecycle.md
+  s_225867510fdacb::t_1d7674f56a1c52 399
+client/scripts/consumable_use_effect.gd.uid
+  s_225867510fdacb::t_0144779b98b901 1
+client/scripts/loot_label_hover.gd.uid
+  s_225867510fdacb::t_0144779b98b901 1
+tools/bot/scenarios/client/12_model_reaction_polish.json
+  s_225867510fdacb::t_f42e039e81fef2 7
+shared/rules/character_progression.v0.schema.json
+  s_225867510fdacb::t_856a4dacae9c78 28-35
+client/scripts/main.gd
+  s_225867510fdacb::t_9675add7326265 454
+  s_225867510fdacb::t_9ad84e044578e5 14
+  s_225867510fdacb::t_74d967c41f837d 5720,5723
+  s_225867510fdacb::t_7edfd632497955 1449-1451,1476-1478
+  s_225867510fdacb::t_5e76711a59e3c0 13
+  s_225867510fdacb::t_759af94d57845b 1456-1458,1483-1485,1614-1616
+  s_225867510fdacb::t_6f76392de5d008 1440
+  s_225867510fdacb::t_7dc9b9b6977d86 1602-1604
+  s_225867510fdacb::t_a3126d2092cf18 3030-3031
+  s_225867510fdacb::t_7bc2519b06db7b 3415-3416,3418-3430,3432-3433
+  s_225867510fdacb::t_1da40b28016633 3417
+  s_225867510fdacb::t_d0d8f2e9c86d08 15
+  s_225867510fdacb::t_54319183ded586 3028-3029
+  s_225867510fdacb::t_c0fceff98b532f 1375,1380
+  s_225867510fdacb::t_d8fb6289a4fa3a 1379
+  s_225867510fdacb::t_030d18a1f2e51c 1381
+server/internal/game/rules.go
+  s_225867510fdacb::t_fad779a4816995 161-168
+  s_225867510fdacb::t_384d0c217ac5a8 960-967
+  s_225867510fdacb::t_cf5df592c0a7e2 876
+client/scripts/level_up_burst.gd.uid
+  s_225867510fdacb::t_0144779b98b901 1
+client/scripts/level_up_burst.gd
+  s_225867510fdacb::t_2c0ede0d786f06 1-55
+shared/rules/character_progression.v0.json
+  s_225867510fdacb::t_95f9c53e1167a9 66-68
+client/scripts/door_presentation.gd.uid
+  s_225867510fdacb::t_0144779b98b901 1
+docs/CODEMAP.md
+  s_225867510fdacb::t_94b84630cfc7f5 23
+  s_225867510fdacb::t_ed3efc5c5fb933 37
+  s_225867510fdacb::t_4aff0707cacf17 19
+  s_225867510fdacb::t_d966b8d4e721a9 20
+client/scripts/combat_event_presentation.gd
+  s_225867510fdacb::t_9e5d80f6706779 30
+  s_225867510fdacb::t_76e5c58ccc2424 87-88,102-103,111-114
+  s_225867510fdacb::t_f05688bed487ac 14,17-18,25
+  s_225867510fdacb::t_13e96d25836d09 31-37,115-116
+.maintainability/file-size-baseline.tsv
+  s_225867510fdacb::t_5aa70fc0799543 9
+  s_225867510fdacb::t_10a08144cf1957 23
+  s_225867510fdacb::t_03b07b6a9658d7 18
+  s_225867510fdacb::t_30676882a9f32b 33
+  s_225867510fdacb::t_2c4c73fb04d1c9 20
+client/scripts/combat_feel_presentation_loader.gd
+  s_225867510fdacb::t_4b4d53a4876d59 43-45
+  s_225867510fdacb::t_79b48809c45381 12
+  s_225867510fdacb::t_c717bec14c5fad 91
+  s_225867510fdacb::t_c5d22a5ee168ad 78-82
+client/scripts/gameplay_feedback_presentation.gd
+  s_225867510fdacb::t_3c37ed0e153b3b 141
+  s_225867510fdacb::t_ba48c00e861734 1-10,12-78
+  s_225867510fdacb::t_2e26b43a0478ce 11
+  s_225867510fdacb::t_f32433d3dc9257 79-140,142-162
+docs/as-built/v385_gameplay-feel-polish.md
+  s_225867510fdacb::t_f4a3306f72cdbf 1-44
+  s_225867510fdacb::t_d047e037a64252 45-48
+server/internal/game/level_up_test.go
+  s_225867510fdacb::t_f9434ca44f7fa6 1-58
+tools/bot/scenarios/client/11_combat_feedback.json
+  s_225867510fdacb::t_31804b1a993828 6-9
+client/scripts/door_presentation.gd
+  s_225867510fdacb::t_791082e1f7535b 18
+  s_225867510fdacb::t_0c6fa17d4de410 1-17,19-83
+tools/bot/scenarios/client/36_market_purchase_ui.json
+  s_225867510fdacb::t_80de2358ce1ef9 3
+  s_225867510fdacb::t_72150685e0a09e 37,39
+server/internal/game/sim.go
+  s_225867510fdacb::t_7a9e5d0f2627f6 3959
+client/scripts/consumable_use_effect.gd
+  s_225867510fdacb::t_6273d53f158422 1-40
+client/tests/test_combat_feel_presentation_loader.gd
+  s_225867510fdacb::t_2d06b1020721a9 25
+  s_225867510fdacb::t_de5619db37876a 42-45
+shared/assets/combat_feel_presentation.v0.json
+  s_225867510fdacb::t_03a0ce4d07e2e9 22-24
+shared/assets/combat_feel_presentation.v0.schema.json
+  s_225867510fdacb::t_17d8b6d7036575 64-71
+client/scripts/interactable_state_presentation.gd
+  s_225867510fdacb::t_238c91785c326b 1-74
+docs/progress/scenario-movement-audit.tsv
+  s_225867510fdacb::t_c5d94bfdf8e032 104-106
+client/scripts/town_node_factory.gd
+  s_225867510fdacb::t_14d1ff79e6bed5 5,10
+PROGRESS.md
+  s_225867510fdacb::t_80184ccf9a3916 26,28
+client/scripts/loot_label_hover.gd
+  s_225867510fdacb::t_ca75673380f21f 35,37,41
+  s_225867510fdacb::t_1682ce597227cd 50-68
+  s_225867510fdacb::t_95e5f7098e32d2 1-34,36,38-40,42-49
+tools/bot/test_protocol.py
+  s_225867510fdacb::t_c075716f437fb2 450-454,456
+client/scripts/gameplay_feedback_presentation.gd.uid
+  s_225867510fdacb::t_e72acca4c8df12 1
+client/scripts/interactable_state_presentation.gd.uid
+  s_225867510fdacb::t_70b07a62bd26dd 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "4055c4562316398f06e9c4ab0c44497af6da0387",
+  "prompts": {},
+  "sessions": {
+    "s_225867510fdacb": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d8761f97-3ee6-4876-9fec-7249ad6e7ea1",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

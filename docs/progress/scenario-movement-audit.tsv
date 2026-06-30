@@ -91,6 +91,7 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 84_wayfarers_accord_set.json	wayfarers_accord_set	protocol	extended	setup-eliminable	1	1		
 84_boss_special_drops.json	boss_special_drops	protocol	extended	contract	0	0		
 85_item_level_progression.json	item_level_progression	protocol	extended	contract	0	0		
+89_tiered_item_level_drops.json	tiered_item_level_drops	protocol	extended	contract	0	0		
 86_mercenary_foundation.json	mercenary_foundation	protocol	extended	setup-eliminable	1	1		
 87_boss_enrage_phase.json	boss_enrage_phase	protocol	extended	contract	0	0		
 88_mercenary_hiring_board.json	mercenary_hiring_board	protocol	extended	contract	0	0		

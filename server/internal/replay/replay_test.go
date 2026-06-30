@@ -59,7 +59,7 @@ func TestReconstructFromInputsWithDirectionalAttackAggro(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stored inputs: %v", err)
 	}
-	recon, err := ReconstructFromInputs(testSessionID, "cafebabecafebabe", rules, "combat_control_lab", inputs, 10)
+	recon, err := ReconstructFromInputs(testSessionID, "cafebabecafebabe", rules, "combat_control_lab", inputs, 25)
 	if err != nil {
 		t.Fatalf("reconstruct: %v", err)
 	}

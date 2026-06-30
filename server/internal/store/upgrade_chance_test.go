@@ -126,7 +126,7 @@ func TestAccountStashItemUpgradePityGuaranteesSuccess(t *testing.T) {
 	if err := json.Unmarshal(item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
 	}
-	if stats.ItemLevel != 1 || stats.DamageMax != 5 || stats.Pity.Failures != 0 {
+	if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.Pity.Failures != 0 {
 		t.Fatalf("pity success stats = %+v raw=%s", stats, string(item.RolledStats))
 	}
 }

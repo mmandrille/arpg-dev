@@ -52,6 +52,12 @@ static func click_bishop_respec(main) -> void:
 		panel.bot_click_respec()
 
 
+static func click_bishop_debug(main, action: String) -> void:
+	var panel = _member(main, "bishop_panel")
+	if panel != null and panel.has_method("bot_click_debug"):
+		panel.bot_click_debug(action)
+
+
 static func click_blacksmith_upgrade(main, stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	var panel = _member(main, "blacksmith_panel")
 	if panel != null and panel.has_method("bot_click_upgrade"):

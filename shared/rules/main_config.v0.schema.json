@@ -10,7 +10,7 @@
     "version": { "type": "integer", "const": 0 },
     "gameplay": {
       "type": "object",
-      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent", "respec_cost_gold", "bishop_respec_resource_item_def_id", "bishop_respec_resource_count", "bishop_revive_resource_item_def_id", "bishop_revive_resource_count", "item_upgrade_cost_gold", "item_upgrade_cost_growth_per_level", "item_upgrade_max_level", "item_upgrade_success_chance_percent", "item_upgrade_pity_failure_threshold", "item_upgrade_resource_item_def_id", "item_upgrade_resource_count", "upgrade_shard_enemy_drop_chance_percent", "upgrade_shard_chest_drop_chance_percent", "upgrade_shard_boss_drop_chance_percent", "badge_reward_rules", "mercenary_hire_cost_gold", "quest_turn_in_item_def_id", "quest_turn_in_reward_gold", "companion_assist_radius", "companion_follow_distance", "companion_follow_stop_radius"],
+      "required": ["base_attack_interval_ticks", "base_movement_speed", "base_drop_rate_percent", "respec_cost_gold", "bishop_respec_resource_item_def_id", "bishop_respec_resource_count", "bishop_revive_resource_item_def_id", "bishop_revive_resource_count", "item_upgrade_cost_gold", "item_upgrade_cost_growth_per_level", "item_upgrade_max_level", "item_upgrade_success_chance_percent", "item_upgrade_pity_failure_threshold", "item_upgrade_resource_item_def_id", "item_upgrade_resource_count", "resource_loot_drops", "badge_reward_rules", "mercenary_hire_cost_gold", "quest_turn_in_item_def_id", "quest_turn_in_reward_gold", "companion_assist_radius", "companion_follow_distance", "companion_follow_stop_radius"],
       "additionalProperties": false,
       "properties": {
         "base_attack_interval_ticks": { "type": "integer", "minimum": 1 },
@@ -33,9 +33,32 @@
         "item_upgrade_pity_failure_threshold": { "type": "integer", "minimum": 0 },
         "item_upgrade_resource_item_def_id": { "type": "string", "minLength": 1 },
         "item_upgrade_resource_count": { "type": "integer", "minimum": 0 },
-        "upgrade_shard_enemy_drop_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "upgrade_shard_chest_drop_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "upgrade_shard_boss_drop_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "resource_loot_drops": {
+          "type": "object",
+          "required": ["monster_common_rare_chance_percent", "monster_champion_chance_percent", "monster_unique_chance_percent", "boss_kill_chance_percent", "chest_regular_chance_percent", "chest_boss_chance_percent", "pool"],
+          "additionalProperties": false,
+          "properties": {
+            "monster_common_rare_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "monster_champion_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "monster_unique_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "boss_kill_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "chest_regular_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "chest_boss_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "pool": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["item_def_id", "weight"],
+                "additionalProperties": false,
+                "properties": {
+                  "item_def_id": { "type": "string", "minLength": 1 },
+                  "weight": { "type": "integer", "minimum": 1 }
+                }
+              }
+            }
+          }
+        },
         "badge_reward_rules": {
           "type": "array",
           "minItems": 1,

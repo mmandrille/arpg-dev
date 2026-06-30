@@ -100,8 +100,11 @@ func TestBossKillGrantsDepthBadgeReward(t *testing.T) {
 
 func TestConfiguredBadgesAreWalletResourceItems(t *testing.T) {
 	sim := MustNewSim("sess_badge_wallet_item", "badge_wallet_item", loadRules(t))
-	if !sim.isWalletResourceItem("respec_badge") || !sim.isWalletResourceItem("upgrade_shard") {
+	if !sim.isWalletResourceItem("respec_badge") {
 		t.Fatalf("configured badges should be wallet resources")
+	}
+	if sim.isWalletResourceItem("upgrade_shard") {
+		t.Fatalf("upgrade shards are bag items, not wallet resources")
 	}
 	if sim.isWalletResourceItem("quest_leaf") {
 		t.Fatalf("quest item should not be wallet resource")

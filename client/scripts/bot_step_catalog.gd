@@ -58,7 +58,7 @@ const STEP_TYPES_ACTION := [
 	"click_skill_button", "use_skill_slot", "click_shop_buy_offer", "click_shop_reroll", "click_shop_sell_item",
 	"open_resource_wallet_window",
 	"drag_bag_to_stash", "drag_stash_to_bag", "click_stash_deposit_gold",
-	"click_stash_withdraw_gold", "click_bishop_respec", "set_stash_search", "select_stash_sort",
+	"click_stash_withdraw_gold", "click_bishop_respec", "click_bishop_debug", "set_stash_search", "select_stash_sort",
 	"set_multiplayer_search", "select_multiplayer_sort",
 	"click_blacksmith_upgrade", "click_blacksmith_stage_item", "select_blacksmith_recipe", "select_blacksmith_tab", "fill_blacksmith_merge", "click_blacksmith_merge", "click_mercenary_stance",
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",

@@ -177,6 +177,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_stash_withdraw_gold(action)
 		"click_bishop_respec":
 			_do_click_bishop_respec()
+		"click_bishop_debug":
+			_do_click_bishop_debug(action)
 		"click_blacksmith_upgrade":
 			_do_click_blacksmith_upgrade(action)
 		"click_blacksmith_stage_item":
@@ -369,6 +371,11 @@ func _do_click_stash_withdraw_gold(action: Dictionary) -> void:
 func _do_click_bishop_respec() -> void:
 	if _main != null and _main.has_method("bot_click_bishop_respec"):
 		_main.bot_click_bishop_respec()
+
+
+func _do_click_bishop_debug(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_bishop_debug"):
+		_main.bot_click_bishop_debug(str(action.get("action", "")))
 
 
 func _do_click_blacksmith_upgrade(action: Dictionary) -> void:
@@ -744,6 +751,8 @@ func _format_action(action: Dictionary) -> String:
 			return "click_stash_withdraw_gold amount=%s" % str(action.get("amount", 1))
 		"click_bishop_respec":
 			return "click_bishop_respec"
+		"click_bishop_debug":
+			return "click_bishop_debug action=%s" % str(action.get("action", ""))
 		"click_blacksmith_upgrade":
 			return "click_blacksmith_upgrade stash_item=%s item=%s stash_index=%s" % [
 				str(action.get("stash_item_id", "")),

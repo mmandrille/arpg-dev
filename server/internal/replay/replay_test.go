@@ -1515,6 +1515,19 @@ func (f *fakeRepo) UpgradeAccountStashItem(context.Context, string, string, int,
 func (f *fakeRepo) UpgradeAccountStashItemWithWallet(context.Context, string, string, string, int, int, int, int, int, int, map[string]struct{}, game.ItemUpgradeOptions) (store.AccountStashItem, int, int, int, bool, error) {
 	return store.AccountStashItem{}, 0, 0, 0, true, nil
 }
+func (f *fakeRepo) UpgradeAccountStashItemWithShard(context.Context, string, string, string, int, int, int, int, int, int, map[string]struct{}, game.ItemUpgradeOptions) (store.AccountStashItem, int, int, int, bool, error) {
+	return store.AccountStashItem{}, 0, 0, 0, false, nil
+}
+func (f *fakeRepo) MigrateUpgradeShardWalletToStash(context.Context, string) error { return nil }
+func (f *fakeRepo) MergeUpgradeShards(context.Context, string, []string) (store.AccountStashItem, error) {
+	return store.AccountStashItem{}, nil
+}
+func (f *fakeRepo) MergeLeveledConsumablesFromBag(context.Context, string, string, []string) (store.CharacterItemInstance, error) {
+	return store.CharacterItemInstance{}, nil
+}
+func (f *fakeRepo) RenewInventoryItem(context.Context, string, string, string, int, int, map[string]struct{}, func(json.RawMessage) ([]byte, error)) (store.CharacterItemInstance, int, int, int, error) {
+	return store.CharacterItemInstance{}, 0, 0, 0, nil
+}
 func (f *fakeRepo) ListActiveMarketListings(context.Context) ([]store.MarketListing, error) {
 	return nil, nil
 }

@@ -2794,6 +2794,14 @@
           }
         },
         {
+          "type": "loot",
+          "item_def_id": "renew_stone",
+          "position": {
+            "x": 21,
+            "y": 14
+          }
+        },
+        {
           "type": "interactable",
           "interactable_def_id": "town_quest_giver",
           "position": {

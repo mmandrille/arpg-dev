@@ -57,3 +57,7 @@ func _assert_true(label: String, value: bool) -> void:
 	else:
 		_fail_count += 1
 		push_error("[gdtest] FAIL %s" % label)
+
+
+func _assert_false(label: String, value: bool) -> void:
+	_assert_true(label, not value)

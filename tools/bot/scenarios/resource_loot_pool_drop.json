@@ -1,0 +1,60 @@
+{
+  "id": "resource_loot_pool_drop",
+  "ci_tier": "extended",
+  "world_id": "vendor_lab",
+  "seed": "resource_loot_pickup_seed",
+  "title": "Resource loot pool pickup",
+  "description": "Pick up preset upgrade shard and renew stone from vendor_lab and prove both pool members land in the bag as leveled items.",
+  "steps": [
+    {
+      "action": "action_entity",
+      "item_def_id": "upgrade_shard",
+      "event_type": "item_picked_up"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "inventory_count",
+        "item_def_id": "upgrade_shard",
+        "equals": 1
+      },
+      "timeout_s": 5
+    },
+    {
+      "action": "action_entity",
+      "item_def_id": "renew_stone",
+      "event_type": "item_picked_up"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "inventory_count",
+        "item_def_id": "renew_stone",
+        "equals": 1
+      },
+      "timeout_s": 5
+    },
+    {
+      "action": "assert_inventory_count",
+      "item_def_id": "upgrade_shard",
+      "equals": 1
+    },
+    {
+      "action": "assert_inventory_count",
+      "item_def_id": "renew_stone",
+      "equals": 1
+    }
+  ],
+  "assertions": [
+    {
+      "type": "inventory_count",
+      "item_def_id": "upgrade_shard",
+      "equals": 1
+    },
+    {
+      "type": "inventory_count",
+      "item_def_id": "renew_stone",
+      "equals": 1
+    }
+  ]
+}

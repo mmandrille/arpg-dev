@@ -430,6 +430,24 @@ func upgrade_inventory_item(item_instance_id: String, p_character_id: String, re
 	return {"_error": str(r)}
 
 
+func renew_inventory_item(item_instance_id: String, p_character_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/items/renew",
+		["Authorization: Bearer " + token], JSON.stringify({"item_instance_id": item_instance_id, "character_id": p_character_id}))
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("renew_inventory_item failed: %s" % r)
+	return {"_error": str(r)}
+
+
+func merge_leveled_consumables(item_instance_ids: Array, p_character_id: String) -> Dictionary:
+	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/leveled-consumables/merge",
+		["Authorization: Bearer " + token], JSON.stringify({"item_instance_ids": item_instance_ids, "character_id": p_character_id}))
+	if r.get("_code", 0) == 200 and r.has("body"):
+		return r["body"]
+	push_error("merge_leveled_consumables failed: %s" % r)
+	return {"_error": str(r)}
+
+
 func merge_upgrade_shards(stash_item_ids: Array) -> Dictionary:
 	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/upgrade-shards/merge",
 		["Authorization: Bearer " + token], JSON.stringify({"stash_item_ids": stash_item_ids}))

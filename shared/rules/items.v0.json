@@ -9,6 +9,7 @@
     "paladin_mace": { "name": "Paladin Mace", "category": "equipment", "slot": "main_hand", "equippable": true, "class_required": "paladin", "handedness": "one_handed", "occupies_hands": ["main_hand"], "attack_speed": 1.0, "damage": { "min": 4, "max": 6 }, "reach": 1.6 },
     "gold": { "name": "Gold", "category": "currency", "equippable": false, "gold": { "min": 6, "max": 12 } },
     "upgrade_shard": { "name": "Upgrade Shard", "category": "currency", "equippable": false },
+    "renew_stone": { "name": "Renew Stone", "category": "currency", "equippable": false },
     "respec_badge": { "name": "Respec Badge", "category": "currency", "equippable": false },
     "stat_badge": { "name": "Stat Badge", "category": "currency", "equippable": false },
     "skill_badge": { "name": "Skill Badge", "category": "currency", "equippable": false },

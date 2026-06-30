@@ -75,17 +75,17 @@ func TestNonGoldLootDoesNotAutoPickup(t *testing.T) {
 	}
 }
 
-func TestResourceWalletAutoPickupWalkingIntoShard(t *testing.T) {
+func TestResourceWalletAutoPickupWalkingIntoBadge(t *testing.T) {
 	sim := MustNewSim("sess_resource_auto_town", "v229_resource_auto_town", loadRules(t))
 	player := sim.entities[sim.playerID]
-	shard := addTestWalletResourceLoot(sim, Vec2{X: player.pos.X + 1.6, Y: player.pos.Y})
-	resourceID := sim.rules.MainConfig.Gameplay.ItemUpgradeResourceID
+	badge := addTestWalletResourceLoot(sim, Vec2{X: player.pos.X + 1.6, Y: player.pos.Y})
+	resourceID := "respec_badge"
 
-	results := sim.TickResults([]Input{{MessageID: "move_shard", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}}})
+	results := sim.TickResults([]Input{{MessageID: "move_badge", Type: "move_intent", Move: &MoveIntent{Direction: Vec2{X: 1}, DurationTicks: 1}}})
 
-	assertAckInResults(t, results, "move_shard")
-	if sim.entities[shard.id] != nil {
-		t.Fatalf("resource entity %d still present after auto-pickup", shard.id)
+	assertAckInResults(t, results, "move_badge")
+	if sim.entities[badge.id] != nil {
+		t.Fatalf("resource entity %d still present after auto-pickup", badge.id)
 	}
 	if got := sim.resourceWallet[resourceID]; got != 1 {
 		t.Fatalf("resource wallet %s = %d, want 1", resourceID, got)
@@ -106,10 +106,10 @@ func TestResourceWalletAutoPickupCoopLowestPlayerIDWins(t *testing.T) {
 	if err != nil {
 		t.Fatalf("add guest: %v", err)
 	}
-	shard := addTestWalletResourceLoot(sim, Vec2{X: 6, Y: 6})
-	resourceID := sim.rules.MainConfig.Gameplay.ItemUpgradeResourceID
-	sim.entities[hostID].pos = shard.pos
-	sim.entities[guestID].pos = shard.pos
+	badge := addTestWalletResourceLoot(sim, Vec2{X: 6, Y: 6})
+	resourceID := "respec_badge"
+	sim.entities[hostID].pos = badge.pos
+	sim.entities[guestID].pos = badge.pos
 
 	results := sim.TickResults(nil)
 
@@ -278,5 +278,5 @@ func addTestGoldLoot(sim *Sim, pos Vec2, amount int) *entity {
 }
 
 func addTestWalletResourceLoot(sim *Sim, pos Vec2) *entity {
-	return addTestFloorLoot(sim, sim.rules.MainConfig.Gameplay.ItemUpgradeResourceID, pos)
+	return addTestFloorLoot(sim, "respec_badge", pos)
 }

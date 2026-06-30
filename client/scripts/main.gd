@@ -1560,7 +1560,7 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "bishop_revive_all" and bishop_panel != null and bishop_panel.visible:
 			bishop_panel.show_status("Account heroes revived")
 			continue
-		if event_type in ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained", "bishop_debug_upgrade_shard_dropped"] and bishop_panel != null and bishop_panel.visible:
+		if event_type in ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained", "bishop_debug_upgrade_shard_dropped", "bishop_debug_renew_stone_dropped"] and bishop_panel != null and bishop_panel.visible:
 			if event_type == "bishop_debug_level_gained":
 				bishop_panel.show_status("Level gained")
 			elif event_type == "bishop_debug_skill_point_gained":
@@ -3829,8 +3829,8 @@ func _build_scene() -> void:
 	market_panel.staged_offer_items_changed.connect(_on_market_staged_offer_items_changed)
 	ui.add_child(market_panel)
 	blacksmith_panel = BlacksmithPanelScript.new()
-	blacksmith_panel.upgrade_requested.connect(_on_blacksmith_upgrade_requested)
 	blacksmith_panel.upgrade_inventory_requested.connect(_on_blacksmith_inventory_upgrade_requested)
+	blacksmith_panel.renew_inventory_requested.connect(_on_blacksmith_inventory_renew_requested)
 	blacksmith_panel.merge_requested.connect(_on_blacksmith_merge_requested)
 	ui.add_child(blacksmith_panel)
 	consumable_bar = ConsumableBarScript.new()
@@ -4945,23 +4945,44 @@ func _hide_blacksmith_panel() -> void:
 		blacksmith_panel.hide_display()
 	TownServiceBridgeScript.close_blacksmith_inventory_context(inventory_panel)
 
-func _on_blacksmith_upgrade_requested(stash_item_id: String) -> void:
-	if client == null or stash_item_id == "":
+func _on_blacksmith_inventory_renew_requested(item_instance_id: String) -> void:
+	if client == null or item_instance_id == "":
 		return
-	var result := client.upgrade_account_stash_item(stash_item_id, blacksmith_panel.selected_recipe_id() if blacksmith_panel != null and blacksmith_panel.has_method("selected_recipe_id") else "item_upgrade")
+	var result := client.renew_inventory_item(item_instance_id, client.character_id)
 	if result.has("_error"):
 		if blacksmith_panel != null:
-			blacksmith_panel.show_status("Could not upgrade item", true)
+			blacksmith_panel.show_status("Could not renew item", true)
 		return
 	var item: Dictionary = result.get("item", {})
 	gold = int(result.get("gold", gold))
 	stash_gold = int(result.get("stash_gold", stash_gold))
-	_upsert_stash_item(item)
+	_apply_upgrade_resource_response(result)
+	_update_inventory_item(item)
 	if blacksmith_panel != null:
 		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)), resource_wallet)
 		_refresh_blacksmith_panel()
-	if stash_panel != null and stash_panel.visible:
-		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
+	_refresh_inventory_ui()
+
+func _on_blacksmith_merge_requested(item_instance_ids: Array) -> void:
+	if client == null or item_instance_ids.is_empty():
+		return
+	var result := client.merge_leveled_consumables(item_instance_ids, client.character_id)
+	if result.has("_error"):
+		if blacksmith_panel != null:
+			blacksmith_panel.show_status("Could not merge consumables", true)
+		return
+	for item_instance_id in item_instance_ids:
+		_remove_inventory_item(str(item_instance_id))
+	var merged: Dictionary = result.get("item", {})
+	if not merged.is_empty():
+		_update_inventory_item(merged)
+	if blacksmith_panel != null:
+		blacksmith_panel.show_status("Merged into level %d %s" % [
+			int(merged.get("rolled_stats", {}).get("item_level", 1)),
+			str(merged.get("item_def_id", "consumable")).replace("_", " "),
+		])
+		_refresh_blacksmith_panel()
+	_refresh_inventory_ui()
 
 func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> void:
 	if client == null or item_instance_id == "":
@@ -4981,25 +5002,6 @@ func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> voi
 		_refresh_blacksmith_panel()
 	_refresh_inventory_ui()
 
-func _on_blacksmith_merge_requested(stash_item_ids: Array) -> void:
-	if client == null or stash_item_ids.is_empty():
-		return
-	var result := client.merge_upgrade_shards(stash_item_ids)
-	if result.has("_error"):
-		if blacksmith_panel != null:
-			blacksmith_panel.show_status("Could not merge shards", true)
-		return
-	for stash_item_id in stash_item_ids:
-		_remove_stash_item(str(stash_item_id))
-	var merged: Dictionary = result.get("item", {})
-	if not merged.is_empty():
-		_upsert_stash_item(merged)
-	if blacksmith_panel != null:
-		blacksmith_panel.show_status("Merged into level %d shard" % int(merged.get("rolled_stats", {}).get("item_level", 1)))
-		_refresh_blacksmith_panel()
-	if stash_panel != null and stash_panel.visible:
-		stash_panel.set_stash_state(stash_items, stash_gold, stash_capacity)
-
 func _apply_upgrade_resource_response(result: Dictionary) -> void:
 	var resource_id := str(result.get("resource_item_def_id", ""))
 	if resource_id == "":
@@ -5010,14 +5012,7 @@ func _apply_upgrade_resource_response(result: Dictionary) -> void:
 		resource_wallet[resource_id] = max(0, int(result.get("resource_wallet", 0)))
 
 func _blacksmith_inventory_items() -> Array:
-	var out: Array = inventory.duplicate(true)
-	for item in stash_items:
-		if typeof(item) != TYPE_DICTIONARY:
-			continue
-		if str((item as Dictionary).get("item_def_id", "")) != "upgrade_shard":
-			continue
-		out.append(item)
-	return out
+	return inventory.duplicate(true)
 
 func _refresh_blacksmith_panel() -> void:
 	if blacksmith_panel == null or not blacksmith_panel.visible:
@@ -5074,6 +5069,8 @@ func _on_bishop_debug_requested(action: String, bishop_entity_id: String) -> voi
 			client.send("bishop_debug_stat_point_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 		"drop_upgrade_shard":
 			client.send("bishop_debug_drop_upgrade_shard_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+		"drop_renew_stone":
+			client.send("bishop_debug_drop_renew_stone_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 
 func _shop_title(next_shop_id: String) -> String:
 	match next_shop_id:
@@ -6140,6 +6137,9 @@ func bot_click_stash_withdraw_gold(amount: int = 1) -> void:
 	BotFacade.click_stash_withdraw_gold(self, amount)
 func bot_click_bishop_respec() -> void:
 	BotFacade.click_bishop_respec(self)
+
+func bot_click_bishop_debug(action: String) -> void:
+	BotFacade.click_bishop_debug(self, action)
 func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	BotFacade.click_blacksmith_upgrade(self, stash_item_id, item_def_id, stash_index)
 func bot_select_blacksmith_tab(tab_name: String = "Merge") -> void:

@@ -1,0 +1,35 @@
+{
+  "id": "blacksmith_renew_item",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "vendor_lab",
+  "seed": "v391_blacksmith_renew_item",
+  "title": "Blacksmith renew item",
+  "description": "Bishop debug drops a renew stone, player renews a bag item at the blacksmith.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_bishop",
+      "timeout_s": 15.0
+    },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_bishop" },
+    { "type": "wait_bishop_panel", "visible": true, "debug_enabled": true, "timeout_s": 15.0 },
+    { "type": "click_bishop_debug", "action": "drop_renew_stone" },
+    { "type": "wait_event", "event_type": "bishop_debug_renew_stone_dropped", "timeout_s": 10.0 },
+    { "type": "click_loot_item", "item_def_id": "renew_stone" },
+    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "town_blacksmith",
+      "timeout_s": 15.0
+    },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_blacksmith" },
+    { "type": "wait_blacksmith_panel", "visible": true, "timeout_s": 15.0 },
+    { "type": "select_blacksmith_recipe", "recipe_id": "item_renew" },
+    { "type": "click_blacksmith_stage_item", "item_def_id": "cave_bow", "stash_index": 0 },
+    { "type": "click_blacksmith_upgrade", "item_def_id": "cave_bow", "stash_index": 0 }
+  ]
+}

@@ -118,14 +118,15 @@ func (s *Sim) grantUpgradeShardItemForPlayer(playerID uint64, depth int, source 
 		return false
 	}
 	current := s.players[s.playerID]
-	if current != nil && current.PlayerID != playerID {
+	switchedPlayer := current != nil && current.PlayerID != playerID
+	if switchedPlayer {
 		s.savePlayer(current)
+		s.usePlayer(ps)
 	}
-	s.usePlayer(ps)
 
 	level := RollItemLevel(s.rng, depth, s.rules.DungeonGeneration.ItemLevelTiers)
 	if s.bagOccupancyCount()+1 > s.inventoryCapacity() {
-		if current != nil {
+		if switchedPlayer && current != nil {
 			s.usePlayer(current)
 		}
 		return false
@@ -145,7 +146,7 @@ func (s *Sim) grantUpgradeShardItemForPlayer(playerID uint64, depth int, source 
 		ItemInstanceID: idStr(item.instanceID),
 	})
 	s.savePlayer(ps)
-	if current != nil && current.PlayerID != playerID {
+	if switchedPlayer && current != nil {
 		s.usePlayer(current)
 	}
 

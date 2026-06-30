@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
 
 	"github.com/jackc/pgx/v5"
 
@@ -81,22 +80,24 @@ func (s *Store) MergeUpgradeShards(ctx context.Context, accountID string, stashI
 
 	var out AccountStashItem
 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		itemDefID := ""
 		level := -1
 		for _, stashItemID := range stashItemIDs {
 			item, err := lockAccountStashItem(ctx, tx, accountID, stashItemID)
 			if err != nil {
 				return err
 			}
-			if item.ItemDefID != game.UpgradeShardItemDefID {
+			if item.ItemDefID != game.UpgradeShardItemDefID && item.ItemDefID != game.RenewStoneItemDefID {
 				return ErrConflict
 			}
-			itemLevel, err := game.UpgradeShardLevelFromRaw(item.RolledStats)
+			itemLevel, err := game.LeveledConsumableLevelFromRaw(item.ItemDefID, item.RolledStats)
 			if err != nil {
 				return err
 			}
-			if level < 0 {
+			if itemDefID == "" {
+				itemDefID = item.ItemDefID
 				level = itemLevel
-			} else if itemLevel != level {
+			} else if item.ItemDefID != itemDefID || itemLevel != level {
 				return ErrConflict
 			}
 		}
@@ -115,16 +116,25 @@ func (s *Store) MergeUpgradeShards(ctx context.Context, accountID string, stashI
 		}
 
 		nextLevel := level + 1
-		stats, err := game.MarshalUpgradeShardRolledStats(nextLevel)
+		var stats json.RawMessage
+		var err error
+		switch itemDefID {
+		case game.UpgradeShardItemDefID:
+			stats, err = game.MarshalUpgradeShardRolledStats(nextLevel)
+		case game.RenewStoneItemDefID:
+			stats, err = game.MarshalRenewStoneRolledStats(nextLevel)
+		default:
+			return ErrConflict
+		}
 		if err != nil {
 			return err
 		}
-		resultID := fmt.Sprintf("merged_upgrade_shard_%s_%d", accountID, nextLevel)
+		resultID := fmt.Sprintf("merged_%s_%s_%d", itemDefID, accountID, nextLevel)
 		err = tx.QueryRow(ctx,
 			`INSERT INTO account_stash_items (account_id, stash_item_id, item_def_id, rolled_stats)
 			 VALUES ($1, $2, $3, $4::jsonb)
 			 RETURNING account_id, stash_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, updated_at`,
-			accountID, resultID, game.UpgradeShardItemDefID, []byte(stats),
+			accountID, resultID, itemDefID, []byte(stats),
 		).Scan(&out.AccountID, &out.StashItemID, &out.SourceCharacterID, &out.ItemDefID, &out.RolledStats, &out.CreatedAt, &out.UpdatedAt)
 		if err != nil {
 			return fmt.Errorf("store: insert merged upgrade shard: %w", err)
@@ -136,132 +146,8 @@ func (s *Store) MergeUpgradeShards(ctx context.Context, accountID string, stashI
 	return out, err
 }
 
-func spendUpgradeShardInTx(ctx context.Context, tx pgx.Tx, accountID, characterID string, minLevel int) error {
-	candidates, err := listUpgradeShardCandidates(ctx, tx, accountID, characterID)
-	if err != nil {
-		return err
-	}
-	if len(candidates) == 0 {
-		return ErrConflict
-	}
-	sort.Slice(candidates, func(i, j int) bool {
-		if candidates[i].level == candidates[j].level {
-			return candidates[i].stashItemID < candidates[j].stashItemID
-		}
-		return candidates[i].level < candidates[j].level
-	})
-
-	var picked *upgradeShardCandidate
-	for i := range candidates {
-		if candidates[i].level >= minLevel {
-			picked = &candidates[i]
-			break
-		}
-	}
-	if picked == nil {
-		return ErrConflict
-	}
-
-	if picked.stashItemID != "" {
-		tag, err := tx.Exec(ctx,
-			`DELETE FROM account_stash_items WHERE account_id = $1 AND stash_item_id = $2`,
-			accountID, picked.stashItemID,
-		)
-		if err != nil {
-			return fmt.Errorf("store: spend stash upgrade shard: %w", err)
-		}
-		if tag.RowsAffected() == 0 {
-			return ErrNotFound
-		}
-		return nil
-	}
-
-	tag, err := tx.Exec(ctx,
-		`DELETE FROM character_item_instances
-		 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
-		accountID, picked.characterID, picked.characterItemID,
-	)
-	if err != nil {
-		return fmt.Errorf("store: spend inventory upgrade shard: %w", err)
-	}
-	if tag.RowsAffected() == 0 {
-		return ErrNotFound
-	}
-	if _, err := tx.Exec(ctx,
-		`UPDATE character_hotbar_slots
-		 SET item_instance_id = NULL, updated_at = now()
-		 WHERE account_id = $1 AND character_id = $2 AND item_instance_id = $3`,
-		accountID, picked.characterID, picked.characterItemID,
-	); err != nil {
-		return fmt.Errorf("store: clear hotbar for spent upgrade shard: %w", err)
-	}
-
-	return nil
-}
-
 func listUpgradeShardCandidates(ctx context.Context, tx pgx.Tx, accountID, characterID string) ([]upgradeShardCandidate, error) {
-	rows, err := tx.Query(ctx,
-		`SELECT stash_item_id, rolled_stats
-		 FROM account_stash_items
-		 WHERE account_id = $1 AND item_def_id = $2
-		 FOR UPDATE`,
-		accountID, game.UpgradeShardItemDefID,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("store: list stash upgrade shards: %w", err)
-	}
-	defer rows.Close()
-
-	out := make([]upgradeShardCandidate, 0)
-	for rows.Next() {
-		var stashItemID string
-		var rolled json.RawMessage
-		if err := rows.Scan(&stashItemID, &rolled); err != nil {
-			return nil, fmt.Errorf("store: scan stash upgrade shard: %w", err)
-		}
-		level, err := game.UpgradeShardLevelFromRaw(rolled)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, upgradeShardCandidate{stashItemID: stashItemID, level: level})
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("store: list stash upgrade shard rows: %w", err)
-	}
-
-	if characterID == "" {
-		return out, nil
-	}
-
-	invRows, err := tx.Query(ctx,
-		`SELECT id, rolled_stats
-		 FROM character_item_instances
-		 WHERE account_id = $1 AND character_id = $2 AND item_def_id = $3 AND location IN ($4, $5)
-		 FOR UPDATE`,
-		accountID, characterID, game.UpgradeShardItemDefID, ItemLocationInventory, ItemLocationEquipped,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("store: list inventory upgrade shards: %w", err)
-	}
-	defer invRows.Close()
-
-	for invRows.Next() {
-		var itemID string
-		var rolled json.RawMessage
-		if err := invRows.Scan(&itemID, &rolled); err != nil {
-			return nil, fmt.Errorf("store: scan inventory upgrade shard: %w", err)
-		}
-		level, err := game.UpgradeShardLevelFromRaw(rolled)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, upgradeShardCandidate{characterItemID: itemID, characterID: characterID, level: level})
-	}
-	if err := invRows.Err(); err != nil {
-		return nil, fmt.Errorf("store: list inventory upgrade shard rows: %w", err)
-	}
-
-	return out, nil
+	return listLeveledConsumableCandidates(ctx, tx, accountID, characterID, game.UpgradeShardItemDefID)
 }
 
 func countQualifyingUpgradeShards(ctx context.Context, tx pgx.Tx, accountID, characterID string, minLevel int) (int, error) {

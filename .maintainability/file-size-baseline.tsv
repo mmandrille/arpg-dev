@@ -1,6 +1,6 @@
 # Grandfathered source/test/tool files above the 600-line target.
 # Format: path<TAB>baseline_line_count
-client/scripts/blacksmith_panel.gd	656	# v390: merge tab + shard inventory extracted to blacksmith_shard_inventory.gd
+client/scripts/blacksmith_panel.gd	656	# v391: renew actions extracted to blacksmith_panel_actions.gd
 client/scripts/bot_assertion_handlers.gd	623	# v357: intent-reject assertions extracted to bot_intent_reject_assertions.gd
 client/scripts/bot_controller.gd	796	# v390: blacksmith merge tab bot steps
 client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait filters consolidated into flag loop
@@ -21,7 +21,7 @@ server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: inter
 server/internal/game/rules.go	3073	# v385: character_progression level_up.restore_hp_and_mana loader field
 server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6516	# v385: restorePlayerResourcesOnLevelUp -> level_up_resources.go
+server/internal/game/sim.go	6542	# v391: resource loot drop hook dispatch in dropLoot/chest paths
 server/internal/game/types.go	665
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482

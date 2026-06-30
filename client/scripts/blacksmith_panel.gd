@@ -1,9 +1,9 @@
 class_name BlacksmithPanel
 extends Control
 
-signal upgrade_requested(stash_item_id: String)
 signal upgrade_inventory_requested(item_instance_id: String)
-signal merge_requested(stash_item_ids: Array)
+signal renew_inventory_requested(item_instance_id: String)
+signal merge_requested(item_instance_ids: Array)
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
@@ -11,6 +11,7 @@ const BlacksmithUpgradeHistoryScript := preload("res://scripts/blacksmith_upgrad
 const BlacksmithRecipesScript := preload("res://scripts/blacksmith_recipes.gd")
 const BlacksmithShardInventoryScript := preload("res://scripts/blacksmith_shard_inventory.gd")
 const BlacksmithMergePanelScript := preload("res://scripts/blacksmith_merge_panel.gd")
+const BlacksmithPanelActionsScript := preload("res://scripts/blacksmith_panel_actions.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const PANEL_SIZE := Vector2(320, 260)
 const STAGE_SLOT_SIZE := Vector2(84, 84)
@@ -173,11 +174,20 @@ func bot_select_recipe(recipe_id: String) -> void:
 
 
 func select_recipe(recipe_id: String) -> void:
-	if not _recipe_ids().has(recipe_id):
+	for option in _recipe_options():
+		if str((option as Dictionary).get("id", "")) != recipe_id:
+			continue
+		_selected_recipe_id = recipe_id
+		resource_item_def_id = str(option.get("resource_item_def_id", resource_item_def_id))
+		resource_count = int(option.get("resource_required_count", resource_count))
+		if _recipe_selector != null:
+			_recipe_selector.set_block_signals(true)
+		_sync_recipe_selector()
+		if _recipe_selector != null:
+			_recipe_selector.set_block_signals(false)
+		_rebuild()
+
 		return
-	_selected_recipe_id = recipe_id
-	_sync_recipe_selector()
-	_rebuild()
 
 
 func selected_recipe_id() -> String:
@@ -295,17 +305,17 @@ func _build() -> void:
 func _rebuild() -> void:
 	_gold_label.text = "Gold: %d  Stash: %d" % [gold, stash_gold]
 	if _merge_view != null:
-		_merge_view.set_stash_items(BlacksmithShardInventoryScript.shard_stash_items(inventory_items))
+		_merge_view.set_bag_items(BlacksmithShardInventoryScript.leveled_consumable_bag_items(inventory_items))
 	_sync_recipe_selector()
 	_clear_rows()
 	_rows.add_child(_stage_slot())
 	_rows.add_child(_preview_block())
 	var button_center := CenterContainer.new()
 	var button := Button.new()
-	button.text = "Upgrade"
+	button.text = "Renew" if _selected_recipe_id == BlacksmithRecipesScript.RECIPE_ITEM_RENEW else "Upgrade"
 	button.custom_minimum_size = Vector2(150, 40)
-	button.disabled = staged_item.is_empty() or not _upgrade_enabled(staged_item)
-	button.pressed.connect(func() -> void: _emit_upgrade(staged_item))
+	button.disabled = staged_item.is_empty() or not _action_enabled(staged_item)
+	button.pressed.connect(func() -> void: _emit_action(staged_item))
 	button_center.add_child(button)
 	_rows.add_child(button_center)
 
@@ -351,8 +361,8 @@ func _preview_block() -> Control:
 	cost_row.add_child(cost_label)
 	box.add_child(cost_row)
 	if resource_count > 0:
-		var required_level := BlacksmithShardInventoryScript.required_shard_level(staged_item)
-		var resource_label := _empty_label("%s: %d/%d (Lv%d+)" % [BlacksmithShardInventoryScript.resource_display_name(resource_item_def_id), BlacksmithShardInventoryScript.resource_inventory_count(inventory_items, resource_item_def_id, required_level), resource_count, required_level])
+		var required_level := _required_resource_level(staged_item)
+		var resource_label := _empty_label("%s: %d/%d (Lv%d+)" % [BlacksmithShardInventoryScript.resource_display_name(_recipe_resource_item_def_id()), BlacksmithShardInventoryScript.resource_inventory_count(inventory_items, _recipe_resource_item_def_id(), required_level), resource_count, required_level])
 		resource_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		resource_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 		resource_label.add_theme_color_override("font_color", Color("#d8c8a8") if _has_upgrade_resource() else Color("#ff9f7a"))
@@ -363,30 +373,43 @@ func _preview_block() -> Control:
 		box.add_child(label)
 	return box
 
+func _action_context() -> Dictionary:
+	return {
+		"selected_recipe_id": _selected_recipe_id,
+		"inventory_items": inventory_items,
+		"gold": gold,
+		"stash_gold": stash_gold,
+		"base_cost": base_cost,
+		"growth_cost": growth_cost,
+		"max_level": max_level,
+		"deepest_dungeon_depth": deepest_dungeon_depth,
+		"item_level_levels_per_tier": item_level_levels_per_tier,
+		"resource_item_def_id": resource_item_def_id,
+		"resource_count": resource_count,
+	}
+
+
+func _emit_action(item: Dictionary) -> void:
+	if _selected_recipe_id == BlacksmithRecipesScript.RECIPE_ITEM_RENEW:
+		_emit_renew(item)
+	else:
+		_emit_upgrade(item)
+
+
+func _emit_renew(item: Dictionary) -> void:
+	var result := BlacksmithPanelActionsScript.emit_renew(_action_context(), item)
+	if not bool(result.get("ok", false)):
+		show_status(str(result.get("message", "Could not renew item")), true)
+		return
+	renew_inventory_requested.emit(str(result.get("item_instance_id", "")))
+
+
 func _emit_upgrade(item: Dictionary) -> void:
-	var level := _item_level(item)
-	var cost := _next_cost(item)
-	if not _recipe_accepts_item(item):
-		show_status(BlacksmithRecipesScript.rejection_message(_selected_recipe_id), true)
+	var result := BlacksmithPanelActionsScript.emit_upgrade(_action_context(), item)
+	if not bool(result.get("ok", false)):
+		show_status(str(result.get("message", "Could not upgrade item")), true)
 		return
-	if level >= max_level:
-		show_status("Item is already at max level", true)
-		return
-	if _wallet_gold() < cost:
-		show_status("Need %d gold" % cost, true)
-		return
-	if not _has_upgrade_resource():
-		show_status("Need %d %s" % [resource_count, BlacksmithShardInventoryScript.resource_display_name(resource_item_def_id)], true)
-		return
-	var item_instance_id := str(item.get("item_instance_id", ""))
-	if item_instance_id != "":
-		upgrade_inventory_requested.emit(item_instance_id)
-		return
-	var stash_item_id := str(item.get("stash_item_id", ""))
-	if stash_item_id == "":
-		show_status("Missing item id", true)
-		return
-	upgrade_requested.emit(stash_item_id)
+	upgrade_inventory_requested.emit(str(result.get("item_instance_id", "")))
 
 func _matching_item(stash_item_id: String, item_def_id: String, stash_index: int) -> Dictionary:
 	var matches: Array = []
@@ -428,40 +451,28 @@ func _debug_row(item: Dictionary) -> Dictionary:
 		"rarity": str(item.get("rarity", "")),
 		"item_level": level,
 		"next_cost_gold": _next_cost(item),
-		"upgrade_enabled": _upgrade_enabled(item),
+		"upgrade_enabled": BlacksmithPanelActionsScript.action_enabled(_action_context(), item),
 	}
 
 
-func _upgrade_enabled(item: Dictionary) -> bool:
-	var level := _item_level(item)
-	var depth_cap := _max_item_level_for_deepest_depth()
-	var effective_max := max_level
-	if depth_cap > 0:
-		effective_max = mini(max_level, depth_cap)
-	return _is_upgrade_candidate(item) and _recipe_accepts_item(item) and level < effective_max and _wallet_gold() >= _next_cost(item) and _has_upgrade_resource(item)
+func _action_enabled(item: Dictionary) -> bool:
+	return BlacksmithPanelActionsScript.action_enabled(_action_context(), item)
 
 
-func _max_item_level_for_deepest_depth() -> int:
-	var depth: int = maxi(0, deepest_dungeon_depth)
-	if depth < 1:
-		return 1
-	var levels_per_tier: int = maxi(1, item_level_levels_per_tier)
-	var tier: int = int(depth / levels_per_tier)
-	return maxi(1, tier)
+func _has_action_resource(item: Dictionary = staged_item) -> bool:
+	return BlacksmithPanelActionsScript.has_action_resource(_action_context(), item)
 
 
-func _is_upgrade_candidate(item: Dictionary) -> bool:
-	if item.is_empty():
-		return false
-	if resource_item_def_id != "" and str(item.get("item_def_id", "")) == resource_item_def_id:
-		return false
-	return str(item.get("item_template_id", "")) != "" or str(item.get("slot", "")) != "" or str(item.get("category", "")) == "equipment"
+func _required_resource_level(item: Dictionary) -> int:
+	return BlacksmithShardInventoryScript.required_resource_level(_selected_recipe_id, item)
+
+
+func _recipe_resource_item_def_id() -> String:
+	return BlacksmithRecipesScript.resource_item_def_id(_selected_recipe_id)
 
 
 func _has_upgrade_resource(item: Dictionary = staged_item) -> bool:
-	if resource_count <= 0:
-		return true
-	return BlacksmithShardInventoryScript.resource_inventory_count(inventory_items, resource_item_def_id, BlacksmithShardInventoryScript.required_shard_level(item)) >= resource_count
+	return _has_action_resource(item)
 
 
 func _required_shard_level(item: Dictionary) -> int:
@@ -470,10 +481,6 @@ func _required_shard_level(item: Dictionary) -> int:
 
 func _resource_inventory_count(min_level: int = -1) -> int:
 	return BlacksmithShardInventoryScript.resource_inventory_count(inventory_items, resource_item_def_id, min_level)
-
-
-func _shard_stash_items() -> Array:
-	return BlacksmithShardInventoryScript.shard_stash_items(inventory_items)
 
 
 func _resource_wallet_count() -> int:
@@ -501,7 +508,7 @@ func _next_cost(item: Dictionary) -> int:
 func _upgrade_preview_lines(item: Dictionary) -> Array:
 	var lines: Array = ["Recipe: %s" % _selected_recipe_label()]
 	lines.append(_selected_recipe_eligibility())
-	if not _recipe_accepts_item(item):
+	if not BlacksmithPanelActionsScript.recipe_accepts_item(_selected_recipe_id, item):
 		lines.append("Recipe cannot modify this item")
 		return lines
 	lines.append_array(BlacksmithUpgradePreviewScript.preview_lines(item, {
@@ -549,7 +556,7 @@ func _sync_recipe_selector() -> void:
 
 
 func _recipe_options() -> Array:
-	return BlacksmithRecipesScript.options(resource_item_def_id, resource_count, success_chance_percent, max_level)
+	return BlacksmithRecipesScript.options(success_chance_percent, max_level)
 
 
 func _selected_recipe_label() -> String:
@@ -568,11 +575,9 @@ func _on_recipe_selected(index: int) -> void:
 	var options := _recipe_options()
 	if index >= 0 and index < options.size():
 		_selected_recipe_id = str((options[index] as Dictionary).get("id", BlacksmithRecipesScript.RECIPE_ITEM_UPGRADE))
+		resource_item_def_id = str((options[index] as Dictionary).get("resource_item_def_id", resource_item_def_id))
+		resource_count = int((options[index] as Dictionary).get("resource_required_count", resource_count))
 		_rebuild()
-
-
-func _recipe_accepts_item(item: Dictionary) -> bool:
-	return BlacksmithRecipesScript.accepts_item(_selected_recipe_id, item)
 
 
 func _item_title(item: Dictionary) -> String:

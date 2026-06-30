@@ -1,0 +1,80 @@
+tools/validate_skills.py
+  s_61582feb25210f::t_d420d1869bde1b 77-78
+  s_61582feb25210f::t_c0c595e88aa116 84-85
+  s_61582feb25210f::t_640569e9648a18 285-286
+docs/specs/v386_spec-skill-weapon-damage-scaling.md
+  s_61582feb25210f::t_2c13e70cac21b4 1-50
+tools/bot/scenarios/108_skill_weapon_damage_scaling.json
+  s_61582feb25210f::t_af68c7d8ee20c2 36-39
+  s_61582feb25210f::t_78852aa6ce3c61 59
+  s_61582feb25210f::t_5270d893daad77 1-35,42-44,46-58,60-64
+  s_61582feb25210f::t_1bcc3e4b14a24a 40-41,45
+server/internal/game/sim.go
+  s_61582feb25210f::t_129ec4cef132c4 2286
+server/internal/game/game_test.go
+  s_61582feb25210f::t_59ca310e9d88e5 1634
+  s_61582feb25210f::t_02a264a5c01193 1629
+  s_61582feb25210f::t_fe172ca122dc46 1704-1728
+shared/rules/skills.v0.schema.json
+  s_61582feb25210f::t_3cd31dd3aae399 33
+  s_61582feb25210f::t_2b8c4bae364c6b 235-247
+  s_61582feb25210f::t_5ab8a3e6ddc85b 216-221
+shared/golden/skill_points_and_magic_bolt.json
+  s_61582feb25210f::t_db5d323eeb0bff 124-125,132-133,140-141
+docs/CODEMAP.md
+  s_61582feb25210f::t_44303d16ab6ef1 12
+docs/progress/slice-lifecycle.md
+  s_61582feb25210f::t_08dfb2ee74c74d 400
+client/tests/test_skills_panel.gd
+  s_61582feb25210f::t_706deb7edbcb04 255
+PROGRESS.md
+  s_61582feb25210f::t_b0552430430777 26,28-29
+  s_61582feb25210f::t_70aebdc19aee35 18
+server/internal/game/ranger_skills.go
+  s_61582feb25210f::t_e6826923a4d67e 91,123
+docs/as-built/v386_skill-weapon-damage-scaling.md
+  s_61582feb25210f::t_c71a44b3d2459e 1-24
+server/internal/game/skill_weapon_damage.go
+  s_61582feb25210f::t_a7066026bc0ebd 1-65
+client/tests/test_golden.gd
+  s_61582feb25210f::t_45c1acd46e06aa 538
+  s_61582feb25210f::t_d72638ef3a0ae1 774
+client/scripts/skills_panel.gd
+  s_61582feb25210f::t_a20c864b17605c 89-90,97-103
+docs/plans/v386_2026-06-29-skill-weapon-damage-scaling.md
+  s_61582feb25210f::t_4e59a2bdd4e042 1-82
+server/internal/game/rules.go
+  s_61582feb25210f::t_337bb2617272d8 2751-2760
+shared/rules/skills.v0.json
+  s_61582feb25210f::t_00285de65deee3 33-35
+  s_61582feb25210f::t_49433345f90678 954-955
+  s_61582feb25210f::t_9a80b8f8c18cea 1212-1213
+  s_61582feb25210f::t_c0832df2216dce 129-131,951-953
+  s_61582feb25210f::t_909b3966720509 265-266
+  s_61582feb25210f::t_12da8787dd73c0 36-37
+  s_61582feb25210f::t_ca0e2c9112e157 262-264
+  s_61582feb25210f::t_825acbe8bbdcb8 1054-1055
+  s_61582feb25210f::t_25e172a6129c46 1109-1110
+  s_61582feb25210f::t_dae893eb641899 1051-1053,1106-1108
+  s_61582feb25210f::t_dca258f69471b8 1209-1211
+  s_61582feb25210f::t_94503a952dd626 132-133,202-203
+  s_61582feb25210f::t_5e1bf468d3a770 199-201
+shared/golden/skill_points_and_magic_bolt.v0.schema.json
+  s_61582feb25210f::t_25d789fea26e8f 164,167-168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bdf97df1db6ca5c339483d69c3fc06171932e435",
+  "prompts": {},
+  "sessions": {
+    "s_61582feb25210f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "609578d2-ce93-42c6-857d-67434e7d3989",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

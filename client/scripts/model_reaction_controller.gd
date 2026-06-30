@@ -11,7 +11,6 @@ const DEATH_SECONDS := 0.18
 const HIT_DARKEN := 0.45
 const DEATH_DARKEN := 0.28
 const DEATH_FLOURISH_COLOR := Color("#d9c089")
-const HIGHLIGHT_EMISSION := Color("#d4a017")
 const HIGHLIGHT_EMISSION_ENERGY := 0.35
 const UNRESOLVED_SOURCE := Vector3(1000000000000.0, 1000000000000.0, 1000000000000.0)
 
@@ -20,6 +19,7 @@ var _base_rotation := Vector3.ZERO
 var _base_mesh_colors: Dictionary = {}
 var _terminal: bool = false
 var _highlighted: bool = false
+var _highlight_color := Color.WHITE
 var _last_reaction: String = ""
 var _current_tint := Color.WHITE
 var _base_tint := Color.WHITE
@@ -48,8 +48,13 @@ func set_base_tint(color: Color) -> void:
 		_apply_color_scale(1.0)
 
 
-func set_highlight(on: bool) -> void:
-	if _terminal or _highlighted == on:
+func set_highlight(on: bool, color: Color = Color.WHITE) -> void:
+	if _terminal:
+		return
+	_highlight_color = color
+	if _highlighted == on:
+		if on:
+			_sync_highlight_emission()
 		return
 	_highlighted = on
 	_sync_highlight_emission()
@@ -209,7 +214,7 @@ func _sync_highlight_emission() -> void:
 			continue
 		if _highlighted and not _terminal:
 			mat.emission_enabled = true
-			mat.emission = HIGHLIGHT_EMISSION
+			mat.emission = _highlight_color
 			mat.emission_energy_multiplier = HIGHLIGHT_EMISSION_ENERGY
 		else:
 			mat.emission_enabled = false

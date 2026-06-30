@@ -48,6 +48,30 @@ const LOOT_LABEL_CATEGORY_COLORS := {
 	"quest": Color("#6ee68b"),
 	"consumable": Color("#ff8f70"),
 }
+const TARGET_HIGHLIGHT_ITEM_RARITY := {
+	"common": Color("#ffffff"),
+	"magic": Color("#93c5fd"),
+	"rare": Color("#f4d481"),
+	"unique": Color("#ffb26b"),
+	"set": Color("#55e66f"),
+}
+const TARGET_HIGHLIGHT_MONSTER_RARITY := {
+	"common": Color("#ffffff"),
+	"champion": Color("#9fc7ff"),
+	"rare": Color("#ff9b9b"),
+	"unique": Color("#ffd978"),
+}
+
+
+static func target_highlight_color(entity_type: String, rarity: String = "common") -> Color:
+	var key := rarity.to_lower()
+	match entity_type:
+		"monster", "companion":
+			return TARGET_HIGHLIGHT_MONSTER_RARITY.get(key, TARGET_HIGHLIGHT_MONSTER_RARITY["common"])
+		"loot":
+			return TARGET_HIGHLIGHT_ITEM_RARITY.get(key, TARGET_HIGHLIGHT_ITEM_RARITY["common"])
+		_:
+			return TARGET_HIGHLIGHT_ITEM_RARITY["common"]
 const GROUND_EQUIPMENT_MODEL_SCALE := 1.0
 const BOSS_VISUAL_MODEL := "current_humanoid_player"
 const BOSS_PHASE_TICK_RATE := 10.0

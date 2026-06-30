@@ -25,11 +25,14 @@ func attach_to(parent: Node) -> void:
 	parent.add_child(self)
 
 
-func show_for(camera: Camera3D, target: Node3D, text: String) -> void:
+func show_for(camera: Camera3D, target: Node3D, text: String, accent_color: Color = Color.WHITE) -> void:
 	_camera = camera
 	_target = target
 	_ensure_built()
 	_label.text = text.strip_edges()
+	_accent.color = accent_color
+	if _label.label_settings != null:
+		_label.label_settings.font_color = accent_color.lightened(0.12)
 	if _label.text == "":
 		hide_tag()
 		return
@@ -78,7 +81,7 @@ func _ensure_built() -> void:
 	_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_background)
 	_accent = ColorRect.new()
-	_accent.color = Color("#d4a017")
+	_accent.color = Color.WHITE
 	_accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_accent)
 	_label = Label.new()
@@ -87,7 +90,7 @@ func _ensure_built() -> void:
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var settings := LabelSettings.new()
 	settings.font_size = FONT_SIZE
-	settings.font_color = Color("#f3e8c8")
+	settings.font_color = Color.WHITE
 	settings.outline_size = 2
 	settings.outline_color = Color(0.03, 0.025, 0.02, 0.9)
 	_label.label_settings = settings

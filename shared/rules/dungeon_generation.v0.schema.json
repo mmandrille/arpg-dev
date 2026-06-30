@@ -21,6 +21,7 @@
     "boss_floor",
     "monster_rarity_note",
     "monster_depth_scaling",
+    "item_level_tiers",
     "monster_rarities",
     "loot_band_note",
     "loot_bands",
@@ -366,6 +367,14 @@
         "max_block_percent": { "type": "number", "minimum": 0, "maximum": 100 },
         "attack_cooldown_multiplier_per_depth": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
         "min_attack_cooldown_ticks": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "item_level_tiers": {
+      "type": "object",
+      "required": ["levels_per_tier"],
+      "additionalProperties": false,
+      "properties": {
+        "levels_per_tier": { "type": "integer", "minimum": 1 }
       }
     },
     "monster_rarities": {

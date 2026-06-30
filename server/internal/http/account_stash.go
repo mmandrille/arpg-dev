@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"net/http"
 
+	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -235,8 +236,27 @@ func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID st
 	if err != nil {
 		return store.AccountStashItem{}, 0, 0, 0, false, err
 	}
-	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, chance, roll, pityFailures, eligible)
+	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithWallet(r.Context(), accountID, characterID, stashItemID, cost, growth, maxLevel, chance, roll, pityFailures, eligible, s.itemUpgradeOptions(r, accountID, characterID))
 	return item, characterGold, stashGold, chargedCost, success, err
+}
+
+func (s *Server) itemUpgradeOptions(r *http.Request, accountID, characterID string) game.ItemUpgradeOptions {
+	opts := game.ItemUpgradeOptions{
+		Scaling: s.rules.DungeonGeneration.MonsterDepthScaling,
+		Tiers:   s.rules.DungeonGeneration.ItemLevelTiers,
+	}
+	if characterID == "" || s.rules == nil {
+		return opts
+	}
+
+	prog, err := s.store.GetCharacterProgression(r.Context(), accountID, characterID)
+	if err != nil {
+		return opts
+	}
+
+	opts.MaxItemLevelDepth = game.MaxItemLevelForDepth(prog.DeepestDungeonDepth, opts.Tiers)
+
+	return opts
 }
 
 func (s *Server) decodeUpgradeRecipeID(w http.ResponseWriter, r *http.Request) (string, bool) {

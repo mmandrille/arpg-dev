@@ -10,8 +10,10 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 		return ItemRollPayload{}, false
 	}
 	rarity := r.Rarities[rarityID]
+	itemLevel := RollItemLevel(rng, sourceDepth, r.DungeonGeneration.ItemLevelTiers)
+	representativeDepth := RepresentativeDepthForItemLevel(itemLevel, r.DungeonGeneration.ItemLevelTiers)
 	stats := cloneIntMap(template.BaseStats)
-	rollableStats := r.rollableStatsForRarity(template.RollableStats, rarityID, sourceDepth)
+	rollableStats := r.rollableStatsForRarity(template.RollableStats, rarityID, representativeDepth)
 	rollCount := rarity.StatRollsMin
 	if rarity.StatRollsMax > rarity.StatRollsMin {
 		rollCount += rng.IntN(rarity.StatRollsMax - rarity.StatRollsMin + 1)
@@ -34,23 +36,18 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 	} else if rarityID != "set" {
 		displayName = r.affixDisplayName(template, rarityID, stats)
 	}
-	return ItemRollPayload{
+	payload := ItemRollPayload{
 		ItemTemplateID:  templateID,
 		DisplayName:     displayName,
 		Rarity:          rarityID,
-		ItemLevel:       itemLevelForSourceDepth(sourceDepth),
+		ItemLevel:       1,
 		Stats:           stats,
 		Requirements:    cloneIntMap(template.Requirements),
 		EffectIDs:       effectIDs,
 		ClassAffinities: rollClassAffinities(template.ClassAffinities, rng),
-	}, true
-}
-
-func itemLevelForSourceDepth(sourceDepth int) int {
-	if sourceDepth < 1 {
-		return 1
 	}
-	return sourceDepth
+
+	return FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers), true
 }
 
 func (r *Rules) rollItemRarityID(rng *RNG, magicFindPercent int) (string, bool) {

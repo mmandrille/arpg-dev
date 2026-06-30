@@ -200,6 +200,9 @@
     "attack_cooldown_multiplier_per_depth": 0.96,
     "min_attack_cooldown_ticks": 12
   },
+  "item_level_tiers": {
+    "levels_per_tier": 10
+  },
   "monster_rarities": [
     {
       "id": "common",

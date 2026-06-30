@@ -70,19 +70,14 @@ func TestRarityRollCountRanges(t *testing.T) {
 
 func TestRolledItemLevelFollowsSourceDepth(t *testing.T) {
 	rules := loadRules(t)
-	low, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 0)
-	if !ok {
-		t.Fatal("roll low-depth cave_blade")
-	}
-	deep, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 7)
+	tiers := rules.DungeonGeneration.ItemLevelTiers
+	deep, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 36)
 	if !ok {
 		t.Fatal("roll deep cave_blade")
 	}
-	if low.ItemLevel != 1 {
-		t.Fatalf("low item level = %d, want 1", low.ItemLevel)
-	}
-	if deep.ItemLevel != 7 {
-		t.Fatalf("deep item level = %d, want 7", deep.ItemLevel)
+	maxLevel := MaxItemLevelForDepth(36, tiers)
+	if deep.ItemLevel < 1 || deep.ItemLevel > maxLevel {
+		t.Fatalf("deep item level = %d, want 1..%d", deep.ItemLevel, maxLevel)
 	}
 }
 

@@ -184,13 +184,10 @@ type generatedMonsterEffectiveStats struct {
 
 func (s *Sim) generatedMonsterStats(def MonsterDef, levelNum int, rarity MonsterRarityDef) generatedMonsterEffectiveStats {
 	depth := absInt(levelNum)
-	depthIndex := maxInt(0, depth-1)
+	depthIndex := DepthIndex(depth)
 	scaling := s.rules.DungeonGeneration.MonsterDepthScaling
-	depthFactor := func(perDepth float64) float64 {
-		return 1 + perDepth*float64(depthIndex)
-	}
 	stats := generatedMonsterEffectiveStats{
-		maxHP:        roundPositive(float64(def.MaxHP) * depthFactor(scaling.HPPerDepth) * rarity.HPMultiplier),
+		maxHP:        roundPositive(float64(def.MaxHP) * DepthFactor(scaling.HPPerDepth, depthIndex) * rarity.HPMultiplier),
 		armor:        math.Round((float64(def.Armor)+scaling.ArmorPerDepth*float64(depthIndex))*rarity.ArmorMultiplier + rarity.ArmorBonus),
 		hitChance:    clampFloat(def.effectiveHitChance(s.rules.Combat)+scaling.HitChancePerDepth*float64(depthIndex)+rarity.HitChanceBonus, 0, scaling.MaxHitChance),
 		critChance:   clampFloat(def.effectiveCritChance(s.rules.Combat)+scaling.CritChancePerDepth*float64(depthIndex)+rarity.CritChanceBonus, 0, scaling.MaxCritChance),
@@ -198,7 +195,7 @@ func (s *Sim) generatedMonsterStats(def MonsterDef, levelNum int, rarity Monster
 		xpReward:     roundPositive(float64(def.XPReward) * rarity.XPMultiplier),
 	}
 	if def.AttackDamage != nil {
-		scaledAttack := scaleDamageRange(*def.AttackDamage, depthFactor(scaling.DamagePerDepth)*rarity.DamageMultiplier)
+		scaledAttack := scaleDamageRange(*def.AttackDamage, DepthFactor(scaling.DamagePerDepth, depthIndex)*rarity.DamageMultiplier)
 		stats.attackDamage = &scaledAttack
 	}
 	if def.AttackCooldown > 0 {

@@ -53,7 +53,7 @@ func TestBlacksmithRecipeRouteHonorsRecipeID(t *testing.T) {
 	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
 	}
-	if stats.ItemLevel != 1 || stats.DamageMax != 5 {
+	if stats.ItemLevel != 1 || stats.DamageMax != 4 {
 		t.Fatalf("weapon recipe stats = %+v", stats)
 	}
 	rec = postJSON(h, "/v0/account-stash/items/recipe_shield_stash_"+suffix+"/upgrade", token, map[string]string{"recipe_id": "weapon_honing"})
@@ -82,7 +82,7 @@ func TestBlacksmithRecipeRouteHonorsRecipeID(t *testing.T) {
 	if err := json.Unmarshal(reinforced.Item.RolledStats, &armorStats); err != nil {
 		t.Fatal(err)
 	}
-	if armorStats.ItemLevel != 1 || armorStats.Armor != 3 {
+	if armorStats.ItemLevel != 1 || armorStats.Armor != 2 {
 		t.Fatalf("armor recipe stats = %+v", armorStats)
 	}
 	rec = postJSON(h, "/v0/account-stash/items/recipe_shield_stash_"+suffix+"/upgrade", token, map[string]string{"recipe_id": "unknown_recipe"})

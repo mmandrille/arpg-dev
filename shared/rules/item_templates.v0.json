@@ -85,7 +85,7 @@
       "attack_mode": "ranged",
       "attack_speed": 1.1,
       "reach": 13.0,
-      "projectile_speed": 55.0,
+      "projectile_speed": 25.0,
       "requirements": { "level": 1, "dex": 5 },
       "base_stats": { "damage_min": 2, "damage_max": 4 },
       "rollable_stats": [
@@ -119,9 +119,10 @@
       "equippable": true,
       "handedness": "two_handed",
       "occupies_hands": ["main_hand", "off_hand"],
-      "attack_mode": "melee",
+      "attack_mode": "ranged",
       "attack_speed": 0.9,
-      "reach": 1.8,
+      "reach": 13.0,
+      "projectile_speed": 25.0,
       "requirements": { "level": 1, "magic": 5 },
       "base_stats": { "damage_min": 2, "damage_max": 4, "max_mana": 2 },
       "rollable_stats": [
@@ -203,7 +204,7 @@
       "attack_mode": "ranged",
       "attack_speed": 0.85,
       "reach": 12.0,
-      "projectile_speed": 50.0,
+      "projectile_speed": 25.0,
       "requirements": { "level": 1, "dex": 5 },
       "base_stats": { "damage_min": 1, "damage_max": 2 },
       "rollable_stats": [
@@ -422,7 +423,7 @@
       "attack_mode": "ranged",
       "attack_speed": 0.9,
       "reach": 14.0,
-      "projectile_speed": 55.0,
+      "projectile_speed": 25.0,
       "requirements": { "level": 1, "dex": 8 },
       "base_stats": { "damage_min": 2, "damage_max": 4 },
       "rollable_stats": [
@@ -442,9 +443,10 @@
       "equippable": true,
       "handedness": "two_handed",
       "occupies_hands": ["main_hand", "off_hand"],
-      "attack_mode": "melee",
+      "attack_mode": "ranged",
       "attack_speed": 0.9,
-      "reach": 1.8,
+      "reach": 13.0,
+      "projectile_speed": 25.0,
       "requirements": { "level": 1, "magic": 5 },
       "base_stats": { "damage_min": 2, "damage_max": 4, "max_mana": 2 },
       "rollable_stats": [

@@ -1,0 +1,52 @@
+tools/bot/scenarios/110_armor_slot_families_lab.json
+  s_9e3f0b142afb4e::t_d209e57647c037 1-68
+docs/as-built/v388_armor-slot-families.md
+  s_9e3f0b142afb4e::t_01aca5603cd59f 1-25
+PROGRESS.md
+  s_9e3f0b142afb4e::t_72edfd0bd95a65 26,28
+  s_9e3f0b142afb4e::t_275e1b309633d9 18
+docs/progress/slice-lifecycle.md
+  s_9e3f0b142afb4e::t_389a6f796bf387 401-402
+shared/rules/worlds.v0.json
+  s_9e3f0b142afb4e::t_0371db271aa4b6 1457-1490
+shared/assets/item_presentations.v0.json
+  s_9e3f0b142afb4e::t_23c76bf71f168b 173-174
+  s_9e3f0b142afb4e::t_615fa21a7943ec 158-159,161-162,164-165
+docs/specs/v388_spec-armor-slot-families.md
+  s_9e3f0b142afb4e::t_141abad655d848 1-2,4-70
+  s_9e3f0b142afb4e::t_d3c828ef3beddb 3
+shared/rules/treasure_classes.v0.json
+  s_9e3f0b142afb4e::t_129e9f8734f6a9 72-80,82-84
+shared/assets/item_visuals.v0.json
+  s_9e3f0b142afb4e::t_d2b833954d8334 184-203
+  s_9e3f0b142afb4e::t_5d4dffc429ebac 294-313
+  s_9e3f0b142afb4e::t_f1bc54318d259f 214-233
+  s_9e3f0b142afb4e::t_da82bea85cdfa9 244-263
+shared/rules/item_templates.v0.json
+  s_9e3f0b142afb4e::t_50dcc5c608bd5d 459-512,514-579
+  s_9e3f0b142afb4e::t_fc07338cbe09d1 513
+docs/plans/v388_2026-06-30-armor-slot-families.md
+  s_9e3f0b142afb4e::t_dbd7dd08bc250f 1-113
+server/internal/game/item_templates_test.go
+  s_9e3f0b142afb4e::t_98365688c81d72 71-76,78-90,93-94,100-118
+  s_9e3f0b142afb4e::t_122381c4229335 1-47,49-70,77,91-92,95-99,119-120
+  s_9e3f0b142afb4e::t_b9016718981349 48
+shared/golden/shop_offers.json
+  s_9e3f0b142afb4e::t_3f2a36e147465a 170-171,174-175,177,184-185,188-189,191,198-200,202-203,205,212-213,216-217,226-227,230-231,233
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "82d8eef3baf435df6405c0a07b43a231964bff07",
+  "prompts": {},
+  "sessions": {
+    "s_9e3f0b142afb4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8e2b2de-7759-442e-ad45-b730d5031331",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -18,6 +18,31 @@ func rollableStatDef(template ItemTemplateDef, stat string) (RollableStatDef, bo
 	return RollableStatDef{}, false
 }
 
+func TestArmorSlotFamiliesArmorStatRequirements(t *testing.T) {
+	rules := loadRulesForArmorFamilies(t)
+	armorTypes := map[string]bool{
+		"helm": true, "chest": true, "gloves": true, "belt": true, "boots": true,
+	}
+	for templateID, template := range rules.ItemTemplates {
+		if !armorTypes[template.ItemType] {
+			continue
+		}
+		if template.Requirements["level"] < 1 {
+			t.Fatalf("template %s requirements = %+v, want level requirement", templateID, template.Requirements)
+		}
+		hasStat := false
+		for _, stat := range []string{"str", "dex", "magic", "vit"} {
+			if template.Requirements[stat] >= 1 {
+				hasStat = true
+				break
+			}
+		}
+		if !hasStat {
+			t.Fatalf("template %s item_type %s requirements = %+v, want a class stat requirement", templateID, template.ItemType, template.Requirements)
+		}
+	}
+}
+
 func TestArmorSlotFamiliesPlateArmorRatio(t *testing.T) {
 	rules := loadRulesForArmorFamilies(t)
 	mail, ok := rules.ItemTemplates["cave_mail"]

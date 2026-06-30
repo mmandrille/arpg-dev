@@ -817,8 +817,11 @@ def cross_checks(report: Report) -> None:
     hand_slots = {"main_hand", "off_hand"}
     required_templates = {
         "cave_blade", "cave_greatsword", "cave_bow", "cave_shield",
-        "cave_helm", "cave_mail", "cave_gloves", "cave_belt",
-        "cave_boots", "cave_ring", "cave_amulet",
+        "cave_helm", "cave_leather_cap", "cave_tiara",
+        "cave_mail", "cave_leather_vest", "cave_full_plate",
+        "cave_gloves", "cave_cloth_wraps", "cave_gauntlets",
+        "cave_belt", "cave_boots", "cave_soft_boots", "cave_plate_boots",
+        "cave_ring", "cave_amulet",
     }
 
     def treasure_class_id_for_table(table_id: str) -> str | None:

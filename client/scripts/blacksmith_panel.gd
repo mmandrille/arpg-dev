@@ -392,17 +392,17 @@ func _upgrade_enabled(item: Dictionary) -> bool:
 	var depth_cap := _max_item_level_for_deepest_depth()
 	var effective_max := max_level
 	if depth_cap > 0:
-		effective_max = min(max_level, depth_cap)
+		effective_max = mini(max_level, depth_cap)
 	return _is_upgrade_candidate(item) and _recipe_accepts_item(item) and level < effective_max and _wallet_gold() >= _next_cost(level) and _has_upgrade_resource()
 
 
 func _max_item_level_for_deepest_depth() -> int:
-	var depth := max(0, deepest_dungeon_depth)
+	var depth: int = maxi(0, deepest_dungeon_depth)
 	if depth < 1:
 		return 1
-	var levels_per_tier := max(1, item_level_levels_per_tier)
-	var tier := depth / levels_per_tier
-	return max(1, tier)
+	var levels_per_tier: int = maxi(1, item_level_levels_per_tier)
+	var tier: int = int(depth / levels_per_tier)
+	return maxi(1, tier)
 
 
 func _is_upgrade_candidate(item: Dictionary) -> bool:

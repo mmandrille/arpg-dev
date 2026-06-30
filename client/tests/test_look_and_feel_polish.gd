@@ -10,6 +10,8 @@ const CombatEventPresentationScript := preload("res://scripts/combat_event_prese
 const PlayerDamageVignetteScript := preload("res://scripts/player_damage_vignette.gd")
 const MonsterMeleeWindupMarkerScript := preload("res://scripts/monster_melee_windup_marker.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const DamageNumberScript := preload("res://scripts/damage_number.gd")
+const LevelUpBurstScript := preload("res://scripts/level_up_burst.gd")
 
 var _pass_count := 0
 var _fail_count := 0
@@ -26,6 +28,8 @@ func _initialize() -> void:
 	_test_combat_camera_binding()
 	_test_player_damage_vignette()
 	_test_monster_melee_windup_marker()
+	_test_level_up_floating_text()
+	_test_level_up_burst_and_feedback()
 	_finish()
 
 
@@ -182,6 +186,45 @@ func _test_monster_melee_windup_marker() -> void:
 		return
 	monster.free()
 	_pass("monster melee windup marker")
+
+
+func _test_level_up_floating_text() -> void:
+	var camera := Camera3D.new()
+	var anchor := Node3D.new()
+	var root := Node.new()
+	root.add_child(camera)
+	root.add_child(anchor)
+	var pop := DamageNumberScript.new() as DamageNumber
+	root.add_child(pop)
+	pop.setup(camera, anchor, Vector3.ZERO, null, Color("#ffe08a"), 0.0, "", "level_up", "Level Up!")
+	if pop.combat_text != "Level Up!":
+		_fail("level up floating text should read Level Up!")
+		root.free()
+		return
+	if pop.combat_variant != "level_up":
+		_fail("level up floating text should use level_up variant")
+		root.free()
+		return
+	var settings := pop.label_settings
+	if settings == null or settings.font_color != Color("#ffe08a"):
+		_fail("level up floating text should use yellow color")
+		root.free()
+		return
+	root.free()
+	_pass("level up floating text")
+
+
+func _test_level_up_burst_and_feedback() -> void:
+	var root := Node3D.new()
+	var anchor := Node3D.new()
+	root.add_child(anchor)
+	LevelUpBurstScript.spawn(root, anchor.position)
+	if root.find_child("LevelUpBurst", true, false) == null:
+		_fail("level up should spawn energy burst")
+		root.free()
+		return
+	root.free()
+	_pass("level up energy burst")
 
 
 func _noop_damage(_entity_id: String, _color: Color, _amount = null, _prefix: String = "", _scale: float = 0.0, _variant: String = "", _text: String = "", _damage_type: String = "") -> void:

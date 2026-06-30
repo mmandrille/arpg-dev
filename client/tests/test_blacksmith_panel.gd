@@ -25,6 +25,8 @@ func _run() -> void:
 		"item_upgrade_pity_failure_threshold": 2,
 		"item_upgrade_resource_item_def_id": "upgrade_shard",
 		"item_upgrade_resource_count": 1,
+		"deepest_dungeon_depth": 30,
+		"item_level_levels_per_tier": 10,
 	}
 	var item := {
 		"item_instance_id": "2001",
@@ -48,6 +50,7 @@ func _run() -> void:
 	_assert_true("preview shows selected recipe", _array_contains_text(state.get("preview_lines", []), "Recipe: Upgrade Item"))
 	_assert_true("pity preview shows progress", _array_contains_text(state.get("preview_lines", []), "Pity: 1/2 failures"))
 	_assert_true("preview shows success result", _array_contains_text(state.get("preview_lines", []), "On success: Level 0 -> 1"))
+	_assert_true("preview shows tier rescale", _array_contains_text(state.get("preview_lines", []), "Stats rescale to the next item tier"))
 	_assert_true("preview shows failure result", _array_contains_text(state.get("preview_lines", []), "On failure: item unchanged; pity 1 -> 2 failures"))
 	_assert_true("preview shows attempt spend", _array_contains_text(state.get("preview_lines", []), "Spend on attempt: 100 gold, 1 Upgrade Badge"))
 	_assert_true("preview shows after attempt balance", _array_contains_text(state.get("preview_lines", []), "After attempt: 0 gold, 0 Upgrade Badge"))

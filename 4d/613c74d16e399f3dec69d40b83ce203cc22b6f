@@ -1,0 +1,21 @@
+docs/progress/slice-lifecycle.md
+  s_9e3f0b142afb4e::t_56e2b9cb98113b 402
+PROGRESS.md
+  s_9e3f0b142afb4e::t_85dcd63543c08d 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4d613c74d16e399f3dec69d40b83ce203cc22b6f",
+  "prompts": {},
+  "sessions": {
+    "s_9e3f0b142afb4e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8e2b2de-7759-442e-ad45-b730d5031331",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

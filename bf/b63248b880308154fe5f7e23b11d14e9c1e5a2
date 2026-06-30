@@ -1,0 +1,32 @@
+client/scripts/main.gd
+  s_6391f5d44d3fc0::t_0979a74ae560d1 1380
+  s_6391f5d44d3fc0::t_06915ac0a36bf2 2209
+client/tests/test_look_and_feel_polish.gd
+  s_6391f5d44d3fc0::t_e94f76d5464871 191-226,228-229
+  s_6391f5d44d3fc0::t_bebe0ae6bc7625 13-14
+  s_6391f5d44d3fc0::t_a990281d0ef37d 31-32
+  s_6391f5d44d3fc0::t_79377d1320d8b9 227
+client/scripts/damage_number.gd
+  s_6391f5d44d3fc0::t_8841cab81e33ad 56,60,62
+  s_6391f5d44d3fc0::t_8f34e63a45c718 41-43,46
+  s_6391f5d44d3fc0::t_e00b5c8ad262aa 5,7,10,17-19
+  s_6391f5d44d3fc0::t_26df7e5d95627d 75-77
+client/scripts/gameplay_feedback_presentation.gd
+  s_6391f5d44d3fc0::t_f21c433f2fb378 51,55-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bfb63248b880308154fe5f7e23b11d14e9c1e5a2",
+  "prompts": {},
+  "sessions": {
+    "s_6391f5d44d3fc0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5c35799b-4678-4f01-a837-fc0b19b1b230",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

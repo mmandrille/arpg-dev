@@ -54,6 +54,7 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"bishop_debug_skill_point_intent": (*Sim).handleBishopDebugSkillPoint,
 	"bishop_debug_stat_point_intent":          (*Sim).handleBishopDebugStatPoint,
 	"bishop_debug_drop_upgrade_shard_intent": (*Sim).handleBishopDebugDropUpgradeShard,
+	"bishop_debug_drop_renew_stone_intent":   (*Sim).handleBishopDebugDropRenewStone,
 	"stash_deposit_item_intent":       (*Sim).handleStashDepositItem,
 	"stash_withdraw_item_intent":      (*Sim).handleStashWithdrawItem,
 	"stash_deposit_gold_intent":       (*Sim).handleStashDepositGold,

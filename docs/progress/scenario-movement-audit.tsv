@@ -77,6 +77,8 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 70_paladin_sanctuary.json	paladin_sanctuary	protocol	extended	contract	0	0		
 71_mana_regeneration.json	mana_regeneration	protocol	extended	contract	0	0		
 72_upgrade_resource_drop.json	upgrade_resource_drop	protocol	extended	contract	0	0		
+resource_loot_pool_drop.json	resource_loot_pool_drop	protocol	extended	contract	0	0		
+upgrade_shard_level_drop.json	upgrade_shard_level_drop	protocol	extended	contract	0	0		
 73_companion_ai_foundation.json	companion_ai_foundation	protocol	pack	contract	1	1		
 74_ranger_wolf_companion.json	ranger_wolf_companion	protocol	extended	contract	0	0		
 75_sorcerer_revive_companion.json	sorcerer_revive_companion	protocol	extended	contract	0	0		
@@ -173,7 +175,8 @@ client/58_market_expiration_countdown.json	market_expiration_countdown	godot_cli
 client/59_market_search_sort.json	market_search_sort	godot_client	extended	contract	0	0		
 client/60_market_item_comparison.json	market_item_comparison	godot_client	extended	contract	0	0		
 client/61_material_wallet_window.json	material_wallet_window	godot_client	extended	contract	0	0		
-client/62_blacksmith_second_recipe.json	blacksmith_second_recipe	godot_client	extended	contract	0	0		
+client/blacksmith_renew_item.json	blacksmith_renew_item	godot_client	extended	contract	0	0		
+client/blacksmith_shard_merge.json	blacksmith_shard_merge	godot_client	extended	contract	0	0		
 client/63_blacksmith_upgrade_history.json	blacksmith_upgrade_history	godot_client	extended	contract	0	0		
 client/64_mercenary_combat_stats.json	mercenary_combat_stats	godot_client	extended	contract	0	0		
 client/65_boss_reward_panel.json	boss_reward_panel	godot_client	extended	contract	0	0		
@@ -183,7 +186,6 @@ client/68_fog_los_shadow_mask.json	fog_los_shadow_mask	godot_client	extended	con
 client/68_market_notification_badge.json	market_notification_badge	godot_client	extended	contract	0	0		
 client/69_discovery_minimap_toggle.json	discovery_minimap_toggle	godot_client	extended	contract	0	0		
 client/69_mercenary_offer_variant_ui.json	mercenary_offer_variant_ui	godot_client	extended	contract	0	0		
-client/70_blacksmith_armor_recipe.json	blacksmith_armor_recipe	godot_client	extended	contract	0	0		
 client/70_full_screen_map_overlay.json	full_screen_map_overlay	godot_client	extended	contract	0	0		
 client/71_minimap_points_of_interest.json	minimap_points_of_interest	godot_client	extended	contract	0	0		
 client/72_active_session_map_memory.json	active_session_map_memory	godot_client	extended	contract	0	0		

@@ -420,11 +420,14 @@ func TestRangedDummyDropsSeparatedLootItems(t *testing.T) {
 	}
 
 	want := map[string]bool{
-		"gold":          false,
-		"quest_leaf":    false,
+		"gold":        false,
+		"quest_leaf":  false,
+		"red_potion":  false,
+		"blue_potion": false,
+	}
+	poolExtras := map[string]bool{
 		"upgrade_shard": false,
-		"red_potion":    false,
-		"blue_potion":   false,
+		"renew_stone":   false,
 	}
 	positions := map[Vec2]string{}
 	for _, c := range r.Changes {
@@ -433,6 +436,17 @@ func TestRangedDummyDropsSeparatedLootItems(t *testing.T) {
 		}
 		itemDefID := c.Entity.ItemDefID
 		if _, ok := want[itemDefID]; !ok {
+			if _, poolOK := poolExtras[itemDefID]; poolOK {
+				poolExtras[itemDefID] = true
+				if positions[c.Entity.Position] != "" {
+					t.Fatalf("loot overlap at %+v: %s and %s", c.Entity.Position, positions[c.Entity.Position], itemDefID)
+				}
+				if sim.lootDropBlocked(c.Entity.Position) {
+					t.Fatalf("loot spawned inside blocked geometry at %+v", c.Entity.Position)
+				}
+				positions[c.Entity.Position] = itemDefID
+				continue
+			}
 			t.Fatalf("unexpected ranged loot %s in %+v", itemDefID, r.Changes)
 		}
 		if positions[c.Entity.Position] != "" {

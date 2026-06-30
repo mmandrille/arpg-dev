@@ -1615,7 +1615,7 @@ func _step_detail(step: Dictionary, stype: String) -> String:
 		"wait_market_panel", "assert_market_panel_visible", "assert_market_listing_rows", "assert_market_offer_rows", \
 		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", "click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer", "set_market_search", "select_market_sort":
 			return "market=%s" % str(step)
-		"wait_bishop_panel", "assert_bishop_panel", "assert_bishop_panel_visible", "click_bishop_respec":
+		"wait_bishop_panel", "assert_bishop_panel", "assert_bishop_panel_visible", "click_bishop_respec", "click_bishop_debug":
 			return "bishop=%s" % str(step)
 		"wait_mercenary_panel", "assert_mercenary_panel", "assert_mercenary_panel_visible", "click_mercenary_stance":
 			return "mercenary=%s" % str(step)

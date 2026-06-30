@@ -6,14 +6,8 @@ func validateMainGameplayEconomyConfig(gameplay MainGameplayConfig) error {
 	if gameplay.ItemUpgradeResourceCost < 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_count: must be non-negative")
 	}
-	if gameplay.UpgradeShardEnemyDropPct < 0 || gameplay.UpgradeShardEnemyDropPct > 100 {
-		return fmt.Errorf("game: invalid rules main_config.gameplay.upgrade_shard_enemy_drop_chance_percent: must be within [0,100]")
-	}
-	if gameplay.UpgradeShardChestDropPct < 0 || gameplay.UpgradeShardChestDropPct > 100 {
-		return fmt.Errorf("game: invalid rules main_config.gameplay.upgrade_shard_chest_drop_chance_percent: must be within [0,100]")
-	}
-	if gameplay.UpgradeShardBossDropPct < 0 || gameplay.UpgradeShardBossDropPct > 100 {
-		return fmt.Errorf("game: invalid rules main_config.gameplay.upgrade_shard_boss_drop_chance_percent: must be within [0,100]")
+	if err := validateResourceLootDropsConfig(gameplay.ResourceLootDrops); err != nil {
+		return err
 	}
 	if gameplay.BishopRespecResourceCost < 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.bishop_respec_resource_count: must be non-negative")
@@ -62,6 +56,43 @@ func validateMainGameplayEconomyConfig(gameplay MainGameplayConfig) error {
 	return nil
 }
 
+func validateResourceLootDropsConfig(cfg ResourceLootDropsConfig) error {
+	chanceFields := []struct {
+		label string
+		value int
+	}{
+		{"monster_common_rare_chance_percent", cfg.MonsterCommonRareChancePercent},
+		{"monster_champion_chance_percent", cfg.MonsterChampionChancePercent},
+		{"monster_unique_chance_percent", cfg.MonsterUniqueChancePercent},
+		{"boss_kill_chance_percent", cfg.BossKillChancePercent},
+		{"chest_regular_chance_percent", cfg.ChestRegularChancePercent},
+		{"chest_boss_chance_percent", cfg.ChestBossChancePercent},
+	}
+	for _, field := range chanceFields {
+		if field.value < 0 || field.value > 100 {
+			return fmt.Errorf("game: invalid rules main_config.gameplay.resource_loot_drops.%s: must be within [0,100]", field.label)
+		}
+	}
+	if len(cfg.Pool) == 0 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.resource_loot_drops.pool: must not be empty")
+	}
+	totalWeight := 0
+	for idx, entry := range cfg.Pool {
+		if entry.ItemDefID == "" {
+			return fmt.Errorf("game: invalid rules main_config.gameplay.resource_loot_drops.pool[%d].item_def_id: must be non-empty", idx)
+		}
+		if entry.Weight <= 0 {
+			return fmt.Errorf("game: invalid rules main_config.gameplay.resource_loot_drops.pool[%d].weight: must be positive", idx)
+		}
+		totalWeight += entry.Weight
+	}
+	if totalWeight <= 0 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.resource_loot_drops.pool: total weight must be positive")
+	}
+
+	return nil
+}
+
 func validateMainGameplayResourceItems(gameplay MainGameplayConfig, items map[string]ItemDef) error {
 	if gameplay.ItemUpgradeResourceCost > 0 {
 		if _, ok := items[gameplay.ItemUpgradeResourceID]; !ok {
@@ -80,6 +111,11 @@ func validateMainGameplayResourceItems(gameplay MainGameplayConfig, items map[st
 	}
 	if turnInItem.Category != "quest" {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_item_def_id: item %q must be category quest", gameplay.QuestTurnInItemDefID)
+	}
+	for idx, entry := range gameplay.ResourceLootDrops.Pool {
+		if _, ok := items[entry.ItemDefID]; !ok {
+			return fmt.Errorf("game: invalid rules main_config.gameplay.resource_loot_drops.pool[%d].item_def_id: unknown item %q", idx, entry.ItemDefID)
+		}
 	}
 	for idx, rule := range gameplay.BadgeRewardRules {
 		item, ok := items[rule.ResourceItemDefID]

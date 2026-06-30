@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 )
@@ -84,6 +85,8 @@ type CharacterProgressionRepo interface {
 	UpgradeAccountStashItemWithShard(ctx context.Context, accountID, characterID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, int, bool, error)
 	MigrateUpgradeShardWalletToStash(ctx context.Context, accountID string) error
 	MergeUpgradeShards(ctx context.Context, accountID string, stashItemIDs []string) (AccountStashItem, error)
+	MergeLeveledConsumablesFromBag(ctx context.Context, accountID, characterID string, itemInstanceIDs []string) (CharacterItemInstance, error)
+	RenewInventoryItem(ctx context.Context, accountID, characterID, itemInstanceID string, chargedCost, minStoneLevel int, eligibleItemDefs map[string]struct{}, renewFn func(json.RawMessage) ([]byte, error)) (CharacterItemInstance, int, int, int, error)
 	ListActiveMarketListings(ctx context.Context) ([]MarketListing, error)
 	CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string, priceGold int) (MarketListing, error)
 	CancelMarketListing(ctx context.Context, accountID, listingID string) (MarketListing, error)

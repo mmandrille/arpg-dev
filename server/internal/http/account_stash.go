@@ -15,13 +15,13 @@ import (
 func (s *Server) registerAccountStashRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /v0/account-stash/items/{stash_item_id}/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeAccountStashItem)))
 	mux.Handle("POST /v0/account-stash/items/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeInventoryItem)))
+	mux.Handle("POST /v0/account-stash/items/renew", s.requireAuth(http.HandlerFunc(s.handleRenewInventoryItem)))
 	s.registerAccountStashMergeRoutes(mux)
 }
 
 const (
-	blacksmithRecipeItemUpgrade        = "item_upgrade"
-	blacksmithRecipeWeaponHoning       = "weapon_honing"
-	blacksmithRecipeArmorReinforcement = "armor_reinforcement"
+	blacksmithRecipeItemUpgrade = "item_upgrade"
+	blacksmithRecipeItemRenew   = "item_renew"
 )
 
 type accountStashItemResponse struct {
@@ -155,7 +155,7 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 			return
 		}
 		resourceRequiredLevel = currentLevel + 1
-		resourceInventoryCount = countQualifyingUpgradeShards(stashItems, originalItems, resourceID, resourceRequiredLevel)
+		resourceInventoryCount = countQualifyingLeveledConsumables(stashItems, originalItems, resourceID, resourceRequiredLevel)
 		if resourceInventoryCount < resourceCount {
 			writeError(w, http.StatusConflict, "missing_upgrade_resource", "upgrade resource is required")
 			return
@@ -203,7 +203,7 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
 			return
 		}
-		resourceInventoryCount = countQualifyingUpgradeShards(stashItems, items, resourceID, resourceRequiredLevel)
+		resourceInventoryCount = countQualifyingLeveledConsumables(stashItems, items, resourceID, resourceRequiredLevel)
 	}
 	writeJSON(w, http.StatusOK, upgradeInventoryItemResponse{
 		Item:                   characterItemResponseFromStore(owned),
@@ -325,38 +325,15 @@ func normalizeBlacksmithRecipeID(recipeID string) string {
 }
 
 func (s *Server) validBlacksmithRecipe(recipeID string) bool {
-	return recipeID == blacksmithRecipeItemUpgrade || recipeID == blacksmithRecipeWeaponHoning ||
-		recipeID == blacksmithRecipeArmorReinforcement
+	return recipeID == blacksmithRecipeItemUpgrade || recipeID == blacksmithRecipeItemRenew
 }
 
 func (s *Server) eligibleBlacksmithItemDefs(recipeID string) map[string]struct{} {
 	eligible := make(map[string]struct{}, len(s.rules.ItemTemplates))
-	for itemDefID, def := range s.rules.ItemTemplates {
-		if recipeID == blacksmithRecipeWeaponHoning && !templateCanBeWeaponHoned(def.Slot, def.BaseStats) {
-			continue
-		}
-		if recipeID == blacksmithRecipeArmorReinforcement && !templateCanBeArmorReinforced(def.Slot, def.BaseStats) {
-			continue
-		}
+	for itemDefID := range s.rules.ItemTemplates {
 		eligible[itemDefID] = struct{}{}
 	}
 	return eligible
-}
-
-func templateCanBeWeaponHoned(slot string, baseStats map[string]int) bool {
-	return slot == "main_hand" && baseStats["damage_min"] > 0 && baseStats["damage_max"] > 0
-}
-
-func templateCanBeArmorReinforced(slot string, baseStats map[string]int) bool {
-	if baseStats["armor"] <= 0 {
-		return false
-	}
-	switch slot {
-	case "off_hand", "head", "chest", "gloves", "belt", "boots":
-		return true
-	default:
-		return false
-	}
 }
 
 func (s *Server) upgradeResourceConfig() (string, int) {
@@ -397,13 +374,13 @@ func rolledStatsItemLevelHTTP(raw json.RawMessage) (int, error) {
 	return 0, nil
 }
 
-func countQualifyingUpgradeShards(stashItems []store.AccountStashItem, inventoryItems []store.CharacterItemInstance, resourceID string, minLevel int) int {
+func countQualifyingLeveledConsumables(stashItems []store.AccountStashItem, inventoryItems []store.CharacterItemInstance, resourceID string, minLevel int) int {
 	count := 0
 	for _, item := range stashItems {
 		if item.ItemDefID != resourceID {
 			continue
 		}
-		level, err := game.UpgradeShardLevelFromRaw(item.RolledStats)
+		level, err := game.LeveledConsumableLevelFromRaw(item.ItemDefID, item.RolledStats)
 		if err != nil || level < minLevel {
 			continue
 		}
@@ -413,7 +390,7 @@ func countQualifyingUpgradeShards(stashItems []store.AccountStashItem, inventory
 		if item.ItemDefID != resourceID {
 			continue
 		}
-		level, err := game.UpgradeShardLevelFromRaw(item.RolledStats)
+		level, err := game.LeveledConsumableLevelFromRaw(item.ItemDefID, item.RolledStats)
 		if err != nil || level < minLevel {
 			continue
 		}

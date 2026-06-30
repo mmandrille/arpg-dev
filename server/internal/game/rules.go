@@ -65,9 +65,7 @@ type MainGameplayConfig struct {
 	ItemUpgradePityFailures  int               `json:"item_upgrade_pity_failure_threshold"`
 	ItemUpgradeResourceID    string            `json:"item_upgrade_resource_item_def_id"`
 	ItemUpgradeResourceCost  int               `json:"item_upgrade_resource_count"`
-	UpgradeShardEnemyDropPct int               `json:"upgrade_shard_enemy_drop_chance_percent"`
-	UpgradeShardChestDropPct int               `json:"upgrade_shard_chest_drop_chance_percent"`
-	UpgradeShardBossDropPct  int               `json:"upgrade_shard_boss_drop_chance_percent"`
+	ResourceLootDrops        ResourceLootDropsConfig `json:"resource_loot_drops"`
 	BadgeRewardRules         []BadgeRewardRule `json:"badge_reward_rules"`
 	MercenaryHireCostGold    int               `json:"mercenary_hire_cost_gold"`
 	QuestTurnInItemDefID     string            `json:"quest_turn_in_item_def_id"`

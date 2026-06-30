@@ -481,7 +481,12 @@ func _run() -> void:
 	upgrade_item["rolled_stats"] = {"damage_min": 2, "damage_max": 4}
 	upgrade_item["summary_lines"] = ["Min damage: +2", "Max damage: +4"]
 	var blacksmith_config := {"item_upgrade_cost_gold": 100, "item_upgrade_cost_growth_per_level": 50, "item_upgrade_max_level": 3, "item_upgrade_resource_item_def_id": "upgrade_shard", "item_upgrade_resource_count": 1, "deepest_dungeon_depth": 30, "item_level_levels_per_tier": 10}
-	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item], 40, 60, blacksmith_config, "Choose", {"upgrade_shard": 1})
+	var blacksmith_shard := {
+		"item_instance_id": "shard1",
+		"item_def_id": "upgrade_shard",
+		"rolled_stats": {"item_level": 2},
+	}
+	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item, blacksmith_shard], 40, 60, blacksmith_config, "Choose", {})
 	blacksmith_panel.stage_inventory_item(upgrade_item)
 	var blacksmith_state := blacksmith_panel.get_debug_state()
 	_assert_eq("blacksmith staged item id", str(blacksmith_state.get("staged_item_id", "")), "2001")
@@ -587,7 +592,6 @@ func _array_contains_text(rows: Array, needle: String) -> bool:
 		if str(row).contains(needle):
 			return true
 	return false
-
 
 func _font_size_for_text(rows: Array, text: String) -> int:
 	for row in rows:

@@ -365,6 +365,34 @@ func TestBishopDebugDropUpgradeShardSpawnsLoot(t *testing.T) {
 	}
 }
 
+func TestBishopDebugDropRenewStoneSpawnsLoot(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_debug_renew", "v_bishop_debug_renew", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.SetGameplayDebug(true)
+	sim.progression.DeepestDungeonDepth = 20
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	startLoot := countEntitiesByType(sim, lootEntity)
+
+	res := sim.Tick([]Input{{
+		MessageID:                 "debug_renew",
+		CorrelationID:             "corr_debug_renew",
+		Type:                      "bishop_debug_drop_renew_stone_intent",
+		BishopDebugDropRenewStone: &BishopDebugDropRenewStoneIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertAck(t, res, "debug_renew")
+	if countEntitiesByType(sim, lootEntity) != startLoot+1 {
+		t.Fatalf("loot entities = %d, want %d", countEntitiesByType(sim, lootEntity), startLoot+1)
+	}
+	ev := findEvent(res.Events, "bishop_debug_renew_stone_dropped")
+	if ev == nil || ev.TargetEntityID == "" || ev.Amount == nil || *ev.Amount < 1 {
+		t.Fatalf("bishop_debug_renew_stone_dropped event = %+v", ev)
+	}
+}
+
 func countEntitiesByType(sim *Sim, kind string) int {
 	count := 0
 	for _, e := range sim.activeLevel().entities {

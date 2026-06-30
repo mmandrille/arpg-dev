@@ -245,6 +245,8 @@ func _wallet_resource_keys() -> Array:
 	var keys: Array = _resource_wallet.keys()
 	keys.sort()
 	for key in keys:
+		if str(key) == "upgrade_shard":
+			continue
 		var amount := int(_resource_wallet.get(key, 0))
 		if amount <= 0:
 			continue
@@ -254,7 +256,7 @@ func _wallet_resource_keys() -> Array:
 
 func _resource_label(resource_id: String) -> String:
 	if resource_id == "upgrade_shard":
-		return "Upgrade"
+		return "Shard"
 	if resource_id == "respec_badge":
 		return "Respec"
 	if resource_id == "stat_badge":

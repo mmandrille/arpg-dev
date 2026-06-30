@@ -6,6 +6,15 @@ func validateMainGameplayEconomyConfig(gameplay MainGameplayConfig) error {
 	if gameplay.ItemUpgradeResourceCost < 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_count: must be non-negative")
 	}
+	if gameplay.UpgradeShardEnemyDropPct < 0 || gameplay.UpgradeShardEnemyDropPct > 100 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.upgrade_shard_enemy_drop_chance_percent: must be within [0,100]")
+	}
+	if gameplay.UpgradeShardChestDropPct < 0 || gameplay.UpgradeShardChestDropPct > 100 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.upgrade_shard_chest_drop_chance_percent: must be within [0,100]")
+	}
+	if gameplay.UpgradeShardBossDropPct < 0 || gameplay.UpgradeShardBossDropPct > 100 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.upgrade_shard_boss_drop_chance_percent: must be within [0,100]")
+	}
 	if gameplay.BishopRespecResourceCost < 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.bishop_respec_resource_count: must be non-negative")
 	}
@@ -76,6 +85,9 @@ func validateMainGameplayResourceItems(gameplay MainGameplayConfig, items map[st
 		item, ok := items[rule.ResourceItemDefID]
 		if !ok {
 			return fmt.Errorf("game: invalid rules main_config.gameplay.badge_reward_rules[%d].resource_item_def_id: unknown item %q", idx, rule.ResourceItemDefID)
+		}
+		if rule.ResourceItemDefID == gameplay.ItemUpgradeResourceID {
+			continue
 		}
 		if item.Category != "currency" || item.Equippable {
 			return fmt.Errorf("game: invalid rules main_config.gameplay.badge_reward_rules[%d].resource_item_def_id: item %q must be a non-equippable currency", idx, rule.ResourceItemDefID)

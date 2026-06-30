@@ -42,7 +42,9 @@ func TestAccountStashItemUpgradeRejectsDepthCap(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 300); err != nil {
 		t.Fatal(err)
 	}
-	_, _, _, _, err = s.UpgradeAccountStashItem(ctx, acct.ID, "depth_upgrade_stash_"+suffix, 100, 50, 3, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptionsWithDepthCap(t, 25))
+	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4,"item_level":2}`)
+	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
+	_, _, _, _, err = s.UpgradeAccountStashItem(ctx, acct.ID, "depth_upgrade_stash_"+suffix, sellPrice, 3, 100, 1, 0, 3, map[string]struct{}{"cave_blade": {}}, testUpgradeOptionsWithDepthCap(t, 25))
 	if !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("depth-capped upgrade err = %v, want ErrConflict", err)
 	}

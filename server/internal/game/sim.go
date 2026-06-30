@@ -751,6 +751,9 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			level.entities[monster.id] = monster
 		case lootEntity:
 			loot := s.newLootEntity(preset.ItemDefID, preset.Position, nil, goldRollContext{levelNum: level.levelNum})
+			if preset.ItemDefID == UpgradeShardItemDefID {
+				loot.rollPayload = NewUpgradeShardRollPayload(1)
+			}
 			if preset.ItemTemplateID != "" {
 				rolled, ok := s.rollItemTemplate(preset.ItemTemplateID, absInt(level.levelNum))
 				if !ok {
@@ -866,7 +869,8 @@ type Input struct {
 	BishopReviveAll     *BishopReviveAllIntent
 	BishopDebugLevel    *BishopDebugLevelIntent
 	BishopDebugSkill    *BishopDebugSkillPointIntent
-	BishopDebugStat     *BishopDebugStatPointIntent
+	BishopDebugStat              *BishopDebugStatPointIntent
+	BishopDebugDropUpgradeShard  *BishopDebugDropUpgradeShardIntent
 	StashDepositItem    *StashDepositItemIntent
 	StashWithdrawItem   *StashWithdrawItemIntent
 	StashDepositGold    *StashDepositGoldIntent
@@ -956,6 +960,9 @@ type (
 		BishopEntityID string
 	}
 	BishopDebugStatPointIntent struct {
+		BishopEntityID string
+	}
+	BishopDebugDropUpgradeShardIntent struct {
 		BishopEntityID string
 	}
 	StashDepositItemIntent struct {
@@ -1483,6 +1490,12 @@ func (s *Sim) dropLoot(monster *entity, sourceID uint64, corr string, res *TickR
 		monsterRarityID: monster.monsterRarityID,
 		magicFind:       true,
 	})
+	depth := absInt(s.activeLevel().levelNum)
+	if monster.isBoss {
+		s.tryDropUpgradeShard(monster.pos, s.targetInteractionRadius(monster), depth, upgradeShardDropBoss, corr, res)
+	} else {
+		s.tryDropUpgradeShard(monster.pos, s.targetInteractionRadius(monster), depth, upgradeShardDropEnemy, corr, res)
+	}
 	s.grantBossBadgeRewards(monster, sourceID, corr, res)
 }
 

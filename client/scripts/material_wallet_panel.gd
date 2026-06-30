@@ -154,6 +154,8 @@ func _wallet_resource_keys() -> Array:
 	var keys: Array = resource_wallet.keys()
 	keys.sort()
 	for key in keys:
+		if str(key) == "upgrade_shard":
+			continue
 		var amount := int(resource_wallet.get(key, 0))
 		if amount > 0:
 			out.append(key)

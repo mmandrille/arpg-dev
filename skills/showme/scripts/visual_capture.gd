@@ -12,6 +12,7 @@ const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessi
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const MainScript := preload("res://scripts/main.gd")
+const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 
@@ -326,14 +327,13 @@ func _setup_floor_item() -> void:
 	floor.material_override = floor_mat
 	root.add_child(floor)
 
-	var main: Node3D = MainScript.new()
 	var base := ProjectSettings.globalize_path("res://")
 	var manifest = _read_json(base.path_join("../assets/manifests/assets.v0.json"))
-	if typeof(manifest) == TYPE_DICTIONARY:
-		main.asset_manifest = manifest.get("assets", {})
+	var assets: Dictionary = manifest.get("assets", {}) if typeof(manifest) == TYPE_DICTIONARY else {}
 	ItemRulesLoader.ensure_loaded()
 	var item_def_id := str(_items[0]) if not _items.is_empty() else "cave_blade"
-	var loot: Node3D = main._make_loot_node({
+	var factory := LootNodeFactoryScript.new(assets, ItemRulesLoader.item_presentations)
+	var loot: Node3D = factory.make_loot_node({
 		"type": "loot",
 		"item_def_id": item_def_id,
 		"rarity": "magic",

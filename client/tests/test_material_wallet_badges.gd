@@ -16,27 +16,26 @@ func _run() -> void:
 	get_root().add_child(bar)
 	await process_frame
 	bar.set_resource_wallet({
-		"upgrade_shard": 2,
 		"respec_badge": 1,
 		"skill_badge": 3,
 	})
 	var state := bar.get_debug_state()
 	_assert_true("wallet visible", bool(state.get("wallet_visible", false)))
 	var compact := str(state.get("wallet_text", ""))
-	_assert_true("compact upgrade badge", compact.contains("Upgrade 2"))
+	_assert_false("compact hides upgrade shard wallet", compact.contains("Upgrade"))
 	_assert_true("compact respec badge", compact.contains("Respec 1"))
 	_assert_true("compact skill badge", compact.contains("Skill 3"))
 	var tooltip := str(state.get("wallet_tooltip", ""))
-	_assert_true("tooltip upgrade badge", tooltip.contains("Upgrade Badge x2"))
+	_assert_false("tooltip hides upgrade shard wallet", tooltip.contains("Upgrade Badge"))
 	_assert_true("tooltip respec badge", tooltip.contains("Respec Badge x1"))
 	_assert_true("tooltip skill badge", tooltip.contains("Skill Badge x3"))
 	bar.open_wallet_window()
 	state = bar.get_debug_state()
 	var window: Dictionary = state.get("wallet_window", {})
 	_assert_true("wallet window visible", bool(window.get("visible", false)))
-	_assert_eq("wallet window rows", int(window.get("row_count", 0)), 3)
+	_assert_eq("wallet window rows", int(window.get("row_count", 0)), 2)
 	var text := str(window.get("text", ""))
-	_assert_true("window upgrade badge", text.contains("Upgrade Badge x2"))
+	_assert_false("window hides upgrade shard wallet", text.contains("Upgrade Badge"))
 	_assert_true("window respec badge", text.contains("Respec Badge x1"))
 	_assert_true("window skill badge", text.contains("Skill Badge x3"))
 	bar.free()

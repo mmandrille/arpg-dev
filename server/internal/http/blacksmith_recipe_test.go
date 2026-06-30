@@ -16,7 +16,7 @@ func TestBlacksmithRecipeRouteHonorsRecipeID(t *testing.T) {
 	suffix := ids.Token()[:12]
 	accountID, token := loginEmail(t, h, "stash-recipe+"+suffix+"@example.test")
 	char := createCharacter(t, h, token, "Recipe Route Hero")
-	prog := store.CharacterProgression{AccountID: accountID, CharacterID: char.CharacterID, CharacterClass: "barbarian", Level: 1, Gold: 300, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
+	prog := store.CharacterProgression{AccountID: accountID, CharacterID: char.CharacterID, CharacterClass: "barbarian", Level: 1, Gold: 800, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
 	if err := db.UpsertCharacterProgression(ctx, accountID, prog); err != nil {
 		t.Fatal(err)
 	}
@@ -32,9 +32,14 @@ func TestBlacksmithRecipeRouteHonorsRecipeID(t *testing.T) {
 	if _, err := db.TransferCharacterItemToAccountStash(ctx, accountID, char.CharacterID, "recipe_shield_"+suffix, "recipe_shield_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 250); err != nil {
+	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 600); err != nil {
 		t.Fatal(err)
 	}
+	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
+	shieldRolled := json.RawMessage(`{"armor":2,"block_percent":5}`)
+	bladeSell := httpTestItemSellPrice(t, "cave_blade", bladeRolled)
+	shieldSell := httpTestItemSellPrice(t, "cave_shield", shieldRolled)
+	addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, "recipe_blade_shard_"+suffix, 1)
 	rec := postJSON(h, "/v0/account-stash/items/recipe_blade_stash_"+suffix+"/upgrade", token, map[string]string{"recipe_id": "weapon_honing"})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("weapon recipe status = %d body=%s", rec.Code, rec.Body.String())
@@ -43,7 +48,7 @@ func TestBlacksmithRecipeRouteHonorsRecipeID(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.RecipeID != "weapon_honing" || upgraded.CostGold != 100 || !upgraded.Success {
+	if upgraded.RecipeID != "weapon_honing" || upgraded.CostGold != bladeSell || !upgraded.Success {
 		t.Fatalf("weapon recipe response = %+v", upgraded)
 	}
 	var stats struct {
@@ -64,6 +69,7 @@ func TestBlacksmithRecipeRouteHonorsRecipeID(t *testing.T) {
 	if rec.Code != http.StatusConflict {
 		t.Fatalf("blade armor recipe status = %d body=%s", rec.Code, rec.Body.String())
 	}
+	addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, "recipe_shield_shard_"+suffix, 1)
 	rec = postJSON(h, "/v0/account-stash/items/recipe_shield_stash_"+suffix+"/upgrade", token, map[string]string{"recipe_id": "armor_reinforcement"})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("armor recipe status = %d body=%s", rec.Code, rec.Body.String())
@@ -72,7 +78,7 @@ func TestBlacksmithRecipeRouteHonorsRecipeID(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &reinforced); err != nil {
 		t.Fatal(err)
 	}
-	if reinforced.RecipeID != "armor_reinforcement" || reinforced.CostGold != 100 || !reinforced.Success {
+	if reinforced.RecipeID != "armor_reinforcement" || reinforced.CostGold != shieldSell || !reinforced.Success {
 		t.Fatalf("armor recipe response = %+v", reinforced)
 	}
 	var armorStats struct {

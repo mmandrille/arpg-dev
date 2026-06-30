@@ -1,7 +1,14 @@
 package game
 
 func (s *Sim) isWalletResourceItem(itemDefID string) bool {
-	return itemDefID != "" && (itemDefID == s.rules.MainConfig.Gameplay.ItemUpgradeResourceID || s.rules.isBadgeRewardResourceItem(itemDefID))
+	if itemDefID == "" {
+		return false
+	}
+	if itemDefID == s.rules.MainConfig.Gameplay.ItemUpgradeResourceID {
+		return false
+	}
+
+	return s.rules.isBadgeRewardResourceItem(itemDefID)
 }
 
 func (s *Sim) isAutoPickableWalletResource(e *entity) bool {

@@ -58,6 +58,24 @@ static func click_blacksmith_upgrade(main, stash_item_id: String = "", item_def_
 		panel.bot_click_upgrade(stash_item_id, item_def_id, stash_index)
 
 
+static func select_blacksmith_tab(main, tab_name: String) -> void:
+	var panel = _member(main, "blacksmith_panel")
+	if panel != null and panel.has_method("bot_select_tab"):
+		panel.bot_select_tab(tab_name)
+
+
+static func fill_blacksmith_merge(main, count: int = 3) -> void:
+	var panel = _member(main, "blacksmith_panel")
+	if panel != null and panel.has_method("bot_merge_fill"):
+		panel.bot_merge_fill(count)
+
+
+static func click_blacksmith_merge(main) -> void:
+	var panel = _member(main, "blacksmith_panel")
+	if panel != null and panel.has_method("bot_click_merge"):
+		panel.bot_click_merge()
+
+
 static func click_mercenary_stance(main, stance: String) -> void:
 	var panel = _member(main, "mercenary_panel")
 	if panel != null and panel.has_method("bot_click_stance"):

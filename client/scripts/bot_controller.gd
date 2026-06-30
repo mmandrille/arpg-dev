@@ -183,6 +183,12 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_blacksmith_stage_item(action)
 		"select_blacksmith_recipe":
 			_do_select_blacksmith_recipe(action)
+		"select_blacksmith_tab":
+			_do_select_blacksmith_tab(action)
+		"fill_blacksmith_merge":
+			_do_fill_blacksmith_merge(action)
+		"click_blacksmith_merge":
+			_do_click_blacksmith_merge()
 		"click_mercenary_stance":
 			_do_click_mercenary_stance(action)
 		"set_stash_search":
@@ -388,6 +394,21 @@ func _do_select_blacksmith_recipe(action: Dictionary) -> void:
 	var panel = _main.get("blacksmith_panel") if _main != null else null
 	if panel != null and panel.has_method("bot_select_recipe"):
 		panel.bot_select_recipe(str(action.get("recipe_id", "item_upgrade")))
+
+
+func _do_select_blacksmith_tab(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_select_blacksmith_tab"):
+		_main.bot_select_blacksmith_tab(str(action.get("tab", "Merge")))
+
+
+func _do_fill_blacksmith_merge(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_fill_blacksmith_merge"):
+		_main.bot_fill_blacksmith_merge(int(action.get("count", 3)))
+
+
+func _do_click_blacksmith_merge() -> void:
+	if _main != null and _main.has_method("bot_click_blacksmith_merge"):
+		_main.bot_click_blacksmith_merge()
 
 
 func _do_click_mercenary_stance(action: Dictionary) -> void:

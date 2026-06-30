@@ -3,6 +3,7 @@ package store_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
@@ -36,15 +37,18 @@ func TestAccountStashItemUpgradeFailureSpendsGoldWithoutStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 100); err != nil {
 		t.Fatal(err)
 	}
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
+	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
+	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "fail_upgrade_shard_"+suffix, 1)
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if success {
 		t.Fatal("forced failure upgrade returned success")
 	}
-	if cost != 100 || gold != 0 {
-		t.Fatalf("failed upgrade cost/gold = %d/%d, want 100/0", cost, gold)
+	if cost != sellPrice || gold != 100-sellPrice {
+		t.Fatalf("failed upgrade cost/gold = %d/%d, want %d/%d", cost, gold, sellPrice, 100-sellPrice)
 	}
 	var stats struct {
 		ItemLevel int `json:"item_level"`
@@ -95,15 +99,18 @@ func TestAccountStashItemUpgradePityGuaranteesSuccess(t *testing.T) {
 			Failures int `json:"failures"`
 		} `json:"upgrade_pity"`
 	}
+	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
+	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
 	for attempt := 1; attempt <= 2; attempt++ {
-		item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 2, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+		addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, fmt.Sprintf("pity_shard_%s_%d", suffix, attempt), 1)
+		item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 2, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 		if err != nil {
 			t.Fatal(err)
 		}
 		if success {
 			t.Fatalf("attempt %d unexpectedly succeeded", attempt)
 		}
-		if cost != 100 || gold != 300-attempt*100 {
+		if cost != sellPrice || gold != 300-attempt*sellPrice {
 			t.Fatalf("attempt %d cost/gold = %d/%d", attempt, cost, gold)
 		}
 		if err := json.Unmarshal(item.RolledStats, &stats); err != nil {
@@ -113,15 +120,16 @@ func TestAccountStashItemUpgradePityGuaranteesSuccess(t *testing.T) {
 			t.Fatalf("attempt %d stats = %+v", attempt, stats)
 		}
 	}
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, 100, 50, 2, 0, 100, 2, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "pity_shard_"+suffix+"_final", 1)
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 2, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !success {
 		t.Fatal("pity attempt should be guaranteed success")
 	}
-	if cost != 100 || gold != 0 {
-		t.Fatalf("pity attempt cost/gold = %d/%d, want 100/0", cost, gold)
+	if cost != sellPrice || gold != 300-3*sellPrice {
+		t.Fatalf("pity attempt cost/gold = %d/%d, want %d/%d", cost, gold, sellPrice, 300-3*sellPrice)
 	}
 	if err := json.Unmarshal(item.RolledStats, &stats); err != nil {
 		t.Fatal(err)

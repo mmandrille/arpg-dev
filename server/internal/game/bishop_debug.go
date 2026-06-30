@@ -50,6 +50,48 @@ func (s *Sim) handleBishopDebugStatPoint(in Input, res *TickResult) {
 	})
 }
 
+func (s *Sim) handleBishopDebugDropUpgradeShard(in Input, res *TickResult) {
+	if !s.gameplayDebug {
+		res.reject(in.MessageID, "debug_disabled")
+		return
+	}
+	if in.BishopDebugDropUpgradeShard == nil || in.BishopDebugDropUpgradeShard.BishopEntityID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	bishopEntity, ok, reason := s.resolveBishopIntentTarget(in.BishopDebugDropUpgradeShard.BishopEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+
+	depth := maxInt(1, s.progression.DeepestDungeonDepth)
+	lootID, level, ok := s.spawnUpgradeShardLoot(player.pos, s.targetInteractionRadius(player), depth, in.CorrelationID, res)
+	if !ok {
+		res.reject(in.MessageID, "drop_failed")
+		return
+	}
+
+	healed, restored := s.restorePlayerResources(player, res)
+	res.Events = append(res.Events, Event{
+		EventType:      "bishop_debug_upgrade_shard_dropped",
+		EntityID:       idStr(bishopEntity.id),
+		TargetEntityID: idStr(lootID),
+		CorrelationID:  in.CorrelationID,
+		Service:        "bishop",
+		Amount:         intPtr(level),
+		Heal:           intPtr(healed),
+		Mana:           intPtr(restored),
+	})
+	res.ack(in.MessageID)
+	s.savePlayer(s.defaultPlayer())
+}
+
 func (s *Sim) handleBishopDebugAction(in Input, res *TickResult, action bishopDebugAction) {
 	if !s.gameplayDebug {
 		res.reject(in.MessageID, "debug_disabled")

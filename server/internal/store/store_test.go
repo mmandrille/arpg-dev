@@ -1097,15 +1097,18 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 250); err != nil {
 		t.Fatal(err)
 	}
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
+	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
+	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "upgrade_shard_1_"+suffix, 1)
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !success {
 		t.Fatal("first upgrade should succeed")
 	}
-	if cost != 100 || gold != 150 {
-		t.Fatalf("first upgrade cost/gold = %d/%d, want 100/150", cost, gold)
+	if cost != sellPrice || gold != 250-sellPrice {
+		t.Fatalf("first upgrade cost/gold = %d/%d, want %d/%d", cost, gold, sellPrice, 250-sellPrice)
 	}
 	var stats struct {
 		ItemLevel int `json:"item_level"`
@@ -1118,15 +1121,16 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.DamageMin != 2 {
 		t.Fatalf("upgraded stats = %+v", stats)
 	}
-	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "upgrade_shard_2_"+suffix, 2)
+	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 2, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !success {
 		t.Fatal("second upgrade should succeed")
 	}
-	if cost != 150 || gold != 0 {
-		t.Fatalf("second upgrade cost/gold = %d/%d, want 150/0", cost, gold)
+	if cost != sellPrice || gold != 250-2*sellPrice {
+		t.Fatalf("second upgrade cost/gold = %d/%d, want %d/%d", cost, gold, sellPrice, 250-2*sellPrice)
 	}
 	if err := json.Unmarshal(item.RolledStats, &stats); err != nil {
 		t.Fatal(err)
@@ -1137,7 +1141,7 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 25); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, 1, 1, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
+	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 3, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("max level upgrade err = %v, want ErrConflict", err)
 	}
 }
@@ -1160,7 +1164,10 @@ func TestAccountStashItemUpgradeRejectsInsufficientGold(t *testing.T) {
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "poor_upgrade_item_"+suffix, "poor_upgrade_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
+	bladeRolled := json.RawMessage(`{"damage_min":2}`)
+	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
+	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "poor_upgrade_shard_"+suffix, 1)
+	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("insufficient gold upgrade err = %v, want ErrConflict", err)
 	}
 }
@@ -1177,7 +1184,7 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	prog := store.CharacterProgression{AccountID: acct.ID, CharacterID: char.ID, CharacterClass: "barbarian", Level: 1, Gold: 150, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
+	prog := store.CharacterProgression{AccountID: acct.ID, CharacterID: char.ID, CharacterClass: "barbarian", Level: 1, Gold: 600, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, prog); err != nil {
 		t.Fatal(err)
 	}
@@ -1188,18 +1195,20 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "payload_upgrade_item_"+suffix, "payload_upgrade_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 100); err != nil {
+	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 500); err != nil {
 		t.Fatal(err)
 	}
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, 100, 50, 2, 100, 1, 0, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	sellPrice := testItemSellPrice(t, "cave_blade", json.RawMessage(payload))
+	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "payload_upgrade_shard_"+suffix, 1)
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !success {
 		t.Fatal("payload upgrade should succeed")
 	}
-	if cost != 100 || gold != 0 {
-		t.Fatalf("payload upgrade cost/gold = %d/%d, want 100/0", cost, gold)
+	if cost != sellPrice || gold != 500-sellPrice {
+		t.Fatalf("payload upgrade cost/gold = %d/%d, want %d/%d", cost, gold, sellPrice, 500-sellPrice)
 	}
 	var upgraded struct {
 		ItemTemplateID string         `json:"item_template_id"`

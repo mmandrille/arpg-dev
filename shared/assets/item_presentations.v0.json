@@ -175,7 +175,11 @@
     "cave_ring": { "family": "ring" },
     "cave_amulet": { "family": "amulet" },
     "gold": { "family": "gold" },
-    "upgrade_shard": { "family": "badge" },
+    "upgrade_shard": {
+      "family": "badge",
+      "icon": { "shape": "badge", "color": "#8b5cf6", "accent": "#e9d5ff", "label": "Sh" },
+      "ground": { "shape": "badge", "color": "#8b5cf6", "accent": "#e9d5ff", "scale": 0.75 }
+    },
     "respec_badge": {
       "family": "badge",
       "icon": { "shape": "badge", "color": "#4fa7d6", "accent": "#d8f4ff", "label": "Re" },

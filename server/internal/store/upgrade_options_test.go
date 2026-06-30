@@ -7,12 +7,23 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 )
 
-func testUpgradeOptions(t *testing.T) game.ItemUpgradeOptions {
+func testRulesPath() string {
+	return filepath.Join("..", "..", "..", "shared", "rules")
+}
+
+func testRules(t *testing.T) *game.Rules {
 	t.Helper()
-	rules, err := game.LoadRules(filepath.Join("..", "..", "..", "shared", "rules"))
+	rules, err := game.LoadRules(testRulesPath())
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	return rules
+}
+
+func testUpgradeOptions(t *testing.T) game.ItemUpgradeOptions {
+	t.Helper()
+	rules := testRules(t)
 
 	return game.ItemUpgradeOptions{
 		Scaling: rules.DungeonGeneration.MonsterDepthScaling,

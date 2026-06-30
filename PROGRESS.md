@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-30 (v389 tiered-item-level-scaling)
+Last updated: 2026-06-30 (v390 leveled-upgrade-shards)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-06-30 (v389 tiered-item-level-scaling)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v389 — tiered-item-level-scaling |
+| **Latest completed slice** | v390 — leveled-upgrade-shards |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green 2026-06-30 (v389 batch + CI follow-ups) |
+| **CI gate** | `make ci` pending (v390 autoloop batch) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |

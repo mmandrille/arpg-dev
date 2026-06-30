@@ -1,10 +1,10 @@
 {
-  "id": "upgrade_resource_drop",
+  "id": "upgrade_shard_level_drop",
   "ci_tier": "extended",
   "world_id": "vendor_lab",
-  "seed": "v390_upgrade_resource_drop",
-  "title": "Upgrade shard bag pickup",
-  "description": "Pick up upgrade shards as bag items; wallet stays empty for upgrade_shard.",
+  "seed": "v390_upgrade_shard_level_drop",
+  "title": "Leveled upgrade shard pickup",
+  "description": "Pick up a preset upgrade shard from vendor_lab and prove it lands in the bag as a leveled item, not wallet currency.",
   "steps": [
     {
       "action": "action_entity",
@@ -46,12 +46,5 @@
       "resource_id": "upgrade_shard",
       "equals": 0
     }
-  ],
-  "visual": {
-    "camera": {
-      "x": 16,
-      "y": 10,
-      "zoom": 1.1
-    }
-  }
+  ]
 }

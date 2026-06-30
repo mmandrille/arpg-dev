@@ -87,20 +87,16 @@ static func tooltip_next_rank_lines(skill_id: String, rank: int) -> Array:
 		lines.append("Mana: %d -> %d" % [mana_now, mana_next])
 	var damage: Dictionary = def.get("damage", {})
 	var damage_type := str(damage.get("type", ""))
-	if damage_type == "rank_linear_range":
+	if damage_type == "rank_linear_range" or damage_type == "weapon_multiplier_range":
 		var min_now := _static_ranked_stat_value(int(damage.get("min_base", 0)), int(damage.get("min_per_rank", 0)), current_rank)
 		var max_now := _static_ranked_stat_value(int(damage.get("max_base", 0)), int(damage.get("max_per_rank", 0)), current_rank)
 		var min_next := _static_ranked_stat_value(int(damage.get("min_base", 0)), int(damage.get("min_per_rank", 0)), next_rank)
 		var max_next := _static_ranked_stat_value(int(damage.get("max_base", 0)), int(damage.get("max_per_rank", 0)), next_rank)
 		if min_now != min_next or max_now != max_next:
-			lines.append("Damage: %d-%d -> %d-%d" % [min_now, max_now, min_next, max_next])
-	elif damage_type == "weapon_multiplier_range":
-		var min_now := _static_ranked_stat_value(int(damage.get("min_base", 0)), int(damage.get("min_per_rank", 0)), current_rank)
-		var max_now := _static_ranked_stat_value(int(damage.get("max_base", 0)), int(damage.get("max_per_rank", 0)), current_rank)
-		var min_next := _static_ranked_stat_value(int(damage.get("min_base", 0)), int(damage.get("min_per_rank", 0)), next_rank)
-		var max_next := _static_ranked_stat_value(int(damage.get("max_base", 0)), int(damage.get("max_per_rank", 0)), next_rank)
-		if min_now != min_next or max_now != max_next:
-			lines.append("Weapon damage: %d%%-%d%% -> %d%%-%d%%" % [min_now, max_now, min_next, max_next])
+			if damage_type == "weapon_multiplier_range":
+				lines.append("Weapon damage: %d%%-%d%% -> %d%%-%d%%" % [min_now, max_now, min_next, max_next])
+			else:
+				lines.append("Damage: %d-%d -> %d-%d" % [min_now, max_now, min_next, max_next])
 	var effects: Array = def.get("effects", [])
 	for effect in effects:
 		if typeof(effect) != TYPE_DICTIONARY:

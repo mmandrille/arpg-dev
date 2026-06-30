@@ -307,7 +307,7 @@ func TestItemTemplateFamilyStatRequirements(t *testing.T) {
 	expectedByType := map[string]string{
 		"sword":      "str",
 		"greatsword": "str",
-		"axe":        "str",
+		"axe": "str", "dagger": "dex", "war_hammer": "str",
 		"staff":      "magic",
 		"bow":        "dex",
 		"shield":     "str",

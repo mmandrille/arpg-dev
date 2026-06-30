@@ -209,3 +209,5 @@ client/87_dungeon_torch_lights.json	dungeon_torch_lights	godot_client	extended	c
 client/88_torch_walk_visual.json	torch_walk_visual	godot_client	extended	contract	8	8		
 client/89_aura_soft_lights.json	aura_soft_lights	godot_client	extended	contract	0	0		
 client/90_town_night_perimeter.json	town_night_perimeter	godot_client	extended	setup-eliminable	3	3		
+108_skill_weapon_damage_scaling.json	skill_weapon_damage_scaling	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
+109_class_weapon_affinities_lab.json	class_weapon_affinities_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup

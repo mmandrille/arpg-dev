@@ -25,7 +25,7 @@ Last updated: 2026-06-29 (v387 class-weapon-affinities)
 |-------|-------|
 | **Latest completed slice** | v387 — class-weapon-affinities |
 | **Active branch** | `main` |
-| **CI gate** | focused verification green for v386–v387; final batch `make ci` pending |
+| **CI gate** | `make ci` green 2026-06-30 (v386–v387 batch + CI fixes) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |

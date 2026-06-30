@@ -25,7 +25,7 @@ Last updated: 2026-06-30 (v389 tiered-item-level-scaling)
 |-------|-------|
 | **Latest completed slice** | v389 — tiered-item-level-scaling |
 | **Active branch** | `main` |
-| **CI gate** | focused verification green 2026-06-30 (v389); batch `make ci` pending autoloop handoff |
+| **CI gate** | `make ci` green 2026-06-30 (v389 batch + CI follow-ups) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |

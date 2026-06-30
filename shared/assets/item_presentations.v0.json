@@ -155,8 +155,14 @@
     },
     "cave_shield": { "family": "shield" },
     "cave_helm": { "family": "helm" },
+    "cave_leather_cap": { "family": "helm" },
+    "cave_tiara": { "family": "helm" },
     "cave_mail": { "family": "chest" },
+    "cave_leather_vest": { "family": "chest" },
+    "cave_full_plate": { "family": "chest" },
     "cave_gloves": { "family": "gloves" },
+    "cave_cloth_wraps": { "family": "gloves" },
+    "cave_gauntlets": { "family": "gloves" },
     "cave_belt": { "family": "belt" },
     "cave_pack_belt": {
       "family": "belt",
@@ -164,6 +170,8 @@
       "ground": { "shape": "belt", "color": "#5f7043", "accent": "#d2e6a4", "scale": 0.8 }
     },
     "cave_boots": { "family": "boots" },
+    "cave_soft_boots": { "family": "boots" },
+    "cave_plate_boots": { "family": "boots" },
     "cave_ring": { "family": "ring" },
     "cave_amulet": { "family": "amulet" },
     "gold": { "family": "gold" },

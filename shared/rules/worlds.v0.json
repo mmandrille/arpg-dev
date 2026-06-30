@@ -1454,6 +1454,40 @@
         }
       ]
     },
+    "armor_slot_families_lab": {
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
+      "entities": [
+        {
+          "type": "loot",
+          "item_template_id": "cave_tiara",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_mail",
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "cave_full_plate",
+          "position": {
+            "x": 6,
+            "y": 5
+          }
+        }
+      ]
+    },
     "damage_types_lab": {
       "player": {
         "position": {

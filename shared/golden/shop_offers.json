@@ -167,54 +167,54 @@
         {
           "offer_id": "generated:depth3:000",
           "kind": "generated",
-          "item_template_id": "cave_boots",
-          "display_name": "Common Cave Boots",
+          "item_template_id": "cave_soft_boots",
+          "display_name": "Common Soft Boots",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 1,
-            "movement_speed_percent": 6
+            "armor": 0,
+            "movement_speed_percent": 10
           },
-          "buy_price": 100,
+          "buy_price": 120,
           "source": "common_dungeon_mob",
           "depth": 3
         },
         {
           "offer_id": "generated:depth3:001",
           "kind": "generated",
-          "item_template_id": "cave_bow",
-          "display_name": "Common Cave Bow",
+          "item_template_id": "cave_belt",
+          "display_name": "Common Cave Belt",
           "rarity": "common",
           "rolled_stats": {
-            "damage_max": 2,
-            "damage_min": 2
+            "armor": 1,
+            "hotbar_slots": 10
           },
-          "buy_price": 150,
+          "buy_price": 460,
           "source": "common_dungeon_mob",
           "depth": 3
         },
         {
           "offer_id": "generated:depth3:002",
           "kind": "generated",
-          "item_template_id": "cave_boots",
-          "display_name": "Magic Cave Boots",
-          "rarity": "magic",
+          "item_template_id": "cave_blade",
+          "display_name": "Common Cave Blade",
+          "rarity": "common",
           "rolled_stats": {
-            "armor": 1,
-            "movement_speed_percent": 16
+            "damage_max": 6,
+            "damage_min": 2
           },
-          "buy_price": 285,
+          "buy_price": 245,
           "source": "common_dungeon_mob",
           "depth": 3
         },
         {
           "offer_id": "generated:depth3:003",
           "kind": "generated",
-          "item_template_id": "cave_blade",
-          "display_name": "Common Cave Blade",
+          "item_template_id": "cave_tiara",
+          "display_name": "Common Cave Tiara",
           "rarity": "common",
           "rolled_stats": {
-            "damage_max": 4,
-            "damage_min": 3
+            "armor": 0,
+            "skill_damage_percent": 15
           },
           "buy_price": 220,
           "source": "common_dungeon_mob",
@@ -223,13 +223,14 @@
         {
           "offer_id": "generated:depth3:004",
           "kind": "generated",
-          "item_template_id": "cave_mail",
-          "display_name": "Common Cave Mail",
+          "item_template_id": "cave_gloves",
+          "display_name": "Common Cave Gloves",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 8
+            "armor": 2,
+            "attack_speed_percent": 5
           },
-          "buy_price": 185,
+          "buy_price": 95,
           "source": "common_dungeon_mob",
           "depth": 3
         }

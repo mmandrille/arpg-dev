@@ -181,6 +181,26 @@
         "scale": { "x": 0.36, "y": 0.36, "z": 0.36 }
       }
     },
+    "cave_leather_cap": {
+      "asset_id": "fallback_equipment_head_v0",
+      "slot": "head",
+      "mount_socket": "head_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.20, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.32, "y": 0.32, "z": 0.32 }
+      }
+    },
+    "cave_tiara": {
+      "asset_id": "fallback_equipment_head_v0",
+      "slot": "head",
+      "mount_socket": "head_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.22, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.30, "y": 0.30, "z": 0.30 }
+      }
+    },
     "cave_mail": {
       "asset_id": "fallback_equipment_chest_v0",
       "slot": "chest",
@@ -191,6 +211,26 @@
         "scale": { "x": 0.55, "y": 0.55, "z": 0.55 }
       }
     },
+    "cave_leather_vest": {
+      "asset_id": "fallback_equipment_chest_v0",
+      "slot": "chest",
+      "mount_socket": "chest_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.12 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.48, "y": 0.48, "z": 0.48 }
+      }
+    },
+    "cave_full_plate": {
+      "asset_id": "fallback_equipment_chest_v0",
+      "slot": "chest",
+      "mount_socket": "chest_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.16 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.62, "y": 0.62, "z": 0.62 }
+      }
+    },
     "cave_gloves": {
       "asset_id": "fallback_equipment_gloves_v0",
       "slot": "gloves",
@@ -199,6 +239,26 @@
         "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "scale": { "x": 0.32, "y": 0.32, "z": 0.32 }
+      }
+    },
+    "cave_cloth_wraps": {
+      "asset_id": "fallback_equipment_gloves_v0",
+      "slot": "gloves",
+      "mount_socket": "gloves_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.28, "y": 0.28, "z": 0.28 }
+      }
+    },
+    "cave_gauntlets": {
+      "asset_id": "fallback_equipment_gloves_v0",
+      "slot": "gloves",
+      "mount_socket": "gloves_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.36, "y": 0.36, "z": 0.36 }
       }
     },
     "cave_belt": {
@@ -229,6 +289,26 @@
         "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
         "scale": { "x": 0.24, "y": 0.24, "z": 0.24 }
+      }
+    },
+    "cave_soft_boots": {
+      "asset_id": "fallback_equipment_boots_v0",
+      "slot": "boots",
+      "mount_socket": "boots_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.22, "y": 0.22, "z": 0.22 }
+      }
+    },
+    "cave_plate_boots": {
+      "asset_id": "fallback_equipment_boots_v0",
+      "slot": "boots",
+      "mount_socket": "boots_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.28, "y": 0.28, "z": 0.28 }
       }
     },
     "cave_ring": {

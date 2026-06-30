@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-29 (v387 class-weapon-affinities)
+Last updated: 2026-06-30 (v388 armor-slot-families)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-06-29 (v387 class-weapon-affinities)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v387 — class-weapon-affinities |
+| **Latest completed slice** | v388 — armor-slot-families |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green 2026-06-30 (v386–v387 batch + CI fixes) |
+| **CI gate** | `make ci` pending post-v388 batch gate |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |

@@ -1,0 +1,127 @@
+client/tests/test_class_affinity_tooltip.gd.uid
+  s_61582feb25210f::t_ed116805b85267 1
+scripts/client_smoke.sh
+  s_61582feb25210f::t_ff4fc8cde0b032 181
+shared/rules/item_templates.v0.schema.json
+  s_61582feb25210f::t_d7abcf960db4f0 38
+  s_61582feb25210f::t_5bae03d0934c59 65-69
+  s_61582feb25210f::t_80f7a997abd410 149-180
+client/scripts/class_affinity_tooltip.gd
+  s_61582feb25210f::t_0d3f93abd9ec9b 1-83
+docs/progress/slice-lifecycle.md
+  s_61582feb25210f::t_15410fb545f499 400-401
+docs/specs/v387_spec-class-weapon-affinities.md
+  s_61582feb25210f::t_1f17a60aaa2d50 1-32
+shared/rules/item_templates.v0.json
+  s_61582feb25210f::t_1198641f11937c 350-458
+server/internal/game/sim_load.go
+  s_61582feb25210f::t_d6e945db9d2315 206,215-220
+docs/as-built/v387_class-weapon-affinities.md
+  s_61582feb25210f::t_e832bc50720ae2 1-26
+docs/as-built/v386_skill-weapon-damage-scaling.md
+  s_61582feb25210f::t_e63d6c6356fa3f 24
+client/tests/test_class_affinity_tooltip.gd
+  s_61582feb25210f::t_0a6c9e5f526716 1-51
+shared/protocol/session_snapshot.v8.schema.json
+  s_61582feb25210f::t_8675a799443fa0 111,159,192
+  s_61582feb25210f::t_54b058e39f6716 265-280
+tools/bot/scenarios/109_class_weapon_affinities_lab.json
+  s_61582feb25210f::t_bf2ef6ac6ff522 1-68
+PROGRESS.md
+  s_61582feb25210f::t_6d32abf300884e 26,28-29
+  s_61582feb25210f::t_174217ae3e0c07 18
+client/scripts/shop_panel.gd
+  s_61582feb25210f::t_484e1569ab9db5 7
+  s_61582feb25210f::t_124ab98a7dc8ef 746-747
+server/internal/game/rules.go
+  s_61582feb25210f::t_ac667052ae37be 3062-3064
+  s_61582feb25210f::t_d4ad2330490b05 293-295
+  s_61582feb25210f::t_3f2c5a9df5f261 1168-1181
+server/internal/game/sim.go
+  s_61582feb25210f::t_ad86627a8e65f0 5398-5402
+  s_61582feb25210f::t_de9f4bd4f3f838 5483-5487
+  s_61582feb25210f::t_81aa0ea3b577a6 5446-5450
+  s_61582feb25210f::t_8a9f632b79cb6a 5772-5773
+  s_61582feb25210f::t_0f49b28369c870 4741,4747-4753,4755-4756,4758
+server/internal/game/item_rolls.go
+  s_61582feb25210f::t_93b2e453055a06 38-45
+server/internal/game/types.go
+  s_61582feb25210f::t_4f9f14c4e7624f 96-101
+  s_61582feb25210f::t_f8cba05e37d1ed 76-83
+  s_61582feb25210f::t_cf1e4bfcb32ec6 44-47
+  s_61582feb25210f::t_9362036780ed0c 117-119
+shared/protocol/state_delta.v8.schema.json
+  s_61582feb25210f::t_6b0b2c451c78f2 406-421
+  s_61582feb25210f::t_36033d5f9050a4 152,186,219,249,344
+client/scripts/inventory_panel.gd
+  s_61582feb25210f::t_f2249afc04a5b7 6
+  s_61582feb25210f::t_d88daf289ea8a2 686
+  s_61582feb25210f::t_9509a9491c54a8 687
+docs/plans/v387_2026-06-29-class-weapon-affinities.md
+  s_61582feb25210f::t_b95b016d110d49 3,7-9,12-14,17-18,21
+  s_61582feb25210f::t_93be07579f05f6 1-2,4-6,10-11,15-16,19-20,22-29
+shared/assets/item_visuals.v0.json
+  s_61582feb25210f::t_1352457c8981fa 253-302
+client/scripts/market_panel.gd
+  s_61582feb25210f::t_9e08dca8dc7c5b 117
+  s_61582feb25210f::t_223a9879a0811c 36
+  s_61582feb25210f::t_8217034225ac73 11
+  s_61582feb25210f::t_356459699cf79e 1041-1044
+  s_61582feb25210f::t_80214985da4f64 920-921
+  s_61582feb25210f::t_b5b7353ccd54d4 107
+server/internal/game/class_item_affinities.go
+  s_61582feb25210f::t_1155e244d92cd2 1-67,69-72,80-109,118-133,193-214
+  s_61582feb25210f::t_47bb041686229d 68,73-79
+  s_61582feb25210f::t_0a44f6ca977a40 110-115
+  s_61582feb25210f::t_dceda34bfded0f 116-117,134
+  s_61582feb25210f::t_3ac9fc77b754d7 135-192
+shared/rules/worlds.v0.json
+  s_61582feb25210f::t_d374517329ea2b 1430-1453
+client/scripts/stash_panel.gd
+  s_61582feb25210f::t_32b5e1e98f221d 9
+  s_61582feb25210f::t_9d3f5beff2fe92 604
+  s_61582feb25210f::t_6b50bc51edab1a 605
+client/scripts/item_tooltip_panel.gd
+  s_61582feb25210f::t_3c144a912965ef 62
+  s_61582feb25210f::t_72f4c6ab23d322 102-106
+client/scripts/main.gd
+  s_61582feb25210f::t_68a66aaf8cb1ee 4760
+  s_61582feb25210f::t_43398fec7a7478 1831
+  s_61582feb25210f::t_7e7eef4b8d5121 4872
+server/internal/game/class_item_affinities_test.go
+  s_61582feb25210f::t_e77566490640aa 34
+  s_61582feb25210f::t_3cbcbfe5b8b3c1 40-45
+  s_61582feb25210f::t_828a5699a7d746 1-16,20-33,35-39,46-113
+  s_61582feb25210f::t_e0493125ce5d91 17-19
+shared/assets/item_presentations.v0.json
+  s_61582feb25210f::t_dd34003ef370bd 191-195
+  s_61582feb25210f::t_afa9dd749bfc28 19-28
+tools/bot/run.py
+  s_61582feb25210f::t_9c59060dcfc0fb 3004-3013
+server/internal/game/shop_views.go
+  s_61582feb25210f::t_aa11152c23b5f2 82-87
+  s_61582feb25210f::t_2b7b89b75ccc9c 23-28
+docs/CODEMAP.md
+  s_61582feb25210f::t_5caf0dd5d67749 20
+server/internal/game/shop.go
+  s_61582feb25210f::t_8a7347b803563d 724-728
+  s_61582feb25210f::t_a7d4095857e298 590-603
+client/scripts/class_affinity_tooltip.gd.uid
+  s_61582feb25210f::t_ed116805b85267 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "702d8de63acc68ae3db0ca54c560fa741940220f",
+  "prompts": {},
+  "sessions": {
+    "s_61582feb25210f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "609578d2-ce93-42c6-857d-67434e7d3989",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

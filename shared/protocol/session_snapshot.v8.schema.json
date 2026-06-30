@@ -108,6 +108,7 @@
         "requirements": { "$ref": "#/$defs/requirements" },
         "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
         "requirements_met": { "type": "boolean" },
+        "class_affinity_status": { "$ref": "#/$defs/class_affinity_status_list" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "interactable_def_id": { "type": "string" },
@@ -155,6 +156,7 @@
         "requirements": { "$ref": "#/$defs/requirements" },
         "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
         "requirements_met": { "type": "boolean" },
+        "class_affinity_status": { "$ref": "#/$defs/class_affinity_status_list" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "summary_lines": { "$ref": "#/$defs/item_summary_lines" },
@@ -187,6 +189,7 @@
         "requirements": { "$ref": "#/$defs/requirements" },
         "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
         "requirements_met": { "type": "boolean" },
+        "class_affinity_status": { "$ref": "#/$defs/class_affinity_status_list" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "summary_lines": { "$ref": "#/$defs/item_summary_lines" }
@@ -258,6 +261,22 @@
     "requirement_status_list": {
       "type": "array",
       "items": { "$ref": "#/$defs/requirement_status" }
+    },
+    "class_affinity_status": {
+      "type": "object",
+      "required": ["class", "stat", "value", "active", "display"],
+      "additionalProperties": false,
+      "properties": {
+        "class": { "type": "string" },
+        "stat": { "type": "string" },
+        "value": { "type": "integer" },
+        "active": { "type": "boolean" },
+        "display": { "type": "string" }
+      }
+    },
+    "class_affinity_status_list": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/class_affinity_status" }
     },
     "equip_preview_delta": {
       "type": "object",

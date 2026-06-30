@@ -4738,18 +4738,24 @@ func (s *Sim) playerProjectileSpeed() (float64, bool) {
 }
 
 func (s *Sim) itemReach(item *invItem) (float64, bool) {
+	var reach float64
 	if item.rollPayload != nil {
 		template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
 		if !ok || template.Reach <= 0 {
 			return 0, false
 		}
-		return template.Reach, true
+		reach = template.Reach
+	} else {
+		def, ok := s.rules.Items[item.itemDefID]
+		if !ok || def.Reach == nil {
+			return 0, false
+		}
+		reach = *def.Reach
 	}
-	def, ok := s.rules.Items[item.itemDefID]
-	if !ok || def.Reach == nil {
-		return 0, false
+	if pct := s.itemClassAffinityTotal(item, "reach_percent"); pct != 0 {
+		reach = applyPercentDelta(reach, pct)
 	}
-	return *def.Reach, true
+	return reach, true
 }
 
 func (s *Sim) itemEquipSlot(item *invItem) (string, bool) {
@@ -5389,6 +5395,11 @@ func (s *Sim) stashItemView(item *stashItem) StashItemView {
 		view.RequirementStatus = status
 		view.RequirementsMet = met
 	})
+	if item.rollPayload != nil {
+		s.annotateClassAffinityStatus(item.rollPayload, func(status []ClassAffinityStatusView) {
+			view.ClassAffinityStatus = status
+		})
+	}
 	if previewItem := item.previewItem(); previewItem != nil {
 		view.SummaryLines = s.itemSummaryLines("", viewSlotForSummary(previewItem, view.ItemTemplateID, s.rules), s.itemHandedness(previewItem), s.statsForInventoryItem(previewItem), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]))
 		view.SummaryLines = append(view.SummaryLines, s.setItemSummaryLines(previewItem)...)
@@ -5432,6 +5443,11 @@ func (s *Sim) annotateItemView(view *ItemView, item *invItem) {
 		view.RequirementStatus = status
 		view.RequirementsMet = met
 	})
+	if item.rollPayload != nil {
+		s.annotateClassAffinityStatus(item.rollPayload, func(status []ClassAffinityStatusView) {
+			view.ClassAffinityStatus = status
+		})
+	}
 	if preview := s.equipPreviewForItem(item, view.Slot); preview != nil {
 		view.EquipPreview = preview
 	}
@@ -5464,6 +5480,11 @@ func (s *Sim) entityView(e *entity) EntityView {
 		view.RequirementStatus = status
 		view.RequirementsMet = met
 	})
+	if e.rollPayload != nil {
+		s.annotateClassAffinityStatus(e.rollPayload, func(status []ClassAffinityStatusView) {
+			view.ClassAffinityStatus = status
+		})
+	}
 	if preview := s.equipPreviewForLoot(e); preview != nil {
 		view.EquipPreview = preview
 	}
@@ -5747,6 +5768,8 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 		}
 	}
 	applySetCombatStats(s.equippedSetBonusStats(), &damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &hitChancePercent, &critChancePercent, &evadeChancePercent, &magicFindPercent, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources, &hitChanceSources, &critChanceSources, &evadeChanceSources, &magicFindSources)
+
+	s.applyClassAffinityCombatStats(&damageMin, &damageMax, &itemSpeedPercent, &maxMana, &damageMinSources, &damageMaxSources, &attackSpeedSources, &maxManaSources)
 
 	s.applyPassiveCombatStats(&damageMin, &damageMax, &armor, &maxHP, &maxMana, &healthRegen, &manaRegen, &blockPercent, &itemSpeedPercent, &hitChancePercent, &critChancePercent, &evadeChancePercent, &magicFindPercent, &lightRadius, &damageMinSources, &damageMaxSources, &armorSources, &maxHPSources, &maxManaSources, &healthRegenSources, &manaRegenSources, &blockSources, &attackSpeedSources, &hitChanceSources, &critChanceSources, &evadeChanceSources, &magicFindSources, &lightRadiusSources)
 

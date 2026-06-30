@@ -3,6 +3,7 @@ extends Control
 
 signal intent_requested(intent_type: String, payload: Dictionary)
 
+const ClassAffinityTooltipScript := preload("res://scripts/class_affinity_tooltip.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
@@ -682,7 +683,8 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		_comparison_entries(item) + UniqueEffectTooltipScript.rich_lines_for_item(item),
 		_item_gold_value(item),
 		true,
-		_short_label(str(item.get("item_def_id", "")))
+		_short_label(str(item.get("item_def_id", ""))),
+		ClassAffinityTooltipScript.lines_for_item(item, str(character_progression.get("character_class", "")))
 	)
 	return tooltip
 

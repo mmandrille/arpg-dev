@@ -3001,6 +3001,16 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
             raise AssertionError(f"{where}: effect_ids {item.get('effect_ids', [])} != {expected_effects}: {item}")
     elif item.get("rarity") != "unique" and item.get("effect_ids", []) != []:
         raise AssertionError(f"{where}: non-unique effect_ids should be empty: {item}")
+    if (active_count := assertion.get("class_affinity_active_count")) is not None:
+        status = item.get("class_affinity_status", [])
+        active = sum(1 for row in status if isinstance(row, dict) and bool(row.get("active")))
+        if active != int(active_count):
+            raise AssertionError(f"{where}: class_affinity active count {active} != {active_count}: {item}")
+    if (inactive_count := assertion.get("class_affinity_inactive_count")) is not None:
+        status = item.get("class_affinity_status", [])
+        inactive = sum(1 for row in status if isinstance(row, dict) and not bool(row.get("active")))
+        if inactive != int(inactive_count):
+            raise AssertionError(f"{where}: class_affinity inactive count {inactive} != {inactive_count}: {item}")
 
 
 def assert_rolled_inventory_any(inventory: list[dict], equipped: bool | None, where: str) -> None:

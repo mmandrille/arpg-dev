@@ -16,6 +16,16 @@
       "ground": { "shape": "blade", "color": "#b85f48", "accent": "#ffd0a3", "scale": 1.05 },
       "3d_model": "weapon_starter_axe_v0"
     },
+    "dagger": {
+      "icon": { "shape": "blade", "color": "#7a8f72", "accent": "#d6f2c8", "label": "Dg" },
+      "ground": { "shape": "blade", "color": "#7a8f72", "accent": "#d6f2c8", "scale": 0.85 },
+      "3d_model": "weapon_rusty_sword_v0"
+    },
+    "war_hammer": {
+      "icon": { "shape": "greatsword", "color": "#8f5a42", "accent": "#f0c8a0", "label": "Hm" },
+      "ground": { "shape": "greatsword", "color": "#8f5a42", "accent": "#f0c8a0", "scale": 1.15 },
+      "3d_model": "weapon_starter_axe_v0"
+    },
     "staff": {
       "icon": { "shape": "staff", "color": "#5e8fd6", "accent": "#d8f0ff", "label": "St" },
       "ground": { "shape": "staff", "color": "#5e8fd6", "accent": "#d8f0ff", "scale": 1.1 },
@@ -178,6 +188,11 @@
       "icon": { "shape": "badge", "color": "#c45768", "accent": "#ffd3dc", "label": "Rez" },
       "ground": { "shape": "badge", "color": "#c45768", "accent": "#ffd3dc", "scale": 0.75 }
     },
+    "affinity_sorcerer_staff": { "family": "staff" },
+    "affinity_rogue_dagger": { "family": "dagger" },
+    "affinity_barbarian_war_hammer": { "family": "war_hammer" },
+    "affinity_heraldic_shield": { "family": "shield" },
+    "affinity_compound_bow": { "family": "bow" },
     "quest_leaf": { "family": "quest" },
     "red_potion": { "family": "health_potion" },
     "blue_potion": { "family": "mana_potion" }

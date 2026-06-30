@@ -4,6 +4,7 @@ extends Control
 signal intent_requested(intent_type: String, payload: Dictionary)
 
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const ClassAffinityTooltipScript := preload("res://scripts/class_affinity_tooltip.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const MysterySilhouetteDrawer := preload("res://scripts/mystery_silhouette_drawer.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
@@ -742,7 +743,8 @@ func _make_offer_tooltip(offer: Dictionary) -> Control:
 		_comparison_entries(offer),
 		int(offer.get("buy_price", 0)),
 		_offer_affordable(offer),
-		_short_label(str(offer.get("item_def_id", "")))
+		_short_label(str(offer.get("item_def_id", ""))),
+		ClassAffinityTooltipScript.lines_for_item(offer)
 	)
 	return tooltip
 

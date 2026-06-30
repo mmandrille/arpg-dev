@@ -347,6 +347,115 @@
         { "stat": "movement_speed_percent", "min": 3, "max": 12, "weight": 2 }
       ],
       "effect_pool": []
+    },
+    "affinity_rogue_dagger": {
+      "name": "Rogue Dagger",
+      "category": "equipment",
+      "item_type": "dagger",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": ["main_hand"],
+      "attack_mode": "melee",
+      "attack_speed": 1.1,
+      "reach": 1.2,
+      "requirements": { "level": 1, "dex": 5 },
+      "base_stats": { "damage_min": 2, "damage_max": 4 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 }
+      ],
+      "class_affinities": [
+        { "class": "rogue", "stat": "attack_speed_percent", "min": 8, "max": 12 }
+      ],
+      "effect_pool": []
+    },
+    "affinity_barbarian_war_hammer": {
+      "name": "War Hammer",
+      "category": "equipment",
+      "item_type": "war_hammer",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "melee",
+      "attack_speed": 0.7,
+      "reach": 1.8,
+      "requirements": { "level": 1, "str": 8 },
+      "base_stats": { "damage_min": 6, "damage_max": 10 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 2, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 }
+      ],
+      "class_affinities": [
+        { "class": "barbarian", "stat": "damage_percent", "min": 8, "max": 12 }
+      ],
+      "effect_pool": []
+    },
+    "affinity_heraldic_shield": {
+      "name": "Heraldic Shield",
+      "category": "equipment",
+      "item_type": "shield",
+      "slot": "off_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": ["off_hand"],
+      "requirements": { "level": 1, "str": 5 },
+      "base_stats": { "armor": 3, "block_percent": 8 },
+      "rollable_stats": [
+        { "stat": "armor", "min": 1, "max": 3, "weight": 3 },
+        { "stat": "block_percent", "min": 1, "max": 4, "weight": 2 }
+      ],
+      "class_affinities": [
+        { "class": "paladin", "stat": "attack_speed_percent", "min": -18, "max": -12, "mode": "penalty_if_not_class" }
+      ],
+      "effect_pool": []
+    },
+    "affinity_compound_bow": {
+      "name": "Compound Bow",
+      "category": "equipment",
+      "item_type": "bow",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "ranged",
+      "attack_speed": 0.9,
+      "reach": 14.0,
+      "projectile_speed": 55.0,
+      "requirements": { "level": 1, "dex": 8 },
+      "base_stats": { "damage_min": 2, "damage_max": 4 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 }
+      ],
+      "class_affinities": [
+        { "class": "ranger", "stat": "reach_percent", "min": 15, "max": 25 }
+      ],
+      "effect_pool": []
+    },
+    "affinity_sorcerer_staff": {
+      "name": "Affinity Staff",
+      "category": "equipment",
+      "item_type": "staff",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "melee",
+      "attack_speed": 0.9,
+      "reach": 1.8,
+      "requirements": { "level": 1, "magic": 5 },
+      "base_stats": { "damage_min": 2, "damage_max": 4, "max_mana": 2 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 1 },
+        { "stat": "damage_max", "min": 1, "max": 2, "weight": 2 },
+        { "stat": "max_mana", "min": 1, "max": 3, "weight": 3 }
+      ],
+      "class_affinities": [
+        { "class": "sorcerer", "stat": "max_mana_percent", "min": 8, "max": 12 }
+      ],
+      "effect_pool": []
     }
   }
 }

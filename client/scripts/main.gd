@@ -1828,7 +1828,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 			rec["amount"] = int(e["amount"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "combat_stats", "remaining_ticks", "total_ticks", "companion_stance"]:
+	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "class_affinity_status", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "combat_stats", "remaining_ticks", "total_ticks", "companion_stance"]:
 		if e.has(key):
 			rec[key] = e[key]
 	for key in ["corpse_character_id", "corpse_name", "corpse_level", "corpse_item_count"]:
@@ -4757,7 +4757,7 @@ func _show_market_panel(ev: Dictionary) -> void:
 			status = "Could not load market listings"
 		elif listings.is_empty():
 			status = "No active listings"
-	market_panel.show_market(next_entity_id, listings, inventory, client.account_id if client != null else "", status, equipped)
+	market_panel.show_market(next_entity_id, listings, inventory, client.account_id if client != null else "", status, equipped, str(character_progression.get("character_class", "")))
 	_raise_gameplay_windows()
 
 func _on_market_action_requested(action: String, payload: Dictionary) -> void:
@@ -4869,7 +4869,7 @@ func _refresh_market_panel_data() -> void:
 		return
 	var body := client.list_market_listings()
 	var listings: Array = body.get("listings", [])
-	market_panel.show_market(market_panel.market_entity_id, listings, inventory, client.account_id, market_panel.get_debug_state().get("status", ""), equipped)
+	market_panel.show_market(market_panel.market_entity_id, listings, inventory, client.account_id, market_panel.get_debug_state().get("status", ""), equipped, str(character_progression.get("character_class", "")))
 
 func _remove_market_stash_item(stash_item_id: String) -> void:
 	for i in range(stash_items.size() - 1, -1, -1):

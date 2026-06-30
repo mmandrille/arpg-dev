@@ -20,11 +20,12 @@ type ShopOfferView struct {
 	Category          string                  `json:"category,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
 	Requirements      map[string]int          `json:"requirements,omitempty"`
-	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
-	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
-	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
-	EffectIDs         []string                `json:"effect_ids,omitempty"`
-	BuyPrice          int                     `json:"buy_price"`
+	RequirementStatus   []RequirementStatusView   `json:"requirement_status,omitempty"`
+	RequirementsMet     *bool                     `json:"requirements_met,omitempty"`
+	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	EquipPreview        *EquipPreviewView         `json:"equip_preview,omitempty"`
+	EffectIDs           []string                  `json:"effect_ids,omitempty"`
+	BuyPrice            int                       `json:"buy_price"`
 	SummaryLines      []string                `json:"summary_lines,omitempty"`
 	Comparison        *ShopComparisonView     `json:"comparison,omitempty"`
 	Source            string                  `json:"source,omitempty"`
@@ -78,11 +79,12 @@ type ShopSellAppraisalView struct {
 	Category          string                  `json:"category,omitempty"`
 	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
 	Requirements      map[string]int          `json:"requirements,omitempty"`
-	RequirementStatus []RequirementStatusView `json:"requirement_status,omitempty"`
-	RequirementsMet   *bool                   `json:"requirements_met,omitempty"`
-	EquipPreview      *EquipPreviewView       `json:"equip_preview,omitempty"`
-	EffectIDs         []string                `json:"effect_ids,omitempty"`
-	SellPrice         int                     `json:"sell_price"`
+	RequirementStatus   []RequirementStatusView   `json:"requirement_status,omitempty"`
+	RequirementsMet     *bool                     `json:"requirements_met,omitempty"`
+	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	EquipPreview        *EquipPreviewView         `json:"equip_preview,omitempty"`
+	EffectIDs           []string                  `json:"effect_ids,omitempty"`
+	SellPrice           int                       `json:"sell_price"`
 	SummaryLines      []string                `json:"summary_lines,omitempty"`
 	Comparison        *ShopComparisonView     `json:"comparison,omitempty"`
 }

@@ -1,0 +1,68 @@
+{
+  "id": "class_weapon_affinities_lab",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v387_class_weapon_affinities_lab",
+  "character_class": "rogue",
+  "debug_progression": {
+    "level": 3,
+    "unspent_skill_points": 0,
+    "stats": { "dex": 12 }
+  },
+  "title": "Class weapon affinities lab",
+  "description": "Rogue gains active dagger affinity and inactive barbarian hammer affinity; heraldic shield penalty applies to non-paladins.",
+  "steps": [
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "affinity_rogue_dagger"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "affinity_rogue_dagger",
+      "item_template_id": "affinity_rogue_dagger",
+      "class_affinity_active_count": 1
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "affinity_barbarian_war_hammer"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "affinity_barbarian_war_hammer",
+      "item_template_id": "affinity_barbarian_war_hammer",
+      "class_affinity_inactive_count": 1
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "affinity_rogue_dagger",
+      "slot": "main_hand"
+    },
+    {
+      "action": "assert_character_progression",
+      "stat_breakdowns": [
+        {
+          "key": "attack_speed",
+          "source_kinds": ["class_affinity"]
+        }
+      ]
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "affinity_heraldic_shield"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "affinity_heraldic_shield",
+      "slot": "off_hand"
+    },
+    {
+      "action": "assert_character_progression",
+      "stat_breakdowns": [
+        {
+          "key": "attack_speed",
+          "source_kinds": ["class_affinity"]
+        }
+      ]
+    }
+  ]
+}

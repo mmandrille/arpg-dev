@@ -11,6 +11,7 @@ var _fail_count: int = 0
 
 func _initialize() -> void:
 	_test_training_arrow_is_white_arrow_shape()
+	_test_staff_orb_is_small_white_ball()
 	_test_ranger_projectiles_use_green_arrow_cues()
 	_test_magic_bolt_remains_blue_energy_bolt()
 	_test_ligthing_projectile_uses_yellow_energy_bolt()
@@ -31,6 +32,18 @@ func _test_training_arrow_is_white_arrow_shape() -> void:
 	var mat := shaft.material_override as StandardMaterial3D
 	_assert_true("arrow material is white", mat.albedo_color.r > 0.9 and mat.albedo_color.g > 0.9 and mat.albedo_color.b > 0.9)
 	arrow.free()
+
+
+func _test_staff_orb_is_small_white_ball() -> void:
+	var orb := ProjectileVisualsScript.make_node("staff_orb")
+	_assert_true("staff orb mesh exists", orb.find_child("StaffOrb", false, false) != null)
+	_assert_true("staff orb has no arrow head", orb.find_child("ArrowHead", false, false) == null)
+	var mesh := orb.find_child("StaffOrb", false, false) as MeshInstance3D
+	var mat := mesh.material_override as StandardMaterial3D
+	_assert_true("staff orb is white", mat.albedo_color.r > 0.9 and mat.albedo_color.g > 0.9 and mat.albedo_color.b > 0.9)
+	var sphere := mesh.mesh as SphereMesh
+	_assert_true("staff orb is small", sphere.radius <= 0.12)
+	orb.free()
 
 
 func _test_ranger_projectiles_use_green_arrow_cues() -> void:

@@ -49,6 +49,7 @@ const (
 	attackModeRanged               = "ranged"
 	magicBoltSkillID               = "magic_bolt"
 	trainingArrowProjectileDefID   = "training_arrow"
+	staffOrbProjectileDefID        = "staff_orb"
 	goldItemDefID                  = "gold"
 	mainHandSlot                   = "main_hand"
 	offHandSlot                    = "off_hand"
@@ -1426,7 +1427,7 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 		pos:              player.pos,
 		ownerID:          player.id,
 		targetID:         targetID,
-		projectileDefID:  trainingArrowProjectileDefID,
+		projectileDefID:  s.playerProjectileDefID(),
 		dir:              dir,
 		speed:            projectileSpeed,
 		maxDistance:      maxDistance,
@@ -1442,6 +1443,33 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 	if ack {
 		res.ack(in.MessageID)
 	}
+}
+
+func (s *Sim) playerEquippedWeaponItemType() string {
+	item := s.equippedWeaponItem()
+	if item == nil {
+		return ""
+	}
+	if item.rollPayload != nil {
+		if template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]; ok {
+			return template.ItemType
+		}
+		return ""
+	}
+	if strings.Contains(item.itemDefID, "staff") {
+		return "staff"
+	}
+	if strings.Contains(item.itemDefID, "bow") {
+		return "bow"
+	}
+	return ""
+}
+
+func (s *Sim) playerProjectileDefID() string {
+	if s.playerEquippedWeaponItemType() == "staff" {
+		return staffOrbProjectileDefID
+	}
+	return trainingArrowProjectileDefID
 }
 
 func (s *Sim) directionalMeleeTarget(dir Vec2) *entity {

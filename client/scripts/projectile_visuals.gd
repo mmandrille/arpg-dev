@@ -4,6 +4,8 @@ extends RefCounted
 static func make_node(projectile_def_id: String = "") -> Node3D:
 	if projectile_def_id == "training_arrow":
 		return _make_training_arrow()
+	if projectile_def_id == "staff_orb":
+		return _make_staff_orb()
 	if projectile_def_id == "piercing_shot_projectile":
 		return _make_arrow_projectile(Color(0.48, 1.0, 0.56), Color(0.18, 0.88, 0.32), 1.8, true)
 	if projectile_def_id == "pinning_shot_projectile":
@@ -15,6 +17,28 @@ static func make_node(projectile_def_id: String = "") -> Node3D:
 
 static func _make_training_arrow() -> Node3D:
 	return _make_arrow_projectile(Color(0.96, 0.98, 1.0), Color(0.82, 0.90, 1.0), 0.35, false)
+
+
+static func _make_staff_orb() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Projectile"
+	var color := Color(0.98, 0.99, 1.0)
+	var emission := Color(0.92, 0.95, 1.0)
+	var mat := _material(color, emission, 0.55)
+
+	var orb := MeshInstance3D.new()
+	orb.name = "StaffOrb"
+	var orb_mesh := SphereMesh.new()
+	orb_mesh.radius = 0.10
+	orb_mesh.height = 0.20
+	orb_mesh.radial_segments = 16
+	orb_mesh.rings = 12
+	orb.mesh = orb_mesh
+	orb.position = Vector3(0.0, 0.35, 0.0)
+	orb.material_override = mat
+	root.add_child(orb)
+	_add_motion_trail(root, color, emission, 0.42)
+	return root
 
 
 static func _make_arrow_projectile(color: Color, emission: Color, emission_energy: float, long_head: bool) -> Node3D:

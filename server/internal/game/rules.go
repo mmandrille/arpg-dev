@@ -158,13 +158,14 @@ type NavigationRules struct {
 // CharacterProgressionRules controls XP thresholds, level-up points, base
 // stats, and derived-stat formulas.
 type CharacterProgressionRules struct {
-	BaseStats      BaseStatsView
-	Classes        map[string]CharacterClassDef
-	PointsPerLevel int
-	SkillPoints    SkillPointRules
-	LevelCap       int
-	XPThresholds   map[int]int
-	DerivedStats   map[string]LinearStatFormula
+	BaseStats              BaseStatsView
+	Classes                map[string]CharacterClassDef
+	PointsPerLevel         int
+	SkillPoints            SkillPointRules
+	LevelCap               int
+	XPThresholds           map[int]int
+	DerivedStats           map[string]LinearStatFormula
+	LevelUpRestoreHPMana   bool
 }
 
 type CharacterClassDef struct {
@@ -872,6 +873,7 @@ func LoadRules(dir string) (*Rules, error) {
 			} `json:"levels"`
 		} `json:"experience_curve"`
 		DerivedStats map[string]LinearStatFormula `json:"derived_stats"`
+		LevelUp      struct { RestoreHPAndMana bool `json:"restore_hp_and_mana"` } `json:"level_up"`
 	}
 	if err := readJSON(filepath.Join(dir, "character_progression.v0.json"), &progression); err != nil {
 		return nil, err
@@ -955,13 +957,14 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 	r.CharacterProgression = CharacterProgressionRules{
-		BaseStats:      progression.BaseStats,
-		Classes:        progression.Classes,
-		PointsPerLevel: progression.PointsPerLevel,
-		SkillPoints:    progression.SkillPoints,
-		LevelCap:       progression.LevelCap,
-		XPThresholds:   thresholds,
-		DerivedStats:   progression.DerivedStats,
+		BaseStats:            progression.BaseStats,
+		Classes:              progression.Classes,
+		PointsPerLevel:       progression.PointsPerLevel,
+		SkillPoints:          progression.SkillPoints,
+		LevelCap:             progression.LevelCap,
+		XPThresholds:         thresholds,
+		DerivedStats:         progression.DerivedStats,
+		LevelUpRestoreHPMana: progression.LevelUp.RestoreHPAndMana,
 	}
 
 	var items struct {

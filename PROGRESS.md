@@ -23,9 +23,9 @@ Last updated: 2026-06-29
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v384 — persist-combat-defer |
+| **Latest completed slice** | v385 — gameplay-feel-polish |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` + `make ci-full` green (2026-06-29 post v384 review paydown) |
+| **CI gate** | `make ci` green (2026-06-29 post v385 gameplay feel polish) |
 | **Next slice** | Run `/next` for new work |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |

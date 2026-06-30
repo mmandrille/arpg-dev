@@ -10,7 +10,9 @@ const ModelReactionControllerScript := preload("res://scripts/model_reaction_con
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const BotPresentationDebugScript := preload("res://scripts/bot_presentation_debug.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
-const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
+const GameplayFeedbackPresentationScript := preload("res://scripts/gameplay_feedback_presentation.gd")
+const InteractableStatePresentationScript := preload("res://scripts/interactable_state_presentation.gd")
+const LootLabelHoverScript := preload("res://scripts/loot_label_hover.gd")
 const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_markers.gd")
 const AuraSoftLights := preload("res://scripts/aura_soft_lights.gd")
 const EliteAuraPreviewSync := preload("res://scripts/elite_aura_preview_sync.gd")
@@ -449,6 +451,7 @@ func _start_join_session(join_session_id: String, character_id: String) -> bool:
 func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
 	gameplay_active = true
+	GameplayFeedbackPresentationScript.bind_session(self, entities)
 	_sync_camera_from_settings()
 	call_deferred("_refresh_fog_presentation")
 	current_world_id = client.world_id
@@ -1369,14 +1372,12 @@ func _apply_delta(p: Dictionary) -> void:
 			_show_skill_rejected_feedback(str(ev.get("reason", "")))
 			continue
 		if event_type == "player_healed":
-			ClientAudioBridgeScript.heal(audio_controller)
-			_show_damage_number(eid, Color(0.3, 1.0, 0.45), ev.get("heal", null), "+", 1.0)
-			if str(ev.get("skill_id", "")) == "heal":
-				_spawn_heal_rain(eid)
-			else:
-				_spawn_consumable_heal_effect(eid)
+			GameplayFeedbackPresentationScript.handle_player_healed(self, ev, eid, audio_controller)
 			if eid == player_id and _health_bar != null:
 				_health_bar.update_hp(player_hp, player_max_hp, true)
+			continue
+		if event_type == "character_leveled" and eid == player_id:
+			GameplayFeedbackPresentationScript.handle_character_leveled(self, audio_controller, player_anchor, Callable(self, "_node_world_or_local_position"))
 			continue
 		if event_type == "skill_effect_started" and str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
 			_pulse_holy_shield_aura(ev)
@@ -1436,7 +1437,7 @@ func _apply_delta(p: Dictionary) -> void:
 				inventory_panel.show_gesture_hint(str(hint))
 		if eid == player_id:
 			if event_type == "player_mana_restored":
-				_show_damage_number(eid, Color("#54c7f3"), ev.get("mana", null), "+", 1.0)
+				GameplayFeedbackPresentationScript.handle_player_mana_restored(self, ev, eid)
 				if _health_bar != null:
 					_health_bar.update_mana(player_mana, player_max_mana, true)
 				continue
@@ -1445,12 +1446,16 @@ func _apply_delta(p: Dictionary) -> void:
 				MonsterAttackAnimationEventsScript.play_source_attack_for_event(ev, entities)
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
-					_play_entity_reaction(eid, ev, "hit")
+					GameplayFeedbackPresentationScript.play_entity_reaction(
+						entities, player_id, player_anchor, player_reaction, eid, ev, "hit",
+						Callable(self, "_node_world_or_local_position"))
 				if _health_bar != null:
 					_health_bar.update_hp(player_hp, player_max_hp)
 			if event_type == "player_killed":
 				MonsterAttackAnimationEventsScript.play_source_attack_for_event(ev, entities)
-				_play_entity_reaction(eid, ev, "death")
+				GameplayFeedbackPresentationScript.play_entity_reaction(
+					entities, player_id, player_anchor, player_reaction, eid, ev, "death",
+					Callable(self, "_node_world_or_local_position"))
 				_show_loss_popup()
 			if event_type == "attack_missed":
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
@@ -1468,12 +1473,16 @@ func _apply_delta(p: Dictionary) -> void:
 				MonsterAttackAnimationEventsScript.play_source_attack_for_event(ev, entities)
 				_show_combat_text_for_event(eid, ev, Color(1.0, 0.32, 0.2))
 				if str(ev.get("outcome", "")) != "immune":
-					_play_entity_reaction(eid, ev, "hit")
+					GameplayFeedbackPresentationScript.play_entity_reaction(
+						entities, player_id, player_anchor, player_reaction, eid, ev, "hit",
+						Callable(self, "_node_world_or_local_position"))
 			if event_type == "player_killed":
 				MonsterAttackAnimationEventsScript.play_source_attack_for_event(ev, entities)
 				var remote_dead: Dictionary = entities[eid]
 				remote_dead["hp"] = 0
-				_play_entity_reaction(eid, ev, "death")
+				GameplayFeedbackPresentationScript.play_entity_reaction(
+					entities, player_id, player_anchor, player_reaction, eid, ev, "death",
+					Callable(self, "_node_world_or_local_position"))
 			var remote_player_clip = ClientConstants.PLAYER_EVENT_CLIPS.get(event_type, null)
 			var remote_ctrl = entities[eid].get("controller", null)
 			if remote_ctrl != null:
@@ -1590,7 +1599,9 @@ func _apply_delta(p: Dictionary) -> void:
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
 			ClientAudioBridgeScript.damage(audio_controller, false)
-			_play_entity_reaction(eid, ev, "hit")
+			GameplayFeedbackPresentationScript.play_entity_reaction(
+				entities, player_id, player_anchor, player_reaction, eid, ev, "hit",
+				Callable(self, "_node_world_or_local_position"))
 		if event_type == "monster_killed":
 			ClientAudioBridgeScript.kill(audio_controller, false)
 			_remove_monster_health_bar(eid)
@@ -1600,7 +1611,9 @@ func _apply_delta(p: Dictionary) -> void:
 				_set_pickable(dead_rec["node"] as Node3D, false)
 				_clear_terminal_entity_status_markers(dead_rec)
 				_clear_elite_command_for_pack_if_leader_died(dead_rec)
-				_play_entity_reaction(eid, ev, "death")
+				GameplayFeedbackPresentationScript.play_entity_reaction(
+					entities, player_id, player_anchor, player_reaction, eid, ev, "death",
+					Callable(self, "_node_world_or_local_position"))
 		if autoplay_enabled and event_type == "monster_killed":
 			autoplay_phase = "pickup"
 			autoplay_timer = autoplay_step_delay
@@ -2096,54 +2109,6 @@ func _play_local_player_reaction_animation(clip: String) -> void:
 	if clip == "hit" and player_anim.current_clip() in ["attack", "attack_off_hand"]: return
 	player_anim.play_one_shot(clip)
 
-func _play_entity_reaction(entity_id: String, ev: Dictionary, reaction_name: String) -> void:
-	var reaction = _reaction_for_entity(entity_id)
-	if reaction == null: return
-	var source_pos := _source_position_for_event(ev)
-	var fallback := _fallback_reaction_direction(entity_id)
-	if reaction_name == "death":
-		reaction.enter_death(source_pos, fallback)
-	else:
-		reaction.play_hit(source_pos, fallback)
-
-func _reaction_for_entity(entity_id: String):
-	if entity_id == player_id: return player_reaction
-	if entities.has(entity_id):
-		return (entities[entity_id] as Dictionary).get("reaction", null)
-	return null
-
-func _source_position_for_event(ev: Dictionary) -> Vector3:
-	var source_id := str(ev.get("source_entity_id", ""))
-	if source_id == "":
-		return ModelReactionControllerScript.UNRESOLVED_SOURCE
-	if source_id == player_id and player_anchor != null:
-		return _node_world_or_local_position(player_anchor)
-	if entities.has(source_id):
-		var rec: Dictionary = entities[source_id]
-		var node := rec.get("node", null) as Node3D
-		if node != null:
-			return _node_world_or_local_position(node)
-	return ModelReactionControllerScript.UNRESOLVED_SOURCE
-
-func _fallback_reaction_direction(entity_id: String) -> Vector3:
-	var target := _entity_world_position(entity_id)
-	if target != ModelReactionControllerScript.UNRESOLVED_SOURCE and player_anchor != null:
-		var direction := target - _node_world_or_local_position(player_anchor)
-		direction.y = 0.0
-		if direction.length() > 0.001:
-			return direction.normalized()
-	return Vector3.BACK
-
-func _entity_world_position(entity_id: String) -> Vector3:
-	if entity_id == player_id and player_anchor != null:
-		return _node_world_or_local_position(player_anchor)
-	if entities.has(entity_id):
-		var rec: Dictionary = entities[entity_id]
-		var node := rec.get("node", null) as Node3D
-		if node != null:
-			return _node_world_or_local_position(node)
-	return ModelReactionControllerScript.UNRESOLVED_SOURCE
-
 func _node_world_or_local_position(node: Node3D) -> Vector3:
 	if node == null:
 		return Vector3.ZERO
@@ -2270,14 +2235,6 @@ func _spawn_heal_rain(entity_id: String) -> void:
 	if target == null:
 		return
 	_spawn_heal_rain_at_position(_node_world_or_local_position(target))
-
-func _spawn_consumable_heal_effect(entity_id: String) -> void:
-	var target := _node_for_entity_id(entity_id)
-	if target == null:
-		return
-	var effect := ConsumableHealEffectScript.new() as Node3D
-	effect.position = _node_world_or_local_position(target) + Vector3(0.0, 0.45, 0.0)
-	add_child(effect)
 
 func _heal_cast_rain_correlations(events: Array) -> Dictionary:
 	var heal_casts := {}
@@ -3068,6 +3025,10 @@ func _hold_input_allowed() -> bool:
 	return not _world_pointer_input_blocked() and not bot_mode
 
 func _resolve_click_at_mouse() -> Dictionary:
+	if Input.is_key_pressed(KEY_ALT) and _camera != null:
+		var label_pick := LootLabelHoverScript.pick_loot_id(_camera, get_viewport(), get_viewport().get_mouse_position(), _loot_label_entity_ids(), entities)
+		if label_pick != "":
+			return {"kind": "oneshot", "target_id": label_pick}
 	var target_id := _pick_entity_at_mouse()
 	if target_id == "" or not entities.has(target_id):
 		var ground := _mouse_ground_point()
@@ -3451,18 +3412,26 @@ func _nearest_loot_at_ground(ground: Vector3) -> String:
 	return ""
 
 func _update_loot_hover_label() -> void:
-	var reveal_held := _is_loot_label_reveal_held()
-	var reveal_changed := reveal_held != loot_label_reveal_held
-	loot_label_reveal_held = reveal_held
-
-	var next_hover := _action_hover_target_id()
-	if next_hover == hovered_loot_id and not reveal_changed:
+	var reveal_held := Input.is_key_pressed(KEY_ALT)
+	var crosshair_id := ""
+	if _crosshair_target != null:
+		crosshair_id = _crosshair_target.locked_target_id()
+	var update := LootLabelHoverScript.compute_hover_update(
+		crosshair_id,
+		reveal_held,
+		loot_label_reveal_held,
+		hovered_loot_id,
+		_camera,
+		get_viewport(),
+		get_viewport().get_mouse_position(),
+		_loot_label_entity_ids(),
+		entities,
+	)
+	if not bool(update.get("changed", false)):
 		return
-	hovered_loot_id = next_hover
+	loot_label_reveal_held = bool(update.get("reveal_held", false))
+	hovered_loot_id = str(update.get("hover_id", ""))
 	_refresh_loot_label_visibility()
-
-func _is_loot_label_reveal_held() -> bool:
-	return Input.is_key_pressed(KEY_ALT)
 
 func _apply_reconciliation_backpressure() -> void:
 	if not ReconciliationBackpressureScript.should_clear_pending_targets(
@@ -5748,68 +5717,10 @@ func _set_interactable_state(_entity_id: String, rec: Dictionary, state: String)
 	if node == null:
 		return
 	_apply_interactable_state_tint(rec, state)
-	var chest_pivot := node.find_child("ChestLidPivot", true, false) as Node3D
-	if chest_pivot != null:
-		var chest_rot := deg_to_rad(-68.0) if state == "open" else 0.0
-		var chest_tween := create_tween()
-		chest_tween.tween_property(chest_pivot, "rotation:x", chest_rot, 0.22)
+	if InteractableStatePresentationScript.animate_open_motion(node, state, self):
 		return
-	var pivot := node.find_child("DoorPivot", true, false) as Node3D
-	if pivot == null:
-		return
-	var target_rot := deg_to_rad(90.0) if state == "open" else 0.0
-	var tween := create_tween()
-	tween.tween_property(pivot, "rotation:y", target_rot, 0.25)
 func _apply_interactable_state_tint(rec: Dictionary, state: String) -> void:
-	var node := rec.get("node", null) as Node3D
-	if node == null:
-		return
-	var def_id := str(rec.get("interactable_def_id", ""))
-	if def_id == "treasure_chest" or def_id == "town_stash" or def_id == "town_unique_chest":
-		ChestPresentationScript.sync_objective_marker(node, bool(rec.get("elite_objective", false)), state == "open")
-		ChestPresentationScript.sync_quest_marker(node, bool(rec.get("quest_reward", false)), state == "open")
-		if state == "open":
-			ChestPresentationScript.sync_open_burst(node, true)
-		var glow := node.find_child("ChestInnerGlow", true, false) as MeshInstance3D
-		if glow != null:
-			glow.visible = state == "open"
-		var lock := node.find_child("ChestLockPlate", true, false) as MeshInstance3D
-		if lock != null:
-			var lock_mat := StandardMaterial3D.new()
-			if state == "locked" or state == "disabled":
-				lock_mat.albedo_color = Color("#7a2f2d")
-			elif state == "open":
-				lock_mat.albedo_color = Color("#f0cf72")
-				lock_mat.emission_enabled = true
-				lock_mat.emission = Color("#8a6122")
-			else:
-				lock_mat.albedo_color = Color("#c77dff") if def_id == "town_unique_chest" else (Color("#d1b15d") if def_id == "town_stash" else Color("#8d8f8f"))
-			lock.material_override = lock_mat
-		return
-	if def_id == "teleporter":
-		var core := node.get_child(1) as MeshInstance3D if node.get_child_count() > 1 else null
-		if core == null:
-			return
-		var mat := StandardMaterial3D.new()
-		if state == "disabled" or state == "locked":
-			mat.albedo_color = Color(0.30, 0.16, 0.18)
-			mat.emission_enabled = false
-		else:
-			mat.albedo_color = Color(0.15, 0.62, 0.70)
-			mat.emission_enabled = true
-			mat.emission = Color(0.05, 0.55, 0.68)
-		core.material_override = mat
-		return
-	if def_id == "stairs_down" or def_id == "stairs_up":
-		var base := node.get_child(0) as MeshInstance3D if node.get_child_count() > 0 else null
-		if base == null:
-			return
-		var mat := StandardMaterial3D.new()
-		if state == "locked" or state == "disabled":
-			mat.albedo_color = TownNodeFactoryScript.stair_base_color(def_id, state)
-		else:
-			mat.albedo_color = TownNodeFactoryScript.stair_base_color(def_id, state)
-		base.material_override = mat
+	InteractableStatePresentationScript.apply_state_tint(rec, state)
 
 # --- bot API (read-only state + intent dispatch) ----------------------------
 

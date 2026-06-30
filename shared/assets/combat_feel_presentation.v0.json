@@ -19,5 +19,8 @@
     "baseline_attack_speed": 1.0,
     "min_speed_scale": 0.75,
     "max_speed_scale": 2.5
+  },
+  "enemy_impact_feedback": {
+    "enabled": false
   }
 }

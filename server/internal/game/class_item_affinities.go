@@ -212,3 +212,31 @@ func scaleIntRangeByPercent(minValue, maxValue int, percent int) (int, int) {
 	}
 	return outMin, outMax
 }
+
+func validateClassAffinityDefs(templateID string, affinities []ClassAffinityDef, classes map[string]CharacterClassDef) error {
+	for i, affinity := range affinities {
+		if _, ok := classes[affinity.Class]; !ok {
+			return fmt.Errorf("game: invalid rules item_templates.%s.class_affinities[%d].class: unknown class %s", templateID, i, affinity.Class)
+		}
+		if !isSupportedClassAffinityStat(affinity.Stat) {
+			return fmt.Errorf("game: invalid rules item_templates.%s.class_affinities[%d].stat: unsupported stat %s", templateID, i, affinity.Stat)
+		}
+		if affinity.Max < affinity.Min {
+			return fmt.Errorf("game: invalid rules item_templates.%s.class_affinities[%d]: max must be >= min", templateID, i)
+		}
+		if affinity.Mode != "" && affinity.Mode != "penalty_if_not_class" {
+			return fmt.Errorf("game: invalid rules item_templates.%s.class_affinities[%d].mode: %s", templateID, i, affinity.Mode)
+		}
+	}
+
+	return nil
+}
+
+func isSupportedClassAffinityStat(stat string) bool {
+	switch stat {
+	case "damage_percent", "attack_speed_percent", "reach_percent", "max_mana_percent":
+		return true
+	default:
+		return false
+	}
+}

@@ -61,7 +61,11 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 	} else if rarityID == "set" {
 		if payload.SetPieceID != "" {
 			if setItem, ok := rules.SetItems[payload.SetPieceID]; ok {
-				displayName = rules.rolledEquipmentDisplayName(template, "set", stats, "of "+setItem.SetDisplayName)
+				if setItem.Piece.DisplayName != "" {
+					displayName = setItem.Piece.DisplayName
+				} else {
+					displayName = rules.rolledEquipmentDisplayName(template, "set", stats, "of "+setItem.SetDisplayName)
+				}
 			}
 		} else if payload.DisplayName != "" {
 			displayName = payload.DisplayName

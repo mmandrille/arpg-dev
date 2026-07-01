@@ -15,11 +15,11 @@
     {
       "action": "take_unique_chest_item",
       "interactable_def_id": "town_unique_chest",
-      "display_name": "Stormrunner Covenant Bow"
+      "display_name": "Savage Bow of Stormrunner Covenant"
     },
     {
       "action": "assert_inventory_count",
-      "display_name": "Stormrunner Covenant Bow",
+      "display_name": "Savage Bow of Stormrunner Covenant",
       "equals": 1
     }
   ],
@@ -34,7 +34,7 @@
     },
     {
       "type": "inventory_count",
-      "display_name": "Stormrunner Covenant Bow",
+      "display_name": "Savage Bow of Stormrunner Covenant",
       "equals": 1
     }
   ],

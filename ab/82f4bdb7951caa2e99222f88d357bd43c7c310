@@ -1,0 +1,47 @@
+shared/assets/item_visuals.v0.json
+  s_e6e8a3f8f9d465::t_0f798323f0e337 24-43
+  s_e6e8a3f8f9d465::t_e5ddbbde5113b4 184-203
+docs/CODEMAP.md
+  s_e6e8a3f8f9d465::t_06cb37e46c4016 23
+PROGRESS.md
+  s_e6e8a3f8f9d465::t_35922b13f5dc86 18,26,28-29
+server/internal/game/weapon_slot_families_test.go
+  s_e6e8a3f8f9d465::t_af6d38a4d8dfa5 1-46
+shared/rules/worlds.v0.json
+  s_e6e8a3f8f9d465::t_8668d70f8fc2ba 1491-1503
+shared/rules/treasure_classes.v0.json
+  s_e6e8a3f8f9d465::t_b0f62457e277ae 54-55,58-59,90-91,94-95,170-171,174-175,191-192,195-196,219-220,223-224,244-245,248-249
+shared/rules/item_templates.v0.json
+  s_e6e8a3f8f9d465::t_0ea246ef676617 38-84
+  s_e6e8a3f8f9d465::t_12eea3f6058542 263-305
+docs/as-built/v394_weapon-slot-families.md
+  s_e6e8a3f8f9d465::t_a3f3cae9c92780 1-22
+shared/assets/item_presentations.v0.json
+  s_e6e8a3f8f9d465::t_4ac3337b0c0e93 166-175
+  s_e6e8a3f8f9d465::t_a9e077cbfbabbc 107-116
+tools/bot/scenarios/112_weapon_slot_families_lab.json
+  s_e6e8a3f8f9d465::t_3ef6a30d019b45 47
+  s_e6e8a3f8f9d465::t_2e4d386da1c036 1-46,48-50
+docs/progress/slice-lifecycle.md
+  s_e6e8a3f8f9d465::t_323409d08a61ec 408
+docs/specs/v394_spec-weapon-slot-families.md
+  s_e6e8a3f8f9d465::t_5f89f857d03cd3 1-37
+shared/golden/shop_offers.json
+  s_e6e8a3f8f9d465::t_d2d87e20b1d773 93-95,97-98,100,107-109,111-112,114,135-137,139-140,142,149-151,153-154,156,170-171,174-176,178,185-186,189-190,192,199-201,203-204,206,213-214,217,219,226-227,230-231,233
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ab82f4bdb7951caa2e99222f88d357bd43c7c310",
+  "prompts": {},
+  "sessions": {
+    "s_e6e8a3f8f9d465": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2645b0c9-0ade-4638-a892-f1f2890ec8df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

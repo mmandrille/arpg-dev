@@ -344,7 +344,7 @@ func _test_v45_menu_assertions() -> void:
 		"runner": "godot_client",
 		"world_id": "dungeon_levels",
 		"client_steps": [
-			{"type": "assert_main_menu_actions", "labels": ["Create Game", "Join Game", "Settings", "Exit"], "actions": ["create_game", "join_game"]},
+			{"type": "assert_main_menu_actions", "labels": ["Create Game", "Join Game", "Codex", "Settings", "Exit"], "actions": ["create_game", "join_game"]},
 			{"type": "assert_character_panel", "mode": "choose_or_create", "title": "Choose Character", "min_character_count": 1, "name_field_visible": false, "create_button_visible": true},
 			{"type": "assert_create_game_type", "session_type": "coop"},
 			{"type": "assert_current_session", "exists": true, "mode": "coop", "listed": true},

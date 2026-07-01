@@ -1,0 +1,47 @@
+client/tests/test_codex_loader.gd
+  s_4f034067e4e37f::t_d4c1cf4cf6cabe 12
+client/scripts/bot_controller.gd
+  s_4f034067e4e37f::t_6f858ce69a6422 143-144
+  s_4f034067e4e37f::t_8e8b137a0ed9bc 254-257
+docs/progress/slice-lifecycle.md
+  s_4f034067e4e37f::t_65b808f5124353 410
+docs/as-built/v396_game-codex-chapters.md
+  s_4f034067e4e37f::t_19c8613f38ab2a 1-20
+client/scripts/main.gd
+  s_4f034067e4e37f::t_5b65a2865f5ad7 6352-6356
+shared/content/codex_index.v0.json
+  s_4f034067e4e37f::t_d9901b999cd8a6 1989-1998
+  s_4f034067e4e37f::t_d53ad164055dd7 1363-1988,1999-2027
+PROGRESS.md
+  s_4f034067e4e37f::t_ead5f65c7e0f47 18,26,29
+tools/content/build_codex.py
+  s_4f034067e4e37f::t_080e78be10cdc9 387,391-392
+docs/plans/v396_2026-06-30-game-codex-chapters.md
+  s_4f034067e4e37f::t_bf03d4a47a3578 1-19
+client/scripts/bot_step_catalog.gd
+  s_4f034067e4e37f::t_368bf009170c97 55
+tools/test_build_codex.py
+  s_4f034067e4e37f::t_591690a3d0ad2c 31-35
+  s_4f034067e4e37f::t_cc7cc18f897717 36-37
+tools/bot/scenarios/client/44_codex_foundation.json
+  s_4f034067e4e37f::t_0665a8b28eb3a3 7,41-77
+client/scripts/bot_action_step_validator.gd
+  s_4f034067e4e37f::t_9ee243fda7f927 57-58
+  s_4f034067e4e37f::t_0e4602a8f32500 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "f470feb533d00d6b17400134b5610db8bd1a840a",
+  "prompts": {},
+  "sessions": {
+    "s_4f034067e4e37f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e620be96-c297-4187-b8fd-15556c7aba35",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

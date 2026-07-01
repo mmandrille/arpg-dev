@@ -38,8 +38,8 @@
     {
       "action": "wait_until_assertion",
       "assertion": {
-        "type": "resource_wallet_count",
-        "resource_id": "upgrade_shard",
+        "type": "inventory_count",
+        "item_def_id": "upgrade_shard",
         "equals": 1
       },
       "timeout_s": 2
@@ -131,8 +131,8 @@
       "level": 125
     },
     {
-      "type": "resource_wallet_count",
-      "resource_id": "upgrade_shard",
+      "type": "inventory_count",
+      "item_def_id": "upgrade_shard",
       "equals": 1
     },
     {

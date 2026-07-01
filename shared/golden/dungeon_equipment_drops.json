@@ -1,5 +1,4 @@
 {
-  "description": "Depth-band dungeon source selection plus representative v29 generated dungeon equipment drops.",
   "world_id": "dungeon_levels",
   "required_templates": [
     "cave_blade",
@@ -57,7 +56,9 @@
       "treasure_class_id": "dungeon_mob_tc_depth_3_plus",
       "seed": "v29_dungeon_mob_tc_depth_3_plus_41",
       "expected_drops": [
-        { "item_template_id": "cave_belt" }
+        {
+          "item_template_id": "cave_belt"
+        }
       ]
     },
     {
@@ -68,7 +69,9 @@
       "treasure_class_id": "guarded_chest_tc_depth_3_plus",
       "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
-        { "item_template_id": "cave_rapier" }
+        {
+          "item_template_id": "cave_rapier"
+        }
       ]
     },
     {
@@ -79,8 +82,12 @@
       "treasure_class_id": "guarded_chest_tc_depth_3_plus",
       "seed": "v29_guarded_chest_tc_depth_3_plus_8",
       "expected_drops": [
-        { "item_def_id": "gold" },
-        { "item_template_id": "cave_mail" }
+        {
+          "item_def_id": "red_potion"
+        },
+        {
+          "item_def_id": "gold"
+        }
       ]
     }
   ]

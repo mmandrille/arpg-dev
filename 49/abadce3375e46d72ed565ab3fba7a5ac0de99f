@@ -1,0 +1,29 @@
+client/scripts/codex_panel.gd.uid
+  s_4f034067e4e37f::t_ee57e8674318f7 1
+client/scripts/codex_menu_bridge.gd.uid
+  s_4f034067e4e37f::t_7f2bb5e8a7a27c 1
+client/scripts/bot_codex_assertions.gd.uid
+  s_4f034067e4e37f::t_ee57e8674318f7 1
+client/scripts/codex_loader.gd.uid
+  s_4f034067e4e37f::t_ee57e8674318f7 1
+client/tests/test_codex_loader.gd.uid
+  s_4f034067e4e37f::t_ee57e8674318f7 1
+client/tests/test_codex_panel.gd.uid
+  s_4f034067e4e37f::t_ee57e8674318f7 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "49abadce3375e46d72ed565ab3fba7a5ac0de99f",
+  "prompts": {},
+  "sessions": {
+    "s_4f034067e4e37f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e620be96-c297-4187-b8fd-15556c7aba35",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

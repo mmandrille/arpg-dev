@@ -1,0 +1,70 @@
+client/scripts/bot_presentation_debug.gd
+  s_a5a4c9e0856846::t_e451eeddafc1e9 91
+client/scripts/player_status_effect_markers.gd
+  s_a5a4c9e0856846::t_4f94c3b71e6cc3 18
+  s_a5a4c9e0856846::t_91d4d42af94011 324-353
+  s_a5a4c9e0856846::t_e72bffce148c4b 14,16
+  s_a5a4c9e0856846::t_4638016fb4789d 96-111
+  s_a5a4c9e0856846::t_f37c92c44ab443 93
+  s_a5a4c9e0856846::t_d895d07fbb49fb 82-86
+server/internal/game/rogue_skills_test.go
+  s_a5a4c9e0856846::t_f775a475e5133e 105-106,109-142,145-147
+  s_a5a4c9e0856846::t_ea437def9d5168 143-144
+server/internal/game/sim.go
+  s_a5a4c9e0856846::t_c0a15836fcfafe 732
+  s_a5a4c9e0856846::t_eb1b1d0b5ce5b5 344
+  s_a5a4c9e0856846::t_e5aae448f66824 410
+  s_a5a4c9e0856846::t_8c5170956a2e71 502
+server/internal/game/tick_results.go
+  s_a5a4c9e0856846::t_dd6db1dbf8b030 56
+shared/i18n/en.json
+  s_a5a4c9e0856846::t_0314e92d800a24 99
+client/scripts/main.gd
+  s_a5a4c9e0856846::t_6458f22821ee74 1405-1411
+  s_a5a4c9e0856846::t_758c6b7ee61047 5662-5677
+  s_a5a4c9e0856846::t_18ad0b36186e00 5726-5727
+  s_e51fd9c426278a::t_7751494b4a43ef 2212-2213
+server/internal/game/sim_players.go
+  s_a5a4c9e0856846::t_48c065df664806 78
+  s_a5a4c9e0856846::t_9be3f857e95d3e 422
+  s_a5a4c9e0856846::t_0d24b6a85d3b12 352-355
+shared/rules/skills.v0.schema.json
+  s_a5a4c9e0856846::t_4f4efa689feeb8 368-371
+server/internal/game/rogue_rules.go
+  s_a5a4c9e0856846::t_64db75e7064513 21-24
+  s_a5a4c9e0856846::t_f380b7dc60e7b7 58-59,62-71
+shared/rules/skills.v0.json
+  s_a5a4c9e0856846::t_a0289544ebb718 826-829
+server/internal/game/rogue_skills.go
+  s_a5a4c9e0856846::t_f8fdd558b3f65c 16-28
+  s_a5a4c9e0856846::t_fc7fa8ff64e31e 194-305,307
+  s_a5a4c9e0856846::t_016e7b8635385d 41-51
+client/tests/test_status_effect_presentation.gd
+  s_a5a4c9e0856846::t_16093a099db734 254-288
+  s_a5a4c9e0856846::t_621a6a36290f9f 25
+  s_a5a4c9e0856846::t_b7013faf026fcf 290
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "84d29c35378835f3408aa0f795f83006c11b4be5",
+  "prompts": {},
+  "sessions": {
+    "s_a5a4c9e0856846": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "47cada0b-e294-437e-8c9e-8470642dc124",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_e51fd9c426278a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "81cdb792-667f-4c6c-88f5-be096643e54c",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

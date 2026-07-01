@@ -11,6 +11,14 @@ def test_ci_pack_validation_passes():
     validate_ci_pack()
 
 
+def test_cross_tree_scenario_pairs_are_registered():
+    from tools.bot.ci_pack import CROSS_TREE_SCENARIO_PAIRS, validate_cross_tree_scenario_pairs
+
+    validate_cross_tree_scenario_pairs()
+    assert "mystery_seller_core" in CROSS_TREE_SCENARIO_PAIRS
+    assert "quest_town_turn_in" in CROSS_TREE_SCENARIO_PAIRS
+
+
 def test_ci_pack_sizes_are_curated_subset():
     protocol = load_scenarios()
     selected = select_scenarios(protocol, CI_SELECTOR)

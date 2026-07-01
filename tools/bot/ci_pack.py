@@ -76,7 +76,40 @@ def select_pack_scenarios(scenarios: list[Any], kind: str) -> list[Any]:
     return [by_id[scenario_id] for scenario_id in wanted]
 
 
+# Intentional protocol/client pairs that share the same scenario id string.
+CROSS_TREE_SCENARIO_PAIRS: dict[str, str] = {
+    "mystery_seller_core": "client/24_mystery_seller_core.json",
+    "mystery_seller_paid_reroll": "client/29_mystery_seller_paid_reroll.json",
+    "quest_town_turn_in": "client/75_quest_town_turn_in.json",
+    "shop_stock_lifecycle": "client/22_shop_stock_lifecycle.json",
+    "unique_burn_effect_live": "client/33_unique_burn_effect_live.json",
+}
+
+
+def validate_cross_tree_scenario_pairs() -> None:
+    protocol_by_id = {_scenario_id(path): path for path in list_protocol_scenario_paths()}
+    client_by_id = {_scenario_id(path): path for path in list_client_scenario_paths()}
+    for scenario_id, client_suffix in CROSS_TREE_SCENARIO_PAIRS.items():
+        if scenario_id not in protocol_by_id:
+            raise ValueError(f"cross-tree pair missing protocol scenario id: {scenario_id}")
+        client_path = CLIENT_SCENARIOS_DIR / Path(client_suffix).name
+        if not client_path.exists():
+            raise ValueError(f"cross-tree pair missing client scenario file: {client_path}")
+        if _scenario_id(client_path) != scenario_id:
+            raise ValueError(
+                f"cross-tree pair id mismatch for {scenario_id}: client file {client_path} "
+                f"has id {_scenario_id(client_path)!r}"
+            )
+    unexpected = (set(protocol_by_id) & set(client_by_id)) - set(CROSS_TREE_SCENARIO_PAIRS)
+    if unexpected:
+        raise ValueError(
+            "unexpected duplicate scenario ids across protocol/client trees "
+            f"(register in CROSS_TREE_SCENARIO_PAIRS or rename): {sorted(unexpected)}"
+        )
+
+
 def validate_ci_pack() -> None:
+    validate_cross_tree_scenario_pairs()
     pack = load_ci_pack()
     protocol_paths = list_protocol_scenario_paths()
     client_paths = list_client_scenario_paths()

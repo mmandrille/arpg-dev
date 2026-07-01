@@ -944,6 +944,12 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		_entity_tick_smoothing.player_smoothing().reset(player_anchor.position)
 	_entity_tick_smoothing.player_smoothing().reset(player_anchor.position)
 	_player_movement_feel.reset()
+	if player_anim != null:
+		player_anim.reset_terminal()
+	if player_reaction != null:
+		player_reaction.reset_terminal()
+	if loss_popup != null:
+		loss_popup.visible = false
 	if clear_session and client != null:
 		client.session_id = ""
 		client.character_id = ""

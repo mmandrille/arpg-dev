@@ -6349,6 +6349,11 @@ func bot_select_character(index: int) -> void:
 	if character_panel != null: character_panel.start_character_at_index(index)
 func bot_select_character_class(class_id: String) -> void:
 	if character_panel != null: character_panel.select_class(class_id)
+func bot_select_codex_page(page_id: String) -> void:
+	if codex_panel != null:
+		if not codex_panel.visible:
+			codex_panel.show_codex()
+		codex_panel.select_page(page_id)
 func bot_select_window_size(size: String) -> void:
 	_on_window_size_selected(size)
 func bot_set_floating_combat_text(enabled: bool) -> void:

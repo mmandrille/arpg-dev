@@ -407,6 +407,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v393** | `hero-skill-expansion` | Complete (focused verification green) | [`spec`](../specs/v393_spec-hero-skill-expansion.md) | — | [`as-built`](../as-built/v393_hero-skill-expansion.md) |
 | **v394** | `weapon-slot-families` | Complete (focused verification green) | [`spec`](../specs/v394_spec-weapon-slot-families.md) | — | [`as-built`](../as-built/v394_weapon-slot-families.md) |
 | **v395** | `game-codex-shell` | Complete (focused verification green) | [`spec`](../specs/v395_spec-game-codex-shell.md) | [`plan`](../plans/v395_2026-06-30-game-codex-shell.md) | [`as-built`](../as-built/v395_game-codex-shell.md) |
+| **v396** | `game-codex-chapters` | Complete (focused verification green) | [`spec`](../specs/v396_spec-game-codex-chapters.md) | [`plan`](../plans/v396_2026-06-30-game-codex-chapters.md) | [`as-built`](../as-built/v396_game-codex-chapters.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

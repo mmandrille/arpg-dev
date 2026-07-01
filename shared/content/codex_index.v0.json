@@ -1360,6 +1360,671 @@
           ]
         }
       ]
+    },
+    {
+      "id": "item_families",
+      "title": "Item Families",
+      "pages": [
+        {
+          "id": "family:amulet",
+          "title": "Amulet",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Am  Shape: amulet"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "amulet"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:axe",
+          "title": "Axe",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Ax  Shape: blade"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "main_hand"
+              ]
+            },
+            {
+              "heading": "Attack Speed Baseline",
+              "lines": [
+                "0.75x"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:badge",
+          "title": "Badge",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Up  Shape: badge"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:belt",
+          "title": "Belt",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Bt  Shape: belt"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "belt"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:boots",
+          "title": "Boots",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Bo  Shape: boots"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "boots"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:bow",
+          "title": "Bow",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Bw  Shape: bow"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "main_hand"
+              ]
+            },
+            {
+              "heading": "Attack Speed Baseline",
+              "lines": [
+                "0.68x to 1.10x"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "bullets": [
+                "Ranger: +15% to +25% reach when equipped"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:chest",
+          "title": "Chest",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Ml  Shape: chest"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "chest"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:dagger",
+          "title": "Dagger",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Dg  Shape: blade"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "main_hand"
+              ]
+            },
+            {
+              "heading": "Attack Speed Baseline",
+              "lines": [
+                "1.10x"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "bullets": [
+                "Rogue: +8% to +12% attack speed when equipped"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:gloves",
+          "title": "Gloves",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Gl  Shape: gloves"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "gloves"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:gold",
+          "title": "Gold",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Au  Shape: coin"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:greatsword",
+          "title": "Greatsword",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: 2H  Shape: greatsword"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "main_hand"
+              ]
+            },
+            {
+              "heading": "Attack Speed Baseline",
+              "lines": [
+                "0.70x"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:health_potion",
+          "title": "Health Potion",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Pt  Shape: potion"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:helm",
+          "title": "Helm",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Hm  Shape: helm"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "head"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:mana_potion",
+          "title": "Mana Potion",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Mn  Shape: potion"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:quest",
+          "title": "Quest",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Lf  Shape: leaf"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:ring",
+          "title": "Ring",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Rg  Shape: ring"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "ring"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:shield",
+          "title": "Shield",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Sh  Shape: shield"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "off_hand"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "bullets": [
+                "Non-Paladin: -18% to -12% attack speed when equipped"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:staff",
+          "title": "Staff",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: St  Shape: staff"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "main_hand"
+              ]
+            },
+            {
+              "heading": "Attack Speed Baseline",
+              "lines": [
+                "0.90x"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "bullets": [
+                "Sorcerer: +8% to +12% max mana when equipped"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:sword",
+          "title": "Sword",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Sw  Shape: blade"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "main_hand"
+              ]
+            },
+            {
+              "heading": "Attack Speed Baseline",
+              "lines": [
+                "0.82x to 1.15x"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "lines": [
+                "No class-specific affinity on current templates."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "family:war_hammer",
+          "title": "War Hammer",
+          "sections": [
+            {
+              "heading": "Presentation",
+              "lines": [
+                "Icon label: Hm  Shape: greatsword"
+              ]
+            },
+            {
+              "heading": "Typical Slot",
+              "lines": [
+                "main_hand"
+              ]
+            },
+            {
+              "heading": "Attack Speed Baseline",
+              "lines": [
+                "0.70x"
+              ]
+            },
+            {
+              "heading": "Class Affinities",
+              "bullets": [
+                "Barbarian: +8% to +12% damage when equipped"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "resources",
+      "title": "Resources & Crafting",
+      "pages": [
+        {
+          "id": "resource:upgrade_shard",
+          "title": "Upgrade Shard",
+          "sections": [
+            {
+              "lines": [
+                "Leveled consumable stored in your bag.",
+                "Merge three stones of the same level at the blacksmith to create one stone of level +1."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "resource:renew_stone",
+          "title": "Renew Stone",
+          "sections": [
+            {
+              "lines": [
+                "Leveled consumable stored in your bag.",
+                "Merge three stones of the same level at the blacksmith to create one stone of level +1."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mechanic:resource_drops",
+          "title": "Resource Drops",
+          "sections": [
+            {
+              "lines": [
+                "Upgrade Shards and Renew Stones drop from a separate resource pool on kills and chest opens. Tier chances depend on monster or chest type."
+              ]
+            },
+            {
+              "heading": "Drop Chances (%)",
+              "bullets": [
+                "Common/rare monster kill: 1",
+                "Champion monster kill: 2",
+                "Unique monster kill: 3",
+                "Boss kill: 5",
+                "Regular chest: 2",
+                "Boss chest: 3"
+              ]
+            },
+            {
+              "heading": "Weighted Pool",
+              "bullets": [
+                "upgrade_shard (weight 1)",
+                "renew_stone (weight 1)"
+              ]
+            },
+            {
+              "heading": "Shard Level",
+              "lines": [
+                "Dropped resource level rolls uniformly from 1..max(1, floor(depth / 10))."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mechanic:blacksmith_upgrade",
+          "title": "Upgrade Item",
+          "sections": [
+            {
+              "lines": [
+                "Spend gold (equal to the item sell price) plus an Upgrade Shard whose level is at least the target item level. Success raises item level and rescales stats."
+              ]
+            },
+            {
+              "heading": "Caps",
+              "bullets": [
+                "Config max upgrade steps per item: 2",
+                "Depth cap at deepest cleared floor: item_level + 1 <= max(1, floor(depth / 10))",
+                "Example at depth 25: max item level 2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mechanic:blacksmith_renew",
+          "title": "Renew Item",
+          "sections": [
+            {
+              "lines": [
+                "Spend gold (sell price) plus a Renew Stone whose level is at least the item level. Random affixes reroll; unique fixed effects stay intact."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mechanic:shard_merge",
+          "title": "Merge Resources",
+          "sections": [
+            {
+              "lines": [
+                "At the blacksmith merge tab, combine three leveled Upgrade Shards or Renew Stones of the same level into one stone of level +1."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "loot",
+      "title": "Loot & Treasure Classes",
+      "pages": [
+        {
+          "id": "mechanic:treasure_classes",
+          "title": "Treasure Classes",
+          "sections": [
+            {
+              "lines": [
+                "Loot profiles point monsters, chests, and bosses at a treasure class (TC). Each attempt rolls success vs no-drop, then picks a weighted entry from the table."
+              ]
+            },
+            {
+              "heading": "Flow",
+              "bullets": [
+                "Loot profile selects a treasure_class_id for the event.",
+                "Each attempt rolls success_weight vs no_drop_weight.",
+                "On success, one entry is picked by weight from the table.",
+                "Entries may be fixed items (item_def_id) or equipment templates (item_template_id)."
+              ]
+            },
+            {
+              "heading": "Sample Loot Profiles",
+              "bullets": [
+                "boss_chest_drop_tier_1 -> guarded_chest_tc_depth_3_plus",
+                "boss_drop_tier_1 -> boss_special_tc_tier_1",
+                "dungeon_mob_drop -> dungeon_mob_tc_1",
+                "dungeon_mob_drop_depth_1 -> dungeon_mob_tc_depth_1",
+                "dungeon_mob_drop_depth_2 -> dungeon_mob_tc_depth_2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "treasure_class:dungeon_mob_tc_1",
+          "title": "Example: dungeon_mob_tc_1",
+          "sections": [
+            {
+              "heading": "Attempt",
+              "lines": [
+                "Success weight: 20",
+                "No-drop weight: 80"
+              ]
+            },
+            {
+              "heading": "Sample Entries",
+              "bullets": [
+                "gold (weight 40)",
+                "red_potion (weight 15)",
+                "blue_potion (weight 15)",
+                "cave_helm template (weight 10)",
+                "cave_boots template (weight 10)",
+                "cave_blade template (weight 5)",
+                "cave_bow template (weight 5)"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

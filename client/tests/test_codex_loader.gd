@@ -9,7 +9,7 @@ var _failures: int = 0
 func _initialize() -> void:
 	CodexLoaderScript.reset_for_tests()
 	CodexLoaderScript.ensure_loaded()
-	_assert_true("chapters loaded", CodexLoaderScript.chapters.size() >= 3)
+	_assert_true("six chapters loaded", CodexLoaderScript.chapters.size() >= 6)
 	_assert_true("concepts chapter present", "concepts" in CodexLoaderScript.chapter_ids())
 	var barbarian := CodexLoaderScript.page("class:barbarian")
 	_assert_eq("barbarian title", str(barbarian.get("title", "")), "Barbarian")

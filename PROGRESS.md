@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-01 (v398 client-ws-reconnect)
+Last updated: 2026-07-01 (v398 engineering review)
 
 ---
 
@@ -25,10 +25,10 @@ Last updated: 2026-07-01 (v398 client-ws-reconnect)
 |-------|-------|
 | **Latest completed slice** | v398 — client-ws-reconnect |
 | **Active branch** | `main` |
-| **CI gate** | green post-v398 |
+| **CI gate** | `make ci` green; client extended bot failures triaged and fixed ($refactor 2026-07-01); `make ci-full` re-run pending |
 | **Next slice** | TBD (`/next`) |
-| **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
-| **Next engineering review** | ~v394 milestone |
+| **Last engineering review** | v398 — [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md) (2026-07-01; official cadence) |
+| **Next engineering review** | ~v408 milestone |
 
 
 ### Periodic engineering reviews
@@ -87,8 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v384 `$review` complete (official cadence at `625f5600`).** Overview:
-  [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md). All ten review recommendations closed (2026-06-29 paydown): ci-full scenario fixes, attack-move extraction, `runner.go` removal, orphan smoke tests, sim movement paydown, perf unit tests, as-built backfill, fog schema, `PROGRESS` sync. **`make ci` and `make ci-full` green** on paydown branch.
+- **v398 `$review` complete (official cadence at `e0f402e4`).** Overview:
+  [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md). Protocol ci-full green; **19 client extended bot scenarios** failed step 10/11 at review time — **fixed in `$refactor`** (menu-bot detection, market preflight, v390 assertion drift, blacksmith staging, combat-feel config). Re-run `make ci-full` to confirm.
+- **v384 `$review` (superseded by v398).** Overview:
+  [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md). All ten review recommendations closed (2026-06-29 paydown).
 - **v349 `$review` (superseded by v384).** Overview:
   [`docs/reviews/20260626_v349-overview.md`](docs/reviews/20260626_v349-overview.md). Failure inventory:
   [`docs/reviews/20260626_v349-ci-full-failures.md`](docs/reviews/20260626_v349-ci-full-failures.md). All 15 recovered at v350.

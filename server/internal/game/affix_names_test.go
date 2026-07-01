@@ -47,8 +47,8 @@ func TestRolledSetDisplayNameGrammar(t *testing.T) {
 	if !ok {
 		t.Fatal("setItemPayload returned false")
 	}
-	if payload.DisplayName != "Savage Long Sword of Verdant Vanguard" {
-		t.Fatalf("set display name = %q, want Savage Long Sword of Verdant Vanguard", payload.DisplayName)
+	if payload.DisplayName != "Verdant Vanguard Blade" {
+		t.Fatalf("set display name = %q, want Verdant Vanguard Blade", payload.DisplayName)
 	}
 	if payload.SetPieceID != "verdant_vanguard_blade" {
 		t.Fatalf("set piece id = %q, want verdant_vanguard_blade", payload.SetPieceID)

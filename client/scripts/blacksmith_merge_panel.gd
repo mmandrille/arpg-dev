@@ -55,13 +55,28 @@ func bot_fill_merge_slots(count: int = 3) -> void:
 	_refresh_slots()
 
 
+func can_place_item_at(index: int, item: Dictionary) -> bool:
+	return _can_place_item(index, item)
+
+
+func place_item_at(index: int, item: Dictionary) -> bool:
+	if not _can_place_item(index, item):
+		return false
+	_place_item(index, item)
+	return true
+
+
+func clear_merge_slot(index: int) -> void:
+	_clear_slot(index)
+
+
 func _build() -> void:
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
 	add_child(root)
 
 	_status_label = Label.new()
-	_status_label.text = "Place 3 same-level shards or stones from your bag"
+	_status_label.text = "Drag or click to place 3 same-level shards or stones"
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(_status_label)
@@ -89,21 +104,14 @@ func _build() -> void:
 
 
 func _make_slot(index: int) -> Button:
-	var button := Button.new()
+	var button := MergeSlotButton.new()
+	button.merge_panel = self
+	button.slot_index = index
 	button.custom_minimum_size = SLOT_SIZE
-	button.text = ""
 	button.focus_mode = Control.FOCUS_NONE
-	button.set_meta("slot_index", index)
-	button.gui_input.connect(func(event: InputEvent) -> void: _on_slot_gui_input(index, event))
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.disabled = false
 	return button
-
-
-func _on_slot_gui_input(index: int, event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if event.double_click:
-			_clear_slot(index)
-		else:
-			_try_fill_slot(index)
 
 
 func _try_fill_slot(index: int) -> void:
@@ -111,7 +119,11 @@ func _try_fill_slot(index: int) -> void:
 	if candidate.is_empty():
 		show_status("No mergeable consumable in bag", true)
 		return
-	_slots[index] = candidate.duplicate(true)
+	_place_item(index, candidate)
+
+
+func _place_item(index: int, item: Dictionary) -> void:
+	_slots[index] = item.duplicate(true)
 	_refresh_slots()
 
 
@@ -121,6 +133,7 @@ func _clear_slot(index: int) -> void:
 
 
 func _next_available_consumable() -> Dictionary:
+	var lock := _merge_lock_from_filled()
 	var used: Dictionary = {}
 	for slot in _slots:
 		if typeof(slot) != TYPE_DICTIONARY:
@@ -135,23 +148,78 @@ func _next_available_consumable() -> Dictionary:
 		var item_instance_id := str(row.get("item_instance_id", ""))
 		if item_instance_id == "" or used.has(item_instance_id):
 			continue
+		if not _is_leveled_consumable(row):
+			continue
+		if lock.is_empty():
+			return row
+		if str(row.get("item_def_id", "")) != str(lock.get("def_id", "")):
+			continue
+		if _consumable_level(row) != int(lock.get("level", 0)):
+			continue
 		return row
 	return {}
+
+
+func _can_place_item(index: int, item: Dictionary) -> bool:
+	if index < 0 or index >= _slots.size():
+		return false
+	if not _is_leveled_consumable(item):
+		return false
+	var item_instance_id := str(item.get("item_instance_id", ""))
+	if item_instance_id == "" or _is_instance_used(item_instance_id, index):
+		return false
+	var lock := _merge_lock_from_filled()
+	if lock.is_empty():
+		return true
+	if str(item.get("item_def_id", "")) != str(lock.get("def_id", "")):
+		return false
+	return _consumable_level(item) == int(lock.get("level", 0))
+
+
+func _is_instance_used(item_instance_id: String, except_index: int) -> bool:
+	for slot_index in range(_slots.size()):
+		if slot_index == except_index:
+			continue
+		var slot: Dictionary = _slots[slot_index] if typeof(_slots[slot_index]) == TYPE_DICTIONARY else {}
+		if str(slot.get("item_instance_id", "")) == item_instance_id:
+			return true
+	return false
+
+
+func _merge_lock_from_filled() -> Dictionary:
+	for slot in _slots:
+		if typeof(slot) != TYPE_DICTIONARY:
+			continue
+		var row := slot as Dictionary
+		if row.is_empty():
+			continue
+		return {
+			"def_id": str(row.get("item_def_id", "")),
+			"level": _consumable_level(row),
+		}
+	return {}
+
+
+func _is_leveled_consumable(item: Dictionary) -> bool:
+	var def_id := str(item.get("item_def_id", ""))
+	return def_id == "upgrade_shard" or def_id == "renew_stone"
 
 
 func _refresh_slots() -> void:
 	var grid := get_child(0).get_child(1) as GridContainer
 	for index in range(grid.get_child_count()):
-		var button := grid.get_child(index) as Button
+		var button := grid.get_child(index) as MergeSlotButton
 		var slot: Dictionary = _slots[index] if index < _slots.size() else {}
 		if slot.is_empty():
-			button.text = ""
-			button.tooltip_text = "Click to place consumable"
+			button.text = "+"
+			button.tooltip_text = "Drag from bag or click to place consumable"
+			button.add_theme_color_override("font_color", Color("#8aa4b8"))
 			continue
 		var level := _consumable_level(slot)
 		var def_id := str(slot.get("item_def_id", "consumable"))
 		button.text = "Lv%d" % level
 		button.tooltip_text = "%s Lv%d" % [def_id.replace("_", " ").capitalize(), level]
+		button.remove_theme_color_override("font_color")
 	_merge_button.disabled = not _can_merge()
 
 
@@ -197,3 +265,54 @@ func _consumable_level(item: Dictionary) -> int:
 	if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
 		return maxi(1, int((payload.get("stats", {}) as Dictionary).get("item_level", 1)))
 	return maxi(1, int(payload.get("item_level", 1)))
+
+
+class MergeSlotButton:
+	extends Button
+
+	var merge_panel: BlacksmithMergePanel
+	var slot_index: int = 0
+
+	func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+		if typeof(data) != TYPE_DICTIONARY:
+			return false
+		if str(data.get("source", "")) != "bag":
+			return false
+		var item: Dictionary = data.get("item", {})
+		return merge_panel._can_place_item(slot_index, item)
+
+	func _drop_data(_at_position: Vector2, data: Variant) -> void:
+		var item: Dictionary = data.get("item", {})
+		if item.is_empty():
+			return
+		merge_panel._place_item(slot_index, item)
+
+	func _get_drag_data(_at_position: Vector2) -> Variant:
+		if merge_panel == null or slot_index >= merge_panel._slots.size():
+			return null
+		var slot: Dictionary = merge_panel._slots[slot_index]
+		if slot.is_empty():
+			return null
+		var data := {
+			"source": "blacksmith_merge",
+			"item": slot.duplicate(true),
+			"merge_panel": merge_panel,
+			"slot_index": slot_index,
+		}
+		var preview := Label.new()
+		preview.text = str(slot.get("item_def_id", "consumable"))
+		preview.add_theme_color_override("font_color", Color("#e8dcc8"))
+		set_drag_preview(preview)
+		return data
+
+	func _gui_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton \
+				and event.button_index == MOUSE_BUTTON_LEFT \
+				and event.pressed:
+			if event.double_click:
+				merge_panel._clear_slot(slot_index)
+				accept_event()
+				return
+			if merge_panel._slots[slot_index].is_empty():
+				merge_panel._try_fill_slot(slot_index)
+				accept_event()

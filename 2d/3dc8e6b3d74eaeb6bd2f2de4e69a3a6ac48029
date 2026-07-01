@@ -1,0 +1,23 @@
+shared/assets/combat_feel_presentation.v0.json
+  s_468512adab21b7::t_e2afefd7287b4c 24
+client/scripts/combat_feel_presentation_loader.gd
+  s_468512adab21b7::t_e2afefd7287b4c 92-95
+client/tests/test_combat_feel_presentation_loader.gd
+  s_468512adab21b7::t_e2afefd7287b4c 25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2d3dc8e6b3d74eaeb6bd2f2de4e69a3a6ac48029",
+  "prompts": {},
+  "sessions": {
+    "s_468512adab21b7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7f989d29-ee64-42cc-a12e-1ea1b96bf844",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

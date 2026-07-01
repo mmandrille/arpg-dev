@@ -1,0 +1,21 @@
+shared/golden/dungeon_equipment_drops.json
+  s_e6e8a3f8f9d465::t_991b120fc891b8 2
+server/internal/game/game_test.go
+  s_e6e8a3f8f9d465::t_ae0621aa93074f 2284
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0943e4227f9cb117f55e987685a29a21a0d8e4bc",
+  "prompts": {},
+  "sessions": {
+    "s_e6e8a3f8f9d465": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2645b0c9-0ade-4638-a892-f1f2890ec8df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -66,6 +66,7 @@ const CharacterSelectPanelScript := preload("res://scripts/character_select_pane
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
 const CodexPanelScript := preload("res://scripts/codex_panel.gd")
+const CodexMenuBridgeScript := preload("res://scripts/codex_menu_bridge.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
@@ -684,18 +685,10 @@ func _on_settings_from_main() -> void:
 	settings_return_target = "main"
 	main_menu.visible = false
 	ClientAudioBridgeScript.show_settings(settings_panel, client_settings)
-
 func _on_codex_from_main() -> void:
-	if main_menu != null:
-		main_menu.visible = false
-	if codex_panel != null:
-		codex_panel.show_codex()
-
+	CodexMenuBridgeScript.open_from_main(main_menu, codex_panel)
 func _on_codex_back() -> void:
-	if codex_panel != null:
-		codex_panel.hide_panel()
-	if main_menu != null:
-		main_menu.show_menu()
+	CodexMenuBridgeScript.back_to_main(main_menu, codex_panel)
 func _on_settings_from_pause() -> void:
 	settings_return_target = "pause"
 	if pause_menu != null:
@@ -3995,9 +3988,7 @@ func _setup_menu_layer() -> void:
 	settings_panel.map_opacity_changed.connect(_on_map_opacity_changed)
 	menu_layer.add_child(settings_panel)
 
-	codex_panel = CodexPanelScript.new()
-	codex_panel.back_requested.connect(_on_codex_back)
-	menu_layer.add_child(codex_panel)
+	codex_panel = CodexMenuBridgeScript.install(menu_layer, _on_codex_back)
 
 	pause_menu = PauseMenuScript.new()
 	pause_menu.resume_pressed.connect(_resume_from_pause)
@@ -6324,8 +6315,8 @@ func bot_click_menu_button(button: String) -> void:
 		"codex":
 			_on_codex_from_main()
 		"back":
-			if codex_panel != null and codex_panel.visible:
-				_on_codex_back()
+			if CodexMenuBridgeScript.handle_back(main_menu, codex_panel):
+				pass
 			elif settings_panel != null and settings_panel.visible:
 				_on_settings_back()
 			elif character_panel != null and character_panel.visible:
@@ -6350,10 +6341,7 @@ func bot_select_character(index: int) -> void:
 func bot_select_character_class(class_id: String) -> void:
 	if character_panel != null: character_panel.select_class(class_id)
 func bot_select_codex_page(page_id: String) -> void:
-	if codex_panel != null:
-		if not codex_panel.visible:
-			codex_panel.show_codex()
-		codex_panel.select_page(page_id)
+	CodexMenuBridgeScript.bot_select_page(codex_panel, page_id)
 func bot_select_window_size(size: String) -> void:
 	_on_window_size_selected(size)
 func bot_set_floating_combat_text(enabled: bool) -> void:

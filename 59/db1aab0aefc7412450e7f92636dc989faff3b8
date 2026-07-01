@@ -1,0 +1,22 @@
+client/tests/test_shop_panel.gd
+  s_e6e8a3f8f9d465::t_fd7e84c26f8995 530
+  s_e6e8a3f8f9d465::t_9a95af761e3df5 477
+  s_e6e8a3f8f9d465::t_a5c077b31bfc98 491
+  s_e6e8a3f8f9d465::t_43b2e08510b9ad 527
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "59db1aab0aefc7412450e7f92636dc989faff3b8",
+  "prompts": {},
+  "sessions": {
+    "s_e6e8a3f8f9d465": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2645b0c9-0ade-4638-a892-f1f2890ec8df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

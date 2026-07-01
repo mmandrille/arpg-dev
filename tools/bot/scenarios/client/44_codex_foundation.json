@@ -4,7 +4,7 @@
   "runner": "godot_client",
   "world_id": "dungeon_levels",
   "title": "Codex foundation",
-  "description": "Open the main-menu Codex, browse to the Barbarian class page, and assert compiled rules content is visible.",
+  "description": "Open the main-menu Codex and assert compiled class, item-family affinity, and resource mechanic pages.",
   "client_steps": [
     {
       "type": "wait_main_menu",
@@ -38,8 +38,43 @@
     {
       "type": "assert_codex_panel",
       "visible": true,
-      "chapter_id": "concepts",
-      "min_chapter_count": 3
+      "min_chapter_count": 6
+    },
+    {
+      "type": "select_codex_page",
+      "page_id": "class:barbarian"
+    },
+    {
+      "type": "assert_codex_panel",
+      "page_id": "class:barbarian",
+      "page_title_contains": "Barbarian"
+    },
+    {
+      "type": "select_codex_page",
+      "page_id": "family:dagger"
+    },
+    {
+      "type": "assert_codex_panel",
+      "page_id": "family:dagger",
+      "page_title_contains": "Dagger"
+    },
+    {
+      "type": "select_codex_page",
+      "page_id": "resource:upgrade_shard"
+    },
+    {
+      "type": "assert_codex_panel",
+      "page_id": "resource:upgrade_shard",
+      "page_title_contains": "Upgrade Shard"
+    },
+    {
+      "type": "select_codex_page",
+      "page_id": "mechanic:treasure_classes"
+    },
+    {
+      "type": "assert_codex_panel",
+      "page_id": "mechanic:treasure_classes",
+      "page_title_contains": "Treasure"
     },
     {
       "type": "click_menu_button",

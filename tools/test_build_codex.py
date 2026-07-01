@@ -28,6 +28,13 @@ def test_build_codex_dagger_family_includes_rogue_affinity() -> None:
     assert "attack speed" in body
 
 
+def test_build_codex_full_index_has_six_chapters() -> None:
+    payload = build_index()
+    assert len(payload["chapters"]) == 6
+    chapter_ids = {chapter["id"] for chapter in payload["chapters"]}
+    assert chapter_ids == {"concepts", "classes", "skills", "item_families", "resources", "loot"}
+
+
 def test_max_item_level_formula_matches_v389() -> None:
     assert max_item_level_for_depth(25, 10) == 2
     assert max_item_level_for_depth(9, 10) == 1

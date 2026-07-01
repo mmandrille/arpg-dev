@@ -384,11 +384,12 @@ def build_loot_chapter(treasure_classes: dict, loot_tables: dict, overlays: dict
                 ],
             )
         )
-    profiles = loot_tables.get("profiles", {})
+    profiles = loot_tables.get("loot_tables", {})
     profile_lines = []
     for profile_id in sorted(profiles.keys())[:6]:
         profile = profiles[profile_id]
-        profile_lines.append("%s -> %s" % (profile_id, profile.get("treasure_class_id", "?")))
+        if profile.get("treasure_class_id"):
+            profile_lines.append("%s -> %s" % (profile_id, profile.get("treasure_class_id", "?")))
     if profile_lines:
         pages[0]["sections"].append(section("Sample Loot Profiles", bullets=profile_lines))
     return chapter("loot", "Loot & Treasure Classes", pages)

@@ -47,6 +47,52 @@ func TestRerollItemRollPayloadPreservesUniqueFixedEffects(t *testing.T) {
 	}
 }
 
+func TestRenewRolledStatsJSONPreservesNestedItemLevel(t *testing.T) {
+	rules := loadRules(t)
+	raw := json.RawMessage(`{"item_template_id":"cave_shield","display_name":"Stalwart Rare Cave Shield","rarity":"rare","stats":{"armor":43,"block_percent":25,"dex":15,"item_level":15},"requirements":{"str":77,"level":15}}`)
+	rng := NewRNG(SeedToUint64("renew_nested_ilvl"))
+	renewed, err := RenewRolledStatsJSON(rules, raw, rng)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var payload ItemRollPayload
+	if err := json.Unmarshal(renewed, &payload); err != nil {
+		t.Fatal(err)
+	}
+	var outMap map[string]any
+	if err := json.Unmarshal(renewed, &outMap); err != nil {
+		t.Fatal(err)
+	}
+	stats := intStatMapFromAny(rollPayloadStatsMap(outMap))
+	if intStatValue(stats["item_level"]) != 15 {
+		t.Fatalf("nested renewed item_level = %+v", outMap)
+	}
+	if stats["dex"] > 400 {
+		t.Fatalf("dex %d looks inflated after renew", stats["dex"])
+	}
+}
+
+func TestRenewRolledStatsJSONFlatItemLevelFifteenStaysBounded(t *testing.T) {
+	rules := loadRules(t)
+	raw := json.RawMessage(`{"item_template_id":"cave_shield","display_name":"Stalwart Rare Cave Shield","rarity":"rare","item_level":15,"armor":43,"block_percent":25,"dex":15}`)
+	rng := NewRNG(SeedToUint64("renew_flat_ilvl"))
+	renewed, err := RenewRolledStatsJSON(rules, raw, rng)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var outMap map[string]any
+	if err := json.Unmarshal(renewed, &outMap); err != nil {
+		t.Fatal(err)
+	}
+	if intStatValue(rollPayloadStatsMap(outMap)["item_level"]) != 15 {
+		t.Fatalf("flat renewed item_level = %+v", outMap)
+	}
+	stats := intStatMapFromAny(rollPayloadStatsMap(outMap))
+	if stats["dex"] > 400 || stats["block_percent"] > 150 {
+		t.Fatalf("renew at ilvl 15 produced inflated stats: %+v", stats)
+	}
+}
+
 func TestRenewRolledStatsJSONChangesAffixStats(t *testing.T) {
 	rules := loadRules(t)
 	raw := json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Sharp Cave Blade","rarity":"magic","stats":{"damage_min":2,"damage_max":5,"item_level":1}}`)
@@ -59,8 +105,15 @@ func TestRenewRolledStatsJSONChangesAffixStats(t *testing.T) {
 	if err := json.Unmarshal(renewed, &payload); err != nil {
 		t.Fatal(err)
 	}
-	if payload.ItemTemplateID != "cave_blade" || payload.Rarity != "magic" || payload.ItemLevel != 1 {
+	if payload.ItemTemplateID != "cave_blade" || payload.Rarity != "magic" {
 		t.Fatalf("renewed payload = %+v", payload)
+	}
+	var outMap map[string]any
+	if err := json.Unmarshal(renewed, &outMap); err != nil {
+		t.Fatal(err)
+	}
+	if intStatValue(rollPayloadStatsMap(outMap)["item_level"]) != 1 {
+		t.Fatalf("renewed item_level = %+v", outMap)
 	}
 	if payload.DisplayName == "Sharp Cave Blade" {
 		t.Fatalf("expected display name to change after reroll: %q", payload.DisplayName)

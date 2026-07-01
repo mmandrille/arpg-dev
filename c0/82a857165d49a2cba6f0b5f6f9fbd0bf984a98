@@ -1,0 +1,39 @@
+client/scripts/blacksmith_merge_panel.gd
+  s_029ce3df06db3c::t_962d5970c61825 58-72,79,107-109,112-113,122-126,136,151-158,163-207,211,214-216,222,268-318
+client/scripts/blacksmith_panel.gd
+  s_029ce3df06db3c::t_7cede07bc7c270 479
+  s_029ce3df06db3c::t_0879c699b7eda8 483
+  s_029ce3df06db3c::t_31fb20c9a90e65 491
+  s_029ce3df06db3c::t_052c0dcbbcf5c3 514,523-525,532-535
+  s_029ce3df06db3c::t_78ae815d33ffe4 364
+client/scripts/blacksmith_upgrade_preview.gd
+  s_029ce3df06db3c::t_1472add49bf37e 51-68
+client/scripts/inventory_transfer_router.gd
+  s_029ce3df06db3c::t_bc25a5bdc2d402 109-110
+  s_029ce3df06db3c::t_d1cb1234709c28 6
+  s_029ce3df06db3c::t_b412ba8c4271c3 14
+client/scripts/inventory_panel.gd
+  s_029ce3df06db3c::t_867608500ae442 164-165
+  s_029ce3df06db3c::t_7b06564260269e 928-931
+client/tests/test_blacksmith_panel.gd
+  s_029ce3df06db3c::t_4a5e02eec5dbf5 65-72
+  s_029ce3df06db3c::t_026d5d20133767 60-62
+  s_029ce3df06db3c::t_7f0777f5d96eca 6
+  s_029ce3df06db3c::t_0784b2fa48170a 86-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c082a857165d49a2cba6f0b5f6f9fbd0bf984a98",
+  "prompts": {},
+  "sessions": {
+    "s_029ce3df06db3c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "65b01da4-21e0-47f3-8da9-220ab6781b97",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

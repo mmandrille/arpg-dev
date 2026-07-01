@@ -156,7 +156,8 @@ client/39_blacksmith_upgrade_ui.json	blacksmith_upgrade_ui	godot_client	extended
 client/40_unique_chest_client_proof.json	unique_chest_client_proof	godot_client	extended	contract	0	0		
 client/41_objective_chest_presentation.json	objective_chest_presentation	godot_client	extended	contract	0	0		
 client/42_quest_reward_chest_presentation.json	quest_reward_chest_presentation	godot_client	extended	contract	0	0		
-client/43_quest_journal_foundation.json	quest_journal_foundation	godot_client	extended	contract	0	0		
+client/43_quest_journal_foundation.json	quest_journal_foundation	godot_client	extended	contract	0	0
+client/44_codex_foundation.json	codex_foundation	godot_client	extended	contract	0	0		
 client/44_elite_objective_hud.json	elite_objective_hud	godot_client	extended	contract	0	0		
 client/45_elite_objective_minimap_pin.json	elite_objective_minimap_pin	godot_client	extended	contract	0	0		
 client/46_set_collection_panel.json	set_collection_panel	godot_client	extended	contract	0	0		

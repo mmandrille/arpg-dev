@@ -12,8 +12,8 @@
     { "type": "wait_main_menu", "timeout_s": 10.0 },
     {
       "type": "assert_main_menu_actions",
-      "labels": ["Create Game", "Join Game", "Settings", "Exit"],
-      "actions": ["create_game", "join_game", "settings", "exit"]
+      "labels": ["Create Game", "Join Game", "Codex", "Settings", "Exit"],
+      "actions": ["create_game", "join_game", "codex", "settings", "exit"]
     },
     { "type": "click_menu_button", "button": "join_game" },
     { "type": "wait_multiplayer_panel", "timeout_s": 5.0 },

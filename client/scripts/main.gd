@@ -1573,13 +1573,28 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "bishop_revive_all" and bishop_panel != null and bishop_panel.visible:
 			bishop_panel.show_status("Account heroes revived")
 			continue
-		if event_type in ["bishop_debug_level_gained", "bishop_debug_skill_point_gained", "bishop_debug_stat_point_gained", "bishop_debug_upgrade_shard_dropped", "bishop_debug_renew_stone_dropped"] and bishop_panel != null and bishop_panel.visible:
+		if event_type in [
+			"bishop_debug_level_gained",
+			"bishop_debug_skill_point_gained",
+			"bishop_debug_stat_point_gained",
+			"bishop_debug_upgrade_shard_dropped",
+			"bishop_debug_renew_stone_dropped",
+			"bishop_debug_respec_badge_dropped",
+			"bishop_debug_resurrection_badge_dropped",
+		] and bishop_panel != null and bishop_panel.visible:
 			if event_type == "bishop_debug_level_gained":
 				bishop_panel.show_status("Level gained")
 			elif event_type == "bishop_debug_skill_point_gained":
 				bishop_panel.show_status("Skill point gained")
 			elif event_type == "bishop_debug_stat_point_gained":
 				bishop_panel.show_status("Stat point gained")
+			elif event_type == "bishop_debug_renew_stone_dropped":
+				var renew_level := int(ev.get("amount", 1))
+				bishop_panel.show_status("Dropped level %d renew stone" % renew_level)
+			elif event_type == "bishop_debug_respec_badge_dropped":
+				bishop_panel.show_status("Dropped respec token")
+			elif event_type == "bishop_debug_resurrection_badge_dropped":
+				bishop_panel.show_status("Dropped revive token")
 			else:
 				var shard_level := int(ev.get("amount", 1))
 				bishop_panel.show_status("Dropped level %d upgrade shard" % shard_level)
@@ -5112,6 +5127,10 @@ func _on_bishop_debug_requested(action: String, bishop_entity_id: String) -> voi
 			client.send("bishop_debug_drop_upgrade_shard_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 		"drop_renew_stone":
 			client.send("bishop_debug_drop_renew_stone_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+		"drop_respec_badge":
+			client.send("bishop_debug_drop_respec_badge_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+		"drop_resurrection_badge":
+			client.send("bishop_debug_drop_resurrection_badge_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 
 func _shop_title(next_shop_id: String) -> String:
 	match next_shop_id:

@@ -1,0 +1,54 @@
+client/scripts/bot_scenario_runner.gd
+  s_d5baab824d370d::t_84ca00f516d47b 1048
+  s_d5baab824d370d::t_af5e6706471715 13
+client/scripts/item_tooltip_panel.gd
+  s_d5baab824d370d::t_bd64a3fde6d6da 333-340
+client/scripts/blacksmith_upgrade_preview.gd
+  s_d5baab824d370d::t_aa373bccbfd308 7-17,24-25
+  s_d5baab824d370d::t_1bcbfa773d638e 142-143
+  s_d5baab824d370d::t_8f1233b32dfaa4 89
+client/scripts/blacksmith_merge_panel.gd
+  s_d5baab824d370d::t_314ce4dc4ef211 8
+  s_d5baab824d370d::t_da06c5ac1cd598 265
+server/internal/store/repos.go
+  s_d5baab824d370d::t_a225966bac4bd9 1571
+server/internal/game/upgrade_shard_items_test.go
+  s_d5baab824d370d::t_e4e46d199fdfa7 9-28
+server/internal/http/account_stash.go
+  s_d5baab824d370d::t_270cdac4701329 157
+  s_d5baab824d370d::t_6bc0aba4382908 276
+client/scripts/blacksmith_shard_inventory.gd
+  s_d5baab824d370d::t_fe923bf23ffe10 13
+server/internal/game/upgrade_shard_items.go
+  s_d5baab824d370d::t_b5c87e50ad1258 12-22
+client/tests/test_blacksmith_panel.gd
+  s_d5baab824d370d::t_609322b2d74932 7
+  s_d5baab824d370d::t_2ef46205c952a3 81-85,87-88
+  s_d5baab824d370d::t_8922b050291a45 19
+  s_d5baab824d370d::t_3bdc543627a4c4 86
+server/internal/http/auth_session_test.go
+  s_d5baab824d370d::t_f3432e450bed9e 629
+client/scripts/blacksmith_panel.gd
+  s_d5baab824d370d::t_21434450e154db 351
+  s_d5baab824d370d::t_151317012019ca 600-604
+server/internal/store/store_test.go
+  s_d5baab824d370d::t_3e94a9637477b8 1124-1125
+client/scripts/blacksmith_recipes.gd
+  s_d5baab824d370d::t_9a150ebb2a8859 57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d5533b0b6ff7f0dd7d3b341da2eac15d3bfe59b6",
+  "prompts": {},
+  "sessions": {
+    "s_d5baab824d370d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b65b77dc-570b-4bb9-87b6-0c59e4bee4ac",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

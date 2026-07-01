@@ -1,0 +1,27 @@
+client/tests/test_bishop_panel.gd
+  s_b5ee270b714f38::t_e7444c895954db 41-49
+client/scripts/bishop_panel.gd
+  s_b5ee270b714f38::t_105ef4ce0bd890 28-29,37-38
+  s_b5ee270b714f38::t_bde26642869d51 117
+  s_b5ee270b714f38::t_5a0fd7295d5e23 178-189,193,199,205,211,217,223,229-241
+  s_b5ee270b714f38::t_06832d0f83d690 263-271
+client/scripts/main.gd
+  s_b5ee270b714f38::t_d1a43434f996e4 5130-5133
+  s_b5ee270b714f38::t_19ed5eab06a364 1576-1584,1591-1597
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "9af7077c7551e09f2f90796036a720a22f7e2f41",
+  "prompts": {},
+  "sessions": {
+    "s_b5ee270b714f38": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "94df0af6-60cf-4c01-838f-6f9b79e9ef68",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

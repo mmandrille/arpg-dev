@@ -1,0 +1,26 @@
+server/internal/game/item_reroll.go
+  s_5e9d690624d2be::t_ce82cac8d8c526 55
+server/internal/game/unique_chest.go
+  s_5e9d690624d2be::t_002f024107dc63 477
+tools/bot/scenarios/83_second_set_package.json
+  s_5e9d690624d2be::t_d3678e034c752c 37
+  s_5e9d690624d2be::t_67a2649a14cc39 18,22
+tools/bot/scenarios/84_wayfarers_accord_set.json
+  s_5e9d690624d2be::t_890d351a5e1837 18,22,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0f6f784c44c809f632f04687de901aca4a92f673",
+  "prompts": {},
+  "sessions": {
+    "s_5e9d690624d2be": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8a17c9df-e848-4b3e-ad10-a5a521ef99ec",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

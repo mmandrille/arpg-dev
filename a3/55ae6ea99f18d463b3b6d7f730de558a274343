@@ -1,0 +1,44 @@
+docs/as-built/v393_hero-skill-expansion.md
+  s_e6e8a3f8f9d465::t_b08ffe92021501 1-20
+shared/i18n/es.json
+  s_e6e8a3f8f9d465::t_f5cfbab29dbaf3 113-122
+server/internal/game/hero_skill_expansion_test.go
+  s_e6e8a3f8f9d465::t_3f7cbd57840ab4 3-6,9-12
+  s_e6e8a3f8f9d465::t_87e2f628a6f42b 21
+  s_e6e8a3f8f9d465::t_ae6b1ad45393a3 1-2,7-8,13-20,22-38
+docs/specs/v393_spec-hero-skill-expansion.md
+  s_e6e8a3f8f9d465::t_77c99c6f5d77ff 1-39
+PROGRESS.md
+  s_e6e8a3f8f9d465::t_04d576e2c6b6ef 18,26,28-29
+shared/rules/skills.v0.json
+  s_e6e8a3f8f9d465::t_b80b33ff6a8feb 1232-1500
+shared/i18n/en.json
+  s_e6e8a3f8f9d465::t_809b6700e830c8 116-125
+docs/CODEMAP.md
+  s_e6e8a3f8f9d465::t_a49fc69764f764 11
+tools/bot/scenarios/111_hero_skill_expansion.json
+  s_e6e8a3f8f9d465::t_d22d9ffc959aea 8,30,32-48,51,53
+  s_e6e8a3f8f9d465::t_ead1747d4b44a9 1-7,9-29,31,49-50,52,54-56
+docs/progress/slice-lifecycle.md
+  s_e6e8a3f8f9d465::t_da1fdecafe4a59 406-407
+docs/as-built/v392_class-creation-features.md
+  s_e6e8a3f8f9d465::t_92e1e469fabe03 1-14
+shared/assets/skill_presentations.v0.json
+  s_e6e8a3f8f9d465::t_11c98ccfefc98b 293-347
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a355ae6ea99f18d463b3b6d7f730de558a274343",
+  "prompts": {},
+  "sessions": {
+    "s_e6e8a3f8f9d465": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2645b0c9-0ade-4638-a892-f1f2890ec8df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

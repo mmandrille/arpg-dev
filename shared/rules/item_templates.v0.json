@@ -35,6 +35,53 @@
       ],
       "effect_pool": []
     },
+    "cave_rapier": {
+      "name": "Cave Rapier",
+      "category": "equipment",
+      "item_type": "sword",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": ["main_hand"],
+      "attack_mode": "melee",
+      "attack_speed": 1.15,
+      "reach": 1.55,
+      "requirements": { "level": 1, "dex": 7 },
+      "base_stats": {
+        "damage_min": 1,
+        "damage_max": 3
+      },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 2, "weight": 2 },
+        { "stat": "attack_speed_percent", "min": 3, "max": 10, "weight": 4 },
+        { "stat": "crit_chance", "min": 2, "max": 6, "weight": 2, "min_rarity": "magic" }
+      ],
+      "effect_pool": []
+    },
+    "cave_heavy_blade": {
+      "name": "Cave Heavy Blade",
+      "category": "equipment",
+      "item_type": "sword",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": ["main_hand"],
+      "attack_mode": "melee",
+      "attack_speed": 0.82,
+      "reach": 1.5,
+      "requirements": { "level": 1, "str": 8 },
+      "base_stats": {
+        "damage_min": 5,
+        "damage_max": 9
+      },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 2, "weight": 3 },
+        { "stat": "damage_max", "min": 1, "max": 4, "weight": 3 },
+        { "stat": "attack_speed_percent", "min": -15, "max": -5, "weight": 4 }
+      ],
+      "effect_pool": []
+    },
     "starter_paladin_sword": {
       "name": "Paladin Sword",
       "category": "equipment",
@@ -210,6 +257,49 @@
       "rollable_stats": [
         { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
         { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 }
+      ],
+      "effect_pool": []
+    },
+    "cave_hunting_bow": {
+      "name": "Hunting Bow",
+      "category": "equipment",
+      "item_type": "bow",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "ranged",
+      "attack_speed": 1.0,
+      "reach": 13.0,
+      "projectile_speed": 27.0,
+      "requirements": { "level": 1, "dex": 7 },
+      "base_stats": { "damage_min": 1, "damage_max": 2 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
+        { "stat": "damage_max", "min": 1, "max": 2, "weight": 2 },
+        { "stat": "attack_speed_percent", "min": 4, "max": 12, "weight": 4 },
+        { "stat": "hit_chance", "min": 3, "max": 10, "weight": 2, "min_rarity": "magic" }
+      ],
+      "effect_pool": []
+    },
+    "cave_war_bow": {
+      "name": "War Bow",
+      "category": "equipment",
+      "item_type": "bow",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": ["main_hand", "off_hand"],
+      "attack_mode": "ranged",
+      "attack_speed": 0.68,
+      "reach": 14.0,
+      "projectile_speed": 22.0,
+      "requirements": { "level": 1, "str": 6, "dex": 6 },
+      "base_stats": { "damage_min": 3, "damage_max": 6 },
+      "rollable_stats": [
+        { "stat": "damage_min", "min": 0, "max": 2, "weight": 3 },
+        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 },
+        { "stat": "attack_speed_percent", "min": -18, "max": -8, "weight": 4 }
       ],
       "effect_pool": []
     },

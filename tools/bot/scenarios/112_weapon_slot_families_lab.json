@@ -1,0 +1,50 @@
+{
+  "id": "weapon_slot_families_lab",
+  "ci_tier": "extended",
+  "world_id": "weapon_slot_families_lab",
+  "seed": "v394_weapon_lab",
+  "character_class": "rogue",
+  "debug_progression": {
+    "level": 3,
+    "unspent_stat_points": 0,
+    "stats": { "dex": 5, "str": 5, "vit": 5, "magic": 4 }
+  },
+  "title": "Weapon slot families lab",
+  "description": "Prove rapier dex requirement gate, heavy blade rolled attack-speed penalty, and hunting bow positive speed roll bias.",
+  "steps": [
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_rapier"
+    },
+    {
+      "action": "assert_inventory_requirement_status",
+      "item_def_id": "cave_rapier",
+      "requirements_met": false
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "cave_rapier",
+      "slot": "main_hand",
+      "expect_reject": "requirements_not_met"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_heavy_blade"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "cave_heavy_blade",
+      "item_template_id": "cave_heavy_blade",
+      "stat_keys": ["attack_speed_percent"]
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "cave_hunting_bow"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "cave_hunting_bow",
+      "item_template_id": "cave_hunting_bow"
+    }
+  ]
+}

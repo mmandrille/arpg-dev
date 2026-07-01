@@ -405,6 +405,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v391** | `renew-stones` | Complete (`make ci` green 2026-06-30) | [`spec`](../specs/v391_spec-renew-stones.md) | [`plan`](../plans/v391_2026-06-30-renew-stones.md) | [`as-built`](../as-built/v391_renew-stones.md) |
 | **v392** | `class-creation-features` | Complete (focused verification green) | [`spec`](../specs/v392_spec-class-creation-features.md) | — | [`as-built`](../as-built/v392_class-creation-features.md) |
 | **v393** | `hero-skill-expansion` | Complete (focused verification green) | [`spec`](../specs/v393_spec-hero-skill-expansion.md) | — | [`as-built`](../as-built/v393_hero-skill-expansion.md) |
+| **v394** | `weapon-slot-families` | Complete (focused verification green) | [`spec`](../specs/v394_spec-weapon-slot-families.md) | — | [`as-built`](../as-built/v394_weapon-slot-families.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

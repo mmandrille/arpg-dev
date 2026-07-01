@@ -1,0 +1,36 @@
+.maintainability/file-size-baseline.tsv
+  s_4f034067e4e37f::t_440d8c7915fcff 10
+  s_4f034067e4e37f::t_014db8150f101e 16
+tools/bot/scenarios/client/08_main_menu_flow.json
+  s_4f034067e4e37f::t_ea823e0d8d261b 18,25
+docs/progress/scenario-movement-audit.tsv
+  s_4f034067e4e37f::t_dc4410f1041eff 159-160
+client/scripts/main.gd
+  s_4f034067e4e37f::t_356f8a2cfa3776 3991
+  s_4f034067e4e37f::t_eb28415782eca7 689,691
+  s_4f034067e4e37f::t_6b5ed9b17569ed 69
+  s_4f034067e4e37f::t_4169126f7e2c5c 6318-6319
+  s_4f034067e4e37f::t_52acdacd3a6ee6 6344
+client/scripts/codex_menu_bridge.gd
+  s_4f034067e4e37f::t_5707550c79087b 1-40
+tools/bot/scenarios/client/21_join_game_listed_session.json
+  s_4f034067e4e37f::t_8e1b499e76ad6b 15-16
+docs/CODEMAP.md
+  s_4f034067e4e37f::t_c9e760ec415b85 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "46cba408b993efa45ecd3948e93906cc7977c142",
+  "prompts": {},
+  "sessions": {
+    "s_4f034067e4e37f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e620be96-c297-4187-b8fd-15556c7aba35",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

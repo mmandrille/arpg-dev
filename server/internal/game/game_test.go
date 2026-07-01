@@ -2281,6 +2281,7 @@ func TestTreasureClassRollsGolden(t *testing.T) {
 func TestDungeonEquipmentDropsGolden(t *testing.T) {
 	rules := loadRules(t)
 	var golden struct {
+		Description       string   `json:"description"`
 		WorldID           string   `json:"world_id"`
 		RequiredTemplates []string `json:"required_templates"`
 		Bands             []struct {

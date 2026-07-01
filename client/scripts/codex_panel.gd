@@ -93,7 +93,9 @@ func _build() -> void:
 	body.add_child(nav)
 
 	_chapter_list = ItemList.new()
-	_chapter_list.custom_minimum_size = Vector2(220, 140)
+	_chapter_list.custom_minimum_size = Vector2(220, 0)
+	_chapter_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_chapter_list.size_flags_stretch_ratio = 0.5
 	_chapter_list.item_selected.connect(_on_chapter_selected)
 	nav.add_child(_chapter_list)
 
@@ -187,7 +189,7 @@ func _reload_chapters() -> void:
 			continue
 		var rec: Dictionary = chapter
 		var chapter_id := str(rec.get("id", ""))
-		_chapter_list.add_item(str(rec.get("title", chapter_id)), null, false)
+		_chapter_list.add_item(str(rec.get("title", chapter_id)))
 		_chapter_list.set_item_metadata(_chapter_list.item_count - 1, chapter_id)
 
 
@@ -199,7 +201,7 @@ func _select_chapter(chapter_id: String) -> void:
 		if typeof(raw_page) != TYPE_DICTIONARY:
 			continue
 		var page: Dictionary = raw_page
-		_page_list.add_item(str(page.get("title", "")), null, false)
+		_page_list.add_item(str(page.get("title", "")))
 		_page_list.set_item_metadata(_page_list.item_count - 1, str(page.get("id", "")))
 	for index in range(_chapter_list.item_count):
 		if str(_chapter_list.get_item_metadata(index)) == chapter_id:

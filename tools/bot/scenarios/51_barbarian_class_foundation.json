@@ -29,7 +29,8 @@
       "rage": 1,
       "leap": 1,
       "cleave": 1,
-      "earthbreaker": 1
+      "earthbreaker": 1,
+      "ground_slam": 1
     }
   },
   "steps": [

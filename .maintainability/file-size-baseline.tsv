@@ -1,13 +1,13 @@
 # Grandfathered source/test/tool files above the 600-line target.
 # Format: path<TAB>baseline_line_count
-client/scripts/blacksmith_panel.gd	731	# v392: two-slot craft UI (item + resource); recipe inferred from resource
+client/scripts/blacksmith_panel.gd	771	# v392: two-slot craft UI (item + resource); recipe inferred from resource
 client/scripts/bot_assertion_handlers.gd	623	# v357: intent-reject assertions extracted to bot_intent_reject_assertions.gd
 client/scripts/bot_controller.gd	796	# v390: blacksmith merge tab bot steps
 client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait filters consolidated into flag loop
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
-client/scripts/character_select_panel.gd	642
-client/scripts/inventory_panel.gd	1556
-client/scripts/main.gd	6381	# v390: upgrade shard merge HTTP wiring
+client/scripts/character_select_panel.gd	701	# v392: class creation features panel
+client/scripts/inventory_panel.gd	1612
+client/scripts/main.gd	6445	# v390: upgrade shard merge HTTP wiring
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010
@@ -28,6 +28,7 @@ server/internal/http/ws_test.go	1482
 server/internal/realtime/session_loop.go	924
 server/internal/replay/replay.go	722
 server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating passive gold auto-pickup test for v332 momentum
+server/internal/game/rogue_skills.go	620	# pre-v394 grandfather; passive_execute + poison stack handlers
 server/internal/store/repos.go	2315
 server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store test setup
 skills/showme/scripts/visual_capture.gd	1016

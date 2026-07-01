@@ -474,7 +474,7 @@ func _run() -> void:
 	root.add_child(blacksmith_panel)
 	await process_frame
 	var blacksmith_emitted: Array = []
-	blacksmith_panel.upgrade_inventory_requested.connect(func(item_instance_id: String) -> void:
+	blacksmith_panel.upgrade_inventory_requested.connect(func(item_instance_id: String, _resource_instance_id: String = "") -> void:
 		blacksmith_emitted.append(item_instance_id)
 	)
 	var upgrade_item: Dictionary = (inventory[0] as Dictionary).duplicate(true)
@@ -488,6 +488,7 @@ func _run() -> void:
 	}
 	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item, blacksmith_shard], 40, 60, blacksmith_config, "Choose", {})
 	blacksmith_panel.stage_inventory_item(upgrade_item)
+	blacksmith_panel.stage_resource_item(blacksmith_shard)
 	var blacksmith_state := blacksmith_panel.get_debug_state()
 	_assert_eq("blacksmith staged item id", str(blacksmith_state.get("staged_item_id", "")), "2001")
 	_assert_eq("blacksmith wallet gold", int(blacksmith_state.get("wallet_gold", 0)), 100)
@@ -523,8 +524,10 @@ func _run() -> void:
 	blacksmith_state = blacksmith_panel.get_debug_state()
 	_assert_eq("blacksmith unstage clears item", str(blacksmith_state.get("staged_item_id", "")), "")
 	blacksmith_panel.stage_inventory_item(upgrade_item)
+	blacksmith_panel.stage_resource_item(blacksmith_shard)
 	blacksmith_panel._emit_upgrade(upgrade_item)
 	_assert_eq("blacksmith inventory upgrade emitted", str(blacksmith_emitted[0]), "2001")
+	blacksmith_panel.unstage_resource(false)
 	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item], 100, 0, blacksmith_config, "Choose", {})
 	blacksmith_panel.stage_inventory_item(upgrade_item)
 	blacksmith_state = blacksmith_panel.get_debug_state()

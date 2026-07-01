@@ -6,6 +6,7 @@ static var gameplay: Dictionary = {}
 static var presentation_lod: Dictionary = {}
 static var loot_labels: Dictionary = {}
 static var client_perf: Dictionary = {}
+static var client_reconnect: Dictionary = {}
 static var _loaded: bool = false
 
 
@@ -21,6 +22,7 @@ static func ensure_loaded() -> void:
 		presentation_lod = root.get("presentation_lod", {})
 		loot_labels = root.get("loot_labels", {})
 		client_perf = root.get("client_perf", {})
+		client_reconnect = root.get("client_reconnect", {})
 
 
 static func presentation_lod_rules() -> Dictionary:
@@ -62,12 +64,18 @@ static func delta_minimap_sync_interval_ticks() -> int:
 	return int(client_perf.get("delta_minimap_sync_interval_ticks", 2))
 
 
+static func client_reconnect_rules() -> Dictionary:
+	ensure_loaded()
+	return client_reconnect
+
+
 static func reset_for_tests() -> void:
 	_loaded = false
 	gameplay = {}
 	presentation_lod = {}
 	loot_labels = {}
 	client_perf = {}
+	client_reconnect = {}
 
 
 static func base_movement_speed() -> float:

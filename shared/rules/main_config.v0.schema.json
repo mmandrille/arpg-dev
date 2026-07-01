@@ -109,6 +109,18 @@
         "delta_ui_sync_interval_ticks": { "type": "integer", "minimum": 1 },
         "delta_minimap_sync_interval_ticks": { "type": "integer", "minimum": 1 }
       }
+    },
+    "client_reconnect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "initial_delay_s": { "type": "number", "exclusiveMinimum": 0 },
+        "max_delay_s": { "type": "number", "exclusiveMinimum": 0 },
+        "backoff_exponent": { "type": "integer", "minimum": 2 },
+        "max_attempts": { "type": "integer", "minimum": 1 },
+        "give_up_s": { "type": "number", "exclusiveMinimum": 0 },
+        "http_resume_after_ws_failures": { "type": "integer", "minimum": 1 }
+      }
     }
   }
 }

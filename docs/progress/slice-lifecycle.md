@@ -409,6 +409,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v395** | `game-codex-shell` | Complete (focused verification green) | [`spec`](../specs/v395_spec-game-codex-shell.md) | [`plan`](../plans/v395_2026-06-30-game-codex-shell.md) | [`as-built`](../as-built/v395_game-codex-shell.md) |
 | **v396** | `game-codex-chapters` | Complete (focused verification green) | [`spec`](../specs/v396_spec-game-codex-chapters.md) | [`plan`](../plans/v396_2026-06-30-game-codex-chapters.md) | [`as-built`](../as-built/v396_game-codex-chapters.md) |
 | **v397** | `item-archetype-library` | Complete (`make ci` green) | [`spec`](../specs/v397_spec-item-archetype-library.md) | [`plan`](../plans/v397_2026-07-01-item-archetype-library.md) | [`as-built`](../as-built/v397_item-archetype-library.md) |
+| **v398** | `client-ws-reconnect` | Complete (focused verification green) | [`spec`](../specs/v398_spec-client-ws-reconnect.md) | [`plan`](../plans/v398_2026-07-01-client-ws-reconnect.md) | [`as-built`](../as-built/v398_client-ws-reconnect.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

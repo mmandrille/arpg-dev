@@ -90,6 +90,8 @@ const PlayerMovementFeelScript := preload("res://scripts/player_movement_feel.gd
 const MovementInputPresenterScript := preload("res://scripts/movement_input_presenter.gd")
 const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
 const LevelLoadingOverlayScript := preload("res://scripts/level_loading_overlay.gd")
+const ConnectionRecoveryRuntimeScript := preload("res://scripts/connection_recovery_runtime.gd")
+const ConnectionOverlayBridgeScript := preload("res://scripts/connection_overlay_bridge.gd")
 const CommandRetargetGraceScript := preload("res://scripts/command_retarget_grace.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
@@ -297,6 +299,10 @@ var _level_loading_active: bool = false
 var _level_loading_walls_ready: bool = false
 var _level_loading_started_at: float = 0.0
 var _level_loading_traveling: bool = false
+var _connection_recovery_runtime: ConnectionRecoveryRuntime = ConnectionRecoveryRuntimeScript.new()
+var _connection_overlay: ConnectionOverlay
+var _session_established: bool = false
+var _intentional_disconnect: bool = false
 var _pending_level_walls: Array = []
 var _command_retarget_grace: CommandRetargetGrace = CommandRetargetGraceScript.new()
 var _movement_input: MovementInputPresenter = MovementInputPresenterScript.new()
@@ -454,6 +460,9 @@ func _start_join_session(join_session_id: String, character_id: String) -> bool:
 func _begin_gameplay_connection(enable_autoplay: bool = false) -> void:
 	_hide_all_menus()
 	gameplay_active = true
+	_intentional_disconnect = false
+	_session_established = false
+	_connection_recovery_runtime.reset_overlay(_connection_overlay)
 	GameplayFeedbackPresentationScript.bind_session(self, entities)
 	_sync_camera_from_settings()
 	call_deferred("_refresh_fog_presentation")
@@ -864,6 +873,8 @@ func _refresh_localized_texts() -> void:
 		codex_panel.refresh_texts()
 
 func _show_pause_menu() -> void:
+	if _connection_recovery_runtime.blocks_input():
+		return
 	if gameplay_active and pause_menu != null: pause_menu.show_pause()
 	_update_mouse_capture()
 func _resume_from_pause() -> void:
@@ -871,6 +882,8 @@ func _resume_from_pause() -> void:
 	_update_mouse_capture()
 
 func _return_to_main_menu() -> void:
+	_intentional_disconnect = true
+	_connection_recovery_runtime.reset_overlay(_connection_overlay)
 	if client != null:
 		if client.session_id != "":
 			client.end_session()
@@ -879,6 +892,8 @@ func _return_to_main_menu() -> void:
 	_show_main_menu()
 
 func _exit_game() -> void:
+	_intentional_disconnect = true
+	_connection_recovery_runtime.reset_overlay(_connection_overlay)
 	if client != null:
 		if gameplay_active and client.session_id != "":
 			client.end_session()
@@ -887,6 +902,8 @@ func _exit_game() -> void:
 
 func _teardown_gameplay_state(clear_session: bool) -> void:
 	gameplay_active = false
+	_session_established = false
+	_connection_recovery_runtime.reset_overlay(_connection_overlay)
 	_clear_presentation_session_state()
 	_update_mouse_capture(); _update_reticle_visibility()
 	ready_sent = false
@@ -971,6 +988,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		client.ws_url = ""
 
 
+
 func _clear_presentation_session_state() -> void:
 	PickTargetHighlightScript.clear_all()
 	CombatEventPresentationScript.clear_session()
@@ -983,19 +1001,43 @@ func _process(delta: float) -> void:
 	if client == null:
 		return
 
-	var state := client.ready_state()
-	if state == WebSocketPeer.STATE_OPEN and not ready_sent:
+	var ws_state := client.ready_state()
+	_connection_recovery_runtime.tick(
+		delta,
+		ws_state,
+		gameplay_active,
+		bot_mode,
+		visual_replay_enabled,
+		_intentional_disconnect,
+		_session_established,
+		client,
+		_connection_overlay,
+		last_server_tick,
+		Callable(self, "_handle_message"),
+		Callable(self, "_clear_pending_for_reconnect"),
+		Callable(self, "_apply_reconciliation_backpressure"),
+		Callable(self, "_debug"),
+		Callable(self, "_return_to_main_menu"),
+		func() -> bool: return ready_sent,
+		func(value: bool) -> void: ready_sent = value,
+	)
+	if client == null:
+		return
+	ws_state = client.ready_state()
+
+	if ws_state == WebSocketPeer.STATE_OPEN and not ready_sent and not _connection_recovery_runtime.is_active():
 		if bot_mode:
 			print("[bot-client] ws open, sending client_ready tick=%d" % last_server_tick)
 		client.send("client_ready", last_server_tick, {"client_version": "godot", "last_seen_tick": last_server_tick})
 		ready_sent = true
 
 	if gameplay_active or visual_replay_enabled:
-		_flush_pending_deltas()
-		var net_start := Time.get_ticks_usec()
-		for env in client.poll():
-			_handle_message(env)
-		PerfPhaseTimerScript.measure_usec("net_poll", net_start)
+		if not _connection_recovery_runtime.is_active():
+			_flush_pending_deltas()
+			var net_start := Time.get_ticks_usec()
+			for env in client.poll():
+				_handle_message(env)
+			PerfPhaseTimerScript.measure_usec("net_poll", net_start)
 		if _boss_visuals != null:
 			_boss_visuals_context.last_server_tick = last_server_tick
 			_boss_visuals.advance_boss_phase_display(delta)
@@ -1035,7 +1077,7 @@ func _process(delta: float) -> void:
 			var live_monsters := int(last_performance_status.get("live_monsters", monster_ids.size()))
 			fog_overlay.set_live_monster_count(live_monsters)
 	_update_debug()
-	_perf_debug_sampler.sample(delta, state, last_server_tick, reconciliation_delta, entities, monster_ids)
+	_perf_debug_sampler.sample(delta, ws_state, last_server_tick, reconciliation_delta, entities, monster_ids)
 
 # --- message handling -------------------------------------------------------
 
@@ -1149,6 +1191,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	if discovery_minimap != null: discovery_minimap.sync_session(str(p.get("session_id", client.session_id if client != null else "")))
 	ClientAudioBridgeScript.ambience_for_level(audio_controller, current_level)
 	_update_ground_material()
+	_session_established = true
 	var local_id := _snapshot_local_player_id(p)
 	if local_id != "": player_id = local_id
 	party = p.get("party", [])
@@ -1209,6 +1252,8 @@ func _apply_snapshot(p: Dictionary) -> void:
 		print("[bot-client] snapshot applied entities=%d monsters=%d loot=%d hp=%d" % [
 			entities.size(), monster_ids.size(), loot_ids.size(), player_hp
 		])
+	if _connection_recovery_runtime.is_active():
+		_connection_recovery_runtime.finish_resync(_connection_overlay, Callable(self, "_debug"))
 
 func _apply_delta(p: Dictionary) -> void:
 	var delta_start := Time.get_ticks_usec()
@@ -2912,6 +2957,8 @@ func _handle_escape() -> void:
 		_close_gameplay_panels()
 		_hide_inventory_if_no_actionable_panel()
 		return
+	if _connection_recovery_runtime.blocks_input():
+		return
 	if gameplay_active:
 		_show_pause_menu()
 
@@ -2966,7 +3013,8 @@ func _user_input_blocked() -> bool:
 func _modal_menu_blocks_gameplay_input() -> bool:
 	return (main_menu != null and main_menu.visible) or (character_panel != null and character_panel.visible) \
 		or (multiplayer_panel != null and multiplayer_panel.visible) or (settings_panel != null and settings_panel.visible) \
-		or (pause_menu != null and pause_menu.visible) or (loss_popup != null and loss_popup.visible)
+		or (pause_menu != null and pause_menu.visible) or (loss_popup != null and loss_popup.visible) \
+		or _connection_recovery_runtime.blocks_input()
 
 func _menu_blocks_gameplay_input() -> bool:
 	return _modal_menu_blocks_gameplay_input() or _any_gameplay_panel_open()
@@ -4005,6 +4053,20 @@ func _setup_menu_layer() -> void:
 	loading_layer.layer = 20
 	loading_layer.add_child(_level_loading_overlay)
 	add_child(loading_layer)
+
+	_connection_overlay = ConnectionOverlayBridgeScript.install(
+		self,
+		Callable(self, "_return_to_main_menu"),
+		Callable(self, "_return_to_main_menu"),
+	)
+
+func _clear_pending_for_reconnect() -> void:
+	_close_gameplay_panels()
+	pending_interactable_action.clear()
+	pending_waypoint_travel = false
+	pending_action_targets.clear()
+	_clear_pending_attack_commands()
+
 
 func _build_loss_popup() -> Control:
 	var root := Control.new()

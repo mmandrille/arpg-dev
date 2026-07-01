@@ -478,6 +478,18 @@ func connect_ws() -> void:
 	_ws.connect_to_url(url)
 
 
+func reconnect_ws() -> void:
+	close()
+	connect_ws()
+
+
+func resume_same_session() -> bool:
+	if session_id == "":
+		return false
+	var resumed_id := session_id
+	return create_session(resumed_id)
+
+
 func websocket_url() -> String:
 	var scheme := "wss" if use_tls else "ws"
 	# Token via query param: WebSocketPeer cannot set the Authorization header.

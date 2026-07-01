@@ -1,0 +1,44 @@
+{
+  "id": "ws_reconnect_proof",
+  "runner": "godot_client",
+  "world_id": "vertical_slice",
+  "ci_tier": "extended",
+  "title": "WebSocket drop reconnect proof",
+  "description": "Simulates unintended WS drop during gameplay, asserts reconnect overlay and same-session resync without main-menu navigation.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 10.0 },
+    { "type": "remember_session" },
+    { "type": "remember_player_position" },
+    { "type": "enable_ws_reconnect_proof" },
+    { "type": "simulate_ws_drop" },
+    {
+      "type": "wait_connection_recovery",
+      "active": true,
+      "overlay_visible": true,
+      "title_contains": "Reconnecting",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_connection_recovery",
+      "active": true,
+      "overlay_visible": true,
+      "blocks_input": true
+    },
+    {
+      "type": "wait_connection_resync",
+      "active": false,
+      "overlay_visible": false,
+      "ws_open": true,
+      "timeout_s": 20.0
+    },
+    { "type": "assert_session_unchanged" },
+    { "type": "assert_player_position_unchanged", "tolerance": 2.0 },
+    {
+      "type": "assert_connection_recovery",
+      "active": false,
+      "overlay_visible": false,
+      "ws_open": true
+    }
+  ]
+}

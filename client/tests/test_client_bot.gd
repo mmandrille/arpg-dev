@@ -70,6 +70,7 @@ func _initialize() -> void:
 	_test_stash_assertions()
 	_test_boss_health_bar_step_types_load()
 	_test_boss_health_bar_assertions()
+	_test_ws_reconnect_proof_step_types_load()
 	_test_bot_prepare_exit_frees_canvas_layers()
 
 	print("[gdtest] PASS: test_client_bot (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -1114,6 +1115,21 @@ func _test_inventory_paper_doll_assertions() -> void:
 	runner.tick(0.016, state)
 	runner.tick(0.016, state)
 	_assert_true("inventory paper doll assertions pass", runner.is_done() and runner.passed())
+
+
+func _test_ws_reconnect_proof_step_types_load() -> void:
+	var data := _make_valid_scenario()
+	data["client_steps"] = [
+		{"type": "enable_ws_reconnect_proof"},
+		{"type": "simulate_ws_drop"},
+		{"type": "wait_connection_recovery", "active": true, "overlay_visible": true, "timeout_s": 5.0},
+		{"type": "wait_connection_resync", "timeout_s": 10.0},
+		{"type": "assert_connection_recovery", "active": false, "ws_open": true},
+		{"type": "assert_session_unchanged"},
+	]
+	var err := BotScenarioRunnerScript.validate_scenario(data)
+	_assert_eq("ws reconnect proof scenario valid", err, "")
+	_assert_ne("wait_connection_recovery without expectation rejected", BotScenarioRunnerScript.validate_step({"type": "wait_connection_recovery", "timeout_s": 5.0}, 0), "")
 
 
 # --- helpers -----------------------------------------------------------------

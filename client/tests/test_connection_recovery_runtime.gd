@@ -49,6 +49,7 @@ func _test_transport_loss_starts_recovery_and_blocks_ready() -> void:
 		false,
 		false,
 		false,
+		false,
 		true,
 		client,
 		overlay,

@@ -9,6 +9,7 @@ const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
 const BotIntentRejectAssertionsScript := preload("res://scripts/bot_intent_reject_assertions.gd")
+const BotConnectionRecoveryAssertionsScript := preload("res://scripts/bot_connection_recovery_assertions.gd")
 const FLOAT_BOUND_EPSILON := 0.00001
 
 
@@ -244,6 +245,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				])
 				return false
 			return true
+		"assert_session_unchanged":
+			return BotConnectionRecoveryAssertionsScript.assert_session_unchanged(runner, state)
 		"assert_player_position_unchanged":
 			var remembered_pos: Dictionary = runner._memory.get("player_pos", {})
 			var current_pos: Dictionary = state.get("player_pos", {})
@@ -370,6 +373,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return true
 		"assert_camera_mode":
 			return _assert_camera_mode(runner, step, state)
+		"assert_connection_recovery":
+			return BotConnectionRecoveryAssertionsScript.assert_connection_recovery(runner, step, state)
 	return true
 
 

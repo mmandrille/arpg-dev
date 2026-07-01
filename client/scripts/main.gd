@@ -91,6 +91,7 @@ const MovementInputPresenterScript := preload("res://scripts/movement_input_pres
 const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
 const LevelLoadingOverlayScript := preload("res://scripts/level_loading_overlay.gd")
 const ConnectionRecoveryRuntimeScript := preload("res://scripts/connection_recovery_runtime.gd")
+const BotReconnectProofActionsScript := preload("res://scripts/bot_reconnect_proof_actions.gd")
 const ConnectionOverlayBridgeScript := preload("res://scripts/connection_overlay_bridge.gd")
 const CommandRetargetGraceScript := preload("res://scripts/command_retarget_grace.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
@@ -427,6 +428,7 @@ func _bot_uses_menu() -> bool:
 
 	return str((first_step as Dictionary).get("type", "")) == "wait_main_menu"
 func _mount_bot_controller() -> void:
+	BotReconnectProofActionsScript.reset()
 	if input_shadow != null and DisplayServer.get_name() != "headless":
 		input_shadow.set_active(true)
 	else:
@@ -1015,6 +1017,7 @@ func _process(delta: float) -> void:
 		ws_state,
 		gameplay_active,
 		bot_mode,
+		BotReconnectProofActionsScript.is_enabled(),
 		visual_replay_enabled,
 		_intentional_disconnect,
 		_session_established,
@@ -6123,6 +6126,7 @@ func get_bot_state() -> Dictionary:
 		"camera_projection": _camera_projection_for_bot(),
 		"mouse_captured": Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
 	}
+	out.merge(ConnectionRecoveryRuntimeScript.bot_state_fields(_connection_recovery_runtime, _connection_overlay, BotReconnectProofActionsScript.is_enabled()))
 	return out
 func _camera_projection_for_bot() -> String:
 	if _camera_controller == null: return "orthogonal"
@@ -6429,6 +6433,7 @@ func bot_consume_pending_event_at(index: int) -> void:
 	if ev is Dictionary:
 		_record_bot_damage_number_for_event(ev as Dictionary)
 	_bot_pending_events.remove_at(index)
+
 
 func _record_bot_damage_number_for_event(ev: Dictionary) -> void:
 	if not bot_mode:

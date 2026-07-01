@@ -8,6 +8,7 @@ const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_
 const BotMarketReceiptAssertionsScript := preload("res://scripts/bot_market_receipt_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 const BotAssertionHandlersScript := preload("res://scripts/bot_assertion_handlers.gd")
+const BotConnectionRecoveryAssertionsScript := preload("res://scripts/bot_connection_recovery_assertions.gd")
 const BotIntentRejectAssertionsScript := preload("res://scripts/bot_intent_reject_assertions.gd")
 const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
 
@@ -97,6 +98,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return runner._boss_health_bar_matches(step, state)
 		"wait_remote_player_count":
 			return runner._remote_player_count_matches(step, state)
+		"wait_connection_recovery", "wait_connection_resync":
+			return BotConnectionRecoveryAssertionsScript.connection_recovery_matches(step, state)
 		"wait_quest_journal":
 			return BotQuestJournalAssertionsScript.matches(step, state)
 		"wait_elite_objective_tracker":

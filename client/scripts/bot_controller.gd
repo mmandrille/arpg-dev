@@ -18,6 +18,7 @@ extends Node
 
 const BotMarketActionsScript := preload("res://scripts/bot_market_actions.gd")
 const BotScenarioRunnerScript := preload("res://scripts/bot_scenario_runner.gd")
+const BotReconnectProofActionsScript := preload("res://scripts/bot_reconnect_proof_actions.gd")
 
 var _runner: BotScenarioRunner
 var _scenario_id: String = ""
@@ -203,6 +204,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_set_multiplayer_search(action)
 		"select_multiplayer_sort":
 			_do_select_multiplayer_sort(action)
+		"enable_ws_reconnect_proof":
+			BotReconnectProofActionsScript.enable(_main)
+		"simulate_ws_drop":
+			BotReconnectProofActionsScript.simulate_ws_drop(_main)
 		"set_camera_mode":
 			if _main != null and _main.has_method("bot_set_camera_mode"):
 				_main.bot_set_camera_mode(str(action.get("mode", "isometric")))

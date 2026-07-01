@@ -20,6 +20,7 @@ const STEP_TYPES_ACTION := [
 	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
 	"set_market_search", "select_market_sort", "click_waypoint_level",
 	"set_camera_mode", "select_camera_mode",
+	"enable_ws_reconnect_proof", "simulate_ws_drop",
 ]
 
 

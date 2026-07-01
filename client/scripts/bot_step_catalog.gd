@@ -15,6 +15,7 @@ const STEP_TYPES_WAIT := [
 	"wait_damage_number", "wait_no_damage_number", "wait_entity_reaction",
 	"wait_movement_visual_smoothing", "wait_entity_tick_smoothing", "wait_projectile_tick_smoothing", "wait_loot_tick_smoothing", "wait_interactable_tick_smoothing", "wait_mobility_skill_smoothing", "wait_dungeon_torch_lights", "wait_command_retarget_grace", "wait_melee_lunge",
 	"wait_wall_layout", "wait_fog_of_war", "wait_intent_rejected", "wait_shop_panel", "wait_stash_panel", "wait_market_panel", "wait_bishop_panel", "wait_mercenary_panel", "wait_blacksmith_panel",
+	"wait_connection_recovery", "wait_connection_resync",
 	"wait_market_board_badges", "wait_boss_health_bar", "wait_remote_player_count",
 	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker", "wait_elite_objective_minimap",
 ]
@@ -45,7 +46,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_board_badges", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar", "assert_audio_state", "assert_resource_wallet_panel",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_mercenary_panel_visible", "assert_mercenary_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
 	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap",
-	"assert_camera_mode",
+	"assert_camera_mode", "assert_connection_recovery", "assert_session_unchanged",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_entity_buffered", "click_loot_item", "click_floor",
@@ -65,6 +66,7 @@ const STEP_TYPES_ACTION := [
 	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
 	"set_market_search", "select_market_sort", "click_waypoint_level",
 	"set_camera_mode", "select_camera_mode",
+	"enable_ws_reconnect_proof", "simulate_ws_drop",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -270,4 +272,11 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "assert_camera_mode":
 		if str(step.get("mode", "")) == "":
 			return "client_steps[%d] (%s) requires mode" % [index, stype]
+	if stype in ["wait_connection_recovery", "wait_connection_resync", "assert_connection_recovery"]:
+		var has_recovery_expectation := false
+		for key in ["active", "overlay_visible", "title_contains", "ws_open", "blocks_input"]:
+			if step.has(key):
+				has_recovery_expectation = true
+		if stype != "wait_connection_resync" and not has_recovery_expectation:
+			return "client_steps[%d] (%s) requires at least one connection recovery expectation" % [index, stype]
 	return ""

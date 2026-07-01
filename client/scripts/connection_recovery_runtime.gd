@@ -22,6 +22,17 @@ func reset_overlay(overlay: ConnectionOverlay) -> void:
 		overlay.hide_overlay()
 
 
+static func bot_state_fields(runtime: ConnectionRecoveryRuntime, overlay: ConnectionOverlay, bot_proof_enabled: bool) -> Dictionary:
+	return {
+		"connection_recovery": {
+			"active": runtime.is_active(),
+			"blocks_input": runtime.blocks_input(),
+			"bot_proof_enabled": bot_proof_enabled,
+		},
+		"connection_overlay": overlay.get_debug_state() if overlay != null else {},
+	}
+
+
 func finish_resync(overlay: ConnectionOverlay, debug: Callable) -> void:
 	if not recovery.is_active():
 		return
@@ -37,6 +48,7 @@ func tick(
 	ws_state: int,
 	gameplay_active: bool,
 	bot_mode: bool,
+	bot_reconnect_proof: bool,
 	visual_replay_enabled: bool,
 	intentional_disconnect: bool,
 	session_established: bool,
@@ -51,7 +63,7 @@ func tick(
 	ready_sent_get: Callable,
 	ready_sent_set: Callable,
 ) -> void:
-	if not gameplay_active or client == null or bot_mode or visual_replay_enabled or intentional_disconnect:
+	if not gameplay_active or client == null or (bot_mode and not bot_reconnect_proof) or visual_replay_enabled or intentional_disconnect:
 		return
 	if not session_established:
 		return

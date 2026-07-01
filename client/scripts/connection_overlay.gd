@@ -43,6 +43,17 @@ func hide_overlay() -> void:
 	visible = false
 
 
+func get_debug_state() -> Dictionary:
+	return {
+		"visible": visible,
+		"title": _title.text if _title != null else "",
+		"subtitle": _subtitle.text if _subtitle != null else "",
+		"detail": _detail.text if _detail != null else "",
+		"cancel_visible": _cancel_button.visible if _cancel_button != null else false,
+		"menu_visible": _menu_button.visible if _menu_button != null else false,
+	}
+
+
 func _build() -> void:
 	var bg := ColorRect.new()
 	bg.color = Color(0.03, 0.035, 0.05, 0.94)

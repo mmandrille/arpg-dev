@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-01 (v398 engineering review)
+Last updated: 2026-07-01 (v399 ws-reconnect-bot-proof)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-01 (v398 engineering review)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v398 — client-ws-reconnect |
+| **Latest completed slice** | v399 — ws-reconnect-bot-proof |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green; client extended bot failures triaged and fixed ($refactor 2026-07-01); `make ci-full` re-run pending |
+| **CI gate** | `make ci` green post-v399 autoloop batch; `make ci-full` re-run pending |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v398 — [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md) (2026-07-01; official cadence) |
 | **Next engineering review** | ~v408 milestone |

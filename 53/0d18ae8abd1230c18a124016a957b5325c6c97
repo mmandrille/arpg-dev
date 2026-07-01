@@ -1,0 +1,22 @@
+scripts/ci.sh
+  s_170fa4069445a2::t_7b6816ab1572f8 197-202,206,222-225
+  s_170fa4069445a2::t_8e6f8dd14c939d 162-164,168-173,175-182,187-193
+  s_170fa4069445a2::t_5034cc5621b520 390,393
+  s_170fa4069445a2::t_c4e45ec951966c 165-167,174,183-186
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "530d18ae8abd1230c18a124016a957b5325c6c97",
+  "prompts": {},
+  "sessions": {
+    "s_170fa4069445a2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2c0627b7-384b-40ea-bd23-19782ead7e87",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

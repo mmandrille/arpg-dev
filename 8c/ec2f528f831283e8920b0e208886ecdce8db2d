@@ -1,0 +1,23 @@
+client/tests/test_impact_sparks.gd
+  s_e51fd9c426278a::t_74fa2364ee46eb 7-9
+  s_e51fd9c426278a::t_fb4d9796de616a 42,59,70,78-95
+  s_e51fd9c426278a::t_7610fc42199490 16,19-20
+client/scripts/model_reaction_controller.gd
+  s_e51fd9c426278a::t_35a97750a48a52 85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8cec2f528f831283e8920b0e208886ecdce8db2d",
+  "prompts": {},
+  "sessions": {
+    "s_e51fd9c426278a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "81cdb792-667f-4c6c-88f5-be096643e54c",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

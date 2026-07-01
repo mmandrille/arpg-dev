@@ -1,0 +1,20 @@
+client/tests/test_blacksmith_panel.gd
+  s_e6e8a3f8f9d465::t_c3b93573fb194a 87-172
+  s_e6e8a3f8f9d465::t_b6c17081542cf4 82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "944234ffdb6358073b93cd1434e00952add36bad",
+  "prompts": {},
+  "sessions": {
+    "s_e6e8a3f8f9d465": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2645b0c9-0ade-4638-a892-f1f2890ec8df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1488,6 +1488,19 @@
         }
       ]
     },
+    "weapon_slot_families_lab": {
+      "player": {
+        "position": { "x": 4, "y": 5 }
+      },
+      "entities": [
+        { "type": "loot", "item_template_id": "cave_rapier", "position": { "x": 2, "y": 5 } },
+        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 3, "y": 5 } },
+        { "type": "loot", "item_template_id": "cave_heavy_blade", "position": { "x": 4, "y": 5 } },
+        { "type": "loot", "item_template_id": "cave_hunting_bow", "position": { "x": 5, "y": 5 } },
+        { "type": "loot", "item_template_id": "cave_bow", "position": { "x": 6, "y": 5 } },
+        { "type": "loot", "item_template_id": "cave_war_bow", "position": { "x": 7, "y": 5 } }
+      ]
+    },
     "damage_types_lab": {
       "player": {
         "position": {

@@ -104,6 +104,16 @@
       "icon": { "shape": "blade", "color": "#78a7b8", "accent": "#d8f0ff", "label": "CB" },
       "ground": { "shape": "blade", "color": "#78a7b8", "accent": "#d8f0ff", "scale": 1.0 }
     },
+    "cave_rapier": {
+      "family": "sword",
+      "icon": { "shape": "blade", "color": "#6ec9a8", "accent": "#d8fff0", "label": "Rp" },
+      "ground": { "shape": "blade", "color": "#6ec9a8", "accent": "#d8fff0", "scale": 0.92 }
+    },
+    "cave_heavy_blade": {
+      "family": "sword",
+      "icon": { "shape": "blade", "color": "#8a5a3a", "accent": "#ffd8b0", "label": "HB" },
+      "ground": { "shape": "blade", "color": "#8a5a3a", "accent": "#ffd8b0", "scale": 1.1 }
+    },
     "starter_paladin_sword": {
       "family": "sword",
       "icon": { "shape": "blade", "color": "#d1b457", "accent": "#fff1a8", "label": "Sw" },
@@ -152,6 +162,16 @@
       "family": "bow",
       "icon": { "shape": "bow", "color": "#8f6b42", "accent": "#e6c27b", "label": "CB" },
       "ground": { "shape": "bow", "color": "#8f6b42", "accent": "#e6c27b", "scale": 1.0 }
+    },
+    "cave_hunting_bow": {
+      "family": "bow",
+      "icon": { "shape": "bow", "color": "#4f9a62", "accent": "#d6f2b8", "label": "Hu" },
+      "ground": { "shape": "bow", "color": "#4f9a62", "accent": "#d6f2b8", "scale": 0.95 }
+    },
+    "cave_war_bow": {
+      "family": "bow",
+      "icon": { "shape": "bow", "color": "#6a4030", "accent": "#e8c090", "label": "WB" },
+      "ground": { "shape": "bow", "color": "#6a4030", "accent": "#e8c090", "scale": 1.08 }
     },
     "cave_shield": { "family": "shield" },
     "cave_helm": { "family": "helm" },

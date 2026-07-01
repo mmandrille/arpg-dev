@@ -4,22 +4,25 @@ extends RefCounted
 
 static func item_level(item: Dictionary) -> int:
 	var rolled = item.get("rolled_stats", {})
-	if typeof(rolled) == TYPE_DICTIONARY:
-		var payload := rolled as Dictionary
-		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-			return int((payload.get("stats", {}) as Dictionary).get("item_level", 0))
-		return int(payload.get("item_level", 0))
-	return 0
+	if typeof(rolled) != TYPE_DICTIONARY:
+		return 0
+
+	return rolled_payload_item_level(rolled as Dictionary)
+
+
+static func rolled_payload_item_level(payload: Dictionary) -> int:
+	if payload.has("stats") and typeof(payload.get("stats")) == TYPE_DICTIONARY:
+		return int((payload.get("stats") as Dictionary).get("item_level", 0))
+
+	return int(payload.get("item_level", 0))
 
 
 static func shard_level(item: Dictionary) -> int:
 	var rolled = item.get("rolled_stats", {})
 	if typeof(rolled) != TYPE_DICTIONARY:
 		return 1
-	var payload := rolled as Dictionary
-	if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-		return maxi(1, int((payload.get("stats", {}) as Dictionary).get("item_level", 1)))
-	return maxi(1, int(payload.get("item_level", 1)))
+
+	return maxi(1, rolled_payload_item_level(rolled as Dictionary))
 
 
 static func upgrade_sell_price(item: Dictionary) -> int:
@@ -83,7 +86,7 @@ static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	var base_cost := int(context.get("base_cost", 0))
 	var growth_cost := int(context.get("growth_cost", 0))
 	var level := item_level(item)
-	var resource_required_level := int(context.get("resource_required_level", level + 1))
+	var resource_required_level := int(context.get("resource_required_level", maxi(1, level)))
 	var cost := next_cost(item, base_cost, growth_cost)
 	var lines: Array = []
 	var stats := _summary_stat_map(item)
@@ -136,8 +139,8 @@ static func _stats_map(item: Dictionary) -> Dictionary:
 	var rolled: Variant = item.get("rolled_stats", {})
 	if typeof(rolled) == TYPE_DICTIONARY:
 		var payload := _dictionary_from_variant(rolled)
-		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-			var nested := _dictionary_from_variant(payload.get("stats", {}))
+		if payload.has("stats") and typeof(payload.get("stats")) == TYPE_DICTIONARY:
+			var nested := _dictionary_from_variant(payload.get("stats"))
 			_merge_missing_stats(nested, base_stats)
 			return nested
 		var out := payload

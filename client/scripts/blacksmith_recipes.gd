@@ -54,10 +54,7 @@ static func resource_item_def_id(recipe_id: String) -> String:
 
 
 static func required_resource_level(recipe_id: String, item: Dictionary) -> int:
-	var item_level := BlacksmithUpgradePreviewScript.item_level(item)
-	if recipe_id == RECIPE_ITEM_RENEW:
-		return maxi(1, item_level)
-	return item_level + 1
+	return maxi(1, BlacksmithUpgradePreviewScript.item_level(item))
 
 
 static func _option(id: String, option_label: String, option_eligibility: String, resource_item_def_id: String, resource_count: int, success_chance_percent: int, max_level: int) -> Dictionary:

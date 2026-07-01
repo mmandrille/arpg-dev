@@ -10,7 +10,7 @@ static func required_resource_level(recipe_id: String, item: Dictionary) -> int:
 
 
 static func required_shard_level(item: Dictionary) -> int:
-	return BlacksmithUpgradePreviewScript.item_level(item) + 1
+	return maxi(1, BlacksmithUpgradePreviewScript.item_level(item))
 
 
 static func resource_inventory_count(items: Array, resource_item_def_id: String, min_level: int = -1) -> int:

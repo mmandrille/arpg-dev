@@ -626,7 +626,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.Pity.Failures != 0 {
 		t.Fatalf("upgraded route stats = %+v", stats)
 	}
-	addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, "route_upgrade_shard_2_"+suffix, 2)
+	addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, "route_upgrade_shard_2_"+suffix, 1)
 	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("second upgrade status = %d body=%s", rec.Code, rec.Body.String())

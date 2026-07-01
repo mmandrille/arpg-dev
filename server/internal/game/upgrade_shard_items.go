@@ -9,6 +9,17 @@ const UpgradeShardItemDefID = "upgrade_shard"
 
 const defaultAppraisalShopID = "town_vendor"
 
+// UpgradeShardMinLevel returns the minimum leveled upgrade-shard tier required to
+// upgrade an item currently at currentLevel. The shard must be the same tier or higher;
+// consumable tiers floor at 1.
+func UpgradeShardMinLevel(currentLevel int) int {
+	if currentLevel < 1 {
+		return 1
+	}
+
+	return currentLevel
+}
+
 // NewUpgradeShardRollPayload builds the durable loot/inventory payload for a leveled shard.
 func NewUpgradeShardRollPayload(level int) *ItemRollPayload {
 	if level < 1 {

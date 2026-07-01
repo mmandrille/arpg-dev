@@ -1,0 +1,53 @@
+{
+  "id": "codex_foundation",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "title": "Codex foundation",
+  "description": "Open the main-menu Codex, browse to the Barbarian class page, and assert compiled rules content is visible.",
+  "client_steps": [
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_main_menu_actions",
+      "labels": [
+        "Create Game",
+        "Join Game",
+        "Codex",
+        "Settings",
+        "Exit"
+      ],
+      "actions": [
+        "create_game",
+        "join_game",
+        "codex",
+        "settings",
+        "exit"
+      ]
+    },
+    {
+      "type": "click_menu_button",
+      "button": "codex"
+    },
+    {
+      "type": "wait_codex_panel",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "assert_codex_panel",
+      "visible": true,
+      "chapter_id": "concepts",
+      "min_chapter_count": 3
+    },
+    {
+      "type": "click_menu_button",
+      "button": "back"
+    },
+    {
+      "type": "wait_main_menu",
+      "timeout_s": 3.0
+    }
+  ]
+}

@@ -5,6 +5,7 @@ const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 
 signal create_game_pressed
 signal join_game_pressed
+signal codex_pressed
 signal settings_pressed
 signal exit_pressed
 
@@ -44,8 +45,8 @@ func _build() -> void:
 	box.set_anchors_preset(Control.PRESET_CENTER)
 	box.offset_left = -170
 	box.offset_right = 170
-	box.offset_top = -160
-	box.offset_bottom = 160
+	box.offset_top = -190
+	box.offset_bottom = 190
 	add_child(box)
 
 	_title = Label.new()
@@ -62,6 +63,7 @@ func _build() -> void:
 
 	box.add_child(_button(TextCatalogScript.get_text("menu.create_game", "Create Game"), create_game_pressed.emit, "create_game"))
 	box.add_child(_button(TextCatalogScript.get_text("menu.join_game", "Join Game"), join_game_pressed.emit, "join_game"))
+	box.add_child(_button(TextCatalogScript.get_text("menu.codex", "Codex"), codex_pressed.emit, "codex"))
 	box.add_child(_button(TextCatalogScript.get_text("menu.settings", "Settings"), settings_pressed.emit))
 	box.add_child(_button(TextCatalogScript.get_text("menu.exit", "Exit"), exit_pressed.emit))
 	refresh_texts()
@@ -84,7 +86,7 @@ func button_labels() -> Array:
 
 
 func available_actions() -> Array:
-	return ["create_game", "join_game", "settings", "exit"]
+	return ["create_game", "join_game", "codex", "settings", "exit"]
 
 
 func set_account_email(email: String) -> void:
@@ -102,11 +104,13 @@ func refresh_texts() -> void:
 		_account_label.visible = _account_text != ""
 	_set_button_text("create_game", TextCatalogScript.get_text("menu.create_game", "Create Game"))
 	_set_button_text("join_game", TextCatalogScript.get_text("menu.join_game", "Join Game"))
+	_set_button_text("codex", TextCatalogScript.get_text("menu.codex", "Codex"))
 	_set_button_text("settings", TextCatalogScript.get_text("menu.settings", "Settings"))
 	_set_button_text("exit", TextCatalogScript.get_text("menu.exit", "Exit"))
 	_button_labels = [
 		TextCatalogScript.get_text("menu.create_game", "Create Game"),
 		TextCatalogScript.get_text("menu.join_game", "Join Game"),
+		TextCatalogScript.get_text("menu.codex", "Codex"),
 		TextCatalogScript.get_text("menu.settings", "Settings"),
 		TextCatalogScript.get_text("menu.exit", "Exit"),
 	]

@@ -5,6 +5,8 @@
     "app.title": "ARPG Dev",
     "menu.create_game": "Create Game",
     "menu.join_game": "Join Game",
+    "menu.codex": "Codex",
+    "menu.back": "Back",
     "menu.settings": "Settings",
     "menu.exit": "Exit",
     "pause.title": "Paused",

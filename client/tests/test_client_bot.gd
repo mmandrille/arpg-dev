@@ -319,7 +319,7 @@ func _test_v45_menu_step_types_load() -> void:
 	var data := _make_valid_scenario()
 	data["client_steps"] = [
 		{"type": "wait_main_menu", "timeout_s": 1.0},
-		{"type": "assert_main_menu_actions", "labels": ["Create Game", "Join Game", "Settings", "Exit"], "actions": ["create_game", "join_game", "settings", "exit"]},
+		{"type": "assert_main_menu_actions", "labels": ["Create Game", "Join Game", "Codex", "Settings", "Exit"], "actions": ["create_game", "join_game", "codex", "settings", "exit"]},
 		{"type": "click_menu_button", "button": "create_game"},
 		{"type": "assert_character_panel", "mode": "forced_create", "title": "Create Character", "name_field_visible": true, "create_button_visible": true},
 		{"type": "assert_character_panel", "min_level": 1, "min_gold": 0, "min_deepest_dungeon_depth": 0, "status": "Ready"},
@@ -352,8 +352,8 @@ func _test_v45_menu_assertions() -> void:
 	}
 	runner.load_scenario(data)
 	var state := {
-		"main_menu_button_labels": ["Create Game", "Join Game", "Settings", "Exit"],
-		"main_menu_actions": ["create_game", "join_game", "settings", "exit"],
+		"main_menu_button_labels": ["Create Game", "Join Game", "Codex", "Settings", "Exit"],
+		"main_menu_actions": ["create_game", "join_game", "codex", "settings", "exit"],
 		"character_panel": {
 			"mode": "choose_or_create",
 			"title": "Choose Character",

@@ -65,6 +65,7 @@ const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
+const CodexPanelScript := preload("res://scripts/codex_panel.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const DirectionalAttackInputScript := preload("res://scripts/directional_attack_input.gd")
@@ -224,6 +225,7 @@ var main_menu: MainMenu
 var character_panel: CharacterSelectPanel
 var multiplayer_panel: MultiplayerSessionsPanel
 var settings_panel: SettingsPanel
+var codex_panel: CodexPanel
 var audio_controller: ClientAudioController
 var pause_menu: PauseMenu
 var loss_popup: Control
@@ -499,6 +501,8 @@ func _hide_all_menus() -> void:
 		multiplayer_panel.hide_panel()
 	if settings_panel != null:
 		settings_panel.hide_panel()
+	if codex_panel != null:
+		codex_panel.hide_panel()
 	if pause_menu != null:
 		pause_menu.hide_pause()
 	if loss_popup != null:
@@ -680,6 +684,18 @@ func _on_settings_from_main() -> void:
 	settings_return_target = "main"
 	main_menu.visible = false
 	ClientAudioBridgeScript.show_settings(settings_panel, client_settings)
+
+func _on_codex_from_main() -> void:
+	if main_menu != null:
+		main_menu.visible = false
+	if codex_panel != null:
+		codex_panel.show_codex()
+
+func _on_codex_back() -> void:
+	if codex_panel != null:
+		codex_panel.hide_panel()
+	if main_menu != null:
+		main_menu.show_menu()
 func _on_settings_from_pause() -> void:
 	settings_return_target = "pause"
 	if pause_menu != null:
@@ -851,6 +867,8 @@ func _refresh_localized_texts() -> void:
 		pause_menu.refresh_texts()
 	if settings_panel != null:
 		settings_panel.refresh_texts()
+	if codex_panel != null:
+		codex_panel.refresh_texts()
 
 func _show_pause_menu() -> void:
 	if gameplay_active and pause_menu != null: pause_menu.show_pause()
@@ -3939,6 +3957,7 @@ func _setup_menu_layer() -> void:
 	main_menu.create_game_pressed.connect(_on_create_game_pressed)
 	main_menu.join_game_pressed.connect(_on_join_game_pressed)
 	main_menu.settings_pressed.connect(_on_settings_from_main)
+	main_menu.codex_pressed.connect(_on_codex_from_main)
 	main_menu.exit_pressed.connect(_exit_game)
 	menu_layer.add_child(main_menu)
 
@@ -3975,6 +3994,10 @@ func _setup_menu_layer() -> void:
 	settings_panel.sfx_volume_changed.connect(_on_sfx_volume_changed)
 	settings_panel.map_opacity_changed.connect(_on_map_opacity_changed)
 	menu_layer.add_child(settings_panel)
+
+	codex_panel = CodexPanelScript.new()
+	codex_panel.back_requested.connect(_on_codex_back)
+	menu_layer.add_child(codex_panel)
 
 	pause_menu = PauseMenuScript.new()
 	pause_menu.resume_pressed.connect(_resume_from_pause)
@@ -6014,6 +6037,8 @@ func get_bot_state() -> Dictionary:
 		"character_panel_title": character_panel.title_text() if character_panel != null else "",
 		"multiplayer_panel_visible": multiplayer_panel != null and multiplayer_panel.visible,
 		"settings_panel_visible": settings_panel != null and settings_panel.visible,
+		"codex_panel_visible": codex_panel != null and codex_panel.visible,
+		"codex_panel": codex_panel.get_debug_state() if codex_panel != null else {},
 		"pause_menu_visible": pause_menu != null and pause_menu.visible,
 		"loss_popup_visible": loss_popup != null and loss_popup.visible,
 		"selected_window_size": ClientSettingsScript.size_label(client_settings.window_size) if client_settings != null else "",
@@ -6296,8 +6321,12 @@ func bot_click_menu_button(button: String) -> void:
 				_on_settings_from_pause()
 			else:
 				_on_settings_from_main()
+		"codex":
+			_on_codex_from_main()
 		"back":
-			if settings_panel != null and settings_panel.visible:
+			if codex_panel != null and codex_panel.visible:
+				_on_codex_back()
+			elif settings_panel != null and settings_panel.visible:
 				_on_settings_back()
 			elif character_panel != null and character_panel.visible:
 				_on_character_panel_back()

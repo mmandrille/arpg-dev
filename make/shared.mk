@@ -1,8 +1,11 @@
 # --- Shared contracts ---------------------------------------------------------
-.PHONY: validate-shared validate-assets gen-assets gen-anims
+.PHONY: validate-shared validate-assets gen-assets gen-anims gen-codex
 validate-shared: tools ## Validate all shared JSON (protocol, rules, golden) against schemas
 	$(PY) tools/validate_shared.py
 	$(PY) tools/validate_codemap.py
+
+gen-codex: tools ## Regenerate shared/content/codex_index.v0.json from rules/assets
+	$(PY) tools/content/build_codex.py
 
 validate-assets: tools ## Validate the asset manifest, runtime .glb paths, and GLB nodes
 	$(PY) tools/assets/validate_assets.py

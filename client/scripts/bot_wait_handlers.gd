@@ -24,6 +24,8 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return bool(state.get("multiplayer_panel_visible", false))
 		"wait_settings_panel":
 			return bool(state.get("settings_panel_visible", false))
+		"wait_codex_panel":
+			return bool(state.get("codex_panel_visible", false))
 		"wait_pause_menu":
 			return bool(state.get("pause_menu_visible", false))
 		"wait_character_progression":

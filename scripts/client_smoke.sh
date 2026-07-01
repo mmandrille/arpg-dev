@@ -200,6 +200,8 @@ run_gate "GDScript client audio controller test" "[gdtest] PASS: test_client_aud
 run_gate "GDScript character bar test" "[gdtest] PASS: test_character_bar" res://tests/test_character_bar.gd
 run_gate "GDScript character stats panel test" "[gdtest] PASS: test_character_stats_panel" res://tests/test_character_stats_panel.gd
 run_gate "GDScript skill rules loader test" "[gdtest] PASS: test_skill_rules_loader" res://tests/test_skill_rules_loader.gd
+run_gate "GDScript codex loader test" "[gdtest] PASS: test_codex_loader" res://tests/test_codex_loader.gd
+run_gate "GDScript codex panel test" "[gdtest] PASS: test_codex_panel" res://tests/test_codex_panel.gd
 run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://tests/test_skills_panel.gd
 run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/test_skill_bar.gd
 run_gate "GDScript status effects bar test" "[gdtest] PASS: test_status_effects_bar" res://tests/test_status_effects_bar.gd

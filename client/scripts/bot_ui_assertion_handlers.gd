@@ -1,6 +1,8 @@
 class_name BotUiAssertionHandlers
 extends RefCounted
 
+const BotCodexAssertionsScript := preload("res://scripts/bot_codex_assertions.gd")
+
 
 static func try_evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> Dictionary:
 	match stype:
@@ -33,6 +35,13 @@ static func try_evaluate(runner, step: Dictionary, stype: String, state: Diction
 			return _handled(runner._assert_multiplayer_filter(step, state))
 		"assert_settings_panel_visible":
 			return _handled(runner._assert_bool_state("assert_settings_panel_visible", "settings_panel_visible", step, state))
+		"assert_codex_panel":
+			if not BotCodexAssertionsScript.matches(step, state):
+				runner._fail("assert_codex_panel failed: want=%s panel=%s step=%d scenario=%s" % [
+					str(step), str(state.get("codex_panel", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return _handled(false)
+			return _handled(true)
 		"assert_pause_menu_visible":
 			return _handled(runner._assert_bool_state("assert_pause_menu_visible", "pause_menu_visible", step, state))
 		"assert_character_stats_panel_visible":

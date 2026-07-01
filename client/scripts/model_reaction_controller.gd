@@ -82,7 +82,7 @@ func play_hit(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_direction: 
 
 
 func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_direction: Vector3 = Vector3.BACK) -> void:
-	if _root == null:
+	if _root == null or _terminal:
 		return
 	_terminal = true
 	_highlighted = false

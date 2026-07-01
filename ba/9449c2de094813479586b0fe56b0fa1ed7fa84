@@ -1,0 +1,42 @@
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_e6e8a3f8f9d465::t_b5a1d455819348 32-33
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_e6e8a3f8f9d465::t_5d5d43a6a2a3f9 28
+.maintainability/file-size-baseline.tsv
+  s_e6e8a3f8f9d465::t_8100c7bf9e6b98 3
+  s_e6e8a3f8f9d465::t_90b0bd1e0e7aed 8
+  s_e6e8a3f8f9d465::t_08e709e9949b89 31
+  s_e6e8a3f8f9d465::t_1a51562de953b7 9
+  s_e6e8a3f8f9d465::t_62fdd7459d486c 10
+shared/rules/item_templates.v0.json
+  s_e6e8a3f8f9d465::t_7d43f5e951d7c2 49
+docs/progress/scenario-movement-audit.tsv
+  s_e6e8a3f8f9d465::t_0d234c1614e64e 218-219
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_e6e8a3f8f9d465::t_bf33d61c563932 18
+shared/golden/dungeon_equipment_drops.json
+  s_e6e8a3f8f9d465::t_7fc4b4417315db 60
+  s_e6e8a3f8f9d465::t_7fa330a93df2f4 71
+shared/golden/treasure_class_rolls.json
+  s_e6e8a3f8f9d465::t_8fdea99b297ddb 9,18,27,39,42,51,54,63,66
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_e6e8a3f8f9d465::t_fe9e02f1c0187d 34-35
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_e6e8a3f8f9d465::t_da0a0d32b03325 34-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ba9449c2de094813479586b0fe56b0fa1ed7fa84",
+  "prompts": {},
+  "sessions": {
+    "s_e6e8a3f8f9d465": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2645b0c9-0ade-4638-a892-f1f2890ec8df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

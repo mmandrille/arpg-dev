@@ -159,12 +159,51 @@ stream_bot_progress() {
   '
 }
 
+protocol_bot_failure_detail() {
+  local log_path="$1"
+  awk '
+    /\] scenario begin / {
+      total++
+    }
+    /\] scenario failed / {
+      line = $0
+      sub(/^.*\] scenario failed /, "", line)
+      scenario = line
+      sub(/ .*/, "", scenario)
+      if (!seen[scenario]++) {
+        failed++
+        if (scenarios != "") {
+          scenarios = scenarios ", " scenario
+        } else {
+          scenarios = scenario
+        }
+      }
+    }
+    END {
+      if (failed > 0 && total > 0) {
+        printf "%d of %d failed: %s", failed, total, scenarios
+      } else if (failed > 0) {
+        printf "%d failed: %s", failed, scenarios
+      } else {
+        printf "protocol bot failed"
+      }
+    }
+  ' "$log_path"
+}
+
 client_bot_failure_detail() {
   local log_path="$1"
   awk '
+    /^RUNNING: client bot scenario / {
+      total++
+    }
+    /^\[bot-client .*\] running scenario: / {
+      total++
+    }
     /^\[bot-client\] FAIL [^ ]+ --/ {
       scenario = $3
       if (!seen[scenario]++) {
+        failed++
         if (scenarios != "") {
           scenarios = scenarios ", " scenario
         } else {
@@ -180,8 +219,10 @@ client_bot_failure_detail() {
       validation = "scenario file validation failed"
     }
     END {
-      if (scenarios != "") {
-        printf "client bot scenario(s) failed: %s", scenarios
+      if (failed > 0 && total > 0) {
+        printf "%d of %d failed: %s", failed, total, scenarios
+      } else if (failed > 0) {
+        printf "%d failed: %s", failed, scenarios
       } else if (validation != "") {
         printf "%s", validation
       } else {
@@ -346,9 +387,10 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
   if [[ "$bot_status" -ne 0 ]]; then
     echo "FAILED: protocol bot"
     show_log "$BOT_LOG" "protocol bot"
+    bot_failure_detail="$(protocol_bot_failure_detail "$BOT_LOG")"
     rm -f "$BOT_LOG"
     step9_failed=1
-    step9_failure_details+=("protocol bot failed")
+    step9_failure_details+=("$bot_failure_detail")
   else
     if [[ "${ARPG_VERBOSE:-0}" == "1" ]]; then
       cat "$BOT_LOG"

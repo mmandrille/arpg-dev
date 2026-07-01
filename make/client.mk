@@ -39,10 +39,10 @@ model: tools ## Preview a model: make model model=<asset_id> [CHECK=1]
 	fi
 
 play: db-up ## Play locally: use `mail=user@example.com` for one account, or `make play 3` for co-op
-	GODOT="$(GODOT)" ARPG_ADDR="$(PLAY_ADDR)" BASE_URL="$(PLAY_BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" $(PLAY_MAIL_ENV) ./scripts/play.sh
+	ARPG_GAMEPLAY_DEBUG=false GODOT="$(GODOT)" ARPG_ADDR="$(PLAY_ADDR)" BASE_URL="$(PLAY_BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" $(PLAY_MAIL_ENV) ./scripts/play.sh
 
-play-debug: db-up ## Play locally with perf logs captured to /tmp/arpg-perf.log
-	ARPG_PERF_DEBUG=true GODOT="$(GODOT)" ARPG_ADDR="$(PLAY_ADDR)" BASE_URL="$(PLAY_BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" $(PLAY_MAIL_ENV) ./scripts/play.sh 2>&1 | tee /tmp/arpg-perf.log
+play-debug: db-up ## Play locally with gameplay debug + perf logs captured to /tmp/arpg-perf.log
+	ARPG_GAMEPLAY_DEBUG=true ARPG_PERF_DEBUG=true GODOT="$(GODOT)" ARPG_ADDR="$(PLAY_ADDR)" BASE_URL="$(PLAY_BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" $(PLAY_MAIL_ENV) ./scripts/play.sh 2>&1 | tee /tmp/arpg-perf.log
 
 play-remote: ## Launch menu client(s) against an existing backend: `BASE_URL=https://... make play-remote 3`
 	GODOT="$(GODOT)" BASE_URL="$(BASE_URL)" PLAY_CLIENTS="$(PLAY_CLIENTS)" ./scripts/play_remote.sh

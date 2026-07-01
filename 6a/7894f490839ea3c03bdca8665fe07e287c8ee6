@@ -1,0 +1,24 @@
+client/scripts/main.gd
+  s_150b2d5e6cf21f::t_4e39c060f1e033 947-952
+client/tests/test_coop_client.gd
+  s_150b2d5e6cf21f::t_b0cd3482d8669b 26-27
+  s_150b2d5e6cf21f::t_c3237ff58a45c6 69
+  s_150b2d5e6cf21f::t_5f9616b443679d 297-299,301-314,316-321
+  s_150b2d5e6cf21f::t_8a9ba9a67d0369 300,315
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6a7894f490839ea3c03bdca8665fe07e287c8ee6",
+  "prompts": {},
+  "sessions": {
+    "s_150b2d5e6cf21f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b2bd02fe-2d71-403a-951d-956c94426c39",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

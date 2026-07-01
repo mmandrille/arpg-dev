@@ -75,6 +75,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		SkillCooldowns:        cooldowns,
 		SkillEffects:          effects,
 		PoisonDots:            make(map[uint64]poisonDotState),
+		BleedDots:             make(map[uint64]bleedDotState),
 		UniqueBurnDots:        make(map[string]uniqueBurnDotState),
 		UniqueExecutionMarks:  make(map[uint64]uniqueExecutionMarkState),
 		UniqueHungerStacks:    make(map[uint64]uniqueHungerStackState),
@@ -348,6 +349,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.poisonDots == nil {
 		s.poisonDots = make(map[uint64]poisonDotState)
 	}
+	s.bleedDots = ps.BleedDots
+	if s.bleedDots == nil {
+		s.bleedDots = make(map[uint64]bleedDotState)
+	}
 	s.rogueMarks = ps.RogueMarks
 	if s.rogueMarks == nil {
 		s.rogueMarks = make(map[uint64]rogueMarkState)
@@ -414,6 +419,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.SkillCooldowns = s.skillCooldowns
 	ps.SkillEffects = s.skillEffects
 	ps.PoisonDots = s.poisonDots
+	ps.BleedDots = s.bleedDots
 	ps.RogueMarks = s.rogueMarks
 	ps.UniqueBurnDots = s.uniqueBurnDots
 	ps.UniqueExecutionMarks = s.uniqueExecutionMarks

@@ -88,7 +88,7 @@ static func entities_presentation_debug(entities: Dictionary) -> Array:
 			"active_aura_id": AuraSoftLightsScript.active_aura_id(node),
 			"aura_light_range": AuraSoftLightsScript.aura_light_range(node),
 			"aura_light_color": AuraSoftLightsScript.aura_light_color(node),
-			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node), "has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
+			"has_burning_effect": PlayerStatusEffectMarkers.has_burning_effect(node), "has_bleed_effect": PlayerStatusEffectMarkers.has_bleed_effect(node), "has_elite_command_effect": PlayerStatusEffectMarkers.has_elite_command_effect(node),
 			"has_pinning_root_effect": PlayerStatusEffectMarkers.has_pinning_root_effect(node), "has_stun_effect": PlayerStatusEffectMarkers.has_stun_effect(node),
 			"has_rogue_mark_effect": PlayerStatusEffectMarkers.has_rogue_mark_effect(node),
 			"has_elite_command_radius_preview": PlayerStatusEffectMarkers.has_elite_command_radius_preview(node), "elite_command_radius_preview": PlayerStatusEffectMarkers.elite_command_radius_preview_value(node),

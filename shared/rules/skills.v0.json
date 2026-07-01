@@ -823,8 +823,10 @@
         "damage_percent_base": 50,
         "damage_percent_per_magic": 3,
         "max_damage_bonus_percent": 50,
-        "stun_effect_id": "dash_stun",
-        "stun_duration_ticks": 15
+        "bleed_effect_id": "dash_bleed",
+        "bleed_damage_percent_max_hp": 5,
+        "bleed_duration_ticks": 50,
+        "bleed_interval_ticks": 10
       },
       "cooldown": {
         "type": "attack_interval_multiplier",

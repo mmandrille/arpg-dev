@@ -13,6 +13,19 @@ type poisonDotState struct {
 	CorrelationID  string
 }
 
+type bleedDotState struct {
+	SourcePlayerID         uint64
+	TargetID               uint64
+	SkillID                string
+	EffectID               string
+	DamagePercentMaxHP     int
+	IntervalTicks          int
+	NextTick               uint64
+	RemainingTicks         int
+	TotalTicks             int
+	CorrelationID          string
+}
+
 type rogueMarkState struct {
 	SourcePlayerID     uint64
 	TargetID           uint64
@@ -23,6 +36,17 @@ type rogueMarkState struct {
 	TotalTicks         int
 	EffectID           string
 	CorrelationID      string
+}
+
+func cloneBleedDots(in map[uint64]bleedDotState) map[uint64]bleedDotState {
+	if len(in) == 0 {
+		return make(map[uint64]bleedDotState)
+	}
+	out := make(map[uint64]bleedDotState, len(in))
+	for targetID, dot := range in { //nolint:determinism — pure map clone, output is a map
+		out[targetID] = dot
+	}
+	return out
 }
 
 func clonePoisonDots(in map[uint64]poisonDotState) map[uint64]poisonDotState {
@@ -167,9 +191,120 @@ func (s *Sim) applyDashSkill(player *entity, skillID string, def SkillDef, rank 
 				res.Events[i].SkillID = skillID
 			}
 		}
-		if target.hp > 0 && def.Dash.StunDurationTicks > 0 {
-			s.applyMonsterRoot(target, player.id, skillID, SkillRootDef{EffectID: def.Dash.StunEffectID, DurationTicks: def.Dash.StunDurationTicks}, correlationID, res)
+		if target.hp > 0 && def.Dash.BleedDurationTicks > 0 {
+			s.startBleedDot(player, target, skillID, def.Dash, correlationID, res)
 		}
+	}
+}
+
+func (s *Sim) startBleedDot(player *entity, target *entity, skillID string, dash SkillDashDef, correlationID string, res *TickResult) {
+	if player == nil || target == nil || target.kind != monsterEntity || target.hp <= 0 || dash.BleedDurationTicks <= 0 {
+		return
+	}
+	if s.bleedDots == nil {
+		s.bleedDots = make(map[uint64]bleedDotState)
+	}
+	interval := dash.BleedIntervalTicks
+	if interval <= 0 {
+		interval = 10
+	}
+	duration := dash.BleedDurationTicks
+	effectID := dash.BleedEffectID
+	if effectID == "" {
+		effectID = "bleed"
+	}
+	dot := bleedDotState{
+		SourcePlayerID:     player.id,
+		TargetID:           target.id,
+		SkillID:            skillID,
+		EffectID:           effectID,
+		DamagePercentMaxHP: dash.BleedDamagePercentMaxHP,
+		IntervalTicks:      interval,
+		NextTick:           s.tick + uint64(interval),
+		RemainingTicks:     duration,
+		TotalTicks:         duration,
+		CorrelationID:      correlationID,
+	}
+	s.bleedDots[target.id] = dot
+	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+	res.Events = append(res.Events, Event{
+		EventType:      "skill_effect_started",
+		EntityID:       idStr(target.id),
+		SourceEntityID: idStr(player.id),
+		TargetEntityID: idStr(target.id),
+		CorrelationID:  correlationID,
+		SkillID:        skillID,
+		Amount:         intPtr(dash.BleedDamagePercentMaxHP),
+		RemainingTicks: intPtr(duration),
+		TotalTicks:     intPtr(duration),
+	})
+}
+
+func (s *Sim) advanceBleedDots(res *TickResult) {
+	if len(s.bleedDots) == 0 {
+		return
+	}
+	for _, targetID := range sortedUint64Keys(s.bleedDots) {
+		dot := s.bleedDots[targetID]
+		target := s.activeLevel().entities[targetID]
+		if target == nil || target.kind != monsterEntity || target.hp <= 0 || dot.RemainingTicks <= 0 {
+			if target != nil && dot.EffectID != "" {
+				removeEffectIDAndUpdate(target, dot.EffectID, s, res)
+			}
+			delete(s.bleedDots, targetID)
+			continue
+		}
+		if s.tick < dot.NextTick {
+			continue
+		}
+		interval := dot.IntervalTicks
+		if interval <= 0 {
+			interval = 10
+		}
+		rawDamage := percentOf(target.maxHP, dot.DamagePercentMaxHP)
+		damage := s.applyResistanceToDamage(rawDamage, s.monsterResistance(target, damageTypeForce))
+		if damage > target.hp {
+			damage = target.hp
+		}
+		target.hp -= damage
+		dot.RemainingTicks -= interval
+		dot.NextTick += uint64(interval)
+		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+		res.Events = append(res.Events, Event{
+			EventType:       "monster_damaged",
+			EntityID:        idStr(target.id),
+			SourceEntityID:  idStr(dot.SourcePlayerID),
+			TargetEntityID:  idStr(target.id),
+			CorrelationID:   dot.CorrelationID,
+			SkillID:         dot.SkillID,
+			Damage:          intPtr(damage),
+			DamageType:      damageTypeForce,
+			Outcome:         "hit",
+			RawDamage:       intPtr(rawDamage),
+			MitigatedDamage: intPtr(rawDamage),
+		})
+		if damage > 0 {
+			s.tryPassiveExecute(target, dot.SourcePlayerID, dot.CorrelationID, res)
+		}
+		if target.hp == 0 {
+			s.finishMonsterKill(target, dot.SourcePlayerID, dot.CorrelationID, res)
+			delete(s.bleedDots, targetID)
+			continue
+		}
+		if dot.RemainingTicks <= 0 {
+			removeEffectIDAndUpdate(target, dot.EffectID, s, res)
+			delete(s.bleedDots, targetID)
+			res.Events = append(res.Events, Event{
+				EventType:      "skill_effect_ended",
+				EntityID:       idStr(target.id),
+				SourceEntityID: idStr(dot.SourcePlayerID),
+				TargetEntityID: idStr(target.id),
+				SkillID:        dot.SkillID,
+			})
+			continue
+		}
+		s.bleedDots[targetID] = dot
 	}
 }
 

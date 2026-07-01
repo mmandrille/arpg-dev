@@ -53,6 +53,7 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 				s.expireSkillEffects(res)
 				s.advanceRogueMarks(res)
 				s.advancePoisonDots(res)
+				s.advanceBleedDots(res)
 				s.advanceUniqueBurnDots(res)
 				s.advanceOffensiveUniqueEffectStates(res)
 				channelActive = s.applyActiveSkillChannel(res)

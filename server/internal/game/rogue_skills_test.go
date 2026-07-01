@@ -102,11 +102,49 @@ func TestRogueDashMovesThroughAndDamagesTarget(t *testing.T) {
 	if target.hp >= 20 {
 		t.Fatalf("dash target hp = %d, want damaged", target.hp)
 	}
-	if !containsStringValue(target.effectIDs, "dash_stun") {
-		t.Fatalf("dash target effects = %+v, want dash_stun", target.effectIDs)
+	if !containsStringValue(target.effectIDs, "dash_bleed") {
+		t.Fatalf("dash target effects = %+v, want dash_bleed", target.effectIDs)
 	}
 	if !hasEvent(cast, "skill_effect_started") {
-		t.Fatalf("dash events = %+v, want stun skill_effect_started", cast.Events)
+		t.Fatalf("dash events = %+v, want bleed skill_effect_started", cast.Events)
+	}
+}
+
+func TestRogueDashBleedTicksPercentMaxHPAndRefreshes(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	rules.Combat.BaseHitChance = 1
+	rules.Combat.BaseCritChance = 0
+	sim := newRogueSkillTestSim(t, rules)
+	player := sim.entities[sim.playerID]
+	target := addRogueSkillTarget(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 100)
+	target.maxHP = 100
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "dash_bleed",
+		CorrelationID: "corr_dash_bleed",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "dash", Direction: &Vec2{X: 1}},
+	}})
+	assertAck(t, cast, "dash_bleed")
+	dot, ok := sim.bleedDots[target.id]
+	if !ok || dot.RemainingTicks != 50 {
+		t.Fatalf("bleed dot = %+v ok=%v, want 50 remaining ticks", dot, ok)
+	}
+
+	sim.tick += 10
+	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+	sim.advanceBleedDots(&res)
+	if damage := eventDamage(res, "monster_damaged"); damage != 5 {
+		t.Fatalf("first bleed tick damage = %d, want 5 (5%% of 100 max hp)", damage)
+	}
+
+	dot.RemainingTicks = 10
+	sim.bleedDots[target.id] = dot
+	refresh := TickResult{Tick: sim.tick, Level: sim.currentLevel}
+	sim.startBleedDot(player, target, "dash", rules.Skills["dash"].Dash, "corr_dash_refresh", &refresh)
+	refreshed, ok := sim.bleedDots[target.id]
+	if !ok || refreshed.RemainingTicks != 50 {
+		t.Fatalf("refreshed bleed dot = %+v ok=%v, want replenished 50 ticks", refreshed, ok)
 	}
 }
 

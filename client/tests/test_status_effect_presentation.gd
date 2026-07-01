@@ -22,6 +22,7 @@ func _initialize() -> void:
 	_test_sanctuary_started_and_ended_updates_local_dome()
 	_test_unique_burn_started_and_ended_updates_monster_cue()
 	_test_pinning_root_started_and_ended_updates_monster_cue()
+	_test_bleed_started_and_ended_updates_monster_cue_for_dash()
 	_test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge()
 	_test_rogue_mark_effect_id_updates_monster_skull()
 	_test_monster_death_clears_elite_aura_markers()
@@ -250,8 +251,43 @@ func _test_pinning_root_started_and_ended_updates_monster_cue() -> void:
 	_free_main(main)
 
 
+func _test_bleed_started_and_ended_updates_monster_cue_for_dash() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1002",
+		"type": "monster",
+		"position": {"x": 2.0, "y": 0.0},
+		"hp": 10,
+		"max_hp": 10,
+		"monster_def_id": "training_dummy",
+	})
+	main._apply_delta({"events": [{
+		"event_type": "skill_effect_started",
+		"entity_id": "1002",
+		"source_entity_id": "1001",
+		"target_entity_id": "1002",
+		"skill_id": "dash",
+	}], "changes": []})
+	var before: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+	_assert_true("dash bleed marker active", bool(before.get("has_bleed_effect", false)))
+	_assert_true("dash bleed effect id present", (before.get("effect_ids", []) as Array).has("dash_bleed"))
+
+	main._apply_delta({"events": [{
+		"event_type": "skill_effect_ended",
+		"entity_id": "1002",
+		"source_entity_id": "1001",
+		"target_entity_id": "1002",
+		"skill_id": "dash",
+	}], "changes": []})
+	var after: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+	_assert_true("dash bleed marker removed", not bool(after.get("has_bleed_effect", true)))
+	_assert_true("dash bleed effect id removed", not (after.get("effect_ids", []) as Array).has("dash_bleed"))
+	_free_main(main)
+
+
 func _test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge() -> void:
-	for skill_id in ["leap", "charge", "dash"]:
+	for skill_id in ["leap", "charge"]:
 		var main = _make_main()
 		main.player_id = "1001"
 		main._upsert_entity({

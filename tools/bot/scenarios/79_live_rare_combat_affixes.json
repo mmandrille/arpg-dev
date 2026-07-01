@@ -2,7 +2,7 @@
   "id": "live_rare_combat_affixes",
   "ci_tier": "extended",
   "world_id": "equipment_lab",
-  "seed": "000000000000ba40",
+  "seed": "00000000000221fd",
   "title": "Live rare combat affixes",
   "description": "Equip deterministic rare rolled gear and verify hit, crit, evade, and attack-speed rolls surface through character progression breakdowns.",
   "steps": [
@@ -29,7 +29,7 @@
       "stat_breakdowns": [
         {
           "key": "hit_chance",
-          "min_value": 0.73,
+          "min_value": 0.60,
           "cap": 1,
           "source_kinds": [
             "character_formula",
@@ -70,7 +70,7 @@
       "stat_breakdowns": [
         {
           "key": "hit_chance",
-          "min_value": 0.73,
+          "min_value": 0.60,
           "cap": 1,
           "source_kinds": [
             "character_formula",

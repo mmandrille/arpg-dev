@@ -19,7 +19,7 @@
       "stat_keys": [
         "damage_min",
         "damage_max",
-        "hit_chance",
+        "attack_speed_percent",
         "magic"
       ],
       "effect_ids": [

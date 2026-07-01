@@ -1,0 +1,22 @@
+tools/bot/scenarios/79_live_rare_combat_affixes.json
+  s_5e9d690624d2be::t_aca376462d1ed1 5
+  s_5e9d690624d2be::t_498e803f97ce6d 32,73
+tools/bot/scenarios/78_rarity_roll_pools.json
+  s_5e9d690624d2be::t_a46427c3d30616 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ff1d539bfbfcd5ae5df3d362a15d57a28a5427f4",
+  "prompts": {},
+  "sessions": {
+    "s_5e9d690624d2be": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8a17c9df-e848-4b3e-ad10-a5a521ef99ec",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

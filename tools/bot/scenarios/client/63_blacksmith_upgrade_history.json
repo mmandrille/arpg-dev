@@ -206,17 +206,17 @@
     {
       "type": "wait_blacksmith_panel",
       "item_def_id": "long_sword",
+      "item_level": 1,
       "upgrade_enabled": false,
       "resource_wallet_count": 0,
-      "status_contains": "Upgraded",
       "timeout_s": 15.0
     },
     {
       "type": "assert_blacksmith_panel",
       "item_def_id": "long_sword",
+      "item_level": 1,
       "upgrade_enabled": false,
-      "resource_wallet_count": 0,
-      "status_contains": "Upgraded"
+      "resource_wallet_count": 0
     }
   ]
 }

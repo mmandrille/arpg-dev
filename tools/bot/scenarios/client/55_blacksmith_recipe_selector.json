@@ -41,7 +41,7 @@
     },
     {
       "type": "wait_blacksmith_panel",
-      "item_count": 1,
+      "item_count": 2,
       "resource_wallet_count": 1,
       "timeout_s": 15.0
     },

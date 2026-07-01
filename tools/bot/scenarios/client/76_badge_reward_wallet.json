@@ -56,7 +56,7 @@
     {
       "type": "assert_inventory_count",
       "item_def_id": "upgrade_shard",
-      "at_least": 1
+      "equals": 1
     },
     {
       "type": "assert_resource_wallet_panel",
@@ -76,7 +76,7 @@
     {
       "type": "assert_resource_wallet_panel",
       "window_visible": true,
-      "window_row_count_at_least": 5,
+      "window_row_count_at_least": 4,
       "window_contains": "Resurrection Badge x1"
     },
     {

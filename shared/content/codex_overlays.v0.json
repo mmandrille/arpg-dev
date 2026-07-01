@@ -1,0 +1,51 @@
+{
+  "version": 0,
+  "concepts": {
+    "str": {
+      "title": "Strength (STR)",
+      "body": "Increases melee damage and heavy-weapon effectiveness. Many weapons and skills require minimum STR to equip or rank up."
+    },
+    "dex": {
+      "title": "Dexterity (DEX)",
+      "body": "Improves attack speed, evasion, and ranged accuracy. Rogues and Rangers lean on DEX for weapons and mobility skills."
+    },
+    "vit": {
+      "title": "Vitality (VIT)",
+      "body": "Raises maximum health and survivability. Paladins start with higher VIT; all classes benefit from extra life."
+    },
+    "magic": {
+      "title": "Magic",
+      "body": "Fuels spell power and mana-heavy skills. Sorcerers rely on Magic for projectile and utility spells."
+    },
+    "rarity": {
+      "title": "Item Rarity",
+      "body": "Common, Magic, Rare, and higher tiers unlock more affix rolls. Rarity color follows the inventory panel legend."
+    },
+    "item_level": {
+      "title": "Item Level",
+      "body": "Higher item levels scale base stats and requirements with dungeon depth tiers. Upgrades and drops respect your deepest cleared depth."
+    }
+  },
+  "mechanics": {
+    "treasure_classes": {
+      "title": "Treasure Classes",
+      "intro": "Loot profiles point monsters, chests, and bosses at a treasure class (TC). Each attempt rolls success vs no-drop, then picks a weighted entry from the table."
+    },
+    "resource_drops": {
+      "title": "Resource Drops",
+      "intro": "Upgrade Shards and Renew Stones drop from a separate resource pool on kills and chest opens. Tier chances depend on monster or chest type."
+    },
+    "blacksmith_upgrade": {
+      "title": "Upgrade Item",
+      "intro": "Spend gold (equal to the item sell price) plus an Upgrade Shard whose level is at least the target item level. Success raises item level and rescales stats."
+    },
+    "blacksmith_renew": {
+      "title": "Renew Item",
+      "intro": "Spend gold (sell price) plus a Renew Stone whose level is at least the item level. Random affixes reroll; unique fixed effects stay intact."
+    },
+    "shard_merge": {
+      "title": "Merge Resources",
+      "intro": "At the blacksmith merge tab, combine three leveled Upgrade Shards or Renew Stones of the same level into one stone of level +1."
+    }
+  }
+}

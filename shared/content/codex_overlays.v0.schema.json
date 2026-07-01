@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/content/codex_overlays.v0.schema.json",
+  "title": "Codex overlay prose (v0)",
+  "description": "Human-readable codex copy keyed by stable concept ids. Gameplay numbers stay in shared/rules.",
+  "type": "object",
+  "required": ["version", "concepts", "mechanics"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "concepts": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/concept_entry" }
+    },
+    "mechanics": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/mechanic_entry" }
+    }
+  },
+  "$defs": {
+    "concept_entry": {
+      "type": "object",
+      "required": ["title", "body"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1 }
+      }
+    },
+    "mechanic_entry": {
+      "type": "object",
+      "required": ["title", "intro"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "intro": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

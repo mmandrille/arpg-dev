@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-30 (v394 weapon-slot-families)
+Last updated: 2026-06-30 (v395 game-codex-shell)
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-30 (v394 weapon-slot-families)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v394 — weapon-slot-families |
+| **Latest completed slice** | v395 — game-codex-shell |
 | **Active branch** | `main` |
 | **CI gate** | batch CI pending post-autoloop |
-| **Next slice** | TBD (`/next`) |
+| **Next slice** | v396 game-codex-chapters (in progress) |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |
 

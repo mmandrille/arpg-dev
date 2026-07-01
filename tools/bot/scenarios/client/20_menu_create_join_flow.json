@@ -15,12 +15,14 @@
       "labels": [
         "Create Game",
         "Join Game",
+        "Codex",
         "Settings",
         "Exit"
       ],
       "actions": [
         "create_game",
         "join_game",
+        "codex",
         "settings",
         "exit"
       ]

@@ -1,0 +1,1365 @@
+{
+  "version": 0,
+  "chapters": [
+    {
+      "id": "concepts",
+      "title": "Game Concepts",
+      "pages": [
+        {
+          "id": "concept:dex",
+          "title": "Dexterity (DEX)",
+          "sections": [
+            {
+              "lines": [
+                "Improves attack speed, evasion, and ranged accuracy. Rogues and Rangers lean on DEX for weapons and mobility skills."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "concept:item_level",
+          "title": "Item Level",
+          "sections": [
+            {
+              "lines": [
+                "Higher item levels scale base stats and requirements with dungeon depth tiers. Upgrades and drops respect your deepest cleared depth."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "concept:magic",
+          "title": "Magic",
+          "sections": [
+            {
+              "lines": [
+                "Fuels spell power and mana-heavy skills. Sorcerers rely on Magic for projectile and utility spells."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "concept:rarity",
+          "title": "Item Rarity",
+          "sections": [
+            {
+              "lines": [
+                "Common, Magic, Rare, and higher tiers unlock more affix rolls. Rarity color follows the inventory panel legend."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "concept:str",
+          "title": "Strength (STR)",
+          "sections": [
+            {
+              "lines": [
+                "Increases melee damage and heavy-weapon effectiveness. Many weapons and skills require minimum STR to equip or rank up."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "concept:vit",
+          "title": "Vitality (VIT)",
+          "sections": [
+            {
+              "lines": [
+                "Raises maximum health and survivability. Paladins start with higher VIT; all classes benefit from extra life."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "classes",
+      "title": "Classes",
+      "pages": [
+        {
+          "id": "class:barbarian",
+          "title": "Barbarian",
+          "sections": [
+            {
+              "heading": "Starting Stats",
+              "lines": [
+                "STR 5  DEX 5  VIT 5  MAGIC 5"
+              ]
+            },
+            {
+              "heading": "Identity",
+              "lines": [
+                "Movement speed: 75%",
+                "Light radius: 9"
+              ]
+            },
+            {
+              "heading": "Icon",
+              "lines": [
+                "Label: B  Shape: axe"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 1)",
+              "bullets": [
+                "Cleave",
+                "Leap"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 2)",
+              "bullets": [
+                "Earthbreaker",
+                "Ground Slam",
+                "Rage"
+              ]
+            },
+            {
+              "heading": "Passives",
+              "bullets": [
+                "Battle Tempo",
+                "Crushing Force",
+                "Iron Hide"
+              ]
+            }
+          ],
+          "subtitle": "barbarian"
+        },
+        {
+          "id": "class:paladin",
+          "title": "Paladin",
+          "sections": [
+            {
+              "heading": "Starting Stats",
+              "lines": [
+                "STR 6  DEX 4  VIT 8  MAGIC 5"
+              ]
+            },
+            {
+              "heading": "Identity",
+              "lines": [
+                "Movement speed: 65%",
+                "Light radius: 9"
+              ]
+            },
+            {
+              "heading": "Icon",
+              "lines": [
+                "Label: P  Shape: shield"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 1)",
+              "bullets": [
+                "Charge",
+                "Heal",
+                "Holy Shield"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 2)",
+              "bullets": [
+                "Radiant Bolt"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 3)",
+              "bullets": [
+                "Sanctuary"
+              ]
+            },
+            {
+              "heading": "Passives",
+              "bullets": [
+                "Consecrated Vitality",
+                "Faithful Bulwark",
+                "Vigilant Guard"
+              ]
+            }
+          ],
+          "subtitle": "paladin"
+        },
+        {
+          "id": "class:ranger",
+          "title": "Ranger",
+          "sections": [
+            {
+              "heading": "Starting Stats",
+              "lines": [
+                "STR 4  DEX 8  VIT 5  MAGIC 3"
+              ]
+            },
+            {
+              "heading": "Identity",
+              "lines": [
+                "Movement speed: 85%",
+                "Light radius: 12"
+              ]
+            },
+            {
+              "heading": "Icon",
+              "lines": [
+                "Label: Ra  Shape: bow"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 1)",
+              "bullets": [
+                "Black Wolf Companion",
+                "Disengage",
+                "Piercing Shot"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 2)",
+              "bullets": [
+                "Pinning Shot",
+                "Snipe",
+                "Volley"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 3)",
+              "bullets": [
+                "Split Arrow"
+              ]
+            },
+            {
+              "heading": "Passives",
+              "bullets": [
+                "Deadeye",
+                "Precision Draw",
+                "Trail Sense"
+              ]
+            }
+          ],
+          "subtitle": "ranger"
+        },
+        {
+          "id": "class:rogue",
+          "title": "Rogue",
+          "sections": [
+            {
+              "heading": "Starting Stats",
+              "lines": [
+                "STR 4  DEX 8  VIT 5  MAGIC 4"
+              ]
+            },
+            {
+              "heading": "Identity",
+              "lines": [
+                "Movement speed: 90%",
+                "Light radius: 9"
+              ]
+            },
+            {
+              "heading": "Icon",
+              "lines": [
+                "Label: R  Shape: dagger"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 1)",
+              "bullets": [
+                "Dash",
+                "Poison Stab"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 2)",
+              "bullets": [
+                "Executioner",
+                "Fan of Blades",
+                "Shadow Flurry"
+              ]
+            },
+            {
+              "heading": "Passives",
+              "bullets": [
+                "Evasive Footwork",
+                "Killer Instinct",
+                "Quick Hands"
+              ]
+            }
+          ],
+          "subtitle": "rogue"
+        },
+        {
+          "id": "class:sorcerer",
+          "title": "Sorcerer",
+          "sections": [
+            {
+              "heading": "Starting Stats",
+              "lines": [
+                "STR 3  DEX 5  VIT 5  MAGIC 5"
+              ]
+            },
+            {
+              "heading": "Identity",
+              "lines": [
+                "Movement speed: 75%",
+                "Light radius: 10"
+              ]
+            },
+            {
+              "heading": "Icon",
+              "lines": [
+                "Label: S  Shape: spark"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 1)",
+              "bullets": [
+                "Magic Bolt",
+                "Teleport"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 2)",
+              "bullets": [
+                "Arcane Orb",
+                "Ice Shard",
+                "Ligthing",
+                "Revive"
+              ]
+            },
+            {
+              "heading": "Active Skills (Tier 3)",
+              "bullets": [
+                "Arcane Barrage"
+              ]
+            },
+            {
+              "heading": "Passives",
+              "bullets": [
+                "Arcane Focus",
+                "Mana Weaving",
+                "Spell Dynamo"
+              ]
+            }
+          ],
+          "subtitle": "sorcerer"
+        }
+      ]
+    },
+    {
+      "id": "skills",
+      "title": "Skills",
+      "pages": [
+        {
+          "id": "skill:arcane_barrage",
+          "title": "Arcane Barrage",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: projectile_attack",
+                "Tree tier 3, column 2",
+                "Max rank: 5",
+                "Mana cost base: 5 (+1 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Piercing arcane projectile"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:arcane_focus",
+          "title": "Arcane Focus",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: passive_stat_bonus",
+                "Tree tier 1, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive max mana boost"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:arcane_orb",
+          "title": "Arcane Orb",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: projectile_attack",
+                "Tree tier 2, column 3",
+                "Max rank: 5",
+                "Mana cost base: 4 (+1 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 3"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Heavy arcane projectile"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:battle_tempo",
+          "title": "Battle Tempo",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: passive_stat_bonus",
+                "Tree tier 2, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 5"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive attack speed"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:black_wolf_companion",
+          "title": "Black Wolf Companion",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: summon_companion",
+                "Tree tier 1, column 3",
+                "Max rank: 5",
+                "Mana cost base: 5 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Summons a loyal wolf"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:charge",
+          "title": "Charge",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: mobility",
+                "Tree tier 1, column 2",
+                "Max rank: 5",
+                "Mana cost base: 5 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Shield rush stun"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:cleave",
+          "title": "Cleave",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: cone_attack",
+                "Tree tier 1, column 1",
+                "Max rank: 5",
+                "Mana cost base: 4 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Cone weapon attack"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:consecrated_vitality",
+          "title": "Consecrated Vitality",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: passive_stat_bonus",
+                "Tree tier 3, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 10"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive health regeneration boost"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:crushing_force",
+          "title": "Crushing Force",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: passive_stat_bonus",
+                "Tree tier 3, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 10"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive weapon damage boost"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:dash",
+          "title": "Dash",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: cone_attack",
+                "Tree tier 1, column 2",
+                "Max rank: 5",
+                "Mana cost base: 2 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Forward dash strike"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:deadeye",
+          "title": "Deadeye",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: passive_stat_bonus",
+                "Tree tier 3, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 10"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive critical chance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:disengage",
+          "title": "Disengage",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: mobility",
+                "Tree tier 1, column 2",
+                "Max rank: 5",
+                "Mana cost base: 1 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Vault away and snare pursuers"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:earthbreaker",
+          "title": "Earthbreaker",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: cone_attack",
+                "Tree tier 2, column 1",
+                "Max rank: 5",
+                "Mana cost base: 6 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Radial leap smash"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:evasive_footwork",
+          "title": "Evasive Footwork",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: passive_stat_bonus",
+                "Tree tier 3, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 10"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive evade chance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:executioner",
+          "title": "Executioner",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: passive_execute",
+                "Tree tier 2, column 2",
+                "Max rank: 5",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive low-health execute"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:faithful_bulwark",
+          "title": "Faithful Bulwark",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: passive_stat_bonus",
+                "Tree tier 2, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 5"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive block chance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:fan_of_blades",
+          "title": "Fan of Blades",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: cone_attack",
+                "Tree tier 2, column 3",
+                "Max rank: 5",
+                "Mana cost base: 3 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 3"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Wide poison cone"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:ground_slam",
+          "title": "Ground Slam",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: cone_attack",
+                "Tree tier 2, column 3",
+                "Max rank: 5",
+                "Mana cost base: 6 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 3"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Focused ground smash"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:heal",
+          "title": "Heal",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: area_heal",
+                "Tree tier 1, column 3",
+                "Max rank: 5",
+                "Mana cost base: 6 (+1 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Area ally heal"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:holy_shield",
+          "title": "Holy Shield",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: area_stat_buff",
+                "Tree tier 1, column 4",
+                "Max rank: 5",
+                "Mana cost base: 5 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Area ally defense"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:ice_shard",
+          "title": "Ice Shard",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: cold_projectile_attack",
+                "Tree tier 2, column 1",
+                "Max rank: 5",
+                "Mana cost base: 3 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Cold shattering projectile"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:iron_hide",
+          "title": "Iron Hide",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: passive_stat_bonus",
+                "Tree tier 1, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive max HP boost"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:killer_instinct",
+          "title": "Killer Instinct",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: passive_stat_bonus",
+                "Tree tier 2, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 5"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive critical chance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:leap",
+          "title": "Leap",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: mobility",
+                "Tree tier 1, column 2",
+                "Max rank: 5",
+                "Mana cost base: 5 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Jumping impact stun"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:ligthing",
+          "title": "Ligthing",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: chain_projectile_attack",
+                "Tree tier 2, column 2",
+                "Max rank: 5",
+                "Mana cost base: 3 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Chaining lightning projectile"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:magic_bolt",
+          "title": "Magic Bolt",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: projectile_attack",
+                "Tree tier 1, column 1",
+                "Max rank: 5",
+                "Mana cost base: 1 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Projectile spell"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:mana_weaving",
+          "title": "Mana Weaving",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: passive_stat_bonus",
+                "Tree tier 2, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 5"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive mana regeneration boost"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:piercing_shot",
+          "title": "Piercing Shot",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: projectile_attack",
+                "Tree tier 1, column 1",
+                "Max rank: 5",
+                "Mana cost base: 2 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Arrow that pierces enemies"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:pinning_shot",
+          "title": "Pinning Shot",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: projectile_attack",
+                "Tree tier 2, column 2",
+                "Max rank: 5",
+                "Mana cost base: 3 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Arrow that roots one enemy"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:poison_stab",
+          "title": "Poison Stab",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: cone_attack",
+                "Tree tier 1, column 1",
+                "Max rank: 5",
+                "Mana cost base: 1 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Close poison weapon strike"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:precision_draw",
+          "title": "Precision Draw",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: passive_stat_bonus",
+                "Tree tier 2, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 5"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive hit chance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:quick_hands",
+          "title": "Quick Hands",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: passive_stat_bonus",
+                "Tree tier 1, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive attack speed"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:radiant_bolt",
+          "title": "Radiant Bolt",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: projectile_attack",
+                "Tree tier 2, column 3",
+                "Max rank: 5",
+                "Mana cost base: 5 (+1 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 3"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Holy force bolt"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:rage",
+          "title": "Rage",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: self_buff",
+                "Tree tier 2, column 2",
+                "Max rank: 5",
+                "Mana cost base: 5 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "STR/VIT size buff"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:revive",
+          "title": "Revive",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: revive_companion",
+                "Tree tier 2, column 2",
+                "Max rank: 5",
+                "Mana cost base: 6 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Revives a slain monster"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:sanctuary",
+          "title": "Sanctuary",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: area_stat_buff",
+                "Tree tier 3, column 4",
+                "Max rank: 5",
+                "Mana cost base: 7 (+1 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Short ally immunity dome"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:shadow_flurry",
+          "title": "Shadow Flurry",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: cone_attack",
+                "Tree tier 2, column 1",
+                "Max rank: 5",
+                "Mana cost base: 4 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Fast close flurry"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:snipe",
+          "title": "Snipe",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: projectile_attack",
+                "Tree tier 2, column 3",
+                "Max rank: 5",
+                "Mana cost base: 4 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 3"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Long-range aimed shot"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:spell_dynamo",
+          "title": "Spell Dynamo",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: passive_stat_bonus",
+                "Tree tier 3, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 10"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive skill cooldown reduction"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:split_arrow",
+          "title": "Split Arrow",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: projectile_attack",
+                "Tree tier 3, column 1",
+                "Max rank: 5",
+                "Mana cost base: 5 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Piercing split arrow"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:teleport",
+          "title": "Teleport",
+          "sections": [
+            {
+              "lines": [
+                "Class: sorcerer",
+                "Kind: mobility",
+                "Tree tier 1, column 2",
+                "Max rank: 5",
+                "Mana cost base: 5 (+1 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Instant aimed blink"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:trail_sense",
+          "title": "Trail Sense",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: passive_stat_bonus",
+                "Tree tier 1, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive light radius boost"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:vigilant_guard",
+          "title": "Vigilant Guard",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: passive_stat_bonus",
+                "Tree tier 1, column 5",
+                "Max rank: 1",
+                "Mana cost base: 0 (+0 per rank)",
+                "Cooldown: none",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Passive armor boost"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:volley",
+          "title": "Volley",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: projectile_attack",
+                "Tree tier 2, column 1",
+                "Max rank: 5",
+                "Mana cost base: 4 (+0 per rank)",
+                "Cooldown: attack_interval_multiplier",
+                "Requires character level 1"
+              ]
+            },
+            {
+              "heading": "Summary",
+              "lines": [
+                "Fan of arrows"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

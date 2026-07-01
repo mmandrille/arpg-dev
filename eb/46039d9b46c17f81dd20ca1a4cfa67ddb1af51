@@ -1,0 +1,29 @@
+tools/bot/scenarios/98_badge_reward_foundation.json
+  s_5e9d690624d2be::t_700640bea3d8c6 134-135
+  s_5e9d690624d2be::t_f464331913155f 41-42
+tools/bot/scenarios/80_skill_affix_rolls.json
+  s_5e9d690624d2be::t_fc92a3f6d9f680 5
+  s_5e9d690624d2be::t_b423c5949e6593 18,30
+server/internal/game/sim.go
+  s_5e9d690624d2be::t_9d17116448a2bd 1445-1446,1461
+  s_5e9d690624d2be::t_0e9ef793bb71cf 3669
+  s_5e9d690624d2be::t_3cbe332dbd71a9 151
+tools/bot/scenarios/84_boss_special_drops.json
+  s_5e9d690624d2be::t_54abfe50dbcae0 60,97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "eb46039d9b46c17f81dd20ca1a4cfa67ddb1af51",
+  "prompts": {},
+  "sessions": {
+    "s_5e9d690624d2be": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8a17c9df-e848-4b3e-ad10-a5a521ef99ec",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

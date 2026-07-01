@@ -106,7 +106,9 @@
       "name_field_visible": true,
       "create_button_visible": true,
       "class_picker_visible": true,
-      "selected_class": "barbarian"
+      "selected_class": "barbarian",
+      "min_class_feature_lines": 4,
+      "class_feature_contains": ["Rage", "Passives"]
     },
     {
       "type": "select_character_class",
@@ -114,7 +116,8 @@
     },
     {
       "type": "assert_character_panel",
-      "selected_class": "sorcerer"
+      "selected_class": "sorcerer",
+      "class_feature_contains": ["Magic Bolt", "Teleport", "Passives"]
     },
     {
       "type": "enter_character_name",

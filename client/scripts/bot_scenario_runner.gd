@@ -1329,6 +1329,22 @@ func _assert_character_panel(step: Dictionary, state: Dictionary) -> bool:
 			str(step.get("class_picker_visible", false)), str(panel.get("class_picker_visible", false)), str(panel), _step_index, str(scenario.get("id", "?"))
 		])
 		return false
+	if step.has("min_class_feature_lines"):
+		var feature_lines: Array = panel.get("class_feature_lines", [])
+		if feature_lines.size() < int(step.get("min_class_feature_lines", 0)):
+			_fail("assert_character_panel min_class_feature_lines failed: want=%d got=%d lines=%s step=%d scenario=%s" % [
+				int(step.get("min_class_feature_lines", 0)), feature_lines.size(), str(feature_lines), _step_index, str(scenario.get("id", "?"))
+			])
+			return false
+	if step.has("class_feature_contains"):
+		var feature_lines: Array = panel.get("class_feature_lines", [])
+		var joined := " ".join(feature_lines.map(func(line): return str(line)))
+		for needle in step.get("class_feature_contains", []):
+			if str(needle) not in joined:
+				_fail("assert_character_panel class_feature_contains failed: want=%s lines=%s step=%d scenario=%s" % [
+					str(needle), str(feature_lines), _step_index, str(scenario.get("id", "?"))
+				])
+				return false
 	if step.has("row_character_class"):
 		var rows: Array = panel.get("character_rows", characters)
 		var found_class := false

@@ -1,0 +1,21 @@
+docs/CODEMAP.md
+  s_468512adab21b7::t_e913fd1672bf48 28
+docs/progress/scenario-movement-audit.tsv
+  s_468512adab21b7::t_e81b5c131c03da 216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0873e7d9f3c67cee4f40c89ef7729f92eebcf944",
+  "prompts": {},
+  "sessions": {
+    "s_468512adab21b7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7f989d29-ee64-42cc-a12e-1ea1b96bf844",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -25,6 +25,8 @@ var revive_resource_count: int = 0
 var _panel: DraggableWindow
 var _title_label: Label
 var _body_label: Label
+var _actions_scroll: ScrollContainer
+var _actions_box: VBoxContainer
 var _respec_button: Button
 var _revive_all_button: Button
 var _debug_level_button: Button
@@ -32,6 +34,8 @@ var _debug_skill_button: Button
 var _debug_stat_button: Button
 var _debug_drop_shard_button: Button
 var _debug_drop_renew_stone_button: Button
+var _debug_drop_respec_badge_button: Button
+var _debug_drop_resurrection_badge_button: Button
 var _status_label: Label
 var _interactive: bool = true
 
@@ -110,6 +114,7 @@ func get_debug_state() -> Dictionary:
 		"respec_enabled": _respec_enabled(),
 		"revive_all_enabled": _revive_all_enabled(),
 		"debug_enabled": debug_enabled,
+		"actions_scroll_visible": _actions_scroll != null and _actions_scroll.visible,
 		"status": _status_label.text if _status_label != null else "",
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
@@ -170,46 +175,70 @@ func _build() -> void:
 	_body_label.add_theme_color_override("font_color", Color("#d9c8b5"))
 	root.add_child(_body_label)
 
+	_actions_scroll = ScrollContainer.new()
+	_actions_scroll.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 220)
+	_actions_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_actions_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_actions_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	root.add_child(_actions_scroll)
+
+	_actions_box = VBoxContainer.new()
+	_actions_box.add_theme_constant_override("separation", 8)
+	_actions_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_actions_scroll.add_child(_actions_box)
+
 	_respec_button = Button.new()
 	_respec_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 42)
 	_respec_button.pressed.connect(_emit_respec)
-	root.add_child(_respec_button)
+	_actions_box.add_child(_respec_button)
 
 	_revive_all_button = Button.new()
 	_revive_all_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 42)
 	_revive_all_button.text = "Revive all dead heroes"
 	_revive_all_button.pressed.connect(_emit_revive_all)
-	root.add_child(_revive_all_button)
+	_actions_box.add_child(_revive_all_button)
 
 	_debug_level_button = Button.new()
 	_debug_level_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
 	_debug_level_button.text = "Debug: gain level"
 	_debug_level_button.pressed.connect(func() -> void: _emit_debug("level"))
-	root.add_child(_debug_level_button)
+	_actions_box.add_child(_debug_level_button)
 
 	_debug_skill_button = Button.new()
 	_debug_skill_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
 	_debug_skill_button.text = "Debug: gain skill point"
 	_debug_skill_button.pressed.connect(func() -> void: _emit_debug("skill_point"))
-	root.add_child(_debug_skill_button)
+	_actions_box.add_child(_debug_skill_button)
 
 	_debug_stat_button = Button.new()
 	_debug_stat_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
 	_debug_stat_button.text = "Debug: gain stat point"
 	_debug_stat_button.pressed.connect(func() -> void: _emit_debug("stat_point"))
-	root.add_child(_debug_stat_button)
+	_actions_box.add_child(_debug_stat_button)
 
 	_debug_drop_shard_button = Button.new()
 	_debug_drop_shard_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
 	_debug_drop_shard_button.text = "Debug: drop an upgrade shard"
 	_debug_drop_shard_button.pressed.connect(func() -> void: _emit_debug("drop_upgrade_shard"))
-	root.add_child(_debug_drop_shard_button)
+	_actions_box.add_child(_debug_drop_shard_button)
 
 	_debug_drop_renew_stone_button = Button.new()
 	_debug_drop_renew_stone_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
 	_debug_drop_renew_stone_button.text = "Debug: drop a renew stone"
 	_debug_drop_renew_stone_button.pressed.connect(func() -> void: _emit_debug("drop_renew_stone"))
-	root.add_child(_debug_drop_renew_stone_button)
+	_actions_box.add_child(_debug_drop_renew_stone_button)
+
+	_debug_drop_respec_badge_button = Button.new()
+	_debug_drop_respec_badge_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
+	_debug_drop_respec_badge_button.text = "Debug: drop a respec token"
+	_debug_drop_respec_badge_button.pressed.connect(func() -> void: _emit_debug("drop_respec_badge"))
+	_actions_box.add_child(_debug_drop_respec_badge_button)
+
+	_debug_drop_resurrection_badge_button = Button.new()
+	_debug_drop_resurrection_badge_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
+	_debug_drop_resurrection_badge_button.text = "Debug: drop a revive token"
+	_debug_drop_resurrection_badge_button.pressed.connect(func() -> void: _emit_debug("drop_resurrection_badge"))
+	_actions_box.add_child(_debug_drop_resurrection_badge_button)
 
 	_status_label = Label.new()
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -231,7 +260,15 @@ func _render() -> void:
 	if _revive_all_button != null:
 		_revive_all_button.text = _service_button_text("Revive all", 0, revive_resource_item_def_id, revive_resource_count)
 		_revive_all_button.disabled = not _revive_all_enabled()
-	for button in [_debug_level_button, _debug_skill_button, _debug_stat_button, _debug_drop_shard_button, _debug_drop_renew_stone_button]:
+	for button in [
+		_debug_level_button,
+		_debug_skill_button,
+		_debug_stat_button,
+		_debug_drop_shard_button,
+		_debug_drop_renew_stone_button,
+		_debug_drop_respec_badge_button,
+		_debug_drop_resurrection_badge_button,
+	]:
 		if button != null:
 			button.visible = debug_enabled
 			button.disabled = not _debug_action_enabled()

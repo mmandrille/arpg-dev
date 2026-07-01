@@ -38,6 +38,15 @@ func _run() -> void:
 	_assert_true("revive enabled with resurrection badge", bool(state.get("revive_all_enabled", false)))
 	_assert_eq("revive wallet count", int(state.get("revive_resource_wallet_count", 0)), 1)
 
+	panel.set_debug_enabled(false)
+	state = panel.get_debug_state()
+	_assert_false("debug buttons hidden when debug disabled", bool(state.get("debug_enabled", true)))
+	_assert_true("actions scroll remains available", bool(state.get("actions_scroll_visible", false)))
+
+	panel.set_debug_enabled(true)
+	state = panel.get_debug_state()
+	_assert_true("debug buttons visible when debug enabled", bool(state.get("debug_enabled", false)))
+
 	if _fail_count == 0:
 		print("[gdtest] PASS: test_bishop_panel (%d passed, %d failed)" % [_pass_count, _fail_count])
 	else:

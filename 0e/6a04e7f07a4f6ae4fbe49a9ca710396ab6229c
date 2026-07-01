@@ -1,0 +1,27 @@
+docs/plans/v392_2026-06-30-class-creation-features.md
+  s_468512adab21b7::t_6ac81b60601223 1-20
+docs/progress/slice-lifecycle.md
+  s_468512adab21b7::t_6ac81b60601223 406-408
+docs/progress/scenario-catalog.md
+  s_468512adab21b7::t_6ac81b60601223 9
+docs/plans/v394_2026-06-30-weapon-slot-families.md
+  s_468512adab21b7::t_6ac81b60601223 1-24
+docs/plans/v393_2026-06-30-hero-skill-expansion.md
+  s_468512adab21b7::t_6ac81b60601223 1-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0e6a04e7f07a4f6ae4fbe49a9ca710396ab6229c",
+  "prompts": {},
+  "sessions": {
+    "s_468512adab21b7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7f989d29-ee64-42cc-a12e-1ea1b96bf844",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

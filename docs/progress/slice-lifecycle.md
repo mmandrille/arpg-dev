@@ -403,6 +403,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v389** | `tiered-item-level-scaling` | Complete (focused verification green) | [`spec`](../specs/v389_spec-tiered-item-level-scaling.md) | [`plan`](../plans/v389_2026-06-30-tiered-item-level-scaling.md) | [`as-built`](../as-built/v389_tiered-item-level-scaling.md) |
 | **v390** | `leveled-upgrade-shards` | Complete (`make ci` green) | [`spec`](../specs/v390_spec-leveled-upgrade-shards.md) | [`plan`](../plans/v390_2026-06-30-leveled-upgrade-shards.md) | [`as-built`](../as-built/v390_leveled-upgrade-shards.md) |
 | **v391** | `renew-stones` | Complete (`make ci` green 2026-06-30) | [`spec`](../specs/v391_spec-renew-stones.md) | [`plan`](../plans/v391_2026-06-30-renew-stones.md) | [`as-built`](../as-built/v391_renew-stones.md) |
+| **v392** | `class-creation-features` | Complete (focused verification green) | [`spec`](../specs/v392_spec-class-creation-features.md) | — | [`as-built`](../as-built/v392_class-creation-features.md) |
+| **v393** | `hero-skill-expansion` | Complete (focused verification green) | [`spec`](../specs/v393_spec-hero-skill-expansion.md) | — | [`as-built`](../as-built/v393_hero-skill-expansion.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

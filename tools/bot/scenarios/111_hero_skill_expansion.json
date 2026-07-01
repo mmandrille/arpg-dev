@@ -1,0 +1,56 @@
+{
+  "id": "hero_skill_expansion",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v393_hero_skill_expansion",
+  "character_class": "barbarian",
+  "title": "Hero skill expansion tier-2 column-3",
+  "description": "Prove barbarian Ground Slam casts and damages a lab target.",
+  "debug_progression": {
+    "level": 6,
+    "unspent_skill_points": 0,
+    "stats": { "str": 12, "dex": 8, "vit": 10, "magic": 5 },
+    "skill_ranks": {
+      "cleave": 1,
+      "leap": 1,
+      "rage": 1,
+      "earthbreaker": 1,
+      "ground_slam": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "move",
+      "direction": { "x": 1, "y": 0 },
+      "duration_ticks": 4
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "ground_slam",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    }
+  ],
+  "assertions": [
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "ground_slam",
+      "rank": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "min_damage": 1
+    }
+  ]
+}

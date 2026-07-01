@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-06-30 (v391 renew-stones)
+Last updated: 2026-06-30 (v393 hero-skill-expansion)
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-06-30 (v391 renew-stones)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v391 — renew-stones |
+| **Latest completed slice** | v393 — hero-skill-expansion |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green (2026-06-30, v391) |
-| **Next slice** | TBD (`/next`) |
+| **CI gate** | focused verification green (v393); batch CI pending |
+| **Next slice** | v394 weapon-slot-families (autoloop) |
 | **Last engineering review** | v384 — [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md) (2026-06-29; official cadence) |
 | **Next engineering review** | ~v394 milestone |
 

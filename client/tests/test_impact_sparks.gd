@@ -8,6 +8,7 @@ const GameplayFeedbackPresentationScript := preload("res://scripts/gameplay_feed
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
+const CombatFeelPresentationLoaderScript := preload("res://scripts/combat_feel_presentation_loader.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -43,6 +44,9 @@ func _test_special_outcomes_do_not_spawn() -> void:
 
 
 func _test_damage_event_integration_respects_disabled_monster_impacts() -> void:
+	CombatFeelConfigScript.reset_for_tests()
+	CombatFeelPresentationLoaderScript.ensure_loaded()
+	CombatFeelPresentationLoaderScript.set_enemy_impact_feedback_enabled_for_tests(false)
 	var main = MainScript.new()
 	main.player_id = "1001"
 	main.player_anchor = null
@@ -79,6 +83,9 @@ func _test_damage_event_integration_respects_disabled_monster_impacts() -> void:
 
 
 func _test_terminal_death_skips_monster_reaction_artifacts() -> void:
+	CombatFeelConfigScript.reset_for_tests()
+	CombatFeelPresentationLoaderScript.ensure_loaded()
+	CombatFeelPresentationLoaderScript.set_enemy_impact_feedback_enabled_for_tests(false)
 	var main = MainScript.new()
 	main.entities_root = Node3D.new()
 	var monster := Node3D.new()

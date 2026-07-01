@@ -1,0 +1,26 @@
+server/internal/game/game_test.go
+  s_e6e8a3f8f9d465::t_1a6ab7a9d7c69c 2347-2350
+  s_e6e8a3f8f9d465::t_5786daa5a96485 2330,2354-2356,2360-2361
+client/tests/test_skills_panel.gd
+  s_e6e8a3f8f9d465::t_a4333ecaa71393 175,180-183
+  s_e6e8a3f8f9d465::t_a805218dae6d6e 211,217-219
+  s_e6e8a3f8f9d465::t_3241907ede696b 63,70-73
+shared/golden/dungeon_equipment_drops.json
+  s_e6e8a3f8f9d465::t_3616cbb1bcf56e 59-61,72-74,85-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "52cd17dbef551deefe83cd0601930a28701a813b",
+  "prompts": {},
+  "sessions": {
+    "s_e6e8a3f8f9d465": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2645b0c9-0ade-4638-a892-f1f2890ec8df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

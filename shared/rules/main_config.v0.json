@@ -62,5 +62,13 @@
     "projectile_visible_cap": 16,
     "delta_ui_sync_interval_ticks": 3,
     "delta_minimap_sync_interval_ticks": 2
+  },
+  "client_reconnect": {
+    "initial_delay_s": 0.5,
+    "max_delay_s": 8.0,
+    "backoff_exponent": 2,
+    "max_attempts": 8,
+    "give_up_s": 45.0,
+    "http_resume_after_ws_failures": 2
   }
 }

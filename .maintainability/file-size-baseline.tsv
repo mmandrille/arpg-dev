@@ -7,7 +7,7 @@ client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait 
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	701	# v392: class creation features panel
 client/scripts/inventory_panel.gd	1612
-client/scripts/main.gd	6492	# v396: codex menu bridge; further extraction needs menu-layer coordinator split
+client/scripts/main.gd	6548	# v398: ws reconnect coordinator hooks; logic in connection_recovery_runtime.gd
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010

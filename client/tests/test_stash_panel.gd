@@ -27,12 +27,12 @@ func _run() -> void:
 	)
 
 	var stash_items := [
-		{"stash_item_id": "9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "rolled_stats": {"damage_min": 2, "damage_max": 2}, "summary_lines": ["Slot: Main hand", "Damage 2-2"]},
-		{"stash_item_id": "9002", "item_def_id": "cave_ring", "item_template_id": "cave_ring", "display_name": "Rare Cave Ring", "rarity": "rare", "slot": "ring", "rolled_stats": {"max_hp": 4}, "summary_lines": ["Slot: Ring", "Maximum Health +4"]},
+		{"stash_item_id": "9001", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Bow", "rarity": "common", "slot": "main_hand", "rolled_stats": {"damage_min": 2, "damage_max": 2}, "summary_lines": ["Slot: Main hand", "Damage 2-2"]},
+		{"stash_item_id": "9002", "item_def_id": "ring", "item_template_id": "ring", "display_name": "Rare Cave Ring", "rarity": "rare", "slot": "ring", "rolled_stats": {"max_hp": 4}, "summary_lines": ["Slot: Ring", "Maximum Health +4"]},
 		{"stash_item_id": "9003", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "summary_lines": ["Kind: consumable", "Restores 5 HP"]},
 	]
 	var inventory := [
-		{"item_instance_id": "2001", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Magic Cave Blade", "rarity": "magic", "slot": "main_hand", "rolled_stats": {"damage_min": 3, "damage_max": 7}, "summary_lines": ["Slot: Main hand", "Damage 3-7"]},
+		{"item_instance_id": "2001", "item_def_id": "long_sword", "item_template_id": "long_sword", "display_name": "Long Sword", "rarity": "magic", "slot": "main_hand", "rolled_stats": {"damage_min": 3, "damage_max": 7}, "summary_lines": ["Slot: Main hand", "Damage 3-7"]},
 		{"item_instance_id": "2002", "item_def_id": "red_potion"},
 	]
 
@@ -81,7 +81,7 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("search text trimmed", str(state.get("stash_search_text", "")), "ring")
 	_assert_eq("search filters ring", int(state.get("filtered_stash_item_count", 0)), 1)
-	_assert_eq("filtered row is ring", str((state.get("stash_rows", [])[0] as Dictionary).get("item_def_id", "")), "cave_ring")
+	_assert_eq("filtered row is ring", str((state.get("stash_rows", [])[0] as Dictionary).get("item_def_id", "")), "ring")
 
 	panel.bot_select_sort_mode("rarity")
 	state = panel.get_debug_state()
@@ -92,7 +92,7 @@ func _run() -> void:
 	panel.bot_select_sort_mode("name")
 	state = panel.get_debug_state()
 	_assert_eq("search cleared count", int(state.get("filtered_stash_item_count", 0)), 3)
-	_assert_eq("name sort first bow", str((state.get("stash_rows", [])[0] as Dictionary).get("item_def_id", "")), "cave_bow")
+	_assert_eq("name sort first bow", str((state.get("stash_rows", [])[0] as Dictionary).get("item_def_id", "")), "bow")
 
 	panel.bot_drag_bag_to_stash("", true, 0)
 	_assert_eq("deposit emitted count", emitted.size(), 1)
@@ -146,7 +146,7 @@ func _run() -> void:
 		"source": "unique_chest",
 		"stash_entity_id": "unique_chest_entity_1",
 		"stash_item_id": "unique_item_1",
-		"item": {"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique"},
+		"item": {"stash_item_id": "unique_item_1", "item_def_id": "long_sword", "item_template_id": "long_sword", "display_name": "Embercall Blade", "rarity": "unique"},
 	})
 	_assert_eq("unique chest drag to bag emitted count", inventory_emitted.size(), 3)
 	_assert_eq("unique chest drag to bag type", str(inventory_emitted[2]["type"]), "unique_chest_take_item_intent")
@@ -199,7 +199,7 @@ func _run() -> void:
 		"corpse_entity_1",
 		"p2",
 		[
-			{"item_instance_id": "dead_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Lost Cave Blade", "rarity": "common", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"item_instance_id": "dead_item_1", "item_def_id": "long_sword", "item_template_id": "long_sword", "display_name": "Lost Cave Blade", "rarity": "common", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
 		],
 		inventory,
 		{},
@@ -226,10 +226,10 @@ func _run() -> void:
 	panel.show_unique_chest(
 		"unique_chest_entity_1",
 		[
-			{"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
-			{"stash_item_id": "unique_item_2", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Stormstring Bow", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
-			{"stash_item_id": "unique_item_3", "item_def_id": "cave_ring", "item_template_id": "cave_ring", "display_name": "Bloodbound Sigil", "rarity": "unique", "slot": "ring", "summary_lines": ["Slot: Ring"]},
-			{"stash_item_id": "unique_item_4", "item_def_id": "cave_amulet", "item_template_id": "cave_amulet", "display_name": "Lantern Amulet", "rarity": "unique", "slot": "amulet", "summary_lines": ["Slot: Amulet"]},
+			{"stash_item_id": "unique_item_1", "item_def_id": "long_sword", "item_template_id": "long_sword", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "unique_item_2", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Stormstring Bow", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "unique_item_3", "item_def_id": "ring", "item_template_id": "ring", "display_name": "Bloodbound Sigil", "rarity": "unique", "slot": "ring", "summary_lines": ["Slot: Ring"]},
+			{"stash_item_id": "unique_item_4", "item_def_id": "amulet", "item_template_id": "amulet", "display_name": "Lantern Amulet", "rarity": "unique", "slot": "amulet", "summary_lines": ["Slot: Amulet"]},
 			{"stash_item_id": "set_item_1", "item_def_id": "verdant_vanguard_blade", "item_template_id": "verdant_vanguard_blade", "display_name": "Verdant Vanguard Blade", "rarity": "set", "slot": "main_hand", "summary_lines": ["Slot: Main hand", "Set: Verdant Vanguard (2/5 equipped)", "2-piece set bonus: Armor +3 (active)", "3-piece set bonus: Max HP +8 (inactive)"]},
 			{"stash_item_id": "set_item_2", "item_def_id": "verdant_vanguard_helm", "item_template_id": "verdant_vanguard_helm", "display_name": "Verdant Vanguard Helm", "rarity": "set", "slot": "head", "summary_lines": ["Slot: Head"]},
 			{"stash_item_id": "set_item_3", "item_def_id": "stormrunner_covenant_bow", "item_template_id": "stormrunner_covenant_bow", "display_name": "Stormrunner Covenant Bow", "rarity": "set", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
@@ -263,10 +263,10 @@ func _run() -> void:
 		{"stash_item_id": "account_unique_1", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
 		{"stash_item_id": "account_unique_2", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
 		{"stash_item_id": "account_unique_3", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
-		{"stash_item_id": "account_set_1", "item_def_id": "cave_helm", "item_template_id": "cave_helm", "display_name": "Account Set", "rarity": "set"},
-		{"stash_item_id": "account_set_2", "item_def_id": "cave_helm", "item_template_id": "cave_helm", "display_name": "Account Set", "rarity": "set"},
-		{"stash_item_id": "account_set_3", "item_def_id": "cave_helm", "item_template_id": "cave_helm", "display_name": "Account Set", "rarity": "set"},
-		{"stash_item_id": "account_set_4", "item_def_id": "cave_helm", "item_template_id": "cave_helm", "display_name": "Account Set", "rarity": "set"},
+		{"stash_item_id": "account_set_1", "item_def_id": "helm", "item_template_id": "helm", "display_name": "Account Set", "rarity": "set"},
+		{"stash_item_id": "account_set_2", "item_def_id": "helm", "item_template_id": "helm", "display_name": "Account Set", "rarity": "set"},
+		{"stash_item_id": "account_set_3", "item_def_id": "helm", "item_template_id": "helm", "display_name": "Account Set", "rarity": "set"},
+		{"stash_item_id": "account_set_4", "item_def_id": "helm", "item_template_id": "helm", "display_name": "Account Set", "rarity": "set"},
 	]
 	main._refresh_inventory_ui()
 	state = panel.get_debug_state()
@@ -290,8 +290,8 @@ func _run() -> void:
 	set_chest_tooltip.queue_free()
 	var unique_chest_item := {
 		"stash_item_id": "unique_item_1",
-		"item_def_id": "cave_blade",
-		"item_template_id": "cave_blade",
+		"item_def_id": "long_sword",
+		"item_template_id": "long_sword",
 		"display_name": "Embercall Blade",
 		"rarity": "unique",
 		"slot": "main_hand",
@@ -318,7 +318,7 @@ func _run() -> void:
 	panel.show_unique_chest(
 		"unique_chest_entity_1",
 		[
-			{"stash_item_id": "unique_item_1", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
+			{"stash_item_id": "unique_item_1", "item_def_id": "long_sword", "item_template_id": "long_sword", "display_name": "Embercall Blade", "rarity": "unique", "slot": "main_hand", "summary_lines": ["Slot: Main hand"]},
 			{"stash_item_id": "set_item_2", "item_def_id": "verdant_vanguard_helm", "item_template_id": "verdant_vanguard_helm", "display_name": "Verdant Vanguard Helm", "rarity": "set", "slot": "head", "summary_lines": ["Slot: head"]},
 		],
 		inventory,

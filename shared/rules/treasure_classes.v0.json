@@ -8,13 +8,34 @@
           "success_weight": 20,
           "no_drop_weight": 80,
           "entries": [
-            { "item_def_id": "gold", "weight": 40 },
-            { "item_def_id": "red_potion", "weight": 15 },
-            { "item_def_id": "blue_potion", "weight": 15 },
-            { "item_template_id": "cave_helm", "weight": 10 },
-            { "item_template_id": "cave_boots", "weight": 10 },
-            { "item_template_id": "cave_blade", "weight": 5 },
-            { "item_template_id": "cave_bow", "weight": 5 }
+            {
+              "item_def_id": "gold",
+              "weight": 40
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 15
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 15
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 10
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 10
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 5
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 5
+            }
           ]
         }
       ]
@@ -26,13 +47,34 @@
           "success_weight": 20,
           "no_drop_weight": 80,
           "entries": [
-            { "item_def_id": "gold", "weight": 40 },
-            { "item_def_id": "red_potion", "weight": 15 },
-            { "item_def_id": "blue_potion", "weight": 15 },
-            { "item_template_id": "cave_helm", "weight": 10 },
-            { "item_template_id": "cave_boots", "weight": 10 },
-            { "item_template_id": "cave_blade", "weight": 5 },
-            { "item_template_id": "cave_bow", "weight": 5 }
+            {
+              "item_def_id": "gold",
+              "weight": 40
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 15
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 15
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 10
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 10
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 5
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 5
+            }
           ]
         }
       ]
@@ -44,20 +86,62 @@
           "success_weight": 20,
           "no_drop_weight": 80,
           "entries": [
-            { "item_def_id": "gold", "weight": 35 },
-            { "item_def_id": "red_potion", "weight": 13 },
-            { "item_def_id": "blue_potion", "weight": 12 },
-            { "item_template_id": "cave_belt", "weight": 8 },
-            { "item_template_id": "cave_mail", "weight": 8 },
-            { "item_template_id": "cave_shield", "weight": 8 },
-            { "item_template_id": "cave_blade", "weight": 4 },
-            { "item_template_id": "cave_rapier", "weight": 2 },
-            { "item_template_id": "cave_heavy_blade", "weight": 2 },
-            { "item_template_id": "cave_greatsword", "weight": 4 },
-            { "item_template_id": "cave_bow", "weight": 4 },
-            { "item_template_id": "cave_hunting_bow", "weight": 2 },
-            { "item_template_id": "cave_war_bow", "weight": 2 },
-            { "item_template_id": "cave_ring", "weight": 4 }
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 8
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 8
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 8
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 4
+            }
           ]
         }
       ]
@@ -69,32 +153,146 @@
           "success_weight": 20,
           "no_drop_weight": 80,
           "entries": [
-            { "item_def_id": "gold", "weight": 35 },
-            { "item_def_id": "red_potion", "weight": 13 },
-            { "item_def_id": "blue_potion", "weight": 12 },
-            { "item_template_id": "cave_shield", "weight": 4 },
-            { "item_template_id": "cave_helm", "weight": 3 },
-            { "item_template_id": "cave_leather_cap", "weight": 2 },
-            { "item_template_id": "cave_tiara", "weight": 2 },
-            { "item_template_id": "cave_mail", "weight": 3 },
-            { "item_template_id": "cave_leather_vest", "weight": 2 },
-            { "item_template_id": "cave_full_plate", "weight": 2 },
-            { "item_template_id": "cave_gloves", "weight": 3 },
-            { "item_template_id": "cave_cloth_wraps", "weight": 2 },
-            { "item_template_id": "cave_gauntlets", "weight": 2 },
-            { "item_template_id": "cave_belt", "weight": 4 },
-            { "item_template_id": "cave_boots", "weight": 3 },
-            { "item_template_id": "cave_soft_boots", "weight": 2 },
-            { "item_template_id": "cave_plate_boots", "weight": 2 },
-            { "item_template_id": "cave_blade", "weight": 4 },
-            { "item_template_id": "cave_rapier", "weight": 2 },
-            { "item_template_id": "cave_heavy_blade", "weight": 2 },
-            { "item_template_id": "cave_greatsword", "weight": 4 },
-            { "item_template_id": "cave_bow", "weight": 4 },
-            { "item_template_id": "cave_hunting_bow", "weight": 2 },
-            { "item_template_id": "cave_war_bow", "weight": 2 },
-            { "item_template_id": "cave_ring", "weight": 2 },
-            { "item_template_id": "cave_amulet", "weight": 2 }
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 4
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 3
+            },
+            {
+              "item_template_id": "leather_cap",
+              "weight": 2
+            },
+            {
+              "item_template_id": "tiara",
+              "weight": 2
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 3
+            },
+            {
+              "item_template_id": "leather_vest",
+              "weight": 2
+            },
+            {
+              "item_template_id": "full_plate",
+              "weight": 2
+            },
+            {
+              "item_template_id": "gloves",
+              "weight": 3
+            },
+            {
+              "item_template_id": "cloth_wraps",
+              "weight": 2
+            },
+            {
+              "item_template_id": "gauntlets",
+              "weight": 2
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 4
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 3
+            },
+            {
+              "item_template_id": "soft_boots",
+              "weight": 2
+            },
+            {
+              "item_template_id": "plate_boots",
+              "weight": 2
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 2
+            },
+            {
+              "item_template_id": "amulet",
+              "weight": 2
+            },
+            {
+              "item_template_id": "dagger",
+              "weight": 2
+            },
+            {
+              "item_template_id": "hammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "morningstar",
+              "weight": 2
+            },
+            {
+              "item_template_id": "wand",
+              "weight": 2
+            },
+            {
+              "item_template_id": "warhammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "buckler",
+              "weight": 2
+            },
+            {
+              "item_template_id": "sash",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_girdle",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_sword",
+              "weight": 2
+            }
           ]
         }
       ]
@@ -106,11 +304,26 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "item_def_id": "gold", "weight": 45 },
-            { "item_def_id": "red_potion", "weight": 20 },
-            { "item_def_id": "blue_potion", "weight": 15 },
-            { "item_template_id": "cave_helm", "weight": 12 },
-            { "item_template_id": "cave_blade", "weight": 8 }
+            {
+              "item_def_id": "gold",
+              "weight": 45
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 20
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 15
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 12
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 8
+            }
           ]
         },
         {
@@ -118,7 +331,10 @@
           "success_weight": 35,
           "no_drop_weight": 65,
           "entries": [
-            { "item_def_id": "gold", "weight": 100 }
+            {
+              "item_def_id": "gold",
+              "weight": 100
+            }
           ]
         }
       ]
@@ -130,13 +346,34 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "item_def_id": "gold", "weight": 40 },
-            { "item_def_id": "red_potion", "weight": 15 },
-            { "item_def_id": "blue_potion", "weight": 15 },
-            { "item_template_id": "cave_helm", "weight": 15 },
-            { "item_template_id": "cave_boots", "weight": 15 },
-            { "item_template_id": "cave_blade", "weight": 5 },
-            { "item_template_id": "cave_bow", "weight": 5 }
+            {
+              "item_def_id": "gold",
+              "weight": 40
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 15
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 15
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 15
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 15
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 5
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 5
+            }
           ]
         },
         {
@@ -144,11 +381,26 @@
           "success_weight": 45,
           "no_drop_weight": 55,
           "entries": [
-            { "item_def_id": "gold", "weight": 45 },
-            { "item_def_id": "red_potion", "weight": 20 },
-            { "item_def_id": "blue_potion", "weight": 15 },
-            { "item_template_id": "cave_belt", "weight": 12 },
-            { "item_template_id": "cave_blade", "weight": 8 }
+            {
+              "item_def_id": "gold",
+              "weight": 45
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 20
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 15
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 12
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 8
+            }
           ]
         }
       ]
@@ -160,20 +412,62 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "item_def_id": "gold", "weight": 35 },
-            { "item_def_id": "red_potion", "weight": 13 },
-            { "item_def_id": "blue_potion", "weight": 12 },
-            { "item_template_id": "cave_shield", "weight": 7 },
-            { "item_template_id": "cave_mail", "weight": 7 },
-            { "item_template_id": "cave_belt", "weight": 10 },
-            { "item_template_id": "cave_blade", "weight": 4 },
-            { "item_template_id": "cave_rapier", "weight": 2 },
-            { "item_template_id": "cave_heavy_blade", "weight": 2 },
-            { "item_template_id": "cave_greatsword", "weight": 4 },
-            { "item_template_id": "cave_bow", "weight": 4 },
-            { "item_template_id": "cave_hunting_bow", "weight": 2 },
-            { "item_template_id": "cave_war_bow", "weight": 2 },
-            { "item_template_id": "cave_ring", "weight": 4 }
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 7
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 7
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 10
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 4
+            }
           ]
         },
         {
@@ -181,20 +475,62 @@
           "success_weight": 55,
           "no_drop_weight": 45,
           "entries": [
-            { "item_def_id": "gold", "weight": 35 },
-            { "item_def_id": "red_potion", "weight": 13 },
-            { "item_def_id": "blue_potion", "weight": 12 },
-            { "item_template_id": "cave_helm", "weight": 8 },
-            { "item_template_id": "cave_gloves", "weight": 8 },
-            { "item_template_id": "cave_boots", "weight": 8 },
-            { "item_template_id": "cave_blade", "weight": 4 },
-            { "item_template_id": "cave_rapier", "weight": 2 },
-            { "item_template_id": "cave_heavy_blade", "weight": 2 },
-            { "item_template_id": "cave_greatsword", "weight": 4 },
-            { "item_template_id": "cave_bow", "weight": 4 },
-            { "item_template_id": "cave_hunting_bow", "weight": 2 },
-            { "item_template_id": "cave_war_bow", "weight": 2 },
-            { "item_template_id": "cave_ring", "weight": 4 }
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 8
+            },
+            {
+              "item_template_id": "gloves",
+              "weight": 8
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 8
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 4
+            }
           ]
         }
       ]
@@ -206,24 +542,114 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "item_def_id": "gold", "weight": 35 },
-            { "item_def_id": "red_potion", "weight": 13 },
-            { "item_def_id": "blue_potion", "weight": 12 },
-            { "item_template_id": "cave_shield", "weight": 4 },
-            { "item_template_id": "cave_helm", "weight": 4 },
-            { "item_template_id": "cave_mail", "weight": 4 },
-            { "item_template_id": "cave_gloves", "weight": 4 },
-            { "item_template_id": "cave_belt", "weight": 4 },
-            { "item_template_id": "cave_boots", "weight": 4 },
-            { "item_template_id": "cave_blade", "weight": 4 },
-            { "item_template_id": "cave_rapier", "weight": 2 },
-            { "item_template_id": "cave_heavy_blade", "weight": 2 },
-            { "item_template_id": "cave_greatsword", "weight": 4 },
-            { "item_template_id": "cave_bow", "weight": 4 },
-            { "item_template_id": "cave_hunting_bow", "weight": 2 },
-            { "item_template_id": "cave_war_bow", "weight": 2 },
-            { "item_template_id": "cave_ring", "weight": 2 },
-            { "item_template_id": "cave_amulet", "weight": 2 }
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 4
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 4
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 4
+            },
+            {
+              "item_template_id": "gloves",
+              "weight": 4
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 4
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 4
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 2
+            },
+            {
+              "item_template_id": "amulet",
+              "weight": 2
+            },
+            {
+              "item_template_id": "dagger",
+              "weight": 2
+            },
+            {
+              "item_template_id": "hammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "morningstar",
+              "weight": 2
+            },
+            {
+              "item_template_id": "wand",
+              "weight": 2
+            },
+            {
+              "item_template_id": "warhammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "buckler",
+              "weight": 2
+            },
+            {
+              "item_template_id": "sash",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_girdle",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_sword",
+              "weight": 2
+            }
           ]
         },
         {
@@ -231,24 +657,114 @@
           "success_weight": 65,
           "no_drop_weight": 35,
           "entries": [
-            { "item_def_id": "gold", "weight": 35 },
-            { "item_def_id": "red_potion", "weight": 13 },
-            { "item_def_id": "blue_potion", "weight": 12 },
-            { "item_template_id": "cave_shield", "weight": 4 },
-            { "item_template_id": "cave_helm", "weight": 4 },
-            { "item_template_id": "cave_mail", "weight": 4 },
-            { "item_template_id": "cave_gloves", "weight": 4 },
-            { "item_template_id": "cave_belt", "weight": 4 },
-            { "item_template_id": "cave_boots", "weight": 4 },
-            { "item_template_id": "cave_blade", "weight": 4 },
-            { "item_template_id": "cave_rapier", "weight": 2 },
-            { "item_template_id": "cave_heavy_blade", "weight": 2 },
-            { "item_template_id": "cave_greatsword", "weight": 4 },
-            { "item_template_id": "cave_bow", "weight": 4 },
-            { "item_template_id": "cave_hunting_bow", "weight": 2 },
-            { "item_template_id": "cave_war_bow", "weight": 2 },
-            { "item_template_id": "cave_ring", "weight": 2 },
-            { "item_template_id": "cave_amulet", "weight": 2 }
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 4
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 4
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 4
+            },
+            {
+              "item_template_id": "gloves",
+              "weight": 4
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 4
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 4
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 2
+            },
+            {
+              "item_template_id": "amulet",
+              "weight": 2
+            },
+            {
+              "item_template_id": "dagger",
+              "weight": 2
+            },
+            {
+              "item_template_id": "hammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "morningstar",
+              "weight": 2
+            },
+            {
+              "item_template_id": "wand",
+              "weight": 2
+            },
+            {
+              "item_template_id": "warhammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "buckler",
+              "weight": 2
+            },
+            {
+              "item_template_id": "sash",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_girdle",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_sword",
+              "weight": 2
+            }
           ]
         }
       ]
@@ -260,7 +776,10 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "unique_item_id": "conduit_staff", "weight": 1 }
+            {
+              "unique_item_id": "conduit_staff",
+              "weight": 1
+            }
           ]
         },
         {
@@ -268,7 +787,10 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "set_item_id": "stormrunner_covenant_bow", "weight": 1 }
+            {
+              "set_item_id": "stormrunner_covenant_bow",
+              "weight": 1
+            }
           ]
         },
         {
@@ -276,7 +798,10 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "item_template_id": "cave_amulet", "weight": 1 }
+            {
+              "item_template_id": "amulet",
+              "weight": 1
+            }
           ]
         }
       ]
@@ -288,21 +813,66 @@
           "success_weight": 20,
           "no_drop_weight": 80,
           "entries": [
-            { "set_item_id": "verdant_vanguard_blade", "weight": 1 },
-            { "set_item_id": "verdant_vanguard_helm", "weight": 1 },
-            { "set_item_id": "verdant_vanguard_mail", "weight": 1 },
-            { "set_item_id": "verdant_vanguard_gloves", "weight": 1 },
-            { "set_item_id": "verdant_vanguard_boots", "weight": 1 },
-            { "set_item_id": "stormrunner_covenant_bow", "weight": 1 },
-            { "set_item_id": "stormrunner_covenant_mask", "weight": 1 },
-            { "set_item_id": "stormrunner_covenant_grips", "weight": 1 },
-            { "set_item_id": "stormrunner_covenant_treads", "weight": 1 },
-            { "set_item_id": "stormrunner_covenant_loop", "weight": 1 },
-            { "set_item_id": "wayfarers_accord_hood", "weight": 1 },
-            { "set_item_id": "wayfarers_accord_robes", "weight": 1 },
-            { "set_item_id": "wayfarers_accord_bindings", "weight": 1 },
-            { "set_item_id": "wayfarers_accord_treads", "weight": 1 },
-            { "set_item_id": "wayfarers_accord_pendant", "weight": 1 }
+            {
+              "set_item_id": "verdant_vanguard_blade",
+              "weight": 1
+            },
+            {
+              "set_item_id": "verdant_vanguard_helm",
+              "weight": 1
+            },
+            {
+              "set_item_id": "verdant_vanguard_mail",
+              "weight": 1
+            },
+            {
+              "set_item_id": "verdant_vanguard_gloves",
+              "weight": 1
+            },
+            {
+              "set_item_id": "verdant_vanguard_boots",
+              "weight": 1
+            },
+            {
+              "set_item_id": "stormrunner_covenant_bow",
+              "weight": 1
+            },
+            {
+              "set_item_id": "stormrunner_covenant_mask",
+              "weight": 1
+            },
+            {
+              "set_item_id": "stormrunner_covenant_grips",
+              "weight": 1
+            },
+            {
+              "set_item_id": "stormrunner_covenant_treads",
+              "weight": 1
+            },
+            {
+              "set_item_id": "stormrunner_covenant_loop",
+              "weight": 1
+            },
+            {
+              "set_item_id": "wayfarers_accord_hood",
+              "weight": 1
+            },
+            {
+              "set_item_id": "wayfarers_accord_robes",
+              "weight": 1
+            },
+            {
+              "set_item_id": "wayfarers_accord_bindings",
+              "weight": 1
+            },
+            {
+              "set_item_id": "wayfarers_accord_treads",
+              "weight": 1
+            },
+            {
+              "set_item_id": "wayfarers_accord_pendant",
+              "weight": 1
+            }
           ]
         },
         {
@@ -310,7 +880,10 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "item_template_id": "cave_ring", "weight": 1 }
+            {
+              "item_template_id": "ring",
+              "weight": 1
+            }
           ]
         }
       ]
@@ -322,25 +895,82 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "item_template_id": "cave_blade", "weight": 1 },
-            { "item_template_id": "cave_greatsword", "weight": 1 },
-            { "item_template_id": "cave_bow", "weight": 1 },
-            { "item_template_id": "cave_shield", "weight": 1 },
-            { "item_template_id": "cave_helm", "weight": 1 },
-            { "item_template_id": "cave_leather_cap", "weight": 1 },
-            { "item_template_id": "cave_tiara", "weight": 1 },
-            { "item_template_id": "cave_mail", "weight": 1 },
-            { "item_template_id": "cave_leather_vest", "weight": 1 },
-            { "item_template_id": "cave_full_plate", "weight": 1 },
-            { "item_template_id": "cave_gloves", "weight": 1 },
-            { "item_template_id": "cave_cloth_wraps", "weight": 1 },
-            { "item_template_id": "cave_gauntlets", "weight": 1 },
-            { "item_template_id": "cave_belt", "weight": 1 },
-            { "item_template_id": "cave_boots", "weight": 1 },
-            { "item_template_id": "cave_soft_boots", "weight": 1 },
-            { "item_template_id": "cave_plate_boots", "weight": 1 },
-            { "item_template_id": "cave_ring", "weight": 1 },
-            { "item_template_id": "cave_amulet", "weight": 1 }
+            {
+              "item_template_id": "long_sword",
+              "weight": 1
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 1
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 1
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 1
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 1
+            },
+            {
+              "item_template_id": "leather_cap",
+              "weight": 1
+            },
+            {
+              "item_template_id": "tiara",
+              "weight": 1
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 1
+            },
+            {
+              "item_template_id": "leather_vest",
+              "weight": 1
+            },
+            {
+              "item_template_id": "full_plate",
+              "weight": 1
+            },
+            {
+              "item_template_id": "gloves",
+              "weight": 1
+            },
+            {
+              "item_template_id": "cloth_wraps",
+              "weight": 1
+            },
+            {
+              "item_template_id": "gauntlets",
+              "weight": 1
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 1
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 1
+            },
+            {
+              "item_template_id": "soft_boots",
+              "weight": 1
+            },
+            {
+              "item_template_id": "plate_boots",
+              "weight": 1
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 1
+            },
+            {
+              "item_template_id": "amulet",
+              "weight": 1
+            }
           ]
         },
         {
@@ -348,7 +978,10 @@
           "success_weight": 100,
           "no_drop_weight": 0,
           "entries": [
-            { "item_def_id": "red_potion", "weight": 1 }
+            {
+              "item_def_id": "red_potion",
+              "weight": 1
+            }
           ]
         }
       ]

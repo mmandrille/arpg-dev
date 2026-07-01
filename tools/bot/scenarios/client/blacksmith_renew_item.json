@@ -29,7 +29,7 @@
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_blacksmith" },
     { "type": "wait_blacksmith_panel", "visible": true, "timeout_s": 15.0 },
     { "type": "select_blacksmith_recipe", "recipe_id": "item_renew" },
-    { "type": "click_blacksmith_stage_item", "item_def_id": "cave_bow", "stash_index": 0 },
-    { "type": "click_blacksmith_upgrade", "item_def_id": "cave_bow", "stash_index": 0 }
+    { "type": "click_blacksmith_stage_item", "item_def_id": "bow", "stash_index": 0 },
+    { "type": "click_blacksmith_upgrade", "item_def_id": "bow", "stash_index": 0 }
   ]
 }

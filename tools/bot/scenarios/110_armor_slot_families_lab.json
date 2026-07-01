@@ -14,11 +14,11 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_tiara"
+      "item_def_id": "tiara"
     },
     {
       "action": "assert_inventory_requirement_status",
-      "item_def_id": "cave_tiara",
+      "item_def_id": "tiara",
       "requirements_met": false,
       "status": [
         {
@@ -31,13 +31,13 @@
     },
     {
       "action": "assert_rolled_inventory_item",
-      "item_def_id": "cave_tiara",
-      "item_template_id": "cave_tiara",
+      "item_def_id": "tiara",
+      "item_template_id": "tiara",
       "stat_keys": ["skill_damage_percent"]
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_tiara",
+      "item_def_id": "tiara",
       "slot": "head",
       "expect_reject": "requirements_not_met"
     },
@@ -51,17 +51,17 @@
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_tiara",
+      "item_def_id": "tiara",
       "slot": "head"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_full_plate"
+      "item_def_id": "full_plate"
     },
     {
       "action": "assert_rolled_inventory_item",
-      "item_def_id": "cave_full_plate",
-      "item_template_id": "cave_full_plate",
+      "item_def_id": "full_plate",
+      "item_template_id": "full_plate",
       "stat_keys": ["movement_speed_percent"]
     }
   ]

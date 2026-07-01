@@ -107,7 +107,7 @@
       "search_text": "blade",
       "sort_mode": "name",
       "filtered_equals": 1,
-      "first_item_def_id": "cave_blade"
+      "first_item_def_id": "long_sword"
     },
     {
       "type": "select_stash_sort",

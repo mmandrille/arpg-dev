@@ -71,9 +71,9 @@ func TestRarityRollCountRanges(t *testing.T) {
 func TestRolledItemLevelFollowsSourceDepth(t *testing.T) {
 	rules := loadRules(t)
 	tiers := rules.DungeonGeneration.ItemLevelTiers
-	deep, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 36)
+	deep, ok := rules.rollItemTemplateWithRNG("long_sword", NewRNG(11), 36)
 	if !ok {
-		t.Fatal("roll deep cave_blade")
+		t.Fatal("roll deep long_sword")
 	}
 	maxLevel := MaxItemLevelForDepth(36, tiers)
 	if deep.ItemLevel < 1 || deep.ItemLevel > maxLevel {
@@ -83,7 +83,7 @@ func TestRolledItemLevelFollowsSourceDepth(t *testing.T) {
 
 func TestJewelryTemplatesCanRollInventoryRows(t *testing.T) {
 	rules := loadRules(t)
-	for _, templateID := range []string{"cave_ring", "cave_amulet"} {
+	for _, templateID := range []string{"ring", "amulet"} {
 		template := rules.ItemTemplates[templateID]
 		roll, ok := findRollableStat(template.RollableStats, "inventory_rows")
 		if !ok {
@@ -103,20 +103,20 @@ func TestAffixDisplayNameUsesSkillAffixFamily(t *testing.T) {
 	stats["skill_mana_cost_reduction"] = 1
 
 	got := rules.affixDisplayName(template, "rare", stats)
-	if got != "Focused Rare Sorcerer Staff" {
-		t.Fatalf("affix display name = %q, want Focused Rare Sorcerer Staff", got)
+	if got != "Focused Sorcerer Staff" {
+		t.Fatalf("affix display name = %q, want Focused Sorcerer Staff", got)
 	}
 }
 
 func TestAffixDisplayNamePreservesCommonRarityName(t *testing.T) {
 	rules := loadRules(t)
-	template := rules.ItemTemplates["cave_blade"]
+	template := rules.ItemTemplates["long_sword"]
 	stats := cloneIntMap(template.BaseStats)
 	stats["damage_max"] += 2
 
 	got := rules.affixDisplayName(template, "common", stats)
-	if got != "Common Cave Blade" {
-		t.Fatalf("common affix display name = %q, want Common Cave Blade", got)
+	if got != "Long Sword" {
+		t.Fatalf("common affix display name = %q, want Long Sword", got)
 	}
 }
 

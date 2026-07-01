@@ -18,11 +18,11 @@
     },
     {
       "type": "click_loot_item",
-      "item_def_id": "cave_war_sword"
+      "item_def_id": "war_sword"
     },
     {
       "type": "wait_inventory_item",
-      "item_def_id": "cave_war_sword",
+      "item_def_id": "war_sword",
       "timeout_s": 15.0
     },
     {
@@ -43,7 +43,7 @@
     },
     {
       "type": "assert_inventory_presentation",
-      "item_def_id": "cave_war_sword"
+      "item_def_id": "war_sword"
     }
   ]
 }

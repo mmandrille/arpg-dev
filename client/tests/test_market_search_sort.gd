@@ -27,9 +27,9 @@ func _run() -> void:
 
 func _test_listing_filter_sort() -> void:
 	var listings := [
-		_listing("listing-mail-low", "cave_mail", "Iron Mail", "seller-a", 42),
-		_listing("listing-blade", "cave_blade", "Cave Blade", "seller-b", 9),
-		_listing("listing-mail-high", "cave_mail", "Aegis Mail", "seller-c", 80),
+		_listing("listing-mail-low", "mail", "Iron Mail", "seller-a", 42),
+		_listing("listing-blade", "long_sword", "Cave Blade", "seller-b", 9),
+		_listing("listing-mail-high", "mail", "Aegis Mail", "seller-c", 80),
 	]
 	var rows := MarketRowFiltersScript.filter_sort_listings(listings, "mail", "price_high")
 	_assert_eq("mail filter count", rows.size(), 2)
@@ -37,7 +37,7 @@ func _test_listing_filter_sort() -> void:
 	_assert_false("source listings not tagged", (listings[0] as Dictionary).has("_market_source_index"))
 	rows = MarketRowFiltersScript.filter_sort_listings(listings, "seller-b", "default")
 	_assert_eq("seller search count", rows.size(), 1)
-	_assert_eq("seller search row", str((rows[0] as Dictionary).get("item_def_id", "")), "cave_blade")
+	_assert_eq("seller search row", str((rows[0] as Dictionary).get("item_def_id", "")), "long_sword")
 	rows = MarketRowFiltersScript.filter_sort_listings(listings, "", "name")
 	_assert_eq("name sort first", str((rows[0] as Dictionary).get("display_name", "")), "Aegis Mail")
 
@@ -48,14 +48,14 @@ func _test_offer_and_receipt_filter_sort() -> void:
 		"listing_id": "listing-mail",
 		"status": "active",
 		"bidder_account_id": "bidder-a",
-		"listing": _listing("listing-mail", "cave_mail", "Iron Mail", "seller-a", 42),
-		"items": [{"item_def_id": "cave_blade", "display_name": "Cave Blade"}],
+		"listing": _listing("listing-mail", "mail", "Iron Mail", "seller-a", 42),
+		"items": [{"item_def_id": "long_sword", "display_name": "Cave Blade"}],
 	}, {
 		"offer_id": "offer-canceled",
 		"listing_id": "listing-ring",
 		"status": "canceled",
 		"bidder_account_id": "bidder-b",
-		"listing": _listing("listing-ring", "cave_ring", "Cave Ring", "seller-a", 70),
+		"listing": _listing("listing-ring", "ring", "Cave Ring", "seller-a", 70),
 		"items": [{"item_def_id": "red_potion", "display_name": "Red Potion"}],
 	}]
 	var offer_rows := MarketRowFiltersScript.filter_sort_offers(offers, "blade", "status")
@@ -65,8 +65,8 @@ func _test_offer_and_receipt_filter_sort() -> void:
 	_assert_eq("offer price high", str((offer_rows[0] as Dictionary).get("offer_id", "")), "offer-canceled")
 
 	var receipts := [
-		{"action": "offer_canceled", "item_def_id": "cave_mail", "offer_id": "offer-canceled", "created_at": "2026-06-17T12:00:00Z"},
-		{"action": "listing_purchased", "item_def_id": "cave_ring", "offer_id": "", "created_at": "2026-06-17T11:00:00Z"},
+		{"action": "offer_canceled", "item_def_id": "mail", "offer_id": "offer-canceled", "created_at": "2026-06-17T12:00:00Z"},
+		{"action": "listing_purchased", "item_def_id": "ring", "offer_id": "", "created_at": "2026-06-17T11:00:00Z"},
 	]
 	var receipt_rows := MarketRowFiltersScript.filter_sort_receipts(receipts, "canceled", "status")
 	_assert_eq("receipt action filter count", receipt_rows.size(), 1)
@@ -78,9 +78,9 @@ func _test_panel_controls_filter_debug_rows() -> void:
 	root.add_child(panel)
 	await process_frame
 	panel.show_market("market-1", [
-		_listing("listing-mail", "cave_mail", "Iron Mail", "other-a", 42),
-		_listing("listing-blade", "cave_blade", "Cave Blade", "other-b", 9),
-		_listing("listing-owned", "cave_bow", "Cave Bow", "me", 22),
+		_listing("listing-mail", "mail", "Iron Mail", "other-a", 42),
+		_listing("listing-blade", "long_sword", "Cave Blade", "other-b", 9),
+		_listing("listing-owned", "bow", "Cave Bow", "me", 22),
 	], [], "me", "Active listings")
 	var state := panel.get_debug_state()
 	_assert_true("market filter visible", bool(state.get("market_filter_visible", false)))
@@ -91,16 +91,16 @@ func _test_panel_controls_filter_debug_rows() -> void:
 	state = panel.get_debug_state()
 	_assert_eq("panel search text", str(state.get("market_search_text", "")), "mail")
 	_assert_eq("panel search filters browse", int(state.get("filtered_listing_count", -1)), 1)
-	_assert_eq("panel search row", str(((state.get("listing_rows", []) as Array)[0] as Dictionary).get("item_def_id", "")), "cave_mail")
+	_assert_eq("panel search row", str(((state.get("listing_rows", []) as Array)[0] as Dictionary).get("item_def_id", "")), "mail")
 
 	panel.bot_set_market_search("")
 	panel.bot_select_market_sort("price_high")
 	state = panel.get_debug_state()
 	_assert_eq("panel sort mode", str(state.get("market_sort_mode", "")), "price_high")
-	_assert_eq("panel high sort first", str(((state.get("listing_rows", []) as Array)[0] as Dictionary).get("item_def_id", "")), "cave_mail")
+	_assert_eq("panel high sort first", str(((state.get("listing_rows", []) as Array)[0] as Dictionary).get("item_def_id", "")), "mail")
 	panel.bot_select_market_sort("price_low")
 	state = panel.get_debug_state()
-	_assert_eq("panel low sort first", str(((state.get("listing_rows", []) as Array)[0] as Dictionary).get("item_def_id", "")), "cave_blade")
+	_assert_eq("panel low sort first", str(((state.get("listing_rows", []) as Array)[0] as Dictionary).get("item_def_id", "")), "long_sword")
 	panel.queue_free()
 
 

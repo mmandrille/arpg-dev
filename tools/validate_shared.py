@@ -19,6 +19,8 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
+from validate_item_naming import rolled_equipment_display_name
+
 try:
     from .content_manifest import (
         ManifestError,
@@ -816,12 +818,12 @@ def cross_checks(report: Report) -> None:
     }
     hand_slots = {"main_hand", "off_hand"}
     required_templates = {
-        "cave_blade", "cave_greatsword", "cave_bow", "cave_shield",
-        "cave_helm", "cave_leather_cap", "cave_tiara",
-        "cave_mail", "cave_leather_vest", "cave_full_plate",
-        "cave_gloves", "cave_cloth_wraps", "cave_gauntlets",
-        "cave_belt", "cave_boots", "cave_soft_boots", "cave_plate_boots",
-        "cave_ring", "cave_amulet",
+        "long_sword", "great_sword", "bow", "shield",
+        "helm", "leather_cap", "tiara",
+        "mail", "leather_vest", "full_plate",
+        "gloves", "cloth_wraps", "gauntlets",
+        "belt", "boots", "soft_boots", "plate_boots",
+        "ring", "amulet",
     }
 
     def treasure_class_id_for_table(table_id: str) -> str | None:
@@ -921,7 +923,7 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"class weapon {item_id} is valid")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "movement_speed_percent"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "movement_speed_percent", "bonus_cold_damage", "bonus_fire_damage", "bonus_lightning_damage", "bonus_poison_damage"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -936,6 +938,12 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"item template rarity {rarity_id} is valid")
     for template_id, template in item_templates["templates"].items():
+        if template_id.startswith("cave_"):
+            report.fail("item template id", f"{template_id}: cave_* template ids are removed")
+            continue
+        if template.get("equipment_category") not in {"weapon_1h", "weapon_2h", "off_hand", "gear", "jewelry"}:
+            report.fail("item template equipment_category", f"{template_id}: equipment_category required")
+            continue
         slot = template.get("slot")
         item_type = template.get("item_type")
         if template.get("category") != "equipment" or not template.get("equippable"):
@@ -1038,18 +1046,18 @@ def cross_checks(report: Report) -> None:
             report.ok(f"item template {template_id} roll ranges are valid")
     report.ok("item template stat keys are restricted to supported rolls")
 
-    blade_speed = item_templates["templates"].get("cave_blade", {}).get("attack_speed")
-    greatsword_speed = item_templates["templates"].get("cave_greatsword", {}).get("attack_speed")
+    blade_speed = item_templates["templates"].get("long_sword", {}).get("attack_speed")
+    greatsword_speed = item_templates["templates"].get("great_sword", {}).get("attack_speed")
     training_bow_speed = items["items"].get("training_bow", {}).get("attack_speed")
-    cave_bow_speed = item_templates["templates"].get("cave_bow", {}).get("attack_speed")
+    bow_speed = item_templates["templates"].get("bow", {}).get("attack_speed")
     if not isinstance(blade_speed, (int, float)) or not isinstance(greatsword_speed, (int, float)):
-        report.fail("weapon attack_speed relationships", "cave_blade and cave_greatsword speeds are required")
+        report.fail("weapon attack_speed relationships", "long_sword and great_sword speeds are required")
     elif float(greatsword_speed) > float(blade_speed) * 0.70:
-        report.fail("weapon attack_speed relationships", "cave_greatsword must be at least 30% slower than cave_blade")
-    elif not isinstance(training_bow_speed, (int, float)) or not isinstance(cave_bow_speed, (int, float)):
-        report.fail("weapon attack_speed relationships", "training_bow and cave_bow speeds are required")
-    elif float(training_bow_speed) <= float(cave_bow_speed):
-        report.fail("weapon attack_speed relationships", "training_bow short-bow proof must be faster than cave_bow")
+        report.fail("weapon attack_speed relationships", "great_sword must be at least 30% slower than long_sword")
+    elif not isinstance(training_bow_speed, (int, float)) or not isinstance(bow_speed, (int, float)):
+        report.fail("weapon attack_speed relationships", "training_bow and bow speeds are required")
+    elif float(training_bow_speed) <= float(bow_speed):
+        report.fail("weapon attack_speed relationships", "training_bow short-bow proof must be faster than bow")
     else:
         report.ok("weapon attack_speed relationships match v44")
 
@@ -2032,7 +2040,7 @@ def cross_checks(report: Report) -> None:
                     return stat
             return stats[-1]
 
-        affix_words = {stat: (word, priority) for word, priority, group in [("Arcane", 90, "all_skills skill_damage_percent"), ("Focused", 85, "skill_cooldown_reduction_percent skill_mana_cost_reduction"), ("Keen", 80, "crit_chance hit_chance attack_speed_percent"), ("Savage", 70, "damage_min damage_max"), ("Stalwart", 65, "evade_chance block_percent armor"), ("Vigorous", 60, "max_hp health_regen_per_10_seconds vit"), ("Mystic", 55, "max_mana mana_regen_per_10_seconds magic"), ("Mighty", 50, "str"), ("Nimble", 50, "dex"), ("Fortunate", 48, "magic_find_percent"), ("Traveler's", 45, "inventory_rows hotbar_slots")] for stat in group.split()}
+        affix_words = {stat: (word, priority) for word, priority, group in [("Freezing", 95, "bonus_cold_damage"), ("Burning", 95, "bonus_fire_damage"), ("Shocking", 95, "bonus_lightning_damage"), ("Venomous", 95, "bonus_poison_damage"), ("Arcane", 90, "all_skills skill_damage_percent"), ("Focused", 85, "skill_cooldown_reduction_percent skill_mana_cost_reduction"), ("Keen", 80, "crit_chance hit_chance attack_speed_percent"), ("Savage", 70, "damage_min damage_max"), ("Stalwart", 65, "evade_chance block_percent armor"), ("Vigorous", 60, "max_hp health_regen_per_10_seconds vit"), ("Mystic", 55, "max_mana mana_regen_per_10_seconds magic"), ("Mighty", 50, "str"), ("Nimble", 50, "dex"), ("Fortunate", 48, "magic_find_percent"), ("Traveler's", 45, "inventory_rows hotbar_slots")] for stat in group.split()}
 
         def roll_template(template_id: str, rng: ShopRNG, source_depth: int = 1) -> dict:
             template = item_templates["templates"][template_id]
@@ -2060,10 +2068,10 @@ def cross_checks(report: Report) -> None:
                 if stat is None:
                     continue
                 stats[stat["stat"]] = int(stats.get(stat["stat"], 0)) + int(stat["min"]) + rng.intn(int(stat["max"]) - int(stat["min"]) + 1)
-            display_name = f"{rarities[rarity_id]['name_prefix']} {template['name']}"
+            display_name = template["name"]
             gains = [(affix_words[s][1], int(v) - int(template.get("base_stats", {}).get(s, 0)), s, affix_words[s][0]) for s, v in stats.items() if s in affix_words and int(v) > int(template.get("base_stats", {}).get(s, 0))]
             if item_rarity_rank(rarity_id) >= item_rarity_rank("magic") and gains:
-                display_name = f"{max(gains, key=lambda row: (row[0], row[1], ''.join(chr(255 - ord(ch)) for ch in row[2])))[3]} {display_name}"
+                display_name = f"{max(gains, key=lambda row: (row[0], row[1], ''.join(chr(255 - ord(ch)) for ch in row[2])))[3]} {template['name']}"
             return {
                 "item_template_id": template_id,
                 "display_name": display_name,
@@ -2121,24 +2129,9 @@ def cross_checks(report: Report) -> None:
                         break
             return out
 
-        failed_offers = False
-        if shop_offers_golden["shop_id"] != "town_vendor":
-            report.fail("shop_offers golden", "shop_id must be town_vendor")
-            failed_offers = True
-        for case in shop_offers_golden["cases"]:
-            if failed_offers:
-                break
-            got = generated_shop_offers(shop_offers_golden["seed"], shop_offers_golden["character_id"], int(case["deepest_dungeon_depth"]))
-            if len(got) != int(case["expected_offer_count"]):
-                report.fail("shop_offers golden", f"{case['name']}: got {len(got)} offers")
-                failed_offers = True
-                break
-            if got != case["expected"]:
-                report.fail("shop_offers golden", f"{case['name']}: generated catalog drift")
-                failed_offers = True
-                break
-        if not failed_offers:
-            report.ok("shop_offers golden matches deterministic catalog")
+        from validate_item_naming import validate_shop_offers_golden
+
+        validate_shop_offers_golden(report, shop_offers_golden, item_templates, rarities, generated_buy_price)
 
         stat_order = ["damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "hotbar_slots", "inventory_rows"]
 
@@ -2191,7 +2184,7 @@ def cross_checks(report: Report) -> None:
                 failed_appraisals = True
             else:
                 got_buy = generated_buy_price(template_id, rarity, generated_case["rolled_stats"])
-                got_name = f"{rarities[rarity]['name_prefix']} {template['name']}"
+                got_name = rolled_equipment_display_name(template, rarity, generated_case["rolled_stats"])
                 got_comparison = comparison_deltas(generated_case["rolled_stats"], generated_case["equipped_stats"])
                 if got_buy != int(expected["buy_price"]):
                     report.fail("shop_appraisals golden", f"generated buy price {got_buy} != {expected['buy_price']}")
@@ -2216,7 +2209,7 @@ def cross_checks(report: Report) -> None:
                 failed_appraisals = True
             else:
                 got_sell = sell_price(generated_buy_price(template_id, rarity, sell_case["rolled_stats"]))
-                got_name = f"{rarities[rarity]['name_prefix']} {template['name']}"
+                got_name = rolled_equipment_display_name(template, rarity, sell_case["rolled_stats"])
                 got_comparison = comparison_deltas(sell_case["rolled_stats"], {})
                 if got_sell != int(expected["sell_price"]):
                     report.fail("shop_appraisals golden", f"sell price {got_sell} != {expected['sell_price']}")
@@ -2374,7 +2367,7 @@ def cross_checks(report: Report) -> None:
         "combat_lab_crit_attacker",
         "combat_lab_miss_attacker",
     }
-    required_combat_lab_templates = {"cave_blade", "cave_shield", "cave_bow"}
+    required_combat_lab_templates = {"long_sword", "shield", "bow"}
     if combat_lab is None:
         report.fail("combat_stat_lab world", "missing world")
     else:
@@ -2690,10 +2683,9 @@ def cross_checks(report: Report) -> None:
                     golden_failed = True
                     break
                 effect_name = unique_effect_defs[effect_ids[0]].get("display_name", "")
-                item_type_name = str(template.get("item_type", "")).replace("_", " ").title()
-                expected_unique_name = f"{item_type_name} of {effect_name}"
-                if expected["display_name"] != expected_unique_name:
-                    report.fail("item_rolls golden", f"{case['name']}: unique display_name must be {expected_unique_name!r}")
+                display_name = expected["display_name"]
+                if not display_name.endswith(" of " + effect_name) or template["name"] not in display_name:
+                    report.fail("item_rolls golden", f"{case['name']}: unique display_name must use affix + archetype + of + effect (got {display_name!r}, effect {effect_name!r})")
                     golden_failed = True
                     break
             elif effect_ids != []:

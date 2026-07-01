@@ -20,13 +20,13 @@ func _run() -> void:
 
 	var offers := [
 		{"offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable"]},
-		{"offer_id": "generated:depth3:000", "kind": "generated", "item_template_id": "cave_bow", "item_def_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "item_level": 3, "buy_price": 50, "summary_lines": ["Slot: Main hand"]},
+		{"offer_id": "generated:depth3:000", "kind": "generated", "item_template_id": "bow", "item_def_id": "bow", "display_name": "Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "item_level": 3, "buy_price": 50, "summary_lines": ["Slot: Main hand"]},
 	]
 	var inventory := [
-		{"item_instance_id": "2001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common"},
+		{"item_instance_id": "2001", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Bow", "rarity": "common"},
 	]
 	var sell_appraisals := [
-		{"item_instance_id": "2001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "sell_price": 27},
+		{"item_instance_id": "2001", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Bow", "rarity": "common", "sell_price": 27},
 	]
 
 	panel.show_shop("1004", "town_vendor", offers, 60, inventory, {}, "Town Vendor", sell_appraisals)

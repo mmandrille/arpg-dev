@@ -10,16 +10,16 @@ func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
 	var mount := _make_mount_root(tree)
 	var resolver = ResolverScript.new(mount)
 	var inventory := [
-		{"item_instance_id": "2001", "item_def_id": "cave_helm", "slot": "head", "equipped": true, "rarity": "rare"},
-		{"item_instance_id": "2002", "item_def_id": "cave_amulet", "slot": "amulet", "equipped": true, "rarity": "magic"},
-		{"item_instance_id": "2003", "item_def_id": "cave_mail", "slot": "chest", "equipped": true, "rarity": "common"},
-		{"item_instance_id": "2004", "item_def_id": "cave_gloves", "slot": "gloves", "equipped": true, "rarity": "magic"},
-		{"item_instance_id": "2005", "item_def_id": "cave_belt", "slot": "belt", "equipped": true, "rarity": "rare"},
-		{"item_instance_id": "2006", "item_def_id": "cave_boots", "slot": "boots", "equipped": true, "rarity": "common"},
-		{"item_instance_id": "2007", "item_def_id": "cave_ring", "slot": "ring_left", "equipped": true, "rarity": "magic"},
-		{"item_instance_id": "2008", "item_def_id": "cave_ring", "slot": "ring_right", "equipped": true, "rarity": "rare"},
-		{"item_instance_id": "2009", "item_def_id": "cave_bow", "slot": "main_hand", "equipped": true, "rarity": "rare"},
-		{"item_instance_id": "2010", "item_def_id": "cave_shield", "slot": "off_hand", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2001", "item_def_id": "helm", "slot": "head", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2002", "item_def_id": "amulet", "slot": "amulet", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2003", "item_def_id": "mail", "slot": "chest", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "2004", "item_def_id": "gloves", "slot": "gloves", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2005", "item_def_id": "belt", "slot": "belt", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2006", "item_def_id": "boots", "slot": "boots", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "2007", "item_def_id": "ring", "slot": "ring_left", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2008", "item_def_id": "ring", "slot": "ring_right", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2009", "item_def_id": "bow", "slot": "main_hand", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2010", "item_def_id": "shield", "slot": "off_hand", "equipped": true, "rarity": "magic"},
 	]
 	resolver.apply_snapshot({
 		"inventory": inventory,

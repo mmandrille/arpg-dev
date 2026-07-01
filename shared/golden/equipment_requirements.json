@@ -1,5 +1,5 @@
 {
-  "template_id": "cave_war_sword",
+  "template_id": "war_sword",
   "requirements": { "level": 2, "str": 6 },
   "fresh_character": {
     "level": 1,

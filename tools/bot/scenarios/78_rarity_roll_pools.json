@@ -11,8 +11,8 @@
     },
     {
       "action": "assert_rolled_inventory_item",
-      "item_def_id": "cave_blade",
-      "item_template_id": "cave_blade",
+      "item_def_id": "long_sword",
+      "item_template_id": "long_sword",
       "rarity": "unique",
       "stat_count_min": 3,
       "stat_count_max": 5,

@@ -19,9 +19,9 @@
     },
     {
       "action": "assert_rolled_inventory_item",
-      "item_def_id": "cave_ring",
+      "item_def_id": "ring",
       "display_name": "Bloodbound Sigil",
-      "item_template_id": "cave_ring",
+      "item_template_id": "ring",
       "rarity": "unique",
       "effect_ids": [
         "blood_price"

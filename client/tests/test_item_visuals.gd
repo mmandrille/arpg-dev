@@ -165,11 +165,11 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		_fail("consumable loot label is not category-colored")
 		main.free()
 		return false
-	if main._loot_label_color({"item_def_id": "cave_blade", "rarity": "magic"}).to_html(false) != "93c5fd":
+	if main._loot_label_color({"item_def_id": "long_sword", "rarity": "magic"}).to_html(false) != "93c5fd":
 		_fail("magic equipment loot label is not magic-colored")
 		main.free()
 		return false
-	if main._loot_label_color({"item_def_id": "cave_blade", "rarity": "rare"}).to_html(false) != "f4d481":
+	if main._loot_label_color({"item_def_id": "long_sword", "rarity": "rare"}).to_html(false) != "f4d481":
 		_fail("rare equipment loot label is not rare-colored")
 		main.free()
 		return false
@@ -219,7 +219,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		return false
 	sword_node.free()
 
-	var armor_node: Node3D = loot_factory.make_loot_node({"item_def_id": "cave_helm", "rarity": "rare"})
+	var armor_node: Node3D = loot_factory.make_loot_node({"item_def_id": "helm", "rarity": "rare"})
 	if armor_node.find_child("GroundModel_fallback_equipment_head_v0", true, false) != null:
 		_fail("armor floor loot loaded fallback sword-backed model")
 		armor_node.free()
@@ -237,7 +237,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		return false
 	armor_node.free()
 
-	var shield_node: Node3D = loot_factory.make_loot_node({"item_def_id": "cave_shield", "rarity": "magic"})
+	var shield_node: Node3D = loot_factory.make_loot_node({"item_def_id": "shield", "rarity": "magic"})
 	if shield_node.find_child("GroundModel_fallback_equipment_off_hand_v0", true, false) != null:
 		_fail("shield floor loot loaded fallback sword-backed model")
 		shield_node.free()
@@ -254,7 +254,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 	var loot_b := _make_labelled_loot_node()
 	main.entities = {
 		"loot_a": {"node": loot_a, "type": "loot", "item_def_id": "gold"},
-		"loot_b": {"node": loot_b, "type": "loot", "item_def_id": "cave_blade"},
+		"loot_b": {"node": loot_b, "type": "loot", "item_def_id": "long_sword"},
 	}
 	main.loot_ids = ["loot_a", "loot_b"]
 	main.hovered_loot_id = "loot_a"
@@ -282,7 +282,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		loot_b.free()
 		main.free()
 		return false
-	var label_b_full := main._loot_label_color({"item_def_id": "cave_blade"})
+	var label_b_full := main._loot_label_color({"item_def_id": "long_sword"})
 	if label_a.modulate.to_html(false) != "ffffff":
 		_fail("ALT-hovered currency loot label did not stay white")
 		loot_a.free()

@@ -2,25 +2,25 @@
   "description": "Depth-band dungeon source selection plus representative v29 generated dungeon equipment drops.",
   "world_id": "dungeon_levels",
   "required_templates": [
-    "cave_blade",
-    "cave_greatsword",
-    "cave_bow",
-    "cave_shield",
-    "cave_helm",
-    "cave_leather_cap",
-    "cave_tiara",
-    "cave_mail",
-    "cave_leather_vest",
-    "cave_full_plate",
-    "cave_gloves",
-    "cave_cloth_wraps",
-    "cave_gauntlets",
-    "cave_belt",
-    "cave_boots",
-    "cave_soft_boots",
-    "cave_plate_boots",
-    "cave_ring",
-    "cave_amulet"
+    "long_sword",
+    "great_sword",
+    "bow",
+    "shield",
+    "helm",
+    "leather_cap",
+    "tiara",
+    "mail",
+    "leather_vest",
+    "full_plate",
+    "gloves",
+    "cloth_wraps",
+    "gauntlets",
+    "belt",
+    "boots",
+    "soft_boots",
+    "plate_boots",
+    "ring",
+    "amulet"
   ],
   "bands": [
     {
@@ -58,7 +58,7 @@
       "seed": "v29_dungeon_mob_tc_depth_3_plus_41",
       "expected_drops": [
         {
-          "item_template_id": "cave_belt"
+          "item_template_id": "buckler"
         }
       ]
     },
@@ -71,7 +71,7 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
         {
-          "item_template_id": "cave_rapier"
+          "item_template_id": "mail"
         }
       ]
     },
@@ -84,10 +84,10 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_8",
       "expected_drops": [
         {
-          "item_def_id": "red_potion"
+          "item_template_id": "bow"
         },
         {
-          "item_def_id": "gold"
+          "item_def_id": "blue_potion"
         }
       ]
     }

@@ -8,14 +8,14 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     }
   ],
   "assertions": [
     {
       "type": "rolled_inventory_item",
-      "item_def_id": "cave_blade",
-      "item_template_id": "cave_blade",
+      "item_def_id": "long_sword",
+      "item_template_id": "long_sword",
       "item_level": 1
     }
   ],

@@ -8,20 +8,20 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_gloves"
+      "item_def_id": "gloves"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "slot": "main_hand"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_gloves",
+      "item_def_id": "gloves",
       "slot": "gloves"
     },
     {

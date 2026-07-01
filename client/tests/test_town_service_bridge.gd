@@ -79,7 +79,7 @@ func _run() -> void:
 	TownServiceBridgeScript.close_blacksmith_inventory_context(inventory_panel)
 	_assert_eq("blacksmith context disabled", inventory_panel.blacksmith_context, false)
 
-	var item := {"item_instance_id": "2001", "item_def_id": "cave_bow"}
+	var item := {"item_instance_id": "2001", "item_def_id": "bow"}
 	var handled_market := TownServiceBridgeScript.route_inventory_stage_intent(
 		"market_stage_inventory_item",
 		{"context": "offer", "item": item},

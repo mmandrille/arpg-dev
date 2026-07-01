@@ -7,12 +7,12 @@ import (
 
 func TestRareCombatAffixRollsAffectDerivedStats(t *testing.T) {
 	sim := MustNewSim("sess_rare_combat_affixes", "01", loadRules(t))
-	blade := addRolledInventoryItem(t, sim, 6500, "cave_blade", map[string]int{
+	blade := addRolledInventoryItem(t, sim, 6500, "long_sword", map[string]int{
 		"hit_chance":           40,
 		"crit_chance":          25,
 		"attack_speed_percent": 10,
 	})
-	gloves := addRolledInventoryItem(t, sim, 6501, "cave_gloves", map[string]int{"evade_chance": 15})
+	gloves := addRolledInventoryItem(t, sim, 6501, "gloves", map[string]int{"evade_chance": 15})
 
 	assertAck(t, sim.Tick([]Input{{MessageID: "blade", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "blade")
 	assertAck(t, sim.Tick([]Input{{MessageID: "gloves", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(gloves.instanceID), Slot: "gloves"}}}), "gloves")
@@ -61,21 +61,21 @@ func TestRareCombatAffixesAffectCombatResolution(t *testing.T) {
 
 func TestRareCombatAffixRollCandidates(t *testing.T) {
 	rules := loadRules(t)
-	blade := rules.ItemTemplates["cave_blade"]
+	blade := rules.ItemTemplates["long_sword"]
 	rareBlade := rules.rollableStatsForRarity(blade.RollableStats, "rare", 1)
 	for _, stat := range []string{"attack_speed_percent", "hit_chance", "crit_chance"} {
 		if _, ok := findRollableStat(rareBlade, stat); !ok {
-			t.Fatalf("rare cave_blade pool missing %s", stat)
+			t.Fatalf("rare long_sword pool missing %s", stat)
 		}
 	}
 
 	magicBlade := rules.rollableStatsForRarity(blade.RollableStats, "magic", 1)
 	if _, ok := findRollableStat(magicBlade, "hit_chance"); ok {
-		t.Fatal("magic cave_blade pool should not include rare-gated hit_chance")
+		t.Fatal("magic long_sword pool should not include rare-gated hit_chance")
 	}
 
-	gloves := rules.rollableStatsForRarity(rules.ItemTemplates["cave_gloves"].RollableStats, "rare", 1)
+	gloves := rules.rollableStatsForRarity(rules.ItemTemplates["gloves"].RollableStats, "rare", 1)
 	if _, ok := findRollableStat(gloves, "evade_chance"); !ok {
-		t.Fatal("rare cave_gloves pool missing evade_chance")
+		t.Fatal("rare gloves pool missing evade_chance")
 	}
 }

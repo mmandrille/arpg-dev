@@ -9,11 +9,11 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_shield"
+      "item_def_id": "shield"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_shield",
+      "item_def_id": "shield",
       "slot": "off_hand"
     },
     {
@@ -29,7 +29,7 @@
   "assertions": [
     {
       "type": "inventory_contains",
-      "item_def_id": "cave_shield",
+      "item_def_id": "shield",
       "equipped": true
     },
     {

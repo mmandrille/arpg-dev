@@ -27,7 +27,7 @@ func TestAccountStashItemUpgradeFailureSpendsGoldWithoutStats(t *testing.T) {
 		t.Fatal(err)
 	}
 	itemID := "fail_upgrade_item_" + suffix
-	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "long_sword", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
 		t.Fatal(err)
 	}
 	stashID := "fail_upgrade_stash_" + suffix
@@ -38,9 +38,9 @@ func TestAccountStashItemUpgradeFailureSpendsGoldWithoutStats(t *testing.T) {
 		t.Fatal(err)
 	}
 	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
-	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
+	sellPrice := testItemSellPrice(t, "long_sword", bladeRolled)
 	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "fail_upgrade_shard_"+suffix, 1)
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 0, 1, map[string]struct{}{"long_sword": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestAccountStashItemUpgradePityGuaranteesSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	itemID := "pity_upgrade_item_" + suffix
-	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "long_sword", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
 		t.Fatal(err)
 	}
 	stashID := "pity_upgrade_stash_" + suffix
@@ -100,10 +100,10 @@ func TestAccountStashItemUpgradePityGuaranteesSuccess(t *testing.T) {
 		} `json:"upgrade_pity"`
 	}
 	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
-	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
+	sellPrice := testItemSellPrice(t, "long_sword", bladeRolled)
 	for attempt := 1; attempt <= 2; attempt++ {
 		addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, fmt.Sprintf("pity_shard_%s_%d", suffix, attempt), 1)
-		item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 2, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+		item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 2, 1, map[string]struct{}{"long_sword": {}}, testUpgradeOptions(t))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -121,7 +121,7 @@ func TestAccountStashItemUpgradePityGuaranteesSuccess(t *testing.T) {
 		}
 	}
 	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "pity_shard_"+suffix+"_final", 1)
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 2, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, stashID, sellPrice, 2, 0, 100, 2, 1, map[string]struct{}{"long_sword": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,35 +9,35 @@
       "items": [
         {
           "id": "verdant_vanguard_blade",
-          "base_template_id": "cave_blade",
+          "base_template_id": "long_sword",
           "display_name": "Verdant Vanguard Blade",
           "minimum_level": 5,
           "fixed_stats": { "damage_min": 3, "damage_max": 7, "str": 1 }
         },
         {
           "id": "verdant_vanguard_helm",
-          "base_template_id": "cave_helm",
+          "base_template_id": "helm",
           "display_name": "Verdant Vanguard Helm",
           "minimum_level": 5,
           "fixed_stats": { "armor": 4, "vit": 1 }
         },
         {
           "id": "verdant_vanguard_mail",
-          "base_template_id": "cave_mail",
+          "base_template_id": "mail",
           "display_name": "Verdant Vanguard Mail",
           "minimum_level": 5,
           "fixed_stats": { "armor": 7, "max_hp": 5 }
         },
         {
           "id": "verdant_vanguard_gloves",
-          "base_template_id": "cave_gloves",
+          "base_template_id": "gloves",
           "display_name": "Verdant Vanguard Gloves",
           "minimum_level": 5,
           "fixed_stats": { "armor": 3, "attack_speed_percent": 8 }
         },
         {
           "id": "verdant_vanguard_boots",
-          "base_template_id": "cave_boots",
+          "base_template_id": "boots",
           "display_name": "Verdant Vanguard Boots",
           "minimum_level": 5,
           "fixed_stats": { "armor": 3, "dex": 1 }
@@ -62,35 +62,35 @@
       "items": [
         {
           "id": "stormrunner_covenant_bow",
-          "base_template_id": "cave_bow",
+          "base_template_id": "bow",
           "display_name": "Stormrunner Covenant Bow",
           "minimum_level": 5,
           "fixed_stats": { "damage_min": 3, "damage_max": 6, "dex": 1 }
         },
         {
           "id": "stormrunner_covenant_mask",
-          "base_template_id": "cave_helm",
+          "base_template_id": "helm",
           "display_name": "Stormrunner Covenant Mask",
           "minimum_level": 5,
           "fixed_stats": { "armor": 3, "max_mana": 4 }
         },
         {
           "id": "stormrunner_covenant_grips",
-          "base_template_id": "cave_gloves",
+          "base_template_id": "gloves",
           "display_name": "Stormrunner Covenant Grips",
           "minimum_level": 5,
           "fixed_stats": { "armor": 2, "attack_speed_percent": 7 }
         },
         {
           "id": "stormrunner_covenant_treads",
-          "base_template_id": "cave_boots",
+          "base_template_id": "boots",
           "display_name": "Stormrunner Covenant Treads",
           "minimum_level": 5,
           "fixed_stats": { "armor": 2, "evade_chance": 5 }
         },
         {
           "id": "stormrunner_covenant_loop",
-          "base_template_id": "cave_ring",
+          "base_template_id": "ring",
           "display_name": "Stormrunner Covenant Loop",
           "minimum_level": 5,
           "fixed_stats": { "max_hp": 3, "magic_find_percent": 18 }
@@ -115,35 +115,35 @@
       "items": [
         {
           "id": "wayfarers_accord_hood",
-          "base_template_id": "cave_helm",
+          "base_template_id": "helm",
           "display_name": "Wayfarer's Accord Hood",
           "minimum_level": 5,
           "fixed_stats": { "armor": 4, "vit": 1, "max_hp": 3 }
         },
         {
           "id": "wayfarers_accord_robes",
-          "base_template_id": "cave_mail",
+          "base_template_id": "mail",
           "display_name": "Wayfarer's Accord Robes",
           "minimum_level": 5,
           "fixed_stats": { "armor": 7, "magic": 1, "max_mana": 4 }
         },
         {
           "id": "wayfarers_accord_bindings",
-          "base_template_id": "cave_gloves",
+          "base_template_id": "gloves",
           "display_name": "Wayfarer's Accord Bindings",
           "minimum_level": 5,
           "fixed_stats": { "armor": 3, "dex": 1, "attack_speed_percent": 5 }
         },
         {
           "id": "wayfarers_accord_treads",
-          "base_template_id": "cave_boots",
+          "base_template_id": "boots",
           "display_name": "Wayfarer's Accord Treads",
           "minimum_level": 5,
           "fixed_stats": { "armor": 3, "str": 1, "max_hp": 4 }
         },
         {
           "id": "wayfarers_accord_pendant",
-          "base_template_id": "cave_amulet",
+          "base_template_id": "amulet",
           "display_name": "Wayfarer's Accord Pendant",
           "minimum_level": 5,
           "fixed_stats": { "max_mana": 5, "magic": 1, "max_hp": 3 }

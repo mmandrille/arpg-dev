@@ -5,6 +5,7 @@ const ImpactSparksScript := preload("res://scripts/impact_sparks.gd")
 const MainScript := preload("res://scripts/main.gd")
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const GameplayFeedbackPresentationScript := preload("res://scripts/gameplay_feedback_presentation.gd")
+const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 
@@ -18,6 +19,8 @@ func _initialize() -> void:
 	_test_special_outcomes_do_not_spawn()
 	_test_damage_event_integration_respects_disabled_monster_impacts()
 	_test_terminal_death_skips_monster_reaction_artifacts()
+	CombatEventPresentationScript.clear_session()
+	CombatFeelConfigScript.reset_for_tests()
 	print("[gdtest] PASS: test_impact_sparks (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 

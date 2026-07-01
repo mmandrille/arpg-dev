@@ -45,46 +45,46 @@ func TestArmorSlotFamiliesArmorStatRequirements(t *testing.T) {
 
 func TestArmorSlotFamiliesPlateArmorRatio(t *testing.T) {
 	rules := loadRulesForArmorFamilies(t)
-	mail, ok := rules.ItemTemplates["cave_mail"]
+	mail, ok := rules.ItemTemplates["mail"]
 	if !ok {
-		t.Fatal("missing cave_mail template")
+		t.Fatal("missing mail template")
 	}
-	plate, ok := rules.ItemTemplates["cave_full_plate"]
+	plate, ok := rules.ItemTemplates["full_plate"]
 	if !ok {
-		t.Fatal("missing cave_full_plate template")
+		t.Fatal("missing full_plate template")
 	}
 	mailArmor := mail.BaseStats["armor"]
 	plateArmor := plate.BaseStats["armor"]
 	if mailArmor <= 0 {
-		t.Fatalf("cave_mail armor = %d, want positive baseline", mailArmor)
+		t.Fatalf("mail armor = %d, want positive baseline", mailArmor)
 	}
 	if plateArmor != mailArmor*2 {
-		t.Fatalf("cave_full_plate armor = %d, want 2x cave_mail (%d)", plateArmor, mailArmor*2)
+		t.Fatalf("full_plate armor = %d, want 2x mail (%d)", plateArmor, mailArmor*2)
 	}
 }
 
 func TestArmorSlotFamiliesRollPools(t *testing.T) {
 	rules := loadRulesForArmorFamilies(t)
-	plate := rules.ItemTemplates["cave_full_plate"]
+	plate := rules.ItemTemplates["full_plate"]
 	moveRoll, ok := rollableStatDef(plate, "movement_speed_percent")
 	if !ok {
-		t.Fatal("cave_full_plate missing movement_speed_percent roll pool")
+		t.Fatal("full_plate missing movement_speed_percent roll pool")
 	}
 	if moveRoll.Min < -25 || moveRoll.Max > -10 || moveRoll.Min > moveRoll.Max {
 		t.Fatalf("plate move roll range = [%d,%d], want within [-25,-10]", moveRoll.Min, moveRoll.Max)
 	}
 
-	tiara := rules.ItemTemplates["cave_tiara"]
+	tiara := rules.ItemTemplates["tiara"]
 	if tiara.Requirements["magic"] < 8 {
-		t.Fatalf("cave_tiara magic requirement = %d, want >= 8", tiara.Requirements["magic"])
+		t.Fatalf("tiara magic requirement = %d, want >= 8", tiara.Requirements["magic"])
 	}
 	skillRoll, ok := rollableStatDef(tiara, "skill_damage_percent")
 	if !ok {
-		t.Fatal("cave_tiara missing skill_damage_percent roll pool")
+		t.Fatal("tiara missing skill_damage_percent roll pool")
 	}
 	armorRoll, ok := rollableStatDef(tiara, "armor")
 	if !ok {
-		t.Fatal("cave_tiara missing armor roll pool")
+		t.Fatal("tiara missing armor roll pool")
 	}
 	if skillRoll.Weight <= armorRoll.Weight {
 		t.Fatalf("tiara skill_damage_percent weight = %d, want > armor weight %d", skillRoll.Weight, armorRoll.Weight)
@@ -105,7 +105,7 @@ func TestArmorSlotFamiliesPlateRollIncludesMovePenalty(t *testing.T) {
 		if ent.kind != lootEntity || ent.rollPayload == nil {
 			continue
 		}
-		if ent.rollPayload.ItemTemplateID != "cave_full_plate" {
+		if ent.rollPayload.ItemTemplateID != "full_plate" {
 			continue
 		}
 		plateMove = ent.rollPayload.Stats["movement_speed_percent"]
@@ -113,7 +113,7 @@ func TestArmorSlotFamiliesPlateRollIncludesMovePenalty(t *testing.T) {
 	if plateMove >= 0 {
 		t.Fatalf("lab plate loot movement_speed_percent = %d, want negative", plateMove)
 	}
-	plate := rules.ItemTemplates["cave_full_plate"]
+	plate := rules.ItemTemplates["full_plate"]
 	moveRoll, _ := rollableStatDef(plate, "movement_speed_percent")
 	if plateMove < moveRoll.Min || plateMove > moveRoll.Max {
 		t.Fatalf("rolled movement_speed_percent = %d, want within [%d,%d]", plateMove, moveRoll.Min, moveRoll.Max)
@@ -134,7 +134,7 @@ func TestArmorSlotFamiliesTiaraSkillRoll(t *testing.T) {
 		if ent.kind != lootEntity || ent.rollPayload == nil {
 			continue
 		}
-		if ent.rollPayload.ItemTemplateID != "cave_tiara" {
+		if ent.rollPayload.ItemTemplateID != "tiara" {
 			continue
 		}
 		skillDamage = ent.rollPayload.Stats["skill_damage_percent"]

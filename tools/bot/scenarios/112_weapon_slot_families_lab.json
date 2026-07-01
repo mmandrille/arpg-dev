@@ -14,37 +14,37 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_rapier"
+      "item_def_id": "rapier"
     },
     {
       "action": "assert_inventory_requirement_status",
-      "item_def_id": "cave_rapier",
+      "item_def_id": "rapier",
       "requirements_met": false
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_rapier",
+      "item_def_id": "rapier",
       "slot": "main_hand",
       "expect_reject": "requirements_not_met"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_heavy_blade"
+      "item_def_id": "falchion"
     },
     {
       "action": "assert_rolled_inventory_item",
-      "item_def_id": "cave_heavy_blade",
-      "item_template_id": "cave_heavy_blade",
+      "item_def_id": "falchion",
+      "item_template_id": "falchion",
       "stat_keys": ["attack_speed_percent"]
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_hunting_bow"
+      "item_def_id": "hunter_bow"
     },
     {
       "action": "assert_rolled_inventory_item",
-      "item_def_id": "cave_hunting_bow",
-      "item_template_id": "cave_hunting_bow"
+      "item_def_id": "hunter_bow",
+      "item_template_id": "hunter_bow"
     }
   ]
 }

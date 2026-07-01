@@ -10,7 +10,7 @@ func TestUniqueBurnAppliesFromEquippedEffectAndTicksFromOriginalDamage(t *testin
 	player := sim.entities[sim.playerID]
 	target := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, hp: 50, maxHP: 50, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	sim.entities[target.id] = target
-	blade := addRolledInventoryItem(t, sim, 9801, "cave_blade", map[string]int{"damage_min": 10, "damage_max": 10})
+	blade := addRolledInventoryItem(t, sim, 9801, "long_sword", map[string]int{"damage_min": 10, "damage_max": 10})
 	blade.rollPayload.EffectIDs = []string{everburningWoundEffectID}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_burn", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "equip_burn")
 
@@ -94,7 +94,7 @@ func TestOffensiveUniqueStormboundEchoChainsFromBasicAttack(t *testing.T) {
 	secondary := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: primary.pos.X + 1, Y: primary.pos.Y}, hp: 50, maxHP: 50, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	sim.entities[primary.id] = primary
 	sim.entities[secondary.id] = secondary
-	blade := addRolledInventoryItem(t, sim, 9802, "cave_blade", map[string]int{"damage_min": 10, "damage_max": 10})
+	blade := addRolledInventoryItem(t, sim, 9802, "long_sword", map[string]int{"damage_min": 10, "damage_max": 10})
 	blade.rollPayload.EffectIDs = []string{stormboundEchoEffectID}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_storm", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "equip_storm")
 
@@ -122,7 +122,7 @@ func TestOffensiveUniqueStormboundEchoDoesNotChainFromSkillDamage(t *testing.T) 
 	secondary := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: primary.pos.X + 1, Y: primary.pos.Y}, hp: 50, maxHP: 50, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	sim.entities[primary.id] = primary
 	sim.entities[secondary.id] = secondary
-	blade := addRolledInventoryItem(t, sim, 9803, "cave_blade", map[string]int{"damage_min": 10, "damage_max": 10})
+	blade := addRolledInventoryItem(t, sim, 9803, "long_sword", map[string]int{"damage_min": 10, "damage_max": 10})
 	blade.rollPayload.EffectIDs = []string{stormboundEchoEffectID}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_storm", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "equip_storm")
 
@@ -148,7 +148,7 @@ func TestOffensiveUniqueExecutionersMarkPulsesOnMarkedKill(t *testing.T) {
 	secondary := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: primary.pos.X + 1, Y: primary.pos.Y}, hp: 50, maxHP: 50, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	sim.entities[primary.id] = primary
 	sim.entities[secondary.id] = secondary
-	blade := addRolledInventoryItem(t, sim, 9804, "cave_blade", map[string]int{"damage_min": 10, "damage_max": 10})
+	blade := addRolledInventoryItem(t, sim, 9804, "long_sword", map[string]int{"damage_min": 10, "damage_max": 10})
 	blade.rollPayload.EffectIDs = []string{executionersMarkEffectID}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_mark", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "equip_mark")
 
@@ -178,7 +178,7 @@ func TestOffensiveUniqueExecutionersMarkExpires(t *testing.T) {
 	player := sim.entities[sim.playerID]
 	primary := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, hp: 15, maxHP: 50, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	sim.entities[primary.id] = primary
-	blade := addRolledInventoryItem(t, sim, 9805, "cave_blade", map[string]int{"damage_min": 10, "damage_max": 10})
+	blade := addRolledInventoryItem(t, sim, 9805, "long_sword", map[string]int{"damage_min": 10, "damage_max": 10})
 	blade.rollPayload.EffectIDs = []string{executionersMarkEffectID}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_mark", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "equip_mark")
 
@@ -209,7 +209,7 @@ func TestOffensiveUniqueHungerOfTheDeepRampsAndResets(t *testing.T) {
 	secondary := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: player.pos.X, Y: player.pos.Y + 1.2}, hp: 80, maxHP: 80, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	sim.entities[primary.id] = primary
 	sim.entities[secondary.id] = secondary
-	blade := addRolledInventoryItem(t, sim, 9806, "cave_blade", map[string]int{"damage_min": 10, "damage_max": 10})
+	blade := addRolledInventoryItem(t, sim, 9806, "long_sword", map[string]int{"damage_min": 10, "damage_max": 10})
 	blade.rollPayload.EffectIDs = []string{hungerOfTheDeepEffectID}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_hunger", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "equip_hunger")
 
@@ -239,7 +239,7 @@ func TestSurvivalUniqueVeilOfTheLastOathPreventsLethalHitOnce(t *testing.T) {
 	clearUniqueTestMonsters(sim)
 	player := sim.entities[sim.playerID]
 	monster := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 50)
-	equipUniqueTestEffect(t, sim, veilOfTheLastOathEffectID, 9901, "cave_shield", offHandSlot)
+	equipUniqueTestEffect(t, sim, veilOfTheLastOathEffectID, 9901, "shield", offHandSlot)
 	player.hp = 5
 	player.maxHP = 20
 
@@ -270,7 +270,7 @@ func TestSurvivalUniqueFrostglassWardSlowsAndBuffsAfterLargeHit(t *testing.T) {
 	player := sim.entities[sim.playerID]
 	attacker := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 50)
 	nearby := uniqueTestMonster(sim, Vec2{X: player.pos.X + 2, Y: player.pos.Y}, 50)
-	equipUniqueTestEffect(t, sim, frostglassWardEffectID, 9902, "cave_shield", offHandSlot)
+	equipUniqueTestEffect(t, sim, frostglassWardEffectID, 9902, "shield", offHandSlot)
 	player.hp = 100
 	player.maxHP = 100
 
@@ -297,7 +297,7 @@ func TestSurvivalUniqueMirrorsteelSkinReducesProjectileAndReflects(t *testing.T)
 	clearUniqueTestMonsters(sim)
 	player := sim.entities[sim.playerID]
 	attacker := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 50)
-	equipUniqueTestEffect(t, sim, mirrorsteelSkinEffectID, 9903, "cave_shield", offHandSlot)
+	equipUniqueTestEffect(t, sim, mirrorsteelSkinEffectID, 9903, "shield", offHandSlot)
 	player.hp = 100
 	player.maxHP = 100
 
@@ -327,7 +327,7 @@ func TestSurvivalUniqueAshenReprisalPrimesAndConsumesOnNextHit(t *testing.T) {
 	player := sim.entities[sim.playerID]
 	attacker := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 50)
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, 200)
-	blade := equipUniqueTestEffect(t, sim, ashenReprisalEffectID, 9904, "cave_blade", mainHandSlot)
+	blade := equipUniqueTestEffect(t, sim, ashenReprisalEffectID, 9904, "long_sword", mainHandSlot)
 	blade.rollPayload.Stats["damage_min"] = 10
 	blade.rollPayload.Stats["damage_max"] = 10
 
@@ -358,7 +358,7 @@ func TestResourceUniqueGravePactHealsLowHealthKiller(t *testing.T) {
 	player.hp = 10
 	player.maxHP = 100
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 1)
-	equipUniqueTestEffect(t, sim, gravePactEffectID, 9910, "cave_ring", ringLeftSlot)
+	equipUniqueTestEffect(t, sim, gravePactEffectID, 9910, "ring", ringLeftSlot)
 	player.hp = 10
 	player.maxHP = 100
 
@@ -378,7 +378,7 @@ func TestResourceUniqueBloodPricePaysMissingManaWithHP(t *testing.T) {
 	clearUniqueTestMonsters(sim)
 	player := sim.entities[sim.playerID]
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 50)
-	equipUniqueTestEffect(t, sim, bloodPriceEffectID, 9911, "cave_belt", "belt")
+	equipUniqueTestEffect(t, sim, bloodPriceEffectID, 9911, "belt", "belt")
 	sim.progression.CharacterClass = "sorcerer"
 	sim.progression.BaseStats.Magic = 10
 	sim.progression.SkillRanks[magicBoltSkillID] = 1
@@ -441,7 +441,7 @@ func TestUniqueSkillModifierBoostsConfiguredSkill(t *testing.T) {
 	clearUniqueTestMonsters(sim)
 	player := sim.entities[sim.playerID]
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 100)
-	equipUniqueTestEffect(t, sim, arcaneConduitEffectID, 9914, "cave_amulet", "amulet")
+	equipUniqueTestEffect(t, sim, arcaneConduitEffectID, 9914, "amulet", "amulet")
 
 	res := &TickResult{}
 	outcome := sim.damageMonsterByPlayerSkillTypedWithID(target, player.id, magicBoltSkillID, "arcane_conduit", res, DamageRange{Min: 10, Max: 10}, damageTypeForce)
@@ -456,7 +456,7 @@ func TestUniqueSkillModifierDoesNotBoostOtherSkills(t *testing.T) {
 	clearUniqueTestMonsters(sim)
 	player := sim.entities[sim.playerID]
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 100)
-	equipUniqueTestEffect(t, sim, arcaneConduitEffectID, 9915, "cave_amulet", "amulet")
+	equipUniqueTestEffect(t, sim, arcaneConduitEffectID, 9915, "amulet", "amulet")
 
 	res := &TickResult{}
 	outcome := sim.damageMonsterByPlayerSkillTypedWithID(target, player.id, "ice_shard", "arcane_conduit_other", res, DamageRange{Min: 10, Max: 10}, damageTypeForce)
@@ -474,7 +474,7 @@ func TestResourceUniquePilgrimsMomentumChargesAndKnocksBack(t *testing.T) {
 	clearUniqueTestMonsters(sim)
 	player := sim.entities[sim.playerID]
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1.2, Y: player.pos.Y}, 200)
-	equipUniqueTestEffect(t, sim, pilgrimsMomentumEffectID, 9912, "cave_boots", "boots")
+	equipUniqueTestEffect(t, sim, pilgrimsMomentumEffectID, 9912, "boots", "boots")
 	for i := 0; i < 20; i++ {
 		sim.updatePilgrimMomentumMovement(player, true, &TickResult{})
 	}
@@ -501,7 +501,7 @@ func TestResourceUniqueLanternOfTheFallenHealsLowestNearbyHero(t *testing.T) {
 	player.hp = 20
 	player.maxHP = 100
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 1, Y: player.pos.Y}, 1)
-	equipUniqueTestEffect(t, sim, lanternOfTheFallenEffectID, 9913, "cave_amulet", "amulet")
+	equipUniqueTestEffect(t, sim, lanternOfTheFallenEffectID, 9913, "amulet", "amulet")
 	player.hp = 20
 	player.maxHP = 100
 

@@ -226,7 +226,7 @@ func _test_loot_node_factory() -> void:
 	_assert_eq("gold label text", factory.loot_label_text({"item_def_id": "gold", "amount": 7}), "7 gold")
 	_assert_eq("known loot name", factory.generic_loot_name("rusty_sword"), "Sword")
 	_assert_eq("staff loot name", factory.generic_loot_name("starter_sorcerer_staff"), "Staff")
-	_assert_eq("greatsword loot name", factory.generic_loot_name("cave_greatsword"), "Greatsword")
+	_assert_eq("greatsword loot name", factory.generic_loot_name("great_sword"), "Greatsword")
 	_assert_eq("rolled loot label", factory.loot_label_text({
 		"item_def_id": "starter_sorcerer_staff",
 		"display_name": "Magic Starter Sorcerer Staff",

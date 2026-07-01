@@ -31,7 +31,7 @@ func TestInferRollPayloadFromFlatStatsCaveBlade(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	payload := inferRollPayloadFromFlatStats(rules, "cave_blade", json.RawMessage(`{"damage_min":2,"damage_max":4,"item_level":2}`))
+	payload := inferRollPayloadFromFlatStats(rules, "long_sword", json.RawMessage(`{"damage_min":2,"damage_max":4,"item_level":2}`))
 	if payload == nil {
 		t.Fatal("payload is nil")
 	}

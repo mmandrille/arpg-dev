@@ -68,6 +68,10 @@
           "light_radius": 8,
           "hotbar_slots": 20,
           "inventory_rows": 35,
+          "bonus_cold_damage": 8,
+          "bonus_fire_damage": 8,
+          "bonus_lightning_damage": 8,
+          "bonus_poison_damage": 8,
           "movement_speed_percent": 4
         }
       }
@@ -148,6 +152,10 @@
           "light_radius": 8,
           "hotbar_slots": 20,
           "inventory_rows": 35,
+          "bonus_cold_damage": 8,
+          "bonus_fire_damage": 8,
+          "bonus_lightning_damage": 8,
+          "bonus_poison_damage": 8,
           "movement_speed_percent": 4
         }
       }

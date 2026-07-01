@@ -7,14 +7,14 @@ import (
 
 func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	sim := MustNewSim("sess_attack_speed", "01", loadRules(t))
-	blade := addRolledInventoryItem(t, sim, 6400, "cave_blade", nil)
-	gloves := addRolledInventoryItem(t, sim, 6401, "cave_gloves", map[string]int{"attack_speed_percent": 10})
+	blade := addRolledInventoryItem(t, sim, 6400, "long_sword", nil)
+	gloves := addRolledInventoryItem(t, sim, 6401, "gloves", map[string]int{"attack_speed_percent": 10})
 	assertAck(t, sim.Tick([]Input{{MessageID: "blade", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "blade")
 	assertAck(t, sim.Tick([]Input{{MessageID: "gloves", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(gloves.instanceID), Slot: "gloves"}}}), "gloves")
 
 	view := sim.CharacterProgressionView()
 	baseAttackSpeed := sim.characterDerivedStatsView().AttackSpeed
-	expectedBladeSpeed := sim.clampEffectiveAttackSpeed(baseAttackSpeed * sim.rules.ItemTemplates["cave_blade"].AttackSpeed * (1.0 + float64(gloves.rollPayload.Stats["attack_speed_percent"])/100.0))
+	expectedBladeSpeed := sim.clampEffectiveAttackSpeed(baseAttackSpeed * sim.rules.ItemTemplates["long_sword"].AttackSpeed * (1.0 + float64(gloves.rollPayload.Stats["attack_speed_percent"])/100.0))
 	expectedBladeInterval := sim.attackIntervalTicksFromSpeed(expectedBladeSpeed)
 	if math.Abs(view.DerivedStats.AttackSpeed-expectedBladeSpeed) > 0.000001 || view.DerivedStats.AttackIntervalTicks != expectedBladeInterval {
 		t.Fatalf("attack speed/interval with blade+gloves = %+v, want %v / %d", view.DerivedStats, expectedBladeSpeed, expectedBladeInterval)
@@ -26,10 +26,10 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 	}
 
 	slow := MustNewSim("sess_attack_speed_slow", "01", loadRules(t))
-	greatsword := addRolledInventoryItem(t, slow, 6402, "cave_greatsword", nil)
+	greatsword := addRolledInventoryItem(t, slow, 6402, "great_sword", nil)
 	assertAck(t, slow.Tick([]Input{{MessageID: "greatsword", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}}), "greatsword")
 	slowView := slow.CharacterProgressionView()
-	expectedGreatswordSpeed := slow.clampEffectiveAttackSpeed(slow.characterDerivedStatsView().AttackSpeed * slow.rules.ItemTemplates["cave_greatsword"].AttackSpeed)
+	expectedGreatswordSpeed := slow.clampEffectiveAttackSpeed(slow.characterDerivedStatsView().AttackSpeed * slow.rules.ItemTemplates["great_sword"].AttackSpeed)
 	expectedGreatswordInterval := slow.attackIntervalTicksFromSpeed(expectedGreatswordSpeed)
 	if math.Abs(slowView.DerivedStats.AttackSpeed-expectedGreatswordSpeed) > 0.000001 || slowView.DerivedStats.AttackIntervalTicks != expectedGreatswordInterval {
 		t.Fatalf("attack speed/interval with greatsword = %+v, want %v / %d", slowView.DerivedStats, expectedGreatswordSpeed, expectedGreatswordInterval)
@@ -39,7 +39,7 @@ func TestEffectiveAttackSpeedUsesWeaponAndItemPercent(t *testing.T) {
 func TestCharacterProgressionViewEffectiveBaseStatsAndBreakdowns(t *testing.T) {
 	sim := MustNewSim("sess_effective_base_stat_breakdowns", "01", loadRules(t))
 	before := sim.CharacterProgressionView()
-	ring := addRolledInventoryItem(t, sim, 6403, "cave_ring", map[string]int{
+	ring := addRolledInventoryItem(t, sim, 6403, "ring", map[string]int{
 		"str": 10,
 		"vit": 8,
 	})
@@ -117,7 +117,7 @@ func TestHealthAndManaRegenUseStatsAndItemRolls(t *testing.T) {
 	}
 
 	geared := MustNewSim("sess_regen_item", "01", rules)
-	ring := addRolledInventoryItem(t, geared, 6410, "cave_ring", map[string]int{"health_regen_per_10_seconds": 5, "mana_regen_per_10_seconds": 5})
+	ring := addRolledInventoryItem(t, geared, 6410, "ring", map[string]int{"health_regen_per_10_seconds": 5, "mana_regen_per_10_seconds": 5})
 	assertAck(t, geared.Tick([]Input{{MessageID: "ring", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "ring")
 	gearedPlayer := geared.entities[geared.playerID]
 	gearedPlayer.hp = gearedPlayer.maxHP - 2

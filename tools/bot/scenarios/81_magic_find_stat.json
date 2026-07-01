@@ -8,19 +8,19 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_ring"
+      "item_def_id": "ring"
     },
     {
       "action": "assert_rolled_inventory_item",
-      "item_def_id": "cave_ring",
-      "item_template_id": "cave_ring",
+      "item_def_id": "ring",
+      "item_template_id": "ring",
       "stat_keys": [
         "magic_find_percent"
       ]
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_ring",
+      "item_def_id": "ring",
       "slot": "ring_left"
     },
     {
@@ -42,8 +42,8 @@
   "assertions": [
     {
       "type": "rolled_inventory_item",
-      "item_def_id": "cave_ring",
-      "item_template_id": "cave_ring",
+      "item_def_id": "ring",
+      "item_template_id": "ring",
       "stat_keys": [
         "magic_find_percent"
       ],

@@ -102,12 +102,13 @@ func (r *Rules) setItemPayload(setItemID string) (ItemRollPayload, bool) {
 	itemLevel := MaxItemLevelForDepth(maxInt(1, requirements["level"]), r.DungeonGeneration.ItemLevelTiers)
 	payload := ItemRollPayload{
 		ItemTemplateID: setItem.Piece.BaseTemplateID,
-		DisplayName:    setItem.Piece.DisplayName,
+		DisplayName:    r.rolledEquipmentDisplayName(template, "set", stats, "of "+setItem.SetDisplayName),
 		Rarity:         "set",
 		ItemLevel:      1,
 		Stats:          stats,
 		Requirements:   requirements,
 		EffectIDs:      []string{},
+		SetPieceID:     setItemID,
 	}
 
 	return FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers), true
@@ -220,7 +221,16 @@ func (s *Sim) setItemForEquippedItem(item *invItem) (SetItemDef, bool) {
 	}
 	for _, setItemID := range sortedStringKeys(s.rules.SetItems) {
 		setItem := s.rules.SetItems[setItemID]
-		if setItem.Piece.BaseTemplateID == item.rollPayload.ItemTemplateID && setItem.Piece.DisplayName == item.rollPayload.DisplayName {
+		if setItem.Piece.BaseTemplateID != item.rollPayload.ItemTemplateID {
+			continue
+		}
+		if item.rollPayload.SetPieceID != "" {
+			if item.rollPayload.SetPieceID == setItemID {
+				return setItem, true
+			}
+			continue
+		}
+		if setItem.Piece.DisplayName == item.rollPayload.DisplayName {
 			return setItem, true
 		}
 	}
@@ -233,7 +243,16 @@ func (s *Sim) setItemForInventoryItem(item *invItem) (SetItemDef, bool) {
 	}
 	for _, setItemID := range sortedStringKeys(s.rules.SetItems) {
 		setItem := s.rules.SetItems[setItemID]
-		if setItem.Piece.BaseTemplateID == item.rollPayload.ItemTemplateID && setItem.Piece.DisplayName == item.rollPayload.DisplayName {
+		if setItem.Piece.BaseTemplateID != item.rollPayload.ItemTemplateID {
+			continue
+		}
+		if item.rollPayload.SetPieceID != "" {
+			if item.rollPayload.SetPieceID == setItemID {
+				return setItem, true
+			}
+			continue
+		}
+		if setItem.Piece.DisplayName == item.rollPayload.DisplayName {
 			return setItem, true
 		}
 	}

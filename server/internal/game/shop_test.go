@@ -125,7 +125,7 @@ func TestShopRulesValidationRejectsBadReferencesAndPricing(t *testing.T) {
 }
 
 func TestShopOpenBuyAndSell(t *testing.T) {
-	sim := newTownVendorSim(t, 250, 3)
+	sim := newTownVendorSim(t, 1000, 3)
 	vendor := townVendorEntity(t, sim)
 	shop := sim.rules.Shops["town_vendor"]
 	potionPrice, ok := shop.fixedBuyPrice("red_potion")
@@ -151,10 +151,10 @@ func TestShopOpenBuyAndSell(t *testing.T) {
 		MessageID: "msg_buy_potion",
 		ShopBuy:   &ShopBuyIntent{ShopEntityID: idStr(vendor.id), OfferID: "fixed:red_potion"},
 	}})
-	if !hasAck(buyPotion, "msg_buy_potion") || sim.gold != 250-potionPrice || len(sim.inventory) != 1 || sim.inventory[0].itemDefID != "red_potion" {
+	if !hasAck(buyPotion, "msg_buy_potion") || sim.gold != 1000-potionPrice || len(sim.inventory) != 1 || sim.inventory[0].itemDefID != "red_potion" {
 		t.Fatalf("buy potion result gold=%d inv=%+v res=%+v", sim.gold, sim.inventory, buyPotion)
 	}
-	if ev := findEvent(buyPotion.Events, "shop_purchase"); ev == nil || ev.Price == nil || *ev.Price != potionPrice || ev.TotalGold == nil || *ev.TotalGold != 250-potionPrice {
+	if ev := findEvent(buyPotion.Events, "shop_purchase"); ev == nil || ev.Price == nil || *ev.Price != potionPrice || ev.TotalGold == nil || *ev.TotalGold != 1000-potionPrice {
 		t.Fatalf("shop_purchase event = %+v", ev)
 	}
 
@@ -834,12 +834,12 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 	vendor := townVendorEntity(t, sim)
 	equipped := &invItem{
 		instanceID: 7001,
-		itemDefID:  "cave_blade",
+		itemDefID:  "long_sword",
 		slot:       mainHandSlot,
 		equipped:   true,
 		rollPayload: &ItemRollPayload{
-			ItemTemplateID: "cave_blade",
-			DisplayName:    "Common Cave Blade",
+			ItemTemplateID: "long_sword",
+			DisplayName:    "Long Sword",
 			Rarity:         "common",
 			Stats:          map[string]int{"damage_min": 2, "damage_max": 4},
 			Requirements:   map[string]int{"level": 1},
@@ -848,10 +848,10 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 	}
 	sellable := &invItem{
 		instanceID: 7002,
-		itemDefID:  "cave_shield",
+		itemDefID:  "shield",
 		slot:       offHandSlot,
 		rollPayload: &ItemRollPayload{
-			ItemTemplateID: "cave_shield",
+			ItemTemplateID: "shield",
 			DisplayName:    "Magic Cave Shield",
 			Rarity:         "magic",
 			Stats:          map[string]int{"armor": 5, "block_percent": 9},
@@ -862,8 +862,8 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 	sim.inventory = append(sim.inventory, equipped, sellable)
 	sim.equipped[mainHandSlot] = equipped.instanceID
 	bladePayload, err := json.Marshal(ItemRollPayload{
-		ItemTemplateID: "cave_blade",
-		DisplayName:    "Magic Cave Blade",
+		ItemTemplateID: "long_sword",
+		DisplayName:    "Long Sword",
 		Rarity:         "magic",
 		Stats:          map[string]int{"damage_min": 3, "damage_max": 6},
 		Requirements:   map[string]int{"level": 1},
@@ -878,7 +878,7 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 		OfferIndex:     0,
 		OfferID:        "generated:test:000",
 		SourceDepth:    2,
-		ItemTemplateID: "cave_blade",
+		ItemTemplateID: "long_sword",
 		RolledPayload:  bladePayload,
 		BuyPrice:       215,
 		Available:      true,
@@ -918,9 +918,9 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 	if redPotion == nil || redPotion.Category != "consumable" || !containsShopString(redPotion.SummaryLines, "Restores 5 HP") {
 		t.Fatalf("red potion offer = %+v", redPotion)
 	}
-	blade := findGeneratedOfferByTemplate(opened.Offers, "cave_blade")
+	blade := findGeneratedOfferByTemplate(opened.Offers, "long_sword")
 	if blade == nil {
-		t.Fatalf("missing generated cave_blade offer: %+v", opened.Offers)
+		t.Fatalf("missing generated long_sword offer: %+v", opened.Offers)
 	}
 	if blade.Slot != mainHandSlot || blade.Category != "equipment" || blade.Comparison == nil {
 		t.Fatalf("generated blade appraisal = %+v", blade)

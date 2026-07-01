@@ -16,27 +16,27 @@ const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 
-const DEFAULT_GEAR_ITEMS := ["cave_blade", "cave_shield", "cave_helm", "cave_mail", "cave_boots"]
+const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
 	"rusty_sword": "main_hand",
-	"cave_blade": "main_hand",
+	"long_sword": "main_hand",
 	"starter_sorcerer_staff": "main_hand",
 	"starter_barbarian_axe": "main_hand",
 	"starter_paladin_sword": "main_hand",
 	"starter_paladin_shield": "off_hand",
-	"cave_greatsword": "main_hand",
-	"cave_war_sword": "main_hand",
+	"great_sword": "main_hand",
+	"war_sword": "main_hand",
 	"training_bow": "main_hand",
-	"cave_bow": "main_hand",
-	"cave_shield": "off_hand",
-	"cave_helm": "head",
-	"cave_mail": "chest",
-	"cave_gloves": "gloves",
-	"cave_belt": "belt",
-	"cave_pack_belt": "belt",
-	"cave_boots": "boots",
-	"cave_ring": "ring_left",
-	"cave_amulet": "amulet",
+	"bow": "main_hand",
+	"shield": "off_hand",
+	"helm": "head",
+	"mail": "chest",
+	"gloves": "gloves",
+	"belt": "belt",
+	"war_girdle": "belt",
+	"boots": "boots",
+	"ring": "ring_left",
+	"amulet": "amulet",
 }
 
 var _mode := "screenshot"
@@ -298,9 +298,9 @@ func _setup_corpse_inventory() -> void:
 	]
 	var equipped := {"main_hand": "3001"}
 	var corpse_items := [
-		{"item_instance_id": "4001", "item_def_id": "cave_blade", "display_name": "Fallen Cave Blade", "slot": "main_hand", "equipped": true, "rarity": "magic", "rolled_stats": {"damage_min": 3, "damage_max": 6}},
-		{"item_instance_id": "4002", "item_def_id": "cave_boots", "display_name": "Fallen Boots", "slot": "boots", "equipped": true, "rarity": "common"},
-		{"item_instance_id": "4003", "item_def_id": "cave_ring", "display_name": "Fallen Ring", "slot": "ring_left", "equipped": false, "rarity": "rare", "rolled_stats": {"max_hp": 4}},
+		{"item_instance_id": "4001", "item_def_id": "long_sword", "display_name": "Fallen Cave Blade", "slot": "main_hand", "equipped": true, "rarity": "magic", "rolled_stats": {"damage_min": 3, "damage_max": 6}},
+		{"item_instance_id": "4002", "item_def_id": "boots", "display_name": "Fallen Boots", "slot": "boots", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "4003", "item_def_id": "ring", "display_name": "Fallen Ring", "slot": "ring_left", "equipped": false, "rarity": "rare", "rolled_stats": {"max_hp": 4}},
 	]
 
 	inventory_panel.set_inventory_state(inventory, equipped, 3, 15, 82)
@@ -331,7 +331,7 @@ func _setup_floor_item() -> void:
 	var manifest = _read_json(base.path_join("../assets/manifests/assets.v0.json"))
 	var assets: Dictionary = manifest.get("assets", {}) if typeof(manifest) == TYPE_DICTIONARY else {}
 	ItemRulesLoader.ensure_loaded()
-	var item_def_id := str(_items[0]) if not _items.is_empty() else "cave_blade"
+	var item_def_id := str(_items[0]) if not _items.is_empty() else "long_sword"
 	var factory := LootNodeFactoryScript.new(assets, ItemRulesLoader.item_presentations)
 	var loot: Node3D = factory.make_loot_node({
 		"type": "loot",
@@ -832,7 +832,7 @@ func _gear_snapshot(items: Array) -> Dictionary:
 		var slot := str(ITEM_SLOT.get(item_def_id, ""))
 		if slot == "":
 			continue
-		if item_def_id == "cave_ring":
+		if item_def_id == "ring":
 			slot = "ring_right" if ring_count > 0 else "ring_left"
 			ring_count += 1
 		var iid := str(next_id)
@@ -842,7 +842,7 @@ func _gear_snapshot(items: Array) -> Dictionary:
 			"item_def_id": item_def_id,
 			"slot": slot,
 			"equipped": true,
-			"rarity": "rare" if item_def_id in ["cave_helm", "cave_mail"] else "magic",
+			"rarity": "rare" if item_def_id in ["helm", "mail"] else "magic",
 		})
 		equipped[slot] = iid
 	return {"inventory": inventory, "equipped": equipped}
@@ -850,15 +850,15 @@ func _gear_snapshot(items: Array) -> Dictionary:
 
 func _inventory_items() -> Array:
 	return [
-		{"item_instance_id": "2001", "item_def_id": "cave_helm", "slot": "head", "equipped": true, "rarity": "rare"},
-		{"item_instance_id": "2002", "item_def_id": "cave_mail", "slot": "chest", "equipped": true, "rarity": "rare"},
-		{"item_instance_id": "2003", "item_def_id": "cave_pack_belt", "slot": "belt", "equipped": true, "rarity": "magic"},
-		{"item_instance_id": "2004", "item_def_id": "cave_boots", "slot": "boots", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "2001", "item_def_id": "helm", "slot": "head", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2002", "item_def_id": "mail", "slot": "chest", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2003", "item_def_id": "war_girdle", "slot": "belt", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2004", "item_def_id": "boots", "slot": "boots", "equipped": true, "rarity": "common"},
 		{
 			"item_instance_id": "2005",
-			"item_def_id": "cave_blade",
-			"item_template_id": "cave_blade",
-			"display_name": "Magic Cave Blade",
+			"item_def_id": "long_sword",
+			"item_template_id": "long_sword",
+			"display_name": "Long Sword",
 			"slot": "main_hand",
 			"equipped": true,
 			"rarity": "magic",
@@ -869,12 +869,12 @@ func _inventory_items() -> Array:
 			],
 			"requirements_met": true,
 		},
-		{"item_instance_id": "2006", "item_def_id": "cave_shield", "slot": "off_hand", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2006", "item_def_id": "shield", "slot": "off_hand", "equipped": true, "rarity": "magic"},
 		{
 			"item_instance_id": "2011",
-			"item_def_id": "cave_amulet",
-			"item_template_id": "cave_amulet",
-			"display_name": "Common Cave Amulet",
+			"item_def_id": "amulet",
+			"item_template_id": "amulet",
+			"display_name": "Amulet",
 			"slot": "amulet",
 			"equipped": true,
 			"rarity": "common",
@@ -887,11 +887,11 @@ func _inventory_items() -> Array:
 		},
 		{"item_instance_id": "2007", "item_def_id": "red_potion", "slot": "", "equipped": false, "rarity": "common"},
 		{"item_instance_id": "2008", "item_def_id": "blue_potion", "slot": "", "equipped": false, "rarity": "common"},
-		{"item_instance_id": "2009", "item_def_id": "cave_ring", "slot": "ring_left", "equipped": false, "rarity": "rare"},
+		{"item_instance_id": "2009", "item_def_id": "ring", "slot": "ring_left", "equipped": false, "rarity": "rare"},
 		{
 			"item_instance_id": "2010",
-			"item_def_id": "cave_war_sword",
-			"item_template_id": "cave_war_sword",
+			"item_def_id": "war_sword",
+			"item_template_id": "war_sword",
 			"display_name": "Rare Cave War Sword",
 			"slot": "main_hand",
 			"equipped": false,
@@ -945,10 +945,10 @@ func _shop_offers() -> Array:
 			"summary_lines": ["Kind: consumable", "Restores 5 mana"],
 		},
 		{
-			"offer_id": "generated:1:cave_helm",
+			"offer_id": "generated:1:helm",
 			"kind": "generated",
-			"item_def_id": "cave_helm",
-			"item_template_id": "cave_helm",
+			"item_def_id": "helm",
+			"item_template_id": "helm",
 			"display_name": "Magic Cave Helm",
 			"rarity": "magic",
 			"buy_price": 110,
@@ -956,21 +956,21 @@ func _shop_offers() -> Array:
 			"summary_lines": ["Slot: head", "Armor +5", "+0 Min damage vs equipped", "+1 Max damage vs equipped"],
 		},
 		{
-			"offer_id": "generated:1:cave_blade",
+			"offer_id": "generated:1:long_sword",
 			"kind": "generated",
-			"item_def_id": "cave_blade",
-			"item_template_id": "cave_blade",
-			"display_name": "Rare Cave Blade",
+			"item_def_id": "long_sword",
+			"item_template_id": "long_sword",
+			"display_name": "Long Sword",
 			"rarity": "rare",
 			"buy_price": 680,
 			"slot": "main_hand",
 			"summary_lines": ["Slot: main hand", "Damage 3-7", "Requires level 1", "+2 Min damage vs equipped", "+2 Max damage vs equipped", "-1 Armor vs equipped"],
 		},
 		{
-			"offer_id": "generated:1:cave_shield",
+			"offer_id": "generated:1:shield",
 			"kind": "generated",
-			"item_def_id": "cave_shield",
-			"item_template_id": "cave_shield",
+			"item_def_id": "shield",
+			"item_template_id": "shield",
 			"display_name": "Guarding Cave Shield",
 			"rarity": "magic",
 			"buy_price": 95,
@@ -982,8 +982,8 @@ func _shop_offers() -> Array:
 
 func _shop_inventory() -> Array:
 	return [
-		{"item_instance_id": "3001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Magic Cave Bow", "slot": "main_hand", "equipped": false, "rarity": "magic", "sell_price": 42},
-		{"item_instance_id": "3002", "item_def_id": "cave_mail", "item_template_id": "cave_mail", "display_name": "Rare Cave Mail", "slot": "chest", "equipped": false, "rarity": "rare", "sell_price": 88},
+		{"item_instance_id": "3001", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Magic Cave Bow", "slot": "main_hand", "equipped": false, "rarity": "magic", "sell_price": 42},
+		{"item_instance_id": "3002", "item_def_id": "mail", "item_template_id": "mail", "display_name": "Rare Cave Mail", "slot": "chest", "equipped": false, "rarity": "rare", "sell_price": 88},
 	]
 
 
@@ -991,8 +991,8 @@ func _shop_sell_appraisals() -> Array:
 	return [
 		{
 			"item_instance_id": "3001",
-			"item_def_id": "cave_bow",
-			"item_template_id": "cave_bow",
+			"item_def_id": "bow",
+			"item_template_id": "bow",
 			"display_name": "Magic Cave Bow",
 			"rarity": "magic",
 			"slot": "main_hand",
@@ -1001,8 +1001,8 @@ func _shop_sell_appraisals() -> Array:
 		},
 		{
 			"item_instance_id": "3002",
-			"item_def_id": "cave_mail",
-			"item_template_id": "cave_mail",
+			"item_def_id": "mail",
+			"item_template_id": "mail",
 			"display_name": "Rare Cave Mail",
 			"rarity": "rare",
 			"slot": "chest",
@@ -1014,15 +1014,15 @@ func _shop_sell_appraisals() -> Array:
 
 func _market_stash_items() -> Array:
 	return [
-		{"stash_item_id": "stash_9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Magic Cave Bow", "rarity": "magic", "slot": "main_hand", "summary_lines": ["Slot: main hand", "Damage 2-5"]},
-		{"stash_item_id": "stash_9002", "item_def_id": "cave_ring", "item_template_id": "cave_ring", "display_name": "Rare Cave Ring", "rarity": "rare", "slot": "ring", "summary_lines": ["Slot: ring", "Maximum Health +4"]},
-		{"stash_item_id": "stash_9003", "item_def_id": "cave_mail", "item_template_id": "cave_mail", "display_name": "Common Cave Mail", "rarity": "common", "slot": "chest", "summary_lines": ["Slot: chest", "Armor +8"]},
+		{"stash_item_id": "stash_9001", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Magic Cave Bow", "rarity": "magic", "slot": "main_hand", "summary_lines": ["Slot: main hand", "Damage 2-5"]},
+		{"stash_item_id": "stash_9002", "item_def_id": "ring", "item_template_id": "ring", "display_name": "Rare Cave Ring", "rarity": "rare", "slot": "ring", "summary_lines": ["Slot: ring", "Maximum Health +4"]},
+		{"stash_item_id": "stash_9003", "item_def_id": "mail", "item_template_id": "mail", "display_name": "Mail", "rarity": "common", "slot": "chest", "summary_lines": ["Slot: chest", "Armor +8"]},
 	]
 
 func _market_listings() -> Array:
 	return [
-		{"listing_id": "listing_1001", "seller_account_id": "acct_other", "stash_item_id": "seller_stash_1", "item_def_id": "cave_blade", "display_name": "Rare Cave Blade", "rarity": "rare", "rolled_stats": {"damage_min": 4, "damage_max": 8}},
-		{"listing_id": "listing_1002", "seller_account_id": "acct_player", "stash_item_id": "my_stash_1", "item_def_id": "cave_shield", "display_name": "Magic Cave Shield", "rarity": "magic", "rolled_stats": {"block_percent": 8}},
+		{"listing_id": "listing_1001", "seller_account_id": "acct_other", "stash_item_id": "seller_stash_1", "item_def_id": "long_sword", "display_name": "Long Sword", "rarity": "rare", "rolled_stats": {"damage_min": 4, "damage_max": 8}},
+		{"listing_id": "listing_1002", "seller_account_id": "acct_player", "stash_item_id": "my_stash_1", "item_def_id": "shield", "display_name": "Magic Cave Shield", "rarity": "magic", "rolled_stats": {"block_percent": 8}},
 	]
 
 

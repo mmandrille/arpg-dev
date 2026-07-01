@@ -161,7 +161,7 @@ func TestPassiveSkillPercentStatsApplyAfterFlatStatsAndDoNotCompound(t *testing.
 		t.Fatalf("new sim: %v", err)
 	}
 
-	ring := addRolledInventoryItem(t, sim, 7310, "cave_ring", map[string]int{"max_hp": 20})
+	ring := addRolledInventoryItem(t, sim, 7310, "ring", map[string]int{"max_hp": 20})
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_hp_ring", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "equip_hp_ring")
 	flatOnly, _ := sim.playerEffectiveCombatStats()
 

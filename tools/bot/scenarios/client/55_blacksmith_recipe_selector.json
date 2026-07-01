@@ -47,7 +47,7 @@
     },
     {
       "type": "click_blacksmith_stage_item",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "type": "select_blacksmith_recipe",
@@ -55,7 +55,7 @@
     },
     {
       "type": "wait_blacksmith_panel",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "preview_contains": [
         "Recipe: Upgrade Item",
         "Spend on attempt"

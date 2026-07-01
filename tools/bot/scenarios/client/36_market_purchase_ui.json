@@ -8,7 +8,7 @@
   "description": "Client funds account-stash gold, buys a seller preflight listing from the market board, and verifies the priced active row disappears.",
   "preflight": {
     "type": "market_listing",
-    "item_def_id": "cave_mail",
+    "item_def_id": "mail",
     "price_gold": 37
   },
   "client_steps": [
@@ -34,10 +34,10 @@
     { "type": "wait_event", "event_type": "stash_gold_deposited", "timeout_s": 15.0 },
     { "type": "assert_stash_gold", "at_least": 37 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_market_board" },
-    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 37, "at_least": 1, "timeout_s": 30.0 },
-    { "type": "click_market_purchase_listing", "item_def_id": "cave_mail", "price_gold": 37 },
-    { "type": "wait_market_panel", "item_def_id": "cave_mail", "price_gold": 37, "equals": 0, "timeout_s": 30.0 },
-    { "type": "assert_market_listing_rows", "item_def_id": "cave_mail", "price_gold": 37, "equals": 0 },
-    { "type": "assert_stash_item_count", "item_def_id": "cave_mail", "equals": 1 }
+    { "type": "wait_market_panel", "item_def_id": "mail", "price_gold": 37, "at_least": 1, "timeout_s": 30.0 },
+    { "type": "click_market_purchase_listing", "item_def_id": "mail", "price_gold": 37 },
+    { "type": "wait_market_panel", "item_def_id": "mail", "price_gold": 37, "equals": 0, "timeout_s": 30.0 },
+    { "type": "assert_market_listing_rows", "item_def_id": "mail", "price_gold": 37, "equals": 0 },
+    { "type": "assert_stash_item_count", "item_def_id": "mail", "equals": 1 }
   ]
 }

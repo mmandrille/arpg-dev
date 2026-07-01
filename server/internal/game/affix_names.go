@@ -3,11 +3,25 @@ package game
 import "strings"
 
 func (r *Rules) affixDisplayName(template ItemTemplateDef, rarityID string, stats map[string]int) string {
-	rarity := r.Rarities[rarityID]
-	baseName := strings.TrimSpace(rarity.NamePrefix + " " + template.Name)
-	if itemRarityRank(rarityID) < itemRarityRank("magic") {
-		return baseName
+	return r.rolledEquipmentDisplayName(template, rarityID, stats, "")
+}
+
+func (r *Rules) rolledEquipmentDisplayName(template ItemTemplateDef, rarityID string, stats map[string]int, suffix string) string {
+	archetype := strings.TrimSpace(template.Name)
+	name := archetype
+	if itemRarityRank(rarityID) >= itemRarityRank("magic") {
+		if affix := r.bestAffixWord(template, stats); affix != "" {
+			name = affix + " " + archetype
+		}
 	}
+	if suffix != "" {
+		name = name + " " + suffix
+	}
+
+	return name
+}
+
+func (r *Rules) bestAffixWord(template ItemTemplateDef, stats map[string]int) string {
 	bestWord := ""
 	bestStat := ""
 	bestPriority := -1
@@ -28,14 +42,20 @@ func (r *Rules) affixDisplayName(template ItemTemplateDef, rarityID string, stat
 			bestGain = gain
 		}
 	}
-	if bestWord == "" {
-		return baseName
-	}
-	return bestWord + " " + baseName
+
+	return bestWord
 }
 
 func affixWordForStat(stat string) (string, int) {
 	switch stat {
+	case "bonus_cold_damage":
+		return "Freezing", 95
+	case "bonus_fire_damage":
+		return "Burning", 95
+	case "bonus_lightning_damage":
+		return "Shocking", 95
+	case "bonus_poison_damage":
+		return "Venomous", 95
 	case "all_skills", "skill_damage_percent":
 		return "Arcane", 90
 	case "skill_cooldown_reduction_percent", "skill_mana_cost_reduction":
@@ -63,4 +83,37 @@ func affixWordForStat(stat string) (string, int) {
 	default:
 		return "", 0
 	}
+}
+
+func dominantElementalDamageType(stats map[string]int) string {
+	bestStat := ""
+	bestValue := 0
+	for _, stat := range []string{"bonus_cold_damage", "bonus_fire_damage", "bonus_lightning_damage", "bonus_poison_damage"} {
+		value := stats[stat]
+		if value > bestValue || (value == bestValue && value > 0 && (bestStat == "" || stat < bestStat)) {
+			bestStat = stat
+			bestValue = value
+		}
+	}
+	switch bestStat {
+	case "bonus_cold_damage":
+		return damageTypeCold
+	case "bonus_fire_damage":
+		return damageTypeFire
+	case "bonus_lightning_damage":
+		return damageTypeLightning
+	case "bonus_poison_damage":
+		return damageTypePoison
+	default:
+		return damageTypeForce
+	}
+}
+
+func elementalBonusDamage(stats map[string]int) int {
+	total := 0
+	for _, stat := range []string{"bonus_cold_damage", "bonus_fire_damage", "bonus_lightning_damage", "bonus_poison_damage"} {
+		total += stats[stat]
+	}
+
+	return total
 }

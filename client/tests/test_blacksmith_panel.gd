@@ -35,9 +35,9 @@ func _run() -> void:
 	}
 	var item := {
 		"item_instance_id": "2001",
-		"item_def_id": "cave_bow",
-		"item_template_id": "cave_bow",
-		"display_name": "Common Cave Bow",
+		"item_def_id": "bow",
+		"item_template_id": "bow",
+		"display_name": "Bow",
 		"rarity": "common",
 		"rolled_stats": {"damage_min": 1, "damage_max": 2, "upgrade_pity": {"failures": 1}},
 	}
@@ -94,9 +94,9 @@ func _test_upgrade_preview_flow() -> void:
 	)
 	var upgrade_item := {
 		"item_instance_id": "2001",
-		"item_def_id": "cave_bow",
-		"item_template_id": "cave_bow",
-		"display_name": "Common Cave Bow",
+		"item_def_id": "bow",
+		"item_template_id": "bow",
+		"display_name": "Bow",
 		"rarity": "common",
 		"rolled_stats": {"damage_min": 2, "damage_max": 4},
 		"summary_lines": ["Min damage: +2", "Max damage: +4"],
@@ -141,8 +141,8 @@ func _test_upgrade_preview_flow() -> void:
 	state = panel.get_debug_state()
 	_assert_true("blacksmith summary preview includes tier rescale", _array_contains_text(state.get("preview_lines", []), "Stats rescale to the next item tier"))
 	var common_bow: Dictionary = upgrade_item.duplicate(true)
-	common_bow["item_def_id"] = "cave_bow"
-	common_bow["display_name"] = "Common Cave Bow"
+	common_bow["item_def_id"] = "bow"
+	common_bow["display_name"] = "Bow"
 	common_bow["rarity"] = "common"
 	common_bow["rolled_stats"] = {"item_level": 0}
 	common_bow["summary_lines"] = []

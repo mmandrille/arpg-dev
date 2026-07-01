@@ -28,8 +28,8 @@ func _test_comparison_against_equipped_item() -> void:
 	var listed := _mail_listing("listing-1", 6)
 	var equipped_item := {
 		"item_instance_id": "equipped-chest",
-		"item_def_id": "cave_mail",
-		"item_template_id": "cave_mail",
+		"item_def_id": "mail",
+		"item_template_id": "mail",
 		"slot": "chest",
 		"rolled_stats": {"armor": 3},
 	}
@@ -50,8 +50,8 @@ func _test_market_panel_debug_and_tooltip_comparison() -> void:
 	var listed := _mail_listing("listing-1", 6)
 	var equipped_item := {
 		"item_instance_id": "equipped-chest",
-		"item_def_id": "cave_mail",
-		"item_template_id": "cave_mail",
+		"item_def_id": "mail",
+		"item_template_id": "mail",
 		"slot": "chest",
 		"rolled_stats": {"armor": 3},
 	}
@@ -70,8 +70,8 @@ func _test_market_panel_debug_and_tooltip_comparison() -> void:
 func _mail_listing(listing_id: String, armor: int) -> Dictionary:
 	return {
 		"listing_id": listing_id,
-		"item_def_id": "cave_mail",
-		"item_template_id": "cave_mail",
+		"item_def_id": "mail",
+		"item_template_id": "mail",
 		"display_name": "Cave Mail",
 		"seller_account_id": "seller",
 		"price_gold": 63,

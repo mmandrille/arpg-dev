@@ -8,21 +8,21 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_bow"
+      "item_def_id": "bow"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "slot": "main_hand",
       "weapon_set": 0
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_bow",
+      "item_def_id": "bow",
       "slot": "main_hand",
       "weapon_set": 1
     },
@@ -34,18 +34,18 @@
       "action": "assert_weapon_set_slot_def",
       "weapon_set": 0,
       "slot": "main_hand",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "action": "assert_weapon_set_slot_def",
       "weapon_set": 1,
       "slot": "main_hand",
-      "item_def_id": "cave_bow"
+      "item_def_id": "bow"
     },
     {
       "action": "assert_equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "action": "swap_weapon_set",
@@ -58,7 +58,7 @@
     {
       "action": "assert_equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "cave_bow"
+      "item_def_id": "bow"
     }
   ],
   "assertions": [
@@ -69,7 +69,7 @@
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "cave_bow"
+      "item_def_id": "bow"
     }
   ],
   "visual": {

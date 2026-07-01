@@ -54,7 +54,7 @@
     },
     {
       "type": "wait_inventory_item",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "timeout_s": 15.0
     },
     {

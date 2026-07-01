@@ -13,7 +13,7 @@
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_pack_belt"
+      "item_def_id": "war_girdle"
     },
     {
       "action": "pick_up_loot",
@@ -104,7 +104,7 @@
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_pack_belt",
+      "item_def_id": "war_girdle",
       "slot": "belt"
     },
     {
@@ -159,14 +159,14 @@
     },
     {
       "type": "inventory_count",
-      "item_template_id": "cave_pack_belt",
+      "item_template_id": "war_girdle",
       "equipped": true,
       "equals": 1
     },
     {
       "type": "equipped_slot_def",
       "slot": "belt",
-      "item_def_id": "cave_pack_belt"
+      "item_def_id": "war_girdle"
     }
   ]
 }

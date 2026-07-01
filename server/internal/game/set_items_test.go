@@ -16,7 +16,7 @@ func TestSetItemPayloadsAndEquippedBonuses(t *testing.T) {
 	if payload.Rarity != "set" {
 		t.Fatalf("set payload identity = %+v", payload)
 	}
-	if payload.DisplayName != "Verdant Vanguard Blade" || payload.Stats["damage_max"] != 7 || payload.Requirements["level"] != 5 {
+	if payload.DisplayName != "Savage Long Sword of Verdant Vanguard" || payload.Stats["damage_max"] != 7 || payload.Requirements["level"] != 5 {
 		t.Fatalf("set payload fields = %+v", payload)
 	}
 
@@ -83,7 +83,7 @@ func TestSecondSetPackagePayloadsAndBonuses(t *testing.T) {
 	if !ok {
 		t.Fatal("stormrunner setItemPayload returned false")
 	}
-	if payload.Rarity != "set" || payload.DisplayName != "Stormrunner Covenant Bow" || payload.ItemTemplateID != "cave_bow" {
+	if payload.Rarity != "set" || payload.DisplayName != "Savage Bow of Stormrunner Covenant" || payload.ItemTemplateID != "bow" {
 		t.Fatalf("stormrunner payload identity = %+v", payload)
 	}
 	if payload.Stats["damage_min"] != 3 || payload.Stats["damage_max"] != 6 || payload.Stats["dex"] != 1 || payload.Requirements["level"] != 5 {
@@ -154,7 +154,7 @@ func TestWayfarersAccordSetPayloadsAndBonuses(t *testing.T) {
 	if !ok {
 		t.Fatal("wayfarers setItemPayload returned false")
 	}
-	if payload.Rarity != "set" || payload.DisplayName != "Wayfarer's Accord Pendant" || payload.ItemTemplateID != "cave_amulet" {
+	if payload.Rarity != "set" || payload.DisplayName != "Vigorous Amulet of Wayfarer's Accord" || payload.ItemTemplateID != "amulet" {
 		t.Fatalf("wayfarers payload identity = %+v", payload)
 	}
 	if payload.Stats["max_mana"] != 5 || payload.Stats["magic"] != 1 || payload.Stats["max_hp"] != 3 || payload.Requirements["level"] != 5 {

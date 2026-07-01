@@ -78,6 +78,8 @@ type ItemView struct {
 	ClassAffinityStatus  []ClassAffinityStatusView  `json:"class_affinity_status,omitempty"`
 	EquipPreview         *EquipPreviewView          `json:"equip_preview,omitempty"`
 	EffectIDs            []string                   `json:"effect_ids,omitempty"`
+	SetPieceID           string                     `json:"set_piece_id,omitempty"`
+	NamedUniqueID        string                     `json:"named_unique_id,omitempty"`
 	SummaryLines         []string                   `json:"summary_lines,omitempty"`
 	Slot                 string                     `json:"slot"`
 	Equipped             bool                       `json:"equipped"`
@@ -98,6 +100,8 @@ type StashItemView struct {
 	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
 	EquipPreview        *EquipPreviewView         `json:"equip_preview,omitempty"`
 	EffectIDs           []string                  `json:"effect_ids,omitempty"`
+	SetPieceID          string                    `json:"set_piece_id,omitempty"`
+	NamedUniqueID       string                    `json:"named_unique_id,omitempty"`
 	SummaryLines        []string                  `json:"summary_lines,omitempty"`
 }
 
@@ -116,6 +120,8 @@ type ItemRollPayload struct {
 	Stats          map[string]int `json:"stats"`
 	Requirements    map[string]int      `json:"requirements"`
 	EffectIDs       []string            `json:"effect_ids"`
+	SetPieceID      string              `json:"set_piece_id,omitempty"`
+	NamedUniqueID   string              `json:"named_unique_id,omitempty"`
 	ClassAffinities []ClassAffinityRoll `json:"class_affinities,omitempty"`
 }
 
@@ -130,6 +136,8 @@ func (p ItemRollPayload) itemViewFields(v *ItemView) {
 	v.RolledStats = cloneIntMap(p.Stats)
 	v.Requirements = cloneIntMap(p.Requirements)
 	v.EffectIDs = cloneStringSlice(p.EffectIDs)
+	v.SetPieceID = p.SetPieceID
+	v.NamedUniqueID = p.NamedUniqueID
 }
 
 func (p ItemRollPayload) stashItemViewFields(v *StashItemView) {
@@ -143,6 +151,8 @@ func (p ItemRollPayload) stashItemViewFields(v *StashItemView) {
 	v.RolledStats = cloneIntMap(p.Stats)
 	v.Requirements = cloneIntMap(p.Requirements)
 	v.EffectIDs = cloneStringSlice(p.EffectIDs)
+	v.SetPieceID = p.SetPieceID
+	v.NamedUniqueID = p.NamedUniqueID
 }
 
 // RollPayload returns the durable payload represented by optional rolled item
@@ -159,6 +169,8 @@ func (v ItemView) RollPayload() *ItemRollPayload {
 		Stats:          cloneIntMap(v.RolledStats),
 		Requirements:   cloneIntMap(v.Requirements),
 		EffectIDs:      cloneStringSlice(v.EffectIDs),
+		SetPieceID:     v.SetPieceID,
+		NamedUniqueID:    v.NamedUniqueID,
 	}
 }
 
@@ -176,6 +188,8 @@ func (v StashItemView) RollPayload() *ItemRollPayload {
 		Stats:          cloneIntMap(v.RolledStats),
 		Requirements:   cloneIntMap(v.Requirements),
 		EffectIDs:      cloneStringSlice(v.EffectIDs),
+		SetPieceID:     v.SetPieceID,
+		NamedUniqueID:  v.NamedUniqueID,
 	}
 }
 

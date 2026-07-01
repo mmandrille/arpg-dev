@@ -31,8 +31,8 @@ func _test_loot_filter_hides_ground_items_and_pick_colliders() -> void:
 	main._upsert_entity({
 		"id": "loot_rare",
 		"type": "loot",
-		"item_def_id": "cave_blade",
-		"display_name": "Rare Cave Blade",
+		"item_def_id": "long_sword",
+		"display_name": "Long Sword",
 		"rarity": "rare",
 		"position": {"x": 3.0, "y": 0.0},
 	})

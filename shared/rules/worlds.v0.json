@@ -1010,7 +1010,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_blade",
+          "item_template_id": "long_sword",
           "position": {
             "x": 3,
             "y": 5
@@ -1080,7 +1080,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_shield",
+          "item_template_id": "shield",
           "position": {
             "x": 3,
             "y": 5
@@ -1150,7 +1150,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_bow",
+          "item_template_id": "bow",
           "position": {
             "x": 3,
             "y": 5
@@ -1228,7 +1228,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_blade",
+          "item_template_id": "long_sword",
           "position": {
             "x": 3,
             "y": 5
@@ -1236,7 +1236,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_shield",
+          "item_template_id": "shield",
           "position": {
             "x": 3,
             "y": 6
@@ -1244,7 +1244,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_bow",
+          "item_template_id": "bow",
           "position": {
             "x": 3,
             "y": 4
@@ -1464,7 +1464,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_tiara",
+          "item_template_id": "tiara",
           "position": {
             "x": 3,
             "y": 5
@@ -1472,7 +1472,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_mail",
+          "item_template_id": "mail",
           "position": {
             "x": 5,
             "y": 5
@@ -1480,7 +1480,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_full_plate",
+          "item_template_id": "full_plate",
           "position": {
             "x": 6,
             "y": 5
@@ -1493,12 +1493,23 @@
         "position": { "x": 4, "y": 5 }
       },
       "entities": [
-        { "type": "loot", "item_template_id": "cave_rapier", "position": { "x": 2, "y": 5 } },
-        { "type": "loot", "item_template_id": "cave_blade", "position": { "x": 3, "y": 5 } },
-        { "type": "loot", "item_template_id": "cave_heavy_blade", "position": { "x": 4, "y": 5 } },
-        { "type": "loot", "item_template_id": "cave_hunting_bow", "position": { "x": 5, "y": 5 } },
-        { "type": "loot", "item_template_id": "cave_bow", "position": { "x": 6, "y": 5 } },
-        { "type": "loot", "item_template_id": "cave_war_bow", "position": { "x": 7, "y": 5 } }
+        { "type": "loot", "item_template_id": "rapier", "position": { "x": 2, "y": 5 } },
+        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 3, "y": 5 } },
+        { "type": "loot", "item_template_id": "falchion", "position": { "x": 4, "y": 5 } },
+        { "type": "loot", "item_template_id": "hunter_bow", "position": { "x": 5, "y": 5 } },
+        { "type": "loot", "item_template_id": "bow", "position": { "x": 6, "y": 5 } },
+        { "type": "loot", "item_template_id": "war_bow", "position": { "x": 7, "y": 5 } }
+      ]
+    },
+    "item_archetype_lab": {
+      "player": {
+        "position": { "x": 4, "y": 5 }
+      },
+      "entities": [
+        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 2, "y": 5 } },
+        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 3, "y": 5 } },
+        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 4, "y": 5 } },
+        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 5, "y": 5 } }
       ]
     },
     "damage_types_lab": {
@@ -2405,7 +2416,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_blade",
+          "item_template_id": "long_sword",
           "position": {
             "x": 8,
             "y": 5
@@ -2736,7 +2747,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_blade",
+          "item_template_id": "long_sword",
           "position": {
             "x": 13,
             "y": 11
@@ -2744,7 +2755,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_greatsword",
+          "item_template_id": "great_sword",
           "position": {
             "x": 13,
             "y": 12
@@ -2752,7 +2763,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_mail",
+          "item_template_id": "mail",
           "position": {
             "x": 13,
             "y": 13
@@ -2760,7 +2771,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_mail",
+          "item_template_id": "mail",
           "position": {
             "x": 14,
             "y": 11
@@ -2768,7 +2779,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_mail",
+          "item_template_id": "mail",
           "position": {
             "x": 14,
             "y": 12
@@ -2776,7 +2787,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_mail",
+          "item_template_id": "mail",
           "position": {
             "x": 14,
             "y": 13
@@ -2912,7 +2923,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_blade",
+          "item_template_id": "long_sword",
           "position": {
             "x": 3,
             "y": 4
@@ -2920,7 +2931,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_shield",
+          "item_template_id": "shield",
           "position": {
             "x": 4,
             "y": 4
@@ -2928,7 +2939,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_greatsword",
+          "item_template_id": "great_sword",
           "position": {
             "x": 5,
             "y": 4
@@ -2936,7 +2947,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_bow",
+          "item_template_id": "bow",
           "position": {
             "x": 6,
             "y": 4
@@ -2944,7 +2955,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_helm",
+          "item_template_id": "helm",
           "position": {
             "x": 3,
             "y": 6
@@ -2952,7 +2963,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_mail",
+          "item_template_id": "mail",
           "position": {
             "x": 4,
             "y": 6
@@ -2960,7 +2971,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_gloves",
+          "item_template_id": "gloves",
           "position": {
             "x": 5,
             "y": 6
@@ -2968,7 +2979,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_belt",
+          "item_template_id": "belt",
           "position": {
             "x": 6,
             "y": 6
@@ -2976,7 +2987,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_boots",
+          "item_template_id": "boots",
           "position": {
             "x": 7,
             "y": 6
@@ -2984,7 +2995,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_ring",
+          "item_template_id": "ring",
           "position": {
             "x": 8,
             "y": 4
@@ -2992,7 +3003,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_ring",
+          "item_template_id": "ring",
           "position": {
             "x": 8,
             "y": 6
@@ -3000,7 +3011,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "cave_amulet",
+          "item_template_id": "amulet",
           "position": {
             "x": 9,
             "y": 5
@@ -3086,7 +3097,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_blade",
+          "item_template_id": "long_sword",
           "position": {
             "x": 3,
             "y": 5
@@ -3148,7 +3159,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_war_sword",
+          "item_template_id": "war_sword",
           "position": {
             "x": 3,
             "y": 5
@@ -3570,7 +3581,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_blade",
+          "item_template_id": "long_sword",
           "position": {
             "x": 3,
             "y": 5
@@ -4527,7 +4538,7 @@
       "entities": [
         {
           "type": "loot",
-          "item_template_id": "cave_pack_belt",
+          "item_template_id": "war_girdle",
           "position": {
             "x": 3,
             "y": 5

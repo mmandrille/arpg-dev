@@ -13,7 +13,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var item := {"item_instance_id": "2001", "item_def_id": "cave_blade"}
+	var item := {"item_instance_id": "2001", "item_def_id": "long_sword"}
 	_assert_intent("double shop sell", Router.double_click_route(item, "shop_1", "", false, false, "", {}, false), "shop_sell_intent")
 	_assert_eq("double shop entity", _payload(Router.double_click_route(item, "shop_1", "", false, false, "", {}, false)).get("shop_entity_id", ""), "shop_1")
 	_assert_intent("double market stage", Router.double_click_route(item, "", "offer", false, false, "", {}, false), "market_stage_inventory_item")

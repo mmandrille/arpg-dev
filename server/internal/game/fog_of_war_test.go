@@ -35,7 +35,7 @@ func TestLightRadiusClassBaselines(t *testing.T) {
 func TestLightRadiusUsesEquippedItemRolls(t *testing.T) {
 	sim := MustNewSim("sess_light_radius_item", "light_radius_item_seed", loadRules(t))
 	base := sim.CharacterProgressionView().DerivedStats.LightRadius
-	ring := addRolledInventoryItem(t, sim, 6900, "cave_ring", map[string]int{"light_radius": 2})
+	ring := addRolledInventoryItem(t, sim, 6900, "ring", map[string]int{"light_radius": 2})
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_light", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "equip_light")
 
 	view := sim.CharacterProgressionView()

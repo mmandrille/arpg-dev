@@ -31,7 +31,7 @@ func TestAccountStashItemUpgradeRejectsDepthCap(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{
-		ID: "depth_upgrade_item_"+suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade",
+		ID: "depth_upgrade_item_"+suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "long_sword",
 		Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4,"item_level":2}`),
 	}); err != nil {
 		t.Fatal(err)
@@ -43,8 +43,8 @@ func TestAccountStashItemUpgradeRejectsDepthCap(t *testing.T) {
 		t.Fatal(err)
 	}
 	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4,"item_level":2}`)
-	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
-	_, _, _, _, err = s.UpgradeAccountStashItem(ctx, acct.ID, "depth_upgrade_stash_"+suffix, sellPrice, 3, 100, 1, 0, 3, map[string]struct{}{"cave_blade": {}}, testUpgradeOptionsWithDepthCap(t, 20))
+	sellPrice := testItemSellPrice(t, "long_sword", bladeRolled)
+	_, _, _, _, err = s.UpgradeAccountStashItem(ctx, acct.ID, "depth_upgrade_stash_"+suffix, sellPrice, 3, 100, 1, 0, 3, map[string]struct{}{"long_sword": {}}, testUpgradeOptionsWithDepthCap(t, 20))
 	if !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("depth-capped upgrade err = %v, want ErrConflict", err)
 	}

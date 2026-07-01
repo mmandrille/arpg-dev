@@ -26,15 +26,13 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
 	}
 	effectIDs := cloneStringSlice(template.EffectPool)
-	displayName := rarity.NamePrefix + " " + template.Name
+	displayName := r.affixDisplayName(template, rarityID, stats)
 	if rarityID == "unique" {
 		effectID, ok := r.rollUniqueEffectForTemplate(template, rng)
 		if ok {
 			effectIDs = append(effectIDs, effectID)
-			displayName = uniqueItemDisplayName(template, r.UniqueEffects[effectID])
+			displayName = r.uniqueItemDisplayName(template, stats, r.UniqueEffects[effectID])
 		}
-	} else if rarityID != "set" {
-		displayName = r.affixDisplayName(template, rarityID, stats)
 	}
 	payload := ItemRollPayload{
 		ItemTemplateID:  templateID,

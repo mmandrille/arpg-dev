@@ -1,0 +1,48 @@
+server/internal/game/set_items.go
+  s_5e9d690624d2be::t_fd67ad6ebf1781 103-106,109
+tools/bot/scenarios/client/76_badge_reward_wallet.json
+  s_5e9d690624d2be::t_b286ce6d78fb6d 57-59
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_5e9d690624d2be::t_01022cdf848849 25,31
+server/internal/game/item_reroll.go
+  s_5e9d690624d2be::t_014b03b6f020e8 64-68
+tools/bot/scenarios/client/61_material_wallet_window.json
+  s_5e9d690624d2be::t_3aaca35943e180 8,25,29-31,35
+server/internal/game/set_items_test.go
+  s_5e9d690624d2be::t_6bee33a665cadb 86
+  s_5e9d690624d2be::t_50865bc00c5935 19
+  s_5e9d690624d2be::t_bf95d162495a92 157
+tools/bot/scenarios/client/30_stash_search_and_sorting.json
+  s_5e9d690624d2be::t_237261ea78250f 107,118
+  s_5e9d690624d2be::t_0d4ec379b907c6 103
+tools/bot/scenarios/client/55_blacksmith_recipe_selector.json
+  s_5e9d690624d2be::t_72ef3500b119fe 25
+tools/bot/scenarios/83_second_set_package.json
+  s_5e9d690624d2be::t_f98be88a21b836 18,22,37
+tools/bot/scenarios/84_boss_special_drops.json
+  s_5e9d690624d2be::t_d184c16b62cff5 60,97
+tools/bot/scenarios/client/54_material_wallet_details.json
+  s_5e9d690624d2be::t_150266f815ee29 8,25,29-31,35
+scripts/bot_client.sh
+  s_5e9d690624d2be::t_cfe2bd1f391989 281
+tools/bot/scenarios/client/63_blacksmith_upgrade_history.json
+  s_5e9d690624d2be::t_923ef5533b6d5f 25
+tools/bot/scenarios/84_wayfarers_accord_set.json
+  s_5e9d690624d2be::t_b0491d0ca70001 18,22,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bde725810abb32dfaa86a44ec81b3639e313d817",
+  "prompts": {},
+  "sessions": {
+    "s_5e9d690624d2be": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8a17c9df-e848-4b3e-ad10-a5a521ef99ec",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

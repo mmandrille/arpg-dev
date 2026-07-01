@@ -1,0 +1,111 @@
+client/scripts/blacksmith_item_craft_slot.gd
+  s_d5baab824d370d::t_817c34b607899d 1-3,6-49
+  s_d5baab824d370d::t_27a3b0dfde0f30 4-5
+client/tests/test_blacksmith_panel.gd
+  s_d5baab824d370d::t_62d77c40ab3000 92-99
+  s_d5baab824d370d::t_06897f9fe7bc0e 57-59,61,69-72
+  s_d5baab824d370d::t_755954a3828fd6 9
+client/scripts/blacksmith_upgrade_preview.gd
+  s_d5baab824d370d::t_03408cb1c5af10 242
+client/tests/test_town_service_bridge.gd
+  s_d5baab824d370d::t_e199d6e460282b 46,51-52
+  s_d5baab824d370d::t_960bb841971ec0 101-109
+client/tests/test_inventory_transfer_router.gd
+  s_d5baab824d370d::t_1ae88948305422 51-53
+server/internal/replay/replay_test.go
+  s_d5baab824d370d::t_58c74c847d718b 1528
+  s_d5baab824d370d::t_f09f619bbdaa49 1518
+server/internal/store/repos.go
+  s_d5baab824d370d::t_089666b5b28c1e 1506
+  s_d5baab824d370d::t_d033e89536ec1b 1510
+  s_d5baab824d370d::t_6bd153dca03e36 1571
+server/internal/store/upgrade_depth_cap_test.go
+  s_d5baab824d370d::t_385a373ba45526 47
+  s_d5baab824d370d::t_407fde6b6f316b 27
+.maintainability/file-size-baseline.tsv
+  s_d5baab824d370d::t_28e8ea26f396ee 3
+server/internal/store/leveled_consumable_store.go
+  s_d5baab824d370d::t_6c470c06549a74 70
+  s_d5baab824d370d::t_693f367b7ce98c 223-226,234-287
+  s_d5baab824d370d::t_bb6327e35e0936 15
+client/scripts/blacksmith_resource_craft_slot.gd.uid
+  s_d5baab824d370d::t_45d75630e9b5b7 1
+client/scripts/inventory_panel.gd
+  s_d5baab824d370d::t_8a9bba0500a4f5 947-952
+  s_d5baab824d370d::t_1f4766d95e3a4e 239-252
+  s_d5baab824d370d::t_1922b6dc3ad095 97
+  s_d5baab824d370d::t_538b97ac69960b 167-168
+  s_d5baab824d370d::t_fa8e54dba162c9 577-578
+  s_d5baab824d370d::t_d428bd4a386689 147-148
+client/scripts/blacksmith_resource_craft_slot.gd
+  s_d5baab824d370d::t_b37c506e6eb62a 4-5
+  s_d5baab824d370d::t_8cf2d7540cd7b9 1-3,6-49
+client/scripts/inventory_transfer_router.gd
+  s_d5baab824d370d::t_b83dc0dd617123 82
+  s_d5baab824d370d::t_0a41e62aee2f90 109-111
+  s_d5baab824d370d::t_73e99b814c1e25 14
+server/internal/store/interfaces.go
+  s_d5baab824d370d::t_6fbd0a0d34b05b 89
+  s_d5baab824d370d::t_8a9af6a7243fef 85
+tools/bot/scenarios/client/63_blacksmith_upgrade_history.json
+  s_d5baab824d370d::t_46798e9bdec1ba 188-190
+client/scripts/net_client.gd
+  s_d5baab824d370d::t_86a509eb891d23 424-431,433
+  s_d5baab824d370d::t_dc004d8c08c240 440-446,448
+server/internal/http/account_stash_renew.go
+  s_d5baab824d370d::t_ddaedb27b17bc5 99
+  s_d5baab824d370d::t_33b6d516b9bbfe 15-17
+client/scripts/town_service_bridge.gd
+  s_d5baab824d370d::t_a4214acb6ed4e4 47,50-52
+  s_d5baab824d370d::t_24b8f2dc41dca1 48-49
+server/internal/http/account_stash.go
+  s_d5baab824d370d::t_8d1434951a3921 228
+  s_d5baab824d370d::t_49823a4dc9988d 243
+  s_d5baab824d370d::t_ceab17f0bec508 178
+  s_d5baab824d370d::t_d231954bb71018 282
+  s_d5baab824d370d::t_63b2955e919fa4 84-87
+tools/bot/scenarios/client/55_blacksmith_recipe_selector.json
+  s_d5baab824d370d::t_92e552c7fc27cb 53-55
+client/scripts/blacksmith_item_craft_slot.gd.uid
+  s_d5baab824d370d::t_45d75630e9b5b7 1
+server/internal/game/item_level_scaling.go
+  s_d5baab824d370d::t_e95ce03d4496d3 17,23
+client/scripts/main.gd
+  s_d5baab824d370d::t_16909fa32b434a 4960,4962-4966,4969,4977
+  s_d5baab824d370d::t_ff623312e8f150 3846
+  s_d5baab824d370d::t_f711c8f2969d01 5005,5008,5016,5023-5041
+client/scripts/blacksmith_panel_actions.gd
+  s_d5baab824d370d::t_0b42968505a361 53-54
+  s_d5baab824d370d::t_31e3f542e7ce28 21
+  s_d5baab824d370d::t_a167e3769a98fd 91-96
+  s_d5baab824d370d::t_121411eaff3016 105-113
+server/internal/game/item_level_scaling_test.go
+  s_d5baab824d370d::t_b697072873300b 12-17
+client/scripts/blacksmith_panel.gd
+  s_d5baab824d370d::t_f276811e0a3378 540
+  s_d5baab824d370d::t_c630424e4a9bbb 91
+  s_d5baab824d370d::t_1b9ce9190e34d0 4-5,7
+  s_d5baab824d370d::t_9265c2a32fa3a1 16-17,42,53-56,63,87,90,96,114,121-123,163,221,227,229,233-234,242,244,247,249-257,270-277,283,340,346,352,357-388,390,396,405-423,429-432,452-459,462,470-502,507,620-621,624,628,632,636,640,644,660,662,702-703
+  s_d5baab824d370d::t_e30dc2dfb351bd 532
+  s_d5baab824d370d::t_ec942bd5148170 248
+  s_d5baab824d370d::t_c1cb329099a5ef 106
+  s_d5baab824d370d::t_447bc11df4a442 172-204
+  s_d5baab824d370d::t_3c1bc11f19b30e 258
+  s_d5baab824d370d::t_ef577518b22ff1 269,280
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ec4a938baef6926777c0565bae706dd4eba39c9b",
+  "prompts": {},
+  "sessions": {
+    "s_d5baab824d370d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b65b77dc-570b-4bb9-87b6-0c59e4bee4ac",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

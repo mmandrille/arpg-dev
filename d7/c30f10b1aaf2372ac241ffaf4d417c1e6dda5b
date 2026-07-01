@@ -1,0 +1,19 @@
+client/tests/test_client_bot.gd
+  s_4f034067e4e37f::t_31b50618a00f88 347
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "d7c30f10b1aaf2372ac241ffaf4d417c1e6dda5b",
+  "prompts": {},
+  "sessions": {
+    "s_4f034067e4e37f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e620be96-c297-4187-b8fd-15556c7aba35",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

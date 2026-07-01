@@ -1,0 +1,94 @@
+tools/content/build_codex.py
+  s_4f034067e4e37f::t_efbb12976d6d4e 1-442
+client/tests/test_client_bot.gd
+  s_4f034067e4e37f::t_02b9f623157271 355-356
+  s_4f034067e4e37f::t_66c4d25e477048 322
+scripts/client_smoke.sh
+  s_4f034067e4e37f::t_e9f946ba51079b 203-204
+shared/i18n/en.json
+  s_4f034067e4e37f::t_5296b6b68e3dab 8-9
+docs/specs/v395_spec-game-codex-shell.md
+  s_4f034067e4e37f::t_f57ad4d1495bc9 1-46
+docs/progress/slice-lifecycle.md
+  s_4f034067e4e37f::t_3d2b6b770a0c46 409
+shared/content/codex_overlays.v0.schema.json
+  s_4f034067e4e37f::t_a87a4b28d2e05c 1-40
+docs/specs/v396_spec-game-codex-chapters.md
+  s_4f034067e4e37f::t_ffb9b912162ea0 1-38
+shared/content/codex_index.v0.schema.json
+  s_4f034067e4e37f::t_489159864d3db3 1-63
+client/scripts/codex_loader.gd
+  s_4f034067e4e37f::t_d8d2b3fbd6d14b 1-104
+docs/plans/v395_2026-06-30-game-codex-shell.md
+  s_4f034067e4e37f::t_5d19d9357adbe2 1-21
+client/scripts/bot_step_catalog.gd
+  s_4f034067e4e37f::t_ce76ed4f10554b 13
+  s_4f034067e4e37f::t_732d7c18847356 28
+docs/CODEMAP.md
+  s_4f034067e4e37f::t_460c69318b8d2f 39-40
+  s_4f034067e4e37f::t_98c37bfc94b748 28
+client/tests/test_codex_loader.gd
+  s_4f034067e4e37f::t_c4defc50157ee7 1-33
+shared/content/codex_overlays.v0.json
+  s_4f034067e4e37f::t_33f5fc079e5b08 1-51
+client/scripts/codex_panel.gd
+  s_4f034067e4e37f::t_a3422cd5e733ae 29,37-41
+  s_4f034067e4e37f::t_a01a6567e78783 1-28,30-36,42-256
+tools/bot/scenarios/client/44_codex_foundation.json
+  s_4f034067e4e37f::t_00e282bc3e00e1 1-53
+client/scripts/bot_codex_assertions.gd
+  s_4f034067e4e37f::t_0093fb05b67125 1-23
+docs/as-built/v395_game-codex-shell.md
+  s_4f034067e4e37f::t_1b9b2e238125d0 1-22
+client/tests/test_codex_panel.gd
+  s_4f034067e4e37f::t_3b9f34079b6a57 1-13,15-41
+  s_4f034067e4e37f::t_e48b024aefbd9e 14
+client/scripts/bot_ui_assertion_handlers.gd
+  s_4f034067e4e37f::t_f61bce59120db3 4-5
+  s_4f034067e4e37f::t_fa85678cc07b22 38-44
+tools/test_build_codex.py
+  s_4f034067e4e37f::t_7e014319e470c3 1-33
+client/scripts/main_menu.gd
+  s_4f034067e4e37f::t_d7e959be3cb51d 48-49
+  s_4f034067e4e37f::t_8cd9d7833b1eec 89
+  s_4f034067e4e37f::t_f7392f10b23a15 8
+  s_4f034067e4e37f::t_061c3199bf1a0f 107,113
+  s_4f034067e4e37f::t_58ec0e4b9010dd 66
+client/scripts/bot_wait_handlers.gd
+  s_4f034067e4e37f::t_875db3c6e0623d 27-28
+make/shared.mk
+  s_4f034067e4e37f::t_e1bc4318f4cfda 2,7-8
+  s_4f034067e4e37f::t_e330411abcb38d 9
+shared/content/codex_index.v0.json
+  s_4f034067e4e37f::t_1c4da8bd89d32c 1-1365
+client/scripts/main.gd
+  s_4f034067e4e37f::t_3344448285d4e9 870-871
+  s_4f034067e4e37f::t_3528bd533e4169 504-505
+  s_4f034067e4e37f::t_87fc948bda0a7d 3998-4001
+  s_4f034067e4e37f::t_6a7a9e62c1c0c5 68
+  s_4f034067e4e37f::t_1468abbe308936 228
+  s_4f034067e4e37f::t_70338018a0ea9b 3960
+  s_4f034067e4e37f::t_4a2892f806ccfc 6040-6041
+  s_4f034067e4e37f::t_969697632807d6 6324-6325,6327-6329
+  s_4f034067e4e37f::t_93d8121adb6b66 687-698
+PROGRESS.md
+  s_4f034067e4e37f::t_ad68eb9894a350 18,26,29
+tools/bot/scenarios/client/20_menu_create_join_flow.json
+  s_4f034067e4e37f::t_f3549f167056c1 18,25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "cf745f1bf708d160601f365449231ddcb3c43f02",
+  "prompts": {},
+  "sessions": {
+    "s_4f034067e4e37f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e620be96-c297-4187-b8fd-15556c7aba35",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

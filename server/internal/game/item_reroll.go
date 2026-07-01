@@ -28,8 +28,8 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 	}
 
 	stats := cloneIntMap(template.BaseStats)
-	representativeDepth := RepresentativeDepthForItemLevel(payload.ItemLevel, rules.DungeonGeneration.ItemLevelTiers)
-	rollableStats := rules.rollableStatsForRarity(template.RollableStats, rarityID, representativeDepth)
+	// Affix rolls use depth-1 ranges; FinalizeItemRollPayload applies item-level scaling once.
+	rollableStats := rules.rollableStatsForRarity(template.RollableStats, rarityID, 1)
 	rollCount := rarity.StatRollsMin
 	if rarity.StatRollsMax > rarity.StatRollsMin {
 		rollCount += rng.IntN(rarity.StatRollsMax - rarity.StatRollsMin + 1)
@@ -42,10 +42,7 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
 	}
 
-	requirements := cloneIntMap(payload.Requirements)
-	if len(requirements) == 0 {
-		requirements = cloneIntMap(template.Requirements)
-	}
+	requirements := cloneIntMap(template.Requirements)
 	effectIDs := cloneStringSlice(payload.EffectIDs)
 	displayName := rarity.NamePrefix + " " + template.Name
 
@@ -90,17 +87,9 @@ func RenewRolledStatsJSON(rules *Rules, raw json.RawMessage, rng *RNG) ([]byte, 
 		}
 	}
 
-	var payload ItemRollPayload
-	if err := json.Unmarshal(raw, &payload); err != nil || payload.ItemTemplateID == "" {
-		itemDefID, _ := payloadMap["item_template_id"].(string)
-		if itemDefID == "" {
-			return nil, fmt.Errorf("game: renew requires item_template_id")
-		}
-		inferred := inferRollPayloadFromFlatStats(rules, itemDefID, raw)
-		if inferred == nil {
-			return nil, fmt.Errorf("game: renew could not parse rolled stats")
-		}
-		payload = *inferred
+	payload, err := decodeItemRollPayloadForRenew(rules, raw, payloadMap)
+	if err != nil {
+		return nil, err
 	}
 
 	rerolled, err := RerollItemRollPayload(rules, payload, rng)
@@ -108,30 +97,51 @@ func RenewRolledStatsJSON(rules *Rules, raw json.RawMessage, rng *RNG) ([]byte, 
 		return nil, err
 	}
 
-	if _, hasPity := payloadMap["upgrade_pity"]; hasPity {
-		out, err := json.Marshal(rerolled)
-		if err != nil {
-			return nil, fmt.Errorf("game: encode renewed rolled stats: %w", err)
-		}
-		merged := map[string]any{}
-		if err := json.Unmarshal(out, &merged); err != nil {
-			return nil, err
-		}
-		merged["upgrade_pity"] = payloadMap["upgrade_pity"]
-		out, err = json.Marshal(merged)
-		if err != nil {
-			return nil, fmt.Errorf("game: encode renewed rolled stats with pity: %w", err)
-		}
-
-		return out, nil
+	nextStats := cloneIntMap(rerolled.Stats)
+	nextStats["item_level"] = rerolled.ItemLevel
+	writeRollPayloadStats(payloadMap, nextStats)
+	writeRollPayloadRequirements(payloadMap, rerolled.Requirements)
+	payloadMap["item_template_id"] = rerolled.ItemTemplateID
+	payloadMap["display_name"] = rerolled.DisplayName
+	payloadMap["rarity"] = rerolled.Rarity
+	if len(rerolled.EffectIDs) > 0 {
+		payloadMap["effect_ids"] = rerolled.EffectIDs
+	} else {
+		delete(payloadMap, "effect_ids")
 	}
 
-	out, err := json.Marshal(rerolled)
+	out, err := json.Marshal(payloadMap)
 	if err != nil {
 		return nil, fmt.Errorf("game: encode renewed rolled stats: %w", err)
 	}
 
 	return out, nil
+}
+
+func decodeItemRollPayloadForRenew(rules *Rules, raw json.RawMessage, payloadMap map[string]any) (ItemRollPayload, error) {
+	var payload ItemRollPayload
+	if err := json.Unmarshal(raw, &payload); err != nil || payload.ItemTemplateID == "" {
+		itemDefID, _ := payloadMap["item_template_id"].(string)
+		if itemDefID == "" {
+			return ItemRollPayload{}, fmt.Errorf("game: renew requires item_template_id")
+		}
+		inferred := inferRollPayloadFromFlatStats(rules, itemDefID, raw)
+		if inferred == nil {
+			return ItemRollPayload{}, fmt.Errorf("game: renew could not parse rolled stats")
+		}
+		payload = *inferred
+	}
+
+	if payload.ItemLevel < 1 {
+		if level := intStatValue(rollPayloadStatsMap(payloadMap)["item_level"]); level > 0 {
+			payload.ItemLevel = level
+		}
+	}
+	if payload.ItemLevel < 1 {
+		payload.ItemLevel = 1
+	}
+
+	return payload, nil
 }
 
 func (r *Rules) namedUniqueForEffectIDs(templateID string, effectIDs []string) (UniqueItemDef, bool) {

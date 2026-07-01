@@ -1,0 +1,39 @@
+server/internal/game/bishop_debug.go
+  s_b5ee270b714f38::t_4edbef3afe2934 137-185
+server/internal/inputdecode/inputdecode.go
+  s_b5ee270b714f38::t_7b6d3dd7eb49b2 43-44
+  s_b5ee270b714f38::t_769ab4b77a4330 375-386
+  s_b5ee270b714f38::t_94afddd13da8c9 165
+server/internal/game/resource_loot_drops.go
+  s_b5ee270b714f38::t_5a3636e4686146 157-175
+server/internal/game/handlers.go
+  s_b5ee270b714f38::t_89bd7049730594 58-59
+shared/protocol/messages.v8.schema.json
+  s_b5ee270b714f38::t_ee8d9667676c38 42-45
+  s_b5ee270b714f38::t_872d51600d1c2e 124-131
+server/internal/game/bishop_test.go
+  s_b5ee270b714f38::t_bd511a84dd8fde 396-449
+server/internal/game/sim.go
+  s_b5ee270b714f38::t_27334931d13364 882-883
+  s_b5ee270b714f38::t_a0ab1e56432502 981
+  s_b5ee270b714f38::t_bb53379ea6ca8b 982-983
+shared/protocol/state_delta.v8.schema.json
+  s_b5ee270b714f38::t_77581388da17cd 846-850
+  s_b5ee270b714f38::t_d0cf084ef70390 844-845
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "79f0e385539fd97efe8811863eb166323ca25c1d",
+  "prompts": {},
+  "sessions": {
+    "s_b5ee270b714f38": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "94df0af6-60cf-4c01-838f-6f9b79e9ef68",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -52,11 +52,7 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 				stats[stat] = value
 			}
 			effectIDs = cloneStringSlice(named.FixedEffectIDs)
-			if len(effectIDs) > 0 {
-				if effect, ok := rules.UniqueEffects[effectIDs[0]]; ok {
-					displayName = rules.uniqueItemDisplayName(template, stats, effect)
-				}
-			}
+			displayName = named.DisplayName
 		} else if len(effectIDs) > 0 {
 			if effect, ok := rules.UniqueEffects[effectIDs[0]]; ok {
 				displayName = rules.uniqueItemDisplayName(template, stats, effect)

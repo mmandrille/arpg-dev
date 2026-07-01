@@ -472,10 +472,9 @@ func (r *Rules) namedUniquePayload(uniqueID string) (ItemRollPayload, bool) {
 		requirements["level"] = unique.MinimumLevel
 	}
 	itemLevel := MaxItemLevelForDepth(maxInt(1, requirements["level"]), r.DungeonGeneration.ItemLevelTiers)
-	primaryEffect := r.UniqueEffects[unique.FixedEffectIDs[0]]
 	payload := ItemRollPayload{
 		ItemTemplateID: unique.BaseTemplateID,
-		DisplayName:    r.uniqueItemDisplayName(template, stats, primaryEffect),
+		DisplayName:    unique.DisplayName,
 		Rarity:         "unique",
 		ItemLevel:      1,
 		Stats:          stats,

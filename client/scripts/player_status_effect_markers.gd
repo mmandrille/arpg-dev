@@ -11,10 +11,11 @@ const BURNING_EFFECT_ID := "everburning_wound"
 const ELITE_COMMAND_EFFECT_ID := "elite_command"
 const PINNING_ROOT_EFFECT_ID := "pinning_root"
 const STUN_EFFECT_ID := "stun"
-const DASH_STUN_EFFECT_ID := "dash_stun"
+const DASH_BLEED_EFFECT_ID := "dash_bleed"
 const ROGUE_MARK_EFFECT_ID := "rogue_mark"
-const STUN_SKILL_IDS := ["leap", "charge", "dash"]
+const STUN_SKILL_IDS := ["leap", "charge"]
 
+const BLEED_MARKER_NAME := "BleedVisualEffect"
 const BURNING_MARKER_NAME := "BurningVisualEffect"
 const PINNING_ROOT_MARKER_NAME := "PinningRootVisualEffect"
 const STUN_MARKER_NAME := "StunStarsVisualEffect"
@@ -78,13 +79,36 @@ static func has_rogue_mark_effect_id(effect_ids_value) -> bool:
 	return effect_ids.has(ROGUE_MARK_EFFECT_ID)
 
 
+static func has_bleed_effect_id(effect_ids_value) -> bool:
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	return effect_ids.has(DASH_BLEED_EFFECT_ID)
+
+
 static func is_stun_skill_id(skill_id: String) -> bool:
 	return STUN_SKILL_IDS.has(skill_id)
 
 
 static func has_stun_effect_id(effect_ids_value) -> bool:
 	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
-	return effect_ids.has(STUN_EFFECT_ID) or effect_ids.has("leap_stun") or effect_ids.has("charge_stun") or effect_ids.has(DASH_STUN_EFFECT_ID)
+	return effect_ids.has(STUN_EFFECT_ID) or effect_ids.has("leap_stun") or effect_ids.has("charge_stun")
+
+
+static func sync_bleed_effect(root: Node3D, active: bool) -> void:
+	if root == null:
+		return
+	var existing := root.find_child(BLEED_MARKER_NAME, false, false) as Node3D
+	if not active:
+		if existing != null:
+			root.remove_child(existing)
+			existing.queue_free()
+		return
+	if existing == null:
+		existing = make_bleed_effect()
+		root.add_child(existing)
+
+
+static func has_bleed_effect(root: Node3D) -> bool:
+	return root != null and root.find_child(BLEED_MARKER_NAME, false, false) != null
 
 
 static func sync_burning_effect(root: Node3D, active: bool) -> void:
@@ -294,6 +318,36 @@ static func make_stun_effect() -> Node3D:
 	var tween := orbit.create_tween()
 	tween.set_loops()
 	tween.tween_property(orbit, "rotation:y", TAU, 0.95).from(0.0)
+	return marker
+
+
+static func make_bleed_effect() -> Node3D:
+	var marker := Node3D.new()
+	marker.name = BLEED_MARKER_NAME
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.82, 0.04, 0.08, 0.78)
+	mat.emission_enabled = true
+	mat.emission = Color(0.62, 0.02, 0.05)
+	mat.emission_energy_multiplier = 2.2
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.no_depth_test = true
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	for i in range(5):
+		var drip := MeshInstance3D.new()
+		drip.name = "BleedDrip%d" % i
+		var drip_mesh := CylinderMesh.new()
+		drip_mesh.top_radius = 0.03
+		drip_mesh.bottom_radius = 0.08
+		drip_mesh.height = 0.42
+		drip_mesh.radial_segments = 10
+		drip.mesh = drip_mesh
+		var angle := float(i) * TAU / 5.0
+		drip.position = Vector3(cos(angle) * 0.28, 0.48, sin(angle) * 0.28)
+		drip.material_override = mat
+		marker.add_child(drip)
 	return marker
 
 

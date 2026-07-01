@@ -18,8 +18,10 @@ type SkillDashDef struct {
 	DamagePercentBase     int     `json:"damage_percent_base"`
 	DamagePercentPerMagic int     `json:"damage_percent_per_magic"`
 	MaxDamageBonusPercent int     `json:"max_damage_bonus_percent"`
-	StunEffectID          string  `json:"stun_effect_id"`
-	StunDurationTicks     int     `json:"stun_duration_ticks"`
+	BleedEffectID           string  `json:"bleed_effect_id"`
+	BleedDamagePercentMaxHP int     `json:"bleed_damage_percent_max_hp"`
+	BleedDurationTicks      int     `json:"bleed_duration_ticks"`
+	BleedIntervalTicks      int     `json:"bleed_interval_ticks"`
 }
 
 type SkillMobilityDef struct {
@@ -53,11 +55,20 @@ func validateRogueConeSkillPayload(skillID string, skill SkillDef) error {
 	}
 	if (skill.Dash.RangeBase > 0 || skill.Dash.DamagePercentBase > 0) &&
 		(skill.Dash.RangeBase <= 0 || skill.Dash.RangePerRank < 0 || skill.Dash.DamagePercentBase <= 0 ||
-			skill.Dash.DamagePercentPerMagic < 0 || skill.Dash.MaxDamageBonusPercent < 0 || skill.Dash.StunDurationTicks < 0) {
+			skill.Dash.DamagePercentPerMagic < 0 || skill.Dash.MaxDamageBonusPercent < 0 || skill.Dash.BleedDurationTicks < 0 ||
+			skill.Dash.BleedDamagePercentMaxHP < 0 || skill.Dash.BleedIntervalTicks < 0) {
 		return fmt.Errorf("game: invalid rules skills.%s.dash: values must be valid", skillID)
 	}
-	if skill.Dash.StunDurationTicks > 0 && skill.Dash.StunEffectID == "" {
-		return fmt.Errorf("game: invalid rules skills.%s.dash.stun_effect_id: required", skillID)
+	if skill.Dash.BleedDurationTicks > 0 {
+		if skill.Dash.BleedEffectID == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.dash.bleed_effect_id: required", skillID)
+		}
+		if skill.Dash.BleedDamagePercentMaxHP <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.dash.bleed_damage_percent_max_hp: must be positive", skillID)
+		}
+		if skill.Dash.BleedIntervalTicks <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.dash.bleed_interval_ticks: must be positive", skillID)
+		}
 	}
 	if skill.Kind == "mobility" {
 		if skill.Mobility.RangeBase <= 0 || skill.Mobility.RangePerRank < 0 || skill.Mobility.Visual == "" {

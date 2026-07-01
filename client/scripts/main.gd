@@ -1402,6 +1402,13 @@ func _apply_delta(p: Dictionary) -> void:
 			if event_type == "skill_effect_ended":
 				_set_entity_pinning_root(eid, false)
 				continue
+		if str(ev.get("skill_id", "")) == "dash":
+			if event_type == "skill_effect_started":
+				_set_entity_bleed(eid, true)
+				continue
+			if event_type == "skill_effect_ended":
+				_set_entity_bleed(eid, false)
+				continue
 		if PlayerStatusEffectMarkers.is_stun_skill_id(str(ev.get("skill_id", ""))):
 			if event_type == "skill_effect_started":
 				_set_entity_stun(eid, true)
@@ -2202,6 +2209,8 @@ func _enter_entity_terminal_death(entity_id: String, rec: Dictionary) -> void:
 	var ctrl = rec.get("controller", null)
 	if ctrl != null:
 		ctrl.enter_terminal("death")
+	if not GameplayFeedbackPresentationScript.entity_combat_impacts_allowed(entities, entity_id):
+		return
 	var reaction = rec.get("reaction", null)
 	if reaction != null:
 		reaction.enter_death()
@@ -5650,6 +5659,22 @@ func _set_entity_poison_tint(entity_id: String, active: bool) -> void:
 	rec["poisoned"] = active
 	_apply_entity_status_tint(rec)
 
+func _set_entity_bleed(entity_id: String, active: bool) -> void:
+	var rec: Dictionary = entities.get(entity_id, {})
+	if rec.is_empty():
+		return
+	rec["bleeding"] = active
+	var effect_ids: Array = rec.get("effect_ids", []) if rec.get("effect_ids", []) is Array else []
+	if active:
+		if not effect_ids.has(PlayerStatusEffectMarkers.DASH_BLEED_EFFECT_ID):
+			effect_ids.append(PlayerStatusEffectMarkers.DASH_BLEED_EFFECT_ID)
+	else:
+		effect_ids.erase(PlayerStatusEffectMarkers.DASH_BLEED_EFFECT_ID)
+	rec["effect_ids"] = effect_ids
+	var node := rec.get("node", null) as Node3D
+	PlayerStatusEffectMarkers.sync_bleed_effect(node, active)
+	_apply_entity_status_tint(rec)
+
 func _set_entity_burning(entity_id: String, active: bool) -> void:
 	var rec: Dictionary = entities.get(entity_id, {})
 	if rec.is_empty():
@@ -5685,7 +5710,6 @@ func _set_entity_stun(entity_id: String, active: bool) -> void:
 		effect_ids.erase(PlayerStatusEffectMarkers.STUN_EFFECT_ID)
 		effect_ids.erase("leap_stun")
 		effect_ids.erase("charge_stun")
-		effect_ids.erase(PlayerStatusEffectMarkers.DASH_STUN_EFFECT_ID)
 	rec["effect_ids"] = effect_ids
 	var node := rec.get("node", null) as Node3D
 	PlayerStatusEffectMarkers.sync_stun_effect(node, active)
@@ -5699,6 +5723,8 @@ func _apply_entity_status_tint(rec: Dictionary) -> void:
 		tint = Color(0.62, 0.86, 1.0)
 	if bool(rec.get("burning", false)) or PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])):
 		tint = Color(1.0, 0.38, 0.12)
+	if bool(rec.get("bleeding", false)) or PlayerStatusEffectMarkers.has_bleed_effect_id(rec.get("effect_ids", [])):
+		tint = Color(0.92, 0.22, 0.24)
 	if bool(rec.get("poisoned", false)):
 		tint = ClientConstants.POISON_TINT
 	var reaction = rec.get("reaction", null)

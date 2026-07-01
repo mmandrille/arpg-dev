@@ -341,6 +341,7 @@ type playerState struct {
 	SkillCooldowns        map[string]skillCooldownState
 	SkillEffects          map[string]skillEffectState
 	PoisonDots            map[uint64]poisonDotState
+	BleedDots             map[uint64]bleedDotState
 	RogueMarks            map[uint64]rogueMarkState
 	UniqueBurnDots        map[string]uniqueBurnDotState
 	UniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
@@ -406,6 +407,7 @@ type Sim struct {
 	skillCooldowns        map[string]skillCooldownState
 	skillEffects          map[string]skillEffectState
 	poisonDots            map[uint64]poisonDotState
+	bleedDots             map[uint64]bleedDotState
 	rogueMarks            map[uint64]rogueMarkState
 	uniqueBurnDots        map[string]uniqueBurnDotState
 	uniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
@@ -497,6 +499,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		skillCooldowns:        make(map[string]skillCooldownState),
 		skillEffects:          make(map[string]skillEffectState),
 		poisonDots:            make(map[uint64]poisonDotState),
+		bleedDots:             make(map[uint64]bleedDotState),
 		rogueMarks:            make(map[uint64]rogueMarkState),
 		uniqueBurnDots:        make(map[string]uniqueBurnDotState),
 		uniqueExecutionMarks:  make(map[uint64]uniqueExecutionMarkState),
@@ -726,6 +729,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
 		SkillEffects:          cloneSkillEffects(s.skillEffects),
 		PoisonDots:            clonePoisonDots(s.poisonDots),
+		BleedDots:             cloneBleedDots(s.bleedDots),
 		RogueMarks:            cloneRogueMarks(s.rogueMarks),
 		UniqueBurnDots:        cloneUniqueBurnDots(s.uniqueBurnDots),
 		UniqueExecutionMarks:  cloneUniqueExecutionMarks(s.uniqueExecutionMarks),

@@ -8,6 +8,7 @@ signal delete_requested(character_id: String)
 signal rename_requested(character_id: String, name: String)
 
 const ClassIconScript := preload("res://scripts/class_icon.gd")
+const ClassCreationSummaryScript := preload("res://scripts/class_creation_summary.gd")
 const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 
 const MODE_CHOOSE_OR_CREATE := "choose_or_create"
@@ -58,6 +59,7 @@ var _rows: VBoxContainer
 var _empty_label: Label
 var _create_row: HBoxContainer
 var _class_picker: HBoxContainer
+var _features_panel: VBoxContainer
 var _name_edit: LineEdit
 var _create_button: Button
 var _error_label: Label
@@ -114,6 +116,7 @@ func show_forced_create(title: String = "Create Character") -> void:
 	_set_create_entry_expanded(true, "Character name")
 	_error_label.text = ""
 	_render_characters([])
+	_refresh_features_panel()
 	_focus_name_edit()
 
 
@@ -154,6 +157,8 @@ func get_debug_state() -> Dictionary:
 		"class_picker_visible": _class_picker != null and _class_picker.visible,
 		"selected_class": _selected_class_id,
 		"class_options": _debug_class_options(),
+		"class_feature_lines": _selected_class_feature_lines(),
+		"class_feature_summary": _selected_class_feature_summary(),
 		"empty_visible": _empty_label != null and _empty_label.visible,
 		"error": _error_label.text if _error_label != null else "",
 	}
@@ -174,6 +179,7 @@ func select_class(class_id: String) -> void:
 		return
 	_selected_class_id = class_id
 	_refresh_class_buttons()
+	_refresh_features_panel()
 
 
 func selected_class_id() -> String:
@@ -196,12 +202,12 @@ func _build() -> void:
 	add_child(bg)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(520, 470)
+	panel.custom_minimum_size = Vector2(520, 560)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.offset_left = -260
 	panel.offset_right = 260
-	panel.offset_top = -235
-	panel.offset_bottom = 235
+	panel.offset_top = -280
+	panel.offset_bottom = 280
 	add_child(panel)
 
 	var box := VBoxContainer.new()
@@ -246,6 +252,12 @@ func _build() -> void:
 	_class_picker.add_theme_constant_override("separation", 8)
 	box.add_child(_class_picker)
 	_build_class_picker()
+
+	_features_panel = VBoxContainer.new()
+	_features_panel.add_theme_constant_override("separation", 2)
+	_features_panel.custom_minimum_size = Vector2(460, 88)
+	box.add_child(_features_panel)
+	_refresh_features_panel()
 
 	_error_label = Label.new()
 	_error_label.add_theme_color_override("font_color", Color("#ff9b7a"))
@@ -551,24 +563,71 @@ func _class_skill(class_id: String) -> String:
 
 
 func _class_stats(class_id: String) -> Dictionary:
+	var summary: Dictionary = ClassCreationSummaryScript.feature_summary(class_id)
+	var stats: Dictionary = summary.get("stats", {}) as Dictionary
+	if not stats.is_empty():
+		return stats
 	return (CLASS_DEFS.get(class_id, CLASS_DEFS[DEFAULT_CLASS_ID]) as Dictionary).get("stats", {}) as Dictionary
 
 
 func _class_tooltip(class_id: String) -> String:
-	var stats := _class_stats(class_id)
-	return "%s\n%s: %s\n%s %d  %s %d  %s %d  %s %d" % [
-		_class_name(class_id),
-		TextCatalogScript.get_text("character.skill", "Skill"),
-		_class_skill(class_id),
-		TextCatalogScript.get_text("stat.str", "STR"),
-		int(stats.get("str", 0)),
-		TextCatalogScript.get_text("stat.dex", "DEX"),
-		int(stats.get("dex", 0)),
-		TextCatalogScript.get_text("stat.vit", "VIT"),
-		int(stats.get("vit", 0)),
-		TextCatalogScript.get_text("stat.magic", "MAGIC").to_upper(),
-		int(stats.get("magic", 0)),
-	]
+	var lines: Array = _class_feature_lines(class_id)
+	if lines.is_empty():
+		var stats := _class_stats(class_id)
+		return "%s\n%s: %s\n%s %d  %s %d  %s %d  %s %d" % [
+			_class_name(class_id),
+			TextCatalogScript.get_text("character.skill", "Skill"),
+			_class_skill(class_id),
+			TextCatalogScript.get_text("stat.str", "STR"),
+			int(stats.get("str", 0)),
+			TextCatalogScript.get_text("stat.dex", "DEX"),
+			int(stats.get("dex", 0)),
+			TextCatalogScript.get_text("stat.vit", "VIT"),
+			int(stats.get("vit", 0)),
+			TextCatalogScript.get_text("stat.magic", "MAGIC").to_upper(),
+			int(stats.get("magic", 0)),
+		]
+	return "\n".join(lines)
+
+
+func _class_feature_lines(class_id: String) -> Array:
+	var summary: Dictionary = ClassCreationSummaryScript.feature_summary(class_id)
+	return (summary.get("feature_lines", []) as Array).duplicate()
+
+
+func _selected_class_feature_lines() -> Array:
+	return _class_feature_lines(_selected_class_id)
+
+
+func _selected_class_feature_summary() -> Dictionary:
+	return ClassCreationSummaryScript.feature_summary(_selected_class_id)
+
+
+func _refresh_features_panel() -> void:
+	if _features_panel == null:
+		return
+	for child in _features_panel.get_children():
+		child.queue_free()
+	var lines: Array = _class_feature_lines(_selected_class_id)
+	if lines.is_empty():
+		_features_panel.visible = false
+		return
+	_features_panel.visible = true
+	var heading := Label.new()
+	heading.text = TextCatalogScript.get_text("character.class_features", "Class features")
+	heading.add_theme_font_size_override("font_size", 14)
+	heading.add_theme_color_override("font_color", Color("#e8dcc4"))
+	_features_panel.add_child(heading)
+	for index in range(lines.size()):
+		var line := Label.new()
+		line.text = str(lines[index])
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if index == 0:
+			line.add_theme_font_size_override("font_size", 15)
+		else:
+			line.add_theme_font_size_override("font_size", 12)
+			line.add_theme_color_override("font_color", Color("#cfc3aa"))
+		_features_panel.add_child(line)
 
 
 func _character_row_label(character: Dictionary) -> String:

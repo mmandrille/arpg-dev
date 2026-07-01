@@ -843,6 +843,13 @@
         },
         {
           "if": {
+            "properties": { "event_type": { "enum": ["bishop_debug_upgrade_shard_dropped", "bishop_debug_renew_stone_dropped", "bishop_debug_respec_badge_dropped", "bishop_debug_resurrection_badge_dropped"] } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "target_entity_id", "service", "amount", "heal", "mana"] }
+        },
+        {
+          "if": {
             "properties": { "event_type": { "const": "stash_opened" } },
             "required": ["event_type"]
           },

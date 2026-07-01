@@ -879,6 +879,8 @@ type Input struct {
 	BishopDebugStat              *BishopDebugStatPointIntent
 	BishopDebugDropUpgradeShard  *BishopDebugDropUpgradeShardIntent
 	BishopDebugDropRenewStone    *BishopDebugDropRenewStoneIntent
+	BishopDebugDropRespecBadge   *BishopDebugDropWalletBadgeIntent
+	BishopDebugDropResurrectionBadge *BishopDebugDropWalletBadgeIntent
 	StashDepositItem    *StashDepositItemIntent
 	StashWithdrawItem   *StashWithdrawItemIntent
 	StashDepositGold    *StashDepositGoldIntent
@@ -974,6 +976,9 @@ type (
 		BishopEntityID string
 	}
 	BishopDebugDropRenewStoneIntent struct {
+		BishopEntityID string
+	}
+	BishopDebugDropWalletBadgeIntent struct {
 		BishopEntityID string
 	}
 	StashDepositItemIntent struct {

@@ -1,0 +1,29 @@
+server/internal/game/item_reroll_test.go
+  s_029ce3df06db3c::t_72b628c8417c05 50-52,54-61,93-95
+  s_029ce3df06db3c::t_6fe65bc8f6c9c7 62-65,68-69,83-84,87-88,90,92
+  s_029ce3df06db3c::t_a9902073935301 66-67,70-71
+  s_029ce3df06db3c::t_bf0004d4a55038 53
+  s_029ce3df06db3c::t_efdffc82d6cb94 72-82,85-86,89
+  s_029ce3df06db3c::t_157c52a5a61d99 91
+  s_029ce3df06db3c::t_7d1996c1617d63 108,111-116
+server/internal/game/item_reroll.go
+  s_029ce3df06db3c::t_9726621fcde47e 31-32
+  s_029ce3df06db3c::t_0ec277c75d1426 45
+  s_029ce3df06db3c::t_19304a58a92d25 90-121,126,130,135-137,140-141,144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bfd27f06594c0d4c63805f5d3f8237ebe5217e80",
+  "prompts": {},
+  "sessions": {
+    "s_029ce3df06db3c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "65b01da4-21e0-47f3-8da9-220ab6781b97",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

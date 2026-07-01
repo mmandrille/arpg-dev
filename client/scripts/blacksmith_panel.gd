@@ -361,7 +361,7 @@ func _preview_block() -> Control:
 	cost_row.add_child(cost_label)
 	box.add_child(cost_row)
 	if resource_count > 0:
-		var required_level := _required_resource_level(staged_item)
+		var required_level := BlacksmithRecipesScript.required_resource_level(_selected_recipe_id, staged_item)
 		var resource_label := _empty_label("%s: %d/%d (Lv%d+)" % [BlacksmithShardInventoryScript.resource_display_name(_recipe_resource_item_def_id()), BlacksmithShardInventoryScript.resource_inventory_count(inventory_items, _recipe_resource_item_def_id(), required_level), resource_count, required_level])
 		resource_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		resource_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
@@ -476,11 +476,11 @@ func _has_upgrade_resource(item: Dictionary = staged_item) -> bool:
 
 
 func _required_shard_level(item: Dictionary) -> int:
-	return BlacksmithShardInventoryScript.required_shard_level(item)
+	return BlacksmithShardInventoryScript.required_resource_level(_selected_recipe_id, item)
 
 
 func _resource_inventory_count(min_level: int = -1) -> int:
-	return BlacksmithShardInventoryScript.resource_inventory_count(inventory_items, resource_item_def_id, min_level)
+	return BlacksmithShardInventoryScript.resource_inventory_count(inventory_items, _recipe_resource_item_def_id(), min_level)
 
 
 func _resource_wallet_count() -> int:
@@ -488,7 +488,7 @@ func _resource_wallet_count() -> int:
 
 
 func _resource_display_name() -> String:
-	return BlacksmithShardInventoryScript.resource_display_name(resource_item_def_id)
+	return BlacksmithShardInventoryScript.resource_display_name(_recipe_resource_item_def_id())
 
 func _pity_failure_count(item: Dictionary) -> int:
 	return BlacksmithUpgradePreviewScript.pity_failure_count(item)
@@ -511,7 +511,7 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 	if not BlacksmithPanelActionsScript.recipe_accepts_item(_selected_recipe_id, item):
 		lines.append("Recipe cannot modify this item")
 		return lines
-	lines.append_array(BlacksmithUpgradePreviewScript.preview_lines(item, {
+	lines.append_array(_recipe_preview_lines(item, {
 		"base_cost": base_cost,
 		"growth_cost": growth_cost,
 		"max_level": max_level,
@@ -520,13 +520,19 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 		"success_chance_percent": success_chance_percent,
 		"pity_failure_threshold": pity_failure_threshold,
 		"resource_count": resource_count,
-		"resource_inventory_count": _resource_inventory_count(_required_shard_level(item)),
-		"resource_required_level": _required_shard_level(item),
-		"resource_wallet_count": _resource_inventory_count(_required_shard_level(item)),
+		"resource_inventory_count": _resource_inventory_count(_required_resource_level(item)),
+		"resource_required_level": _required_resource_level(item),
+		"resource_wallet_count": _resource_inventory_count(_required_resource_level(item)),
 		"resource_name": _resource_display_name(),
 		"wallet_gold": _wallet_gold(),
 	}))
 	return lines
+
+
+func _recipe_preview_lines(item: Dictionary, context: Dictionary) -> Array:
+	if _selected_recipe_id == BlacksmithRecipesScript.RECIPE_ITEM_RENEW:
+		return BlacksmithUpgradePreviewScript.renew_preview_lines(item, context)
+	return BlacksmithUpgradePreviewScript.preview_lines(item, context)
 
 
 func _recipe_selector_row() -> Control:

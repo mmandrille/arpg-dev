@@ -3,6 +3,7 @@ extends RefCounted
 
 const KIND_INTENT := "intent"
 const KIND_BLACKSMITH_UNSTAGE := "blacksmith_unstage"
+const KIND_BLACKSMITH_MERGE_UNPLACE := "blacksmith_merge_unplace"
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -10,6 +11,7 @@ const DRAG_SOURCE_STASH := "stash"
 const DRAG_SOURCE_CORPSE := "corpse"
 const DRAG_SOURCE_UNIQUE_CHEST := "unique_chest"
 const DRAG_SOURCE_BLACKSMITH_STAGE := "blacksmith_stage"
+const DRAG_SOURCE_BLACKSMITH_MERGE := "blacksmith_merge"
 
 
 static func double_click_route(
@@ -104,6 +106,8 @@ static func drop_route(slot_kind: String, data: Dictionary, can_equip_to_slot: b
 		})
 	if source == DRAG_SOURCE_BLACKSMITH_STAGE:
 		return {"kind": KIND_BLACKSMITH_UNSTAGE}
+	if source == DRAG_SOURCE_BLACKSMITH_MERGE:
+		return {"kind": KIND_BLACKSMITH_MERGE_UNPLACE}
 	if is_equipment_slot(source):
 		var unequip_slot := slot_from_kind(source)
 		var unequip_payload := {"slot": unequip_slot}

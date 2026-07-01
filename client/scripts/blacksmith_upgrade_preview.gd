@@ -48,6 +48,24 @@ static func pity_guaranteed(item: Dictionary, pity_failure_threshold: int) -> bo
 	return pity_failure_threshold > 0 and pity_failure_count(item) >= pity_failure_threshold
 
 
+static func renew_preview_lines(item: Dictionary, context: Dictionary) -> Array:
+	var resource_count := int(context.get("resource_count", 0))
+	var wallet_gold := int(context.get("wallet_gold", 0))
+	var resource_inventory_count := int(context.get("resource_inventory_count", context.get("resource_wallet_count", 0)))
+	var resource_name := str(context.get("resource_name", "resource"))
+	var base_cost := int(context.get("base_cost", 0))
+	var growth_cost := int(context.get("growth_cost", 0))
+	var resource_required_level := int(context.get("resource_required_level", maxi(1, item_level(item))))
+	var cost := next_cost(item, base_cost, growth_cost)
+	var lines: Array = []
+	lines.append("Success chance: 100%")
+	lines.append("On success: reroll random affixes at current item level")
+	lines.append(_spend_line(cost, resource_count, resource_name, resource_required_level))
+	if wallet_gold >= cost and (resource_count <= 0 or resource_inventory_count >= resource_count):
+		lines.append(_after_attempt_line(wallet_gold - cost, resource_inventory_count - resource_count, resource_count, resource_name))
+	return lines
+
+
 static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	var max_level: int = int(context.get("max_level", 0))
 	var deepest_depth: int = int(context.get("deepest_dungeon_depth", 0))

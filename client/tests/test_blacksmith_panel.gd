@@ -3,6 +3,7 @@
 extends SceneTree
 
 const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
+const BlacksmithMergePanelScript := preload("res://scripts/blacksmith_merge_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -56,8 +57,19 @@ func _run() -> void:
 	_assert_eq("selected renew recipe id", str(state.get("selected_recipe_id", "")), "item_renew")
 	_assert_eq("selected renew recipe label", str(state.get("selected_recipe_label", "")), "Renew Item")
 	_assert_true("renew recipe eligibility", _array_contains_text(state.get("preview_lines", []), "Eligible: Equipment (reroll affixes)"))
+	_assert_true("renew preview mentions reroll", _array_contains_text(state.get("preview_lines", []), "reroll random affixes"))
+	_assert_true("renew preview uses renew stone", _array_contains_text(state.get("preview_lines", []), "Renew Stone"))
+	_assert_false("renew preview avoids upgrade shard", _array_contains_text(state.get("preview_lines", []), "Upgrade Shard"))
 	var rows: Array = state.get("rows", [])
 	_assert_true("renew enables bow with stone", bool((rows[0] as Dictionary).get("upgrade_enabled", false)))
+	panel.bot_select_tab("Merge")
+	var merge_view: BlacksmithMergePanel = panel._merge_view
+	_assert_true("merge accepts shard drop", merge_view.can_place_item_at(0, shard))
+	_assert_true("merge place shard", merge_view.place_item_at(0, shard))
+	_assert_false("merge rejects mismatched stone", merge_view.can_place_item_at(1, stone))
+	var shard_two := shard.duplicate(true)
+	shard_two["item_instance_id"] = "shard2"
+	_assert_true("merge accepts matching shard", merge_view.can_place_item_at(1, shard_two))
 	panel.queue_free()
 	print("[gdtest] PASS: test_blacksmith_panel (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -69,6 +81,10 @@ func _assert_eq(label: String, got, expected) -> void:
 	else:
 		_fail_count += 1
 		push_error("[gdtest] FAIL %s: expected=%s got=%s" % [label, str(expected), str(got)])
+
+
+func _assert_false(label: String, value: bool) -> void:
+	_assert_true(label, not value)
 
 
 func _assert_true(label: String, value: bool) -> void:

@@ -161,6 +161,8 @@ class InventorySlotButton:
 				return true
 			if source == "blacksmith_stage" and data.get("blacksmith_panel", null) != null:
 				return true
+			if source == "blacksmith_merge" and data.get("merge_panel", null) != null:
+				return true
 			return InventoryTransferRouterScript.is_equipment_slot(source)
 		return false
 
@@ -923,6 +925,10 @@ func _apply_transfer_decision(decision: Dictionary, data: Dictionary) -> void:
 			var blacksmith = data.get("blacksmith_panel", null)
 			if blacksmith != null and blacksmith.has_method("unstage_item"):
 				blacksmith.call("unstage_item")
+		InventoryTransferRouterScript.KIND_BLACKSMITH_MERGE_UNPLACE:
+			var merge_panel = data.get("merge_panel", null)
+			if merge_panel != null and merge_panel.has_method("clear_merge_slot"):
+				merge_panel.call("clear_merge_slot", int(data.get("slot_index", -1)))
 
 
 func _item_can_equip_to(item: Dictionary, slot: String) -> bool:

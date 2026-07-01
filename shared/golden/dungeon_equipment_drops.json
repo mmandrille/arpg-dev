@@ -57,7 +57,7 @@
       "treasure_class_id": "dungeon_mob_tc_depth_3_plus",
       "seed": "v29_dungeon_mob_tc_depth_3_plus_41",
       "expected_drops": [
-        { "item_template_id": "cave_blade" }
+        { "item_template_id": "cave_belt" }
       ]
     },
     {
@@ -68,7 +68,7 @@
       "treasure_class_id": "guarded_chest_tc_depth_3_plus",
       "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
-        { "item_def_id": "gold" }
+        { "item_template_id": "cave_rapier" }
       ]
     },
     {

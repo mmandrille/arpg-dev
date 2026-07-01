@@ -25,7 +25,7 @@
       "vit": 5,
       "magic": 4
     },
-    "skill_ranks": {}
+    "skill_ranks": { "fan_of_blades": 1 }
   },
   "steps": [
     {

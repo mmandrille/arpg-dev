@@ -46,7 +46,7 @@
       "attack_mode": "melee",
       "attack_speed": 1.15,
       "reach": 1.55,
-      "requirements": { "level": 1, "dex": 7 },
+      "requirements": { "level": 1, "str": 4, "dex": 7 },
       "base_stats": {
         "damage_min": 1,
         "damage_max": 3

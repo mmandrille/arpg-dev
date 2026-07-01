@@ -15,7 +15,7 @@
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
     "stats": { "str": 6, "dex": 20, "vit": 8, "magic": 20 },
-    "skill_ranks": { "heal": 1, "charge": 1, "holy_shield": 1, "sanctuary": 1 }
+    "skill_ranks": { "heal": 1, "charge": 1, "holy_shield": 1, "sanctuary": 1, "radiant_bolt": 1 }
   },
   "steps": [
     { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_paladin_sword" },

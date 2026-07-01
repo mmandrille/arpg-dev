@@ -1,0 +1,25 @@
+client/scripts/player_status_effect_markers.gd
+  s_e51fd9c426278a::t_9d83c3e710f668 96-123
+client/scripts/main.gd
+  s_e51fd9c426278a::t_739f8c528e2a8e 1973-1978
+  s_e51fd9c426278a::t_52d78911e3ed44 5602-5608
+client/tests/test_status_effect_presentation.gd
+  s_e51fd9c426278a::t_6e6b8dad6e41f7 29
+  s_e51fd9c426278a::t_c91ce0760a9338 370-403
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "37eadf1ff9e23fd6a893ff3a3237dd665ca0b208",
+  "prompts": {},
+  "sessions": {
+    "s_e51fd9c426278a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "81cdb792-667f-4c6c-88f5-be096643e54c",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

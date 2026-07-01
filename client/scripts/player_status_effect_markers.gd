@@ -93,6 +93,34 @@ static func has_stun_effect_id(effect_ids_value) -> bool:
 	return effect_ids.has(STUN_EFFECT_ID) or effect_ids.has("leap_stun") or effect_ids.has("charge_stun")
 
 
+static func strip_combat_status_effect_ids(effect_ids_value) -> Array:
+	var strip_ids := {
+		ICE_SLOW_EFFECT_ID: true,
+		BURNING_EFFECT_ID: true,
+		PINNING_ROOT_EFFECT_ID: true,
+		STUN_EFFECT_ID: true,
+		"leap_stun": true,
+		"charge_stun": true,
+		DASH_BLEED_EFFECT_ID: true,
+		ROGUE_MARK_EFFECT_ID: true,
+		ELITE_COMMAND_EFFECT_ID: true,
+	}
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	var kept: Array = []
+	for id in effect_ids:
+		if not strip_ids.has(str(id)):
+			kept.append(id)
+	return kept
+
+
+static func clear_combat_markers(root: Node3D) -> void:
+	sync_burning_effect(root, false)
+	sync_bleed_effect(root, false)
+	sync_pinning_root_effect(root, false)
+	sync_stun_effect(root, false)
+	sync_rogue_mark_effect(root, false)
+
+
 static func sync_bleed_effect(root: Node3D, active: bool) -> void:
 	if root == null:
 		return

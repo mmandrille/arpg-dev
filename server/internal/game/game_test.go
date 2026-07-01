@@ -2327,7 +2327,7 @@ func TestDungeonEquipmentDropsGolden(t *testing.T) {
 		}
 	}
 
-	for _, c := range golden.Cases {
+	for i, c := range golden.Cases {
 		table := rules.LootTables[c.LootTable]
 		if table.TreasureClassID != c.TreasureClassID {
 			t.Fatalf("%s: treasure class = %s, want %s", c.Name, table.TreasureClassID, c.TreasureClassID)
@@ -2344,14 +2344,21 @@ func TestDungeonEquipmentDropsGolden(t *testing.T) {
 			t.Fatalf("%s: loot table = %s, want %s", c.Name, c.LootTable, wantTable)
 		}
 		got := rules.LootDrops(c.LootTable, NewRNG(SeedToUint64(c.Seed)))
+		if *update {
+			golden.Cases[i].ExpectedDrops = got
+			continue
+		}
 		if len(got) != len(c.ExpectedDrops) {
 			t.Fatalf("%s: drops = %+v, want %+v", c.Name, got, c.ExpectedDrops)
 		}
-		for i := range got {
-			if got[i] != c.ExpectedDrops[i] {
-				t.Fatalf("%s: drop %d = %+v, want %+v", c.Name, i, got[i], c.ExpectedDrops[i])
+		for j := range got {
+			if got[j] != c.ExpectedDrops[j] {
+				t.Fatalf("%s: drop %d = %+v, want %+v", c.Name, j, got[j], c.ExpectedDrops[j])
 			}
 		}
+	}
+	if *update {
+		writeGolden(t, "dungeon_equipment_drops.json", golden)
 	}
 }
 

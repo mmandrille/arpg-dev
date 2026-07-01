@@ -1,4 +1,5 @@
 {
+  "description": "Depth-band dungeon source selection plus representative v29 generated dungeon equipment drops.",
   "world_id": "dungeon_levels",
   "required_templates": [
     "cave_blade",

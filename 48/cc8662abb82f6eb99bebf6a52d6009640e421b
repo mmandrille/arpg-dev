@@ -1,0 +1,87 @@
+client/scripts/main_config_loader.gd
+  s_fbdf5a0bbf4e5e::t_fdb70e57be809c 9
+  s_fbdf5a0bbf4e5e::t_e99a7c3d9b61d9 67-71
+  s_fbdf5a0bbf4e5e::t_40182d394aa4ed 25
+  s_fbdf5a0bbf4e5e::t_0d4ac4cf4835bb 78
+PROGRESS.md
+  s_fbdf5a0bbf4e5e::t_743bfce4dee3ca 18
+  s_fbdf5a0bbf4e5e::t_a6cdd144130752 26,28
+docs/progress/slice-lifecycle.md
+  s_fbdf5a0bbf4e5e::t_ede4d06db5f926 412
+client/scripts/connection_recovery.gd
+  s_fbdf5a0bbf4e5e::t_2e2e410d8c1e08 110
+  s_fbdf5a0bbf4e5e::t_4ea097a425fa29 99-103
+  s_fbdf5a0bbf4e5e::t_395b9d6552a08e 1-98,104-109,111-137
+shared/rules/main_config.v0.schema.json
+  s_fbdf5a0bbf4e5e::t_8c474e9b8af4ca 112-123
+docs/CODEMAP.md
+  s_fbdf5a0bbf4e5e::t_81d043ebdf8d84 39
+shared/rules/main_config.v0.json
+  s_fbdf5a0bbf4e5e::t_0692435cde89de 65-72
+docs/specs/v398_spec-client-ws-reconnect.md
+  s_fbdf5a0bbf4e5e::t_59f2f8944abc22 1-2,4-68
+  s_fbdf5a0bbf4e5e::t_46a028064033d5 3
+client/scripts/connection_overlay_bridge.gd
+  s_fbdf5a0bbf4e5e::t_3890d00e5f9ddc 1-15
+client/tests/test_connection_recovery.gd
+  s_fbdf5a0bbf4e5e::t_a5638a86338796 1-77
+docs/plans/v398_2026-07-01-client-ws-reconnect.md
+  s_fbdf5a0bbf4e5e::t_6c67a5843397d7 1-2,4-20,22,24-31,34-36,38-40,45-47,50-52,54-56
+  s_fbdf5a0bbf4e5e::t_300e4d39de5dc8 3,21,23,32-33,37,41-44,48-49,53,57-59
+client/scripts/main.gd
+  s_fbdf5a0bbf4e5e::t_622922ccde1049 3017
+  s_fbdf5a0bbf4e5e::t_cf797682ecc93f 1255-1256
+  s_fbdf5a0bbf4e5e::t_034337d99c36c7 876,2960
+  s_fbdf5a0bbf4e5e::t_fc3e77b41012bf 303-305
+  s_fbdf5a0bbf4e5e::t_06ef3333665ae7 463-464
+  s_fbdf5a0bbf4e5e::t_bf0ab2d94f6344 885
+  s_fbdf5a0bbf4e5e::t_845e8d20f31422 1005-1023
+  s_fbdf5a0bbf4e5e::t_aa7e34d9c1cd48 1035
+  s_fbdf5a0bbf4e5e::t_3a7e1afce69bba 1036-1040
+  s_fbdf5a0bbf4e5e::t_9a0ca76d93c619 3016
+  s_fbdf5a0bbf4e5e::t_215f055b6c580f 991
+  s_fbdf5a0bbf4e5e::t_b1dc99dc9e90cd 4070
+  s_fbdf5a0bbf4e5e::t_61dd027d5033a1 93
+  s_fbdf5a0bbf4e5e::t_7cac3ba30e87ad 896
+  s_fbdf5a0bbf4e5e::t_a76cc622593746 302
+  s_fbdf5a0bbf4e5e::t_e30775a04a9e29 94
+  s_fbdf5a0bbf4e5e::t_978d9e9240ba3b 1028
+  s_fbdf5a0bbf4e5e::t_b601c091e42c81 895
+  s_fbdf5a0bbf4e5e::t_6805bc1d67af7f 1080
+  s_fbdf5a0bbf4e5e::t_43277f9a015134 1194
+  s_fbdf5a0bbf4e5e::t_53e9d0a7b506d4 877
+  s_fbdf5a0bbf4e5e::t_c63cd16cf3295b 4057-4069
+  s_fbdf5a0bbf4e5e::t_14485c2cf21065 465,886,906
+  s_fbdf5a0bbf4e5e::t_ee1c616c8812a6 1004,1024-1027
+  s_fbdf5a0bbf4e5e::t_8ad84339459c21 905
+  s_fbdf5a0bbf4e5e::t_8c105f725d19ea 2961
+client/scripts/connection_overlay.gd
+  s_fbdf5a0bbf4e5e::t_7fac27bbfa9ce6 1-95
+client/scripts/connection_recovery_runtime.gd
+  s_fbdf5a0bbf4e5e::t_7a5c73e62bcf76 1-10,19-147
+  s_fbdf5a0bbf4e5e::t_8015cabe80b9e1 11-18
+scripts/client_smoke.sh
+  s_fbdf5a0bbf4e5e::t_58eb48fe25fb8e 216
+.maintainability/file-size-baseline.tsv
+  s_fbdf5a0bbf4e5e::t_1b52e7d0bbaa8d 10
+docs/as-built/v398_client-ws-reconnect.md
+  s_fbdf5a0bbf4e5e::t_6f0023ff65a6bb 1-32
+client/scripts/net_client.gd
+  s_fbdf5a0bbf4e5e::t_352eb69a975236 481-492
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "48cc8662abb82f6eb99bebf6a52d6009640e421b",
+  "prompts": {},
+  "sessions": {
+    "s_fbdf5a0bbf4e5e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e82d45ba-0349-4fe3-a714-2c605c0ed0b4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

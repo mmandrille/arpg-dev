@@ -1970,9 +1970,12 @@ func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 		return
 	var entity_kind := "monster" if str(rec.get("type", "")) == "monster" else "hero"
 	AuraSoftLights.sync_aura(node, AuraSoftLights.build_state([], entity_kind))
-	PlayerStatusEffectMarkers.sync_burning_effect(node, false)
-	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, false)
-	PlayerStatusEffectMarkers.sync_stun_effect(node, false)
+	PlayerStatusEffectMarkers.clear_combat_markers(node)
+	rec["bleeding"] = false
+	rec["burning"] = false
+	rec["poisoned"] = false
+	rec["effect_ids"] = PlayerStatusEffectMarkers.strip_combat_status_effect_ids(rec.get("effect_ids", []))
+	_apply_entity_status_tint(rec)
 
 func _clear_elite_command_for_pack_if_leader_died(dead_rec: Dictionary) -> void:
 	if not bool(dead_rec.get("monster_pack_leader", false)):
@@ -5596,6 +5599,13 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	elif str(rec.get("type", "")) == "monster":
 		AuraSoftLights.sync_monster_aura_from_record(rec, _sanctuary_radius(), _holy_shield_aura_radius())
 	PlayerStatusEffectMarkers.sync_burning_effect(node, alive and PlayerStatusEffectMarkers.has_burning_effect_id(rec.get("effect_ids", [])))
+	PlayerStatusEffectMarkers.sync_bleed_effect(
+		node,
+		alive and (
+			bool(rec.get("bleeding", false))
+			or PlayerStatusEffectMarkers.has_bleed_effect_id(rec.get("effect_ids", []))
+		),
+	)
 	PlayerStatusEffectMarkers.sync_pinning_root_effect(node, alive and PlayerStatusEffectMarkers.has_pinning_root_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_stun_effect(node, alive and PlayerStatusEffectMarkers.has_stun_effect_id(rec.get("effect_ids", [])))
 	PlayerStatusEffectMarkers.sync_rogue_mark_effect(node, alive and PlayerStatusEffectMarkers.has_rogue_mark_effect_id(rec.get("effect_ids", [])))

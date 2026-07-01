@@ -26,6 +26,7 @@ func _initialize() -> void:
 	_test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge()
 	_test_rogue_mark_effect_id_updates_monster_skull()
 	_test_monster_death_clears_elite_aura_markers()
+	_test_monster_death_clears_bleed_marker()
 	_test_potion_heal_uses_personal_effect()
 	_test_paladin_heal_uses_area_rain()
 
@@ -363,6 +364,40 @@ func _test_rogue_mark_effect_id_updates_monster_skull() -> void:
 	}]})
 	var after: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
 	_assert_true("rogue mark skull marker removed", not bool(after.get("has_rogue_mark_effect", true)))
+	_free_main(main)
+
+
+func _test_monster_death_clears_bleed_marker() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1002",
+		"type": "monster",
+		"position": {"x": 2.0, "y": 0.0},
+		"hp": 10,
+		"max_hp": 10,
+		"monster_def_id": "training_dummy",
+	})
+	main._apply_delta({"events": [{
+		"event_type": "skill_effect_started",
+		"entity_id": "1002",
+		"source_entity_id": "1001",
+		"target_entity_id": "1002",
+		"skill_id": "dash",
+	}], "changes": []})
+	var before: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+	_assert_true("bleed marker active before death", bool(before.get("has_bleed_effect", false)))
+
+	main.entities["1002"]["reaction"] = null
+	main._apply_delta({"events": [{
+		"event_type": "monster_killed",
+		"entity_id": "1002",
+		"source_entity_id": "1001",
+		"target_entity_id": "1002",
+	}], "changes": []})
+	var after: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+	_assert_true("bleed marker removed on death", not bool(after.get("has_bleed_effect", true)))
+	_assert_true("bleed effect id removed on death", not (after.get("effect_ids", []) as Array).has("dash_bleed"))
 	_free_main(main)
 
 

@@ -128,6 +128,7 @@ func bot_stage_item(stash_item_id: String = "", item_def_id: String = "", stash_
 		show_status("No matching inventory item", true)
 		return
 	stage_inventory_item(item)
+	_auto_stage_resource_for_recipe()
 
 
 func bot_select_tab(tab_name: String) -> void:

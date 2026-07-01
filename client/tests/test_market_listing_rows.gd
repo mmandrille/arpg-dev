@@ -31,7 +31,7 @@ func _test_listing_expiration_label() -> void:
 func _test_debug_rows_expose_expiration() -> void:
 	var rows: Array = MarketListingRowsScript.debug_listing_rows([{
 		"listing_id": "listing-1",
-		"item_def_id": "cave_mail",
+		"item_def_id": "mail",
 		"seller_account_id": "seller-account",
 		"price_gold": 25,
 		"expires_at": "2026-06-20T12:30:00Z",

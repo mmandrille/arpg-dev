@@ -108,8 +108,8 @@ func _test_weapon_set_inventory_panel_hides_inactive_set_item() -> void:
 	m.inventory_panel = InventoryPanelScript.new()
 	m.add_child(m.inventory_panel)
 	m.inventory = [
-		{"item_instance_id": "ii_1", "item_def_id": "cave_blade", "slot": "main_hand", "equipped": true},
-		{"item_instance_id": "ii_2", "item_def_id": "cave_bow", "slot": "main_hand", "equipped": true},
+		{"item_instance_id": "ii_1", "item_def_id": "long_sword", "slot": "main_hand", "equipped": true},
+		{"item_instance_id": "ii_2", "item_def_id": "bow", "slot": "main_hand", "equipped": true},
 	]
 	m.equipped = {"main_hand": "ii_1"}
 	m.active_weapon_set = 0
@@ -162,7 +162,7 @@ func _test_snapshot_gold_and_inventory() -> void:
 	var snap := {
 		"local_player_id": "p1",
 		"gold": 77,
-		"inventory": [{"item_instance_id": "ii_3", "item_def_id": "cave_ring"}],
+		"inventory": [{"item_instance_id": "ii_3", "item_def_id": "ring"}],
 		"equipped": {},
 		"hotbar": [],
 		"inventory_rows": 3,
@@ -181,7 +181,7 @@ func _test_snapshot_gold_and_inventory() -> void:
 	_assert_eq("snapshot sets gold", m.gold, 77)
 	_assert_eq("snapshot sets inventory size", m.inventory.size(), 1)
 	_assert_eq("snapshot inventory item def",
-		str(m.inventory[0].get("item_def_id", "")), "cave_ring")
+		str(m.inventory[0].get("item_def_id", "")), "ring")
 
 
 func _test_snapshot_equipped() -> void:

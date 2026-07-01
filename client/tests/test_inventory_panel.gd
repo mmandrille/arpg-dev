@@ -25,8 +25,8 @@ func _test_identical_state_refresh_keeps_slots_alive() -> void:
 
 	var blade := {
 		"item_instance_id": "item-1",
-		"item_def_id": "cave_blade",
-		"item_template_id": "cave_blade",
+		"item_def_id": "long_sword",
+		"item_template_id": "long_sword",
 		"display_name": "Training Blade",
 		"rarity": "common",
 		"summary_lines": ["Damage 1-2"],
@@ -42,8 +42,8 @@ func _test_identical_state_refresh_keeps_slots_alive() -> void:
 
 	var ring := {
 		"item_instance_id": "item-2",
-		"item_def_id": "cave_ring",
-		"item_template_id": "cave_ring",
+		"item_def_id": "ring",
+		"item_template_id": "ring",
 		"display_name": "Training Ring",
 		"rarity": "magic",
 		"summary_lines": ["Magic +1"],

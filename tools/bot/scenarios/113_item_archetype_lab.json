@@ -1,0 +1,37 @@
+{
+  "id": "item_archetype_lab",
+  "ci_tier": "extended",
+  "world_id": "item_archetype_lab",
+  "seed": "0000000000000010",
+  "title": "Item archetype library lab",
+  "description": "Prove generic archetype display names: common Long Sword, magic Freezing cold long sword.",
+  "steps": [
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "long_sword"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "long_sword",
+      "item_template_id": "long_sword",
+      "rarity": "magic",
+      "stat_keys": ["bonus_cold_damage"],
+      "display_name_contains": "Freezing"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "long_sword"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "long_sword"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "long_sword",
+      "item_template_id": "long_sword",
+      "rarity": "common",
+      "display_name": "Long Sword"
+    }
+  ]
+}

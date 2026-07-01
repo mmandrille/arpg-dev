@@ -344,10 +344,14 @@ func _initialize() -> void:
 				_fail("unique item_rolls references unknown effect_id")
 				return
 			var effect: Dictionary = unique_effects["effects"][str(effect_ids[0])]
-			var item_type_name := str(template.get("item_type", "")).replace("_", " ").capitalize()
-			var expected_unique_name := "%s of %s" % [item_type_name, str(effect.get("display_name", ""))]
-			if str(expected["display_name"]) != expected_unique_name:
-				_fail("unique item_rolls display_name mismatch")
+			var display_name := str(expected["display_name"])
+			var archetype_name := str(template["name"])
+			var effect_name := str(effect.get("display_name", ""))
+			if not display_name.contains(archetype_name):
+				_fail("unique item_rolls display_name missing archetype name")
+				return
+			if not display_name.ends_with(" of " + effect_name):
+				_fail("unique item_rolls display_name missing effect suffix")
 				return
 		elif effect_ids.size() != 0:
 			_fail("non-unique item_rolls effect_ids must be empty")

@@ -104,7 +104,7 @@ func TestAccountStashRejectsHotbarAssignedItem(t *testing.T) {
 func TestAccountStashRejectsInvalidTransfers(t *testing.T) {
 	t.Run("equipped item deposits and clears slot", func(t *testing.T) {
 		sim, stash := newReadyStashSim(t, "equipped")
-		item := &invItem{instanceID: sim.alloc(), itemDefID: "cave_blade", slot: mainHandSlot, equipped: true}
+		item := &invItem{instanceID: sim.alloc(), itemDefID: "long_sword", slot: mainHandSlot, equipped: true}
 		sim.inventory = append(sim.inventory, item)
 		sim.equipped[mainHandSlot] = item.instanceID
 		sim.savePlayer(sim.defaultPlayer())

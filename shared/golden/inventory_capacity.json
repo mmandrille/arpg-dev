@@ -2,7 +2,7 @@
   "base_inventory_rows": 3,
   "columns": 5,
   "base_capacity": 15,
-  "row_granting_item": "cave_pack_belt",
+  "row_granting_item": "war_girdle",
   "row_item_bonus": 1,
   "row_item_capacity": 20,
   "bag_occupancy": {

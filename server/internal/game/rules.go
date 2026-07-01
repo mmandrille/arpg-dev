@@ -278,8 +278,9 @@ type ItemDef struct {
 
 // ItemTemplateDef is a server-authoritative rolled item template.
 type ItemTemplateDef struct {
-	Name            string            `json:"name"`
-	Category        string            `json:"category"`
+	Name              string            `json:"name"`
+	Category          string            `json:"category"`
+	EquipmentCategory string            `json:"equipment_category"`
 	ItemType        string            `json:"item_type"`
 	Slot            string            `json:"slot"`
 	Equippable      bool              `json:"equippable"`
@@ -1093,6 +1094,11 @@ func LoadRules(dir string) (*Rules, error) {
 	for id, def := range itemTemplates.Templates {
 		if !def.Equippable || def.Category != "equipment" {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s: templates must be equippable equipment", id)
+		}
+		switch def.EquipmentCategory {
+		case "weapon_1h", "weapon_2h", "off_hand", "gear", "jewelry":
+		default:
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s.equipment_category: required", id)
 		}
 		if !isEquipmentSlot(def.Slot) && def.Slot != "ring" {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s.slot: unsupported slot %s", id, def.Slot)
@@ -2453,17 +2459,17 @@ func validateDungeonLootBands(bands []DungeonLootBand, r *Rules) error {
 		reachable[templateID] = true
 	}
 	requiredTemplates := []string{
-		"cave_blade",
-		"cave_greatsword",
-		"cave_bow",
-		"cave_shield",
-		"cave_helm",
-		"cave_mail",
-		"cave_gloves",
-		"cave_belt",
-		"cave_boots",
-		"cave_ring",
-		"cave_amulet",
+		"long_sword",
+		"great_sword",
+		"bow",
+		"shield",
+		"helm",
+		"mail",
+		"gloves",
+		"belt",
+		"boots",
+		"ring",
+		"amulet",
 	}
 	missing := []string{}
 	for _, templateID := range requiredTemplates {
@@ -3047,7 +3053,7 @@ func isSupportedRequirementStat(stat string) bool {
 
 func isSupportedItemStat(stat string) bool {
 	switch stat {
-	case "damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows", "movement_speed_percent":
+	case "damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows", "movement_speed_percent", "bonus_cold_damage", "bonus_fire_damage", "bonus_lightning_damage", "bonus_poison_damage":
 		return true
 	default:
 		return false

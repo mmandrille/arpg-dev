@@ -140,7 +140,7 @@ func TestShopDeltasAreActorScoped(t *testing.T) {
 			ShopID:         "town_vendor",
 			RefreshKey:     "wp:none",
 			OfferID:        "generated:wp:none:000",
-			ItemTemplateID: "cave_blade",
+			ItemTemplateID: "long_sword",
 			Available:      true,
 		}}},
 		{Op: game.OpShopStockAvailability, ShopID: "town_vendor", OfferID: "generated:wp:none:000", Available: false},
@@ -359,8 +359,8 @@ func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 				Op: game.OpInventoryAdd,
 				Item: &game.ItemView{
 					ItemInstanceID: "2001",
-					ItemDefID:      "cave_blade",
-					ItemTemplateID: "cave_blade",
+					ItemDefID:      "long_sword",
+					ItemTemplateID: "long_sword",
 					DisplayName:    "Verdant Vanguard Blade",
 					Rarity:         "set",
 					Slot:           "main_hand",
@@ -371,7 +371,7 @@ func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 				StashTransferID: "stash_withdraw:3001",
 				Item: &game.ItemView{
 					ItemInstanceID: "3001",
-					ItemDefID:      "cave_helm",
+					ItemDefID:      "helm",
 					Slot:           "head",
 				},
 			},
@@ -382,7 +382,7 @@ func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 	if len(repo.items) != 1 {
 		t.Fatalf("persisted item count = %d, want only non-stash-transfer add: %+v", len(repo.items), repo.items)
 	}
-	if got := repo.items[0]; got.ID != "2001" || got.ItemDefID != "cave_blade" || got.Location != store.ItemLocationInventory {
+	if got := repo.items[0]; got.ID != "2001" || got.ItemDefID != "long_sword" || got.Location != store.ItemLocationInventory {
 		t.Fatalf("persisted item = %+v, want unique-chest-style inventory item", got)
 	}
 }
@@ -402,7 +402,7 @@ func TestHandInventoryUpdatePersistenceRequiresExplicitWeaponSet(t *testing.T) {
 				Op: game.OpInventoryUpdate,
 				Item: &game.ItemView{
 					ItemInstanceID: "2001",
-					ItemDefID:      "cave_bow",
+					ItemDefID:      "bow",
 					Slot:           "main_hand",
 					Equipped:       true,
 				},
@@ -412,7 +412,7 @@ func TestHandInventoryUpdatePersistenceRequiresExplicitWeaponSet(t *testing.T) {
 				WeaponSet: &set2,
 				Item: &game.ItemView{
 					ItemInstanceID: "2001",
-					ItemDefID:      "cave_bow",
+					ItemDefID:      "bow",
 					Slot:           "main_hand",
 					Equipped:       true,
 				},

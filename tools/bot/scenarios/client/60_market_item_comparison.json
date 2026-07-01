@@ -8,7 +8,7 @@
   "description": "Client opens the market board and verifies a market listing exposes direct item comparison text.",
   "preflight": {
     "type": "market_listing",
-    "item_def_id": "cave_mail",
+    "item_def_id": "mail",
     "price_gold": 63
   },
   "client_steps": [
@@ -28,7 +28,7 @@
     },
     {
       "type": "wait_market_panel",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 63,
       "comparison_at_least": 1,
       "comparison_contains": "Armor",
@@ -37,7 +37,7 @@
     },
     {
       "type": "assert_market_listing_rows",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 63,
       "comparison_at_least": 1,
       "comparison_contains": "Armor",

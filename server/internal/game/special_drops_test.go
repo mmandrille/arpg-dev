@@ -14,8 +14,8 @@ func TestBossSpecialTreasureClassDropsAuthoredPackages(t *testing.T) {
 	if drops[1].SetItemID != "stormrunner_covenant_bow" {
 		t.Fatalf("boss set drop = %+v, want stormrunner_covenant_bow", drops[1])
 	}
-	if drops[2].ItemTemplateID != "cave_amulet" {
-		t.Fatalf("boss equipment drop = %+v, want cave_amulet", drops[2])
+	if drops[2].ItemTemplateID != "amulet" {
+		t.Fatalf("boss equipment drop = %+v, want amulet", drops[2])
 	}
 }
 
@@ -55,21 +55,41 @@ func TestAuthoredSpecialDropsSpawnFixedPayloads(t *testing.T) {
 	res := &TickResult{}
 	sim.spawnLootDrops(rules.LootDrops("boss_drop_tier_1", NewRNG(3)), sim.entities[sim.playerID].pos, playerRadius, "corr_special", res, goldRollContext{levelNum: -5})
 
-	conduit := findLootByDisplayName(sim, "Conduit Staff")
-	if conduit == nil || conduit.rollPayload == nil || conduit.rollPayload.Rarity != "unique" || !sameStringSlice(conduit.rollPayload.EffectIDs, []string{"arcane_conduit"}) {
-		t.Fatalf("Conduit Staff loot payload = %+v", conduit)
+	conduit := findLootByEffectID(sim, "arcane_conduit")
+	if conduit == nil || conduit.rollPayload == nil || conduit.rollPayload.Rarity != "unique" || conduit.rollPayload.ItemTemplateID != "starter_sorcerer_staff" || !sameStringSlice(conduit.rollPayload.EffectIDs, []string{"arcane_conduit"}) {
+		t.Fatalf("conduit staff loot payload = %+v", conduit)
 	}
-	stormrunner := findLootByDisplayName(sim, "Stormrunner Covenant Bow")
-	if stormrunner == nil || stormrunner.rollPayload == nil || stormrunner.rollPayload.Rarity != "set" || stormrunner.rollPayload.ItemTemplateID != "cave_bow" {
+	stormrunner := findLootBySetPieceID(sim, "stormrunner_covenant_bow")
+	if stormrunner == nil || stormrunner.rollPayload == nil || stormrunner.rollPayload.Rarity != "set" || stormrunner.rollPayload.ItemTemplateID != "bow" {
 		t.Fatalf("Stormrunner loot payload = %+v", stormrunner)
 	}
-	amulet := findLootByTemplateID(sim, "cave_amulet")
+	amulet := findLootByTemplateID(sim, "amulet")
 	if amulet == nil || amulet.rollPayload == nil || amulet.rollPayload.Rarity == "" || amulet.rollPayload.DisplayName == "" {
 		t.Fatalf("rolled amulet payload = %+v", amulet)
 	}
 	if got := countSpecialDropEvents(res.Events, "loot_dropped"); got != 3 {
 		t.Fatalf("loot_dropped events = %d, want 3: %+v", got, res.Events)
 	}
+}
+
+func findLootByEffectID(sim *Sim, effectID string) *entity {
+	for _, entity := range sim.activeLevel().entities {
+		if entity.kind == lootEntity && entity.rollPayload != nil && sameStringSlice(entity.rollPayload.EffectIDs, []string{effectID}) {
+			return entity
+		}
+	}
+
+	return nil
+}
+
+func findLootBySetPieceID(sim *Sim, setPieceID string) *entity {
+	for _, entity := range sim.activeLevel().entities {
+		if entity.kind == lootEntity && entity.rollPayload != nil && entity.rollPayload.SetPieceID == setPieceID {
+			return entity
+		}
+	}
+
+	return nil
 }
 
 func findLootByDisplayName(sim *Sim, displayName string) *entity {

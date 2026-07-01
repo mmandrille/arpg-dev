@@ -9,11 +9,11 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "slot": "main_hand"
     },
     {
@@ -43,7 +43,7 @@
   "assertions": [
     {
       "type": "inventory_contains",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "equipped": true
     },
     {

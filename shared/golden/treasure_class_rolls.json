@@ -6,7 +6,7 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
         {
-          "item_template_id": "cave_rapier"
+          "item_template_id": "mail"
         }
       ]
     },
@@ -15,7 +15,7 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_13",
       "expected_drops": [
         {
-          "item_def_id": "blue_potion"
+          "item_template_id": "war_sword"
         }
       ]
     },
@@ -24,7 +24,7 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_3",
       "expected_drops": [
         {
-          "item_def_id": "gold"
+          "item_def_id": "red_potion"
         },
         {
           "item_def_id": "gold"
@@ -36,10 +36,10 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_4",
       "expected_drops": [
         {
-          "item_def_id": "red_potion"
+          "item_template_id": "gloves"
         },
         {
-          "item_template_id": "cave_mail"
+          "item_template_id": "mail"
         }
       ]
     },
@@ -48,10 +48,10 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_8",
       "expected_drops": [
         {
-          "item_def_id": "red_potion"
+          "item_template_id": "bow"
         },
         {
-          "item_def_id": "gold"
+          "item_def_id": "blue_potion"
         }
       ]
     },
@@ -60,10 +60,10 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_14",
       "expected_drops": [
         {
-          "item_def_id": "gold"
+          "item_def_id": "red_potion"
         },
         {
-          "item_template_id": "cave_heavy_blade"
+          "item_template_id": "gloves"
         }
       ]
     }

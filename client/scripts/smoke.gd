@@ -462,12 +462,12 @@ func _verify_inventory_panel_model() -> bool:
 		_fail("inventory panel equipped state mismatch: %s" % state)
 		return false
 	panel.set_inventory_state([
-		{"item_instance_id": "1009", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "slot": "main_hand", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "1009", "item_def_id": "bow", "item_template_id": "bow", "slot": "main_hand", "equipped": true, "rarity": "common"},
 	], {"main_hand": "1009"})
 	state = panel.get_debug_state()
 	var bow_slots: Dictionary = state["paper_doll_slots"]
 	if not bool((bow_slots["off_hand"] as Dictionary).get("blocked_by_two_handed", false)) \
-			or str((bow_slots["off_hand"] as Dictionary).get("item_def_id", "")) != "cave_bow":
+			or str((bow_slots["off_hand"] as Dictionary).get("item_def_id", "")) != "bow":
 		_fail("inventory panel two-handed off-hand blocker mismatch: %s" % state)
 		return false
 	panel.set_inventory_state([

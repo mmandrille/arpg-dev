@@ -21,8 +21,8 @@ func TestRenewInventoryItemRoute(t *testing.T) {
 	if err := db.UpsertCharacterProgression(ctx, accountID, prog); err != nil {
 		t.Fatal(err)
 	}
-	rolled := json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Common Cave Blade","rarity":"common","stats":{"damage_min":1,"damage_max":2,"item_level":1}}`)
-	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "renew_blade_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: rolled}); err != nil {
+	rolled := json.RawMessage(`{"item_template_id":"long_sword","display_name":"Long Sword","rarity":"common","stats":{"damage_min":1,"damage_max":2,"item_level":1}}`)
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "renew_blade_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "long_sword", Location: store.ItemLocationInventory, RolledStats: rolled}); err != nil {
 		t.Fatal(err)
 	}
 	stoneStats, err := game.MarshalRenewStoneRolledStats(1)
@@ -32,7 +32,7 @@ func TestRenewInventoryItemRoute(t *testing.T) {
 	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "renew_stone_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: game.RenewStoneItemDefID, Location: store.ItemLocationInventory, RolledStats: stoneStats}); err != nil {
 		t.Fatal(err)
 	}
-	sellPrice := httpTestItemSellPrice(t, "cave_blade", rolled)
+	sellPrice := httpTestItemSellPrice(t, "long_sword", rolled)
 	rec := postJSON(h, "/v0/account-stash/items/renew", token, map[string]string{
 		"item_instance_id": "renew_blade_" + suffix,
 		"character_id":     char.CharacterID,
@@ -61,7 +61,7 @@ func TestBlacksmithRecipeRouteRejectsHoneAndArmor(t *testing.T) {
 	if err := db.UpsertCharacterProgression(ctx, accountID, store.CharacterProgression{AccountID: accountID, CharacterID: char.CharacterID, CharacterClass: "barbarian", Level: 1, Gold: 800, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{}}); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "reject_blade_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "reject_blade_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "long_sword", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := db.TransferCharacterItemToAccountStash(ctx, accountID, char.CharacterID, "reject_blade_"+suffix, "reject_blade_stash_"+suffix); err != nil {

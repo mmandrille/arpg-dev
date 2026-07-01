@@ -17,11 +17,11 @@
     },
     {
       "type": "click_loot_item",
-      "item_def_id": "cave_pack_belt"
+      "item_def_id": "war_girdle"
     },
     {
       "type": "wait_inventory_item",
-      "item_def_id": "cave_pack_belt",
+      "item_def_id": "war_girdle",
       "timeout_s": 15.0
     },
     {
@@ -60,7 +60,7 @@
     },
     {
       "type": "drag_bag_to_equipment_slot",
-      "item_def_id": "cave_pack_belt",
+      "item_def_id": "war_girdle",
       "slot": "belt"
     },
     {

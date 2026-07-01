@@ -406,9 +406,9 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	hostProgression, _ := s.GetOrCreateCharacterProgression(ctx, hostAcct.ID, hostChar.ID, defaultProgression)
 	guestProgression, _ := s.GetOrCreateCharacterProgression(ctx, guestAcct.ID, guestChar.ID, defaultProgression)
 	thirdProgression, _ := s.GetOrCreateCharacterProgression(ctx, thirdAcct.ID, thirdChar.ID, defaultProgression)
-	hostItem := store.CharacterItemInstance{ID: "2001", AccountID: hostAcct.ID, CharacterID: hostChar.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory}
-	guestItem := store.CharacterItemInstance{ID: "2001", AccountID: guestAcct.ID, CharacterID: guestChar.ID, ItemDefID: "cave_bow", Location: store.ItemLocationInventory}
-	thirdItem := store.CharacterItemInstance{ID: "2001", AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, ItemDefID: "cave_helm", Location: store.ItemLocationInventory}
+	hostItem := store.CharacterItemInstance{ID: "2001", AccountID: hostAcct.ID, CharacterID: hostChar.ID, ItemDefID: "long_sword", Location: store.ItemLocationInventory}
+	guestItem := store.CharacterItemInstance{ID: "2001", AccountID: guestAcct.ID, CharacterID: guestChar.ID, ItemDefID: "bow", Location: store.ItemLocationInventory}
+	thirdItem := store.CharacterItemInstance{ID: "2001", AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, ItemDefID: "helm", Location: store.ItemLocationInventory}
 	hostHotbar := []store.CharacterHotbarSlot{{AccountID: hostAcct.ID, CharacterID: hostChar.ID, SlotIndex: 0, ItemInstanceID: &hostItem.ID}}
 	guestHotbar := []store.CharacterHotbarSlot{{AccountID: guestAcct.ID, CharacterID: guestChar.ID, SlotIndex: 0, ItemInstanceID: &guestItem.ID}}
 	thirdHotbar := []store.CharacterHotbarSlot{{AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, SlotIndex: 0, ItemInstanceID: &thirdItem.ID}}
@@ -428,7 +428,7 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	if len(snaps) != 3 || len(snaps[0].Items) != 1 || len(snaps[1].Items) != 1 || len(snaps[2].Items) != 1 {
 		t.Fatalf("snapshot count mismatch: %+v", snaps)
 	}
-	if snaps[0].Items[0].ItemDefID != "cave_blade" || snaps[1].Items[0].ItemDefID != "cave_bow" || snaps[2].Items[0].ItemDefID != "cave_helm" {
+	if snaps[0].Items[0].ItemDefID != "long_sword" || snaps[1].Items[0].ItemDefID != "bow" || snaps[2].Items[0].ItemDefID != "helm" {
 		t.Fatalf("member snapshots collided: %+v", snaps)
 	}
 }
@@ -559,9 +559,9 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		ID:          "1004",
 		AccountID:   acct.ID,
 		CharacterID: char.ID,
-		ItemDefID:   "cave_blade",
+		ItemDefID:   "long_sword",
 		Location:    store.ItemLocationInventory,
-		RolledStats: json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Rare Cave Blade","rarity":"rare","stats":{"damage_min":4,"damage_max":5,"max_hp":3},"requirements":{"level":1},"effect_ids":[]}`),
+		RolledStats: json.RawMessage(`{"item_template_id":"long_sword","display_name":"Long Sword","rarity":"rare","stats":{"damage_min":4,"damage_max":5,"max_hp":3},"requirements":{"level":1},"effect_ids":[]}`),
 	}
 	if err := s.AddCharacterItem(ctx, item); err != nil {
 		t.Fatalf("add character item: %v", err)
@@ -595,7 +595,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if len(items) != 1 {
 		t.Fatalf("character item count = %d, want 1", len(items))
 	}
-	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "main_hand" || items[0].WeaponSet != 1 || items[0].ItemDefID != "cave_blade" {
+	if !items[0].Equipped || items[0].Location != store.ItemLocationEquipped || items[0].Slot != "main_hand" || items[0].WeaponSet != 1 || items[0].ItemDefID != "long_sword" {
 		t.Fatalf("character item not persisted/equipped correctly: %+v", items[0])
 	}
 	var payload struct {
@@ -609,7 +609,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	if err := json.Unmarshal(items[0].RolledStats, &payload); err != nil {
 		t.Fatalf("rolled stats payload invalid: %v", err)
 	}
-	if payload.ItemTemplateID != "cave_blade" || payload.DisplayName != "Rare Cave Blade" || payload.Rarity != "rare" ||
+	if payload.ItemTemplateID != "long_sword" || payload.DisplayName != "Long Sword" || payload.Rarity != "rare" ||
 		payload.Stats["damage_min"] != 4 || payload.Stats["damage_max"] != 5 || payload.Stats["max_hp"] != 3 ||
 		payload.Requirements["level"] != 1 || len(payload.EffectIDs) != 0 {
 		t.Fatalf("rolled stats not preserved: %+v raw=%s", payload, string(items[0].RolledStats))
@@ -679,8 +679,8 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 			OfferIndex:     0,
 			OfferID:        "generated:depth1:000",
 			SourceDepth:    1,
-			ItemTemplateID: "cave_blade",
-			RolledPayload:  json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Common Cave Blade","rarity":"common","stats":{"damage_min":2,"damage_max":4},"requirements":{"level":1},"effect_ids":[]}`),
+			ItemTemplateID: "long_sword",
+			RolledPayload:  json.RawMessage(`{"item_template_id":"long_sword","display_name":"Long Sword","rarity":"common","stats":{"damage_min":2,"damage_max":4},"requirements":{"level":1},"effect_ids":[]}`),
 			BuyPrice:       100,
 			Available:      true,
 		},
@@ -692,8 +692,8 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 			OfferIndex:     1,
 			OfferID:        "generated:depth2:001",
 			SourceDepth:    2,
-			ItemTemplateID: "cave_bow",
-			RolledPayload:  json.RawMessage(`{"item_template_id":"cave_bow","display_name":"Rare Cave Bow","rarity":"rare","stats":{"damage_min":2,"damage_max":3},"requirements":{"level":1},"effect_ids":[]}`),
+			ItemTemplateID: "bow",
+			RolledPayload:  json.RawMessage(`{"item_template_id":"bow","display_name":"Rare Cave Bow","rarity":"rare","stats":{"damage_min":2,"damage_max":3},"requirements":{"level":1},"effect_ids":[]}`),
 			BuyPrice:       210,
 			Available:      true,
 		},
@@ -759,8 +759,8 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 		OfferIndex:     0,
 		OfferID:        "generated:depth3:000",
 		SourceDepth:    3,
-		ItemTemplateID: "cave_helm",
-		RolledPayload:  json.RawMessage(`{"item_template_id":"cave_helm","display_name":"Magic Cave Helm","rarity":"magic","stats":{"armor":5},"requirements":{"level":1},"effect_ids":[]}`),
+		ItemTemplateID: "helm",
+		RolledPayload:  json.RawMessage(`{"item_template_id":"helm","display_name":"Magic Cave Helm","rarity":"magic","stats":{"armor":5},"requirements":{"level":1},"effect_ids":[]}`),
 		BuyPrice:       85,
 		Available:      true,
 	}}
@@ -888,9 +888,9 @@ func TestAccountStashTransfersAreAccountScopedAndAtomic(t *testing.T) {
 		ID:          "item_a",
 		AccountID:   acct.ID,
 		CharacterID: charA.ID,
-		ItemDefID:   "cave_blade",
+		ItemDefID:   "long_sword",
 		Location:    store.ItemLocationInventory,
-		RolledStats: json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Rare Cave Blade","rarity":"rare","stats":{"damage_min":4,"damage_max":6},"requirements":{"level":1},"effect_ids":[]}`),
+		RolledStats: json.RawMessage(`{"item_template_id":"long_sword","display_name":"Long Sword","rarity":"rare","stats":{"damage_min":4,"damage_max":6},"requirements":{"level":1},"effect_ids":[]}`),
 	}
 	if err := s.AddCharacterItem(ctx, itemA); err != nil {
 		t.Fatalf("add character item A: %v", err)
@@ -1088,7 +1088,7 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, prog); err != nil {
 		t.Fatal(err)
 	}
-	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "long_sword", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "upgrade_item_"+suffix, "upgrade_stash_"+suffix); err != nil {
@@ -1098,9 +1098,9 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 		t.Fatal(err)
 	}
 	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
-	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
+	sellPrice := testItemSellPrice(t, "long_sword", bladeRolled)
 	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "upgrade_shard_1_"+suffix, 1)
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"long_sword": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1122,7 +1122,7 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 		t.Fatalf("upgraded stats = %+v", stats)
 	}
 	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "upgrade_shard_2_"+suffix, 1)
-	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"long_sword": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1141,7 +1141,7 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 25); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 3, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
+	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 3, map[string]struct{}{"long_sword": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("max level upgrade err = %v, want ErrConflict", err)
 	}
 }
@@ -1158,16 +1158,16 @@ func TestAccountStashItemUpgradeRejectsInsufficientGold(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "poor_upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2}`)}); err != nil {
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "poor_upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "long_sword", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2}`)}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "poor_upgrade_item_"+suffix, "poor_upgrade_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
 	bladeRolled := json.RawMessage(`{"damage_min":2}`)
-	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
+	sellPrice := testItemSellPrice(t, "long_sword", bladeRolled)
 	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "poor_upgrade_shard_"+suffix, 1)
-	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
+	if _, _, _, _, err := s.UpgradeAccountStashItem(ctx, acct.ID, "poor_upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"long_sword": {}}, testUpgradeOptions(t)); !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("insufficient gold upgrade err = %v, want ErrConflict", err)
 	}
 }
@@ -1188,8 +1188,8 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, prog); err != nil {
 		t.Fatal(err)
 	}
-	payload := `{"item_template_id":"cave_blade","display_name":"Rare Cave Blade","rarity":"rare","stats":{"damage_min":4,"damage_max":5},"requirements":{"level":1,"str":5},"effect_ids":[]}`
-	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "payload_upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(payload)}); err != nil {
+	payload := `{"item_template_id":"long_sword","display_name":"Long Sword","rarity":"rare","stats":{"damage_min":4,"damage_max":5},"requirements":{"level":1,"str":5},"effect_ids":[]}`
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "payload_upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "long_sword", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(payload)}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, acct.ID, char.ID, "payload_upgrade_item_"+suffix, "payload_upgrade_stash_"+suffix); err != nil {
@@ -1198,9 +1198,9 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if _, _, err := s.TransferCharacterGoldToAccountStash(ctx, acct.ID, char.ID, 500); err != nil {
 		t.Fatal(err)
 	}
-	sellPrice := testItemSellPrice(t, "cave_blade", json.RawMessage(payload))
+	sellPrice := testItemSellPrice(t, "long_sword", json.RawMessage(payload))
 	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "payload_upgrade_shard_"+suffix, 1)
-	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	item, gold, cost, success, err := s.UpgradeAccountStashItem(ctx, acct.ID, "payload_upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"long_sword": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1220,7 +1220,7 @@ func TestAccountStashItemUpgradeHandlesRolledPayloadStats(t *testing.T) {
 	if err := json.Unmarshal(item.RolledStats, &upgraded); err != nil {
 		t.Fatal(err)
 	}
-	if upgraded.ItemTemplateID != "cave_blade" || upgraded.DisplayName != "Rare Cave Blade" || upgraded.Rarity != "rare" {
+	if upgraded.ItemTemplateID != "long_sword" || upgraded.DisplayName != "Long Sword" || upgraded.Rarity != "rare" {
 		t.Fatalf("payload metadata after upgrade = %+v raw=%s", upgraded, string(item.RolledStats))
 	}
 	if upgraded.Stats["item_level"] != 1 || upgraded.Stats["damage_max"] != 5 || upgraded.Stats["damage_min"] != 4 {

@@ -26,13 +26,13 @@ func TestMaxItemLevelForDepthUsesTierBands(t *testing.T) {
 func TestRollItemLevelIsDeterministicAndWithinBand(t *testing.T) {
 	rules := loadRules(t)
 	tiers := rules.DungeonGeneration.ItemLevelTiers
-	first, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 36)
+	first, ok := rules.rollItemTemplateWithRNG("long_sword", NewRNG(11), 36)
 	if !ok {
-		t.Fatal("roll cave_blade")
+		t.Fatal("roll long_sword")
 	}
-	second, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 36)
+	second, ok := rules.rollItemTemplateWithRNG("long_sword", NewRNG(11), 36)
 	if !ok {
-		t.Fatal("repeat roll cave_blade")
+		t.Fatal("repeat roll long_sword")
 	}
 	if first.ItemLevel != second.ItemLevel {
 		t.Fatalf("repeat item level = %d vs %d", first.ItemLevel, second.ItemLevel)
@@ -44,9 +44,9 @@ func TestRollItemLevelIsDeterministicAndWithinBand(t *testing.T) {
 
 func TestRolledItemLevelAtShallowDepthIsOne(t *testing.T) {
 	rules := loadRules(t)
-	low, ok := rules.rollItemTemplateWithRNG("cave_blade", NewRNG(11), 0)
+	low, ok := rules.rollItemTemplateWithRNG("long_sword", NewRNG(11), 0)
 	if !ok {
-		t.Fatal("roll low-depth cave_blade")
+		t.Fatal("roll low-depth long_sword")
 	}
 	if low.ItemLevel != 1 {
 		t.Fatalf("low item level = %d, want 1", low.ItemLevel)
@@ -64,9 +64,9 @@ func TestItemLevelScalingMatchesMonsterDamageBand(t *testing.T) {
 	monster := sim.generatedMonsterStats(def, -11, rarity)
 	itemLevel := 2
 	tiers := rules.DungeonGeneration.ItemLevelTiers
-	template := rules.ItemTemplates["cave_blade"]
+	template := rules.ItemTemplates["long_sword"]
 	payload := FinalizeItemRollPayload(ItemRollPayload{
-		ItemTemplateID: "cave_blade",
+		ItemTemplateID: "long_sword",
 		DisplayName:    template.Name,
 		Rarity:         "common",
 		ItemLevel:      1,

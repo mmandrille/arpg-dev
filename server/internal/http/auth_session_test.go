@@ -590,7 +590,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if err := db.UpsertCharacterProgression(ctx, accountID, prog); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "route_upgrade_item_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "route_upgrade_item_" + suffix, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "long_sword", Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4}`)}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := db.TransferCharacterItemToAccountStash(ctx, accountID, char.CharacterID, "route_upgrade_item_"+suffix, "route_upgrade_stash_"+suffix); err != nil {
@@ -600,7 +600,7 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 		t.Fatal(err)
 	}
 	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4}`)
-	sellPrice := httpTestItemSellPrice(t, "cave_blade", bladeRolled)
+	sellPrice := httpTestItemSellPrice(t, "long_sword", bladeRolled)
 	addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, "route_upgrade_shard_1_"+suffix, 1)
 	rec := postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
 	if rec.Code != http.StatusOK {
@@ -660,8 +660,8 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 		t.Fatal(err)
 	}
 	itemID := "inventory_upgrade_item_" + suffix
-	rareShield := `{"item_template_id":"cave_shield","display_name":"Rare Cave Shield","rarity":"rare","stats":{"armor":4,"block_percent":8},"requirements":{"level":1,"str":5},"effect_ids":[]}`
-	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "cave_shield", Location: store.ItemLocationEquipped, Slot: "off_hand", Equipped: true, RolledStats: json.RawMessage(rareShield)}); err != nil {
+	rareShield := `{"item_template_id":"shield","display_name":"Rare Cave Shield","rarity":"rare","stats":{"armor":4,"block_percent":8},"requirements":{"level":1,"str":5},"effect_ids":[]}`
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: itemID, AccountID: accountID, CharacterID: char.CharacterID, ItemDefID: "shield", Location: store.ItemLocationEquipped, Slot: "off_hand", Equipped: true, RolledStats: json.RawMessage(rareShield)}); err != nil {
 		t.Fatal(err)
 	}
 	rec := postJSON(h, "/v0/account-stash/items/upgrade", token, map[string]string{
@@ -675,7 +675,7 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if _, _, err := db.TransferCharacterGoldToAccountStash(ctx, accountID, char.CharacterID, 400); err != nil {
 		t.Fatal(err)
 	}
-	sellPrice := httpTestItemSellPrice(t, "cave_shield", json.RawMessage(rareShield))
+	sellPrice := httpTestItemSellPrice(t, "shield", json.RawMessage(rareShield))
 	rec = postJSON(h, "/v0/account-stash/items/upgrade", token, map[string]string{
 		"item_instance_id": itemID,
 		"character_id":     char.CharacterID,
@@ -690,7 +690,7 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if upgraded.Item.ItemInstanceID != itemID || !upgraded.Item.Equipped || upgraded.Item.Slot != "off_hand" || upgraded.Gold+upgraded.StashGold != 500-sellPrice || upgraded.CostGold != sellPrice || upgraded.ResourceItemDefID != "upgrade_shard" || upgraded.ResourceCount != 1 || upgraded.ResourceRequiredLevel != 1 || upgraded.ResourceInventoryCount != 0 {
 		t.Fatalf("inventory upgrade response = %+v", upgraded)
 	}
-	if upgraded.Item.ItemDefID != "cave_shield" || upgraded.Item.ItemTemplateID != "cave_shield" || upgraded.Item.DisplayName != "Rare Cave Shield" || upgraded.Item.Rarity != "rare" {
+	if upgraded.Item.ItemDefID != "shield" || upgraded.Item.ItemTemplateID != "shield" || upgraded.Item.DisplayName != "Rare Cave Shield" || upgraded.Item.Rarity != "rare" {
 		t.Fatalf("upgraded rare shield response = %+v", upgraded.Item)
 	}
 	items, err := db.ListCharacterItems(ctx, accountID, char.CharacterID)
@@ -727,7 +727,7 @@ func TestAccountStashItemUpgradeRouteAcceptsInventoryItem(t *testing.T) {
 	if err := json.Unmarshal(found.RolledStats, &payload); err != nil {
 		t.Fatal(err)
 	}
-	if payload.ItemTemplateID != "cave_shield" || payload.DisplayName != "Rare Cave Shield" || payload.Rarity != "rare" {
+	if payload.ItemTemplateID != "shield" || payload.DisplayName != "Rare Cave Shield" || payload.Rarity != "rare" {
 		t.Fatalf("persisted upgraded rare shield metadata = %+v raw=%s", payload, string(found.RolledStats))
 	}
 	if payload.Stats["item_level"] != 1 || payload.Stats["armor"] != 4 || payload.Stats["block_percent"] != 8 {

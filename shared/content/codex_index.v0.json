@@ -2016,10 +2016,10 @@
                 "gold (weight 40)",
                 "red_potion (weight 15)",
                 "blue_potion (weight 15)",
-                "cave_helm template (weight 10)",
-                "cave_boots template (weight 10)",
-                "cave_blade template (weight 5)",
-                "cave_bow template (weight 5)"
+                "helm template (weight 10)",
+                "boots template (weight 10)",
+                "long_sword template (weight 5)",
+                "bow template (weight 5)"
               ]
             }
           ]

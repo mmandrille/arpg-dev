@@ -253,6 +253,8 @@ func cloneRollPayload(in *ItemRollPayload) *ItemRollPayload {
 		Stats:          cloneIntMap(in.Stats),
 		Requirements:   cloneIntMap(in.Requirements),
 		EffectIDs:      cloneStringSlice(in.EffectIDs),
+		SetPieceID:     in.SetPieceID,
+		NamedUniqueID:  in.NamedUniqueID,
 	}
 	if len(in.ClassAffinities) > 0 {
 		out.ClassAffinities = make([]ClassAffinityRoll, len(in.ClassAffinities))

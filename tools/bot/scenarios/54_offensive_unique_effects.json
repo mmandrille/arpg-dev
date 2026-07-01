@@ -9,11 +9,11 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_bow"
+      "item_def_id": "bow"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_bow",
+      "item_def_id": "bow",
       "slot": "main_hand"
     },
     {
@@ -28,7 +28,7 @@
   "assertions": [
     {
       "type": "inventory_contains",
-      "item_def_id": "cave_bow",
+      "item_def_id": "bow",
       "equipped": true
     },
     {

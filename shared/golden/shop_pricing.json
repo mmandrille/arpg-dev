@@ -14,8 +14,8 @@
     {
       "name": "common cave blade low roll",
       "input": {
-        "item_def_id": "cave_blade",
-        "item_template_id": "cave_blade",
+        "item_def_id": "long_sword",
+        "item_template_id": "long_sword",
         "rarity": "common",
         "rolled_stats": { "damage_min": 2, "damage_max": 5 }
       },
@@ -24,8 +24,8 @@
     {
       "name": "magic cave shield high roll",
       "input": {
-        "item_def_id": "cave_shield",
-        "item_template_id": "cave_shield",
+        "item_def_id": "shield",
+        "item_template_id": "shield",
         "rarity": "magic",
         "rolled_stats": { "armor": 5, "block_percent": 9 }
       },
@@ -34,8 +34,8 @@
     {
       "name": "rare cave amulet high roll",
       "input": {
-        "item_def_id": "cave_amulet",
-        "item_template_id": "cave_amulet",
+        "item_def_id": "amulet",
+        "item_template_id": "amulet",
         "rarity": "rare",
         "rolled_stats": { "max_hp": 8 }
       },

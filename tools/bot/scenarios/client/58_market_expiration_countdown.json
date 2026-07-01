@@ -8,7 +8,7 @@
   "description": "Client opens the market board and verifies active listing rows expose expiration text.",
   "preflight": {
     "type": "market_listing",
-    "item_def_id": "cave_mail",
+    "item_def_id": "mail",
     "price_gold": 59
   },
   "client_steps": [
@@ -28,7 +28,7 @@
     },
     {
       "type": "wait_market_panel",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 59,
       "expiration_visible": true,
       "expiration_contains": "Expires",
@@ -37,7 +37,7 @@
     },
     {
       "type": "assert_market_listing_rows",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 59,
       "expiration_visible": true,
       "expiration_contains": "Expires",

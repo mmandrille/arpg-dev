@@ -31,7 +31,7 @@ Common examples:
 python3 skills/showme/scripts/render_focus.py --focus gear
 
 # A specific item or small set.
-python3 skills/showme/scripts/render_focus.py --focus gear --items cave_helm,cave_mail,cave_boots
+python3 skills/showme/scripts/render_focus.py --focus gear --items helm,mail,boots
 
 # Paper-doll inventory UI only.
 python3 skills/showme/scripts/render_focus.py --focus inventory

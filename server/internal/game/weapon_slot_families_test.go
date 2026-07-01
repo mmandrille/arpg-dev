@@ -4,20 +4,20 @@ import "testing"
 
 func TestWeaponSlotFamiliesDamageRatio(t *testing.T) {
 	rules := loadRulesForArmorFamilies(t)
-	medium, ok := rules.ItemTemplates["cave_blade"]
+	medium, ok := rules.ItemTemplates["long_sword"]
 	if !ok {
-		t.Fatal("missing cave_blade template")
+		t.Fatal("missing long_sword template")
 	}
-	heavy, ok := rules.ItemTemplates["cave_heavy_blade"]
+	heavy, ok := rules.ItemTemplates["falchion"]
 	if !ok {
-		t.Fatal("missing cave_heavy_blade template")
+		t.Fatal("missing falchion template")
 	}
 	if heavy.BaseStats["damage_max"] < medium.BaseStats["damage_max"]*2 {
 		t.Fatalf("heavy blade damage_max = %d, want at least 2x medium (%d)", heavy.BaseStats["damage_max"], medium.BaseStats["damage_max"])
 	}
-	rapier := rules.ItemTemplates["cave_rapier"]
+	rapier := rules.ItemTemplates["rapier"]
 	if rapier.Requirements["dex"] < 7 {
-		t.Fatalf("cave_rapier dex requirement = %d, want >= 7", rapier.Requirements["dex"])
+		t.Fatalf("rapier dex requirement = %d, want >= 7", rapier.Requirements["dex"])
 	}
 }
 
@@ -35,7 +35,7 @@ func TestWeaponSlotFamiliesHeavyBladeRollIncludesAttackSpeedPenalty(t *testing.T
 		if ent.kind != lootEntity || ent.rollPayload == nil {
 			continue
 		}
-		if ent.rollPayload.ItemTemplateID != "cave_heavy_blade" {
+		if ent.rollPayload.ItemTemplateID != "falchion" {
 			continue
 		}
 		attackSpeed = ent.rollPayload.Stats["attack_speed_percent"]

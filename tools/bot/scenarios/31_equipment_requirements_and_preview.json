@@ -8,11 +8,11 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_war_sword"
+      "item_def_id": "war_sword"
     },
     {
       "action": "assert_inventory_requirement_status",
-      "item_def_id": "cave_war_sword",
+      "item_def_id": "war_sword",
       "requirements_met": false,
       "preview_slot": "main_hand",
       "preview_requirements_met": false,
@@ -36,7 +36,7 @@
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_war_sword",
+      "item_def_id": "war_sword",
       "slot": "main_hand",
       "expect_reject": "requirements_not_met"
     },
@@ -64,7 +64,7 @@
     },
     {
       "action": "assert_inventory_requirement_status",
-      "item_def_id": "cave_war_sword",
+      "item_def_id": "war_sword",
       "requirements_met": true,
       "preview_slot": "main_hand",
       "preview_requirements_met": true,
@@ -85,7 +85,7 @@
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_war_sword",
+      "item_def_id": "war_sword",
       "slot": "main_hand"
     }
   ],
@@ -107,11 +107,11 @@
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "cave_war_sword"
+      "item_def_id": "war_sword"
     },
     {
       "type": "inventory_requirement_status",
-      "item_def_id": "cave_war_sword",
+      "item_def_id": "war_sword",
       "equipped": true,
       "requirements_met": true,
       "preview_slot": "main_hand",
@@ -146,11 +146,11 @@
         {
           "type": "equipped_slot_def",
           "slot": "main_hand",
-          "item_def_id": "cave_war_sword"
+          "item_def_id": "war_sword"
         },
         {
           "type": "inventory_requirement_status",
-          "item_def_id": "cave_war_sword",
+          "item_def_id": "war_sword",
           "equipped": true,
           "requirements_met": true,
           "preview_slot": "main_hand",

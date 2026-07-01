@@ -9,9 +9,9 @@
   "preflight": {
     "type": "market_listing",
     "seller_is_client": true,
-    "item_def_id": "cave_mail",
+    "item_def_id": "mail",
     "price_gold": 43,
-    "offer_item_def_id": "cave_blade"
+    "offer_item_def_id": "long_sword"
   },
   "client_steps": [
     {
@@ -40,7 +40,7 @@
     },
     {
       "type": "wait_market_panel",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 43,
       "seller_owned": true,
       "at_least": 1,
@@ -48,12 +48,12 @@
     },
     {
       "type": "click_market_cancel_listing",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 43
     },
     {
       "type": "wait_market_panel",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 43,
       "seller_owned": true,
       "equals": 0,
@@ -61,14 +61,14 @@
     },
     {
       "type": "assert_market_listing_rows",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 43,
       "seller_owned": true,
       "equals": 0
     },
     {
       "type": "assert_stash_item_count",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "equals": 1
     }
   ]

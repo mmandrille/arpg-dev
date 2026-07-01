@@ -18,13 +18,13 @@ func TestMarketReceiptRouteListsAccountReceipts(t *testing.T) {
 	sellerChar := createCharacter(t, h, sellerToken, "Receipt Seller")
 	bidderID, bidderToken := loginEmail(t, h, "market-receipts-bidder+"+suffix+"@example.test")
 	bidderChar := createCharacter(t, h, bidderToken, "Receipt Bidder")
-	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "market_receipt_listing_item_" + suffix, AccountID: sellerID, CharacterID: sellerChar.CharacterID, ItemDefID: "cave_mail", Location: store.ItemLocationInventory}); err != nil {
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "market_receipt_listing_item_" + suffix, AccountID: sellerID, CharacterID: sellerChar.CharacterID, ItemDefID: "mail", Location: store.ItemLocationInventory}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := db.TransferCharacterItemToAccountStash(ctx, sellerID, sellerChar.CharacterID, "market_receipt_listing_item_"+suffix, "market_receipt_listing_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "market_receipt_bidder_item_" + suffix, AccountID: bidderID, CharacterID: bidderChar.CharacterID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory}); err != nil {
+	if err := db.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "market_receipt_bidder_item_" + suffix, AccountID: bidderID, CharacterID: bidderChar.CharacterID, ItemDefID: "long_sword", Location: store.ItemLocationInventory}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := db.TransferCharacterItemToAccountStash(ctx, bidderID, bidderChar.CharacterID, "market_receipt_bidder_item_"+suffix, "market_receipt_bidder_stash_"+suffix); err != nil {

@@ -48,9 +48,9 @@ func TestSkillAffixRollCandidates(t *testing.T) {
 			t.Fatalf("rare starter_sorcerer_staff pool missing %s", stat)
 		}
 	}
-	amulet := rules.rollableStatsForRarity(rules.ItemTemplates["cave_amulet"].RollableStats, "rare", 1)
+	amulet := rules.rollableStatsForRarity(rules.ItemTemplates["amulet"].RollableStats, "rare", 1)
 	if _, ok := findRollableStat(amulet, "skill_cooldown_reduction_percent"); !ok {
-		t.Fatal("rare cave_amulet pool missing skill_cooldown_reduction_percent")
+		t.Fatal("rare amulet pool missing skill_cooldown_reduction_percent")
 	}
 }
 

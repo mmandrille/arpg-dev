@@ -175,9 +175,9 @@ func _test_missing_drag_bag_item_def_id_rejected() -> void:
 func _test_full_equipment_step_types_load() -> void:
 	var data := _make_valid_scenario()
 	data["client_steps"] = [
-		{"type": "drag_bag_to_equipment_slot", "item_def_id": "cave_helm", "slot": "head"},
+		{"type": "drag_bag_to_equipment_slot", "item_def_id": "helm", "slot": "head"},
 		{"type": "drag_equipment_to_bag", "slot": "head"},
-		{"type": "click_loot_item", "item_def_id": "cave_belt"},
+		{"type": "click_loot_item", "item_def_id": "belt"},
 		{"type": "click_loot_item", "rolled": true},
 		{"type": "assign_hotbar_slot", "slot_index": 5, "item_def_id": "red_potion"},
 		{"type": "wait_hotbar_assigned", "slot_index": 5, "item_def_id": "red_potion", "timeout_s": 1.0},
@@ -622,7 +622,7 @@ func _test_shop_assertions() -> void:
 				},
 			],
 			"sell_rows": [
-				{"item_instance_id": "1", "item_def_id": "cave_bow", "item_template_id": "cave_bow"},
+				{"item_instance_id": "1", "item_def_id": "bow", "item_template_id": "bow"},
 			],
 		},
 	}
@@ -640,7 +640,7 @@ func _test_stash_step_types_load() -> void:
 		{"type": "assert_stash_gold", "equals": 3},
 		{"type": "set_stash_search", "text": "bow"},
 		{"type": "select_stash_sort", "mode": "name"},
-		{"type": "assert_stash_filter", "search_text": "bow", "sort_mode": "name", "filtered_equals": 1, "first_item_def_id": "cave_bow"},
+		{"type": "assert_stash_filter", "search_text": "bow", "sort_mode": "name", "filtered_equals": 1, "first_item_def_id": "bow"},
 		{"type": "drag_bag_to_stash", "rolled": true, "bag_index": 0},
 		{"type": "drag_stash_to_bag", "rolled": true, "stash_index": 0},
 		{"type": "click_stash_deposit_gold", "amount": 1},
@@ -668,7 +668,7 @@ func _test_stash_assertions() -> void:
 			{"type": "assert_stash_panel_visible", "visible": true},
 			{"type": "assert_stash_item_count", "rolled": true, "equals": 1},
 			{"type": "assert_stash_gold", "equals": 3},
-			{"type": "assert_stash_filter", "search_text": "bow", "sort_mode": "name", "filtered_equals": 1, "first_item_def_id": "cave_bow"},
+			{"type": "assert_stash_filter", "search_text": "bow", "sort_mode": "name", "filtered_equals": 1, "first_item_def_id": "bow"},
 		],
 	}
 	runner.load_scenario(data)
@@ -676,7 +676,7 @@ func _test_stash_assertions() -> void:
 		"stash_panel_visible": true,
 		"stash_gold": 3,
 		"stash_items": [
-			{"stash_item_id": "9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow"},
+			{"stash_item_id": "9001", "item_def_id": "bow", "item_template_id": "bow"},
 		],
 		"stash_panel": {
 			"visible": true,
@@ -685,7 +685,7 @@ func _test_stash_assertions() -> void:
 			"stash_sort_mode": "name",
 			"filtered_stash_item_count": 1,
 			"stash_rows": [
-				{"stash_item_id": "9001", "item_def_id": "cave_bow", "item_template_id": "cave_bow"},
+				{"stash_item_id": "9001", "item_def_id": "bow", "item_template_id": "bow"},
 			],
 		},
 	}

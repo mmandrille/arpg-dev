@@ -7,7 +7,7 @@ import (
 
 func TestRerollItemRollPayloadPreservesUniqueFixedEffects(t *testing.T) {
 	rules := loadRules(t)
-	templateID := "cave_blade"
+	templateID := "long_sword"
 	template := rules.ItemTemplates[templateID]
 	payload := ItemRollPayload{
 		ItemTemplateID: templateID,
@@ -49,7 +49,7 @@ func TestRerollItemRollPayloadPreservesUniqueFixedEffects(t *testing.T) {
 
 func TestRenewRolledStatsJSONPreservesNestedItemLevel(t *testing.T) {
 	rules := loadRules(t)
-	raw := json.RawMessage(`{"item_template_id":"cave_shield","display_name":"Stalwart Rare Cave Shield","rarity":"rare","stats":{"armor":43,"block_percent":25,"dex":15,"item_level":15},"requirements":{"str":77,"level":15}}`)
+	raw := json.RawMessage(`{"item_template_id":"shield","display_name":"Stalwart Rare Cave Shield","rarity":"rare","stats":{"armor":43,"block_percent":25,"dex":15,"item_level":15},"requirements":{"str":77,"level":15}}`)
 	rng := NewRNG(SeedToUint64("renew_nested_ilvl"))
 	renewed, err := RenewRolledStatsJSON(rules, raw, rng)
 	if err != nil {
@@ -74,7 +74,7 @@ func TestRenewRolledStatsJSONPreservesNestedItemLevel(t *testing.T) {
 
 func TestRenewRolledStatsJSONFlatItemLevelFifteenStaysBounded(t *testing.T) {
 	rules := loadRules(t)
-	raw := json.RawMessage(`{"item_template_id":"cave_shield","display_name":"Stalwart Rare Cave Shield","rarity":"rare","item_level":15,"armor":43,"block_percent":25,"dex":15}`)
+	raw := json.RawMessage(`{"item_template_id":"shield","display_name":"Stalwart Rare Cave Shield","rarity":"rare","item_level":15,"armor":43,"block_percent":25,"dex":15}`)
 	rng := NewRNG(SeedToUint64("renew_flat_ilvl"))
 	renewed, err := RenewRolledStatsJSON(rules, raw, rng)
 	if err != nil {
@@ -95,7 +95,7 @@ func TestRenewRolledStatsJSONFlatItemLevelFifteenStaysBounded(t *testing.T) {
 
 func TestRenewRolledStatsJSONChangesAffixStats(t *testing.T) {
 	rules := loadRules(t)
-	raw := json.RawMessage(`{"item_template_id":"cave_blade","display_name":"Sharp Cave Blade","rarity":"magic","stats":{"damage_min":2,"damage_max":5,"item_level":1}}`)
+	raw := json.RawMessage(`{"item_template_id":"long_sword","display_name":"Sharp Cave Blade","rarity":"magic","stats":{"damage_min":2,"damage_max":5,"item_level":1}}`)
 	rng := NewRNG(SeedToUint64("renew_affix_roll"))
 	renewed, err := RenewRolledStatsJSON(rules, raw, rng)
 	if err != nil {
@@ -105,7 +105,7 @@ func TestRenewRolledStatsJSONChangesAffixStats(t *testing.T) {
 	if err := json.Unmarshal(renewed, &payload); err != nil {
 		t.Fatal(err)
 	}
-	if payload.ItemTemplateID != "cave_blade" || payload.Rarity != "magic" {
+	if payload.ItemTemplateID != "long_sword" || payload.Rarity != "magic" {
 		t.Fatalf("renewed payload = %+v", payload)
 	}
 	var outMap map[string]any

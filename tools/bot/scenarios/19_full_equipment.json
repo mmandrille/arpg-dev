@@ -8,51 +8,51 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_shield"
+      "item_def_id": "shield"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_greatsword"
+      "item_def_id": "great_sword"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_bow"
+      "item_def_id": "bow"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_helm"
+      "item_def_id": "helm"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_mail"
+      "item_def_id": "mail"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_gloves"
+      "item_def_id": "gloves"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_belt"
+      "item_def_id": "belt"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_boots"
+      "item_def_id": "boots"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_amulet"
+      "item_def_id": "amulet"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_ring"
+      "item_def_id": "ring"
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "cave_ring",
+      "item_def_id": "ring",
       "bag_index": 1
     },
     {
@@ -71,62 +71,53 @@
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_helm",
+      "item_def_id": "helm",
       "slot": "head"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "slot": "chest"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_gloves",
+      "item_def_id": "gloves",
       "slot": "gloves"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_boots",
+      "item_def_id": "boots",
       "slot": "boots"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_amulet",
+      "item_def_id": "amulet",
       "slot": "amulet"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_ring",
+      "item_def_id": "ring",
       "slot": "ring_left"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_ring",
+      "item_def_id": "ring",
       "bag_index": 1,
       "slot": "ring_right"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "slot": "main_hand"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_shield",
+      "item_def_id": "shield",
       "slot": "off_hand"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_greatsword",
-      "slot": "main_hand"
-    },
-    {
-      "action": "assert_equipped_slot_empty",
-      "slot": "off_hand"
-    },
-    {
-      "action": "equip_inventory_item",
-      "item_def_id": "cave_bow",
+      "item_def_id": "great_sword",
       "slot": "main_hand"
     },
     {
@@ -135,7 +126,16 @@
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_belt",
+      "item_def_id": "bow",
+      "slot": "main_hand"
+    },
+    {
+      "action": "assert_equipped_slot_empty",
+      "slot": "off_hand"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "belt",
       "slot": "belt"
     },
     {
@@ -172,7 +172,7 @@
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "cave_belt",
+      "item_def_id": "belt",
       "slot": "belt"
     },
     {
@@ -189,42 +189,42 @@
     {
       "type": "equipped_slot_def",
       "slot": "head",
-      "item_def_id": "cave_helm"
+      "item_def_id": "helm"
     },
     {
       "type": "equipped_slot_def",
       "slot": "chest",
-      "item_def_id": "cave_mail"
+      "item_def_id": "mail"
     },
     {
       "type": "equipped_slot_def",
       "slot": "gloves",
-      "item_def_id": "cave_gloves"
+      "item_def_id": "gloves"
     },
     {
       "type": "equipped_slot_def",
       "slot": "boots",
-      "item_def_id": "cave_boots"
+      "item_def_id": "boots"
     },
     {
       "type": "equipped_slot_def",
       "slot": "amulet",
-      "item_def_id": "cave_amulet"
+      "item_def_id": "amulet"
     },
     {
       "type": "equipped_slot_def",
       "slot": "ring_left",
-      "item_def_id": "cave_ring"
+      "item_def_id": "ring"
     },
     {
       "type": "equipped_slot_def",
       "slot": "ring_right",
-      "item_def_id": "cave_ring"
+      "item_def_id": "ring"
     },
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "cave_bow"
+      "item_def_id": "bow"
     },
     {
       "type": "equipped_slot_empty",
@@ -233,7 +233,7 @@
     {
       "type": "equipped_slot_def",
       "slot": "belt",
-      "item_def_id": "cave_belt"
+      "item_def_id": "belt"
     },
     {
       "type": "hotbar_capacity",
@@ -263,12 +263,12 @@
         {
           "type": "equipped_slot_def",
           "slot": "main_hand",
-          "item_def_id": "cave_bow"
+          "item_def_id": "bow"
         },
         {
           "type": "equipped_slot_def",
           "slot": "belt",
-          "item_def_id": "cave_belt"
+          "item_def_id": "belt"
         },
         {
           "type": "hotbar_capacity",

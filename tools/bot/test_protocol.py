@@ -220,15 +220,15 @@ def test_select_shop_offer_prefers_cheapest_affordable_generated():
             "generated:depth3:000": {
                 "offer_id": "generated:depth3:000",
                 "kind": "generated",
-                "item_def_id": "cave_blade",
-                "item_template_id": "cave_blade",
+                "item_def_id": "long_sword",
+                "item_template_id": "long_sword",
                 "buy_price": 120,
             },
             "generated:depth3:001": {
                 "offer_id": "generated:depth3:001",
                 "kind": "generated",
-                "item_def_id": "cave_boots",
-                "item_template_id": "cave_boots",
+                "item_def_id": "boots",
+                "item_template_id": "boots",
                 "buy_price": 40,
             },
         }
@@ -249,8 +249,8 @@ def test_runtime_assertions_support_shop_offer_count_and_events():
         "town_vendor": {
             "fixed:red_potion": {"offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "buy_price": 20},
             "fixed:blue_potion": {"offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "buy_price": 20},
-            "generated:depth3:000": {"offer_id": "generated:depth3:000", "kind": "generated", "item_def_id": "cave_boots", "buy_price": 40, "source_depth": 3},
-            "buyback:2001": {"offer_id": "buyback:2001", "kind": "buyback", "item_def_id": "cave_boots", "buy_price": 12},
+            "generated:depth3:000": {"offer_id": "generated:depth3:000", "kind": "generated", "item_def_id": "boots", "buy_price": 40, "source_depth": 3},
+            "buyback:2001": {"offer_id": "buyback:2001", "kind": "buyback", "item_def_id": "boots", "buy_price": 12},
         }
     }
     state.shop_events = [
@@ -295,8 +295,8 @@ def test_runtime_assertions_support_concealed_mystery_offers_and_reveal_event():
             "offer_id": "mystery:main_hand:000",
             "item": {
                 "item_instance_id": "itm_1",
-                "item_def_id": "cave_blade",
-                "item_template_id": "cave_blade",
+                "item_def_id": "long_sword",
+                "item_template_id": "long_sword",
                 "display_name": "Bright Cave Blade",
                 "rarity": "magic",
             },
@@ -1085,7 +1085,7 @@ def test_structured_assertions():
 def test_structured_requirement_and_shop_preview_assertions():
     requirement_payload = {
         "item_instance_id": "2004",
-        "item_def_id": "cave_war_sword",
+        "item_def_id": "war_sword",
         "slot": "main_hand",
         "equipped": False,
         "requirements_met": False,
@@ -1103,7 +1103,7 @@ def test_structured_requirement_and_shop_preview_assertions():
     run_assertions([
         {
             "type": "inventory_requirement_status",
-            "item_def_id": "cave_war_sword",
+            "item_def_id": "war_sword",
             "equipped": False,
             "requirements_met": False,
             "preview_slot": "main_hand",
@@ -1124,7 +1124,7 @@ def test_structured_requirement_and_shop_preview_assertions():
     run_runtime_assertions([
         {
             "type": "inventory_requirement_status",
-            "item_def_id": "cave_war_sword",
+            "item_def_id": "war_sword",
             "requirements_met": False,
             "requires_equip_preview": True,
         },
@@ -1163,9 +1163,9 @@ def test_stash_snapshot_delta_and_assertions():
                 "stash_items": [
                     {
                         "stash_item_id": "9001",
-                        "item_def_id": "cave_bow",
-                        "item_template_id": "cave_bow",
-                        "display_name": "Common Cave Bow",
+                        "item_def_id": "bow",
+                        "item_template_id": "bow",
+                        "display_name": "Bow",
                     }
                 ],
                 "stash_gold": 3,
@@ -1180,12 +1180,12 @@ def test_stash_snapshot_delta_and_assertions():
     )
 
     run_runtime_assertions([
-        {"type": "stash_item_count", "item_template_id": "cave_bow", "equals": 1},
+        {"type": "stash_item_count", "item_template_id": "bow", "equals": 1},
         {"type": "stash_gold", "equals": 3},
         {"type": "stash_capacity", "equals": 50},
     ], state, "unit runtime")
     run_assertions([
-        {"type": "stash_item_count", "item_template_id": "cave_bow", "equals": 1},
+        {"type": "stash_item_count", "item_template_id": "bow", "equals": 1},
         {"type": "stash_gold", "equals": 3},
         {"type": "stash_capacity", "equals": 50},
     ], [], [], {}, None, "unit state", stash_items=list(state.stash_items), stash_gold=state.stash_gold, stash_capacity=state.stash_capacity)
@@ -1212,8 +1212,8 @@ def test_stash_snapshot_delta_and_assertions():
                         "op": "stash_item_add",
                         "item": {
                             "stash_item_id": "9002",
-                            "item_def_id": "cave_blade",
-                            "item_template_id": "cave_blade",
+                            "item_def_id": "long_sword",
+                            "item_template_id": "long_sword",
                         },
                     },
                     {"op": "stash_item_remove", "stash_item_id": "9001"},
@@ -1225,8 +1225,8 @@ def test_stash_snapshot_delta_and_assertions():
     )
 
     run_runtime_assertions([
-        {"type": "stash_item_count", "item_template_id": "cave_bow", "equals": 0},
-        {"type": "stash_item_count", "item_template_id": "cave_blade", "equals": 1},
+        {"type": "stash_item_count", "item_template_id": "bow", "equals": 0},
+        {"type": "stash_item_count", "item_template_id": "long_sword", "equals": 1},
         {"type": "stash_gold", "equals": 7},
         {"type": "gold", "equals": 7},
         {"type": "stash_event", "event_type": "stash_gold_deposited", "equals": 1},
@@ -1255,7 +1255,7 @@ def test_structured_assertions_support_range_comparators_and_filters():
     inventory = [
         {"item_instance_id": "2001", "item_def_id": "red_potion", "equipped": False},
         {"item_instance_id": "2002", "item_def_id": "red_potion", "equipped": False},
-        {"item_instance_id": "2003", "item_def_id": "cave_blade", "item_template_id": "sword_t1", "equipped": True},
+        {"item_instance_id": "2003", "item_def_id": "long_sword", "item_template_id": "sword_t1", "equipped": True},
     ]
 
     run_assertions([
@@ -1273,8 +1273,8 @@ def test_structured_assertions_support_unique_effect_coverage():
     inventory = [
         {
             "item_instance_id": str(3000 + index),
-            "item_def_id": "cave_blade",
-            "item_template_id": "cave_blade",
+            "item_def_id": "long_sword",
+            "item_template_id": "long_sword",
             "rarity": "unique",
             "effect_ids": [effect_id],
             "equipped": False,

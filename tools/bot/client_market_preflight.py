@@ -142,11 +142,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--email", required=True)
     parser.add_argument("--character-name", default="Market Seller")
     parser.add_argument("--metadata-file", required=True)
-    parser.add_argument("--item-def-id", default="cave_mail")
+    parser.add_argument("--item-def-id", default="mail")
     parser.add_argument("--price-gold", type=int, default=37)
     parser.add_argument("--offer-email", default="")
     parser.add_argument("--offer-character-name", default="Market Bidder")
-    parser.add_argument("--offer-item-def-id", default="cave_blade")
+    parser.add_argument("--offer-item-def-id", default="long_sword")
     return parser.parse_args(argv)
 
 

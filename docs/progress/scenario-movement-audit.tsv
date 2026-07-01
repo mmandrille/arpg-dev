@@ -218,3 +218,4 @@ client/90_town_night_perimeter.json	town_night_perimeter	godot_client	extended	s
 110_armor_slot_families_lab.json	armor_slot_families_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
 111_hero_skill_expansion.json	hero_skill_expansion	protocol	extended	contract	0	0		lab combat + debug_progression; no navigation setup
 112_weapon_slot_families_lab.json	weapon_slot_families_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
+113_item_archetype_lab.json	item_archetype_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup

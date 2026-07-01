@@ -44,7 +44,7 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 
 	requirements := cloneIntMap(template.Requirements)
 	effectIDs := cloneStringSlice(payload.EffectIDs)
-	displayName := rarity.NamePrefix + " " + template.Name
+	displayName := rules.affixDisplayName(template, rarityID, stats)
 
 	if rarityID == "unique" {
 		if named, ok := rules.namedUniqueForEffectIDs(payload.ItemTemplateID, effectIDs); ok {
@@ -52,16 +52,24 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 				stats[stat] = value
 			}
 			effectIDs = cloneStringSlice(named.FixedEffectIDs)
-			displayName = named.DisplayName
+			if len(effectIDs) > 0 {
+				if effect, ok := rules.UniqueEffects[effectIDs[0]]; ok {
+					displayName = rules.uniqueItemDisplayName(template, stats, effect)
+				}
+			}
 		} else if len(effectIDs) > 0 {
 			if effect, ok := rules.UniqueEffects[effectIDs[0]]; ok {
-				displayName = uniqueItemDisplayName(template, effect)
+				displayName = rules.uniqueItemDisplayName(template, stats, effect)
 			}
 		}
-	} else if rarityID != "set" {
-		displayName = rules.affixDisplayName(template, rarityID, stats)
-	} else if payload.DisplayName != "" {
-		displayName = payload.DisplayName
+	} else if rarityID == "set" {
+		if payload.SetPieceID != "" {
+			if setItem, ok := rules.SetItems[payload.SetPieceID]; ok {
+				displayName = rules.rolledEquipmentDisplayName(template, "set", stats, "of "+setItem.SetDisplayName)
+			}
+		} else if payload.DisplayName != "" {
+			displayName = payload.DisplayName
+		}
 	}
 
 	out := ItemRollPayload{
@@ -72,6 +80,7 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 		Stats:           stats,
 		Requirements:    requirements,
 		EffectIDs:       effectIDs,
+		SetPieceID:      payload.SetPieceID,
 		ClassAffinities: cloneClassAffinityRolls(payload.ClassAffinities),
 	}
 

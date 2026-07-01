@@ -450,8 +450,8 @@ func TestReconstructLoadsSessionStartHotbarAndInputs(t *testing.T) {
 func TestReconstructLoadsSessionStartShopStock(t *testing.T) {
 	rules := loadRules(t)
 	stock := []store.CharacterShopStockItem{
-		shopStockFixture("generated:wp:none:000", 0, false, "cave_blade", `{"damage_min":2,"damage_max":4}`),
-		shopStockFixture("generated:wp:none:001", 1, true, "cave_bow", `{"damage_min":2,"damage_max":2}`),
+		shopStockFixture("generated:wp:none:000", 0, false, "long_sword", `{"damage_min":2,"damage_max":4}`),
+		shopStockFixture("generated:wp:none:001", 1, true, "bow", `{"damage_min":2,"damage_max":2}`),
 	}
 	repo := &fakeRepo{
 		session: store.Session{ID: testSessionID, AccountID: "acct_1", CharacterID: "char_1", Seed: testSeed, WorldID: "dungeon_levels"},
@@ -493,7 +493,7 @@ func TestReconstructLoadsSessionStartShopStock(t *testing.T) {
 		t.Fatalf("consumed stock offer surfaced in replay shop_opened: %+v", opened.Offers)
 	}
 	available := findReplayOffer(opened.Offers, "generated:wp:none:001")
-	if available == nil || available.ItemTemplateID != "cave_bow" || available.SourceDepth != 1 {
+	if available == nil || available.ItemTemplateID != "bow" || available.SourceDepth != 1 {
 		t.Fatalf("available stock offer = %+v, offers=%+v", available, opened.Offers)
 	}
 }

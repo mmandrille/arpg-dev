@@ -6,11 +6,21 @@
   "title": "Combat stat effects and feedback",
   "description": "Equip rolled gear, verify stat breakdowns over protocol, and observe miss, crit, block, minimum-damage, and projectile combat event metadata.",
   "steps": [
-    { "action": "pick_up_loot", "item_def_id": "cave_blade" },
-    { "action": "pick_up_loot", "item_def_id": "cave_shield" },
-    { "action": "pick_up_loot", "item_def_id": "cave_bow" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" },
+    { "action": "pick_up_loot", "item_def_id": "long_sword" },
+    { "action": "pick_up_loot", "item_def_id": "shield" },
+    { "action": "pick_up_loot", "item_def_id": "bow" },
+    { "action": "equip_inventory_item", "item_def_id": "bow", "slot": "main_hand" },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "monster_damaged",
+      "outcome": "hit",
+      "min_damage": 2,
+      "blocked": false,
+      "critical": false
+    },
+    { "action": "equip_inventory_item", "item_def_id": "long_sword", "slot": "main_hand" },
+    { "action": "equip_inventory_item", "item_def_id": "shield", "slot": "off_hand" },
     {
       "action": "assert_character_progression",
       "stat_breakdowns": [
@@ -47,16 +57,6 @@
       "blocked": true,
       "critical": false
     },
-    { "action": "equip_inventory_item", "item_def_id": "cave_bow", "slot": "main_hand" },
-    {
-      "action": "action_until_combat_event",
-      "monster_def_id": "combat_lab_soft_target",
-      "event_type": "monster_damaged",
-      "outcome": "hit",
-      "min_damage": 2,
-      "blocked": false,
-      "critical": false
-    },
     {
       "action": "walk_to_monster",
       "monster_def_id": "combat_lab_miss_attacker",
@@ -73,8 +73,8 @@
       "source_monster_def_id": "combat_lab_miss_attacker",
       "timeout_s": 10.0
     },
-    { "action": "equip_inventory_item", "item_def_id": "cave_blade", "slot": "main_hand" },
-    { "action": "equip_inventory_item", "item_def_id": "cave_shield", "slot": "off_hand" }
+    { "action": "equip_inventory_item", "item_def_id": "long_sword", "slot": "main_hand" },
+    { "action": "equip_inventory_item", "item_def_id": "shield", "slot": "off_hand" }
   ],
   "assertions": [
     {

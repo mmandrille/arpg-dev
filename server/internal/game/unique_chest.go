@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"unicode"
 )
 
 func (r *Rules) validateUniqueItemRules(uniqueItems map[string]UniqueItemDef) error {
@@ -267,11 +266,49 @@ func (s *Sim) seedUniqueTestChests() {
 	}
 }
 
+func (r *Rules) namedUniqueCoveredEffectIDs() map[string]bool {
+	covered := map[string]bool{}
+	for _, uniqueID := range sortedStringKeys(r.UniqueItems) {
+		unique := r.UniqueItems[uniqueID]
+		if !unique.Enabled || unique.Status != "ready" {
+			continue
+		}
+		for _, effectID := range unique.FixedEffectIDs {
+			covered[effectID] = true
+		}
+	}
+
+	return covered
+}
+
+func (r *Rules) uniqueTestChestCatalogSize() int {
+	covered := r.namedUniqueCoveredEffectIDs()
+	count := 0
+	for _, effectID := range sortedStringKeys(r.UniqueEffects) {
+		effect := r.UniqueEffects[effectID]
+		if !effect.Enabled || effect.Status != "ready" || covered[effectID] {
+			continue
+		}
+		count++
+	}
+	for _, unique := range r.UniqueItems {
+		if unique.Enabled && unique.Status == "ready" {
+			count++
+		}
+	}
+	for range r.SetItems {
+		count++
+	}
+
+	return count
+}
+
 func (s *Sim) uniqueTestChestItems() ([]*invItem, bool) {
 	items := []*invItem{}
+	covered := s.rules.namedUniqueCoveredEffectIDs()
 	for _, effectID := range sortedStringKeys(s.rules.UniqueEffects) {
 		effect := s.rules.UniqueEffects[effectID]
-		if !effect.Enabled || effect.Status != "ready" {
+		if !effect.Enabled || effect.Status != "ready" || covered[effectID] {
 			continue
 		}
 		templateID, ok := s.rules.rollUniqueChestTemplateForEffect(s.seed, effectID, effect)
@@ -397,7 +434,7 @@ func (r *Rules) uniqueChestPayload(templateID string, effectID string) (ItemRoll
 	itemLevel := MaxItemLevelForDepth(maxInt(1, template.Requirements["level"]), r.DungeonGeneration.ItemLevelTiers)
 	payload := ItemRollPayload{
 		ItemTemplateID: templateID,
-		DisplayName:    uniqueItemDisplayName(template, effect),
+		DisplayName:    r.uniqueItemDisplayName(template, cloneIntMap(template.BaseStats), effect),
 		Rarity:         "unique",
 		ItemLevel:      1,
 		Stats:          cloneIntMap(template.BaseStats),
@@ -435,14 +472,16 @@ func (r *Rules) namedUniquePayload(uniqueID string) (ItemRollPayload, bool) {
 		requirements["level"] = unique.MinimumLevel
 	}
 	itemLevel := MaxItemLevelForDepth(maxInt(1, requirements["level"]), r.DungeonGeneration.ItemLevelTiers)
+	primaryEffect := r.UniqueEffects[unique.FixedEffectIDs[0]]
 	payload := ItemRollPayload{
 		ItemTemplateID: unique.BaseTemplateID,
-		DisplayName:    unique.DisplayName,
+		DisplayName:    r.uniqueItemDisplayName(template, stats, primaryEffect),
 		Rarity:         "unique",
 		ItemLevel:      1,
 		Stats:          stats,
 		Requirements:   requirements,
 		EffectIDs:      cloneStringSlice(unique.FixedEffectIDs),
+		NamedUniqueID:  uniqueID,
 	}
 
 	return FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers), true
@@ -460,22 +499,6 @@ func uniqueChestEffectCompatible(effect UniqueEffectDef, itemType string) bool {
 	return false
 }
 
-func uniqueItemDisplayName(template ItemTemplateDef, effect UniqueEffectDef) string {
-	return uniqueFamilyTypeName(template.ItemType) + " of " + effect.DisplayName
-}
-
-func uniqueFamilyTypeName(itemType string) string {
-	words := strings.Fields(strings.ReplaceAll(itemType, "_", " "))
-	for i, word := range words {
-		runes := []rune(word)
-		if len(runes) == 0 {
-			continue
-		}
-		runes[0] = unicode.ToUpper(runes[0])
-		for j := 1; j < len(runes); j++ {
-			runes[j] = unicode.ToLower(runes[j])
-		}
-		words[i] = string(runes)
-	}
-	return strings.Join(words, " ")
+func (r *Rules) uniqueItemDisplayName(template ItemTemplateDef, stats map[string]int, effect UniqueEffectDef) string {
+	return r.rolledEquipmentDisplayName(template, "unique", stats, "of "+effect.DisplayName)
 }

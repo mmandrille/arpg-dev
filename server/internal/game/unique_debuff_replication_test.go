@@ -19,7 +19,7 @@ func TestOffensiveUniqueReplicatingBlightCopiesBurnDebuffOnly(t *testing.T) {
 	sim.entities[nearA.id] = nearA
 	sim.entities[nearB.id] = nearB
 	sim.entities[far.id] = far
-	blade := addRolledInventoryItem(t, sim, 9807, "cave_blade", map[string]int{"damage_min": 10, "damage_max": 10})
+	blade := addRolledInventoryItem(t, sim, 9807, "long_sword", map[string]int{"damage_min": 10, "damage_max": 10})
 	blade.rollPayload.EffectIDs = []string{everburningWoundEffectID, replicatingBlightEffectID}
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_replicate", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "equip_replicate")
 
@@ -68,7 +68,7 @@ func TestOffensiveUniqueReplicatingBlightCopiesPinningRootDuration(t *testing.T)
 	nearby := &entity{id: sim.alloc(), kind: monsterEntity, pos: Vec2{X: primary.pos.X + 1, Y: primary.pos.Y}, hp: 80, maxHP: 80, monsterDefID: monsterDefID, lootTable: "no_drop"}
 	sim.entities[primary.id] = primary
 	sim.entities[nearby.id] = nearby
-	equipUniqueTestEffect(t, sim, replicatingBlightEffectID, 9808, "cave_blade", mainHandSlot)
+	equipUniqueTestEffect(t, sim, replicatingBlightEffectID, 9808, "long_sword", mainHandSlot)
 	root := SkillRootDef{EffectID: "pinning_root", DurationTicks: 30}
 
 	sim.applyMonsterRoot(primary, player.id, "pinning_shot", root, "pin_corr", &TickResult{})

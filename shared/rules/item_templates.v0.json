@@ -1,86 +1,290 @@
 {
   "version": 0,
   "rarities": {
-    "common": { "weight": 70, "stat_rolls_min": 1, "stat_rolls_max": 1, "name_prefix": "Common" },
-    "magic": { "weight": 25, "stat_rolls_min": 1, "stat_rolls_max": 2, "name_prefix": "Magic" },
-    "rare": { "weight": 5, "stat_rolls_min": 2, "stat_rolls_max": 4, "name_prefix": "Rare" },
-    "unique": { "weight": 1, "stat_rolls_min": 3, "stat_rolls_max": 5, "name_prefix": "Unique" },
-    "set": { "weight": 1, "stat_rolls_min": 3, "stat_rolls_max": 5, "name_prefix": "Set", "random_rollable": false }
+    "common": {
+      "weight": 70,
+      "stat_rolls_min": 1,
+      "stat_rolls_max": 1,
+      "name_prefix": "Common"
+    },
+    "magic": {
+      "weight": 25,
+      "stat_rolls_min": 1,
+      "stat_rolls_max": 2,
+      "name_prefix": "Magic"
+    },
+    "rare": {
+      "weight": 5,
+      "stat_rolls_min": 2,
+      "stat_rolls_max": 4,
+      "name_prefix": "Rare"
+    },
+    "unique": {
+      "weight": 1,
+      "stat_rolls_min": 3,
+      "stat_rolls_max": 5,
+      "name_prefix": "Unique"
+    },
+    "set": {
+      "weight": 1,
+      "stat_rolls_min": 3,
+      "stat_rolls_max": 5,
+      "name_prefix": "Set",
+      "random_rollable": false
+    }
   },
   "templates": {
-    "cave_blade": {
-      "name": "Cave Blade",
+    "long_sword": {
+      "name": "Long Sword",
       "category": "equipment",
       "item_type": "sword",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["main_hand"],
+      "occupies_hands": [
+        "main_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 1.0,
       "reach": 1.5,
-      "requirements": { "level": 1, "str": 5 },
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
       "base_stats": {
         "damage_min": 2,
         "damage_max": 4
       },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 3 },
-        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 },
-        { "stat": "max_hp", "min": 1, "max": 3, "weight": 1 },
-        { "stat": "max_mana", "min": 1, "max": 3, "weight": 1, "min_rarity": "magic" },
-        { "stat": "attack_speed_percent", "min": 1, "max": 5, "weight": 1, "min_rarity": "rare" },
-        { "stat": "hit_chance", "min": 5, "max": 15, "weight": 1, "min_rarity": "rare" },
-        { "stat": "crit_chance", "min": 3, "max": 8, "weight": 1, "min_rarity": "rare" }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "max_hp",
+          "min": 1,
+          "max": 3,
+          "weight": 1
+        },
+        {
+          "stat": "max_mana",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": 1,
+          "max": 5,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "hit_chance",
+          "min": 5,
+          "max": 15,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "crit_chance",
+          "min": 3,
+          "max": 8,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_1h"
     },
-    "cave_rapier": {
-      "name": "Cave Rapier",
+    "rapier": {
+      "name": "Rapier",
       "category": "equipment",
       "item_type": "sword",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["main_hand"],
+      "occupies_hands": [
+        "main_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 1.15,
       "reach": 1.55,
-      "requirements": { "level": 1, "str": 4, "dex": 7 },
+      "requirements": {
+        "level": 1,
+        "str": 4,
+        "dex": 7
+      },
       "base_stats": {
         "damage_min": 1,
         "damage_max": 3
       },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 2 },
-        { "stat": "attack_speed_percent", "min": 3, "max": 10, "weight": 4 },
-        { "stat": "crit_chance", "min": 2, "max": 6, "weight": 2, "min_rarity": "magic" }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": 3,
+          "max": 10,
+          "weight": 4
+        },
+        {
+          "stat": "crit_chance",
+          "min": 2,
+          "max": 6,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_1h"
     },
-    "cave_heavy_blade": {
-      "name": "Cave Heavy Blade",
+    "falchion": {
+      "name": "Falchion",
       "category": "equipment",
       "item_type": "sword",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["main_hand"],
+      "occupies_hands": [
+        "main_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 0.82,
       "reach": 1.5,
-      "requirements": { "level": 1, "str": 8 },
+      "requirements": {
+        "level": 1,
+        "str": 8
+      },
       "base_stats": {
         "damage_min": 5,
         "damage_max": 9
       },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 2, "weight": 3 },
-        { "stat": "damage_max", "min": 1, "max": 4, "weight": 3 },
-        { "stat": "attack_speed_percent", "min": -15, "max": -5, "weight": 4 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 4,
+          "weight": 3
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": -15,
+          "max": -5,
+          "weight": 4
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_1h"
     },
     "starter_paladin_sword": {
       "name": "Paladin Sword",
@@ -89,17 +293,64 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["main_hand"],
+      "occupies_hands": [
+        "main_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 1.0,
       "reach": 1.5,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "damage_min": 3, "damage_max": 5 },
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "damage_min": 3,
+        "damage_max": 5
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_1h"
     },
     "starter_rogue_sword": {
       "name": "Rogue Sword",
@@ -108,18 +359,70 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["main_hand"],
+      "occupies_hands": [
+        "main_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 1.05,
       "reach": 1.45,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "damage_min": 2, "damage_max": 4 },
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "damage_min": 2,
+        "damage_max": 4
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 },
-        { "stat": "attack_speed_percent", "min": 1, "max": 5, "weight": 1 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": 1,
+          "max": 5,
+          "weight": 1
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_1h"
     },
     "starter_ranger_bow": {
       "name": "Ranger Bow",
@@ -128,19 +431,72 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "ranged",
       "attack_speed": 1.1,
       "reach": 13.0,
       "projectile_speed": 25.0,
-      "requirements": { "level": 1, "dex": 5 },
-      "base_stats": { "damage_min": 2, "damage_max": 4 },
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {
+        "damage_min": 2,
+        "damage_max": 4
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 },
-        { "stat": "attack_speed_percent", "min": 1, "max": 4, "weight": 1 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": 1,
+          "max": 4,
+          "weight": 1
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
     "starter_paladin_shield": {
       "name": "Paladin Shield",
@@ -149,14 +505,33 @@
       "slot": "off_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["off_hand"],
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "armor": 2, "block_percent": 5 },
-      "rollable_stats": [
-        { "stat": "armor", "min": 1, "max": 2, "weight": 3 },
-        { "stat": "block_percent", "min": 1, "max": 4, "weight": 2 }
+      "occupies_hands": [
+        "off_hand"
       ],
-      "effect_pool": []
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "armor": 2,
+        "block_percent": 5
+      },
+      "rollable_stats": [
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "block_percent",
+          "min": 1,
+          "max": 4,
+          "weight": 2
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "off_hand"
     },
     "starter_sorcerer_staff": {
       "name": "Sorcerer Staff",
@@ -165,23 +540,99 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "ranged",
       "attack_speed": 0.9,
       "reach": 13.0,
       "projectile_speed": 25.0,
-      "requirements": { "level": 1, "magic": 5 },
-      "base_stats": { "damage_min": 2, "damage_max": 4, "max_mana": 2 },
+      "requirements": {
+        "level": 1,
+        "magic": 5
+      },
+      "base_stats": {
+        "damage_min": 2,
+        "damage_max": 4,
+        "max_mana": 2
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 1 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 2 },
-        { "stat": "max_mana", "min": 1, "max": 3, "weight": 3 },
-        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 3, "weight": 2 },
-        { "stat": "skill_damage_percent", "min": 5, "max": 15, "weight": 2 },
-        { "stat": "skill_cooldown_reduction_percent", "min": 5, "max": 15, "weight": 1, "min_rarity": "rare" },
-        { "stat": "skill_mana_cost_reduction", "min": 1, "max": 2, "weight": 1, "min_rarity": "rare" }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "max_mana",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "mana_regen_per_10_seconds",
+          "min": 1,
+          "max": 3,
+          "weight": 2
+        },
+        {
+          "stat": "skill_damage_percent",
+          "min": 5,
+          "max": 15,
+          "weight": 2
+        },
+        {
+          "stat": "skill_cooldown_reduction_percent",
+          "min": 5,
+          "max": 15,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "skill_mana_cost_reduction",
+          "min": 1,
+          "max": 2,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
     "starter_barbarian_axe": {
       "name": "Barbarian Axe",
@@ -190,254 +641,780 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 0.75,
       "reach": 1.7,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "damage_min": 5, "damage_max": 8 },
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "damage_min": 5,
+        "damage_max": 8
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 2, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
-    "cave_greatsword": {
-      "name": "Cave Greatsword",
+    "great_sword": {
+      "name": "Great Sword",
       "category": "equipment",
       "item_type": "greatsword",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
-      "attack_mode": "melee",
-      "attack_speed": 0.70,
-      "reach": 1.8,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "damage_min": 4, "damage_max": 7 },
-      "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 2, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 4, "weight": 3 }
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
       ],
-      "effect_pool": []
+      "attack_mode": "melee",
+      "attack_speed": 0.7,
+      "reach": 1.8,
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "damage_min": 4,
+        "damage_max": 7
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 4,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
-    "cave_war_sword": {
-      "name": "Cave War Sword",
+    "war_sword": {
+      "name": "War Sword",
       "category": "equipment",
       "item_type": "sword",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["main_hand"],
+      "occupies_hands": [
+        "main_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 1.0,
       "reach": 1.5,
-      "requirements": { "level": 2, "str": 6 },
-      "base_stats": { "damage_min": 5, "damage_max": 8 },
+      "requirements": {
+        "level": 2,
+        "str": 6
+      },
+      "base_stats": {
+        "damage_min": 5,
+        "damage_max": 8
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_1h"
     },
-    "cave_bow": {
-      "name": "Cave Bow",
+    "bow": {
+      "name": "Bow",
       "category": "equipment",
       "item_type": "bow",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "ranged",
       "attack_speed": 0.85,
       "reach": 12.0,
       "projectile_speed": 25.0,
-      "requirements": { "level": 1, "dex": 5 },
-      "base_stats": { "damage_min": 1, "damage_max": 2 },
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {
+        "damage_min": 1,
+        "damage_max": 2
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
-    "cave_hunting_bow": {
-      "name": "Hunting Bow",
+    "hunter_bow": {
+      "name": "Hunter Bow",
       "category": "equipment",
       "item_type": "bow",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "ranged",
       "attack_speed": 1.0,
       "reach": 13.0,
       "projectile_speed": 27.0,
-      "requirements": { "level": 1, "dex": 7 },
-      "base_stats": { "damage_min": 1, "damage_max": 2 },
+      "requirements": {
+        "level": 1,
+        "dex": 7
+      },
+      "base_stats": {
+        "damage_min": 1,
+        "damage_max": 2
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 2 },
-        { "stat": "attack_speed_percent", "min": 4, "max": 12, "weight": 4 },
-        { "stat": "hit_chance", "min": 3, "max": 10, "weight": 2, "min_rarity": "magic" }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": 4,
+          "max": 12,
+          "weight": 4
+        },
+        {
+          "stat": "hit_chance",
+          "min": 3,
+          "max": 10,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
-    "cave_war_bow": {
+    "war_bow": {
       "name": "War Bow",
       "category": "equipment",
       "item_type": "bow",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "ranged",
       "attack_speed": 0.68,
       "reach": 14.0,
       "projectile_speed": 22.0,
-      "requirements": { "level": 1, "str": 6, "dex": 6 },
-      "base_stats": { "damage_min": 3, "damage_max": 6 },
+      "requirements": {
+        "level": 1,
+        "str": 6,
+        "dex": 6
+      },
+      "base_stats": {
+        "damage_min": 3,
+        "damage_max": 6
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 2, "weight": 3 },
-        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 },
-        { "stat": "attack_speed_percent", "min": -18, "max": -8, "weight": 4 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": -18,
+          "max": -8,
+          "weight": 4
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
-    "cave_shield": {
-      "name": "Cave Shield",
+    "shield": {
+      "name": "Shield",
       "category": "equipment",
       "item_type": "shield",
       "slot": "off_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["off_hand"],
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "armor": 2, "block_percent": 5 },
-      "rollable_stats": [
-        { "stat": "armor", "min": 1, "max": 3, "weight": 3 },
-        { "stat": "block_percent", "min": 1, "max": 5, "weight": 2 }
+      "occupies_hands": [
+        "off_hand"
       ],
-      "effect_pool": []
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "armor": 2,
+        "block_percent": 5
+      },
+      "rollable_stats": [
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "block_percent",
+          "min": 1,
+          "max": 5,
+          "weight": 2
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "off_hand"
     },
-    "cave_helm": {
-      "name": "Cave Helm",
+    "helm": {
+      "name": "Helm",
       "category": "equipment",
       "item_type": "helm",
       "slot": "head",
       "equippable": true,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "armor": 1 },
-      "rollable_stats": [{ "stat": "armor", "min": 1, "max": 3, "weight": 1 }],
-      "effect_pool": []
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "armor": 1
+      },
+      "rollable_stats": [
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 3,
+          "weight": 1
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_mail": {
-      "name": "Cave Mail",
+    "mail": {
+      "name": "Mail",
       "category": "equipment",
       "item_type": "chest",
       "slot": "chest",
       "equippable": true,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "armor": 3 },
-      "rollable_stats": [{ "stat": "armor", "min": 2, "max": 5, "weight": 1 }],
-      "effect_pool": []
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "armor": 3
+      },
+      "rollable_stats": [
+        {
+          "stat": "armor",
+          "min": 2,
+          "max": 5,
+          "weight": 1
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_gloves": {
-      "name": "Cave Gloves",
+    "gloves": {
+      "name": "Gloves",
       "category": "equipment",
       "item_type": "gloves",
       "slot": "gloves",
       "equippable": true,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "armor": 1, "attack_speed_percent": 5 },
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "armor": 1,
+        "attack_speed_percent": 5
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 1, "max": 2, "weight": 2 },
-        { "stat": "attack_speed_percent", "min": -5, "max": 10, "weight": 1 },
-        { "stat": "evade_chance", "min": 3, "max": 8, "weight": 1, "min_rarity": "rare" }
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": -5,
+          "max": 10,
+          "weight": 1
+        },
+        {
+          "stat": "evade_chance",
+          "min": 3,
+          "max": 8,
+          "weight": 1,
+          "min_rarity": "rare"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_belt": {
-      "name": "Cave Belt",
+    "belt": {
+      "name": "Belt",
       "category": "equipment",
       "item_type": "belt",
       "slot": "belt",
       "equippable": true,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "hotbar_slots": 3, "armor": 1 },
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "hotbar_slots": 3,
+        "armor": 1
+      },
       "rollable_stats": [
-        { "stat": "hotbar_slots", "min": 3, "max": 10, "weight": 4 },
-        { "stat": "armor", "min": 1, "max": 2, "weight": 1 }
+        {
+          "stat": "hotbar_slots",
+          "min": 3,
+          "max": 10,
+          "weight": 4
+        },
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 2,
+          "weight": 1
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_pack_belt": {
-      "name": "Cave Pack Belt",
+    "war_girdle": {
+      "name": "War Girdle",
       "category": "equipment",
       "item_type": "belt",
       "slot": "belt",
       "equippable": true,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "hotbar_slots": 3, "inventory_rows": 1, "armor": 1 },
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "hotbar_slots": 3,
+        "inventory_rows": 1,
+        "armor": 1
+      },
       "rollable_stats": [
-        { "stat": "hotbar_slots", "min": 3, "max": 10, "weight": 3 },
-        { "stat": "armor", "min": 1, "max": 2, "weight": 1 }
+        {
+          "stat": "hotbar_slots",
+          "min": 3,
+          "max": 10,
+          "weight": 3
+        },
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 2,
+          "weight": 1
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_boots": {
-      "name": "Cave Boots",
+    "boots": {
+      "name": "Boots",
       "category": "equipment",
       "item_type": "boots",
       "slot": "boots",
       "equippable": true,
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "armor": 1 },
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "armor": 1
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 1, "max": 2, "weight": 1 },
-        { "stat": "movement_speed_percent", "min": 5, "max": 20, "weight": 3 }
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 2,
+          "weight": 1
+        },
+        {
+          "stat": "movement_speed_percent",
+          "min": 5,
+          "max": 20,
+          "weight": 3
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_ring": {
-      "name": "Cave Ring",
+    "ring": {
+      "name": "Ring",
       "category": "equipment",
       "item_type": "ring",
       "slot": "ring",
       "equippable": true,
-      "requirements": { "level": 1, "magic": 5 },
-      "base_stats": { "max_hp": 1 },
+      "requirements": {
+        "level": 1,
+        "magic": 5
+      },
+      "base_stats": {
+        "max_hp": 1
+      },
       "rollable_stats": [
-        { "stat": "max_hp", "min": 1, "max": 4, "weight": 2 },
-        { "stat": "armor", "min": 1, "max": 2, "weight": 1 },
-        { "stat": "health_regen_per_10_seconds", "min": 1, "max": 3, "weight": 1 },
-        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 3, "weight": 1 },
-        { "stat": "skill_mana_cost_reduction", "min": 1, "max": 1, "weight": 1, "min_rarity": "rare" },
-        { "stat": "magic_find_percent", "min": 15, "max": 30, "weight": 1, "min_rarity": "rare" },
-        { "stat": "light_radius", "min": 1, "max": 2, "weight": 1, "min_rarity": "magic" },
-        { "stat": "inventory_rows", "min": 1, "max": 1, "weight": 1 },
-        { "stat": "movement_speed_percent", "min": 3, "max": 10, "weight": 2 }
+        {
+          "stat": "max_hp",
+          "min": 1,
+          "max": 4,
+          "weight": 2
+        },
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 2,
+          "weight": 1
+        },
+        {
+          "stat": "health_regen_per_10_seconds",
+          "min": 1,
+          "max": 3,
+          "weight": 1
+        },
+        {
+          "stat": "mana_regen_per_10_seconds",
+          "min": 1,
+          "max": 3,
+          "weight": 1
+        },
+        {
+          "stat": "skill_mana_cost_reduction",
+          "min": 1,
+          "max": 1,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "magic_find_percent",
+          "min": 15,
+          "max": 30,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "light_radius",
+          "min": 1,
+          "max": 2,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "inventory_rows",
+          "min": 1,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "movement_speed_percent",
+          "min": 3,
+          "max": 10,
+          "weight": 2
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "jewelry"
     },
-    "cave_amulet": {
-      "name": "Cave Amulet",
+    "amulet": {
+      "name": "Amulet",
       "category": "equipment",
       "item_type": "amulet",
       "slot": "amulet",
       "equippable": true,
-      "requirements": { "level": 1, "magic": 5 },
-      "base_stats": { "max_hp": 2 },
+      "requirements": {
+        "level": 1,
+        "magic": 5
+      },
+      "base_stats": {
+        "max_hp": 2
+      },
       "rollable_stats": [
-        { "stat": "max_hp", "min": 2, "max": 6, "weight": 2 },
-        { "stat": "health_regen_per_10_seconds", "min": 1, "max": 4, "weight": 1 },
-        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 4, "weight": 1 },
-        { "stat": "skill_cooldown_reduction_percent", "min": 5, "max": 12, "weight": 1, "min_rarity": "rare" },
-        { "stat": "magic_find_percent", "min": 20, "max": 35, "weight": 1, "min_rarity": "rare" },
-        { "stat": "light_radius", "min": 1, "max": 3, "weight": 1, "min_rarity": "magic" },
-        { "stat": "inventory_rows", "min": 1, "max": 1, "weight": 1 },
-        { "stat": "movement_speed_percent", "min": 3, "max": 12, "weight": 2 }
+        {
+          "stat": "max_hp",
+          "min": 2,
+          "max": 6,
+          "weight": 2
+        },
+        {
+          "stat": "health_regen_per_10_seconds",
+          "min": 1,
+          "max": 4,
+          "weight": 1
+        },
+        {
+          "stat": "mana_regen_per_10_seconds",
+          "min": 1,
+          "max": 4,
+          "weight": 1
+        },
+        {
+          "stat": "skill_cooldown_reduction_percent",
+          "min": 5,
+          "max": 12,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "magic_find_percent",
+          "min": 20,
+          "max": 35,
+          "weight": 1,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "light_radius",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "inventory_rows",
+          "min": 1,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "movement_speed_percent",
+          "min": 3,
+          "max": 12,
+          "weight": 2
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "jewelry"
     },
     "affinity_rogue_dagger": {
       "name": "Rogue Dagger",
@@ -446,20 +1423,72 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["main_hand"],
+      "occupies_hands": [
+        "main_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 1.1,
       "reach": 1.2,
-      "requirements": { "level": 1, "dex": 5 },
-      "base_stats": { "damage_min": 2, "damage_max": 4 },
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {
+        "damage_min": 2,
+        "damage_max": 4
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
       "class_affinities": [
-        { "class": "rogue", "stat": "attack_speed_percent", "min": 8, "max": 12 }
+        {
+          "class": "rogue",
+          "stat": "attack_speed_percent",
+          "min": 8,
+          "max": 12
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_1h"
     },
     "affinity_barbarian_war_hammer": {
       "name": "War Hammer",
@@ -468,20 +1497,73 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "melee",
       "attack_speed": 0.7,
       "reach": 1.8,
-      "requirements": { "level": 1, "str": 8 },
-      "base_stats": { "damage_min": 6, "damage_max": 10 },
+      "requirements": {
+        "level": 1,
+        "str": 8
+      },
+      "base_stats": {
+        "damage_min": 6,
+        "damage_max": 10
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 2, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 3, "weight": 3 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
       "class_affinities": [
-        { "class": "barbarian", "stat": "damage_percent", "min": 8, "max": 12 }
+        {
+          "class": "barbarian",
+          "stat": "damage_percent",
+          "min": 8,
+          "max": 12
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
     "affinity_heraldic_shield": {
       "name": "Heraldic Shield",
@@ -490,17 +1572,42 @@
       "slot": "off_hand",
       "equippable": true,
       "handedness": "one_handed",
-      "occupies_hands": ["off_hand"],
-      "requirements": { "level": 1, "str": 5 },
-      "base_stats": { "armor": 3, "block_percent": 8 },
+      "occupies_hands": [
+        "off_hand"
+      ],
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "armor": 3,
+        "block_percent": 8
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 1, "max": 3, "weight": 3 },
-        { "stat": "block_percent", "min": 1, "max": 4, "weight": 2 }
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "block_percent",
+          "min": 1,
+          "max": 4,
+          "weight": 2
+        }
       ],
       "class_affinities": [
-        { "class": "paladin", "stat": "attack_speed_percent", "min": -18, "max": -12, "mode": "penalty_if_not_class" }
+        {
+          "class": "paladin",
+          "stat": "attack_speed_percent",
+          "min": -18,
+          "max": -12,
+          "mode": "penalty_if_not_class"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "off_hand"
     },
     "affinity_compound_bow": {
       "name": "Compound Bow",
@@ -509,21 +1616,74 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "ranged",
       "attack_speed": 0.9,
       "reach": 14.0,
       "projectile_speed": 25.0,
-      "requirements": { "level": 1, "dex": 8 },
-      "base_stats": { "damage_min": 2, "damage_max": 4 },
+      "requirements": {
+        "level": 1,
+        "dex": 8
+      },
+      "base_stats": {
+        "damage_min": 2,
+        "damage_max": 4
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 2 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 3 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
       "class_affinities": [
-        { "class": "ranger", "stat": "reach_percent", "min": 15, "max": 25 }
+        {
+          "class": "ranger",
+          "stat": "reach_percent",
+          "min": 15,
+          "max": 25
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
     "affinity_sorcerer_staff": {
       "name": "Affinity Staff",
@@ -532,141 +1692,859 @@
       "slot": "main_hand",
       "equippable": true,
       "handedness": "two_handed",
-      "occupies_hands": ["main_hand", "off_hand"],
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
       "attack_mode": "ranged",
       "attack_speed": 0.9,
       "reach": 13.0,
       "projectile_speed": 25.0,
-      "requirements": { "level": 1, "magic": 5 },
-      "base_stats": { "damage_min": 2, "damage_max": 4, "max_mana": 2 },
+      "requirements": {
+        "level": 1,
+        "magic": 5
+      },
+      "base_stats": {
+        "damage_min": 2,
+        "damage_max": 4,
+        "max_mana": 2
+      },
       "rollable_stats": [
-        { "stat": "damage_min", "min": 0, "max": 1, "weight": 1 },
-        { "stat": "damage_max", "min": 1, "max": 2, "weight": 2 },
-        { "stat": "max_mana", "min": 1, "max": 3, "weight": 3 }
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "max_mana",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
       ],
       "class_affinities": [
-        { "class": "sorcerer", "stat": "max_mana_percent", "min": 8, "max": 12 }
+        {
+          "class": "sorcerer",
+          "stat": "max_mana_percent",
+          "min": 8,
+          "max": 12
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "weapon_2h"
     },
-    "cave_leather_cap": {
+    "leather_cap": {
       "name": "Leather Cap",
       "category": "equipment",
       "item_type": "helm",
       "slot": "head",
       "equippable": true,
-      "requirements": { "level": 1, "dex": 5 },
-      "base_stats": { "armor": 0 },
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {
+        "armor": 0
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 0, "max": 1, "weight": 1 },
-        { "stat": "dex", "min": 1, "max": 3, "weight": 3, "min_rarity": "magic" },
-        { "stat": "evade_chance", "min": 3, "max": 8, "weight": 2, "min_rarity": "rare" }
+        {
+          "stat": "armor",
+          "min": 0,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "dex",
+          "min": 1,
+          "max": 3,
+          "weight": 3,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "evade_chance",
+          "min": 3,
+          "max": 8,
+          "weight": 2,
+          "min_rarity": "rare"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_tiara": {
-      "name": "Cave Tiara",
+    "tiara": {
+      "name": "Tiara",
       "category": "equipment",
       "item_type": "helm",
       "slot": "head",
       "equippable": true,
-      "requirements": { "level": 1, "magic": 8 },
-      "base_stats": { "armor": 0 },
+      "requirements": {
+        "level": 1,
+        "magic": 8
+      },
+      "base_stats": {
+        "armor": 0
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 0, "max": 1, "weight": 1 },
-        { "stat": "skill_damage_percent", "min": 5, "max": 15, "weight": 4 },
-        { "stat": "skill_cooldown_reduction_percent", "min": 5, "max": 12, "weight": 3, "min_rarity": "magic" },
-        { "stat": "skill_mana_cost_reduction", "min": 1, "max": 2, "weight": 2, "min_rarity": "magic" },
-        { "stat": "max_mana", "min": 1, "max": 4, "weight": 2, "min_rarity": "magic" }
+        {
+          "stat": "armor",
+          "min": 0,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "skill_damage_percent",
+          "min": 5,
+          "max": 15,
+          "weight": 4
+        },
+        {
+          "stat": "skill_cooldown_reduction_percent",
+          "min": 5,
+          "max": 12,
+          "weight": 3,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "skill_mana_cost_reduction",
+          "min": 1,
+          "max": 2,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "max_mana",
+          "min": 1,
+          "max": 4,
+          "weight": 2,
+          "min_rarity": "magic"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_leather_vest": {
+    "leather_vest": {
       "name": "Leather Vest",
       "category": "equipment",
       "item_type": "chest",
       "slot": "chest",
       "equippable": true,
-      "requirements": { "level": 1, "dex": 5 },
-      "base_stats": { "armor": 1 },
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {
+        "armor": 1
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 0, "max": 1, "weight": 1 },
-        { "stat": "movement_speed_percent", "min": 3, "max": 12, "weight": 4 },
-        { "stat": "evade_chance", "min": 3, "max": 8, "weight": 2, "min_rarity": "rare" }
+        {
+          "stat": "armor",
+          "min": 0,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "movement_speed_percent",
+          "min": 3,
+          "max": 12,
+          "weight": 4
+        },
+        {
+          "stat": "evade_chance",
+          "min": 3,
+          "max": 8,
+          "weight": 2,
+          "min_rarity": "rare"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_full_plate": {
+    "full_plate": {
       "name": "Full Plate",
       "category": "equipment",
       "item_type": "chest",
       "slot": "chest",
       "equippable": true,
-      "requirements": { "level": 1, "str": 6 },
-      "base_stats": { "armor": 6 },
+      "requirements": {
+        "level": 1,
+        "str": 6
+      },
+      "base_stats": {
+        "armor": 6
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 1, "max": 3, "weight": 2 },
-        { "stat": "movement_speed_percent", "min": -25, "max": -10, "weight": 5 }
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 3,
+          "weight": 2
+        },
+        {
+          "stat": "movement_speed_percent",
+          "min": -25,
+          "max": -10,
+          "weight": 5
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_cloth_wraps": {
+    "cloth_wraps": {
       "name": "Cloth Wraps",
       "category": "equipment",
       "item_type": "gloves",
       "slot": "gloves",
       "equippable": true,
-      "requirements": { "level": 1, "magic": 5 },
-      "base_stats": { "armor": 0 },
+      "requirements": {
+        "level": 1,
+        "magic": 5
+      },
+      "base_stats": {
+        "armor": 0
+      },
       "rollable_stats": [
-        { "stat": "skill_damage_percent", "min": 5, "max": 12, "weight": 3 },
-        { "stat": "skill_mana_cost_reduction", "min": 1, "max": 2, "weight": 3, "min_rarity": "magic" },
-        { "stat": "mana_regen_per_10_seconds", "min": 1, "max": 3, "weight": 2, "min_rarity": "magic" },
-        { "stat": "armor", "min": 0, "max": 1, "weight": 1 }
+        {
+          "stat": "skill_damage_percent",
+          "min": 5,
+          "max": 12,
+          "weight": 3
+        },
+        {
+          "stat": "skill_mana_cost_reduction",
+          "min": 1,
+          "max": 2,
+          "weight": 3,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "mana_regen_per_10_seconds",
+          "min": 1,
+          "max": 3,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "armor",
+          "min": 0,
+          "max": 1,
+          "weight": 1
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_gauntlets": {
-      "name": "Cave Gauntlets",
+    "gauntlets": {
+      "name": "Gauntlets",
       "category": "equipment",
       "item_type": "gloves",
       "slot": "gloves",
       "equippable": true,
-      "requirements": { "level": 1, "str": 7 },
-      "base_stats": { "armor": 3 },
+      "requirements": {
+        "level": 1,
+        "str": 7
+      },
+      "base_stats": {
+        "armor": 3
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 1, "max": 2, "weight": 2 },
-        { "stat": "attack_speed_percent", "min": -15, "max": -5, "weight": 4 },
-        { "stat": "block_percent", "min": 1, "max": 4, "weight": 1, "min_rarity": "rare" }
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": -15,
+          "max": -5,
+          "weight": 4
+        },
+        {
+          "stat": "block_percent",
+          "min": 1,
+          "max": 4,
+          "weight": 1,
+          "min_rarity": "rare"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_soft_boots": {
+    "soft_boots": {
       "name": "Soft Boots",
       "category": "equipment",
       "item_type": "boots",
       "slot": "boots",
       "equippable": true,
-      "requirements": { "level": 1, "dex": 5 },
-      "base_stats": { "armor": 0 },
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {
+        "armor": 0
+      },
       "rollable_stats": [
-        { "stat": "movement_speed_percent", "min": 8, "max": 20, "weight": 5 },
-        { "stat": "armor", "min": 0, "max": 1, "weight": 1 },
-        { "stat": "evade_chance", "min": 3, "max": 8, "weight": 2, "min_rarity": "rare" }
+        {
+          "stat": "movement_speed_percent",
+          "min": 8,
+          "max": 20,
+          "weight": 5
+        },
+        {
+          "stat": "armor",
+          "min": 0,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "evade_chance",
+          "min": 3,
+          "max": 8,
+          "weight": 2,
+          "min_rarity": "rare"
+        }
       ],
-      "effect_pool": []
+      "effect_pool": [],
+      "equipment_category": "gear"
     },
-    "cave_plate_boots": {
+    "plate_boots": {
       "name": "Plate Boots",
       "category": "equipment",
       "item_type": "boots",
       "slot": "boots",
       "equippable": true,
-      "requirements": { "level": 1, "str": 7 },
-      "base_stats": { "armor": 2 },
+      "requirements": {
+        "level": 1,
+        "str": 7
+      },
+      "base_stats": {
+        "armor": 2
+      },
       "rollable_stats": [
-        { "stat": "armor", "min": 1, "max": 2, "weight": 2 },
-        { "stat": "movement_speed_percent", "min": -20, "max": -8, "weight": 4 }
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "movement_speed_percent",
+          "min": -20,
+          "max": -8,
+          "weight": 4
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "gear"
+    },
+    "dagger": {
+      "name": "Dagger",
+      "category": "equipment",
+      "equipment_category": "weapon_1h",
+      "item_type": "dagger",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": [
+        "main_hand"
+      ],
+      "attack_mode": "melee",
+      "attack_speed": 1.25,
+      "reach": 1.1,
+      "requirements": {
+        "level": 1,
+        "dex": 6
+      },
+      "base_stats": {
+        "damage_min": 1,
+        "damage_max": 3
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "dex",
+          "min": 1,
+          "max": 3,
+          "weight": 3,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": 3,
+          "max": 8,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "hammer": {
+      "name": "Hammer",
+      "category": "equipment",
+      "equipment_category": "weapon_1h",
+      "item_type": "sword",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": [
+        "main_hand"
+      ],
+      "attack_mode": "melee",
+      "attack_speed": 0.88,
+      "reach": 1.4,
+      "requirements": {
+        "level": 1,
+        "str": 9
+      },
+      "base_stats": {
+        "damage_min": 4,
+        "damage_max": 7
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "str",
+          "min": 1,
+          "max": 3,
+          "weight": 3,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "morningstar": {
+      "name": "Morningstar",
+      "category": "equipment",
+      "equipment_category": "weapon_1h",
+      "item_type": "sword",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": [
+        "main_hand"
+      ],
+      "attack_mode": "melee",
+      "attack_speed": 0.9,
+      "reach": 1.45,
+      "requirements": {
+        "level": 1,
+        "str": 10
+      },
+      "base_stats": {
+        "damage_min": 5,
+        "damage_max": 8
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "str",
+          "min": 1,
+          "max": 2,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 3,
+          "weight": 2,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "wand": {
+      "name": "Wand",
+      "category": "equipment",
+      "equipment_category": "weapon_1h",
+      "item_type": "staff",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": [
+        "main_hand"
+      ],
+      "attack_mode": "ranged",
+      "attack_speed": 1.0,
+      "reach": 11.0,
+      "projectile_speed": 22.0,
+      "requirements": {
+        "level": 1,
+        "magic": 8
+      },
+      "base_stats": {
+        "damage_min": 1,
+        "damage_max": 3,
+        "max_mana": 2
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 1,
+          "weight": 1
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "magic",
+          "min": 1,
+          "max": 3,
+          "weight": 3,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "skill_damage_percent",
+          "min": 5,
+          "max": 12,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "warhammer": {
+      "name": "Warhammer",
+      "category": "equipment",
+      "equipment_category": "weapon_2h",
+      "item_type": "war_hammer",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
+      "attack_mode": "melee",
+      "attack_speed": 0.65,
+      "reach": 1.85,
+      "requirements": {
+        "level": 1,
+        "str": 12
+      },
+      "base_stats": {
+        "damage_min": 8,
+        "damage_max": 12
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 4,
+          "weight": 3
+        },
+        {
+          "stat": "str",
+          "min": 1,
+          "max": 3,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 3,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "buckler": {
+      "name": "Buckler",
+      "category": "equipment",
+      "equipment_category": "off_hand",
+      "item_type": "shield",
+      "slot": "off_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": [
+        "off_hand"
+      ],
+      "requirements": {
+        "level": 1,
+        "dex": 6
+      },
+      "base_stats": {
+        "armor": 1,
+        "block_percent": 8
+      },
+      "rollable_stats": [
+        {
+          "stat": "armor",
+          "min": 0,
+          "max": 1,
+          "weight": 2
+        },
+        {
+          "stat": "block_percent",
+          "min": 1,
+          "max": 4,
+          "weight": 2
+        },
+        {
+          "stat": "evade_chance",
+          "min": 3,
+          "max": 8,
+          "weight": 3,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "dex",
+          "min": 1,
+          "max": 2,
+          "weight": 2,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "sash": {
+      "name": "Sash",
+      "category": "equipment",
+      "equipment_category": "gear",
+      "item_type": "belt",
+      "slot": "belt",
+      "equippable": true,
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {
+        "hotbar_slots": 3,
+        "armor": 0
+      },
+      "rollable_stats": [
+        {
+          "stat": "hotbar_slots",
+          "min": 3,
+          "max": 8,
+          "weight": 4
+        },
+        {
+          "stat": "movement_speed_percent",
+          "min": 3,
+          "max": 10,
+          "weight": 3
+        },
+        {
+          "stat": "dex",
+          "min": 1,
+          "max": 2,
+          "weight": 2,
+          "min_rarity": "magic"
+        }
       ],
       "effect_pool": []
     }

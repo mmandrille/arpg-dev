@@ -8,7 +8,7 @@
   "description": "Client opens the market board, filters active listing rows, and changes the market sort mode.",
   "preflight": {
     "type": "market_listing",
-    "item_def_id": "cave_mail",
+    "item_def_id": "mail",
     "price_gold": 61
   },
   "client_steps": [
@@ -28,7 +28,7 @@
     },
     {
       "type": "wait_market_panel",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 61,
       "at_least": 1,
       "timeout_s": 15.0
@@ -40,7 +40,7 @@
     {
       "type": "wait_market_panel",
       "market_search_text": "mail",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 61,
       "at_least": 1,
       "timeout_s": 15.0
@@ -53,7 +53,7 @@
       "type": "wait_market_panel",
       "market_search_text": "mail",
       "market_sort_mode": "price_high",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 61,
       "at_least": 1,
       "timeout_s": 15.0
@@ -81,7 +81,7 @@
       "type": "assert_market_listing_rows",
       "market_search_text": "",
       "market_sort_mode": "name",
-      "item_def_id": "cave_mail",
+      "item_def_id": "mail",
       "price_gold": 61,
       "at_least": 1
     }

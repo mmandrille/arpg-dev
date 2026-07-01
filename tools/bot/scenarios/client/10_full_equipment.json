@@ -17,20 +17,20 @@
     },
     {
       "type": "click_loot_item",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "type": "wait_inventory_item",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "timeout_s": 15.0
     },
     {
       "type": "click_loot_item",
-      "item_def_id": "cave_belt"
+      "item_def_id": "belt"
     },
     {
       "type": "wait_inventory_item",
-      "item_def_id": "cave_belt",
+      "item_def_id": "belt",
       "timeout_s": 15.0
     },
     {
@@ -53,7 +53,7 @@
     },
     {
       "type": "drag_bag_to_equipment_slot",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "slot": "main_hand"
     },
     {
@@ -84,7 +84,7 @@
     },
     {
       "type": "drag_bag_to_equipment_slot",
-      "item_def_id": "cave_belt",
+      "item_def_id": "belt",
       "slot": "belt"
     },
     {

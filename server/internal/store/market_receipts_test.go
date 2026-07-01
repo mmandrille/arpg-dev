@@ -32,13 +32,13 @@ func TestMarketAuditRecordsForAccountFiltersAndOrdersReceipts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "receipts_listing_item_" + suffix, AccountID: seller.ID, CharacterID: sellerChar.ID, ItemDefID: "cave_mail", Location: store.ItemLocationInventory}); err != nil {
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "receipts_listing_item_" + suffix, AccountID: seller.ID, CharacterID: sellerChar.ID, ItemDefID: "mail", Location: store.ItemLocationInventory}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, seller.ID, sellerChar.ID, "receipts_listing_item_"+suffix, "receipts_listing_stash_"+suffix); err != nil {
 		t.Fatal(err)
 	}
-	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "receipts_bidder_item_" + suffix, AccountID: bidder.ID, CharacterID: bidderChar.ID, ItemDefID: "cave_blade", Location: store.ItemLocationInventory}); err != nil {
+	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{ID: "receipts_bidder_item_" + suffix, AccountID: bidder.ID, CharacterID: bidderChar.ID, ItemDefID: "long_sword", Location: store.ItemLocationInventory}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := s.TransferCharacterItemToAccountStash(ctx, bidder.ID, bidderChar.ID, "receipts_bidder_item_"+suffix, "receipts_bidder_stash_"+suffix); err != nil {

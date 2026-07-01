@@ -7,20 +7,20 @@
     {
       "name": "one hand sword and shield can coexist",
       "expected": {
-        "equipped": { "main_hand": "cave_blade", "off_hand": "cave_shield" },
+        "equipped": { "main_hand": "long_sword", "off_hand": "shield" },
         "hotbar_capacity": 2
       }
     },
     {
       "name": "two handed sword clears offhand",
       "expected": {
-        "equipped": { "main_hand": "cave_greatsword", "off_hand": null }
+        "equipped": { "main_hand": "great_sword", "off_hand": null }
       }
     },
     {
       "name": "bow occupies both hands",
       "expected": {
-        "equipped": { "main_hand": "cave_bow", "off_hand": null },
+        "equipped": { "main_hand": "bow", "off_hand": null },
         "occupies_hands": ["main_hand", "off_hand"]
       }
     },

@@ -50,11 +50,12 @@ func (s *Sim) playerWeaponDamageTypeForSlot(slot string) string {
 		return damageTypeForce
 	}
 	if item.rollPayload != nil {
-		return damageTypeForce
+		return dominantElementalDamageType(item.rollPayload.Stats)
 	}
 	if def, ok := s.rules.Items[item.itemDefID]; ok {
 		return canonicalDamageType(def.DamageType)
 	}
+
 	return damageTypeForce
 }
 

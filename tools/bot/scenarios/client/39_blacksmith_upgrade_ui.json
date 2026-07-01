@@ -184,7 +184,7 @@
     },
     {
       "type": "wait_blacksmith_panel",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "item_level": 0,
       "upgrade_enabled": true,
       "success_chance_percent": 100,
@@ -198,11 +198,11 @@
     },
     {
       "type": "click_blacksmith_stage_item",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "type": "wait_blacksmith_panel",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "item_level": 0,
       "upgrade_enabled": true,
       "preview_contains": [
@@ -214,11 +214,11 @@
     },
     {
       "type": "click_blacksmith_upgrade",
-      "item_def_id": "cave_blade"
+      "item_def_id": "long_sword"
     },
     {
       "type": "wait_blacksmith_panel",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "upgrade_enabled": false,
       "resource_wallet_count": 0,
       "status_contains": "Upgraded",
@@ -235,7 +235,7 @@
     },
     {
       "type": "assert_blacksmith_panel",
-      "item_def_id": "cave_blade",
+      "item_def_id": "long_sword",
       "upgrade_enabled": false,
       "resource_wallet_count": 0,
       "status_contains": "Upgraded"

@@ -4,7 +4,7 @@
     "embercall_blade": {
       "id": "embercall_blade",
       "enabled": true,
-      "base_template_id": "cave_blade",
+      "base_template_id": "long_sword",
       "display_name": "Embercall Blade",
       "minimum_level": 5,
       "fixed_stats": {
@@ -19,7 +19,7 @@
     "stormstring_bow": {
       "id": "stormstring_bow",
       "enabled": true,
-      "base_template_id": "cave_bow",
+      "base_template_id": "bow",
       "display_name": "Stormstring Bow",
       "minimum_level": 5,
       "fixed_stats": {
@@ -49,7 +49,7 @@
     "bloodbound_sigil": {
       "id": "bloodbound_sigil",
       "enabled": true,
-      "base_template_id": "cave_ring",
+      "base_template_id": "ring",
       "display_name": "Bloodbound Sigil",
       "minimum_level": 5,
       "fixed_stats": {

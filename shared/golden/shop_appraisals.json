@@ -11,12 +11,12 @@
     }
   },
   "generated_offer": {
-    "item_template_id": "cave_blade",
+    "item_template_id": "long_sword",
     "rarity": "magic",
     "rolled_stats": { "damage_min": 3, "damage_max": 6 },
     "equipped_stats": { "damage_min": 2, "damage_max": 4 },
     "expected": {
-      "display_name": "Magic Cave Blade",
+      "display_name": "Savage Long Sword",
       "slot": "main_hand",
       "category": "equipment",
       "buy_price": 425,
@@ -29,11 +29,11 @@
   },
   "sell_appraisal": {
     "item_instance_id": "2001",
-    "item_template_id": "cave_shield",
+    "item_template_id": "shield",
     "rarity": "magic",
     "rolled_stats": { "armor": 5, "block_percent": 9 },
     "expected": {
-      "display_name": "Magic Cave Shield",
+      "display_name": "Stalwart Shield",
       "slot": "off_hand",
       "category": "equipment",
       "sell_price": 77,

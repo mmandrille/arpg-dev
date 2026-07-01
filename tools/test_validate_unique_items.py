@@ -23,7 +23,7 @@ def base_catalogs() -> tuple[dict, dict, dict]:
             "embercall_blade": {
                 "id": "embercall_blade",
                 "enabled": True,
-                "base_template_id": "cave_blade",
+                "base_template_id": "long_sword",
                 "display_name": "Embercall Blade",
                 "minimum_level": 1,
                 "fixed_stats": {"damage_min": 4},
@@ -34,7 +34,7 @@ def base_catalogs() -> tuple[dict, dict, dict]:
             "stormstring_bow": {
                 "id": "stormstring_bow",
                 "enabled": True,
-                "base_template_id": "cave_bow",
+                "base_template_id": "bow",
                 "display_name": "Stormstring Bow",
                 "minimum_level": 1,
                 "fixed_stats": {"damage_max": 6},
@@ -44,7 +44,7 @@ def base_catalogs() -> tuple[dict, dict, dict]:
             }
         }
     }
-    item_templates = {"templates": {"cave_blade": {"item_type": "sword"}, "cave_bow": {"item_type": "bow"}}}
+    item_templates = {"templates": {"long_sword": {"item_type": "sword"}, "bow": {"item_type": "bow"}}}
     unique_effects = {
         "effects": {
             "everburning_wound": {
@@ -146,7 +146,7 @@ def test_unique_items_rejects_duplicate_unknown_inactive_and_incompatible_effect
         (["everburning_wound", "everburning_wound"], "duplicate effect ids"),
         (["missing_effect"], "unknown effect missing_effect"),
         (["disabled_effect"], "inactive effect disabled_effect"),
-        (["shield_only"], "effect shield_only incompatible with cave_blade type sword"),
+        (["shield_only"], "effect shield_only incompatible with long_sword type sword"),
     ]
     for effect_ids, message in cases:
         unique_items, _, _ = base_catalogs()

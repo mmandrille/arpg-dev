@@ -10,24 +10,24 @@ from tools.bot.stash_assertions import (
 def test_stash_assertion_helpers_filter_select_and_find():
     state = RuntimeState()
     state.stash_items = [
-        {"stash_item_id": "9002", "item_def_id": "cave_blade", "item_template_id": "cave_blade", "display_name": "Common Cave Blade"},
+        {"stash_item_id": "9002", "item_def_id": "long_sword", "item_template_id": "long_sword", "display_name": "Long Sword"},
         {"stash_item_id": "9001", "item_def_id": "gold", "display_name": "Gold", "amount": 10},
-        {"stash_item_id": "9003", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Magic Cave Bow"},
+        {"stash_item_id": "9003", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Magic Cave Bow"},
     ]
 
     assert [item["stash_item_id"] for item in filtered_stash_items(state.stash_items, {"rolled": True})] == ["9002", "9003"]
     assert [item["stash_item_id"] for item in filtered_stash_items(state.stash_items, {"rolled": False})] == ["9001"]
-    assert select_stash_item(state, {"item_template_id": "cave_bow"})["stash_item_id"] == "9003"
-    assert find_stash_item_by_id(state.stash_items, "9002")["item_def_id"] == "cave_blade"
+    assert select_stash_item(state, {"item_template_id": "bow"})["stash_item_id"] == "9003"
+    assert find_stash_item_by_id(state.stash_items, "9002")["item_def_id"] == "long_sword"
     assert find_stash_item_by_id(state.stash_items, None) is None
 
 
 def test_stash_assertion_helpers_reject_missing_and_bad_index():
     state = RuntimeState()
-    state.stash_items = [{"stash_item_id": "9001", "item_def_id": "cave_blade"}]
+    state.stash_items = [{"stash_item_id": "9001", "item_def_id": "long_sword"}]
 
     try:
-        select_stash_item(state, {"action": "withdraw_stash_item", "item_def_id": "cave_bow"})
+        select_stash_item(state, {"action": "withdraw_stash_item", "item_def_id": "bow"})
     except AssertionError as exc:
         assert "no matching stash item" in str(exc)
     else:

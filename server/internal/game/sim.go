@@ -5894,9 +5894,10 @@ func (s *Sim) weaponDamageContributions(item *invItem) (baseMin, baseMax, rollMi
 		if !minOK || !maxOK || totalMax < totalMin {
 			return 0, 0, 0, 0, "", "", false
 		}
+		elementalBonus := elementalBonusDamage(item.rollPayload.Stats)
 		baseMinInt := template.BaseStats["damage_min"]
 		baseMaxInt := template.BaseStats["damage_max"]
-		return float64(baseMinInt), float64(baseMaxInt), float64(totalMin - baseMinInt), float64(totalMax - baseMaxInt), label, itemID, true
+		return float64(baseMinInt), float64(baseMaxInt), float64(totalMin-baseMinInt+elementalBonus), float64(totalMax-baseMaxInt+elementalBonus), label, itemID, true
 	}
 	def, found := s.rules.Items[item.itemDefID]
 	if !found || def.Damage == nil {

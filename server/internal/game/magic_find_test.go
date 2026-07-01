@@ -5,7 +5,7 @@ import "testing"
 func TestMagicFindDerivedStatFromEquipment(t *testing.T) {
 	rules := loadRules(t)
 	sim := MustNewSim("sess_magic_find_stats", "mf-stat", rules)
-	ring := addRolledInventoryItem(t, sim, 9701, "cave_ring", map[string]int{"magic_find_percent": 25})
+	ring := addRolledInventoryItem(t, sim, 9701, "ring", map[string]int{"magic_find_percent": 25})
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_mf", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(ring.instanceID), Slot: ringLeftSlot}}}), "equip_mf")
 
 	view := sim.CharacterProgressionView()
@@ -35,12 +35,12 @@ func TestMagicFindBiasesRarityWeights(t *testing.T) {
 func TestMagicFindDoesNotChangeBaselineShopRoll(t *testing.T) {
 	rules := loadRules(t)
 	rng := NewRNG(SeedToUint64("shop-baseline-magic-find"))
-	got, ok := rules.rollItemTemplateWithRNG("cave_ring", rng, 1)
+	got, ok := rules.rollItemTemplateWithRNG("ring", rng, 1)
 	if !ok {
 		t.Fatal("baseline shop-style roll failed")
 	}
 	rng = NewRNG(SeedToUint64("shop-baseline-magic-find"))
-	want, ok := rules.rollItemTemplateWithMagicFind("cave_ring", rng, 1, 0)
+	want, ok := rules.rollItemTemplateWithMagicFind("ring", rng, 1, 0)
 	if !ok {
 		t.Fatal("zero magic find roll failed")
 	}

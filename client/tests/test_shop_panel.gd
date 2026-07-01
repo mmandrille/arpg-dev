@@ -25,15 +25,15 @@ func _run() -> void:
 	var offers := [
 		{"offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 HP"]},
 		{"offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 mana"]},
-		{"offer_id": "generated:depth3:000", "kind": "generated", "item_template_id": "cave_bow", "item_def_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "item_level": 3, "rolled_stats": {"damage_min": 2, "damage_max": 2}, "buy_price": 50, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"], "requirements": {"level": 2, "str": 15}, "requirement_status": [{"stat": "level", "required": 2, "current": 2, "met": true}, {"stat": "str", "required": 15, "current": 12, "met": false}], "equip_preview": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "current": 4, "preview": 6, "delta": 2}]}, "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 2, "equipped": 4, "delta": -2}]}},
-		{"offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "cave_gloves", "item_def_id": "cave_gloves", "display_name": "Magic Cave Gloves", "rarity": "magic", "slot": "gloves", "category": "equipment", "rolled_stats": {"armor": 3}, "buy_price": 90, "summary_lines": ["Slot: gloves", "Armor +3", "Requires level 1"], "comparison": {"slot": "gloves", "deltas": [{"stat": "armor", "offered": 3, "equipped": 0, "delta": 3}]}},
+		{"offer_id": "generated:depth3:000", "kind": "generated", "item_template_id": "bow", "item_def_id": "bow", "display_name": "Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "item_level": 3, "rolled_stats": {"damage_min": 2, "damage_max": 2}, "buy_price": 50, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"], "requirements": {"level": 2, "str": 15}, "requirement_status": [{"stat": "level", "required": 2, "current": 2, "met": true}, {"stat": "str", "required": 15, "current": 12, "met": false}], "equip_preview": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "current": 4, "preview": 6, "delta": 2}]}, "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 2, "equipped": 4, "delta": -2}]}},
+		{"offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "gloves", "item_def_id": "gloves", "display_name": "Magic Cave Gloves", "rarity": "magic", "slot": "gloves", "category": "equipment", "rolled_stats": {"armor": 3}, "buy_price": 90, "summary_lines": ["Slot: gloves", "Armor +3", "Requires level 1"], "comparison": {"slot": "gloves", "deltas": [{"stat": "armor", "offered": 3, "equipped": 0, "delta": 3}]}},
 	]
 	var inventory := [
-		{"item_instance_id": "2001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common"},
+		{"item_instance_id": "2001", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Bow", "rarity": "common"},
 		{"item_instance_id": "2002", "item_def_id": "red_potion"},
 	]
 	var sell_appraisals := [
-		{"item_instance_id": "2001", "item_def_id": "cave_bow", "item_template_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "item_level": 3, "sell_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"], "requirements": {"level": 2, "str": 15}, "requirement_status": [{"stat": "level", "required": 2, "current": 2, "met": true}, {"stat": "str", "required": 15, "current": 12, "met": false}], "equip_preview": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "current": 4, "preview": 6, "delta": 2}]}, "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 2, "equipped": 4, "delta": -2}]}},
+		{"item_instance_id": "2001", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "item_level": 3, "sell_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"], "requirements": {"level": 2, "str": 15}, "requirement_status": [{"stat": "level", "required": 2, "current": 2, "met": true}, {"stat": "str", "required": 15, "current": 12, "met": false}], "equip_preview": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "current": 4, "preview": 6, "delta": 2}]}, "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 2, "equipped": 4, "delta": -2}]}},
 		{"item_instance_id": "2002", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "sell_price": 5, "summary_lines": ["Kind: consumable", "Restores 5 HP"]},
 	]
 	panel.show_shop("1004", "town_vendor", offers, 60, inventory, {}, "Town Vendor", sell_appraisals)
@@ -92,8 +92,8 @@ func _run() -> void:
 	var set_inventory_panel := InventoryPanelScript.new()
 	var set_item := {
 		"item_instance_id": "set_item_1",
-		"item_def_id": "cave_gloves",
-		"item_template_id": "cave_gloves",
+		"item_def_id": "gloves",
+		"item_template_id": "gloves",
 		"display_name": "Verdant Vanguard Gloves",
 		"rarity": "set",
 		"slot": "gloves",
@@ -126,8 +126,8 @@ func _run() -> void:
 	var refreshed_offers := [
 		offers[0],
 		offers[1],
-		{"offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "cave_gloves", "item_def_id": "cave_gloves", "display_name": "Magic Cave Gloves", "rarity": "magic", "slot": "gloves", "category": "equipment", "rolled_stats": {"armor": 3}, "buy_price": 90, "source_depth": 3, "summary_lines": ["Slot: gloves", "Armor +3", "Requires level 1"]},
-		{"offer_id": "buyback:2001", "kind": "buyback", "item_template_id": "cave_bow", "item_def_id": "cave_bow", "display_name": "Common Cave Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "buy_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"]},
+		{"offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "gloves", "item_def_id": "gloves", "display_name": "Magic Cave Gloves", "rarity": "magic", "slot": "gloves", "category": "equipment", "rolled_stats": {"armor": 3}, "buy_price": 90, "source_depth": 3, "summary_lines": ["Slot: gloves", "Armor +3", "Requires level 1"]},
+		{"offer_id": "buyback:2001", "kind": "buyback", "item_template_id": "bow", "item_def_id": "bow", "display_name": "Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "buy_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"]},
 	]
 	panel.apply_shop_refresh(refreshed_offers, [sell_appraisals[1]])
 	state = panel.get_debug_state()
@@ -227,9 +227,9 @@ func _run() -> void:
 	_assert_eq("inventory shift click full belt hint", inventory_panel._gesture_hint.text, "belt full")
 	var amulet := {
 		"item_instance_id": "2003",
-		"item_def_id": "cave_amulet",
-		"item_template_id": "cave_amulet",
-		"display_name": "Common Cave Amulet",
+		"item_def_id": "amulet",
+		"item_template_id": "amulet",
+		"display_name": "Amulet",
 		"rarity": "common",
 		"rolled_stats": {"max_hp": 4, "mana_regen_per_10_seconds": 2},
 	}
@@ -245,9 +245,9 @@ func _run() -> void:
 	_assert_true("inventory amulet separator before random", last_separator < amulet_lines.find("Mana regen / 10s: +2"))
 	var blade := {
 		"item_instance_id": "2004",
-		"item_def_id": "cave_blade",
-		"item_template_id": "cave_blade",
-		"display_name": "Magic Cave Blade",
+		"item_def_id": "long_sword",
+		"item_template_id": "long_sword",
+		"display_name": "Long Sword",
 		"rarity": "magic",
 		"rolled_stats": {"damage_min": 3, "damage_max": 4, "max_hp": 3},
 	}
@@ -286,9 +286,9 @@ func _run() -> void:
 	blade_tooltip.queue_free()
 	var ring := {
 		"item_instance_id": "2005",
-		"item_def_id": "cave_ring",
-		"item_template_id": "cave_ring",
-		"display_name": "Common Cave Ring",
+		"item_def_id": "ring",
+		"item_template_id": "ring",
+		"display_name": "Ring",
 		"rarity": "common",
 		"slot": "ring",
 		"rolled_stats": {"max_hp": 2, "mana_regen_per_10_seconds": 2},
@@ -298,8 +298,8 @@ func _run() -> void:
 	ring_tooltip.queue_free()
 	var unique_blade := {
 		"item_instance_id": "2006",
-		"item_def_id": "cave_blade",
-		"item_template_id": "cave_blade",
+		"item_def_id": "long_sword",
+		"item_template_id": "long_sword",
 		"display_name": "Embercall Blade",
 		"rarity": "unique",
 		"slot": "main_hand",
@@ -378,8 +378,8 @@ func _run() -> void:
 	)
 	market_panel.show_market("market-1", [{
 		"listing_id": "listing-1",
-		"item_def_id": "cave_mail",
-		"item_template_id": "cave_mail",
+		"item_def_id": "mail",
+		"item_template_id": "mail",
 		"display_name": "Magic Cave Mail",
 		"rarity": "magic",
 		"seller_account_id": "other",
@@ -388,9 +388,9 @@ func _run() -> void:
 		"rolled_stats": {"armor": 6},
 	}, {
 		"listing_id": "listing-owned",
-		"item_def_id": "cave_bow",
-		"item_template_id": "cave_bow",
-		"display_name": "Common Cave Bow",
+		"item_def_id": "bow",
+		"item_template_id": "bow",
+		"display_name": "Bow",
 		"rarity": "common",
 		"seller_account_id": "me",
 		"price_gold": 25,

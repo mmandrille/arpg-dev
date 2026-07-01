@@ -7,8 +7,8 @@ func TestWeaponSetEquipTargetsInactiveSetAndSwapUpdatesActiveHands(t *testing.T)
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}
-	blade := addRolledInventoryItem(t, sim, 9101, "cave_blade", nil)
-	bow := addRolledInventoryItem(t, sim, 9102, "cave_bow", nil)
+	blade := addRolledInventoryItem(t, sim, 9101, "long_sword", nil)
+	bow := addRolledInventoryItem(t, sim, 9102, "bow", nil)
 	set2 := 1
 
 	assertAck(t, sim.Tick([]Input{{MessageID: "blade_set1", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(blade.instanceID), Slot: mainHandSlot}}}), "blade_set1")
@@ -17,7 +17,7 @@ func TestWeaponSetEquipTargetsInactiveSetAndSwapUpdatesActiveHands(t *testing.T)
 	if sim.activeWeaponSet != 0 {
 		t.Fatalf("active weapon set = %d, want 0", sim.activeWeaponSet)
 	}
-	assertEquippedTemplate(t, sim, mainHandSlot, "cave_blade")
+	assertEquippedTemplate(t, sim, mainHandSlot, "long_sword")
 	if got := sim.weaponSets[1][mainHandSlot]; got != bow.instanceID {
 		t.Fatalf("set 2 main_hand = %d, want %d", got, bow.instanceID)
 	}
@@ -27,7 +27,7 @@ func TestWeaponSetEquipTargetsInactiveSetAndSwapUpdatesActiveHands(t *testing.T)
 	if sim.activeWeaponSet != 1 {
 		t.Fatalf("active weapon set after swap = %d, want 1", sim.activeWeaponSet)
 	}
-	assertEquippedTemplate(t, sim, mainHandSlot, "cave_bow")
+	assertEquippedTemplate(t, sim, mainHandSlot, "bow")
 	if got := sim.playerAttackMode(); got != attackModeRanged {
 		t.Fatalf("active attack mode after bow swap = %s, want %s", got, attackModeRanged)
 	}
@@ -69,11 +69,11 @@ func TestLoadInventoryRestoresPersistedWeaponSets(t *testing.T) {
 	}
 
 	sim.LoadInventory([]PersistedItem{
-		{InstanceID: "9301", ItemDefID: "cave_greatsword", Slot: mainHandSlot, Equipped: true, WeaponSet: 0},
-		{InstanceID: "9302", ItemDefID: "cave_bow", Slot: mainHandSlot, Equipped: true, WeaponSet: 1},
+		{InstanceID: "9301", ItemDefID: "great_sword", Slot: mainHandSlot, Equipped: true, WeaponSet: 0},
+		{InstanceID: "9302", ItemDefID: "bow", Slot: mainHandSlot, Equipped: true, WeaponSet: 1},
 	})
 
-	assertEquippedItemDef(t, sim, mainHandSlot, "cave_greatsword")
+	assertEquippedItemDef(t, sim, mainHandSlot, "great_sword")
 	if sim.weaponSets[0][mainHandSlot] != 9301 {
 		t.Fatalf("set 1 main_hand = %d, want 9301", sim.weaponSets[0][mainHandSlot])
 	}
@@ -83,7 +83,7 @@ func TestLoadInventoryRestoresPersistedWeaponSets(t *testing.T) {
 
 	swap := sim.Tick([]Input{{MessageID: "swap", Type: "swap_weapon_set_intent", SwapWeaponSet: &SwapWeaponSetIntent{}}})
 	assertAck(t, swap, "swap")
-	assertEquippedItemDef(t, sim, mainHandSlot, "cave_bow")
+	assertEquippedItemDef(t, sim, mainHandSlot, "bow")
 }
 
 func TestLoadInventoryRestoresFourHandSlots(t *testing.T) {
@@ -93,13 +93,13 @@ func TestLoadInventoryRestoresFourHandSlots(t *testing.T) {
 	}
 
 	sim.LoadInventory([]PersistedItem{
-		{InstanceID: "9401", ItemDefID: "cave_blade", Slot: mainHandSlot, Equipped: true, WeaponSet: 0},
-		{InstanceID: "9402", ItemDefID: "cave_shield", Slot: offHandSlot, Equipped: true, WeaponSet: 0},
-		{InstanceID: "9403", ItemDefID: "cave_bow", Slot: mainHandSlot, Equipped: true, WeaponSet: 1},
+		{InstanceID: "9401", ItemDefID: "long_sword", Slot: mainHandSlot, Equipped: true, WeaponSet: 0},
+		{InstanceID: "9402", ItemDefID: "shield", Slot: offHandSlot, Equipped: true, WeaponSet: 0},
+		{InstanceID: "9403", ItemDefID: "bow", Slot: mainHandSlot, Equipped: true, WeaponSet: 1},
 	})
 
-	assertEquippedItemDef(t, sim, mainHandSlot, "cave_blade")
-	assertEquippedItemDef(t, sim, offHandSlot, "cave_shield")
+	assertEquippedItemDef(t, sim, mainHandSlot, "long_sword")
+	assertEquippedItemDef(t, sim, offHandSlot, "shield")
 	snap := sim.Snapshot()
 	if snap.WeaponSets[0].MainHand == nil || *snap.WeaponSets[0].MainHand != "9401" ||
 		snap.WeaponSets[0].OffHand == nil || *snap.WeaponSets[0].OffHand != "9402" ||
@@ -118,7 +118,7 @@ func TestLoadInventoryRestoresFourHandSlots(t *testing.T) {
 
 	swap := sim.Tick([]Input{{MessageID: "swap", Type: "swap_weapon_set_intent", SwapWeaponSet: &SwapWeaponSetIntent{}}})
 	assertAck(t, swap, "swap")
-	assertEquippedItemDef(t, sim, mainHandSlot, "cave_bow")
+	assertEquippedItemDef(t, sim, mainHandSlot, "bow")
 	if sim.equipped[offHandSlot] != 0 {
 		t.Fatalf("set 2 off hand = %d, want empty with bow", sim.equipped[offHandSlot])
 	}
@@ -129,13 +129,13 @@ func TestWeaponSetEquipFlowPersistsFourHandSlots(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}
-	blade := addRolledInventoryItem(t, sim, 9501, "cave_blade", nil)
-	shield := addRolledInventoryItem(t, sim, 9502, "cave_shield", nil)
-	bow := addRolledInventoryItem(t, sim, 9503, "cave_bow", nil)
+	blade := addRolledInventoryItem(t, sim, 9501, "long_sword", nil)
+	shield := addRolledInventoryItem(t, sim, 9502, "shield", nil)
+	bow := addRolledInventoryItem(t, sim, 9503, "bow", nil)
 	persisted := map[string]PersistedItem{
-		"9501": {InstanceID: "9501", ItemDefID: "cave_blade"},
-		"9502": {InstanceID: "9502", ItemDefID: "cave_shield"},
-		"9503": {InstanceID: "9503", ItemDefID: "cave_bow"},
+		"9501": {InstanceID: "9501", ItemDefID: "long_sword"},
+		"9502": {InstanceID: "9502", ItemDefID: "shield"},
+		"9503": {InstanceID: "9503", ItemDefID: "bow"},
 	}
 	set2 := 1
 
@@ -149,8 +149,8 @@ func TestWeaponSetEquipFlowPersistsFourHandSlots(t *testing.T) {
 		t.Fatalf("new reload sim: %v", err)
 	}
 	reloaded.LoadInventory(persistedItemsFromMap(persisted))
-	assertEquippedItemDef(t, reloaded, mainHandSlot, "cave_blade")
-	assertEquippedItemDef(t, reloaded, offHandSlot, "cave_shield")
+	assertEquippedItemDef(t, reloaded, mainHandSlot, "long_sword")
+	assertEquippedItemDef(t, reloaded, offHandSlot, "shield")
 	if reloaded.weaponSets[1][mainHandSlot] != bow.instanceID || reloaded.weaponSets[1][offHandSlot] != 0 {
 		t.Fatalf("reloaded set 2 = %+v, want bow only", reloaded.weaponSets[1])
 	}
@@ -161,8 +161,8 @@ func TestWeaponSetHandBlockingIsPerSet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}
-	greatsword := addRolledInventoryItem(t, sim, 9201, "cave_greatsword", nil)
-	shield := addRolledInventoryItem(t, sim, 9202, "cave_shield", nil)
+	greatsword := addRolledInventoryItem(t, sim, 9201, "great_sword", nil)
+	shield := addRolledInventoryItem(t, sim, 9202, "shield", nil)
 	set2 := 1
 
 	assertAck(t, sim.Tick([]Input{{MessageID: "greatsword_set1", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(greatsword.instanceID), Slot: mainHandSlot}}}), "greatsword_set1")

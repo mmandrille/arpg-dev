@@ -1,13 +1,13 @@
 {
-  "description": "Deterministic rolled item payloads for rarity, stats, display names, and effect ids.",
-  "template_id": "cave_blade",
+  "description": "Cross-language item roll golden for long_sword template naming and stat rolls.",
+  "template_id": "long_sword",
   "cases": [
     {
       "name": "common cave blade",
       "seed": "0000000000000000",
       "expected": {
-        "item_template_id": "cave_blade",
-        "display_name": "Common Cave Blade",
+        "item_template_id": "long_sword",
+        "display_name": "Long Sword",
         "rarity": "common",
         "stats": {
           "damage_max": 5,
@@ -24,13 +24,14 @@
       "name": "rare cave blade",
       "seed": "0000000000000006",
       "expected": {
-        "item_template_id": "cave_blade",
-        "display_name": "Keen Rare Cave Blade",
+        "item_template_id": "long_sword",
+        "display_name": "Mystic Long Sword",
         "rarity": "rare",
         "stats": {
-          "attack_speed_percent": 3,
           "damage_max": 4,
-          "damage_min": 3
+          "damage_min": 2,
+          "magic": 2,
+          "str": 3
         },
         "requirements": {
           "level": 1,
@@ -43,14 +44,15 @@
       "name": "unique cave blade",
       "seed": "00000000000000b1",
       "expected": {
-        "item_template_id": "cave_blade",
-        "display_name": "Sword of Pilgrim's Momentum",
+        "item_template_id": "long_sword",
+        "display_name": "Keen Long Sword of Pilgrim's Momentum",
         "rarity": "unique",
         "stats": {
-          "damage_max": 7,
+          "crit_chance": 3,
+          "damage_max": 4,
           "damage_min": 3,
-          "dex": 2,
-          "vit": 1
+          "magic": 3,
+          "vit": 2
         },
         "requirements": {
           "level": 1,

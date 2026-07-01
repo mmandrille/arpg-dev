@@ -1229,6 +1229,275 @@
       },
       "name_key": "skill.split_arrow.name"
     },
+    "ground_slam": {
+      "name": "Ground Slam",
+      "class": "barbarian",
+      "tree": {
+        "tier": 2,
+        "column": 3
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 3,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 8,
+          "vit": 6
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "cleave",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 5,
+        "angle_degrees": 40,
+        "push_min": 3,
+        "push_max": 7,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      },
+      "name_key": "skill.ground_slam.name"
+    },
+    "arcane_orb": {
+      "name": "Arcane Orb",
+      "class": "sorcerer",
+      "damage_type": "force",
+      "tree": {
+        "tier": 2,
+        "column": 3
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 3,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 8
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "magic_bolt",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 250,
+        "max_base": 200,
+        "min_per_rank": 50,
+        "max_per_rank": 25,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 25,
+          "use_requirement_baseline": true
+        }
+      },
+      "projectile": {
+        "range": 17,
+        "speed": 22.5,
+        "visual": "magic_bolt_projectile"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      },
+      "name_key": "skill.arcane_orb.name"
+    },
+    "radiant_bolt": {
+      "name": "Radiant Bolt",
+      "class": "paladin",
+      "damage_type": "force",
+      "tree": {
+        "tier": 2,
+        "column": 3
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 3,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 8,
+          "magic": 6
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "charge",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 200,
+        "max_base": 175,
+        "min_per_rank": 40,
+        "max_per_rank": 20,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 20,
+          "use_requirement_baseline": true
+        }
+      },
+      "projectile": {
+        "range": 14,
+        "speed": 26.25,
+        "visual": "magic_bolt_projectile"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      },
+      "name_key": "skill.radiant_bolt.name"
+    },
+    "fan_of_blades": {
+      "name": "Fan of Blades",
+      "class": "rogue",
+      "damage_type": "poison",
+      "tree": {
+        "tier": 2,
+        "column": 3
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 3,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 10
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "poison_stab",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 3,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 2.5,
+        "angle_degrees": 70,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "poison": {
+        "damage_percent_base": 15,
+        "damage_percent_per_rank": 8,
+        "duration_ticks": 40,
+        "magic_duration_ticks_per_point": 2,
+        "mark_damage_bonus_percent": 15,
+        "mark_duration_ticks": 40,
+        "mark_effect_id": "rogue_mark"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2
+      },
+      "name_key": "skill.fan_of_blades.name"
+    },
+    "snipe": {
+      "name": "Snipe",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 2,
+        "column": 3
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 3,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 10
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "piercing_shot",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 275,
+        "max_base": 225,
+        "min_per_rank": 60,
+        "max_per_rank": 30
+      },
+      "projectile": {
+        "range": 22,
+        "speed": 30,
+        "visual": "piercing_shot_projectile"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.snipe.name"
+    },
     "arcane_focus": {
       "name": "Arcane Focus",
       "class": "sorcerer",

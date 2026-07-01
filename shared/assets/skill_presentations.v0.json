@@ -290,6 +290,61 @@
       "effect_visual": "split_arrow",
       "summary_key": "skill.split_arrow.summary"
     },
+    "ground_slam": {
+      "icon": {
+        "label": "G",
+        "shape": "quake",
+        "color": "#a84828",
+        "accent": "#ffd0a8"
+      },
+      "summary": "Focused ground smash",
+      "effect_visual": "earthbreaker_ring",
+      "summary_key": "skill.ground_slam.summary"
+    },
+    "arcane_orb": {
+      "icon": {
+        "label": "O",
+        "shape": "orb_projectile",
+        "color": "#7b5cff",
+        "accent": "#efe8ff"
+      },
+      "summary": "Heavy arcane projectile",
+      "projectile_visual": "magic_bolt_projectile",
+      "summary_key": "skill.arcane_orb.summary"
+    },
+    "radiant_bolt": {
+      "icon": {
+        "label": "R",
+        "shape": "orb_projectile",
+        "color": "#f0c84a",
+        "accent": "#fff6c8"
+      },
+      "summary": "Holy force bolt",
+      "projectile_visual": "magic_bolt_projectile",
+      "summary_key": "skill.radiant_bolt.summary"
+    },
+    "fan_of_blades": {
+      "icon": {
+        "label": "F",
+        "shape": "slash",
+        "color": "#3f9a62",
+        "accent": "#d8ffe8"
+      },
+      "summary": "Wide poison cone",
+      "effect_visual": "cleave_cone",
+      "summary_key": "skill.fan_of_blades.summary"
+    },
+    "snipe": {
+      "icon": {
+        "label": "S",
+        "shape": "arrow",
+        "color": "#2f7d4a",
+        "accent": "#d4f5b8"
+      },
+      "summary": "Long-range aimed shot",
+      "projectile_visual": "piercing_shot_projectile",
+      "summary_key": "skill.snipe.summary"
+    },
     "arcane_focus": {
       "icon": {
         "label": "A",

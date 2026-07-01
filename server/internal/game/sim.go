@@ -148,6 +148,7 @@ type entity struct {
 	companionStance       string
 	projectileDefID       string
 	sourceSkillID         string
+	sourceWeaponSlot      string
 	expiresTick           uint64
 	totalDurationTicks    int
 	sourceDamageType      string
@@ -1441,7 +1442,8 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 		res.reject(in.MessageID, "invalid_direction")
 		return
 	}
-	if _, ok := s.consumeBasicAttack(in, res); !ok {
+	weaponSlot, ok := s.consumeBasicAttack(in, res)
+	if !ok {
 		return
 	}
 	maxDistance := s.playerActionReach()
@@ -1456,6 +1458,7 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 		maxDistance:      maxDistance,
 		damageRange:      s.resolvePlayerAttackDamage(),
 		sourceDamageType: s.playerWeaponDamageTypeForSlot(mainHandSlot),
+		sourceWeaponSlot: weaponSlot,
 		sourceMsgID:      in.MessageID,
 		sourceCorrID:     in.CorrelationID,
 		spawnTick:        s.tick,
@@ -3663,7 +3666,7 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 		s.resolveSkillProjectileMonsterHit(p, target, res)
 		return
 	}
-	s.damageMonsterByPlayerWithSlot(target, p.ownerID, p.sourceCorrID, res, p.damageRange, p.sourceDamageType, "")
+	s.damageMonsterByPlayerWithSlot(target, p.ownerID, p.sourceCorrID, res, p.damageRange, p.sourceDamageType, p.sourceWeaponSlot)
 }
 
 func (s *Sim) resolveSkillProjectileMonsterHit(p *entity, target *entity, res *TickResult) {

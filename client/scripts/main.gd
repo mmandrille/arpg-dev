@@ -3843,6 +3843,7 @@ func _build_scene() -> void:
 	blacksmith_panel = BlacksmithPanelScript.new()
 	blacksmith_panel.upgrade_inventory_requested.connect(_on_blacksmith_inventory_upgrade_requested)
 	blacksmith_panel.renew_inventory_requested.connect(_on_blacksmith_inventory_renew_requested)
+	blacksmith_panel.staged_inventory_changed.connect(_on_blacksmith_staged_inventory_changed)
 	blacksmith_panel.merge_requested.connect(_on_blacksmith_merge_requested)
 	ui.add_child(blacksmith_panel)
 	consumable_bar = ConsumableBarScript.new()
@@ -4956,11 +4957,16 @@ func _hide_blacksmith_panel() -> void:
 	if blacksmith_panel != null:
 		blacksmith_panel.hide_display()
 	TownServiceBridgeScript.close_blacksmith_inventory_context(inventory_panel)
+	_on_blacksmith_staged_inventory_changed([])
 
-func _on_blacksmith_inventory_renew_requested(item_instance_id: String) -> void:
+func _on_blacksmith_staged_inventory_changed(item_instance_ids: Array) -> void:
+	if inventory_panel != null:
+		inventory_panel.set_blacksmith_hidden_item_ids(item_instance_ids)
+
+func _on_blacksmith_inventory_renew_requested(item_instance_id: String, resource_instance_id: String) -> void:
 	if client == null or item_instance_id == "":
 		return
-	var result := client.renew_inventory_item(item_instance_id, client.character_id)
+	var result := client.renew_inventory_item(item_instance_id, client.character_id, resource_instance_id)
 	if result.has("_error"):
 		if blacksmith_panel != null:
 			blacksmith_panel.show_status("Could not renew item", true)
@@ -4968,7 +4974,7 @@ func _on_blacksmith_inventory_renew_requested(item_instance_id: String) -> void:
 	var item: Dictionary = result.get("item", {})
 	gold = int(result.get("gold", gold))
 	stash_gold = int(result.get("stash_gold", stash_gold))
-	_apply_upgrade_resource_response(result)
+	_consume_blacksmith_craft_resource(resource_instance_id, result)
 	_update_inventory_item(item)
 	if blacksmith_panel != null:
 		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)), resource_wallet)
@@ -4996,10 +5002,10 @@ func _on_blacksmith_merge_requested(item_instance_ids: Array) -> void:
 		_refresh_blacksmith_panel()
 	_refresh_inventory_ui()
 
-func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> void:
+func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String, resource_instance_id: String) -> void:
 	if client == null or item_instance_id == "":
 		return
-	var result := client.upgrade_inventory_item(item_instance_id, client.character_id, blacksmith_panel.selected_recipe_id() if blacksmith_panel != null and blacksmith_panel.has_method("selected_recipe_id") else "item_upgrade")
+	var result := client.upgrade_inventory_item(item_instance_id, client.character_id, blacksmith_panel.selected_recipe_id() if blacksmith_panel != null and blacksmith_panel.has_method("selected_recipe_id") else "item_upgrade", resource_instance_id)
 	if result.has("_error"):
 		if blacksmith_panel != null:
 			blacksmith_panel.show_status("Could not upgrade item", true)
@@ -5007,12 +5013,32 @@ func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String) -> voi
 	var item: Dictionary = result.get("item", {})
 	gold = int(result.get("gold", gold))
 	stash_gold = int(result.get("stash_gold", stash_gold))
-	_apply_upgrade_resource_response(result)
+	_consume_blacksmith_craft_resource(resource_instance_id, result)
 	_update_inventory_item(item)
 	if blacksmith_panel != null:
 		blacksmith_panel.update_after_upgrade(item, gold, stash_gold, int(result.get("cost_gold", 0)), bool(result.get("success", true)), resource_wallet)
 		_refresh_blacksmith_panel()
 	_refresh_inventory_ui()
+
+func _consume_blacksmith_craft_resource(resource_instance_id: String, result: Dictionary) -> void:
+	if resource_instance_id != "":
+		_remove_inventory_item(resource_instance_id)
+	_apply_upgrade_resource_response(result)
+
+func _blacksmith_inventory_items() -> Array:
+	var hidden: Dictionary = {}
+	if blacksmith_panel != null and blacksmith_panel.has_method("staged_inventory_ids"):
+		for item_id in blacksmith_panel.staged_inventory_ids():
+			hidden[str(item_id)] = true
+	var items: Array = []
+	for value in inventory:
+		if typeof(value) != TYPE_DICTIONARY:
+			continue
+		var item := value as Dictionary
+		if hidden.has(str(item.get("item_instance_id", ""))):
+			continue
+		items.append(item.duplicate(true))
+	return items
 
 func _apply_upgrade_resource_response(result: Dictionary) -> void:
 	var resource_id := str(result.get("resource_item_def_id", ""))
@@ -5022,9 +5048,6 @@ func _apply_upgrade_resource_response(result: Dictionary) -> void:
 		return
 	if result.has("resource_wallet"):
 		resource_wallet[resource_id] = max(0, int(result.get("resource_wallet", 0)))
-
-func _blacksmith_inventory_items() -> Array:
-	return inventory.duplicate(true)
 
 func _refresh_blacksmith_panel() -> void:
 	if blacksmith_panel == null or not blacksmith_panel.visible:

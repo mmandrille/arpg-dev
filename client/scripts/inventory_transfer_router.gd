@@ -11,6 +11,7 @@ const DRAG_SOURCE_STASH := "stash"
 const DRAG_SOURCE_CORPSE := "corpse"
 const DRAG_SOURCE_UNIQUE_CHEST := "unique_chest"
 const DRAG_SOURCE_BLACKSMITH_STAGE := "blacksmith_stage"
+const DRAG_SOURCE_BLACKSMITH_RESOURCE_STAGE := "blacksmith_resource_stage"
 const DRAG_SOURCE_BLACKSMITH_MERGE := "blacksmith_merge"
 
 
@@ -78,7 +79,7 @@ static func drop_route(slot_kind: String, data: Dictionary, can_equip_to_slot: b
 				"item_instance_id": str(data.get("item_instance_id", "")),
 			})
 		if source == DRAG_SOURCE_BLACKSMITH_STAGE:
-			return {"kind": KIND_BLACKSMITH_UNSTAGE}
+			return {"kind": KIND_BLACKSMITH_UNSTAGE, "unstage": "item"}
 		var equip_payload := {"item_instance_id": str(item.get("item_instance_id", "")), "slot": slot}
 		equip_payload.merge(weapon_set_payload, true)
 		return _intent("equip_intent", equip_payload)
@@ -105,7 +106,9 @@ static func drop_route(slot_kind: String, data: Dictionary, can_equip_to_slot: b
 			"chest_item_id": str(data.get("stash_item_id", "")),
 		})
 	if source == DRAG_SOURCE_BLACKSMITH_STAGE:
-		return {"kind": KIND_BLACKSMITH_UNSTAGE}
+		return {"kind": KIND_BLACKSMITH_UNSTAGE, "unstage": "item"}
+	if source == DRAG_SOURCE_BLACKSMITH_RESOURCE_STAGE:
+		return {"kind": KIND_BLACKSMITH_UNSTAGE, "unstage": "resource"}
 	if source == DRAG_SOURCE_BLACKSMITH_MERGE:
 		return {"kind": KIND_BLACKSMITH_MERGE_UNPLACE}
 	if is_equipment_slot(source):

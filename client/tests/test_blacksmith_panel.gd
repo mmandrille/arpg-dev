@@ -6,6 +6,7 @@ const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
 const BlacksmithMergePanelScript := preload("res://scripts/blacksmith_merge_panel.gd")
 const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
 const BlacksmithRecipesScript := preload("res://scripts/blacksmith_recipes.gd")
+const BlacksmithPanelActionsScript := preload("res://scripts/blacksmith_panel_actions.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -53,11 +54,11 @@ func _run() -> void:
 	panel.show_blacksmith("smith-1", [item, shard, stone], 100, 0, config, "Choose", {})
 	panel.stage_inventory_item(item)
 	var state := panel.get_debug_state()
-	_assert_eq("recipe option count", (state.get("recipe_options", []) as Array).size(), 2)
-	_assert_eq("selected recipe id", str(state.get("selected_recipe_id", "")), "item_upgrade")
-	panel.select_recipe("item_renew")
+	_assert_eq("default recipe id", str(state.get("selected_recipe_id", "")), "item_upgrade")
+	_assert_eq("preview hidden without resource", (state.get("preview_lines", []) as Array).size(), 0)
+	panel.stage_resource_item(stone)
 	state = panel.get_debug_state()
-	_assert_eq("selected renew recipe id", str(state.get("selected_recipe_id", "")), "item_renew")
+	_assert_eq("renew recipe from stone", str(state.get("selected_recipe_id", "")), "item_renew")
 	_assert_eq("selected renew recipe label", str(state.get("selected_recipe_label", "")), "Renew Item")
 	_assert_true("renew recipe eligibility", _array_contains_text(state.get("preview_lines", []), "Eligible: Equipment (reroll affixes)"))
 	_assert_true("renew preview mentions reroll", _array_contains_text(state.get("preview_lines", []), "reroll random affixes"))
@@ -65,6 +66,10 @@ func _run() -> void:
 	_assert_false("renew preview avoids upgrade shard", _array_contains_text(state.get("preview_lines", []), "Upgrade Shard"))
 	var rows: Array = state.get("rows", [])
 	_assert_true("renew enables bow with stone", bool((rows[0] as Dictionary).get("upgrade_enabled", false)))
+	panel.unstage_resource(false)
+	panel.select_recipe("item_renew")
+	state = panel.get_debug_state()
+	_assert_eq("bot select renew stages stone", str(state.get("staged_resource_id", "")), "stone1")
 	panel.bot_select_tab("Merge")
 	var merge_view: BlacksmithMergePanel = panel._merge_view
 	_assert_true("merge accepts shard drop", merge_view.can_place_item_at(0, shard))
@@ -84,6 +89,14 @@ func _test_rolled_stats_item_level_reads() -> void:
 	var flattened := {"rolled_stats": {"dex": 5, "item_level": 1}}
 	_assert_eq("flattened rolled_stats item level", BlacksmithUpgradePreviewScript.item_level(flattened), 1)
 	_assert_eq("level one item needs level one shard", BlacksmithRecipesScript.required_resource_level(BlacksmithRecipesScript.RECIPE_ITEM_UPGRADE, flattened), 1)
+	_assert_eq("depth 11 allows item level 2", BlacksmithPanelActionsScript.max_item_level_for_deepest_depth({
+		"deepest_dungeon_depth": 11,
+		"item_level_levels_per_tier": 10,
+	}), 2)
+	_assert_eq("depth 10 caps at item level 1", BlacksmithPanelActionsScript.max_item_level_for_deepest_depth({
+		"deepest_dungeon_depth": 10,
+		"item_level_levels_per_tier": 10,
+	}), 1)
 
 
 func _assert_eq(label: String, got, expected) -> void:

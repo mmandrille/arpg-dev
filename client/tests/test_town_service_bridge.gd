@@ -43,9 +43,13 @@ class FakeBlacksmithPanel:
 	extends Node
 
 	var staged_item: Dictionary = {}
+	var staged_resource: Dictionary = {}
 
 	func stage_inventory_item(item: Dictionary) -> void:
 		staged_item = item.duplicate(true)
+
+	func stage_resource_item(item: Dictionary) -> void:
+		staged_resource = item.duplicate(true)
 
 
 func _initialize() -> void:
@@ -94,6 +98,15 @@ func _run() -> void:
 	)
 	_assert_eq("blacksmith stage handled", handled_blacksmith, true)
 	_assert_eq("blacksmith stage item", str(blacksmith_panel.staged_item.get("item_instance_id", "")), "2001")
+	var shard := {"item_instance_id": "shard1", "item_def_id": "upgrade_shard"}
+	var handled_shard := TownServiceBridgeScript.route_inventory_stage_intent(
+		"blacksmith_stage_inventory_item",
+		{"item": shard},
+		market_panel,
+		blacksmith_panel
+	)
+	_assert_eq("blacksmith shard stage handled", handled_shard, true)
+	_assert_eq("blacksmith shard staged as resource", str(blacksmith_panel.staged_resource.get("item_instance_id", "")), "shard1")
 	_assert_eq(
 		"unknown intent not handled",
 		TownServiceBridgeScript.route_inventory_stage_intent("shop_sell_intent", {}, market_panel, blacksmith_panel),

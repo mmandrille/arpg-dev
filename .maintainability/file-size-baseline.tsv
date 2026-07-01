@@ -1,6 +1,6 @@
 # Grandfathered source/test/tool files above the 600-line target.
 # Format: path<TAB>baseline_line_count
-client/scripts/blacksmith_panel.gd	656	# v391: renew actions extracted to blacksmith_panel_actions.gd
+client/scripts/blacksmith_panel.gd	731	# v392: two-slot craft UI (item + resource); recipe inferred from resource
 client/scripts/bot_assertion_handlers.gd	623	# v357: intent-reject assertions extracted to bot_intent_reject_assertions.gd
 client/scripts/bot_controller.gd	796	# v390: blacksmith merge tab bot steps
 client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait filters consolidated into flag loop

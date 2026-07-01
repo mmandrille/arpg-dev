@@ -48,6 +48,9 @@ func _run() -> void:
 	_assert_eq("blacksmith stage to bag", str(Router.drop_route("bag", {
 		"source": "blacksmith_stage", "item": item,
 	}, false).get("kind", "")), Router.KIND_BLACKSMITH_UNSTAGE)
+	_assert_eq("blacksmith resource stage to bag", str(Router.drop_route("bag", {
+		"source": "blacksmith_resource_stage", "item": {"item_def_id": "upgrade_shard"},
+	}, false).get("unstage", "")), "resource")
 	_assert_intent("equipment to bag", Router.drop_route("bag", {
 		"source": "equip:main_hand", "item": item,
 	}, false, {"weapon_set": 1}), "unequip_intent")

@@ -82,11 +82,11 @@ type CharacterProgressionRepo interface {
 	ListRecoverableCharacterCorpses(ctx context.Context, accountID, excludeCharacterID string) ([]CharacterCorpse, error)
 	TransferCorpseItemToCharacter(ctx context.Context, accountID, corpseCharacterID, targetCharacterID, corpseItemID, newItemID string) (CharacterItemInstance, error)
 	UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, bool, error)
-	UpgradeAccountStashItemWithShard(ctx context.Context, accountID, characterID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, int, bool, error)
+	UpgradeAccountStashItemWithShard(ctx context.Context, accountID, characterID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions, preferredShardCharacterItemID string) (AccountStashItem, int, int, int, bool, error)
 	MigrateUpgradeShardWalletToStash(ctx context.Context, accountID string) error
 	MergeUpgradeShards(ctx context.Context, accountID string, stashItemIDs []string) (AccountStashItem, error)
 	MergeLeveledConsumablesFromBag(ctx context.Context, accountID, characterID string, itemInstanceIDs []string) (CharacterItemInstance, error)
-	RenewInventoryItem(ctx context.Context, accountID, characterID, itemInstanceID string, chargedCost, minStoneLevel int, eligibleItemDefs map[string]struct{}, renewFn func(json.RawMessage) ([]byte, error)) (CharacterItemInstance, int, int, int, error)
+	RenewInventoryItem(ctx context.Context, accountID, characterID, itemInstanceID string, chargedCost, minStoneLevel int, eligibleItemDefs map[string]struct{}, renewFn func(json.RawMessage) ([]byte, error), preferredStoneCharacterItemID string) (CharacterItemInstance, int, int, int, error)
 	ListActiveMarketListings(ctx context.Context) ([]MarketListing, error)
 	CreateMarketListingFromStash(ctx context.Context, accountID, stashItemID, listingID string, priceGold int) (MarketListing, error)
 	CancelMarketListing(ctx context.Context, accountID, listingID string) (MarketListing, error)

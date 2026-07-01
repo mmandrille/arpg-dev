@@ -18,10 +18,7 @@ static func action_enabled(ctx: Dictionary, item: Dictionary) -> bool:
 
 static func upgrade_enabled(ctx: Dictionary, item: Dictionary) -> bool:
 	var level := item_level(item)
-	var depth_cap := max_item_level_for_deepest_depth(ctx)
-	var effective_max: int = int(ctx.get("max_level", 1))
-	if depth_cap > 0:
-		effective_max = mini(effective_max, depth_cap)
+	var effective_max := effective_max_level(ctx)
 	var recipe_id := str(ctx.get("selected_recipe_id", BlacksmithRecipesScript.RECIPE_ITEM_UPGRADE))
 	return is_upgrade_candidate(ctx, item) \
 		and recipe_accepts_item(recipe_id, item) \
@@ -51,10 +48,10 @@ static func emit_upgrade(ctx: Dictionary, item: Dictionary) -> Dictionary:
 	var recipe_id := str(ctx.get("selected_recipe_id", ""))
 	var level := item_level(item)
 	var cost := next_cost(ctx, item)
-	var max_level := int(ctx.get("max_level", 1))
 	if not recipe_accepts_item(recipe_id, item):
 		return {"ok": false, "message": BlacksmithRecipesScript.rejection_message(recipe_id)}
-	if level >= max_level:
+	var effective_max := effective_max_level(ctx)
+	if level >= effective_max:
 		return {"ok": false, "message": "Item is already at max level"}
 	if wallet_gold(ctx) < cost:
 		return {"ok": false, "message": "Need %d gold" % cost}
@@ -89,9 +86,14 @@ static func has_action_resource(ctx: Dictionary, item: Dictionary) -> bool:
 	if resource_count <= 0:
 		return true
 	var recipe_id := str(ctx.get("selected_recipe_id", BlacksmithRecipesScript.RECIPE_ITEM_UPGRADE))
-	var inventory_items: Array = ctx.get("inventory_items", [])
 	var resource_id := BlacksmithRecipesScript.resource_item_def_id(recipe_id)
 	var required_level := BlacksmithShardInventoryScript.required_resource_level(recipe_id, item)
+	var staged_resource: Dictionary = ctx.get("staged_resource", {})
+	if typeof(staged_resource) == TYPE_DICTIONARY and not staged_resource.is_empty():
+		if str(staged_resource.get("item_def_id", "")) != resource_id:
+			return false
+		return BlacksmithUpgradePreviewScript.shard_level(staged_resource) >= required_level
+	var inventory_items: Array = ctx.get("inventory_items", [])
 	return BlacksmithShardInventoryScript.resource_inventory_count(inventory_items, resource_id, required_level) >= resource_count
 
 
@@ -100,8 +102,15 @@ static func max_item_level_for_deepest_depth(ctx: Dictionary) -> int:
 	if depth < 1:
 		return 1
 	var levels_per_tier: int = maxi(1, int(ctx.get("item_level_levels_per_tier", 10)))
-	var tier: int = int(depth / levels_per_tier)
-	return maxi(1, tier)
+	return 1 + int((depth - 1) / levels_per_tier)
+
+
+static func effective_max_level(ctx: Dictionary) -> int:
+	var effective_max: int = int(ctx.get("max_level", 1))
+	var depth_cap := max_item_level_for_deepest_depth(ctx)
+	if depth_cap > 0:
+		effective_max = mini(effective_max, depth_cap)
+	return effective_max
 
 
 static func wallet_gold(ctx: Dictionary) -> int:

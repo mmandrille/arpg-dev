@@ -50,6 +50,10 @@
       "item_def_id": "cave_blade"
     },
     {
+      "type": "select_blacksmith_recipe",
+      "recipe_id": "item_upgrade"
+    },
+    {
       "type": "wait_blacksmith_panel",
       "item_def_id": "cave_blade",
       "preview_contains": [

@@ -44,6 +44,11 @@ static func route_inventory_stage_intent(intent_type: String, payload: Dictionar
 		return true
 	if intent_type == "blacksmith_stage_inventory_item":
 		if blacksmith_panel != null:
-			blacksmith_panel.call("stage_inventory_item", payload.get("item", {}))
+			var item: Dictionary = payload.get("item", {})
+			var def_id := str(item.get("item_def_id", ""))
+			if def_id == "upgrade_shard" or def_id == "renew_stone":
+				blacksmith_panel.call("stage_resource_item", item)
+			else:
+				blacksmith_panel.call("stage_inventory_item", item)
 		return true
 	return false

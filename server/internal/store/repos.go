@@ -1503,11 +1503,11 @@ func (s *Store) TransferAccountStashGoldToCharacter(ctx context.Context, account
 }
 
 func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, bool, error) {
-	item, _, stashGold, _, success, err := s.UpgradeAccountStashItemWithShard(ctx, accountID, "", stashItemID, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel, eligibleItemDefs, upgradeOpts)
+	item, _, stashGold, _, success, err := s.UpgradeAccountStashItemWithShard(ctx, accountID, "", stashItemID, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel, eligibleItemDefs, upgradeOpts, "")
 	return item, stashGold, chargedCost, success, err
 }
 
-func (s *Store) UpgradeAccountStashItemWithShard(ctx context.Context, accountID, characterID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions) (AccountStashItem, int, int, int, bool, error) {
+func (s *Store) UpgradeAccountStashItemWithShard(ctx context.Context, accountID, characterID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions, preferredShardCharacterItemID string) (AccountStashItem, int, int, int, bool, error) {
 	if chargedCost < 0 || maxLevel <= 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 || pityFailureThreshold < 0 || minShardLevel < 1 {
 		return AccountStashItem{}, 0, 0, 0, false, ErrConflict
 	}
@@ -1568,7 +1568,7 @@ func (s *Store) UpgradeAccountStashItemWithShard(ctx context.Context, accountID,
 		if currentLevel >= effectiveMaxLevel {
 			return ErrConflict
 		}
-		if err := spendUpgradeShardInTx(ctx, tx, accountID, characterID, minShardLevel); err != nil {
+		if err := spendUpgradeShardInTx(ctx, tx, accountID, characterID, minShardLevel, preferredShardCharacterItemID); err != nil {
 			return err
 		}
 		if characterGold+stashGold < chargedCost {

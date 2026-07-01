@@ -14,17 +14,13 @@ func (t ItemLevelTierRules) levelsPerTier() int {
 }
 
 // MaxItemLevelForDepth returns the highest item level allowed at a dungeon depth.
+// Level 1 is the base tier; depth 11 unlocks level 2 because tiers start above base.
 func MaxItemLevelForDepth(depth int, tiers ItemLevelTierRules) int {
 	if depth < 1 {
 		return 1
 	}
 
-	tier := depth / tiers.levelsPerTier()
-	if tier < 1 {
-		return 1
-	}
-
-	return tier
+	return 1 + (depth-1)/tiers.levelsPerTier()
 }
 
 // RepresentativeDepthForItemLevel returns the anchor dungeon depth for an item level tier.

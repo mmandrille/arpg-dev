@@ -12,8 +12,9 @@ import (
 )
 
 type renewInventoryItemRequest struct {
-	ItemInstanceID string `json:"item_instance_id"`
-	CharacterID    string `json:"character_id"`
+	ItemInstanceID           string `json:"item_instance_id"`
+	CharacterID              string `json:"character_id"`
+	ResourceItemInstanceID   string `json:"resource_item_instance_id,omitempty"`
 }
 
 type renewInventoryItemResponse struct {
@@ -95,7 +96,7 @@ func (s *Server) handleRenewInventoryItem(w http.ResponseWriter, r *http.Request
 
 	item, characterGold, stashGold, chargedCost, err := s.store.RenewInventoryItem(
 		r.Context(), accountID, req.CharacterID, req.ItemInstanceID,
-		chargedCost, resourceRequiredLevel, s.eligibleBlacksmithItemDefs(blacksmithRecipeItemRenew), renewFn,
+		chargedCost, resourceRequiredLevel, s.eligibleBlacksmithItemDefs(blacksmithRecipeItemRenew), renewFn, req.ResourceItemInstanceID,
 	)
 	if errors.Is(err, store.ErrNotFound) {
 		writeError(w, http.StatusNotFound, "inventory_item_not_found", "inventory item not found")

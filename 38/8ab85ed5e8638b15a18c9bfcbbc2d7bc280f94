@@ -1,0 +1,21 @@
+scripts/play.sh
+  s_b5ee270b714f38::t_311d3916cd77bf 16
+make/client.mk
+  s_b5ee270b714f38::t_21267d674a0984 42,44-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "388ab85ed5e8638b15a18c9bfcbbc2d7bc280f94",
+  "prompts": {},
+  "sessions": {
+    "s_b5ee270b714f38": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "94df0af6-60cf-4c01-838f-6f9b79e9ef68",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

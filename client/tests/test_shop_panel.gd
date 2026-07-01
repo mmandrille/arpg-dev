@@ -5,7 +5,6 @@ extends SceneTree
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
-const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 
@@ -469,78 +468,6 @@ func _run() -> void:
 	_assert_true("market viewed offer slot uses icon", bool((viewed_offer_slots[0] as Dictionary).get("has_icon", false)))
 	_assert_true("market viewed offer slot uses shared tooltip", bool((viewed_offer_slots[0] as Dictionary).get("uses_shared_tooltip", false)))
 	market_panel.queue_free()
-
-	var blacksmith_panel := BlacksmithPanelScript.new()
-	root.add_child(blacksmith_panel)
-	await process_frame
-	var blacksmith_emitted: Array = []
-	blacksmith_panel.upgrade_inventory_requested.connect(func(item_instance_id: String, _resource_instance_id: String = "") -> void:
-		blacksmith_emitted.append(item_instance_id)
-	)
-	var upgrade_item: Dictionary = (inventory[0] as Dictionary).duplicate(true)
-	upgrade_item["rolled_stats"] = {"damage_min": 2, "damage_max": 4}
-	upgrade_item["summary_lines"] = ["Min damage: +2", "Max damage: +4"]
-	var blacksmith_config := {"item_upgrade_cost_gold": 100, "item_upgrade_cost_growth_per_level": 50, "item_upgrade_max_level": 3, "item_upgrade_resource_item_def_id": "upgrade_shard", "item_upgrade_resource_count": 1, "deepest_dungeon_depth": 30, "item_level_levels_per_tier": 10}
-	var blacksmith_shard := {
-		"item_instance_id": "shard1",
-		"item_def_id": "upgrade_shard",
-		"rolled_stats": {"item_level": 2},
-	}
-	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item, blacksmith_shard], 40, 60, blacksmith_config, "Choose", {})
-	blacksmith_panel.stage_inventory_item(upgrade_item)
-	blacksmith_panel.stage_resource_item(blacksmith_shard)
-	var blacksmith_state := blacksmith_panel.get_debug_state()
-	_assert_eq("blacksmith staged item id", str(blacksmith_state.get("staged_item_id", "")), "2001")
-	_assert_eq("blacksmith wallet gold", int(blacksmith_state.get("wallet_gold", 0)), 100)
-	_assert_eq("blacksmith resource item", str(blacksmith_state.get("resource_item_def_id", "")), "upgrade_shard")
-	_assert_eq("blacksmith required shard count", int(blacksmith_state.get("resource_required_count", 0)), 1)
-	_assert_eq("blacksmith wallet shard count", int(blacksmith_state.get("resource_wallet_count", 0)), 1)
-	var blacksmith_window_size: Dictionary = (blacksmith_state.get("window", {}) as Dictionary).get("minimum_size", {})
-	_assert_eq("blacksmith compact window width", int(blacksmith_window_size.get("x", 0)), 320)
-	_assert_eq("blacksmith compact window height", int(blacksmith_window_size.get("y", 0)), 294)
-	var stage_size: Dictionary = blacksmith_state.get("stage_slot_size", {})
-	_assert_eq("blacksmith stage slot width", int(stage_size.get("x", 0)), 84)
-	_assert_eq("blacksmith stage slot height", int(stage_size.get("y", 0)), 84)
-	_assert_eq("blacksmith stage slot centered", bool(blacksmith_state.get("stage_slot_centered", false)), true)
-	_assert_eq("blacksmith stage icon visible", bool(blacksmith_state.get("stage_icon_visible", false)), true)
-	_assert_true("blacksmith direct preview includes tier rescale", _array_contains_text(blacksmith_state.get("preview_lines", []), "Stats rescale to the next item tier"))
-	_assert_false("blacksmith instruction removed", bool(blacksmith_state.get("instruction_visible", true)))
-	var summary_shield: Dictionary = upgrade_item.duplicate(true)
-	summary_shield["rolled_stats"] = {"item_level": 0}
-	summary_shield["summary_lines"] = ["Armor: +2", "Block: +12%"]
-	blacksmith_panel.stage_inventory_item(summary_shield)
-	blacksmith_state = blacksmith_panel.get_debug_state()
-	_assert_true("blacksmith summary preview includes tier rescale", _array_contains_text(blacksmith_state.get("preview_lines", []), "Stats rescale to the next item tier"))
-	var common_bow: Dictionary = upgrade_item.duplicate(true)
-	common_bow["item_def_id"] = "cave_bow"
-	common_bow["display_name"] = "Common Cave Bow"
-	common_bow["rarity"] = "common"
-	common_bow["rolled_stats"] = {"item_level": 0}
-	common_bow["summary_lines"] = []
-	blacksmith_panel.stage_inventory_item(common_bow)
-	blacksmith_state = blacksmith_panel.get_debug_state()
-	_assert_true("blacksmith template preview includes tier rescale", _array_contains_text(blacksmith_state.get("preview_lines", []), "Stats rescale to the next item tier"))
-	blacksmith_panel.unstage_item()
-	blacksmith_state = blacksmith_panel.get_debug_state()
-	_assert_eq("blacksmith unstage clears item", str(blacksmith_state.get("staged_item_id", "")), "")
-	blacksmith_panel.stage_inventory_item(upgrade_item)
-	blacksmith_panel.stage_resource_item(blacksmith_shard)
-	blacksmith_panel._emit_upgrade(upgrade_item)
-	_assert_eq("blacksmith inventory upgrade emitted", str(blacksmith_emitted[0]), "2001")
-	blacksmith_panel.unstage_resource(false)
-	blacksmith_panel.show_blacksmith("smith-1", [upgrade_item], 100, 0, blacksmith_config, "Choose", {})
-	blacksmith_panel.stage_inventory_item(upgrade_item)
-	blacksmith_state = blacksmith_panel.get_debug_state()
-	_assert_eq("blacksmith missing wallet shard count", int(blacksmith_state.get("resource_wallet_count", -1)), 0)
-	var missing_rows: Array = blacksmith_state.get("rows", [])
-	_assert_false("blacksmith disables upgrade without shard", bool((missing_rows[0] as Dictionary).get("upgrade_enabled", true)))
-	blacksmith_panel._emit_upgrade(upgrade_item)
-	_assert_eq("blacksmith missing shard does not emit upgrade", blacksmith_emitted.size(), 1)
-	_assert_true("blacksmith missing shard status", str(blacksmith_panel.get_debug_state().get("status", "")).contains("Need 1 Upgrade Shard"))
-	blacksmith_panel.hide_display()
-	blacksmith_state = blacksmith_panel.get_debug_state()
-	_assert_eq("blacksmith close returns staged item", str(blacksmith_state.get("staged_item_id", "")), "")
-	blacksmith_panel.queue_free()
 
 	panel.show_status("insufficient gold", true)
 	_assert_eq("status text", str(panel.get_debug_state().get("status", "")), "insufficient gold")

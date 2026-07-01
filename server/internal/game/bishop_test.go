@@ -393,6 +393,60 @@ func TestBishopDebugDropRenewStoneSpawnsLoot(t *testing.T) {
 	}
 }
 
+func TestBishopDebugDropRespecBadgeSpawnsLoot(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_debug_respec_badge", "v_bishop_debug_respec_badge", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.SetGameplayDebug(true)
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	startLoot := countEntitiesByType(sim, lootEntity)
+
+	res := sim.Tick([]Input{{
+		MessageID:                  "debug_respec_badge",
+		CorrelationID:              "corr_debug_respec_badge",
+		Type:                       "bishop_debug_drop_respec_badge_intent",
+		BishopDebugDropRespecBadge: &BishopDebugDropWalletBadgeIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertAck(t, res, "debug_respec_badge")
+	if countEntitiesByType(sim, lootEntity) != startLoot+1 {
+		t.Fatalf("loot entities = %d, want %d", countEntitiesByType(sim, lootEntity), startLoot+1)
+	}
+	ev := findEvent(res.Events, "bishop_debug_respec_badge_dropped")
+	if ev == nil || ev.TargetEntityID == "" || ev.Amount == nil || *ev.Amount != 1 {
+		t.Fatalf("bishop_debug_respec_badge_dropped event = %+v", ev)
+	}
+}
+
+func TestBishopDebugDropResurrectionBadgeSpawnsLoot(t *testing.T) {
+	sim, err := NewSimWithWorld("sess_bishop_debug_resurrection_badge", "v_bishop_debug_resurrection_badge", loadRules(t), "vendor_lab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.SetGameplayDebug(true)
+	bishop := findInteractableByDefID(t, sim, "town_bishop")
+	sim.activeLevel().entities[sim.playerID].pos = Vec2{X: bishop.pos.X - 0.5, Y: bishop.pos.Y}
+	startLoot := countEntitiesByType(sim, lootEntity)
+
+	res := sim.Tick([]Input{{
+		MessageID:                        "debug_resurrection_badge",
+		CorrelationID:                    "corr_debug_resurrection_badge",
+		Type:                             "bishop_debug_drop_resurrection_badge_intent",
+		BishopDebugDropResurrectionBadge: &BishopDebugDropWalletBadgeIntent{BishopEntityID: idStr(bishop.id)},
+	}})
+
+	assertAck(t, res, "debug_resurrection_badge")
+	if countEntitiesByType(sim, lootEntity) != startLoot+1 {
+		t.Fatalf("loot entities = %d, want %d", countEntitiesByType(sim, lootEntity), startLoot+1)
+	}
+	ev := findEvent(res.Events, "bishop_debug_resurrection_badge_dropped")
+	if ev == nil || ev.TargetEntityID == "" || ev.Amount == nil || *ev.Amount != 1 {
+		t.Fatalf("bishop_debug_resurrection_badge_dropped event = %+v", ev)
+	}
+}
+
 func countEntitiesByType(sim *Sim, kind string) int {
 	count := 0
 	for _, e := range sim.activeLevel().entities {

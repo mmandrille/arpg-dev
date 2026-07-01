@@ -134,6 +134,55 @@ func (s *Sim) handleBishopDebugDropRenewStone(in Input, res *TickResult) {
 	s.savePlayer(s.defaultPlayer())
 }
 
+func (s *Sim) handleBishopDebugDropRespecBadge(in Input, res *TickResult) {
+	s.handleBishopDebugDropWalletBadge(in, res, in.BishopDebugDropRespecBadge, "respec_badge", "bishop_debug_respec_badge_dropped")
+}
+
+func (s *Sim) handleBishopDebugDropResurrectionBadge(in Input, res *TickResult) {
+	s.handleBishopDebugDropWalletBadge(in, res, in.BishopDebugDropResurrectionBadge, "resurrection_badge", "bishop_debug_resurrection_badge_dropped")
+}
+
+func (s *Sim) handleBishopDebugDropWalletBadge(in Input, res *TickResult, intent *BishopDebugDropWalletBadgeIntent, itemDefID string, eventType string) {
+	if !s.gameplayDebug {
+		res.reject(in.MessageID, "debug_disabled")
+		return
+	}
+	if intent == nil || intent.BishopEntityID == "" {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	bishopEntity, ok, reason := s.resolveBishopIntentTarget(intent.BishopEntityID)
+	if !ok {
+		res.reject(in.MessageID, reason)
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+
+	lootID, ok := s.spawnWalletBadgeLoot(itemDefID, player.pos, s.targetInteractionRadius(player), in.CorrelationID, res)
+	if !ok {
+		res.reject(in.MessageID, "drop_failed")
+		return
+	}
+
+	healed, restored := s.restorePlayerResources(player, res)
+	res.Events = append(res.Events, Event{
+		EventType:      eventType,
+		EntityID:       idStr(bishopEntity.id),
+		TargetEntityID: idStr(lootID),
+		CorrelationID:  in.CorrelationID,
+		Service:        "bishop",
+		Amount:         intPtr(1),
+		Heal:           intPtr(healed),
+		Mana:           intPtr(restored),
+	})
+	res.ack(in.MessageID)
+	s.savePlayer(s.defaultPlayer())
+}
+
 func (s *Sim) handleBishopDebugAction(in Input, res *TickResult, action bishopDebugAction) {
 	if !s.gameplayDebug {
 		res.reject(in.MessageID, "debug_disabled")

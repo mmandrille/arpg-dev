@@ -40,6 +40,8 @@ const (
 	TypeBishopDebugStat              = "bishop_debug_stat_point_intent"
 	TypeBishopDebugDropUpgradeShard  = "bishop_debug_drop_upgrade_shard_intent"
 	TypeBishopDebugDropRenewStone    = "bishop_debug_drop_renew_stone_intent"
+	TypeBishopDebugDropRespecBadge   = "bishop_debug_drop_respec_badge_intent"
+	TypeBishopDebugDropResurrectionBadge = "bishop_debug_drop_resurrection_badge_intent"
 	TypeStashDepositItem    = "stash_deposit_item_intent"
 	TypeStashWithdrawItem   = "stash_withdraw_item_intent"
 	TypeStashDepositGold    = "stash_deposit_gold_intent"
@@ -160,7 +162,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeBishopDebugDropUpgradeShard, TypeBishopDebugDropRenewStone, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeBishopDebugDropUpgradeShard, TypeBishopDebugDropRenewStone, TypeBishopDebugDropRespecBadge, TypeBishopDebugDropResurrectionBadge, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
 		return true
 	}
 	return false
@@ -370,6 +372,18 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.BishopDebugDropRenewStone = &game.BishopDebugDropRenewStoneIntent{BishopEntityID: p.BishopEntityID}
+	case TypeBishopDebugDropRespecBadge:
+		var p bishopDebugPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {
+			return in, false
+		}
+		in.BishopDebugDropRespecBadge = &game.BishopDebugDropWalletBadgeIntent{BishopEntityID: p.BishopEntityID}
+	case TypeBishopDebugDropResurrectionBadge:
+		var p bishopDebugPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {
+			return in, false
+		}
+		in.BishopDebugDropResurrectionBadge = &game.BishopDebugDropWalletBadgeIntent{BishopEntityID: p.BishopEntityID}
 	case TypeStashDepositItem:
 		var p stashItemPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.ItemInstanceID == "" {

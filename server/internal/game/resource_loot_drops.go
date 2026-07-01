@@ -154,3 +154,22 @@ func (s *Sim) spawnUpgradeShardLoot(sourcePos Vec2, sourceRadius float64, depth 
 func (s *Sim) spawnRenewStoneLoot(sourcePos Vec2, sourceRadius float64, depth int, corr string, res *TickResult) (uint64, int, bool) {
 	return s.spawnResourceLoot(RenewStoneItemDefID, sourcePos, sourceRadius, depth, corr, res)
 }
+
+func (s *Sim) spawnWalletBadgeLoot(itemDefID string, sourcePos Vec2, sourceRadius float64, corr string, res *TickResult) (uint64, bool) {
+	if !s.isWalletResourceItem(itemDefID) {
+		return 0, false
+	}
+
+	dropPos, ok := s.findEntityLootDropPosition(sourcePos, sourceRadius)
+	if !ok {
+		dropPos = sourcePos
+	}
+
+	loot := s.newLootEntity(itemDefID, dropPos, nil, goldRollContext{levelNum: 0})
+	loot.id = s.alloc()
+	s.activeLevel().entities[loot.id] = loot
+	res.Changes = append(res.Changes, Change{Op: OpEntitySpawn, Entity: ptrEntityView(s.entityView(loot))})
+	res.Events = append(res.Events, Event{EventType: "loot_dropped", EntityID: idStr(loot.id), CorrelationID: corr})
+
+	return loot.id, true
+}

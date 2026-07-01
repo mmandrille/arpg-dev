@@ -21,6 +21,6 @@
     "max_speed_scale": 2.5
   },
   "enemy_impact_feedback": {
-    "enabled": false
+    "enabled": true
   }
 }

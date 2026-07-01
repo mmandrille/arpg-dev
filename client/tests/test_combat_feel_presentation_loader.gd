@@ -22,7 +22,7 @@ func _test_catalog_loads_positive_values() -> void:
 	CombatFeelPresentationLoaderScript.ensure_loaded()
 	_assert_true("input buffer positive", CombatFeelPresentationLoaderScript.input_buffer_seconds() > 0.0)
 	_assert_true("movement smoothing has catch_up_speed", CombatFeelPresentationLoaderScript.movement_smoothing().has("catch_up_speed"))
-	_assert_false("enemy impact disabled by default", CombatFeelPresentationLoaderScript.enemy_impact_feedback_enabled())
+	_assert_true("enemy impact enabled from catalog", CombatFeelPresentationLoaderScript.enemy_impact_feedback_enabled())
 
 
 func _test_config_facade_matches_loader() -> void:

@@ -89,3 +89,7 @@ static func reset_for_tests() -> void:
 	_level_loading_min_display_seconds = 0.55
 	_attack_animation = {}
 	_enemy_impact_feedback_enabled = true
+
+
+static func set_enemy_impact_feedback_enabled_for_tests(enabled: bool) -> void:
+	_enemy_impact_feedback_enabled = enabled

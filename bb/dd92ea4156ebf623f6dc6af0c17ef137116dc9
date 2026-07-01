@@ -1,0 +1,37 @@
+tools/bot/scenarios/client/blacksmith_shard_merge.json
+  s_468512adab21b7::t_294bb080730e45 19
+  s_468512adab21b7::t_7b52fa755e00a0 23
+tools/bot/scenarios/client/61_material_wallet_window.json
+  s_468512adab21b7::t_2d9c33077de57e 31
+tools/bot/scenarios/client/63_blacksmith_upgrade_history.json
+  s_468512adab21b7::t_05d58a724a5414 209
+  s_468512adab21b7::t_7e8d8034bb270d 217,219
+tools/bot/scenarios/client/39_blacksmith_upgrade_ui.json
+  s_468512adab21b7::t_d1f0052788a52b 218
+  s_468512adab21b7::t_f58b872f9ced12 206-207
+  s_468512adab21b7::t_9fce0646e7d7cf 205
+  s_468512adab21b7::t_7c31a49eadf54d 235,237
+tools/bot/scenarios/client/76_badge_reward_wallet.json
+  s_468512adab21b7::t_e4b1b09706ece1 59
+  s_468512adab21b7::t_1d31c2ee1a6d92 79
+tools/bot/scenarios/client/54_material_wallet_details.json
+  s_468512adab21b7::t_21d578d708e636 31
+tools/bot/scenarios/client/55_blacksmith_recipe_selector.json
+  s_468512adab21b7::t_d62f9a49c1f8f2 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bbdd92ea4156ebf623f6dc6af0c17ef137116dc9",
+  "prompts": {},
+  "sessions": {
+    "s_468512adab21b7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7f989d29-ee64-42cc-a12e-1ea1b96bf844",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

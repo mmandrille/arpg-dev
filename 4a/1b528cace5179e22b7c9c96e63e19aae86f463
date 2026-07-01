@@ -1,0 +1,24 @@
+server/internal/game/affix_names_test.go
+  s_5e9d690624d2be::t_658f8b61f9e5d5 64-65
+server/internal/game/unique_chest_test.go
+  s_5e9d690624d2be::t_86449d5f42ecfe 132
+  s_5e9d690624d2be::t_f6548740167f2f 156
+  s_5e9d690624d2be::t_f30ff54d5b7d5e 140
+  s_5e9d690624d2be::t_c0dc2e9f85e6bd 148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4a1b528cace5179e22b7c9c96e63e19aae86f463",
+  "prompts": {},
+  "sessions": {
+    "s_5e9d690624d2be": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8a17c9df-e848-4b3e-ad10-a5a521ef99ec",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

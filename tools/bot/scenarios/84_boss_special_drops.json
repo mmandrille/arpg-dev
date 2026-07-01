@@ -57,7 +57,7 @@
       "assertion": {
         "type": "entity_count",
         "entity_type": "loot",
-        "display_name": "Savage Bow of Stormrunner Covenant",
+        "display_name": "Stormrunner Covenant Bow",
         "rarity": "set",
         "equals": 1
       },
@@ -94,7 +94,7 @@
     {
       "type": "entity_count",
       "entity_type": "loot",
-      "display_name": "Savage Bow of Stormrunner Covenant",
+      "display_name": "Stormrunner Covenant Bow",
       "rarity": "set",
       "equals": 1
     },

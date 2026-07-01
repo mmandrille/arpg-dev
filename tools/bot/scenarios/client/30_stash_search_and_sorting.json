@@ -100,11 +100,11 @@
     },
     {
       "type": "set_stash_search",
-      "text": "blade"
+      "text": "long"
     },
     {
       "type": "assert_stash_filter",
-      "search_text": "blade",
+      "search_text": "long",
       "sort_mode": "name",
       "filtered_equals": 1,
       "first_item_def_id": "long_sword"
@@ -115,7 +115,7 @@
     },
     {
       "type": "assert_stash_filter",
-      "search_text": "blade",
+      "search_text": "long",
       "sort_mode": "rarity",
       "filtered_equals": 1
     },

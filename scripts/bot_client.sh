@@ -278,7 +278,7 @@ start_preflight() {
       --email "$host_email" \
       --character-name "Market Seller" \
       --metadata-file "$metadata_file" \
-      --item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('item_def_id', 'cave_mail')")" \
+      --item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('item_def_id', 'mail')")" \
       --price-gold "$(json_field "$scenario_path" "d.get('preflight', {}).get('price_gold', 37)")" \
       --offer-email "$offer_email" \
       --offer-item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('offer_item_def_id', '')")" \

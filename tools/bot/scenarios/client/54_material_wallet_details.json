@@ -5,7 +5,7 @@
   "world_id": "vendor_lab",
   "seed": "v237_material_wallet_details",
   "title": "Material wallet details",
-  "description": "Client auto-picks the upgrade shard and verifies the HUD wallet exposes readable material details.",
+  "description": "Client auto-picks the upgrade shard and verifies it lands in the inventory bag (not the HUD wallet, since upgrade_shard is now an inventory item).",
   "client_steps": [
     {
       "type": "wait_ws_open",
@@ -22,24 +22,17 @@
     },
     {
       "type": "wait_event",
-      "event_type": "resource_picked_up",
+      "event_type": "item_picked_up",
       "timeout_s": 15.0
     },
     {
-      "type": "assert_resource_wallet_panel",
-      "visible": true,
-      "text_contains": "Upgrade 1",
-      "tooltip_contains": "Upgrade Badge x1"
+      "type": "assert_inventory_count",
+      "item_def_id": "upgrade_shard",
+      "at_least": 1
     },
     {
       "type": "assert_resource_wallet_panel",
-      "visible": true,
-      "tooltip_contains": "Category: Currency"
-    },
-    {
-      "type": "assert_resource_wallet_panel",
-      "visible": true,
-      "tooltip_contains": "Stored account-wide"
+      "visible": false
     }
   ]
 }

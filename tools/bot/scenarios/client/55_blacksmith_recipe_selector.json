@@ -22,7 +22,7 @@
     },
     {
       "type": "wait_event",
-      "event_type": "resource_picked_up",
+      "event_type": "item_picked_up",
       "timeout_s": 15.0
     },
     {

@@ -100,9 +100,13 @@ func (r *Rules) setItemPayload(setItemID string) (ItemRollPayload, bool) {
 		requirements["level"] = setItem.Piece.MinimumLevel
 	}
 	itemLevel := MaxItemLevelForDepth(maxInt(1, requirements["level"]), r.DungeonGeneration.ItemLevelTiers)
+	displayName := setItem.Piece.DisplayName
+	if displayName == "" {
+		displayName = r.rolledEquipmentDisplayName(template, "set", stats, "of "+setItem.SetDisplayName)
+	}
 	payload := ItemRollPayload{
 		ItemTemplateID: setItem.Piece.BaseTemplateID,
-		DisplayName:    r.rolledEquipmentDisplayName(template, "set", stats, "of "+setItem.SetDisplayName),
+		DisplayName:    displayName,
 		Rarity:         "set",
 		ItemLevel:      1,
 		Stats:          stats,

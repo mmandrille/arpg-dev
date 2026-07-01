@@ -6,7 +6,7 @@ end-to-end proofs — not required for routine slice startup.
 ## CI tiers (`make ci` vs full matrix)
 
 `make ci` runs the curated pack in [`tools/bot/ci_pack.json`](../../tools/bot/ci_pack.json)
-(~22 protocol + ~14 client scenarios) via `SCENARIO=ci`. Target: representative integration in
+(~22 protocol + 13 client scenarios) via `SCENARIO=ci`. Target: representative integration in
 ~5–7 minutes alongside unit tests, not every end-to-end proof on every run.
 
 `make ci-full` and `make bot` / `make bot-client SCENARIO=all` run the full discovered matrix.

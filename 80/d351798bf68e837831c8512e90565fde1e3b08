@@ -1,0 +1,39 @@
+client/scripts/bot_scenario_runner.gd
+  s_e6e8a3f8f9d465::t_5ecfed6d948ac3 1332-1347
+client/tests/test_coop_client.gd
+  s_e6e8a3f8f9d465::t_541a0962da12bf 366-368
+  s_e6e8a3f8f9d465::t_68bcdf947b160f 375-377
+tools/bot/scenarios/client/20_menu_create_join_flow.json
+  s_e6e8a3f8f9d465::t_cb5e7e8e5ddb4f 109-111,119-120
+docs/specs/v392_spec-class-creation-features.md
+  s_e6e8a3f8f9d465::t_2c6f46cef0a551 1-73
+client/scripts/class_creation_summary.gd
+  s_e6e8a3f8f9d465::t_7c86826f424977 1-127
+client/scripts/character_select_panel.gd
+  s_e6e8a3f8f9d465::t_fbd5863382da84 182
+  s_e6e8a3f8f9d465::t_a510638134d5f1 160-161
+  s_e6e8a3f8f9d465::t_f6f8a2949a3400 256-261
+  s_e6e8a3f8f9d465::t_1d95a7c158c343 205,209-210
+  s_e6e8a3f8f9d465::t_0664973577cab4 11
+  s_e6e8a3f8f9d465::t_80f4039f561b12 566-569,574-630
+  s_e6e8a3f8f9d465::t_ee32076a1ddcfd 119
+  s_e6e8a3f8f9d465::t_9cab3ba2895473 62
+client/scripts/class_creation_summary.gd.uid
+  s_e6e8a3f8f9d465::t_f7a057d58ffd21 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "80d351798bf68e837831c8512e90565fde1e3b08",
+  "prompts": {},
+  "sessions": {
+    "s_e6e8a3f8f9d465": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2645b0c9-0ade-4638-a892-f1f2890ec8df",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

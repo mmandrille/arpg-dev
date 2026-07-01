@@ -239,6 +239,4 @@ static func _max_item_level_for_depth(depth: int, levels_per_tier: int) -> int:
 	if depth < 1:
 		return 1
 	var per_tier: int = maxi(1, levels_per_tier)
-	var tier: int = int(depth / per_tier)
-
-	return maxi(1, tier)
+	return 1 + int((depth - 1) / per_tier)

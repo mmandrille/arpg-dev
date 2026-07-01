@@ -9,9 +9,12 @@ func TestMaxItemLevelForDepthUsesTierBands(t *testing.T) {
 		1:  1,
 		9:  1,
 		10: 1,
-		17: 1,
-		25: 2,
-		36: 3,
+		11: 2,
+		17: 2,
+		20: 2,
+		21: 3,
+		25: 3,
+		36: 4,
 	}
 	for depth, want := range cases {
 		if got := MaxItemLevelForDepth(depth, tiers); got != want {

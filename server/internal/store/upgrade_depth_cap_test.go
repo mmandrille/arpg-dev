@@ -24,7 +24,7 @@ func TestAccountStashItemUpgradeRejectsDepthCap(t *testing.T) {
 	}
 	prog := store.CharacterProgression{
 		AccountID: acct.ID, CharacterID: char.ID, CharacterClass: "barbarian", Level: 1, Gold: 500,
-		DeepestDungeonDepth: 25,
+		DeepestDungeonDepth: 20,
 		Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{},
 	}
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, prog); err != nil {
@@ -44,7 +44,7 @@ func TestAccountStashItemUpgradeRejectsDepthCap(t *testing.T) {
 	}
 	bladeRolled := json.RawMessage(`{"damage_min":2,"damage_max":4,"item_level":2}`)
 	sellPrice := testItemSellPrice(t, "cave_blade", bladeRolled)
-	_, _, _, _, err = s.UpgradeAccountStashItem(ctx, acct.ID, "depth_upgrade_stash_"+suffix, sellPrice, 3, 100, 1, 0, 3, map[string]struct{}{"cave_blade": {}}, testUpgradeOptionsWithDepthCap(t, 25))
+	_, _, _, _, err = s.UpgradeAccountStashItem(ctx, acct.ID, "depth_upgrade_stash_"+suffix, sellPrice, 3, 100, 1, 0, 3, map[string]struct{}{"cave_blade": {}}, testUpgradeOptionsWithDepthCap(t, 20))
 	if !errors.Is(err, store.ErrConflict) {
 		t.Fatalf("depth-capped upgrade err = %v, want ErrConflict", err)
 	}

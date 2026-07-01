@@ -12,7 +12,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 )
 
-func (s *Store) RenewInventoryItem(ctx context.Context, accountID, characterID, itemInstanceID string, chargedCost, minStoneLevel int, eligibleItemDefs map[string]struct{}, renewFn func(json.RawMessage) ([]byte, error)) (CharacterItemInstance, int, int, int, error) {
+func (s *Store) RenewInventoryItem(ctx context.Context, accountID, characterID, itemInstanceID string, chargedCost, minStoneLevel int, eligibleItemDefs map[string]struct{}, renewFn func(json.RawMessage) ([]byte, error), preferredStoneCharacterItemID string) (CharacterItemInstance, int, int, int, error) {
 	if chargedCost < 0 || minStoneLevel < 1 || renewFn == nil {
 		return CharacterItemInstance{}, 0, 0, 0, ErrConflict
 	}
@@ -67,7 +67,7 @@ func (s *Store) RenewInventoryItem(ctx context.Context, accountID, characterID, 
 		if _, ok := eligibleItemDefs[item.ItemDefID]; !ok {
 			return ErrConflict
 		}
-		if err := spendLeveledConsumableInTx(ctx, tx, accountID, characterID, game.RenewStoneItemDefID, minStoneLevel); err != nil {
+		if err := spendLeveledConsumableInTx(ctx, tx, accountID, characterID, game.RenewStoneItemDefID, minStoneLevel, preferredStoneCharacterItemID); err != nil {
 			return err
 		}
 		if characterGold+stashGold < chargedCost {
@@ -220,7 +220,10 @@ func (s *Store) MergeLeveledConsumablesFromBag(ctx context.Context, accountID, c
 	return out, err
 }
 
-func spendLeveledConsumableInTx(ctx context.Context, tx pgx.Tx, accountID, characterID, itemDefID string, minLevel int) error {
+func spendLeveledConsumableInTx(ctx context.Context, tx pgx.Tx, accountID, characterID, itemDefID string, minLevel int, preferredCharacterItemID string) error {
+	if preferredCharacterItemID != "" {
+		return spendCharacterLeveledConsumableByID(ctx, tx, accountID, characterID, preferredCharacterItemID, itemDefID, minLevel)
+	}
 	candidates, err := listLeveledConsumableCandidates(ctx, tx, accountID, characterID, itemDefID)
 	if err != nil {
 		return err
@@ -228,8 +231,60 @@ func spendLeveledConsumableInTx(ctx context.Context, tx pgx.Tx, accountID, chara
 	return spendLeveledConsumableCandidate(ctx, tx, accountID, characterID, candidates, minLevel)
 }
 
-func spendUpgradeShardInTx(ctx context.Context, tx pgx.Tx, accountID, characterID string, minLevel int) error {
-	return spendLeveledConsumableInTx(ctx, tx, accountID, characterID, game.UpgradeShardItemDefID, minLevel)
+func spendCharacterLeveledConsumableByID(ctx context.Context, tx pgx.Tx, accountID, characterID, itemInstanceID, itemDefID string, minLevel int) error {
+	if characterID == "" || itemInstanceID == "" {
+		return ErrConflict
+	}
+	var defID string
+	var rolled json.RawMessage
+	err := tx.QueryRow(ctx,
+		`SELECT item_def_id, rolled_stats
+		 FROM character_item_instances
+		 WHERE account_id = $1 AND character_id = $2 AND id = $3 AND location IN ($4, $5)
+		 FOR UPDATE`,
+		accountID, characterID, itemInstanceID, ItemLocationInventory, ItemLocationEquipped,
+	).Scan(&defID, &rolled)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ErrNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("store: lock preferred leveled consumable: %w", err)
+	}
+	if defID != itemDefID {
+		return ErrConflict
+	}
+	level, err := game.LeveledConsumableLevelFromRaw(itemDefID, rolled)
+	if err != nil {
+		return err
+	}
+	if level < minLevel {
+		return ErrConflict
+	}
+	tag, err := tx.Exec(ctx,
+		`DELETE FROM character_item_instances
+		 WHERE account_id = $1 AND character_id = $2 AND id = $3`,
+		accountID, characterID, itemInstanceID,
+	)
+	if err != nil {
+		return fmt.Errorf("store: spend preferred leveled consumable: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	if _, err := tx.Exec(ctx,
+		`UPDATE character_hotbar_slots
+		 SET item_instance_id = NULL, updated_at = now()
+		 WHERE account_id = $1 AND character_id = $2 AND item_instance_id = $3`,
+		accountID, characterID, itemInstanceID,
+	); err != nil {
+		return fmt.Errorf("store: clear hotbar for spent preferred leveled consumable: %w", err)
+	}
+
+	return nil
+}
+
+func spendUpgradeShardInTx(ctx context.Context, tx pgx.Tx, accountID, characterID string, minLevel int, preferredCharacterItemID string) error {
+	return spendLeveledConsumableInTx(ctx, tx, accountID, characterID, game.UpgradeShardItemDefID, minLevel, preferredCharacterItemID)
 }
 
 func listLeveledConsumableCandidates(ctx context.Context, tx pgx.Tx, accountID, characterID, itemDefID string) ([]upgradeShardCandidate, error) {

@@ -421,18 +421,31 @@ func upgrade_account_stash_item(stash_item_id: String, recipe_id: String = "item
 	return {"_error": str(r)}
 
 
-func upgrade_inventory_item(item_instance_id: String, p_character_id: String, recipe_id: String = "item_upgrade") -> Dictionary:
+func upgrade_inventory_item(item_instance_id: String, p_character_id: String, recipe_id: String = "item_upgrade", resource_item_instance_id: String = "") -> Dictionary:
+	var payload := {
+		"item_instance_id": item_instance_id,
+		"character_id": p_character_id,
+		"recipe_id": recipe_id,
+	}
+	if resource_item_instance_id != "":
+		payload["resource_item_instance_id"] = resource_item_instance_id
 	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/items/upgrade",
-		["Authorization: Bearer " + token], JSON.stringify({"item_instance_id": item_instance_id, "character_id": p_character_id, "recipe_id": recipe_id}))
+		["Authorization: Bearer " + token], JSON.stringify(payload))
 	if r.get("_code", 0) == 200 and r.has("body"):
 		return r["body"]
 	push_error("upgrade_inventory_item failed: %s" % r)
 	return {"_error": str(r)}
 
 
-func renew_inventory_item(item_instance_id: String, p_character_id: String) -> Dictionary:
+func renew_inventory_item(item_instance_id: String, p_character_id: String, resource_item_instance_id: String = "") -> Dictionary:
+	var payload := {
+		"item_instance_id": item_instance_id,
+		"character_id": p_character_id,
+	}
+	if resource_item_instance_id != "":
+		payload["resource_item_instance_id"] = resource_item_instance_id
 	var r := _http(HTTPClient.METHOD_POST, "/v0/account-stash/items/renew",
-		["Authorization: Bearer " + token], JSON.stringify({"item_instance_id": item_instance_id, "character_id": p_character_id}))
+		["Authorization: Bearer " + token], JSON.stringify(payload))
 	if r.get("_code", 0) == 200 and r.has("body"):
 		return r["body"]
 	push_error("renew_inventory_item failed: %s" % r)

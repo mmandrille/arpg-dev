@@ -94,6 +94,7 @@ var _rendered_bag_slot_count: int = 0
 var _shop_sell_entity_id: String = ""
 var _market_context: String = ""
 var _market_hidden_item_ids: Array = []
+var _blacksmith_hidden_item_ids: Array = []
 var _blacksmith_context_enabled: bool = false
 
 
@@ -143,6 +144,8 @@ class InventorySlotButton:
 		if InventoryTransferRouterScript.is_equipment_slot(slot_kind):
 			if source == "blacksmith_stage" and data.get("blacksmith_panel", null) != null:
 				return panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
+			if source == "blacksmith_resource_stage" and data.get("blacksmith_panel", null) != null:
+				return false
 			return (source == SLOT_KIND_BAG or source == DRAG_SOURCE_STASH or source == DRAG_SOURCE_CORPSE) and panel._item_can_equip_to(dragged, panel._slot_from_kind(slot_kind))
 		if slot_kind == SLOT_KIND_BAG:
 			if source == DRAG_SOURCE_SHOP_OFFER and str(data.get("offer_id", "")) != "" and str(data.get("shop_entity_id", "")) != "":
@@ -160,6 +163,8 @@ class InventorySlotButton:
 					and str(data.get("stash_item_id", "")) != "":
 				return true
 			if source == "blacksmith_stage" and data.get("blacksmith_panel", null) != null:
+				return true
+			if source == "blacksmith_resource_stage" and data.get("blacksmith_panel", null) != null:
 				return true
 			if source == "blacksmith_merge" and data.get("merge_panel", null) != null:
 				return true
@@ -231,6 +236,20 @@ func set_market_hidden_item_ids(item_instance_ids: Array) -> void:
 
 func set_blacksmith_context(enabled: bool) -> void:
 	_blacksmith_context_enabled = enabled
+	if not enabled:
+		_blacksmith_hidden_item_ids = []
+	if _bag_grid != null:
+		_render()
+
+
+func set_blacksmith_hidden_item_ids(item_instance_ids: Array) -> void:
+	_blacksmith_hidden_item_ids = []
+	for item_id in item_instance_ids:
+		var id := str(item_id)
+		if id != "" and not _blacksmith_hidden_item_ids.has(id):
+			_blacksmith_hidden_item_ids.append(id)
+	if _bag_grid != null:
+		_render()
 
 func set_character_progression(next_progression: Dictionary) -> void:
 	character_progression = next_progression.duplicate(true)
@@ -554,6 +573,8 @@ func _bag_items() -> Array:
 		if _is_equipped_instance(str(item.get("item_instance_id", ""))):
 			continue
 		if _market_context == "offer" and _market_hidden_item_ids.has(str(item.get("item_instance_id", ""))):
+			continue
+		if _blacksmith_context_enabled and _blacksmith_hidden_item_ids.has(str(item.get("item_instance_id", ""))):
 			continue
 		items.append(item)
 	return items
@@ -923,8 +944,12 @@ func _apply_transfer_decision(decision: Dictionary, data: Dictionary) -> void:
 			intent_requested.emit(str(decision.get("intent_type", "")), decision.get("payload", {}))
 		InventoryTransferRouterScript.KIND_BLACKSMITH_UNSTAGE:
 			var blacksmith = data.get("blacksmith_panel", null)
-			if blacksmith != null and blacksmith.has_method("unstage_item"):
-				blacksmith.call("unstage_item")
+			var unstage_kind := str(decision.get("unstage", "item"))
+			if blacksmith != null:
+				if unstage_kind == "resource" and blacksmith.has_method("unstage_resource"):
+					blacksmith.call("unstage_resource")
+				elif blacksmith.has_method("unstage_item"):
+					blacksmith.call("unstage_item")
 		InventoryTransferRouterScript.KIND_BLACKSMITH_MERGE_UNPLACE:
 			var merge_panel = data.get("merge_panel", null)
 			if merge_panel != null and merge_panel.has_method("clear_merge_slot"):

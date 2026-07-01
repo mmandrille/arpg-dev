@@ -348,7 +348,7 @@ func _preview_block() -> Control:
 	var cost_row := HBoxContainer.new()
 	cost_row.add_theme_constant_override("separation", 8)
 	var level_label := Label.new()
-	level_label.text = "Level %d/%d" % [level, max_level]
+	level_label.text = _upgrade_level_label(level)
 	level_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	level_label.add_theme_font_size_override("font_size", DETAIL_FONT_SIZE)
 	level_label.add_theme_color_override("font_color", Color("#b8b8b8"))
@@ -597,7 +597,11 @@ func _item_detail(item: Dictionary) -> String:
 	var lines: Array = item.get("summary_lines", [])
 	if not lines.is_empty():
 		return str(lines[0])
-	return "Level %d/%d" % [_item_level(item), max_level]
+	return _upgrade_level_label(_item_level(item))
+
+
+func _upgrade_level_label(level: int) -> String:
+	return "Actual level %d, Max level %d" % [level, max_level]
 
 
 func _draw_item_icon(slot: Control, item: Dictionary) -> void:

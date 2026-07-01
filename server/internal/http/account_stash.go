@@ -154,7 +154,7 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect item level")
 			return
 		}
-		resourceRequiredLevel = currentLevel + 1
+		resourceRequiredLevel = game.UpgradeShardMinLevel(currentLevel)
 		resourceInventoryCount = countQualifyingLeveledConsumables(stashItems, originalItems, resourceID, resourceRequiredLevel)
 		if resourceInventoryCount < resourceCount {
 			writeError(w, http.StatusConflict, "missing_upgrade_resource", "upgrade resource is required")
@@ -273,7 +273,7 @@ func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID st
 	if err != nil {
 		return store.AccountStashItem{}, 0, 0, 0, false, err
 	}
-	minShardLevel := currentLevel + 1
+	minShardLevel := game.UpgradeShardMinLevel(currentLevel)
 
 	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithShard(
 		r.Context(), accountID, characterID, stashItemID,

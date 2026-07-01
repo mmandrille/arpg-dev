@@ -5,6 +5,7 @@ signal merge_requested(item_instance_ids: Array)
 
 const SLOT_SIZE := Vector2(44, 44)
 const GRID_SIZE := 5
+const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
 
 var bag_items: Array = []
 var _slots: Array = []
@@ -261,10 +262,7 @@ func _consumable_level(item: Dictionary) -> int:
 	var rolled = item.get("rolled_stats", {})
 	if typeof(rolled) != TYPE_DICTIONARY:
 		return 1
-	var payload := rolled as Dictionary
-	if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-		return maxi(1, int((payload.get("stats", {}) as Dictionary).get("item_level", 1)))
-	return maxi(1, int(payload.get("item_level", 1)))
+	return maxi(1, BlacksmithUpgradePreviewScript.rolled_payload_item_level(rolled as Dictionary))
 
 
 class MergeSlotButton:

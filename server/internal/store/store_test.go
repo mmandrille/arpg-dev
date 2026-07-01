@@ -1121,8 +1121,8 @@ func TestAccountStashItemUpgradeSpendsGoldAndPersistsStats(t *testing.T) {
 	if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.DamageMin != 2 {
 		t.Fatalf("upgraded stats = %+v", stats)
 	}
-	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "upgrade_shard_2_"+suffix, 2)
-	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 2, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
+	addUpgradeShardStash(t, s, ctx, acct.ID, char.ID, "upgrade_shard_2_"+suffix, 1)
+	item, gold, cost, success, err = s.UpgradeAccountStashItem(ctx, acct.ID, "upgrade_stash_"+suffix, sellPrice, 2, 100, 1, 0, 1, map[string]struct{}{"cave_blade": {}}, testUpgradeOptions(t))
 	if err != nil {
 		t.Fatal(err)
 	}

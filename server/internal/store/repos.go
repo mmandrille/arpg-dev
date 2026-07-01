@@ -1568,7 +1568,7 @@ func (s *Store) UpgradeAccountStashItemWithShard(ctx context.Context, accountID,
 		if currentLevel >= effectiveMaxLevel {
 			return ErrConflict
 		}
-		if err := spendUpgradeShardInTx(ctx, tx, accountID, characterID, currentLevel+1); err != nil {
+		if err := spendUpgradeShardInTx(ctx, tx, accountID, characterID, minShardLevel); err != nil {
 			return err
 		}
 		if characterGold+stashGold < chargedCost {

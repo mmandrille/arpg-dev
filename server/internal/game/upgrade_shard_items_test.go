@@ -6,6 +6,26 @@ import (
 	"testing"
 )
 
+func TestUpgradeShardMinLevelMatchesItemTier(t *testing.T) {
+	tests := []struct {
+		name         string
+		currentLevel int
+		want         int
+	}{
+		{name: "level zero item uses tier one shard", currentLevel: 0, want: 1},
+		{name: "level one item uses tier one shard", currentLevel: 1, want: 1},
+		{name: "level two item uses tier two shard", currentLevel: 2, want: 2},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := UpgradeShardMinLevel(test.currentLevel); got != test.want {
+				t.Fatalf("UpgradeShardMinLevel(%d) = %d, want %d", test.currentLevel, got, test.want)
+			}
+		})
+	}
+}
+
 func TestInferRollPayloadFromFlatStatsCaveBlade(t *testing.T) {
 	rules, err := LoadRules(filepath.Join("..", "..", "..", "shared", "rules"))
 	if err != nil {

@@ -10,6 +10,7 @@ const BotAssertionHandlersScript := preload("res://scripts/bot_assertion_handler
 const BotActionHandlersScript := preload("res://scripts/bot_action_handlers.gd")
 const BotMarketRowAssertionsScript := preload("res://scripts/bot_market_row_assertions.gd")
 const BotWaitProgressLoggerScript := preload("res://scripts/bot_wait_progress_logger.gd")
+const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
 
 const STEP_TYPES_WAIT := BotStepCatalogScript.STEP_TYPES_WAIT
 const STEP_TYPES_ASSERT := BotStepCatalogScript.STEP_TYPES_ASSERT
@@ -1044,10 +1045,7 @@ func _blacksmith_row_item_level(row: Dictionary) -> int:
 		return int(row.get("item_level", -1))
 	var rolled: Variant = row.get("rolled_stats", {})
 	if typeof(rolled) == TYPE_DICTIONARY:
-		var payload := rolled as Dictionary
-		if typeof(payload.get("stats", {})) == TYPE_DICTIONARY:
-			return int((payload.get("stats", {}) as Dictionary).get("item_level", 0))
-		return int(payload.get("item_level", 0))
+		return BlacksmithUpgradePreviewScript.rolled_payload_item_level(rolled as Dictionary)
 	return -1
 
 

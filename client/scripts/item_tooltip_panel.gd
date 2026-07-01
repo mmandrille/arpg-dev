@@ -330,8 +330,14 @@ func _explicit_item_level(item: Dictionary):
 	if typeof(stats) == TYPE_DICTIONARY and (stats as Dictionary).has("item_level"):
 		return (stats as Dictionary).get("item_level", 0)
 	var rolled_stats = item.get("rolled_stats", {})
-	if typeof(rolled_stats) == TYPE_DICTIONARY and (rolled_stats as Dictionary).has("item_level"):
-		return (rolled_stats as Dictionary).get("item_level", 0)
+	if typeof(rolled_stats) == TYPE_DICTIONARY:
+		var payload := rolled_stats as Dictionary
+		if payload.has("stats") and typeof(payload.get("stats")) == TYPE_DICTIONARY:
+			var nested := payload.get("stats") as Dictionary
+			if nested.has("item_level"):
+				return nested.get("item_level", 0)
+		if payload.has("item_level"):
+			return payload.get("item_level", 0)
 	return null
 
 

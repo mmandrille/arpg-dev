@@ -4,6 +4,8 @@ extends SceneTree
 
 const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
 const BlacksmithMergePanelScript := preload("res://scripts/blacksmith_merge_panel.gd")
+const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
+const BlacksmithRecipesScript := preload("res://scripts/blacksmith_recipes.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -14,6 +16,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	_test_rolled_stats_item_level_reads()
 	var panel := BlacksmithPanelScript.new()
 	root.add_child(panel)
 	await process_frame
@@ -73,6 +76,14 @@ func _run() -> void:
 	panel.queue_free()
 	print("[gdtest] PASS: test_blacksmith_panel (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
+
+
+func _test_rolled_stats_item_level_reads() -> void:
+	var nested := {"rolled_stats": {"stats": {"dex": 5, "item_level": 2}, "requirements": {"level": 2}}}
+	_assert_eq("nested rolled_stats item level", BlacksmithUpgradePreviewScript.item_level(nested), 2)
+	var flattened := {"rolled_stats": {"dex": 5, "item_level": 1}}
+	_assert_eq("flattened rolled_stats item level", BlacksmithUpgradePreviewScript.item_level(flattened), 1)
+	_assert_eq("level one item needs level one shard", BlacksmithRecipesScript.required_resource_level(BlacksmithRecipesScript.RECIPE_ITEM_UPGRADE, flattened), 1)
 
 
 func _assert_eq(label: String, got, expected) -> void:

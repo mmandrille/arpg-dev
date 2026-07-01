@@ -129,7 +129,7 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 		{
 			uniqueID:     "bloodbound_sigil",
 			templateID:   "ring",
-			displayName:  "Vigorous Ring of Blood Price",
+			displayName:  "Bloodbound Sigil",
 			wantStats:    map[string]int{"max_hp": 6, "max_mana": 6},
 			requirements: map[string]int{"level": 5, "magic": 5},
 			effectIDs:    []string{"blood_price"},
@@ -137,7 +137,7 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 		{
 			uniqueID:     "conduit_staff",
 			templateID:   "starter_sorcerer_staff",
-			displayName:  "Mystic Sorcerer Staff of Arcane Conduit",
+			displayName:  "Conduit Staff",
 			wantStats:    map[string]int{"damage_min": 1, "damage_max": 3, "max_mana": 8},
 			requirements: map[string]int{"level": 5, "magic": 5},
 			effectIDs:    []string{"arcane_conduit"},
@@ -145,7 +145,7 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 		{
 			uniqueID:     "embercall_blade",
 			templateID:   "long_sword",
-			displayName:  "Savage Long Sword of Everburning Wound",
+			displayName:  "Embercall Blade",
 			wantStats:    map[string]int{"damage_min": 3, "damage_max": 9, "max_hp": 4},
 			requirements: map[string]int{"level": 5, "str": 5},
 			effectIDs:    []string{"everburning_wound"},
@@ -153,7 +153,7 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 		{
 			uniqueID:     "stormstring_bow",
 			templateID:   "bow",
-			displayName:  "Keen Bow of Stormbound Echo",
+			displayName:  "Stormstring Bow",
 			wantStats:    map[string]int{"damage_min": 2, "damage_max": 6, "attack_speed_percent": 6},
 			requirements: map[string]int{"level": 5, "dex": 5},
 			effectIDs:    []string{"stormbound_echo"},

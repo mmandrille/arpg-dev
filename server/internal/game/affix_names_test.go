@@ -61,8 +61,8 @@ func TestNamedUniqueDisplayNameGrammar(t *testing.T) {
 	if !ok {
 		t.Fatal("namedUniquePayload returned false")
 	}
-	if payload.DisplayName != "Savage Long Sword of Everburning Wound" {
-		t.Fatalf("unique display name = %q, want Savage Long Sword of Everburning Wound", payload.DisplayName)
+	if payload.DisplayName != "Embercall Blade" {
+		t.Fatalf("unique display name = %q, want Embercall Blade", payload.DisplayName)
 	}
 }
 

@@ -1,0 +1,21 @@
+client/scripts/codex_panel.gd
+  s_6106f8dc4a6899::t_988352811d5e8d 192
+  s_6106f8dc4a6899::t_05c57d5f9fb193 96-98
+  s_6106f8dc4a6899::t_82cd572ea18132 204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "512f6fa304ecd1cf76ab7482162865ec4d4dfa9c",
+  "prompts": {},
+  "sessions": {
+    "s_6106f8dc4a6899": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "49f8db69-7cd4-4e7d-9a26-e959b817104c",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

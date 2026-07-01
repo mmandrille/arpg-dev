@@ -413,11 +413,19 @@ func _bot_uses_menu() -> bool:
 	if _truthy_env("ARPG_BOT_MENU"):
 		return true
 	var scenario_path := _env("ARPG_BOT_SCENARIO", "")
-	var file_name := scenario_path.get_file()
-	return file_name.begins_with("08_main_menu_flow") \
-		or file_name.begins_with("20_menu_create_join_flow") \
-		or file_name.begins_with("21_join_game_listed_session") \
-		or file_name.begins_with("27_character_select_summaries")
+	if scenario_path == "" or not FileAccess.file_exists(scenario_path):
+		return false
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(scenario_path))
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return false
+	var steps: Variant = (parsed as Dictionary).get("client_steps", [])
+	if typeof(steps) != TYPE_ARRAY or (steps as Array).is_empty():
+		return false
+	var first_step: Variant = (steps as Array)[0]
+	if typeof(first_step) != TYPE_DICTIONARY:
+		return false
+
+	return str((first_step as Dictionary).get("type", "")) == "wait_main_menu"
 func _mount_bot_controller() -> void:
 	if input_shadow != null and DisplayServer.get_name() != "headless":
 		input_shadow.set_active(true)

@@ -23,6 +23,8 @@ const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effect.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
+const AnimationControllerScript := preload("res://scripts/animation_controller.gd")
+const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -64,6 +66,7 @@ func _initialize() -> void:
 	_test_channel_skill_payload_requires_direction_until_stop()
 	_test_charge_channel_visual_poses_shield_and_trails()
 	_test_loss_popup_shows_for_dead_local_player()
+	_test_teardown_clears_local_player_death_pose()
 	_test_dead_character_rows_are_disabled()
 	_test_character_panel_modes_for_v45()
 	_test_multiplayer_sessions_panel_row_join_affordances()
@@ -285,6 +288,31 @@ func _test_loss_popup_shows_for_dead_local_player() -> void:
 	})
 	_assert_true("dead local player shows loss popup", bool(main.get_bot_state().get("loss_popup_visible", false)))
 	main.loss_popup.queue_free()
+	main.player_anchor.queue_free()
+	main.entities_root.queue_free()
+	main.walls_root.queue_free()
+	main.free()
+
+
+func _test_teardown_clears_local_player_death_pose() -> void:
+	var main = _make_main()
+	var character_visual := Node3D.new()
+	get_root().add_child(character_visual)
+	var ap := AnimationPlayer.new()
+	character_visual.add_child(ap)
+	main.character_visual = character_visual
+	main.player_anim = AnimationControllerScript.new(ap)
+	main.player_reaction = ModelReactionControllerScript.new(character_visual, ClientConstantsScript.PLAYER_TINT)
+	main.player_anim.enter_terminal("death")
+	main.player_reaction.enter_death()
+	_assert_true("death pose precondition anim terminal", main.player_anim.is_terminal())
+	_assert_true("death pose precondition reaction terminal", main.player_reaction.is_terminal())
+	main._teardown_gameplay_state(false)
+	_assert_true("teardown clears anim terminal", not main.player_anim.is_terminal())
+	_assert_true("teardown clears reaction terminal", not main.player_reaction.is_terminal())
+	_assert_true("teardown hides loss popup", main.loss_popup == null or not main.loss_popup.visible)
+	main.player_reaction.dispose()
+	character_visual.queue_free()
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()

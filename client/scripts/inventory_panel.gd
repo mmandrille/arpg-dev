@@ -13,6 +13,7 @@ const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer
 const SetCollectionPanelScript := preload("res://scripts/set_collection_panel.gd")
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
+const ItemRequirementViewsScript := preload("res://scripts/item_requirement_views.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -619,15 +620,16 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 	slot.text = ""
 	slot.tooltip_text = _tooltip(item)
 	var rarity := str(item.get("rarity", "common"))
+	var invalid_requirements := _item_shows_requirement_warning(item)
 	if bool(item.get("_blocked_by_two_handed", false)):
 		slot.tooltip_text = "%s occupies both hands" % str(item.get("display_name", item.get("item_def_id", "Two-handed item")))
 		slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.blocked_slot_style(false))
 		slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.blocked_slot_style(true))
 		slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.blocked_slot_style(true))
 	else:
-		slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.item_slot_style(rarity, false))
-		slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.item_slot_style(rarity, true))
-		slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.item_slot_style(rarity, true))
+		slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.item_slot_style(rarity, false, invalid_requirements))
+		slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.item_slot_style(rarity, true, invalid_requirements))
+		slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.item_slot_style(rarity, true, invalid_requirements))
 	slot.queue_redraw()
 
 
@@ -652,10 +654,13 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var rect := Rect2(Vector2.ZERO, slot.size)
 	var label := str(icon.get("label", _short_label(def_id)))
 	var blocked := bool(item.get("_blocked_by_two_handed", false))
-	ItemIconDrawerScript.draw(slot, rect, icon, label, blocked, 0.38, ICON_FONT_SIZE)
+	var invalid_requirements := _item_shows_requirement_warning(item)
+	ItemIconDrawerScript.draw(slot, rect, icon, label, blocked or invalid_requirements, 0.38, ICON_FONT_SIZE)
 	if blocked:
 		slot.draw_rect(rect.grow(-3.0), Color(0.05, 0.05, 0.05, 0.46), true)
 		return
+	if invalid_requirements:
+		slot.draw_rect(rect.grow(-4.0), Color(1.0, 0.35, 0.35, 0.30), true)
 	_draw_hotbar_badge(slot, item)
 
 
@@ -858,6 +863,13 @@ func _apply_transfer_decision(decision: Dictionary, data: Dictionary) -> void:
 			var merge_panel = data.get("merge_panel", null)
 			if merge_panel != null and merge_panel.has_method("clear_merge_slot"):
 				merge_panel.call("clear_merge_slot", int(data.get("slot_index", -1)))
+
+
+func _item_shows_requirement_warning(item: Dictionary) -> bool:
+	return ItemRequirementViewsScript.shows_invalid_requirement_warning(
+		item,
+		bool(_item_definition_for_item(item).get("equippable", false))
+	)
 
 
 func _item_can_equip_to(item: Dictionary, slot: String) -> bool:

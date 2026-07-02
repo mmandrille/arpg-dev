@@ -40,11 +40,17 @@ static func slot_style(hover: bool) -> StyleBoxFlat:
 	return s
 
 
-static func item_slot_style(rarity: String, hover: bool) -> StyleBoxFlat:
+static func item_slot_style(rarity: String, hover: bool, invalid_requirements: bool = false) -> StyleBoxFlat:
 	var s := slot_style(hover)
 	var base: Color = ITEM_RARITY_BACKGROUNDS.get(rarity.to_lower(), ITEM_RARITY_BACKGROUNDS["common"])
+	if invalid_requirements:
+		base = base.darkened(0.40)
 	s.bg_color = base.lightened(0.12) if hover else base
-	s.border_color = base.lightened(0.46) if hover else base.lightened(0.28)
+	if invalid_requirements:
+		s.border_color = Color("#d45f5f") if hover else Color("#a84545")
+	else:
+		s.border_color = base.lightened(0.46) if hover else base.lightened(0.28)
+
 	return s
 
 

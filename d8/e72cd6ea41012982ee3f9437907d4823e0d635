@@ -1,0 +1,96 @@
+shared/i18n/es.json
+  s_f902c1dbe15187::t_3650634229fafa 25
+shared/i18n/en.json
+  s_f902c1dbe15187::t_9bb58febd953f6 152
+server/internal/game/weapon_elemental_test.go
+  s_f902c1dbe15187::t_9d22c5a4709b3d 36
+  s_f902c1dbe15187::t_8ee36c9b25d482 31,35,37,39-44,80,84,86,88-93
+  s_f902c1dbe15187::t_d3f2e55c942c33 34,83
+  s_f902c1dbe15187::t_191da623a922e7 1-28,38,45-46,48-77,87,94-95,100-127
+  s_f902c1dbe15187::t_45e1fa9c504f3c 81-82
+  s_f902c1dbe15187::t_01588644cb64a4 85
+  s_f902c1dbe15187::t_d46d62cdfd3dae 97-98
+  s_f902c1dbe15187::t_07bda98d933a0b 29-30
+  s_f902c1dbe15187::t_a1e80795fc1d2e 32-33
+  s_f902c1dbe15187::t_cb76a1937562a2 96
+  s_f902c1dbe15187::t_160718b71da7a1 99
+  s_f902c1dbe15187::t_8a8744a85d4cb5 47
+  s_f902c1dbe15187::t_931c4c9d59bec1 78-79
+server/internal/game/weapon_elemental.go
+  s_f902c1dbe15187::t_26ab0d62304a10 90-109
+  s_f902c1dbe15187::t_7919a004f32515 209-244
+  s_f902c1dbe15187::t_df16aaa573be80 177-208
+  s_f902c1dbe15187::t_a7ff6ac6ce05ba 3-4
+  s_f902c1dbe15187::t_3737a4659cf4bb 1-2,5-89,110-176
+PROGRESS.md
+  s_f902c1dbe15187::t_67e94ceba5562b 18
+  s_f902c1dbe15187::t_261cc6355f2a3e 26,28-29
+shared/rules/monsters.v0.json
+  s_f902c1dbe15187::t_0757d8af39632e 390-404
+docs/as-built/v407_weapon-elemental-damage.md
+  s_f902c1dbe15187::t_f5d5bcbbb98b4f 1-29
+shared/rules/worlds.v0.schema.json
+  s_f902c1dbe15187::t_1e13e75dae70da 40-55
+  s_f902c1dbe15187::t_e25755dc698730 99-100
+server/internal/game/item_reroll.go
+  s_f902c1dbe15187::t_791f661c142ebd 40
+server/internal/game/mercenary_character.go
+  s_f902c1dbe15187::t_dc50b4c84d1e2e 297,299
+shared/rules/item_templates.v0.json
+  s_f902c1dbe15187::t_2c8ffb9b8c8628 108,115,122,129,188,195,202,209,260,267,274,281,326,333,340,347,398,405,412,419,472,479,486,493,608,615,622,629,675,682,689,696,742,749,756,763,808,815,822,829,876,883,890,897,957,964,971,978,1032,1039,1046,1053,1456,1463,1470,1477,1531,1538,1545,1552,1651,1658,1665,1672,1734,1741,1748,1755,2127,2134,2141,2148,2200,2207,2214,2221,2280,2287,2294,2301,2362,2369,2376,2383,2436,2443,2450,2457
+tools/validate_shared.py
+  s_f902c1dbe15187::t_12e7171846947d 2349-2355,2360-2369
+.maintainability/file-size-baseline.tsv
+  s_f902c1dbe15187::t_776bc59ed2c3b9 19
+  s_f902c1dbe15187::t_ca704a09e845d1 12
+  s_f902c1dbe15187::t_0586fb5ae3bff0 21-22
+server/internal/game/shop.go
+  s_f902c1dbe15187::t_956d362fe12a2c 820
+  s_f902c1dbe15187::t_67d0424f1f689a 825-827
+tools/bot/scenarios/116_weapon_elemental_damage.json
+  s_f902c1dbe15187::t_c760a8143ef4fe 1-8,10-57
+  s_f902c1dbe15187::t_a29baa4e560d5b 9
+server/internal/game/handlers.go
+  s_f902c1dbe15187::t_dc5339860fdfbd 123
+docs/CODEMAP.md
+  s_f902c1dbe15187::t_34f8157860a4d3 19
+  s_f902c1dbe15187::t_d7164e38ae74a3 20
+server/internal/game/sim.go
+  s_f902c1dbe15187::t_4fe23d18435961 777-784
+  s_f902c1dbe15187::t_07c38d063af837 5927-5929
+  s_f902c1dbe15187::t_4ac6474f8e2dd9 1357
+  s_f902c1dbe15187::t_83bbeffb65717e 1477
+  s_f902c1dbe15187::t_8bcc4cb08e5608 1322
+docs/progress/slice-lifecycle.md
+  s_f902c1dbe15187::t_087250b33d09a9 419
+docs/plans/v407_2026-07-02-weapon-elemental-damage.md
+  s_f902c1dbe15187::t_3bdf45a19b957d 1-2,4-30,32-39,41-46,50-55,57-62,64-69,71-73
+  s_f902c1dbe15187::t_8aa432388724d3 3,31,40,47-49,56,63,70,74-77
+server/internal/game/rules.go
+  s_f902c1dbe15187::t_c4647f297b1de3 721-739
+  s_f902c1dbe15187::t_964afa7b290602 1881-1882
+shared/rules/worlds.v0.json
+  s_f902c1dbe15187::t_5a1e8fdf4b75a9 1583-1626
+docs/specs/v407_spec-weapon-elemental-damage.md
+  s_f902c1dbe15187::t_d9414c76ea1ae1 1-2,4-25,32-53
+  s_f902c1dbe15187::t_ad3dace829925a 26-31
+  s_f902c1dbe15187::t_b275f5fccf38f0 3
+server/internal/game/item_rolls.go
+  s_f902c1dbe15187::t_168c125f1f382c 40-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d8e72cd6ea41012982ee3f9437907d4823e0d635",
+  "prompts": {},
+  "sessions": {
+    "s_f902c1dbe15187": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b55d2564-ae02-4be2-9d6e-130df5199401",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

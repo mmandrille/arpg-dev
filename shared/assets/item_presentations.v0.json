@@ -33,13 +33,13 @@
     },
     "axe": {
       "icon": {
-        "shape": "blade",
+        "shape": "axe",
         "color": "#b85f48",
         "accent": "#ffd0a3",
         "label": "Ax"
       },
       "ground": {
-        "shape": "blade",
+        "shape": "axe",
         "color": "#b85f48",
         "accent": "#ffd0a3",
         "scale": 1.05
@@ -63,16 +63,76 @@
     },
     "war_hammer": {
       "icon": {
-        "shape": "greatsword",
+        "shape": "hammer",
         "color": "#8f5a42",
         "accent": "#f0c8a0",
         "label": "Hm"
       },
       "ground": {
-        "shape": "greatsword",
+        "shape": "hammer",
         "color": "#8f5a42",
         "accent": "#f0c8a0",
         "scale": 1.15
+      },
+      "3d_model": "weapon_starter_axe_v0"
+    },
+    "hammer": {
+      "icon": {
+        "shape": "hammer",
+        "color": "#8a7a5a",
+        "accent": "#ffe8c0",
+        "label": "Hm"
+      },
+      "ground": {
+        "shape": "hammer",
+        "color": "#8a7a5a",
+        "accent": "#ffe8c0",
+        "scale": 1.0
+      },
+      "3d_model": "weapon_rusty_sword_v0"
+    },
+    "mace": {
+      "icon": {
+        "shape": "mace",
+        "color": "#7a6a58",
+        "accent": "#e8d0b0",
+        "label": "Mc"
+      },
+      "ground": {
+        "shape": "mace",
+        "color": "#7a6a58",
+        "accent": "#e8d0b0",
+        "scale": 1.0
+      },
+      "3d_model": "weapon_rusty_sword_v0"
+    },
+    "spear": {
+      "icon": {
+        "shape": "spear",
+        "color": "#8a9a7a",
+        "accent": "#d8f0c8",
+        "label": "Sp"
+      },
+      "ground": {
+        "shape": "spear",
+        "color": "#8a9a7a",
+        "accent": "#d8f0c8",
+        "scale": 1.2
+      },
+      "3d_model": "weapon_rusty_sword_v0"
+    },
+    "halberd": {
+      "icon": {
+        "shape": "halberd",
+        "color": "#6a7a8a",
+        "accent": "#d0e8ff",
+        "label": "Hb"
+      },
+      "ground": {
+        "shape": "halberd",
+        "color": "#6a7a8a",
+        "accent": "#d0e8ff",
+        "scale": 1.25
       },
       "3d_model": "weapon_starter_axe_v0"
     },
@@ -731,30 +791,18 @@
       }
     },
     "hammer": {
-      "family": "sword",
-      "icon": {
-        "shape": "blade",
-        "color": "#8a7a5a",
-        "accent": "#ffe8c0",
-        "label": "Hm"
-      },
-      "ground": {
-        "shape": "blade",
-        "color": "#8a7a5a",
-        "accent": "#ffe8c0",
-        "scale": 1.05
-      }
+      "family": "hammer"
     },
     "morningstar": {
-      "family": "sword",
+      "family": "mace",
       "icon": {
-        "shape": "blade",
+        "shape": "mace",
         "color": "#6a5a4a",
         "accent": "#ffd0a0",
         "label": "Ms"
       },
       "ground": {
-        "shape": "blade",
+        "shape": "mace",
         "color": "#6a5a4a",
         "accent": "#ffd0a0",
         "scale": 1.08
@@ -778,7 +826,7 @@
     "warhammer": {
       "family": "war_hammer",
       "ground": {
-        "shape": "blade",
+        "shape": "hammer",
         "color": "#5a4a3a",
         "accent": "#d8c0a0",
         "scale": 1.2
@@ -828,6 +876,54 @@
     },
     "hunting_quiver": {
       "family": "belt"
+    },
+    "spear": {
+      "family": "spear",
+      "icon": {
+        "shape": "spear",
+        "color": "#7a9a6a",
+        "accent": "#d0ffd0",
+        "label": "2H"
+      },
+      "ground": {
+        "shape": "spear",
+        "color": "#7a9a6a",
+        "accent": "#d0ffd0",
+        "scale": 1.25
+      }
+    },
+    "short_spear": {
+      "family": "spear",
+      "icon": {
+        "shape": "spear",
+        "color": "#8aaa7a",
+        "accent": "#e8ffe0",
+        "label": "Sp"
+      },
+      "ground": {
+        "shape": "spear",
+        "color": "#8aaa7a",
+        "accent": "#e8ffe0",
+        "scale": 1.05
+      }
+    },
+    "halberd": {
+      "family": "halberd"
+    },
+    "mace": {
+      "family": "mace",
+      "icon": {
+        "shape": "mace",
+        "color": "#8a7a68",
+        "accent": "#f0e0c8",
+        "label": "Mc"
+      },
+      "ground": {
+        "shape": "mace",
+        "color": "#8a7a68",
+        "accent": "#f0e0c8",
+        "scale": 1.0
+      }
     }
   }
 }

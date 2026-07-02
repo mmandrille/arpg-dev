@@ -13,11 +13,11 @@
     },
     "iconShape": {
       "type": "string",
-      "enum": ["blade", "greatsword", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "coin", "badge", "leaf", "potion", "box"]
+      "enum": ["blade", "greatsword", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "coin", "badge", "leaf", "potion", "box", "axe", "hammer", "mace", "spear", "halberd"]
     },
     "groundShape": {
       "type": "string",
-      "enum": ["blade", "greatsword", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "coin", "badge", "leaf", "potion", "box"]
+      "enum": ["blade", "greatsword", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "coin", "badge", "leaf", "potion", "box", "axe", "hammer", "mace", "spear", "halberd"]
     }
   },
   "properties": {

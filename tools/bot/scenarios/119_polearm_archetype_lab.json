@@ -1,0 +1,60 @@
+{
+  "id": "polearm_archetype_lab",
+  "ci_tier": "extended",
+  "world_id": "polearm_archetype_lab",
+  "seed": "0000000000000011",
+  "character_class": "barbarian",
+  "title": "Polearm archetype lab",
+  "description": "Prove spear-line archetypes: common names, spear reach hit at distance 2.0, short spear pickup.",
+  "debug_progression": {
+    "level": 3,
+    "stats": {
+      "str": 12,
+      "dex": 7,
+      "vit": 5,
+      "magic": 5
+    }
+  },
+  "steps": [
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "spear"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "spear",
+      "item_template_id": "spear",
+      "rarity": "common",
+      "display_name": "Spear"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "spear",
+      "slot": "main_hand"
+    },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "town_training_doll",
+      "event_type": "monster_damaged",
+      "min_damage": 1
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "short_spear"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "short_spear",
+      "item_template_id": "short_spear",
+      "display_name_contains": "Short Spear"
+    }
+  ],
+  "assertions": [
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "target_monster_def_id": "town_training_doll",
+      "min_damage": 1
+    }
+  ]
+}

@@ -2156,7 +2156,7 @@
       "name": "Hammer",
       "category": "equipment",
       "equipment_category": "weapon_1h",
-      "item_type": "sword",
+      "item_type": "hammer",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
@@ -2229,7 +2229,7 @@
       "name": "Morningstar",
       "category": "equipment",
       "equipment_category": "weapon_1h",
-      "item_type": "sword",
+      "item_type": "mace",
       "slot": "main_hand",
       "equippable": true,
       "handedness": "one_handed",
@@ -2688,6 +2688,315 @@
           "min": 1,
           "max": 3,
           "weight": 2,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "spear": {
+      "name": "Spear",
+      "category": "equipment",
+      "equipment_category": "weapon_2h",
+      "item_type": "spear",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
+      "attack_mode": "melee",
+      "attack_speed": 0.8,
+      "reach": 3.0,
+      "requirements": {
+        "level": 1,
+        "str": 10
+      },
+      "base_stats": {
+        "damage_min": 5,
+        "damage_max": 9
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 4,
+          "weight": 3
+        },
+        {
+          "stat": "str",
+          "min": 1,
+          "max": 3,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "short_spear": {
+      "name": "Short Spear",
+      "category": "equipment",
+      "equipment_category": "weapon_1h",
+      "item_type": "spear",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": [
+        "main_hand"
+      ],
+      "attack_mode": "melee",
+      "attack_speed": 1.05,
+      "reach": 2.2,
+      "requirements": {
+        "level": 1,
+        "str": 6,
+        "dex": 6
+      },
+      "base_stats": {
+        "damage_min": 3,
+        "damage_max": 6
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 2
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 2
+        },
+        {
+          "stat": "dex",
+          "min": 1,
+          "max": 3,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "attack_speed_percent",
+          "min": 2,
+          "max": 8,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "halberd": {
+      "name": "Halberd",
+      "category": "equipment",
+      "equipment_category": "weapon_2h",
+      "item_type": "halberd",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "two_handed",
+      "occupies_hands": [
+        "main_hand",
+        "off_hand"
+      ],
+      "attack_mode": "melee",
+      "attack_speed": 0.9,
+      "reach": 2.5,
+      "requirements": {
+        "level": 1,
+        "str": 11
+      },
+      "base_stats": {
+        "damage_min": 6,
+        "damage_max": 10
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 4,
+          "weight": 3
+        },
+        {
+          "stat": "str",
+          "min": 1,
+          "max": 3,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        }
+      ],
+      "effect_pool": []
+    },
+    "mace": {
+      "name": "Mace",
+      "category": "equipment",
+      "equipment_category": "weapon_1h",
+      "item_type": "mace",
+      "slot": "main_hand",
+      "equippable": true,
+      "handedness": "one_handed",
+      "occupies_hands": [
+        "main_hand"
+      ],
+      "attack_mode": "melee",
+      "attack_speed": 0.92,
+      "reach": 1.5,
+      "requirements": {
+        "level": 1,
+        "str": 8
+      },
+      "base_stats": {
+        "damage_min": 4,
+        "damage_max": 7
+      },
+      "rollable_stats": [
+        {
+          "stat": "damage_min",
+          "min": 0,
+          "max": 2,
+          "weight": 3
+        },
+        {
+          "stat": "damage_max",
+          "min": 1,
+          "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "str",
+          "min": 1,
+          "max": 3,
+          "weight": 2,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 3,
+          "weight": 2,
+          "min_rarity": "rare"
+        },
+        {
+          "stat": "bonus_cold_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_fire_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_lightning_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "bonus_poison_damage",
+          "min": 1,
+          "max": 6,
+          "weight": 1,
           "min_rarity": "magic"
         }
       ],

@@ -1546,6 +1546,20 @@
         { "type": "loot", "item_template_id": "long_sword", "position": { "x": 5, "y": 5 } }
       ]
     },
+    "polearm_archetype_lab": {
+      "player": {
+        "position": { "x": 11, "y": 18 }
+      },
+      "entities": [
+        { "type": "loot", "item_template_id": "spear", "position": { "x": 10, "y": 18 } },
+        { "type": "loot", "item_template_id": "short_spear", "position": { "x": 10, "y": 19 } },
+        {
+          "type": "monster",
+          "monster_def_id": "town_training_doll",
+          "position": { "x": 13, "y": 18 }
+        }
+      ]
+    },
     "damage_types_lab": {
       "player": {
         "position": {

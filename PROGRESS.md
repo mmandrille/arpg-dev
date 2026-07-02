@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-02 (v409 town-training-doll)
+Last updated: 2026-07-02 (v410 polearm-archetypes-and-family-icons)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-02 (v409 town-training-doll)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v409 — town-training-doll |
+| **Latest completed slice** | v410 — polearm-archetypes-and-family-icons |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-02 — `make ci` green (v409 autoloop batch) |
+| **CI gate** | 2026-07-02 — focused verification green (v410 autoloop); final `make ci` pending |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v408 — [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md) (2026-07-02; official cadence) |
 | **Next engineering review** | ~v418 milestone |

@@ -290,6 +290,22 @@
               "weight": 2
             },
             {
+              "item_template_id": "spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "short_spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "halberd",
+              "weight": 2
+            },
+            {
+              "item_template_id": "mace",
+              "weight": 2
+            },
+            {
               "item_template_id": "wand",
               "weight": 2
             },
@@ -647,6 +663,22 @@
               "weight": 2
             },
             {
+              "item_template_id": "spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "short_spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "halberd",
+              "weight": 2
+            },
+            {
+              "item_template_id": "mace",
+              "weight": 2
+            },
+            {
               "item_template_id": "wand",
               "weight": 2
             },
@@ -759,6 +791,22 @@
             },
             {
               "item_template_id": "morningstar",
+              "weight": 2
+            },
+            {
+              "item_template_id": "spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "short_spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "halberd",
+              "weight": 2
+            },
+            {
+              "item_template_id": "mace",
               "weight": 2
             },
             {
@@ -979,6 +1027,22 @@
               "weight": 2
             },
             {
+              "item_template_id": "spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "short_spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "halberd",
+              "weight": 2
+            },
+            {
+              "item_template_id": "mace",
+              "weight": 2
+            },
+            {
               "item_template_id": "wand",
               "weight": 2
             },
@@ -1094,6 +1158,22 @@
               "weight": 2
             },
             {
+              "item_template_id": "spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "short_spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "halberd",
+              "weight": 2
+            },
+            {
+              "item_template_id": "mace",
+              "weight": 2
+            },
+            {
               "item_template_id": "wand",
               "weight": 2
             },
@@ -1206,6 +1286,22 @@
             },
             {
               "item_template_id": "morningstar",
+              "weight": 2
+            },
+            {
+              "item_template_id": "spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "short_spear",
+              "weight": 2
+            },
+            {
+              "item_template_id": "halberd",
+              "weight": 2
+            },
+            {
+              "item_template_id": "mace",
               "weight": 2
             },
             {

@@ -15,6 +15,16 @@ static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label:
 	match shape:
 		"blade":
 			_draw_blade(canvas, center, min_side, color, accent)
+		"axe":
+			_draw_axe(canvas, center, min_side, color, accent)
+		"hammer":
+			_draw_hammer(canvas, center, min_side, color, accent)
+		"mace":
+			_draw_mace(canvas, center, min_side, color, accent)
+		"spear":
+			_draw_spear(canvas, center, min_side, color, accent)
+		"halberd":
+			_draw_halberd(canvas, center, min_side, color, accent)
 		"greatsword":
 			_draw_greatsword(canvas, center, min_side, color, accent)
 		"staff":
@@ -54,6 +64,66 @@ static func _draw_blade(canvas: Control, center: Vector2, min_side: float, color
 	var b := center + Vector2(min_side * 0.24, -min_side * 0.24)
 	canvas.draw_line(a, b, color, maxf(4.0, min_side * 0.09), true)
 	canvas.draw_line(a + Vector2(-min_side * 0.07, min_side * 0.07), a + Vector2(min_side * 0.10, -min_side * 0.10), accent, maxf(3.0, min_side * 0.065), true)
+
+
+static func _draw_axe(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
+	var handle_top := center + Vector2(0.0, -min_side * 0.28)
+	var handle_bottom := center + Vector2(0.0, min_side * 0.28)
+	canvas.draw_line(handle_bottom, handle_top, accent, maxf(3.0, min_side * 0.06), true)
+	var blade_pts := PackedVector2Array([
+		center + Vector2(-min_side * 0.28, -min_side * 0.18),
+		center + Vector2(min_side * 0.10, -min_side * 0.30),
+		center + Vector2(min_side * 0.16, -min_side * 0.08),
+	])
+	canvas.draw_colored_polygon(blade_pts, color)
+
+
+static func _draw_hammer(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
+	var handle_top := center + Vector2(0.0, -min_side * 0.10)
+	var handle_bottom := center + Vector2(0.0, min_side * 0.30)
+	canvas.draw_line(handle_bottom, handle_top, accent, maxf(3.0, min_side * 0.06), true)
+	canvas.draw_rect(
+		Rect2(center + Vector2(-min_side * 0.22, -min_side * 0.28), Vector2(min_side * 0.44, min_side * 0.18)),
+		color,
+		true
+	)
+
+
+static func _draw_mace(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
+	var handle_top := center + Vector2(0.0, -min_side * 0.04)
+	var handle_bottom := center + Vector2(0.0, min_side * 0.30)
+	canvas.draw_line(handle_bottom, handle_top, accent, maxf(3.0, min_side * 0.06), true)
+	var head_center := center + Vector2(0.0, -min_side * 0.16)
+	canvas.draw_circle(head_center, min_side * 0.16, color)
+	for i in range(6):
+		var angle := float(i) * TAU / 6.0
+		var spike := head_center + Vector2(cos(angle), sin(angle)) * min_side * 0.22
+		canvas.draw_line(head_center, spike, accent, maxf(2.0, min_side * 0.035), true)
+
+
+static func _draw_spear(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
+	var tip := center + Vector2(0.0, -min_side * 0.34)
+	var butt := center + Vector2(0.0, min_side * 0.30)
+	canvas.draw_line(butt, tip, color, maxf(3.0, min_side * 0.055), true)
+	var head := PackedVector2Array([
+		tip,
+		center + Vector2(-min_side * 0.10, -min_side * 0.16),
+		center + Vector2(min_side * 0.10, -min_side * 0.16),
+	])
+	canvas.draw_colored_polygon(head, accent)
+
+
+static func _draw_halberd(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:
+	var tip := center + Vector2(0.0, -min_side * 0.34)
+	var butt := center + Vector2(0.0, min_side * 0.30)
+	canvas.draw_line(butt, tip, accent, maxf(3.0, min_side * 0.055), true)
+	var blade_pts := PackedVector2Array([
+		center + Vector2(-min_side * 0.26, -min_side * 0.20),
+		center + Vector2(min_side * 0.18, -min_side * 0.28),
+		center + Vector2(min_side * 0.10, -min_side * 0.10),
+	])
+	canvas.draw_colored_polygon(blade_pts, color)
+	canvas.draw_line(center + Vector2(-min_side * 0.08, -min_side * 0.12), center + Vector2(min_side * 0.08, -min_side * 0.12), color, maxf(2.5, min_side * 0.05), true)
 
 
 static func _draw_greatsword(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:

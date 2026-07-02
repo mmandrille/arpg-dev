@@ -36,7 +36,7 @@
           "name": { "type": "string", "minLength": 1 },
           "category": { "type": "string", "enum": ["equipment"] },
           "equipment_category": { "type": "string", "enum": ["weapon_1h", "weapon_2h", "off_hand", "gear", "jewelry", "class_specialist"] },
-          "item_type": { "type": "string", "enum": ["sword", "greatsword", "axe", "staff", "bow", "shield", "dagger", "war_hammer", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "book"] },
+          "item_type": { "type": "string", "enum": ["sword", "greatsword", "axe", "staff", "bow", "shield", "dagger", "hammer", "mace", "spear", "halberd", "war_hammer", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "book"] },
           "class_required": { "type": "string", "enum": ["barbarian", "sorcerer", "paladin", "rogue", "ranger"] },
           "slot": {
             "type": "string",

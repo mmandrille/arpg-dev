@@ -143,6 +143,7 @@ run_gate "GDScript golden test" "[gdtest] PASS" res://tests/test_golden.gd
 
 # 2. Item visual resolution test (server-independent; acceptance #14).
 run_gate "GDScript item visual resolution test" "[gdtest] PASS" res://tests/test_item_visuals.gd
+run_gate "GDScript item icon drawer test" "test_item_icon_drawer: ok" res://tests/test_item_icon_drawer.gd
 run_gate "GDScript projectile visual test" "[gdtest] PASS: test_projectile_visuals" res://tests/test_projectile_visuals.gd
 
 # 2b. Rig gate: both GLBs import as skinned Skeleton3D (spec §10 fail-fast).

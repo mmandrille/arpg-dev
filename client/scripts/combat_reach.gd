@@ -62,6 +62,10 @@ static func _slot_attack_reach(inventory: Array, equipped: Dictionary, slot: Str
 	return reach if reach > 0.0 else ClientConstants.LOCAL_UNARMED_REACH
 
 
+static func is_rogue_dual_wield(inventory: Array, equipped: Dictionary, character_class: String) -> bool:
+	return _has_rogue_offhand_melee_weapon(inventory, equipped, character_class)
+
+
 static func _has_rogue_offhand_melee_weapon(inventory: Array, equipped: Dictionary, character_class: String) -> bool:
 	if character_class != "rogue":
 		return false

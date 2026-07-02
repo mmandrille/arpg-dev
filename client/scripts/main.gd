@@ -2498,6 +2498,8 @@ func _basic_attack_cooldown_seconds() -> float:
 		ticks = int(derived.get("attack_interval_ticks", ClientConstants.DEFAULT_ATTACK_INTERVAL_TICKS))
 	if ticks <= 0:
 		ticks = ClientConstants.DEFAULT_ATTACK_INTERVAL_TICKS
+	if CombatReachScript.is_rogue_dual_wield(inventory, equipped, str(character_progression.get("character_class", ""))):
+		ticks = ceili(float(ticks) / 1.5)
 	return maxf(ClientConstants.SEND_INTERVAL, float(ticks) / ClientConstants.SERVER_TICK_RATE)
 
 

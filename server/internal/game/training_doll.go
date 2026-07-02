@@ -2,6 +2,10 @@ package game
 
 const townTrainingDollDefID = "town_training_doll"
 
+func trainingDollMaxHPFromHost(hostMaxHP int, def MonsterDef) int {
+	return hostMaxHP * def.effectiveTrainingHPMultiplier()
+}
+
 func (s *Sim) syncTownTrainingDollsFromHost() {
 	if !s.multiLevel {
 		return
@@ -25,8 +29,8 @@ func (s *Sim) syncTownTrainingDollsFromHost() {
 			continue
 		}
 
-		monster.maxHP = player.maxHP
-		monster.hp = player.maxHP
+		monster.maxHP = trainingDollMaxHPFromHost(player.maxHP, s.rules.Monsters[monster.monsterDefID])
+		monster.hp = monster.maxHP
 		monster.monsterArmor = stats.Armor
 		monster.monsterBlockPercent = stats.BlockPercent
 	}

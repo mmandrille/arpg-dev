@@ -61,6 +61,7 @@
             "leash_radius": { "type": "number", "exclusiveMinimum": 0 },
             "move_speed": { "type": "number", "exclusiveMinimum": 0 },
             "training_target": { "type": "boolean" },
+            "training_hp_multiplier": { "type": "integer", "minimum": 1 },
             "revive_delay_ticks": { "type": "integer", "minimum": 1 }
           }
         }

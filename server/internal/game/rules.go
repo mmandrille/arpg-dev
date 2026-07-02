@@ -521,8 +521,17 @@ type MonsterDef struct {
 	LeashRadius       float64            `json:"leash_radius,omitempty"`
 	MoveSpeed         float64            `json:"move_speed,omitempty"`
 	XPReward          int                `json:"xp_reward,omitempty"`
-	TrainingTarget    bool               `json:"training_target,omitempty"`
-	ReviveDelayTicks  int                `json:"revive_delay_ticks,omitempty"`
+	TrainingTarget      bool               `json:"training_target,omitempty"`
+	TrainingHPMultiplier int               `json:"training_hp_multiplier,omitempty"`
+	ReviveDelayTicks    int                `json:"revive_delay_ticks,omitempty"`
+}
+
+func (d MonsterDef) effectiveTrainingHPMultiplier() int {
+	if d.TrainingHPMultiplier < 1 {
+		return 1
+	}
+
+	return d.TrainingHPMultiplier
 }
 
 func (d MonsterDef) effectiveAssistRadius() float64 {

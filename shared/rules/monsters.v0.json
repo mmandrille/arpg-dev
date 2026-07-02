@@ -12,6 +12,7 @@
       "armor": 0,
       "block_percent": 0,
       "training_target": true,
+      "training_hp_multiplier": 10,
       "revive_delay_ticks": 30,
       "name_key": "monster.town_training_doll.name"
     },

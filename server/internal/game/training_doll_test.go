@@ -11,9 +11,11 @@ func TestTrainingDollMirrorsHostDefensiveStats(t *testing.T) {
 	player := sim.levels[townLevel].entities[sim.playerID]
 	doll := findMonsterByDefID(t, sim, townTrainingDollDefID)
 	stats, _ := sim.playerEffectiveCombatStats()
+	dollDef := sim.rules.Monsters[townTrainingDollDefID]
+	wantHP := trainingDollMaxHPFromHost(player.maxHP, dollDef)
 
-	if doll.maxHP != player.maxHP || doll.hp != player.maxHP {
-		t.Fatalf("doll hp = %d/%d, want player max %d", doll.hp, doll.maxHP, player.maxHP)
+	if doll.maxHP != wantHP || doll.hp != wantHP {
+		t.Fatalf("doll hp = %d/%d, want host max %d x%d = %d", doll.hp, doll.maxHP, player.maxHP, dollDef.effectiveTrainingHPMultiplier(), wantHP)
 	}
 
 	if doll.monsterArmor != stats.Armor {

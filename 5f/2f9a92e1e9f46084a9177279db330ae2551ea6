@@ -1,0 +1,135 @@
+client/scripts/training_damage_log_bridge.gd
+  s_07d51bd710a1b8::t_ac6f5019e5f89d 1-55
+server/internal/game/training_doll.go
+  s_07d51bd710a1b8::t_426ac1fb447ee6 88,93
+  s_07d51bd710a1b8::t_07e878c0d9d13f 1-87,89-92,94-169
+tools/bot/scenarios/client/91_training_damage_log.json
+  s_07d51bd710a1b8::t_ce34672f393ae3 3,9,11-12,15-19,31-32,36,39-40
+  s_07d51bd710a1b8::t_50382ada9e58b0 1-2,4-8,10,13-14,20-30,33-35,37-38,41-44
+docs/plans/v409_2026-07-02-town-training-doll.md
+  s_07d51bd710a1b8::t_11fa533c292e58 47,54,61,69,73-77
+  s_07d51bd710a1b8::t_4eb189730e11e2 40
+  s_07d51bd710a1b8::t_2ebe3df1bcb4b0 1-39,41-46,48-53,55-60,62-68,70-72
+shared/rules/monsters.v0.schema.json
+  s_07d51bd710a1b8::t_16b31df5f571f1 62-64
+client/scripts/main.gd
+  s_07d51bd710a1b8::t_5210f78c946b68 39
+  s_07d51bd710a1b8::t_e07cdac2c5ea31 6289,6292
+  s_07d51bd710a1b8::t_7cca9d22e81bcb 1641
+  s_07d51bd710a1b8::t_6fb02491ebf399 1640
+  s_07d51bd710a1b8::t_085dc14656764d 3880
+  s_07d51bd710a1b8::t_d96434566964d1 2129,2131
+  s_07d51bd710a1b8::t_9d20af3a572d09 5434,5436-5437
+  s_07d51bd710a1b8::t_271b3de7dbb424 1656
+  s_07d51bd710a1b8::t_a3d590fa4c4d75 6092
+  s_07d51bd710a1b8::t_bbcab044699e8f 38
+  s_07d51bd710a1b8::t_2a9c71c4e630bc 1642
+  s_07d51bd710a1b8::t_17b6798fd8803c 268
+  s_07d51bd710a1b8::t_747ec2e3a75f18 5435
+  s_07d51bd710a1b8::t_4123e65970c8df 2130
+  s_07d51bd710a1b8::t_a3b1da3fc4200a 6287-6288,6290-6291
+server/internal/game/damage_types.go
+  s_07d51bd710a1b8::t_a1bdcce45f27d1 90,93-101,106
+client/scripts/training_doll_visual.gd
+  s_07d51bd710a1b8::t_cc6ad4d8d8a95d 1-34
+server/internal/game/types.go
+  s_07d51bd710a1b8::t_281fcf69f565ac 352
+shared/i18n/en.json
+  s_07d51bd710a1b8::t_25bde8d4063d11 133
+shared/i18n/es.json
+  s_07d51bd710a1b8::t_d9e107602f96a5 46
+client/scripts/bot_training_damage_log_actions.gd
+  s_07d51bd710a1b8::t_a2295c97cf1348 1-20
+server/internal/game/tick_results.go
+  s_07d51bd710a1b8::t_aebd7eaa1cfd7e 86-88
+client/scripts/combat_breakdown_format.gd
+  s_07d51bd710a1b8::t_4c9e7eeb605267 1-34
+docs/specs/v409_spec-town-training-doll.md
+  s_07d51bd710a1b8::t_6e205bd82ed05a 1-78
+client/scripts/training_damage_log_panel.gd
+  s_07d51bd710a1b8::t_f68adc69347a04 27-30
+  s_07d51bd710a1b8::t_54e15474f08e75 1-26,31-141
+scripts/client_smoke.sh
+  s_07d51bd710a1b8::t_4088afe0e0e2d7 203
+docs/CODEMAP.md
+  s_07d51bd710a1b8::t_a3cfdc44a8bddb 19
+shared/rules/worlds.v0.json
+  s_07d51bd710a1b8::t_cf7d9320b11dbf 2406-2432
+client/scripts/bot_step_catalog.gd
+  s_07d51bd710a1b8::t_b16709ec07d822 33
+  s_07d51bd710a1b8::t_419af9da648d2f 68-69
+.maintainability/file-size-baseline.tsv
+  s_07d51bd710a1b8::t_d85be7350e34a3 25
+tools/bot/run.py
+  s_07d51bd710a1b8::t_fe2d28e28ef8b7 2218-2221
+server/internal/game/sim.go
+  s_07d51bd710a1b8::t_124b7fca135d03 1345,1347-1349,1359,1361,1363-1364,1372-1379
+  s_07d51bd710a1b8::t_b8f8cd02e9e837 560,573
+  s_07d51bd710a1b8::t_f3f6a1da73471e 188-190
+  s_07d51bd710a1b8::t_f5e6fc7cfe7137 1398,1404-1405,1413-1417
+PROGRESS.md
+  s_07d51bd710a1b8::t_81d314b2ac65f7 18
+  s_07d51bd710a1b8::t_3c63bdc1b75a2d 26,28
+client/scripts/bot_controller.gd
+  s_07d51bd710a1b8::t_3ed776ee7ec819 188,190
+  s_07d51bd710a1b8::t_2c789769bbac1d 22
+  s_07d51bd710a1b8::t_edc4f8129e48ca 189,191
+shared/assets/monster_visuals.v0.schema.json
+  s_07d51bd710a1b8::t_81179a4de0ad6f 22
+docs/progress/slice-lifecycle.md
+  s_07d51bd710a1b8::t_fa15b919d8e645 420
+client/scripts/bot_assertion_handlers.gd
+  s_07d51bd710a1b8::t_75faa60e50684a 29-39
+server/internal/game/combat_breakdown.go
+  s_07d51bd710a1b8::t_3d260989798a9c 1-2,13-130
+  s_07d51bd710a1b8::t_0dc5d45637cc09 3-7
+  s_07d51bd710a1b8::t_c36cea081c1680 8-12
+docs/progress/scenario-movement-audit.tsv
+  s_07d51bd710a1b8::t_5373cd1bcdc137 221-222
+  s_07d51bd710a1b8::t_e8f86da0a7548e 81-82
+server/internal/game/training_doll_test.go
+  s_07d51bd710a1b8::t_a12b0657be545e 41,68
+  s_07d51bd710a1b8::t_6b45ae7b985f40 87-95
+  s_07d51bd710a1b8::t_b219e495e0d0c9 1-40,42-43,45-67,69-86,96-107
+  s_07d51bd710a1b8::t_1d821cb185bc7c 44
+shared/assets/monster_visuals.v0.json
+  s_07d51bd710a1b8::t_062fd5e8713a77 4,6-10
+  s_07d51bd710a1b8::t_eeee8ca07b280d 5
+server/internal/game/companion_ai.go
+  s_07d51bd710a1b8::t_77f35d54a7c463 27-29
+docs/as-built/v409_town-training-doll.md
+  s_07d51bd710a1b8::t_a996602334b9b0 1-37
+shared/rules/monsters.v0.json
+  s_07d51bd710a1b8::t_9197be197c071c 4-17
+shared/assets/model_preview_catalog.v0.json
+  s_07d51bd710a1b8::t_1e89d88223a899 97
+tools/bot/scenarios/118_town_training_doll.json
+  s_07d51bd710a1b8::t_58bfc23de18d34 1-6,8-26
+  s_07d51bd710a1b8::t_b19e45af840367 7
+server/internal/game/rules.go
+  s_07d51bd710a1b8::t_a780ca4df9af2f 524-525
+client/tests/test_training_damage_log_panel.gd
+  s_07d51bd710a1b8::t_91b21c06986a22 1-5,7,9,15,18-36,38-41,43-52,55-56,58
+  s_07d51bd710a1b8::t_96c3ea6146c45e 6,8,10-14,16-17,37,42,54,57
+  s_07d51bd710a1b8::t_bc9c4970bd52fe 53
+shared/protocol/state_delta.v8.schema.json
+  s_07d51bd710a1b8::t_6a4703b87e7211 1036-1044
+  s_07d51bd710a1b8::t_70ef504d0794c3 481-484
+  s_07d51bd710a1b8::t_da4ce460067d18 661-665
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5f2f9a92e1e9f46084a9177279db330ae2551ea6",
+  "prompts": {},
+  "sessions": {
+    "s_07d51bd710a1b8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d68ca6fa-d517-4566-aa69-574a730cc02f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

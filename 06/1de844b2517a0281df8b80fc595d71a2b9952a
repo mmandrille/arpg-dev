@@ -1,0 +1,73 @@
+shared/rules/main_config.v0.schema.json
+  s_f902c1dbe15187::t_8ba3b5baae3315 147-198
+server/internal/game/weapon_elemental_procs.go
+  s_f902c1dbe15187::t_aefa007532e6bf 1-87,97,99-326
+  s_f902c1dbe15187::t_6adfb61a7c57a8 88-96,98
+shared/rules/worlds.v0.json
+  s_f902c1dbe15187::t_8687af0511d864 1627-1662
+docs/as-built/v408_weapon-elemental-procs.md
+  s_f902c1dbe15187::t_f289886a8bebc7 1-17
+server/internal/game/weapon_elemental_procs_test.go
+  s_f902c1dbe15187::t_c0cf28e821576d 78-83,85-87,90-111
+  s_f902c1dbe15187::t_15693dbd698293 89
+  s_f902c1dbe15187::t_b2c200ee2aba8d 88
+  s_f902c1dbe15187::t_199440d9b9a9da 1-77,112-113
+  s_f902c1dbe15187::t_849c1d6342cdc0 84
+shared/rules/main_config.v0.json
+  s_f902c1dbe15187::t_1c218ee268dd6f 60-86
+server/internal/game/companion_ai.go
+  s_f902c1dbe15187::t_15cf4e9ebfde42 533-536
+  s_f902c1dbe15187::t_9dd674e19b30db 495
+shared/i18n/es.json
+  s_f902c1dbe15187::t_98fc1995ed929f 30
+tools/bot/scenarios/117_weapon_elemental_procs.json
+  s_f902c1dbe15187::t_1df15890c5f33e 5
+  s_f902c1dbe15187::t_a94b357e69fdea 1-3,6-10,13-15,33-34,42,48-50
+  s_f902c1dbe15187::t_3796e1e1e82a9d 4,16,18,32
+  s_f902c1dbe15187::t_6c79ffbf7e82f8 11-12,17,19-31,35-41,43-47
+shared/rules/monsters.v0.json
+  s_f902c1dbe15187::t_819d395c856418 375-386
+server/internal/game/sim.go
+  s_f902c1dbe15187::t_4152cd9195b24f 3174
+  s_f902c1dbe15187::t_e7051f5de865a7 1357
+docs/progress/slice-lifecycle.md
+  s_f902c1dbe15187::t_4a4aa716ed178f 419
+docs/specs/v408_spec-weapon-elemental-procs.md
+  s_f902c1dbe15187::t_286300a228bdbb 3,20-24
+  s_f902c1dbe15187::t_61e0390bf7e2e5 1-2,4-19
+server/internal/game/rules.go
+  s_f902c1dbe15187::t_0fc02544946579 747
+  s_f902c1dbe15187::t_5677581fd233fc 46-47
+  s_f902c1dbe15187::t_43b52bc3c5ffb9 819
+  s_f902c1dbe15187::t_fc8b3516968f5d 811-813
+server/internal/game/weapon_elemental_test.go
+  s_f902c1dbe15187::t_7c1020de9652f0 96
+shared/i18n/en.json
+  s_f902c1dbe15187::t_2240c8d4a5d335 151
+server/internal/game/weapon_elemental.go
+  s_f902c1dbe15187::t_493cddbebaedba 140,145-151,173-174,180-181
+docs/CODEMAP.md
+  s_f902c1dbe15187::t_c94636ecf9f0d2 19
+PROGRESS.md
+  s_f902c1dbe15187::t_59dd9f48bf5a85 26,28-29
+  s_f902c1dbe15187::t_5c895e26ed5800 18
+docs/plans/v408_2026-07-02-weapon-elemental-procs.md
+  s_f902c1dbe15187::t_aa47c61accfd8f 1-2,4-9,11-16,20,22-25,28-33
+  s_f902c1dbe15187::t_4c46331bf92b53 3,10,17-19,21,26-27,34-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "061de844b2517a0281df8b80fc595d71a2b9952a",
+  "prompts": {},
+  "sessions": {
+    "s_f902c1dbe15187": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b55d2564-ae02-4be2-9d6e-130df5199401",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

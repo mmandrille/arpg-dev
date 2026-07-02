@@ -1,0 +1,244 @@
+tools/bot/scenarios/97_character_mercenary_hire.json
+  s_00c9855ac17875::t_907caacf041000 1-41,56-77,79-84
+  s_00c9855ac17875::t_4065902fa0509b 42-48
+  s_00c9855ac17875::t_870c9b31eb126a 78
+  s_00c9855ac17875::t_71a34182bb0a14 49-50,52-55
+  s_00c9855ac17875::t_ccf128ac877756 51
+shared/rules/main_config.v0.schema.json
+  s_00c9855ac17875::t_5aed1314824a13 100
+.maintainability/file-size-baseline.tsv
+  s_00c9855ac17875::t_5c80920c2d6ecb 35
+  s_00c9855ac17875::t_0aec3f8dc5dda3 5
+  s_00c9855ac17875::t_cedbf70de20cb7 29
+docs/specs/v404_spec-character-mercenary-hire.md
+  s_00c9855ac17875::t_20f7ce180513c3 1
+tools/bot/scenarios/89_companion_stance_command.json
+  s_00c9855ac17875::t_7f9c9876e1d941 117
+  s_00c9855ac17875::t_0de9cca3bcadf5 86
+  s_00c9855ac17875::t_b2b4b49df4f3ea 7,9,12-18,21,23,28,34,56,78,90,109,122
+server/internal/store/models.go
+  s_00c9855ac17875::t_fa66f5bfea2718 278
+server/internal/game/mercenary_hiring_test.go
+  s_00c9855ac17875::t_fec5f0f6a7771c 12-43,46,50-69
+  s_00c9855ac17875::t_8201f2a3297806 72-73,76
+  s_00c9855ac17875::t_6cee1b3cf494b0 3
+client/scripts/bot_controller.gd
+  s_00c9855ac17875::t_3f16095fb69496 439-443
+  s_00c9855ac17875::t_b3a56d4c6ccbbe 199-200
+docs/progress/slice-lifecycle.md
+  s_00c9855ac17875::t_779a05d820aed9 417
+tools/bot/run.py
+  s_00c9855ac17875::t_76b8eb52e38ed3 3351,3356-3357
+  s_00c9855ac17875::t_bc315c60c4b150 396
+  s_00c9855ac17875::t_ed41eb5e9e22b0 828-835
+  s_00c9855ac17875::t_f20120dac6064b 2215-2220
+  s_00c9855ac17875::t_b2d8665c5c731c 252-273
+shared/protocol/state_delta.v8.schema.json
+  s_00c9855ac17875::t_2cc80378fa23f6 446-458
+  s_00c9855ac17875::t_9b0ff169ea956a 1034-1035
+  s_00c9855ac17875::t_b1a24ae7c107b3 826,833
+  s_00c9855ac17875::t_5c9f0906587425 514-520
+client/scripts/bot_mercenary_panel_assertions.gd
+  s_00c9855ac17875::t_b9ff59a14961e1 9
+client/scripts/main.gd
+  s_00c9855ac17875::t_b09f0ca90874c6 6248-6250
+  s_00c9855ac17875::t_9bf6e6af200366 3844
+  s_00c9855ac17875::t_9af94d635e135a 2472,2477-2480
+  s_00c9855ac17875::t_0c29160ab90176 844-848
+  s_00c9855ac17875::t_316a609cc28bd1 5392-5395
+client/scripts/bot_step_catalog.gd
+  s_00c9855ac17875::t_c5d573fa21dc8c 64
+  s_00c9855ac17875::t_a1e03a34b6c0c0 246
+tools/bot/bot_types.py
+  s_00c9855ac17875::t_bc57d58d499874 92
+shared/i18n/es.json
+  s_00c9855ac17875::t_dad3ecf718dfa4 39
+server/internal/game/sim.go
+  s_00c9855ac17875::t_49d1cd1a24914d 148-156
+  s_00c9855ac17875::t_610bff410c90af 437
+  s_00c9855ac17875::t_0f642af970898b 5132
+  s_00c9855ac17875::t_dc6555f4b418b3 456
+  s_00c9855ac17875::t_bc850f903dae79 915-918
+  s_00c9855ac17875::t_4dfd7380e7901a 3623-3626
+  s_00c9855ac17875::t_288e4f5516334e 3691-3694
+shared/i18n/en.json
+  s_00c9855ac17875::t_1ec2224cbb7404 147
+server/internal/game/mercenary_character_test.go
+  s_00c9855ac17875::t_b2edd5015192cf 4
+  s_00c9855ac17875::t_9fac7e77cfcbc5 66-68
+  s_00c9855ac17875::t_5807fbc89dafb8 276-324
+  s_00c9855ac17875::t_7c338da7e26ad6 325-361
+  s_00c9855ac17875::t_9b3b1c4a53934f 44
+  s_00c9855ac17875::t_cb0100a428a366 394-395
+  s_00c9855ac17875::t_03d7d03282948f 185
+  s_00c9855ac17875::t_4731cfe5e2081e 252-275
+  s_00c9855ac17875::t_13566e9732a510 373,424-444
+  s_00c9855ac17875::t_c0ce038be8f1b8 151-167
+  s_00c9855ac17875::t_23f2e734d005d4 393,396
+  s_00c9855ac17875::t_b54ddc6f07472b 125
+  s_00c9855ac17875::t_91e8f590a739e9 170-184,186-204
+  s_00c9855ac17875::t_6a44e159110222 205-251
+  s_00c9855ac17875::t_dc231c8e605027 1-3,5-43,45-65,69-124,126-150,168-169,362-372
+  s_00c9855ac17875::t_a829a3de928e31 402-423
+  s_00c9855ac17875::t_909d6e1270ef75 374-392,397-401
+tools/bot/debug_progression.py
+  s_00c9855ac17875::t_1330c5a5701378 8-11,17
+server/internal/game/mercenary_character.go
+  s_00c9855ac17875::t_0217de2046f94c 194,281,290-300,303,307
+  s_00c9855ac17875::t_3621362fac8d34 511
+  s_00c9855ac17875::t_abd0e8a3192900 532-590
+  s_00c9855ac17875::t_468df914e7d103 1-102,125-134,140-193,195-255,261,273-276,279-280,282-289,301-302,304-306,308-321,324-326,328-392,394-403,405-455,457-510,512-531
+  s_00c9855ac17875::t_3e2d6daacc6c5d 103-124,135-139
+  s_00c9855ac17875::t_83d43617bac5b2 393,404
+  s_00c9855ac17875::t_e615d471f0db12 256-260,262-272,277-278
+  s_00c9855ac17875::t_d45e2396580ae9 456
+  s_00c9855ac17875::t_c83199ff48a592 322-323,327
+server/internal/game/companion_stance_test.go
+  s_00c9855ac17875::t_66c977e6501b01 119
+  s_00c9855ac17875::t_0ec61faeaf09d4 7-8,11-22,24
+tools/bot/scenarios/client/47_mercenary_roster_ui.json
+  s_00c9855ac17875::t_537741c061069f 7-16,24-36,58-59
+docs/CODEMAP.md
+  s_00c9855ac17875::t_66e3575cec7e04 32
+client/tests/test_mercenary_panel.gd
+  s_00c9855ac17875::t_a74d748bad850c 99-113,116-119,122,125-127
+  s_00c9855ac17875::t_131fb474f842e6 60
+  s_00c9855ac17875::t_c56a3d118bcce5 64
+  s_00c9855ac17875::t_92eeba6e3a57d5 73
+  s_00c9855ac17875::t_f8733506b921a3 49-52,55
+  s_00c9855ac17875::t_f1c60108b71a2c 23-37,41-42
+  s_00c9855ac17875::t_cd91bb19153a1b 74
+server/migrations/0029_character_hired_mercenary.sql
+  s_00c9855ac17875::t_614d0acfe9f81b 1-7
+server/internal/mercenaryroster/load.go
+  s_00c9855ac17875::t_f2680b1e7b42c3 1-87,89-127
+  s_00c9855ac17875::t_0a78efea9f05cd 88
+server/internal/game/companion_ranged.go
+  s_00c9855ac17875::t_810d0d82d33326 1-44
+server/internal/game/companion_ai.go
+  s_00c9855ac17875::t_eb76b301328c48 464
+  s_00c9855ac17875::t_d6e6c58c3ca7ef 267-271
+  s_00c9855ac17875::t_9d1deba9a07f37 504-508,513-519
+tools/bot/mercenary_roster_preflight.py
+  s_00c9855ac17875::t_31ef2127ca1c65 1-46
+tools/bot/scenarios/96_mercenary_offer_variants.json
+  s_00c9855ac17875::t_f8df88c076f1c0 7,19
+  s_00c9855ac17875::t_35438b8956e5d1 44
+  s_00c9855ac17875::t_45f6550a886add 9,12-18,20-21,24,26,31,37,42-43,45-48,55,60,72
+  s_00c9855ac17875::t_6e8885591de22e 67
+server/internal/realtime/session_shared.go
+  s_00c9855ac17875::t_f12345fc38f561 23
+client/scripts/town_node_factory.gd
+  s_00c9855ac17875::t_bce195ca3b2cab 242-243
+  s_00c9855ac17875::t_c8622839b0662f 170-183
+client/scripts/mercenary_panel.gd
+  s_00c9855ac17875::t_b7bf6f3f190f3d 425-430
+  s_00c9855ac17875::t_b7763370b40797 174-175
+  s_00c9855ac17875::t_95aa368b87f337 220-223
+  s_00c9855ac17875::t_619b122871d0fe 45-54,62-77
+  s_00c9855ac17875::t_4c4e212f53d938 292
+  s_00c9855ac17875::t_9e1eca202d061c 267-268
+  s_00c9855ac17875::t_00d82d4fbc38bb 316-353
+  s_00c9855ac17875::t_2d601b38f4740c 270-278
+  s_00c9855ac17875::t_62ef05d12056f5 94-100,104,106-109
+  s_00c9855ac17875::t_94841ded481386 23,28
+  s_00c9855ac17875::t_2c5c631ffb6436 6,8
+  s_00c9855ac17875::t_34f47a3b9de324 372
+client/scripts/bot_facade.gd
+  s_00c9855ac17875::t_fa9ee9ff3861c3 91-96
+server/internal/inputdecode/inputdecode.go
+  s_00c9855ac17875::t_e549cac19610b4 213
+  s_00c9855ac17875::t_2a36b766ca14c4 72-73
+shared/rules/monsters.v0.json
+  s_00c9855ac17875::t_e238295d2554f9 478-498
+docs/progress/scenario-movement-audit.tsv
+  s_00c9855ac17875::t_119e11ee17e53c 113-114
+  s_00c9855ac17875::t_8266708dfa2c24 191
+server/internal/realtime/mercenary_roster.go
+  s_00c9855ac17875::t_3ee854650cea68 1-6,8-10
+  s_00c9855ac17875::t_eb7a63f30a3ddf 7,11
+  s_00c9855ac17875::t_808b41040a2b58 12
+scripts/bot_client.sh
+  s_00c9855ac17875::t_036c52c98f00da 352-360
+server/internal/realtime/session_loop.go
+  s_00c9855ac17875::t_1d7e7cad6b2861 157,161-163
+  s_00c9855ac17875::t_9a5645766094bf 154-156
+  s_00c9855ac17875::t_e0f8523e4b0b1f 158
+  s_00c9855ac17875::t_9b430db44936e8 159-160
+docs/plans/v404_2026-07-02-character-mercenary-hire.md
+  s_00c9855ac17875::t_9a3dbb5af99a16 1-22
+tools/bot/scenarios/88_mercenary_hiring_board.json
+  s_00c9855ac17875::t_9903adf98357cb 90-94
+  s_00c9855ac17875::t_ec2835288c7796 7-8,10,13-19,38-43,108
+  s_00c9855ac17875::t_9ca85b75c5e07d 98
+  s_00c9855ac17875::t_c7bce4a2b505d1 63-64,66-69
+  s_00c9855ac17875::t_8562ff02fbb5ed 65
+tools/bot/scenarios/90_mercenary_death_loss.json
+  s_00c9855ac17875::t_e65ba0005b7ce1 76-79
+  s_00c9855ac17875::t_8eea396e5f088f 7,9,12-18,21,23,28,55,81
+server/internal/game/monster_companion_combat.go
+  s_00c9855ac17875::t_9c47694a660a30 85
+  s_00c9855ac17875::t_f1c277a7cbb666 82,86-92,95-102
+shared/protocol/messages.v8.schema.json
+  s_00c9855ac17875::t_ceb6b6222c51fa 203-206
+shared/rules/worlds.v0.json
+  s_00c9855ac17875::t_f4b83dd62b235b 4014
+  s_00c9855ac17875::t_241f14b1c7ff7f 4082
+server/internal/realtime/hub.go
+  s_00c9855ac17875::t_0ef5c0caca1f43 136
+client/scripts/mercenary_panel_bridge.gd
+  s_00c9855ac17875::t_85846a3eacaf8f 9
+server/internal/store/repos.go
+  s_00c9855ac17875::t_0ff55a2e1c69c3 865,867,870,872,875
+  s_00c9855ac17875::t_3d693928145232 895,901
+  s_00c9855ac17875::t_d5511f5476af46 921,923,936,940
+  s_00c9855ac17875::t_4f4949523b629f 1841,1843,1846
+  s_00c9855ac17875::t_5c94a926866b15 2019,2025
+server/internal/game/mercenary_hiring.go
+  s_00c9855ac17875::t_3ebf19eff05acf 4-5,9-15,17-18,37,40-47,49-60,66-78,86,88,92-100
+  s_00c9855ac17875::t_9de0d42a6f4597 82
+shared/rules/main_config.v0.json
+  s_00c9855ac17875::t_0af767c6205cf1 53
+shared/protocol/session_snapshot.v8.schema.json
+  s_00c9855ac17875::t_1e6fc42e1e65a6 535-541
+  s_00c9855ac17875::t_fcaa2c9c65187c 305-317
+  s_00c9855ac17875::t_79885f704c1eb7 440-441
+  s_00c9855ac17875::t_8e14101d43d09c 805,812
+PROGRESS.md
+  s_00c9855ac17875::t_3288b78b35ee47 119
+  s_00c9855ac17875::t_51801f17e28fc5 18,26,28
+docs/as-built/v404_character-mercenary-hire.md
+  s_00c9855ac17875::t_9793fa0091e8f7 1-25
+server/internal/game/types.go
+  s_00c9855ac17875::t_73004df14cbcfe 25
+  s_00c9855ac17875::t_b5040a1da9214e 265
+  s_00c9855ac17875::t_dd668d95914f48 382-385
+tools/bot/scenarios/client/70_character_mercenary_picker_ui.json
+  s_00c9855ac17875::t_acd776a8363303 3
+  s_00c9855ac17875::t_2a3201684aad52 1-2,4-44
+server/internal/replay/replay.go
+  s_00c9855ac17875::t_e279c9c2e53770 362-364
+  s_00c9855ac17875::t_987356b881f499 329-331,333
+  s_00c9855ac17875::t_3b03dc6ec79902 365
+  s_00c9855ac17875::t_02dcc3970c2499 628
+  s_00c9855ac17875::t_da41841fa231ab 332
+  s_00c9855ac17875::t_f03a39ce776df1 16
+server/internal/game/rules.go
+  s_00c9855ac17875::t_3aec98ebd8ac8e 75-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cf10d46e98986df9dce707e049eef97cb8ea0b07",
+  "prompts": {},
+  "sessions": {
+    "s_00c9855ac17875": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b07fde9d-0cef-4a33-ba51-d42daacdb7e0",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

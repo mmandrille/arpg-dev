@@ -105,28 +105,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -185,28 +185,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -257,28 +257,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -323,28 +323,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -395,28 +395,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -469,28 +469,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -605,28 +605,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -672,28 +672,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -739,28 +739,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -805,28 +805,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -873,28 +873,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -954,28 +954,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -1029,28 +1029,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -1453,28 +1453,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -1528,28 +1528,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -1648,28 +1648,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -1731,28 +1731,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -2124,28 +2124,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -2197,28 +2197,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -2277,28 +2277,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -2359,28 +2359,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }
@@ -2433,28 +2433,28 @@
         {
           "stat": "bonus_cold_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_fire_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_lightning_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         },
         {
           "stat": "bonus_poison_damage",
           "min": 1,
-          "max": 3,
+          "max": 6,
           "weight": 1,
           "min_rarity": "magic"
         }

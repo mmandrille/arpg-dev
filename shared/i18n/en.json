@@ -149,6 +149,7 @@
     "monster.dungeon_undead.name": "Skeleton",
     "monster.crowded_probe_chaser.name": "Crowd Probe Skeleton",
     "monster.combat_lab_soft_target.name": "Combat Lab Soft Target",
+    "monster.combat_lab_cold_resistant.name": "Cold Resistant Target",
     "monster.combat_lab_lightning_resistant.name": "Lightning Resistant Target",
     "monster.combat_lab_lightning_weak.name": "Lightning Weak Target",
     "monster.combat_lab_armored_target.name": "Combat Lab Armored Target",

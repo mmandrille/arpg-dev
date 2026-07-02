@@ -37,6 +37,22 @@
                 "monster_def_id": { "type": "string" },
                 "item_def_id": { "type": "string" },
                 "item_template_id": { "type": "string" },
+                "loot_preset": {
+                  "type": "object",
+                  "required": ["item_template_id", "stats"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "item_template_id": { "type": "string" },
+                    "rarity": { "type": "string" },
+                    "item_level": { "type": "integer", "minimum": 1 },
+                    "display_name": { "type": "string" },
+                    "stats": {
+                      "type": "object",
+                      "minProperties": 1,
+                      "additionalProperties": { "type": "integer" }
+                    }
+                  }
+                },
                 "interactable_def_id": { "type": "string" },
                 "kind": { "type": "string", "enum": ["wall", "wood", "water", "hole", "rock", "column", "rubble"] },
                 "blocks_line_of_sight": { "type": "boolean" },
@@ -80,7 +96,8 @@
                   "then": {
                     "oneOf": [
                       { "required": ["item_def_id"] },
-                      { "required": ["item_template_id"] }
+                      { "required": ["item_template_id"] },
+                      { "required": ["loot_preset"] }
                     ],
                     "not": { "anyOf": [
                       { "required": ["monster_def_id"] },

@@ -718,15 +718,25 @@ type WorldPlayer struct {
 
 // WorldEntity is an initial non-player entity in a world.
 type WorldEntity struct {
-	Type              string `json:"type"`
-	MonsterDefID      string `json:"monster_def_id,omitempty"`
-	ItemDefID         string `json:"item_def_id,omitempty"`
-	ItemTemplateID    string `json:"item_template_id,omitempty"`
-	InteractableDefID string `json:"interactable_def_id,omitempty"`
-	Kind              string `json:"kind,omitempty"`
-	BlocksLineOfSight *bool  `json:"blocks_line_of_sight,omitempty"`
-	Position          Vec2   `json:"position"`
-	Size              Vec2   `json:"size,omitempty"`
+	Type              string           `json:"type"`
+	MonsterDefID      string           `json:"monster_def_id,omitempty"`
+	ItemDefID         string           `json:"item_def_id,omitempty"`
+	ItemTemplateID    string           `json:"item_template_id,omitempty"`
+	LootPreset        *WorldLootPreset `json:"loot_preset,omitempty"`
+	InteractableDefID string           `json:"interactable_def_id,omitempty"`
+	Kind              string           `json:"kind,omitempty"`
+	BlocksLineOfSight *bool            `json:"blocks_line_of_sight,omitempty"`
+	Position          Vec2             `json:"position"`
+	Size              Vec2             `json:"size,omitempty"`
+}
+
+// WorldLootPreset pins rolled stats for lab loot entities.
+type WorldLootPreset struct {
+	ItemTemplateID string         `json:"item_template_id"`
+	Rarity         string         `json:"rarity,omitempty"`
+	ItemLevel      int            `json:"item_level,omitempty"`
+	DisplayName    string         `json:"display_name,omitempty"`
+	Stats          map[string]int `json:"stats"`
 }
 
 // LoadRules reads and parses the v0 rules files from a directory.
@@ -1868,18 +1878,8 @@ func LoadRules(dir string) (*Rules, error) {
 					return nil, fmt.Errorf("game: invalid rules %s: unknown monster %s", label, entity.MonsterDefID)
 				}
 			case lootEntity:
-				if (entity.ItemDefID == "") == (entity.ItemTemplateID == "") {
-					return nil, fmt.Errorf("game: invalid rules %s: declare exactly one of item_def_id or item_template_id", label)
-				}
-				if entity.ItemDefID != "" {
-					if _, ok := r.Items[entity.ItemDefID]; !ok {
-						return nil, fmt.Errorf("game: invalid rules %s: unknown item %s", label, entity.ItemDefID)
-					}
-				}
-				if entity.ItemTemplateID != "" {
-					if _, ok := r.ItemTemplates[entity.ItemTemplateID]; !ok {
-						return nil, fmt.Errorf("game: invalid rules %s: unknown item template %s", label, entity.ItemTemplateID)
-					}
+				if err := validateWorldLootEntity(r, label, entity); err != nil {
+					return nil, err
 				}
 			case wallEntity:
 				if entity.Size.X <= 0 || entity.Size.Y <= 0 {

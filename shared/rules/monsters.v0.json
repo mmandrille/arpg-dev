@@ -387,6 +387,21 @@
       },
       "name_key": "monster.combat_lab_lightning_resistant.name"
     },
+    "combat_lab_cold_resistant": {
+      "name": "Cold Resistant Target",
+      "max_hp": 60,
+      "loot_table": "no_drop",
+      "xp_reward": 0,
+      "hit_chance": 0.5,
+      "crit_chance": 0,
+      "crit_damage": 1.5,
+      "armor": 0,
+      "block_percent": 0,
+      "resistances": {
+        "cold": 0.5
+      },
+      "name_key": "monster.combat_lab_cold_resistant.name"
+    },
     "combat_lab_lightning_weak": {
       "name": "Lightning Weak Target",
       "max_hp": 60,

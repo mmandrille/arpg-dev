@@ -774,7 +774,14 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			if preset.ItemDefID == RenewStoneItemDefID {
 				loot.rollPayload = NewRenewStoneRollPayload(1)
 			}
-			if preset.ItemTemplateID != "" {
+			if preset.LootPreset != nil {
+				rolled, ok := s.lootPayloadFromWorldPreset(preset.LootPreset)
+				if !ok {
+					return ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
+				}
+				loot.itemDefID = rolled.ItemTemplateID
+				loot.rollPayload = &rolled
+			} else if preset.ItemTemplateID != "" {
 				rolled, ok := s.rollItemTemplate(preset.ItemTemplateID, absInt(level.levelNum))
 				if !ok {
 					return ErrUnknownWorldEntity{WorldID: worldID, EntityType: preset.Type}
@@ -1312,7 +1319,7 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 	if ack {
 		res.ack(in.MessageID)
 	}
-	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), s.playerWeaponDamageTypeForSlot(weaponSlot), weaponSlot)
+	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), damageTypeForce, weaponSlot)
 }
 
 func (s *Sim) damageMonsterByPlayer(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
@@ -1347,6 +1354,7 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 
 	if outcome.Damage > 0 {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
+		s.applyWeaponElementalDamageFromSlot(target, playerID, corr, weaponSlot, res)
 	}
 	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: true})
 	if outcome.Damage > 0 {
@@ -1466,7 +1474,7 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 		speed:            projectileSpeed,
 		maxDistance:      maxDistance,
 		damageRange:      s.resolvePlayerAttackDamage(),
-		sourceDamageType: s.playerWeaponDamageTypeForSlot(mainHandSlot),
+		sourceDamageType: damageTypeForce,
 		sourceWeaponSlot: weaponSlot,
 		sourceMsgID:      in.MessageID,
 		sourceCorrID:     in.CorrelationID,
@@ -5914,10 +5922,11 @@ func (s *Sim) weaponDamageContributions(item *invItem) (baseMin, baseMax, rollMi
 		if !minOK || !maxOK || totalMax < totalMin {
 			return 0, 0, 0, 0, "", "", false
 		}
-		elementalBonus := elementalBonusDamage(item.rollPayload.Stats)
 		baseMinInt := template.BaseStats["damage_min"]
 		baseMaxInt := template.BaseStats["damage_max"]
-		return float64(baseMinInt), float64(baseMaxInt), float64(totalMin-baseMinInt+elementalBonus), float64(totalMax-baseMaxInt+elementalBonus), label, itemID, true
+		rollMin, rollMax := physicalWeaponRollBonus(item.rollPayload.Stats, baseMinInt, baseMaxInt)
+
+		return float64(baseMinInt), float64(baseMaxInt), float64(rollMin), float64(rollMax), label, itemID, true
 	}
 	def, found := s.rules.Items[item.itemDefID]
 	if !found || def.Damage == nil {

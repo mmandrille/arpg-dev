@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-02 (v406 bishop-force-drop)
+Last updated: 2026-07-02 (v407 weapon-elemental-damage)
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-07-02 (v406 bishop-force-drop)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v406 — bishop-force-drop |
+| **Latest completed slice** | v407 — weapon-elemental-damage |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-02 — green (`make ci`) |
-| **Next slice** | TBD (`/next`) |
+| **CI gate** | 2026-07-02 — v407 focused verification green; autoloop batch `make ci` pending |
+| **Next slice** | v408 — weapon-elemental-procs (autoloop) |
 | **Last engineering review** | v398 — [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md) (2026-07-01; official cadence) |
 | **Next engineering review** | ~v408 milestone |
 

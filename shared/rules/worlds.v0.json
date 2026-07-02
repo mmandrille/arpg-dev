@@ -1580,6 +1580,50 @@
         }
       ]
     },
+    "weapon_elemental_lab": {
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
+      "entities": [
+        {
+          "type": "loot",
+          "loot_preset": {
+            "item_template_id": "long_sword",
+            "rarity": "magic",
+            "item_level": 1,
+            "display_name": "Freezing Cave Blade",
+            "stats": {
+              "damage_min": 5,
+              "damage_max": 8,
+              "bonus_cold_damage": 4
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_soft_target",
+          "position": {
+            "x": 8,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "combat_lab_cold_resistant",
+          "position": {
+            "x": 8,
+            "y": 6
+          }
+        }
+      ]
+    },
     "undead_skeleton_poison_immunity": {
       "player": {
         "position": {

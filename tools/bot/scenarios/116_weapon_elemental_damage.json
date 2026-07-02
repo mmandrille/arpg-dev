@@ -1,0 +1,57 @@
+{
+  "id": "weapon_elemental_damage",
+  "ci_tier": "extended",
+  "world_id": "weapon_elemental_lab",
+  "seed": "weapon_elemental_damage_v407",
+  "character_class": "barbarian",
+  "debug_progression": {
+    "level": 6,
+    "stats": { "str": 20, "dex": 20, "vit": 10, "magic": 5 }
+  },
+  "title": "Weapon elemental damage",
+  "description": "Equip a pinned cold sword, basic-attack soft and cold-resistant targets, and prove split force/cold damage with resistance.",
+  "steps": [
+    { "action": "pick_up_loot", "item_def_id": "long_sword" },
+    { "action": "equip_inventory_item", "item_def_id": "long_sword", "slot": "main_hand" },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "monster_damaged",
+      "damage_type": "force",
+      "outcome": "hit",
+      "min_damage": 1
+    },
+    { "action": "wait_ticks", "ticks": 20 },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_cold_resistant",
+      "event_type": "monster_damaged",
+      "damage_type": "cold",
+      "outcome": "hit",
+      "damage": 2
+    }
+  ],
+  "assertions": [
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "force",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "min_damage": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "cold",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "damage": 4
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "cold",
+      "target_monster_def_id": "combat_lab_cold_resistant",
+      "damage": 2
+    }
+  ]
+}

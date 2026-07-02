@@ -37,6 +37,9 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 			continue
 		}
 		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
+		if isElementalWeaponAffix(stat.Stat) {
+			rollableStats = filterOutElementalWeaponAffixes(rollableStats)
+		}
 	}
 	effectIDs := cloneStringSlice(template.EffectPool)
 	displayName := r.affixDisplayName(template, rarityID, stats)

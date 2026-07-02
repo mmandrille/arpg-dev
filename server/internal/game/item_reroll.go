@@ -37,13 +37,7 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 	if rarity.StatRollsMax > rarity.StatRollsMin {
 		rollCount += rng.IntN(rarity.StatRollsMax - rarity.StatRollsMin + 1)
 	}
-	for i := 0; i < rollCount; i++ {
-		stat, ok := weightedRollableStat(rollableStats, rng)
-		if !ok {
-			continue
-		}
-		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
-	}
+	rollAffixStatsOntoMap(stats, rollableStats, rng, rollCount)
 
 	requirements := cloneIntMap(template.Requirements)
 	effectIDs := cloneStringSlice(payload.EffectIDs)

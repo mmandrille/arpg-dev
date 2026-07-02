@@ -817,8 +817,12 @@ func statSummaryLines(stats map[string]int) []string {
 	if stats["damage_min"] > 0 || stats["damage_max"] > 0 {
 		lines = append(lines, fmt.Sprintf("Damage %d-%d", stats["damage_min"], stats["damage_max"]))
 	}
+	lines = append(lines, elementalStatSummaryLines(stats)...)
 	for _, stat := range shopStatOrder() {
 		if stat == "damage_min" || stat == "damage_max" {
+			continue
+		}
+		if isElementalWeaponAffix(stat) {
 			continue
 		}
 		if value := stats[stat]; value != 0 {

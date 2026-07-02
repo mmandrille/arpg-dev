@@ -2346,12 +2346,27 @@ def cross_checks(report: Report) -> None:
             elif etype == "loot":
                 item_id = entity.get("item_def_id")
                 template_id = entity.get("item_template_id")
-                if bool(item_id) == bool(template_id):
-                    report.fail("world loot entity", f"{label}: exactly one of item_def_id/item_template_id")
+                loot_preset = entity.get("loot_preset")
+                source_count = sum(1 for value in (item_id, template_id, loot_preset) if value)
+                if source_count != 1:
+                    report.fail(
+                        "world loot entity",
+                        f"{label}: exactly one of item_def_id/item_template_id/loot_preset",
+                    )
                 elif item_id and item_id not in items["items"]:
                     report.fail("world loot entity", f"{label}: unknown item {item_id}")
                 elif template_id and template_id not in item_templates["templates"]:
                     report.fail("world loot entity", f"{label}: unknown item template {template_id}")
+                elif loot_preset:
+                    preset_template = loot_preset.get("item_template_id")
+                    if not preset_template:
+                        report.fail("world loot entity", f"{label}: loot_preset.item_template_id required")
+                    elif preset_template not in item_templates["templates"]:
+                        report.fail("world loot entity", f"{label}: unknown loot preset template {preset_template}")
+                    elif not loot_preset.get("stats"):
+                        report.fail("world loot entity", f"{label}: loot_preset.stats required")
+                    else:
+                        report.ok(f"{label} loot preset reference resolves")
                 else:
                     report.ok(f"{label} loot item reference resolves")
             elif etype == "wall":

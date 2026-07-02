@@ -12,6 +12,7 @@ const UniqueChestTabsScript := preload("res://scripts/unique_chest_tabs.gd")
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
+const ItemTooltipStatSectionsScript := preload("res://scripts/item_tooltip_stat_sections.gd")
 const PANEL_SIZE := Vector2(390, 520)
 const COLUMNS := 5
 const STASH_VISIBLE_ROWS := 6
@@ -952,23 +953,23 @@ func _debug_withdraw_buttons() -> Dictionary:
 		out[str(rec.get("stash_item_id", ""))] = {"enabled": _interactive and stash_entity_id != ""}
 	return out
 
-
 func _tooltip_lines(row: Dictionary) -> Array:
 	var rarity := str(row.get("rarity", ""))
 	var lines: Array = [{"text": _item_name(row), "color": _rarity_color(rarity)}]
 	if rarity != "":
 		lines.append({"text": "Rarity: %s" % rarity.capitalize(), "color": Color("#cdbd9f"), "font_size": DETAIL_FONT_SIZE})
 	var summary = row.get("summary_lines", [])
-	if typeof(summary) == TYPE_ARRAY:
-		var summary_lines: Array = summary.duplicate()
-		WeaponRangeTooltipScript.ensure_after_slot(summary_lines, row)
-		for line in _compact_metadata_lines(summary_lines):
+	if typeof(summary) == TYPE_ARRAY and not summary.is_empty():
+		var metadata_lines := ItemTooltipStatSectionsScript.metadata_lines_from_summary(summary)
+		WeaponRangeTooltipScript.ensure_after_slot(metadata_lines, row)
+		for line in _compact_metadata_lines(metadata_lines):
 			var text := str(line)
 			if typeof(line) == TYPE_DICTIONARY:
 				text = str((line as Dictionary).get("text", ""))
 			if text != "":
 				lines.append(line)
-	if lines.size() == 1:
+		ItemTooltipStatSectionsScript.append_equipment_stat_sections(lines, row.get("rolled_stats", {}), _item_definition(str(row.get("item_template_id", row.get("item_def_id", "")))), ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
+	elif lines.size() == 1:
 		var slot := str(row.get("slot", ""))
 		if slot != "":
 			lines.append("Slot: %s" % slot)

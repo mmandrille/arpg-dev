@@ -11,6 +11,7 @@ const StatLabels := preload("res://scripts/stat_labels.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
+const ItemTooltipStatSectionsScript := preload("res://scripts/item_tooltip_stat_sections.gd")
 const PANEL_SIZE := Vector2(360, 680)
 const VENDOR_COLUMNS := 5
 const VENDOR_ROWS := 10
@@ -764,8 +765,11 @@ func _tooltip_lines(row: Dictionary) -> Array:
 	if rarity != "":
 		lines.append(_metadata_tooltip_line("Rarity: %s" % rarity.capitalize()))
 	var detail_lines := _detail_lines(row, false, false)
-	WeaponRangeTooltipScript.ensure_after_slot(detail_lines, row)
-	lines.append_array(_compact_metadata_lines(detail_lines))
+	var metadata_lines := ItemTooltipStatSectionsScript.metadata_lines_from_summary(detail_lines)
+	WeaponRangeTooltipScript.ensure_after_slot(metadata_lines, row)
+	lines.append_array(_compact_metadata_lines(metadata_lines))
+	var def := _item_definition(str(row.get("item_template_id", row.get("item_def_id", ""))))
+	ItemTooltipStatSectionsScript.append_equipment_stat_sections(lines, row.get("rolled_stats", {}), def, ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
 	return lines
 
 

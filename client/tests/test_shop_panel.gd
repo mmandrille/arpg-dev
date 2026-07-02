@@ -6,7 +6,7 @@ const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
-const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
+const ItemTooltipStatSectionsScript := preload("res://scripts/item_tooltip_stat_sections.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 
 var _pass_count: int = 0
@@ -244,8 +244,8 @@ func _run() -> void:
 	_assert_false("inventory amulet no random title", _array_contains_text(amulet_lines, "Random stats"))
 	_assert_true("inventory amulet base max hp", _array_contains_text(amulet_lines, "Max HP: +2"))
 	_assert_true("inventory amulet random mana regen", _array_contains_text(amulet_lines, "Mana regen / 10s: +2"))
-	var first_separator := amulet_lines.find(InventoryPanelScript.TOOLTIP_STAT_SEPARATOR)
-	var last_separator := amulet_lines.rfind(InventoryPanelScript.TOOLTIP_STAT_SEPARATOR)
+	var first_separator := amulet_lines.find(ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
+	var last_separator := amulet_lines.rfind(ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
 	_assert_true("inventory amulet two separators", first_separator >= 0 and last_separator > first_separator)
 	_assert_true("inventory amulet separator before base", first_separator < amulet_lines.find("Max HP: +2"))
 	_assert_true("inventory amulet separator before random", last_separator < amulet_lines.find("Mana regen / 10s: +2"))
@@ -259,10 +259,36 @@ func _run() -> void:
 	}
 	var blade_lines: Array = inventory_panel._tooltip_lines(blade)
 	_assert_true("inventory blade range before stats", _array_contains_text(blade_lines, "Range: 1.5 tiles"))
-	_assert_true("inventory blade type mode before stats", blade_lines.find("Mode: melee") < blade_lines.find(InventoryPanelScript.TOOLTIP_STAT_SEPARATOR))
+	_assert_true("inventory blade type mode before stats", blade_lines.find("Mode: melee") < blade_lines.find(ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR))
 	_assert_true("inventory blade random min delta", _array_contains_text(blade_lines, "Min damage: +1"))
 	_assert_false("inventory blade hides zero max delta", _array_contains_text(blade_lines, "Max damage:"))
 	_assert_true("inventory blade random hp delta", _array_contains_text(blade_lines, "Max HP: +3"))
+	var rare_blade := {
+		"item_instance_id": "2005",
+		"item_def_id": "long_sword",
+		"item_template_id": "long_sword",
+		"display_name": "Savage Long Sword",
+		"rarity": "rare",
+		"rolled_stats": {"damage_min": 3, "damage_max": 4, "str": 2},
+		"summary_lines": ["Slot: Main hand", "Range: 1.5 tiles", "Damage 3-4", "Strength +2"],
+		"equip_preview": {
+			"slot": "main_hand",
+			"deltas": [
+				{"stat": "damage_min", "current": 1.0, "preview": 3.0, "delta": 2.0},
+				{"stat": "attack_speed", "current": 1.0, "preview": 0.57, "delta": -0.43},
+				{"stat": "attack_interval_ticks", "current": 10.0, "preview": 11.0, "delta": 1.0},
+			],
+		},
+	}
+	var rare_blade_lines: Array = inventory_panel._tooltip_lines(rare_blade)
+	_assert_true("summary rare blade keeps slot metadata", _array_contains_text(rare_blade_lines, "Slot: Main hand"))
+	_assert_false("summary rare blade drops merged damage summary", _array_contains_text(rare_blade_lines, "Damage 3-4"))
+	_assert_true("summary rare blade shows base damage", _array_contains_text(rare_blade_lines, "Damage: 2-4"))
+	_assert_true("summary rare blade shows min roll delta", _array_contains_text(rare_blade_lines, "Min damage: +1"))
+	_assert_true("summary rare blade shows str roll delta", _array_contains_text(rare_blade_lines, "STR: +2"))
+	var preview_entries: Array = inventory_panel._comparison_entries(rare_blade)
+	_assert_true("equip preview labels attack speed", _entry_text_contains(preview_entries, "Attack speed preview"))
+	_assert_true("equip preview labels attack interval", _entry_text_contains(preview_entries, "Attack interval preview"))
 	inventory_panel.set_inventory_state([sell_appraisals[0]], {}, 3, 15, 60)
 	var inventory_state := inventory_panel.get_debug_state()
 	_assert_true("inventory requirements rendered", int(inventory_state.get("requirement_row_count", 0)) >= 2)
@@ -526,6 +552,13 @@ func _row_for_offer(rows: Variant, offer_id: String) -> Dictionary:
 func _array_contains_text(rows: Array, needle: String) -> bool:
 	for row in rows:
 		if str(row).contains(needle):
+			return true
+	return false
+
+
+func _entry_text_contains(entries: Array, needle: String) -> bool:
+	for entry in entries:
+		if typeof(entry) == TYPE_DICTIONARY and str((entry as Dictionary).get("text", "")).contains(needle):
 			return true
 	return false
 

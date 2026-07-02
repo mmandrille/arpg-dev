@@ -15,6 +15,7 @@ const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guar
 const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
 const ItemRequirementViewsScript := preload("res://scripts/item_requirement_views.gd")
 const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
+const ItemTooltipStatSectionsScript := preload("res://scripts/item_tooltip_stat_sections.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -43,7 +44,6 @@ const EQUIPMENT_LABELS := {
 	"main_hand": "Main",
 	"off_hand": "Off"
 }
-const TOOLTIP_STAT_SEPARATOR := "----------------"
 const PAPER_DOLL_SLOT_POSITIONS := {
 	"head": Vector2(122, 10),
 	"amulet": Vector2(208, 40),
@@ -965,16 +965,18 @@ func _tooltip(item: Dictionary) -> String:
 
 
 func _tooltip_lines(item: Dictionary) -> Array:
+	var def: Dictionary = _item_definition_for_item(item)
 	var def_id := str(item.get("item_def_id", ""))
-	var def: Dictionary = _item_definition(def_id)
 	var rarity := str(item.get("rarity", ""))
 	var lines: Array = [_item_name_tooltip_line(str(item.get("display_name", def.get("name", def_id))), rarity)]
 	if rarity != "":
 		lines.append(_metadata_tooltip_line("Rarity: %s" % rarity.capitalize()))
 	var summary_lines := _detail_lines(item, false, false)
 	if not summary_lines.is_empty():
-		WeaponRangeTooltipScript.ensure_after_slot(summary_lines, item)
-		lines.append_array(_compact_metadata_lines(summary_lines))
+		var metadata_lines := ItemTooltipStatSectionsScript.metadata_lines_from_summary(summary_lines)
+		WeaponRangeTooltipScript.ensure_after_slot(metadata_lines, item)
+		lines.append_array(_compact_metadata_lines(metadata_lines))
+		ItemTooltipStatSectionsScript.append_equipment_stat_sections(lines, item.get("rolled_stats", {}), def, ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
 		_append_hotbar_tooltip_line(lines, item)
 		return lines
 	var slot := str(def.get("slot", ""))
@@ -995,11 +997,11 @@ func _tooltip_lines(item: Dictionary) -> Array:
 	lines.append_array(_consumable_effect_lines(def))
 	var base_stat_lines := _base_stat_lines(def)
 	if not base_stat_lines.is_empty():
-		lines.append(TOOLTIP_STAT_SEPARATOR)
+		lines.append(ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
 		lines.append_array(base_stat_lines)
 	var random_stat_lines := _random_stat_lines(item.get("rolled_stats", {}), def)
 	if not random_stat_lines.is_empty():
-		lines.append(TOOLTIP_STAT_SEPARATOR)
+		lines.append(ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
 		lines.append_array(random_stat_lines)
 	elif def.has("damage"):
 		var dmg: Dictionary = def["damage"]

@@ -1,0 +1,52 @@
+shared/rules/main_config.v0.json
+  s_cb7d177d8447f1::t_20173f689afdd2 12-14
+server/internal/game/sim.go
+  s_cb7d177d8447f1::t_2f0c6fe5f281d4 202-205
+  s_cb7d177d8447f1::t_ab606949ca4e17 4261-4270
+  s_adc8fb80610009::t_75309a7d19abee 672-677
+  s_cb7d177d8447f1::t_0ed7bda4a080bd 1515-1518
+shared/content/codex_index.v0.json
+  s_cb7d177d8447f1::t_4ee0967d311c94 1994
+shared/rules/treasure_classes.v0.json
+  s_cb7d177d8447f1::t_9144b148ec1254 772,775,780,782,784,786,788,790,792,796,800,804,808,812,816,820,824,828,832,836,840,844,848-852,858,863,870,873,877-912,915-923,927,931,934-935,938-939,942-943,946-947,950-951,954-955,958-959,962-963,966-967,970-1018,1022,1026,1029-1030,1033-1054,1058,1062-1098,1103-1105,1107-1110,1113-1213
+server/internal/game/rules.go
+  s_cb7d177d8447f1::t_6548e39c6d135e 56-58
+  s_cb7d177d8447f1::t_a0da9d35355128 1787-1789
+  s_cb7d177d8447f1::t_56af152405caa2 762-770
+server/internal/game/main_config_drop_rate.go
+  s_cb7d177d8447f1::t_325f6add48740a 41-67
+shared/rules/main_config.v0.schema.json
+  s_cb7d177d8447f1::t_80881a547efda0 13
+  s_cb7d177d8447f1::t_99c5b1da94d5ef 24-26
+tools/bot/scenarios/84_boss_special_drops.json
+  s_cb7d177d8447f1::t_de9b932d294fc5 6-7,49,56-57,75,78-79
+server/internal/game/special_drops_test.go
+  s_cb7d177d8447f1::t_9d7fe87e7fc26a 62
+  s_cb7d177d8447f1::t_254f78c836aa30 5,7-20,22-23,25-26,28-29,33,38-40,44,46,48-55,57,59-60,63,65-66,68-69,72-77,87
+shared/rules/loot_tables.v0.json
+  s_cb7d177d8447f1::t_a7b6e5db935722 54,57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "84165a24e4be37bb86e5224ae0f5235e99f39fd6",
+  "prompts": {},
+  "sessions": {
+    "s_adc8fb80610009": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3b9ff9a4-a2f9-4212-ba42-fcd87d655863",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_cb7d177d8447f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "64e0ca15-ee78-4769-aa95-b55fe62ecd82",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

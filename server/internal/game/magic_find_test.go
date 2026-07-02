@@ -40,7 +40,7 @@ func TestMagicFindDoesNotChangeBaselineShopRoll(t *testing.T) {
 		t.Fatal("baseline shop-style roll failed")
 	}
 	rng = NewRNG(SeedToUint64("shop-baseline-magic-find"))
-	want, ok := rules.rollItemTemplateWithMagicFind("ring", rng, 1, 0)
+	want, ok := rules.rollItemTemplateWithMagicFind("ring", rng, 1, 0, 0)
 	if !ok {
 		t.Fatal("zero magic find roll failed")
 	}

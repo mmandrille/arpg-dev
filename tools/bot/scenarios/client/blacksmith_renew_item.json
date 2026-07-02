@@ -16,8 +16,8 @@
     },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_bishop" },
     { "type": "wait_bishop_panel", "visible": true, "debug_enabled": true, "timeout_s": 15.0 },
-    { "type": "click_bishop_debug", "action": "drop_renew_stone" },
-    { "type": "wait_event", "event_type": "bishop_debug_renew_stone_dropped", "timeout_s": 10.0 },
+    { "type": "click_bishop_force_loot", "depth": 10, "source_type": "monster", "drop_kind": "resource_pool", "item_def_id": "renew_stone", "item_level": 1 },
+    { "type": "wait_event", "event_type": "bishop_debug_loot_dropped", "timeout_s": 10.0 },
     { "type": "click_loot_item", "item_def_id": "renew_stone" },
     { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
     {

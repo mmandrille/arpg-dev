@@ -35,13 +35,12 @@ const (
 	TypeShopReroll          = "shop_reroll_intent"
 	TypeBishopRespec        = "bishop_respec_intent"
 	TypeBishopReviveAll     = "bishop_revive_all_intent"
-	TypeBishopDebugLevel    = "bishop_debug_level_intent"
-	TypeBishopDebugSkill    = "bishop_debug_skill_point_intent"
-	TypeBishopDebugStat              = "bishop_debug_stat_point_intent"
-	TypeBishopDebugDropUpgradeShard  = "bishop_debug_drop_upgrade_shard_intent"
-	TypeBishopDebugDropRenewStone    = "bishop_debug_drop_renew_stone_intent"
-	TypeBishopDebugDropRespecBadge   = "bishop_debug_drop_respec_badge_intent"
-	TypeBishopDebugDropResurrectionBadge = "bishop_debug_drop_resurrection_badge_intent"
+	TypeBishopDebugLevel              = "bishop_debug_level_intent"
+	TypeBishopDebugSkill              = "bishop_debug_skill_point_intent"
+	TypeBishopDebugStat               = "bishop_debug_stat_point_intent"
+	TypeBishopDebugLootCatalog        = "bishop_debug_loot_catalog_intent"
+	TypeBishopDebugLootSourceCatalog  = "bishop_debug_loot_source_catalog_intent"
+	TypeBishopDebugForceLoot          = "bishop_debug_force_loot_intent"
 	TypeStashDepositItem    = "stash_deposit_item_intent"
 	TypeStashWithdrawItem   = "stash_withdraw_item_intent"
 	TypeStashDepositGold    = "stash_deposit_gold_intent"
@@ -141,6 +140,21 @@ type (
 	bishopDebugPayloadWire struct {
 		BishopEntityID string `json:"bishop_entity_id"`
 	}
+	bishopDebugLootSourcePayloadWire struct {
+		BishopEntityID string `json:"bishop_entity_id"`
+		Depth          int    `json:"depth"`
+		SourceType     string `json:"source_type"`
+	}
+	bishopDebugForceLootPayloadWire struct {
+		BishopEntityID string `json:"bishop_entity_id"`
+		Depth          int    `json:"depth"`
+		SourceType     string `json:"source_type"`
+		DropKind       string `json:"drop_kind"`
+		AttemptID      string `json:"attempt_id,omitempty"`
+		EntryIndex     int    `json:"entry_index,omitempty"`
+		ItemDefID      string `json:"item_def_id,omitempty"`
+		ItemLevel      int    `json:"item_level,omitempty"`
+	}
 	stashItemPayloadWire struct {
 		StashEntityID  string `json:"stash_entity_id"`
 		ItemInstanceID string `json:"item_instance_id"`
@@ -163,7 +177,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeBishopDebugDropUpgradeShard, TypeBishopDebugDropRenewStone, TypeBishopDebugDropRespecBadge, TypeBishopDebugDropResurrectionBadge, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeBishopDebugLootCatalog, TypeBishopDebugLootSourceCatalog, TypeBishopDebugForceLoot, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
 		return true
 	}
 	return false
@@ -361,30 +375,37 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.BishopDebugStat = &game.BishopDebugStatPointIntent{BishopEntityID: p.BishopEntityID}
-	case TypeBishopDebugDropUpgradeShard:
+	case TypeBishopDebugLootCatalog:
 		var p bishopDebugPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {
 			return in, false
 		}
-		in.BishopDebugDropUpgradeShard = &game.BishopDebugDropUpgradeShardIntent{BishopEntityID: p.BishopEntityID}
-	case TypeBishopDebugDropRenewStone:
-		var p bishopDebugPayloadWire
-		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {
+		in.BishopDebugLootCatalog = &game.BishopDebugLootCatalogIntent{BishopEntityID: p.BishopEntityID}
+	case TypeBishopDebugLootSourceCatalog:
+		var p bishopDebugLootSourcePayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" || p.Depth < 1 || p.SourceType == "" {
 			return in, false
 		}
-		in.BishopDebugDropRenewStone = &game.BishopDebugDropRenewStoneIntent{BishopEntityID: p.BishopEntityID}
-	case TypeBishopDebugDropRespecBadge:
-		var p bishopDebugPayloadWire
-		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {
+		in.BishopDebugLootSourceCatalog = &game.BishopDebugLootSourceCatalogIntent{
+			BishopEntityID: p.BishopEntityID,
+			Depth:          p.Depth,
+			SourceType:     p.SourceType,
+		}
+	case TypeBishopDebugForceLoot:
+		var p bishopDebugForceLootPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" || p.Depth < 1 || p.SourceType == "" || p.DropKind == "" {
 			return in, false
 		}
-		in.BishopDebugDropRespecBadge = &game.BishopDebugDropWalletBadgeIntent{BishopEntityID: p.BishopEntityID}
-	case TypeBishopDebugDropResurrectionBadge:
-		var p bishopDebugPayloadWire
-		if err := json.Unmarshal(payload, &p); err != nil || p.BishopEntityID == "" {
-			return in, false
+		in.BishopDebugForceLoot = &game.BishopDebugForceLootIntent{
+			BishopEntityID: p.BishopEntityID,
+			Depth:          p.Depth,
+			SourceType:     p.SourceType,
+			DropKind:       p.DropKind,
+			AttemptID:      p.AttemptID,
+			EntryIndex:     p.EntryIndex,
+			ItemDefID:      p.ItemDefID,
+			ItemLevel:      p.ItemLevel,
 		}
-		in.BishopDebugDropResurrectionBadge = &game.BishopDebugDropWalletBadgeIntent{BishopEntityID: p.BishopEntityID}
 	case TypeStashDepositItem:
 		var p stashItemPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.ItemInstanceID == "" {

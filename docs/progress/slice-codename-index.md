@@ -237,7 +237,8 @@ v290_* = blacksmith-armor-recipe
 v291_* = quest-town-turn-in
 v292_* = badge-reward-foundation
 v293_* = bishop-badge-costs
-v350_* = ci-full-green
+v405_* = class-specialist-gear
+v406_* = bishop-force-drop
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

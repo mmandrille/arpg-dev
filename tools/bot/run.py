@@ -1500,6 +1500,37 @@ async def execute_step(
             await wait_for_skill_progression(ws, state, expected_skill, loop)
         return
 
+    if action == "force_bishop_loot":
+        target = find_interactable(state, str(step.get("interactable_def_id", "town_bishop")))
+        if target is None:
+            raise AssertionError(f"force_bishop_loot: missing town_bishop on level {state.current_level}")
+        payload = {
+            "bishop_entity_id": str(target["id"]),
+            "depth": int(step.get("depth", 1)),
+            "source_type": str(step.get("source_type", "monster")),
+            "drop_kind": str(step.get("drop_kind", "treasure_entry")),
+        }
+        if step.get("attempt_id") is not None:
+            payload["attempt_id"] = str(step.get("attempt_id"))
+        if step.get("entry_index") is not None:
+            payload["entry_index"] = int(step.get("entry_index", 0))
+        if step.get("item_def_id"):
+            payload["item_def_id"] = str(step.get("item_def_id"))
+        if step.get("item_level") is not None:
+            payload["item_level"] = int(step.get("item_level", 1))
+        start_index = len(state.events)
+        env = make_envelope("bishop_debug_force_loot_intent", session_id, state.last_tick, payload)
+        await ws.send(json.dumps(env))
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_event(
+            ws,
+            state,
+            str(step.get("event_type", "bishop_debug_loot_dropped")),
+            loop,
+            start_index=start_index,
+        )
+        return
+
     if action == "assert_shop_offer_count":
         offers = filtered_shop_offers(state, step)
         assert_count_matches(len(offers), step, "assert_shop_offer_count", f": {offers}")

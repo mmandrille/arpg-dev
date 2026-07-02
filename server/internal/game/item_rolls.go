@@ -1,6 +1,6 @@
 package game
 
-func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourceDepth int, magicFindPercent int) (ItemRollPayload, bool) {
+func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourceDepth int, magicFindPercent int, forcedItemLevel int) (ItemRollPayload, bool) {
 	template, ok := r.ItemTemplates[templateID]
 	if !ok || len(r.RarityOrder) == 0 {
 		return ItemRollPayload{}, false
@@ -11,6 +11,16 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 	}
 	rarity := r.Rarities[rarityID]
 	itemLevel := RollItemLevel(rng, sourceDepth, r.DungeonGeneration.ItemLevelTiers)
+	if forcedItemLevel > 0 {
+		maxLevel := MaxItemLevelForDepth(sourceDepth, r.DungeonGeneration.ItemLevelTiers)
+		itemLevel = forcedItemLevel
+		if itemLevel > maxLevel {
+			itemLevel = maxLevel
+		}
+		if itemLevel < 1 {
+			itemLevel = 1
+		}
+	}
 	representativeDepth := RepresentativeDepthForItemLevel(itemLevel, r.DungeonGeneration.ItemLevelTiers)
 	stats := cloneIntMap(template.BaseStats)
 	if stats == nil {

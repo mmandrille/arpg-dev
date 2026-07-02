@@ -279,17 +279,18 @@ func TestDecodeShopRerollIntentRejectsInvalidPayload(t *testing.T) {
 
 func TestDecodeBishopDebugIntents(t *testing.T) {
 	tests := []struct {
-		typ  string
-		want string
+		typ     string
+		want    string
+		payload json.RawMessage
 	}{
-		{typ: TypeBishopDebugLevel, want: "level"},
-		{typ: TypeBishopDebugSkill, want: "skill"},
-		{typ: TypeBishopDebugStat, want: "stat"},
-		{typ: TypeBishopDebugDropUpgradeShard, want: "drop_shard"},
+		{typ: TypeBishopDebugLevel, want: "level", payload: json.RawMessage(`{"bishop_entity_id":"1013"}`)},
+		{typ: TypeBishopDebugSkill, want: "skill", payload: json.RawMessage(`{"bishop_entity_id":"1013"}`)},
+		{typ: TypeBishopDebugStat, want: "stat", payload: json.RawMessage(`{"bishop_entity_id":"1013"}`)},
+		{typ: TypeBishopDebugForceLoot, want: "force_loot", payload: json.RawMessage(`{"bishop_entity_id":"1013","depth":1,"source_type":"monster","drop_kind":"wallet_item","item_def_id":"respec_badge"}`)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.typ, func(t *testing.T) {
-			in, ok := Decode(tt.typ, "msg_bishop_debug", "corr_bishop_debug", json.RawMessage(`{"bishop_entity_id":"1013"}`))
+			in, ok := Decode(tt.typ, "msg_bishop_debug", "corr_bishop_debug", tt.payload)
 			if !ok {
 				t.Fatalf("Decode %s rejected valid payload", tt.typ)
 			}
@@ -309,9 +310,9 @@ func TestDecodeBishopDebugIntents(t *testing.T) {
 				if in.BishopDebugStat == nil || in.BishopDebugStat.BishopEntityID != "1013" {
 					t.Fatalf("decoded bishop debug stat = %+v", in.BishopDebugStat)
 				}
-			case "drop_shard":
-				if in.BishopDebugDropUpgradeShard == nil || in.BishopDebugDropUpgradeShard.BishopEntityID != "1013" {
-					t.Fatalf("decoded bishop debug drop shard = %+v", in.BishopDebugDropUpgradeShard)
+			case "force_loot":
+				if in.BishopDebugForceLoot == nil || in.BishopDebugForceLoot.BishopEntityID != "1013" {
+					t.Fatalf("decoded bishop debug force loot = %+v", in.BishopDebugForceLoot)
 				}
 			}
 		})

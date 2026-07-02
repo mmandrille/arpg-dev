@@ -206,10 +206,11 @@ type uniqueChestState struct {
 }
 
 type goldRollContext struct {
-	levelNum                int
-	monsterRarityID         string
-	magicFind               bool
-	magicFindBonusPercent   int
+	levelNum              int
+	monsterRarityID       string
+	magicFind             bool
+	magicFindBonusPercent int
+	forcedItemLevel       int
 }
 
 type activeMove struct {
@@ -888,11 +889,10 @@ type Input struct {
 	BishopReviveAll     *BishopReviveAllIntent
 	BishopDebugLevel    *BishopDebugLevelIntent
 	BishopDebugSkill    *BishopDebugSkillPointIntent
-	BishopDebugStat              *BishopDebugStatPointIntent
-	BishopDebugDropUpgradeShard  *BishopDebugDropUpgradeShardIntent
-	BishopDebugDropRenewStone    *BishopDebugDropRenewStoneIntent
-	BishopDebugDropRespecBadge   *BishopDebugDropWalletBadgeIntent
-	BishopDebugDropResurrectionBadge *BishopDebugDropWalletBadgeIntent
+	BishopDebugStat                 *BishopDebugStatPointIntent
+	BishopDebugLootCatalog          *BishopDebugLootCatalogIntent
+	BishopDebugLootSourceCatalog    *BishopDebugLootSourceCatalogIntent
+	BishopDebugForceLoot            *BishopDebugForceLootIntent
 	StashDepositItem    *StashDepositItemIntent
 	StashWithdrawItem   *StashWithdrawItemIntent
 	StashDepositGold    *StashDepositGoldIntent
@@ -985,15 +985,6 @@ type (
 		BishopEntityID string
 	}
 	BishopDebugStatPointIntent struct {
-		BishopEntityID string
-	}
-	BishopDebugDropUpgradeShardIntent struct {
-		BishopEntityID string
-	}
-	BishopDebugDropRenewStoneIntent struct {
-		BishopEntityID string
-	}
-	BishopDebugDropWalletBadgeIntent struct {
 		BishopEntityID string
 	}
 	StashDepositItemIntent struct {
@@ -4274,10 +4265,11 @@ func (s *Sim) rollItemTemplate(templateID string, sourceDepth int) (ItemRollPayl
 
 func (s *Sim) rollItemTemplateForLoot(templateID string, sourceDepth int, ctx goldRollContext) (ItemRollPayload, bool) {
 	if !ctx.magicFind {
-		return s.rollItemTemplate(templateID, sourceDepth)
+		return s.rules.rollItemTemplateWithMagicFind(templateID, s.rng, sourceDepth, 0, ctx.forcedItemLevel)
 	}
 	magicFindPercent := int(s.playerMagicFindPercent()) + ctx.magicFindBonusPercent
-	return s.rules.rollItemTemplateWithMagicFind(templateID, s.rng, sourceDepth, magicFindPercent)
+
+	return s.rules.rollItemTemplateWithMagicFind(templateID, s.rng, sourceDepth, magicFindPercent, ctx.forcedItemLevel)
 }
 
 func (s *Sim) bossLootMagicFindBonusPercent(isBoss bool) int {

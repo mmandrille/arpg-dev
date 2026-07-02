@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-02 (v405 class-specialist-gear)
+Last updated: 2026-07-02 (v406 bishop-force-drop)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-02 (v405 class-specialist-gear)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v405 — class-specialist-gear |
+| **Latest completed slice** | v406 — bishop-force-drop |
 | **Active branch** | `main` |
-| **CI gate** | focused verification green; final `make ci` pending autoloop close-out |
+| **CI gate** | 2026-07-02 — green (`make ci`) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v398 — [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md) (2026-07-01; official cadence) |
 | **Next engineering review** | ~v408 milestone |

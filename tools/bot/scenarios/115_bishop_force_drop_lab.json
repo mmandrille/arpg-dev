@@ -1,0 +1,35 @@
+{
+  "id": "bishop_force_drop_lab",
+  "ci_tier": "extended",
+  "world_id": "vendor_lab",
+  "seed": "v406_bishop_force_drop_lab",
+  "title": "Bishop force loot drop lab",
+  "description": "Gameplay-debug bishop force drop spawns gold and a renew stone with explicit item level.",
+  "debug_progression": {
+    "deepest_dungeon_depth": 10
+  },
+  "steps": [
+    {
+      "action": "open_bishop_service"
+    },
+    {
+      "action": "force_bishop_loot",
+      "depth": 1,
+      "source_type": "monster",
+      "drop_kind": "treasure_entry",
+      "attempt_id": "primary",
+      "entry_index": 0,
+      "item_level": 1,
+      "event_type": "bishop_debug_loot_dropped"
+    },
+    {
+      "action": "force_bishop_loot",
+      "depth": 10,
+      "source_type": "monster",
+      "drop_kind": "resource_pool",
+      "item_def_id": "renew_stone",
+      "item_level": 2,
+      "event_type": "bishop_debug_loot_dropped"
+    }
+  ]
+}

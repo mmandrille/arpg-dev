@@ -90,12 +90,16 @@
       "timeout_s": 15.0
     },
     {
-      "type": "click_bishop_debug",
-      "action": "drop_upgrade_shard"
+      "type": "click_bishop_force_loot",
+      "depth": 10,
+      "source_type": "monster",
+      "drop_kind": "resource_pool",
+      "item_def_id": "upgrade_shard",
+      "item_level": 1
     },
     {
       "type": "wait_event",
-      "event_type": "bishop_debug_upgrade_shard_dropped",
+      "event_type": "bishop_debug_loot_dropped",
       "timeout_s": 10.0
     },
     {

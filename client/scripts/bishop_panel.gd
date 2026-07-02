@@ -32,10 +32,7 @@ var _revive_all_button: Button
 var _debug_level_button: Button
 var _debug_skill_button: Button
 var _debug_stat_button: Button
-var _debug_drop_shard_button: Button
-var _debug_drop_renew_stone_button: Button
-var _debug_drop_respec_badge_button: Button
-var _debug_drop_resurrection_badge_button: Button
+var _debug_force_loot_button: Button
 var _status_label: Label
 var _interactive: bool = true
 
@@ -216,29 +213,11 @@ func _build() -> void:
 	_debug_stat_button.pressed.connect(func() -> void: _emit_debug("stat_point"))
 	_actions_box.add_child(_debug_stat_button)
 
-	_debug_drop_shard_button = Button.new()
-	_debug_drop_shard_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
-	_debug_drop_shard_button.text = "Debug: drop an upgrade shard"
-	_debug_drop_shard_button.pressed.connect(func() -> void: _emit_debug("drop_upgrade_shard"))
-	_actions_box.add_child(_debug_drop_shard_button)
-
-	_debug_drop_renew_stone_button = Button.new()
-	_debug_drop_renew_stone_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
-	_debug_drop_renew_stone_button.text = "Debug: drop a renew stone"
-	_debug_drop_renew_stone_button.pressed.connect(func() -> void: _emit_debug("drop_renew_stone"))
-	_actions_box.add_child(_debug_drop_renew_stone_button)
-
-	_debug_drop_respec_badge_button = Button.new()
-	_debug_drop_respec_badge_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
-	_debug_drop_respec_badge_button.text = "Debug: drop a respec token"
-	_debug_drop_respec_badge_button.pressed.connect(func() -> void: _emit_debug("drop_respec_badge"))
-	_actions_box.add_child(_debug_drop_respec_badge_button)
-
-	_debug_drop_resurrection_badge_button = Button.new()
-	_debug_drop_resurrection_badge_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
-	_debug_drop_resurrection_badge_button.text = "Debug: drop a revive token"
-	_debug_drop_resurrection_badge_button.pressed.connect(func() -> void: _emit_debug("drop_resurrection_badge"))
-	_actions_box.add_child(_debug_drop_resurrection_badge_button)
+	_debug_force_loot_button = Button.new()
+	_debug_force_loot_button.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 36)
+	_debug_force_loot_button.text = "Debug: force loot drop…"
+	_debug_force_loot_button.pressed.connect(func() -> void: _emit_debug("force_loot"))
+	_actions_box.add_child(_debug_force_loot_button)
 
 	_status_label = Label.new()
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -264,10 +243,7 @@ func _render() -> void:
 		_debug_level_button,
 		_debug_skill_button,
 		_debug_stat_button,
-		_debug_drop_shard_button,
-		_debug_drop_renew_stone_button,
-		_debug_drop_respec_badge_button,
-		_debug_drop_resurrection_badge_button,
+		_debug_force_loot_button,
 	]:
 		if button != null:
 			button.visible = debug_enabled

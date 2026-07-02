@@ -1047,7 +1047,7 @@ func (s *Sim) itemFromShopStock(row *shopStockItem, instanceID uint64) *invItem 
 }
 
 func (r *Rules) rollItemTemplateWithRNG(templateID string, rng *RNG, sourceDepth int) (ItemRollPayload, bool) {
-	return r.rollItemTemplateWithMagicFind(templateID, rng, sourceDepth, 0)
+	return r.rollItemTemplateWithMagicFind(templateID, rng, sourceDepth, 0, 0)
 }
 
 func (r *Rules) rollableStatsForRarity(base []RollableStatDef, rarityID string, sourceDepth int) []RollableStatDef {

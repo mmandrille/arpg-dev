@@ -39,10 +39,9 @@
         "bishop_debug_level_intent",
         "bishop_debug_skill_point_intent",
         "bishop_debug_stat_point_intent",
-        "bishop_debug_drop_upgrade_shard_intent",
-        "bishop_debug_drop_renew_stone_intent",
-        "bishop_debug_drop_respec_badge_intent",
-        "bishop_debug_drop_resurrection_badge_intent",
+        "bishop_debug_loot_catalog_intent",
+        "bishop_debug_loot_source_catalog_intent",
+        "bishop_debug_force_loot_intent",
         "stash_deposit_item_intent",
         "stash_withdraw_item_intent",
         "stash_deposit_gold_intent",
@@ -121,14 +120,12 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
     { "if": { "properties": { "type": { "const": "bishop_debug_stat_point_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
-    { "if": { "properties": { "type": { "const": "bishop_debug_drop_upgrade_shard_intent" } } },
+    { "if": { "properties": { "type": { "const": "bishop_debug_loot_catalog_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
-    { "if": { "properties": { "type": { "const": "bishop_debug_drop_renew_stone_intent" } } },
-      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
-    { "if": { "properties": { "type": { "const": "bishop_debug_drop_respec_badge_intent" } } },
-      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
-    { "if": { "properties": { "type": { "const": "bishop_debug_drop_resurrection_badge_intent" } } },
-      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_intent" } } } },
+    { "if": { "properties": { "type": { "const": "bishop_debug_loot_source_catalog_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_loot_source_intent" } } } },
+    { "if": { "properties": { "type": { "const": "bishop_debug_force_loot_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/bishop_debug_force_loot_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_deposit_item_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/stash_deposit_item_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_withdraw_item_intent" } } },
@@ -402,6 +399,31 @@
       "additionalProperties": false,
       "properties": {
         "bishop_entity_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "bishop_debug_loot_source_intent": {
+      "type": "object",
+      "required": ["bishop_entity_id", "depth", "source_type"],
+      "additionalProperties": false,
+      "properties": {
+        "bishop_entity_id": { "$ref": "#/$defs/decimal_id" },
+        "depth": { "type": "integer", "minimum": 1 },
+        "source_type": { "type": "string", "enum": ["monster", "chest", "boss", "boss_chest"] }
+      }
+    },
+    "bishop_debug_force_loot_intent": {
+      "type": "object",
+      "required": ["bishop_entity_id", "depth", "source_type", "drop_kind"],
+      "additionalProperties": false,
+      "properties": {
+        "bishop_entity_id": { "$ref": "#/$defs/decimal_id" },
+        "depth": { "type": "integer", "minimum": 1 },
+        "source_type": { "type": "string", "enum": ["monster", "chest", "boss", "boss_chest"] },
+        "drop_kind": { "type": "string", "enum": ["treasure_entry", "resource_pool", "wallet_item"] },
+        "attempt_id": { "type": "string" },
+        "entry_index": { "type": "integer", "minimum": 0 },
+        "item_def_id": { "type": "string" },
+        "item_level": { "type": "integer", "minimum": 1 }
       }
     },
     "stash_deposit_item_intent": {

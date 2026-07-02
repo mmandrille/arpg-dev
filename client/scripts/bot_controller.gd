@@ -182,6 +182,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_bishop_respec()
 		"click_bishop_debug":
 			_do_click_bishop_debug(action)
+		"click_bishop_force_loot":
+			_do_click_bishop_force_loot(action)
 		"click_blacksmith_upgrade":
 			_do_click_blacksmith_upgrade(action)
 		"click_blacksmith_stage_item":
@@ -389,6 +391,24 @@ func _do_click_bishop_respec() -> void:
 func _do_click_bishop_debug(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_click_bishop_debug"):
 		_main.bot_click_bishop_debug(str(action.get("action", "")))
+
+
+func _do_click_bishop_force_loot(action: Dictionary) -> void:
+	if _main == null or not _main.has_method("bot_force_bishop_loot"):
+		return
+	var payload := {
+		"bishop_entity_id": str(action.get("bishop_entity_id", _main.bishop_panel.bishop_entity_id if _main.bishop_panel != null else "")),
+		"depth": int(action.get("depth", 1)),
+		"source_type": str(action.get("source_type", "monster")),
+		"drop_kind": str(action.get("drop_kind", "resource_pool")),
+		"item_def_id": str(action.get("item_def_id", "")),
+		"item_level": int(action.get("item_level", 1)),
+	}
+	if action.has("attempt_id"):
+		payload["attempt_id"] = str(action.get("attempt_id", ""))
+	if action.has("entry_index"):
+		payload["entry_index"] = int(action.get("entry_index", 0))
+	_main.bot_force_bishop_loot(payload)
 
 
 func _do_click_blacksmith_upgrade(action: Dictionary) -> void:

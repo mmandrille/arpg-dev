@@ -7,7 +7,7 @@ client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait 
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	701	# v392: class creation features panel
 client/scripts/inventory_panel.gd	1516
-client/scripts/main.gd	6475	# v399 refactor: inventory wallet delta runtime extraction
+client/scripts/main.gd	6523	# v406: bishop force-loot wizard wiring + bot hook; extraction deferred to main.gd attack-move cluster slice
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1217
 client/scripts/skills_panel.gd	1010
@@ -32,6 +32,6 @@ server/internal/game/rogue_skills.go	620	# pre-v394 grandfather; passive_execute
 server/internal/store/repos.go	2315
 server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store test setup
 skills/showme/scripts/visual_capture.gd	1016
-tools/bot/run.py	4339	# v404: mercenary roster seed + combat_event entity match fallback
+tools/bot/run.py	4370	# v406: protocol bot force_bishop_loot action
 tools/bot/test_protocol.py	1434
 tools/validate_shared.py	3038	# $refactor v334: extracted validate_fog_presentation.py

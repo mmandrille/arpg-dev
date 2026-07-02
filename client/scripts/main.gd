@@ -34,6 +34,7 @@ const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
+const BishopLootDebugPanelScript := preload("res://scripts/bishop_loot_debug_panel.gd")
 const MercenaryPanelScript := preload("res://scripts/mercenary_panel.gd")
 const MercenaryPanelBridgeScript := preload("res://scripts/mercenary_panel_bridge.gd")
 const BotDebugProgressionSetupScript := preload("res://scripts/bot_debug_progression_setup.gd")
@@ -261,6 +262,7 @@ var inventory_panel: InventoryPanel
 var shop_panel: ShopPanel
 var stash_panel: StashPanel
 var bishop_panel: BishopPanel
+var bishop_loot_debug_panel: BishopLootDebugPanel
 var mercenary_panel: MercenaryPanel
 var market_panel
 var blacksmith_panel: BlacksmithPanel
@@ -1593,27 +1595,26 @@ func _apply_delta(p: Dictionary) -> void:
 			"bishop_debug_level_gained",
 			"bishop_debug_skill_point_gained",
 			"bishop_debug_stat_point_gained",
-			"bishop_debug_upgrade_shard_dropped",
-			"bishop_debug_renew_stone_dropped",
-			"bishop_debug_respec_badge_dropped",
-			"bishop_debug_resurrection_badge_dropped",
 		] and bishop_panel != null and bishop_panel.visible:
 			if event_type == "bishop_debug_level_gained":
 				bishop_panel.show_status("Level gained")
 			elif event_type == "bishop_debug_skill_point_gained":
 				bishop_panel.show_status("Skill point gained")
-			elif event_type == "bishop_debug_stat_point_gained":
-				bishop_panel.show_status("Stat point gained")
-			elif event_type == "bishop_debug_renew_stone_dropped":
-				var renew_level := int(ev.get("amount", 1))
-				bishop_panel.show_status("Dropped level %d renew stone" % renew_level)
-			elif event_type == "bishop_debug_respec_badge_dropped":
-				bishop_panel.show_status("Dropped respec token")
-			elif event_type == "bishop_debug_resurrection_badge_dropped":
-				bishop_panel.show_status("Dropped revive token")
 			else:
-				var shard_level := int(ev.get("amount", 1))
-				bishop_panel.show_status("Dropped level %d upgrade shard" % shard_level)
+				bishop_panel.show_status("Stat point gained")
+			continue
+		if event_type == "bishop_debug_loot_catalog" and bishop_loot_debug_panel != null:
+			bishop_loot_debug_panel.apply_depth_catalog(ev.get("bishop_loot_depth_catalog", {}))
+			continue
+		if event_type == "bishop_debug_loot_source_catalog" and bishop_loot_debug_panel != null:
+			bishop_loot_debug_panel.apply_source_catalog(ev.get("bishop_loot_source_catalog", {}))
+			continue
+		if event_type == "bishop_debug_loot_dropped":
+			var drop_level := int(ev.get("amount", 1))
+			if bishop_loot_debug_panel != null and bishop_loot_debug_panel.visible:
+				bishop_loot_debug_panel.show_status("Forced loot dropped (ilvl %d)" % drop_level)
+			if bishop_panel != null and bishop_panel.visible:
+				bishop_panel.show_status("Forced loot dropped")
 			continue
 		if event_type == "boss_killed":
 			ClientAudioBridgeScript.kill(audio_controller, true)
@@ -3839,6 +3840,11 @@ func _build_scene() -> void:
 	bishop_panel.debug_requested.connect(_on_bishop_debug_requested)
 	bishop_panel.set_debug_enabled(gameplay_debug_enabled)
 	ui.add_child(bishop_panel)
+	bishop_loot_debug_panel = BishopLootDebugPanelScript.new()
+	bishop_loot_debug_panel.catalog_requested.connect(_on_bishop_loot_catalog_requested)
+	bishop_loot_debug_panel.source_catalog_requested.connect(_on_bishop_loot_source_catalog_requested)
+	bishop_loot_debug_panel.force_loot_requested.connect(_on_bishop_force_loot_requested)
+	ui.add_child(bishop_loot_debug_panel)
 	mercenary_panel = MercenaryPanelScript.new()
 	mercenary_panel.stance_requested.connect(_on_companion_stance_requested)
 	mercenary_panel.hire_requested.connect(_on_mercenary_hire_requested)
@@ -4782,6 +4788,8 @@ func _show_bishop_panel(ev: Dictionary) -> void:
 func _hide_bishop_panel() -> void:
 	if bishop_panel != null:
 		bishop_panel.hide_display()
+	if bishop_loot_debug_panel != null:
+		bishop_loot_debug_panel.hide_display()
 
 func _show_market_panel(ev: Dictionary) -> void:
 	if market_panel == null:
@@ -5127,14 +5135,31 @@ func _on_bishop_debug_requested(action: String, bishop_entity_id: String) -> voi
 			client.send("bishop_debug_skill_point_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
 		"stat_point":
 			client.send("bishop_debug_stat_point_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
-		"drop_upgrade_shard":
-			client.send("bishop_debug_drop_upgrade_shard_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
-		"drop_renew_stone":
-			client.send("bishop_debug_drop_renew_stone_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
-		"drop_respec_badge":
-			client.send("bishop_debug_drop_respec_badge_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
-		"drop_resurrection_badge":
-			client.send("bishop_debug_drop_resurrection_badge_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+		"force_loot":
+			if bishop_loot_debug_panel != null:
+				bishop_loot_debug_panel.open_for_bishop(bishop_entity_id)
+
+
+func _on_bishop_loot_catalog_requested(bishop_entity_id: String) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "" or not gameplay_debug_enabled:
+		return
+	client.send("bishop_debug_loot_catalog_intent", last_server_tick, {"bishop_entity_id": bishop_entity_id})
+
+
+func _on_bishop_loot_source_catalog_requested(bishop_entity_id: String, depth: int, source_type: String) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or bishop_entity_id == "" or not gameplay_debug_enabled:
+		return
+	client.send("bishop_debug_loot_source_catalog_intent", last_server_tick, {
+		"bishop_entity_id": bishop_entity_id,
+		"depth": depth,
+		"source_type": source_type,
+	})
+
+
+func _on_bishop_force_loot_requested(payload: Dictionary) -> void:
+	if client == null or client.ready_state() != WebSocketPeer.STATE_OPEN or not gameplay_debug_enabled:
+		return
+	client.send("bishop_debug_force_loot_intent", last_server_tick, payload)
 
 func _shop_title(next_shop_id: String) -> String:
 	match next_shop_id:
@@ -5994,6 +6019,7 @@ func get_bot_state() -> Dictionary:
 		"shop_panel": shop_panel.get_debug_state() if shop_panel != null else {},
 		"stash_panel": stash_panel.get_debug_state() if stash_panel != null else {},
 		"bishop_panel": bishop_panel.get_debug_state() if bishop_panel != null else {},
+		"bishop_loot_debug_panel": bishop_loot_debug_panel.get_debug_state() if bishop_loot_debug_panel != null else {},
 		"mercenary_panel": mercenary_panel.get_debug_state() if mercenary_panel != null else {},
 		"market_panel": market_panel.get_debug_state() if market_panel != null else {},
 		"blacksmith_panel": blacksmith_panel.get_debug_state() if blacksmith_panel != null else {},
@@ -6235,6 +6261,12 @@ func bot_click_bishop_respec() -> void:
 
 func bot_click_bishop_debug(action: String) -> void:
 	BotFacade.click_bishop_debug(self, action)
+
+func bot_force_bishop_loot(payload: Dictionary) -> void:
+	if bishop_loot_debug_panel != null:
+		bishop_loot_debug_panel.bot_force_pick(payload)
+	elif client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and gameplay_debug_enabled:
+		client.send("bishop_debug_force_loot_intent", last_server_tick, payload)
 func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	BotFacade.click_blacksmith_upgrade(self, stash_item_id, item_def_id, stash_index)
 func bot_select_blacksmith_tab(tab_name: String = "Merge") -> void:

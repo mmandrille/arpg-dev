@@ -114,15 +114,14 @@ func (s *Sim) tryDropResourceLoot(sourcePos Vec2, sourceRadius float64, depth in
 	s.spawnResourceLoot(itemDefID, sourcePos, sourceRadius, depth, corr, res)
 }
 
-func (s *Sim) spawnResourceLoot(itemDefID string, sourcePos Vec2, sourceRadius float64, depth int, corr string, res *TickResult) (uint64, int, bool) {
+func (s *Sim) spawnResourceLootAtLevel(itemDefID string, sourcePos Vec2, sourceRadius float64, depth int, level int, corr string, res *TickResult) (uint64, int, bool) {
 	if s.rules == nil || itemDefID == "" {
 		return 0, 0, false
 	}
 	if depth < 1 {
 		depth = 1
 	}
-
-	level := RollItemLevel(s.rng, depth, s.rules.DungeonGeneration.ItemLevelTiers)
+	level = s.clampBishopForcedItemLevel(level, depth)
 	dropPos, ok := s.findEntityLootDropPosition(sourcePos, sourceRadius)
 	if !ok {
 		dropPos = sourcePos
@@ -145,6 +144,18 @@ func (s *Sim) spawnResourceLoot(itemDefID string, sourcePos Vec2, sourceRadius f
 	res.Events = append(res.Events, Event{EventType: "loot_dropped", EntityID: idStr(loot.id), CorrelationID: corr})
 
 	return loot.id, level, true
+}
+
+func (s *Sim) spawnResourceLoot(itemDefID string, sourcePos Vec2, sourceRadius float64, depth int, corr string, res *TickResult) (uint64, int, bool) {
+	if s.rules == nil || itemDefID == "" {
+		return 0, 0, false
+	}
+	if depth < 1 {
+		depth = 1
+	}
+
+	level := RollItemLevel(s.rng, depth, s.rules.DungeonGeneration.ItemLevelTiers)
+	return s.spawnResourceLootAtLevel(itemDefID, sourcePos, sourceRadius, depth, level, corr, res)
 }
 
 func (s *Sim) spawnUpgradeShardLoot(sourcePos Vec2, sourceRadius float64, depth int, corr string, res *TickResult) (uint64, int, bool) {

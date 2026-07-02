@@ -414,6 +414,8 @@ type Event struct {
 	HitShape             *BossHitShapeView       `json:"hit_shape,omitempty"`
 	State                string                  `json:"state,omitempty"`
 	Stance               string                  `json:"stance,omitempty"`
+	BishopLootDepthCatalog  *BishopLootDepthCatalogView  `json:"bishop_loot_depth_catalog,omitempty"`
+	BishopLootSourceCatalog *BishopLootSourceCatalogView `json:"bishop_loot_source_catalog,omitempty"`
 }
 
 // TeleporterDiscoveryView is the protocol view of a generated dungeon level's

@@ -216,6 +216,7 @@ run_gate "GDScript net client test" "[gdtest] PASS: test_net_client" res://tests
 run_gate "GDScript connection recovery test" "[gdtest] PASS: test_connection_recovery" res://tests/test_connection_recovery.gd
 run_gate "GDScript connection recovery runtime test" "[gdtest] PASS: test_connection_recovery_runtime" res://tests/test_connection_recovery_runtime.gd
 run_gate "GDScript delta apply test" "[gdtest] PASS: test_delta_apply" res://tests/test_delta_apply.gd
+run_gate "GDScript inventory wallet delta runtime test" "[gdtest] PASS: test_inventory_wallet_delta_runtime" res://tests/test_inventory_wallet_delta_runtime.gd
 
 # 2n. Loot label rarity filter unit tests (server-independent; v153).
 run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filter" res://tests/test_loot_label_filter.gd

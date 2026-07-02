@@ -92,6 +92,7 @@ const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
 const LevelLoadingOverlayScript := preload("res://scripts/level_loading_overlay.gd")
 const ConnectionRecoveryRuntimeScript := preload("res://scripts/connection_recovery_runtime.gd")
 const BotReconnectProofActionsScript := preload("res://scripts/bot_reconnect_proof_actions.gd")
+const InventoryWalletDeltaRuntimeScript := preload("res://scripts/inventory_wallet_delta_runtime.gd")
 const ConnectionOverlayBridgeScript := preload("res://scripts/connection_overlay_bridge.gd")
 const CommandRetargetGraceScript := preload("res://scripts/command_retarget_grace.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
@@ -1299,65 +1300,8 @@ func _apply_delta(p: Dictionary) -> void:
 			"entity_remove":
 				_delta_ui_sync_gate.mark_entity_removed()
 				_remove_entity(str(c.get("entity_id", "")))
-			"inventory_add":
-				var inv_item: Dictionary = c.get("item", {})
-				inventory.append(inv_item)
-				_delta_ui_sync_gate.mark_inventory_dirty()
-				if resolver != null:
-					resolver.ingest_inventory_item(inv_item)
-			"inventory_update":
-				var upd_item: Dictionary = c.get("item", {})
-				_update_inventory_item(upd_item)
-				_delta_ui_sync_gate.mark_inventory_dirty()
-				if resolver != null:
-					resolver.ingest_inventory_item(upd_item)
-			"inventory_remove":
-				_remove_inventory_item(str(c.get("item_instance_id", "")))
-				_delta_ui_sync_gate.mark_inventory_dirty()
-			"equipped_update":
-				var slot := str(c.get("slot", ""))
-				if not slot.is_empty():
-					equipped[slot] = c.get("item_instance_id")
-					if resolver != null:
-						resolver.apply_equipped_update(slot, c.get("item_instance_id"))
-				if c.has("inventory_rows"):
-					inventory_rows = int(c.get("inventory_rows", inventory_rows))
-				if c.has("inventory_capacity"):
-					inventory_capacity = int(c.get("inventory_capacity", inventory_capacity))
-				if c.has("hotbar_capacity"):
-					hotbar_capacity = int(c.get("hotbar_capacity", hotbar_capacity))
-					if consumable_bar != null:
-						consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
-				_delta_ui_sync_gate.mark_inventory_dirty()
-			"weapon_set_update":
-				active_weapon_set = int(c.get("active_weapon_set", active_weapon_set))
-				weapon_sets = c.get("weapon_sets", weapon_sets)
-				_remount_local_equipment_visuals()
-				_delta_ui_sync_gate.mark_inventory_dirty()
-			"hotbar_update":
-				if c.has("inventory_rows"):
-					inventory_rows = int(c.get("inventory_rows", inventory_rows))
-				if c.has("inventory_capacity"):
-					inventory_capacity = int(c.get("inventory_capacity", inventory_capacity))
-				_apply_hotbar_update(int(c.get("slot_index", -1)), c.get("item_instance_id"), c.get("item", {}))
-				_delta_ui_sync_gate.mark_inventory_dirty()
-			"gold_update":
-				gold = int(c.get("gold", gold))
-				_delta_ui_sync_gate.mark_inventory_dirty()
-			"stash_item_add":
-				_upsert_stash_item(c.get("item", {}))
-				_delta_ui_sync_gate.mark_inventory_dirty()
-			"stash_item_remove":
-				_remove_stash_item(str(c.get("stash_item_id", "")))
-				_delta_ui_sync_gate.mark_inventory_dirty()
-			"stash_gold_update":
-				stash_gold = int(c.get("stash_gold", stash_gold))
-				_delta_ui_sync_gate.mark_inventory_dirty()
-			"resource_wallet_update":
-				var resource_id := str(c.get("resource_id", ""))
-				if resource_id != "":
-					resource_wallet[resource_id] = max(0, int(c.get("amount", resource_wallet.get(resource_id, 0))))
-				_delta_ui_sync_gate.mark_inventory_dirty()
+			"inventory_add", "inventory_update", "inventory_remove", "equipped_update", "weapon_set_update", "hotbar_update", "gold_update", "stash_item_add", "stash_item_remove", "stash_gold_update", "resource_wallet_update":
+				InventoryWalletDeltaRuntimeScript.apply_change(self, c)
 			"teleporter_discovery_update":
 				var discovered_level := int(c.get("level", 0))
 				var discovered := bool(c.get("discovered", false))
@@ -2100,67 +2044,31 @@ func _clear_level_entities() -> void:
 	interactable_ids.clear()
 
 func _update_inventory_item(item: Dictionary) -> void:
-	for i in range(inventory.size()):
-		if inventory[i]["item_instance_id"] == item["item_instance_id"]:
-			inventory[i] = item
-			return
-	inventory.append(item)
+	InventoryWalletDeltaRuntimeScript.update_inventory_item(self, item)
+
 
 func _remove_inventory_item(item_instance_id: String) -> void:
-	for i in range(inventory.size() - 1, -1, -1):
-		if str(inventory[i].get("item_instance_id", "")) == item_instance_id:
-			inventory.remove_at(i)
+	InventoryWalletDeltaRuntimeScript.remove_inventory_item(self, item_instance_id)
+
 
 func _remove_inventory_items_by_def(item_def_id: String, count: int) -> void:
-	if item_def_id == "" or count <= 0:
-		return
-	var removed := 0
-	for i in range(inventory.size() - 1, -1, -1):
-		if str(inventory[i].get("item_def_id", "")) == item_def_id:
-			inventory.remove_at(i)
-			removed += 1
-			if removed >= count:
-				return
+	InventoryWalletDeltaRuntimeScript.remove_inventory_items_by_def(self, item_def_id, count)
+
 
 func _upsert_stash_item(item: Dictionary) -> void:
-	var stash_item_id := str(item.get("stash_item_id", ""))
-	if stash_item_id == "":
-		return
-	for i in range(stash_items.size()):
-		if str(stash_items[i].get("stash_item_id", "")) == stash_item_id:
-			var merged: Dictionary = stash_items[i].duplicate(true)
-			merged.merge(item, true)
-			stash_items[i] = merged
-			return
-	stash_items.append(item.duplicate(true))
+	InventoryWalletDeltaRuntimeScript.upsert_stash_item(self, item)
+
 
 func _remove_stash_item(stash_item_id: String) -> void:
-	for i in range(stash_items.size() - 1, -1, -1):
-		if str(stash_items[i].get("stash_item_id", "")) == stash_item_id:
-			stash_items.remove_at(i)
+	InventoryWalletDeltaRuntimeScript.remove_stash_item(self, stash_item_id)
+
 
 func _apply_resource_wallet_snapshot(rows: Variant) -> void:
-	resource_wallet.clear()
-	if typeof(rows) != TYPE_ARRAY:
-		return
-	for value in rows:
-		if typeof(value) != TYPE_DICTIONARY:
-			continue
-		var row := value as Dictionary
-		var resource_id := str(row.get("resource_id", ""))
-		if resource_id != "":
-			resource_wallet[resource_id] = max(0, int(row.get("amount", 0)))
+	InventoryWalletDeltaRuntimeScript.apply_resource_wallet_snapshot(self, rows)
+
+
 func _apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = {}) -> void:
-	if slot_index < 0 or slot_index >= 10:
-		return
-	while hotbar.size() < 10:
-		hotbar.append({"slot_index": hotbar.size(), "item_instance_id": null})
-	var slot := {"slot_index": slot_index, "item_instance_id": item_instance_id}
-	if not item.is_empty():
-		slot["item"] = item.duplicate(true)
-	hotbar[slot_index] = slot
-	if consumable_bar != null:
-		consumable_bar.apply_hotbar_update(slot_index, item_instance_id, item)
+	InventoryWalletDeltaRuntimeScript.apply_hotbar_update(self, slot_index, item_instance_id, item)
 
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:

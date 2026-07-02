@@ -1,0 +1,31 @@
+.maintainability/file-size-baseline.tsv
+  s_468512adab21b7::t_902efa848a4c8d 10
+client/scripts/inventory_wallet_delta_runtime.gd
+  s_468512adab21b7::t_1475189f280cae 1-155
+docs/CODEMAP.md
+  s_468512adab21b7::t_9e2c2fae1ea809 39
+scripts/client_smoke.sh
+  s_468512adab21b7::t_d3e41601780d9a 219
+client/tests/test_inventory_wallet_delta_runtime.gd
+  s_468512adab21b7::t_a6b59ff30e83ee 1-31
+client/scripts/main.gd
+  s_468512adab21b7::t_e2548dc4f46613 1303-1304
+  s_468512adab21b7::t_2fd4abb49cf2d9 2047-2048,2051-2052,2055-2056,2059-2060,2063-2064,2067-2069,2071
+  s_468512adab21b7::t_9d45b88aa80121 95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "012348f4baccb36c4f31e3972c98dcb0974926b2",
+  "prompts": {},
+  "sessions": {
+    "s_468512adab21b7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7f989d29-ee64-42cc-a12e-1ea1b96bf844",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

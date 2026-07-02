@@ -16,8 +16,11 @@ var _title_label: Label
 var _body_label: Label
 var _actions_scroll: ScrollContainer
 var _actions_box: VBoxContainer
+var _filter_input: LineEdit
 var _status_label: Label
 var _step: int = Step.DEPTH
+var _filter_text: String = ""
+var _last_filter_step: int = -1
 var _depth_catalog: Dictionary = {}
 var _source_catalog: Dictionary = {}
 var _selected_depth: int = 0
@@ -72,6 +75,8 @@ func get_debug_state() -> Dictionary:
 		"depth_catalog": _depth_catalog.duplicate(true),
 		"source_catalog": _source_catalog.duplicate(true),
 		"status": _status_label.text if _status_label != null else "",
+		"filter_text": _filter_text,
+		"filter_visible": _filter_input.visible if _filter_input != null else false,
 	}
 
 
@@ -83,6 +88,7 @@ func bot_force_pick(payload: Dictionary) -> void:
 
 func _reset_flow() -> void:
 	_step = Step.DEPTH
+	_last_filter_step = -1
 	_depth_catalog = {}
 	_source_catalog = {}
 	_selected_depth = 0
@@ -127,6 +133,13 @@ func _build() -> void:
 	_body_label.add_theme_color_override("font_color", Color("#d9c8b5"))
 	root.add_child(_body_label)
 
+	_filter_input = LineEdit.new()
+	_filter_input.placeholder_text = "Filter options…"
+	_filter_input.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 32)
+	_filter_input.visible = false
+	_filter_input.text_changed.connect(_on_filter_text_changed)
+	root.add_child(_filter_input)
+
 	_actions_scroll = ScrollContainer.new()
 	_actions_scroll.custom_minimum_size = Vector2(PANEL_SIZE.x - 60, 280)
 	_actions_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -148,57 +161,73 @@ func _build() -> void:
 
 
 func _render() -> void:
+	if _step != _last_filter_step:
+		_clear_filter()
+		_last_filter_step = _step
+	if _filter_input != null:
+		_filter_input.visible = _step == Step.PICK or _step == Step.ITEM_LEVEL
 	_clear_actions()
+	var option_count := 0
 	match _step:
 		Step.DEPTH:
 			_body_label.text = "Pick dungeon depth (capped at deepest reached)."
-			_add_button("Back", _on_back_pressed, _selected_depth > 0 or _selected_source != "")
+			_add_button("Back", _on_back_pressed, _selected_depth > 0 or _selected_source != "", true)
 			for depth_row in _depth_catalog.get("depths", []):
 				var depth := int(depth_row.get("depth", 0))
 				var label := str(depth_row.get("label", "Depth %d" % depth))
-				_add_button(label, _select_depth.bind(depth))
+				option_count += _add_button(label, _select_depth.bind(depth))
 		Step.SOURCE:
 			_body_label.text = "Depth %d — pick drop source." % _selected_depth
-			_add_button("Back", _on_back_pressed, true)
+			_add_button("Back", _on_back_pressed, true, true)
 			for source_type in ["monster", "chest", "boss", "boss_chest"]:
-				_add_button(source_type.replace("_", " ").capitalize(), _select_source.bind(source_type))
+				option_count += _add_button(source_type.replace("_", " ").capitalize(), _select_source.bind(source_type))
 		Step.PICK:
 			_body_label.text = "Depth %d / %s — pick outcome." % [_selected_depth, _selected_source]
-			_add_button("Back", _on_back_pressed, true)
-			_render_pick_buttons()
+			_add_button("Back", _on_back_pressed, true, true)
+			option_count += _render_pick_buttons()
 		Step.ITEM_LEVEL:
 			_body_label.text = "Pick item level (max %d)." % int(_source_catalog.get("max_item_level", 1))
-			_add_button("Back", _on_back_pressed, true)
+			_add_button("Back", _on_back_pressed, true, true)
 			var max_level := maxi(1, int(_source_catalog.get("max_item_level", 1)))
 			for level in range(1, max_level + 1):
-				_add_button("Item level %d" % level, _confirm_force.bind(level))
+				option_count += _add_button("Item level %d" % level, _confirm_force.bind(level))
+	if option_count == 0 and _filter_text.strip_edges() != "":
+		_add_no_matches_label()
 
 
-func _render_pick_buttons() -> void:
+func _render_pick_buttons() -> int:
+	var option_count := 0
 	for attempt in _source_catalog.get("attempts", []):
 		var attempt_id := str(attempt.get("attempt_id", "primary"))
 		var success_weight := int(attempt.get("success_weight", 0))
 		var no_drop_weight := int(attempt.get("no_drop_weight", 0))
-		_add_button("%s: drop (%d%%)" % [attempt_id, success_weight], _pick_treasure_branch.bind(attempt_id))
+		option_count += _add_button("%s: drop (%d%%)" % [attempt_id, success_weight], _pick_treasure_branch.bind(attempt_id))
 		if no_drop_weight > 0:
-			_add_button("%s: no drop (%d%%)" % [attempt_id, no_drop_weight], _show_no_drop_hint)
+			option_count += _add_button("%s: no drop (%d%%)" % [attempt_id, no_drop_weight], _show_no_drop_hint)
 		for entry in attempt.get("entries", []):
 			var entry_index := int(entry.get("entry_index", 0))
 			var label := str(entry.get("label", "entry"))
 			var weight := int(entry.get("weight", 0))
-			_add_button("%s / %s (%d)" % [attempt_id, label, weight], _pick_treasure_entry.bind(attempt_id, entry_index, entry.duplicate(true)))
+			option_count += _add_button(
+				"%s / %s (%d)" % [attempt_id, label, weight],
+				_pick_treasure_entry.bind(attempt_id, entry_index, entry.duplicate(true))
+			)
 	var resource_loot: Dictionary = _source_catalog.get("resource_loot", {})
 	if not resource_loot.is_empty():
 		var chance := int(resource_loot.get("chance_percent", 0))
-		_add_button("Resource loot: drop (%d%%)" % chance, func() -> void: show_status("Pick a resource item below.", false))
+		option_count += _add_button(
+			"Resource loot: drop (%d%%)" % chance,
+			func() -> void: show_status("Pick a resource item below.", false)
+		)
 		for entry in resource_loot.get("pool", []):
 			var item_def_id := str(entry.get("item_def_id", ""))
 			var label := str(entry.get("label", item_def_id))
-			_add_button("Resource: %s" % label, _pick_resource_entry.bind(item_def_id, entry.duplicate(true)))
+			option_count += _add_button("Resource: %s" % label, _pick_resource_entry.bind(item_def_id, entry.duplicate(true)))
 	for wallet_item in _source_catalog.get("wallet_items", []):
 		var item_def_id := str(wallet_item.get("item_def_id", ""))
 		var label := str(wallet_item.get("label", item_def_id))
-		_add_button("Wallet: %s" % label, _pick_wallet_item.bind(item_def_id))
+		option_count += _add_button("Wallet: %s" % label, _pick_wallet_item.bind(item_def_id))
+	return option_count
 
 
 func _show_no_drop_hint() -> void:
@@ -289,6 +318,24 @@ func _on_back_pressed() -> void:
 	_render()
 
 
+func _on_filter_text_changed(text: String) -> void:
+	_filter_text = text
+	_render()
+
+
+func _clear_filter() -> void:
+	_filter_text = ""
+	if _filter_input != null:
+		_filter_input.text = ""
+
+
+func _matches_filter(text: String) -> bool:
+	var needle := _filter_text.strip_edges().to_lower()
+	if needle == "":
+		return true
+	return text.to_lower().contains(needle)
+
+
 func _clear_actions() -> void:
 	if _actions_box == null:
 		return
@@ -296,7 +343,18 @@ func _clear_actions() -> void:
 		child.queue_free()
 
 
-func _add_button(text: String, callback: Callable, enabled: bool = true) -> void:
+func _add_no_matches_label() -> void:
+	var label := Label.new()
+	label.text = "No matching options"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", Color("#b8a898"))
+	_actions_box.add_child(label)
+
+
+func _add_button(text: String, callback: Callable, enabled: bool = true, always_show: bool = false) -> int:
+	if not always_show and not _matches_filter(text):
+		return 0
 	var button := Button.new()
 	button.text = text
 	button.custom_minimum_size = Vector2(PANEL_SIZE.x - 72, 34)
@@ -304,6 +362,7 @@ func _add_button(text: String, callback: Callable, enabled: bool = true) -> void
 	if callback is Callable:
 		button.pressed.connect(callback)
 	_actions_box.add_child(button)
+	return 1
 
 
 func _reposition_panel() -> void:

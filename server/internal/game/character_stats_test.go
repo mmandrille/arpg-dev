@@ -205,3 +205,28 @@ func TestStarterStaffAddsMaxManaAndSkillDamage(t *testing.T) {
 		t.Fatalf("skill damage with staff = %+v, want raw/final 6", outcome)
 	}
 }
+
+func TestCharacterProgressionViewDualWieldWeaponDamageBySlot(t *testing.T) {
+	rules := cloneRules(loadRules(t))
+	sim := newRogueSkillTestSim(t, rules)
+	dagger := addRolledInventoryItem(t, sim, 9301, "dagger", nil)
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_dagger", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(dagger.instanceID), Slot: offHandSlot}}}), "equip_dagger")
+
+	view := sim.CharacterProgressionView()
+	bySlot := view.DerivedStats.WeaponDamageBySlot
+	if bySlot == nil || bySlot.MainHand == nil || bySlot.OffHand == nil {
+		t.Fatalf("weapon_damage_by_slot = %+v, want main and off hand entries", bySlot)
+	}
+	if bySlot.MainHand.Min <= bySlot.OffHand.Min && bySlot.MainHand.Max <= bySlot.OffHand.Max {
+		t.Fatalf("expected different weapon damage per slot: main=%+v off=%+v", bySlot.MainHand, bySlot.OffHand)
+	}
+	if math.Abs(view.DerivedStats.DamageMin-bySlot.MainHand.Min) > 0.0001 || math.Abs(view.DerivedStats.DamageMax-bySlot.MainHand.Max) > 0.0001 {
+		t.Fatalf("derived damage = %v..%v, want main-hand slot damage %v..%v", view.DerivedStats.DamageMin, view.DerivedStats.DamageMax, bySlot.MainHand.Min, bySlot.MainHand.Max)
+	}
+	if len(bySlot.MainHand.MinSources) == 0 || len(bySlot.OffHand.MinSources) == 0 {
+		t.Fatalf("expected per-slot damage breakdown sources: main=%+v off=%+v", bySlot.MainHand, bySlot.OffHand)
+	}
+	if bySlot.MainHand.MinSources[0].ItemInstanceID == bySlot.OffHand.MinSources[0].ItemInstanceID {
+		t.Fatalf("expected different weapon sources per slot: main=%+v off=%+v", bySlot.MainHand.MinSources, bySlot.OffHand.MinSources)
+	}
+}

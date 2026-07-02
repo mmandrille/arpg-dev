@@ -30,6 +30,7 @@ const DERIVED_LABELS := {
 const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance", "evade_chance"]
 const WHOLE_PERCENT_STATS := ["block_percent"]
 const TILES_PER_TICK_STATS := ["movement_speed"]
+const DUAL_WIELD_DAMAGE_KEYS := ["damage_min", "damage_max"]
 
 var progression: Dictionary = {}
 var allocation_enabled: bool = false
@@ -43,6 +44,11 @@ var _stat_effective_labels: Dictionary = {}
 var _stat_buttons: Dictionary = {}
 var _derived_name_labels: Dictionary = {}
 var _derived_labels: Dictionary = {}
+var _derived_off_labels: Dictionary = {}
+var _derived_header_name: Label
+var _derived_header_main: Label
+var _derived_header_off: Label
+var _derived_dual_wield_active: bool = false
 var _derived_title: Label
 var _derived_scroll: ScrollContainer
 var _derived_container: VBoxContainer
@@ -102,8 +108,12 @@ func get_debug_state() -> Dictionary:
 	for key in _derived_labels.keys():
 		var name_label: Label = _derived_name_labels.get(key, null)
 		var label: Label = _derived_labels.get(key, null)
+		var off_label: Label = _derived_off_labels.get(key, null)
 		if label != null and name_label != null:
-			derived_labels[key] = "%s  %s" % [name_label.text, label.text]
+			if _derived_dual_wield_active and key in DUAL_WIELD_DAMAGE_KEYS and off_label != null:
+				derived_labels[key] = "%s  %s  %s" % [name_label.text, label.text, off_label.text]
+			else:
+				derived_labels[key] = "%s  %s" % [name_label.text, label.text]
 	var stat_labels := {}
 	var stat_effective_styles := {}
 	for stat in BASE_STATS:
@@ -128,10 +138,12 @@ func get_debug_state() -> Dictionary:
 		"stat_mouse_filters": _stat_mouse_filters_by_key(),
 		"derived_open": true,
 		"derived_labels": derived_labels,
-		"derived_columns": ["NAME", "VALUE"],
+		"derived_columns": (["NAME", "MAIN", "OFF"] if _derived_dual_wield_active else ["NAME", "VALUE"]),
 		"derived_title": _derived_title.text if _derived_title != null else "",
 		"derived_title_is_button": false,
 		"derived_tooltips": _derived_tooltips_by_key(),
+		"derived_tooltips_main": _derived_slot_tooltips_by_key(_derived_labels),
+		"derived_tooltips_off": _derived_slot_tooltips_by_key(_derived_off_labels),
 		"derived_mouse_filters": _derived_mouse_filters_by_key(),
 		"derived_scroll": _derived_scroll_debug_state(),
 		"derived_tooltip_panel": _derived_tooltip_panel_debug_state(),
@@ -227,8 +239,13 @@ func _build() -> void:
 	root.add_child(_derived_title)
 	var derived_header := HBoxContainer.new()
 	derived_header.add_theme_constant_override("separation", 6)
-	derived_header.add_child(_header_label("NAME", 188, HORIZONTAL_ALIGNMENT_LEFT))
-	derived_header.add_child(_header_label("VALUE", 72, HORIZONTAL_ALIGNMENT_RIGHT))
+	_derived_header_name = _header_label("NAME", 188, HORIZONTAL_ALIGNMENT_LEFT)
+	_derived_header_main = _header_label("VALUE", 72, HORIZONTAL_ALIGNMENT_RIGHT)
+	_derived_header_off = _header_label("OFF", 72, HORIZONTAL_ALIGNMENT_RIGHT)
+	_derived_header_off.visible = false
+	derived_header.add_child(_derived_header_name)
+	derived_header.add_child(_derived_header_main)
+	derived_header.add_child(_derived_header_off)
 	root.add_child(derived_header)
 
 	_derived_scroll = ScrollContainer.new()
@@ -260,6 +277,14 @@ func _build() -> void:
 		_derived_name_labels[key] = name_label
 		_derived_labels[key] = label
 		row.add_child(label)
+		if key in DUAL_WIELD_DAMAGE_KEYS:
+			var off_label := _derived_value_label()
+			off_label.custom_minimum_size = Vector2(72, 28)
+			off_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			off_label.mouse_filter = Control.MOUSE_FILTER_STOP
+			off_label.visible = false
+			row.add_child(off_label)
+			_derived_off_labels[key] = off_label
 
 	_render()
 
@@ -303,16 +328,49 @@ func _render() -> void:
 			effective_label.tooltip_text = tooltip
 			effective_label.call("apply_effective_stat_style", base_value, effective_value)
 	var derived: Dictionary = progression.get("derived_stats", {})
+	var dual_wield := _dual_wield_damage_active(derived)
+	if dual_wield != _derived_dual_wield_active:
+		_derived_dual_wield_active = dual_wield
+		_apply_derived_header_layout(dual_wield)
+	var weapon_damage: Dictionary = derived.get("weapon_damage_by_slot", {})
+	var main_damage: Dictionary = weapon_damage.get("main_hand", {})
+	var off_damage: Dictionary = weapon_damage.get("off_hand", {})
 	for key in DERIVED_LABELS.keys():
 		var name_label: Label = _derived_name_labels.get(key, null)
 		var label: Label = _derived_labels.get(key, null)
+		var off_label: Label = _derived_off_labels.get(key, null)
 		var tooltip := _breakdown_summary(key)
 		if name_label != null:
 			name_label.text = DERIVED_LABELS[key]
-			name_label.tooltip_text = tooltip
+			if dual_wield and key in DUAL_WIELD_DAMAGE_KEYS:
+				name_label.tooltip_text = ""
+			else:
+				name_label.tooltip_text = tooltip
 		if label != null:
-			label.text = _format_stat_value(key, float(derived.get(key, 0.0)))
-			label.tooltip_text = tooltip
+			if dual_wield and key == "damage_min":
+				label.text = _format_stat_value(key, float(main_damage.get("min", derived.get("damage_min", 0.0))))
+			elif dual_wield and key == "damage_max":
+				label.text = _format_stat_value(key, float(main_damage.get("max", derived.get("damage_max", 0.0))))
+			else:
+				label.text = _format_stat_value(key, float(derived.get(key, 0.0)))
+			if dual_wield and key in DUAL_WIELD_DAMAGE_KEYS:
+				var damage_key := "min" if key == "damage_min" else "max"
+				label.tooltip_text = _weapon_slot_tooltip(key, main_damage, damage_key)
+			else:
+				label.tooltip_text = tooltip
+		if off_label != null:
+			if dual_wield and key == "damage_min":
+				off_label.visible = true
+				off_label.text = _format_stat_value(key, float(off_damage.get("min", 0.0)))
+				off_label.tooltip_text = _weapon_slot_tooltip("damage_min", off_damage, "min")
+			elif dual_wield and key == "damage_max":
+				off_label.visible = true
+				off_label.text = _format_stat_value(key, float(off_damage.get("max", 0.0)))
+				off_label.tooltip_text = _weapon_slot_tooltip("damage_max", off_damage, "max")
+			else:
+				off_label.visible = false
+				off_label.text = ""
+				off_label.tooltip_text = ""
 	_render_buttons()
 
 
@@ -326,6 +384,49 @@ func _render_buttons() -> void:
 		var btn: Button = _stat_buttons.get(stat, null)
 		if btn != null:
 			btn.disabled = not allocation_enabled or points <= 0
+
+
+func _dual_wield_damage_active(derived: Dictionary) -> bool:
+	var weapon_damage = derived.get("weapon_damage_by_slot", null)
+	if typeof(weapon_damage) != TYPE_DICTIONARY:
+		return false
+	return (weapon_damage as Dictionary).get("off_hand", null) != null
+
+
+func _apply_derived_header_layout(dual_wield: bool) -> void:
+	if _derived_header_name == null or _derived_header_main == null or _derived_header_off == null:
+		return
+	if dual_wield:
+		_derived_header_name.custom_minimum_size = Vector2(120, 22)
+		_derived_header_main.text = "MAIN"
+		_derived_header_main.custom_minimum_size = Vector2(58, 22)
+		_derived_header_off.visible = true
+		_derived_header_off.custom_minimum_size = Vector2(58, 22)
+		for key in DUAL_WIELD_DAMAGE_KEYS:
+			var name_label: Label = _derived_name_labels.get(key, null)
+			var label: Label = _derived_labels.get(key, null)
+			var off_label: Label = _derived_off_labels.get(key, null)
+			if name_label != null:
+				name_label.custom_minimum_size = Vector2(120, 28)
+			if label != null:
+				label.custom_minimum_size = Vector2(58, 28)
+			if off_label != null:
+				off_label.custom_minimum_size = Vector2(58, 28)
+		return
+	_derived_header_name.custom_minimum_size = Vector2(188, 22)
+	_derived_header_main.text = "VALUE"
+	_derived_header_main.custom_minimum_size = Vector2(72, 22)
+	_derived_header_off.visible = false
+	for key in DUAL_WIELD_DAMAGE_KEYS:
+		var name_label: Label = _derived_name_labels.get(key, null)
+		var label: Label = _derived_labels.get(key, null)
+		var off_label: Label = _derived_off_labels.get(key, null)
+		if name_label != null:
+			name_label.custom_minimum_size = Vector2(188, 28)
+		if label != null:
+			label.custom_minimum_size = Vector2(72, 28)
+		if off_label != null:
+			off_label.custom_minimum_size = Vector2(72, 28)
 
 
 func _format_number(value: float) -> String:
@@ -385,6 +486,34 @@ func _derived_tooltips_by_key() -> Dictionary:
 		if label != null and label.tooltip_text != "":
 			out[key] = label.tooltip_text
 	return out
+
+
+func _derived_slot_tooltips_by_key(labels_by_key: Dictionary) -> Dictionary:
+	var out := {}
+	for key in labels_by_key.keys():
+		var label: Label = labels_by_key.get(key, null)
+		if label != null and label.visible and label.tooltip_text != "":
+			out[key] = label.tooltip_text
+	return out
+
+
+func _weapon_slot_tooltip(key: String, slot_damage: Dictionary, damage_key: String) -> String:
+	var sources_key := "min_sources" if damage_key == "min" else "max_sources"
+	var sources: Array = slot_damage.get(sources_key, [])
+	if sources.is_empty():
+		return _breakdown_summary(key)
+	return _breakdown_summary_from_sources(key, float(slot_damage.get(damage_key, 0.0)), sources)
+
+
+func _breakdown_summary_from_sources(key: String, value: float, sources: Array) -> String:
+	if sources.is_empty():
+		return ""
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append("%s formula:" % _breakdown_display_name(key))
+	var formula_terms := _source_formula_terms(key, sources, _item_names_by_instance_id(sources))
+	parts.append_array(formula_terms)
+	parts.append("= %s" % _format_stat_value(key, value))
+	return "\n".join(parts)
 
 
 func _derived_mouse_filters_by_key() -> Dictionary:

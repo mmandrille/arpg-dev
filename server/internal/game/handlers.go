@@ -116,8 +116,12 @@ func (s *Sim) handleDirectionalAttack(in Input, res *TickResult) {
 		return
 	}
 	res.ack(in.MessageID)
-	target := s.directionalMeleeTarget(dir)
+	target := s.directionalMeleeTarget(dir, weaponSlot)
 	if target == nil {
+		return
+	}
+	if !s.inWeaponSlotMeleeRange(target, weaponSlot) {
+		s.emitPlayerWeaponMiss(target, s.playerID, in.CorrelationID, res, weaponSlot)
 		return
 	}
 	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), damageTypeForce, weaponSlot)

@@ -390,7 +390,33 @@
         "health_regen_per_second": { "type": "number", "minimum": 0 },
         "mana_regen_per_second": { "type": "number", "minimum": 0 },
         "light_radius": { "type": "number", "minimum": 0 },
-        "magic_find_percent": { "type": "number", "minimum": 0 }
+        "magic_find_percent": { "type": "number", "minimum": 0 },
+        "weapon_damage_by_slot": { "$ref": "#/$defs/weapon_damage_by_slot" }
+      }
+    },
+    "weapon_slot_damage": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": "number", "minimum": 0 },
+        "max": { "type": "number", "minimum": 0 },
+        "min_sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stat_breakdown_source" }
+        },
+        "max_sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stat_breakdown_source" }
+        }
+      }
+    },
+    "weapon_damage_by_slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "main_hand": { "$ref": "#/$defs/weapon_slot_damage" },
+        "off_hand": { "$ref": "#/$defs/weapon_slot_damage" }
       }
     },
     "stat_breakdown_source": {

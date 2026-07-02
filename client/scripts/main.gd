@@ -3159,7 +3159,8 @@ func _living_monster_target(target_id: String) -> bool:
 
 func _target_in_local_attack_range(target_id: String) -> bool:
 	return CombatReachScript.target_in_local_attack_range(
-		player_anchor, entities, inventory, equipped, target_id)
+		player_anchor, entities, inventory, equipped, target_id,
+		str(character_progression.get("character_class", "")))
 
 func _tick_sustained_click() -> void:
 	AttackMoveInputCoordinatorScript.tick_sustained_click(self)

@@ -15,6 +15,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await _test_derived_stats_scroll_and_breakdown_tooltips()
+	await _test_dual_wield_damage_columns()
 	_test_item_tooltip_ignores_mouse()
 	print("[gdtest] PASS: test_character_stats_panel (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -135,6 +136,61 @@ func _test_derived_stats_scroll_and_breakdown_tooltips() -> void:
 	_assert_true("tooltip includes cap formula source", block_tip.contains("-11% (Block cap, Cap)"))
 	_assert_true("tooltip puts formula elements on separate lines", block_tip.contains("+15% (Faithful Bulwark, Passive skill)\n+5% (Cave Shield)"))
 	_assert_true("tooltip includes capped final", block_tip.contains("= 75% (cap 75%)"))
+	panel.free()
+
+
+func _test_dual_wield_damage_columns() -> void:
+	var panel = CharacterStatsPanelScript.new()
+	root.add_child(panel)
+	await process_frame
+	panel.set_progression({
+		"derived_stats": {
+			"damage_min": 6.4,
+			"damage_max": 13.8,
+			"armor": 15.4,
+			"weapon_damage_by_slot": {
+				"main_hand": {
+					"min": 6.4,
+					"max": 13.8,
+					"min_sources": [
+						{"label": "Training Blade", "value": 4.0, "kind": "equipment_base", "item_instance_id": "main-1"},
+						{"label": "Rolled damage", "value": 0.4, "kind": "equipment_roll", "item_instance_id": "main-1"},
+						{"label": "Strength", "value": 2.0, "kind": "character_formula"},
+					],
+					"max_sources": [
+						{"label": "Training Blade", "value": 8.0, "kind": "equipment_base", "item_instance_id": "main-1"},
+						{"label": "Rolled damage", "value": 3.8, "kind": "equipment_roll", "item_instance_id": "main-1"},
+						{"label": "Strength", "value": 2.0, "kind": "character_formula"},
+					],
+				},
+				"off_hand": {
+					"min": 4.1,
+					"max": 9.2,
+					"min_sources": [
+						{"label": "Rusty Dagger", "value": 2.0, "kind": "equipment_base", "item_instance_id": "off-1"},
+						{"label": "Rolled damage", "value": 0.1, "kind": "equipment_roll", "item_instance_id": "off-1"},
+						{"label": "Strength", "value": 2.0, "kind": "character_formula"},
+					],
+					"max_sources": [
+						{"label": "Rusty Dagger", "value": 5.0, "kind": "equipment_base", "item_instance_id": "off-1"},
+						{"label": "Rolled damage", "value": 2.2, "kind": "equipment_roll", "item_instance_id": "off-1"},
+						{"label": "Strength", "value": 2.0, "kind": "character_formula"},
+					],
+				},
+			},
+		},
+	})
+	var state: Dictionary = panel.get_debug_state()
+	_assert_eq("dual wield derived columns", str(state.get("derived_columns", [])), str(["NAME", "MAIN", "OFF"]))
+	var labels: Dictionary = state.get("derived_labels", {})
+	_assert_eq("damage min shows both hands", str(labels.get("damage_min", "")), "Damage min  6.4  4.1")
+	_assert_eq("damage max shows both hands", str(labels.get("damage_max", "")), "Damage max  13.8  9.2")
+	_assert_eq("armor stays single column", str(labels.get("armor", "")), "Armor  15.4")
+	var main_tooltips: Dictionary = state.get("derived_tooltips_main", {})
+	var off_tooltips: Dictionary = state.get("derived_tooltips_off", {})
+	_assert_true("main damage min tooltip mentions main weapon", str(main_tooltips.get("damage_min", "")).find("Training Blade") >= 0)
+	_assert_true("off damage min tooltip mentions off weapon", str(off_tooltips.get("damage_min", "")).find("Rusty Dagger") >= 0)
+	_assert_true("main and off damage min tooltips differ", str(main_tooltips.get("damage_min", "")) != str(off_tooltips.get("damage_min", "")))
 	panel.free()
 
 

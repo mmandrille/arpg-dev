@@ -18,6 +18,7 @@ static func target_in_local_attack_range(host, target_id: String) -> bool:
 		host.inventory,
 		host.equipped,
 		target_id,
+		str(host.character_progression.get("character_class", "")),
 	)
 
 
@@ -44,6 +45,7 @@ static func start_attack_move(host, target_id: String) -> void:
 		host.equipped,
 		target_id,
 		host._last_facing_direction,
+		str(host.character_progression.get("character_class", "")),
 	)
 	if host._path_reject_backoff.blocks_goal(Vector2(goal.x, goal.z), Time.get_ticks_msec()):
 		return

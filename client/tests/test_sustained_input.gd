@@ -5,6 +5,7 @@ extends SceneTree
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
 const CombatInputBufferScript := preload("res://scripts/combat_input_buffer.gd")
 const CombatReachScript := preload("res://scripts/combat_reach.gd")
+const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 
@@ -27,6 +28,7 @@ func _initialize() -> void:
 	_test_local_attack_presentation_matches_and_clears()
 	_test_local_attack_presentation_ignores_non_matches()
 	_test_combat_reach_uses_equipped_weapon()
+	_test_combat_reach_dual_wield_uses_shorter_off_hand()
 	_test_combat_reach_attack_approach_point()
 
 	print("[gdtest] PASS: test_sustained_input (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -194,6 +196,19 @@ func _test_combat_reach_uses_equipped_weapon() -> void:
 	_assert_true("equipped bow reach covers control lab target", CombatReachScript.target_in_local_attack_range(player, entities, inventory, equipped, "1002"))
 	player.free()
 	monster.free()
+
+
+func _test_combat_reach_dual_wield_uses_shorter_off_hand() -> void:
+	ItemRulesLoaderScript.ensure_loaded()
+	var inventory := [
+		{"item_instance_id": "mh", "item_template_id": "starter_rogue_sword"},
+		{"item_instance_id": "oh", "item_template_id": "dagger"},
+	]
+	var equipped := {"main_hand": "mh", "off_hand": "oh"}
+	var dual_reach := CombatReachScript._local_player_attack_reach(inventory, equipped, "rogue")
+	_assert_true("rogue dual wield uses shorter off-hand reach", dual_reach <= 1.11)
+	var main_only_reach := CombatReachScript._local_player_attack_reach(inventory, equipped, "")
+	_assert_true("non-rogue ignores off-hand reach", main_only_reach > 1.4)
 
 
 func _test_combat_reach_attack_approach_point() -> void:

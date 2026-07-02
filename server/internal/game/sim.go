@@ -1319,6 +1319,10 @@ func (s *Sim) attackTarget(target *entity, in Input, res *TickResult, ack bool) 
 	if ack {
 		res.ack(in.MessageID)
 	}
+	if !s.inWeaponSlotMeleeRange(target, weaponSlot) {
+		s.emitPlayerWeaponMiss(target, s.playerID, in.CorrelationID, res, weaponSlot)
+		return
+	}
 	s.damageMonsterByPlayerWithSlot(target, s.playerID, in.CorrelationID, res, s.resolvePlayerAttackDamageForSlot(weaponSlot), damageTypeForce, weaponSlot)
 }
 
@@ -1488,12 +1492,12 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 	}
 }
 
-func (s *Sim) directionalMeleeTarget(dir Vec2) *entity {
+func (s *Sim) directionalMeleeTarget(dir Vec2, weaponSlot string) *entity {
 	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		return nil
 	}
-	reach := s.playerMeleeReach()
+	reach := s.playerWeaponSlotReach(weaponSlot)
 	var best *entity
 	bestDist := math.MaxFloat64
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
@@ -4698,15 +4702,14 @@ func (s *Sim) playerReach() float64 {
 }
 
 func (s *Sim) playerMeleeReach() float64 {
-	item := s.equippedWeaponItem()
-	if item == nil || s.playerAttackMode() == attackModeRanged {
+	if s.playerAttackMode() == attackModeRanged {
 		return s.rules.Combat.UnarmedReach
 	}
-	reach, ok := s.itemReach(item)
-	if !ok {
+	if s.equippedWeaponItem() == nil {
 		return s.rules.Combat.UnarmedReach
 	}
-	return reach
+
+	return s.playerDualWieldMeleeReach()
 }
 
 func (s *Sim) playerActionReach() float64 {

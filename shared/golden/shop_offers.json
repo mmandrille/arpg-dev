@@ -44,11 +44,12 @@
           "display_name": "Shocking Bow",
           "rarity": "magic",
           "rolled_stats": {
-            "bonus_lightning_damage": 1,
+            "bonus_lightning_damage": 4,
             "damage_max": 2,
-            "damage_min": 2
+            "damage_min": 1,
+            "vit": 2
           },
-          "buy_price": 265,
+          "buy_price": 360,
           "source": "common_dungeon_mob",
           "depth": 1
         },
@@ -72,12 +73,12 @@
           "display_name": "Venomous Long Sword",
           "rarity": "magic",
           "rolled_stats": {
-            "bonus_poison_damage": 1,
+            "bonus_poison_damage": 4,
             "damage_max": 4,
             "damage_min": 2,
-            "vit": 2
+            "str": 2
           },
-          "buy_price": 395,
+          "buy_price": 470,
           "source": "common_dungeon_mob",
           "depth": 1
         }

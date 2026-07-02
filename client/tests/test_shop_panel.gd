@@ -6,6 +6,7 @@ const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
+const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const ItemTooltipStatSectionsScript := preload("res://scripts/item_tooltip_stat_sections.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 

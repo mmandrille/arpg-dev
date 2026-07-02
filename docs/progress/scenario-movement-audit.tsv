@@ -77,6 +77,8 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 71_mana_regeneration.json	mana_regeneration	protocol	extended	contract	0	0		
 72_upgrade_resource_drop.json	upgrade_resource_drop	protocol	extended	contract	0	0		
 115_bishop_force_drop_lab.json	bishop_force_drop_lab	protocol	extended	contract	1	1		
+116_weapon_elemental_damage.json	weapon_elemental_lab	protocol	extended	contract	1	1		
+117_weapon_elemental_procs.json	weapon_elemental_proc_lab	protocol	extended	contract	1	1		
 resource_loot_pool_drop.json	resource_loot_pool_drop	protocol	extended	contract	0	0		
 upgrade_shard_level_drop.json	upgrade_shard_level_drop	protocol	extended	contract	0	0		
 73_companion_ai_foundation.json	companion_ai_foundation	protocol	pack	contract	1	1		

@@ -1,0 +1,33 @@
+server/internal/game/game_test.go
+  s_f902c1dbe15187::t_e78a455719a298 2561
+  s_f902c1dbe15187::t_3333f978dbeeb7 2562
+  s_f902c1dbe15187::t_5b884b8cdc6866 2885-2886
+  s_f902c1dbe15187::t_96f493404f8359 2983
+docs/progress/scenario-movement-audit.tsv
+  s_f902c1dbe15187::t_7f7463b70e5b5d 80-81
+server/internal/game/unique_effects_hunger_test.go
+  s_f902c1dbe15187::t_f60f58e023cb3d 1-53
+docs/CODEMAP.md
+  s_f902c1dbe15187::t_84edf996a27af9 10
+  s_f902c1dbe15187::t_cdfbb8bca8f8e5 20
+client/tests/test_shop_panel.gd
+  s_f902c1dbe15187::t_b9cd0521b8885b 9
+shared/golden/shop_offers.json
+  s_f902c1dbe15187::t_04d14bad032cc1 47,49-50,52,76,79,81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c9386f2793666c9b07226c436eb717a550c25bac",
+  "prompts": {},
+  "sessions": {
+    "s_f902c1dbe15187": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b55d2564-ae02-4be2-9d6e-130df5199401",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

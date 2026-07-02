@@ -20,33 +20,48 @@ func _run() -> void:
 	await process_frame
 	panel.stance_requested.connect(func(stance: String) -> void: _requested_stance = stance)
 
-	panel.show_board("board-1", "mercenary", "fixed:mercenary_guard", "mercenary_guard", 75, true, 125)
+	panel.show_board_from_event({
+		"entity_id": "board-1",
+		"service": "mercenary",
+		"price": 100,
+		"affordable": true,
+		"total_gold": 125,
+		"mercenary_candidates": [{
+			"character_id": "char-1",
+			"name": "Alt Hero",
+			"character_class": "barbarian",
+			"level": 5,
+			"price": 100,
+			"affordable": true,
+		}],
+	})
 	var state := panel.get_debug_state()
 	_assert_true("panel visible after board event", bool(state.get("visible", false)))
 	_assert_eq("service id", str(state.get("service_id", "")), "mercenary")
-	_assert_eq("offer id", str(state.get("offer_id", "")), "fixed:mercenary_guard")
-	_assert_eq("price", int(state.get("price", 0)), 75)
+	_assert_eq("candidate count", int(state.get("candidate_count", -1)), 1)
+	_assert_eq("price", int(state.get("price", 0)), 100)
 	_assert_eq("gold", int(state.get("gold", 0)), 125)
 	_assert_true("affordable", bool(state.get("affordable", false)))
 	_assert_eq("empty roster", int(state.get("hired_count", -1)), 0)
 
 	panel.apply_hired_event({
 		"target_entity_id": "2001",
-		"monster_def_id": "mercenary_guard",
-		"price": 75,
-		"total_gold": 50,
+		"source_character_id": "char-1",
+		"character_class": "barbarian",
+		"price": 100,
+		"total_gold": 25,
 	})
 	panel.set_companions([
-		{"id": "2001", "monster_def_id": "mercenary_guard", "hp": 24, "max_hp": 30, "companion_stance": "defend", "combat_stats": {"damage_min": 1, "damage_max": 3, "attack_cooldown_ticks": 28, "armor": 1.0, "block_percent": 5.0, "hit_chance": 0.75, "crit_chance": 0.05}},
+		{"id": "2001", "monster_def_id": "character_mercenary", "character_class": "barbarian", "display_name": "Alt Hero", "hp": 24, "max_hp": 30, "companion_stance": "defend", "combat_stats": {"damage_min": 1, "damage_max": 3, "attack_cooldown_ticks": 28, "armor": 1.0, "block_percent": 5.0, "hit_chance": 0.75, "crit_chance": 0.05}},
 		{"id": "wolf-1", "monster_def_id": "ranger_wolf", "hp": 10, "max_hp": 10},
 	])
 	state = panel.get_debug_state()
 	_assert_eq("hired entity id", str(state.get("hired_entity_id", "")), "2001")
-	_assert_eq("gold after hire", int(state.get("gold", 0)), 50)
+	_assert_eq("gold after hire", int(state.get("gold", 0)), 25)
 	_assert_eq("companion roster includes owned companions", int(state.get("hired_count", -1)), 2)
 	_assert_eq("selected stance follows companion state", str(state.get("selected_stance", "")), "defend")
 	_assert_true("stats card visible", bool(state.get("stats_card_visible", false)))
-	_assert_true("stats card names guard", str(state.get("stats_card_text", "")).contains("Mercenary Guard"))
+	_assert_true("stats card names mercenary", str(state.get("stats_card_text", "")).contains("Alt Hero"))
 	_assert_true("stats card shows hp", str(state.get("stats_card_text", "")).contains("HP: 24/30"))
 	_assert_true("stats card shows damage", str(state.get("stats_card_text", "")).contains("Damage: 1-3"))
 	_assert_true("stats card shows attack cooldown", str(state.get("stats_card_text", "")).contains("Attack: 28 ticks"))
@@ -55,8 +70,8 @@ func _run() -> void:
 	_assert_true("stats card shows stance", str(state.get("stats_card_text", "")).contains("Stance: Defend"))
 	_assert_true("stats card shows id", str(state.get("stats_card_text", "")).contains("ID: 2001"))
 	var rows: Array = state.get("hired_rows", [])
-	_assert_eq("roster monster id", str((rows[0] as Dictionary).get("monster_def_id", "")), "mercenary_guard")
-	_assert_true("status names hire", str(state.get("status", "")).contains("Mercenary Guard"))
+	_assert_eq("roster monster id", str((rows[0] as Dictionary).get("character_class", "")), "barbarian")
+	_assert_true("status names hire", str(state.get("status", "")).contains("Barbarian"))
 	var stance_buttons: Dictionary = state.get("stance_buttons", {})
 	_assert_true("defend stance button disabled", bool((stance_buttons.get("defend", {}) as Dictionary).get("disabled", false)))
 	panel.bot_click_stance("passive")
@@ -81,21 +96,35 @@ func _run() -> void:
 	MercenaryPanelBridgeScript.apply_lost(owner, panel, {"target_entity_id": "2001", "monster_def_id": "mercenary_guard"})
 	_assert_eq("bridge removes stale lost companion", owner.removed_id, "2001")
 
-	panel.show_board("board-2", "mercenary", "fixed:mercenary_scout", "mercenary_scout", 75, true, 125)
+	panel.show_board_from_event({
+		"entity_id": "board-2",
+		"service": "mercenary",
+		"price": 100,
+		"affordable": true,
+		"total_gold": 125,
+		"mercenary_candidates": [{
+			"character_id": "char-ranger",
+			"name": "Ranger Alt",
+			"character_class": "ranger",
+			"level": 8,
+			"price": 100,
+			"affordable": true,
+		}],
+	})
 	panel.apply_hired_event({
 		"target_entity_id": "2002",
-		"monster_def_id": "mercenary_scout",
-		"price": 75,
-		"total_gold": 50,
+		"source_character_id": "char-ranger",
+		"character_class": "ranger",
+		"price": 100,
+		"total_gold": 25,
 	})
 	panel.set_companions([
-		{"id": "2002", "monster_def_id": "mercenary_scout", "hp": 8, "max_hp": 8, "companion_stance": "assist", "combat_stats": {"damage_min": 1, "damage_max": 2, "attack_cooldown_ticks": 18, "armor": 0.0, "block_percent": 0.0, "hit_chance": 0.8, "crit_chance": 0.08}},
+		{"id": "2002", "monster_def_id": "character_mercenary", "character_class": "ranger", "display_name": "Ranger Alt", "hp": 8, "max_hp": 8, "companion_stance": "assist", "combat_stats": {"damage_min": 1, "damage_max": 2, "attack_cooldown_ticks": 18, "armor": 0.0, "block_percent": 0.0, "hit_chance": 0.8, "crit_chance": 0.08}},
 	])
 	state = panel.get_debug_state()
-	_assert_eq("scout offer id", str(state.get("offer_id", "")), "fixed:mercenary_scout")
-	_assert_eq("scout monster id", str(state.get("monster_def_id", "")), "mercenary_scout")
-	_assert_true("scout status display name", str(state.get("status", "")).contains("Mercenary Scout"))
-	_assert_true("scout stats display name", str(state.get("stats_card_text", "")).contains("Mercenary Scout"))
+	_assert_eq("ranger class", str(state.get("monster_def_id", "")), "ranger")
+	_assert_true("ranger status display name", str(state.get("status", "")).contains("Ranger"))
+	_assert_true("ranger stats display name", str(state.get("stats_card_text", "")).contains("Ranger"))
 
 	panel.queue_free()
 	print("[gdtest] PASS: test_mercenary_panel (%d passed, %d failed)" % [_pass_count, _fail_count])

@@ -6,15 +6,7 @@ static func show_board(owner, panel: MercenaryPanel, ev: Dictionary, gold: int) 
 	if panel == null:
 		return
 	owner._close_gameplay_panels("mercenary")
-	panel.show_board(
-		str(ev.get("entity_id", "")),
-		str(ev.get("service", "mercenary")),
-		str(ev.get("offer_id", "fixed:mercenary_guard")),
-		str(ev.get("monster_def_id", "mercenary_guard")),
-		int(ev.get("price", 0)),
-		bool(ev.get("affordable", gold >= int(ev.get("price", 0)))),
-		int(ev.get("total_gold", gold))
-	)
+	panel.show_board_from_event(ev, gold)
 	owner._sync_companion_bar()
 	owner._raise_gameplay_windows()
 

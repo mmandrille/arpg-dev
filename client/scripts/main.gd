@@ -841,6 +841,11 @@ func _on_companion_stance_requested(stance: String) -> void:
 		return
 	client.send("companion_command_intent", last_server_tick, {"stance": stance})
 
+func _on_mercenary_hire_requested(character_id: String) -> void:
+	if mercenary_panel == null or character_id == "":
+		return
+	_send_action_intent(mercenary_panel.board_entity_id, {"mercenary_character_id": character_id})
+
 func _on_companion_bar_selected(_companion: Dictionary) -> void:
 	if mercenary_panel == null:
 		return
@@ -2464,12 +2469,15 @@ func _show_bag_full_cant_unequip_text() -> void:
 		inventory_panel.show_gesture_hint(ClientConstants.BAG_FULL_CANT_UNEQUIP_TEXT)
 	_show_damage_number(player_id, Color("#ffcf5a"), null, "", 0.0, "inventory", ClientConstants.BAG_FULL_CANT_UNEQUIP_TEXT)
 
-func _send_action_intent(target_id: String) -> void:
+func _send_action_intent(target_id: String, extra: Dictionary = {}) -> void:
 	if client == null or target_id == "":
 		return
 	if _path_reject_backoff.blocks_target(target_id, Time.get_ticks_msec()):
 		return
-	var message_id := client.send("action_intent", last_server_tick, {"target_id": target_id})
+	var payload := {"target_id": target_id}
+	for key in extra.keys():
+		payload[key] = extra[key]
+	var message_id := client.send("action_intent", last_server_tick, payload)
 	pending_action_targets[message_id] = {"target_id": target_id}
 
 func _basic_attack_cooldown_seconds() -> float:
@@ -3833,6 +3841,7 @@ func _build_scene() -> void:
 	ui.add_child(bishop_panel)
 	mercenary_panel = MercenaryPanelScript.new()
 	mercenary_panel.stance_requested.connect(_on_companion_stance_requested)
+	mercenary_panel.hire_requested.connect(_on_mercenary_hire_requested)
 	ui.add_child(mercenary_panel)
 	market_panel = MarketPanelScript.new()
 	market_panel.market_action_requested.connect(_on_market_action_requested)
@@ -5380,6 +5389,10 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 	# Monsters resolve presentation through shared visual metadata while
 	# gameplay stays server-owned.
 	if kind == "monster" or kind == "companion":
+		if str(e.get("character_class", "")) != "":
+			var player_root := _make_remote_player_node(e)
+			player_root.name = "CompanionVisualRoot"
+			return player_root
 		var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
 		var packed := _monster_scene_for_visual(str(visual.get("scene", "monster_dummy")))
 		if str(e.get("visual_model", "")) == ClientConstants.BOSS_VISUAL_MODEL:
@@ -6232,6 +6245,9 @@ func bot_click_blacksmith_merge() -> void:
 	BotFacade.click_blacksmith_merge(self)
 func bot_click_mercenary_stance(stance: String = "assist") -> void:
 	BotFacade.click_mercenary_stance(self, stance)
+
+func bot_click_mercenary_hire(character_id: String = "") -> void:
+	BotFacade.click_mercenary_hire(self, character_id)
 func bot_set_stash_search(text: String) -> void:
 	BotFacade.set_stash_search(self, text)
 func bot_select_stash_sort(mode: String) -> void:

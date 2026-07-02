@@ -69,7 +69,8 @@ type (
 		Direction *game.Vec2 `json:"direction"`
 	}
 	actionPayloadWire struct {
-		TargetID string `json:"target_id"`
+		TargetID             string `json:"target_id"`
+		MercenaryCharacterID string `json:"mercenary_character_id,omitempty"`
 	}
 	descendPayloadWire  struct{}
 	ascendPayloadWire   struct{}
@@ -209,7 +210,7 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 		if err := json.Unmarshal(payload, &p); err != nil || p.TargetID == "" {
 			return in, false
 		}
-		in.Action = &game.ActionIntent{TargetID: p.TargetID}
+		in.Action = &game.ActionIntent{TargetID: p.TargetID, MercenaryCharacterID: p.MercenaryCharacterID}
 	case TypeDescend:
 		var p descendPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil {

@@ -4011,7 +4011,7 @@
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
           "position": {
-            "x": 5.5,
+            "x": 7.5,
             "y": 5
           }
         },
@@ -4079,7 +4079,7 @@
         },
         {
           "type": "monster",
-          "monster_def_id": "combat_lab_crit_attacker",
+          "monster_def_id": "mercenary_death_attacker",
           "position": {
             "x": 5,
             "y": 5

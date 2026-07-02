@@ -89,6 +89,7 @@ class RuntimeState:
     last_gold_before_action: int | None = None
     last_gold_after_action: int | None = None
     remembered_entity_ids: dict[str, str] = field(default_factory=dict)
+    mercenary_roster_by_name: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass

@@ -264,6 +264,11 @@ func (e *entity) applyMonsterLikeViewFields(ev *EntityView) {
 	if e.kind == companionEntity {
 		ev.OwnerID = idStr(e.ownerID)
 		ev.CompanionStance = e.companionStanceOrDefault()
+		if e.sourceCharacterID != "" {
+			ev.CharacterID = e.sourceCharacterID
+			ev.CharacterClass = e.characterClass
+			ev.DisplayName = e.displayName
+		}
 		if e.targetID != 0 {
 			ev.TargetID = idStr(e.targetID)
 		}
@@ -456,7 +461,7 @@ func (s *Sim) companionMovementGoal(companion *entity, owner *entity, target *en
 }
 
 func (s *Sim) companionAttackGoal(companion *entity, target *entity, def MonsterDef) (Vec2, bool) {
-	reach := s.monsterAttackReach(def) + monsterRadius - 0.05
+	reach := s.companionEffectiveReach(companion, def) + monsterRadius - 0.05
 	minSeparation := monsterRadius + monsterRadius + 0.05
 	if reach < minSeparation {
 		reach = minSeparation
@@ -496,11 +501,22 @@ func (s *Sim) advanceCompanionAttack(companion *entity, target *entity, res *Tic
 	}
 	companion.lastAttackTick = s.tick
 	companion.hasAttacked = true
+	if companion.companionAttackMode == attackModeRanged && companion.companionProjectileSpeed > 0 {
+		s.fireCompanionProjectile(companion, target, *damage, res)
+
+		return
+	}
 	s.damageMonsterByCompanion(target, companion, *damage, res)
 }
 
 func (s *Sim) companionInAttackRange(companion *entity, target *entity, def MonsterDef) bool {
-	return meleeInRange(distance(target.pos, companion.pos), s.monsterAttackReach(def), monsterRadius+0.05)
+	dist := distance(target.pos, companion.pos)
+	reach := s.companionEffectiveReach(companion, def)
+	if companion != nil && companion.companionAttackMode == attackModeRanged {
+		return dist <= reach+monsterRadius+0.05
+	}
+
+	return meleeInRange(dist, reach, monsterRadius+0.05)
 }
 
 func (s *Sim) damageMonsterByCompanion(target *entity, companion *entity, damageRange DamageRange, res *TickResult) combatResolution {

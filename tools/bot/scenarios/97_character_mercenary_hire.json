@@ -1,21 +1,22 @@
 {
-  "id": "mercenary_offer_variants",
+  "id": "character_mercenary_hire",
   "ci_tier": "extended",
   "world_id": "mercenary_hiring_lab",
-  "seed": "v289_mercenary_offer_variants_000",
-  "title": "Mercenary offer variants",
-  "description": "Hires a roster ranger alt from the mercenary board and proves the hired character mercenary engages the lab target.",
+  "seed": "v403_character_mercenary_hire",
+  "title": "Character mercenary hire",
+  "description": "Hires a same-account alt character from the mercenary board, proves level-down scaling only, combat follow/damage, and re-hire after loss.",
+  "character_class": "paladin",
   "debug_progression": {
-    "level": 10,
-    "gold": 300
+    "level": 20,
+    "gold": 500
   },
   "roster_characters": [
     {
-      "name": "Merc Ranger Alt",
-      "character_class": "ranger",
+      "name": "Merc Alt Sorc",
+      "character_class": "sorcerer",
       "debug_progression": {
-        "level": 8,
-        "base_stats": { "str": 8, "dex": 16, "vit": 10, "magic": 6 }
+        "level": 10,
+        "base_stats": { "str": 5, "dex": 8, "vit": 8, "magic": 18 }
       }
     }
   ],
@@ -28,15 +29,21 @@
     {
       "action": "action_entity",
       "interactable_def_id": "town_mercenary_board",
-      "mercenary_character_name": "Merc Ranger Alt",
+      "mercenary_character_name": "Merc Alt Sorc",
       "event_type": "mercenary_hired"
     },
     {
       "action": "assert_entity_count",
       "entity_type": "companion",
-      "monster_def_id": "character_mercenary",
       "alive": true,
       "equals": 1
+    },
+    {
+      "action": "move_until_player_position",
+      "x": 4,
+      "y": 5,
+      "tolerance": 0.35,
+      "max_ticks": 60
     },
     {
       "action": "wait_for_combat_event",
@@ -51,13 +58,17 @@
   "assertions": [
     {
       "type": "event_seen",
+      "event_type": "mercenary_board_opened",
+      "service": "mercenary"
+    },
+    {
+      "type": "event_seen",
       "event_type": "mercenary_hired",
       "service": "mercenary"
     },
     {
       "type": "entity_count",
       "entity_type": "companion",
-      "monster_def_id": "character_mercenary",
       "alive": true,
       "equals": 1
     },

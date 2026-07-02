@@ -196,6 +196,8 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_blacksmith_merge()
 		"click_mercenary_stance":
 			_do_click_mercenary_stance(action)
+		"click_mercenary_hire":
+			_do_click_mercenary_hire(action)
 		"set_stash_search":
 			_do_set_stash_search(action)
 		"select_stash_sort":
@@ -432,6 +434,11 @@ func _do_click_blacksmith_merge() -> void:
 func _do_click_mercenary_stance(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_click_mercenary_stance"):
 		_main.bot_click_mercenary_stance(str(action.get("stance", "assist")))
+
+
+func _do_click_mercenary_hire(action: Dictionary) -> void:
+	if _main != null and _main.has_method("bot_click_mercenary_hire"):
+		_main.bot_click_mercenary_hire(str(action.get("character_id", "")))
 
 
 func _do_set_stash_search(action: Dictionary) -> void:

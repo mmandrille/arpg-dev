@@ -20,6 +20,7 @@ func storeProgressionFromView(accountID, characterID string, view game.Character
 		SkillRanks:          cloneSkillRanks(view.SkillRanks),
 		Gold:                view.Gold,
 		DeepestDungeonDepth: view.DeepestDungeonDepth,
+		HiredMercenaryCharacterID: view.HiredMercenaryCharacterID,
 		Stats: store.CharacterBaseStats{
 			Str:   view.BaseStats.Str,
 			Dex:   view.BaseStats.Dex,

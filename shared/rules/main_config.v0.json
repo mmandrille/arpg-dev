@@ -50,6 +50,7 @@
       { "resource_item_def_id": "resurrection_badge", "unlock_depth": 50, "base_chance_percent": 25, "chance_per_depth_percent": 1 }
     ],
     "mercenary_hire_cost_gold": 75,
+    "mercenary_hire_cost_gold_per_level": 10,
     "quest_turn_in_item_def_id": "quest_leaf",
     "quest_turn_in_reward_gold": 25,
     "companion_assist_radius": 5.0,

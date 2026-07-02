@@ -275,6 +275,7 @@ type CharacterProgression struct {
 	Gold                int
 	DeepestDungeonDepth int
 	SkillRanks          map[string]int
+	HiredMercenaryCharacterID string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 }

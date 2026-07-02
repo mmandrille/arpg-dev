@@ -88,6 +88,12 @@ static func click_mercenary_stance(main, stance: String) -> void:
 		panel.bot_click_stance(stance)
 
 
+static func click_mercenary_hire(main, character_id: String = "") -> void:
+	var panel = _member(main, "mercenary_panel")
+	if panel != null and panel.has_method("bot_click_hire_candidate"):
+		panel.bot_click_hire_candidate(character_id)
+
+
 static func set_stash_search(main, text: String) -> void:
 	var panel = _member(main, "stash_panel")
 	if panel != null and panel.has_method("bot_set_search_text"):

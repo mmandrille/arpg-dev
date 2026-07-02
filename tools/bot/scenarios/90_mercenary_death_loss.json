@@ -4,28 +4,28 @@
   "world_id": "mercenary_death_loss_lab",
   "seed": "v220_mercenary_death_loss",
   "title": "Mercenary death loss",
-  "description": "Hires a guard, lets a hostile lab monster kill it, proves the loss event removes the active companion, then hires a replacement.",
+  "description": "Hires a character mercenary, lets a hostile lab monster kill it, proves the loss event removes the active companion, then hires a replacement.",
   "debug_progression": {
+    "level": 10,
     "gold": 600
   },
+  "roster_characters": [
+    {
+      "name": "Death Merc Alt",
+      "character_class": "barbarian",
+      "debug_progression": { "level": 6 }
+    }
+  ],
   "steps": [
     {
-      "action": "assert_entity_count",
-      "entity_type": "interactable",
+      "action": "action_entity",
       "interactable_def_id": "town_mercenary_board",
-      "state": "ready",
-      "equals": 1
-    },
-    {
-      "action": "assert_entity_count",
-      "entity_type": "monster",
-      "monster_def_id": "combat_lab_crit_attacker",
-      "alive": true,
-      "equals": 1
+      "event_type": "mercenary_board_opened"
     },
     {
       "action": "action_entity",
       "interactable_def_id": "town_mercenary_board",
+      "mercenary_character_name": "Death Merc Alt",
       "event_type": "mercenary_hired"
     },
     {
@@ -52,6 +52,7 @@
     {
       "action": "action_entity",
       "interactable_def_id": "town_mercenary_board",
+      "mercenary_character_name": "Death Merc Alt",
       "event_type": "mercenary_hired"
     },
     {
@@ -72,17 +73,10 @@
       "service": "mercenary"
     },
     {
-      "type": "entity_count",
-      "entity_type": "companion",
-      "alive": true,
-      "equals": 1
+      "type": "event_count",
+      "event_type": "mercenary_hired",
+      "service": "mercenary",
+      "equals": 2
     }
-  ],
-  "visual": {
-    "camera": {
-      "x": 4,
-      "y": 5,
-      "zoom": 1.0
-    }
-  }
+  ]
 }

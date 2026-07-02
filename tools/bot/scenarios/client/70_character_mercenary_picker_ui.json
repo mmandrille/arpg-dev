@@ -1,0 +1,44 @@
+{
+  "id": "character_mercenary_picker_ui",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "mercenary_hiring_lab",
+  "seed": "v403_character_mercenary_picker_ui",
+  "title": "Character mercenary picker UI",
+  "description": "Client opens the mercenary board, picks an alt character from the roster list, and verifies hire panel plus companion HUD.",
+  "character_class": "paladin",
+  "debug_progression": { "level": 12, "gold": 400 },
+  "roster_characters": [
+    {
+      "name": "Merc UI Alt",
+      "character_class": "barbarian",
+      "debug_progression": { "level": 8 }
+    }
+  ],
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
+    { "type": "wait_event", "event_type": "mercenary_board_opened", "timeout_s": 15.0 },
+    {
+      "type": "wait_mercenary_panel",
+      "price": 120,
+      "gold": 400,
+      "affordable": true,
+      "service_id": "mercenary",
+      "candidate_count": 1,
+      "hired_count": 0,
+      "timeout_s": 15.0
+    },
+    { "type": "click_mercenary_hire" },
+    { "type": "wait_event", "event_type": "mercenary_hired", "timeout_s": 15.0 },
+    {
+      "type": "wait_mercenary_panel",
+      "hired_count": 1,
+      "companion_bar_count": 1,
+      "companion_icon_kind": "mercenary",
+      "status_contains": "Hired",
+      "timeout_s": 15.0
+    }
+  ]
+}

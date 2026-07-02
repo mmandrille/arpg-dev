@@ -145,8 +145,15 @@ type entity struct {
 	corpseItemCount       int
 	ownerID               uint64
 	targetID              uint64
-	companionStance       string
-	projectileDefID       string
+	companionStance          string
+	characterClass           string
+	sourceCharacterID        string
+	companionAttackMode      string
+	companionAttackReach     float64
+	companionAttackRange     float64
+	companionProjectileDefID string
+	companionProjectileSpeed float64
+	projectileDefID          string
 	sourceSkillID         string
 	sourceWeaponSlot      string
 	expiresTick           uint64
@@ -427,6 +434,7 @@ type Sim struct {
 	stashCapacity         int
 	resourceWallet        map[string]int
 	corpses               map[string]*corpseState
+	mercenaryRoster       map[string]MercenaryCharacterSnapshot
 	hpRegenCarry          float64
 	manaRegenCarry        float64
 	nextBasicAttackTick   uint64
@@ -445,6 +453,7 @@ type CharacterProgressionState struct {
 	BaseStats           BaseStatsView
 	Gold                int
 	DeepestDungeonDepth int
+	HiredMercenaryCharacterID string
 }
 
 // NewSim builds a fresh session in the default vertical-slice world.
@@ -903,7 +912,10 @@ type (
 	DirectionalAttackIntent struct {
 		Direction Vec2
 	}
-	ActionIntent   struct{ TargetID string }
+	ActionIntent struct {
+		TargetID              string
+		MercenaryCharacterID  string
+	}
 	DescendIntent  struct{}
 	AscendIntent   struct{}
 	TeleportIntent struct {
@@ -3608,7 +3620,10 @@ func (s *Sim) firstProjectileHit(p *entity, candidate Vec2) (projectileHit, bool
 				consider(projectileHit{t: t, category: projectileHitInteractable, entityID: e.id})
 			}
 		case monsterEntity:
-			if ownerKind != playerEntity || e.hp <= 0 {
+			if e.hp <= 0 {
+				continue
+			}
+			if ownerKind != playerEntity && ownerKind != companionEntity {
 				continue
 			}
 			if t, ok := segmentIntersectsCircle(p.pos, candidate, e.pos, monsterRadius+projectileRadius); ok {
@@ -3671,6 +3686,10 @@ func (s *Sim) resolveProjectileHit(p *entity, hit projectileHit, res *TickResult
 	}
 	if p.sourceSkillID != "" {
 		s.resolveSkillProjectileMonsterHit(p, target, res)
+		return
+	}
+	if owner := s.activeLevel().entities[p.ownerID]; owner != nil && owner.kind == companionEntity {
+		s.damageMonsterByCompanion(target, owner, p.damageRange, res)
 		return
 	}
 	s.damageMonsterByPlayerWithSlot(target, p.ownerID, p.sourceCorrID, res, p.damageRange, p.sourceDamageType, p.sourceWeaponSlot)
@@ -5110,6 +5129,7 @@ func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 		DerivedStats:          s.DerivedStatsView(),
 		StatBreakdowns:        s.StatBreakdownViews(),
 		SkillRanks:            cloneIntMap(s.progression.SkillRanks),
+		HiredMercenaryCharacterID: s.progression.HiredMercenaryCharacterID,
 	}
 }
 

@@ -4,8 +4,16 @@
   "world_id": "mercenary_hiring_lab",
   "seed": "v207_mercenary_roster_ui",
   "title": "Mercenary roster UI",
-  "description": "Client opens the mercenary board, hires the selected offer, and verifies the roster panel and companion HUD.",
-  "debug_progression": { "gold": 300 },
+  "description": "Client opens the mercenary board, hires an alt character, and verifies the roster panel and companion HUD.",
+  "character_class": "paladin",
+  "debug_progression": { "level": 10, "gold": 300 },
+  "roster_characters": [
+    {
+      "name": "Merc Roster Alt",
+      "character_class": "barbarian",
+      "debug_progression": { "level": 6 }
+    }
+  ],
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
@@ -13,8 +21,19 @@
     { "type": "wait_event", "event_type": "mercenary_board_opened", "timeout_s": 15.0 },
     {
       "type": "wait_mercenary_panel",
-      "price": 75,
-      "gold": 225,
+      "price": 100,
+      "gold": 300,
+      "affordable": true,
+      "service_id": "mercenary",
+      "candidate_count": 1,
+      "timeout_s": 15.0
+    },
+    { "type": "click_mercenary_hire" },
+    { "type": "wait_event", "event_type": "mercenary_hired", "timeout_s": 15.0 },
+    {
+      "type": "wait_mercenary_panel",
+      "price": 100,
+      "gold": 200,
       "affordable": true,
       "service_id": "mercenary",
       "hired_count": 1,
@@ -36,8 +55,8 @@
     { "type": "assert_mercenary_panel_visible", "visible": true },
     {
       "type": "assert_mercenary_panel",
-      "price": 75,
-      "gold": 225,
+      "price": 100,
+      "gold": 200,
       "affordable": true,
       "service_id": "mercenary",
       "hired_count": 1,

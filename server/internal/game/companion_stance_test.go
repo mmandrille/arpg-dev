@@ -4,11 +4,24 @@ import "testing"
 
 func TestCompanionStanceCommandUpdatesOwnedCompanions(t *testing.T) {
 	sim, board := newMercenaryHiringSim(t, "v208_companion_stance_command")
-	cost := sim.rules.MainConfig.Gameplay.MercenaryHireCostGold
+	sim.progression.Level = 10
+	cost := sim.mercenaryHireCostGold()
 	sim.gold = cost
 	sim.progression.Gold = cost
+	sim.LoadMercenaryRoster([]MercenaryCharacterSnapshot{
+		{
+			CharacterID:    "char_alt",
+			Name:           "Alt",
+			CharacterClass: "barbarian",
+			Level:          5,
+			Progression: CharacterProgressionState{
+				CharacterClass: "barbarian",
+				Level:          5,
+			},
+		},
+	})
 	sim.savePlayer(sim.defaultPlayer())
-	hire := sim.Tick([]Input{mercenaryHireInput(board, "hire_for_stance")})
+	hire := sim.Tick([]Input{mercenaryHireCharacterInput(board, "hire_for_stance", "char_alt")})
 	assertAck(t, hire, "hire_for_stance")
 	mercenary := hiredMercenary(sim)
 	if mercenary == nil {
@@ -103,7 +116,7 @@ func newCompanionStanceAISim(t *testing.T) (*Sim, *entity, *entity) {
 		hp:                    20,
 		maxHP:                 20,
 		ownerID:               player.id,
-		monsterDefID:          mercenaryGuardMonsterDefID,
+		monsterDefID:          characterMercenaryMonsterDefID,
 		monsterAttackDamage:   &DamageRange{Min: 1, Max: 1},
 		monsterAttackCooldown: 1,
 		aiMode:                monsterAIModeIdle,

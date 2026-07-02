@@ -3,8 +3,9 @@ extends Control
 
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 signal stance_requested(stance: String)
+signal hire_requested(character_id: String)
 
-const PANEL_SIZE := Vector2(360, 400)
+const PANEL_SIZE := Vector2(360, 440)
 const TITLE_FONT_SIZE := 28
 const BODY_FONT_SIZE := 18
 const MERCENARY_MONSTER_DEF_ID := "mercenary_guard"
@@ -19,10 +20,12 @@ var affordable: bool = false
 var gold: int = 0
 var hired_entity_id: String = ""
 var selected_stance: String = "assist"
+var candidates: Array = []
 
 var _panel: DraggableWindow
 var _offer_label: Label
 var _status_label: Label
+var _candidate_list: VBoxContainer
 var _stance_label: Label
 var _stance_buttons: Dictionary = {}
 var _roster_label: Label
@@ -39,19 +42,39 @@ func _ready() -> void:
 	visible = false
 
 
-func show_board(next_entity_id: String, next_service_id: String, next_offer_id: String, next_monster_def_id: String, next_price: int, next_affordable: bool, next_gold: int) -> void:
-	board_entity_id = next_entity_id
-	service_id = next_service_id if next_service_id != "" else "mercenary"
-	offer_id = next_offer_id if next_offer_id != "" else "fixed:mercenary_guard"
-	monster_def_id = next_monster_def_id if next_monster_def_id != "" else MERCENARY_MONSTER_DEF_ID
-	price = max(0, next_price)
-	gold = max(0, next_gold)
-	affordable = next_affordable
+func show_board_from_event(ev: Dictionary, next_gold: int = -1) -> void:
+	board_entity_id = str(ev.get("entity_id", ""))
+	service_id = str(ev.get("service", "mercenary"))
+	price = max(0, int(ev.get("price", 0)))
+	gold = max(0, int(ev.get("total_gold", next_gold if next_gold >= 0 else gold)))
+	affordable = bool(ev.get("affordable", gold >= price))
+	candidates = []
+	for row in ev.get("mercenary_candidates", []):
+		if typeof(row) == TYPE_DICTIONARY:
+			candidates.append((row as Dictionary).duplicate(true))
 	hired_entity_id = ""
 	if _status_label != null:
 		_status_label.text = ""
 	visible = true
 	_render()
+
+
+func show_board(next_entity_id: String, next_service_id: String, next_offer_id: String, next_monster_def_id: String, next_price: int, next_affordable: bool, next_gold: int) -> void:
+	show_board_from_event({
+		"entity_id": next_entity_id,
+		"service": next_service_id,
+		"price": next_price,
+		"affordable": next_affordable,
+		"total_gold": next_gold,
+		"mercenary_candidates": [{
+			"character_id": next_offer_id,
+			"name": _display_name(next_monster_def_id),
+			"character_class": "barbarian",
+			"level": 1,
+			"price": next_price,
+			"affordable": next_affordable,
+		}],
+	}, next_gold)
 
 
 func set_gold(next_gold: int) -> void:
@@ -68,12 +91,22 @@ func set_gold(next_gold: int) -> void:
 
 func apply_hired_event(ev: Dictionary) -> void:
 	hired_entity_id = str(ev.get("target_entity_id", hired_entity_id))
-	monster_def_id = str(ev.get("monster_def_id", monster_def_id))
+	var source_character_id := str(ev.get("source_character_id", ""))
+	if source_character_id != "":
+		offer_id = "character:%s" % source_character_id
+		monster_def_id = str(ev.get("character_class", "character_mercenary"))
+	else:
+		monster_def_id = str(ev.get("monster_def_id", monster_def_id))
+		offer_id = str(ev.get("offer_id", offer_id))
 	price = max(0, int(ev.get("price", price)))
 	gold = max(0, int(ev.get("total_gold", gold)))
 	affordable = gold >= price
+	candidates = []
 	if _status_label != null:
-		_status_label.text = "Hired %s" % _display_name(monster_def_id)
+		var hired_name := _display_name(monster_def_id)
+		if ev.has("character_class"):
+			hired_name = "%s (%s)" % [hired_name, str(ev.get("character_class", "")).capitalize()]
+		_status_label.text = "Hired %s" % hired_name
 		_status_label.add_theme_color_override("font_color", Color("#9ee6a8"))
 	_render()
 
@@ -138,6 +171,8 @@ func get_debug_state() -> Dictionary:
 		"selected_stance": selected_stance,
 		"stance_buttons": _stance_button_debug(),
 		"hired_count": _companions.size(),
+		"candidate_count": candidates.size(),
+		"candidates": candidates.duplicate(true),
 		"hired_rows": _companions.duplicate(true),
 		"stats_card_visible": _stats_card.visible if _stats_card != null else false,
 		"stats_card_text": _stats_card_text(),
@@ -182,6 +217,10 @@ func _build() -> void:
 	_offer_label.add_theme_color_override("font_color", Color("#d9c8b5"))
 	root.add_child(_offer_label)
 
+	_candidate_list = VBoxContainer.new()
+	_candidate_list.add_theme_constant_override("separation", 6)
+	root.add_child(_candidate_list)
+
 	_status_label = Label.new()
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
@@ -225,15 +264,18 @@ func _build() -> void:
 func _render() -> void:
 	if _offer_label == null:
 		return
-	_offer_label.text = "%s\nOffer: %s\nCost: %d gold\nGold: %d" % [
-		_display_name(monster_def_id),
-		offer_id,
-		price,
-		gold,
-	]
+	_offer_label.text = "Hire cost: %d gold per active level\nYour gold: %d" % [price, gold]
+	_render_candidates()
 	if _status_label != null and _status_label.text == "":
-		_status_label.text = "Ready to hire" if affordable else "Not enough gold"
-		_status_label.add_theme_color_override("font_color", Color("#9ee6a8") if affordable else Color("#ff9f7a"))
+		if candidates.is_empty():
+			_status_label.text = "No characters available to hire"
+			_status_label.add_theme_color_override("font_color", Color("#ff9f7a"))
+		elif affordable:
+			_status_label.text = "Select a character to hire"
+			_status_label.add_theme_color_override("font_color", Color("#9ee6a8"))
+		else:
+			_status_label.text = "Not enough gold"
+			_status_label.add_theme_color_override("font_color", Color("#ff9f7a"))
 	if _stance_label != null:
 		_stance_label.text = "Stance: %s" % selected_stance.capitalize()
 	for stance in _stance_buttons.keys():
@@ -247,7 +289,7 @@ func _render() -> void:
 			for companion in _companions:
 				var rec := companion as Dictionary
 				lines.append("%s  HP %d/%d  %s  ID %s" % [
-					_display_name(str(rec.get("monster_def_id", ""))),
+					_companion_label(rec),
 					int(rec.get("hp", 0)),
 					int(rec.get("max_hp", 0)),
 					str(rec.get("companion_stance", selected_stance)).capitalize(),
@@ -271,6 +313,44 @@ func _reposition_panel() -> void:
 	_panel.position = Vector2(maxf(16.0, viewport_size.x - PANEL_SIZE.x - 22.0), 106.0)
 
 
+func _render_candidates() -> void:
+	if _candidate_list == null:
+		return
+	for child in _candidate_list.get_children():
+		child.queue_free()
+	if hired_entity_id != "":
+		return
+	for row in candidates:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var rec := row as Dictionary
+		var button := Button.new()
+		var class_id := str(rec.get("character_class", ""))
+		var label := "%s Lv%d" % [str(rec.get("name", "Hero")), int(rec.get("level", 1))]
+		if class_id != "":
+			label = "%s (%s)" % [label, class_id.capitalize()]
+		label = "%s - %d gold" % [label, int(rec.get("price", price))]
+		button.text = label
+		button.disabled = not bool(rec.get("affordable", affordable))
+		var character_id := str(rec.get("character_id", ""))
+		button.pressed.connect(func() -> void: _request_hire(character_id))
+		_candidate_list.add_child(button)
+
+
+func _request_hire(character_id: String) -> void:
+	if character_id == "":
+		return
+	hire_requested.emit(character_id)
+
+
+func _companion_label(rec: Dictionary) -> String:
+	if str(rec.get("display_name", "")) != "":
+		return str(rec.get("display_name", ""))
+	if str(rec.get("character_class", "")) != "":
+		return str(rec.get("character_class", "")).capitalize()
+	return _display_name(str(rec.get("monster_def_id", "")))
+
+
 func _display_name(id: String) -> String:
 	if id == "mercenary_guard":
 		return "Mercenary Guard"
@@ -289,7 +369,7 @@ func _stats_card_lines() -> Array:
 	var rec := _companions[0] as Dictionary
 	var stance := _normalize_stance(str(rec.get("companion_stance", selected_stance))).capitalize()
 	var lines := [
-		_display_name(str(rec.get("monster_def_id", ""))),
+		_companion_label(rec),
 		"HP: %d/%d" % [int(rec.get("hp", 0)), int(rec.get("max_hp", 0))],
 	]
 	lines.append_array(_combat_stat_lines(rec))
@@ -340,6 +420,12 @@ func _stance_button_debug() -> Dictionary:
 			"text": button.text,
 		}
 	return out
+
+
+func bot_click_hire_candidate(character_id: String = "") -> void:
+	if character_id == "" and not candidates.is_empty() and typeof(candidates[0]) == TYPE_DICTIONARY:
+		character_id = str((candidates[0] as Dictionary).get("character_id", ""))
+	_request_hire(character_id)
 
 
 func bot_click_stance(stance: String) -> void:

@@ -4,10 +4,19 @@
   "world_id": "mercenary_hiring_lab",
   "seed": "v206_mercenary_hiring_board",
   "title": "Mercenary hiring board",
-  "description": "Uses the town mercenary board to spend gold, hire one guard companion, then proves the hired mercenary follows and damages a target.",
+  "description": "Uses the town mercenary board to spend gold, hire one character mercenary companion, then proves the hired mercenary follows and damages a target.",
+  "character_class": "paladin",
   "debug_progression": {
+    "level": 10,
     "gold": 300
   },
+  "roster_characters": [
+    {
+      "name": "Merc Board Alt",
+      "character_class": "barbarian",
+      "debug_progression": { "level": 6 }
+    }
+  ],
   "steps": [
     {
       "action": "assert_entity_count",
@@ -26,6 +35,12 @@
     {
       "action": "action_entity",
       "interactable_def_id": "town_mercenary_board",
+      "event_type": "mercenary_board_opened"
+    },
+    {
+      "action": "action_entity",
+      "interactable_def_id": "town_mercenary_board",
+      "mercenary_character_name": "Merc Board Alt",
       "event_type": "mercenary_hired"
     },
     {
@@ -45,8 +60,13 @@
       "equals": 1
     },
     {
-      "action": "wait_ticks",
-      "ticks": 120
+      "action": "wait_for_combat_event",
+      "event_type": "monster_damaged",
+      "source_monster_def_id": "character_mercenary",
+      "target_entity_type": "monster",
+      "target_monster_def_id": "combat_lab_soft_target",
+      "min_damage": 1,
+      "timeout_s": 12
     }
   ],
   "assertions": [
@@ -67,9 +87,15 @@
       "min_distance": 0.5
     },
     {
+      "type": "entity_moved",
+      "entity_type": "companion",
+      "monster_def_id": "character_mercenary",
+      "min_distance": 0.5
+    },
+    {
       "type": "combat_event_seen",
       "event_type": "monster_damaged",
-      "source_entity_type": "companion",
+      "source_monster_def_id": "character_mercenary",
       "target_entity_type": "monster",
       "target_monster_def_id": "combat_lab_soft_target",
       "min_damage": 1
@@ -79,7 +105,7 @@
     "camera": {
       "x": 6,
       "y": 5,
-      "zoom": 1.0
+      "zoom": 1.2
     }
   }
 }

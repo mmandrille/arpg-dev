@@ -110,7 +110,8 @@ upgrade_shard_level_drop.json	upgrade_shard_level_drop	protocol	extended	contrac
 94_player_path_budget_lab.json	player_path_budget_lab	protocol	extended	contract	0	0		
 95_second_boss_template.json	second_boss_template	protocol	extended	contract	0	0		
 96_mercenary_offer_variants.json	mercenary_offer_variants	protocol	extended	contract	0	0		
-97_quest_town_turn_in.json	quest_town_turn_in	protocol	pack	contract	0	0		
+97_character_mercenary_hire.json	character_mercenary_hire	protocol	extended	contract	1	1		player move_until for combat lane; lab spawn insufficient alone
+97_quest_town_turn_in.json	quest_town_turn_in	protocol	pack	contract	0	0				
 98_badge_reward_foundation.json	badge_reward_foundation	protocol	extended	contract	0	0		
 99_flying_navigation_trait.json	flying_navigation_trait	protocol	extended	contract	0	0		
 client/01_click_to_kill.json	click_to_kill	godot_client	pack	contract	0	0		
@@ -187,6 +188,7 @@ client/68_fog_los_shadow_mask.json	fog_los_shadow_mask	godot_client	extended	con
 client/68_market_notification_badge.json	market_notification_badge	godot_client	extended	contract	0	0		
 client/69_discovery_minimap_toggle.json	discovery_minimap_toggle	godot_client	extended	contract	0	0		
 client/69_mercenary_offer_variant_ui.json	mercenary_offer_variant_ui	godot_client	extended	contract	0	0		
+client/70_character_mercenary_picker_ui.json	character_mercenary_picker_ui	godot_client	extended	contract	0	0		
 client/70_full_screen_map_overlay.json	full_screen_map_overlay	godot_client	extended	contract	0	0		
 client/71_minimap_points_of_interest.json	minimap_points_of_interest	godot_client	extended	contract	0	0		
 client/72_active_session_map_memory.json	active_session_map_memory	godot_client	extended	contract	0	0		

@@ -167,6 +167,20 @@ static func make_market_board_node() -> Node3D:
 	root.add_child(make_market_badge("PublishedListingBadge", "PublishedListingCount", Vector3(0.58, 1.42, 0.20), Color("#14324f"), Color("#776d5e")))
 	return root
 
+static func make_mercenary_board_node() -> Node3D:
+	var root := Node3D.new()
+	root.name = "MercenaryBoard"
+	add_merchant_box(root, "MercenaryBoardShadow", Vector3(1.70, 0.035, 0.52), Vector3(0.0, 0.018, 0.03), Color("#171513"))
+	add_merchant_box(root, "MercenaryBoardLeftPost", Vector3(0.13, 1.24, 0.13), Vector3(-0.68, 0.62, 0.0), Color("#3a2a1f"))
+	add_merchant_box(root, "MercenaryBoardRightPost", Vector3(0.13, 1.24, 0.13), Vector3(0.68, 0.62, 0.0), Color("#3a2a1f"))
+	add_merchant_box(root, "MercenaryBoardPanel", Vector3(1.34, 0.82, 0.12), Vector3(0.0, 0.88, 0.02), Color("#5a3a24"))
+	add_merchant_box(root, "MercenaryBoardInset", Vector3(1.12, 0.58, 0.135), Vector3(0.0, 0.88, 0.09), Color("#241a14"))
+	add_merchant_box(root, "MercenaryBoardHeader", Vector3(1.44, 0.16, 0.14), Vector3(0.0, 1.38, 0.04), Color("#8f6a3d"))
+	add_merchant_box(root, "MercenaryBoardSword", Vector3(0.10, 0.58, 0.145), Vector3(-0.34, 0.86, 0.16), Color("#9aa3ad"))
+	add_merchant_box(root, "MercenaryBoardShield", Vector3(0.34, 0.40, 0.145), Vector3(0.30, 0.84, 0.16), Color("#6d4a2d"))
+	add_merchant_box(root, "MercenaryBoardCoin", Vector3(0.16, 0.16, 0.16), Vector3(0.46, 0.72, 0.17), Color("#d8b24a"))
+	return root
+
 static func make_town_preview_scene() -> Node3D:
 	var root := Node3D.new()
 	root.name = "TownPreview"
@@ -225,6 +239,8 @@ static func make_interactable_node(def_id: String, elite_objective: bool = false
 			return make_bishop_node()
 		"town_market_board":
 			return make_market_board_node()
+		"town_mercenary_board":
+			return make_mercenary_board_node()
 		"town_blacksmith":
 			return make_blacksmith_node()
 		"town_quest_giver":

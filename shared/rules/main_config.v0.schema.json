@@ -97,6 +97,7 @@
           }
         },
         "mercenary_hire_cost_gold": { "type": "integer", "minimum": 0 },
+        "mercenary_hire_cost_gold_per_level": { "type": "integer", "minimum": 0 },
         "quest_turn_in_item_def_id": { "type": "string", "minLength": 1 },
         "quest_turn_in_reward_gold": { "type": "integer", "minimum": 0 },
         "companion_assist_radius": { "type": "number", "exclusiveMinimum": 0 },

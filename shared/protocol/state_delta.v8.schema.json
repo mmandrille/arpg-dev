@@ -443,6 +443,19 @@
         }
       }
     },
+    "mercenary_candidate": {
+      "type": "object",
+      "required": ["character_id", "name", "character_class", "level", "price", "affordable"],
+      "additionalProperties": false,
+      "properties": {
+        "character_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "character_class": { "type": "string" },
+        "level": { "type": "integer", "minimum": 1 },
+        "price": { "type": "integer", "minimum": 0 },
+        "affordable": { "type": "boolean" }
+      }
+    },
     "effect_ids": {
       "type": "array",
       "items": { "type": "string" }
@@ -498,7 +511,13 @@
           "type": "array",
           "items": { "$ref": "#/$defs/shop_sell_appraisal" }
         },
-        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback|mystery):[a-z0-9_:-]+$" },
+        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback|mystery|character):[a-z0-9_:-]+$" },
+        "source_character_id": { "type": "string", "minLength": 1 },
+        "character_class": { "type": "string" },
+        "mercenary_candidates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mercenary_candidate" }
+        },
         "item": { "$ref": "#/$defs/item" },
         "price": { "type": "integer", "minimum": 0 },
         "affordable": { "type": "boolean" },
@@ -804,14 +823,14 @@
             "properties": { "event_type": { "const": "mercenary_board_opened" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "service", "offer_id", "monster_def_id", "price", "affordable", "total_gold"] }
+          "then": { "required": ["entity_id", "service", "price", "affordable", "total_gold", "mercenary_candidates"] }
         },
         {
           "if": {
             "properties": { "event_type": { "const": "mercenary_hired" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "target_entity_id", "service", "offer_id", "monster_def_id", "price", "total_gold"] }
+          "then": { "required": ["entity_id", "target_entity_id", "service", "source_character_id", "price", "total_gold"] }
         },
         {
           "if": {
@@ -1012,7 +1031,8 @@
         "stat_breakdowns": {
           "type": "array",
           "items": { "$ref": "#/$defs/stat_breakdown" }
-        }
+        },
+        "hired_mercenary_character_id": { "type": "string", "minLength": 1 }
       }
     },
     "skill_progression_skill": {

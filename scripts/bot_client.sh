@@ -349,6 +349,15 @@ run_scenario() {
   local godot_flags="--resolution 1280x720"
   local email
   email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "$scenario_id")"
+  if [[ "$(json_field "$scenario_path" "len(d.get('roster_characters', []))")" != "0" ]]; then
+    echo "[bot-client $(_ts)] seeding mercenary roster characters for $scenario_id email=$email"
+    "$PYTHON" "$ROOT/tools/bot/mercenary_roster_preflight.py" \
+      --base-url "$BASE_URL" \
+      --dev-token "$DEV_TOKEN" \
+      --debug-token "$DEBUG_TOKEN" \
+      --email "$email" \
+      --scenario-path "$scenario_path"
+  fi
   expected_join_session=""
   if ! start_preflight "$scenario_path" "$scenario_id" "$world_id" "$seed" "$preflight_metadata" "$preflight_log"; then
     rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"

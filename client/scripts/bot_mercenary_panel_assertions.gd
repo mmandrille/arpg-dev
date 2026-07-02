@@ -6,7 +6,7 @@ static func matches(step: Dictionary, state: Dictionary) -> bool:
 	var panel: Dictionary = state.get("mercenary_panel", {})
 	if step.has("visible") and bool(panel.get("visible", false)) != bool(step.get("visible", false)):
 		return false
-	for key in ["price", "gold", "hired_count"]:
+	for key in ["price", "gold", "hired_count", "candidate_count"]:
 		if step.has(key) and int(panel.get(key, -1)) != int(step.get(key, 0)):
 			return false
 	if step.has("affordable") and bool(panel.get("affordable", false)) != bool(step.get("affordable", false)):

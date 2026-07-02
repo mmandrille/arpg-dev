@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-02 (v403 tier4-passive-skill-proof)
+Last updated: 2026-07-02 (v404 character-mercenary-hire)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-02 (v403 tier4-passive-skill-proof)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v403 — tier4-passive-skill-proof |
+| **Latest completed slice** | v404 — character-mercenary-hire |
 | **Active branch** | `main` |
-| **CI gate** | `make ci` green (2026-07-02 post-v403 batch) |
+| **CI gate** | focused verification green; final `make ci` pending autoloop close-out |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v398 — [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md) (2026-07-01; official cadence) |
 | **Next engineering review** | ~v408 milestone |
@@ -116,7 +116,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
 | Multiplayer | Matchmaking/lobby beyond backend-listed sessions, advanced active-session filtering/pagination/load-aware capacity controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49/v164 non-goals, ADR-0001, ADR-0014 |
-| Companions / AI | Hired mercenaries derived from other players' characters, multi-offer picker UI, per-offer pricing, durable mercenary roster/recovery rules, pricing/listing model, gear snapshot refresh rules, limits per player/party, per-companion command UI, ranged mercenary AI, production mercenary variant art, mercenary loot/XP/potion behavior | v206-v208/v220/v289 non-goals, ADR-0010 |
+| Companions / AI | Cross-account mercenary listings, durable mercenary roster/recovery persistence, production mercenary variant art, mercenary loot/XP/potion behavior | v206-v208/v220/v289 non-goals, ADR-0010; v404 shipped same-account character mercenaries with level-down-only scaling |
 
 ### Curated autoloop candidates
 

@@ -249,6 +249,28 @@ def ensure_character(client: httpx.Client, token: str, name: str, character_clas
     return str(create_character(client, token, name, character_class)["character_id"])
 
 
+def seed_roster_characters(
+    client: httpx.Client,
+    token: str,
+    debug_token: str,
+    scenario_path: Path,
+) -> dict[str, str]:
+    raw = json.loads(scenario_path.read_text())
+    roster_ids: dict[str, str] = {}
+    for entry in raw.get("roster_characters", []):
+        if not isinstance(entry, dict):
+            continue
+        name = str(entry.get("name", ""))
+        if not name:
+            continue
+        character_id = ensure_character(client, token, name, str(entry.get("character_class", "")))
+        progression = entry.get("debug_progression")
+        if isinstance(progression, dict) and progression:
+            seed_debug_progression(client, token, debug_token, character_id, progression)
+        roster_ids[name] = character_id
+    return roster_ids
+
+
 def seed_debug_progression(
     client: httpx.Client, token: str, debug_token: str, character_id: str,
     progression: dict[str, Any],
@@ -371,6 +393,7 @@ async def drive_scenario(base_url: str, token: str, sess: dict[str, Any], scenar
         assert first["type"] == "session_snapshot", first["type"]
         state = RuntimeState()
         state.world_id = scenario.world_id
+        state.mercenary_roster_by_name = dict(sess.get("mercenary_roster_by_name", {}))
         ingest_snapshot(first["payload"], state)
         log("connected; initial snapshot tick", state.last_tick)
 
@@ -802,7 +825,14 @@ async def execute_step(
         target = resolve_target(state, step)
         target_type = str(target.get("type", ""))
         target_item_def_id = str(target.get("item_def_id", step.get("item_def_id", "")))
-        env = make_envelope("action_intent", session_id, state.last_tick, {"target_id": str(target["id"])})
+        payload: dict[str, Any] = {"target_id": str(target["id"])}
+        character_id = str(step.get("mercenary_character_id", ""))
+        character_name = str(step.get("mercenary_character_name", ""))
+        if not character_id and character_name:
+            character_id = str(state.mercenary_roster_by_name.get(character_name, ""))
+        if character_id:
+            payload["mercenary_character_id"] = character_id
+        env = make_envelope("action_intent", session_id, state.last_tick, payload)
         await ws.send(json.dumps(env))
         expect_reject = step.get("expect_reject")
         if expect_reject:
@@ -2182,7 +2212,12 @@ def combat_event_entity_matches(
         return event_monster_def_id == str(selector["monster_def_id"])
     entity = state.entities.get(entity_id)
     if entity is None:
-        return False
+        event_monster_def_id = str(event.get(f"{prefix}_monster_def_id", ""))
+        if event_monster_def_id and "monster_def_id" in selector:
+            return event_monster_def_id == str(selector["monster_def_id"])
+        if "entity_type" in selector:
+            return False
+        return len(selector) == 0
     return entity_matches_selector(entity, selector)
 
 
@@ -3313,10 +3348,13 @@ def run_verified_session(
         character_id = ensure_character(client, token, character_name, scenario.character_class)
     if active_debug_progression:
         seed_debug_progression(client, token, debug_token, character_id, active_debug_progression)
+    roster_ids = seed_roster_characters(client, token, debug_token, scenario.path)
     if listed_coop and character_id:
         sess = create_listed_coop_session(client, token, world_id, character_id, seed)
     else:
         sess = create_session(client, token, world_id, seed, character_id)
+    if roster_ids:
+        sess["mercenary_roster_by_name"] = roster_ids
     if session_id_file is not None:
         session_id_file.write_text(sess["session_id"])
     session_id = sess["session_id"]

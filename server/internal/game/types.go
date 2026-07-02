@@ -22,6 +22,7 @@ type EntityView struct {
 	Mana                       *int                    `json:"mana,omitempty"`
 	MaxMana                    *int                    `json:"max_mana,omitempty"`
 	CharacterID                string                  `json:"character_id,omitempty"`
+	CharacterClass             string                  `json:"character_class,omitempty"`
 	MonsterDefID               string                  `json:"monster_def_id,omitempty"`
 	MonsterPackID              string                  `json:"monster_pack_id,omitempty"`
 	MonsterPackLeader          bool                    `json:"monster_pack_leader,omitempty"`
@@ -261,6 +262,7 @@ type CharacterProgressionView struct {
 	DerivedStats          DerivedStatsView    `json:"derived_stats"`
 	StatBreakdowns        []StatBreakdownView `json:"stat_breakdowns,omitempty"`
 	SkillRanks            map[string]int      `json:"-"`
+	HiredMercenaryCharacterID string          `json:"hired_mercenary_character_id,omitempty"`
 }
 
 // SkillProgressionSkillView is one skill row in the server-owned skill
@@ -377,8 +379,10 @@ type Event struct {
 	Service              string                  `json:"service,omitempty"`
 	Offers               []ShopOfferView         `json:"offers,omitempty"`
 	SellAppraisals       []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
-	OfferID              string                  `json:"offer_id,omitempty"`
-	Price                *int                    `json:"price,omitempty"`
+	OfferID               string                  `json:"offer_id,omitempty"`
+	SourceCharacterID     string                  `json:"source_character_id,omitempty"`
+	MercenaryCandidates   []MercenaryCandidateView `json:"mercenary_candidates,omitempty"`
+	Price                 *int                    `json:"price,omitempty"`
 	Affordable           *bool                   `json:"affordable,omitempty"`
 	RefreshKey           string                  `json:"refresh_key,omitempty"`
 	Item                 *ItemView               `json:"item,omitempty"`

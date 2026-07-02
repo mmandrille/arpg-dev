@@ -151,6 +151,16 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
 	sim.LoadAccountStashForPlayer(hostPlayerID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
 	sim.LoadResourceWalletForPlayer(hostPlayerID, persistedResources(hostStart.Resources))
+	if err := h.loadMercenaryRosterIntoSim(ctx, sim, host.AccountID, host.CharacterID); err != nil {
+		return nil, nil, err
+	}
+	persistedHireID := hostProgression.HiredMercenaryCharacterID
+	sim.RestoreHiredMercenaryCompanion(hostPlayerID)
+	if persistedHireID != "" && sim.CharacterProgressionView().HiredMercenaryCharacterID == "" {
+		if err := h.store.UpsertCharacterProgression(ctx, host.AccountID, storeProgressionFromView(host.AccountID, host.CharacterID, sim.CharacterProgressionView())); err != nil {
+			return nil, nil, fmt.Errorf("clear stale hired mercenary: %w", err)
+		}
+	}
 	h.loadCharacterCorpses(ctx, h.log, sim, host)
 	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, host.AccountID, host.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err

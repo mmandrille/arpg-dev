@@ -79,21 +79,27 @@ func (s *Sim) finishCompanionDeath(companion *entity, killer *entity, res *TickR
 	}
 	delete(s.activeLevel().entities, companion.id)
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(companion.id)})
-	if companion.sourceSkillID != mercenaryHireSourceID || companion.monsterDefID == "" {
+	if companion.sourceSkillID != mercenaryHireSourceID {
 		return
 	}
-	offer, ok := s.rules.Mercenaries.OfferByMonsterDefID(companion.monsterDefID)
-	if !ok {
-		return
+	s.clearHiredMercenaryForOwner(companion.ownerID, res)
+	offerID := ""
+	monsterDefID := companion.monsterDefID
+	if companion.sourceCharacterID != "" {
+		offerID = "character:" + companion.sourceCharacterID
+	} else if offer, ok := s.rules.Mercenaries.OfferByMonsterDefID(companion.monsterDefID); ok {
+		offerID = offer.OfferID
+		monsterDefID = offer.MonsterDefID
 	}
 	res.Events = append(res.Events, Event{
-		EventType:      "mercenary_lost",
-		EntityID:       idStr(companion.id),
-		SourceEntityID: idStr(entityID(killer)),
-		TargetEntityID: idStr(companion.id),
-		Service:        mercenaryService,
-		OfferID:        offer.OfferID,
-		MonsterDefID:   companion.monsterDefID,
+		EventType:         "mercenary_lost",
+		EntityID:          idStr(companion.id),
+		SourceEntityID:    idStr(entityID(killer)),
+		TargetEntityID:    idStr(companion.id),
+		Service:           mercenaryService,
+		OfferID:           offerID,
+		MonsterDefID:      monsterDefID,
+		SourceCharacterID: companion.sourceCharacterID,
 	})
 }
 

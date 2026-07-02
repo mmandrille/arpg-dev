@@ -133,6 +133,7 @@ func progressionStateFromStore(rules *game.Rules, progression *store.CharacterPr
 		SkillRanks:          cloneSkillRanks(progression.SkillRanks),
 		Gold:                progression.Gold,
 		DeepestDungeonDepth: progression.DeepestDungeonDepth,
+		HiredMercenaryCharacterID: progression.HiredMercenaryCharacterID,
 		BaseStats: game.BaseStatsView{
 			Str:   progression.Stats.Str,
 			Dex:   progression.Stats.Dex,

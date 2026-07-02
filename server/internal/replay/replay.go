@@ -13,6 +13,7 @@ import (
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/inputdecode"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/mercenaryroster"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -325,6 +326,11 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 		sim.LoadDiscoveredTeleporters(waypointLevels(start.Waypoints))
 		sim.LoadShopStock(persistedShopStock(start.ShopStock))
 		sim.LoadAccountStash(persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
+		if err := mercenaryroster.LoadIntoSim(ctx, repo, rules, sim, sess.AccountID, sess.CharacterID); err != nil {
+			return nil, nil, nil, err
+		}
+		sim.RestoreHiredMercenaryCompanion(sim.DefaultPlayerID())
+
 		return sim, nil, nil, nil
 	}
 
@@ -353,6 +359,10 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 	sim.LoadDiscoveredTeleportersForPlayer(hostID, waypointLevels(hostStart.Waypoints))
 	sim.LoadShopStockForPlayer(hostID, persistedShopStock(hostStart.ShopStock))
 	sim.LoadAccountStashForPlayer(hostID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
+	if err := mercenaryroster.LoadIntoSim(ctx, repo, rules, sim, host.AccountID, host.CharacterID); err != nil {
+		return nil, nil, nil, err
+	}
+	sim.RestoreHiredMercenaryCompanion(hostID)
 
 	players := []memberPlayer{{member: host, playerID: hostID}}
 	if err := assertStoredPlayerID(host, hostID); err != nil {
@@ -615,6 +625,7 @@ func progressionStateFromStore(rules *game.Rules, progression *store.CharacterPr
 		SkillRanks:          cloneSkillRanks(progression.SkillRanks),
 		Gold:                progression.Gold,
 		DeepestDungeonDepth: progression.DeepestDungeonDepth,
+		HiredMercenaryCharacterID: progression.HiredMercenaryCharacterID,
 		BaseStats: game.BaseStatsView{
 			Str:   progression.Stats.Str,
 			Dex:   progression.Stats.Dex,

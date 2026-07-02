@@ -72,7 +72,8 @@ type MainGameplayConfig struct {
 	ItemUpgradeResourceCost  int               `json:"item_upgrade_resource_count"`
 	ResourceLootDrops        ResourceLootDropsConfig `json:"resource_loot_drops"`
 	BadgeRewardRules         []BadgeRewardRule `json:"badge_reward_rules"`
-	MercenaryHireCostGold    int               `json:"mercenary_hire_cost_gold"`
+	MercenaryHireCostGold        int               `json:"mercenary_hire_cost_gold"`
+	MercenaryHireCostGoldPerLevel int              `json:"mercenary_hire_cost_gold_per_level"`
 	QuestTurnInItemDefID     string            `json:"quest_turn_in_item_def_id"`
 	QuestTurnInRewardGold    int               `json:"quest_turn_in_reward_gold"`
 	CompanionAssistRadius    float64           `json:"companion_assist_radius"`

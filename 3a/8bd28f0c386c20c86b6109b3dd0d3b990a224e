@@ -1,0 +1,32 @@
+server/internal/game/sim.go
+  s_a344bbac4a9e2a::t_a848c53563bdb6 1378-1382
+tools/bot/test_protocol.py
+  s_a344bbac4a9e2a::t_3bbd11667d561b 531
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_a344bbac4a9e2a::t_87a8e208cf8d96 26,213
+  s_a344bbac4a9e2a::t_8074a17e21424c 134-151,156-167
+  s_a344bbac4a9e2a::t_e7ca4c864beb03 152-155
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_a344bbac4a9e2a::t_915f53b661c688 145
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_a344bbac4a9e2a::t_2830949139e48f 134-137
+  s_a344bbac4a9e2a::t_f29c2e2f087f36 143-144,146
+tools/bot/scenarios/client/11_combat_feedback.json
+  s_a344bbac4a9e2a::t_6d09ff656c5a34 153-156,166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3a8bd28f0c386c20c86b6109b3dd0d3b990a224e",
+  "prompts": {},
+  "sessions": {
+    "s_a344bbac4a9e2a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9932d75f-d265-4bc7-a837-bd7cc1a6fd0a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+client/scripts/main.gd
+  s_53c1554af3a9ec::t_4aa782536732e0 3162-3163
+docs/CODEMAP.md
+  s_53c1554af3a9ec::t_eb11bfef57a0e1 19
+shared/protocol/state_delta.v8.schema.json
+  s_53c1554af3a9ec::t_1d98f2a2693ca7 996-1005,1015-1022
+  s_53c1554af3a9ec::t_69926c6c944c71 1006-1014
+server/internal/game/handlers.go
+  s_53c1554af3a9ec::t_f2ad0653d40ff9 119,123-124
+client/scripts/attack_move_input_coordinator.gd
+  s_53c1554af3a9ec::t_f1041b62e650e2 48
+  s_53c1554af3a9ec::t_d62edbea074acb 21
+server/internal/game/player_melee_reach_test.go
+  s_53c1554af3a9ec::t_3e6b1b09d51143 42-43
+  s_53c1554af3a9ec::t_ff9a836a9e5489 22,30-31,33-34,36-37,60-79
+  s_53c1554af3a9ec::t_358fcbacf25082 49,54,59
+  s_53c1554af3a9ec::t_b98c0623afb70e 1-21,23-29,32,35,38-41,44-48,50-53,55-58,80-81
+server/internal/game/player_melee_reach.go
+  s_53c1554af3a9ec::t_b3d9d2358f7feb 1-65
+server/internal/game/sim.go
+  s_53c1554af3a9ec::t_1ee832bf6bb970 1495,1500
+  s_53c1554af3a9ec::t_2182d043d88418 4705,4708,4711-4712
+  s_53c1554af3a9ec::t_fbb4caa1c3aa96 1322-1325
+server/internal/game/character_stats_test.go
+  s_53c1554af3a9ec::t_71113699704256 208-225,232
+  s_53c1554af3a9ec::t_77871b694852f0 226-231
+client/tests/test_character_stats_panel.gd
+  s_53c1554af3a9ec::t_c90c45841fcd5e 18
+  s_53c1554af3a9ec::t_51958ba3c812c7 142-151,180-188,194-196
+  s_53c1554af3a9ec::t_bc6b76b72193e9 152-179,189-193
+client/tests/test_sustained_input.gd
+  s_53c1554af3a9ec::t_813e64d2d6cece 31
+  s_53c1554af3a9ec::t_d4f946e8ada60f 201-213
+  s_53c1554af3a9ec::t_98a82df2146cfd 8
+shared/protocol/session_snapshot.v8.schema.json
+  s_53c1554af3a9ec::t_616247032815b8 403-411
+  s_53c1554af3a9ec::t_794825e4592b8e 393-402,412-419
+client/scripts/combat_reach.gd
+  s_53c1554af3a9ec::t_6612a4dbd4e20e 7,17,21,35,48-57,59,65-74,76-80
+server/internal/game/derived_stats.go
+  s_53c1554af3a9ec::t_03031465c23406 5-26,31-36
+  s_53c1554af3a9ec::t_96f62090bc0d92 41
+  s_53c1554af3a9ec::t_a88430fe6b9ff4 27-30
+  s_53c1554af3a9ec::t_6f2dd1bd909dfb 60,64,74-77,85-93,95,98-136
+  s_53c1554af3a9ec::t_2d715ec2a6995b 62-63,65-73,78-84,94,96-97
+client/scripts/character_stats_panel.gd
+  s_53c1554af3a9ec::t_ed2f45c063c8e2 111,113-116
+  s_53c1554af3a9ec::t_52dd3b895ffced 331-337,341,350-355,361-364,366-368,370-373
+  s_53c1554af3a9ec::t_55d3c07276fcd4 141
+  s_53c1554af3a9ec::t_67d2d695774c99 345-348,356-360,365,369
+  s_53c1554af3a9ec::t_b9d4ddcf55cd55 33
+  s_53c1554af3a9ec::t_11300686fa38d4 389-431
+  s_53c1554af3a9ec::t_1b01ce633e6986 491-518
+  s_53c1554af3a9ec::t_8c1dbb064b0658 47-51
+  s_53c1554af3a9ec::t_4733d386b2b627 145-146
+  s_53c1554af3a9ec::t_0d477a22158f4e 242-248
+  s_53c1554af3a9ec::t_e2ad53ee04daf1 280-287
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ffdd3f0b57bcebcb3823df45358cea2c137f9489",
+  "prompts": {},
+  "sessions": {
+    "s_53c1554af3a9ec": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6401bef1-20fe-4975-a7a4-5d8d7439d801",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

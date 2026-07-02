@@ -1,0 +1,21 @@
+docs/reviews/20260702_v408-overview.md
+  s_6d75e40516eb13::t_7ace00863d09b4 52
+  s_6d75e40516eb13::t_a16f2ddceb321e 7
+  s_6d75e40516eb13::t_7f228dc42c9eb9 84-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3cc9bb627c8b25a6d92fb2d0a2edc0e223200d76",
+  "prompts": {},
+  "sessions": {
+    "s_6d75e40516eb13": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "29d30ec3-5aab-41fa-9e36-d3d9e0fefc7f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

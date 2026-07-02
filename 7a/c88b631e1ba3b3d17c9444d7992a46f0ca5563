@@ -1,0 +1,43 @@
+shared/rules/combat.v0.schema.json
+  s_e64010706aad61::t_51e855eaca86b0 7
+  s_e64010706aad61::t_156ec0f1b4447f 28
+server/internal/game/sim.go
+  s_e64010706aad61::t_a6193d3a193db4 5723-5728,5731-5732,5735
+server/internal/game/rogue_skills.go
+  s_e64010706aad61::t_c575d4751ece1a 595-597
+server/internal/game/rules.go
+  s_e64010706aad61::t_f44fbd4fd19eae 102-104
+  s_e64010706aad61::t_54e2fcfc573828 881-883
+  s_e64010706aad61::t_ae39d522df78c6 843-846
+  s_e64010706aad61::t_967de9931a877c 896-899
+server/internal/game/weapon_strength_damage_test.go
+  s_e64010706aad61::t_0303c27cd86428 1-19,22-47
+  s_e64010706aad61::t_0f2fcd68eac7bd 20
+  s_e64010706aad61::t_9fd01c915ec616 21
+server/internal/game/weapon_strength_damage.go
+  s_e64010706aad61::t_ed6b0b6bc67a24 1-60
+server/internal/game/derived_stats.go
+  s_e64010706aad61::t_60f3bed6a3bbc2 123-125,128-130,133-134,137
+server/internal/game/mercenary_character.go
+  s_e64010706aad61::t_eb2aeb952417d7 209-211
+shared/rules/combat.v0.json
+  s_e64010706aad61::t_772fcf07b6881d 12
+docs/CODEMAP.md
+  s_e64010706aad61::t_80adc3a85de818 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7ac88b631e1ba3b3d17c9444d7992a46f0ca5563",
+  "prompts": {},
+  "sessions": {
+    "s_e64010706aad61": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b4193aa3-1dbe-4de4-8910-ec3af49b498a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

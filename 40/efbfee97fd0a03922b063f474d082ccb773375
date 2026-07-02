@@ -1,0 +1,130 @@
+server/internal/game/hero_skill_expansion_test.go
+  s_adc8fb80610009::t_5d690468bd5e1a 14-17
+server/internal/game/sim.go
+  s_adc8fb80610009::t_cf98c918a1f972 672
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_adc8fb80610009::t_2c0e0bb4f9542a 141-156
+  s_adc8fb80610009::t_e6af347ef69085 33-34
+shared/assets/skill_presentations.v0.json
+  s_adc8fb80610009::t_d2ae5949108013 202-212
+  s_adc8fb80610009::t_c3e8ab6f895365 46,54-56
+  s_adc8fb80610009::t_8780a2f4ff67da 325-335
+  s_adc8fb80610009::t_7075407fe8f0a3 347-357
+  s_adc8fb80610009::t_db882907b54d09 303,305-308,310-312
+  s_adc8fb80610009::t_8dc9f33083eae7 518-557
+shared/content/codex_index.v0.json
+  s_adc8fb80610009::t_589ce53e2d70d4 397-398,403-404,501-513,675-687,919-920,987-999,1230-1255,1348-1360,1406-1415
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_adc8fb80610009::t_e7b4a24a3578e8 46-48
+  s_adc8fb80610009::t_15b6612aa17927 18
+  s_adc8fb80610009::t_283c95ac3b4944 17
+client/scripts/main.gd
+  s_adc8fb80610009::t_ade947f1d0535d 1386,2399
+docs/as-built/v401_class-skill-decuple.md
+  s_adc8fb80610009::t_7e377c85cd0721 1-16
+server/internal/game/passive_skill_rules.go
+  s_adc8fb80610009::t_850a9c9b03ff49 30
+PROGRESS.md
+  s_adc8fb80610009::t_f4b1bf8d856c59 18,26,28
+docs/plans/v401_2026-07-02-class-skill-decuple-core.md
+  s_adc8fb80610009::t_f61b47587e46e9 1-6,10-14,18-37
+  s_adc8fb80610009::t_4b9c3011d1e64f 7-9,15-17
+tools/bot/scenarios/69_sorcerer_arcane_barrage.json
+  s_adc8fb80610009::t_ade947f1d0535d 22
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_adc8fb80610009::t_ade947f1d0535d 32,143,152,216
+  s_adc8fb80610009::t_92d2ea46365904 34
+server/internal/game/game_test.go
+  s_adc8fb80610009::t_f8f2ae4e63e6dc 261-268
+client/tests/test_skill_rules_loader.gd
+  s_adc8fb80610009::t_58e6b76bcff41b 104-105
+  s_adc8fb80610009::t_9c3b99049a5285 32
+  s_adc8fb80610009::t_b245f17d69bd03 63-64
+docs/CODEMAP.md
+  s_adc8fb80610009::t_bdce86e8f0bf56 11
+shared/i18n/es.json
+  s_adc8fb80610009::t_2ced1ccf36038d 115-116,119-120
+  s_adc8fb80610009::t_69503d7c6603e9 77-78
+  s_adc8fb80610009::t_6808fa800db3c3 123-124
+  s_adc8fb80610009::t_28eb9c30642a8d 190-198
+  s_adc8fb80610009::t_e930684235ff1e 97-98
+client/tests/test_skills_panel.gd
+  s_adc8fb80610009::t_d3b60fa721b1b5 117,121-122,126
+  s_adc8fb80610009::t_d1d72a33eb8a6e 70-73
+  s_adc8fb80610009::t_daa308454bb351 208
+  s_adc8fb80610009::t_762a9aca178487 178,185-188
+  s_adc8fb80610009::t_710118cdd0cee7 232
+  s_adc8fb80610009::t_38a30f74557e44 320
+  s_adc8fb80610009::t_3aadcf0ba7ef41 212
+  s_adc8fb80610009::t_cdf670b964772a 216,219-226
+docs/specs/v402_spec-rogue-escape-kit.md
+  s_adc8fb80610009::t_bd9f60ad3e84f1 1-15
+server/internal/game/ranger_skills_test.go
+  s_adc8fb80610009::t_6c6d5a6130ded5 235
+  s_adc8fb80610009::t_7963a36653161d 194-196
+docs/specs/v401_spec-class-skill-decuple-core.md
+  s_adc8fb80610009::t_07fa47fd380e60 1-51
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_adc8fb80610009::t_557565522db3b5 170-201
+  s_adc8fb80610009::t_e2208df003ff57 28
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_adc8fb80610009::t_864620aa338ae3 8
+  s_adc8fb80610009::t_63cc76841587de 133,142,223,229
+tools/bot/scenarios/93_crowded_lightning_perf_probe.json
+  s_adc8fb80610009::t_ade947f1d0535d 23,36,60,73,86,116
+tools/bot/scenarios/48_damage_types_and_resistances.json
+  s_adc8fb80610009::t_ade947f1d0535d 14,19,26,33
+tools/bot/test_protocol.py
+  s_adc8fb80610009::t_a32b6bbd5e95ca 530-531
+shared/i18n/en.json
+  s_adc8fb80610009::t_d69943d538b1fb 192-200
+  s_adc8fb80610009::t_b844cdc2dc9d8f 102-103
+  s_adc8fb80610009::t_54d8f9eeb099ca 128-129
+  s_adc8fb80610009::t_e61f951798da65 76-77
+tools/bot/test_skill_demo.py
+  s_adc8fb80610009::t_58d59462df8e39 16-18
+  s_adc8fb80610009::t_1bd357d0da2d55 52-54
+docs/progress/slice-lifecycle.md
+  s_adc8fb80610009::t_3d149b98b9396d 415
+shared/rules/skills.v0.json
+  s_adc8fb80610009::t_19864d38e17555 837-875
+  s_adc8fb80610009::t_99f930aa92ec9e 1369-1416
+  s_adc8fb80610009::t_fd709e42954a21 214,219
+  s_adc8fb80610009::t_bdae80a55833de 165-166
+  s_adc8fb80610009::t_318dbae892c84d 226
+  s_adc8fb80610009::t_1baff0fc06c64b 1472-1526
+  s_adc8fb80610009::t_4fafcf511ec2a6 250
+  s_adc8fb80610009::t_5e165814dc04e7 2167-2338
+  s_adc8fb80610009::t_adbf1511932318 1263-1265,1267-1268,1270,1274,1277-1278,1281-1282,1286,1293-1294,1297-1302,1306,1308
+shared/rules/skills.v0.schema.json
+  s_adc8fb80610009::t_fecfad926eab76 421-422
+tools/validate_skills.py
+  s_adc8fb80610009::t_4adc59b45cb738 226,232-233
+  s_adc8fb80610009::t_d7359420a72ea5 176
+  s_adc8fb80610009::t_7a8be41f541d38 174
+  s_adc8fb80610009::t_5176905d7d9430 172-173,175,177-200
+  s_adc8fb80610009::t_d82ba2e52039d3 110,116,122,133
+  s_adc8fb80610009::t_3910f636a629ed 234
+.maintainability/file-size-baseline.tsv
+  s_adc8fb80610009::t_adc112a2a5cade 21
+server/internal/game/skill_rank_aliases.go
+  s_adc8fb80610009::t_560505b986f16f 1-11
+server/internal/game/class_third_skills_test.go
+  s_adc8fb80610009::t_2d2825e75de85b 12,14-18,25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "40efbfee97fd0a03922b063f474d082ccb773375",
+  "prompts": {},
+  "sessions": {
+    "s_adc8fb80610009": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3b9ff9a4-a2f9-4212-ba42-fcd87d655863",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

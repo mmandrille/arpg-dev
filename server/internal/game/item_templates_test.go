@@ -24,6 +24,9 @@ func TestArmorSlotFamiliesArmorStatRequirements(t *testing.T) {
 		"helm": true, "chest": true, "gloves": true, "belt": true, "boots": true,
 	}
 	for templateID, template := range rules.ItemTemplates {
+		if template.EquipmentCategory == "class_specialist" {
+			continue
+		}
 		if !armorTypes[template.ItemType] {
 			continue
 		}

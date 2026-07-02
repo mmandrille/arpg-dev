@@ -2557,7 +2557,8 @@
       "equippable": true,
       "class_required": "barbarian",
       "requirements": {
-        "level": 1
+        "level": 1,
+        "str": 5
       },
       "base_stats": {},
       "rollable_stats": [

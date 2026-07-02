@@ -315,6 +315,7 @@ func TestItemTemplateFamilyStatRequirements(t *testing.T) {
 		"greatsword": "str",
 		"axe": "str", "dagger": "dex", "war_hammer": "str",
 		"staff":      "magic",
+		"book":       "magic",
 		"bow":        "dex",
 		"shield":     "str",
 		"helm":       "str",

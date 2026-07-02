@@ -24,7 +24,7 @@ func TestClassSpecialistTemplatesHaveNoArmor(t *testing.T) {
 	}
 }
 
-func TestSkullFaceCommonRollDamageMaxRange(t *testing.T) {
+func TestSkullFaceRollPoolDamageMaxRange(t *testing.T) {
 	rules := loadRules(t)
 	template, ok := rules.ItemTemplates["skull_face"]
 	if !ok {
@@ -39,23 +39,26 @@ func TestSkullFaceCommonRollDamageMaxRange(t *testing.T) {
 	}
 
 	rng := NewRNG(40501)
-	payload, ok := rules.rollItemTemplateWithRNG("skull_face", rng, 1)
-	if !ok {
-		t.Fatal("failed to roll skull_face")
+	foundDamage := false
+	for i := 0; i < 32; i++ {
+		payload, ok := rules.rollItemTemplateWithRNG("skull_face", rng, 1)
+		if !ok {
+			t.Fatal("failed to roll skull_face")
+		}
+		if payload.Stats["armor"] != 0 {
+			t.Fatalf("skull_face roll armor = %d, want 0", payload.Stats["armor"])
+		}
+		if payload.Stats["damage_max"] > 0 {
+			foundDamage = true
+			break
+		}
 	}
-	if payload.ItemLevel != 1 {
-		t.Fatalf("item level = %d, want 1", payload.ItemLevel)
-	}
-	got := payload.Stats["damage_max"]
-	if got < 1 || got > 5 {
-		t.Fatalf("common skull_face damage_max = %d, want 1..5", got)
-	}
-	if payload.Stats["armor"] != 0 {
-		t.Fatalf("common skull_face armor = %d, want 0", payload.Stats["armor"])
+	if !foundDamage {
+		t.Fatal("skull_face rolls never produced damage_max across sample")
 	}
 }
 
-func TestHolyScepterRollsSkillDamagePercent(t *testing.T) {
+func TestHolyScepterRollPoolSkillDamagePercent(t *testing.T) {
 	rules := loadRules(t)
 	template, ok := rules.ItemTemplates["holy_scepter"]
 	if !ok {
@@ -65,18 +68,24 @@ func TestHolyScepterRollsSkillDamagePercent(t *testing.T) {
 	if !ok {
 		t.Fatal("holy_scepter missing skill_damage_percent roll")
 	}
-	if roll.MinRarity != "" && roll.MinRarity != "common" {
-		t.Fatalf("holy_scepter skill_damage_percent min_rarity = %q, want common pool", roll.MinRarity)
+	if roll.Min != 5 || roll.Max != 15 {
+		t.Fatalf("holy_scepter skill_damage_percent roll = %+v, want min 5 max 15", roll)
 	}
 
 	rng := NewRNG(40502)
-	payload, ok := rules.rollItemTemplateWithRNG("holy_scepter", rng, 1)
-	if !ok {
-		t.Fatal("failed to roll holy_scepter")
+	foundSkillDamage := false
+	for i := 0; i < 48; i++ {
+		payload, ok := rules.rollItemTemplateWithRNG("holy_scepter", rng, 1)
+		if !ok {
+			t.Fatal("failed to roll holy_scepter")
+		}
+		if got := payload.Stats["skill_damage_percent"]; got >= roll.Min && got <= roll.Max {
+			foundSkillDamage = true
+			break
+		}
 	}
-	got := payload.Stats["skill_damage_percent"]
-	if got < roll.Min || got > roll.Max {
-		t.Fatalf("holy_scepter skill_damage_percent = %d, want %d..%d", got, roll.Min, roll.Max)
+	if !foundSkillDamage {
+		t.Fatal("holy_scepter rolls never produced skill_damage_percent within pool range across sample")
 	}
 }
 

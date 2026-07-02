@@ -1,0 +1,42 @@
+docs/reviews/20260702_v408-overview.md
+  s_6d75e40516eb13::t_e1656382fcfc60 1-106
+client/scripts/character_stats_panel.gd
+  s_6d75e40516eb13::t_1f38d8f84f6f45 7
+  s_6d75e40516eb13::t_c5efade2a8c8a6 318
+  s_6d75e40516eb13::t_60574796fbcc5b 349,351,353,356
+  s_6d75e40516eb13::t_51041822a0c597 340
+  s_6d75e40516eb13::t_6223b9cc93754b 362-363,366-367
+  s_6d75e40516eb13::t_1dd8636d7627fc 148
+  s_6d75e40516eb13::t_ebf1e66bdb59c5 311
+docs/reviews/extras/20260702_v408-shared-tooling-and-process.md
+  s_6d75e40516eb13::t_734b1b97ff462b 1-80
+docs/reviews/backend/20260702_v408-backend.md
+  s_6d75e40516eb13::t_9e5ce7d6ee0273 1-76
+client/scripts/character_stats_breakdown.gd
+  s_6d75e40516eb13::t_5b65b374a52345 1-85,87,94-97,99,101,103-216
+  s_6d75e40516eb13::t_27a3e8afd87469 86,88-93,98,100,102
+PROGRESS.md
+  s_6d75e40516eb13::t_2654c16f9361d2 30-31
+  s_6d75e40516eb13::t_dbad7fe2dc28b0 18
+  s_6d75e40516eb13::t_d5a017f420840e 90-93
+docs/CODEMAP.md
+  s_6d75e40516eb13::t_6d57f2ec95ec45 11
+docs/reviews/client/20260702_v408-client.md
+  s_6d75e40516eb13::t_60b2f0f0fd819e 1-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "10cc6bc611e0ca20f1cb9506a7d1da229449b4ed",
+  "prompts": {},
+  "sessions": {
+    "s_6d75e40516eb13": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "29d30ec3-5aab-41fa-9e36-d3d9e0fefc7f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

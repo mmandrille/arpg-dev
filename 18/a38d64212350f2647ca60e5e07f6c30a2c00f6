@@ -1,0 +1,30 @@
+client/scripts/inventory_panel.gd
+  s_908236d126238e::t_994dd24500598f 868-874
+  s_908236d126238e::t_69d4e23b781532 657-658,662-663
+  s_908236d126238e::t_a4f41e3edb32d9 16
+  s_908236d126238e::t_822ecc9e815545 623,630-632
+client/scripts/inventory_panel_styles.gd
+  s_908236d126238e::t_94a02f7373528b 43,46-47,49-53
+client/tests/test_inventory_panel.gd
+  s_908236d126238e::t_b9d5d82589e29c 6
+  s_908236d126238e::t_0a8b4811dcf02b 18-19
+  s_908236d126238e::t_f5ccdd8a908c64 61-105
+client/scripts/item_requirement_views.gd
+  s_908236d126238e::t_b89ec2b089ca42 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "18a38d64212350f2647ca60e5e07f6c30a2c00f6",
+  "prompts": {},
+  "sessions": {
+    "s_908236d126238e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6a916772-cdc5-4c98-bb51-aa8fdeae03f8",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

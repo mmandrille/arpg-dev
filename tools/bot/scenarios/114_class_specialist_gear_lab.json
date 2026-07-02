@@ -1,0 +1,36 @@
+{
+  "id": "class_specialist_gear_lab",
+  "ci_tier": "extended",
+  "world_id": "class_specialist_gear_lab",
+  "seed": "v405_class_specialist_1",
+  "character_class": "barbarian",
+  "title": "Class specialist gear lab",
+  "description": "Prove barbarian skull face rolls damage without armor and class-locks paladin scepter.",
+  "steps": [
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "skull_face"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "skull_face",
+      "item_template_id": "skull_face",
+      "stat_keys": ["damage_max"]
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "skull_face",
+      "slot": "head"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "holy_scepter"
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "holy_scepter",
+      "slot": "main_hand",
+      "expect_reject": "class_requirement_not_met"
+    }
+  ]
+}

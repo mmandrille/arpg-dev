@@ -28,6 +28,9 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 	}
 
 	stats := cloneIntMap(template.BaseStats)
+	if stats == nil {
+		stats = map[string]int{}
+	}
 	// Affix rolls use depth-1 ranges; FinalizeItemRollPayload applies item-level scaling once.
 	rollableStats := rules.rollableStatsForRarity(template.RollableStats, rarityID, 1)
 	rollCount := rarity.StatRollsMin

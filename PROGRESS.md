@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-02 (v404 character-mercenary-hire)
+Last updated: 2026-07-02 (v405 class-specialist-gear)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-07-02 (v404 character-mercenary-hire)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v404 — character-mercenary-hire |
+| **Latest completed slice** | v405 — class-specialist-gear |
 | **Active branch** | `main` |
 | **CI gate** | focused verification green; final `make ci` pending autoloop close-out |
 | **Next slice** | TBD (`/next`) |

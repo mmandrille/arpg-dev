@@ -300,6 +300,7 @@ type ItemTemplateDef struct {
 	BaseStats       map[string]int    `json:"base_stats"`
 	RollableStats   []RollableStatDef  `json:"rollable_stats"`
 	ClassAffinities []ClassAffinityDef `json:"class_affinities,omitempty"`
+	ClassRequired   string             `json:"class_required,omitempty"`
 	EffectPool      []string           `json:"effect_pool"`
 }
 
@@ -1111,14 +1112,32 @@ func LoadRules(dir string) (*Rules, error) {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s: templates must be equippable equipment", id)
 		}
 		switch def.EquipmentCategory {
-		case "weapon_1h", "weapon_2h", "off_hand", "gear", "jewelry":
+		case "weapon_1h", "weapon_2h", "off_hand", "gear", "jewelry", "class_specialist":
 		default:
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s.equipment_category: required", id)
+		}
+		if def.EquipmentCategory == "class_specialist" {
+			if def.ClassRequired == "" {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.class_required: required for class_specialist", id)
+			}
+			if _, ok := r.CharacterProgression.Classes[def.ClassRequired]; !ok {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.class_required: unknown class %s", id, def.ClassRequired)
+			}
+			if def.BaseStats["armor"] != 0 {
+				return nil, fmt.Errorf("game: invalid rules item_templates.%s.base_stats.armor: class_specialist must not grant armor", id)
+			}
+			for _, roll := range def.RollableStats {
+				if roll.Stat == "armor" {
+					return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats.armor: class_specialist must not roll armor", id)
+				}
+			}
+		} else if def.ClassRequired != "" {
+			return nil, fmt.Errorf("game: invalid rules item_templates.%s.class_required: only valid on class_specialist templates", id)
 		}
 		if !isEquipmentSlot(def.Slot) && def.Slot != "ring" {
 			return nil, fmt.Errorf("game: invalid rules item_templates.%s.slot: unsupported slot %s", id, def.Slot)
 		}
-		isWeaponTemplate := isHandSlot(def.Slot) && def.ItemType != "shield"
+		isWeaponTemplate := isHandSlot(def.Slot) && def.ItemType != "shield" && def.ItemType != "book"
 		if isWeaponTemplate {
 			if def.AttackMode == "" {
 				def.AttackMode = attackModeMelee

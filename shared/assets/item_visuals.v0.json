@@ -1057,6 +1057,116 @@
         }
       }
     },
+    "magic_book": {
+      "asset_id": "fallback_equipment_off_hand_v0",
+      "slot": "off_hand",
+      "mount_socket": "off_hand_socket",
+      "local_transform": {
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 90.0
+        },
+        "scale": {
+          "x": 0.75,
+          "y": 0.75,
+          "z": 0.75
+        }
+      }
+    },
+    "skull_face": {
+      "asset_id": "fallback_equipment_head_v0",
+      "slot": "head",
+      "mount_socket": "head_socket",
+      "local_transform": {
+        "position": {
+          "x": 0.0,
+          "y": 0.22,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.32,
+          "y": 0.32,
+          "z": 0.32
+        }
+      }
+    },
+    "shadow_mask": {
+      "asset_id": "fallback_equipment_head_v0",
+      "slot": "head",
+      "mount_socket": "head_socket",
+      "local_transform": {
+        "position": {
+          "x": 0.0,
+          "y": 0.22,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        }
+      }
+    },
+    "holy_scepter": {
+      "asset_id": "weapon_starter_staff_v0",
+      "slot": "main_hand",
+      "mount_socket": "main_hand_socket",
+      "local_transform": {
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.85,
+          "y": 0.85,
+          "z": 0.85
+        }
+      }
+    },
+    "hunting_quiver": {
+      "asset_id": "fallback_equipment_belt_v0",
+      "slot": "belt",
+      "mount_socket": "belt_socket",
+      "local_transform": {
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 0.26
+        }
+      }
+    },
     "sash": {
       "asset_id": "fallback_equipment_belt_v0",
       "slot": "belt",

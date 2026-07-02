@@ -25,7 +25,7 @@ server/internal/game/sim.go	6571	# v403/ci: skill_id on projectile skill damage 
 server/internal/game/types.go	665
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482
-server/internal/realtime/session_loop.go	924
+server/internal/realtime/session_loop.go	951
 server/internal/replay/replay.go	751	# v404: mercenary roster load on session reconstruct
 server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating passive gold auto-pickup test for v332 momentum
 server/internal/game/rogue_skills.go	620	# pre-v394 grandfather; passive_execute + poison stack handlers

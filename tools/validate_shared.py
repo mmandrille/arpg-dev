@@ -941,8 +941,22 @@ def cross_checks(report: Report) -> None:
         if template_id.startswith("cave_"):
             report.fail("item template id", f"{template_id}: cave_* template ids are removed")
             continue
-        if template.get("equipment_category") not in {"weapon_1h", "weapon_2h", "off_hand", "gear", "jewelry"}:
+        if template.get("equipment_category") not in {"weapon_1h", "weapon_2h", "off_hand", "gear", "jewelry", "class_specialist"}:
             report.fail("item template equipment_category", f"{template_id}: equipment_category required")
+            continue
+        if template.get("equipment_category") == "class_specialist":
+            class_required = template.get("class_required")
+            if class_required not in class_defs:
+                report.fail("item template class_specialist", f"{template_id}: class_required must be a known class")
+                continue
+            if "armor" in template.get("base_stats", {}):
+                report.fail("item template class_specialist", f"{template_id}: base_stats must not include armor")
+                continue
+            if any(roll.get("stat") == "armor" for roll in template.get("rollable_stats", [])):
+                report.fail("item template class_specialist", f"{template_id}: rollable_stats must not include armor")
+                continue
+        elif template.get("class_required"):
+            report.fail("item template class_required", f"{template_id}: class_required is only valid on class_specialist templates")
             continue
         slot = template.get("slot")
         item_type = template.get("item_type")
@@ -953,7 +967,7 @@ def cross_checks(report: Report) -> None:
             report.fail("item template slot", f"{template_id}: unsupported slot {slot}")
             continue
         attack_mode = template.get("attack_mode")
-        if slot in hand_slots and item_type != "shield":
+        if slot in hand_slots and item_type not in {"shield", "book"}:
             if attack_mode not in {"melee", "ranged"}:
                 report.fail("item template attack_mode", f"{template_id}: hand weapons need attack_mode")
                 continue
@@ -1037,7 +1051,7 @@ def cross_checks(report: Report) -> None:
                 break
         if failed_roll:
             continue
-        if slot in hand_slots and item_type != "shield":
+        if slot in hand_slots and item_type not in {"shield", "book"}:
             if "damage_min" not in seen_roll_stats or "damage_max" not in seen_roll_stats:
                 report.fail("item template rollable stats", f"{template_id}: weapons must include damage_min and damage_max")
             else:

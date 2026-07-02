@@ -1454,6 +1454,40 @@
         }
       ]
     },
+    "class_specialist_gear_lab": {
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
+      "entities": [
+        {
+          "type": "loot",
+          "item_template_id": "skull_face",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "magic_book",
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "holy_scepter",
+          "position": {
+            "x": 6,
+            "y": 5
+          }
+        }
+      ]
+    },
     "armor_slot_families_lab": {
       "player": {
         "position": {

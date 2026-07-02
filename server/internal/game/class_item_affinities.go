@@ -240,3 +240,23 @@ func isSupportedClassAffinityStat(stat string) bool {
 		return false
 	}
 }
+
+func (s *Sim) itemClassAllowed(item *invItem) bool {
+	if item == nil {
+		return true
+	}
+	if item.rollPayload != nil {
+		template, ok := s.rules.ItemTemplates[item.rollPayload.ItemTemplateID]
+		if !ok {
+			return true
+		}
+
+		return template.ClassRequired == "" || template.ClassRequired == s.progression.CharacterClass
+	}
+	def, ok := s.rules.Items[item.itemDefID]
+	if !ok {
+		return true
+	}
+
+	return def.ClassRequired == "" || def.ClassRequired == s.progression.CharacterClass
+}

@@ -13,6 +13,9 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 	itemLevel := RollItemLevel(rng, sourceDepth, r.DungeonGeneration.ItemLevelTiers)
 	representativeDepth := RepresentativeDepthForItemLevel(itemLevel, r.DungeonGeneration.ItemLevelTiers)
 	stats := cloneIntMap(template.BaseStats)
+	if stats == nil {
+		stats = map[string]int{}
+	}
 	rollableStats := r.rollableStatsForRarity(template.RollableStats, rarityID, representativeDepth)
 	rollCount := rarity.StatRollsMin
 	if rarity.StatRollsMax > rarity.StatRollsMin {

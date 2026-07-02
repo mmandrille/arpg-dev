@@ -415,6 +415,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v401** | `class-skill-decuple` | Complete (`make ci` green) | [`spec`](../specs/v401_spec-class-skill-decuple-core.md) | [`plan`](../plans/v401_2026-07-02-class-skill-decuple-core.md) | [`as-built`](../as-built/v401_class-skill-decuple.md) |
 | **v403** | `tier4-passive-skill-proof` | Complete (`make ci` green) | [`spec`](../specs/v403_spec-tier4-passive-skill-proof.md) | [`plan`](../plans/v403_2026-07-02-tier4-passive-skill-proof.md) | [`as-built`](../as-built/v403_tier4-passive-skill-proof.md) |
 | **v404** | `character-mercenary-hire` | Complete (focused verification green) | [`spec`](../specs/v404_spec-character-mercenary-hire.md) | [`plan`](../plans/v404_2026-07-02-character-mercenary-hire.md) | [`as-built`](../as-built/v404_character-mercenary-hire.md) |
+| **v405** | `class-specialist-gear` | Complete (focused verification green) | [`spec`](../specs/v405_spec-class-specialist-gear.md) | [`plan`](../plans/v405_2026-07-02-class-specialist-gear.md) | [`as-built`](../as-built/v405_class-specialist-gear.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

@@ -74,6 +74,26 @@
             {
               "item_template_id": "bow",
               "weight": 5
+            },
+            {
+              "item_template_id": "skull_face",
+              "weight": 1
+            },
+            {
+              "item_template_id": "magic_book",
+              "weight": 1
+            },
+            {
+              "item_template_id": "holy_scepter",
+              "weight": 1
+            },
+            {
+              "item_template_id": "shadow_mask",
+              "weight": 1
+            },
+            {
+              "item_template_id": "hunting_quiver",
+              "weight": 1
             }
           ]
         }

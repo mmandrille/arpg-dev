@@ -5407,17 +5407,6 @@ func (s *Sim) skillEffectLabel(effect skillEffectState) string {
 	return "Skill effect"
 }
 
-func (s *Sim) itemClassAllowed(item *invItem) bool {
-	if item == nil || item.rollPayload != nil {
-		return true
-	}
-	def, ok := s.rules.Items[item.itemDefID]
-	if !ok {
-		return true
-	}
-	return def.ClassRequired == "" || def.ClassRequired == s.progression.CharacterClass
-}
-
 func skillRequirementsForRank(req SkillRequirementDef, rank int) map[string]int {
 	if rank < 1 {
 		rank = 1

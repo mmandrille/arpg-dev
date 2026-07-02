@@ -91,6 +91,21 @@
       },
       "3d_model": "weapon_starter_staff_v0"
     },
+    "book": {
+      "icon": {
+        "shape": "staff",
+        "color": "#6a4a9a",
+        "accent": "#e8d0ff",
+        "label": "Bk"
+      },
+      "ground": {
+        "shape": "staff",
+        "color": "#6a4a9a",
+        "accent": "#e8d0ff",
+        "scale": 0.8
+      },
+      "3d_model": "weapon_starter_staff_v0"
+    },
     "bow": {
       "icon": {
         "shape": "bow",
@@ -798,6 +813,21 @@
         "accent": "#d8f8d8",
         "scale": 0.95
       }
+    },
+    "skull_face": {
+      "family": "helm"
+    },
+    "magic_book": {
+      "family": "book"
+    },
+    "holy_scepter": {
+      "family": "staff"
+    },
+    "shadow_mask": {
+      "family": "helm"
+    },
+    "hunting_quiver": {
+      "family": "belt"
     }
   }
 }

@@ -23,7 +23,7 @@
       "str": 4,
       "dex": 12,
       "vit": 5,
-      "magic": 4
+      "magic": 12
     },
     "skill_ranks": { "fan_of_blades": 1, "shadowstep": 1, "eviscerate": 1 }
   },
@@ -131,6 +131,41 @@
       "timeout_s": 3
     },
     {
+      "action": "cast_skill",
+      "skill_id": "shadowstep",
+      "direction": { "x": 0, "y": -1 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "shadowstep",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "eviscerate",
+      "monster_def_id": "combat_lab_soft_target",
+      "exclude_remembered": [
+        "poison_stab_target"
+      ],
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "eviscerate",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
       "action": "action_until_combat_event",
       "monster_def_id": "combat_lab_soft_target",
       "exclude_remembered": [
@@ -167,38 +202,6 @@
         "skill_id": "poison_stab"
       },
       "timeout_s": 8
-    },
-    {
-      "action": "cast_skill",
-      "skill_id": "shadowstep",
-      "direction": { "x": 0, "y": -1 },
-      "event_type": "skill_cast"
-    },
-    {
-      "action": "wait_until_assertion",
-      "assertion": {
-        "type": "event_seen",
-        "event_type": "skill_cast",
-        "skill_id": "shadowstep",
-        "rank": 1
-      },
-      "timeout_s": 3
-    },
-    {
-      "action": "cast_skill",
-      "skill_id": "eviscerate",
-      "direction": { "x": 1, "y": 0 },
-      "event_type": "skill_cast"
-    },
-    {
-      "action": "wait_until_assertion",
-      "assertion": {
-        "type": "event_seen",
-        "event_type": "skill_cast",
-        "skill_id": "eviscerate",
-        "rank": 1
-      },
-      "timeout_s": 3
     }
   ],
   "assertions": [
@@ -207,7 +210,7 @@
       "str": 4,
       "dex": 12,
       "vit": 5,
-      "magic": 4
+      "magic": 12
     },
     {
       "type": "equipped_slot_def",

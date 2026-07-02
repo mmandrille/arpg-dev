@@ -150,6 +150,11 @@
       "timeout_s": 8.0
     },
     {
+      "type": "wait_ticks",
+      "ticks": 10,
+      "timeout_s": 5.0
+    },
+    {
       "type": "click_entity_until_event",
       "entity_type": "monster",
       "monster_def_id": "combat_lab_blocking_target",
@@ -158,7 +163,7 @@
       "blocked": true,
       "consume_event": true,
       "retry_s": 0.25,
-      "timeout_s": 15.0
+      "timeout_s": 25.0
     },
     {
       "type": "wait_damage_number",

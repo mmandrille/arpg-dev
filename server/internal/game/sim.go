@@ -1375,7 +1375,11 @@ func (s *Sim) damageMonsterByPlayerSkillTypedWithID(target *entity, playerID uin
 		target.hp = 0
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
+	event := combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome)
+	if skillID != "" {
+		event.SkillID = skillID
+	}
+	res.Events = append(res.Events, event)
 	if outcome.Damage > 0 {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}

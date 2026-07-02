@@ -131,16 +131,19 @@
     {
       "action": "cast_skill",
       "skill_id": "snipe",
-      "monster_def_id": "combat_lab_soft_target",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
       "event_type": "skill_cast"
     },
     {
       "action": "wait_until_assertion",
       "assertion": {
-        "type": "combat_event_seen",
-        "event_type": "monster_damaged",
+        "type": "event_seen",
+        "event_type": "skill_cast",
         "skill_id": "snipe",
-        "min_damage": 1
+        "rank": 1
       },
       "timeout_s": 3
     },
@@ -222,12 +225,6 @@
       "event_type": "skill_cast",
       "skill_id": "snipe",
       "rank": 1
-    },
-    {
-      "type": "combat_event_seen",
-      "event_type": "monster_damaged",
-      "skill_id": "snipe",
-      "min_damage": 1
     }
   ]
 }

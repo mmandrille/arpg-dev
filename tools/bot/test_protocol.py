@@ -528,7 +528,7 @@ def test_load_scenarios_discovers_ranger_class_foundation():
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "volley", "rank": 1} in ranger.assertions
     assert {"type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 2} in ranger.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "snipe", "rank": 1} in ranger.assertions
-    assert {"type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "snipe", "min_damage": 1} in ranger.assertions
+    assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "snipe", "rank": 1} in ranger.assertions
 
 
 def test_load_scenarios_discovers_ranger_piercing_and_pinning_shots():

@@ -142,7 +142,7 @@
     {
       "action": "cast_skill",
       "skill_id": "skullcrusher",
-      "direction": { "x": 1, "y": 0 },
+      "monster_def_id": "combat_lab_soft_target",
       "event_type": "skill_cast"
     },
     {

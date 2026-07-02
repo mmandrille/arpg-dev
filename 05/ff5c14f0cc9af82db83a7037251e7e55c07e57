@@ -1,0 +1,38 @@
+docs/specs/v403_spec-tier4-passive-skill-proof.md
+  s_a344bbac4a9e2a::t_2cf8ab8cf0ef3b 3
+  s_a344bbac4a9e2a::t_316b3605efd115 1-2,4-57
+tools/bot/scenarios/tier4_passive_proof.json
+  s_a344bbac4a9e2a::t_f75e7fb1485e78 1-74
+docs/progress/scenario-movement-audit.tsv
+  s_a344bbac4a9e2a::t_69a439fd4ad956 223
+server/internal/game/tier4_passive_skills_test.go
+  s_a344bbac4a9e2a::t_7da7e10027eb81 1-83
+docs/plans/v403_2026-07-02-tier4-passive-skill-proof.md
+  s_a344bbac4a9e2a::t_855e9c8d981e0f 1-6,9-13,16-20,23-24
+  s_a344bbac4a9e2a::t_d2d7f42157df2a 21-22
+  s_a344bbac4a9e2a::t_36bc5c34f4b4a9 14-15
+  s_a344bbac4a9e2a::t_b13d045879b23b 7-8
+docs/as-built/v403_tier4-passive-skill-proof.md
+  s_a344bbac4a9e2a::t_4a34b6d6925e50 1-28
+docs/progress/slice-lifecycle.md
+  s_a344bbac4a9e2a::t_0770ad88ef77ee 415-416
+PROGRESS.md
+  s_a344bbac4a9e2a::t_f51680f6f3c31e 26,28
+  s_a344bbac4a9e2a::t_f469fcf06dfdea 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "05ff5c14f0cc9af82db83a7037251e7e55c07e57",
+  "prompts": {},
+  "sessions": {
+    "s_a344bbac4a9e2a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9932d75f-d265-4bc7-a837-bd7cc1a6fd0a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

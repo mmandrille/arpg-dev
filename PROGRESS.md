@@ -25,7 +25,7 @@ Last updated: 2026-07-02 (v408 weapon-elemental-procs)
 |-------|-------|
 | **Latest completed slice** | v408 — weapon-elemental-procs |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-02 — autoloop batch `make ci` pending |
+| **CI gate** | 2026-07-02 — `make ci` green (v408 autoloop batch) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v398 — [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md) (2026-07-01; official cadence) |
 | **Next engineering review** | ~v408 milestone |

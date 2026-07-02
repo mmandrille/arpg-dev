@@ -1,0 +1,40 @@
+server/internal/game/training_doll_test.go
+  s_07d51bd710a1b8::t_79480aca80cbcb 14-15,17-18
+server/internal/game/training_doll.go
+  s_07d51bd710a1b8::t_3386e4f430832d 32-33
+  s_07d51bd710a1b8::t_a4354ed9a2e29b 5-8
+server/internal/game/rules.go
+  s_07d51bd710a1b8::t_0c4c2f5b0d570c 524-534
+shared/rules/monsters.v0.json
+  s_07d51bd710a1b8::t_2cde81ab293835 15
+shared/rules/monsters.v0.schema.json
+  s_07d51bd710a1b8::t_7eb2b560f8709f 64
+client/scripts/combat_reach.gd
+  s_05680a771bc754::t_9ae12b8cf046ee 65-68
+client/scripts/main.gd
+  s_05680a771bc754::t_1024466cf225cd 2501-2502
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "51d7743da388b8a16969b62ea9a10cb9457e5922",
+  "prompts": {},
+  "sessions": {
+    "s_05680a771bc754": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "85413888-5b29-42ec-9346-ed717c5a4d6a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_07d51bd710a1b8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d68ca6fa-d517-4566-aa69-574a730cc02f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+server/internal/game/game_test.go
+  s_a344bbac4a9e2a::t_2f064c0ac7c01a 1036-1038
+  s_a344bbac4a9e2a::t_8b4f9da6f3b0ab 1089-1090
+  s_a344bbac4a9e2a::t_62919c1cd92cf6 1057-1058
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_a344bbac4a9e2a::t_fa8e99a0167670 36,44,54,65,76,87,293,300
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0c81f70893789780af2d312759144b852fb0733b",
+  "prompts": {},
+  "sessions": {
+    "s_a344bbac4a9e2a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9932d75f-d265-4bc7-a837-bd7cc1a6fd0a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

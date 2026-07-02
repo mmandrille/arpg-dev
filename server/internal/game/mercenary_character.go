@@ -206,8 +206,9 @@ func mercenaryCombatStats(rules *Rules, progression CharacterProgressionState, e
 	if weapon := equipped[mainHandSlot]; weapon != nil {
 		baseMin, baseMax, minRoll, maxRoll, ok := weaponDamageContributionsForItem(rules, weapon)
 		if ok {
-			damageMin = character.DamageMin + baseMin + minRoll
-			damageMax = character.DamageMax + baseMax + maxRoll
+			strMin, strMax := scaledWeaponStrengthDamage(character, weaponStrengthDamageMultiplier(rules, weapon))
+			damageMin = strMin + baseMin + minRoll
+			damageMax = strMax + baseMax + maxRoll
 		}
 		if speed, ok := weaponAttackSpeedContributionForItem(rules, weapon); ok {
 			weaponSpeed = speed

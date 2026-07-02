@@ -9,6 +9,7 @@
   "min_effective_attack_speed": 0.25,
   "max_effective_attack_speed": 3.0,
   "player_damage": { "min": 2, "max": 4 },
+  "two_handed_strength_damage_multiplier": 2,
   "unarmed_reach": 1.0,
   "coop": {
     "xp_share": {

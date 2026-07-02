@@ -120,20 +120,21 @@ func (s *Sim) weaponSlotDamageBreakdownView(slot string) *WeaponSlotDamageView {
 	if !ok {
 		return nil
 	}
+	strMultiplier := weaponStrengthDamageMultiplier(s.rules, item)
+	strMin, strMax := scaledWeaponStrengthDamage(character, strMultiplier)
+	minStrSources, maxStrSources := weaponStrengthDamageSources(character, strMultiplier)
 
 	return &WeaponSlotDamageView{
-		Min: character.DamageMin + baseMin + minRoll,
-		Max: character.DamageMax + baseMax + maxRoll,
-		MinSources: []StatBreakdownSourceView{
+		Min: strMin + baseMin + minRoll,
+		Max: strMax + baseMax + maxRoll,
+		MinSources: append([]StatBreakdownSourceView{
 			{Label: label, Value: baseMin, Kind: "equipment_base", ItemInstanceID: itemID},
 			{Label: "Rolled damage", Value: minRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
-			{Label: "Strength", Value: character.DamageMin, Kind: "character_formula"},
-		},
-		MaxSources: []StatBreakdownSourceView{
+		}, minStrSources...),
+		MaxSources: append([]StatBreakdownSourceView{
 			{Label: label, Value: baseMax, Kind: "equipment_base", ItemInstanceID: itemID},
 			{Label: "Rolled damage", Value: maxRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
-			{Label: "Strength", Value: character.DamageMax, Kind: "character_formula"},
-		},
+		}, maxStrSources...),
 	}
 }
 

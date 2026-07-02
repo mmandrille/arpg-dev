@@ -99,8 +99,9 @@ type Combat struct {
 	BaseAttackIntervalTicks int         `json:"base_attack_interval_ticks"`
 	MinEffectiveAttackSpeed float64     `json:"min_effective_attack_speed"`
 	MaxEffectiveAttackSpeed float64     `json:"max_effective_attack_speed"`
-	PlayerDamage            DamageRange `json:"player_damage"`
-	UnarmedReach            float64     `json:"unarmed_reach"`
+	PlayerDamage                       DamageRange `json:"player_damage"`
+	TwoHandedStrengthDamageMultiplier  float64     `json:"two_handed_strength_damage_multiplier"`
+	UnarmedReach                       float64     `json:"unarmed_reach"`
 	Coop                    CoopCombat  `json:"coop"`
 }
 
@@ -839,9 +840,10 @@ func LoadRules(dir string) (*Rules, error) {
 		BaseAttackIntervalTicks int         `json:"base_attack_interval_ticks"`
 		MinEffectiveAttackSpeed float64     `json:"min_effective_attack_speed"`
 		MaxEffectiveAttackSpeed float64     `json:"max_effective_attack_speed"`
-		PlayerDamage            DamageRange `json:"player_damage"`
-		UnarmedReach            float64     `json:"unarmed_reach"`
-		Coop                    CoopCombat  `json:"coop"`
+		PlayerDamage                       DamageRange `json:"player_damage"`
+		TwoHandedStrengthDamageMultiplier  float64     `json:"two_handed_strength_damage_multiplier"`
+		UnarmedReach                       float64     `json:"unarmed_reach"`
+		Coop                               CoopCombat  `json:"coop"`
 	}
 	if err := readJSON(filepath.Join(dir, "combat.v0.json"), &combat); err != nil {
 		return nil, err
@@ -876,6 +878,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if combat.UnarmedReach <= 0 {
 		return nil, fmt.Errorf("game: invalid rules combat.unarmed_reach: must be positive")
 	}
+	if combat.TwoHandedStrengthDamageMultiplier < 1 {
+		return nil, fmt.Errorf("game: invalid rules combat.two_handed_strength_damage_multiplier: must be >= 1")
+	}
 	if err := validateCoopCombatRules(combat.Coop); err != nil {
 		return nil, err
 	}
@@ -888,9 +893,10 @@ func LoadRules(dir string) (*Rules, error) {
 		BaseAttackIntervalTicks: mainConfig.Gameplay.BaseAttackIntervalTicks,
 		MinEffectiveAttackSpeed: combat.MinEffectiveAttackSpeed,
 		MaxEffectiveAttackSpeed: combat.MaxEffectiveAttackSpeed,
-		PlayerDamage:            combat.PlayerDamage,
-		UnarmedReach:            combat.UnarmedReach,
-		Coop:                    combat.Coop,
+		PlayerDamage:                      combat.PlayerDamage,
+		TwoHandedStrengthDamageMultiplier: combat.TwoHandedStrengthDamageMultiplier,
+		UnarmedReach:                      combat.UnarmedReach,
+		Coop:                              combat.Coop,
 	}
 
 	navigation, err := loadNavigationRules(dir)

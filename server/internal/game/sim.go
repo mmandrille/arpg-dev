@@ -5720,18 +5720,19 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 	if weapon := equippedItems[mainHandSlot]; weapon != nil {
 		baseMin, baseMax, minRoll, maxRoll, label, itemID, ok := s.weaponDamageContributions(weapon)
 		if ok {
-			damageMin = character.DamageMin + baseMin + minRoll
-			damageMax = character.DamageMax + baseMax + maxRoll
-			damageMinSources = []StatBreakdownSourceView{
+			strMultiplier := weaponStrengthDamageMultiplier(s.rules, weapon)
+			strMin, strMax := scaledWeaponStrengthDamage(character, strMultiplier)
+			damageMin = strMin + baseMin + minRoll
+			damageMax = strMax + baseMax + maxRoll
+			minStrSources, maxStrSources := weaponStrengthDamageSources(character, strMultiplier)
+			damageMinSources = append([]StatBreakdownSourceView{
 				{Label: label, Value: baseMin, Kind: "equipment_base", ItemInstanceID: itemID},
 				{Label: "Rolled damage", Value: minRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
-				{Label: "Strength", Value: character.DamageMin, Kind: "character_formula"},
-			}
-			damageMaxSources = []StatBreakdownSourceView{
+			}, minStrSources...)
+			damageMaxSources = append([]StatBreakdownSourceView{
 				{Label: label, Value: baseMax, Kind: "equipment_base", ItemInstanceID: itemID},
 				{Label: "Rolled damage", Value: maxRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
-				{Label: "Strength", Value: character.DamageMax, Kind: "character_formula"},
-			}
+			}, maxStrSources...)
 		}
 		if speed, label, itemID, ok := s.weaponAttackSpeedContribution(weapon); ok {
 			weaponSpeed = speed

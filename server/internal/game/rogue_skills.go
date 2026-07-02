@@ -592,8 +592,9 @@ func (s *Sim) resolvePlayerAttackDamageForSlot(slot string) DamageRange {
 	if !ok {
 		return s.resolvePlayerAttackDamage()
 	}
-	minDamage := int(math.Floor(character.DamageMin + baseMin + minRoll))
-	maxDamage := int(math.Floor(character.DamageMax + baseMax + maxRoll))
+	strMin, strMax := scaledWeaponStrengthDamage(character, weaponStrengthDamageMultiplier(s.rules, item))
+	minDamage := int(math.Floor(strMin + baseMin + minRoll))
+	maxDamage := int(math.Floor(strMax + baseMax + maxRoll))
 	if minDamage < 0 {
 		minDamage = 0
 	}

@@ -27,7 +27,7 @@ func isSupportedPassiveSkillStat(stat string) bool {
 	switch stat {
 	case "all_skills", "hotbar_slots", "inventory_rows":
 		return false
-	case "damage_percent", "armor_percent", "max_hp_percent", "max_mana_percent", "health_regen_percent", "mana_regen_percent", "light_radius_percent":
+	case "damage_percent", "armor_percent", "max_hp_percent", "max_mana_percent", "health_regen_percent", "mana_regen_percent", "light_radius_percent", "movement_speed_percent":
 		return true
 	default:
 		return isSupportedItemStat(stat)

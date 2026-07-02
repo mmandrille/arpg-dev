@@ -162,8 +162,8 @@
       },
       "name_key": "skill.ice_shard.name"
     },
-    "ligthing": {
-      "name": "Ligthing",
+    "lightning": {
+      "name": "Lightning",
       "class": "sorcerer",
       "damage_type": "lightning",
       "tree": {
@@ -211,19 +211,19 @@
       "projectile": {
         "range": 18,
         "speed": 28.125,
-        "visual": "ligthing_projectile"
+        "visual": "lightning_projectile"
       },
       "chain": {
         "range_multiplier": 0.8,
         "max_jumps": 8,
-        "visual": "ligthing_chain"
+        "visual": "lightning_chain"
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
         "multiplier": 2,
         "flat_ticks": 10
       },
-      "name_key": "skill.ligthing.name"
+      "name_key": "skill.lightning.name"
     },
     "arcane_barrage": {
       "name": "Arcane Barrage",
@@ -247,7 +247,7 @@
         },
         "skills": [
           {
-            "skill_id": "ligthing",
+            "skill_id": "lightning",
             "rank": 1
           }
         ]
@@ -834,6 +834,45 @@
       },
       "name_key": "skill.dash.name"
     },
+    "shadowstep": {
+      "name": "Shadowstep",
+      "class": "rogue",
+      "tree": {
+        "tier": 1,
+        "column": 3
+      },
+      "kind": "mobility",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 1,
+        "level_per_rank": 0,
+        "stats": {
+          "dex": 8
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 3,
+          "per_rank": 0
+        }
+      },
+      "mobility": {
+        "range_base": 7,
+        "range_per_rank": 0.5,
+        "mode": "teleport",
+        "visual": "teleport_blink"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 5
+      },
+      "name_key": "skill.shadowstep.name"
+    },
     "shadow_flurry": {
       "name": "Shadow Flurry",
       "class": "rogue",
@@ -1174,61 +1213,6 @@
       },
       "name_key": "skill.black_wolf_companion.name"
     },
-    "split_arrow": {
-      "name": "Split Arrow",
-      "class": "ranger",
-      "damage_type": "force",
-      "tree": {
-        "tier": 3,
-        "column": 1
-      },
-      "kind": "projectile_attack",
-      "max_rank": 5,
-      "targeting": "direction_or_target",
-      "requirements": {
-        "level": 1,
-        "level_per_rank": 1,
-        "stats": {
-          "dex": 12
-        },
-        "stats_per_rank": {
-          "dex": 2
-        },
-        "skills": [
-          {
-            "skill_id": "volley",
-            "rank": 1
-          }
-        ]
-      },
-      "cost": {
-        "mana": {
-          "base": 5,
-          "per_rank": 0
-        }
-      },
-      "damage": {
-        "type": "weapon_multiplier_range",
-        "min_base": 200,
-        "max_base": 150,
-        "min_per_rank": 50,
-        "max_per_rank": 25
-      },
-      "projectile": {
-        "range": 17,
-        "speed": 25,
-        "visual": "split_arrow_projectile"
-      },
-      "pierce": {
-        "max_hits": 3,
-        "damage_percent_per_extra_hit": 80
-      },
-      "cooldown": {
-        "type": "attack_interval_multiplier",
-        "multiplier": 3.2
-      },
-      "name_key": "skill.split_arrow.name"
-    },
     "ground_slam": {
       "name": "Ground Slam",
       "class": "barbarian",
@@ -1276,62 +1260,52 @@
       },
       "name_key": "skill.ground_slam.name"
     },
-    "arcane_orb": {
-      "name": "Arcane Orb",
-      "class": "sorcerer",
-      "damage_type": "force",
+    "skullcrusher": {
+      "name": "Skullcrusher",
+      "class": "barbarian",
       "tree": {
-        "tier": 2,
-        "column": 3
+        "tier": 3,
+        "column": 4
       },
-      "kind": "projectile_attack",
+      "kind": "cone_attack",
       "max_rank": 5,
       "targeting": "direction_or_target",
       "requirements": {
-        "level": 3,
+        "level": 5,
         "level_per_rank": 1,
         "stats": {
-          "magic": 8
+          "str": 10,
+          "vit": 8
         },
         "stats_per_rank": {
-          "magic": 2
+          "str": 1,
+          "vit": 1
         },
         "skills": [
           {
-            "skill_id": "magic_bolt",
+            "skill_id": "ground_slam",
             "rank": 1
           }
         ]
       },
       "cost": {
         "mana": {
-          "base": 4,
-          "per_rank": 1
+          "base": 7,
+          "per_rank": 0
         }
       },
-      "damage": {
-        "type": "weapon_multiplier_range",
-        "min_base": 250,
-        "max_base": 200,
-        "min_per_rank": 50,
-        "max_per_rank": 25,
-        "magic_scaling": {
-          "stat": "magic",
-          "percent_per_point": 1,
-          "max_bonus_percent": 25,
-          "use_requirement_baseline": true
-        }
-      },
-      "projectile": {
-        "range": 17,
-        "speed": 22.5,
-        "visual": "magic_bolt_projectile"
+      "cone": {
+        "range": 4,
+        "angle_degrees": 28,
+        "push_min": 1,
+        "push_max": 3,
+        "damage_source": "weapon"
       },
       "cooldown": {
         "type": "attack_interval_multiplier",
-        "multiplier": 2.5
+        "multiplier": 3
       },
-      "name_key": "skill.arcane_orb.name"
+      "name_key": "skill.skullcrusher.name"
     },
     "radiant_bolt": {
       "name": "Radiant Bolt",
@@ -1392,6 +1366,54 @@
       },
       "name_key": "skill.radiant_bolt.name"
     },
+    "consecrated_smite": {
+      "name": "Consecrated Smite",
+      "class": "paladin",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 9,
+          "magic": 7
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "radiant_bolt",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "cone": {
+        "range": 6,
+        "angle_degrees": 55,
+        "push_min": 2,
+        "push_max": 4,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.8
+      },
+      "name_key": "skill.consecrated_smite.name"
+    },
     "fan_of_blades": {
       "name": "Fan of Blades",
       "class": "rogue",
@@ -1446,6 +1468,61 @@
         "multiplier": 2
       },
       "name_key": "skill.fan_of_blades.name"
+    },
+    "eviscerate": {
+      "name": "Eviscerate",
+      "class": "rogue",
+      "damage_type": "poison",
+      "tree": {
+        "tier": 3,
+        "column": 2
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 12
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "poison_stab",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 2.2,
+        "angle_degrees": 22,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "poison": {
+        "damage_percent_base": 20,
+        "damage_percent_per_rank": 10,
+        "duration_ticks": 45,
+        "magic_duration_ticks_per_point": 2,
+        "mark_damage_bonus_percent": 30,
+        "mark_duration_ticks": 45,
+        "mark_effect_id": "rogue_mark"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.eviscerate.name"
     },
     "snipe": {
       "name": "Snipe",
@@ -2087,6 +2164,178 @@
         "type": "none"
       },
       "name_key": "skill.deadeye.name"
+    },
+    "arcane_reservoir": {
+      "name": "Arcane Reservoir",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 4,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 15,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "spell_dynamo",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "max_mana_percent": {
+            "base": 12,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.arcane_reservoir.name"
+    },
+    "unstoppable_heart": {
+      "name": "Unstoppable Heart",
+      "class": "barbarian",
+      "tree": {
+        "tier": 4,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 15,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "crushing_force",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "max_hp_percent": {
+            "base": 8,
+            "per_rank": 0
+          },
+          "damage_percent": {
+            "base": 4,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.unstoppable_heart.name"
+    },
+    "oathbound_resolve": {
+      "name": "Oathbound Resolve",
+      "class": "paladin",
+      "tree": {
+        "tier": 4,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 15,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "consecrated_vitality",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "max_mana_percent": {
+            "base": 10,
+            "per_rank": 0
+          },
+          "armor_percent": {
+            "base": 4,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.oathbound_resolve.name"
+    },
+    "wildborn_endurance": {
+      "name": "Wildborn Endurance",
+      "class": "ranger",
+      "tree": {
+        "tier": 4,
+        "column": 5
+      },
+      "kind": "passive_stat_bonus",
+      "max_rank": 1,
+      "targeting": "self",
+      "requirements": {
+        "level": 15,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": [
+          {
+            "skill_id": "deadeye",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "passive_stats": {
+        "stats": {
+          "movement_speed_percent": {
+            "base": 8,
+            "per_rank": 0
+          }
+        }
+      },
+      "cooldown": {
+        "type": "none"
+      },
+      "name_key": "skill.wildborn_endurance.name"
     }
   }
 }

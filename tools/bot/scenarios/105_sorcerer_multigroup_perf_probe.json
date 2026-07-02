@@ -5,7 +5,7 @@
   "seed": "sorcerer_multigroup_perf_probe_seed",
   "character_class": "sorcerer",
   "title": "Sorcerer Multigroup Perf Probe",
-  "description": "Sorcerer pulls three groups of real enemies (18 dungeon_mob melee bipeds, 12 dungeon_bat flyers, 6 dungeon_wolf quadrupeds) in a dungeon vault, rotates 3 directional skills (ligthing, ice_shard, magic_bolt), flees left under full-pack chase, re-engages right groups. Exercises: multi-group pathfind under chase, real enemy visual models, projectile fanout, client delta/upsert flood, and all perf phase buckets under sustained load.",
+  "description": "Sorcerer pulls three groups of real enemies (18 dungeon_mob melee bipeds, 12 dungeon_bat flyers, 6 dungeon_wolf quadrupeds) in a dungeon vault, rotates 3 directional skills (lightning, ice_shard, magic_bolt), flees left under full-pack chase, re-engages right groups. Exercises: multi-group pathfind under chase, real enemy visual models, projectile fanout, client delta/upsert flood, and all perf phase buckets under sustained load.",
   "max_elapsed_s": 65.0,
   "debug_progression": {
     "level": 12,
@@ -21,7 +21,7 @@
     "skill_ranks": {
       "magic_bolt": 1,
       "ice_shard": 1,
-      "ligthing": 1
+      "lightning": 1
     }
   },
   "steps": [
@@ -40,7 +40,7 @@
     },
     {
       "action": "cast_skill",
-      "skill_id": "ligthing",
+      "skill_id": "lightning",
       "direction": { "x": 1, "y": 0 },
       "event_type": "skill_cast"
     },
@@ -106,7 +106,7 @@
 
     {
       "action": "cast_skill",
-      "skill_id": "ligthing",
+      "skill_id": "lightning",
       "direction": { "x": 1, "y": 0 },
       "event_type": "skill_cast"
     },
@@ -155,7 +155,7 @@
 
     {
       "action": "cast_skill",
-      "skill_id": "ligthing",
+      "skill_id": "lightning",
       "direction": { "x": -1, "y": 0 },
       "event_type": "skill_cast"
     },
@@ -194,7 +194,7 @@
 
     {
       "action": "cast_skill",
-      "skill_id": "ligthing",
+      "skill_id": "lightning",
       "direction": { "x": 1, "y": 0 },
       "event_type": "skill_cast"
     },
@@ -241,7 +241,7 @@
     {
       "type": "event_seen",
       "event_type": "skill_cast",
-      "skill_id": "ligthing"
+      "skill_id": "lightning"
     },
     {
       "type": "event_seen",

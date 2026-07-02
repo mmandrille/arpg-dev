@@ -45,7 +45,6 @@ def validate_skill_catalogs(
         or skill_class_map.get("piercing_shot") != "ranger"
         or skill_class_map.get("pinning_shot") != "ranger"
         or skill_class_map.get("volley") != "ranger"
-        or skill_class_map.get("split_arrow") != "ranger"
     ):
         report.fail("skill classes", "core class skills must map to their owning classes")
     else:
@@ -108,16 +107,19 @@ def validate_skill_catalogs(
             ("arcane_focus", 1, None),
             ("mana_weaving", 5, "arcane_focus"),
             ("spell_dynamo", 10, "mana_weaving"),
+            ("arcane_reservoir", 15, "spell_dynamo"),
         ],
         "barbarian": [
             ("iron_hide", 1, None),
             ("battle_tempo", 5, "iron_hide"),
             ("crushing_force", 10, "battle_tempo"),
+            ("unstoppable_heart", 15, "crushing_force"),
         ],
         "paladin": [
             ("vigilant_guard", 1, None),
             ("faithful_bulwark", 5, "vigilant_guard"),
             ("consecrated_vitality", 10, "faithful_bulwark"),
+            ("oathbound_resolve", 15, "consecrated_vitality"),
         ],
         "rogue": [
             ("quick_hands", 1, None),
@@ -128,6 +130,7 @@ def validate_skill_catalogs(
             ("trail_sense", 1, None),
             ("precision_draw", 5, "trail_sense"),
             ("deadeye", 10, "precision_draw"),
+            ("wildborn_endurance", 15, "deadeye"),
         ],
     }
     passive_errors = []
@@ -166,6 +169,35 @@ def validate_skill_catalogs(
     else:
         report.ok("class passive column chains are valid")
 
+    mobility_kinds = {"mobility"}
+    passive_kinds = {"passive_stat_bonus", "passive_execute"}
+    decuple_classes = ("barbarian", "paladin", "sorcerer", "ranger", "rogue")
+    decuple_errors = []
+    for class_id in decuple_classes:
+        actives = []
+        movement = []
+        passives = []
+        for skill_id, skill in skills.get("skills", {}).items():
+            if skill.get("class") != class_id:
+                continue
+            kind = skill.get("kind", "")
+            if kind in mobility_kinds:
+                movement.append(skill_id)
+            elif kind in passive_kinds:
+                passives.append(skill_id)
+            else:
+                actives.append(skill_id)
+        if len(actives) != 5:
+            decuple_errors.append(f"{class_id}: actives={len(actives)} want 5 ({actives})")
+        if len(movement) != 1:
+            decuple_errors.append(f"{class_id}: movement={len(movement)} want 1 ({movement})")
+        if len(passives) != 4:
+            decuple_errors.append(f"{class_id}: passives={len(passives)} want 4 ({passives})")
+    if decuple_errors:
+        report.fail("class skill decuple", "; ".join(decuple_errors))
+    else:
+        report.ok("each class has 5 actives, 1 movement, and 4 passives")
+
     if magic_bolt is not None:
         for skill_id, skill in skills.get("skills", {}).items():
             for req in skill.get("requirements", {}).get("skills", []):
@@ -191,13 +223,15 @@ def validate_skill_catalogs(
         for skill_id, skill in skills.get("skills", {}).items()
     }
     expected_prereqs = {
-        "arcane_barrage": {"ligthing": 1},
+        "arcane_barrage": {"lightning": 1},
         "earthbreaker": {"cleave": 1},
         "sanctuary": {"holy_shield": 1},
         "shadow_flurry": {"dash": 1},
         "pinning_shot": {"piercing_shot": 1},
         "volley": {"piercing_shot": 1},
-        "split_arrow": {"volley": 1},
+        "skullcrusher": {"ground_slam": 1},
+        "consecrated_smite": {"radiant_bolt": 1},
+        "eviscerate": {"poison_stab": 1},
     }
     mismatched_prereqs = {
         skill_id: skill_prereqs.get(skill_id, {})

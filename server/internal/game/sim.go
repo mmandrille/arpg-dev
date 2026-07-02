@@ -669,12 +669,7 @@ func (r *Rules) defaultSkillRanks() map[string]int {
 }
 
 func (r *Rules) normalizeSkillRanks(in map[string]int) map[string]int {
-	if rank, ok := in["ligthing"]; ok {
-		if _, has := in["lightning"]; !has && rank > 0 {
-			in["lightning"] = rank
-		}
-		delete(in, "ligthing")
-	}
+	migrateLegacySkillRanks(in)
 	out := r.defaultSkillRanks()
 	for skillID, rank := range in { //nolint:determinism — output is a map, iteration order does not affect the result
 		def, ok := r.Skills[skillID]

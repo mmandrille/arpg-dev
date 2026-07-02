@@ -25,7 +25,7 @@
       "vit": 5,
       "magic": 4
     },
-    "skill_ranks": { "fan_of_blades": 1 }
+    "skill_ranks": { "fan_of_blades": 1, "shadowstep": 1, "eviscerate": 1 }
   },
   "steps": [
     {
@@ -167,6 +167,38 @@
         "skill_id": "poison_stab"
       },
       "timeout_s": 8
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "shadowstep",
+      "direction": { "x": 0, "y": -1 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "shadowstep",
+        "rank": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "eviscerate",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "eviscerate",
+        "rank": 1
+      },
+      "timeout_s": 3
     }
   ],
   "assertions": [

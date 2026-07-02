@@ -133,8 +133,8 @@ def test_load_scenarios_discovers_crowded_lightning_perf_probe():
     assert scenario.world_id == "crowded_lightning_perf_probe"
     assert scenario.character_class == "sorcerer"
     assert scenario.max_elapsed_s == 30.0
-    assert scenario.debug_progression["skill_ranks"]["ligthing"] == 1
-    assert any(step.get("action") == "cast_skill" and step.get("skill_id") == "ligthing" for step in scenario.steps)
+    assert scenario.debug_progression["skill_ranks"]["lightning"] == 1
+    assert any(step.get("action") == "cast_skill" and step.get("skill_id") == "lightning" for step in scenario.steps)
     assert any(
         assertion.get("type") == "entity_count" and assertion.get("monster_def_id") == "crowded_probe_chaser"
         for assertion in scenario.assertions
@@ -527,8 +527,8 @@ def test_load_scenarios_discovers_ranger_class_foundation():
     assert {"type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 2} in ranger.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "volley", "rank": 1} in ranger.assertions
     assert {"type": "event_count", "event_type": "monster_damaged", "skill_id": "volley", "min": 2} in ranger.assertions
-    assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "split_arrow", "rank": 1} in ranger.assertions
-    assert {"type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "split_arrow", "min_damage": 1} in ranger.assertions
+    assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "snipe", "rank": 1} in ranger.assertions
+    assert {"type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "snipe", "min_damage": 1} in ranger.assertions
 
 
 def test_load_scenarios_discovers_ranger_piercing_and_pinning_shots():

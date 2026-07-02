@@ -163,13 +163,13 @@ def test_skill_visual_seed_payload_sets_skill_prerequisites() -> None:
             self.payload = json
             return Response()
 
-    entry = next(entry for entry in all_skill_demo_entries() if entry.skill_id == "ligthing")
+    entry = next(entry for entry in all_skill_demo_entries() if entry.skill_id == "lightning")
     client = Client()
 
     seed_skill_visual_character(client, "access", "debug", "char_123", entry, rank=5, level=5)  # type: ignore[arg-type]
 
-    assert skill_required_skill_ranks("ligthing") == {"magic_bolt": 1}
-    assert client.payload["skill_ranks"] == {"magic_bolt": 1, "ligthing": 5}
+    assert skill_required_skill_ranks("lightning") == {"magic_bolt": 1}
+    assert client.payload["skill_ranks"] == {"magic_bolt": 1, "lightning": 5}
 
 
 def test_skill_visual_seed_payload_covers_ranked_mana_cost() -> None:

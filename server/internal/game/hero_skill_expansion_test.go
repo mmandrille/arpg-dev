@@ -11,11 +11,10 @@ func TestTier2Column3SkillExpansion(t *testing.T) {
 		t.Fatalf("LoadRules: %v", err)
 	}
 	want := map[string]string{
-		"ground_slam":    "barbarian",
-		"arcane_orb":     "sorcerer",
-		"radiant_bolt":   "paladin",
-		"fan_of_blades":  "rogue",
-		"snipe":          "ranger",
+		"ground_slam":   "barbarian",
+		"radiant_bolt":  "paladin",
+		"fan_of_blades": "rogue",
+		"snipe":         "ranger",
 	}
 	for skillID, classID := range want {
 		skill, ok := rules.Skills[skillID]

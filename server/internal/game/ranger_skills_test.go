@@ -191,9 +191,9 @@ func TestRangerSkillRulesLoad(t *testing.T) {
 	if pin.Class != "ranger" || pin.Tree.Tier != 2 || len(pin.Requirements.Skills) != 1 || pin.Requirements.Skills[0].SkillID != "piercing_shot" || pin.Root.EffectID != "pinning_root" || pin.Root.DurationTicks <= 0 || pin.Projectile.Visual != "pinning_shot_projectile" {
 		t.Fatalf("pinning_shot = %+v, want tier 2 ranger projectile with piercing prereq and root", pin)
 	}
-	split := rules.Skills["split_arrow"]
-	if split.Class != "ranger" || split.Tree.Tier != 3 || len(split.Requirements.Skills) != 1 || split.Requirements.Skills[0].SkillID != "volley" {
-		t.Fatalf("split_arrow = %+v, want tier 3 with volley prereq", split)
+	snipe := rules.Skills["snipe"]
+	if snipe.Class != "ranger" || snipe.Tree.Tier != 2 || len(snipe.Requirements.Skills) != 1 || snipe.Requirements.Skills[0].SkillID != "piercing_shot" {
+		t.Fatalf("snipe = %+v, want tier 2 with piercing_shot prereq", snipe)
 	}
 	volley := rules.Skills["volley"]
 	if volley.Class != "ranger" || volley.Tree.Tier != 2 || len(volley.Requirements.Skills) != 1 || volley.Requirements.Skills[0].SkillID != "piercing_shot" || volley.Volley.ArrowCount < 3 || volley.Volley.SpreadDegrees <= 0 || volley.Projectile.Visual != "volley_arrow_projectile" {
@@ -232,7 +232,7 @@ func rangerSkillSim(t *testing.T, sessionID string) *Sim {
 	sim.progression.SkillRanks["piercing_shot"] = 1
 	sim.progression.SkillRanks["pinning_shot"] = 1
 	sim.progression.SkillRanks["volley"] = 1
-	sim.progression.SkillRanks["split_arrow"] = 1
+	sim.progression.SkillRanks["snipe"] = 1
 	sim.progression.SkillRanks["black_wolf_companion"] = 1
 	ps := sim.defaultPlayer()
 	ps.Progression = sim.progression

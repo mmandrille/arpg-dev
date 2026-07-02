@@ -30,7 +30,8 @@
       "leap": 1,
       "cleave": 1,
       "earthbreaker": 1,
-      "ground_slam": 1
+      "ground_slam": 1,
+      "skullcrusher": 1
     }
   },
   "steps": [
@@ -135,6 +136,22 @@
         "type": "combat_event_seen",
         "event_type": "monster_damaged",
         "min_damage": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "skullcrusher",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_cast",
+        "skill_id": "skullcrusher",
+        "rank": 1
       },
       "timeout_s": 3
     }

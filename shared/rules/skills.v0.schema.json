@@ -418,7 +418,8 @@
             "skill_mana_cost_reduction": { "$ref": "#/$defs/rank_linear_integer" },
             "magic_find_percent": { "$ref": "#/$defs/rank_linear_integer" },
             "light_radius": { "$ref": "#/$defs/rank_linear_integer" },
-            "light_radius_percent": { "$ref": "#/$defs/rank_linear_integer" }
+            "light_radius_percent": { "$ref": "#/$defs/rank_linear_integer" },
+            "movement_speed_percent": { "$ref": "#/$defs/rank_linear_integer" }
           }
         }
       }

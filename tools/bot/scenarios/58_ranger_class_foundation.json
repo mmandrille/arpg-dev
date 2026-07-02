@@ -5,7 +5,7 @@
   "seed": "ranger_class_foundation_seed",
   "character_class": "ranger",
   "title": "Ranger class foundation",
-  "description": "Create a Ranger, prove starter bow and ranged class stats, then use Disengage, Pinning Shot, Piercing Shot, Volley, and Split Arrow across the class lab pack.",
+  "description": "Create a Ranger, prove starter bow and ranged class stats, then use Disengage, Pinning Shot, Piercing Shot, Volley, and Snipe across the class lab pack.",
   "visual": {
     "camera": {
       "x": 6,
@@ -31,7 +31,6 @@
       "pinning_shot": 1,
       "volley": 1,
       "black_wolf_companion": 1,
-      "split_arrow": 1,
       "snipe": 1
     }
   },
@@ -131,7 +130,7 @@
     },
     {
       "action": "cast_skill",
-      "skill_id": "split_arrow",
+      "skill_id": "snipe",
       "monster_def_id": "combat_lab_soft_target",
       "event_type": "skill_cast"
     },
@@ -140,7 +139,7 @@
       "assertion": {
         "type": "combat_event_seen",
         "event_type": "monster_damaged",
-        "skill_id": "split_arrow",
+        "skill_id": "snipe",
         "min_damage": 1
       },
       "timeout_s": 3
@@ -221,13 +220,13 @@
     {
       "type": "event_seen",
       "event_type": "skill_cast",
-      "skill_id": "split_arrow",
+      "skill_id": "snipe",
       "rank": 1
     },
     {
       "type": "combat_event_seen",
       "event_type": "monster_damaged",
-      "skill_id": "split_arrow",
+      "skill_id": "snipe",
       "min_damage": 1
     }
   ]

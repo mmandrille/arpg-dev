@@ -1383,7 +1383,7 @@ func _apply_delta(p: Dictionary) -> void:
 				_spawn_heal_rain(heal_target_id)
 			continue
 		if event_type == "skill_chain_hit":
-			_spawn_ligthing_chain(ev)
+			_spawn_lightning_chain(ev)
 			continue
 		if event_type == "skill_cooldown_rejected" and eid == player_id:
 			_show_skill_rejected_feedback(str(ev.get("reason", "")))
@@ -2396,7 +2396,7 @@ func _spawn_single_projectile_visual(projectile_def_id: String, start: Vector3, 
 	tween.tween_property(node, "position", finish, duration).set_trans(Tween.TRANS_LINEAR)
 	tween.tween_callback(node.queue_free)
 
-func _spawn_ligthing_chain(ev: Dictionary) -> void:
+func _spawn_lightning_chain(ev: Dictionary) -> void:
 	var source := _node_for_entity_id(str(ev.get("source_entity_id", "")))
 	var target := _node_for_entity_id(str(ev.get("target_entity_id", "")))
 	if source == null or target == null:

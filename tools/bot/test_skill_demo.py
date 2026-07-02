@@ -13,9 +13,9 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["magic_bolt"].icon_label == "M"
     assert entries["magic_bolt"].rank_targets == [1, 5]
 
-    assert entries["ligthing"].category == "attack"
-    assert entries["ligthing"].class_id == "sorcerer"
-    assert entries["ligthing"].icon_label == "L"
+    assert entries["lightning"].category == "attack"
+    assert entries["lightning"].class_id == "sorcerer"
+    assert entries["lightning"].icon_label == "L"
 
     assert entries["arcane_barrage"].category == "attack"
     assert entries["arcane_barrage"].class_id == "sorcerer"
@@ -49,9 +49,9 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["executioner"].class_id == "rogue"
     assert entries["executioner"].icon_label == "X"
 
-    assert entries["split_arrow"].category == "attack"
-    assert entries["split_arrow"].class_id == "ranger"
-    assert entries["split_arrow"].icon_label == "S"
+    assert entries["snipe"].category == "attack"
+    assert entries["snipe"].class_id == "ranger"
+    assert entries["snipe"].icon_label == "S"
 
 
 def test_single_skill_demo_entry_has_display_metadata() -> None:

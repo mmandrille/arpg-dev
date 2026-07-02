@@ -65,12 +65,12 @@ func _run() -> void:
 	_assert_eq("sorcerer second skill visible", str((state.get("skill_ids", []) as Array)[1]), "teleport")
 	_assert_eq("sorcerer passive column row 1 visible", str((state.get("skill_ids", []) as Array)[2]), "arcane_focus")
 	_assert_eq("sorcerer third skill visible", str((state.get("skill_ids", []) as Array)[3]), "ice_shard")
-	_assert_eq("sorcerer fourth skill visible", str((state.get("skill_ids", []) as Array)[4]), "ligthing")
+	_assert_eq("sorcerer fourth skill visible", str((state.get("skill_ids", []) as Array)[4]), "lightning")
 	_assert_eq("sorcerer fifth skill visible", str((state.get("skill_ids", []) as Array)[5]), "revive")
-	_assert_eq("sorcerer sixth skill visible", str((state.get("skill_ids", []) as Array)[6]), "arcane_orb")
-	_assert_eq("sorcerer passive column row 2 visible", str((state.get("skill_ids", []) as Array)[7]), "mana_weaving")
-	_assert_eq("sorcerer seventh skill visible", str((state.get("skill_ids", []) as Array)[8]), "arcane_barrage")
-	_assert_eq("sorcerer passive column row 3 visible", str((state.get("skill_ids", []) as Array)[9]), "spell_dynamo")
+	_assert_eq("sorcerer sixth skill visible", str((state.get("skill_ids", []) as Array)[6]), "mana_weaving")
+	_assert_eq("sorcerer passive column row 2 visible", str((state.get("skill_ids", []) as Array)[7]), "arcane_barrage")
+	_assert_eq("sorcerer seventh skill visible", str((state.get("skill_ids", []) as Array)[8]), "spell_dynamo")
+	_assert_eq("sorcerer passive column row 4 visible", str((state.get("skill_ids", []) as Array)[9]), "arcane_reservoir")
 	_assert_eq("skill name from catalog", str(state.get("skill_name", "")), "Magic Bolt")
 	_assert_eq("skill icon from presentation", str(state.get("icon_label", "")), "M")
 	_assert_eq("skill icon shape from presentation", str(state.get("icon_shape", "")), "orb_projectile")
@@ -101,7 +101,7 @@ func _run() -> void:
 	_assert_false("tooltip omits next-rank section header", str(state.get("tooltip_body", "")).contains("Next rank:"))
 	_assert_false("rank 0 tooltip omits next-rank rich damage", str(state.get("tooltip_rich_text", "")).contains("Damage: 6-9[color=#6fd66f] -> 7-10[/color]"))
 	_assert_true("tooltip separates stats from requirements", str(state.get("tooltip_body", "")).contains("\n\nRequires:\nLevel %d\nMagic %d" % [magic_bolt_level_req, magic_rank1_req]))
-	_assert_true("ligthing tooltip includes flat cooldown", SkillsPanelScript.tooltip_plain_body("ligthing", 1, panel.skill_progression, panel.character_progression).contains("Cooldown: attack x2 + 1s"))
+	_assert_true("lightning tooltip includes flat cooldown", SkillsPanelScript.tooltip_plain_body("lightning", 1, panel.skill_progression, panel.character_progression).contains("Cooldown: attack x2 + 1s"))
 	var arcane_focus_tooltip := SkillsPanelScript.tooltip_plain_body("arcane_focus", 0, panel.skill_progression, panel.character_progression)
 	_assert_true("passive tooltip includes passive summary", arcane_focus_tooltip.contains("Passive max mana boost"))
 	_assert_true("passive tooltip includes stat effect", arcane_focus_tooltip.contains("Max mana: +8%"))
@@ -114,13 +114,16 @@ func _run() -> void:
 	var arcane_block := panel._skill_blocks.get("arcane_focus", null) as Control
 	var mana_block := panel._skill_blocks.get("mana_weaving", null) as Control
 	var dynamo_block := panel._skill_blocks.get("spell_dynamo", null) as Control
+	var reservoir_block := panel._skill_blocks.get("arcane_reservoir", null) as Control
 	_assert_true("sorcerer passive row 1 block exists", arcane_block != null)
 	_assert_true("sorcerer passive row 2 block exists", mana_block != null)
 	_assert_true("sorcerer passive row 3 block exists", dynamo_block != null)
-	if arcane_block != null and mana_block != null and dynamo_block != null:
+	_assert_true("sorcerer passive row 4 block exists", reservoir_block != null)
+	if arcane_block != null and mana_block != null and dynamo_block != null and reservoir_block != null:
 		_assert_eq("sorcerer passive column row 1 x", int(arcane_block.position.x), 407)
 		_assert_eq("sorcerer passive column row 2 x", int(mana_block.position.x), 407)
 		_assert_eq("sorcerer passive column row 3 x", int(dynamo_block.position.x), 407)
+		_assert_eq("sorcerer passive column row 4 x", int(reservoir_block.position.x), 407)
 		_assert_true("sorcerer passive column sits at right edge", arcane_block.position.x + arcane_block.size.x <= 491.0)
 	panel.bot_leave_skill_tooltip()
 	state = panel.get_debug_state()
@@ -172,15 +175,17 @@ func _run() -> void:
 	})
 	state = panel.get_debug_state()
 	var paladin_skill_ids: Array = state.get("skill_ids", [])
-	_assert_eq("paladin has four compact visible skills plus passive column", paladin_skill_ids.size(), 8)
+	_assert_eq("paladin visible skill count", paladin_skill_ids.size(), 10)
 	_assert_eq("paladin first local skill", str(paladin_skill_ids[0]), "charge")
 	_assert_eq("paladin second local skill", str(paladin_skill_ids[1]), "heal")
 	_assert_eq("paladin third local skill", str(paladin_skill_ids[2]), "holy_shield")
 	_assert_eq("paladin passive row 1", str(paladin_skill_ids[3]), "vigilant_guard")
 	_assert_eq("paladin tier-two skill", str(paladin_skill_ids[4]), "radiant_bolt")
 	_assert_eq("paladin passive row 2", str(paladin_skill_ids[5]), "faithful_bulwark")
-	_assert_eq("paladin fourth local skill", str(paladin_skill_ids[6]), "sanctuary")
-	_assert_eq("paladin passive row 3", str(paladin_skill_ids[7]), "consecrated_vitality")
+	_assert_eq("paladin tier-three skill", str(paladin_skill_ids[6]), "consecrated_smite")
+	_assert_eq("paladin fourth local skill", str(paladin_skill_ids[7]), "sanctuary")
+	_assert_eq("paladin passive row 3", str(paladin_skill_ids[8]), "consecrated_vitality")
+	_assert_eq("paladin passive row 4", str(paladin_skill_ids[9]), "oathbound_resolve")
 	var heal_tooltip := SkillsPanelScript.tooltip_plain_body("heal", 1, panel.skill_progression, panel.character_progression)
 	_assert_true("heal tooltip includes inline next-rank percent", heal_tooltip.contains("Heal: 25% -> 35%"))
 	_assert_false("heal tooltip omits next-rank header", heal_tooltip.contains("Next rank:"))
@@ -200,29 +205,31 @@ func _run() -> void:
 	panel.set_character_progression({
 		"character_class": "rogue",
 		"level": 1,
-		"base_stats": {"str": 5, "dex": 8, "vit": 5, "magic": 5},
+		"base_stats": {"str": 5, "dex": 10, "vit": 5, "magic": 5},
 	})
 	panel.set_skill_progression({
 		"unspent_skill_points": 1,
-		"skills": _skill_rows(0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, true, 0, true, 0, false, 0, false, 0, false, 0, false, 0, false, 0, true),
+		"skills": _skill_rows(0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 1, true, 0, true, 0, false, 0, false, 0, false, 0, false, 0, false),
 	})
 	state = panel.get_debug_state()
 	var rogue_skill_ids: Array = state.get("skill_ids", [])
-	_assert_eq("rogue has two starter skills plus higher row skills and passive column", rogue_skill_ids.size(), 8)
+	_assert_eq("rogue visible skill count", rogue_skill_ids.size(), 10)
 	_assert_eq("rogue first starter skill", str(rogue_skill_ids[0]), "poison_stab")
 	_assert_eq("rogue second starter skill", str(rogue_skill_ids[1]), "dash")
-	_assert_eq("rogue passive row 1 visible", str(rogue_skill_ids[2]), "quick_hands")
-	_assert_eq("rogue higher-row skill visible", str(rogue_skill_ids[3]), "shadow_flurry")
-	_assert_eq("rogue passive skill visible", str(rogue_skill_ids[4]), "executioner")
-	_assert_eq("rogue tier-two skill visible", str(rogue_skill_ids[5]), "fan_of_blades")
-	_assert_eq("rogue passive row 2 visible", str(rogue_skill_ids[6]), "killer_instinct")
-	_assert_eq("rogue passive row 3 visible", str(rogue_skill_ids[7]), "evasive_footwork")
+	_assert_eq("rogue movement skill visible", str(rogue_skill_ids[2]), "shadowstep")
+	_assert_eq("rogue passive row 1 visible", str(rogue_skill_ids[3]), "quick_hands")
+	_assert_eq("rogue higher-row skill visible", str(rogue_skill_ids[4]), "shadow_flurry")
+	_assert_eq("rogue passive skill visible", str(rogue_skill_ids[5]), "executioner")
+	_assert_eq("rogue tier-two skill visible", str(rogue_skill_ids[6]), "fan_of_blades")
+	_assert_eq("rogue passive row 2 visible", str(rogue_skill_ids[7]), "killer_instinct")
+	_assert_eq("rogue tier-three skill visible", str(rogue_skill_ids[8]), "eviscerate")
+	_assert_eq("rogue passive row 3 visible", str(rogue_skill_ids[9]), "evasive_footwork")
 	_assert_eq("rogue skill name from catalog", str(state.get("skill_name", "")), "Poison Stab")
 	_assert_eq("rogue skill icon from presentation", str(state.get("icon_label", "")), "P")
 	_assert_true("rogue poison stab can spend", bool(((state.get("skills", {}) as Dictionary).get("poison_stab", {}) as Dictionary).get("can_spend", false)))
 	_assert_true("rogue dash can spend", bool(((state.get("skills", {}) as Dictionary).get("dash", {}) as Dictionary).get("can_spend", false)))
 	_assert_false("rogue shadow flurry gated before dash rank", bool(((state.get("skills", {}) as Dictionary).get("shadow_flurry", {}) as Dictionary).get("can_spend", true)))
-	_assert_true("rogue executioner can spend", bool(((state.get("skills", {}) as Dictionary).get("executioner", {}) as Dictionary).get("can_spend", false)))
+	_assert_false("rogue executioner gated before poison stab rank", bool(((state.get("skills", {}) as Dictionary).get("executioner", {}) as Dictionary).get("can_spend", true)))
 
 	panel.set_character_progression({
 		"character_class": "sorcerer",
@@ -310,13 +317,13 @@ func _remove_user_file(path: String) -> void:
 		DirAccess.remove_absolute(absolute_path)
 
 
-func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, ligthing_rank: int = 0, ligthing_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false, earthbreaker_rank: int = 0, earthbreaker_can_spend: bool = false, shadow_flurry_rank: int = 0, shadow_flurry_can_spend: bool = false, split_arrow_rank: int = 0, split_arrow_can_spend: bool = false, arcane_barrage_rank: int = 0, arcane_barrage_can_spend: bool = false, sanctuary_rank: int = 0, sanctuary_can_spend: bool = false, executioner_rank: int = 0, executioner_can_spend: bool = false) -> Array:
+func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, lightning_rank: int = 0, lightning_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false, earthbreaker_rank: int = 0, earthbreaker_can_spend: bool = false, shadow_flurry_rank: int = 0, shadow_flurry_can_spend: bool = false, arcane_barrage_rank: int = 0, arcane_barrage_can_spend: bool = false, sanctuary_rank: int = 0, sanctuary_can_spend: bool = false, executioner_rank: int = 0, executioner_can_spend: bool = false) -> Array:
 	return [
 		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": _skill_max_rank("cleave"), "can_spend": cleave_can_spend},
 		{"skill_id": "earthbreaker", "rank": earthbreaker_rank, "max_rank": _skill_max_rank("earthbreaker"), "can_spend": earthbreaker_can_spend},
 		{"skill_id": "magic_bolt", "rank": magic_rank, "max_rank": _skill_max_rank("magic_bolt"), "can_spend": magic_can_spend},
 		{"skill_id": "ice_shard", "rank": ice_shard_rank, "max_rank": _skill_max_rank("ice_shard"), "can_spend": ice_shard_can_spend},
-		{"skill_id": "ligthing", "rank": ligthing_rank, "max_rank": _skill_max_rank("ligthing"), "can_spend": ligthing_can_spend},
+		{"skill_id": "lightning", "rank": lightning_rank, "max_rank": _skill_max_rank("lightning"), "can_spend": lightning_can_spend},
 		{"skill_id": "arcane_barrage", "rank": arcane_barrage_rank, "max_rank": _skill_max_rank("arcane_barrage"), "can_spend": arcane_barrage_can_spend},
 		{"skill_id": "rage", "rank": rage_rank, "max_rank": _skill_max_rank("rage"), "can_spend": rage_can_spend},
 		{"skill_id": "heal", "rank": heal_rank, "max_rank": _skill_max_rank("heal"), "can_spend": heal_can_spend},
@@ -326,7 +333,6 @@ func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rag
 		{"skill_id": "dash", "rank": dash_rank, "max_rank": _skill_max_rank("dash"), "can_spend": dash_can_spend},
 		{"skill_id": "shadow_flurry", "rank": shadow_flurry_rank, "max_rank": _skill_max_rank("shadow_flurry"), "can_spend": shadow_flurry_can_spend},
 		{"skill_id": "executioner", "rank": executioner_rank, "max_rank": _skill_max_rank("executioner"), "can_spend": executioner_can_spend},
-		{"skill_id": "split_arrow", "rank": split_arrow_rank, "max_rank": _skill_max_rank("split_arrow"), "can_spend": split_arrow_can_spend},
 	]
 
 

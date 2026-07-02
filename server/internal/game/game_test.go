@@ -222,11 +222,11 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["ice_shard"]; len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Requirements.Skills[0].Rank != 1 {
 		t.Fatalf("ice_shard prerequisites = %+v, want magic_bolt rank 1", skill.Requirements.Skills)
 	}
-	if skill := r.Skills["ligthing"]; skill.Class != "sorcerer" || skill.Kind != "chain_projectile_attack" || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Chain.RangeMultiplier != 0.8 || skill.Projectile.Speed != r.Skills[magicBoltSkillID].Projectile.Speed || skill.Cooldown.FlatTicks != 10 {
-		t.Fatalf("ligthing skill = %+v, want sorcerer chain_projectile_attack with magic_bolt prerequisite, magic_bolt speed, 0.8 chain, and +1s cooldown", skill)
+	if skill := r.Skills["lightning"]; skill.Class != "sorcerer" || skill.Kind != "chain_projectile_attack" || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != magicBoltSkillID || skill.Chain.RangeMultiplier != 0.8 || skill.Projectile.Speed != r.Skills[magicBoltSkillID].Projectile.Speed || skill.Cooldown.FlatTicks != 10 {
+		t.Fatalf("lightning skill = %+v, want sorcerer chain_projectile_attack with magic_bolt prerequisite, magic_bolt speed, 0.8 chain, and +1s cooldown", skill)
 	}
-	if skill := r.Skills["arcane_barrage"]; skill.Class != "sorcerer" || skill.Kind != "projectile_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "ligthing" || skill.Pierce.MaxHits != 2 || skill.Projectile.Visual != "arcane_barrage_projectile" {
-		t.Fatalf("arcane_barrage skill = %+v, want sorcerer tier 3 projectile requiring ligthing with pierce", skill)
+	if skill := r.Skills["arcane_barrage"]; skill.Class != "sorcerer" || skill.Kind != "projectile_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "lightning" || skill.Pierce.MaxHits != 2 || skill.Projectile.Visual != "arcane_barrage_projectile" {
+		t.Fatalf("arcane_barrage skill = %+v, want sorcerer tier 3 projectile requiring lightning with pierce", skill)
 	}
 	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
 		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
@@ -258,8 +258,14 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["executioner"]; skill.Class != "rogue" || skill.Kind != "passive_execute" || skill.Targeting != "self" || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "poison_stab" || skill.Execute.ThresholdPercentBase != 10 || skill.Execute.ThresholdPercentPerRank != 5 {
 		t.Fatalf("executioner skill = %+v, want rogue passive execute requiring poison_stab with 10%% + 5%%/rank threshold", skill)
 	}
-	if skill := r.Skills["split_arrow"]; skill.Class != "ranger" || skill.Kind != "projectile_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "volley" || skill.Pierce.MaxHits != 3 || skill.Projectile.Visual != "split_arrow_projectile" {
-		t.Fatalf("split_arrow skill = %+v, want ranger tier 3 projectile requiring volley with pierce", skill)
+	if skill := r.Skills["snipe"]; skill.Class != "ranger" || skill.Kind != "projectile_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "piercing_shot" {
+		t.Fatalf("snipe skill = %+v, want ranger tier 2 projectile requiring piercing_shot", skill)
+	}
+	if skill := r.Skills["skullcrusher"]; skill.Class != "barbarian" || skill.Kind != "cone_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "ground_slam" {
+		t.Fatalf("skullcrusher skill = %+v, want barbarian tier 3 cone requiring ground_slam", skill)
+	}
+	if skill := r.Skills["consecrated_smite"]; skill.Class != "paladin" || skill.Kind != "cone_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "radiant_bolt" {
+		t.Fatalf("consecrated_smite skill = %+v, want paladin tier 3 cone requiring radiant_bolt", skill)
 	}
 	if r.Monsters["dungeon_mob"].XPReward <= 0 {
 		t.Fatalf("dungeon_mob xp_reward = %d, want positive", r.Monsters["dungeon_mob"].XPReward)
@@ -1233,17 +1239,17 @@ func TestIceShardAlwaysHitsAppliesSlowAndSpawnsShards(t *testing.T) {
 
 func TestLigthingChainsToNearestTargetsWithShrinkingRange(t *testing.T) {
 	rules := cloneRules(loadRules(t))
-	skill := rules.Skills["ligthing"]
+	skill := rules.Skills["lightning"]
 	skill.Damage.MinBase = 5
 	skill.Damage.MaxBase = 5
 	skill.Chain.RangeMultiplier = 0.8
 	skill.Chain.MaxJumps = 8
-	rules.Skills["ligthing"] = skill
-	sim := MustNewSim("sess_ligthing", "01", rules)
+	rules.Skills["lightning"] = skill
+	sim := MustNewSim("sess_lightning", "01", rules)
 	sim.progression.CharacterClass = "sorcerer"
 	sim.progression.BaseStats.Magic = 15
 	sim.progression.SkillRanks[magicBoltSkillID] = 1
-	sim.progression.SkillRanks["ligthing"] = 1
+	sim.progression.SkillRanks["lightning"] = 1
 	sim.savePlayer(sim.defaultPlayer())
 	player := sim.entities[sim.playerID]
 	for id, e := range sim.entities {
@@ -1260,16 +1266,16 @@ func TestLigthingChainsToNearestTargetsWithShrinkingRange(t *testing.T) {
 	}
 
 	cast := sim.Tick([]Input{{
-		MessageID:     "cast_ligthing",
-		CorrelationID: "corr_ligthing",
+		MessageID:     "cast_lightning",
+		CorrelationID: "corr_lightning",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "ligthing", TargetID: idStr(first.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "lightning", TargetID: idStr(first.id)},
 	}})
-	assertAck(t, cast, "cast_ligthing")
+	assertAck(t, cast, "cast_lightning")
 	cooldowns := skillCooldownUpdate(cast)
-	expectedCooldown := sim.skillCooldownTicks(rules.Skills["ligthing"])
-	if len(cooldowns) != 1 || cooldowns[0].SkillID != "ligthing" || cooldowns[0].TotalTicks != expectedCooldown {
-		t.Fatalf("ligthing cooldown update = %+v, want ligthing total %d", cooldowns, expectedCooldown)
+	expectedCooldown := sim.skillCooldownTicks(rules.Skills["lightning"])
+	if len(cooldowns) != 1 || cooldowns[0].SkillID != "lightning" || cooldowns[0].TotalTicks != expectedCooldown {
+		t.Fatalf("lightning cooldown update = %+v, want lightning total %d", cooldowns, expectedCooldown)
 	}
 	var impactEvents []Event
 	for i := 0; i < 30; i++ {
@@ -1290,7 +1296,7 @@ func TestLigthingChainsToNearestTargetsWithShrinkingRange(t *testing.T) {
 		}
 	}
 	if chainHits != 2 {
-		t.Fatalf("ligthing chain hits = %d, want 2; events=%+v", chainHits, impactEvents)
+		t.Fatalf("lightning chain hits = %d, want 2; events=%+v", chainHits, impactEvents)
 	}
 	for _, monster := range []*entity{first, second, third} {
 		if damageByTarget[idStr(monster.id)] == 0 || monster.hp >= monster.maxHP {

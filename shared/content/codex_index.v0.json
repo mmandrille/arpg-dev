@@ -394,24 +394,14 @@
           ]
         },
         {
-          "id": "skill:arcane_orb",
-          "title": "Arcane Orb",
+          "id": "skill:arcane_reservoir",
+          "title": "Arcane Reservoir",
           "sections": [
             {
               "lines": [
                 "Class: sorcerer",
-                "Kind: projectile_attack",
-                "Tree tier 2, column 3",
-                "Max rank: 5",
-                "Mana cost base: 4 (+1 per rank)",
-                "Cooldown: attack_interval_multiplier",
-                "Requires character level 3"
-              ]
-            },
-            {
-              "heading": "Summary",
-              "lines": [
-                "Heavy arcane projectile"
+                "Kind: passive_stat_bonus",
+                "Tree tier 4, column 5"
               ]
             }
           ]
@@ -504,6 +494,19 @@
               "heading": "Summary",
               "lines": [
                 "Cone weapon attack"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:consecrated_smite",
+          "title": "Consecrated Smite",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: cone_attack",
+                "Tree tier 3, column 1"
               ]
             }
           ]
@@ -665,6 +668,19 @@
               "heading": "Summary",
               "lines": [
                 "Passive evade chance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:eviscerate",
+          "title": "Eviscerate",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: cone_attack",
+                "Tree tier 3, column 2"
               ]
             }
           ]
@@ -900,8 +916,8 @@
           ]
         },
         {
-          "id": "skill:ligthing",
-          "title": "Ligthing",
+          "id": "skill:lightning",
+          "title": "Lightning",
           "sections": [
             {
               "lines": [
@@ -964,6 +980,19 @@
               "heading": "Summary",
               "lines": [
                 "Passive mana regeneration boost"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:oathbound_resolve",
+          "title": "Oathbound Resolve",
+          "sections": [
+            {
+              "lines": [
+                "Class: paladin",
+                "Kind: passive_stat_bonus",
+                "Tree tier 4, column 5"
               ]
             }
           ]
@@ -1199,6 +1228,32 @@
           ]
         },
         {
+          "id": "skill:shadowstep",
+          "title": "Shadowstep",
+          "sections": [
+            {
+              "lines": [
+                "Class: rogue",
+                "Kind: mobility",
+                "Tree tier 1, column 3"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:skullcrusher",
+          "title": "Skullcrusher",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: cone_attack",
+                "Tree tier 3, column 4"
+              ]
+            }
+          ]
+        },
+        {
           "id": "skill:snipe",
           "title": "Snipe",
           "sections": [
@@ -1240,29 +1295,6 @@
               "heading": "Summary",
               "lines": [
                 "Passive skill cooldown reduction"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "skill:split_arrow",
-          "title": "Split Arrow",
-          "sections": [
-            {
-              "lines": [
-                "Class: ranger",
-                "Kind: projectile_attack",
-                "Tree tier 3, column 1",
-                "Max rank: 5",
-                "Mana cost base: 5 (+0 per rank)",
-                "Cooldown: attack_interval_multiplier",
-                "Requires character level 1"
-              ]
-            },
-            {
-              "heading": "Summary",
-              "lines": [
-                "Piercing split arrow"
               ]
             }
           ]
@@ -1314,6 +1346,19 @@
           ]
         },
         {
+          "id": "skill:unstoppable_heart",
+          "title": "Unstoppable Heart",
+          "sections": [
+            {
+              "lines": [
+                "Class: barbarian",
+                "Kind: passive_stat_bonus",
+                "Tree tier 4, column 5"
+              ]
+            }
+          ]
+        },
+        {
           "id": "skill:vigilant_guard",
           "title": "Vigilant Guard",
           "sections": [
@@ -1355,6 +1400,19 @@
               "heading": "Summary",
               "lines": [
                 "Fan of arrows"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "skill:wildborn_endurance",
+          "title": "Wildborn Endurance",
+          "sections": [
+            {
+              "lines": [
+                "Class: ranger",
+                "Kind: passive_stat_bonus",
+                "Tree tier 4, column 5"
               ]
             }
           ]

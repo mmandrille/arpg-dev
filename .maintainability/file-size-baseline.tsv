@@ -18,7 +18,7 @@ client/tests/test_golden.gd	784
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7938	# v388: armor-slot skip in family stat test; armor families covered in item_templates_test.go
 server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: interactable path_too_long uses floor max_auto_steps
-server/internal/game/rules.go	3073	# v385: character_progression level_up.restore_hp_and_mana loader field
+server/internal/game/rules.go	3112	# v401: baseline sync to current rules.go line count (no v401 logic edits)
 server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6542	# v391: resource loot drop hook dispatch in dropLoot/chest paths

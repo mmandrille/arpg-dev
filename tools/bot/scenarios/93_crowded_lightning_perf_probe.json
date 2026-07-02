@@ -20,7 +20,7 @@
     },
     "skill_ranks": {
       "magic_bolt": 1,
-      "ligthing": 1
+      "lightning": 1
     }
   },
   "steps": [
@@ -33,7 +33,7 @@
     },
     {
       "action": "cast_skill",
-      "skill_id": "ligthing",
+      "skill_id": "lightning",
       "direction": {
         "x": 1,
         "y": 0
@@ -57,7 +57,7 @@
     },
     {
       "action": "cast_skill",
-      "skill_id": "ligthing",
+      "skill_id": "lightning",
       "direction": {
         "x": 1,
         "y": 0
@@ -70,7 +70,7 @@
     },
     {
       "action": "cast_skill",
-      "skill_id": "ligthing",
+      "skill_id": "lightning",
       "direction": {
         "x": 1,
         "y": 0
@@ -83,7 +83,7 @@
     },
     {
       "action": "cast_skill",
-      "skill_id": "ligthing",
+      "skill_id": "lightning",
       "direction": {
         "x": 1,
         "y": 0
@@ -113,7 +113,7 @@
     {
       "type": "event_seen",
       "event_type": "skill_cast",
-      "skill_id": "ligthing"
+      "skill_id": "lightning"
     },
     {
       "type": "combat_event_seen",

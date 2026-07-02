@@ -14,8 +14,8 @@
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
-    "stats": { "str": 6, "dex": 20, "vit": 8, "magic": 20 },
-    "skill_ranks": { "heal": 1, "charge": 1, "holy_shield": 1, "sanctuary": 1, "radiant_bolt": 1 }
+    "stats": { "str": 10, "dex": 20, "vit": 8, "magic": 20 },
+    "skill_ranks": { "heal": 1, "charge": 1, "holy_shield": 1, "sanctuary": 1, "radiant_bolt": 1, "consecrated_smite": 1 }
   },
   "steps": [
     { "action": "assert_equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_paladin_sword" },
@@ -43,7 +43,9 @@
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_channel_started", "skill_id": "charge", "rank": 1 }, "timeout_s": 3 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_channel_ended", "skill_id": "charge" }, "timeout_s": 3 },
     { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "monster_pushed", "skill_id": "charge" }, "timeout_s": 3 },
-    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "charge" }, "timeout_s": 3 }
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "charge" }, "timeout_s": 3 },
+    { "action": "cast_skill", "skill_id": "consecrated_smite", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
+    { "action": "wait_until_assertion", "assertion": { "type": "event_seen", "event_type": "skill_cast", "skill_id": "consecrated_smite", "rank": 1 }, "timeout_s": 3 }
   ],
   "assertions": [
     { "type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_paladin_sword" },

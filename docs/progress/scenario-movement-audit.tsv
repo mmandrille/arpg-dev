@@ -68,7 +68,6 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 61_purple_town_unique_chest.json	purple_town_unique_chest	protocol	extended	setup-eliminable	0	0		
 62_barbarian_earthbreaker.json	barbarian_earthbreaker	protocol	extended	contract	0	0		
 63_rogue_shadow_flurry.json	rogue_shadow_flurry	protocol	extended	contract	0	0		
-64_ranger_split_arrow.json	ranger_split_arrow	protocol	extended	contract	0	0		
 65_random_quest_reward_floor.json	random_quest_reward_floor	protocol	extended	contract	0	0		
 66_weapon_set_swap_and_tabs.json	weapon_set_swap_and_tabs	protocol	extended	contract	0	0		
 67_skill_secondary_bindings.json	skill_secondary_bindings	protocol	extended	contract	0	0		

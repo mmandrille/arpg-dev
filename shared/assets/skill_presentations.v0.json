@@ -43,7 +43,7 @@
       "effect_visual": "ice_slow",
       "summary_key": "skill.ice_shard.summary"
     },
-    "ligthing": {
+    "lightning": {
       "icon": {
         "label": "L",
         "shape": "bolt",
@@ -51,9 +51,9 @@
         "accent": "#fff9bd"
       },
       "summary": "Chaining lightning projectile",
-      "projectile_visual": "ligthing_projectile",
-      "effect_visual": "ligthing_chain",
-      "summary_key": "skill.ligthing.summary"
+      "projectile_visual": "lightning_projectile",
+      "effect_visual": "lightning_chain",
+      "summary_key": "skill.lightning.summary"
     },
     "arcane_barrage": {
       "icon": {
@@ -199,6 +199,17 @@
       "effect_visual": "dash",
       "summary_key": "skill.dash.summary"
     },
+    "shadowstep": {
+      "icon": {
+        "label": "S",
+        "shape": "dash",
+        "color": "#4a4f7a",
+        "accent": "#d8dcff"
+      },
+      "summary": "Instant shadow blink",
+      "effect_visual": "teleport_blink",
+      "summary_key": "skill.shadowstep.summary"
+    },
     "shadow_flurry": {
       "icon": {
         "label": "F",
@@ -278,18 +289,6 @@
       "effect_visual": "black_wolf_companion",
       "summary_key": "skill.black_wolf_companion.summary"
     },
-    "split_arrow": {
-      "icon": {
-        "label": "S",
-        "shape": "arrow",
-        "color": "#53d7a2",
-        "accent": "#e0fff0"
-      },
-      "summary": "Piercing split arrow",
-      "projectile_visual": "split_arrow_projectile",
-      "effect_visual": "split_arrow",
-      "summary_key": "skill.split_arrow.summary"
-    },
     "ground_slam": {
       "icon": {
         "label": "G",
@@ -301,16 +300,16 @@
       "effect_visual": "earthbreaker_ring",
       "summary_key": "skill.ground_slam.summary"
     },
-    "arcane_orb": {
+    "skullcrusher": {
       "icon": {
-        "label": "O",
-        "shape": "orb_projectile",
-        "color": "#7b5cff",
-        "accent": "#efe8ff"
+        "label": "K",
+        "shape": "slash",
+        "color": "#8f2418",
+        "accent": "#ffc7b8"
       },
-      "summary": "Heavy arcane projectile",
-      "projectile_visual": "magic_bolt_projectile",
-      "summary_key": "skill.arcane_orb.summary"
+      "summary": "Focused crushing strike",
+      "effect_visual": "cleave_cone",
+      "summary_key": "skill.skullcrusher.summary"
     },
     "radiant_bolt": {
       "icon": {
@@ -323,6 +322,17 @@
       "projectile_visual": "magic_bolt_projectile",
       "summary_key": "skill.radiant_bolt.summary"
     },
+    "consecrated_smite": {
+      "icon": {
+        "label": "S",
+        "shape": "slash",
+        "color": "#e8c24a",
+        "accent": "#fff4c8"
+      },
+      "summary": "Holy shockwave cone",
+      "effect_visual": "cleave_cone",
+      "summary_key": "skill.consecrated_smite.summary"
+    },
     "fan_of_blades": {
       "icon": {
         "label": "F",
@@ -333,6 +343,17 @@
       "summary": "Wide poison cone",
       "effect_visual": "cleave_cone",
       "summary_key": "skill.fan_of_blades.summary"
+    },
+    "eviscerate": {
+      "icon": {
+        "label": "E",
+        "shape": "slash",
+        "color": "#2f7a4a",
+        "accent": "#c8ffe0"
+      },
+      "summary": "Lethal poison finisher",
+      "effect_visual": "cleave_cone",
+      "summary_key": "skill.eviscerate.summary"
     },
     "snipe": {
       "icon": {
@@ -494,6 +515,46 @@
       },
       "summary": "Passive critical chance",
       "summary_key": "skill.deadeye.summary"
+    },
+    "arcane_reservoir": {
+      "icon": {
+        "label": "R",
+        "shape": "passive_arcane_focus",
+        "color": "#5a3fd8",
+        "accent": "#ece4ff"
+      },
+      "summary": "Passive deep mana reserve",
+      "summary_key": "skill.arcane_reservoir.summary"
+    },
+    "unstoppable_heart": {
+      "icon": {
+        "label": "H",
+        "shape": "passive_iron_hide",
+        "color": "#9a2f24",
+        "accent": "#ffd4c9"
+      },
+      "summary": "Passive vitality and force",
+      "summary_key": "skill.unstoppable_heart.summary"
+    },
+    "oathbound_resolve": {
+      "icon": {
+        "label": "O",
+        "shape": "passive_vigilant_guard",
+        "color": "#d4b43a",
+        "accent": "#fff4c8"
+      },
+      "summary": "Passive mana and armor",
+      "summary_key": "skill.oathbound_resolve.summary"
+    },
+    "wildborn_endurance": {
+      "icon": {
+        "label": "E",
+        "shape": "passive_trail_sense",
+        "color": "#2f8f4a",
+        "accent": "#d7ffd6"
+      },
+      "summary": "Passive movement speed",
+      "summary_key": "skill.wildborn_endurance.summary"
     }
   }
 }

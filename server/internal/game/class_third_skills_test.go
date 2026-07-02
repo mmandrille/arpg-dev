@@ -9,18 +9,20 @@ func TestThirdClassSkillsRequirePrerequisites(t *testing.T) {
 		skillID string
 		prereq  string
 		stats   BaseStatsView
+		level   int
 	}{
-		{classID: "sorcerer", skillID: "arcane_barrage", prereq: "ligthing", stats: BaseStatsView{Str: 3, Dex: 5, Vit: 5, Magic: 11}},
-		{classID: "barbarian", skillID: "earthbreaker", prereq: "cleave", stats: BaseStatsView{Str: 8, Dex: 5, Vit: 8, Magic: 5}},
-		{classID: "paladin", skillID: "sanctuary", prereq: "holy_shield", stats: BaseStatsView{Str: 6, Dex: 4, Vit: 10, Magic: 10}},
-		{classID: "rogue", skillID: "shadow_flurry", prereq: "dash", stats: BaseStatsView{Str: 4, Dex: 12, Vit: 5, Magic: 4}},
-		{classID: "ranger", skillID: "split_arrow", prereq: "volley", stats: BaseStatsView{Str: 4, Dex: 14, Vit: 5, Magic: 4}},
+		{classID: "sorcerer", skillID: "arcane_barrage", prereq: "lightning", stats: BaseStatsView{Str: 3, Dex: 5, Vit: 5, Magic: 11}, level: 1},
+		{classID: "barbarian", skillID: "earthbreaker", prereq: "cleave", stats: BaseStatsView{Str: 8, Dex: 5, Vit: 8, Magic: 5}, level: 1},
+		{classID: "barbarian", skillID: "skullcrusher", prereq: "ground_slam", stats: BaseStatsView{Str: 12, Dex: 5, Vit: 10, Magic: 5}, level: 5},
+		{classID: "paladin", skillID: "sanctuary", prereq: "holy_shield", stats: BaseStatsView{Str: 6, Dex: 4, Vit: 10, Magic: 10}, level: 1},
+		{classID: "rogue", skillID: "shadow_flurry", prereq: "dash", stats: BaseStatsView{Str: 4, Dex: 12, Vit: 5, Magic: 4}, level: 1},
 	}
 	for _, c := range cases {
 		t.Run(c.skillID, func(t *testing.T) {
 			state := rules.DefaultCharacterProgressionState()
 			state.CharacterClass = c.classID
 			state.BaseStats = c.stats
+			state.Level = c.level
 			state.UnspentSkillPoints = 2
 			sim, err := NewSimWithWorldProgression("sess_"+c.skillID+"_prereq", "class_third_skill_seed", rules, DefaultWorldID, state)
 			if err != nil {

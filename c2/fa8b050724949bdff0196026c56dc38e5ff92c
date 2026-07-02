@@ -1,0 +1,19 @@
+PROGRESS.md
+  s_f902c1dbe15187::t_b8665a0c212b34 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c2fa8b050724949bdff0196026c56dc38e5ff92c",
+  "prompts": {},
+  "sessions": {
+    "s_f902c1dbe15187": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b55d2564-ae02-4be2-9d6e-130df5199401",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

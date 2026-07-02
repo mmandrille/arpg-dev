@@ -144,6 +144,58 @@
         "give_up_s": { "type": "number", "exclusiveMinimum": 0 },
         "http_resume_after_ws_failures": { "type": "integer", "minimum": 1 }
       }
+    },
+    "weapon_elemental_procs": {
+      "type": "object",
+      "required": ["cold", "fire", "lightning", "poison"],
+      "additionalProperties": false,
+      "properties": {
+        "cold": {
+          "type": "object",
+          "required": ["proc_chance_percent", "slow_percent", "duration_seconds", "effect_id"],
+          "additionalProperties": false,
+          "properties": {
+            "proc_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "slow_percent": { "type": "integer", "minimum": 1, "maximum": 95 },
+            "duration_seconds": { "type": "integer", "minimum": 1 },
+            "effect_id": { "type": "string", "minLength": 1 }
+          }
+        },
+        "fire": {
+          "type": "object",
+          "required": ["proc_chance_percent", "burn_percent_of_total_hit", "duration_seconds", "tick_interval_seconds", "effect_id"],
+          "additionalProperties": false,
+          "properties": {
+            "proc_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "burn_percent_of_total_hit": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "duration_seconds": { "type": "integer", "minimum": 1 },
+            "tick_interval_seconds": { "type": "integer", "minimum": 1 },
+            "effect_id": { "type": "string", "minLength": 1 }
+          }
+        },
+        "lightning": {
+          "type": "object",
+          "required": ["proc_chance_percent", "stun_duration_seconds", "effect_id"],
+          "additionalProperties": false,
+          "properties": {
+            "proc_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "stun_duration_seconds": { "type": "integer", "minimum": 1 },
+            "effect_id": { "type": "string", "minLength": 1 }
+          }
+        },
+        "poison": {
+          "type": "object",
+          "required": ["proc_chance_percent", "dot_percent_of_elemental_damage", "duration_seconds", "tick_interval_seconds", "effect_id"],
+          "additionalProperties": false,
+          "properties": {
+            "proc_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "dot_percent_of_elemental_damage": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "duration_seconds": { "type": "integer", "minimum": 1 },
+            "tick_interval_seconds": { "type": "integer", "minimum": 1 },
+            "effect_id": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
     }
   }
 }

@@ -1,0 +1,50 @@
+{
+  "id": "weapon_elemental_procs",
+  "ci_tier": "extended",
+  "world_id": "weapon_elemental_proc_lab",
+  "seed": "weapon_elemental_procs_v408_0",
+  "character_class": "barbarian",
+  "debug_progression": {
+    "level": 6,
+    "stats": { "str": 20, "dex": 20, "vit": 10, "magic": 5 }
+  },
+  "title": "Weapon elemental procs lab",
+  "description": "Proc lab world regression: pinned cold sword still splits force/cold damage (proc rolls covered by Go tests).",
+  "steps": [
+    { "action": "pick_up_loot", "item_def_id": "long_sword" },
+    { "action": "equip_inventory_item", "item_def_id": "long_sword", "slot": "main_hand" },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_proc_dummy",
+      "event_type": "monster_damaged",
+      "damage_type": "force",
+      "outcome": "hit",
+      "min_damage": 1
+    },
+    { "action": "wait_ticks", "ticks": 12 },
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "combat_lab_proc_dummy",
+      "event_type": "monster_damaged",
+      "damage_type": "cold",
+      "outcome": "hit",
+      "min_damage": 1
+    }
+  ],
+  "assertions": [
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "force",
+      "target_monster_def_id": "combat_lab_proc_dummy",
+      "min_damage": 1
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "damage_type": "cold",
+      "target_monster_def_id": "combat_lab_proc_dummy",
+      "min_damage": 1
+    }
+  ]
+}

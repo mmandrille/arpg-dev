@@ -1354,7 +1354,7 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 
 	if outcome.Damage > 0 {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
-		s.applyWeaponElementalDamageFromSlot(target, playerID, corr, weaponSlot, res)
+		s.applyWeaponElementalDamageFromSlot(target, playerID, corr, weaponSlot, outcome.Damage, res)
 	}
 	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: true})
 	if outcome.Damage > 0 {
@@ -3171,7 +3171,7 @@ func (s *Sim) advanceMonsterAttack(res *TickResult) {
 		if monster.monsterAttackCooldown > 0 {
 			attackCooldown = monster.monsterAttackCooldown
 		}
-		if monster.hasAttacked && s.tick-monster.lastAttackTick < uint64(attackCooldown) {
+		if monster.hasAttacked && s.tick-monster.lastAttackTick < uint64(s.monsterAttackCooldownTicks(monster, attackCooldown)) {
 			continue
 		}
 		if monster.attackWindupRemaining > 0 {

@@ -57,6 +57,33 @@
     "companion_follow_distance": 1.1,
     "companion_follow_stop_radius": 1.6
   },
+  "weapon_elemental_procs": {
+    "cold": {
+      "proc_chance_percent": 10,
+      "slow_percent": 25,
+      "duration_seconds": 3,
+      "effect_id": "weapon_freeze"
+    },
+    "fire": {
+      "proc_chance_percent": 10,
+      "burn_percent_of_total_hit": 10,
+      "duration_seconds": 10,
+      "tick_interval_seconds": 1,
+      "effect_id": "weapon_burn"
+    },
+    "lightning": {
+      "proc_chance_percent": 5,
+      "stun_duration_seconds": 3,
+      "effect_id": "stun"
+    },
+    "poison": {
+      "proc_chance_percent": 10,
+      "dot_percent_of_elemental_damage": 25,
+      "duration_seconds": 5,
+      "tick_interval_seconds": 1,
+      "effect_id": "weapon_poison"
+    }
+  },
   "presentation_lod": {
     "min_live_monsters": 24,
     "distance_threshold": 14.0

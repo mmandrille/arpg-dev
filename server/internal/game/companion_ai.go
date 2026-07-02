@@ -492,7 +492,7 @@ func (s *Sim) advanceCompanionAttack(companion *entity, target *entity, res *Tic
 	if cooldown <= 0 {
 		return
 	}
-	if companion.hasAttacked && s.tick-companion.lastAttackTick < uint64(cooldown) {
+	if companion.hasAttacked && s.tick-companion.lastAttackTick < uint64(s.monsterAttackCooldownTicks(companion, cooldown)) {
 		return
 	}
 	damage := def.AttackDamage
@@ -530,6 +530,10 @@ func (s *Sim) damageMonsterByCompanion(target *entity, companion *entity, damage
 			target.hp = 0
 		}
 		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
+		if outcome.Damage > 0 {
+			item := s.mercenaryMainHandItem(companion)
+			s.applyWeaponElementalDamageWithItem(target, companion.ownerID, "", item, outcome.Damage, res)
+		}
 	}
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), companion.id, target.id, "", outcome))
 	if target.hp == 0 {

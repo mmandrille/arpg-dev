@@ -137,11 +137,18 @@ func (s *Sim) weaponItemForSlot(slot string) *invItem {
 	return s.findItemByID(s.equipped[slot])
 }
 
-func (s *Sim) applyWeaponElementalDamageFromSlot(target *entity, playerID uint64, corr string, weaponSlot string, res *TickResult) {
+func (s *Sim) applyWeaponElementalDamageFromSlot(target *entity, playerID uint64, corr string, weaponSlot string, physicalHitDamage int, res *TickResult) {
 	if target == nil || target.hp <= 0 {
 		return
 	}
 	item := s.weaponItemForSlot(weaponSlot)
+	s.applyWeaponElementalDamageWithItem(target, playerID, corr, item, physicalHitDamage, res, weaponSlot)
+}
+
+func (s *Sim) applyWeaponElementalDamageWithItem(target *entity, playerID uint64, corr string, item *invItem, physicalHitDamage int, res *TickResult, weaponSlot ...string) {
+	if target == nil || target.hp <= 0 {
+		return
+	}
 	amount, damageType := weaponElementalDamageFromItem(item)
 	if amount <= 0 || damageType == damageTypeForce {
 		return
@@ -163,13 +170,15 @@ func (s *Sim) applyWeaponElementalDamageFromSlot(target *entity, playerID uint64
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
 	event := combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome)
-	if weaponSlot != "" {
-		event.WeaponSlot = weaponSlot
+	if len(weaponSlot) > 0 && weaponSlot[0] != "" {
+		event.WeaponSlot = weaponSlot[0]
 	}
 	res.Events = append(res.Events, event)
 	if outcome.Damage > 0 {
 		s.tryPassiveExecute(target, playerID, corr, res)
 	}
+	totalHit := physicalHitDamage + outcome.Damage
+	s.tryWeaponElementalProcs(target, playerID, corr, damageType, outcome.Damage, totalHit, res)
 	if target.hp == 0 {
 		s.finishMonsterKill(target, playerID, corr, res)
 	}

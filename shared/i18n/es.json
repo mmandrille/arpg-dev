@@ -27,6 +27,7 @@
     "monster.combat_lab_lightning_resistant.name": "Objetivo resistente a relampago",
     "monster.combat_lab_lightning_weak.name": "Objetivo debil a relampago",
     "monster.combat_lab_miss_attacker.name": "Atacante erratico de combate",
+    "monster.combat_lab_proc_dummy.name": "Objetivo de proc de combate",
     "monster.combat_lab_soft_target.name": "Objetivo blando de combate",
     "monster.dungeon_archer.name": "Arquera de cueva",
     "monster.dungeon_bat.name": "Murcielago de cueva",

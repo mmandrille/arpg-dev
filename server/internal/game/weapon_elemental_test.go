@@ -93,7 +93,7 @@ func TestWeaponElementalDamageRespectsResistance(t *testing.T) {
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_cold_resist", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(sword.instanceID), Slot: mainHandSlot}}}), "equip_cold_resist")
 
 	var res TickResult
-	sim.applyWeaponElementalDamageFromSlot(target, player.id, "cold_resist", mainHandSlot, &res)
+	sim.applyWeaponElementalDamageFromSlot(target, player.id, "cold_resist", mainHandSlot, 0, &res)
 
 	coldDamage := 0
 	for _, ev := range res.Events {

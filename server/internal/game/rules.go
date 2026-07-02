@@ -43,7 +43,8 @@ type Rules struct {
 // MainConfig holds high-level gameplay tuning values that are being promoted
 // into one designer-facing file before older rules consume them directly.
 type MainConfig struct {
-	Gameplay MainGameplayConfig `json:"gameplay"`
+	Gameplay             MainGameplayConfig         `json:"gameplay"`
+	WeaponElementalProcs WeaponElementalProcsConfig `json:"weapon_elemental_procs"`
 }
 
 type MainGameplayConfig struct {
@@ -743,10 +744,7 @@ type WorldLootPreset struct {
 func LoadRules(dir string) (*Rules, error) {
 	r := &Rules{}
 
-	var mainConfig struct {
-		Version  int                `json:"version"`
-		Gameplay MainGameplayConfig `json:"gameplay"`
-	}
+	var mainConfig MainConfig
 	if err := readJSON(filepath.Join(dir, "main_config.v0.json"), &mainConfig); err != nil {
 		return nil, err
 	}
@@ -810,12 +808,15 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateMainGameplayEconomyConfig(mainConfig.Gameplay); err != nil {
 		return nil, err
 	}
+	if err := validateWeaponElementalProcsConfig(mainConfig.WeaponElementalProcs); err != nil {
+		return nil, err
+	}
 	if mainConfig.Gameplay.ItemUpgradeResourceCost > 0 {
 		if mainConfig.Gameplay.ItemUpgradeResourceID == "" {
 			return nil, fmt.Errorf("game: invalid rules main_config.gameplay.item_upgrade_resource_item_def_id: required when count is positive")
 		}
 	}
-	r.MainConfig = MainConfig{Gameplay: mainConfig.Gameplay}
+	r.MainConfig = mainConfig
 
 	var combat struct {
 		Version                 int         `json:"version"`

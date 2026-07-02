@@ -521,6 +521,8 @@ type MonsterDef struct {
 	LeashRadius       float64            `json:"leash_radius,omitempty"`
 	MoveSpeed         float64            `json:"move_speed,omitempty"`
 	XPReward          int                `json:"xp_reward,omitempty"`
+	TrainingTarget    bool               `json:"training_target,omitempty"`
+	ReviveDelayTicks  int                `json:"revive_delay_ticks,omitempty"`
 }
 
 func (d MonsterDef) effectiveAssistRadius() float64 {

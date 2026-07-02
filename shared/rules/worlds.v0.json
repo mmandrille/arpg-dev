@@ -2403,6 +2403,33 @@
             "x": 8,
             "y": 10
           }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "town_training_doll",
+          "position": {
+            "x": 14,
+            "y": 16
+          }
+        }
+      ]
+    },
+    "town_training_doll_lab": {
+      "mode": "multi_level",
+      "player": {
+        "position": {
+          "x": 11,
+          "y": 18
+        }
+      },
+      "entities": [
+        {
+          "type": "monster",
+          "monster_def_id": "town_training_doll",
+          "position": {
+            "x": 13,
+            "y": 18
+          }
         }
       ]
     },

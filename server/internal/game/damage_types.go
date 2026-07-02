@@ -87,12 +87,22 @@ func (s *Sim) applyResistanceToDamage(damage int, resistance float64) int {
 }
 
 func (s *Sim) monsterResistance(target *entity, damageType string) float64 {
-	if target == nil || target.monsterDefID == "" {
+	if target == nil {
 		return 0
 	}
+
+	if len(target.monsterResistances) > 0 {
+		return clampFloat(target.monsterResistances[canonicalDamageType(damageType)], -1, 1)
+	}
+
+	if target.monsterDefID == "" {
+		return 0
+	}
+
 	def, ok := s.rules.Monsters[target.monsterDefID]
 	if !ok || len(def.Resistances) == 0 {
 		return 0
 	}
+
 	return clampFloat(def.Resistances[canonicalDamageType(damageType)], -1, 1)
 }

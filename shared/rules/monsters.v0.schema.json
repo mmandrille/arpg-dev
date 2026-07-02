@@ -59,7 +59,9 @@
             "aggro_radius": { "type": "number", "exclusiveMinimum": 0 },
             "assist_radius": { "type": "number", "exclusiveMinimum": 0 },
             "leash_radius": { "type": "number", "exclusiveMinimum": 0 },
-            "move_speed": { "type": "number", "exclusiveMinimum": 0 }
+            "move_speed": { "type": "number", "exclusiveMinimum": 0 },
+            "training_target": { "type": "boolean" },
+            "revive_delay_ticks": { "type": "integer", "minimum": 1 }
           }
         }
       }

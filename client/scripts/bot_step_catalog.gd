@@ -30,6 +30,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_pause_menu_visible", "assert_session_changed",
 	"assert_multiplayer_panel_visible", "assert_multiplayer_session_rows", "assert_multiplayer_filter",
 	"assert_player_position_unchanged", "assert_character_stats_panel_visible",
+	"assert_training_damage_log_panel_visible",
 	"assert_character_info_panel_visible", "assert_character_info",
 	"assert_character_progression", "assert_stat_button_enabled", "assert_xp_bar",
 	"assert_skills_panel_visible", "assert_skill_progression",
@@ -64,7 +65,8 @@ const STEP_TYPES_ACTION := [
 	"click_blacksmith_upgrade", "click_blacksmith_stage_item", "select_blacksmith_recipe", "select_blacksmith_tab", "fill_blacksmith_merge", "click_blacksmith_merge", "click_mercenary_stance", "click_mercenary_hire",
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
 	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
-	"set_market_search", "select_market_sort", "click_waypoint_level",
+	"set_market_search", "select_market_sort", 	"click_waypoint_level",
+	"inject_training_damage_log_event", "click_training_damage_log_close",
 	"set_camera_mode", "select_camera_mode",
 	"enable_ws_reconnect_proof", "simulate_ws_drop",
 ]

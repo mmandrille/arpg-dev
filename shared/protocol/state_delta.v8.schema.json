@@ -478,6 +478,10 @@
         "mitigated_damage": { "type": "integer" },
         "blocked": { "type": "boolean" },
         "critical": { "type": "boolean" },
+        "damage_breakdown": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/damage_breakdown_line" }
+        },
         "heal": { "type": "integer", "minimum": 0 },
         "mana": { "type": "integer", "minimum": 0 },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" },
@@ -651,6 +655,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "training_doll_revived" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "monster_def_id"] }
         },
         {
           "if": {
@@ -1020,6 +1031,15 @@
       "properties": {
         "main_hand": { "$ref": "#/$defs/weapon_slot_damage" },
         "off_hand": { "$ref": "#/$defs/weapon_slot_damage" }
+      }
+    },
+    "damage_breakdown_line": {
+      "type": "object",
+      "required": ["label", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 }
       }
     },
     "stat_breakdown_source": {

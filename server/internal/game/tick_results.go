@@ -83,6 +83,9 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 				s.advanceMonsterMeleeWindups(res)
 				s.advanceMonsterAttack(res)
 				s.advanceProjectiles(res)
+				if levelNum == townLevel {
+					s.tickTrainingDollRevives(res)
+				}
 			})
 		}
 	}

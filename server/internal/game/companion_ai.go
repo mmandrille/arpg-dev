@@ -24,6 +24,9 @@ func (s *Sim) newPresetMonsterOrCompanion(level *LevelState, preset WorldEntity,
 		return monster
 	}
 	s.applyPartyHPScale(level, monster)
+	if def.TrainingTarget {
+		monster.isTrainingDoll = true
+	}
 	return monster
 }
 

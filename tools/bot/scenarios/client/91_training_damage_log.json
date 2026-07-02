@@ -1,0 +1,44 @@
+{
+  "id": "training_damage_log",
+  "runner": "godot_client",
+  "world_id": "town_training_doll_lab",
+  "seed": "training_damage_log_0409",
+  "ci_tier": "extended",
+  "title": "Training damage log panel",
+  "description": "Open the combat damage log when attacking the town training doll and close it with X.",
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "assert_training_damage_log_panel_visible",
+      "visible": false
+    },
+    {
+      "type": "inject_training_damage_log_event",
+      "monster_def_id": "town_training_doll",
+      "damage": 4,
+      "outcome": "hit",
+      "damage_breakdown": [
+        { "label": "Attack", "value": "Basic attack (main_hand)" },
+        { "label": "Damage range", "value": "2-4" },
+        { "label": "Rolled damage", "value": "4" },
+        { "label": "Final damage", "value": "4" }
+      ]
+    },
+    {
+      "type": "assert_training_damage_log_panel_visible",
+      "visible": true,
+      "min_entries": 1
+    },
+    {
+      "type": "click_training_damage_log_close"
+    },
+    {
+      "type": "assert_training_damage_log_panel_visible",
+      "visible": false
+    }
+  ],
+  "assertions": []
+}

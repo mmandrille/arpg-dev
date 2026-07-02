@@ -19,6 +19,7 @@ extends Node
 const BotMarketActionsScript := preload("res://scripts/bot_market_actions.gd")
 const BotScenarioRunnerScript := preload("res://scripts/bot_scenario_runner.gd")
 const BotReconnectProofActionsScript := preload("res://scripts/bot_reconnect_proof_actions.gd")
+const BotTrainingDamageLogActionsScript := preload("res://scripts/bot_training_damage_log_actions.gd")
 
 var _runner: BotScenarioRunner
 var _scenario_id: String = ""
@@ -184,6 +185,10 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 			_do_click_bishop_debug(action)
 		"click_bishop_force_loot":
 			_do_click_bishop_force_loot(action)
+		"inject_training_damage_log_event":
+			BotTrainingDamageLogActionsScript.inject_event(_main, action)
+		"click_training_damage_log_close":
+			BotTrainingDamageLogActionsScript.click_close(_main)
 		"click_blacksmith_upgrade":
 			_do_click_blacksmith_upgrade(action)
 		"click_blacksmith_stage_item":

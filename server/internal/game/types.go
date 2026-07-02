@@ -349,6 +349,7 @@ type Event struct {
 	MitigatedDamage      *int                    `json:"mitigated_damage,omitempty"`
 	Blocked              *bool                   `json:"blocked,omitempty"`
 	Critical             *bool                   `json:"critical,omitempty"`
+	DamageBreakdown      []CombatBreakdownLineView `json:"damage_breakdown,omitempty"`
 	Heal                 *int                    `json:"heal,omitempty"`
 	Mana                 *int                    `json:"mana,omitempty"`
 	ItemInstanceID       string                  `json:"item_instance_id,omitempty"`

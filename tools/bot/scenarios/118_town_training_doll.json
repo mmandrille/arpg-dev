@@ -1,0 +1,26 @@
+{
+  "id": "town_training_doll",
+  "world_id": "town_training_doll_lab",
+  "seed": "town_training_doll_0409",
+  "ci_tier": "extended",
+  "title": "Town training doll",
+  "description": "Attack the town training doll and verify authoritative damage breakdown lines on combat events.",
+  "steps": [
+    {
+      "action": "action_until_combat_event",
+      "monster_def_id": "town_training_doll",
+      "event_type": "monster_damaged",
+      "min_damage": 1,
+      "min_damage_breakdown_lines": 4
+    }
+  ],
+  "assertions": [
+    { "type": "current_level", "equals": 0 },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "target_monster_def_id": "town_training_doll",
+      "min_damage_breakdown_lines": 4
+    }
+  ]
+}

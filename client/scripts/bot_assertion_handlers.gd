@@ -26,6 +26,17 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return runner._assert_xp_bar(step, state)
 		"assert_skills_panel_visible":
 			return runner._assert_bool_state("assert_skills_panel_visible", "skills_panel_visible", step, state)
+		"assert_training_damage_log_panel_visible":
+			if not runner._assert_bool_state("assert_training_damage_log_panel_visible", "training_damage_log_panel_visible", step, state):
+				return false
+			if step.has("min_entries"):
+				var panel_state: Dictionary = state.get("training_damage_log_panel", {})
+				if int(panel_state.get("entry_count", 0)) < int(step.get("min_entries", 0)):
+					runner._fail("assert_training_damage_log_panel_visible failed: entry_count=%s want>=%s" % [
+						str(panel_state.get("entry_count", 0)), str(step.get("min_entries", 0))
+					])
+					return false
+			return true
 		"assert_skill_progression":
 			return runner._assert_skill_progression(step, state)
 		"assert_skill_button_enabled":

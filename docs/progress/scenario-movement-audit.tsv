@@ -78,7 +78,8 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 72_upgrade_resource_drop.json	upgrade_resource_drop	protocol	extended	contract	0	0		
 115_bishop_force_drop_lab.json	bishop_force_drop_lab	protocol	extended	contract	1	1		
 116_weapon_elemental_damage.json	weapon_elemental_lab	protocol	extended	contract	1	1		
-117_weapon_elemental_procs.json	weapon_elemental_proc_lab	protocol	extended	contract	1	1		
+117_weapon_elemental_procs.json	weapon_elemental_proc_lab	protocol	extended	contract	1	1
+118_town_training_doll.json	town_training_doll	protocol	extended	contract	0	0		
 resource_loot_pool_drop.json	resource_loot_pool_drop	protocol	extended	contract	0	0		
 upgrade_shard_level_drop.json	upgrade_shard_level_drop	protocol	extended	contract	0	0		
 73_companion_ai_foundation.json	companion_ai_foundation	protocol	pack	contract	1	1		
@@ -217,7 +218,8 @@ client/86_mobility_skill_smoothing.json	mobility_skill_smoothing	godot_client	ex
 client/87_dungeon_torch_lights.json	dungeon_torch_lights	godot_client	extended	contract	0	0		
 client/88_torch_walk_visual.json	torch_walk_visual	godot_client	extended	contract	8	8		
 client/89_aura_soft_lights.json	aura_soft_lights	godot_client	extended	contract	0	0		
-client/90_town_night_perimeter.json	town_night_perimeter	godot_client	extended	setup-eliminable	3	3		
+client/90_town_night_perimeter.json	town_night_perimeter	godot_client	extended	setup-eliminable	3	3
+client/91_training_damage_log.json	training_damage_log	godot_client	extended	contract	0	0		
 client/ws_reconnect_proof.json	ws_reconnect_proof	godot_client	extended	contract	0	0		
 108_skill_weapon_damage_scaling.json	skill_weapon_damage_scaling	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
 109_class_weapon_affinities_lab.json	class_weapon_affinities_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup

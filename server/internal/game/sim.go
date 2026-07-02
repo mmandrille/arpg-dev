@@ -185,6 +185,9 @@ type entity struct {
 	attackWindupTargetID  uint64
 	attackWindupDamage    DamageRange
 	rangedMeleeEngagedTick uint64
+	isTrainingDoll          bool
+	trainingDollReviveAt    uint64
+	monsterResistances      map[string]float64
 }
 
 type invItem struct {
@@ -554,6 +557,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		}
 		s.syncCompatibilityFields()
 		s.seedUniqueTestChests()
+		s.syncTownTrainingDollsFromHost()
 
 		return s, nil
 	}
@@ -566,6 +570,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 
 	s.syncCompatibilityFields()
 	s.seedUniqueTestChests()
+	s.syncTownTrainingDollsFromHost()
 
 	return s, nil
 }
@@ -1337,12 +1342,12 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
 	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
+	breakdown := s.trainingDollBreakdownForBasicAttack(attackerStats, defenderStats, damageRange, outcome, target, damageType, weaponSlot)
 	if !outcome.Hit || outcome.Blocked {
-		res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
-		if weaponSlot != "" {
-			res.Events[len(res.Events)-1].WeaponSlot = weaponSlot
+		s.appendMonsterCombatEvent(res, s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome, breakdown, weaponSlot, "")
+		if !s.isTrainingDoll(target) {
+			s.aggroMonsterOnHit(target, playerID, corr, res)
 		}
-		s.aggroMonsterOnHit(target, playerID, corr, res)
 		return outcome
 	}
 
@@ -1351,13 +1356,12 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 		target.hp = 0
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome))
-	if weaponSlot != "" {
-		res.Events[len(res.Events)-1].WeaponSlot = weaponSlot
-	}
+	s.appendMonsterCombatEvent(res, s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome, breakdown, weaponSlot, "")
 
-	if outcome.Damage > 0 {
+	if outcome.Damage > 0 && !s.isTrainingDoll(target) {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
+	}
+	if outcome.Damage > 0 {
 		s.applyWeaponElementalDamageFromSlot(target, playerID, corr, weaponSlot, outcome.Damage, res)
 	}
 	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: true})
@@ -1365,9 +1369,15 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 		s.tryPassiveExecute(target, playerID, corr, res)
 	}
 	if target.hp == 0 {
-		s.finishMonsterKill(target, playerID, corr, res)
+		if s.isTrainingDoll(target) {
+			s.finishTrainingDollDown(target, playerID, corr, res)
+		} else {
+			s.finishMonsterKill(target, playerID, corr, res)
+		}
 	}
-	s.retaliate(target, corr, res)
+	if !s.isTrainingDoll(target) {
+		s.retaliate(target, corr, res)
+	}
 	return outcome
 }
 
@@ -1385,17 +1395,14 @@ func (s *Sim) damageMonsterByPlayerSkillTypedWithID(target *entity, playerID uin
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveSkillDamage(defenderStats, damageRange)
 	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
+	breakdown := s.trainingDollBreakdownForSkill(defenderStats, damageRange, outcome, target, damageType, skillID)
 	target.hp -= outcome.Damage
 	if target.hp < 0 {
 		target.hp = 0
 	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	event := combatEvent(s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome)
-	if skillID != "" {
-		event.SkillID = skillID
-	}
-	res.Events = append(res.Events, event)
-	if outcome.Damage > 0 {
+	s.appendMonsterCombatEvent(res, s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome, breakdown, "", skillID)
+	if outcome.Damage > 0 && !s.isTrainingDoll(target) {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}
 	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: false})
@@ -1403,9 +1410,12 @@ func (s *Sim) damageMonsterByPlayerSkillTypedWithID(target *entity, playerID uin
 		s.tryPassiveExecute(target, playerID, corr, res)
 	}
 	if target.hp == 0 {
-		s.finishMonsterKill(target, playerID, corr, res)
+		if s.isTrainingDoll(target) {
+			s.finishTrainingDollDown(target, playerID, corr, res)
+		} else {
+			s.finishMonsterKill(target, playerID, corr, res)
+		}
 	}
-	s.retaliate(target, corr, res)
 	return outcome
 }
 

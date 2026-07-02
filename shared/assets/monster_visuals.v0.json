@@ -1,6 +1,13 @@
 {
   "version": 0,
   "monster_visuals": {
+    "town_training_doll": {
+      "asset_id": "monster_dummy_v0",
+      "scene": "training_doll_silhouette",
+      "scale": 1.0,
+      "height_offset": 0.0,
+      "animation_profile": "ground_biped"
+    },
     "training_dummy": {
       "asset_id": "monster_dummy_v0",
       "scene": "monster_dummy",

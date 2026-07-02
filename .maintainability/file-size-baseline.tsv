@@ -22,7 +22,7 @@ server/internal/game/rules.go	3132	# v407: loot_preset validation extracted to w
 server/internal/game/shop.go	1196	# v407: elemental summary lines extracted to weapon_elemental.go
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6571	# v403/ci: skill_id on projectile skill damage events (3a8bd28f)
-server/internal/game/types.go	665
+server/internal/game/types.go	691	# v409: Event.damage_breakdown field is coupled to Event struct; CombatBreakdownLineView extracted to combat_breakdown.go
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482
 server/internal/realtime/session_loop.go	951

@@ -35,6 +35,8 @@ const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const BishopLootDebugPanelScript := preload("res://scripts/bishop_loot_debug_panel.gd")
+const TrainingDamageLogPanelScript := preload("res://scripts/training_damage_log_panel.gd")
+const TrainingDamageLogBridgeScript := preload("res://scripts/training_damage_log_bridge.gd")
 const MercenaryPanelScript := preload("res://scripts/mercenary_panel.gd")
 const MercenaryPanelBridgeScript := preload("res://scripts/mercenary_panel_bridge.gd")
 const BotDebugProgressionSetupScript := preload("res://scripts/bot_debug_progression_setup.gd")
@@ -263,6 +265,7 @@ var shop_panel: ShopPanel
 var stash_panel: StashPanel
 var bishop_panel: BishopPanel
 var bishop_loot_debug_panel: BishopLootDebugPanel
+var training_damage_log_panel: TrainingDamageLogPanel
 var mercenary_panel: MercenaryPanel
 var market_panel
 var blacksmith_panel: BlacksmithPanel
@@ -1634,6 +1637,9 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "monster_aggro":
 			_show_damage_number(eid, Color("#80ff8f"), null, "", 0.0, "threat", "AGGRO")
 			continue
+		if event_type == "training_doll_revived" and entities.has(eid):
+			TrainingDamageLogBridgeScript.handle_training_doll_revived(self, eid, ev)
+			continue
 		var clip = ClientConstants.MONSTER_EVENT_CLIPS.get(event_type, null)
 		if clip == null:
 			if event_type in ["attack_missed", "attack_blocked"]:
@@ -1647,6 +1653,7 @@ func _apply_delta(p: Dictionary) -> void:
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
 			ClientAudioBridgeScript.damage(audio_controller, false)
+			_notify_training_damage_log(eid, ev)
 			GameplayFeedbackPresentationScript.play_entity_reaction(
 				entities, player_id, player_anchor, player_reaction, eid, ev, "hit",
 				Callable(self, "_node_world_or_local_position"))
@@ -2118,6 +2125,9 @@ func _reconcile_player() -> void:
 
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
 	CombatEventPresentationScript.show_combat_text_for_event(entity_id, ev, default_color, Callable(self, "_show_damage_number"), Callable(self, "_node_for_entity_id"))
+
+func _notify_training_damage_log(entity_id: String, ev: Dictionary) -> void:
+	TrainingDamageLogBridgeScript.notify_combat_event(self, training_damage_log_panel, entity_id, ev)
 
 func _play_local_player_reaction_animation(clip: String) -> void:
 	if player_anim == null: return
@@ -3867,6 +3877,7 @@ func _build_scene() -> void:
 	character_stats_panel = CharacterStatsPanelScript.new()
 	character_stats_panel.allocate_stat_requested.connect(_on_character_stat_requested)
 	ui.add_child(character_stats_panel)
+	training_damage_log_panel = TrainingDamageLogBridgeScript.attach_panel(ui)
 	skills_panel = SkillsPanelScript.new()
 	skills_panel.allocate_skill_point_requested.connect(_on_skill_point_requested)
 	ui.add_child(skills_panel)
@@ -5420,6 +5431,10 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			player_root.name = "CompanionVisualRoot"
 			return player_root
 		var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
+		if str(visual.get("scene", "")) == "training_doll_silhouette":
+			var silhouette_root := TrainingDamageLogBridgeScript.make_silhouette_root()
+			silhouette_root.scale = Vector3.ONE * _entity_visual_scale(e)
+			return silhouette_root
 		var packed := _monster_scene_for_visual(str(visual.get("scene", "monster_dummy")))
 		if str(e.get("visual_model", "")) == ClientConstants.BOSS_VISUAL_MODEL:
 			packed = CharacterScene
@@ -6074,6 +6089,7 @@ func get_bot_state() -> Dictionary:
 		"camera_projection": _camera_projection_for_bot(),
 		"mouse_captured": Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
 	}
+	out.merge(TrainingDamageLogBridgeScript.bot_debug_state(training_damage_log_panel))
 	out.merge(ConnectionRecoveryRuntimeScript.bot_state_fields(_connection_recovery_runtime, _connection_overlay, BotReconnectProofActionsScript.is_enabled()))
 	return out
 func _camera_projection_for_bot() -> String:
@@ -6268,6 +6284,12 @@ func bot_force_bishop_loot(payload: Dictionary) -> void:
 		bishop_loot_debug_panel.bot_force_pick(payload)
 	elif client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and gameplay_debug_enabled:
 		client.send("bishop_debug_force_loot_intent", last_server_tick, payload)
+
+func bot_inject_training_damage_log_event(event: Dictionary) -> void:
+	TrainingDamageLogBridgeScript.bot_inject_event(training_damage_log_panel, event)
+
+func bot_click_training_damage_log_close() -> void:
+	TrainingDamageLogBridgeScript.bot_click_close(training_damage_log_panel)
 func bot_click_blacksmith_upgrade(stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	BotFacade.click_blacksmith_upgrade(self, stash_item_id, item_def_id, stash_index)
 func bot_select_blacksmith_tab(tab_name: String = "Merge") -> void:

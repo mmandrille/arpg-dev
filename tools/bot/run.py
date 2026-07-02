@@ -2215,6 +2215,10 @@ def combat_event_matches(event: dict[str, Any], expected: dict[str, Any], state:
         return False
     if not combat_event_entity_matches(event, expected, state, "target"):
         return False
+    if "min_damage_breakdown_lines" in expected:
+        breakdown = event.get("damage_breakdown", [])
+        if not isinstance(breakdown, list) or len(breakdown) < int(expected["min_damage_breakdown_lines"]):
+            return False
     return True
 
 

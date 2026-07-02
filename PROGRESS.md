@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-02 (v408 engineering review + weapon-elemental-procs)
+Last updated: 2026-07-02 (v409 town-training-doll)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-02 (v408 engineering review + weapon-elemental-procs)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v408 — weapon-elemental-procs |
+| **Latest completed slice** | v409 — town-training-doll |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-02 — `make ci` green (v408 autoloop batch) |
+| **CI gate** | 2026-07-02 — `make ci` green (v409 autoloop batch) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v408 — [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md) (2026-07-02; official cadence) |
 | **Next engineering review** | ~v418 milestone |

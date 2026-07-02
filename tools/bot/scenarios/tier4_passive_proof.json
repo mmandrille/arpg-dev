@@ -1,0 +1,74 @@
+{
+  "id": "tier4_passive_proof",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "tier4_passive_proof_seed",
+  "character_class": "sorcerer",
+  "title": "Tier-4 passive skill proof",
+  "description": "At level 15 with spell_dynamo learned, spend a skill point on arcane_reservoir and prove passive max mana contribution.",
+  "debug_progression": {
+    "level": 15,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 1,
+    "stats": {
+      "str": 4,
+      "dex": 8,
+      "vit": 8,
+      "magic": 20
+    },
+    "skill_ranks": {
+      "arcane_focus": 1,
+      "mana_weaving": 1,
+      "spell_dynamo": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 1,
+      "skill_id": "arcane_reservoir",
+      "rank": 0,
+      "max_rank": "from_rules",
+      "can_spend": true
+    },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "arcane_reservoir",
+      "expect_skill_progression": {
+        "unspent_skill_points": 0,
+        "skill_id": "arcane_reservoir",
+        "rank": 1,
+        "max_rank": "from_rules",
+        "can_spend": false
+      }
+    },
+    {
+      "action": "assert_character_progression",
+      "stat_breakdowns": [
+        {
+          "key": "max_mana",
+          "min_value": 1,
+          "source_kinds": [
+            "passive_skill"
+          ]
+        }
+      ]
+    }
+  ],
+  "assertions": [
+    {
+      "type": "event_seen",
+      "event_type": "skill_rank_updated",
+      "skill_id": "arcane_reservoir",
+      "rank": 1
+    },
+    {
+      "type": "skill_progression",
+      "skill_id": "arcane_reservoir",
+      "rank": 1,
+      "max_rank": "from_rules",
+      "can_spend": false
+    }
+  ]
+}

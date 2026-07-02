@@ -220,3 +220,4 @@ client/ws_reconnect_proof.json	ws_reconnect_proof	godot_client	extended	contract
 111_hero_skill_expansion.json	hero_skill_expansion	protocol	extended	contract	0	0		lab combat + debug_progression; no navigation setup
 112_weapon_slot_families_lab.json	weapon_slot_families_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
 113_item_archetype_lab.json	item_archetype_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
+tier4_passive_proof.json	tier4_passive_proof	protocol	extended	contract	0	0		lab debug_progression; no navigation setup

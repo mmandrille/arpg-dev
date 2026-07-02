@@ -412,7 +412,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v398** | `client-ws-reconnect` | Complete (focused verification green) | [`spec`](../specs/v398_spec-client-ws-reconnect.md) | [`plan`](../plans/v398_2026-07-01-client-ws-reconnect.md) | [`as-built`](../as-built/v398_client-ws-reconnect.md) |
 | **v399** | `ws-reconnect-bot-proof` | Complete (focused verification green) | [`spec`](../specs/v399_spec-ws-reconnect-bot-proof.md) | [`plan`](../plans/v399_2026-07-01-ws-reconnect-bot-proof.md) | [`as-built`](../as-built/v399_ws-reconnect-bot-proof.md) |
 | **v400** | `scaled-upgrade-risk` | Complete (`make ci` green) | [`spec`](../specs/v400_spec-scaled-upgrade-risk.md) | [`plan`](../plans/v400_2026-07-01-scaled-upgrade-risk.md) | [`as-built`](../as-built/v400_scaled-upgrade-risk.md) |
-| **v401** | `class-skill-decuple` | Complete (focused verification green; batch `make ci` pending) | [`spec`](../specs/v401_spec-class-skill-decuple-core.md) | [`plan`](../plans/v401_2026-07-02-class-skill-decuple-core.md) | [`as-built`](../as-built/v401_class-skill-decuple.md) |
+| **v401** | `class-skill-decuple` | Complete (`make ci` green) | [`spec`](../specs/v401_spec-class-skill-decuple-core.md) | [`plan`](../plans/v401_2026-07-02-class-skill-decuple-core.md) | [`as-built`](../as-built/v401_class-skill-decuple.md) |
+| **v403** | `tier4-passive-skill-proof` | Complete (`make ci` green) | [`spec`](../specs/v403_spec-tier4-passive-skill-proof.md) | [`plan`](../plans/v403_2026-07-02-tier4-passive-skill-proof.md) | [`as-built`](../as-built/v403_tier4-passive-skill-proof.md) |
 | **v355** | `aura-soft-lights` | Complete (implementation; `make ci` pending `/finish`) | [`spec`](../specs/v355_spec-aura-soft-lights.md) | [`plan`](../plans/v355_2026-06-26-aura-soft-lights.md) | [`as-built`](../as-built/v355_aura-soft-lights.md) |
 
 ---

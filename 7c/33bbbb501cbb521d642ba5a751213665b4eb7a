@@ -1,0 +1,65 @@
+client/scripts/item_icon_drawer.gd
+  s_d37b6a93e8faa6::t_ef63854f3a6b96 69-128
+  s_d37b6a93e8faa6::t_c352bf8d6408f0 18-27
+shared/rules/item_templates.v0.schema.json
+  s_d37b6a93e8faa6::t_cbfc2f783fd433 39
+docs/specs/v410_spec-polearm-archetypes-and-family-icons.md
+  s_d37b6a93e8faa6::t_0fb43d082e1018 1-2,4-102
+  s_d37b6a93e8faa6::t_e0431c5606f929 3
+shared/assets/item_presentations.v0.json
+  s_d37b6a93e8faa6::t_84ebf180c91a42 36,42
+  s_d37b6a93e8faa6::t_94cac8d5f0c601 66,72,79-135
+  s_d37b6a93e8faa6::t_b09ec01849ee11 829
+  s_d37b6a93e8faa6::t_139b713b56f297 879-926
+  s_d37b6a93e8faa6::t_da2924e0614d8e 794,797,799,805
+tools/bot/scenarios/119_polearm_archetype_lab.json
+  s_d37b6a93e8faa6::t_1805ef16705591 1-5,7-8,18-48,50-60
+  s_d37b6a93e8faa6::t_e173623a13619b 49
+  s_d37b6a93e8faa6::t_c7c7f524a00c4f 6,9-12,14-17
+  s_d37b6a93e8faa6::t_22397bf748dc6f 13
+PROGRESS.md
+  s_d37b6a93e8faa6::t_9a4aeeb739b465 18
+  s_d37b6a93e8faa6::t_0763c6ea5a6c8f 26,28
+docs/plans/v410_2026-07-02-polearm-archetypes-and-family-icons.md
+  s_d37b6a93e8faa6::t_57335ba3add558 1-91
+shared/assets/item_visuals.v0.json
+  s_d37b6a93e8faa6::t_2f031ba484d60e 1038-1125
+shared/rules/treasure_classes.v0.json
+  s_d37b6a93e8faa6::t_754b1a624025dc 293-307,665-680,796-811,1029-1044,1160-1175,1291-1304
+shared/rules/item_templates.v0.json
+  s_d37b6a93e8faa6::t_a6664e93327aa0 2232
+  s_d37b6a93e8faa6::t_b24e034af10bc3 2696-2963,2965-3004
+  s_d37b6a93e8faa6::t_dfe7aee551f0f6 2964
+  s_d37b6a93e8faa6::t_4262263ccae316 2159
+server/internal/game/polearm_reach_test.go
+  s_d37b6a93e8faa6::t_9ec86d4ab051f4 1-4,27-28,30-45,47-53,55-69
+  s_d37b6a93e8faa6::t_5818829e4ca854 5-26,29,46,54
+docs/as-built/v410_polearm-archetypes-and-family-icons.md
+  s_d37b6a93e8faa6::t_0f9a2bd3593d47 1-23
+shared/assets/item_presentations.v0.schema.json
+  s_d37b6a93e8faa6::t_4483a7f65fcdc3 16,20
+scripts/client_smoke.sh
+  s_d37b6a93e8faa6::t_e8aea7a9cf9dd4 146
+docs/progress/slice-lifecycle.md
+  s_d37b6a93e8faa6::t_743e0fc5f3b142 420
+shared/rules/worlds.v0.json
+  s_d37b6a93e8faa6::t_897e92314e235d 1549-1562
+client/tests/test_item_icon_drawer.gd
+  s_d37b6a93e8faa6::t_b9f7b6054b6382 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7c33bbbb501cbb521d642ba5a751213665b4eb7a",
+  "prompts": {},
+  "sessions": {
+    "s_d37b6a93e8faa6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b3cf49ba-76f7-47c1-a41e-5bf1594a252a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

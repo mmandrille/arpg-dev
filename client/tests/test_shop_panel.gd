@@ -4,6 +4,7 @@ extends SceneTree
 
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
+const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
@@ -103,8 +104,8 @@ func _run() -> void:
 	var set_inventory_tooltip := set_inventory_panel._make_item_tooltip(set_item)
 	_assert_eq("inventory set tooltip name is rarity green", set_inventory_tooltip.debug_first_main_line_color(), "55e66f")
 	set_inventory_tooltip.queue_free()
-	_assert_eq("inventory set slot background is green", set_inventory_panel._item_slot_style("set", false).bg_color.to_html(false), "173f28")
-	_assert_eq("inventory set hover background stays green", set_inventory_panel._item_slot_style("set", true).bg_color.to_html(false), "335642")
+	_assert_eq("inventory set slot background is green", InventoryPanelStylesScript.item_slot_style("set", false).bg_color.to_html(false), "173f28")
+	_assert_eq("inventory set hover background stays green", InventoryPanelStylesScript.item_slot_style("set", true).bg_color.to_html(false), "335642")
 	set_inventory_panel.free()
 
 	panel.bot_click_buy_offer("fixed:red_potion")

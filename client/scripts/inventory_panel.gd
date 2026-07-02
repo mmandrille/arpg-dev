@@ -12,6 +12,7 @@ const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer_router.gd")
 const SetCollectionPanelScript := preload("res://scripts/set_collection_panel.gd")
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
+const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -41,13 +42,6 @@ const EQUIPMENT_LABELS := {
 	"off_hand": "Off"
 }
 const TOOLTIP_STAT_SEPARATOR := "----------------"
-const ITEM_RARITY_BACKGROUNDS := {
-	"common": Color("#343432"),
-	"magic": Color("#1b3458"),
-	"rare": Color("#5a4520"),
-	"unique": Color("#5a2f17"),
-	"set": Color("#173f28"),
-}
 const PAPER_DOLL_SLOT_POSITIONS := {
 	"head": Vector2(122, 10),
 	"amulet": Vector2(208, 40),
@@ -451,7 +445,7 @@ func _build() -> void:
 	_panel.configure("Inventory", Vector2(720, 396))
 	_reposition_panel()
 	_panel.set_layout_key("inventory")
-	_panel.add_theme_stylebox_override("panel", _panel_style())
+	_panel.add_theme_stylebox_override("panel", InventoryPanelStylesScript.panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.close_requested.connect(hide_display)
 	add_child(_panel)
@@ -485,7 +479,7 @@ func _build() -> void:
 	_paper_doll_preview.position = Vector2(124, 78)
 	_paper_doll_preview.custom_minimum_size = Vector2(92, 210)
 	_paper_doll_preview.size = _paper_doll_preview.custom_minimum_size
-	_paper_doll_preview.add_theme_stylebox_override("panel", _paper_doll_style())
+	_paper_doll_preview.add_theme_stylebox_override("panel", InventoryPanelStylesScript.paper_doll_style())
 	paper.add_child(_paper_doll_preview)
 	for slot in EQUIPMENT_SLOTS:
 		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), EQUIPMENT_SLOT_SIZE)
@@ -611,15 +605,15 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 			var slot_name := _slot_from_kind(slot.slot_kind)
 			slot.text = str(EQUIPMENT_LABELS.get(slot_name, slot_name))
 			slot.tooltip_text = "Empty %s" % str(EQUIPMENT_LABELS.get(slot_name, slot_name))
-			slot.add_theme_stylebox_override("normal", _empty_slot_style(false))
-			slot.add_theme_stylebox_override("hover", _empty_slot_style(true))
-			slot.add_theme_stylebox_override("pressed", _empty_slot_style(true))
+			slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.empty_slot_style(false))
+			slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.empty_slot_style(true))
+			slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.empty_slot_style(true))
 		else:
 			slot.text = ""
 			slot.tooltip_text = "Empty"
-			slot.add_theme_stylebox_override("normal", _slot_style(false))
-			slot.add_theme_stylebox_override("hover", _slot_style(true))
-			slot.add_theme_stylebox_override("pressed", _slot_style(true))
+			slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.slot_style(false))
+			slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.slot_style(true))
+			slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.slot_style(true))
 		slot.queue_redraw()
 		return
 	slot.text = ""
@@ -627,13 +621,13 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 	var rarity := str(item.get("rarity", "common"))
 	if bool(item.get("_blocked_by_two_handed", false)):
 		slot.tooltip_text = "%s occupies both hands" % str(item.get("display_name", item.get("item_def_id", "Two-handed item")))
-		slot.add_theme_stylebox_override("normal", _blocked_slot_style(false))
-		slot.add_theme_stylebox_override("hover", _blocked_slot_style(true))
-		slot.add_theme_stylebox_override("pressed", _blocked_slot_style(true))
+		slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.blocked_slot_style(false))
+		slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.blocked_slot_style(true))
+		slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.blocked_slot_style(true))
 	else:
-		slot.add_theme_stylebox_override("normal", _item_slot_style(rarity, false))
-		slot.add_theme_stylebox_override("hover", _item_slot_style(rarity, true))
-		slot.add_theme_stylebox_override("pressed", _item_slot_style(rarity, true))
+		slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.item_slot_style(rarity, false))
+		slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.item_slot_style(rarity, true))
+		slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.item_slot_style(rarity, true))
 	slot.queue_redraw()
 
 
@@ -644,9 +638,9 @@ func _slot_button(kind: String, size: Vector2) -> InventorySlotButton:
 	btn.custom_minimum_size = size
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.clip_text = true
-	btn.add_theme_stylebox_override("normal", _slot_style(false))
-	btn.add_theme_stylebox_override("hover", _slot_style(true))
-	btn.add_theme_stylebox_override("pressed", _slot_style(true))
+	btn.add_theme_stylebox_override("normal", InventoryPanelStylesScript.slot_style(false))
+	btn.add_theme_stylebox_override("hover", InventoryPanelStylesScript.slot_style(true))
+	btn.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.slot_style(true))
 	btn.add_theme_color_override("font_color", Color("#e8dcc8"))
 	btn.add_theme_font_size_override("font_size", SLOT_FONT_SIZE)
 	return btn
@@ -804,96 +798,6 @@ func _reposition_panel() -> void:
 		maxf(margin, viewport_size.x - panel_size.x - margin),
 		maxf(margin, viewport_size.y - panel_size.y - bottom_margin)
 	)
-
-
-func _panel_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.07, 0.06, 0.05, 0.92)
-	s.border_color = Color("#6b5420")
-	s.border_width_left = 2
-	s.border_width_top = 2
-	s.border_width_right = 2
-	s.border_width_bottom = 2
-	s.content_margin_left = 14
-	s.content_margin_top = 12
-	s.content_margin_right = 14
-	s.content_margin_bottom = 12
-	return s
-
-
-func _slot_style(hover: bool) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color("#3d2e10") if hover else Color("#0a0908")
-	s.border_color = Color("#8b6914") if hover else Color("#5c4a1f")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	s.content_margin_left = 4
-	s.content_margin_top = 4
-	s.content_margin_right = 4
-	s.content_margin_bottom = 4
-	return s
-
-
-func _item_slot_style(rarity: String, hover: bool) -> StyleBoxFlat:
-	var s := _slot_style(hover)
-	var base: Color = ITEM_RARITY_BACKGROUNDS.get(rarity.to_lower(), ITEM_RARITY_BACKGROUNDS["common"])
-	s.bg_color = base.lightened(0.12) if hover else base
-	s.border_color = base.lightened(0.46) if hover else base.lightened(0.28)
-	return s
-
-
-func _empty_slot_style(hover: bool) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color("#3a3a37") if hover else Color("#242422")
-	s.border_color = Color("#8a877d") if hover else Color("#5f5b52")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	s.content_margin_left = 4
-	s.content_margin_top = 4
-	s.content_margin_right = 4
-	s.content_margin_bottom = 4
-	return s
-
-
-func _blocked_slot_style(hover: bool) -> StyleBoxFlat:
-	var s := _empty_slot_style(hover)
-	s.bg_color = Color("#2f302f") if hover else Color("#202120")
-	s.border_color = Color("#96928a") if hover else Color("#6f6b64")
-	return s
-
-
-func _paper_doll_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color("#171715")
-	s.border_color = Color("#5f5b52")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	s.corner_radius_top_left = 8
-	s.corner_radius_top_right = 8
-	s.corner_radius_bottom_right = 8
-	s.corner_radius_bottom_left = 8
-	return s
-
-
-func _tooltip_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.07, 0.06, 0.05, 0.97)
-	s.border_color = Color("#8b6914")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	s.content_margin_left = 10
-	s.content_margin_top = 8
-	s.content_margin_right = 10
-	s.content_margin_bottom = 8
-	return s
 
 
 func _handle_double_click(item: Dictionary) -> void:

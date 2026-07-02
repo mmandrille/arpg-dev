@@ -1,0 +1,21 @@
+.maintainability/file-size-baseline.tsv
+  s_a344bbac4a9e2a::t_a7cd0d66a6d3d3 24
+docs/CODEMAP.md
+  s_a344bbac4a9e2a::t_3577e5eae70740 39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6e569367b96ce3f57dce95fc17b396d53bc0be68",
+  "prompts": {},
+  "sessions": {
+    "s_a344bbac4a9e2a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9932d75f-d265-4bc7-a837-bd7cc1a6fd0a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

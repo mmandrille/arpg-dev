@@ -1,0 +1,14 @@
+{
+  "curve": {
+    "safe_target_level_max": 1,
+    "level_anchors": [2, 10],
+    "failure_chance_percent_anchors": [10, 75]
+  },
+  "shard_bonus_percent_per_tier": 10,
+  "cases": [
+    { "current_level": 0, "shard_level": 1, "success_percent": 100 },
+    { "current_level": 1, "shard_level": 1, "success_percent": 90 },
+    { "current_level": 9, "shard_level": 9, "success_percent": 25 },
+    { "current_level": 9, "shard_level": 12, "success_percent": 55 }
+  ]
+}

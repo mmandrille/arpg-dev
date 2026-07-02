@@ -1508,7 +1508,7 @@ func (s *Store) UpgradeAccountStashItem(ctx context.Context, accountID, stashIte
 }
 
 func (s *Store) UpgradeAccountStashItemWithShard(ctx context.Context, accountID, characterID, stashItemID string, chargedCost, maxLevel, successChancePercent, successRoll, pityFailureThreshold, minShardLevel int, eligibleItemDefs map[string]struct{}, upgradeOpts game.ItemUpgradeOptions, preferredShardCharacterItemID string) (AccountStashItem, int, int, int, bool, error) {
-	if chargedCost < 0 || maxLevel <= 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 || pityFailureThreshold < 0 || minShardLevel < 1 {
+	if chargedCost < 0 || successChancePercent < 0 || successChancePercent > 100 || successRoll < 1 || successRoll > 100 || pityFailureThreshold < 0 || minShardLevel < 1 {
 		return AccountStashItem{}, 0, 0, 0, false, ErrConflict
 	}
 	var out AccountStashItem

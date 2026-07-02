@@ -13,17 +13,24 @@ type ItemUpgradeOptions struct {
 }
 
 // EffectiveItemUpgradeMaxLevel returns the lowest allowed cap from config and depth progression.
+// When configMaxLevel is 0, only depthMaxLevel gates upgrades. A depthMaxLevel below 1 means no depth cap.
+// When configMaxLevel is positive and depthMaxLevel is unset, config alone gates upgrades.
 func EffectiveItemUpgradeMaxLevel(configMaxLevel, depthMaxLevel int) int {
-	maxLevel := configMaxLevel
-	if depthMaxLevel > 0 && (maxLevel <= 0 || depthMaxLevel < maxLevel) {
-		maxLevel = depthMaxLevel
+	if configMaxLevel <= 0 {
+		if depthMaxLevel < 1 {
+			return 1_000_000
+		}
+
+		return depthMaxLevel
+	}
+	if depthMaxLevel < 1 {
+		return configMaxLevel
+	}
+	if depthMaxLevel < configMaxLevel {
+		return depthMaxLevel
 	}
 
-	if maxLevel < 1 {
-		return 1
-	}
-
-	return maxLevel
+	return configMaxLevel
 }
 
 // UpgradeRolledStatsJSON increments item level and rescales durable rolled stats JSON.

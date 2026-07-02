@@ -1,6 +1,7 @@
 class_name BlacksmithUpgradePreview
 extends RefCounted
 
+const BlacksmithUpgradeChanceScript := preload("res://scripts/blacksmith_upgrade_chance.gd")
 
 static func item_level(item: Dictionary) -> int:
 	var rolled = item.get("rolled_stats", {})
@@ -23,6 +24,19 @@ static func shard_level(item: Dictionary) -> int:
 		return 1
 
 	return maxi(1, rolled_payload_item_level(rolled as Dictionary))
+
+
+static func effective_success_chance_for_item(current_level: int, shard_level: int, min_shard_level: int, curve: Dictionary, shard_bonus_percent_per_tier: int, fallback_percent: int) -> int:
+	if curve.is_empty():
+		return fallback_percent
+
+	return BlacksmithUpgradeChanceScript.effective_success_percent(
+		current_level,
+		shard_level,
+		min_shard_level,
+		curve,
+		shard_bonus_percent_per_tier
+	)
 
 
 static func upgrade_sell_price(item: Dictionary) -> int:
@@ -74,10 +88,23 @@ static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	var deepest_depth: int = int(context.get("deepest_dungeon_depth", 0))
 	var levels_per_tier: int = maxi(1, int(context.get("item_level_levels_per_tier", 10)))
 	var depth_cap: int = _max_item_level_for_depth(deepest_depth, levels_per_tier)
+	var level := item_level(item)
 	var effective_max: int = max_level
-	if depth_cap > 0:
+	if max_level <= 0:
+		effective_max = depth_cap if depth_cap > 0 else 1_000_000
+	elif depth_cap > 0:
 		effective_max = mini(max_level, depth_cap)
 	var success_chance_percent := int(context.get("success_chance_percent", 100))
+	if context.has("failure_curve"):
+		var min_shard := int(context.get("resource_required_level", maxi(1, level)))
+		var shard_level := int(context.get("staged_shard_level", min_shard))
+		success_chance_percent = BlacksmithUpgradeChanceScript.effective_success_percent(
+			level,
+			shard_level,
+			min_shard,
+			context.get("failure_curve", {}),
+			int(context.get("shard_bonus_percent_per_tier", 0))
+		)
 	var pity_failure_threshold := int(context.get("pity_failure_threshold", 0))
 	var resource_count := int(context.get("resource_count", 0))
 	var wallet_gold := int(context.get("wallet_gold", 0))
@@ -85,7 +112,6 @@ static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	var resource_name := str(context.get("resource_name", "resource"))
 	var base_cost := int(context.get("base_cost", 0))
 	var growth_cost := int(context.get("growth_cost", 0))
-	var level := item_level(item)
 	var resource_required_level := int(context.get("resource_required_level", maxi(1, level)))
 	var cost := next_cost(item, base_cost, growth_cost)
 	var lines: Array = []
@@ -93,15 +119,28 @@ static func preview_lines(item: Dictionary, context: Dictionary) -> Array:
 	if stats.is_empty():
 		stats = _stats_map(item)
 	if level >= effective_max:
-		if depth_cap > 0 and level >= depth_cap and level < max_level:
+		if depth_cap > 0 and level >= depth_cap and (max_level <= 0 or level < max_level):
 			return ["Reach deeper dungeon depth to upgrade further"]
 		return ["Max level reached"]
 	var guaranteed := pity_guaranteed(item, pity_failure_threshold)
+	var base_success := success_chance_percent
+	if context.has("failure_curve"):
+		var min_shard := int(context.get("resource_required_level", maxi(1, level)))
+		var shard_level := int(context.get("staged_shard_level", min_shard))
+		var failure_curve: Dictionary = context.get("failure_curve", {})
+		var target_level := BlacksmithUpgradeChanceScript.upgrade_target_level(level)
+		var base_failure := BlacksmithUpgradeChanceScript.failure_chance_percent(target_level, failure_curve)
+		base_success = 100 - base_failure
+		var shard_bonus := maxi(0, success_chance_percent - base_success)
+		lines.append("Base success: %d%%" % base_success)
+		if shard_bonus > 0:
+			lines.append("Shard bonus: +%d%%" % shard_bonus)
 	lines.append("Success chance: %d%%" % success_chance_percent)
 	if pity_failure_threshold > 0:
 		lines.append("Next upgrade guaranteed" if guaranteed else "Pity: %d/%d failures" % [pity_failure_count(item), pity_failure_threshold])
 	lines.append("On success: Level %d -> %d" % [level, mini(effective_max, level + 1)])
 	lines.append("Stats rescale to the next item tier")
+	_append_requirements_preview(lines, item)
 	if _failure_possible(success_chance_percent, guaranteed):
 		lines.append(_failure_line(item, pity_failure_threshold))
 	lines.append(_spend_line(cost, resource_count, resource_name, resource_required_level))
@@ -116,10 +155,45 @@ static func _failure_possible(success_chance_percent: int, guaranteed: bool) -> 
 
 static func _failure_line(item: Dictionary, pity_failure_threshold: int) -> String:
 	if pity_failure_threshold <= 0:
-		return "On failure: item unchanged"
+		return "On failure: item unchanged; shard consumed"
 	var current := pity_failure_count(item)
 	var next: int = mini(pity_failure_threshold, current + 1)
-	return "On failure: item unchanged; pity %d -> %d failures" % [current, next]
+	return "On failure: item unchanged; shard consumed; pity %d -> %d failures" % [current, next]
+
+
+static func _append_requirements_preview(lines: Array, item: Dictionary) -> void:
+	var requirements := _requirements_map(item)
+	if requirements.is_empty():
+		lines.append("Requirements increase on success")
+		return
+	var parts: Array = []
+	for key in _ordered_requirement_keys(requirements):
+		parts.append("%s %d" % [_display_stat(str(key)), int(requirements.get(key, 0))])
+	lines.append("Current requirements: %s" % ", ".join(parts))
+	lines.append("Requirements increase on success")
+
+
+static func _requirements_map(item: Dictionary) -> Dictionary:
+	if item.has("requirements") and typeof(item.get("requirements")) == TYPE_DICTIONARY:
+		return item.get("requirements") as Dictionary
+	var rolled: Variant = item.get("rolled_stats", {})
+	if typeof(rolled) != TYPE_DICTIONARY:
+		return {}
+	var payload := rolled as Dictionary
+	if payload.has("requirements") and typeof(payload.get("requirements")) == TYPE_DICTIONARY:
+		return payload.get("requirements") as Dictionary
+	return {}
+
+
+static func _ordered_requirement_keys(requirements: Dictionary) -> Array:
+	var out: Array = []
+	for key in ["level", "str", "dex", "vit", "magic"]:
+		if requirements.has(key):
+			out.append(key)
+	for key in requirements.keys():
+		if not out.has(str(key)):
+			out.append(str(key))
+	return out
 
 
 static func _spend_line(cost: int, resource_count: int, resource_name: String, resource_required_level: int) -> String:

@@ -243,7 +243,6 @@ func (s *Server) upgradeAccountStashItem(w http.ResponseWriter, r *http.Request,
 func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID string, characterID string, stashItemID string, recipeID string, preferredShardCharacterItemID string) (store.AccountStashItem, int, int, int, bool, error) {
 	eligible := s.eligibleBlacksmithItemDefs(recipeID)
 	maxLevel := s.rules.MainConfig.Gameplay.ItemUpgradeMaxLevel
-	chance := s.rules.MainConfig.Gameplay.ItemUpgradeSuccessPct
 	pityFailures := s.rules.MainConfig.Gameplay.ItemUpgradePityFailures
 	roll, err := upgradeSuccessRoll()
 	if err != nil {
@@ -275,6 +274,17 @@ func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID st
 		return store.AccountStashItem{}, 0, 0, 0, false, err
 	}
 	minShardLevel := game.UpgradeShardMinLevel(currentLevel)
+	shardLevel := minShardLevel
+	if preferredShardCharacterItemID != "" && characterID != "" {
+		inventoryItems, listErr := s.store.ListCharacterItems(r.Context(), accountID, characterID)
+		if listErr != nil {
+			return store.AccountStashItem{}, 0, 0, 0, false, listErr
+		}
+		if resolved, ok := resolvePreferredUpgradeShardLevel(inventoryItems, preferredShardCharacterItemID, minShardLevel); ok {
+			shardLevel = resolved
+		}
+	}
+	chance := game.EffectiveUpgradeSuccessPercent(currentLevel, shardLevel, minShardLevel, s.itemUpgradeChanceRules())
 
 	item, characterGold, stashGold, chargedCost, success, err := s.store.UpgradeAccountStashItemWithShard(
 		r.Context(), accountID, characterID, stashItemID,
@@ -302,6 +312,34 @@ func (s *Server) itemUpgradeOptions(r *http.Request, accountID, characterID stri
 	opts.MaxItemLevelDepth = game.MaxItemLevelForDepth(prog.DeepestDungeonDepth, opts.Tiers)
 
 	return opts
+}
+
+func (s *Server) itemUpgradeChanceRules() game.ItemUpgradeChanceRules {
+	if s.rules == nil {
+		return game.ItemUpgradeChanceRules{}
+	}
+	gameplay := s.rules.MainConfig.Gameplay
+
+	return game.ItemUpgradeChanceRules{
+		FailureCurve:                    gameplay.ItemUpgradeFailureCurve,
+		ShardSuccessBonusPercentPerTier: gameplay.ItemUpgradeShardSuccessBonusPercentPerTier,
+	}
+}
+
+func resolvePreferredUpgradeShardLevel(items []store.CharacterItemInstance, preferredID string, minLevel int) (int, bool) {
+	for _, item := range items {
+		if item.ID != preferredID || item.ItemDefID != game.UpgradeShardItemDefID {
+			continue
+		}
+		level, err := game.LeveledConsumableLevelFromRaw(item.ItemDefID, item.RolledStats)
+		if err != nil || level < minLevel {
+			return 0, false
+		}
+
+		return level, true
+	}
+
+	return 0, false
 }
 
 func (s *Server) decodeUpgradeRecipeID(w http.ResponseWriter, r *http.Request) (string, bool) {

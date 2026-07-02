@@ -181,6 +181,7 @@ run_gate "GDScript shop panel test" "[gdtest] PASS: test_shop_panel" res://tests
 run_gate "GDScript class affinity tooltip test" "[gdtest] PASS: test_class_affinity_tooltip" res://tests/test_class_affinity_tooltip.gd
 run_gate "GDScript shop tooltip stability test" "[gdtest] PASS: test_shop_tooltip_stability" res://tests/test_shop_tooltip_stability.gd
 run_gate "GDScript blacksmith panel test" "[gdtest] PASS: test_blacksmith_panel" res://tests/test_blacksmith_panel.gd
+run_gate "GDScript blacksmith upgrade chance test" "[gdtest] PASS: test_blacksmith_upgrade_chance" res://tests/test_blacksmith_upgrade_chance.gd
 run_gate "GDScript set collection panel test" "[gdtest] PASS: test_set_collection_panel" res://tests/test_set_collection_panel.gd
 run_gate "GDScript mercenary panel test" "[gdtest] PASS: test_mercenary_panel" res://tests/test_mercenary_panel.gd
 

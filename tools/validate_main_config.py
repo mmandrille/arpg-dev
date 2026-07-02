@@ -47,8 +47,8 @@ def validate_main_config_gameplay(
 
     if int(main_gameplay.get("item_upgrade_cost_gold", -1)) < 0:
         report.fail("main_config gameplay", "item_upgrade_cost_gold must be non-negative")
-    elif int(main_gameplay.get("item_upgrade_max_level", 0)) <= 0:
-        report.fail("main_config gameplay", "item_upgrade_max_level must be positive")
+    elif int(main_gameplay.get("item_upgrade_max_level", -1)) < 0:
+        report.fail("main_config gameplay", "item_upgrade_max_level must be non-negative")
     else:
         report.ok("main_config gameplay owns starter item upgrade tuning")
 

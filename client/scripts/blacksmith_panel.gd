@@ -13,6 +13,7 @@ const BlacksmithRecipesScript := preload("res://scripts/blacksmith_recipes.gd")
 const BlacksmithShardInventoryScript := preload("res://scripts/blacksmith_shard_inventory.gd")
 const BlacksmithMergePanelScript := preload("res://scripts/blacksmith_merge_panel.gd")
 const BlacksmithPanelActionsScript := preload("res://scripts/blacksmith_panel_actions.gd")
+const BlacksmithUpgradeChanceScript := preload("res://scripts/blacksmith_upgrade_chance.gd")
 const BlacksmithItemCraftSlotScript := preload("res://scripts/blacksmith_item_craft_slot.gd")
 const BlacksmithResourceCraftSlotScript := preload("res://scripts/blacksmith_resource_craft_slot.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
@@ -31,6 +32,8 @@ var growth_cost: int = 50
 var max_level: int = 3
 var success_chance_percent: int = 100
 var pity_failure_threshold: int = 0
+var failure_curve: Dictionary = {}
+var shard_bonus_percent_per_tier: int = 0
 var resource_item_def_id: String = ""
 var resource_count: int = 0
 var resource_wallet: Dictionary = {}
@@ -73,6 +76,8 @@ func show_blacksmith(entity_id: String, next_stash_items: Array, next_gold: int,
 	max_level = int(config.get("item_upgrade_max_level", max_level))
 	success_chance_percent = int(config.get("item_upgrade_success_chance_percent", success_chance_percent))
 	pity_failure_threshold = int(config.get("item_upgrade_pity_failure_threshold", 0))
+	failure_curve = config.get("item_upgrade_failure_curve", failure_curve).duplicate(true) if typeof(config.get("item_upgrade_failure_curve", {})) == TYPE_DICTIONARY else {}
+	shard_bonus_percent_per_tier = int(config.get("item_upgrade_shard_success_bonus_percent_per_tier", shard_bonus_percent_per_tier))
 	resource_item_def_id = str(config.get("item_upgrade_resource_item_def_id", ""))
 	resource_count = int(config.get("item_upgrade_resource_count", 0))
 	deepest_dungeon_depth = int(config.get("deepest_dungeon_depth", deepest_dungeon_depth))
@@ -128,6 +133,7 @@ func bot_stage_item(stash_item_id: String = "", item_def_id: String = "", stash_
 		show_status("No matching inventory item", true)
 		return
 	stage_inventory_item(item)
+	_auto_stage_resource_for_recipe()
 	_auto_stage_resource_for_recipe()
 
 
@@ -210,7 +216,7 @@ func get_debug_state() -> Dictionary:
 		"gold": gold,
 		"stash_gold": stash_gold,
 		"wallet_gold": _wallet_gold(),
-		"success_chance_percent": success_chance_percent,
+		"success_chance_percent": _upgrade_success_chance(staged_item),
 		"pity_failure_count": BlacksmithUpgradePreviewScript.pity_failure_count(staged_item),
 		"pity_threshold": pity_failure_threshold,
 		"pity_guaranteed": _pity_guaranteed(staged_item),
@@ -656,6 +662,9 @@ func _upgrade_preview_lines(item: Dictionary) -> Array:
 		"deepest_dungeon_depth": deepest_dungeon_depth,
 		"item_level_levels_per_tier": item_level_levels_per_tier,
 		"success_chance_percent": success_chance_percent,
+		"failure_curve": failure_curve,
+		"shard_bonus_percent_per_tier": shard_bonus_percent_per_tier,
+		"staged_shard_level": BlacksmithUpgradeChanceScript.staged_shard_level(staged_resource, _recipe_resource_item_def_id(), _required_shard_level(item)),
 		"pity_failure_threshold": pity_failure_threshold,
 		"resource_count": resource_count,
 		"resource_inventory_count": 1 if _has_action_resource(item) else 0,
@@ -674,7 +683,19 @@ func _recipe_preview_lines(item: Dictionary, context: Dictionary) -> Array:
 
 
 func _recipe_options() -> Array:
-	return BlacksmithRecipesScript.options(success_chance_percent, max_level)
+	return BlacksmithRecipesScript.options(_upgrade_success_chance(staged_item), max_level)
+
+
+func _upgrade_success_chance(item: Dictionary) -> int:
+	return BlacksmithUpgradeChanceScript.panel_success_chance(
+		_item_level(item),
+		staged_resource,
+		_recipe_resource_item_def_id(),
+		_required_shard_level(item),
+		failure_curve,
+		shard_bonus_percent_per_tier,
+		success_chance_percent
+	)
 
 
 func _selected_recipe_label() -> String:

@@ -106,11 +106,18 @@ static func max_item_level_for_deepest_depth(ctx: Dictionary) -> int:
 
 
 static func effective_max_level(ctx: Dictionary) -> int:
-	var effective_max: int = int(ctx.get("max_level", 1))
+	var config_max: int = int(ctx.get("max_level", 1))
 	var depth_cap := max_item_level_for_deepest_depth(ctx)
-	if depth_cap > 0:
-		effective_max = mini(effective_max, depth_cap)
-	return effective_max
+	if config_max <= 0:
+		if depth_cap < 1:
+			return 1_000_000
+		return depth_cap
+	if depth_cap < 1:
+		return config_max
+	if depth_cap < config_max:
+		return depth_cap
+
+	return config_max
 
 
 static func wallet_gold(ctx: Dictionary) -> int:

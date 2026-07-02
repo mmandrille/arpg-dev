@@ -1,0 +1,35 @@
+client/scripts/inventory_panel.gd
+  s_468512adab21b7::t_eb09a5a54e7efb 624-626
+  s_468512adab21b7::t_d6a1eafa7cfbcb 614-616
+  s_468512adab21b7::t_1bdc12a262bfdd 608-610
+  s_468512adab21b7::t_ad1c38969ca36b 15
+  s_468512adab21b7::t_89423ca0c33ca8 482
+  s_468512adab21b7::t_21c8882704bbb3 448
+  s_468512adab21b7::t_3e31dd9a88b923 628-630
+  s_468512adab21b7::t_7ef42b1e269a0e 641-643
+.maintainability/file-size-baseline.tsv
+  s_468512adab21b7::t_2b2e7c890caf13 9
+client/scripts/inventory_panel_styles.gd
+  s_468512adab21b7::t_a67ee6a3ab07ba 1-85
+client/tests/test_shop_panel.gd
+  s_468512adab21b7::t_598d0cefa32b57 7
+  s_468512adab21b7::t_88ec816bfef58b 107-108
+docs/CODEMAP.md
+  s_468512adab21b7::t_c47395771d1178 39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "723e51410a975c8256330ae820715303d530abbe",
+  "prompts": {},
+  "sessions": {
+    "s_468512adab21b7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7f989d29-ee64-42cc-a12e-1ea1b96bf844",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

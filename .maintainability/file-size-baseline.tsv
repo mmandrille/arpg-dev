@@ -21,7 +21,7 @@ server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: inter
 server/internal/game/rules.go	3112	# v401: baseline sync to current rules.go line count (no v401 logic edits)
 server/internal/game/shop.go	1118
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6542	# v391: resource loot drop hook dispatch in dropLoot/chest paths
+server/internal/game/sim.go	6571	# v403/ci: skill_id on projectile skill damage events (3a8bd28f)
 server/internal/game/types.go	665
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482

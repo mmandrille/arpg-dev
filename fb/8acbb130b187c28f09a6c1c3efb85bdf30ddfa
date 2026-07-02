@@ -1,0 +1,27 @@
+client/scripts/bishop_loot_debug_panel.gd
+  s_cc2e936dda200a::t_a2e435fdd10739 91
+  s_cc2e936dda200a::t_a8992f1a4302f0 78-79
+  s_cc2e936dda200a::t_6c80ff23886b6e 19,22-23
+  s_cc2e936dda200a::t_6fbfae3d8c5208 164-168,170
+  s_cc2e936dda200a::t_3fc1b67d839980 174,178,181,183,186-187,190,193-195
+  s_cc2e936dda200a::t_7c6b2bbd4bbf2b 321-338,346-357,365
+  s_cc2e936dda200a::t_7b2c0d8ffd1b04 198-199
+  s_cc2e936dda200a::t_2fe4d09c524ae4 204,206,211-214,218-221,225,229-230
+  s_cc2e936dda200a::t_d7df1d2074a2de 136-142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fb8acbb130b187c28f09a6c1c3efb85bdf30ddfa",
+  "prompts": {},
+  "sessions": {
+    "s_cc2e936dda200a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "287571cf-33dd-4f41-8ab1-08b801bb46b2",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

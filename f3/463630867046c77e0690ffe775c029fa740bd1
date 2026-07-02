@@ -1,0 +1,55 @@
+client/tests/test_shop_panel.gd
+  s_f902c1dbe15187::t_35c94a9148a0d3 247-248
+  s_f4c58ae955b30e::t_5714a4e4f203ec 266-291
+  s_f4c58ae955b30e::t_c4844504a923dd 558-564
+  s_f902c1dbe15187::t_fbeeacfa3dd12e 262
+  s_f902c1dbe15187::t_b0dec112692d90 9
+client/scripts/inventory_panel.gd
+  s_f4c58ae955b30e::t_8e7133b8d48c50 968
+  s_f4c58ae955b30e::t_778386adabc9bf 18
+  s_f4c58ae955b30e::t_4e8bed7e636b0a 976-978
+  s_f902c1dbe15187::t_2cbe99481eb5a6 979
+  s_f902c1dbe15187::t_6b3a406641a598 1000,1004
+client/scripts/shop_panel.gd
+  s_f4c58ae955b30e::t_52b8cc19cd956e 14
+  s_f902c1dbe15187::t_eb2379df3dd827 772
+  s_f4c58ae955b30e::t_5058481e4e4b04 768-771
+client/scripts/stat_labels.gd
+  s_f4c58ae955b30e::t_89ef00e734a9e1 28-29
+  s_f4c58ae955b30e::t_7cf4f29936e87e 40
+client/scripts/item_tooltip_stat_sections.gd
+  s_f902c1dbe15187::t_bb5f0c430eefa9 7-8
+  s_f4c58ae955b30e::t_ffd65224548f63 1-6,9-35,39-52,54-56,59,76-77,79-83,85-145
+  s_f4c58ae955b30e::t_b6515fe4d70ef1 36-38,53,57-58,60-61,63-65,67-75,78
+  s_f4c58ae955b30e::t_e31d2bfcde2c7e 66
+  s_f4c58ae955b30e::t_1fe06c7260d9e2 84
+  s_f4c58ae955b30e::t_a456be5231a14d 62
+client/scripts/stash_panel.gd
+  s_f902c1dbe15187::t_86ea74af316c59 971
+  s_f4c58ae955b30e::t_49b759fc33bc3a 962-965,972
+  s_f4c58ae955b30e::t_ab08bfb817422c 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f3463630867046c77e0690ffe775c029fa740bd1",
+  "prompts": {},
+  "sessions": {
+    "s_f4c58ae955b30e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f27a1ee3-3bd7-4be7-9105-dc93eeaa7365",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_f902c1dbe15187": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b55d2564-ae02-4be2-9d6e-130df5199401",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

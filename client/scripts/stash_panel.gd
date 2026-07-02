@@ -11,6 +11,7 @@ const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.
 const UniqueChestTabsScript := preload("res://scripts/unique_chest_tabs.gd")
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
+const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
 const PANEL_SIZE := Vector2(390, 520)
 const COLUMNS := 5
 const STASH_VISIBLE_ROWS := 6
@@ -959,7 +960,9 @@ func _tooltip_lines(row: Dictionary) -> Array:
 		lines.append({"text": "Rarity: %s" % rarity.capitalize(), "color": Color("#cdbd9f"), "font_size": DETAIL_FONT_SIZE})
 	var summary = row.get("summary_lines", [])
 	if typeof(summary) == TYPE_ARRAY:
-		for line in _compact_metadata_lines(summary):
+		var summary_lines: Array = summary.duplicate()
+		WeaponRangeTooltipScript.ensure_after_slot(summary_lines, row)
+		for line in _compact_metadata_lines(summary_lines):
 			var text := str(line)
 			if typeof(line) == TYPE_DICTIONARY:
 				text = str((line as Dictionary).get("text", ""))
@@ -969,6 +972,7 @@ func _tooltip_lines(row: Dictionary) -> Array:
 		var slot := str(row.get("slot", ""))
 		if slot != "":
 			lines.append("Slot: %s" % slot)
+		WeaponRangeTooltipScript.ensure_after_slot(lines, row)
 		lines.append_array(_stat_lines(row.get("rolled_stats", {})))
 		var req = row.get("requirements", {})
 		if typeof(req) == TYPE_DICTIONARY and int((req as Dictionary).get("level", 0)) > 0:
@@ -980,7 +984,7 @@ func _compact_metadata_lines(lines: Array) -> Array:
 	var out: Array = []
 	for line in lines:
 		var text := str(line)
-		if text.begins_with("Slot:"):
+		if WeaponRangeTooltipScript.is_weapon_metadata_line(text):
 			out.append({"text": text, "color": Color("#cdbd9f"), "font_size": DETAIL_FONT_SIZE})
 		elif text.begins_with("Set:"):
 			out.append_array(_set_membership_tooltip_lines(text))

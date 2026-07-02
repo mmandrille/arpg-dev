@@ -5448,7 +5448,7 @@ func (s *Sim) stashItemView(item *stashItem) StashItemView {
 		})
 	}
 	if previewItem := item.previewItem(); previewItem != nil {
-		view.SummaryLines = s.itemSummaryLines("", viewSlotForSummary(previewItem, view.ItemTemplateID, s.rules), s.itemHandedness(previewItem), s.statsForInventoryItem(previewItem), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]))
+		view.SummaryLines = s.itemSummaryLines("", viewSlotForSummary(previewItem, view.ItemTemplateID, s.rules), s.itemHandedness(previewItem), s.statsForInventoryItem(previewItem), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(previewItem, view.ItemTemplateID))
 		view.SummaryLines = append(view.SummaryLines, s.setItemSummaryLines(previewItem)...)
 		if preview := s.equipPreviewForItem(previewItem, ""); preview != nil {
 			view.EquipPreview = preview
@@ -5484,7 +5484,7 @@ func (s *Sim) annotateItemView(view *ItemView, item *invItem) {
 	if item == nil {
 		return
 	}
-	view.SummaryLines = s.itemSummaryLines("", view.Slot, s.itemHandedness(item), s.statsForInventoryItem(item), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]))
+	view.SummaryLines = s.itemSummaryLines("", view.Slot, s.itemHandedness(item), s.statsForInventoryItem(item), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(item, view.ItemTemplateID))
 	view.SummaryLines = append(view.SummaryLines, s.setItemSummaryLines(item)...)
 	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
 		view.RequirementStatus = status

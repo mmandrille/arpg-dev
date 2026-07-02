@@ -92,7 +92,7 @@ func (s *Sim) fixedShopOffers(shop ShopDef) []ShopOfferView {
 			Slot:         item.Slot,
 			Category:     item.Category,
 			BuyPrice:     offer.BuyPrice,
-			SummaryLines: s.itemSummaryLines(item.Category, item.Slot, item.Handedness, stats, nil, &item),
+			SummaryLines: s.itemSummaryLines(item.Category, item.Slot, item.Handedness, stats, nil, &item, ""),
 			Comparison:   s.shopComparisonForItem(item.Slot, stats),
 		}
 		s.annotateShopOfferView(&view, &invItem{instanceID: previewItemInstanceID(), itemDefID: offer.ItemDefID})
@@ -164,7 +164,7 @@ func (s *Sim) generatedShopOffers(shopID string, shop ShopDef, characterID strin
 				Requirements:   cloneIntMap(payload.Requirements),
 				EffectIDs:      cloneStringSlice(payload.EffectIDs),
 				BuyPrice:       buyPrice,
-				SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, template.Handedness, stats, payload.Requirements, nil),
+				SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, template.Handedness, stats, payload.Requirements, nil, templateID),
 				Comparison:     s.shopComparisonForItem(template.Slot, stats),
 				Source:         gen.Source,
 				Depth:          depth,
@@ -443,7 +443,7 @@ func (s *Sim) shopOfferViewFromGeneratedStock(shop ShopDef, row *shopStockItem) 
 		Requirements:   cloneIntMap(row.Payload.Requirements),
 		EffectIDs:      cloneStringSlice(row.Payload.EffectIDs),
 		BuyPrice:       row.BuyPrice,
-		SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, template.Handedness, stats, row.Payload.Requirements, nil),
+		SummaryLines:   s.itemSummaryLines(template.Category, template.Slot, template.Handedness, stats, row.Payload.Requirements, nil, row.ItemTemplateID),
 		Comparison:     s.shopComparisonForItem(template.Slot, stats),
 		Source:         shop.GeneratedOffers.Source,
 		Depth:          row.SourceDepth,
@@ -603,7 +603,7 @@ func (s *Sim) shopSellAppraisalView(item *invItem, sellPrice int) ShopSellApprai
 		EquipPreview:        view.EquipPreview,
 		EffectIDs:         view.EffectIDs,
 		SellPrice:         sellPrice,
-		SummaryLines:      s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID])),
+		SummaryLines:      s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(item, view.ItemTemplateID)),
 		Comparison:        s.shopComparisonForItem(view.Slot, stats),
 	}
 }
@@ -643,7 +643,7 @@ func (s *Sim) shopOfferViewFromBuyback(row *shopBuybackItem) (ShopOfferView, boo
 		EquipPreview:      view.EquipPreview,
 		EffectIDs:         view.EffectIDs,
 		BuyPrice:          row.BuyPrice,
-		SummaryLines:      s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID])),
+		SummaryLines:      s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(item, view.ItemTemplateID)),
 		Comparison:        s.shopComparisonForItem(view.Slot, stats),
 	}
 	return offer, true
@@ -760,12 +760,18 @@ func itemDefPtr(item ItemDef) *ItemDef {
 	return &item
 }
 
-func (s *Sim) itemSummaryLines(category, slot, handedness string, stats map[string]int, requirements map[string]int, fixed *ItemDef) []string {
+func (s *Sim) itemSummaryLines(category, slot, handedness string, stats map[string]int, requirements map[string]int, fixed *ItemDef, templateID string) []string {
 	lines := []string{}
 	if slot != "" {
 		lines = append(lines, fmt.Sprintf("Slot: %s", displayEquipmentSlotName(slot, handedness)))
 	} else if category != "" {
 		lines = append(lines, fmt.Sprintf("Kind: %s", displayStatName(category)))
+	}
+	if reach, ok := summaryWeaponReach(s.rules, fixed, templateID); ok {
+		lines = append(lines, displayWeaponRangeTiles(reach, s.rules.Navigation.CellSize))
+	}
+	if speed, ok := summaryWeaponProjectileSpeed(s.rules, fixed, templateID); ok {
+		lines = append(lines, displayWeaponProjectileSpeed(speed))
 	}
 	if fixed != nil {
 		if fixed.Heal != nil {
@@ -834,6 +840,67 @@ func displayRange(r DamageRange) string {
 		return fmt.Sprintf("%d", r.Min)
 	}
 	return fmt.Sprintf("%d-%d", r.Min, r.Max)
+}
+
+func templateIDForSummary(item *invItem, viewTemplateID string) string {
+	if viewTemplateID != "" {
+		return viewTemplateID
+	}
+	if item != nil && item.rollPayload != nil {
+		return item.rollPayload.ItemTemplateID
+	}
+	return ""
+}
+
+func summaryWeaponReach(rules *Rules, fixed *ItemDef, templateID string) (float64, bool) {
+	if templateID != "" {
+		template, ok := rules.ItemTemplates[templateID]
+		if ok && template.Reach > 0 {
+			return template.Reach, true
+		}
+	}
+	if fixed != nil && fixed.Reach != nil && *fixed.Reach > 0 {
+		return *fixed.Reach, true
+	}
+	return 0, false
+}
+
+func displayWeaponRangeTiles(reach, cellSize float64) string {
+	if cellSize <= 0 {
+		cellSize = 1.0
+	}
+	tiles := reach / cellSize
+	rounded := math.Round(tiles)
+	if math.Abs(tiles-rounded) < 0.05 {
+		count := int(rounded)
+		unit := "tiles"
+		if count == 1 {
+			unit = "tile"
+		}
+		return fmt.Sprintf("Range: %d %s", count, unit)
+	}
+	return fmt.Sprintf("Range: %.1f tiles", tiles)
+}
+
+func summaryWeaponProjectileSpeed(rules *Rules, fixed *ItemDef, templateID string) (float64, bool) {
+	if templateID != "" {
+		template, ok := rules.ItemTemplates[templateID]
+		if ok && template.ProjectileSpeed > 0 {
+			return template.ProjectileSpeed, true
+		}
+	}
+	if fixed != nil && fixed.ProjectileSpeed != nil && *fixed.ProjectileSpeed > 0 {
+		return *fixed.ProjectileSpeed, true
+	}
+	return 0, false
+}
+
+func displayWeaponProjectileSpeed(speed float64) string {
+	rounded := math.Round(speed)
+	if math.Abs(speed-rounded) < 0.05 {
+		return fmt.Sprintf("Projectile speed: %d tiles/s", int(rounded))
+	}
+	return fmt.Sprintf("Projectile speed: %.1f tiles/s", speed)
 }
 
 func (s *Sim) shopComparisonForItem(slot string, stats map[string]int) *ShopComparisonView {

@@ -10,6 +10,7 @@ const MysterySilhouetteDrawer := preload("res://scripts/mystery_silhouette_drawe
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
+const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
 const PANEL_SIZE := Vector2(360, 680)
 const VENDOR_COLUMNS := 5
 const VENDOR_ROWS := 10
@@ -762,7 +763,9 @@ func _tooltip_lines(row: Dictionary) -> Array:
 	var lines: Array = [_item_name_tooltip_line(_offer_name(row), rarity)]
 	if rarity != "":
 		lines.append(_metadata_tooltip_line("Rarity: %s" % rarity.capitalize()))
-	lines.append_array(_compact_metadata_lines(_detail_lines(row, false, false)))
+	var detail_lines := _detail_lines(row, false, false)
+	WeaponRangeTooltipScript.ensure_after_slot(detail_lines, row)
+	lines.append_array(_compact_metadata_lines(detail_lines))
 	return lines
 
 
@@ -778,7 +781,7 @@ func _compact_metadata_lines(lines: Array) -> Array:
 	var out: Array = []
 	for line in lines:
 		var text := str(line)
-		if text.begins_with("Slot:"):
+		if WeaponRangeTooltipScript.is_weapon_metadata_line(text):
 			out.append(_metadata_tooltip_line(text))
 		else:
 			out.append(line)
@@ -807,6 +810,7 @@ func _detail_lines(row: Dictionary, include_requirements: bool = true, include_c
 			var category := str(row.get("category", ""))
 			if category != "":
 				lines.append("Kind: %s" % category)
+		WeaponRangeTooltipScript.ensure_after_slot(lines, row)
 		lines.append_array(_stat_lines(row.get("rolled_stats", {})))
 		var req = row.get("requirements", {})
 		if include_requirements and typeof(req) == TYPE_DICTIONARY and int((req as Dictionary).get("level", 0)) > 0:

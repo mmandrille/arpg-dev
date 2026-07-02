@@ -14,6 +14,7 @@ const SetCollectionPanelScript := preload("res://scripts/set_collection_panel.gd
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
 const ItemRequirementViewsScript := preload("res://scripts/item_requirement_views.gd")
+const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -972,6 +973,7 @@ func _tooltip_lines(item: Dictionary) -> Array:
 		lines.append(_metadata_tooltip_line("Rarity: %s" % rarity.capitalize()))
 	var summary_lines := _detail_lines(item, false, false)
 	if not summary_lines.is_empty():
+		WeaponRangeTooltipScript.ensure_after_slot(summary_lines, item)
 		lines.append_array(_compact_metadata_lines(summary_lines))
 		_append_hotbar_tooltip_line(lines, item)
 		return lines
@@ -982,8 +984,12 @@ func _tooltip_lines(item: Dictionary) -> Array:
 		var category := str(def.get("category", ""))
 		if category != "":
 			lines.append("Kind: %s" % category)
-	if def.has("reach"):
-		lines.append("Reach: %s" % str(def["reach"]))
+	var range_line := WeaponRangeTooltipScript.line_for_item(item)
+	if range_line != "":
+		lines.append(_metadata_tooltip_line(range_line))
+	var projectile_speed_line := WeaponRangeTooltipScript.projectile_speed_line_for_item(item)
+	if projectile_speed_line != "":
+		lines.append(_metadata_tooltip_line(projectile_speed_line))
 	if def.has("attack_mode"):
 		lines.append("Mode: %s" % str(def["attack_mode"]))
 	lines.append_array(_consumable_effect_lines(def))
@@ -1014,7 +1020,7 @@ func _compact_metadata_lines(lines: Array) -> Array:
 	var out: Array = []
 	for line in lines:
 		var text := str(line)
-		if text.begins_with("Slot:"):
+		if WeaponRangeTooltipScript.is_weapon_metadata_line(text):
 			out.append(_metadata_tooltip_line(text))
 		elif text.begins_with("Set:"):
 			out.append_array(_set_membership_tooltip_lines(text))

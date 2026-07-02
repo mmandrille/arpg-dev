@@ -2760,6 +2760,12 @@ func TestTwoHandedWeaponSummaryDisplaysBothHands(t *testing.T) {
 	if len(view.SummaryLines) == 0 || view.SummaryLines[0] != "Slot: Both hands" {
 		t.Fatalf("two-handed summary lines = %+v, want Slot: Both hands first", view.SummaryLines)
 	}
+	if len(view.SummaryLines) < 2 || view.SummaryLines[1] != "Range: 12 tiles" {
+		t.Fatalf("bow summary range line = %+v, want Range: 12 tiles second", view.SummaryLines)
+	}
+	if len(view.SummaryLines) < 3 || view.SummaryLines[2] != "Projectile speed: 25 tiles/s" {
+		t.Fatalf("bow summary projectile speed line = %+v, want Projectile speed: 25 tiles/s third", view.SummaryLines)
+	}
 	if got := displayEquipmentSlotName(mainHandSlot, "two_handed"); got != "Both hands" {
 		t.Fatalf("two-handed mystery slot label = %q, want Both hands", got)
 	}

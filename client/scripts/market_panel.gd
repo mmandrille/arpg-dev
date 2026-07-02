@@ -16,6 +16,7 @@ const MarketListingRowsScript := preload("res://scripts/market_listing_rows.gd")
 const MarketRowFiltersScript := preload("res://scripts/market_row_filters.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
+const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
 const PANEL_SIZE := Vector2(640, 520)
 const BODY_FONT_SIZE := 19
 const DETAIL_FONT_SIZE := 16
@@ -937,6 +938,12 @@ func _tooltip_lines(item: Dictionary) -> Array:
 	var slot := str(item.get("slot", ""))
 	if slot != "":
 		lines.append({"text": "Slot: %s" % slot, "color": Color("#cdbd9f"), "font_size": 19})
+	var range_line := WeaponRangeTooltipScript.line_for_item(item)
+	if range_line != "":
+		lines.append({"text": range_line, "color": Color("#cdbd9f"), "font_size": 19})
+	var projectile_speed_line := WeaponRangeTooltipScript.projectile_speed_line_for_item(item)
+	if projectile_speed_line != "":
+		lines.append({"text": projectile_speed_line, "color": Color("#cdbd9f"), "font_size": 19})
 	for line in _listing_stat_lines(item):
 		var text := str(line)
 		if text.begins_with("Level "):

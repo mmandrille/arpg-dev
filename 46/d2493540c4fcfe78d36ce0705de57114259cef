@@ -1,0 +1,121 @@
+docs/progress/scenario-movement-audit.tsv
+  s_3993de7b89c5d9::t_6291a83803a749 79
+shared/protocol/messages.v8.schema.json
+  s_3993de7b89c5d9::t_b390e2e3034e46 404-428
+  s_3993de7b89c5d9::t_443e5776bd75ba 42-44
+  s_3993de7b89c5d9::t_b81036115397e0 123,125-128
+docs/progress/slice-lifecycle.md
+  s_3993de7b89c5d9::t_76479b431a00ae 419
+server/internal/game/handlers.go
+  s_3993de7b89c5d9::t_a750d334563226 56-58
+server/internal/game/magic_find_test.go
+  s_3993de7b89c5d9::t_d7e77e732c1e08 43
+PROGRESS.md
+  s_3993de7b89c5d9::t_54e4d7cdfb6fd5 18
+  s_3993de7b89c5d9::t_7d17d7a414886f 26,28
+shared/protocol/state_delta.v8.schema.json
+  s_3993de7b89c5d9::t_810f25a364f428 553-555
+  s_3993de7b89c5d9::t_3f60690c0eb290 867-874
+client/scripts/bot_step_catalog.gd
+  s_3993de7b89c5d9::t_9d1c9af8bda38c 62
+client/scripts/bot_controller.gd
+  s_3993de7b89c5d9::t_1254182ca3d052 185-186
+  s_3993de7b89c5d9::t_6c9d6569c18a9a 396-413
+client/scripts/bot_scenario_runner.gd
+  s_3993de7b89c5d9::t_23bd4597f463ef 1632
+server/internal/game/shop.go
+  s_3993de7b89c5d9::t_de826c7a8dd162 1050
+docs/progress/slice-codename-index.md
+  s_3993de7b89c5d9::t_0a09b322e70db5 240-241
+server/internal/game/bishop_loot_debug_test.go
+  s_3993de7b89c5d9::t_167f2d9740f835 73,76
+  s_3993de7b89c5d9::t_4aed69589af947 48
+  s_3993de7b89c5d9::t_bdfaf9a0ee64e3 5-9,16
+  s_3993de7b89c5d9::t_24649bde2168aa 108,118
+  s_3993de7b89c5d9::t_0fb58e06c8d51d 1-4,10-15,17-47,49-72,74-75,77-93,96-107,109-117,119-159
+  s_3993de7b89c5d9::t_60bf2fcea42a03 94-95
+docs/plans/v406_2026-07-02-bishop-force-drop.md
+  s_3993de7b89c5d9::t_9737b660e97d30 3,31-32,41,48-49,56,63,70,74-76
+  s_3993de7b89c5d9::t_6453e48cefbb86 1-2,4-30,33-40,42-47,50-55,57-62,64-69,71-73
+tools/bot/run.py
+  s_3993de7b89c5d9::t_656c1def3822f4 1503-1533
+server/internal/game/types.go
+  s_3993de7b89c5d9::t_f189ea530624b5 417-418
+client/scripts/bishop_loot_debug_panel.gd
+  s_3993de7b89c5d9::t_d284c44595368a 204-207
+  s_3993de7b89c5d9::t_1307a0ac3fb999 159,164
+  s_3993de7b89c5d9::t_a25c2d14de5814 174
+  s_3993de7b89c5d9::t_9a7db1c2257c21 197,201
+  s_3993de7b89c5d9::t_81098180d0d599 304-305
+  s_3993de7b89c5d9::t_bdb74886a50a09 1-158,160-163,165-173,175-181,183,185-188,190-196,198-200,202-203,208-303,306-332
+  s_3993de7b89c5d9::t_5da50ee62fb7a2 182,184,189
+client/scripts/main.gd
+  s_3993de7b89c5d9::t_216544cf1c2416 3843-3847
+  s_3993de7b89c5d9::t_bebdf640b96ddf 6264-6269
+  s_3993de7b89c5d9::t_45cfa19d967f4f 1604-1617
+  s_3993de7b89c5d9::t_cffc91e242a4da 6022
+  s_3993de7b89c5d9::t_941197a6467475 265
+  s_3993de7b89c5d9::t_defa81555154dc 5138-5162
+  s_3993de7b89c5d9::t_63cbbdcfa58b28 37
+  s_3993de7b89c5d9::t_40acf1dfe912fd 4791-4792
+server/internal/game/item_rolls.go
+  s_3993de7b89c5d9::t_515812d6bc8406 14-23
+  s_3993de7b89c5d9::t_df94265059a4d7 3
+client/scripts/bot_action_step_validator.gd
+  s_3993de7b89c5d9::t_a61b5b35356f41 16
+tools/bot/scenarios/client/blacksmith_upgrade_risk.json
+  s_3993de7b89c5d9::t_c91c5c5df5361d 93-98,102
+server/internal/game/sim.go
+  s_3993de7b89c5d9::t_5e66db407abdfb 209-213
+  s_3993de7b89c5d9::t_cc83e8c3186ec5 892-895
+  s_3993de7b89c5d9::t_e9eba8bc84779e 4268,4271-4272
+server/internal/game/bishop_loot_debug.go
+  s_3993de7b89c5d9::t_b841c96a7bced4 502-503
+  s_3993de7b89c5d9::t_99d405a3bbdeda 1-374,377-501,504-508
+  s_3993de7b89c5d9::t_f20e1a053c1d03 375-376
+server/internal/inputdecode/inputdecode.go
+  s_3993de7b89c5d9::t_79615cd3a2644e 38-43
+  s_3993de7b89c5d9::t_f22263e6108e2a 180
+  s_3993de7b89c5d9::t_dec18f65719604 143-157
+  s_3993de7b89c5d9::t_f926d5509148f2 378,383-386,389-392,394-396,399-407
+tools/bot/scenarios/115_bishop_force_drop_lab.json
+  s_3993de7b89c5d9::t_2606f3c72b4bff 13-32
+  s_3993de7b89c5d9::t_6a95e44ca1d10b 1-12,33-35
+server/internal/game/resource_loot_drops.go
+  s_3993de7b89c5d9::t_9eb09fc130efeb 158-160
+  s_3993de7b89c5d9::t_5adb7326f4533e 117,124
+client/scripts/bishop_panel.gd
+  s_3993de7b89c5d9::t_1f37494f752168 35
+  s_3993de7b89c5d9::t_35778df0ee1fcf 216-220
+  s_3993de7b89c5d9::t_1112f70c0a38e7 246
+docs/CODEMAP.md
+  s_3993de7b89c5d9::t_3756bf3c367368 23
+docs/as-built/v406_bishop-force-drop.md
+  s_3993de7b89c5d9::t_88a27c59de7b54 1-26
+.maintainability/file-size-baseline.tsv
+  s_3993de7b89c5d9::t_e28ff100c9f9e5 10
+  s_3993de7b89c5d9::t_9fc69dc8d233bd 35
+server/internal/inputdecode/inputdecode_test.go
+  s_3993de7b89c5d9::t_1e1cb92ca9d060 313-315
+  s_3993de7b89c5d9::t_2304a57c4b4e4c 282-284,286-289,293
+docs/specs/v406_spec-bishop-force-drop.md
+  s_3993de7b89c5d9::t_3e56a0d77909cd 1-63
+tools/bot/scenarios/client/blacksmith_renew_item.json
+  s_3993de7b89c5d9::t_3da445efbdf5c7 19-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "46d2493540c4fcfe78d36ce0705de57114259cef",
+  "prompts": {},
+  "sessions": {
+    "s_3993de7b89c5d9": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "75378844-445e-4477-8f26-c733848d967a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

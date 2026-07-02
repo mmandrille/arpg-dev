@@ -1033,6 +1033,9 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	sim.progression.SkillRanks[magicBoltSkillID] = 1
 	sim.savePlayer(sim.defaultPlayer())
 	player := sim.entities[sim.playerID]
+	magicBolt := rules.Skills[magicBoltSkillID]
+	magicBoltManaCost := sim.effectiveSkillManaCost(magicBolt, 1)
+	wantManaAfterCast := player.maxMana - magicBoltManaCost
 	monster := &entity{
 		id:           sim.alloc(),
 		kind:         monsterEntity,
@@ -1051,8 +1054,8 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
 	}})
 	assertAck(t, cast, "cast_magic")
-	if player.mana != 9 {
-		t.Fatalf("mana after cast = %d, want 9", player.mana)
+	if player.mana != wantManaAfterCast {
+		t.Fatalf("mana after cast = %d, want %d (max %d - cost %d)", player.mana, wantManaAfterCast, player.maxMana, magicBoltManaCost)
 	}
 	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_cooldown_started") {
 		t.Fatalf("missing cast/cooldown events: %+v", cast.Events)
@@ -1083,8 +1086,8 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
 	}})
 	assertReject(t, recast, "recast_magic", "skill_on_cooldown")
-	if player.mana != 9 {
-		t.Fatalf("recast spent mana: %d", player.mana)
+	if player.mana != wantManaAfterCast {
+		t.Fatalf("recast spent mana: got %d want %d", player.mana, wantManaAfterCast)
 	}
 	if !hasEvent(recast, "skill_cooldown_rejected") {
 		t.Fatalf("missing cooldown rejected event: %+v", recast.Events)

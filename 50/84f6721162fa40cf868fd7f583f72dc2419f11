@@ -1,0 +1,29 @@
+docs/progress/scenario-movement-audit.tsv
+  s_5a3ea93ee1a1e9::t_3fa08768864b46 225
+shared/rules/item_templates.v0.json
+  s_5a3ea93ee1a1e9::t_c5b0dcf78a9066 2560-2561
+shared/golden/shop_offers.json
+  s_5a3ea93ee1a1e9::t_367524ac631416 14-15,18-20,22,29-30,34,36,43-45,47-49,51,58-60,62,64,72-73,75,77-78,80
+server/internal/game/class_specialist_gear_test.go
+  s_5a3ea93ee1a1e9::t_0d3f37f0d2ee8c 27,42-54,56-57,61,71-72,76-85,87-88
+server/internal/game/game_test.go
+  s_5a3ea93ee1a1e9::t_b4cf2526648a5b 318
+server/internal/game/item_templates_test.go
+  s_5a3ea93ee1a1e9::t_0a50b90825d5a4 27-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5084f6721162fa40cf868fd7f583f72dc2419f11",
+  "prompts": {},
+  "sessions": {
+    "s_5a3ea93ee1a1e9": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1f81b20e-cdf0-4c82-929e-ab8f720b78c7",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -53,6 +53,9 @@ type MainGameplayConfig struct {
 	MovementMinSpeedFactor        float64           `json:"movement_min_speed_factor"`
 	MinimumMonsterAggroRadius     float64           `json:"minimum_monster_aggro_radius"`
 	BaseDropRatePercent      int               `json:"base_drop_rate_percent"`
+	BossBonusDropRatePercent int               `json:"boss_bonus_drop_rate_percent"`
+	BossExtraDropRatePercent int               `json:"boss_extra_drop_rate_percent"`
+	BossLootMagicFindBonusPercent int          `json:"boss_loot_magic_find_bonus_percent"`
 	RespecCostGold           int               `json:"respec_cost_gold"`
 	BishopRespecResourceID   string            `json:"bishop_respec_resource_item_def_id"`
 	BishopRespecResourceCost int               `json:"bishop_respec_resource_count"`
@@ -755,6 +758,15 @@ func LoadRules(dir string) (*Rules, error) {
 	}
 	if mainConfig.Gameplay.BaseDropRatePercent < 0 || mainConfig.Gameplay.BaseDropRatePercent > 100 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.base_drop_rate_percent: must be within [0,100]")
+	}
+	if mainConfig.Gameplay.BossBonusDropRatePercent < 0 || mainConfig.Gameplay.BossBonusDropRatePercent > 100 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.boss_bonus_drop_rate_percent: must be within [0,100]")
+	}
+	if mainConfig.Gameplay.BossExtraDropRatePercent < 0 || mainConfig.Gameplay.BossExtraDropRatePercent > 100 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.boss_extra_drop_rate_percent: must be within [0,100]")
+	}
+	if mainConfig.Gameplay.BossLootMagicFindBonusPercent < 0 || mainConfig.Gameplay.BossLootMagicFindBonusPercent > 500 {
+		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.boss_loot_magic_find_bonus_percent: must be within [0,500]")
 	}
 	if mainConfig.Gameplay.RespecCostGold < 0 {
 		return nil, fmt.Errorf("game: invalid rules main_config.gameplay.respec_cost_gold: must be non-negative")
@@ -1770,6 +1782,9 @@ func LoadRules(dir string) (*Rules, error) {
 		monsterPackRoles:         monsterPackRoles,
 	}.withDensityForSize(dungeonGeneration.FloorSize)
 	if err := r.applyMainConfigDungeonMonsterDropRate(); err != nil {
+		return nil, err
+	}
+	if err := r.applyMainConfigBossDropRate(); err != nil {
 		return nil, err
 	}
 

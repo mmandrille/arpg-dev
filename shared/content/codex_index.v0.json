@@ -1991,7 +1991,7 @@
               "heading": "Sample Loot Profiles",
               "bullets": [
                 "boss_chest_drop_tier_1 -> guarded_chest_tc_depth_3_plus",
-                "boss_drop_tier_1 -> boss_special_tc_tier_1",
+                "boss_drop_tier_1 -> boss_tc_tier_1 (guaranteed primary + bonus/extra rolls from depth-3+ equipment pool)",
                 "dungeon_mob_drop -> dungeon_mob_tc_1",
                 "dungeon_mob_drop_depth_1 -> dungeon_mob_tc_depth_1",
                 "dungeon_mob_drop_depth_2 -> dungeon_mob_tc_depth_2"

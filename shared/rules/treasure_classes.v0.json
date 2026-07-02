@@ -769,125 +769,6 @@
         }
       ]
     },
-    "boss_special_tc_tier_1": {
-      "attempts": [
-        {
-          "attempt_id": "named_unique",
-          "success_weight": 100,
-          "no_drop_weight": 0,
-          "entries": [
-            {
-              "unique_item_id": "conduit_staff",
-              "weight": 1
-            }
-          ]
-        },
-        {
-          "attempt_id": "set_piece",
-          "success_weight": 100,
-          "no_drop_weight": 0,
-          "entries": [
-            {
-              "set_item_id": "stormrunner_covenant_bow",
-              "weight": 1
-            }
-          ]
-        },
-        {
-          "attempt_id": "equipment",
-          "success_weight": 100,
-          "no_drop_weight": 0,
-          "entries": [
-            {
-              "item_template_id": "amulet",
-              "weight": 1
-            }
-          ]
-        }
-      ]
-    },
-    "elite_objective_special_tc_1": {
-      "attempts": [
-        {
-          "attempt_id": "set_piece",
-          "success_weight": 20,
-          "no_drop_weight": 80,
-          "entries": [
-            {
-              "set_item_id": "verdant_vanguard_blade",
-              "weight": 1
-            },
-            {
-              "set_item_id": "verdant_vanguard_helm",
-              "weight": 1
-            },
-            {
-              "set_item_id": "verdant_vanguard_mail",
-              "weight": 1
-            },
-            {
-              "set_item_id": "verdant_vanguard_gloves",
-              "weight": 1
-            },
-            {
-              "set_item_id": "verdant_vanguard_boots",
-              "weight": 1
-            },
-            {
-              "set_item_id": "stormrunner_covenant_bow",
-              "weight": 1
-            },
-            {
-              "set_item_id": "stormrunner_covenant_mask",
-              "weight": 1
-            },
-            {
-              "set_item_id": "stormrunner_covenant_grips",
-              "weight": 1
-            },
-            {
-              "set_item_id": "stormrunner_covenant_treads",
-              "weight": 1
-            },
-            {
-              "set_item_id": "stormrunner_covenant_loop",
-              "weight": 1
-            },
-            {
-              "set_item_id": "wayfarers_accord_hood",
-              "weight": 1
-            },
-            {
-              "set_item_id": "wayfarers_accord_robes",
-              "weight": 1
-            },
-            {
-              "set_item_id": "wayfarers_accord_bindings",
-              "weight": 1
-            },
-            {
-              "set_item_id": "wayfarers_accord_treads",
-              "weight": 1
-            },
-            {
-              "set_item_id": "wayfarers_accord_pendant",
-              "weight": 1
-            }
-          ]
-        },
-        {
-          "attempt_id": "equipment",
-          "success_weight": 100,
-          "no_drop_weight": 0,
-          "entries": [
-            {
-              "item_template_id": "ring",
-              "weight": 1
-            }
-          ]
-        }
-      ]
-    },
     "equipment_lab_tc_1": {
       "attempts": [
         {
@@ -981,6 +862,355 @@
             {
               "item_def_id": "red_potion",
               "weight": 1
+            }
+          ]
+        }
+      ]
+    },
+    "boss_tc_tier_1": {
+      "attempts": [
+        {
+          "attempt_id": "primary",
+          "success_weight": 100,
+          "no_drop_weight": 0,
+          "entries": [
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 4
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 4
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 4
+            },
+            {
+              "item_template_id": "gloves",
+              "weight": 4
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 4
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 4
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 2
+            },
+            {
+              "item_template_id": "amulet",
+              "weight": 2
+            },
+            {
+              "item_template_id": "dagger",
+              "weight": 2
+            },
+            {
+              "item_template_id": "hammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "morningstar",
+              "weight": 2
+            },
+            {
+              "item_template_id": "wand",
+              "weight": 2
+            },
+            {
+              "item_template_id": "warhammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "buckler",
+              "weight": 2
+            },
+            {
+              "item_template_id": "sash",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_girdle",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_sword",
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "attempt_id": "bonus",
+          "success_weight": 80,
+          "no_drop_weight": 20,
+          "entries": [
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 4
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 4
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 4
+            },
+            {
+              "item_template_id": "gloves",
+              "weight": 4
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 4
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 4
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 2
+            },
+            {
+              "item_template_id": "amulet",
+              "weight": 2
+            },
+            {
+              "item_template_id": "dagger",
+              "weight": 2
+            },
+            {
+              "item_template_id": "hammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "morningstar",
+              "weight": 2
+            },
+            {
+              "item_template_id": "wand",
+              "weight": 2
+            },
+            {
+              "item_template_id": "warhammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "buckler",
+              "weight": 2
+            },
+            {
+              "item_template_id": "sash",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_girdle",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_sword",
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "attempt_id": "extra",
+          "success_weight": 35,
+          "no_drop_weight": 65,
+          "entries": [
+            {
+              "item_def_id": "gold",
+              "weight": 35
+            },
+            {
+              "item_def_id": "red_potion",
+              "weight": 13
+            },
+            {
+              "item_def_id": "blue_potion",
+              "weight": 12
+            },
+            {
+              "item_template_id": "shield",
+              "weight": 4
+            },
+            {
+              "item_template_id": "helm",
+              "weight": 4
+            },
+            {
+              "item_template_id": "mail",
+              "weight": 4
+            },
+            {
+              "item_template_id": "gloves",
+              "weight": 4
+            },
+            {
+              "item_template_id": "belt",
+              "weight": 4
+            },
+            {
+              "item_template_id": "boots",
+              "weight": 4
+            },
+            {
+              "item_template_id": "long_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "rapier",
+              "weight": 2
+            },
+            {
+              "item_template_id": "falchion",
+              "weight": 2
+            },
+            {
+              "item_template_id": "great_sword",
+              "weight": 4
+            },
+            {
+              "item_template_id": "bow",
+              "weight": 4
+            },
+            {
+              "item_template_id": "hunter_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_bow",
+              "weight": 2
+            },
+            {
+              "item_template_id": "ring",
+              "weight": 2
+            },
+            {
+              "item_template_id": "amulet",
+              "weight": 2
+            },
+            {
+              "item_template_id": "dagger",
+              "weight": 2
+            },
+            {
+              "item_template_id": "hammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "morningstar",
+              "weight": 2
+            },
+            {
+              "item_template_id": "wand",
+              "weight": 2
+            },
+            {
+              "item_template_id": "warhammer",
+              "weight": 2
+            },
+            {
+              "item_template_id": "buckler",
+              "weight": 2
+            },
+            {
+              "item_template_id": "sash",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_girdle",
+              "weight": 2
+            },
+            {
+              "item_template_id": "war_sword",
+              "weight": 2
             }
           ]
         }

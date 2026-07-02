@@ -2,112 +2,79 @@ package game
 
 import "testing"
 
-func TestBossSpecialTreasureClassDropsAuthoredPackages(t *testing.T) {
+func TestBossTreasureClassUsesRandomEquipmentPool(t *testing.T) {
 	rules := loadRules(t)
-	drops := rules.LootDrops("boss_drop_tier_1", NewRNG(1))
-	if len(drops) != 3 {
-		t.Fatalf("boss special drops = %+v, want 3 drops", drops)
+	table, ok := rules.LootTables["boss_drop_tier_1"]
+	if !ok || table.TreasureClassID != "boss_tc_tier_1" {
+		t.Fatalf("boss loot table = %+v, want boss_tc_tier_1", table)
 	}
-	if drops[0].UniqueItemID != "conduit_staff" {
-		t.Fatalf("boss unique drop = %+v, want conduit_staff", drops[0])
+	tc := rules.TreasureClasses["boss_tc_tier_1"]
+	if len(tc.Attempts) < 3 {
+		t.Fatalf("boss treasure class = %+v, want primary/bonus/extra attempts", tc.Attempts)
 	}
-	if drops[1].SetItemID != "stormrunner_covenant_bow" {
-		t.Fatalf("boss set drop = %+v, want stormrunner_covenant_bow", drops[1])
+	for _, attempt := range tc.Attempts {
+		for _, entry := range attempt.Entries {
+			if entry.UniqueItemID != "" || entry.SetItemID != "" {
+				t.Fatalf("boss attempt %s has authored drop = %+v, want item templates only", attempt.AttemptID, entry)
+			}
+		}
 	}
-	if drops[2].ItemTemplateID != "amulet" {
-		t.Fatalf("boss equipment drop = %+v, want amulet", drops[2])
+	if tc.Attempts[0].AttemptID != "primary" || tc.Attempts[0].SuccessWeight != 100 || tc.Attempts[0].NoDropWeight != 0 {
+		t.Fatalf("boss primary attempt = %+v, want guaranteed primary roll", tc.Attempts[0])
+	}
+	if tc.Attempts[1].SuccessWeight != rules.MainConfig.Gameplay.BossBonusDropRatePercent {
+		t.Fatalf("boss bonus success = %d, want %d", tc.Attempts[1].SuccessWeight, rules.MainConfig.Gameplay.BossBonusDropRatePercent)
+	}
+	if tc.Attempts[2].SuccessWeight != rules.MainConfig.Gameplay.BossExtraDropRatePercent {
+		t.Fatalf("boss extra success = %d, want %d", tc.Attempts[2].SuccessWeight, rules.MainConfig.Gameplay.BossExtraDropRatePercent)
 	}
 }
 
-func TestEliteObjectiveSpecialTreasureClassUsesWeightedSetPool(t *testing.T) {
+func TestEliteObjectiveTreasureClassUsesGuardedChestPool(t *testing.T) {
 	rules := loadRules(t)
 	if rules.DungeonGeneration.EliteObjective.LootTable != "elite_objective_special_drop" {
 		t.Fatalf("elite objective loot table = %s, want elite_objective_special_drop", rules.DungeonGeneration.EliteObjective.LootTable)
 	}
-	tc := rules.TreasureClasses["elite_objective_special_tc_1"]
-	if len(tc.Attempts) < 2 {
-		t.Fatalf("elite special treasure class = %+v, want set and equipment attempts", tc.Attempts)
-	}
-	setAttempt := tc.Attempts[0]
-	if setAttempt.AttemptID != "set_piece" || setAttempt.SuccessWeight != 20 || setAttempt.NoDropWeight != 80 {
-		t.Fatalf("elite set attempt = %+v, want 20/80 weighted chance", setAttempt)
-	}
-	setIDs := map[string]bool{}
-	for _, entry := range setAttempt.Entries {
-		if entry.SetItemID == "" {
-			t.Fatalf("elite set attempt entry = %+v, want set_item_id", entry)
-		}
-		setIDs[entry.SetItemID] = true
-	}
-	for setItemID := range rules.SetItems {
-		if !setIDs[setItemID] {
-			t.Fatalf("elite set attempt missing %s in %+v", setItemID, setAttempt.Entries)
-		}
-	}
-	if len(setIDs) != len(rules.SetItems) {
-		t.Fatalf("elite set attempt entries = %d, want %d", len(setIDs), len(rules.SetItems))
+	table := rules.LootTables["elite_objective_special_drop"]
+	if table.TreasureClassID != "guarded_chest_tc_depth_3_plus" {
+		t.Fatalf("elite objective treasure class = %s, want guarded_chest_tc_depth_3_plus", table.TreasureClassID)
 	}
 }
 
-func TestAuthoredSpecialDropsSpawnFixedPayloads(t *testing.T) {
+func TestBossLootRollsRandomEquipmentPayloads(t *testing.T) {
 	rules := loadRules(t)
-	sim := MustNewSim("sess_special_drops", "special_drops_seed", rules)
+	sim := MustNewSim("sess_boss_random_loot", "boss_random_loot_seed", rules)
 	res := &TickResult{}
-	sim.spawnLootDrops(rules.LootDrops("boss_drop_tier_1", NewRNG(3)), sim.entities[sim.playerID].pos, playerRadius, "corr_special", res, goldRollContext{levelNum: -5})
+	sim.spawnLootDrops(
+		rules.LootDrops("boss_drop_tier_1", NewRNG(3)),
+		sim.entities[sim.playerID].pos,
+		playerRadius,
+		"corr_boss_loot",
+		res,
+		goldRollContext{levelNum: -5, magicFind: true, magicFindBonusPercent: rules.MainConfig.Gameplay.BossLootMagicFindBonusPercent},
+	)
 
-	conduit := findLootByEffectID(sim, "arcane_conduit")
-	if conduit == nil || conduit.rollPayload == nil || conduit.rollPayload.Rarity != "unique" || conduit.rollPayload.ItemTemplateID != "starter_sorcerer_staff" || !sameStringSlice(conduit.rollPayload.EffectIDs, []string{"arcane_conduit"}) {
-		t.Fatalf("conduit staff loot payload = %+v", conduit)
-	}
-	stormrunner := findLootBySetPieceID(sim, "stormrunner_covenant_bow")
-	if stormrunner == nil || stormrunner.rollPayload == nil || stormrunner.rollPayload.Rarity != "set" || stormrunner.rollPayload.ItemTemplateID != "bow" {
-		t.Fatalf("Stormrunner loot payload = %+v", stormrunner)
-	}
-	amulet := findLootByTemplateID(sim, "amulet")
-	if amulet == nil || amulet.rollPayload == nil || amulet.rollPayload.Rarity == "" || amulet.rollPayload.DisplayName == "" {
-		t.Fatalf("rolled amulet payload = %+v", amulet)
-	}
-	if got := countSpecialDropEvents(res.Events, "loot_dropped"); got != 3 {
-		t.Fatalf("loot_dropped events = %d, want 3: %+v", got, res.Events)
-	}
-}
-
-func findLootByEffectID(sim *Sim, effectID string) *entity {
+	rolledEquipment := 0
 	for _, entity := range sim.activeLevel().entities {
-		if entity.kind == lootEntity && entity.rollPayload != nil && sameStringSlice(entity.rollPayload.EffectIDs, []string{effectID}) {
-			return entity
+		if entity.kind != lootEntity || entity.rollPayload == nil {
+			continue
+		}
+		if entity.rollPayload.NamedUniqueID != "" || entity.rollPayload.SetPieceID != "" {
+			t.Fatalf("boss loot has authored payload = %+v", entity.rollPayload)
+		}
+		if entity.rollPayload.Rarity == "unique" || entity.rollPayload.Rarity == "set" {
+			t.Fatalf("boss loot has authored rarity = %+v", entity.rollPayload)
+		}
+		if entity.rollPayload.ItemTemplateID != "" && entity.rollPayload.Rarity != "" {
+			rolledEquipment++
 		}
 	}
-
-	return nil
-}
-
-func findLootBySetPieceID(sim *Sim, setPieceID string) *entity {
-	for _, entity := range sim.activeLevel().entities {
-		if entity.kind == lootEntity && entity.rollPayload != nil && entity.rollPayload.SetPieceID == setPieceID {
-			return entity
-		}
+	if rolledEquipment == 0 {
+		t.Fatalf("boss loot spawned no rolled equipment; events=%+v", res.Events)
 	}
-
-	return nil
-}
-
-func findLootByDisplayName(sim *Sim, displayName string) *entity {
-	for _, entity := range sim.activeLevel().entities {
-		if entity.kind == lootEntity && entity.rollPayload != nil && entity.rollPayload.DisplayName == displayName {
-			return entity
-		}
+	if got := countSpecialDropEvents(res.Events, "loot_dropped"); got == 0 {
+		t.Fatalf("loot_dropped events = 0, want at least one: %+v", res.Events)
 	}
-	return nil
-}
-
-func findLootByTemplateID(sim *Sim, templateID string) *entity {
-	for _, entity := range sim.activeLevel().entities {
-		if entity.kind == lootEntity && entity.rollPayload != nil && entity.rollPayload.ItemTemplateID == templateID {
-			return entity
-		}
-	}
-	return nil
 }
 
 func countSpecialDropEvents(events []Event, eventType string) int {
@@ -117,5 +84,6 @@ func countSpecialDropEvents(events []Event, eventType string) int {
 			count++
 		}
 	}
+
 	return count
 }

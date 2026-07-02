@@ -38,3 +38,30 @@ func (r *Rules) applyMainConfigDungeonMonsterDropRate() error {
 	}
 	return nil
 }
+
+func (r *Rules) applyMainConfigBossDropRate() error {
+	table, ok := r.LootTables["boss_drop_tier_1"]
+	if !ok || table.TreasureClassID == "" {
+		return fmt.Errorf("game: invalid main_config boss drop profile: unknown boss loot table")
+	}
+	classDef, ok := r.TreasureClasses[table.TreasureClassID]
+	if !ok {
+		return fmt.Errorf("game: invalid main_config boss drop profile: unknown treasure class %s", table.TreasureClassID)
+	}
+	if len(classDef.Attempts) == 0 {
+		return fmt.Errorf("game: invalid main_config boss drop profile: treasure class %s has no attempts", table.TreasureClassID)
+	}
+	for i, attempt := range classDef.Attempts {
+		switch attempt.AttemptID {
+		case "bonus":
+			classDef.Attempts[i].SuccessWeight = r.MainConfig.Gameplay.BossBonusDropRatePercent
+			classDef.Attempts[i].NoDropWeight = 100 - r.MainConfig.Gameplay.BossBonusDropRatePercent
+		case "extra":
+			classDef.Attempts[i].SuccessWeight = r.MainConfig.Gameplay.BossExtraDropRatePercent
+			classDef.Attempts[i].NoDropWeight = 100 - r.MainConfig.Gameplay.BossExtraDropRatePercent
+		}
+	}
+	r.TreasureClasses[table.TreasureClassID] = classDef
+
+	return nil
+}

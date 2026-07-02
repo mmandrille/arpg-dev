@@ -3,8 +3,8 @@
   "ci_tier": "extended",
   "world_id": "boss_floor_gate_lab",
   "seed": "boss_special_drops",
-  "title": "Boss special drops",
-  "description": "Kill Cave Warden and prove boss-authored unique and set drops spawn as loot.",
+  "title": "Boss random loot drops",
+  "description": "Kill Cave Warden and prove boss kill loot rolls random equipment through the boss treasure class.",
   "debug_progression": {
     "level": 1,
     "experience": 0,
@@ -46,30 +46,15 @@
       "assertion": {
         "type": "entity_count",
         "entity_type": "loot",
-        "display_name": "Conduit Staff",
-        "rarity": "unique",
-        "equals": 1
-      },
-      "timeout_s": 2
-    },
-    {
-      "action": "wait_until_assertion",
-      "assertion": {
-        "type": "entity_count",
-        "entity_type": "loot",
-        "display_name": "Stormrunner Covenant Bow",
-        "rarity": "set",
-        "equals": 1
-      },
-      "timeout_s": 2
-    },
-    {
-      "action": "wait_until_assertion",
-      "assertion": {
-        "type": "entity_count",
-        "entity_type": "loot",
-        "item_template_id": "amulet",
         "at_least": 1
+      },
+      "timeout_s": 2
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "loot_dropped"
       },
       "timeout_s": 2
     }
@@ -87,22 +72,11 @@
     {
       "type": "entity_count",
       "entity_type": "loot",
-      "display_name": "Conduit Staff",
-      "rarity": "unique",
-      "equals": 1
-    },
-    {
-      "type": "entity_count",
-      "entity_type": "loot",
-      "display_name": "Stormrunner Covenant Bow",
-      "rarity": "set",
-      "equals": 1
-    },
-    {
-      "type": "entity_count",
-      "entity_type": "loot",
-      "item_template_id": "amulet",
       "at_least": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "loot_dropped"
     }
   ],
   "visual": {

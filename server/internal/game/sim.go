@@ -199,9 +199,10 @@ type uniqueChestState struct {
 }
 
 type goldRollContext struct {
-	levelNum        int
-	monsterRarityID string
-	magicFind       bool
+	levelNum                int
+	monsterRarityID         string
+	magicFind               bool
+	magicFindBonusPercent   int
 }
 
 type activeMove struct {
@@ -668,6 +669,12 @@ func (r *Rules) defaultSkillRanks() map[string]int {
 }
 
 func (r *Rules) normalizeSkillRanks(in map[string]int) map[string]int {
+	if rank, ok := in["ligthing"]; ok {
+		if _, has := in["lightning"]; !has && rank > 0 {
+			in["lightning"] = rank
+		}
+		delete(in, "ligthing")
+	}
 	out := r.defaultSkillRanks()
 	for skillID, rank := range in { //nolint:determinism — output is a map, iteration order does not affect the result
 		def, ok := r.Skills[skillID]
@@ -1505,9 +1512,10 @@ func (s *Sim) directionalMeleeTarget(dir Vec2) *entity {
 func (s *Sim) dropLoot(monster *entity, sourceID uint64, corr string, res *TickResult) {
 	drops := s.rules.LootDrops(monster.lootTable, s.rng)
 	s.spawnLootDrops(drops, monster.pos, s.targetInteractionRadius(monster), corr, res, goldRollContext{
-		levelNum:        s.activeLevel().levelNum,
-		monsterRarityID: monster.monsterRarityID,
-		magicFind:       true,
+		levelNum:              s.activeLevel().levelNum,
+		monsterRarityID:       monster.monsterRarityID,
+		magicFind:             true,
+		magicFindBonusPercent: s.bossLootMagicFindBonusPercent(monster.isBoss),
 	})
 	depth := absInt(s.activeLevel().levelNum)
 	hook := monsterResourceLootHook(monster.monsterRarityID, monster.isBoss)
@@ -4250,7 +4258,16 @@ func (s *Sim) rollItemTemplateForLoot(templateID string, sourceDepth int, ctx go
 	if !ctx.magicFind {
 		return s.rollItemTemplate(templateID, sourceDepth)
 	}
-	return s.rules.rollItemTemplateWithMagicFind(templateID, s.rng, sourceDepth, int(s.playerMagicFindPercent()))
+	magicFindPercent := int(s.playerMagicFindPercent()) + ctx.magicFindBonusPercent
+	return s.rules.rollItemTemplateWithMagicFind(templateID, s.rng, sourceDepth, magicFindPercent)
+}
+
+func (s *Sim) bossLootMagicFindBonusPercent(isBoss bool) int {
+	if !isBoss || s.rules == nil {
+		return 0
+	}
+
+	return s.rules.MainConfig.Gameplay.BossLootMagicFindBonusPercent
 }
 
 func (s *Sim) itemRollSourceDepth(ctx goldRollContext) int {

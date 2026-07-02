@@ -4,6 +4,7 @@ extends Control
 signal allocate_stat_requested(stat: String)
 
 const StatLabels := preload("res://scripts/stat_labels.gd")
+const CharacterStatsBreakdown := preload("res://scripts/character_stats_breakdown.gd")
 const StatTooltipLabelScript := preload("res://scripts/stat_tooltip_label.gd")
 const CharacterPanelStyles := preload("res://scripts/character_panel_styles.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
@@ -27,9 +28,6 @@ const DERIVED_LABELS := {
 	"mana_regen_per_second": "Mana regen /s",
 	"light_radius": "Light radius",
 }
-const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance", "evade_chance"]
-const WHOLE_PERCENT_STATS := ["block_percent"]
-const TILES_PER_TICK_STATS := ["movement_speed"]
 const DUAL_WIELD_DAMAGE_KEYS := ["damage_min", "damage_max"]
 
 var progression: Dictionary = {}
@@ -147,7 +145,7 @@ func get_debug_state() -> Dictionary:
 		"derived_mouse_filters": _derived_mouse_filters_by_key(),
 		"derived_scroll": _derived_scroll_debug_state(),
 		"derived_tooltip_panel": _derived_tooltip_panel_debug_state(),
-		"stat_breakdowns": _breakdowns_by_key(),
+		"stat_breakdowns": CharacterStatsBreakdown.breakdowns_by_key(progression),
 		"hero_name": _hero_name,
 		"window": _panel.get_debug_state() if _panel != null else {},
 	}
@@ -310,14 +308,14 @@ func _render() -> void:
 	_xp_label.text = "XP %d%s" % [xp, "" if remaining == null else " (+%d)" % int(remaining)]
 	_points_label.text = "Points %d" % points
 	var base: Dictionary = progression.get("base_stats", {})
-	var effective := _effective_base_stats(base)
+	var effective := CharacterStatsBreakdown.effective_base_stats(progression)
 	for stat in BASE_STATS:
 		var label: Label = _stat_value_labels.get(stat, null)
 		var base_label: Label = _stat_base_labels.get(stat, null)
 		var effective_label: Label = _stat_effective_labels.get(stat, null)
 		var base_value := int(base.get(stat, 0))
 		var effective_value := int(effective.get(stat, base_value))
-		var tooltip := _breakdown_summary(stat)
+		var tooltip := CharacterStatsBreakdown.breakdown_summary(progression, stat, DERIVED_LABELS)
 		if label != null:
 			label.text = StatLabels.display_name(stat)
 			label.tooltip_text = ""
@@ -339,7 +337,7 @@ func _render() -> void:
 		var name_label: Label = _derived_name_labels.get(key, null)
 		var label: Label = _derived_labels.get(key, null)
 		var off_label: Label = _derived_off_labels.get(key, null)
-		var tooltip := _breakdown_summary(key)
+		var tooltip := CharacterStatsBreakdown.breakdown_summary(progression, key, DERIVED_LABELS)
 		if name_label != null:
 			name_label.text = DERIVED_LABELS[key]
 			if dual_wield and key in DUAL_WIELD_DAMAGE_KEYS:
@@ -348,25 +346,25 @@ func _render() -> void:
 				name_label.tooltip_text = tooltip
 		if label != null:
 			if dual_wield and key == "damage_min":
-				label.text = _format_stat_value(key, float(main_damage.get("min", derived.get("damage_min", 0.0))))
+				label.text = CharacterStatsBreakdown.format_stat_value(key, float(main_damage.get("min", derived.get("damage_min", 0.0))))
 			elif dual_wield and key == "damage_max":
-				label.text = _format_stat_value(key, float(main_damage.get("max", derived.get("damage_max", 0.0))))
+				label.text = CharacterStatsBreakdown.format_stat_value(key, float(main_damage.get("max", derived.get("damage_max", 0.0))))
 			else:
-				label.text = _format_stat_value(key, float(derived.get(key, 0.0)))
+				label.text = CharacterStatsBreakdown.format_stat_value(key, float(derived.get(key, 0.0)))
 			if dual_wield and key in DUAL_WIELD_DAMAGE_KEYS:
 				var damage_key := "min" if key == "damage_min" else "max"
-				label.tooltip_text = _weapon_slot_tooltip(key, main_damage, damage_key)
+				label.tooltip_text = CharacterStatsBreakdown.weapon_slot_tooltip(progression, key, main_damage, damage_key, DERIVED_LABELS)
 			else:
 				label.tooltip_text = tooltip
 		if off_label != null:
 			if dual_wield and key == "damage_min":
 				off_label.visible = true
-				off_label.text = _format_stat_value(key, float(off_damage.get("min", 0.0)))
-				off_label.tooltip_text = _weapon_slot_tooltip("damage_min", off_damage, "min")
+				off_label.text = CharacterStatsBreakdown.format_stat_value(key, float(off_damage.get("min", 0.0)))
+				off_label.tooltip_text = CharacterStatsBreakdown.weapon_slot_tooltip(progression, "damage_min", off_damage, "min", DERIVED_LABELS)
 			elif dual_wield and key == "damage_max":
 				off_label.visible = true
-				off_label.text = _format_stat_value(key, float(off_damage.get("max", 0.0)))
-				off_label.tooltip_text = _weapon_slot_tooltip("damage_max", off_damage, "max")
+				off_label.text = CharacterStatsBreakdown.format_stat_value(key, float(off_damage.get("max", 0.0)))
+				off_label.tooltip_text = CharacterStatsBreakdown.weapon_slot_tooltip(progression, "damage_max", off_damage, "max", DERIVED_LABELS)
 			else:
 				off_label.visible = false
 				off_label.text = ""
@@ -429,38 +427,6 @@ func _apply_derived_header_layout(dual_wield: bool) -> void:
 			off_label.custom_minimum_size = Vector2(72, 28)
 
 
-func _format_number(value: float) -> String:
-	if absf(value - roundf(value)) < 0.0001:
-		return str(int(roundf(value)))
-	var out := "%.2f" % value
-	while out.ends_with("0"):
-		out = out.left(out.length() - 1)
-	if out.ends_with("."):
-		out = out.left(out.length() - 1)
-	return out
-
-
-func _format_stat_value(key: String, value: float) -> String:
-	if key in FRACTION_PERCENT_STATS:
-		return "%s%%" % _format_number(value * 100.0)
-	if key in WHOLE_PERCENT_STATS:
-		return "%s%%" % _format_number(value)
-	if key in TILES_PER_TICK_STATS:
-		return "%.1f t/s" % (value * 10.0)
-	return _format_number(value)
-
-
-func _breakdowns_by_key() -> Dictionary:
-	var out := {}
-	var rows: Array = progression.get("stat_breakdowns", [])
-	for row in rows:
-		if typeof(row) != TYPE_DICTIONARY:
-			continue
-		var rec := row as Dictionary
-		out[str(rec.get("key", ""))] = rec.duplicate(true)
-	return out
-
-
 func _stat_tooltips_by_key() -> Dictionary:
 	var out := {}
 	for key in _stat_effective_labels.keys():
@@ -495,25 +461,6 @@ func _derived_slot_tooltips_by_key(labels_by_key: Dictionary) -> Dictionary:
 		if label != null and label.visible and label.tooltip_text != "":
 			out[key] = label.tooltip_text
 	return out
-
-
-func _weapon_slot_tooltip(key: String, slot_damage: Dictionary, damage_key: String) -> String:
-	var sources_key := "min_sources" if damage_key == "min" else "max_sources"
-	var sources: Array = slot_damage.get(sources_key, [])
-	if sources.is_empty():
-		return _breakdown_summary(key)
-	return _breakdown_summary_from_sources(key, float(slot_damage.get(damage_key, 0.0)), sources)
-
-
-func _breakdown_summary_from_sources(key: String, value: float, sources: Array) -> String:
-	if sources.is_empty():
-		return ""
-	var parts: PackedStringArray = PackedStringArray()
-	parts.append("%s formula:" % _breakdown_display_name(key))
-	var formula_terms := _source_formula_terms(key, sources, _item_names_by_instance_id(sources))
-	parts.append_array(formula_terms)
-	parts.append("= %s" % _format_stat_value(key, value))
-	return "\n".join(parts)
 
 
 func _derived_mouse_filters_by_key() -> Dictionary:
@@ -557,134 +504,6 @@ func _derived_tooltip_panel_debug_state() -> Dictionary:
 			"background_alpha": alpha,
 		}
 	return {}
-
-
-func _breakdown_summary(key: String) -> String:
-	var rec: Dictionary = _breakdowns_by_key().get(key, {})
-	if rec.is_empty():
-		return ""
-	var parts: PackedStringArray = PackedStringArray()
-	var value := _format_stat_value(key, float(rec.get("value", 0.0)))
-	parts.append("%s formula:" % _breakdown_display_name(key))
-	var sources: Array = rec.get("sources", [])
-	var formula_terms := _source_formula_terms(key, sources, _item_names_by_instance_id(sources))
-	parts.append_array(formula_terms)
-	if rec.get("cap", null) != null:
-		parts.append("= %s (cap %s)" % [value, _format_stat_value(key, float(rec.get("cap", 0.0)))])
-	else:
-		parts.append("= %s" % value)
-	return "\n".join(parts)
-
-
-func _source_formula_terms(key: String, sources: Array, item_names_by_id: Dictionary) -> PackedStringArray:
-	var terms := PackedStringArray()
-	for source in sources:
-		if typeof(source) != TYPE_DICTIONARY:
-			continue
-		var source_rec := source as Dictionary
-		var source_text := _source_formula_source(source_rec, item_names_by_id)
-		terms.append("%s (%s)" % [_format_stat_delta(key, float(source_rec.get("value", 0.0))), source_text])
-	return terms
-
-
-func _item_names_by_instance_id(sources: Array) -> Dictionary:
-	var out := {}
-	for source in sources:
-		if typeof(source) != TYPE_DICTIONARY:
-			continue
-		var source_rec := source as Dictionary
-		var item_id := str(source_rec.get("item_instance_id", "")).strip_edges()
-		var kind := str(source_rec.get("kind", "")).strip_edges()
-		if item_id == "" or not (kind == "equipment_base" or kind == "equipment_roll"):
-			continue
-		var label := str(source_rec.get("label", "")).strip_edges()
-		if label != "" and not out.has(item_id):
-			out[item_id] = label
-	return out
-
-
-func _source_formula_source(source_rec: Dictionary, item_names_by_id: Dictionary) -> String:
-	var label := str(source_rec.get("label", source_rec.get("kind", ""))).strip_edges()
-	if label == "":
-		label = "Source"
-	var kind := str(source_rec.get("kind", "")).strip_edges()
-	var item_id := str(source_rec.get("item_instance_id", "")).strip_edges()
-	if item_id != "" and (kind == "equipment_base" or kind == "equipment_roll"):
-		return str(item_names_by_id.get(item_id, label))
-	var detail := label
-	var kind_label := _source_kind_label(kind)
-	if kind == "character_formula":
-		var stat_key := _formula_source_stat_key(label)
-		if stat_key != "":
-			var base_stats: Dictionary = progression.get("base_stats", {})
-			var effective_stats := _effective_base_stats(base_stats)
-			detail = "%d %s" % [int(effective_stats.get(stat_key, 0)), label]
-	if kind_label != "" and kind_label != "Source":
-		detail += ", %s" % kind_label
-	return detail
-
-
-func _source_kind_label(kind: String) -> String:
-	match kind:
-		"base_stat":
-			return "Base stat"
-		"character_formula":
-			return "Character formula"
-		"equipment_base":
-			return "Item base"
-		"equipment_roll":
-			return "Item roll"
-		"skill_effect":
-			return "Skill effect"
-		"passive_skill":
-			return "Passive skill"
-		"set_bonus":
-			return "Set bonus"
-		"buff":
-			return "Buff"
-		"debuff":
-			return "Debuff"
-		"cap":
-			return "Cap"
-		"clamp":
-			return "Clamp"
-		_:
-			if kind == "":
-				return "Source"
-			return kind.replace("_", " ").capitalize()
-
-
-func _formula_source_stat_key(label: String) -> String:
-	match label:
-		"Strength":
-			return "str"
-		"Dexterity":
-			return "dex"
-		"Vitality":
-			return "vit"
-		"Magic":
-			return "magic"
-	return ""
-
-
-func _effective_base_stats(base: Dictionary) -> Dictionary:
-	var effective = progression.get("effective_base_stats", null)
-	if typeof(effective) == TYPE_DICTIONARY:
-		return effective as Dictionary
-	return base
-
-
-func _breakdown_display_name(key: String) -> String:
-	if key in BASE_STATS:
-		return StatLabels.display_name(key)
-	return str(DERIVED_LABELS.get(key, key))
-
-
-func _format_stat_delta(key: String, value: float) -> String:
-	var formatted := _format_stat_value(key, value)
-	if value > 0.0:
-		return "+%s" % formatted
-	return formatted
 
 
 func _value_label() -> Label:

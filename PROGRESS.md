@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-02 (v408 weapon-elemental-procs)
+Last updated: 2026-07-02 (v408 engineering review + weapon-elemental-procs)
 
 ---
 
@@ -27,8 +27,8 @@ Last updated: 2026-07-02 (v408 weapon-elemental-procs)
 | **Active branch** | `main` |
 | **CI gate** | 2026-07-02 — `make ci` green (v408 autoloop batch) |
 | **Next slice** | TBD (`/next`) |
-| **Last engineering review** | v398 — [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md) (2026-07-01; official cadence) |
-| **Next engineering review** | ~v408 milestone |
+| **Last engineering review** | v408 — [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md) (2026-07-02; official cadence) |
+| **Next engineering review** | ~v418 milestone |
 
 
 ### Periodic engineering reviews
@@ -87,8 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v398 `$review` complete (official cadence at `e0f402e4`).** Overview:
-  [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md). Protocol ci-full green; **19 client extended bot scenarios** failed step 10/11 at review time — **fixed in `$refactor`** (menu-bot detection, market preflight, v390 assertion drift, blacksmith staging, combat-feel config). Re-run `make ci-full` to confirm.
+- **v408 `$review` complete (official cadence at `ffdd3f0b`).** Overview:
+  [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md). Pre-refactor `make ci-full` failed step 1 (`character_stats_panel.gd` ratchet breach) — **fixed in `$refactor`** via `character_stats_breakdown.gd` extraction. Re-run `make ci-full` to confirm full matrix.
+- **v398 `$review` (superseded by v408).** Overview:
+  [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md). Protocol ci-full green; 19 client extended failures fixed in prior `$refactor`.
 - **v384 `$review` (superseded by v398).** Overview:
   [`docs/reviews/20260629_v384-overview.md`](docs/reviews/20260629_v384-overview.md). All ten review recommendations closed (2026-06-29 paydown).
 - **v349 `$review` (superseded by v384).** Overview:

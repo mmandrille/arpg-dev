@@ -1,0 +1,65 @@
+client/scripts/inventory_panel.gd
+  s_a61a613784f06c::t_1371d166860ffb 990-992
+  s_a61a613784f06c::t_95ee7f1dd3580a 1023
+  s_a61a613784f06c::t_68f750f17a1201 976
+  s_a61a613784f06c::t_0f1f896be03a33 17
+  s_a61a613784f06c::t_2bd36ba1f23c56 987-989
+client/scripts/shop_panel.gd
+  s_a61a613784f06c::t_1e815956a3ae59 813
+  s_a61a613784f06c::t_732d26111a34f4 13
+  s_a61a613784f06c::t_3b085b55a7888e 766-768
+  s_a61a613784f06c::t_ea387510d79d1c 784
+client/tests/test_shop_panel.gd
+  s_a61a613784f06c::t_e89cafbfbc674c 84
+  s_a61a613784f06c::t_6b830980a5206a 261
+  s_a61a613784f06c::t_ed749dcfdcece4 75
+  s_a61a613784f06c::t_ac0699d8d388c6 76
+  s_a61a613784f06c::t_93e85f5a9a5889 82-83
+server/internal/game/shop.go
+  s_a61a613784f06c::t_abddcea60aad10 773-775
+  s_a61a613784f06c::t_b268d990dd2e6f 845-884
+  s_a61a613784f06c::t_590ad7de33ac92 446
+  s_a61a613784f06c::t_8dd24d3e1f18a6 885-905
+  s_a61a613784f06c::t_e615b3cd9e4dfa 646
+  s_a61a613784f06c::t_afc5675ddf9ed4 606
+  s_a61a613784f06c::t_323a49bdbc26d4 95
+  s_a61a613784f06c::t_4bfd5562b23790 167
+  s_a61a613784f06c::t_44a1c6935431e8 763,770-771
+client/scripts/stash_panel.gd
+  s_a61a613784f06c::t_314c6fdbe7e413 963-965
+  s_a61a613784f06c::t_bff074010c0213 975
+  s_a61a613784f06c::t_bf8ca689d75b68 14
+  s_a61a613784f06c::t_a2923c34b2c891 987
+client/scripts/weapon_range_tooltip.gd
+  s_a61a613784f06c::t_2a90f1ba1f5778 1-4,6-15,24,68-72,76-79,82-85,90,92-93,100,103,109,112,114-120,129-130,132
+  s_a61a613784f06c::t_7f23e9be180807 5,16-23,25-67,73-75,80-81,86-89,91,94-99,101-102,104-108,110-111,113,121-128,131
+client/tests/test_weapon_range_tooltip.gd
+  s_a61a613784f06c::t_099c4b76a00672 1-11,13-26,35-51,53-69
+  s_a61a613784f06c::t_ca53e42a387cf2 12,27-34,52
+server/internal/game/sim.go
+  s_a61a613784f06c::t_fb6dae2c5dd372 5451
+  s_a61a613784f06c::t_f83073b38e68e0 5487
+server/internal/game/game_test.go
+  s_a61a613784f06c::t_591cf3f402fe94 2763-2765
+  s_a61a613784f06c::t_6c55f232e1f993 2766-2768
+client/scripts/market_panel.gd
+  s_a61a613784f06c::t_da567558d7fa62 19
+  s_a61a613784f06c::t_3fdea3555188f0 941-943
+  s_a61a613784f06c::t_db5d6206be3978 944-946
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7d4b935084e2a06721446b8f7b61b40c52de6c51",
+  "prompts": {},
+  "sessions": {
+    "s_a61a613784f06c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ed00effe-bcfa-4b5b-bbda-05412c567091",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

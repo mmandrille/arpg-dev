@@ -1,0 +1,68 @@
+server/internal/game/class_specialist_gear_test.go
+  s_5a3ea93ee1a1e9::t_f8e3f2e9dfc69d 108
+  s_5a3ea93ee1a1e9::t_f5eacd6840ebb9 88,94
+  s_5a3ea93ee1a1e9::t_c76b603f815400 1-84,93,101-102,113-114
+  s_5a3ea93ee1a1e9::t_69473b074c04a5 99
+  s_5a3ea93ee1a1e9::t_189bfe3fa77633 85-87,89-92,95-98,100,103-107,109-112
+tools/validate_shared.py
+  s_5a3ea93ee1a1e9::t_cea82e93630744 944,947-959
+  s_5a3ea93ee1a1e9::t_c9cee9aa606f6e 970,1054
+server/internal/game/item_rolls.go
+  s_5a3ea93ee1a1e9::t_0e2a08c29272ba 16-18
+PROGRESS.md
+  s_5a3ea93ee1a1e9::t_94cef865ab51fd 26
+  s_5a3ea93ee1a1e9::t_121ea86b84d12d 18
+shared/rules/item_templates.v0.schema.json
+  s_5a3ea93ee1a1e9::t_2859aaf92ca397 38-40
+shared/assets/item_visuals.v0.json
+  s_5a3ea93ee1a1e9::t_65786926594393 1060-1169
+docs/progress/slice-lifecycle.md
+  s_5a3ea93ee1a1e9::t_17404e677913a1 418
+tools/bot/scenarios/114_class_specialist_gear_lab.json
+  s_5a3ea93ee1a1e9::t_a21af5404d74ba 1-7,9-26,28-30,33-36
+  s_5a3ea93ee1a1e9::t_c171f8eeca02c2 8
+  s_5a3ea93ee1a1e9::t_21e659aab6d27c 27,31-32
+shared/rules/worlds.v0.json
+  s_5a3ea93ee1a1e9::t_28627a6743529e 1457-1490
+shared/assets/item_presentations.v0.json
+  s_5a3ea93ee1a1e9::t_2243a4e3d3115b 821
+  s_5a3ea93ee1a1e9::t_e92726c78783a0 94-108
+  s_5a3ea93ee1a1e9::t_45cb793183adc7 816-820,822-830
+.maintainability/file-size-baseline.tsv
+  s_5a3ea93ee1a1e9::t_e1f8b61db579c7 28
+docs/specs/v405_spec-class-specialist-gear.md
+  s_5a3ea93ee1a1e9::t_92d3491e4c5b53 1-88
+server/internal/game/class_item_affinities.go
+  s_5a3ea93ee1a1e9::t_f98d44d771871a 243-262
+docs/plans/v405_2026-07-02-class-specialist-gear.md
+  s_5a3ea93ee1a1e9::t_1e43b9d7a18cf1 3,11,24,32,36-39,43-46,50,54,58-61
+  s_5a3ea93ee1a1e9::t_fdf94bfdcdde15 1-2,4-10,12-23,25-31,33-35,40-42,47-49,51-53,55-57
+shared/rules/treasure_classes.v0.json
+  s_5a3ea93ee1a1e9::t_f44a380090513a 77-96
+server/internal/game/rules.go
+  s_5a3ea93ee1a1e9::t_9ad5a7ad2cc614 1140
+  s_5a3ea93ee1a1e9::t_edc54fc76946d4 1115,1119-1135
+  s_5a3ea93ee1a1e9::t_ce774b15691e2b 303
+docs/as-built/v405_class-specialist-gear.md
+  s_5a3ea93ee1a1e9::t_0319f2ac17ffe8 1-26
+shared/rules/item_templates.v0.json
+  s_5a3ea93ee1a1e9::t_34b749471bce7e 2550-2723
+server/internal/game/item_reroll.go
+  s_5a3ea93ee1a1e9::t_7192be10a1dc77 31-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c8b593d133801c330974f5a2f0133a4c06b2dfcc",
+  "prompts": {},
+  "sessions": {
+    "s_5a3ea93ee1a1e9": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1f81b20e-cdf0-4c82-929e-ab8f720b78c7",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

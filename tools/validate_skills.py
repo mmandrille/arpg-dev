@@ -293,11 +293,11 @@ def validate_skill_catalogs(
     survival_kinds = {"survival_autocast"}
     decuple_classes = ("barbarian", "paladin", "sorcerer", "ranger", "rogue")
     expected_actives = {
-        "barbarian": 7,
-        "paladin": 7,
-        "sorcerer": 7,
-        "ranger": 7,
-        "rogue": 7,
+        "barbarian": 13,
+        "paladin": 13,
+        "sorcerer": 13,
+        "ranger": 13,
+        "rogue": 13,
     }
     decuple_errors = []
     for class_id in decuple_classes:

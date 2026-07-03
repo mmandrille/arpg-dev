@@ -1,0 +1,45 @@
+{
+  "id": "class_build_branches_lab",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v420_class_build_branches",
+  "character_class": "barbarian",
+  "title": "Class build branch skills",
+  "description": "Prove barbarian Gore Strike capstone casts in the skill lab; other classes covered by Go registration tests.",
+  "debug_progression": {
+    "level": 24,
+    "unspent_skill_points": 0,
+    "stats": { "str": 18, "dex": 5, "vit": 14, "magic": 3 },
+    "skill_ranks": {
+      "cleave": 1,
+      "ground_slam": 1,
+      "rend": 1,
+      "gore_strike": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "cast_skill",
+      "skill_id": "gore_strike",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_started",
+        "skill_id": "gore_strike"
+      },
+      "timeout_s": 3
+    }
+  ],
+  "assertions": [
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "gore_strike",
+      "rank": 1
+    }
+  ]
+}

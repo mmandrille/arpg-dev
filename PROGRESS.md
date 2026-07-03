@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-03 (v419 skill-tree-prerequisite-layout)
+Last updated: 2026-07-03 (v420 class-skill-build-branches)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-07-03 (v419 skill-tree-prerequisite-layout)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v419 — skill-tree-prerequisite-layout |
+| **Latest completed slice** | v420 — class-skill-build-branches |
 | **Active branch** | `main` |
 | **CI gate** | 2026-07-03 — autoloop batch CI pending |
 | **Next slice** | TBD (`/next`) |

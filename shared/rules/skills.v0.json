@@ -3365,6 +3365,1841 @@
         "fixed_ticks": 1200
       },
       "name_key": "skill.spectral_path.name"
+    },
+    "rampage": {
+      "name": "Rampage",
+      "class": "barbarian",
+      "tree": {
+        "tier": 3,
+        "column": 2
+      },
+      "kind": "self_buff",
+      "max_rank": 10,
+      "targeting": "self",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 12,
+          "vit": 10
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "rage",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "effects": [
+        {
+          "type": "stat_percent_buff",
+          "stats": [
+            "str",
+            "dex"
+          ],
+          "percent_base": 15,
+          "percent_per_rank": 10,
+          "duration_ticks": 450,
+          "visual_scale": true
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 675
+      },
+      "name_key": "skill.rampage.name",
+      "synergies": [
+        {
+          "source_skill_id": "rage",
+          "modifier": "buff_power_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "shatter_strike": {
+      "name": "Shatter Strike",
+      "class": "barbarian",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 12,
+          "vit": 10
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "earthbreaker",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 7,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 5,
+        "angle_degrees": 35,
+        "push_min": 2,
+        "push_max": 5,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.shatter_strike.name",
+      "synergies": [
+        {
+          "source_skill_id": "earthbreaker",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "battle_roar": {
+      "name": "Battle Roar",
+      "class": "barbarian",
+      "tree": {
+        "tier": 4,
+        "column": 4
+      },
+      "kind": "area_stat_buff",
+      "max_rank": 10,
+      "targeting": "self_or_ally_area",
+      "requirements": {
+        "level": 18,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 14,
+          "vit": 12
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "war_cry",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "area_stat_percent_buff",
+          "target": "allies",
+          "include_caster": true,
+          "range": 9,
+          "radius": 6,
+          "stats": [
+            "str",
+            "vit"
+          ],
+          "percent_base": 15,
+          "percent_per_rank": 8,
+          "duration_ticks": 350,
+          "effect_id": "battle_roar"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 525
+      },
+      "name_key": "skill.battle_roar.name",
+      "synergies": [
+        {
+          "source_skill_id": "war_cry",
+          "modifier": "buff_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "worldbreaker": {
+      "name": "Worldbreaker",
+      "class": "barbarian",
+      "tree": {
+        "tier": 4,
+        "column": 1
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 16,
+          "vit": 14
+        },
+        "stats_per_rank": {
+          "str": 2,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "shatter_strike",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 8,
+        "angle_degrees": 360,
+        "push_min": 4,
+        "push_max": 10,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.worldbreaker.name",
+      "synergies": [
+        {
+          "source_skill_id": "shatter_strike",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "blood_frenzy": {
+      "name": "Blood Frenzy",
+      "class": "barbarian",
+      "tree": {
+        "tier": 4,
+        "column": 2
+      },
+      "kind": "self_buff",
+      "max_rank": 10,
+      "targeting": "self",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 16,
+          "vit": 14
+        },
+        "stats_per_rank": {
+          "str": 2,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "rampage",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "effects": [
+        {
+          "type": "stat_percent_buff",
+          "stats": [
+            "str",
+            "vit"
+          ],
+          "percent_base": 20,
+          "percent_per_rank": 12,
+          "duration_ticks": 550,
+          "visual_scale": true
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 825
+      },
+      "name_key": "skill.blood_frenzy.name",
+      "synergies": [
+        {
+          "source_skill_id": "rampage",
+          "modifier": "buff_power_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "gore_strike": {
+      "name": "Gore Strike",
+      "class": "barbarian",
+      "damage_type": "force",
+      "tree": {
+        "tier": 4,
+        "column": 3
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 16,
+          "vit": 14
+        },
+        "stats_per_rank": {
+          "str": 2,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "rend",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "cone": {
+        "range": 5,
+        "angle_degrees": 45,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "bleed": {
+        "effect_id": "gore_bleed",
+        "damage_percent_max_hp": 8,
+        "damage_percent_max_hp_per_rank": 2,
+        "duration_ticks": 60,
+        "duration_ticks_per_rank": 10,
+        "interval_ticks": 10
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      },
+      "name_key": "skill.gore_strike.name",
+      "synergies": [
+        {
+          "source_skill_id": "rend",
+          "modifier": "bleed_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "glacial_lance": {
+      "name": "Glacial Lance",
+      "class": "sorcerer",
+      "damage_type": "cold",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "cold_projectile_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 14
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "ice_shard",
+            "rank": 3
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 3,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 200,
+        "max_base": 175,
+        "min_per_rank": 55,
+        "max_per_rank": 30,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 25,
+          "use_requirement_baseline": true
+        }
+      },
+      "projectile": {
+        "range": 18,
+        "speed": 18.75,
+        "visual": "ice_shard_projectile"
+      },
+      "slow": {
+        "effect_id": "ice_slow",
+        "percent": 35,
+        "duration_ticks": 80,
+        "max_percent": 80
+      },
+      "shatter": {
+        "min_shards": 2,
+        "max_shards": 5,
+        "range": 7,
+        "speed": 22.5,
+        "visual": "ice_shard_shard"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2
+      },
+      "name_key": "skill.glacial_lance.name",
+      "synergies": [
+        {
+          "source_skill_id": "ice_shard",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "chain_storm": {
+      "name": "Chain Storm",
+      "class": "sorcerer",
+      "damage_type": "lightning",
+      "tree": {
+        "tier": 3,
+        "column": 2
+      },
+      "kind": "chain_projectile_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 14
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "lightning",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 3,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 150,
+        "max_base": 150,
+        "min_per_rank": 50,
+        "max_per_rank": 25,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 25,
+          "use_requirement_baseline": true
+        }
+      },
+      "projectile": {
+        "range": 18,
+        "speed": 28.125,
+        "visual": "lightning_projectile"
+      },
+      "chain": {
+        "range_multiplier": 0.9,
+        "max_jumps": 10,
+        "visual": "lightning_chain"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2,
+        "flat_ticks": 10
+      },
+      "name_key": "skill.chain_storm.name",
+      "synergies": [
+        {
+          "source_skill_id": "lightning",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "renewing_light": {
+      "name": "Renewing Light",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 3,
+        "column": 2
+      },
+      "kind": "area_heal",
+      "max_rank": 10,
+      "targeting": "direction_or_target_area",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 12
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "revive",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 8,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "area_percent_heal",
+          "target": "allies",
+          "include_caster": true,
+          "range": 8,
+          "radius": 5,
+          "percent_base": 20,
+          "percent_per_rank": 10,
+          "duration_ticks": 30,
+          "magic_scaling": {
+            "stat": "magic",
+            "percent_per_point": 1,
+            "max_bonus_percent": 25,
+            "use_requirement_baseline": true
+          }
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 12,
+        "flat_ticks": 45
+      },
+      "name_key": "skill.renewing_light.name",
+      "synergies": [
+        {
+          "source_skill_id": "revive",
+          "modifier": "area_radius_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "inferno": {
+      "name": "Inferno",
+      "class": "sorcerer",
+      "damage_type": "fire",
+      "tree": {
+        "tier": 4,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 18
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "fireball",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 320,
+        "max_base": 260,
+        "min_per_rank": 60,
+        "max_per_rank": 35,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 25,
+          "use_requirement_baseline": true
+        }
+      },
+      "projectile": {
+        "range": 18,
+        "speed": 24,
+        "visual": "magic_bolt_projectile"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      },
+      "name_key": "skill.inferno.name",
+      "synergies": [
+        {
+          "source_skill_id": "fireball",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "arcane_overload": {
+      "name": "Arcane Overload",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 4,
+        "column": 3
+      },
+      "kind": "self_buff",
+      "max_rank": 10,
+      "targeting": "self",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 16
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "arcane_barrage",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "stat_percent_buff",
+          "stats": [
+            "vit",
+            "magic"
+          ],
+          "percent_base": 20,
+          "percent_per_rank": 10,
+          "duration_ticks": 500,
+          "visual_scale": true
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 750
+      },
+      "name_key": "skill.arcane_overload.name",
+      "synergies": [
+        {
+          "source_skill_id": "arcane_barrage",
+          "modifier": "buff_power_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "arcane_renewal": {
+      "name": "Arcane Renewal",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 4,
+        "column": 2
+      },
+      "kind": "revive_companion",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 16
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "renewing_light",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 10,
+          "per_rank": 1
+        }
+      },
+      "revive": {
+        "power_percent_base": 50,
+        "power_percent_per_rank": 10,
+        "duration_seconds_base": 60,
+        "duration_seconds_per_rank": 10,
+        "limit": {
+          "base": 1,
+          "per_rank_step": 1,
+          "ranks_per_step": 3
+        }
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 4
+      },
+      "name_key": "skill.arcane_renewal.name",
+      "synergies": [
+        {
+          "source_skill_id": "renewing_light",
+          "modifier": "revive_power_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "blessed_recovery": {
+      "name": "Blessed Recovery",
+      "class": "paladin",
+      "tree": {
+        "tier": 3,
+        "column": 3
+      },
+      "kind": "area_heal",
+      "max_rank": 10,
+      "targeting": "direction_or_target_area",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 12,
+          "vit": 10
+        },
+        "stats_per_rank": {
+          "magic": 2,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "heal",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "area_percent_heal",
+          "target": "allies",
+          "include_caster": true,
+          "range": 10,
+          "radius": 5,
+          "percent_base": 30,
+          "percent_per_rank": 10,
+          "duration_ticks": 30,
+          "magic_scaling": {
+            "stat": "magic",
+            "percent_per_point": 1,
+            "max_bonus_percent": 25,
+            "use_requirement_baseline": true
+          }
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 10,
+        "flat_ticks": 45
+      },
+      "name_key": "skill.blessed_recovery.name",
+      "synergies": [
+        {
+          "source_skill_id": "heal",
+          "modifier": "area_radius_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "avenging_light": {
+      "name": "Avenging Light",
+      "class": "paladin",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 2
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 12,
+          "magic": 10
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "consecrated_smite",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "cone": {
+        "range": 7,
+        "angle_degrees": 55,
+        "push_min": 2,
+        "push_max": 4,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.8
+      },
+      "name_key": "skill.avenging_light.name",
+      "synergies": [
+        {
+          "source_skill_id": "consecrated_smite",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "bulwark_aura": {
+      "name": "Bulwark Aura",
+      "class": "paladin",
+      "tree": {
+        "tier": 3,
+        "column": 4
+      },
+      "kind": "area_stat_buff",
+      "max_rank": 10,
+      "targeting": "self_or_ally_area",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "vit": 12,
+          "magic": 10
+        },
+        "stats_per_rank": {
+          "vit": 2,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "holy_shield",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "effects": [
+        {
+          "type": "area_stat_percent_buff",
+          "target": "allies",
+          "include_caster": true,
+          "range": 9,
+          "radius": 5,
+          "stats": [
+            "armor",
+            "block_percent"
+          ],
+          "percent_base": 25,
+          "percent_per_rank": 8,
+          "duration_ticks": 350,
+          "effect_id": "bulwark_aura",
+          "magic_scaling": {
+            "stat": "magic",
+            "percent_per_point": 1,
+            "max_bonus_percent": 20,
+            "use_requirement_baseline": true
+          }
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 525
+      },
+      "name_key": "skill.bulwark_aura.name",
+      "synergies": [
+        {
+          "source_skill_id": "holy_shield",
+          "modifier": "buff_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "divine_hammer": {
+      "name": "Divine Hammer",
+      "class": "paladin",
+      "damage_type": "force",
+      "tree": {
+        "tier": 4,
+        "column": 2
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 16,
+          "magic": 12
+        },
+        "stats_per_rank": {
+          "str": 2,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "hammer_of_light",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 7,
+          "per_rank": 1
+        }
+      },
+      "cone": {
+        "range": 8,
+        "angle_degrees": 70,
+        "push_min": 4,
+        "push_max": 7,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.divine_hammer.name",
+      "synergies": [
+        {
+          "source_skill_id": "hammer_of_light",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "sacred_ground": {
+      "name": "Sacred Ground",
+      "class": "paladin",
+      "tree": {
+        "tier": 4,
+        "column": 4
+      },
+      "kind": "area_stat_buff",
+      "max_rank": 10,
+      "targeting": "self_or_ally_area",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "vit": 16,
+          "magic": 14
+        },
+        "stats_per_rank": {
+          "vit": 2,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "sanctuary",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 7,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "area_immunity_buff",
+          "target": "allies",
+          "include_caster": true,
+          "range": 6,
+          "radius": 5,
+          "duration_ticks": 40,
+          "effect_id": "sacred_ground",
+          "magic_scaling": {
+            "stat": "magic",
+            "percent_per_point": 1,
+            "max_bonus_percent": 15,
+            "use_requirement_baseline": true
+          }
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 590
+      },
+      "name_key": "skill.sacred_ground.name",
+      "synergies": [
+        {
+          "source_skill_id": "sanctuary",
+          "modifier": "buff_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "righteous_fury": {
+      "name": "Righteous Fury",
+      "class": "paladin",
+      "tree": {
+        "tier": 4,
+        "column": 1
+      },
+      "kind": "self_buff",
+      "max_rank": 10,
+      "targeting": "self",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "vit": 16,
+          "magic": 12
+        },
+        "stats_per_rank": {
+          "vit": 2,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "retribution",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "reflect_on_block_buff",
+          "percent_base": 50,
+          "percent_per_rank": 10,
+          "duration_ticks": 350,
+          "effect_id": "righteous_fury"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 600
+      },
+      "name_key": "skill.righteous_fury.name",
+      "synergies": [
+        {
+          "source_skill_id": "retribution",
+          "modifier": "buff_power_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "blade_dance": {
+      "name": "Blade Dance",
+      "class": "rogue",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 14
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "shadow_flurry",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 4,
+        "angle_degrees": 100,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1.8
+      },
+      "name_key": "skill.blade_dance.name",
+      "synergies": [
+        {
+          "source_skill_id": "shadow_flurry",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "venom_spray": {
+      "name": "Venom Spray",
+      "class": "rogue",
+      "damage_type": "poison",
+      "tree": {
+        "tier": 3,
+        "column": 3
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 14
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "fan_of_blades",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 3,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 2.5,
+        "angle_degrees": 70,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "poison": {
+        "damage_percent_base": 20,
+        "damage_percent_per_rank": 10,
+        "duration_ticks": 50,
+        "magic_duration_ticks_per_point": 2,
+        "mark_damage_bonus_percent": 20,
+        "mark_duration_ticks": 50,
+        "mark_effect_id": "rogue_mark"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2
+      },
+      "name_key": "skill.venom_spray.name",
+      "synergies": [
+        {
+          "source_skill_id": "fan_of_blades",
+          "modifier": "mark_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "shadow_veil": {
+      "name": "Shadow Veil",
+      "class": "rogue",
+      "tree": {
+        "tier": 3,
+        "column": 5
+      },
+      "kind": "area_stat_buff",
+      "max_rank": 10,
+      "targeting": "self_or_ally_area",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 14
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "smoke_screen",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "area_stat_percent_buff",
+          "target": "allies",
+          "include_caster": true,
+          "range": 7,
+          "radius": 5,
+          "stats": [
+            "evade_chance"
+          ],
+          "percent_base": 35,
+          "percent_per_rank": 5,
+          "duration_ticks": 120,
+          "effect_id": "shadow_veil"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 500
+      },
+      "name_key": "skill.shadow_veil.name",
+      "synergies": [
+        {
+          "source_skill_id": "smoke_screen",
+          "modifier": "buff_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "death_blossom": {
+      "name": "Death Blossom",
+      "class": "rogue",
+      "tree": {
+        "tier": 4,
+        "column": 1
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 18
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "blade_dance",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 3.5,
+        "angle_degrees": 360,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1.8
+      },
+      "name_key": "skill.death_blossom.name",
+      "synergies": [
+        {
+          "source_skill_id": "blade_dance",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "assassinate": {
+      "name": "Assassinate",
+      "class": "rogue",
+      "damage_type": "poison",
+      "tree": {
+        "tier": 4,
+        "column": 2
+      },
+      "kind": "cone_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 18
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "eviscerate",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "cone": {
+        "range": 4,
+        "angle_degrees": 30,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "poison": {
+        "damage_percent_base": 25,
+        "damage_percent_per_rank": 12,
+        "duration_ticks": 60,
+        "magic_duration_ticks_per_point": 2,
+        "mark_damage_bonus_percent": 25,
+        "mark_duration_ticks": 60,
+        "mark_effect_id": "rogue_mark"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.assassinate.name",
+      "synergies": [
+        {
+          "source_skill_id": "eviscerate",
+          "modifier": "mark_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "killing_mark": {
+      "name": "Killing Mark",
+      "class": "rogue",
+      "damage_type": "force",
+      "tree": {
+        "tier": 4,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 18
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "predators_mark",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 80,
+        "max_base": 80,
+        "min_per_rank": 25,
+        "max_per_rank": 15
+      },
+      "projectile": {
+        "range": 14,
+        "speed": 22,
+        "visual": "pinning_shot_projectile"
+      },
+      "mark": {
+        "damage_bonus_percent": 30,
+        "damage_bonus_percent_per_rank": 5,
+        "duration_ticks": 100,
+        "effect_id": "rogue_mark"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2
+      },
+      "name_key": "skill.killing_mark.name",
+      "synergies": [
+        {
+          "source_skill_id": "predators_mark",
+          "modifier": "mark_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "alpha_call": {
+      "name": "Alpha Call",
+      "class": "ranger",
+      "tree": {
+        "tier": 3,
+        "column": 3
+      },
+      "kind": "summon_companion",
+      "max_rank": 10,
+      "targeting": "self",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 12
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "black_wolf_companion",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "companion": {
+        "monster_def_id": "companion_black_wolf",
+        "visual_model": "monster_wolf",
+        "visual_tint": "101014",
+        "visual_scale": 1.1,
+        "hero_stat_percent_base": 85,
+        "hero_stat_percent_per_rank": 15,
+        "limit": {
+          "base": 1,
+          "per_rank_step": 0,
+          "ranks_per_step": 1
+        }
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "fixed_ticks": 1200,
+        "magic_reduction_ticks_per_point": 10
+      },
+      "name_key": "skill.alpha_call.name",
+      "synergies": [
+        {
+          "source_skill_id": "black_wolf_companion",
+          "modifier": "buff_power_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "pinning_volley": {
+      "name": "Pinning Volley",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 2
+      },
+      "kind": "projectile_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 14
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "pinning_shot",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 100,
+        "max_base": 100,
+        "min_per_rank": 50,
+        "max_per_rank": 25
+      },
+      "projectile": {
+        "range": 14,
+        "speed": 23,
+        "visual": "volley_arrow_projectile"
+      },
+      "volley": {
+        "arrow_count": 5,
+        "spread_degrees": 40
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.pinning_volley.name",
+      "synergies": [
+        {
+          "source_skill_id": "pinning_shot",
+          "modifier": "volley_spread_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
+    },
+    "hunters_volley": {
+      "name": "Hunter's Volley",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 12,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 14
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "volley",
+            "rank": 3
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 100,
+        "max_base": 100,
+        "min_per_rank": 50,
+        "max_per_rank": 25
+      },
+      "projectile": {
+        "range": 14,
+        "speed": 23,
+        "visual": "volley_arrow_projectile"
+      },
+      "volley": {
+        "arrow_count": 6,
+        "spread_degrees": 55
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.hunters_volley.name",
+      "synergies": [
+        {
+          "source_skill_id": "volley",
+          "modifier": "volley_spread_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
+    },
+    "pack_master": {
+      "name": "Pack Master",
+      "class": "ranger",
+      "tree": {
+        "tier": 4,
+        "column": 3
+      },
+      "kind": "summon_companion",
+      "max_rank": 10,
+      "targeting": "self",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 16
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "alpha_call",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 0
+        }
+      },
+      "companion": {
+        "monster_def_id": "companion_black_wolf",
+        "visual_model": "monster_wolf",
+        "visual_tint": "202028",
+        "visual_scale": 1.15,
+        "hero_stat_percent_base": 100,
+        "hero_stat_percent_per_rank": 20,
+        "limit": {
+          "base": 1,
+          "per_rank_step": 0,
+          "ranks_per_step": 1
+        }
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "fixed_ticks": 900,
+        "magic_reduction_ticks_per_point": 10
+      },
+      "name_key": "skill.pack_master.name",
+      "synergies": [
+        {
+          "source_skill_id": "alpha_call",
+          "modifier": "buff_power_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "meteor_shot": {
+      "name": "Meteor Shot",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 4,
+        "column": 4
+      },
+      "kind": "projectile_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 18
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "explosive_shot",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 7,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 420,
+        "max_base": 360,
+        "min_per_rank": 75,
+        "max_per_rank": 40
+      },
+      "projectile": {
+        "range": 22,
+        "speed": 30,
+        "visual": "piercing_shot_projectile"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3.5
+      },
+      "name_key": "skill.meteor_shot.name",
+      "synergies": [
+        {
+          "source_skill_id": "explosive_shot",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
+    },
+    "arrow_storm": {
+      "name": "Arrow Storm",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 4,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 10,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 22,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 18
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "rain_of_arrows",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 100,
+        "max_base": 100,
+        "min_per_rank": 40,
+        "max_per_rank": 20
+      },
+      "projectile": {
+        "range": 16,
+        "speed": 21,
+        "visual": "volley_arrow_projectile"
+      },
+      "volley": {
+        "arrow_count": 9,
+        "spread_degrees": 60
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3.5
+      },
+      "name_key": "skill.arrow_storm.name",
+      "synergies": [
+        {
+          "source_skill_id": "rain_of_arrows",
+          "modifier": "volley_spread_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
     }
   }
 }

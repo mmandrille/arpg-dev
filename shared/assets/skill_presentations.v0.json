@@ -724,6 +724,346 @@
       "summary": "Auto-proc: redirect damage and ghost walk",
       "effect_visual": "teleport_blink",
       "summary_key": "skill.spectral_path.summary"
+    },
+    "rampage": {
+      "icon": {
+        "label": "R",
+        "shape": "flame",
+        "color": "#cf4f3e",
+        "accent": "#ffd0a8"
+      },
+      "summary": "Rampage skill",
+      "effect_visual": "rage_scale",
+      "summary_key": "skill.rampage.summary"
+    },
+    "shatter_strike": {
+      "icon": {
+        "label": "S",
+        "shape": "slash",
+        "color": "#8f2418",
+        "accent": "#ffc7b8"
+      },
+      "summary": "Shatter Strike skill",
+      "effect_visual": "cleave_cone",
+      "summary_key": "skill.shatter_strike.summary"
+    },
+    "battle_roar": {
+      "icon": {
+        "label": "B",
+        "shape": "burst",
+        "color": "#c43a2a",
+        "accent": "#ffd0c8"
+      },
+      "summary": "Battle Roar skill",
+      "effect_visual": "holy_shield_ring",
+      "summary_key": "skill.battle_roar.summary"
+    },
+    "worldbreaker": {
+      "icon": {
+        "label": "W",
+        "shape": "quake",
+        "color": "#8b5a34",
+        "accent": "#ffd68a"
+      },
+      "summary": "Worldbreaker skill",
+      "effect_visual": "earthbreaker_ring",
+      "summary_key": "skill.worldbreaker.summary"
+    },
+    "blood_frenzy": {
+      "icon": {
+        "label": "B",
+        "shape": "flame",
+        "color": "#cf4f3e",
+        "accent": "#ffd0a8"
+      },
+      "summary": "Blood Frenzy skill",
+      "effect_visual": "rage_scale",
+      "summary_key": "skill.blood_frenzy.summary"
+    },
+    "gore_strike": {
+      "icon": {
+        "label": "G",
+        "shape": "slash",
+        "color": "#c04030",
+        "accent": "#ff8060"
+      },
+      "summary": "Gore Strike skill",
+      "effect_visual": "earthbreaker_ring",
+      "summary_key": "skill.gore_strike.summary"
+    },
+    "glacial_lance": {
+      "icon": {
+        "label": "G",
+        "shape": "ice_spike",
+        "color": "#8fdcff",
+        "accent": "#f2fdff"
+      },
+      "summary": "Glacial Lance skill",
+      "projectile_visual": "ice_shard_projectile",
+      "effect_visual": "ice_slow",
+      "summary_key": "skill.glacial_lance.summary"
+    },
+    "chain_storm": {
+      "icon": {
+        "label": "C",
+        "shape": "bolt",
+        "color": "#f7e35f",
+        "accent": "#fff9bd"
+      },
+      "summary": "Chain Storm skill",
+      "projectile_visual": "lightning_projectile",
+      "effect_visual": "lightning_chain",
+      "summary_key": "skill.chain_storm.summary"
+    },
+    "renewing_light": {
+      "icon": {
+        "label": "R",
+        "shape": "heart",
+        "color": "#47b870",
+        "accent": "#d8ffe3"
+      },
+      "summary": "Renewing Light skill",
+      "effect_visual": "healing_pulse",
+      "visual_radius": 4,
+      "summary_key": "skill.renewing_light.summary"
+    },
+    "inferno": {
+      "icon": {
+        "label": "I",
+        "shape": "flame",
+        "color": "#e85a28",
+        "accent": "#ffd0a0"
+      },
+      "summary": "Inferno skill",
+      "projectile_visual": "magic_bolt_projectile",
+      "effect_visual": "magic_bolt_burst",
+      "summary_key": "skill.inferno.summary"
+    },
+    "arcane_overload": {
+      "icon": {
+        "label": "A",
+        "shape": "shield",
+        "color": "#4a7fd4",
+        "accent": "#d8e8ff"
+      },
+      "summary": "Arcane Overload skill",
+      "effect_visual": "rage_aura",
+      "summary_key": "skill.arcane_overload.summary"
+    },
+    "arcane_renewal": {
+      "icon": {
+        "label": "A",
+        "shape": "burst",
+        "color": "#4fbf7a",
+        "accent": "#d7ffe8"
+      },
+      "summary": "Arcane Renewal skill",
+      "effect_visual": "revive_companion",
+      "summary_key": "skill.arcane_renewal.summary"
+    },
+    "blessed_recovery": {
+      "icon": {
+        "label": "B",
+        "shape": "heart",
+        "color": "#47b870",
+        "accent": "#d8ffe3"
+      },
+      "summary": "Blessed Recovery skill",
+      "effect_visual": "healing_pulse",
+      "visual_radius": 4,
+      "summary_key": "skill.blessed_recovery.summary"
+    },
+    "avenging_light": {
+      "icon": {
+        "label": "A",
+        "shape": "slash",
+        "color": "#e8c24a",
+        "accent": "#fff4c8"
+      },
+      "summary": "Avenging Light skill",
+      "effect_visual": "cleave_cone",
+      "summary_key": "skill.avenging_light.summary"
+    },
+    "bulwark_aura": {
+      "icon": {
+        "label": "B",
+        "shape": "shield",
+        "color": "#f0c23d",
+        "accent": "#fff7b0"
+      },
+      "summary": "Bulwark Aura skill",
+      "effect_visual": "holy_shield",
+      "summary_key": "skill.bulwark_aura.summary"
+    },
+    "divine_hammer": {
+      "icon": {
+        "label": "D",
+        "shape": "slash",
+        "color": "#f0d060",
+        "accent": "#fff8d0"
+      },
+      "summary": "Divine Hammer skill",
+      "effect_visual": "earthbreaker_ring",
+      "summary_key": "skill.divine_hammer.summary"
+    },
+    "sacred_ground": {
+      "icon": {
+        "label": "S",
+        "shape": "shield",
+        "color": "#74d6a1",
+        "accent": "#e5fff0"
+      },
+      "summary": "Sacred Ground skill",
+      "effect_visual": "sanctuary",
+      "summary_key": "skill.sacred_ground.summary"
+    },
+    "righteous_fury": {
+      "icon": {
+        "label": "R",
+        "shape": "shield",
+        "color": "#d0b040",
+        "accent": "#fff0a0"
+      },
+      "summary": "Righteous Fury skill",
+      "effect_visual": "holy_shield_ring",
+      "summary_key": "skill.righteous_fury.summary"
+    },
+    "blade_dance": {
+      "icon": {
+        "label": "B",
+        "shape": "slash",
+        "color": "#7c65ff",
+        "accent": "#e8e0ff"
+      },
+      "summary": "Blade Dance skill",
+      "effect_visual": "shadow_flurry",
+      "summary_key": "skill.blade_dance.summary"
+    },
+    "venom_spray": {
+      "icon": {
+        "label": "V",
+        "shape": "slash",
+        "color": "#3f9a62",
+        "accent": "#d8ffe8"
+      },
+      "summary": "Venom Spray skill",
+      "effect_visual": "cleave_cone",
+      "summary_key": "skill.venom_spray.summary"
+    },
+    "shadow_veil": {
+      "icon": {
+        "label": "S",
+        "shape": "dash",
+        "color": "#6a6a72",
+        "accent": "#d0d0d8"
+      },
+      "summary": "Shadow Veil skill",
+      "effect_visual": "holy_shield_ring",
+      "summary_key": "skill.shadow_veil.summary"
+    },
+    "death_blossom": {
+      "icon": {
+        "label": "D",
+        "shape": "slash",
+        "color": "#7c65ff",
+        "accent": "#e8e0ff"
+      },
+      "summary": "Death Blossom skill",
+      "effect_visual": "shadow_flurry",
+      "summary_key": "skill.death_blossom.summary"
+    },
+    "assassinate": {
+      "icon": {
+        "label": "A",
+        "shape": "slash",
+        "color": "#2f7a4a",
+        "accent": "#c8ffe0"
+      },
+      "summary": "Assassinate skill",
+      "effect_visual": "cleave_cone",
+      "summary_key": "skill.assassinate.summary"
+    },
+    "killing_mark": {
+      "icon": {
+        "label": "K",
+        "shape": "arrow",
+        "color": "#40a060",
+        "accent": "#90f0b0"
+      },
+      "summary": "Killing Mark skill",
+      "projectile_visual": "pinning_shot_projectile",
+      "effect_visual": "poison_stab",
+      "summary_key": "skill.killing_mark.summary"
+    },
+    "alpha_call": {
+      "icon": {
+        "label": "A",
+        "shape": "burst",
+        "color": "#101014",
+        "accent": "#9ea7b3"
+      },
+      "summary": "Alpha Call skill",
+      "effect_visual": "black_wolf_companion",
+      "summary_key": "skill.alpha_call.summary"
+    },
+    "pinning_volley": {
+      "icon": {
+        "label": "P",
+        "shape": "volley",
+        "color": "#3fd65e",
+        "accent": "#dfffd2"
+      },
+      "summary": "Pinning Volley skill",
+      "projectile_visual": "volley_arrow_projectile",
+      "effect_visual": "volley_fan",
+      "summary_key": "skill.pinning_volley.summary"
+    },
+    "hunters_volley": {
+      "icon": {
+        "label": "H",
+        "shape": "volley",
+        "color": "#3fd65e",
+        "accent": "#dfffd2"
+      },
+      "summary": "Hunter's Volley skill",
+      "projectile_visual": "volley_arrow_projectile",
+      "effect_visual": "volley_fan",
+      "summary_key": "skill.hunters_volley.summary"
+    },
+    "pack_master": {
+      "icon": {
+        "label": "P",
+        "shape": "burst",
+        "color": "#101014",
+        "accent": "#9ea7b3"
+      },
+      "summary": "Pack Master skill",
+      "effect_visual": "black_wolf_companion",
+      "summary_key": "skill.pack_master.summary"
+    },
+    "meteor_shot": {
+      "icon": {
+        "label": "M",
+        "shape": "arrow",
+        "color": "#ff8c3a",
+        "accent": "#ffe2c8"
+      },
+      "summary": "Meteor Shot skill",
+      "projectile_visual": "piercing_shot_projectile",
+      "effect_visual": "piercing_shot_burst",
+      "summary_key": "skill.meteor_shot.summary"
+    },
+    "arrow_storm": {
+      "icon": {
+        "label": "A",
+        "shape": "volley",
+        "color": "#3fd65e",
+        "accent": "#dfffd2"
+      },
+      "summary": "Arrow Storm skill",
+      "projectile_visual": "volley_arrow_projectile",
+      "effect_visual": "volley_fan",
+      "summary_key": "skill.arrow_storm.summary"
     }
   }
 }

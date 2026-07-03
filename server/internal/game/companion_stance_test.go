@@ -27,8 +27,8 @@ func TestCompanionStanceCommandUpdatesOwnedCompanions(t *testing.T) {
 	if mercenary == nil {
 		t.Fatal("missing hired mercenary")
 	}
-	if got := sim.entityView(mercenary).CompanionStance; got != CompanionStanceAssist {
-		t.Fatalf("default companion stance = %q, want %q", got, CompanionStanceAssist)
+	if got := sim.entityView(mercenary).CompanionStance; got != CompanionStanceDefend {
+		t.Fatalf("default companion stance = %q, want %q", got, CompanionStanceDefend)
 	}
 
 	res := sim.Tick([]Input{{

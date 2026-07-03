@@ -2596,7 +2596,7 @@ func _sync_companion_bar() -> void:
 			"visual_model": str(rec.get("visual_model", "")),
 			"remaining_ticks": int(rec.get("remaining_ticks", 0)),
 			"total_ticks": int(rec.get("total_ticks", 0)),
-			"companion_stance": str(rec.get("companion_stance", "assist")), "combat_stats": (rec.get("combat_stats", {}) as Dictionary).duplicate(true),
+			"companion_stance": str(rec.get("companion_stance", "defend")), "combat_stats": (rec.get("combat_stats", {}) as Dictionary).duplicate(true),
 		})
 	companion_bar.set_companions(companions)
 	if mercenary_panel != null: mercenary_panel.set_companions(companions)

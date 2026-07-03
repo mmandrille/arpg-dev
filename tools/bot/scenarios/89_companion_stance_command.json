@@ -32,7 +32,7 @@
       "action": "assert_entity_count",
       "entity_type": "companion",
       "monster_def_id": "character_mercenary",
-      "companion_stance": "assist",
+      "companion_stance": "defend",
       "alive": true,
       "equals": 1
     },

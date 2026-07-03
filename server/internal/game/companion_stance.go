@@ -12,7 +12,7 @@ type CompanionCommandIntent struct {
 
 func normalizeCompanionStance(stance string) string {
 	if stance == "" {
-		return CompanionStanceAssist
+		return CompanionStanceDefend
 	}
 	return stance
 }

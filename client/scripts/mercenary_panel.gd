@@ -19,7 +19,7 @@ var price: int = 0
 var affordable: bool = false
 var gold: int = 0
 var hired_entity_id: String = ""
-var selected_stance: String = "assist"
+var selected_stance: String = "defend"
 var candidates: Array = []
 
 var _panel: DraggableWindow
@@ -408,7 +408,7 @@ func _format_chance(value: Variant) -> String:
 
 func _normalize_stance(stance: String) -> String:
 	var normalized := stance.strip_edges().to_lower()
-	return normalized if normalized in SUPPORTED_STANCES else "assist"
+	return normalized if normalized in SUPPORTED_STANCES else "defend"
 
 
 func _stance_button_debug() -> Dictionary:

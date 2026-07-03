@@ -36,7 +36,7 @@ from tools.bot.bot_types import CoopPeer, DEFAULT_WORLD_ID, RuntimeState, Scenar
 from tools.bot.protocol import make_envelope, to_ws_url
 from tools.bot.bot_context import BotContext, StateIngestContext
 from tools.bot.coop_gold_staging import stage_peers_for_same_tick_gold_pickup
-from tools.bot.runtime_queries import dict_distance, event_matches, event_summary, find_player
+from tools.bot.runtime_queries import dict_distance, event_matches, event_summary, find_interactable, find_player
 from tools.bot import skill_visual_runtime
 from tools.bot.ci_pack import CI_SELECTOR, select_pack_scenarios
 from tools.bot.debug_progression import debug_progression_body
@@ -2505,13 +2505,6 @@ def find_live_monsters_sorted(
     return [entity for _, _, entity in ranked]
 
 
-def find_interactable(state: RuntimeState, interactable_def_id: str) -> dict[str, Any] | None:
-    for entity in state.entities.values():
-        if entity.get("type") == "interactable" and entity.get("interactable_def_id") == interactable_def_id:
-            return entity
-    return None
-
-
 def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
     if step.get("target_id"):
         target = state.entities.get(str(step["target_id"]))
@@ -2541,7 +2534,13 @@ def resolve_target(state: RuntimeState, step: dict[str, Any]) -> dict[str, Any]:
             raise AssertionError(f"{step.get('action')}: loot not found: {step}")
         return target
     if step.get("interactable_def_id"):
-        target = find_interactable(state, str(step["interactable_def_id"]))
+        target = find_interactable(
+            state,
+            str(step["interactable_def_id"]),
+            elite_objective=step.get("elite_objective") if step.get("elite_objective") is not None else None,
+            quest_reward=step.get("quest_reward") if step.get("quest_reward") is not None else None,
+            entity_state=str(step["state"]) if step.get("state") is not None else None,
+        )
         if target is None:
             raise AssertionError(f"{step.get('action')}: interactable not found: {step}")
         return target
@@ -3136,7 +3135,7 @@ def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) ->
     if "level" in selector and selector["level"] is not None:
         if int(entity.get("level", -999999)) != int(selector["level"]):
             return False
-    for bool_key in ("is_boss", "monster_pack_leader"):
+    for bool_key in ("is_boss", "monster_pack_leader", "elite_objective", "quest_reward"):
         if selector.get(bool_key) is not None and bool(entity.get(bool_key, False)) != bool(selector[bool_key]):
             return False
     if selector.get("visual_scale") is not None:

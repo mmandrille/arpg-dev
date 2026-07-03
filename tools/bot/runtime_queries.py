@@ -115,3 +115,26 @@ def event_summary(expected: dict[str, Any]) -> str:
         if key in expected:
             parts.append(f"{key}={expected[key]}")
     return ", ".join(parts) or str(expected)
+
+
+def find_interactable(
+    state: RuntimeState,
+    interactable_def_id: str,
+    *,
+    elite_objective: bool | None = None,
+    quest_reward: bool | None = None,
+    entity_state: str | None = None,
+) -> dict[str, Any] | None:
+    for entity in state.entities.values():
+        if entity.get("type") != "interactable":
+            continue
+        if entity.get("interactable_def_id") != interactable_def_id:
+            continue
+        if elite_objective is not None and bool(entity.get("elite_objective", False)) != bool(elite_objective):
+            continue
+        if quest_reward is not None and bool(entity.get("quest_reward", False)) != bool(quest_reward):
+            continue
+        if entity_state is not None and entity.get("state") != entity_state:
+            continue
+        return entity
+    return None

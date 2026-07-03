@@ -35,12 +35,14 @@
       "action": "assert_entity_count",
       "entity_type": "interactable",
       "interactable_def_id": "treasure_chest",
+      "elite_objective": true,
       "state": "closed",
       "at_least": 1
     },
     {
       "action": "action_entity",
       "interactable_def_id": "treasure_chest",
+      "elite_objective": true,
       "expect_reject": "elite_objective_incomplete"
     },
     {
@@ -49,8 +51,27 @@
       "timeout_s": 60
     },
     {
+      "action": "wait_until_assertion",
+      "timeout_s": 10,
+      "assertion": {
+        "type": "entity_count",
+        "entity_type": "monster",
+        "alive": true,
+        "monster_pack_leader": true,
+        "equals": 0
+      }
+    },
+    {
+      "action": "move_until_in_range",
+      "interactable_def_id": "treasure_chest",
+      "elite_objective": true,
+      "stop_distance": 0.5,
+      "max_ticks": 80
+    },
+    {
       "action": "action_entity",
       "interactable_def_id": "treasure_chest",
+      "elite_objective": true,
       "event_type": "interactable_activated",
       "timeout_s": 90
     },
@@ -58,6 +79,7 @@
       "action": "assert_entity_count",
       "entity_type": "interactable",
       "interactable_def_id": "treasure_chest",
+      "elite_objective": true,
       "state": "open",
       "at_least": 1
     }
@@ -71,6 +93,7 @@
       "type": "entity_count",
       "entity_type": "interactable",
       "interactable_def_id": "treasure_chest",
+      "elite_objective": true,
       "state": "open",
       "at_least": 1
     },

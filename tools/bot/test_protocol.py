@@ -733,6 +733,22 @@ def test_runtime_state_selectors_from_snapshot_and_delta():
     assert find_monster(state, "training_dummy_reward", "champion")["id"] == "1003"
     assert find_monster(state, "training_dummy_reward", "rare") is None
     assert find_interactable(state, "wooden_door")["id"] == "1004"
+    state.entities["1008"] = {
+        "id": "1008",
+        "type": "interactable",
+        "interactable_def_id": "treasure_chest",
+        "elite_objective": True,
+        "state": "closed",
+    }
+    state.entities["1009"] = {
+        "id": "1009",
+        "type": "interactable",
+        "interactable_def_id": "treasure_chest",
+        "elite_objective": False,
+        "state": "closed",
+    }
+    assert find_interactable(state, "treasure_chest", elite_objective=True)["id"] == "1008"
+    assert find_interactable(state, "treasure_chest", elite_objective=False)["id"] == "1009"
 
     ingest_message({
         "type": "state_delta",

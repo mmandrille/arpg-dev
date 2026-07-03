@@ -4,6 +4,19 @@
   "world_id": "dungeon_levels",
   "seed": "chest_fast_69",
   "max_elapsed_s": 18.0,
+  "character_class": "barbarian",
+  "debug_progression": {
+    "level": 6,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 80,
+      "dex": 80,
+      "vit": 80,
+      "magic": 5
+    }
+  },
   "title": "Treasure classes and guarded chests",
   "description": "Pinned dungeon seed generates a guarded chest floor with enough dungeon mobs for loot attempts, at least one closed chest, multi-attempt mob loot, chest loot, pickup, state, reconnect, replay, and fresh-session persistence.",
   "steps": [
@@ -28,7 +41,7 @@
     {
       "action": "kill_monsters",
       "monster_def_id": "dungeon_mob",
-      "count": 1,
+      "count": 2,
       "timeout_s": 60
     },
     {

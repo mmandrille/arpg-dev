@@ -1,0 +1,21 @@
+docs/as-built/v420_class-skill-build-branches.md
+  s_2586c16d173356::t_11a6ec1b3d4a80 9
+docs/plans/v420_2026-07-03-class-skill-build-branches.md
+  s_2586c16d173356::t_98bec32da6cb20 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "13f9e28006d49dd38c0b91698eda20e34f3976c4",
+  "prompts": {},
+  "sessions": {
+    "s_2586c16d173356": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3e6daa32-bc16-469e-b428-71ea7ad03be6",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

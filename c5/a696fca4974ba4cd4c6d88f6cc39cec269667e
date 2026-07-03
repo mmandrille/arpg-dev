@@ -1,0 +1,78 @@
+server/internal/game/class_skill_engine.go
+  s_b993e8609e263e::t_e1c74d3dc6d12c 1-137
+server/internal/game/unique_survival_effects.go
+  s_b993e8609e263e::t_268342aaa98cc8 38-40
+server/internal/game/skill_buffs.go
+  s_b993e8609e263e::t_468e5ac6455722 10-39
+server/internal/game/sim.go
+  s_b993e8609e263e::t_8ac63fa003f23c 1686-1688
+  s_b993e8609e263e::t_e21319f9767bbf 305
+  s_b993e8609e263e::t_da4da3694dce17 2684-2690
+  s_b993e8609e263e::t_5cb44336befbf6 3733-3740
+docs/plans/v413_2026-07-03-class-skill-engine-expansion.md
+  s_b993e8609e263e::t_54e1b38da76b56 3,8-9,13-16,20-21,25-26,30
+  s_b993e8609e263e::t_51104b280ee1a9 1-2,4-7,10-12,17-19,22-24,27-29
+docs/as-built/v413_class-skill-engine-expansion.md
+  s_b993e8609e263e::t_065a4301de2464 1-27
+tools/validate_skills.py
+  s_b993e8609e263e::t_7cef1c1e28829e 176-177,180
+shared/rules/skills.v0.json
+  s_b993e8609e263e::t_916133989e89e1 2714-2876
+shared/assets/skill_presentations.v0.json
+  s_b993e8609e263e::t_4fb695e4012ba2 670
+  s_b993e8609e263e::t_2eac5fb972a4a0 638-668,671
+  s_b993e8609e263e::t_a48cb02d9e10ac 669
+server/internal/game/rogue_rules.go
+  s_b993e8609e263e::t_3d41971016a7d8 15-30
+  s_b993e8609e263e::t_f23eb5790d8fb8 87-105
+shared/i18n/en.json
+  s_b993e8609e263e::t_90d670ecb6b8c9 218-224
+PROGRESS.md
+  s_b993e8609e263e::t_4e60d4ceadd667 18,26,28-29
+server/internal/game/rogue_skills.go
+  s_b993e8609e263e::t_413e8ab2c46ad3 373,375,377
+docs/progress/slice-lifecycle.md
+  s_b993e8609e263e::t_790fa988584ac4 421
+docs/specs/v413_spec-class-skill-engine-expansion.md
+  s_b993e8609e263e::t_68e5f4a7508587 1-44
+server/internal/game/class_skill_engine_test.go
+  s_b993e8609e263e::t_3653f54e661978 125-131,133-140
+  s_b993e8609e263e::t_2cfd21d905a78a 61-62
+  s_b993e8609e263e::t_9c2439469dcc65 27-29
+  s_b993e8609e263e::t_8096750023db23 68-78
+  s_b993e8609e263e::t_220debd56497e8 1-26,30-34,36,40-60,63-67,79-89,93-100,102-111,113,117-124,141-162
+  s_b993e8609e263e::t_56d7c70b3654af 112,114-116
+  s_b993e8609e263e::t_b60b1997b8c5ea 35,37-39
+  s_b993e8609e263e::t_8a12504db7d8f4 132
+  s_b993e8609e263e::t_22a49a1fd71d63 101
+  s_b993e8609e263e::t_d8e6b6353bbb8c 90-92
+docs/CODEMAP.md
+  s_b993e8609e263e::t_0c3690b7c38aa0 11
+shared/rules/skills.v0.schema.json
+  s_b993e8609e263e::t_1f517770f57161 40-41
+  s_b993e8609e263e::t_3be241967bfe67 360-383,534
+  s_b993e8609e263e::t_94c2fee92a3b17 519-520,523-533
+server/internal/game/rules.go
+  s_b993e8609e263e::t_5aba01f080ace3 328-329
+  s_b993e8609e263e::t_e4ab5605455b19 2771
+  s_b993e8609e263e::t_bc5d6f00101ed9 3040-3056
+  s_b993e8609e263e::t_9dd303fe45bb1f 2978-2981
+tools/bot/scenarios/class_skill_engine_expansion.json
+  s_b993e8609e263e::t_badbd8d13be41d 1-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "c5a696fca4974ba4cd4c6d88f6cc39cec269667e",
+  "prompts": {},
+  "sessions": {
+    "s_b993e8609e263e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fb30590a-f710-4071-b41f-11dcfb5b9b2b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

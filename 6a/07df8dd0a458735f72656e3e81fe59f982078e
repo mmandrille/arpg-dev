@@ -1,0 +1,19 @@
+shared/golden/item_rolls.json
+  s_d37b6a93e8faa6::t_6f6d0465d186d5 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6a07df8dd0a458735f72656e3e81fe59f982078e",
+  "prompts": {},
+  "sessions": {
+    "s_d37b6a93e8faa6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b3cf49ba-76f7-47c1-a41e-5bf1594a252a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

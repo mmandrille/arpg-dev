@@ -439,12 +439,11 @@ func _initialize() -> void:
 		_fail("character_progression base stats mismatch")
 		return
 	for c in progression_golden["cases"]:
-		var stats: Dictionary = c["base_stats"].duplicate(true)
-		if c.has("allocated_stat"):
-			stats[str(c["allocated_stat"])] = int(stats[str(c["allocated_stat"])]) + int(c["allocated_points"])
 		var expected: Dictionary = c["expected"]
+		var stats: Dictionary = expected["base_stats"].duplicate(true)
 		for key in progression_rules["derived_stats"].keys():
 			var got := _eval_progression_formula(progression_rules["derived_stats"][key], stats)
+			var _case_class := str(c.get("character_class", "barbarian"))
 			if key == "damage_min":
 				got += float(progression_combat_rules["player_damage"]["min"])
 			elif key == "damage_max":
@@ -452,15 +451,17 @@ func _initialize() -> void:
 			elif key == "movement_speed":
 				# movement_speed formula yields the DEX multiplier; scale by classBase
 				# to match Go's playerEffectiveMovementSpeed = classBase * dex_mult * gear%
-				var _case_class := str(c.get("character_class", ""))
 				var _class_base := progression_base_move_speed
-				if _case_class != "":
-					var _classes := progression_rules.get("classes", {}) as Dictionary
-					if _classes.has(_case_class):
-						var _cms := float((_classes[_case_class] as Dictionary).get("base_movement_speed", 0.0))
-						if _cms > 0.0:
-							_class_base = _cms
+				var _classes := progression_rules.get("classes", {}) as Dictionary
+				if _classes.has(_case_class):
+					var _cms := float((_classes[_case_class] as Dictionary).get("base_movement_speed", 0.0))
+					if _cms > 0.0:
+						_class_base = _cms
 				got *= _class_base
+			elif key == "light_radius":
+				var _classes_lr := progression_rules.get("classes", {}) as Dictionary
+				if _classes_lr.has(_case_class):
+					got += float((_classes_lr[_case_class] as Dictionary).get("light_radius", 0.0))
 			var want := float(expected["derived_stats"][key])
 			if not is_equal_approx(got, want):
 				_fail("character_progression case %s %s got %.4f want %.4f" % [str(c["name"]), str(key), got, want])
@@ -723,11 +724,15 @@ func _round_positive(value: float) -> int:
 
 func _skill_points_for_level(level: int, cadence: Dictionary) -> int:
 	var first := int(cadence["first_grant_level"])
-	if level < first:
+	var every := int(cadence["grant_every_levels"])
+	var points := int(cadence["points_per_grant"])
+	if level < first or points <= 0 or every <= 0:
 		return 0
-	var every := maxi(1, int(cadence["grant_every_levels"]))
-	var grants := int(floor(float(level - first) / float(every))) + 1
-	return grants * int(cadence["points_per_grant"])
+	var grants := 0
+	for grant_level in range(1, level + 1):
+		if grant_level == first or grant_level % every == 0:
+			grants += 1
+	return grants * points
 
 
 func _attack_interval_ticks(combat: Dictionary, effective_attack_speed: float) -> int:

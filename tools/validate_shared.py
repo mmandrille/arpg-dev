@@ -703,14 +703,23 @@ def cross_checks(report: Report) -> None:
             if class_speed > 0.0:
                 class_base_speed = class_speed
         derived["movement_speed"] = round(derived["movement_speed"] * class_base_speed, 6)
+        if character_class:
+            class_def = character_progression.get("classes", {}).get(character_class, {})
+            derived["light_radius"] = round(derived["light_radius"] + float(class_def.get("light_radius", 0.0)), 6)
         return derived
 
     def expected_skill_points_for_level(level: int) -> int:
         cadence = character_progression["skill_points"]
-        if level < int(cadence["first_grant_level"]):
+        first = int(cadence["first_grant_level"])
+        every = int(cadence["grant_every_levels"])
+        points = int(cadence["points_per_grant"])
+        if level < first or points <= 0 or every <= 0:
             return 0
-        grants = ((level - int(cadence["first_grant_level"])) // int(cadence["grant_every_levels"])) + 1
-        return grants * int(cadence["points_per_grant"])
+        grants = 0
+        for grant_level in range(1, level + 1):
+            if grant_level == first or grant_level % every == 0:
+                grants += 1
+        return grants * points
 
     if character_progression_golden["base_stats"] != progression_base_stats:
         report.fail("character_progression golden", "base_stats must match character_progression.v0.json")
@@ -723,6 +732,14 @@ def cross_checks(report: Report) -> None:
             unspent = int(case["starting_unspent_stat_points"])
             level = progression_level(int(case["experience"]))
             gained_levels = max(0, level - 1)
+            character_class = str(case.get("character_class", "barbarian"))
+            if gained_levels > 0 and character_class:
+                class_def = character_progression.get("classes", {}).get(character_class, {})
+                growth = class_def.get("level_stat_growth", {})
+                stats["str"] += int(growth.get("str", 0)) * gained_levels
+                stats["dex"] += int(growth.get("dex", 0)) * gained_levels
+                stats["vit"] += int(growth.get("vit", 0)) * gained_levels
+                stats["magic"] += int(growth.get("magic", 0)) * gained_levels
             unspent += gained_levels * int(character_progression["points_per_level"])
             if "allocated_stat" in case:
                 stat = case["allocated_stat"]
@@ -758,7 +775,7 @@ def cross_checks(report: Report) -> None:
                 report.fail("character_progression golden", f"{case['name']}: base stats mismatch")
                 failed_progression_golden = True
                 break
-            got_derived = derived_stats_for(stats, character_class=str(case.get("character_class", "")))
+            got_derived = derived_stats_for(stats, character_class=character_class)
             for stat_id, want in expected["derived_stats"].items():
                 got = got_derived[stat_id]
                 if not math.isclose(float(want), got, rel_tol=0, abs_tol=0.000001):
@@ -781,9 +798,13 @@ def cross_checks(report: Report) -> None:
             first = int(skill_point_rules["first_grant_level"])
             every = int(skill_point_rules["grant_every_levels"])
             points = int(skill_point_rules["points_per_grant"])
-            if level < first:
+            if level < first or points <= 0 or every <= 0:
                 return 0
-            return ((level - first) // every + 1) * points
+            grants = 0
+            for grant_level in range(1, level + 1):
+                if grant_level == first or grant_level % every == 0:
+                    grants += 1
+            return grants * points
 
         for case in skill_magic_golden["progression"]["level_cases"]:
             level = int(case["level"])

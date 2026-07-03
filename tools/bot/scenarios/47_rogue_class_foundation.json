@@ -25,7 +25,7 @@
       "vit": 5,
       "magic": 12
     },
-    "skill_ranks": { "fan_of_blades": 1, "shadowstep": 1, "eviscerate": 1 }
+    "skill_ranks": { "fan_of_blades": 1, "shadowstep": 1, "eviscerate": 1, "smoke_screen": 1, "predators_mark": 1 }
   },
   "steps": [
     {

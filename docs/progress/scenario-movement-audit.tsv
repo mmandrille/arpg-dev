@@ -56,6 +56,9 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 49_undead_skeleton_poison_immunity.json	undead_skeleton_poison_immunity	protocol	extended	contract	0	0		
 50_paladin_class_foundation.json	paladin_class_foundation	protocol	pack	contract	0	0		
 51_barbarian_class_foundation.json	barbarian_class_foundation	protocol	extended	contract	0	0		
+class_build_pacing_skills.json	class_build_pacing_skills	protocol	extended	contract	0	0		lab cast only
+class_progression_pacing.json	class_progression_pacing	protocol	extended	contract	0	0		debug_progression only
+class_skill_engine_expansion.json	class_skill_engine_expansion	protocol	extended	contract	0	0		lab cast only
 52_sorcerer_class_foundation.json	sorcerer_class_foundation	protocol	extended	contract	0	0		
 53_unique_burn_effect_live.json	unique_burn_effect_live	protocol	extended	contract	0	0		
 54_offensive_unique_effects.json	offensive_unique_effects	protocol	extended	contract	0	0		

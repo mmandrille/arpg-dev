@@ -31,7 +31,9 @@
       "ice_shard": 1,
       "lightning": 1,
       "arcane_barrage": 1,
-      "revive": 1
+      "revive": 1,
+      "fireball": 1,
+      "energy_ward": 1
     }
   },
   "steps": [

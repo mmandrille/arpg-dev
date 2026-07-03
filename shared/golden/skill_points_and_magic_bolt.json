@@ -21,12 +21,12 @@
       {
         "level": 3,
         "expected_unspent_stat_points": 6,
-        "expected_unspent_skill_points": 1
+        "expected_unspent_skill_points": 2
       },
       {
         "level": 6,
         "expected_unspent_stat_points": 15,
-        "expected_unspent_skill_points": 2
+        "expected_unspent_skill_points": 3
       }
     ]
   },

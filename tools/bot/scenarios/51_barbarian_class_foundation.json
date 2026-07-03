@@ -31,7 +31,9 @@
       "cleave": 1,
       "earthbreaker": 1,
       "ground_slam": 1,
-      "skullcrusher": 1
+      "skullcrusher": 1,
+      "rend": 1,
+      "war_cry": 1
     }
   },
   "steps": [

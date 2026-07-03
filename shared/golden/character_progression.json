@@ -44,7 +44,7 @@
           "max_mana": 10,
           "health_regen_per_second": 0.15,
           "mana_regen_per_second": 0.2,
-          "light_radius": 0
+          "light_radius": 9
         }
       }
     },
@@ -84,7 +84,7 @@
           "max_mana": 10,
           "health_regen_per_second": 0.15,
           "mana_regen_per_second": 0.2,
-          "light_radius": 0
+          "light_radius": 9
         }
       }
     },
@@ -105,26 +105,26 @@
         "unspent_stat_points": 3,
         "unspent_skill_points": 1,
         "base_stats": {
-          "str": 5,
+          "str": 6,
           "dex": 5,
           "vit": 5,
           "magic": 5
         },
         "derived_stats": {
-          "damage_min": 2,
-          "damage_max": 4,
+          "damage_min": 2.2,
+          "damage_max": 4.4,
           "armor": 1,
           "attack_speed": 1.53125,
           "attack_interval_ticks": 8,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
-          "crit_damage": 1.54,
+          "crit_damage": 1.545,
           "movement_speed": 0.75375,
           "max_hp": 10,
           "max_mana": 10,
           "health_regen_per_second": 0.15,
           "mana_regen_per_second": 0.2,
-          "light_radius": 0
+          "light_radius": 9
         }
       }
     },
@@ -143,28 +143,28 @@
         "current_level_xp": 3,
         "next_level_xp": 45,
         "unspent_stat_points": 6,
-        "unspent_skill_points": 1,
+        "unspent_skill_points": 2,
         "base_stats": {
-          "str": 5,
+          "str": 7,
           "dex": 5,
           "vit": 5,
           "magic": 5
         },
         "derived_stats": {
-          "damage_min": 2,
-          "damage_max": 4,
+          "damage_min": 2.4,
+          "damage_max": 4.8,
           "armor": 1,
           "attack_speed": 1.53125,
           "attack_interval_ticks": 8,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
-          "crit_damage": 1.54,
+          "crit_damage": 1.55,
           "movement_speed": 0.75375,
           "max_hp": 10,
           "max_mana": 10,
           "health_regen_per_second": 0.15,
           "mana_regen_per_second": 0.2,
-          "light_radius": 0
+          "light_radius": 9
         }
       }
     },
@@ -187,26 +187,26 @@
         "unspent_stat_points": 2,
         "unspent_skill_points": 1,
         "base_stats": {
-          "str": 5,
+          "str": 6,
           "dex": 5,
           "vit": 6,
           "magic": 5
         },
         "derived_stats": {
-          "damage_min": 2,
-          "damage_max": 4,
+          "damage_min": 2.2,
+          "damage_max": 4.4,
           "armor": 1,
           "attack_speed": 1.53125,
           "attack_interval_ticks": 8,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
-          "crit_damage": 1.54,
+          "crit_damage": 1.545,
           "movement_speed": 0.75375,
           "max_hp": 11,
           "max_mana": 10,
           "health_regen_per_second": 0.18,
           "mana_regen_per_second": 0.2,
-          "light_radius": 0
+          "light_radius": 9
         }
       }
     },
@@ -227,26 +227,26 @@
         "unspent_stat_points": 3,
         "unspent_skill_points": 1,
         "base_stats": {
-          "str": 10,
+          "str": 11,
           "dex": 5,
           "vit": 5,
           "magic": 5
         },
         "derived_stats": {
-          "damage_min": 3,
-          "damage_max": 6,
+          "damage_min": 3.2,
+          "damage_max": 6.4,
           "armor": 1,
           "attack_speed": 1.53125,
           "attack_interval_ticks": 8,
           "hit_chance": 0.6,
           "crit_chance": 0.06,
-          "crit_damage": 1.565,
+          "crit_damage": 1.57,
           "movement_speed": 0.75375,
           "max_hp": 10,
           "max_mana": 10,
           "health_regen_per_second": 0.15,
           "mana_regen_per_second": 0.2,
-          "light_radius": 0
+          "light_radius": 9
         }
       }
     },
@@ -267,26 +267,26 @@
         "unspent_stat_points": 3,
         "unspent_skill_points": 1,
         "base_stats": {
-          "str": 5,
+          "str": 6,
           "dex": 100,
           "vit": 5,
           "magic": 5
         },
         "derived_stats": {
-          "damage_min": 2,
-          "damage_max": 4,
+          "damage_min": 2.2,
+          "damage_max": 4.4,
           "armor": 20,
           "attack_speed": 2.125,
           "attack_interval_ticks": 6,
           "hit_chance": 1,
           "crit_chance": 0.25,
-          "crit_damage": 1.825,
+          "crit_damage": 1.83,
           "movement_speed": 0.825,
           "max_hp": 10,
           "max_mana": 10,
           "health_regen_per_second": 0.15,
           "mana_regen_per_second": 0.2,
-          "light_radius": 0
+          "light_radius": 9
         }
       }
     }

@@ -5,6 +5,8 @@ signal allocate_skill_point_requested(skill_id: String)
 
 const SkillIconScript := preload("res://scripts/skill_icon.gd")
 const SkillPassiveTooltipScript := preload("res://scripts/skill_passive_tooltip.gd")
+const SkillTreeLayoutScript := preload("res://scripts/skill_tree_layout.gd")
+const SkillTreeConnectorsScript := preload("res://scripts/skill_tree_connectors.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 
 const SKILL_BLOCK_SIZE := Vector2(83, 83)
@@ -35,6 +37,7 @@ var _tooltip_title: Label
 var _tooltip_rank: Label
 var _tooltip_body: RichTextLabel
 var _tooltip_plain_text: String = ""
+var _connectors: SkillTreeConnectors
 
 
 static func skill_tooltip_text(skill_id: String, rank: int, max_rank: int, skill_progression: Dictionary, character_progression: Dictionary) -> String:
@@ -373,6 +376,8 @@ func get_debug_state() -> Dictionary:
 		"tooltip_visible": _tooltip != null and _tooltip.visible,
 		"tooltip_position": _vec2_debug(_tooltip.position if _tooltip != null else Vector2.ZERO),
 		"tooltip_mouse_filter": _tooltip.mouse_filter if _tooltip != null else -1,
+		"tooltip_skill_id": _tooltip_skill_id(),
+		"tooltip_rank_label": _tooltip_rank.text if _tooltip_rank != null else "",
 		"tooltip_body": _tooltip_plain_text,
 		"tooltip_rich_text": _tooltip_body.text if _tooltip_body != null else "",
 		"points_label_visible": _points_label != null and _points_label.visible,
@@ -380,6 +385,7 @@ func get_debug_state() -> Dictionary:
 		"requirement_status": requirement_status,
 		"window": _panel.get_debug_state() if _panel != null else {},
 		"skills": skill_states,
+		"connections": _connectors.get_debug_state().get("connections", []) if _connectors != null else [],
 	}
 
 
@@ -402,7 +408,7 @@ func bot_drag_window_by(delta: Vector2) -> void:
 func bot_hover_skill(skill_id: String = "") -> void:
 	if skill_id == "":
 		skill_id = _current_skill_id()
-	if not _select_skill(skill_id):
+	if skill_id == "" or not _skill_is_visible(skill_id):
 		return
 	_hovered_skill_id = skill_id
 	_show_tooltip(skill_id)
@@ -445,14 +451,10 @@ func _build() -> void:
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tree.add_child(backdrop)
 
-	var line := ColorRect.new()
-	line.color = Color(0.05, 0.045, 0.04, 0.95)
-	line.position = Vector2(196, 164)
-	line.custom_minimum_size = Vector2(5, 164)
-	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tree.add_child(line)
-	_add_disabled_slot(tree, Vector2(144, 328))
-	_add_disabled_slot(tree, Vector2(229, 328))
+	_connectors = SkillTreeConnectorsScript.new()
+	_connectors.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_connectors.configure(SKILL_TREE_ORIGIN, SKILL_TREE_SPACING, SKILL_BLOCK_SIZE)
+	tree.add_child(_connectors)
 
 	for raw_skill_id in _tree_skill_ids():
 		var skill_id := str(raw_skill_id)
@@ -526,15 +528,11 @@ func _render() -> void:
 	if _selected_skill_id == "" or not _skill_is_visible(_selected_skill_id):
 		_selected_skill_id = str(_visible_skill_ids().front()) if not _visible_skill_ids().is_empty() else SkillRulesLoader.first_skill_id()
 	var unspent := int(skill_progression.get("unspent_skill_points", 0))
-	var skill_id := _current_skill_id()
-	var skill := _skill_row(skill_id)
-	var rank := int(skill.get("rank", 0))
-	var max_rank := int(skill.get("max_rank", int(_skill_def(skill_id).get("max_rank", 0))))
 	_points_label.text = "Skill choices remaining  %d" % unspent
-	if _tooltip_title != null:
-		_tooltip_title.text = _skill_name(skill_id)
-	_tooltip_rank.text = "Rank %d / %d" % [rank, max_rank]
-	_set_tooltip_body(skill_id, rank)
+	_update_tooltip_content(_tooltip_skill_id())
+	if _connectors != null:
+		_connectors.set_edges(SkillTreeLayoutScript.prerequisite_edges(_visible_skill_ids(), skill_progression))
+	var skill_id := _current_skill_id()
 	for raw_skill_id in _tree_skill_ids():
 		var row_skill_id := str(raw_skill_id)
 		var row_visible := _skill_is_visible(row_skill_id)
@@ -606,8 +604,9 @@ func _mouse_over_skill_controls() -> bool:
 
 
 func _show_tooltip(skill_id: String) -> void:
-	if not _select_skill(skill_id) or _tooltip == null:
+	if skill_id == "" or not _skill_is_visible(skill_id) or _tooltip == null:
 		return
+	_update_tooltip_content(skill_id)
 	_position_tooltip_below_skill(skill_id)
 	_tooltip.visible = true
 	if _points_label != null:
@@ -682,37 +681,25 @@ func _skill_is_visible(skill_id: String) -> bool:
 
 
 func _skill_block_position(skill_id: String) -> Vector2:
-	var tree: Dictionary = _skill_def(skill_id).get("tree", {})
-	var tier := maxi(1, int(tree.get("tier", 1)))
-	var visible_ids := _visible_skill_ids()
-	var column := maxi(1, int(tree.get("column", 1)))
-	if _skill_is_passive_stat_bonus(skill_id):
-		return Vector2(SKILL_TREE_ORIGIN.x + (column - 1) * SKILL_TREE_SPACING.x, SKILL_TREE_ORIGIN.y + (tier - 1) * SKILL_TREE_SPACING.y)
-	if not visible_ids.is_empty():
-		var visible_index := visible_ids.find(skill_id)
-		if visible_index >= 0:
-			column = visible_index + 1
-	var row_ids: Array = []
-	for raw_skill_id in visible_ids:
-		var row_skill_id := str(raw_skill_id)
-		if _skill_is_passive_stat_bonus(row_skill_id):
-			continue
-		var row_tree: Dictionary = _skill_def(row_skill_id).get("tree", {})
-		if maxi(1, int(row_tree.get("tier", 1))) == tier:
-			row_ids.append(row_skill_id)
-	var row_count := row_ids.size()
-	var centered_offset := 0.0
-	if row_count > 0:
-		var row_width := (float(row_count - 1) * SKILL_TREE_SPACING.x) + SKILL_BLOCK_SIZE.x
-		centered_offset = maxf(0.0, (SKILL_ACTIVE_TREE_WIDTH - row_width) * 0.5)
-		var row_index := row_ids.find(skill_id)
-		if row_index >= 0:
-			column = row_index + 1
-	return Vector2(SKILL_TREE_ORIGIN.x + centered_offset + (column - 1) * SKILL_TREE_SPACING.x, SKILL_TREE_ORIGIN.y + (tier - 1) * SKILL_TREE_SPACING.y)
+	return SkillTreeLayoutScript.block_position(skill_id, SKILL_TREE_ORIGIN, SKILL_TREE_SPACING)
 
 
-func _skill_is_passive_stat_bonus(skill_id: String) -> bool:
-	return str(_skill_def(skill_id).get("kind", "")) == "passive_stat_bonus"
+func _tooltip_skill_id() -> String:
+	if _tooltip != null and _tooltip.visible and _hovered_skill_id != "":
+		return _hovered_skill_id
+
+	return _current_skill_id()
+
+
+func _update_tooltip_content(skill_id: String) -> void:
+	if skill_id == "" or _tooltip_title == null or _tooltip_rank == null:
+		return
+	var skill := _skill_row(skill_id)
+	var rank := int(skill.get("rank", 0))
+	var max_rank := int(skill.get("max_rank", int(_skill_def(skill_id).get("max_rank", 0))))
+	_tooltip_title.text = _skill_name(skill_id)
+	_tooltip_rank.text = "Rank %d / %d" % [rank, max_rank]
+	_set_tooltip_body(skill_id, rank)
 
 
 func _skill_spend_enabled(skill_id: String) -> bool:
@@ -887,15 +874,6 @@ func _stat_label(stat: String) -> String:
 			return stat.capitalize()
 
 
-func _add_disabled_slot(parent: Control, position: Vector2) -> void:
-	var slot := PanelContainer.new()
-	slot.position = position
-	slot.custom_minimum_size = Vector2(52, 52)
-	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slot.add_theme_stylebox_override("panel", _disabled_slot_style())
-	parent.add_child(slot)
-
-
 func _badge_label(text: String) -> Label:
 	var label := _label(text, 16, Color("#d9d0bd"))
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1021,13 +999,3 @@ func _badge_style() -> StyleBoxFlat:
 	s.border_width_bottom = 1
 	return s
 
-
-func _disabled_slot_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.05, 0.046, 0.042, 0.9)
-	s.border_color = Color("#2f2c28")
-	s.border_width_left = 2
-	s.border_width_top = 2
-	s.border_width_right = 2
-	s.border_width_bottom = 2
-	return s

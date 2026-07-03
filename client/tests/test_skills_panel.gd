@@ -6,6 +6,7 @@ const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
+const SkillTreeLayoutScript := preload("res://scripts/skill_tree_layout.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -194,8 +195,8 @@ func _run() -> void:
 	_assert_true("paladin heal block exists", heal_block != null)
 	_assert_true("paladin holy shield block exists", holy_shield_block != null)
 	if heal_block != null and holy_shield_block != null:
-		_assert_true("paladin third-column skill reflows into compact row", heal_block.position.x <= 240.0)
-		_assert_true("paladin fourth-column skill remains inside active tree", holy_shield_block.position.x + holy_shield_block.size.x <= 395.0)
+		_assert_eq("paladin heal grid x", int(heal_block.position.x), _expected_block_x("heal"))
+		_assert_eq("paladin holy shield grid x", int(holy_shield_block.position.x), _expected_block_x("holy_shield"))
 	var paladin_passive_block := panel._skill_blocks.get("vigilant_guard", null) as Control
 	_assert_true("paladin passive column block exists", paladin_passive_block != null)
 	if paladin_passive_block != null:
@@ -230,6 +231,24 @@ func _run() -> void:
 	_assert_true("rogue dash can spend", bool(((state.get("skills", {}) as Dictionary).get("dash", {}) as Dictionary).get("can_spend", false)))
 	_assert_false("rogue shadow flurry gated before dash rank", bool(((state.get("skills", {}) as Dictionary).get("shadow_flurry", {}) as Dictionary).get("can_spend", true)))
 	_assert_false("rogue executioner gated before poison stab rank", bool(((state.get("skills", {}) as Dictionary).get("executioner", {}) as Dictionary).get("can_spend", true)))
+	var connections: Array = state.get("connections", [])
+	_assert_true("rogue tree draws prerequisite connectors", connections.size() >= 3)
+	_assert_true("rogue fan of blades requires poison stab edge", _has_connection(connections, "poison_stab", "fan_of_blades"))
+	var poison_block := panel._skill_blocks.get("poison_stab", null) as Control
+	var fan_block := panel._skill_blocks.get("fan_of_blades", null) as Control
+	if poison_block != null and fan_block != null:
+		_assert_eq("rogue poison stab grid x", int(poison_block.position.x), _expected_block_x("poison_stab"))
+		_assert_eq("rogue fan of blades grid x", int(fan_block.position.x), _expected_block_x("fan_of_blades"))
+		_assert_eq("rogue fan of blades grid y", int(fan_block.position.y), _expected_block_y("fan_of_blades"))
+	panel.set_skill_progression({
+		"unspent_skill_points": 0,
+		"skills": _skill_rows(0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 1, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 1, false),
+	})
+	panel.bot_hover_skill("fan_of_blades")
+	state = panel.get_debug_state()
+	_assert_eq("hovered fan tooltip skill id", str(state.get("tooltip_skill_id", "")), "fan_of_blades")
+	_assert_eq("hovered fan tooltip rank label", str(state.get("tooltip_rank_label", "")), "Rank 1 / 5")
+	panel.bot_leave_skill_tooltip()
 
 	panel.set_character_progression({
 		"character_class": "sorcerer",
@@ -317,7 +336,7 @@ func _remove_user_file(path: String) -> void:
 		DirAccess.remove_absolute(absolute_path)
 
 
-func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, lightning_rank: int = 0, lightning_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false, earthbreaker_rank: int = 0, earthbreaker_can_spend: bool = false, shadow_flurry_rank: int = 0, shadow_flurry_can_spend: bool = false, arcane_barrage_rank: int = 0, arcane_barrage_can_spend: bool = false, sanctuary_rank: int = 0, sanctuary_can_spend: bool = false, executioner_rank: int = 0, executioner_can_spend: bool = false) -> Array:
+func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rage_can_spend: bool = false, heal_rank: int = 0, heal_can_spend: bool = false, holy_shield_rank: int = 0, holy_shield_can_spend: bool = false, cleave_rank: int = 0, cleave_can_spend: bool = false, ice_shard_rank: int = 0, ice_shard_can_spend: bool = false, lightning_rank: int = 0, lightning_can_spend: bool = false, poison_stab_rank: int = 0, poison_stab_can_spend: bool = false, dash_rank: int = 0, dash_can_spend: bool = false, earthbreaker_rank: int = 0, earthbreaker_can_spend: bool = false, shadow_flurry_rank: int = 0, shadow_flurry_can_spend: bool = false, arcane_barrage_rank: int = 0, arcane_barrage_can_spend: bool = false, sanctuary_rank: int = 0, sanctuary_can_spend: bool = false, executioner_rank: int = 0, executioner_can_spend: bool = false, fan_of_blades_rank: int = 0, fan_of_blades_can_spend: bool = false, eviscerate_rank: int = 0, eviscerate_can_spend: bool = false) -> Array:
 	return [
 		{"skill_id": "cleave", "rank": cleave_rank, "max_rank": _skill_max_rank("cleave"), "can_spend": cleave_can_spend},
 		{"skill_id": "earthbreaker", "rank": earthbreaker_rank, "max_rank": _skill_max_rank("earthbreaker"), "can_spend": earthbreaker_can_spend},
@@ -333,6 +352,8 @@ func _skill_rows(magic_rank: int, magic_can_spend: bool, rage_rank: int = 0, rag
 		{"skill_id": "dash", "rank": dash_rank, "max_rank": _skill_max_rank("dash"), "can_spend": dash_can_spend},
 		{"skill_id": "shadow_flurry", "rank": shadow_flurry_rank, "max_rank": _skill_max_rank("shadow_flurry"), "can_spend": shadow_flurry_can_spend},
 		{"skill_id": "executioner", "rank": executioner_rank, "max_rank": _skill_max_rank("executioner"), "can_spend": executioner_can_spend},
+		{"skill_id": "fan_of_blades", "rank": fan_of_blades_rank, "max_rank": _skill_max_rank("fan_of_blades"), "can_spend": fan_of_blades_can_spend},
+		{"skill_id": "eviscerate", "rank": eviscerate_rank, "max_rank": _skill_max_rank("eviscerate"), "can_spend": eviscerate_can_spend},
 	]
 
 
@@ -356,6 +377,25 @@ func _skill_mana_cost(skill_id: String, current_rank: int) -> int:
 	var cost: Dictionary = SkillRulesLoaderScript.skill_definition(skill_id).get("cost", {})
 	var mana: Dictionary = cost.get("mana", {})
 	return int(mana.get("base", 0)) + current_rank * int(mana.get("per_rank", 0))
+
+
+func _expected_block_x(skill_id: String) -> int:
+	return int(SkillTreeLayoutScript.block_position(skill_id).x)
+
+
+func _expected_block_y(skill_id: String) -> int:
+	return int(SkillTreeLayoutScript.block_position(skill_id).y)
+
+
+func _has_connection(connections: Array, from_id: String, to_id: String) -> bool:
+	for raw in connections:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var rec := raw as Dictionary
+		if str(rec.get("from", "")) == from_id and str(rec.get("to", "")) == to_id:
+			return true
+
+	return false
 
 
 func _assert_passive_icon_shapes() -> void:

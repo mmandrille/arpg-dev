@@ -1,0 +1,19 @@
+tools/bot/scenarios/client/blacksmith_renew_item.json
+  s_6dcd7202175d93::t_2087516f7b04ed 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1135b82668f2c473afc2e35dc68d5b31033b991b",
+  "prompts": {},
+  "sessions": {
+    "s_6dcd7202175d93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a20c93ed-50b1-4020-b801-b36543cc3eea",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

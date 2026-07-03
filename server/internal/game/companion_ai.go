@@ -355,7 +355,7 @@ func (s *Sim) companionTarget(companion *entity) *entity {
 }
 
 func (s *Sim) validCompanionTarget(companion *entity, target *entity) bool {
-	if companion == nil || target == nil || target.kind != monsterEntity || target.hp <= 0  {
+	if companion == nil || target == nil || target.kind != monsterEntity || target.hp <= 0 || target.isTrainingDoll {
 		return false
 	}
 	switch companion.companionStanceOrDefault() {
@@ -540,7 +540,11 @@ func (s *Sim) damageMonsterByCompanion(target *entity, companion *entity, damage
 	}
 	res.Events = append(res.Events, combatEvent(s.combatEventType(monsterEntity, outcome), companion.id, target.id, "", outcome))
 	if target.hp == 0 {
-		s.finishMonsterKill(target, companion.id, "", res)
+		if s.isTrainingDoll(target) {
+			s.finishTrainingDollDown(target, companion.id, "", res)
+		} else {
+			s.finishMonsterKill(target, companion.id, "", res)
+		}
 	}
 	return outcome
 }

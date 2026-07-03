@@ -2,6 +2,10 @@ extends SceneTree
 
 const TrainingDamageLogPanelScript := preload("res://scripts/training_damage_log_panel.gd")
 const CombatBreakdownFormatScript := preload("res://scripts/combat_breakdown_format.gd")
+const TrainingDamageLogBridgeScript := preload("res://scripts/training_damage_log_bridge.gd")
+const TrainingDollVisualScript := preload("res://scripts/training_doll_visual.gd")
+const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
+const MainScript := preload("res://scripts/main.gd")
 
 var _fail_count: int = 0
 
@@ -13,6 +17,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await _test_panel_open_close()
 	_test_breakdown_format()
+	_test_revive_resets_death_pose()
 	print("[gdtest] PASS: test_training_damage_log_panel (%d failed)" % _fail_count)
 	quit(1 if _fail_count > 0 else 0)
 
@@ -56,3 +61,25 @@ func _test_breakdown_format() -> void:
 	if CombatBreakdownFormatScript.outcome_label(event) != "Hit — 7":
 		_fail_count += 1
 		push_error("unexpected outcome label")
+
+
+func _test_revive_resets_death_pose() -> void:
+	var visual_root := TrainingDollVisualScript.make_node()
+	var reaction := ModelReactionControllerScript.new(visual_root, Color.WHITE)
+	reaction.enter_death()
+	var main = MainScript.new()
+	main.entities = {
+		"42": {
+			"node": visual_root,
+			"reaction": reaction,
+			"controller": null,
+			"max_hp": 100,
+		},
+	}
+	TrainingDamageLogBridgeScript.handle_training_doll_revived(main, "42", {"damage": 100})
+	if reaction.is_terminal():
+		_fail_count += 1
+		push_error("training doll revive should clear death reaction")
+	if absf(visual_root.rotation.x) > 0.01 or absf(visual_root.rotation.z) > 0.01:
+		_fail_count += 1
+		push_error("training doll revive should restore upright pose")

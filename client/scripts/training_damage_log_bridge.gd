@@ -24,9 +24,12 @@ static func handle_training_doll_revived(owner, entity_id: String, ev: Dictionar
 	var revived_rec: Dictionary = owner.entities[entity_id]
 	revived_rec["hp"] = int(ev.get("damage", revived_rec.get("max_hp", 1)))
 	owner._set_pickable(revived_rec["node"] as Node3D, true)
+	var revived_reaction = revived_rec.get("reaction")
+	if revived_reaction != null and revived_reaction.has_method("reset_terminal"):
+		revived_reaction.reset_terminal()
 	var revived_ctrl = revived_rec.get("controller")
-	if revived_ctrl != null:
-		revived_ctrl.enter_locomotion("idle")
+	if revived_ctrl != null and revived_ctrl.has_method("reset_terminal"):
+		revived_ctrl.reset_terminal()
 
 
 static func notify_combat_event(owner, panel: TrainingDamageLogPanel, entity_id: String, ev: Dictionary) -> void:

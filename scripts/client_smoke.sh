@@ -145,6 +145,7 @@ run_gate "GDScript golden test" "[gdtest] PASS" res://tests/test_golden.gd
 run_gate "GDScript item visual resolution test" "[gdtest] PASS" res://tests/test_item_visuals.gd
 run_gate "GDScript item icon drawer test" "test_item_icon_drawer: ok" res://tests/test_item_icon_drawer.gd
 run_gate "GDScript item requirement views test" "[gdtest] PASS: test_item_requirement_views" res://tests/test_item_requirement_views.gd
+run_gate "GDScript skill bonus tooltip test" "[gdtest] PASS: test_skill_bonus_tooltip" res://tests/test_skill_bonus_tooltip.gd
 run_gate "GDScript projectile visual test" "[gdtest] PASS: test_projectile_visuals" res://tests/test_projectile_visuals.gd
 
 # 2b. Rig gate: both GLBs import as skinned Skeleton3D (spec §10 fail-fast).

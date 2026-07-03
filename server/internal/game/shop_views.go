@@ -23,6 +23,7 @@ type ShopOfferView struct {
 	RequirementStatus   []RequirementStatusView   `json:"requirement_status,omitempty"`
 	RequirementsMet     *bool                     `json:"requirements_met,omitempty"`
 	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	SkillBonusStatus    []SkillBonusStatusView    `json:"skill_bonus_status,omitempty"`
 	EquipPreview        *EquipPreviewView         `json:"equip_preview,omitempty"`
 	EffectIDs           []string                  `json:"effect_ids,omitempty"`
 	BuyPrice            int                       `json:"buy_price"`
@@ -82,6 +83,7 @@ type ShopSellAppraisalView struct {
 	RequirementStatus   []RequirementStatusView   `json:"requirement_status,omitempty"`
 	RequirementsMet     *bool                     `json:"requirements_met,omitempty"`
 	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	SkillBonusStatus    []SkillBonusStatusView    `json:"skill_bonus_status,omitempty"`
 	EquipPreview        *EquipPreviewView         `json:"equip_preview,omitempty"`
 	EffectIDs           []string                  `json:"effect_ids,omitempty"`
 	SellPrice           int                       `json:"sell_price"`

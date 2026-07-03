@@ -706,7 +706,7 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		_item_gold_value(item),
 		true,
 		_short_label(str(item.get("item_def_id", ""))),
-		preload("res://scripts/class_affinity_tooltip.gd").lines_for_item(item, str(character_progression.get("character_class", "")))
+		preload("res://scripts/class_affinity_tooltip.gd").equipment_bonus_lines_for_item(item, str(character_progression.get("character_class", "")))
 	)
 	return tooltip
 

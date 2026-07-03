@@ -5273,6 +5273,35 @@
           }
         }
       ]
+    },
+    "skill_level_affix_lab": {
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
+      "entities": [
+        {
+          "type": "loot",
+          "loot_preset": {
+            "item_template_id": "amulet",
+            "rarity": "rare",
+            "item_level": 5,
+            "display_name": "Arcane Training Amulet",
+            "skill_level_bonuses": [
+              {
+                "skill_id": "magic_bolt",
+                "value": 3
+              }
+            ]
+          },
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        }
+      ]
     }
   }
 }

@@ -3089,6 +3089,21 @@ def assert_rolled_inventory_item(inventory: list[dict], assertion: dict[str, Any
         inactive = sum(1 for row in status if isinstance(row, dict) and not bool(row.get("active")))
         if inactive != int(inactive_count):
             raise AssertionError(f"{where}: class_affinity inactive count {inactive} != {inactive_count}: {item}")
+    if (skill_bonus_count := assertion.get("skill_bonus_count")) is not None:
+        status = item.get("skill_bonus_status", [])
+        if len(status) != int(skill_bonus_count):
+            raise AssertionError(f"{where}: skill_bonus_status count {len(status)} != {skill_bonus_count}: {item}")
+    if (skill_id := assertion.get("skill_bonus_skill_id")) is not None:
+        status = item.get("skill_bonus_status", [])
+        if not any(isinstance(row, dict) and str(row.get("skill_id", "")) == str(skill_id) for row in status):
+            raise AssertionError(f"{where}: missing skill_bonus_status skill_id {skill_id}: {item}")
+    if assertion.get("skill_bonus_active") is not None:
+        want_active = bool(assertion["skill_bonus_active"])
+        status = item.get("skill_bonus_status", [])
+        skill_id = str(assertion.get("skill_bonus_skill_id", ""))
+        row = next((row for row in status if isinstance(row, dict) and (not skill_id or str(row.get("skill_id", "")) == skill_id)), None)
+        if row is None or bool(row.get("active")) != want_active:
+            raise AssertionError(f"{where}: skill_bonus active={row.get('active') if isinstance(row, dict) else None} want {want_active}: {item}")
 
 
 def assert_rolled_inventory_any(inventory: list[dict], equipped: bool | None, where: str) -> None:

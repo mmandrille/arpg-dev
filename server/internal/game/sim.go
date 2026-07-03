@@ -2114,6 +2114,8 @@ func (s *Sim) appendEquipmentProgressionChanges(res *TickResult) {
 	s.syncActivePlayerResourceCaps(res)
 	view := s.CharacterProgressionView()
 	res.Changes = append(res.Changes, Change{Op: OpCharacterProgressionUpdate, Progression: &view})
+	skillView := s.SkillProgressionView()
+	res.Changes = append(res.Changes, Change{Op: OpSkillProgressionUpdate, SkillProgression: &skillView})
 	s.appendInventoryPresentationUpdates(res)
 }
 
@@ -5277,18 +5279,8 @@ func (s *Sim) effectiveSkillRank(skillID string) int {
 	if baseRank <= 0 {
 		return 0
 	}
-	rank := baseRank + s.allSkillsBonus()
-	def, ok := s.rules.Skills[skillID]
-	if !ok {
-		return rank
-	}
-	if def.MaxRank > 0 && rank > def.MaxRank {
-		rank = def.MaxRank
-	}
-	for rank > baseRank && !s.skillRequirementsMet(def, rank) {
-		rank--
-	}
-	return rank
+
+	return baseRank + s.allSkillsBonus() + s.equippedPerSkillBonus(skillID)
 }
 
 func (s *Sim) allSkillsBonus() int {
@@ -5487,6 +5479,9 @@ func (s *Sim) stashItemView(item *stashItem) StashItemView {
 		s.annotateClassAffinityStatus(item.rollPayload, func(status []ClassAffinityStatusView) {
 			view.ClassAffinityStatus = status
 		})
+		s.annotateSkillBonusStatus(item.rollPayload, func(status []SkillBonusStatusView) {
+			view.SkillBonusStatus = status
+		})
 	}
 	if previewItem := item.previewItem(); previewItem != nil {
 		view.SummaryLines = s.itemSummaryLines("", viewSlotForSummary(previewItem, view.ItemTemplateID, s.rules), s.itemHandedness(previewItem), s.statsForInventoryItem(previewItem), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(previewItem, view.ItemTemplateID))
@@ -5535,6 +5530,9 @@ func (s *Sim) annotateItemView(view *ItemView, item *invItem) {
 		s.annotateClassAffinityStatus(item.rollPayload, func(status []ClassAffinityStatusView) {
 			view.ClassAffinityStatus = status
 		})
+		s.annotateSkillBonusStatus(item.rollPayload, func(status []SkillBonusStatusView) {
+			view.SkillBonusStatus = status
+		})
 	}
 	if preview := s.equipPreviewForItem(item, view.Slot); preview != nil {
 		view.EquipPreview = preview
@@ -5571,6 +5569,9 @@ func (s *Sim) entityView(e *entity) EntityView {
 	if e.rollPayload != nil {
 		s.annotateClassAffinityStatus(e.rollPayload, func(status []ClassAffinityStatusView) {
 			view.ClassAffinityStatus = status
+		})
+		s.annotateSkillBonusStatus(e.rollPayload, func(status []SkillBonusStatusView) {
+			view.SkillBonusStatus = status
 		})
 	}
 	if preview := s.equipPreviewForLoot(e); preview != nil {

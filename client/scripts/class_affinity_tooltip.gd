@@ -81,3 +81,9 @@ static func _display_line(stat: String, value: int, item_class: String, mode: St
 			suffix = ""
 	var stat_label := stat.replace("_percent", "").replace("_", " ")
 	return "%s%s%s %s (%s)" % [sign, value, suffix, stat_label, class_label]
+
+
+static func equipment_bonus_lines_for_item(item: Dictionary, character_class: String = "") -> Array:
+	var lines := lines_for_item(item, character_class)
+	lines.append_array(preload("res://scripts/skill_bonus_tooltip.gd").lines_for_item(item, character_class))
+	return lines

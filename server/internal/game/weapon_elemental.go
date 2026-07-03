@@ -27,17 +27,7 @@ func filterOutElementalWeaponAffixes(stats []RollableStatDef) []RollableStatDef 
 }
 
 func rollAffixStatsOntoMap(stats map[string]int, rollableStats []RollableStatDef, rng *RNG, rollCount int) {
-	pool := rollableStats
-	for i := 0; i < rollCount; i++ {
-		stat, ok := weightedRollableStat(pool, rng)
-		if !ok {
-			continue
-		}
-		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
-		if isElementalWeaponAffix(stat.Stat) {
-			pool = filterOutElementalWeaponAffixes(pool)
-		}
-	}
+	rollAffixesOntoPayload(stats, nil, rollableStats, nil, ItemTemplateDef{}, 1, rng, rollCount)
 }
 
 func elementalAffixStatForDamageType(damageType string) string {
@@ -185,7 +175,10 @@ func (s *Sim) applyWeaponElementalDamageWithItem(target *entity, playerID uint64
 }
 
 func (s *Sim) lootPayloadFromWorldPreset(preset *WorldLootPreset) (ItemRollPayload, bool) {
-	if preset == nil || preset.ItemTemplateID == "" || len(preset.Stats) == 0 {
+	if preset == nil || preset.ItemTemplateID == "" {
+		return ItemRollPayload{}, false
+	}
+	if len(preset.Stats) == 0 && len(preset.SkillLevelBonuses) == 0 {
 		return ItemRollPayload{}, false
 	}
 	template, ok := s.rules.ItemTemplates[preset.ItemTemplateID]
@@ -201,18 +194,22 @@ func (s *Sim) lootPayloadFromWorldPreset(preset *WorldLootPreset) (ItemRollPaylo
 		itemLevel = 1
 	}
 	stats := cloneIntMap(preset.Stats)
+	if stats == nil {
+		stats = map[string]int{}
+	}
 	displayName := preset.DisplayName
 	if displayName == "" {
 		displayName = s.rules.affixDisplayName(template, rarity, stats)
 	}
 
 	return ItemRollPayload{
-		ItemTemplateID: preset.ItemTemplateID,
-		DisplayName:    displayName,
-		Rarity:         rarity,
-		ItemLevel:      itemLevel,
-		Stats:          stats,
-		Requirements:   cloneIntMap(template.Requirements),
+		ItemTemplateID:    preset.ItemTemplateID,
+		DisplayName:       displayName,
+		Rarity:            rarity,
+		ItemLevel:         itemLevel,
+		Stats:             stats,
+		Requirements:      cloneIntMap(template.Requirements),
+		SkillLevelBonuses: cloneSkillLevelBonusRolls(preset.SkillLevelBonuses),
 	}, true
 }
 
@@ -244,8 +241,8 @@ func validateWorldLootEntity(r *Rules, label string, entity WorldEntity) error {
 		if _, ok := r.ItemTemplates[entity.LootPreset.ItemTemplateID]; !ok {
 			return fmt.Errorf("game: invalid rules %s: unknown loot preset template %s", label, entity.LootPreset.ItemTemplateID)
 		}
-		if len(entity.LootPreset.Stats) == 0 {
-			return fmt.Errorf("game: invalid rules %s: loot_preset.stats required", label)
+		if len(entity.LootPreset.Stats) == 0 && len(entity.LootPreset.SkillLevelBonuses) == 0 {
+			return fmt.Errorf("game: invalid rules %s: loot_preset requires stats or skill_level_bonuses", label)
 		}
 	}
 

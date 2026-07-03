@@ -988,7 +988,7 @@ def cross_checks(report: Report) -> None:
         else:
             report.ok(f"class weapon {item_id} is valid")
 
-    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "movement_speed_percent", "bonus_cold_damage", "bonus_fire_damage", "bonus_lightning_damage", "bonus_poison_damage"}
+    valid_combat_roll_stats = {"damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "movement_speed_percent", "bonus_cold_damage", "bonus_fire_damage", "bonus_lightning_damage", "bonus_poison_damage", "random_skill_level", "random_class_skill_level"}
     valid_roll_stats = valid_combat_roll_stats | {"hotbar_slots", "inventory_rows"}
     rarities = item_templates["rarities"]
     for rarity_id, rarity in rarities.items():
@@ -1094,6 +1094,15 @@ def cross_checks(report: Report) -> None:
                 report.fail("item template rollable stat", f"{template_id}: unsupported stat {stat}")
                 failed_roll = True
                 break
+            if stat in {"random_skill_level", "random_class_skill_level"}:
+                if roll["min"] != 0 or roll["max"] != 0:
+                    report.fail("item template rollable stat", f"{template_id}.{stat}: min and max must be 0")
+                    failed_roll = True
+                    break
+                if stat == "random_class_skill_level" and not template.get("class_required"):
+                    report.fail("item template rollable stat", f"{template_id}.{stat}: requires class_required")
+                    failed_roll = True
+                    break
             if stat == "attack_speed_percent" and (roll["min"] < -50 or roll["max"] > 50):
                 report.fail("item template rollable stat", f"{template_id}.{stat}: min/max must be within -50..50")
                 failed_roll = True
@@ -2428,8 +2437,8 @@ def cross_checks(report: Report) -> None:
                         report.fail("world loot entity", f"{label}: loot_preset.item_template_id required")
                     elif preset_template not in item_templates["templates"]:
                         report.fail("world loot entity", f"{label}: unknown loot preset template {preset_template}")
-                    elif not loot_preset.get("stats"):
-                        report.fail("world loot entity", f"{label}: loot_preset.stats required")
+                    elif not loot_preset.get("stats") and not loot_preset.get("skill_level_bonuses"):
+                        report.fail("world loot entity", f"{label}: loot_preset requires stats or skill_level_bonuses")
                     else:
                         report.ok(f"{label} loot preset reference resolves")
                 else:

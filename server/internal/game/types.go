@@ -44,7 +44,8 @@ type EntityView struct {
 	Requirements               map[string]int          `json:"requirements,omitempty"`
 	RequirementStatus          []RequirementStatusView   `json:"requirement_status,omitempty"`
 	RequirementsMet            *bool                     `json:"requirements_met,omitempty"`
-	ClassAffinityStatus        []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	SkillBonusStatus    []SkillBonusStatusView    `json:"skill_bonus_status,omitempty"`
 	EquipPreview               *EquipPreviewView         `json:"equip_preview,omitempty"`
 	EffectIDs                  []string                `json:"effect_ids,omitempty"`
 	InteractableDefID          string                  `json:"interactable_def_id,omitempty"`
@@ -77,6 +78,7 @@ type ItemView struct {
 	RequirementStatus    []RequirementStatusView    `json:"requirement_status,omitempty"`
 	RequirementsMet      *bool                      `json:"requirements_met,omitempty"`
 	ClassAffinityStatus  []ClassAffinityStatusView  `json:"class_affinity_status,omitempty"`
+	SkillBonusStatus     []SkillBonusStatusView     `json:"skill_bonus_status,omitempty"`
 	EquipPreview         *EquipPreviewView          `json:"equip_preview,omitempty"`
 	EffectIDs            []string                   `json:"effect_ids,omitempty"`
 	SetPieceID           string                     `json:"set_piece_id,omitempty"`
@@ -99,6 +101,7 @@ type StashItemView struct {
 	RequirementStatus   []RequirementStatusView   `json:"requirement_status,omitempty"`
 	RequirementsMet     *bool                     `json:"requirements_met,omitempty"`
 	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	SkillBonusStatus    []SkillBonusStatusView    `json:"skill_bonus_status,omitempty"`
 	EquipPreview        *EquipPreviewView         `json:"equip_preview,omitempty"`
 	EffectIDs           []string                  `json:"effect_ids,omitempty"`
 	SetPieceID          string                    `json:"set_piece_id,omitempty"`
@@ -123,7 +126,8 @@ type ItemRollPayload struct {
 	EffectIDs       []string            `json:"effect_ids"`
 	SetPieceID      string              `json:"set_piece_id,omitempty"`
 	NamedUniqueID   string              `json:"named_unique_id,omitempty"`
-	ClassAffinities []ClassAffinityRoll `json:"class_affinities,omitempty"`
+	ClassAffinities   []ClassAffinityRoll   `json:"class_affinities,omitempty"`
+	SkillLevelBonuses []SkillLevelBonusRoll `json:"skill_level_bonuses,omitempty"`
 }
 
 func (p ItemRollPayload) itemViewFields(v *ItemView) {

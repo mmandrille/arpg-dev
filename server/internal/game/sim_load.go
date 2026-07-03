@@ -260,6 +260,10 @@ func cloneRollPayload(in *ItemRollPayload) *ItemRollPayload {
 		out.ClassAffinities = make([]ClassAffinityRoll, len(in.ClassAffinities))
 		copy(out.ClassAffinities, in.ClassAffinities)
 	}
+	if len(in.SkillLevelBonuses) > 0 {
+		out.SkillLevelBonuses = make([]SkillLevelBonusRoll, len(in.SkillLevelBonuses))
+		copy(out.SkillLevelBonuses, in.SkillLevelBonuses)
+	}
 
 	return out
 }

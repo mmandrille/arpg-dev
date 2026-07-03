@@ -31,12 +31,13 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 	if rarity.StatRollsMax > rarity.StatRollsMin {
 		rollCount += rng.IntN(rarity.StatRollsMax - rarity.StatRollsMin + 1)
 	}
+	skillBonuses := []SkillLevelBonusRoll{}
 	for i := 0; i < rollCount; i++ {
 		stat, ok := weightedRollableStat(rollableStats, rng)
 		if !ok {
 			continue
 		}
-		stats[stat.Stat] += stat.Min + rng.IntN(stat.Max-stat.Min+1)
+		applyRollableStat(stat, stats, &skillBonuses, r, template, itemLevel, rng)
 		if isElementalWeaponAffix(stat.Stat) {
 			rollableStats = filterOutElementalWeaponAffixes(rollableStats)
 		}
@@ -51,14 +52,15 @@ func (r *Rules) rollItemTemplateWithMagicFind(templateID string, rng *RNG, sourc
 		}
 	}
 	payload := ItemRollPayload{
-		ItemTemplateID:  templateID,
-		DisplayName:     displayName,
-		Rarity:          rarityID,
-		ItemLevel:       1,
-		Stats:           stats,
-		Requirements:    cloneIntMap(template.Requirements),
-		EffectIDs:       effectIDs,
-		ClassAffinities: rollClassAffinities(template.ClassAffinities, rng),
+		ItemTemplateID:    templateID,
+		DisplayName:       displayName,
+		Rarity:            rarityID,
+		ItemLevel:         1,
+		Stats:             stats,
+		Requirements:      cloneIntMap(template.Requirements),
+		EffectIDs:         effectIDs,
+		ClassAffinities:   rollClassAffinities(template.ClassAffinities, rng),
+		SkillLevelBonuses: skillBonuses,
 	}
 
 	return FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers), true

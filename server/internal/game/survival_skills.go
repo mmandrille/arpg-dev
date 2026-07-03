@@ -49,7 +49,7 @@ func (s *Sim) trySurvivalAutocast(player *entity, attacker *entity, outcome *com
 		return
 	}
 	rank := s.effectiveSkillRank(skillID)
-	if rank <= 0 || !s.skillRequirementsMet(def, rank) {
+	if rank <= 0 {
 		return
 	}
 	if remaining, onCooldown := s.skillCooldownRemaining(skillID); onCooldown {

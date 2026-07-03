@@ -919,7 +919,7 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		-1,
 		true,
 		MarketListingRowsScript.short_label(str(item.get("item_def_id", ""))),
-		ClassAffinityTooltipScript.lines_for_item(item, _viewer_character_class())
+		ClassAffinityTooltipScript.equipment_bonus_lines_for_item(item, _viewer_character_class())
 	)
 	return tooltip
 

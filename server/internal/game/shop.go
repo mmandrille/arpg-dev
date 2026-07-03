@@ -725,6 +725,9 @@ func (s *Sim) annotateShopOfferView(view *ShopOfferView, item *invItem) {
 		s.annotateClassAffinityStatus(item.rollPayload, func(status []ClassAffinityStatusView) {
 			view.ClassAffinityStatus = status
 		})
+		s.annotateSkillBonusStatus(item.rollPayload, func(status []SkillBonusStatusView) {
+			view.SkillBonusStatus = status
+		})
 	}
 	if preview := s.equipPreviewForItem(item, view.Slot); preview != nil {
 		view.EquipPreview = preview

@@ -1189,10 +1189,6 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		res.reject(in.MessageID, "skill_class_not_allowed")
 		return
 	}
-	if !s.skillRequirementsMet(def, rank) {
-		res.reject(in.MessageID, "skill_requirements_not_met")
-		return
-	}
 	if remaining, onCooldown := s.skillCooldownRemaining(skillID); onCooldown {
 		res.Events = append(res.Events, Event{
 			EventType:      "skill_cooldown_rejected",

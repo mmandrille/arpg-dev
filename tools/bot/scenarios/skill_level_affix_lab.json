@@ -1,0 +1,49 @@
+{
+  "id": "skill_level_affix_lab",
+  "ci_tier": "extended",
+  "world_id": "skill_level_affix_lab",
+  "seed": "v416_skill_level_affix",
+  "character_class": "sorcerer",
+  "title": "Per-skill affix rolls",
+  "description": "Pick up a lab amulet with +3 Magic Bolt, equip it, and prove effective skill rank increases over protocol.",
+  "steps": [
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "magic_bolt"
+    },
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "amulet"
+    },
+    {
+      "action": "assert_rolled_inventory_item",
+      "item_def_id": "amulet",
+      "item_template_id": "amulet",
+      "display_name": "Arcane Training Amulet",
+      "skill_bonus_count": 1,
+      "skill_bonus_skill_id": "magic_bolt",
+      "skill_bonus_active": true
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "amulet",
+      "slot": "amulet"
+    },
+    {
+      "action": "assert_skill_progression",
+      "skill_id": "magic_bolt",
+      "rank": 4,
+      "max_rank": 5,
+      "can_spend": false
+    }
+  ],
+  "assertions": [
+    {
+      "type": "skill_progression",
+      "skill_id": "magic_bolt",
+      "rank": 4,
+      "max_rank": 5
+    }
+  ],
+  "fresh_session_checks": []
+}

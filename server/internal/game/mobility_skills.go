@@ -145,10 +145,6 @@ func (s *Sim) handleChannelSkill(in Input, res *TickResult) {
 		res.reject(in.MessageID, "skill_class_not_allowed")
 		return
 	}
-	if !s.skillRequirementsMet(def, rank) {
-		res.reject(in.MessageID, "skill_requirements_not_met")
-		return
-	}
 	if def.Kind != "mobility" || def.Mobility.Mode != "charge" {
 		res.reject(in.MessageID, "unsupported_channel_skill")
 		return

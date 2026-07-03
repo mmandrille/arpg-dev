@@ -604,7 +604,7 @@ func _make_item_tooltip(item: Dictionary) -> Control:
 		-1,
 		true,
 		_short_label(str(item.get("item_def_id", ""))),
-		ClassAffinityTooltipScript.lines_for_item(item)
+		ClassAffinityTooltipScript.equipment_bonus_lines_for_item(item)
 	)
 	return tooltip
 

@@ -1396,7 +1396,7 @@ func TestMagicBoltAutoNavigatesToCastRange(t *testing.T) {
 	}
 }
 
-func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
+func TestMagicBoltCastIgnoresStatRequirements(t *testing.T) {
 	sim := MustNewSim("sess_magic_bolt_requirement", "01", loadRules(t))
 	sim.progression.CharacterClass = "sorcerer"
 	sim.progression.SkillRanks[magicBoltSkillID] = 2
@@ -1419,15 +1419,9 @@ func TestMagicBoltCastRequiresMagicRequirement(t *testing.T) {
 		Type:      "cast_skill_intent",
 		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
 	}})
-	assertReject(t, cast, "cast_requirement", "skill_requirements_not_met")
-	if player.mana != beforeMana {
-		t.Fatalf("requirement rejection spent mana: got %d want %d", player.mana, beforeMana)
-	}
-	if len(sim.SkillCooldownViews()) != 0 {
-		t.Fatalf("requirement rejection started cooldown: %+v", sim.SkillCooldownViews())
-	}
-	if firstChangeEntityByType(cast, projectileEntity) != nil || hasEvent(cast, "monster_damaged") {
-		t.Fatalf("requirement rejection spawned/damaged: changes=%+v events=%+v", cast.Changes, cast.Events)
+	assertAck(t, cast, "cast_requirement")
+	if player.mana >= beforeMana {
+		t.Fatalf("cast should spend mana: got %d want < %d", player.mana, beforeMana)
 	}
 }
 
@@ -2628,7 +2622,7 @@ func TestRolledBaseStatsAndAllSkillsApplyWhenEquipped(t *testing.T) {
 	}
 }
 
-func TestAllSkillsBonusDoesNotBypassRankRequirements(t *testing.T) {
+func TestAllSkillsBonusIgnoresSpendRequirementsForEffectiveRank(t *testing.T) {
 	rules := loadRules(t)
 	sim := MustNewSim("sess_all_skills_requirements", "01", rules)
 	sim.progression.CharacterClass = "sorcerer"
@@ -2652,13 +2646,8 @@ func TestAllSkillsBonusDoesNotBypassRankRequirements(t *testing.T) {
 	addTestInventoryItem(sim, item)
 	sim.equipped[ringLeftSlot] = item.instanceID
 
-	if rank := sim.effectiveSkillRank("magic_bolt"); rank != 1 {
-		t.Fatalf("effective magic_bolt rank = %d, want capped rank 1 without rank 2 requirements", rank)
-	}
-	sim.progression.Level = 3
-	sim.progression.BaseStats.Magic = 11
 	if rank := sim.effectiveSkillRank("magic_bolt"); rank != 3 {
-		t.Fatalf("effective magic_bolt rank = %d, want rank 3 after requirements are met", rank)
+		t.Fatalf("effective magic_bolt rank = %d, want 3 without spend requirements", rank)
 	}
 }
 

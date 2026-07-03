@@ -1111,7 +1111,46 @@
           "stat": "armor",
           "min": 1,
           "max": 3,
+          "weight": 3
+        },
+        {
+          "stat": "max_hp",
+          "min": 2,
+          "max": 8,
+          "weight": 2
+        },
+        {
+          "stat": "max_mana",
+          "min": 2,
+          "max": 6,
           "weight": 1
+        },
+        {
+          "stat": "hit_chance",
+          "min": 1,
+          "max": 5,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "evade_chance",
+          "min": 1,
+          "max": 5,
+          "weight": 1,
+          "min_rarity": "magic"
+        },
+        {
+          "stat": "health_regen_per_10_seconds",
+          "min": 1,
+          "max": 4,
+          "weight": 1
+        },
+        {
+          "stat": "random_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": [],
@@ -1411,6 +1450,13 @@
           "min": 3,
           "max": 12,
           "weight": 2
+        },
+        {
+          "stat": "random_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": [],
@@ -2574,6 +2620,13 @@
           "max": 3,
           "weight": 1,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -2614,6 +2667,13 @@
           "max": 2,
           "weight": 1,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -2659,6 +2719,13 @@
           "min": 5,
           "max": 15,
           "weight": 3
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -2689,6 +2756,13 @@
           "max": 3,
           "weight": 2,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3028,6 +3102,13 @@
           "max": 3,
           "weight": 2,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3058,6 +3139,13 @@
           "max": 3,
           "weight": 2,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3087,6 +3175,13 @@
           "min": 1,
           "max": 3,
           "weight": 2
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3117,6 +3212,13 @@
           "max": 12,
           "weight": 2,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3147,6 +3249,13 @@
           "max": 3,
           "weight": 2,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3180,6 +3289,13 @@
           "min": 6,
           "max": 14,
           "weight": 2
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3210,6 +3326,13 @@
           "max": 10,
           "weight": 2,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3240,6 +3363,13 @@
           "max": 6,
           "weight": 2,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3269,6 +3399,13 @@
           "min": 1,
           "max": 3,
           "weight": 2
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3300,6 +3437,13 @@
           "max": 3,
           "weight": 2,
           "min_rarity": "magic"
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []
@@ -3329,6 +3473,13 @@
           "min": 1,
           "max": 3,
           "weight": 2
+        },
+        {
+          "stat": "random_class_skill_level",
+          "min": 0,
+          "max": 0,
+          "weight": 1,
+          "min_rarity": "rare"
         }
       ],
       "effect_pool": []

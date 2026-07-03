@@ -12,13 +12,14 @@
           "offer_id": "generated:depth1:000",
           "kind": "generated",
           "item_template_id": "helm",
-          "display_name": "Stalwart Helm",
+          "display_name": "Vigorous Helm",
           "rarity": "magic",
           "rolled_stats": {
-            "armor": 3,
-            "magic": 2
+            "armor": 1,
+            "health_regen_per_10_seconds": 1,
+            "str": 2
           },
-          "buy_price": 185,
+          "buy_price": 155,
           "source": "common_dungeon_mob",
           "depth": 1
         },
@@ -70,9 +71,10 @@
           "display_name": "Helm",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 2
+            "armor": 1,
+            "max_hp": 8
           },
-          "buy_price": 70,
+          "buy_price": 135,
           "source": "common_dungeon_mob",
           "depth": 1
         }

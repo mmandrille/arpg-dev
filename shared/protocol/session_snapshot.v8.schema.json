@@ -109,6 +109,7 @@
         "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
         "requirements_met": { "type": "boolean" },
         "class_affinity_status": { "$ref": "#/$defs/class_affinity_status_list" },
+        "skill_bonus_status": { "$ref": "#/$defs/skill_bonus_status_list" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "interactable_def_id": { "type": "string" },
@@ -157,6 +158,7 @@
         "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
         "requirements_met": { "type": "boolean" },
         "class_affinity_status": { "$ref": "#/$defs/class_affinity_status_list" },
+        "skill_bonus_status": { "$ref": "#/$defs/skill_bonus_status_list" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "summary_lines": { "$ref": "#/$defs/item_summary_lines" },
@@ -190,6 +192,7 @@
         "requirement_status": { "$ref": "#/$defs/requirement_status_list" },
         "requirements_met": { "type": "boolean" },
         "class_affinity_status": { "$ref": "#/$defs/class_affinity_status_list" },
+        "skill_bonus_status": { "$ref": "#/$defs/skill_bonus_status_list" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "summary_lines": { "$ref": "#/$defs/item_summary_lines" }
@@ -278,6 +281,22 @@
     "class_affinity_status_list": {
       "type": "array",
       "items": { "$ref": "#/$defs/class_affinity_status" }
+    },
+    "skill_bonus_status": {
+      "type": "object",
+      "required": ["skill_id", "value", "active", "display"],
+      "additionalProperties": false,
+      "properties": {
+        "skill_id": { "type": "string" },
+        "skill_class": { "type": "string", "enum": ["barbarian", "sorcerer", "paladin", "rogue", "ranger"] },
+        "value": { "type": "integer", "minimum": 1 },
+        "active": { "type": "boolean" },
+        "display": { "type": "string" }
+      }
+    },
+    "skill_bonus_status_list": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/skill_bonus_status" }
     },
     "equip_preview_delta": {
       "type": "object",

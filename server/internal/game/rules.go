@@ -772,11 +772,12 @@ type WorldEntity struct {
 
 // WorldLootPreset pins rolled stats for lab loot entities.
 type WorldLootPreset struct {
-	ItemTemplateID string         `json:"item_template_id"`
-	Rarity         string         `json:"rarity,omitempty"`
-	ItemLevel      int            `json:"item_level,omitempty"`
-	DisplayName    string         `json:"display_name,omitempty"`
-	Stats          map[string]int `json:"stats"`
+	ItemTemplateID    string                `json:"item_template_id"`
+	Rarity            string                `json:"rarity,omitempty"`
+	ItemLevel         int                   `json:"item_level,omitempty"`
+	DisplayName       string                `json:"display_name,omitempty"`
+	Stats             map[string]int        `json:"stats"`
+	SkillLevelBonuses []SkillLevelBonusRoll `json:"skill_level_bonuses,omitempty"`
 }
 
 // LoadRules reads and parses the v0 rules files from a directory.
@@ -1258,6 +1259,9 @@ func LoadRules(dir string) (*Rules, error) {
 			}
 			if roll.Weight <= 0 {
 				return nil, fmt.Errorf("game: invalid rules item_templates.%s.rollable_stats.%s: weight must be positive", id, roll.Stat)
+			}
+			if err := validateSkillLevelRollStat(id, roll, def); err != nil {
+				return nil, err
 			}
 			seen[roll.Stat] = true
 		}
@@ -3178,6 +3182,9 @@ func isSupportedRequirementStat(stat string) bool {
 }
 
 func isSupportedItemStat(stat string) bool {
+	if isSkillLevelRollStat(stat) {
+		return true
+	}
 	switch stat {
 	case "damage_min", "damage_max", "str", "dex", "vit", "magic", "all_skills", "max_hp", "max_mana", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "light_radius", "hotbar_slots", "inventory_rows", "movement_speed_percent", "bonus_cold_damage", "bonus_fire_damage", "bonus_lightning_damage", "bonus_poison_damage":
 		return true

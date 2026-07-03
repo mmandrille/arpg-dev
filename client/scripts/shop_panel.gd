@@ -746,7 +746,7 @@ func _make_offer_tooltip(offer: Dictionary) -> Control:
 		int(offer.get("buy_price", 0)),
 		_offer_affordable(offer),
 		_short_label(str(offer.get("item_def_id", ""))),
-		ClassAffinityTooltipScript.lines_for_item(offer)
+		ClassAffinityTooltipScript.equipment_bonus_lines_for_item(offer)
 	)
 	return tooltip
 

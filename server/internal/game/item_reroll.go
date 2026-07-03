@@ -37,7 +37,8 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 	if rarity.StatRollsMax > rarity.StatRollsMin {
 		rollCount += rng.IntN(rarity.StatRollsMax - rarity.StatRollsMin + 1)
 	}
-	rollAffixStatsOntoMap(stats, rollableStats, rng, rollCount)
+	skillBonuses := []SkillLevelBonusRoll{}
+	rollAffixesOntoPayload(stats, &skillBonuses, rollableStats, rules, template, payload.ItemLevel, rng, rollCount)
 
 	requirements := cloneIntMap(template.Requirements)
 	effectIDs := cloneStringSlice(payload.EffectIDs)
@@ -70,15 +71,16 @@ func RerollItemRollPayload(rules *Rules, payload ItemRollPayload, rng *RNG) (Ite
 	}
 
 	out := ItemRollPayload{
-		ItemTemplateID:  payload.ItemTemplateID,
-		DisplayName:     displayName,
-		Rarity:          rarityID,
-		ItemLevel:       1,
-		Stats:           stats,
-		Requirements:    requirements,
-		EffectIDs:       effectIDs,
-		SetPieceID:      payload.SetPieceID,
-		ClassAffinities: cloneClassAffinityRolls(payload.ClassAffinities),
+		ItemTemplateID:    payload.ItemTemplateID,
+		DisplayName:       displayName,
+		Rarity:            rarityID,
+		ItemLevel:         1,
+		Stats:             stats,
+		Requirements:      requirements,
+		EffectIDs:         effectIDs,
+		SetPieceID:        payload.SetPieceID,
+		ClassAffinities:   cloneClassAffinityRolls(payload.ClassAffinities),
+		SkillLevelBonuses: skillBonuses,
 	}
 
 	return FinalizeItemRollPayload(out, payload.ItemLevel, rules.DungeonGeneration.MonsterDepthScaling, rules.DungeonGeneration.ItemLevelTiers), nil

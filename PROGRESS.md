@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-03 (v415 class-specialist-expansion)
+Last updated: 2026-07-03 (v416 per-skill-affix-rolls)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-07-03 (v415 class-specialist-expansion)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v415 — class-specialist-expansion |
+| **Latest completed slice** | v416 — per-skill-affix-rolls |
 | **Active branch** | `main` |
 | **CI gate** | 2026-07-03 — autoloop batch CI pending |
 | **Next slice** | TBD (`/next`) |

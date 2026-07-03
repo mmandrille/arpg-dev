@@ -442,6 +442,8 @@ func _initialize() -> void:
 		var expected: Dictionary = c["expected"]
 		var stats: Dictionary = expected["base_stats"].duplicate(true)
 		for key in progression_rules["derived_stats"].keys():
+			if not expected["derived_stats"].has(key):
+				continue
 			var got := _eval_progression_formula(progression_rules["derived_stats"][key], stats)
 			var _case_class := str(c.get("character_class", "barbarian"))
 			if key == "damage_min":

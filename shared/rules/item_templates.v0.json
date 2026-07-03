@@ -3165,7 +3165,7 @@
       ],
       "requirements": {
         "level": 1,
-        "vit": 5
+        "str": 5
       },
       "base_stats": {},
       "rollable_stats": [
@@ -3283,7 +3283,8 @@
       "class_required": "ranger",
       "requirements": {
         "level": 1,
-        "dex": 6
+        "magic": 5,
+        "dex": 5
       },
       "base_stats": {},
       "rollable_stats": [

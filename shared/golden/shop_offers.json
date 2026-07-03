@@ -11,74 +11,68 @@
         {
           "offer_id": "generated:depth1:000",
           "kind": "generated",
-          "item_template_id": "long_sword",
-          "display_name": "Mystic Long Sword",
-          "rarity": "rare",
+          "item_template_id": "helm",
+          "display_name": "Stalwart Helm",
+          "rarity": "magic",
           "rolled_stats": {
-            "damage_max": 4,
-            "damage_min": 2,
-            "magic": 3
+            "armor": 3,
+            "magic": 2
           },
-          "buy_price": 590,
+          "buy_price": 185,
           "source": "common_dungeon_mob",
           "depth": 1
         },
         {
           "offer_id": "generated:depth1:001",
           "kind": "generated",
-          "item_template_id": "helm",
-          "display_name": "Mystic Helm",
+          "item_template_id": "arcane_robes",
+          "display_name": "Mighty Arcane Robes",
           "rarity": "magic",
           "rolled_stats": {
-            "armor": 1,
-            "magic": 4
+            "str": 4
           },
-          "buy_price": 190,
+          "buy_price": 215,
           "source": "common_dungeon_mob",
           "depth": 1
         },
         {
           "offer_id": "generated:depth1:002",
           "kind": "generated",
-          "item_template_id": "bow",
-          "display_name": "Shocking Bow",
-          "rarity": "magic",
+          "item_template_id": "long_sword",
+          "display_name": "Long Sword",
+          "rarity": "common",
           "rolled_stats": {
-            "bonus_lightning_damage": 4,
-            "damage_max": 2,
-            "damage_min": 1,
-            "vit": 2
+            "damage_max": 4,
+            "damage_min": 3
           },
-          "buy_price": 360,
+          "buy_price": 220,
           "source": "common_dungeon_mob",
           "depth": 1
         },
         {
           "offer_id": "generated:depth1:003",
           "kind": "generated",
-          "item_template_id": "helm",
-          "display_name": "Helm",
-          "rarity": "common",
+          "item_template_id": "boots",
+          "display_name": "Boots",
+          "rarity": "magic",
           "rolled_stats": {
-            "armor": 3
+            "armor": 1,
+            "movement_speed_percent": 18
           },
-          "buy_price": 85,
+          "buy_price": 315,
           "source": "common_dungeon_mob",
           "depth": 1
         },
         {
           "offer_id": "generated:depth1:004",
           "kind": "generated",
-          "item_template_id": "long_sword",
-          "display_name": "Venomous Long Sword",
-          "rarity": "magic",
+          "item_template_id": "helm",
+          "display_name": "Helm",
+          "rarity": "common",
           "rolled_stats": {
-            "bonus_poison_damage": 4,
-            "damage_max": 4,
-            "damage_min": 2,
-            "str": 2
+            "armor": 2
           },
-          "buy_price": 470,
+          "buy_price": 70,
           "source": "common_dungeon_mob",
           "depth": 1
         }

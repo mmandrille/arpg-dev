@@ -1286,7 +1286,7 @@
       }
     },
     "focus_band": {
-      "asset_id": "fallback_equipment_ring_v0",
+      "asset_id": "fallback_equipment_ring_left_v0",
       "slot": "ring_left",
       "mount_socket": "ring_left_socket",
       "local_transform": {
@@ -1296,7 +1296,7 @@
       }
     },
     "consecrated_aegis": {
-      "asset_id": "fallback_equipment_shield_v0",
+      "asset_id": "fallback_equipment_off_hand_v0",
       "slot": "off_hand",
       "mount_socket": "off_hand_socket",
       "local_transform": {

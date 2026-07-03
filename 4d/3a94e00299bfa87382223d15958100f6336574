@@ -1,0 +1,19 @@
+server/internal/game/weapon_elemental_procs_test.go
+  s_6dcd7202175d93::t_0ccc09f20574a1 3-6,117-204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4d3a94e00299bfa87382223d15958100f6336574",
+  "prompts": {},
+  "sessions": {
+    "s_6dcd7202175d93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a20c93ed-50b1-4020-b801-b36543cc3eea",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

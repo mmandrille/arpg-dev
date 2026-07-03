@@ -672,6 +672,8 @@ func (r *Rules) normalizeProgressionState(in CharacterProgressionState) Characte
 	if in.Level > r.CharacterProgression.LevelCap {
 		in.Level = r.CharacterProgression.LevelCap
 	}
+	r.applyClassLevelStatGrowthFloor(&in)
+
 	return in
 }
 
@@ -3991,6 +3993,7 @@ func (s *Sim) awardExperienceForCurrentPlayer(amount int, corr string, res *Tick
 		from := s.progression.Level
 		s.progression.Level++
 		s.progression.UnspentStatPoints += s.rules.CharacterProgression.PointsPerLevel
+		s.applyClassLevelStatGrowthOnLevelUp()
 		to := s.progression.Level
 		res.Events = append(res.Events, Event{
 			EventType:         "character_leveled",
@@ -5079,12 +5082,7 @@ func (s *Sim) respecCostGold() int {
 }
 
 func (s *Sim) resetCharacterBuildForRespec() {
-	classDef, ok := s.rules.CharacterProgression.Classes[s.progression.CharacterClass]
-	if ok {
-		s.progression.BaseStats = classDef.BaseStats
-	} else {
-		s.progression.BaseStats = s.rules.CharacterProgression.BaseStats
-	}
+	s.progression.BaseStats = s.rules.classGrownBaseStats(s.progression.CharacterClass, s.progression.Level)
 	s.progression.UnspentStatPoints = s.totalEarnedStatPoints()
 	s.progression.UnspentSkillPoints = s.totalEarnedSkillPoints()
 	s.progression.SkillRanks = make(map[string]int)
@@ -5096,16 +5094,7 @@ func (s *Sim) totalEarnedStatPoints() int {
 }
 
 func (s *Sim) totalEarnedSkillPoints() int {
-	rules := s.rules.CharacterProgression.SkillPoints
-	level := maxInt(1, s.progression.Level)
-	if level < rules.FirstGrantLevel {
-		return 0
-	}
-	grants := 0
-	for grantLevel := rules.FirstGrantLevel; grantLevel <= level; grantLevel += rules.GrantEveryLevels {
-		grants++
-	}
-	return grants * rules.PointsPerGrant
+	return s.rules.totalSkillPointGrantsForLevel(maxInt(1, s.progression.Level))
 }
 
 func (s *Sim) restorePlayerResources(player *entity, res *TickResult) (int, int) {
@@ -5858,6 +5847,9 @@ func (s *Sim) playerEffectiveCombatStatsFor(equippedItems map[string]*invItem) (
 			case "block_percent":
 				blockPercent += float64(effect.Percent)
 				blockSources = append(blockSources, StatBreakdownSourceView{Label: s.skillEffectLabel(effect), Value: float64(effect.Percent), Kind: "skill_effect"})
+			case "evade_chance":
+				evadeChancePercent += float64(effect.Percent)
+				evadeChanceSources = append(evadeChanceSources, StatBreakdownSourceView{Label: s.skillEffectLabel(effect), Value: float64(effect.Percent), Kind: "skill_effect"})
 			}
 		}
 	}
@@ -6087,14 +6079,11 @@ func (r *Rules) nextLevelTotalXP(level int) (int, bool) {
 }
 
 func (r *Rules) skillPointsGrantedAtLevel(level int) int {
-	cadence := r.CharacterProgression.SkillPoints
-	if cadence.PointsPerGrant <= 0 || cadence.GrantEveryLevels <= 0 || level < cadence.FirstGrantLevel {
+	if !r.skillPointGrantLevel(level) {
 		return 0
 	}
-	if (level-cadence.FirstGrantLevel)%cadence.GrantEveryLevels != 0 {
-		return 0
-	}
-	return cadence.PointsPerGrant
+
+	return r.CharacterProgression.SkillPoints.PointsPerGrant
 }
 
 func (s *Sim) playerProjectileInFlight() bool {

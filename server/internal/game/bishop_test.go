@@ -92,15 +92,15 @@ func TestBishopRespecConsumesBadgeAndRefundsBuild(t *testing.T) {
 	if got := sim.resourceWallet["respec_badge"]; got != 0 {
 		t.Fatalf("respec badge after respec = %d, want 0", got)
 	}
-	wantStats := sim.rules.CharacterProgression.Classes["sorcerer"].BaseStats
+	wantStats := sim.rules.classGrownBaseStats("sorcerer", 6)
 	if sim.progression.BaseStats != wantStats {
 		t.Fatalf("base stats after respec = %+v, want %+v", sim.progression.BaseStats, wantStats)
 	}
 	if sim.progression.UnspentStatPoints != 15 {
 		t.Fatalf("unspent stat points = %d, want 15", sim.progression.UnspentStatPoints)
 	}
-	if sim.progression.UnspentSkillPoints != 2 {
-		t.Fatalf("unspent skill points = %d, want 2", sim.progression.UnspentSkillPoints)
+	if sim.progression.UnspentSkillPoints != 3 {
+		t.Fatalf("unspent skill points = %d, want 3", sim.progression.UnspentSkillPoints)
 	}
 	if len(sim.progression.SkillRanks) != 0 || len(sim.skillCooldowns) != 0 {
 		t.Fatalf("skills/cooldowns after respec ranks=%+v cooldowns=%+v", sim.progression.SkillRanks, sim.skillCooldowns)

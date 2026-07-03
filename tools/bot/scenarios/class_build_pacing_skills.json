@@ -1,0 +1,74 @@
+{
+  "id": "class_build_pacing_skills",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v412_class_build_pacing_skills",
+  "character_class": "ranger",
+  "title": "Class build pacing skills",
+  "description": "Prove tier-3 ranger skills Rain of Arrows and Explosive Shot cast in the skill lab.",
+  "debug_progression": {
+    "level": 8,
+    "unspent_skill_points": 0,
+    "stats": { "str": 4, "dex": 16, "vit": 5, "magic": 20 },
+    "skill_ranks": {
+      "piercing_shot": 1,
+      "disengage": 1,
+      "volley": 1,
+      "pinning_shot": 1,
+      "snipe": 1,
+      "rain_of_arrows": 1,
+      "explosive_shot": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "move",
+      "direction": { "x": 1, "y": 0 },
+      "duration_ticks": 4
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "rain_of_arrows",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "explosive_shot",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    }
+  ],
+  "assertions": [
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "rain_of_arrows",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "explosive_shot",
+      "rank": 1
+    }
+  ]
+}

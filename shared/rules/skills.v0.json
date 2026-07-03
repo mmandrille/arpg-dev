@@ -2336,6 +2336,381 @@
         "type": "none"
       },
       "name_key": "skill.wildborn_endurance.name"
+    },
+    "rain_of_arrows": {
+      "name": "Rain of Arrows",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 12
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "volley",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 90,
+        "max_base": 90,
+        "min_per_rank": 35,
+        "max_per_rank": 20
+      },
+      "projectile": {
+        "range": 16,
+        "speed": 21,
+        "visual": "volley_arrow_projectile"
+      },
+      "volley": {
+        "arrow_count": 8,
+        "spread_degrees": 50
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3.5
+      },
+      "name_key": "skill.rain_of_arrows.name"
+    },
+    "explosive_shot": {
+      "name": "Explosive Shot",
+      "class": "ranger",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 4
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 14
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "snipe",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 7,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 350,
+        "max_base": 300,
+        "min_per_rank": 70,
+        "max_per_rank": 35
+      },
+      "projectile": {
+        "range": 20,
+        "speed": 28,
+        "visual": "piercing_shot_projectile"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3.5
+      },
+      "name_key": "skill.explosive_shot.name"
+    },
+    "fireball": {
+      "name": "Fireball",
+      "class": "sorcerer",
+      "damage_type": "fire",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 12
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "ice_shard",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 250,
+        "max_base": 200,
+        "min_per_rank": 55,
+        "max_per_rank": 30,
+        "magic_scaling": {
+          "stat": "magic",
+          "percent_per_point": 1,
+          "max_bonus_percent": 25,
+          "use_requirement_baseline": true
+        }
+      },
+      "projectile": {
+        "range": 18,
+        "speed": 24,
+        "visual": "magic_bolt_projectile"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      },
+      "name_key": "skill.fireball.name"
+    },
+    "energy_ward": {
+      "name": "Energy Ward",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 3,
+        "column": 3
+      },
+      "kind": "self_buff",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "magic": 10
+        },
+        "stats_per_rank": {
+          "magic": 2
+        },
+        "skills": [
+          {
+            "skill_id": "teleport",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "stat_percent_buff",
+          "stats": [
+            "vit",
+            "magic"
+          ],
+          "percent_base": 15,
+          "percent_per_rank": 10,
+          "duration_ticks": 450,
+          "visual_scale": true
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 675
+      },
+      "name_key": "skill.energy_ward.name"
+    },
+    "war_cry": {
+      "name": "War Cry",
+      "class": "barbarian",
+      "tree": {
+        "tier": 3,
+        "column": 4
+      },
+      "kind": "area_stat_buff",
+      "max_rank": 5,
+      "targeting": "self_or_ally_area",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 10,
+          "vit": 8
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "leap",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "area_stat_percent_buff",
+          "target": "allies",
+          "include_caster": true,
+          "range": 8,
+          "radius": 6,
+          "stats": [
+            "str"
+          ],
+          "percent_base": 20,
+          "percent_per_rank": 8,
+          "duration_ticks": 300,
+          "effect_id": "war_cry"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 525
+      },
+      "name_key": "skill.war_cry.name"
+    },
+    "hammer_of_light": {
+      "name": "Hammer of Light",
+      "class": "paladin",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 2
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 10,
+          "magic": 8
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "charge",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 7,
+          "per_rank": 1
+        }
+      },
+      "cone": {
+        "range": 7,
+        "angle_degrees": 60,
+        "push_min": 3,
+        "push_max": 5,
+        "damage_source": "weapon"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 3
+      },
+      "name_key": "skill.hammer_of_light.name"
+    },
+    "smoke_screen": {
+      "name": "Smoke Screen",
+      "class": "rogue",
+      "tree": {
+        "tier": 3,
+        "column": 4
+      },
+      "kind": "area_stat_buff",
+      "max_rank": 5,
+      "targeting": "self_or_ally_area",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 12
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "shadowstep",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "area_stat_percent_buff",
+          "target": "allies",
+          "include_caster": true,
+          "range": 6,
+          "radius": 5,
+          "stats": [
+            "evade_chance"
+          ],
+          "percent_base": 30,
+          "percent_per_rank": 5,
+          "duration_ticks": 100,
+          "effect_id": "smoke_screen"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 500
+      },
+      "name_key": "skill.smoke_screen.name"
     }
   }
 }

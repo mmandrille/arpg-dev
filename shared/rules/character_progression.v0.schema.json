@@ -110,7 +110,17 @@
         "name": { "type": "string", "minLength": 1 },
         "light_radius": { "type": "number", "exclusiveMinimum": 0 },
         "base_movement_speed": { "type": "number", "exclusiveMinimum": 0 },
-        "base_stats": { "$ref": "#/$defs/base_stats" }
+        "base_stats": { "$ref": "#/$defs/base_stats" },
+        "level_stat_growth": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "str": { "type": "integer", "minimum": 0 },
+            "dex": { "type": "integer", "minimum": 0 },
+            "vit": { "type": "integer", "minimum": 0 },
+            "magic": { "type": "integer", "minimum": 0 }
+          }
+        }
       }
     },
     "derived_formula": {

@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-02 (v411 skill-tree-graph-layout)
+Last updated: 2026-07-03 (v412 class-build-pacing)
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-07-02 (v411 skill-tree-graph-layout)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v411 — skill-tree-graph-layout |
+| **Latest completed slice** | v412 — class-build-pacing |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-02 — focused `test_skills_panel.gd` green; final batch CI pending unrelated dirty worktree |
-| **Next slice** | TBD (`/next`) |
+| **CI gate** | 2026-07-03 — focused verification green; final autoloop batch CI pending |
+| **Next slice** | v413 — class-skill-engine-expansion (autoloop queue) |
 | **Last engineering review** | v408 — [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md) (2026-07-02; official cadence) |
 | **Next engineering review** | ~v418 milestone |
 

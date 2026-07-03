@@ -8,7 +8,7 @@ func validateAreaStatPercentBuffEffect(skillID string, idx int, effect SkillEffe
 	}
 	seen := map[string]bool{}
 	for _, stat := range effect.Stats {
-		if stat != "armor" && stat != "block_percent" && !isSupportedRequirementStat(stat) {
+		if stat != "armor" && stat != "block_percent" && stat != "evade_chance" && !isSupportedRequirementStat(stat) {
 			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].stats.%s: unsupported stat", skillID, idx, stat)
 		}
 		if seen[stat] {

@@ -16,6 +16,9 @@
         "dex": 5,
         "vit": 5,
         "magic": 5
+      },
+      "level_stat_growth": {
+        "str": 1
       }
     },
     "sorcerer": {
@@ -27,6 +30,9 @@
         "dex": 5,
         "vit": 5,
         "magic": 5
+      },
+      "level_stat_growth": {
+        "magic": 1
       }
     },
     "paladin": {
@@ -38,6 +44,9 @@
         "dex": 4,
         "vit": 8,
         "magic": 5
+      },
+      "level_stat_growth": {
+        "vit": 1
       }
     },
     "rogue": {
@@ -49,6 +58,9 @@
         "dex": 8,
         "vit": 5,
         "magic": 4
+      },
+      "level_stat_growth": {
+        "dex": 1
       }
     },
     "ranger": {
@@ -60,6 +72,9 @@
         "dex": 8,
         "vit": 5,
         "magic": 3
+      },
+      "level_stat_growth": {
+        "dex": 1
       }
     }
   },

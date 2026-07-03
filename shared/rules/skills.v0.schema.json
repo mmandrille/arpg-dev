@@ -541,7 +541,7 @@
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "type": "string", "enum": ["str", "dex", "vit", "magic", "armor", "block_percent"] }
+          "items": { "type": "string", "enum": ["str", "dex", "vit", "magic", "armor", "block_percent", "evade_chance"] }
         },
         "percent_base": { "type": "integer", "minimum": 0 },
         "percent_per_rank": { "type": "integer", "minimum": 0 },

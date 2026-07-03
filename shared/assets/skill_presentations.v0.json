@@ -555,6 +555,86 @@
       },
       "summary": "Passive movement speed",
       "summary_key": "skill.wildborn_endurance.summary"
+    },
+    "rain_of_arrows": {
+      "icon": {
+        "label": "R",
+        "shape": "volley",
+        "color": "#3fd65e",
+        "accent": "#dfffd2"
+      },
+      "summary": "Wide volley of arrows",
+      "projectile_visual": "volley_arrow_projectile",
+      "effect_visual": "volley_fan",
+      "summary_key": "skill.rain_of_arrows.summary"
+    },
+    "explosive_shot": {
+      "icon": {
+        "label": "X",
+        "shape": "arrow",
+        "color": "#ff8c3a",
+        "accent": "#ffe2c8"
+      },
+      "summary": "High-impact sniper blast",
+      "projectile_visual": "piercing_shot_projectile",
+      "effect_visual": "piercing_shot_burst",
+      "summary_key": "skill.explosive_shot.summary"
+    },
+    "fireball": {
+      "icon": {
+        "label": "F",
+        "shape": "flame",
+        "color": "#e85a28",
+        "accent": "#ffd0a0"
+      },
+      "summary": "Explosive fire projectile",
+      "projectile_visual": "magic_bolt_projectile",
+      "effect_visual": "magic_bolt_burst",
+      "summary_key": "skill.fireball.summary"
+    },
+    "energy_ward": {
+      "icon": {
+        "label": "W",
+        "shape": "shield",
+        "color": "#4a7fd4",
+        "accent": "#d8e8ff"
+      },
+      "summary": "Arcane vitality shield",
+      "effect_visual": "rage_aura",
+      "summary_key": "skill.energy_ward.summary"
+    },
+    "war_cry": {
+      "icon": {
+        "label": "C",
+        "shape": "burst",
+        "color": "#c43a2a",
+        "accent": "#ffd0c8"
+      },
+      "summary": "Rally nearby allies with strength",
+      "effect_visual": "holy_shield_ring",
+      "summary_key": "skill.war_cry.summary"
+    },
+    "hammer_of_light": {
+      "icon": {
+        "label": "H",
+        "shape": "slash",
+        "color": "#f0d060",
+        "accent": "#fff8d0"
+      },
+      "summary": "Holy cone smash after charge",
+      "effect_visual": "earthbreaker_ring",
+      "summary_key": "skill.hammer_of_light.summary"
+    },
+    "smoke_screen": {
+      "icon": {
+        "label": "S",
+        "shape": "dash",
+        "color": "#6a6a72",
+        "accent": "#d0d0d8"
+      },
+      "summary": "Ally evasion cloud",
+      "effect_visual": "holy_shield_ring",
+      "summary_key": "skill.smoke_screen.summary"
     }
   }
 }

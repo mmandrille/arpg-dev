@@ -71,11 +71,11 @@
           "str": 3,
           "dex": 5,
           "vit": 5,
-          "magic": 5
+          "magic": 10
         }
       },
       "expect_skill_progression": {
-        "unspent_skill_points": 2,
+        "unspent_skill_points": 3,
         "skill_id": "magic_bolt",
         "rank": 0,
         "max_rank": 5,
@@ -93,7 +93,7 @@
     },
     {
       "action": "assert_skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 3,
       "skill_id": "ice_shard",
       "rank": 0,
       "max_rank": 5,
@@ -141,7 +141,7 @@
       "resource_id": "respec_badge",
       "resource_amount": 1,
       "unspent_stat_points": 15,
-      "unspent_skill_points": 2
+      "unspent_skill_points": 3
     },
     {
       "type": "character_progression",
@@ -152,12 +152,12 @@
         "str": 3,
         "dex": 5,
         "vit": 5,
-        "magic": 5
+        "magic": 10
       }
     },
     {
       "type": "skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 3,
       "skill_id": "magic_bolt",
       "rank": 0,
       "max_rank": 5,

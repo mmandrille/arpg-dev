@@ -201,6 +201,20 @@
     "skill.oathbound_resolve.name": "Oathbound Resolve",
     "skill.oathbound_resolve.summary": "Passive mana and armor",
     "skill.wildborn_endurance.name": "Wildborn Endurance",
-    "skill.wildborn_endurance.summary": "Passive movement speed"
+    "skill.wildborn_endurance.summary": "Passive movement speed",
+    "skill.rain_of_arrows.name": "Rain of Arrows",
+    "skill.rain_of_arrows.summary": "Wide volley of arrows",
+    "skill.explosive_shot.name": "Explosive Shot",
+    "skill.explosive_shot.summary": "High-impact sniper blast",
+    "skill.fireball.name": "Fireball",
+    "skill.fireball.summary": "Explosive fire projectile",
+    "skill.energy_ward.name": "Energy Ward",
+    "skill.energy_ward.summary": "Arcane vitality shield",
+    "skill.war_cry.name": "War Cry",
+    "skill.war_cry.summary": "Rally nearby allies with strength",
+    "skill.hammer_of_light.name": "Hammer of Light",
+    "skill.hammer_of_light.summary": "Holy cone smash after charge",
+    "skill.smoke_screen.name": "Smoke Screen",
+    "skill.smoke_screen.summary": "Ally evasion cloud"
   }
 }

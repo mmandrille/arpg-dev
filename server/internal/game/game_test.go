@@ -776,60 +776,10 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}
 	skillView = sim.SkillProgressionView()
 	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if skillView.UnspentSkillPoints != 1 || magicSkill.Rank != 1 || magicSkill.CanSpend {
-		t.Fatalf("skill progression after spend = %+v, want rank 1, 1 point, and blocked rank 2 requirements", skillView)
+	if skillView.UnspentSkillPoints != 1 || magicSkill.Rank != 1 || !magicSkill.CanSpend {
+		t.Fatalf("skill progression after spend = %+v, want rank 1, 1 point, rank 2 spendable with class growth", skillView)
 	}
 
-	overspend := sim.Tick([]Input{{
-		MessageID:          "overspend_skill",
-		Type:               "allocate_skill_point_intent",
-		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
-	}})
-	assertReject(t, overspend, "overspend_skill", "skill_requirements_not_met")
-	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
-	if magicSkill.Rank != 1 {
-		t.Fatalf("overspend mutated rank: %+v", sim.SkillProgressionView())
-	}
-
-	rankTwoXP := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
-	sim.awardExperience(76, "corr_rank_two_xp", &rankTwoXP)
-	sim.savePlayer(sim.defaultPlayer())
-	view = sim.CharacterProgressionView()
-	if view.Level != 6 || view.UnspentStatPoints != 15 || view.UnspentSkillPoints != 1 {
-		t.Fatalf("progression after level 6 = %+v, want level 6, 15 stat points, 1 skill point", view)
-	}
-	skillView = sim.SkillProgressionView()
-	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if magicSkill.CanSpend {
-		t.Fatalf("rank 2 skill progression at magic 5 = %+v, want blocked until magic 8", skillView)
-	}
-	rankTwoRejected := sim.Tick([]Input{{
-		MessageID:          "spend_rank_two_rejected",
-		CorrelationID:      "corr_spend_rank_two_rejected",
-		Type:               "allocate_skill_point_intent",
-		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
-	}})
-	assertReject(t, rankTwoRejected, "spend_rank_two_rejected", "skill_requirements_not_met")
-	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
-	if magicSkill.Rank != 1 || sim.progression.UnspentSkillPoints != 1 {
-		t.Fatalf("rank 2 requirement rejection mutated skill progression: %+v", sim.SkillProgressionView())
-	}
-
-	allocateRankTwoMagic := sim.Tick([]Input{{
-		MessageID:     "allocate_rank_two_magic",
-		CorrelationID: "corr_allocate_rank_two_magic",
-		Type:          "allocate_stat_intent",
-		AllocateStat:  &AllocateStatIntent{Stat: "magic", Points: 3},
-	}})
-	assertAck(t, allocateRankTwoMagic, "allocate_rank_two_magic")
-	if sim.progression.BaseStats.Magic != 8 || sim.progression.UnspentStatPoints != 12 {
-		t.Fatalf("rank 2 magic allocation progression = %+v, want magic 8 and 12 unspent stat points", sim.CharacterProgressionView())
-	}
-	skillView = sim.SkillProgressionView()
-	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if !magicSkill.CanSpend {
-		t.Fatalf("rank 2 skill progression after magic 8 = %+v, want spendable", skillView)
-	}
 	rankTwoSpend := sim.Tick([]Input{{
 		MessageID:          "spend_rank_two",
 		CorrelationID:      "corr_spend_rank_two",
@@ -839,8 +789,63 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	assertAck(t, rankTwoSpend, "spend_rank_two")
 	skillView = sim.SkillProgressionView()
 	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if skillView.UnspentSkillPoints != 0 || magicSkill.Rank != 2 || magicSkill.CanSpend {
-		t.Fatalf("skill progression after rank 2 spend = %+v, want rank 2 and no spendable points", skillView)
+	if skillView.UnspentSkillPoints != 0 || magicSkill.Rank != 2 {
+		t.Fatalf("skill progression after rank 2 spend = %+v, want rank 2 and no unspent points", skillView)
+	}
+
+	rankTwoXP := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
+	sim.awardExperience(76, "corr_rank_two_xp", &rankTwoXP)
+	sim.savePlayer(sim.defaultPlayer())
+	view = sim.CharacterProgressionView()
+	if view.Level != 6 || view.UnspentStatPoints != 15 || view.UnspentSkillPoints != 1 {
+		t.Fatalf("progression after level 6 = %+v, want level 6, 15 stat points, 1 skill point", view)
+	}
+	if view.BaseStats.Magic != 10 {
+		t.Fatalf("sorcerer magic at level 6 = %d, want 10 with class growth", view.BaseStats.Magic)
+	}
+	skillView = sim.SkillProgressionView()
+	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
+	if magicSkill.CanSpend {
+		t.Fatalf("rank 3 skill progression at magic 10 = %+v, want blocked until magic 11", skillView)
+	}
+	rankThreeRejected := sim.Tick([]Input{{
+		MessageID:          "spend_rank_three_rejected",
+		CorrelationID:      "corr_spend_rank_three_rejected",
+		Type:               "allocate_skill_point_intent",
+		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
+	}})
+	assertReject(t, rankThreeRejected, "spend_rank_three_rejected", "skill_requirements_not_met")
+	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
+	if magicSkill.Rank != 2 || sim.progression.UnspentSkillPoints != 1 {
+		t.Fatalf("rank 3 requirement rejection mutated skill progression: %+v", sim.SkillProgressionView())
+	}
+
+	allocateRankThreeMagic := sim.Tick([]Input{{
+		MessageID:     "allocate_rank_three_magic",
+		CorrelationID: "corr_allocate_rank_three_magic",
+		Type:          "allocate_stat_intent",
+		AllocateStat:  &AllocateStatIntent{Stat: "magic", Points: 1},
+	}})
+	assertAck(t, allocateRankThreeMagic, "allocate_rank_three_magic")
+	if sim.progression.BaseStats.Magic != 11 || sim.progression.UnspentStatPoints != 14 {
+		t.Fatalf("rank 3 magic allocation progression = %+v, want magic 11 and 14 unspent stat points", sim.CharacterProgressionView())
+	}
+	skillView = sim.SkillProgressionView()
+	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
+	if !magicSkill.CanSpend {
+		t.Fatalf("rank 3 skill progression after magic 11 = %+v, want spendable", skillView)
+	}
+	rankThreeSpend := sim.Tick([]Input{{
+		MessageID:          "spend_rank_three",
+		CorrelationID:      "corr_spend_rank_three",
+		Type:               "allocate_skill_point_intent",
+		AllocateSkillPoint: &AllocateSkillPointIntent{SkillID: magicBoltSkillID},
+	}})
+	assertAck(t, rankThreeSpend, "spend_rank_three")
+	skillView = sim.SkillProgressionView()
+	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
+	if skillView.UnspentSkillPoints != 0 || magicSkill.Rank != 3 || magicSkill.CanSpend {
+		t.Fatalf("skill progression after rank 3 spend = %+v, want rank 3 and no spendable points", skillView)
 	}
 }
 

@@ -172,6 +172,13 @@ def validate_skill_catalogs(
     mobility_kinds = {"mobility"}
     passive_kinds = {"passive_stat_bonus", "passive_execute"}
     decuple_classes = ("barbarian", "paladin", "sorcerer", "ranger", "rogue")
+    expected_actives = {
+        "barbarian": 6,
+        "paladin": 6,
+        "sorcerer": 7,
+        "ranger": 7,
+        "rogue": 6,
+    }
     decuple_errors = []
     for class_id in decuple_classes:
         actives = []
@@ -187,8 +194,8 @@ def validate_skill_catalogs(
                 passives.append(skill_id)
             else:
                 actives.append(skill_id)
-        if len(actives) != 5:
-            decuple_errors.append(f"{class_id}: actives={len(actives)} want 5 ({actives})")
+        if len(actives) != expected_actives[class_id]:
+            decuple_errors.append(f"{class_id}: actives={len(actives)} want {expected_actives[class_id]} ({actives})")
         if len(movement) != 1:
             decuple_errors.append(f"{class_id}: movement={len(movement)} want 1 ({movement})")
         if len(passives) != 4:
@@ -196,7 +203,7 @@ def validate_skill_catalogs(
     if decuple_errors:
         report.fail("class skill decuple", "; ".join(decuple_errors))
     else:
-        report.ok("each class has 5 actives, 1 movement, and 4 passives")
+        report.ok("each class has expected actives, 1 movement, and 4 passives")
 
     if magic_bolt is not None:
         for skill_id, skill in skills.get("skills", {}).items():

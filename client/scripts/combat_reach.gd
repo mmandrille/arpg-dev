@@ -45,6 +45,10 @@ static func local_player_attack_mode(inventory: Array, equipped: Dictionary) -> 
 	return mode if mode != "" else "melee"
 
 
+static func local_player_attack_reach(inventory: Array, equipped: Dictionary, character_class: String = "") -> float:
+	return _local_player_attack_reach(inventory, equipped, character_class)
+
+
 static func _local_player_attack_reach(inventory: Array, equipped: Dictionary, character_class: String = "") -> float:
 	var main_reach := _slot_attack_reach(inventory, equipped, "main_hand")
 	if not _has_rogue_offhand_melee_weapon(inventory, equipped, character_class):

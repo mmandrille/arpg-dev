@@ -11,6 +11,11 @@ static func apply(entities: Dictionary, hero_pos: Vector3) -> void:
 		var rec: Dictionary = entities[id]
 		if str(rec.get("type", "")) != "projectile":
 			continue
+		if bool(rec.get("use_flight_visual", false)):
+			var hidden := rec.get("node", null) as Node3D
+			if hidden != null:
+				hidden.visible = false
+			continue
 		var node := rec.get("node", null) as Node3D
 		if node == null:
 			continue

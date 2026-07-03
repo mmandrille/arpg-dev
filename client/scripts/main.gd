@@ -17,6 +17,7 @@ const PlayerStatusEffectMarkers := preload("res://scripts/player_status_effect_m
 const AuraSoftLights := preload("res://scripts/aura_soft_lights.gd")
 const EliteAuraPreviewSync := preload("res://scripts/elite_aura_preview_sync.gd")
 const ProjectileVisualsScript := preload("res://scripts/projectile_visuals.gd")
+const ProjectileFlightPresentationScript := preload("res://scripts/projectile_flight_presentation.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const EnemyHealthBarVisibilityScript := preload("res://scripts/enemy_health_bar_visibility.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
@@ -1381,7 +1382,14 @@ func _apply_delta(p: Dictionary) -> void:
 				EarthbreakerJump.play(character_visual, self)
 			_play_mobility_skill_visual(ev, mobility_landings)
 			if ev.has("projectile_def_id") and ev.has("position") and ev.has("direction"):
-				_spawn_skill_projectile_visual(ev)
+				ProjectileFlightPresentationScript.spawn_from_skill_cast(
+					self,
+					entities_root,
+					ev,
+					entities,
+					autoplay_step_delay,
+					visual_replay_enabled,
+				)
 			if ev.has("angle_degrees") and ev.has("range") and ev.has("direction"):
 				_spawn_skill_cone(ev)
 			var correlation_id := str(ev.get("correlation_id", ""))
@@ -1919,8 +1927,44 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		interactable_ids.append(id)
 	if rec["type"] == "projectile":
 		var node := rec["node"] as Node3D
-		_entity_tick_smoothing.apply_projectile_authoritative(rec, node, server_pos, is_new)
+		var previous_server_pos: Vector3 = rec.get("last_server_pos", server_pos)
+		var segment_distance := _entity_tick_smoothing.apply_projectile_authoritative(rec, node, server_pos, is_new)
 		rec["last_server_pos"] = server_pos
+		if not _is_skill_authored_projectile(str(e.get("projectile_def_id", ""))):
+			rec["use_flight_visual"] = true
+			node.visible = false
+			var character_class := str(character_progression.get("character_class", ""))
+			if is_new:
+				rec["flight_visual_spawned"] = ProjectileFlightPresentationScript.try_spawn_from_entity_spawn(
+					self,
+					entities_root,
+					e,
+					entities,
+					inventory,
+					equipped,
+					character_class,
+					player_id,
+					player_anchor,
+					autoplay_step_delay,
+					visual_replay_enabled,
+				)
+			elif not bool(rec.get("flight_visual_spawned", false)) and segment_distance > 0.001:
+				ProjectileFlightPresentationScript.spawn_from_motion_segment(
+					self,
+					entities_root,
+					e,
+					entities,
+					previous_server_pos,
+					server_pos,
+					segment_distance,
+					inventory,
+					equipped,
+					character_class,
+					player_id,
+					autoplay_step_delay,
+					visual_replay_enabled,
+				)
+				rec["flight_visual_spawned"] = true
 		if player_anchor != null:
 			ProjectilePresentationCapScript.apply(entities, player_anchor.global_position)
 		_record_upsert_timing(upsert_start, entity_type)
@@ -2361,56 +2405,6 @@ func _skill_presentation_float(skill_id: String, field: String) -> float:
 	push_warning("skill presentation %s.%s must be positive" % [skill_id, field])
 	return 0.1
 
-
-func _spawn_skill_projectile_visual(ev: Dictionary) -> void:
-	var projectile_def_id := str(ev.get("projectile_def_id", ""))
-	if projectile_def_id == "":
-		return
-	var pos := _vec2_from_dict(ev.get("position", {}))
-	var dir := _vec2_from_dict(ev.get("direction", {}))
-	if dir.length_squared() <= 0.0001:
-		return
-	dir = dir.normalized()
-	var max_range := maxf(float(ev.get("range", 0.0)), 1.0)
-	var start := Vector3(pos.x + dir.x * 0.45, 0.0, pos.y + dir.y * 0.45)
-	var distance := minf(max_range, 8.5)
-	var target_id := str(ev.get("target_entity_id", ""))
-	if target_id != "" and entities.has(target_id):
-		var target_node := (entities[target_id] as Dictionary).get("node", null) as Node3D
-		if target_node != null:
-			var target_pos := _node_world_or_local_position(target_node)
-			var target_flat := Vector2(target_pos.x - start.x, target_pos.z - start.z)
-			if target_flat.length_squared() > 0.0001:
-				distance = clampf(target_flat.length(), 1.0, max_range)
-	var arrow_count := 1
-	var spread_degrees := 0.0
-	if str(ev.get("skill_id", "")) == "volley":
-		arrow_count = 5
-		spread_degrees = 32.0
-	for i in range(arrow_count):
-		var shot_dir := dir
-		if arrow_count > 1:
-			var t := 0.0 if arrow_count == 1 else (float(i) / float(arrow_count - 1) - 0.5)
-			shot_dir = dir.rotated(deg_to_rad(spread_degrees * t)).normalized()
-		var finish := Vector3(start.x + shot_dir.x * distance, 0.0, start.z + shot_dir.y * distance)
-		_spawn_single_projectile_visual(projectile_def_id, start, finish, i)
-
-func _spawn_single_projectile_visual(projectile_def_id: String, start: Vector3, finish: Vector3, index: int = 0) -> void:
-	var node := ProjectileVisualsScript.make_node(projectile_def_id)
-	node.name = "SkillProjectilePreview_%s" % projectile_def_id
-	node.position = start
-	entities_root.add_child(node)
-	var flat := Vector2(finish.x - start.x, finish.z - start.z)
-	if flat.length_squared() > 0.0001:
-		node.look_at(Vector3(finish.x, start.y, finish.z), Vector3.UP)
-	var duration := 0.42
-	if visual_replay_enabled:
-		duration = maxf(autoplay_step_delay * 0.85, 0.32)
-	var tween := create_tween()
-	if index > 0:
-		tween.tween_interval(0.025 * float(index))
-	tween.tween_property(node, "position", finish, duration).set_trans(Tween.TRANS_LINEAR)
-	tween.tween_callback(node.queue_free)
 
 func _spawn_lightning_chain(ev: Dictionary) -> void:
 	var source := _node_for_entity_id(str(ev.get("source_entity_id", "")))

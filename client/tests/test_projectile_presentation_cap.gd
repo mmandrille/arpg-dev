@@ -12,6 +12,7 @@ func _init() -> void:
 	MainConfigLoaderScript.ensure_loaded()
 	_test_all_visible_when_under_cap()
 	_test_far_projectiles_hidden_when_over_cap()
+	_test_flight_visual_projectiles_stay_hidden()
 	_finish()
 
 
@@ -39,6 +40,17 @@ func _test_far_projectiles_hidden_when_over_cap() -> void:
 		if (entities[key]["node"] as Node3D).visible:
 			visible += 1
 	_assert_eq("only cap nearest projectiles visible", visible, cap)
+
+
+func _test_flight_visual_projectiles_stay_hidden() -> void:
+	var node := Node3D.new()
+	node.visible = false
+	var entities := {
+		"p1": {"type": "projectile", "node": node, "use_flight_visual": true},
+	}
+	ProjectilePresentationCapScript.apply(entities, Vector3.ZERO)
+	_assert_true("flight visual authority stays hidden", not node.visible)
+	node.queue_free()
 
 
 func _node_at(x: float, z: float) -> Node3D:

@@ -19,10 +19,11 @@ func _initialize() -> void:
 
 func _test_sorcerer_branch_bands() -> void:
 	_assert_eq("magic bolt starts branch band", _column("magic_bolt"), 1)
-	_assert_eq("teleport starts after magic bolt band", _column("teleport"), 4)
+	_assert_eq("teleport starts after revive band", _column("teleport"), 5)
 	_assert_eq("ice shard under magic bolt band", _column("ice_shard"), 1)
 	_assert_eq("lightning fans in magic bolt row", _column("lightning"), 2)
-	_assert_eq("revive fans in magic bolt row", _column("revive"), 3)
+	_assert_eq("revive sits in second row column", _column("revive"), 4)
+	_assert_ne("revive does not stack on lightning", _column("revive"), _column("lightning"))
 	_assert_eq("fireball chains ice shard", _column("fireball"), _column("ice_shard"))
 	_assert_eq("arcane barrage chains lightning", _column("arcane_barrage"), _column("lightning"))
 	_assert_eq("energy ward chains teleport", _column("energy_ward"), _column("teleport"))
@@ -32,7 +33,8 @@ func _test_ranger_prerequisite_columns() -> void:
 	_assert_ne("pinning shot not under disengage column", _column("pinning_shot"), _column("disengage"))
 	_assert_ne("snipe not under companion column", _column("snipe"), _column("black_wolf_companion"))
 	_assert_eq("volley chains under piercing shot", _column("volley"), _column("piercing_shot"))
-	_assert_eq("rain chains under volley", _column("rain_of_arrows"), _column("volley"))
+	_assert_eq("hunters volley chains under volley", _column("hunters_volley"), _column("volley"))
+	_assert_eq("rain fans beside hunters volley", _column("rain_of_arrows"), _column("volley") + 1)
 	_assert_eq("explosive shot chains under snipe", _column("explosive_shot"), _column("snipe"))
 
 

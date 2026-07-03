@@ -153,7 +153,6 @@ func sorcererReviveSim(t *testing.T, sessionID string) *Sim {
 	sim.progression.Level = 7
 	sim.progression.BaseStats = rules.CharacterProgression.Classes["sorcerer"].BaseStats
 	sim.progression.BaseStats.Magic = 18
-	sim.progression.SkillRanks["magic_bolt"] = 1
 	sim.progression.SkillRanks["revive"] = 1
 	ps := sim.defaultPlayer()
 	ps.Progression = sim.progression

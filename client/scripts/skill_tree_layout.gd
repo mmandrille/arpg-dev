@@ -219,10 +219,12 @@ static func _assign_sibling_columns(parent_id: String, tier: int, branch_skills:
 	siblings.sort_custom(_sort_skill_ids)
 	var parent_col := int(resolved.get(parent_id, {}).get("column", 1))
 	var fan_offset := 0
+	var chain_used := false
 	for sibling_id in siblings:
 		var col: int
-		if _is_chain_continuer(str(sibling_id), parent_id, combat_skills):
+		if not chain_used and _is_chain_continuer(str(sibling_id), parent_id, combat_skills):
 			col = parent_col
+			chain_used = true
 		else:
 			fan_offset += 1
 			col = parent_col + fan_offset
@@ -269,15 +271,65 @@ static func _assign_branch(root_id: String, start_col: int, combat_skills: Array
 	return _max_branch_column(branch_skills, resolved)
 
 
+static func _assign_unanchored_combat_skills(combat_skills: Array, resolved: Dictionary) -> void:
+	for skill_id in combat_skills:
+		if resolved.has(skill_id):
+			continue
+		if _primary_prereq(skill_id) != "":
+			continue
+		resolved[skill_id] = _static_tree(skill_id)
+
+	var max_tier := 1
+	for skill_id in combat_skills:
+		max_tier = maxi(max_tier, _tier_hint(skill_id))
+
+	for tier in range(2, max_tier + 1):
+		var parents := {}
+		for skill_id in combat_skills:
+			if _tier_hint(skill_id) != tier:
+				continue
+			if resolved.has(skill_id):
+				continue
+			var parent_id := _primary_prereq(skill_id)
+			if parent_id != "" and resolved.has(parent_id):
+				parents[parent_id] = true
+		var parent_ids: Array = parents.keys()
+		parent_ids.sort_custom(func(a, b) -> bool:
+			var tier_a := _tier_hint(str(a))
+			var tier_b := _tier_hint(str(b))
+			if tier_a != tier_b:
+				return tier_a < tier_b
+			return str(a) < str(b)
+		)
+		for parent_id in parent_ids:
+			_assign_sibling_columns(str(parent_id), tier, combat_skills, combat_skills, resolved)
+
+
+static func _max_resolved_column(resolved: Dictionary) -> int:
+	var max_col := 0
+	for skill_id in resolved.keys():
+		if str(skill_id).begins_with("_"):
+			continue
+		max_col = maxi(max_col, int(resolved[skill_id].get("column", 0)))
+
+	return max_col
+
+
 static func _resolve_class(class_id: String) -> Dictionary:
 	if _resolved_by_class.has(class_id):
 		return _resolved_by_class[class_id]
 
 	var resolved := {}
 	var combat_skills := _combat_skills(class_id)
-	var next_root_col := 1
-	for root_id in _tier1_roots(combat_skills):
-		var branch_max_col := _assign_branch(str(root_id), next_root_col, combat_skills, resolved)
+	var tier1_roots := _tier1_roots(combat_skills)
+	if not tier1_roots.is_empty():
+		_assign_branch(str(tier1_roots[0]), 1, combat_skills, resolved)
+
+	_assign_unanchored_combat_skills(combat_skills, resolved)
+
+	var next_root_col := _max_resolved_column(resolved) + 1
+	for root_index in range(1, tier1_roots.size()):
+		var branch_max_col := _assign_branch(str(tier1_roots[root_index]), next_root_col, combat_skills, resolved)
 		next_root_col = branch_max_col + 1
 
 	var max_combat_column := 0

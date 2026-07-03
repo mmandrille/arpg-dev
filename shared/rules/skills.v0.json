@@ -312,13 +312,13 @@
       "class": "sorcerer",
       "tree": {
         "tier": 2,
-        "column": 2
+        "column": 4
       },
       "kind": "revive_companion",
       "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
-        "level": 1,
+        "level": 5,
         "level_per_rank": 1,
         "stats": {
           "magic": 10
@@ -326,12 +326,7 @@
         "stats_per_rank": {
           "magic": 2
         },
-        "skills": [
-          {
-            "skill_id": "magic_bolt",
-            "rank": 1
-          }
-        ]
+        "skills": []
       },
       "cost": {
         "mana": {
@@ -354,14 +349,7 @@
         "type": "attack_interval_multiplier",
         "multiplier": 4
       },
-      "name_key": "skill.revive.name",
-      "synergies": [
-        {
-          "source_skill_id": "magic_bolt",
-          "modifier": "revive_power_percent",
-          "percent_per_source_rank": 8
-        }
-      ]
+      "name_key": "skill.revive.name"
     },
     "cleave": {
       "name": "Cleave",

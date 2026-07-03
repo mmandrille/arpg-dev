@@ -1,0 +1,80 @@
+client/scripts/inventory_panel.gd
+  s_ef99dff08fca10::t_508d7bf1ceb8d1 1251-1253
+shared/assets/item_presentations.v0.json
+  s_ef99dff08fca10::t_a18478161fd6e2 887
+  s_ef99dff08fca10::t_1ba2779a8811ed 896
+  s_ef99dff08fca10::t_1a5291b0767fd1 880-886,888-895,897-909
+server/internal/game/sim.go
+  s_ef99dff08fca10::t_4bc7885caa95f0 5482
+  s_ef99dff08fca10::t_9489f73ab3903e 5567
+  s_ef99dff08fca10::t_3bbd83e3084e88 5530
+  s_ef99dff08fca10::t_0c611780a8689f 5628
+server/internal/game/types.go
+  s_ef99dff08fca10::t_440fe87b71cfe5 212
+docs/plans/v415_2026-07-03-class-specialist-expansion.md
+  s_ef99dff08fca10::t_3503ebb6ac74a1 1-91
+shared/rules/worlds.v0.json
+  s_ef99dff08fca10::t_3cfe1245ebcd65 1488-1503
+shared/protocol/state_delta.v8.schema.json
+  s_ef99dff08fca10::t_7ada0b93500909 396-397,399-400
+client/tests/test_item_requirement_views.gd
+  s_ef99dff08fca10::t_12428629ffcd42 1-66
+shared/assets/item_visuals.v0.json
+  s_ef99dff08fca10::t_f35c8b7ebebb5c 1290
+  s_ef99dff08fca10::t_8cd5f17d91afc4 1258-1289,1291-1357
+tools/bot/scenarios/114_class_specialist_gear_lab.json
+  s_ef99dff08fca10::t_b3e8826455c951 5,8,27-46,51-62
+  s_ef99dff08fca10::t_133b55f6bd35b2 18
+shared/rules/treasure_classes.v0.json
+  s_ef99dff08fca10::t_9031a2ac453374 97-136
+server/internal/game/shop.go
+  s_ef99dff08fca10::t_00fc264f49a139 720
+docs/CODEMAP.md
+  s_ef99dff08fca10::t_c63663a25b0877 20
+PROGRESS.md
+  s_ef99dff08fca10::t_5a90aceff875c7 26
+  s_ef99dff08fca10::t_302c978120a2a7 18
+shared/protocol/session_snapshot.v8.schema.json
+  s_ef99dff08fca10::t_6e7b9a48723bce 255-256,258-259
+shared/rules/item_templates.v0.json
+  s_ef99dff08fca10::t_440e1f7ffa6b3e 3045
+  s_ef99dff08fca10::t_053efa52f30a39 3034-3044,3046-3049,3053-3290,3292-3333
+  s_ef99dff08fca10::t_da0b53965a12cc 3050-3052
+  s_ef99dff08fca10::t_54e970071a5417 3291
+docs/progress/slice-lifecycle.md
+  s_ef99dff08fca10::t_774a9f89e88496 422
+server/internal/game/class_specialist_gear_test.go
+  s_ef99dff08fca10::t_5a50509a30186c 43
+  s_ef99dff08fca10::t_c76331b3c50e3a 7-42,44-62
+scripts/client_smoke.sh
+  s_ef99dff08fca10::t_f415504a74fef1 147
+server/internal/game/item_class_requirements.go
+  s_ef99dff08fca10::t_4749f4a663f29c 72
+  s_ef99dff08fca10::t_9263cb1973d111 43-71
+  s_ef99dff08fca10::t_3ac8aed1b9afea 1-42,73-85
+docs/specs/v415_spec-class-specialist-expansion.md
+  s_ef99dff08fca10::t_c93b39ed55eb00 1-80
+client/scripts/item_requirement_views.gd
+  s_ef99dff08fca10::t_04db1b93a3c2fd 43-69
+  s_ef99dff08fca10::t_c477a5fa31af55 4-5
+shared/rules/items.v0.schema.json
+  s_ef99dff08fca10::t_715d6083ddbfc4 25
+docs/as-built/v415_class-specialist-expansion.md
+  s_ef99dff08fca10::t_f3d078573f467f 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "62cba18a80aad8733e3d9d2cbbe3c3dd49b7d7f2",
+  "prompts": {},
+  "sessions": {
+    "s_ef99dff08fca10": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7f1cf017-7c15-484e-a383-084a02bbab0b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+tools/bot/runtime_queries.py
+  s_6dcd7202175d93::t_7b56d3285f00d1 118-140
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_6dcd7202175d93::t_7b56d3285f00d1 38,45,53-70,74,82,96
+tools/bot/run.py
+  s_6dcd7202175d93::t_7b56d3285f00d1 39,2537-2543,3138
+tools/bot/scenarios/17_treasure_classes_and_guarded_chests.json
+  s_6dcd7202175d93::t_7b56d3285f00d1 7-19,44
+tools/bot/test_protocol.py
+  s_6dcd7202175d93::t_7b56d3285f00d1 736-751
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "34b798bb0035c5263e4ba089ef9137507b6445e6",
+  "prompts": {},
+  "sessions": {
+    "s_6dcd7202175d93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a20c93ed-50b1-4020-b801-b36543cc3eea",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

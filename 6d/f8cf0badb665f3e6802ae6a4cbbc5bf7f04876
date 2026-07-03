@@ -1,0 +1,24 @@
+client/scripts/item_family_icon_preview.gd
+  s_6dcd7202175d93::t_31a494b2a5babd 1-32
+docs/CODEMAP.md
+  s_6dcd7202175d93::t_f7c813c263cd27 12
+  s_6dcd7202175d93::t_5635fc567a8eb1 20
+client/scripts/item_icons_catalog.gd
+  s_6dcd7202175d93::t_31a494b2a5babd 1-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6df8cf0badb665f3e6802ae6a4cbbc5bf7f04876",
+  "prompts": {},
+  "sessions": {
+    "s_6dcd7202175d93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a20c93ed-50b1-4020-b801-b36543cc3eea",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

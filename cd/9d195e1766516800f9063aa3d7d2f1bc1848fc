@@ -1,0 +1,98 @@
+server/internal/game/class_skill_engine.go
+  s_d454930afdc53a::t_c225ff8d42040c 69
+  s_d454930afdc53a::t_9e490b28e99ce9 109
+server/internal/game/rogue_skills.go
+  s_d454930afdc53a::t_927c0834aad6b5 517
+server/internal/game/paladin_defense_test.go
+  s_d454930afdc53a::t_7ffcb9323be9dc 149
+  s_d454930afdc53a::t_1f24d5ceb8a233 130-132
+docs/specs/v418_spec-skill-synergies.md
+  s_d454930afdc53a::t_7d53023e0bc45f 1-2,4-45,48-50,53-55,58-60,62-78
+  s_d454930afdc53a::t_cbc2c2c8043f8a 46-47,51-52,56-57,61
+  s_d454930afdc53a::t_bd55b585dbf5d9 3
+server/internal/game/sim.go
+  s_d454930afdc53a::t_f85dcf7deac57e 5185-5189
+  s_d454930afdc53a::t_e5273d3572eea9 2366
+  s_d454930afdc53a::t_8df6b9715fac7e 2667-2672
+shared/protocol/state_delta.v8.schema.json
+  s_d454930afdc53a::t_d10ee7f6817058 1115-1127,1136-1140
+shared/protocol/session_snapshot.v8.schema.json
+  s_d454930afdc53a::t_4c76ff76d8c46a 490-502,511-515
+server/internal/game/skill_synergies.go
+  s_d454930afdc53a::t_82038141bace16 90-94
+  s_d454930afdc53a::t_57de224ee6ef0c 1-89,95-190
+server/internal/game/ranger_skills.go
+  s_d454930afdc53a::t_23d81df62a576d 14-15,18
+  s_d454930afdc53a::t_92a7e2c6d2d709 92,124
+  s_d454930afdc53a::t_1e0c44603b8ad3 194-197
+  s_d454930afdc53a::t_f50062b9c40bf6 209-210,222-223
+  s_d454930afdc53a::t_16a0c21e1e7768 126
+scripts/client_smoke.sh
+  s_d454930afdc53a::t_89cb6de3d88243 150
+docs/plans/v418_2026-07-03-skill-synergies.md
+  s_d454930afdc53a::t_25265e4a1d296b 1-2,4-45,48-54,57-59,62-64,66-72
+  s_d454930afdc53a::t_c8f95bd45e33c6 3,46-47,55-56,60-61,65,73
+server/internal/game/rules.go
+  s_d454930afdc53a::t_155baab63234c3 352
+server/internal/game/skill_synergies_test.go
+  s_d454930afdc53a::t_470b3a11806798 62-77
+  s_d454930afdc53a::t_a814f204d767f9 1-61,78-101
+tools/bot/scenarios/skill_synergy_lab.json
+  s_d454930afdc53a::t_43275ffd6d178a 1-74
+server/internal/game/passive_skill_stats.go
+  s_d454930afdc53a::t_2c262fa237394b 31
+  s_d454930afdc53a::t_6d1327ac0f416e 14
+server/internal/game/passive_skill_column_test.go
+  s_d454930afdc53a::t_de24233e59f17c 171-173,175
+docs/CODEMAP.md
+  s_d454930afdc53a::t_05b7460c4ff81b 12
+docs/progress/slice-lifecycle.md
+  s_d454930afdc53a::t_30c1d468dad97c 424
+server/internal/game/skill_buffs.go
+  s_d454930afdc53a::t_d15b5f9ce0738e 117
+  s_d454930afdc53a::t_f0157c86dc48c8 74
+  s_d454930afdc53a::t_a32d2a9744d597 43,48
+  s_d454930afdc53a::t_bb66380ed21b13 11,16
+  s_d454930afdc53a::t_daaa2a350a117b 85,87-89
+server/internal/game/handlers.go
+  s_d454930afdc53a::t_d9d09f8d574554 1314-1315,1318
+  s_d454930afdc53a::t_45fd23e6234684 1338-1339,1342,1348
+  s_d454930afdc53a::t_546715fdf62042 1358
+  s_d454930afdc53a::t_f1dccc71ae2ce4 1402
+server/internal/game/earthbreaker_test.go
+  s_d454930afdc53a::t_2aeb4fe058640b 38-40
+  s_d454930afdc53a::t_4fb3bb7609dd24 37
+client/scripts/skills_panel.gd
+  s_d454930afdc53a::t_c1e4d6ef8c71b6 75-79
+  s_d454930afdc53a::t_fcd7942faa60e6 8
+docs/progress/scenario-movement-audit.tsv
+  s_d454930afdc53a::t_00fcacf9b6a25b 238
+PROGRESS.md
+  s_d454930afdc53a::t_16ee74ba5496f8 18
+  s_d454930afdc53a::t_8a5d568233ff35 26,31
+client/tests/test_skill_synergy_tooltip.gd
+  s_d454930afdc53a::t_6f765faad5b77e 5,8-14,18-23,30-31,35-36,38-40,46-56,58-61
+  s_d454930afdc53a::t_28d38114bfe598 1-4,6-7,15-17,24-29,32-34,37,41-45,57
+server/internal/game/types.go
+  s_d454930afdc53a::t_863b3ccbf3cd8e 275-283,285-289
+client/scripts/skill_synergy_tooltip.gd
+  s_d454930afdc53a::t_4d2b735ddb8025 1-96
+docs/as-built/v418_skill-synergies.md
+  s_d454930afdc53a::t_99e7e71cec3db7 1-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cd9d195e1766516800f9063aa3d7d2f1bc1848fc",
+  "prompts": {},
+  "sessions": {
+    "s_d454930afdc53a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e1055ff4-f558-4675-9387-346575655668",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

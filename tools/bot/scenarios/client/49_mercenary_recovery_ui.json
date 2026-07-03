@@ -5,16 +5,19 @@
   "world_id": "mercenary_death_loss_lab",
   "seed": "v232_mercenary_recovery_ui",
   "title": "Mercenary recovery UI",
-  "description": "Client hires a mercenary, observes the loss event in the panel, then rehires a replacement from the board.",
+  "description": "Client hires a roster character mercenary, observes the loss event in the panel, then rehires a replacement from the board.",
+  "character_class": "paladin",
   "debug_progression": {
-    "gold": 600,
-    "stats": {
-      "str": 5,
-      "dex": 5,
-      "vit": 80,
-      "magic": 5
-    }
+    "level": 10,
+    "gold": 600
   },
+  "roster_characters": [
+    {
+      "name": "Recovery Merc Alt",
+      "character_class": "barbarian",
+      "debug_progression": { "level": 6 }
+    }
+  ],
   "client_steps": [
     {
       "type": "wait_ws_open",
@@ -33,8 +36,15 @@
     },
     {
       "type": "wait_event",
+      "event_type": "mercenary_board_opened",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_mercenary_hire"
+    },
+    {
+      "type": "wait_event",
       "event_type": "mercenary_hired",
-      "offer_id": "fixed:mercenary_guard",
       "timeout_s": 15.0
     },
     {
@@ -66,8 +76,15 @@
     },
     {
       "type": "wait_event",
+      "event_type": "mercenary_board_opened",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_mercenary_hire"
+    },
+    {
+      "type": "wait_event",
       "event_type": "mercenary_hired",
-      "offer_id": "fixed:mercenary_guard",
       "timeout_s": 15.0
     },
     {

@@ -5,10 +5,19 @@
   "world_id": "mercenary_hiring_lab",
   "seed": "v247_mercenary_combat_stats",
   "title": "Mercenary combat stats",
-  "description": "Client hires the selected offer and verifies the mercenary panel renders server-owned combat stat lines.",
+  "description": "Client hires a roster character mercenary and verifies the mercenary panel renders server-owned combat stat lines.",
+  "character_class": "paladin",
   "debug_progression": {
+    "level": 10,
     "gold": 300
   },
+  "roster_characters": [
+    {
+      "name": "Combat Stats Alt",
+      "character_class": "barbarian",
+      "debug_progression": { "level": 6 }
+    }
+  ],
   "client_steps": [
     {
       "type": "wait_ws_open",
@@ -24,6 +33,20 @@
       "type": "click_entity",
       "entity_type": "interactable",
       "interactable_def_id": "town_mercenary_board"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "mercenary_board_opened",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_mercenary_panel",
+      "candidate_count": 1,
+      "affordable": true,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_mercenary_hire"
     },
     {
       "type": "wait_event",

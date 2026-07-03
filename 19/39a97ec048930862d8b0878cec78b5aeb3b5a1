@@ -1,0 +1,27 @@
+shared/rules/item_templates.v0.json
+  s_ef99dff08fca10::t_6e7a9bf521155a 3168
+  s_ef99dff08fca10::t_b636952008c3c6 3286-3287
+shared/golden/shop_offers.json
+  s_ef99dff08fca10::t_5153d3d2276cec 14-16,18-19,21,28-29,32,34,41-43,45-46,48,55-57,59-60,62,69-71,73,75
+shared/assets/item_visuals.v0.json
+  s_ef99dff08fca10::t_ee513bba2b0d40 1289
+  s_ef99dff08fca10::t_836be59aaea490 1299
+client/tests/test_golden.gd
+  s_ef99dff08fca10::t_1ffd7588cf9555 445-446
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1939a97ec048930862d8b0878cec78b5aeb3b5a1",
+  "prompts": {},
+  "sessions": {
+    "s_ef99dff08fca10": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7f1cf017-7c15-484e-a383-084a02bbab0b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

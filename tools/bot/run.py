@@ -255,6 +255,8 @@ def seed_roster_characters(
     debug_token: str,
     scenario_path: Path,
 ) -> dict[str, str]:
+    if scenario_path.suffix.lower() != ".json":
+        return {}
     raw = json.loads(scenario_path.read_text())
     roster_ids: dict[str, str] = {}
     for entry in raw.get("roster_characters", []):

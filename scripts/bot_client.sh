@@ -269,7 +269,7 @@ start_preflight() {
       offer_email="$(scenario_email "$EMAIL" "$EMAIL_RUN_ID" "$scenario_id")"
     fi
     echo "[bot-client $(_ts)] starting market preflight for $scenario_id email=$host_email"
-    "$PYTHON" "$ROOT/tools/bot/client_market_preflight.py" \
+    if ! "$PYTHON" "$ROOT/tools/bot/client_market_preflight.py" \
       --base-url "$BASE_URL" \
       --dev-token "$DEV_TOKEN" \
       --debug-token "${ARPG_DEBUG_TOKEN:-local-debug-token}" \
@@ -282,7 +282,11 @@ start_preflight() {
       --price-gold "$(json_field "$scenario_path" "d.get('preflight', {}).get('price_gold', 37)")" \
       --offer-email "$offer_email" \
       --offer-item-def-id "$(json_field "$scenario_path" "d.get('preflight', {}).get('offer_item_def_id', '')")" \
-      >"$log_file" 2>&1
+      >"$log_file" 2>&1; then
+      echo "[bot-client] FAIL: market preflight failed for $scenario_id" >&2
+      show_log "$log_file" "$scenario_id market preflight"
+      return 1
+    fi
     echo "[bot-client $(_ts)] market preflight ready listing=$(metadata_field "$metadata_file" listing_id)"
     return 0
   fi

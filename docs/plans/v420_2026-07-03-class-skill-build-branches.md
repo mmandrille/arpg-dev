@@ -2,14 +2,13 @@
 
 Status: Complete  
 Goal: Add 30 build-branch actives (6 per class) reusing existing skill kinds.  
-Architecture: Data-only `skills.v0.json` + i18n + presentations; `tools/gen_class_build_branch_skills.py` generator; validator active count 13/class.
+Architecture: Data-only `skills.v0.json` + i18n + presentations; validator active count 13/class.
 
 ## File map
 
 | Action | Path |
 |--------|------|
 | Create | `docs/specs/v420_spec-class-skill-build-branches.md` |
-| Create | `tools/gen_class_build_branch_skills.py` |
 | Modify | `shared/rules/skills.v0.json` |
 | Modify | `shared/i18n/en.json` |
 | Modify | `shared/assets/skill_presentations.v0.json` |

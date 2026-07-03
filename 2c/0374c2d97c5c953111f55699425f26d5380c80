@@ -1,0 +1,62 @@
+client/scripts/skills_panel.gd
+  s_1f9a9805f4d2df::t_87a0d85d5747f8 19-20
+  s_1f9a9805f4d2df::t_7aad58f285e3f5 424
+docs/specs/v419_spec-skill-tree-prerequisite-layout.md
+  s_1f9a9805f4d2df::t_72f79914d798ca 3
+  s_1f9a9805f4d2df::t_11f329535bfa4e 1-2,4-64
+tools/validate_skills.py
+  s_1f9a9805f4d2df::t_6b270c55cf118e 350
+  s_1f9a9805f4d2df::t_a66e468e0bc43d 51-80
+docs/plans/v419_2026-07-03-skill-tree-prerequisite-layout.md
+  s_1f9a9805f4d2df::t_2bb2d4f1e25259 64
+  s_1f9a9805f4d2df::t_4ca66fe8bd64b6 81-82,90-92
+  s_1f9a9805f4d2df::t_29329b8741ac8d 1-2,4-39,42-52,55-63,65-73,75-80,83-89
+  s_1f9a9805f4d2df::t_ded2bb8972b1ed 3
+  s_1f9a9805f4d2df::t_6377ea098d6a44 53-54
+  s_1f9a9805f4d2df::t_461fa31cfc5b20 74
+  s_1f9a9805f4d2df::t_ee5cb1e9851567 40-41
+client/scripts/skill_tree_layout.gd
+  s_1f9a9805f4d2df::t_7a5cd8feda5e8a 49
+  s_1f9a9805f4d2df::t_d8f2fd6a4d7950 277
+  s_1f9a9805f4d2df::t_710279f92ff335 129-141
+  s_1f9a9805f4d2df::t_9236055296686d 235
+  s_1f9a9805f4d2df::t_b159f4f1290c9d 186-188,191,196,203,206,233,237-239,241,244,250,266,268-276,278-283
+  s_1f9a9805f4d2df::t_aafb07fc9def5b 178-185
+  s_1f9a9805f4d2df::t_84326a630eb2ec 8-13,16-18,32-48,50-53,61,81-128,142-177,189-190,192-195,197-202,204-205,207-232,234,236,240,242-243,245-249,251-265,267,284-301
+PROGRESS.md
+  s_1f9a9805f4d2df::t_167b7f0ac0cf6b 18
+  s_1f9a9805f4d2df::t_416acc7f6041a5 26,28
+docs/progress/slice-lifecycle.md
+  s_1f9a9805f4d2df::t_c6a1c837ba43d1 425
+scripts/client_smoke.sh
+  s_1f9a9805f4d2df::t_60f1e2ed073743 214
+client/tests/test_skill_tree_layout.gd
+  s_1f9a9805f4d2df::t_eef295cf9869c7 44,49-50
+  s_1f9a9805f4d2df::t_b57d3797a0854f 1-28,30-43,45-48,51-53,57-58,60-117
+  s_1f9a9805f4d2df::t_3393878faa7336 29
+  s_1f9a9805f4d2df::t_4f9bea1834729f 54-56,59
+docs/as-built/v419_skill-tree-prerequisite-layout.md
+  s_1f9a9805f4d2df::t_a5353ce37a7363 1-28
+client/tests/test_skills_panel.gd
+  s_1f9a9805f4d2df::t_15b9ac1e6c1ae1 200
+  s_1f9a9805f4d2df::t_9abde904ead6c9 58
+  s_1f9a9805f4d2df::t_2f909a979aa2c9 127-132
+  s_1f9a9805f4d2df::t_076c2b8513246c 245-269
+  s_1f9a9805f4d2df::t_e4ba0d454a36b6 363-370
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2c0374c2d97c5c953111f55699425f26d5380c80",
+  "prompts": {},
+  "sessions": {
+    "s_1f9a9805f4d2df": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f3ef0959-72b7-45d8-ab7a-149af583ee3a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

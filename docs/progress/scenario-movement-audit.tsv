@@ -57,6 +57,7 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 50_paladin_class_foundation.json	paladin_class_foundation	protocol	pack	contract	0	0		
 51_barbarian_class_foundation.json	barbarian_class_foundation	protocol	extended	contract	0	0		
 class_build_pacing_skills.json	class_build_pacing_skills	protocol	extended	contract	0	0		lab cast only
+class_build_branches_lab.json	class_build_branches_lab	protocol	extended	contract	0	0		lab cast only; debug_progression
 class_progression_pacing.json	class_progression_pacing	protocol	extended	contract	0	0		debug_progression only
 class_skill_engine_expansion.json	class_skill_engine_expansion	protocol	extended	contract	0	0		lab cast only
 class_survival_skills.json	class_survival_skills	protocol	extended	contract	0	0		debug_progression only

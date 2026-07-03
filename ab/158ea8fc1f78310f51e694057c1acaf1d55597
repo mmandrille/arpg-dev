@@ -1,0 +1,21 @@
+server/internal/game/combat_control_test.go
+  s_1f9a9805f4d2df::t_085b1253cb9b3a 148,163-166,170-171,173-180,183-191
+  s_1f9a9805f4d2df::t_43c9f8976e5d93 167-169,172,181-182
+  s_1f9a9805f4d2df::t_356210d9949c6a 358,363
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ab158ea8fc1f78310f51e694057c1acaf1d55597",
+  "prompts": {},
+  "sessions": {
+    "s_1f9a9805f4d2df": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f3ef0959-72b7-45d8-ab7a-149af583ee3a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

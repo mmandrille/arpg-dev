@@ -1,0 +1,135 @@
+server/internal/game/types.go
+  s_63ebd4557bb48e::t_74458d55df943f 81
+  s_63ebd4557bb48e::t_53579bd2da13e4 47-48
+  s_63ebd4557bb48e::t_d38ad4a00d8d23 104
+  s_63ebd4557bb48e::t_4d9dd7600927a3 129-130
+docs/specs/v416_spec-per-skill-affix-rolls.md
+  s_63ebd4557bb48e::t_a66b8fd15a2241 3
+  s_63ebd4557bb48e::t_965c825c4225af 1-2,4-94
+shared/golden/shop_offers.json
+  s_63ebd4557bb48e::t_2be1eac940a9c1 15,18-20,22,74-75,77
+server/internal/game/weapon_elemental.go
+  s_63ebd4557bb48e::t_e6ceca13f3d57b 206-212
+  s_63ebd4557bb48e::t_4bbd1290c31352 197-199
+  s_63ebd4557bb48e::t_c53106a62a4e5e 244-245
+  s_63ebd4557bb48e::t_5025aef6f35c8f 30
+  s_63ebd4557bb48e::t_21b65ab91db229 178-181
+server/internal/game/shop.go
+  s_63ebd4557bb48e::t_fd05b8501cb4d2 728-730
+client/scripts/stash_panel.gd
+  s_63ebd4557bb48e::t_b5f30b67c7a17f 607
+shared/rules/worlds.v0.schema.json
+  s_63ebd4557bb48e::t_571ec643dd17e9 42,52-64,66-70
+docs/as-built/v416_per-skill-affix-rolls.md
+  s_63ebd4557bb48e::t_88918f27093c2c 1-33
+docs/progress/scenario-movement-audit.tsv
+  s_63ebd4557bb48e::t_fb7f9ac9aea67c 236
+server/internal/game/rules.go
+  s_63ebd4557bb48e::t_db89030cf04b3a 1263-1265
+  s_63ebd4557bb48e::t_2e0a26a7d7f47b 775-780
+  s_63ebd4557bb48e::t_cfa08acba8ea59 3185-3187
+shared/protocol/state_delta.v8.schema.json
+  s_63ebd4557bb48e::t_0566e59e748b0b 153,188,222,253,349
+  s_63ebd4557bb48e::t_b360e56635d85f 428-443
+PROGRESS.md
+  s_63ebd4557bb48e::t_0570ed2a3299d4 18
+  s_63ebd4557bb48e::t_5e107e14ea9462 26
+server/internal/game/sim_load.go
+  s_63ebd4557bb48e::t_26deae44b350d0 263-266
+server/internal/game/shop_views.go
+  s_63ebd4557bb48e::t_8be414078b0432 26,86
+client/scripts/shop_panel.gd
+  s_63ebd4557bb48e::t_be3012bdd269d0 749
+scripts/client_smoke.sh
+  s_63ebd4557bb48e::t_4ec93aeb1d05a2 148
+client/scripts/main.gd
+  s_63ebd4557bb48e::t_f933681a56ab55 1886
+docs/CODEMAP.md
+  s_63ebd4557bb48e::t_eed25acb22c15c 20
+  s_63ebd4557bb48e::t_79a90ca9c98ce5 12
+client/tests/test_skill_bonus_tooltip.gd
+  s_63ebd4557bb48e::t_1158fe792d0313 10
+  s_63ebd4557bb48e::t_7d1afbcb6dc078 1-9,11-71
+server/internal/game/item_rolls.go
+  s_63ebd4557bb48e::t_4657127046ed67 34,40
+  s_63ebd4557bb48e::t_b794fd69db2e81 55-63
+shared/rules/worlds.v0.json
+  s_63ebd4557bb48e::t_03350e648dd0bc 5276-5304
+client/scripts/skill_bonus_tooltip.gd
+  s_63ebd4557bb48e::t_e4b680744e5761 1-8,10,12-22,24-27,30,32-34
+  s_63ebd4557bb48e::t_b8d826bce0b685 9,11,23,28-29,31,35
+server/internal/game/item_reroll.go
+  s_63ebd4557bb48e::t_213d9ffb0ca70e 40-41
+  s_63ebd4557bb48e::t_1a49221e0b13dc 74-83
+server/internal/game/survival_skills.go
+  s_63ebd4557bb48e::t_1e3cb52ca47eec 52
+shared/rules/item_templates.v0.json
+  s_63ebd4557bb48e::t_82ce0cdccf992a 1114-1125,1127-1153,1453-1459,2623-2629,2670-2676,2722-2728,2759-2765,3105-3111,3142-3148,3178-3184,3215-3221,3252-3258,3292-3298,3329-3335,3366-3372,3402-3408,3440-3446,3476-3482
+shared/rules/shops.v0.json
+  s_63ebd4557bb48e::t_80df60e66f1737 75-77,161-163
+tools/bot/run.py
+  s_63ebd4557bb48e::t_04367f1b74c0fc 3092-3106
+server/internal/game/sim.go
+  s_63ebd4557bb48e::t_e0d3c2b521f142 5573-5575
+  s_63ebd4557bb48e::t_ec0d834c3183f3 2117-2118
+  s_63ebd4557bb48e::t_f260a8abc03c2e 5482-5484,5533-5534
+  s_63ebd4557bb48e::t_0ff2cf2fe278ba 5282-5283
+server/internal/game/game_test.go
+  s_63ebd4557bb48e::t_e029feb8800528 1399,1422-1424
+  s_63ebd4557bb48e::t_d60cdfe8ba2247 2625,2650
+shared/protocol/session_snapshot.v8.schema.json
+  s_63ebd4557bb48e::t_38827781070158 112,161,195
+  s_63ebd4557bb48e::t_4d42716a3f37d9 285-300
+server/internal/game/item_skill_level_bonuses.go
+  s_63ebd4557bb48e::t_49a2ae58680338 5
+  s_63ebd4557bb48e::t_1db0a4200fe6cb 1-4,6-48,50,52-216
+  s_63ebd4557bb48e::t_41ea098f4e181a 49,51
+client/scripts/inventory_panel.gd
+  s_63ebd4557bb48e::t_37794fba84cdd9 709
+tools/validate_shared.py
+  s_63ebd4557bb48e::t_dcf58a55a9a02b 991
+  s_63ebd4557bb48e::t_6cdc6c43640939 1097-1105
+  s_63ebd4557bb48e::t_4e0084855f2866 2440-2441
+server/internal/game/item_skill_level_bonuses_test.go
+  s_63ebd4557bb48e::t_ecf5e347318759 71,101
+  s_63ebd4557bb48e::t_778b66d871edd2 4
+  s_63ebd4557bb48e::t_a57b9fbbe20b30 13
+  s_63ebd4557bb48e::t_8336f4e1416ef0 42
+  s_63ebd4557bb48e::t_4cdbac87a3a63c 58
+  s_63ebd4557bb48e::t_9c471602f473b1 86,113
+  s_63ebd4557bb48e::t_464243c9325c82 124-146,148-162
+  s_63ebd4557bb48e::t_fadd2a50b734fc 147
+  s_63ebd4557bb48e::t_9708fe1bce01ef 1-3,5-10,26,30-32,34-38,43,45,55,59-70,72-85,87-100,102-112,114-123,164-184,186
+  s_63ebd4557bb48e::t_40d8fe47484141 163
+  s_63ebd4557bb48e::t_59aa05a6498f4e 39-41,44,46-54,56-57
+  s_63ebd4557bb48e::t_a8e01f6386de1c 185
+  s_63ebd4557bb48e::t_a8631a7888ec06 11-12,14-25,27-29,33
+docs/progress/slice-lifecycle.md
+  s_63ebd4557bb48e::t_3895dfd53a7b2d 423
+shared/rules/item_templates.v0.schema.json
+  s_63ebd4557bb48e::t_57a2c34d11e3a1 129
+tools/bot/scenarios/skill_level_affix_lab.json
+  s_63ebd4557bb48e::t_1284d6013f9901 28
+  s_63ebd4557bb48e::t_245bde20c904db 1-27,29-49
+docs/plans/v416_2026-07-03-per-skill-affix-rolls.md
+  s_63ebd4557bb48e::t_ede5776c2d0112 1-2,4-43,46-52,58-64,66-72,74-80,82-91
+  s_63ebd4557bb48e::t_4484c03824f744 3,44-45,53-57,65,73,81
+client/scripts/class_affinity_tooltip.gd
+  s_63ebd4557bb48e::t_24c0c724505685 84-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "829d02e4154cc49701c2b8a1a8d1903cffc2d296",
+  "prompts": {},
+  "sessions": {
+    "s_63ebd4557bb48e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a2a06605-119e-416b-bd77-6eba50f34261",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

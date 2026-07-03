@@ -1,0 +1,33 @@
+client/scripts/skill_tree_layout.gd
+  s_161512345d504a::t_22b74838e1f6c2 308-317,324-326,329-332
+  s_161512345d504a::t_401896b7937a9f 328
+  s_161512345d504a::t_460ff25599d2c4 222,225,227
+  s_161512345d504a::t_26512a5942e946 274-307
+shared/rules/skills.v0.json
+  s_161512345d504a::t_bebe0d3e319cc6 352
+  s_161512345d504a::t_dc2590f353063d 315
+  s_161512345d504a::t_c5b0ae320e83b6 321,329
+tools/bot/scenarios/75_sorcerer_revive_companion.json
+  s_161512345d504a::t_278758b06f4fe1 18
+client/tests/test_skill_tree_layout.gd
+  s_161512345d504a::t_fd8d8890015bba 26
+  s_161512345d504a::t_38154a264fba6d 37
+  s_161512345d504a::t_6a5d0f6f3bdefc 22,25
+  s_161512345d504a::t_e7497903ab6489 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "00cd480964eba236bdc072b881259b5ac292c939",
+  "prompts": {},
+  "sessions": {
+    "s_161512345d504a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "17744e1d-6065-4a7e-9c8c-58fbac992458",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

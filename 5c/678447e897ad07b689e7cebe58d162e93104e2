@@ -1,0 +1,24 @@
+tools/bot/scenarios/48_damage_types_and_resistances.json
+  s_484ae3ecbf09ca::t_3f0909e74e4076 52-53
+  s_484ae3ecbf09ca::t_1c4fb0346292e4 44-45
+  s_484ae3ecbf09ca::t_5512c6ffaee37c 20,27,34
+.maintainability/file-size-baseline.tsv
+  s_484ae3ecbf09ca::t_f0d3c0f59ab3ac 21
+  s_484ae3ecbf09ca::t_8963d09b8496c6 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5c678447e897ad07b689e7cebe58d162e93104e2",
+  "prompts": {},
+  "sessions": {
+    "s_484ae3ecbf09ca": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0c015ac0-1567-4b32-b987-4a6fb08d5966",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

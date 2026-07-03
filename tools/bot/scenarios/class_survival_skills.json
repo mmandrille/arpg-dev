@@ -1,0 +1,51 @@
+{
+  "id": "class_survival_skills",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v414_class_survival_skills",
+  "character_class": "barbarian",
+  "title": "Class survival skills",
+  "description": "Prove level-10 barbarian spends a skill point on Second Wind; lethal auto-proc covered by Go tests.",
+  "debug_progression": {
+    "level": 10,
+    "unspent_skill_points": 1,
+    "stats": { "str": 10, "dex": 5, "vit": 10, "magic": 5 }
+  },
+  "steps": [
+    {
+      "action": "assert_skill_progression",
+      "unspent_skill_points": 1,
+      "skill_id": "second_wind",
+      "rank": 0,
+      "max_rank": "from_rules",
+      "can_spend": true
+    },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "second_wind",
+      "expect_skill_progression": {
+        "unspent_skill_points": 0,
+        "skill_id": "second_wind",
+        "rank": 1,
+        "max_rank": "from_rules",
+        "can_spend": false
+      }
+    }
+  ],
+  "assertions": [
+    {
+      "type": "event_seen",
+      "event_type": "skill_rank_updated",
+      "skill_id": "second_wind",
+      "rank": 1
+    },
+    {
+      "type": "skill_progression",
+      "unspent_skill_points": 0,
+      "skill_id": "second_wind",
+      "rank": 1,
+      "max_rank": "from_rules",
+      "can_spend": false
+    }
+  ]
+}

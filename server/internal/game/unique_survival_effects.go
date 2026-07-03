@@ -30,6 +30,12 @@ func (s *Sim) damagePlayerByMonsterWithSource(monster *entity, player *entity, d
 		res.Events = append(res.Events, combatEventWithAttackStyle(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome, source.MonsterAttackStyle))
 		return outcome
 	}
+	if s.playerForceEvadeActive(player) {
+		outcome := combatResolution{Outcome: "miss", Hit: false}
+		s.triggerUniqueEffectsAfterPlayerAvoidedHit(player, monster, corr, res)
+		res.Events = append(res.Events, combatEventWithAttackStyle(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome, source.MonsterAttackStyle))
+		return outcome
+	}
 	damageRange = s.applyEliteAuraToMonsterDamage(monster, damageRange)
 	attackerStats := s.monsterEffectiveCombatStats(monster, damageRange)
 	defenderStats, _ := s.playerEffectiveCombatStats()
@@ -43,6 +49,7 @@ func (s *Sim) damagePlayerByMonsterWithSource(monster *entity, player *entity, d
 		return outcome
 	}
 	outcome = s.applyUniqueEffectsBeforePlayerDamage(player, monster, corr, res, outcome, source)
+	s.adjustPlayerIncomingDamage(player, monster, &outcome, corr, res)
 	player.hp -= outcome.Damage
 	if player.hp < 0 {
 		player.hp = 0

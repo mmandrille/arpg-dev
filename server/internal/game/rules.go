@@ -341,8 +341,9 @@ type SkillDef struct {
 }
 
 type SkillTreeDef struct {
-	Tier   int `json:"tier"`
-	Column int `json:"column"`
+	Tier   int    `json:"tier"`
+	Column int    `json:"column"`
+	Branch string `json:"branch,omitempty"`
 }
 
 type SkillRequirementDef struct {
@@ -456,18 +457,32 @@ type SkillPassiveStatsDef struct {
 
 // SkillEffectDef is a closed data contract for supported active-skill effects.
 type SkillEffectDef struct {
-	Type           string          `json:"type"`
-	Stats          []string        `json:"stats"`
-	PercentBase    int             `json:"percent_base"`
-	PercentPerRank int             `json:"percent_per_rank"`
-	DurationTicks  int             `json:"duration_ticks"`
-	VisualScale    bool            `json:"visual_scale"`
-	Target         string          `json:"target"`
-	IncludeCaster  bool            `json:"include_caster"`
-	Range          float64         `json:"range"`
-	Radius         float64         `json:"radius"`
-	EffectID       string          `json:"effect_id"`
-	MagicScaling   SkillScalingDef `json:"magic_scaling,omitempty"`
+	Type                          string          `json:"type"`
+	Stats                         []string        `json:"stats"`
+	PercentBase                   int             `json:"percent_base"`
+	PercentPerRank                int             `json:"percent_per_rank"`
+	DurationTicks                 int             `json:"duration_ticks"`
+	VisualScale                   bool            `json:"visual_scale"`
+	Target                        string          `json:"target"`
+	IncludeCaster                 bool            `json:"include_caster"`
+	Range                         float64         `json:"range"`
+	Radius                        float64         `json:"radius"`
+	EffectID                      string          `json:"effect_id"`
+	MagicScaling                  SkillScalingDef `json:"magic_scaling,omitempty"`
+	ManaPerHPBase                 int             `json:"mana_per_hp_base,omitempty"`
+	ManaPerHPPerRank              int             `json:"mana_per_hp_per_rank,omitempty"`
+	OutgoingDamagePercent         int             `json:"outgoing_damage_percent,omitempty"`
+	HealthRegenMultiplierPercent  int             `json:"health_regen_multiplier_percent,omitempty"`
+	CleanseDebuffs                bool            `json:"cleanse_debuffs,omitempty"`
+	MarkRadius                    float64         `json:"mark_radius,omitempty"`
+	MarkDamageBonusPercent        int             `json:"mark_damage_bonus_percent,omitempty"`
+	MarkDamageBonusPercentPerRank int             `json:"mark_damage_bonus_percent_per_rank,omitempty"`
+	MarkDurationTicks             int             `json:"mark_duration_ticks,omitempty"`
+	MarkEffectID                  string          `json:"mark_effect_id,omitempty"`
+	RedirectDamage                bool            `json:"redirect_damage,omitempty"`
+	PhaseThroughMonsters          bool            `json:"phase_through_monsters,omitempty"`
+	DamageImmunity                bool            `json:"damage_immunity,omitempty"`
+	EvadePercent                  int             `json:"evade_percent,omitempty"`
 }
 
 // SkillCooldownDef defines how a skill cooldown is derived.
@@ -2726,7 +2741,7 @@ func validateBuffSkillCooldown(skillID string, skill SkillDef, baseAttackInterva
 }
 func isSupportedSkillKind(kind string) bool {
 	switch kind {
-	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute", "passive_stat_bonus":
+	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute", "passive_stat_bonus", "survival_autocast":
 		return true
 	default:
 		return false
@@ -2801,6 +2816,8 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for passive_stat_bonus", skillID, skill.Targeting)
 		}
 		return validatePassiveStatSkillPayload(skillID, skill)
+	case "survival_autocast":
+		return validateSurvivalAutocastSkill(skillID, skill)
 	default:
 		return fmt.Errorf("game: invalid rules skills.%s.kind: unsupported %s", skillID, skill.Kind)
 	}

@@ -2874,6 +2874,210 @@
         "multiplier": 2
       },
       "name_key": "skill.predators_mark.name"
+    },
+    "second_wind": {
+      "name": "Second Wind",
+      "class": "barbarian",
+      "tree": {
+        "tier": 2,
+        "column": 6,
+        "branch": "survival"
+      },
+      "kind": "survival_autocast",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "effects": [
+        {
+          "type": "survival_vit_regen",
+          "percent_base": 100,
+          "percent_per_rank": 0,
+          "health_regen_multiplier_percent": 200,
+          "duration_ticks": 100
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "fixed_ticks": 1200
+      },
+      "name_key": "skill.second_wind.name"
+    },
+    "arcane_barrier": {
+      "name": "Arcane Barrier",
+      "class": "sorcerer",
+      "tree": {
+        "tier": 2,
+        "column": 6,
+        "branch": "survival"
+      },
+      "kind": "survival_autocast",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "effects": [
+        {
+          "type": "survival_mana_shield",
+          "mana_per_hp_base": 2,
+          "mana_per_hp_per_rank": 1,
+          "duration_ticks": 100
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "fixed_ticks": 1200
+      },
+      "name_key": "skill.arcane_barrier.name"
+    },
+    "divine_protection": {
+      "name": "Divine Protection",
+      "class": "paladin",
+      "tree": {
+        "tier": 2,
+        "column": 6,
+        "branch": "survival"
+      },
+      "kind": "survival_autocast",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "effects": [
+        {
+          "type": "survival_immunity_damage",
+          "outgoing_damage_percent": 500,
+          "duration_ticks": 40,
+          "effect_id": "divine_protection",
+          "damage_immunity": true
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "fixed_ticks": 1200
+      },
+      "name_key": "skill.divine_protection.name"
+    },
+    "evasive_stance": {
+      "name": "Evasive Stance",
+      "class": "rogue",
+      "tree": {
+        "tier": 2,
+        "column": 6,
+        "branch": "survival"
+      },
+      "kind": "survival_autocast",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "effects": [
+        {
+          "type": "survival_evasive_stance",
+          "evade_percent": 100,
+          "cleanse_debuffs": true,
+          "mark_radius": 5,
+          "mark_damage_bonus_percent": 15,
+          "mark_damage_bonus_percent_per_rank": 5,
+          "mark_duration_ticks": 50,
+          "mark_effect_id": "rogue_mark",
+          "duration_ticks": 50,
+          "effect_id": "evasive_stance"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "fixed_ticks": 1200
+      },
+      "name_key": "skill.evasive_stance.name"
+    },
+    "spectral_path": {
+      "name": "Spectral Path",
+      "class": "ranger",
+      "tree": {
+        "tier": 2,
+        "column": 6,
+        "branch": "survival"
+      },
+      "kind": "survival_autocast",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 10,
+        "level_per_rank": 0,
+        "stats": {},
+        "stats_per_rank": {},
+        "skills": []
+      },
+      "cost": {
+        "mana": {
+          "base": 0,
+          "per_rank": 0
+        }
+      },
+      "effects": [
+        {
+          "type": "survival_spectral_path",
+          "redirect_damage": true,
+          "phase_through_monsters": true,
+          "duration_ticks": 50,
+          "effect_id": "spectral_path"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "fixed_ticks": 1200
+      },
+      "name_key": "skill.spectral_path.name"
     }
   }
 }

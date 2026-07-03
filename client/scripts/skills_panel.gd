@@ -14,7 +14,7 @@ const SKILL_ICON_SIZE := Vector2(62, 62)
 const SKILL_TREE_ORIGIN := Vector2(23, 70)
 const SKILL_TREE_SPACING := Vector2(96, 127)
 const SKILL_ACTIVE_TREE_WIDTH := 395.0
-const SKILL_TREE_WIDTH := 491.0
+const SKILL_TREE_WIDTH := 583.0
 const SKILL_TOOLTIP_SIZE := Vector2(218, 218)
 const SKILL_TOOLTIP_GAP := 8.0
 
@@ -428,7 +428,7 @@ func _build() -> void:
 	_panel = DraggableWindowScript.new()
 	_panel.custom_minimum_size = Vector2(525, 650)
 	_panel.position = Vector2(362, 118)
-	_panel.configure("Skills", Vector2(491, 567))
+	_panel.configure("Skills", Vector2(SKILL_TREE_WIDTH, 567))
 	_panel.set_layout_key("skills")
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _panel_style())
@@ -437,17 +437,17 @@ func _build() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 10)
-	root.custom_minimum_size = Vector2(491, 567)
+	root.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, 567)
 	_panel.set_content(root)
 
 	var tree := Control.new()
-	tree.custom_minimum_size = Vector2(491, 463)
+	tree.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, 463)
 	tree.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(tree)
 
 	var backdrop := ColorRect.new()
 	backdrop.color = Color("#151617")
-	backdrop.custom_minimum_size = Vector2(491, 463)
+	backdrop.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, 463)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tree.add_child(backdrop)
 

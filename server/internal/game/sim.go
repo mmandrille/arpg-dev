@@ -296,15 +296,22 @@ type skillCooldownState struct {
 }
 
 type skillEffectState struct {
-	SkillID     string
-	TargetID    uint64
-	Stats       []string
-	Percent     int
-	VisualScale float64
-	EffectID    string
-	ReflectOnBlock bool
-	EndsTick    uint64
-	TotalTicks  int
+	SkillID                  string
+	TargetID                 uint64
+	Stats                    []string
+	Percent                  int
+	VisualScale              float64
+	EffectID                 string
+	ReflectOnBlock           bool
+	Immunity                 bool
+	OutgoingDamagePercent    int
+	ManaPerHP                int
+	HealthRegenMultiplier    float64
+	ForceEvade               bool
+	RedirectDamage           bool
+	PhaseThroughMonsters     bool
+	EndsTick                 uint64
+	TotalTicks               int
 }
 
 type areaHealZoneState struct {
@@ -1110,7 +1117,8 @@ func (s *Sim) applyPlayerRegen(res *TickResult) {
 	}
 	stats, _ := s.playerEffectiveCombatStats()
 	changed := false
-	if delta := regenAmount(stats.HealthRegenPerSecond, tickDuration, &s.hpRegenCarry, player.maxHP-player.hp); delta > 0 {
+	regenRate := stats.HealthRegenPerSecond * s.playerHealthRegenMultiplier()
+	if delta := regenAmount(regenRate, tickDuration, &s.hpRegenCarry, player.maxHP-player.hp); delta > 0 {
 		player.hp += delta
 		changed = true
 	}
@@ -1345,6 +1353,7 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
 	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
+	s.applyPlayerOutgoingDamageMultiplier(&outcome)
 	breakdown := s.trainingDollBreakdownForBasicAttack(attackerStats, defenderStats, damageRange, outcome, target, damageType, weaponSlot)
 	if !outcome.Hit || outcome.Blocked {
 		s.appendMonsterCombatEvent(res, s.combatEventType(monsterEntity, outcome), playerID, target.id, corr, outcome, breakdown, weaponSlot, "")
@@ -1398,6 +1407,7 @@ func (s *Sim) damageMonsterByPlayerSkillTypedWithID(target *entity, playerID uin
 	defenderStats := s.monsterEffectiveCombatStats(target, DamageRange{})
 	outcome := s.resolveSkillDamage(defenderStats, damageRange)
 	s.applyMonsterResistanceToOutcome(target, damageType, &outcome)
+	s.applyPlayerOutgoingDamageMultiplier(&outcome)
 	breakdown := s.trainingDollBreakdownForSkill(defenderStats, damageRange, outcome, target, damageType, skillID)
 	target.hp -= outcome.Damage
 	if target.hp < 0 {
@@ -2931,7 +2941,7 @@ func (s *Sim) playerDynamicBlocked(pos Vec2) bool {
 			continue
 		}
 		if e.kind == monsterEntity && e.hp > 0 {
-			if circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
+			if !s.playerPhasingThroughMonsters() && circlesOverlap(pos, playerRadius, e.pos, monsterRadius) {
 				return true
 			}
 			continue
@@ -4272,16 +4282,18 @@ func (s *Sim) playerDamageImmunityOutcome(player *entity) (combatResolution, boo
 	}
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]
-		if effect.TargetID != player.id || effect.EffectID != "sanctuary" || effect.EndsTick <= s.tick {
+		if effect.TargetID != player.id || effect.EndsTick <= s.tick {
 			continue
 		}
-		return combatResolution{
-			Outcome:         "immune",
-			Damage:          0,
-			RawDamage:       0,
-			MitigatedDamage: 0,
-			Hit:             true,
-		}, true
+		if effect.Immunity || effect.EffectID == "sanctuary" {
+			return combatResolution{
+				Outcome:         "immune",
+				Damage:          0,
+				RawDamage:       0,
+				MitigatedDamage: 0,
+				Hit:             true,
+			}, true
+		}
 	}
 	return combatResolution{}, false
 }

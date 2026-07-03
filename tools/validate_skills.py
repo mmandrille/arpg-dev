@@ -171,6 +171,7 @@ def validate_skill_catalogs(
 
     mobility_kinds = {"mobility"}
     passive_kinds = {"passive_stat_bonus", "passive_execute"}
+    survival_kinds = {"survival_autocast"}
     decuple_classes = ("barbarian", "paladin", "sorcerer", "ranger", "rogue")
     expected_actives = {
         "barbarian": 7,
@@ -184,6 +185,7 @@ def validate_skill_catalogs(
         actives = []
         movement = []
         passives = []
+        survival = []
         for skill_id, skill in skills.get("skills", {}).items():
             if skill.get("class") != class_id:
                 continue
@@ -192,6 +194,8 @@ def validate_skill_catalogs(
                 movement.append(skill_id)
             elif kind in passive_kinds:
                 passives.append(skill_id)
+            elif kind in survival_kinds:
+                survival.append(skill_id)
             else:
                 actives.append(skill_id)
         if len(actives) != expected_actives[class_id]:
@@ -200,10 +204,12 @@ def validate_skill_catalogs(
             decuple_errors.append(f"{class_id}: movement={len(movement)} want 1 ({movement})")
         if len(passives) != 4:
             decuple_errors.append(f"{class_id}: passives={len(passives)} want 4 ({passives})")
+        if len(survival) != 1:
+            decuple_errors.append(f"{class_id}: survival={len(survival)} want 1 ({survival})")
     if decuple_errors:
         report.fail("class skill decuple", "; ".join(decuple_errors))
     else:
-        report.ok("each class has expected actives, 1 movement, and 4 passives")
+        report.ok("each class has expected actives, 1 movement, 4 passives, and 1 survival")
 
     if magic_bolt is not None:
         for skill_id, skill in skills.get("skills", {}).items():

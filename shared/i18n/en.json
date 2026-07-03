@@ -221,6 +221,16 @@
     "skill.retribution.name": "Retribution",
     "skill.retribution.summary": "Reflect damage when you block",
     "skill.predators_mark.name": "Predator's Mark",
-    "skill.predators_mark.summary": "Mark a foe for bonus damage"
+    "skill.predators_mark.summary": "Mark a foe for bonus damage",
+    "skill.second_wind.name": "Second Wind",
+    "skill.second_wind.summary": "Auto-proc: VIT surge and doubled regen",
+    "skill.arcane_barrier.name": "Arcane Barrier",
+    "skill.arcane_barrier.summary": "Auto-proc: damage drains mana first",
+    "skill.divine_protection.name": "Divine Protection",
+    "skill.divine_protection.summary": "Auto-proc: immunity and 5x damage",
+    "skill.evasive_stance.name": "Evasive Stance",
+    "skill.evasive_stance.summary": "Auto-proc: cleanse, perfect evade, mark foes",
+    "skill.spectral_path.name": "Spectral Path",
+    "skill.spectral_path.summary": "Auto-proc: redirect damage and ghost walk"
   }
 }

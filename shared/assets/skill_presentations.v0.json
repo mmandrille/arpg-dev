@@ -669,6 +669,61 @@
       "projectile_visual": "pinning_shot_projectile",
       "effect_visual": "poison_stab",
       "summary_key": "skill.predators_mark.summary"
+    },
+    "second_wind": {
+      "icon": {
+        "label": "Sw",
+        "shape": "burst",
+        "color": "#3a9a50",
+        "accent": "#b8f0c8"
+      },
+      "summary": "Auto-proc: VIT surge and doubled regen",
+      "effect_visual": "holy_shield_ring",
+      "summary_key": "skill.second_wind.summary"
+    },
+    "arcane_barrier": {
+      "icon": {
+        "label": "Ab",
+        "shape": "orb_projectile",
+        "color": "#5080d0",
+        "accent": "#c8e0ff"
+      },
+      "summary": "Auto-proc: damage drains mana first",
+      "effect_visual": "magic_bolt_projectile",
+      "summary_key": "skill.arcane_barrier.summary"
+    },
+    "divine_protection": {
+      "icon": {
+        "label": "Dp",
+        "shape": "burst",
+        "color": "#e0c040",
+        "accent": "#fff8c0"
+      },
+      "summary": "Auto-proc: immunity and 5x damage",
+      "effect_visual": "holy_shield_ring",
+      "summary_key": "skill.divine_protection.summary"
+    },
+    "evasive_stance": {
+      "icon": {
+        "label": "Es",
+        "shape": "dash",
+        "color": "#606878",
+        "accent": "#c0c8d8"
+      },
+      "summary": "Auto-proc: cleanse, perfect evade, mark foes",
+      "effect_visual": "smoke_screen",
+      "summary_key": "skill.evasive_stance.summary"
+    },
+    "spectral_path": {
+      "icon": {
+        "label": "Sp",
+        "shape": "dash",
+        "color": "#70a890",
+        "accent": "#d0f0e0"
+      },
+      "summary": "Auto-proc: redirect damage and ghost walk",
+      "effect_visual": "teleport_blink",
+      "summary_key": "skill.spectral_path.summary"
     }
   }
 }

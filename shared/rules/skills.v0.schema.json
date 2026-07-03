@@ -25,7 +25,7 @@
         "class": { "type": "string", "minLength": 1 },
         "damage_type": { "$ref": "#/$defs/damage_type" },
         "tree": { "$ref": "#/$defs/tree_position" },
-        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute", "passive_stat_bonus"] },
+        "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute", "passive_stat_bonus", "survival_autocast"] },
         "max_rank": { "type": "integer", "minimum": 1 },
         "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
@@ -139,6 +139,13 @@
             "required": ["passive_stats"],
             "properties": { "targeting": { "const": "self" } }
           }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "survival_autocast" } }, "required": ["kind"] },
+          "then": {
+            "required": ["effects"],
+            "properties": { "targeting": { "const": "self" } }
+          }
         }
       ]
     },
@@ -148,7 +155,8 @@
       "additionalProperties": false,
       "properties": {
         "tier": { "type": "integer", "minimum": 1 },
-        "column": { "type": "integer", "minimum": 1 }
+        "column": { "type": "integer", "minimum": 1 },
+        "branch": { "type": "string", "enum": ["combat", "passive", "survival"] }
       }
     },
     "damage_type": {
@@ -517,8 +525,77 @@
         { "$ref": "#/$defs/area_percent_heal_effect" },
         { "$ref": "#/$defs/area_stat_percent_buff_effect" },
         { "$ref": "#/$defs/area_immunity_buff_effect" },
-        { "$ref": "#/$defs/reflect_on_block_buff_effect" }
+        { "$ref": "#/$defs/reflect_on_block_buff_effect" },
+        { "$ref": "#/$defs/survival_vit_regen_effect" },
+        { "$ref": "#/$defs/survival_mana_shield_effect" },
+        { "$ref": "#/$defs/survival_immunity_damage_effect" },
+        { "$ref": "#/$defs/survival_evasive_stance_effect" },
+        { "$ref": "#/$defs/survival_spectral_path_effect" }
       ]
+    },
+    "survival_vit_regen_effect": {
+      "type": "object",
+      "required": ["type", "percent_base", "percent_per_rank", "health_regen_multiplier_percent", "duration_ticks"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "survival_vit_regen" },
+        "percent_base": { "type": "integer", "minimum": 1 },
+        "percent_per_rank": { "type": "integer", "minimum": 0 },
+        "health_regen_multiplier_percent": { "type": "integer", "minimum": 100 },
+        "duration_ticks": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "survival_mana_shield_effect": {
+      "type": "object",
+      "required": ["type", "mana_per_hp_base", "mana_per_hp_per_rank", "duration_ticks"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "survival_mana_shield" },
+        "mana_per_hp_base": { "type": "integer", "minimum": 1 },
+        "mana_per_hp_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "survival_immunity_damage_effect": {
+      "type": "object",
+      "required": ["type", "outgoing_damage_percent", "duration_ticks", "effect_id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "survival_immunity_damage" },
+        "outgoing_damage_percent": { "type": "integer", "minimum": 100 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "effect_id": { "type": "string", "minLength": 1 },
+        "damage_immunity": { "type": "boolean" }
+      }
+    },
+    "survival_evasive_stance_effect": {
+      "type": "object",
+      "required": ["type", "evade_percent", "cleanse_debuffs", "mark_radius", "mark_damage_bonus_percent", "mark_duration_ticks", "mark_effect_id", "duration_ticks", "effect_id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "survival_evasive_stance" },
+        "evade_percent": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "cleanse_debuffs": { "type": "boolean" },
+        "mark_radius": { "type": "number", "exclusiveMinimum": 0 },
+        "mark_damage_bonus_percent": { "type": "integer", "minimum": 1 },
+        "mark_damage_bonus_percent_per_rank": { "type": "integer", "minimum": 0 },
+        "mark_duration_ticks": { "type": "integer", "minimum": 1 },
+        "mark_effect_id": { "type": "string", "minLength": 1 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "effect_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "survival_spectral_path_effect": {
+      "type": "object",
+      "required": ["type", "redirect_damage", "phase_through_monsters", "duration_ticks", "effect_id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "survival_spectral_path" },
+        "redirect_damage": { "const": true },
+        "phase_through_monsters": { "const": true },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "effect_id": { "type": "string", "minLength": 1 }
+      }
     },
     "reflect_on_block_buff_effect": {
       "type": "object",

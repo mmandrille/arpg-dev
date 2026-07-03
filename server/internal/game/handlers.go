@@ -1235,7 +1235,7 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		s.handleReviveCompanionSkillCast(in, res, player, skillID, def, rank, manaCost)
 	case "mobility":
 		s.handleMobilitySkillCast(in, res, player, skillID, def, rank, manaCost)
-	case "passive_execute", "passive_stat_bonus":
+	case "passive_execute", "passive_stat_bonus", "survival_autocast":
 		res.reject(in.MessageID, "passive_skill_not_castable")
 	default:
 		res.reject(in.MessageID, "unsupported_skill_kind")

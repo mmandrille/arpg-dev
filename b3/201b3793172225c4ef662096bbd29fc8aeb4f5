@@ -1,0 +1,31 @@
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_2586c16d173356::t_14208293e0a9bc 18,36-42
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_2586c16d173356::t_14208293e0a9bc 18,28-40,148-151
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_2586c16d173356::t_14208293e0a9bc 9-13,17,21-42,45-131,136-163,166-221,224-281
+client/tests/test_skill_rules_loader.gd
+  s_2586c16d173356::t_e1c7f37c22ab57 33
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_2586c16d173356::t_14208293e0a9bc 18,36-42
+server/internal/game/combat_control_autonav_test.go
+  s_2586c16d173356::t_367629e8455fb4 1-52
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_2586c16d173356::t_14208293e0a9bc 18,36-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b3201b3793172225c4ef662096bbd29fc8aeb4f5",
+  "prompts": {},
+  "sessions": {
+    "s_2586c16d173356": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3e6daa32-bc16-469e-b428-71ea7ad03be6",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -89,20 +89,28 @@ type DamageRange struct {
 	Max int `json:"max"`
 }
 
+// WeaponDamageScalingDef maps an item type to derived-stat keys for weapon damage bonuses.
+type WeaponDamageScalingDef struct {
+	DamageMin   string `json:"damage_min"`
+	DamageMax   string `json:"damage_max"`
+	SourceLabel string `json:"source_label"`
+}
+
 // Combat holds combat parameters.
 type Combat struct {
-	BaseHitChance           float64     `json:"base_hit_chance"`
-	BaseCritChance          float64     `json:"base_crit_chance"`
-	BaseCritDamage          float64     `json:"base_crit_damage"`
-	MinimumDamage           int         `json:"minimum_damage"`
-	BlockCap                int         `json:"block_cap_percent"`
-	BaseAttackIntervalTicks int         `json:"base_attack_interval_ticks"`
-	MinEffectiveAttackSpeed float64     `json:"min_effective_attack_speed"`
-	MaxEffectiveAttackSpeed float64     `json:"max_effective_attack_speed"`
-	PlayerDamage                       DamageRange `json:"player_damage"`
-	TwoHandedStrengthDamageMultiplier  float64     `json:"two_handed_strength_damage_multiplier"`
-	UnarmedReach                       float64     `json:"unarmed_reach"`
-	Coop                    CoopCombat  `json:"coop"`
+	BaseHitChance                      float64                            `json:"base_hit_chance"`
+	BaseCritChance                     float64                            `json:"base_crit_chance"`
+	BaseCritDamage                     float64                            `json:"base_crit_damage"`
+	MinimumDamage                      int                                `json:"minimum_damage"`
+	BlockCap                           int                                `json:"block_cap_percent"`
+	BaseAttackIntervalTicks            int                                `json:"base_attack_interval_ticks"`
+	MinEffectiveAttackSpeed            float64                            `json:"min_effective_attack_speed"`
+	MaxEffectiveAttackSpeed            float64                            `json:"max_effective_attack_speed"`
+	PlayerDamage                       DamageRange                        `json:"player_damage"`
+	TwoHandedStrengthDamageMultiplier  float64                            `json:"two_handed_strength_damage_multiplier"`
+	WeaponDamageScaling                map[string]WeaponDamageScalingDef  `json:"weapon_damage_scaling"`
+	UnarmedReach                       float64                            `json:"unarmed_reach"`
+	Coop                               CoopCombat                         `json:"coop"`
 }
 
 type CoopCombat struct {
@@ -269,6 +277,7 @@ type GridBounds struct {
 type ItemDef struct {
 	Name            string       `json:"name"`
 	Category        string       `json:"category"`
+	ItemType        string       `json:"item_type,omitempty"`
 	Slot            string       `json:"slot"`
 	Equippable      bool         `json:"equippable"`
 	ClassRequired   string       `json:"class_required,omitempty"`
@@ -849,19 +858,20 @@ func LoadRules(dir string) (*Rules, error) {
 	r.MainConfig = mainConfig
 
 	var combat struct {
-		Version                 int         `json:"version"`
-		BaseHitChance           float64     `json:"base_hit_chance"`
-		BaseCritChance          float64     `json:"base_crit_chance"`
-		BaseCritDamage          float64     `json:"base_crit_damage"`
-		MinimumDamage           int         `json:"minimum_damage"`
-		BlockCap                int         `json:"block_cap_percent"`
-		BaseAttackIntervalTicks int         `json:"base_attack_interval_ticks"`
-		MinEffectiveAttackSpeed float64     `json:"min_effective_attack_speed"`
-		MaxEffectiveAttackSpeed float64     `json:"max_effective_attack_speed"`
-		PlayerDamage                       DamageRange `json:"player_damage"`
-		TwoHandedStrengthDamageMultiplier  float64     `json:"two_handed_strength_damage_multiplier"`
-		UnarmedReach                       float64     `json:"unarmed_reach"`
-		Coop                               CoopCombat  `json:"coop"`
+		Version                            int                                `json:"version"`
+		BaseHitChance                      float64                            `json:"base_hit_chance"`
+		BaseCritChance                     float64                            `json:"base_crit_chance"`
+		BaseCritDamage                     float64                            `json:"base_crit_damage"`
+		MinimumDamage                      int                                `json:"minimum_damage"`
+		BlockCap                           int                                `json:"block_cap_percent"`
+		BaseAttackIntervalTicks            int                                `json:"base_attack_interval_ticks"`
+		MinEffectiveAttackSpeed            float64                            `json:"min_effective_attack_speed"`
+		MaxEffectiveAttackSpeed            float64                            `json:"max_effective_attack_speed"`
+		PlayerDamage                       DamageRange                        `json:"player_damage"`
+		TwoHandedStrengthDamageMultiplier  float64                            `json:"two_handed_strength_damage_multiplier"`
+		WeaponDamageScaling                map[string]WeaponDamageScalingDef  `json:"weapon_damage_scaling"`
+		UnarmedReach                       float64                            `json:"unarmed_reach"`
+		Coop                               CoopCombat                         `json:"coop"`
 	}
 	if err := readJSON(filepath.Join(dir, "combat.v0.json"), &combat); err != nil {
 		return nil, err
@@ -899,20 +909,24 @@ func LoadRules(dir string) (*Rules, error) {
 	if combat.TwoHandedStrengthDamageMultiplier < 1 {
 		return nil, fmt.Errorf("game: invalid rules combat.two_handed_strength_damage_multiplier: must be >= 1")
 	}
+	if err := validateWeaponDamageScaling(combat.WeaponDamageScaling); err != nil {
+		return nil, err
+	}
 	if err := validateCoopCombatRules(combat.Coop); err != nil {
 		return nil, err
 	}
 	r.Combat = Combat{
-		BaseHitChance:           combat.BaseHitChance,
-		BaseCritChance:          combat.BaseCritChance,
-		BaseCritDamage:          combat.BaseCritDamage,
-		MinimumDamage:           combat.MinimumDamage,
-		BlockCap:                combat.BlockCap,
-		BaseAttackIntervalTicks: mainConfig.Gameplay.BaseAttackIntervalTicks,
-		MinEffectiveAttackSpeed: combat.MinEffectiveAttackSpeed,
-		MaxEffectiveAttackSpeed: combat.MaxEffectiveAttackSpeed,
+		BaseHitChance:                     combat.BaseHitChance,
+		BaseCritChance:                    combat.BaseCritChance,
+		BaseCritDamage:                    combat.BaseCritDamage,
+		MinimumDamage:                     combat.MinimumDamage,
+		BlockCap:                          combat.BlockCap,
+		BaseAttackIntervalTicks:           mainConfig.Gameplay.BaseAttackIntervalTicks,
+		MinEffectiveAttackSpeed:           combat.MinEffectiveAttackSpeed,
+		MaxEffectiveAttackSpeed:           combat.MaxEffectiveAttackSpeed,
 		PlayerDamage:                      combat.PlayerDamage,
 		TwoHandedStrengthDamageMultiplier: combat.TwoHandedStrengthDamageMultiplier,
+		WeaponDamageScaling:               combat.WeaponDamageScaling,
 		UnarmedReach:                      combat.UnarmedReach,
 		Coop:                              combat.Coop,
 	}
@@ -2623,6 +2637,22 @@ func validateDamageRange(label string, d DamageRange) error {
 	if d.Max < d.Min {
 		return fmt.Errorf("game: invalid rules %s: max must be >= min", label)
 	}
+	return nil
+}
+
+func validateWeaponDamageScaling(scaling map[string]WeaponDamageScalingDef) error {
+	if len(scaling) == 0 {
+		return fmt.Errorf("game: invalid rules combat.weapon_damage_scaling: required")
+	}
+	for itemType, def := range scaling {
+		if itemType == "" {
+			return fmt.Errorf("game: invalid rules combat.weapon_damage_scaling: item type must be non-empty")
+		}
+		if def.DamageMin == "" || def.DamageMax == "" || def.SourceLabel == "" {
+			return fmt.Errorf("game: invalid rules combat.weapon_damage_scaling.%s: damage_min, damage_max, and source_label are required", itemType)
+		}
+	}
+
 	return nil
 }
 

@@ -193,6 +193,12 @@ func attackIntervalTicksFromSpeed(speed float64, rules *Rules) int {
 
 func mercenaryCombatStats(rules *Rules, progression CharacterProgressionState, equipped map[string]*invItem) (effectiveCombatStats, float64) {
 	character := mercenaryDerivedStats(rules, progression, equipped)
+	stats := progression.BaseStats
+	equipment := equipmentBaseStatBonusesForItems(rules, equipped)
+	stats.Str += equipment.Str
+	stats.Dex += equipment.Dex
+	stats.Vit += equipment.Vit
+	stats.Magic += equipment.Magic
 	damageMin := float64(rules.Combat.PlayerDamage.Min) + character.DamageMin
 	damageMax := float64(rules.Combat.PlayerDamage.Max) + character.DamageMax
 	armor := character.Armor
@@ -206,9 +212,9 @@ func mercenaryCombatStats(rules *Rules, progression CharacterProgressionState, e
 	if weapon := equipped[mainHandSlot]; weapon != nil {
 		baseMin, baseMax, minRoll, maxRoll, ok := weaponDamageContributionsForItem(rules, weapon)
 		if ok {
-			strMin, strMax := scaledWeaponStrengthDamage(character, weaponStrengthDamageMultiplier(rules, weapon))
-			damageMin = strMin + baseMin + minRoll
-			damageMax = strMax + baseMax + maxRoll
+			statMin, statMax := weaponStatDamageBonus(rules, stats, weapon)
+			damageMin = statMin + baseMin + minRoll
+			damageMax = statMax + baseMax + maxRoll
 		}
 		if speed, ok := weaponAttackSpeedContributionForItem(rules, weapon); ok {
 			weaponSpeed = speed

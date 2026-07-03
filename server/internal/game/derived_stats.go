@@ -115,26 +115,24 @@ func (s *Sim) weaponSlotDamageBreakdownView(slot string) *WeaponSlotDamageView {
 	if slot == offHandSlot && !s.canOffhandWeapon(item) {
 		return nil
 	}
-	character := s.characterDerivedStatsView()
 	baseMin, baseMax, minRoll, maxRoll, label, itemID, ok := s.weaponDamageContributions(item)
 	if !ok {
 		return nil
 	}
-	strMultiplier := weaponStrengthDamageMultiplier(s.rules, item)
-	strMin, strMax := scaledWeaponStrengthDamage(character, strMultiplier)
-	minStrSources, maxStrSources := weaponStrengthDamageSources(character, strMultiplier)
+	stats := s.effectiveBaseStatsView()
+	statMin, statMax, minStatSources, maxStatSources := weaponStatDamageBonusWithSources(s.rules, stats, item)
 
 	return &WeaponSlotDamageView{
-		Min: strMin + baseMin + minRoll,
-		Max: strMax + baseMax + maxRoll,
+		Min: statMin + baseMin + minRoll,
+		Max: statMax + baseMax + maxRoll,
 		MinSources: append([]StatBreakdownSourceView{
 			{Label: label, Value: baseMin, Kind: "equipment_base", ItemInstanceID: itemID},
 			{Label: "Rolled damage", Value: minRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
-		}, minStrSources...),
+		}, minStatSources...),
 		MaxSources: append([]StatBreakdownSourceView{
 			{Label: label, Value: baseMax, Kind: "equipment_base", ItemInstanceID: itemID},
 			{Label: "Rolled damage", Value: maxRoll, Kind: "equipment_roll", ItemInstanceID: itemID},
-		}, maxStrSources...),
+		}, maxStatSources...),
 	}
 }
 

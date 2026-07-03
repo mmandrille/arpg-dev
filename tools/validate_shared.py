@@ -516,6 +516,10 @@ def cross_checks(report: Report) -> None:
     derived_keys = {
         "damage_min",
         "damage_max",
+        "bow_damage_min",
+        "bow_damage_max",
+        "staff_damage_min",
+        "staff_damage_max",
         "armor",
         "attack_speed",
         "hit_chance",
@@ -652,6 +656,46 @@ def cross_checks(report: Report) -> None:
             break
     if not formula_failed:
         report.ok("character_progression derived stat formulas are bounded and supported")
+
+    weapon_scaling = combat.get("weapon_damage_scaling", {})
+    if not weapon_scaling:
+        report.fail("combat weapon_damage_scaling", "required")
+    else:
+        scaling_failed = False
+        str_min = character_progression["derived_stats"]["damage_min"]
+        str_max = character_progression["derived_stats"]["damage_max"]
+        for item_type, scaling in sorted(weapon_scaling.items()):
+            for field in ("damage_min", "damage_max"):
+                stat_id = scaling.get(field, "")
+                if stat_id not in character_progression["derived_stats"]:
+                    report.fail("combat weapon_damage_scaling", f"{item_type}.{field} references unknown derived stat {stat_id}")
+                    scaling_failed = True
+                    break
+            if scaling_failed:
+                break
+            if not scaling.get("source_label"):
+                report.fail("combat weapon_damage_scaling", f"{item_type}: source_label is required")
+                scaling_failed = True
+                break
+        if not scaling_failed:
+            bow_min = character_progression["derived_stats"].get("bow_damage_min", {})
+            bow_max = character_progression["derived_stats"].get("bow_damage_max", {})
+            staff_min = character_progression["derived_stats"].get("staff_damage_min", {})
+            staff_max = character_progression["derived_stats"].get("staff_damage_max", {})
+            if bow_min.get("base") != str_min.get("base") or bow_min.get("per_dex") != str_min.get("per_str"):
+                report.fail("combat weapon_damage_scaling", "bow_damage_min must mirror damage_min coefficients with per_dex")
+                scaling_failed = True
+            elif bow_max.get("base") != str_max.get("base") or bow_max.get("per_dex") != str_max.get("per_str"):
+                report.fail("combat weapon_damage_scaling", "bow_damage_max must mirror damage_max coefficients with per_dex")
+                scaling_failed = True
+            elif staff_min.get("base") != str_min.get("base") or staff_min.get("per_magic") != str_min.get("per_str"):
+                report.fail("combat weapon_damage_scaling", "staff_damage_min must mirror damage_min coefficients with per_magic")
+                scaling_failed = True
+            elif staff_max.get("base") != str_max.get("base") or staff_max.get("per_magic") != str_max.get("per_str"):
+                report.fail("combat weapon_damage_scaling", "staff_damage_max must mirror damage_max coefficients with per_magic")
+                scaling_failed = True
+            else:
+                report.ok("combat weapon_damage_scaling references valid derived stats")
 
     def progression_level(experience: int) -> int:
         level = 1

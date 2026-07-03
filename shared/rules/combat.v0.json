@@ -10,6 +10,18 @@
   "max_effective_attack_speed": 3.0,
   "player_damage": { "min": 2, "max": 4 },
   "two_handed_strength_damage_multiplier": 2,
+  "weapon_damage_scaling": {
+    "bow": {
+      "damage_min": "bow_damage_min",
+      "damage_max": "bow_damage_max",
+      "source_label": "Dexterity"
+    },
+    "staff": {
+      "damage_min": "staff_damage_min",
+      "damage_max": "staff_damage_max",
+      "source_label": "Magic"
+    }
+  },
   "unarmed_reach": 1.0,
   "coop": {
     "xp_share": {

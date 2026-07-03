@@ -502,6 +502,30 @@
       "per_str": 0.4,
       "min": 0
     },
+    "bow_damage_min": {
+      "type": "linear",
+      "base": -1,
+      "per_dex": 0.2,
+      "min": 0
+    },
+    "bow_damage_max": {
+      "type": "linear",
+      "base": -2,
+      "per_dex": 0.4,
+      "min": 0
+    },
+    "staff_damage_min": {
+      "type": "linear",
+      "base": -1,
+      "per_magic": 0.2,
+      "min": 0
+    },
+    "staff_damage_max": {
+      "type": "linear",
+      "base": -2,
+      "per_magic": 0.4,
+      "min": 0
+    },
     "armor": {
       "type": "linear",
       "base": 0,

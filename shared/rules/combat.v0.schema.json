@@ -4,7 +4,7 @@
   "title": "Combat rules (v0)",
   "description": "Declarative combat parameters. Authoritative damage is rolled by the server PRNG within [min, max]; the cross-language damage formula is pinned by shared/golden/damage_formula.json.",
   "type": "object",
-  "required": ["version", "base_hit_chance", "base_crit_chance", "base_crit_damage", "minimum_damage", "block_cap_percent", "base_attack_interval_ticks", "min_effective_attack_speed", "max_effective_attack_speed", "player_damage", "two_handed_strength_damage_multiplier", "unarmed_reach", "coop"],
+  "required": ["version", "base_hit_chance", "base_crit_chance", "base_crit_damage", "minimum_damage", "block_cap_percent", "base_attack_interval_ticks", "min_effective_attack_speed", "max_effective_attack_speed", "player_damage", "two_handed_strength_damage_multiplier", "weapon_damage_scaling", "unarmed_reach", "coop"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
@@ -26,6 +26,19 @@
       }
     },
     "two_handed_strength_damage_multiplier": { "type": "number", "minimum": 1 },
+    "weapon_damage_scaling": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["damage_min", "damage_max", "source_label"],
+        "additionalProperties": false,
+        "properties": {
+          "damage_min": { "type": "string", "minLength": 1 },
+          "damage_max": { "type": "string", "minLength": 1 },
+          "source_label": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "unarmed_reach": { "type": "number", "exclusiveMinimum": 0 },
     "coop": {
       "type": "object",

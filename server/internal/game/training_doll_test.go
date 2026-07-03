@@ -86,42 +86,6 @@ func TestTrainingDollRevivesAfterDelay(t *testing.T) {
 	}
 }
 
-func TestCompanionIgnoresTrainingDoll(t *testing.T) {
-	sim, err := NewSimWithWorld("sess_training_doll_companion", "town_training_doll_companion", loadRules(t), "town_training_doll_lab")
-	if err != nil {
-		t.Fatalf("NewSimWithWorld: %v", err)
-	}
-
-	player := sim.levels[townLevel].entities[sim.playerID]
-	doll := findMonsterByDefID(t, sim, townTrainingDollDefID)
-	startHP := doll.hp
-	companion := &entity{
-		id:                    sim.alloc(),
-		kind:                  companionEntity,
-		pos:                   Vec2{X: doll.pos.X + 0.5, Y: doll.pos.Y},
-		hp:                    20,
-		maxHP:                 20,
-		ownerID:               player.id,
-		monsterDefID:          characterMercenaryMonsterDefID,
-		monsterAttackDamage:   &DamageRange{Min: 5, Max: 5},
-		monsterAttackCooldown: 1,
-		aiMode:                monsterAIModeIdle,
-		speed:                 1,
-	}
-	sim.levels[townLevel].entities[companion.id] = companion
-
-	for i := 0; i < 80; i++ {
-		sim.Tick(nil)
-	}
-
-	if doll.hp != startHP {
-		t.Fatalf("companion damaged training doll hp=%d, want %d", doll.hp, startHP)
-	}
-	if companion.targetID != 0 {
-		t.Fatalf("companion target_id=%d, want 0 for training doll", companion.targetID)
-	}
-}
-
 func findTrainingDollEvent(events []Event, eventType string) *Event {
 	for i := range events {
 		if events[i].EventType == eventType {

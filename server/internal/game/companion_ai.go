@@ -355,7 +355,7 @@ func (s *Sim) companionTarget(companion *entity) *entity {
 }
 
 func (s *Sim) validCompanionTarget(companion *entity, target *entity) bool {
-	if companion == nil || target == nil || target.kind != monsterEntity || target.hp <= 0 || target.isTrainingDoll {
+	if companion == nil || target == nil || target.kind != monsterEntity || target.hp <= 0  {
 		return false
 	}
 	switch companion.companionStanceOrDefault() {

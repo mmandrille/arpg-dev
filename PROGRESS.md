@@ -25,7 +25,7 @@ Last updated: 2026-07-02 (v410 polearm-archetypes-and-family-icons)
 |-------|-------|
 | **Latest completed slice** | v410 — polearm-archetypes-and-family-icons |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-02 — focused verification green (v410 autoloop); final `make ci` pending |
+| **CI gate** | 2026-07-02 — `make ci` green (v410 autoloop batch) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v408 — [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md) (2026-07-02; official cadence) |
 | **Next engineering review** | ~v418 milestone |

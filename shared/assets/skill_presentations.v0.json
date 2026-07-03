@@ -635,6 +635,40 @@
       "summary": "Ally evasion cloud",
       "effect_visual": "holy_shield_ring",
       "summary_key": "skill.smoke_screen.summary"
+    },
+    "rend": {
+      "icon": {
+        "label": "R",
+        "shape": "slash",
+        "color": "#c04030",
+        "accent": "#ff8060"
+      },
+      "summary": "Bleeding cone slash",
+      "effect_visual": "earthbreaker_ring",
+      "summary_key": "skill.rend.summary"
+    },
+    "retribution": {
+      "icon": {
+        "label": "Rt",
+        "shape": "shield",
+        "color": "#d0b040",
+        "accent": "#fff0a0"
+      },
+      "summary": "Reflect damage when you block",
+      "effect_visual": "holy_shield_ring",
+      "summary_key": "skill.retribution.summary"
+    },
+    "predators_mark": {
+      "icon": {
+        "label": "Pm",
+        "shape": "arrow",
+        "color": "#40a060",
+        "accent": "#90f0b0"
+      },
+      "summary": "Mark a foe for bonus damage",
+      "projectile_visual": "pinning_shot_projectile",
+      "effect_visual": "poison_stab",
+      "summary_key": "skill.predators_mark.summary"
     }
   }
 }

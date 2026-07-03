@@ -302,6 +302,7 @@ type skillEffectState struct {
 	Percent     int
 	VisualScale float64
 	EffectID    string
+	ReflectOnBlock bool
 	EndsTick    uint64
 	TotalTicks  int
 }
@@ -1682,6 +1683,9 @@ func (s *Sim) retaliate(monster *entity, corr string, res *TickResult) {
 	defenderStats, _ := s.playerEffectiveCombatStats()
 	outcome := s.resolveCombat(attackerStats, defenderStats, retaliationDamage)
 	if !outcome.Hit || outcome.Blocked {
+		if outcome.Blocked {
+			s.trySkillReflectOnPlayerBlock(player, monster, retaliationDamage, corr, res)
+		}
 		s.triggerUniqueEffectsAfterPlayerAvoidedHit(player, monster, corr, res)
 		res.Events = append(res.Events, combatEvent(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome))
 		return
@@ -2676,6 +2680,13 @@ func (s *Sim) applyConeSkill(player *entity, skillID string, def SkillDef, targe
 		outcome := s.damageMonsterByPlayerSkillTypedWithID(target, player.id, skillID, correlationID, res, s.resolvePlayerAttackDamage(), s.skillDamageType(def))
 		if def.Poison.DurationTicks > 0 && outcome.Hit && !outcome.Blocked && target.hp > 0 {
 			s.startPoisonDot(player, target, skillID, def, outcome.Damage, correlationID, res)
+		}
+		if def.Bleed.DurationTicks > 0 && outcome.Hit && !outcome.Blocked && target.hp > 0 {
+			rank := s.effectiveSkillRank(skillID)
+			if rank < 1 {
+				rank = 1
+			}
+			s.startSkillBleed(player, target, skillID, def.Bleed, rank, correlationID, res)
 		}
 		if target.hp <= 0 || outcome.Damage <= 0 {
 			continue
@@ -3719,6 +3730,14 @@ func (s *Sim) resolveSkillProjectileMonsterHit(p *entity, target *entity, res *T
 	}
 	damageType := s.skillDamageType(def)
 	outcome := s.damageMonsterByPlayerSkillTypedWithID(target, p.ownerID, skillID, p.sourceCorrID, res, p.damageRange, damageType)
+	if def.Mark.DurationTicks > 0 && outcome.Hit && !outcome.Blocked && target.hp > 0 {
+		rank := s.effectiveSkillRank(skillID)
+		if rank < 1 {
+			rank = 1
+		}
+		player := s.activeLevel().entities[p.ownerID]
+		s.startSkillMark(player, target, skillID, def.Mark, rank, p.sourceCorrID, res)
+	}
 	if def.Kind == "chain_projectile_attack" && outcome.Damage > 0 {
 		s.applySkillChain(target, p.ownerID, skillID, def, p.damageRange, p.sourceCorrID, res)
 		return

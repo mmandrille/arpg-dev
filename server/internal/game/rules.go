@@ -325,6 +325,8 @@ type SkillDef struct {
 	Volley       SkillVolleyDef       `json:"volley"`
 	Cone         SkillConeDef         `json:"cone"`
 	Poison       SkillPoisonDef       `json:"poison"`
+	Bleed        SkillBleedDef        `json:"bleed"`
+	Mark         SkillMarkDef         `json:"mark"`
 	Dash         SkillDashDef         `json:"dash"`
 	Mobility     SkillMobilityDef     `json:"mobility"`
 	Execute      SkillExecuteDef      `json:"execute"`
@@ -2766,7 +2768,7 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 		if skill.Targeting != "self" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for self_buff", skillID, skill.Targeting)
 		}
-		return validateSkillEffects(skillID, skill.Effects, "stat_percent_buff")
+		return validateSkillEffects(skillID, skill.Effects, "stat_percent_buff", "reflect_on_block_buff")
 	case "area_heal":
 		if skill.Targeting != "direction_or_target_area" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for area_heal", skillID, skill.Targeting)
@@ -2973,6 +2975,10 @@ func validateSkillEffects(skillID string, effects []SkillEffectDef, expectedType
 			if err := validateAreaImmunityBuffEffect(skillID, idx, effect); err != nil {
 				return err
 			}
+		case "reflect_on_block_buff":
+			if err := validateReflectOnBlockBuffEffect(skillID, idx, effect); err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("game: invalid rules skills.%s.effects[%d].type: unsupported %s", skillID, idx, effect.Type)
 		}
@@ -3028,6 +3034,23 @@ func validateAreaPercentHealEffect(skillID string, idx int, effect SkillEffectDe
 	if err := validateSkillMagicScaling(fmt.Sprintf("skills.%s.effects[%d].magic_scaling", skillID, idx), effect.MagicScaling); err != nil {
 		return err
 	}
+	return nil
+}
+
+func validateReflectOnBlockBuffEffect(skillID string, idx int, effect SkillEffectDef) error {
+	if effect.PercentBase <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].percent_base: must be positive", skillID, idx)
+	}
+	if effect.PercentPerRank < 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].percent_per_rank: must be non-negative", skillID, idx)
+	}
+	if effect.DurationTicks <= 0 {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].duration_ticks: must be positive", skillID, idx)
+	}
+	if effect.EffectID == "" {
+		return fmt.Errorf("game: invalid rules skills.%s.effects[%d].effect_id: required", skillID, idx)
+	}
+
 	return nil
 }
 

@@ -370,37 +370,11 @@ func (s *Sim) startRogueMark(player *entity, target *entity, skillID string, def
 	if player == nil || target == nil || def.Poison.MarkDurationTicks <= 0 || def.Poison.MarkDamageBonusPercent <= 0 {
 		return
 	}
-	if s.rogueMarks == nil {
-		s.rogueMarks = make(map[uint64]rogueMarkState)
-	}
-	mark := rogueMarkState{
-		SourcePlayerID:     player.id,
-		TargetID:           target.id,
-		SkillID:            skillID,
-		Rank:               rank,
+	s.startSkillMark(player, target, skillID, SkillMarkDef{
 		DamageBonusPercent: def.Poison.MarkDamageBonusPercent,
-		EndsTick:           s.tick + uint64(def.Poison.MarkDurationTicks),
-		TotalTicks:         def.Poison.MarkDurationTicks,
+		DurationTicks:      def.Poison.MarkDurationTicks,
 		EffectID:           def.Poison.MarkEffectID,
-		CorrelationID:      correlationID,
-	}
-	s.rogueMarks[target.id] = mark
-	if mark.EffectID != "" {
-		target.effectIDs = sortedUniqueStrings(append(target.effectIDs, mark.EffectID))
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	}
-	res.Events = append(res.Events, Event{
-		EventType:      "skill_effect_started",
-		EntityID:       idStr(target.id),
-		SourceEntityID: idStr(player.id),
-		TargetEntityID: idStr(target.id),
-		CorrelationID:  correlationID,
-		SkillID:        skillID,
-		Rank:           intPtr(rank),
-		Amount:         intPtr(mark.DamageBonusPercent),
-		RemainingTicks: intPtr(mark.TotalTicks),
-		TotalTicks:     intPtr(mark.TotalTicks),
-	})
+	}, rank, correlationID, res)
 }
 
 func (s *Sim) replicatePoisonDot(playerID uint64, primary *entity, dot poisonDotState, res *TickResult) {

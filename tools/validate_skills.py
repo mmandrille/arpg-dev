@@ -173,11 +173,11 @@ def validate_skill_catalogs(
     passive_kinds = {"passive_stat_bonus", "passive_execute"}
     decuple_classes = ("barbarian", "paladin", "sorcerer", "ranger", "rogue")
     expected_actives = {
-        "barbarian": 6,
-        "paladin": 6,
+        "barbarian": 7,
+        "paladin": 7,
         "sorcerer": 7,
         "ranger": 7,
-        "rogue": 6,
+        "rogue": 7,
     }
     decuple_errors = []
     for class_id in decuple_classes:

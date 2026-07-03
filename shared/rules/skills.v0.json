@@ -2711,6 +2711,169 @@
         "flat_ticks": 500
       },
       "name_key": "skill.smoke_screen.name"
+    },
+    "rend": {
+      "name": "Rend",
+      "class": "barbarian",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 3
+      },
+      "kind": "cone_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "str": 12,
+          "vit": 8
+        },
+        "stats_per_rank": {
+          "str": 1,
+          "vit": 1
+        },
+        "skills": [
+          {
+            "skill_id": "ground_slam",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 5,
+          "per_rank": 1
+        }
+      },
+      "cone": {
+        "range": 5,
+        "angle_degrees": 45,
+        "push_min": 0,
+        "push_max": 0,
+        "damage_source": "weapon"
+      },
+      "bleed": {
+        "effect_id": "rend_bleed",
+        "damage_percent_max_hp": 6,
+        "damage_percent_max_hp_per_rank": 2,
+        "duration_ticks": 50,
+        "duration_ticks_per_rank": 10,
+        "interval_ticks": 10
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2.5
+      },
+      "name_key": "skill.rend.name"
+    },
+    "retribution": {
+      "name": "Retribution",
+      "class": "paladin",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "self_buff",
+      "max_rank": 5,
+      "targeting": "self",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "vit": 10,
+          "magic": 8
+        },
+        "stats_per_rank": {
+          "vit": 2,
+          "magic": 1
+        },
+        "skills": [
+          {
+            "skill_id": "hammer_of_light",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 6,
+          "per_rank": 1
+        }
+      },
+      "effects": [
+        {
+          "type": "reflect_on_block_buff",
+          "percent_base": 40,
+          "percent_per_rank": 10,
+          "duration_ticks": 300,
+          "effect_id": "retribution"
+        }
+      ],
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 1,
+        "flat_ticks": 600
+      },
+      "name_key": "skill.retribution.name"
+    },
+    "predators_mark": {
+      "name": "Predator's Mark",
+      "class": "rogue",
+      "damage_type": "force",
+      "tree": {
+        "tier": 3,
+        "column": 1
+      },
+      "kind": "projectile_attack",
+      "max_rank": 5,
+      "targeting": "direction_or_target",
+      "requirements": {
+        "level": 5,
+        "level_per_rank": 1,
+        "stats": {
+          "dex": 12
+        },
+        "stats_per_rank": {
+          "dex": 2
+        },
+        "skills": [
+          {
+            "skill_id": "eviscerate",
+            "rank": 1
+          }
+        ]
+      },
+      "cost": {
+        "mana": {
+          "base": 4,
+          "per_rank": 0
+        }
+      },
+      "damage": {
+        "type": "weapon_multiplier_range",
+        "min_base": 80,
+        "max_base": 80,
+        "min_per_rank": 25,
+        "max_per_rank": 15
+      },
+      "projectile": {
+        "range": 14,
+        "speed": 22,
+        "visual": "pinning_shot_projectile"
+      },
+      "mark": {
+        "damage_bonus_percent": 20,
+        "damage_bonus_percent_per_rank": 5,
+        "duration_ticks": 80,
+        "effect_id": "rogue_mark"
+      },
+      "cooldown": {
+        "type": "attack_interval_multiplier",
+        "multiplier": 2
+      },
+      "name_key": "skill.predators_mark.name"
     }
   }
 }

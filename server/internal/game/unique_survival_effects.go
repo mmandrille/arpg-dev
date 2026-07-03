@@ -35,6 +35,9 @@ func (s *Sim) damagePlayerByMonsterWithSource(monster *entity, player *entity, d
 	defenderStats, _ := s.playerEffectiveCombatStats()
 	outcome := s.resolveCombat(attackerStats, defenderStats, damageRange)
 	if !outcome.Hit || outcome.Blocked {
+		if outcome.Blocked {
+			s.trySkillReflectOnPlayerBlock(player, monster, damageRange, corr, res)
+		}
 		s.triggerUniqueEffectsAfterPlayerAvoidedHit(player, monster, corr, res)
 		res.Events = append(res.Events, combatEventWithAttackStyle(s.combatEventType(playerEntity, outcome), monster.id, player.id, corr, outcome, source.MonsterAttackStyle))
 		return outcome

@@ -37,6 +37,8 @@
         "volley": { "$ref": "#/$defs/volley" },
         "cone": { "$ref": "#/$defs/cone" },
         "poison": { "$ref": "#/$defs/poison" },
+        "bleed": { "$ref": "#/$defs/bleed" },
+        "mark": { "$ref": "#/$defs/mark" },
         "dash": { "$ref": "#/$defs/dash" },
         "mobility": { "$ref": "#/$defs/mobility" },
         "execute": { "$ref": "#/$defs/execute" },
@@ -355,6 +357,30 @@
         "mark_effect_id": { "type": "string", "minLength": 1 }
       }
     },
+    "bleed": {
+      "type": "object",
+      "required": ["effect_id", "damage_percent_max_hp", "duration_ticks", "interval_ticks"],
+      "additionalProperties": false,
+      "properties": {
+        "effect_id": { "type": "string", "minLength": 1 },
+        "damage_percent_max_hp": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "damage_percent_max_hp_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "duration_ticks_per_rank": { "type": "integer", "minimum": 0 },
+        "interval_ticks": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "mark": {
+      "type": "object",
+      "required": ["damage_bonus_percent", "duration_ticks", "effect_id"],
+      "additionalProperties": false,
+      "properties": {
+        "damage_bonus_percent": { "type": "integer", "minimum": 1 },
+        "damage_bonus_percent_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "effect_id": { "type": "string", "minLength": 1 }
+      }
+    },
     "dash": {
       "type": "object",
       "required": ["range_base", "range_per_rank", "damage_percent_base", "damage_percent_per_magic", "max_damage_bonus_percent"],
@@ -490,8 +516,21 @@
         { "$ref": "#/$defs/stat_percent_buff_effect" },
         { "$ref": "#/$defs/area_percent_heal_effect" },
         { "$ref": "#/$defs/area_stat_percent_buff_effect" },
-        { "$ref": "#/$defs/area_immunity_buff_effect" }
+        { "$ref": "#/$defs/area_immunity_buff_effect" },
+        { "$ref": "#/$defs/reflect_on_block_buff_effect" }
       ]
+    },
+    "reflect_on_block_buff_effect": {
+      "type": "object",
+      "required": ["type", "percent_base", "percent_per_rank", "duration_ticks", "effect_id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "reflect_on_block_buff" },
+        "percent_base": { "type": "integer", "minimum": 1 },
+        "percent_per_rank": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "effect_id": { "type": "string", "minLength": 1 }
+      }
     },
     "stat_percent_buff_effect": {
       "type": "object",

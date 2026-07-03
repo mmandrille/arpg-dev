@@ -7,6 +7,36 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 		return
 	}
 	for _, effect := range def.Effects {
+		if effect.Type == "reflect_on_block_buff" {
+			percent := skillEffectPercent(effect, rank)
+			effectID := effect.EffectID
+			if effectID == "" {
+				effectID = skillID
+			}
+			totalTicks := effect.DurationTicks
+			s.skillEffects[skillID] = skillEffectState{
+				SkillID:        skillID,
+				TargetID:       player.id,
+				Percent:        percent,
+				EffectID:       effectID,
+				ReflectOnBlock: true,
+				EndsTick:       s.tick + uint64(totalTicks),
+				TotalTicks:     totalTicks,
+			}
+			player.effectIDs = sortedUniqueStrings(append(player.effectIDs, effectID))
+			res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
+			res.Events = append(res.Events, Event{
+				EventType:      "skill_effect_started",
+				EntityID:       idStr(player.id),
+				CorrelationID:  correlationID,
+				SkillID:        skillID,
+				Rank:           intPtr(rank),
+				Amount:         intPtr(percent),
+				RemainingTicks: intPtr(totalTicks),
+				TotalTicks:     intPtr(totalTicks),
+			})
+			continue
+		}
 		if effect.Type != "stat_percent_buff" {
 			continue
 		}

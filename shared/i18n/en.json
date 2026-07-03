@@ -215,6 +215,12 @@
     "skill.hammer_of_light.name": "Hammer of Light",
     "skill.hammer_of_light.summary": "Holy cone smash after charge",
     "skill.smoke_screen.name": "Smoke Screen",
-    "skill.smoke_screen.summary": "Ally evasion cloud"
+    "skill.smoke_screen.summary": "Ally evasion cloud",
+    "skill.rend.name": "Rend",
+    "skill.rend.summary": "Bleeding cone slash",
+    "skill.retribution.name": "Retribution",
+    "skill.retribution.summary": "Reflect damage when you block",
+    "skill.predators_mark.name": "Predator's Mark",
+    "skill.predators_mark.summary": "Mark a foe for bonus damage"
   }
 }

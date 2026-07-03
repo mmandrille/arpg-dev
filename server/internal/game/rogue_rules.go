@@ -12,6 +12,22 @@ type SkillPoisonDef struct {
 	MarkEffectID               string `json:"mark_effect_id"`
 }
 
+type SkillBleedDef struct {
+	EffectID                    string `json:"effect_id"`
+	DamagePercentMaxHP          int    `json:"damage_percent_max_hp"`
+	DamagePercentMaxHPPerRank   int    `json:"damage_percent_max_hp_per_rank"`
+	DurationTicks               int    `json:"duration_ticks"`
+	DurationTicksPerRank        int    `json:"duration_ticks_per_rank"`
+	IntervalTicks               int    `json:"interval_ticks"`
+}
+
+type SkillMarkDef struct {
+	DamageBonusPercent        int    `json:"damage_bonus_percent"`
+	DamageBonusPercentPerRank int    `json:"damage_bonus_percent_per_rank"`
+	DurationTicks             int    `json:"duration_ticks"`
+	EffectID                  string `json:"effect_id"`
+}
+
 type SkillDashDef struct {
 	RangeBase             float64 `json:"range_base"`
 	RangePerRank          float64 `json:"range_per_rank"`
@@ -68,6 +84,25 @@ func validateRogueConeSkillPayload(skillID string, skill SkillDef) error {
 		}
 		if skill.Dash.BleedIntervalTicks <= 0 {
 			return fmt.Errorf("game: invalid rules skills.%s.dash.bleed_interval_ticks: must be positive", skillID)
+		}
+	}
+	if skill.Bleed.DurationTicks > 0 {
+		if skill.Bleed.EffectID == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.bleed.effect_id: required", skillID)
+		}
+		if skill.Bleed.DamagePercentMaxHP <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.bleed.damage_percent_max_hp: must be positive", skillID)
+		}
+		if skill.Bleed.IntervalTicks <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.bleed.interval_ticks: must be positive", skillID)
+		}
+	}
+	if skill.Mark.DurationTicks > 0 {
+		if skill.Mark.EffectID == "" {
+			return fmt.Errorf("game: invalid rules skills.%s.mark.effect_id: required", skillID)
+		}
+		if skill.Mark.DamageBonusPercent <= 0 {
+			return fmt.Errorf("game: invalid rules skills.%s.mark.damage_bonus_percent: must be positive", skillID)
 		}
 	}
 	if skill.Kind == "mobility" {

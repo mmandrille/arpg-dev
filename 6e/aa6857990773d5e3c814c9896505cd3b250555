@@ -1,0 +1,91 @@
+docs/plans/v412_2026-07-03-class-build-pacing.md
+  s_b993e8609e263e::t_047eefb2ffbf5c 1-2,4-33,36-41,45-50,52-57,60-65,67-73,76-85
+  s_b993e8609e263e::t_3ddfcec303ce34 3,34-35,42-44,51,58-59,66,74-75
+shared/rules/character_progression.v0.schema.json
+  s_b993e8609e263e::t_2c8e36c7a23ca9 113-123
+server/internal/game/game_test.go
+  s_b993e8609e263e::t_eb51de0c1ef8d1 779-780,783-785,789-793,803-805,809,811-813,817,819-820,823-825,827,829-831,836,838-840,844,847-848
+server/internal/game/sim.go
+  s_b993e8609e263e::t_616fd0522fef3b 3996
+  s_b993e8609e263e::t_f2af192f20c791 5085
+  s_b993e8609e263e::t_b4710e01464094 6082,6085-6086
+  s_b993e8609e263e::t_d1cc587a622935 675-676
+  s_b993e8609e263e::t_44e83416874191 5097
+  s_b993e8609e263e::t_7ccef1f48a66a8 5850-5852
+tools/bot/scenarios/45_town_bishop_respec.json
+  s_b993e8609e263e::t_de2a4c63c90c0b 96,160
+  s_b993e8609e263e::t_be46d48f9df78b 155
+  s_b993e8609e263e::t_51d23f284d02dd 74,78
+  s_b993e8609e263e::t_12210039efbef3 144
+docs/specs/v412_spec-class-build-pacing.md
+  s_b993e8609e263e::t_7f3829f3be0e80 1-76
+tools/validate_skills.py
+  s_b993e8609e263e::t_6438538502e1c3 206
+  s_b993e8609e263e::t_1a8dcd776cd0b6 175-181
+  s_b993e8609e263e::t_cc1415b2fb785e 197-198
+shared/assets/skill_presentations.v0.json
+  s_b993e8609e263e::t_bdc99ba980a97c 620
+  s_b993e8609e263e::t_d805bf50837c19 631
+  s_b993e8609e263e::t_8ebe034053cdc3 609
+  s_b993e8609e263e::t_7d8a0f0ec502f9 586
+  s_b993e8609e263e::t_3f63b860ca0ff7 558-573,575-585,587-597,599-608,610-619,621-630,632-637
+  s_b993e8609e263e::t_5610566eae2e70 598
+  s_b993e8609e263e::t_06ba97f238ed52 574
+server/internal/game/class_build_pacing_test.go
+  s_b993e8609e263e::t_2639bce6b9a83f 96-97
+  s_b993e8609e263e::t_f7e84cb54bb2d7 82-95,98-103,105-111
+  s_b993e8609e263e::t_36ded1594d1a88 1-81,113-127,130-143
+  s_b993e8609e263e::t_b9085efefe5e1e 112
+  s_b993e8609e263e::t_9b2f40590fdf6a 128-129
+  s_b993e8609e263e::t_30f1c2b678942c 104
+shared/rules/character_progression.v0.json
+  s_b993e8609e263e::t_69a73709594ab9 19-21,33-35,47-49,61-63,75-77
+server/internal/game/class_progression.go
+  s_b993e8609e263e::t_a370074a73866a 14
+  s_b993e8609e263e::t_4e900bb4bbbd42 1-13,15-94
+server/internal/game/rules.go
+  s_b993e8609e263e::t_5184f45e52c621 185
+shared/rules/skills.v0.json
+  s_b993e8609e263e::t_ea78f2a1303329 2339-2550,2552-2713
+  s_b993e8609e263e::t_22a2c4e60b0a58 2551
+docs/CODEMAP.md
+  s_b993e8609e263e::t_8d2f103f298bba 11
+server/internal/game/rules_area_buffs.go
+  s_b993e8609e263e::t_10afaba66ad1b9 11
+tools/bot/scenarios/class_progression_pacing.json
+  s_b993e8609e263e::t_4b83f1c05d8639 29,31-36
+  s_b993e8609e263e::t_f51f387b5c3a13 8-11,13-14,17-20,23-24
+  s_b993e8609e263e::t_0e7b9f9ae5eb9c 1-7,15-16,21-22,25-28,30,37-39
+  s_b993e8609e263e::t_7edc920de1cc92 12
+docs/as-built/v412_class-build-pacing.md
+  s_b993e8609e263e::t_ab58b3bd7f747c 1-28
+server/internal/game/bishop_test.go
+  s_b993e8609e263e::t_2a2da6d7073268 95,102-103
+docs/progress/slice-lifecycle.md
+  s_b993e8609e263e::t_854874bec6b013 421
+tools/bot/scenarios/class_build_pacing_skills.json
+  s_b993e8609e263e::t_df023c494c5d20 1-11,13-74
+  s_b993e8609e263e::t_142bcdf42dd3df 12
+shared/i18n/en.json
+  s_b993e8609e263e::t_4883204a0160d7 204-218
+PROGRESS.md
+  s_b993e8609e263e::t_c29890f73e9bcf 18,26,28-29
+shared/rules/skills.v0.schema.json
+  s_b993e8609e263e::t_6252d779d57ea1 544
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "6eaa6857990773d5e3c814c9896505cd3b250555",
+  "prompts": {},
+  "sessions": {
+    "s_b993e8609e263e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fb30590a-f710-4071-b41f-11dcfb5b9b2b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+server/internal/game/game_test.go
+  s_d37b6a93e8faa6::t_d1ad15aa3c012f 316-322
+shared/golden/dungeon_equipment_drops.json
+  s_d37b6a93e8faa6::t_3d55c69e487238 61,74,87,90
+shared/golden/item_rolls.json
+  s_d37b6a93e8faa6::t_3d55c69e487238 11,30,51
+shared/golden/shop_offers.json
+  s_d37b6a93e8faa6::t_3d55c69e487238 172-173,176,178,185-186,189-190,192,199-201,203-205,207,214-215,218-219,221,228-229,232-235,237
+shared/golden/treasure_class_rolls.json
+  s_d37b6a93e8faa6::t_3d55c69e487238 9,18,27,30,51,54,63,66
+docs/progress/scenario-movement-audit.tsv
+  s_d37b6a93e8faa6::t_0130865da236bd 230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ea508f4f802f28669f209ca2bc2d1a8f4bfdac83",
+  "prompts": {},
+  "sessions": {
+    "s_d37b6a93e8faa6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b3cf49ba-76f7-47c1-a41e-5bf1594a252a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

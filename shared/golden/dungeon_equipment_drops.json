@@ -58,7 +58,7 @@
       "seed": "v29_dungeon_mob_tc_depth_3_plus_41",
       "expected_drops": [
         {
-          "item_template_id": "buckler"
+          "item_template_id": "leather_cap"
         }
       ]
     },
@@ -71,7 +71,7 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
         {
-          "item_template_id": "mail"
+          "item_template_id": "gloves"
         }
       ]
     },
@@ -84,10 +84,10 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_8",
       "expected_drops": [
         {
-          "item_template_id": "bow"
+          "item_template_id": "ring"
         },
         {
-          "item_def_id": "blue_potion"
+          "item_template_id": "hammer"
         }
       ]
     }

@@ -1,5 +1,4 @@
 {
-  "description": "Cross-language item roll golden for long_sword template naming and stat rolls.",
   "template_id": "long_sword",
   "cases": [
     {
@@ -9,6 +8,7 @@
         "item_template_id": "long_sword",
         "display_name": "Long Sword",
         "rarity": "common",
+        "item_level": 1,
         "stats": {
           "damage_max": 5,
           "damage_min": 2
@@ -27,6 +27,7 @@
         "item_template_id": "long_sword",
         "display_name": "Mystic Long Sword",
         "rarity": "rare",
+        "item_level": 1,
         "stats": {
           "damage_max": 4,
           "damage_min": 2,
@@ -47,6 +48,7 @@
         "item_template_id": "long_sword",
         "display_name": "Keen Long Sword of Pilgrim's Momentum",
         "rarity": "unique",
+        "item_level": 1,
         "stats": {
           "crit_chance": 3,
           "damage_max": 4,

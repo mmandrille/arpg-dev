@@ -169,71 +169,72 @@
         {
           "offer_id": "generated:depth3:000",
           "kind": "generated",
-          "item_template_id": "shield",
-          "display_name": "Shield",
+          "item_template_id": "leather_cap",
+          "display_name": "Leather Cap",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 2,
-            "block_percent": 10
+            "armor": 1
           },
-          "buy_price": 160,
+          "buy_price": 55,
           "source": "common_dungeon_mob",
           "depth": 3
         },
         {
           "offer_id": "generated:depth3:001",
           "kind": "generated",
-          "item_template_id": "soft_boots",
-          "display_name": "Soft Boots",
+          "item_template_id": "bow",
+          "display_name": "Bow",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 0,
-            "movement_speed_percent": 10
+            "damage_max": 2,
+            "damage_min": 1
           },
-          "buy_price": 120,
+          "buy_price": 130,
           "source": "common_dungeon_mob",
           "depth": 3
         },
         {
           "offer_id": "generated:depth3:002",
           "kind": "generated",
-          "item_template_id": "great_sword",
-          "display_name": "Great Sword",
-          "rarity": "common",
+          "item_template_id": "gloves",
+          "display_name": "Mystic Gloves",
+          "rarity": "magic",
           "rolled_stats": {
-            "damage_max": 7,
-            "damage_min": 5
+            "armor": 1,
+            "attack_speed_percent": 5,
+            "magic": 3
           },
-          "buy_price": 330,
+          "buy_price": 205,
           "source": "common_dungeon_mob",
           "depth": 3
         },
         {
           "offer_id": "generated:depth3:003",
           "kind": "generated",
-          "item_template_id": "buckler",
-          "display_name": "Buckler",
+          "item_template_id": "shield",
+          "display_name": "Shield",
           "rarity": "common",
           "rolled_stats": {
-            "armor": 2,
-            "block_percent": 8
+            "armor": 3,
+            "block_percent": 5
           },
-          "buy_price": 145,
+          "buy_price": 135,
           "source": "common_dungeon_mob",
           "depth": 3
         },
         {
           "offer_id": "generated:depth3:004",
           "kind": "generated",
-          "item_template_id": "mail",
-          "display_name": "Mystic Mail",
+          "item_template_id": "spear",
+          "display_name": "Venomous Spear",
           "rarity": "magic",
           "rolled_stats": {
-            "armor": 3,
-            "dex": 1,
-            "magic": 1
+            "bonus_poison_damage": 1,
+            "damage_max": 9,
+            "damage_min": 5,
+            "dex": 1
           },
-          "buy_price": 235,
+          "buy_price": 655,
           "source": "common_dungeon_mob",
           "depth": 3
         }

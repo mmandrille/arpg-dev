@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
 
 func weaponElementalProcRules(t *testing.T) *Rules {
 	t.Helper()
@@ -109,5 +112,95 @@ func TestWeaponElementalProcOnBasicAttackHit(t *testing.T) {
 	}
 	if !freezeStarted {
 		t.Fatalf("events = %+v, want weapon freeze proc", res.Events)
+	}
+}
+
+func mustMercenaryColdSwordItem(t *testing.T, instanceID string) PersistedItem {
+	t.Helper()
+	raw, err := json.Marshal(ItemRollPayload{
+		ItemTemplateID: "long_sword",
+		DisplayName:    "Cold Sword",
+		Rarity:         "magic",
+		Stats: map[string]int{
+			"damage_min":        5,
+			"damage_max":        8,
+			"bonus_cold_damage": 4,
+		},
+		Requirements: map[string]int{"level": 1},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return PersistedItem{
+		InstanceID:  instanceID,
+		ItemDefID:   "long_sword",
+		Slot:        mainHandSlot,
+		Equipped:    true,
+		RolledStats: raw,
+	}
+}
+
+func TestCompanionWeaponElementalProcOnMeleeHit(t *testing.T) {
+	rules := weaponElementalProcRules(t)
+	rules.Combat.BaseHitChance = 1
+	rules.Combat.BaseCritChance = 0
+	sim, board := newMercenaryHiringSim(t, "companion_weapon_proc")
+	sim.progression.Level = 10
+	cost := sim.mercenaryHireCostGold()
+	sim.gold = cost
+	sim.progression.Gold = cost
+	sim.LoadMercenaryRoster([]MercenaryCharacterSnapshot{
+		{
+			CharacterID:    "char_proc",
+			Name:           "Proc Alt",
+			CharacterClass: "barbarian",
+			Level:          10,
+			Progression: CharacterProgressionState{
+				CharacterClass: "barbarian",
+				Level:          10,
+				BaseStats:      BaseStatsView{Str: 20, Dex: 10, Vit: 20, Magic: 5},
+			},
+			Items: []PersistedItem{mustMercenaryColdSwordItem(t, "proc_sword")},
+		},
+	})
+	sim.savePlayer(sim.defaultPlayer())
+
+	hire := sim.Tick([]Input{mercenaryHireCharacterInput(board, "hire_proc", "char_proc")})
+	assertAck(t, hire, "hire_proc")
+	companion := hiredMercenary(sim)
+	if companion == nil {
+		t.Fatal("missing hired companion")
+	}
+	companion.monsterHitChance = 1
+	companion.monsterCritChance = 0
+	player := sim.entities[sim.playerID]
+	target := &entity{
+		id:           sim.alloc(),
+		kind:         monsterEntity,
+		pos:          Vec2{X: companion.pos.X + 1.2, Y: companion.pos.Y},
+		hp:           150,
+		maxHP:        150,
+		monsterDefID: "combat_lab_soft_target",
+		lootTable:    "no_drop",
+	}
+	sim.entities[target.id] = target
+
+	var res TickResult
+	outcome := sim.damageMonsterByCompanion(target, companion, DamageRange{Min: 10, Max: 10}, &res)
+	if !outcome.Hit || outcome.Damage <= 0 {
+		t.Fatalf("physical outcome = %+v, want hit", outcome)
+	}
+	if player == nil {
+		t.Fatal("missing player")
+	}
+	freezeStarted := false
+	for _, ev := range res.Events {
+		if ev.EventType == "skill_effect_started" && ev.SkillID == weaponElementalFreezeSkillID {
+			freezeStarted = true
+		}
+	}
+	if !freezeStarted {
+		t.Fatalf("events = %+v, want companion weapon freeze proc", res.Events)
 	}
 }

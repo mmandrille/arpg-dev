@@ -1,0 +1,21 @@
+tools/bot/class_foundation_coverage.py
+  s_484ae3ecbf09ca::t_fa4bb436a047ab 55-56
+docs/progress/scenario-movement-audit.tsv
+  s_484ae3ecbf09ca::t_7d7b54ac968422 62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "47907e6bda2cd3319fc135f24d6c6cf67c473f15",
+  "prompts": {},
+  "sessions": {
+    "s_484ae3ecbf09ca": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0c015ac0-1567-4b32-b987-4a6fb08d5966",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

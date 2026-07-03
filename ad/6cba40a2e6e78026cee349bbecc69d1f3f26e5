@@ -1,0 +1,230 @@
+docs/CODEMAP.md
+  s_7573ba3e2ad6ac::t_a62849f95ee220 12
+server/internal/game/rules.go
+  s_7573ba3e2ad6ac::t_18903e6b27bcfb 200-204
+  s_7573ba3e2ad6ac::t_e190cb1e13c411 950-952
+  s_7573ba3e2ad6ac::t_0f05adff0af6da 182-183
+  s_7573ba3e2ad6ac::t_b0ec1227091081 1050-1051
+server/internal/game/survival_skills.go
+  s_7573ba3e2ad6ac::t_fa17ba999e043a 120-122
+  s_7573ba3e2ad6ac::t_c91058c51e4dfe 97
+client/scripts/skill_passive_tooltip.gd
+  s_7573ba3e2ad6ac::t_2500f4192ed701 91
+tools/bot/scenarios/skill_level_affix_lab.json
+  s_7573ba3e2ad6ac::t_d4be39b4b0ea1f 36
+shared/golden/character_progression.json
+  s_7573ba3e2ad6ac::t_530c2819e006d4 106,188,228,268
+server/internal/game/skill_buffs.go
+  s_7573ba3e2ad6ac::t_1c00f0f7c154ee 11,43,85
+PROGRESS.md
+  s_7573ba3e2ad6ac::t_e2cfc3c7c2b785 18
+  s_7573ba3e2ad6ac::t_4aa92ee121a19e 26
+  s_7573ba3e2ad6ac::t_7d60af479576c1 28
+server/internal/game/bishop_test.go
+  s_7573ba3e2ad6ac::t_ad5c4284858c1e 102-103
+.maintainability/file-size-baseline.tsv
+  s_7573ba3e2ad6ac::t_f04ae94651f837 17
+server/internal/game/companion_ai.go
+  s_7573ba3e2ad6ac::t_24c430417c5e71 40
+  s_7573ba3e2ad6ac::t_42a98843beea14 139-140
+client/scripts/skill_bar.gd
+  s_7573ba3e2ad6ac::t_4a87d928ce4532 318
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_7573ba3e2ad6ac::t_7509383faea942 28
+  s_7573ba3e2ad6ac::t_1af30931723dca 38,180
+tools/bot/test_protocol.py
+  s_7573ba3e2ad6ac::t_4325867a5f80c6 1379,1393
+  s_7573ba3e2ad6ac::t_4ebe23cfdee5fb 1382
+server/internal/game/mobility_obstacle_crossing_test.go
+  s_7573ba3e2ad6ac::t_2dc1605b0d0776 14,45
+docs/progress/scenario-movement-audit.tsv
+  s_7573ba3e2ad6ac::t_9ca6124c836d80 237
+server/internal/game/passive_skill_stats.go
+  s_7573ba3e2ad6ac::t_2d87ccd4055d99 31
+  s_7573ba3e2ad6ac::t_2745446b161662 14
+  s_7573ba3e2ad6ac::t_ef4db1315c2a5d 134-135,142-143
+server/internal/game/rogue_skills.go
+  s_7573ba3e2ad6ac::t_7793ee37587ffd 334
+  s_7573ba3e2ad6ac::t_8b6a8696a624a4 78
+  s_7573ba3e2ad6ac::t_b852d0f9018625 516
+client/scripts/skills_panel.gd
+  s_7573ba3e2ad6ac::t_069fc456d3cad6 248
+  s_7573ba3e2ad6ac::t_5a6d3efb73032d 213
+shared/rules/character_progression.v0.json
+  s_7573ba3e2ad6ac::t_20c651b7465b7d 87-98
+client/tests/test_golden_skill_progression.gd
+  s_7573ba3e2ad6ac::t_eadc08e5094880 1,12
+  s_7573ba3e2ad6ac::t_e3145efafe1ce1 2-11,13-186
+tools/validate_skills.py
+  s_d454930afdc53a::t_53ba5d3b42d19d 7-25
+  s_7573ba3e2ad6ac::t_4bfdd729ff8043 113,118-119
+  s_7573ba3e2ad6ac::t_233dd44e34130e 169-171
+  s_d454930afdc53a::t_7c595a1eb9e55d 320-321
+  s_7573ba3e2ad6ac::t_7df332fe3f13fc 421,423-424
+  s_7573ba3e2ad6ac::t_e54a30b97101d0 40-50
+  s_d454930afdc53a::t_8717e1797bc34e 51-105
+client/tests/test_skills_panel.gd
+  s_7573ba3e2ad6ac::t_dc9c1950b4ea39 377-382
+  s_7573ba3e2ad6ac::t_e6983de7e7a05b 31,34
+  s_7573ba3e2ad6ac::t_99093cf82c4de7 272
+  s_7573ba3e2ad6ac::t_7d7241d92f84ea 271
+  s_7573ba3e2ad6ac::t_de65fc54102a52 9
+  s_7573ba3e2ad6ac::t_79112d8d59311f 24
+  s_7573ba3e2ad6ac::t_2723bc43a81068 29
+  s_7573ba3e2ad6ac::t_55ece851958a3d 30,32-33,35
+  s_7573ba3e2ad6ac::t_da0ef982e67249 186
+  s_7573ba3e2ad6ac::t_60b065f4baf383 238
+shared/golden/skill_points_and_magic_bolt.json
+  s_7573ba3e2ad6ac::t_3aa03bc55f1987 7-10,21,31
+  s_7573ba3e2ad6ac::t_d432a7407ab2a5 86
+  s_7573ba3e2ad6ac::t_3c85ae3ab675a0 134-135,142-143
+client/tests/test_skill_rank_scaling.gd
+  s_7573ba3e2ad6ac::t_4dadf2c7351ef4 1-41
+client/scripts/skill_rank_scaling.gd
+  s_7573ba3e2ad6ac::t_c01953dde90238 5,7-23,49-53,57-61
+  s_7573ba3e2ad6ac::t_7cc4614f352c9e 1-4,6,24-48,54-56
+server/internal/game/skill_rank_scaling.go
+  s_7573ba3e2ad6ac::t_1b09e6b01d91f7 1-120
+server/internal/game/ranged_companion_projectile_test.go
+  s_7573ba3e2ad6ac::t_c7258e17d8f1ff 18
+server/internal/game/rules_companion.go
+  s_7573ba3e2ad6ac::t_2a5fc8379351df 112,116-120,123,127-131,134,138-141,145
+server/internal/game/class_skill_engine.go
+  s_7573ba3e2ad6ac::t_f8f4b65d6c165f 46,50-53
+  s_7573ba3e2ad6ac::t_39b36c5be1ce36 69
+  s_7573ba3e2ad6ac::t_ed2cd4372369b9 23,27-31
+  s_7573ba3e2ad6ac::t_5ced037270424a 109
+server/internal/game/sorcerer_revive_test.go
+  s_7573ba3e2ad6ac::t_60fc7b2969a8f0 79,84-85
+  s_7573ba3e2ad6ac::t_0deda3fa0ea582 141-143
+server/internal/game/ranger_skills_test.go
+  s_7573ba3e2ad6ac::t_64dd850afc80b8 203-205
+  s_7573ba3e2ad6ac::t_38dfafbb6b6cfd 128
+server/internal/game/skill_weapon_damage.go
+  s_7573ba3e2ad6ac::t_d5b47961cd5c7a 53,58-59
+  s_7573ba3e2ad6ac::t_060719c4d69db5 5,9-10,14,18,23,25-26
+shared/rules/character_progression.v0.schema.json
+  s_7573ba3e2ad6ac::t_dd92c3ed3fca7e 173-182
+  s_7573ba3e2ad6ac::t_95794d93fd6df6 25-27,30-31
+server/internal/game/sim.go
+  s_7573ba3e2ad6ac::t_efc4a9a18cc387 2316,2320,2323-2324
+  s_7573ba3e2ad6ac::t_e028cce11b2318 5440-5443,5445
+  s_7573ba3e2ad6ac::t_ee4b29b3ec2032 2474,2526
+  s_7573ba3e2ad6ac::t_97ca3ae4dec8fe 2392,2395-2396
+  s_7573ba3e2ad6ac::t_5e9855b8afb9db 2388
+server/internal/game/class_progression.go
+  s_7573ba3e2ad6ac::t_69a80284b54f4b 6,14-27
+server/internal/game/skill_affixes_test.go
+  s_7573ba3e2ad6ac::t_4097ee0d3bb3ba 20
+server/internal/game/skill_rank_scaling_test.go
+  s_7573ba3e2ad6ac::t_f99d11acc80ab1 121-136,138-153
+  s_7573ba3e2ad6ac::t_62498de051f537 3-6
+  s_7573ba3e2ad6ac::t_cbf8d6322e23eb 1-2,7-69,154-181
+  s_7573ba3e2ad6ac::t_0fd9e909eedfbd 70-120
+  s_7573ba3e2ad6ac::t_01bbe1d7e65d5f 137
+tools/bot/scenarios/class_progression_pacing.json
+  s_7573ba3e2ad6ac::t_71d18ee071ee36 5,8,11,24,36
+server/internal/game/game_test.go
+  s_7573ba3e2ad6ac::t_b695a039c871ba 847
+  s_7573ba3e2ad6ac::t_0f7b136773b140 240
+  s_7573ba3e2ad6ac::t_54a5aaa25d7af5 1683
+  s_7573ba3e2ad6ac::t_16422daf00afdf 213-214,216
+  s_7573ba3e2ad6ac::t_3d8221f94e90c6 792-793
+  s_7573ba3e2ad6ac::t_9940fced49414d 755-756
+  s_7573ba3e2ad6ac::t_c1c63ebaa1fc94 1633
+  s_7573ba3e2ad6ac::t_c4080df417d27d 819
+  s_7573ba3e2ad6ac::t_44a0f0194955bb 217
+  s_7573ba3e2ad6ac::t_cef48df325d6e8 800-801
+  s_7573ba3e2ad6ac::t_83e5627f3963b9 231
+  s_7573ba3e2ad6ac::t_ba010cd7c65b23 1504
+  s_7573ba3e2ad6ac::t_73fcd62310a855 1614
+  s_7573ba3e2ad6ac::t_164ef960c8e92f 779-780
+docs/specs/v417_spec-skill-rank-scaling-and-pacing.md
+  s_7573ba3e2ad6ac::t_709e9f32ca25d5 1-72
+tools/bot/scenarios/skill_rank_scaling_lab.json
+  s_7573ba3e2ad6ac::t_38bb466b2d9975 55
+  s_7573ba3e2ad6ac::t_6b97981defbdd4 37-48
+  s_7573ba3e2ad6ac::t_5524548e6f78f1 96-100,102
+  s_7573ba3e2ad6ac::t_cadc054104ad98 50-54,56
+  s_7573ba3e2ad6ac::t_77f13593b58a7b 79-94
+  s_7573ba3e2ad6ac::t_2d57b4cd1f9f31 13
+  s_7573ba3e2ad6ac::t_45e78121d7fea3 101
+  s_7573ba3e2ad6ac::t_d41b113ad99da7 17-20
+  s_7573ba3e2ad6ac::t_b55a76ceb565a4 1-10,12,14-16,21-36,49,57-58,63-78,95,103-118
+  s_7573ba3e2ad6ac::t_65d563b666960d 11
+  s_7573ba3e2ad6ac::t_6971fa75b28ab1 59-62
+tools/validate_shared.py
+  s_7573ba3e2ad6ac::t_0fd471dd9afe25 1349
+  s_7573ba3e2ad6ac::t_bdbfcbf070531b 841,843,846-861
+shared/rules/skills.v0.schema.json
+  s_d454930afdc53a::t_0ec90c63978879 722-749
+  s_d454930afdc53a::t_8fdc6bbfa94ea7 51-55,64-83
+scripts/client_smoke.sh
+  s_7573ba3e2ad6ac::t_d7bbd6e5dd9fdd 234
+  s_7573ba3e2ad6ac::t_b202e94d38179f 143
+docs/as-built/v417_skill-rank-scaling-and-pacing.md
+  s_7573ba3e2ad6ac::t_a97de8e94f3a02 1-29
+server/internal/game/class_build_pacing_test.go
+  s_7573ba3e2ad6ac::t_5ac322907dfefa 7-8
+docs/plans/v417_2026-07-03-skill-rank-scaling-and-pacing.md
+  s_7573ba3e2ad6ac::t_1b2f2c48e78d08 1-33,36-38,42-44,47-49,52-54,57-59,63-65,69-71,73-81
+  s_7573ba3e2ad6ac::t_9b425af026ff3f 34-35,39-41,45-46,50-51,55-56,60-62,66-68,72
+server/internal/game/item_skill_stats.go
+  s_7573ba3e2ad6ac::t_73b6016994b11b 43
+shared/golden/skill_points_and_magic_bolt.v0.schema.json
+  s_7573ba3e2ad6ac::t_1c86e3ed95d74c 18,23-25
+docs/progress/slice-lifecycle.md
+  s_7573ba3e2ad6ac::t_a93a805d18ef34 424
+tools/bot/scenarios/client/47_mercenary_roster_ui.json
+  s_7573ba3e2ad6ac::t_694b5515274caa 40
+client/tests/test_golden.gd
+  s_7573ba3e2ad6ac::t_1c948d0b98c9bd 633
+server/internal/game/mercenary_character_test.go
+  s_7573ba3e2ad6ac::t_1e5e3643851846 266
+  s_7573ba3e2ad6ac::t_4e5a486d7cd71e 172,189,207
+  s_7573ba3e2ad6ac::t_1f5b20c6de2e87 445-459
+  s_7573ba3e2ad6ac::t_05c8ceb7f163ee 254
+  s_7573ba3e2ad6ac::t_be8c070c3daac5 220
+tools/bot/test_skill_demo.py
+  s_7573ba3e2ad6ac::t_7a2e12abb46194 14
+  s_7573ba3e2ad6ac::t_452d8038f029be 62
+shared/rules/skills.v0.json
+  s_7573ba3e2ad6ac::t_fa747da5b3479e 13,64,104,181,251,318,374,416,465,515,569,621,668,727,787,836,887,926,978,1028,1078,1123,1185,1246,1294,1348,1403,1469,1524,1586,1648,2566,2628,2686,2749,2808,2873,2927,2990,3052,3110,3174,3214,3253,3293,3338
+  s_d454930afdc53a::t_0a862c3506b2d0 163-170,233-240,301-308,357-364,552-559,769-776,961-968,1010-1017,1167-1174,1229-1236,1331-1338,1385-1392,1451-1458,1506-1513,1568-1575,1630-1637,1688-1695,1772-1779,1820-1827,1904-1911,1952-1959,2036-2043,2084-2091,2168-2175,2216-2223,2300-2307,2348-2355,2396-2403,2448-2455,2500-2507,2548-2555,2610-2617,2668-2675,2732-2739,2791-2798,2855-2862,2910-2917,2972-2979,3035-3042,3092-3099,3156-3163
+tools/test_validate_shared.py
+  s_d454930afdc53a::t_766c8011b1f4d8 79,93-127
+  s_d454930afdc53a::t_85505038e52e26 12
+  s_d454930afdc53a::t_e252b2830f8403 131
+server/internal/game/mobility_skills.go
+  s_7573ba3e2ad6ac::t_bec2fad853ebf1 94
+  s_7573ba3e2ad6ac::t_2930eb326ecc09 5,9-13
+  s_7573ba3e2ad6ac::t_2c81e9ccb8983c 336,369
+  s_7573ba3e2ad6ac::t_a3f8f6de2b9020 440-447,451
+tools/bot/test_skill_visual.py
+  s_7573ba3e2ad6ac::t_fc46cdd0f59d68 67-68
+  s_7573ba3e2ad6ac::t_f329e571a52b02 205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ad6cba40a2e6e78026cee349bbecc69d1f3f26e5",
+  "prompts": {},
+  "sessions": {
+    "s_7573ba3e2ad6ac": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d6b88634-ada3-4c42-bca7-8b86d4f9dab3",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_d454930afdc53a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e1055ff4-f558-4675-9387-346575655668",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

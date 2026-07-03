@@ -18,7 +18,7 @@ client/tests/test_golden.gd	784
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7968	# v407: baseline sync (no v407 logic edits)
 server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: interactable path_too_long uses floor max_auto_steps
-server/internal/game/rules.go	3174	# v412/v413: class skill engine + progression validation
+server/internal/game/rules.go	3221	# v414: survival_autocast kind + SkillEffectDef extensions; validation delegates to survival_skills.go
 server/internal/game/shop.go	1196	# v407: elemental summary lines extracted to weapon_elemental.go
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6603	# v412/v413: class level stat growth + skill engine hooks
@@ -34,4 +34,4 @@ server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store tes
 skills/showme/scripts/visual_capture.gd	1016
 tools/bot/run.py	4370	# v406: protocol bot force_bishop_loot action
 tools/bot/test_protocol.py	1434
-tools/validate_shared.py	3083	# v412: class level stat growth + skill cadence golden checks
+tools/validate_shared.py	3127	# pre-v414 drift: weapon family stat scaling cross-checks; extraction deferred

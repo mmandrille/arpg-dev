@@ -17,6 +17,13 @@
     {
       "action": "cast_skill",
       "skill_id": "lightning",
+      "monster_def_id": "combat_lab_lightning_weak",
+      "event_type": "skill_cast"
+    },
+    { "action": "wait_ticks", "ticks": 32 },
+    {
+      "action": "cast_skill",
+      "skill_id": "lightning",
       "monster_def_id": "combat_lab_lightning_resistant",
       "event_type": "skill_cast"
     },
@@ -26,13 +33,6 @@
       "skill_id": "lightning",
       "monster_def_id": "combat_lab_soft_target",
       "event_type": "skill_cast"
-    },
-    { "action": "wait_ticks", "ticks": 32 },
-    {
-      "action": "cast_skill",
-      "skill_id": "lightning",
-      "monster_def_id": "combat_lab_lightning_weak",
-      "event_type": "skill_cast"
     }
   ],
   "assertions": [
@@ -41,23 +41,23 @@
       "event_type": "monster_damaged",
       "damage_type": "lightning",
       "target_monster_def_id": "combat_lab_lightning_resistant",
-      "min_damage": 1,
-      "max_damage": 4
+      "min_damage": 8,
+      "max_damage": 15
     },
     {
       "type": "combat_event_seen",
       "event_type": "monster_damaged",
       "damage_type": "lightning",
       "target_monster_def_id": "combat_lab_soft_target",
-      "min_damage": 3,
-      "max_damage": 7
+      "min_damage": 10,
+      "max_damage": 25
     },
     {
       "type": "combat_event_seen",
       "event_type": "monster_damaged",
       "damage_type": "lightning",
       "target_monster_def_id": "combat_lab_lightning_weak",
-      "min_damage": 5
+      "min_damage": 20
     }
   ]
 }

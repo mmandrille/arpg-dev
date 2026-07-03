@@ -1,0 +1,82 @@
+server/internal/game/handlers.go
+  s_484ae3ecbf09ca::t_ddfed7f2291f02 1238
+shared/assets/skill_presentations.v0.json
+  s_484ae3ecbf09ca::t_bd72ffc282aa7e 672-726
+server/internal/game/rules.go
+  s_484ae3ecbf09ca::t_2dd1cee74d92cf 460-485
+  s_484ae3ecbf09ca::t_f5fcf882e1f996 344-346
+  s_484ae3ecbf09ca::t_1d96be7a22c44d 2819-2820
+  s_484ae3ecbf09ca::t_6fa79aed76a449 2744
+docs/specs/v414_spec-class-survival-skills.md
+  s_484ae3ecbf09ca::t_1dc2139f8e7024 3
+  s_484ae3ecbf09ca::t_e50509ff1af33d 1-2,4-63
+tools/bot/scenarios/class_survival_skills.json
+  s_484ae3ecbf09ca::t_7b043071261324 1-7,9-10,13-15,33-35,42,49-51
+  s_484ae3ecbf09ca::t_11bea49d7cb655 16,18,20-21,43-47
+  s_484ae3ecbf09ca::t_4dd829241558da 8,11-12,17,19,22-32,36-41,48
+docs/progress/slice-lifecycle.md
+  s_484ae3ecbf09ca::t_964b08c0490d87 421
+server/internal/game/sim.go
+  s_484ae3ecbf09ca::t_aba446b7aa7f36 1120-1121
+  s_484ae3ecbf09ca::t_9930de6ce94f34 2944
+  s_484ae3ecbf09ca::t_d7d97c8cdfbaf7 1410
+  s_484ae3ecbf09ca::t_784461d9e368e8 4285,4288-4296
+  s_484ae3ecbf09ca::t_06887e9064305c 299-314
+  s_484ae3ecbf09ca::t_1b6b0477350ec6 1356
+docs/plans/v414_2026-07-03-class-survival-skills.md
+  s_484ae3ecbf09ca::t_e2fc31c19a5466 1-2,4-32,35-40,44-49,51-56,58-63,65-74
+  s_484ae3ecbf09ca::t_bca9c7dbd7206b 3,33-34,41-43,50,57,64
+server/internal/game/survival_skills_test.go
+  s_484ae3ecbf09ca::t_0657ce165050f0 68-69
+  s_484ae3ecbf09ca::t_91db06fecfc924 79
+  s_484ae3ecbf09ca::t_735788c01b9d7c 97
+  s_484ae3ecbf09ca::t_fa0870da48c1ad 117-125
+  s_484ae3ecbf09ca::t_1cf7037d5d26d1 57
+  s_484ae3ecbf09ca::t_78cd80191ea4e0 132
+  s_484ae3ecbf09ca::t_2fcc5b9452712c 1-11,13-40,42-56,58-67,70-78,80-96,98-116,126-131,133
+  s_484ae3ecbf09ca::t_a4364c169aec38 12,41
+shared/rules/skills.v0.schema.json
+  s_484ae3ecbf09ca::t_c99cb7273a0736 28
+  s_484ae3ecbf09ca::t_431cb079694df7 528-533,536-598
+  s_484ae3ecbf09ca::t_f40b31313a3b8a 158-159
+  s_484ae3ecbf09ca::t_c211cef110b866 142-148
+server/internal/game/survival_skills.go
+  s_484ae3ecbf09ca::t_dcf1bbdb35aebf 1-465
+docs/as-built/v414_class-survival-skills.md
+  s_484ae3ecbf09ca::t_ce3f8370ebc097 1-31
+tools/validate_skills.py
+  s_484ae3ecbf09ca::t_04de15d0dc8801 174,188,197-198,207-208,212
+PROGRESS.md
+  s_484ae3ecbf09ca::t_4339f5ba41711f 18,26
+shared/rules/skills.v0.json
+  s_484ae3ecbf09ca::t_2e96f4322c296f 2877-3080
+docs/CODEMAP.md
+  s_484ae3ecbf09ca::t_fb5c66b4c58ab2 11
+server/internal/game/unique_survival_effects.go
+  s_484ae3ecbf09ca::t_b41374e54fb018 52
+  s_484ae3ecbf09ca::t_7094ae34f9dc14 33-38
+shared/i18n/en.json
+  s_484ae3ecbf09ca::t_e4649a62edcb36 224-234
+client/scripts/skills_panel.gd
+  s_484ae3ecbf09ca::t_2a514b38e2940e 450
+  s_484ae3ecbf09ca::t_ef780c7cbaeaf5 431
+  s_484ae3ecbf09ca::t_2937ecc937687a 444
+  s_484ae3ecbf09ca::t_9e727c6914126e 440
+  s_484ae3ecbf09ca::t_3c41526d75a149 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d0e89881b050d4e9266deb8e8106820b8695ad3c",
+  "prompts": {},
+  "sessions": {
+    "s_484ae3ecbf09ca": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0c015ac0-1567-4b32-b987-4a6fb08d5966",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

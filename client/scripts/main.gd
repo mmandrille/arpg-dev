@@ -6282,13 +6282,7 @@ func bot_click_bishop_debug(action: String) -> void:
 	BotFacade.click_bishop_debug(self, action)
 
 func bot_force_bishop_loot(payload: Dictionary) -> void:
-	var next_payload := payload.duplicate(true)
-	if str(next_payload.get("bishop_entity_id", "")) == "" and bishop_panel != null:
-		next_payload["bishop_entity_id"] = str(bishop_panel.bishop_entity_id)
-	if bishop_loot_debug_panel != null and bishop_loot_debug_panel.bishop_entity_id != "":
-		bishop_loot_debug_panel.bot_force_pick(next_payload)
-	elif client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and gameplay_debug_enabled:
-		client.send("bishop_debug_force_loot_intent", last_server_tick, next_payload)
+	BotFacade.force_bishop_loot(self, payload)
 
 func bot_inject_training_damage_log_event(event: Dictionary) -> void:
 	TrainingDamageLogBridgeScript.bot_inject_event(training_damage_log_panel, event)

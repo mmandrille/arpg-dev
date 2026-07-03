@@ -58,6 +58,20 @@ static func click_bishop_debug(main, action: String) -> void:
 		panel.bot_click_debug(action)
 
 
+static func force_bishop_loot(main, payload: Dictionary) -> void:
+	var next_payload := payload.duplicate(true)
+	var bishop_panel = _member(main, "bishop_panel")
+	if str(next_payload.get("bishop_entity_id", "")) == "" and bishop_panel != null:
+		next_payload["bishop_entity_id"] = str(bishop_panel.bishop_entity_id)
+	var debug_panel = _member(main, "bishop_loot_debug_panel")
+	if debug_panel != null and debug_panel.bishop_entity_id != "":
+		debug_panel.bot_force_pick(next_payload)
+		return
+	var client = _member(main, "client")
+	if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and bool(_member(main, "gameplay_debug_enabled")):
+		client.send("bishop_debug_force_loot_intent", int(_member(main, "last_server_tick")), next_payload)
+
+
 static func click_blacksmith_upgrade(main, stash_item_id: String = "", item_def_id: String = "", stash_index: int = 0) -> void:
 	var panel = _member(main, "blacksmith_panel")
 	if panel != null and panel.has_method("bot_click_upgrade"):

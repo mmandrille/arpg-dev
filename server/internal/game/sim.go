@@ -1467,10 +1467,6 @@ func (s *Sim) fireProjectile(target *entity, in Input, res *TickResult, ack bool
 }
 
 func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res *TickResult, ack bool) {
-	if s.playerProjectileInFlight() {
-		res.reject(in.MessageID, "projectile_busy")
-		return
-	}
 	player := s.activeLevel().entities[s.playerID]
 	if player == nil {
 		res.reject(in.MessageID, "player_dead")
@@ -6125,15 +6121,6 @@ func (r *Rules) skillPointsGrantedAtLevel(level int) int {
 	}
 
 	return r.CharacterProgression.SkillPoints.PointsPerGrant
-}
-
-func (s *Sim) playerProjectileInFlight() bool {
-	for _, e := range s.activeLevel().entities {
-		if e.kind == projectileEntity && e.ownerID == s.playerID {
-			return true
-		}
-	}
-	return false
 }
 
 func (s *Sim) rollRange(d DamageRange) int {

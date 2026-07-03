@@ -145,14 +145,11 @@ func rulesCopyWithHitChance(base *Rules, chance float64) *Rules {
 	return &copyRules
 }
 
-func TestProjectileBusyRejectsSecondFire(t *testing.T) {
+func TestRangedRejectsSecondFireOnBasicAttackCooldown(t *testing.T) {
 	sim := rangedLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
 	monster := firstEntityByKind(sim, monsterEntity)
 	first := sim.Tick([]Input{{MessageID: "fire1", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
 	assertAck(t, first, "fire1")
-	// Wait for the approach to complete and the first projectile to spawn before
-	// testing the busy-rejection.  With wall-adjacent cells excluded from
-	// pathfinding, the approach goal is farther from the spawn point.
 	for i := 0; i < 100; i++ {
 		if firstEntityByKind(sim, projectileEntity) != nil {
 			break
@@ -163,7 +160,35 @@ func TestProjectileBusyRejectsSecondFire(t *testing.T) {
 		t.Fatal("fire1 did not spawn projectile within 100 ticks")
 	}
 	second := sim.Tick([]Input{{MessageID: "fire2", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(monster.id)}}})
-	assertReject(t, second, "fire2", "projectile_busy")
+	assertReject(t, second, "fire2", "basic_attack_on_cooldown")
+}
+
+func TestRangedAllowsOverlappingProjectilesWhenCooldownReady(t *testing.T) {
+	rules := rulesWithTrainingBowReach(t, 30)
+	sim := combatControlLabWithEquippedBow(t, rules, "cafebabecafebabe")
+	first := sim.Tick([]Input{{MessageID: "fire1", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertAck(t, first, "fire1")
+	if firstEntityByKind(sim, projectileEntity) == nil {
+		t.Fatal("fire1 did not spawn projectile")
+	}
+	interval := sim.DerivedStatsView().AttackIntervalTicks
+	for i := 0; i < interval; i++ {
+		sim.Tick(nil)
+	}
+	if firstEntityByKind(sim, projectileEntity) == nil {
+		t.Fatal("first projectile resolved before overlap test window")
+	}
+	second := sim.Tick([]Input{{MessageID: "fire2", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
+	assertAck(t, second, "fire2")
+	count := 0
+	for _, e := range sim.activeLevel().entities {
+		if e != nil && e.kind == projectileEntity && e.ownerID == sim.playerID {
+			count++
+		}
+	}
+	if count < 2 {
+		t.Fatalf("player projectile count = %d, want at least 2 while first is still in flight", count)
+	}
 }
 
 func TestBasicAttackCooldownRejectsRapidMelee(t *testing.T) {
@@ -330,12 +355,12 @@ func TestDirectionalRangedFreeShotHitsAndOmitsTargetID(t *testing.T) {
 	}
 }
 
-func TestDirectionalRangedProjectileBusy(t *testing.T) {
+func TestDirectionalRangedRejectsSecondFireOnBasicAttackCooldown(t *testing.T) {
 	sim := combatControlLabWithEquippedBow(t, loadRules(t), "cafebabecafebabe")
 	first := sim.Tick([]Input{{MessageID: "fire1", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
 	assertAck(t, first, "fire1")
 	second := sim.Tick([]Input{{MessageID: "fire2", Type: "directional_attack_intent", DirectionalAttack: &DirectionalAttackIntent{Direction: Vec2{X: 1}}}})
-	assertReject(t, second, "fire2", "projectile_busy")
+	assertReject(t, second, "fire2", "basic_attack_on_cooldown")
 }
 
 func TestDirectionalRangedProjectileBlockedAndExpires(t *testing.T) {

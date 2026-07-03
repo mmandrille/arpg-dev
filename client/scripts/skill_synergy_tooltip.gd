@@ -62,13 +62,18 @@ static func _synergy_status_from_rules(skill_id: String, skill_progression: Dict
 		var per_rank := float(rec.get("percent_per_source_rank", 0))
 		var bonus := int(round(float(source_rank) * per_rank))
 		var source_name := SkillRulesLoader.skill_display_name(source_id)
+		var display := ""
+		if source_rank > 0:
+			display = "+%d%% from %s (rank %d)" % [bonus, source_name, source_rank]
+		elif per_rank > 0:
+			display = "+%.0f%% per %s rank" % [per_rank, source_name]
 		out.append({
 			"source_skill_id": source_id,
 			"source_name": source_name,
 			"source_rank": source_rank,
 			"modifier": str(rec.get("modifier", "")),
 			"bonus_percent": bonus,
-			"display": "+%d%% from %s (rank %d)" % [bonus, source_name, source_rank],
+			"display": display,
 		})
 	return out
 

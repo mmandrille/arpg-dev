@@ -1,6 +1,7 @@
 class_name SkillPassiveTooltip
 extends RefCounted
 
+const SkillNextRankTooltipScript := preload("res://scripts/skill_next_rank_tooltip.gd")
 
 static func passive_stat_lines(def: Dictionary, rank: int) -> Array:
 	var passive_stats: Dictionary = def.get("passive_stats", {}).get("stats", {})
@@ -21,7 +22,9 @@ static func passive_next_rank_lines(def: Dictionary, current_rank: int, next_ran
 		var now := _ranked_stat_value(int(value.get("base", 0)), int(value.get("per_rank", 0)), current_rank)
 		var next := _ranked_stat_value(int(value.get("base", 0)), int(value.get("per_rank", 0)), next_rank)
 		if now != next:
-			lines.append("%s: %s -> %s" % [passive_stat_label(str(stat)), passive_stat_value_text(str(stat), now), passive_stat_value_text(str(stat), next)])
+			var line := SkillNextRankTooltipScript.percent_delta(passive_stat_label(str(stat)), now, next)
+			if line != "":
+				lines.append(line)
 	return lines
 
 

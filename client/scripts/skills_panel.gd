@@ -6,6 +6,8 @@ signal allocate_skill_point_requested(skill_id: String)
 const SkillIconScript := preload("res://scripts/skill_icon.gd")
 const SkillPassiveTooltipScript := preload("res://scripts/skill_passive_tooltip.gd")
 const SkillSynergyTooltipScript := preload("res://scripts/skill_synergy_tooltip.gd")
+const SkillMechanicTooltipScript := preload("res://scripts/skill_mechanic_tooltip.gd")
+const SkillNextRankTooltipScript := preload("res://scripts/skill_next_rank_tooltip.gd")
 const SkillTreeLayoutScript := preload("res://scripts/skill_tree_layout.gd")
 const SkillTreeConnectorsScript := preload("res://scripts/skill_tree_connectors.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
@@ -62,8 +64,11 @@ static func tooltip_plain_body(skill_id: String, rank: int, skill_progression: D
 	var cooldown_text := _static_skill_cooldown_text(def)
 	if cooldown_text != "":
 		text += "\n%s" % cooldown_text
-	for line in SkillPassiveTooltipScript.passive_stat_lines(def, maxi(rank, 1)):
-		text += "\n%s" % str(line)
+	var description_lines := _tooltip_description_lines(def, rank)
+	if not description_lines.is_empty():
+		text += "\n\nDescription:"
+		for line in description_lines:
+			text += "\n%s" % str(line)
 	var next_lines := tooltip_next_rank_lines(skill_id, rank)
 	for line in next_lines:
 		text += "\n%s" % str(line)
@@ -93,32 +98,16 @@ static func tooltip_next_rank_lines(skill_id: String, rank: int) -> Array:
 	var mana_now := _static_skill_mana_cost(def, current_rank)
 	var mana_next := _static_skill_mana_cost(def, next_rank)
 	if mana_next != mana_now:
-		lines.append("Mana: %d -> %d" % [mana_now, mana_next])
-	var damage: Dictionary = def.get("damage", {})
-	var damage_type := str(damage.get("type", ""))
-	if damage_type == "rank_linear_range" or damage_type == "weapon_multiplier_range":
-		var min_now := _static_ranked_stat_value(int(damage.get("min_base", 0)), int(damage.get("min_per_rank", 0)), current_rank)
-		var max_now := _static_ranked_stat_value(int(damage.get("max_base", 0)), int(damage.get("max_per_rank", 0)), current_rank)
-		var min_next := _static_ranked_stat_value(int(damage.get("min_base", 0)), int(damage.get("min_per_rank", 0)), next_rank)
-		var max_next := _static_ranked_stat_value(int(damage.get("max_base", 0)), int(damage.get("max_per_rank", 0)), next_rank)
-		if min_now != min_next or max_now != max_next:
-			if damage_type == "weapon_multiplier_range":
-				lines.append("Weapon damage: %d%%-%d%% -> %d%%-%d%%" % [min_now, max_now, min_next, max_next])
-			else:
-				lines.append("Damage: %d-%d -> %d-%d" % [min_now, max_now, min_next, max_next])
-	var effects: Array = def.get("effects", [])
-	for effect in effects:
-		if typeof(effect) != TYPE_DICTIONARY:
-			continue
-		var rec := effect as Dictionary
-		if not rec.has("percent_base") and not rec.has("percent_per_rank"):
-			continue
-		var percent_now := _static_ranked_stat_value(int(rec.get("percent_base", 0)), int(rec.get("percent_per_rank", 0)), current_rank)
-		var percent_next := _static_ranked_stat_value(int(rec.get("percent_base", 0)), int(rec.get("percent_per_rank", 0)), next_rank)
-		if percent_now == percent_next:
-			continue
-		lines.append("%s: %d%% -> %d%%" % [_static_effect_label(rec), percent_now, percent_next])
+		lines.append(SkillNextRankTooltipScript.value_delta("mana", mana_now, mana_next))
+	lines.append_array(SkillMechanicTooltipScript.mechanic_next_rank_lines(def, current_rank, next_rank))
 	lines.append_array(SkillPassiveTooltipScript.passive_next_rank_lines(def, current_rank, next_rank))
+	return lines
+
+
+static func _tooltip_description_lines(def: Dictionary, rank: int) -> Array:
+	var lines: Array = []
+	lines.append_array(SkillMechanicTooltipScript.mechanic_lines(def, maxi(rank, 1)))
+	lines.append_array(SkillPassiveTooltipScript.passive_stat_lines(def, maxi(rank, 1)))
 	return lines
 
 
@@ -780,11 +769,15 @@ func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
 	var cooldown_text := _skill_cooldown_text(def)
 	if cooldown_text != "":
 		lines.append(_escape_bbcode(cooldown_text))
-	for line in SkillPassiveTooltipScript.passive_stat_lines(def, maxi(rank, 1)):
-		lines.append(_escape_bbcode(str(line)))
+	var description_lines := _tooltip_description_lines(def, rank)
+	if not description_lines.is_empty():
+		lines.append("")
+		lines.append(_escape_bbcode("Description:"))
+		for line in description_lines:
+			lines.append(_escape_bbcode(str(line)))
 	var next_lines := tooltip_next_rank_lines(skill_id, rank)
 	for line in next_lines:
-		lines.append(_next_rank_rich_line(str(line)))
+		lines.append(SkillNextRankTooltipScript.rich_line(str(line), Callable(self, "_escape_bbcode")))
 	var requirement_lines := _requirement_lines(skill_id)
 	if not requirement_lines.is_empty():
 		lines.append("")
@@ -794,6 +787,14 @@ func _tooltip_rich_text_for(skill_id: String, rank: int) -> String:
 			var text := _escape_bbcode(str(rec.get("text", "")))
 			var color := str(rec.get("color", "#b9ad97"))
 			lines.append("[color=%s]%s[/color]" % [color, text])
+	var synergy_lines := SkillSynergyTooltipScript.lines_for_skill(skill_id, skill_progression)
+	if not synergy_lines.is_empty():
+		lines.append("")
+		lines.append(_escape_bbcode("Synergies:"))
+		for line in synergy_lines:
+			var rec := line as Dictionary
+			var synergy_text := _escape_bbcode(str(rec.get("text", "")))
+			lines.append("[color=#c9b0ff]%s[/color]" % synergy_text)
 	return "\n".join(lines)
 
 
@@ -822,17 +823,6 @@ func _requirement_color(met: bool) -> String:
 
 func _escape_bbcode(text: String) -> String:
 	return text.replace("[", "\\[").replace("]", "\\]")
-
-
-func _next_rank_rich_line(text: String) -> String:
-	var marker := " -> "
-	var marker_index := text.find(marker)
-	if marker_index < 0:
-		return _escape_bbcode(text)
-	var left := text.substr(0, marker_index)
-	var right := text.substr(marker_index)
-	return "%s[color=#6fd66f]%s[/color]" % [_escape_bbcode(left), _escape_bbcode(right)]
-
 
 
 func _requirement_status(skill_id: String) -> Array:

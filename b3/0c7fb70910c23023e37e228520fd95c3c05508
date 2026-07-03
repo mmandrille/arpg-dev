@@ -1,0 +1,30 @@
+client/scripts/skill_tree_layout.gd
+  s_1f9a9805f4d2df::t_0ee3d4d8d95694 249,251,254-256,264
+  s_1f9a9805f4d2df::t_bea22537ac6ae4 10,144-153,188-193,195,198-201,203-204,206,209,211-212,214,216-218,221,223,225-229,232-235,237,239-248,250,252-253,267,269,278-281,287
+  s_1f9a9805f4d2df::t_477cd8a3050081 220
+  s_1f9a9805f4d2df::t_4b6282f2c3a1fb 257-263,265-266
+client/scripts/skills_panel.gd
+  s_1f9a9805f4d2df::t_8d07356e79e60e 435-436,440,446
+  s_1f9a9805f4d2df::t_ba601fef77a9f0 21
+  s_1f9a9805f4d2df::t_bd45035cb472f5 516
+client/tests/test_skill_tree_layout.gd
+  s_1f9a9805f4d2df::t_d88e83c46b27ea 20-30
+  s_1f9a9805f4d2df::t_90e51c0b627d38 12
+  s_1f9a9805f4d2df::t_7f88a0cb38510e 46-67,70-71,75,83,85-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b30c7fb70910c23023e37e228520fd95c3c05508",
+  "prompts": {},
+  "sessions": {
+    "s_1f9a9805f4d2df": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f3ef0959-72b7-45d8-ab7a-149af583ee3a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -209,6 +209,7 @@ type RequirementStatusView struct {
 	Required int    `json:"required"`
 	Current  int    `json:"current"`
 	Met      bool   `json:"met"`
+	ClassID  string `json:"class_id,omitempty"`
 }
 
 // EquipPreviewDeltaView describes one derived-stat change if an item were

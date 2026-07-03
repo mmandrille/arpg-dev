@@ -877,6 +877,36 @@
     "hunting_quiver": {
       "family": "belt"
     },
+    "war_bracers": {
+      "family": "gloves"
+    },
+    "iron_girdle": {
+      "family": "belt"
+    },
+    "arcane_robes": {
+      "family": "chest"
+    },
+    "focus_band": {
+      "family": "ring"
+    },
+    "consecrated_aegis": {
+      "family": "shield"
+    },
+    "crusader_plate": {
+      "family": "chest"
+    },
+    "assassin_gloves": {
+      "family": "gloves"
+    },
+    "silent_treads": {
+      "family": "boots"
+    },
+    "hawk_amulet": {
+      "family": "amulet"
+    },
+    "pathfinder_boots": {
+      "family": "boots"
+    },
     "spear": {
       "family": "spear",
       "icon": {

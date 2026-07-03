@@ -1485,6 +1485,22 @@
             "x": 6,
             "y": 5
           }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "war_bracers",
+          "position": {
+            "x": 3,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "shadow_mask",
+          "position": {
+            "x": 7,
+            "y": 5
+          }
         }
       ]
     },

@@ -94,6 +94,46 @@
             {
               "item_template_id": "hunting_quiver",
               "weight": 1
+            },
+            {
+              "item_template_id": "war_bracers",
+              "weight": 1
+            },
+            {
+              "item_template_id": "iron_girdle",
+              "weight": 1
+            },
+            {
+              "item_template_id": "arcane_robes",
+              "weight": 1
+            },
+            {
+              "item_template_id": "focus_band",
+              "weight": 1
+            },
+            {
+              "item_template_id": "consecrated_aegis",
+              "weight": 1
+            },
+            {
+              "item_template_id": "crusader_plate",
+              "weight": 1
+            },
+            {
+              "item_template_id": "assassin_gloves",
+              "weight": 1
+            },
+            {
+              "item_template_id": "silent_treads",
+              "weight": 1
+            },
+            {
+              "item_template_id": "hawk_amulet",
+              "weight": 1
+            },
+            {
+              "item_template_id": "pathfinder_boots",
+              "weight": 1
             }
           ]
         }

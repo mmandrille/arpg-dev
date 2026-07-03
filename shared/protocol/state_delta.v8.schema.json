@@ -393,10 +393,11 @@
       "required": ["stat", "required", "current", "met"],
       "additionalProperties": false,
       "properties": {
-        "stat": { "type": "string", "enum": ["level", "str", "dex", "vit", "magic"] },
-        "required": { "type": "integer", "minimum": 1 },
+        "stat": { "type": "string", "enum": ["level", "str", "dex", "vit", "magic", "class"] },
+        "required": { "type": "integer", "minimum": 0 },
         "current": { "type": "integer", "minimum": 0 },
-        "met": { "type": "boolean" }
+        "met": { "type": "boolean" },
+        "class_id": { "type": "string", "enum": ["barbarian", "sorcerer", "paladin", "rogue", "ranger"] }
       }
     },
     "requirement_status_list": {

@@ -5479,7 +5479,7 @@ func (s *Sim) stashItemView(item *stashItem) StashItemView {
 		return StashItemView{}
 	}
 	view := item.view()
-	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
+	s.annotateItemRequirementStatus(view.Requirements, item.previewItem(), func(status []RequirementStatusView, met *bool) {
 		view.RequirementStatus = status
 		view.RequirementsMet = met
 	})
@@ -5527,7 +5527,7 @@ func (s *Sim) annotateItemView(view *ItemView, item *invItem) {
 	}
 	view.SummaryLines = s.itemSummaryLines("", view.Slot, s.itemHandedness(item), s.statsForInventoryItem(item), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(item, view.ItemTemplateID))
 	view.SummaryLines = append(view.SummaryLines, s.setItemSummaryLines(item)...)
-	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
+	s.annotateItemRequirementStatus(view.Requirements, item, func(status []RequirementStatusView, met *bool) {
 		view.RequirementStatus = status
 		view.RequirementsMet = met
 	})
@@ -5564,7 +5564,7 @@ func (s *Sim) entityView(e *entity) EntityView {
 	if e.kind != lootEntity {
 		return view
 	}
-	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
+	s.annotateItemRequirementStatus(view.Requirements, s.lootItemForRequirements(e), func(status []RequirementStatusView, met *bool) {
 		view.RequirementStatus = status
 		view.RequirementsMet = met
 	})
@@ -5625,7 +5625,7 @@ func (s *Sim) equipPreviewForItemWithSlot(item *invItem, slot string) *EquipPrev
 	if item.rollPayload != nil {
 		requirements = item.rollPayload.Requirements
 	}
-	requirementsMet := s.requirementsMet(requirements)
+	requirementsMet := s.requirementsMet(requirements) && s.itemClassAllowed(item)
 	current, _ := s.playerEffectiveCombatStats()
 	preview := s.previewEffectiveCombatStats(item, slot)
 	deltas := equipPreviewDeltas(current, preview)

@@ -1255,6 +1255,106 @@
         }
       }
     },
+    "war_bracers": {
+      "asset_id": "fallback_equipment_gloves_v0",
+      "slot": "gloves",
+      "mount_socket": "gloves_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.32, "y": 0.32, "z": 0.32 }
+      }
+    },
+    "iron_girdle": {
+      "asset_id": "fallback_equipment_belt_v0",
+      "slot": "belt",
+      "mount_socket": "belt_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.26, "y": 0.26, "z": 0.26 }
+      }
+    },
+    "arcane_robes": {
+      "asset_id": "fallback_equipment_chest_v0",
+      "slot": "chest",
+      "mount_socket": "chest_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.34, "y": 0.34, "z": 0.34 }
+      }
+    },
+    "focus_band": {
+      "asset_id": "fallback_equipment_ring_v0",
+      "slot": "ring_left",
+      "mount_socket": "ring_left_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.2, "y": 0.2, "z": 0.2 }
+      }
+    },
+    "consecrated_aegis": {
+      "asset_id": "fallback_equipment_shield_v0",
+      "slot": "off_hand",
+      "mount_socket": "off_hand_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.36, "y": 0.36, "z": 0.36 }
+      }
+    },
+    "crusader_plate": {
+      "asset_id": "fallback_equipment_chest_v0",
+      "slot": "chest",
+      "mount_socket": "chest_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.36, "y": 0.36, "z": 0.36 }
+      }
+    },
+    "assassin_gloves": {
+      "asset_id": "fallback_equipment_gloves_v0",
+      "slot": "gloves",
+      "mount_socket": "gloves_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.3, "y": 0.3, "z": 0.3 }
+      }
+    },
+    "silent_treads": {
+      "asset_id": "fallback_equipment_boots_v0",
+      "slot": "boots",
+      "mount_socket": "boots_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.3, "y": 0.3, "z": 0.3 }
+      }
+    },
+    "hawk_amulet": {
+      "asset_id": "fallback_equipment_amulet_v0",
+      "slot": "amulet",
+      "mount_socket": "amulet_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.22, "y": 0.22, "z": 0.22 }
+      }
+    },
+    "pathfinder_boots": {
+      "asset_id": "fallback_equipment_boots_v0",
+      "slot": "boots",
+      "mount_socket": "boots_socket",
+      "local_transform": {
+        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "scale": { "x": 0.32, "y": 0.32, "z": 0.32 }
+      }
+    },
     "sash": {
       "asset_id": "fallback_equipment_belt_v0",
       "slot": "belt",

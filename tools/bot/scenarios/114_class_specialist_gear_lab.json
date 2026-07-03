@@ -2,10 +2,10 @@
   "id": "class_specialist_gear_lab",
   "ci_tier": "extended",
   "world_id": "class_specialist_gear_lab",
-  "seed": "v405_class_specialist_1",
+  "seed": "v415_class_specialist_1",
   "character_class": "barbarian",
   "title": "Class specialist gear lab",
-  "description": "Prove barbarian skull face rolls damage without armor and class-locks paladin scepter.",
+  "description": "Prove barbarian specialists equip, class requirement status rows, and wrong-class scepter gate.",
   "steps": [
     {
       "action": "pick_up_loot",
@@ -15,7 +15,7 @@
       "action": "assert_rolled_inventory_item",
       "item_def_id": "skull_face",
       "item_template_id": "skull_face",
-      "stat_keys": ["damage_max"]
+      "stat_keys": ["damage_min"]
     },
     {
       "action": "equip_inventory_item",
@@ -24,7 +24,42 @@
     },
     {
       "action": "pick_up_loot",
+      "item_def_id": "war_bracers"
+    },
+    {
+      "action": "assert_inventory_requirement_status",
+      "item_def_id": "war_bracers",
+      "requirements_met": true,
+      "status": [
+        {
+          "stat": "class",
+          "required": 1,
+          "current": 1,
+          "met": true
+        }
+      ]
+    },
+    {
+      "action": "equip_inventory_item",
+      "item_def_id": "war_bracers",
+      "slot": "gloves"
+    },
+    {
+      "action": "pick_up_loot",
       "item_def_id": "holy_scepter"
+    },
+    {
+      "action": "assert_inventory_requirement_status",
+      "item_def_id": "holy_scepter",
+      "requirements_met": false,
+      "status": [
+        {
+          "stat": "class",
+          "required": 1,
+          "current": 0,
+          "met": false
+        }
+      ]
     },
     {
       "action": "equip_inventory_item",

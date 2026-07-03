@@ -1248,18 +1248,9 @@ func _requirement_lines(item: Dictionary) -> Array:
 		for status in statuses:
 			if typeof(status) != TYPE_DICTIONARY:
 				continue
-			var rec := status as Dictionary
-			var stat := str(rec.get("stat", ""))
-			var required := int(rec.get("required", 0))
-			if stat == "" or required <= 0:
-				continue
-			var current := int(rec.get("current", 0))
-			var met := bool(rec.get("met", current >= required))
-			var suffix := "" if met else "(%d)" % (current - required)
-			lines.append({
-				"text": "%s %d%s" % [_display_stat(stat), required, suffix],
-				"color": _requirement_color(met),
-			})
+			var formatted := ItemRequirementViews.format_requirement_status(status as Dictionary, _requirement_color(true), _requirement_color(false))
+			if not formatted.is_empty():
+				lines.append(formatted)
 	if not lines.is_empty():
 		return lines
 	var requirements: Dictionary = item.get("requirements", {})

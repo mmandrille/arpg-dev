@@ -717,7 +717,7 @@ func (s *Sim) annotateShopOfferView(view *ShopOfferView, item *invItem) {
 	if view == nil || item == nil {
 		return
 	}
-	s.annotateRequirementStatus(view.Requirements, func(status []RequirementStatusView, met *bool) {
+	s.annotateItemRequirementStatus(view.Requirements, item, func(status []RequirementStatusView, met *bool) {
 		view.RequirementStatus = status
 		view.RequirementsMet = met
 	})

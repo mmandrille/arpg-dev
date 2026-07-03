@@ -4,6 +4,62 @@ import (
 	"testing"
 )
 
+func TestClassSpecialistTemplateCount(t *testing.T) {
+	rules := loadRules(t)
+	count := 0
+	for _, template := range rules.ItemTemplates {
+		if template.EquipmentCategory == "class_specialist" {
+			count++
+		}
+	}
+	if count != 15 {
+		t.Fatalf("class_specialist template count = %d, want 15", count)
+	}
+}
+
+func TestClassRequirementStatusOnSpecialistInventoryView(t *testing.T) {
+	rules := loadRules(t)
+	state := rules.DefaultCharacterProgressionState()
+	state.CharacterClass = "barbarian"
+	state.BaseStats = rules.CharacterProgression.Classes["barbarian"].BaseStats
+	sim, err := NewSimWithWorldProgression("sess_class_req_status", "class_req_seed", rules, DefaultWorldID, state)
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+
+	addRolledInventoryItem(t, sim, 41501, "holy_scepter", map[string]int{"skill_damage_percent": 8})
+	view := sim.itemView(sim.findItem("41501"))
+	if view.RequirementsMet == nil || *view.RequirementsMet {
+		t.Fatalf("paladin scepter requirements_met = %v, want false for barbarian", view.RequirementsMet)
+	}
+	classStatus := findRequirementStatus(view.RequirementStatus, "class")
+	if classStatus == nil {
+		t.Fatalf("missing class requirement status: %+v", view.RequirementStatus)
+	}
+	if classStatus.ClassID != "paladin" || classStatus.Met || classStatus.Current != 0 {
+		t.Fatalf("class status = %+v, want paladin unmet", classStatus)
+	}
+
+	addRolledInventoryItem(t, sim, 41502, "war_bracers", map[string]int{"damage_max": 4})
+	barbView := sim.itemView(sim.findItem("41502"))
+	if barbView.RequirementsMet == nil || !*barbView.RequirementsMet {
+		t.Fatalf("war_bracers requirements_met = %v, want true for barbarian", barbView.RequirementsMet)
+	}
+	barbClass := findRequirementStatus(barbView.RequirementStatus, "class")
+	if barbClass == nil || !barbClass.Met || barbClass.ClassID != "barbarian" {
+		t.Fatalf("barbarian class status = %+v, want met barbarian", barbClass)
+	}
+}
+
+func findRequirementStatus(status []RequirementStatusView, stat string) *RequirementStatusView {
+	for i := range status {
+		if status[i].Stat == stat {
+			return &status[i]
+		}
+	}
+	return nil
+}
+
 func TestClassSpecialistTemplatesHaveNoArmor(t *testing.T) {
 	rules := loadRules(t)
 	for templateID, template := range rules.ItemTemplates {

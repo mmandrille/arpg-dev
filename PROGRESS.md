@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-03 (v414 class-survival-skills)
+Last updated: 2026-07-03 (v415 class-specialist-expansion)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-07-03 (v414 class-survival-skills)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v414 — class-survival-skills |
+| **Latest completed slice** | v415 — class-specialist-expansion |
 | **Active branch** | `main` |
 | **CI gate** | 2026-07-03 — autoloop batch CI pending |
 | **Next slice** | TBD (`/next`) |

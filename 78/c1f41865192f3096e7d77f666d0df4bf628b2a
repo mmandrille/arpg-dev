@@ -1,0 +1,30 @@
+server/internal/game/companion_stance_test.go
+  s_1209632d2a4b63::t_bbd06c12d2fbf1 30-31
+server/internal/game/companion_stance.go
+  s_1209632d2a4b63::t_b6582b3484f551 15
+client/scripts/main.gd
+  s_1209632d2a4b63::t_cf9782c9b34991 2599
+server/internal/game/training_doll_test.go
+  s_1209632d2a4b63::t_ba0e88fcf9d0f5 89-124
+tools/bot/scenarios/89_companion_stance_command.json
+  s_1209632d2a4b63::t_b4803e55aaeec8 35
+client/scripts/mercenary_panel.gd
+  s_1209632d2a4b63::t_8328f76209ee23 22
+  s_1209632d2a4b63::t_aaf7ff6c320dae 411
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "78c1f41865192f3096e7d77f666d0df4bf628b2a",
+  "prompts": {},
+  "sessions": {
+    "s_1209632d2a4b63": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5cfb7fe3-7fe2-4c63-85bc-26461459d63d",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

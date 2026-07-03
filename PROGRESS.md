@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-03 (v418 skill-synergies)
+Last updated: 2026-07-03 (v419 skill-tree-prerequisite-layout)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-03 (v418 skill-synergies)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v418 — skill-synergies |
+| **Latest completed slice** | v419 — skill-tree-prerequisite-layout |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-03 — green (`make ci`) |
+| **CI gate** | 2026-07-03 — autoloop batch CI pending |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v408 — [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md) (2026-07-02; official cadence) |
 | **Next engineering review** | due — run `$review` then `$refactor` |

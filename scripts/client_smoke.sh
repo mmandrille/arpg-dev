@@ -211,6 +211,7 @@ run_gate "GDScript skill rules loader test" "[gdtest] PASS: test_skill_rules_loa
 run_gate "GDScript codex loader test" "[gdtest] PASS: test_codex_loader" res://tests/test_codex_loader.gd
 run_gate "GDScript codex panel test" "[gdtest] PASS: test_codex_panel" res://tests/test_codex_panel.gd
 run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://tests/test_skills_panel.gd
+run_gate "GDScript skill tree layout test" "[gdtest] PASS: test_skill_tree_layout" res://tests/test_skill_tree_layout.gd
 run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/test_skill_bar.gd
 run_gate "GDScript status effects bar test" "[gdtest] PASS: test_status_effects_bar" res://tests/test_status_effects_bar.gd
 run_gate "GDScript status effect presentation test" "[gdtest] PASS: test_status_effect_presentation" res://tests/test_status_effect_presentation.gd

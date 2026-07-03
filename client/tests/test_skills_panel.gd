@@ -55,7 +55,7 @@ func _run() -> void:
 	panel.ensure_display_visible()
 	var state := panel.get_debug_state()
 	_assert_true("panel visible", bool(state.get("visible", false)))
-	_assert_eq("panel width includes passive column", int(panel._panel.custom_minimum_size.x), 525)
+	_assert_eq("panel width includes passive column", int(panel._panel.custom_minimum_size.x), 720)
 	_assert_eq("panel height is 30 percent larger", int(panel._panel.custom_minimum_size.y), 650)
 	var window: Dictionary = state.get("window", {})
 	_assert_eq("skills window title", str(window.get("title", "")), "Skills")
@@ -124,11 +124,12 @@ func _run() -> void:
 	_assert_true("sorcerer passive row 3 block exists", dynamo_block != null)
 	_assert_true("sorcerer passive row 4 block exists", reservoir_block != null)
 	if arcane_block != null and mana_block != null and dynamo_block != null and reservoir_block != null:
-		_assert_eq("sorcerer passive column row 1 x", int(arcane_block.position.x), 407)
-		_assert_eq("sorcerer passive column row 2 x", int(mana_block.position.x), 407)
-		_assert_eq("sorcerer passive column row 3 x", int(dynamo_block.position.x), 407)
-		_assert_eq("sorcerer passive column row 4 x", int(reservoir_block.position.x), 407)
-		_assert_true("sorcerer passive column sits at right edge", arcane_block.position.x + arcane_block.size.x <= 491.0)
+		var passive_x := _expected_block_x("arcane_focus")
+		_assert_eq("sorcerer passive column row 1 x", int(arcane_block.position.x), passive_x)
+		_assert_eq("sorcerer passive column row 2 x", int(mana_block.position.x), passive_x)
+		_assert_eq("sorcerer passive column row 3 x", int(dynamo_block.position.x), passive_x)
+		_assert_eq("sorcerer passive column row 4 x", int(reservoir_block.position.x), passive_x)
+		_assert_true("sorcerer passive column sits at right edge", arcane_block.position.x + arcane_block.size.x <= float(passive_x) + 84.0)
 	panel.bot_leave_skill_tooltip()
 	state = panel.get_debug_state()
 	_assert_eq("tooltip leave clears hovered skill", str(state.get("hovered_skill_id", "")), "")
@@ -196,7 +197,7 @@ func _run() -> void:
 	var paladin_passive_block := panel._skill_blocks.get("vigilant_guard", null) as Control
 	_assert_true("paladin passive column block exists", paladin_passive_block != null)
 	if paladin_passive_block != null:
-		_assert_eq("paladin passive column stays fixed right", int(paladin_passive_block.position.x), 407)
+		_assert_eq("paladin passive column stays fixed right", int(paladin_passive_block.position.x), _expected_block_x("vigilant_guard"))
 	_assert_eq("rankable paladin skill is highlighted", str(((state.get("skills", {}) as Dictionary).get("heal", {}) as Dictionary).get("visual_state", "")), "highlight")
 
 	panel.set_character_progression({
@@ -239,6 +240,32 @@ func _run() -> void:
 	_assert_eq("hovered fan tooltip skill id", str(state.get("tooltip_skill_id", "")), "fan_of_blades")
 	_assert_eq("hovered fan tooltip rank label", str(state.get("tooltip_rank_label", "")), "Rank 1 / %d" % fan_of_blades_max_rank)
 	panel.bot_leave_skill_tooltip()
+
+	panel.set_character_progression({
+		"character_class": "ranger",
+		"level": 1,
+		"base_stats": {"str": 5, "dex": 10, "vit": 5, "magic": 5},
+	})
+	panel.set_skill_progression({
+		"unspent_skill_points": 0,
+		"skills": _skill_rows(0, false),
+	})
+	state = panel.get_debug_state()
+	var pinning_block := panel._skill_blocks.get("pinning_shot", null) as Control
+	var disengage_block := panel._skill_blocks.get("disengage", null) as Control
+	var companion_block := panel._skill_blocks.get("black_wolf_companion", null) as Control
+	var snipe_block := panel._skill_blocks.get("snipe", null) as Control
+	var explosive_block := panel._skill_blocks.get("explosive_shot", null) as Control
+	var volley_block := panel._skill_blocks.get("volley", null) as Control
+	var piercing_block := panel._skill_blocks.get("piercing_shot", null) as Control
+	if pinning_block != null and disengage_block != null:
+		_assert_ne("ranger pinning not under disengage", int(pinning_block.position.x), int(disengage_block.position.x))
+	if snipe_block != null and companion_block != null:
+		_assert_ne("ranger snipe not under companion", int(snipe_block.position.x), int(companion_block.position.x))
+	if explosive_block != null and snipe_block != null:
+		_assert_eq("ranger explosive under snipe", int(explosive_block.position.x), int(snipe_block.position.x))
+	if volley_block != null and piercing_block != null:
+		_assert_eq("ranger volley under piercing", int(volley_block.position.x), int(piercing_block.position.x))
 
 	panel.set_character_progression({
 		"character_class": "sorcerer",
@@ -331,6 +358,14 @@ func _assert_true(label: String, value: bool) -> void:
 
 func _assert_false(label: String, value: bool) -> void:
 	_assert_true(label, not value)
+
+
+func _assert_ne(label: String, got, expected) -> void:
+	if got != expected:
+		_pass_count += 1
+	else:
+		_fail_count += 1
+		push_error("[gdtest] FAIL %s: expected not %s" % [label, str(expected)])
 
 
 func _remove_user_file(path: String) -> void:

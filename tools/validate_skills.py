@@ -48,6 +48,36 @@ def rank_scaled_int(curve: dict[str, Any], base: int, per_rank: int, rank: int) 
     return max(0, int(round(base * factor + per_rank * (rank - 1))))
 
 
+def validate_skill_tree_layout_hints(report: Any, skills: dict[str, Any]) -> None:
+    errors: list[str] = []
+    catalog = skills.get("skills", {})
+    for skill_id, skill in catalog.items():
+        tree = skill.get("tree", {})
+        if str(tree.get("branch", "")) == "survival":
+            continue
+        if str(skill.get("kind", "")) in {"passive_stat_bonus", "passive_execute"}:
+            continue
+        prereqs = skill.get("requirements", {}).get("skills", [])
+        if len(prereqs) != 1:
+            continue
+        parent_id = str(prereqs[0].get("skill_id", ""))
+        parent = catalog.get(parent_id)
+        if parent is None:
+            continue
+        child_tier = int(tree.get("tier", 0))
+        parent_tier = int(parent.get("tree", {}).get("tier", 0))
+        child_col = int(tree.get("column", 0))
+        parent_col = int(parent.get("tree", {}).get("column", 0))
+        if child_col == parent_col and child_tier <= parent_tier:
+            errors.append(f"{skill_id}: chain column hint must be below parent tier")
+        if child_col == parent_col and str(prereqs[0].get("skill_id", "")) != parent_id:
+            errors.append(f"{skill_id}: mismatched chain parent")
+    if errors:
+        report.fail("skill tree layout hints", "; ".join(errors))
+    else:
+        report.ok("skill tree layout hints are coherent for chain children")
+
+
 def validate_skill_synergies(report: Any, skills: dict[str, Any]) -> None:
     catalog = skills.get("skills", {})
     errors: list[str] = []
@@ -317,6 +347,7 @@ def validate_skill_catalogs(
         else:
             report.ok("skill prerequisites reference known skills")
 
+    validate_skill_tree_layout_hints(report, skills)
     validate_skill_synergies(report, skills)
 
     skill_prereqs = {

@@ -1,0 +1,56 @@
+shared/golden/character_progression.json
+  s_b993e8609e263e::t_cbf1125eb18050 270,276-277
+  s_b993e8609e263e::t_dc16eab654c648 108,114-115,121,127
+  s_b993e8609e263e::t_592eccfb62f01f 243,249
+  s_b993e8609e263e::t_bd595c12f320d5 203,209
+  s_b993e8609e263e::t_2f7104ea587388 190,196-197
+  s_b993e8609e263e::t_73a43d94123b4b 146,148,154-155,161,167
+  s_b993e8609e263e::t_d9fbce3922fac2 47
+  s_b993e8609e263e::t_fb1c7a21615ba6 283,289
+  s_b993e8609e263e::t_1f813bc0bb5b53 87
+  s_b993e8609e263e::t_0c33cbb419ea03 230,236-237
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_b993e8609e263e::t_70dc6d0b535118 28
+client/tests/test_golden.gd
+  s_b993e8609e263e::t_6190335e3d794a 443
+  s_b993e8609e263e::t_efc18fe9a4a8a1 446,455-459,461-464
+  s_b993e8609e263e::t_2c2611e33265c3 727-729,731-735
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_b993e8609e263e::t_c28d228cdde3b2 34-36
+tools/validate_shared.py
+  s_b993e8609e263e::t_e82e0f092f4d1f 778
+  s_b993e8609e263e::t_b0fc7119f55b6b 706-708
+  s_b993e8609e263e::t_a8a39af0eb6323 735-742
+  s_b993e8609e263e::t_e03458b5e710ac 801,803-807
+  s_b993e8609e263e::t_5b0dd971192926 713-716,718-722
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_b993e8609e263e::t_c8b41086f6a156 34-36
+shared/golden/skill_points_and_magic_bolt.json
+  s_b993e8609e263e::t_02638ddfc9f6fd 24,29
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_b993e8609e263e::t_bbe7e0b7af24c4 34-36
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_b993e8609e263e::t_b8e6b364c36c75 18
+docs/progress/scenario-movement-audit.tsv
+  s_b993e8609e263e::t_acec2f145cd5e2 59-61
+.maintainability/file-size-baseline.tsv
+  s_b993e8609e263e::t_508849b471176b 24
+  s_b993e8609e263e::t_ed330fffc4a83f 37
+  s_b993e8609e263e::t_6f1674068ebcc0 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "255f678de63c8fcf0b68d22589dc969e3dd4a8cd",
+  "prompts": {},
+  "sessions": {
+    "s_b993e8609e263e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fb30590a-f710-4071-b41f-11dcfb5b9b2b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

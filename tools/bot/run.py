@@ -946,7 +946,7 @@ async def execute_step(
     if action == "move_until_in_range":
         target = resolve_target(state, step)
         stop_distance = float(step.get("stop_distance", WALK_STOP_DISTANCE))
-        if target.get("type") == "monster":
+        if target.get("type") in {"monster", "interactable"}:
             await move_until_entity_in_range(
                 ws,
                 session_id,

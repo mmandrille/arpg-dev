@@ -1,0 +1,46 @@
+client/scripts/main.gd
+  s_1f9a9805f4d2df::t_2e93ab66637afd 1930,1934-1936,1945-1947,1957-1958,1962-1963
+  s_1f9a9805f4d2df::t_ebf486475b22d2 1931,1933,1937-1944,1948-1956,1959-1961,1964-1967
+  s_1f9a9805f4d2df::t_a4cbe808803457 20
+  s_1f9a9805f4d2df::t_4cdd0e950e0be6 1385-1392
+client/tests/test_projectile_flight_presentation.gd
+  s_1f9a9805f4d2df::t_3aab936dd02eb1 7,16-17,43-51,59,72,79-81,86,93,97-106
+  s_1f9a9805f4d2df::t_58383cd0f7d6dc 66-69,76-77,90,95-96
+  s_1f9a9805f4d2df::t_12f7ff82ce8a80 1-6,8-15,18-42,52-58,60-65,70-71,73-75,78,82-85,87-89,91-92,94,107-134
+client/scripts/combat_reach.gd
+  s_1f9a9805f4d2df::t_adbe0556b13794 48-51
+client/scripts/projectile_flight_presentation.gd
+  s_1f9a9805f4d2df::t_049827ba3944b1 251-255
+  s_1f9a9805f4d2df::t_4aebfbee2e97cd 175,178-179,188-202
+  s_1f9a9805f4d2df::t_e5c64a14fce26d 61-62,67,73
+  s_1f9a9805f4d2df::t_aecc1d5328e1b6 78
+  s_1f9a9805f4d2df::t_ae001b79a8a12c 156
+  s_1f9a9805f4d2df::t_94faf87b3a4c41 25-26,33-41
+  s_1f9a9805f4d2df::t_026effa1f70e90 77,79
+  s_1f9a9805f4d2df::t_dc04beccbfb8c4 1-24,27-32,42-60,63-66,68-72,74-76,80-139,142-144,146-155,157-174,176-177,180-183,185-187,203-250,256-300
+  s_1f9a9805f4d2df::t_bfcf92b1861b4d 140-141,145
+  s_1f9a9805f4d2df::t_b780e5591c1599 184
+client/scripts/projectile_presentation_cap.gd
+  s_1f9a9805f4d2df::t_583a25fb69b424 14-18
+scripts/client_smoke.sh
+  s_1f9a9805f4d2df::t_bd5296a62eb2f1 262
+client/tests/test_projectile_presentation_cap.gd
+  s_1f9a9805f4d2df::t_8cdefcce2b84f3 15
+  s_1f9a9805f4d2df::t_ea2dea86c322be 45-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f7b0e7cd0a0be1d1119ab948ce298d0d1135e993",
+  "prompts": {},
+  "sessions": {
+    "s_1f9a9805f4d2df": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f3ef0959-72b7-45d8-ab7a-149af583ee3a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

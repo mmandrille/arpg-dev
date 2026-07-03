@@ -4,6 +4,7 @@ const CharacterScene := preload("res://scenes/character.tscn")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
+const ShowmeItemIconsCaptureScript := preload("res://skills/showme/scripts/showme_item_icons_capture.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
@@ -88,6 +89,7 @@ func _initialize() -> void:
 			await _setup_corpse_inventory()
 		"skills":
 			await _setup_skills()
+		"item-icons": await ShowmeItemIconsCaptureScript.setup(self),
 		"shop":
 			await _setup_shop()
 		"bishop":
@@ -343,7 +345,6 @@ func _setup_floor_item() -> void:
 	root.add_child(loot)
 	_subject = loot
 
-
 func _setup_skills() -> void:
 	var panel = SkillsPanelScript.new()
 	_skills_panel = panel
@@ -363,7 +364,6 @@ func _setup_skills() -> void:
 	})
 	panel.ensure_display_visible()
 	panel.bot_hover_skill("rage")
-
 
 func _setup_shop() -> void:
 	var offers := _shop_offers()

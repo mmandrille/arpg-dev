@@ -4,6 +4,7 @@
   "runner": "godot_client",
   "world_id": "vendor_lab",
   "seed": "v391_blacksmith_renew_item",
+  "debug_progression": { "deepest_dungeon_depth": 10 },
   "title": "Blacksmith renew item",
   "description": "Bishop debug drops a renew stone, player renews a bag item at the blacksmith.",
   "client_steps": [

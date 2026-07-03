@@ -487,6 +487,19 @@
         "hired_mercenary_character_id": { "type": "string", "minLength": 1 }
       }
     },
+    "skill_synergy_status": {
+      "type": "object",
+      "required": ["source_skill_id", "source_name", "source_rank", "modifier", "bonus_percent", "display"],
+      "additionalProperties": false,
+      "properties": {
+        "source_skill_id": { "type": "string", "minLength": 1 },
+        "source_name": { "type": "string", "minLength": 1 },
+        "source_rank": { "type": "integer", "minimum": 0 },
+        "modifier": { "type": "string", "minLength": 1 },
+        "bonus_percent": { "type": "integer", "minimum": 0 },
+        "display": { "type": "string", "minLength": 1 }
+      }
+    },
     "skill_progression_skill": {
       "type": "object",
       "required": ["skill_id", "rank", "max_rank", "can_spend"],
@@ -495,7 +508,11 @@
         "skill_id": { "type": "string", "minLength": 1 },
         "rank": { "type": "integer", "minimum": 0 },
         "max_rank": { "type": "integer", "minimum": 1 },
-        "can_spend": { "type": "boolean" }
+        "can_spend": { "type": "boolean" },
+        "synergy_status": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/skill_synergy_status" }
+        }
       }
     },
     "skill_progression": {

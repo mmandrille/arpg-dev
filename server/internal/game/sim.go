@@ -2363,7 +2363,7 @@ func (s *Sim) skillCastDirectionWithRange(def SkillDef, cast *CastSkillIntent, p
 }
 
 func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef, rank int, dir Vec2, targetID uint64, in Input) *entity {
-	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRange(def, rank))
+	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank))
 	projectile := &entity{
 		kind:             projectileEntity,
 		pos:              player.pos,
@@ -2664,7 +2664,12 @@ func (s *Sim) coneSkillTargets(player *entity, dir Vec2, cone SkillConeDef) []*e
 	if dir.X == 0 && dir.Y == 0 {
 		return targets
 	}
-	cosLimit := math.Cos(cone.AngleDegrees * math.Pi / 360.0)
+	var cosLimit float64
+	if cone.AngleDegrees >= 360 {
+		cosLimit = -1
+	} else {
+		cosLimit = math.Cos(cone.AngleDegrees * math.Pi / 360.0)
+	}
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		target := s.activeLevel().entities[id]
 		if target == nil || target.kind != monsterEntity || target.hp <= 0 {
@@ -5177,10 +5182,11 @@ func (s *Sim) SkillProgressionView() SkillProgressionView {
 		baseRank := s.progression.SkillRanks[skillID]
 		rank := s.effectiveSkillRank(skillID)
 		skills = append(skills, SkillProgressionSkillView{
-			SkillID:  skillID,
-			Rank:     rank,
-			MaxRank:  def.MaxRank,
-			CanSpend: s.progression.UnspentSkillPoints > 0 && baseRank < def.MaxRank && s.skillClassAllowed(def) && s.skillRequirementsMet(def, baseRank+1),
+			SkillID:       skillID,
+			Rank:          rank,
+			MaxRank:       def.MaxRank,
+			CanSpend:      s.progression.UnspentSkillPoints > 0 && baseRank < def.MaxRank && s.skillClassAllowed(def) && s.skillRequirementsMet(def, baseRank+1),
+			SynergyStatus: s.skillSynergyStatus(skillID),
 		})
 	}
 	return SkillProgressionView{

@@ -1,0 +1,74 @@
+{
+  "id": "skill_synergy_lab",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v418_skill_synergy",
+  "character_class": "ranger",
+  "title": "Skill synergy lab",
+  "description": "Prove piercing_shot ranks increase snipe damage through declarative synergies.",
+  "debug_progression": {
+    "level": 20,
+    "unspent_skill_points": 4,
+    "unspent_stat_points": 0,
+    "stats": { "str": 5, "dex": 30, "vit": 5, "magic": 5 },
+    "skill_ranks": { "piercing_shot": 1, "snipe": 1 }
+  },
+  "steps": [
+    {
+      "action": "cast_skill",
+      "skill_id": "snipe",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 4
+      },
+      "timeout_s": 8
+    },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "piercing_shot"
+    },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "piercing_shot"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 32
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "snipe",
+      "monster_def_id": "combat_lab_soft_target",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "min_damage": 7
+      },
+      "timeout_s": 8
+    }
+  ],
+  "assertions": [
+    {
+      "type": "skill_progression",
+      "skill_id": "piercing_shot",
+      "rank": 3,
+      "max_rank": 10
+    },
+    {
+      "type": "skill_progression",
+      "skill_id": "snipe",
+      "rank": 1,
+      "max_rank": 10
+    }
+  ]
+}

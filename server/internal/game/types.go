@@ -272,11 +272,21 @@ type CharacterProgressionView struct {
 
 // SkillProgressionSkillView is one skill row in the server-owned skill
 // progression state.
+type SkillSynergyStatusView struct {
+	SourceSkillID string `json:"source_skill_id"`
+	SourceName    string `json:"source_name"`
+	SourceRank    int    `json:"source_rank"`
+	Modifier      string `json:"modifier"`
+	BonusPercent  int    `json:"bonus_percent"`
+	Display       string `json:"display"`
+}
+
 type SkillProgressionSkillView struct {
-	SkillID  string `json:"skill_id"`
-	Rank     int    `json:"rank"`
-	MaxRank  int    `json:"max_rank"`
-	CanSpend bool   `json:"can_spend"`
+	SkillID        string                   `json:"skill_id"`
+	Rank           int                      `json:"rank"`
+	MaxRank        int                      `json:"max_rank"`
+	CanSpend       bool                     `json:"can_spend"`
+	SynergyStatus  []SkillSynergyStatusView `json:"synergy_status,omitempty"`
 }
 
 // SkillProgressionView is the protocol view of spendable skill points and

@@ -1311,10 +1311,11 @@ func (s *Sim) appendSkillCooldownStartedEvent(res *TickResult, player *entity, s
 }
 
 func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
-	dir, targetID, rejectReason := s.skillCastDirection(def, in.CastSkill, player)
+	castRange := s.effectiveProjectileRangeForSkill(skillID, def.Projectile.Range)
+	dir, targetID, rejectReason := s.skillCastDirectionWithRange(def, in.CastSkill, player, castRange)
 	if rejectReason != "" {
 		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
-			s.beginSkillAutoNav(in, res, def.Projectile.Range, true)
+			s.beginSkillAutoNav(in, res, castRange, true)
 			return
 		}
 		res.reject(in.MessageID, rejectReason)
@@ -1334,16 +1335,17 @@ func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entit
 }
 
 func (s *Sim) handleConeSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
-	dir, targetID, rejectReason := s.skillCastDirectionWithRange(def, in.CastSkill, player, def.Cone.Range)
+	cone := s.effectiveConeForSkill(skillID, def.Cone)
+	dir, targetID, rejectReason := s.skillCastDirectionWithRange(def, in.CastSkill, player, cone.Range)
 	if rejectReason != "" {
 		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
-			s.beginSkillAutoNav(in, res, def.Cone.Range, false)
+			s.beginSkillAutoNav(in, res, cone.Range, false)
 			return
 		}
 		res.reject(in.MessageID, rejectReason)
 		return
 	}
-	targets := s.coneSkillTargets(player, dir, def.Cone)
+	targets := s.coneSkillTargets(player, dir, cone)
 	if len(targets) == 0 {
 		res.reject(in.MessageID, "no_valid_targets")
 		return
@@ -1353,7 +1355,7 @@ func (s *Sim) handleConeSkillCast(in Input, res *TickResult, player *entity, ski
 	s.clearAutoNav()
 	cooldownTicks := s.commitSkillSpend(player, skillID, def, manaCost)
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
-	s.appendConeSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, dir, def.Cone)
+	s.appendConeSkillCastEvent(res, player, skillID, rank, manaCost, in.CorrelationID, targetID, dir, cone)
 	s.applyConeSkill(player, skillID, def, targets, in.CorrelationID, res)
 	s.appendSkillCooldownUpdate(res)
 	s.appendSkillCooldownStartedEvent(res, player, skillID, in.CorrelationID, cooldownTicks)
@@ -1397,7 +1399,7 @@ func (s *Sim) handleAreaHealSkillCast(in Input, res *TickResult, player *entity,
 }
 
 func (s *Sim) handleAreaStatBuffSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
-	applications, rejectReason := s.areaStatBuffApplications(player, def, rank, in.CastSkill)
+	applications, rejectReason := s.areaStatBuffApplications(player, skillID, def, rank, in.CastSkill)
 	if rejectReason != "" {
 		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
 			s.beginSkillAutoNav(in, res, skillCastRange(def), false)

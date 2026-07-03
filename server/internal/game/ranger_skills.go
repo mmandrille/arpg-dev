@@ -11,10 +11,11 @@ type rangerLineTarget struct {
 }
 
 func (s *Sim) handleRangerProjectileSkillCast(in Input, res *TickResult, player *entity, skillID string, def SkillDef, rank int, manaCost int) {
-	dir, targetID, rejectReason := s.skillCastDirection(def, in.CastSkill, player)
+	castRange := s.effectiveProjectileRangeForSkill(skillID, def.Projectile.Range)
+	dir, targetID, rejectReason := s.skillCastDirectionWithRange(def, in.CastSkill, player, castRange)
 	if rejectReason != "" {
 		if rejectReason == "target_out_of_range" && in.CastSkill != nil && in.CastSkill.TargetID != "" {
-			s.beginSkillAutoNav(in, res, def.Projectile.Range, true)
+			s.beginSkillAutoNav(in, res, castRange, true)
 			return
 		}
 		res.reject(in.MessageID, rejectReason)
@@ -88,7 +89,7 @@ func (s *Sim) applyRangerShot(player *entity, skillID string, def SkillDef, rank
 	if def.Pierce.MaxHits > 0 {
 		maxHits = def.Pierce.MaxHits
 	}
-	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRange(def, rank))
+	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank))
 	for hitIndex, row := range targets {
 		if hitIndex >= maxHits {
 			break
@@ -120,9 +121,9 @@ func (s *Sim) applyRangerVolley(player *entity, skillID string, def SkillDef, ra
 	if count <= 0 {
 		return
 	}
-	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRange(def, rank))
+	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank))
 	hitIDs := map[uint64]bool{}
-	for _, arrowDir := range volleyDirections(dir, count, def.Volley.SpreadDegrees) {
+	for _, arrowDir := range volleyDirections(dir, count, s.effectiveVolleySpreadForSkill(skillID, def.Volley.SpreadDegrees)) {
 		targets := s.rangerLineTargets(player, arrowDir, def.Projectile.Range)
 		for _, row := range targets {
 			target := row.Target
@@ -190,6 +191,10 @@ func (s *Sim) applyMonsterRoot(target *entity, sourceID uint64, skillID string, 
 	if target == nil || target.kind != monsterEntity || target.hp <= 0 || root.DurationTicks <= 0 {
 		return
 	}
+	durationTicks := s.synergyScaledInt(skillID, "root_duration_percent", root.DurationTicks)
+	if durationTicks <= 0 {
+		return
+	}
 	effectID := root.EffectID
 	if effectID == "" {
 		effectID = skillID
@@ -201,8 +206,8 @@ func (s *Sim) applyMonsterRoot(target *entity, sourceID uint64, skillID string, 
 		Stats:      []string{"root"},
 		Percent:    100,
 		EffectID:   effectID,
-		EndsTick:   s.tick + uint64(root.DurationTicks),
-		TotalTicks: root.DurationTicks,
+		EndsTick:   s.tick + uint64(durationTicks),
+		TotalTicks: durationTicks,
 	}
 	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
@@ -214,8 +219,8 @@ func (s *Sim) applyMonsterRoot(target *entity, sourceID uint64, skillID string, 
 		CorrelationID:  correlationID,
 		SkillID:        skillID,
 		Amount:         intPtr(100),
-		RemainingTicks: intPtr(root.DurationTicks),
-		TotalTicks:     intPtr(root.DurationTicks),
+		RemainingTicks: intPtr(durationTicks),
+		TotalTicks:     intPtr(durationTicks),
 	})
 	s.replicateSkillEffectToNearbyMonsters(sourceID, target, stateKey, res)
 }

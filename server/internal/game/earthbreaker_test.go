@@ -34,6 +34,10 @@ func TestEarthbreakerDamagesRadialTargets(t *testing.T) {
 	if front.hp >= 20 || back.hp >= 20 {
 		t.Fatalf("earthbreaker hp front=%d back=%d, want both radial targets damaged; events=%+v", front.hp, back.hp, cast.Events)
 	}
+	wantCone := sim.effectiveConeForSkill("earthbreaker", rules.Skills["earthbreaker"].Cone)
+	if wantCone.Range <= rules.Skills["earthbreaker"].Cone.Range {
+		t.Fatalf("earthbreaker cone range = %v, want cleave synergy to increase range from %v", wantCone.Range, rules.Skills["earthbreaker"].Cone.Range)
+	}
 	var castEvent *Event
 	for i := range cast.Events {
 		if cast.Events[i].EventType == "skill_cast" {

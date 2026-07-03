@@ -66,7 +66,7 @@ func (s *Sim) startSkillBleed(player *entity, target *entity, skillID string, bl
 	if player == nil || target == nil || target.kind != monsterEntity || target.hp <= 0 || bleed.DurationTicks <= 0 {
 		return
 	}
-	damagePercentMaxHP, durationTicks, intervalTicks := skillBleedValues(s.rules, bleed, rank)
+	damagePercentMaxHP, durationTicks, intervalTicks := skillBleedValuesWithSynergy(s, skillID, bleed, rank)
 	effectID := bleed.EffectID
 	if effectID == "" {
 		effectID = "bleed"
@@ -106,7 +106,7 @@ func (s *Sim) startSkillMark(player *entity, target *entity, skillID string, mar
 	if player == nil || target == nil || target.kind != monsterEntity || target.hp <= 0 || mark.DurationTicks <= 0 {
 		return
 	}
-	damageBonusPercent, durationTicks := skillMarkValues(s.rules, mark, rank)
+	damageBonusPercent, durationTicks := skillMarkValuesWithSynergy(s, skillID, mark, rank)
 	if s.rogueMarks == nil {
 		s.rogueMarks = make(map[uint64]rogueMarkState)
 	}

@@ -8,12 +8,12 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 	}
 	for _, effect := range def.Effects {
 		if effect.Type == "reflect_on_block_buff" {
-			percent := skillEffectPercent(s.rules,effect, rank)
+			percent := skillEffectPercentWithSynergy(s, skillID, effect, rank)
 			effectID := effect.EffectID
 			if effectID == "" {
 				effectID = skillID
 			}
-			totalTicks := effect.DurationTicks
+			totalTicks := skillEffectDurationWithSynergy(s, skillID, effect.DurationTicks)
 			s.skillEffects[skillID] = skillEffectState{
 				SkillID:        skillID,
 				TargetID:       player.id,
@@ -40,12 +40,12 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 		if effect.Type != "stat_percent_buff" {
 			continue
 		}
-		percent := skillEffectPercent(s.rules,effect, rank)
+		percent := skillEffectPercentWithSynergy(s, skillID, effect, rank)
 		scale := 1.0
 		if effect.VisualScale {
 			scale += float64(percent) / 100.0
 		}
-		totalTicks := effect.DurationTicks
+		totalTicks := skillEffectDurationWithSynergy(s, skillID, effect.DurationTicks)
 		s.skillEffects[skillID] = skillEffectState{
 			SkillID:     skillID,
 			TargetID:    player.id,
@@ -71,7 +71,7 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 	s.appendCharacterProgressionUpdate(res)
 }
 
-func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, cast *CastSkillIntent) ([]skillBuffApplication, string) {
+func (s *Sim) areaStatBuffApplications(player *entity, skillID string, def SkillDef, rank int, cast *CastSkillIntent) ([]skillBuffApplication, string) {
 	if player == nil {
 		return nil, "player_dead"
 	}
@@ -82,9 +82,11 @@ func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, c
 		}
 		percent := 0
 		if effect.Type == "area_stat_percent_buff" {
-			percent = s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(s.rules,effect, rank))
+			percent = s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercentWithSynergy(s, skillID, effect, rank))
 		}
-		targets := s.healSkillTargets(player.pos, effect, player.id, s.scaleSkillRadiusForMagic(def, rank, effect))
+		radius := s.scaleSkillRadiusForMagic(def, rank, effect)
+		radius = s.synergyScaledFloat(skillID, "area_radius_percent", radius)
+		targets := s.healSkillTargets(player.pos, effect, player.id, radius)
 		for _, target := range targets {
 			applications = append(applications, skillBuffApplication{
 				Target:      target,
@@ -112,7 +114,7 @@ func (s *Sim) applyAreaStatBuff(player *entity, skillID string, rank int, applic
 		if target.id != s.playerID {
 			stateKey = fmt.Sprintf("%s:%d", skillID, target.id)
 		}
-		totalTicks := app.Effect.DurationTicks
+		totalTicks := skillEffectDurationWithSynergy(s, skillID, app.Effect.DurationTicks)
 		s.skillEffects[stateKey] = skillEffectState{
 			SkillID:     skillID,
 			TargetID:    target.id,

@@ -11,7 +11,7 @@ func (s *Sim) passiveSkillStatTotal(stat string) int {
 		if rank <= 0 {
 			continue
 		}
-		total += passiveSkillRankedStat(s.rules, def, stat, rank)
+		total += passiveSkillRankedStatWithSynergy(s, skillID, def, stat, rank)
 	}
 	return total
 }
@@ -28,7 +28,7 @@ func (s *Sim) passiveSkillStatSources(stat string, valueScale float64) (float64,
 		if rank <= 0 {
 			continue
 		}
-		raw := passiveSkillRankedStat(s.rules, def, stat, rank)
+		raw := passiveSkillRankedStatWithSynergy(s, skillID, def, stat, rank)
 		if raw == 0 {
 			continue
 		}

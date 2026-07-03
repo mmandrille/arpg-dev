@@ -5,6 +5,7 @@ signal allocate_skill_point_requested(skill_id: String)
 
 const SkillIconScript := preload("res://scripts/skill_icon.gd")
 const SkillPassiveTooltipScript := preload("res://scripts/skill_passive_tooltip.gd")
+const SkillSynergyTooltipScript := preload("res://scripts/skill_synergy_tooltip.gd")
 const SkillTreeLayoutScript := preload("res://scripts/skill_tree_layout.gd")
 const SkillTreeConnectorsScript := preload("res://scripts/skill_tree_connectors.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
@@ -70,6 +71,11 @@ static func tooltip_plain_body(skill_id: String, rank: int, skill_progression: D
 	if not requirement_lines.is_empty():
 		text += "\n\nRequires:"
 		for line in requirement_lines:
+			text += "\n%s" % str((line as Dictionary).get("text", ""))
+	var synergy_lines := SkillSynergyTooltipScript.lines_for_skill(skill_id, skill_progression)
+	if not synergy_lines.is_empty():
+		text += "\n\nSynergies:"
+		for line in synergy_lines:
 			text += "\n%s" % str((line as Dictionary).get("text", ""))
 	return text
 

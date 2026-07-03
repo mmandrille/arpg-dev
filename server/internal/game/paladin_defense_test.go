@@ -127,8 +127,9 @@ func TestSanctuaryGrantsTemporaryDamageImmunity(t *testing.T) {
 	if !sameStringSlice(player.effectIDs, []string{"sanctuary"}) {
 		t.Fatalf("player effect ids = %v, want sanctuary", player.effectIDs)
 	}
-	if started := skillEvent(cast.Events, "skill_effect_started", "sanctuary"); started == nil || started.RemainingTicks == nil || *started.RemainingTicks != 60 {
-		t.Fatalf("sanctuary start event = %+v, want 60 ticks", started)
+	wantDuration := sim.synergyScaledInt("sanctuary", "buff_duration_percent", 60)
+	if started := skillEvent(cast.Events, "skill_effect_started", "sanctuary"); started == nil || started.RemainingTicks == nil || *started.RemainingTicks != wantDuration {
+		t.Fatalf("sanctuary start event = %+v, want %d ticks", started, wantDuration)
 	}
 	if cooldown := skillEvent(cast.Events, "skill_cooldown_started", "sanctuary"); cooldown == nil || cooldown.RemainingTicks == nil || *cooldown.RemainingTicks != 598 {
 		t.Fatalf("sanctuary cooldown event = %+v, want 598 ticks", cooldown)
@@ -145,7 +146,7 @@ func TestSanctuaryGrantsTemporaryDamageImmunity(t *testing.T) {
 	}
 
 	var expired TickResult
-	for i := 0; i < 60; i++ {
+	for i := 0; i < wantDuration; i++ {
 		expired = sim.Tick(nil)
 	}
 	if !hasEvent(expired, "skill_effect_ended") || len(player.effectIDs) != 0 {

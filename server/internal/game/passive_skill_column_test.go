@@ -168,9 +168,11 @@ func TestPassiveSkillPercentStatsApplyAfterFlatStatsAndDoNotCompound(t *testing.
 	sim.progression.SkillRanks["iron_hide"] = 1
 	sim.progression.SkillRanks["battle_tempo"] = 1
 	withPercent, _ := sim.playerEffectiveCombatStats()
-	want := flatOnly.MaxHP * 1.15
+	ironHidePct := passiveSkillRankedStat(rules, rules.Skills["iron_hide"], "max_hp_percent", 1)
+	battleTempoPct := sim.synergyScaledInt("battle_tempo", "passive_stat_percent", 5)
+	want := flatOnly.MaxHP * (1.0 + float64(ironHidePct+battleTempoPct)/100.0)
 	if math.Abs(withPercent.MaxHP-want) > 0.000001 {
-		t.Fatalf("max hp with passives = %v, want flat %v * summed percent 1.15 = %v", withPercent.MaxHP, flatOnly.MaxHP, want)
+		t.Fatalf("max hp with passives = %v, want flat %v * summed percent 1.%02d = %v", withPercent.MaxHP, flatOnly.MaxHP, ironHidePct+battleTempoPct, want)
 	}
 	compounded := flatOnly.MaxHP * 1.10 * 1.05
 	if math.Abs(withPercent.MaxHP-compounded) < 0.000001 {

@@ -514,6 +514,7 @@ func (s *Sim) tryPassiveExecute(target *entity, playerID uint64, corr string, re
 		return false
 	}
 	threshold := s.rules.rankScaledInt(def.Execute.ThresholdPercentBase, def.Execute.ThresholdPercentPerRank, rank)
+	threshold = s.synergyScaledInt("executioner", "execute_threshold_percent", threshold)
 	if threshold <= 0 || target.hp*100 > target.maxHP*threshold {
 		return false
 	}

@@ -349,6 +349,7 @@ type SkillDef struct {
 	Chain        SkillChainDef        `json:"chain"`
 	Companion    SkillCompanionDef    `json:"companion"`
 	Revive       SkillReviveDef       `json:"revive"`
+	Synergies    []SkillSynergyDef    `json:"synergies,omitempty"`
 	Effects      []SkillEffectDef     `json:"effects"`
 	Cooldown     SkillCooldownDef     `json:"cooldown"`
 }

@@ -7,7 +7,7 @@ const DEFAULT_BLOCK_SIZE := Vector2(83, 83)
 
 const PASSIVE_DISPLAY_COLUMN_DEFAULT := 5
 const SURVIVAL_DISPLAY_COLUMN := 6
-const COMBAT_COLUMN_LIMIT := 5
+const COMBAT_COLUMN_LIMIT := 8
 
 static var _resolved_by_class: Dictionary = {}
 
@@ -141,6 +141,16 @@ static func _is_chain_continuer(skill_id: String, parent_id: String, combat_skil
 	return sibling_count == 1
 
 
+static func _is_ancestor_of(ancestor_id: String, skill_id: String) -> bool:
+	var current := skill_id
+	while current != "":
+		if current == ancestor_id:
+			return true
+		current = _primary_prereq(current)
+
+	return false
+
+
 static func _class_skills(class_id: String) -> Array:
 	var out: Array = []
 	for raw_id in SkillRulesLoader.skill_ids():
@@ -175,85 +185,88 @@ static func _sort_skill_ids(a: String, b: String) -> bool:
 	return a < b
 
 
-static func _occupancy_key(column: int, tier: int) -> String:
-	return "%d:%d" % [column, tier]
+static func _tier1_roots(combat_skills: Array) -> Array:
+	var roots: Array = []
+	for skill_id in combat_skills:
+		if _tier_hint(skill_id) == 1 and _primary_prereq(skill_id) == "":
+			roots.append(skill_id)
+	roots.sort_custom(_sort_skill_ids)
+
+	return roots
 
 
-static func _is_occupied(occupancy: Dictionary, column: int, tier: int) -> bool:
-	return occupancy.has(_occupancy_key(column, tier))
-
-
-static func _is_ancestor_of(ancestor_id: String, skill_id: String) -> bool:
-	var current := skill_id
-	while current != "":
-		if current == ancestor_id:
-			return true
-		current = _primary_prereq(current)
-
-	return false
-
-
-static func _would_false_stack(occupancy: Dictionary, column: int, tier: int, skill_id: String) -> bool:
-	for key in occupancy.keys():
-		var parts: PackedStringArray = str(key).split(":")
-		if parts.size() != 2:
+static func _branch_skill_ids(root_id: String, combat_skills: Array) -> Array:
+	var out: Array = [root_id]
+	for skill_id in combat_skills:
+		if skill_id == root_id:
 			continue
-		var occupied_column := int(parts[0])
-		var occupied_tier := int(parts[1])
-		if occupied_column != column or occupied_tier >= tier:
-			continue
-		var occupant_id := str(occupancy[key])
-		if not _is_ancestor_of(occupant_id, skill_id):
-			return true
+		if _is_ancestor_of(root_id, skill_id):
+			out.append(skill_id)
 
-	return false
+	return out
 
 
-static func _claim(occupancy: Dictionary, column: int, tier: int, skill_id: String) -> void:
-	occupancy[_occupancy_key(column, tier)] = skill_id
-
-
-static func _parent_column(parent_id: String, resolved: Dictionary) -> int:
-	if resolved.has(parent_id):
-		return int(resolved[parent_id].get("column", 1))
-
-	return _column_hint(parent_id)
-
-
-static func _fan_column(skill_id: String, parent_id: String, tier: int, combat_skills: Array, resolved: Dictionary) -> int:
+static func _assign_sibling_columns(parent_id: String, tier: int, branch_skills: Array, combat_skills: Array, resolved: Dictionary) -> void:
 	var siblings: Array = []
-	for candidate_id in combat_skills:
-		if _tier_hint(candidate_id) != tier:
+	for skill_id in branch_skills:
+		if _tier_hint(skill_id) != tier:
 			continue
-		if _primary_prereq(candidate_id) != parent_id:
+		if _primary_prereq(skill_id) != parent_id:
 			continue
-		siblings.append(candidate_id)
+		siblings.append(skill_id)
+	if siblings.is_empty():
+		return
 	siblings.sort_custom(_sort_skill_ids)
-	var parent_column := _parent_column(parent_id, resolved)
-	var fan_index := 0
+	var parent_col := int(resolved.get(parent_id, {}).get("column", 1))
+	var fan_offset := 0
 	for sibling_id in siblings:
+		var col: int
 		if _is_chain_continuer(str(sibling_id), parent_id, combat_skills):
+			col = parent_col
+		else:
+			fan_offset += 1
+			col = parent_col + fan_offset
+		resolved[sibling_id] = {"tier": tier, "column": col}
+
+
+static func _max_branch_column(branch_skills: Array, resolved: Dictionary) -> int:
+	var max_col := 1
+	for skill_id in branch_skills:
+		if not resolved.has(skill_id):
 			continue
-		fan_index += 1
-		if str(sibling_id) == skill_id:
-			return parent_column + fan_index
+		max_col = maxi(max_col, int(resolved[skill_id].get("column", 1)))
 
-	return parent_column + 1
+	return max_col
 
 
-static func _lowest_free_column(start: int, tier: int, occupancy: Dictionary, skill_id: String) -> int:
-	var column := maxi(1, start)
-	while column <= COMBAT_COLUMN_LIMIT:
-		if _is_occupied(occupancy, column, tier):
-			column += 1
-			continue
-		if _would_false_stack(occupancy, column, tier, skill_id):
-			column += 1
-			continue
+static func _assign_branch(root_id: String, start_col: int, combat_skills: Array, resolved: Dictionary) -> int:
+	var branch_skills := _branch_skill_ids(root_id, combat_skills)
+	resolved[root_id] = {"tier": 1, "column": start_col}
+	var max_tier := 1
+	for skill_id in branch_skills:
+		max_tier = maxi(max_tier, _tier_hint(skill_id))
+	for tier in range(2, max_tier + 1):
+		var parents := {}
+		for skill_id in branch_skills:
+			if _tier_hint(skill_id) != tier:
+				continue
+			var parent_id := _primary_prereq(skill_id)
+			if parent_id != "":
+				parents[parent_id] = true
+		var parent_ids: Array = parents.keys()
+		parent_ids.sort_custom(func(a, b) -> bool:
+			var tier_a := _tier_hint(str(a))
+			var tier_b := _tier_hint(str(b))
+			if tier_a != tier_b:
+				return tier_a < tier_b
+			return str(a) < str(b)
+		)
+		for parent_id in parent_ids:
+			if not resolved.has(str(parent_id)):
+				continue
+			_assign_sibling_columns(str(parent_id), tier, branch_skills, combat_skills, resolved)
 
-		return column
-
-	return column
+	return _max_branch_column(branch_skills, resolved)
 
 
 static func _resolve_class(class_id: String) -> Dictionary:
@@ -261,32 +274,17 @@ static func _resolve_class(class_id: String) -> Dictionary:
 		return _resolved_by_class[class_id]
 
 	var resolved := {}
-	var occupancy := {}
 	var combat_skills := _combat_skills(class_id)
-	var max_tier := 1
-	for skill_id in combat_skills:
-		max_tier = maxi(max_tier, _tier_hint(skill_id))
-
-	for tier in range(1, max_tier + 1):
-		for skill_id in combat_skills:
-			if _tier_hint(skill_id) != tier:
-				continue
-			var parent_id := _primary_prereq(skill_id)
-			var column := _column_hint(skill_id)
-			if parent_id != "":
-				if _is_chain_continuer(skill_id, parent_id, combat_skills):
-					column = _parent_column(parent_id, resolved)
-				else:
-					column = _fan_column(skill_id, parent_id, tier, combat_skills, resolved)
-			column = _lowest_free_column(column, tier, occupancy, skill_id)
-			resolved[skill_id] = {"tier": tier, "column": column}
-			_claim(occupancy, column, tier, skill_id)
+	var next_root_col := 1
+	for root_id in _tier1_roots(combat_skills):
+		var branch_max_col := _assign_branch(str(root_id), next_root_col, combat_skills, resolved)
+		next_root_col = branch_max_col + 1
 
 	var max_combat_column := 0
 	for skill_id in resolved.keys():
 		max_combat_column = maxi(max_combat_column, int(resolved[skill_id].get("column", 0)))
 	var passive_column := PASSIVE_DISPLAY_COLUMN_DEFAULT
-	if max_combat_column >= COMBAT_COLUMN_LIMIT:
+	if max_combat_column >= PASSIVE_DISPLAY_COLUMN_DEFAULT:
 		passive_column = maxi(PASSIVE_DISPLAY_COLUMN_DEFAULT + 2, max_combat_column + 2)
 
 	for skill_id in _class_skills(class_id):

@@ -18,6 +18,7 @@ const SKILL_TREE_ORIGIN := Vector2(23, 70)
 const SKILL_TREE_SPACING := Vector2(96, 127)
 const SKILL_ACTIVE_TREE_WIDTH := 530.0
 const SKILL_TREE_WIDTH := 778.0
+const SKILL_TREE_VIEW_HEIGHT := 548.0
 const SKILL_TOOLTIP_SIZE := Vector2(218, 218)
 const SKILL_TOOLTIP_GAP := 8.0
 
@@ -431,18 +432,18 @@ func _build() -> void:
 	add_child(_panel)
 
 	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 10)
-	root.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, 567)
+	root.add_theme_constant_override("separation", 12)
+	root.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, SKILL_TREE_VIEW_HEIGHT + 36.0)
 	_panel.set_content(root)
 
 	var tree := Control.new()
-	tree.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, 463)
+	tree.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, SKILL_TREE_VIEW_HEIGHT)
 	tree.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(tree)
 
 	var backdrop := ColorRect.new()
 	backdrop.color = Color("#151617")
-	backdrop.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, 463)
+	backdrop.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, SKILL_TREE_VIEW_HEIGHT)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tree.add_child(backdrop)
 
@@ -512,6 +513,7 @@ func _build() -> void:
 	tip_root.add_child(_tooltip_body)
 	_points_label = _label("", 18, Color("#bfc6c2"))
 	_points_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_points_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.add_child(_points_label)
 
 	_render()

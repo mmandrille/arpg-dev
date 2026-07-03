@@ -1,0 +1,27 @@
+server/internal/game/training_doll_test.go
+  s_7131ec88d653c3::t_5166aa6bbcb175 89-126
+client/scripts/training_damage_log_bridge.gd
+  s_7131ec88d653c3::t_4e9e8e3c7d53df 27-29,31-32
+client/tests/test_training_damage_log_panel.gd
+  s_7131ec88d653c3::t_2196ccc023113f 64-85
+  s_7131ec88d653c3::t_5fdfa53fd5e839 5-8,20
+server/internal/game/companion_ai.go
+  s_7131ec88d653c3::t_b6c5dfea25ba26 358
+  s_7131ec88d653c3::t_bca2c65ecea913 543-547
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9a11e4ae08f554d4b675976194f4d3f53a89fe13",
+  "prompts": {},
+  "sessions": {
+    "s_7131ec88d653c3": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2d5c7bc6-6b59-41c3-b5ce-65d81c0d4155",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

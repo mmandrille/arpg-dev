@@ -15,7 +15,7 @@
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
-    "level": 6,
+    "level": 24,
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
@@ -33,7 +33,13 @@
       "arcane_barrage": 1,
       "revive": 1,
       "fireball": 1,
-      "energy_ward": 1
+      "energy_ward": 1,
+      "glacial_lance": 1,
+      "chain_storm": 1,
+      "renewing_light": 1,
+      "inferno": 1,
+      "arcane_overload": 1,
+      "arcane_renewal": 1
     }
   },
   "steps": [

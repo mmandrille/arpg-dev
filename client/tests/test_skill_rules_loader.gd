@@ -30,7 +30,7 @@ func _run() -> void:
 	_assert_true("manifest-loaded skills include pinning shot", ids.has("pinning_shot"))
 	_assert_true("manifest-loaded skills include volley", ids.has("volley"))
 	_assert_true("manifest-loaded skills include snipe", ids.has("snipe"))
-	_assert_eq("alphabetical first id stable", str(ids[0]), "arcane_barrage")
+	_assert_eq("alphabetical first id stable", str(ids[0]), "alpha_call")
 	_assert_eq("tree-order first skill stable", SkillRulesLoaderScript.first_skill_id(), "cleave")
 
 	var skill := SkillRulesLoaderScript.skill_definition("magic_bolt")

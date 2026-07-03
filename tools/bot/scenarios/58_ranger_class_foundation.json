@@ -15,7 +15,7 @@
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
-    "level": 7,
+    "level": 24,
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
@@ -33,7 +33,13 @@
       "black_wolf_companion": 1,
       "snipe": 1,
       "rain_of_arrows": 1,
-      "explosive_shot": 1
+      "explosive_shot": 1,
+      "alpha_call": 1,
+      "pinning_volley": 1,
+      "hunters_volley": 1,
+      "pack_master": 1,
+      "meteor_shot": 1,
+      "arrow_storm": 1
     }
   },
   "steps": [

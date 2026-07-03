@@ -15,7 +15,7 @@
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
-    "level": 6,
+    "level": 24,
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 4,
@@ -25,7 +25,19 @@
       "vit": 5,
       "magic": 12
     },
-    "skill_ranks": { "fan_of_blades": 1, "shadowstep": 1, "eviscerate": 1, "smoke_screen": 1, "predators_mark": 1 }
+    "skill_ranks": {
+      "fan_of_blades": 1,
+      "shadowstep": 1,
+      "eviscerate": 1,
+      "smoke_screen": 1,
+      "predators_mark": 1,
+      "blade_dance": 1,
+      "venom_spray": 1,
+      "shadow_veil": 1,
+      "death_blossom": 1,
+      "assassinate": 1,
+      "killing_mark": 1
+    }
   },
   "steps": [
     {
@@ -133,7 +145,10 @@
     {
       "action": "cast_skill",
       "skill_id": "shadowstep",
-      "direction": { "x": 0, "y": -1 },
+      "direction": {
+        "x": 0,
+        "y": -1
+      },
       "event_type": "skill_cast"
     },
     {

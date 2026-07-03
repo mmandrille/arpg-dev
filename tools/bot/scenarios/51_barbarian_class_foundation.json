@@ -15,7 +15,7 @@
     "post_complete_hold_s": 3.0
   },
   "debug_progression": {
-    "level": 6,
+    "level": 24,
     "experience": 0,
     "unspent_stat_points": 0,
     "unspent_skill_points": 0,
@@ -33,7 +33,13 @@
       "ground_slam": 1,
       "skullcrusher": 1,
       "rend": 1,
-      "war_cry": 1
+      "war_cry": 1,
+      "rampage": 1,
+      "shatter_strike": 1,
+      "battle_roar": 1,
+      "worldbreaker": 1,
+      "blood_frenzy": 1,
+      "gore_strike": 1
     }
   },
   "steps": [

@@ -64,8 +64,8 @@ def test_unknown_skill_fails_before_scenario_mapping() -> None:
 
 
 def test_rank_must_be_within_skill_max_rank() -> None:
-    with pytest.raises(ValueError, match="between 1 and 5"):
-        run_skill_visual("holy_shield", dry_run=True, rank=6)
+    with pytest.raises(ValueError, match="between 1 and 10"):
+        run_skill_visual("holy_shield", dry_run=True, rank=11)
 
 
 def test_skill_visual_matrix_reports_current_coverage() -> None:
@@ -202,4 +202,4 @@ def test_print_skill_visual_matrix(capsys: pytest.CaptureFixture[str]) -> None:
 
     out = capsys.readouterr().out
     assert "skill_id\tclass\tcategory\ticon\tranks\tscenario\trank1\trank5\tbuff_stats" in out
-    assert "holy_shield\tpaladin\tstat_buff\tS\t1,5\tskill_visual\tyes\tno\tno" in out
+    assert "holy_shield\tpaladin\tstat_buff\tS\t1,10\tskill_visual\tyes\tno\tno" in out

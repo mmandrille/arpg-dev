@@ -17,7 +17,7 @@ func TestSkillAffixRollsReduceManaCostAndCooldown(t *testing.T) {
 	assertAck(t, sim.Tick([]Input{{MessageID: "staff", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(staff.instanceID), Slot: mainHandSlot}}}), "staff")
 
 	def := rules.Skills["magic_bolt"]
-	baseMana := skillManaCost(def, 1)
+	baseMana := skillManaCost(rules, def, 1)
 	if got := sim.effectiveSkillManaCost(def, 1); got != baseMana-1 {
 		t.Fatalf("effective mana cost = %d, want %d", got, baseMana-1)
 	}

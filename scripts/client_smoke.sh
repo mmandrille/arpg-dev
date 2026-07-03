@@ -140,6 +140,7 @@ echo "OK: Godot asset import ($((SECONDS - import_started))s)"
 
 # 1. GDScript golden-fixture test (server-independent; ADR D6 / acceptance #7).
 run_gate "GDScript golden test" "[gdtest] PASS" res://tests/test_golden.gd
+run_gate "GDScript skill progression golden test" "[gdtest] PASS: consumed shared/golden/skill_points_and_magic_bolt.json" res://tests/test_golden_skill_progression.gd
 
 # 2. Item visual resolution test (server-independent; acceptance #14).
 run_gate "GDScript item visual resolution test" "[gdtest] PASS" res://tests/test_item_visuals.gd
@@ -230,6 +231,7 @@ run_gate "GDScript loot node factory test" "[gdtest] PASS: test_loot_node_factor
 run_gate "GDScript impact sparks test" "[gdtest] PASS: test_impact_sparks" res://tests/test_impact_sparks.gd
 run_gate "GDScript combat outcome punch test" "[gdtest] PASS: test_combat_outcome_punch" res://tests/test_combat_outcome_punch.gd
 run_gate "GDScript skill rank intensity test" "[gdtest] PASS: test_skill_rank_intensity" res://tests/test_skill_rank_intensity.gd
+run_gate "GDScript skill rank scaling test" "[gdtest] PASS: compound rank scaling increases" res://tests/test_skill_rank_scaling.gd
 run_gate "GDScript look-and-feel polish test" "[gdtest] PASS: test_look_and_feel_polish" res://tests/test_look_and_feel_polish.gd
 
 # 2o. World-detail render + combat-feel unit tests (server-independent; v295-v308).

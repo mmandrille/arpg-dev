@@ -99,8 +99,8 @@ func TestBishopRespecConsumesBadgeAndRefundsBuild(t *testing.T) {
 	if sim.progression.UnspentStatPoints != 15 {
 		t.Fatalf("unspent stat points = %d, want 15", sim.progression.UnspentStatPoints)
 	}
-	if sim.progression.UnspentSkillPoints != 3 {
-		t.Fatalf("unspent skill points = %d, want 3", sim.progression.UnspentSkillPoints)
+	if sim.progression.UnspentSkillPoints != sim.rules.totalSkillPointGrantsForLevel(6) {
+		t.Fatalf("unspent skill points = %d, want %d", sim.progression.UnspentSkillPoints, sim.rules.totalSkillPointGrantsForLevel(6))
 	}
 	if len(sim.progression.SkillRanks) != 0 || len(sim.skillCooldowns) != 0 {
 		t.Fatalf("skills/cooldowns after respec ranks=%+v cooldowns=%+v", sim.progression.SkillRanks, sim.skillCooldowns)

@@ -1376,10 +1376,10 @@ def test_skill_progression_assertions_for_runtime_and_state_payloads():
     progression = {
         "unspent_skill_points": 0,
         "skills": [
-            {"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": False},
+            {"skill_id": "magic_bolt", "rank": 1, "max_rank": 10, "can_spend": False},
         ],
     }
-    assertion = {"type": "skill_progression", "unspent_skill_points": 0, "skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": False}
+    assertion = {"type": "skill_progression", "unspent_skill_points": 0, "skill_id": "magic_bolt", "rank": 1, "max_rank": 10, "can_spend": False}
 
     state = RuntimeState(skill_progression=progression)
     run_runtime_assertions([assertion], state, "unit runtime")
@@ -1390,7 +1390,7 @@ def test_skill_progression_assertions_can_derive_max_rank_from_rules():
     progression = {
         "unspent_skill_points": 0,
         "skills": [
-            {"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": False},
+            {"skill_id": "magic_bolt", "rank": 1, "max_rank": 10, "can_spend": False},
         ],
     }
     assertion = {

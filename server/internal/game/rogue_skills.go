@@ -75,7 +75,7 @@ func (s *Sim) dashRange(def SkillDef, rank int) float64 {
 	if rank < 1 {
 		rank = 1
 	}
-	r := def.Dash.RangeBase + def.Dash.RangePerRank*float64(rank-1)
+	r := s.rules.rankScaledFloat(def.Dash.RangeBase, def.Dash.RangePerRank, rank)
 	if r <= 0 {
 		return def.Cone.Range
 	}
@@ -331,7 +331,7 @@ func (s *Sim) startPoisonDot(player *entity, target *entity, skillID string, def
 	if rank < 1 {
 		rank = 1
 	}
-	percent := def.Poison.DamagePercentBase + def.Poison.DamagePercentPerRank*(rank-1)
+	percent := s.rules.rankScaledInt(def.Poison.DamagePercentBase, def.Poison.DamagePercentPerRank, rank)
 	damage := int(math.Round(float64(sourceDamage) * float64(percent) / 100.0))
 	if sourceDamage > 0 && damage < 1 {
 		damage = 1
@@ -513,7 +513,7 @@ func (s *Sim) tryPassiveExecute(target *entity, playerID uint64, corr string, re
 	if !ok || def.Kind != "passive_execute" {
 		return false
 	}
-	threshold := def.Execute.ThresholdPercentBase + def.Execute.ThresholdPercentPerRank*(rank-1)
+	threshold := s.rules.rankScaledInt(def.Execute.ThresholdPercentBase, def.Execute.ThresholdPercentPerRank, rank)
 	if threshold <= 0 || target.hp*100 > target.maxHP*threshold {
 		return false
 	}

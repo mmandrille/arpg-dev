@@ -4,8 +4,10 @@
     "points_per_level": 3,
     "skill_points": {
       "points_per_grant": 1,
-      "grant_every_levels": 3,
-      "first_grant_level": 1
+      "first_grant_level": 1,
+      "second_grant_level": 2,
+      "grant_every_levels": 2,
+      "grant_every_min_level": 4
     },
     "level_cases": [
       {
@@ -16,7 +18,7 @@
       {
         "level": 2,
         "expected_unspent_stat_points": 3,
-        "expected_unspent_skill_points": 1
+        "expected_unspent_skill_points": 2
       },
       {
         "level": 3,
@@ -26,7 +28,7 @@
       {
         "level": 6,
         "expected_unspent_stat_points": 15,
-        "expected_unspent_skill_points": 3
+        "expected_unspent_skill_points": 4
       }
     ]
   },
@@ -81,7 +83,7 @@
       "column": 1
     },
     "kind": "projectile_attack",
-    "max_rank": 5,
+    "max_rank": 10,
     "requirements": {
       "level": 1,
       "level_per_rank": 1,
@@ -129,16 +131,16 @@
         "rank": 2,
         "mana_cost": 1,
         "damage": {
-          "min_percent": 350,
-          "max_percent": 250
+          "min_percent": 374,
+          "max_percent": 268
         }
       },
       {
         "rank": 5,
         "mana_cost": 1,
         "damage": {
-          "min_percent": 500,
-          "max_percent": 325
+          "min_percent": 608,
+          "max_percent": 406
         }
       }
     ]

@@ -37,7 +37,7 @@
       "affordable": true,
       "service_id": "mercenary",
       "hired_count": 1,
-      "selected_stance": "assist",
+      "selected_stance": "defend",
       "status_contains": "Hired",
       "companion_bar_count": 1,
       "companion_icon_kind": "mercenary",

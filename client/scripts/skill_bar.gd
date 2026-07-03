@@ -315,7 +315,7 @@ func _mana_cost() -> int:
 	var def := SkillRulesLoader.skill_definition(_current_skill_id())
 	var cost: Dictionary = def.get("cost", {})
 	var mana: Dictionary = cost.get("mana", {})
-	return maxi(0, int(mana.get("base", 0)) + int(mana.get("per_rank", 0)) * maxi(0, _rank - 1))
+	return maxi(0, SkillRankScaling.rank_scaled_int(int(mana.get("base", 0)), int(mana.get("per_rank", 0)), _rank, SkillRankScaling.progression_mana_curve()))
 
 
 func _flash(color: Color) -> void:

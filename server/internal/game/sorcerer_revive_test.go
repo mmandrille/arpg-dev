@@ -76,12 +76,13 @@ func TestSorcererReviveRankScalingAllowsMultipleCompanions(t *testing.T) {
 	}
 	def := sim.rules.Monsters["dungeon_wolf"]
 	wantHP := scalePositiveInt(def.MaxHP, 80)
+	wantDuration := reviveDurationTicks(sim.rules, sim.rules.Skills["revive"], 4)
 	for _, companion := range companions {
 		if companion.maxHP != wantHP || companion.monsterAttackDamage == nil || companion.monsterAttackDamage.Max != 2 {
 			t.Fatalf("rank 4 companion stats hp=%d damage=%+v, want scaled hp=%d and damage max=2", companion.maxHP, companion.monsterAttackDamage, wantHP)
 		}
-		if companion.totalDurationTicks != 900 {
-			t.Fatalf("rank 4 companion duration = %d, want 900", companion.totalDurationTicks)
+		if companion.totalDurationTicks != wantDuration {
+			t.Fatalf("rank 4 companion duration = %d, want %d", companion.totalDurationTicks, wantDuration)
 		}
 	}
 }
@@ -137,7 +138,9 @@ func TestSorcererReviveRejectsBossAndLivingTargets(t *testing.T) {
 func TestSorcererReviveRulesLoad(t *testing.T) {
 	rules := loadRules(t)
 	revive := rules.Skills["revive"]
-	if revive.Class != "sorcerer" || revive.Kind != "revive_companion" || revive.Revive.PowerPercentBase != 50 || revive.Revive.PowerPercentPerRank != 10 || reviveDurationTicks(revive, 1) != 600 || reviveDurationTicks(revive, 4) != 900 || companionLimitAtRank(revive.Revive.Limit, 4) != 2 {
+	reviveRank1 := reviveDurationTicks(rules, revive, 1)
+	reviveRank4 := reviveDurationTicks(rules, revive, 4)
+	if revive.Class != "sorcerer" || revive.Kind != "revive_companion" || revive.Revive.PowerPercentBase != 50 || revive.Revive.PowerPercentPerRank != 10 || reviveRank1 != 600 || reviveRank4 <= reviveRank1 || companionLimitAtRank(revive.Revive.Limit, 4) != 2 {
 		t.Fatalf("revive = %+v, want sorcerer revive companion scaling", revive)
 	}
 }

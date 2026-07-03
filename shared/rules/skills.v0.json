@@ -10,7 +10,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -61,7 +61,7 @@
         "column": 2
       },
       "kind": "mobility",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -101,7 +101,7 @@
         "column": 1
       },
       "kind": "cold_projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -160,7 +160,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2
       },
-      "name_key": "skill.ice_shard.name"
+      "name_key": "skill.ice_shard.name",
+      "synergies": [
+        {
+          "source_skill_id": "magic_bolt",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
     },
     "lightning": {
       "name": "Lightning",
@@ -171,7 +178,7 @@
         "column": 2
       },
       "kind": "chain_projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -223,7 +230,14 @@
         "multiplier": 2,
         "flat_ticks": 10
       },
-      "name_key": "skill.lightning.name"
+      "name_key": "skill.lightning.name",
+      "synergies": [
+        {
+          "source_skill_id": "magic_bolt",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "arcane_barrage": {
       "name": "Arcane Barrage",
@@ -234,7 +248,7 @@
         "column": 2
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -284,7 +298,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3
       },
-      "name_key": "skill.arcane_barrage.name"
+      "name_key": "skill.arcane_barrage.name",
+      "synergies": [
+        {
+          "source_skill_id": "lightning",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "revive": {
       "name": "Revive",
@@ -294,7 +315,7 @@
         "column": 2
       },
       "kind": "revive_companion",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -333,7 +354,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 4
       },
-      "name_key": "skill.revive.name"
+      "name_key": "skill.revive.name",
+      "synergies": [
+        {
+          "source_skill_id": "magic_bolt",
+          "modifier": "revive_power_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
     },
     "cleave": {
       "name": "Cleave",
@@ -343,7 +371,7 @@
         "column": 1
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -385,7 +413,7 @@
         "column": 2
       },
       "kind": "self_buff",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 1,
@@ -434,7 +462,7 @@
         "column": 2
       },
       "kind": "mobility",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -484,7 +512,7 @@
         "column": 1
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -521,7 +549,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3
       },
-      "name_key": "skill.earthbreaker.name"
+      "name_key": "skill.earthbreaker.name",
+      "synergies": [
+        {
+          "source_skill_id": "cleave",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 3
+        }
+      ]
     },
     "heal": {
       "name": "Heal",
@@ -531,7 +566,7 @@
         "column": 3
       },
       "kind": "area_heal",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target_area",
       "requirements": {
         "level": 1,
@@ -583,7 +618,7 @@
       },
       "kind": "mobility",
       "damage_type": "force",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -630,7 +665,7 @@
         "column": 4
       },
       "kind": "area_stat_buff",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self_or_ally_area",
       "requirements": {
         "level": 1,
@@ -689,7 +724,7 @@
         "column": 4
       },
       "kind": "area_stat_buff",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self_or_ally_area",
       "requirements": {
         "level": 1,
@@ -731,7 +766,14 @@
         "multiplier": 1,
         "flat_ticks": 590
       },
-      "name_key": "skill.sanctuary.name"
+      "name_key": "skill.sanctuary.name",
+      "synergies": [
+        {
+          "source_skill_id": "holy_shield",
+          "modifier": "buff_duration_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
     },
     "poison_stab": {
       "name": "Poison Stab",
@@ -742,7 +784,7 @@
         "column": 1
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -791,7 +833,7 @@
         "column": 2
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -842,7 +884,7 @@
         "column": 3
       },
       "kind": "mobility",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -881,7 +923,7 @@
         "column": 1
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -916,7 +958,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 1.8
       },
-      "name_key": "skill.shadow_flurry.name"
+      "name_key": "skill.shadow_flurry.name",
+      "synergies": [
+        {
+          "source_skill_id": "dash",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 3
+        }
+      ]
     },
     "executioner": {
       "name": "Executioner",
@@ -926,7 +975,7 @@
         "column": 2
       },
       "kind": "passive_execute",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 1,
@@ -958,7 +1007,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.executioner.name"
+      "name_key": "skill.executioner.name",
+      "synergies": [
+        {
+          "source_skill_id": "poison_stab",
+          "modifier": "execute_threshold_percent",
+          "percent_per_source_rank": 3
+        }
+      ]
     },
     "piercing_shot": {
       "name": "Piercing Shot",
@@ -969,7 +1025,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -1019,7 +1075,7 @@
         "column": 2
       },
       "kind": "mobility",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -1064,7 +1120,7 @@
         "column": 2
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -1108,7 +1164,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2.5
       },
-      "name_key": "skill.pinning_shot.name"
+      "name_key": "skill.pinning_shot.name",
+      "synergies": [
+        {
+          "source_skill_id": "piercing_shot",
+          "modifier": "root_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
     },
     "volley": {
       "name": "Volley",
@@ -1119,7 +1182,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 1,
@@ -1163,7 +1226,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3
       },
-      "name_key": "skill.volley.name"
+      "name_key": "skill.volley.name",
+      "synergies": [
+        {
+          "source_skill_id": "piercing_shot",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
     },
     "black_wolf_companion": {
       "name": "Black Wolf Companion",
@@ -1173,7 +1243,7 @@
         "column": 3
       },
       "kind": "summon_companion",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 1,
@@ -1221,7 +1291,7 @@
         "column": 3
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 3,
@@ -1258,7 +1328,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2.5
       },
-      "name_key": "skill.ground_slam.name"
+      "name_key": "skill.ground_slam.name",
+      "synergies": [
+        {
+          "source_skill_id": "cleave",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 3
+        }
+      ]
     },
     "skullcrusher": {
       "name": "Skullcrusher",
@@ -1268,7 +1345,7 @@
         "column": 4
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -1305,7 +1382,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3
       },
-      "name_key": "skill.skullcrusher.name"
+      "name_key": "skill.skullcrusher.name",
+      "synergies": [
+        {
+          "source_skill_id": "ground_slam",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "radiant_bolt": {
       "name": "Radiant Bolt",
@@ -1316,7 +1400,7 @@
         "column": 3
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 3,
@@ -1364,7 +1448,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2.5
       },
-      "name_key": "skill.radiant_bolt.name"
+      "name_key": "skill.radiant_bolt.name",
+      "synergies": [
+        {
+          "source_skill_id": "charge",
+          "modifier": "projectile_range_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
     },
     "consecrated_smite": {
       "name": "Consecrated Smite",
@@ -1375,7 +1466,7 @@
         "column": 1
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -1412,7 +1503,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2.8
       },
-      "name_key": "skill.consecrated_smite.name"
+      "name_key": "skill.consecrated_smite.name",
+      "synergies": [
+        {
+          "source_skill_id": "radiant_bolt",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "fan_of_blades": {
       "name": "Fan of Blades",
@@ -1423,7 +1521,7 @@
         "column": 3
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 3,
@@ -1467,7 +1565,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2
       },
-      "name_key": "skill.fan_of_blades.name"
+      "name_key": "skill.fan_of_blades.name",
+      "synergies": [
+        {
+          "source_skill_id": "poison_stab",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 3
+        }
+      ]
     },
     "eviscerate": {
       "name": "Eviscerate",
@@ -1478,7 +1583,7 @@
         "column": 2
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -1522,7 +1627,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3
       },
-      "name_key": "skill.eviscerate.name"
+      "name_key": "skill.eviscerate.name",
+      "synergies": [
+        {
+          "source_skill_id": "poison_stab",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
     },
     "snipe": {
       "name": "Snipe",
@@ -1533,7 +1645,7 @@
         "column": 3
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 3,
@@ -1573,7 +1685,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3
       },
-      "name_key": "skill.snipe.name"
+      "name_key": "skill.snipe.name",
+      "synergies": [
+        {
+          "source_skill_id": "piercing_shot",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "arcane_focus": {
       "name": "Arcane Focus",
@@ -1650,7 +1769,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.mana_weaving.name"
+      "name_key": "skill.mana_weaving.name",
+      "synergies": [
+        {
+          "source_skill_id": "arcane_focus",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "spell_dynamo": {
       "name": "Spell Dynamo",
@@ -1691,7 +1817,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.spell_dynamo.name"
+      "name_key": "skill.spell_dynamo.name",
+      "synergies": [
+        {
+          "source_skill_id": "mana_weaving",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "iron_hide": {
       "name": "Iron Hide",
@@ -1768,7 +1901,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.battle_tempo.name"
+      "name_key": "skill.battle_tempo.name",
+      "synergies": [
+        {
+          "source_skill_id": "iron_hide",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "crushing_force": {
       "name": "Crushing Force",
@@ -1809,7 +1949,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.crushing_force.name"
+      "name_key": "skill.crushing_force.name",
+      "synergies": [
+        {
+          "source_skill_id": "battle_tempo",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "vigilant_guard": {
       "name": "Vigilant Guard",
@@ -1886,7 +2033,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.faithful_bulwark.name"
+      "name_key": "skill.faithful_bulwark.name",
+      "synergies": [
+        {
+          "source_skill_id": "vigilant_guard",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "consecrated_vitality": {
       "name": "Consecrated Vitality",
@@ -1927,7 +2081,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.consecrated_vitality.name"
+      "name_key": "skill.consecrated_vitality.name",
+      "synergies": [
+        {
+          "source_skill_id": "faithful_bulwark",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "quick_hands": {
       "name": "Quick Hands",
@@ -2004,7 +2165,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.killer_instinct.name"
+      "name_key": "skill.killer_instinct.name",
+      "synergies": [
+        {
+          "source_skill_id": "quick_hands",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "evasive_footwork": {
       "name": "Evasive Footwork",
@@ -2045,7 +2213,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.evasive_footwork.name"
+      "name_key": "skill.evasive_footwork.name",
+      "synergies": [
+        {
+          "source_skill_id": "killer_instinct",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "trail_sense": {
       "name": "Trail Sense",
@@ -2122,7 +2297,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.precision_draw.name"
+      "name_key": "skill.precision_draw.name",
+      "synergies": [
+        {
+          "source_skill_id": "trail_sense",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "deadeye": {
       "name": "Deadeye",
@@ -2163,7 +2345,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.deadeye.name"
+      "name_key": "skill.deadeye.name",
+      "synergies": [
+        {
+          "source_skill_id": "precision_draw",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "arcane_reservoir": {
       "name": "Arcane Reservoir",
@@ -2204,7 +2393,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.arcane_reservoir.name"
+      "name_key": "skill.arcane_reservoir.name",
+      "synergies": [
+        {
+          "source_skill_id": "spell_dynamo",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "unstoppable_heart": {
       "name": "Unstoppable Heart",
@@ -2249,7 +2445,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.unstoppable_heart.name"
+      "name_key": "skill.unstoppable_heart.name",
+      "synergies": [
+        {
+          "source_skill_id": "crushing_force",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "oathbound_resolve": {
       "name": "Oathbound Resolve",
@@ -2294,7 +2497,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.oathbound_resolve.name"
+      "name_key": "skill.oathbound_resolve.name",
+      "synergies": [
+        {
+          "source_skill_id": "consecrated_vitality",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "wildborn_endurance": {
       "name": "Wildborn Endurance",
@@ -2335,7 +2545,14 @@
       "cooldown": {
         "type": "none"
       },
-      "name_key": "skill.wildborn_endurance.name"
+      "name_key": "skill.wildborn_endurance.name",
+      "synergies": [
+        {
+          "source_skill_id": "deadeye",
+          "modifier": "passive_stat_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "rain_of_arrows": {
       "name": "Rain of Arrows",
@@ -2346,7 +2563,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -2390,7 +2607,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3.5
       },
-      "name_key": "skill.rain_of_arrows.name"
+      "name_key": "skill.rain_of_arrows.name",
+      "synergies": [
+        {
+          "source_skill_id": "volley",
+          "modifier": "volley_spread_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
     },
     "explosive_shot": {
       "name": "Explosive Shot",
@@ -2401,7 +2625,7 @@
         "column": 4
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -2441,7 +2665,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3.5
       },
-      "name_key": "skill.explosive_shot.name"
+      "name_key": "skill.explosive_shot.name",
+      "synergies": [
+        {
+          "source_skill_id": "snipe",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "fireball": {
       "name": "Fireball",
@@ -2452,7 +2683,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -2498,7 +2729,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2.5
       },
-      "name_key": "skill.fireball.name"
+      "name_key": "skill.fireball.name",
+      "synergies": [
+        {
+          "source_skill_id": "ice_shard",
+          "modifier": "damage_percent",
+          "percent_per_source_rank": 10
+        }
+      ]
     },
     "energy_ward": {
       "name": "Energy Ward",
@@ -2508,7 +2746,7 @@
         "column": 3
       },
       "kind": "self_buff",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 5,
@@ -2550,7 +2788,14 @@
         "multiplier": 1,
         "flat_ticks": 675
       },
-      "name_key": "skill.energy_ward.name"
+      "name_key": "skill.energy_ward.name",
+      "synergies": [
+        {
+          "source_skill_id": "teleport",
+          "modifier": "buff_duration_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
     },
     "war_cry": {
       "name": "War Cry",
@@ -2560,7 +2805,7 @@
         "column": 4
       },
       "kind": "area_stat_buff",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self_or_ally_area",
       "requirements": {
         "level": 5,
@@ -2607,7 +2852,14 @@
         "multiplier": 1,
         "flat_ticks": 525
       },
-      "name_key": "skill.war_cry.name"
+      "name_key": "skill.war_cry.name",
+      "synergies": [
+        {
+          "source_skill_id": "leap",
+          "modifier": "buff_duration_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
     },
     "hammer_of_light": {
       "name": "Hammer of Light",
@@ -2618,7 +2870,7 @@
         "column": 2
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -2655,7 +2907,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 3
       },
-      "name_key": "skill.hammer_of_light.name"
+      "name_key": "skill.hammer_of_light.name",
+      "synergies": [
+        {
+          "source_skill_id": "charge",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 3
+        }
+      ]
     },
     "smoke_screen": {
       "name": "Smoke Screen",
@@ -2665,7 +2924,7 @@
         "column": 4
       },
       "kind": "area_stat_buff",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self_or_ally_area",
       "requirements": {
         "level": 5,
@@ -2710,7 +2969,14 @@
         "multiplier": 1,
         "flat_ticks": 500
       },
-      "name_key": "skill.smoke_screen.name"
+      "name_key": "skill.smoke_screen.name",
+      "synergies": [
+        {
+          "source_skill_id": "shadowstep",
+          "modifier": "area_radius_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
     },
     "rend": {
       "name": "Rend",
@@ -2721,7 +2987,7 @@
         "column": 3
       },
       "kind": "cone_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -2766,7 +3032,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2.5
       },
-      "name_key": "skill.rend.name"
+      "name_key": "skill.rend.name",
+      "synergies": [
+        {
+          "source_skill_id": "ground_slam",
+          "modifier": "cone_size_percent",
+          "percent_per_source_rank": 3
+        }
+      ]
     },
     "retribution": {
       "name": "Retribution",
@@ -2776,7 +3049,7 @@
         "column": 1
       },
       "kind": "self_buff",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 5,
@@ -2816,7 +3089,14 @@
         "multiplier": 1,
         "flat_ticks": 600
       },
-      "name_key": "skill.retribution.name"
+      "name_key": "skill.retribution.name",
+      "synergies": [
+        {
+          "source_skill_id": "hammer_of_light",
+          "modifier": "buff_duration_percent",
+          "percent_per_source_rank": 5
+        }
+      ]
     },
     "predators_mark": {
       "name": "Predator's Mark",
@@ -2827,7 +3107,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "direction_or_target",
       "requirements": {
         "level": 5,
@@ -2873,7 +3153,14 @@
         "type": "attack_interval_multiplier",
         "multiplier": 2
       },
-      "name_key": "skill.predators_mark.name"
+      "name_key": "skill.predators_mark.name",
+      "synergies": [
+        {
+          "source_skill_id": "eviscerate",
+          "modifier": "mark_duration_percent",
+          "percent_per_source_rank": 8
+        }
+      ]
     },
     "second_wind": {
       "name": "Second Wind",
@@ -2884,7 +3171,7 @@
         "branch": "survival"
       },
       "kind": "survival_autocast",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 10,
@@ -2924,7 +3211,7 @@
         "branch": "survival"
       },
       "kind": "survival_autocast",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 10,
@@ -2963,7 +3250,7 @@
         "branch": "survival"
       },
       "kind": "survival_autocast",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 10,
@@ -3003,7 +3290,7 @@
         "branch": "survival"
       },
       "kind": "survival_autocast",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 10,
@@ -3048,7 +3335,7 @@
         "branch": "survival"
       },
       "kind": "survival_autocast",
-      "max_rank": 5,
+      "max_rank": 10,
       "targeting": "self",
       "requirements": {
         "level": 10,

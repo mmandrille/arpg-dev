@@ -103,7 +103,7 @@
         "current_level_xp": 0,
         "next_level_xp": 32,
         "unspent_stat_points": 3,
-        "unspent_skill_points": 1,
+        "unspent_skill_points": 2,
         "base_stats": {
           "str": 6,
           "dex": 5,
@@ -185,7 +185,7 @@
         "current_level_xp": 0,
         "next_level_xp": 32,
         "unspent_stat_points": 2,
-        "unspent_skill_points": 1,
+        "unspent_skill_points": 2,
         "base_stats": {
           "str": 6,
           "dex": 5,
@@ -225,7 +225,7 @@
         "current_level_xp": 0,
         "next_level_xp": 32,
         "unspent_stat_points": 3,
-        "unspent_skill_points": 1,
+        "unspent_skill_points": 2,
         "base_stats": {
           "str": 11,
           "dex": 5,
@@ -265,7 +265,7 @@
         "current_level_xp": 0,
         "next_level_xp": 32,
         "unspent_stat_points": 3,
-        "unspent_skill_points": 1,
+        "unspent_skill_points": 2,
         "base_stats": {
           "str": 6,
           "dex": 100,

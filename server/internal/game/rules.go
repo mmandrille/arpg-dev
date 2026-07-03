@@ -179,6 +179,8 @@ type CharacterProgressionRules struct {
 	Classes                map[string]CharacterClassDef
 	PointsPerLevel         int
 	SkillPoints            SkillPointRules
+	SkillRankScaling       RankScalingCurve
+	SkillManaScaling       RankScalingCurve
 	LevelCap               int
 	XPThresholds           map[int]int
 	DerivedStats           map[string]LinearStatFormula
@@ -195,9 +197,11 @@ type CharacterClassDef struct {
 
 // SkillPointRules controls deterministic skill-point grants on level-up.
 type SkillPointRules struct {
-	PointsPerGrant   int `json:"points_per_grant"`
-	GrantEveryLevels int `json:"grant_every_levels"`
-	FirstGrantLevel  int `json:"first_grant_level"`
+	PointsPerGrant     int `json:"points_per_grant"`
+	GrantEveryLevels   int `json:"grant_every_levels"`
+	FirstGrantLevel    int `json:"first_grant_level"`
+	SecondGrantLevel   int `json:"second_grant_level"`
+	GrantEveryMinLevel int `json:"grant_every_min_level"`
 }
 
 type LinearStatFormula struct {
@@ -943,7 +947,9 @@ func LoadRules(dir string) (*Rules, error) {
 		BaseStats       BaseStatsView                `json:"base_stats"`
 		Classes         map[string]CharacterClassDef `json:"classes"`
 		PointsPerLevel  int                          `json:"points_per_level"`
-		SkillPoints     SkillPointRules              `json:"skill_points"`
+		SkillPoints        SkillPointRules              `json:"skill_points"`
+		SkillRankScaling   RankScalingCurve             `json:"skill_rank_scaling"`
+		SkillManaScaling   RankScalingCurve             `json:"skill_mana_scaling"`
 		LevelCap        int                          `json:"level_cap"`
 		ExperienceCurve struct {
 			Type   string `json:"type"`
@@ -1041,6 +1047,8 @@ func LoadRules(dir string) (*Rules, error) {
 		Classes:              progression.Classes,
 		PointsPerLevel:       progression.PointsPerLevel,
 		SkillPoints:          progression.SkillPoints,
+		SkillRankScaling:     progression.SkillRankScaling,
+		SkillManaScaling:     progression.SkillManaScaling,
 		LevelCap:             progression.LevelCap,
 		XPThresholds:         thresholds,
 		DerivedStats:         progression.DerivedStats,

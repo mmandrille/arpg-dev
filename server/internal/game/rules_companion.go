@@ -109,28 +109,40 @@ func validateCompanionLimit(label string, limit SkillCompanionLimitDef) error {
 	return nil
 }
 
-func revivePowerPercent(def SkillDef, rank int) int {
+func revivePowerPercent(r *Rules, def SkillDef, rank int) int {
 	if rank < 1 {
 		rank = 1
 	}
-	return def.Revive.PowerPercentBase + def.Revive.PowerPercentPerRank*(rank-1)
+	if r == nil {
+		return 0
+	}
+
+	return r.rankScaledInt(def.Revive.PowerPercentBase, def.Revive.PowerPercentPerRank, rank)
 }
 
-func companionHeroStatPercent(def SkillDef, rank int) int {
+func companionHeroStatPercent(r *Rules, def SkillDef, rank int) int {
 	if rank < 1 {
 		rank = 1
 	}
-	return def.Companion.HeroStatPercentBase + def.Companion.HeroStatPercentPerRank*(rank-1)
+	if r == nil {
+		return 0
+	}
+
+	return r.rankScaledInt(def.Companion.HeroStatPercentBase, def.Companion.HeroStatPercentPerRank, rank)
 }
 
-func reviveDurationTicks(def SkillDef, rank int) int {
+func reviveDurationTicks(r *Rules, def SkillDef, rank int) int {
 	if rank < 1 {
 		rank = 1
 	}
-	seconds := def.Revive.DurationSecondsBase + def.Revive.DurationSecondsPerRank*(rank-1)
+	if r == nil {
+		return 0
+	}
+	seconds := r.rankScaledInt(def.Revive.DurationSecondsBase, def.Revive.DurationSecondsPerRank, rank)
 	if seconds < 1 {
 		seconds = 1
 	}
+
 	return seconds * 10
 }
 

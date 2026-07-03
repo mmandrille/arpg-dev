@@ -15,6 +15,7 @@ func TestRangedMonsterProjectileTargetsEngagedCompanion(t *testing.T) {
 	if player == nil || archer == nil || companion == nil {
 		t.Fatalf("setup player=%+v archer=%+v companion=%+v", player, archer, companion)
 	}
+	companion.companionStance = CompanionStanceAssist
 
 	var spawn TickResult
 	var projectile *EntityView

@@ -11,7 +11,7 @@ func TestLeapObstacleCrossingIgnoresWaterAndHoles(t *testing.T) {
 		t.Fatal("water/hole lab position is not blocked for ordinary player movement")
 	}
 
-	landed := sim.resolveSkillMobilityEndpoint(player.pos, Vec2{X: 1}, mobilityRange(leap, 1), leap.Mobility)
+	landed := sim.resolveSkillMobilityEndpoint(player.pos, Vec2{X: 1}, mobilityRange(sim.rules, leap, 1), leap.Mobility)
 	if landed.X <= 5.6 {
 		t.Fatalf("Leap landed at %+v, want beyond water/hole strip", landed)
 	}
@@ -42,7 +42,7 @@ func TestLeapObstacleCrossingKeepsNormalWallsHardBlocked(t *testing.T) {
 		{pos: Vec2{X: 4, Y: 5}, size: Vec2{X: 1, Y: 6}, kind: obstacleKindWall},
 	})
 
-	landed := sim.resolveSkillMobilityEndpoint(player.pos, Vec2{X: 1}, mobilityRange(leap, 1), leap.Mobility)
+	landed := sim.resolveSkillMobilityEndpoint(player.pos, Vec2{X: 1}, mobilityRange(sim.rules, leap, 1), leap.Mobility)
 	if landed.X >= 3.25 {
 		t.Fatalf("Leap crossed hard wall and landed at %+v", landed)
 	}

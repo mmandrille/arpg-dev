@@ -169,8 +169,7 @@ func TestMercenaryRangedCompanionUsesProjectile(t *testing.T) {
 
 func TestCharacterMercenaryScenarioSeedDamagesMonster(t *testing.T) {
 	sim, board := newMercenaryHiringSim(t, "v403_character_mercenary_hire")
-	player := sim.activeLevel().entities[sim.playerID]
-	player.pos = Vec2{X: 2, Y: 5}
+	placePlayerWithinMercenaryLabDefendRadius(sim)
 	sim.progression.Level = 20
 	cost := sim.mercenaryHireCostGold()
 	sim.gold = cost
@@ -187,6 +186,7 @@ func TestCharacterMercenaryScenarioSeedDamagesMonster(t *testing.T) {
 	sim.savePlayer(sim.defaultPlayer())
 	assertAck(t, sim.Tick([]Input{mercenaryHireCharacterInput(board, "hire_seed", "char_seed")}), "hire_seed")
 	mercenary := hiredMercenary(sim)
+	setCompanionAssistStance(mercenary)
 	var damaged bool
 	for i := 0; i < 120; i++ {
 		for _, res := range sim.TickResults(nil) {
@@ -204,8 +204,7 @@ func TestCharacterMercenaryScenarioSeedDamagesMonster(t *testing.T) {
 
 func TestCharacterMercenaryRealtimeShapedTicksEmitCombat(t *testing.T) {
 	sim, board := newMercenaryHiringSim(t, "v404_character_merc_realtime")
-	player := sim.activeLevel().entities[sim.playerID]
-	player.pos = Vec2{X: 2, Y: 5}
+	placePlayerWithinMercenaryLabDefendRadius(sim)
 	sim.progression.Level = 20
 	cost := sim.mercenaryHireCostGold()
 	sim.gold = cost
@@ -218,6 +217,7 @@ func TestCharacterMercenaryRealtimeShapedTicksEmitCombat(t *testing.T) {
 	results := sim.TickResults([]Input{mercenaryHireCharacterInput(board, "hire_rt", "char_rt")})
 	assertAckResult(t, results, "hire_rt")
 	mercenary := hiredMercenary(sim)
+	setCompanionAssistStance(mercenary)
 	if mercenary == nil {
 		t.Fatal("missing hired mercenary")
 	}
@@ -251,8 +251,7 @@ func assertAckResult(t *testing.T, results []TickResult, messageID string) {
 
 func TestCharacterMercenaryMovesFromPlayerAtWorldSpawn(t *testing.T) {
 	sim, board := newMercenaryHiringSim(t, "v404_character_merc_world_spawn")
-	player := sim.activeLevel().entities[sim.playerID]
-	player.pos = Vec2{X: 2, Y: 5}
+	placePlayerWithinMercenaryLabDefendRadius(sim)
 	sim.progression.Level = 20
 	cost := sim.mercenaryHireCostGold()
 	sim.gold = cost
@@ -264,6 +263,7 @@ func TestCharacterMercenaryMovesFromPlayerAtWorldSpawn(t *testing.T) {
 	sim.savePlayer(sim.defaultPlayer())
 	assertAck(t, sim.Tick([]Input{mercenaryHireCharacterInput(board, "hire_spawn", "char_spawn")}), "hire_spawn")
 	mercenary := hiredMercenary(sim)
+	setCompanionAssistStance(mercenary)
 	start := mercenary.pos
 	for i := 0; i < 120; i++ {
 		sim.Tick(nil)
@@ -440,5 +440,20 @@ func mustMercenaryBowItem(t *testing.T, instanceID string) PersistedItem {
 		Slot:        mainHandSlot,
 		Equipped:    true,
 		RolledStats: raw,
+	}
+}
+
+func placePlayerWithinMercenaryLabDefendRadius(sim *Sim) {
+	player := sim.activeLevel().entities[sim.playerID]
+	if player == nil {
+		return
+	}
+	// mercenary_hiring_lab soft target is at x=7.5; defend stance requires owner within assist radius.
+	player.pos = Vec2{X: 3, Y: 5}
+}
+
+func setCompanionAssistStance(companion *entity) {
+	if companion != nil {
+		companion.companionStance = CompanionStanceAssist
 	}
 }

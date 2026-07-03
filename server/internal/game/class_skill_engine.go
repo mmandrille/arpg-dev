@@ -20,12 +20,15 @@ func (s *Sim) trySkillReflectOnPlayerBlock(player *entity, attacker *entity, dam
 	}
 }
 
-func skillBleedValues(bleed SkillBleedDef, rank int) (damagePercentMaxHP, durationTicks, intervalTicks int) {
+func skillBleedValues(r *Rules, bleed SkillBleedDef, rank int) (damagePercentMaxHP, durationTicks, intervalTicks int) {
 	if rank < 1 {
 		rank = 1
 	}
-	damagePercentMaxHP = bleed.DamagePercentMaxHP + bleed.DamagePercentMaxHPPerRank*(rank-1)
-	durationTicks = bleed.DurationTicks + bleed.DurationTicksPerRank*(rank-1)
+	if r == nil {
+		return 0, 0, 10
+	}
+	damagePercentMaxHP = r.rankScaledInt(bleed.DamagePercentMaxHP, bleed.DamagePercentMaxHPPerRank, rank)
+	durationTicks = r.rankScaledInt(bleed.DurationTicks, bleed.DurationTicksPerRank, rank)
 	intervalTicks = bleed.IntervalTicks
 	if intervalTicks <= 0 {
 		intervalTicks = 10
@@ -40,11 +43,14 @@ func skillBleedValues(bleed SkillBleedDef, rank int) (damagePercentMaxHP, durati
 	return damagePercentMaxHP, durationTicks, intervalTicks
 }
 
-func skillMarkValues(mark SkillMarkDef, rank int) (damageBonusPercent, durationTicks int) {
+func skillMarkValues(r *Rules, mark SkillMarkDef, rank int) (damageBonusPercent, durationTicks int) {
 	if rank < 1 {
 		rank = 1
 	}
-	damageBonusPercent = mark.DamageBonusPercent + mark.DamageBonusPercentPerRank*(rank-1)
+	if r == nil {
+		return 0, 0
+	}
+	damageBonusPercent = r.rankScaledInt(mark.DamageBonusPercent, mark.DamageBonusPercentPerRank, rank)
 	durationTicks = mark.DurationTicks
 	if damageBonusPercent < 1 {
 		damageBonusPercent = 1
@@ -60,7 +66,7 @@ func (s *Sim) startSkillBleed(player *entity, target *entity, skillID string, bl
 	if player == nil || target == nil || target.kind != monsterEntity || target.hp <= 0 || bleed.DurationTicks <= 0 {
 		return
 	}
-	damagePercentMaxHP, durationTicks, intervalTicks := skillBleedValues(bleed, rank)
+	damagePercentMaxHP, durationTicks, intervalTicks := skillBleedValues(s.rules, bleed, rank)
 	effectID := bleed.EffectID
 	if effectID == "" {
 		effectID = "bleed"
@@ -100,7 +106,7 @@ func (s *Sim) startSkillMark(player *entity, target *entity, skillID string, mar
 	if player == nil || target == nil || target.kind != monsterEntity || target.hp <= 0 || mark.DurationTicks <= 0 {
 		return
 	}
-	damageBonusPercent, durationTicks := skillMarkValues(mark, rank)
+	damageBonusPercent, durationTicks := skillMarkValues(s.rules, mark, rank)
 	if s.rogueMarks == nil {
 		s.rogueMarks = make(map[uint64]rogueMarkState)
 	}

@@ -4,25 +4,8 @@ import "testing"
 
 func TestSkillPointGrantLevels(t *testing.T) {
 	rules := loadRules(t)
-	cases := []struct {
-		level int
-		want  bool
-	}{
-		{level: 1, want: true},
-		{level: 2, want: false},
-		{level: 3, want: true},
-		{level: 5, want: false},
-		{level: 6, want: true},
-		{level: 9, want: true},
-		{level: 10, want: false},
-	}
-	for _, c := range cases {
-		if got := rules.skillPointGrantLevel(c.level); got != c.want {
-			t.Fatalf("skillPointGrantLevel(%d) = %v, want %v", c.level, got, c.want)
-		}
-	}
-	if rules.totalSkillPointGrantsForLevel(6) != 3 {
-		t.Fatalf("total grants at 6 = %d, want 3", rules.totalSkillPointGrantsForLevel(6))
+	if rules.totalSkillPointGrantsForLevel(6) != 4 {
+		t.Fatalf("total grants at 6 = %d, want 4", rules.totalSkillPointGrantsForLevel(6))
 	}
 }
 

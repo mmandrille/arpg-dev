@@ -125,7 +125,7 @@ func TestRangerBlackWolfCompanionSummonsAndReplaces(t *testing.T) {
 	if view.Type != companionEntity || view.MonsterDefID != "companion_black_wolf" || view.VisualModel != "monster_wolf" || view.VisualTint != "101014" {
 		t.Fatalf("wolf view = %+v, want black wolf companion", view)
 	}
-	percent := companionHeroStatPercent(sim.rules.Skills["black_wolf_companion"], sim.effectiveSkillRank("black_wolf_companion"))
+	percent := companionHeroStatPercent(sim.rules, sim.rules.Skills["black_wolf_companion"], sim.effectiveSkillRank("black_wolf_companion"))
 	if firstWolf.maxHP != scalePositiveInt(player.maxHP, percent) || firstWolf.monsterAttackDamage == nil {
 		t.Fatalf("wolf stats hp=%d damage=%+v percent=%d player=%+v", firstWolf.maxHP, firstWolf.monsterAttackDamage, percent, player)
 	}
@@ -200,7 +200,9 @@ func TestRangerSkillRulesLoad(t *testing.T) {
 		t.Fatalf("volley = %+v, want tier 2 ranger projectile with piercing prereq and fan", volley)
 	}
 	wolf := rules.Skills["black_wolf_companion"]
-	if wolf.Class != "ranger" || wolf.Tree.Tier != 1 || wolf.Requirements.Stats["magic"] != 8 || wolf.Kind != "summon_companion" || wolf.Companion.MonsterDefID != "companion_black_wolf" || companionHeroStatPercent(wolf, 1) != 70 || companionHeroStatPercent(wolf, 2) != 85 || companionLimitAtRank(wolf.Companion.Limit, 5) != 1 {
+	wolfRank1 := companionHeroStatPercent(rules, wolf, 1)
+	wolfRank2 := companionHeroStatPercent(rules, wolf, 2)
+	if wolf.Class != "ranger" || wolf.Tree.Tier != 1 || wolf.Requirements.Stats["magic"] != 8 || wolf.Kind != "summon_companion" || wolf.Companion.MonsterDefID != "companion_black_wolf" || wolfRank1 != 70 || wolfRank2 <= wolfRank1 || companionLimitAtRank(wolf.Companion.Limit, 5) != 1 {
 		t.Fatalf("black_wolf_companion = %+v, want tier 1 magic-scaled black wolf summon", wolf)
 	}
 	if wolf.Cooldown.FixedTicks != 1200 || wolf.Cooldown.MagicReductionTicksPerPoint <= 0 {

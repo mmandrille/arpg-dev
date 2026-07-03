@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-03 (v416 per-skill-affix-rolls)
+Last updated: 2026-07-03 (v417 skill-rank-scaling-and-pacing)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-03 (v416 per-skill-affix-rolls)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v416 — per-skill-affix-rolls |
+| **Latest completed slice** | v417 — skill-rank-scaling-and-pacing |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-03 — autoloop batch CI pending |
+| **CI gate** | 2026-07-03 — green (`make ci`) |
 | **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v408 — [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md) (2026-07-02; official cadence) |
 | **Next engineering review** | ~v418 milestone |

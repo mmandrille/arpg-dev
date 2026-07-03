@@ -88,4 +88,4 @@ static func passive_stat_label(stat: String) -> String:
 
 
 static func _ranked_stat_value(base: int, per_rank: int, rank: int) -> int:
-	return maxi(0, base + per_rank * maxi(0, rank - 1))
+	return SkillRankScaling.rank_scaled_int(base, per_rank, rank, SkillRankScaling.progression_rank_curve())

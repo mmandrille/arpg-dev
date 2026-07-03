@@ -33,7 +33,7 @@
       "action": "assert_skill_progression",
       "skill_id": "magic_bolt",
       "rank": 4,
-      "max_rank": 5,
+      "max_rank": 10,
       "can_spend": false
     }
   ],

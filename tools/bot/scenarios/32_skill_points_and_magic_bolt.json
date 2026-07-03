@@ -25,7 +25,7 @@
     },
     {
       "action": "assert_skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 4,
       "skill_id": "magic_bolt",
       "rank": 0,
       "max_rank": "from_rules",
@@ -35,7 +35,7 @@
       "action": "allocate_skill_point",
       "skill_id": "magic_bolt",
       "expect_skill_progression": {
-        "unspent_skill_points": 1,
+        "unspent_skill_points": 3,
         "skill_id": "magic_bolt",
         "rank": 1,
         "max_rank": "from_rules",
@@ -177,7 +177,7 @@
         },
         {
           "type": "skill_progression",
-          "unspent_skill_points": 1,
+          "unspent_skill_points": 3,
           "skill_id": "magic_bolt",
           "rank": 1,
           "max_rank": "from_rules",

@@ -234,4 +234,5 @@ client/ws_reconnect_proof.json	ws_reconnect_proof	godot_client	extended	contract
 119_polearm_archetype_lab.json	polearm_archetype_lab	protocol	extended	contract	0	0		lab loot + debug_progression; spear hit at distance 2.0
 114_class_specialist_gear_lab.json	class_specialist_gear_lab	protocol	extended	contract	0	0		lab loot + equip; no navigation setup
 skill_level_affix_lab.json	skill_level_affix_lab	protocol	extended	contract	0	0		lab loot + equip; no navigation setup
+skill_rank_scaling_lab.json	skill_rank_scaling_lab	protocol	extended	contract	0	0		lab debug progression; no navigation setup
 tier4_passive_proof.json	tier4_passive_proof	protocol	extended	contract	0	0		lab debug_progression; no navigation setup

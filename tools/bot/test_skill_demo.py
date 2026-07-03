@@ -11,7 +11,7 @@ def test_skill_demo_entries_cover_current_skill_kinds() -> None:
     assert entries["magic_bolt"].category == "attack"
     assert entries["magic_bolt"].class_id == "sorcerer"
     assert entries["magic_bolt"].icon_label == "M"
-    assert entries["magic_bolt"].rank_targets == [1, 5]
+    assert entries["magic_bolt"].rank_targets == [1, 10]
 
     assert entries["lightning"].category == "attack"
     assert entries["lightning"].class_id == "sorcerer"
@@ -59,7 +59,7 @@ def test_single_skill_demo_entry_has_display_metadata() -> None:
 
     assert entry.name == "Holy Shield"
     assert entry.kind == "area_stat_buff"
-    assert entry.max_rank == 5
+    assert entry.max_rank == 10
     assert entry.targeting == "self_or_ally_area"
     assert entry.icon_color == "#f0c23d"
     assert entry.icon_accent == "#fff7b0"

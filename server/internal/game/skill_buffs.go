@@ -8,7 +8,7 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 	}
 	for _, effect := range def.Effects {
 		if effect.Type == "reflect_on_block_buff" {
-			percent := skillEffectPercent(effect, rank)
+			percent := skillEffectPercent(s.rules,effect, rank)
 			effectID := effect.EffectID
 			if effectID == "" {
 				effectID = skillID
@@ -40,7 +40,7 @@ func (s *Sim) applySkillBuff(player *entity, skillID string, def SkillDef, rank 
 		if effect.Type != "stat_percent_buff" {
 			continue
 		}
-		percent := skillEffectPercent(effect, rank)
+		percent := skillEffectPercent(s.rules,effect, rank)
 		scale := 1.0
 		if effect.VisualScale {
 			scale += float64(percent) / 100.0
@@ -82,7 +82,7 @@ func (s *Sim) areaStatBuffApplications(player *entity, def SkillDef, rank int, c
 		}
 		percent := 0
 		if effect.Type == "area_stat_percent_buff" {
-			percent = s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank))
+			percent = s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(s.rules,effect, rank))
 		}
 		targets := s.healSkillTargets(player.pos, effect, player.id, s.scaleSkillRadiusForMagic(def, rank, effect))
 		for _, target := range targets {

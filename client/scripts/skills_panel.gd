@@ -210,7 +210,7 @@ static func _static_ranked_requirement_value(base: int, per_rank: int, rank: int
 
 
 static func _static_ranked_stat_value(base: int, per_rank: int, rank: int) -> int:
-	return base + per_rank * maxi(0, rank - 1)
+	return SkillRankScaling.rank_scaled_int(base, per_rank, rank, SkillRankScaling.progression_rank_curve())
 
 
 static func _static_effect_label(effect: Dictionary) -> String:
@@ -245,7 +245,7 @@ static func _static_stat_label(stat: String) -> String:
 static func _static_skill_mana_cost(def: Dictionary, rank: int) -> int:
 	var cost: Dictionary = def.get("cost", {})
 	var mana: Dictionary = cost.get("mana", {})
-	return maxi(0, int(mana.get("base", 0)) + int(mana.get("per_rank", 0)) * maxi(0, rank - 1))
+	return SkillRankScaling.rank_scaled_int(int(mana.get("base", 0)), int(mana.get("per_rank", 0)), rank, SkillRankScaling.progression_mana_curve())
 
 
 static func _static_skill_cooldown_text(def: Dictionary) -> String:

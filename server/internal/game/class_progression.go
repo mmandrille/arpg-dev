@@ -3,12 +3,28 @@ package game
 // skillPointGrantLevel reports whether a character earns a skill point when reaching level.
 func (r *Rules) skillPointGrantLevel(level int) bool {
 	cadence := r.CharacterProgression.SkillPoints
-	if cadence.PointsPerGrant <= 0 || cadence.GrantEveryLevels <= 0 || level < cadence.FirstGrantLevel {
+	if cadence.PointsPerGrant <= 0 || level < cadence.FirstGrantLevel {
 		return false
 	}
 
 	if level == cadence.FirstGrantLevel {
 		return true
+	}
+
+	if cadence.SecondGrantLevel > 0 && level == cadence.SecondGrantLevel {
+		return true
+	}
+
+	if cadence.GrantEveryLevels <= 0 {
+		return false
+	}
+
+	minLevel := cadence.GrantEveryMinLevel
+	if minLevel <= 0 {
+		minLevel = cadence.GrantEveryLevels
+	}
+	if level < minLevel {
+		return false
 	}
 
 	return level%cadence.GrantEveryLevels == 0

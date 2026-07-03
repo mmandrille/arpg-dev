@@ -2,29 +2,28 @@ package game
 
 import "math"
 
-func absoluteSkillDamageRange(def SkillDef, rank int) DamageRange {
+func absoluteSkillDamageRange(r *Rules, def SkillDef, rank int) DamageRange {
 	if rank < 1 {
 		rank = 1
 	}
-	minDamage := def.Damage.MinBase + def.Damage.MinPerRank*(rank-1)
-	maxDamage := def.Damage.MaxBase + def.Damage.MaxPerRank*(rank-1)
-	if minDamage < 0 {
-		minDamage = 0
-	}
+	minDamage := r.rankScaledInt(def.Damage.MinBase, def.Damage.MinPerRank, rank)
+	maxDamage := r.rankScaledInt(def.Damage.MaxBase, def.Damage.MaxPerRank, rank)
 	if maxDamage < minDamage {
 		maxDamage = minDamage
 	}
+
 	return DamageRange{Min: minDamage, Max: maxDamage}
 }
 
-func skillWeaponMultiplierPercent(def SkillDef, rank int, min bool) int {
+func skillWeaponMultiplierPercent(r *Rules, def SkillDef, rank int, min bool) int {
 	if rank < 1 {
 		rank = 1
 	}
 	if min {
-		return def.Damage.MinBase + def.Damage.MinPerRank*(rank-1)
+		return r.rankScaledInt(def.Damage.MinBase, def.Damage.MinPerRank, rank)
 	}
-	return def.Damage.MaxBase + def.Damage.MaxPerRank*(rank-1)
+
+	return r.rankScaledInt(def.Damage.MaxBase, def.Damage.MaxPerRank, rank)
 }
 
 func weaponPercentDamageRange(base DamageRange, minPercent, maxPercent int) DamageRange {
@@ -51,13 +50,13 @@ func weaponPercentDamageRange(base DamageRange, minPercent, maxPercent int) Dama
 func (s *Sim) skillDamageRange(def SkillDef, rank int) DamageRange {
 	switch def.Damage.Type {
 	case "", "rank_linear_range":
-		return absoluteSkillDamageRange(def, rank)
+		return absoluteSkillDamageRange(s.rules, def, rank)
 	case "weapon_multiplier_range":
 		base := s.resolvePlayerAttackDamage()
 		return weaponPercentDamageRange(
 			base,
-			skillWeaponMultiplierPercent(def, rank, true),
-			skillWeaponMultiplierPercent(def, rank, false),
+			skillWeaponMultiplierPercent(s.rules, def, rank, true),
+			skillWeaponMultiplierPercent(s.rules, def, rank, false),
 		)
 	default:
 		return DamageRange{}

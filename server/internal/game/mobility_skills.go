@@ -2,11 +2,15 @@ package game
 
 import "math"
 
-func mobilityRange(def SkillDef, rank int) float64 {
+func mobilityRange(r *Rules, def SkillDef, rank int) float64 {
 	if rank < 1 {
 		rank = 1
 	}
-	return def.Mobility.RangeBase + def.Mobility.RangePerRank*float64(rank-1)
+	if r == nil {
+		return 0
+	}
+
+	return r.rankScaledFloat(def.Mobility.RangeBase, def.Mobility.RangePerRank, rank)
 }
 
 type playerMobilityBlockKind int
@@ -87,7 +91,7 @@ func (s *Sim) handleMobilitySkillCast(in Input, res *TickResult, player *entity,
 		res.reject(in.MessageID, "use_channel_skill_intent")
 		return
 	}
-	rng := mobilityRange(def, rank)
+	rng := mobilityRange(s.rules, def, rank)
 	dir, targetID, rejectReason := s.skillCastDirectionWithRange(def, in.CastSkill, player, rng)
 	if rejectReason != "" {
 		res.reject(in.MessageID, rejectReason)
@@ -329,7 +333,7 @@ func (s *Sim) applyMobilityImpact(player *entity, impactPos Vec2, skillID string
 	if impactRadius <= 0 {
 		return
 	}
-	damageRange := mobilityDamageRange(s.resolvePlayerAttackDamage(), def, rank)
+	damageRange := mobilityDamageRange(s.rules, s.resolvePlayerAttackDamage(), def, rank)
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		target := s.activeLevel().entities[id]
 		if target == nil || target.kind != monsterEntity || target.hp <= 0 || distance(impactPos, target.pos) > impactRadius {
@@ -362,7 +366,7 @@ func (s *Sim) applyChargeLineImpactOnce(player *entity, start Vec2, end Vec2, di
 	if impactRadius <= 0 {
 		return
 	}
-	damageRange := mobilityDamageRange(s.resolvePlayerAttackDamage(), def, rank)
+	damageRange := mobilityDamageRange(s.rules, s.resolvePlayerAttackDamage(), def, rank)
 	for _, id := range sortedEntityIDs(s.activeLevel().entities) {
 		target := s.activeLevel().entities[id]
 		if target == nil || target.kind != monsterEntity || target.hp <= 0 || distancePointToSegment(target.pos, start, end) > impactRadius {
@@ -433,11 +437,18 @@ func distancePointToSegment(point Vec2, start Vec2, end Vec2) float64 {
 	return distance(point, closest)
 }
 
-func mobilityDamageRange(base DamageRange, def SkillDef, rank int) DamageRange {
-	percent := def.Mobility.DamagePercentBase + def.Mobility.DamagePercentPerRank*max(0, rank-1)
+func mobilityDamageRange(r *Rules, base DamageRange, def SkillDef, rank int) DamageRange {
+	if rank < 1 {
+		rank = 1
+	}
+	if r == nil {
+		return DamageRange{}
+	}
+	percent := r.rankScaledInt(def.Mobility.DamagePercentBase, def.Mobility.DamagePercentPerRank, rank)
 	if percent <= 0 {
 		return DamageRange{}
 	}
+
 	return DamageRange{
 		Min: max(1, int(math.Round(float64(base.Min)*float64(percent)/100.0))),
 		Max: max(1, int(math.Round(float64(base.Max)*float64(percent)/100.0))),

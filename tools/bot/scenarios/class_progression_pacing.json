@@ -2,13 +2,13 @@
   "id": "class_progression_pacing",
   "ci_tier": "extended",
   "world_id": "skill_progression_lab",
-  "seed": "v412_class_progression_pacing",
+  "seed": "v417_class_progression_pacing",
   "character_class": "barbarian",
   "title": "Class progression pacing",
-  "description": "Prove level-6 barbarian earns three skill points and grown STR from class pacing rules.",
+  "description": "Prove level-6 barbarian earns four skill points and grown STR from v417 cadence rules.",
   "debug_progression": {
     "level": 6,
-    "unspent_skill_points": 3,
+    "unspent_skill_points": 4,
     "unspent_stat_points": 15,
     "stats": { "str": 10, "dex": 5, "vit": 5, "magic": 5 }
   },
@@ -21,7 +21,7 @@
     },
     {
       "action": "assert_skill_progression",
-      "unspent_skill_points": 3
+      "unspent_skill_points": 4
     }
   ],
   "assertions": [
@@ -33,7 +33,7 @@
     },
     {
       "type": "skill_progression",
-      "unspent_skill_points": 3
+      "unspent_skill_points": 4
     }
   ]
 }

@@ -94,7 +94,7 @@ func (s *Sim) applySurvivalVitRegen(player *entity, skillID string, effect Skill
 	if totalTicks <= 0 {
 		return
 	}
-	percent := skillEffectPercent(effect, rank)
+	percent := skillEffectPercent(s.rules, effect, rank)
 	regenMultiplier := float64(effect.HealthRegenMultiplierPercent) / 100.0
 	if regenMultiplier <= 0 {
 		regenMultiplier = 1
@@ -117,6 +117,9 @@ func (s *Sim) applySurvivalVitRegen(player *entity, skillID string, effect Skill
 func (s *Sim) applySurvivalManaShield(player *entity, skillID string, effect SkillEffectDef, rank int, corr string, res *TickResult) {
 	totalTicks := effect.DurationTicks
 	manaPerHP := effect.ManaPerHPBase - effect.ManaPerHPPerRank*(rank-1)
+	if manaPerHP < 1 {
+		manaPerHP = 1
+	}
 	if totalTicks <= 0 || manaPerHP <= 0 {
 		return
 	}

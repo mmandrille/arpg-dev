@@ -2313,15 +2313,15 @@ func (s *Sim) baseSkillCooldownTicks(def SkillDef) int {
 	return cooldown
 }
 
-func skillManaCost(def SkillDef, rank int) int {
+func skillManaCost(r *Rules, def SkillDef, rank int) int {
 	if rank < 1 {
 		rank = 1
 	}
-	cost := def.Cost.Mana.Base + def.Cost.Mana.PerRank*(rank-1)
-	if cost < 0 {
+	if r == nil {
 		return 0
 	}
-	return cost
+
+	return r.rankScaledManaCost(def.Cost.Mana.Base, def.Cost.Mana.PerRank, rank)
 }
 
 func (s *Sim) skillCastDirection(def SkillDef, cast *CastSkillIntent, player *entity) (Vec2, uint64, string) {
@@ -2385,15 +2385,15 @@ func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef,
 	return projectile
 }
 
-func skillEffectPercent(effect SkillEffectDef, rank int) int {
+func skillEffectPercent(r *Rules, effect SkillEffectDef, rank int) int {
 	if rank < 1 {
 		rank = 1
 	}
-	percent := effect.PercentBase + effect.PercentPerRank*(rank-1)
-	if percent < 0 {
+	if r == nil {
 		return 0
 	}
-	return percent
+
+	return r.rankScaledInt(effect.PercentBase, effect.PercentPerRank, rank)
 }
 
 func skillCastRange(def SkillDef) float64 {
@@ -2471,7 +2471,7 @@ func (s *Sim) areaHealApplications(player *entity, def SkillDef, rank int, cast 
 		if rejectReason != "" {
 			return nil, rejectReason
 		}
-		percent := s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank))
+		percent := s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(s.rules,effect, rank))
 		targets := s.healSkillTargets(center, effect, player.id, s.scaleSkillRadiusForMagic(def, rank, effect))
 		for _, target := range targets {
 			if target.hp >= target.maxHP {
@@ -2523,7 +2523,7 @@ func (s *Sim) startAreaHealZones(player *entity, skillID string, def SkillDef, r
 			CasterID:      player.id,
 			SkillID:       skillID,
 			Rank:          rank,
-			Percent:       s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(effect, rank)),
+			Percent:       s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(s.rules,effect, rank)),
 			Radius:        s.scaleSkillRadiusForMagic(def, rank, effect),
 			IncludeCaster: effect.IncludeCaster,
 			CorrelationID: correlationID,
@@ -5437,8 +5437,12 @@ func skillRequirementsForRank(req SkillRequirementDef, rank int) map[string]int 
 		rank = 1
 	}
 	rankOffset := rank - 1
+	levelSteps := rankOffset
+	if levelSteps > 5 {
+		levelSteps = 5
+	}
 	out := map[string]int{}
-	level := req.Level + req.LevelPerRank*rankOffset
+	level := req.Level + req.LevelPerRank*levelSteps
 	if level > 0 {
 		out["level"] = level
 	}

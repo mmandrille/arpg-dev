@@ -210,11 +210,11 @@ func TestLoadRules(t *testing.T) {
 		r.CharacterProgression.Classes["ranger"].BaseStats.Magic != 3 {
 		t.Fatalf("character classes = %+v, want barbarian/sorcerer/paladin/rogue/ranger starting stats", r.CharacterProgression.Classes)
 	}
-	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 3 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 1 {
-		t.Fatalf("skill point cadence = %+v, want 1 point every 3 levels starting at 1", r.CharacterProgression.SkillPoints)
+	if r.CharacterProgression.SkillPoints.PointsPerGrant != 1 || r.CharacterProgression.SkillPoints.GrantEveryLevels != 2 || r.CharacterProgression.SkillPoints.FirstGrantLevel != 1 || r.CharacterProgression.SkillPoints.SecondGrantLevel != 2 || r.CharacterProgression.SkillPoints.GrantEveryMinLevel != 4 {
+		t.Fatalf("skill point cadence = %+v, want grants at 1,2,4,6...", r.CharacterProgression.SkillPoints)
 	}
-	if skill := r.Skills[magicBoltSkillID]; skill.Class != "sorcerer" || skill.MaxRank != 5 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 3 {
-		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 5 magic 5 +3/rank level +1/rank attack interval cooldown", skill)
+	if skill := r.Skills[magicBoltSkillID]; skill.Class != "sorcerer" || skill.MaxRank != 10 || skill.Kind != "projectile_attack" || skill.Cooldown.Type != "attack_interval_multiplier" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.LevelPerRank != 1 || skill.Requirements.StatsPerRank["magic"] != 3 {
+		t.Fatalf("magic_bolt skill = %+v, want projectile_attack max rank 10 magic 5 +3/rank level +1/rank attack interval cooldown", skill)
 	}
 	if scaling := r.Skills[magicBoltSkillID].Damage.MagicScaling; scaling.Stat != "magic" || scaling.PercentPerPoint <= 0 || scaling.MaxBonusPercent <= 0 || !scaling.UseRequirementBaseline {
 		t.Fatalf("magic_bolt magic scaling = %+v, want capped requirement-based magic scaling", scaling)
@@ -228,7 +228,7 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["arcane_barrage"]; skill.Class != "sorcerer" || skill.Kind != "projectile_attack" || skill.Tree.Tier != 3 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "lightning" || skill.Pierce.MaxHits != 2 || skill.Projectile.Visual != "arcane_barrage_projectile" {
 		t.Fatalf("arcane_barrage skill = %+v, want sorcerer tier 3 projectile requiring lightning with pierce", skill)
 	}
-	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 5 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
+	if skill := r.Skills["rage"]; skill.Class != "barbarian" || skill.MaxRank != 10 || skill.Kind != "self_buff" || skill.Targeting != "self" || skill.Requirements.Stats["str"] != 5 || skill.Requirements.Stats["vit"] != 5 || skill.Requirements.StatsPerRank["str"] != 1 || skill.Requirements.StatsPerRank["vit"] != 1 || len(skill.Effects) != 1 || skill.Effects[0].Type != "stat_percent_buff" || skill.Effects[0].DurationTicks != 450 {
 		t.Fatalf("rage skill = %+v, want self_buff STR/VIT 5 +1/rank requirements and 450 tick effect", skill)
 	}
 	if got, want := r.Skills["rage"].Cooldown.FlatTicks, 675; got != want {
@@ -237,7 +237,7 @@ func TestLoadRules(t *testing.T) {
 	if skill := r.Skills["earthbreaker"]; skill.Class != "barbarian" || skill.Kind != "cone_attack" || skill.Tree.Tier != 2 || len(skill.Requirements.Skills) != 1 || skill.Requirements.Skills[0].SkillID != "cleave" || skill.Cone.AngleDegrees != 360 || skill.Cone.Range <= r.Skills["cleave"].Cone.Range {
 		t.Fatalf("earthbreaker skill = %+v, want barbarian tier 2 radial smash requiring cleave with longer range", skill)
 	}
-	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 5 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 4.0 || skill.Effects[0].DurationTicks != 30 {
+	if skill := r.Skills["heal"]; skill.Class != "paladin" || skill.MaxRank != 10 || skill.Kind != "area_heal" || skill.Targeting != "direction_or_target_area" || skill.Requirements.Stats["magic"] != 5 || skill.Requirements.StatsPerRank["magic"] != 3 || len(skill.Effects) != 1 || skill.Effects[0].Type != "area_percent_heal" || skill.Effects[0].Range != 9.0 || skill.Effects[0].Radius != 4.0 || skill.Effects[0].DurationTicks != 30 {
 		t.Fatalf("heal skill = %+v, want area_heal magic 5 +3/rank requirements and enlarged range/radius effect", skill)
 	}
 	if scaling := r.Skills["heal"].Effects[0].MagicScaling; scaling.Stat != "magic" || scaling.PercentPerPoint <= 0 || scaling.MaxBonusPercent <= 0 || !scaling.UseRequirementBaseline {
@@ -752,8 +752,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	sim.savePlayer(sim.defaultPlayer())
 
 	view := sim.CharacterProgressionView()
-	if view.Level != 5 || view.UnspentStatPoints != 12 || view.UnspentSkillPoints != 2 {
-		t.Fatalf("progression after level 5 = %+v, want level 5, 12 stat points, 2 skill points", view)
+	if view.Level != 5 || view.UnspentStatPoints != 12 || view.UnspentSkillPoints != 3 {
+		t.Fatalf("progression after level 5 = %+v, want level 5, 12 stat points, 3 skill points", view)
 	}
 	if !hasEvent(res, "skill_point_gained") {
 		t.Fatalf("missing skill_point_gained event: %+v", res.Events)
@@ -776,8 +776,8 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}
 	skillView = sim.SkillProgressionView()
 	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if skillView.UnspentSkillPoints != 1 || magicSkill.Rank != 1 || !magicSkill.CanSpend {
-		t.Fatalf("skill progression after spend = %+v, want rank 1, 1 point, rank 2 spendable with class growth", skillView)
+	if skillView.UnspentSkillPoints != 2 || magicSkill.Rank != 1 || !magicSkill.CanSpend {
+		t.Fatalf("skill progression after spend = %+v, want rank 1, 2 points, rank 2 spendable with class growth", skillView)
 	}
 
 	rankTwoSpend := sim.Tick([]Input{{
@@ -789,16 +789,16 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	assertAck(t, rankTwoSpend, "spend_rank_two")
 	skillView = sim.SkillProgressionView()
 	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if skillView.UnspentSkillPoints != 0 || magicSkill.Rank != 2 {
-		t.Fatalf("skill progression after rank 2 spend = %+v, want rank 2 and no unspent points", skillView)
+	if skillView.UnspentSkillPoints != 1 || magicSkill.Rank != 2 {
+		t.Fatalf("skill progression after rank 2 spend = %+v, want rank 2 and 1 unspent point", skillView)
 	}
 
 	rankTwoXP := TickResult{Tick: sim.tick, Level: sim.currentLevel, Changes: []Change{}, Events: []Event{}}
 	sim.awardExperience(76, "corr_rank_two_xp", &rankTwoXP)
 	sim.savePlayer(sim.defaultPlayer())
 	view = sim.CharacterProgressionView()
-	if view.Level != 6 || view.UnspentStatPoints != 15 || view.UnspentSkillPoints != 1 {
-		t.Fatalf("progression after level 6 = %+v, want level 6, 15 stat points, 1 skill point", view)
+	if view.Level != 6 || view.UnspentStatPoints != 15 || view.UnspentSkillPoints != 2 {
+		t.Fatalf("progression after level 6 = %+v, want level 6, 15 stat points, 2 skill points", view)
 	}
 	if view.BaseStats.Magic != 10 {
 		t.Fatalf("sorcerer magic at level 6 = %d, want 10 with class growth", view.BaseStats.Magic)
@@ -816,7 +816,7 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	}})
 	assertReject(t, rankThreeRejected, "spend_rank_three_rejected", "skill_requirements_not_met")
 	magicSkill, _ = skillProgressionRow(sim.SkillProgressionView(), magicBoltSkillID)
-	if magicSkill.Rank != 2 || sim.progression.UnspentSkillPoints != 1 {
+	if magicSkill.Rank != 2 || sim.progression.UnspentSkillPoints != 2 {
 		t.Fatalf("rank 3 requirement rejection mutated skill progression: %+v", sim.SkillProgressionView())
 	}
 
@@ -844,7 +844,7 @@ func TestSkillPointCadenceAndSpend(t *testing.T) {
 	assertAck(t, rankThreeSpend, "spend_rank_three")
 	skillView = sim.SkillProgressionView()
 	magicSkill, _ = skillProgressionRow(skillView, magicBoltSkillID)
-	if skillView.UnspentSkillPoints != 0 || magicSkill.Rank != 3 || magicSkill.CanSpend {
+	if skillView.UnspentSkillPoints != 1 || magicSkill.Rank != 3 || magicSkill.CanSpend {
 		t.Fatalf("skill progression after rank 3 spend = %+v, want rank 3 and no spendable points", skillView)
 	}
 }
@@ -1501,7 +1501,7 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill:     &CastSkillIntent{SkillID: "heal", TargetID: idStr(hostID)},
 	}})
 	assertAck(t, cast, "cast_heal")
-	wantMana := player.maxMana - skillManaCost(healSkill, 1)
+	wantMana := player.maxMana - skillManaCost(rules, healSkill, 1)
 	if player.mana != wantMana {
 		t.Fatalf("heal mana after cast = %d, want %d", player.mana, wantMana)
 	}
@@ -1611,7 +1611,7 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 	if !hasEvent(completed, "skill_cast") || !hasEvent(completed, "skill_cooldown_started") {
 		t.Fatalf("auto-nav heal completion missing cast/cooldown events: %+v", completed.Events)
 	}
-	wantAutoNavMana := beforeMana - skillManaCost(healSkill, 1)
+	wantAutoNavMana := beforeMana - skillManaCost(rules, healSkill, 1)
 	if player.mana != wantAutoNavMana {
 		t.Fatalf("auto-nav heal mana after cast = %d, want %d", player.mana, wantAutoNavMana)
 	}
@@ -1630,7 +1630,7 @@ func TestHealAreaSkillHealsAlliesAndAllowsFullHPNoop(t *testing.T) {
 		CastSkill: &CastSkillIntent{SkillID: "heal"},
 	}})
 	assertAck(t, noop, "cast_heal_full")
-	wantNoopMana := player.maxMana - skillManaCost(healSkill, 1)
+	wantNoopMana := player.maxMana - skillManaCost(rules, healSkill, 1)
 	if player.mana != wantNoopMana {
 		t.Fatalf("full-hp heal mana = %d, want %d", player.mana, wantNoopMana)
 	}
@@ -1680,7 +1680,7 @@ func TestMagicStatScalesSkillDamageHealAndArea(t *testing.T) {
 	player.mana = player.maxMana
 	sim.progression.BaseStats.Magic = skillStatRequirementForRank(heal, "magic", 1) + 50
 	sim.progression.SkillRanks["heal"] = 1
-	basePercent := skillEffectPercent(effect, 1)
+	basePercent := skillEffectPercent(rules, effect, 1)
 	scaledPercent := sim.scaleSkillPercentForMagic(heal, 1, effect, basePercent)
 	if scaledPercent <= basePercent {
 		t.Fatalf("magic-scaled heal percent = %d, want above base %d", scaledPercent, basePercent)

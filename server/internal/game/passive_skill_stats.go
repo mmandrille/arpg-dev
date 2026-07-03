@@ -11,7 +11,7 @@ func (s *Sim) passiveSkillStatTotal(stat string) int {
 		if rank <= 0 {
 			continue
 		}
-		total += passiveSkillRankedStat(def, stat, rank)
+		total += passiveSkillRankedStat(s.rules, def, stat, rank)
 	}
 	return total
 }
@@ -28,7 +28,7 @@ func (s *Sim) passiveSkillStatSources(stat string, valueScale float64) (float64,
 		if rank <= 0 {
 			continue
 		}
-		raw := passiveSkillRankedStat(def, stat, rank)
+		raw := passiveSkillRankedStat(s.rules, def, stat, rank)
 		if raw == 0 {
 			continue
 		}
@@ -131,13 +131,14 @@ func applyPercentSourceRows(target *float64, sources *[]StatBreakdownSourceView,
 	}
 }
 
-func passiveSkillRankedStat(def SkillDef, stat string, rank int) int {
-	if rank <= 0 {
+func passiveSkillRankedStat(r *Rules, def SkillDef, stat string, rank int) int {
+	if rank <= 0 || r == nil {
 		return 0
 	}
 	value, ok := def.PassiveStats.Stats[stat]
 	if !ok {
 		return 0
 	}
-	return value.Base + value.PerRank*(rank-1)
+
+	return r.rankScaledInt(value.Base, value.PerRank, rank)
 }

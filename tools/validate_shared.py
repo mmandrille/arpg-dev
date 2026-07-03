@@ -838,16 +838,27 @@ def cross_checks(report: Report) -> None:
     else:
         failed_skill_progression = False
 
-        def skill_points_for_level(level: int) -> int:
+        def skill_point_grant_level(level: int) -> bool:
             first = int(skill_point_rules["first_grant_level"])
+            second = int(skill_point_rules.get("second_grant_level", 0))
             every = int(skill_point_rules["grant_every_levels"])
             points = int(skill_point_rules["points_per_grant"])
-            if level < first or points <= 0 or every <= 0:
-                return 0
-            grants = 0
-            for grant_level in range(1, level + 1):
-                if grant_level == first or grant_level % every == 0:
-                    grants += 1
+            if level < first or points <= 0:
+                return False
+            if level == first:
+                return True
+            if second > 0 and level == second:
+                return True
+            if every <= 0:
+                return False
+            min_level = int(skill_point_rules.get("grant_every_min_level", 0) or every)
+            if level < min_level:
+                return False
+            return level % every == 0
+
+        def skill_points_for_level(level: int) -> int:
+            points = int(skill_point_rules["points_per_grant"])
+            grants = sum(1 for grant_level in range(1, level + 1) if skill_point_grant_level(grant_level))
             return grants * points
 
         for case in skill_magic_golden["progression"]["level_cases"]:
@@ -1335,6 +1346,7 @@ def cross_checks(report: Report) -> None:
         skill_presentations,
         class_defs,
         skill_magic_golden,
+        character_progression=character_progression,
         base_attack_interval=base_attack_interval,
         min_attack_speed=min_attack_speed,
         max_attack_speed=max_attack_speed,

@@ -6,6 +6,7 @@ const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const CharacterStatsPanelScript := preload("res://scripts/character_stats_panel.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
+const SkillRankScalingScript := preload("res://scripts/skill_rank_scaling.gd")
 const SkillTreeLayoutScript := preload("res://scripts/skill_tree_layout.gd")
 
 var _pass_count: int = 0
@@ -20,11 +21,18 @@ func _run() -> void:
 	_remove_user_file(DraggableWindowScript.layout_storage_path)
 	SkillRulesLoaderScript.reset_for_tests()
 	SkillRulesLoaderScript.ensure_loaded()
+	SkillRankScalingScript.ensure_loaded()
 	var magic_bolt_max_rank := _skill_max_rank("magic_bolt")
 	var magic_rank1_req := _skill_stat_requirement("magic_bolt", "magic", 0)
 	var magic_rank2_req := _skill_stat_requirement("magic_bolt", "magic", 1)
 	var magic_bolt_level_req := _skill_level_requirement("magic_bolt", 0)
-	var magic_bolt_mana_cost := _skill_mana_cost("magic_bolt", 0)
+	var magic_bolt_mana_cost := _skill_mana_cost("magic_bolt", 1)
+	var rank_curve := SkillRankScalingScript.progression_rank_curve()
+	var fan_of_blades_max_rank := _skill_max_rank("fan_of_blades")
+	var magic_rank2_min := SkillRankScalingScript.rank_scaled_int(300, 50, 2, rank_curve)
+	var magic_rank2_max := SkillRankScalingScript.rank_scaled_int(225, 25, 2, rank_curve)
+	var magic_rank2_damage := "%d%%-%d%%" % [magic_rank2_min, magic_rank2_max]
+	var heal_rank2_percent := SkillRankScalingScript.rank_scaled_int(25, 10, 2, rank_curve)
 	var panel := SkillsPanelScript.new()
 	root.add_child(panel)
 	await process_frame
@@ -175,7 +183,7 @@ func _run() -> void:
 	_assert_eq("paladin visible skill order", paladin_skill_ids, expected_paladin_ids)
 	_assert_eq("paladin first local skill", str(paladin_skill_ids[0]), "charge")
 	var heal_tooltip := SkillsPanelScript.tooltip_plain_body("heal", 1, panel.skill_progression, panel.character_progression)
-	_assert_true("heal tooltip includes inline next-rank percent", heal_tooltip.contains("Heal: 25% -> 35%"))
+	_assert_true("heal tooltip includes inline next-rank percent", heal_tooltip.contains("Heal: 25%% -> %d%%" % heal_rank2_percent))
 	_assert_false("heal tooltip omits next-rank header", heal_tooltip.contains("Next rank:"))
 	var heal_block := panel._skill_blocks.get("heal", null) as Control
 	var holy_shield_block := panel._skill_blocks.get("holy_shield", null) as Control
@@ -227,7 +235,7 @@ func _run() -> void:
 	panel.bot_hover_skill("fan_of_blades")
 	state = panel.get_debug_state()
 	_assert_eq("hovered fan tooltip skill id", str(state.get("tooltip_skill_id", "")), "fan_of_blades")
-	_assert_eq("hovered fan tooltip rank label", str(state.get("tooltip_rank_label", "")), "Rank 1 / 5")
+	_assert_eq("hovered fan tooltip rank label", str(state.get("tooltip_rank_label", "")), "Rank 1 / %d" % fan_of_blades_max_rank)
 	panel.bot_leave_skill_tooltip()
 
 	panel.set_character_progression({
@@ -260,8 +268,8 @@ func _run() -> void:
 	panel.bot_leave_skill_tooltip()
 	panel.bot_hover_skill("magic_bolt")
 	state = panel.get_debug_state()
-	var rank_one_magic_tooltip := str(((state.get("skills", {}) as Dictionary).get("magic_bolt", {}) as Dictionary).get("tooltip_body", ""))
-	_assert_true("rank 1 tooltip includes next-rank damage", rank_one_magic_tooltip.contains("Weapon damage: 300%-225% -> 350%-250%"))
+	var rank_one_magic_tooltip := str(state.get("tooltip_body", ""))
+	_assert_true("rank 1 tooltip includes next-rank damage", rank_one_magic_tooltip.contains("Weapon damage: 300%%-225%% -> %s" % magic_rank2_damage))
 	panel.set_skill_bindings(["", "magic_bolt", "", "", "", "", "", "", "heal", "", "", "", "", "", "", ""], "magic_bolt")
 	state = panel.get_debug_state()
 	_assert_eq("assigned key shown", str(state.get("assigned_key", "")), "F2")
@@ -366,7 +374,12 @@ func _skill_stat_requirement(skill_id: String, stat: String, current_rank: int) 
 func _skill_mana_cost(skill_id: String, current_rank: int) -> int:
 	var cost: Dictionary = SkillRulesLoaderScript.skill_definition(skill_id).get("cost", {})
 	var mana: Dictionary = cost.get("mana", {})
-	return int(mana.get("base", 0)) + current_rank * int(mana.get("per_rank", 0))
+	return SkillRankScalingScript.rank_scaled_int(
+		int(mana.get("base", 0)),
+		int(mana.get("per_rank", 0)),
+		current_rank + 1,
+		SkillRankScalingScript.progression_mana_curve(),
+	)
 
 
 func _expected_block_x(skill_id: String) -> int:

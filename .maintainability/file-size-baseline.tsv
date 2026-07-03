@@ -14,7 +14,7 @@ client/scripts/skills_panel.gd	1010
 client/scripts/stash_panel.gd	1155
 client/tests/test_client_bot.gd	1153	# v334 client-bot: bot exit cleanup helpers
 client/tests/test_coop_client.gd	1721	# v392: class creation feature panel tests
-client/tests/test_golden.gd	784
+client/tests/test_golden.gd	686
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7968	# v407: baseline sync (no v407 logic edits)
 server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: interactable path_too_long uses floor max_auto_steps

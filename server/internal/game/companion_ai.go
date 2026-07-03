@@ -37,7 +37,7 @@ func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, rank 
 	level := s.activeLevel()
 	s.pruneCompanionsForNewSpawn(owner.id, skillID, companionLimitAtRank(def.Companion.Limit, rank), res)
 	monsterDef := s.rules.Monsters[def.Companion.MonsterDefID]
-	statPercent := companionHeroStatPercent(def, rank)
+	statPercent := companionHeroStatPercent(s.rules, def, rank)
 	hp := monsterDef.MaxHP
 	damage := monsterDef.AttackDamage
 	if statPercent > 0 {
@@ -136,8 +136,8 @@ func (s *Sim) reviveMonsterCompanion(owner *entity, target *entity, skillID stri
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(target.id)})
 
 	monsterDef := s.rules.Monsters[target.monsterDefID]
-	powerPercent := revivePowerPercent(def, rank)
-	durationTicks := reviveDurationTicks(def, rank)
+	powerPercent := revivePowerPercent(s.rules, def, rank)
+	durationTicks := reviveDurationTicks(s.rules, def, rank)
 	maxHP := scalePositiveInt(monsterDef.MaxHP, powerPercent)
 	companion := &entity{
 		kind:                  companionEntity,

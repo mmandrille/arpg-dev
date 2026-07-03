@@ -4,6 +4,25 @@ from __future__ import annotations
 import math
 from typing import Any
 
+SKILL_SYNERGY_MODIFIERS = frozenset(
+    {
+        "damage_percent",
+        "cone_size_percent",
+        "volley_spread_percent",
+        "projectile_range_percent",
+        "buff_duration_percent",
+        "buff_power_percent",
+        "area_radius_percent",
+        "root_duration_percent",
+        "slow_duration_percent",
+        "mark_duration_percent",
+        "bleed_duration_percent",
+        "revive_power_percent",
+        "passive_stat_percent",
+        "execute_threshold_percent",
+    }
+)
+
 
 def skill_requirements_for_rank(requirements: dict[str, Any], rank: int) -> dict[str, Any]:
     rank_offset = max(0, int(rank) - 1)
@@ -18,6 +37,72 @@ def skill_requirements_for_rank(requirements: dict[str, Any], rank: int) -> dict
     return {"level": level, "stats": stats}
 
 
+def rank_scaled_int(curve: dict[str, Any], base: int, per_rank: int, rank: int) -> int:
+    if rank < 1:
+        rank = 1
+    curve_type = curve.get("type", "compound_percent")
+    if curve_type == "linear":
+        return max(0, base + per_rank * (rank - 1))
+    pct = max(0, int(curve.get("percent_per_rank", 8)))
+    factor = (1.0 + pct / 100.0) ** (rank - 1)
+    return max(0, int(round(base * factor + per_rank * (rank - 1))))
+
+
+def validate_skill_synergies(report: Any, skills: dict[str, Any]) -> None:
+    catalog = skills.get("skills", {})
+    errors: list[str] = []
+
+    for skill_id, skill in sorted(catalog.items()):
+        required_skills = skill.get("requirements", {}).get("skills", [])
+        synergies = skill.get("synergies", [])
+        if not required_skills:
+            if synergies:
+                errors.append(f"{skill_id}: synergies defined without skill prerequisites")
+            continue
+        if not synergies:
+            errors.append(f"{skill_id}: missing synergies for required skills")
+            continue
+
+        required_ids = [str(req.get("skill_id", "")) for req in required_skills]
+        if any(not source_id for source_id in required_ids):
+            errors.append(f"{skill_id}: prerequisite entry missing source_skill_id")
+            continue
+
+        synergy_by_source: dict[str, list[dict[str, Any]]] = {}
+        for idx, synergy in enumerate(synergies):
+            source_id = str(synergy.get("source_skill_id", ""))
+            modifier = str(synergy.get("modifier", ""))
+            percent = synergy.get("percent_per_source_rank")
+            if not source_id:
+                errors.append(f"{skill_id}: synergies[{idx}] missing source_skill_id")
+                continue
+            if source_id not in catalog:
+                errors.append(f"{skill_id}: synergies[{idx}] references unknown skill {source_id}")
+                continue
+            if catalog[source_id].get("class") != skill.get("class"):
+                errors.append(f"{skill_id}: synergy source {source_id} must match class {skill.get('class')}")
+            if modifier not in SKILL_SYNERGY_MODIFIERS:
+                errors.append(f"{skill_id}: synergies[{idx}] uses unknown modifier {modifier!r}")
+            if not isinstance(percent, (int, float)) or float(percent) <= 0:
+                errors.append(f"{skill_id}: synergies[{idx}] percent_per_source_rank must be positive")
+            synergy_by_source.setdefault(source_id, []).append(synergy)
+
+        for source_id in required_ids:
+            if source_id not in synergy_by_source:
+                errors.append(f"{skill_id}: missing synergy for prerequisite {source_id}")
+
+        for source_id, entries in synergy_by_source.items():
+            if source_id not in required_ids:
+                errors.append(f"{skill_id}: synergy source {source_id} is not a prerequisite")
+            if len(entries) != 1:
+                errors.append(f"{skill_id}: duplicate synergy entries for source {source_id}")
+
+    if errors:
+        report.fail("skill synergies", "; ".join(errors))
+    else:
+        report.ok("skills with prerequisites declare synergies")
+
+
 def validate_skill_catalogs(
     report: Any,
     skills: dict[str, Any],
@@ -25,10 +110,13 @@ def validate_skill_catalogs(
     class_defs: dict[str, Any],
     skill_magic_golden: dict[str, Any],
     *,
+    character_progression: dict[str, Any] | None = None,
     base_attack_interval: int,
     min_attack_speed: float,
     max_attack_speed: float,
 ) -> None:
+    rank_curve = (character_progression or {}).get("skill_rank_scaling", {"type": "compound_percent", "percent_per_rank": 8})
+    mana_curve = (character_progression or {}).get("skill_mana_scaling", {"type": "compound_percent", "percent_per_rank": 10})
     magic_bolt = skills.get("skills", {}).get("magic_bolt")
     skill_class_map = {skill_id: skill.get("class", "") for skill_id, skill in skills.get("skills", {}).items()}
     unknown_skill_classes = {skill_id: class_id for skill_id, class_id in skill_class_map.items() if class_id not in class_defs}
@@ -78,8 +166,9 @@ def validate_skill_catalogs(
         else:
             rank_one_min = int(dmg["min_base"])
             rank_one_max = int(dmg["max_base"])
-            rank_max_min = rank_one_min + int(dmg["min_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
-            rank_max_max = rank_one_max + int(dmg["max_per_rank"]) * (int(magic_bolt["max_rank"]) - 1)
+            max_rank = int(magic_bolt["max_rank"])
+            rank_max_min = rank_scaled_int(rank_curve, rank_one_min, int(dmg["min_per_rank"]), max_rank)
+            rank_max_max = rank_scaled_int(rank_curve, rank_one_max, int(dmg["max_per_rank"]), max_rank)
             if rank_one_min < 1 or rank_one_max < 1 or rank_max_min < 1 or rank_max_max < 1:
                 report.fail("skills magic_bolt damage", "weapon multiplier percents must be positive at every rank")
             else:
@@ -228,6 +317,8 @@ def validate_skill_catalogs(
         else:
             report.ok("skill prerequisites reference known skills")
 
+    validate_skill_synergies(report, skills)
+
     skill_prereqs = {
         skill_id: {
             str(req.get("skill_id", "")): int(req.get("rank", 0))
@@ -327,10 +418,10 @@ def validate_skill_catalogs(
                 report.fail("skill_points golden skill", f"rank {rank}: outside max_rank")
                 failed_skill_magic = True
                 break
-            mana_cost = int(cost["base"]) + int(cost["per_rank"]) * (rank - 1)
+            mana_cost = rank_scaled_int(mana_curve, int(cost["base"]), int(cost["per_rank"]), rank)
             damage = {
-                "min_percent": int(dmg["min_base"]) + int(dmg["min_per_rank"]) * (rank - 1),
-                "max_percent": int(dmg["max_base"]) + int(dmg["max_per_rank"]) * (rank - 1),
+                "min_percent": rank_scaled_int(rank_curve, int(dmg["min_base"]), int(dmg["min_per_rank"]), rank),
+                "max_percent": rank_scaled_int(rank_curve, int(dmg["max_base"]), int(dmg["max_per_rank"]), rank),
             }
             if int(case["mana_cost"]) != mana_cost or case["damage"] != damage:
                 report.fail("skill_points golden skill", f"rank {rank}: mana/damage mismatch")

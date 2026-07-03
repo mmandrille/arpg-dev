@@ -48,6 +48,11 @@
         "chain": { "$ref": "#/$defs/chain" },
         "companion": { "$ref": "#/$defs/companion" },
         "revive": { "$ref": "#/$defs/revive" },
+        "synergies": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/skill_synergy" }
+        },
         "effects": {
           "type": "array",
           "minItems": 1,
@@ -56,6 +61,26 @@
         "cooldown": { "$ref": "#/$defs/cooldown" }
       },
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "requirements": {
+                "type": "object",
+                "properties": {
+                  "skills": { "type": "array", "minItems": 1 }
+                },
+                "required": ["skills"]
+              }
+            },
+            "required": ["requirements"]
+          },
+          "then": {
+            "required": ["synergies"],
+            "properties": {
+              "synergies": { "type": "array", "minItems": 1 }
+            }
+          }
+        },
         {
           "if": { "properties": { "kind": { "const": "projectile_attack" } }, "required": ["kind"] },
           "then": {
@@ -694,6 +719,34 @@
       },
       "if": { "properties": { "type": { "const": "attack_interval_multiplier" } }, "required": ["type"] },
       "then": { "required": ["multiplier"] }
+    },
+    "skill_synergy": {
+      "type": "object",
+      "required": ["source_skill_id", "modifier", "percent_per_source_rank"],
+      "additionalProperties": false,
+      "properties": {
+        "source_skill_id": { "type": "string", "minLength": 1 },
+        "modifier": {
+          "type": "string",
+          "enum": [
+            "damage_percent",
+            "cone_size_percent",
+            "volley_spread_percent",
+            "projectile_range_percent",
+            "buff_duration_percent",
+            "buff_power_percent",
+            "area_radius_percent",
+            "root_duration_percent",
+            "slow_duration_percent",
+            "mark_duration_percent",
+            "bleed_duration_percent",
+            "revive_power_percent",
+            "passive_stat_percent",
+            "execute_threshold_percent"
+          ]
+        },
+        "percent_per_source_rank": { "type": "number", "exclusiveMinimum": 0 }
+      }
     }
   }
 }

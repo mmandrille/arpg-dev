@@ -40,7 +40,7 @@ func (s *Sim) applySkillDamageModifiers(playerID uint64, skillID string, damageR
 }
 
 func (s *Sim) effectiveSkillManaCost(def SkillDef, rank int) int {
-	cost := skillManaCost(def, rank) - s.equippedItemStatTotal("skill_mana_cost_reduction")
+	cost := skillManaCost(s.rules, def, rank) - s.equippedItemStatTotal("skill_mana_cost_reduction")
 	if cost < 0 {
 		return 0
 	}

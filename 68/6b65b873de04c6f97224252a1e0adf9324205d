@@ -1,0 +1,52 @@
+docs/specs/v411_spec-skill-tree-graph-layout.md
+  s_9e6bbd1c3db3c6::t_36df623f953e8f 1-2,4-52
+  s_9e6bbd1c3db3c6::t_a1aad9d1cd0d04 3
+docs/as-built/v411_skill-tree-graph-layout.md
+  s_9e6bbd1c3db3c6::t_db4d22ca4d7b2e 1-28
+client/scripts/skill_tree_layout.gd
+  s_9e6bbd1c3db3c6::t_3b7e6deff3719c 1-59
+PROGRESS.md
+  s_9e6bbd1c3db3c6::t_2cbca3d4270656 18,26,28
+client/tests/test_skills_panel.gd
+  s_9e6bbd1c3db3c6::t_cef56a7dba832d 234-244,246-248
+  s_9e6bbd1c3db3c6::t_524ca7026cc722 339,355-356
+  s_9e6bbd1c3db3c6::t_cfd76581be3899 9
+  s_9e6bbd1c3db3c6::t_860f952e6efd18 198-199
+  s_9e6bbd1c3db3c6::t_e21b2f311b57b6 251
+  s_9e6bbd1c3db3c6::t_008b34d882683b 249-250
+  s_9e6bbd1c3db3c6::t_7382afbee3f7a7 382-400
+  s_9e6bbd1c3db3c6::t_b67e561bf7658c 245
+docs/progress/slice-lifecycle.md
+  s_9e6bbd1c3db3c6::t_522df978053223 421
+docs/plans/v411_2026-07-02-skill-tree-graph-layout.md
+  s_9e6bbd1c3db3c6::t_288de4c61a0327 1-84
+client/scripts/skills_panel.gd
+  s_9e6bbd1c3db3c6::t_e452f63f8d62b7 388
+  s_9e6bbd1c3db3c6::t_18a35c39a41b42 454-457
+  s_9e6bbd1c3db3c6::t_a7149a8e37442c 532-534
+  s_9e6bbd1c3db3c6::t_2f77fb28041725 535
+  s_9e6bbd1c3db3c6::t_ca858ab55b0797 684-685,687-689,691-702
+  s_9e6bbd1c3db3c6::t_aba0e55973290b 379-380
+  s_9e6bbd1c3db3c6::t_c85389363b7e84 607,609
+  s_9e6bbd1c3db3c6::t_ce13f734c1f3ad 8-9
+  s_9e6bbd1c3db3c6::t_9ce63145c5e5ac 40
+  s_9e6bbd1c3db3c6::t_dc234b457e4e95 411
+client/scripts/skill_tree_connectors.gd
+  s_9e6bbd1c3db3c6::t_0f65f60a9a1369 1-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "686b65b873de04c6f97224252a1e0adf9324205d",
+  "prompts": {},
+  "sessions": {
+    "s_9e6bbd1c3db3c6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e347647f-3185-474a-945b-912f264bab68",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

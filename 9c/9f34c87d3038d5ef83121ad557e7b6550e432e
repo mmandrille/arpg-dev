@@ -1,0 +1,52 @@
+shared/rules/character_progression.v0.json
+  s_0db7b1caa2ed54::t_a511fe2f70f726 505-528
+server/internal/game/weapon_strength_damage.go
+  s_0db7b1caa2ed54::t_a8d0fb49ecc6cc 3-4,23-75,87-134
+shared/rules/character_progression.v0.schema.json
+  s_0db7b1caa2ed54::t_c11d2fb104d81f 63-66
+  s_0db7b1caa2ed54::t_1ffb4225e87fed 83-86
+server/internal/game/sim.go
+  s_0db7b1caa2ed54::t_d35500a77a79b8 5743-5746,5750,5754
+shared/rules/combat.v0.json
+  s_0db7b1caa2ed54::t_fa8c3185db0114 13-24
+server/internal/game/mercenary_character.go
+  s_0db7b1caa2ed54::t_0eb2223f3c8798 215-217
+  s_0db7b1caa2ed54::t_6afcfaa6854bb5 196-201
+tools/validate_shared.py
+  s_0db7b1caa2ed54::t_f12a6f798dd465 519-522
+  s_0db7b1caa2ed54::t_2add768d35a482 660-699
+server/internal/game/rogue_skills.go
+  s_0db7b1caa2ed54::t_a76e6430fc58f4 568-571
+shared/rules/combat.v0.schema.json
+  s_0db7b1caa2ed54::t_e942420ecc651d 7
+  s_0db7b1caa2ed54::t_1090ac3e39019d 29-41
+server/internal/game/weapon_stat_damage_test.go
+  s_0db7b1caa2ed54::t_d15bf163bba6cd 48-49,51-52,56-58
+  s_0db7b1caa2ed54::t_7ee69f15ba7ea7 1-24,28-47,50,53-55,59-92
+  s_0db7b1caa2ed54::t_6081c2628a3c12 25-27
+server/internal/game/derived_stats.go
+  s_0db7b1caa2ed54::t_864530c1ec0d9e 122-123,126-127,131,135
+server/internal/game/rules.go
+  s_0db7b1caa2ed54::t_fd160243b37387 912-914
+  s_0db7b1caa2ed54::t_56d5a0e6a93403 919-926,929
+  s_0db7b1caa2ed54::t_96b4850a945d19 92-98,101-113
+  s_0db7b1caa2ed54::t_c1e66acb824553 861-874
+  s_0db7b1caa2ed54::t_65e6f92019069c 2643-2658
+  s_0db7b1caa2ed54::t_d65d59ee93d503 280
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9c9f34c87d3038d5ef83121ad557e7b6550e432e",
+  "prompts": {},
+  "sessions": {
+    "s_0db7b1caa2ed54": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "07a8c3dc-a3dd-4602-9408-bdef1545a9ff",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

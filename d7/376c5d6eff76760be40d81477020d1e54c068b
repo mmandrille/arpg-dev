@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-04-base-model-consolidation-design.md
+  s_ca4868bac46551::t_fb4b7c2d193a00 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d7376c5d6eff76760be40d81477020d1e54c068b",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

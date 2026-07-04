@@ -1,0 +1,29 @@
+docs/specs/v436_spec-weapons-tier3-melee.md
+  s_7bdc2687bb052d::t_66adb36423e468 1-25
+docs/as-built/v436_weapons-tier3-melee.md
+  s_7bdc2687bb052d::t_9e136dbe2639da 1-16
+docs/plans/v436_2026-07-04-weapons-tier3-melee.md
+  s_7bdc2687bb052d::t_ec53f67d58de17 1-13
+tools/assets/import_equipment_glb.py
+  s_7bdc2687bb052d::t_119cbe9e443387 1-22,24-131,144-184
+  s_7bdc2687bb052d::t_4e7a44eb712a26 23
+  s_7bdc2687bb052d::t_9e6573afb643d9 132-143
+assets/manifests/assets.v0.json
+  s_7bdc2687bb052d::t_03a1c8f72aca87 190,192,204,206,218,220,232,234,246,248,260,262,274,276,288,290,316,318,330,332,344,346,372,374,386,388,400,402,414,416
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c847e76f2a223608f00c091b509480866cf53404",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

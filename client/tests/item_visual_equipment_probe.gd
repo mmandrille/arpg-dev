@@ -67,18 +67,23 @@ func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
 	if chest_node == null:
 		fail.call("chest fallback missing")
 		return false
-	var boots_node := mount.find_child("fallback_equipment_boots_v0", true, false) as Node3D
-	if boots_node == null or absf(boots_node.rotation_degrees.z) > 0.001:
-		fail.call("boots fallback rotated away from left/right foot layout: %s" % str(boots_node.rotation_degrees if boots_node != null else null))
+	var boots_state: Dictionary = equipped_visuals["boots"]
+	var boots_node := mount.find_child(str(boots_state.get("asset_id", "fallback_equipment_boots_v0")), true, false) as Node3D
+	if boots_node == null:
+		fail.call("boots visual missing")
 		return false
-	var left_boot := boots_node.find_child("left_boot", true, false) as Node3D
-	var right_boot := boots_node.find_child("right_boot", true, false) as Node3D
-	if left_boot == null or right_boot == null or left_boot.position.x > -0.5 or right_boot.position.x < 0.5:
-		fail.call("boots fallback not split across feet: left=%s right=%s" % [
-			str(left_boot.position if left_boot != null else null),
-			str(right_boot.position if right_boot != null else null),
-		])
-		return false
+	if bool(boots_state.get("procedural_fallback", false)):
+		if absf(boots_node.rotation_degrees.z) > 0.001:
+			fail.call("boots fallback rotated away from left/right foot layout: %s" % str(boots_node.rotation_degrees))
+			return false
+		var left_boot := boots_node.find_child("left_boot", true, false) as Node3D
+		var right_boot := boots_node.find_child("right_boot", true, false) as Node3D
+		if left_boot == null or right_boot == null or left_boot.position.x > -0.5 or right_boot.position.x < 0.5:
+			fail.call("boots fallback not split across feet: left=%s right=%s" % [
+				str(left_boot.position if left_boot != null else null),
+				str(right_boot.position if right_boot != null else null),
+			])
+			return false
 
 	resolver.apply_snapshot({
 		"inventory": [{"item_instance_id": "3001", "item_def_id": "future_helmet", "slot": "head", "equipped": true, "rarity": "magic"}],

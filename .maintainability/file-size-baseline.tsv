@@ -34,4 +34,5 @@ server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store tes
 client/scripts/showme/visual_capture.gd	1042
 tools/bot/run.py	4370	# v406: protocol bot force_bishop_loot action
 tools/bot/test_protocol.py	1434
+tools/assets/rig_hero_glbs.py	686	# v434: 17-bone hero rig; GLB parse/weight/IBM pipeline tightly coupled to mesh mutation state
 tools/validate_shared.py	3127	# pre-v414 drift: weapon family stat scaling cross-checks; extraction deferred

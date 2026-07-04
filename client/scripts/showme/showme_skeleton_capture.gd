@@ -46,8 +46,14 @@ static func setup(capture: SceneTree, class_id: String) -> Node3D:
 	await capture.process_frame
 	await capture.process_frame
 
+	var ap_stop := character.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap_stop != null:
+		ap_stop.stop()
+	await capture.process_frame
+
 	var skel := character.find_child("Skeleton3D", true, false) as Skeleton3D
 	if skel != null:
+		skel.reset_bone_poses()
 		_spread_pose(skel)
 		await capture.process_frame
 

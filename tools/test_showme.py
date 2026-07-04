@@ -20,3 +20,9 @@ def test_showme_scripts_live_under_client() -> None:
 def test_render_focus_points_at_client_capture() -> None:
     script = (ROOT / "skills" / "showme" / "scripts" / "render_focus.py").read_text(encoding="utf-8")
     assert 'client" / "scripts" / "showme" / "visual_capture.gd"' in script
+
+
+def test_skeleton_focus_in_render_focus_choices() -> None:
+    script = (ROOT / "skills" / "showme" / "scripts" / "render_focus.py").read_text(encoding="utf-8")
+    assert '"skeleton"' in script, "skeleton focus missing from render_focus.py choices"
+    assert "showme_skeleton_capture.gd" in (ROOT / "client" / "scripts" / "showme" / "visual_capture.gd").read_text(encoding="utf-8")

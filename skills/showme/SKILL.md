@@ -68,6 +68,7 @@ Canonical list lives in `skills/showme/scripts/render_focus.py` (`--focus` choic
 | Every item icon family (grid) | `item-icons` |
 | Vendor buy/sell UI | `shop` |
 | Bishop heal/resurrect panel | `bishop` |
+| Skeleton bone positions + socket markers | `skeleton` |
 | Market board interactable (3D labels) | `market-board` |
 | Market publish tab | `market-publish` |
 | Market offer/bid tab | `market-offer` |
@@ -88,6 +89,7 @@ Canonical list lives in `skills/showme/scripts/render_focus.py` (`--focus` choic
 |-------|-------|-------------|---------------|
 | `gear` | Isolated `character.tscn` with equipment from `EquipmentResolver`. Default items: `long_sword,shield,helm,mail,boots`. | `--items`, `--class-id` | 640×480 |
 | `classes` | Barbarian, sorcerer, paladin models in a row with labels. | — | 1120×640 |
+| `skeleton` | Character in spread T-pose; red dot at every bone + colored labeled sphere at each equipment socket. | `--class-id` | 800×600 |
 | `floor-item` | Single loot node on grass (`LootNodeFactory`). First `--items` entry or `long_sword`. | `--items` | 640×480 |
 
 ### Inventory and icons
@@ -140,6 +142,12 @@ python3 skills/showme/scripts/render_focus.py --focus gear
 
 # Specific items and class body.
 python3 skills/showme/scripts/render_focus.py --focus gear --items helm,mail,boots --class-id paladin
+
+# Skeleton bone visualization (default class: paladin).
+python3 skills/showme/scripts/render_focus.py --focus skeleton --class-id paladin
+
+# Check another class skeleton.
+python3 skills/showme/scripts/render_focus.py --focus skeleton --class-id barbarian
 
 # One floor loot drop.
 python3 skills/showme/scripts/render_focus.py --focus floor-item --items spear

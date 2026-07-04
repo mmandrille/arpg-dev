@@ -26,6 +26,9 @@ const SPREAD_BONES := {
 }
 const ARM_SPREAD_ANGLE := PI / 2.0
 const LEG_SPREAD_ANGLE := PI / 5.0
+const CLASS_LEG_SPREAD_OVERRIDE := {
+	"sorcerer": PI / 16.0,
+}
 
 
 static func setup(capture: SceneTree, class_id: String) -> Node3D:
@@ -54,7 +57,7 @@ static func setup(capture: SceneTree, class_id: String) -> Node3D:
 	var skel := character.find_child("Skeleton3D", true, false) as Skeleton3D
 	if skel != null:
 		skel.reset_bone_poses()
-		_spread_pose(skel)
+		_spread_pose(skel, effective_class)
 		await capture.process_frame
 
 		_place_bone_dots(skel, root)
@@ -66,13 +69,14 @@ static func setup(capture: SceneTree, class_id: String) -> Node3D:
 	return character
 
 
-static func _spread_pose(skel: Skeleton3D) -> void:
+static func _spread_pose(skel: Skeleton3D, class_id: String) -> void:
 	for bone_name in SPREAD_BONES.keys():
 		var idx := skel.find_bone(str(bone_name))
 		if idx < 0:
 			continue
 		var axis: Vector3 = SPREAD_BONES[bone_name]
-		var angle := ARM_SPREAD_ANGLE if str(bone_name).begins_with("arm") else LEG_SPREAD_ANGLE
+		var leg_angle: float = CLASS_LEG_SPREAD_OVERRIDE.get(class_id, LEG_SPREAD_ANGLE)
+		var angle: float = ARM_SPREAD_ANGLE if str(bone_name).begins_with("arm") else leg_angle
 		skel.set_bone_pose_rotation(idx, Quaternion(axis.normalized(), angle))
 	skel.force_update_all_bone_transforms()
 
@@ -120,6 +124,32 @@ static func _place_socket_spheres(character: Node3D, root: Node3D) -> void:
 		label.modulate = color
 		root.add_child(label)
 		label.global_position = socket.global_position + Vector3(0.0, 0.12, 0.0)
+	# Also mark foot_r bone position with boots color (no socket node exists for it)
+	var skel_node := character.find_child("Skeleton3D", true, false) as Skeleton3D
+	if skel_node != null:
+		var foot_r_idx := skel_node.find_bone("foot_r")
+		if foot_r_idx >= 0:
+			var foot_transform: Transform3D = skel_node.global_transform * skel_node.get_bone_global_pose(foot_r_idx)
+			var mat := StandardMaterial3D.new()
+			mat.albedo_color = Color("#ff8822")
+			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			var sphere := MeshInstance3D.new()
+			sphere.name = "Socket_boots_r"
+			var mesh := SphereMesh.new()
+			mesh.radius = 0.045
+			mesh.height = 0.09
+			sphere.mesh = mesh
+			sphere.material_override = mat
+			root.add_child(sphere)
+			sphere.global_position = foot_transform.origin
+			var label := Label3D.new()
+			label.name = "Label_boots_r"
+			label.text = "boots_r"
+			label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			label.font_size = 28
+			label.modulate = Color("#ff8822")
+			root.add_child(label)
+			label.global_position = foot_transform.origin + Vector3(0.0, 0.12, 0.0)
 
 
 static func _apply_class_model(character: Node3D, class_id: String) -> void:

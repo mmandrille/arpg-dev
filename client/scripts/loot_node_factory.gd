@@ -2,6 +2,7 @@ class_name LootNodeFactory
 extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
+const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
 
 var asset_manifest: Dictionary = {}
 var item_presentations: Dictionary = {}
@@ -106,7 +107,10 @@ func make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
 	if inst == null:
 		return null
 	inst.name = "GroundModel_%s" % asset_id
-	inst.scale = Vector3.ONE * ClientConstantsScript.GROUND_EQUIPMENT_MODEL_SCALE
+	var ground: Dictionary = presentation.get("ground", {}) if typeof(presentation.get("ground", {})) == TYPE_DICTIONARY else {}
+	var ground_scale := float(ground.get("scale", 1.0))
+	var mesh_scale := ClientConstantsScript.GROUND_EQUIPMENT_MODEL_SCALE * ground_scale * EquipmentDisplayLoaderScript.ground_multiplier()
+	inst.scale = Vector3.ONE * mesh_scale
 	inst.position = Vector3(0.0, 0.12, 0.0)
 	inst.rotation_degrees = Vector3(90.0, 35.0, 0.0)
 	apply_model_tint(inst, ground_item_tint(rarity))

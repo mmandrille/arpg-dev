@@ -1,0 +1,7 @@
+{
+  "version": 0,
+  "glb_mesh_multipliers": {
+    "equipped": 1.0,
+    "ground": 0.7
+  }
+}

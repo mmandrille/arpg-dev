@@ -29,74 +29,74 @@ IMPORTS: dict[str, dict[str, object]] = {
     "assets/equipment/weapons/rusty_sword/rusty_sword.glb": {
         "uuid": "70e87f26-6cb2-4e69-8a76-9620d6cb66f7",
         "origin": "https://poly.pizza/m/cDsobPucFA (Sword by Quaternius)",
-        "target_extent": 0.90,
+        "target_extent": 0.80,
     },
     "assets/equipment/weapons/long_sword/long_sword.glb": {
         "uuid": "65837148-8c3c-42d5-9ce7-c55f9295cc7e",
         "origin": "https://poly.pizza/m/9lLmH8Et4K (Sword by Quaternius)",
-        "target_extent": 1.15,
+        "target_extent": 1.00,
     },
     "assets/equipment/weapons/rapier/rapier.glb": {
         "uuid": "49e2f3d1-9e8d-4322-83d0-9c0dd340ac84",
         "origin": "https://poly.pizza/m/Ds2bJiNI5w (Sword by Quaternius)",
-        "target_extent": 1.00,
+        "target_extent": 0.88,
     },
     "assets/equipment/weapons/starter_axe/starter_axe.glb": {
         "uuid": "2b206f9f-30f7-43a4-8dd8-daa04953962b",
         "origin": "https://poly.pizza/m/W0UYZPYSXf (Axe by Quaternius)",
-        "target_extent": 1.10,
+        "target_extent": 0.96,
     },
     "assets/equipment/armor/shield/kite_shield.glb": {
         "uuid": "21ae2d91-300c-43e0-b140-d119ef00ea9d",
         "origin": "https://poly.pizza/m/xoHSnOjsBG (Shield by Quaternius)",
-        "target_extent": 0.72,
+        "target_extent": 0.48,
     },
     "assets/equipment/armor/shield/tower_shield.glb": {
         "uuid": "21ae2d91-300c-43e0-b140-d119ef00ea9d",
         "origin": "https://poly.pizza/m/xoHSnOjsBG (Shield by Quaternius; tower variant scaled in item_visuals)",
-        "target_extent": 0.95,
+        "target_extent": 0.62,
     },
     # v437 ranged
     "assets/equipment/weapons/training_bow/training_bow.glb": {
         "uuid": "e1abc1c7-47db-48c3-9c65-0879273e8bc8",
         "origin": "https://poly.pizza/m/QnpqjLSKFU (Wooden Bow by Quaternius)",
-        "target_extent": 1.20,
+        "target_extent": 1.05,
     },
     "assets/equipment/weapons/starter_staff/starter_staff.glb": {
         "uuid": "18031dd6-1a26-4fa1-bd09-53c45bd31880",
         "origin": "https://poly.pizza/m/PnGRvO4Lwd (Staff by Quaternius)",
-        "target_extent": 1.50,
+        "target_extent": 1.28,
     },
     # v438 armor
     "assets/equipment/armor/helm/helm.glb": {
         "uuid": "34f2a899-7f26-4161-98f6-734f9f979d8f",
         "origin": "https://poly.pizza/m/apPuLbVJ4N5 (Viking Helmet by Michael Fuchs)",
-        "target_extent": 0.32,
+        "target_extent": 0.21,
     },
     "assets/equipment/armor/chest/chest.glb": {
         "uuid": "60ccfcdb-6aa7-4caf-a688-9b16a2a5f300",
         "origin": "https://poly.pizza/m/TMUoxILh9w (Armor Metal by Quaternius)",
-        "target_extent": 0.55,
+        "target_extent": 0.36,
     },
     "assets/equipment/armor/gloves/gloves.glb": {
         "uuid": "5bcc01d6-1f10-4e50-837f-1b53ba398c60",
         "origin": "https://poly.pizza/m/l1zv4LaA4I (Glove by Quaternius)",
-        "target_extent": 0.28,
+        "target_extent": 0.18,
     },
     "assets/equipment/armor/boots/boots.glb": {
         "uuid": "888317ad-20f0-4b0d-ba01-0bdd017adfd8",
         "origin": "https://poly.pizza/m/7HbqG8RwRcA (Boots by Poly by Google)",
-        "target_extent": 0.34,
+        "target_extent": 0.22,
     },
     "assets/equipment/armor/amulet/amulet.glb": {
         "uuid": "2afce515-0123-40df-9740-23e5b97725e4",
         "origin": "https://poly.pizza/m/Jvhs8DCNDZ (Necklace by Quaternius)",
-        "target_extent": 0.22,
+        "target_extent": 0.14,
     },
     "assets/equipment/armor/ring/ring.glb": {
         "uuid": "c68bce85-929c-442b-b388-ab9d5fd6327c",
         "origin": "https://poly.pizza/m/f9AVG7oFxBi (Ring by Poly by Google)",
-        "target_extent": 0.10,
+        "target_extent": 0.07,
     },
 }
 
@@ -143,6 +143,14 @@ def _normalize_extent(
         positions_by_accessor[accessor_index] = scaled
 
 
+def _flatten_node_scales(gltf: dict) -> None:
+    """Poly Pizza exports often keep cm mesh data under node scale=100; vertices are
+    normalized to meters in accessors, so non-identity node scales double-apply size."""
+    for node in gltf.get("nodes", []):
+        if "scale" in node:
+            del node["scale"]
+
+
 def import_one(source_rel: str, spec: dict[str, object]) -> tuple[Path, str]:
     source_path = ROOT / str(source_rel)
     runtime_rel = str(source_rel).replace("assets/", "client/assets/", 1)
@@ -154,6 +162,7 @@ def import_one(source_rel: str, spec: dict[str, object]) -> tuple[Path, str]:
     bin_buf = bytearray(chunked.bin_blob)
     positions = _positions_by_accessor(chunked.gltf, bytes(bin_buf))
     _normalize_extent(chunked.gltf, bin_buf, positions, float(spec["target_extent"]))
+    _flatten_node_scales(chunked.gltf)
     normalized = write_glb(chunked.gltf, bytes(bin_buf))
 
     source_path.parent.mkdir(parents=True, exist_ok=True)

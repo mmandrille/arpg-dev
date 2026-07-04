@@ -15,6 +15,7 @@ class_name EquipmentVisualResolver
 
 const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
+const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
 const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
 const FALLBACK_ASSET_BY_SLOT := {
 	"head": "fallback_equipment_head_v0",
@@ -198,7 +199,7 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 			return
 		inst = (packed as PackedScene).instantiate()
 	inst.name = asset_id
-	_apply_transform(inst, _local_transform_for_slot(slot, vis))
+	_apply_transform(inst, _local_transform_for_slot(slot, vis), procedural_fallback == null)
 	_apply_model_root_scale_compensation(inst, socket)
 	var rarity := str(item.get("rarity", "common")).to_lower()
 	var tint: Color = RARITY_TINTS.get(rarity, RARITY_TINTS["common"])
@@ -307,7 +308,7 @@ func _clear_mounted(slot: String) -> void:
 	_mounted_nodes.erase(slot)
 
 
-func _apply_transform(node: Node3D, t: Dictionary) -> void:
+func _apply_transform(node: Node3D, t: Dictionary, apply_glb_mesh_multiplier: bool = false) -> void:
 	if t == null or t.is_empty():
 		return
 	var p = t.get("position", {})
@@ -315,7 +316,12 @@ func _apply_transform(node: Node3D, t: Dictionary) -> void:
 	var r = t.get("rotation_degrees", {})
 	node.rotation_degrees = Vector3(r.get("x", 0.0), r.get("y", 0.0), r.get("z", 0.0))
 	var s = t.get("scale", {})
-	node.scale = Vector3(s.get("x", 1.0), s.get("y", 1.0), s.get("z", 1.0))
+	var mesh_mult := EquipmentDisplayLoaderScript.equipped_multiplier() if apply_glb_mesh_multiplier else 1.0
+	node.scale = Vector3(
+		float(s.get("x", 1.0)) * mesh_mult,
+		float(s.get("y", 1.0)) * mesh_mult,
+		float(s.get("z", 1.0)) * mesh_mult,
+	)
 
 
 func _apply_model_root_scale_compensation(node: Node3D, socket: Node) -> void:

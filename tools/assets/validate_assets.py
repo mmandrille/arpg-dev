@@ -84,6 +84,28 @@ def parse_glb_skin_joint_names(path: Path) -> set[str] | None:
         return None
 
 
+def parse_glb_non_unit_node_scales(path: Path, tolerance: float = 0.01) -> list[tuple[str, list[float]]]:
+    """Return [(node_name, scale)] for glTF nodes whose scale is not ~identity."""
+    try:
+        data = path.read_bytes()
+        if len(data) < 20 or data[0:4] != b"glTF":
+            return []
+        chunk_len, chunk_type = struct.unpack_from("<II", data, 12)
+        if chunk_type != 0x4E4F534A:  # 'JSON'
+            return []
+        gltf = json.loads(data[20 : 20 + chunk_len].decode("utf-8"))
+        issues: list[tuple[str, list[float]]] = []
+        for node in gltf.get("nodes", []):
+            scale = node.get("scale")
+            if not isinstance(scale, list) or len(scale) != 3:
+                continue
+            if any(abs(float(value) - 1.0) > tolerance for value in scale):
+                issues.append((str(node.get("name", "?")), [float(value) for value in scale]))
+        return issues
+    except Exception:  # noqa: BLE001
+        return ["?", [0.0]]
+
+
 def sha256_of(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -159,6 +181,26 @@ def validate(root: Path, report: Report) -> None:
             report.fail("equipment slot", f"{asset_id}: equipment entry missing slot")
         elif entry["type"] == "equipment":
             report.ok(f"{asset_id} declares slot {entry['slot']}")
+
+    # [3b] imported equipment GLBs must not keep cm-scale glTF node transforms.
+    print("[3b] equipment GLB node scales")
+    for asset_id, entry in sorted(assets.items()):
+        if entry.get("type") != "equipment":
+            continue
+        runtime_rel = str(entry.get("runtime_path", ""))
+        if "/equipment/" not in runtime_rel:
+            continue
+        origin = str(entry.get("provenance", {}).get("origin", ""))
+        if "poly.pizza" not in origin.lower():
+            continue
+        rt = root / runtime_rel
+        if not rt.is_file():
+            continue
+        issues = parse_glb_non_unit_node_scales(rt)
+        if issues:
+            report.fail("equipment node scale", f"{asset_id}: non-identity node scales {issues}")
+        else:
+            report.ok(f"{asset_id} equipment GLB node scales are identity")
 
     # [4] visual->manifest resolution + slot agreement (spec §4.9 #2, #4).
     print("[4] item_visuals -> manifest resolution")

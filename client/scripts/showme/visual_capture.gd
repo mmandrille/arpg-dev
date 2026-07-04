@@ -16,6 +16,7 @@ const MainScript := preload("res://scripts/main.gd")
 const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
+const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
 
 const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
@@ -201,10 +202,18 @@ func _setup_gear() -> void:
 	_subject = character
 
 	await process_frame
+	var resolver = EquipmentResolverScript.new(character)
 	if _class_id != "":
 		_apply_class_model(character, _class_id)
-	var resolver = EquipmentResolverScript.new(character)
+		resolver.set_character_class(_class_id)
+	await process_frame
+	await process_frame
 	resolver.apply_snapshot(_gear_snapshot(_items))
+	var ap := character.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap != null:
+		ap.play("idle")
+	await process_frame
+	await process_frame
 
 
 func _apply_class_model(character: Node3D, class_id: String) -> void:
@@ -220,6 +229,7 @@ func _apply_class_model(character: Node3D, class_id: String) -> void:
 	model.name = "ModelRoot"
 	model.scale = Vector3.ONE * float(resolved.get("scale", 1.0))
 	model.position.y = float(resolved.get("height_offset", 0.0))
+	ClassIdleStanceScript.apply_to_model(model, class_id)
 	character.add_child(model)
 	character.move_child(model, 0)
 	var ap := character.find_child("AnimationPlayer", true, false) as AnimationPlayer

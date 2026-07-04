@@ -25,6 +25,25 @@ func _ready() -> void:
 	_ensure_gear_sockets()
 
 
+func refresh_gear_sockets() -> void:
+	_remove_gear_socket_nodes()
+	_ensure_gear_sockets()
+
+
+func _remove_gear_socket_nodes() -> void:
+	var skel := find_child("Skeleton3D", true, false) as Skeleton3D
+	var socket_names: Array = GearSocketsLoaderScript.sockets_for_class(class_id).keys()
+	if skel != null:
+		for child in skel.get_children():
+			if socket_names.has(child.name):
+				child.queue_free()
+		return
+	for socket_name in socket_names:
+		var existing := find_child(str(socket_name), true, false)
+		if existing != null:
+			existing.queue_free()
+
+
 func _ensure_gear_sockets() -> void:
 	var skel := find_child("Skeleton3D", true, false) as Skeleton3D
 	if skel == null:
@@ -40,12 +59,16 @@ func _ensure_gear_sockets() -> void:
 		var bone_name := str(entry.get("bone", ""))
 		if bone_name == "":
 			continue
+		var bone_idx := skel.find_bone(bone_name)
+		if bone_idx < 0:
+			push_warning("[character] bone %s not found for socket %s" % [bone_name, socket_name])
+			continue
 		var att := BoneAttachment3D.new()
 		att.name = str(socket_name)
 		skel.add_child(att)
-		att.bone_name = bone_name
+		att.bone_idx = bone_idx
 		if att.bone_idx < 0:
-			push_warning("[character] bone %s not found for socket %s" % [bone_name, socket_name])
+			att.queue_free()
 			continue
 		_apply_socket_transform(att, entry)
 
@@ -76,4 +99,4 @@ func _apply_socket_transform(att: BoneAttachment3D, entry: Dictionary) -> void:
 
 
 func _ensure_weapon_socket() -> void:
-	_ensure_gear_sockets()
+	refresh_gear_sockets()

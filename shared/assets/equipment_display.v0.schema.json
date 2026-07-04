@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/equipment_display.v0.schema.json",
+  "title": "Equipment display scale (v0)",
+  "description": "Global multipliers for Tier-3 GLB equipment relative to the humanoid reference (~1.8m).",
+  "type": "object",
+  "required": ["version", "glb_mesh_multipliers"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "glb_mesh_multipliers": {
+      "type": "object",
+      "required": ["equipped", "ground"],
+      "additionalProperties": false,
+      "properties": {
+        "equipped": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "ground": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        }
+      }
+    }
+  }
+}

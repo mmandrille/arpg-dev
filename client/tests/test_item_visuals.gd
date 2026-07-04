@@ -15,9 +15,11 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 const WallRendererScript := preload("res://scripts/wall_renderer.gd")
 const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
+const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
 const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 const ScaleProbeScript := preload("res://tests/item_visual_scale_probe.gd")
 const EquipmentProbeScript := preload("res://tests/item_visual_equipment_probe.gd")
+const EquippedGearFitProbeScript := preload("res://tests/equipped_gear_fit_probe.gd")
 const InteractableProbeScript := preload("res://tests/item_visual_interactable_probe.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 
@@ -80,6 +82,8 @@ func _run_all() -> void:
 			_fail("item_visuals is missing equippable template %s" % item_def_id)
 			return
 
+	if not await EquippedGearFitProbeScript.new().verify_all_classes(self, Callable(self, "_fail")):
+		return
 	if not EquipmentProbeScript.new().verify_equipped_fallback_resolver(self, Callable(self, "_fail")):
 		return
 	var scale_ctx := ScaleProbeScript.new().prepare(self, MainScript, CharacterScene, ResolverScript, Callable(self, "_fail"))
@@ -202,8 +206,10 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		sword_node.free()
 		main.free()
 		return false
-	if absf(sword_model.scale.x - 1.0) > 0.001 or absf(sword_model.scale.y - 1.0) > 0.001 or absf(sword_model.scale.z - 1.0) > 0.001:
-		_fail("equipment floor loot model was not scaled to 100%%: %s" % str(sword_model.scale))
+	var rusty_ground: Dictionary = ItemRulesLoader.item_presentations.get("rusty_sword", {}).get("ground", {})
+	var expected_ground_scale := float(rusty_ground.get("scale", 1.0)) * EquipmentDisplayLoaderScript.ground_multiplier()
+	if absf(sword_model.scale.x - expected_ground_scale) > 0.001 or absf(sword_model.scale.y - expected_ground_scale) > 0.001 or absf(sword_model.scale.z - expected_ground_scale) > 0.001:
+		_fail("equipment floor loot model scale mismatch want=%s got=%s" % [str(expected_ground_scale), str(sword_model.scale)])
 		sword_node.free()
 		main.free()
 		return false

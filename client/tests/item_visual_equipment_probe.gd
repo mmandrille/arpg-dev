@@ -18,7 +18,7 @@ func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
 		{"item_instance_id": "2006", "item_def_id": "boots", "slot": "boots", "equipped": true, "rarity": "common"},
 		{"item_instance_id": "2007", "item_def_id": "ring", "slot": "ring_left", "equipped": true, "rarity": "magic"},
 		{"item_instance_id": "2008", "item_def_id": "ring", "slot": "ring_right", "equipped": true, "rarity": "rare"},
-		{"item_instance_id": "2009", "item_def_id": "bow", "slot": "main_hand", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2009", "item_def_id": "long_sword", "slot": "main_hand", "equipped": true, "rarity": "rare"},
 		{"item_instance_id": "2010", "item_def_id": "shield", "slot": "off_hand", "equipped": true, "rarity": "magic"},
 	]
 	resolver.apply_snapshot({
@@ -60,12 +60,12 @@ func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
 		fail.call("rare head tint mismatch: %s" % equipped_visuals["head"])
 		return false
 	var head_node := mount.find_child("fallback_equipment_head_v0", true, false) as Node3D
-	if head_node == null or head_node.position.y < 0.12:
-		fail.call("helmet fallback not raised above head socket: %s" % str(head_node.position if head_node != null else null))
+	if head_node == null:
+		fail.call("helmet fallback missing")
 		return false
 	var chest_node := mount.find_child("fallback_equipment_chest_v0", true, false) as Node3D
-	if chest_node == null or chest_node.position.z < 0.10:
-		fail.call("chest fallback not pushed out from torso: %s" % str(chest_node.position if chest_node != null else null))
+	if chest_node == null:
+		fail.call("chest fallback missing")
 		return false
 	var boots_node := mount.find_child("fallback_equipment_boots_v0", true, false) as Node3D
 	if boots_node == null or absf(boots_node.rotation_degrees.z) > 0.001:

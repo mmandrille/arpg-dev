@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/attack_presentation.v0.schema.json",
+  "title": "Attack presentation clip selection (v0)",
+  "type": "object",
+  "required": ["version", "clips"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "clips": {
+      "type": "object",
+      "required": ["melee_one_handed_main", "melee_one_handed_off", "melee_two_handed", "ranged_bow", "ranged_staff"],
+      "additionalProperties": false,
+      "properties": {
+        "melee_one_handed_main": { "type": "string", "minLength": 1 },
+        "melee_one_handed_off": { "type": "string", "minLength": 1 },
+        "melee_two_handed": { "type": "string", "minLength": 1 },
+        "ranged_bow": { "type": "string", "minLength": 1 },
+        "ranged_staff": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -97,6 +97,12 @@ func _character_clips() -> Dictionary:
 			"spine": [[0.0, 0, 0, 0], [0.12, 0, 0, -9], [0.35, 0, 0, 0]],
 			"arm_l": [[0.0, 0, 0, 0], [0.12, -125, 0, -46], [0.35, 0, 0, 0]],
 		}},
+		# attack_2h: both arms + spine for two-handed weapons.
+		"attack_2h": {"length": 0.4, "loop": false, "bones": {
+			"spine": [[0.0, 0, 0, 0], [0.14, 0, 0, -12], [0.4, 0, 0, 0]],
+			"arm_r": [[0.0, 0, 0, 0], [0.14, -95, 0, 0], [0.4, 0, 0, 0]],
+			"arm_l": [[0.0, 0, 0, 0], [0.14, -95, 0, 0], [0.4, 0, 0, 0]],
+		}},
 		# hit: brief backward wobble on authoritative player damage.
 		"hit": {"length": 0.25, "loop": false, "bones": {
 			"spine": [[0.0, 0, 0, 0], [0.08, -14, 0, 0], [0.25, 0, 0, 0]],

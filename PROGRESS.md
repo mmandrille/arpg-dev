@@ -23,7 +23,7 @@ Last updated: 2026-07-04 (v430 barbarian tier-3 mesh swap)
 
 | Field | Value |
 |-------|-------|
-Last updated: 2026-07-04 (v433 ranger tier-3 mesh swap — hero Tier-3 batch complete)
+Last updated: 2026-07-04 (v434 humanoid skeleton v2)
 
 ---
 
@@ -31,9 +31,9 @@ Last updated: 2026-07-04 (v433 ranger tier-3 mesh swap — hero Tier-3 batch com
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v433 — ranger tier-3 mesh swap |
-| **CI gate** | 2026-07-04 — `make ci` green (hero Tier-3 batch + animation-strip fix) |
-| **Next slice** | TBD (`/next`) |
+| **Latest completed slice** | v434 — humanoid skeleton v2 |
+| **CI gate** | 2026-07-04 — focused verification green (autoloop batch; final `make ci` pending) |
+| **Next slice** | v435 — bone-gear-sockets |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
 | **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |
 

@@ -16,7 +16,25 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-REQUIRED_BONES = ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"]
+REQUIRED_BONES = [
+    "root",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "arm_l",
+    "elbow_l",
+    "hand_l",
+    "arm_r",
+    "elbow_r",
+    "hand_r",
+    "leg_l",
+    "knee_l",
+    "foot_l",
+    "leg_r",
+    "knee_r",
+    "foot_r",
+]
 
 HEROES = {
     "barbarian": (
@@ -346,6 +364,18 @@ def _normalize_mesh_height(
         positions_by_accessor[accessor_index] = read_position_accessor(gltf, bytes(bin_buf), accessor_index)
 
 
+def _lerp3(
+    a: tuple[float, float, float],
+    b: tuple[float, float, float],
+    t: float,
+) -> tuple[float, float, float]:
+    return (
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t,
+        a[2] + (b[2] - a[2]) * t,
+    )
+
+
 def _joint_globals(mins: list[float], maxs: list[float]) -> list[tuple[float, float, float]]:
     cx = (mins[0] + maxs[0]) * 0.5
     cy = mins[1]
@@ -357,29 +387,108 @@ def _joint_globals(mins: list[float], maxs: list[float]) -> list[tuple[float, fl
     leg_x = width * 0.12
     hand_z = depth * 0.18
 
+    root = (cx, cy, cz)
+    spine = (cx, cy + height * 0.575, cz)
+    chest = (cx, cy + height * 0.68, cz)
+    neck = (cx, cy + height * 0.85, cz)
+    head = (cx, cy + height * 0.92, cz)
+    arm_l = (cx - shoulder_x, cy + height * 0.75, cz)
+    hand_l = (cx - shoulder_x, cy + height * 0.41, cz + hand_z)
+    arm_r = (cx + shoulder_x, cy + height * 0.75, cz)
+    hand_r = (cx + shoulder_x, cy + height * 0.41, cz + hand_z)
+    leg_l = (cx - leg_x, cy + height * 0.45, cz)
+    leg_r = (cx + leg_x, cy + height * 0.45, cz)
+    foot_l = (cx - leg_x, cy + height * 0.05, cz)
+    foot_r = (cx + leg_x, cy + height * 0.05, cz)
+
     return [
-        (cx, cy, cz),
-        (cx, cy + height * 0.575, cz),
-        (cx - shoulder_x, cy + height * 0.75, cz),
-        (cx - shoulder_x, cy + height * 0.41, cz + hand_z),
-        (cx + shoulder_x, cy + height * 0.75, cz),
-        (cx + shoulder_x, cy + height * 0.41, cz + hand_z),
-        (cx - leg_x, cy + height * 0.45, cz),
-        (cx + leg_x, cy + height * 0.45, cz),
+        root,
+        spine,
+        chest,
+        neck,
+        head,
+        arm_l,
+        _lerp3(arm_l, hand_l, 0.5),
+        hand_l,
+        arm_r,
+        _lerp3(arm_r, hand_r, 0.5),
+        hand_r,
+        leg_l,
+        _lerp3(leg_l, foot_l, 0.5),
+        foot_l,
+        leg_r,
+        _lerp3(leg_r, foot_r, 0.5),
+        foot_r,
     ]
 
 
 def _joint_nodes(joint_globals: list[tuple[float, float, float]], offset: int) -> list[dict]:
-    root, spine, arm_l, hand_l, arm_r, hand_r, leg_l, leg_r = joint_globals
+    (
+        root,
+        spine,
+        chest,
+        neck,
+        head,
+        arm_l,
+        elbow_l,
+        hand_l,
+        arm_r,
+        elbow_r,
+        hand_r,
+        leg_l,
+        knee_l,
+        foot_l,
+        leg_r,
+        knee_r,
+        foot_r,
+    ) = joint_globals
+
     return [
-        {"name": "root", "translation": list(root), "children": [offset + 1, offset + 6, offset + 7]},
-        {"name": "spine", "translation": _delta(root, spine), "children": [offset + 2, offset + 4]},
-        {"name": "arm_l", "translation": _delta(spine, arm_l), "children": [offset + 3]},
-        {"name": "hand_l", "translation": _delta(arm_l, hand_l)},
-        {"name": "arm_r", "translation": _delta(spine, arm_r), "children": [offset + 5]},
-        {"name": "hand_r", "translation": _delta(arm_r, hand_r)},
-        {"name": "leg_l", "translation": _delta(root, leg_l)},
-        {"name": "leg_r", "translation": _delta(root, leg_r)},
+        {
+            "name": "root",
+            "translation": list(root),
+            "children": [offset + 1, offset + 11, offset + 14],
+        },
+        {
+            "name": "spine",
+            "translation": _delta(root, spine),
+            "children": [offset + 2],
+        },
+        {
+            "name": "chest",
+            "translation": _delta(spine, chest),
+            "children": [offset + 3, offset + 5, offset + 8],
+        },
+        {"name": "neck", "translation": _delta(chest, neck), "children": [offset + 4]},
+        {"name": "head", "translation": _delta(neck, head)},
+        {
+            "name": "arm_l",
+            "translation": _delta(chest, arm_l),
+            "children": [offset + 6],
+        },
+        {"name": "elbow_l", "translation": _delta(arm_l, elbow_l), "children": [offset + 7]},
+        {"name": "hand_l", "translation": _delta(elbow_l, hand_l)},
+        {
+            "name": "arm_r",
+            "translation": _delta(chest, arm_r),
+            "children": [offset + 9],
+        },
+        {"name": "elbow_r", "translation": _delta(arm_r, elbow_r), "children": [offset + 10]},
+        {"name": "hand_r", "translation": _delta(elbow_r, hand_r)},
+        {
+            "name": "leg_l",
+            "translation": _delta(root, leg_l),
+            "children": [offset + 12],
+        },
+        {"name": "knee_l", "translation": _delta(leg_l, knee_l), "children": [offset + 13]},
+        {"name": "foot_l", "translation": _delta(knee_l, foot_l)},
+        {
+            "name": "leg_r",
+            "translation": _delta(root, leg_r),
+            "children": [offset + 15],
+        },
+        {"name": "knee_r", "translation": _delta(leg_r, knee_r), "children": [offset + 16]},
+        {"name": "foot_r", "translation": _delta(knee_r, foot_r)},
     ]
 
 
@@ -405,16 +514,40 @@ def _joint_for_vertex(pos: tuple[float, float, float], mins: list[float], maxs: 
     yn = (y - mins[1]) / height
     side = x - cx
     arm_threshold = width * 0.20
+    right = side > 0.0
+
     # Mastjie A-pose meshes often retain horizontal T-pose shoulder caps around yn~0.5–0.65.
-    # Bind those to spine so shared character_anims arm rotations do not stretch them.
+    # Bind those to chest so shared character_anims arm rotations do not stretch them.
     if 0.52 <= yn < 0.68 and abs(side) >= arm_threshold * 0.85:
-        return 1
+        return 2
+
+    if yn >= 0.90:
+        return 4
+
+    if yn >= 0.84:
+        return 3
+
+    if 0.68 <= yn < 0.84 and abs(side) < arm_threshold * 0.75:
+        return 2
+
     if 0.68 <= yn <= 0.88 and abs(side) >= arm_threshold:
-        return 4 if side > 0.0 else 2
+        return 8 if right else 5
+
+    if 0.52 <= yn < 0.68 and abs(side) >= arm_threshold * 0.85:
+        return 9 if right else 6
+
     if 0.35 <= yn < 0.52 and abs(side) >= arm_threshold * 0.85:
-        return 5 if side > 0.0 else 3
+        return 10 if right else 7
+
+    if yn < 0.12:
+        return 16 if right else 13
+
+    if yn < 0.35:
+        return 15 if right else 12
+
     if yn < 0.52:
-        return 7 if side > 0.0 else 6
+        return 14 if right else 11
+
     return 1
 
 

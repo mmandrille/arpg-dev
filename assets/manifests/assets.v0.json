@@ -32,17 +32,26 @@
       "required_nodes": [
         "root",
         "spine",
+        "chest",
+        "neck",
+        "head",
         "arm_l",
+        "elbow_l",
         "hand_l",
         "arm_r",
+        "elbow_r",
         "hand_r",
         "leg_l",
-        "leg_r"
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
       ],
       "provenance": {
         "origin": "https://poly.pizza/m/GorWw41SFf (Male Fighter by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/barbarian/goliath_barbarian_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "4198ec3bb4ccf9e9dd1355642cd313004387c6f687d3a8ac92fcb7b7c6afb2a2"
+        "sha256": "80a6ef3d30702c97b51369649ecb6683df9ef49dab292bdb57454e2c2d078a89"
       }
     },
     "character_sorcerer_v0": {
@@ -54,17 +63,26 @@
       "required_nodes": [
         "root",
         "spine",
+        "chest",
+        "neck",
+        "head",
         "arm_l",
+        "elbow_l",
         "hand_l",
         "arm_r",
+        "elbow_r",
         "hand_r",
         "leg_l",
-        "leg_r"
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
       ],
       "provenance": {
         "origin": "https://poly.pizza/m/6kY9VaAfPv (Wizard by Polygonal Mind); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/sorcerer/mage_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "b3bd220e5ba411b2933014f217d7e20e90c7082ea358a1271c0dd2bae7d34f71"
+        "sha256": "f1173c1bbc69d4490298f329499a8d7a8a382f6a08713b94e9fdcc14060c98a8"
       }
     },
     "character_paladin_v0": {
@@ -76,17 +94,26 @@
       "required_nodes": [
         "root",
         "spine",
+        "chest",
+        "neck",
+        "head",
         "arm_l",
+        "elbow_l",
         "hand_l",
         "arm_r",
+        "elbow_r",
         "hand_r",
         "leg_l",
-        "leg_r"
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
       ],
       "provenance": {
         "origin": "https://poly.pizza/m/RaWl2GJ0NZ (Warrior by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/paladin/knight_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "5fabc96c84b4184c6624159fbc03be836b04b568786e867639b42ba6516d4e4a"
+        "sha256": "f151aeedae61325c7c24d59cb16731c4ab4997a7380a584ca8b4228ce237b4ae"
       }
     },
     "character_rogue_v0": {
@@ -98,17 +125,26 @@
       "required_nodes": [
         "root",
         "spine",
+        "chest",
+        "neck",
+        "head",
         "arm_l",
+        "elbow_l",
         "hand_l",
         "arm_r",
+        "elbow_r",
         "hand_r",
         "leg_l",
-        "leg_r"
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
       ],
       "provenance": {
         "origin": "https://poly.pizza/m/NfMffTkeBa (Female Fighter by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/rogue/assasine_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "bb827670e539164ccee279b3bc5fcdc7edc9a6934b70160c9db2a98d38b8319b"
+        "sha256": "170e3779ebba893f7b07adc518ec43408f71a797667447dba95ef8df24e1fb55"
       }
     },
     "character_ranger_v0": {
@@ -120,17 +156,26 @@
       "required_nodes": [
         "root",
         "spine",
+        "chest",
+        "neck",
+        "head",
         "arm_l",
+        "elbow_l",
         "hand_l",
         "arm_r",
+        "elbow_r",
         "hand_r",
         "leg_l",
-        "leg_r"
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
       ],
       "provenance": {
         "origin": "https://poly.pizza/m/o6i43Vacwc (Warrior by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/ranger/green_hood_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "0402dcc7205a8dd6a895bed2d32e3543a901243585089f64882008f607f5d752"
+        "sha256": "a82b5984dd26a642221aaaa2be0cafa82639903da4123b973135962d162af7f6"
       }
     },
     "weapon_rusty_sword_v0": {

@@ -246,7 +246,11 @@ func _test_class_character_models() -> void:
 		var skel := model.find_child("Skeleton3D", true, false) as Skeleton3D
 		_assert(skel != null, "%s model missing Skeleton3D" % class_id)
 		if skel != null:
-			for bone in ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"]:
+			for bone in [
+				"root", "spine", "chest", "neck", "head",
+				"arm_l", "elbow_l", "hand_l", "arm_r", "elbow_r", "hand_r",
+				"leg_l", "knee_l", "foot_l", "leg_r", "knee_r", "foot_r",
+			]:
 				_assert(skel.find_bone(bone) >= 0, "%s model missing bone %s" % [class_id, bone])
 		model.free()
 		await process_frame

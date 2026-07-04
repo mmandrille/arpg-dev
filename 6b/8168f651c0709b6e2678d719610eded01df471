@@ -1,0 +1,42 @@
+client/assets/characters/rogue/rogue_Cards_Atlas.png.import
+  s_47c91f4feb7c91::t_37a5f33adb4afe 1-43
+docs/plans/v431_2026-07-04-rogue-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_d4de2ffee47c12 1-6
+  s_47c91f4feb7c91::t_0b87c84ec725ab 7-9
+tools/assets/test_rig_hero_glbs.py
+  s_47c91f4feb7c91::t_8286d5a6d19ddc 134-139
+tools/bot/scenarios/client/94_rogue_tier3_visual.json
+  s_47c91f4feb7c91::t_3a552ef7d3b275 1-8,10-20,27-28,30,32,34-46
+  s_47c91f4feb7c91::t_d2f531f5f6fa39 9,21-26,29,31,33
+docs/as-built/v431_rogue-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_ecc63619050f43 1-19
+docs/specs/v431_spec-rogue-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_7b5afc2590787e 1-22
+assets/characters/rogue/README.md
+  s_47c91f4feb7c91::t_c9c612abbdb2b3 1-22
+PROGRESS.md
+  s_47c91f4feb7c91::t_dc06e74ee3c94c 26-28
+assets/manifests/assets.v0.json
+  s_47c91f4feb7c91::t_fe5e43cca83783 109-110
+  s_47c91f4feb7c91::t_dcc9b0096a523a 111
+tools/assets/rig_hero_glbs.py
+  s_47c91f4feb7c91::t_08d1397001b619 48
+docs/progress/slice-lifecycle.md
+  s_47c91f4feb7c91::t_5bf41654a92b04 430
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6b8168f651c0709b6e2678d719610eded01df471",
+  "prompts": {},
+  "sessions": {
+    "s_47c91f4feb7c91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "26610c73-98fa-4acd-a133-bc38edadb697",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

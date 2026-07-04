@@ -1,0 +1,29 @@
+tools/bot/scenarios/client/19_skill_points_and_magic_bolt.json
+  s_bcb8a5c79e7927::t_89225dc49a704a 67
+  s_bcb8a5c79e7927::t_1185bd4bdc3e87 73
+  s_bcb8a5c79e7927::t_a0fd21aafd7954 19,76,85,114
+  s_bcb8a5c79e7927::t_6fbd9e2935da78 111
+  s_bcb8a5c79e7927::t_0017dda85d476e 82
+tools/bot/scenarios/client/56_mercenary_stats_card.json
+  s_bcb8a5c79e7927::t_be3e4001a3f613 59,62
+tools/bot/scenarios/client/64_mercenary_combat_stats.json
+  s_bcb8a5c79e7927::t_724bba52e20f25 59,65
+tools/bot/scenarios/client/69_mercenary_offer_variant_ui.json
+  s_bcb8a5c79e7927::t_7f6507809bc518 64,69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ca2d9567eacab8044108012af6514561eefd3282",
+  "prompts": {},
+  "sessions": {
+    "s_bcb8a5c79e7927": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7d4f49d2-cde2-4fdf-aa22-9fa0825a9cf5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

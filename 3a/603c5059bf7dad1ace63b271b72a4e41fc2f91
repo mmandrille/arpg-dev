@@ -1,0 +1,38 @@
+docs/plans/v433_2026-07-04-ranger-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_0a3e7321d98cc7 1-7
+PROGRESS.md
+  s_47c91f4feb7c91::t_7b44ec2a382500 26-36
+client/assets/characters/ranger/ranger_100Avatars_019_Wizzir.png.import
+  s_47c91f4feb7c91::t_4f0eb7f0b0e7f0 1-43
+docs/progress/slice-lifecycle.md
+  s_47c91f4feb7c91::t_e3e8b8b3025fd0 432
+tools/bot/scenarios/client/96_ranger_tier3_visual.json
+  s_47c91f4feb7c91::t_aec8db18507979 1-46
+assets/manifests/assets.v0.json
+  s_47c91f4feb7c91::t_195687a5c28c76 131-132
+  s_47c91f4feb7c91::t_3570c22888f05d 133
+docs/as-built/v433_ranger-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_c435db8ef158cd 1-20
+docs/specs/v433_spec-ranger-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_fff8c330f8fe02 1-13
+assets/characters/ranger/README.md
+  s_47c91f4feb7c91::t_056d2d676e7fc7 1-21
+tools/assets/test_rig_hero_glbs.py
+  s_47c91f4feb7c91::t_bd977797c50c39 146-151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3a603c5059bf7dad1ace63b271b72a4e41fc2f91",
+  "prompts": {},
+  "sessions": {
+    "s_47c91f4feb7c91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "26610c73-98fa-4acd-a133-bc38edadb697",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+tools/bot/run.py
+  s_bcb8a5c79e7927::t_0bb2fd2442b41b 958
+  s_bcb8a5c79e7927::t_d1bcc2a1de5bca 1972,1984
+tools/bot/movement_runtime.py
+  s_bcb8a5c79e7927::t_edda7a9f5a6880 104,113,115-120
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_bcb8a5c79e7927::t_75b1d0c25b2289 49-55,77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "dd037a1608f6e70a395a8b1894134a3365572771",
+  "prompts": {},
+  "sessions": {
+    "s_bcb8a5c79e7927": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7d4f49d2-cde2-4fdf-aa22-9fa0825a9cf5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

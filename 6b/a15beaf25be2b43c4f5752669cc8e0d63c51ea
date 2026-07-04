@@ -1,0 +1,23 @@
+docs/as-built/v437_weapons-tier3-ranged.md
+  s_7bdc2687bb052d::t_9127012c32000e 1-14
+docs/specs/v437_spec-weapons-tier3-ranged.md
+  s_7bdc2687bb052d::t_48792e7c86dac1 1-14
+docs/plans/v437_2026-07-04-weapons-tier3-ranged.md
+  s_7bdc2687bb052d::t_74719f252d3149 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6ba15beaf25be2b43c4f5752669cc8e0d63c51ea",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

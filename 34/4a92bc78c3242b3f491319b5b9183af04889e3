@@ -1,0 +1,23 @@
+skills/showme/scripts/render_focus.py
+  s_ca4868bac46551::t_24242715dab602 24
+  s_ca4868bac46551::t_20727cba31ffc7 77-78
+client/scripts/showme/visual_capture.gd
+  s_ca4868bac46551::t_a1b7e63cf77d43 106-107
+  s_ca4868bac46551::t_41d05a8efcd0a7 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "344a92bc78c3242b3f491319b5b9183af04889e3",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

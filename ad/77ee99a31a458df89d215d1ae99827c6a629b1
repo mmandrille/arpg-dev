@@ -1,0 +1,21 @@
+docs/researchs/agent-visual-improvement-playbook.md
+  s_949141f89be97e::t_e986b4a5fa5115 1-45
+docs/as-built/v425_ai-body-mesh-workflow.md
+  s_949141f89be97e::t_6d5ff1a830f8c6 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ad77ee99a31a458df89d215d1ae99827c6a629b1",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

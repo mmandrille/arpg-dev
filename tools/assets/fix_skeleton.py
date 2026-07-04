@@ -6,6 +6,10 @@ Usage:
   python3 tools/assets/fix_skeleton.py --dry-run  # print changes without writing
   python3 tools/assets/fix_skeleton.py --delta hand_r=0,-0.1,0 --delta foot_r=0,-0.05,0
 
+NOTE: This script applies ADDITIVE deltas — running it twice doubles the offsets.
+      Run with --dry-run first to inspect current bone positions before applying.
+      The committed barbarian.glb already has DEFAULT_DELTAS applied as of v443.
+
 All barbarian bones have identity rotation, so the IBM for each joint is simply:
   [ 1  0  0  -tx ]
   [ 0  1  0  -ty ]

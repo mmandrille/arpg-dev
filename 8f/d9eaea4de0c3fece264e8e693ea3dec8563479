@@ -1,0 +1,41 @@
+shared/assets/item_visuals.v0.json
+  s_949141f89be97e::t_af06fe2b55b1d7 93
+  s_949141f89be97e::t_2b5a5c891c1afb 49
+  s_949141f89be97e::t_8f1b8c577c91ae 137
+  s_949141f89be97e::t_289f3152dd0f92 27
+client/assets/equipment/weapons/long_sword/long_sword.glb.import
+  s_949141f89be97e::t_8fa5fe7d541ee0 1-42
+tools/assets/gen_glb.py
+  s_949141f89be97e::t_7540d780e5fa86 470-514
+  s_949141f89be97e::t_ea27f79486dabb 645-646
+  s_949141f89be97e::t_ee5e2cfcc521b2 658-659
+assets/manifests/assets.v0.json
+  s_949141f89be97e::t_8fa5fe7d541ee0 162,176,190,204
+  s_949141f89be97e::t_c916a934aa729e 151-161,163-175,177-189,191-203,205-206
+client/assets/equipment/armor/shield/kite_shield.glb.import
+  s_949141f89be97e::t_8fa5fe7d541ee0 1-42
+docs/as-built/v423_weapon-variety-glbs.md
+  s_949141f89be97e::t_d6deb49ce25d4d 1-15
+client/assets/equipment/weapons/rapier/rapier.glb.import
+  s_949141f89be97e::t_8fa5fe7d541ee0 1-42
+client/assets/equipment/armor/shield/tower_shield.glb.import
+  s_949141f89be97e::t_8fa5fe7d541ee0 1-42
+client/tests/item_visual_scale_probe.gd
+  s_949141f89be97e::t_cbedba9c6464bb 28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8fd9eaea4de0c3fece264e8e693ea3dec8563479",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

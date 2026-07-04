@@ -1,0 +1,80 @@
+tools/bot/scenarios/skill_level_affix_lab.json
+  s_bcb8a5c79e7927::t_56bb03d57f9c88 45
+tools/bot/scenarios/70_paladin_sanctuary.json
+  s_bcb8a5c79e7927::t_1f6019088928ab 62-63
+tools/bot/scenarios/39_rage_and_heal_skills.json
+  s_bcb8a5c79e7927::t_5f46c305e5e5da 18,26
+  s_bcb8a5c79e7927::t_b7ad0a73203122 36,84,92
+tools/bot/scenarios/59_ranger_piercing_and_pinning_shots.json
+  s_bcb8a5c79e7927::t_c0f8fbf2ed72a0 53
+  s_bcb8a5c79e7927::t_e38420f9013d40 39,47
+  s_bcb8a5c79e7927::t_ed34983630d1fb 24
+tools/bot/scenarios/75_sorcerer_revive_companion.json
+  s_bcb8a5c79e7927::t_9b63014fa0afd8 93
+  s_bcb8a5c79e7927::t_ebc80e0ba770b8 77-82
+tools/bot/scenarios/96_mercenary_offer_variants.json
+  s_bcb8a5c79e7927::t_e7ccc9a4f9332d 42-47
+  s_bcb8a5c79e7927::t_001b36db675ea7 55
+tools/bot/scenarios/112_weapon_slot_families_lab.json
+  s_bcb8a5c79e7927::t_11c72de55bb518 6,8
+tools/bot/scenarios/32_skill_points_and_magic_bolt.json
+  s_bcb8a5c79e7927::t_9c66796dc9873b 179
+  s_bcb8a5c79e7927::t_3e725d508298ac 151
+  s_bcb8a5c79e7927::t_5e090be85e285d 42
+  s_bcb8a5c79e7927::t_623224b2f31552 20,23,139,142
+  s_bcb8a5c79e7927::t_93c0fb503cd3af 167,170
+  s_bcb8a5c79e7927::t_e633d7980d7a6d 147
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_bcb8a5c79e7927::t_e1232da4ad9fbe 172
+  s_bcb8a5c79e7927::t_7879b3c938878e 24
+tools/bot/scenarios/88_mercenary_hiring_board.json
+  s_bcb8a5c79e7927::t_1faae0fa2b353e 63-68
+  s_bcb8a5c79e7927::t_56efca0cd2080b 76
+tools/bot/scenarios/31_equipment_requirements_and_preview.json
+  s_bcb8a5c79e7927::t_2b8737d67ab121 90
+  s_bcb8a5c79e7927::t_54a04746fd5eb6 53
+  s_bcb8a5c79e7927::t_f610f6d6dba899 129
+tools/bot/scenarios/91_ranged_threats_hit_companions.json
+  s_bcb8a5c79e7927::t_84483d6566a580 24-25,29
+  s_bcb8a5c79e7927::t_1b1599c44d34a3 26
+tools/bot/scenarios/45_town_bishop_respec.json
+  s_bcb8a5c79e7927::t_8cd742c69d5afb 78,96,160
+  s_bcb8a5c79e7927::t_cd7f9b01067252 81,99,163
+  s_bcb8a5c79e7927::t_9e625f9b086367 144
+tools/bot/scenarios/60_ranger_volley_and_visual_showcase.json
+  s_bcb8a5c79e7927::t_0d2f1ffd827ca1 51
+tools/bot/scenarios/40_paladin_heal_skill.json
+  s_bcb8a5c79e7927::t_dca066c745b9dc 18,26
+  s_bcb8a5c79e7927::t_1ee653a5fca926 36,53,61,105
+  s_bcb8a5c79e7927::t_194033fabff4b3 21,29,39,56,64,108
+tools/bot/scenarios/45_class_second_combat_skills.json
+  s_bcb8a5c79e7927::t_3b123c0599f71d 28,36,46,91,99
+  s_bcb8a5c79e7927::t_66ac2965a547bf 88,96
+tools/bot/scenarios/43_paladin_holy_shield.json
+  s_bcb8a5c79e7927::t_5b90c5a02cbca4 18,26
+  s_bcb8a5c79e7927::t_33d3d834695b26 21,29,39,82,90
+  s_bcb8a5c79e7927::t_e900349175c1dc 36,79,87
+tools/bot/scenarios/110_armor_slot_families_lab.json
+  s_bcb8a5c79e7927::t_c92461dacc341a 8
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_bcb8a5c79e7927::t_eb00d2b07aec33 24
+  s_bcb8a5c79e7927::t_41f0a43fc8d37e 226
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_bcb8a5c79e7927::t_f55a8a81765fcd 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "936b8c61df1c3ed07fdfd9605f5dbb4b47e3d758",
+  "prompts": {},
+  "sessions": {
+    "s_bcb8a5c79e7927": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7d4f49d2-cde2-4fdf-aa22-9fa0825a9cf5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -56,13 +56,13 @@
     {
       "type": "wait_mercenary_panel",
       "hired_count": 1,
-      "selected_stance": "assist",
+      "selected_stance": "defend",
       "stats_card_contains": [
         "Damage:",
         "Attack:",
         "Defense:",
         "Accuracy:",
-        "Stance: Assist"
+        "Stance: Defend"
       ],
       "companion_bar_count": 1,
       "companion_icon_kind": "mercenary",

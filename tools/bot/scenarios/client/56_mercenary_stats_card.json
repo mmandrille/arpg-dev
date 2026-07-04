@@ -56,10 +56,10 @@
     {
       "type": "wait_mercenary_panel",
       "hired_count": 1,
-      "selected_stance": "assist",
+      "selected_stance": "defend",
       "stats_card_contains": [
         "HP:",
-        "Stance: Assist",
+        "Stance: Defend",
         "State: Active",
         "ID:"
       ],

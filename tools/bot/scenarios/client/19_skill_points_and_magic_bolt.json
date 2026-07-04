@@ -16,7 +16,7 @@
       "unspent_skill_points": 1,
       "skill_id": "rage",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": 10,
       "can_spend": true
     },
     {
@@ -64,25 +64,25 @@
     },
     {
       "type": "wait_character_progression",
-      "str": 6,
+      "str": 11,
       "vit": 6,
       "timeout_s": 5.0
     },
     {
       "type": "wait_skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 4,
       "skill_id": "rage",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": 10,
       "can_spend": true,
       "timeout_s": 5.0
     },
     {
       "type": "wait_skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 4,
       "skill_id": "magic_bolt",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": 10,
       "can_spend": false,
       "timeout_s": 5.0
     },
@@ -108,10 +108,10 @@
     },
     {
       "type": "wait_skill_progression",
-      "unspent_skill_points": 1,
+      "unspent_skill_points": 3,
       "skill_id": "rage",
       "rank": 1,
-      "max_rank": 5,
+      "max_rank": 10,
       "can_spend": true,
       "timeout_s": 5.0
     },

@@ -23,9 +23,9 @@ Last updated: 2026-07-04 (v430 barbarian tier-3 mesh swap)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v430 — barbarian tier-3 mesh swap |
-| **CI gate** | 2026-07-04 — focused validation green (validate-assets, bone test, client scenario) |
-| **Next slice** | v431 rogue tier-3 mesh swap (autoloop batch) |
+| **Latest completed slice** | v431 — rogue tier-3 mesh swap |
+| **CI gate** | 2026-07-04 — focused validation green (autoloop batch; final `make ci` pending) |
+| **Next slice** | v432 sorcerer tier-3 mesh swap (autoloop batch) |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
 | **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |
 

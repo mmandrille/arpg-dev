@@ -45,7 +45,7 @@ RANGER_REST_POSE_SHOULDER_RATIO = 0.12
 HERO_TARGET_HEIGHTS: dict[str, float] = {
     "barbarian": 1.97,
     "paladin": 1.85,
-    "rogue": 1.85,
+    "rogue": 1.70,
     "ranger": 1.85,
     "sorcerer": 1.85,
 }

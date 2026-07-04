@@ -106,9 +106,9 @@
         "leg_r"
       ],
       "provenance": {
-        "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
-        "license": "user-provided-unverified",
-        "sha256": "10ea09a59e40859c3a62c1cf535bfb4ae0b316fdfbc29e2370088fbec4207684"
+        "origin": "https://poly.pizza/m/M8kyS2Btfp (Thief Icon by Quaternius); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/rogue/assasine_legacy.glb",
+        "license": "CC0-1.0",
+        "sha256": "b29fb52ec3d1ed0f1e7d91c998ec41995f64a11afeba51374f691fc577fe0b1d"
       }
     },
     "character_ranger_v0": {

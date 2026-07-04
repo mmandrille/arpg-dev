@@ -1,0 +1,30 @@
+.maintainability/file-size-baseline.tsv
+  s_949141f89be97e::t_bf1c6fa47a6905 34
+shared/rules/worlds.v0.json
+  s_949141f89be97e::t_8edcec9524b217 1289-1290
+tools/assets/gen_glb_equipment.py
+  s_949141f89be97e::t_ba60a723695281 1-3,9-17,19-29,31-40,42-51,53-62,64-76,78-91,93-107,109-117,119-128,130-137,139-146,148-155,157-164,166-173,175-184,186-205
+  s_949141f89be97e::t_6ba95a961c6731 18,30,41,52,63,77,92,108,118,129,138,147,156,165,174,185
+  s_949141f89be97e::t_508359a63151e3 4-8
+shared/assets/model_preview_catalog.v0.json
+  s_949141f89be97e::t_bd695873ddd945 18
+tools/assets/gen_glb.py
+  s_949141f89be97e::t_06ba7bb294675b 459-460,462-472,475
+  s_949141f89be97e::t_bcfd62038833c5 461
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "623dfecd4566b566e4505e19095ce62b4c2d72d5",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

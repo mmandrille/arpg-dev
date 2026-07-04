@@ -1,0 +1,27 @@
+docs/reviews/20260703_v420-overview.md
+  s_bcb8a5c79e7927::t_f5b3b98ef3b5b7 1-110
+PROGRESS.md
+  s_bcb8a5c79e7927::t_d953547618efc0 18,28,30-31
+docs/reviews/client/20260703_v420-client.md
+  s_bcb8a5c79e7927::t_d7336e0aa72f2e 1-71
+docs/reviews/extras/20260703_v420-shared-tooling-and-process.md
+  s_bcb8a5c79e7927::t_4ce6bc584b0a7f 1-70
+docs/reviews/backend/20260703_v420-backend.md
+  s_bcb8a5c79e7927::t_6f0b51687ca42b 1-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1fac62d6e22221a290dc2327c2d5eaaf31a497b1",
+  "prompts": {},
+  "sessions": {
+    "s_bcb8a5c79e7927": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7d4f49d2-cde2-4fdf-aa22-9fa0825a9cf5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

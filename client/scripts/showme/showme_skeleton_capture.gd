@@ -18,6 +18,19 @@ const SOCKET_COLORS := {
 	"ring_right_socket": Color("#cc44ff"),
 }
 
+const SOCKET_LABEL_OFFSETS := {
+	"head_socket":       Vector3( 0.0,   0.22,  0.0),
+	"amulet_socket":     Vector3(-0.28,  0.12,  0.0),
+	"chest_socket":      Vector3(-0.30,  0.08,  0.0),
+	"belt_socket":       Vector3( 0.28,  0.08,  0.0),
+	"gloves_socket":     Vector3( 0.30,  0.0,   0.0),
+	"boots_socket":      Vector3(-0.14,  0.14,  0.0),
+	"ring_left_socket":  Vector3(-0.22,  0.0,   0.0),
+	"ring_right_socket": Vector3( 0.22,  0.0,   0.0),
+	"right_hand_socket": Vector3( 0.14,  0.14,  0.0),
+	"off_hand_socket":   Vector3(-0.14,  0.14,  0.0),
+}
+
 const SPREAD_BONES := {
 	"arm_r": Vector3(0.0, 0.0, 1.0),
 	"arm_l": Vector3(0.0, 0.0, -1.0),
@@ -123,7 +136,8 @@ static func _place_socket_spheres(character: Node3D, root: Node3D) -> void:
 		label.font_size = 28
 		label.modulate = color
 		root.add_child(label)
-		label.global_position = socket.global_position + Vector3(0.0, 0.12, 0.0)
+		var label_offset: Vector3 = SOCKET_LABEL_OFFSETS.get(str(socket_name), Vector3(0.0, 0.12, 0.0))
+		label.global_position = socket.global_position + label_offset
 	# Also mark foot_r bone position with boots color (no socket node exists for it)
 	var skel_node := character.find_child("Skeleton3D", true, false) as Skeleton3D
 	if skel_node != null:
@@ -149,7 +163,7 @@ static func _place_socket_spheres(character: Node3D, root: Node3D) -> void:
 			label.font_size = 28
 			label.modulate = Color("#ff8822")
 			root.add_child(label)
-			label.global_position = foot_transform.origin + Vector3(0.0, 0.12, 0.0)
+			label.global_position = foot_transform.origin + Vector3(0.14, 0.14, 0.0)
 
 
 static func _apply_class_model(character: Node3D, class_id: String) -> void:

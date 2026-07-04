@@ -5541,10 +5541,10 @@ func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 	var ap := root.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		ap.root_node = NodePath("../ModelRoot")
+	if "class_id" in root:
+		root.set("class_id", class_id)
 	if root.has_method("_ensure_weapon_socket"):
 		root.call("_ensure_weapon_socket")
-	if root.has_method("_ensure_fallback_sockets"):
-		root.call("_ensure_fallback_sockets")
 
 func _remount_local_equipment_visuals() -> void:
 	if resolver == null:

@@ -225,10 +225,10 @@ func _apply_class_model(character: Node3D, class_id: String) -> void:
 	var ap := character.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		ap.root_node = NodePath("../ModelRoot")
+	if "class_id" in character:
+		character.set("class_id", class_id)
 	if character.has_method("_ensure_weapon_socket"):
 		character.call("_ensure_weapon_socket")
-	if character.has_method("_ensure_fallback_sockets"):
-		character.call("_ensure_fallback_sockets")
 
 
 func _setup_inventory() -> void:

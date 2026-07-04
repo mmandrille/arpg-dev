@@ -1,0 +1,35 @@
+{
+  "id": "bone_gear_sockets",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "equipment_lab",
+  "seed": "v435_bone_gear_sockets",
+  "character_class": "ranger",
+  "title": "Bone-driven gear socket mounts",
+  "description": "Ranger with Tier-3 body equips helm/chest/boots; proves bone-attached gear sockets after v435.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    {
+      "type": "assert_entity_reaction",
+      "local_player": true,
+      "entity_type": "player",
+      "visual_model": "character"
+    },
+    { "type": "wait_loot_count", "min_count": 6, "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "helm" },
+    { "type": "wait_inventory_item", "item_def_id": "helm", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "mail" },
+    { "type": "wait_inventory_item", "item_def_id": "mail", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "boots" },
+    { "type": "wait_inventory_item", "item_def_id": "boots", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "helm", "slot": "head" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "mail", "slot": "chest" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "boots", "slot": "boots" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "assert_equipped", "slot": "head" },
+    { "type": "assert_equipped", "slot": "chest" },
+    { "type": "assert_equipped", "slot": "boots" }
+  ]
+}

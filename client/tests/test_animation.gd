@@ -270,16 +270,24 @@ func _test_class_character_models() -> void:
 		var ap := character.find_child("AnimationPlayer", true, false) as AnimationPlayer
 		if ap != null:
 			ap.root_node = NodePath("../ModelRoot")
+		character.set("class_id", class_id)
 		character.call("_ensure_weapon_socket")
-		character.call("_ensure_fallback_sockets")
 		var right_sock := character.find_child("right_hand_socket", true, false)
 		var off_sock := character.find_child("off_hand_socket", true, false)
+		var head_sock := character.find_child("head_socket", true, false)
+		var chest_sock := character.find_child("chest_socket", true, false)
 		_assert(right_sock is BoneAttachment3D, "%s replacement right_hand_socket should bind to the rig" % class_id)
 		_assert(off_sock is BoneAttachment3D, "%s replacement off_hand_socket should bind to the rig" % class_id)
+		_assert(head_sock is BoneAttachment3D, "%s head_socket should bind to the rig" % class_id)
+		_assert(chest_sock is BoneAttachment3D, "%s chest_socket should bind to the rig" % class_id)
 		if right_sock is BoneAttachment3D:
 			_assert((right_sock as BoneAttachment3D).bone_name == "hand_r", "%s right hand socket bone mismatch" % class_id)
 		if off_sock is BoneAttachment3D:
 			_assert((off_sock as BoneAttachment3D).bone_name == "hand_l", "%s off hand socket bone mismatch" % class_id)
+		if head_sock is BoneAttachment3D:
+			_assert((head_sock as BoneAttachment3D).bone_name == "head", "%s head socket bone mismatch" % class_id)
+		if chest_sock is BoneAttachment3D:
+			_assert((chest_sock as BoneAttachment3D).bone_name == "chest", "%s chest socket bone mismatch" % class_id)
 		if right_sock is Node3D:
 			_assert((right_sock as Node3D).scale.is_equal_approx(Vector3.ONE), "%s right hand socket should keep authored bone scale, got %s" % [class_id, str((right_sock as Node3D).scale)])
 		var class_skel := class_model.find_child("Skeleton3D", true, false) as Skeleton3D

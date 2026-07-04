@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/gear_sockets.v0.schema.json",
+  "title": "Gear socket bone mounts (v0)",
+  "description": "Maps equipment mount socket names to skeleton bones with optional per-class offsets.",
+  "type": "object",
+  "required": ["version", "default", "classes"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "default": {
+      "type": "object",
+      "required": ["sockets"],
+      "additionalProperties": false,
+      "properties": {
+        "sockets": { "$ref": "#/$defs/socket_map" }
+      }
+    },
+    "classes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "sockets": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/$defs/socket_override" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+    "socket_override": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bone": { "type": "string", "minLength": 1 },
+        "offset": { "$ref": "#/$defs/vec3" },
+        "rotation_degrees": { "$ref": "#/$defs/vec3" }
+      }
+    },
+    "socket_entry": {
+      "allOf": [
+        { "$ref": "#/$defs/socket_override" },
+        { "required": ["bone"] }
+      ]
+    },
+    "socket_map": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/socket_entry" }
+    }
+  }
+}

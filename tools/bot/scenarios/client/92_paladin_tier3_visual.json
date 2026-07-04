@@ -6,7 +6,7 @@
   "seed": "v427_paladin_tier3_visual",
   "character_class": "paladin",
   "title": "Paladin tier-3 body and gear presentation",
-  "description": "Paladin class uses the rigged knight GLB with starter gear equipped; proves local player visual_model and equipment slots via client bot.",
+  "description": "Paladin class uses the swapped Tier-3 knight body (v429 CC0 evaluation mesh) with starter gear equipped; proves local player visual_model and equipment slots via client bot.",
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     {

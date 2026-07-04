@@ -84,9 +84,9 @@
         "leg_r"
       ],
       "provenance": {
-        "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
-        "license": "user-provided-unverified",
-        "sha256": "7e4bab16ce5f1b9dfd54a3b7137dcb6972b01e10dc4e562b4dbd46a0ccfce8e5"
+        "origin": "https://poly.pizza/m/RaWl2GJ0NZ (Warrior by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/paladin/knight_legacy.glb",
+        "license": "CC0-1.0",
+        "sha256": "52f62a23b93defcd70a1c8cbd1202b496038de9028fe3f7b74c0a263924c059d"
       }
     },
     "character_rogue_v0": {

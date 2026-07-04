@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-04 (v428 hero animation feel pass)
+Last updated: 2026-07-04 (v429 paladin AI mesh swap evaluation)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-04 (v428 hero animation feel pass)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v428 — hero animation feel pass |
-| **CI gate** | 2026-07-04 — `make ci` green on `d41a02d1` |
-| **Next slice** | TBD (`/next`) |
+| **Latest completed slice** | v429 — paladin AI mesh swap (evaluation) |
+| **CI gate** | 2026-07-04 — targeted validation green (validate-assets, bone test, client scenario) |
+| **Next slice** | TBD (`/next`) — user decides per-class Tier-3 mesh swaps |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
 | **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |
 

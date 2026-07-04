@@ -59,13 +59,15 @@ func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
 	if str(equipped_visuals["head"].get("tint", "")) != "ffd75e":
 		fail.call("rare head tint mismatch: %s" % equipped_visuals["head"])
 		return false
-	var head_node := mount.find_child("fallback_equipment_head_v0", true, false) as Node3D
+	var head_asset := str(equipped_visuals["head"].get("asset_id", ""))
+	var head_node := mount.find_child(head_asset if head_asset != "" else "fallback_equipment_head_v0", true, false) as Node3D
 	if head_node == null:
-		fail.call("helmet fallback missing")
+		fail.call("helmet visual missing for asset %s" % head_asset)
 		return false
-	var chest_node := mount.find_child("fallback_equipment_chest_v0", true, false) as Node3D
+	var chest_asset := str(equipped_visuals["chest"].get("asset_id", ""))
+	var chest_node := mount.find_child(chest_asset if chest_asset != "" else "fallback_equipment_chest_v0", true, false) as Node3D
 	if chest_node == null:
-		fail.call("chest fallback missing")
+		fail.call("chest visual missing for asset %s" % chest_asset)
 		return false
 	var boots_state: Dictionary = equipped_visuals["boots"]
 	var boots_node := mount.find_child(str(boots_state.get("asset_id", "fallback_equipment_boots_v0")), true, false) as Node3D

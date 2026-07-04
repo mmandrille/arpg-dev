@@ -22,26 +22,27 @@ func prepare(
 	]
 	main.equipped = {"main_hand": "5001", "off_hand": "5002"}
 	main.resolver = resolver_script.new(character)
-	main.resolver.apply_snapshot({"inventory": main.inventory, "equipped": main.equipped})
 	main.character_progression = {"character_class": "paladin"}
 	main.call("_apply_local_player_class_model")
-	var sword := character.find_child("weapon_long_sword_v0", true, false) as Node3D
-	var shield := character.find_child("equipment_shield_kite_v0", true, false) as Node3D
-	if sword == null or shield == null:
-		fail.call("paladin mounted equipment missing: sword=%s shield=%s" % [str(sword), str(shield)])
-		character.queue_free()
-		main.queue_free()
-		return {}
-	return {"main": main, "character": character, "sword": sword, "shield": shield}
+	return {"main": main}
 
 
 func verify_transforms(ctx: Dictionary, fail: Callable) -> bool:
 	if ctx.is_empty():
 		return false
-	var character: Node3D = ctx.get("character")
 	var main = ctx.get("main")
-	var sword: Node3D = ctx.get("sword")
-	var shield: Node3D = ctx.get("shield")
+	var character: Node3D = main.character_visual as Node3D
+	if character == null:
+		fail.call("paladin character visual missing after class model apply")
+		main.queue_free()
+		return false
+	var sword := character.find_child("weapon_long_sword_v0", true, false) as Node3D
+	var shield := character.find_child("equipment_shield_kite_v0", true, false) as Node3D
+	if sword == null or shield == null:
+		fail.call("paladin mounted equipment missing after class model apply: sword=%s shield=%s" % [str(sword), str(shield)])
+		character.queue_free()
+		main.queue_free()
+		return false
 	var sword_scale := sword.global_transform.basis.get_scale()
 	var shield_scale := shield.global_transform.basis.get_scale()
 	if sword.global_position.y < 0.2:

@@ -220,31 +220,21 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 	sword_node.free()
 
 	var armor_node: Node3D = loot_factory.make_loot_node({"item_def_id": "helm", "rarity": "rare"})
-	if armor_node.find_child("GroundModel_fallback_equipment_head_v0", true, false) != null:
-		_fail("armor floor loot loaded fallback sword-backed model")
+	if armor_node.find_child("GroundModel_fallback_equipment_head_v0", true, false) == null:
+		_fail("armor floor loot did not use manifest-backed helm model")
 		armor_node.free()
 		main.free()
 		return false
-	if armor_node.find_child("HelmCap", true, false) == null or armor_node.find_child("HelmBrow", true, false) == null:
-		_fail("armor floor loot did not use helmet primitive presentation")
-		armor_node.free()
-		main.free()
-		return false
-	if armor_node.find_child("RarityBackground", true, false) == null:
-		_fail("armor primitive floor loot is missing rarity background")
+	if armor_node.find_child("RarityBackground", true, false) != null:
+		_fail("armor GLB floor loot should not render primitive rarity tile")
 		armor_node.free()
 		main.free()
 		return false
 	armor_node.free()
 
 	var shield_node: Node3D = loot_factory.make_loot_node({"item_def_id": "shield", "rarity": "magic"})
-	if shield_node.find_child("GroundModel_fallback_equipment_off_hand_v0", true, false) != null:
-		_fail("shield floor loot loaded fallback sword-backed model")
-		shield_node.free()
-		main.free()
-		return false
-	if shield_node.find_child("ShieldFace", true, false) == null or shield_node.find_child("ShieldBoss", true, false) == null:
-		_fail("shield floor loot did not use shield primitive presentation")
+	if shield_node.find_child("GroundModel_equipment_shield_kite_v0", true, false) == null:
+		_fail("shield floor loot did not use manifest-backed kite shield model")
 		shield_node.free()
 		main.free()
 		return false

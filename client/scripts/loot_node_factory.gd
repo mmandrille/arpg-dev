@@ -91,7 +91,9 @@ func add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color
 func make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
 	var presentation: Dictionary = item_presentations.get(item_def_id, {})
 	var asset_id := str(presentation.get("3d_model", ""))
-	if asset_id == "" or asset_id.begins_with("fallback_equipment_"):
+	if asset_id == "":
+		return null
+	if asset_id == "fallback_equipment_off_hand_v0":
 		return null
 	var entry = asset_manifest.get(asset_id, null)
 	if typeof(entry) != TYPE_DICTIONARY:

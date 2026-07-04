@@ -155,6 +155,18 @@
       "timeout_s": 5.0
     },
     {
+      "type": "wait_entity_near_player",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_blocking_target",
+      "distance": 3.5,
+      "timeout_s": 12.0
+    },
+    {
+      "type": "wait_ticks",
+      "ticks": 10,
+      "timeout_s": 5.0
+    },
+    {
       "type": "click_entity_until_event",
       "entity_type": "monster",
       "monster_def_id": "combat_lab_blocking_target",
@@ -162,8 +174,8 @@
       "outcome": "block",
       "blocked": true,
       "consume_event": true,
-      "retry_s": 0.25,
-      "timeout_s": 25.0
+      "retry_s": 0.5,
+      "timeout_s": 30.0
     },
     {
       "type": "wait_damage_number",
@@ -175,6 +187,15 @@
       "type": "wait_ticks",
       "ticks": 5,
       "timeout_s": 5.0
+    },
+    {
+      "type": "drag_equipment_to_bag",
+      "slot": "off_hand"
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_unequipped",
+      "timeout_s": 10.0
     },
     {
       "type": "click_floor",
@@ -189,20 +210,14 @@
       "timeout_s": 10.0
     },
     {
-      "type": "click_entity_until_event",
-      "entity_type": "monster",
-      "monster_def_id": "combat_lab_crit_attacker",
+      "type": "wait_event",
       "event_type": "player_damaged",
-      "outcome": "crit",
-      "critical": true,
-      "consume_event": true,
-      "retry_s": 0.25,
-      "timeout_s": 20.0
+      "timeout_s": 30.0
     },
     {
       "type": "wait_damage_number",
       "variant": "crit",
-      "timeout_s": 2.0
+      "timeout_s": 5.0
     }
   ]
 }

@@ -194,7 +194,7 @@
         "accent": "#cbd4df",
         "scale": 1.0
       },
-      "3d_model": "fallback_equipment_off_hand_v0"
+      "3d_model": "equipment_shield_kite_v0"
     },
     "helm": {
       "icon": {

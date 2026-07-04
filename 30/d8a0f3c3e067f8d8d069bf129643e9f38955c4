@@ -1,0 +1,23 @@
+assets/manifests/assets.v0.json
+  s_ca4868bac46551::t_51b962d73b9eae 11-27,32,63
+tools/assets/fix_skeleton.py
+  s_ca4868bac46551::t_6a66fee8ef9084 1-161
+client/tests/equipped_gear_fit_probe.gd
+  s_ca4868bac46551::t_5e10bfcefec3b2 48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "30d8a0f3c3e067f8d8d069bf129643e9f38955c4",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -32,12 +32,9 @@ const SOCKET_LABEL_OFFSETS := {
 }
 
 const SPREAD_BONES := {
-	"arm_r": Vector3(0.0, 0.0, 1.0),
-	"arm_l": Vector3(0.0, 0.0, -1.0),
 	"leg_r": Vector3(0.0, 0.0, 1.0),
 	"leg_l": Vector3(0.0, 0.0, -1.0),
 }
-const ARM_SPREAD_ANGLE := PI / 2.0
 const LEG_SPREAD_ANGLE := PI / 7.0
 const CLASS_LEG_SPREAD_OVERRIDE := {
 	"sorcerer": PI / 10.0,
@@ -90,7 +87,7 @@ static func _spread_pose(skel: Skeleton3D, class_id: String) -> void:
 			continue
 		var axis: Vector3 = SPREAD_BONES[bone_name]
 		var leg_angle: float = CLASS_LEG_SPREAD_OVERRIDE.get(class_id, LEG_SPREAD_ANGLE)
-		var angle: float = ARM_SPREAD_ANGLE if str(bone_name).begins_with("arm") else leg_angle
+		var angle: float = leg_angle
 		skel.set_bone_pose_rotation(idx, Quaternion(axis.normalized(), angle))
 	skel.force_update_all_bone_transforms()
 

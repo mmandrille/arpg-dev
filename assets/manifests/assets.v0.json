@@ -128,10 +128,9 @@
         "leg_r"
       ],
       "provenance": {
-        "source_url": "https://sketchfab.com/3d-models/rogue-002c266eb95a45039fc4b9da9875a2ab",
-        "origin": "Sketchfab Rogue by OliverMatheGames, rigged by tools/assets/rig_hero_glbs.py",
-        "license": "CC-BY-4.0",
-        "sha256": "22be75917caccc86a468ce211fd43240d19ed6df95c9d91e7117f0862d7c0a71"
+        "origin": "https://poly.pizza/m/BCMT02FrVE (Adventurer by Polygonal Mind); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/ranger/green_hood_legacy.glb",
+        "license": "CC0-1.0",
+        "sha256": "8e3965f5ea18f3a021206135a51dccb3522d20485be524efe0ebb237dc6cce4f"
       }
     },
     "weapon_rusty_sword_v0": {

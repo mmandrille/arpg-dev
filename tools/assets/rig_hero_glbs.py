@@ -46,7 +46,7 @@ HERO_TARGET_HEIGHTS: dict[str, float] = {
     "barbarian": 1.97,
     "paladin": 1.85,
     "rogue": 1.70,
-    "ranger": 1.85,
+    "ranger": 1.82,
     "sorcerer": 1.80,
 }
 

@@ -23,8 +23,17 @@ Last updated: 2026-07-04 (v430 barbarian tier-3 mesh swap)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v432 — sorcerer tier-3 mesh swap |
-| **Next slice** | v433 ranger tier-3 mesh swap (autoloop batch) |
+Last updated: 2026-07-04 (v433 ranger tier-3 mesh swap — hero Tier-3 batch complete)
+
+---
+
+## Current status
+
+| Field | Value |
+|-------|-------|
+| **Latest completed slice** | v433 — ranger tier-3 mesh swap |
+| **CI gate** | 2026-07-04 — autoloop batch complete; final `make ci` pending |
+| **Next slice** | TBD (`/next`) |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
 | **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |
 

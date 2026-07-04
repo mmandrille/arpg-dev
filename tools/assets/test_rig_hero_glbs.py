@@ -143,3 +143,9 @@ def test_sorcerer_runtime_glb_has_required_bones():
     runtime = ROOT / HEROES["sorcerer"][1]
     assert runtime.is_file(), f"missing rigged sorcerer runtime GLB: {runtime}"
     assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)
+
+
+def test_ranger_runtime_glb_has_required_bones():
+    runtime = ROOT / HEROES["ranger"][1]
+    assert runtime.is_file(), f"missing rigged ranger runtime GLB: {runtime}"
+    assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)

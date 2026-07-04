@@ -1,0 +1,19 @@
+client/scripts/showme/showme_skeleton_capture.gd
+  s_ca4868bac46551::t_1637cc2e7ffebf 22-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "01ab57540280be8f061181219d2385273fdcd6a0",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

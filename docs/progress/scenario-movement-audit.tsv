@@ -133,6 +133,7 @@ client/07_town_teleporter_auto_approach.json	town_teleporter_auto_approach	godot
 client/08_main_menu_flow.json	main_menu_flow	godot_client	extended	setup-eliminable	1	1		
 client/09_character_stats_panel.json	character_stats_panel	godot_client	extended	contract	0	0		
 client/10_full_equipment.json	client_full_equipment	godot_client	extended	contract	0	0		
+client/92_paladin_tier3_visual.json	paladin_tier3_visual	godot_client	extended	contract	0	0		
 client/11_combat_feedback.json	client_combat_feedback	godot_client	pack	setup-eliminable	4	4		
 client/12_model_reaction_polish.json	model_reaction_polish	godot_client	pack	contract	0	0		
 client/13_inventory_paper_doll.json	client_inventory_paper_doll	godot_client	extended	contract	0	0		

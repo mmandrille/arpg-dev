@@ -166,7 +166,7 @@ python3 skills/showme/scripts/render_focus.py --focus town
 ## Notes
 
 - The renderer mirrors client presentation code and shared visual metadata; it must not mutate server rules or gameplay authority.
-- Implementation: `skills/showme/scripts/render_focus.py` (CLI) → `skills/showme/scripts/visual_capture.gd` (`_setup_*` per focus).
+- Implementation: `skills/showme/scripts/render_focus.py` (CLI) → `client/scripts/showme/visual_capture.gd` (`_setup_*` per focus).
 - For visual-equipment changes, usually run `godot --headless --path client --script res://tests/test_item_visuals.gd` after a capture.
 - For UI layout changes, usually run `make client-unit` after the focused iteration stabilizes.
 - Add new focus values only when a repeated feedback loop appears; update both `render_focus.py` choices and this catalog.

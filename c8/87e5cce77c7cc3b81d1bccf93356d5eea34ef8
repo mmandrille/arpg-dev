@@ -1,0 +1,75 @@
+client/scripts/equipment_visuals.gd
+  s_7bdc2687bb052d::t_c3d78c6d6898cf 311,319-324
+  s_7bdc2687bb052d::t_7e170c6604aa42 18
+  s_7bdc2687bb052d::t_ae232a29494160 202
+client/scripts/showme/visual_capture.gd
+  s_7bdc2687bb052d::t_2a32dea7cbf222 205,208-210
+  s_7bdc2687bb052d::t_8a6be62765b730 212-216
+  s_7bdc2687bb052d::t_2b8538f9ec9e71 19
+  s_7bdc2687bb052d::t_33642fdac39dcc 232
+client/tests/equipped_gear_fit_probe.gd
+  s_7bdc2687bb052d::t_902ad9cf7d3ace 9,27-32,35-51,84-88,100-103,108-113,116-118,122-140
+  s_7bdc2687bb052d::t_a7e8ded84a3ce5 1-8,10-26,33-34,52-61,63-76,81-83,89-99,104-107,114-115,119-121,141-209
+  s_7bdc2687bb052d::t_102a193df4c37b 62
+  s_7bdc2687bb052d::t_59c936881faab3 77-80
+client/scripts/loot_node_factory.gd
+  s_7bdc2687bb052d::t_5b7e36d898a045 5
+  s_7bdc2687bb052d::t_f25014b42f0989 110-113
+shared/assets/equipment_display.v0.schema.json
+  s_7bdc2687bb052d::t_9280e6c9a2f2a5 1-29
+PROGRESS.md
+  s_7bdc2687bb052d::t_b635fae1f1fa52 34-35
+shared/assets/equipment_display.v0.json
+  s_7bdc2687bb052d::t_c151d4a9eeccf1 1-3,6-7
+  s_7bdc2687bb052d::t_3172e789bc0445 4-5
+client/tests/test_item_visuals.gd
+  s_7bdc2687bb052d::t_be7cf58540bcc1 18
+  s_7bdc2687bb052d::t_eddf07dcfc90cc 209-212
+  s_7bdc2687bb052d::t_a21e634c1391ef 22
+  s_7bdc2687bb052d::t_0fbd34e4946ddb 85-86
+docs/CODEMAP.md
+  s_7bdc2687bb052d::t_ee3d2d8df246c8 29
+  s_7bdc2687bb052d::t_27462d2dd7f666 11
+assets/manifests/assets.v0.json
+  s_7bdc2687bb052d::t_991b9449012bb8 318,374,388,402
+  s_7bdc2687bb052d::t_73c59df33ac513 192,206,220,234,248,262,276,290,332,346,416
+docs/as-built/v442_equipped-gear-fit.md
+  s_7bdc2687bb052d::t_27df107810b422 1-16
+docs/plans/v442_2026-07-04-equipped-gear-fit.md
+  s_7bdc2687bb052d::t_3dd004673530cf 1-6,14-25
+  s_7bdc2687bb052d::t_895ef3a7f4f9b0 7-13
+tools/assets/validate_assets.py
+  s_7bdc2687bb052d::t_f76621e68b6e6c 185
+  s_7bdc2687bb052d::t_e5d637ab37de6b 186-204
+  s_7bdc2687bb052d::t_62ac6cabfabee9 94
+  s_7bdc2687bb052d::t_33ace508969e5e 87-93,95-108
+tools/assets/import_equipment_glb.py
+  s_7bdc2687bb052d::t_be1e9936847665 146-153
+  s_7bdc2687bb052d::t_f510675186a099 165
+  s_7bdc2687bb052d::t_48aa3ce4159815 32,37,42,47,52,57,63,68,74,79,84,89,94,99
+docs/specs/v442_spec-equipped-gear-fit.md
+  s_7bdc2687bb052d::t_96ecd9e9c6998d 1-49
+docs/progress/slice-lifecycle.md
+  s_7bdc2687bb052d::t_64f394cd0e3edf 432
+client/scripts/character_visual.gd
+  s_7bdc2687bb052d::t_9e2558bcf74d84 28-46,62-65,69,71
+  s_7bdc2687bb052d::t_cd46bf42249010 102
+client/scripts/equipment_display_loader.gd
+  s_7bdc2687bb052d::t_27f35ba8763629 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c887e5cce77c7cc3b81d1bccf93356d5eea34ef8",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-04 (v429 paladin AI mesh swap evaluation)
+Last updated: 2026-07-04 (v430 barbarian tier-3 mesh swap)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-04 (v429 paladin AI mesh swap evaluation)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v429 — paladin AI mesh swap (evaluation) |
-| **CI gate** | 2026-07-04 — targeted validation green (validate-assets, bone test, client scenario) |
-| **Next slice** | TBD (`/next`) — user decides per-class Tier-3 mesh swaps |
+| **Latest completed slice** | v430 — barbarian tier-3 mesh swap |
+| **CI gate** | 2026-07-04 — focused validation green (validate-assets, bone test, client scenario) |
+| **Next slice** | v431 rogue tier-3 mesh swap (autoloop batch) |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
 | **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |
 

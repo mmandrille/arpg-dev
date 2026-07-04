@@ -40,9 +40,9 @@
         "leg_r"
       ],
       "provenance": {
-        "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
-        "license": "user-provided-unverified",
-        "sha256": "76d8b1920e0b8df7c7780efcca9a2769026c674eccd9af8f22299808518720ba"
+        "origin": "https://poly.pizza/m/GorWw41SFf (Male Fighter by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/barbarian/goliath_barbarian_legacy.glb",
+        "license": "CC0-1.0",
+        "sha256": "b563d44a6256613c54b491c102d1f27edaea7524943dfc7a4b0ef3f69e76f079"
       }
     },
     "character_sorcerer_v0": {

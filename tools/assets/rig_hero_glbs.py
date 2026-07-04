@@ -364,6 +364,7 @@ def rig_glb_bytes(data: bytes, *, hero_id: str = "", target_height: float | None
     gltf = parsed.gltf
     if gltf.get("skins"):
         raise ValueError("source GLB is already skinned")
+    gltf.pop("animations", None)
     bin_buf = bytearray(parsed.bin_blob)
     if hero_id == "ranger":
         _apply_ranger_rest_pose(gltf, bin_buf)

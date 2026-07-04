@@ -1,0 +1,21 @@
+docs/superpowers/plans/2026-07-04-base-model-consolidation.md
+  s_ca4868bac46551::t_fe6f2f64264f4c 1-56,58-62,65,78-79,82-432,434,465-470,472-473,478
+  s_ca4868bac46551::t_933bc05aee3d3e 57,63-64,66-77,80-81
+  s_ca4868bac46551::t_32ec14743031bb 433,435-464,471,474-477
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5ec58d7c61169390df8a8350c81235f31f42a270",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

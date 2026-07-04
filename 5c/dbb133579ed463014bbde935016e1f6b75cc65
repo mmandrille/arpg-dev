@@ -1,0 +1,23 @@
+assets/manifests/assets.v0.json
+  s_47c91f4feb7c91::t_7d2c70b51e725f 45
+docs/progress/scenario-movement-audit.tsv
+  s_47c91f4feb7c91::t_8b4078176079da 136-140
+tools/assets/rig_hero_glbs.py
+  s_47c91f4feb7c91::t_ec13281b5d3a52 367
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5cdbb133579ed463014bbde935016e1f6b75cc65",
+  "prompts": {},
+  "sessions": {
+    "s_47c91f4feb7c91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "26610c73-98fa-4acd-a133-bc38edadb697",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

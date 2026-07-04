@@ -1,0 +1,34 @@
+client/scripts/loot_node_factory.gd
+  s_7bdc2687bb052d::t_7962129101a911 94-96
+client/tests/item_visual_equipment_probe.gd
+  s_7bdc2687bb052d::t_14b9b26a95fb8b 62-63,65,67-68,70
+client/tests/test_item_visuals.gd
+  s_7bdc2687bb052d::t_7962129101a911 223-224,228-229,236-237
+client/tests/item_visual_scale_probe.gd
+  s_7bdc2687bb052d::t_7962129101a911 27,34-45
+tools/bot/scenarios/client/11_combat_feedback.json
+  s_7bdc2687bb052d::t_9858a674b3b0b8 177-178
+  s_7bdc2687bb052d::t_3e32ed134528e7 220
+  s_7bdc2687bb052d::t_a4f22a01ce7c93 165-168
+  s_7bdc2687bb052d::t_0d48941050ad63 158-164
+  s_7bdc2687bb052d::t_de9704db5f5bd6 192-199
+  s_7bdc2687bb052d::t_45863356b6030c 213,215
+shared/assets/item_presentations.v0.json
+  s_7bdc2687bb052d::t_7962129101a911 197
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5d291d5bcc8d387725cf830aa757e1f915356b60",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

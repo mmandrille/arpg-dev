@@ -25,9 +25,9 @@ const SPREAD_BONES := {
 	"leg_l": Vector3(0.0, 0.0, -1.0),
 }
 const ARM_SPREAD_ANGLE := PI / 2.0
-const LEG_SPREAD_ANGLE := PI / 5.0
+const LEG_SPREAD_ANGLE := PI / 7.0
 const CLASS_LEG_SPREAD_OVERRIDE := {
-	"sorcerer": PI / 16.0,
+	"sorcerer": PI / 10.0,
 }
 
 
@@ -189,9 +189,9 @@ static func _add_camera(root: Node3D) -> void:
 	var camera := Camera3D.new()
 	camera.name = "capture_camera"
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 3.2
+	camera.size = 4.0
 	root.add_child(camera)
-	camera.look_at_from_position(Vector3(3.2, 2.2, 4.5), Vector3(0.0, 1.1, 0.0), Vector3.UP)
+	camera.look_at_from_position(Vector3(0.0, 1.3, 6.0), Vector3(0.0, 1.3, 0.0), Vector3.UP)
 	camera.current = true
 
 

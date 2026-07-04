@@ -79,7 +79,7 @@ def main() -> int:
     if args.mode == "live" and duration < 0.0:
         duration = 45.0
 
-    gdscript = root / "skills" / "showme" / "scripts" / "visual_capture.gd"
+    gdscript = root / "client" / "scripts" / "showme" / "visual_capture.gd"
     cmd = [
         args.godot,
         "--windowed",

@@ -144,6 +144,7 @@ run_gate "GDScript skill progression golden test" "[gdtest] PASS: consumed share
 
 # 2. Item visual resolution test (server-independent; acceptance #14).
 run_gate "GDScript item visual resolution test" "[gdtest] PASS" res://tests/test_item_visuals.gd
+run_gate "GDScript showme capture preload test" "[gdtest] PASS: showme capture scripts preload" res://tests/test_showme_load.gd
 run_gate "GDScript item icon drawer test" "test_item_icon_drawer: ok" res://tests/test_item_icon_drawer.gd
 run_gate "GDScript item requirement views test" "[gdtest] PASS: test_item_requirement_views" res://tests/test_item_requirement_views.gd
 run_gate "GDScript skill bonus tooltip test" "[gdtest] PASS: test_skill_bonus_tooltip" res://tests/test_skill_bonus_tooltip.gd

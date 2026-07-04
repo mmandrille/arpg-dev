@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-03 (v425 AI body mesh workflow)
+Last updated: 2026-07-04 (v426 showme visual proof loop)
 
 ---
 
@@ -23,10 +23,10 @@ Last updated: 2026-07-03 (v425 AI body mesh workflow)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v425 — AI body mesh workflow |
+| **Latest completed slice** | v426 — showme visual proof loop |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-03 — `make ci-full` green (~24m) on `dd037a16` |
-| **Next slice** | TBD (`/next`) |
+| **CI gate** | 2026-07-04 — `make ci` green on `d41a02d1` (pre-v426 batch) |
+| **Next slice** | v427 in progress (autoloop) |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
 | **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |
 

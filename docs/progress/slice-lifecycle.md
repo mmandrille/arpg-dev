@@ -423,6 +423,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v416** | `per-skill-affix-rolls` | Complete (autoloop focused verification) | [`spec`](../specs/v416_spec-per-skill-affix-rolls.md) | [`plan`](../plans/v416_2026-07-03-per-skill-affix-rolls.md) | [`as-built`](../as-built/v416_per-skill-affix-rolls.md) |
 | **v418** | `skill-synergies` | Complete (autoloop) | [`spec`](../specs/v418_spec-skill-synergies.md) | [`plan`](../plans/v418_2026-07-03-skill-synergies.md) | [`as-built`](../as-built/v418_skill-synergies.md) |
 | **v425** | `ai-body-mesh-workflow` | Complete (autoloop) | — | — | [`as-built`](../as-built/v425_ai-body-mesh-workflow.md) |
+| **v426** | `showme-visual-proof` | Complete (autoloop) | [`spec`](../specs/v426_spec-showme-visual-proof.md) | [`plan`](../plans/v426_2026-07-04-showme-visual-proof.md) | [`as-built`](../as-built/v426_showme-visual-proof.md) |
 | **v424** | `monster-rig-pass` | Complete (autoloop) | — | — | [`as-built`](../as-built/v424_monster-rig-pass.md) |
 | **v423** | `weapon-variety-glbs` | Complete (autoloop) | — | — | [`as-built`](../as-built/v423_weapon-variety-glbs.md) |
 | **v422** | `hero-rig-rollout` | Complete (autoloop) | [`spec`](../specs/v422_spec-hero-rig-rollout.md) | — | [`as-built`](../as-built/v422_hero-rig-rollout.md) |

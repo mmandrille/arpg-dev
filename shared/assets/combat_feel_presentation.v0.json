@@ -9,8 +9,8 @@
     "settle_epsilon": 0.01
   },
   "melee_lunge": {
-    "distance": 0.16,
-    "recovery_seconds": 0.14,
+    "distance": 0.18,
+    "recovery_seconds": 0.12,
     "settle_epsilon": 0.01
   },
   "level_loading_min_display_seconds": 0.55,

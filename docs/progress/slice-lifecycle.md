@@ -425,6 +425,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v425** | `ai-body-mesh-workflow` | Complete (autoloop) | — | — | [`as-built`](../as-built/v425_ai-body-mesh-workflow.md) |
 | **v426** | `showme-visual-proof` | Complete (autoloop) | [`spec`](../specs/v426_spec-showme-visual-proof.md) | [`plan`](../plans/v426_2026-07-04-showme-visual-proof.md) | [`as-built`](../as-built/v426_showme-visual-proof.md) |
 | **v427** | `paladin-tier3-body` | Complete (autoloop) | [`spec`](../specs/v427_spec-paladin-tier3-body.md) | [`plan`](../plans/v427_2026-07-04-paladin-tier3-body.md) | [`as-built`](../as-built/v427_paladin-tier3-body.md) |
+| **v428** | `hero-animation-feel` | Complete (autoloop) | — | — | [`as-built`](../as-built/v428_hero-animation-feel.md) |
 | **v424** | `monster-rig-pass` | Complete (autoloop) | — | — | [`as-built`](../as-built/v424_monster-rig-pass.md) |
 | **v423** | `weapon-variety-glbs` | Complete (autoloop) | — | — | [`as-built`](../as-built/v423_weapon-variety-glbs.md) |
 | **v422** | `hero-rig-rollout` | Complete (autoloop) | [`spec`](../specs/v422_spec-hero-rig-rollout.md) | — | [`as-built`](../as-built/v422_hero-rig-rollout.md) |

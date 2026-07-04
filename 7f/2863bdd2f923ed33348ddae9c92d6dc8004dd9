@@ -1,0 +1,38 @@
+docs/as-built/v434_humanoid-skeleton-v2.md
+  s_7bdc2687bb052d::t_a55e0e42eb9dc4 1-29
+docs/specs/v434_spec-humanoid-skeleton-v2.md
+  s_7bdc2687bb052d::t_bb1138ab49b293 1-72
+client/tests/test_animation.gd
+  s_7bdc2687bb052d::t_d37786dceb5185 249-253
+assets/manifests/assets.v0.json
+  s_7bdc2687bb052d::t_0c723dde3e0238 35-37,39,42,45-49,66-68,70,73,76-80,97-99,101,104,107-111,128-130,132,135,138-142,159-161,163,166,169-173
+  s_7bdc2687bb052d::t_7443054bf1c6be 54,85,116,147,178
+tools/assets/rig_hero_glbs.py
+  s_7bdc2687bb052d::t_61806d54250ccc 19-37
+  s_7bdc2687bb052d::t_458b53fdf2551a 426-445,447-491
+  s_7bdc2687bb052d::t_1e237e707509e7 517-518,520,522-532,534-538,540-547,549-550
+  s_7bdc2687bb052d::t_35bd912a9fdc17 367-378,390-403,405-421
+PROGRESS.md
+  s_7bdc2687bb052d::t_b1fb3be3385cab 26,34-36
+docs/progress/slice-lifecycle.md
+  s_7bdc2687bb052d::t_102fa1cb28a210 432
+docs/plans/v434_2026-07-04-humanoid-skeleton-v2.md
+  s_7bdc2687bb052d::t_21d85e50c147a9 7-12
+  s_7bdc2687bb052d::t_8d6a318b91cc40 1-6,13-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7f2863bdd2f923ed33348ddae9c92d6dc8004dd9",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+skills/showme/SKILL.md
+  s_949141f89be97e::t_7415f714fb81e9 169
+docs/progress/scenario-movement-audit.tsv
+  s_949141f89be97e::t_f812190683410a 136
+tools/test_showme.py
+  s_949141f89be97e::t_40336a21e06d85 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "3aef60aeeb47f823b8db8bb14220229c81831a4f",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

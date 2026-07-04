@@ -1,0 +1,31 @@
+docs/specs/v439_spec-equip-class-tuning.md
+  s_7bdc2687bb052d::t_3462d5dbf0c0b9 1-15
+docs/plans/v439_2026-07-04-equip-class-tuning.md
+  s_7bdc2687bb052d::t_34e3062356f58f 1-13
+client/scripts/equipment_visuals.gd
+  s_7bdc2687bb052d::t_892073c6c0359a 17,51,63-67,159-160,257-262,274-300
+docs/as-built/v439_equip-class-tuning.md
+  s_7bdc2687bb052d::t_d6f45aa2c6635d 1-16
+client/scripts/main.gd
+  s_7bdc2687bb052d::t_892073c6c0359a 1655,1660,3025,3147,5515-5516
+shared/assets/item_visuals.v0.json
+  s_7bdc2687bb052d::t_892073c6c0359a 46-61
+shared/assets/item_visuals.v0.schema.json
+  s_7bdc2687bb052d::t_892073c6c0359a 46-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b57578b6aa9623b9b0e707653ce08c5498441e0d",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

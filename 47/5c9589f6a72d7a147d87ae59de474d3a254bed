@@ -1,0 +1,63 @@
+client/assets/equipment/armor/amulet/amulet.glb.import
+  s_949141f89be97e::t_867d544776364f 1-42
+client/assets/equipment/armor/ring/ring.glb.import
+  s_949141f89be97e::t_867d544776364f 1-42
+client/assets/equipment/armor/helm/helm.glb.import
+  s_949141f89be97e::t_867d544776364f 1-42
+docs/as-built/v421_gear-rig-corridor.md
+  s_949141f89be97e::t_03c215ca5b8968 1-29
+docs/plans/v421_2026-07-03-gear-rig-corridor.md
+  s_949141f89be97e::t_ab47ab734a3866 1-26
+client/tests/test_animation.gd
+  s_949141f89be97e::t_2b05e4e96bf95a 288
+client/tests/item_visual_equipment_probe.gd
+  s_949141f89be97e::t_d1147455096ec4 53-54
+assets/manifests/assets.v0.json
+  s_949141f89be97e::t_627e59c638669d 196-197,200-203,205,210-211,214-217,219,224-225,228-231,233,238-239,242-245,247,252-253,256-259,261,266-267,270-273,275,280-281,284-287,289,294-295,298-301,303,308-309,312-315,317
+  s_949141f89be97e::t_79c3d6a0a69923 10-19,32-41,54-63,76-85,89,98-107,120-129,204,218,232,246,260,274,288,302,316,325-328,341-350,363-372,385-394,420-426,439-447
+client/assets/equipment/armor/belt/belt.glb.import
+  s_949141f89be97e::t_867d544776364f 1-42
+client/assets/equipment/armor/chest/chest.glb.import
+  s_949141f89be97e::t_867d544776364f 1-42
+shared/assets/class_presentations.v0.json
+  s_949141f89be97e::t_cf7eaa022c26b7 16
+docs/specs/v421_spec-gear-rig-corridor.md
+  s_949141f89be97e::t_a9b26b7c49335f 1-58
+docs/progress/slice-lifecycle.md
+  s_949141f89be97e::t_def5777a2984b6 425
+client/scripts/equipment_visuals.gd
+  s_949141f89be97e::t_9b223ee5028548 315
+  s_949141f89be97e::t_5e2821ad359fb8 181
+  s_949141f89be97e::t_6d9e0da89c5466 318-321
+tools/assets/rig_hero_glbs.py
+  s_949141f89be97e::t_d41b4fbb7b8246 380-382
+  s_949141f89be97e::t_95908e688389c0 45-47
+  s_949141f89be97e::t_cb3fdca6dff063 237-276
+tools/assets/gen_glb.py
+  s_949141f89be97e::t_bd2bb04f31e30c 603-610
+  s_949141f89be97e::t_bb20294c018a7c 515-591
+PROGRESS.md
+  s_949141f89be97e::t_5143d5f41381c7 18,26
+client/assets/equipment/armor/gloves/gloves.glb.import
+  s_949141f89be97e::t_867d544776364f 1-42
+client/assets/equipment/armor/boots/boots.glb.import
+  s_949141f89be97e::t_867d544776364f 1-42
+client/assets/equipment/armor/shield/shield.glb.import
+  s_949141f89be97e::t_867d544776364f 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "475c9589f6a72d7a147d87ae59de474d3a254bed",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

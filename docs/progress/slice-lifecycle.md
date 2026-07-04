@@ -428,6 +428,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v429** | `paladin-ai-mesh-swap` | Complete | [`spec`](../specs/v429_spec-paladin-ai-mesh-swap.md) | [`plan`](../plans/v429_2026-07-04-paladin-ai-mesh-swap.md) | [`as-built`](../as-built/v429_paladin-ai-mesh-swap.md) |
 | **v430** | `barbarian-tier3-mesh-swap` | Complete | [`spec`](../specs/v430_spec-barbarian-tier3-mesh-swap.md) | [`plan`](../plans/v430_2026-07-04-barbarian-tier3-mesh-swap.md) | [`as-built`](../as-built/v430_barbarian-tier3-mesh-swap.md) |
 | **v431** | `rogue-tier3-mesh-swap` | Complete | [`spec`](../specs/v431_spec-rogue-tier3-mesh-swap.md) | [`plan`](../plans/v431_2026-07-04-rogue-tier3-mesh-swap.md) | [`as-built`](../as-built/v431_rogue-tier3-mesh-swap.md) |
+| **v432** | `sorcerer-tier3-mesh-swap` | Complete | [`spec`](../specs/v432_spec-sorcerer-tier3-mesh-swap.md) | [`plan`](../plans/v432_2026-07-04-sorcerer-tier3-mesh-swap.md) | [`as-built`](../as-built/v432_sorcerer-tier3-mesh-swap.md) |
 | **v428** | `hero-animation-feel` | Complete (autoloop) | — | — | [`as-built`](../as-built/v428_hero-animation-feel.md) |
 | **v424** | `monster-rig-pass` | Complete (autoloop) | — | — | [`as-built`](../as-built/v424_monster-rig-pass.md) |
 | **v423** | `weapon-variety-glbs` | Complete (autoloop) | — | — | [`as-built`](../as-built/v423_weapon-variety-glbs.md) |

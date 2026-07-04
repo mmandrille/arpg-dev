@@ -62,9 +62,9 @@
         "leg_r"
       ],
       "provenance": {
-        "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
-        "license": "user-provided-unverified",
-        "sha256": "b0aa094aee76b1c0280d2a101c86dc6d1f4f3dc2c6398f50ac2dd1d0b27f75ae"
+        "origin": "https://poly.pizza/m/6kY9VaAfPv (Wizard by Polygonal Mind); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/sorcerer/mage_legacy.glb",
+        "license": "CC0-1.0",
+        "sha256": "934138294acf61c2661579b0cd4ffa8347e567bcde7aabc15cc535d64390d17a"
       }
     },
     "character_paladin_v0": {

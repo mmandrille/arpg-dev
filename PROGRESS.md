@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-03 (v420 class-skill-build-branches)
+Last updated: 2026-07-03 (v420 engineering review)
 
 ---
 
@@ -25,10 +25,10 @@ Last updated: 2026-07-03 (v420 class-skill-build-branches)
 |-------|-------|
 | **Latest completed slice** | v420 — class-skill-build-branches |
 | **Active branch** | `main` |
-| **CI gate** | 2026-07-03 — autoloop batch CI pending |
+| **CI gate** | 2026-07-03 — `make ci-full` green (~24m) on `dd037a16` |
 | **Next slice** | TBD (`/next`) |
-| **Last engineering review** | v408 — [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md) (2026-07-02; official cadence) |
-| **Next engineering review** | due — run `$review` then `$refactor` |
+| **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
+| **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |
 
 
 ### Periodic engineering reviews

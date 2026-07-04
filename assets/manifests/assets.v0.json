@@ -29,7 +29,7 @@
       "provenance": {
         "origin": "Redirected to barbarian.glb (shared base humanoid). See character_barbarian_v0 for full provenance.",
         "license": "CC0-1.0",
-        "sha256": "34685ec999e272df12c7664099ba3a3e180d227c96e160bae14fcd30d006bd14"
+        "sha256": "80a6ef3d30702c97b51369649ecb6683df9ef49dab292bdb57454e2c2d078a89"
       }
     },
     "character_barbarian_v0": {
@@ -60,7 +60,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/GorWw41SFf (Male Fighter by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/barbarian/goliath_barbarian_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "34685ec999e272df12c7664099ba3a3e180d227c96e160bae14fcd30d006bd14"
+        "sha256": "80a6ef3d30702c97b51369649ecb6683df9ef49dab292bdb57454e2c2d078a89"
       }
     },
     "character_sorcerer_v0": {

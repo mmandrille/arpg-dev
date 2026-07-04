@@ -1,0 +1,27 @@
+docs/as-built/v422_hero-rig-rollout.md
+  s_949141f89be97e::t_bdc077ee7834a8 1-16
+assets/manifests/assets.v0.json
+  s_949141f89be97e::t_36c553e1440a99 45,67,111,134
+skills/showme/scripts/visual_capture.gd
+  s_949141f89be97e::t_ca960842fc47df 92-93
+tools/assets/rig_hero_glbs.py
+  s_949141f89be97e::t_745811c671d518 46,48-50
+docs/specs/v422_spec-hero-rig-rollout.md
+  s_949141f89be97e::t_c265376eb3553e 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5426573ed7b73a8b269111fc6238fdf4da7bdb2a",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

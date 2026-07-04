@@ -20,11 +20,21 @@ BIPED_MONSTERS = {
         "client/assets/monsters/archer/crocodile_archer.glb",
     ),
 }
+MONSTER_TARGET_HEIGHTS: dict[str, float] = {
+    "dark_purple": 1.65,
+    "crocodile_archer": 1.55,
+}
 
 
-def rig_monster_file(source: Path, target: Path) -> None:
+def rig_monster_file(source: Path, target: Path, *, monster_id: str = "") -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_bytes(rig_glb_bytes(source.read_bytes()))
+    target.write_bytes(
+        rig_glb_bytes(
+            source.read_bytes(),
+            hero_id=monster_id,
+            target_height=MONSTER_TARGET_HEIGHTS.get(monster_id),
+        )
+    )
 
 
 def validate_target(target: Path) -> None:
@@ -44,7 +54,7 @@ def main() -> int:
     for monster_id, (source_rel, target_rel) in BIPED_MONSTERS.items():
         source = ROOT / source_rel
         target = ROOT / target_rel
-        rig_monster_file(source, target)
+        rig_monster_file(source, target, monster_id=monster_id)
         validate_target(target)
         print(f"rigged {monster_id}: {source_rel} -> {target_rel}")
     return 0

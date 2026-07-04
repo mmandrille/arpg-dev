@@ -407,7 +407,7 @@
       "provenance": {
         "origin": "user-provided local GLB",
         "license": "unconfirmed-user-provided",
-        "sha256": "aa5f968eb9b5f788fb0385b719331ec45e8cae929d2a49da935ffdb353185508"
+        "sha256": "bbabf5c03c826c850ee4e745e59a4d7bad01bb4996a5ab0f78e8306883942057"
       }
     },
     "monster_crocodile_archer_v0": {
@@ -429,7 +429,7 @@
       "provenance": {
         "origin": "user-provided local GLB",
         "license": "unconfirmed-user-provided",
-        "sha256": "2f5a2c1c969f3398c0f3a21ea45e6e940fb0caa1e0f1e9f8e623b05eb724ed32"
+        "sha256": "c2f86db0588abc524a122792eabde135293e2d12651d70d6ed667abeea4c6dda"
       }
     },
     "monster_quadruped_predator_v0": {

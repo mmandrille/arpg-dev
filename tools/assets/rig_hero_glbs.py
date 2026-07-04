@@ -359,7 +359,7 @@ def _append_accessor(gltf: dict, accessor: dict) -> int:
     return len(gltf["accessors"]) - 1
 
 
-def rig_glb_bytes(data: bytes, *, hero_id: str = "") -> bytes:
+def rig_glb_bytes(data: bytes, *, hero_id: str = "", target_height: float | None = None) -> bytes:
     parsed = parse_glb(data)
     gltf = parsed.gltf
     if gltf.get("skins"):
@@ -381,7 +381,7 @@ def rig_glb_bytes(data: bytes, *, hero_id: str = "") -> bytes:
                 read_position_accessor(gltf, bytes(bin_buf), position_accessor),
             )
             primitives.append(primitive)
-    target_height = HERO_TARGET_HEIGHTS.get(hero_id)
+    target_height = target_height if target_height is not None else HERO_TARGET_HEIGHTS.get(hero_id)
     if target_height is not None:
         _normalize_mesh_height(gltf, bin_buf, positions_by_accessor, target_height)
     mins, maxs = _bounds(positions_by_accessor)

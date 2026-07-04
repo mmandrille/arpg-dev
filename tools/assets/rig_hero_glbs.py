@@ -42,6 +42,9 @@ HEROES = {
 }
 RANGER_REST_POSE_DEGREES = 82.0
 RANGER_REST_POSE_SHOULDER_RATIO = 0.12
+HERO_TARGET_HEIGHTS: dict[str, float] = {
+    "paladin": 1.85,
+}
 
 
 @dataclass(frozen=True)
@@ -231,6 +234,46 @@ def _rotate_xy_vec(vec: tuple[float, float, float], angle: float) -> tuple[float
     return (vec[0] * c - vec[1] * s, vec[0] * s + vec[1] * c, vec[2])
 
 
+def _scale_position_accessor(
+    gltf: dict,
+    bin_buf: bytearray,
+    accessor_index: int,
+    scale: float,
+    origin_y: float,
+) -> None:
+    positions = read_position_accessor(gltf, bytes(bin_buf), accessor_index)
+    accessor = gltf["accessors"][accessor_index]
+    view = gltf["bufferViews"][accessor["bufferView"]]
+    offset = int(view["byteOffset"])
+    scaled: list[tuple[float, float, float]] = []
+    for x, y, z in positions:
+        sx = x * scale
+        sy = origin_y + (y - origin_y) * scale
+        sz = z * scale
+        scaled.append((sx, sy, sz))
+        struct.pack_into("<fff", bin_buf, offset, sx, sy, sz)
+        offset += 12
+    accessor["min"] = [min(p[i] for p in scaled) for i in range(3)]
+    accessor["max"] = [max(p[i] for p in scaled) for i in range(3)]
+
+
+def _normalize_mesh_height(
+    gltf: dict,
+    bin_buf: bytearray,
+    positions_by_accessor: dict[int, list[tuple[float, float, float]]],
+    target_height: float,
+) -> None:
+    mins, maxs = _bounds(positions_by_accessor)
+    height = max(maxs[1] - mins[1], 0.001)
+    if abs(height - target_height) < 0.05:
+        return
+    scale = target_height / height
+    origin_y = mins[1]
+    for accessor_index in positions_by_accessor.keys():
+        _scale_position_accessor(gltf, bin_buf, accessor_index, scale, origin_y)
+        positions_by_accessor[accessor_index] = read_position_accessor(gltf, bytes(bin_buf), accessor_index)
+
+
 def _joint_globals(mins: list[float], maxs: list[float]) -> list[tuple[float, float, float]]:
     cx = (mins[0] + maxs[0]) * 0.5
     cy = mins[1]
@@ -334,6 +377,9 @@ def rig_glb_bytes(data: bytes, *, hero_id: str = "") -> bytes:
                 read_position_accessor(gltf, bytes(bin_buf), position_accessor),
             )
             primitives.append(primitive)
+    target_height = HERO_TARGET_HEIGHTS.get(hero_id)
+    if target_height is not None:
+        _normalize_mesh_height(gltf, bin_buf, positions_by_accessor, target_height)
     mins, maxs = _bounds(positions_by_accessor)
     joint_globals = _joint_globals(mins, maxs)
 

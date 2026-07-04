@@ -285,7 +285,7 @@ func _test_class_character_models() -> void:
 			_assert_animation_rotates_bone(ap, class_skel, "attack", 0.12, "arm_r", class_id)
 			_assert_animation_rotates_bone(ap, class_skel, "attack_off_hand", 0.12, "arm_l", class_id)
 		if class_id == "paladin":
-			_assert(is_equal_approx(class_model.scale.x, 10.0), "paladin class scale not applied")
+			_assert(is_equal_approx(class_model.scale.x, 1.0), "paladin class scale not applied")
 		character.free()
 		await process_frame
 	var fallback := ClassPresentationsLoaderScript.resolve("necromancer")

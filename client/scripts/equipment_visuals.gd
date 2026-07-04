@@ -178,7 +178,7 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		_warn({"code": "missing_mount_socket", "mount_socket": mount_socket, "slot": slot})
 		return
 
-	var procedural_fallback := _procedural_fallback_visual(asset_id, slot)
+	var procedural_fallback := _procedural_fallback_visual(asset_id, slot, entry)
 	var inst: Node3D
 	if procedural_fallback != null:
 		inst = procedural_fallback
@@ -312,9 +312,13 @@ func _apply_tint(root: Node, color: Color) -> void:
 		_apply_tint(child, color)
 
 
-func _procedural_fallback_visual(asset_id: String, slot: String) -> Node3D:
+func _procedural_fallback_visual(asset_id: String, slot: String, entry) -> Node3D:
 	if not asset_id.begins_with("fallback_equipment_"):
 		return null
+	if typeof(entry) == TYPE_DICTIONARY:
+		var runtime_path := str((entry as Dictionary).get("runtime_path", ""))
+		if runtime_path.find("/equipment/weapons/rusty_sword/") == -1:
+			return null
 	var root := Node3D.new()
 	match slot:
 		"off_hand":

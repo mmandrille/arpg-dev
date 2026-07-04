@@ -50,8 +50,8 @@ func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
 			fail.call("resolver mounted invisible slot %s: %s" % [slot, mounted])
 			return false
 	for slot in ["head", "chest", "boots", "off_hand"]:
-		if not bool((equipped_visuals[slot] as Dictionary).get("procedural_fallback", false)):
-			fail.call("resolver did not use procedural fallback for slot %s: %s" % [slot, equipped_visuals[slot]])
+		if bool((equipped_visuals[slot] as Dictionary).get("procedural_fallback", false)):
+			fail.call("resolver should mount GLB equipment for slot %s: %s" % [slot, equipped_visuals[slot]])
 			return false
 	if str(equipped_visuals["ring_right"].get("mount_socket", "")) != "ring_right_socket":
 		fail.call("ring_right mounted to wrong socket: %s" % equipped_visuals["ring_right"])

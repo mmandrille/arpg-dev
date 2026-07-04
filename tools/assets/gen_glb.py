@@ -512,6 +512,83 @@ def starter_axe_glb() -> bytes:
     return _build_glb(color, parts, [])
 
 
+def equipment_helm_glb() -> bytes:
+    """Medium helm centered on head socket origin."""
+    color = (0.52, 0.54, 0.58, 1.0)
+    parts = [
+        {"name": "helmet_cap", "translation": [0.0, 0.12, 0.0], "scale": [0.62, 0.56, 0.62]},
+        {"name": "helmet_brow", "translation": [0.0, -0.06, -0.16], "scale": [1.0, 0.12, 0.62]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_chest_glb() -> bytes:
+    """Chest armor with pauldrons, origin at torso center."""
+    color = (0.48, 0.50, 0.55, 1.0)
+    parts = [
+        {"name": "chest_plate", "translation": [0.0, 0.0, 0.14], "scale": [0.86, 1.0, 0.28]},
+        {"name": "left_pauldron", "translation": [-0.58, 0.34, 0.0], "scale": [0.32, 0.18, 0.34]},
+        {"name": "right_pauldron", "translation": [0.58, 0.34, 0.0], "scale": [0.32, 0.18, 0.34]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_gloves_glb() -> bytes:
+    color = (0.42, 0.40, 0.38, 1.0)
+    parts = [
+        {"name": "left_glove", "translation": [-0.36, 0.0, 0.0], "scale": [0.42, 0.42, 0.36]},
+        {"name": "right_glove", "translation": [0.36, 0.0, 0.0], "scale": [0.42, 0.42, 0.36]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_boots_glb() -> bytes:
+    color = (0.38, 0.34, 0.30, 1.0)
+    parts = [
+        {"name": "left_boot", "translation": [-0.52, 0.0, -0.08], "scale": [0.48, 0.62, 0.78]},
+        {"name": "right_boot", "translation": [0.52, 0.0, -0.08], "scale": [0.48, 0.62, 0.78]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_belt_glb() -> bytes:
+    color = (0.36, 0.28, 0.20, 1.0)
+    parts = [
+        {"name": "belt_band", "translation": [0.0, 0.0, 0.0], "scale": [1.05, 0.24, 0.34]},
+        {"name": "belt_buckle", "translation": [0.0, 0.0, -0.04], "scale": [0.24, 0.28, 0.40]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_amulet_glb() -> bytes:
+    color = (0.72, 0.62, 0.22, 1.0)
+    parts = [
+        {"name": "amulet_chain", "translation": [0.0, 0.0, 0.0], "scale": [0.34, 0.04, 0.34]},
+        {"name": "amulet_gem", "translation": [0.0, -0.32, 0.0], "scale": [0.20, 0.24, 0.12]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_ring_glb() -> bytes:
+    color = (0.78, 0.72, 0.48, 1.0)
+    parts = [
+        {"name": "ring_band", "translation": [0.0, 0.0, 0.0], "scale": [0.32, 0.06, 0.32]},
+        {"name": "ring_stone", "translation": [0.0, -0.30, 0.0], "scale": [0.14, 0.12, 0.10]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_shield_glb() -> bytes:
+    """Round shield for off-hand socket, face pointing +Z."""
+    color = (0.46, 0.48, 0.52, 1.0)
+    parts = [
+        {"name": "round_shield_face", "translation": [0.0, 0.0, 0.04], "scale": [0.48, 0.48, 0.08]},
+        {"name": "round_shield_boss", "translation": [0.0, 0.0, 0.09], "scale": [0.16, 0.16, 0.10]},
+        {"name": "round_shield_grip", "translation": [0.0, 0.0, -0.07], "scale": [0.12, 0.62, 0.07]},
+    ]
+    return _build_glb(color, parts, [])
+
+
 TARGETS = {
     "client/assets/characters/base_humanoid/base_humanoid.glb": base_humanoid_glb,
     "client/assets/characters/barbarian/barbarian.glb": barbarian_glb,
@@ -523,6 +600,14 @@ TARGETS = {
     "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
     "client/assets/equipment/weapons/starter_staff/starter_staff.glb": starter_staff_glb,
     "client/assets/equipment/weapons/starter_axe/starter_axe.glb": starter_axe_glb,
+    "client/assets/equipment/armor/helm/helm.glb": equipment_helm_glb,
+    "client/assets/equipment/armor/chest/chest.glb": equipment_chest_glb,
+    "client/assets/equipment/armor/gloves/gloves.glb": equipment_gloves_glb,
+    "client/assets/equipment/armor/boots/boots.glb": equipment_boots_glb,
+    "client/assets/equipment/armor/belt/belt.glb": equipment_belt_glb,
+    "client/assets/equipment/armor/amulet/amulet.glb": equipment_amulet_glb,
+    "client/assets/equipment/armor/ring/ring.glb": equipment_ring_glb,
+    "client/assets/equipment/armor/shield/shield.glb": equipment_shield_glb,
     "client/assets/monsters/dummy/monster_dummy.glb": monster_dummy_glb,
     "client/assets/monsters/skeleton/monster_skeleton.glb": monster_skeleton_glb,
 }

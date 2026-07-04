@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-03 (v420 engineering review)
+Last updated: 2026-07-03 (v421 gear-rig-corridor)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-07-03 (v420 engineering review)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v420 — class-skill-build-branches |
+| **Latest completed slice** | v421 — gear-rig-corridor |
 | **Active branch** | `main` |
 | **CI gate** | 2026-07-03 — `make ci-full` green (~24m) on `dd037a16` |
 | **Next slice** | TBD (`/next`) |

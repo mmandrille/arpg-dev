@@ -13,7 +13,7 @@
     },
     "paladin": {
       "icon": { "label": "P", "shape": "shield", "color": "#d9b44a", "accent": "#fff3ba" },
-      "model": { "asset_id": "character_paladin_v0", "scale": 10.0 },
+      "model": { "asset_id": "character_paladin_v0", "scale": 1.0 },
       "idle_stance": { "scale": 1.02, "lean_degrees": 0.0 }
     },
     "rogue": {

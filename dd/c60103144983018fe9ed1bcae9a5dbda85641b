@@ -1,0 +1,41 @@
+client/tests/test_animation.gd
+  s_7bdc2687bb052d::t_b8ab6ec6a4d711 228
+client/scripts/combat_local_attack_presentation.gd
+  s_7bdc2687bb052d::t_6f0197246ad976 6-7,38,42,45,51,54,56,60-86
+client/animations/character_anims.tres
+  s_7bdc2687bb052d::t_c75abd449e1c25 14-37,54,64,74,84,105-110
+docs/plans/v440_2026-07-04-attack-animations-melee-2h.md
+  s_7bdc2687bb052d::t_dcfb66dfad8727 1-13
+shared/assets/attack_presentation.v0.json
+  s_7bdc2687bb052d::t_fe40452e90b06d 6
+docs/as-built/v440_attack-animations-melee-2h.md
+  s_7bdc2687bb052d::t_55d8168790a1d3 1-15
+docs/CODEMAP.md
+  s_7bdc2687bb052d::t_6f0197246ad976 11,29
+client/scripts/attack_presentation_loader.gd
+  s_7bdc2687bb052d::t_6f0197246ad976 1-40
+docs/specs/v440_spec-attack-animations-melee-2h.md
+  s_7bdc2687bb052d::t_86e02edf2613af 1-16
+client/tests/item_visual_equipment_probe.gd
+  s_7bdc2687bb052d::t_6f0197246ad976 21,63-64,67-68
+client/scripts/bot_facade.gd
+  s_7bdc2687bb052d::t_6f0197246ad976 273
+shared/assets/attack_presentation.v0.schema.json
+  s_7bdc2687bb052d::t_6f0197246ad976 1-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ddc60103144983018fe9ed1bcae9a5dbda85641b",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -14,6 +14,7 @@ extends RefCounted
 class_name EquipmentVisualResolver
 
 const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
+const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
 const FALLBACK_ASSET_BY_SLOT := {
 	"head": "fallback_equipment_head_v0",
@@ -47,6 +48,7 @@ const RARITY_TINTS := {
 }
 
 var _mount_root: Node3D
+var _character_class: String = ""
 var _visuals: Dictionary = {}      # item_def_id -> visual metadata
 var _assets: Dictionary = {}       # asset_id -> manifest entry
 var _inventory: Dictionary = {}    # item_instance_id (String) -> inventory item Dictionary
@@ -56,6 +58,11 @@ var _active_weapon_set: int = 0
 var _mounted_nodes: Dictionary = {} # slot -> Node3D
 var _mounted_state: Dictionary = {} # slot -> debug state
 var _warnings: Array = []
+
+
+func set_character_class(class_id: String) -> void:
+	_character_class = str(class_id)
+	_refresh_all()
 
 
 func _init(mount_root: Node3D) -> void:
@@ -148,6 +155,8 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 
 	var item_instance_id := _equipped_instance_id_for_slot(slot)
 	if item_instance_id == "":
+		return
+	if slot == "off_hand" and _main_hand_blocks_off_hand_visual():
 		return
 
 	var item: Dictionary = _inventory.get(item_instance_id, {})
@@ -245,6 +254,12 @@ func _mount_socket_for_slot(slot: String, vis: Dictionary) -> String:
 
 func _local_transform_for_slot(slot: String, vis: Dictionary) -> Dictionary:
 	var transform: Dictionary = (vis.get("local_transform", {}) as Dictionary).duplicate(true)
+	if _character_class != "":
+		var class_transforms: Dictionary = vis.get("class_transforms", {}) if typeof(vis.get("class_transforms", {})) == TYPE_DICTIONARY else {}
+		var class_entry: Dictionary = class_transforms.get(_character_class, {}) if typeof(class_transforms.get(_character_class, {})) == TYPE_DICTIONARY else {}
+		var class_transform: Dictionary = class_entry.get("local_transform", {}) if typeof(class_entry.get("local_transform", {})) == TYPE_DICTIONARY else {}
+		if not class_transform.is_empty():
+			transform = _merge_transform(transform, class_transform)
 	if slot != "off_hand" or str(vis.get("slot", slot)) == slot:
 		return transform
 	var position: Dictionary = (transform.get("position", {}) as Dictionary).duplicate(true)
@@ -254,6 +269,35 @@ func _local_transform_for_slot(slot: String, vis: Dictionary) -> Dictionary:
 	rotation["z"] = float(rotation.get("z", 0.0)) + 180.0
 	transform["rotation_degrees"] = rotation
 	return transform
+
+
+func _merge_transform(base: Dictionary, override_transform: Dictionary) -> Dictionary:
+	var out := base.duplicate(true)
+	for key in ["position", "rotation_degrees", "scale"]:
+		if not override_transform.has(key):
+			continue
+		var patch: Dictionary = override_transform.get(key, {}) if typeof(override_transform.get(key, {})) == TYPE_DICTIONARY else {}
+		if patch.is_empty():
+			continue
+		var existing: Dictionary = out.get(key, {}) if typeof(out.get(key, {})) == TYPE_DICTIONARY else {}
+		out[key] = existing.merged(patch)
+	return out
+
+
+func _main_hand_blocks_off_hand_visual() -> bool:
+	var main_id := _equipped_instance_id_for_slot("main_hand")
+	if main_id == "":
+		return false
+	var item: Dictionary = _inventory.get(main_id, {})
+	var def_id := str(item.get("item_def_id", ""))
+	if def_id == "":
+		return false
+	ItemRulesLoaderScript.ensure_loaded()
+	var def: Dictionary = ItemRulesLoaderScript.item_definition(def_id)
+	if str(def.get("handedness", "")) == "two_handed":
+		return true
+	var occupies = def.get("occupies_hands", [])
+	return typeof(occupies) == TYPE_ARRAY and (occupies as Array).has("off_hand")
 
 
 func _clear_mounted(slot: String) -> void:

@@ -43,6 +43,26 @@
               "rotation_degrees": { "$ref": "#/$defs/vec3" },
               "scale": { "$ref": "#/$defs/vec3" }
             }
+          },
+          "class_transforms": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["local_transform"],
+              "additionalProperties": false,
+              "properties": {
+                "local_transform": {
+                  "type": "object",
+                  "required": ["position", "rotation_degrees", "scale"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "position": { "$ref": "#/$defs/vec3" },
+                    "rotation_degrees": { "$ref": "#/$defs/vec3" },
+                    "scale": { "$ref": "#/$defs/vec3" }
+                  }
+                }
+              }
+            }
           }
         }
       }

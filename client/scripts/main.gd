@@ -1652,12 +1652,12 @@ func _apply_delta(p: Dictionary) -> void:
 		if clip == null:
 			if event_type in ["attack_missed", "attack_blocked"]:
 				_face_event_source_toward_target(ev)
-				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed())
+				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			_face_event_source_toward_target(ev)
-			CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed())
+			CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
 			ClientAudioBridgeScript.damage(audio_controller, false)
@@ -3022,7 +3022,7 @@ func _handle_autoplay(delta: float) -> void:
 			if aim != Vector2.ZERO:
 				_face_direction(aim)
 			if autoplay_attack_cooldown <= 0.0:
-				CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed())
+				CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 				_send_action_intent(target_id)
 				autoplay_attack_cooldown = autoplay_step_delay
 			autoplay_timer = autoplay_step_delay
@@ -3144,7 +3144,7 @@ func _dispatch_monster_attack_now(target_id: String, rec: Dictionary) -> void:
 		var flat := Vector2(target_node.global_position.x - player_anchor.global_position.x, target_node.global_position.z - player_anchor.global_position.z)
 		if flat.length_squared() > 0.0001:
 			_face_direction(flat.normalized())
-	CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed())
+	CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)
@@ -5512,6 +5512,8 @@ func _apply_local_player_class_model() -> void:
 	if player_reaction != null:
 		player_reaction.dispose()
 	_apply_character_class_model(character_visual, class_id)
+	if resolver != null:
+		resolver.set_character_class(class_id)
 	_apply_local_player_visual_scale(player_visual_scale)
 	_apply_model_tint(character_visual, ClientConstants.PLAYER_TINT)
 	_remount_local_equipment_visuals()

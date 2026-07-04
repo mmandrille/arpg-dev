@@ -1,0 +1,1 @@
+"""Showme batch screenshot tooling."""

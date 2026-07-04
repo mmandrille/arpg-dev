@@ -1,5 +1,5 @@
 # --- Client -------------------------------------------------------------------
-.PHONY: client-unit client-smoke play play-debug play-remote skill-logo-sheet model-catalog-generate model-list model
+.PHONY: client-unit client-smoke play play-debug play-remote skill-logo-sheet regen-screenshots regen-screenshots-list model-catalog-generate model-list model
 SKILL_LOGO_SHEET_OUT := $(or $(OUT),.artifacts/skill-logo-sheet.svg)
 PLAY_CLIENTS_FROM_GOALS := $(firstword $(filter-out play play-debug play-remote,$(MAKECMDGOALS)))
 PLAY_CLIENTS ?= $(if $(PLAY_CLIENTS_FROM_GOALS),$(PLAY_CLIENTS_FROM_GOALS),1)
@@ -22,6 +22,17 @@ client-smoke: ## Run Godot headless smoke against TEST_BASE_URL (default :18081;
 skill-logo-sheet: tools ## Render current skill logos and labels to an SVG image
 	@mkdir -p "$$(dirname "$(SKILL_LOGO_SHEET_OUT)")"
 	$(PY) tools/assets/skill_logo_sheet.py --out "$(abspath $(SKILL_LOGO_SHEET_OUT))"
+
+regen-screenshots: tools ## Regenerate data-driven showme screenshots (all suites by default)
+	@$(PY) -m tools.showme.regen_screenshots \
+		$(if $(SUITE),$(foreach s,$(SUITE),--suite $(s)),) \
+		$(if $(OUT),--out-dir "$(OUT)",) \
+		$(if $(DRY_RUN),--dry-run,) \
+		$(if $(FAIL_FAST),--fail-fast,) \
+		--godot "$(GODOT)"
+
+regen-screenshots-list: tools ## List regen-screenshots suites and capture counts
+	@$(PY) -m tools.showme.regen_screenshots --list
 
 model-list: tools ## List previewable character/monster model asset IDs
 	@$(PY) -m tools.assets.model_catalog list

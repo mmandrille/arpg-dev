@@ -10,7 +10,7 @@ Canonical skill definitions for this repo. **Edit files here only** — tool-spe
 | [`execute/`](execute/SKILL.md) | `/execute {plan}` → implement until `make ci` green |
 | [`finish/`](finish/SKILL.md) | `/finish` → consolidate PROGRESS, CI, `feat: vN:` commit |
 | [`review/`](review/SKILL.md) | `/review` or `$review` → write repo-wide engineering review docs |
-| [`showme/`](showme/SKILL.md) | `/showme` or `$showme` → focused Godot screenshot/live preview for visual tuning |
+| [`showme/`](showme/SKILL.md) | `/showme` or `$showme` → focused screenshot/live preview; `make regen-screenshots` for batch visual regression |
 | [`3dmodel/`](3dmodel/SKILL.md) | `$3dmodel` → integrate supplied GLB/glTF models into the Godot client |
 | [`autoloop/`](autoloop/SKILL.md) | `$autoloop` → curate or accept feature/gameplay ideas, then run next/spec/plan/execute/finish for every viable slice the user selects |
 | [`refactor/`](refactor/SKILL.md) | `$refactor` → scorecard-driven minor cleanup commits after a fresh review |

@@ -37,7 +37,7 @@ Canonical definitions live in [`skills/`](skills/README.md). Tool paths are syml
 | `/execute {plan_file.md}` | [`skills/execute/SKILL.md`](skills/execute/SKILL.md) | Review plan for gaps → ask questions → implement task-by-task until `make ci` is green |
 | `/finish` | [`skills/finish/SKILL.md`](skills/finish/SKILL.md) | Consolidate `PROGRESS.md` + uncommitted changes → `make ci` green → commit `feat: v{N}: {title}` |
 | `/review {vN?}` | [`skills/review/SKILL.md`](skills/review/SKILL.md) | Analyze the full repo → write overview at `docs/reviews/YYYYMMDD_vN-overview.md` plus companion reports under `docs/reviews/{backend,client,extras}/` |
-| `/showme {gear\|inventory\|...}` | [`skills/showme/SKILL.md`](skills/showme/SKILL.md) | Open or capture a focused Godot client preview for fast visual feedback |
+| `/showme {gear\|inventory\|...}` | [`skills/showme/SKILL.md`](skills/showme/SKILL.md) | Capture one focused Godot visual, or run `make regen-screenshots` for batch regression |
 | `$3dmodel {model task}` | [`skills/3dmodel/SKILL.md`](skills/3dmodel/SKILL.md) | Integrate supplied GLB/glTF models into the Godot client presentation path |
 | `/autoloop` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Curate or accept feature/gameplay ideas, then repeat `/next` → `/spec` → `/plan` → `/execute` → `/finish` for every viable slice selected |
 | `/refactor` | [`skills/refactor/SKILL.md`](skills/refactor/SKILL.md) | Read the latest review scorecard → make small verified cleanup commits until scorecard areas are 9+ or only major work remains |
@@ -74,6 +74,13 @@ When worktree isolation is used:
 Prefer targeted verification while iterating. Run the smallest command or scenario that covers the files and behavior you changed, such as a focused Go package test, `make validate-shared`, `make client-unit`, a single `make bot scenario=...`, or one client bot scenario.
 
 When working on features or changes that involve visual effects and a client bot scenario exists, always tell the user the exact scenario name and command they can run for visual verification, for example: `make bot-visual scenario=blablabla`.
+
+**Batch visual regression:** after presentation changes (gear fit, skeleton sockets, item/skill
+icons, floor loot models, class bodies), run `make regen-screenshots` with the relevant
+`SUITE=` filter and inspect PNGs under `.artifacts/screenshots/latest/`. Use
+`make regen-screenshots-list` to see suites; `DRY_RUN=1` to preview jobs without Godot.
+Single-element captures still use `/showme` or `python3 skills/showme/scripts/render_focus.py`.
+Full catalog: [`skills/showme/SKILL.md`](skills/showme/SKILL.md).
 
 Do **not** repeatedly run the full suite by default. Reserve `make ci` for the final pre-commit proof when the change is broad enough to justify it, when targeted tests leave meaningful integration risk, or when the user explicitly asks for full CI.
 

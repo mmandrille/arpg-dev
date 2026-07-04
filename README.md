@@ -48,6 +48,8 @@ make bot-visual      # scripts/bot_visual.sh: server + Godot autoplay (see below
 make replay SESSION_ID=<id>   # re-simulate and verify a recorded session
 make client-smoke    # Godot headless smoke against a running TEST_BASE_URL server
 make ci              # full local CI suite
+make regen-screenshots-list  # list visual capture suites (classes, icons, items, …)
+make regen-screenshots       # batch PNG captures for visual regression review
 ```
 
 To watch the scripted slice in the real client (move → attack → pickup → equip,
@@ -100,6 +102,23 @@ Typical first run:
 ```bash
 make bot-visual
 ```
+
+### Visual regression screenshots
+
+After client presentation changes (gear sockets, item icons, skill icons, loot models,
+class bodies), regenerate focused PNGs and inspect them for regressions:
+
+```bash
+make regen-screenshots-list                              # suites + counts
+make regen-screenshots SUITE="skeleton gear"             # subset only
+make regen-screenshots SUITE="skill-icon item-icon"      # all icons
+make regen-screenshots DRY_RUN=1                         # plan without Godot
+```
+
+Output: `.artifacts/screenshots/<timestamp>/` with per-element PNGs and `index.json`.
+Symlink: `.artifacts/screenshots/latest/`. Implementation: `tools/showme/` +
+[`skills/showme/SKILL.md`](skills/showme/SKILL.md). Agents should run the relevant
+suite after visual slices and open the PNGs before asking for human review.
 
 ## Status
 

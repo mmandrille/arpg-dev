@@ -18,6 +18,9 @@ const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
 const ShowmeSkeletonCaptureScript := preload("res://scripts/showme/showme_skeleton_capture.gd")
+const ShowmeSkillIconCaptureScript := preload("res://scripts/showme/showme_skill_icon_capture.gd")
+const ShowmeItemIconCaptureScript := preload("res://scripts/showme/showme_item_icon_capture.gd")
+const ShowmeItemAssetCaptureScript := preload("res://scripts/showme/showme_item_asset_capture.gd")
 
 const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
@@ -50,6 +53,9 @@ var _height := 480
 var _duration := 0.0
 var _items: Array = []
 var _class_id := ""
+var _skill_id := ""
+var _family_id := ""
+var _asset_id := ""
 var _subject: Node3D
 var _skills_panel: Control
 
@@ -93,6 +99,12 @@ func _initialize() -> void:
 			await _setup_skills()
 		"item-icons":
 			await ShowmeItemIconsCaptureScript.setup(self)
+		"skill-icon":
+			await ShowmeSkillIconCaptureScript.setup(self, _skill_id)
+		"item-icon":
+			await ShowmeItemIconCaptureScript.setup(self, _family_id)
+		"item-asset":
+			_subject = await ShowmeItemAssetCaptureScript.setup(self, _asset_id)
 		"shop":
 			await _setup_shop()
 		"bishop":
@@ -165,6 +177,15 @@ func _parse_args() -> void:
 			"--class-id":
 				i += 1
 				_class_id = str(args[i]).strip_edges()
+			"--skill-id":
+				i += 1
+				_skill_id = str(args[i]).strip_edges()
+			"--family-id":
+				i += 1
+				_family_id = str(args[i]).strip_edges()
+			"--asset-id":
+				i += 1
+				_asset_id = str(args[i]).strip_edges()
 		i += 1
 	if _output == "":
 		_output = ProjectSettings.globalize_path("res://").path_join("../.artifacts/showme/capture.png")

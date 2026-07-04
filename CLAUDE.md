@@ -50,6 +50,11 @@ make model-list      # list previewable character/monster model asset IDs
 make model model=<asset_id>        # open a focused Godot preview for one model
 make model model=<asset_id> CHECK=1 # headless model-viewer load check
 
+# Visual regression (batch showme captures; no server required)
+make regen-screenshots-list         # list suites and capture counts
+make regen-screenshots              # all suites → .artifacts/screenshots/<timestamp>/
+make regen-screenshots SUITE="gear skeleton"  # subset only
+
 # Replay
 make replay SESSION_ID=<id>   # re-simulate a recorded session and verify output
 ```

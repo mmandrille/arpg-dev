@@ -21,10 +21,13 @@ def _default_output(root: Path, focus: str) -> Path:
 def main() -> int:
     root = _repo_root()
     parser = argparse.ArgumentParser(description="Render a focused Godot client visual.")
-    parser.add_argument("--focus", choices=["gear", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "skeleton"], default="gear")
+    parser.add_argument("--focus", choices=["gear", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "skeleton"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
     parser.add_argument("--class-id", default="", help="Class id for gear focus, e.g. paladin.")
+    parser.add_argument("--skill-id", default="", help="Skill id for skill-icon focus.")
+    parser.add_argument("--family-id", default="", help="Item presentation family id for item-icon focus.")
+    parser.add_argument("--asset-id", default="", help="Asset manifest id for item-asset focus.")
     parser.add_argument("--output", default="", help="PNG output path for screenshot mode.")
     parser.add_argument("--width", type=int, default=640)
     parser.add_argument("--height", type=int, default=480)
@@ -48,6 +51,10 @@ def main() -> int:
         width, height = 960, 640
     if args.focus == "item-icons" and (args.width, args.height) == (640, 480):
         width, height = 960, 720
+    if args.focus in ("skill-icon", "item-icon") and (args.width, args.height) == (640, 480):
+        width, height = 480, 480
+    if args.focus == "item-asset" and (args.width, args.height) == (640, 480):
+        width, height = 640, 480
     if args.focus == "shop" and (args.width, args.height) == (640, 480):
         width, height = 1280, 760
     if args.focus == "bishop" and (args.width, args.height) == (640, 480):
@@ -115,6 +122,12 @@ def main() -> int:
         cmd += ["--items", args.items]
     if args.class_id:
         cmd += ["--class-id", args.class_id]
+    if args.skill_id:
+        cmd += ["--skill-id", args.skill_id]
+    if args.family_id:
+        cmd += ["--family-id", args.family_id]
+    if args.asset_id:
+        cmd += ["--asset-id", args.asset_id]
 
     print("[showme] running:", " ".join(cmd))
     result = subprocess.run(cmd, cwd=root)

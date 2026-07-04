@@ -17,6 +17,7 @@ const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
+const ShowmeSkeletonCaptureScript := preload("res://scripts/showme/showme_skeleton_capture.gd")
 
 const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
@@ -102,6 +103,8 @@ func _initialize() -> void:
 			await _setup_market_publish()
 		"market-offer":
 			await _setup_market_offer()
+		"skeleton":
+			_subject = await ShowmeSkeletonCaptureScript.setup(self, _class_id)
 		_:
 			await _setup_gear()
 

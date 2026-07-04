@@ -1,0 +1,31 @@
+docs/progress/slice-lifecycle.md
+  s_949141f89be97e::t_8a177784633493 428
+PROGRESS.md
+  s_949141f89be97e::t_8e3d57594204d3 26-28
+  s_949141f89be97e::t_909464ff35aec9 18
+shared/assets/item_visuals.v0.json
+  s_949141f89be97e::t_c138ef5033bd5c 99
+  s_949141f89be97e::t_b820e0a5a3ca6b 33
+  s_949141f89be97e::t_ae8ec81b087b05 143-144
+  s_949141f89be97e::t_7f748c3cc3e651 445,451-452,460-462,473
+docs/as-built/v428_hero-animation-feel.md
+  s_949141f89be97e::t_ef1b11da9bf3e6 1-22
+shared/assets/combat_feel_presentation.v0.json
+  s_949141f89be97e::t_664b6d7522ea10 12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1c4661dcfa5c32181840058bf4924251b499f53d",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

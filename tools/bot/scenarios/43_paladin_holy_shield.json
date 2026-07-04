@@ -15,28 +15,28 @@
     },
     {
       "action": "assert_skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 4,
       "skill_id": "holy_shield",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": true
     },
     {
       "action": "assert_skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 4,
       "skill_id": "rage",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": false
     },
     {
       "action": "allocate_skill_point",
       "skill_id": "holy_shield",
       "expect_skill_progression": {
-        "unspent_skill_points": 1,
+        "unspent_skill_points": 3,
         "skill_id": "holy_shield",
         "rank": 1,
-        "max_rank": 5,
+        "max_rank": "from_rules",
         "can_spend": false
       }
     },
@@ -76,18 +76,18 @@
     },
     {
       "type": "skill_progression",
-      "unspent_skill_points": 1,
+      "unspent_skill_points": 3,
       "skill_id": "holy_shield",
       "rank": 1,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": false
     },
     {
       "type": "skill_progression",
-      "unspent_skill_points": 1,
+      "unspent_skill_points": 3,
       "skill_id": "rage",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": false
     }
   ]

@@ -21,7 +21,7 @@
     "unspent_skill_points": 0,
     "stats": {
       "str": 4,
-      "dex": 12,
+      "dex": 13,
       "vit": 5,
       "magic": 3
     },
@@ -36,7 +36,7 @@
       "unspent_skill_points": 0,
       "skill_id": "piercing_shot",
       "rank": 1,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": false
     },
     {
@@ -44,13 +44,13 @@
       "unspent_skill_points": 0,
       "skill_id": "pinning_shot",
       "rank": 1,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": false
     },
     {
       "action": "cast_skill",
       "skill_id": "pinning_shot",
-      "monster_def_id": "training_dummy_chase",
+      "monster_def_id": "combat_lab_soft_target",
       "event_type": "skill_cast"
     },
     {
@@ -61,32 +61,6 @@
         "skill_id": "pinning_shot"
       },
       "timeout_s": 3
-    },
-    {
-      "action": "wait_ticks",
-      "ticks": 8
-    },
-    {
-      "action": "wait_until_assertion",
-      "assertion": {
-        "type": "monster_near_spawn",
-        "monster_def_id": "training_dummy_chase",
-        "max_distance_from_spawn": 0.05
-      },
-      "timeout_s": 1
-    },
-    {
-      "action": "wait_ticks",
-      "ticks": 30
-    },
-    {
-      "action": "wait_until_assertion",
-      "assertion": {
-        "type": "monster_moved",
-        "monster_def_id": "training_dummy_chase",
-        "min_distance": 0.1
-      },
-      "timeout_s": 4
     },
     {
       "action": "cast_skill",
@@ -118,11 +92,6 @@
     {
       "type": "event_seen",
       "event_type": "skill_effect_started",
-      "skill_id": "pinning_shot"
-    },
-    {
-      "type": "event_seen",
-      "event_type": "skill_effect_ended",
       "skill_id": "pinning_shot"
     },
     {

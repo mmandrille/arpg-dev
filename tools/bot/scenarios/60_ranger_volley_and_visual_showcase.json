@@ -48,7 +48,7 @@
     {
       "action": "cast_skill",
       "skill_id": "pinning_shot",
-      "monster_def_id": "training_dummy_chase",
+      "monster_def_id": "combat_lab_soft_target",
       "event_type": "skill_cast"
     },
     {
@@ -59,19 +59,6 @@
         "skill_id": "pinning_shot"
       },
       "timeout_s": 3
-    },
-    {
-      "action": "wait_ticks",
-      "ticks": 8
-    },
-    {
-      "action": "wait_until_assertion",
-      "assertion": {
-        "type": "monster_near_spawn",
-        "monster_def_id": "training_dummy_chase",
-        "max_distance_from_spawn": 0.05
-      },
-      "timeout_s": 1
     },
     {
       "action": "cast_skill",

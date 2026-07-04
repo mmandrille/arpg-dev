@@ -21,7 +21,7 @@
     "unspent_skill_points": 4,
     "stats": {
       "str": 4,
-      "dex": 12,
+      "dex": 31,
       "vit": 5,
       "magic": 12
     },
@@ -223,7 +223,7 @@
     {
       "type": "character_progression",
       "str": 4,
-      "dex": 12,
+      "dex": 31,
       "vit": 5,
       "magic": 12
     },

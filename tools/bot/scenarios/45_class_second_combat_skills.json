@@ -25,7 +25,7 @@
       "unspent_skill_points": 2,
       "skill_id": "cleave",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": true
     },
     {
@@ -33,7 +33,7 @@
       "unspent_skill_points": 2,
       "skill_id": "ice_shard",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": false
     },
     {
@@ -43,7 +43,7 @@
         "unspent_skill_points": 1,
         "skill_id": "cleave",
         "rank": 1,
-        "max_rank": 5,
+        "max_rank": "from_rules",
         "can_spend": false
       }
     },
@@ -85,18 +85,18 @@
     },
     {
       "type": "skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 1,
       "skill_id": "cleave",
       "rank": 1,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": false
     },
     {
       "type": "skill_progression",
-      "unspent_skill_points": 2,
+      "unspent_skill_points": 1,
       "skill_id": "ice_shard",
       "rank": 0,
-      "max_rank": 5,
+      "max_rank": "from_rules",
       "can_spend": false
     }
   ],

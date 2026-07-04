@@ -5,7 +5,7 @@
   "seed": "v388_armor_lab_2",
   "character_class": "sorcerer",
   "debug_progression": {
-    "level": 3,
+    "level": 1,
     "unspent_stat_points": 5,
     "stats": { "magic": 5 }
   },

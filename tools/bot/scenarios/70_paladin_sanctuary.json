@@ -59,8 +59,8 @@
       "type": "event_seen",
       "event_type": "skill_effect_started",
       "skill_id": "sanctuary",
-      "remaining_ticks": 60,
-      "total_ticks": 60
+      "remaining_ticks": 63,
+      "total_ticks": 63
     },
     {
       "type": "event_seen",

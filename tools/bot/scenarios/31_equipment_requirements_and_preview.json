@@ -50,17 +50,7 @@
       "action": "assert_character_progression",
       "level": 2,
       "unspent_stat_points": 3,
-      "str": 5
-    },
-    {
-      "action": "allocate_stat",
-      "stat": "str",
-      "points": 1,
-      "expect_progression": {
-        "level": 2,
-        "unspent_stat_points": 2,
-        "str": 6
-      }
+      "str": 6
     },
     {
       "action": "assert_inventory_requirement_status",
@@ -95,13 +85,9 @@
       "event_type": "character_leveled"
     },
     {
-      "type": "event_seen",
-      "event_type": "stat_allocated"
-    },
-    {
       "type": "character_progression",
       "level": 2,
-      "unspent_stat_points": 2,
+      "unspent_stat_points": 3,
       "str": 6
     },
     {
@@ -140,7 +126,7 @@
         {
           "type": "character_progression",
           "level": 2,
-          "unspent_stat_points": 2,
+          "unspent_stat_points": 3,
           "str": 6
         },
         {

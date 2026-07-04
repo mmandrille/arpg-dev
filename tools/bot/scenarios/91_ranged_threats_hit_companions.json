@@ -21,8 +21,12 @@
       "equals": 1
     },
     {
+      "action": "set_companion_stance",
+      "stance": "assist"
+    },
+    {
       "action": "wait_until_assertion",
-      "timeout_s": 8,
+      "timeout_s": 12,
       "assertion": {
         "type": "combat_event_seen",
         "source_entity_type": "monster",

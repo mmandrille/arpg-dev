@@ -42,7 +42,7 @@
       "type": "skill_progression",
       "skill_id": "magic_bolt",
       "rank": 4,
-      "max_rank": 5
+      "max_rank": "from_rules"
     }
   ],
   "fresh_session_checks": []

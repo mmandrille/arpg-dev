@@ -955,6 +955,7 @@ async def execute_step(
                 loop,
                 stop_distance=stop_distance,
                 max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+                timeout_s=float(step["timeout_s"]) if step.get("timeout_s") is not None else None,
             )
             return
         max_ticks = int(step.get("max_ticks", WALK_MAX_TICKS))
@@ -1968,6 +1969,7 @@ async def move_until_entity_in_range(
     *,
     stop_distance: float,
     max_ticks: int = WALK_MAX_TICKS,
+    timeout_s: float | None = None,
 ) -> None:
     from tools.bot.movement_runtime import move_until_entity_in_range as move_until_entity_in_range_impl
 
@@ -1979,6 +1981,7 @@ async def move_until_entity_in_range(
         loop,
         stop_distance=stop_distance,
         max_ticks=max_ticks,
+        timeout_s=timeout_s,
         ctx=_runtime_context(),
     )
 

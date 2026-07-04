@@ -101,6 +101,7 @@ async def move_until_entity_in_range(
     *,
     stop_distance: float,
     max_ticks: int = WALK_MAX_TICKS,
+    timeout_s: float | None = None,
     ctx: BotContext,
 ) -> None:
     target = state.entities.get(target_id)
@@ -109,7 +110,14 @@ async def move_until_entity_in_range(
     max_ticks = derived_walk_max_ticks(state, target["position"], max_ticks)
     last_error: Exception | None = None
     attempts = max(1, max_ticks // 20)
+    started = loop.time()
     for _ in range(attempts):
+        if timeout_s is not None and loop.time() - started > timeout_s:
+            player = find_player(state)
+            raise TimeoutError(
+                f"move_until_entity_in_range timed out after {timeout_s}s toward {target_id}; "
+                f"player={(player or {}).get('position')} target={target.get('position')}"
+            )
         target = state.entities.get(target_id)
         player = find_player(state)
         if target is None:

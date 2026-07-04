@@ -1,0 +1,41 @@
+docs/progress/slice-lifecycle.md
+  s_47c91f4feb7c91::t_52d5aefe7a70e0 429
+docs/plans/v430_2026-07-04-barbarian-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_4012e64e39e5be 1-6
+  s_47c91f4feb7c91::t_72fd10f5dc3c5d 7-15
+assets/manifests/assets.v0.json
+  s_47c91f4feb7c91::t_24570d79548254 43-45
+tools/assets/rig_hero_glbs.py
+  s_47c91f4feb7c91::t_864211590b4b60 46
+assets/characters/barbarian/README.md
+  s_47c91f4feb7c91::t_6c2ed56b4fd2c7 1,3,5-6,8-33
+tools/bot/scenarios/client/93_barbarian_tier3_visual.json
+  s_47c91f4feb7c91::t_ac215bc86443b9 1-8,10-18,21-26,28-46
+  s_47c91f4feb7c91::t_fcaae03620f276 9,19-20,27
+client/assets/characters/barbarian/barbarian_f_txr_03.png.import
+  s_47c91f4feb7c91::t_80395e344972f2 1-43
+docs/specs/v430_spec-barbarian-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_9b31fea64e68b8 1-28
+PROGRESS.md
+  s_47c91f4feb7c91::t_f68c2ddd523b0e 18,26-28
+tools/assets/test_rig_hero_glbs.py
+  s_47c91f4feb7c91::t_155be2e588f974 128-133
+docs/as-built/v430_barbarian-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_b399cbe602d7f8 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e20fbda49c400bde05b956457604f79cfd483dd6",
+  "prompts": {},
+  "sessions": {
+    "s_47c91f4feb7c91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "26610c73-98fa-4acd-a133-bc38edadb697",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

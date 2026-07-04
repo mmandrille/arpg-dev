@@ -1,1 +1,0 @@
-../../../client/scripts/showme/showme_item_icons_capture.gd

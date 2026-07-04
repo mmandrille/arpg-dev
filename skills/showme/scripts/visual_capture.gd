@@ -1,1 +1,0 @@
-../../../client/scripts/showme/visual_capture.gd

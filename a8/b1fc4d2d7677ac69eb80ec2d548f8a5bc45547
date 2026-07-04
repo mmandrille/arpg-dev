@@ -1,0 +1,51 @@
+client/scripts/gear_sockets_loader.gd
+  s_7bdc2687bb052d::t_ee60906895a304 1-64
+client/scripts/character_visual.gd
+  s_7bdc2687bb052d::t_fc7b9d6917b241 3-4,6-8,21-22,25,28,31,33-34,37-42,46,48-50,53-54,59,63-79
+client/scripts/main.gd
+  s_7bdc2687bb052d::t_103163752a8e10 5544-5545
+docs/specs/v435_spec-bone-gear-sockets.md
+  s_7bdc2687bb052d::t_dea06beccdf266 1-28
+docs/plans/v435_2026-07-04-bone-gear-sockets.md
+  s_7bdc2687bb052d::t_76a37940b18faa 1-6,13-20
+  s_7bdc2687bb052d::t_0765eeb620c7af 7-12
+shared/assets/gear_sockets.v0.json
+  s_7bdc2687bb052d::t_94d0a12df8ae96 1-51
+tools/bot/scenarios/client/97_bone_gear_sockets.json
+  s_7bdc2687bb052d::t_34886c596854a3 1-35
+docs/CODEMAP.md
+  s_7bdc2687bb052d::t_fdf800d144aca7 11
+  s_7bdc2687bb052d::t_36f44e8f86d783 29
+PROGRESS.md
+  s_7bdc2687bb052d::t_943e6790669bd3 34,36
+docs/progress/slice-lifecycle.md
+  s_7bdc2687bb052d::t_c57311d4be1d6b 432
+docs/as-built/v435_bone-gear-sockets.md
+  s_7bdc2687bb052d::t_c880b0743288f6 1-18
+client/tests/test_animation.gd
+  s_7bdc2687bb052d::t_381de449ab7832 287-290
+  s_7bdc2687bb052d::t_321ff96dd5dbc0 273,277-278,281-282
+client/scripts/showme/visual_capture.gd
+  s_7bdc2687bb052d::t_faa8ca869ed673 228-229
+shared/assets/gear_sockets.v0.schema.json
+  s_7bdc2687bb052d::t_94bec13c94913e 53-58
+  s_7bdc2687bb052d::t_8d16fd641394f0 25-28
+  s_7bdc2687bb052d::t_af5b02147deedb 1-24,29-43,45-52,59-65
+  s_7bdc2687bb052d::t_abad494d13e4e0 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a8b1fc4d2d7677ac69eb80ec2d548f8a5bc45547",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

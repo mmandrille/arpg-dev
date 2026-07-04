@@ -1,0 +1,34 @@
+docs/specs/v427_spec-paladin-tier3-body.md
+  s_949141f89be97e::t_7436c97cde01d5 1-26
+docs/progress/slice-lifecycle.md
+  s_949141f89be97e::t_1a6fa23f51e695 427
+tools/bot/scenarios/client/92_paladin_tier3_visual.json
+  s_949141f89be97e::t_2272b853330c78 33
+  s_949141f89be97e::t_cd107c06294237 1-32,34-40,42-51
+  s_949141f89be97e::t_40041dc97d76c6 41
+docs/plans/v427_2026-07-04-paladin-tier3-body.md
+  s_949141f89be97e::t_2becf18eb0488f 1-9
+assets/characters/paladin/README.md
+  s_949141f89be97e::t_68450883d3dc64 1,3,5,7-20
+docs/as-built/v427_paladin-tier3-body.md
+  s_949141f89be97e::t_2bc29383119441 1-19
+tools/assets/test_rig_hero_glbs.py
+  s_949141f89be97e::t_689434a5d54530 122-127
+  s_949141f89be97e::t_2a13f869ed1c07 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "cc94f9632f558a7825132074f5f497c956dd4da8",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

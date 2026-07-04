@@ -1,0 +1,23 @@
+docs/specs/v438_spec-armor-tier3.md
+  s_7bdc2687bb052d::t_cbcab17bb35038 1-18
+docs/plans/v438_2026-07-04-armor-tier3.md
+  s_7bdc2687bb052d::t_f360ad7241b113 1-9
+docs/as-built/v438_armor-tier3.md
+  s_7bdc2687bb052d::t_2120d9dc311af4 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b41b395cb2d0de0bbabaf020dd7c4831c2a35c63",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

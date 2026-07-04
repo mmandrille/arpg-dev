@@ -422,6 +422,10 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 | **v415** | `class-specialist-expansion` | Complete (focused verification green) | [`spec`](../specs/v415_spec-class-specialist-expansion.md) | [`plan`](../plans/v415_2026-07-03-class-specialist-expansion.md) | [`as-built`](../as-built/v415_class-specialist-expansion.md) |
 | **v416** | `per-skill-affix-rolls` | Complete (autoloop focused verification) | [`spec`](../specs/v416_spec-per-skill-affix-rolls.md) | [`plan`](../plans/v416_2026-07-03-per-skill-affix-rolls.md) | [`as-built`](../as-built/v416_per-skill-affix-rolls.md) |
 | **v418** | `skill-synergies` | Complete (autoloop) | [`spec`](../specs/v418_spec-skill-synergies.md) | [`plan`](../plans/v418_2026-07-03-skill-synergies.md) | [`as-built`](../as-built/v418_skill-synergies.md) |
+| **v425** | `ai-body-mesh-workflow` | Complete (autoloop) | — | — | [`as-built`](../as-built/v425_ai-body-mesh-workflow.md) |
+| **v424** | `monster-rig-pass` | Complete (autoloop) | — | — | [`as-built`](../as-built/v424_monster-rig-pass.md) |
+| **v423** | `weapon-variety-glbs` | Complete (autoloop) | — | — | [`as-built`](../as-built/v423_weapon-variety-glbs.md) |
+| **v422** | `hero-rig-rollout` | Complete (autoloop) | [`spec`](../specs/v422_spec-hero-rig-rollout.md) | — | [`as-built`](../as-built/v422_hero-rig-rollout.md) |
 | **v421** | `gear-rig-corridor` | Complete (autoloop focused verification) | [`spec`](../specs/v421_spec-gear-rig-corridor.md) | [`plan`](../plans/v421_2026-07-03-gear-rig-corridor.md) | [`as-built`](../as-built/v421_gear-rig-corridor.md) |
 | **v420** | `class-skill-build-branches` | Complete (autoloop focused verification) | [`spec`](../specs/v420_spec-class-skill-build-branches.md) | [`plan`](../plans/v420_2026-07-03-class-skill-build-branches.md) | [`as-built`](../as-built/v420_class-skill-build-branches.md) |
 | **v419** | `skill-tree-prerequisite-layout` | Complete (autoloop) | [`spec`](../specs/v419_spec-skill-tree-prerequisite-layout.md) | [`plan`](../plans/v419_2026-07-03-skill-tree-prerequisite-layout.md) | [`as-built`](../as-built/v419_skill-tree-prerequisite-layout.md) |

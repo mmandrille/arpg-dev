@@ -61,6 +61,7 @@ static func setup(capture: SceneTree, class_id: String) -> Node3D:
 	_apply_class_model(character, effective_class)
 	await capture.process_frame
 	await capture.process_frame
+	_dim_mesh(character)
 
 	var ap_stop := character.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap_stop != null:
@@ -164,6 +165,18 @@ static func _place_socket_spheres(character: Node3D, root: Node3D) -> void:
 			label.modulate = Color("#ff8822")
 			root.add_child(label)
 			label.global_position = foot_transform.origin + Vector3(0.14, 0.14, 0.0)
+
+
+static func _dim_mesh(node: Node) -> void:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(1.0, 1.0, 1.0, 0.25)
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mi.material_override = mat
+	for child in node.get_children():
+		_dim_mesh(child)
 
 
 static func _apply_class_model(character: Node3D, class_id: String) -> void:

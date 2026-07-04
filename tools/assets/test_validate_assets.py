@@ -16,7 +16,7 @@ from tools.assets.validate_assets import Report, validate
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REAL_SCHEMA = REPO_ROOT / "assets/manifests/assets.v0.schema.json"
 
-CHAR_GLB = "client/assets/characters/base_humanoid/base_humanoid.glb"
+CHAR_GLB = "client/assets/characters/barbarian/barbarian.glb"
 STATIC_CHAR_GLB = "client/assets/characters/static_hero/static_hero.glb"
 SWORD_GLB = "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb"
 MONSTER_GLB = "client/assets/monsters/dummy/monster_dummy.glb"
@@ -112,7 +112,11 @@ def default_manifest() -> dict:
                 "type": "character",
                 "runtime_path": CHAR_GLB,
                 "format": "glb",
-                "required_nodes": ["root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
+                "required_nodes": ["root", "spine", "chest", "neck", "head",
+                                   "arm_l", "elbow_l", "hand_l",
+                                   "arm_r", "elbow_r", "hand_r",
+                                   "leg_l", "knee_l", "foot_l",
+                                   "leg_r", "knee_r", "foot_r"],
             },
             "weapon_rusty_sword_v0": {
                 "type": "equipment",
@@ -180,7 +184,11 @@ def build_root(
     write(root / "shared/assets/item_visuals.v0.json", visuals or default_visuals())
     write(root / "shared/assets/monster_visuals.v0.json", monster_visuals or default_monster_visuals())
     char_joints = char_nodes if char_nodes is not None else [
-        "root", "spine", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"
+        "root", "spine", "chest", "neck", "head",
+        "arm_l", "elbow_l", "hand_l",
+        "arm_r", "elbow_r", "hand_r",
+        "leg_l", "knee_l", "foot_l",
+        "leg_r", "knee_r", "foot_r",
     ]
     write(root / CHAR_GLB, make_skinned_glb(char_joints))
     if write_sword:

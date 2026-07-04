@@ -36,7 +36,7 @@ static func resolve(class_id: String) -> Dictionary:
 	if str(asset.get("type", "")) != "character":
 		asset_id = FALLBACK_ASSET_ID
 		asset = _manifest_assets.get(asset_id, {})
-	var runtime_path := str(asset.get("runtime_path", "client/assets/characters/base_humanoid/base_humanoid.glb"))
+	var runtime_path := str(asset.get("runtime_path", "client/assets/characters/barbarian/barbarian.glb"))
 	return {
 		"class_id": class_id,
 		"asset_id": asset_id,
@@ -62,7 +62,7 @@ static func packed_scene_for_class(class_id: String) -> PackedScene:
 		var packed := load(scene_path) as PackedScene
 		if packed != null:
 			return packed
-	var fallback_path := _res_path("client/assets/characters/base_humanoid/base_humanoid.glb")
+	var fallback_path := _res_path("client/assets/characters/barbarian/barbarian.glb")
 	return load(fallback_path) as PackedScene
 
 

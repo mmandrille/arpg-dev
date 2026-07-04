@@ -460,7 +460,8 @@ def _all_targets() -> dict:
     from tools.assets import gen_glb_equipment
 
     return {
-        "client/assets/characters/base_humanoid/base_humanoid.glb": base_humanoid_glb,
+        # base_humanoid.glb is a committed Blender export — not generated here.
+        # character_base_humanoid_v0 now points to barbarian.glb in assets.v0.json.
         "client/assets/characters/barbarian/barbarian.glb": barbarian_glb,
         "client/assets/characters/sorcerer/sorcerer.glb": sorcerer_glb,
         "client/assets/characters/paladin/paladin.glb": paladin_glb,

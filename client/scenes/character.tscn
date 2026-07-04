@@ -5,7 +5,7 @@
 ; character_visual.gd attaches hand sockets so equipped weapons ride the matching
 ; arm. AnimationPlayer plays idle/walk/attack/off-hand attack from the committed
 ; library; root_node targets ModelRoot so bone-pose tracks resolve.
-[ext_resource type="PackedScene" path="res://assets/characters/base_humanoid/base_humanoid.glb" id="1_glb"]
+[ext_resource type="PackedScene" path="res://assets/characters/barbarian/barbarian.glb" id="1_glb"]
 [ext_resource type="Script" path="res://scripts/character_visual.gd" id="2_script"]
 [ext_resource type="AnimationLibrary" path="res://animations/character_anims.tres" id="3_anims"]
 

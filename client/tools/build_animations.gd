@@ -7,7 +7,7 @@ const DEG := PI / 180.0
 
 func _initialize() -> void:
 	_build(
-		"res://assets/characters/base_humanoid/base_humanoid.glb",
+		"res://assets/characters/barbarian/barbarian.glb",
 		"res://animations/character_anims.tres",
 		_character_clips())
 	_build(

@@ -1,0 +1,39 @@
+docs/plans/v429_2026-07-04-paladin-ai-mesh-swap.md
+  s_949141f89be97e::t_edcf6d03c8a373 13
+  s_949141f89be97e::t_cf54af2a00c9c0 1-12,14-17
+PROGRESS.md
+  s_949141f89be97e::t_d11c08ab648b07 18,26-28
+docs/researchs/hero-tier3-mesh-autoloop-prompt.md
+  s_949141f89be97e::t_bb02a4a65c8efa 1-62
+assets/characters/paladin/README.md
+  s_949141f89be97e::t_4f10a9edf7614d 5-6,11-21,32-33
+docs/specs/v429_spec-paladin-ai-mesh-swap.md
+  s_949141f89be97e::t_f3927189c4a8f1 1-28
+docs/as-built/v429_paladin-ai-mesh-swap.md
+  s_949141f89be97e::t_c16126f9f81631 1-26
+  s_949141f89be97e::t_f08323a3cc46ba 27
+tools/bot/scenarios/client/92_paladin_tier3_visual.json
+  s_949141f89be97e::t_ee7d6996d76360 9
+client/assets/characters/paladin/paladin_w_txr.png.import
+  s_949141f89be97e::t_8a4b6a15bf2072 1-43
+assets/manifests/assets.v0.json
+  s_949141f89be97e::t_99e4eac19032d3 87-89
+docs/progress/slice-lifecycle.md
+  s_949141f89be97e::t_1edd55844b7021 428
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e1daf625de9a3f48b5e3b2b34ad8f66cb787993f",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

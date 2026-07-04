@@ -45,7 +45,7 @@ const MIN_BONE_REST_Y := {
 	"chest": 0.9,
 	"main_hand": 0.6,
 	"off_hand": 0.6,
-	"boots": 0.0,
+	"boots": -0.05,
 }
 
 const MAX_LOCAL_SCALE := {

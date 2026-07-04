@@ -1,0 +1,23 @@
+docs/superpowers/specs/2026-07-04-showme-skeleton-viewer-design.md
+  s_ca4868bac46551::t_ba0cb6a12e13d0 1-119
+docs/superpowers/plans/2026-07-04-showme-skeleton-viewer.md
+  s_ca4868bac46551::t_c8f99046d2438b 1-132,134-152,154-160,162-391
+  s_ca4868bac46551::t_d975507cacfcaf 133
+  s_ca4868bac46551::t_89b7e295c84679 153,161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3e3d0e76a46d3456303cb8407931df37f2fcbb8d",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

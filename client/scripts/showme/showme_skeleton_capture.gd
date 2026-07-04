@@ -19,10 +19,10 @@ const SOCKET_COLORS := {
 }
 
 const SPREAD_BONES := {
-	"arm_r": Vector3(0.0, 0.0, -1.0),
-	"arm_l": Vector3(0.0, 0.0, 1.0),
-	"leg_r": Vector3(0.0, 0.0, -1.0),
-	"leg_l": Vector3(0.0, 0.0, 1.0),
+	"arm_r": Vector3(0.0, 0.0, 1.0),
+	"arm_l": Vector3(0.0, 0.0, -1.0),
+	"leg_r": Vector3(0.0, 0.0, 1.0),
+	"leg_l": Vector3(0.0, 0.0, -1.0),
 }
 const ARM_SPREAD_ANGLE := PI / 2.0
 const LEG_SPREAD_ANGLE := PI / 5.0
@@ -74,6 +74,7 @@ static func _spread_pose(skel: Skeleton3D) -> void:
 		var axis: Vector3 = SPREAD_BONES[bone_name]
 		var angle := ARM_SPREAD_ANGLE if str(bone_name).begins_with("arm") else LEG_SPREAD_ANGLE
 		skel.set_bone_pose_rotation(idx, Quaternion(axis.normalized(), angle))
+	skel.force_update_all_bone_transforms()
 
 
 static func _place_bone_dots(skel: Skeleton3D, root: Node3D) -> void:

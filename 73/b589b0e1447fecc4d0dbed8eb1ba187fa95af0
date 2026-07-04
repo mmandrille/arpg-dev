@@ -1,0 +1,23 @@
+skills/showme/SKILL.md
+  s_ca4868bac46551::t_da1c517b96a5b2 71
+  s_ca4868bac46551::t_9dbaf6af8ef34c 92
+  s_ca4868bac46551::t_a50f8c2dd3e65c 146-151
+tools/test_showme.py
+  s_ca4868bac46551::t_b2df75485cca43 23-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "73b589b0e1447fecc4d0dbed8eb1ba187fa95af0",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

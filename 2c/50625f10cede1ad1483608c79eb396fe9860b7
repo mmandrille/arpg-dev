@@ -1,0 +1,39 @@
+assets/manifests/assets.v0.json
+  s_47c91f4feb7c91::t_b3c18389b831a6 65-67
+tools/assets/rig_hero_glbs.py
+  s_47c91f4feb7c91::t_aca6134d36fd34 50
+assets/characters/sorcerer/README.md
+  s_47c91f4feb7c91::t_1930fc05e01adb 1,3,5-6,8-21
+tools/bot/scenarios/client/95_sorcerer_tier3_visual.json
+  s_47c91f4feb7c91::t_98dc98d73a2400 1-46
+docs/as-built/v432_sorcerer-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_86afd4f7d9efdc 1-17
+docs/plans/v432_2026-07-04-sorcerer-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_516a19bd9550fd 1-7
+tools/assets/test_rig_hero_glbs.py
+  s_47c91f4feb7c91::t_93e333672e0e07 140-145
+client/assets/characters/sorcerer/sorcerer_100Avatars_056_Olivia.png.import
+  s_47c91f4feb7c91::t_d39368853da507 1-43
+PROGRESS.md
+  s_47c91f4feb7c91::t_4bf619f095ae98 26-27
+docs/specs/v432_spec-sorcerer-tier3-mesh-swap.md
+  s_47c91f4feb7c91::t_fab5448d26071b 1-13
+docs/progress/slice-lifecycle.md
+  s_47c91f4feb7c91::t_1c738905a5005f 431
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2c50625f10cede1ad1483608c79eb396fe9860b7",
+  "prompts": {},
+  "sessions": {
+    "s_47c91f4feb7c91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "26610c73-98fa-4acd-a133-bc38edadb697",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

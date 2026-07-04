@@ -1,0 +1,48 @@
+docs/specs/v426_spec-showme-visual-proof.md
+  s_949141f89be97e::t_d44b2bb4b3309f 1-41
+client/scripts/showme/visual_capture.gd
+  s_949141f89be97e::t_ad2b3d360c59c7 7
+  s_949141f89be97e::t_9ada135dfa72db 1-6,8-1042
+docs/progress/slice-lifecycle.md
+  s_949141f89be97e::t_28458b34ab808a 426
+docs/as-built/v426_showme-visual-proof.md
+  s_949141f89be97e::t_d4e40ad1d7fb09 1-18
+docs/plans/v426_2026-07-04-showme-visual-proof.md
+  s_949141f89be97e::t_afe766574ba5bf 7-14
+  s_949141f89be97e::t_7aa93b89b40bd2 1-6,15-23
+.maintainability/file-size-baseline.tsv
+  s_949141f89be97e::t_48df585f099d85 34
+tools/test_showme.py
+  s_949141f89be97e::t_bbddc1fa465282 1-28
+client/scripts/showme/showme_item_icons_capture.gd
+  s_949141f89be97e::t_9ada135dfa72db 1-11
+skills/showme/scripts/render_focus.py
+  s_949141f89be97e::t_701329603e59d1 82
+client/tests/test_showme_load.gd
+  s_949141f89be97e::t_7abe8bf60ca468 1-17
+scripts/client_smoke.sh
+  s_949141f89be97e::t_7a88fbaa2ae856 147
+PROGRESS.md
+  s_949141f89be97e::t_40d099c5c52af4 26,28-29
+  s_949141f89be97e::t_87d1c6fbf7f383 18
+skills/showme/scripts/showme_item_icons_capture.gd
+  s_949141f89be97e::t_8e567c4e181dbf 1
+skills/showme/scripts/visual_capture.gd
+  s_949141f89be97e::t_c01767641bd60c 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "3503b6afada33b0ccc30b02944a450e6834343ac",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

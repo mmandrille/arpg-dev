@@ -1,0 +1,29 @@
+client/tests/item_visual_equipment_probe.gd
+  s_7bdc2687bb052d::t_3efa9764c5c476 70-73,75-86
+docs/progress/scenario-movement-audit.tsv
+  s_7bdc2687bb052d::t_1c32bc5ed9dade 141
+client/assets/equipment/armor/boots/boots_CHAHIN_BOOTS_TEXTURE.jpg.import
+  s_7bdc2687bb052d::t_c75abd449e1c25 1-43
+client/assets/equipment/weapons/rapier/rapier_Atlas_Pirate.png.import
+  s_7bdc2687bb052d::t_c75abd449e1c25 1-43
+.maintainability/file-size-baseline.tsv
+  s_7bdc2687bb052d::t_62b28543108701 37
+client/assets/equipment/weapons/rusty_sword/rusty_sword_Atlas_Pirate.png.import
+  s_7bdc2687bb052d::t_c75abd449e1c25 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "52423b47f9db9e56ca69b12c58a55b04b1562555",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

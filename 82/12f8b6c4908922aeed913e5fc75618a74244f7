@@ -1,0 +1,25 @@
+tools/assets/rig_monster_glbs.py
+  s_949141f89be97e::t_da3005e8c06de0 57
+  s_949141f89be97e::t_39ce08c5db0225 23-26,29,31-37
+tools/assets/rig_hero_glbs.py
+  s_949141f89be97e::t_73dd0057f9d9ea 384
+  s_949141f89be97e::t_82a71cbd9fc722 362
+assets/manifests/assets.v0.json
+  s_949141f89be97e::t_2b28311c6b1841 410,432
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8212f8b6c4908922aeed913e5fc75618a74244f7",
+  "prompts": {},
+  "sessions": {
+    "s_949141f89be97e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b5aa7b0-89ec-49b5-abfb-aefdb08189f4",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

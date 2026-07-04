@@ -1230,15 +1230,15 @@
           "type": "loot",
           "item_template_id": "long_sword",
           "position": {
-            "x": 3,
-            "y": 5
+            "x": 2,
+            "y": 4
           }
         },
         {
           "type": "loot",
           "item_template_id": "shield",
           "position": {
-            "x": 3,
+            "x": 2,
             "y": 6
           }
         },
@@ -1246,8 +1246,8 @@
           "type": "loot",
           "item_template_id": "bow",
           "position": {
-            "x": 3,
-            "y": 4
+            "x": 2,
+            "y": 3
           }
         },
         {
@@ -1286,8 +1286,8 @@
           "type": "monster",
           "monster_def_id": "combat_lab_miss_attacker",
           "position": {
-            "x": 12,
-            "y": 9
+            "x": 6,
+            "y": 8
           }
         },
         {

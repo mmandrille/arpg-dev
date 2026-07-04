@@ -446,7 +446,7 @@
     },
     "combat_lab_armored_target": {
       "name": "Combat Lab Armored Target",
-      "max_hp": 12,
+      "max_hp": 120,
       "loot_table": "no_drop",
       "xp_reward": 0,
       "hit_chance": 0.5,

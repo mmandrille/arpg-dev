@@ -42,7 +42,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/GorWw41SFf (Male Fighter by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/barbarian/goliath_barbarian_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "3d3a68a05dfd03052c43867f8668d00494ece7c25002353f0f199d27324e2a7b"
+        "sha256": "4198ec3bb4ccf9e9dd1355642cd313004387c6f687d3a8ac92fcb7b7c6afb2a2"
       }
     },
     "character_sorcerer_v0": {
@@ -64,7 +64,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/6kY9VaAfPv (Wizard by Polygonal Mind); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/sorcerer/mage_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "934138294acf61c2661579b0cd4ffa8347e567bcde7aabc15cc535d64390d17a"
+        "sha256": "b3bd220e5ba411b2933014f217d7e20e90c7082ea358a1271c0dd2bae7d34f71"
       }
     },
     "character_paladin_v0": {
@@ -86,7 +86,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/RaWl2GJ0NZ (Warrior by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/paladin/knight_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "52f62a23b93defcd70a1c8cbd1202b496038de9028fe3f7b74c0a263924c059d"
+        "sha256": "5fabc96c84b4184c6624159fbc03be836b04b568786e867639b42ba6516d4e4a"
       }
     },
     "character_rogue_v0": {
@@ -106,9 +106,9 @@
         "leg_r"
       ],
       "provenance": {
-        "origin": "https://poly.pizza/m/M8kyS2Btfp (Thief Icon by Quaternius); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/rogue/assasine_legacy.glb",
+        "origin": "https://poly.pizza/m/NfMffTkeBa (Female Fighter by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/rogue/assasine_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "b29fb52ec3d1ed0f1e7d91c998ec41995f64a11afeba51374f691fc577fe0b1d"
+        "sha256": "bb827670e539164ccee279b3bc5fcdc7edc9a6934b70160c9db2a98d38b8319b"
       }
     },
     "character_ranger_v0": {
@@ -128,9 +128,9 @@
         "leg_r"
       ],
       "provenance": {
-        "origin": "https://poly.pizza/m/BCMT02FrVE (Adventurer by Polygonal Mind); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/ranger/green_hood_legacy.glb",
+        "origin": "https://poly.pizza/m/o6i43Vacwc (Warrior by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/ranger/green_hood_legacy.glb",
         "license": "CC0-1.0",
-        "sha256": "8e3965f5ea18f3a021206135a51dccb3522d20485be524efe0ebb237dc6cce4f"
+        "sha256": "0402dcc7205a8dd6a895bed2d32e3543a901243585089f64882008f607f5d752"
       }
     },
     "weapon_rusty_sword_v0": {

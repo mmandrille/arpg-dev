@@ -2,13 +2,13 @@
 
 Imported hero body rigged for Godot animation clips.
 
-- **Source mesh:** `assets/characters/rogue/assasine.glb` (Tier-3 external GLB; CC0 Thief Icon from Poly Pizza)
+- **Source mesh:** `assets/characters/rogue/assasine.glb` (Tier-3 external GLB; CC0 Female Fighter from Poly Pizza)
 - **Legacy mesh:** `assets/characters/rogue/assasine_legacy.glb` (pre-v431 user-provided assassin; for before/after comparison)
 - **Runtime model:** `client/assets/characters/rogue/rogue.glb`
 - **Rig tool:** `python3 tools/assets/rig_hero_glbs.py` (target height ~1.70m via `HERO_TARGET_HEIGHTS`)
 - **Manifest:** `character_rogue_v0` in `assets/manifests/assets.v0.json`
 - **Class binding:** `shared/assets/class_presentations.v0.json` → `rogue.model.asset_id` + `idle_stance` lean
-- **License:** CC0-1.0 (Quaternius / Poly Pizza — see manifest provenance)
+- **License:** CC0-1.0 (mastjie / Poly Pizza — see manifest provenance)
 
 ## Verify
 

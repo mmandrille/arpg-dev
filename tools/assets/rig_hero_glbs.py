@@ -151,6 +151,74 @@ def write_vec3_accessor(gltf: dict, bin_buf: bytearray, accessor_index: int, val
     accessor["max"] = [max(v[i] for v in values) for i in range(3)]
 
 
+def _read_index_accessor(gltf: dict, bin_blob: bytes, accessor_index: int) -> list[int]:
+    accessor = gltf["accessors"][accessor_index]
+    if accessor.get("type") != "SCALAR":
+        raise ValueError(f"index accessor {accessor_index} must be SCALAR")
+    component_type = int(accessor["componentType"])
+    if component_type not in (5123, 5125):
+        raise ValueError(f"index accessor {accessor_index} must be uint16 or uint32")
+    view = gltf["bufferViews"][accessor["bufferView"]]
+    count = int(accessor["count"])
+    elem_size = _component_size(component_type)
+    stride = int(view.get("byteStride", elem_size))
+    start = int(view.get("byteOffset", 0)) + int(accessor.get("byteOffset", 0))
+    fmt = "<H" if component_type == 5123 else "<I"
+    return [struct.unpack_from(fmt, bin_blob, start + i * stride)[0] for i in range(count)]
+
+
+def _write_index_accessor(gltf: dict, bin_buf: bytearray, accessor_index: int, values: list[int]) -> None:
+    accessor = gltf["accessors"][accessor_index]
+    component_type = int(accessor["componentType"])
+    if component_type not in (5123, 5125):
+        raise ValueError(f"index accessor {accessor_index} must be uint16 or uint32")
+    view = gltf["bufferViews"][accessor["bufferView"]]
+    elem_size = _component_size(component_type)
+    stride = int(view.get("byteStride", elem_size))
+    start = int(view.get("byteOffset", 0)) + int(accessor.get("byteOffset", 0))
+    fmt = "<H" if component_type == 5123 else "<I"
+    for i, value in enumerate(values):
+        struct.pack_into(fmt, bin_buf, start + i * stride, value)
+    accessor["count"] = len(values)
+    accessor["max"] = [max(values) if values else 0]
+
+
+def _cull_apose_tpose_cap_triangles(
+    gltf: dict,
+    bin_buf: bytearray,
+    positions_by_accessor: dict[int, list[tuple[float, float, float]]],
+    primitives: list[dict],
+    mins: list[float],
+    maxs: list[float],
+) -> None:
+    """Drop leftover horizontal T-pose shoulder caps common on mastjie A-pose exports."""
+    cx = (mins[0] + maxs[0]) * 0.5
+    width = max(maxs[0] - mins[0], 0.001)
+    height = max(maxs[1] - mins[1], 0.001)
+    side_threshold = width * 0.42
+
+    for primitive in primitives:
+        if "indices" not in primitive:
+            continue
+        position_accessor = int(primitive["attributes"]["POSITION"])
+        positions = positions_by_accessor[position_accessor]
+        index_accessor = int(primitive["indices"])
+        indices = _read_index_accessor(gltf, bytes(bin_buf), index_accessor)
+        kept: list[int] = []
+        for tri in range(0, len(indices), 3):
+            verts = [positions[indices[tri + i]] for i in range(3)]
+            centroid = (
+                sum(v[0] for v in verts) / 3.0,
+                sum(v[1] for v in verts) / 3.0,
+                sum(v[2] for v in verts) / 3.0,
+            )
+            yn = (centroid[1] - mins[1]) / height
+            if 0.47 <= yn <= 0.63 and abs(centroid[0] - cx) >= side_threshold:
+                continue
+            kept.extend(indices[tri : tri + 3])
+        _write_index_accessor(gltf, bin_buf, index_accessor, kept)
+
+
 def _bounds(positions_by_accessor: dict[int, list[tuple[float, float, float]]]) -> tuple[list[float], list[float]]:
     positions = [p for values in positions_by_accessor.values() for p in values]
     if not positions:
@@ -288,6 +356,7 @@ def _joint_globals(mins: list[float], maxs: list[float]) -> list[tuple[float, fl
     shoulder_x = width * 0.30
     leg_x = width * 0.12
     hand_z = depth * 0.18
+
     return [
         (cx, cy, cz),
         (cx, cy + height * 0.575, cz),
@@ -336,8 +405,14 @@ def _joint_for_vertex(pos: tuple[float, float, float], mins: list[float], maxs: 
     yn = (y - mins[1]) / height
     side = x - cx
     arm_threshold = width * 0.20
-    if 0.32 <= yn <= 0.82 and abs(side) >= arm_threshold:
+    # Mastjie A-pose meshes often retain horizontal T-pose shoulder caps around yn~0.5–0.65.
+    # Bind those to spine so shared character_anims arm rotations do not stretch them.
+    if 0.52 <= yn < 0.68 and abs(side) >= arm_threshold * 0.85:
+        return 1
+    if 0.68 <= yn <= 0.88 and abs(side) >= arm_threshold:
         return 4 if side > 0.0 else 2
+    if 0.35 <= yn < 0.52 and abs(side) >= arm_threshold * 0.85:
+        return 5 if side > 0.0 else 3
     if yn < 0.52:
         return 7 if side > 0.0 else 6
     return 1
@@ -366,8 +441,9 @@ def rig_glb_bytes(data: bytes, *, hero_id: str = "", target_height: float | None
         raise ValueError("source GLB is already skinned")
     gltf.pop("animations", None)
     bin_buf = bytearray(parsed.bin_blob)
-    if hero_id == "ranger":
-        _apply_ranger_rest_pose(gltf, bin_buf)
+    # Ranger vertex rest-pose was for the legacy Sketchfab green-hood T-pose source.
+    # Tier-3 mastjie meshes share character_anims bone rotations; pre-bending vertices
+    # fights those clips and stretches arms at runtime.
 
     positions_by_accessor: dict[int, list[tuple[float, float, float]]] = {}
     primitives: list[dict] = []
@@ -386,6 +462,7 @@ def rig_glb_bytes(data: bytes, *, hero_id: str = "", target_height: float | None
     if target_height is not None:
         _normalize_mesh_height(gltf, bin_buf, positions_by_accessor, target_height)
     mins, maxs = _bounds(positions_by_accessor)
+    _cull_apose_tpose_cap_triangles(gltf, bin_buf, positions_by_accessor, primitives, mins, maxs)
     joint_globals = _joint_globals(mins, maxs)
 
     first_joint_node = len(gltf.setdefault("nodes", []))

@@ -698,9 +698,11 @@ func _setup_classes() -> void:
 	root.add_child(floor)
 
 	var entries := [
-		{"class_id": "barbarian", "label": "Barbarian", "x": -1.75},
-		{"class_id": "sorcerer", "label": "Sorcerer", "x": 0.0},
-		{"class_id": "paladin", "label": "Paladin", "x": 1.75},
+		{"class_id": "barbarian", "label": "Barbarian", "x": -3.5},
+		{"class_id": "sorcerer", "label": "Sorcerer", "x": -1.75},
+		{"class_id": "paladin", "label": "Paladin", "x": 0.0},
+		{"class_id": "rogue", "label": "Rogue", "x": 1.75},
+		{"class_id": "ranger", "label": "Ranger", "x": 3.5},
 	]
 	for entry in entries:
 		var packed := ClassPresentationsLoaderScript.packed_scene_for_class(str(entry["class_id"]))

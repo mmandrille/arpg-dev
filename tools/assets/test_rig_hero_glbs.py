@@ -93,7 +93,8 @@ def test_rig_glb_bytes_rejects_already_skinned_source():
         raise AssertionError("expected already-skinned GLB to be rejected")
 
 
-def test_ranger_rest_pose_lowers_static_t_pose_arms():
+def test_ranger_runtime_glb_skips_vertex_rest_pose_bake():
+    """Tier-3 ranger meshes must not pre-bend vertices; shared anims rotate bones instead."""
     out = rig_glb_bytes(
         _minimal_static_glb([
             (-10.0, 7.5, 0.0),
@@ -106,11 +107,9 @@ def test_ranger_rest_pose_lowers_static_t_pose_arms():
     parsed = parse_glb(out)
     accessor = parsed.gltf["meshes"][0]["primitives"][0]["attributes"]["POSITION"]
     positions = read_position_accessor(parsed.gltf, parsed.bin_blob, accessor)
-    assert positions[0][1] < 4.0
-    assert positions[1][1] < 4.0
-    assert abs(positions[0][0]) < 7.0
-    assert abs(positions[1][0]) < 7.0
-    assert positions[2] == (0.0, 0.0, 0.0)
+    left, right = positions[0], positions[1]
+    assert abs(left[1] - right[1]) < 1e-5, "arms must stay level (no vertex rest-pose fold)"
+    assert abs(left[0] + right[0]) < 1e-5, "arms must stay symmetric after rig scale"
 
 
 def test_hero_rig_sources_include_all_class_models():

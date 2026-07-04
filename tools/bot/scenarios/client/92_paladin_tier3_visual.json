@@ -1,0 +1,51 @@
+{
+  "id": "paladin_tier3_visual",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "equipment_lab",
+  "seed": "v427_paladin_tier3_visual",
+  "character_class": "paladin",
+  "title": "Paladin tier-3 body and gear presentation",
+  "description": "Paladin class uses the rigged knight GLB with starter gear equipped; proves local player visual_model and equipment slots via client bot.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    {
+      "type": "assert_entity_reaction",
+      "local_player": true,
+      "entity_type": "player",
+      "visual_model": "character"
+    },
+    { "type": "wait_loot_count", "min_count": 8, "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "long_sword" },
+    { "type": "wait_inventory_item", "item_def_id": "long_sword", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "shield" },
+    { "type": "wait_inventory_item", "item_def_id": "shield", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "helm" },
+    { "type": "wait_inventory_item", "item_def_id": "helm", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "mail" },
+    { "type": "wait_inventory_item", "item_def_id": "mail", "timeout_s": 15.0 },
+    { "type": "click_loot_item", "item_def_id": "boots" },
+    { "type": "wait_inventory_item", "item_def_id": "boots", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "long_sword", "slot": "main_hand" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "shield", "slot": "off_hand" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "helm", "slot": "head" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "mail", "slot": "chest" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "boots", "slot": "boots" },
+    { "type": "wait_event", "event_type": "item_equipped", "timeout_s": 15.0 },
+    { "type": "assert_equipped", "slot": "main_hand" },
+    { "type": "assert_equipped", "slot": "off_hand" },
+    { "type": "assert_equipped", "slot": "head" },
+    { "type": "assert_equipped", "slot": "chest" },
+    { "type": "assert_equipped", "slot": "boots" },
+    {
+      "type": "assert_entity_reaction",
+      "local_player": true,
+      "entity_type": "player",
+      "visual_model": "character"
+    }
+  ]
+}

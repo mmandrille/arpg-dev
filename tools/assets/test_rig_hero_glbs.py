@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import struct
 
-from tools.assets.rig_hero_glbs import HEROES, REQUIRED_BONES, parse_glb, read_position_accessor, rig_glb_bytes
+from tools.assets.rig_hero_glbs import HEROES, REQUIRED_BONES, ROOT, parse_glb, read_position_accessor, rig_glb_bytes
 from tools.assets.validate_assets import parse_glb_skin_joint_names
 
 
@@ -119,3 +119,9 @@ def test_hero_rig_sources_include_all_class_models():
         "assets/characters/ranger/green_hood.glb",
         "client/assets/characters/ranger/ranger.glb",
     )
+
+
+def test_paladin_runtime_glb_has_required_bones():
+    runtime = ROOT / HEROES["paladin"][1]
+    assert runtime.is_file(), f"missing rigged paladin runtime GLB: {runtime}"
+    assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)

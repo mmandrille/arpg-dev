@@ -1,8 +1,20 @@
-# Paladin Character
+# Paladin Character (Tier 3)
 
-Generated placeholder character model for the paladin class.
+Imported hero body rigged for Godot animation clips.
 
+- **Source mesh:** `assets/characters/paladin/knight.glb` (user-provided static GLB)
 - **Runtime model:** `client/assets/characters/paladin/paladin.glb`
-- **Generator:** `tools/assets/gen_glb.py`
-- **License:** CC0-1.0
-- **Rig contract:** `root`, `spine`, `arm_l`, `hand_l`, `arm_r`, `hand_r`, `leg_l`, `leg_r`
+- **Rig tool:** `python3 tools/assets/rig_hero_glbs.py` (target height ~1.85m via `HERO_TARGET_HEIGHTS`)
+- **Manifest:** `character_paladin_v0` in `assets/manifests/assets.v0.json`
+- **Class binding:** `shared/assets/class_presentations.v0.json` → `paladin.model.asset_id`
+- **License:** user-provided-unverified (see manifest provenance)
+
+## Verify
+
+```bash
+python3 tools/assets/rig_hero_glbs.py
+make validate-assets
+.venv/bin/pytest tools/assets/test_rig_hero_glbs.py -q
+python3 skills/showme/scripts/render_focus.py --focus gear --class-id paladin --items starter_paladin_sword,starter_paladin_shield,helm,mail,boots
+make bot-client SCENARIO=92_paladin_tier3_visual HEADLESS=1
+```

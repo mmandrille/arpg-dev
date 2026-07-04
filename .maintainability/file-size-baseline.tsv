@@ -31,7 +31,7 @@ server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating 
 server/internal/game/rogue_skills.go	620	# pre-v394 grandfather; passive_execute + poison stack handlers
 server/internal/store/repos.go	2315
 server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store test setup
-skills/showme/scripts/visual_capture.gd	1016
+skills/showme/scripts/visual_capture.gd	1042
 tools/bot/run.py	4370	# v406: protocol bot force_bishop_loot action
 tools/bot/test_protocol.py	1434
 tools/validate_shared.py	3127	# pre-v414 drift: weapon family stat scaling cross-checks; extraction deferred

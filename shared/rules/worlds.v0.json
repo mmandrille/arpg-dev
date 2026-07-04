@@ -1286,8 +1286,8 @@
           "type": "monster",
           "monster_def_id": "combat_lab_miss_attacker",
           "position": {
-            "x": 6,
-            "y": 8
+            "x": 12,
+            "y": 9
           }
         },
         {

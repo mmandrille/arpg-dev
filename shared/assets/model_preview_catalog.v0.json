@@ -15,7 +15,7 @@
       "asset_id": "character_paladin_v0",
       "height_offset": 0.0,
       "runtime_path": "client/assets/characters/paladin/paladin.glb",
-      "scale": 10.0,
+      "scale": 1.0,
       "scene": "",
       "type": "character",
       "used_by": [

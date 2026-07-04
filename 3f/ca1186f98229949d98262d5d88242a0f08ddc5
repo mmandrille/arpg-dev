@@ -1,0 +1,50 @@
+client/assets/characters/ranger/ranger_w_txr.png.import
+  s_47c91f4feb7c91::t_586211a7229070 1-43
+assets/characters/rogue/README.md
+  s_47c91f4feb7c91::t_542923341c25a8 5,11
+assets/characters/ranger/README.md
+  s_47c91f4feb7c91::t_e6d2c772b45832 5-6,10-11
+  s_47c91f4feb7c91::t_dfc650259c3af7 8
+shared/assets/model_preview_catalog.v0.json
+  s_47c91f4feb7c91::t_b126e4192c93e4 29
+tools/assets/test_rig_hero_glbs.py
+  s_47c91f4feb7c91::t_043fd55ee0e82c 110-112
+  s_47c91f4feb7c91::t_2e8652e920aff9 96-97
+tools/assets/rig_hero_glbs.py
+  s_47c91f4feb7c91::t_a2ca52dccd6463 409-411,414
+  s_47c91f4feb7c91::t_848d1365530f57 154-221
+  s_47c91f4feb7c91::t_ef17040156e9c4 444-446
+  s_47c91f4feb7c91::t_3dc58bed27451c 465
+  s_47c91f4feb7c91::t_a2261088a4bd0d 408,412,415
+  s_47c91f4feb7c91::t_441b60dd3bad17 359
+shared/assets/class_presentations.v0.json
+  s_47c91f4feb7c91::t_ff4e21cbf54cdf 26
+client/scripts/showme/visual_capture.gd
+  s_47c91f4feb7c91::t_51b35e7fd21373 701-705
+assets/manifests/assets.v0.json
+  s_47c91f4feb7c91::t_ae7f2b89e0aa27 133
+  s_47c91f4feb7c91::t_2e5985775cd19b 131
+  s_47c91f4feb7c91::t_a124bffe4358e6 111
+  s_47c91f4feb7c91::t_f692c79df917c8 45
+  s_47c91f4feb7c91::t_5106b3fd07c818 67
+  s_47c91f4feb7c91::t_00a13bab2977c6 89
+  s_47c91f4feb7c91::t_1086c558fd47bb 109
+client/assets/characters/rogue/rogue_f_txr_01.png.import
+  s_47c91f4feb7c91::t_586211a7229070 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3fca1186f98229949d98262d5d88242a0f08ddc5",
+  "prompts": {},
+  "sessions": {
+    "s_47c91f4feb7c91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "26610c73-98fa-4acd-a133-bc38edadb697",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -89,7 +89,8 @@ func _initialize() -> void:
 			await _setup_corpse_inventory()
 		"skills":
 			await _setup_skills()
-		"item-icons": await ShowmeItemIconsCaptureScript.setup(self),
+		"item-icons":
+			await ShowmeItemIconsCaptureScript.setup(self)
 		"shop":
 			await _setup_shop()
 		"bishop":

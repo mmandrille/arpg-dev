@@ -42,7 +42,7 @@
       "provenance": {
         "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
         "license": "user-provided-unverified",
-        "sha256": "9d5b89c553e372bdb0877d23ca30d99604371efbac8899f3384166b5a7267247"
+        "sha256": "76d8b1920e0b8df7c7780efcca9a2769026c674eccd9af8f22299808518720ba"
       }
     },
     "character_sorcerer_v0": {
@@ -64,7 +64,7 @@
       "provenance": {
         "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
         "license": "user-provided-unverified",
-        "sha256": "08bbcef910f88539058b9720ce5bfa0b4549612efb1ad61330066319b62b9f02"
+        "sha256": "b0aa094aee76b1c0280d2a101c86dc6d1f4f3dc2c6398f50ac2dd1d0b27f75ae"
       }
     },
     "character_paladin_v0": {
@@ -108,7 +108,7 @@
       "provenance": {
         "origin": "user-provided local GLB rigged by tools/assets/rig_hero_glbs.py",
         "license": "user-provided-unverified",
-        "sha256": "972e18a4b10efdec029ba51912e4c800ab4696b43d6e5974a4c56b11975a504c"
+        "sha256": "10ea09a59e40859c3a62c1cf535bfb4ae0b316fdfbc29e2370088fbec4207684"
       }
     },
     "character_ranger_v0": {
@@ -131,7 +131,7 @@
         "source_url": "https://sketchfab.com/3d-models/rogue-002c266eb95a45039fc4b9da9875a2ab",
         "origin": "Sketchfab Rogue by OliverMatheGames, rigged by tools/assets/rig_hero_glbs.py",
         "license": "CC-BY-4.0",
-        "sha256": "6a151f30cded6037845771617bc103f5d9d51826ec336daa0586106154ba08a8"
+        "sha256": "22be75917caccc86a468ce211fd43240d19ed6df95c9d91e7117f0862d7c0a71"
       }
     },
     "weapon_rusty_sword_v0": {

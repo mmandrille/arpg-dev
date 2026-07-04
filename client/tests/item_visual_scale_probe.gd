@@ -25,8 +25,8 @@ func prepare(
 	main.resolver.apply_snapshot({"inventory": main.inventory, "equipped": main.equipped})
 	main.character_progression = {"character_class": "paladin"}
 	main.call("_apply_local_player_class_model")
-	var sword := character.find_child("weapon_rusty_sword_v0", true, false) as Node3D
-	var shield := character.find_child("fallback_equipment_off_hand_v0", true, false) as Node3D
+	var sword := character.find_child("weapon_long_sword_v0", true, false) as Node3D
+	var shield := character.find_child("equipment_shield_kite_v0", true, false) as Node3D
 	if sword == null or shield == null:
 		fail.call("paladin mounted equipment missing: sword=%s shield=%s" % [str(sword), str(shield)])
 		character.queue_free()

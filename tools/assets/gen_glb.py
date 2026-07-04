@@ -467,6 +467,51 @@ def rusty_sword_glb() -> bytes:
     return _build_glb(color, parts, [])
 
 
+def long_sword_glb() -> bytes:
+    """Steel longsword with longer blade than rusty sword."""
+    color = (0.62, 0.64, 0.68, 1.0)
+    parts = [
+        {"name": "grip", "translation": [0.0, -0.10, 0.0], "scale": [0.05, 0.24, 0.05]},
+        {"name": "guard", "translation": [0.0, 0.06, 0.0], "scale": [0.30, 0.06, 0.08]},
+        {"name": "blade", "translation": [0.0, 0.62, 0.0], "scale": [0.08, 1.15, 0.025]},
+        {"name": "pommel", "translation": [0.0, -0.22, 0.0], "scale": [0.10, 0.08, 0.10]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def rapier_glb() -> bytes:
+    """Thin thrusting sword."""
+    color = (0.70, 0.72, 0.78, 1.0)
+    parts = [
+        {"name": "grip", "translation": [0.0, -0.06, 0.0], "scale": [0.04, 0.18, 0.04]},
+        {"name": "guard", "translation": [0.0, 0.04, 0.0], "scale": [0.22, 0.04, 0.05]},
+        {"name": "blade", "translation": [0.0, 0.48, 0.0], "scale": [0.035, 0.95, 0.012]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_shield_kite_glb() -> bytes:
+    """Kite shield for paladin-style off-hand."""
+    color = (0.50, 0.52, 0.58, 1.0)
+    parts = [
+        {"name": "kite_face", "translation": [0.0, 0.0, 0.05], "scale": [0.42, 0.72, 0.08]},
+        {"name": "kite_boss", "translation": [0.0, 0.08, 0.10], "scale": [0.14, 0.14, 0.08]},
+        {"name": "kite_grip", "translation": [0.0, -0.12, -0.06], "scale": [0.10, 0.48, 0.06]},
+    ]
+    return _build_glb(color, parts, [])
+
+
+def equipment_shield_tower_glb() -> bytes:
+    """Large tower shield."""
+    color = (0.44, 0.40, 0.36, 1.0)
+    parts = [
+        {"name": "tower_face", "translation": [0.0, 0.0, 0.05], "scale": [0.58, 0.88, 0.08]},
+        {"name": "tower_boss", "translation": [0.0, 0.12, 0.10], "scale": [0.18, 0.18, 0.08]},
+        {"name": "tower_grip", "translation": [0.0, -0.18, -0.06], "scale": [0.12, 0.56, 0.06]},
+    ]
+    return _build_glb(color, parts, [])
+
+
 def training_bow_glb() -> bytes:
     """Low-poly bow, grip at origin, bow/string standing along local Y."""
     color = (0.38, 0.24, 0.12, 1.0)
@@ -597,6 +642,8 @@ TARGETS = {
     "client/assets/characters/rogue/rogue.glb": rogue_glb,
     "client/assets/characters/ranger/ranger.glb": ranger_glb,
     "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb": rusty_sword_glb,
+    "client/assets/equipment/weapons/long_sword/long_sword.glb": long_sword_glb,
+    "client/assets/equipment/weapons/rapier/rapier.glb": rapier_glb,
     "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
     "client/assets/equipment/weapons/starter_staff/starter_staff.glb": starter_staff_glb,
     "client/assets/equipment/weapons/starter_axe/starter_axe.glb": starter_axe_glb,
@@ -608,6 +655,8 @@ TARGETS = {
     "client/assets/equipment/armor/amulet/amulet.glb": equipment_amulet_glb,
     "client/assets/equipment/armor/ring/ring.glb": equipment_ring_glb,
     "client/assets/equipment/armor/shield/shield.glb": equipment_shield_glb,
+    "client/assets/equipment/armor/shield/kite_shield.glb": equipment_shield_kite_glb,
+    "client/assets/equipment/armor/shield/tower_shield.glb": equipment_shield_tower_glb,
     "client/assets/monsters/dummy/monster_dummy.glb": monster_dummy_glb,
     "client/assets/monsters/skeleton/monster_skeleton.glb": monster_skeleton_glb,
 }

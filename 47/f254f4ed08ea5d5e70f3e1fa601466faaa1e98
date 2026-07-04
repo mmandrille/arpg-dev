@@ -1,0 +1,63 @@
+tools/test_showme.py
+  s_677ce7498f4f91::t_2b90585e5a00c1 28-31
+tools/test_regen_screenshots.py
+  s_677ce7498f4f91::t_b17f9ec258a84f 1-87
+make/client.mk
+  s_677ce7498f4f91::t_d86f679cdd8a80 2
+  s_677ce7498f4f91::t_2c7878be84a613 26-36
+client/scripts/showme/showme_skill_icon_capture.gd
+  s_677ce7498f4f91::t_29cfd3c34db06e 1-61
+README.md
+  s_677ce7498f4f91::t_747373762255e4 51-52
+  s_677ce7498f4f91::t_adba4a79938751 106-122
+tools/showme/__init__.py
+  s_677ce7498f4f91::t_aa83eb38b6ec91 1
+tools/showme/screenshot_catalog.py
+  s_677ce7498f4f91::t_c6cd5f9f4f3756 1-203
+client/scripts/showme/showme_item_icon_capture.gd
+  s_677ce7498f4f91::t_65da7a98a2dc35 1-78
+client/scripts/showme/visual_capture.gd
+  s_677ce7498f4f91::t_bac107f896c238 180-188
+  s_677ce7498f4f91::t_086c7772b934e7 102-107
+  s_677ce7498f4f91::t_f5e1343a2f715d 56-58
+  s_677ce7498f4f91::t_59b3c02880bcb9 21-23
+skills/showme/SKILL.md
+  s_677ce7498f4f91::t_7fe60cf6a70570 13-16
+  s_677ce7498f4f91::t_62c5be3d7c3dda 3
+  s_677ce7498f4f91::t_1ad388d89f12b3 36-39
+  s_677ce7498f4f91::t_27152acb220328 73-75
+  s_677ce7498f4f91::t_85ec939dfe1f2b 111-113
+  s_677ce7498f4f91::t_6e2076ea28aab1 184-223
+  s_677ce7498f4f91::t_3fb97ba21b0f79 227
+client/scripts/showme/showme_item_asset_capture.gd
+  s_677ce7498f4f91::t_c94571fcde89ba 1-124
+skills/showme/scripts/render_focus.py
+  s_677ce7498f4f91::t_354ad0ed1f29e7 125-130
+  s_677ce7498f4f91::t_75730e809622af 24,28-30
+  s_677ce7498f4f91::t_5c3e6d4beabe49 54-57
+CLAUDE.md
+  s_677ce7498f4f91::t_b8c47d40c6f11d 53-57
+tools/showme/regen_screenshots.py
+  s_677ce7498f4f91::t_bee8d4e42b3f00 1-133
+skills/README.md
+  s_677ce7498f4f91::t_40f51754731c14 13
+AGENTS.md
+  s_677ce7498f4f91::t_7f7bdbb389fca2 78-84
+  s_677ce7498f4f91::t_db330f46e67e3a 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "47f254f4ed08ea5d5e70f3e1fa601466faaa1e98",
+  "prompts": {},
+  "sessions": {
+    "s_677ce7498f4f91": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a0737a7a-5c88-470a-bb5e-fad1ca1721dc",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

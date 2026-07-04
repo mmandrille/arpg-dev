@@ -103,6 +103,17 @@ func _character_clips() -> Dictionary:
 			"arm_r": [[0.0, 0, 0, 0], [0.14, -95, 0, 0], [0.4, 0, 0, 0]],
 			"arm_l": [[0.0, 0, 0, 0], [0.14, -95, 0, 0], [0.4, 0, 0, 0]],
 		}},
+		# attack_ranged: bow hold (arm_r) + string pull (arm_l).
+		"attack_ranged": {"length": 0.45, "loop": false, "bones": {
+			"arm_r": [[0.0, 0, 0, 0], [0.1, -35, 0, 15], [0.45, 0, 0, 0]],
+			"arm_l": [[0.0, 0, 0, 0], [0.18, -55, 0, -35], [0.45, 0, 0, 0]],
+		}},
+		# attack_staff: two-hand cast wind-up.
+		"attack_staff": {"length": 0.42, "loop": false, "bones": {
+			"spine": [[0.0, 0, 0, 0], [0.12, 0, 0, 10], [0.42, 0, 0, 0]],
+			"arm_r": [[0.0, 0, 0, 0], [0.12, -70, 0, 20], [0.42, 0, 0, 0]],
+			"arm_l": [[0.0, 0, 0, 0], [0.12, -55, 0, -15], [0.42, 0, 0, 0]],
+		}},
 		# hit: brief backward wobble on authoritative player damage.
 		"hit": {"length": 0.25, "loop": false, "bones": {
 			"spine": [[0.0, 0, 0, 0], [0.08, -14, 0, 0], [0.25, 0, 0, 0]],

@@ -3,6 +3,8 @@
   "clips": {
     "melee_one_handed_main": "attack",
     "melee_one_handed_off": "attack_off_hand",
-    "melee_two_handed": "attack_2h"
+    "melee_two_handed": "attack_2h",
+    "ranged_bow": "attack_ranged",
+    "ranged_staff": "attack_staff"
   }
 }

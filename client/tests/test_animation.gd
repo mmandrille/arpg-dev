@@ -225,7 +225,7 @@ func _test_character_scene() -> void:
 	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_assert(ap != null, "character AnimationPlayer missing")
 	if ap != null:
-		for clip in ["idle", "walk", "attack", "attack_off_hand", "attack_2h", "hit", "death"]:
+		for clip in ["idle", "walk", "attack", "attack_off_hand", "attack_2h", "attack_ranged", "attack_staff", "hit", "death"]:
 			_assert(ap.has_animation(clip), "character missing clip %s" % clip)
 	s.free()
 	await process_frame

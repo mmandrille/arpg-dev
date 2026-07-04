@@ -1,0 +1,31 @@
+docs/specs/v441_spec-attack-animations-ranged.md
+  s_7bdc2687bb052d::t_ed36f0b119e808 1-15
+shared/assets/attack_presentation.v0.json
+  s_7bdc2687bb052d::t_02efd0a592e1a2 6-8
+docs/as-built/v441_attack-animations-ranged.md
+  s_7bdc2687bb052d::t_c7f9bf28a2862d 1-16
+docs/plans/v441_2026-07-04-attack-animations-ranged.md
+  s_7bdc2687bb052d::t_1b5e85dac43330 1-12
+client/animations/character_anims.tres
+  s_7bdc2687bb052d::t_0c098536799d09 55-95,105,115,125,148-153
+client/tests/test_animation.gd
+  s_7bdc2687bb052d::t_8f455a12ccfe25 228
+client/tools/build_animations.gd
+  s_7bdc2687bb052d::t_a366d9cd77e5df 106-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0c703729703545d381c969ace020144e3f6fb476",
+  "prompts": {},
+  "sessions": {
+    "s_7bdc2687bb052d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "56f841ab-bbbc-4b5a-9c56-58f22075ac7b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

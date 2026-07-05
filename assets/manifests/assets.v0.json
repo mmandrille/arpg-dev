@@ -198,7 +198,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/cDsobPucFA (Sword by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "989075ba7ff2c0b0820cc8677578e5adead78ab66bf4772be7cae19eac6db67c"
+        "sha256": "0e113d35d2835c537460600bb4c8cf7d7dab2d576616040ccb94e3ab9702e341"
       }
     },
     "weapon_long_sword_v0": {
@@ -212,7 +212,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/9lLmH8Et4K (Sword by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "65822e157e40536b89daba7fa733b838905c911fccf4ee6a18511d5cd962d691"
+        "sha256": "da94227eec285be65f243aeb08ad30499507f666101b5e5ae74e51d10abf335d"
       }
     },
     "weapon_rapier_v0": {
@@ -226,7 +226,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/Ds2bJiNI5w (Sword by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "6b651a88a399d08c7824fb16fffa1bcda9351979a885ddea92670a4a69834f84"
+        "sha256": "5d003224c2ea5461c2f7a9d61d1fc2d36375eea59cda8fb0d89d5cdd7d167b52"
       }
     },
     "equipment_shield_kite_v0": {
@@ -240,7 +240,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/xoHSnOjsBG (Shield by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "2c8074db5a0030a25f1ac39d8a2e5f2686ad051dcd475e753b6a717204e1fc83"
+        "sha256": "02ee7a810a4c215908b03fd4dca6af529666de48c0681f6754a6d89b4a18f7b7"
       }
     },
     "equipment_shield_tower_v0": {
@@ -254,7 +254,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/xoHSnOjsBG (Shield by Quaternius; tower scale via item_visuals)",
         "license": "CC0-1.0",
-        "sha256": "d317a7dfe03f567ac343b2d2c1e4c0f4c28e79be4ef0ec1a5e9ea00a1a7bf5cf"
+        "sha256": "28c385c4de08fc2d57dac5c3ef0c47047d3375cf90823b4ec86ef7493e90bcc5"
       }
     },
     "weapon_training_bow_v0": {
@@ -268,7 +268,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/QnpqjLSKFU (Wooden Bow by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "2432bad3494376faf1f2c8a6afefb815c80c0fa86b2f3f10d6a918539eb6b979"
+        "sha256": "df38805e8ba1d1b21f47202a0af6ee0d522aac41d5ee90891c5ba7964c9e9c00"
       }
     },
     "weapon_starter_staff_v0": {
@@ -282,7 +282,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/PnGRvO4Lwd (Staff by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "55432b38fb9512d2fd43274fc602b94006462f1011da7c96422550036dbe164f"
+        "sha256": "ecbd05245d7bfbc7fd704c18785fd17935d4344209e6eae28ed99f169f4f9056"
       }
     },
     "weapon_starter_axe_v0": {
@@ -296,7 +296,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/W0UYZPYSXf (Axe by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "afcff29ba7df4c8fd3f112ebc655105625e635b119fe32ef2dff726001e3d78c"
+        "sha256": "bb86ffdb121a754265d3ff4213efe1508f08e2118417a7de0b39b1072fd8aa49"
       }
     },
     "fallback_equipment_off_hand_v0": {
@@ -324,7 +324,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/apPuLbVJ4N5 (Viking Helmet by Michael Fuchs)",
         "license": "CC0-1.0",
-        "sha256": "f68ba443ba77930d291aa5b922f62f2337b20e44c459d78ba1fd20d0c652f341"
+        "sha256": "127a78335eebf4fccda6e26b432f4d82f9ae949ce9d972849231eb2d7b73fdfb"
       }
     },
     "fallback_equipment_chest_v0": {
@@ -338,7 +338,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/TMUoxILh9w (Armor Metal by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "b79b10f46eb58979632e2dcf7a660f838312d7315581055980945b56fb523072"
+        "sha256": "76d0e5311165c7a137c140eadc125c1c909691ada77e34ff24ddccfb8fe677b0"
       }
     },
     "fallback_equipment_gloves_v0": {
@@ -352,7 +352,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/l1zv4LaA4I (Glove by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "d3fc9925ba70984249e6e37d23644d48ba01368402d5ad446a17da0ab9f2741e"
+        "sha256": "92034b6d1ba05bd9a58c19e84e14f74455c3be5df3b18cce37b40c500d467a21"
       }
     },
     "fallback_equipment_belt_v0": {
@@ -380,7 +380,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/7HbqG8RwRcA (Boots by Poly by Google)",
         "license": "CC0-1.0",
-        "sha256": "370215d91f9e827153ca4f57e72f446ba3cbbe4623ef3e6cbf0c4bbf3b72b541"
+        "sha256": "3866e1386f16bef77b7fce0e2a2e86dd017cf9f063a3984799401943c483f7c5"
       }
     },
     "fallback_equipment_ring_left_v0": {
@@ -394,7 +394,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/f9AVG7oFxBi (Ring by Poly by Google)",
         "license": "CC0-1.0",
-        "sha256": "3677825229a738c44228cc0ca38a0b41916144c0e5104a82e45130da67565727"
+        "sha256": "00c7c69ae7d8b15224811fde071cb7a513dee67ee75d0926af8fc65e07f22e7b"
       }
     },
     "fallback_equipment_ring_right_v0": {
@@ -408,7 +408,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/f9AVG7oFxBi (Ring by Poly by Google)",
         "license": "CC0-1.0",
-        "sha256": "3677825229a738c44228cc0ca38a0b41916144c0e5104a82e45130da67565727"
+        "sha256": "00c7c69ae7d8b15224811fde071cb7a513dee67ee75d0926af8fc65e07f22e7b"
       }
     },
     "fallback_equipment_amulet_v0": {
@@ -422,7 +422,7 @@
       "provenance": {
         "origin": "https://poly.pizza/m/Jvhs8DCNDZ (Necklace by Quaternius)",
         "license": "CC0-1.0",
-        "sha256": "0a4feb42ff65f83cfd687cb33a280c8e19e1a22a6fae4f97a1f8a04dfd071520"
+        "sha256": "87c0a4d5515deeb4f4bea5bec5a89b073cb4b0e8452529c23b979a88c4e0a074"
       }
     },
     "monster_dummy_v0": {
@@ -460,7 +460,7 @@
       "provenance": {
         "origin": "user-provided local GLB",
         "license": "unconfirmed-user-provided",
-        "sha256": "f207cf1a7f7520c829c9b051e5acb668649fe7433b1264d5cbdc384994656aba"
+        "sha256": "bbabf5c03c826c850ee4e745e59a4d7bad01bb4996a5ab0f78e8306883942057"
       }
     },
     "monster_crocodile_archer_v0": {
@@ -482,7 +482,7 @@
       "provenance": {
         "origin": "user-provided local GLB",
         "license": "unconfirmed-user-provided",
-        "sha256": "a4ba0832b24d7a53283d334e69dfd151c94fcdf5c29670632417b2b2894c22fa"
+        "sha256": "c2f86db0588abc524a122792eabde135293e2d12651d70d6ed667abeea4c6dda"
       }
     },
     "monster_quadruped_predator_v0": {

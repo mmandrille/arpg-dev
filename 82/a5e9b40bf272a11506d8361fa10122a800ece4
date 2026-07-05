@@ -1,0 +1,25 @@
+tools/assets/gen_glb.py
+  s_ca4868bac46551::t_ca0c105a0113b6 521
+  s_ca4868bac46551::t_e493f68ce96520 317-381,383-384
+tools/assets/rig_hero_glbs.py
+  s_ca4868bac46551::t_cf7525e6016dc6 40-42
+assets/manifests/assets.v0.json
+  s_ca4868bac46551::t_acdc8f680feefd 32,63
+  s_ca4868bac46551::t_d7d58482676d5e 201,215,229,243,257,271,285,299,327,341,355,383,397,411,425,463,485
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "82a5e9b40bf272a11506d8361fa10122a800ece4",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

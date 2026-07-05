@@ -1,0 +1,21 @@
+assets/manifests/assets.v0.json
+  s_ca4868bac46551::t_0afa3c043bed70 201,215,229,243,257,271,285,299,327,341,355,383,397,411,425,463,485
+tools/assets/test_rig_hero_glbs.py
+  s_ca4868bac46551::t_9a50003f016a2b 116-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "38c567989aafc0044ab84abdc30290677520c2df",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

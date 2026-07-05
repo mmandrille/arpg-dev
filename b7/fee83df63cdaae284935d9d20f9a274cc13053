@@ -1,0 +1,19 @@
+assets/manifests/assets.v0.json
+  s_ca4868bac46551::t_a3d413a39586b7 32,63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b7fee83df63cdaae284935d9d20f9a274cc13053",
+  "prompts": {},
+  "sessions": {
+    "s_ca4868bac46551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15829808-0435-4933-b09b-d99a14f4442a",
+        "model": "unknown"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

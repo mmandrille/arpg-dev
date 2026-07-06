@@ -1,0 +1,48 @@
+client/scripts/main.gd
+  s_63be96fac64d0c::t_c8548ffd0c9ad8 5521-5522
+  s_63be96fac64d0c::t_e4950c14073fca 350
+  s_63be96fac64d0c::t_9a4553f1901e38 106
+  s_63be96fac64d0c::t_5228242b568664 5484-5486
+  s_63be96fac64d0c::t_118ba3fa036347 5552-5554
+client/scripts/class_presentations_loader.gd
+  s_63be96fac64d0c::t_44f8a90b8b3e6d 58-65
+client/scripts/class_body_tint.gd
+  s_63be96fac64d0c::t_cbfd22ed0a8e24 1-48
+client/tests/equipped_gear_fit_probe.gd
+  s_63be96fac64d0c::t_92229b28a3d8ae 9
+  s_63be96fac64d0c::t_e4b34f0b0d86c7 211
+shared/assets/class_presentations.v0.json
+  s_63be96fac64d0c::t_960f8b525b5802 7-8,13-14,19-20,25-26,31-32
+shared/assets/class_presentations.v0.schema.json
+  s_63be96fac64d0c::t_2d5c6da38190cb 47-55
+client/scripts/showme/visual_capture.gd
+  s_63be96fac64d0c::t_7aef395dcbdaf4 19
+  s_63be96fac64d0c::t_52cd120b38698f 267
+client/tests/test_class_body_tint.gd
+  s_63be96fac64d0c::t_6f6c54951e8419 1-45
+tools/validate_shared.py
+  s_63be96fac64d0c::t_fc24fdcc1a730d 582-589
+docs/CODEMAP.md
+  s_63be96fac64d0c::t_0a658db15832cb 11
+scripts/client_smoke.sh
+  s_63be96fac64d0c::t_1324d11d2e9610 160
+client/scripts/showme/showme_skeleton_capture.gd
+  s_63be96fac64d0c::t_fd095152df320d 6
+  s_63be96fac64d0c::t_38ff93c83a7c99 203
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "46497669c11dec1155ec0bf8decc2994edc075cd",
+  "prompts": {},
+  "sessions": {
+    "s_63be96fac64d0c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "582c56f7-051e-485e-a94f-7cafe5ca6268",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

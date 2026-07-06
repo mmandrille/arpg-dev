@@ -552,8 +552,7 @@ def _all_targets() -> dict:
     from tools.assets import gen_glb_equipment
 
     return {
-        # base_humanoid.glb removed — character_base_humanoid_v0 now points to barbarian.glb.
-        "client/assets/characters/barbarian/barbarian.glb": barbarian_glb,
+        # barbarian runtime comes from rig_canonical_hero + goliath_barbarian.glb (see rig_hero_glbs).
         "client/assets/characters/sorcerer/sorcerer.glb": sorcerer_glb,
         "client/assets/characters/paladin/paladin.glb": paladin_glb,
         "client/assets/characters/rogue/rogue.glb": rogue_glb,

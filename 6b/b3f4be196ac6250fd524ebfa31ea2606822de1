@@ -1,0 +1,25 @@
+shared/assets/item_visuals.v0.json
+  h_e5f15a920467af 340-342,350-352,423-436
+  s_db2ee42ec62955::t_fa9c973b5412d3 354-355,421-422
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6bb3f4be196ac6250fd524ebfa31ea2606822de1",
+  "prompts": {},
+  "humans": {
+    "h_e5f15a920467af": {
+      "author": "mmandrille <mmandrille@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_db2ee42ec62955": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f38c1-203f-7cc3-bbb6-bec9c82539ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-06-barbarian-connected-mesh-design.md
+  s_8dad5e42f3aa31::t_b2af0aeb551911 1-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "8f87f036dbae437de18703fbc40096c84ba60386",
+  "prompts": {},
+  "sessions": {
+    "s_8dad5e42f3aa31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b804852f-a5da-4344-9edd-30dbd9489055",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

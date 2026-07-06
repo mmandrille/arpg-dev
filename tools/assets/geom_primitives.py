@@ -145,3 +145,49 @@ def _extrapolate(p0: tuple[float, float, float], p1: tuple[float, float, float],
         p1[1] + t * (p1[1] - p0[1]),
         p1[2] + t * (p1[2] - p0[2]),
     )
+
+
+def _lerp3(
+    a: tuple[float, float, float],
+    b: tuple[float, float, float],
+    t: float,
+) -> tuple[float, float, float]:
+    return (
+        a[0] + t * (b[0] - a[0]),
+        a[1] + t * (b[1] - a[1]),
+        a[2] + t * (b[2] - a[2]),
+    )
+
+
+def _smooth_shared_normals(
+    positions: list[tuple[float, float, float]],
+    normals: list[tuple[float, float, float]],
+    grid: float = 0.0020,
+) -> list[tuple[float, float, float]]:
+    """Average normals at coincident positions — softens faceted skin shading."""
+    buckets: dict[tuple[int, int, int], list[int]] = {}
+    for i, (px, py, pz) in enumerate(positions):
+        key = (int(round(px / grid)), int(round(py / grid)), int(round(pz / grid)))
+        buckets.setdefault(key, []).append(i)
+
+    out = list(normals)
+    for indices in buckets.values():
+        if len(indices) < 2:
+            continue
+
+        sx = sy = sz = 0.0
+        for i in indices:
+            nx, ny, nz = normals[i]
+            sx += nx
+            sy += ny
+            sz += nz
+
+        length = math.sqrt(sx * sx + sy * sy + sz * sz)
+        if length < 1e-9:
+            continue
+
+        fn = (sx / length, sy / length, sz / length)
+        for i in indices:
+            out[i] = fn
+
+    return out

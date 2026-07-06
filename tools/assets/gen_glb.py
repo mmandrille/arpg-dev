@@ -27,6 +27,7 @@ import struct
 from pathlib import Path
 
 from tools.assets.barbarian_mesh import barbarian_parts
+from tools.assets.geom_primitives import _smooth_shared_normals
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -166,7 +167,7 @@ def _joint_globals(joints):
     return globals_
 
 
-def _build_skinned_glb(color, joints, parts):
+def _build_skinned_glb(color, joints, parts, smooth_normals: bool = False):
     """Build a .glb with a single skinned mesh + a skeleton.
 
     joints: [(name, parent_idx, (lx,ly,lz))]  -- translation-only bind pose
@@ -213,6 +214,9 @@ def _build_skinned_glb(color, joints, parts):
             weights0.append(w)
         for i in geom_idx:
             indices.append(base + i)
+
+    if smooth_normals:
+        normals = _smooth_shared_normals(positions, normals)
 
     bin_buf = bytearray()
     pos_off = len(bin_buf)
@@ -338,7 +342,7 @@ def base_humanoid_glb() -> bytes:
     ])
 
 
-def _full_humanoid_glb(color, parts=None, extra_parts=None) -> bytes:
+def _full_humanoid_glb(color, parts=None, extra_parts=None, smooth_normals: bool = False) -> bytes:
     """17-bone humanoid — rest pose matches bind pose so bones sit inside mesh.
 
     Bone local translations match the re-rigged barbarian.glb (arm chain goes
@@ -402,12 +406,16 @@ def _full_humanoid_glb(color, parts=None, extra_parts=None) -> bytes:
         parts = _default_parts
     if extra_parts:
         parts = list(parts) + list(extra_parts)
-    return _build_skinned_glb(color, joints, parts)
+    return _build_skinned_glb(color, joints, parts, smooth_normals=smooth_normals)
 
 
 def barbarian_glb() -> bytes:
-    """17-bone low-poly humanoid — elliptical torso, bone-aligned limbs, silhouette pads."""
-    return _full_humanoid_glb((0.66, 0.36, 0.25, 1.0), parts=barbarian_parts())
+    """17-bone low-poly humanoid — anatomy pads, multi-bone weights, smooth normals."""
+    return _full_humanoid_glb(
+        (0.66, 0.36, 0.25, 1.0),
+        parts=barbarian_parts(),
+        smooth_normals=True,
+    )
 
 
 def sorcerer_glb() -> bytes:

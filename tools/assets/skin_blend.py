@@ -116,3 +116,32 @@ def blend_lateral(
         return _pack(ja, jb, t, 1.0 - t)
 
     return _fn
+
+
+def blend_shoulder(
+    arm: int,
+    chest: int,
+    spine: int,
+    axis: str,
+    center: float,
+    inner: float,
+    outer: float,
+    back_z: float,
+    back_depth: float = 0.065,
+    spine_mix: float = 0.55,
+) -> WeightFn:
+    """Lateral chest↔arm blend; back-facing verts also pull spine weight."""
+    lat_fn = blend_lateral(arm, chest, axis, center, inner, outer)
+
+    def _fn(px: float, py: float, pz: float):
+        j2, w2 = lat_fn(px, py, pz)
+        wa, wc = w2[0], w2[1]
+        if pz >= back_z or wc < 1e-6:
+            return (arm, chest, 0, 0), (wa, wc, 0.0, 0.0)
+
+        back_t = min(1.0, (back_z - pz) / back_depth)
+        w_spine = wc * back_t * spine_mix
+        w_chest = wc - w_spine
+        return _pack3(arm, chest, spine, wa, w_chest, w_spine)
+
+    return _fn

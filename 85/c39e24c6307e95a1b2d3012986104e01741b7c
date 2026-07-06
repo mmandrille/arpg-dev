@@ -1,0 +1,25 @@
+client/scripts/showme/visual_capture.gd
+  s_a2d2f2435be6f1::t_a064fa60e1b5a7 25
+  s_a2d2f2435be6f1::t_7d32bad10c6ba1 88-89
+client/scripts/showme/showme_gear_matrix_capture.gd
+  s_a2d2f2435be6f1::t_1df6aa1eb89809 1-206
+skills/showme/scripts/render_focus.py
+  s_a2d2f2435be6f1::t_2139e67e197aa1 80-81
+  s_a2d2f2435be6f1::t_49aefa86934fbe 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "85c39e24c6307e95a1b2d3012986104e01741b7c",
+  "prompts": {},
+  "sessions": {
+    "s_a2d2f2435be6f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "40148032-aca0-4fb7-9a8d-94ac63ec5a0b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

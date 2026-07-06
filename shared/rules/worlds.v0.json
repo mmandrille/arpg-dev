@@ -1422,7 +1422,7 @@
         },
         {
           "type": "loot",
-          "item_template_id": "starter_sorcerer_staff",
+          "item_template_id": "sorcerer_staff",
           "position": {
             "x": 4,
             "y": 4

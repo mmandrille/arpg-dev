@@ -260,9 +260,9 @@ func _run() -> void:
 	main.gold = 67
 	main.hotbar = []
 	main.stash_items = [
-		{"stash_item_id": "account_unique_1", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
-		{"stash_item_id": "account_unique_2", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
-		{"stash_item_id": "account_unique_3", "item_def_id": "starter_sorcerer_staff", "item_template_id": "starter_sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
+		{"stash_item_id": "account_unique_1", "item_def_id": "sorcerer_staff", "item_template_id": "sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
+		{"stash_item_id": "account_unique_2", "item_def_id": "sorcerer_staff", "item_template_id": "sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
+		{"stash_item_id": "account_unique_3", "item_def_id": "sorcerer_staff", "item_template_id": "sorcerer_staff", "display_name": "Account Staff", "rarity": "unique"},
 		{"stash_item_id": "account_set_1", "item_def_id": "helm", "item_template_id": "helm", "display_name": "Account Set", "rarity": "set"},
 		{"stash_item_id": "account_set_2", "item_def_id": "helm", "item_template_id": "helm", "display_name": "Account Set", "rarity": "set"},
 		{"stash_item_id": "account_set_3", "item_def_id": "helm", "item_template_id": "helm", "display_name": "Account Set", "rarity": "set"},

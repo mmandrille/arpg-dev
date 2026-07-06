@@ -45,7 +45,7 @@ func TestStaffWeaponDamageUsesMagic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}
-	wand := addRolledInventoryItem(t, sim, 9911, "starter_sorcerer_staff", map[string]int{"damage_min": 2, "damage_max": 4})
+	wand := addRolledInventoryItem(t, sim, 9911, "sorcerer_staff", map[string]int{"damage_min": 2, "damage_max": 4})
 	assertAck(t, sim.Tick([]Input{{MessageID: "staff", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(wand.instanceID), Slot: mainHandSlot}}}), "staff")
 
 	if got := sim.resolvePlayerAttackDamage(); got != (DamageRange{Min: 2, Max: 4}) {

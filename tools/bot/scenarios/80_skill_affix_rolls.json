@@ -9,12 +9,12 @@
   "steps": [
     {
       "action": "pick_up_loot",
-      "item_def_id": "starter_sorcerer_staff"
+      "item_def_id": "sorcerer_staff"
     },
     {
       "action": "assert_rolled_inventory_item",
-      "item_def_id": "starter_sorcerer_staff",
-      "item_template_id": "starter_sorcerer_staff",
+      "item_def_id": "sorcerer_staff",
+      "item_template_id": "sorcerer_staff",
       "display_name": "Arcane Sorcerer Staff",
       "stat_keys": [
         "skill_cooldown_reduction_percent",
@@ -25,8 +25,8 @@
   "assertions": [
     {
       "type": "rolled_inventory_item",
-      "item_def_id": "starter_sorcerer_staff",
-      "item_template_id": "starter_sorcerer_staff",
+      "item_def_id": "sorcerer_staff",
+      "item_template_id": "sorcerer_staff",
       "display_name": "Arcane Sorcerer Staff",
       "stat_keys": [
         "skill_cooldown_reduction_percent",

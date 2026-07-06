@@ -28,12 +28,12 @@ func _test_common_gold_has_glow_marker_and_label() -> void:
 
 func _test_rare_equipment_keeps_model_and_rarity_glow() -> void:
 	var factory = LootNodeFactoryScript.new({}, {
-		"starter_paladin_sword": {
+		"long_sword": {
 			"ground": {"shape": "blade", "color": "#b8c7d8", "accent": "#f6e8b1", "scale": 1.0},
 			"3d_model": "fallback_equipment_main_hand_v0",
 		},
 	})
-	var node := factory.make_loot_node({"id": "loot_sword", "type": "loot", "item_def_id": "starter_paladin_sword", "rarity": "rare"})
+	var node := factory.make_loot_node({"id": "loot_sword", "type": "loot", "item_def_id": "long_sword", "rarity": "rare"})
 	_assert_true("rare loot glow exists", node.find_child("RarityGlow", false, false) != null)
 	_assert_true("rare spawn pop exists", node.find_child("SpawnPopRing", false, false) != null)
 	_assert_true("rare primitive remains", node.find_child("Blade", false, false) != null)
@@ -45,12 +45,12 @@ func _test_rare_equipment_keeps_model_and_rarity_glow() -> void:
 
 func _test_rare_equipment_has_pickup_beam() -> void:
 	var factory = LootNodeFactoryScript.new({}, {
-		"starter_paladin_sword": {
+		"long_sword": {
 			"ground": {"shape": "blade", "color": "#b8c7d8", "accent": "#f6e8b1", "scale": 1.0},
 			"3d_model": "fallback_equipment_main_hand_v0",
 		},
 	})
-	var node := factory.make_loot_node({"id": "loot_sword", "type": "loot", "item_def_id": "starter_paladin_sword", "rarity": "rare"})
+	var node := factory.make_loot_node({"id": "loot_sword", "type": "loot", "item_def_id": "long_sword", "rarity": "rare"})
 	_assert_true("rare pickup beam exists", node.find_child("PickupBeam", false, false) != null)
 	var common := factory.make_loot_node({"id": "loot_gold", "type": "loot", "item_def_id": "gold", "rarity": "common", "amount": 3})
 	_assert_true("common loot has no pickup beam", common.find_child("PickupBeam", false, false) == null)

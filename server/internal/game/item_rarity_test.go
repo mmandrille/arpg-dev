@@ -97,7 +97,7 @@ func TestJewelryTemplatesCanRollInventoryRows(t *testing.T) {
 
 func TestAffixDisplayNameUsesSkillAffixFamily(t *testing.T) {
 	rules := loadRules(t)
-	template := rules.ItemTemplates["starter_sorcerer_staff"]
+	template := rules.ItemTemplates["sorcerer_staff"]
 	stats := cloneIntMap(template.BaseStats)
 	stats["skill_cooldown_reduction_percent"] = 12
 	stats["skill_mana_cost_reduction"] = 1

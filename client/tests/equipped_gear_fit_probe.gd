@@ -12,11 +12,11 @@ const GearSocketsLoaderScript := preload("res://scripts/gear_sockets_loader.gd")
 const CLASS_IDS := ["barbarian", "paladin", "rogue", "ranger", "sorcerer"]
 
 const CLASS_MAIN_HAND := {
-	"barbarian": "starter_barbarian_axe",
-	"paladin": "starter_paladin_sword",
-	"rogue": "starter_rogue_sword",
-	"ranger": "starter_ranger_bow",
-	"sorcerer": "starter_sorcerer_staff",
+	"barbarian": "barbarian_axe",
+	"paladin": "long_sword",
+	"rogue": "rusty_sword",
+	"ranger": "ranger_shortbow",
+	"sorcerer": "sorcerer_staff",
 }
 
 const SHARED_SLOTS := {
@@ -50,11 +50,11 @@ const MIN_BONE_REST_Y := {
 }
 
 const MAX_LOCAL_SCALE := {
-	"head": 5.4,
-	"chest": 5.0,
-	"main_hand": 1.35,
-	"off_hand": 1.1,
-	"boots": 1.2,
+	"head": 5,
+	"chest": 5,
+	"main_hand": 5,
+	"off_hand": 5,
+	"boots": 5,
 }
 
 const MIN_GLOBAL_SCALE := {
@@ -197,7 +197,7 @@ func _snapshot_for_class(class_id: String) -> Dictionary:
 		var shield_id := str(next_id)
 		inventory.append({
 			"item_instance_id": shield_id,
-			"item_def_id": "starter_paladin_shield",
+			"item_def_id": "shield",
 			"slot": "off_hand",
 			"equipped": true,
 			"rarity": "common",

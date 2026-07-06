@@ -27,10 +27,10 @@ const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
 	"rusty_sword": "main_hand",
 	"long_sword": "main_hand",
-	"starter_sorcerer_staff": "main_hand",
-	"starter_barbarian_axe": "main_hand",
-	"starter_paladin_sword": "main_hand",
-	"starter_paladin_shield": "off_hand",
+	"sorcerer_staff": "main_hand",
+	"barbarian_axe": "main_hand",
+	"long_sword": "main_hand",
+	"shield": "off_hand",
 	"great_sword": "main_hand",
 	"war_sword": "main_hand",
 	"training_bow": "main_hand",
@@ -332,7 +332,7 @@ func _setup_corpse_inventory() -> void:
 	await process_frame
 
 	var inventory := [
-		{"item_instance_id": "3001", "item_def_id": "starter_paladin_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "3001", "item_def_id": "long_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
 		{"item_instance_id": "3002", "item_def_id": "red_potion", "slot": "", "equipped": false, "rarity": "common"},
 	]
 	var equipped := {"main_hand": "3001"}

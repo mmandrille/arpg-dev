@@ -402,7 +402,7 @@ func TestClearHiredMercenaryForOwnerClearsProgressionField(t *testing.T) {
 func mustMercenaryStaffItem(t *testing.T, instanceID string) PersistedItem {
 	t.Helper()
 	raw, err := json.Marshal(ItemRollPayload{
-		ItemTemplateID: "starter_sorcerer_staff",
+		ItemTemplateID: "sorcerer_staff",
 		DisplayName:    "Starter Staff",
 		Rarity:         "common",
 		Stats:          map[string]int{"damage_min": 1, "damage_max": 3, "magic": 2},
@@ -414,7 +414,7 @@ func mustMercenaryStaffItem(t *testing.T, instanceID string) PersistedItem {
 
 	return PersistedItem{
 		InstanceID:  instanceID,
-		ItemDefID:   "starter_sorcerer_staff",
+		ItemDefID:   "sorcerer_staff",
 		Slot:        mainHandSlot,
 		Equipped:    true,
 		RolledStats: raw,

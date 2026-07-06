@@ -17,8 +17,8 @@ func prepare(
 	tree.get_root().add_child(character)
 	main.character_visual = character
 	main.inventory = [
-		{"item_instance_id": "5001", "item_def_id": "starter_paladin_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
-		{"item_instance_id": "5002", "item_def_id": "starter_paladin_shield", "slot": "off_hand", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "5001", "item_def_id": "long_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
+		{"item_instance_id": "5002", "item_def_id": "shield", "slot": "off_hand", "equipped": true, "rarity": "common"},
 	]
 	main.equipped = {"main_hand": "5001", "off_hand": "5002"}
 	main.resolver = resolver_script.new(character)

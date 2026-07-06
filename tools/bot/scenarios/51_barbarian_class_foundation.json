@@ -46,7 +46,7 @@
     {
       "action": "assert_equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_barbarian_axe"
+      "item_def_id": "barbarian_axe"
     },
     {
       "action": "assert_equipped_slot_empty",
@@ -152,7 +152,7 @@
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_barbarian_axe"
+      "item_def_id": "barbarian_axe"
     },
     {
       "type": "equipped_slot_empty",

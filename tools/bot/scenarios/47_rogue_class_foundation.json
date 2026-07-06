@@ -230,12 +230,12 @@
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_rogue_sword"
+      "item_def_id": "rusty_sword"
     },
     {
       "type": "equipped_slot_def",
       "slot": "off_hand",
-      "item_def_id": "starter_rogue_sword"
+      "item_def_id": "rusty_sword"
     },
     {
       "type": "event_seen",

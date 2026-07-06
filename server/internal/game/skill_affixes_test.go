@@ -10,7 +10,7 @@ func TestSkillAffixRollsReduceManaCostAndCooldown(t *testing.T) {
 	sim.progression.SkillRanks["magic_bolt"] = 1
 	player := sim.entities[sim.playerID]
 	player.mana = 12
-	staff := addRolledInventoryItem(t, sim, 6600, "starter_sorcerer_staff", map[string]int{
+	staff := addRolledInventoryItem(t, sim, 6600, "sorcerer_staff", map[string]int{
 		"skill_mana_cost_reduction":        1,
 		"skill_cooldown_reduction_percent": 50,
 	})
@@ -42,10 +42,10 @@ func TestSkillAffixRollsReduceManaCostAndCooldown(t *testing.T) {
 
 func TestSkillAffixRollCandidates(t *testing.T) {
 	rules := loadRules(t)
-	staff := rules.rollableStatsForRarity(rules.ItemTemplates["starter_sorcerer_staff"].RollableStats, "rare", 1)
+	staff := rules.rollableStatsForRarity(rules.ItemTemplates["sorcerer_staff"].RollableStats, "rare", 1)
 	for _, stat := range []string{"skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction"} {
 		if _, ok := findRollableStat(staff, stat); !ok {
-			t.Fatalf("rare starter_sorcerer_staff pool missing %s", stat)
+			t.Fatalf("rare sorcerer_staff pool missing %s", stat)
 		}
 	}
 	amulet := rules.rollableStatsForRarity(rules.ItemTemplates["amulet"].RollableStats, "rare", 1)

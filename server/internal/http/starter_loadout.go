@@ -23,29 +23,29 @@ type starterLoadoutItem struct {
 
 var starterLoadouts = map[string][]starterLoadoutItem{
 	"barbarian": {
-		{itemDefID: "starter_barbarian_axe", slot: "main_hand", equipped: true, rolled: true},
+		{itemDefID: "barbarian_axe", slot: "main_hand", equipped: true, rolled: true},
 		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
 		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
 	"sorcerer": {
-		{itemDefID: "starter_sorcerer_staff", slot: "main_hand", equipped: true, rolled: true},
+		{itemDefID: "sorcerer_staff", slot: "main_hand", equipped: true, rolled: true},
 		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
 		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
 	"paladin": {
-		{itemDefID: "starter_paladin_sword", slot: "main_hand", equipped: true, rolled: true},
-		{itemDefID: "starter_paladin_shield", slot: "off_hand", equipped: true, rolled: true},
+		{itemDefID: "long_sword", slot: "main_hand", equipped: true, rolled: true},
+		{itemDefID: "shield", slot: "off_hand", equipped: true, rolled: true},
 		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
 		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
 	"rogue": {
-		{itemDefID: "starter_rogue_sword", slot: "main_hand", equipped: true, rolled: true},
-		{itemDefID: "starter_rogue_sword", slot: "off_hand", equipped: true, rolled: true},
+		{itemDefID: "rusty_sword", slot: "main_hand", equipped: true, rolled: true},
+		{itemDefID: "rusty_sword", slot: "off_hand", equipped: true, rolled: true},
 		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
 		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},
 	"ranger": {
-		{itemDefID: "starter_ranger_bow", slot: "main_hand", equipped: true, rolled: true},
+		{itemDefID: "ranger_shortbow", slot: "main_hand", equipped: true, rolled: true},
 		{itemDefID: "red_potion", hotbarSlotIdx: intPtrHTTP(0)},
 		{itemDefID: "blue_potion", hotbarSlotIdx: intPtrHTTP(1)},
 	},

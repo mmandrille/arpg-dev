@@ -12,16 +12,16 @@
         "bone": "head",
         "offset": {
           "x": 0.0,
-          "y": 0.03,
-          "z": 0.0
+          "y": -1.35,
+          "z": -0.04
         }
       },
       "chest_socket": {
         "bone": "chest",
         "offset": {
           "x": 0.0,
-          "y": -1.25,
-          "z": 0.05
+          "y": 0.0,
+          "z": -0.04
         }
       },
       "gloves_socket": {
@@ -45,7 +45,7 @@
         "offset": {
           "x": 0.06,
           "y": 0.06,
-          "z": 0.04
+          "z": -0.08
         }
       },
       "boots_right_socket": {
@@ -53,7 +53,7 @@
         "offset": {
           "x": -0.06,
           "y": 0.06,
-          "z": 0.04
+          "z": -0.08
         }
       },
       "ring_left_socket": {
@@ -76,128 +76,21 @@
         "bone": "chest",
         "offset": {
           "x": 0.0,
-          "y": 0.14,
-          "z": -0.05
+          "y": 0.1,
+          "z": -0.04
         }
       }
     }
   },
   "classes": {
-    "barbarian": {
-      "sockets": {
-        "head_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.05,
-            "z": 0.0
-          }
-        },
-        "chest_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.02,
-            "z": 0.06
-          }
-        }
-      }
-    },
-    "paladin": {
-      "sockets": {
-        "head_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.04,
-            "z": -0.04
-          }
-        },
-        "chest_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": -0.04
-          }
-        },
-        "boots_socket": {
-          "offset": {
-            "x": 0.06,
-            "y": 0.06,
-            "z": -0.04
-          }
-        },
-        "boots_right_socket": {
-          "offset": {
-            "x": -0.06,
-            "y": 0.06,
-            "z": -0.04
-          }
-        }
-      }
-    },
     "rogue": {
       "sockets": {
-        "head_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.02,
-            "z": 0.0
-          }
-        },
-        "chest_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": -0.02,
-            "z": 0.04
-          }
-        },
         "gloves_socket": {
           "bone": "hand_l",
           "offset": {
             "x": 0.0,
             "y": -0.02,
             "z": 0.0
-          }
-        }
-      }
-    },
-    "ranger": {
-      "sockets": {
-        "head_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.06,
-            "z": 0.0
-          }
-        },
-        "chest_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.01,
-            "z": 0.05
-          }
-        }
-      }
-    },
-    "sorcerer": {
-      "sockets": {
-        "head_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.08,
-            "z": 0.0
-          }
-        },
-        "chest_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.04,
-            "z": 0.04
-          }
-        },
-        "amulet_socket": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.1,
-            "z": -0.04
           }
         }
       }

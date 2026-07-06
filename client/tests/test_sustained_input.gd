@@ -201,7 +201,7 @@ func _test_combat_reach_uses_equipped_weapon() -> void:
 func _test_combat_reach_dual_wield_uses_shorter_off_hand() -> void:
 	ItemRulesLoaderScript.ensure_loaded()
 	var inventory := [
-		{"item_instance_id": "mh", "item_template_id": "starter_rogue_sword"},
+		{"item_instance_id": "mh", "item_template_id": "rusty_sword"},
 		{"item_instance_id": "oh", "item_template_id": "dagger"},
 	]
 	var equipped := {"main_hand": "mh", "off_hand": "oh"}

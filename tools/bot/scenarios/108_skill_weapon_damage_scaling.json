@@ -38,11 +38,11 @@
     },
     {
       "action": "pick_up_loot",
-      "item_def_id": "starter_sorcerer_staff"
+      "item_def_id": "sorcerer_staff"
     },
     {
       "action": "equip_inventory_item",
-      "item_def_id": "starter_sorcerer_staff",
+      "item_def_id": "sorcerer_staff",
       "slot": "main_hand"
     },
     {

@@ -31,7 +31,7 @@
         "position": {
           "x": 0.0,
           "y": 0.0,
-          "z": 0.48
+          "z": 0.49
         },
         "rotation_degrees": {
           "x": 90.0,
@@ -39,45 +39,9 @@
           "z": 0.0
         },
         "scale": {
-          "x": 1.0,
-          "y": 1.0,
-          "z": 1.0
-        }
-      },
-      "class_transforms": {
-        "rogue": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": -0.42 },
-            "rotation_degrees": { "x": 90.0, "y": 0.0, "z": -8.0 },
-            "scale": { "x": 0.92, "y": 0.92, "z": 0.92 }
-          }
-        },
-        "barbarian": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": -0.52 },
-            "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 1.08, "y": 1.08, "z": 1.08 }
-          }
-        },
-        "sorcerer": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": -0.46 },
-            "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 0.96, "y": 0.96, "z": 0.96 }
-          }
-        },
-        "ranger": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": -0.47 },
-            "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 0.98, "y": 0.98, "z": 0.98 }
-          }
-        },
-        "paladin": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": 0.49 },
-            "scale": { "x": 1.02, "y": 1.02, "z": 1.02 }
-          }
+          "x": 1.02,
+          "y": 1.02,
+          "z": 1.02
         }
       }
     },
@@ -122,116 +86,6 @@
           "x": 1.15,
           "y": 1.15,
           "z": 1.15
-        }
-      }
-    },
-    "starter_paladin_sword": {
-      "asset_id": "weapon_long_sword_v0",
-      "slot": "main_hand",
-      "mount_socket": "right_hand_socket",
-      "local_transform": {
-        "position": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.49
-        },
-        "rotation_degrees": {
-          "x": 90.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "scale": {
-          "x": 1.05,
-          "y": 1.05,
-          "z": 1.05
-        }
-      }
-    },
-    "starter_rogue_sword": {
-      "asset_id": "weapon_rusty_sword_v0",
-      "slot": "main_hand",
-      "mount_socket": "right_hand_socket",
-      "local_transform": {
-        "position": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.36
-        },
-        "rotation_degrees": {
-          "x": 90.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "scale": {
-          "x": 0.92,
-          "y": 0.92,
-          "z": 0.92
-        }
-      }
-    },
-    "starter_paladin_shield": {
-      "asset_id": "equipment_shield_kite_v0",
-      "slot": "off_hand",
-      "mount_socket": "off_hand_socket",
-      "local_transform": {
-        "position": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": -0.06
-        },
-        "rotation_degrees": {
-          "x": 0.0,
-          "y": -90.0,
-          "z": 0.0
-        },
-        "scale": {
-          "x": 1.0,
-          "y": 1.0,
-          "z": 1.0
-        }
-      }
-    },
-    "starter_sorcerer_staff": {
-      "asset_id": "weapon_starter_staff_v0",
-      "slot": "main_hand",
-      "mount_socket": "right_hand_socket",
-      "local_transform": {
-        "position": {
-          "x": 0.0,
-          "y": -0.18,
-          "z": 0.0
-        },
-        "rotation_degrees": {
-          "x": 90.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "scale": {
-          "x": 1.05,
-          "y": 1.05,
-          "z": 1.05
-        }
-      }
-    },
-    "starter_barbarian_axe": {
-      "asset_id": "weapon_starter_axe_v0",
-      "slot": "main_hand",
-      "mount_socket": "right_hand_socket",
-      "local_transform": {
-        "position": {
-          "x": 0.0,
-          "y": -0.16,
-          "z": 0.0
-        },
-        "rotation_degrees": {
-          "x": 90.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "scale": {
-          "x": 1.08,
-          "y": 1.08,
-          "z": 1.08
         }
       }
     },
@@ -298,28 +152,6 @@
           "x": 1.0,
           "y": 1.0,
           "z": 1.0
-        }
-      }
-    },
-    "starter_ranger_bow": {
-      "asset_id": "weapon_training_bow_v0",
-      "slot": "main_hand",
-      "mount_socket": "right_hand_socket",
-      "local_transform": {
-        "position": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "rotation_degrees": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "scale": {
-          "x": 1.04,
-          "y": 1.04,
-          "z": 1.04
         }
       }
     },
@@ -506,7 +338,7 @@
       "local_transform": {
         "position": {
           "x": 0.0,
-          "y": 0.02,
+          "y": 0.1,
           "z": 0.0
         },
         "rotation_degrees": {
@@ -515,39 +347,9 @@
           "z": 0.0
         },
         "scale": {
-          "x": 2.0,
-          "y": 2.0,
-          "z": 2.0
-        }
-      },
-      "class_transforms": {
-        "rogue": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": -0.22, "z": 0.0 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 0.92, "y": 0.92, "z": 0.92 }
-          }
-        },
-        "barbarian": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.04, "z": 0.0 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 1.06, "y": 1.06, "z": 1.06 }
-          }
-        },
-        "sorcerer": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.06, "z": -0.03 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 1.55, "y": 1.55, "z": 1.55 }
-          }
-        },
-        "paladin": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.10, "z": 0.0 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 5.3, "y": 5.3, "z": 5.3 }
-          }
+          "x": 1.7,
+          "y": 1.7,
+          "z": 1.7
         }
       }
     },
@@ -603,7 +405,7 @@
         "position": {
           "x": 0.0,
           "y": 0.0,
-          "z": 0.06
+          "z": 0.0
         },
         "rotation_degrees": {
           "x": 0.0,
@@ -611,39 +413,9 @@
           "z": 0.0
         },
         "scale": {
-          "x": 2.0,
-          "y": 2.0,
-          "z": 2.0
-        }
-      },
-      "class_transforms": {
-        "rogue": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 0.90, "y": 0.90, "z": 0.90 }
-          }
-        },
-        "barbarian": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 1.08, "y": 1.08, "z": 1.08 }
-          }
-        },
-        "sorcerer": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": -0.02 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 0.94, "y": 1.02, "z": 0.94 }
-          }
-        },
-        "paladin": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 4.9, "y": 4.9, "z": 4.9 }
-          }
+          "x": 1.76,
+          "y": 1.76,
+          "z": 1.76
         }
       }
     },
@@ -808,8 +580,8 @@
       "local_transform": {
         "position": {
           "x": 0.0,
-          "y": 0.06,
-          "z": 0.02
+          "y": 0.0,
+          "z": -0.06
         },
         "rotation_degrees": {
           "x": 0.0,
@@ -817,31 +589,9 @@
           "z": 0.0
         },
         "scale": {
-          "x": 1.15,
-          "y": 1.15,
-          "z": 1.15
-        }
-      },
-      "class_transforms": {
-        "rogue": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.04, "z": 0.02 },
-            "rotation_degrees": { "x": 0.0, "y": 270.0, "z": 0.0 },
-            "scale": { "x": 0.88, "y": 0.88, "z": 0.88 }
-          }
-        },
-        "barbarian": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.04, "z": 0.02 },
-            "rotation_degrees": { "x": 0.0, "y": 270.0, "z": 0.0 },
-            "scale": { "x": 1.06, "y": 1.06, "z": 1.06 }
-          }
-        },
-        "paladin": {
-          "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 1.08, "y": 1.08, "z": 1.08 }
-          }
+          "x": 1.3,
+          "y": 1.3,
+          "z": 1.3
         }
       }
     },
@@ -1378,9 +1128,21 @@
       "slot": "gloves",
       "mount_socket": "gloves_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.32, "y": 0.32, "z": 0.32 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.32,
+          "y": 0.32,
+          "z": 0.32
+        }
       }
     },
     "iron_girdle": {
@@ -1388,9 +1150,21 @@
       "slot": "belt",
       "mount_socket": "belt_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.26, "y": 0.26, "z": 0.26 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 0.26
+        }
       }
     },
     "arcane_robes": {
@@ -1398,9 +1172,21 @@
       "slot": "chest",
       "mount_socket": "chest_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.34, "y": 0.34, "z": 0.34 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.34,
+          "y": 0.34,
+          "z": 0.34
+        }
       }
     },
     "focus_band": {
@@ -1408,9 +1194,21 @@
       "slot": "ring_left",
       "mount_socket": "ring_left_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.2, "y": 0.2, "z": 0.2 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.2,
+          "y": 0.2,
+          "z": 0.2
+        }
       }
     },
     "consecrated_aegis": {
@@ -1418,9 +1216,21 @@
       "slot": "off_hand",
       "mount_socket": "off_hand_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.36, "y": 0.36, "z": 0.36 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.36,
+          "y": 0.36,
+          "z": 0.36
+        }
       }
     },
     "crusader_plate": {
@@ -1428,9 +1238,21 @@
       "slot": "chest",
       "mount_socket": "chest_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.36, "y": 0.36, "z": 0.36 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.36,
+          "y": 0.36,
+          "z": 0.36
+        }
       }
     },
     "assassin_gloves": {
@@ -1438,9 +1260,21 @@
       "slot": "gloves",
       "mount_socket": "gloves_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.3, "y": 0.3, "z": 0.3 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        }
       }
     },
     "silent_treads": {
@@ -1448,9 +1282,21 @@
       "slot": "boots",
       "mount_socket": "boots_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.3, "y": 0.3, "z": 0.3 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        }
       }
     },
     "hawk_amulet": {
@@ -1458,9 +1304,21 @@
       "slot": "amulet",
       "mount_socket": "amulet_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.22, "y": 0.22, "z": 0.22 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.22,
+          "y": 0.22,
+          "z": 0.22
+        }
       }
     },
     "pathfinder_boots": {
@@ -1468,9 +1326,21 @@
       "slot": "boots",
       "mount_socket": "boots_socket",
       "local_transform": {
-        "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-        "scale": { "x": 0.32, "y": 0.32, "z": 0.32 }
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation_degrees": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 0.32,
+          "y": 0.32,
+          "z": 0.32
+        }
       }
     },
     "sash": {

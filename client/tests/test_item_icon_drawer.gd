@@ -13,7 +13,7 @@ func _initialize() -> void:
 	_assert_shape(presentations, "mace", "mace")
 	_assert_shape(presentations, "hammer", "hammer")
 	_assert_shape(presentations, "morningstar", "mace")
-	_assert_shape(presentations, "starter_barbarian_axe", "axe")
+	_assert_shape(presentations, "barbarian_axe", "axe")
 	print("test_item_icon_drawer: ok")
 	quit(0)
 

@@ -46,7 +46,7 @@
     {
       "action": "assert_equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_ranger_bow"
+      "item_def_id": "ranger_shortbow"
     },
     {
       "action": "assert_equipped_slot_empty",
@@ -176,7 +176,7 @@
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_ranger_bow"
+      "item_def_id": "ranger_shortbow"
     },
     {
       "type": "equipped_slot_empty",

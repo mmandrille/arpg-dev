@@ -1748,7 +1748,7 @@ func TestSkillProjectileDamageScalesWithWeapon(t *testing.T) {
 	armed := MustNewSim("sess_skill_weapon_staff", "01", rules)
 	armed.progression.CharacterClass = "sorcerer"
 	armed.progression.SkillRanks[magicBoltSkillID] = 1
-	staff := addRolledInventoryItem(t, armed, 8801, "starter_sorcerer_staff", map[string]int{
+	staff := addRolledInventoryItem(t, armed, 8801, "sorcerer_staff", map[string]int{
 		"damage_min": 8,
 		"damage_max": 12,
 	})
@@ -2731,7 +2731,7 @@ func TestRogueOffhandWeaponEquipRules(t *testing.T) {
 	rogueState := rules.DefaultCharacterProgressionState()
 	rogueState.CharacterClass = "rogue"
 	rogueState.BaseStats = rules.CharacterProgression.Classes["rogue"].BaseStats
-	if req := rules.ItemTemplates["starter_rogue_sword"].Requirements["str"]; rogueState.BaseStats.Str < req {
+	if req := rules.ItemTemplates["rusty_sword"].Requirements["str"]; rogueState.BaseStats.Str < req {
 		rogueState.BaseStats.Str = req
 	}
 	if req := rules.ItemTemplates["long_sword"].Requirements["str"]; rogueState.BaseStats.Str < req {
@@ -2741,7 +2741,7 @@ func TestRogueOffhandWeaponEquipRules(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new rogue sim: %v", err)
 	}
-	main := addRolledInventoryItem(t, rogue, 6110, "starter_rogue_sword", nil)
+	main := addRolledInventoryItem(t, rogue, 6110, "rusty_sword", nil)
 	off := addRolledInventoryItem(t, rogue, 6111, "long_sword", nil)
 	mainResult := rogue.Tick([]Input{{MessageID: "main", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(main.instanceID), Slot: mainHandSlot}}})
 	assertAck(t, mainResult, "main")
@@ -2759,7 +2759,7 @@ func TestRogueOffhandWeaponEquipRules(t *testing.T) {
 	barbarianResult := barbarian.Tick([]Input{{MessageID: "barb_off", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(barbarianWeapon.instanceID), Slot: offHandSlot}}})
 	assertReject(t, barbarianResult, "barb_off", "wrong_slot")
 
-	twoHand := addRolledInventoryItem(t, rogue, 6130, "starter_sorcerer_staff", nil)
+	twoHand := addRolledInventoryItem(t, rogue, 6130, "sorcerer_staff", nil)
 	twoHandResult := rogue.Tick([]Input{{MessageID: "two_hand_off", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(twoHand.instanceID), Slot: offHandSlot}}})
 	assertReject(t, twoHandResult, "two_hand_off", "wrong_slot")
 }

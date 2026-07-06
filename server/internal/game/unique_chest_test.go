@@ -136,7 +136,7 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 		},
 		{
 			uniqueID:     "conduit_staff",
-			templateID:   "starter_sorcerer_staff",
+			templateID:   "sorcerer_staff",
 			displayName:  "Conduit Staff",
 			wantStats:    map[string]int{"damage_min": 1, "damage_max": 3, "max_mana": 8},
 			requirements: map[string]int{"level": 5, "magic": 5},

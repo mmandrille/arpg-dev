@@ -300,8 +300,8 @@ func newRogueSkillTestSim(t *testing.T, rules *Rules) *Sim {
 			delete(sim.entities, id)
 		}
 	}
-	main := addRolledInventoryItem(t, sim, 9101, "starter_rogue_sword", nil)
-	off := addRolledInventoryItem(t, sim, 9102, "starter_rogue_sword", nil)
+	main := addRolledInventoryItem(t, sim, 9101, "rusty_sword", nil)
+	off := addRolledInventoryItem(t, sim, 9102, "rusty_sword", nil)
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_main", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(main.instanceID), Slot: mainHandSlot}}}), "equip_main")
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_off", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(off.instanceID), Slot: offHandSlot}}}), "equip_off")
 	player.mana = player.maxMana

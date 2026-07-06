@@ -53,7 +53,7 @@
               "properties": {
                 "local_transform": {
                   "type": "object",
-                  "required": ["position", "rotation_degrees", "scale"],
+                  "minProperties": 1,
                   "additionalProperties": false,
                   "properties": {
                     "position": { "$ref": "#/$defs/vec3" },

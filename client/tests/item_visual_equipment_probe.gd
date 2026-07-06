@@ -109,7 +109,7 @@ func verify_off_hand_weapon_resolver(tree: SceneTree, fail: Callable) -> bool:
 	var resolver = ResolverScript.new(mount)
 	resolver.apply_snapshot({
 		"inventory": [
-			{"item_instance_id": "4001", "item_def_id": "starter_rogue_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
+			{"item_instance_id": "4001", "item_def_id": "rusty_sword", "slot": "main_hand", "equipped": true, "rarity": "common"},
 		],
 		"equipped": {"off_hand": "4001"},
 	})

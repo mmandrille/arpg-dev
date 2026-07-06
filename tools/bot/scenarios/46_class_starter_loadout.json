@@ -11,7 +11,7 @@
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_sorcerer_staff"
+      "item_def_id": "sorcerer_staff"
     },
     {
       "type": "equipped_slot_empty",

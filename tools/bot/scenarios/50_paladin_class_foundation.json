@@ -45,12 +45,12 @@
     {
       "action": "assert_equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_paladin_sword"
+      "item_def_id": "long_sword"
     },
     {
       "action": "assert_equipped_slot_def",
       "slot": "off_hand",
-      "item_def_id": "starter_paladin_shield"
+      "item_def_id": "shield"
     },
     {
       "action": "move",
@@ -224,12 +224,12 @@
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_paladin_sword"
+      "item_def_id": "long_sword"
     },
     {
       "type": "equipped_slot_def",
       "slot": "off_hand",
-      "item_def_id": "starter_paladin_shield"
+      "item_def_id": "shield"
     },
     {
       "type": "event_seen",

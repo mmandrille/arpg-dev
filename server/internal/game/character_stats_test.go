@@ -181,7 +181,7 @@ func statBreakdownHasItemSource(row StatBreakdownView, itemID string, label stri
 
 func TestStarterStaffAddsMaxManaAndSkillDamage(t *testing.T) {
 	sim := MustNewSim("sess_starter_staff_stats", "01", loadRules(t))
-	staff := addRolledInventoryItem(t, sim, 6420, "starter_sorcerer_staff", map[string]int{
+	staff := addRolledInventoryItem(t, sim, 6420, "sorcerer_staff", map[string]int{
 		"damage_min":           2,
 		"damage_max":           4,
 		"max_mana":             5,

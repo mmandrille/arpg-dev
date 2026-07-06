@@ -496,7 +496,7 @@ def test_load_scenarios_discovers_class_starter_loadout():
 
     assert starter.world_id == "vertical_slice"
     assert starter.character_class == "sorcerer"
-    assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_sorcerer_staff"} in starter.assertions
+    assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "sorcerer_staff"} in starter.assertions
 
 
 def test_load_scenarios_discovers_rogue_class_foundation():
@@ -505,8 +505,8 @@ def test_load_scenarios_discovers_rogue_class_foundation():
 
     assert rogue.world_id == "skill_progression_lab"
     assert rogue.character_class == "rogue"
-    assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_rogue_sword"} in rogue.assertions
-    assert {"type": "equipped_slot_def", "slot": "off_hand", "item_def_id": "starter_rogue_sword"} in rogue.assertions
+    assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "rusty_sword"} in rogue.assertions
+    assert {"type": "equipped_slot_def", "slot": "off_hand", "item_def_id": "rusty_sword"} in rogue.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "dash", "rank": 1} in rogue.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "poison_stab", "rank": 1} in rogue.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "shadow_flurry", "rank": 1} in rogue.assertions
@@ -519,7 +519,7 @@ def test_load_scenarios_discovers_ranger_class_foundation():
 
     assert ranger.world_id == "ranger_showcase_lab"
     assert ranger.character_class == "ranger"
-    assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "starter_ranger_bow"} in ranger.assertions
+    assert {"type": "equipped_slot_def", "slot": "main_hand", "item_def_id": "ranger_shortbow"} in ranger.assertions
     assert {"type": "equipped_slot_empty", "slot": "off_hand"} in ranger.assertions
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "pinning_shot", "rank": 1} in ranger.assertions
     assert {"type": "event_seen", "event_type": "skill_effect_started", "skill_id": "pinning_shot"} in ranger.assertions

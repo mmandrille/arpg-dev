@@ -35,7 +35,7 @@
     {
       "action": "assert_equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_ranger_bow"
+      "item_def_id": "ranger_shortbow"
     },
     {
       "action": "assert_skill_progression",
@@ -107,7 +107,7 @@
     {
       "type": "equipped_slot_def",
       "slot": "main_hand",
-      "item_def_id": "starter_ranger_bow"
+      "item_def_id": "ranger_shortbow"
     },
     {
       "type": "event_seen",

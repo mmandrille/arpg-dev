@@ -139,6 +139,7 @@ client/94_rogue_tier3_visual.json	rogue_tier3_visual	godot_client	extended	contr
 client/95_sorcerer_tier3_visual.json	sorcerer_tier3_visual	godot_client	extended	contract	0	0
 client/96_ranger_tier3_visual.json	ranger_tier3_visual	godot_client	extended	contract	0	0		
 client/97_bone_gear_sockets.json	bone_gear_sockets	godot_client	extended	contract	0	0		
+client/98_wall_occlusion_fade.json	wall_occlusion_fade	godot_client	extended	contract	0	0		
 client/11_combat_feedback.json	client_combat_feedback	godot_client	pack	setup-eliminable	4	4		
 client/12_model_reaction_polish.json	model_reaction_polish	godot_client	pack	contract	0	0		
 client/13_inventory_paper_doll.json	client_inventory_paper_doll	godot_client	extended	contract	0	0		

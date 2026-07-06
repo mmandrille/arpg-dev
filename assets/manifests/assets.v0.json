@@ -32,6 +32,161 @@
         "sha256": "6d9a6b28b7b0c240375ad41e176796d1c639d9d13c51c79ef1834b59d6d9faaf"
       }
     },
+    "character_barbarian_v0": {
+      "type": "character",
+      "source_path": "assets/characters/barbarian/barbarian_mesh.glb",
+      "runtime_path": "client/assets/characters/barbarian/barbarian.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "arm_l",
+        "elbow_l",
+        "hand_l",
+        "arm_r",
+        "elbow_r",
+        "hand_r",
+        "leg_l",
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
+      ],
+      "provenance": {
+        "origin": "base_human fork via tools/assets/class_body_morph.py; re-skinned via tools/assets/rig_canonical_hero.py",
+        "license": "CC0-1.0",
+        "sha256": "b3a3cec984fe04c2c42dcd2e7cb28fd9efa2cb67c4ca9a719162d7fc38ecf022"
+      }
+    },
+    "character_paladin_v0": {
+      "type": "character",
+      "source_path": "assets/characters/paladin/paladin_mesh.glb",
+      "runtime_path": "client/assets/characters/paladin/paladin.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "arm_l",
+        "elbow_l",
+        "hand_l",
+        "arm_r",
+        "elbow_r",
+        "hand_r",
+        "leg_l",
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
+      ],
+      "provenance": {
+        "origin": "base_human fork via tools/assets/class_body_morph.py; re-skinned via tools/assets/rig_canonical_hero.py",
+        "license": "CC0-1.0",
+        "sha256": "2e09dd686a384cfbf747552984b30a9000a6940e85f82d6d6f21527b94aae71b"
+      }
+    },
+    "character_ranger_v0": {
+      "type": "character",
+      "source_path": "assets/characters/ranger/ranger_mesh.glb",
+      "runtime_path": "client/assets/characters/ranger/ranger.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "arm_l",
+        "elbow_l",
+        "hand_l",
+        "arm_r",
+        "elbow_r",
+        "hand_r",
+        "leg_l",
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
+      ],
+      "provenance": {
+        "origin": "base_human fork via tools/assets/class_body_morph.py; re-skinned via tools/assets/rig_canonical_hero.py",
+        "license": "CC0-1.0",
+        "sha256": "bd613c8b894f42b09888d3788d1ef8f5a645829e96a6c1ab1150907e070d8022"
+      }
+    },
+    "character_rogue_v0": {
+      "type": "character",
+      "source_path": "assets/characters/rogue/rogue_mesh.glb",
+      "runtime_path": "client/assets/characters/rogue/rogue.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "arm_l",
+        "elbow_l",
+        "hand_l",
+        "arm_r",
+        "elbow_r",
+        "hand_r",
+        "leg_l",
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
+      ],
+      "provenance": {
+        "origin": "base_human fork via tools/assets/class_body_morph.py; re-skinned via tools/assets/rig_canonical_hero.py",
+        "license": "CC0-1.0",
+        "sha256": "04a06de59c8f199477d72514bff4aa5d16fcbe13b2f4450575a34b7653b419aa"
+      }
+    },
+    "character_sorcerer_v0": {
+      "type": "character",
+      "source_path": "assets/characters/sorcerer/sorcerer_mesh.glb",
+      "runtime_path": "client/assets/characters/sorcerer/sorcerer.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "spine",
+        "chest",
+        "neck",
+        "head",
+        "arm_l",
+        "elbow_l",
+        "hand_l",
+        "arm_r",
+        "elbow_r",
+        "hand_r",
+        "leg_l",
+        "knee_l",
+        "foot_l",
+        "leg_r",
+        "knee_r",
+        "foot_r"
+      ],
+      "provenance": {
+        "origin": "base_human fork via tools/assets/class_body_morph.py; re-skinned via tools/assets/rig_canonical_hero.py",
+        "license": "CC0-1.0",
+        "sha256": "daa830ba41a9de4f5f94a6db1ac257c46c3092d773e0ce76137f8a344383c01f"
+      }
+    },
     "weapon_rusty_sword_v0": {
       "type": "equipment",
       "slot": "main_hand",

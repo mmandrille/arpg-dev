@@ -23,7 +23,7 @@ Last updated: 2026-07-04 (v430 barbarian tier-3 mesh swap)
 
 | Field | Value |
 |-------|-------|
-Last updated: 2026-07-04 (v441 attack animations ranged)
+Last updated: 2026-07-06 (v444 class body forks)
 
 ---
 
@@ -31,8 +31,8 @@ Last updated: 2026-07-04 (v441 attack animations ranged)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v442 — equipped gear fit matrix |
-| **CI gate** | 2026-07-04 — `make ci` green (v442) |
+| **Latest completed slice** | v444 — class body forks |
+| **CI gate** | 2026-07-06 — focused verification green (batch `make ci` pending) |
 | **Next slice** | TBD |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
 | **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |

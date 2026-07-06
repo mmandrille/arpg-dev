@@ -7,7 +7,7 @@ Shared player body mesh — starting point for per-class customization.
 - **Runtime model:** `client/assets/characters/base_human/base_human.glb`
 - **Rig pipeline:** `make gen-assets` → `rig_hero_glbs.py` → `rig_canonical_hero.py`
 - **Manifest:** `character_base_human_v0` in `assets/manifests/assets.v0.json`
-- **Class binding:** `shared/assets/class_presentations.v0.json` — all five player classes use `character_base_human_v0` until class-specific variants exist
+- **Class binding:** `shared/assets/class_presentations.v0.json` — each player class uses its own `character_{class}_v0` fork (v444); `character_base_human_v0` remains fallback for unknown classes
 - **License:** CC0-1.0 (mastjie / Poly Pizza — see manifest provenance)
 
 ## Canonical re-skin (v443)

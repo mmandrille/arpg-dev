@@ -11,6 +11,7 @@ validate-assets: tools ## Validate the asset manifest, runtime .glb paths, and G
 	$(PY) tools/assets/validate_assets.py
 
 gen-assets: tools ## Regenerate committed runtime .glb files (deterministic source-of-truth)
+	$(PY) tools/assets/class_body_morph.py generate
 	$(PY) tools/assets/gen_glb.py
 	$(PY) tools/assets/rig_hero_glbs.py
 	$(PY) tools/assets/rig_monster_glbs.py

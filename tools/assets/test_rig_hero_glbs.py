@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import struct
 
+import pytest
+
 from tools.assets.rig_hero_glbs import HEROES, REQUIRED_BONES, ROOT, parse_glb, rig_glb_bytes
 from tools.assets.validate_assets import parse_glb_skin_joint_names
 
@@ -93,15 +95,23 @@ def test_rig_glb_bytes_rejects_already_skinned_source():
         raise AssertionError("expected already-skinned GLB to be rejected")
 
 
-def test_hero_rig_sources_only_base_human():
-    assert set(HEROES.keys()) == {"base_human"}
+def test_hero_rig_sources_include_all_player_classes():
+    assert set(HEROES.keys()) == {
+        "base_human",
+        "barbarian",
+        "paladin",
+        "ranger",
+        "rogue",
+        "sorcerer",
+    }
     assert HEROES["base_human"] == (
         "assets/characters/base_human/base_human_mesh.glb",
         "client/assets/characters/base_human/base_human.glb",
     )
 
 
-def test_base_human_runtime_glb_has_required_bones():
-    runtime = ROOT / HEROES["base_human"][1]
-    assert runtime.is_file(), f"missing base_human runtime GLB: {runtime}"
+@pytest.mark.parametrize("class_id", ["barbarian", "paladin", "ranger", "rogue", "sorcerer"])
+def test_class_runtime_glb_has_required_bones(class_id: str):
+    runtime = ROOT / HEROES[class_id][1]
+    assert runtime.is_file(), f"missing {class_id} runtime GLB: {runtime}"
     assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)

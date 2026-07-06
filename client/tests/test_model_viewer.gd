@@ -9,17 +9,17 @@ var _fail_count: int = 0
 
 func _initialize() -> void:
 	await _test_catalog_resolves_expected_assets()
-	await _test_viewer_loads_asset("character_base_human_v0")
+	await _test_viewer_loads_asset("character_paladin_v0")
 	await _test_viewer_loads_asset("monster_tiny_flyer_v0")
 	print("[gdtest] PASS: test_model_viewer (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
 
 func _test_catalog_resolves_expected_assets() -> void:
-	var base_human: Dictionary = ViewerScript.resolve("character_base_human_v0")
-	_assert(str(base_human.get("type", "")) == "character", "base_human resolves as character")
-	_assert(str(base_human.get("runtime_path", "")) == "client/assets/characters/base_human/base_human.glb", "base_human runtime path")
-	_assert((base_human.get("used_by", []) as Array).has("paladin"), "base_human used_by includes paladin")
+	var paladin: Dictionary = ViewerScript.resolve("character_paladin_v0")
+	_assert(str(paladin.get("type", "")) == "character", "paladin resolves as character")
+	_assert(str(paladin.get("runtime_path", "")) == "client/assets/characters/paladin/paladin.glb", "paladin runtime path")
+	_assert((paladin.get("used_by", []) as Array).has("paladin"), "paladin used_by includes paladin")
 	var bat: Dictionary = ViewerScript.resolve("monster_tiny_flyer_v0")
 	_assert(str(bat.get("type", "")) == "monster", "bat resolves as monster")
 	_assert(str(bat.get("scene", "")) == "monster_tiny_flyer", "bat scene label")

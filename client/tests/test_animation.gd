@@ -234,7 +234,7 @@ func _test_character_scene() -> void:
 func _test_class_character_models() -> void:
 	for class_id in ["barbarian", "sorcerer", "paladin", "rogue", "ranger"]:
 		var resolved := ClassPresentationsLoaderScript.resolve(class_id)
-		_assert(str(resolved.get("asset_id", "")) == "character_base_human_v0", "%s model asset mismatch: %s" % [class_id, resolved])
+		_assert(str(resolved.get("asset_id", "")) == "character_%s_v0" % class_id, "%s model asset mismatch: %s" % [class_id, resolved])
 		_assert(float(resolved.get("scale", 0.0)) > 0.0, "%s model scale should be positive" % class_id)
 		var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)
 		_assert(packed != null, "%s model packed scene missing" % class_id)

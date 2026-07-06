@@ -41,12 +41,37 @@ HEROES = {
         "assets/characters/base_human/base_human_mesh.glb",
         "client/assets/characters/base_human/base_human.glb",
     ),
+    "barbarian": (
+        "assets/characters/barbarian/barbarian_mesh.glb",
+        "client/assets/characters/barbarian/barbarian.glb",
+    ),
+    "paladin": (
+        "assets/characters/paladin/paladin_mesh.glb",
+        "client/assets/characters/paladin/paladin.glb",
+    ),
+    "ranger": (
+        "assets/characters/ranger/ranger_mesh.glb",
+        "client/assets/characters/ranger/ranger.glb",
+    ),
+    "rogue": (
+        "assets/characters/rogue/rogue_mesh.glb",
+        "client/assets/characters/rogue/rogue.glb",
+    ),
+    "sorcerer": (
+        "assets/characters/sorcerer/sorcerer_mesh.glb",
+        "client/assets/characters/sorcerer/sorcerer.glb",
+    ),
 }
-CANONICAL_RIG_IDS = frozenset({"base_human"})
+CANONICAL_RIG_IDS = frozenset({"base_human", "barbarian", "paladin", "ranger", "rogue", "sorcerer"})
 RANGER_REST_POSE_DEGREES = 82.0
 RANGER_REST_POSE_SHOULDER_RATIO = 0.12
 HERO_TARGET_HEIGHTS: dict[str, float] = {
     "base_human": 1.97,
+    "barbarian": 1.97,
+    "paladin": 1.88,
+    "ranger": 1.82,
+    "rogue": 1.70,
+    "sorcerer": 1.86,
 }
 
 

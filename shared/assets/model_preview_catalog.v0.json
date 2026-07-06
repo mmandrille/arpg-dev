@@ -1,17 +1,57 @@
 {
   "models": [
     {
-      "asset_id": "character_base_human_v0",
+      "asset_id": "character_barbarian_v0",
       "height_offset": 0.0,
-      "runtime_path": "client/assets/characters/base_human/base_human.glb",
+      "runtime_path": "client/assets/characters/barbarian/barbarian.glb",
       "scale": 1.0,
       "scene": "",
       "type": "character",
       "used_by": [
-        "barbarian",
-        "paladin",
-        "ranger",
-        "rogue",
+        "barbarian"
+      ]
+    },
+    {
+      "asset_id": "character_paladin_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/paladin/paladin.glb",
+      "scale": 1.0,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "paladin"
+      ]
+    },
+    {
+      "asset_id": "character_ranger_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/ranger/ranger.glb",
+      "scale": 1.0,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "ranger"
+      ]
+    },
+    {
+      "asset_id": "character_rogue_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/rogue/rogue.glb",
+      "scale": 1.0,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "rogue"
+      ]
+    },
+    {
+      "asset_id": "character_sorcerer_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/sorcerer/sorcerer.glb",
+      "scale": 1.0,
+      "scene": "",
+      "type": "character",
+      "used_by": [
         "sorcerer"
       ]
     },

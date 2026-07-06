@@ -22,6 +22,7 @@ Run via ``make gen-assets`` (or directly) to regenerate the committed runtime
 from __future__ import annotations
 
 import json
+import math
 import struct
 from pathlib import Path
 
@@ -55,6 +56,63 @@ def _cube_geometry() -> tuple[list[tuple[float, float, float]], list[tuple[float
 def _pad(buf: bytearray, alignment: int = 4, fill: int = 0) -> None:
     while len(buf) % alignment != 0:
         buf.append(fill)
+
+
+def _prism_geom(n: int, r_bot: float, r_top: float, h: float):
+    """N-sided frustum centered on Y axis (y: -h/2 to +h/2), flat-shaded faces."""
+    pos, nrm, idx = [], [], []
+    hh = h / 2.0
+    # Side faces: 4n vertices (4 per quad face)
+    for i in range(n):
+        a0 = 2 * math.pi * i / n
+        a1 = 2 * math.pi * (i + 1) / n
+        am = (a0 + a1) / 2.0
+        bl = (r_bot * math.cos(a0), -hh, r_bot * math.sin(a0))
+        br = (r_bot * math.cos(a1), -hh, r_bot * math.sin(a1))
+        tr = (r_top * math.cos(a1),  hh, r_top * math.sin(a1))
+        tl = (r_top * math.cos(a0),  hh, r_top * math.sin(a0))
+        dr = (r_top - r_bot) / h if h else 0.0
+        raw = (math.cos(am), -dr, math.sin(am))
+        nl = math.sqrt(sum(v * v for v in raw))
+        fn = tuple(v / nl for v in raw)
+        b = len(pos)
+        for v in (bl, tl, tr, br):  # CCW from outside → outward normal
+            pos.append(v)
+            nrm.append(fn)
+        idx += [b, b + 1, b + 2, b, b + 2, b + 3]
+    # Bottom cap: 1 center + n edge vertices
+    cy = -hh
+    cn = (0.0, -1.0, 0.0)
+    c_bot = len(pos)
+    pos.append((0.0, cy, 0.0))
+    nrm.append(cn)
+    bot_edges = []
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        bot_edges.append(len(pos))
+        pos.append((r_bot * math.cos(a), cy, r_bot * math.sin(a)))
+        nrm.append(cn)
+    for i in range(n):
+        p0 = bot_edges[i]
+        p1 = bot_edges[(i + 1) % n]
+        idx += [c_bot, p1, p0]  # CW from below = CCW viewed from -y
+    # Top cap: 1 center + n edge vertices
+    cy = hh
+    cn = (0.0, 1.0, 0.0)
+    c_top = len(pos)
+    pos.append((0.0, cy, 0.0))
+    nrm.append(cn)
+    top_edges = []
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        top_edges.append(len(pos))
+        pos.append((r_top * math.cos(a), cy, r_top * math.sin(a)))
+        nrm.append(cn)
+    for i in range(n):
+        p0 = top_edges[i]
+        p1 = top_edges[(i + 1) % n]
+        idx += [c_top, p0, p1]  # CCW viewed from +y
+    return pos, nrm, idx
 
 
 def _build_glb(color: tuple[float, float, float, float], parts: list[dict], empties: list[dict]) -> bytes:
@@ -175,19 +233,27 @@ def _build_skinned_glb(color, joints, parts):
 
     positions, normals, colors0, indices, joints0, weights0 = [], [], [], [], [], []
     for part in parts:
-        if len(part) == 4:
+        if len(part) == 5:
+            joint_idx, (tx, ty, tz), _, part_color, (geom_pos, geom_nrm, geom_idx) = part
+            if part_color is None:
+                part_color = color
+        elif len(part) == 4:
             joint_idx, (tx, ty, tz), (sx, sy, sz), part_color = part
+            geom_pos = [(px * sx, py * sy, pz * sz) for px, py, pz in cube_pos]
+            geom_nrm, geom_idx = cube_nrm, cube_idx
         else:
             joint_idx, (tx, ty, tz), (sx, sy, sz) = part
             part_color = color
+            geom_pos = [(px * sx, py * sy, pz * sz) for px, py, pz in cube_pos]
+            geom_nrm, geom_idx = cube_nrm, cube_idx
         base = len(positions)
-        for (px, py, pz), n in zip(cube_pos, cube_nrm):
-            positions.append((px * sx + tx, py * sy + ty, pz * sz + tz))
+        for (px, py, pz), n in zip(geom_pos, geom_nrm):
+            positions.append((px + tx, py + ty, pz + tz))
             normals.append(n)
             colors0.append(part_color)
             joints0.append((joint_idx, 0, 0, 0))
             weights0.append((1.0, 0.0, 0.0, 0.0))
-        for i in cube_idx:
+        for i in geom_idx:
             indices.append(base + i)
 
     bin_buf = bytearray()

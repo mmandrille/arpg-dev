@@ -26,7 +26,7 @@ import math
 import struct
 from pathlib import Path
 
-from tools.assets.barbarian_mesh import barbarian_parts
+from tools.assets.base_human_mesh import base_human_parts
 from tools.assets.geom_primitives import _smooth_shared_normals
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -345,7 +345,7 @@ def base_humanoid_glb() -> bytes:
 def _full_humanoid_glb(color, parts=None, extra_parts=None, smooth_normals: bool = False) -> bytes:
     """17-bone humanoid — rest pose matches bind pose so bones sit inside mesh.
 
-    Bone local translations match the re-rigged barbarian.glb (arm chain goes
+    Bone local translations match the re-rigged base_human.glb (arm chain goes
     from shoulder downward-inward; foot bones extend past the ankle).  Each
     mesh part is centered at its controlling bone's world position so the
     editor shows bones inside the mesh without any Blender work.
@@ -409,76 +409,13 @@ def _full_humanoid_glb(color, parts=None, extra_parts=None, smooth_normals: bool
     return _build_skinned_glb(color, joints, parts, smooth_normals=smooth_normals)
 
 
-def barbarian_glb() -> bytes:
+def base_human_glb() -> bytes:
     """17-bone low-poly humanoid — anatomy pads, multi-bone weights, smooth normals."""
     return _full_humanoid_glb(
         (0.66, 0.36, 0.25, 1.0),
-        parts=barbarian_parts(),
+        parts=base_human_parts(),
         smooth_normals=True,
     )
-
-
-def sorcerer_glb() -> bytes:
-    """Robe silhouette with a pointed hat."""
-    return _humanoid_glb((0.26, 0.30, 0.70, 1.0), [
-        (1, (0.0, 1.06, 0.0), (0.54, 0.96, 0.36)),   # robe body
-        (1, (0.0, 0.55, 0.0), (0.68, 0.42, 0.40)),   # robe hem
-        (1, (0.0, 1.78, 0.0), (0.30, 0.30, 0.30)),   # head
-        (1, (0.0, 2.08, 0.0), (0.34, 0.34, 0.34)),   # hat brim
-        (1, (0.0, 2.32, 0.0), (0.18, 0.50, 0.18)),   # pointed hat
-        (2, (-0.38, 1.14, 0.0), (0.13, 0.70, 0.14)),
-        (4, (0.38, 1.14, 0.0), (0.13, 0.70, 0.14)),
-        (6, (-0.14, 0.38, 0.0), (0.15, 0.62, 0.15)),
-        (7, (0.14, 0.38, 0.0), (0.15, 0.62, 0.15)),
-    ])
-
-
-def paladin_glb() -> bytes:
-    """Armored but thinner than the barbarian, with a chest cross."""
-    return _humanoid_glb((0.62, 0.58, 0.48, 1.0), [
-        (1, (0.0, 1.15, 0.0), (0.52, 0.82, 0.32)),
-        (1, (0.0, 1.78, 0.0), (0.32, 0.32, 0.32)),
-        (1, (0.0, 1.20, 0.21), (0.08, 0.62, 0.06), (0.96, 0.91, 0.50, 1.0)), # front cross vertical
-        (1, (0.0, 1.34, 0.24), (0.38, 0.08, 0.06), (0.96, 0.91, 0.50, 1.0)), # front cross horizontal
-        (1, (0.0, 1.20, -0.21), (0.08, 0.62, 0.06), (0.96, 0.91, 0.50, 1.0)), # back cross vertical
-        (1, (0.0, 1.34, -0.24), (0.38, 0.08, 0.06), (0.96, 0.91, 0.50, 1.0)), # back cross horizontal
-        (1, (0.31, 1.20, 0.0), (0.06, 0.62, 0.08), (0.96, 0.91, 0.50, 1.0)), # side cross vertical
-        (1, (0.34, 1.34, 0.0), (0.06, 0.08, 0.38), (0.96, 0.91, 0.50, 1.0)), # side cross horizontal
-        (1, (-0.31, 1.20, 0.0), (0.06, 0.62, 0.08), (0.96, 0.91, 0.50, 1.0)), # opposite side cross vertical
-        (1, (-0.34, 1.34, 0.0), (0.06, 0.08, 0.38), (0.96, 0.91, 0.50, 1.0)), # opposite side cross horizontal
-        (2, (-0.43, 1.15, 0.0), (0.17, 0.74, 0.17)),
-        (4, (0.43, 1.15, 0.0), (0.17, 0.74, 0.17)),
-        (6, (-0.17, 0.45, 0.0), (0.19, 0.88, 0.19)),
-        (7, (0.17, 0.45, 0.0), (0.19, 0.88, 0.19)),
-    ])
-
-
-def rogue_glb() -> bytes:
-    """Smaller, thinner dual-wield class silhouette."""
-    return _humanoid_glb((0.24, 0.48, 0.36, 1.0), [
-        (1, (0.0, 1.05, 0.0), (0.42, 0.76, 0.26)),
-        (1, (0.0, 1.63, 0.0), (0.28, 0.28, 0.28)),
-        (1, (0.0, 1.05, 0.18), (0.34, 0.12, 0.05), (0.08, 0.12, 0.10, 1.0)),
-        (2, (-0.34, 1.06, 0.0), (0.12, 0.64, 0.12)),
-        (4, (0.34, 1.06, 0.0), (0.12, 0.64, 0.12)),
-        (6, (-0.13, 0.40, 0.0), (0.15, 0.80, 0.15)),
-        (7, (0.13, 0.40, 0.0), (0.15, 0.80, 0.15)),
-    ])
-
-
-def ranger_glb() -> bytes:
-    """Tall, thin hooded bow class silhouette."""
-    return _humanoid_glb((0.20, 0.50, 0.27, 1.0), [
-        (1, (0.0, 1.16, 0.0), (0.40, 0.92, 0.25)),
-        (1, (0.0, 1.86, 0.0), (0.27, 0.30, 0.27)),
-        (1, (0.0, 1.94, 0.0), (0.42, 0.34, 0.36), (0.07, 0.15, 0.10, 1.0)),
-        (1, (0.0, 1.20, -0.18), (0.36, 0.78, 0.06), (0.09, 0.22, 0.13, 1.0)),
-        (1, (0.0, 1.28, 0.18), (0.30, 0.08, 0.05), (0.74, 0.66, 0.34, 1.0)),
-        (2, (-0.36, 1.18, 0.0), (0.12, 0.78, 0.12)),
-        (4, (0.36, 1.18, 0.0), (0.12, 0.78, 0.12)),
-        (6, (-0.13, 0.46, 0.0), (0.14, 0.92, 0.14)),
-        (7, (0.13, 0.46, 0.0), (0.14, 0.92, 0.14)),
-    ])
 
 
 def monster_dummy_glb() -> bytes:
@@ -552,11 +489,6 @@ def _all_targets() -> dict:
     from tools.assets import gen_glb_equipment
 
     return {
-        # barbarian runtime comes from rig_canonical_hero + goliath_barbarian.glb (see rig_hero_glbs).
-        "client/assets/characters/sorcerer/sorcerer.glb": sorcerer_glb,
-        "client/assets/characters/paladin/paladin.glb": paladin_glb,
-        "client/assets/characters/rogue/rogue.glb": rogue_glb,
-        "client/assets/characters/ranger/ranger.glb": ranger_glb,
         **gen_glb_equipment.EQUIPMENT_TARGETS,
         "client/assets/monsters/dummy/monster_dummy.glb": monster_dummy_glb,
         "client/assets/monsters/skeleton/monster_skeleton.glb": monster_skeleton_glb,

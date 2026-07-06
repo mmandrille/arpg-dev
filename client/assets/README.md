@@ -6,7 +6,7 @@ as `res://assets/foo/bar.glb` — strip `client/`, prepend `res://` (ADR-0006 D6
 
 ```
 client/assets/
-  characters/base_humanoid/base_humanoid.glb
+  characters/base_human/base_human.glb
   equipment/weapons/rusty_sword/rusty_sword.glb
 ```
 

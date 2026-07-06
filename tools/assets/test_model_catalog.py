@@ -18,9 +18,9 @@ def _repo(tmp_path: Path) -> Path:
     _write(root / model_catalog.MANIFEST_REL, {
         "version": 0,
         "assets": {
-            "character_paladin_v0": {
+            "character_base_human_v0": {
                 "type": "character",
-                "runtime_path": "client/assets/characters/paladin/paladin.glb",
+                "runtime_path": "client/assets/characters/base_human/base_human.glb",
                 "format": "glb",
                 "required_nodes": [],
             },
@@ -48,7 +48,7 @@ def _repo(tmp_path: Path) -> Path:
     _write(root / model_catalog.CLASS_PRESENTATIONS_REL, {
         "version": 0,
         "classes": {
-            "paladin": {"model": {"asset_id": "character_paladin_v0", "scale": 10.0}},
+            "paladin": {"model": {"asset_id": "character_base_human_v0", "scale": 10.0}},
         },
     })
     _write(root / model_catalog.MONSTER_VISUALS_REL, {
@@ -91,15 +91,15 @@ def test_catalog_discovers_characters_and_monsters(tmp_path: Path) -> None:
     rows = model_catalog.load_catalog(_repo(tmp_path))
 
     assert [row.asset_id for row in rows] == [
-        "character_paladin_v0",
+        "character_base_human_v0",
         "monster_dummy_v0",
         "monster_tiny_flyer_v0",
     ]
-    paladin = model_catalog.resolve("character_paladin_v0", _repo(tmp_path))
-    assert paladin.asset_type == "character"
-    assert paladin.runtime_path == "client/assets/characters/paladin/paladin.glb"
-    assert paladin.used_by == ("paladin",)
-    assert paladin.scale == 10.0
+    base_human = model_catalog.resolve("character_base_human_v0", _repo(tmp_path))
+    assert base_human.asset_type == "character"
+    assert base_human.runtime_path == "client/assets/characters/base_human/base_human.glb"
+    assert base_human.used_by == ("paladin",)
+    assert base_human.scale == 10.0
 
 
 def test_generated_catalog_round_trips_discovered_rows(tmp_path: Path) -> None:
@@ -108,7 +108,7 @@ def test_generated_catalog_round_trips_discovered_rows(tmp_path: Path) -> None:
 
     assert path == root / model_catalog.GENERATED_CATALOG_REL
     assert [row.asset_id for row in model_catalog.load_generated_catalog(root)] == [
-        "character_paladin_v0",
+        "character_base_human_v0",
         "monster_dummy_v0",
         "monster_tiny_flyer_v0",
     ]

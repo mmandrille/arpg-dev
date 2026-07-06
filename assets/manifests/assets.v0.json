@@ -1,12 +1,12 @@
 {
   "version": 0,
   "assets": {
-    "character_base_humanoid_v0": {
+    "character_base_human_v0": {
       "type": "character",
+      "source_path": "assets/characters/base_human/base_human_mesh.glb",
+      "runtime_path": "client/assets/characters/base_human/base_human.glb",
       "format": "glb",
       "scale_unit": "meters",
-      "source_path": "assets/characters/barbarian/goliath_barbarian.glb",
-      "runtime_path": "client/assets/characters/barbarian/barbarian.glb",
       "required_nodes": [
         "root",
         "spine",
@@ -27,164 +27,9 @@
         "foot_r"
       ],
       "provenance": {
-        "origin": "Redirected to barbarian.glb (shared base humanoid). See character_barbarian_v0 for full provenance.",
+        "origin": "assets/characters/base_human/base_human_mesh.glb re-skinned via tools/assets/rig_canonical_hero.py (canonical 17-bone skeleton + A-pose mesh landmarks + segment weights)",
         "license": "CC0-1.0",
         "sha256": "6d9a6b28b7b0c240375ad41e176796d1c639d9d13c51c79ef1834b59d6d9faaf"
-      }
-    },
-    "character_barbarian_v0": {
-      "type": "character",
-      "source_path": "assets/characters/barbarian/goliath_barbarian.glb",
-      "runtime_path": "client/assets/characters/barbarian/barbarian.glb",
-      "format": "glb",
-      "scale_unit": "meters",
-      "required_nodes": [
-        "root",
-        "spine",
-        "chest",
-        "neck",
-        "head",
-        "arm_l",
-        "elbow_l",
-        "hand_l",
-        "arm_r",
-        "elbow_r",
-        "hand_r",
-        "leg_l",
-        "knee_l",
-        "foot_l",
-        "leg_r",
-        "knee_r",
-        "foot_r"
-      ],
-      "provenance": {
-        "origin": "assets/characters/barbarian/goliath_barbarian.glb re-skinned via tools/assets/rig_canonical_hero.py (canonical 17-bone skeleton + A-pose mesh landmarks + segment weights)",
-        "license": "CC0-1.0",
-        "sha256": "6d9a6b28b7b0c240375ad41e176796d1c639d9d13c51c79ef1834b59d6d9faaf"
-      }
-    },
-    "character_sorcerer_v0": {
-      "type": "character",
-      "source_path": "assets/characters/sorcerer/mage.glb",
-      "runtime_path": "client/assets/characters/sorcerer/sorcerer.glb",
-      "format": "glb",
-      "scale_unit": "meters",
-      "required_nodes": [
-        "root",
-        "spine",
-        "chest",
-        "neck",
-        "head",
-        "arm_l",
-        "elbow_l",
-        "hand_l",
-        "arm_r",
-        "elbow_r",
-        "hand_r",
-        "leg_l",
-        "knee_l",
-        "foot_l",
-        "leg_r",
-        "knee_r",
-        "foot_r"
-      ],
-      "provenance": {
-        "origin": "https://poly.pizza/m/6kY9VaAfPv (Wizard by Polygonal Mind); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/sorcerer/mage_legacy.glb",
-        "license": "CC0-1.0",
-        "sha256": "f1173c1bbc69d4490298f329499a8d7a8a382f6a08713b94e9fdcc14060c98a8"
-      }
-    },
-    "character_paladin_v0": {
-      "type": "character",
-      "source_path": "assets/characters/paladin/knight.glb",
-      "runtime_path": "client/assets/characters/paladin/paladin.glb",
-      "format": "glb",
-      "scale_unit": "meters",
-      "required_nodes": [
-        "root",
-        "spine",
-        "chest",
-        "neck",
-        "head",
-        "arm_l",
-        "elbow_l",
-        "hand_l",
-        "arm_r",
-        "elbow_r",
-        "hand_r",
-        "leg_l",
-        "knee_l",
-        "foot_l",
-        "leg_r",
-        "knee_r",
-        "foot_r"
-      ],
-      "provenance": {
-        "origin": "https://poly.pizza/m/RaWl2GJ0NZ (Warrior by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/paladin/knight_legacy.glb",
-        "license": "CC0-1.0",
-        "sha256": "f151aeedae61325c7c24d59cb16731c4ab4997a7380a584ca8b4228ce237b4ae"
-      }
-    },
-    "character_rogue_v0": {
-      "type": "character",
-      "source_path": "assets/characters/rogue/assasine.glb",
-      "runtime_path": "client/assets/characters/rogue/rogue.glb",
-      "format": "glb",
-      "scale_unit": "meters",
-      "required_nodes": [
-        "root",
-        "spine",
-        "chest",
-        "neck",
-        "head",
-        "arm_l",
-        "elbow_l",
-        "hand_l",
-        "arm_r",
-        "elbow_r",
-        "hand_r",
-        "leg_l",
-        "knee_l",
-        "foot_l",
-        "leg_r",
-        "knee_r",
-        "foot_r"
-      ],
-      "provenance": {
-        "origin": "https://poly.pizza/m/NfMffTkeBa (Female Fighter by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/rogue/assasine_legacy.glb",
-        "license": "CC0-1.0",
-        "sha256": "170e3779ebba893f7b07adc518ec43408f71a797667447dba95ef8df24e1fb55"
-      }
-    },
-    "character_ranger_v0": {
-      "type": "character",
-      "source_path": "assets/characters/ranger/green_hood.glb",
-      "runtime_path": "client/assets/characters/ranger/ranger.glb",
-      "format": "glb",
-      "scale_unit": "meters",
-      "required_nodes": [
-        "root",
-        "spine",
-        "chest",
-        "neck",
-        "head",
-        "arm_l",
-        "elbow_l",
-        "hand_l",
-        "arm_r",
-        "elbow_r",
-        "hand_r",
-        "leg_l",
-        "knee_l",
-        "foot_l",
-        "leg_r",
-        "knee_r",
-        "foot_r"
-      ],
-      "provenance": {
-        "origin": "https://poly.pizza/m/o6i43Vacwc (Warrior by mastjie); rigged by tools/assets/rig_hero_glbs.py. Legacy mesh: assets/characters/ranger/green_hood_legacy.glb",
-        "license": "CC0-1.0",
-        "sha256": "a82b5984dd26a642221aaaa2be0cafa82639903da4123b973135962d162af7f6"
       }
     },
     "weapon_rusty_sword_v0": {

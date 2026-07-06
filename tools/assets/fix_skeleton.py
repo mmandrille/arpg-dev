@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Patch barbarian.glb bone local translations and recompute inverse bind matrices.
+"""Patch base_human.glb bone local translations and recompute inverse bind matrices.
 
 Usage:
   python3 tools/assets/fix_skeleton.py           # apply DEFAULT_DELTAS
@@ -8,9 +8,9 @@ Usage:
 
 NOTE: This script applies ADDITIVE deltas — running it twice doubles the offsets.
       Run with --dry-run first to inspect current bone positions before applying.
-      The committed barbarian.glb already has DEFAULT_DELTAS applied as of v443.
+      The committed base_human.glb already has DEFAULT_DELTAS applied as of v443.
 
-All barbarian bones have identity rotation, so the IBM for each joint is simply:
+All base_human bones have identity rotation, so the IBM for each joint is simply:
   [ 1  0  0  -tx ]
   [ 0  1  0  -ty ]
   [ 0  0  1  -tz ]
@@ -22,7 +22,7 @@ import argparse, json, struct, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-GLB_PATH = ROOT / "client/assets/characters/barbarian/barbarian.glb"
+GLB_PATH = ROOT / "client/assets/characters/base_human/base_human.glb"
 
 # First-iteration deltas: (dx, dy, dz) added to current local_translation.
 # hand_r/l: extend further down the arm (more negative Y).
@@ -127,7 +127,7 @@ def fix_bones(
         struct.pack_into("<16f", bin_data, ibm_byte_offset + slot * 64, *ibm)
 
     if dry_run:
-        print("[dry-run] would write updated barbarian.glb")
+        print("[dry-run] would write updated base_human.glb")
         return
 
     gltf["nodes"] = nodes

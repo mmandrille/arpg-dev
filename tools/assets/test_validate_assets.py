@@ -16,7 +16,7 @@ from tools.assets.validate_assets import Report, validate
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REAL_SCHEMA = REPO_ROOT / "assets/manifests/assets.v0.schema.json"
 
-CHAR_GLB = "client/assets/characters/barbarian/barbarian.glb"
+CHAR_GLB = "client/assets/characters/base_human/base_human.glb"
 STATIC_CHAR_GLB = "client/assets/characters/static_hero/static_hero.glb"
 SWORD_GLB = "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb"
 MONSTER_GLB = "client/assets/monsters/dummy/monster_dummy.glb"
@@ -108,7 +108,7 @@ def default_manifest() -> dict:
     return {
         "version": 0,
         "assets": {
-            "character_base_humanoid_v0": {
+            "character_base_human_v0": {
                 "type": "character",
                 "runtime_path": CHAR_GLB,
                 "format": "glb",
@@ -223,7 +223,7 @@ def test_unknown_asset_id(tmp_path):
 def test_socket_coverage_failure(tmp_path):
     manifest = default_manifest()
     # Drop the weapon mount bone: the mount-bone coverage check must fail.
-    manifest["assets"]["character_base_humanoid_v0"]["required_nodes"] = [
+    manifest["assets"]["character_base_human_v0"]["required_nodes"] = [
         "root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"
     ]
     report = run(build_root(
@@ -283,7 +283,7 @@ def test_glb_required_node_not_a_skin_joint(tmp_path):
 def test_asset_id_wrong_type(tmp_path):
     # Point the weapon visual at the character asset -> type mismatch.
     visuals = default_visuals()
-    visuals["item_visuals"]["rusty_sword"]["asset_id"] = "character_base_humanoid_v0"
+    visuals["item_visuals"]["rusty_sword"]["asset_id"] = "character_base_human_v0"
     report = run(build_root(tmp_path, visuals=visuals))
     assert any("asset_id type" in f for f in report.failures)
 
@@ -325,7 +325,7 @@ def test_monster_visual_wrong_asset_type(tmp_path):
 
 def test_required_node_not_a_skin_joint_fails(tmp_path):
     manifest = default_manifest()
-    manifest["assets"]["character_base_humanoid_v0"]["required_nodes"] = ["not_a_joint"]
+    manifest["assets"]["character_base_human_v0"]["required_nodes"] = ["not_a_joint"]
     root = build_root(tmp_path, manifest=manifest, char_nodes=["root", "hand_r"])
     report = run(root)
     assert any("not skin joints" in f or "not_a_joint" in f for f in report.failures)

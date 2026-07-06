@@ -2,23 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://8cuja8xpx1jy"
-path="res://.godot/imported/ranger_2.png-77062a38541acc6c808f2210b456ff36.ctex"
+uid="uid://bub8ddilbxrid"
+path.s3tc="res://.godot/imported/base_human_0.png-ae0a07e8dd5649690f08b85ca958cc69.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "7922466727cdaefa2f99a54579b39bcc"
+"md5": "3c398ea11545a87982aaf1e7e6fef8b2"
 }
 
 [deps]
 
-source_file="res://assets/characters/ranger/ranger_2.png"
-dest_files=["res://.godot/imported/ranger_2.png-77062a38541acc6c808f2210b456ff36.ctex"]
+source_file="res://assets/characters/base_human/base_human_0.png"
+dest_files=["res://.godot/imported/base_human_0.png-ae0a07e8dd5649690f08b85ca958cc69.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

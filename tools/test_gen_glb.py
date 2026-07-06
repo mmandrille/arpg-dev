@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tools.assets.geom_primitives import _prism_between, _prism_ellipse_geom, _prism_geom
-from tools.assets.gen_glb import _build_skinned_glb, barbarian_glb
+from tools.assets.gen_glb import _build_skinned_glb, base_human_glb
 
 
 def test_prism_geom_vertex_count():
@@ -38,8 +38,8 @@ def test_prism_geom_side_normals_outward():
         assert dot_xz > 0.0, f"side normal points inward at vert {i}: pos={pos[i]}, nrm={nrm[i]}"
 
 
-def test_barbarian_glb_is_valid_gltf():
-    data = barbarian_glb()
+def test_base_human_glb_is_valid_gltf():
+    data = base_human_glb()
     assert data[:4] == b"glTF"
     assert len(data) > 10_000
 

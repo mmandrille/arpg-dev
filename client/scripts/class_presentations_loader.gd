@@ -1,7 +1,7 @@
 class_name ClassPresentationsLoader
 extends RefCounted
 
-const FALLBACK_ASSET_ID := "character_base_humanoid_v0"
+const FALLBACK_ASSET_ID := "character_base_human_v0"
 
 static var _loaded: bool = false
 static var _classes: Dictionary = {}
@@ -36,7 +36,7 @@ static func resolve(class_id: String) -> Dictionary:
 	if str(asset.get("type", "")) != "character":
 		asset_id = FALLBACK_ASSET_ID
 		asset = _manifest_assets.get(asset_id, {})
-	var runtime_path := str(asset.get("runtime_path", "client/assets/characters/barbarian/barbarian.glb"))
+	var runtime_path := str(asset.get("runtime_path", "client/assets/characters/base_human/base_human.glb"))
 	return {
 		"class_id": class_id,
 		"asset_id": asset_id,
@@ -62,7 +62,7 @@ static func packed_scene_for_class(class_id: String) -> PackedScene:
 		var packed := load(scene_path) as PackedScene
 		if packed != null:
 			return packed
-	var fallback_path := _res_path("client/assets/characters/barbarian/barbarian.glb")
+	var fallback_path := _res_path("client/assets/characters/base_human/base_human.glb")
 	return load(fallback_path) as PackedScene
 
 

@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tools.assets.gen_glb import barbarian_glb
+from tools.assets.gen_glb import base_human_glb
 from tools.assets.skin_blend import blend_lateral, blend_segment, blend_segment_triple, blend_shoulder
 
 
@@ -49,8 +49,8 @@ def test_blend_shoulder_back_adds_spine():
     assert abs(sum(w_back) - 1.0) < 1e-6
 
 
-def test_barbarian_glb_has_triple_weights():
-    data = barbarian_glb()
+def test_base_human_glb_has_triple_weights():
+    data = base_human_glb()
     import json
     import struct
     jlen = struct.unpack_from("<I", data, 12)[0]
@@ -68,8 +68,8 @@ def test_barbarian_glb_has_triple_weights():
     assert triple > 50, f"expected triple-weight verts, got {triple}"
 
 
-def test_barbarian_smooth_normals_are_unit_length():
-    data = barbarian_glb()
+def test_base_human_smooth_normals_are_unit_length():
+    data = base_human_glb()
     import json
     import math
     import struct
@@ -86,8 +86,8 @@ def test_barbarian_smooth_normals_are_unit_length():
         assert abs(length - 1.0) < 1e-4, f"normal not unit at {i}: {length}"
 
 
-def test_barbarian_glb_has_dual_weights():
-    data = barbarian_glb()
+def test_base_human_glb_has_dual_weights():
+    data = base_human_glb()
     jlen = struct.unpack_from("<I", data, 12)[0]
     blen = struct.unpack_from("<I", data, 20 + jlen)[0]
     bin_start = 20 + jlen + 8

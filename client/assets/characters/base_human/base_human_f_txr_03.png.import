@@ -2,23 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7fm7i03q4k06"
-path="res://.godot/imported/rogue_0.png-c68c98227c7f7c874d0e4335f0419f02.ctex"
+uid="uid://7wwcw2c6hkfy"
+path.s3tc="res://.godot/imported/base_human_f_txr_03.png-df2a85ab897fe258a9ddaf89dab1f3ea.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "d60d90a52973534f5cb6959f12c2b711"
+"md5": "c1c4e3998ec9d210b4a5175961aa1501"
 }
 
 [deps]
 
-source_file="res://assets/characters/rogue/rogue_0.png"
-dest_files=["res://.godot/imported/rogue_0.png-c68c98227c7f7c874d0e4335f0419f02.ctex"]
+source_file="res://assets/characters/base_human/base_human_f_txr_03.png"
+dest_files=["res://.godot/imported/base_human_f_txr_03.png-df2a85ab897fe258a9ddaf89dab1f3ea.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

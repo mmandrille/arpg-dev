@@ -38,7 +38,7 @@ def test_vertex_weights_arm_segment_is_dual():
 
 
 def test_rig_glb_canonical_bytes_adds_skin(tmp_path):
-    out = rig_glb_canonical_bytes(_minimal_static_glb(), hero_id="barbarian")
+    out = rig_glb_canonical_bytes(_minimal_static_glb(), hero_id="base_human")
     parsed = parse_glb(out)
     assert [parsed.gltf["nodes"][i]["name"] for i in parsed.gltf["skins"][0]["joints"]] == REQUIRED_BONES
     primitive = parsed.gltf["meshes"][0]["primitives"][0]
@@ -49,13 +49,13 @@ def test_rig_glb_canonical_bytes_adds_skin(tmp_path):
     assert parse_glb_skin_joint_names(rigged_path) == set(REQUIRED_BONES)
 
 
-def test_barbarian_landmark_hands_near_mesh_extents():
+def test_base_human_landmark_hands_near_mesh_extents():
     from pathlib import Path
     import statistics
 
     from tools.assets.rig_hero_glbs import _bounds, _normalize_mesh_height, parse_glb, read_position_accessor
 
-    data = Path("assets/characters/barbarian/goliath_barbarian.glb").read_bytes()
+    data = Path("assets/characters/base_human/base_human_mesh.glb").read_bytes()
     parsed = parse_glb(data)
     bin_buf = bytearray(parsed.bin_blob)
     pos_by: dict[int, list[tuple[float, float, float]]] = {}
@@ -79,10 +79,10 @@ def test_barbarian_landmark_hands_near_mesh_extents():
     assert dist < 0.12, f"hand_r joint too far from mesh hand cluster: {dist:.3f}"
 
 
-def test_barbarian_canonical_rig_has_dual_weights():
-    source = ROOT / "assets/characters/barbarian/goliath_barbarian.glb"
+def test_base_human_canonical_rig_has_dual_weights():
+    source = ROOT / "assets/characters/base_human/base_human_mesh.glb"
     assert source.is_file()
-    out = rig_glb_canonical_bytes(source.read_bytes(), hero_id="barbarian")
+    out = rig_glb_canonical_bytes(source.read_bytes(), hero_id="base_human")
     parsed = parse_glb(out)
     bin_buf = parsed.bin_blob
     w_acc = parsed.gltf["accessors"][

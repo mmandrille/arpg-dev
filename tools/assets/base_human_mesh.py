@@ -1,4 +1,4 @@
-"""Procedural barbarian body mesh — parts list for _full_humanoid_glb."""
+"""Procedural base_human body mesh — parts list for _full_humanoid_glb."""
 from __future__ import annotations
 
 from tools.assets.geom_primitives import (
@@ -362,8 +362,8 @@ def _leg_chain(leg_bone: int, knee_bone: int, foot_bone: int,
     ]
 
 
-def barbarian_parts() -> list:
-    """All skinned mesh parts for the procedural barbarian."""
+def base_human_parts() -> list:
+    """All skinned mesh parts for the procedural base_human."""
     n_body = 16
     parts = (
         _torso_stack(n_body)

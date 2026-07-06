@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import struct
 
-from tools.assets.rig_hero_glbs import HEROES, REQUIRED_BONES, ROOT, parse_glb, read_position_accessor, rig_glb_bytes
+from tools.assets.rig_hero_glbs import HEROES, REQUIRED_BONES, ROOT, parse_glb, rig_glb_bytes
 from tools.assets.validate_assets import parse_glb_skin_joint_names
 
 
@@ -93,58 +93,15 @@ def test_rig_glb_bytes_rejects_already_skinned_source():
         raise AssertionError("expected already-skinned GLB to be rejected")
 
 
-def test_ranger_runtime_glb_skips_vertex_rest_pose_bake():
-    """Tier-3 ranger meshes must not pre-bend vertices; shared anims rotate bones instead."""
-    out = rig_glb_bytes(
-        _minimal_static_glb([
-            (-10.0, 7.5, 0.0),
-            (10.0, 7.5, 0.0),
-            (0.0, 0.0, 0.0),
-            (0.0, 10.0, 0.0),
-        ]),
-        hero_id="ranger",
-    )
-    parsed = parse_glb(out)
-    accessor = parsed.gltf["meshes"][0]["primitives"][0]["attributes"]["POSITION"]
-    positions = read_position_accessor(parsed.gltf, parsed.bin_blob, accessor)
-    left, right = positions[0], positions[1]
-    assert abs(left[1] - right[1]) < 1e-5, "arms must stay level (no vertex rest-pose fold)"
-    assert abs(left[0] + right[0]) < 1e-5, "arms must stay symmetric after rig scale"
-
-
-def test_hero_rig_sources_include_all_class_models():
-    assert set(HEROES.keys()) == {"barbarian", "paladin", "rogue", "ranger", "sorcerer"}
-    assert HEROES["barbarian"] == (
-        "assets/characters/barbarian/goliath_barbarian.glb",
-        "client/assets/characters/barbarian/barbarian.glb",
+def test_hero_rig_sources_only_base_human():
+    assert set(HEROES.keys()) == {"base_human"}
+    assert HEROES["base_human"] == (
+        "assets/characters/base_human/base_human_mesh.glb",
+        "client/assets/characters/base_human/base_human.glb",
     )
 
 
-def test_paladin_runtime_glb_has_required_bones():
-    runtime = ROOT / HEROES["paladin"][1]
-    assert runtime.is_file(), f"missing rigged paladin runtime GLB: {runtime}"
-    assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)
-
-
-def test_barbarian_runtime_glb_has_required_bones():
-    runtime = ROOT / HEROES["barbarian"][1]
-    assert runtime.is_file(), f"missing barbarian runtime GLB: {runtime}"
-    assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)
-
-
-def test_rogue_runtime_glb_has_required_bones():
-    runtime = ROOT / HEROES["rogue"][1]
-    assert runtime.is_file(), f"missing rigged rogue runtime GLB: {runtime}"
-    assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)
-
-
-def test_sorcerer_runtime_glb_has_required_bones():
-    runtime = ROOT / HEROES["sorcerer"][1]
-    assert runtime.is_file(), f"missing rigged sorcerer runtime GLB: {runtime}"
-    assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)
-
-
-def test_ranger_runtime_glb_has_required_bones():
-    runtime = ROOT / HEROES["ranger"][1]
-    assert runtime.is_file(), f"missing rigged ranger runtime GLB: {runtime}"
+def test_base_human_runtime_glb_has_required_bones():
+    runtime = ROOT / HEROES["base_human"][1]
+    assert runtime.is_file(), f"missing base_human runtime GLB: {runtime}"
     assert parse_glb_skin_joint_names(runtime) == set(REQUIRED_BONES)

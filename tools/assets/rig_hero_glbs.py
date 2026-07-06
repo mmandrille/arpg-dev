@@ -37,36 +37,16 @@ REQUIRED_BONES = [
 ]
 
 HEROES = {
-    "barbarian": (
-        "assets/characters/barbarian/goliath_barbarian.glb",
-        "client/assets/characters/barbarian/barbarian.glb",
-    ),
-    "paladin": (
-        "assets/characters/paladin/knight.glb",
-        "client/assets/characters/paladin/paladin.glb",
-    ),
-    "rogue": (
-        "assets/characters/rogue/assasine.glb",
-        "client/assets/characters/rogue/rogue.glb",
-    ),
-    "ranger": (
-        "assets/characters/ranger/green_hood.glb",
-        "client/assets/characters/ranger/ranger.glb",
-    ),
-    "sorcerer": (
-        "assets/characters/sorcerer/mage.glb",
-        "client/assets/characters/sorcerer/sorcerer.glb",
+    "base_human": (
+        "assets/characters/base_human/base_human_mesh.glb",
+        "client/assets/characters/base_human/base_human.glb",
     ),
 }
-CANONICAL_RIG_IDS = frozenset({"barbarian"})
+CANONICAL_RIG_IDS = frozenset({"base_human"})
 RANGER_REST_POSE_DEGREES = 82.0
 RANGER_REST_POSE_SHOULDER_RATIO = 0.12
 HERO_TARGET_HEIGHTS: dict[str, float] = {
-    "barbarian": 1.97,
-    "paladin": 1.85,
-    "rogue": 1.70,
-    "ranger": 1.82,
-    "sorcerer": 1.80,
+    "base_human": 1.97,
 }
 
 

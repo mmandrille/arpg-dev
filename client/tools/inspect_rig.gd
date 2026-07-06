@@ -1,7 +1,7 @@
 extends SceneTree
 # Rig gate (spec §10): confirm both rigged GLBs import as real skinned scenes.
 func _initialize() -> void:
-	_check("res://assets/characters/barbarian/barbarian.glb", [
+	_check("res://assets/characters/base_human/base_human.glb", [
 		"root", "spine", "chest", "neck", "head",
 		"arm_l", "elbow_l", "hand_l",
 		"arm_r", "elbow_r", "hand_r",

@@ -1088,15 +1088,10 @@ func appendMoveToAndAdvanceReplay(
 	pos game.Vec2,
 ) int64 {
 	t.Helper()
-	player := entityByID(sim.SnapshotForPlayer(actorID), fmt.Sprintf("%d", actorID))
-	goal := pos
-	if player != nil {
-		goal = replayApproachPosition(player.Position, pos, replayInteractableReach(rules))
-	}
 	tick = appendInputAndAdvanceReplay(t, sim, rows, events, tick, sequence, game.Input{
 		ActorPlayerID: actorID,
 		Type:          "move_to_intent",
-		MoveTo:        &game.MoveToIntent{Position: goal},
+		MoveTo:        &game.MoveToIntent{Position: pos},
 	})
 	for guard := 0; guard < 2000; guard++ {
 		player := entityByID(sim.SnapshotForPlayer(actorID), fmt.Sprintf("%d", actorID))
@@ -1109,18 +1104,6 @@ func appendMoveToAndAdvanceReplay(
 	}
 	t.Fatalf("player %d did not reach %+v", actorID, pos)
 	return tick
-}
-
-func replayApproachPosition(from, target game.Vec2, stop float64) game.Vec2 {
-	dx := target.X - from.X
-	dy := target.Y - from.Y
-	dist := math.Hypot(dx, dy)
-	if dist <= stop+0.001 {
-		return target
-	}
-	scale := (dist - stop) / dist
-
-	return game.Vec2{X: from.X + dx*scale, Y: from.Y + dy*scale}
 }
 
 func replayInteractableReach(rules *game.Rules) float64 {

@@ -949,11 +949,14 @@ func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out g
 
 func validateGeneratedDungeonReachability(rules DungeonGenerationRules, out generatedDungeonLevel) error {
 	start := generatedReachabilityStart(rules, out)
+	nav := generatedDungeonNavigation(rules)
+	blockedGrid := buildDungeonBlockedGrid(nav, out)
 	for _, target := range generatedReachabilityTargets(out) {
-		if !generatedTargetReachableFrom(rules, out, start, target.pos) {
+		if !generatedTargetReachableFromNav(nav, blockedGrid.blocked, start, target.pos) {
 			return fmt.Errorf("game: generate dungeon level %d: %s at %.2f,%.2f is unreachable", out.levelNum, target.kind, target.pos.X, target.pos.Y)
 		}
 	}
+
 	return nil
 }
 
@@ -998,17 +1001,28 @@ func generatedReachabilityStart(rules DungeonGenerationRules, out generatedDunge
 }
 
 func generatedTargetReachable(rules DungeonGenerationRules, out generatedDungeonLevel, target Vec2) bool {
-	return generatedTargetReachableFrom(rules, out, generatedReachabilityStart(rules, out), target)
+	nav := generatedDungeonNavigation(rules)
+	blockedGrid := buildDungeonBlockedGrid(nav, out)
+
+	return generatedTargetReachableFromNav(nav, blockedGrid.blocked, generatedReachabilityStart(rules, out), target)
 }
 
 func generatedTargetReachableFrom(rules DungeonGenerationRules, out generatedDungeonLevel, start, target Vec2) bool {
+	nav := generatedDungeonNavigation(rules)
+	blockedGrid := buildDungeonBlockedGrid(nav, out)
+
+	return generatedTargetReachableFromNav(nav, blockedGrid.blocked, start, target)
+}
+
+func generatedTargetReachableFromNav(nav NavigationRules, blocked func(gx, gy int) bool, start, target Vec2) bool {
 	if distance(start, target) <= playerRadius {
 		return true
 	}
-	nav := generatedDungeonNavigation(rules)
-	blocked := generatedDungeonBlockedFn(nav, out)
-	_, ok := PlanPath(nav, start, target, blocked)
-	return ok
+	nodeLimit := dungeonReachabilityNodeLimit(nav, start, target)
+	stats := PathSearchStats{NodeLimit: nodeLimit}
+	_, ok := PlanPathWithStats(nav, start, target, blocked, &stats)
+
+	return ok && !stats.LimitExceeded
 }
 
 func generatedDungeonNavigation(rules DungeonGenerationRules) NavigationRules {

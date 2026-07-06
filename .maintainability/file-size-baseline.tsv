@@ -35,4 +35,4 @@ client/scripts/showme/visual_capture.gd	1078	# v443: skeleton dim-mesh fix added
 tools/bot/run.py	4370	# v406: protocol bot force_bishop_loot action
 tools/bot/test_protocol.py	1434
 tools/assets/rig_hero_glbs.py	686	# v434: 17-bone hero rig; GLB parse/weight/IBM pipeline tightly coupled to mesh mutation state
-tools/validate_shared.py	3127	# pre-v414 drift: weapon family stat scaling cross-checks; extraction deferred
+tools/validate_shared.py	3156	# pre-v414 drift: weapon family stat scaling cross-checks; extraction deferred

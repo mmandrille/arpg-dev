@@ -185,21 +185,8 @@ def equipment_shield_glb() -> bytes:
     return _build_glb(color, parts)
 
 
+# Poly Pizza imports are owned by tools/assets/import_equipment_glb.py — do not regenerate here.
 EQUIPMENT_TARGETS = {
-    "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb": rusty_sword_glb,
-    "client/assets/equipment/weapons/long_sword/long_sword.glb": long_sword_glb,
-    "client/assets/equipment/weapons/rapier/rapier.glb": rapier_glb,
-    "client/assets/equipment/weapons/training_bow/training_bow.glb": training_bow_glb,
-    "client/assets/equipment/weapons/starter_staff/starter_staff.glb": starter_staff_glb,
-    "client/assets/equipment/weapons/starter_axe/starter_axe.glb": starter_axe_glb,
-    "client/assets/equipment/armor/helm/helm.glb": equipment_helm_glb,
-    "client/assets/equipment/armor/chest/chest.glb": equipment_chest_glb,
-    "client/assets/equipment/armor/gloves/gloves.glb": equipment_gloves_glb,
-    "client/assets/equipment/armor/boots/boots.glb": equipment_boots_glb,
     "client/assets/equipment/armor/belt/belt.glb": equipment_belt_glb,
-    "client/assets/equipment/armor/amulet/amulet.glb": equipment_amulet_glb,
-    "client/assets/equipment/armor/ring/ring.glb": equipment_ring_glb,
     "client/assets/equipment/armor/shield/shield.glb": equipment_shield_glb,
-    "client/assets/equipment/armor/shield/kite_shield.glb": equipment_shield_kite_glb,
-    "client/assets/equipment/armor/shield/tower_shield.glb": equipment_shield_tower_glb,
 }

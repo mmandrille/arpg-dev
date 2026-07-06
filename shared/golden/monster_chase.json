@@ -9,7 +9,7 @@
     "path_planning_horizon_seconds": 3.0,
     "player_max_auto_steps": 30,
     "player_path_nodes_per_search": 480,
-    "player_path_nodes_per_tick": 8192,
+    "player_path_nodes_per_tick": 24576,
     "grid_bounds": {
       "min_x": -2,
       "min_y": -2,

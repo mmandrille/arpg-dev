@@ -2,7 +2,7 @@
   "id": "dungeon_wall_rendering",
   "runner": "godot_client",
   "world_id": "generated_wall_lab",
-  "seed": "v40_obstacles",
+  "seed": "wall_seed_00",
   "title": "Dungeon wall rendering",
   "description": "Client applies authoritative generated dungeon wall layouts from snapshots and level-transition deltas.",
   "client_steps": [

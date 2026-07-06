@@ -1,0 +1,21 @@
+tools/test_gen_glb.py
+  s_8dad5e42f3aa31::t_d49d73618303f0 44-55
+tools/assets/gen_glb.py
+  s_8dad5e42f3aa31::t_76524e065f310b 61-68,89-93,95-107,109-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a7da435be031e6598a97322d47dd2af1335d0bab",
+  "prompts": {},
+  "sessions": {
+    "s_8dad5e42f3aa31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b804852f-a5da-4344-9edd-30dbd9489055",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

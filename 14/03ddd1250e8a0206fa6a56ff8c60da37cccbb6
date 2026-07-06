@@ -1,0 +1,48 @@
+docs/CODEMAP.md
+  s_20b395b12292fb::t_05e9409c524f5d 29
+tools/assets/rig_hero_glbs.py
+  s_20b395b12292fb::t_0c931a6e310f54 674-681
+  s_20b395b12292fb::t_a513893569c2db 61
+  s_20b395b12292fb::t_409aba1bb407b3 40-43
+tools/assets/gen_glb.py
+  s_20b395b12292fb::t_725fe1062ab29e 555
+tools/assets/canonical_skeleton.py
+  s_20b395b12292fb::t_c47ebd0bf1c8f7 5
+  s_20b395b12292fb::t_5c4a75065de370 133-200
+  s_20b395b12292fb::t_1e172d2f229531 1-4,6-132
+tools/assets/rig_canonical_hero.py
+  s_20b395b12292fb::t_4f325e6a818b18 55-56
+  s_20b395b12292fb::t_c61ac852da68bf 1-6,8-54,57-131
+  s_20b395b12292fb::t_e39847e0fba564 7
+tools/assets/test_rig_canonical_hero.py
+  s_20b395b12292fb::t_8abb313047955e 8
+  s_20b395b12292fb::t_a70e4ae833c316 52-81
+  s_20b395b12292fb::t_cc397fc6c10ead 1-2,4-5,7,9-51,82-98
+  s_20b395b12292fb::t_1826507dd853d2 3,6
+tools/assets/test_rig_hero_glbs.py
+  s_20b395b12292fb::t_c23614d4aaee6a 116-119
+  s_20b395b12292fb::t_f03b237cd39567 130
+assets/characters/barbarian/README.md
+  s_20b395b12292fb::t_13bcc3ea316d3a 8,13-43,49,54-56,61-62
+assets/manifests/assets.v0.json
+  s_20b395b12292fb::t_43eaee80cf1235 61
+  s_20b395b12292fb::t_c4b2ed5f45b140 32,63
+docs/as-built/v443_barbarian-canonical-reskin.md
+  s_20b395b12292fb::t_554096e535211c 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1403ddd1250e8a0206fa6a56ff8c60da37cccbb6",
+  "prompts": {},
+  "sessions": {
+    "s_20b395b12292fb": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6c771dc4-7cfd-462a-8e73-79331333fce3",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -380,7 +380,7 @@ def base_humanoid_glb() -> bytes:
     ])
 
 
-def _full_humanoid_glb(color, extra_parts=None) -> bytes:
+def _full_humanoid_glb(color, parts=None, extra_parts=None) -> bytes:
     """17-bone humanoid — rest pose matches bind pose so bones sit inside mesh.
 
     Bone local translations match the re-rigged barbarian.glb (arm chain goes
@@ -415,7 +415,7 @@ def _full_humanoid_glb(color, extra_parts=None) -> bytes:
         ("knee_r",      14, ( 0.0,    -0.394,   0.0   )),   # 15 world ( 0.155, 0.493, 0.159)
         ("foot_r",      15, ( 0.077,  -0.454,  -0.054 )),   # 16 world ( 0.232, 0.039, 0.105)
     ]
-    parts = [
+    _default_parts = [
         # head
         ( 4, ( 0.000,  1.762,  0.159), (0.26, 0.28, 0.26)),
         # torso: upper (chest) + lower (spine)
@@ -440,14 +440,43 @@ def _full_humanoid_glb(color, extra_parts=None) -> bytes:
         (12, (-0.194,  0.266,  0.132), (0.10, 0.46, 0.10)),
         (13, (-0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),
     ]
+    if parts is None:
+        parts = _default_parts
     if extra_parts:
         parts = list(parts) + list(extra_parts)
     return _build_skinned_glb(color, joints, parts)
 
 
 def barbarian_glb() -> bytes:
-    """17-bone humanoid base — each mesh segment weighted to its bone."""
-    return _full_humanoid_glb((0.66, 0.36, 0.25, 1.0))
+    """17-bone low-poly humanoid — frustum segments weighted to each bone."""
+    skin = (0.66, 0.36, 0.25, 1.0)
+    parts = [
+        # head (bone 4)
+        ( 4, ( 0.000,  1.762,  0.159), None, skin, _prism_geom(8, 0.13, 0.13, 0.28)),
+        # upper torso (bone 2): wide at shoulders, narrow at waist
+        ( 2, ( 0.000,  1.507,  0.159), None, skin, _prism_geom(8, 0.19, 0.23, 0.33)),
+        # lower torso (bone 1)
+        ( 1, ( 0.000,  1.236,  0.159), None, skin, _prism_geom(8, 0.17, 0.19, 0.32)),
+        # hips (bone 1)
+        ( 1, ( 0.000,  0.980,  0.159), None, skin, _prism_geom(8, 0.15, 0.17, 0.18)),
+        # right arm: upper (bone 8), forearm (bone 9), hand box (bone 10)
+        ( 8, ( 0.316,  1.285,  0.035), None, skin, _prism_geom(6, 0.045, 0.055, 0.32)),
+        ( 9, ( 0.252,  1.004,  0.044), None, skin, _prism_geom(6, 0.036, 0.045, 0.26)),
+        (10, ( 0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),
+        # left arm: upper (bone 5), forearm (bone 6), hand box (bone 7)
+        ( 5, (-0.316,  1.285,  0.035), None, skin, _prism_geom(6, 0.045, 0.055, 0.32)),
+        ( 6, (-0.252,  1.004,  0.044), None, skin, _prism_geom(6, 0.036, 0.045, 0.26)),
+        ( 7, (-0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),
+        # right leg: thigh (bone 14), shin (bone 15), foot box (bone 16)
+        (14, ( 0.155,  0.690,  0.159), None, skin, _prism_geom(6, 0.062, 0.075, 0.40)),
+        (15, ( 0.194,  0.266,  0.132), None, skin, _prism_geom(6, 0.048, 0.062, 0.46)),
+        (16, ( 0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),
+        # left leg: thigh (bone 11), shin (bone 12), foot box (bone 13)
+        (11, (-0.155,  0.690,  0.159), None, skin, _prism_geom(6, 0.062, 0.075, 0.40)),
+        (12, (-0.194,  0.266,  0.132), None, skin, _prism_geom(6, 0.048, 0.062, 0.46)),
+        (13, (-0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),
+    ]
+    return _full_humanoid_glb(skin, parts=parts)
 
 
 def sorcerer_glb() -> bytes:

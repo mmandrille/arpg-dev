@@ -1,0 +1,49 @@
+client/scripts/character_visual.gd
+  s_70664371392708::t_94077bdd89cc3c 39,44
+shared/assets/item_visuals.v0.json
+  h_e5f15a920467af 186-188,191-192,196-198,208-209,213,253,258,540,562,567
+client/scripts/class_presentations_loader.gd
+  s_70664371392708::t_1617c53439b315 11-14
+client/scripts/gear_sockets_loader.gd
+  s_70664371392708::t_fc5e931e513963 9-12
+client/scripts/equipment_display_loader.gd
+  s_70664371392708::t_96df4f7d341585 9-12
+client/scripts/equipment_visuals.gd
+  s_70664371392708::t_d019218da6a722 491-494
+  s_70664371392708::t_ec010d9c6aa0ad 486-490
+client/scripts/showme/visual_capture.gd
+  s_70664371392708::t_f2c6e134b23093 239-244
+  s_70664371392708::t_f190c60a6768bc 207
+  s_70664371392708::t_fdbdb30bd401e1 57-62
+  s_70664371392708::t_ce0f54628f0302 26-28
+  s_70664371392708::t_a5b9f23ac7f89d 161-162,165-205,208-212
+  s_70664371392708::t_cbe8991ea23360 206
+  s_70664371392708::t_aa8aff8a3fdc97 141-144
+  s_70664371392708::t_2189677aa48ce4 301-302
+client/scripts/item_rules_loader.gd
+  s_70664371392708::t_6642e904b98b69 24-27
+skills/showme/scripts/render_focus.py
+  s_70664371392708::t_a7a245f4ba27d8 125-128
+  s_70664371392708::t_af56f54b7deae7 35-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "36c9ade64ed093f2e7ce281621a6b3f1f536b2c4",
+  "prompts": {},
+  "humans": {
+    "h_e5f15a920467af": {
+      "author": "mmandrille <mmandrille@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_70664371392708": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "15a832e5-eee2-454f-b049-feb7344f577c",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

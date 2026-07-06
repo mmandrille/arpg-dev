@@ -16,6 +16,7 @@ const MainScript := preload("res://scripts/main.gd")
 const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
+const ClassBodyTintScript := preload("res://scripts/class_body_tint.gd")
 const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
 const ShowmeSkeletonCaptureScript := preload("res://scripts/showme/showme_skeleton_capture.gd")
 const ShowmeSkillIconCaptureScript := preload("res://scripts/showme/showme_skill_icon_capture.gd")
@@ -263,6 +264,7 @@ func _apply_class_model(character: Node3D, class_id: String) -> void:
 		character.set("class_id", class_id)
 	if character.has_method("_ensure_weapon_socket"):
 		character.call("_ensure_weapon_socket")
+	ClassBodyTintScript.apply_to_model(model, class_id)
 
 
 func _setup_inventory() -> void:

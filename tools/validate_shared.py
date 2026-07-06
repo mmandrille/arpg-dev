@@ -579,6 +579,14 @@ def cross_checks(report: Report) -> None:
         report.fail("class_presentations model assets", f"must resolve to character assets: {bad_class_models}")
     else:
         report.ok("class presentation model assets resolve")
+    missing_body_tints = [
+        class_id for class_id, presentation in sorted(class_presentation_defs.items())
+        if not isinstance(presentation.get("body_tint"), dict)
+    ]
+    if missing_body_tints:
+        report.fail("class_presentations body_tint", f"missing body_tint for {missing_body_tints}")
+    else:
+        report.ok("class presentations define body_tint")
 
     if character_progression["points_per_level"] <= 0:
         report.fail("character_progression points_per_level", "must be positive")

@@ -103,6 +103,7 @@ const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
+const ClassBodyTintScript := preload("res://scripts/class_body_tint.gd")
 const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
 const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
@@ -346,8 +347,7 @@ func _ready() -> void:
 	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
-	_apply_model_tint(character_visual, ClientConstants.PLAYER_TINT)
-	player_reaction = ModelReactionControllerScript.new(character_visual, ClientConstants.PLAYER_TINT)
+	player_reaction = ModelReactionControllerScript.new(character_visual, Color.WHITE)
 	gameplay_debug_enabled = _truthy_env("ARPG_GAMEPLAY_DEBUG")
 	client_settings = ClientSettingsScript.new()
 	client_settings.load()
@@ -5473,7 +5473,6 @@ func _make_remote_player_node(e: Dictionary) -> Node3D:
 	root.name = "RemotePlayer_%s" % str(e.get("id", ""))
 	_apply_character_class_model(root, str(e.get("character_class", "")))
 	root.scale = Vector3.ONE * _entity_visual_scale(e)
-	_apply_model_tint(root, ClientConstants.REMOTE_PLAYER_TINT)
 	return root
 
 func _monster_tint(rarity: String) -> Color:
@@ -5482,6 +5481,9 @@ func _monster_tint(rarity: String) -> Color:
 func _entity_base_tint(e: Dictionary) -> Color:
 	var kind := str(e.get("type", ""))
 	if kind == "player":
+		var class_id := str(e.get("character_class", ""))
+		if class_id != "":
+			return ClassBodyTintScript.representative_color(class_id)
 		return ClientConstants.REMOTE_PLAYER_TINT
 	if kind == "monster" or kind == "companion":
 		if e.has("visual_tint"):
@@ -5515,9 +5517,9 @@ func _apply_local_player_class_model() -> void:
 	if resolver != null:
 		resolver.set_character_class(class_id)
 	_apply_local_player_visual_scale(player_visual_scale)
-	_apply_model_tint(character_visual, ClientConstants.PLAYER_TINT)
 	_remount_local_equipment_visuals()
-	player_reaction = ModelReactionControllerScript.new(character_visual, ClientConstants.PLAYER_TINT)
+	var player_tint := ClassBodyTintScript.representative_color(class_id)
+	player_reaction = ModelReactionControllerScript.new(character_visual, player_tint)
 	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
@@ -5547,6 +5549,9 @@ func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 		root.set("class_id", class_id)
 	if root.has_method("_ensure_weapon_socket"):
 		root.call("_ensure_weapon_socket")
+	var model_root := root.find_child("ModelRoot", false, false) as Node3D
+	if model_root != null and class_id != "":
+		ClassBodyTintScript.apply_to_model(model_root, class_id)
 
 func _remount_local_equipment_visuals() -> void:
 	if resolver == null:

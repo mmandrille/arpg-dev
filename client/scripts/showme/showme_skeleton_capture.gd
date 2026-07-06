@@ -3,6 +3,7 @@ extends RefCounted
 
 const CharacterScene := preload("res://scenes/character.tscn")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
+const ClassBodyTintScript := preload("res://scripts/class_body_tint.gd")
 const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
 
 const SOCKET_COLORS := {
@@ -199,6 +200,7 @@ static func _apply_class_model(character: Node3D, class_id: String) -> void:
 		character.set("class_id", class_id)
 	if character.has_method("_ensure_weapon_socket"):
 		character.call("_ensure_weapon_socket")
+	ClassBodyTintScript.apply_to_model(model, class_id)
 
 
 static func _add_light(root: Node3D) -> void:

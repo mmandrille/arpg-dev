@@ -44,6 +44,15 @@
               "scale": { "type": "number", "exclusiveMinimum": 0 },
               "lean_degrees": { "type": "number" }
             }
+          },
+          "body_tint": {
+            "type": "object",
+            "required": ["color", "strength"],
+            "additionalProperties": false,
+            "properties": {
+              "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+              "strength": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
           }
         }
       }

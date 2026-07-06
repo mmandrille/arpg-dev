@@ -55,6 +55,14 @@ static func idle_stance_for_class(class_id: String) -> Dictionary:
 	return {}
 
 
+static func body_tint_for_class(class_id: String) -> Dictionary:
+	ensure_loaded()
+	var entry: Dictionary = _classes.get(class_id, {})
+	if typeof(entry.get("body_tint", {})) == TYPE_DICTIONARY:
+		return (entry.get("body_tint", {}) as Dictionary).duplicate(true)
+	return {}
+
+
 static func packed_scene_for_class(class_id: String) -> PackedScene:
 	var resolved := resolve(class_id)
 	var scene_path := str(resolved.get("scene_path", ""))

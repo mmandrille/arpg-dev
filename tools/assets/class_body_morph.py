@@ -28,7 +28,6 @@ class BodyMorphParams:
     leg_scale: float = 1.0
     torso_length: float = 1.0
     neck_scale: float = 1.0
-    forward_shift: float = 0.0
 
 
 CLASS_MORPHS: dict[str, BodyMorphParams] = {
@@ -68,7 +67,6 @@ CLASS_MORPHS: dict[str, BodyMorphParams] = {
         chest_scale=0.90,
         arm_scale=0.90,
         leg_scale=0.88,
-        forward_shift=0.028,
     ),
 }
 
@@ -107,7 +105,6 @@ def morph_vertex(
     sx = 1.0
     sy = 1.0
     sz = 1.0
-    dz = 0.0
 
     if yn >= 0.68:
         shoulder_t = _smoothstep(0.68, 0.86, yn)
@@ -128,12 +125,9 @@ def morph_vertex(
     if yn >= 0.84 and side < 0.22:
         sx = max(sx, params.neck_scale)
 
-    if params.forward_shift > 0.0 and yn >= 0.42:
-        dz = params.forward_shift * _smoothstep(0.42, 0.82, yn)
-
     nx = cx + (x - cx) * sx
     ny = mins[1] + (y - mins[1]) * sy
-    nz = z * sz + dz
+    nz = z * sz
 
     return nx, ny, nz
 

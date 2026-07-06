@@ -153,7 +153,7 @@
       "provenance": {
         "origin": "base_human fork via tools/assets/class_body_morph.py; re-skinned via tools/assets/rig_canonical_hero.py",
         "license": "CC0-1.0",
-        "sha256": "04a06de59c8f199477d72514bff4aa5d16fcbe13b2f4450575a34b7653b419aa"
+        "sha256": "09ddc06f7185eb2f29246f2d5ff447e2934734123ab138fd1b0cef6d6174a80e"
       }
     },
     "character_sorcerer_v0": {

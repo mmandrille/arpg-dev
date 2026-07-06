@@ -7,4 +7,6 @@ Fork of `base_human_mesh.glb` with compact-assassin morphology via `tools/assets
 - **Manifest:** `character_rogue_v0`
 - **Target height:** 1.70 m (shortest player class)
 
+Stooped presentation uses `idle_stance.lean_degrees` in `class_presentations.v0.json`, not mesh vertex shear.
+
 Regenerate: `make gen-assets`

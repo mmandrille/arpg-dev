@@ -1,0 +1,33 @@
+{
+  "id": "wall_occlusion_fade",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "line_of_sight_blocker_lab",
+  "seed": "v446_wall_occlusion_fade",
+  "title": "Wall occlusion fade",
+  "description": "Client fades box wall meshes that block the camera view of the hero in the LOS blocker lab.",
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "isometric"
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": 0,
+      "at_least": 6,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "assert_wall_occlusion",
+      "active": true,
+      "target_count_min": 1,
+      "faded_wall_count_min": 1,
+      "min_faded_alpha_max": 0.9,
+      "faded_alpha": 0.24
+    }
+  ]
+}

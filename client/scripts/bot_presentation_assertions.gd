@@ -26,3 +26,31 @@ static func _mobility_smoothing_state_matches(step: Dictionary, smoothing: Dicti
 		return false
 
 	return step.has("active") or step.has("skill_id")
+
+
+static func wall_occlusion_matches(step: Dictionary, state: Dictionary) -> bool:
+	return wall_occlusion_mismatch(step, state) == ""
+
+
+static func wall_occlusion_mismatch(step: Dictionary, state: Dictionary) -> String:
+	var occlusion: Dictionary = state.get("wall_occlusion", {})
+	for key in ["active"]:
+		if step.has(key) and bool(occlusion.get(key, false)) != bool(step.get(key, true)):
+			return "%s want=%s got=%s occlusion=%s" % [key, str(step.get(key, true)), str(occlusion.get(key, null)), str(occlusion)]
+	for key in ["faded_wall_count", "target_count"]:
+		var min_key := "%s_min" % key
+		if step.has(min_key) and int(occlusion.get(key, 0)) < int(step.get(min_key, 0)):
+			return "%s want_min=%s got=%s occlusion=%s" % [key, str(step.get(min_key, 0)), str(occlusion.get(key, null)), str(occlusion)]
+		if step.has(key) and int(occlusion.get(key, -999999)) != int(step.get(key, 0)):
+			return "%s want=%s got=%s occlusion=%s" % [key, str(step.get(key, 0)), str(occlusion.get(key, null)), str(occlusion)]
+	for key in ["min_faded_alpha", "faded_alpha", "opaque_alpha"]:
+		var max_key := "%s_max" % key
+		var min_key := "%s_min" % key
+		if step.has(max_key) and float(occlusion.get(key, 1.0)) > float(step.get(max_key, 1.0)):
+			return "%s want_max=%s got=%s occlusion=%s" % [key, str(step.get(max_key, 1.0)), str(occlusion.get(key, null)), str(occlusion)]
+		if step.has(min_key) and float(occlusion.get(key, 0.0)) < float(step.get(min_key, 0.0)):
+			return "%s want_min=%s got=%s occlusion=%s" % [key, str(step.get(min_key, 0.0)), str(occlusion.get(key, null)), str(occlusion)]
+		if step.has(key) and abs(float(occlusion.get(key, -999999.0)) - float(step.get(key, 0.0))) > float(step.get("tolerance", 0.001)):
+			return "%s want=%s got=%s occlusion=%s" % [key, str(step.get(key, 0.0)), str(occlusion.get(key, null)), str(occlusion)]
+
+	return ""

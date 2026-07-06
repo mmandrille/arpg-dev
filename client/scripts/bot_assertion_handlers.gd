@@ -50,6 +50,14 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return true
 		"assert_fog_of_war":
 			return _assert_fog_of_war(runner, step, state)
+		"assert_wall_occlusion":
+			var wall_occlusion_mismatch := BotPresentationAssertionsScript.wall_occlusion_mismatch(step, state)
+			if wall_occlusion_mismatch != "":
+				runner._fail("assert_wall_occlusion failed: %s step=%d scenario=%s" % [
+					wall_occlusion_mismatch, runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
 		"assert_intent_rejected":
 			return BotIntentRejectAssertionsScript.assert_step(runner, step, state)
 		"assert_discovery_minimap":

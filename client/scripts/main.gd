@@ -2567,7 +2567,8 @@ func _refresh_monster_health_bar_visibility(entity_id: String = "") -> void:
 		if monster_health_bars.has(id) and is_instance_valid(monster_health_bars[id]):
 			var hero_pos := player_anchor.global_position if player_anchor != null else Vector3.ZERO
 			monster_health_bars[id].visible = EnemyHealthBarVisibilityScript.should_show(mode, id, hovered_id, pending_action_targets, pending_skill_casts) and EnemyHealthBarVisibilityScript.perspective_visible(entities.get(id, {}).get("node", null), hero_pos, _is_perspective_camera_mode(), float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
-
+	if _wall_renderer != null:
+		_wall_renderer.sync_occlusion_fade(_camera, current_wall_layout, player_anchor, entities, monster_ids, gameplay_active or visual_replay_enabled)
 func _sync_companion_bar() -> void:
 	if companion_bar == null:
 		return
@@ -6053,6 +6054,7 @@ func get_bot_state() -> Dictionary:
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
 		"boss_health_bar": boss_health_bar.get_debug_state() if boss_health_bar != null else {"visible": false},
 		"fog_of_war": fog_overlay.get_debug_state() if fog_overlay != null else {},
+		"wall_occlusion": _wall_renderer.occlusion_debug_state() if _wall_renderer != null else {},
 		"audio": audio_controller.get_debug_state() if audio_controller != null else {},
 		"character_info_panel": _character_info_debug_state(),
 		"consumable_bar": consumable_bar.get_debug_state() if consumable_bar != null else {},

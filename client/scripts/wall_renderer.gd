@@ -2,11 +2,16 @@ class_name WallRenderer
 extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
+const WallOcclusionPresentationLoaderScript := preload("res://scripts/wall_occlusion_presentation_loader.gd")
+const WallOcclusionFadeScript := preload("res://scripts/wall_occlusion_fade.gd")
+const WallOcclusionRuntimeScript := preload("res://scripts/wall_occlusion_runtime.gd")
 
 var _walls_root: Node3D
 var _ground_factory: RefCounted
 var _current_level: int = 0
 var _ceiling_node: MeshInstance3D
+var _occlusion_meshes: Dictionary = {}
+var _occlusion_fade: WallOcclusionFade
 
 const TOWN_WALL_HEIGHT := 1.0
 const WALL_FLOOR_SEAM_OVERLAP := 0.08
@@ -65,6 +70,8 @@ func set_level(level: int) -> void:
 
 func clear_wall_nodes() -> void:
 	_ceiling_node = null
+	_occlusion_meshes.clear()
+	reset_occlusion_fade()
 	if _walls_root == null:
 		return
 	for child in _walls_root.get_children():
@@ -167,6 +174,7 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 	var mat := _make_wall_material(wall, wall_height)
 	node.material_override = mat
 	body.add_child(node)
+	_register_occlusion_mesh(str(wall.get("id", "")), node)
 	return body
 
 func _make_wood_palisade_node(wall: Dictionary) -> Node3D:
@@ -192,6 +200,7 @@ func _make_wood_palisade_node(wall: Dictionary) -> Node3D:
 	node.mesh = mesh
 	node.material_override = _make_wood_wall_material(size, wall_height)
 	body.add_child(node)
+	_register_occlusion_mesh(str(wall.get("id", "")), node)
 	return body
 
 func _make_wood_wall_material(size: Dictionary, wall_height: float) -> StandardMaterial3D:
@@ -415,3 +424,65 @@ func _read_json(path: String):
 		return null
 	var parsed = JSON.parse_string(f.get_as_text())
 	return parsed
+
+
+func _register_occlusion_mesh(wall_id: String, mesh: MeshInstance3D) -> void:
+	if wall_id == "" or mesh == null:
+		return
+	_occlusion_meshes[wall_id] = mesh
+
+
+func apply_occlusion_fades(faded_by_id: Dictionary) -> void:
+	var opaque_alpha := WallOcclusionPresentationLoaderScript.opaque_alpha()
+	for wall_id in _occlusion_meshes.keys():
+		var mesh := _occlusion_meshes[wall_id] as MeshInstance3D
+		if mesh == null:
+			continue
+		var alpha := float(faded_by_id.get(wall_id, opaque_alpha))
+		_set_mesh_occlusion_alpha(mesh, alpha)
+
+
+func _set_mesh_occlusion_alpha(mesh: MeshInstance3D, alpha: float) -> void:
+	var mat := mesh.material_override as StandardMaterial3D
+	if mat == null:
+		return
+	var base := mat.albedo_color
+	if alpha >= 0.999:
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+		mat.albedo_color = Color(base.r, base.g, base.b, 1.0)
+		return
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(base.r, base.g, base.b, clampf(alpha, 0.05, 1.0))
+	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
+
+
+func sync_occlusion_fade(
+	camera: Camera3D,
+	wall_layout: Array,
+	player_anchor: Node3D,
+	entities: Dictionary,
+	monster_ids: Array,
+	active: bool,
+) -> void:
+	if _occlusion_fade == null:
+		_occlusion_fade = WallOcclusionFadeScript.new(self)
+	WallOcclusionRuntimeScript.sync(
+		_occlusion_fade,
+		camera,
+		wall_layout,
+		player_anchor,
+		entities,
+		monster_ids,
+		active,
+	)
+
+
+func reset_occlusion_fade() -> void:
+	if _occlusion_fade != null:
+		_occlusion_fade.reset()
+
+
+func occlusion_debug_state() -> Dictionary:
+	if _occlusion_fade == null:
+		return {}
+	return _occlusion_fade.get_debug_state()

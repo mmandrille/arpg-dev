@@ -1,13 +1,13 @@
 # Grandfathered source/test/tool files above the 600-line target.
 # Format: path<TAB>baseline_line_count
 client/scripts/blacksmith_panel.gd	771	# v392: two-slot craft UI (item + resource); recipe inferred from resource
-client/scripts/bot_assertion_handlers.gd	623	# v357: intent-reject assertions extracted to bot_intent_reject_assertions.gd
+client/scripts/bot_assertion_handlers.gd	655	# v446: assert_wall_occlusion delegates to bot_presentation_assertions.gd
 client/scripts/bot_controller.gd	823	# v404: character mercenary hire client bot steps
 client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait filters consolidated into flag loop
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	701	# v392: class creation features panel
 client/scripts/inventory_panel.gd	1516
-client/scripts/main.gd	6523	# v406: bishop force-loot wizard wiring + bot hook; extraction deferred to main.gd attack-move cluster slice
+client/scripts/main.gd	6548	# v446: wall occlusion sync piggybacks health-bar refresh; logic lives on WallRenderer
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1243	# v407: baseline sync (no v407 logic edits)
 client/scripts/skills_panel.gd	1010

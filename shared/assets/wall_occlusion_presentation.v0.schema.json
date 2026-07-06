@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/wall_occlusion_presentation.v0.schema.json",
+  "title": "Wall occlusion presentation (v0)",
+  "description": "Client-only wall fade tuning when geometry blocks the camera view.",
+  "type": "object",
+  "required": [
+    "version",
+    "faded_alpha",
+    "opaque_alpha",
+    "segment_inflate",
+    "move_epsilon",
+    "min_rebuild_interval_frames"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "faded_alpha": {
+      "type": "number",
+      "minimum": 0.05,
+      "maximum": 0.95
+    },
+    "opaque_alpha": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 1.0
+    },
+    "segment_inflate": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "move_epsilon": {
+      "type": "number",
+      "exclusiveMinimum": 0.0
+    },
+    "min_rebuild_interval_frames": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

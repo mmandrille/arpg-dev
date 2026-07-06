@@ -36,9 +36,11 @@ func finalizeGeneratedDungeonLevel(
 	return validateGeneratedDungeonReachability(rules, *out)
 }
 
-// placeRoomLayout adds cross-floor divider walls with corridor gaps that
-// partition the open floor into visually distinct rooms/areas.
+// placeRoomLayout adds structured room-corridor PCG or legacy cross-floor divider walls.
 func placeRoomLayout(seed string, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
+	if rules.RoomCorridorPCG.Enabled {
+		return placeRoomCorridorLayout(seed, rules, out)
+	}
 	r := rules.RoomLayout
 	if !r.Enabled {
 		return nil

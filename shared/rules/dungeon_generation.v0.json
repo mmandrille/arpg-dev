@@ -102,7 +102,7 @@
     "max_attempts": 32
   },
   "room_layout": {
-    "enabled": true,
+    "enabled": false,
     "max_attempts": 32,
     "horizontal_dividers": { "min": 1, "max": 2 },
     "vertical_dividers": { "min": 0, "max": 1 },
@@ -114,6 +114,20 @@
     "corridors_per_wall_min": 1,
     "corridors_per_wall_max": 2,
     "margin_from_perimeter": 5.0
+  },
+  "room_corridor_pcg": {
+    "enabled": true,
+    "max_attempts": 48,
+    "room_count": { "min": 5, "max": 7 },
+    "hub_room_enabled": true,
+    "hub_size_multiplier": 1.3,
+    "room_size_min": { "x": 8, "y": 6 },
+    "room_size_max": { "x": 14, "y": 10 },
+    "room_spacing": 4.0,
+    "corridor_width": 2.0,
+    "loop_edge_count": { "min": 1, "max": 2 },
+    "margin_from_perimeter": 4.0,
+    "disable_obstacle_scatter": true
   },
   "obstacle_generation": {
     "enabled": true,

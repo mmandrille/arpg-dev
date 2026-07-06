@@ -206,6 +206,9 @@ func perimeterWalls(size DungeonFloorSize, thickness float64) []wallObstacle {
 }
 
 func placeDungeonObstacles(seed string, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
+	if rules.RoomCorridorPCG.Enabled && rules.RoomCorridorPCG.DisableObstacleScatter {
+		return nil
+	}
 	obstacles := rules.ObstacleGeneration
 	if !obstacles.Enabled || obstacles.TargetGroupCount.Max == 0 {
 		return nil

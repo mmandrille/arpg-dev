@@ -31,13 +31,13 @@
         "minimum_hole_count": { "type": "integer", "minimum": 0 },
         "shape_families": {
           "type": "array",
-          "minItems": 2,
+          "minItems": 0,
           "items": { "type": "string", "enum": ["line", "l", "t", "block"] },
           "uniqueItems": true
         },
         "solid_kinds": {
           "type": "array",
-          "minItems": 1,
+          "minItems": 0,
           "items": { "type": "string", "enum": ["rock", "column", "rubble"] },
           "uniqueItems": true
         },
@@ -94,7 +94,7 @@
         "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
         "position": { "$ref": "#/$defs/vec2" },
         "size": { "$ref": "#/$defs/wall_size" },
-        "source": { "type": "string", "enum": ["perimeter", "generated", "room_divider"] },
+        "source": { "type": "string", "enum": ["perimeter", "generated", "room_divider", "room_wall"] },
         "shape_family": { "type": "string", "enum": ["line", "l", "t", "block", "water", "hole"] },
         "kind": { "type": "string", "enum": ["wall", "water", "hole", "rock", "column", "rubble"] }
       }

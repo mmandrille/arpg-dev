@@ -23,7 +23,7 @@ Last updated: 2026-07-04 (v430 barbarian tier-3 mesh swap)
 
 | Field | Value |
 |-------|-------|
-Last updated: 2026-07-06 (v444 class body forks)
+Last updated: 2026-07-06 (v445 dungeon room corridors)
 
 ---
 
@@ -31,7 +31,7 @@ Last updated: 2026-07-06 (v444 class body forks)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v444 — class body forks |
+| **Latest completed slice** | v445 — dungeon room corridors |
 | **CI gate** | 2026-07-06 — focused verification green (batch `make ci` pending) |
 | **Next slice** | TBD |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |

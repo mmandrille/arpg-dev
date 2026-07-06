@@ -17,6 +17,7 @@
     "chest_placement",
     "elite_objective",
     "room_layout",
+    "room_corridor_pcg",
     "obstacle_generation",
     "boss_floor",
     "monster_rarity_note",
@@ -183,6 +184,38 @@
         "corridors_per_wall_min": { "type": "integer", "minimum": 1 },
         "corridors_per_wall_max": { "type": "integer", "minimum": 1 },
         "margin_from_perimeter": { "type": "number", "minimum": 0 }
+      }
+    },
+    "room_corridor_pcg": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "max_attempts",
+        "room_count",
+        "hub_room_enabled",
+        "hub_size_multiplier",
+        "room_size_min",
+        "room_size_max",
+        "room_spacing",
+        "corridor_width",
+        "loop_edge_count",
+        "margin_from_perimeter",
+        "disable_obstacle_scatter"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "max_attempts": { "type": "integer", "minimum": 1 },
+        "room_count": { "$ref": "#/$defs/int_range" },
+        "hub_room_enabled": { "type": "boolean" },
+        "hub_size_multiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "room_size_min": { "$ref": "#/$defs/position" },
+        "room_size_max": { "$ref": "#/$defs/position" },
+        "room_spacing": { "type": "number", "minimum": 0 },
+        "corridor_width": { "type": "number", "exclusiveMinimum": 0 },
+        "loop_edge_count": { "$ref": "#/$defs/int_range" },
+        "margin_from_perimeter": { "type": "number", "minimum": 0 },
+        "disable_obstacle_scatter": { "type": "boolean" }
       }
     },
     "obstacle_generation": {

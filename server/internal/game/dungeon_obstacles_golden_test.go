@@ -171,6 +171,9 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 				}
 			}
 		}
+		if wall.source == "room_wall" && wall.shapeFamily != "" {
+			shapeFamilies[wall.shapeFamily] = true
+		}
 	}
 	golden.Expected.MinimumWallCount = len(level.walls)
 	golden.Expected.MinimumGeneratedWallCount = generatedCount

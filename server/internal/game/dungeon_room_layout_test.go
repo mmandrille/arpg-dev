@@ -4,6 +4,9 @@ import "testing"
 
 func TestPlaceRoomLayout_DividersPresent(t *testing.T) {
 	rules := loadRules(t)
+	if rules.DungeonGeneration.RoomCorridorPCG.Enabled {
+		t.Skip("room_corridor_pcg enabled; see TestPlaceRoomCorridorLayout_RoomWallsPresent")
+	}
 	level, err := GenerateDungeonLevel("room_layout_test_dividers", -1, rules.DungeonGeneration)
 	if err != nil {
 		t.Fatalf("generate: %v", err)
@@ -21,6 +24,9 @@ func TestPlaceRoomLayout_DividersPresent(t *testing.T) {
 
 func TestPlaceRoomLayout_CorridorGapWidth(t *testing.T) {
 	rules := loadRules(t)
+	if rules.DungeonGeneration.RoomCorridorPCG.Enabled {
+		t.Skip("room_corridor_pcg enabled; corridor gaps covered by room_wall doors")
+	}
 	corridorWidth := rules.DungeonGeneration.RoomLayout.CorridorWidth
 	seeds := []string{"room_layout_gap_a", "room_layout_gap_b", "room_layout_gap_c"}
 	for _, seed := range seeds {
@@ -28,8 +34,6 @@ func TestPlaceRoomLayout_CorridorGapWidth(t *testing.T) {
 		if err != nil {
 			t.Fatalf("seed %s generate: %v", seed, err)
 		}
-		// For each pair of room_divider walls at the same Y (horizontal), verify
-		// consecutive X extents leave at least corridorWidth gap.
 		type yGroup struct {
 			minX, maxX float64
 		}
@@ -49,7 +53,6 @@ func TestPlaceRoomLayout_CorridorGapWidth(t *testing.T) {
 			if len(segs) < 2 {
 				continue
 			}
-			// Sort by minX
 			for i := 0; i < len(segs); i++ {
 				for j := i + 1; j < len(segs); j++ {
 					if segs[j].minX < segs[i].minX {
@@ -86,14 +89,16 @@ func TestPlaceRoomLayout_Reachability(t *testing.T) {
 
 func TestPlaceRoomLayout_Disabled(t *testing.T) {
 	rules := loadRules(t)
+	rules.DungeonGeneration.RoomCorridorPCG.Enabled = false
 	rules.DungeonGeneration.RoomLayout.Enabled = false
+	rules.DungeonGeneration.ObstacleGeneration.Enabled = false
 	level, err := GenerateDungeonLevel("room_layout_disabled", -1, rules.DungeonGeneration)
 	if err != nil {
 		t.Fatalf("generate: %v", err)
 	}
 	for _, w := range level.walls {
-		if w.source == "room_divider" {
-			t.Fatalf("found room_divider wall when disabled: %+v", w)
+		if w.source == "room_divider" || w.source == "room_wall" {
+			t.Fatalf("found structured room wall when disabled: %+v", w)
 		}
 	}
 }
@@ -105,8 +110,8 @@ func TestPlaceRoomLayout_BossFloorUnaffected(t *testing.T) {
 		t.Fatalf("generate boss floor: %v", err)
 	}
 	for _, w := range level.walls {
-		if w.source == "room_divider" {
-			t.Fatalf("boss floor has room_divider wall: %+v", w)
+		if w.source == "room_divider" || w.source == "room_wall" {
+			t.Fatalf("boss floor has structured room wall: %+v", w)
 		}
 	}
 }

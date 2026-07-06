@@ -39,6 +39,52 @@ type RoomLayoutRules struct {
 	MarginFromPerimeter float64  `json:"margin_from_perimeter"`
 }
 
+type RoomCorridorPCGRules struct {
+	Enabled                bool     `json:"enabled"`
+	MaxAttempts            int      `json:"max_attempts"`
+	RoomCount              IntRange `json:"room_count"`
+	HubRoomEnabled         bool     `json:"hub_room_enabled"`
+	HubSizeMultiplier      float64  `json:"hub_size_multiplier"`
+	RoomSizeMin            Vec2     `json:"room_size_min"`
+	RoomSizeMax            Vec2     `json:"room_size_max"`
+	RoomSpacing            float64  `json:"room_spacing"`
+	CorridorWidth          float64  `json:"corridor_width"`
+	LoopEdgeCount          IntRange `json:"loop_edge_count"`
+	MarginFromPerimeter    float64  `json:"margin_from_perimeter"`
+	DisableObstacleScatter bool     `json:"disable_obstacle_scatter"`
+}
+
+func validateRoomCorridorPCGRules(r RoomCorridorPCGRules) error {
+	if !r.Enabled {
+		return nil
+	}
+	if r.MaxAttempts <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.max_attempts: must be positive")
+	}
+	if r.RoomCount.Min < 2 || r.RoomCount.Max < r.RoomCount.Min {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.room_count: min must be >= 2 and max >= min")
+	}
+	if r.HubSizeMultiplier <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.hub_size_multiplier: must be positive")
+	}
+	if r.RoomSizeMin.X <= 0 || r.RoomSizeMin.Y <= 0 || r.RoomSizeMax.X < r.RoomSizeMin.X || r.RoomSizeMax.Y < r.RoomSizeMin.Y {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg room sizes: invalid min/max")
+	}
+	if r.RoomSpacing < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.room_spacing: must be non-negative")
+	}
+	if r.CorridorWidth <= 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.corridor_width: must be positive")
+	}
+	if r.LoopEdgeCount.Min < 0 || r.LoopEdgeCount.Max < r.LoopEdgeCount.Min {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.loop_edge_count: invalid range")
+	}
+	if r.MarginFromPerimeter < 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.margin_from_perimeter: must be non-negative")
+	}
+	return nil
+}
+
 func validateRoomLayoutRules(r RoomLayoutRules) error {
 	if !r.Enabled {
 		return nil

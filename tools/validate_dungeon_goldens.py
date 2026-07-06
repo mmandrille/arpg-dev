@@ -22,15 +22,24 @@ def validate_dungeon_obstacle_goldens(report, dungeon_generation: dict, dungeon_
     """
     floor_size = dungeon_generation.get("floor_size")
     obstacle_gen = dungeon_generation.get("obstacle_generation", {})
+    room_corridor = dungeon_generation.get("room_corridor_pcg", {})
     obstacle_expected = dungeon_obstacles_golden.get("expected", {})
     obstacle_floor = obstacle_expected.get("floor_size", {})
     obstacle_shapes = set(obstacle_expected.get("shape_families", []))
     obstacle_walls = obstacle_expected.get("walls", [])
     generated_walls = [wall for wall in obstacle_walls if wall.get("source") == "generated"]
+    room_walls = [wall for wall in obstacle_walls if wall.get("source") == "room_wall"]
     if dungeon_obstacles_golden.get("level", 0) >= 0:
         report.fail("dungeon_obstacles golden", "level must be a generated dungeon floor")
     elif obstacle_floor != floor_size:
         report.fail("dungeon_obstacles golden", "floor_size must match dungeon_generation floor_size")
+    elif room_corridor.get("enabled", False):
+        if len(room_walls) < 8:
+            report.fail("dungeon_obstacles golden", "must include at least eight room_wall segments when room_corridor_pcg is enabled")
+        elif obstacle_expected.get("minimum_generated_wall_count", 0) <= 0:
+            report.fail("dungeon_obstacles golden", "minimum_generated_wall_count must be positive (water/hole features)")
+        else:
+            report.ok("dungeon_obstacles golden declares room-corridor PCG contract")
     elif len(obstacle_shapes) < 2:
         report.fail("dungeon_obstacles golden", "must name at least two shape families")
     elif obstacle_expected.get("minimum_generated_wall_count", 0) <= 0:
@@ -53,7 +62,7 @@ def validate_dungeon_obstacle_goldens(report, dungeon_generation: dict, dungeon_
             report.fail("dungeon_obstacles golden vs generation", f"{field} ({floor}) exceeds obstacle_generation.{kind}.target_count.max ({cap})")
             consistent = False
     unknown_solid = [k for k in obstacle_expected.get("solid_kinds", []) if solid_weights.get(k, 0) <= 0]
-    if unknown_solid:
+    if unknown_solid and not room_corridor.get("enabled", False):
         report.fail("dungeon_obstacles golden vs generation", f"solid_kinds {unknown_solid} have no positive weight in obstacle_generation.solid_kind_weights")
         consistent = False
     if consistent:

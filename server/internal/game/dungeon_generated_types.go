@@ -9,6 +9,7 @@ type generatedDungeonLevel struct {
 	levelNum      int
 	walls         []wallObstacle
 	corridorZones []corridorZone
+	rooms         []dungeonRoom
 	stairs        []generatedStair
 	teleporters []generatedTeleporter
 	chests      []generatedChest

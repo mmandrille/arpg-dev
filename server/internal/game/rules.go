@@ -1686,6 +1686,7 @@ func LoadRules(dir string) (*Rules, error) {
 		ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
 		EliteObjective           EliteObjectiveRules      `json:"elite_objective"`
 		RoomLayout               RoomLayoutRules          `json:"room_layout"`
+		RoomCorridorPCG          RoomCorridorPCGRules     `json:"room_corridor_pcg"`
 		ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
 		BossFloor                BossFloorRules           `json:"boss_floor"`
 		MonsterRarityNote        string                   `json:"monster_rarity_note"`
@@ -1800,6 +1801,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateRoomLayoutRules(dungeonGeneration.RoomLayout); err != nil {
 		return nil, err
 	}
+	if err := validateRoomCorridorPCGRules(dungeonGeneration.RoomCorridorPCG); err != nil {
+		return nil, err
+	}
 	if err := validateAreaRangeFormula("dungeon_generation.obstacle_generation.target_group_count_formula", dungeonGeneration.ObstacleGeneration.TargetGroupCountFormula); err != nil {
 		return nil, err
 	}
@@ -1862,6 +1866,7 @@ func LoadRules(dir string) (*Rules, error) {
 		ChestPlacement:           dungeonGeneration.ChestPlacement,
 		EliteObjective:           dungeonGeneration.EliteObjective,
 		RoomLayout:               dungeonGeneration.RoomLayout,
+		RoomCorridorPCG:          dungeonGeneration.RoomCorridorPCG,
 		ObstacleGeneration:       dungeonGeneration.ObstacleGeneration,
 		BossFloor:                dungeonGeneration.BossFloor,
 		MonsterRarityNote:        dungeonGeneration.MonsterRarityNote,

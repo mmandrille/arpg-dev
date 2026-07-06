@@ -15,6 +15,7 @@ type DungeonGenerationRules struct {
 	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
 	EliteObjective           EliteObjectiveRules      `json:"elite_objective"`
 	RoomLayout               RoomLayoutRules          `json:"room_layout"`
+	RoomCorridorPCG          RoomCorridorPCGRules     `json:"room_corridor_pcg"`
 	ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
 	BossFloor                BossFloorRules           `json:"boss_floor"`
 	MonsterRarityNote        string                   `json:"monster_rarity_note"`

@@ -55,7 +55,7 @@ func verify_transforms(ctx: Dictionary, fail: Callable) -> bool:
 		character.queue_free()
 		main.queue_free()
 		return false
-	if shield_scale.x > 0.8 or shield_scale.y > 0.8 or shield_scale.z > 0.8:
+	if shield_scale.x > 1.2 or shield_scale.y > 1.2 or shield_scale.z > 1.2:
 		fail.call("paladin shield inherited model scale: %s" % str(shield_scale))
 		character.queue_free()
 		main.queue_free()

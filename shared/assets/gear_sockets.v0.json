@@ -8,7 +8,8 @@
       "chest_socket": { "bone": "chest", "offset": { "x": 0.0, "y": 0.0, "z": 0.05 } },
       "gloves_socket": { "bone": "hand_r", "offset": { "x": 0.0, "y": -0.02, "z": 0.0 } },
       "belt_socket": { "bone": "spine", "offset": { "x": 0.0, "y": -0.04, "z": 0.08 } },
-      "boots_socket": { "bone": "foot_l", "offset": { "x": 0.1, "y": 0.03, "z": 0.0 } },
+      "boots_socket": { "bone": "foot_l", "offset": { "x": 0.08, "y": 0.18, "z": 0.10 } },
+      "boots_right_socket": { "bone": "foot_r", "offset": { "x": -0.08, "y": 0.18, "z": 0.10 } },
       "ring_left_socket": { "bone": "hand_l", "offset": { "x": 0.0, "y": -0.03, "z": 0.02 } },
       "ring_right_socket": { "bone": "hand_r", "offset": { "x": 0.0, "y": -0.03, "z": 0.02 } },
       "amulet_socket": { "bone": "chest", "offset": { "x": 0.0, "y": 0.14, "z": -0.05 } }

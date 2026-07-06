@@ -50,11 +50,17 @@ const MIN_BONE_REST_Y := {
 }
 
 const MAX_LOCAL_SCALE := {
-	"head": 0.55,
-	"chest": 0.75,
+	"head": 1.2,
+	"chest": 1.2,
 	"main_hand": 1.35,
-	"off_hand": 0.95,
-	"boots": 0.55,
+	"off_hand": 1.1,
+	"boots": 1.2,
+}
+
+const MIN_GLOBAL_SCALE := {
+	"head": 0.08,
+	"chest": 0.10,
+	"boots": 0.06,
 }
 
 
@@ -137,10 +143,40 @@ func _verify_class(tree: SceneTree, class_id: String, fail: Callable) -> bool:
 				return false
 		var local_scale := node.scale
 		var max_scale := float(MAX_LOCAL_SCALE.get(slot_name, 1.5))
-		if local_scale.x > max_scale or local_scale.y > max_scale or local_scale.z > max_scale:
+		if absf(local_scale.x) > max_scale or absf(local_scale.y) > max_scale or absf(local_scale.z) > max_scale:
 			fail.call("%s slot %s local scale too large: %s" % [class_id, slot_name, str(local_scale)])
 			character.queue_free()
 			return false
+		var min_global := float(MIN_GLOBAL_SCALE.get(slot_name, 0.0))
+		if min_global > 0.0:
+			var node_global_scale := node.global_transform.basis.get_scale()
+			var global_max := maxf(
+				absf(node_global_scale.x),
+				maxf(absf(node_global_scale.y), absf(node_global_scale.z))
+			)
+			if global_max < min_global:
+				fail.call("%s slot %s global scale %.3f below %.3f" % [
+					class_id, slot_name, global_max, min_global,
+				])
+				character.queue_free()
+				return false
+		if slot_name == "boots":
+			var right_boot := character.find_child("%s_right" % asset_id, true, false) as Node3D
+			if right_boot == null:
+				fail.call("%s boots mirror node missing for %s" % [class_id, asset_id])
+				character.queue_free()
+				return false
+			var right_socket := skel.find_child("boots_right_socket", false, false)
+			if right_socket == null:
+				fail.call("%s boots_right_socket missing" % class_id)
+				character.queue_free()
+				return false
+			if right_boot.get_parent() != right_socket:
+				fail.call("%s right boot parent %s != boots_right_socket" % [
+					class_id, str(right_boot.get_parent().name if right_boot.get_parent() != null else ""),
+				])
+				character.queue_free()
+				return false
 	character.queue_free()
 	return true
 

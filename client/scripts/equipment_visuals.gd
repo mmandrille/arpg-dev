@@ -57,6 +57,7 @@ var _equipped: Dictionary = {}      # slot -> item_instance_id
 var _weapon_sets: Array = []
 var _active_weapon_set: int = 0
 var _mounted_nodes: Dictionary = {} # slot -> Node3D
+var _mounted_mirror_nodes: Dictionary = {} # slot -> Node3D (e.g. right boot)
 var _mounted_state: Dictionary = {} # slot -> debug state
 var _warnings: Array = []
 
@@ -206,6 +207,8 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 	_apply_tint(inst, tint)
 	socket.add_child(inst)
 	_mounted_nodes[slot] = inst
+	if slot == "boots":
+		_mount_boots_mirror(socket, _right_boot_transform(vis, slot), asset_id, entry, procedural_fallback == null)
 	_mounted_state[slot] = {
 		"slot": slot,
 		"item_instance_id": item_instance_id,
@@ -264,7 +267,7 @@ func _local_transform_for_slot(slot: String, vis: Dictionary) -> Dictionary:
 	if slot != "off_hand" or str(vis.get("slot", slot)) == slot:
 		return transform
 	var position: Dictionary = (transform.get("position", {}) as Dictionary).duplicate(true)
-	position["z"] = float(position.get("z", 0.0)) + 0.08
+	position["z"] = -float(position.get("z", 0.0)) + 0.08
 	transform["position"] = position
 	var rotation: Dictionary = (transform.get("rotation_degrees", {}) as Dictionary).duplicate(true)
 	rotation["z"] = float(rotation.get("z", 0.0)) + 180.0
@@ -306,6 +309,44 @@ func _clear_mounted(slot: String) -> void:
 	if mounted != null and is_instance_valid(mounted):
 		(mounted as Node3D).queue_free()
 	_mounted_nodes.erase(slot)
+	var mirror = _mounted_mirror_nodes.get(slot, null)
+	if mirror != null and is_instance_valid(mirror):
+		(mirror as Node3D).queue_free()
+	_mounted_mirror_nodes.erase(slot)
+
+
+func _right_boot_transform(vis: Dictionary, slot: String) -> Dictionary:
+	var transform := _local_transform_for_slot(slot, vis).duplicate(true)
+	var position: Dictionary = (transform.get("position", {}) as Dictionary).duplicate(true)
+	position["x"] = -float(position.get("x", 0.0))
+	transform["position"] = position
+	return transform
+
+
+func _mount_boots_mirror(
+		left_socket: Node,
+		transform: Dictionary,
+		asset_id: String,
+		entry,
+		apply_glb_mesh_multiplier: bool,
+	) -> void:
+	var right_socket := _mount_root.find_child("boots_right_socket", true, false)
+	if right_socket == null:
+		return
+	var procedural_fallback := _procedural_fallback_visual(asset_id, "boots", entry)
+	var right_inst: Node3D
+	if procedural_fallback != null:
+		right_inst = procedural_fallback
+	else:
+		var packed = load(_res_path(str(entry["runtime_path"])))
+		if packed == null:
+			return
+		right_inst = (packed as PackedScene).instantiate()
+	right_inst.name = "%s_right" % asset_id
+	_apply_transform(right_inst, transform, procedural_fallback == null)
+	_apply_model_root_scale_compensation(right_inst, right_socket)
+	right_socket.add_child(right_inst)
+	_mounted_mirror_nodes["boots"] = right_inst
 
 
 func _apply_transform(node: Node3D, t: Dictionary, apply_glb_mesh_multiplier: bool = false) -> void:

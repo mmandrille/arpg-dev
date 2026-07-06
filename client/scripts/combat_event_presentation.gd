@@ -3,7 +3,6 @@ class_name CombatEventPresentation
 extends RefCounted
 
 const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_text.gd")
-const ImpactSparksScript := preload("res://scripts/impact_sparks.gd")
 const CombatOutcomePunchScript := preload("res://scripts/combat_outcome_punch.gd")
 const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
 const PlayerDamageVignetteScript := preload("res://scripts/player_damage_vignette.gd")
@@ -74,12 +73,10 @@ static func show_combat_text_for_event(
 			str(presentation.get("text", "")),
 			str(presentation.get("damage_type", "")),
 		)
-		spawn_impact_sparks(entity_id, ev, presentation.get("color", default_color), node_for_entity_id)
 		spawn_outcome_punch(entity_id, ev, node_for_entity_id)
 		return
 
 	show_damage_number.call(entity_id, default_color, damage)
-	spawn_impact_sparks(entity_id, ev, default_color, node_for_entity_id)
 	spawn_outcome_punch(entity_id, ev, node_for_entity_id)
 
 
@@ -91,21 +88,6 @@ static func spawn_outcome_punch(entity_id: String, ev: Dictionary, node_for_enti
 	var target: Node3D = node_for_entity_id.call(entity_id)
 	if target != null:
 		target.add_child(CombatOutcomePunchScript.make_node(ev))
-
-
-static func spawn_impact_sparks(
-	entity_id: String,
-	ev: Dictionary,
-	fallback_color: Color,
-	node_for_entity_id: Callable,
-) -> void:
-	if not _entity_impact_allowed_for(entity_id):
-		return
-	if not ImpactSparksScript.should_spawn(ev):
-		return
-	var target: Node3D = node_for_entity_id.call(entity_id)
-	if target != null:
-		target.add_child(ImpactSparksScript.make_node(ev, fallback_color))
 
 
 static func _entity_impact_allowed_for(entity_id: String) -> bool:

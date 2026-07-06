@@ -10,7 +10,6 @@ const DEATH_LEAN_RADIANS := 1.35
 const DEATH_SECONDS := 0.18
 const HIT_DARKEN := 0.45
 const DEATH_DARKEN := 0.28
-const DEATH_FLOURISH_COLOR := Color("#d9c089")
 const HIGHLIGHT_EMISSION_ENERGY := 0.35
 const UNRESOLVED_SOURCE := Vector3(1000000000000.0, 1000000000000.0, 1000000000000.0)
 
@@ -94,7 +93,6 @@ func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_directio
 	var target_x := _base_rotation.x + direction.z * DEATH_LEAN_RADIANS
 	var target_z := _base_rotation.z - direction.x * DEATH_LEAN_RADIANS
 	_apply_impact_flash()
-	_add_death_flourish(direction)
 	_death_tween = _root.create_tween()
 	_death_tween.tween_interval(HIT_STOP_SECONDS)
 	_death_tween.tween_callback(_apply_color_scale.bind(DEATH_DARKEN))
@@ -111,7 +109,6 @@ func reset_terminal() -> void:
 	if _root != null:
 		_root.rotation.x = _base_rotation.x
 		_root.rotation.z = _base_rotation.z
-		_clear_death_flourish()
 	_apply_color_scale(1.0)
 
 
@@ -235,44 +232,6 @@ func _apply_impact_flash() -> void:
 		var base: Color = rec.get("color", _base_tint)
 		mat.albedo_color = base.lerp(Color.WHITE, HIT_FLASH_BLEND)
 	_current_tint = _base_tint.lerp(Color.WHITE, HIT_FLASH_BLEND)
-
-
-func _add_death_flourish(direction: Vector3) -> void:
-	_clear_death_flourish()
-	var root := Node3D.new()
-	root.name = "DeathFlourish"
-	root.position = Vector3(0.0, 0.18, 0.0)
-	root.look_at_from_position(root.position, root.position + direction, Vector3.UP)
-	for i in range(6):
-		var shard := MeshInstance3D.new()
-		shard.name = "DeathShard_%d" % i
-		var mesh := BoxMesh.new()
-		mesh.size = Vector3(0.04, 0.04, 0.34 + float(i % 2) * 0.08)
-		shard.mesh = mesh
-		var angle := (TAU / 6.0) * float(i)
-		shard.position = Vector3(cos(angle) * 0.24, 0.16 + float(i % 3) * 0.045, sin(angle) * 0.24)
-		shard.rotation = Vector3(0.4, angle, 0.7)
-		shard.material_override = _death_flourish_material(0.68 - float(i) * 0.05)
-		root.add_child(shard)
-	_root.add_child(root)
-
-
-func _clear_death_flourish() -> void:
-	if _root == null:
-		return
-	for child in _root.find_children("DeathFlourish", "", false, false):
-		_root.remove_child(child)
-		child.queue_free()
-
-
-func _death_flourish_material(alpha: float) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(DEATH_FLOURISH_COLOR.r, DEATH_FLOURISH_COLOR.g, DEATH_FLOURISH_COLOR.b, alpha)
-	mat.emission_enabled = true
-	mat.emission = DEATH_FLOURISH_COLOR
-	mat.emission_energy_multiplier = 0.55
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	return mat
 
 
 func _on_hit_finished() -> void:

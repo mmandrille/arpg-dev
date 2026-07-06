@@ -9,7 +9,7 @@
         "position": {
           "x": 0.0,
           "y": 0.0,
-          "z": -0.38
+          "z": 0.38
         },
         "rotation_degrees": {
           "x": 90.0,
@@ -31,7 +31,7 @@
         "position": {
           "x": 0.0,
           "y": 0.0,
-          "z": -0.48
+          "z": 0.48
         },
         "rotation_degrees": {
           "x": 90.0,
@@ -75,8 +75,7 @@
         },
         "paladin": {
           "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": -0.49 },
-            "rotation_degrees": { "x": 90.0, "y": 0.0, "z": 0.0 },
+            "position": { "x": 0.0, "y": 0.0, "z": 0.49 },
             "scale": { "x": 1.02, "y": 1.02, "z": 1.02 }
           }
         }
@@ -134,7 +133,7 @@
         "position": {
           "x": 0.0,
           "y": 0.0,
-          "z": -0.49
+          "z": 0.49
         },
         "rotation_degrees": {
           "x": 90.0,
@@ -156,7 +155,7 @@
         "position": {
           "x": 0.0,
           "y": 0.0,
-          "z": -0.36
+          "z": 0.36
         },
         "rotation_degrees": {
           "x": 90.0,
@@ -516,9 +515,9 @@
           "z": 0.0
         },
         "scale": {
-          "x": 1.0,
-          "y": 1.0,
-          "z": 1.0
+          "x": 2.0,
+          "y": 2.0,
+          "z": 2.0
         }
       },
       "class_transforms": {
@@ -538,9 +537,16 @@
         },
         "sorcerer": {
           "local_transform": {
-            "position": { "x": 0.0, "y": 0.03, "z": 0.0 },
+            "position": { "x": 0.0, "y": 0.06, "z": -0.03 },
             "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "scale": { "x": 0.98, "y": 0.98, "z": 0.98 }
+            "scale": { "x": 1.55, "y": 1.55, "z": 1.55 }
+          }
+        },
+        "paladin": {
+          "local_transform": {
+            "position": { "x": 0.0, "y": 0.06, "z": -0.52 },
+            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+            "scale": { "x": 5.3, "y": 5.3, "z": 5.3 }
           }
         }
       }
@@ -605,9 +611,9 @@
           "z": 0.0
         },
         "scale": {
-          "x": 1.0,
-          "y": 1.0,
-          "z": 1.0
+          "x": 2.0,
+          "y": 2.0,
+          "z": 2.0
         }
       },
       "class_transforms": {
@@ -627,9 +633,16 @@
         },
         "sorcerer": {
           "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+            "position": { "x": 0.0, "y": 0.0, "z": -0.02 },
             "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
             "scale": { "x": 0.94, "y": 1.02, "z": 0.94 }
+          }
+        },
+        "paladin": {
+          "local_transform": {
+            "position": { "x": 0.0, "y": 0.0, "z": -0.48 },
+            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+            "scale": { "x": 4.9, "y": 4.9, "z": 4.9 }
           }
         }
       }
@@ -795,33 +808,39 @@
       "local_transform": {
         "position": {
           "x": 0.0,
-          "y": 0.22,
-          "z": 0.06
+          "y": 0.06,
+          "z": 0.02
         },
         "rotation_degrees": {
           "x": 0.0,
-          "y": 0.0,
+          "y": 270.0,
           "z": 0.0
         },
         "scale": {
-          "x": 1.0,
-          "y": 1.0,
-          "z": 1.0
+          "x": 1.15,
+          "y": 1.15,
+          "z": 1.15
         }
       },
       "class_transforms": {
         "rogue": {
           "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+            "position": { "x": 0.0, "y": 0.04, "z": 0.02 },
+            "rotation_degrees": { "x": 0.0, "y": 270.0, "z": 0.0 },
             "scale": { "x": 0.88, "y": 0.88, "z": 0.88 }
           }
         },
         "barbarian": {
           "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
+            "position": { "x": 0.0, "y": 0.04, "z": 0.02 },
+            "rotation_degrees": { "x": 0.0, "y": 270.0, "z": 0.0 },
             "scale": { "x": 1.06, "y": 1.06, "z": 1.06 }
+          }
+        },
+        "paladin": {
+          "local_transform": {
+            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+            "scale": { "x": 1.08, "y": 1.08, "z": 1.08 }
           }
         }
       }

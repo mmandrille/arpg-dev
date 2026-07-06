@@ -267,7 +267,7 @@ func _local_transform_for_slot(slot: String, vis: Dictionary) -> Dictionary:
 	if slot != "off_hand" or str(vis.get("slot", slot)) == slot:
 		return transform
 	var position: Dictionary = (transform.get("position", {}) as Dictionary).duplicate(true)
-	position["z"] = -float(position.get("z", 0.0)) + 0.08
+	position["z"] = float(position.get("z", 0.0)) + 0.08
 	transform["position"] = position
 	var rotation: Dictionary = (transform.get("rotation_degrees", {}) as Dictionary).duplicate(true)
 	rotation["z"] = float(rotation.get("z", 0.0)) + 180.0

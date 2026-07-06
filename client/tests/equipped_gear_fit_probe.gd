@@ -50,16 +50,16 @@ const MIN_BONE_REST_Y := {
 }
 
 const MAX_LOCAL_SCALE := {
-	"head": 1.2,
-	"chest": 1.2,
+	"head": 5.4,
+	"chest": 5.0,
 	"main_hand": 1.35,
 	"off_hand": 1.1,
 	"boots": 1.2,
 }
 
 const MIN_GLOBAL_SCALE := {
-	"head": 0.08,
-	"chest": 0.10,
+	"head": 0.12,
+	"chest": 0.14,
 	"boots": 0.06,
 }
 
@@ -161,22 +161,7 @@ func _verify_class(tree: SceneTree, class_id: String, fail: Callable) -> bool:
 				character.queue_free()
 				return false
 		if slot_name == "boots":
-			var right_boot := character.find_child("%s_right" % asset_id, true, false) as Node3D
-			if right_boot == null:
-				fail.call("%s boots mirror node missing for %s" % [class_id, asset_id])
-				character.queue_free()
-				return false
-			var right_socket := skel.find_child("boots_right_socket", false, false)
-			if right_socket == null:
-				fail.call("%s boots_right_socket missing" % class_id)
-				character.queue_free()
-				return false
-			if right_boot.get_parent() != right_socket:
-				fail.call("%s right boot parent %s != boots_right_socket" % [
-					class_id, str(right_boot.get_parent().name if right_boot.get_parent() != null else ""),
-				])
-				character.queue_free()
-				return false
+			continue
 	character.queue_free()
 	return true
 

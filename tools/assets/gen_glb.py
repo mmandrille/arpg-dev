@@ -452,32 +452,52 @@ def _full_humanoid_glb(color, parts=None, extra_parts=None) -> bytes:
 
 
 def barbarian_glb() -> bytes:
-    """17-bone low-poly humanoid — frustum segments weighted to each bone."""
+    """17-bone low-poly humanoid — connected frustum stack, no internal cap rings."""
     skin = (0.66, 0.36, 0.25, 1.0)
     parts = [
-        # head (bone 4)
-        ( 4, ( 0.000,  1.762,  0.159), None, skin, _prism_geom(8, 0.13, 0.13, 0.28)),
-        # upper torso (bone 2): wide at shoulders, narrow at waist
-        ( 2, ( 0.000,  1.507,  0.159), None, skin, _prism_geom(8, 0.19, 0.23, 0.33)),
-        # lower torso (bone 1)
-        ( 1, ( 0.000,  1.236,  0.159), None, skin, _prism_geom(8, 0.17, 0.19, 0.32)),
-        # hips (bone 1)
-        ( 1, ( 0.000,  0.980,  0.159), None, skin, _prism_geom(8, 0.15, 0.17, 0.18)),
-        # right arm: upper (bone 8), forearm (bone 9), hand box (bone 10)
-        ( 8, ( 0.316,  1.285,  0.035), None, skin, _prism_geom(6, 0.045, 0.055, 0.32)),
-        ( 9, ( 0.252,  1.004,  0.044), None, skin, _prism_geom(6, 0.036, 0.045, 0.26)),
+        # --- Torso stack: shared boundaries, no internal caps ---
+        # Hips (bone 1): y [0.889, 1.050], r=0.17 both ends
+        ( 1, ( 0.000,  0.970,  0.159), None, skin,
+          _prism_geom(8, 0.17, 0.17, 0.161, cap_bot=True,  cap_top=False)),
+        # Lower torso (bone 1): y [1.050, 1.340], r 0.17→0.19
+        ( 1, ( 0.000,  1.195,  0.159), None, skin,
+          _prism_geom(8, 0.17, 0.19, 0.290, cap_bot=False, cap_top=False)),
+        # Upper torso (bone 2): y [1.340, 1.550], r 0.19→0.23
+        ( 2, ( 0.000,  1.445,  0.159), None, skin,
+          _prism_geom(8, 0.19, 0.23, 0.210, cap_bot=False, cap_top=False)),
+        # Neck (bone 3): y [1.550, 1.700], r 0.23→0.16
+        ( 3, ( 0.000,  1.625,  0.159), None, skin,
+          _prism_geom(8, 0.23, 0.16, 0.150, cap_bot=False, cap_top=False)),
+        # Head (bone 4): y [1.700, 1.902], r 0.16→0.13
+        ( 4, ( 0.000,  1.801,  0.159), None, skin,
+          _prism_geom(8, 0.16, 0.13, 0.202, cap_bot=False, cap_top=True)),
+        # --- Right arm: elbow joint connected, shoulder + wrist capped ---
+        # Upper arm (bone 8): y [1.131, 1.550], elbow at bottom (no cap)
+        ( 8, ( 0.316,  1.341,  0.035), None, skin,
+          _prism_geom(6, 0.042, 0.060, 0.419, cap_bot=False, cap_top=True)),
+        # Forearm (bone 9): y [0.877, 1.131], elbow at top (no cap)
+        ( 9, ( 0.252,  1.004,  0.044), None, skin,
+          _prism_geom(6, 0.036, 0.042, 0.254, cap_bot=True,  cap_top=False)),
         (10, ( 0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),  # box — too small for prism
-        # left arm: upper (bone 5), forearm (bone 6), hand box (bone 7)
-        ( 5, (-0.316,  1.285,  0.035), None, skin, _prism_geom(6, 0.045, 0.055, 0.32)),
-        ( 6, (-0.252,  1.004,  0.044), None, skin, _prism_geom(6, 0.036, 0.045, 0.26)),
+        # --- Left arm (mirrored X) ---
+        ( 5, (-0.316,  1.341,  0.035), None, skin,
+          _prism_geom(6, 0.042, 0.060, 0.419, cap_bot=False, cap_top=True)),
+        ( 6, (-0.252,  1.004,  0.044), None, skin,
+          _prism_geom(6, 0.036, 0.042, 0.254, cap_bot=True,  cap_top=False)),
         ( 7, (-0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),  # box — too small for prism
-        # right leg: thigh (bone 14), shin (bone 15), foot box (bone 16)
-        (14, ( 0.155,  0.690,  0.159), None, skin, _prism_geom(6, 0.062, 0.075, 0.40)),
-        (15, ( 0.194,  0.266,  0.132), None, skin, _prism_geom(6, 0.048, 0.062, 0.46)),
+        # --- Right leg: knee joint connected, hip + ankle capped ---
+        # Thigh (bone 14): y [0.493, 0.889], knee at bottom (no cap)
+        (14, ( 0.155,  0.691,  0.159), None, skin,
+          _prism_geom(6, 0.062, 0.075, 0.396, cap_bot=False, cap_top=True)),
+        # Shin (bone 15): y [0.039, 0.493], knee at top (no cap)
+        (15, ( 0.194,  0.266,  0.132), None, skin,
+          _prism_geom(6, 0.048, 0.062, 0.454, cap_bot=True,  cap_top=False)),
         (16, ( 0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),  # box — too small for prism
-        # left leg: thigh (bone 11), shin (bone 12), foot box (bone 13)
-        (11, (-0.155,  0.690,  0.159), None, skin, _prism_geom(6, 0.062, 0.075, 0.40)),
-        (12, (-0.194,  0.266,  0.132), None, skin, _prism_geom(6, 0.048, 0.062, 0.46)),
+        # --- Left leg (mirrored X) ---
+        (11, (-0.155,  0.691,  0.159), None, skin,
+          _prism_geom(6, 0.062, 0.075, 0.396, cap_bot=False, cap_top=True)),
+        (12, (-0.194,  0.266,  0.132), None, skin,
+          _prism_geom(6, 0.048, 0.062, 0.454, cap_bot=True,  cap_top=False)),
         (13, (-0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),  # box — too small for prism
     ]
     return _full_humanoid_glb(skin, parts=parts)

@@ -1,0 +1,79 @@
+docs/plans/v446_2026-07-06-wall-occlusion-fade.md
+  s_8770c6debe0679::t_55ee85a18b9ba5 1-45,48-50,53-59,62-64,68-75,77-84
+  s_8770c6debe0679::t_848652100a9449 46-47
+  s_8770c6debe0679::t_30b9c2452e4474 51-52
+  s_8770c6debe0679::t_ebd46b6e27b951 65-67
+  s_8770c6debe0679::t_bf86331a60c072 76
+  s_8770c6debe0679::t_e4037294b5ed6c 60-61
+client/scripts/wall_occlusion_runtime.gd
+  s_8770c6debe0679::t_4f6d919d087a24 1-26,30-31
+  s_8770c6debe0679::t_ff13425bfca970 27-29
+docs/as-built/v446_wall-occlusion-fade.md
+  s_8770c6debe0679::t_a32b92197567ec 1-32
+docs/specs/v446_spec-wall-occlusion-fade.md
+  s_8770c6debe0679::t_81eb5bc260d435 1-2,4-97
+  s_8770c6debe0679::t_971dc1b7890d4e 3
+client/scripts/wall_occlusion_presentation_loader.gd
+  s_8770c6debe0679::t_076baa554f7aeb 1-74
+tools/bot/scenarios/client/98_wall_occlusion_fade.json
+  s_8770c6debe0679::t_3b50455aaef6b2 1-33
+scripts/client_smoke.sh
+  s_8770c6debe0679::t_77a4e86468cc53 248
+client/scripts/bot_presentation_assertions.gd
+  s_8770c6debe0679::t_85e5c3355f8e78 29-31,33-34,36-56
+  s_8770c6debe0679::t_bfefd3eb458441 32,35
+client/scripts/wall_occlusion_fade.gd
+  s_8770c6debe0679::t_963c6d012ea01a 102-103,105-108,110-111,116,118-120,130-131,133
+  s_8770c6debe0679::t_802bdc7db4df2c 1-101,104,109,112-115,117,121-129,132,134-179
+shared/assets/wall_occlusion_presentation.v0.schema.json
+  s_8770c6debe0679::t_747f08af27fd0d 1-41
+shared/assets/wall_occlusion_presentation.v0.json
+  s_8770c6debe0679::t_19cef2fc5766b9 1-8
+PROGRESS.md
+  s_8770c6debe0679::t_f126aff0af15da 26,34
+client/tests/test_wall_occlusion_fade.gd
+  s_8770c6debe0679::t_13e76d8306e2b8 1-8,14-17,20-85
+  s_8770c6debe0679::t_a950f836a60a5b 9-13,18-19,86-89
+client/scripts/bot_assertion_handlers.gd
+  s_8770c6debe0679::t_b4c58ff1293858 53
+  s_8770c6debe0679::t_7a49ddbd4a4ae9 54-55,57
+  s_8770c6debe0679::t_cdc116204fcc64 56,58-60
+.maintainability/file-size-baseline.tsv
+  s_8770c6debe0679::t_d8e028ab598553 4
+  s_8770c6debe0679::t_53947e63fdaa0e 10
+client/scripts/wall_renderer.gd
+  s_8770c6debe0679::t_cf4cd55cba7563 177
+  s_8770c6debe0679::t_f4a9eee7958840 73
+  s_8770c6debe0679::t_44d8706382ff67 427-435,437-456
+  s_8770c6debe0679::t_14633a699d199d 457-488
+  s_8770c6debe0679::t_f1e99f35f85530 5
+  s_8770c6debe0679::t_4b7112d5157f98 6-7
+  s_8770c6debe0679::t_7823356d86474e 436
+  s_8770c6debe0679::t_8466c9ff623eae 13
+  s_8770c6debe0679::t_81005c29a6fe5d 14
+  s_8770c6debe0679::t_a0ac9df4ffdbcb 203
+  s_8770c6debe0679::t_364618de2889c4 74
+client/scripts/bot_step_catalog.gd
+  s_8770c6debe0679::t_86626c4edb23eb 38-39
+client/scripts/main.gd
+  s_8770c6debe0679::t_9be8db8fd105bc 6057
+  s_8770c6debe0679::t_17788878d68d8d 2570-2571
+docs/progress/slice-lifecycle.md
+  s_8770c6debe0679::t_a53f6926b593ed 433
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4c80b017215d8e05def2c3065cee65fc3817eba6",
+  "prompts": {},
+  "sessions": {
+    "s_8770c6debe0679": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f9bd82d7-6226-4d4d-a622-6f1e46e62ce5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

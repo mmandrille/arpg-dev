@@ -1,0 +1,23 @@
+tools/assets/class_body_morph.py
+  s_63be96fac64d0c::t_2e0a480a9ad950 130
+assets/characters/rogue/README.md
+  s_63be96fac64d0c::t_c56607894c60b1 10-11
+assets/manifests/assets.v0.json
+  s_63be96fac64d0c::t_e3c65a47f52fb1 156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "46efb3b6aa3591651673b7faf00727cc2f27e121",
+  "prompts": {},
+  "sessions": {
+    "s_63be96fac64d0c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "582c56f7-051e-485e-a94f-7cafe5ca6268",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

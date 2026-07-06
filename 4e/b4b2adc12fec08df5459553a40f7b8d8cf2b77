@@ -1,0 +1,19 @@
+client/tests/test_impact_sparks.gd
+  s_75c55c3a60e663::t_e9213eefed5763 1,18-19,26,29,57,65,67,69-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4eb4b2adc12fec08df5459553a40f7b8d8cf2b77",
+  "prompts": {},
+  "sessions": {
+    "s_75c55c3a60e663": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "384154bc-745a-47f2-95f5-a61ed3e755ec",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

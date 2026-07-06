@@ -8,6 +8,10 @@ static var _classes: Dictionary = {}
 static var _manifest_assets: Dictionary = {}
 
 
+static func invalidate() -> void:
+	_loaded = false
+
+
 static func ensure_loaded() -> void:
 	if _loaded:
 		return

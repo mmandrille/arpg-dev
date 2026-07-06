@@ -23,6 +23,9 @@ const ShowmeSkillIconCaptureScript := preload("res://scripts/showme/showme_skill
 const ShowmeItemIconCaptureScript := preload("res://scripts/showme/showme_item_icon_capture.gd")
 const ShowmeItemAssetCaptureScript := preload("res://scripts/showme/showme_item_asset_capture.gd")
 const ShowmeGearMatrixCaptureScript := preload("res://scripts/showme/showme_gear_matrix_capture.gd")
+const GearSocketsLoaderScript := preload("res://scripts/gear_sockets_loader.gd")
+const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
+const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 
 const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
@@ -51,6 +54,12 @@ var _output := ""
 var _width := 640
 var _height := 480
 var _duration := 0.0
+var _refresh_interval := 0.0
+var _rotation_period := 0.0
+var _rotation_speed := 0.35
+var _live_elapsed := 0.0
+var _gear_resolver: EquipmentVisualResolver
+var _gear_character: Node3D
 var _items: Array = []
 var _class_id := ""
 var _skill_id := ""
@@ -129,6 +138,10 @@ func _initialize() -> void:
 		await process_frame
 
 	if _mode == "live":
+		if _refresh_interval > 0.0 and _focus == "gear":
+			await _run_live_gear_refresh_loop()
+			quit(0)
+			return
 		if _duration > 0.0:
 			await create_timer(_duration).timeout
 			quit(0)
@@ -145,8 +158,58 @@ func _initialize() -> void:
 
 func _process(delta: float) -> bool:
 	if _mode == "live" and _subject != null:
-		_subject.rotate_y(delta * 0.35)
+		_subject.rotate_y(delta * _rotation_speed)
+
 	return false
+
+
+func _run_live_gear_refresh_loop() -> void:
+	if _rotation_period <= 0.0:
+		_rotation_period = _refresh_interval
+	_rotation_speed = TAU / _rotation_period
+
+	while true:
+		var wait := _refresh_interval
+		if _duration > 0.0:
+			var remaining := _duration - _live_elapsed
+			if remaining <= 0.0:
+				break
+			wait = minf(wait, remaining)
+
+		await create_timer(wait).timeout
+		_live_elapsed += wait
+		if _duration > 0.0 and _live_elapsed >= _duration:
+			break
+
+		await _refresh_gear_visuals()
+		if _subject != null:
+			_subject.rotation.y = deg_to_rad(-18.0)
+
+
+func _refresh_gear_visuals() -> void:
+	ItemRulesLoaderScript.invalidate()
+	ClassPresentationsLoaderScript.invalidate()
+	GearSocketsLoaderScript.invalidate()
+	EquipmentDisplayLoaderScript.invalidate()
+	ItemRulesLoaderScript.ensure_loaded()
+	ClassPresentationsLoaderScript.ensure_loaded()
+	GearSocketsLoaderScript.ensure_loaded()
+	EquipmentDisplayLoaderScript.ensure_loaded()
+
+	if _gear_character == null or _gear_resolver == null:
+		return
+
+	if _gear_character.has_method("refresh_gear_sockets"):
+		_gear_character.call("refresh_gear_sockets")
+
+	await process_frame
+	await process_frame
+	_gear_resolver.reload_data_only()
+	_gear_resolver.apply_snapshot(_gear_snapshot(_items))
+	var ap := _gear_character.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap != null:
+		ap.play("idle")
+	await process_frame
 
 func _parse_args() -> void:
 	_items = DEFAULT_GEAR_ITEMS.duplicate()
@@ -173,6 +236,12 @@ func _parse_args() -> void:
 			"--duration":
 				i += 1
 				_duration = float(args[i])
+			"--refresh":
+				i += 1
+				_refresh_interval = float(args[i])
+			"--rotation-period":
+				i += 1
+				_rotation_period = float(args[i])
 			"--items":
 				i += 1
 				_items = _split_items(str(args[i]))
@@ -229,6 +298,8 @@ func _setup_gear() -> void:
 
 	await process_frame
 	var resolver = EquipmentResolverScript.new(character)
+	_gear_character = character
+	_gear_resolver = resolver
 	if _class_id != "":
 		_apply_class_model(character, _class_id)
 		resolver.set_character_class(_class_id)

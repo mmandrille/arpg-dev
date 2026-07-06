@@ -21,6 +21,10 @@ static var item_presentation_families: Dictionary = {}
 static var _loaded: bool = false
 
 
+static func invalidate() -> void:
+	_loaded = false
+
+
 static func ensure_loaded() -> void:
 	if _loaded:
 		return

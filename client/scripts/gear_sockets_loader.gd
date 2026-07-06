@@ -6,6 +6,10 @@ static var _default_sockets: Dictionary = {}
 static var _class_overrides: Dictionary = {}
 
 
+static func invalidate() -> void:
+	_loaded = false
+
+
 static func ensure_loaded() -> void:
 	if _loaded:
 		return

@@ -32,6 +32,8 @@ def main() -> int:
     parser.add_argument("--width", type=int, default=640)
     parser.add_argument("--height", type=int, default=480)
     parser.add_argument("--duration", type=float, default=-1.0, help="Live mode timeout seconds; 0 keeps the window open until closed.")
+    parser.add_argument("--refresh", type=float, default=0.0, help="Live gear mode: reload shared configs every N seconds (0 = off).")
+    parser.add_argument("--rotation-period", type=float, default=0.0, help="Seconds for one 360° rotation in live mode; defaults to --refresh when set.")
     parser.add_argument("--godot", default="godot")
     args = parser.parse_args()
 
@@ -120,6 +122,10 @@ def main() -> int:
         "--duration",
         str(duration),
     ]
+    if args.refresh > 0.0:
+        cmd += ["--refresh", str(args.refresh)]
+    if args.rotation_period > 0.0:
+        cmd += ["--rotation-period", str(args.rotation_period)]
     if args.items:
         cmd += ["--items", args.items]
     if args.class_id:

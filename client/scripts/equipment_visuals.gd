@@ -483,6 +483,15 @@ func _warn(entry: Dictionary) -> void:
 	_warnings.append(entry)
 
 
+func reload_from_disk() -> void:
+	_load_data()
+	_refresh_all()
+
+
+func reload_data_only() -> void:
+	_load_data()
+
+
 func _load_data() -> void:
 	# Repo-root shared/manifest JSON via the v0 cross-language pattern
 	# (test_golden.gd): project root res:// is client/, so shared/ and assets/

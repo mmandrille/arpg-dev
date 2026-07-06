@@ -36,12 +36,12 @@ func _remove_gear_socket_nodes() -> void:
 	if skel != null:
 		for child in skel.get_children():
 			if socket_names.has(child.name):
-				child.queue_free()
+				child.free()
 		return
 	for socket_name in socket_names:
 		var existing := find_child(str(socket_name), true, false)
 		if existing != null:
-			existing.queue_free()
+			existing.free()
 
 
 func _ensure_gear_sockets() -> void:

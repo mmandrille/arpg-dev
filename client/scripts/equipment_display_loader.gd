@@ -6,6 +6,10 @@ static var _equipped_multiplier: float = 1.0
 static var _ground_multiplier: float = 1.0
 
 
+static func invalidate() -> void:
+	_loaded = false
+
+
 static func ensure_loaded() -> void:
 	if _loaded:
 		return

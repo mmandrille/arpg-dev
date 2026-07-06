@@ -1,4 +1,4 @@
-[gd_resource type="AnimationLibrary" format=3]
+[gd_resource type="AnimationLibrary" format=3 uid="uid://gg35xhb0v1xy"]
 
 [sub_resource type="Animation" id="Animation_attack"]
 length = 0.35
@@ -17,16 +17,6 @@ tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.12, 1, 0, 0.08715574, 0, 0.9961947, 0.35, 1, 0, 0, 0, 1)
 
-[sub_resource type="Animation" id="Animation_hit"]
-length = 0.3
-tracks/0/type = "rotation_3d"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Skeleton3D:spine")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.1, 1, -0.13052619, 0, 0, 0.9914449, 0.3, 1, 0, 0, 0, 1)
-
 [sub_resource type="Animation" id="Animation_death"]
 length = 0.5
 tracks/0/type = "rotation_3d"
@@ -36,6 +26,16 @@ tracks/0/path = NodePath("Skeleton3D:spine")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.5, 1, 0.6946584, 0, 0, 0.7193398)
+
+[sub_resource type="Animation" id="Animation_hit"]
+length = 0.3
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Skeleton3D:spine")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.1, 1, -0.13052619, 0, 0, 0.9914449, 0.3, 1, 0, 0, 0, 1)
 
 [sub_resource type="Animation" id="Animation_idle"]
 loop_mode = 1

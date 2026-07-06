@@ -1,0 +1,24 @@
+tools/assets/gen_glb.py
+  s_8dad5e42f3aa31::t_0232acba11fa56 383,418,443-444
+  s_8dad5e42f3aa31::t_bc074c6179a0b8 451-479
+assets/manifests/assets.v0.json
+  s_8dad5e42f3aa31::t_9a7362252bdcb4 32,63
+.maintainability/file-size-baseline.tsv
+  s_8dad5e42f3aa31::t_908c0e8e78fe36 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "db1a7fdd7147e2761ba58866dd6bf77638548343",
+  "prompts": {},
+  "sessions": {
+    "s_8dad5e42f3aa31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b804852f-a5da-4344-9edd-30dbd9489055",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

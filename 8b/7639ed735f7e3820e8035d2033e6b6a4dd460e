@@ -1,0 +1,60 @@
+tools/assets/barbarian_mesh.py
+  s_20b395b12292fb::t_e32ae443d40a0f 170-184,186-189
+  s_20b395b12292fb::t_9e1a0c095395bd 224-225,227-228,230-231,233-234
+  s_20b395b12292fb::t_aed91830fac614 339,342,345,350-356
+  s_20b395b12292fb::t_98a3995c9fc233 11
+  s_20b395b12292fb::t_b92ee80076736e 111,125-151,190-192
+  s_20b395b12292fb::t_e7944a3f5a766a 152-169,185
+  s_20b395b12292fb::t_99edbe35ca5de4 268-270,272,280,289,291,299,302-304
+  s_20b395b12292fb::t_6cfb21e5ee9d0e 281,284-287
+  s_20b395b12292fb::t_434b5e84a6c408 324
+  s_20b395b12292fb::t_275ef692d42c36 290,296
+  s_20b395b12292fb::t_d528525bf4144b 6
+  s_20b395b12292fb::t_5718b681d63b7c 114-124
+  s_20b395b12292fb::t_8c2ef2621fd18b 333
+  s_20b395b12292fb::t_b2a2350ca32c90 348-349
+  s_20b395b12292fb::t_78e156678fb69a 82,85,88,91-95,98-110
+  s_20b395b12292fb::t_6c90b915cf5d05 193-210
+  s_20b395b12292fb::t_68d4019548b55e 315
+  s_20b395b12292fb::t_356c27ebb05a2f 321-323,325,327,331-332,336-338,340,357-358,360-361
+  s_20b395b12292fb::t_a4f8d3be255088 305-314,316-317
+  s_20b395b12292fb::t_657e7656d45740 381-396
+  s_20b395b12292fb::t_619db80fe497cf 367,371,376-377
+  s_20b395b12292fb::t_0ecd001c31a166 271,273-277
+  s_20b395b12292fb::t_a809d12a6cd37e 288,292-294
+  s_20b395b12292fb::t_01801aef9a0e46 368-370,372-375,378-380
+  s_20b395b12292fb::t_2eb3aa87b1e05a 112-113
+tools/test_skin_blend.py
+  s_20b395b12292fb::t_ac87f075a29b04 43-51
+  s_20b395b12292fb::t_0db653685cea8f 71-88
+  s_20b395b12292fb::t_7550e625a0c1c3 8
+tools/assets/gen_glb.py
+  s_20b395b12292fb::t_ddc0b6f5c7a990 170
+  s_20b395b12292fb::t_e10ed51c3e725c 345
+  s_20b395b12292fb::t_6c4a2d8a4dd5ed 409,413-418
+  s_20b395b12292fb::t_dcb8ac6e56cb03 218-220
+  s_20b395b12292fb::t_bf35b0d2324548 30
+assets/manifests/assets.v0.json
+  s_20b395b12292fb::t_db4603bcd17c78 32,63
+tools/assets/geom_primitives.py
+  s_20b395b12292fb::t_a2b5ea8e01a820 148-164,166-193
+  s_20b395b12292fb::t_da8cd136285211 165
+tools/assets/skin_blend.py
+  s_20b395b12292fb::t_124b653453403d 119-147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "8b7639ed735f7e3820e8035d2033e6b6a4dd460e",
+  "prompts": {},
+  "sessions": {
+    "s_20b395b12292fb": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6c771dc4-7cfd-462a-8e73-79331333fce3",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

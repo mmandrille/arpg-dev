@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-06-barbarian-lowpoly-mesh-design.md
+  s_8dad5e42f3aa31::t_47f7fd957bc031 1-114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8de73359c9b2a2f8db9cdb7de82fed0eaa5e2825",
+  "prompts": {},
+  "sessions": {
+    "s_8dad5e42f3aa31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b804852f-a5da-4344-9edd-30dbd9489055",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

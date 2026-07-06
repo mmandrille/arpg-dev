@@ -35,6 +35,17 @@ func loadRules(t *testing.T) *Rules {
 	}
 	return rules
 }
+
+// dungeonScatterTestRules returns production rules with legacy divider+scatter layout
+// for tests that exercise v40 interior obstacles and generated doors.
+func dungeonScatterTestRules(t *testing.T) *Rules {
+	t.Helper()
+	rules := loadRules(t)
+	rules.DungeonGeneration.RoomCorridorPCG.Enabled = false
+	rules.DungeonGeneration.RoomLayout.Enabled = true
+	return rules
+}
+
 func loadRulesWithMainGameplay(t *testing.T, overrides map[string]any) *Rules {
 	t.Helper()
 	sourceDir, err := FindSharedRulesDir()
@@ -5858,7 +5869,7 @@ func TestDungeonMonsterGenerationCanForceElitePackLeaders(t *testing.T) {
 }
 
 func TestDungeonObstacleGeneration(t *testing.T) {
-	rules := loadRules(t)
+	rules := dungeonScatterTestRules(t)
 	level, err := GenerateDungeonLevel("v40_obstacles", -2, rules.DungeonGeneration)
 	if err != nil {
 		t.Fatalf("generate: %v", err)
@@ -5912,7 +5923,9 @@ func TestGeneratedDungeonTargetsReachable(t *testing.T) {
 }
 
 func TestGeneratedDungeonUnreachableTuningFailsClearly(t *testing.T) {
-	rules := cloneRules(loadRules(t))
+	rules := cloneRules(dungeonScatterTestRules(t))
+	rules.DungeonGeneration.RoomCorridorPCG.Enabled = false
+	rules.DungeonGeneration.RoomLayout.Enabled = false
 	rules.DungeonGeneration.ObstacleGeneration.MaxAttempts = 2
 	rules.DungeonGeneration.ObstacleGeneration.TargetGroupCount = IntRange{Min: 1, Max: 1}
 	rules.DungeonGeneration.ObstacleGeneration.ShapeWeights = ObstacleShapeWeights{Block: 1}

@@ -169,7 +169,7 @@ func TestTreasureChestOpensOnceAndDropsLoot(t *testing.T) {
 }
 
 func TestV40ObstaclesWoodenDoorActionAcks(t *testing.T) {
-	sim, err := NewSimWithWorld("sess_v40_door", "v40_obstacles", loadRules(t), "dungeon_levels")
+	sim, err := NewSimWithWorld("sess_v40_door", "v40_obstacles", dungeonScatterTestRules(t), "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}

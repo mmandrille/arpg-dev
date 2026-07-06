@@ -3,22 +3,22 @@
   "world_id": "generated_wall_lab",
   "seed": "wall_seed_00",
   "title": "Reachable dungeon obstacles",
-  "description": "On a pinned generated dungeon floor, prove authoritative interior walls are present and a wooden door remains reachable under the player path budget.",
+  "description": "On a pinned generated dungeon floor, prove structured room walls, water, and holes remain reachable under the player path budget.",
   "max_elapsed_s": 25.0,
   "steps": [
-    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "source": "generated", "at_least": 1 }, "timeout_s": 5 },
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "source": "room_wall", "at_least": 8 }, "timeout_s": 5 },
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "water", "at_least": 1 }, "timeout_s": 5 },
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "hole", "at_least": 1 }, "timeout_s": 5 },
     { "action": "wait_until_assertion", "assertion": { "type": "non_perimeter_wall_exists" }, "timeout_s": 5 },
-    { "action": "action_entity", "interactable_def_id": "wooden_door", "event_type": "interactable_activated", "timeout_s": 20 }
+    { "action": "use_stair", "direction": "down", "max_ticks": 360 }
   ],
   "assertions": [
-    { "type": "current_level", "equals": -1 },
-    { "type": "wall_count", "source": "generated", "at_least": 1 },
+    { "type": "current_level", "equals": -2 },
+    { "type": "wall_count", "source": "room_wall", "at_least": 8 },
     { "type": "wall_count", "kind": "water", "at_least": 1 },
     { "type": "wall_count", "kind": "hole", "at_least": 1 },
     { "type": "non_perimeter_wall_exists" },
-    { "type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open" }
+    { "type": "visited_levels_contain", "level": -2 }
   ],
   "visual": {
     "camera": { "x": 34, "y": 22, "zoom": 0.9 }

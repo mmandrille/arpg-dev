@@ -59,7 +59,7 @@ func (s *Sim) planPlayerPathSearch(nav NavigationRules, start, goal Vec2, blocke
 	goalCell := worldToGrid(nav, goal)
 	dist := octile(startCell, goalCell)
 	if dist > 0 {
-		scaled := dist*128 + 64
+		scaled := dist*320 + 64
 		if scaled > nodeLimit {
 			nodeLimit = scaled
 		}

@@ -117,8 +117,8 @@
   },
   "room_corridor_pcg": {
     "enabled": true,
-    "max_attempts": 48,
-    "room_count": { "min": 5, "max": 7 },
+    "max_attempts": 96,
+    "room_count": { "min": 4, "max": 6 },
     "hub_room_enabled": true,
     "hub_size_multiplier": 1.3,
     "room_size_min": { "x": 8, "y": 6 },
@@ -126,7 +126,7 @@
     "room_spacing": 4.0,
     "corridor_width": 2.0,
     "loop_edge_count": { "min": 1, "max": 2 },
-    "margin_from_perimeter": 4.0,
+    "margin_from_perimeter": 2.0,
     "disable_obstacle_scatter": true
   },
   "obstacle_generation": {

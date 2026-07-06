@@ -3,7 +3,7 @@ package game
 import "testing"
 
 func TestGeneratedDungeonDoorGeneration(t *testing.T) {
-	rules := loadRules(t)
+	rules := dungeonScatterTestRules(t)
 	level, err := GenerateDungeonLevel("v40_obstacles", -2, rules.DungeonGeneration)
 	if err != nil {
 		t.Fatalf("generate: %v", err)
@@ -43,7 +43,7 @@ func TestBossFloorExcludesGeneratedDoors(t *testing.T) {
 }
 
 func TestGeneratedDungeonDoorsPopulateAsClosedInteractables(t *testing.T) {
-	sim := MustNewSim("v261_generated_doors", "v40_obstacles", loadRules(t))
+	sim := MustNewSim("v261_generated_doors", "v40_obstacles", dungeonScatterTestRules(t))
 	level, err := sim.ensureDungeonLevel(-2)
 	if err != nil {
 		t.Fatalf("ensure dungeon: %v", err)

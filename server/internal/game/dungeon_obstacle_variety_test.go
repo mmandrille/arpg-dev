@@ -14,7 +14,9 @@ func TestObstacleVarietyGenerationUsesConfiguredSolidKinds(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			rules := loadRules(t).DungeonGeneration
+			rules := dungeonScatterTestRules(t).DungeonGeneration
+			rules.RoomCorridorPCG.Enabled = false
+			rules.RoomLayout.Enabled = false
 			rules.ObstacleGeneration.SolidKindWeights = tc.weights
 			level, err := GenerateDungeonLevel("v299_obstacle_variety_"+tc.name, -2, rules)
 			if err != nil {

@@ -84,6 +84,9 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 				}
 			}
 		}
+		if got.source == "room_wall" && got.shapeFamily != "" {
+			shapeFamilies[got.shapeFamily] = true
+		}
 		if id := wallID(level.levelNum, i); id != want.ID {
 			t.Fatalf("wall %d id = %s, want %s", i, id, want.ID)
 		}

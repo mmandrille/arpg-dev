@@ -1002,6 +1002,9 @@ func generatedTargetReachable(rules DungeonGenerationRules, out generatedDungeon
 }
 
 func generatedTargetReachableFrom(rules DungeonGenerationRules, out generatedDungeonLevel, start, target Vec2) bool {
+	if distance(start, target) <= playerRadius {
+		return true
+	}
 	nav := generatedDungeonNavigation(rules)
 	blocked := generatedDungeonBlockedFn(nav, out)
 	_, ok := PlanPath(nav, start, target, blocked)

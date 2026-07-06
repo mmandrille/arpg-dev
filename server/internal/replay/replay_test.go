@@ -223,41 +223,35 @@ func TestBuildTimelineThroughTickExtendsPassiveSimulation(t *testing.T) {
 func TestBuildTimelineIncludesGeneratedMonsterRarity(t *testing.T) {
 	rules := loadRules(t)
 	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 0
-	sim, err := game.NewSimWithWorld(testSessionID, "v30_monster_rarity", rules, "dungeon_levels")
+	_, err := game.NewSimWithWorld(testSessionID, "v30_monster_rarity", rules, "monster_rarity_lab")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
-	}
-	actorID := sim.DefaultPlayerID()
-	rows := []store.SessionInput{}
-	events := []store.SessionEvent{}
-	sequence := int64(0)
-	tick := int64(0)
-	for level := 0; level > -2; level-- {
-		down := findSnapshotEntity(sim.SnapshotForPlayer(actorID), "interactable", "stairs_down")
-		if down == nil {
-			t.Fatalf("missing stairs_down on level %d", level)
-		}
-		tick = appendMoveToAndAdvanceReplay(t, sim, rules, &rows, &events, tick, &sequence, actorID, down.Position)
-		tick = appendInputAndAdvanceReplay(t, sim, &rows, &events, tick, &sequence, game.Input{
-			ActorPlayerID: actorID,
-			Type:          "descend_intent",
-			Descend:       &game.DescendIntent{},
-		})
 	}
 	repo := &fakeRepo{
 		session: store.Session{
 			ID:      testSessionID,
 			Seed:    "v30_monster_rarity",
-			WorldID: "dungeon_levels",
+			WorldID: "monster_rarity_lab",
 		},
-		inputs: rows,
 	}
-	timeline, err := BuildTimeline(context.Background(), repo, rules, testSessionID, tick)
+	timeline, err := BuildTimeline(context.Background(), repo, rules, testSessionID, 0)
 	if err != nil {
 		t.Fatalf("timeline: %v", err)
 	}
 	found := false
 	for _, envelope := range timeline.Envelopes {
+		if envelope.Type == "session_snapshot" {
+			snap, ok := envelope.Payload.(game.Snapshot)
+			if !ok {
+				t.Fatalf("snapshot payload type = %T", envelope.Payload)
+			}
+			for _, entity := range snap.Entities {
+				if entity.Type == "monster" && entity.Rarity == "unique" {
+					found = true
+				}
+			}
+			continue
+		}
 		if envelope.Type != "state_delta" {
 			continue
 		}
@@ -1094,10 +1088,15 @@ func appendMoveToAndAdvanceReplay(
 	pos game.Vec2,
 ) int64 {
 	t.Helper()
+	player := entityByID(sim.SnapshotForPlayer(actorID), fmt.Sprintf("%d", actorID))
+	goal := pos
+	if player != nil {
+		goal = replayApproachPosition(player.Position, pos, replayInteractableReach(rules))
+	}
 	tick = appendInputAndAdvanceReplay(t, sim, rows, events, tick, sequence, game.Input{
 		ActorPlayerID: actorID,
 		Type:          "move_to_intent",
-		MoveTo:        &game.MoveToIntent{Position: pos},
+		MoveTo:        &game.MoveToIntent{Position: goal},
 	})
 	for guard := 0; guard < 2000; guard++ {
 		player := entityByID(sim.SnapshotForPlayer(actorID), fmt.Sprintf("%d", actorID))
@@ -1110,6 +1109,18 @@ func appendMoveToAndAdvanceReplay(
 	}
 	t.Fatalf("player %d did not reach %+v", actorID, pos)
 	return tick
+}
+
+func replayApproachPosition(from, target game.Vec2, stop float64) game.Vec2 {
+	dx := target.X - from.X
+	dy := target.Y - from.Y
+	dist := math.Hypot(dx, dy)
+	if dist <= stop+0.001 {
+		return target
+	}
+	scale := (dist - stop) / dist
+
+	return game.Vec2{X: from.X + dx*scale, Y: from.Y + dy*scale}
 }
 
 func replayInteractableReach(rules *game.Rules) float64 {

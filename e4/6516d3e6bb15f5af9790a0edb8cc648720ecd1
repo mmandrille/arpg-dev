@@ -1,0 +1,65 @@
+docs/specs/v447_spec-class-gear-retune.md
+  s_a2d2f2435be6f1::t_f26aa24d01339c 3
+  s_a2d2f2435be6f1::t_6354ecc2548c34 1-2,4-61
+PROGRESS.md
+  s_a2d2f2435be6f1::t_43e110756f8b60 26,34
+shared/assets/item_visuals.v0.json
+  s_a2d2f2435be6f1::t_274e7854008a43 488-489,494,497-499
+  s_a2d2f2435be6f1::t_e34d20c6065f5d 807-814,817-821,824-825
+  s_a2d2f2435be6f1::t_4dfd2340bf4b32 61-63,66-70,73-77,80
+  s_a2d2f2435be6f1::t_ecc8381d78d7f4 528,535,542
+  s_a2d2f2435be6f1::t_0a534563c37923 510,519-526,529-534,536-541,543-544
+  s_a2d2f2435be6f1::t_484992dce99c3d 158-159
+  s_a2d2f2435be6f1::t_05682bec5e9e52 11-12
+  s_a2d2f2435be6f1::t_d5f8e7d950b35a 50,57,64,71,78
+  s_a2d2f2435be6f1::t_66cc8ab97ee688 527
+  s_a2d2f2435be6f1::t_5b2910ba6389ac 180-181,186,189-191
+  s_a2d2f2435be6f1::t_a05fcaf72c8cc4 185,493
+  s_a2d2f2435be6f1::t_0c0844d9ad0f7b 798-799
+  s_a2d2f2435be6f1::t_b2844bc3534a23 136-137
+  s_a2d2f2435be6f1::t_d6e994349b21a4 600,608-615,618-622,625-629,632-633
+  s_a2d2f2435be6f1::t_6ac81ecbf78594 815-816,822-823
+  s_a2d2f2435be6f1::t_9b1f843ef35ba1 33-34
+  s_a2d2f2435be6f1::t_89c4d2be8eac65 65,72,79
+  s_a2d2f2435be6f1::t_4ba46b5b424d35 616-617,623-624,630-631
+client/tests/item_visual_scale_probe.gd
+  s_a2d2f2435be6f1::t_985f3aad668336 58
+shared/assets/gear_sockets.v0.json
+  s_a2d2f2435be6f1::t_e869fbc991d9de 11-12
+docs/plans/v447_2026-07-06-class-gear-retune.md
+  s_a2d2f2435be6f1::t_c5a51857165a1d 1-4,6-18,20,22-25,30-32,35-37,40-42,45-47,50-52
+  s_a2d2f2435be6f1::t_d17c3d942ffb09 5,19,21,26-29,33-34,38-39,43-44,48-49,53-55
+client/scripts/equipment_visuals.gd
+  s_a2d2f2435be6f1::t_6e3bef4ecea20b 211
+  s_a2d2f2435be6f1::t_0ee7805c13ca3f 318
+  s_a2d2f2435be6f1::t_806c494a575832 312-317,333-335,345,348-349
+  s_a2d2f2435be6f1::t_e3e8d9d8f8d17f 210
+  s_a2d2f2435be6f1::t_f8521ec91962d2 319-332,336,338-339,341-344,346-347
+  s_a2d2f2435be6f1::t_8562603f1cb7ca 337,340
+  s_a2d2f2435be6f1::t_b59b10b1078b73 270
+  s_a2d2f2435be6f1::t_2fb40ff13dbe70 60
+docs/progress/slice-lifecycle.md
+  s_a2d2f2435be6f1::t_b875755e904afb 433
+client/tests/equipped_gear_fit_probe.gd
+  s_a2d2f2435be6f1::t_27cdee93488877 146,150-151,157-179
+  s_a2d2f2435be6f1::t_af6f145520a149 152-156
+  s_a2d2f2435be6f1::t_b421b291ed9f0b 53-54,56-63
+docs/as-built/v447_class-gear-retune.md
+  s_a2d2f2435be6f1::t_5a93dd8b30d670 1-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e46516d3e6bb15f5af9790a0edb8cc648720ecd1",
+  "prompts": {},
+  "sessions": {
+    "s_a2d2f2435be6f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "40148032-aca0-4fb7-9a8d-94ac63ec5a0b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

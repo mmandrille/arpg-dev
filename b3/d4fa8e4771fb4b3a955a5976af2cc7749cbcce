@@ -1,0 +1,94 @@
+tools/assets/fix_skeleton.py
+  s_20b395b12292fb::t_2a9ea5e593bd45 130
+  s_20b395b12292fb::t_142fb650c8e1a7 11,13
+  s_20b395b12292fb::t_8f31a4e8fbfdab 25
+  s_20b395b12292fb::t_04be22ac0f5f02 2
+tools/assets/base_human_mesh.py
+  s_20b395b12292fb::t_3f16d6cd381e5e 1
+  s_20b395b12292fb::t_a662a517bc0054 365-366
+tools/test_skin_blend.py
+  s_20b395b12292fb::t_f623757491e026 52-53
+  s_20b395b12292fb::t_f3f9e468c82196 71-72
+  s_20b395b12292fb::t_63ba119efeba10 89-90
+  s_20b395b12292fb::t_10a0699d73a0cd 7
+tools/assets/test_validate_assets.py
+  s_20b395b12292fb::t_7643ad32c3a5f8 111,226,286,328
+  s_20b395b12292fb::t_1d24c82637ee33 19
+shared/assets/model_preview_catalog.v0.json
+  s_20b395b12292fb::t_1206f9b22891af 4,6,11-14
+assets/README.md
+  s_20b395b12292fb::t_b9a7d8253e8115 7
+assets/manifests/assets.v0.json
+  s_20b395b12292fb::t_5f4ab6f04a9a29 4,6-7,30
+client/assets/characters/base_human/base_human_f_txr_03.png.import
+  s_20b395b12292fb::t_f2ed732291690d 17
+  s_20b395b12292fb::t_59ba0a75c0e54b 6,18
+tools/assets/test_rig_hero_glbs.py
+  s_20b395b12292fb::t_81313989263c01 6
+  s_20b395b12292fb::t_8809a3e3abba42 96-100,104-106
+tools/assets/test_model_catalog.py
+  s_20b395b12292fb::t_bdbfc035086fd3 98-102
+  s_20b395b12292fb::t_5168d96d6773d8 94,111
+  s_20b395b12292fb::t_c04e0357bbf422 21,23
+  s_20b395b12292fb::t_c85ce50230ed92 51
+client/assets/README.md
+  s_20b395b12292fb::t_318b7ea9162ce9 9
+tools/test_gen_glb.py
+  s_20b395b12292fb::t_f69ccf595a5be9 41-42
+  s_20b395b12292fb::t_be9a5d98eb0f56 7
+tools/assets/gen_glb.py
+  s_20b395b12292fb::t_264dd4d8904403 348
+  s_20b395b12292fb::t_088b9263819939 412,416
+  s_20b395b12292fb::t_f4196a4b09492b 29
+assets/characters/base_human/README.md
+  s_20b395b12292fb::t_4c8f25baeb4ad0 1,3,5-10,15,23-24,26,31,37,41,46-47,62-63,66
+client/tools/build_animations.gd
+  s_20b395b12292fb::t_3edf5c4c2000ac 10
+.maintainability/file-size-baseline.tsv
+  s_20b395b12292fb::t_ddd1a4453ece5f 37
+client/tests/test_model_viewer.gd
+  s_20b395b12292fb::t_bf50ed86a6e087 12
+  s_20b395b12292fb::t_a76e378caf9565 19-22
+client/assets/characters/base_human/base_human_0.png.import
+  s_20b395b12292fb::t_59ba0a75c0e54b 6,18
+  s_20b395b12292fb::t_2a8621b839f125 17
+client/assets/characters/base_human/base_human.glb.import
+  s_20b395b12292fb::t_59ba0a75c0e54b 7,12
+  s_20b395b12292fb::t_45edf264b469f9 11
+client/tools/inspect_rig.gd
+  s_20b395b12292fb::t_81f080ca90b838 4
+client/scenes/character.tscn
+  s_20b395b12292fb::t_82591d66363e12 8
+client/scripts/class_presentations_loader.gd
+  s_20b395b12292fb::t_25351383680d49 4
+  s_20b395b12292fb::t_f8b795a9b0cf50 39
+  s_20b395b12292fb::t_77cb8cdbc3288d 65
+shared/assets/class_presentations.v0.json
+  s_20b395b12292fb::t_c5cd9349adc5f2 6,11,16,21,26
+client/tests/test_animation.gd
+  s_20b395b12292fb::t_3481085ff6c459 304
+  s_20b395b12292fb::t_146251e940abbc 237
+tools/assets/test_rig_canonical_hero.py
+  s_20b395b12292fb::t_985a8c05e31fdd 41
+  s_20b395b12292fb::t_e7cfdd87ba1f15 58
+  s_20b395b12292fb::t_58f8b6395b11db 52
+  s_20b395b12292fb::t_283e980eb93b72 82-83,85
+tools/assets/rig_hero_glbs.py
+  s_20b395b12292fb::t_26ff8856675e33 40-42,45,49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b3d4fa8e4771fb4b3a955a5976af2cc7749cbcce",
+  "prompts": {},
+  "sessions": {
+    "s_20b395b12292fb": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6c771dc4-7cfd-462a-8e73-79331333fce3",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

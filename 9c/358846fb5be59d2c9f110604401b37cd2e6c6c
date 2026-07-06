@@ -1,0 +1,62 @@
+server/internal/replay/replay_test.go
+  s_545cb816377490::t_9259042030da1a 226,234
+  s_545cb816377490::t_4bc53cbef48448 237
+  s_545cb816377490::t_c754974327cccf 243,245-254
+  s_545cb816377490::t_e1c675d78bab19 244
+  s_545cb816377490::t_e4723a871a8a5f 1091-1095,1099,1114-1123
+  s_545cb816377490::t_7b3f550de340b4 1124-1125
+server/internal/game/dungeon_doors_test.go
+  s_545cb816377490::t_f5a806cff4802e 46
+  s_545cb816377490::t_ceb2d0ba6e3eb3 6
+shared/rules/navigation.v0.json
+  s_545cb816377490::t_4e8fd8dc7e127a 8
+server/internal/game/dungeon_gen.go
+  s_545cb816377490::t_f15e6a2064c461 1005-1007
+tools/bot/scenarios/28_reachable_dungeon_obstacles.json
+  s_545cb816377490::t_3aa8ece670d95f 6,9,13,16-17,21
+shared/rules/dungeon_generation.v0.json
+  s_545cb816377490::t_b7c68ab1b1d3a0 120
+  s_545cb816377490::t_a0c9406d59a153 129
+  s_545cb816377490::t_00b1ed9ef01ec5 121
+shared/golden/dungeon_obstacles.json
+  s_545cb816377490::t_5570f961122653 9,69-70,73,82-83,86,95-96,99-100,108-109,113,121-122,126,134,138,147-148,151,160-161,164,173-174,178,186-187,191,199-200,203,212-213,216,225-226,229-230,238-239,243,251-252,256,264-265,268,277-278,281,290-291,295,303-304,316-317,327,341,355,445-446,453-454,461-462,469,477-478,485,493,501,509,517-518,525-526,533-534,541,549-550,557-558,565-566
+  s_545cb816377490::t_dab1982c4d0f47 269,282,294,329-330
+server/internal/game/dungeon_obstacle_variety_test.go
+  s_545cb816377490::t_6de93bc91b99a3 17-19
+server/internal/game/player_navigation_budget.go
+  s_545cb816377490::t_c89829efb5ec11 62
+server/internal/game/dungeon_room_corridors.go
+  s_545cb816377490::t_5dcef2952a1887 106-107,110-120
+  s_545cb816377490::t_fa4e73101b04c5 102-104
+  s_545cb816377490::t_9e4765d90127e4 152
+  s_545cb816377490::t_2172b08f53b743 9
+  s_545cb816377490::t_ecb7300698bb17 105,125
+  s_545cb816377490::t_86cbd61a864e29 124
+  s_545cb816377490::t_3561458003f4dc 189-190
+  s_545cb816377490::t_0fed0333abea08 159
+  s_545cb816377490::t_7c8028f211ef94 76
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_545cb816377490::t_22f02f34382c85 87-89
+server/internal/game/game_test.go
+  s_545cb816377490::t_4cac14734b295f 38-48
+  s_545cb816377490::t_59621d14d46068 5872
+  s_545cb816377490::t_7c58545f1fd290 5926-5928
+server/internal/game/interactables_test.go
+  s_545cb816377490::t_fba1baa6d10927 172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "9c358846fb5be59d2c9f110604401b37cd2e6c6c",
+  "prompts": {},
+  "sessions": {
+    "s_545cb816377490": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d2a75a68-3c7c-4d20-a0ff-c0fd5f19a56a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,71 @@
+tools/assets/rig_hero_glbs.py
+  s_63be96fac64d0c::t_2800933c852513 44-63,65,70-74
+client/tests/test_model_viewer.gd
+  s_63be96fac64d0c::t_ea3eec28ba1247 12
+  s_63be96fac64d0c::t_9fe8edaaa4ee8a 19-22
+PROGRESS.md
+  s_63be96fac64d0c::t_ecf57aa67c9f0e 26,34-35
+docs/as-built/v444_class-body-forks.md
+  s_63be96fac64d0c::t_d4f381adc0e5e9 1-44
+assets/manifests/assets.v0.json
+  s_63be96fac64d0c::t_01c21ed72aa9f5 35-189
+docs/progress/slice-lifecycle.md
+  s_63be96fac64d0c::t_ad71f423649333 433
+assets/characters/sorcerer/README.md
+  s_63be96fac64d0c::t_89394fb0cafb7d 1-10
+client/tests/test_animation.gd
+  s_63be96fac64d0c::t_84d5058db47044 237
+shared/assets/class_presentations.v0.json
+  s_63be96fac64d0c::t_704545038ae39d 6,11,16,21,26
+tools/assets/test_rig_hero_glbs.py
+  s_63be96fac64d0c::t_946560af8beff3 6-7
+  s_63be96fac64d0c::t_da23dd847ac735 98-106,113-116
+assets/characters/base_human/README.md
+  s_63be96fac64d0c::t_e2cb8ac17491ce 10
+tools/assets/test_class_body_morph.py
+  s_63be96fac64d0c::t_d9af7623a866c2 1-74
+docs/specs/v444_spec-class-body-forks.md
+  s_63be96fac64d0c::t_86db9d0893ee98 3
+  s_20b395b12292fb::t_3c5f9f0b8c1d6c 1-2,4-188
+docs/plans/v444_2026-07-06-class-body-forks.md
+  s_63be96fac64d0c::t_3f66a3bff56e93 3,14-23
+  s_63be96fac64d0c::t_7c5392cdaca8c8 1-2,4-13,24-33
+assets/characters/ranger/README.md
+  s_63be96fac64d0c::t_78011341e63f9c 1-10
+assets/characters/rogue/README.md
+  s_63be96fac64d0c::t_ea5debac012fcd 1-10
+make/shared.mk
+  s_63be96fac64d0c::t_0e2507b795daff 14
+assets/characters/barbarian/README.md
+  s_63be96fac64d0c::t_ab7ebea4898b9b 1-10
+assets/characters/paladin/README.md
+  s_63be96fac64d0c::t_e6c8c7ea3aac99 1-10
+tools/assets/class_body_morph.py
+  s_63be96fac64d0c::t_73bad835f4afea 1-221
+shared/assets/model_preview_catalog.v0.json
+  s_63be96fac64d0c::t_b004bf2bafb227 4,6-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "c26a8e3fb8cbd79854d4e66dad82737be3a752be",
+  "prompts": {},
+  "sessions": {
+    "s_20b395b12292fb": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6c771dc4-7cfd-462a-8e73-79331333fce3",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_63be96fac64d0c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "582c56f7-051e-485e-a94f-7cafe5ca6268",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

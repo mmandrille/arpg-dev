@@ -99,7 +99,7 @@ def _prism_geom(n: int, r_bot: float, r_top: float, h: float,
             pos.append((r_bot * math.cos(a), cy, r_bot * math.sin(a)))
             nrm.append(cn)
         for i in range(n):
-            idx += [c_bot, bot_edges[(i + 1) % n], bot_edges[i]]
+            idx += [c_bot, bot_edges[(i + 1) % n], bot_edges[i]]  # CW from below = CCW viewed from -y
     if cap_top:
         cy = hh
         cn = (0.0, 1.0, 0.0)

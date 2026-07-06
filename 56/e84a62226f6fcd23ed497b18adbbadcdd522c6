@@ -1,0 +1,41 @@
+client/assets/characters/sorcerer/sorcerer_f_txr_03.png.import
+  s_63be96fac64d0c::t_caf367422907e7 1-43
+  s_63be96fac64d0c::t_77bd35b320f2f7 44
+client/assets/characters/paladin/paladin_f_txr_03.png.import
+  s_63be96fac64d0c::t_caf367422907e7 1-43
+  s_63be96fac64d0c::t_7f15738d2a922b 44
+client/assets/characters/ranger/ranger_f_txr_03.png.import
+  s_63be96fac64d0c::t_caf367422907e7 1-43
+  s_63be96fac64d0c::t_772d39c7eaabf0 44
+client/assets/characters/rogue/rogue.glb.import
+  s_63be96fac64d0c::t_caf367422907e7 1-42
+client/assets/characters/sorcerer/sorcerer.glb.import
+  s_63be96fac64d0c::t_caf367422907e7 1-42
+client/assets/characters/ranger/ranger.glb.import
+  s_63be96fac64d0c::t_caf367422907e7 1-42
+client/assets/characters/rogue/rogue_f_txr_03.png.import
+  s_63be96fac64d0c::t_caf367422907e7 1-43
+  s_63be96fac64d0c::t_1751b676aebfa9 44
+client/assets/characters/paladin/paladin.glb.import
+  s_63be96fac64d0c::t_caf367422907e7 1-42
+client/assets/characters/barbarian/barbarian_f_txr_03.png.import
+  s_63be96fac64d0c::t_caf367422907e7 1-43
+client/assets/characters/barbarian/barbarian.glb.import
+  s_63be96fac64d0c::t_caf367422907e7 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "56e84a62226f6fcd23ed497b18adbbadcdd522c6",
+  "prompts": {},
+  "sessions": {
+    "s_63be96fac64d0c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "582c56f7-051e-485e-a94f-7cafe5ca6268",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -22,6 +22,7 @@ const ShowmeSkeletonCaptureScript := preload("res://scripts/showme/showme_skelet
 const ShowmeSkillIconCaptureScript := preload("res://scripts/showme/showme_skill_icon_capture.gd")
 const ShowmeItemIconCaptureScript := preload("res://scripts/showme/showme_item_icon_capture.gd")
 const ShowmeItemAssetCaptureScript := preload("res://scripts/showme/showme_item_asset_capture.gd")
+const ShowmeGearMatrixCaptureScript := preload("res://scripts/showme/showme_gear_matrix_capture.gd")
 
 const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
@@ -29,8 +30,6 @@ const ITEM_SLOT := {
 	"long_sword": "main_hand",
 	"sorcerer_staff": "main_hand",
 	"barbarian_axe": "main_hand",
-	"long_sword": "main_hand",
-	"shield": "off_hand",
 	"great_sword": "main_hand",
 	"war_sword": "main_hand",
 	"training_bow": "main_hand",
@@ -86,6 +85,8 @@ func _initialize() -> void:
 			await _setup_companions()
 		"classes":
 			await _setup_classes()
+		"gear-matrix":
+			_subject = await ShowmeGearMatrixCaptureScript.setup(self)
 		"heal-rain":
 			await _setup_heal_rain()
 		"town":

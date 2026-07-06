@@ -20,6 +20,50 @@ Baseline: v421–v425 gear/rig/asset corridor
 5. Verify: `make validate-assets`, `test_item_visuals.gd`
 6. Visual: `python3 skills/showme/scripts/render_focus.py --focus gear --class-id paladin`
 
+## Gear transform tuning notes
+
+Use these rules when adjusting equipped item size and placement:
+
+- `shared/assets/item_visuals.v0.json` controls the visible item's `asset_id`, slot, mount socket, and item-local transform.
+- `shared/assets/gear_sockets.v0.json` controls where sockets attach to skeleton bones. Change sockets when the whole class/socket is wrong; change item visuals when one item family is wrong.
+- Prefer base `local_transform` when a fit should apply to every class. Use `class_transforms.<class_id>.local_transform` only for later class-specific exceptions.
+- `scale` can be non-uniform. This is useful for fallback gear: a helmet can be wider/taller/deeper with different `x`, `y`, and `z` values instead of one uniform number.
+- The shared head-family fit uses `position { x: 0, y: 0.05, z: -0.11 }`, `scale { x: 1.8, y: 1.3, z: 1.9 }`.
+- The shared chest-family fit uses `position { x: 0.0, y: 0.08, z: -0.12 }`, `scale { x: 2.4, y: 2.4, z: 2.4 }`.
+- The shared boots-family fit uses `position { x: 0.0, y: 0.0, z: -0.1 }`, `rotation_degrees { x: 0.0, y: 270.0, z: 0.0 }`, `scale { x: 1.45, y: 1.45, z: 1.45 }`.
+- In the focused paladin gear view, larger positive/negative changes are easiest to judge through fast screenshots rather than reasoning from axes alone.
+
+Observed axis behavior from the paladin helmet/mail tuning loop:
+
+- Helmet `y` is vertical relative to the head socket in practice: increasing it made the helmet float upward; decreasing it moved the helmet down over the face.
+- Helmet `z` affected front/back fit in the render; negative `z` moved the helmet back toward the hair/head mass.
+- Mail `z` affected front/back fit; negative `z` moved the armor back into the paladin torso instead of protruding forward.
+- Mail `y` affected vertical placement; reducing an overly high value moved the armor lower on the chest.
+- Mail `x` recenters left/right. Keep it at `0.0` unless the piece is visibly shifted off the character centerline.
+
+Recommended iteration loop:
+
+1. Edit only one item entry or one class override at a time.
+2. Render the exact class and gear set:
+
+```bash
+python3 skills/showme/scripts/render_focus.py --focus gear --class-id paladin
+```
+
+3. Inspect the PNG under `.artifacts/showme/`.
+4. Validate structure and runtime resolution:
+
+```bash
+python3 -m json.tool shared/assets/item_visuals.v0.json
+godot --headless --path client --script res://tests/test_item_visuals.gd
+```
+
+5. If the change affects many classes or base gear, run the relevant batch suite:
+
+```bash
+make regen-screenshots SUITE=gear
+```
+
 ## Skeleton / rig loop (Tier 2–3)
 
 1. **Heroes:** `tools/assets/rig_hero_glbs.py` + `HERO_TARGET_HEIGHTS` (~1.85m)

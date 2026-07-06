@@ -284,7 +284,9 @@ func _merge_transform(base: Dictionary, override_transform: Dictionary) -> Dicti
 		if patch.is_empty():
 			continue
 		var existing: Dictionary = out.get(key, {}) if typeof(out.get(key, {})) == TYPE_DICTIONARY else {}
-		out[key] = existing.merged(patch)
+		var merged_component := existing.duplicate(true)
+		merged_component.merge(patch, true)
+		out[key] = merged_component
 	return out
 
 

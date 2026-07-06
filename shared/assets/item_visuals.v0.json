@@ -544,7 +544,7 @@
         },
         "paladin": {
           "local_transform": {
-            "position": { "x": 0.0, "y": 0.06, "z": -0.52 },
+            "position": { "x": 0.0, "y": 0.10, "z": 0.0 },
             "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
             "scale": { "x": 5.3, "y": 5.3, "z": 5.3 }
           }
@@ -640,7 +640,7 @@
         },
         "paladin": {
           "local_transform": {
-            "position": { "x": 0.0, "y": 0.0, "z": -0.48 },
+            "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
             "rotation_degrees": { "x": 0.0, "y": 0.0, "z": 0.0 },
             "scale": { "x": 4.9, "y": 4.9, "z": 4.9 }
           }

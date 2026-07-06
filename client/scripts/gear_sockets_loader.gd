@@ -49,7 +49,9 @@ static func _merge_socket_entry(base: Dictionary, override_entry: Dictionary) ->
 		if key == "offset" or key == "rotation_degrees":
 			var existing: Dictionary = out.get(key, {}) if typeof(out.get(key, {})) == TYPE_DICTIONARY else {}
 			var patch: Dictionary = override_entry.get(key, {}) if typeof(override_entry.get(key, {})) == TYPE_DICTIONARY else {}
-			out[key] = existing.merged(patch)
+			var merged_component := existing.duplicate(true)
+			merged_component.merge(patch, true)
+			out[key] = merged_component
 		else:
 			out[key] = override_entry[key]
 	return out

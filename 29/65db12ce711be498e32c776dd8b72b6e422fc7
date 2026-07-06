@@ -1,0 +1,73 @@
+docs/plans/v445_2026-07-06-dungeon-room-corridors.md
+  s_545cb816377490::t_8563c862390163 1-33
+server/internal/game/rules.go
+  s_545cb816377490::t_2db8c6a8d01e70 1869
+  s_545cb816377490::t_85de4f1818b7dd 1689
+  s_545cb816377490::t_a23cc3c4386730 1804-1806
+docs/progress/slice-lifecycle.md
+  s_545cb816377490::t_d12faaaad6f0fc 433
+server/internal/game/dungeon_room_layout.go
+  s_545cb816377490::t_de96ce3ae26833 39,41-43
+docs/as-built/v445_dungeon-room-corridors.md
+  s_545cb816377490::t_c5a9a06ff04641 1-20
+PROGRESS.md
+  s_545cb816377490::t_51352f5a5cd49d 26,34
+shared/golden/dungeon_obstacles.v0.schema.json
+  s_545cb816377490::t_2a0d1c87abde77 34,40
+  s_545cb816377490::t_fcebf1de4c4584 97
+shared/rules/dungeon_generation.v0.json
+  s_545cb816377490::t_5aaee7080a0442 105,118-130
+  s_545cb816377490::t_c787889b5734e2 131
+server/internal/game/dungeon_obstacles_golden_test.go
+  s_545cb816377490::t_05796204463b87 174-176
+docs/CODEMAP.md
+  s_545cb816377490::t_25cfbc6b56f407 15
+server/internal/game/dungeon_room_corridors_test.go
+  s_545cb816377490::t_b017584c534361 1-93
+docs/specs/v445_spec-dungeon-room-corridors.md
+  s_545cb816377490::t_94b664b35286be 1-2,4-92
+  s_545cb816377490::t_eb15ac3ec56fbe 3
+server/internal/game/dungeon_generation_rules.go
+  s_545cb816377490::t_0cc4b9d1faf79a 18
+server/internal/game/dungeon_generated_types.go
+  s_545cb816377490::t_2321564dead7a2 12
+server/internal/game/dungeon_room_corridors.go
+  s_545cb816377490::t_4e117b5d460780 316-319
+  s_545cb816377490::t_afb7252c93df6d 124-127,129-135,137-142,144-145
+  s_545cb816377490::t_6483c3f17d2f1b 329-332
+  s_545cb816377490::t_3bcf0d60c85b67 1-75,79,91-123,128,136,143,146-315,320-328,333-430,436-493
+  s_545cb816377490::t_04b639e3b1ac25 76-78,80-90
+  s_545cb816377490::t_57bbac735b4f86 431-435
+server/internal/game/dungeon_gen.go
+  s_545cb816377490::t_379a1e5d6d88d9 209-211
+server/internal/game/dungeon_profiles.go
+  s_545cb816377490::t_80f5501521e966 42-87
+shared/rules/dungeon_generation.v0.schema.json
+  s_545cb816377490::t_92e2691b73ce20 20
+  s_545cb816377490::t_075516e25928ae 189-220
+server/internal/game/dungeon_room_layout_test.go
+  s_545cb816377490::t_f4679c20257cb6 92,94,100-101,113-114
+  s_545cb816377490::t_0cb7535634781e 7-9,27-29
+shared/golden/dungeon_obstacles.json
+  s_545cb816377490::t_4e88c15d36491a 14
+  s_545cb816377490::t_0deacbe5351d80 9-10,16,69-70,73,76,82-83,86,89,95-96,99,102,108-109,112-113,115,121-122,125-126,128,134-135,138,141-142,147-148,151,154-155,160-161,164,167-168,173-174,178,180-181,186-187,190-191,193-194,199-200,203,206-207,212-213,216-217,219-220,225-226,229-230,232-233,238-239,242-243,245-246,251-252,255-256,258-259,264-265,268-269,271-272,277-278,281,284-285,290-291,294,297-298,303-395,399-515,523,537,551,627-628,635-636,643-644,651,659-660,667,675,683,691,699-700,707-708,715-716,723,731-732,739-740,747-748
+tools/validate_dungeon_goldens.py
+  s_545cb816377490::t_a7b4cc83e8f921 25,31,36-42
+  s_545cb816377490::t_6e2264f0610e77 65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2965db12ce711be498e32c776dd8b72b6e422fc7",
+  "prompts": {},
+  "sessions": {
+    "s_545cb816377490": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d2a75a68-3c7c-4d20-a0ff-c0fd5f19a56a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

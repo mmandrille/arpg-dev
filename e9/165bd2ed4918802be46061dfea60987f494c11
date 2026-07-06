@@ -1,0 +1,37 @@
+shared/golden/monster_chase.json
+  s_5b93f58fd4096d::t_5857537903eb52 12
+tools/assets/gen_glb_equipment.py
+  s_5b93f58fd4096d::t_5857537903eb52 188
+server/internal/game/dungeon_gen.go
+  s_5b93f58fd4096d::t_5857537903eb52 952-953,955,959,1004-1007,1011-1017,1021-1025
+.maintainability/file-size-baseline.tsv
+  s_5b93f58fd4096d::t_21d37f495e8c3d 38
+server/internal/replay/replay_test.go
+  s_5b93f58fd4096d::t_e2f3761f5570e2 1094
+shared/golden/auto_path.json
+  s_5b93f58fd4096d::t_5857537903eb52 10
+tools/bot/scenarios/client/14_dungeon_wall_rendering.json
+  s_5b93f58fd4096d::t_6078577c3629f8 5
+server/internal/game/dungeon_reachability_grid.go
+  s_5b93f58fd4096d::t_9cc2a2d5749d1e 1-51
+assets/manifests/assets.v0.json
+  s_5b93f58fd4096d::t_5857537903eb52 201,215,229,243,257,271,285,299,327,341,355,383,397,411,425
+docs/CODEMAP.md
+  s_5b93f58fd4096d::t_5857537903eb52 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e9165bd2ed4918802be46061dfea60987f494c11",
+  "prompts": {},
+  "sessions": {
+    "s_5b93f58fd4096d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "25d166c9-43a3-4cf1-a94b-5f909f3d2972",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

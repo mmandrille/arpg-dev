@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tools.assets.geom_primitives import _prism_between, _prism_geom
+from tools.assets.geom_primitives import _prism_between, _prism_ellipse_geom, _prism_geom
 from tools.assets.gen_glb import _build_skinned_glb, barbarian_glb
 
 
@@ -54,6 +54,13 @@ def test_prism_geom_one_cap_vertex_count():
     pos, nrm, idx = _prism_geom(8, 0.1, 0.1, 0.2, cap_bot=True, cap_top=False)
     assert len(pos) == 5 * 8 + 1   # 41 — sides + bottom cap only
     assert len(idx) == 9 * 8       # 72
+
+
+def test_prism_ellipse_matches_circle():
+    pos_c, nrm_c, idx_c = _prism_geom(8, 0.1, 0.1, 0.2)
+    pos_e, nrm_e, idx_e = _prism_ellipse_geom(8, 0.1, 0.1, 0.1, 0.1, 0.2)
+    assert len(pos_c) == len(pos_e)
+    assert len(idx_c) == len(idx_e)
 
 
 def test_prism_between_endpoints():

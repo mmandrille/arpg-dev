@@ -29,7 +29,7 @@
       "provenance": {
         "origin": "Redirected to barbarian.glb (shared base humanoid). See character_barbarian_v0 for full provenance.",
         "license": "CC0-1.0",
-        "sha256": "f9722a7b28a838cea41a79ac35d920ff4c59195b64d1a660f5b762f5bb31b966"
+        "sha256": "e23a2f3bf3679145695f8779fd4f59a45b712b6911152d337998648c9c85a58f"
       }
     },
     "character_barbarian_v0": {
@@ -60,7 +60,7 @@
       "provenance": {
         "origin": "tools/assets/gen_glb.py barbarian_glb() — procedural low-poly skinned humanoid; legacy external mesh: assets/characters/barbarian/goliath_barbarian.glb",
         "license": "CC0-1.0",
-        "sha256": "f9722a7b28a838cea41a79ac35d920ff4c59195b64d1a660f5b762f5bb31b966"
+        "sha256": "e23a2f3bf3679145695f8779fd4f59a45b712b6911152d337998648c9c85a58f"
       }
     },
     "character_sorcerer_v0": {

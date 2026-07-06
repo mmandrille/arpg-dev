@@ -26,7 +26,7 @@ import math
 import struct
 from pathlib import Path
 
-from tools.assets.geom_primitives import _extrapolate, _prism_between, _prism_geom
+from tools.assets.barbarian_mesh import barbarian_parts
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -173,14 +173,20 @@ def _build_skinned_glb(color, joints, parts):
     parts:  3-element (joint_idx, (tx,ty,tz), (sx,sy,sz)) -- scaled unit cube
             4-element (..., color)                          -- scaled cube with per-part color
             5-element (..., None, color, (pos,nrm,idx))     -- custom pre-baked geometry
-            All forms are fully weighted (1.0) to joint_idx.
+            6-element (..., geom, weight_fn)                -- per-vertex multi-bone weights
+            Without weight_fn, vertices are 100% joint_idx.
     """
     cube_pos, cube_nrm, cube_idx = _cube_geometry()
     globals_ = _joint_globals(joints)
 
     positions, normals, colors0, indices, joints0, weights0 = [], [], [], [], [], []
     for part in parts:
-        if len(part) == 5:
+        weight_fn = None
+        if len(part) == 6:
+            joint_idx, (tx, ty, tz), _, part_color, (geom_pos, geom_nrm, geom_idx), weight_fn = part
+            if part_color is None:
+                part_color = color
+        elif len(part) == 5:
             joint_idx, (tx, ty, tz), _, part_color, (geom_pos, geom_nrm, geom_idx) = part
             if part_color is None:
                 part_color = color
@@ -195,11 +201,16 @@ def _build_skinned_glb(color, joints, parts):
             geom_nrm, geom_idx = cube_nrm, cube_idx
         base = len(positions)
         for (px, py, pz), n in zip(geom_pos, geom_nrm):
-            positions.append((px + tx, py + ty, pz + tz))
+            wx, wy, wz = px + tx, py + ty, pz + tz
+            positions.append((wx, wy, wz))
             normals.append(n)
             colors0.append(part_color)
-            joints0.append((joint_idx, 0, 0, 0))
-            weights0.append((1.0, 0.0, 0.0, 0.0))
+            if weight_fn is not None:
+                j, w = weight_fn(wx, wy, wz)
+            else:
+                j, w = (joint_idx, 0, 0, 0), (1.0, 0.0, 0.0, 0.0)
+            joints0.append(j)
+            weights0.append(w)
         for i in geom_idx:
             indices.append(base + i)
 
@@ -395,93 +406,8 @@ def _full_humanoid_glb(color, parts=None, extra_parts=None) -> bytes:
 
 
 def barbarian_glb() -> bytes:
-    """17-bone low-poly humanoid — bone-aligned limbs and shoulder bridges."""
-    skin = (0.66, 0.36, 0.25, 1.0)
-    # Frozen bind-pose world positions (matches _full_humanoid_glb joints).
-    arm_r = (0.351, 1.440, 0.030)
-    elbow_r = (0.281, 1.131, 0.040)
-    hand_r = (0.223, 0.877, 0.048)
-    arm_l = (-0.351, 1.440, 0.030)
-    elbow_l = (-0.281, 1.131, 0.040)
-    hand_l = (-0.223, 0.877, 0.048)
-    leg_r = (0.155, 0.887, 0.159)
-    knee_r = (0.155, 0.493, 0.159)
-    foot_r = (0.232, 0.039, 0.105)
-    leg_l = (-0.155, 0.887, 0.159)
-    knee_l = (-0.155, 0.493, 0.159)
-    foot_l = (-0.232, 0.039, 0.105)
-    hip_y = 0.889
-    n_body, n_limb = 10, 8
-    parts = [
-        # --- Torso stack: shared boundaries, no internal caps ---
-        ( 1, (0.000, 0.970, 0.159), None, skin,
-          _prism_geom(n_body, 0.17, 0.17, 0.161, cap_bot=True, cap_top=False)),
-        ( 1, (0.000, 1.195, 0.159), None, skin,
-          _prism_geom(n_body, 0.17, 0.19, 0.290, cap_bot=False, cap_top=False)),
-        ( 2, (0.000, 1.445, 0.159), None, skin,
-          _prism_geom(n_body, 0.19, 0.23, 0.210, cap_bot=False, cap_top=False)),
-        ( 3, (0.000, 1.625, 0.159), None, skin,
-          _prism_geom(n_body, 0.23, 0.16, 0.150, cap_bot=False, cap_top=False)),
-        ( 4, (0.000, 1.801, 0.159), None, skin,
-          _prism_geom(n_body, 0.16, 0.13, 0.202, cap_bot=False, cap_top=True)),
-        # Shoulder mass + bridges: chest → upper arm (closes the torso gap).
-        ( 2, (0.185, 1.485, 0.159), None, skin,
-          _prism_geom(6, 0.135, 0.115, 0.130, cap_bot=False, cap_top=False)),
-        ( 2, (-0.185, 1.485, 0.159), None, skin,
-          _prism_geom(6, 0.135, 0.115, 0.130, cap_bot=False, cap_top=False)),
-        ( 2, (0.0, 0.0, 0.0), None, skin,
-          _prism_between((0.195, 1.520, 0.145), arm_r, 6, 0.125, 0.088,
-                         cap_bot=False, cap_top=False)),
-        ( 2, (0.0, 0.0, 0.0), None, skin,
-          _prism_between((-0.195, 1.520, 0.145), arm_l, 6, 0.125, 0.088,
-                         cap_bot=False, cap_top=False)),
-        # Hip mass: torso → thigh.
-        ( 1, (0.105, 0.935, 0.159), None, skin,
-          _prism_geom(6, 0.130, 0.095, 0.120, cap_bot=False, cap_top=False)),
-        ( 1, (-0.105, 0.935, 0.159), None, skin,
-          _prism_geom(6, 0.130, 0.095, 0.120, cap_bot=False, cap_top=False)),
-        # --- Right arm: bone-aligned, elbow connected ---
-        ( 8, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(arm_r, elbow_r, n_limb, 0.088, 0.044,
-                         cap_bot=False, cap_top=True)),
-        ( 9, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(elbow_r, hand_r, n_limb, 0.044, 0.036,
-                         cap_bot=False, cap_top=True)),
-        (10, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(hand_r, _extrapolate(elbow_r, hand_r, 0.35), 6, 0.036, 0.030,
-                         cap_bot=True, cap_top=False)),
-        # --- Left arm ---
-        ( 5, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(arm_l, elbow_l, n_limb, 0.088, 0.044,
-                         cap_bot=False, cap_top=True)),
-        ( 6, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(elbow_l, hand_l, n_limb, 0.044, 0.036,
-                         cap_bot=False, cap_top=True)),
-        ( 7, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(hand_l, _extrapolate(elbow_l, hand_l, 0.35), 6, 0.036, 0.030,
-                         cap_bot=True, cap_top=False)),
-        # --- Right leg ---
-        (14, (0.0, 0.0, 0.0), None, skin,
-          _prism_between((leg_r[0], hip_y, leg_r[2]), knee_r, n_limb, 0.075, 0.064,
-                         cap_bot=False, cap_top=True)),
-        (15, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(knee_r, foot_r, n_limb, 0.064, 0.050,
-                         cap_bot=False, cap_top=True)),
-        (16, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(foot_r, _extrapolate(knee_r, foot_r, 0.25), 6, 0.050, 0.042,
-                         cap_bot=True, cap_top=False)),
-        # --- Left leg ---
-        (11, (0.0, 0.0, 0.0), None, skin,
-          _prism_between((leg_l[0], hip_y, leg_l[2]), knee_l, n_limb, 0.075, 0.064,
-                         cap_bot=False, cap_top=True)),
-        (12, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(knee_l, foot_l, n_limb, 0.064, 0.050,
-                         cap_bot=False, cap_top=True)),
-        (13, (0.0, 0.0, 0.0), None, skin,
-          _prism_between(foot_l, _extrapolate(knee_l, foot_l, 0.25), 6, 0.050, 0.042,
-                         cap_bot=True, cap_top=False)),
-    ]
-    return _full_humanoid_glb(skin, parts=parts)
+    """17-bone low-poly humanoid — elliptical torso, bone-aligned limbs, silhouette pads."""
+    return _full_humanoid_glb((0.66, 0.36, 0.25, 1.0), parts=barbarian_parts())
 
 
 def sorcerer_glb() -> bytes:

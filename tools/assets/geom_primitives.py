@@ -6,23 +6,34 @@ import math
 
 def _prism_geom(n: int, r_bot: float, r_top: float, h: float,
                 cap_bot: bool = True, cap_top: bool = True):
-    """N-sided frustum centered on Y axis (y: -h/2 to +h/2), flat-shaded faces.
+    """Circular frustum — delegates to ellipse with rx=rz=r."""
+    return _prism_ellipse_geom(n, r_bot, r_bot, r_top, r_top, h, cap_bot, cap_top)
 
-    cap_bot/cap_top=False suppresses the disc at that end — use at internal
-    joints between adjacent frustums to remove visible ring separations.
-    """
+
+def _prism_ellipse_geom(
+    n: int,
+    rx_bot: float, rz_bot: float,
+    rx_top: float, rz_top: float,
+    h: float,
+    cap_bot: bool = True,
+    cap_top: bool = True,
+):
+    """Elliptical frustum on Y (x=rx*cos, z=rz*sin) — deeper side profile than front/back."""
     pos, nrm, idx = [], [], []
     hh = h / 2.0
     for i in range(n):
         a0 = 2 * math.pi * i / n
         a1 = 2 * math.pi * (i + 1) / n
         am = (a0 + a1) / 2.0
-        bl = (r_bot * math.cos(a0), -hh, r_bot * math.sin(a0))
-        br = (r_bot * math.cos(a1), -hh, r_bot * math.sin(a1))
-        tr = (r_top * math.cos(a1),  hh, r_top * math.sin(a1))
-        tl = (r_top * math.cos(a0),  hh, r_top * math.sin(a0))
-        dr = (r_top - r_bot) / h if h else 0.0
-        raw = (math.cos(am), -dr, math.sin(am))
+        bl = (rx_bot * math.cos(a0), -hh, rz_bot * math.sin(a0))
+        br = (rx_bot * math.cos(a1), -hh, rz_bot * math.sin(a1))
+        tr = (rx_top * math.cos(a1),  hh, rz_top * math.sin(a1))
+        tl = (rx_top * math.cos(a0),  hh, rz_top * math.sin(a0))
+        drx = (rx_top - rx_bot) / h if h else 0.0
+        drz = (rz_top - rz_bot) / h if h else 0.0
+        nx = math.cos(am)
+        nz = math.sin(am)
+        raw = (nx, -(nx * drx + nz * drz), nz)
         nl = math.sqrt(sum(v * v for v in raw))
         fn = tuple(v / nl for v in raw)
         b = len(pos)
@@ -40,7 +51,7 @@ def _prism_geom(n: int, r_bot: float, r_top: float, h: float,
         for i in range(n):
             a = 2 * math.pi * i / n
             bot_edges.append(len(pos))
-            pos.append((r_bot * math.cos(a), cy, r_bot * math.sin(a)))
+            pos.append((rx_bot * math.cos(a), cy, rz_bot * math.sin(a)))
             nrm.append(cn)
         for i in range(n):
             idx += [c_bot, bot_edges[(i + 1) % n], bot_edges[i]]
@@ -54,7 +65,7 @@ def _prism_geom(n: int, r_bot: float, r_top: float, h: float,
         for i in range(n):
             a = 2 * math.pi * i / n
             top_edges.append(len(pos))
-            pos.append((r_top * math.cos(a), cy, r_top * math.sin(a)))
+            pos.append((rx_top * math.cos(a), cy, rz_top * math.sin(a)))
             nrm.append(cn)
         for i in range(n):
             idx += [c_top, top_edges[i], top_edges[(i + 1) % n]]

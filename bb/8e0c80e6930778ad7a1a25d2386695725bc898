@@ -1,0 +1,19 @@
+assets/manifests/assets.v0.json
+  s_63be96fac64d0c::t_8e7f238e7df777 201,215,229,243,257,271,285,299,327,341,355,383,397,411,425,463,485
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "bb8e0c80e6930778ad7a1a25d2386695725bc898",
+  "prompts": {},
+  "sessions": {
+    "s_63be96fac64d0c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "582c56f7-051e-485e-a94f-7cafe5ca6268",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

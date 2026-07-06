@@ -58,8 +58,14 @@ def _pad(buf: bytearray, alignment: int = 4, fill: int = 0) -> None:
         buf.append(fill)
 
 
-def _prism_geom(n: int, r_bot: float, r_top: float, h: float):
-    """N-sided frustum centered on Y axis (y: -h/2 to +h/2), flat-shaded faces."""
+def _prism_geom(n: int, r_bot: float, r_top: float, h: float,
+                cap_bot: bool = True, cap_top: bool = True):
+    """N-sided frustum centered on Y axis (y: -h/2 to +h/2), flat-shaded faces.
+
+    cap_bot/cap_top=False suppresses the disc at that end — use at internal
+    joints between adjacent frustums to remove visible ring separations.
+    Vertex counts: both caps 6n+2, one cap 5n+1, no caps 4n.
+    """
     pos, nrm, idx = [], [], []
     hh = h / 2.0
     # Side faces: 4n vertices (4 per quad face)
@@ -80,38 +86,34 @@ def _prism_geom(n: int, r_bot: float, r_top: float, h: float):
             pos.append(v)
             nrm.append(fn)
         idx += [b, b + 1, b + 2, b, b + 2, b + 3]
-    # Bottom cap: 1 center + n edge vertices
-    cy = -hh
-    cn = (0.0, -1.0, 0.0)
-    c_bot = len(pos)
-    pos.append((0.0, cy, 0.0))
-    nrm.append(cn)
-    bot_edges = []
-    for i in range(n):
-        a = 2 * math.pi * i / n
-        bot_edges.append(len(pos))
-        pos.append((r_bot * math.cos(a), cy, r_bot * math.sin(a)))
+    if cap_bot:
+        cy = -hh
+        cn = (0.0, -1.0, 0.0)
+        c_bot = len(pos)
+        pos.append((0.0, cy, 0.0))
         nrm.append(cn)
-    for i in range(n):
-        p0 = bot_edges[i]
-        p1 = bot_edges[(i + 1) % n]
-        idx += [c_bot, p1, p0]  # CW from below = CCW viewed from -y
-    # Top cap: 1 center + n edge vertices
-    cy = hh
-    cn = (0.0, 1.0, 0.0)
-    c_top = len(pos)
-    pos.append((0.0, cy, 0.0))
-    nrm.append(cn)
-    top_edges = []
-    for i in range(n):
-        a = 2 * math.pi * i / n
-        top_edges.append(len(pos))
-        pos.append((r_top * math.cos(a), cy, r_top * math.sin(a)))
+        bot_edges = []
+        for i in range(n):
+            a = 2 * math.pi * i / n
+            bot_edges.append(len(pos))
+            pos.append((r_bot * math.cos(a), cy, r_bot * math.sin(a)))
+            nrm.append(cn)
+        for i in range(n):
+            idx += [c_bot, bot_edges[(i + 1) % n], bot_edges[i]]
+    if cap_top:
+        cy = hh
+        cn = (0.0, 1.0, 0.0)
+        c_top = len(pos)
+        pos.append((0.0, cy, 0.0))
         nrm.append(cn)
-    for i in range(n):
-        p0 = top_edges[i]
-        p1 = top_edges[(i + 1) % n]
-        idx += [c_top, p0, p1]  # CCW viewed from +y
+        top_edges = []
+        for i in range(n):
+            a = 2 * math.pi * i / n
+            top_edges.append(len(pos))
+            pos.append((r_top * math.cos(a), cy, r_top * math.sin(a)))
+            nrm.append(cn)
+        for i in range(n):
+            idx += [c_top, top_edges[i], top_edges[(i + 1) % n]]
     return pos, nrm, idx
 
 

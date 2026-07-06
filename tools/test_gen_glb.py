@@ -41,3 +41,15 @@ def test_barbarian_glb_is_valid_gltf():
     data = barbarian_glb()
     assert data[:4] == b"glTF"
     assert len(data) > 10_000
+
+
+def test_prism_geom_no_caps_vertex_count():
+    pos, nrm, idx = _prism_geom(8, 0.1, 0.1, 0.2, cap_bot=False, cap_top=False)
+    assert len(pos) == 4 * 8   # 32 — side faces only
+    assert len(idx) == 6 * 8   # 48
+
+
+def test_prism_geom_one_cap_vertex_count():
+    pos, nrm, idx = _prism_geom(8, 0.1, 0.1, 0.2, cap_bot=True, cap_top=False)
+    assert len(pos) == 5 * 8 + 1   # 41 — sides + bottom cap only
+    assert len(idx) == 9 * 8       # 72

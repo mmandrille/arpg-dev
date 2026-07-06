@@ -225,8 +225,10 @@ def _build_skinned_glb(color, joints, parts):
     """Build a .glb with a single skinned mesh + a skeleton.
 
     joints: [(name, parent_idx, (lx,ly,lz))]  -- translation-only bind pose
-    parts:  [(joint_idx, (tx,ty,tz), (sx,sy,sz))] -- a cube baked into mesh space,
-            fully weighted (1.0) to joint_idx.
+    parts:  3-element (joint_idx, (tx,ty,tz), (sx,sy,sz)) -- scaled unit cube
+            4-element (..., color)                          -- scaled cube with per-part color
+            5-element (..., None, color, (pos,nrm,idx))     -- custom pre-baked geometry
+            All forms are fully weighted (1.0) to joint_idx.
     """
     cube_pos, cube_nrm, cube_idx = _cube_geometry()
     globals_ = _joint_globals(joints)
@@ -388,7 +390,7 @@ def _full_humanoid_glb(color, parts=None, extra_parts=None) -> bytes:
     mesh part is centered at its controlling bone's world position so the
     editor shows bones inside the mesh without any Blender work.
 
-    Bone index map (used by extra_parts):
+    Bone index map (used by parts= and extra_parts):
       0=root 1=spine 2=chest 3=neck 4=head
       5=arm_l  6=elbow_l  7=hand_l
       8=arm_r  9=elbow_r 10=hand_r
@@ -462,19 +464,19 @@ def barbarian_glb() -> bytes:
         # right arm: upper (bone 8), forearm (bone 9), hand box (bone 10)
         ( 8, ( 0.316,  1.285,  0.035), None, skin, _prism_geom(6, 0.045, 0.055, 0.32)),
         ( 9, ( 0.252,  1.004,  0.044), None, skin, _prism_geom(6, 0.036, 0.045, 0.26)),
-        (10, ( 0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),
+        (10, ( 0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),  # box — too small for prism
         # left arm: upper (bone 5), forearm (bone 6), hand box (bone 7)
         ( 5, (-0.316,  1.285,  0.035), None, skin, _prism_geom(6, 0.045, 0.055, 0.32)),
         ( 6, (-0.252,  1.004,  0.044), None, skin, _prism_geom(6, 0.036, 0.045, 0.26)),
-        ( 7, (-0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),
+        ( 7, (-0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),  # box — too small for prism
         # right leg: thigh (bone 14), shin (bone 15), foot box (bone 16)
         (14, ( 0.155,  0.690,  0.159), None, skin, _prism_geom(6, 0.062, 0.075, 0.40)),
         (15, ( 0.194,  0.266,  0.132), None, skin, _prism_geom(6, 0.048, 0.062, 0.46)),
-        (16, ( 0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),
+        (16, ( 0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),  # box — too small for prism
         # left leg: thigh (bone 11), shin (bone 12), foot box (bone 13)
         (11, (-0.155,  0.690,  0.159), None, skin, _prism_geom(6, 0.062, 0.075, 0.40)),
         (12, (-0.194,  0.266,  0.132), None, skin, _prism_geom(6, 0.048, 0.062, 0.46)),
-        (13, (-0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),
+        (13, (-0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),  # box — too small for prism
     ]
     return _full_humanoid_glb(skin, parts=parts)
 

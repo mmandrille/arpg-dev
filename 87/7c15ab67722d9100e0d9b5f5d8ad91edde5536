@@ -1,0 +1,34 @@
+tools/assets/geom_primitives.py
+  s_20b395b12292fb::t_8532298f33feae 1-136
+assets/manifests/assets.v0.json
+  s_20b395b12292fb::t_0060c7abc4f424 32,63
+  s_20b395b12292fb::t_08153552b84888 61
+.maintainability/file-size-baseline.tsv
+  s_20b395b12292fb::t_47f191166d40b6 37
+tools/test_gen_glb.py
+  s_20b395b12292fb::t_8b0a05dbe6fb1a 57-66
+  s_20b395b12292fb::t_6e6f4f7af03c24 6-7
+tools/assets/gen_glb.py
+  s_20b395b12292fb::t_425e7a9789dc75 29-30
+  s_20b395b12292fb::t_e9772fa5df2bf7 398,400-414,418,420,422,424,426,432,434-435,437,443-444,446-454,456-482
+  s_20b395b12292fb::t_5e2e0042c949ce 417,419,421,423,425
+  s_20b395b12292fb::t_7e7881a2339dc7 427-431,433,436,438-442
+  s_20b395b12292fb::t_744644518b07e6 455
+  s_20b395b12292fb::t_4e75a93bd0e457 445
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "877c15ab67722d9100e0d9b5f5d8ad91edde5536",
+  "prompts": {},
+  "sessions": {
+    "s_20b395b12292fb": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6c771dc4-7cfd-462a-8e73-79331333fce3",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

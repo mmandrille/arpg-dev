@@ -1,0 +1,111 @@
+server/internal/game/weapon_stat_damage_test.go
+  s_039d989bf21e3a::t_2614055baed8b1 48
+server/internal/http/starter_loadout_test.go
+  s_039d989bf21e3a::t_f8044e4e4cc920 22-26
+server/internal/http/starter_loadout.go
+  s_039d989bf21e3a::t_8d662a886ebff6 48
+  s_039d989bf21e3a::t_ac10915a5c3c30 36-37
+  s_039d989bf21e3a::t_49eab47a56f2b0 42-43
+  s_039d989bf21e3a::t_c00a4254427fc2 26
+  s_039d989bf21e3a::t_532a7fab375fb9 31
+client/tests/test_loot_node_factory.gd
+  s_039d989bf21e3a::t_2614055baed8b1 31,36,48,53
+tools/bot/scenarios/60_ranger_volley_and_visual_showcase.json
+  s_039d989bf21e3a::t_2614055baed8b1 38,110
+server/internal/game/item_rarity_test.go
+  s_039d989bf21e3a::t_2614055baed8b1 100
+client/tests/equipped_gear_fit_probe.gd
+  s_039d989bf21e3a::t_f71e9e110d15ba 200
+  s_039d989bf21e3a::t_34b0422125ba49 15-19
+  h_e5f15a920467af 53-57
+tools/bot/scenarios/58_ranger_class_foundation.json
+  s_039d989bf21e3a::t_2614055baed8b1 49,179
+client/tests/test_factories.gd
+  s_039d989bf21e3a::t_2614055baed8b1 228,231,234
+shared/assets/item_visuals.v0.schema.json
+  s_a2d2f2435be6f1::t_460f35f422aa50 56
+tools/bot/scenarios/51_barbarian_class_foundation.json
+  s_039d989bf21e3a::t_2614055baed8b1 49,155
+tools/bot/scenarios/108_skill_weapon_damage_scaling.json
+  s_039d989bf21e3a::t_2614055baed8b1 41,45
+client/tests/test_item_icon_drawer.gd
+  s_039d989bf21e3a::t_2614055baed8b1 16
+server/internal/game/mercenary_character_test.go
+  s_039d989bf21e3a::t_2614055baed8b1 405,417
+shared/assets/item_visuals.v0.json
+  s_a2d2f2435be6f1::t_ac7768bd89a2f1 34,42-44
+  s_a2d2f2435be6f1::t_00ccb3742e5b7f 408,416-418
+  s_039d989bf21e3a::t_34b0422125ba49 341,350-352,592-594
+  s_a2d2f2435be6f1::t_b2a8d0fac3a5b8 583-584
+server/internal/game/rogue_skills_test.go
+  s_039d989bf21e3a::t_2614055baed8b1 303-304
+client/tests/item_visual_scale_probe.gd
+  s_039d989bf21e3a::t_2614055baed8b1 20-21
+server/internal/game/skill_affixes_test.go
+  s_039d989bf21e3a::t_2614055baed8b1 13,45,48
+server/internal/game/game_test.go
+  s_039d989bf21e3a::t_2614055baed8b1 1751,2734,2744,2762
+tools/bot/scenarios/52_sorcerer_class_foundation.json
+  s_039d989bf21e3a::t_2614055baed8b1 49,177
+server/internal/game/character_stats_test.go
+  s_039d989bf21e3a::t_2614055baed8b1 184
+shared/rules/unique_items.v0.json
+  s_039d989bf21e3a::t_2614055baed8b1 37
+tools/bot/scenarios/80_skill_affix_rolls.json
+  s_039d989bf21e3a::t_2614055baed8b1 12,16-17,28-29
+shared/assets/gear_sockets.v0.json
+  s_a2d2f2435be6f1::t_b62c2168a18815 48,56
+  h_e5f15a920467af 15-16
+  s_a2d2f2435be6f1::t_4b3ee01cb04e4f 23-24,79-80
+tools/bot/scenarios/50_paladin_class_foundation.json
+  s_039d989bf21e3a::t_2614055baed8b1 48,53,227,232
+tools/bot/test_protocol.py
+  s_039d989bf21e3a::t_2614055baed8b1 499,508-509,522
+client/scripts/showme/visual_capture.gd
+  s_039d989bf21e3a::t_2614055baed8b1 30-33,335
+client/tests/test_stash_panel.gd
+  s_039d989bf21e3a::t_2614055baed8b1 263-265
+client/tests/test_sustained_input.gd
+  s_039d989bf21e3a::t_2614055baed8b1 204
+tools/bot/scenarios/47_rogue_class_foundation.json
+  s_039d989bf21e3a::t_2614055baed8b1 233,238
+server/internal/game/unique_chest_test.go
+  s_039d989bf21e3a::t_2614055baed8b1 139
+tools/bot/scenarios/46_class_starter_loadout.json
+  s_039d989bf21e3a::t_2614055baed8b1 14
+shared/rules/item_templates.v0.json
+  s_039d989bf21e3a::t_32ccb65e32c85c 289-290,292,295,297-298,301-302,308-309,315,321,354,356-357,367-368,370-371,374-375,387,422-423,434-435,442-443,490-491,493,502,504,507,510-511,518,527-530,533-537,571-572,574,582-585,588-589,592-593,600,608-613,646-647,649-650,652,661-662,666-669,672,674-698,702-709,711,714,716,721,723,728,730-739,742,744-745,747-748,751-752,755,759-762,766,768-769,771-772,776,779-780,784,787,790-793,796-798,800,804,806-807,809-810,814,817-818,822,825,828,830-831,835,837-838,840-841,845,848-850,854-856,860,3071-3384
+shared/rules/worlds.v0.json
+  s_039d989bf21e3a::t_2614055baed8b1 1425
+client/tests/item_visual_equipment_probe.gd
+  s_039d989bf21e3a::t_2614055baed8b1 112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "84b009c9db028ce8f8c691a56dd0146eb03d0ab8",
+  "prompts": {},
+  "humans": {
+    "h_e5f15a920467af": {
+      "author": "mmandrille <mmandrille@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_039d989bf21e3a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5fa09089-c204-483f-86bc-6df7e3eaa038",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_a2d2f2435be6f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "40148032-aca0-4fb7-9a8d-94ac63ec5a0b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

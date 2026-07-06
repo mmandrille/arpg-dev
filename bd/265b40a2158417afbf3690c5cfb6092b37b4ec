@@ -1,0 +1,27 @@
+client/scripts/equipment_visuals.gd
+  s_a2d2f2435be6f1::t_68dc97a125fbce 287-289
+shared/assets/gear_sockets.v0.json
+  s_a2d2f2435be6f1::t_1452825d308b87 110,117,124,131
+  s_a2d2f2435be6f1::t_b6b59354c7adad 118-123,125-130
+client/scripts/gear_sockets_loader.gd
+  s_a2d2f2435be6f1::t_79a2e61c5142ee 52-54
+shared/assets/item_visuals.v0.json
+  s_a2d2f2435be6f1::t_aa406b923810f1 643
+  s_a2d2f2435be6f1::t_80e2618c532fb8 547
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bd265b40a2158417afbf3690c5cfb6092b37b4ec",
+  "prompts": {},
+  "sessions": {
+    "s_a2d2f2435be6f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "40148032-aca0-4fb7-9a8d-94ac63ec5a0b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

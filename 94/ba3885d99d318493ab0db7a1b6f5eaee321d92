@@ -1,0 +1,21 @@
+tools/assets/gen_glb.py
+  s_8dad5e42f3aa31::t_cb078c2867d557 102
+.maintainability/file-size-baseline.tsv
+  s_8dad5e42f3aa31::t_ad80f23d451ac0 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "94ba3885d99d318493ab0db7a1b6f5eaee321d92",
+  "prompts": {},
+  "sessions": {
+    "s_8dad5e42f3aa31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b804852f-a5da-4344-9edd-30dbd9489055",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

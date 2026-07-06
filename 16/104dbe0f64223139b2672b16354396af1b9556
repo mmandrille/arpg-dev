@@ -1,0 +1,19 @@
+docs/superpowers/plans/2026-07-06-barbarian-lowpoly-mesh.md
+  s_8dad5e42f3aa31::t_05cfbe7305f94c 1-371
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "16104dbe0f64223139b2672b16354396af1b9556",
+  "prompts": {},
+  "sessions": {
+    "s_8dad5e42f3aa31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b804852f-a5da-4344-9edd-30dbd9489055",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

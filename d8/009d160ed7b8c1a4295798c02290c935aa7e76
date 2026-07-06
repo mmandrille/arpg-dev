@@ -1,0 +1,53 @@
+shared/assets/item_visuals.v0.json
+  s_a2d2f2435be6f1::t_5ecb8d0d8d9f60 158
+  s_a2d2f2435be6f1::t_365335dbd6bc54 12
+  s_a2d2f2435be6f1::t_2918ade9c8eed7 643
+  s_a2d2f2435be6f1::t_53fb6e6aaa8ecf 636,640-642
+  s_a2d2f2435be6f1::t_0ff247b10e7e81 540,542-546
+  s_a2d2f2435be6f1::t_8320dc4c7134f9 644
+  s_a2d2f2435be6f1::t_4dcaf8143a87e3 820-822,843
+  s_a2d2f2435be6f1::t_8054359443ee77 840
+  s_a2d2f2435be6f1::t_30f3a162f70f9c 34
+  s_a2d2f2435be6f1::t_4650943bdb6fa2 136
+  s_a2d2f2435be6f1::t_e464e2d0c21e49 547
+  s_a2d2f2435be6f1::t_056ccb84e24eb1 816
+  s_a2d2f2435be6f1::t_d2c0234570f4c3 614-616,645
+  s_a2d2f2435be6f1::t_c78979c247c23d 518-520,549
+  s_a2d2f2435be6f1::t_578b089a71c2ad 842
+  s_a2d2f2435be6f1::t_26c3d5559049c6 828,835,839
+  s_a2d2f2435be6f1::t_6d6c234cd05090 829,836
+  s_a2d2f2435be6f1::t_9355abe3d90fb8 811-812
+  s_a2d2f2435be6f1::t_363c17a5e93dde 78
+  s_a2d2f2435be6f1::t_27eb2a765d60f7 548
+client/tests/equipped_gear_fit_probe.gd
+  s_a2d2f2435be6f1::t_f3bae290aff4fd 61-62
+  s_a2d2f2435be6f1::t_5a26bc8490adf3 53-54
+  s_a2d2f2435be6f1::t_495aa76f878540 164
+shared/assets/gear_sockets.v0.json
+  h_e5f15a920467af 23
+  s_a2d2f2435be6f1::t_11090ec079fa8b 43-58
+  s_a2d2f2435be6f1::t_ccb7f9c128094c 106-119
+client/scripts/equipment_visuals.gd
+  s_a2d2f2435be6f1::t_8a15fd43cbd228 270
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d8009d160ed7b8c1a4295798c02290c935aa7e76",
+  "prompts": {},
+  "humans": {
+    "h_e5f15a920467af": {
+      "author": "mmandrille <mmandrille@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a2d2f2435be6f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "40148032-aca0-4fb7-9a8d-94ac63ec5a0b",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

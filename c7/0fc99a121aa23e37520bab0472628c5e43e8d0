@@ -1,0 +1,23 @@
+docs/progress/scenario-movement-audit.tsv
+  s_c8780b0c64ec3f::t_009db2f73b382f 15-20,22-31,33,85,91,98,105-106,108,112,114,117,119,123-125,128-132,168,175,223-224,227,230,232-242,244,249
+tools/bot/ci_pack.py
+  s_c8780b0c64ec3f::t_c816edb136d527 84
+server/internal/game/sim.go
+  s_c8780b0c64ec3f::t_400c4679685ac3 1748-1762
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c70fc99a121aa23e37520bab0472628c5e43e8d0",
+  "prompts": {},
+  "sessions": {
+    "s_c8780b0c64ec3f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "36dc9035-0404-4691-8359-e71f264a44af",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

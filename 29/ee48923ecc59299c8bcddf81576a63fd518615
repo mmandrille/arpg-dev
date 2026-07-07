@@ -1,0 +1,25 @@
+skills/showme/SKILL.md
+  s_70664371392708::t_b2b6fc488261cc 189-191
+  s_70664371392708::t_4935c633b43772 55-57,62-88
+  s_70664371392708::t_80d0c445293852 35-36
+README.md
+  s_70664371392708::t_f8150e4bb65d90 123-138
+skills/README.md
+  s_70664371392708::t_f019d8be36c8c2 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "29ee48923ecc59299c8bcddf81576a63fd518615",
+  "prompts": {},
+  "sessions": {
+    "s_70664371392708": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "15a832e5-eee2-454f-b049-feb7344f577c",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

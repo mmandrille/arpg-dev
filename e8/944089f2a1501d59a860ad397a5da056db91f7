@@ -1,0 +1,21 @@
+PROGRESS.md
+  s_c8780b0c64ec3f::t_32761af732ad5c 27
+.maintainability/file-size-baseline.tsv
+  s_c8780b0c64ec3f::t_397ae5a4ec04d9 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e8944089f2a1501d59a860ad397a5da056db91f7",
+  "prompts": {},
+  "sessions": {
+    "s_c8780b0c64ec3f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "36dc9035-0404-4691-8359-e71f264a44af",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

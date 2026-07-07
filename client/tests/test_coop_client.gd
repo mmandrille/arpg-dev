@@ -1416,7 +1416,7 @@ func _test_basic_attack_recovery_cue_lives_on_character_bar() -> void:
 	main.skill_progression = {
 		"unspent_skill_points": 0,
 		"skills": [
-			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false},
+			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 10, "can_spend": false},
 		],
 	}
 	main.skill_cooldowns = []
@@ -1455,7 +1455,7 @@ func _test_expired_skill_cooldown_not_restored_by_left_click_refresh() -> void:
 	main.skill_progression = {
 		"unspent_skill_points": 0,
 		"skills": [
-			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false},
+			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 10, "can_spend": false},
 		],
 	}
 	main.skill_cooldowns = [{"skill_id": "magic_bolt", "remaining_ticks": 2, "total_ticks": 40}]
@@ -1486,8 +1486,8 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	main.skill_progression = {
 		"unspent_skill_points": 0,
 		"skills": [
-			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false},
-			{"skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false},
+			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 10, "can_spend": false},
+			{"skill_id": "heal", "rank": 1, "max_rank": 10, "can_spend": false},
 		],
 	}
 	var event := InputEventKey.new()
@@ -1513,7 +1513,7 @@ func _test_skill_function_key_selects_right_click_skill() -> void:
 	main.right_click_skill_id = ""
 	main.skill_progression = {
 		"unspent_skill_points": 1,
-		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true}],
+		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 10, "can_spend": true}],
 	}
 	_assert_true("unranked skill can still be bound", main._assign_skill_function_key(1, "magic_bolt"))
 	_assert_true("unranked binding cannot select right click", not main._select_right_click_skill_from_function_key(1))
@@ -1537,8 +1537,8 @@ func _test_skill_function_key_assigns_while_skills_panel_open() -> void:
 	main.skill_progression = {
 		"unspent_skill_points": 0,
 		"skills": [
-			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false},
-			{"skill_id": "heal", "rank": 1, "max_rank": 5, "can_spend": false},
+			{"skill_id": "magic_bolt", "rank": 1, "max_rank": 10, "can_spend": false},
+			{"skill_id": "heal", "rank": 1, "max_rank": 10, "can_spend": false},
 		],
 	}
 	main.skills_panel.set_skill_progression(main.skill_progression)
@@ -1571,13 +1571,13 @@ func _test_learned_skill_auto_selects_right_click() -> void:
 	var main = MainScript.new()
 	main.skill_progression = {
 		"unspent_skill_points": 0,
-		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 5, "can_spend": false}],
+		"skills": [{"skill_id": "magic_bolt", "rank": 1, "max_rank": 10, "can_spend": false}],
 	}
 	main._refresh_skill_ui()
 	_assert_eq("learned only active skill auto-selects right click", main.right_click_skill_id, "magic_bolt")
 	main.skill_progression = {
 		"unspent_skill_points": 1,
-		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true}],
+		"skills": [{"skill_id": "magic_bolt", "rank": 0, "max_rank": 10, "can_spend": true}],
 	}
 	main._refresh_skill_ui()
 	_assert_eq("unlearned skill clears right click", main.right_click_skill_id, "")

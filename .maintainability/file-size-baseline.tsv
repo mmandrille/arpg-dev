@@ -21,7 +21,7 @@ server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: inter
 server/internal/game/rules.go	3247	# v448: quest_steward.v0.json load + validation delegates to quest_steward_rules.go
 server/internal/game/shop.go	1196	# v407: elemental summary lines extracted to weapon_elemental.go
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6603	# v412/v413: class level stat growth + skill engine hooks
+server/internal/game/sim.go	6635	# v448: steward hunt pickup metadata + hotbar consumable pickup path restored alongside grantInventoryItem helper
 server/internal/game/types.go	721	# v448: steward hunt level state + quest steward offer/pending fields coupled to Sim/LevelState
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482

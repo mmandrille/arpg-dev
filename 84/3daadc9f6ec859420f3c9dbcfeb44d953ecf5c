@@ -1,0 +1,20 @@
+docs/specs/v420_spec-class-skill-build-branches.md
+  s_578d41414cf02d::t_67f9b984cf7f35 6
+  s_578d41414cf02d::t_12d2f0a6267fca 35-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "843daadc9f6ec859420f3c9dbcfeb44d953ecf5c",
+  "prompts": {},
+  "sessions": {
+    "s_578d41414cf02d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10ba7b93-6934-4c0c-8a7a-d446a6418169",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

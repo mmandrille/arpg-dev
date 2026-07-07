@@ -3,7 +3,7 @@
 Status: Complete  
 Date: 2026-07-03  
 Codename: class-skill-build-branches  
-Slice batch: v420–v424 (one class per execution slice)
+Slice batch: v420 (all 30 skills delivered in one execution; v421–v424 were reassigned to asset pipeline slices)
 
 ## Purpose
 
@@ -32,12 +32,12 @@ Per-class active count rises from **7 → 13** (still 1 mobility, 4 passives, 1 
 
 ## Acceptance criteria (batch)
 
-- [ ] All 30 skills in `skills.v0.json` with tree placement, prerequisites, synergies, i18n, presentations.
-- [ ] `validate_skills.py` expects 13 actives per class.
-- [ ] Focused Go tests prove one representative skill per class (minimum); barbarian bleed capstone in bot lab.
-- [ ] Extended bot scenario `class_build_branches_lab` casts at least one new skill per class (or class-specific labs).
-- [ ] Skill tree layout renders without false stacks (v419 resolver).
-- [ ] `make validate-shared` green after each slice; final autoloop `make ci` green.
+- [x] All 30 skills in `skills.v0.json` with tree placement, prerequisites, synergies, i18n, presentations.
+- [x] `validate_skills.py` expects 13 actives per class.
+- [x] Focused Go tests prove one representative skill per class (minimum); barbarian bleed capstone in bot lab.
+- [x] Extended bot scenario `class_build_branches_lab` casts at least one new skill per class (or class-specific labs).
+- [x] Skill tree layout renders without false stacks (v419 resolver).
+- [x] `make validate-shared` green after each slice; final autoloop `make ci` green.
 
 ## Client asset decision
 

@@ -27,7 +27,7 @@ Last updated: 2026-07-07 (v448 quest steward hunt loop)
 | **CI gate** | 2026-07-07 — `make ci` green |
 | **Next slice** | TBD |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
-| **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |
+| **Next engineering review** | v448 — **overdue** (28 slices since v420); run `$review` now |
 
 
 ### Periodic engineering reviews

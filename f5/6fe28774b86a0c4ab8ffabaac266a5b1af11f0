@@ -1,0 +1,50 @@
+server/internal/game/dungeon_room_layout_test.go
+  s_5ef4025a8a531d::t_61972bfe67b916 160
+tools/bot/scenarios/client/45_elite_objective_minimap_pin.json
+  s_5ef4025a8a531d::t_2b4a53ec6e5019 6
+server/internal/game/dungeon_population_test.go
+  s_5ef4025a8a531d::t_b137bb45a58169 6
+tools/bot/scenarios/client/44_elite_objective_hud.json
+  s_5ef4025a8a531d::t_b261e5838bddaf 6
+server/internal/game/dungeon_elite_objective.go
+  s_5ef4025a8a531d::t_5e6bbbf5bef427 10
+  s_5ef4025a8a531d::t_50a8203ecd5ade 11-12
+  s_5ef4025a8a531d::t_4af2d07fd9ebbd 26-33
+shared/rules/dungeon_generation.v0.json
+  s_5ef4025a8a531d::t_85a7cb53e0f6d3 98
+shared/rules/dungeon_generation.v0.schema.json
+  s_5ef4025a8a531d::t_1ace22780cad2b 146,150
+server/internal/game/dungeon_elite_objective_rules.go
+  s_5ef4025a8a531d::t_5c00fa88fa30c8 6-12
+  s_5ef4025a8a531d::t_3bb55f56114d7e 19-21
+server/internal/game/dungeon_elite_objective_test.go
+  s_5ef4025a8a531d::t_34fb0d7400f29e 3,5-6
+  s_5ef4025a8a531d::t_9ffec8befc58b3 19-22,26-30,33-34,42
+  s_5ef4025a8a531d::t_899cc6587e1d47 121
+  s_5ef4025a8a531d::t_28b8a81e2b1bbf 4
+  s_5ef4025a8a531d::t_d462416573f3ad 8
+  s_5ef4025a8a531d::t_5e74b827c28e18 9,13-17,23-25,31-32,35-41,43-47
+  s_5ef4025a8a531d::t_b07db9e59db5d6 78
+tools/bot/scenarios/77_elite_minion_pack_ai.json
+  s_5ef4025a8a531d::t_7ec0c8d8296b70 4
+tools/bot/scenarios/68_dungeon_elite_side_objective.json
+  s_5ef4025a8a531d::t_7ad6e77307ed65 5
+tools/bot/scenarios/client/41_objective_chest_presentation.json
+  s_5ef4025a8a531d::t_57642cea76ac0b 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f56fe28774b86a0c4ab8ffabaac266a5b1af11f0",
+  "prompts": {},
+  "sessions": {
+    "s_5ef4025a8a531d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f1622f40-5136-4442-ae29-fee9579542bd",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

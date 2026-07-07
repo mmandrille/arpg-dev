@@ -1,0 +1,25 @@
+docs/as-built/v425_ai-body-mesh-workflow.md
+  s_da8d34e366bc0e::t_f96fedb918d81f 4
+docs/as-built/v424_monster-rig-pass.md
+  s_da8d34e366bc0e::t_f96fedb918d81f 4
+docs/as-built/v428_hero-animation-feel.md
+  s_da8d34e366bc0e::t_f96fedb918d81f 4
+docs/as-built/v423_weapon-variety-glbs.md
+  s_da8d34e366bc0e::t_f96fedb918d81f 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6728902155fd4b24313c5c0148acb90feae441f7",
+  "prompts": {},
+  "sessions": {
+    "s_da8d34e366bc0e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3d10-b2f8-7bb0-b604-3849a34f1810",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -25,12 +25,19 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 113_item_archetype_lab.json	item_archetype_lab	protocol	extended	contract	0	0		lab loot + debug_progression; no navigation setup
 114_class_specialist_gear_lab.json	class_specialist_gear_lab	protocol	extended	contract	0	0		lab loot + equip; no navigation setup
 115_bishop_force_drop_lab.json	bishop_force_drop_lab	protocol	extended	contract	1	1		
+115_status_effect_slow_live.json	status_effect_slow_live	protocol	extended	contract	0	0		lab debug progression + local target; no navigation setup
 116_weapon_elemental_damage.json	weapon_elemental_damage	protocol	extended	contract	1	1		
+116_branch_unique_warbrand.json	branch_unique_warbrand	protocol	extended	contract	0	0		unique chest + debug progression; no navigation setup
 117_weapon_elemental_procs.json	weapon_elemental_procs	protocol	extended	contract	1	1	None	None
+117_branch_unique_nightbloom.json	branch_unique_nightbloom	protocol	extended	contract	0	0		unique chest + debug progression; no navigation setup
 118_town_training_doll.json	town_training_doll	protocol	extended	contract	0	0		
+118_branch_unique_rimecoil.json	branch_unique_rimecoil	protocol	extended	contract	0	0		unique chest + debug progression; no navigation setup
 119_polearm_archetype_lab.json	polearm_archetype_lab	protocol	extended	contract	0	0		lab loot + debug_progression; spear hit at distance 2.0
+119_branch_unique_sunwake.json	branch_unique_sunwake	protocol	extended	contract	0	0		unique chest + debug progression; no navigation setup
 11_leash_lab.json	leash_lab	protocol	extended	contract	0	0		
 120_steward_hunt_quest.json	steward_hunt_quest	protocol	extended	setup-eliminable	2	2		
+121_affinity_passive_barbarian.json	affinity_passive_barbarian	protocol	extended	contract	0	0		lab loot + debug progression; no navigation setup
+122_affinity_passive_rogue.json	affinity_passive_rogue	protocol	extended	contract	0	0		lab loot + debug progression; no navigation setup
 12_dungeon_levels.json	dungeon_levels	protocol	pack	contract	3	3		
 13_teleporter_lab.json	teleporter_lab	protocol	extended	contract	4	4		
 14_dungeon_monsters.json	dungeon_monsters	protocol	extended	setup-eliminable	1	1		

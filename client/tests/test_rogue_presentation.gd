@@ -6,6 +6,7 @@ const AnimationControllerScript := preload("res://scripts/animation_controller.g
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const DamageNumberScript := preload("res://scripts/damage_number.gd")
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
+const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -111,11 +112,12 @@ func _test_poison_status_tints_monster_until_end() -> void:
 		"controller": null,
 		"base_tint": base_tint.to_html(false),
 		"reaction": ModelReactionControllerScript.new(monster, base_tint),
+		"effect_ids": [],
 	}
 	main._apply_delta({"events": [{
 		"event_type": "skill_effect_started",
 		"entity_id": "2001",
-		"skill_id": "poison_stab"
+		"skill_id": "poisoned"
 	}], "changes": []})
 	_assert_eq("poison status tint active", _mesh_tint(mesh).to_html(false), ClientConstantsScript.POISON_TINT.to_html(false))
 	main._apply_delta({"events": [{
@@ -132,7 +134,7 @@ func _test_poison_status_tints_monster_until_end() -> void:
 	main._apply_delta({"events": [{
 		"event_type": "skill_effect_ended",
 		"entity_id": "2001",
-		"skill_id": "poison_stab"
+		"skill_id": "poisoned"
 	}], "changes": []})
 	_assert_eq("poison status tint restored", _mesh_tint(mesh).to_html(false), base_tint.to_html(false))
 	main.entities_root.queue_free()
@@ -151,11 +153,11 @@ func _test_off_hand_combat_event_uses_off_hand_attack_clip() -> void:
 	ap.add_animation_library("", lib)
 	root.add_child(ap)
 	main.player_anim = AnimationControllerScript.new(ap)
-	main._play_local_attack_animation_for_event({"weapon_slot": "off_hand"})
+	CombatLocalAttackPresentationScript.present_result(null, {"event_type": "attack_blocked", "source_entity_id": "1001", "target_entity_id": "2001", "weapon_slot": "off_hand"}, "1001", null, main.player_anim)
 	_assert_eq("off hand attack clip", main.player_anim.current_clip(), "attack_off_hand")
 	main._play_local_player_reaction_animation("hit")
 	_assert_eq("off hand not interrupted by hit", main.player_anim.current_clip(), "attack_off_hand")
-	main._play_local_attack_animation_for_event({"weapon_slot": "main_hand"})
+	CombatLocalAttackPresentationScript.present_result(null, {"event_type": "attack_blocked", "source_entity_id": "1001", "target_entity_id": "2001", "weapon_slot": "main_hand"}, "1001", null, main.player_anim)
 	_assert_eq("main hand attack clip", main.player_anim.current_clip(), "attack")
 	ap.queue_free()
 	main.player_anchor.queue_free()

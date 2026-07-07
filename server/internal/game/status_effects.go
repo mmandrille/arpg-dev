@@ -185,7 +185,7 @@ func (s *Sim) advanceStatusEffects(res *TickResult) {
 			s.endStatusEffect(key, effect, target, res)
 			continue
 		}
-		if effect.DamagePerTick > 0 && effect.IntervalTicks > 0 && s.tick >= effect.NextTick {
+		if effect.IntervalTicks > 0 && s.tick >= effect.NextTick && (effect.DamagePerTick > 0 || effect.DamageType != "") {
 			rawDamage := effect.DamagePerTick
 			if effect.DamageType == damageTypePoison {
 				markedDamage := s.applyRogueMarkDamageBonus(target, DamageRange{Min: rawDamage, Max: rawDamage})

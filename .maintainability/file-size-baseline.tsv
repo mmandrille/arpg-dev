@@ -28,7 +28,6 @@ server/internal/http/ws_test.go	1482
 server/internal/realtime/session_loop.go	951
 server/internal/replay/replay.go	751	# v404: mercenary roster load on session reconstruct
 server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating passive gold auto-pickup test for v332 momentum
-server/internal/game/rogue_skills.go	620	# pre-v394 grandfather; passive_execute + poison stack handlers
 server/internal/store/repos.go	2315
 server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store test setup
 client/scripts/showme/visual_capture.gd	1152	# baseline sync: v443 dim-mesh work landed without baseline bump; extraction still deferred (capture mode dispatch table)

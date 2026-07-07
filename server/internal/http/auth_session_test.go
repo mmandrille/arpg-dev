@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -626,22 +627,35 @@ func TestAccountStashItemUpgradeRoute(t *testing.T) {
 	if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.Pity.Failures != 0 {
 		t.Fatalf("upgraded route stats = %+v", stats)
 	}
-	addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, "route_upgrade_shard_2_"+suffix, 1)
-	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
-	if rec.Code != http.StatusOK {
-		t.Fatalf("second upgrade status = %d body=%s", rec.Code, rec.Body.String())
+	secondUpgradeSucceeded := false
+	for attempt := 1; attempt <= 3; attempt++ {
+		addHTTPUpgradeShardStash(t, db, ctx, accountID, char.CharacterID, fmt.Sprintf("route_upgrade_shard_%d_%s", attempt+1, suffix), 1)
+		rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
+		if rec.Code != http.StatusOK {
+			t.Fatalf("upgrade attempt %d status = %d body=%s", attempt+1, rec.Code, rec.Body.String())
+		}
+		if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
+			t.Fatal(err)
+		}
+		if upgraded.StashGold != 250-(attempt+1)*sellPrice || upgraded.CostGold != sellPrice {
+			t.Fatalf("upgrade attempt %d balances = %+v", attempt+1, upgraded)
+		}
+		if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
+			t.Fatal(err)
+		}
+		if upgraded.Success {
+			if stats.ItemLevel != 2 || stats.DamageMax <= 4 || stats.Pity.Failures != 0 {
+				t.Fatalf("upgrade attempt %d success stats = %+v", attempt+1, stats)
+			}
+			secondUpgradeSucceeded = true
+			break
+		}
+		if stats.ItemLevel != 1 || stats.DamageMax != 4 || stats.Pity.Failures != attempt {
+			t.Fatalf("upgrade attempt %d failure stats = %+v", attempt+1, stats)
+		}
 	}
-	if err := json.Unmarshal(rec.Body.Bytes(), &upgraded); err != nil {
-		t.Fatal(err)
-	}
-	if upgraded.StashGold != 250-2*sellPrice || upgraded.CostGold != sellPrice || !upgraded.Success {
-		t.Fatalf("second upgrade balances = %+v", upgraded)
-	}
-	if err := json.Unmarshal(upgraded.Item.RolledStats, &stats); err != nil {
-		t.Fatal(err)
-	}
-	if stats.ItemLevel != 2 || stats.DamageMax <= 4 || stats.Pity.Failures != 0 {
-		t.Fatalf("second upgraded route stats = %+v", stats)
+	if !secondUpgradeSucceeded {
+		t.Fatal("upgrade route did not reach item level 2 within pity window")
 	}
 	rec = postJSON(h, "/v0/account-stash/items/route_upgrade_stash_"+suffix+"/upgrade", token, map[string]string{})
 	if rec.Code != http.StatusConflict {

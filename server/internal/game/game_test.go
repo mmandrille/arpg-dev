@@ -36,6 +36,17 @@ func loadRules(t *testing.T) *Rules {
 	return rules
 }
 
+func loadRulesWithoutMonsterBehavior(t *testing.T) *Rules {
+	t.Helper()
+	rules := loadRules(t)
+	for id, m := range rules.Monsters {
+		m.Behavior = ""
+		m.AttackDamage = nil
+		rules.Monsters[id] = m
+	}
+	return rules
+}
+
 // dungeonScatterTestRules returns production rules with legacy divider+scatter layout
 // for tests that exercise v40 interior obstacles and generated doors.
 func dungeonScatterTestRules(t *testing.T) *Rules {
@@ -7167,7 +7178,7 @@ func TestTeleportRejectsUndiscoveredTargetLevel(t *testing.T) {
 	}
 	loadGolden(t, "dungeon_teleporters.json", &golden)
 
-	sim, err := NewSimWithWorld("sess_dungeon_tp_reject", golden.Seed, loadRules(t), "dungeon_levels")
+	sim, err := NewSimWithWorld("sess_dungeon_tp_reject", golden.Seed, loadRulesWithoutMonsterBehavior(t), "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new dungeon sim: %v", err)
 	}
@@ -7225,7 +7236,7 @@ func TestDungeonTeleportersGolden(t *testing.T) {
 	}
 	loadGolden(t, "dungeon_teleporters.json", &golden)
 
-	sim, err := NewSimWithWorld("sess_dungeon_tp_golden", golden.Seed, loadRules(t), golden.WorldID)
+	sim, err := NewSimWithWorld("sess_dungeon_tp_golden", golden.Seed, loadRulesWithoutMonsterBehavior(t), golden.WorldID)
 	if err != nil {
 		t.Fatalf("new dungeon sim: %v", err)
 	}

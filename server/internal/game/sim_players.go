@@ -24,6 +24,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	discovered := map[int]bool{townLevel: true}
 	cooldowns := make(map[string]skillCooldownState)
 	effects := make(map[string]skillEffectState)
+	statuses := make(map[string]statusEffectState)
 	shopStock := make(map[string]*shopStockState)
 	stashItems := []*stashItem{}
 	stashCapacity := defaultStashCapacity
@@ -38,6 +39,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 	s.progression = character
 	s.skillCooldowns = cooldowns
 	s.skillEffects = effects
+	s.statusEffects = statuses
 	s.shopStock = shopStock
 	s.gold = gold
 	s.stashItems = stashItems
@@ -74,6 +76,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		Progression:           character,
 		SkillCooldowns:        cooldowns,
 		SkillEffects:          effects,
+		StatusEffects:         statuses,
 		PoisonDots:            make(map[uint64]poisonDotState),
 		BleedDots:             make(map[uint64]bleedDotState),
 		UniqueBurnDots:        make(map[string]uniqueBurnDotState),
@@ -356,6 +359,10 @@ func (s *Sim) usePlayer(ps *playerState) {
 	if s.skillEffects == nil {
 		s.skillEffects = make(map[string]skillEffectState)
 	}
+	s.statusEffects = ps.StatusEffects
+	if s.statusEffects == nil {
+		s.statusEffects = make(map[string]statusEffectState)
+	}
 	s.poisonDots = ps.PoisonDots
 	if s.poisonDots == nil {
 		s.poisonDots = make(map[uint64]poisonDotState)
@@ -429,6 +436,7 @@ func (s *Sim) savePlayer(ps *playerState) {
 	ps.Progression = s.progression
 	ps.SkillCooldowns = s.skillCooldowns
 	ps.SkillEffects = s.skillEffects
+	ps.StatusEffects = s.statusEffects
 	ps.PoisonDots = s.poisonDots
 	ps.BleedDots = s.bleedDots
 	ps.RogueMarks = s.rogueMarks

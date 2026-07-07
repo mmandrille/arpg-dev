@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestSurvivalSecondWindProcsOnLethalAndFloorsHP(t *testing.T) {
 	rules := cloneRules(loadRules(t))
@@ -109,6 +112,51 @@ func TestSurvivalSpectralPathRedirectsDamage(t *testing.T) {
 	}
 	if monster.hp >= beforeMonsterHP {
 		t.Fatalf("monster hp = %d, want damage redirected from %d", monster.hp, beforeMonsterHP)
+	}
+}
+
+func TestSurvivalEvasiveStanceCleanseRemovesStatusDebuffs(t *testing.T) {
+	rules := loadRules(t)
+	sim := MustNewSim("sess_survival_cleanse_status", "01", rules)
+	sim.progression.CharacterClass = "rogue"
+	sim.progression.Level = 10
+	sim.progression.SkillRanks["evasive_stance"] = 1
+	player := sim.entities[sim.playerID]
+	player.effectIDs = sortedUniqueStrings([]string{"poisoned", "burning", "pinning_root"})
+	sim.statusEffects[statusEffectKey("poisoned", player.id, "poison_stab")] = statusEffectState{
+		StatusID:       "poisoned",
+		EventSkillID:   "poison_stab",
+		SourcePlayerID: 999,
+		TargetID:       player.id,
+		RemainingTicks: 20,
+		TotalTicks:     20,
+	}
+	sim.statusEffects[statusEffectKey("burning", player.id, everburningWoundEffectID)] = statusEffectState{
+		StatusID:       "burning",
+		EventSkillID:   everburningWoundEffectID,
+		SourcePlayerID: 999,
+		TargetID:       player.id,
+		RemainingTicks: 20,
+		TotalTicks:     20,
+	}
+	sim.skillEffects[fmt.Sprintf("pinning_shot:%d", player.id)] = skillEffectState{
+		SkillID:    "pinning_shot",
+		TargetID:   player.id,
+		EffectID:   "pinning_root",
+		EndsTick:   sim.tick + 20,
+		TotalTicks: 20,
+	}
+
+	sim.activateSurvivalSkill(player, nil, "evasive_stance", rules.Skills["evasive_stance"], 1, "cleanse", &TickResult{})
+
+	if sim.targetHasStatus(player.id, "poisoned") || sim.targetHasStatus(player.id, "burning") {
+		t.Fatalf("status effects still active after cleanse: %+v", sim.statusEffects)
+	}
+	if _, ok := sim.skillEffects[fmt.Sprintf("pinning_shot:%d", player.id)]; ok {
+		t.Fatalf("pinning root skill effect still active after cleanse: %+v", sim.skillEffects)
+	}
+	if containsStringValue(player.effectIDs, "poisoned") || containsStringValue(player.effectIDs, "burning") || containsStringValue(player.effectIDs, "pinning_root") {
+		t.Fatalf("player effect ids still contain debuffs after cleanse: %v", player.effectIDs)
 	}
 }
 

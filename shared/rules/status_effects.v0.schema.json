@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/rules/status_effects.v0.schema.json",
+  "title": "Status effects (v0)",
+  "type": "object",
+  "required": ["version", "statuses"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "statuses": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/status" }
+    }
+  },
+  "$defs": {
+    "status": {
+      "type": "object",
+      "required": ["id", "kind", "debuff"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "enum": ["dot", "slow"] },
+        "damage_type": { "type": "string", "enum": ["force", "cold", "fire", "poison", "lightning"] },
+        "stats": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["movement_speed", "attack_speed"] },
+          "uniqueItems": true
+        },
+        "debuff": { "type": "boolean" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "dot" } }, "required": ["kind"] },
+          "then": { "required": ["damage_type"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "slow" } }, "required": ["kind"] },
+          "then": { "required": ["stats"] }
+        }
+      ]
+    }
+  }
+}

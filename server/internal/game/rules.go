@@ -24,6 +24,7 @@ type Rules struct {
 	UniqueItems          map[string]UniqueItemDef
 	SetItems             map[string]SetItemDef
 	UniqueEffects        map[string]UniqueEffectDef
+	StatusEffects        map[string]StatusEffectDef
 	Skills               map[string]SkillDef
 	Rarities             map[string]RarityDef
 	RarityOrder          []string
@@ -49,39 +50,39 @@ type MainConfig struct {
 }
 
 type MainGameplayConfig struct {
-	BaseAttackIntervalTicks  int               `json:"base_attack_interval_ticks"`
-	BaseMovementSpeed             float64           `json:"base_movement_speed"`
-	MovementAccelerationSeconds   float64           `json:"movement_acceleration_seconds"`
-	MovementMinSpeedFactor        float64           `json:"movement_min_speed_factor"`
-	MinimumMonsterAggroRadius     float64           `json:"minimum_monster_aggro_radius"`
-	BaseDropRatePercent      int               `json:"base_drop_rate_percent"`
-	BossBonusDropRatePercent int               `json:"boss_bonus_drop_rate_percent"`
-	BossExtraDropRatePercent int               `json:"boss_extra_drop_rate_percent"`
-	BossLootMagicFindBonusPercent int          `json:"boss_loot_magic_find_bonus_percent"`
-	RespecCostGold           int               `json:"respec_cost_gold"`
-	BishopRespecResourceID   string            `json:"bishop_respec_resource_item_def_id"`
-	BishopRespecResourceCost int               `json:"bishop_respec_resource_count"`
-	BishopReviveResourceID   string            `json:"bishop_revive_resource_item_def_id"`
-	BishopReviveResourceCost int               `json:"bishop_revive_resource_count"`
-	ItemUpgradeCostGold      int               `json:"item_upgrade_cost_gold"`
-	ItemUpgradeCostGrowth    int               `json:"item_upgrade_cost_growth_per_level"`
-	ItemUpgradeMaxLevel      int               `json:"item_upgrade_max_level"`
-	ItemUpgradeSuccessPct    int               `json:"item_upgrade_success_chance_percent"`
-	ItemUpgradeFailureCurve  ItemUpgradeFailureCurve `json:"item_upgrade_failure_curve"`
-	ItemUpgradeShardSuccessBonusPercentPerTier int `json:"item_upgrade_shard_success_bonus_percent_per_tier"`
-	ItemUpgradePityFailures  int               `json:"item_upgrade_pity_failure_threshold"`
-	ItemUpgradeResourceID    string            `json:"item_upgrade_resource_item_def_id"`
-	ItemUpgradeResourceCost  int               `json:"item_upgrade_resource_count"`
-	ResourceLootDrops        ResourceLootDropsConfig `json:"resource_loot_drops"`
-	BadgeRewardRules         []BadgeRewardRule `json:"badge_reward_rules"`
-	MercenaryHireCostGold        int               `json:"mercenary_hire_cost_gold"`
-	MercenaryHireCostGoldPerLevel int              `json:"mercenary_hire_cost_gold_per_level"`
-	QuestTurnInItemDefID     string            `json:"quest_turn_in_item_def_id"`
-	QuestTurnInRewardGold    int               `json:"quest_turn_in_reward_gold"`
-	CompanionAssistRadius    float64           `json:"companion_assist_radius"`
-	CompanionFollowDistance  float64           `json:"companion_follow_distance"`
-	CompanionFollowStop      float64           `json:"companion_follow_stop_radius"`
-	RangedRetreatMinMeleeEngagementSeconds float64 `json:"ranged_retreat_min_melee_engagement_seconds"`
+	BaseAttackIntervalTicks                    int                     `json:"base_attack_interval_ticks"`
+	BaseMovementSpeed                          float64                 `json:"base_movement_speed"`
+	MovementAccelerationSeconds                float64                 `json:"movement_acceleration_seconds"`
+	MovementMinSpeedFactor                     float64                 `json:"movement_min_speed_factor"`
+	MinimumMonsterAggroRadius                  float64                 `json:"minimum_monster_aggro_radius"`
+	BaseDropRatePercent                        int                     `json:"base_drop_rate_percent"`
+	BossBonusDropRatePercent                   int                     `json:"boss_bonus_drop_rate_percent"`
+	BossExtraDropRatePercent                   int                     `json:"boss_extra_drop_rate_percent"`
+	BossLootMagicFindBonusPercent              int                     `json:"boss_loot_magic_find_bonus_percent"`
+	RespecCostGold                             int                     `json:"respec_cost_gold"`
+	BishopRespecResourceID                     string                  `json:"bishop_respec_resource_item_def_id"`
+	BishopRespecResourceCost                   int                     `json:"bishop_respec_resource_count"`
+	BishopReviveResourceID                     string                  `json:"bishop_revive_resource_item_def_id"`
+	BishopReviveResourceCost                   int                     `json:"bishop_revive_resource_count"`
+	ItemUpgradeCostGold                        int                     `json:"item_upgrade_cost_gold"`
+	ItemUpgradeCostGrowth                      int                     `json:"item_upgrade_cost_growth_per_level"`
+	ItemUpgradeMaxLevel                        int                     `json:"item_upgrade_max_level"`
+	ItemUpgradeSuccessPct                      int                     `json:"item_upgrade_success_chance_percent"`
+	ItemUpgradeFailureCurve                    ItemUpgradeFailureCurve `json:"item_upgrade_failure_curve"`
+	ItemUpgradeShardSuccessBonusPercentPerTier int                     `json:"item_upgrade_shard_success_bonus_percent_per_tier"`
+	ItemUpgradePityFailures                    int                     `json:"item_upgrade_pity_failure_threshold"`
+	ItemUpgradeResourceID                      string                  `json:"item_upgrade_resource_item_def_id"`
+	ItemUpgradeResourceCost                    int                     `json:"item_upgrade_resource_count"`
+	ResourceLootDrops                          ResourceLootDropsConfig `json:"resource_loot_drops"`
+	BadgeRewardRules                           []BadgeRewardRule       `json:"badge_reward_rules"`
+	MercenaryHireCostGold                      int                     `json:"mercenary_hire_cost_gold"`
+	MercenaryHireCostGoldPerLevel              int                     `json:"mercenary_hire_cost_gold_per_level"`
+	QuestTurnInItemDefID                       string                  `json:"quest_turn_in_item_def_id"`
+	QuestTurnInRewardGold                      int                     `json:"quest_turn_in_reward_gold"`
+	CompanionAssistRadius                      float64                 `json:"companion_assist_radius"`
+	CompanionFollowDistance                    float64                 `json:"companion_follow_distance"`
+	CompanionFollowStop                        float64                 `json:"companion_follow_stop_radius"`
+	RangedRetreatMinMeleeEngagementSeconds     float64                 `json:"ranged_retreat_min_melee_engagement_seconds"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -99,19 +100,19 @@ type WeaponDamageScalingDef struct {
 
 // Combat holds combat parameters.
 type Combat struct {
-	BaseHitChance                      float64                            `json:"base_hit_chance"`
-	BaseCritChance                     float64                            `json:"base_crit_chance"`
-	BaseCritDamage                     float64                            `json:"base_crit_damage"`
-	MinimumDamage                      int                                `json:"minimum_damage"`
-	BlockCap                           int                                `json:"block_cap_percent"`
-	BaseAttackIntervalTicks            int                                `json:"base_attack_interval_ticks"`
-	MinEffectiveAttackSpeed            float64                            `json:"min_effective_attack_speed"`
-	MaxEffectiveAttackSpeed            float64                            `json:"max_effective_attack_speed"`
-	PlayerDamage                       DamageRange                        `json:"player_damage"`
-	TwoHandedStrengthDamageMultiplier  float64                            `json:"two_handed_strength_damage_multiplier"`
-	WeaponDamageScaling                map[string]WeaponDamageScalingDef  `json:"weapon_damage_scaling"`
-	UnarmedReach                       float64                            `json:"unarmed_reach"`
-	Coop                               CoopCombat                         `json:"coop"`
+	BaseHitChance                     float64                           `json:"base_hit_chance"`
+	BaseCritChance                    float64                           `json:"base_crit_chance"`
+	BaseCritDamage                    float64                           `json:"base_crit_damage"`
+	MinimumDamage                     int                               `json:"minimum_damage"`
+	BlockCap                          int                               `json:"block_cap_percent"`
+	BaseAttackIntervalTicks           int                               `json:"base_attack_interval_ticks"`
+	MinEffectiveAttackSpeed           float64                           `json:"min_effective_attack_speed"`
+	MaxEffectiveAttackSpeed           float64                           `json:"max_effective_attack_speed"`
+	PlayerDamage                      DamageRange                       `json:"player_damage"`
+	TwoHandedStrengthDamageMultiplier float64                           `json:"two_handed_strength_damage_multiplier"`
+	WeaponDamageScaling               map[string]WeaponDamageScalingDef `json:"weapon_damage_scaling"`
+	UnarmedReach                      float64                           `json:"unarmed_reach"`
+	Coop                              CoopCombat                        `json:"coop"`
 }
 
 type CoopCombat struct {
@@ -176,16 +177,16 @@ type NavigationRules struct {
 // CharacterProgressionRules controls XP thresholds, level-up points, base
 // stats, and derived-stat formulas.
 type CharacterProgressionRules struct {
-	BaseStats              BaseStatsView
-	Classes                map[string]CharacterClassDef
-	PointsPerLevel         int
-	SkillPoints            SkillPointRules
-	SkillRankScaling       RankScalingCurve
-	SkillManaScaling       RankScalingCurve
-	LevelCap               int
-	XPThresholds           map[int]int
-	DerivedStats           map[string]LinearStatFormula
-	LevelUpRestoreHPMana   bool
+	BaseStats            BaseStatsView
+	Classes              map[string]CharacterClassDef
+	PointsPerLevel       int
+	SkillPoints          SkillPointRules
+	SkillRankScaling     RankScalingCurve
+	SkillManaScaling     RankScalingCurve
+	LevelCap             int
+	XPThresholds         map[int]int
+	DerivedStats         map[string]LinearStatFormula
+	LevelUpRestoreHPMana bool
 }
 
 type CharacterClassDef struct {
@@ -301,24 +302,24 @@ type ItemDef struct {
 
 // ItemTemplateDef is a server-authoritative rolled item template.
 type ItemTemplateDef struct {
-	Name              string            `json:"name"`
-	Category          string            `json:"category"`
-	EquipmentCategory string            `json:"equipment_category"`
-	ItemType        string            `json:"item_type"`
-	Slot            string            `json:"slot"`
-	Equippable      bool              `json:"equippable"`
-	Handedness      string            `json:"handedness,omitempty"`
-	OccupiesHands   []string          `json:"occupies_hands,omitempty"`
-	AttackMode      string            `json:"attack_mode,omitempty"`
-	AttackSpeed     float64           `json:"attack_speed,omitempty"`
-	Reach           float64           `json:"reach"`
-	ProjectileSpeed float64           `json:"projectile_speed,omitempty"`
-	Requirements    map[string]int    `json:"requirements"`
-	BaseStats       map[string]int    `json:"base_stats"`
-	RollableStats   []RollableStatDef  `json:"rollable_stats"`
-	ClassAffinities []ClassAffinityDef `json:"class_affinities,omitempty"`
-	ClassRequired   string             `json:"class_required,omitempty"`
-	EffectPool      []string           `json:"effect_pool"`
+	Name              string             `json:"name"`
+	Category          string             `json:"category"`
+	EquipmentCategory string             `json:"equipment_category"`
+	ItemType          string             `json:"item_type"`
+	Slot              string             `json:"slot"`
+	Equippable        bool               `json:"equippable"`
+	Handedness        string             `json:"handedness,omitempty"`
+	OccupiesHands     []string           `json:"occupies_hands,omitempty"`
+	AttackMode        string             `json:"attack_mode,omitempty"`
+	AttackSpeed       float64            `json:"attack_speed,omitempty"`
+	Reach             float64            `json:"reach"`
+	ProjectileSpeed   float64            `json:"projectile_speed,omitempty"`
+	Requirements      map[string]int     `json:"requirements"`
+	BaseStats         map[string]int     `json:"base_stats"`
+	RollableStats     []RollableStatDef  `json:"rollable_stats"`
+	ClassAffinities   []ClassAffinityDef `json:"class_affinities,omitempty"`
+	ClassRequired     string             `json:"class_required,omitempty"`
+	EffectPool        []string           `json:"effect_pool"`
 }
 
 // SkillDef is a server-authoritative active skill definition.
@@ -528,36 +529,36 @@ type InteractableBarrier struct {
 
 // MonsterDef is a single monster definition.
 type MonsterDef struct {
-	Name              string             `json:"name"`
-	MaxHP             int                `json:"max_hp"`
-	LootTable         string             `json:"loot_table"`
-	HitChance         *float64           `json:"hit_chance,omitempty"`
-	CritChance        *float64           `json:"crit_chance,omitempty"`
-	CritDamage        *float64           `json:"crit_damage,omitempty"`
-	Armor             int                `json:"armor,omitempty"`
-	BlockPercent      int                `json:"block_percent,omitempty"`
-	Resistances       map[string]float64 `json:"resistances,omitempty"`
-	RetaliationDamage *DamageRange       `json:"retaliation_damage,omitempty"`
-	AttackDamage      *DamageRange       `json:"attack_damage,omitempty"`
-	AttackCooldown    int                `json:"attack_cooldown_ticks,omitempty"`
-	AttackWindupTicks int                `json:"attack_windup_ticks,omitempty"`
-	AttackMode        string             `json:"attack_mode,omitempty"`
-	AttackStyle       string             `json:"attack_style,omitempty"`
-	AttackRange       float64            `json:"attack_range,omitempty"`
-	PreferredMinRange float64            `json:"preferred_min_range,omitempty"`
-	ProjectileSpeed   float64            `json:"projectile_speed,omitempty"`
-	ProjectileDefID   string             `json:"projectile_def_id,omitempty"`
-	Behavior          string             `json:"behavior,omitempty"`
-	NavigationTrait   string             `json:"navigation_trait,omitempty"`
-	PackRole          string             `json:"pack_role,omitempty"`
-	AggroRadius       float64            `json:"aggro_radius,omitempty"`
-	AssistRadius      float64            `json:"assist_radius,omitempty"`
-	LeashRadius       float64            `json:"leash_radius,omitempty"`
-	MoveSpeed         float64            `json:"move_speed,omitempty"`
-	XPReward          int                `json:"xp_reward,omitempty"`
-	TrainingTarget      bool               `json:"training_target,omitempty"`
-	TrainingHPMultiplier int               `json:"training_hp_multiplier,omitempty"`
-	ReviveDelayTicks    int                `json:"revive_delay_ticks,omitempty"`
+	Name                 string             `json:"name"`
+	MaxHP                int                `json:"max_hp"`
+	LootTable            string             `json:"loot_table"`
+	HitChance            *float64           `json:"hit_chance,omitempty"`
+	CritChance           *float64           `json:"crit_chance,omitempty"`
+	CritDamage           *float64           `json:"crit_damage,omitempty"`
+	Armor                int                `json:"armor,omitempty"`
+	BlockPercent         int                `json:"block_percent,omitempty"`
+	Resistances          map[string]float64 `json:"resistances,omitempty"`
+	RetaliationDamage    *DamageRange       `json:"retaliation_damage,omitempty"`
+	AttackDamage         *DamageRange       `json:"attack_damage,omitempty"`
+	AttackCooldown       int                `json:"attack_cooldown_ticks,omitempty"`
+	AttackWindupTicks    int                `json:"attack_windup_ticks,omitempty"`
+	AttackMode           string             `json:"attack_mode,omitempty"`
+	AttackStyle          string             `json:"attack_style,omitempty"`
+	AttackRange          float64            `json:"attack_range,omitempty"`
+	PreferredMinRange    float64            `json:"preferred_min_range,omitempty"`
+	ProjectileSpeed      float64            `json:"projectile_speed,omitempty"`
+	ProjectileDefID      string             `json:"projectile_def_id,omitempty"`
+	Behavior             string             `json:"behavior,omitempty"`
+	NavigationTrait      string             `json:"navigation_trait,omitempty"`
+	PackRole             string             `json:"pack_role,omitempty"`
+	AggroRadius          float64            `json:"aggro_radius,omitempty"`
+	AssistRadius         float64            `json:"assist_radius,omitempty"`
+	LeashRadius          float64            `json:"leash_radius,omitempty"`
+	MoveSpeed            float64            `json:"move_speed,omitempty"`
+	XPReward             int                `json:"xp_reward,omitempty"`
+	TrainingTarget       bool               `json:"training_target,omitempty"`
+	TrainingHPMultiplier int                `json:"training_hp_multiplier,omitempty"`
+	ReviveDelayTicks     int                `json:"revive_delay_ticks,omitempty"`
 }
 
 func (d MonsterDef) effectiveTrainingHPMultiplier() int {
@@ -865,20 +866,20 @@ func LoadRules(dir string) (*Rules, error) {
 	r.MainConfig = mainConfig
 
 	var combat struct {
-		Version                            int                                `json:"version"`
-		BaseHitChance                      float64                            `json:"base_hit_chance"`
-		BaseCritChance                     float64                            `json:"base_crit_chance"`
-		BaseCritDamage                     float64                            `json:"base_crit_damage"`
-		MinimumDamage                      int                                `json:"minimum_damage"`
-		BlockCap                           int                                `json:"block_cap_percent"`
-		BaseAttackIntervalTicks            int                                `json:"base_attack_interval_ticks"`
-		MinEffectiveAttackSpeed            float64                            `json:"min_effective_attack_speed"`
-		MaxEffectiveAttackSpeed            float64                            `json:"max_effective_attack_speed"`
-		PlayerDamage                       DamageRange                        `json:"player_damage"`
-		TwoHandedStrengthDamageMultiplier  float64                            `json:"two_handed_strength_damage_multiplier"`
-		WeaponDamageScaling                map[string]WeaponDamageScalingDef  `json:"weapon_damage_scaling"`
-		UnarmedReach                       float64                            `json:"unarmed_reach"`
-		Coop                               CoopCombat                         `json:"coop"`
+		Version                           int                               `json:"version"`
+		BaseHitChance                     float64                           `json:"base_hit_chance"`
+		BaseCritChance                    float64                           `json:"base_crit_chance"`
+		BaseCritDamage                    float64                           `json:"base_crit_damage"`
+		MinimumDamage                     int                               `json:"minimum_damage"`
+		BlockCap                          int                               `json:"block_cap_percent"`
+		BaseAttackIntervalTicks           int                               `json:"base_attack_interval_ticks"`
+		MinEffectiveAttackSpeed           float64                           `json:"min_effective_attack_speed"`
+		MaxEffectiveAttackSpeed           float64                           `json:"max_effective_attack_speed"`
+		PlayerDamage                      DamageRange                       `json:"player_damage"`
+		TwoHandedStrengthDamageMultiplier float64                           `json:"two_handed_strength_damage_multiplier"`
+		WeaponDamageScaling               map[string]WeaponDamageScalingDef `json:"weapon_damage_scaling"`
+		UnarmedReach                      float64                           `json:"unarmed_reach"`
+		Coop                              CoopCombat                        `json:"coop"`
 	}
 	if err := readJSON(filepath.Join(dir, "combat.v0.json"), &combat); err != nil {
 		return nil, err
@@ -945,15 +946,15 @@ func LoadRules(dir string) (*Rules, error) {
 	r.Navigation = navigation
 
 	var progression struct {
-		Version         int                          `json:"version"`
-		BaseStats       BaseStatsView                `json:"base_stats"`
-		Classes         map[string]CharacterClassDef `json:"classes"`
-		PointsPerLevel  int                          `json:"points_per_level"`
-		SkillPoints        SkillPointRules              `json:"skill_points"`
-		SkillRankScaling   RankScalingCurve             `json:"skill_rank_scaling"`
-		SkillManaScaling   RankScalingCurve             `json:"skill_mana_scaling"`
-		LevelCap        int                          `json:"level_cap"`
-		ExperienceCurve struct {
+		Version          int                          `json:"version"`
+		BaseStats        BaseStatsView                `json:"base_stats"`
+		Classes          map[string]CharacterClassDef `json:"classes"`
+		PointsPerLevel   int                          `json:"points_per_level"`
+		SkillPoints      SkillPointRules              `json:"skill_points"`
+		SkillRankScaling RankScalingCurve             `json:"skill_rank_scaling"`
+		SkillManaScaling RankScalingCurve             `json:"skill_mana_scaling"`
+		LevelCap         int                          `json:"level_cap"`
+		ExperienceCurve  struct {
 			Type   string `json:"type"`
 			Levels []struct {
 				Level            int `json:"level"`
@@ -961,7 +962,9 @@ func LoadRules(dir string) (*Rules, error) {
 			} `json:"levels"`
 		} `json:"experience_curve"`
 		DerivedStats map[string]LinearStatFormula `json:"derived_stats"`
-		LevelUp      struct { RestoreHPAndMana bool `json:"restore_hp_and_mana"` } `json:"level_up"`
+		LevelUp      struct {
+			RestoreHPAndMana bool `json:"restore_hp_and_mana"`
+		} `json:"level_up"`
 	}
 	if err := readJSON(filepath.Join(dir, "character_progression.v0.json"), &progression); err != nil {
 		return nil, err
@@ -1307,6 +1310,17 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 	r.UniqueEffects = uniqueEffects.Effects
+
+	var statusEffects struct {
+		Statuses map[string]StatusEffectDef `json:"statuses"`
+	}
+	if err := readJSON(filepath.Join(dir, "status_effects.v0.json"), &statusEffects); err != nil {
+		return nil, err
+	}
+	if err := validateStatusEffects(statusEffects.Statuses); err != nil {
+		return nil, err
+	}
+	r.StatusEffects = statusEffects.Statuses
 
 	var uniqueItems struct {
 		Uniques map[string]UniqueItemDef `json:"uniques"`

@@ -95,57 +95,57 @@ const (
 )
 
 type entity struct {
-	id                    uint64
-	kind                  string
-	pos                   Vec2
-	hp                    int
-	maxHP                 int
-	mana                  int
-	maxMana               int
-	characterID           string
-	displayName           string
-	monsterDefID          string
-	monsterRarityID       string
-	monsterPackID         string
-	monsterPackLeader     bool
-	stewardHuntTarget     bool
-	monsterAttackDamage   *DamageRange
-	monsterAttackCooldown int
-	monsterArmor          float64
-	monsterHitChance      float64
-	monsterCritChance     float64
-	monsterBlockPercent   float64
-	monsterXPReward       int
-	isBoss                bool
-	bossTemplateID        string
-	visualModel           string
-	visualTint            string
-	visualScale           float64
-	bossPatternID         string
-	bossPatternDeckIndex  int
-	bossPhaseIndex        int
-	bossPhaseKind         string
-	bossPhaseStarted      uint64
-	bossPhaseEnds         uint64
-	bossCooldownEnds      uint64
-	bossActiveHit         map[uint64]bool
-	bossPhaseExecuted     bool
-	bossPhaseAim          Vec2
-	bossPhaseHasAim       bool
-	bossEnraged           bool
-	bossEnrageThreshold   float64
-	itemDefID             string
-	goldAmount            int
-	rollPayload           *ItemRollPayload
-	interactableDefID     string
-	state                 string
-	lootTable             string
-	corpseCharacterID     string
-	corpseName            string
-	corpseLevel           int
-	corpseItemCount       int
-	ownerID               uint64
-	targetID              uint64
+	id                       uint64
+	kind                     string
+	pos                      Vec2
+	hp                       int
+	maxHP                    int
+	mana                     int
+	maxMana                  int
+	characterID              string
+	displayName              string
+	monsterDefID             string
+	monsterRarityID          string
+	monsterPackID            string
+	monsterPackLeader        bool
+	stewardHuntTarget        bool
+	monsterAttackDamage      *DamageRange
+	monsterAttackCooldown    int
+	monsterArmor             float64
+	monsterHitChance         float64
+	monsterCritChance        float64
+	monsterBlockPercent      float64
+	monsterXPReward          int
+	isBoss                   bool
+	bossTemplateID           string
+	visualModel              string
+	visualTint               string
+	visualScale              float64
+	bossPatternID            string
+	bossPatternDeckIndex     int
+	bossPhaseIndex           int
+	bossPhaseKind            string
+	bossPhaseStarted         uint64
+	bossPhaseEnds            uint64
+	bossCooldownEnds         uint64
+	bossActiveHit            map[uint64]bool
+	bossPhaseExecuted        bool
+	bossPhaseAim             Vec2
+	bossPhaseHasAim          bool
+	bossEnraged              bool
+	bossEnrageThreshold      float64
+	itemDefID                string
+	goldAmount               int
+	rollPayload              *ItemRollPayload
+	interactableDefID        string
+	state                    string
+	lootTable                string
+	corpseCharacterID        string
+	corpseName               string
+	corpseLevel              int
+	corpseItemCount          int
+	ownerID                  uint64
+	targetID                 uint64
 	companionStance          string
 	characterClass           string
 	sourceCharacterID        string
@@ -155,40 +155,40 @@ type entity struct {
 	companionProjectileDefID string
 	companionProjectileSpeed float64
 	projectileDefID          string
-	sourceSkillID         string
-	sourceWeaponSlot      string
-	expiresTick           uint64
-	totalDurationTicks    int
-	sourceDamageType      string
-	shardProjectile       bool
-	effectIDs             []string
-	dir                   Vec2
-	speed                 float64
-	traveled              float64
-	maxDistance           float64
-	damageRange           DamageRange
-	sourceMsgID           string
-	sourceCorrID          string
-	spawnTick             uint64
-	spawnPos              Vec2
-	aiMode                string
-	aiTargetPlayerID      uint64
-	navPath               []Vec2
-	navGoal               Vec2
-	navPathValid          bool
-	navPathCell           gridCell
-	navTargetPlayerID     uint64
-	navPathTick           uint64
-	navNextRepathTick     uint64
-	lastAttackTick        uint64
-	hasAttacked           bool
-	attackWindupRemaining int
-	attackWindupTargetID  uint64
-	attackWindupDamage    DamageRange
-	rangedMeleeEngagedTick uint64
-	isTrainingDoll          bool
-	trainingDollReviveAt    uint64
-	monsterResistances      map[string]float64
+	sourceSkillID            string
+	sourceWeaponSlot         string
+	expiresTick              uint64
+	totalDurationTicks       int
+	sourceDamageType         string
+	shardProjectile          bool
+	effectIDs                []string
+	dir                      Vec2
+	speed                    float64
+	traveled                 float64
+	maxDistance              float64
+	damageRange              DamageRange
+	sourceMsgID              string
+	sourceCorrID             string
+	spawnTick                uint64
+	spawnPos                 Vec2
+	aiMode                   string
+	aiTargetPlayerID         uint64
+	navPath                  []Vec2
+	navGoal                  Vec2
+	navPathValid             bool
+	navPathCell              gridCell
+	navTargetPlayerID        uint64
+	navPathTick              uint64
+	navNextRepathTick        uint64
+	lastAttackTick           uint64
+	hasAttacked              bool
+	attackWindupRemaining    int
+	attackWindupTargetID     uint64
+	attackWindupDamage       DamageRange
+	rangedMeleeEngagedTick   uint64
+	isTrainingDoll           bool
+	trainingDollReviveAt     uint64
+	monsterResistances       map[string]float64
 }
 
 type invItem struct {
@@ -298,22 +298,22 @@ type skillCooldownState struct {
 }
 
 type skillEffectState struct {
-	SkillID                  string
-	TargetID                 uint64
-	Stats                    []string
-	Percent                  int
-	VisualScale              float64
-	EffectID                 string
-	ReflectOnBlock           bool
-	Immunity                 bool
-	OutgoingDamagePercent    int
-	ManaPerHP                int
-	HealthRegenMultiplier    float64
-	ForceEvade               bool
-	RedirectDamage           bool
-	PhaseThroughMonsters     bool
-	EndsTick                 uint64
-	TotalTicks               int
+	SkillID               string
+	TargetID              uint64
+	Stats                 []string
+	Percent               int
+	VisualScale           float64
+	EffectID              string
+	ReflectOnBlock        bool
+	Immunity              bool
+	OutgoingDamagePercent int
+	ManaPerHP             int
+	HealthRegenMultiplier float64
+	ForceEvade            bool
+	RedirectDamage        bool
+	PhaseThroughMonsters  bool
+	EndsTick              uint64
+	TotalTicks            int
 }
 
 type areaHealZoneState struct {
@@ -363,6 +363,7 @@ type playerState struct {
 	Progression           CharacterProgressionState
 	SkillCooldowns        map[string]skillCooldownState
 	SkillEffects          map[string]skillEffectState
+	StatusEffects         map[string]statusEffectState
 	PoisonDots            map[uint64]poisonDotState
 	BleedDots             map[uint64]bleedDotState
 	RogueMarks            map[uint64]rogueMarkState
@@ -412,62 +413,63 @@ type Sim struct {
 	goldRoll                    uint64
 	nextAreaHealZoneID          uint64
 
-	levels                map[int]*LevelState
-	currentLevel          int
-	multiLevel            bool
-	fogOfWarEnabled       bool
-	entities              map[uint64]*entity
-	walls                 []wallObstacle
-	move                  *activeMove
-	autoNav               *autoNavState
-	inventory             []*invItem
-	equipped              map[string]uint64 // slot -> instanceID (0 = none)
-	weaponSets            []map[string]uint64
-	activeWeaponSet       int
-	hotbar                []uint64 // fixed 10-slot item instance assignments (0 = none)
-	discoveredTeleporters map[int]bool
-	progression           CharacterProgressionState
-	skillCooldowns        map[string]skillCooldownState
-	skillEffects          map[string]skillEffectState
-	poisonDots            map[uint64]poisonDotState
-	bleedDots             map[uint64]bleedDotState
-	rogueMarks            map[uint64]rogueMarkState
-	uniqueBurnDots        map[string]uniqueBurnDotState
-	uniqueExecutionMarks  map[uint64]uniqueExecutionMarkState
-	uniqueHungerStacks    map[uint64]uniqueHungerStackState
-	uniqueAshenReprisals  map[uint64]uniqueAshenReprisalState
-	uniquePilgrimMomentum map[uint64]uniquePilgrimMomentumState
-	uniqueChests          map[uint64]*uniqueChestState
-	areaHealZones         map[uint64]areaHealZoneState
-	skillFunctionKeys     []string
-	rightClickSkillID     string
+	levels                    map[int]*LevelState
+	currentLevel              int
+	multiLevel                bool
+	fogOfWarEnabled           bool
+	entities                  map[uint64]*entity
+	walls                     []wallObstacle
+	move                      *activeMove
+	autoNav                   *autoNavState
+	inventory                 []*invItem
+	equipped                  map[string]uint64 // slot -> instanceID (0 = none)
+	weaponSets                []map[string]uint64
+	activeWeaponSet           int
+	hotbar                    []uint64 // fixed 10-slot item instance assignments (0 = none)
+	discoveredTeleporters     map[int]bool
+	progression               CharacterProgressionState
+	skillCooldowns            map[string]skillCooldownState
+	skillEffects              map[string]skillEffectState
+	statusEffects             map[string]statusEffectState
+	poisonDots                map[uint64]poisonDotState
+	bleedDots                 map[uint64]bleedDotState
+	rogueMarks                map[uint64]rogueMarkState
+	uniqueBurnDots            map[string]uniqueBurnDotState
+	uniqueExecutionMarks      map[uint64]uniqueExecutionMarkState
+	uniqueHungerStacks        map[uint64]uniqueHungerStackState
+	uniqueAshenReprisals      map[uint64]uniqueAshenReprisalState
+	uniquePilgrimMomentum     map[uint64]uniquePilgrimMomentumState
+	uniqueChests              map[uint64]*uniqueChestState
+	areaHealZones             map[uint64]areaHealZoneState
+	skillFunctionKeys         []string
+	rightClickSkillID         string
 	shopStock                 map[string]*shopStockState
 	pendingQuestStewardOffers *questStewardOffersState
 	gold                      int
-	stashItems            []*stashItem
-	stashGold             int
-	stashCapacity         int
-	resourceWallet        map[string]int
-	corpses               map[string]*corpseState
-	mercenaryRoster       map[string]MercenaryCharacterSnapshot
-	hpRegenCarry          float64
-	manaRegenCarry        float64
-	nextBasicAttackTick   uint64
-	nextOffHandAttackTick uint64
+	stashItems                []*stashItem
+	stashGold                 int
+	stashCapacity             int
+	resourceWallet            map[string]int
+	corpses                   map[string]*corpseState
+	mercenaryRoster           map[string]MercenaryCharacterSnapshot
+	hpRegenCarry              float64
+	manaRegenCarry            float64
+	nextBasicAttackTick       uint64
+	nextOffHandAttackTick     uint64
 }
 
 // CharacterProgressionState is the authoritative mutable progression state for
 // one character inside a sim session.
 type CharacterProgressionState struct {
-	CharacterClass      string
-	Level               int
-	Experience          int
-	UnspentStatPoints   int
-	UnspentSkillPoints  int
-	SkillRanks          map[string]int
-	BaseStats           BaseStatsView
-	Gold                int
-	DeepestDungeonDepth int
+	CharacterClass            string
+	Level                     int
+	Experience                int
+	UnspentStatPoints         int
+	UnspentSkillPoints        int
+	SkillRanks                map[string]int
+	BaseStats                 BaseStatsView
+	Gold                      int
+	DeepestDungeonDepth       int
 	HiredMercenaryCharacterID string
 }
 
@@ -524,6 +526,7 @@ func NewSimWithWorldProgression(sessionID, seed string, rules *Rules, worldID st
 		progression:           progression,
 		skillCooldowns:        make(map[string]skillCooldownState),
 		skillEffects:          make(map[string]skillEffectState),
+		statusEffects:         make(map[string]statusEffectState),
 		poisonDots:            make(map[uint64]poisonDotState),
 		bleedDots:             make(map[uint64]bleedDotState),
 		rogueMarks:            make(map[uint64]rogueMarkState),
@@ -759,6 +762,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		Progression:           s.progression,
 		SkillCooldowns:        cloneSkillCooldowns(s.skillCooldowns),
 		SkillEffects:          cloneSkillEffects(s.skillEffects),
+		StatusEffects:         cloneStatusEffects(s.statusEffects),
 		PoisonDots:            clonePoisonDots(s.poisonDots),
 		BleedDots:             cloneBleedDots(s.bleedDots),
 		RogueMarks:            cloneRogueMarks(s.rogueMarks),
@@ -882,50 +886,50 @@ func gameplayDebugEnabledFromEnv() bool {
 
 // Input is a decoded client intent applied to a specific tick.
 type Input struct {
-	MessageID           string
-	CorrelationID       string
-	Sequence            int64
-	ActorPlayerID       uint64
-	Type                string
-	Move                *MoveIntent
-	MoveTo              *MoveToIntent
-	DirectionalAttack   *DirectionalAttackIntent
-	Action              *ActionIntent
-	Descend             *DescendIntent
-	Ascend              *AscendIntent
-	Teleport            *TeleportIntent
-	Equip               *EquipIntent
-	Unequip             *UnequipIntent
-	SwapWeaponSet       *SwapWeaponSetIntent
-	Drop                *DropIntent
-	Use                 *UseIntent
-	AssignHotbar        *AssignHotbarIntent
-	UseHotbar           *UseHotbarIntent
-	AllocateStat        *AllocateStatIntent
-	AllocateSkillPoint  *AllocateSkillPointIntent
-	CastSkill           *CastSkillIntent
-	ChannelSkill        *ChannelSkillIntent
-	SetSkillBindings    *SetSkillBindingsIntent
-	CompanionCommand    *CompanionCommandIntent
-	ShopBuy             *ShopBuyIntent
-	ShopSell            *ShopSellIntent
-	ShopReroll          *ShopRerollIntent
-	QuestStewardPick    *QuestStewardPickIntent
-	BishopRespec        *BishopRespecIntent
-	BishopReviveAll     *BishopReviveAllIntent
-	BishopDebugLevel    *BishopDebugLevelIntent
-	BishopDebugSkill    *BishopDebugSkillPointIntent
-	BishopDebugStat                 *BishopDebugStatPointIntent
-	BishopDebugLootCatalog          *BishopDebugLootCatalogIntent
-	BishopDebugLootSourceCatalog    *BishopDebugLootSourceCatalogIntent
-	BishopDebugForceLoot            *BishopDebugForceLootIntent
-	StashDepositItem    *StashDepositItemIntent
-	StashWithdrawItem   *StashWithdrawItemIntent
-	StashDepositGold    *StashDepositGoldIntent
-	StashWithdrawGold   *StashWithdrawGoldIntent
-	CorpseWithdrawItem  *CorpseWithdrawItemIntent
-	UniqueChestTakeItem *UniqueChestTakeItemIntent
-	DebugPlayerPos      *DebugPlayerPosIntent
+	MessageID                    string
+	CorrelationID                string
+	Sequence                     int64
+	ActorPlayerID                uint64
+	Type                         string
+	Move                         *MoveIntent
+	MoveTo                       *MoveToIntent
+	DirectionalAttack            *DirectionalAttackIntent
+	Action                       *ActionIntent
+	Descend                      *DescendIntent
+	Ascend                       *AscendIntent
+	Teleport                     *TeleportIntent
+	Equip                        *EquipIntent
+	Unequip                      *UnequipIntent
+	SwapWeaponSet                *SwapWeaponSetIntent
+	Drop                         *DropIntent
+	Use                          *UseIntent
+	AssignHotbar                 *AssignHotbarIntent
+	UseHotbar                    *UseHotbarIntent
+	AllocateStat                 *AllocateStatIntent
+	AllocateSkillPoint           *AllocateSkillPointIntent
+	CastSkill                    *CastSkillIntent
+	ChannelSkill                 *ChannelSkillIntent
+	SetSkillBindings             *SetSkillBindingsIntent
+	CompanionCommand             *CompanionCommandIntent
+	ShopBuy                      *ShopBuyIntent
+	ShopSell                     *ShopSellIntent
+	ShopReroll                   *ShopRerollIntent
+	QuestStewardPick             *QuestStewardPickIntent
+	BishopRespec                 *BishopRespecIntent
+	BishopReviveAll              *BishopReviveAllIntent
+	BishopDebugLevel             *BishopDebugLevelIntent
+	BishopDebugSkill             *BishopDebugSkillPointIntent
+	BishopDebugStat              *BishopDebugStatPointIntent
+	BishopDebugLootCatalog       *BishopDebugLootCatalogIntent
+	BishopDebugLootSourceCatalog *BishopDebugLootSourceCatalogIntent
+	BishopDebugForceLoot         *BishopDebugForceLootIntent
+	StashDepositItem             *StashDepositItemIntent
+	StashWithdrawItem            *StashWithdrawItemIntent
+	StashDepositGold             *StashDepositGoldIntent
+	StashWithdrawGold            *StashWithdrawGoldIntent
+	CorpseWithdrawItem           *CorpseWithdrawItemIntent
+	UniqueChestTakeItem          *UniqueChestTakeItemIntent
+	DebugPlayerPos               *DebugPlayerPosIntent
 }
 
 type (
@@ -940,8 +944,8 @@ type (
 		Direction Vec2
 	}
 	ActionIntent struct {
-		TargetID              string
-		MercenaryCharacterID  string
+		TargetID             string
+		MercenaryCharacterID string
 	}
 	DescendIntent  struct{}
 	AscendIntent   struct{}
@@ -2495,7 +2499,7 @@ func (s *Sim) areaHealApplications(player *entity, def SkillDef, rank int, cast 
 		if rejectReason != "" {
 			return nil, rejectReason
 		}
-		percent := s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(s.rules,effect, rank))
+		percent := s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(s.rules, effect, rank))
 		targets := s.healSkillTargets(center, effect, player.id, s.scaleSkillRadiusForMagic(def, rank, effect))
 		for _, target := range targets {
 			if target.hp >= target.maxHP {
@@ -2547,7 +2551,7 @@ func (s *Sim) startAreaHealZones(player *entity, skillID string, def SkillDef, r
 			CasterID:      player.id,
 			SkillID:       skillID,
 			Rank:          rank,
-			Percent:       s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(s.rules,effect, rank)),
+			Percent:       s.scaleSkillPercentForMagic(def, rank, effect, skillEffectPercent(s.rules, effect, rank)),
 			Radius:        s.scaleSkillRadiusForMagic(def, rank, effect),
 			IncludeCaster: effect.IncludeCaster,
 			CorrelationID: correlationID,
@@ -3190,6 +3194,9 @@ func (s *Sim) monsterMoveSpeed(monster *entity, def MonsterDef, nav NavigationRu
 		return 0
 	}
 	slowPercent := 0
+	if pct := s.targetStatusPercent(monster.id, "movement_speed"); pct > slowPercent {
+		slowPercent = pct
+	}
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]
 		if effect.TargetID != monster.id || effect.EndsTick <= s.tick {
@@ -5179,20 +5186,20 @@ func (s *Sim) restorePlayerResources(player *entity, res *TickResult) (int, int)
 func (s *Sim) CharacterProgressionView() CharacterProgressionView {
 	remaining := s.experienceToNextLevel()
 	return CharacterProgressionView{
-		CharacterClass:        s.progression.CharacterClass,
-		Level:                 s.progression.Level,
-		Experience:            s.progression.Experience,
-		ExperienceToNextLevel: remaining,
-		LevelCap:              s.rules.CharacterProgression.LevelCap,
-		UnspentStatPoints:     s.progression.UnspentStatPoints,
-		UnspentSkillPoints:    s.progression.UnspentSkillPoints,
-		Gold:                  s.gold,
-		DeepestDungeonDepth:   s.progression.DeepestDungeonDepth,
-		BaseStats:             s.progression.BaseStats,
-		EffectiveBaseStats:    s.effectiveBaseStatsView(),
-		DerivedStats:          s.DerivedStatsView(),
-		StatBreakdowns:        s.StatBreakdownViews(),
-		SkillRanks:            cloneIntMap(s.progression.SkillRanks),
+		CharacterClass:            s.progression.CharacterClass,
+		Level:                     s.progression.Level,
+		Experience:                s.progression.Experience,
+		ExperienceToNextLevel:     remaining,
+		LevelCap:                  s.rules.CharacterProgression.LevelCap,
+		UnspentStatPoints:         s.progression.UnspentStatPoints,
+		UnspentSkillPoints:        s.progression.UnspentSkillPoints,
+		Gold:                      s.gold,
+		DeepestDungeonDepth:       s.progression.DeepestDungeonDepth,
+		BaseStats:                 s.progression.BaseStats,
+		EffectiveBaseStats:        s.effectiveBaseStatsView(),
+		DerivedStats:              s.DerivedStatsView(),
+		StatBreakdowns:            s.StatBreakdownViews(),
+		SkillRanks:                cloneIntMap(s.progression.SkillRanks),
 		HiredMercenaryCharacterID: s.progression.HiredMercenaryCharacterID,
 	}
 }

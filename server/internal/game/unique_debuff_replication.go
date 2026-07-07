@@ -10,38 +10,8 @@ func (s *Sim) applyMonsterSlow(target *entity, sourceID uint64, skillID string, 
 	if effectID == "" {
 		effectID = skillID
 	}
-	stateKey := fmt.Sprintf("%s:%d", skillID, target.id)
-	current := 0
-	if existing, ok := s.skillEffects[stateKey]; ok && existing.EndsTick > s.tick {
-		current = existing.Percent
-	}
-	percent := current + slow.Percent
-	if percent > slow.MaxPercent {
-		percent = slow.MaxPercent
-	}
-	s.skillEffects[stateKey] = skillEffectState{
-		SkillID:    skillID,
-		TargetID:   target.id,
-		Stats:      []string{"movement_speed"},
-		Percent:    percent,
-		EffectID:   effectID,
-		EndsTick:   s.tick + uint64(slow.DurationTicks),
-		TotalTicks: slow.DurationTicks,
-	}
-	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	res.Events = append(res.Events, Event{
-		EventType:      "skill_effect_started",
-		EntityID:       idStr(target.id),
-		SourceEntityID: idStr(sourceID),
-		TargetEntityID: idStr(target.id),
-		CorrelationID:  correlationID,
-		SkillID:        skillID,
-		Amount:         intPtr(percent),
-		RemainingTicks: intPtr(slow.DurationTicks),
-		TotalTicks:     intPtr(slow.DurationTicks),
-	})
-	s.replicateSkillEffectToNearbyMonsters(sourceID, target, stateKey, res)
+	s.applySlowStatus(target, effectID, skillID, sourceID, slow.Percent, slow.MaxPercent, slow.DurationTicks, correlationID, res)
+	s.replicateSlowStatus(sourceID, target, effectID, skillID, slow.Percent, slow.MaxPercent, slow.DurationTicks, correlationID, res)
 }
 
 func (s *Sim) uniqueDebuffReplicationTargets(playerID uint64, primary *entity) []replicatedDebuffTarget {

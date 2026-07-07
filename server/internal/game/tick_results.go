@@ -52,6 +52,7 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 			s.withTickPhase(TickPhaseCombat, func() {
 				s.expireSkillEffects(res)
 				s.advanceRogueMarks(res)
+				s.advanceStatusEffects(res)
 				s.advancePoisonDots(res)
 				s.advanceBleedDots(res)
 				s.advanceUniqueBurnDots(res)

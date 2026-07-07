@@ -1812,6 +1812,68 @@
         }
       ]
     },
+    "status_effect_slow_lab": {
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 5
+        }
+      },
+      "entities": [
+        {
+          "type": "monster",
+          "monster_def_id": "dungeon_undead",
+          "position": {
+            "x": 9,
+            "y": 5
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 0.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 8,
+            "y": 9.5
+          },
+          "size": {
+            "x": 16,
+            "y": 1
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 0.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        },
+        {
+          "type": "wall",
+          "position": {
+            "x": 15.5,
+            "y": 5
+          },
+          "size": {
+            "x": 1,
+            "y": 10
+          }
+        }
+      ]
+    },
     "chase_maze": {
       "player": {
         "position": {

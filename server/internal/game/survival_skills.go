@@ -241,6 +241,17 @@ func (s *Sim) cleansePlayerDebuffs(player *entity, keepSkillID string) {
 		}
 		delete(s.skillEffects, stateKey)
 	}
+	for _, key := range sortedStringKeys(s.statusEffects) {
+		effect := s.statusEffects[key]
+		if effect.TargetID != player.id || effect.EventSkillID == keepSkillID {
+			continue
+		}
+		def, ok := s.statusDef(effect.StatusID)
+		if !ok || !def.Debuff {
+			continue
+		}
+		delete(s.statusEffects, key)
+	}
 	delete(s.poisonDots, player.id)
 	player.effectIDs = []string{}
 }

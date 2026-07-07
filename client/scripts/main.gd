@@ -1422,14 +1422,14 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "skill_effect_started" and str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.HOLY_SHIELD_EFFECT_ID:
 			_pulse_holy_shield_aura(ev)
-		if str(ev.get("skill_id", "")) == "poison_stab":
+		if PlayerStatusEffectMarkers.has_poison_effect_id([str(ev.get("skill_id", ""))]):
 			if event_type == "skill_effect_started":
 				_set_entity_poison_tint(eid, true)
 				continue
 			if event_type == "skill_effect_ended":
 				_set_entity_poison_tint(eid, false)
 				continue
-		if str(ev.get("skill_id", "")) == PlayerStatusEffectMarkers.BURNING_EFFECT_ID:
+		if PlayerStatusEffectMarkers.has_burning_effect_id([str(ev.get("skill_id", ""))]):
 			if event_type == "skill_effect_started":
 				_set_entity_burning(eid, true)
 				continue
@@ -5865,7 +5865,7 @@ func _apply_entity_status_tint(rec: Dictionary) -> void:
 		tint = Color(1.0, 0.38, 0.12)
 	if bool(rec.get("bleeding", false)) or PlayerStatusEffectMarkers.has_bleed_effect_id(rec.get("effect_ids", [])):
 		tint = Color(0.92, 0.22, 0.24)
-	if bool(rec.get("poisoned", false)):
+	if bool(rec.get("poisoned", false)) or PlayerStatusEffectMarkers.has_poison_effect_id(rec.get("effect_ids", [])):
 		tint = ClientConstants.POISON_TINT
 	var reaction = rec.get("reaction", null)
 	if reaction != null and reaction.has_method("set_base_tint"):

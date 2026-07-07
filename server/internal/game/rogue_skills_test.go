@@ -196,19 +196,23 @@ func TestRogueMarkIncreasesPoisonTickDamage(t *testing.T) {
 		EffectID:           "test_rogue_mark",
 		CorrelationID:      "corr_poison_mark",
 	}
-	sim.poisonDots[target.id] = poisonDotState{
+	sim.statusEffects[statusEffectKey("poisoned", target.id, "poison_stab")] = statusEffectState{
+		StatusID:       "poisoned",
+		EventSkillID:   "poison_stab",
 		SourcePlayerID: player.id,
 		TargetID:       target.id,
-		SkillID:        "poison_stab",
 		Rank:           1,
+		DamageType:     damageTypePoison,
 		DamagePerTick:  4,
 		NextTick:       sim.tick,
+		IntervalTicks:  10,
 		RemainingTicks: 10,
+		TotalTicks:     10,
 		CorrelationID:  "corr_poison_mark",
 	}
 
 	res := TickResult{Tick: sim.tick, Level: sim.currentLevel}
-	sim.advancePoisonDots(&res)
+	sim.advanceStatusEffects(&res)
 	if damage := eventDamage(res, "monster_damaged"); damage < 8 {
 		t.Fatalf("poison mark tick events=%+v, want at least 8 damage", res.Events)
 	}

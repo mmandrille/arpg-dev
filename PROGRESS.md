@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-07 (v448 quest steward hunt loop)
+Last updated: 2026-07-07 (v449 status effects foundation)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-07 (v448 quest steward hunt loop)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v448 — quest steward hunt loop |
+| **Latest completed slice** | v449 — status effects foundation |
 | **CI gate** | 2026-07-07 — `make ci` green |
-| **Next slice** | TBD |
+| **Next slice** | v450 — `branch-build-uniques` |
 | **Last engineering review** | v448 — [`docs/reviews/20260707_v448-overview.md`](docs/reviews/20260707_v448-overview.md) (2026-07-07; official cadence) |
 | **Next engineering review** | ~v458 — run `$review` then `$refactor` after next ~10-slice milestone |
 

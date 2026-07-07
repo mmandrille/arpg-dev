@@ -1,0 +1,47 @@
+{
+  "version": 0,
+  "statuses": {
+    "poisoned": {
+      "id": "poisoned",
+      "kind": "dot",
+      "damage_type": "poison",
+      "debuff": true
+    },
+    "weapon_poison": {
+      "id": "weapon_poison",
+      "kind": "dot",
+      "damage_type": "poison",
+      "debuff": true
+    },
+    "everburning_wound": {
+      "id": "everburning_wound",
+      "kind": "dot",
+      "damage_type": "fire",
+      "debuff": true
+    },
+    "burning": {
+      "id": "burning",
+      "kind": "dot",
+      "damage_type": "fire",
+      "debuff": true
+    },
+    "weapon_burn": {
+      "id": "weapon_burn",
+      "kind": "dot",
+      "damage_type": "fire",
+      "debuff": true
+    },
+    "ice_slow": {
+      "id": "ice_slow",
+      "kind": "slow",
+      "stats": ["movement_speed"],
+      "debuff": true
+    },
+    "weapon_freeze": {
+      "id": "weapon_freeze",
+      "kind": "slow",
+      "stats": ["movement_speed", "attack_speed"],
+      "debuff": true
+    }
+  }
+}

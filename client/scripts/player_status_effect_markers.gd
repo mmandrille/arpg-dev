@@ -7,7 +7,9 @@ const HOLY_SHIELD_EFFECT_ID := "holy_shield"
 const SANCTUARY_EFFECT_ID := "sanctuary"
 const RAGE_EFFECT_ID := "rage"
 const ICE_SLOW_EFFECT_ID := "ice_slow"
-const BURNING_EFFECT_ID := "everburning_wound"
+const WEAPON_FREEZE_EFFECT_ID := "weapon_freeze"
+const BURNING_EFFECT_IDS := ["everburning_wound", "burning", "weapon_burn"]
+const POISON_EFFECT_IDS := ["poisoned", "weapon_poison"]
 const ELITE_COMMAND_EFFECT_ID := "elite_command"
 const PINNING_ROOT_EFFECT_ID := "pinning_root"
 const STUN_EFFECT_ID := "stun"
@@ -56,12 +58,23 @@ static func active_holy_shield_target_pulse_count(root: Node3D) -> int:
 
 static func has_ice_slow_effect(effect_ids_value) -> bool:
 	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
-	return effect_ids.has(ICE_SLOW_EFFECT_ID)
+	return effect_ids.has(ICE_SLOW_EFFECT_ID) or effect_ids.has(WEAPON_FREEZE_EFFECT_ID)
 
 
 static func has_burning_effect_id(effect_ids_value) -> bool:
 	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
-	return effect_ids.has(BURNING_EFFECT_ID)
+	for effect_id in BURNING_EFFECT_IDS:
+		if effect_ids.has(effect_id):
+			return true
+	return false
+
+
+static func has_poison_effect_id(effect_ids_value) -> bool:
+	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
+	for effect_id in POISON_EFFECT_IDS:
+		if effect_ids.has(effect_id):
+			return true
+	return false
 
 
 static func has_elite_command_effect_id(effect_ids_value) -> bool:
@@ -96,7 +109,7 @@ static func has_stun_effect_id(effect_ids_value) -> bool:
 static func strip_combat_status_effect_ids(effect_ids_value) -> Array:
 	var strip_ids := {
 		ICE_SLOW_EFFECT_ID: true,
-		BURNING_EFFECT_ID: true,
+		WEAPON_FREEZE_EFFECT_ID: true,
 		PINNING_ROOT_EFFECT_ID: true,
 		STUN_EFFECT_ID: true,
 		"leap_stun": true,
@@ -105,6 +118,10 @@ static func strip_combat_status_effect_ids(effect_ids_value) -> Array:
 		ROGUE_MARK_EFFECT_ID: true,
 		ELITE_COMMAND_EFFECT_ID: true,
 	}
+	for effect_id in BURNING_EFFECT_IDS:
+		strip_ids[effect_id] = true
+	for effect_id in POISON_EFFECT_IDS:
+		strip_ids[effect_id] = true
 	var effect_ids: Array = effect_ids_value if effect_ids_value is Array else []
 	var kept: Array = []
 	for id in effect_ids:

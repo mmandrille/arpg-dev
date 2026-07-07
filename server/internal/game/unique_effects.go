@@ -206,7 +206,6 @@ func (s *Sim) startUniqueBurnDot(playerID uint64, target *entity, def UniqueEffe
 	if target == nil || sourceDamage < 0 {
 		return
 	}
-	damageType := canonicalDamageType(uniqueEffectStringParam(def, "damage_type", damageTypeFire))
 	percent := uniqueEffectIntParam(def, "tick_damage_percent_of_original_hit", 0)
 	durationSeconds := uniqueEffectIntParam(def, "duration_seconds", 0)
 	intervalSeconds := uniqueEffectIntParam(def, "tick_interval_seconds", 0)
@@ -223,33 +222,8 @@ func (s *Sim) startUniqueBurnDot(playerID uint64, target *entity, def UniqueEffe
 	if intervalTicks < 1 || totalTicks < 1 {
 		return
 	}
-	s.uniqueBurnDots[uniqueBurnDotKey(def.ID, target.id)] = uniqueBurnDotState{
-		SourcePlayerID: playerID,
-		TargetID:       target.id,
-		EffectID:       def.ID,
-		DamageType:     damageType,
-		DamagePerTick:  damage,
-		NextTick:       s.tick + uint64(intervalTicks),
-		IntervalTicks:  intervalTicks,
-		RemainingTicks: totalTicks,
-		TotalTicks:     totalTicks,
-		CorrelationID:  corr,
-	}
-	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, def.ID))
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	res.Events = append(res.Events, Event{
-		EventType:      "skill_effect_started",
-		EntityID:       idStr(target.id),
-		SourceEntityID: idStr(playerID),
-		TargetEntityID: idStr(target.id),
-		CorrelationID:  corr,
-		SkillID:        def.ID,
-		Amount:         intPtr(damage),
-		RemainingTicks: intPtr(totalTicks),
-		TotalTicks:     intPtr(totalTicks),
-		DamageType:     damageType,
-	})
-	s.replicateUniqueBurnDot(playerID, target, s.uniqueBurnDots[uniqueBurnDotKey(def.ID, target.id)], res)
+	s.startDotStatus(target, statusID, def.ID, playerID, 1, damage, intervalTicks, totalTicks, corr, res)
+	s.replicateDotStatus(playerID, target, statusID, def.ID, 1, damage, intervalTicks, totalTicks, corr, res)
 }
 
 func (s *Sim) advanceUniqueBurnDots(res *TickResult) {

@@ -14,16 +14,16 @@ type poisonDotState struct {
 }
 
 type bleedDotState struct {
-	SourcePlayerID         uint64
-	TargetID               uint64
-	SkillID                string
-	EffectID               string
-	DamagePercentMaxHP     int
-	IntervalTicks          int
-	NextTick               uint64
-	RemainingTicks         int
-	TotalTicks             int
-	CorrelationID          string
+	SourcePlayerID     uint64
+	TargetID           uint64
+	SkillID            string
+	EffectID           string
+	DamagePercentMaxHP int
+	IntervalTicks      int
+	NextTick           uint64
+	RemainingTicks     int
+	TotalTicks         int
+	CorrelationID      string
 }
 
 type rogueMarkState struct {
@@ -340,30 +340,9 @@ func (s *Sim) startPoisonDot(player *entity, target *entity, skillID string, def
 	if duration < 1 {
 		duration = 1
 	}
-	s.poisonDots[target.id] = poisonDotState{
-		SourcePlayerID: player.id,
-		TargetID:       target.id,
-		SkillID:        skillID,
-		Rank:           rank,
-		DamagePerTick:  damage,
-		NextTick:       s.tick + 10,
-		RemainingTicks: duration,
-		CorrelationID:  correlationID,
-	}
-	res.Events = append(res.Events, Event{
-		EventType:      "skill_effect_started",
-		EntityID:       idStr(target.id),
-		SourceEntityID: idStr(player.id),
-		TargetEntityID: idStr(target.id),
-		CorrelationID:  correlationID,
-		SkillID:        skillID,
-		Rank:           intPtr(rank),
-		Amount:         intPtr(damage),
-		RemainingTicks: intPtr(duration),
-		TotalTicks:     intPtr(duration),
-	})
+	s.startDotStatus(target, "poisoned", skillID, player.id, rank, damage, 10, duration, correlationID, res)
 	s.startRogueMark(player, target, skillID, def, rank, correlationID, res)
-	s.replicatePoisonDot(player.id, target, s.poisonDots[target.id], res)
+	s.replicateDotStatus(player.id, target, "poisoned", skillID, rank, damage, 10, duration, correlationID, res)
 }
 
 func (s *Sim) startRogueMark(player *entity, target *entity, skillID string, def SkillDef, rank int, correlationID string, res *TickResult) {
@@ -381,24 +360,7 @@ func (s *Sim) replicatePoisonDot(playerID uint64, primary *entity, dot poisonDot
 	if dot.SkillID == "" || dot.RemainingTicks <= 0 {
 		return
 	}
-	for _, replicated := range s.uniqueDebuffReplicationTargets(playerID, primary) {
-		target := replicated.entity
-		clone := dot
-		clone.TargetID = target.id
-		s.poisonDots[target.id] = clone
-		res.Events = append(res.Events, Event{
-			EventType:      "skill_effect_started",
-			EntityID:       idStr(target.id),
-			SourceEntityID: idStr(playerID),
-			TargetEntityID: idStr(target.id),
-			CorrelationID:  dot.CorrelationID,
-			SkillID:        dot.SkillID,
-			Rank:           intPtr(dot.Rank),
-			Amount:         intPtr(dot.DamagePerTick),
-			RemainingTicks: intPtr(dot.RemainingTicks),
-			TotalTicks:     intPtr(dot.RemainingTicks),
-		})
-	}
+	s.replicateDotStatus(playerID, primary, "poisoned", dot.SkillID, dot.Rank, dot.DamagePerTick, 10, dot.RemainingTicks, dot.CorrelationID, res)
 }
 
 func (s *Sim) advancePoisonDots(res *TickResult) {

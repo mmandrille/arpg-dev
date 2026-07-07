@@ -31,16 +31,16 @@ func TestOffensiveUniqueReplicatingBlightCopiesBurnDebuffOnly(t *testing.T) {
 	if nearA.hp != nearA.maxHP || nearB.hp != nearB.maxHP || far.hp != far.maxHP {
 		t.Fatalf("replicate hit damaged secondaries: nearA=%d nearB=%d far=%d", nearA.hp, nearB.hp, far.hp)
 	}
-	if !containsStringValue(nearA.effectIDs, everburningWoundEffectID) || !containsStringValue(nearB.effectIDs, everburningWoundEffectID) {
+	if !containsStringValue(nearA.effectIDs, "burning") || !containsStringValue(nearB.effectIDs, "burning") {
 		t.Fatalf("nearby effects = %v / %v, want replicated burn", nearA.effectIDs, nearB.effectIDs)
 	}
-	if containsStringValue(far.effectIDs, everburningWoundEffectID) {
+	if containsStringValue(far.effectIDs, "burning") {
 		t.Fatalf("far effects = %v, want no replicated burn", far.effectIDs)
 	}
-	if _, ok := sim.uniqueBurnDots[uniqueBurnDotKey(everburningWoundEffectID, nearA.id)]; !ok {
+	if _, ok := sim.statusEffects[statusEffectKey("burning", nearA.id, everburningWoundEffectID)]; !ok {
 		t.Fatalf("nearA missing replicated burn dot")
 	}
-	if _, ok := sim.uniqueBurnDots[uniqueBurnDotKey(everburningWoundEffectID, nearB.id)]; !ok {
+	if _, ok := sim.statusEffects[statusEffectKey("burning", nearB.id, everburningWoundEffectID)]; !ok {
 		t.Fatalf("nearB missing replicated burn dot")
 	}
 

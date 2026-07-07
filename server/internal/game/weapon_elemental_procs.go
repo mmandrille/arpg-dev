@@ -27,11 +27,11 @@ type WeaponElementalColdProcConfig struct {
 }
 
 type WeaponElementalFireProcConfig struct {
-	ProcChancePercent      int    `json:"proc_chance_percent"`
-	BurnPercentOfTotalHit  int    `json:"burn_percent_of_total_hit"`
-	DurationSeconds        int    `json:"duration_seconds"`
-	TickIntervalSeconds    int    `json:"tick_interval_seconds"`
-	EffectID               string `json:"effect_id"`
+	ProcChancePercent     int    `json:"proc_chance_percent"`
+	BurnPercentOfTotalHit int    `json:"burn_percent_of_total_hit"`
+	DurationSeconds       int    `json:"duration_seconds"`
+	TickIntervalSeconds   int    `json:"tick_interval_seconds"`
+	EffectID              string `json:"effect_id"`
 }
 
 type WeaponElementalLightningProcConfig struct {
@@ -41,11 +41,11 @@ type WeaponElementalLightningProcConfig struct {
 }
 
 type WeaponElementalPoisonProcConfig struct {
-	ProcChancePercent            int    `json:"proc_chance_percent"`
-	DotPercentOfElementalDamage  int    `json:"dot_percent_of_elemental_damage"`
-	DurationSeconds              int    `json:"duration_seconds"`
-	TickIntervalSeconds          int    `json:"tick_interval_seconds"`
-	EffectID                     string `json:"effect_id"`
+	ProcChancePercent           int    `json:"proc_chance_percent"`
+	DotPercentOfElementalDamage int    `json:"dot_percent_of_elemental_damage"`
+	DurationSeconds             int    `json:"duration_seconds"`
+	TickIntervalSeconds         int    `json:"tick_interval_seconds"`
+	EffectID                    string `json:"effect_id"`
 }
 
 func validateWeaponElementalProcsConfig(cfg WeaponElementalProcsConfig) error {
@@ -215,32 +215,7 @@ func (s *Sim) startWeaponElementalBurnDot(playerID uint64, target *entity, cfg W
 	if effectID == "" {
 		effectID = "weapon_burn"
 	}
-	s.uniqueBurnDots[uniqueBurnDotKey(effectID, target.id)] = uniqueBurnDotState{
-		SourcePlayerID: playerID,
-		TargetID:       target.id,
-		EffectID:       effectID,
-		DamageType:     damageTypeFire,
-		DamagePerTick:  damage,
-		NextTick:       s.tick + uint64(intervalTicks),
-		IntervalTicks:  intervalTicks,
-		RemainingTicks: totalTicks,
-		TotalTicks:     totalTicks,
-		CorrelationID:  corr,
-	}
-	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	res.Events = append(res.Events, Event{
-		EventType:      "skill_effect_started",
-		EntityID:       idStr(target.id),
-		SourceEntityID: idStr(playerID),
-		TargetEntityID: idStr(target.id),
-		CorrelationID:  corr,
-		SkillID:        weaponElementalBurnSkillID,
-		Amount:         intPtr(damage),
-		RemainingTicks: intPtr(totalTicks),
-		TotalTicks:     intPtr(totalTicks),
-		DamageType:     damageTypeFire,
-	})
+	s.startDotStatus(target, effectID, weaponElementalBurnSkillID, playerID, 1, damage, intervalTicks, totalTicks, corr, res)
 }
 
 func (s *Sim) startWeaponElementalPoisonDot(playerID uint64, target *entity, cfg WeaponElementalPoisonProcConfig, elementalDamage int, corr string, res *TickResult) {
@@ -260,30 +235,7 @@ func (s *Sim) startWeaponElementalPoisonDot(playerID uint64, target *entity, cfg
 	if effectID == "" {
 		effectID = "weapon_poison"
 	}
-	s.poisonDots[target.id] = poisonDotState{
-		SourcePlayerID: playerID,
-		TargetID:       target.id,
-		SkillID:        weaponElementalPoisonSkillID,
-		Rank:           1,
-		DamagePerTick:  damage,
-		NextTick:       s.tick + uint64(intervalTicks),
-		RemainingTicks: durationTicks,
-		CorrelationID:  corr,
-	}
-	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, effectID))
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	res.Events = append(res.Events, Event{
-		EventType:      "skill_effect_started",
-		EntityID:       idStr(target.id),
-		SourceEntityID: idStr(playerID),
-		TargetEntityID: idStr(target.id),
-		CorrelationID:  corr,
-		SkillID:        weaponElementalPoisonSkillID,
-		Rank:           intPtr(1),
-		Amount:         intPtr(damage),
-		RemainingTicks: intPtr(durationTicks),
-		TotalTicks:     intPtr(durationTicks),
-	})
+	s.startDotStatus(target, effectID, weaponElementalPoisonSkillID, playerID, 1, damage, intervalTicks, durationTicks, corr, res)
 }
 
 func (s *Sim) monsterAttackCooldownTicks(monster *entity, baseCooldown int) int {
@@ -291,6 +243,9 @@ func (s *Sim) monsterAttackCooldownTicks(monster *entity, baseCooldown int) int 
 		return baseCooldown
 	}
 	slowPercent := 0
+	if pct := s.targetStatusPercent(monster.id, "attack_speed"); pct > slowPercent {
+		slowPercent = pct
+	}
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]
 		if effect.TargetID != monster.id || effect.EndsTick <= s.tick {

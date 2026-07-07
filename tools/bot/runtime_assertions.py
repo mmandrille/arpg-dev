@@ -305,7 +305,6 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
             continue
         if typ == "monster_moved":
             monster_def_id = str(assertion["monster_def_id"])
-            min_distance = float(assertion["min_distance"])
             initial = state.initial_monster_positions.get(monster_def_id)
             monster = find_monster(state, monster_def_id)
             if initial is None or monster is None:
@@ -314,13 +313,16 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
             dx = float(pos.get("x", 0.0)) - initial["x"]
             dy = float(pos.get("y", 0.0)) - initial["y"]
             dist = (dx * dx + dy * dy) ** 0.5
-            if dist < min_distance:
+            if "min_distance" in assertion and dist < float(assertion["min_distance"]):
                 raise AssertionError(
-                    f"{where}: monster {monster_def_id} moved {dist:.3f} < min_distance {min_distance}"
+                    f"{where}: monster {monster_def_id} moved {dist:.3f} < min_distance {float(assertion['min_distance'])}"
+                )
+            if "max_distance" in assertion and dist > float(assertion["max_distance"]):
+                raise AssertionError(
+                    f"{where}: monster {monster_def_id} moved {dist:.3f} > max_distance {float(assertion['max_distance'])}"
                 )
             continue
         if typ == "entity_moved":
-            min_distance = float(assertion["min_distance"])
             matches = [entity for entity in state.entities.values() if entity_matches_selector(entity, assertion)]
             if not matches:
                 raise AssertionError(f"{where}: no entity matched {assertion}")
@@ -334,9 +336,13 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
             dx = float(pos.get("x", 0.0)) - initial["x"]
             dy = float(pos.get("y", 0.0)) - initial["y"]
             dist = (dx * dx + dy * dy) ** 0.5
-            if dist < min_distance:
+            if "min_distance" in assertion and dist < float(assertion["min_distance"]):
                 raise AssertionError(
-                    f"{where}: entity {entity_id} moved {dist:.3f} < min_distance {min_distance}"
+                    f"{where}: entity {entity_id} moved {dist:.3f} < min_distance {float(assertion['min_distance'])}"
+                )
+            if "max_distance" in assertion and dist > float(assertion["max_distance"]):
+                raise AssertionError(
+                    f"{where}: entity {entity_id} moved {dist:.3f} > max_distance {float(assertion['max_distance'])}"
                 )
             continue
         if typ == "monster_within_player_distance":

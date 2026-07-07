@@ -44,7 +44,7 @@ func TestWeaponElementalProcBurnStartsDot(t *testing.T) {
 	var res TickResult
 	sim.tryWeaponElementalProcs(target, player.id, "burn", damageTypeFire, 4, 20, &res)
 
-	if _, ok := sim.uniqueBurnDots[uniqueBurnDotKey("weapon_burn", target.id)]; !ok {
+	if _, ok := sim.statusEffects[statusEffectKey("weapon_burn", target.id, weaponElementalBurnSkillID)]; !ok {
 		t.Fatalf("burn dot missing for target %d", target.id)
 	}
 }
@@ -74,7 +74,10 @@ func TestWeaponElementalProcPoisonRefreshesDot(t *testing.T) {
 	var res TickResult
 	sim.tryWeaponElementalProcs(target, player.id, "poison1", damageTypePoison, 8, 8, &res)
 	sim.tryWeaponElementalProcs(target, player.id, "poison2", damageTypePoison, 4, 4, &res)
-	second := sim.poisonDots[target.id]
+	second, ok := sim.statusEffects[statusEffectKey("weapon_poison", target.id, weaponElementalPoisonSkillID)]
+	if !ok {
+		t.Fatalf("weapon poison status missing for target %d", target.id)
+	}
 	if second.DamagePerTick != 1 {
 		t.Fatalf("refreshed poison tick damage = %d, want 1 (25%% of 4)", second.DamagePerTick)
 	}

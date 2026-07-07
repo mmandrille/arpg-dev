@@ -327,21 +327,7 @@ func (s *Sim) startAshenReprisalBurn(playerID uint64, target *entity, def Unique
 	if damage < 1 {
 		damage = 1
 	}
-	s.uniqueBurnDots[uniqueBurnDotKey(def.ID, target.id)] = uniqueBurnDotState{
-		SourcePlayerID: playerID,
-		TargetID:       target.id,
-		EffectID:       def.ID,
-		DamageType:     damageTypeFire,
-		DamagePerTick:  damage,
-		NextTick:       s.tick + uint64(intervalTicks),
-		IntervalTicks:  intervalTicks,
-		RemainingTicks: durationTicks,
-		TotalTicks:     durationTicks,
-		CorrelationID:  corr,
-	}
-	target.effectIDs = sortedUniqueStrings(append(target.effectIDs, statusID))
-	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-	res.Events = append(res.Events, uniqueEffectStartedEvent(target, nil, def.ID, corr, damage, durationTicks))
+	s.startDotStatus(target, statusID, def.ID, playerID, 1, damage, intervalTicks, durationTicks, corr, res)
 }
 
 func uniqueEffectStartedEvent(target *entity, source *entity, skillID string, corr string, amount int, durationTicks int) Event {

@@ -1,0 +1,59 @@
+{
+  "id": "status_effect_slow_live",
+  "ci_tier": "extended",
+  "world_id": "status_effect_slow_lab",
+  "seed": "v449_status_effect_slow_live",
+  "character_class": "sorcerer",
+  "title": "Status effect slow live",
+  "description": "Cast Ice Shard on a chasing skeleton and prove the slow status starts over the live protocol.",
+  "debug_progression": {
+    "level": 3,
+    "unspent_skill_points": 0,
+    "stats": { "str": 4, "dex": 4, "vit": 5, "magic": 8 },
+    "skill_ranks": {
+      "ice_shard": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "cast_skill",
+      "skill_id": "ice_shard",
+      "monster_def_id": "dungeon_undead",
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_seen",
+        "event_type": "skill_effect_started",
+        "skill_id": "ice_shard"
+      },
+      "timeout_s": 3
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 20
+    }
+  ],
+  "assertions": [
+    {
+      "type": "event_seen",
+      "event_type": "skill_cast",
+      "skill_id": "ice_shard",
+      "rank": 1
+    },
+    {
+      "type": "event_seen",
+      "event_type": "skill_effect_started",
+      "skill_id": "ice_shard"
+    },
+    {
+      "type": "combat_event_seen",
+      "event_type": "monster_damaged",
+      "skill_id": "ice_shard",
+      "damage_type": "cold",
+      "min_damage": 1,
+      "target_monster_def_id": "dungeon_undead"
+    }
+  ]
+}

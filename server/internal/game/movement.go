@@ -27,6 +27,9 @@ func (s *Sim) playerEffectiveMovementSpeed() float64 {
 
 func (s *Sim) playerSlowMultiplier() float64 {
 	slowPercent := 0
+	if pct := s.targetStatusPercent(s.playerID, "movement_speed"); pct > slowPercent {
+		slowPercent = pct
+	}
 	for _, stateKey := range sortedStringKeys(s.skillEffects) {
 		effect := s.skillEffects[stateKey]
 		if effect.EndsTick <= s.tick {

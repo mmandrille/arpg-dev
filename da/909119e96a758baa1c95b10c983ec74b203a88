@@ -1,0 +1,47 @@
+tools/bot/scenarios/103_dungeon_combat_perf_probe.json
+  s_578d41414cf02d::t_0229c4ae89a071 71,80,89
+server/internal/game/bishop_debug.go
+  s_578d41414cf02d::t_3e06c72e6cd19e 101-113
+  s_578d41414cf02d::t_24d0be07f8422d 114-135
+server/internal/game/handlers.go
+  s_578d41414cf02d::t_69afc6862ee055 61
+  s_578d41414cf02d::t_232b8287bf90db 60
+shared/golden/dungeon_teleporters.json
+  s_578d41414cf02d::t_5b7f3b252def99 2
+  s_578d41414cf02d::t_6e115a48288895 7
+server/internal/replay/replay.go
+  s_578d41414cf02d::t_f82be211c47622 254-264
+tools/bot/scenarios/65_random_quest_reward_floor.json
+  s_578d41414cf02d::t_03029b7da977f3 5
+tools/bot/scenarios/13_teleporter_lab.json
+  s_578d41414cf02d::t_bfe72bdd1f43a7 61-63
+  s_578d41414cf02d::t_949d110cbbcdab 60
+server/internal/game/sim_players.go
+  s_578d41414cf02d::t_61b11108ff5d1b 123-133
+server/internal/game/game_replay_test.go
+  s_578d41414cf02d::t_213c1984961287 59-87,92,99,106-115,146-148,151,153
+  s_578d41414cf02d::t_f989bb5e07642f 18-23
+  s_578d41414cf02d::t_d05fee02813f94 137,161
+  s_578d41414cf02d::t_25658af29c505b 116-119,124,127
+  s_578d41414cf02d::t_a93e066e3785f9 26
+  s_578d41414cf02d::t_3158e33ec80f82 156-158
+server/internal/game/sim.go
+  s_578d41414cf02d::t_6bb180151ad6da 1021-1025
+  s_578d41414cf02d::t_d6c6bdcf285a3d 928
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "da909119e96a758baa1c95b10c983ec74b203a88",
+  "prompts": {},
+  "sessions": {
+    "s_578d41414cf02d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10ba7b93-6934-4c0c-8a7a-d446a6418169",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

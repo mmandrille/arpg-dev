@@ -1,0 +1,84 @@
+server/internal/game/unique_debuff_replication_test.go
+  s_da8d34e366bc0e::t_a388898f15a583 34,37,40,43
+shared/rules/status_effects.v0.schema.json
+  s_da8d34e366bc0e::t_f4db1826097519 1-44
+client/scripts/main.gd
+  s_da8d34e366bc0e::t_3a593385d0ed34 1425,1432,5868
+server/internal/game/unique_effects.go
+  s_da8d34e366bc0e::t_b3b03e6bc2048a 225-226
+docs/plans/v449_2026-07-07-status-effects-foundation.md
+  s_da8d34e366bc0e::t_883ab48a6a1070 1-61
+tools/bot/scenarios/115_status_effect_slow_live.json
+  s_da8d34e366bc0e::t_894bcf5fce3716 8,51-56
+  s_da8d34e366bc0e::t_f8622955ad2b8c 21
+  s_da8d34e366bc0e::t_8c5245cc29bcd1 1-7,9-20,22-50,57-59
+server/internal/game/unique_debuff_replication.go
+  s_da8d34e366bc0e::t_5dad8cfeb247a1 13-14
+PROGRESS.md
+  s_da8d34e366bc0e::t_5cc20e52c80420 18,26,28
+docs/specs/v449_spec-status-effects-foundation.md
+  s_da8d34e366bc0e::t_883ab48a6a1070 1-49
+shared/rules/status_effects.v0.json
+  s_da8d34e366bc0e::t_f4db1826097519 1-47
+docs/as-built/v449_status-effects-foundation.md
+  s_da8d34e366bc0e::t_883ab48a6a1070 1-34
+docs/progress/slice-lifecycle.md
+  s_da8d34e366bc0e::t_5cc20e52c80420 434
+server/internal/game/sim.go
+  s_da8d34e366bc0e::t_d967054ca11c0d 366,529,765
+  s_da8d34e366bc0e::t_9f257f49b0b2dd 98-148,158-191,301-316,416-445,449-458,464-472,889-932,947-948,2502,2554,5189-5202
+  s_da8d34e366bc0e::t_88818dfbfe0b52 3197-3199
+client/scripts/player_status_effect_markers.gd
+  s_da8d34e366bc0e::t_0d98b7e433603e 10-12,61,66-77,112,121-124
+server/internal/game/survival_skills.go
+  s_da8d34e366bc0e::t_d967054ca11c0d 244-254
+tools/bot/runtime_assertions.py
+  s_da8d34e366bc0e::t_647464733dfbf9 316,318-322,339-343,345
+server/internal/game/rules.go
+  s_da8d34e366bc0e::t_d967054ca11c0d 27,1314-1323
+  s_da8d34e366bc0e::t_9f257f49b0b2dd 53-85,103-115,180-189,305-322,532-561,869-882,949-957,965-967
+server/internal/game/tick_results.go
+  s_da8d34e366bc0e::t_d967054ca11c0d 55
+server/internal/game/rogue_skills_test.go
+  s_da8d34e366bc0e::t_ef8b1a186f02d7 199-201,205,208,210,215
+server/internal/game/sim_players.go
+  s_da8d34e366bc0e::t_2de5020b54966a 27,42,79,362-365,439
+server/internal/game/status_effects.go
+  s_da8d34e366bc0e::t_51722a7d651e9b 224
+  s_da8d34e366bc0e::t_f4db1826097519 1-164,177-223,225-256,272
+  s_da8d34e366bc0e::t_3ab4be2f1347ef 165-176,257-271
+server/internal/game/weapon_elemental_procs.go
+  s_da8d34e366bc0e::t_604a4683175039 218,238,246-248
+  s_da8d34e366bc0e::t_9f257f49b0b2dd 30-34,44-48
+server/internal/game/unique_survival_effects.go
+  s_da8d34e366bc0e::t_c244cef3d25982 330
+server/internal/game/weapon_elemental_procs_test.go
+  s_da8d34e366bc0e::t_467b9bd6ac6f98 47,77-80
+server/internal/game/rogue_skills.go
+  s_da8d34e366bc0e::t_9f257f49b0b2dd 17-26
+  s_da8d34e366bc0e::t_88abe32d85274a 343,345,363
+server/internal/game/movement.go
+  s_da8d34e366bc0e::t_a8a201ea7b2d5a 30-32
+server/internal/game/survival_skills_test.go
+  s_da8d34e366bc0e::t_8d25adb2fd7292 3-6
+  s_da8d34e366bc0e::t_6a113cbee926a6 118-162
+shared/rules/worlds.v0.json
+  s_da8d34e366bc0e::t_002e036989b239 1825
+  s_da8d34e366bc0e::t_e540f8a283d14a 1815-1824,1826-1876,5369
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "11a0de7ad90d3b1b43bedb0d244cd7a635b7c915",
+  "prompts": {},
+  "sessions": {
+    "s_da8d34e366bc0e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3d10-b2f8-7bb0-b604-3849a34f1810",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

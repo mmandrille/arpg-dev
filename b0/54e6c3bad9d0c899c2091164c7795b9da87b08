@@ -1,0 +1,19 @@
+tools/bot/test_movement_runtime.py
+  s_578d41414cf02d::t_90a2669b599bb0 78-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b054e6c3bad9d0c899c2091164c7795b9da87b08",
+  "prompts": {},
+  "sessions": {
+    "s_578d41414cf02d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10ba7b93-6934-4c0c-8a7a-d446a6418169",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

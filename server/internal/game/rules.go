@@ -468,7 +468,13 @@ type SkillExecuteDef struct {
 
 // SkillPassiveStatsDef defines always-on bonuses applied from learned ranks.
 type SkillPassiveStatsDef struct {
-	Stats map[string]SkillRankValueDef `json:"stats"`
+	Stats           map[string]SkillRankValueDef   `json:"stats"`
+	AffinityScaling SkillPassiveAffinityScalingDef `json:"affinity_scaling,omitempty"`
+}
+
+type SkillPassiveAffinityScalingDef struct {
+	MaxActiveAffinities int                          `json:"max_active_affinities"`
+	Stats               map[string]SkillRankValueDef `json:"stats"`
 }
 
 // SkillEffectDef is a closed data contract for supported active-skill effects.

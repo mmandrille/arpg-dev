@@ -1451,6 +1451,22 @@
             "x": 3,
             "y": 6
           }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "affinity_barbarian_girdle",
+          "position": {
+            "x": 5,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "affinity_rogue_treads",
+          "position": {
+            "x": 4,
+            "y": 6
+          }
         }
       ]
     },

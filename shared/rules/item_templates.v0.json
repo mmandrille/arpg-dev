@@ -1240,6 +1240,80 @@
       "effect_pool": [],
       "equipment_category": "off_hand"
     },
+    "affinity_barbarian_girdle": {
+      "name": "Barbarian Girdle",
+      "category": "equipment",
+      "item_type": "belt",
+      "slot": "belt",
+      "equippable": true,
+      "requirements": {
+        "level": 1,
+        "str": 5
+      },
+      "base_stats": {
+        "armor": 1
+      },
+      "rollable_stats": [
+        {
+          "stat": "max_hp",
+          "min": 6,
+          "max": 14,
+          "weight": 3
+        },
+        {
+          "stat": "armor",
+          "min": 1,
+          "max": 3,
+          "weight": 2
+        }
+      ],
+      "class_affinities": [
+        {
+          "class": "barbarian",
+          "stat": "damage_percent",
+          "min": 4,
+          "max": 6
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "gear"
+    },
+    "affinity_rogue_treads": {
+      "name": "Rogue Treads",
+      "category": "equipment",
+      "item_type": "boots",
+      "slot": "boots",
+      "equippable": true,
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {},
+      "rollable_stats": [
+        {
+          "stat": "attack_speed_percent",
+          "min": 3,
+          "max": 8,
+          "weight": 3
+        },
+        {
+          "stat": "dex",
+          "min": 1,
+          "max": 2,
+          "weight": 2
+        }
+      ],
+      "class_affinities": [
+        {
+          "class": "rogue",
+          "stat": "attack_speed_percent",
+          "min": 4,
+          "max": 6
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "gear"
+    },
     "affinity_compound_bow": {
       "name": "Compound Bow",
       "category": "equipment",

@@ -688,8 +688,14 @@
     "affinity_barbarian_war_hammer": {
       "family": "war_hammer"
     },
+    "affinity_barbarian_girdle": {
+      "family": "belt"
+    },
     "affinity_heraldic_shield": {
       "family": "shield"
+    },
+    "affinity_rogue_treads": {
+      "family": "boots"
     },
     "affinity_compound_bow": {
       "family": "bow"

@@ -131,6 +131,22 @@ func (s *Sim) equippedClassAffinityTotals() map[string]int {
 	return totals
 }
 
+func (s *Sim) activeClassAffinityCount() int {
+	count := 0
+	for _, slot := range equipmentSlots {
+		item := s.findItemByID(s.equipped[slot])
+		if item == nil || item.rollPayload == nil {
+			continue
+		}
+		for _, affinity := range item.rollPayload.ClassAffinities {
+			if classAffinityActive(s.progression.CharacterClass, affinity) {
+				count++
+			}
+		}
+	}
+	return count
+}
+
 func (s *Sim) classAffinityStatus(affinities []ClassAffinityRoll) []ClassAffinityStatusView {
 	if len(affinities) == 0 {
 		return nil

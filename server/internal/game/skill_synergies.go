@@ -7,9 +7,9 @@ import (
 
 // SkillSynergyDef is a declarative bonus from an allocated prerequisite skill rank.
 type SkillSynergyDef struct {
-	SourceSkillID         string  `json:"source_skill_id"`
-	Modifier              string  `json:"modifier"`
-	PercentPerSourceRank  float64 `json:"percent_per_source_rank"`
+	SourceSkillID        string  `json:"source_skill_id"`
+	Modifier             string  `json:"modifier"`
+	PercentPerSourceRank float64 `json:"percent_per_source_rank"`
 }
 
 func (s *Sim) allocatedSkillRank(skillID string) int {
@@ -139,6 +139,7 @@ func passiveSkillRankedStatWithSynergy(s *Sim, skillID string, def SkillDef, sta
 	if s == nil {
 		return base
 	}
+	base += passiveSkillAffinityRankedStat(s.rules, def, stat, rank, s.activeClassAffinityCount())
 
 	return s.synergyScaledInt(skillID, "passive_stat_percent", base)
 }

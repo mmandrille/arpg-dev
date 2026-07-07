@@ -88,6 +88,94 @@ func TestClassAffinityHeraldicShieldNeutralForPaladin(t *testing.T) {
 	}
 }
 
+func TestAffinityPassiveUnstoppableHeartScalesFromActiveAffinities(t *testing.T) {
+	sim := MustNewSim("sess_affinity_passive_barbarian", "01", loadRules(t))
+	sim.progression.CharacterClass = "barbarian"
+	sim.progression.BaseStats.Str = 14
+	sim.progression.SkillRanks["unstoppable_heart"] = 1
+	before := sim.DerivedStatsView().DamageMin
+
+	hammer := addRolledItemWithAffinities(t, sim, 8810, "affinity_barbarian_war_hammer", []ClassAffinityRoll{
+		{Class: "barbarian", Stat: "damage_percent", Value: 10},
+	})
+	girdle := addRolledItemWithAffinities(t, sim, 8811, "affinity_barbarian_girdle", []ClassAffinityRoll{
+		{Class: "barbarian", Stat: "damage_percent", Value: 5},
+	})
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_hammer", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(hammer.instanceID), Slot: mainHandSlot}}}), "equip_hammer")
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_girdle", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(girdle.instanceID), Slot: "belt"}}}), "equip_girdle")
+
+	if got := sim.activeClassAffinityCount(); got != 2 {
+		t.Fatalf("active class affinity count = %d, want 2", got)
+	}
+	if got := sim.passiveSkillStatTotal("damage_percent"); got != 8 {
+		t.Fatalf("unstoppable heart passive total = %d, want 8", got)
+	}
+	view := sim.CharacterProgressionView()
+	if view.DerivedStats.DamageMin <= before {
+		t.Fatalf("damage min = %v, want above %v", view.DerivedStats.DamageMin, before)
+	}
+	breakdown := findStatBreakdown(view.StatBreakdowns, "damage_min")
+	if breakdown == nil || !hasBreakdownSource(breakdown.Sources, "passive_skill") {
+		t.Fatalf("damage min breakdown = %+v", breakdown)
+	}
+}
+
+func TestAffinityPassiveKillerInstinctScalesFromActiveAffinities(t *testing.T) {
+	sim := MustNewSim("sess_affinity_passive_rogue", "01", loadRules(t))
+	sim.progression.CharacterClass = "rogue"
+	sim.progression.BaseStats.Dex = 14
+	sim.progression.SkillRanks["killer_instinct"] = 1
+	before := sim.DerivedStatsView().CritChance
+
+	dagger := addRolledItemWithAffinities(t, sim, 8812, "affinity_rogue_dagger", []ClassAffinityRoll{
+		{Class: "rogue", Stat: "attack_speed_percent", Value: 10},
+	})
+	treads := addRolledItemWithAffinities(t, sim, 8813, "affinity_rogue_treads", []ClassAffinityRoll{
+		{Class: "rogue", Stat: "attack_speed_percent", Value: 5},
+	})
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_dagger", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(dagger.instanceID), Slot: mainHandSlot}}}), "equip_dagger")
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_treads", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(treads.instanceID), Slot: "boots"}}}), "equip_treads")
+
+	if got := sim.activeClassAffinityCount(); got != 2 {
+		t.Fatalf("active class affinity count = %d, want 2", got)
+	}
+	if got := sim.passiveSkillStatTotal("crit_chance"); got != 11 {
+		t.Fatalf("killer instinct passive total = %d, want 11", got)
+	}
+	view := sim.CharacterProgressionView()
+	if view.DerivedStats.CritChance <= before {
+		t.Fatalf("crit chance = %v, want above %v", view.DerivedStats.CritChance, before)
+	}
+	breakdown := findStatBreakdown(view.StatBreakdowns, "crit_chance")
+	if breakdown == nil || !hasBreakdownSource(breakdown.Sources, "passive_skill") {
+		t.Fatalf("crit chance breakdown = %+v", breakdown)
+	}
+}
+
+func TestAffinityPassiveIgnoresInactiveAffinities(t *testing.T) {
+	sim := MustNewSim("sess_affinity_passive_inactive", "01", loadRules(t))
+	sim.progression.CharacterClass = "rogue"
+	sim.progression.BaseStats.Str = 12
+	sim.progression.BaseStats.Dex = 14
+	sim.progression.SkillRanks["killer_instinct"] = 1
+
+	hammer := addRolledItemWithAffinities(t, sim, 8814, "affinity_barbarian_war_hammer", []ClassAffinityRoll{
+		{Class: "barbarian", Stat: "damage_percent", Value: 10},
+	})
+	treads := addRolledItemWithAffinities(t, sim, 8815, "affinity_rogue_treads", []ClassAffinityRoll{
+		{Class: "rogue", Stat: "attack_speed_percent", Value: 5},
+	})
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_hammer", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(hammer.instanceID), Slot: mainHandSlot}}}), "equip_hammer")
+	assertAck(t, sim.Tick([]Input{{MessageID: "equip_treads", Type: "equip_intent", Equip: &EquipIntent{ItemInstanceID: idStr(treads.instanceID), Slot: "boots"}}}), "equip_treads")
+
+	if got := sim.activeClassAffinityCount(); got != 1 {
+		t.Fatalf("active class affinity count = %d, want 1", got)
+	}
+	if got := sim.passiveSkillStatTotal("crit_chance"); got != 8 {
+		t.Fatalf("killer instinct passive total with inactive hammer = %d, want 8", got)
+	}
+}
+
 func addRolledItemWithAffinities(t *testing.T, sim *Sim, instanceID uint64, templateID string, affinities []ClassAffinityRoll) *invItem {
 	t.Helper()
 	template, ok := sim.rules.ItemTemplates[templateID]

@@ -2148,6 +2148,15 @@
             "base": 5,
             "per_rank": 0
           }
+        },
+        "affinity_scaling": {
+          "max_active_affinities": 2,
+          "stats": {
+            "crit_chance": {
+              "base": 3,
+              "per_rank": 0
+            }
+          }
         }
       },
       "cooldown": {
@@ -2427,6 +2436,15 @@
           "damage_percent": {
             "base": 4,
             "per_rank": 0
+          }
+        },
+        "affinity_scaling": {
+          "max_active_affinities": 2,
+          "stats": {
+            "damage_percent": {
+              "base": 2,
+              "per_rank": 0
+            }
           }
         }
       },

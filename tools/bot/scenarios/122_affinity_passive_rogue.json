@@ -1,0 +1,51 @@
+{
+  "id": "affinity_passive_rogue",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v451_affinity_passive_rogue",
+  "character_class": "rogue",
+  "title": "Affinity passive rogue",
+  "description": "Equip two active rogue affinity items, learn Killer Instinct, and prove the passive gains extra authoritative crit chance from affinity stacks.",
+  "debug_progression": {
+    "level": 15,
+    "unspent_skill_points": 1,
+    "stats": { "str": 6, "dex": 14, "vit": 10, "magic": 4 },
+    "skill_ranks": {
+      "quick_hands": 1
+    }
+  },
+  "steps": [
+    { "action": "assert_character_progression", "level": 15 },
+    { "action": "pick_up_loot", "item_def_id": "affinity_rogue_dagger" },
+    { "action": "assert_rolled_inventory_item", "item_def_id": "affinity_rogue_dagger", "item_template_id": "affinity_rogue_dagger", "class_affinity_active_count": 1 },
+    { "action": "pick_up_loot", "item_def_id": "affinity_rogue_treads" },
+    { "action": "assert_rolled_inventory_item", "item_def_id": "affinity_rogue_treads", "item_template_id": "affinity_rogue_treads", "class_affinity_active_count": 1 },
+    { "action": "equip_inventory_item", "item_def_id": "affinity_rogue_dagger", "slot": "main_hand" },
+    { "action": "equip_inventory_item", "item_def_id": "affinity_rogue_treads", "slot": "boots" },
+    { "action": "assert_skill_progression", "unspent_skill_points": 1, "skill_id": "killer_instinct", "rank": 0, "max_rank": "from_rules", "can_spend": true },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "killer_instinct",
+      "expect_skill_progression": {
+        "unspent_skill_points": 0,
+        "skill_id": "killer_instinct",
+        "rank": 1,
+        "max_rank": "from_rules",
+        "can_spend": false
+      }
+    },
+    {
+      "action": "assert_character_progression",
+      "stat_breakdowns": [
+        {
+          "key": "crit_chance",
+          "source_kinds": ["passive_skill"]
+        }
+      ]
+    }
+  ],
+  "assertions": [
+    { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "killer_instinct", "rank": 1, "max_rank": "from_rules", "can_spend": false },
+    { "type": "character_progression", "stat_breakdowns": [{ "key": "crit_chance", "source_kinds": ["passive_skill"] }] }
+  ]
+}

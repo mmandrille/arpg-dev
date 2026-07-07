@@ -1,0 +1,53 @@
+{
+  "id": "affinity_passive_barbarian",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v451_affinity_passive_barbarian",
+  "character_class": "barbarian",
+  "title": "Affinity passive barbarian",
+  "description": "Equip two active barbarian affinity items, learn Unstoppable Heart, and prove the passive adds authoritative damage scaling.",
+  "debug_progression": {
+    "level": 15,
+    "unspent_skill_points": 1,
+    "stats": { "str": 14, "dex": 8, "vit": 12, "magic": 4 },
+    "skill_ranks": {
+      "iron_hide": 1,
+      "battle_tempo": 1,
+      "crushing_force": 1
+    }
+  },
+  "steps": [
+    { "action": "assert_character_progression", "level": 15 },
+    { "action": "pick_up_loot", "item_def_id": "affinity_barbarian_war_hammer" },
+    { "action": "assert_rolled_inventory_item", "item_def_id": "affinity_barbarian_war_hammer", "item_template_id": "affinity_barbarian_war_hammer", "class_affinity_active_count": 1 },
+    { "action": "pick_up_loot", "item_def_id": "affinity_barbarian_girdle" },
+    { "action": "assert_rolled_inventory_item", "item_def_id": "affinity_barbarian_girdle", "item_template_id": "affinity_barbarian_girdle", "class_affinity_active_count": 1 },
+    { "action": "equip_inventory_item", "item_def_id": "affinity_barbarian_war_hammer", "slot": "main_hand" },
+    { "action": "equip_inventory_item", "item_def_id": "affinity_barbarian_girdle", "slot": "belt" },
+    { "action": "assert_skill_progression", "unspent_skill_points": 1, "skill_id": "unstoppable_heart", "rank": 0, "max_rank": "from_rules", "can_spend": true },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "unstoppable_heart",
+      "expect_skill_progression": {
+        "unspent_skill_points": 0,
+        "skill_id": "unstoppable_heart",
+        "rank": 1,
+        "max_rank": "from_rules",
+        "can_spend": false
+      }
+    },
+    {
+      "action": "assert_character_progression",
+      "stat_breakdowns": [
+        {
+          "key": "damage_min",
+          "source_kinds": ["class_affinity", "passive_skill"]
+        }
+      ]
+    }
+  ],
+  "assertions": [
+    { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "unstoppable_heart", "rank": 1, "max_rank": "from_rules", "can_spend": false },
+    { "type": "character_progression", "stat_breakdowns": [{ "key": "damage_min", "source_kinds": ["class_affinity", "passive_skill"] }] }
+  ]
+}

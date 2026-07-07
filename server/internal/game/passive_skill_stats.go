@@ -142,3 +142,18 @@ func passiveSkillRankedStat(r *Rules, def SkillDef, stat string, rank int) int {
 
 	return r.rankScaledInt(value.Base, value.PerRank, rank)
 }
+
+func passiveSkillAffinityRankedStat(r *Rules, def SkillDef, stat string, rank int, activeAffinityCount int) int {
+	if rank <= 0 || r == nil || activeAffinityCount <= 0 {
+		return 0
+	}
+	scaling := def.PassiveStats.AffinityScaling
+	if scaling.MaxActiveAffinities > 0 && activeAffinityCount > scaling.MaxActiveAffinities {
+		activeAffinityCount = scaling.MaxActiveAffinities
+	}
+	value, ok := scaling.Stats[stat]
+	if !ok {
+		return 0
+	}
+	return r.rankScaledInt(value.Base, value.PerRank, rank) * activeAffinityCount
+}

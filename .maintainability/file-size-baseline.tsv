@@ -18,7 +18,7 @@ client/tests/test_golden.gd	686
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7968	# v407: baseline sync (no v407 logic edits)
 server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: interactable path_too_long uses floor max_auto_steps
-server/internal/game/rules.go	3247	# v448: quest_steward.v0.json load + validation delegates to quest_steward_rules.go
+server/internal/game/rules.go	2783	# refactor: skill validators extracted to skill_rules_validation.go
 server/internal/game/shop.go	1196	# v407: elemental summary lines extracted to weapon_elemental.go
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6635	# v448: steward hunt pickup metadata + hotbar consumable pickup path restored alongside grantInventoryItem helper

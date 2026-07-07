@@ -1,0 +1,41 @@
+server/internal/game/find_tp_seed2_test.go
+  s_da8d34e366bc0e::t_2a94557c86d939 12
+  s_da8d34e366bc0e::t_013b94470a9271 19,24-25,28-31,34-36,40-43,46-49,52-54,57-59,61-64,66,68-70,74-76,78-80,84-87
+server/internal/game/status_effects.go
+  s_da8d34e366bc0e::t_01b25623588c27 188
+docs/CODEMAP.md
+  s_da8d34e366bc0e::t_a472fc3e9868ef 10
+shared/golden/dungeon_teleporters.json
+  s_da8d34e366bc0e::t_6fc0d4553a584f 2
+  s_da8d34e366bc0e::t_274bfe188c3809 7
+server/internal/game/unique_effects_skill_status_test.go
+  s_da8d34e366bc0e::t_a472fc3e9868ef 1-92
+docs/progress/scenario-movement-audit.tsv
+  s_da8d34e366bc0e::t_a472fc3e9868ef 28,30,32,34,36,39-40
+server/internal/game/unique_effects_skill_status.go
+  s_da8d34e366bc0e::t_a472fc3e9868ef 1-50
+server/internal/game/game_test.go
+  s_da8d34e366bc0e::t_6ec74cc4bee4af 39-49,7181,7239
+server/internal/http/auth_session_test.go
+  s_da8d34e366bc0e::t_a5f2d68484eefa 7
+  s_da8d34e366bc0e::t_6efafe64dbf37c 657
+  s_da8d34e366bc0e::t_2a94557c86d939 630-655,658
+client/tests/test_rogue_presentation.gd
+  s_da8d34e366bc0e::t_2a94557c86d939 9,115,120,137,156,160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "621f6cb0a22beb8f5f63a632fade1da7cb266abe",
+  "prompts": {},
+  "sessions": {
+    "s_da8d34e366bc0e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3d10-b2f8-7bb0-b604-3849a34f1810",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

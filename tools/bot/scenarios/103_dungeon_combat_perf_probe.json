@@ -68,8 +68,7 @@
     {
       "action": "cast_skill",
       "skill_id": "lightning",
-      "monster_def_id": "dungeon_mob",
-      "event_type": "skill_cast"
+      "monster_def_id": "dungeon_mob"
     },
     {
       "action": "wait_ticks",
@@ -78,8 +77,7 @@
     {
       "action": "cast_skill",
       "skill_id": "lightning",
-      "monster_def_id": "dungeon_mob",
-      "event_type": "skill_cast"
+      "monster_def_id": "dungeon_mob"
     },
     {
       "action": "wait_ticks",
@@ -88,8 +86,7 @@
     {
       "action": "cast_skill",
       "skill_id": "lightning",
-      "monster_def_id": "dungeon_mob",
-      "event_type": "skill_cast"
+      "monster_def_id": "dungeon_mob"
     },
     {
       "action": "wait_until_assertion",

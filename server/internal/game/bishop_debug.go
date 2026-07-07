@@ -98,6 +98,41 @@ func (s *Sim) handleBishopDebugAction(in Input, res *TickResult, action bishopDe
 	s.savePlayer(s.defaultPlayer())
 }
 
+// handleDebugDiscoverTeleporter marks the current level's teleporter as discovered.
+// Only processed when gameplayDebug is true. Used by replay test scaffolding to
+// bypass entity-ID lookup for the discover action (entity IDs can vary due to
+// non-deterministic champion-minion rarity rolls in dungeon population).
+func (s *Sim) handleDebugDiscoverTeleporter(in Input, res *TickResult) {
+	if !s.gameplayDebug {
+		res.reject(in.MessageID, "debug_disabled")
+		return
+	}
+	s.discoveredTeleporters[s.currentLevel] = true
+	res.ack(in.MessageID)
+}
+
+// handleDebugPlayerPos moves the active player directly to the given position.
+// Only processed when gameplayDebug is true. Used by replay test scaffolding to
+// place the player near interactables without recording non-deterministic navigation.
+func (s *Sim) handleDebugPlayerPos(in Input, res *TickResult) {
+	if !s.gameplayDebug {
+		res.reject(in.MessageID, "debug_disabled")
+		return
+	}
+	if in.DebugPlayerPos == nil {
+		res.reject(in.MessageID, "invalid_payload")
+		return
+	}
+	player := s.activeLevel().entities[s.playerID]
+	if player == nil || player.hp <= 0 {
+		res.reject(in.MessageID, "player_dead")
+		return
+	}
+	player.pos = in.DebugPlayerPos.Position
+	s.clearAutoNav()
+	res.ack(in.MessageID)
+}
+
 func (s *Sim) debugGrantSingleLevel() (int, bool) {
 	if s.progression.Level >= s.rules.CharacterProgression.LevelCap {
 		return 0, false

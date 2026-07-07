@@ -57,6 +57,8 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"bishop_debug_loot_catalog_intent":        (*Sim).handleBishopDebugLootCatalog,
 	"bishop_debug_loot_source_catalog_intent": (*Sim).handleBishopDebugLootSourceCatalog,
 	"bishop_debug_force_loot_intent":          (*Sim).handleBishopDebugForceLoot,
+	"debug_player_pos_intent":                 (*Sim).handleDebugPlayerPos,
+	"debug_discover_teleporter_intent":        (*Sim).handleDebugDiscoverTeleporter,
 	"stash_deposit_item_intent":       (*Sim).handleStashDepositItem,
 	"stash_withdraw_item_intent":      (*Sim).handleStashWithdrawItem,
 	"stash_deposit_gold_intent":       (*Sim).handleStashDepositGold,

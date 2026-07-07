@@ -925,6 +925,7 @@ type Input struct {
 	StashWithdrawGold   *StashWithdrawGoldIntent
 	CorpseWithdrawItem  *CorpseWithdrawItemIntent
 	UniqueChestTakeItem *UniqueChestTakeItemIntent
+	DebugPlayerPos      *DebugPlayerPosIntent
 }
 
 type (
@@ -1016,6 +1017,11 @@ type (
 	}
 	BishopDebugStatPointIntent struct {
 		BishopEntityID string
+	}
+	// DebugPlayerPosIntent moves the active player to Position directly, bypassing
+	// navigation and pathfinding. Only processed when gameplayDebug is true.
+	DebugPlayerPosIntent struct {
+		Position Vec2
 	}
 	StashDepositItemIntent struct {
 		StashEntityID  string

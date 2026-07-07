@@ -58,6 +58,10 @@
       "target_level": 0
     },
     {
+      "action": "wait_ticks",
+      "ticks": 3
+    },
+    {
       "action": "assert_player_at_discovered_teleporter",
       "level": 0,
       "tolerance": 0.001

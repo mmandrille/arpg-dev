@@ -120,6 +120,17 @@ func (s *Sim) SetPlayerConnected(playerID uint64, connected bool) {
 	}
 }
 
+// SetPlayerPos directly moves the active player to pos, bypassing navigation.
+// Only use in tests where deterministic scenario setup matters more than
+// recording realistic movement inputs (e.g. replay-scaffold setup).
+func (s *Sim) SetPlayerPos(pos Vec2) {
+	level := s.activeLevel()
+	if player := level.entities[s.playerID]; player != nil {
+		player.pos = pos
+		s.clearAutoNav()
+	}
+}
+
 func (s *Sim) DefaultPlayerID() uint64 {
 	if ps := s.defaultPlayer(); ps != nil {
 		return ps.PlayerID

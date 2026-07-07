@@ -251,6 +251,17 @@ func ReconstructFromInputs(sessionID, seed string, rules *game.Rules, worldID st
 	return ReconstructFromInputsWithProgression(sessionID, seed, rules, worldID, inputs, throughTick, nil, nil, nil, rules.DefaultCharacterProgressionState())
 }
 
+// ReconstructFromInputsWithGameplayDebug is like ReconstructFromInputs but enables
+// gameplay debug mode on the reconstruction sim, allowing debug_player_pos_intent.
+func ReconstructFromInputsWithGameplayDebug(sessionID, seed string, rules *game.Rules, worldID string, inputs []RecordedInput, throughTick int64) (Reconstruction, error) {
+	sim, err := game.NewSimWithWorldProgression(sessionID, seed, rules, worldID, rules.DefaultCharacterProgressionState())
+	if err != nil {
+		return Reconstruction{}, err
+	}
+	sim.SetGameplayDebug(true)
+	return reconstructFromSim(sim, inputs, throughTick), nil
+}
+
 func ReconstructFromInputsWithProgression(sessionID, seed string, rules *game.Rules, worldID string, inputs []RecordedInput, throughTick int64, items []game.PersistedItem, waypointLevels []int, hotbar []game.PersistedHotbarSlot, progression game.CharacterProgressionState) (Reconstruction, error) {
 	sim, err := game.NewSimWithWorldProgression(sessionID, seed, rules, worldID, progression)
 	if err != nil {

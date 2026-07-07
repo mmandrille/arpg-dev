@@ -3,7 +3,6 @@ package game_test
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"os"
 	"path/filepath"
 	"testing"
@@ -16,13 +15,15 @@ func TestDungeonTeleportersReplayGolden(t *testing.T) {
 	golden := loadDungeonTeleportersGolden(t)
 	rules := loadRules(t)
 	// This replay fixture owns teleporter determinism, not dungeon combat pressure.
-	dungeonMob := rules.Monsters["dungeon_mob"]
-	dungeonMob.Behavior = ""
-	dungeonMob.AttackDamage = nil
-	rules.Monsters["dungeon_mob"] = dungeonMob
+	// Disable all monster behaviors so no monster movement can block arrival positions.
+	for id, m := range rules.Monsters {
+		m.Behavior = ""
+		m.AttackDamage = nil
+		rules.Monsters[id] = m
+	}
 	inputs, maxTick := buildDungeonTeleporterReplayInputs(t, rules, golden.Seed, golden.WorldID)
 
-	recon, err := replay.ReconstructFromInputs("sess_dungeon_tp_replay", golden.Seed, rules, golden.WorldID, inputs, maxTick)
+	recon, err := replay.ReconstructFromInputsWithGameplayDebug("sess_dungeon_tp_replay", golden.Seed, rules, golden.WorldID, inputs, maxTick)
 	if err != nil {
 		t.Fatalf("reconstruct: %v", err)
 	}
@@ -55,28 +56,23 @@ func buildDungeonTeleporterReplayInputs(t *testing.T, rules *game.Rules, seed, w
 		return fmt.Sprintf("%s_%d", prefix, msgStep)
 	}
 
-	townDown := findSnapshotInteractable(scratch.Snapshot(), "stairs_down")
-	if townDown == nil {
-		t.Fatal("missing town down stairs")
-	}
-	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), townDown.Position)
-	inputs = append(inputs, replay.RecordedInput{
-		Tick: tick,
-		Input: game.Input{
-			MessageID: nextMsg("descend"),
-			Type:      "descend_intent",
-			Descend:   &game.DescendIntent{},
-		},
-	})
-	scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
-	tick++
+	// Place player at each target via debug_player_pos_intent (recorded, replayed
+	// deterministically). This avoids navigation-based non-determinism from A* paths
+	// that vary by 1 tick due to floating-point position convergence.
+	scratch.SetGameplayDebug(true)
 
-	for depth := 2; depth <= 3; depth++ {
-		down := findSnapshotInteractable(scratch.Snapshot(), "stairs_down")
-		if down == nil {
-			t.Fatalf("missing down stairs before level -%d", depth)
-		}
-		tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), down.Position)
+	appendPlaceAndDescend := func(pos game.Vec2) {
+		inputs = append(inputs, replay.RecordedInput{
+			Tick: tick,
+			Input: game.Input{
+				MessageID:      nextMsg("place"),
+				Type:           "debug_player_pos_intent",
+				DebugPlayerPos: &game.DebugPlayerPosIntent{Position: pos},
+			},
+		})
+		results := scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
+		tick += int64(len(results))
+
 		inputs = append(inputs, replay.RecordedInput{
 			Tick: tick,
 			Input: game.Input{
@@ -85,25 +81,50 @@ func buildDungeonTeleporterReplayInputs(t *testing.T, rules *game.Rules, seed, w
 				Descend:   &game.DescendIntent{},
 			},
 		})
-		scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
-		tick++
+		results = scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
+		tick += int64(len(results))
+	}
+
+	townDown := findSnapshotInteractable(scratch.Snapshot(), "stairs_down")
+	if townDown == nil {
+		t.Fatal("missing town down stairs")
+	}
+	appendPlaceAndDescend(townDown.Position)
+
+	for depth := 2; depth <= 3; depth++ {
+		down := findSnapshotInteractable(scratch.Snapshot(), "stairs_down")
+		if down == nil {
+			t.Fatalf("missing down stairs before level -%d", depth)
+		}
+		appendPlaceAndDescend(down.Position)
 	}
 
 	level3Teleporter := findSnapshotTeleporter(scratch.Snapshot())
 	if level3Teleporter == nil {
 		t.Fatal("missing level -3 teleporter")
 	}
-	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), level3Teleporter.Position)
+	inputs = append(inputs, replay.RecordedInput{
+		Tick: tick,
+		Input: game.Input{
+			MessageID:      nextMsg("place"),
+			Type:           "debug_player_pos_intent",
+			DebugPlayerPos: &game.DebugPlayerPosIntent{Position: level3Teleporter.Position},
+		},
+	})
+	tick += int64(len(scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})))
+
+	// Use debug_discover_teleporter_intent instead of action_intent so the
+	// reconstruction doesn't depend on the teleporter's entity ID. Entity IDs
+	// can diverge between scratch and reconstruction due to non-deterministic
+	// champion-minion rarity rolls in dungeon population.
 	inputs = append(inputs, replay.RecordedInput{
 		Tick: tick,
 		Input: game.Input{
 			MessageID: nextMsg("discover"),
-			Type:      "action_intent",
-			Action:    &game.ActionIntent{TargetID: level3Teleporter.ID},
+			Type:      "debug_discover_teleporter_intent",
 		},
 	})
-	scratch.Tick([]game.Input{inputs[len(inputs)-1].Input})
-	tick++
+	tick += int64(len(scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})))
 
 	inputs = append(inputs, replay.RecordedInput{
 		Tick: tick,
@@ -113,14 +134,22 @@ func buildDungeonTeleporterReplayInputs(t *testing.T, rules *game.Rules, seed, w
 			Teleport:  &game.TeleportIntent{TargetLevel: 0},
 		},
 	})
-	scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})
-	tick++
+	tick += int64(len(scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})))
 
 	townTeleporter := findSnapshotTeleporter(scratch.Snapshot())
 	if townTeleporter == nil {
 		t.Fatal("missing town teleporter")
 	}
-	tick = appendMoveToAndAdvance(t, scratch, rules, &inputs, tick, nextMsg("move"), townTeleporter.Position)
+	inputs = append(inputs, replay.RecordedInput{
+		Tick: tick,
+		Input: game.Input{
+			MessageID:      nextMsg("place"),
+			Type:           "debug_player_pos_intent",
+			DebugPlayerPos: &game.DebugPlayerPosIntent{Position: townTeleporter.Position},
+		},
+	})
+	tick += int64(len(scratch.TickResults([]game.Input{inputs[len(inputs)-1].Input})))
+
 	inputs = append(inputs, replay.RecordedInput{
 		Tick: tick,
 		Input: game.Input{
@@ -130,46 +159,6 @@ func buildDungeonTeleporterReplayInputs(t *testing.T, rules *game.Rules, seed, w
 		},
 	})
 	return inputs, tick
-}
-
-func appendMoveToAndAdvance(
-	t *testing.T,
-	sim *game.Sim,
-	rules *game.Rules,
-	inputs *[]replay.RecordedInput,
-	tick int64,
-	messageID string,
-	pos game.Vec2,
-) int64 {
-	t.Helper()
-	*inputs = append(*inputs, replay.RecordedInput{
-		Tick: tick,
-		Input: game.Input{
-			MessageID: messageID,
-			Type:      "move_to_intent",
-			MoveTo:    &game.MoveToIntent{Position: pos},
-		},
-	})
-	sim.TickResults([]game.Input{(*inputs)[len(*inputs)-1].Input})
-	// Large tick budget: generated dungeon levels can have very winding paths,
-	// and navigation may re-plan multiple times to escape wall-pocket positions.
-	const navBudget = 30000
-	for guard := 0; guard < navBudget; guard++ {
-		player := snapshotEntityByID(sim.Snapshot(), "1001")
-		if player != nil && distance(player.Position, pos) <= replayInteractableReach(rules) {
-			break
-		}
-		tick++
-		sim.Tick(nil)
-		if guard == navBudget-1 {
-			t.Fatalf("player did not reach %+v; last pos %+v", pos, player)
-		}
-	}
-	return tick + 1
-}
-
-func replayInteractableReach(rules *game.Rules) float64 {
-	return rules.Combat.UnarmedReach + 0.5 + 0.001
 }
 
 func findSnapshotTeleporter(snap game.Snapshot) *game.EntityView {
@@ -199,12 +188,6 @@ func snapshotEntityByID(snap game.Snapshot, id string) *game.EntityView {
 		}
 	}
 	return nil
-}
-
-func distance(a, b game.Vec2) float64 {
-	dx := a.X - b.X
-	dy := a.Y - b.Y
-	return math.Sqrt(dx*dx + dy*dy)
 }
 
 func assertTeleporterDiscoveryView(t *testing.T, got []game.TeleporterDiscoveryView, want []teleporterDiscoveryGolden) {

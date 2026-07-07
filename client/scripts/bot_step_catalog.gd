@@ -17,7 +17,7 @@ const STEP_TYPES_WAIT := [
 	"wait_wall_layout", "wait_fog_of_war", "wait_intent_rejected", "wait_shop_panel", "wait_stash_panel", "wait_market_panel", "wait_bishop_panel", "wait_mercenary_panel", "wait_blacksmith_panel",
 	"wait_connection_recovery", "wait_connection_resync",
 	"wait_market_board_badges", "wait_boss_health_bar", "wait_remote_player_count",
-	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker", "wait_elite_objective_minimap",
+	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker", "wait_elite_objective_minimap", "wait_quest_steward_panel", "wait_steward_hunt_banner",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -47,7 +47,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
 	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_board_badges", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar", "assert_audio_state", "assert_resource_wallet_panel",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_mercenary_panel_visible", "assert_mercenary_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
-	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap",
+	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap", "assert_steward_hunt_banner",
 	"assert_camera_mode", "assert_connection_recovery", "assert_session_unchanged",
 ]
 const STEP_TYPES_ACTION := [

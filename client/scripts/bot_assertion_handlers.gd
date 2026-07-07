@@ -5,6 +5,7 @@ const BotUiAssertionHandlersScript := preload("res://scripts/bot_ui_assertion_ha
 const BotQuestJournalAssertionsScript := preload("res://scripts/bot_quest_journal_assertions.gd")
 const BotEliteObjectiveAssertionsScript := preload("res://scripts/bot_elite_objective_assertions.gd")
 const BotEliteObjectiveMinimapAssertionsScript := preload("res://scripts/bot_elite_objective_minimap_assertions.gd")
+const BotStewardHuntAssertionsScript := preload("res://scripts/bot_steward_hunt_assertions.gd")
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
@@ -252,6 +253,13 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			if not BotEliteObjectiveMinimapAssertionsScript.matches(step, state):
 				runner._fail("assert_elite_objective_minimap failed: want=%s minimap=%s step=%d scenario=%s" % [
 					str(step), str(state.get("elite_objective_minimap", {})), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_steward_hunt_banner":
+			if not BotStewardHuntAssertionsScript.banner_matches(step, state):
+				runner._fail("assert_steward_hunt_banner failed: want=%s banner=%s step=%d scenario=%s" % [
+					str(step), str(state.get("steward_hunt_banner", {})), runner._step_index, str(runner.scenario.get("id", "?"))
 				])
 				return false
 			return true

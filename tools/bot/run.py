@@ -873,6 +873,7 @@ async def execute_step(
     if action == "kill_monsters":
         monster_def_id = str(step.get("monster_def_id", ""))
         monster_pack_leader = step.get("monster_pack_leader")
+        steward_hunt_target = step.get("steward_hunt_target")
         max_count = int(step.get("count", 99))
         step_timeout_s = float(step.get("timeout_s", SLICE_TIMEOUT_S * max(1, max_count)))
         killed = 0
@@ -888,7 +889,13 @@ async def execute_step(
             if find_player(state) is None:
                 await pump_one(ws, state, timeout=0.1)
                 continue
-            candidates = find_live_monsters_sorted(state, monster_def_id, monster_pack_leader=monster_pack_leader, exclude_ids=skipped_ids)
+            candidates = find_live_monsters_sorted(
+                state,
+                monster_def_id,
+                monster_pack_leader=monster_pack_leader,
+                steward_hunt_target=steward_hunt_target,
+                exclude_ids=skipped_ids,
+            )
             if not candidates:
                 if skipped_ids:
                     skipped_ids.clear()
@@ -1585,6 +1592,42 @@ async def execute_step(
         assert_shop_event_details([event], step, "buy_shop_offer")
         if len(state.inventory) <= before_inventory_count:
             raise AssertionError(f"buy_shop_offer: inventory did not grow after {offer}")
+        return
+
+    if action == "quest_steward_pick":
+        giver = find_interactable(state, str(step.get("interactable_def_id", "town_quest_giver")))
+        if giver is None:
+            raise AssertionError(f"quest_steward_pick: missing quest giver on level {state.current_level}")
+        offers_event = None
+        for event in reversed(state.events):
+            if str(event.get("event_type", "")) == "quest_steward_offers_opened":
+                offers_event = event
+                break
+        if offers_event is None:
+            raise AssertionError("quest_steward_pick: no quest_steward_offers_opened event seen")
+        offers = list(offers_event.get("quest_steward_offers", []))
+        if not offers:
+            raise AssertionError(f"quest_steward_pick: empty offers in {offers_event}")
+        offer_index = int(step.get("offer_index", 0))
+        if offer_index < 0 or offer_index >= len(offers):
+            raise AssertionError(f"quest_steward_pick: offer_index {offer_index} out of range for {offers}")
+        offer = offers[offer_index]
+        env = make_envelope(
+            "quest_steward_pick_intent",
+            session_id,
+            state.last_tick,
+            {
+                "quest_giver_entity_id": str(giver["id"]),
+                "offer_id": str(offer.get("offer_id", "")),
+            },
+        )
+        await ws.send(json.dumps(env))
+        expect_reject = step.get("expect_reject")
+        if expect_reject:
+            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
+            return
+        await wait_for_accept(ws, state, env["message_id"], loop)
+        await wait_for_event(ws, state, "quest_steward_reward_granted", loop)
         return
 
     if action == "reroll_shop":
@@ -2477,6 +2520,7 @@ def find_live_monsters_sorted(
     rarity: str | None = None,
     is_boss: bool | None = None,
     monster_pack_leader: bool | None = None,
+    steward_hunt_target: bool | None = None,
     alive: bool | None = True,
     exclude_ids: set[str] | None = None,
 ) -> list[dict[str, Any]]:
@@ -2496,6 +2540,7 @@ def find_live_monsters_sorted(
             or (rarity is not None and entity.get("rarity") != rarity)
             or (is_boss is not None and bool(entity.get("is_boss", False)) != is_boss)
             or (monster_pack_leader is not None and bool(entity.get("monster_pack_leader", False)) != bool(monster_pack_leader))
+            or (steward_hunt_target is not None and bool(entity.get("steward_hunt_target", False)) != bool(steward_hunt_target))
             or entity_id in excluded
         ):
             continue
@@ -3153,7 +3198,7 @@ def entity_matches_selector(entity: dict[str, Any], selector: dict[str, Any]) ->
     if "level" in selector and selector["level"] is not None:
         if int(entity.get("level", -999999)) != int(selector["level"]):
             return False
-    for bool_key in ("is_boss", "monster_pack_leader", "elite_objective", "quest_reward"):
+    for bool_key in ("is_boss", "monster_pack_leader", "elite_objective", "quest_reward", "steward_hunt_target"):
         if selector.get(bool_key) is not None and bool(entity.get(bool_key, False)) != bool(selector[bool_key]):
             return False
     if selector.get("visual_scale") is not None:

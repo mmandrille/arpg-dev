@@ -47,6 +47,7 @@ const (
 	TypeStashWithdrawGold   = "stash_withdraw_gold_intent"
 	TypeCorpseWithdrawItem  = "corpse_withdraw_item_intent"
 	TypeUniqueChestTakeItem = "unique_chest_take_item_intent"
+	TypeQuestStewardPick    = "quest_steward_pick_intent"
 )
 
 type envelope struct {
@@ -172,12 +173,16 @@ type (
 		ChestEntityID string `json:"chest_entity_id"`
 		ChestItemID   string `json:"chest_item_id"`
 	}
+	questStewardPickPayloadWire struct {
+		QuestGiverEntityID string `json:"quest_giver_entity_id"`
+		OfferID            string `json:"offer_id"`
+	}
 )
 
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeBishopDebugLootCatalog, TypeBishopDebugLootSourceCatalog, TypeBishopDebugForceLoot, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeQuestStewardPick, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeBishopDebugLootCatalog, TypeBishopDebugLootSourceCatalog, TypeBishopDebugForceLoot, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
 		return true
 	}
 	return false
@@ -442,6 +447,12 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.UniqueChestTakeItem = &game.UniqueChestTakeItemIntent{ChestEntityID: p.ChestEntityID, ChestItemID: p.ChestItemID}
+	case TypeQuestStewardPick:
+		var p questStewardPickPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.QuestGiverEntityID == "" || p.OfferID == "" {
+			return in, false
+		}
+		in.QuestStewardPick = &game.QuestStewardPickIntent{QuestGiverEntityID: p.QuestGiverEntityID, OfferID: p.OfferID}
 	default:
 		return in, false
 	}

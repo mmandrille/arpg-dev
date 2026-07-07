@@ -156,6 +156,7 @@
         "interactable_def_id": { "type": "string" },
         "elite_objective": { "type": "boolean" },
         "quest_reward": { "type": "boolean" },
+        "steward_hunt_target": { "type": "boolean" },
         "corpse_character_id": { "$ref": "#/$defs/prefixed_id" },
         "corpse_name": { "type": "string" },
         "corpse_level": { "type": "integer", "minimum": 1 },
@@ -190,7 +191,8 @@
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "summary_lines": { "$ref": "#/$defs/shop_summary_lines" },
         "slot": { "type": "string", "enum": ["", "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"] },
-        "equipped": { "type": "boolean" }
+        "equipped": { "type": "boolean" },
+        "quest_source_depth": { "type": "integer", "minimum": 1 }
       }
     },
     "weapon_set": {
@@ -276,6 +278,16 @@
         "source": { "type": "string" },
         "source_depth_min": { "type": "integer", "minimum": 1 },
         "source_depth_max": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "quest_steward_offer": {
+      "type": "object",
+      "required": ["offer_id", "family_id", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "offer_id": { "type": "string", "pattern": "^quest_steward:[0-9]+:[0-9]{3}$" },
+        "family_id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 }
       }
     },
     "shop_slot": {
@@ -529,6 +541,7 @@
         "angle_degrees": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
         "reason": { "type": "string" },
         "shop_id": { "type": "string" },
+        "service": { "type": "string" },
         "offers": {
           "type": "array",
           "items": { "$ref": "#/$defs/shop_offer" }
@@ -537,7 +550,16 @@
           "type": "array",
           "items": { "$ref": "#/$defs/shop_sell_appraisal" }
         },
-        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback|mystery|character):[a-z0-9_:-]+$" },
+        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback|mystery|character|quest_steward):[a-z0-9_:-]+$" },
+        "family_id": { "type": "string", "minLength": 1 },
+        "source_depth": { "type": "integer", "minimum": 1 },
+        "monster_name": { "type": "string", "minLength": 1 },
+        "trophy_item_def_id": { "type": "string", "minLength": 1 },
+        "trophy_label": { "type": "string", "minLength": 1 },
+        "quest_steward_offers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/quest_steward_offer" }
+        },
         "source_character_id": { "type": "string", "minLength": 1 },
         "character_class": { "type": "string" },
         "mercenary_candidates": {
@@ -957,6 +979,27 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "service", "item_instance_id", "stash_item_id", "stash_items", "inventory", "equipped", "hotbar", "gold"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "steward_hunt_started" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["monster_def_id", "monster_name", "trophy_item_def_id", "trophy_label", "source_depth"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "quest_steward_offers_opened" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "item_instance_id", "item", "source_depth", "quest_steward_offers"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "quest_steward_reward_granted" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "service", "item_instance_id", "item", "offer_id", "family_id", "source_depth"] }
         }
       ]
     },

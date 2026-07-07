@@ -51,6 +51,8 @@ const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const QuestJournalPanelScript := preload("res://scripts/quest_journal_panel.gd")
 const QuestEliteObjectiveStateScript := preload("res://scripts/quest_elite_objective_state.gd")
 const EliteObjectiveTrackerScript := preload("res://scripts/elite_objective_tracker.gd")
+const StewardHuntBannerScript := preload("res://scripts/steward_hunt_banner.gd")
+const QuestStewardPanelScript := preload("res://scripts/quest_steward_panel.gd")
 const DiscoveryMinimapScript := preload("res://scripts/discovery_minimap.gd")
 const DiscoveryMinimapStateScript := preload("res://scripts/discovery_minimap_state.gd")
 const CharacterBarScript := preload("res://scripts/character_bar.gd")
@@ -276,6 +278,9 @@ var character_stats_panel: CharacterStatsPanel
 var skills_panel: SkillsPanel
 var quest_journal_panel: QuestJournalPanel
 var elite_objective_tracker: EliteObjectiveTracker
+var steward_hunt_banner: StewardHuntBanner
+var quest_steward_panel: QuestStewardPanel
+var _steward_hunt_state: Dictionary = {}
 var discovery_minimap: DiscoveryMinimap
 var character_bar: Control
 var skill_bar: SkillBar
@@ -1288,6 +1293,7 @@ func _apply_delta(p: Dictionary) -> void:
 		if str(ev.get("event_type", "")) == "level_changed":
 			current_level = int(ev.get("to_level", current_level))
 			_begin_level_loading(false)
+			_sync_steward_hunt_banner()
 	var mobility_skills := _mobility_skills_by_entity(p.get("events", []))
 	var mobility_landings := {}
 	PerfPhaseTimerScript.measure_usec("d_prep", phase_start)
@@ -1538,6 +1544,24 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "shop_opened":
 			_show_shop_panel(ev)
+			continue
+		if event_type == "steward_hunt_started":
+			_apply_steward_hunt_started(ev)
+			continue
+		if event_type == "quest_steward_offers_opened":
+			_show_quest_steward_panel(ev)
+			continue
+		if event_type == "quest_steward_reward_granted":
+			_handle_quest_steward_reward_granted(ev)
+			continue
+		if event_type == "item_picked_up":
+			var picked_item = ev.get("item", {})
+			if picked_item is Dictionary:
+				var picked_def_id := str((picked_item as Dictionary).get("item_def_id", ""))
+				if picked_def_id.begins_with("quest_trophy_") and not _steward_hunt_state.is_empty():
+					_steward_hunt_state["complete"] = true
+					_sync_steward_hunt_banner()
+					_sync_quest_journal()
 			continue
 		if event_type == "shop_purchase" and shop_panel != null and shop_panel.visible:
 			_apply_shop_event_refresh(ev)
@@ -3882,6 +3906,11 @@ func _build_scene() -> void:
 	ui.add_child(quest_journal_panel)
 	elite_objective_tracker = EliteObjectiveTrackerScript.new()
 	ui.add_child(elite_objective_tracker)
+	steward_hunt_banner = StewardHuntBannerScript.new()
+	ui.add_child(steward_hunt_banner)
+	quest_steward_panel = QuestStewardPanelScript.new()
+	quest_steward_panel.intent_requested.connect(_on_inventory_intent_requested)
+	ui.add_child(quest_steward_panel)
 	discovery_minimap = DiscoveryMinimapScript.new(); ui.add_child(discovery_minimap)
 	character_bar = CharacterBarScript.new()
 	character_bar.open_character_requested.connect(_open_character_panel_from_bar)
@@ -6033,6 +6062,8 @@ func get_bot_state() -> Dictionary:
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,
 		"quest_journal_panel_visible": quest_journal_panel != null and quest_journal_panel.visible,
 		"elite_objective_tracker_visible": elite_objective_tracker != null and elite_objective_tracker.visible,
+		"steward_hunt_banner_visible": steward_hunt_banner != null and steward_hunt_banner.visible,
+		"quest_steward_panel_visible": quest_steward_panel != null and quest_steward_panel.visible,
 		"character_info_panel_visible": character_info_panel != null and character_info_panel.visible,
 		"waypoint_panel_visible": waypoint_panel != null and waypoint_panel.visible,
 		"inventory_panel": inventory_panel.get_debug_state() if inventory_panel != null else {},
@@ -6047,6 +6078,8 @@ func get_bot_state() -> Dictionary:
 		"skills_panel": skills_panel.get_debug_state() if skills_panel != null else {},
 		"quest_journal_panel": quest_journal_panel.get_debug_state() if quest_journal_panel != null else {},
 		"elite_objective_tracker": elite_objective_tracker.get_debug_state() if elite_objective_tracker != null else {},
+		"steward_hunt_banner": steward_hunt_banner.get_debug_state() if steward_hunt_banner != null else {},
+		"quest_steward_panel": quest_steward_panel.get_debug_state() if quest_steward_panel != null else {},
 		"discovery_minimap": discovery_minimap.get_debug_state() if discovery_minimap != null else {},
 		"character_bar": character_bar.get_debug_state() if character_bar != null else {},
 		"skill_bar": skill_bar.get_debug_state() if skill_bar != null else {},
@@ -6140,7 +6173,49 @@ func _character_info_debug_state() -> Dictionary:
 
 func _sync_quest_journal() -> void:
 	if quest_journal_panel != null:
-		quest_journal_panel.set_objectives(QuestEliteObjectiveStateScript.quest_journal_objectives(entities))
+		quest_journal_panel.set_objectives(QuestEliteObjectiveStateScript.quest_journal_objectives(entities, _steward_hunt_state))
+
+func _sync_steward_hunt_banner() -> void:
+	if steward_hunt_banner == null:
+		return
+	var state := QuestEliteObjectiveStateScript.steward_hunt_banner_state(_steward_hunt_state)
+	if current_level >= 0:
+		state["visible"] = false
+	steward_hunt_banner.set_state(state)
+
+func _apply_steward_hunt_started(ev: Dictionary) -> void:
+	var monster_name := str(ev.get("monster_name", "monster"))
+	var trophy_label := str(ev.get("trophy_label", "trophy"))
+	_steward_hunt_state = {
+		"active": true,
+		"complete": false,
+		"banner_text": "Hunt the %s. Retrieve its %s." % [monster_name, trophy_label],
+	}
+	_sync_steward_hunt_banner()
+	_sync_quest_journal()
+
+func _show_quest_steward_panel(ev: Dictionary) -> void:
+	if quest_steward_panel == null:
+		return
+	_close_gameplay_panels("quest_steward")
+	var trophy_name := ""
+	var item = ev.get("item", {})
+	if item is Dictionary:
+		trophy_name = str((item as Dictionary).get("display_name", (item as Dictionary).get("item_def_id", "")))
+	quest_steward_panel.show_offers(
+		str(ev.get("entity_id", "")),
+		ev.get("quest_steward_offers", []),
+		trophy_name
+	)
+	_raise_gameplay_windows()
+
+func _handle_quest_steward_reward_granted(ev: Dictionary) -> void:
+	if quest_steward_panel != null:
+		quest_steward_panel.hide_display()
+		quest_steward_panel.show_status("Reward granted: %s" % str(ev.get("family_id", "item")))
+	_steward_hunt_state = {}
+	_sync_steward_hunt_banner()
+	_sync_quest_journal()
 
 func _sync_elite_objective_tracker() -> void:
 	if elite_objective_tracker != null:
@@ -6270,6 +6345,8 @@ func bot_click_shop_sell_item(item_def_id: String = "", rolled: Variant = null, 
 	BotFacade.click_shop_sell_item(self, item_def_id, rolled, bag_index)
 func bot_click_shop_reroll() -> void:
 	BotFacade.click_shop_reroll(self)
+func bot_click_quest_steward_offer(offer_index: int = 0) -> void:
+	BotFacade.click_quest_steward_offer(self, offer_index)
 func bot_drag_bag_to_stash(item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
 	BotFacade.drag_bag_to_stash(self, item_def_id, rolled, bag_index)
 func bot_drag_stash_to_bag(stash_item_id: String = "", item_def_id: String = "", rolled: Variant = null, stash_index: int = 0) -> void:

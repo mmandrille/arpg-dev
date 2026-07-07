@@ -26,6 +26,7 @@ type EntityView struct {
 	MonsterDefID               string                  `json:"monster_def_id,omitempty"`
 	MonsterPackID              string                  `json:"monster_pack_id,omitempty"`
 	MonsterPackLeader          bool                    `json:"monster_pack_leader,omitempty"`
+	StewardHuntTarget          bool                    `json:"steward_hunt_target,omitempty"`
 	IsBoss                     bool                    `json:"is_boss,omitempty"`
 	BossTemplateID             string                  `json:"boss_template_id,omitempty"`
 	Enraged                    bool                    `json:"enraged,omitempty"`
@@ -86,6 +87,7 @@ type ItemView struct {
 	SummaryLines         []string                   `json:"summary_lines,omitempty"`
 	Slot                 string                     `json:"slot"`
 	Equipped             bool                       `json:"equipped"`
+	QuestSourceDepth     int                        `json:"quest_source_depth,omitempty"`
 }
 
 // StashItemView is the protocol view of an account-stash item.
@@ -396,6 +398,12 @@ type Event struct {
 	Offers               []ShopOfferView         `json:"offers,omitempty"`
 	SellAppraisals       []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
 	OfferID               string                  `json:"offer_id,omitempty"`
+	FamilyID              string                  `json:"family_id,omitempty"`
+	SourceDepth           *int                    `json:"source_depth,omitempty"`
+	MonsterName           string                  `json:"monster_name,omitempty"`
+	TrophyItemDefID       string                  `json:"trophy_item_def_id,omitempty"`
+	TrophyLabel           string                  `json:"trophy_label,omitempty"`
+	QuestStewardOffers    []QuestStewardOfferView `json:"quest_steward_offers,omitempty"`
 	SourceCharacterID     string                  `json:"source_character_id,omitempty"`
 	MercenaryCandidates   []MercenaryCandidateView `json:"mercenary_candidates,omitempty"`
 	Price                 *int                    `json:"price,omitempty"`
@@ -432,6 +440,13 @@ type Event struct {
 	Stance               string                  `json:"stance,omitempty"`
 	BishopLootDepthCatalog  *BishopLootDepthCatalogView  `json:"bishop_loot_depth_catalog,omitempty"`
 	BishopLootSourceCatalog *BishopLootSourceCatalogView `json:"bishop_loot_source_catalog,omitempty"`
+}
+
+// QuestStewardOfferView is the wire view for a steward reward family choice.
+type QuestStewardOfferView struct {
+	OfferID  string `json:"offer_id"`
+	FamilyID string `json:"family_id"`
+	Label    string `json:"label"`
 }
 
 // TeleporterDiscoveryView is the protocol view of a generated dungeon level's

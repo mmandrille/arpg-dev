@@ -264,6 +264,7 @@ func (e *entity) applyMonsterLikeViewFields(ev *EntityView) {
 	ev.MonsterDefID = e.monsterDefID
 	ev.MonsterPackID = e.monsterPackID
 	ev.MonsterPackLeader = e.monsterPackLeader
+	ev.StewardHuntTarget = e.stewardHuntTarget
 	if e.kind == companionEntity {
 		ev.OwnerID = idStr(e.ownerID)
 		ev.CompanionStance = e.companionStanceOrDefault()

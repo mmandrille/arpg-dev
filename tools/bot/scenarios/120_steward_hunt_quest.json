@@ -1,0 +1,24 @@
+{
+  "id": "steward_hunt_quest",
+  "ci_tier": "extended",
+  "world_id": "dungeon_levels",
+  "seed": "v448_steward_probe_17",
+  "max_elapsed_s": 50.0,
+  "title": "Quest steward hunt loop",
+  "description": "Descend to a pinned steward hunt floor, kill the marked target, return the trophy to the Quest Steward, and claim a magic+ family reward.",
+  "steps": [
+    { "action": "use_stair", "direction": "down", "max_ticks": 240 },
+    { "action": "kill_monsters", "steward_hunt_target": true, "count": 1, "timeout_s": 20 },
+    { "action": "pick_up_loot", "item_def_id": "quest_trophy_bat_wing", "wait_for_loot_s": 6 },
+    { "action": "use_stair", "direction": "up", "max_ticks": 240 },
+    { "action": "action_entity", "interactable_def_id": "town_quest_giver", "event_type": "quest_steward_offers_opened", "timeout_s": 10 },
+    { "action": "quest_steward_pick", "interactable_def_id": "town_quest_giver", "offer_index": 0 }
+  ],
+  "assertions": [
+    { "type": "event_seen", "event_type": "steward_hunt_started", "trophy_item_def_id": "quest_trophy_bat_wing" },
+    { "type": "event_seen", "event_type": "quest_steward_offers_opened", "service": "quest_turn_in" },
+    { "type": "event_seen", "event_type": "quest_steward_reward_granted", "service": "quest_turn_in" },
+    { "type": "inventory_count", "item_def_id": "quest_trophy_bat_wing", "equals": 0 },
+    { "type": "inventory_count", "min_rarity": "magic", "at_least": 1 }
+  ]
+}

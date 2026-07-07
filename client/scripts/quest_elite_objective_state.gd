@@ -2,7 +2,15 @@ class_name QuestEliteObjectiveState
 extends RefCounted
 
 
-static func quest_journal_objectives(entities: Dictionary) -> Array:
+static func quest_journal_objectives(entities: Dictionary, steward_hunt: Dictionary = {}) -> Array:
+	var objectives: Array = quest_journal_objectives_from_entities(entities)
+	var hunt_rows := steward_hunt_journal_objectives(steward_hunt)
+	for row in hunt_rows:
+		objectives.append(row)
+	return objectives
+
+
+static func quest_journal_objectives_from_entities(entities: Dictionary) -> Array:
 	var reward_found := false
 	var reward_complete := true
 	for rec in entities.values():
@@ -17,6 +25,35 @@ static func quest_journal_objectives(entities: Dictionary) -> Array:
 		"title": "Open the marked reward chest",
 		"complete": reward_complete,
 	}]
+
+
+static func steward_hunt_journal_objectives(steward_hunt: Dictionary) -> Array:
+	if steward_hunt.is_empty() or not bool(steward_hunt.get("active", false)):
+		return []
+	var banner_text := str(steward_hunt.get("banner_text", ""))
+	if banner_text == "":
+		return []
+	return [{
+		"id": "steward_hunt",
+		"title": banner_text,
+		"complete": bool(steward_hunt.get("complete", false)),
+	}]
+
+
+static func steward_hunt_banner_state(steward_hunt: Dictionary) -> Dictionary:
+	if steward_hunt.is_empty() or not bool(steward_hunt.get("active", false)):
+		return {"visible": false, "status": "hidden", "banner_text": ""}
+	if bool(steward_hunt.get("complete", false)):
+		return {
+			"visible": true,
+			"status": "complete",
+			"banner_text": str(steward_hunt.get("banner_text", "")),
+		}
+	return {
+		"visible": true,
+		"status": "active",
+		"banner_text": str(steward_hunt.get("banner_text", "")),
+	}
 
 
 static func elite_tracker_state(entities: Dictionary) -> Dictionary:

@@ -7,6 +7,7 @@ type LevelState struct {
 	entities               map[uint64]*entity
 	eliteObjectiveChestIDs map[uint64]bool
 	questRewardChestIDs    map[uint64]bool
+	stewardHunt            *stewardHuntLevelState
 	walls                  []wallObstacle
 	move                   *activeMove
 	moveMomentumTicks      int

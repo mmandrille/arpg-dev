@@ -45,7 +45,9 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
         "stance",
         "service",
         "offer_id",
+        "family_id",
         "monster_def_id",
+        "trophy_item_def_id",
         "resource_id",
     ):
         if key in expected and str(event.get(key, "")) != str(expected[key]):

@@ -22,6 +22,12 @@ static func click_shop_reroll(main) -> void:
 		panel.bot_click_reroll()
 
 
+static func click_quest_steward_offer(main, offer_index: int = 0) -> void:
+	var panel = _member(main, "quest_steward_panel")
+	if panel != null and panel.has_method("bot_click_offer"):
+		panel.bot_click_offer(offer_index)
+
+
 static func drag_bag_to_stash(main, item_def_id: String = "", rolled: Variant = null, bag_index: int = 0) -> void:
 	var panel = _member(main, "stash_panel")
 	if panel != null and panel.has_method("bot_drag_bag_to_stash"):

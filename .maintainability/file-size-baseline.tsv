@@ -7,7 +7,7 @@ client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait 
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	701	# v392: class creation features panel
 client/scripts/inventory_panel.gd	1516
-client/scripts/main.gd	6548	# v446: wall occlusion sync piggybacks health-bar refresh; logic lives on WallRenderer
+client/scripts/main.gd	6625	# v448: steward hunt banner/panel wiring + event handlers; hunt logic extracted to steward_hunt_banner.gd and quest_steward_panel.gd
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1243	# v407: baseline sync (no v407 logic edits)
 client/scripts/skills_panel.gd	1010
@@ -18,11 +18,11 @@ client/tests/test_golden.gd	686
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7968	# v407: baseline sync (no v407 logic edits)
 server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: interactable path_too_long uses floor max_auto_steps
-server/internal/game/rules.go	3221	# v414: survival_autocast kind + SkillEffectDef extensions; validation delegates to survival_skills.go
+server/internal/game/rules.go	3247	# v448: quest_steward.v0.json load + validation delegates to quest_steward_rules.go
 server/internal/game/shop.go	1196	# v407: elemental summary lines extracted to weapon_elemental.go
 server/internal/game/shop_test.go	1517
 server/internal/game/sim.go	6603	# v412/v413: class level stat growth + skill engine hooks
-server/internal/game/types.go	691	# v409: Event.damage_breakdown field is coupled to Event struct; CombatBreakdownLineView extracted to combat_breakdown.go
+server/internal/game/types.go	721	# v448: steward hunt level state + quest steward offer/pending fields coupled to Sim/LevelState
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482
 server/internal/realtime/session_loop.go	951
@@ -31,8 +31,8 @@ server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating 
 server/internal/game/rogue_skills.go	620	# pre-v394 grandfather; passive_execute + poison stack handlers
 server/internal/store/repos.go	2315
 server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store test setup
-client/scripts/showme/visual_capture.gd	1078	# v443: skeleton dim-mesh fix added _dim_mesh helper to showme_skeleton_capture.gd; visual_capture.gd grew from prior showme additions; extraction deferred (dispatch table tightly coupled to capture mode enum)
-tools/bot/run.py	4370	# v406: protocol bot force_bishop_loot action
+client/scripts/showme/visual_capture.gd	1152	# baseline sync: v443 dim-mesh work landed without baseline bump; extraction still deferred (capture mode dispatch table)
+tools/bot/run.py	4438	# v448: quest_steward_pick action + steward_hunt_target selector
 tools/bot/test_protocol.py	1434
 tools/assets/rig_hero_glbs.py	686	# v434: 17-bone hero rig; GLB parse/weight/IBM pipeline tightly coupled to mesh mutation state
 tools/validate_shared.py	3156	# pre-v414 drift: weapon family stat scaling cross-checks; extraction deferred

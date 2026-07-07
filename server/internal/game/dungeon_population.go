@@ -10,6 +10,8 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 	if err != nil {
 		return err
 	}
+	maybeAssignStewardHuntQuest(s.seed, s.rules.DungeonGeneration, s.rules.QuestSteward, &gen)
+	s.applyGeneratedStewardHunt(level, gen)
 	level.walls = gen.walls
 	for _, stair := range gen.stairs {
 		def := s.rules.Interactables[stair.defID]
@@ -123,6 +125,7 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 			monsterRarityID:      generated.rarityID,
 			monsterPackID:        generated.packID,
 			monsterPackLeader:    generated.packLeader,
+			stewardHuntTarget:    generated.stewardHuntTarget,
 			lootTable:            lootTable,
 			aiMode:               monsterAIModeIdle,
 			isBoss:               generated.isBoss,
@@ -167,6 +170,7 @@ func (s *Sim) populateDungeonLevel(level *LevelState) error {
 		monster.id = s.alloc()
 		level.entities[monster.id] = monster
 	}
+	s.bindStewardHuntTargetEntity(level)
 	s.spawnCorpsesOnLevel(level)
 	return nil
 }

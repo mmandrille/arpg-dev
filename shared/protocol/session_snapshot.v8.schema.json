@@ -115,6 +115,7 @@
         "interactable_def_id": { "type": "string" },
         "elite_objective": { "type": "boolean" },
         "quest_reward": { "type": "boolean" },
+        "steward_hunt_target": { "type": "boolean" },
         "corpse_character_id": { "$ref": "#/$defs/prefixed_id" },
         "corpse_name": { "type": "string" },
         "corpse_level": { "type": "integer", "minimum": 1 },
@@ -163,7 +164,8 @@
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
         "summary_lines": { "$ref": "#/$defs/item_summary_lines" },
         "slot": { "type": "string", "enum": ["", "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"] },
-        "equipped": { "type": "boolean" }
+        "equipped": { "type": "boolean" },
+        "quest_source_depth": { "type": "integer", "minimum": 1 }
       }
     },
     "weapon_set": {

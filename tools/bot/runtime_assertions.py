@@ -4,6 +4,31 @@ from typing import Any
 
 from tools.bot.runtime_economy_assertions import handle_runtime_economy_assertion
 
+_ITEM_RARITY_ORDER = ("normal", "magic", "rare", "unique")
+
+
+def _item_rarity_rank(rarity: str) -> int:
+    try:
+        return _ITEM_RARITY_ORDER.index(str(rarity))
+    except ValueError:
+        return -1
+
+
+def _inventory_matches(assertion: dict[str, Any], inventory: list[dict]) -> list[dict]:
+    matches = inventory
+    if assertion.get("item_def_id") is not None:
+        matches = [item for item in matches if str(item.get("item_def_id", "")) == str(assertion["item_def_id"])]
+    if assertion.get("item_template_id") is not None:
+        matches = [item for item in matches if str(item.get("item_template_id", "")) == str(assertion["item_template_id"])]
+    if assertion.get("display_name") is not None:
+        matches = [item for item in matches if str(item.get("display_name", "")) == str(assertion["display_name"])]
+    if assertion.get("equipped") is not None:
+        matches = [item for item in matches if bool(item.get("equipped")) == bool(assertion["equipped"])]
+    if assertion.get("min_rarity") is not None:
+        min_rank = _item_rarity_rank(str(assertion["min_rarity"]))
+        matches = [item for item in matches if _item_rarity_rank(str(item.get("rarity", ""))) >= min_rank]
+    return matches
+
 
 def run_assertions(
     assertions: list[Any],
@@ -67,15 +92,7 @@ def run_assertions(
 
         typ = assertion.get("type")
         if typ == "inventory_count":
-            matches = inventory
-            if assertion.get("item_def_id") is not None:
-                matches = [item for item in matches if str(item.get("item_def_id", "")) == str(assertion["item_def_id"])]
-            if assertion.get("item_template_id") is not None:
-                matches = [item for item in matches if str(item.get("item_template_id", "")) == str(assertion["item_template_id"])]
-            if assertion.get("display_name") is not None:
-                matches = [item for item in matches if str(item.get("display_name", "")) == str(assertion["display_name"])]
-            if assertion.get("equipped") is not None:
-                matches = [item for item in matches if bool(item.get("equipped")) == bool(assertion["equipped"])]
+            matches = _inventory_matches(assertion, inventory)
             assert_count_matches(len(matches), assertion, f"{where}: inventory count", f": {matches}")
         elif typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
@@ -416,13 +433,7 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
             assert_loot_requirement_status(list(state.entities.values()), assertion, where)
             continue
         if typ == "inventory_count":
-            matches = state.inventory
-            if assertion.get("item_def_id") is not None:
-                matches = [item for item in matches if str(item.get("item_def_id", "")) == str(assertion["item_def_id"])]
-            if assertion.get("item_template_id") is not None:
-                matches = [item for item in matches if str(item.get("item_template_id", "")) == str(assertion["item_template_id"])]
-            if assertion.get("equipped") is not None:
-                matches = [item for item in matches if bool(item.get("equipped")) == bool(assertion["equipped"])]
+            matches = _inventory_matches(assertion, state.inventory)
             assert_count_matches(len(matches), assertion, f"{where}: inventory count", f": {matches}")
             continue
         if typ == "gold":

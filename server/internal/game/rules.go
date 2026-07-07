@@ -36,6 +36,7 @@ type Rules struct {
 	Interactables        map[string]InteractableDef
 	Worlds               map[string]WorldDef
 	DungeonGeneration    DungeonGenerationRules
+	QuestSteward         QuestStewardRules
 	BossTemplates        map[string]BossTemplateDef
 	BossPatterns         map[string]BossPatternDef
 }
@@ -1969,6 +1970,10 @@ func LoadRules(dir string) (*Rules, error) {
 		}
 	}
 	r.Worlds = worlds.Worlds
+
+	if err := loadQuestStewardRules(dir, r); err != nil {
+		return nil, err
+	}
 
 	return r, nil
 }

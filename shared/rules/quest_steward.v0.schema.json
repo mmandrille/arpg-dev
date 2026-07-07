@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quest_steward.v0.schema.json",
+  "title": "Quest steward hunt and reward rules",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "hunt_quest", "trophies", "reward_families"],
+  "properties": {
+    "version": { "type": "integer", "const": 0 },
+    "hunt_quest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "floor_chance_percent", "choice_count", "min_rarity"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "floor_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "choice_count": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "min_rarity": { "type": "string", "enum": ["magic", "rare", "unique", "set"] }
+      }
+    },
+    "trophies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["monster_def_id", "item_def_id", "trophy_label"],
+        "properties": {
+          "monster_def_id": { "type": "string", "minLength": 1 },
+          "item_def_id": { "type": "string", "minLength": 1 },
+          "trophy_label": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "reward_families": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["family_id", "label", "template_ids"],
+        "properties": {
+          "family_id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "template_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

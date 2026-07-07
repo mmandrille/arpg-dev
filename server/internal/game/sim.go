@@ -108,6 +108,7 @@ type entity struct {
 	monsterRarityID       string
 	monsterPackID         string
 	monsterPackLeader     bool
+	stewardHuntTarget     bool
 	monsterAttackDamage   *DamageRange
 	monsterAttackCooldown int
 	monsterArmor          float64
@@ -191,11 +192,12 @@ type entity struct {
 }
 
 type invItem struct {
-	instanceID  uint64
-	itemDefID   string
-	rollPayload *ItemRollPayload
-	slot        string
-	equipped    bool
+	instanceID       uint64
+	itemDefID        string
+	rollPayload      *ItemRollPayload
+	slot             string
+	equipped         bool
+	questSourceDepth int
 }
 
 type stashItem struct {
@@ -439,8 +441,9 @@ type Sim struct {
 	areaHealZones         map[uint64]areaHealZoneState
 	skillFunctionKeys     []string
 	rightClickSkillID     string
-	shopStock             map[string]*shopStockState
-	gold                  int
+	shopStock                 map[string]*shopStockState
+	pendingQuestStewardOffers *questStewardOffersState
+	gold                      int
 	stashItems            []*stashItem
 	stashGold             int
 	stashCapacity         int
@@ -907,6 +910,7 @@ type Input struct {
 	ShopBuy             *ShopBuyIntent
 	ShopSell            *ShopSellIntent
 	ShopReroll          *ShopRerollIntent
+	QuestStewardPick    *QuestStewardPickIntent
 	BishopRespec        *BishopRespecIntent
 	BishopReviveAll     *BishopReviveAllIntent
 	BishopDebugLevel    *BishopDebugLevelIntent
@@ -997,6 +1001,10 @@ type (
 	}
 	ShopRerollIntent struct {
 		ShopEntityID string
+	}
+	QuestStewardPickIntent struct {
+		QuestGiverEntityID string
+		OfferID            string
 	}
 	BishopRespecIntent     struct{ BishopEntityID string }
 	BishopReviveAllIntent  struct{ BishopEntityID string }
@@ -1576,6 +1584,7 @@ func (s *Sim) finishMonsterKill(monster *entity, sourceID uint64, corr string, r
 		})
 	}
 	s.dropLoot(monster, sourceID, corr, res)
+	s.maybeDropStewardHuntTrophy(monster, corr, res)
 	s.awardMonsterExperience(monster, sourceID, corr, res)
 	if monster.isBoss {
 		s.unlockBossFloorExits(corr, res)
@@ -1736,19 +1745,20 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 		res.reject(in.MessageID, "inventory_full")
 		return
 	}
-
-	item := &invItem{
-		instanceID:  s.alloc(),
-		itemDefID:   itemDefID,
-		rollPayload: cloneRollPayload(e.rollPayload),
-		slot:        itemSlot,
-		equipped:    false,
+	item := s.grantInventoryItem(itemDefID, e.rollPayload, itemSlot)
+	if item == nil {
+		res.reject(in.MessageID, "inventory_full")
+		return
+	}
+	if _, ok := s.rules.questStewardTrophyForItem(itemDefID); ok {
+		if hunt := s.activeLevel().stewardHunt; hunt != nil {
+			item.questSourceDepth = hunt.SourceDepth
+		}
 	}
 
 	delete(s.activeLevel().entities, e.id)
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
 
-	s.inventory = append(s.inventory, item)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
 	if assignToHotbar {
 		itemID := idStr(item.instanceID)
@@ -2002,6 +2012,7 @@ func (s *Sim) movePlayerToLevel(in Input, res *TickResult, current, dest *LevelS
 		FromLevel:     intPtr(fromLevel),
 		ToLevel:       intPtr(destLevel),
 	})
+	s.appendStewardHuntStartedEvent(dest, in.CorrelationID, res)
 
 	arrivalRes := TickResult{Tick: res.Tick, Level: destLevel, Changes: []Change{}, Events: []Event{}}
 	arrivalRes.Changes = append(arrivalRes.Changes, Change{Op: OpWallLayoutUpdate, Walls: wallViewsForLevel(dest)})
@@ -6523,10 +6534,11 @@ func (e *entity) bossPhaseView() *BossPhaseView {
 
 func (it *invItem) view() ItemView {
 	v := ItemView{
-		ItemInstanceID: idStr(it.instanceID),
-		ItemDefID:      it.itemDefID,
-		Slot:           it.slot,
-		Equipped:       it.equipped,
+		ItemInstanceID:   idStr(it.instanceID),
+		ItemDefID:        it.itemDefID,
+		Slot:             it.slot,
+		Equipped:         it.equipped,
+		QuestSourceDepth: it.questSourceDepth,
 	}
 	if it.rollPayload != nil {
 		it.rollPayload.itemViewFields(&v)

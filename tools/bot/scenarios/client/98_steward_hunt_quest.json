@@ -1,0 +1,19 @@
+{
+  "id": "steward_hunt_quest",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "v448_steward_probe_17",
+  "title": "Quest steward hunt client proof",
+  "description": "Client descends to a pinned steward hunt floor and verifies the red hunt banner and journal objective.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down", "timeout_s": 15.0 },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "stairs_down" },
+    { "type": "wait_event", "event_type": "steward_hunt_started", "timeout_s": 20.0 },
+    { "type": "wait_steward_hunt_banner", "visible": true, "timeout_s": 5.0 },
+    { "type": "assert_steward_hunt_banner", "visible": true, "contains": "Hunt the" },
+    { "type": "wait_quest_journal", "objective_id": "steward_hunt", "timeout_s": 5.0 },
+    { "type": "assert_quest_journal", "objective_id": "steward_hunt", "complete": false }
+  ]
+}

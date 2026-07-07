@@ -1,0 +1,27 @@
+{
+  "version": 0,
+  "hunt_quest": {
+    "enabled": true,
+    "floor_chance_percent": 10,
+    "choice_count": 5,
+    "min_rarity": "magic"
+  },
+  "trophies": [
+    { "monster_def_id": "dungeon_wolf", "item_def_id": "quest_trophy_wolf_heart", "trophy_label": "heart" },
+    { "monster_def_id": "dungeon_bat", "item_def_id": "quest_trophy_bat_wing", "trophy_label": "wing" },
+    { "monster_def_id": "dungeon_archer", "item_def_id": "quest_trophy_archer_head", "trophy_label": "head" },
+    { "monster_def_id": "dungeon_mob", "item_def_id": "quest_trophy_mob_skull", "trophy_label": "skull" }
+  ],
+  "reward_families": [
+    { "family_id": "sword", "label": "Sword", "template_ids": ["long_sword", "rapier"] },
+    { "family_id": "bow", "label": "Bow", "template_ids": ["hunter_bow"] },
+    { "family_id": "greatsword", "label": "Great Sword", "template_ids": ["great_sword"] },
+    { "family_id": "axe", "label": "Axe", "template_ids": ["barbarian_axe"] },
+    { "family_id": "staff", "label": "Staff", "template_ids": ["affinity_sorcerer_staff"] },
+    { "family_id": "helm", "label": "Helm", "template_ids": ["leather_cap"] },
+    { "family_id": "shield", "label": "Shield", "template_ids": ["buckler"] },
+    { "family_id": "chest", "label": "Chest Armor", "template_ids": ["mail"] },
+    { "family_id": "gloves", "label": "Gloves", "template_ids": ["gloves"] },
+    { "family_id": "boots", "label": "Boots", "template_ids": ["boots"] }
+  ]
+}

@@ -697,6 +697,18 @@
     "quest_leaf": {
       "family": "quest"
     },
+    "quest_trophy_wolf_heart": {
+      "family": "quest"
+    },
+    "quest_trophy_bat_wing": {
+      "family": "quest"
+    },
+    "quest_trophy_archer_head": {
+      "family": "quest"
+    },
+    "quest_trophy_mob_skull": {
+      "family": "quest"
+    },
     "red_potion": {
       "family": "health_potion"
     },

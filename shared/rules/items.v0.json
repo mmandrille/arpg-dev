@@ -15,6 +15,10 @@
     "skill_badge": { "name": "Skill Badge", "category": "currency", "equippable": false },
     "resurrection_badge": { "name": "Resurrection Badge", "category": "currency", "equippable": false },
     "quest_leaf": { "name": "Quest Leaf", "category": "quest", "equippable": false },
+    "quest_trophy_wolf_heart": { "name": "Wolf Heart", "category": "quest", "equippable": false },
+    "quest_trophy_bat_wing": { "name": "Bat Wing", "category": "quest", "equippable": false },
+    "quest_trophy_archer_head": { "name": "Archer Head", "category": "quest", "equippable": false },
+    "quest_trophy_mob_skull": { "name": "Mob Skull", "category": "quest", "equippable": false },
     "red_potion": { "name": "Red Potion", "category": "consumable", "equippable": false, "heal": { "min": 5, "max": 5 } },
     "blue_potion": { "name": "Blue Potion", "category": "consumable", "equippable": false, "mana_restore": { "min": 5, "max": 5 } }
   }

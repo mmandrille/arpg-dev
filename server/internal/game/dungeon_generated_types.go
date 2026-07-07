@@ -16,6 +16,7 @@ type generatedDungeonLevel struct {
 	doors       []generatedDoor
 	monsters    []generatedMonster
 	loot        []generatedLoot
+	stewardHunt *generatedStewardHunt
 }
 
 type generatedStair struct {
@@ -56,6 +57,7 @@ type generatedMonster struct {
 	rarityID     string
 	bossTemplate string
 	isBoss       bool
+	stewardHuntTarget bool
 	visualModel  string
 	visualTint   string
 	visualScale  float64

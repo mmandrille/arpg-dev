@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-04 (v430 barbarian tier-3 mesh swap)
+Last updated: 2026-07-07 (v448 quest steward hunt loop)
 
 ---
 
@@ -23,16 +23,8 @@ Last updated: 2026-07-04 (v430 barbarian tier-3 mesh swap)
 
 | Field | Value |
 |-------|-------|
-Last updated: 2026-07-06 (v447 class gear retune)
-
----
-
-## Current status
-
-| Field | Value |
-|-------|-------|
-| **Latest completed slice** | v447 — class gear retune |
-| **CI gate** | 2026-07-06 — focused verification green (batch `make ci` pending) |
+| **Latest completed slice** | v448 — quest steward hunt loop |
+| **CI gate** | 2026-07-07 — focused verification green (batch `make ci` pending) |
 | **Next slice** | TBD |
 | **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
 | **Next engineering review** | ~v430 — run `$review` then `$refactor` after next ~10-slice milestone |

@@ -17,6 +17,11 @@ func (s *Sim) turnInTownQuest(giver *entity, in Input, res *TickResult, ack bool
 		return
 	}
 
+	if trophy := s.firstQuestStewardTrophyItem(); trophy != nil {
+		s.openQuestStewardOffers(giver, trophy, in, res, ack)
+		return
+	}
+
 	itemDefID := s.rules.MainConfig.Gameplay.QuestTurnInItemDefID
 	item := s.firstInventoryItemByDef(itemDefID)
 	if item == nil {
@@ -58,5 +63,6 @@ func (s *Sim) firstInventoryItemByDef(itemDefID string) *invItem {
 			return item
 		}
 	}
+
 	return nil
 }

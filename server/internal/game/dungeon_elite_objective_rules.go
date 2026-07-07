@@ -3,17 +3,21 @@ package game
 import "fmt"
 
 type EliteObjectiveRules struct {
-	Enabled            bool    `json:"enabled"`
-	InteractableDefID  string  `json:"interactable_def_id"`
-	LootTable          string  `json:"loot_table"`
-	MinStairDistance   float64 `json:"min_stair_distance"`
-	RoomClusterRadius  float64 `json:"room_cluster_radius"`
-	MaxAttempts        int     `json:"max_attempts"`
+	Enabled             bool    `json:"enabled"`
+	FloorChancePercent  int     `json:"floor_chance_percent"`
+	InteractableDefID   string  `json:"interactable_def_id"`
+	LootTable           string  `json:"loot_table"`
+	MinStairDistance    float64 `json:"min_stair_distance"`
+	RoomClusterRadius   float64 `json:"room_cluster_radius"`
+	MaxAttempts         int     `json:"max_attempts"`
 }
 
 func validateEliteObjectiveRules(objective EliteObjectiveRules, r *Rules) error {
 	if !objective.Enabled {
 		return nil
+	}
+	if objective.FloorChancePercent < 0 || objective.FloorChancePercent > 100 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.elite_objective.floor_chance_percent: must be 0..100")
 	}
 	if objective.InteractableDefID != treasureChestDefID {
 		return fmt.Errorf("game: invalid rules dungeon_generation.elite_objective.interactable_def_id: must be %s", treasureChestDefID)

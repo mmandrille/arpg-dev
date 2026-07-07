@@ -1,11 +1,50 @@
 package game
 
-import "testing"
+import (
+	"strconv"
+	"testing"
+)
 
-func TestDungeonEliteObjectiveChestRequiresEliteLeader(t *testing.T) {
+func forceEliteObjectiveGenerationRules(t *testing.T) *Rules {
+	t.Helper()
 	rules := loadRules(t)
 	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
 	rules.DungeonGeneration.ChestPlacement.Enabled = false
+	rules.DungeonGeneration.EliteObjective.FloorChancePercent = 100
+	return rules
+}
+
+func TestEliteObjectiveFloorChanceDistribution(t *testing.T) {
+	rules := loadRules(t)
+	chance := rules.DungeonGeneration.EliteObjective.FloorChancePercent
+	if chance != 20 {
+		t.Fatalf("elite objective floor_chance_percent = %d, want 20", chance)
+	}
+	const sampleSize = 200
+	first := 0
+	second := 0
+	for depth := 1; depth <= sampleSize; depth++ {
+		levelNum := -depth
+		seed := "v448_elite_objective_distribution"
+		rng := NewRNG(SeedToUint64(seed + "|elite_objective|" + strconv.Itoa(absInt(levelNum))))
+		if eliteObjectiveFloorChancePasses(rng, chance) {
+			first++
+		}
+		rngAgain := NewRNG(SeedToUint64(seed + "|elite_objective|" + strconv.Itoa(absInt(levelNum))))
+		if eliteObjectiveFloorChancePasses(rngAgain, chance) {
+			second++
+		}
+	}
+	if first != second {
+		t.Fatalf("elite objective floor roll changed between passes: first=%d second=%d", first, second)
+	}
+	if first < 20 || first > 60 {
+		t.Fatalf("elite objective floor rolls = %d/%d, want roughly 20%%", first, sampleSize)
+	}
+}
+
+func TestDungeonEliteObjectiveChestRequiresEliteLeader(t *testing.T) {
+	rules := forceEliteObjectiveGenerationRules(t)
 	level, err := GenerateDungeonLevel("v158_forced_elite_objective", -1, rules.DungeonGeneration)
 	if err != nil {
 		t.Fatalf("generate forced elite objective: %v", err)
@@ -36,9 +75,7 @@ func TestDungeonEliteObjectiveChestRequiresEliteLeader(t *testing.T) {
 }
 
 func TestEliteObjectiveChestRequiresLeaderKill(t *testing.T) {
-	rules := loadRules(t)
-	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
-	rules.DungeonGeneration.ChestPlacement.Enabled = false
+	rules := forceEliteObjectiveGenerationRules(t)
 	sim, err := NewSimWithWorld("sess_elite_objective_gate", "v158_elite_objective_0000", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
@@ -81,9 +118,7 @@ func TestEliteObjectiveChestRequiresLeaderKill(t *testing.T) {
 }
 
 func TestEliteObjectiveChestRequiresAllLeaderKills(t *testing.T) {
-	rules := loadRules(t)
-	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
-	rules.DungeonGeneration.ChestPlacement.Enabled = false
+	rules := forceEliteObjectiveGenerationRules(t)
 	sim, err := NewSimWithWorld("sess_elite_objective_clear_all", "v158_elite_objective_0000", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)

@@ -95,6 +95,7 @@
   },
   "elite_objective": {
     "enabled": true,
+    "floor_chance_percent": 20,
     "interactable_def_id": "treasure_chest",
     "loot_table": "elite_objective_special_drop",
     "min_stair_distance": 4.0,

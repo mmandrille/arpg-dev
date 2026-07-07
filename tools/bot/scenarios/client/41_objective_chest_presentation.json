@@ -3,7 +3,7 @@
   "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "dungeon_levels",
-  "seed": "v161_fast_objective_0018",
+  "seed": "v448_elite_lab_0445",
   "title": "Objective chest presentation",
   "description": "Client descends into a generated dungeon and verifies the elite objective reward chest carries the objective marker.",
   "client_steps": [

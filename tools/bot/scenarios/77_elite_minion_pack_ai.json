@@ -1,7 +1,7 @@
 {
   "id": "elite_minion_pack_ai",
   "world_id": "dungeon_depth_one_lab",
-  "seed": "v161_fast_objective_0018",
+  "seed": "v448_elite_lab_0445",
   "character_class": "barbarian",
   "title": "Elite minion pack AI",
   "description": "Engages a deterministic elite objective leader and proves non-leader minions assist through pack combat while objective locking remains intact.",

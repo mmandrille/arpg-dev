@@ -7,6 +7,9 @@ func maybePlaceEliteObjectiveChest(rng *RNG, rules DungeonGenerationRules, out *
 	if !objective.Enabled || !generatedLevelHasEliteLeader(*out) {
 		return nil
 	}
+	if !eliteObjectiveFloorChancePasses(rng, objective.FloorChancePercent) {
+		return nil
+	}
 	pos, ok := randomObjectiveChestPosition(rng, rules, objective, out)
 	if !ok {
 		return nil
@@ -18,6 +21,14 @@ func maybePlaceEliteObjectiveChest(rng *RNG, rules DungeonGenerationRules, out *
 		eliteObjective: true,
 	})
 	return nil
+}
+
+func eliteObjectiveFloorChancePasses(rng *RNG, chancePercent int) bool {
+	if chancePercent <= 0 {
+		return false
+	}
+
+	return rng.IntN(100) < chancePercent
 }
 
 func generatedLevelHasEliteLeader(out generatedDungeonLevel) bool {

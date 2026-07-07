@@ -157,9 +157,7 @@ func TestRoomSpawnAwareness_MonstersAvoidCorridors(t *testing.T) {
 }
 
 func TestRoomSpawnAwareness_EliteChestClustersNearLeader(t *testing.T) {
-	rules := loadRules(t)
-	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
-	rules.DungeonGeneration.ChestPlacement.Enabled = false
+	rules := forceEliteObjectiveGenerationRules(t)
 	clusterRadius := rules.DungeonGeneration.EliteObjective.RoomClusterRadius
 	level, err := GenerateDungeonLevel("room_spawn_elite_cluster", -1, rules.DungeonGeneration)
 	if err != nil {

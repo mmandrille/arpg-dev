@@ -3,9 +3,7 @@ package game
 import "testing"
 
 func TestPopulateDungeonLevelTracksEliteObjectiveChestIDs(t *testing.T) {
-	rules := loadRules(t)
-	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
-	rules.DungeonGeneration.ChestPlacement.Enabled = false
+	rules := forceEliteObjectiveGenerationRules(t)
 	sim, err := NewSimWithWorld("sess_population_objective", "v160_population_objective", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)

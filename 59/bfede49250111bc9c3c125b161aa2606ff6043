@@ -1,0 +1,85 @@
+tools/validate_shared.py
+  s_da8d34e366bc0e::t_43ba5da1d13170 3092-3094
+server/internal/game/quest_steward_rewards.go
+  s_da8d34e366bc0e::t_e2b20546968199 105,109-115
+server/internal/game/unique_effects.go
+  s_da8d34e366bc0e::t_2ba80975db44a8 116,148-199,201,203
+server/internal/game/quest_steward_rules.go
+  s_da8d34e366bc0e::t_e2b20546968199 32-35,142-143,154-157
+tools/bot/run.py
+  s_da8d34e366bc0e::t_a3f6ccbf19836b 1222-1223
+  s_da8d34e366bc0e::t_0888c5cb09e999 1199,1202,1204-1207,1216
+  s_da8d34e366bc0e::t_5feec80f3100bc 1224-1226
+  s_da8d34e366bc0e::t_926be3424c1284 1228-1229
+shared/rules/quest_steward.v0.schema.json
+  s_da8d34e366bc0e::t_0fb493e4e628da 41,49-53,55-59
+server/internal/game/unique_chest.go
+  s_da8d34e366bc0e::t_702d9386a1cbb5 485-489
+server/internal/game/unique_chest_test.go
+  s_da8d34e366bc0e::t_702d9386a1cbb5 161-168
+shared/rules/unique_effects.v0.schema.json
+  s_da8d34e366bc0e::t_08d96ee1e70ef6 36-37
+docs/as-built/v450_branch-build-uniques.md
+  s_da8d34e366bc0e::t_c3a66724206716 1-29
+docs/progress/slice-lifecycle.md
+  s_da8d34e366bc0e::t_c3a66724206716 435
+tools/bot/scenarios/119_branch_unique_sunwake.json
+  s_da8d34e366bc0e::t_a12ab3ec472287 1-9,11,13-19,21-42
+  s_da8d34e366bc0e::t_dbc48f08e41afc 10,12
+  s_da8d34e366bc0e::t_b43818d4cfab81 20
+docs/plans/v450_2026-07-07-branch-build-uniques.md
+  s_da8d34e366bc0e::t_c3a66724206716 1-20
+shared/rules/worlds.v0.json
+  s_da8d34e366bc0e::t_672fe999cd4bef 5367-5408
+shared/rules/treasure_classes.v0.json
+  s_da8d34e366bc0e::t_da115109ca128a 1108-1111
+server/internal/game/unique_effects_test.go
+  s_da8d34e366bc0e::t_d77007571bb7ce 223-224
+  s_da8d34e366bc0e::t_43ba5da1d13170 39,203-204,222,225,243-244,263-264
+  s_da8d34e366bc0e::t_fa360b440836fe 200-202,205-221,226-242,245-262,265-278,630-637
+PROGRESS.md
+  s_da8d34e366bc0e::t_c3a66724206716 18,26,28,109
+server/internal/game/special_drops_test.go
+  s_da8d34e366bc0e::t_4b7be9d846ec4d 15,18-25,29-31,72-76
+shared/rules/quest_steward.v0.json
+  s_da8d34e366bc0e::t_0fb493e4e628da 20-22
+tools/bot/scenarios/118_branch_unique_rimecoil.json
+  s_da8d34e366bc0e::t_dbc48f08e41afc 10,12
+  s_da8d34e366bc0e::t_a12ab3ec472287 1-9,11,13-18,20-39
+  s_da8d34e366bc0e::t_b43818d4cfab81 19
+tools/bot/scenarios/117_branch_unique_nightbloom.json
+  s_da8d34e366bc0e::t_a12ab3ec472287 1-9,11,13-19,21-42
+  s_da8d34e366bc0e::t_dbc48f08e41afc 10,12
+  s_da8d34e366bc0e::t_b43818d4cfab81 20
+docs/specs/v450_spec-branch-build-uniques.md
+  s_da8d34e366bc0e::t_c3a66724206716 1-43
+shared/rules/unique_effects.v0.json
+  s_da8d34e366bc0e::t_672fe999cd4bef 140-204
+server/internal/game/quest_steward_test.go
+  s_da8d34e366bc0e::t_4b7be9d846ec4d 163-174
+tools/bot/scenarios/116_branch_unique_warbrand.json
+  s_da8d34e366bc0e::t_a12ab3ec472287 1-9,11,13-20,22-43
+  s_da8d34e366bc0e::t_b43818d4cfab81 21
+  s_da8d34e366bc0e::t_dbc48f08e41afc 10,12
+server/internal/game/sim.go
+  s_da8d34e366bc0e::t_2ba80975db44a8 1397,1439
+shared/rules/unique_items.v0.json
+  s_da8d34e366bc0e::t_43ba5da1d13170 75,90,105,120
+  s_da8d34e366bc0e::t_672fe999cd4bef 62-74,76-89,91-104,106-119,121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "59bfede49250111bc9c3c125b161aa2606ff6043",
+  "prompts": {},
+  "sessions": {
+    "s_da8d34e366bc0e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3d10-b2f8-7bb0-b604-3849a34f1810",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

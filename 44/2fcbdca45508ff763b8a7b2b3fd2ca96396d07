@@ -1,0 +1,23 @@
+server/internal/game/skill_rules_validation.go
+  s_578d41414cf02d::t_924095fc0d030e 1-471
+docs/CODEMAP.md
+  s_578d41414cf02d::t_4006d451b6b9d5 12
+.maintainability/file-size-baseline.tsv
+  s_578d41414cf02d::t_8b9ed9c4974116 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "442fcbdca45508ff763b8a7b2b3fd2ca96396d07",
+  "prompts": {},
+  "sessions": {
+    "s_578d41414cf02d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10ba7b93-6934-4c0c-8a7a-d446a6418169",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 # v425 As Built — AI Body Mesh Workflow
 
 Date: 2026-07-03
+Spec-gate: exempt (client-only visual workflow documentation; no protocol/server/rules/golden coordination)
 
 ## Shipped
 

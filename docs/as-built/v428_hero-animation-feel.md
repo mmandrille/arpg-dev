@@ -1,7 +1,7 @@
 # v428 As Built — Hero Animation Feel Pass
 
 Date: 2026-07-04  
-Spec-gate: exempt (client presentation + shared feel JSON only)
+Spec-gate: exempt (client presentation + shared feel JSON only; no protocol/server/golden coordination)
 
 ## Shipped
 

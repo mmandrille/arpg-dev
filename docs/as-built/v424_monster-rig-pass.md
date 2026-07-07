@@ -1,6 +1,7 @@
 # v424 As Built — Monster Rig Pass
 
 Date: 2026-07-03
+Spec-gate: exempt (client-only asset presentation; no protocol/server/rules/golden coordination)
 
 ## Shipped
 

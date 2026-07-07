@@ -1,6 +1,7 @@
 # v423 As Built — Weapon Variety GLBs
 
 Date: 2026-07-03
+Spec-gate: exempt (client-only asset presentation; no protocol/server/rules/golden coordination)
 
 ## Shipped
 

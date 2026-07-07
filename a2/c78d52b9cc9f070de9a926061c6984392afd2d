@@ -1,0 +1,21 @@
+tools/validate_shared.py
+  s_da8d34e366bc0e::t_c561f2f72ba091 3094
+  s_da8d34e366bc0e::t_59e2c792e7447e 221
+  s_da8d34e366bc0e::t_f96fedb918d81f 3077-3093,3095-3099
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a2c78d52b9cc9f070de9a926061c6984392afd2d",
+  "prompts": {},
+  "sessions": {
+    "s_da8d34e366bc0e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3d10-b2f8-7bb0-b604-3849a34f1810",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

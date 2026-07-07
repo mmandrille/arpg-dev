@@ -1,0 +1,21 @@
+.maintainability/file-size-baseline.tsv
+  s_578d41414cf02d::t_b754e8f1bd7722 19
+server/internal/game/skill_rules_validation_test.go
+  s_578d41414cf02d::t_903a0ed33cf477 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "deefa05098105b5113c300fa205433f3c309b3c4",
+  "prompts": {},
+  "sessions": {
+    "s_578d41414cf02d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10ba7b93-6934-4c0c-8a7a-d446a6418169",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

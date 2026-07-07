@@ -26,8 +26,8 @@ Last updated: 2026-07-07 (v448 quest steward hunt loop)
 | **Latest completed slice** | v448 — quest steward hunt loop |
 | **CI gate** | 2026-07-07 — `make ci` green |
 | **Next slice** | TBD |
-| **Last engineering review** | v420 — [`docs/reviews/20260703_v420-overview.md`](docs/reviews/20260703_v420-overview.md) (2026-07-03; official cadence) |
-| **Next engineering review** | v448 — **overdue** (28 slices since v420); run `$review` now |
+| **Last engineering review** | v448 — [`docs/reviews/20260707_v448-overview.md`](docs/reviews/20260707_v448-overview.md) (2026-07-07; official cadence) |
+| **Next engineering review** | ~v458 — run `$review` then `$refactor` after next ~10-slice milestone |
 
 
 ### Periodic engineering reviews
@@ -111,6 +111,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, production dungeon fog lighting/art pass beyond code-native radial/LOS/organic masks, minimap routefinding/click-to-navigate/legend/filter UI, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout | v53/v57/v58/v73/v74/v75/v225/v253/v255/v263/v264 non-goals, ADR-0009 |
 | Dungeon generation | Non-rectangular/polygon fog line-of-sight blocking beyond current rectangular wall/tall-obstacle and closed-door occlusion, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final biome/difficulty balance beyond first area-density formulas | v40/v252/v253/v254/v255/v260/v261/v262/v295/v296/v297/v298/v299/v300 non-goals |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
+| Testing / tooling | **Pre-existing extended-scenario failures (discovered $review v448):** `random_quest_reward_floor` (HTTP 500 server crash on WebSocket, `dungeon_depth_one_lab` world); `teleporter_lab` (level assertion `current_level -3 != 0`); `dungeon_combat_perf_probe` (skill_cast timeout flaky). All confirmed pre-existing at `ebcbdc9a`. | discovered $review 2026-07-07 |
 | Testing / tooling | **`TestDungeonTeleportersReplayGolden` flaky** — town navigation navBudget exhaustion introduced between v420 and v448 (dungeon layout changes). Fix: increase navBudget for post-teleport town traversal or remove navigation from that step. Separate from tuning-test audit. | discovered $refactor 2026-07-07 |
 | Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up, v76/v77/v78 deferred |
 | Settings | Controls remapping, accessibility options, language selection | v24/v224 non-goals; v351 shipped windowed/fullscreen/windowed-fullscreen display mode in `user://settings.json` |

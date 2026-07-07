@@ -1,0 +1,186 @@
+server/internal/game/quest_steward.go
+  s_c8780b0c64ec3f::t_db4c4da5524da1 128-130
+  s_c8780b0c64ec3f::t_c36ce63ab4dea3 3-6
+  s_c8780b0c64ec3f::t_4cd82277fa3069 1-2,7-67,70-125,131-163,165-196,200-203,206-217
+  s_c8780b0c64ec3f::t_81765d512655e9 69
+  s_c8780b0c64ec3f::t_c23bf6b52b5b59 126-127
+  s_c8780b0c64ec3f::t_0e1d4205aec5be 164
+  s_c8780b0c64ec3f::t_7c0f2ab0545422 197-199,204-205
+  s_c8780b0c64ec3f::t_c735160e07d50a 68
+server/internal/game/dungeon_population.go
+  s_c8780b0c64ec3f::t_bf69bf8d379f68 13-14
+  s_c8780b0c64ec3f::t_367bd5c99350bb 128
+  s_c8780b0c64ec3f::t_5fc8d48fe8c495 173
+tools/bot/scenarios/client/98_steward_hunt_quest.json
+  s_c8780b0c64ec3f::t_381f0686b0e52c 1-3,5-7,18-19
+  s_c8780b0c64ec3f::t_ae21c63a83c02d 4,8-17
+shared/assets/item_presentations.v0.json
+  s_c8780b0c64ec3f::t_3c9281c9dea2ac 700-711
+server/internal/game/dungeon_generated_types.go
+  s_c8780b0c64ec3f::t_7695c7e2ca4114 19
+  s_c8780b0c64ec3f::t_1118a3db620172 60
+server/internal/inputdecode/inputdecode.go
+  s_c8780b0c64ec3f::t_dc8a177b4704f6 50
+  s_c8780b0c64ec3f::t_b34b2e455da39b 176-179
+  s_c8780b0c64ec3f::t_3a63ead84742e2 450-455
+  s_c8780b0c64ec3f::t_e2fa90b33ae024 185
+docs/specs/v448_spec-quest-steward-hunt-loop.md
+  s_c8780b0c64ec3f::t_060060a9f782b7 1-65
+client/scripts/bot_step_catalog.gd
+  s_c8780b0c64ec3f::t_434da7124a8733 50
+  s_c8780b0c64ec3f::t_cec29e7c8ed1ae 20
+client/scripts/main.gd
+  s_c8780b0c64ec3f::t_2f27a1b6c1dea1 54-55
+  s_c8780b0c64ec3f::t_2f2d1314e04b78 1548-1556
+  s_c8780b0c64ec3f::t_e97b4d6ee03c5c 1557-1565
+  s_c8780b0c64ec3f::t_9511708e821b16 3909-3913
+  s_c8780b0c64ec3f::t_67fd76bed4c5c2 6081-6082
+  s_c8780b0c64ec3f::t_5154c98114b51d 6176-6218
+  s_c8780b0c64ec3f::t_5750a77504716e 6348-6349
+  s_c8780b0c64ec3f::t_6896e8fa352dd0 1296
+  s_c8780b0c64ec3f::t_83fb357177664e 6065-6066
+  s_c8780b0c64ec3f::t_2f917e2e2f84ff 281-283
+PROGRESS.md
+  s_c8780b0c64ec3f::t_e0d786844b4344 18,26-27
+shared/protocol/messages.v8.schema.json
+  s_c8780b0c64ec3f::t_51d2ff73e74645 51
+  s_c8780b0c64ec3f::t_bbf0bed8e498f1 142-143
+  s_c8780b0c64ec3f::t_403e7f91fac67e 391-399
+tools/bot/scenarios/120_steward_hunt_quest.json
+  s_c8780b0c64ec3f::t_47f03a6ebfbe28 1-5,7-24
+  s_c8780b0c64ec3f::t_6b6c23a57f6885 6
+shared/rules/quest_steward.v0.schema.json
+  s_c8780b0c64ec3f::t_37719fd0babf30 1-54
+server/internal/game/sim.go
+  s_c8780b0c64ec3f::t_3a27f3ac5cfd83 195-200
+  s_c8780b0c64ec3f::t_2f54c19c8c5c40 1748-1751
+  s_c8780b0c64ec3f::t_92a8a2ca3f485b 1753-1756
+  s_c8780b0c64ec3f::t_70413af3007620 111
+  s_c8780b0c64ec3f::t_5c6bddfcfe6f72 444-446
+  s_c8780b0c64ec3f::t_ab01f93d2bf41e 1005-1008
+  s_c8780b0c64ec3f::t_25904b95a9e7cf 913
+  s_c8780b0c64ec3f::t_241ef126fe3a45 6537-6541
+  s_c8780b0c64ec3f::t_f764ee651188d2 2015
+  s_c8780b0c64ec3f::t_27d06d8fb84e85 1587
+server/internal/game/rules.go
+  s_c8780b0c64ec3f::t_0685223c696640 39
+  s_c8780b0c64ec3f::t_8c7e6b55a6d756 1974-1977
+tools/bot/runtime_assertions.py
+  s_c8780b0c64ec3f::t_3d23d8f8625137 95
+  s_c8780b0c64ec3f::t_e9cc79c747e2dd 436
+  s_c8780b0c64ec3f::t_caa6115d8540bd 7-31
+server/internal/game/quest_turn_in.go
+  s_c8780b0c64ec3f::t_e5c6a001af4e7e 20-24,66
+client/scripts/quest_steward_panel.gd
+  s_c8780b0c64ec3f::t_8890a80dcbfbcf 1-107
+  s_c8780b0c64ec3f::t_0f7a65d85df166 108-117
+shared/rules/quest_steward.v0.json
+  s_c8780b0c64ec3f::t_384c08d076df21 1-27
+docs/as-built/v448_quest-steward-hunt-loop.md
+  s_c8780b0c64ec3f::t_8e67ea5bf4a8d0 1-34
+client/scripts/steward_hunt_banner.gd
+  s_c8780b0c64ec3f::t_650e0c438183e7 1-77
+server/internal/game/types.go
+  s_c8780b0c64ec3f::t_17190bad9007a7 445-451
+  s_c8780b0c64ec3f::t_22ba33bd21a973 29
+  s_c8780b0c64ec3f::t_fcd099153b899f 90
+  s_c8780b0c64ec3f::t_ba11e65fe8c3bb 401-406
+server/internal/game/dungeon_steward_hunt.go
+  s_c8780b0c64ec3f::t_797b69c34509fc 1-46
+.maintainability/file-size-baseline.tsv
+  s_c8780b0c64ec3f::t_9116f2fe92ebc4 10
+  s_c8780b0c64ec3f::t_5777a3edf2b95f 35
+  s_c8780b0c64ec3f::t_583ad02a01d3af 34
+  s_c8780b0c64ec3f::t_4a65f0f73e6c29 21
+  s_c8780b0c64ec3f::t_0faff603c0a357 25
+docs/progress/slice-lifecycle.md
+  s_c8780b0c64ec3f::t_b08a437a4f4d87 434
+shared/rules/items.v0.json
+  s_c8780b0c64ec3f::t_2c5e07db199b83 18-21
+shared/protocol/session_snapshot.v8.schema.json
+  s_c8780b0c64ec3f::t_4749cb81084f43 167-168
+  s_c8780b0c64ec3f::t_6a7328d7d94f3e 118
+server/internal/game/level.go
+  s_c8780b0c64ec3f::t_6797b1a41b4f99 10
+docs/plans/v448_2026-07-07-quest-steward-hunt-loop.md
+  s_c8780b0c64ec3f::t_70261c36bead79 42
+  s_c8780b0c64ec3f::t_2c77a3556537ed 49
+  s_c8780b0c64ec3f::t_ac5d0fca3ac19c 1-41,43-48,50-55,57-62,64-70,72-86
+  s_c8780b0c64ec3f::t_3191637c7545f8 63
+  s_c8780b0c64ec3f::t_9ff1915414163e 71
+  s_c8780b0c64ec3f::t_07db3542fa81dd 56
+server/internal/game/handlers.go
+  s_c8780b0c64ec3f::t_83c49d5b1944c0 51
+server/internal/game/quest_steward_test.go
+  s_c8780b0c64ec3f::t_0425de3f5e6f88 41
+  s_c8780b0c64ec3f::t_fe23d613aa2c10 96
+  s_c8780b0c64ec3f::t_b0b92aa9443636 62,66-70
+  s_c8780b0c64ec3f::t_aca5960d851dd0 11,17-21
+  s_c8780b0c64ec3f::t_b5d78869f6eb5e 120-124
+  s_c8780b0c64ec3f::t_92b9fbc5edfe6c 54
+  s_c8780b0c64ec3f::t_103b4a1120b293 126
+  s_c8780b0c64ec3f::t_b15567975e43ea 75
+  s_c8780b0c64ec3f::t_6839ed2338c14f 115-116
+  s_c8780b0c64ec3f::t_8a5f7219a23f50 1-10,12-16,22-30,42-53,55-61,63-65,71-74,76-86,88-90,97-114,117-119,127-165
+  s_c8780b0c64ec3f::t_f02af50cf91474 91-95
+  s_c8780b0c64ec3f::t_6befc3dfc95bb2 31-32,34-35,37-40
+  s_c8780b0c64ec3f::t_544358585324f6 33,36
+  s_c8780b0c64ec3f::t_f4678bf36c63ab 125
+  s_c8780b0c64ec3f::t_f148bd193e163d 87
+shared/protocol/state_delta.v8.schema.json
+  s_c8780b0c64ec3f::t_ee9a7a39d5718a 553-562
+  s_c8780b0c64ec3f::t_1ada0b3aad4575 194-195
+  s_c8780b0c64ec3f::t_c35e44d93a5ce9 283-292
+  s_c8780b0c64ec3f::t_eba631fabb3fe8 982-1002
+  s_c8780b0c64ec3f::t_fdfdab9546d3d9 159
+  s_c8780b0c64ec3f::t_cfa56915babaca 544
+client/scripts/quest_elite_objective_state.gd
+  s_c8780b0c64ec3f::t_1c731b49d09552 30-58
+  s_c8780b0c64ec3f::t_a164a42ea2e123 5-13
+tools/bot/run.py
+  s_c8780b0c64ec3f::t_c93e2d1e9c6f2d 2543
+  s_c8780b0c64ec3f::t_a05a2b50177760 3201
+  s_c8780b0c64ec3f::t_0aaa6cf6e7e707 876
+  s_c8780b0c64ec3f::t_32362df318807d 1597-1632
+  s_c8780b0c64ec3f::t_20623be7bad447 2523
+  s_c8780b0c64ec3f::t_a2798a971e2475 892-898
+client/scripts/bot_wait_handlers.gd
+  s_c8780b0c64ec3f::t_364c5ed5beda32 110-111
+  s_c8780b0c64ec3f::t_203cfdd7f78a99 7
+  s_c8780b0c64ec3f::t_a63bc9e0163e3d 112-113
+client/scripts/bot_steward_hunt_assertions.gd
+  s_c8780b0c64ec3f::t_c1ba23ca73f730 1-23
+server/internal/game/quest_steward_rules.go
+  s_c8780b0c64ec3f::t_058c48af973f02 1-180
+tools/bot/runtime_queries.py
+  s_c8780b0c64ec3f::t_a895e90885fef4 48,50
+client/scripts/bot_assertion_handlers.gd
+  s_c8780b0c64ec3f::t_fb83a4784132f9 8
+  s_c8780b0c64ec3f::t_0008b6d142d691 259-265
+client/scripts/bot_facade.gd
+  s_c8780b0c64ec3f::t_9d83267d06fe60 25-30
+docs/CODEMAP.md
+  s_c8780b0c64ec3f::t_6b2ddaa800581d 34
+  s_c8780b0c64ec3f::t_0ea154aa1e85e3 37
+  s_c8780b0c64ec3f::t_3b79abf00f5bf4 28
+server/internal/game/quest_steward_rewards.go
+  s_c8780b0c64ec3f::t_81eaab916851b6 1-122
+server/internal/game/companion_ai.go
+  s_c8780b0c64ec3f::t_f60049ac7a1b14 267
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "201275260f8375aba4ef30abe806ace71c6999e0",
+  "prompts": {},
+  "sessions": {
+    "s_c8780b0c64ec3f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "36dc9035-0404-4691-8359-e71f264a44af",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

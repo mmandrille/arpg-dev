@@ -120,6 +120,22 @@ Symlink: `.artifacts/screenshots/latest/`. Implementation: `tools/showme/` +
 [`skills/showme/SKILL.md`](skills/showme/SKILL.md). Agents should run the relevant
 suite after visual slices and open the PNGs before asking for human review.
 
+### Live gear tuning (hot-reload JSON)
+
+For socket and mount iteration on equipped gear, open a rotating live preview that
+reloads shared config files every few seconds—no Godot restart between saves:
+
+```bash
+python3 skills/showme/scripts/render_focus.py \
+  --focus gear --class-id paladin --items barbarian_axe,shield,helm \
+  --mode live --refresh 3 --duration 0
+```
+
+Edit `shared/assets/item_visuals.v0.json` or `shared/assets/gear_sockets.v0.json`,
+save, and the window picks up changes on the next cycle. One full 360° rotation
+matches each refresh interval by default. Flags, reload scope, and limitations:
+[`skills/showme/SKILL.md`](skills/showme/SKILL.md) → **Live gear tuning loop**.
+
 ## Status
 
 See [`PROGRESS.md`](PROGRESS.md) for the live snapshot: latest completed slice, CI gate,

@@ -32,6 +32,8 @@ The script prints the screenshot path under `.artifacts/showme/`.
 | `--focus` | `gear` | What to render (see catalog below). |
 | `--mode` | `screenshot` | `screenshot` saves PNG; `live` opens a Godot window. |
 | `--duration` | `-1` (screenshot) / `45` (live) | Live timeout in seconds; `0` keeps the window open until closed. |
+| `--refresh` | `0` (off) | **Gear + live only:** reload shared JSON configs every N seconds (see below). |
+| `--rotation-period` | `0` (auto) | Seconds for one 360° rotation in live mode; defaults to `--refresh` when set. |
 | `--items` | gear default set | Comma-separated `item_def_id`s. Used by `gear` and `floor-item`. |
 | `--class-id` | (none) | Class model for `gear` / `skeleton`, e.g. `paladin`. |
 | `--skill-id` | (none) | Skill id for `skill-icon` focus. |
@@ -50,9 +52,40 @@ python3 skills/showme/scripts/render_focus.py --focus gear --mode live --duratio
 
 # Live preview until the window is closed.
 python3 skills/showme/scripts/render_focus.py --focus gear --mode live --duration 0
+
+# Live gear tuning loop: auto-reload configs every 3s, one full rotation per cycle.
+python3 skills/showme/scripts/render_focus.py --focus gear --class-id paladin --items barbarian_axe --mode live --refresh 3 --duration 0
 ```
 
 Screenshot and live mode both use Godot's render-capable window path because the macOS headless/dummy renderer cannot produce viewport pixels. If sandbox GUI restrictions block either mode, rerun the command with escalation and a short approval prompt.
+
+### Live gear tuning loop (`--refresh`)
+
+Use this when iterating on equipped-gear placement without restarting Godot. **Requires `--mode live` and `--focus gear`.**
+
+Every `--refresh N` seconds the preview:
+
+1. Invalidates and reloads shared JSON caches (`item_visuals.v0.json`, `assets/manifests/assets.v0.json`, `gear_sockets.v0.json`, `equipment_display.v0.json`, plus item/class presentation loaders used by the gear resolver).
+2. Rebuilds bone sockets on the character and remounts the `--items` set.
+3. Resets the turntable to its starting angle.
+
+Rotation speed is tied to the refresh interval by default: one full 360° per cycle (`--rotation-period` overrides). Override with `--rotation-period` if you want a different spin rate.
+
+**Hot-reloads on save:** socket offsets, item mount transforms, equipment display multipliers, and manifest `runtime_path` entries.
+
+**Still needs a restart:** class body `.glb` scene swaps (reload class mesh from disk) and regenerated runtime `.glb` binaries until Godot's resource cache is cleared or the process exits.
+
+Typical workflow while editing `shared/assets/item_visuals.v0.json` or `shared/assets/gear_sockets.v0.json`:
+
+```bash
+python3 skills/showme/scripts/render_focus.py \
+  --focus gear --class-id paladin --items barbarian_axe,shield,helm \
+  --mode live --refresh 3 --duration 0
+```
+
+Save the JSON file; within one refresh cycle the window updates. Close the Godot window (or Ctrl+C the terminal) when done.
+
+Implementation: `skills/showme/scripts/render_focus.py` passes `--refresh` / `--rotation-period` to `client/scripts/showme/visual_capture.gd`, which calls `EquipmentVisualResolver.reload_data_only()` and `refresh_gear_sockets()` on each cycle.
 
 ## Focus catalog
 
@@ -152,6 +185,9 @@ python3 skills/showme/scripts/render_focus.py --focus gear
 
 # Specific items and class body.
 python3 skills/showme/scripts/render_focus.py --focus gear --items helm,mail,boots --class-id paladin
+
+# Live tuning loop while editing item_visuals / gear_sockets JSON.
+python3 skills/showme/scripts/render_focus.py --focus gear --class-id paladin --items barbarian_axe --mode live --refresh 3 --duration 0
 
 # Skeleton bone visualization (default class: paladin).
 python3 skills/showme/scripts/render_focus.py --focus skeleton --class-id paladin

@@ -137,6 +137,71 @@
       },
       "status": "ready"
     },
+    "warbrand_gore": {
+      "id": "warbrand_gore",
+      "enabled": true,
+      "display_name": "Warbrand Gore",
+      "summary": "Gore Strike ignites enemies for 4 seconds, dealing 18% of the hit as fire damage each second.",
+      "hook": "on_skill_hit_status",
+      "compatible_item_types": ["axe"],
+      "params": {
+        "skill_id": "gore_strike",
+        "dot_status_id": "burning",
+        "dot_tick_damage_percent_of_hit": 18,
+        "dot_duration_seconds": 4,
+        "dot_tick_interval_seconds": 1
+      },
+      "status": "ready"
+    },
+    "nightbloom_blossom": {
+      "id": "nightbloom_blossom",
+      "enabled": true,
+      "display_name": "Nightbloom Blossom",
+      "summary": "Death Blossom poisons enemies for 4 seconds, dealing 14% of the hit as poison damage each second.",
+      "hook": "on_skill_hit_status",
+      "compatible_item_types": ["dagger"],
+      "params": {
+        "skill_id": "death_blossom",
+        "dot_status_id": "poisoned",
+        "dot_tick_damage_percent_of_hit": 14,
+        "dot_duration_seconds": 4,
+        "dot_tick_interval_seconds": 1
+      },
+      "status": "ready"
+    },
+    "rimecoil_lance": {
+      "id": "rimecoil_lance",
+      "enabled": true,
+      "display_name": "Rimecoil Lance",
+      "summary": "Glacial Lance splashes a 20% slow for 4 seconds to enemies near the struck target.",
+      "hook": "on_skill_hit_status",
+      "compatible_item_types": ["staff"],
+      "params": {
+        "skill_id": "glacial_lance",
+        "slow_status_id": "ice_slow",
+        "slow_percent": 20,
+        "slow_max_percent": 80,
+        "slow_duration_seconds": 4,
+        "splash_radius_tiles": 3
+      },
+      "status": "ready"
+    },
+    "sunwake_hammer": {
+      "id": "sunwake_hammer",
+      "enabled": true,
+      "display_name": "Sunwake Hammer",
+      "summary": "Divine Hammer scorches enemies for 3 seconds, dealing 12% of the hit as fire damage each second.",
+      "hook": "on_skill_hit_status",
+      "compatible_item_types": ["shield"],
+      "params": {
+        "skill_id": "divine_hammer",
+        "dot_status_id": "burning",
+        "dot_tick_damage_percent_of_hit": 12,
+        "dot_duration_seconds": 3,
+        "dot_tick_interval_seconds": 1
+      },
+      "status": "ready"
+    },
     "frostglass_ward": {
       "id": "frostglass_ward",
       "enabled": true,

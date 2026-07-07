@@ -158,6 +158,14 @@ func TestNamedUniquePayloadBuildsFixedPackages(t *testing.T) {
 			requirements: map[string]int{"level": 5, "dex": 5},
 			effectIDs:    []string{"stormbound_echo"},
 		},
+		{
+			uniqueID:     "warbrand_cleaver",
+			templateID:   "barbarian_axe",
+			displayName:  "Warbrand Cleaver",
+			wantStats:    map[string]int{"damage_min": 34, "damage_max": 54, "max_hp": 46},
+			requirements: map[string]int{"level": 22, "str": 23},
+			effectIDs:    []string{"warbrand_gore"},
+		},
 	}
 
 	for _, tc := range tests {

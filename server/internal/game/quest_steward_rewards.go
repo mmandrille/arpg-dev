@@ -102,10 +102,17 @@ func (s *Sim) rollQuestStewardOffers(trophyInstanceID uint64, sourceDepth int) [
 
 func (s *Sim) rollQuestStewardReward(familyID string, sourceDepth int, trophyInstanceID uint64) (ItemRollPayload, bool) {
 	family, ok := s.rules.questStewardFamilyByID(familyID)
-	if !ok || len(family.TemplateIDs) == 0 {
+	if !ok {
 		return ItemRollPayload{}, false
 	}
 	rng := NewRNG(SeedToUint64(fmt.Sprintf("%s|quest_steward_reward|%d|%s|%d", s.seed, trophyInstanceID, familyID, sourceDepth)))
+	if len(family.UniqueItemIDs) > 0 {
+		uniqueID := family.UniqueItemIDs[rng.IntN(len(family.UniqueItemIDs))]
+		return s.rules.namedUniquePayload(uniqueID)
+	}
+	if len(family.TemplateIDs) == 0 {
+		return ItemRollPayload{}, false
+	}
 	templateID := family.TemplateIDs[rng.IntN(len(family.TemplateIDs))]
 
 	return s.rules.rollItemTemplateWithMinRarity(templateID, rng, sourceDepth, s.rules.QuestSteward.HuntQuest.MinRarity)

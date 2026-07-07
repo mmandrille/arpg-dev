@@ -59,6 +59,66 @@
       "fixed_effect_ids": ["blood_price"],
       "behavior_hook": "Named fixed unique package lets skills pay missing mana with HP through the live blood_price effect.",
       "status": "ready"
+    },
+    "warbrand_cleaver": {
+      "id": "warbrand_cleaver",
+      "enabled": true,
+      "base_template_id": "barbarian_axe",
+      "display_name": "Warbrand Cleaver",
+      "minimum_level": 22,
+      "fixed_stats": {
+        "damage_min": 10,
+        "damage_max": 16,
+        "max_hp": 10
+      },
+      "fixed_effect_ids": ["warbrand_gore"],
+      "behavior_hook": "Named fixed unique effect package turns Gore Strike into a bleed-plus-burn branch finisher.",
+      "status": "ready"
+    },
+    "nightbloom_shiv": {
+      "id": "nightbloom_shiv",
+      "enabled": true,
+      "base_template_id": "dagger",
+      "display_name": "Nightbloom Shiv",
+      "minimum_level": 22,
+      "fixed_stats": {
+        "damage_min": 8,
+        "damage_max": 13,
+        "attack_speed_percent": 8
+      },
+      "fixed_effect_ids": ["nightbloom_blossom"],
+      "behavior_hook": "Named fixed unique effect package turns Death Blossom into a poison-delivery branch capstone.",
+      "status": "ready"
+    },
+    "rimecoil_staff": {
+      "id": "rimecoil_staff",
+      "enabled": true,
+      "base_template_id": "sorcerer_staff",
+      "display_name": "Rimecoil Staff",
+      "minimum_level": 12,
+      "fixed_stats": {
+        "damage_min": 4,
+        "damage_max": 7,
+        "max_mana": 12
+      },
+      "fixed_effect_ids": ["rimecoil_lance"],
+      "behavior_hook": "Named fixed unique effect package lets Glacial Lance spread its slow across clustered targets.",
+      "status": "ready"
+    },
+    "sunwake_guard": {
+      "id": "sunwake_guard",
+      "enabled": true,
+      "base_template_id": "shield",
+      "display_name": "Sunwake Guard",
+      "minimum_level": 22,
+      "fixed_stats": {
+        "armor": 4,
+        "block_percent": 6,
+        "max_hp": 8
+      },
+      "fixed_effect_ids": ["sunwake_hammer"],
+      "behavior_hook": "Named fixed unique effect package adds a holy burn rider to Divine Hammer.",
+      "status": "ready"
     }
   }
 }

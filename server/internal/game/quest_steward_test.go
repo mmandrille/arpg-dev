@@ -160,6 +160,18 @@ func TestStewardHuntTrophyTurnInGrantsMagicReward(t *testing.T) {
 	}
 }
 
+func TestQuestStewardRewardFamilyCanGrantNamedUnique(t *testing.T) {
+	rules := loadRules(t)
+	sim := MustNewSim("sess_steward_unique_reward", "steward_unique_reward", rules)
+	reward, ok := sim.rollQuestStewardReward("warbrand", 5, 44901)
+	if !ok {
+		t.Fatal("rollQuestStewardReward returned false for warbrand")
+	}
+	if reward.NamedUniqueID != "warbrand_cleaver" || reward.DisplayName != "Warbrand Cleaver" {
+		t.Fatalf("reward = %+v, want named Warbrand Cleaver", reward)
+	}
+}
+
 func TestQuestTurnInStillConsumesLegacyQuestLeaf(t *testing.T) {
 	TestQuestTurnInConsumesQuestItemAndRewardsGold(t)
 }

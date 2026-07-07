@@ -1105,6 +1105,10 @@
             {
               "item_template_id": "war_sword",
               "weight": 2
+            },
+            {
+              "unique_item_id": "sunwake_guard",
+              "weight": 1
             }
           ]
         },

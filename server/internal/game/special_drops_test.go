@@ -12,12 +12,22 @@ func TestBossTreasureClassUsesRandomEquipmentPool(t *testing.T) {
 	if len(tc.Attempts) < 3 {
 		t.Fatalf("boss treasure class = %+v, want primary/bonus/extra attempts", tc.Attempts)
 	}
+	foundSunwake := false
 	for _, attempt := range tc.Attempts {
 		for _, entry := range attempt.Entries {
-			if entry.UniqueItemID != "" || entry.SetItemID != "" {
-				t.Fatalf("boss attempt %s has authored drop = %+v, want item templates only", attempt.AttemptID, entry)
+			if entry.SetItemID != "" {
+				t.Fatalf("boss attempt %s has authored set drop = %+v, want none", attempt.AttemptID, entry)
+			}
+			if entry.UniqueItemID != "" {
+				if entry.UniqueItemID != "sunwake_guard" {
+					t.Fatalf("boss attempt %s has unexpected authored unique = %+v", attempt.AttemptID, entry)
+				}
+				foundSunwake = true
 			}
 		}
+	}
+	if !foundSunwake {
+		t.Fatal("boss treasure class missing sunwake_guard unique pin")
 	}
 	if tc.Attempts[0].AttemptID != "primary" || tc.Attempts[0].SuccessWeight != 100 || tc.Attempts[0].NoDropWeight != 0 {
 		t.Fatalf("boss primary attempt = %+v, want guaranteed primary roll", tc.Attempts[0])
@@ -59,8 +69,11 @@ func TestBossLootRollsRandomEquipmentPayloads(t *testing.T) {
 		if entity.kind != lootEntity || entity.rollPayload == nil {
 			continue
 		}
-		if entity.rollPayload.NamedUniqueID != "" || entity.rollPayload.SetPieceID != "" {
-			t.Fatalf("boss loot has authored payload = %+v", entity.rollPayload)
+		if entity.rollPayload.SetPieceID != "" {
+			t.Fatalf("boss loot has authored set payload = %+v", entity.rollPayload)
+		}
+		if entity.rollPayload.NamedUniqueID != "" {
+			continue
 		}
 		if entity.rollPayload.Rarity == "unique" || entity.rollPayload.Rarity == "set" {
 			t.Fatalf("boss loot has authored rarity = %+v", entity.rollPayload)

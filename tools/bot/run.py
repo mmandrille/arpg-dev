@@ -1195,15 +1195,16 @@ async def execute_step(
         return
 
     if action == "equip_inventory_item":
-        item_def_id = str(step["item_def_id"])
-        bag_index = int(step.get("bag_index", 0))
         deadline = loop.time() + SLICE_TIMEOUT_S
-        item = find_inventory_item(state.inventory, item_def_id, bag_index)
+        item = None
         while item is None:
             if loop.time() > deadline:
-                raise TimeoutError(f"equip_inventory_item stalled waiting for {item_def_id}")
+                raise TimeoutError(f"equip_inventory_item stalled waiting for {step}")
             await pump_one(ws, state, timeout=0.1)
-            item = find_inventory_item(state.inventory, item_def_id, bag_index)
+            matches = filtered_inventory_items(state.inventory, step)
+            bag_index = int(step.get("bag_index", 0))
+            if 0 <= bag_index < len(matches):
+                item = matches[bag_index]
         slot = str(step.get("slot", item.get("slot", "main_hand")))
         item_id = str(item["item_instance_id"])
         payload = {"item_instance_id": item_id, "slot": slot}
@@ -1212,14 +1213,20 @@ async def execute_step(
             payload["weapon_set"] = int(weapon_set)
         env = make_envelope("equip_intent", session_id, state.last_tick, payload)
         await ws.send(json.dumps(env))
-        log("equipping", item_def_id, item_id)
+        log("equipping", item.get("display_name") or item.get("item_def_id") or item.get("item_template_id"), item_id)
         expect_reject = step.get("expect_reject")
         if expect_reject:
             await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
             return
         while equipped_slot_id(state, slot, weapon_set) != item_id:
+            reason = state.rejected_message_reasons.pop(env["message_id"], None)
+            if reason is not None:
+                raise AssertionError(
+                    f"equip_inventory_item for {item.get('display_name') or item_id} was rejected: {reason}; item={item}"
+                )
             if loop.time() > deadline:
-                raise TimeoutError(f"equip_inventory_item stalled waiting for equipped_update for {item_def_id}")
+                label = item.get("display_name") or item.get("item_def_id") or item.get("item_template_id") or step
+                raise TimeoutError(f"equip_inventory_item stalled waiting for equipped_update for {label}")
             await pump_one(ws, state, timeout=0.1)
         state.equipped_item_id = item_id
         return

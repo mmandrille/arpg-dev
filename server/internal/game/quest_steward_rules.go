@@ -29,9 +29,10 @@ type QuestStewardTrophyRule struct {
 }
 
 type QuestStewardFamilyRule struct {
-	FamilyID    string   `json:"family_id"`
-	Label       string   `json:"label"`
-	TemplateIDs []string `json:"template_ids"`
+	FamilyID      string   `json:"family_id"`
+	Label         string   `json:"label"`
+	TemplateIDs   []string `json:"template_ids,omitempty"`
+	UniqueItemIDs []string `json:"unique_item_ids,omitempty"`
 }
 
 type generatedStewardHunt struct {
@@ -138,8 +139,8 @@ func validateQuestStewardRules(steward QuestStewardRules, r *Rules) error {
 	}
 	seenFamilies := map[string]struct{}{}
 	for _, family := range steward.RewardFamilies {
-		if family.FamilyID == "" || family.Label == "" || len(family.TemplateIDs) == 0 {
-			return fmt.Errorf("game: invalid rules quest_steward.reward_families: family_id, label, and template_ids are required")
+		if family.FamilyID == "" || family.Label == "" || (len(family.TemplateIDs) == 0 && len(family.UniqueItemIDs) == 0) {
+			return fmt.Errorf("game: invalid rules quest_steward.reward_families: family_id, label, and at least one template_ids or unique_item_ids entry are required")
 		}
 		if _, dup := seenFamilies[family.FamilyID]; dup {
 			return fmt.Errorf("game: invalid rules quest_steward.reward_families: duplicate family %s", family.FamilyID)
@@ -148,6 +149,12 @@ func validateQuestStewardRules(steward QuestStewardRules, r *Rules) error {
 		for _, templateID := range family.TemplateIDs {
 			if _, ok := r.ItemTemplates[templateID]; !ok {
 				return fmt.Errorf("game: invalid rules quest_steward.reward_families.%s: unknown template %s", family.FamilyID, templateID)
+			}
+		}
+		for _, uniqueID := range family.UniqueItemIDs {
+			unique, ok := r.UniqueItems[uniqueID]
+			if !ok || !unique.Enabled || unique.Status != "ready" {
+				return fmt.Errorf("game: invalid rules quest_steward.reward_families.%s: unknown or inactive unique %s", family.FamilyID, uniqueID)
 			}
 		}
 	}

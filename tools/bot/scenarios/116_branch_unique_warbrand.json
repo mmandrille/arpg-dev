@@ -1,0 +1,43 @@
+{
+  "id": "branch_unique_warbrand",
+  "ci_tier": "extended",
+  "world_id": "branch_unique_lab",
+  "seed": "v450_branch_unique_warbrand",
+  "character_class": "barbarian",
+  "title": "Branch unique warbrand",
+  "description": "Equip Warbrand Cleaver from the debug unique chest, cast Gore Strike, and prove the branch unique adds a burn rider.",
+  "debug_progression": {
+    "level": 40,
+    "unspent_skill_points": 0,
+    "stats": { "str": 40, "dex": 10, "vit": 24, "magic": 6 },
+    "skill_ranks": {
+      "cleave": 1,
+      "ground_slam": 1,
+      "rend": 1,
+      "gore_strike": 1
+    }
+  },
+  "steps": [
+    { "action": "assert_character_progression", "level": 40 },
+    { "action": "action_entity", "interactable_def_id": "town_unique_chest", "event_type": "unique_chest_opened", "timeout_s": 10 },
+    { "action": "take_unique_chest_item", "interactable_def_id": "town_unique_chest", "display_name": "Warbrand Cleaver" },
+    { "action": "equip_inventory_item", "display_name": "Warbrand Cleaver", "slot": "main_hand" },
+    { "action": "cast_skill", "skill_id": "gore_strike", "monster_def_id": "combat_lab_soft_target", "event_type": "skill_cast" },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "combat_event_seen",
+        "event_type": "monster_damaged",
+        "skill_id": "warbrand_gore",
+        "damage_type": "fire",
+        "min_damage": 1
+      },
+      "timeout_s": 3
+    }
+  ],
+  "assertions": [
+    { "type": "inventory_count", "display_name": "Warbrand Cleaver", "equals": 1 },
+    { "type": "event_seen", "event_type": "skill_effect_started", "skill_id": "warbrand_gore" },
+    { "type": "combat_event_seen", "event_type": "monster_damaged", "skill_id": "warbrand_gore", "damage_type": "fire", "min_damage": 1 }
+  ]
+}

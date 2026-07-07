@@ -1394,7 +1394,7 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 	if outcome.Damage > 0 {
 		s.applyWeaponElementalDamageFromSlot(target, playerID, corr, weaponSlot, outcome.Damage, res)
 	}
-	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: true})
+	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, "", corr, res, outcome, uniqueHeroDamageSource{BasicAttack: true})
 	if outcome.Damage > 0 {
 		s.tryPassiveExecute(target, playerID, corr, res)
 	}
@@ -1436,7 +1436,7 @@ func (s *Sim) damageMonsterByPlayerSkillTypedWithID(target *entity, playerID uin
 	if outcome.Damage > 0 && !s.isTrainingDoll(target) {
 		s.aggroMonsterOnHit(target, playerID, corr, res)
 	}
-	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: false})
+	s.triggerUniqueEffectsAfterHeroDamage(target, playerID, skillID, corr, res, outcome, uniqueHeroDamageSource{BasicAttack: false})
 	if outcome.Damage > 0 {
 		s.tryPassiveExecute(target, playerID, corr, res)
 	}

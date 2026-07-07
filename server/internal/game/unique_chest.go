@@ -482,8 +482,11 @@ func (r *Rules) namedUniquePayload(uniqueID string) (ItemRollPayload, bool) {
 		EffectIDs:      cloneStringSlice(unique.FixedEffectIDs),
 		NamedUniqueID:  uniqueID,
 	}
-
-	return FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers), true
+	payload = FinalizeItemRollPayload(payload, itemLevel, r.DungeonGeneration.MonsterDepthScaling, r.DungeonGeneration.ItemLevelTiers)
+	if unique.MinimumLevel > 0 {
+		payload.Requirements["level"] = unique.MinimumLevel
+	}
+	return payload, true
 }
 
 func uniqueChestEffectCompatible(effect UniqueEffectDef, itemType string) bool {

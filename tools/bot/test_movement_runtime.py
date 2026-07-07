@@ -75,6 +75,41 @@ def test_wait_for_player_move_uses_stub_context() -> None:
     assert pumped["count"] == 0
 
 
+def test_move_until_entity_in_range_timeout_s_fires_before_exhausting_ticks() -> None:
+    """timeout_s must raise TimeoutError on the first loop check when already elapsed."""
+    import asyncio
+    import pytest
+    from tools.bot.bot_context import BotContext
+    from tools.bot.bot_types import RuntimeState
+    from tools.bot.movement_runtime import move_until_entity_in_range
+
+    state = RuntimeState(local_player_id="p1")
+    state.entities["p1"] = {"type": "player", "position": {"x": 0.0, "y": 0.0}}
+    state.entities["m1"] = {"type": "monster", "position": {"x": 100.0, "y": 0.0}}
+
+    async def fake_pump(ws, s, timeout) -> None:  # noqa: ANN001
+        pass
+
+    ctx = BotContext(pump_one=fake_pump)
+
+    # Fake loop: first call (started=) returns 0, second call (timeout check) returns 999
+    _calls = [0]
+
+    class _FakeLoop:
+        def time(self) -> float:
+            _calls[0] += 1
+            return 0.0 if _calls[0] == 1 else 999.0
+
+    async def run() -> None:
+        await move_until_entity_in_range(
+            None, "s1", state, "m1", _FakeLoop(),
+            stop_distance=1.0, timeout_s=1.0, ctx=ctx,
+        )
+
+    with pytest.raises(TimeoutError, match="timed out after 1.0s toward m1"):
+        asyncio.run(run())
+
+
 def test_uses_pathfind_walk_only_for_dungeon_and_obstacle_labs() -> None:
     from tools.bot.bot_types import RuntimeState
     from tools.bot.movement_runtime import uses_pathfind_walk

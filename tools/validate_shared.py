@@ -218,6 +218,7 @@ def cross_checks(report: Report) -> None:
     item_templates = load(RULES / "item_templates.v0.json")
     unique_items = load(RULES / "unique_items.v0.json")
     unique_effects = load(RULES / "unique_effects.v0.json")
+    quest_steward = load(RULES / "quest_steward.v0.json")
     unique_effect_defs = unique_effects.get("effects", {})
     set_item_ids = {piece.get("id") for set_def in load(RULES / "set_items.v0.json")["sets"].values() for piece in set_def.get("items", [])}
     treasure_classes = load(RULES / "treasure_classes.v0.json")
@@ -3072,6 +3073,29 @@ def cross_checks(report: Report) -> None:
     )
 
     validate_unique_items_catalog(report, unique_items, item_templates, unique_effects)
+
+    failed_quest_steward = False
+    for trophy in quest_steward.get("trophies", []):
+        monster_def_id = trophy.get("monster_def_id")
+        item_def_id = trophy.get("item_def_id")
+        if monster_def_id not in monsters["monsters"]:
+            report.fail("quest_steward trophy monster", f"unknown monster_def_id {monster_def_id}")
+            failed_quest_steward = True
+        if item_def_id not in items["items"]:
+            report.fail("quest_steward trophy item", f"unknown item_def_id {item_def_id}")
+            failed_quest_steward = True
+    for family in quest_steward.get("reward_families", []):
+        family_id = family.get("family_id", "")
+        for template_id in family.get("template_ids", []):
+            if template_id not in item_templates["templates"]:
+                report.fail("quest_steward reward family", f"{family_id}: unknown template_id {template_id}")
+                failed_quest_steward = True
+        for unique_item_id in family.get("unique_item_ids", []):
+            if unique_item_id not in unique_items["uniques"]:
+                report.fail("quest_steward reward family", f"{family_id}: unknown unique_item_id {unique_item_id}")
+                failed_quest_steward = True
+    if not failed_quest_steward:
+        report.ok("quest_steward trophies and reward families resolve catalog references")
 
     template_item_types = {template.get("item_type") for template in item_templates["templates"].values()}
     if not unique_effect_defs:

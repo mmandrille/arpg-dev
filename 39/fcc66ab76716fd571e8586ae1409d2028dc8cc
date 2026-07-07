@@ -1,0 +1,60 @@
+shared/rules/skills.v0.schema.json
+  s_da8d34e366bc0e::t_8d87ea05c2b064 482-524
+docs/as-built/v451_weapon-affinity-build-passives.md
+  s_da8d34e366bc0e::t_a18c928b9d52f7 1-25
+server/internal/game/rules.go
+  s_da8d34e366bc0e::t_c2031176004a76 473-475
+  s_da8d34e366bc0e::t_e80bb09fc8fc22 471-472,476-477
+server/internal/game/class_item_affinities_test.go
+  s_da8d34e366bc0e::t_d85219dac08a61 92-94,96-110,112-122,124-126,128-141,144-159,161-173,176-178
+  s_da8d34e366bc0e::t_cded12779546b7 91,95,111,123,127,142-143,160,174-175
+PROGRESS.md
+  s_da8d34e366bc0e::t_a18c928b9d52f7 18,26,28,110
+shared/rules/skills.v0.json
+  s_da8d34e366bc0e::t_cded12779546b7 2151-2159,2440-2447
+shared/assets/item_presentations.v0.json
+  s_da8d34e366bc0e::t_afb8e1071df0b7 691-693,697-698
+server/internal/game/passive_skill_stats.go
+  s_da8d34e366bc0e::t_8e878ed7b223ea 145-159
+shared/rules/item_templates.v0.json
+  s_da8d34e366bc0e::t_afb8e1071df0b7 1243-1316
+shared/assets/item_visuals.v0.json
+  s_da8d34e366bc0e::t_afb8e1071df0b7 730-751,774-795,1413
+docs/progress/slice-lifecycle.md
+  s_da8d34e366bc0e::t_a18c928b9d52f7 436
+shared/rules/worlds.v0.json
+  s_da8d34e366bc0e::t_afb8e1071df0b7 1454-1469
+tools/bot/scenarios/122_affinity_passive_rogue.json
+  s_da8d34e366bc0e::t_cded12779546b7 8,14,25,28,31,48
+  s_da8d34e366bc0e::t_e0814d49e7dbd7 1-7,9-13,15-24,26-27,29-30,32-47,49-51
+docs/specs/v451_spec-weapon-affinity-build-passives.md
+  s_da8d34e366bc0e::t_a18c928b9d52f7 1-41
+server/internal/game/passive_skill_rules.go
+  s_da8d34e366bc0e::t_db52ef45adf6f7 6-7,20-33
+docs/plans/v451_2026-07-07-weapon-affinity-build-passives.md
+  s_da8d34e366bc0e::t_a18c928b9d52f7 1-18
+tools/bot/scenarios/121_affinity_passive_barbarian.json
+  s_da8d34e366bc0e::t_e0814d49e7dbd7 1-7,9-26,28-29,31-32,34-49,51-53
+  s_da8d34e366bc0e::t_cded12779546b7 8,27,30,33,50
+server/internal/game/class_item_affinities.go
+  s_da8d34e366bc0e::t_e237e455823a70 134-149
+server/internal/game/skill_synergies.go
+  s_da8d34e366bc0e::t_ac3bd5ccbfb986 142
+  s_da8d34e366bc0e::t_e80bb09fc8fc22 10-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "39fcc66ab76716fd571e8586ae1409d2028dc8cc",
+  "prompts": {},
+  "sessions": {
+    "s_da8d34e366bc0e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3d10-b2f8-7bb0-b604-3849a34f1810",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

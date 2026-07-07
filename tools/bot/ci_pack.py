@@ -81,6 +81,7 @@ CROSS_TREE_SCENARIO_PAIRS: dict[str, str] = {
     "mystery_seller_core": "client/24_mystery_seller_core.json",
     "mystery_seller_paid_reroll": "client/29_mystery_seller_paid_reroll.json",
     "quest_town_turn_in": "client/75_quest_town_turn_in.json",
+    "steward_hunt_quest": "client/98_steward_hunt_quest.json",
     "shop_stock_lifecycle": "client/22_shop_stock_lifecycle.json",
     "unique_burn_effect_live": "client/33_unique_burn_effect_live.json",
 }

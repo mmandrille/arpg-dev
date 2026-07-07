@@ -1745,10 +1745,21 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 		res.reject(in.MessageID, "inventory_full")
 		return
 	}
-	item := s.grantInventoryItem(itemDefID, e.rollPayload, itemSlot)
-	if item == nil {
-		res.reject(in.MessageID, "inventory_full")
-		return
+	var item *invItem
+	if assignToHotbar {
+		item = &invItem{
+			instanceID:  s.alloc(),
+			itemDefID:   itemDefID,
+			rollPayload: cloneRollPayload(e.rollPayload),
+			slot:        itemSlot,
+		}
+		s.inventory = append(s.inventory, item)
+	} else {
+		item = s.grantInventoryItem(itemDefID, e.rollPayload, itemSlot)
+		if item == nil {
+			res.reject(in.MessageID, "inventory_full")
+			return
+		}
 	}
 	if _, ok := s.rules.questStewardTrophyForItem(itemDefID); ok {
 		if hunt := s.activeLevel().stewardHunt; hunt != nil {

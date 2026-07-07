@@ -1,0 +1,19 @@
+PROGRESS.md
+  s_578d41414cf02d::t_7818f70a7ddcee 114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ebcbdc9a6b5db56501296b0430bdc987df21eba4",
+  "prompts": {},
+  "sessions": {
+    "s_578d41414cf02d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10ba7b93-6934-4c0c-8a7a-d446a6418169",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

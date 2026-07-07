@@ -1,0 +1,30 @@
+docs/reviews/backend/20260707_v448-backend.md
+  s_578d41414cf02d::t_d43eecd4223e44 1-101
+docs/reviews/20260707_v448-overview.md
+  s_578d41414cf02d::t_07acf21235d413 7-15
+  s_578d41414cf02d::t_535988a3f5b88b 104
+  s_578d41414cf02d::t_2b6dae4deb6ce3 1-6,16-103,105-126
+docs/reviews/extras/20260707_v448-shared-tooling-and-process.md
+  s_578d41414cf02d::t_a71772efd19d20 1-101
+docs/reviews/client/20260707_v448-client.md
+  s_578d41414cf02d::t_c1b35d8b85a062 1-93
+PROGRESS.md
+  s_578d41414cf02d::t_8bd7446f005321 114
+  s_578d41414cf02d::t_676df3c05d6774 29-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fcc5f7a5c0fe21212540f11438a29ad8ebceeb2a",
+  "prompts": {},
+  "sessions": {
+    "s_578d41414cf02d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10ba7b93-6934-4c0c-8a7a-d446a6418169",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

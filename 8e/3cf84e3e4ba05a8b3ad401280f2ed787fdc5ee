@@ -1,0 +1,67 @@
+client/scripts/main.gd
+  s_c82b815f40f5ed::t_e00fcf56474104 5397-5400
+client/tests/test_fog_of_war_overlay.gd
+  s_c82b815f40f5ed::t_1e72cd1e4dc06d 32
+  s_c82b815f40f5ed::t_a1b76d9c4a89bc 356-372
+client/scripts/town_node_factory.gd
+  s_ea3cf181a9a1d4::t_2d0b9276909e6b 196
+client/tests/test_wall_occlusion_fade.gd
+  s_c82b815f40f5ed::t_b8f44f42135fcd 60-80
+  s_c82b815f40f5ed::t_1aa3163eab6b48 19
+client/scripts/wall_occlusion_fade.gd
+  s_c82b815f40f5ed::t_9b2931eeb40bd3 83-84
+client/tests/test_set_collection_panel.gd
+  s_50cfe4becc0676::t_194ccff7fd51c1 59-61
+  s_50cfe4becc0676::t_b96170365f782d 14-15
+  s_50cfe4becc0676::t_2d3b2cd3b8edfa 53-58,62-75
+client/scripts/fog_of_war_overlay.gd
+  s_c82b815f40f5ed::t_a07c88f491d00f 229-230
+  s_c82b815f40f5ed::t_3049825b7a88a9 124-135
+  s_c82b815f40f5ed::t_bca4eebf19ebb9 53-55
+  s_c82b815f40f5ed::t_4ee18cbf6d384b 329-331
+client/scripts/set_collection_panel.gd
+  s_50cfe4becc0676::t_333513a5ea786c 233,235-244
+  s_50cfe4becc0676::t_7255711a2d7070 6-10,17
+  s_50cfe4becc0676::t_6869e4cd3c44e2 47-53
+  s_50cfe4becc0676::t_afa18083c84486 82,84-88,92-97
+  s_50cfe4becc0676::t_086720bb14671d 64,66-71,73-75
+  s_50cfe4becc0676::t_09ad4da0002ede 28,30
+client/scripts/fog_of_war_shader.gd
+  s_c82b815f40f5ed::t_75975be9c78765 159-163,166-168
+  s_c82b815f40f5ed::t_0df3e23031cdd4 105-107
+client/scripts/inventory_panel.gd
+  s_50cfe4becc0676::t_f03dcea4a39709 582
+  s_50cfe4becc0676::t_0dc68c9acfc008 589
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8e3cf84e3e4ba05a8b3ad401280f2ed787fdc5ee",
+  "prompts": {},
+  "sessions": {
+    "s_50cfe4becc0676": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a5b291d9-c24e-4380-a829-e26d85344de6",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_c82b815f40f5ed": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "27856d11-e82d-4bc9-8b2d-439d4e5a1ccf",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_ea3cf181a9a1d4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "523cc216-3309-4163-96d5-968e8c99ae6a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

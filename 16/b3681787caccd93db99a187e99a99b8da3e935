@@ -1,0 +1,61 @@
+docs/specs/v455_spec-combat-skill-budget.md
+  s_bb79460e46840d::t_99dfb4720307a7 1-18
+shared/rules/combat.v0.json
+  s_bb79460e46840d::t_cceb7ae9d7ac17 41-45
+docs/CODEMAP.md
+  s_bb79460e46840d::t_a4325d9ba952a9 11
+server/internal/game/tick_results.go
+  s_bb79460e46840d::t_ee336ba9bbd28a 12-13
+server/internal/game/skill_budget.go
+  s_bb79460e46840d::t_c7de744393bb03 19,21-26,30,32,35,45-46,49,54-55,58,63-64
+  s_bb79460e46840d::t_0b653a93e6ab76 1-18,20,27-29,31,33-34,36-44,47-48,50-53,56-57,59-62,65
+tools/bot/scenarios/106_crowded_skill_overlap_lab.json
+  s_bb79460e46840d::t_16d81aedfc5af4 28
+  s_bb79460e46840d::t_aa99ad156a459a 1-5,7-9,11-27,29-40,42-50
+  s_bb79460e46840d::t_9c7197d601a306 41
+  s_bb79460e46840d::t_794f1040129231 10
+  s_bb79460e46840d::t_da241103718809 6
+server/internal/game/handlers.go
+  s_bb79460e46840d::t_20c1bca5c76a1d 1216-1219
+  s_bb79460e46840d::t_d62566cb9bfb47 1343-1347
+server/internal/game/skill_budget_test.go
+  s_bb79460e46840d::t_40e961b9c9996f 8-10
+  s_bb79460e46840d::t_a180c4116934c5 1-7,11,17-27,29-44,46-47,49-51,53-56,58,61-64
+  s_bb79460e46840d::t_2be962164ed041 28
+  s_bb79460e46840d::t_b5ea34e59c7e84 45,48,52,57,59-60
+  s_bb79460e46840d::t_6e5e70f1cda164 12-16
+docs/as-built/v455_combat-skill-budget.md
+  s_bb79460e46840d::t_53ab742ae99820 1-19
+server/internal/game/rules.go
+  s_bb79460e46840d::t_2eb4b4e500a9c5 116
+shared/rules/combat.v0.schema.json
+  s_bb79460e46840d::t_8d265546132f19 7
+  s_bb79460e46840d::t_3816ece544a5cc 73-82
+tools/bot/run.py
+  s_bb79460e46840d::t_e041cd5ae61f3f 4156-4243
+  s_bb79460e46840d::t_ff8566775ade2c 25,27
+  s_bb79460e46840d::t_796f9ee2033e6b 4097-4155,4244-4326
+  s_bb79460e46840d::t_8babb589b74077 4614-4633
+  s_bb79460e46840d::t_beb267a7b8f578 4596-4613
+scripts/bot_local.sh
+  s_bb79460e46840d::t_cf2defe5b6a7bf 99
+server/internal/game/sim.go
+  s_bb79460e46840d::t_06a75b36f2ebec 2442
+  s_bb79460e46840d::t_f987fdfc63bc50 409-412
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "16b3681787caccd93db99a187e99a99b8da3e935",
+  "prompts": {},
+  "sessions": {
+    "s_bb79460e46840d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ef9b8c00-bb05-4c6b-b511-b3349e00d078",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

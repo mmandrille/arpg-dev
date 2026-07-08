@@ -2212,11 +2212,9 @@ func _refresh_inventory_panel() -> void:
 func _reconcile_player() -> void:
 	if player_anchor != null:
 		if _mobility_presentation.is_active(player_id):
-			if _camera_controller != null: _camera_controller.sync_to_player()
 			return
 		player_anchor.position = predicted_pos
 		_movement_visual_smoothing.preserve_after_anchor_move(player_anchor, character_visual)
-		if _camera_controller != null: _camera_controller.sync_to_player()
 
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
 	CombatEventPresentationScript.show_combat_text_for_event(entity_id, ev, default_color, Callable(self, "_show_damage_number"), Callable(self, "_node_for_entity_id"))

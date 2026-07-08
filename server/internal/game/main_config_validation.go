@@ -30,6 +30,9 @@ func validateMainGameplayEconomyConfig(gameplay MainGameplayConfig) error {
 	if gameplay.QuestTurnInRewardGold < 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.quest_turn_in_reward_gold: must be non-negative")
 	}
+	if gameplay.ExperienceRewardPercent < 1 || gameplay.ExperienceRewardPercent > 100 {
+		return fmt.Errorf("game: invalid rules main_config.gameplay.experience_reward_percent: must be within [1,100]")
+	}
 	if len(gameplay.BadgeRewardRules) == 0 {
 		return fmt.Errorf("game: invalid rules main_config.gameplay.badge_reward_rules: must not be empty")
 	}

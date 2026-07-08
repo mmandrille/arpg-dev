@@ -12,6 +12,7 @@ var _fail_count: int = 0
 
 
 func _initialize() -> void:
+	await process_frame
 	_test_loader_defaults_isometric()
 	_test_loader_perspective_modes()
 	_test_loader_unknown_mode_falls_back_to_isometric()
@@ -21,6 +22,7 @@ func _initialize() -> void:
 	_test_settings_graphics_quality_from_data_and_save()
 	_test_controller_isometric_projection()
 	_test_controller_late_settings_mode_sync()
+	_test_controller_isometric_follow_damps_with_fixed_orientation()
 	_test_settings_panel_camera_mode_button_sync()
 	_test_controller_isometric_mouse_capture_policy()
 	_test_loader_isometric_follow_damping_config()
@@ -126,6 +128,28 @@ func _test_controller_late_settings_mode_sync() -> void:
 	_assert_eq("null settings default rig is isometric", ctrl.get_gameplay_camera().projection, Camera3D.PROJECTION_ORTHOGONAL)
 	ctrl.apply_mode(settings.camera_mode)
 	_assert_eq("late chest_view apply uses perspective projection", ctrl.get_gameplay_camera().projection, Camera3D.PROJECTION_PERSPECTIVE)
+	root.queue_free()
+	CameraPresentationsLoaderScript.reset_for_tests()
+
+
+func _test_controller_isometric_follow_damps_with_fixed_orientation() -> void:
+	CameraPresentationsLoaderScript.reset_for_tests()
+	var ctrl := PlayerCameraControllerScript.new()
+	var root := Node3D.new()
+	get_root().add_child(root)
+	var anchor := Node3D.new()
+	root.add_child(anchor)
+	var ctx := PlayerCameraContextScript.make(anchor, null, null, Callable())
+	ctrl.setup(ctx, root)
+	var cam := ctrl.get_gameplay_camera()
+	var start_x := cam.global_position.x
+	var initial_forward := -cam.global_transform.basis.z.normalized()
+	anchor.position.x = 10.0
+	ctrl.tick_follow(0.016)
+	_assert_true("damped follow advances toward target", cam.global_position.x > start_x)
+	_assert_true("damped follow does not snap to target", cam.global_position.x < start_x + 10.0)
+	var actual_forward := -cam.global_transform.basis.z.normalized()
+	_assert_true("damped follow preserves isometric orientation", actual_forward.dot(initial_forward) > 0.9999)
 	root.queue_free()
 	CameraPresentationsLoaderScript.reset_for_tests()
 

@@ -5,7 +5,7 @@ import "testing"
 func TestExperienceGainAndLevelUpFromMonsterKill(t *testing.T) {
 	rules := cloneRules(loadRules(t))
 	def := rules.Monsters["dungeon_mob"]
-	def.XPReward = 20
+	def.XPReward = 40
 	rules.Monsters["dungeon_mob"] = def
 	sim := MustNewSim("sess_xp_kill", "01", rules)
 	player := sim.entities[sim.playerID]

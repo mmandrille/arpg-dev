@@ -4038,6 +4038,10 @@ func (s *Sim) awardMonsterExperience(monster *entity, sourceID uint64, corr stri
 	if monster.monsterXPReward > 0 {
 		xpReward = monster.monsterXPReward
 	}
+	xpReward = s.scaledExperienceReward(xpReward)
+	if xpReward <= 0 {
+		return
+	}
 	if !s.rules.Combat.Coop.XPShare.Enabled {
 		s.awardExperienceToPlayer(sourceID, xpReward, corr, res)
 		return
@@ -6173,6 +6177,21 @@ func (s *Sim) experienceToNextLevel() *int {
 		remaining = 0
 	}
 	return &remaining
+}
+
+func (s *Sim) scaledExperienceReward(amount int) int {
+	if amount <= 0 {
+		return 0
+	}
+	pct := s.rules.MainConfig.Gameplay.ExperienceRewardPercent
+	if pct >= 100 {
+		return amount
+	}
+	if pct <= 0 {
+		return 0
+	}
+
+	return roundPositive(float64(amount) * float64(pct) / 100.0)
 }
 
 func (r *Rules) nextLevelTotalXP(level int) (int, bool) {

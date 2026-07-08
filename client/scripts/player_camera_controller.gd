@@ -259,7 +259,7 @@ func _sync_isometric(delta: float, snap: bool) -> void:
 	else:
 		var alpha := 1.0 - exp(-maxf(delta, 0.0) / damping)
 		_camera.global_position = _camera.global_position.lerp(desired, alpha)
-	_camera.look_at(target, Vector3.UP)
+	_camera.look_at(_camera.global_position - _iso_offset, Vector3.UP)
 
 
 func _sync_chest_view() -> void:

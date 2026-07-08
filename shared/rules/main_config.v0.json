@@ -55,7 +55,8 @@
     "quest_turn_in_reward_gold": 25,
     "companion_assist_radius": 5.0,
     "companion_follow_distance": 1.1,
-    "companion_follow_stop_radius": 1.6
+    "companion_follow_stop_radius": 1.6,
+    "experience_reward_percent": 50
   },
   "weapon_elemental_procs": {
     "cold": {

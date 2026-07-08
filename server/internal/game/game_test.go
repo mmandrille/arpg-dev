@@ -6446,8 +6446,8 @@ func TestCoopActorScopedLootExperienceAndMonsterTargeting(t *testing.T) {
 	if !hasEvent(kill, "monster_killed") || !hasEvent(kill, "experience_gained") {
 		t.Fatalf("kill events = %+v", kill.Events)
 	}
-	if sim.players[hostID].Progression.Experience != 10 || sim.players[guestID].Progression.Experience != 10 {
-		t.Fatalf("xp host=%d guest=%d, want both nearby players", sim.players[hostID].Progression.Experience, sim.players[guestID].Progression.Experience)
+	if sim.players[hostID].Progression.Experience != 5 || sim.players[guestID].Progression.Experience != 5 {
+		t.Fatalf("xp host=%d guest=%d, want both nearby players at 5", sim.players[hostID].Progression.Experience, sim.players[guestID].Progression.Experience)
 	}
 	if owners := changeOwnersForOp(kill, OpCharacterProgressionUpdate); !sameUint64Set(owners, []uint64{hostID, guestID}) {
 		t.Fatalf("progression update owners = %v, want host+guest", owners)
@@ -6499,7 +6499,7 @@ func TestCoopExperienceEligibilityRules(t *testing.T) {
 			setup: func(sim *Sim, hostID, guestID uint64, monster *entity) {
 				sim.entities[guestID].pos = Vec2{X: monster.pos.X + 4, Y: monster.pos.Y}
 			},
-			wantGuestXP: 10,
+			wantGuestXP: 5,
 		},
 		{
 			name: "out of radius",
@@ -6539,8 +6539,8 @@ func TestCoopExperienceEligibilityRules(t *testing.T) {
 			sim, hostID, guestID, monster := newCoopRewardTestSim(t, "sess_coop_xp_"+strings.ReplaceAll(tc.name, " ", "_"))
 			tc.setup(sim, hostID, guestID, monster)
 			kill := killCoopRewardMonster(t, sim, hostID, monster)
-			if sim.players[hostID].Progression.Experience != 10 {
-				t.Fatalf("host xp = %d, want 10", sim.players[hostID].Progression.Experience)
+			if sim.players[hostID].Progression.Experience != 5 {
+				t.Fatalf("host xp = %d, want 5", sim.players[hostID].Progression.Experience)
 			}
 			if sim.players[guestID].Progression.Experience != tc.wantGuestXP {
 				t.Fatalf("guest xp = %d, want %d; events=%+v changes=%+v", sim.players[guestID].Progression.Experience, tc.wantGuestXP, kill.Events, kill.Changes)
@@ -6551,7 +6551,7 @@ func TestCoopExperienceEligibilityRules(t *testing.T) {
 
 func TestCoopExperienceRecipientLevelUpAndSoloUnchanged(t *testing.T) {
 	sim, hostID, guestID, monster := newCoopRewardTestSim(t, "sess_coop_xp_level")
-	sim.players[guestID].Progression.Experience = 10
+	sim.players[guestID].Progression.Experience = 15
 	sim.entities[guestID].pos = Vec2{X: monster.pos.X + 4, Y: monster.pos.Y}
 
 	kill := killCoopRewardMonster(t, sim, hostID, monster)
@@ -6575,8 +6575,8 @@ func TestCoopExperienceRecipientLevelUpAndSoloUnchanged(t *testing.T) {
 	soloMonster.maxHP = 1
 	soloMonster.lootTable = "no_drop"
 	kill = killCoopRewardMonster(t, solo, solo.playerID, soloMonster)
-	if solo.players[solo.playerID].Progression.Experience != 10 {
-		t.Fatalf("solo xp = %d, want 10; events=%+v", solo.players[solo.playerID].Progression.Experience, kill.Events)
+	if solo.players[solo.playerID].Progression.Experience != 5 {
+		t.Fatalf("solo xp = %d, want 5; events=%+v", solo.players[solo.playerID].Progression.Experience, kill.Events)
 	}
 }
 

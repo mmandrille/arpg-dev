@@ -242,6 +242,8 @@ v406_* = bishop-force-drop
 v452_* = resource-wallet-bag
 v453_* = combat-session-stability
 v454_* = skill-damage-burst
+v455_* = combat-skill-budget
+v456_* = six-player-boss-combat-soak
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

@@ -1,0 +1,84 @@
+{
+  "id": "six_player_boss_combat_soak",
+  "ci_tier": "extended",
+  "world_id": "crowded_lightning_perf_probe",
+  "seed": "six_player_boss_combat_soak_seed",
+  "peer_count": 6,
+  "character_class": "ranger",
+  "title": "Six player boss combat soak",
+  "description": "Six simulated co-op peers rotate representative skills in a crowded boss-room-density lab; assert stable WebSockets and perf ceilings.",
+  "max_elapsed_s": 70.0,
+  "soak_config": {
+    "cast_cycles": 8,
+    "ticks_between_cycles": 18,
+    "max_tick_overruns": 12,
+    "max_persist_ms_p95": 100.0,
+    "max_tick_overrun_ms_p95": 50.0
+  },
+  "peer_loadouts": [
+    {
+      "character_class": "ranger",
+      "cast_skill": "volley",
+      "debug_progression": {
+        "level": 12,
+        "stats": { "str": 4, "dex": 18, "vit": 12, "magic": 30 },
+        "skill_ranks": { "piercing_shot": 1, "pinning_shot": 1, "volley": 1 }
+      }
+    },
+    {
+      "character_class": "sorcerer",
+      "cast_skill": "magic_bolt",
+      "debug_progression": {
+        "level": 12,
+        "stats": { "str": 3, "dex": 5, "vit": 12, "magic": 20 },
+        "skill_ranks": { "magic_bolt": 1, "lightning": 1 }
+      }
+    },
+    {
+      "character_class": "sorcerer",
+      "cast_skill": "lightning",
+      "debug_progression": {
+        "level": 12,
+        "stats": { "str": 3, "dex": 5, "vit": 40, "magic": 20 },
+        "skill_ranks": { "magic_bolt": 1, "lightning": 1 }
+      }
+    },
+    {
+      "character_class": "ranger",
+      "cast_skill": "volley",
+      "debug_progression": {
+        "level": 12,
+        "stats": { "str": 4, "dex": 18, "vit": 12, "magic": 30 },
+        "skill_ranks": { "piercing_shot": 1, "pinning_shot": 1, "volley": 1 }
+      }
+    },
+    {
+      "character_class": "sorcerer",
+      "cast_skill": "lightning",
+      "debug_progression": {
+        "level": 12,
+        "stats": { "str": 3, "dex": 5, "vit": 40, "magic": 20 },
+        "skill_ranks": { "magic_bolt": 1, "lightning": 1 }
+      }
+    },
+    {
+      "character_class": "sorcerer",
+      "cast_skill": "magic_bolt",
+      "debug_progression": {
+        "level": 12,
+        "stats": { "str": 3, "dex": 5, "vit": 12, "magic": 20 },
+        "skill_ranks": { "magic_bolt": 1, "lightning": 1 }
+      }
+    }
+  ],
+  "steps": [],
+  "assertions": [
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 20
+    }
+  ]
+}

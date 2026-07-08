@@ -1,0 +1,31 @@
+client/tests/test_wall_occlusion_fade.gd
+  s_c82b815f40f5ed::t_703d2f96c9b773 73-108
+  s_c82b815f40f5ed::t_3338a8e8c816f4 18
+tools/bot/scenarios/client/98_wall_occlusion_fade.json
+  s_c82b815f40f5ed::t_d09c472b189fbc 30
+client/scripts/wall_renderer.gd
+  s_c82b815f40f5ed::t_8e93a3c5869a5c 456
+client/scripts/fog_of_war_shader.gd
+  s_c82b815f40f5ed::t_907d338700f4c2 157,162-163,165-167
+shared/assets/wall_occlusion_presentation.v0.json
+  s_c82b815f40f5ed::t_7c5b3599c0fa47 3
+client/scripts/wall_occlusion_presentation_loader.gd
+  s_c82b815f40f5ed::t_0bdb8b148dedac 38
+  s_c82b815f40f5ed::t_fdb96e4d3696df 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "25b6d7d4356bf30797ed86971d1d7d3e510514c7",
+  "prompts": {},
+  "sessions": {
+    "s_c82b815f40f5ed": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "27856d11-e82d-4bc9-8b2d-439d4e5a1ccf",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

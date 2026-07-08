@@ -84,6 +84,7 @@ const DeltaUiSyncGateScript := preload("res://scripts/delta_ui_sync_gate.gd")
 const LocalPlayerAuthoritativeSyncScript := preload("res://scripts/local_player_authoritative_sync.gd")
 const ReconciliationBackpressureScript := preload("res://scripts/reconciliation_backpressure.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
+const SkillAimInputScript := preload("res://scripts/skill_aim_input.gd")
 const PathRejectBackoffScript := preload("res://scripts/path_reject_backoff.gd")
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 const AttackAnimationScalingScript := preload("res://scripts/attack_animation_scaling.gd")
@@ -4217,7 +4218,7 @@ func _on_skill_point_requested(skill_id: String) -> void:
 	client.send("allocate_skill_point_intent", last_server_tick, {"skill_id": skill_id})
 
 func _on_skill_cast_requested(skill_id: String) -> void:
-	_send_skill_cast_intent(skill_id)
+	_send_skill_cast_intent(skill_id, "", _aim_direction_from_mouse(), false)
 
 func _open_skills_panel_from_bar() -> void:
 	if skills_panel == null:
@@ -4443,15 +4444,13 @@ func _try_use_right_click_skill() -> bool:
 		return false
 	if ChannelSkillInputScript.is_channel_skill(right_click_skill_id):
 		return _channel_skill_input.try_start(right_click_skill_id, _aim_direction_from_mouse(), _last_facing_direction, _skill_cast_block_reason(right_click_skill_id), Callable(self, "_send_channel_skill_payload"), Callable(self, "_face_direction"), Callable(self, "_show_skill_rejected_feedback"), ClientConstants.SEND_INTERVAL)
-	var pick := _resolve_click_at_mouse()
 	var target_id := ""
-	var direction := Vector2.ZERO
-	if str(pick.get("kind", "")) == "monster":
-		target_id = str(pick.get("target_id", ""))
-	elif right_click_skill_id == "revive" and _is_dead_monster(str(pick.get("target_id", ""))):
-		target_id = str(pick.get("target_id", ""))
-	else:
-		direction = _aim_direction_from_mouse()
+	var direction := _aim_direction_from_mouse()
+	if right_click_skill_id == "revive":
+		var pick := _resolve_click_at_mouse()
+		if _is_dead_monster(str(pick.get("target_id", ""))):
+			target_id = str(pick.get("target_id", ""))
+			direction = Vector2.ZERO
 	var sent := _send_skill_cast_intent(right_click_skill_id, target_id, direction, false)
 	return sent
 
@@ -4476,10 +4475,17 @@ func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction
 	if payload.is_empty():
 		_show_skill_rejected_feedback("invalid_target")
 		return false
+	if payload.has("target_id"):
+		_face_toward_entity(str(payload.get("target_id", "")))
+	elif payload.has("direction"):
+		var aim_dir: Dictionary = payload.get("direction", {})
+		_face_direction(Vector2(float(aim_dir.get("x", 0.0)), float(aim_dir.get("y", 0.0))))
 	var message_id := client.send("cast_skill_intent", last_server_tick, payload)
 	var pending_skill := {"skill_id": skill_id}
 	if payload.has("target_id"):
-		pending_skill["target_id"] = str(payload.get("target_id", ""))
+		var with_target := {"skill_id": skill_id, "target_id": str(payload.get("target_id", ""))}
+		if SkillAimInputScript.pending_highlights_entity(with_target):
+			pending_skill["target_id"] = str(payload.get("target_id", ""))
 	pending_skill_casts[message_id] = pending_skill
 	_attack_cooldown = ClientConstants.SEND_INTERVAL
 	if player_anim != null:
@@ -4487,43 +4493,24 @@ func _send_skill_cast_intent(skill_id: String, target_id: String = "", direction
 	return true
 
 func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Vector2 = Vector2.ZERO, use_nearest_fallback: bool = true) -> Dictionary:
-	var payload := {"skill_id": skill_id}
-	var targeting := _skill_targeting(skill_id)
-	if targeting == "self":
-		if player_id != "":
-			payload["target_id"] = player_id
-		else:
-			payload["direction"] = {"x": _last_facing_direction.x, "y": _last_facing_direction.y}
-		return payload
-	if targeting == "self_or_ally_area":
-		if player_id != "":
-			payload["target_id"] = player_id
-		else:
-			payload["direction"] = {"x": _last_facing_direction.x, "y": _last_facing_direction.y}
-		return payload
-	if targeting == "direction_or_target_area" and target_id == "" and direction.length_squared() <= 0.0001 and use_nearest_fallback:
-		if player_id != "":
-			payload["target_id"] = player_id
-			return payload
-	var chosen_target := target_id
-	if skill_id == "revive" and chosen_target == "":
+	var hover_dead := ""
+	if skill_id == "revive":
 		var hover_id := _action_hover_target_id()
 		if hover_id != "" and _is_dead_monster(hover_id):
-			chosen_target = hover_id
-	if chosen_target == "" and use_nearest_fallback:
-		chosen_target = _nearest_live_monster_id()
-	if chosen_target != "":
-		payload["target_id"] = chosen_target
-		_face_toward_entity(chosen_target)
-		return payload
-	var dir := DirectionalAttackInputScript.direction_or_fallback(direction, _last_facing_direction)
-	_face_direction(dir)
-	payload["direction"] = {"x": dir.x, "y": dir.y}
-	return payload
+			hover_dead = hover_id
+	return SkillAimInputScript.build_cast_payload(
+		skill_id,
+		target_id,
+		direction,
+		use_nearest_fallback,
+		player_id,
+		_last_facing_direction,
+		hover_dead,
+	)
+
 
 func _skill_targeting(skill_id: String) -> String:
-	var def := SkillRulesLoader.skill_definition(skill_id)
-	return str(def.get("targeting", "direction_or_target"))
+	return SkillAimInputScript.skill_targeting(skill_id)
 
 func _is_skill_reject_reason(reason: String) -> bool:
 	return reason.begins_with("skill_") \
@@ -4532,6 +4519,7 @@ func _is_skill_reject_reason(reason: String) -> bool:
 		or reason == "invalid_direction" \
 		or reason == "target_out_of_range" \
 		or reason == "invalid_target" \
+		or reason == "invalid_targeting" \
 		or reason == "invalid_payload" \
 		or reason == "player_dead" \
 		or reason == "projectile_busy" \

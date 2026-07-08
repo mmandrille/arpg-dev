@@ -343,6 +343,7 @@ func TestResourceUniqueBloodPricePaysMissingManaWithHP(t *testing.T) {
 	clearUniqueTestMonsters(sim)
 	player := sim.entities[sim.playerID]
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 50)
+	_ = target
 	equipUniqueTestEffect(t, sim, bloodPriceEffectID, 9911, "belt", "belt")
 	sim.progression.CharacterClass = "sorcerer"
 	sim.progression.BaseStats.Magic = 10
@@ -352,7 +353,7 @@ func TestResourceUniqueBloodPricePaysMissingManaWithHP(t *testing.T) {
 	player.maxHP = 50
 	sim.savePlayer(sim.defaultPlayer())
 
-	cast := sim.Tick([]Input{{MessageID: "blood_cast", Type: "cast_skill_intent", CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(target.id)}}})
+	cast := sim.Tick([]Input{{MessageID: "blood_cast", Type: "cast_skill_intent", CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, Direction: &Vec2{X: 1}}}})
 	assertAck(t, cast, "blood_cast")
 	if player.hp >= 20 || player.mana != 0 {
 		t.Fatalf("player hp/mana = %d/%d, want hp paid and mana clamped; events=%+v", player.hp, player.mana, cast.Events)
@@ -368,6 +369,7 @@ func TestNamedUniqueBloodboundSigilPaysMissingManaWithHP(t *testing.T) {
 	clearUniqueTestMonsters(sim)
 	player := sim.entities[sim.playerID]
 	target := uniqueTestMonster(sim, Vec2{X: player.pos.X + 3, Y: player.pos.Y}, 50)
+	_ = target
 	payload, ok := rules.namedUniquePayload("bloodbound_sigil")
 	if !ok {
 		t.Fatal("missing bloodbound_sigil named payload")
@@ -390,7 +392,7 @@ func TestNamedUniqueBloodboundSigilPaysMissingManaWithHP(t *testing.T) {
 	manaCost := sim.effectiveSkillManaCost(rules.Skills[magicBoltSkillID], 1)
 	sim.savePlayer(sim.defaultPlayer())
 
-	cast := sim.Tick([]Input{{MessageID: "bloodbound_cast", Type: "cast_skill_intent", CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(target.id)}}})
+	cast := sim.Tick([]Input{{MessageID: "bloodbound_cast", Type: "cast_skill_intent", CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, Direction: &Vec2{X: 1}}}})
 	assertAck(t, cast, "bloodbound_cast")
 	if player.hp != 20-manaCost || player.mana != 0 {
 		t.Fatalf("player hp/mana = %d/%d, want hp paid by named unique cost %d and mana clamped; events=%+v", player.hp, player.mana, manaCost, cast.Events)

@@ -59,7 +59,7 @@ func TestGoreStrikeAppliesBleed(t *testing.T) {
 		MessageID:     "gore_cast",
 		CorrelationID: "corr_gore",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "gore_strike", TargetID: idStr(target.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "gore_strike", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "gore_cast")
 	if !hasEvent(cast, "skill_effect_started") {

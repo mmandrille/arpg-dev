@@ -572,7 +572,7 @@ func TestCharacterProgressionPersistsAcrossStateResumeAndFreshSession(t *testing
 		forceHTTPCharacterHitChance(rules, 1.0)
 		dummy := rules.Monsters["training_dummy"]
 		dummy.MaxHP = 1
-		dummy.XPReward = 20
+		dummy.XPReward = 40
 		dummy.LootTable = "no_drop"
 		dummy.RetaliationDamage = nil
 		rules.Monsters["training_dummy"] = dummy

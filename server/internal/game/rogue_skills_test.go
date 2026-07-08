@@ -14,7 +14,7 @@ func TestRoguePoisonStabAppliesDamageOverTime(t *testing.T) {
 		MessageID:     "poison",
 		CorrelationID: "corr_poison",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "poison_stab", TargetID: idStr(target.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "poison_stab", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "poison")
 	if !hasEvent(cast, "skill_cast") || !hasEvent(cast, "skill_effect_started") || !hasEvent(cast, "monster_damaged") {
@@ -49,7 +49,7 @@ func TestRoguePoisonStabPoisonsImmuneUndeadForZeroDamage(t *testing.T) {
 		MessageID:     "poison_undead",
 		CorrelationID: "corr_poison_undead",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "poison_stab", TargetID: idStr(target.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "poison_stab", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "poison_undead")
 	if !hasEvent(cast, "skill_effect_started") {
@@ -165,7 +165,7 @@ func TestRoguePoisonStabMarkIncreasesAllPlayerDamage(t *testing.T) {
 		MessageID:     "mark",
 		CorrelationID: "corr_mark",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "poison_stab", TargetID: idStr(target.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "poison_stab", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "mark")
 	if _, ok := sim.rogueMarks[target.id]; !ok || !containsStringValue(target.effectIDs, "test_rogue_mark") {

@@ -21,6 +21,9 @@ func (s *Sim) handleRangerProjectileSkillCast(in Input, res *TickResult, player 
 		res.reject(in.MessageID, rejectReason)
 		return
 	}
+	if s.maybeBeginDirectionalSkillAutoNav(in, res, player, def, dir, castRange, true) {
+		return
+	}
 	targets := s.rangerLineTargets(player, dir, def.Projectile.Range)
 
 	s.activeLevel().move = nil

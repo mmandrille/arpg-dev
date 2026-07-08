@@ -1052,7 +1052,7 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 		MessageID:     "cast_magic",
 		CorrelationID: "corr_cast",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
+		CastSkill:     &CastSkillIntent{SkillID: magicBoltSkillID, Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "cast_magic")
 	if player.mana != wantManaAfterCast {
@@ -1181,7 +1181,7 @@ func TestIceShardAlwaysHitsAppliesSlowAndSpawnsShards(t *testing.T) {
 		MessageID:     "cast_ice",
 		CorrelationID: "corr_ice",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "ice_shard", TargetID: idStr(monster.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "ice_shard", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "cast_ice")
 	var impact TickResult
@@ -1251,7 +1251,7 @@ func TestLigthingChainsToNearestTargetsWithShrinkingRange(t *testing.T) {
 		MessageID:     "cast_lightning",
 		CorrelationID: "corr_lightning",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "lightning", TargetID: idStr(first.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "lightning", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "cast_lightning")
 	cooldowns := skillCooldownUpdate(cast)
@@ -1323,7 +1323,7 @@ func TestMagicBoltAutoNavigatesToCastRange(t *testing.T) {
 		MessageID:     "cast_far_magic",
 		CorrelationID: "corr_far_magic",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
+		CastSkill:     &CastSkillIntent{SkillID: magicBoltSkillID, Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "cast_far_magic")
 	if firstChangeEntityByType(cast, projectileEntity) != nil {
@@ -1380,7 +1380,7 @@ func TestMagicBoltCastIgnoresStatRequirements(t *testing.T) {
 	cast := sim.Tick([]Input{{
 		MessageID: "cast_requirement",
 		Type:      "cast_skill_intent",
-		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
+		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "cast_requirement")
 	if player.mana >= beforeMana {

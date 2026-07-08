@@ -52,7 +52,7 @@ func TestRendAppliesBleed(t *testing.T) {
 		MessageID:     "rend_cast",
 		CorrelationID: "corr_rend",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "rend", TargetID: idStr(target.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "rend", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "rend_cast")
 	if !eventListHasSkillEffect(cast.Events, "skill_effect_started", "rend") {

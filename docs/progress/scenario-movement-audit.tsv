@@ -252,6 +252,7 @@ resource_loot_pool_drop.json	resource_loot_pool_drop	protocol	extended	contract	
 skill_level_affix_lab.json	skill_level_affix_lab	protocol	extended	contract	0	0		lab loot + equip; no navigation setup
 skill_rank_scaling_lab.json	skill_rank_scaling_lab	protocol	extended	contract	0	0		lab debug progression; no navigation setup
 skill_synergy_lab.json	skill_synergy_lab	protocol	extended	contract	0	0		lab debug progression; no navigation setup
+skill_ground_aim_lab.json	skill_ground_aim_lab	protocol	extended	contract	0	0		lab debug_progression; cast_skill direction only
 tier4_passive_proof.json	tier4_passive_proof	protocol	extended	contract	0	0		lab debug_progression; no navigation setup
 upgrade_shard_level_drop.json	upgrade_shard_level_drop	protocol	extended	contract	0	0		
 105_ranger_volley_session_stability.json	ranger_volley_session_stability	protocol	extended	contract	0	0		crowded fixed-position combat stability proof

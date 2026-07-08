@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-08 (v457 live combat transport stability)
+Last updated: 2026-07-08 (v459 skill ground aim)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-07-08 (v457 live combat transport stability)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v457 — live combat transport stability |
-| **Next slice** | v458 — engineering review due (`$review`, then `$refactor`) |
+| **Latest completed slice** | v459 — skill ground aim |
+| **Next slice** | v460 — skill travel resolution (PvP prep) or v458 engineering review (`$review`, then `$refactor`) |
 | **Last engineering review** | v448 — [`docs/reviews/20260707_v448-overview.md`](docs/reviews/20260707_v448-overview.md) (2026-07-07; official cadence) |
 | **Next engineering review** | ~v458 — run `$review` then `$refactor` after next ~10-slice milestone |
 

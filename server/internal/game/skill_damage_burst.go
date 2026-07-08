@@ -70,6 +70,9 @@ func (s *Sim) handleInstantProjectileSkillCast(in Input, res *TickResult, player
 		res.reject(in.MessageID, rejectReason)
 		return
 	}
+	if s.maybeBeginDirectionalSkillAutoNav(in, res, player, def, dir, castRange, true) {
+		return
+	}
 
 	s.activeLevel().move = nil
 	s.clearAutoNav()

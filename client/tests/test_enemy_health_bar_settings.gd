@@ -77,7 +77,12 @@ func _test_monster_health_bars_follow_settings_and_targeting() -> void:
 	main.pending_action_targets.clear()
 	main.pending_skill_casts["cmsg-skill"] = {"skill_id": "magic_bolt", "target_id": "2001"}
 	main._refresh_monster_health_bar_visibility()
-	_assert_true("skill target enemy health bar visible", bar.visible)
+	_assert_true("direction skill cast does not highlight foe", not bar.visible)
+
+	main.pending_skill_casts.clear()
+	main.pending_skill_casts["cmsg-revive"] = {"skill_id": "revive", "target_id": "2001"}
+	main._refresh_monster_health_bar_visibility()
+	_assert_true("entity-pick skill target enemy health bar visible", bar.visible)
 
 	main.pending_skill_casts.clear()
 	main.client_settings.set_monster_health_bar_mode("always", false)

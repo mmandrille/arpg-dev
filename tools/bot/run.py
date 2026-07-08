@@ -73,20 +73,10 @@ def monster_xp_reward(monster_def_id: str) -> int:
     return int(data.get("monsters", {}).get(monster_def_id, {}).get("xp_reward", 0))
 
 
+from tools.bot.skill_cast_runtime import execute_cast_skill
+from tools.bot.skill_rules_loader import skill_rule_max_rank
+
 KNOWN_WORLD_IDS = load_known_world_ids()
-_SKILL_RULES: dict[str, Any] | None = None
-
-
-def skill_rule_max_rank(skill_id: str) -> int:
-    global _SKILL_RULES
-    if _SKILL_RULES is None:
-        skills_path = ROOT / "shared" / "rules" / "skills.v0.json"
-        data = json.loads(skills_path.read_text(encoding="utf-8"))
-        _SKILL_RULES = dict(data.get("skills", {}))
-    skill = _SKILL_RULES.get(skill_id)
-    if not isinstance(skill, dict):
-        raise AssertionError(f"shared skill rule {skill_id} not found")
-    return int(skill.get("max_rank", -1))
 
 
 def log(*args: Any) -> None:
@@ -1394,37 +1384,20 @@ async def execute_step(
         return
 
     if action == "cast_skill":
-        skill_id = str(step.get("skill_id", "magic_bolt"))
-        payload: dict[str, Any] = {"skill_id": skill_id}
-        if bool(step.get("target_self", False)):
-            player = find_player(state)
-            if player is None:
-                raise AssertionError("cast_skill target_self: player not found")
-            payload["target_id"] = str(player["id"])
-        elif step.get("target_id") is not None:
-            payload["target_id"] = str(step["target_id"])
-        elif step.get("monster_def_id") is not None:
-            target = resolve_target(state, step)
-            payload["target_id"] = str(target["id"])
-        else:
-            direction = step.get("direction", {"x": 1, "y": 0})
-            payload["direction"] = {"x": float(direction.get("x", 0)), "y": float(direction.get("y", 0))}
-        event_start_index = len(state.events)
-        env = make_envelope("cast_skill_intent", session_id, state.last_tick, payload)
-        await ws.send(json.dumps(env))
-        expect_reject = step.get("expect_reject")
-        if expect_reject:
-            await wait_for_reject(ws, state, env["message_id"], str(expect_reject), loop)
-            return
-        await wait_for_accept(ws, state, env["message_id"], loop)
-        if step.get("event_type"):
-            expected_event: dict[str, Any] = {"event_type": str(step["event_type"])}
-            if step.get("skill_id") is not None:
-                expected_event["skill_id"] = skill_id
-            await wait_for_matching_event(ws, state, expected_event, loop, start_index=event_start_index)
-        expected = step.get("expect_skill_cooldown")
-        if isinstance(expected, dict):
-            await wait_for_skill_cooldown(ws, state, expected, loop)
+        await execute_cast_skill(
+            ws,
+            session_id,
+            state,
+            step,
+            loop,
+            make_envelope,
+            wait_for_accept,
+            wait_for_reject,
+            wait_for_matching_event,
+            wait_for_skill_cooldown,
+            find_player,
+            resolve_target,
+        )
         return
     if action == "channel_skill_path":
         from tools.bot.channel_skill import execute_channel_skill_path

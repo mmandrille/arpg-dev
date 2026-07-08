@@ -2,6 +2,7 @@ extends RefCounted
 class_name EnemyHealthBarVisibility
 
 const ClientSettingsScript := preload("res://scripts/client_settings.gd")
+const SkillAimInputScript := preload("res://scripts/skill_aim_input.gd")
 
 
 static func should_show(mode: String, entity_id: String, hovered_entity_id: String, pending_action_targets: Dictionary, pending_skill_casts: Dictionary) -> bool:
@@ -32,6 +33,10 @@ static func _pending_targets_entity(entity_id: String, pending_action_targets: D
 		if pending is Dictionary and str((pending as Dictionary).get("target_id", "")) == entity_id:
 			return true
 	for pending in pending_skill_casts.values():
-		if pending is Dictionary and str((pending as Dictionary).get("target_id", "")) == entity_id:
+		if not (pending is Dictionary):
+			continue
+		if not SkillAimInputScript.pending_highlights_entity(pending as Dictionary):
+			continue
+		if str((pending as Dictionary).get("target_id", "")) == entity_id:
 			return true
 	return false

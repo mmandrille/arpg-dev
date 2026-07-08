@@ -47,7 +47,7 @@ func TestRangerPinningShotRootsMonsterMovementUntilExpiry(t *testing.T) {
 		MessageID:     "pin",
 		CorrelationID: "corr_pin",
 		Type:          "cast_skill_intent",
-		CastSkill:     &CastSkillIntent{SkillID: "pinning_shot", TargetID: idStr(target.id)},
+		CastSkill:     &CastSkillIntent{SkillID: "pinning_shot", Direction: &Vec2{X: 1}},
 	}})
 	assertAck(t, cast, "pin")
 	if !hasEvent(cast, "skill_effect_started") || !containsStringValue(target.effectIDs, "pinning_root") {

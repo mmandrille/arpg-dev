@@ -173,8 +173,8 @@ def validate_skill_catalogs(
         report.fail("skills magic_bolt", "kind must be projectile_attack")
     elif int(magic_bolt.get("max_rank", 0)) <= 0:
         report.fail("skills magic_bolt", "max_rank must be positive")
-    elif magic_bolt.get("targeting") != "direction_or_target":
-        report.fail("skills magic_bolt", "targeting must be direction_or_target")
+    elif magic_bolt.get("targeting") != "direction":
+        report.fail("skills magic_bolt", "targeting must be direction")
     elif int(magic_bolt.get("tree", {}).get("tier", 0)) <= 0 or int(magic_bolt.get("tree", {}).get("column", 0)) <= 0:
         report.fail("skills magic_bolt", "tree tier/column must be positive")
     elif int(magic_bolt.get("requirements", {}).get("stats", {}).get("magic", 0)) != 5:

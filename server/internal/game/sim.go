@@ -2389,6 +2389,9 @@ func (s *Sim) skillCastDirectionWithRange(def SkillDef, cast *CastSkillIntent, p
 	if cast == nil || player == nil {
 		return Vec2{}, 0, "invalid_payload"
 	}
+	if cast.TargetID != "" && def.Targeting == "direction" {
+		return Vec2{}, 0, "invalid_targeting"
+	}
 	if cast.TargetID != "" {
 		target := s.findEntity(cast.TargetID)
 		if target == nil || target.kind != monsterEntity || target.hp <= 0 {

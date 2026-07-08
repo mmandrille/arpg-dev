@@ -11,7 +11,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
@@ -63,7 +63,7 @@
       },
       "kind": "mobility",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
@@ -103,7 +103,7 @@
       },
       "kind": "cold_projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
@@ -180,7 +180,7 @@
       },
       "kind": "chain_projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
@@ -250,7 +250,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
@@ -361,7 +361,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -452,7 +452,7 @@
       },
       "kind": "mobility",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -502,7 +502,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -608,7 +608,7 @@
       "kind": "mobility",
       "damage_type": "force",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -774,7 +774,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -823,7 +823,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -874,7 +874,7 @@
       },
       "kind": "mobility",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -913,7 +913,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -1015,7 +1015,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -1065,7 +1065,7 @@
       },
       "kind": "mobility",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -1110,7 +1110,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 0,
@@ -1172,7 +1172,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 1,
         "level_per_rank": 1,
@@ -1282,7 +1282,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 3,
         "level_per_rank": 1,
@@ -1336,7 +1336,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -1391,7 +1391,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 3,
         "level_per_rank": 1,
@@ -1457,7 +1457,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -1512,7 +1512,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 3,
         "level_per_rank": 1,
@@ -1574,7 +1574,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -1636,7 +1636,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 3,
         "level_per_rank": 1,
@@ -2572,7 +2572,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -2634,7 +2634,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -2692,7 +2692,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -2879,7 +2879,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -2996,7 +2996,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -3116,7 +3116,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 5,
         "level_per_rank": 1,
@@ -3444,7 +3444,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 12,
         "level_per_rank": 1,
@@ -3563,7 +3563,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,
@@ -3679,7 +3679,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,
@@ -3742,7 +3742,7 @@
       },
       "kind": "cold_projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 12,
         "level_per_rank": 1,
@@ -3819,7 +3819,7 @@
       },
       "kind": "chain_projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 12,
         "level_per_rank": 1,
@@ -3953,7 +3953,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,
@@ -4198,7 +4198,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 12,
         "level_per_rank": 1,
@@ -4324,7 +4324,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,
@@ -4500,7 +4500,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 12,
         "level_per_rank": 1,
@@ -4553,7 +4553,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 12,
         "level_per_rank": 1,
@@ -4676,7 +4676,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,
@@ -4729,7 +4729,7 @@
       },
       "kind": "cone_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,
@@ -4791,7 +4791,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,
@@ -4915,7 +4915,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 12,
         "level_per_rank": 1,
@@ -4977,7 +4977,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 12,
         "level_per_rank": 1,
@@ -5099,7 +5099,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,
@@ -5157,7 +5157,7 @@
       },
       "kind": "projectile_attack",
       "max_rank": 10,
-      "targeting": "direction_or_target",
+      "targeting": "direction",
       "requirements": {
         "level": 22,
         "level_per_rank": 1,

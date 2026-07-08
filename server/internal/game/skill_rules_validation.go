@@ -99,12 +99,12 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 	}
 	switch skill.Kind {
 	case "projectile_attack":
-		if skill.Targeting != "direction_or_target" {
+		if skill.Targeting != "direction" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for projectile_attack", skillID, skill.Targeting)
 		}
 		return validateProjectileSkillPayload(skillID, skill)
 	case "cold_projectile_attack":
-		if skill.Targeting != "direction_or_target" {
+		if skill.Targeting != "direction" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for cold_projectile_attack", skillID, skill.Targeting)
 		}
 		if err := validateProjectileSkillPayload(skillID, skill); err != nil {
@@ -112,7 +112,7 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 		}
 		return validateColdSkillPayload(skillID, skill)
 	case "chain_projectile_attack":
-		if skill.Targeting != "direction_or_target" {
+		if skill.Targeting != "direction" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for chain_projectile_attack", skillID, skill.Targeting)
 		}
 		if err := validateProjectileSkillPayload(skillID, skill); err != nil {
@@ -120,7 +120,7 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 		}
 		return validateChainSkillPayload(skillID, skill)
 	case "cone_attack":
-		if skill.Targeting != "direction_or_target" {
+		if skill.Targeting != "direction" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for cone_attack", skillID, skill.Targeting)
 		}
 		return validateConeSkillPayload(skillID, skill)
@@ -147,7 +147,7 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 	case "revive_companion":
 		return validateReviveCompanionSkillPayload(skillID, skill)
 	case "mobility":
-		if skill.Targeting != "direction_or_target" {
+		if skill.Targeting != "direction" {
 			return fmt.Errorf("game: invalid rules skills.%s.targeting: unsupported %s for mobility", skillID, skill.Targeting)
 		}
 		return validateRogueConeSkillPayload(skillID, skill)

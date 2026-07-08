@@ -27,7 +27,7 @@
         "tree": { "$ref": "#/$defs/tree_position" },
         "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute", "passive_stat_bonus", "survival_autocast"] },
         "max_rank": { "type": "integer", "minimum": 1 },
-        "targeting": { "type": "string", "enum": ["direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
+        "targeting": { "type": "string", "enum": ["direction", "direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
         "cost": { "$ref": "#/$defs/cost" },
         "damage": { "$ref": "#/$defs/skill_damage" },
@@ -89,28 +89,28 @@
           "if": { "properties": { "kind": { "const": "projectile_attack" } }, "required": ["kind"] },
           "then": {
             "required": ["damage", "projectile"],
-            "properties": { "targeting": { "const": "direction_or_target" } }
+            "properties": { "targeting": { "const": "direction" } }
           }
         },
         {
           "if": { "properties": { "kind": { "const": "cold_projectile_attack" } }, "required": ["kind"] },
           "then": {
             "required": ["damage", "projectile", "slow", "shatter"],
-            "properties": { "targeting": { "const": "direction_or_target" } }
+            "properties": { "targeting": { "const": "direction" } }
           }
         },
         {
           "if": { "properties": { "kind": { "const": "chain_projectile_attack" } }, "required": ["kind"] },
           "then": {
             "required": ["damage", "projectile", "chain"],
-            "properties": { "targeting": { "const": "direction_or_target" } }
+            "properties": { "targeting": { "const": "direction" } }
           }
         },
         {
           "if": { "properties": { "kind": { "const": "cone_attack" } }, "required": ["kind"] },
           "then": {
             "required": ["cone"],
-            "properties": { "targeting": { "const": "direction_or_target" } }
+            "properties": { "targeting": { "const": "direction" } }
           }
         },
         {
@@ -152,7 +152,7 @@
           "if": { "properties": { "kind": { "const": "mobility" } }, "required": ["kind"] },
           "then": {
             "required": ["mobility"],
-            "properties": { "targeting": { "const": "direction_or_target" } }
+            "properties": { "targeting": { "const": "direction" } }
           }
         },
         {

@@ -1340,6 +1340,9 @@ func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entit
 		res.reject(in.MessageID, rejectReason)
 		return
 	}
+	if s.maybeBeginDirectionalSkillAutoNav(in, res, player, def, dir, castRange, true) {
+		return
+	}
 	cap := s.combatProcessingBudget().ProjectileSpawnsPerTick
 	if cap > 0 && s.projectileSpawnsThisTick >= cap {
 		s.deferredSkillCasts = append(s.deferredSkillCasts, in)
@@ -1367,6 +1370,9 @@ func (s *Sim) handleConeSkillCast(in Input, res *TickResult, player *entity, ski
 			return
 		}
 		res.reject(in.MessageID, rejectReason)
+		return
+	}
+	if s.maybeBeginDirectionalSkillAutoNav(in, res, player, def, dir, cone.Range, false) {
 		return
 	}
 	targets := s.coneSkillTargets(player, dir, cone)

@@ -134,7 +134,7 @@ func TestReconstructFromInputsWithSkillSpendAndMagicBolt(t *testing.T) {
 
 	rows := []store.SessionInput{
 		storedInput(t, "inp-skill-spend", "msg-skill-spend", 0, 0, "allocate_skill_point_intent", map[string]any{"skill_id": "magic_bolt"}),
-		storedInput(t, "inp-skill-cast", "msg-skill-cast", 1, 1, "cast_skill_intent", map[string]any{"skill_id": "magic_bolt", "target_id": "1002"}),
+		storedInput(t, "inp-skill-cast", "msg-skill-cast", 1, 1, "cast_skill_intent", map[string]any{"skill_id": "magic_bolt", "direction": map[string]any{"x": 1, "y": 0}}),
 	}
 	inputs, _, err := StoredInputs(rows)
 	if err != nil {
@@ -876,7 +876,7 @@ func TestReconstructCoopReplaySharesXPWithNearbyGuest(t *testing.T) {
 	rules := reliableReplayHitRules(t)
 	dummy := rules.Monsters["training_dummy"]
 	dummy.MaxHP = 1
-	dummy.XPReward = 10
+	dummy.XPReward = 20
 	dummy.RetaliationDamage = nil
 	rules.Monsters["training_dummy"] = dummy
 

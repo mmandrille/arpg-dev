@@ -1,0 +1,61 @@
+server/internal/game/types.go
+  s_bb79460e46840d::t_177cbadb6a5acd 443
+docs/adr/0016-combat-processing-budget.md
+  s_bb79460e46840d::t_7144136f51c7e1 1-38
+server/internal/game/game_test.go
+  s_bb79460e46840d::t_a8ad2b9759152a 1084
+  s_bb79460e46840d::t_75a8e515b1a9e7 1340,1342,1344-1347,1350-1351
+  s_bb79460e46840d::t_c2d2ed4e595f41 1079-1080,1082
+docs/as-built/v454_skill-damage-burst.md
+  s_bb79460e46840d::t_92be04c0831ef2 1-20
+client/scripts/main.gd
+  s_bb79460e46840d::t_81fbf49a1b16cf 1684-1706
+docs/progress/slice-codename-index.md
+  s_bb79460e46840d::t_6e27739b690e02 244
+server/internal/game/rules.go
+  s_bb79460e46840d::t_56ff60c81c1802 352
+docs/progress/slice-lifecycle.md
+  s_bb79460e46840d::t_f96f32d52e83fb 438
+server/internal/game/handlers.go
+  s_bb79460e46840d::t_104076e45a9b9c 1218-1226
+shared/protocol/state_delta.v8.schema.json
+  s_bb79460e46840d::t_2c2c736cee60d2 603-623
+  s_bb79460e46840d::t_c5b94ac259ebe1 795-799
+  s_bb79460e46840d::t_f3b30882cf570d 793-794
+tools/bot/state_ingest.py
+  s_bb79460e46840d::t_faf49e451badae 56-78
+server/internal/game/ranger_skills_test.go
+  s_bb79460e46840d::t_24e20146c003f0 306-308
+server/internal/game/skill_damage_burst.go
+  s_bb79460e46840d::t_3408b3071f41c7 1-103
+docs/specs/v454_spec-skill-damage-burst.md
+  s_bb79460e46840d::t_e5cfd97ff8b7f3 1-16
+shared/rules/skills.v0.json
+  s_bb79460e46840d::t_1962db2a451983 1214
+  s_bb79460e46840d::t_2b68da6038994f 50
+server/internal/game/ranger_skills.go
+  s_bb79460e46840d::t_ca284991585570 145
+  s_bb79460e46840d::t_cce5c917b93db2 126
+shared/rules/skills.v0.schema.json
+  s_bb79460e46840d::t_2beee3f6619ed5 49-52
+docs/CODEMAP.md
+  s_bb79460e46840d::t_0a2781272bfe8b 11
+PROGRESS.md
+  s_bb79460e46840d::t_e4259295a5e265 26-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a94d38d03d36c5b13314272969af7cc33880c927",
+  "prompts": {},
+  "sessions": {
+    "s_bb79460e46840d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ef9b8c00-bb05-4c6b-b511-b3349e00d078",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

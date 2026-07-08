@@ -1,0 +1,23 @@
+client/tests/test_golden.gd
+  s_ea3cf181a9a1d4::t_b1efdd59807ba1 207
+shared/golden/dungeon_stairs.json
+  s_ea3cf181a9a1d4::t_f4379425820598 6
+shared/rules/worlds.v0.json
+  s_ea3cf181a9a1d4::t_0be44d4aa7b174 2439
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e33b91e5953a67029c5eeb288f51d007de084aa2",
+  "prompts": {},
+  "sessions": {
+    "s_ea3cf181a9a1d4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "523cc216-3309-4163-96d5-968e8c99ae6a",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

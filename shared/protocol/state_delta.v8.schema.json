@@ -600,7 +600,27 @@
         "state": { "type": "string", "enum": ["closed", "open", "ready", "locked", "disabled"] },
         "stance": { "type": "string", "enum": ["assist", "defend", "passive"] },
         "bishop_loot_depth_catalog": { "type": "object" },
-        "bishop_loot_source_catalog": { "type": "object" }
+        "bishop_loot_source_catalog": { "type": "object" },
+        "hits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["target_entity_id"],
+            "properties": {
+              "target_entity_id": { "$ref": "#/$defs/decimal_id" },
+              "monster_def_id": { "type": "string" },
+              "damage": { "type": "integer", "minimum": 0 },
+              "damage_type": { "type": "string" },
+              "outcome": { "type": "string" },
+              "killed": { "type": "boolean" },
+              "critical": { "type": "boolean" },
+              "blocked": { "type": "boolean" },
+              "raw_damage": { "type": "integer", "minimum": 0 },
+              "mitigated_damage": { "type": "integer" }
+            },
+            "additionalProperties": false
+          }
+        }
       },
       "allOf": [
         {
@@ -769,6 +789,13 @@
             "required": ["event_type"]
           },
           "then": { "required": ["entity_id", "skill_id", "rank", "mana"] }
+        },
+        {
+          "if": {
+            "properties": { "event_type": { "const": "skill_damage_burst" } },
+            "required": ["event_type"]
+          },
+          "then": { "required": ["entity_id", "skill_id", "correlation_id", "hits"] }
         },
         {
           "if": {

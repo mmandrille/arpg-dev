@@ -23,9 +23,8 @@ Last updated: 2026-07-08 (v453 combat session stability)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v453 — combat session stability |
-| **CI gate** | 2026-07-08 — focused verification green; batch `make ci` pending |
-| **Next slice** | v454 — skill damage burst events |
+| **Latest completed slice** | v454 — skill damage burst events |
+| **Next slice** | v455 — combat skill processing budget |
 | **Last engineering review** | v448 — [`docs/reviews/20260707_v448-overview.md`](docs/reviews/20260707_v448-overview.md) (2026-07-07; official cadence) |
 | **Next engineering review** | ~v458 — run `$review` then `$refactor` after next ~10-slice milestone |
 

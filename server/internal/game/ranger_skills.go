@@ -123,6 +123,7 @@ func (s *Sim) applyRangerVolley(player *entity, skillID string, def SkillDef, ra
 	}
 	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank))
 	hitIDs := map[uint64]bool{}
+	startEvents := len(res.Events)
 	for _, arrowDir := range volleyDirections(dir, count, s.effectiveVolleySpreadForSkill(skillID, def.Volley.SpreadDegrees)) {
 		targets := s.rangerLineTargets(player, arrowDir, def.Projectile.Range)
 		for _, row := range targets {
@@ -141,6 +142,7 @@ func (s *Sim) applyRangerVolley(player *entity, skillID string, def SkillDef, ra
 			break
 		}
 	}
+	s.collapseSkillDamageBurst(res, player.id, skillID, correlationID, startEvents)
 }
 
 func volleyDirections(dir Vec2, count int, spreadDegrees float64) []Vec2 {

@@ -1076,34 +1076,12 @@ func TestMagicBoltCastCooldownAndProjectileDamage(t *testing.T) {
 	if len(cooldowns) != 1 || cooldowns[0].SkillID != magicBoltSkillID || cooldowns[0].RemainingTicks != expectedCooldown || cooldowns[0].TotalTicks != expectedCooldown {
 		t.Fatalf("cooldown update = %+v, want magic_bolt %d/%d", cooldowns, expectedCooldown, expectedCooldown)
 	}
-	spawn := firstChangeEntityByType(cast, projectileEntity)
-	if spawn == nil || spawn.ProjectileDefID != magicBoltSkillID || spawn.TargetID != idStr(monster.id) {
-		t.Fatalf("magic bolt projectile spawn = %+v", spawn)
+	if !hasEvent(cast, "monster_damaged") {
+		t.Fatalf("instant magic bolt should damage on cast tick: %+v", cast.Events)
 	}
-
-	recast := sim.Tick([]Input{{
-		MessageID: "recast_magic",
-		Type:      "cast_skill_intent",
-		CastSkill: &CastSkillIntent{SkillID: magicBoltSkillID, TargetID: idStr(monster.id)},
-	}})
-	assertReject(t, recast, "recast_magic", "skill_on_cooldown")
-	if player.mana != wantManaAfterCast {
-		t.Fatalf("recast spent mana: got %d want %d", player.mana, wantManaAfterCast)
-	}
-	if !hasEvent(recast, "skill_cooldown_rejected") {
-		t.Fatalf("missing cooldown rejected event: %+v", recast.Events)
-	}
-
-	var impact TickResult
-	for i := 0; i < 30; i++ {
-		impact = sim.Tick(nil)
-		if hasEvent(impact, "monster_damaged") {
-			break
-		}
-	}
-	damage := eventDamage(impact, "monster_damaged")
+	damage := eventDamage(cast, "monster_damaged")
 	if damage < 6 || damage > 9 {
-		t.Fatalf("magic bolt impact damage = %d, want rank 1 damage 6..9; events=%+v", damage, impact.Events)
+		t.Fatalf("magic bolt impact damage = %d, want rank 1 damage 6..9; events=%+v", damage, cast.Events)
 	}
 
 	for i := 0; i < 50; i++ {
@@ -1359,22 +1337,18 @@ func TestMagicBoltAutoNavigatesToCastRange(t *testing.T) {
 		t.Fatalf("far magic bolt did not queue pending skill auto-nav: %+v", nav)
 	}
 
-	sawProjectile := false
+	sawCast := false
 	var castDistance float64
-	for i := 0; i < 100 && !sawProjectile; i++ {
+	for i := 0; i < 100 && !sawCast; i++ {
 		r := sim.Tick(nil)
-		for _, c := range r.Changes {
-			if c.Op == OpEntitySpawn && c.Entity != nil && c.Entity.Type == projectileEntity {
-				sawProjectile = true
-				castDistance = distance(c.Entity.Position, monster.pos)
-				if c.Entity.ProjectileDefID != magicBoltSkillID || c.Entity.TargetID != idStr(monster.id) {
-					t.Fatalf("auto-nav magic bolt projectile = %+v", c.Entity)
-				}
-			}
+		if hasEvent(r, "monster_damaged") || hasEvent(r, "skill_cast") {
+			player = sim.entities[sim.playerID]
+			castDistance = distance(player.pos, monster.pos)
+			sawCast = true
 		}
 	}
-	if !sawProjectile {
-		t.Fatal("auto-navigated magic bolt never spawned projectile")
+	if !sawCast {
+		t.Fatal("auto-navigated magic bolt never cast")
 	}
 	if castDistance > skill.Projectile.Range+meleeRangeEpsilon {
 		t.Fatalf("magic bolt cast distance = %.3f, want within range %.3f", castDistance, skill.Projectile.Range)

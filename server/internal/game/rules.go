@@ -349,6 +349,7 @@ type SkillDef struct {
 	Slow         SkillSlowDef         `json:"slow"`
 	Shatter      SkillShatterDef      `json:"shatter"`
 	Chain        SkillChainDef        `json:"chain"`
+	Resolution   string               `json:"resolution,omitempty"`
 	Companion    SkillCompanionDef    `json:"companion"`
 	Revive       SkillReviveDef       `json:"revive"`
 	Synergies    []SkillSynergyDef    `json:"synergies,omitempty"`

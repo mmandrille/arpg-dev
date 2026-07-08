@@ -440,6 +440,7 @@ type Event struct {
 	Stance               string                  `json:"stance,omitempty"`
 	BishopLootDepthCatalog  *BishopLootDepthCatalogView  `json:"bishop_loot_depth_catalog,omitempty"`
 	BishopLootSourceCatalog *BishopLootSourceCatalogView `json:"bishop_loot_source_catalog,omitempty"`
+	Hits                    []SkillDamageBurstHit        `json:"hits,omitempty"`
 }
 
 // QuestStewardOfferView is the wire view for a steward reward family choice.

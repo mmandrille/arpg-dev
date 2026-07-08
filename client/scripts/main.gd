@@ -1681,6 +1681,29 @@ func _apply_delta(p: Dictionary) -> void:
 				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
+		if event_type == "skill_damage_burst":
+			_face_event_source_toward_target(ev)
+			for hit in ev.get("hits", []):
+				if not hit is Dictionary:
+					continue
+				hit_ev := {
+					"event_type": "monster_damaged",
+					"entity_id": str(hit.get("target_entity_id", "")),
+					"source_entity_id": str(ev.get("source_entity_id", ev.get("entity_id", ""))),
+					"target_entity_id": str(hit.get("target_entity_id", "")),
+					"damage": hit.get("damage"),
+					"outcome": hit.get("outcome", "hit"),
+					"skill_id": str(ev.get("skill_id", "")),
+				}
+				var hit_eid := str(hit_ev.get("entity_id", ""))
+				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, hit_ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
+				_show_combat_text_for_event(hit_eid, hit_ev, Color(1.0, 0.92, 0.25))
+				ClientAudioBridgeScript.damage(audio_controller, false)
+				_notify_training_damage_log(hit_eid, hit_ev)
+				GameplayFeedbackPresentationScript.play_entity_reaction(
+					entities, player_id, player_anchor, player_reaction, hit_eid, hit_ev, "hit",
+					Callable(self, "_node_world_or_local_position"))
+			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			_face_event_source_toward_target(ev)
 			CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)

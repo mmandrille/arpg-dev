@@ -46,6 +46,10 @@
         "slow": { "$ref": "#/$defs/slow" },
         "shatter": { "$ref": "#/$defs/shatter" },
         "chain": { "$ref": "#/$defs/chain" },
+        "resolution": {
+          "type": "string",
+          "enum": ["simulated_projectile", "instant_ray", "instant_aoe"]
+        },
         "companion": { "$ref": "#/$defs/companion" },
         "revive": { "$ref": "#/$defs/revive" },
         "synergies": {

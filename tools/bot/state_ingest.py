@@ -53,6 +53,29 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, ctx: StateIngestConte
         event_type = ev["event_type"]
         state.seen_events.add(event_type)
         state.events.append(dict(ev))
+        if event_type == "skill_damage_burst":
+            skill_id = str(ev.get("skill_id", ""))
+            correlation_id = str(ev.get("correlation_id", ""))
+            for hit in ev.get("hits") or []:
+                synthetic = {
+                    "event_type": "monster_damaged",
+                    "entity_id": hit.get("target_entity_id"),
+                    "source_entity_id": ev.get("source_entity_id") or ev.get("entity_id"),
+                    "target_entity_id": hit.get("target_entity_id"),
+                    "skill_id": skill_id,
+                    "correlation_id": correlation_id,
+                    "damage": hit.get("damage"),
+                    "outcome": hit.get("outcome"),
+                    "monster_def_id": hit.get("monster_def_id"),
+                }
+                state.events.append(synthetic)
+                state.seen_events.add("monster_damaged")
+                combat_event = dict(synthetic)
+                target_id = str(hit.get("target_entity_id", ""))
+                entity = state.entities.get(target_id)
+                if entity is not None and entity.get("monster_def_id"):
+                    combat_event["target_monster_def_id"] = str(entity["monster_def_id"])
+                state.combat_events.append(combat_event)
         if event_type in {"shop_opened", "shop_purchase", "shop_sale", "shop_reroll"}:
             shop_event = dict(ev)
             state.shop_events.append(shop_event)

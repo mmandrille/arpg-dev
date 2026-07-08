@@ -303,6 +303,9 @@ func countSkillDamageEvents(r TickResult, skillID string) int {
 		if ev.EventType == "monster_damaged" && ev.SkillID == skillID {
 			count++
 		}
+		if ev.EventType == "skill_damage_burst" && ev.SkillID == skillID {
+			count += len(ev.Hits)
+		}
 	}
 	return count
 }

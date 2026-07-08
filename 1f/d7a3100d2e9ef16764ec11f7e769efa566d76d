@@ -1,0 +1,108 @@
+scripts/bot_client.sh
+  s_5255399629ca77::t_3abccad173b54c 334,338
+  s_5255399629ca77::t_faa2de05d19d05 388,408
+tools/bot/scenarios/04_door_lab.json
+  s_5255399629ca77::t_11fa88164f6f15 15,20
+client/scripts/bot_connection_recovery_assertions.gd
+  s_5255399629ca77::t_edd67af488c800 12-13
+server/internal/game/quest_turn_in.go
+  s_5255399629ca77::t_da67d444fce69b 26,32,34,38,47,59-60
+docs/progress/slice-lifecycle.md
+  s_5255399629ca77::t_a3b7c3709dee6d 20
+.maintainability/file-size-baseline.tsv
+  s_5255399629ca77::t_759444d3151d29 9-10,14,31-32,38
+server/internal/game/gold_auto_pickup_test.go
+  s_5255399629ca77::t_11fa88164f6f15 58,73-74
+client/scripts/net_client.gd
+  s_5255399629ca77::t_0d066025fbd418 10-11,479,485,491-500,518-522
+tools/bot/scenarios/client/75_quest_town_turn_in.json
+  s_5255399629ca77::t_9476ce58558b11 12
+docs/plans/v457_2026-07-08-live-combat-transport-stability.md
+  s_5255399629ca77::t_759444d3151d29 11
+  s_5255399629ca77::t_a3b7c3709dee6d 1-10
+  s_5255399629ca77::t_cf5ed30e9323ac 13
+  s_5255399629ca77::t_a22e20b4282e89 12
+client/scripts/connection_recovery_runtime.gd
+  s_5255399629ca77::t_0d066025fbd418 9,124-129
+  s_5255399629ca77::t_edd67af488c800 32,122
+server/internal/http/inspect.go
+  s_5255399629ca77::t_6f4176a859d6f3 72
+client/scripts/main.gd
+  s_5255399629ca77::t_3abccad173b54c 412
+docs/specs/v457_spec-live-combat-transport-stability.md
+  s_5255399629ca77::t_882cf069731a5d 3-6
+  s_5255399629ca77::t_a3b7c3709dee6d 1-2,7-28
+docs/performance/tools.md
+  s_5255399629ca77::t_a3b7c3709dee6d 220-248,329
+tools/bot/scenarios/97_quest_town_turn_in.json
+  s_5255399629ca77::t_da67d444fce69b 9,11,14,16
+client/tests/test_material_wallet_badges.gd
+  s_5255399629ca77::t_d4d638a6e3f40a 37
+PROGRESS.md
+  s_5255399629ca77::t_a3b7c3709dee6d 18,26-27,117
+client/scripts/main_config_loader.gd
+  s_5255399629ca77::t_0d066025fbd418 10,27,74-78,86
+server/internal/game/game_test.go
+  s_5255399629ca77::t_11fa88164f6f15 3787,3789
+shared/rules/main_config.v0.schema.json
+  s_5255399629ca77::t_0d066025fbd418 199-214
+client/scripts/bot_debug_progression_setup.gd
+  s_5255399629ca77::t_3abccad173b54c 5,12
+  s_5255399629ca77::t_c12532a25dd5f5 9
+  s_5255399629ca77::t_658e14c19afbaa 10,36,39-41
+docs/progress/scenario-movement-audit.tsv
+  s_5255399629ca77::t_d3b2ef120d0ad1 257-260
+server/internal/game/dungeon_room_anchor_rooms.go
+  s_5255399629ca77::t_68eed70b29ef20 3-6,93-100
+tools/bot/scenarios/client/99_ranger_volley_live_session_stability.json
+  s_5255399629ca77::t_c12532a25dd5f5 11
+  s_5255399629ca77::t_edd67af488c800 1-10,12-37
+server/internal/game/quest_steward_test.go
+  s_5255399629ca77::t_42be909c79aa4d 175
+server/internal/game/quest_turn_in_test.go
+  s_5255399629ca77::t_42be909c79aa4d 12,80,111-116
+  s_5255399629ca77::t_da67d444fce69b 22-23,28-29,33
+shared/golden/dungeon_obstacles.json
+  s_5255399629ca77::t_b483b42de8957b 389-390
+server/internal/game/interactables_test.go
+  s_5255399629ca77::t_11fa88164f6f15 68-69
+server/internal/game/badge_rewards_test.go
+  s_5255399629ca77::t_42be909c79aa4d 47
+server/internal/realtime/session_loop.go
+  s_5255399629ca77::t_0d066025fbd418 400,415,430-431
+tools/bot/scenarios/client/76_badge_reward_wallet.json
+  s_5255399629ca77::t_9476ce58558b11 30
+tools/bot/scenarios/client/47_mercenary_roster_ui.json
+  s_5255399629ca77::t_6bbd454a00673f 29
+  s_5255399629ca77::t_12ebbd90c534bd 22,24
+shared/rules/main_config.v0.json
+  s_5255399629ca77::t_0d066025fbd418 110-115
+server/internal/game/bishop_test.go
+  s_5255399629ca77::t_42be909c79aa4d 129
+docs/as-built/v457_live-combat-transport-stability.md
+  s_5255399629ca77::t_a3b7c3709dee6d 1-2,7-25,29-41
+  s_5255399629ca77::t_882cf069731a5d 3-6
+  s_5255399629ca77::t_a22e20b4282e89 26-28
+docs/progress/slice-codename-index.md
+  s_5255399629ca77::t_a3b7c3709dee6d 247
+tools/bot/scenarios/101_obstacle_variety_pack.json
+  s_5255399629ca77::t_da67d444fce69b 17
+tools/bot/scenarios/client/32_town_bishop_respec_panel.json
+  s_5255399629ca77::t_9476ce58558b11 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1fd7a3100d2e9ef16764ec11f7e769efa566d76d",
+  "prompts": {},
+  "sessions": {
+    "s_5255399629ca77": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f42bf-ed45-7952-b629-a13c5337d48a",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

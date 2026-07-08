@@ -1,0 +1,239 @@
+server/internal/game/resource_bag.go
+  s_5a9bd588e44990::t_f2606b32241a5e 261-309
+  s_5a9bd588e44990::t_2634153e5b721f 180-224
+  s_5a9bd588e44990::t_9f44f75ff30bd7 1-179,225-260
+server/internal/store/session_start_items_test.go
+  s_5a9bd588e44990::t_453273f04724ea 39
+client/scripts/inventory_wallet_delta_runtime.gd
+  s_5a9bd588e44990::t_5befdd638d1156 87-93
+  s_5a9bd588e44990::t_d304ce36f99165 16-17
+  s_5a9bd588e44990::t_40537cb260d275 154-186
+server/internal/store/interfaces.go
+  s_5a9bd588e44990::t_c26d5ee657b450 75-78,81
+  s_5a9bd588e44990::t_1682c6e7bfb7d1 80
+  s_5a9bd588e44990::t_464c8ab7fffe64 79
+  s_5a9bd588e44990::t_c87dc9c27f2080 109
+shared/protocol/state_delta.v8.schema.json
+  s_5a9bd588e44990::t_357ed9abcbeb41 1362-1376
+shared/protocol/session_snapshot.v8.schema.json
+  s_5a9bd588e44990::t_8c38731a198e13 7
+  s_5a9bd588e44990::t_1f95d56de3d6b0 40
+tools/bot/scenarios/upgrade_shard_level_drop.json
+  s_5a9bd588e44990::t_a022507555fb91 17,26,40,44-47
+server/internal/store/repos.go
+  s_5a9bd588e44990::t_394b6f07253cf9 2213,2215-2233
+  s_5a9bd588e44990::t_7bcf02324395f3 451
+  s_5a9bd588e44990::t_7b6f92decc551c 1835
+  s_5a9bd588e44990::t_de3db0676d0515 1992-2011
+  s_5a9bd588e44990::t_7bdb8da82599a5 211
+  s_5a9bd588e44990::t_0eacae327cd41d 2214
+tools/bot/state_ingest.py
+  s_5a9bd588e44990::t_b394508ae0ab1d 235
+  s_5a9bd588e44990::t_49c0634689a904 378-401
+  s_5a9bd588e44990::t_73ccab93204975 178-181
+tools/bot/scenarios/98_badge_reward_foundation.json
+  s_5a9bd588e44990::t_360800a4a0ed67 46
+  s_5a9bd588e44990::t_bc1d8d7a3dddca 139
+  s_5a9bd588e44990::t_47179d6490a080 19-23
+server/internal/store/store_test.go
+  s_5a9bd588e44990::t_3dbe2e4780a29b 421
+  s_5a9bd588e44990::t_78aebf8d5a86d4 415
+  s_5a9bd588e44990::t_6beb2f3cc54e74 180
+  s_5a9bd588e44990::t_dbadfaa7e74731 418
+  s_5a9bd588e44990::t_aa82574c22c8f2 726
+client/scripts/inventory_transfer_router.gd
+  s_5a9bd588e44990::t_7a9ee162fb00c1 16
+  s_5a9bd588e44990::t_eb382e28f761a4 115-116,118
+  s_5a9bd588e44990::t_9ddfcbd5db2a1a 117
+  s_5a9bd588e44990::t_e24be1e905d0a2 137-150
+scripts/client_smoke.sh
+  s_5a9bd588e44990::t_12699880df10ee 282
+tools/bot/runtime_assertions.py
+  s_5a9bd588e44990::t_df3afc367ddec4 33-43
+  s_5a9bd588e44990::t_0a55fe7f84a625 64
+  s_5a9bd588e44990::t_ad30dbc022ea4f 109-111
+  s_5a9bd588e44990::t_97a86ccf8ed8ef 460-463
+server/internal/realtime/session_loop.go
+  s_5a9bd588e44990::t_cc7961f9b8f9b1 867-883
+  s_5a9bd588e44990::t_4fb5606cf72a30 192
+  s_5a9bd588e44990::t_6c28bbb18462fd 307
+  s_5a9bd588e44990::t_16082315f83877 711-726
+  s_5a9bd588e44990::t_ea1c1f6295da9b 154
+  s_5a9bd588e44990::t_9ce8f33c577b5c 727-734
+  s_5a9bd588e44990::t_e98039f8d1101e 735-742
+tools/bot/scenarios/client/61_material_wallet_window.json
+  s_5a9bd588e44990::t_ef37d8b01d24b8 8,31,35
+tools/bot/run.py
+  s_5a9bd588e44990::t_6a2c77f9396254 2919
+  s_5a9bd588e44990::t_79d5d9b4bf7982 3398
+  s_5a9bd588e44990::t_bc40818143179c 3522
+  s_5a9bd588e44990::t_cf1490202490a9 3424
+  s_5a9bd588e44990::t_55485b39ffb560 593-599
+client/scripts/inventory_panel.gd
+  s_5a9bd588e44990::t_7281bbca25460b 173
+  s_5a9bd588e44990::t_9d96f8e6020f97 1649-1656
+  s_5a9bd588e44990::t_38d66707a47199 172,174
+  s_5a9bd588e44990::t_fcbf4d0755ecc8 258,260,267,272,274-278
+  s_5a9bd588e44990::t_4bf0689a61b1cd 387
+  s_5a9bd588e44990::t_14573823f7c3ef 86
+  s_5a9bd588e44990::t_814d24b15483c1 1586
+server/internal/http/account_stash_renew.go
+  s_5a9bd588e44990::t_60fcf0e1454f03 125-129
+  s_5a9bd588e44990::t_fa237ca3262178 79
+  s_5a9bd588e44990::t_e917fac07c3b16 124
+  s_5a9bd588e44990::t_b1c4136774779c 75-78,80
+client/scripts/main.gd
+  s_5a9bd588e44990::t_b6390176abeba7 2182
+  s_5a9bd588e44990::t_7d6f25de295b44 1322
+  s_5a9bd588e44990::t_1df40db6607683 5102-5103,5106-5126
+  s_5a9bd588e44990::t_a989c32d22029d 5157
+  s_5a9bd588e44990::t_5386b159da803f 2153-2156
+  s_5a9bd588e44990::t_e28ebe0133b21a 1255
+  s_5a9bd588e44990::t_ce85a74ccf3cff 5030
+  s_5a9bd588e44990::t_ebc561b358d6ee 159
+server/internal/realtime/hub.go
+  s_5a9bd588e44990::t_ddaa4ee1651d23 231-243
+server/internal/store/upgrade_shard_store.go
+  s_5a9bd588e44990::t_dc20fc1ac90c20 60-64
+client/scripts/stash_panel.gd
+  s_5a9bd588e44990::t_a0a66a4492e07b 129-132
+  s_5a9bd588e44990::t_678598d0e569e6 16
+  s_5a9bd588e44990::t_70d63df809e246 661-669
+client/tests/test_inventory_transfer_router.gd
+  s_5a9bd588e44990::t_f562197769b7f8 57-62
+server/internal/http/account_stash.go
+  s_5a9bd588e44990::t_1a7ceff1deef1d 153-157,164
+  s_5a9bd588e44990::t_1ed5c5c2898a7e 207-211,217
+  s_5a9bd588e44990::t_0f2c1fac4fb60f 293-297
+  s_5a9bd588e44990::t_942940ffc3f40d 343,355-356
+  s_5a9bd588e44990::t_80a6186f530b11 441,463
+server/internal/game/sim.go
+  s_5a9bd588e44990::t_bad2ce8f86bb1e 1056-1059
+  s_5a9bd588e44990::t_af814745acf2fc 1063-1066
+  s_5a9bd588e44990::t_b41f09a1cef2e5 454
+  s_5a9bd588e44990::t_870f5cb2b3dd19 934
+  s_5a9bd588e44990::t_30a29c52bf16f8 1766-1769
+  s_5a9bd588e44990::t_8650ed76094442 785
+  s_5a9bd588e44990::t_df02f549c3075b 936
+  s_5a9bd588e44990::t_9a91234e61a6ad 1053-1055,1060-1062
+  s_5a9bd588e44990::t_0cd2e615fac6f7 384
+  s_5a9bd588e44990::t_53e2721e7a0764 6407
+  s_5a9bd588e44990::t_da37d69f1ac804 933,935
+server/internal/inputdecode/inputdecode.go
+  s_5a9bd588e44990::t_62a4b368a5e46d 49
+  s_5a9bd588e44990::t_291df12d61886f 447-452,459-464
+  s_5a9bd588e44990::t_7b8302d52d4c4f 51
+  s_5a9bd588e44990::t_c5a77e97380812 453-458
+  s_5a9bd588e44990::t_e605a6c6b872d5 171
+  s_5a9bd588e44990::t_9dda775ea93d9e 48,50
+  s_5a9bd588e44990::t_cdc2813888b883 194
+  s_5a9bd588e44990::t_0f78fdf0372ade 465-470
+  s_5a9bd588e44990::t_8f1e0972c4a955 168-170,172
+server/internal/http/session.go
+  s_5a9bd588e44990::t_e155356ede7df5 413-424
+docs/specs/v452_spec-resource-wallet-bag.md
+  s_5a9bd588e44990::t_7b786206d22a3e 1-51
+server/internal/game/resource_bag_test.go
+  s_5a9bd588e44990::t_9426b07e43d406 127-167
+  s_5a9bd588e44990::t_84462377b8b7ea 86-100,102-126
+  s_5a9bd588e44990::t_e2444109022261 39
+  s_5a9bd588e44990::t_b1fb11dbe9c876 1-6,11,13-32,37,40-85
+  s_5a9bd588e44990::t_a91d7a5b5b932c 7-10,12,33-36,38
+  s_5a9bd588e44990::t_7d7bffc4a425d7 101
+shared/protocol/messages.v8.schema.json
+  s_5a9bd588e44990::t_b4112ae9b1a8d3 148-149
+  s_5a9bd588e44990::t_fd0dabe540b800 515-523
+  s_5a9bd588e44990::t_d410671da9ba97 50
+  s_5a9bd588e44990::t_2a2b4d657baa35 144-145
+  s_5a9bd588e44990::t_7c7e66a7d089cf 142-143,146-147
+  s_5a9bd588e44990::t_7c0166838b2033 532-540
+  s_5a9bd588e44990::t_82ef8c1bf7a548 49,51
+  s_5a9bd588e44990::t_2a50843473416b 507-514,524-531
+  s_5a9bd588e44990::t_44c08f6c975da6 52
+docs/plans/v452_2026-07-08-resource-wallet-bag.md
+  s_5a9bd588e44990::t_ec4b79f7421181 1-23
+server/internal/game/sim_load.go
+  s_5a9bd588e44990::t_91d10e561ce80a 443-453
+  s_5a9bd588e44990::t_0b06face4e980a 38-44
+  s_5a9bd588e44990::t_be538133dc3fc5 179-201
+client/scripts/material_wallet_panel.gd
+  s_5a9bd588e44990::t_724835b52cfefc 303-309
+  s_5a9bd588e44990::t_eea405e8c71fd6 6-7
+  s_5a9bd588e44990::t_78156211da8d88 49,54-65
+  s_5a9bd588e44990::t_11bb3720cb169c 277,291-300
+  s_5a9bd588e44990::t_9590e9f45fa5b4 213
+  s_5a9bd588e44990::t_a3c015bd23d8dd 353-385,388-397
+  s_5a9bd588e44990::t_afbe603d00e0c7 5,9,12-18,21-22,24-26,29-48,50-53,66-71,88,90-92,100,102-103,106,123-125,133-136,142,156,162-175,186,188-189,191-202,205-206,208-212,214-235,240,243,258-268,270-276,279-290,301-302,310,398-405,412-413,417-432,450-463
+  s_5a9bd588e44990::t_63cfc2d0416104 236-239
+  s_5a9bd588e44990::t_a71c2b45773055 73-78
+  s_5a9bd588e44990::t_56c3a2f824655f 269
+  s_5a9bd588e44990::t_90f9b98c0e06b8 244-257
+shared/protocol/examples/session_snapshot.json
+  s_5a9bd588e44990::t_b6a78b208338fe 65-67
+  s_5a9bd588e44990::t_f9965ee38dd5e4 68
+tools/bot/bot_types.py
+  s_5a9bd588e44990::t_53f75541a9651d 87
+server/migrations/0030_account_resource_bag.sql
+  s_5a9bd588e44990::t_d98c99ec7a4ebf 1-29
+server/internal/store/models.go
+  s_5a9bd588e44990::t_aca9e67ff5ee5a 330-332
+tools/bot/scenarios/72_upgrade_resource_drop.json
+  s_5a9bd588e44990::t_db143012e3a7dc 17,26,40,44-47
+server/internal/store/stale_sessions_test.go
+  s_5a9bd588e44990::t_89fba5c8e8570e 105
+server/internal/store/leveled_consumable_store.go
+  s_5a9bd588e44990::t_939001183228db 524-538
+  s_5a9bd588e44990::t_4b56476a80e8da 491-493
+  s_5a9bd588e44990::t_dc29590e2382a4 225-235
+  s_5a9bd588e44990::t_b4ff78e1eed53c 296-382
+  s_5a9bd588e44990::t_8897a2f16f9aff 449-476
+server/internal/game/handlers.go
+  s_5a9bd588e44990::t_f673fdd8960376 69
+  s_5a9bd588e44990::t_56d7e33e907f7e 66,68
+  s_5a9bd588e44990::t_0a99ceec8c4b30 67
+client/tests/test_material_wallet_panel.gd
+  s_5a9bd588e44990::t_27812771836bfc 1-55
+server/internal/game/types.go
+  s_5a9bd588e44990::t_5cb10e9476eb3a 669-679
+  s_5a9bd588e44990::t_b467b879709c30 498
+  s_5a9bd588e44990::t_f7f0929a86f01c 529-530
+server/internal/store/resource_bag_store.go
+  s_5a9bd588e44990::t_c4a79a6245bc1e 271-331
+  s_5a9bd588e44990::t_86738e566c33e9 8
+  s_5a9bd588e44990::t_e75bbe1e150cfc 332-392
+  s_5a9bd588e44990::t_65e3626850d241 397-398,400-401
+  s_5a9bd588e44990::t_fc0f61aa2b2ade 1-7,9-270,393-396,399,402-403
+docs/CODEMAP.md
+  s_5a9bd588e44990::t_085eb1db405d60 34
+server/internal/game/badge_rewards.go
+  s_5a9bd588e44990::t_1c6183018c9495 128,133-134
+server/internal/game/sim_players.go
+  s_5a9bd588e44990::t_550c093574ae69 413-416
+  s_5a9bd588e44990::t_93007904cbe228 94
+  s_5a9bd588e44990::t_448dfc924ceece 32
+  s_5a9bd588e44990::t_52bc46edebe8da 50
+  s_5a9bd588e44990::t_d78e3a7dd0b112 464
+server/internal/replay/replay_test.go
+  s_5a9bd588e44990::t_22f1291b280bc8 1582
+  s_5a9bd588e44990::t_781da0a20c83cd 1500-1511,1518-1520
+  s_5a9bd588e44990::t_514ed2c861dacd 1512-1514
+  s_5a9bd588e44990::t_e7aca906023478 1515-1517
+client/scripts/blacksmith_resource_craft_slot.gd
+  s_5a9bd588e44990::t_8787dd0fcce739 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1ac156b12327c6e8fa49f3c8672280886f72e313",
+  "prompts": {},
+  "sessions": {
+    "s_5a9bd588e44990": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "03bb8d75-46fd-46f6-81b8-5940d0b36f9c",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

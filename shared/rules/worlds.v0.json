@@ -2436,7 +2436,7 @@
           "type": "interactable",
           "interactable_def_id": "teleporter",
           "position": {
-            "x": 12,
+            "x": 13,
             "y": 12
           }
         },

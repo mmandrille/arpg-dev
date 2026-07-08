@@ -204,7 +204,7 @@ func _initialize() -> void:
 	if not _vec2_equals(town["stairs_down"], 11.0, 12.0):
 		_fail("town stairs_down mismatch")
 		return
-	if not _vec2_equals(town["teleporter"], 12.0, 12.0):
+	if not _vec2_equals(town["teleporter"], 13.0, 12.0):
 		_fail("town teleporter mismatch")
 		return
 	if not _vec2_equals(level1["stairs_up"], 4.0, 10.0):

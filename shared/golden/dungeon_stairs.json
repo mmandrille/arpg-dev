@@ -3,7 +3,7 @@
   "levels": {
     "0": {
       "stairs_down": { "x": 11, "y": 12 },
-      "teleporter": { "x": 12, "y": 12 }
+      "teleporter": { "x": 13, "y": 12 }
     },
     "-1": {
       "stairs_up": { "x": 4, "y": 10 },

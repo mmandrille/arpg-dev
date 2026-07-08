@@ -17,21 +17,22 @@ client/tests/test_coop_client.gd	1721	# v392: class creation feature panel tests
 client/tests/test_golden.gd	686
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7948	# refactor: TestValidateSkillRules moved to skill_rules_validation_test.go
-server/internal/game/handlers.go	1458	# v356 player-navigation-guardrails: interactable path_too_long uses floor max_auto_steps
+server/internal/game/handlers.go	1487	# v455 combat skill budget defer hooks on cast_skill and projectile spawn
 server/internal/game/rules.go	2783	# refactor: skill validators extracted to skill_rules_validation.go
 server/internal/game/shop.go	1196	# v407: elemental summary lines extracted to weapon_elemental.go
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6635	# v448: steward hunt pickup metadata + hotbar consumable pickup path restored alongside grantInventoryItem helper
+server/internal/game/sim.go	6679	# v455 skill budget counters and deferred cast queue on Sim
 server/internal/game/types.go	721	# v448: steward hunt level state + quest steward offer/pending fields coupled to Sim/LevelState
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482
 server/internal/realtime/session_loop.go	951
+server/internal/realtime/session_loop_test.go	675	# v453 combat session stability persist defer, enqueue backpressure, fanout coalesce tests
 server/internal/replay/replay.go	751	# v404: mercenary roster load on session reconstruct
 server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating passive gold auto-pickup test for v332 momentum
 server/internal/store/repos.go	2315
 server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store test setup
 client/scripts/showme/visual_capture.gd	1152	# baseline sync: v443 dim-mesh work landed without baseline bump; extraction still deferred (capture mode dispatch table)
-tools/bot/run.py	4438	# v448: quest_steward_pick action + steward_hunt_target selector
+tools/bot/run.py	4553	# v456 combat soak scenario wrappers; soak logic in combat_soak_runtime.py
 tools/bot/test_protocol.py	1434
 tools/assets/rig_hero_glbs.py	686	# v434: 17-bone hero rig; GLB parse/weight/IBM pipeline tightly coupled to mesh mutation state
 tools/validate_shared.py	3156	# pre-v414 drift: weapon family stat scaling cross-checks; extraction deferred

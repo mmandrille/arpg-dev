@@ -1,0 +1,123 @@
+{
+  "id": "ranger_volley_session_stability",
+  "ci_tier": "extended",
+  "world_id": "crowded_lightning_perf_probe",
+  "seed": "ranger_volley_session_stability_seed",
+  "character_class": "ranger",
+  "title": "Ranger Volley session stability",
+  "description": "Cast Volley repeatedly in a crowded combat lab; WebSocket must stay connected with no reconnect.",
+  "max_elapsed_s": 25.0,
+  "debug_progression": {
+    "level": 12,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 4,
+      "dex": 18,
+      "vit": 12,
+      "magic": 30
+    },
+    "skill_ranks": {
+      "piercing_shot": 1,
+      "pinning_shot": 1,
+      "volley": 1
+    }
+  },
+  "steps": [
+    {
+      "action": "assert_entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 25
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "volley",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_count",
+        "event_type": "monster_damaged",
+        "skill_id": "volley",
+        "min": 3
+      },
+      "timeout_s": 4
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "volley",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "volley",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "volley",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_ticks",
+      "ticks": 45
+    },
+    {
+      "action": "cast_skill",
+      "skill_id": "volley",
+      "direction": { "x": 1, "y": 0 },
+      "event_type": "skill_cast"
+    },
+    {
+      "action": "wait_until_assertion",
+      "assertion": {
+        "type": "event_count",
+        "event_type": "skill_cast",
+        "skill_id": "volley",
+        "min": 5
+      },
+      "timeout_s": 4
+    }
+  ],
+  "assertions": [
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 20
+    },
+    {
+      "type": "event_count",
+      "event_type": "skill_cast",
+      "skill_id": "volley",
+      "min": 5
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_damaged",
+      "skill_id": "volley",
+      "min": 10
+    }
+  ]
+}

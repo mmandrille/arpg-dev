@@ -2304,15 +2304,37 @@ func (s *Store) ListInputs(ctx context.Context, sessionID string) ([]SessionInpu
 // --- events -----------------------------------------------------------------
 
 func (s *Store) AppendEvent(ctx context.Context, ev SessionEvent) error {
-	_, err := s.pool.Exec(ctx,
-		`INSERT INTO session_events (id, session_id, tick, sequence, event_type, correlation_id, payload)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
-		ev.ID, ev.SessionID, ev.Tick, ev.Sequence, ev.EventType, nullableStr(ev.CorrelationID), []byte(ev.Payload),
-	)
-	if err != nil {
-		return fmt.Errorf("store: append event: %w", err)
+	return s.AppendEvents(ctx, []SessionEvent{ev})
+}
+
+func (s *Store) AppendEvents(ctx context.Context, events []SessionEvent) error {
+	if len(events) == 0 {
+		return nil
 	}
-	return nil
+	if len(events) == 1 {
+		ev := events[0]
+		_, err := s.pool.Exec(ctx,
+			`INSERT INTO session_events (id, session_id, tick, sequence, event_type, correlation_id, payload)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
+			ev.ID, ev.SessionID, ev.Tick, ev.Sequence, ev.EventType, nullableStr(ev.CorrelationID), []byte(ev.Payload),
+		)
+		if err != nil {
+			return fmt.Errorf("store: append event: %w", err)
+		}
+		return nil
+	}
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		for i, ev := range events {
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_events (id, session_id, tick, sequence, event_type, correlation_id, payload)
+				 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
+				ev.ID, ev.SessionID, ev.Tick, ev.Sequence, ev.EventType, nullableStr(ev.CorrelationID), []byte(ev.Payload),
+			); err != nil {
+				return fmt.Errorf("store: append events[%d]: %w", i, err)
+			}
+		}
+		return nil
+	})
 }
 
 func (s *Store) ListEvents(ctx context.Context, sessionID string) ([]SessionEvent, error) {

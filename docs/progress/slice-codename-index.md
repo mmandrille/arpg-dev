@@ -240,6 +240,7 @@ v293_* = bishop-badge-costs
 v405_* = class-specialist-gear
 v406_* = bishop-force-drop
 v452_* = resource-wallet-bag
+v453_* = combat-session-stability
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

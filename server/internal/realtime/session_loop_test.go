@@ -3,6 +3,7 @@ package realtime
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
@@ -476,6 +477,11 @@ func (r *progressionPersistRepo) AppendEvent(_ context.Context, event store.Sess
 	return nil
 }
 
+func (r *progressionPersistRepo) AppendEvents(_ context.Context, events []store.SessionEvent) error {
+	r.events = append(r.events, events...)
+	return nil
+}
+
 func (r *progressionPersistRepo) AddCharacterItem(_ context.Context, item store.CharacterItemInstance) error {
 	r.items = append(r.items, item)
 	return nil
@@ -590,3 +596,80 @@ func TestPersistTickDefersNonCriticalChangesWhenRequested(t *testing.T) {
 		t.Fatalf("flushed progression should persist, got %d", len(repo.progressions))
 	}
 }
+
+func TestEnqueueBlocksInsteadOfClosingOnFullQueue(t *testing.T) {
+	client := &loopClient{
+		playerID: 1001,
+		sendCh:   make(chan outEnvelope, 1),
+		done:     make(chan struct{}),
+		loop: &sessionLoop{
+			sess: store.Session{ID: "sess_enqueue"},
+		},
+	}
+	client.enqueue(outEnvelope{Type: typeStateDelta, MessageID: "m1", Payload: stateDeltaPayload{ServerTick: 1}})
+
+	enqueued := make(chan struct{})
+	go func() {
+		client.enqueue(outEnvelope{Type: typeStateDelta, MessageID: "m2", Payload: stateDeltaPayload{ServerTick: 2}})
+		close(enqueued)
+	}()
+
+	select {
+	case <-client.done:
+		t.Fatal("enqueue closed connection on full queue")
+	case <-time.After(50 * time.Millisecond):
+	}
+
+	select {
+	case <-enqueued:
+		t.Fatal("second enqueue should block until queue drains")
+	default:
+	}
+
+	<-client.sendCh
+	<-enqueued
+	if len(client.sendCh) != 1 {
+		t.Fatalf("sendCh len = %d, want 1 after blocking enqueue drained", len(client.sendCh))
+	}
+}
+
+func TestFanoutTickResultsCoalescesSameTickDeltas(t *testing.T) {
+	rulesDir, err := game.FindSharedRulesDir()
+	if err != nil {
+		t.Fatalf("find rules: %v", err)
+	}
+	rules, err := game.LoadRules(rulesDir)
+	if err != nil {
+		t.Fatalf("load rules: %v", err)
+	}
+	sim, err := game.NewSimWithWorld("sess_coalesce", "coalesce", rules, "dungeon_levels")
+	if err != nil {
+		t.Fatalf("new sim: %v", err)
+	}
+	playerID := sim.DefaultPlayerID()
+	client := &loopClient{playerID: playerID, sendCh: make(chan outEnvelope, 8), done: make(chan struct{})}
+	loop := &sessionLoop{sess: store.Session{ID: "sess_coalesce"}, sim: sim}
+	results := []game.TickResult{
+		{
+			Tick: 5, Level: 0, ActorPlayerID: playerID,
+			Changes: []game.Change{{Op: game.OpGoldUpdate, Gold: intPtr(10)}},
+			Events:  []game.Event{{EventType: "gold_picked_up", EntityID: idStr(playerID)}},
+		},
+		{
+			Tick: 5, Level: 0, ActorPlayerID: playerID,
+			Changes: []game.Change{{Op: game.OpGoldUpdate, Gold: intPtr(20)}},
+			Events:  []game.Event{{EventType: "experience_gained", EntityID: idStr(playerID)}},
+		},
+	}
+	loop.fanoutTickResults(results, []*loopClient{client}, nil, map[uint64]int{playerID: 0})
+	delta := mustReceiveDelta(t, client)
+	if len(delta.Changes) != 2 {
+		t.Fatalf("coalesced changes = %d, want 2", len(delta.Changes))
+	}
+	if len(delta.Events) != 2 {
+		t.Fatalf("coalesced events = %d, want 2", len(delta.Events))
+	}
+	assertNoEnvelope(t, client)
+}
+
+func intPtr(v int) *int { return &v }

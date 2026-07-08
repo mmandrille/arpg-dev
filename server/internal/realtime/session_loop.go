@@ -419,10 +419,14 @@ func (c *loopClient) writeLoop() {
 func (c *loopClient) enqueue(env outEnvelope) {
 	select {
 	case <-c.done:
+		return
 	case c.sendCh <- env:
+		return
 	default:
-		c.loop.log.Warn("send queue full; closing connection", "session_id", c.loop.sess.ID, "player_id", c.playerID)
-		c.close()
+		select {
+		case <-c.done:
+		case c.sendCh <- env:
+		}
 	}
 }
 
@@ -649,19 +653,6 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 	}
 
 	for _, ev := range res.Events {
-		payload, _ := json.Marshal(ev)
-		if err := l.hub.store.AppendEvent(ctx, store.SessionEvent{
-			ID:            ids.New("evt"),
-			SessionID:     l.sess.ID,
-			Tick:          int64(res.Tick),
-			Sequence:      eventSequence,
-			EventType:     ev.EventType,
-			CorrelationID: ev.CorrelationID,
-			Payload:       payload,
-		}); err != nil {
-			l.hub.metrics.PersistenceErrors.Inc()
-			l.log.Error("persist event", "error", err)
-		}
 		if ev.EventType == "player_killed" {
 			if member, ok := killedEventMember(ev, membersByPlayerID); ok {
 				if err := l.hub.store.MarkCharacterDead(ctx, member.AccountID, member.CharacterID, res.Level); err != nil && !errors.Is(err, store.ErrNotFound) {
@@ -749,8 +740,8 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				l.log.Error("persist corpse item recovery", "account_id", member.AccountID, "corpse_character_id", ev.CorpseCharacterID, "character_id", member.CharacterID, "corpse_item_id", ev.StashItemID, "item_instance_id", ev.ItemInstanceID, "error", err)
 			}
 		}
-		eventSequence++
 	}
+	eventSequence = l.appendSessionEvents(ctx, res, res.Events, eventSequence)
 
 	hotbarAssignedItems := map[string]struct{}{}
 	for _, c := range res.Changes {
@@ -860,27 +851,12 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.ResourceID == "" {
 				continue
 			}
-			if _, err := l.hub.store.AddAccountResource(ctx, changeMember.AccountID, c.ResourceID, 1); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist account resource", "resource_id", c.ResourceID, "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
 		case game.OpResourceBagItemAdd:
 			if c.StashItem == nil {
 				continue
 			}
-			rolledStats := json.RawMessage(`{}`)
-			if payload := c.StashItem.RollPayload(); payload != nil {
-				if raw, err := json.Marshal(payload); err == nil {
-					rolledStats = raw
-				} else {
-					l.hub.metrics.PersistenceErrors.Inc()
-					l.log.Error("marshal resource bag item payload", "error", err)
-				}
-			}
-			if _, err := l.hub.store.InsertAccountResourceBagItem(ctx, changeMember.AccountID, changeMember.CharacterID, c.StashItem.StashItemID, c.StashItem.ItemDefID, rolledStats); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist resource bag item add", "bag_item_id", c.StashItem.StashItemID, "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
 				if _, err := l.hub.store.AddAccountWaypoint(ctx, changeMember.AccountID, c.Level); err != nil {
@@ -889,35 +865,14 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				}
 			}
 		case game.OpShopStockReplace:
-			if deferNonCritical {
-				l.deferredPersistChanges = append(l.deferredPersistChanges, deferredPersistChange{change: c, member: changeMember})
-				continue
-			}
-			if err := l.hub.store.ReplaceCharacterShopStock(ctx, changeMember.AccountID, changeMember.CharacterID, c.ShopID, c.RefreshKey, storeShopStock(changeMember.AccountID, changeMember.CharacterID, c.ShopStock)); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist shop stock replace", "shop_id", c.ShopID, "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
 		case game.OpShopStockAvailability:
-			if deferNonCritical {
-				l.deferredPersistChanges = append(l.deferredPersistChanges, deferredPersistChange{change: c, member: changeMember})
-				continue
-			}
-			if err := l.hub.store.SetCharacterShopStockAvailable(ctx, changeMember.AccountID, changeMember.CharacterID, c.ShopID, c.OfferID, c.Available); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist shop stock availability", "shop_id", c.ShopID, "offer_id", c.OfferID, "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
 		case game.OpCharacterProgressionUpdate:
 			if c.Progression == nil {
 				continue
 			}
-			if deferNonCritical {
-				l.deferredPersistChanges = append(l.deferredPersistChanges, deferredPersistChange{change: c, member: changeMember})
-				continue
-			}
-			if err := l.hub.store.UpsertCharacterProgression(ctx, changeMember.AccountID, storeProgressionFromView(changeMember.AccountID, changeMember.CharacterID, *c.Progression)); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist character progression", "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
 		}
 	}
 

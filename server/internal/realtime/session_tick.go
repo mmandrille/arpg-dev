@@ -53,16 +53,19 @@ func (l *sessionLoop) doTick() {
 	eventSequence := int64(0)
 	persistDuration := time.Duration(0)
 	broadcastDuration := time.Duration(0)
-	simGuardrail := evaluateTickGuardrail(simDuration)
-	deferNonCritical := simGuardrail.OverBudget
+	elapsedAfterSim := time.Since(start)
+	deferNonCritical := shouldDeferNonCritical(simDuration, elapsedAfterSim, 0)
 	for _, res := range results {
+		if shouldDeferNonCritical(simDuration, time.Since(start), persistDuration) {
+			deferNonCritical = true
+		}
 		persistStart := time.Now()
 		eventSequence = l.persistTick(res, membersByPlayerID, eventSequence, deferNonCritical)
 		persistDuration += time.Since(persistStart)
-		broadcastStart := time.Now()
-		l.fanoutResult(res, clients, inputTypes, levelsByPlayerID)
-		broadcastDuration += time.Since(broadcastStart)
 	}
+	broadcastStart := time.Now()
+	l.fanoutTickResults(results, clients, inputTypes, levelsByPlayerID)
+	broadcastDuration = time.Since(broadcastStart)
 	totalDuration := time.Since(start)
 	guardrail := evaluateTickGuardrail(totalDuration)
 	combatBudget := game.CombatPhaseBudgetForTick()

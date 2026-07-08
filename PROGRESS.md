@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-08 (v452 resource wallet bag)
+Last updated: 2026-07-08 (v453 combat session stability)
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-07-08 (v452 resource wallet bag)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v452 — resource wallet bag |
-| **CI gate** | 2026-07-08 — `chore: Resource Wallet Bag` committed on `main` |
-| **Next slice** | v453 — combat session stability (skill-cast disconnect hardening; see `/next` brief) |
+| **Latest completed slice** | v453 — combat session stability |
+| **CI gate** | 2026-07-08 — focused verification green; batch `make ci` pending |
+| **Next slice** | v454 — skill damage burst events |
 | **Last engineering review** | v448 — [`docs/reviews/20260707_v448-overview.md`](docs/reviews/20260707_v448-overview.md) (2026-07-07; official cadence) |
 | **Next engineering review** | ~v458 — run `$review` then `$refactor` after next ~10-slice milestone |
 

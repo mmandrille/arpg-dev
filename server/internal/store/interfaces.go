@@ -124,6 +124,7 @@ type InputRepo interface {
 // EventRepo records and reads authoritative events.
 type EventRepo interface {
 	AppendEvent(ctx context.Context, ev SessionEvent) error
+	AppendEvents(ctx context.Context, events []SessionEvent) error
 	ListEvents(ctx context.Context, sessionID string) ([]SessionEvent, error)
 }
 

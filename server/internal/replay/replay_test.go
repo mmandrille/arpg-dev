@@ -1611,6 +1611,7 @@ func (f *fakeRepo) ListInputs(context.Context, string) ([]store.SessionInput, er
 	return f.inputs, nil
 }
 func (f *fakeRepo) AppendEvent(context.Context, store.SessionEvent) error { return nil }
+func (f *fakeRepo) AppendEvents(context.Context, []store.SessionEvent) error { return nil }
 func (f *fakeRepo) ListEvents(context.Context, string) ([]store.SessionEvent, error) {
 	return f.events, nil
 }

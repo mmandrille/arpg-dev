@@ -1686,7 +1686,7 @@ func _apply_delta(p: Dictionary) -> void:
 			for hit in ev.get("hits", []):
 				if not hit is Dictionary:
 					continue
-				hit_ev := {
+				var hit_ev = {
 					"event_type": "monster_damaged",
 					"entity_id": str(hit.get("target_entity_id", "")),
 					"source_entity_id": str(ev.get("source_entity_id", ev.get("entity_id", ""))),

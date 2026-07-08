@@ -11,6 +11,7 @@ var _ground_factory: RefCounted
 var _current_level: int = 0
 var _ceiling_node: MeshInstance3D
 var _occlusion_meshes: Dictionary = {}
+var _occlusion_bodies: Dictionary = {}
 var _occlusion_fade: WallOcclusionFade
 
 const TOWN_WALL_HEIGHT := 1.0
@@ -71,6 +72,7 @@ func set_level(level: int) -> void:
 func clear_wall_nodes() -> void:
 	_ceiling_node = null
 	_occlusion_meshes.clear()
+	_occlusion_bodies.clear()
 	reset_occlusion_fade()
 	if _walls_root == null:
 		return
@@ -430,6 +432,9 @@ func _register_occlusion_mesh(wall_id: String, mesh: MeshInstance3D) -> void:
 	if wall_id == "" or mesh == null:
 		return
 	_occlusion_meshes[wall_id] = mesh
+	var body := mesh.get_parent() as StaticBody3D
+	if body != null:
+		_occlusion_bodies[wall_id] = body
 
 
 func apply_occlusion_fades(faded_by_id: Dictionary) -> void:
@@ -440,6 +445,17 @@ func apply_occlusion_fades(faded_by_id: Dictionary) -> void:
 			continue
 		var alpha := float(faded_by_id.get(wall_id, opaque_alpha))
 		_set_mesh_occlusion_alpha(mesh, alpha)
+		_set_wall_pick_block(wall_id, alpha >= opaque_alpha - 0.001)
+
+
+func _set_wall_pick_block(wall_id: String, blocked: bool) -> void:
+	var body := _occlusion_bodies.get(wall_id) as StaticBody3D
+	if body == null:
+		return
+	body.input_ray_pickable = blocked
+	for child in body.get_children():
+		if child is CollisionShape3D:
+			(child as CollisionShape3D).disabled = not blocked
 
 
 func _set_mesh_occlusion_alpha(mesh: MeshInstance3D, alpha: float) -> void:

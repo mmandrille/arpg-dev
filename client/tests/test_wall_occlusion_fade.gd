@@ -1,6 +1,8 @@
 extends SceneTree
 
 const WallOcclusionFadeScript := preload("res://scripts/wall_occlusion_fade.gd")
+const WallRendererScript := preload("res://scripts/wall_renderer.gd")
+const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 
 var _pass_count := 0
 var _fail_count := 0
@@ -16,6 +18,7 @@ func _run() -> void:
 	_test_wall_qualifies_for_box_and_wood()
 	_test_resolve_faded_walls_for_lab_layout()
 	_test_backdrop_walls_stay_opaque_in_lab_layout()
+	_test_faded_wall_disables_pick_collision()
 	print("[gdtest] PASS: test_wall_occlusion_fade (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -104,6 +107,29 @@ func _test_backdrop_walls_stay_opaque_in_lab_layout() -> void:
 	_assert_true("north wall faded for centered hero", faded.has("north_wall"))
 	_assert_false("south backdrop wall stays opaque", faded.has("south_wall"))
 	_assert_false("west backdrop wall stays opaque", faded.has("west_wall"))
+
+
+func _test_faded_wall_disables_pick_collision() -> void:
+	var root := Node3D.new()
+	get_root().add_child(root)
+	var renderer = WallRendererScript.new(root, GroundWallFactoryScript.new())
+	renderer.set_level(-4)
+	renderer.render_wall_layout([{
+		"id": "fade_wall",
+		"position": {"x": 4.0, "y": 4.0},
+		"size": {"x": 2.0, "y": 1.0},
+		"source": "generated",
+	}])
+	var body := root.get_child(0) as StaticBody3D
+	var shape := body.get_child(0) as CollisionShape3D
+	_assert_false("wall collision starts enabled", shape.disabled)
+	renderer.apply_occlusion_fades({"fade_wall": 0.34})
+	_assert_true("faded wall disables collision", shape.disabled)
+	_assert_false("faded wall is not ray pickable", body.input_ray_pickable)
+	renderer.apply_occlusion_fades({})
+	_assert_false("opaque wall restores collision", shape.disabled)
+	_assert_true("opaque wall is ray pickable", body.input_ray_pickable)
+	root.queue_free()
 
 
 func _assert_true(label: String, value: bool) -> void:

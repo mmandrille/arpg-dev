@@ -29,6 +29,7 @@ func _run() -> void:
 	await _test_zero_radius_disables_overlay()
 	await _test_set_active_false_survives_progression_update()
 	await _test_hero_centered_falloff_debug_state()
+	await _test_playable_floor_bounds_debug_state()
 	await _test_perspective_world_ground_falloff()
 	await _test_perspective_disables_organic_edge()
 	await _test_shadow_cache_hit_on_static_frames()
@@ -349,6 +350,23 @@ func _test_hero_centered_falloff_debug_state() -> void:
 	_assert_false("world space visibility disabled", bool(state.get("world_space_visibility", true)))
 	_assert_true("falloff power positive", float(state.get("falloff_power", 0.0)) > 0.0)
 	_assert_true("edge feather world positive", float(state.get("edge_feather_world", 0.0)) > 0.0)
+	overlay.free()
+
+
+func _test_playable_floor_bounds_debug_state() -> void:
+	var overlay = FogOfWarOverlayScript.new()
+	get_root().add_child(overlay)
+	await process_frame
+	overlay.set_playable_floor_bounds(Vector2(48.0, 32.0))
+	await process_frame
+	var state := overlay.get_debug_state()
+	_assert_true("floor bounds active", bool(state.get("floor_bounds_active", false)))
+	_assert_eq("floor bounds width", float((state.get("floor_bounds_max", {}) as Dictionary).get("x", 0.0)), 48.0)
+	_assert_eq("floor bounds height", float((state.get("floor_bounds_max", {}) as Dictionary).get("y", 0.0)), 32.0)
+	overlay.set_playable_floor_bounds(Vector2.ZERO)
+	await process_frame
+	state = overlay.get_debug_state()
+	_assert_false("floor bounds cleared", bool(state.get("floor_bounds_active", true)))
 	overlay.free()
 
 

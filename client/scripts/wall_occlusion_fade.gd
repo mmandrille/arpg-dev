@@ -80,6 +80,8 @@ static func resolve_faded_walls(camera_xz: Vector2, targets: Array, wall_layout:
 
 
 static func wall_qualifies_for_occlusion_fade(wall: Dictionary) -> bool:
+	if str(wall.get("source", "")) == "perimeter":
+		return false
 	var kind := str(wall.get("kind", "wall"))
 
 	return kind == "" or kind == "wall" or kind == "wood"

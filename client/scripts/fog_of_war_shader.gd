@@ -102,6 +102,9 @@ vec2 plane_xz_at_height(vec2 screen_px, float plane_y) {
 // iso_world_z_per_px.xy = (dworld_z/dpx_x, dworld_z/dpx_y)
 uniform vec2 iso_world_x_per_px = vec2(0.0);
 uniform vec2 iso_world_z_per_px = vec2(0.0);
+uniform float floor_bounds_active = 0.0;
+uniform vec2 floor_bounds_min = vec2(0.0);
+uniform vec2 floor_bounds_max = vec2(0.0);
 
 vec2 ground_xz_isometric(vec2 screen_px) {
 	if (length(iso_world_x_per_px) < 0.0001) { return hero_world_xz; }
@@ -153,8 +156,16 @@ float visibility_at_world_xz(vec2 world_xz) {
 	return max(hero_vis, torch_vis);
 }
 
+bool outside_playable_floor(vec2 world_xz) {
+	return world_xz.x < floor_bounds_min.x || world_xz.x > floor_bounds_max.x
+		|| world_xz.y < floor_bounds_min.y || world_xz.y > floor_bounds_max.y;
+}
+
 float visibility_isometric(vec2 screen_px) {
 	vec2 world_xz = ground_xz_at_screen(screen_px);
+	if (floor_bounds_active > 0.5 && outside_playable_floor(world_xz)) {
+		return 0.0;
+	}
 	vec2 delta_px = screen_px - center_px;
 	float d = length(delta_px);
 	float edge = organic_edge_screen(delta_px);

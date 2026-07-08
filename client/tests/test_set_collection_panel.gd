@@ -11,6 +11,8 @@ func _init() -> void:
 	_test_empty_catalog_state(panel)
 	_test_owned_and_equipped_progress(panel)
 	_test_refresh_resets_removed_piece(panel)
+	_test_only_equipped_sets_render(panel)
+	_test_inactive_weapon_set_counts_as_equipped(panel)
 	panel.queue_free()
 	root.queue_free()
 	print("[gdtest] PASS: test_set_collection_panel")
@@ -46,6 +48,29 @@ func _test_owned_and_equipped_progress(panel) -> void:
 	_assert_eq("stormrunner owned", int(stormrunner.get("owned_count", -1)), 1)
 	_assert_eq("stormrunner equipped", int(stormrunner.get("equipped_count", -1)), 0)
 	_assert_eq("stormrunner mask state", _piece_state(stormrunner, "Stormrunner Covenant Mask"), "owned")
+
+
+func _test_only_equipped_sets_render(panel) -> void:
+	var items := [
+		_set_item("1001", "Verdant Vanguard Blade"),
+		_set_item("2001", "Stormrunner Covenant Mask"),
+	]
+	panel.set_items(items, {"main_hand": "1001"}, [])
+	var names: Array = panel.get_display_set_names()
+	_assert_eq("only one equipped set shown", names.size(), 1)
+	_assert_eq("equipped set name", str(names[0]), "Verdant Vanguard")
+
+
+func _test_inactive_weapon_set_counts_as_equipped(panel) -> void:
+	var items := [_set_item("1001", "Verdant Vanguard Blade")]
+	var weapon_sets := [
+		{"index": 0, "main_hand": null, "off_hand": null},
+		{"index": 1, "main_hand": "1001", "off_hand": null},
+	]
+	panel.set_items(items, {}, weapon_sets)
+	var verdant := _set_by_name(panel.get_debug_state().get("sets", []), "Verdant Vanguard")
+	_assert_eq("inactive weapon set equipped", int(verdant.get("equipped_count", -1)), 1)
+	_assert_eq("inactive weapon set blade state", _piece_state(verdant, "Verdant Vanguard Blade"), "equipped")
 
 
 func _test_refresh_resets_removed_piece(panel) -> void:

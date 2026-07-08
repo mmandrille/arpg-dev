@@ -193,7 +193,7 @@ static func make_town_preview_scene() -> Node3D:
 	root.add_child(ground)
 	var service_entries := [
 		{"def_id": "stairs_down", "position": Vector3(11.0, 0.0, 12.0)},
-		{"def_id": "teleporter", "position": Vector3(12.0, 0.0, 12.0)},
+		{"def_id": "teleporter", "position": Vector3(13.0, 0.0, 12.0)},
 		{"def_id": "town_blacksmith", "position": Vector3(5.0, 0.0, 12.0)},
 		{"def_id": "town_stash", "position": Vector3(6.0, 0.0, 8.0)},
 		{"def_id": "town_bishop", "position": Vector3(16.0, 0.0, 8.0)},

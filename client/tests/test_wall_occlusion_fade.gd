@@ -16,6 +16,7 @@ func _run() -> void:
 	_test_segment_intersects_wall_between_camera_and_hero()
 	_test_non_box_wall_kind_skipped()
 	_test_wall_qualifies_for_box_and_wood()
+	_test_perimeter_wall_skipped_for_occlusion_fade()
 	_test_resolve_faded_walls_for_lab_layout()
 	_test_backdrop_walls_stay_opaque_in_lab_layout()
 	_test_faded_wall_disables_pick_collision()
@@ -54,6 +55,27 @@ func _test_wall_qualifies_for_box_and_wood() -> void:
 	_assert_true("default wall qualifies", WallOcclusionFadeScript.wall_qualifies_for_occlusion_fade({}))
 	_assert_true("wood wall qualifies", WallOcclusionFadeScript.wall_qualifies_for_occlusion_fade({"kind": "wood"}))
 	_assert_false("water skipped", WallOcclusionFadeScript.wall_qualifies_for_occlusion_fade({"kind": "water"}))
+
+
+func _test_perimeter_wall_skipped_for_occlusion_fade() -> void:
+	_assert_false(
+		"perimeter wall skipped",
+		WallOcclusionFadeScript.wall_qualifies_for_occlusion_fade({"kind": "wall", "source": "perimeter"}),
+	)
+	var faded := WallOcclusionFadeScript.resolve_faded_walls(
+		Vector2(11.0, 20.0),
+		[Vector3(8.0, 0.0, 5.0)],
+		[
+			{
+				"id": "south_perimeter",
+				"kind": "wall",
+				"source": "perimeter",
+				"position": {"x": 8.0, "y": -0.5},
+				"size": {"x": 16.0, "y": 1.0},
+			},
+		],
+	)
+	_assert_eq("perimeter wall not faded", faded.size(), 0)
 
 
 func _test_resolve_faded_walls_for_lab_layout() -> void:

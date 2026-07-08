@@ -5394,6 +5394,10 @@ func _render_wall_layout(walls: Array) -> void:
 func _sync_fog_wall_layout() -> void:
 	if fog_overlay != null:
 		InteractableRulesLoader.sync_fog_overlay(fog_overlay, current_wall_layout, interactable_ids, entities)
+		if current_level < 0 and _ground_factory != null:
+			fog_overlay.set_playable_floor_bounds(_ground_factory.floor_size_for_level(current_level))
+		else:
+			fog_overlay.set_playable_floor_bounds(Vector2.ZERO)
 	if _dungeon_torch_lights != null:
 		_dungeon_torch_lights.sync(current_level, current_wall_layout, current_level < 0 or _lab_world_fog_at_town_level())
 	DungeonRoomFloorTint.sync(ground_node, _ground_factory, current_level, current_wall_layout, entities)

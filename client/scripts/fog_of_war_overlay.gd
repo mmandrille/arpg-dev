@@ -50,6 +50,9 @@ var _shadow_cache: FogLosShadowCacheScript = FogLosShadowCacheScript.new()
 var _viewport_size_changed_connected := false
 var _live_monster_count: int = 0
 var _shader_update_frame_counter: int = 0
+var _floor_bounds_min := Vector2.ZERO
+var _floor_bounds_max := Vector2.ZERO
+var _floor_bounds_active := false
 
 
 func _ready() -> void:
@@ -115,6 +118,18 @@ func set_light_radius(radius: float) -> void:
 func set_wall_layout(walls: Array) -> void:
 	_wall_layout = HeroVisibilityFieldScript.normalize_wall_layout(walls)
 	_shadow_cache.hard_invalidate()
+	_update_shader()
+
+
+func set_playable_floor_bounds(floor_size: Vector2) -> void:
+	if floor_size.x <= 0.0 or floor_size.y <= 0.0:
+		_floor_bounds_active = false
+		_floor_bounds_min = Vector2.ZERO
+		_floor_bounds_max = Vector2.ZERO
+	else:
+		_floor_bounds_active = true
+		_floor_bounds_min = Vector2.ZERO
+		_floor_bounds_max = floor_size
 	_update_shader()
 
 
@@ -211,6 +226,8 @@ func get_debug_state() -> Dictionary:
 		"shadow_cache_last_rebuild_reason": _shadow_cache.last_rebuild_reason,
 		"torch_count": _torch_positions.size(),
 		"torch_light_radius": _torch_light_radius,
+		"floor_bounds_active": _floor_bounds_active,
+		"floor_bounds_max": {"x": _floor_bounds_max.x, "y": _floor_bounds_max.y},
 	}
 
 
@@ -309,6 +326,9 @@ func _update_shader() -> void:
 		_material.set_shader_parameter("inv_view", _camera.get_global_transform().affine_inverse())
 		if not _perspective_camera:
 			_sync_iso_world_mapping()
+	_material.set_shader_parameter("floor_bounds_active", 1.0 if _floor_bounds_active else 0.0)
+	_material.set_shader_parameter("floor_bounds_min", _floor_bounds_min)
+	_material.set_shader_parameter("floor_bounds_max", _floor_bounds_max)
 	var organic_cfg: Dictionary = FogPresentationLoaderScript.organic_edge()
 	_material.set_shader_parameter("organic_edge_segments", float(organic_cfg.get("segments", 18.0)))
 	_material.set_shader_parameter("organic_edge_seed", float(organic_cfg.get("seed", 41.0)))

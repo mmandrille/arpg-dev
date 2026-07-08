@@ -579,14 +579,14 @@ func _render() -> void:
 		_gold_label.text = "Gold: %d" % gold
 	_render_resources_button()
 	if _set_collection_panel != null:
-		_set_collection_panel.set_items(inventory, equipped)
+		_set_collection_panel.set_items(inventory, equipped, weapon_sets)
 	_position_gesture_hint()
 
 func _toggle_set_collection_panel() -> void:
 	if _set_collection_panel == null:
 		return
 	_set_collection_panel.visible = not _set_collection_panel.visible
-	_set_collection_panel.set_items(inventory, equipped)
+	_set_collection_panel.set_items(inventory, equipped, weapon_sets)
 
 
 func _set_viewed_weapon_set(index: int) -> void:

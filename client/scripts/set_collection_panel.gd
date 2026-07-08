@@ -3,14 +3,18 @@ extends PanelContainer
 
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const SET_RULES_REL := "../shared/rules/set_items.v0.json"
-const TITLE_FONT_SIZE := 19
-const BODY_FONT_SIZE := 15
+const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
+const TITLE_FONT_SIZE := 10
+const BODY_FONT_SIZE := 8
+const PANEL_WIDTH := 165
+const PANEL_HEIGHT := 75
 const SET_COLOR := Color("#55e66f")
 const ACTIVE_COLOR := Color("#7df095")
 const INACTIVE_COLOR := Color("#7d8d7f")
 const MUTED_COLOR := Color("#9c8f78")
 
 var _sets: Dictionary = {}
+var _scroll: ScrollContainer
 var _root: VBoxContainer
 var _state: Dictionary = {"sets": [], "visible": false}
 
@@ -21,9 +25,9 @@ func _ready() -> void:
 	visible = false
 
 
-func set_items(items: Array, equipped: Dictionary) -> void:
+func set_items(items: Array, equipped: Dictionary, weapon_sets: Array = []) -> void:
 	_ensure_catalog_loaded()
-	var equipped_ids := _equipped_ids(equipped)
+	var equipped_ids := _equipped_ids(equipped, weapon_sets)
 	var by_set := _initial_state()
 	for item in items:
 		if typeof(item) != TYPE_DICTIONARY:
@@ -40,6 +44,13 @@ func get_debug_state() -> Dictionary:
 	return _state.duplicate(true)
 
 
+func get_display_set_names() -> Array:
+	var out: Array = []
+	for set_state in _display_sets():
+		out.append(str((set_state as Dictionary).get("set_name", "")))
+	return out
+
+
 func has_any_progress() -> bool:
 	for set_state in _state.get("sets", []):
 		if int((set_state as Dictionary).get("owned_count", 0)) > 0:
@@ -50,21 +61,40 @@ func has_any_progress() -> bool:
 func _ensure_built() -> void:
 	if _root != null:
 		return
-	custom_minimum_size = Vector2(330, 150)
+	custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
 	add_theme_stylebox_override("panel", _panel_style(Color("#18251d"), Color("#31523a")))
+	_scroll = ScrollContainer.new()
+	_scroll.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
+	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(_scroll)
 	_root = VBoxContainer.new()
-	_root.add_theme_constant_override("separation", 6)
-	add_child(_root)
+	_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_root.add_theme_constant_override("separation", 3)
+	_scroll.add_child(_root)
 
 
 func _render() -> void:
 	_ensure_built()
 	for child in _root.get_children():
 		child.queue_free()
-	var title := _label("Set Collection", TITLE_FONT_SIZE, SET_COLOR)
+	var title := _label("Active Sets", TITLE_FONT_SIZE, SET_COLOR)
 	_root.add_child(title)
-	for set_state in _state.get("sets", []):
+	var display_sets := _display_sets()
+	if display_sets.is_empty():
+		_root.add_child(_label("Equip a set piece to track progress here.", BODY_FONT_SIZE, MUTED_COLOR))
+		return
+	for set_state in display_sets:
 		_root.add_child(_set_block(set_state as Dictionary))
+
+
+func _display_sets() -> Array:
+	var out: Array = []
+	for set_state in _state.get("sets", []):
+		if int((set_state as Dictionary).get("equipped_count", 0)) > 0:
+			out.append(set_state)
+	return out
 
 
 func _set_block(set_state: Dictionary) -> Control:
@@ -200,12 +230,18 @@ func _sorted_sets(by_set: Dictionary) -> Array:
 	return out
 
 
-func _equipped_ids(equipped: Dictionary) -> Dictionary:
+func _equipped_ids(equipped: Dictionary, weapon_sets: Array) -> Dictionary:
 	var ids := {}
-	for slot in equipped.keys():
-		var item_id := str(equipped.get(slot, ""))
-		if item_id != "" and item_id != "0":
-			ids[item_id] = true
+	for slot in EQUIPMENT_SLOTS:
+		var item_id = equipped.get(slot, null)
+		if item_id != null and str(item_id) != "" and str(item_id) != "0":
+			ids[str(item_id)] = true
+	for set_data in weapon_sets:
+		var data := set_data as Dictionary
+		for slot in ["main_hand", "off_hand"]:
+			var item_id = data.get(slot, null)
+			if item_id != null and str(item_id) != "" and str(item_id) != "0":
+				ids[str(item_id)] = true
 	return ids
 
 

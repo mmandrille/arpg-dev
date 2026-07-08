@@ -1,0 +1,25 @@
+docs/progress/slice-codename-index.md
+  s_280b7abab0cff9::t_40555c7699beb0 242
+docs/progress/slice-lifecycle.md
+  s_280b7abab0cff9::t_f451688a0f43b0 436
+PROGRESS.md
+  s_280b7abab0cff9::t_4b25e1d78cc638 18,26-28
+docs/as-built/v452_resource-wallet-bag.md
+  s_280b7abab0cff9::t_6536fb9677358e 1-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e70a9a6bddcef686fdcfc06831eaa9cb8863ad01",
+  "prompts": {},
+  "sessions": {
+    "s_280b7abab0cff9": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0ba41c3e-f1ea-4d22-837b-0f0339088ea6",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -172,6 +172,6 @@ func TestQuestStewardRewardFamilyCanGrantNamedUnique(t *testing.T) {
 	}
 }
 
-func TestQuestTurnInStillConsumesLegacyQuestLeaf(t *testing.T) {
+func TestQuestTurnInConsumesQuestLeafFromResourceBag(t *testing.T) {
 	TestQuestTurnInConsumesQuestItemAndRewardsGold(t)
 }

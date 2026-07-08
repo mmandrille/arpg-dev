@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-08 (v456 six player boss combat soak)
+Last updated: 2026-07-08 (v457 live combat transport stability)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-07-08 (v456 six player boss combat soak)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v456 — six player boss combat soak |
-| **Next slice** | v457 — TBD (`/next`) |
+| **Latest completed slice** | v457 — live combat transport stability |
+| **Next slice** | v458 — engineering review due (`$review`, then `$refactor`) |
 | **Last engineering review** | v448 — [`docs/reviews/20260707_v448-overview.md`](docs/reviews/20260707_v448-overview.md) (2026-07-07; official cadence) |
 | **Next engineering review** | ~v458 — run `$review` then `$refactor` after next ~10-slice milestone |
 
@@ -114,7 +114,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Testing / tooling | **Pre-existing extended-scenario failures (discovered $review v448):** `random_quest_reward_floor` (HTTP 500 server crash on WebSocket, `dungeon_depth_one_lab` world); `teleporter_lab` (level assertion `current_level -3 != 0`); `dungeon_combat_perf_probe` (skill_cast timeout flaky). All confirmed pre-existing at `ebcbdc9a`. | discovered $review 2026-07-07 |
 | Testing / tooling | **`TestDungeonTeleportersReplayGolden` flaky** — town navigation navBudget exhaustion introduced between v420 and v448 (dungeon layout changes). Fix: increase navBudget for post-teleport town traversal or remove navigation from that step. Separate from tuning-test audit. | discovered $refactor 2026-07-07 |
-| Testing / tooling | **Crowded combat WebSocket disconnects (solo Ranger Volley)** — mitigated by v453–v456 (persist batching, burst events, skill budget, six-peer soak). Re-verify manually with `make play-debug` if regressions appear. | v453–v456 combat session stability program |
+| Testing / tooling | **Performance test topology discipline:** Python protocol bots and offline Godot replay do not prove live Godot transport stability. Use a `runner: godot_client` scenario for authoritative client failures, assert lifetime reconnect count, capture close diagnostics, and correlate backend/client phases. | v457 live combat transport stability; `docs/performance/tools.md` |
 | Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up, v76/v77/v78 deferred |
 | Settings | Controls remapping, accessibility options, language selection | v24/v224 non-goals; v351 shipped windowed/fullscreen/windowed-fullscreen display mode in `user://settings.json` |
 | Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |

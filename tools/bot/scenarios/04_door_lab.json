@@ -12,11 +12,11 @@
     {
       "action": "action_entity",
       "item_def_id": "quest_leaf",
-      "event_type": "item_picked_up"
+      "event_type": "resource_bag_item_picked_up"
     }
   ],
   "assertions": [
     { "type": "interactable_state", "interactable_def_id": "wooden_door", "state": "open" },
-    { "type": "inventory_contains", "item_def_id": "quest_leaf", "equipped": false }
+    { "type": "resource_bag_count", "item_def_id": "quest_leaf", "equals": 1 }
   ]
 }

@@ -14,7 +14,7 @@
     { "type": "wall_count", "kind": "rock", "at_least": 1 },
     { "type": "wall_count", "kind": "column", "at_least": 1 },
     { "type": "wall_count", "kind": "rubble", "at_least": 1 },
-    { "type": "inventory_contains", "item_def_id": "quest_leaf", "equipped": false }
+    { "type": "resource_bag_count", "item_def_id": "quest_leaf", "equals": 1 }
   ],
   "visual": {
     "camera": { "x": 7, "y": 5, "zoom": 1.0 },

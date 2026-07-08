@@ -19,13 +19,14 @@
     { "type": "wait_entity", "entity_type": "interactable", "timeout_s": 15.0 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_mercenary_board" },
     { "type": "wait_event", "event_type": "mercenary_board_opened", "timeout_s": 15.0 },
+    { "type": "assert_mercenary_panel_visible", "visible": true },
     {
-      "type": "wait_mercenary_panel",
+      "type": "assert_mercenary_panel",
       "price": 100,
       "gold": 300,
       "affordable": true,
       "service_id": "mercenary",
-      "candidate_count": 1,
+      "candidate_count": 2,
       "timeout_s": 15.0
     },
     { "type": "click_mercenary_hire" },

@@ -409,7 +409,7 @@ func _ready() -> void:
 	var resume_session_id := _env("ARPG_SESSION_ID", "")
 	var requested_world_id := _env("ARPG_WORLD_ID", "")
 	var requested_seed := _env("ARPG_SEED", "")
-	var requested_character_id := BotDebugProgressionSetupScript.prepare_character(client, _env("ARPG_DEBUG_TOKEN", "local-debug-token"), _env("ARPG_BOT_DEBUG_PROGRESSION", "") if bot_client_run else "", _env("ARPG_BOT_DEBUG_GOLD", "") if bot_client_run else "")
+	var requested_character_id := BotDebugProgressionSetupScript.prepare_character(client, _env("ARPG_DEBUG_TOKEN", "local-debug-token"), _env("ARPG_BOT_DEBUG_PROGRESSION", "") if bot_client_run else "", _env("ARPG_BOT_DEBUG_GOLD", "") if bot_client_run else "", _env("ARPG_BOT_CHARACTER_CLASS", "barbarian"))
 	if requested_world_id == "" and not bot_client_run:
 		requested_world_id = "dungeon_levels"
 	var join_session_id := _env("ARPG_JOIN_SESSION_ID", "")

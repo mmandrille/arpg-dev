@@ -3784,9 +3784,9 @@ func TestInventoryCapacityOccupancyExemptsEquippedAndHotbar(t *testing.T) {
 func TestInventoryCapacityPickupRejectsFullBagBeforeMutation(t *testing.T) {
 	sim := MustNewSim("sess_inventory_full_pickup", "01", loadRules(t))
 	for i := 0; i < inventoryCapacityForRows(baseInventoryRows); i++ {
-		addStaticInventoryItem(sim, uint64(7400+i), "quest_leaf")
+		addStaticInventoryItem(sim, uint64(7400+i), "rusty_sword")
 	}
-	loot := &entity{id: sim.alloc(), kind: lootEntity, pos: sim.entities[sim.playerID].pos, itemDefID: "quest_leaf"}
+	loot := &entity{id: sim.alloc(), kind: lootEntity, pos: sim.entities[sim.playerID].pos, itemDefID: "rusty_sword"}
 	sim.entities[loot.id] = loot
 	beforeNextID := sim.nextID
 

@@ -196,6 +196,22 @@
           }
         }
       }
+    },
+    "client_network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "websocket_inbound_buffer_bytes",
+        "websocket_outbound_buffer_bytes",
+        "websocket_max_queued_packets",
+        "websocket_heartbeat_seconds"
+      ],
+      "properties": {
+        "websocket_inbound_buffer_bytes": { "type": "integer", "minimum": 65535 },
+        "websocket_outbound_buffer_bytes": { "type": "integer", "minimum": 65535 },
+        "websocket_max_queued_packets": { "type": "integer", "minimum": 1 },
+        "websocket_heartbeat_seconds": { "type": "number", "exclusiveMinimum": 0 }
+      }
     }
   }
 }

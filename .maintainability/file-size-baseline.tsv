@@ -6,12 +6,12 @@ client/scripts/bot_controller.gd	823	# v404: character mercenary hire client bot
 client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait filters consolidated into flag loop
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	701	# v392: class creation features panel
-client/scripts/inventory_panel.gd	1516
-client/scripts/main.gd	6625	# v448: steward hunt banner/panel wiring + event handlers; hunt logic extracted to steward_hunt_banner.gd and quest_steward_panel.gd
+client/scripts/inventory_panel.gd	1656	# v457 close-out: inherited v449-v456 item/resource UI growth; extraction deferred to scheduled v458 review/refactor
+client/scripts/main.gd	6725	# v457 close-out: inherited v449-v456 combat/resource wiring plus live transport hook; coordinator extraction deferred to scheduled v458 review/refactor
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1243	# v407: baseline sync (no v407 logic edits)
 client/scripts/skills_panel.gd	1010
-client/scripts/stash_panel.gd	1155
+client/scripts/stash_panel.gd	1194	# v457 close-out: inherited v452 resource wallet/bag UI growth; extraction deferred to scheduled v458 review/refactor
 client/tests/test_client_bot.gd	1153	# v334 client-bot: bot exit cleanup helpers
 client/tests/test_coop_client.gd	1721	# v392: class creation feature panel tests
 client/tests/test_golden.gd	686
@@ -28,11 +28,11 @@ server/internal/http/ws_test.go	1482
 server/internal/realtime/session_loop.go	951
 server/internal/realtime/session_loop_test.go	675	# v453 combat session stability persist defer, enqueue backpressure, fanout coalesce tests
 server/internal/replay/replay.go	751	# v404: mercenary roster load on session reconstruct
-server/internal/replay/replay_test.go	1593	# $refactor v331: +28 lines updating passive gold auto-pickup test for v332 momentum
-server/internal/store/repos.go	2315
+server/internal/replay/replay_test.go	1622	# v457 close-out: inherited v453 replay/session stability coverage; test extraction deferred to scheduled v458 review/refactor
+server/internal/store/repos.go	2369	# v457 close-out: inherited v452-v453 resource persistence and batch-event work; extraction deferred to scheduled v458 review/refactor
 server/internal/store/store_test.go	1679	# v390: leveled upgrade shard store test setup
 client/scripts/showme/visual_capture.gd	1152	# baseline sync: v443 dim-mesh work landed without baseline bump; extraction still deferred (capture mode dispatch table)
 tools/bot/run.py	4553	# v456 combat soak scenario wrappers; soak logic in combat_soak_runtime.py
 tools/bot/test_protocol.py	1434
 tools/assets/rig_hero_glbs.py	686	# v434: 17-bone hero rig; GLB parse/weight/IBM pipeline tightly coupled to mesh mutation state
-tools/validate_shared.py	3156	# pre-v414 drift: weapon family stat scaling cross-checks; extraction deferred
+tools/validate_shared.py	3182	# v457 close-out: inherited v449-v452 catalog/resource validation; extraction deferred to scheduled v458 review/refactor

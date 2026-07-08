@@ -65,8 +65,8 @@ func TestDoorLabClosedDoorPreventsPassageUntilActivated(t *testing.T) {
 	}
 	pickup := sim.Tick([]Input{{MessageID: "loot", Type: "action_intent", Action: &ActionIntent{TargetID: "1003"}}})
 	assertAck(t, pickup, "loot")
-	if !hasEvent(pickup, "item_picked_up") {
-		t.Fatalf("missing item_picked_up after door passage: %+v", pickup.Events)
+	if !hasEvent(pickup, "resource_bag_item_picked_up") {
+		t.Fatalf("missing resource_bag_item_picked_up after door passage: %+v", pickup.Events)
 	}
 }
 

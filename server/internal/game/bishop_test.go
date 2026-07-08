@@ -126,7 +126,7 @@ func TestBishopRespecPreservesEarnedQuestGold(t *testing.T) {
 	sim.progression.Gold = 300
 	sim.progression.DeepestDungeonDepth = 125
 	sim.gold = 300
-	addStaticInventoryItem(sim, 29301, sim.rules.MainConfig.Gameplay.QuestTurnInItemDefID)
+	addTestResourceBagItem(sim, 29301, sim.rules.MainConfig.Gameplay.QuestTurnInItemDefID)
 	sim.savePlayer(sim.defaultPlayer())
 
 	turnIn := sim.Tick([]Input{{

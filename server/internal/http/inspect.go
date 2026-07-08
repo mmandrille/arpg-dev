@@ -69,6 +69,7 @@ func (s *Server) handleDebugCharacterProgression(w http.ResponseWriter, r *http.
 	progression := store.CharacterProgression{
 		AccountID:           accountID,
 		CharacterID:         characterID,
+		CharacterClass:      character.CharacterClass,
 		Level:               req.Level,
 		Experience:          req.Experience,
 		UnspentStatPoints:   req.UnspentStatPoints,

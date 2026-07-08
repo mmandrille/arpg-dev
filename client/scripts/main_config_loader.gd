@@ -7,6 +7,7 @@ static var presentation_lod: Dictionary = {}
 static var loot_labels: Dictionary = {}
 static var client_perf: Dictionary = {}
 static var client_reconnect: Dictionary = {}
+static var client_network: Dictionary = {}
 static var _loaded: bool = false
 
 
@@ -23,6 +24,7 @@ static func ensure_loaded() -> void:
 		loot_labels = root.get("loot_labels", {})
 		client_perf = root.get("client_perf", {})
 		client_reconnect = root.get("client_reconnect", {})
+		client_network = root.get("client_network", {})
 
 
 static func presentation_lod_rules() -> Dictionary:
@@ -69,6 +71,11 @@ static func client_reconnect_rules() -> Dictionary:
 	return client_reconnect
 
 
+static func client_network_rules() -> Dictionary:
+	ensure_loaded()
+	return client_network
+
+
 static func reset_for_tests() -> void:
 	_loaded = false
 	gameplay = {}
@@ -76,6 +83,7 @@ static func reset_for_tests() -> void:
 	loot_labels = {}
 	client_perf = {}
 	client_reconnect = {}
+	client_network = {}
 
 
 static func base_movement_speed() -> float:

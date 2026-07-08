@@ -55,7 +55,7 @@ func TestGoldAutoPickupWorksOnDungeonLevelWallet(t *testing.T) {
 	}
 }
 
-func TestNonGoldLootDoesNotAutoPickup(t *testing.T) {
+func TestQuestLootRoutesToResourceBagOnlyOnExplicitPickup(t *testing.T) {
 	sim := MustNewSim("sess_item_no_auto", "v49_item_no_auto", loadRules(t))
 	player := sim.entities[sim.playerID]
 	loot := addTestFloorLoot(sim, "quest_leaf", player.pos)
@@ -70,8 +70,8 @@ func TestNonGoldLootDoesNotAutoPickup(t *testing.T) {
 	}
 	pickup := sim.Tick([]Input{{MessageID: "pick_leaf", Type: "action_intent", Action: &ActionIntent{TargetID: idStr(loot.id)}}})
 	assertAck(t, pickup, "pick_leaf")
-	if len(sim.inventory) != 1 || sim.inventory[0].itemDefID != "quest_leaf" {
-		t.Fatalf("explicit item pickup inventory = %+v, want quest_leaf", sim.inventory)
+	if len(sim.inventory) != 0 || len(sim.resourceBagItems) != 1 || sim.resourceBagItems[0].itemDefID != "quest_leaf" {
+		t.Fatalf("explicit quest pickup inventory=%+v resource_bag=%+v, want quest_leaf in resource bag", sim.inventory, sim.resourceBagItems)
 	}
 }
 

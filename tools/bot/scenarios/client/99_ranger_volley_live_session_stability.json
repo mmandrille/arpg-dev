@@ -1,0 +1,37 @@
+{
+  "id": "ranger_volley_live_session_stability",
+  "runner": "godot_client",
+  "ci_tier": "extended",
+  "world_id": "crowded_lightning_perf_probe",
+  "seed": "ranger_volley_live_session_stability_seed",
+  "character_class": "ranger",
+  "title": "Live Godot Ranger Volley session stability",
+  "description": "Keep a live Godot WebSocket attached while repeatedly casting Volley in crowded combat; no reconnect may occur.",
+  "debug_progression": {
+    "character_class": "ranger",
+    "level": 12,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 4, "dex": 18, "vit": 40, "magic": 30 },
+    "skill_ranks": { "piercing_shot": 1, "pinning_shot": 1, "volley": 1 }
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "crowded_probe_chaser", "timeout_s": 15.0 },
+    { "type": "assert_connection_recovery", "active": false, "ws_open": true, "recovery_count": 0 },
+    { "type": "use_skill_slot", "skill_id": "volley", "direction": { "x": 1, "y": 0 }, "force_direct": true },
+    { "type": "wait_event", "event_type": "skill_cast", "skill_id": "volley", "timeout_s": 8.0 },
+    { "type": "wait_ticks", "ticks": 45, "timeout_s": 8.0 },
+    { "type": "use_skill_slot", "skill_id": "volley", "direction": { "x": 1, "y": 0 }, "force_direct": true },
+    { "type": "wait_ticks", "ticks": 45, "timeout_s": 8.0 },
+    { "type": "use_skill_slot", "skill_id": "volley", "direction": { "x": 1, "y": 0 }, "force_direct": true },
+    { "type": "wait_ticks", "ticks": 45, "timeout_s": 8.0 },
+    { "type": "use_skill_slot", "skill_id": "volley", "direction": { "x": 1, "y": 0 }, "force_direct": true },
+    { "type": "wait_ticks", "ticks": 45, "timeout_s": 8.0 },
+    { "type": "use_skill_slot", "skill_id": "volley", "direction": { "x": 1, "y": 0 }, "force_direct": true },
+    { "type": "wait_ticks", "ticks": 15, "timeout_s": 5.0 },
+    { "type": "assert_connection_recovery", "active": false, "ws_open": true, "recovery_count": 0 }
+  ],
+  "assertions": []
+}

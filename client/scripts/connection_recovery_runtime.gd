@@ -6,6 +6,7 @@ const ConnectionRecoveryScript := preload("res://scripts/connection_recovery.gd"
 const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
 
 var recovery: ConnectionRecovery = ConnectionRecoveryScript.new()
+var recovery_count: int = 0
 
 
 func blocks_input() -> bool:
@@ -28,6 +29,7 @@ static func bot_state_fields(runtime: ConnectionRecoveryRuntime, overlay: Connec
 			"active": runtime.is_active(),
 			"blocks_input": runtime.blocks_input(),
 			"bot_proof_enabled": bot_proof_enabled,
+			"recovery_count": runtime.recovery_count,
 		},
 		"connection_overlay": overlay.get_debug_state() if overlay != null else {},
 	}
@@ -117,8 +119,14 @@ func _start_recovery(client, overlay: ConnectionOverlay, clear_pending: Callable
 	var max_attempts := int(rules.get("max_attempts", 8))
 	if overlay != null:
 		overlay.show_reconnecting(0, max_attempts)
+	recovery_count += 1
 	if debug.is_valid():
-		debug.call("connection lost; starting reconnect for session %s" % client.session_id)
+		var close_info: Dictionary = client.close_diagnostics()
+		debug.call("connection lost; starting reconnect for session %s code=%d reason=%s" % [
+			client.session_id,
+			int(close_info.get("code", -1)),
+			str(close_info.get("reason", "")),
+		])
 
 
 func _handle_action(result: Dictionary, client, overlay: ConnectionOverlay, ws_state: int) -> void:

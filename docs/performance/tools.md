@@ -217,6 +217,35 @@ code-owned (e.g. combat phase ms) — check file before assuming data-driven.
 
 Reproducible perf paths without manual dungeon walks. Two tiers:
 
+### Test topology is part of the assertion
+
+A performance scenario is valid only when it includes the component suspected of failing:
+
+| Topology | What it proves | What it does not prove |
+|----------|----------------|------------------------|
+| Python protocol bot | Server simulation, persistence, fanout, generic WebSocket behavior | Godot buffers, polling, frame stalls, rendering, client reconnect behavior |
+| Offline Godot replay (`make bot-visual` for protocol scenarios) | Deterministic presentation cost for recorded envelopes | Live socket backpressure, heartbeat, close behavior, concurrent server/client timing |
+| Godot observer in a bot-driven co-op session | Live Godot rendering and receive path for a remote player | The authoritative local-player input/reconciliation path |
+| Godot client-bot (`runner: godot_client`) | Live transport, input, reconciliation, delta application, and presentation | Multi-peer capacity unless the scenario explicitly joins peers |
+| Interactive `make play-debug` | Actual player controls and machine-specific behavior | Repeatable CI regression proof by itself |
+
+Rules for future performance/session-stability work:
+
+1. Reproduce using the real failing topology before declaring mitigation complete. A Python socket
+   cannot close a Godot transport bug, and offline replay cannot exercise live backpressure.
+2. Assert lifetime failures, not only final state. A client that reconnects successfully may finish
+   with `ws_open=true`; scenarios must assert a zero reconnect count when continuity is required.
+3. Record close codes/reasons and server read/write errors. Generic “connection lost” logs cannot
+   distinguish peer close, buffer exhaustion, network reset, or server write failure.
+4. Correlate the exact disconnect window. Healthy backend `total_ms` beside high client `net_poll`,
+   `delta`, or `process_ms` points to transport/presentation pressure, not simulation work.
+5. Include burst shape, not just average load: largest envelope bytes, queued packet count, event and
+   change counts, and resync snapshot cost matter more than mean throughput for heavy skills.
+6. Validate test setup. Assert requested character class, skills, entity density, peer count, and
+   actual cast acceptance; a rejected cast or wrong client type is not a performance proof.
+7. Keep a short interactive soak after automation for platform-specific failures, but land a
+   deterministic live-client regression scenario before closing the issue.
+
 - **`ci_tier: extended`** — included in `make ci-full`, excluded from `make ci`. Manual run with `make bot scenario=<id>`.
 - **`ci_tier: benchmark`** — excluded from all CI. Only launched with `make benchmark`, which runs all benchmark scenarios, opens the visual Godot client with the Performance status overlay, and emits a report.
 
@@ -297,6 +326,7 @@ nodes visited), entity load (monsters moved, changes, events, clients).
 
 | Date | Area | What | Files / commands |
 |------|------|------|------------------|
+| 2026-07-08 | Client + Server + Bot | Live Godot WebSocket capacity/close diagnostics and zero-reconnect crowded Volley proof; documented topology-aware performance testing | v457; `ranger_volley_live_session_stability`; `scripts/bot_client_local.sh` |
 | 2026-06-29 | Client | Delta sub-phases (`d_prep` … `d_recon`), `d_upsert` / `d_upsert_m` / `d_upsert_player`; ranked phase output; delta UI sync gate + `client_perf` interval keys | `perf_phase_timer.gd`, `perf_debug_sampler.gd`, `main.gd`, `delta_ui_sync_gate.gd`, `main_config.v0.json` |
 | 2026-06-29 | Client | Local player upsert change-detection helpers | `local_player_authoritative_sync.gd` |
 | 2026-06-29 | Client | `delta_ui_sync_interval_ticks`, `delta_minimap_sync_interval_ticks` | `main_config.v0.json`, `main_config_loader.gd` |

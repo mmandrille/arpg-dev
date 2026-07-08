@@ -34,7 +34,7 @@ func _run() -> void:
 	state = panel.get_debug_state()
 	var window: Dictionary = state.get("wallet_window", {})
 	_assert_true("wallet window visible", bool(window.get("visible", false)))
-	_assert_eq("wallet window rows", int(window.get("row_count", 0)), 2)
+	_assert_eq("wallet material item rows", int(window.get("row_count", 0)), 0)
 	var text := str(window.get("text", ""))
 	_assert_false("window hides upgrade shard wallet", text.contains("Upgrade Badge"))
 	_assert_true("window respec badge", text.contains("Respec Badge x1"))

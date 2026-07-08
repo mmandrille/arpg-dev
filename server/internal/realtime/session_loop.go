@@ -397,6 +397,7 @@ func (c *loopClient) readLoop() {
 	for {
 		_, data, err := c.conn.ReadMessage()
 		if err != nil {
+			c.loop.log.Warn("websocket_read_closed", "error", err, "player_id", c.playerID)
 			return
 		}
 		c.loop.handleClientMessage(c, data)
@@ -411,6 +412,7 @@ func (c *loopClient) writeLoop() {
 			return
 		case env := <-c.sendCh:
 			if err := c.conn.WriteJSON(env); err != nil {
+				c.loop.log.Warn("websocket_write_closed", "error", err, "player_id", c.playerID, "envelope_type", env.Type)
 				return
 			}
 			c.drainSendOverflow()
@@ -425,6 +427,8 @@ func (c *loopClient) drainSendOverflow() {
 			return
 		}
 		if err := c.conn.WriteJSON(env); err != nil {
+			c.loop.log.Warn("websocket_overflow_write_closed", "error", err, "player_id", c.playerID, "envelope_type", env.Type)
+			c.close()
 			return
 		}
 	}

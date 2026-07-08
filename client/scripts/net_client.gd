@@ -7,6 +7,8 @@
 extends RefCounted
 class_name NetClient
 
+const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
+
 var base_url: String
 var host: String
 var port: int
@@ -474,16 +476,26 @@ func merge_upgrade_shards(stash_item_ids: Array) -> Dictionary:
 
 func connect_ws() -> void:
 	var url := websocket_url()
-	_ws = WebSocketPeer.new()
+	_ws = _new_websocket_peer()
 	_ws.connect_to_url(url)
 
 
 func reconnect_ws() -> void:
 	var old_ws := _ws
-	_ws = WebSocketPeer.new()
+	_ws = _new_websocket_peer()
 	_ws.connect_to_url(websocket_url())
 	if old_ws.get_ready_state() != WebSocketPeer.STATE_CLOSED:
 		old_ws.close()
+
+
+func _new_websocket_peer() -> WebSocketPeer:
+	var peer := WebSocketPeer.new()
+	var rules := MainConfigLoaderScript.client_network_rules()
+	peer.inbound_buffer_size = int(rules.get("websocket_inbound_buffer_bytes", 4194304))
+	peer.outbound_buffer_size = int(rules.get("websocket_outbound_buffer_bytes", 262144))
+	peer.max_queued_packets = int(rules.get("websocket_max_queued_packets", 8192))
+	peer.heartbeat_interval = float(rules.get("websocket_heartbeat_seconds", 5.0))
+	return peer
 
 
 func resume_same_session() -> bool:
@@ -501,6 +513,13 @@ func websocket_url() -> String:
 
 func ready_state() -> int:
 	return _ws.get_ready_state()
+
+
+func close_diagnostics() -> Dictionary:
+	return {
+		"code": _ws.get_close_code(),
+		"reason": _ws.get_close_reason(),
+	}
 
 
 # poll returns any envelopes received this frame as an Array of Dictionaries.

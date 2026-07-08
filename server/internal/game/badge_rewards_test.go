@@ -44,7 +44,7 @@ func TestQuestTurnInGrantsDepthBadgeReward(t *testing.T) {
 	giver := findInteractableByDefID(t, sim, "town_quest_giver")
 	player := sim.activeLevel().entities[sim.playerID]
 	player.pos = Vec2{X: giver.pos.X - 0.5, Y: giver.pos.Y}
-	addStaticInventoryItem(sim, 29201, rules.MainConfig.Gameplay.QuestTurnInItemDefID)
+	addTestResourceBagItem(sim, 29201, rules.MainConfig.Gameplay.QuestTurnInItemDefID)
 
 	turnIn := sim.Tick([]Input{{
 		MessageID:     "turn_in_badge",

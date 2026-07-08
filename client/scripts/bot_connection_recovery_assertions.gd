@@ -9,6 +9,8 @@ static func connection_recovery_matches(step: Dictionary, state: Dictionary) -> 
 		return false
 	if step.has("blocks_input") and bool(recovery.get("blocks_input", false)) != bool(step.get("blocks_input", false)):
 		return false
+	if step.has("recovery_count") and int(recovery.get("recovery_count", 0)) != int(step.get("recovery_count", 0)):
+		return false
 	if step.has("overlay_visible") and bool(overlay.get("visible", false)) != bool(step.get("overlay_visible", false)):
 		return false
 	if step.has("ws_open") and bool(state.get("ws_open", false)) != bool(step.get("ws_open", false)):

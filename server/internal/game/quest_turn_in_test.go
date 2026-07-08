@@ -9,7 +9,7 @@ func TestQuestTurnInConsumesQuestItemAndRewardsGold(t *testing.T) {
 	reward := sim.rules.MainConfig.Gameplay.QuestTurnInRewardGold
 	sim.gold = 7
 	sim.progression.Gold = 7
-	item := addStaticInventoryItem(sim, 29101, sim.rules.MainConfig.Gameplay.QuestTurnInItemDefID)
+	item := addTestResourceBagItem(sim, 29101, sim.rules.MainConfig.Gameplay.QuestTurnInItemDefID)
 
 	turnIn := sim.Tick([]Input{{
 		MessageID:     "turn_in_quest",
@@ -19,19 +19,18 @@ func TestQuestTurnInConsumesQuestItemAndRewardsGold(t *testing.T) {
 	}})
 
 	assertAck(t, turnIn, "turn_in_quest")
-	if sim.findItemByID(item.instanceID) != nil {
-		t.Fatalf("quest item remained in inventory after turn-in")
+	if sim.findResourceBagItem(idStr(item.stashItemID)) != nil {
+		t.Fatalf("quest item remained in resource bag after turn-in")
 	}
 	if sim.gold != 7+reward || sim.progression.Gold != sim.gold {
 		t.Fatalf("gold after turn-in sim/progression=%d/%d, want %d", sim.gold, sim.progression.Gold, 7+reward)
 	}
-	if !hasChange(turnIn, OpInventoryRemove) || !hasChange(turnIn, OpGoldUpdate) || !hasChange(turnIn, OpCharacterProgressionUpdate) {
-		t.Fatalf("turn-in changes missing inventory/gold/progression update: %+v", turnIn.Changes)
+	if !hasChange(turnIn, OpResourceBagItemRemove) || !hasChange(turnIn, OpGoldUpdate) || !hasChange(turnIn, OpCharacterProgressionUpdate) {
+		t.Fatalf("turn-in changes missing resource-bag/gold/progression update: %+v", turnIn.Changes)
 	}
 	ev := findEvent(turnIn.Events, "quest_turn_in_completed")
 	if ev == nil || ev.EntityID != idStr(giver.id) || ev.Service != questTurnInService ||
-		ev.ItemInstanceID != idStr(item.instanceID) || ev.Item == nil ||
-		ev.Item.ItemDefID != sim.rules.MainConfig.Gameplay.QuestTurnInItemDefID ||
+		ev.ItemInstanceID != idStr(item.stashItemID) || ev.StashItemID != idStr(item.stashItemID) ||
 		ev.Amount == nil || *ev.Amount != 1 || ev.Price == nil || *ev.Price != reward ||
 		ev.TotalGold == nil || *ev.TotalGold != sim.gold {
 		t.Fatalf("quest_turn_in_completed = %+v", ev)
@@ -78,7 +77,7 @@ func TestQuestTurnInRewardUsesMainConfig(t *testing.T) {
 	giver := findInteractableByDefID(t, sim, "town_quest_giver")
 	player := sim.activeLevel().entities[sim.playerID]
 	player.pos = Vec2{X: giver.pos.X - 0.5, Y: giver.pos.Y}
-	addStaticInventoryItem(sim, 29102, rules.MainConfig.Gameplay.QuestTurnInItemDefID)
+	addTestResourceBagItem(sim, 29102, rules.MainConfig.Gameplay.QuestTurnInItemDefID)
 
 	turnIn := sim.Tick([]Input{{
 		MessageID: "turn_in_config",
@@ -108,4 +107,11 @@ func newQuestTurnInSim(t *testing.T, seed string) (*Sim, *entity) {
 		t.Fatal(err)
 	}
 	return sim, findInteractableByDefID(t, sim, "town_quest_giver")
+}
+
+func addTestResourceBagItem(sim *Sim, id uint64, itemDefID string) *stashItem {
+	item := &stashItem{stashItemID: id, itemDefID: itemDefID}
+	sim.resourceBagItems = append(sim.resourceBagItems, item)
+	sim.savePlayer(sim.defaultPlayer())
+	return item
 }

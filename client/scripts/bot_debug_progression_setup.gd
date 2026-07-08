@@ -2,13 +2,14 @@ class_name BotDebugProgressionSetup
 extends RefCounted
 
 
-static func prepare_character(client, debug_token: String, debug_progression_json: String, debug_gold: String) -> String:
+static func prepare_character(client, debug_token: String, debug_progression_json: String, debug_gold: String, character_class: String = "barbarian") -> String:
 	var progression := _progression_from_env(debug_progression_json, debug_gold)
 	if client == null or progression.is_empty():
 		return ""
-	var character_id := _first_character_id(client)
+	character_class = str(progression.get("character_class", character_class))
+	var character_id := _first_character_id(client, character_class)
 	if character_id == "":
-		var created: Dictionary = client.create_character("Client Bot")
+		var created: Dictionary = client.create_character("Client Bot", character_class)
 		character_id = str(created.get("character_id", ""))
 	if character_id == "":
 		printerr("[bot-client] debug progression character setup failed")
@@ -32,8 +33,10 @@ static func _progression_from_env(debug_progression_json: String, debug_gold: St
 	return {}
 
 
-static func _first_character_id(client) -> String:
+static func _first_character_id(client, character_class: String = "") -> String:
 	for row in client.list_characters():
 		if typeof(row) == TYPE_DICTIONARY:
-			return str((row as Dictionary).get("character_id", ""))
+			var character: Dictionary = row as Dictionary
+			if character_class == "" or str(character.get("character_class", "")) == character_class:
+				return str(character.get("character_id", ""))
 	return ""

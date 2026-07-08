@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v457** | `live-combat-transport-stability` | Complete (`make ci` green) | [`spec`](../specs/v457_spec-live-combat-transport-stability.md) | [`plan`](../plans/v457_2026-07-08-live-combat-transport-stability.md) | [`as-built`](../as-built/v457_live-combat-transport-stability.md) |
 | **v0** | `first-playable-vertical-slice` | Complete (on `main`) | [`v1_spec-first-playable-vertical-slice.md`](../specs/v1_spec-first-playable-vertical-slice.md) | [`v1_2026-06-05-first-playable-vertical-slice.md`](../plans/v1_2026-06-05-first-playable-vertical-slice.md) | [`as-built`](../as-built/v0_first-playable-vertical-slice.md) |
 | **v2** | `equip-and-see-it` | Complete (on `main`) | [`v2_spec-equip-and-see-it.md`](../specs/v2_spec-equip-and-see-it.md) | [`v2_2026-06-05-equip-and-see-it.md`](../plans/v2_2026-06-05-equip-and-see-it.md) | [`as-built`](../as-built/v2_equip-and-see-it.md) |
 | **v3** | `animate-and-react` | Complete (on `main`) | [`v3_spec-animate-and-react.md`](../specs/v3_spec-animate-and-react.md) | [`v3_2026-06-05-animate-and-react.md`](../plans/v3_2026-06-05-animate-and-react.md) | [`as-built`](../as-built/v3_animate-and-react.md) |

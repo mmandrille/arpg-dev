@@ -107,5 +107,11 @@
     "max_attempts": 8,
     "give_up_s": 45.0,
     "http_resume_after_ws_failures": 2
+  },
+  "client_network": {
+    "websocket_inbound_buffer_bytes": 4194304,
+    "websocket_outbound_buffer_bytes": 262144,
+    "websocket_max_queued_packets": 8192,
+    "websocket_heartbeat_seconds": 5.0
   }
 }

@@ -1,6 +1,9 @@
 package game
 
-import "math"
+import (
+	"math"
+	"sort"
+)
 
 const anchorRoomInset = 0
 
@@ -87,9 +90,14 @@ func clusterAnchorPoints(anchors []Vec2, maxDist float64) [][]Vec2 {
 		root := find(i)
 		groups[root] = append(groups[root], anchor)
 	}
-	out := make([][]Vec2, 0, len(groups))
-	for _, group := range groups {
-		out = append(out, group)
+	roots := make([]int, 0, len(groups))
+	for root := range groups {
+		roots = append(roots, root)
+	}
+	sort.Ints(roots)
+	out := make([][]Vec2, 0, len(roots))
+	for _, root := range roots {
+		out = append(out, groups[root])
 	}
 
 	return out

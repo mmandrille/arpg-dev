@@ -23,20 +23,19 @@ func (s *Sim) turnInTownQuest(giver *entity, in Input, res *TickResult, ack bool
 	}
 
 	itemDefID := s.rules.MainConfig.Gameplay.QuestTurnInItemDefID
-	item := s.firstInventoryItemByDef(itemDefID)
+	item := s.firstResourceBagItemByDef(itemDefID)
 	if item == nil {
 		res.reject(in.MessageID, "missing_quest_item")
 		return
 	}
 
-	itemView := s.itemView(item)
-	removedID := idStr(item.instanceID)
+	removedID := idStr(item.stashItemID)
 	rewardGold := s.rules.MainConfig.Gameplay.QuestTurnInRewardGold
-	s.removeItemByID(item.instanceID)
+	s.removeResourceBagItemByID(item.stashItemID)
 	s.gold += rewardGold
 	s.progression.Gold = s.gold
 
-	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
+	res.Changes = append(res.Changes, Change{Op: OpResourceBagItemRemove, StashItemID: removedID})
 	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
 	s.appendCharacterProgressionUpdate(res)
 	res.Events = append(res.Events, Event{
@@ -45,7 +44,7 @@ func (s *Sim) turnInTownQuest(giver *entity, in Input, res *TickResult, ack bool
 		CorrelationID:  in.CorrelationID,
 		Service:        questTurnInService,
 		ItemInstanceID: removedID,
-		Item:           ptrItemView(itemView),
+		StashItemID:    removedID,
 		Amount:         intPtr(1),
 		Price:          intPtr(rewardGold),
 		TotalGold:      intPtr(s.gold),
@@ -57,8 +56,8 @@ func (s *Sim) turnInTownQuest(giver *entity, in Input, res *TickResult, ack bool
 	s.savePlayer(s.defaultPlayer())
 }
 
-func (s *Sim) firstInventoryItemByDef(itemDefID string) *invItem {
-	for _, item := range s.inventory {
+func (s *Sim) firstResourceBagItemByDef(itemDefID string) *stashItem {
+	for _, item := range s.resourceBagItems {
 		if item != nil && item.itemDefID == itemDefID {
 			return item
 		}

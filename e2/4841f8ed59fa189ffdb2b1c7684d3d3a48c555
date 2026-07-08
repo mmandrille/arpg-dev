@@ -1,0 +1,38 @@
+client/scripts/inventory_panel.gd
+  s_776b69bd9b4e6b::t_4db3ef5430c339 1562-1638
+  s_776b69bd9b4e6b::t_5d0c4686c03b8a 376-382
+  s_776b69bd9b4e6b::t_715e98c69b5dee 16
+  s_776b69bd9b4e6b::t_e2a4e05ea20aa9 83,85-86
+  s_776b69bd9b4e6b::t_2871701db0a999 254-270
+  s_776b69bd9b4e6b::t_dae80733bcf2a4 543-547
+  s_776b69bd9b4e6b::t_f05ce912970804 580
+client/scripts/bot_assertion_handlers.gd
+  s_776b69bd9b4e6b::t_16c7ed2d3b1590 604
+client/tests/test_inventory_panel.gd
+  s_776b69bd9b4e6b::t_87c99935aad66a 20
+  s_776b69bd9b4e6b::t_e6b3b0c979c925 103-131
+client/scripts/main.gd
+  s_776b69bd9b4e6b::t_cb2b4d41501401 2176
+client/tests/test_material_wallet_badges.gd
+  s_776b69bd9b4e6b::t_491c75f195260f 4,15-16,18,22,32-34,42
+client/tests/test_character_bar.gd
+  s_776b69bd9b4e6b::t_2d327aa539cbd2 15,20,24,26-29,31
+client/scripts/bot_controller.gd
+  s_776b69bd9b4e6b::t_2f64ac9638487c 352-354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e24841f8ed59fa189ffdb2b1c7684d3d3a48c555",
+  "prompts": {},
+  "sessions": {
+    "s_776b69bd9b4e6b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b66b81eb-0bf9-47a9-a467-aa8a64bba77f",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

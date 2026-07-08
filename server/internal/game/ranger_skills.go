@@ -22,10 +22,6 @@ func (s *Sim) handleRangerProjectileSkillCast(in Input, res *TickResult, player 
 		return
 	}
 	targets := s.rangerLineTargets(player, dir, def.Projectile.Range)
-	if len(targets) == 0 {
-		res.reject(in.MessageID, "no_valid_targets")
-		return
-	}
 
 	s.activeLevel().move = nil
 	s.clearAutoNav()

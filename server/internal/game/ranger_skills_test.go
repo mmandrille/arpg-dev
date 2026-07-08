@@ -105,6 +105,35 @@ func TestRangerVolleyDamagesFanTargetsOnce(t *testing.T) {
 	}
 }
 
+func TestRangerVolleyAcksDirectionalCastWithoutTargets(t *testing.T) {
+	sim := rangerSkillSim(t, "sess_ranger_volley_empty")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: 2, Y: 2}
+	for id, ent := range sim.activeLevel().entities {
+		if ent != nil && ent.kind == monsterEntity {
+			delete(sim.activeLevel().entities, id)
+		}
+	}
+
+	cast := sim.Tick([]Input{{
+		MessageID:     "volley_empty",
+		CorrelationID: "corr_volley_empty",
+		Type:          "cast_skill_intent",
+		CastSkill:     &CastSkillIntent{SkillID: "volley", Direction: &Vec2{X: 1}},
+	}})
+	assertAck(t, cast, "volley_empty")
+	if !hasEvent(cast, "skill_cast") {
+		t.Fatalf("empty volley cast events = %+v, want skill_cast", cast.Events)
+	}
+	if hasSkillDamageEvent(cast, "volley") || hasEvent(cast, "skill_damage_burst") {
+		t.Fatalf("empty volley cast events = %+v, want no damage", cast.Events)
+	}
+	manaCost := sim.rules.Skills["volley"].Cost.Mana.Base
+	if player.mana != 50-manaCost {
+		t.Fatalf("player mana = %d, want %d after empty volley", player.mana, 50-manaCost)
+	}
+}
+
 func TestRangerBlackWolfCompanionSummonsAndReplaces(t *testing.T) {
 	sim := rangerSkillSim(t, "sess_ranger_black_wolf")
 	player := sim.activeLevel().entities[sim.playerID]

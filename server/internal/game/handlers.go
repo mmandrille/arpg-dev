@@ -1213,6 +1213,10 @@ func (s *Sim) handleCastSkill(in Input, res *TickResult) {
 		res.reject(in.MessageID, "not_enough_mana")
 		return
 	}
+	if s.deferCastSkillIfOverBudget(in) {
+		return
+	}
+	s.noteSkillResolution()
 	switch def.Kind {
 	case "projectile_attack", "cold_projectile_attack", "chain_projectile_attack":
 		if skillUsesInstantResolution(def) {
@@ -1334,6 +1338,11 @@ func (s *Sim) handleProjectileSkillCast(in Input, res *TickResult, player *entit
 			return
 		}
 		res.reject(in.MessageID, rejectReason)
+		return
+	}
+	cap := s.combatProcessingBudget().ProjectileSpawnsPerTick
+	if cap > 0 && s.projectileSpawnsThisTick >= cap {
+		s.deferredSkillCasts = append(s.deferredSkillCasts, in)
 		return
 	}
 

@@ -9,6 +9,8 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 // selected phases. The profiler must not mutate sim state.
 func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickResult {
 	s.resetTickPerf()
+	s.resetSkillBudgetCounters()
+	inputs = s.prependDeferredSkillInputs(inputs)
 	previousProfiler := s.tickProfiler
 	s.tickProfiler = profiler
 	defer func() {

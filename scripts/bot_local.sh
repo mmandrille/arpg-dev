@@ -96,6 +96,7 @@ if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
 fi
 
 echo "[bot-local] running protocol bot scenario selection '$SCENARIO'..."
+export ARPG_BOT_SERVER_LOG="$SERVER_LOG"
 "$RUN_QUIET" --label "protocol bot ($SCENARIO)" -- \
   "$ROOT/.venv/bin/python" -m tools.bot.run \
   --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \

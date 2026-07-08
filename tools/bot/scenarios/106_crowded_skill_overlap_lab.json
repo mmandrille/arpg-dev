@@ -1,0 +1,50 @@
+{
+  "id": "crowded_skill_overlap_lab",
+  "ci_tier": "extended",
+  "world_id": "crowded_lightning_perf_probe",
+  "seed": "crowded_skill_overlap_lab_seed",
+  "peer_count": 2,
+  "character_class": "ranger",
+  "title": "Crowded skill overlap lab",
+  "description": "Rapid overlapping Volley casts in a crowded combat lab; proves skill budget defer without transport drop.",
+  "max_elapsed_s": 35.0,
+  "debug_progression": {
+    "level": 12,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": {
+      "str": 4,
+      "dex": 18,
+      "vit": 12,
+      "magic": 30
+    },
+    "skill_ranks": {
+      "piercing_shot": 1,
+      "pinning_shot": 1,
+      "volley": 1
+    }
+  },
+  "steps": [],
+  "assertions": [
+    {
+      "type": "entity_count",
+      "entity_type": "monster",
+      "monster_def_id": "crowded_probe_chaser",
+      "alive": true,
+      "at_least": 20
+    },
+    {
+      "type": "event_count",
+      "event_type": "skill_cast",
+      "skill_id": "volley",
+      "min": 2
+    },
+    {
+      "type": "event_count",
+      "event_type": "monster_damaged",
+      "skill_id": "volley",
+      "min": 8
+    }
+  ]
+}

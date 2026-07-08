@@ -406,6 +406,10 @@ type Sim struct {
 	playerPathNodesThisTick     int
 	overloadDegradeUntilTick    uint64
 	combatMovementThrottled     bool
+	skillResolutionsThisTick    int
+	projectileSpawnsThisTick    int
+	damageEventsThisTick        int
+	deferredSkillCasts          []Input
 	tickCollisionCache          tickCollisionCache
 	tick                        uint64
 	nextID                      uint64
@@ -2435,6 +2439,7 @@ func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef,
 	}
 	projectile.id = s.alloc()
 	s.activeLevel().entities[projectile.id] = projectile
+	s.projectileSpawnsThisTick++
 	return projectile
 }
 

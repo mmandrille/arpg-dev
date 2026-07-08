@@ -4,7 +4,7 @@
   "title": "Combat rules (v0)",
   "description": "Declarative combat parameters. Authoritative damage is rolled by the server PRNG within [min, max]; the cross-language damage formula is pinned by shared/golden/damage_formula.json.",
   "type": "object",
-  "required": ["version", "base_hit_chance", "base_crit_chance", "base_crit_damage", "minimum_damage", "block_cap_percent", "base_attack_interval_ticks", "min_effective_attack_speed", "max_effective_attack_speed", "player_damage", "two_handed_strength_damage_multiplier", "weapon_damage_scaling", "unarmed_reach", "coop"],
+  "required": ["version", "base_hit_chance", "base_crit_chance", "base_crit_damage", "minimum_damage", "block_cap_percent", "base_attack_interval_ticks", "min_effective_attack_speed", "max_effective_attack_speed", "player_damage", "two_handed_strength_damage_multiplier", "weapon_damage_scaling", "unarmed_reach", "coop", "combat_processing"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
@@ -69,6 +69,16 @@
             "damage_scales_at_attack": { "type": "boolean" }
           }
         }
+      }
+    },
+    "combat_processing": {
+      "type": "object",
+      "required": ["skill_resolutions_per_tick", "projectile_spawns_per_tick", "damage_events_per_tick_soft_cap"],
+      "additionalProperties": false,
+      "properties": {
+        "skill_resolutions_per_tick": { "type": "integer", "minimum": 0 },
+        "projectile_spawns_per_tick": { "type": "integer", "minimum": 0 },
+        "damage_events_per_tick_soft_cap": { "type": "integer", "minimum": 0 }
       }
     }
   }

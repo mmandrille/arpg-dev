@@ -38,5 +38,10 @@
       "hp_scales_at_spawn": true,
       "damage_scales_at_attack": true
     }
+  },
+  "combat_processing": {
+    "skill_resolutions_per_tick": 12,
+    "projectile_spawns_per_tick": 8,
+    "damage_events_per_tick_soft_cap": 48
   }
 }

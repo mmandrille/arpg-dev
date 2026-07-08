@@ -113,6 +113,7 @@ type Combat struct {
 	WeaponDamageScaling               map[string]WeaponDamageScalingDef `json:"weapon_damage_scaling"`
 	UnarmedReach                      float64                           `json:"unarmed_reach"`
 	Coop                              CoopCombat                        `json:"coop"`
+	CombatProcessing                  CombatProcessingBudget            `json:"combat_processing"`
 }
 
 type CoopCombat struct {

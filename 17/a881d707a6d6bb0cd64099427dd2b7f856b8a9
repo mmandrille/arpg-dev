@@ -1,0 +1,30 @@
+docs/as-built/v456_six-player-boss-combat-soak.md
+  s_bb79460e46840d::t_3ec03c4cbee8db 1-20
+docs/specs/v456_spec-six-player-boss-combat-soak.md
+  s_bb79460e46840d::t_928c973304f99d 1-15
+docs/progress/slice-codename-index.md
+  s_bb79460e46840d::t_a83a073fdea6e7 245-246
+tools/bot/scenarios/107_six_player_boss_combat_soak.json
+  s_bb79460e46840d::t_6d3553c42b219b 1-84
+PROGRESS.md
+  s_bb79460e46840d::t_40ff225cc6588f 117
+  s_bb79460e46840d::t_2c6ab531f4303c 18,26-27
+docs/progress/slice-lifecycle.md
+  s_bb79460e46840d::t_3238a30fcafbe3 439-440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "17a881d707a6d6bb0cd64099427dd2b7f856b8a9",
+  "prompts": {},
+  "sessions": {
+    "s_bb79460e46840d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ef9b8c00-bb05-4c6b-b511-b3349e00d078",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -15,6 +15,7 @@ func _run() -> void:
 	_test_non_box_wall_kind_skipped()
 	_test_wall_qualifies_for_box_and_wood()
 	_test_resolve_faded_walls_for_lab_layout()
+	_test_backdrop_walls_stay_opaque_in_lab_layout()
 	print("[gdtest] PASS: test_wall_occlusion_fade (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -67,6 +68,42 @@ func _test_resolve_faded_walls_for_lab_layout() -> void:
 	)
 	_assert_eq("one faded wall", faded.size(), 1)
 	_assert_true("north wall faded", faded.has("north_wall"))
+
+
+func _test_backdrop_walls_stay_opaque_in_lab_layout() -> void:
+	var faded := WallOcclusionFadeScript.resolve_faded_walls(
+		Vector2(11.0, 20.0),
+		[Vector3(8.0, 0.0, 5.0)],
+		[
+			{
+				"id": "south_wall",
+				"kind": "wall",
+				"position": {"x": 8.0, "y": 0.5},
+				"size": {"x": 16.0, "y": 1.0},
+			},
+			{
+				"id": "north_wall",
+				"kind": "wall",
+				"position": {"x": 8.0, "y": 9.5},
+				"size": {"x": 16.0, "y": 1.0},
+			},
+			{
+				"id": "west_wall",
+				"kind": "wall",
+				"position": {"x": 0.5, "y": 5.0},
+				"size": {"x": 1.0, "y": 10.0},
+			},
+			{
+				"id": "east_wall",
+				"kind": "wall",
+				"position": {"x": 15.5, "y": 5.0},
+				"size": {"x": 1.0, "y": 10.0},
+			},
+		],
+	)
+	_assert_true("north wall faded for centered hero", faded.has("north_wall"))
+	_assert_false("south backdrop wall stays opaque", faded.has("south_wall"))
+	_assert_false("west backdrop wall stays opaque", faded.has("west_wall"))
 
 
 func _assert_true(label: String, value: bool) -> void:

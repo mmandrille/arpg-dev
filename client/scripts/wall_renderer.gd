@@ -453,7 +453,7 @@ func _set_mesh_occlusion_alpha(mesh: MeshInstance3D, alpha: float) -> void:
 		return
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_color = Color(base.r, base.g, base.b, clampf(alpha, 0.05, 1.0))
-	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
+	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 
 
 func sync_occlusion_fade(

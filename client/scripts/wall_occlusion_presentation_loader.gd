@@ -35,7 +35,7 @@ static func config() -> Dictionary:
 
 
 static func faded_alpha() -> float:
-	return float(config().get("faded_alpha", 0.24))
+	return float(config().get("faded_alpha", 0.34))
 
 
 static func opaque_alpha() -> float:
@@ -57,7 +57,7 @@ static func min_rebuild_interval_frames() -> int:
 static func _default_config() -> Dictionary:
 	return {
 		"version": 0,
-		"faded_alpha": 0.24,
+		"faded_alpha": 0.34,
 		"opaque_alpha": 1.0,
 		"segment_inflate": 0.02,
 		"move_epsilon": 0.04,

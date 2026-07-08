@@ -1,6 +1,6 @@
 {
   "version": 0,
-  "faded_alpha": 0.24,
+  "faded_alpha": 0.34,
   "opaque_alpha": 1.0,
   "segment_inflate": 0.02,
   "move_epsilon": 0.04,

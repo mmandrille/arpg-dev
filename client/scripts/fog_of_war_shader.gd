@@ -154,14 +154,17 @@ float visibility_at_world_xz(vec2 world_xz) {
 }
 
 float visibility_isometric(vec2 screen_px) {
+	vec2 world_xz = ground_xz_at_screen(screen_px);
 	vec2 delta_px = screen_px - center_px;
 	float d = length(delta_px);
 	float edge = organic_edge_screen(delta_px);
 	float effective_radius_px = max(1.0, light_radius_px + edge * 0.45);
-	float hero_vis = visibility_from_distance(d, effective_radius_px, darkness_feather_px);
-	vec2 world_xz = ground_xz_at_screen(screen_px);
+	float screen_vis = visibility_from_distance(d, effective_radius_px, darkness_feather_px);
+	float world_vis = visibility_at_world_xz(world_xz);
 	float torch_vis = torch_visibility_at_world_xz(world_xz);
-	return max(hero_vis, torch_vis);
+	// Isometric projection stretches world distance on screen edges; blend world-space
+	// light so nearby room walls behind the hero stay readable with wall occlusion fade.
+	return max(max(screen_vis, world_vis), torch_vis);
 }
 
 float visibility_perspective(vec2 screen_px) {

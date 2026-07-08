@@ -125,7 +125,13 @@
             "then": {
               "anyOf": [
                 { "required": ["heal"] },
-                { "required": ["mana_restore"] }
+                { "required": ["mana_restore"] },
+                {
+                  "properties": {
+                    "name": { "const": "Rejuv Potion" }
+                  },
+                  "required": ["name"]
+                }
               ]
             }
           },

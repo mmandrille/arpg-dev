@@ -597,7 +597,7 @@ func _test_shop_assertions() -> void:
 		"shop_panel_visible": true,
 		"shop_panel": {
 			"offer_count": 8,
-			"fixed_offer_count": 2,
+			"fixed_offer_count": 3,
 			"generated_offer_count": 5,
 			"mystery_offer_count": 1,
 			"buyback_offer_count": 0,

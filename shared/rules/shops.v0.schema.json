@@ -36,7 +36,8 @@
       "properties": {
         "offer_id": { "type": "string", "pattern": "^[a-z0-9_:-]+$" },
         "item_def_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
-        "buy_price": { "type": "integer", "minimum": 1 }
+        "buy_price": { "type": "integer", "minimum": 1 },
+        "leveled_consumable": { "type": "boolean" }
       }
     },
     "generated_offers": {

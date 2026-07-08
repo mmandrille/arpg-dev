@@ -103,7 +103,23 @@
         "companion_assist_radius": { "type": "number", "exclusiveMinimum": 0 },
         "companion_follow_distance": { "type": "number", "exclusiveMinimum": 0 },
         "companion_follow_stop_radius": { "type": "number", "exclusiveMinimum": 0 },
-        "experience_reward_percent": { "type": "integer", "minimum": 1, "maximum": 100 }
+        "experience_reward_percent": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "potion_rules": {
+          "type": "object",
+          "required": ["restore_multiplier_per_level", "rejuv_min_restore_percent", "rejuv_drop_weight_percent", "shop_buy_price_per_level", "shop_base_buy_price"],
+          "additionalProperties": false,
+          "properties": {
+            "restore_multiplier_per_level": { "type": "integer", "minimum": 1 },
+            "rejuv_min_restore_percent": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "rejuv_drop_weight_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "shop_buy_price_per_level": { "type": "integer", "minimum": 1 },
+            "shop_base_buy_price": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
       }
     },
     "presentation_lod": {

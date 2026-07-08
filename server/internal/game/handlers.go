@@ -248,7 +248,7 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 			return
 		}
 		item = cloneInvItem(row.Item)
-	} else if entry.Generated != nil && offer.Kind == shopOfferKindMystery {
+	} else 	if entry.Generated != nil && offer.Kind == shopOfferKindMystery {
 		item = s.itemFromShopStock(entry.Generated, s.alloc())
 		if item == nil || item.rollPayload == nil {
 			res.reject(in.MessageID, "invalid_offer")
@@ -256,6 +256,10 @@ func (s *Sim) handleShopBuy(in Input, res *TickResult) {
 		}
 	} else {
 		item = s.itemFromShopOffer(offer, s.alloc())
+	}
+	if item != nil && IsLeveledPotion(item.itemDefID) && item.rollPayload == nil && offer.ItemLevel > 0 {
+		item.rollPayload = NewPotionRollPayload(item.itemDefID, offer.ItemLevel)
+		item.slot = s.itemSlot(item.itemDefID, item.rollPayload)
 	}
 	if entry.Generated != nil {
 		entry.Generated.Available = false

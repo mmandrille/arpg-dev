@@ -5,6 +5,7 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const SLOT_COUNT := 10
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const PotionIconLabelScript := preload("res://scripts/potion_icon_label.gd")
 const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
 var inventory: Array = []
@@ -376,7 +377,8 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var def_id := str(item.get("item_def_id", ""))
 	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
 	var rect := Rect2(Vector2.ZERO, slot.size)
-	ItemIconDrawerScript.draw(slot, rect, icon, "", false, 0.38, 16)
+	var label := PotionIconLabelScript.icon_label(item, str(icon.get("label", "")))
+	ItemIconDrawerScript.draw(slot, rect, icon, label, false, 0.38, 16)
 
 
 func _panel_style() -> StyleBoxFlat:

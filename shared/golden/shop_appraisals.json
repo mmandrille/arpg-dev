@@ -3,11 +3,11 @@
   "fixed_offer": {
     "item_def_id": "red_potion",
     "expected": {
-      "display_name": "Red Potion",
+      "display_name": "Health Potion",
       "slot": "",
       "category": "consumable",
       "buy_price": 40,
-      "summary_lines": ["Kind: consumable", "Restores 5 HP"]
+      "summary_lines": ["Kind: consumable", "Restores 3 HP"]
     }
   },
   "generated_offer": {

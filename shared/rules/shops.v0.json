@@ -4,8 +4,9 @@
     "town_vendor": {
       "name": "Town Vendor",
       "fixed_offers": [
-        { "offer_id": "fixed:red_potion", "item_def_id": "red_potion", "buy_price": 40 },
-        { "offer_id": "fixed:blue_potion", "item_def_id": "blue_potion", "buy_price": 40 }
+        { "offer_id": "fixed:red_potion", "item_def_id": "red_potion", "buy_price": 40, "leveled_consumable": true },
+        { "offer_id": "fixed:blue_potion", "item_def_id": "blue_potion", "buy_price": 40, "leveled_consumable": true },
+        { "offer_id": "fixed:rejuv_potion", "item_def_id": "rejuv_potion", "buy_price": 60, "leveled_consumable": true }
       ],
       "generated_offers": {
         "offer_count": 5,

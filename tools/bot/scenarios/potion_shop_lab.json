@@ -1,0 +1,33 @@
+{
+  "id": "potion_shop_lab",
+  "ci_tier": "extended",
+  "world_id": "vendor_lab",
+  "seed": "potion_shop_lab_01",
+  "title": "Leveled potion shop lab",
+  "description": "Buy max-depth health potion from vendor at tier 10.",
+  "debug_progression": {
+    "gold": 5000,
+    "deepest_dungeon_depth": 10
+  },
+  "steps": [
+    {
+      "action": "open_shop"
+    },
+    {
+      "action": "buy_shop_offer",
+      "shop_id": "town_vendor",
+      "offer_id": "fixed:red_potion"
+    },
+    {
+      "action": "assert_inventory_contains",
+      "item_def_id": "red_potion",
+      "item_level": 10
+    }
+  ],
+  "assertions": [
+    {
+      "type": "inventory_count",
+      "equals": 1
+    }
+  ]
+}

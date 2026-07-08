@@ -25,8 +25,9 @@ func _run() -> void:
 	)
 
 	var offers := [
-		{"offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 HP"]},
-		{"offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Blue Potion", "category": "consumable", "buy_price": 20, "summary_lines": ["Kind: consumable", "Restores 5 mana"]},
+		{"offer_id": "fixed:red_potion", "kind": "fixed", "item_def_id": "red_potion", "display_name": "Health Potion", "item_level": 1, "category": "consumable", "buy_price": 20, "summary_lines": ["Level 1", "Restores 3 HP"]},
+		{"offer_id": "fixed:blue_potion", "kind": "fixed", "item_def_id": "blue_potion", "display_name": "Mana Potion", "item_level": 1, "category": "consumable", "buy_price": 20, "summary_lines": ["Level 1", "Restores 3 mana"]},
+		{"offer_id": "fixed:rejuv_potion", "kind": "fixed", "item_def_id": "rejuv_potion", "display_name": "Rejuv Potion", "item_level": 1, "category": "consumable", "buy_price": 30, "summary_lines": ["Level 1", "Restores 33% HP and mana"]},
 		{"offer_id": "generated:depth3:000", "kind": "generated", "item_template_id": "bow", "item_def_id": "bow", "display_name": "Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "item_level": 3, "rolled_stats": {"damage_min": 2, "damage_max": 2}, "buy_price": 50, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"], "requirements": {"level": 2, "str": 15}, "requirement_status": [{"stat": "level", "required": 2, "current": 2, "met": true}, {"stat": "str", "required": 15, "current": 12, "met": false}], "equip_preview": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "current": 4, "preview": 6, "delta": 2}]}, "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 2, "equipped": 4, "delta": -2}]}},
 		{"offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "gloves", "item_def_id": "gloves", "display_name": "Magic Cave Gloves", "rarity": "magic", "slot": "gloves", "category": "equipment", "rolled_stats": {"armor": 3}, "buy_price": 90, "summary_lines": ["Slot: gloves", "Armor +3", "Requires level 1"], "comparison": {"slot": "gloves", "deltas": [{"stat": "armor", "offered": 3, "equipped": 0, "delta": 3}]}},
 	]
@@ -36,7 +37,7 @@ func _run() -> void:
 	]
 	var sell_appraisals := [
 		{"item_instance_id": "2001", "item_def_id": "bow", "item_template_id": "bow", "display_name": "Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "item_level": 3, "sell_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"], "requirements": {"level": 2, "str": 15}, "requirement_status": [{"stat": "level", "required": 2, "current": 2, "met": true}, {"stat": "str", "required": 15, "current": 12, "met": false}], "equip_preview": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "current": 4, "preview": 6, "delta": 2}]}, "comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 2, "equipped": 4, "delta": -2}]}},
-		{"item_instance_id": "2002", "item_def_id": "red_potion", "display_name": "Red Potion", "category": "consumable", "sell_price": 5, "summary_lines": ["Kind: consumable", "Restores 5 HP"]},
+		{"item_instance_id": "2002", "item_def_id": "red_potion", "display_name": "Health Potion", "category": "consumable", "sell_price": 5, "summary_lines": ["Level 1", "Restores 3 HP"]},
 	]
 	panel.show_shop("1004", "town_vendor", offers, 60, inventory, {}, "Town Vendor", sell_appraisals)
 	var state := panel.get_debug_state()
@@ -45,8 +46,8 @@ func _run() -> void:
 	_assert_eq("shop window title", str(window.get("title", "")), "Town Vendor")
 	_assert_true("shop window has close button", bool(window.get("close_visible", false)))
 	_assert_true("shop window is draggable", bool(window.get("draggable", false)))
-	_assert_eq("offer count", int(state.get("offer_count", 0)), 4)
-	_assert_eq("fixed count", int(state.get("fixed_offer_count", 0)), 2)
+	_assert_eq("offer count", int(state.get("offer_count", 0)), 5)
+	_assert_eq("fixed count", int(state.get("fixed_offer_count", 0)), 3)
 	_assert_eq("generated count", int(state.get("generated_offer_count", 0)), 2)
 	_assert_eq("buyback count", int(state.get("buyback_offer_count", 0)), 0)
 	_assert_false("vendor reroll hidden", bool(state.get("reroll_visible", false)))
@@ -54,7 +55,7 @@ func _run() -> void:
 	_assert_false("expensive generated disabled", bool(state.get("buy_buttons", {}).get("generated:depth3:001", {}).get("enabled", true)))
 	_assert_eq("sell rows", int(state.get("sell_row_count", 0)), 2)
 	_assert_true("offer rows include summaries", _rows_have_summary(state.get("offer_rows", [])))
-	_assert_eq("source depth debug defaults", int((state.get("offer_rows", [])[2] as Dictionary).get("source_depth", 0)), 0)
+	_assert_eq("source depth debug defaults", int((state.get("offer_rows", [])[3] as Dictionary).get("source_depth", 0)), 0)
 	var sell_rows: Array = state.get("sell_rows", [])
 	_assert_true("sell rows include price", not sell_rows.is_empty() and int((sell_rows[0] as Dictionary).get("sell_price", 0)) > 0)
 	_assert_true("comparisons rendered", int(state.get("comparison_row_count", 0)) >= 2)
@@ -63,19 +64,19 @@ func _run() -> void:
 	_assert_eq("vendor grid columns", int(state.get("vendor_columns", 0)), 5)
 	_assert_eq("vendor grid rows", int(state.get("vendor_rows", 0)), 10)
 	_assert_eq("vendor slot count", int(state.get("vendor_slot_count", 0)), 50)
-	_assert_eq("occupied vendor slots", int(state.get("occupied_vendor_slot_count", 0)), 4)
+	_assert_eq("occupied vendor slots", int(state.get("occupied_vendor_slot_count", 0)), 5)
 	_assert_false("header gold hidden", bool(state.get("header_gold_visible", true)))
-	var tooltip_lines: Array = panel._tooltip_lines(offers[2])
+	var tooltip_lines: Array = panel._tooltip_lines(offers[3])
 	_assert_false("tooltip stats exclude requirements", _array_contains_text(tooltip_lines, "Requires"))
 	_assert_false("tooltip stats exclude comparison", _array_contains_text(tooltip_lines, "vs equipped"))
-	_assert_true("tooltip requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "Level 2"))
-	_assert_true("tooltip stat requirements extracted", _array_contains_text(panel._requirement_lines(offers[2]), "%s 15(-3)" % StatLabels.display_name("str")))
-	var comparison_entries: Array = panel._comparison_entries(offers[2])
+	_assert_true("tooltip requirements extracted", _array_contains_text(panel._requirement_lines(offers[3]), "Level 2"))
+	_assert_true("tooltip stat requirements extracted", _array_contains_text(panel._requirement_lines(offers[3]), "%s 15(-3)" % StatLabels.display_name("str")))
+	var comparison_entries: Array = panel._comparison_entries(offers[3])
 	_assert_true("tooltip preview extracted", _array_contains_text(comparison_entries, "preview"))
 	_assert_true("tooltip comparison extracted", _array_contains_text(comparison_entries, "vs equipped"))
 	_assert_true("tooltip bow range line", _array_contains_text(tooltip_lines, "Range: 12 tiles"))
 	_assert_true("tooltip bow projectile speed line", _array_contains_text(tooltip_lines, "Projectile speed: 25 tiles/s"))
-	var offer_tooltip := panel._make_offer_tooltip(offers[2])
+	var offer_tooltip := panel._make_offer_tooltip(offers[3])
 	_assert_eq("vendor tooltip uses shared panel", offer_tooltip.get_script(), ItemTooltipPanelScript)
 	_assert_eq("vendor tooltip item level footer", offer_tooltip.debug_item_level_text(), "Item level 3")
 	_assert_true("vendor tooltip keeps level requirement", _array_contains_text(offer_tooltip.debug_requirement_texts(), "Level 2"))
@@ -84,13 +85,13 @@ func _run() -> void:
 	_assert_eq("vendor tooltip range uses smaller font", _font_size_for_text(bow_fonts, "Range: 12 tiles"), 19)
 	_assert_eq("vendor tooltip projectile speed uses smaller font", _font_size_for_text(bow_fonts, "Projectile speed: 25 tiles/s"), 19)
 	offer_tooltip.queue_free()
-	var magic_offer_tooltip := panel._make_offer_tooltip(offers[3])
+	var magic_offer_tooltip := panel._make_offer_tooltip(offers[4])
 	_assert_eq("vendor magic tooltip name is rarity blue", magic_offer_tooltip.debug_first_main_line_color(), "93c5fd")
 	var magic_offer_fonts: Array = magic_offer_tooltip.debug_main_line_font_sizes()
 	_assert_eq("vendor tooltip rarity uses smaller font", _font_size_for_text(magic_offer_fonts, "Rarity: Magic"), 19)
 	_assert_eq("vendor tooltip slot uses smaller font", _font_size_for_text(magic_offer_fonts, "Slot: gloves"), 19)
 	magic_offer_tooltip.queue_free()
-	var set_offer: Dictionary = offers[3].duplicate(true)
+	var set_offer: Dictionary = offers[4].duplicate(true)
 	set_offer["display_name"] = "Verdant Vanguard Gloves"
 	set_offer["rarity"] = "set"
 	var set_offer_tooltip := panel._make_offer_tooltip(set_offer)
@@ -133,13 +134,14 @@ func _run() -> void:
 	var refreshed_offers := [
 		offers[0],
 		offers[1],
+		offers[2],
 		{"offer_id": "generated:depth3:001", "kind": "generated", "item_template_id": "gloves", "item_def_id": "gloves", "display_name": "Magic Cave Gloves", "rarity": "magic", "slot": "gloves", "category": "equipment", "rolled_stats": {"armor": 3}, "buy_price": 90, "source_depth": 3, "summary_lines": ["Slot: gloves", "Armor +3", "Requires level 1"]},
 		{"offer_id": "buyback:2001", "kind": "buyback", "item_template_id": "bow", "item_def_id": "bow", "display_name": "Bow", "rarity": "common", "slot": "main_hand", "category": "equipment", "buy_price": 27, "summary_lines": ["Slot: Main hand", "Damage 2-2", "Requires level 1"]},
 	]
 	panel.apply_shop_refresh(refreshed_offers, [sell_appraisals[1]])
 	state = panel.get_debug_state()
-	_assert_eq("refreshed offer count", int(state.get("offer_count", 0)), 4)
-	_assert_eq("refreshed fixed count", int(state.get("fixed_offer_count", 0)), 2)
+	_assert_eq("refreshed offer count", int(state.get("offer_count", 0)), 5)
+	_assert_eq("refreshed fixed count", int(state.get("fixed_offer_count", 0)), 3)
 	_assert_eq("refreshed generated count", int(state.get("generated_offer_count", 0)), 1)
 	_assert_eq("refreshed buyback count", int(state.get("buyback_offer_count", 0)), 1)
 	_assert_true("generated removal applied", not _rows_contain_offer_id(state.get("offer_rows", []), "generated:depth3:000"))
@@ -220,8 +222,8 @@ func _run() -> void:
 		inventory_emitted.append({"type": intent_type, "payload": payload.duplicate(true)})
 	)
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60)
-	_assert_true("inventory red potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines(inventory[1]), "Restores 5 HP"))
-	_assert_true("inventory blue potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines({"item_def_id": "blue_potion"}), "Restores 5 mana"))
+	_assert_true("inventory red potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines(inventory[1]), "Restores 3 HP"))
+	_assert_true("inventory blue potion tooltip effect", _array_contains_text(inventory_panel._tooltip_lines({"item_def_id": "blue_potion"}), "Restores 3 mana"))
 	inventory_panel.set_inventory_state(inventory, {}, 3, 15, 60, [{"slot_index": 0, "item_instance_id": "2003"}], 2)
 	inventory_panel._handle_shift_click(inventory[1])
 	_assert_eq("inventory shift click hotbar emitted count", inventory_emitted.size(), 1)

@@ -1380,6 +1380,33 @@
         }
       ]
     },
+    "potion_depth_lab": {
+      "player": {
+        "position": {
+          "x": 6,
+          "y": 5
+        }
+      },
+      "entities": [
+        {
+          "type": "loot",
+          "item_def_id": "red_potion",
+          "item_level": 10,
+          "position": {
+            "x": 7,
+            "y": 5
+          }
+        },
+        {
+          "type": "monster",
+          "monster_def_id": "training_dummy_heal",
+          "position": {
+            "x": 8,
+            "y": 5
+          }
+        }
+      ]
+    },
     "skill_progression_lab": {
       "player": {
         "position": {

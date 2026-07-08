@@ -516,7 +516,7 @@ func _initialize() -> void:
 	if str(shop_pricing["shop_id"]) != "town_vendor" or str(shop_offers["shop_id"]) != "town_vendor":
 		_fail("shop goldens must target town_vendor")
 		return
-	if (town_vendor["fixed_offers"] as Array).size() != 2:
+	if (town_vendor["fixed_offers"] as Array).size() != 3:
 		_fail("town_vendor fixed offer count mismatch")
 		return
 	for offer in town_vendor["fixed_offers"]:

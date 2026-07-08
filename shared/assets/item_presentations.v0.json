@@ -357,6 +357,20 @@
         "scale": 0.9
       }
     },
+    "rejuv_potion": {
+      "icon": {
+        "shape": "potion",
+        "color": "#9b59f5",
+        "accent": "#ead9ff",
+        "label": "Rj"
+      },
+      "ground": {
+        "shape": "potion",
+        "color": "#9b59f5",
+        "accent": "#ead9ff",
+        "scale": 0.9
+      }
+    },
     "badge": {
       "icon": {
         "shape": "badge",
@@ -720,6 +734,9 @@
     },
     "blue_potion": {
       "family": "mana_potion"
+    },
+    "rejuv_potion": {
+      "family": "rejuv_potion"
     },
     "dagger": {
       "family": "dagger",

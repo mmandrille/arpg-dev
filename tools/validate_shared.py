@@ -1961,12 +1961,16 @@ def cross_checks(report: Report) -> None:
             report.fail("shop fixed offers", "duplicate offer_id")
         else:
             report.ok("shop fixed offer ids are unique")
-        expected_fixed = {"fixed:red_potion": "red_potion", "fixed:blue_potion": "blue_potion"}
+        expected_fixed = {
+            "fixed:red_potion": "red_potion",
+            "fixed:blue_potion": "blue_potion",
+            "fixed:rejuv_potion": "rejuv_potion",
+        }
         got_fixed = {offer["offer_id"]: offer["item_def_id"] for offer in town_shop["fixed_offers"]}
         if got_fixed != expected_fixed:
             report.fail("shop fixed offers", f"expected {expected_fixed}, got {got_fixed}")
         else:
-            report.ok("shop fixed offers are red and blue potion")
+            report.ok("shop fixed offers include leveled potions")
         for offer in town_shop["fixed_offers"]:
             item = items["items"].get(offer["item_def_id"])
             if item is None:

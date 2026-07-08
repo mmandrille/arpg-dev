@@ -1,0 +1,49 @@
+{
+  "id": "potion_depth_lab",
+  "ci_tier": "extended",
+  "world_id": "potion_depth_lab",
+  "seed": "potion_depth_lab_01",
+  "title": "Leveled potion depth lab",
+  "description": "Use a level-10 health potion to restore 3x level HP after combat damage.",
+  "debug_progression": {
+    "level": 12,
+    "stats": {
+      "vit": 40
+    }
+  },
+  "steps": [
+    {
+      "action": "pick_up_loot",
+      "item_def_id": "red_potion"
+    },
+    {
+      "action": "assert_hotbar_slot",
+      "slot_index": 0,
+      "item_def_id": "red_potion"
+    },
+    {
+      "action": "attack_until_event",
+      "monster_def_id": "training_dummy_heal",
+      "event_type": "monster_killed"
+    },
+    {
+      "action": "assert_player_hp",
+      "equals": 40
+    },
+    {
+      "action": "use_hotbar_slot",
+      "slot_index": 0,
+      "item_def_id": "red_potion"
+    },
+    {
+      "action": "assert_player_hp",
+      "equals": 45
+    }
+  ],
+  "assertions": [
+    {
+      "type": "player_hp_equals",
+      "equals": 45
+    }
+  ]
+}

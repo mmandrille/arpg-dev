@@ -231,6 +231,14 @@ func validateWorldLootEntity(r *Rules, label string, entity WorldEntity) error {
 		if _, ok := r.Items[entity.ItemDefID]; !ok {
 			return fmt.Errorf("game: invalid rules %s: unknown item %s", label, entity.ItemDefID)
 		}
+		if entity.ItemLevel != nil {
+			if !IsLeveledPotion(entity.ItemDefID) {
+				return fmt.Errorf("game: invalid rules %s: item_level only valid for leveled potions", label)
+			}
+			if *entity.ItemLevel < 1 {
+				return fmt.Errorf("game: invalid rules %s: item_level must be positive", label)
+			}
+		}
 	}
 	if entity.ItemTemplateID != "" {
 		if _, ok := r.ItemTemplates[entity.ItemTemplateID]; !ok {

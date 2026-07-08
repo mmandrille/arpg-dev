@@ -18,10 +18,10 @@ client/tests/test_golden.gd	686
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7948	# refactor: TestValidateSkillRules moved to skill_rules_validation_test.go
 server/internal/game/handlers.go	1487	# v455 combat skill budget defer hooks on cast_skill and projectile spawn
-server/internal/game/rules.go	2783	# refactor: skill validators extracted to skill_rules_validation.go
-server/internal/game/shop.go	1196	# v407: elemental summary lines extracted to weapon_elemental.go
+server/internal/game/rules.go	2813	# v460: potion drop kind uses entry roll without extra RNG; further TC validators remain in-file
+server/internal/game/shop.go	1224	# v460: leveled potion fixed offers and sell pricing; core shop flow remains coordinator
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6679	# v455 skill budget counters and deferred cast queue on Sim
+server/internal/game/sim.go	6782	# v460: leveled potion loot/consume integrated; potion_items.go owns formulas
 server/internal/game/types.go	721	# v448: steward hunt level state + quest steward offer/pending fields coupled to Sim/LevelState
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482

@@ -81,21 +81,40 @@ func (s *Sim) shopCatalogWithChanges(shopID string, res *TickResult) ([]ShopOffe
 
 func (s *Sim) fixedShopOffers(shop ShopDef) []ShopOfferView {
 	offers := make([]ShopOfferView, 0, len(shop.FixedOffers))
+	tierLevel := PotionShopTierLevel(s.progression.DeepestDungeonDepth)
 	for _, offer := range shop.FixedOffers {
 		item := s.rules.Items[offer.ItemDefID]
 		stats := fixedItemStats(item)
+		buyPrice := offer.BuyPrice
+		itemLevel := 0
+		rolledStats := map[string]int{}
+		displayName := item.Name
+		summaryLines := s.itemSummaryLines(item.Category, item.Slot, item.Handedness, stats, nil, &item, "")
+		if offer.LeveledConsumable && IsLeveledPotion(offer.ItemDefID) {
+			itemLevel = tierLevel
+			buyPrice = s.rules.PotionShopBuyPrice(offer.ItemDefID, tierLevel, shop.Pricing.RoundBuyTo)
+			rolledStats = map[string]int{"item_level": itemLevel}
+			displayName = PotionInventoryDisplayName(offer.ItemDefID)
+			summaryLines = s.rules.PotionSummaryLines(offer.ItemDefID, itemLevel)
+		}
 		view := ShopOfferView{
 			OfferID:      offer.OfferID,
 			Kind:         shopOfferKindFixed,
 			ItemDefID:    offer.ItemDefID,
-			DisplayName:  item.Name,
+			DisplayName:  displayName,
 			Slot:         item.Slot,
 			Category:     item.Category,
-			BuyPrice:     offer.BuyPrice,
-			SummaryLines: s.itemSummaryLines(item.Category, item.Slot, item.Handedness, stats, nil, &item, ""),
+			ItemLevel:    itemLevel,
+			RolledStats:  rolledStats,
+			BuyPrice:     buyPrice,
+			SummaryLines: summaryLines,
 			Comparison:   s.shopComparisonForItem(item.Slot, stats),
 		}
-		s.annotateShopOfferView(&view, &invItem{instanceID: previewItemInstanceID(), itemDefID: offer.ItemDefID})
+		previewItem := &invItem{instanceID: previewItemInstanceID(), itemDefID: offer.ItemDefID}
+		if itemLevel > 0 {
+			previewItem.rollPayload = NewPotionRollPayload(offer.ItemDefID, itemLevel)
+		}
+		s.annotateShopOfferView(&view, previewItem)
 		offers = append(offers, view)
 	}
 	return offers
@@ -551,6 +570,10 @@ func (s *Sim) inventorySellPrice(shopID string, item *invItem) (int, bool) {
 		return shop.sellPrice(buyPrice), true
 	}
 	if buyPrice, ok := shop.fixedBuyPrice(item.itemDefID); ok {
+		if IsLeveledPotion(item.itemDefID) {
+			level := PotionLevelFromItem(item)
+			buyPrice = s.rules.PotionShopBuyPrice(item.itemDefID, level, shop.Pricing.RoundBuyTo)
+		}
 		return shop.sellPrice(buyPrice), true
 	}
 	return 0, false
@@ -1092,6 +1115,8 @@ func (offer ShopOfferView) inventoryItem(instanceID uint64) *invItem {
 			Requirements:   cloneIntMap(offer.Requirements),
 			EffectIDs:      cloneStringSlice(offer.EffectIDs),
 		}
+	} else if IsLeveledPotion(offer.ItemDefID) && offer.ItemLevel > 0 {
+		item.rollPayload = NewPotionRollPayload(offer.ItemDefID, offer.ItemLevel)
 	}
 	return item
 }

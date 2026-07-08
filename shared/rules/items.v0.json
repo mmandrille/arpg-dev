@@ -19,7 +19,8 @@
     "quest_trophy_bat_wing": { "name": "Bat Wing", "category": "quest", "equippable": false },
     "quest_trophy_archer_head": { "name": "Archer Head", "category": "quest", "equippable": false },
     "quest_trophy_mob_skull": { "name": "Mob Skull", "category": "quest", "equippable": false },
-    "red_potion": { "name": "Red Potion", "category": "consumable", "equippable": false, "heal": { "min": 5, "max": 5 } },
-    "blue_potion": { "name": "Blue Potion", "category": "consumable", "equippable": false, "mana_restore": { "min": 5, "max": 5 } }
+    "red_potion": { "name": "Health Potion", "category": "consumable", "equippable": false, "heal": { "min": 3, "max": 3 } },
+    "blue_potion": { "name": "Mana Potion", "category": "consumable", "equippable": false, "mana_restore": { "min": 3, "max": 3 } },
+    "rejuv_potion": { "name": "Rejuv Potion", "category": "consumable", "equippable": false }
   }
 }

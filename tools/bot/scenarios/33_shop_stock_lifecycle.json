@@ -16,7 +16,7 @@
       "action": "assert_shop_offer_count",
       "shop_id": "town_vendor",
       "offer_kind": "fixed",
-      "equals": 2
+      "equals": 3
     },
     {
       "action": "assert_shop_offer_count",
@@ -58,7 +58,7 @@
       "action": "assert_shop_offer_count",
       "shop_id": "town_vendor",
       "offer_kind": "fixed",
-      "equals": 2
+      "equals": 3
     },
     {
       "action": "assert_shop_offer_count",

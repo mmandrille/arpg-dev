@@ -803,6 +803,16 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 			if preset.ItemDefID == RenewStoneItemDefID {
 				loot.rollPayload = NewRenewStoneRollPayload(1)
 			}
+			if IsLeveledPotion(preset.ItemDefID) {
+				potionLevel := absInt(level.levelNum)
+				if potionLevel < 1 {
+					potionLevel = 1
+				}
+				if preset.ItemLevel != nil && *preset.ItemLevel > 0 {
+					potionLevel = *preset.ItemLevel
+				}
+				loot.rollPayload = NewPotionRollPayload(preset.ItemDefID, potionLevel)
+			}
 			if preset.LootPreset != nil {
 				rolled, ok := s.lootPayloadFromWorldPreset(preset.LootPreset)
 				if !ok {
@@ -1704,6 +1714,9 @@ func (s *Sim) spawnLootDrops(drops []LootDrop, sourcePos Vec2, sourceRadius floa
 			payload = &rolled
 			itemDefID = rolled.ItemTemplateID
 		}
+		if IsLeveledPotion(itemDefID) {
+			payload = NewPotionRollPayload(itemDefID, PotionFloorLevelFromGoldContext(goldCtx))
+		}
 		loot := s.newLootEntity(itemDefID, dropPos, payload, goldCtx)
 		loot.id = s.alloc()
 		s.activeLevel().entities[loot.id] = loot
@@ -1775,8 +1788,8 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 	itemSlot := s.itemSlot(itemDefID, e.rollPayload)
 	hotbarSlot := 0
 	assignToHotbar := false
-	if e.rollPayload == nil {
-		if def, ok := s.rules.Items[itemDefID]; ok && def.Category == "consumable" {
+	if def, ok := s.rules.Items[itemDefID]; ok && def.Category == "consumable" {
+		if e.rollPayload == nil || IsLeveledPotion(itemDefID) {
 			hotbarSlot, assignToHotbar = s.firstEmptyActiveHotbarSlot()
 		}
 	}
@@ -2232,8 +2245,15 @@ func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) 
 		return false, "player_dead"
 	}
 	def := s.rules.Items[item.itemDefID]
+	if IsRejuvPotion(item.itemDefID) {
+		return s.consumeRejuvPotion(item, player, correlationID, res)
+	}
 	if def.Heal == nil && def.ManaRestore == nil {
 		return false, "not_usable"
+	}
+	level := 1
+	if IsLeveledPotion(item.itemDefID) {
+		level = PotionLevelFromItem(item)
 	}
 	heal := 0
 	mana := 0
@@ -2241,7 +2261,10 @@ func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) 
 		if player.hp >= player.maxHP {
 			return false, "already_full_hp"
 		}
-		heal = s.rollRange(*def.Heal)
+		heal = s.rules.PotionRestoreAmount(level)
+		if !IsLeveledPotion(item.itemDefID) {
+			heal = s.rollRange(*def.Heal)
+		}
 		if player.hp+heal > player.maxHP {
 			heal = player.maxHP - player.hp
 		}
@@ -2253,7 +2276,10 @@ func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) 
 		if player.mana >= player.maxMana {
 			return false, "already_full_mana"
 		}
-		mana = s.rollRange(*def.ManaRestore)
+		mana = s.rules.PotionRestoreAmount(level)
+		if !IsLeveledPotion(item.itemDefID) {
+			mana = s.rollRange(*def.ManaRestore)
+		}
 		if player.mana+mana > player.maxMana {
 			mana = player.maxMana - player.mana
 		}
@@ -2262,6 +2288,43 @@ func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) 
 		}
 	}
 
+	return s.applyConsumableRestore(item, player, correlationID, res, heal, mana)
+}
+
+func (s *Sim) consumeRejuvPotion(item *invItem, player *entity, correlationID string, res *TickResult) (bool, string) {
+	if player.hp >= player.maxHP && player.mana >= player.maxMana {
+		return false, "already_full_hp"
+	}
+	level := PotionLevelFromItem(item)
+	percent := s.rules.RejuvRestorePercent(level)
+	heal := 0
+	mana := 0
+	if player.hp < player.maxHP {
+		heal = int(math.Round(float64(player.maxHP) * float64(percent) / 100.0))
+		if heal <= 0 {
+			heal = 1
+		}
+		if player.hp+heal > player.maxHP {
+			heal = player.maxHP - player.hp
+		}
+	}
+	if player.mana < player.maxMana {
+		mana = int(math.Round(float64(player.maxMana) * float64(percent) / 100.0))
+		if mana <= 0 {
+			mana = 1
+		}
+		if player.mana+mana > player.maxMana {
+			mana = player.maxMana - player.mana
+		}
+	}
+	if heal <= 0 && mana <= 0 {
+		return false, "already_full_hp"
+	}
+
+	return s.applyConsumableRestore(item, player, correlationID, res, heal, mana)
+}
+
+func (s *Sim) applyConsumableRestore(item *invItem, player *entity, correlationID string, res *TickResult, heal, mana int) (bool, string) {
 	removedID := idStr(item.instanceID)
 	s.removeItemByID(item.instanceID)
 	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
@@ -2301,6 +2364,7 @@ func (s *Sim) consumeItem(item *invItem, correlationID string, res *TickResult) 
 			ItemInstanceID: removedID,
 		})
 	}
+
 	return true, ""
 }
 
@@ -4690,11 +4754,18 @@ func (s *Sim) hotbarView() []HotbarSlotView {
 }
 
 func (s *Sim) itemIsConsumable(item *invItem) bool {
-	if item == nil || item.rollPayload != nil {
+	if item == nil {
 		return false
 	}
 	def, ok := s.rules.Items[item.itemDefID]
-	return ok && def.Category == "consumable"
+	if !ok || def.Category != "consumable" {
+		return false
+	}
+	if item.rollPayload != nil && !IsLeveledPotion(item.itemDefID) {
+		return false
+	}
+
+	return true
 }
 
 func (s *Sim) newLootEntity(itemDefID string, pos Vec2, payload *ItemRollPayload, goldCtx goldRollContext) *entity {
@@ -5598,8 +5669,18 @@ func (s *Sim) annotateItemView(view *ItemView, item *invItem) {
 	if item == nil {
 		return
 	}
-	view.SummaryLines = s.itemSummaryLines("", view.Slot, s.itemHandedness(item), s.statsForInventoryItem(item), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(item, view.ItemTemplateID))
-	view.SummaryLines = append(view.SummaryLines, s.setItemSummaryLines(item)...)
+	if IsLeveledPotion(item.itemDefID) {
+		level := PotionLevelFromItem(item)
+		view.ItemLevel = level
+		if item.rollPayload != nil {
+			view.RolledStats = cloneIntMap(item.rollPayload.Stats)
+			view.DisplayName = PotionInventoryDisplayName(item.itemDefID)
+		}
+		view.SummaryLines = s.rules.PotionSummaryLines(item.itemDefID, level)
+	} else {
+		view.SummaryLines = s.itemSummaryLines("", view.Slot, s.itemHandedness(item), s.statsForInventoryItem(item), view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(item, view.ItemTemplateID))
+		view.SummaryLines = append(view.SummaryLines, s.setItemSummaryLines(item)...)
+	}
 	s.annotateItemRequirementStatus(view.Requirements, item, func(status []RequirementStatusView, met *bool) {
 		view.RequirementStatus = status
 		view.RequirementsMet = met

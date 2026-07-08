@@ -128,10 +128,7 @@ func TestShopOpenBuyAndSell(t *testing.T) {
 	sim := newTownVendorSim(t, 1000, 3)
 	vendor := townVendorEntity(t, sim)
 	shop := sim.rules.Shops["town_vendor"]
-	potionPrice, ok := shop.fixedBuyPrice("red_potion")
-	if !ok {
-		t.Fatal("missing red_potion fixed shop price")
-	}
+	potionPrice := sim.rules.PotionShopBuyPrice("red_potion", PotionShopTierLevel(sim.progression.DeepestDungeonDepth), shop.Pricing.RoundBuyTo)
 
 	open := sim.Tick([]Input{{
 		Type:      "action_intent",
@@ -142,7 +139,7 @@ func TestShopOpenBuyAndSell(t *testing.T) {
 		t.Fatalf("open shop was not acked: %+v", open)
 	}
 	opened := findEvent(open.Events, "shop_opened")
-	if opened == nil || opened.ShopID != "town_vendor" || len(opened.Offers) != 7 {
+	if opened == nil || opened.ShopID != "town_vendor" || len(opened.Offers) != 8 {
 		t.Fatalf("shop_opened event = %+v", opened)
 	}
 
@@ -915,7 +912,7 @@ func TestShopOpenIncludesAppraisalsAndComparisons(t *testing.T) {
 		t.Fatalf("sell appraisal summary lines = %+v", appraisal.SummaryLines)
 	}
 	redPotion := findOffer(opened.Offers, "fixed:red_potion")
-	if redPotion == nil || redPotion.Category != "consumable" || !containsShopString(redPotion.SummaryLines, "Restores 5 HP") {
+	if redPotion == nil || redPotion.Category != "consumable" || !containsShopString(redPotion.SummaryLines, "Restores 6 HP") {
 		t.Fatalf("red potion offer = %+v", redPotion)
 	}
 	blade := findGeneratedOfferByTemplate(opened.Offers, "long_sword")

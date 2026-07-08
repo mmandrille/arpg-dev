@@ -185,12 +185,12 @@ func TestLoadRules(t *testing.T) {
 		t.Fatalf("gold def = %+v, want currency amount {6,12}", r.Items["gold"])
 	}
 	potion := r.Items["red_potion"]
-	if potion.Category != "consumable" || potion.Heal == nil || potion.Heal.Min != 5 || potion.Heal.Max != 5 {
-		t.Fatalf("red_potion def = %+v, want consumable heal {5,5}", potion)
+	if potion.Category != "consumable" || potion.Heal == nil || potion.Heal.Min != 3 || potion.Heal.Max != 3 {
+		t.Fatalf("red_potion def = %+v, want consumable heal {3,3}", potion)
 	}
 	manaPotion := r.Items["blue_potion"]
-	if manaPotion.Category != "consumable" || manaPotion.ManaRestore == nil || manaPotion.ManaRestore.Min != 5 || manaPotion.ManaRestore.Max != 5 {
-		t.Fatalf("blue_potion def = %+v, want consumable mana_restore {5,5}", manaPotion)
+	if manaPotion.Category != "consumable" || manaPotion.ManaRestore == nil || manaPotion.ManaRestore.Min != 3 || manaPotion.ManaRestore.Max != 3 {
+		t.Fatalf("blue_potion def = %+v, want consumable mana_restore {3,3}", manaPotion)
 	}
 	if _, ok := r.Worlds[DefaultWorldID]; !ok {
 		t.Fatalf("missing default world %q", DefaultWorldID)
@@ -3615,10 +3615,10 @@ func TestUseConsumableHealLab(t *testing.T) {
 		Use:       &UseIntent{ItemInstanceID: firstID},
 	}})
 	assertAck(t, use1, "use1")
-	if player.hp != 10 {
-		t.Fatalf("player hp after first use = %d, want 10", player.hp)
+	if player.hp != 8 {
+		t.Fatalf("player hp after first use = %d, want 8", player.hp)
 	}
-	assertEventHeal(t, use1, "player_healed", 5)
+	assertEventHeal(t, use1, "player_healed", 3)
 
 	bluePotion := findItemByDef(sim, "blue_potion")
 	if bluePotion == nil {
@@ -3632,10 +3632,10 @@ func TestUseConsumableHealLab(t *testing.T) {
 		Use:       &UseIntent{ItemInstanceID: secondID},
 	}})
 	assertAck(t, use2, "use2")
-	if player.mana != 10 {
-		t.Fatalf("player mana after blue potion = %d, want 10", player.mana)
+	if player.mana != 8 {
+		t.Fatalf("player mana after blue potion = %d, want 8", player.mana)
 	}
-	assertEventMana(t, use2, "player_mana_restored", 5)
+	assertEventMana(t, use2, "player_mana_restored", 3)
 	if len(sim.inventory) != 0 {
 		t.Fatalf("inventory after potion uses = %+v, want empty", sim.inventory)
 	}

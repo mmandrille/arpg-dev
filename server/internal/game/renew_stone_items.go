@@ -70,6 +70,8 @@ func LeveledConsumableLevelFromRaw(itemDefID string, raw json.RawMessage) (int, 
 		return UpgradeShardLevelFromRaw(raw)
 	case RenewStoneItemDefID:
 		return RenewStoneLevelFromRaw(raw)
+	case "red_potion", "blue_potion", RejuvPotionItemDefID:
+		return PotionLevelFromRaw(itemDefID, raw)
 	default:
 		return 0, fmt.Errorf("game: unknown leveled consumable %q", itemDefID)
 	}

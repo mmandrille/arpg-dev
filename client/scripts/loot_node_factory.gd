@@ -3,6 +3,7 @@ extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
+const PotionIconLabelScript := preload("res://scripts/potion_icon_label.gd")
 
 var asset_manifest: Dictionary = {}
 var item_presentations: Dictionary = {}
@@ -286,6 +287,8 @@ func loot_label_color(e: Dictionary) -> Color:
 
 func loot_label_text(e: Dictionary) -> String:
 	var item_def_id := str(e.get("item_def_id", ""))
+	if PotionIconLabelScript.is_leveled_potion(item_def_id):
+		return _potion_ground_label(item_def_id)
 	var def := item_definition(item_def_id)
 	var category := str(def.get("category", "")).to_lower()
 	if item_def_id == "gold" or category == "currency":
@@ -366,6 +369,17 @@ func generic_loot_name(item_def_id: String) -> String:
 		"quest":
 			return "Item"
 	return "Item"
+
+func _potion_ground_label(item_def_id: String) -> String:
+	match item_def_id:
+		"red_potion":
+			return "Health Potion"
+		"blue_potion":
+			return "Mana Potion"
+		"rejuv_potion":
+			return "Rejuv Potion"
+		_:
+			return "Potion"
 
 func res_path(runtime_path: String) -> String:
 	var p := runtime_path

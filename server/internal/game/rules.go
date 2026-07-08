@@ -84,6 +84,7 @@ type MainGameplayConfig struct {
 	CompanionFollowStop                        float64                 `json:"companion_follow_stop_radius"`
 	RangedRetreatMinMeleeEngagementSeconds     float64                 `json:"ranged_retreat_min_melee_engagement_seconds"`
 	ExperienceRewardPercent                      int                     `json:"experience_reward_percent"`
+	PotionRules                                  PotionRulesConfig       `json:"potion_rules"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.
@@ -689,9 +690,10 @@ type LootTable struct {
 }
 
 type ShopFixedOffer struct {
-	OfferID   string `json:"offer_id"`
-	ItemDefID string `json:"item_def_id"`
-	BuyPrice  int    `json:"buy_price"`
+	OfferID           string `json:"offer_id"`
+	ItemDefID         string `json:"item_def_id"`
+	BuyPrice          int    `json:"buy_price"`
+	LeveledConsumable bool   `json:"leveled_consumable,omitempty"`
 }
 
 type ShopGeneratedOffers struct {
@@ -778,6 +780,7 @@ type WorldEntity struct {
 	MonsterDefID      string           `json:"monster_def_id,omitempty"`
 	ItemDefID         string           `json:"item_def_id,omitempty"`
 	ItemTemplateID    string           `json:"item_template_id,omitempty"`
+	ItemLevel         *int             `json:"item_level,omitempty"`
 	LootPreset        *WorldLootPreset `json:"loot_preset,omitempty"`
 	InteractableDefID string           `json:"interactable_def_id,omitempty"`
 	Kind              string           `json:"kind,omitempty"`
@@ -2083,7 +2086,11 @@ func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
 		for _, entry := range attempt.Entries {
 			roll -= entry.Weight
 			if roll < 0 {
-				out = append(out, LootDrop{ItemDefID: entry.ItemDefID, ItemTemplateID: entry.ItemTemplateID, UniqueItemID: entry.UniqueItemID, SetItemID: entry.SetItemID})
+				itemDefID := entry.ItemDefID
+				if itemDefID == "red_potion" || itemDefID == "blue_potion" {
+					itemDefID = r.resolvePotionDropKindFromRoll(itemDefID, roll)
+				}
+				out = append(out, LootDrop{ItemDefID: itemDefID, ItemTemplateID: entry.ItemTemplateID, UniqueItemID: entry.UniqueItemID, SetItemID: entry.SetItemID})
 				break
 			}
 		}

@@ -7,6 +7,8 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 06_ranged_lab.json	ranged_lab	protocol	extended	setup-eliminable	1	1		
 07_inventory_lab.json	inventory_lab	protocol	extended	contract	0	0		
 08_heal_lab.json	heal_lab	protocol	extended	contract	0	0		
+potion_depth_lab.json	potion_depth_lab	protocol	extended	contract	0	0		
+potion_shop_lab.json	potion_shop_lab	protocol	extended	contract	0	0		
 09_chase_lab.json	chase_lab	protocol	extended	contract	0	0		
 100_barbarian_leap_obstacle_crossing.json	barbarian_leap_obstacle_crossing	protocol	extended	contract	0	0		
 101_obstacle_variety_pack.json	obstacle_variety_pack	protocol	pack	contract	0	0		

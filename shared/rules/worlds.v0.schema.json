@@ -37,6 +37,7 @@
                 "monster_def_id": { "type": "string" },
                 "item_def_id": { "type": "string" },
                 "item_template_id": { "type": "string" },
+                "item_level": { "type": "integer", "minimum": 1 },
                 "loot_preset": {
                   "type": "object",
                   "required": ["item_template_id"],

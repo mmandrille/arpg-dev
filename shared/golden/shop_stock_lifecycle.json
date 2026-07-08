@@ -33,7 +33,7 @@
   "finite_stock": {
     "initial_generated_count": 5,
     "after_generated_purchase_count": 4,
-    "fixed_offer_count": 2
+    "fixed_offer_count": 3
   },
   "buyback": {
     "enabled": true,

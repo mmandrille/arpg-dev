@@ -56,7 +56,18 @@
     "companion_assist_radius": 5.0,
     "companion_follow_distance": 1.1,
     "companion_follow_stop_radius": 1.6,
-    "experience_reward_percent": 50
+    "experience_reward_percent": 50,
+    "potion_rules": {
+      "restore_multiplier_per_level": 3,
+      "rejuv_min_restore_percent": 33,
+      "rejuv_drop_weight_percent": 20,
+      "shop_buy_price_per_level": 40,
+      "shop_base_buy_price": {
+        "red_potion": 40,
+        "blue_potion": 40,
+        "rejuv_potion": 60
+      }
+    }
   },
   "weapon_elemental_procs": {
     "cold": {

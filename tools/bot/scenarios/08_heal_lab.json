@@ -29,7 +29,7 @@
     },
     {
       "action": "assert_player_hp",
-      "equals": 10
+      "equals": 8
     },
     {
       "action": "use_hotbar_slot",
@@ -41,7 +41,7 @@
   "assertions": [
     {
       "type": "player_hp_equals",
-      "equals": 10
+      "equals": 8
     },
     {
       "type": "inventory_count",

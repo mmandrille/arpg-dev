@@ -1,16 +1,16 @@
 {
   "version": 0,
-  "description": "Consumable heal rolls and HP cap behavior for red_potion.",
+  "description": "Consumable heal rolls and HP cap behavior for level-1 red_potion.",
   "item_def_id": "red_potion",
-  "heal": { "min": 5, "max": 5 },
+  "heal": { "min": 3, "max": 3 },
   "cases": [
     {
       "name": "partial_heal_after_combat",
       "player_hp": 4,
       "player_max_hp": 10,
       "draw": 0,
-      "expected_heal": 5,
-      "expected_player_hp": 9
+      "expected_heal": 3,
+      "expected_player_hp": 7
     },
     {
       "name": "top_off_from_hotbar",

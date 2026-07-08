@@ -74,6 +74,12 @@ func (s *Server) ensureStarterLoadout(ctx context.Context, character store.Chara
 				return err
 			}
 			rolledStats = payload
+		} else if game.IsLeveledPotion(item.itemDefID) {
+			payload, err := game.MarshalPotionRolledStats(1)
+			if err != nil {
+				return err
+			}
+			rolledStats = payload
 		}
 		if err := s.store.AddCharacterItem(ctx, store.CharacterItemInstance{
 			ID:          itemID,

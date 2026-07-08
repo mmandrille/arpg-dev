@@ -479,8 +479,11 @@ func connect_ws() -> void:
 
 
 func reconnect_ws() -> void:
-	close()
-	connect_ws()
+	var old_ws := _ws
+	_ws = WebSocketPeer.new()
+	_ws.connect_to_url(websocket_url())
+	if old_ws.get_ready_state() != WebSocketPeer.STATE_CLOSED:
+		old_ws.close()
 
 
 func resume_same_session() -> bool:

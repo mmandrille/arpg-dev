@@ -16,7 +16,8 @@ type deferredPersistChange struct {
 func persistChangeDeferrable(op string) bool {
 	switch op {
 	case game.OpCharacterProgressionUpdate, game.OpShopStockReplace, game.OpShopStockAvailability,
-		game.OpResourceWalletUpdate, game.OpResourceBagItemAdd:
+		game.OpResourceWalletUpdate, game.OpResourceBagItemAdd,
+		game.OpInventoryAdd, game.OpInventoryUpdate, game.OpEquippedUpdate, game.OpGoldUpdate:
 		return true
 	default:
 		return false
@@ -80,5 +81,79 @@ func (l *sessionLoop) persistChange(ctx context.Context, c game.Change, member s
 			l.hub.metrics.PersistenceErrors.Inc()
 			l.log.Error("persist resource bag item add", "bag_item_id", c.StashItem.StashItemID, "error", err)
 		}
+	case game.OpInventoryAdd:
+		l.persistInventoryAdd(ctx, c, member)
+	case game.OpInventoryUpdate:
+		l.persistInventoryUpdate(ctx, c, member)
+	case game.OpEquippedUpdate:
+		l.persistEquippedUpdate(ctx, c, member)
+	case game.OpGoldUpdate:
+		l.persistGoldUpdate(ctx, c, member)
+	}
+}
+
+func (l *sessionLoop) persistInventoryAdd(ctx context.Context, c game.Change, member store.SessionMember) {
+	if c.Item == nil {
+		return
+	}
+	location := store.ItemLocationInventory
+	if c.Item.Equipped {
+		location = store.ItemLocationEquipped
+	}
+	rolledStats := json.RawMessage(`{}`)
+	if payload := c.Item.RollPayload(); payload != nil {
+		if raw, err := json.Marshal(payload); err == nil {
+			rolledStats = raw
+		} else {
+			l.hub.metrics.PersistenceErrors.Inc()
+			l.log.Error("marshal rolled item payload", "error", err)
+		}
+	}
+	if err := l.hub.store.AddCharacterItem(ctx, store.CharacterItemInstance{
+		ID:          c.Item.ItemInstanceID,
+		AccountID:   member.AccountID,
+		CharacterID: member.CharacterID,
+		ItemDefID:   c.Item.ItemDefID,
+		Location:    location,
+		Slot:        c.Item.Slot,
+		Equipped:    c.Item.Equipped,
+		WeaponSet:   changeWeaponSet(c),
+		RolledStats: rolledStats,
+	}); err != nil {
+		l.hub.metrics.PersistenceErrors.Inc()
+		l.log.Error("persist inventory add", "error", err)
+	}
+}
+
+func (l *sessionLoop) persistInventoryUpdate(ctx context.Context, c game.Change, member store.SessionMember) {
+	if c.Item == nil {
+		return
+	}
+	if changeRequiresExplicitWeaponSet(c) && !changeHasExplicitWeaponSet(c) {
+		return
+	}
+	if err := l.hub.store.SetCharacterItemEquipped(ctx, member.AccountID, member.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
+		l.hub.metrics.PersistenceErrors.Inc()
+		l.log.Error("persist inventory update", "error", err)
+	}
+}
+
+func (l *sessionLoop) persistEquippedUpdate(ctx context.Context, c game.Change, member store.SessionMember) {
+	if c.ItemInstanceID == nil || c.Slot == "" {
+		return
+	}
+	if err := l.hub.store.SetCharacterItemEquipped(ctx, member.AccountID, member.CharacterID, *c.ItemInstanceID, c.Slot, true, changeWeaponSet(c)); err != nil {
+		l.hub.metrics.PersistenceErrors.Inc()
+		l.log.Error("persist equipped update", "error", err)
+	}
+}
+
+func (l *sessionLoop) persistGoldUpdate(ctx context.Context, c game.Change, member store.SessionMember) {
+	if c.Gold == nil {
+		return
+	}
+	if err := l.hub.store.SetCharacterGold(ctx, member.AccountID, member.CharacterID, *c.Gold); err != nil {
+		l.hub.metrics.PersistenceErrors.Inc()
+		l.log.Error("persist character gold", "error", err)
 	}
 }

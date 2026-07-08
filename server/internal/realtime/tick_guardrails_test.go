@@ -21,6 +21,20 @@ func TestEvaluateTickGuardrail(t *testing.T) {
 	}
 }
 
+func TestShouldApplySimPressureOverloadDegradation(t *testing.T) {
+	nav := game.NavigationRules{MonsterOverloadLiveMonsterThreshold: 28}
+	budget := time.Second / tickHz
+	if shouldApplySimPressureOverloadDegradation(50*time.Millisecond, budget, game.PerfSnapshot{LiveMonsters: 30}, nav) {
+		t.Fatal("sim within budget should not apply sim-pressure degradation")
+	}
+	if !shouldApplySimPressureOverloadDegradation(150*time.Millisecond, budget, game.PerfSnapshot{LiveMonsters: 26}, nav) {
+		t.Fatal("crowded sim overrun should apply sim-pressure degradation")
+	}
+	if shouldApplySimPressureOverloadDegradation(150*time.Millisecond, budget, game.PerfSnapshot{LiveMonsters: 10}, nav) {
+		t.Fatal("sparse sim overrun should not apply sim-pressure degradation")
+	}
+}
+
 func TestShouldApplyOverloadDegradationRequiresRoomPressure(t *testing.T) {
 	nav := game.NavigationRules{
 		MonsterPathNodesPerTick:             500,

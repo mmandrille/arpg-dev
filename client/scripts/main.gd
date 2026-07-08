@@ -325,6 +325,7 @@ var _last_facing_direction := Vector2(1.0, 0.0)
 var _level_label: Label
 var last_performance_status: Dictionary = {}
 var _pending_delta_payloads: Array = []
+var _deferred_burst_hits: Array = []
 var _last_ping_ms: int = -1
 var _last_intent_reject_reason: String = ""
 var _camera: Camera3D  # convenience alias — always equal to _camera_controller.get_gameplay_camera()
@@ -1062,8 +1063,11 @@ func _process(delta: float) -> void:
 
 	if gameplay_active or visual_replay_enabled:
 		if not _connection_recovery_runtime.is_active():
-			_flush_pending_deltas()
 			var net_start := Time.get_ticks_usec()
+			for env in client.poll():
+				_handle_message(env)
+			_flush_pending_deltas()
+			_process_deferred_burst_hits()
 			for env in client.poll():
 				_handle_message(env)
 			PerfPhaseTimerScript.measure_usec("net_poll", net_start)
@@ -1683,26 +1687,20 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "skill_damage_burst":
 			_face_event_source_toward_target(ev)
-			for hit in ev.get("hits", []):
+			var burst_hits: Array = ev.get("hits", [])
+			var burst_budget := ClientConstants.SKILL_DAMAGE_BURST_HITS_PER_FRAME
+			var played_audio := false
+			for hit in burst_hits:
+				if burst_budget <= 0:
+					_deferred_burst_hits.append({"ev": ev, "hit": hit})
+					continue
 				if not hit is Dictionary:
 					continue
-				var hit_ev = {
-					"event_type": "monster_damaged",
-					"entity_id": str(hit.get("target_entity_id", "")),
-					"source_entity_id": str(ev.get("source_entity_id", ev.get("entity_id", ""))),
-					"target_entity_id": str(hit.get("target_entity_id", "")),
-					"damage": hit.get("damage"),
-					"outcome": hit.get("outcome", "hit"),
-					"skill_id": str(ev.get("skill_id", "")),
-				}
-				var hit_eid := str(hit_ev.get("entity_id", ""))
-				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, hit_ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
-				_show_combat_text_for_event(hit_eid, hit_ev, Color(1.0, 0.92, 0.25))
+				burst_budget -= 1
+				_present_skill_burst_hit(_skill_burst_hit_event(ev, hit as Dictionary))
+				played_audio = true
+			if played_audio:
 				ClientAudioBridgeScript.damage(audio_controller, false)
-				_notify_training_damage_log(hit_eid, hit_ev)
-				GameplayFeedbackPresentationScript.play_entity_reaction(
-					entities, player_id, player_anchor, player_reaction, hit_eid, hit_ev, "hit",
-					Callable(self, "_node_world_or_local_position"))
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			_face_event_source_toward_target(ev)
@@ -4066,7 +4064,53 @@ func _clear_pending_for_reconnect() -> void:
 	pending_interactable_action.clear()
 	pending_waypoint_travel = false
 	pending_action_targets.clear()
+	_deferred_burst_hits.clear()
 	_clear_pending_attack_commands()
+
+
+func _skill_burst_hit_event(source_ev: Dictionary, hit: Dictionary) -> Dictionary:
+	return {
+		"event_type": "monster_damaged",
+		"entity_id": str(hit.get("target_entity_id", "")),
+		"source_entity_id": str(source_ev.get("source_entity_id", source_ev.get("entity_id", ""))),
+		"target_entity_id": str(hit.get("target_entity_id", "")),
+		"damage": hit.get("damage"),
+		"outcome": hit.get("outcome", "hit"),
+		"skill_id": str(source_ev.get("skill_id", "")),
+	}
+
+
+func _present_skill_burst_hit(hit_ev: Dictionary) -> void:
+	var hit_eid := str(hit_ev.get("entity_id", ""))
+	_show_combat_text_for_event(hit_eid, hit_ev, Color(1.0, 0.92, 0.25))
+	_notify_training_damage_log(hit_eid, hit_ev)
+	GameplayFeedbackPresentationScript.play_entity_reaction(
+		entities, player_id, player_anchor, player_reaction, hit_eid, hit_ev, "hit",
+		Callable(self, "_node_world_or_local_position"))
+
+
+func _process_deferred_burst_hits() -> void:
+	if _deferred_burst_hits.is_empty():
+		return
+	var burst_budget := ClientConstants.SKILL_DAMAGE_BURST_HITS_PER_FRAME
+	var played_audio := false
+	var remaining: Array = []
+	for entry in _deferred_burst_hits:
+		if burst_budget <= 0:
+			remaining.append(entry)
+			continue
+		if not entry is Dictionary:
+			continue
+		var hit = (entry as Dictionary).get("hit")
+		var source_ev: Dictionary = (entry as Dictionary).get("ev", {})
+		if not hit is Dictionary:
+			continue
+		burst_budget -= 1
+		_present_skill_burst_hit(_skill_burst_hit_event(source_ev, hit as Dictionary))
+		played_audio = true
+	_deferred_burst_hits = remaining
+	if played_audio:
+		ClientAudioBridgeScript.damage(audio_controller, false)
 
 
 func _build_loss_popup() -> Control:

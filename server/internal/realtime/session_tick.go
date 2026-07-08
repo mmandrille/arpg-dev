@@ -54,13 +54,13 @@ func (l *sessionLoop) doTick() {
 	persistDuration := time.Duration(0)
 	broadcastDuration := time.Duration(0)
 	elapsedAfterSim := time.Since(start)
-	deferNonCritical := shouldDeferNonCritical(simDuration, elapsedAfterSim, 0)
+	deferNonCritical := shouldDeferNonCritical(simDuration, elapsedAfterSim, 0) || shouldPrearmPersistDefer(results, simDuration)
 	for _, res := range results {
 		if shouldDeferNonCritical(simDuration, time.Since(start), persistDuration) {
 			deferNonCritical = true
 		}
 		persistStart := time.Now()
-		eventSequence = l.persistTick(res, membersByPlayerID, eventSequence, deferNonCritical)
+		eventSequence = l.persistTick(res, membersByPlayerID, eventSequence, deferNonCritical, start)
 		persistDuration += time.Since(persistStart)
 	}
 	broadcastStart := time.Now()
@@ -72,7 +72,8 @@ func (l *sessionLoop) doTick() {
 	degradationApplied := false
 	if guardrail.OverBudget {
 		l.mu.Lock()
-		if l.sim != nil && shouldApplyOverloadDegradation(counters, snapshot, nav) {
+		if l.sim != nil && (shouldApplyOverloadDegradation(counters, snapshot, nav) ||
+			shouldApplySimPressureOverloadDegradation(simDuration, guardrail.Budget, snapshot, nav)) {
 			degradationApplied = l.sim.ApplyOverloadDegradation()
 		}
 		if l.sim != nil {

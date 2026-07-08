@@ -220,7 +220,7 @@ func TestProgressionDeltasUseExplicitOwner(t *testing.T) {
 	}, map[uint64]store.SessionMember{
 		actorID: {AccountID: "acct_host", CharacterID: "char_host"},
 		ownerID: {AccountID: "acct_guest", CharacterID: "char_guest"},
-	}, 0, false)
+	}, 0, false, time.Now())
 	if len(repo.progressions) != 1 {
 		t.Fatalf("persisted progressions = %d, want 1", len(repo.progressions))
 	}
@@ -296,7 +296,7 @@ func TestGoldPickupDeltasUseExplicitOwner(t *testing.T) {
 	persistLoop.persistTick(result, map[uint64]store.SessionMember{
 		hostID:  {AccountID: "acct_host", CharacterID: "char_host"},
 		guestID: {AccountID: "acct_guest", CharacterID: "char_guest"},
-	}, 0, false)
+	}, 0, false, time.Now())
 	if len(repo.goldUpdates) != 1 {
 		t.Fatalf("persisted gold updates = %d, want 1", len(repo.goldUpdates))
 	}
@@ -379,7 +379,7 @@ func TestInventoryAddPersistenceSkipsOnlyStashTransfers(t *testing.T) {
 		},
 	}, map[uint64]store.SessionMember{
 		1001: {AccountID: "acct_host", CharacterID: "char_host"},
-	}, 0, false)
+	}, 0, false, time.Now())
 	if len(repo.items) != 1 {
 		t.Fatalf("persisted item count = %d, want only non-stash-transfer add: %+v", len(repo.items), repo.items)
 	}
@@ -421,7 +421,7 @@ func TestHandInventoryUpdatePersistenceRequiresExplicitWeaponSet(t *testing.T) {
 		},
 	}, map[uint64]store.SessionMember{
 		1001: {AccountID: "acct_host", CharacterID: "char_host"},
-	}, 0, false)
+	}, 0, false, time.Now())
 	if len(repo.equippedItems) != 1 {
 		t.Fatalf("persisted equipped updates = %d, want only explicit weapon-set update: %+v", len(repo.equippedItems), repo.equippedItems)
 	}
@@ -584,7 +584,7 @@ func TestPersistTickDefersNonCriticalChangesWhenRequested(t *testing.T) {
 		}},
 	}, map[uint64]store.SessionMember{
 		1001: {AccountID: "acct_host", CharacterID: "char_host"},
-	}, 0, true)
+	}, 0, true, time.Now())
 	if len(repo.progressions) != 0 {
 		t.Fatalf("deferred progression should not persist immediately, got %d", len(repo.progressions))
 	}
@@ -597,7 +597,7 @@ func TestPersistTickDefersNonCriticalChangesWhenRequested(t *testing.T) {
 	}
 }
 
-func TestEnqueueBlocksInsteadOfClosingOnFullQueue(t *testing.T) {
+func TestEnqueueCoalescesInsteadOfClosingOnFullQueue(t *testing.T) {
 	client := &loopClient{
 		playerID: 1001,
 		sendCh:   make(chan outEnvelope, 1),
@@ -610,7 +610,15 @@ func TestEnqueueBlocksInsteadOfClosingOnFullQueue(t *testing.T) {
 
 	enqueued := make(chan struct{})
 	go func() {
-		client.enqueue(outEnvelope{Type: typeStateDelta, MessageID: "m2", Payload: stateDeltaPayload{ServerTick: 2}})
+		client.enqueue(outEnvelope{
+			Type:      typeStateDelta,
+			MessageID: "m2",
+			Tick:      2,
+			Payload: stateDeltaPayload{
+				ServerTick: 2,
+				Changes:    []game.Change{{Op: game.OpGoldUpdate, Gold: intPtr(5)}},
+			},
+		})
 		close(enqueued)
 	}()
 
@@ -622,14 +630,23 @@ func TestEnqueueBlocksInsteadOfClosingOnFullQueue(t *testing.T) {
 
 	select {
 	case <-enqueued:
-		t.Fatal("second enqueue should block until queue drains")
 	default:
+		t.Fatal("second enqueue should coalesce immediately without blocking")
 	}
 
-	<-client.sendCh
-	<-enqueued
 	if len(client.sendCh) != 1 {
-		t.Fatalf("sendCh len = %d, want 1 after blocking enqueue drained", len(client.sendCh))
+		t.Fatalf("sendCh len = %d, want 1", len(client.sendCh))
+	}
+	env, ok := client.overflow.take()
+	if !ok {
+		t.Fatal("expected coalesced overflow envelope")
+	}
+	payload, ok := env.Payload.(stateDeltaPayload)
+	if !ok || len(payload.Changes) != 1 {
+		t.Fatalf("coalesced payload = %+v, want one gold change", env.Payload)
+	}
+	if payload.ServerTick != 2 {
+		t.Fatalf("coalesced server tick = %d, want 2", payload.ServerTick)
 	}
 }
 

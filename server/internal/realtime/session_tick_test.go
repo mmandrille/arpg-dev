@@ -35,6 +35,51 @@ func TestShouldDeferNonCriticalPersistPhaseOverBudget(t *testing.T) {
 	}
 }
 
+func TestShouldPrearmPersistDeferOnHeavyChangeBurst(t *testing.T) {
+	results := []game.TickResult{{Changes: make([]game.Change, persistPrearmChangeCount)}}
+	if !shouldPrearmPersistDefer(results, 10*time.Millisecond) {
+		t.Fatal("heavy change burst should prearm defer")
+	}
+}
+
+func TestShouldPrearmPersistDeferOnSimThreshold(t *testing.T) {
+	if !shouldPrearmPersistDefer(nil, persistPrearmSimThreshold) {
+		t.Fatal("sim at prearm threshold should prearm defer")
+	}
+}
+
+func TestPersistTickDefersInventoryAddsWhenRequested(t *testing.T) {
+	repo := &progressionPersistRepo{}
+	loop := &sessionLoop{
+		hub:  &Hub{store: repo},
+		sess: store.Session{ID: "sess_defer_inventory", AccountID: "acct_host", CharacterID: "char_host"},
+	}
+	loop.persistTick(game.TickResult{
+		Tick:          4,
+		ActorPlayerID: 1001,
+		Changes: []game.Change{{
+			Op: game.OpInventoryAdd,
+			Item: &game.ItemView{
+				ItemInstanceID: "loot_1",
+				ItemDefID:      "red_potion",
+				Slot:           "inventory",
+			},
+		}},
+	}, map[uint64]store.SessionMember{
+		1001: {AccountID: "acct_host", CharacterID: "char_host"},
+	}, 0, true, time.Now())
+	if len(repo.items) != 0 {
+		t.Fatalf("deferred inventory add should not persist immediately, got %d", len(repo.items))
+	}
+	if len(loop.deferredPersistChanges) != 1 {
+		t.Fatalf("deferred queue = %d, want 1", len(loop.deferredPersistChanges))
+	}
+	loop.flushDeferredPersist()
+	if len(repo.items) != 1 {
+		t.Fatalf("flushed inventory add should persist, got %d", len(repo.items))
+	}
+}
+
 func TestAppendSessionEventsBatch(t *testing.T) {
 	repo := &progressionPersistRepo{}
 	loop := &sessionLoop{

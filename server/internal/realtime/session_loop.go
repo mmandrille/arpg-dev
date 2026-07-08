@@ -48,6 +48,7 @@ type loopClient struct {
 	member   store.SessionMember
 	playerID uint64
 	sendCh   chan outEnvelope
+	overflow clientSendOverflow
 	done     chan struct{}
 	once     sync.Once
 }
@@ -412,20 +413,40 @@ func (c *loopClient) writeLoop() {
 			if err := c.conn.WriteJSON(env); err != nil {
 				return
 			}
+			c.drainSendOverflow()
+		}
+	}
+}
+
+func (c *loopClient) drainSendOverflow() {
+	for {
+		env, ok := c.overflow.take()
+		if !ok {
+			return
+		}
+		if err := c.conn.WriteJSON(env); err != nil {
+			return
 		}
 	}
 }
 
 func (c *loopClient) enqueue(env outEnvelope) {
-	select {
-	case <-c.done:
-		return
-	case c.sendCh <- env:
-		return
-	default:
+	for {
 		select {
 		case <-c.done:
+			return
 		case c.sendCh <- env:
+			return
+		default:
+		}
+		if c.overflow.merge(env) {
+			return
+		}
+		select {
+		case <-c.done:
+			return
+		case c.sendCh <- env:
+			return
 		}
 	}
 }
@@ -640,7 +661,7 @@ func filterEventsForClient(events []game.Event, actorPlayerID, clientPlayerID ui
 	return out
 }
 
-func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uint64]store.SessionMember, eventSequence int64, deferNonCritical bool) int64 {
+func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uint64]store.SessionMember, eventSequence int64, deferNonCritical bool, tickStart time.Time) int64 {
 	ctx := context.Background()
 	member := store.SessionMember{
 		AccountID:   l.sess.AccountID,
@@ -749,9 +770,13 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			hotbarAssignedItems[*c.ItemInstanceID] = struct{}{}
 		}
 	}
+	deferActive := deferNonCritical
 	for _, c := range res.Changes {
 		if c.StashTransferID != "" {
 			continue
+		}
+		if !deferActive && persistTickBudgetExceeded(tickStart) {
+			deferActive = true
 		}
 		changeMember := member
 		if c.OwnerPlayerID != 0 {
@@ -764,33 +789,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if c.Item == nil {
 				continue
 			}
-			location := store.ItemLocationInventory
-			if c.Item.Equipped {
-				location = store.ItemLocationEquipped
-			}
-			rolledStats := json.RawMessage(`{}`)
-			if payload := c.Item.RollPayload(); payload != nil {
-				if raw, err := json.Marshal(payload); err == nil {
-					rolledStats = raw
-				} else {
-					l.hub.metrics.PersistenceErrors.Inc()
-					l.log.Error("marshal rolled item payload", "error", err)
-				}
-			}
-			if err := l.hub.store.AddCharacterItem(ctx, store.CharacterItemInstance{
-				ID:          c.Item.ItemInstanceID,
-				AccountID:   changeMember.AccountID,
-				CharacterID: changeMember.CharacterID,
-				ItemDefID:   c.Item.ItemDefID,
-				Location:    location,
-				Slot:        c.Item.Slot,
-				Equipped:    c.Item.Equipped,
-				WeaponSet:   changeWeaponSet(c),
-				RolledStats: rolledStats,
-			}); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist inventory add", "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		case game.OpInventoryUpdate:
 			if c.Item == nil {
 				continue
@@ -798,10 +797,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if changeRequiresExplicitWeaponSet(c) && !changeHasExplicitWeaponSet(c) {
 				continue
 			}
-			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, c.Item.ItemInstanceID, c.Item.Slot, c.Item.Equipped, changeWeaponSet(c)); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist inventory update", "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		case game.OpInventoryRemove:
 			if c.ItemInstanceID == nil {
 				continue
@@ -814,13 +810,7 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				l.log.Error("persist inventory remove", "error", err)
 			}
 		case game.OpEquippedUpdate:
-			if c.ItemInstanceID == nil || c.Slot == "" {
-				continue
-			}
-			if err := l.hub.store.SetCharacterItemEquipped(ctx, changeMember.AccountID, changeMember.CharacterID, *c.ItemInstanceID, c.Slot, true, changeWeaponSet(c)); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist equipped update", "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		case game.OpHotbarUpdate:
 			if err := l.hub.store.SetCharacterHotbarSlot(ctx, changeMember.AccountID, changeMember.CharacterID, c.SlotIndex, c.ItemInstanceID); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
@@ -840,23 +830,17 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				l.log.Error("persist skill bindings update", "error", err)
 			}
 		case game.OpGoldUpdate:
-			if c.Gold == nil {
-				continue
-			}
-			if err := l.hub.store.SetCharacterGold(ctx, changeMember.AccountID, changeMember.CharacterID, *c.Gold); err != nil {
-				l.hub.metrics.PersistenceErrors.Inc()
-				l.log.Error("persist character gold", "error", err)
-			}
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		case game.OpResourceWalletUpdate:
 			if c.ResourceID == "" {
 				continue
 			}
-			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		case game.OpResourceBagItemAdd:
 			if c.StashItem == nil {
 				continue
 			}
-			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {
 				if _, err := l.hub.store.AddAccountWaypoint(ctx, changeMember.AccountID, c.Level); err != nil {
@@ -865,14 +849,14 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				}
 			}
 		case game.OpShopStockReplace:
-			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		case game.OpShopStockAvailability:
-			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		case game.OpCharacterProgressionUpdate:
 			if c.Progression == nil {
 				continue
 			}
-			l.persistChangeOrDefer(c, changeMember, deferNonCritical)
+			l.persistChangeOrDefer(c, changeMember, deferActive)
 		}
 	}
 

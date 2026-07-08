@@ -1,0 +1,124 @@
+tools/bot/skill_rules_loader.py
+  s_f80a7d9fd4fbf2::t_926fec8dc61496 1-33
+server/internal/game/handlers.go
+  s_f80a7d9fd4fbf2::t_2f2d05d423439b 1343-1345
+  s_f80a7d9fd4fbf2::t_7b480149fa6365 1375-1377
+server/internal/game/sim.go
+  s_f80a7d9fd4fbf2::t_0553d6d456c27f 2392-2394
+tools/bot/skill_cast_runtime.py
+  s_f80a7d9fd4fbf2::t_20609bc0bbc049 1-89
+docs/progress/scenario-movement-audit.tsv
+  s_f80a7d9fd4fbf2::t_c6eb6e4e5876f0 255
+docs/as-built/v459_skill-ground-aim.md
+  s_f80a7d9fd4fbf2::t_2e34239b5b8b3f 1-22
+client/tests/test_enemy_health_bar_settings.gd
+  s_f80a7d9fd4fbf2::t_9aeb100d71c9ba 80-85
+server/internal/game/class_skill_engine_test.go
+  s_f80a7d9fd4fbf2::t_2eb5279c12a92c 55
+shared/rules/skills.v0.schema.json
+  s_f80a7d9fd4fbf2::t_b8fa1fc8150f70 113
+  s_f80a7d9fd4fbf2::t_2874ff7072e8f9 155
+  s_f80a7d9fd4fbf2::t_2c47b7fcbd9c15 30
+  s_f80a7d9fd4fbf2::t_8d2b5faa8a85bd 92
+  s_f80a7d9fd4fbf2::t_ca67613264066e 99
+  s_f80a7d9fd4fbf2::t_a46bcbe23e3b50 106
+server/internal/game/class_build_branches_test.go
+  s_f80a7d9fd4fbf2::t_b4f86982cfa89d 62
+PROGRESS.md
+  s_f80a7d9fd4fbf2::t_06bd3e96d52781 18,26-27
+client/scripts/skill_aim_input.gd
+  s_f80a7d9fd4fbf2::t_fbe6ef5ee46854 1-65
+tools/bot/scenarios/skill_ground_aim_lab.json
+  s_f80a7d9fd4fbf2::t_84a43a7fa7634f 44
+  s_f80a7d9fd4fbf2::t_9e7f28ece43978 1-43,45-46,49-59
+  s_f80a7d9fd4fbf2::t_0f92430b2cb880 47-48
+docs/adr/0017-skill-aim-and-cast-resolution.md
+  s_f80a7d9fd4fbf2::t_9c235a8a9206f3 1-43
+docs/progress/slice-lifecycle.md
+  s_f80a7d9fd4fbf2::t_7002ddad8a5fff 21
+server/internal/game/rogue_skills_test.go
+  s_f80a7d9fd4fbf2::t_036df9ee46ee75 17,52,168
+server/internal/game/unique_effects_test.go
+  s_f80a7d9fd4fbf2::t_49bde5c4fafa36 346,372
+  s_f80a7d9fd4fbf2::t_063eb69cef0b34 356
+  s_f80a7d9fd4fbf2::t_460a0ffeef64ca 395
+docs/CODEMAP.md
+  s_f80a7d9fd4fbf2::t_b330009826621b 12
+server/internal/game/skill_rules_validation.go
+  s_f80a7d9fd4fbf2::t_3895968a692615 123
+  s_f80a7d9fd4fbf2::t_76eced48e2f96f 115
+  s_f80a7d9fd4fbf2::t_fe9c4942be20ea 102,107
+  s_f80a7d9fd4fbf2::t_d2505fd40c1c39 150
+docs/plans/v459_2026-07-08-skill-ground-aim.md
+  s_f80a7d9fd4fbf2::t_3feded1c51e711 35-36
+  s_f80a7d9fd4fbf2::t_30c678f5f2627b 83
+  s_f80a7d9fd4fbf2::t_6d326c7b7aa2d5 1-2,4-34,37-48,51-53,57-63,67-73,76-82,84-93
+  s_f80a7d9fd4fbf2::t_38a2a8ea22a647 64-66
+  s_f80a7d9fd4fbf2::t_81b59ea028dfea 54-56
+  s_f80a7d9fd4fbf2::t_2ce46370bfaa9b 74-75
+  s_f80a7d9fd4fbf2::t_885e0c6aa3271d 49-50
+.maintainability/file-size-baseline.tsv
+  s_f80a7d9fd4fbf2::t_cd2ad81e17deca 35
+server/internal/game/skill_damage_burst.go
+  s_f80a7d9fd4fbf2::t_dbc72c590a464e 73-75
+client/scripts/enemy_health_bar_visibility.gd
+  s_f80a7d9fd4fbf2::t_eeec5d4f34ea54 5
+  s_f80a7d9fd4fbf2::t_7ed59cec991740 36-40
+tools/bot/run.py
+  s_f80a7d9fd4fbf2::t_fc3054006c31b3 77,79
+  s_f80a7d9fd4fbf2::t_b6dd1e98c70df6 1387-1400
+  s_f80a7d9fd4fbf2::t_99b67723010971 76
+shared/rules/skills.v0.json
+  s_f80a7d9fd4fbf2::t_b6d331f76ff0cd 14,66,106,183,253,364,455,505,611,777,826,877,916,1018,1068,1113,1175,1285,1339,1394,1460,1515,1577,1639,2575,2637,2695,2882,2999,3119,3447,3566,3682,3745,3822,3956,4201,4327,4503,4556,4679,4732,4794,4918,4980,5102,5160
+client/scripts/main.gd
+  s_f80a7d9fd4fbf2::t_7ee936034fb96f 4448-4453
+  s_f80a7d9fd4fbf2::t_8ecffd576b7e87 87
+  s_f80a7d9fd4fbf2::t_ec9501e071c4d6 4221
+  s_f80a7d9fd4fbf2::t_5209f7c77421a1 4478-4482
+  s_f80a7d9fd4fbf2::t_58338b520cf125 4486-4488
+  s_f80a7d9fd4fbf2::t_a538d9ad46f579 4496-4497,4500-4510,4513
+  s_f80a7d9fd4fbf2::t_e779479b76db7f 4522
+client/tests/test_coop_client.gd
+  s_f80a7d9fd4fbf2::t_d8fc4f36622535 1600-1604
+docs/specs/v459_spec-skill-ground-aim.md
+  s_f80a7d9fd4fbf2::t_7fd78ea046c602 1-2,4-64
+  s_f80a7d9fd4fbf2::t_d5af754a17c14f 3
+server/internal/http/ws_test.go
+  s_f80a7d9fd4fbf2::t_b05a8a1ce02c15 575
+server/internal/game/ranger_skills.go
+  s_f80a7d9fd4fbf2::t_6b5438c1f7bcfd 24-26
+server/internal/game/game_test.go
+  s_f80a7d9fd4fbf2::t_2634909cefa567 1055,1326
+  s_f80a7d9fd4fbf2::t_7cee94056e8c1a 1254
+  s_f80a7d9fd4fbf2::t_ec9ee5b77024ce 1184
+  s_f80a7d9fd4fbf2::t_63ee8cf8dd64ed 1383
+server/internal/game/ranger_skills_test.go
+  s_f80a7d9fd4fbf2::t_e9492b41860f1b 50
+server/internal/game/skill_affixes_test.go
+  s_f80a7d9fd4fbf2::t_ee522f4d940cb9 65-67,76-93,102-115
+  s_f80a7d9fd4fbf2::t_05b71eadf328ed 68-75,94-101
+server/internal/game/skill_aim_nav.go
+  s_f80a7d9fd4fbf2::t_6dad06cea7bd26 18-19,34-36,38-43,46
+  s_f80a7d9fd4fbf2::t_988a1485967ac1 1-17,20-33,37,44-45,47-90
+tools/validate_skills.py
+  s_f80a7d9fd4fbf2::t_46546bcb86d82e 176-177
+server/internal/replay/replay_test.go
+  s_f80a7d9fd4fbf2::t_8cdf51ce973bdd 879
+  s_f80a7d9fd4fbf2::t_d879defe91603c 137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cd471600847ec79eaf2c3b1662f31a12c708448e",
+  "prompts": {},
+  "sessions": {
+    "s_f80a7d9fd4fbf2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8a332236-d463-411b-8721-939243e3da11",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

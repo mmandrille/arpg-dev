@@ -1,0 +1,154 @@
+client/tests/test_golden.gd
+  s_7a642e5ea2ae6d::t_1b176814486cb8 519
+server/internal/game/game_test.go
+  s_7a642e5ea2ae6d::t_0a006ad5bd3499 3618-3619,3621
+  s_7a642e5ea2ae6d::t_10bb636f3d14c6 3635-3636,3638
+  s_7a642e5ea2ae6d::t_7ebc1f4a272fed 188-189,192-193
+docs/plans/v460_2026-07-08-leveled-potions.md
+  s_7a642e5ea2ae6d::t_844cea44e0a4e0 1-57
+server/internal/game/sim.go
+  s_7a642e5ea2ae6d::t_220d2394c1b40f 1791-1792
+  s_7a642e5ea2ae6d::t_9849b6b1eff3ac 806-815
+  s_7a642e5ea2ae6d::t_ed137aff959ef7 2248-2250,2254-2257,2264-2267,2279-2282,2291-2327,2367
+  s_7a642e5ea2ae6d::t_6e374b7b970660 5672-5683
+  s_7a642e5ea2ae6d::t_732a9785babf4b 1717-1719
+  s_7a642e5ea2ae6d::t_0dd6131020cd04 4757,4761-4768
+client/scripts/potion_icon_label.gd
+  s_7a642e5ea2ae6d::t_a022530249df0a 1-23
+shared/rules/shops.v0.schema.json
+  s_7a642e5ea2ae6d::t_f4c2d235b24f5c 39-40
+shared/rules/items.v0.json
+  s_7a642e5ea2ae6d::t_0aa05630a1c0ab 22-24
+client/tests/test_shop_panel.gd
+  s_7a642e5ea2ae6d::t_fa026e0d223833 137
+  s_7a642e5ea2ae6d::t_97a01a42ecf7e6 88
+  s_7a642e5ea2ae6d::t_262e66e15a2fdd 58
+  s_7a642e5ea2ae6d::t_a2e69d9c674797 79
+  s_7a642e5ea2ae6d::t_e77a001f1e3528 40
+  s_7a642e5ea2ae6d::t_bd6326122a690a 49-50
+  s_7a642e5ea2ae6d::t_cbd304dd017492 67,69
+  s_7a642e5ea2ae6d::t_50a8d50e62b0a3 28-30
+  s_7a642e5ea2ae6d::t_6677a834e9d92b 72-74
+  s_7a642e5ea2ae6d::t_af696b0e618dc5 94
+  s_7a642e5ea2ae6d::t_c5268798ef7651 143-144
+  s_7a642e5ea2ae6d::t_d9f226a57d33a8 225-226
+server/internal/game/shop_test.go
+  s_7a642e5ea2ae6d::t_3bc1e3687f9c01 915
+  s_7a642e5ea2ae6d::t_fbc5d627d23876 131,142
+client/scripts/consumable_bar.gd
+  s_7a642e5ea2ae6d::t_92b0dd1cb3ed5d 8
+  s_7a642e5ea2ae6d::t_c16f194ce91f1d 380-381
+docs/specs/v460_spec-leveled-potions.md
+  s_7a642e5ea2ae6d::t_13e18c06efba81 1-64
+docs/progress/scenario-movement-audit.tsv
+  s_7a642e5ea2ae6d::t_e1d7188723c61d 10-11
+server/internal/game/potion_items.go
+  s_7a642e5ea2ae6d::t_7d00bc45373e67 200-203,206
+  s_7a642e5ea2ae6d::t_f50dad32cca06a 1-180,186-198,204-205,207-276
+  s_7a642e5ea2ae6d::t_62a2fb1c1c5560 181-185
+  s_7a642e5ea2ae6d::t_6d3a875911ab9f 199
+client/scripts/loot_node_factory.gd
+  s_7a642e5ea2ae6d::t_9a2d332b8361af 373-383
+  s_7a642e5ea2ae6d::t_d1bea6228f3f4e 290-291
+  s_7a642e5ea2ae6d::t_565e8b1ed213cd 6
+docs/CODEMAP.md
+  s_7a642e5ea2ae6d::t_70d019521c08a1 14
+  s_7a642e5ea2ae6d::t_1ac3341623a339 20
+PROGRESS.md
+  s_7a642e5ea2ae6d::t_7968b12fdb278a 26-27
+  s_7a642e5ea2ae6d::t_7a4466210d21bc 18
+shared/rules/main_config.v0.json
+  s_7a642e5ea2ae6d::t_22e31ca93cafdd 59-70
+shared/rules/shops.v0.json
+  s_7a642e5ea2ae6d::t_c4852f6839f1c9 7-9
+tools/bot/scenarios/08_heal_lab.json
+  s_7a642e5ea2ae6d::t_7489437da33321 32
+  s_7a642e5ea2ae6d::t_a117a1d14326f3 44
+server/internal/game/weapon_elemental.go
+  s_7a642e5ea2ae6d::t_1f42798f7b8660 234-241
+shared/rules/main_config.v0.schema.json
+  s_7a642e5ea2ae6d::t_aeba76950de1cf 106-122
+shared/rules/items.v0.schema.json
+  s_7a642e5ea2ae6d::t_5c02f4594866a3 128-134
+tools/validate_shared.py
+  s_7a642e5ea2ae6d::t_de6f119e5189c7 1964-1968,1973
+shared/rules/worlds.v0.schema.json
+  s_7a642e5ea2ae6d::t_87cacd2762c268 40
+server/internal/game/potion_items_test.go
+  s_7a642e5ea2ae6d::t_bf3ec5639c024e 65
+  s_7a642e5ea2ae6d::t_c71b1b04450bd3 29
+  s_7a642e5ea2ae6d::t_7378edebef979e 1-2,7-28,30-44,55-64
+  s_7a642e5ea2ae6d::t_f4c8074e50d726 45-54
+  s_7a642e5ea2ae6d::t_a3a6ebe7d9788b 3-6
+docs/progress/slice-lifecycle.md
+  s_7a642e5ea2ae6d::t_de8cd4d3b5e27a 22
+tools/bot/scenarios/33_shop_stock_lifecycle.json
+  s_7a642e5ea2ae6d::t_0e6c43da64113c 19,61
+tools/bot/scenarios/29_town_vendor_gold_sink.json
+  s_7a642e5ea2ae6d::t_aa6084b5c64d66 11
+.maintainability/file-size-baseline.tsv
+  s_7a642e5ea2ae6d::t_3bf1c7262332ad 21
+  s_7a642e5ea2ae6d::t_2462f9211de782 24
+  s_7a642e5ea2ae6d::t_50782731f81060 22
+server/internal/game/renew_stone_items.go
+  s_7a642e5ea2ae6d::t_484b340f7080d2 73-74
+tools/bot/scenarios/potion_shop_lab.json
+  s_7a642e5ea2ae6d::t_5b1912480c1b24 1-33
+shared/rules/worlds.v0.json
+  s_7a642e5ea2ae6d::t_d5a382aa34675b 1392,1395-1400,1404
+  s_7a642e5ea2ae6d::t_ea5e406a785dcf 1383-1391,1401-1403,1405-1409
+  s_7a642e5ea2ae6d::t_f50ebbf515d0d5 1393-1394
+server/internal/game/rules.go
+  s_7a642e5ea2ae6d::t_d798cd7d762f88 693-696
+  s_7a642e5ea2ae6d::t_a74df7144c7b8d 783
+  s_7a642e5ea2ae6d::t_85064cfdef1baa 2091
+  s_7a642e5ea2ae6d::t_4fd396f8006015 2089-2090,2092-2093
+  s_7a642e5ea2ae6d::t_2b123fcb0e5150 87
+server/internal/game/handlers.go
+  s_7a642e5ea2ae6d::t_34174d962b2478 251,260-262
+shared/golden/use_consumable.json
+  s_7a642e5ea2ae6d::t_837e7065fac9d4 3,5,12-13
+shared/golden/shop_appraisals.json
+  s_7a642e5ea2ae6d::t_af720ce5554ded 6,10
+shared/assets/item_presentations.v0.json
+  s_7a642e5ea2ae6d::t_fc50744b28f3a8 360-373
+  s_7a642e5ea2ae6d::t_b0419a37f53411 738-740
+shared/golden/shop_stock_lifecycle.json
+  s_7a642e5ea2ae6d::t_194721fcf5228f 36
+client/tests/test_client_bot.gd
+  s_7a642e5ea2ae6d::t_df46b764b0540e 600
+tools/bot/scenarios/potion_depth_lab.json
+  s_7a642e5ea2ae6d::t_780eb9a1b78a8f 31,40,46
+  s_7a642e5ea2ae6d::t_eee76a529213d7 20-22
+  s_7a642e5ea2ae6d::t_b65c25c3c8cd2e 7,16-17,23-24
+  s_7a642e5ea2ae6d::t_d997a188265969 8,13
+  s_7a642e5ea2ae6d::t_bc753ec26258de 1-6,14-15,25-30,32-39,41-45,47-49
+  s_7a642e5ea2ae6d::t_0aa60d6ebcb97f 9-12,18-19
+server/internal/game/shop.go
+  s_7a642e5ea2ae6d::t_d3d035e3e09236 84,88-99,104,107-110,113-117
+  s_7a642e5ea2ae6d::t_b1b9f2c3cc673b 573-576
+  s_7a642e5ea2ae6d::t_5d872416d03d30 1118-1119
+client/scripts/inventory_panel.gd
+  s_7a642e5ea2ae6d::t_3ae1c9d212c5fc 701
+  s_7a642e5ea2ae6d::t_c8fceaf9e5a282 8
+docs/as-built/v460_leveled-potions.md
+  s_7a642e5ea2ae6d::t_9e1d78234ed201 1-30
+server/internal/http/starter_loadout.go
+  s_7a642e5ea2ae6d::t_a141369b26ca4c 77-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e75e64d09e99304279e083292121f0197068e4eb",
+  "prompts": {},
+  "sessions": {
+    "s_7a642e5ea2ae6d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "149dee88-be1c-4546-a6c2-b5cdc164f73e",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

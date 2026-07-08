@@ -17,6 +17,7 @@ func _run() -> void:
 	await _test_identical_state_refresh_keeps_slots_alive()
 	_test_requirement_warning_helpers()
 	await _test_inventory_bag_marks_unmet_requirements()
+	await _test_resource_wallet_footer()
 	print("[gdtest] PASS: test_inventory_panel (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -96,6 +97,35 @@ func _test_inventory_bag_marks_unmet_requirements() -> void:
 	var slot: InventoryPanelScript.InventorySlotButton = panel._bag_grid.get_child(0)
 	var normal_style: StyleBoxFlat = slot.get_theme_stylebox("normal")
 	_assert_true("invalid requirement slot border is reddish", normal_style.border_color.r > 0.55 and normal_style.border_color.g < 0.45)
+	panel.free()
+
+
+func _test_resource_wallet_footer() -> void:
+	var panel := InventoryPanelScript.new()
+	root.add_child(panel)
+	await process_frame
+	panel.set_resource_wallet({"respec_badge": 2, "empty": 0})
+	var state := panel.get_debug_state()
+	_assert_true("wallet visible", bool(state.get("wallet_visible", false)))
+	_assert_eq("wallet text", str(state.get("wallet_text", "")), "Respec 2")
+	_assert_true("wallet tooltip name", str(state.get("wallet_tooltip", "")).contains("Respec Badge x2"))
+	_assert_eq("resources button label", str(state.get("resources_button_text", "")), "Resources")
+	panel.set_resource_wallet({})
+	state = panel.get_debug_state()
+	_assert_false("empty wallet hidden", bool(state.get("wallet_visible", true)))
+	panel.open_wallet_window()
+	state = panel.get_debug_state()
+	var window: Dictionary = state.get("wallet_window", {})
+	_assert_false("empty wallet window hidden", bool(window.get("visible", true)))
+	panel.set_resource_wallet({"respec_badge": 2})
+	panel.open_wallet_window()
+	state = panel.get_debug_state()
+	window = state.get("wallet_window", {})
+	_assert_true("wallet window visible", bool(window.get("visible", false)))
+	panel.set_resource_wallet({"respec_badge": 0})
+	state = panel.get_debug_state()
+	window = state.get("wallet_window", {})
+	_assert_false("empty update closes wallet window", bool(window.get("visible", true)))
 	panel.free()
 
 

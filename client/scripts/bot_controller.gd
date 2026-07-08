@@ -349,9 +349,9 @@ func _do_click_shop_sell_item(action: Dictionary) -> void:
 
 
 func _do_open_resource_wallet_window() -> void:
-	var bar = _main.get("character_bar") if _main != null else null
-	if bar != null and bar.has_method("open_wallet_window"):
-		bar.open_wallet_window()
+	var panel = _main.get("inventory_panel") if _main != null else null
+	if panel != null and panel.has_method("open_wallet_window"):
+		panel.open_wallet_window()
 
 
 func _do_click_waypoint_level(action: Dictionary) -> void:

@@ -1,7 +1,7 @@
 # Unit test for badge resources in the material wallet.
 extends SceneTree
 
-const CharacterBarScript := preload("res://scripts/character_bar.gd")
+const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -12,14 +12,14 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var bar = CharacterBarScript.new()
-	get_root().add_child(bar)
+	var panel = InventoryPanelScript.new()
+	get_root().add_child(panel)
 	await process_frame
-	bar.set_resource_wallet({
+	panel.set_resource_wallet({
 		"respec_badge": 1,
 		"skill_badge": 3,
 	})
-	var state := bar.get_debug_state()
+	var state := panel.get_debug_state()
 	_assert_true("wallet visible", bool(state.get("wallet_visible", false)))
 	var compact := str(state.get("wallet_text", ""))
 	_assert_false("compact hides upgrade shard wallet", compact.contains("Upgrade"))
@@ -29,8 +29,9 @@ func _run() -> void:
 	_assert_false("tooltip hides upgrade shard wallet", tooltip.contains("Upgrade Badge"))
 	_assert_true("tooltip respec badge", tooltip.contains("Respec Badge x1"))
 	_assert_true("tooltip skill badge", tooltip.contains("Skill Badge x3"))
-	bar.open_wallet_window()
-	state = bar.get_debug_state()
+	_assert_eq("resources button label", str(state.get("resources_button_text", "")), "Resources")
+	panel.open_wallet_window()
+	state = panel.get_debug_state()
 	var window: Dictionary = state.get("wallet_window", {})
 	_assert_true("wallet window visible", bool(window.get("visible", false)))
 	_assert_eq("wallet window rows", int(window.get("row_count", 0)), 2)
@@ -38,7 +39,7 @@ func _run() -> void:
 	_assert_false("window hides upgrade shard wallet", text.contains("Upgrade Badge"))
 	_assert_true("window respec badge", text.contains("Respec Badge x1"))
 	_assert_true("window skill badge", text.contains("Skill Badge x3"))
-	bar.free()
+	panel.free()
 	print("[gdtest] PASS: test_material_wallet_badges (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 

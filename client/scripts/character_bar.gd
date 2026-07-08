@@ -1,8 +1,6 @@
 class_name CharacterBar
 extends Control
 
-const MaterialWalletPanelScript := preload("res://scripts/material_wallet_panel.gd")
-
 signal open_character_requested
 
 var _interactive: bool = true
@@ -10,16 +8,12 @@ var _progression: Dictionary = {}
 var _panel: PanelContainer
 var _slot: Button
 var _badge: Label
-var _wallet_label: Label
 var _cooldown_overlay: ColorRect
 var _attack_recovery_remaining: float = 0.0
 var _attack_recovery_total: float = 0.0
-var _resource_wallet: Dictionary = {}
-var _wallet_window: Control
 
 
 func _ready() -> void:
-	ItemRulesLoader.ensure_loaded()
 	_sync_viewport_size()
 	get_viewport().size_changed.connect(_sync_viewport_size)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -44,25 +38,10 @@ func set_progression(next_progression: Dictionary) -> void:
 	_render()
 
 
-func set_resource_wallet(next_wallet: Dictionary) -> void:
-	_resource_wallet = next_wallet.duplicate(true)
-	_render()
-	_sync_wallet_window()
-
-
 func open_slot() -> void:
 	if not _interactive:
 		return
 	open_character_requested.emit()
-
-
-func open_wallet_window() -> void:
-	if _wallet_rows().is_empty():
-		return
-	if _wallet_window == null:
-		_wallet_window = MaterialWalletPanelScript.new()
-		add_child(_wallet_window)
-	_wallet_window.show_wallet(_resource_wallet)
 
 
 func start_attack_recovery(duration_seconds: float) -> void:
@@ -83,12 +62,6 @@ func get_debug_state() -> Dictionary:
 		"upgrade_badge_outline_size": _badge.label_settings.outline_size if _badge != null and _badge.label_settings != null else 0,
 		"slot_text": _slot.text if _slot != null else "",
 		"tooltip_text": _slot.tooltip_text if _slot != null else "",
-		"wallet_visible": _wallet_label.visible if _wallet_label != null else false,
-		"wallet_text": _wallet_label.text if _wallet_label != null else "",
-		"wallet_tooltip": _wallet_label.tooltip_text if _wallet_label != null else "",
-		"wallet_rows": _wallet_rows(),
-		"wallet_details": _wallet_detail_lines(),
-		"wallet_window": _wallet_window.get_debug_state() if _wallet_window != null else {"visible": false, "row_count": 0, "rows": [], "text": ""},
 		"attack_recovery_remaining": _attack_recovery_remaining,
 		"attack_recovery_total": _attack_recovery_total,
 		"attack_recovery_fraction": _attack_recovery_fraction(),
@@ -133,20 +106,6 @@ func _build() -> void:
 	_badge = _make_upgrade_badge()
 	_slot.add_child(_badge)
 
-	var spacer := Control.new()
-	spacer.custom_minimum_size = Vector2(52, 6)
-	box.add_child(spacer)
-
-	_wallet_label = Label.new()
-	_wallet_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_wallet_label.add_theme_font_size_override("font_size", 13)
-	_wallet_label.add_theme_color_override("font_color", Color("#b8e6ff"))
-	_wallet_label.clip_text = true
-	_wallet_label.custom_minimum_size = Vector2(56, 18)
-	_wallet_label.mouse_filter = Control.MOUSE_FILTER_STOP
-	_wallet_label.gui_input.connect(_on_wallet_gui_input)
-	box.add_child(_wallet_label)
-
 	_position_panel()
 	_render()
 
@@ -169,7 +128,6 @@ func _render() -> void:
 		_cooldown_overlay.visible = fraction > 0.0
 		_cooldown_overlay.position = Vector2(0.0, slot_size.y * (1.0 - fraction))
 		_cooldown_overlay.size = Vector2(slot_size.x, slot_size.y * fraction)
-	_render_wallet()
 
 
 func _unspent_stat_points() -> int:
@@ -197,87 +155,6 @@ func _make_upgrade_badge() -> Label:
 	settings.outline_color = Color(0.0, 0.0, 0.0, 0.95)
 	badge.label_settings = settings
 	return badge
-
-
-func _render_wallet() -> void:
-	if _wallet_label == null:
-		return
-	var rows := _wallet_rows()
-	_wallet_label.visible = not rows.is_empty()
-	_wallet_label.text = "  ".join(rows)
-	_wallet_label.tooltip_text = "\n".join(_wallet_detail_lines())
-
-
-func _sync_wallet_window() -> void:
-	if _wallet_window != null:
-		_wallet_window.set_wallet(_resource_wallet)
-
-
-func _on_wallet_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		open_wallet_window()
-		accept_event()
-
-
-func _wallet_rows() -> Array:
-	var rows: Array = []
-	for key in _wallet_resource_keys():
-		var amount := int(_resource_wallet.get(key, 0))
-		rows.append("%s %d" % [_resource_label(str(key)), amount])
-	return rows
-
-
-func _wallet_detail_lines() -> Array:
-	var lines: Array = []
-	for key in _wallet_resource_keys():
-		var resource_id := str(key)
-		var amount := int(_resource_wallet.get(resource_id, 0))
-		lines.append("%s x%d" % [_resource_name(resource_id), amount])
-		var category := _resource_category(resource_id)
-		if category != "":
-			lines.append("Category: %s" % category)
-		lines.append("Stored account-wide")
-	return lines
-
-
-func _wallet_resource_keys() -> Array:
-	var out: Array = []
-	var keys: Array = _resource_wallet.keys()
-	keys.sort()
-	for key in keys:
-		if str(key) == "upgrade_shard":
-			continue
-		var amount := int(_resource_wallet.get(key, 0))
-		if amount <= 0:
-			continue
-		out.append(key)
-	return out
-
-
-func _resource_label(resource_id: String) -> String:
-	if resource_id == "upgrade_shard":
-		return "Shard"
-	if resource_id == "respec_badge":
-		return "Respec"
-	if resource_id == "stat_badge":
-		return "Stat"
-	if resource_id == "skill_badge":
-		return "Skill"
-	if resource_id == "resurrection_badge":
-		return "Resurrect"
-	return _resource_name(resource_id)
-
-
-func _resource_name(resource_id: String) -> String:
-	var def := ItemRulesLoader.item_definition(resource_id)
-	if def.has("name"):
-		return str(def.get("name", ""))
-	return resource_id.replace("_", " ").capitalize()
-
-
-func _resource_category(resource_id: String) -> String:
-	var def := ItemRulesLoader.item_definition(resource_id)
-	return str(def.get("category", "")).replace("_", " ").capitalize()
 
 
 func _vec2_debug(v: Vector2) -> Dictionary:

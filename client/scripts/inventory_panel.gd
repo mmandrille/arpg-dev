@@ -13,6 +13,7 @@ const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer
 const SetCollectionPanelScript := preload("res://scripts/set_collection_panel.gd")
 const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guard.gd")
 const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
+const MaterialWalletPanelScript := preload("res://scripts/material_wallet_panel.gd")
 const ItemRequirementViewsScript := preload("res://scripts/item_requirement_views.gd")
 const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
 const ItemTooltipStatSectionsScript := preload("res://scripts/item_tooltip_stat_sections.gd")
@@ -79,7 +80,10 @@ var _equipment_slots: Dictionary = {}
 var _weapon_set_tabs: Array = []
 var _bag_grid: GridContainer
 var _gold_label: Label
+var _resources_button: Button
 var _set_collection_button: Button
+var _resource_wallet: Dictionary = {}
+var _wallet_window: Control
 var _set_collection_panel: SetCollectionPanel
 var _paper_doll_preview: Control
 var _drag_data: Dictionary = {}
@@ -247,6 +251,23 @@ func set_blacksmith_hidden_item_ids(item_instance_ids: Array) -> void:
 	if _bag_grid != null:
 		_render()
 
+func set_resource_wallet(next_wallet: Dictionary) -> void:
+	_resource_wallet = next_wallet.duplicate(true)
+	_ensure_built()
+	_render_resources_button()
+	_sync_wallet_window()
+
+
+func open_wallet_window() -> void:
+	if _wallet_rows().is_empty():
+		return
+	_ensure_built()
+	if _wallet_window == null:
+		_wallet_window = MaterialWalletPanelScript.new()
+		add_child(_wallet_window)
+	_wallet_window.show_wallet(_resource_wallet)
+
+
 func set_character_progression(next_progression: Dictionary) -> void:
 	character_progression = next_progression.duplicate(true)
 
@@ -352,6 +373,13 @@ func get_debug_state() -> Dictionary:
 			"visible": _paper_doll_preview.visible if _paper_doll_preview != null else false,
 		},
 		"set_collection": _set_collection_panel.get_debug_state() if _set_collection_panel != null else {},
+		"resources_button_text": _resources_button.text if _resources_button != null else "",
+		"wallet_visible": not _wallet_rows().is_empty(),
+		"wallet_text": "  ".join(_wallet_rows()),
+		"wallet_tooltip": "\n".join(_wallet_detail_lines()),
+		"wallet_rows": _wallet_rows(),
+		"wallet_details": _wallet_detail_lines(),
+		"wallet_window": _wallet_window.get_debug_state() if _wallet_window != null else {"visible": false, "row_count": 0, "rows": [], "text": ""},
 		"requirement_row_count": _requirement_row_count(),
 		"equip_preview_row_count": _equip_preview_row_count(),
 		"empty_slot_style": "gray_block",
@@ -512,6 +540,11 @@ func _build() -> void:
 	_gold_label.add_theme_color_override("font_color", Color("#f4c84f"))
 	_gold_label.add_theme_font_size_override("font_size", 26)
 	footer.add_child(_gold_label)
+	_resources_button = Button.new()
+	_resources_button.text = "Resources"
+	_resources_button.tooltip_text = "Account materials"
+	_resources_button.pressed.connect(open_wallet_window)
+	footer.add_child(_resources_button)
 	_set_collection_button = Button.new()
 	_set_collection_button.text = "Sets"
 	_set_collection_button.pressed.connect(_toggle_set_collection_panel)
@@ -544,6 +577,7 @@ func _render() -> void:
 		_bag_grid.add_child(slot)
 	if _gold_label != null:
 		_gold_label.text = "Gold: %d" % gold
+	_render_resources_button()
 	if _set_collection_panel != null:
 		_set_collection_panel.set_items(inventory, equipped)
 	_position_gesture_hint()
@@ -1525,3 +1559,80 @@ func _debug_paper_doll_slots() -> Dictionary:
 			"label": str(EQUIPMENT_LABELS.get(str(slot), str(slot))),
 		}
 	return out
+
+
+func _render_resources_button() -> void:
+	if _resources_button == null:
+		return
+	var rows := _wallet_rows()
+	if rows.is_empty():
+		_resources_button.tooltip_text = "No account materials stored"
+		return
+	_resources_button.tooltip_text = "\n".join(_wallet_detail_lines())
+
+
+func _sync_wallet_window() -> void:
+	if _wallet_window != null:
+		_wallet_window.set_wallet(_resource_wallet)
+
+
+func _wallet_rows() -> Array:
+	var rows: Array = []
+	for key in _wallet_resource_keys():
+		var amount := int(_resource_wallet.get(key, 0))
+		rows.append("%s %d" % [_resource_label(str(key)), amount])
+	return rows
+
+
+func _wallet_detail_lines() -> Array:
+	var lines: Array = []
+	for key in _wallet_resource_keys():
+		var resource_id := str(key)
+		var amount := int(_resource_wallet.get(resource_id, 0))
+		lines.append("%s x%d" % [_resource_name(resource_id), amount])
+		var category := _resource_category(resource_id)
+		if category != "":
+			lines.append("Category: %s" % category)
+		lines.append("Stored account-wide")
+	return lines
+
+
+func _wallet_resource_keys() -> Array:
+	var out: Array = []
+	var keys: Array = _resource_wallet.keys()
+	keys.sort()
+	for key in keys:
+		if str(key) == "upgrade_shard":
+			continue
+		var amount := int(_resource_wallet.get(key, 0))
+		if amount <= 0:
+			continue
+		out.append(key)
+	return out
+
+
+func _resource_label(resource_id: String) -> String:
+	if resource_id == "upgrade_shard":
+		return "Shard"
+	if resource_id == "respec_badge":
+		return "Respec"
+	if resource_id == "stat_badge":
+		return "Stat"
+	if resource_id == "skill_badge":
+		return "Skill"
+	if resource_id == "resurrection_badge":
+		return "Resurrect"
+	return _resource_name(resource_id)
+
+
+func _resource_name(resource_id: String) -> String:
+	var def := ItemRulesLoader.item_definition(resource_id)
+	if def.has("name"):
+		return str(def.get("name", ""))
+	return resource_id.replace("_", " ").capitalize()
+
+
+func _resource_category(resource_id: String) -> String:
+	var def := ItemRulesLoader.item_definition(resource_id)
+	return str(def.get("category", "")).replace("_", " ").capitalize()
+

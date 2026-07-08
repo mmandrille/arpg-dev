@@ -2173,7 +2173,7 @@ func _refresh_inventory_ui() -> void:
 			resource_wallet
 		)
 	if bishop_panel != null and bishop_panel.visible: bishop_panel.set_resource_wallet(resource_wallet)
-	if character_bar != null: character_bar.set_resource_wallet(resource_wallet)
+	if inventory_panel != null: inventory_panel.set_resource_wallet(resource_wallet)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)

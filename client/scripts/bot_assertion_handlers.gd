@@ -601,7 +601,7 @@ static func _assert_audio_state(runner, step: Dictionary, state: Dictionary) -> 
 
 
 static func _assert_resource_wallet_panel(runner, step: Dictionary, state: Dictionary) -> bool:
-	var panel: Dictionary = state.get("character_bar", {})
+	var panel: Dictionary = state.get("inventory_panel", {})
 	if step.has("visible") and bool(panel.get("wallet_visible", false)) != bool(step.get("visible", true)):
 		runner._fail("assert_resource_wallet_panel visible failed: want=%s panel=%s step=%d scenario=%s" % [
 			str(step.get("visible", true)), str(panel), runner._step_index, str(runner.scenario.get("id", "?"))

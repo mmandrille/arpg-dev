@@ -62,7 +62,10 @@
   ],
   "stash_gold": 25,
   "resource_wallet": [
-    { "resource_id": "upgrade_shard", "amount": 1 }
+    { "resource_id": "respec_badge", "amount": 1 }
+  ],
+  "resource_bag_items": [
+    { "stash_item_id": "1016", "item_def_id": "upgrade_shard", "rolled_stats": {} }
   ],
   "stash_capacity": 50,
   "discovered_teleporters": [],

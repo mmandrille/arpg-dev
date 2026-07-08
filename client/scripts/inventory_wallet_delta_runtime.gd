@@ -13,6 +13,8 @@ const WALLET_OPS := [
 	"stash_item_remove",
 	"stash_gold_update",
 	"resource_wallet_update",
+	"resource_bag_item_add",
+	"resource_bag_item_remove",
 ]
 
 
@@ -82,6 +84,13 @@ static func apply_change(host, change: Dictionary) -> void:
 			if resource_id != "":
 				host.resource_wallet[resource_id] = max(0, int(change.get("amount", host.resource_wallet.get(resource_id, 0))))
 			host._delta_ui_sync_gate.mark_inventory_dirty()
+		"resource_bag_item_add":
+			upsert_resource_bag_item(host, change.get("item", {}))
+			host._delta_ui_sync_gate.mark_inventory_dirty()
+		"resource_bag_item_remove":
+			var bag_item_id := str(change.get("bag_item_id", change.get("stash_item_id", "")))
+			remove_resource_bag_item(host, bag_item_id)
+			host._delta_ui_sync_gate.mark_inventory_dirty()
 
 
 static func update_inventory_item(host, item: Dictionary) -> void:
@@ -140,6 +149,39 @@ static func apply_resource_wallet_snapshot(host, rows: Variant) -> void:
 		var resource_id := str(row.get("resource_id", ""))
 		if resource_id != "":
 			host.resource_wallet[resource_id] = max(0, int(row.get("amount", 0)))
+
+
+static func apply_resource_bag_snapshot(host, rows: Variant) -> void:
+	host.resource_bag_items = []
+	if typeof(rows) != TYPE_ARRAY:
+		return
+	for value in rows:
+		if typeof(value) == TYPE_DICTIONARY:
+			host.resource_bag_items.append((value as Dictionary).duplicate(true))
+
+
+static func upsert_resource_bag_item(host, item: Dictionary) -> void:
+	if typeof(item) != TYPE_DICTIONARY or item.is_empty():
+		return
+	var bag_item_id := str(item.get("stash_item_id", item.get("bag_item_id", "")))
+	if bag_item_id == "":
+		return
+	for i in range(host.resource_bag_items.size()):
+		if str(host.resource_bag_items[i].get("stash_item_id", host.resource_bag_items[i].get("bag_item_id", ""))) == bag_item_id:
+			var merged: Dictionary = host.resource_bag_items[i].duplicate(true)
+			merged.merge(item, true)
+			host.resource_bag_items[i] = merged
+			return
+	host.resource_bag_items.append(item.duplicate(true))
+
+
+static func remove_resource_bag_item(host, bag_item_id: String) -> void:
+	if bag_item_id == "":
+		return
+	for i in range(host.resource_bag_items.size() - 1, -1, -1):
+		var row_id := str(host.resource_bag_items[i].get("stash_item_id", host.resource_bag_items[i].get("bag_item_id", "")))
+		if row_id == bag_item_id:
+			host.resource_bag_items.remove_at(i)
 
 
 static func apply_hotbar_update(host, slot_index: int, item_instance_id, item: Dictionary = {}) -> void:

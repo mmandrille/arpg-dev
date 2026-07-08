@@ -54,6 +54,12 @@ func _run() -> void:
 	_assert_intent("equipment to bag", Router.drop_route("bag", {
 		"source": "equip:main_hand", "item": item,
 	}, false, {"weapon_set": 1}), "unequip_intent")
+	_assert_intent("resource bag to bag", Router.drop_route("bag", {
+		"source": "resource_bag", "bag_item_id": "bag_shard_1", "item": {"stash_item_id": "bag_shard_1", "item_def_id": "upgrade_shard"},
+	}, false), "resource_bag_withdraw_item_intent")
+	_assert_eq("resource bag id fallback", Router.resource_bag_item_id({
+		"source": "resource_bag", "item": {"stash_item_id": "bag_shard_2"},
+	}), "bag_shard_2")
 
 	_assert_eq("ineligible equip ignored", Router.drop_route("equip:main_hand", {
 		"source": "bag", "item": item,

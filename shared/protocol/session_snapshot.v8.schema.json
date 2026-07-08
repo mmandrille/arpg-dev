@@ -4,7 +4,7 @@
   "title": "session_snapshot payload (v8)",
   "description": "Full authoritative state needed to render the scene. This validates the bare payload body (the `payload` field of a session_snapshot envelope).",
   "type": "object",
-  "required": ["server_tick", "session_id", "seed", "current_level", "local_player_id", "party", "walls", "entities", "inventory", "equipped", "hotbar_capacity", "hotbar", "inventory_rows", "inventory_capacity", "gold", "stash_items", "stash_gold", "resource_wallet", "stash_capacity", "discovered_teleporters", "character_progression", "skill_progression", "skill_cooldowns", "recent_events"],
+  "required": ["server_tick", "session_id", "seed", "current_level", "local_player_id", "party", "walls", "entities", "inventory", "equipped", "hotbar_capacity", "hotbar", "inventory_rows", "inventory_capacity", "gold", "stash_items", "stash_gold", "resource_wallet", "resource_bag_items", "stash_capacity", "discovered_teleporters", "character_progression", "skill_progression", "skill_cooldowns", "recent_events"],
   "additionalProperties": false,
   "properties": {
     "server_tick": { "type": "integer", "minimum": 0 },
@@ -37,6 +37,7 @@
     "stash_items": { "type": "array", "items": { "$ref": "#/$defs/stash_item" } },
     "stash_gold": { "type": "integer", "minimum": 0 },
     "resource_wallet": { "type": "array", "items": { "$ref": "#/$defs/resource_amount" } },
+    "resource_bag_items": { "type": "array", "items": { "$ref": "#/$defs/stash_item" } },
     "stash_capacity": { "type": "integer", "minimum": 0, "maximum": 200 },
     "discovered_teleporters": { "type": "array", "items": { "$ref": "#/$defs/teleporter_discovery" } },
     "character_progression": { "$ref": "#/$defs/character_progression" },

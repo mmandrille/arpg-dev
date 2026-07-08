@@ -177,7 +177,7 @@ func TestDeleteCharacterRemovesProgressionAndSessions(t *testing.T) {
 		t.Fatalf("create session: %v", err)
 	}
 	resources := []store.AccountResourceAmount{{AccountID: acct.ID, ResourceID: "delete_test_shard", Amount: 3}}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, remove.ID, nil, nil, nil, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: acct.ID}, resources, progression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, remove.ID, nil, nil, nil, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: acct.ID}, resources, nil, progression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.DeleteCharacter(ctx, acct.ID, remove.ID); err != nil {
@@ -412,13 +412,13 @@ func TestCoopSessionMembersActorInputsAndSnapshots(t *testing.T) {
 	hostHotbar := []store.CharacterHotbarSlot{{AccountID: hostAcct.ID, CharacterID: hostChar.ID, SlotIndex: 0, ItemInstanceID: &hostItem.ID}}
 	guestHotbar := []store.CharacterHotbarSlot{{AccountID: guestAcct.ID, CharacterID: guestChar.ID, SlotIndex: 0, ItemInstanceID: &guestItem.ID}}
 	thirdHotbar := []store.CharacterHotbarSlot{{AccountID: thirdAcct.ID, CharacterID: thirdChar.ID, SlotIndex: 0, ItemInstanceID: &thirdItem.ID}}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: hostAcct.ID}, nil, hostProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, hostAcct.ID, hostChar.ID, []store.CharacterItemInstance{hostItem}, nil, hostHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: hostAcct.ID}, nil, nil, hostProgression); err != nil {
 		t.Fatalf("host start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: guestAcct.ID}, nil, guestProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, guestAcct.ID, guestChar.ID, []store.CharacterItemInstance{guestItem}, nil, guestHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: guestAcct.ID}, nil, nil, guestProgression); err != nil {
 		t.Fatalf("guest start snapshot: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: thirdAcct.ID}, nil, thirdProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, thirdAcct.ID, thirdChar.ID, []store.CharacterItemInstance{thirdItem}, nil, thirdHotbar, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: thirdAcct.ID}, nil, nil, thirdProgression); err != nil {
 		t.Fatalf("third start snapshot: %v", err)
 	}
 	snaps, err := s.LoadSessionStartSnapshots(ctx, sess.ID)
@@ -723,7 +723,7 @@ func TestCharacterProgressionPersistEquipWaypointAndSnapshot(t *testing.T) {
 	}
 
 	resources := []store.AccountResourceAmount{{AccountID: acct.ID, ResourceID: "upgrade_shard", Amount: 2}}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, skillBinds, shopStock, nil, store.AccountStashGold{AccountID: acct.ID}, resources, loadedProgression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, items, waypoints, hotbar, skillBinds, shopStock, nil, store.AccountStashGold{AccountID: acct.ID}, resources, nil, loadedProgression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.SetCharacterItemEquipped(ctx, acct.ID, char.ID, item.ID, "", false, 0); err != nil {

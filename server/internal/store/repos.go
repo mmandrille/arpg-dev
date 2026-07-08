@@ -208,6 +208,7 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_start_account_stash_items WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_account_stash_gold WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_account_resource_wallet WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_account_resource_bag_items WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_shop_stock WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_skill_preferences WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_skill_bindings WHERE ` + sessionFilter, []any{accountID, characterID}},
@@ -447,6 +448,7 @@ func (s *Store) DeleteStaleEmptySessions(ctx context.Context, updatedBefore time
 			`DELETE FROM session_start_account_stash_items WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_account_stash_gold WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_account_resource_wallet WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_account_resource_bag_items WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_shop_stock WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_skill_preferences WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_skill_bindings WHERE session_id = ANY($1)`,
@@ -1830,7 +1832,7 @@ func scanAccountStashItem(row rowScanner) (AccountStashItem, error) {
 	return item, nil
 }
 
-func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, progression CharacterProgression) error {
+func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, resourceBagItems []AccountResourceBagItem, progression CharacterProgression) error {
 	characterClass := progression.CharacterClass
 	if characterClass == "" {
 		characterClass = "barbarian"
@@ -1985,6 +1987,26 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accou
 				sessionID, resourceAccountID, resource.ResourceID, resource.Amount,
 			); err != nil {
 				return fmt.Errorf("store: insert session start account resource: %w", err)
+			}
+		}
+		for _, bagItem := range resourceBagItems {
+			rolledStats := bagItem.RolledStats
+			if len(rolledStats) == 0 {
+				rolledStats = []byte(`{}`)
+			}
+			var sourceCharacterID any
+			if bagItem.SourceCharacterID != "" {
+				sourceCharacterID = bagItem.SourceCharacterID
+			}
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO session_start_account_resource_bag_items (
+				   session_id, account_id, bag_item_id, source_character_id, item_def_id, rolled_stats
+				 )
+				 VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+				 ON CONFLICT (session_id, account_id, bag_item_id) DO NOTHING`,
+				sessionID, accountID, bagItem.BagItemID, sourceCharacterID, bagItem.ItemDefID, []byte(rolledStats),
+			); err != nil {
+				return fmt.Errorf("store: insert session start account resource bag item: %w", err)
 			}
 		}
 		return nil
@@ -2186,6 +2208,27 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 		snap.Resources = append(snap.Resources, resource)
 	}
 	if err := resourceRows.Err(); err != nil {
+		return snap, err
+	}
+	bagRows, err := s.pool.Query(ctx,
+		`SELECT account_id, bag_item_id, COALESCE(source_character_id, ''), item_def_id, rolled_stats, created_at, created_at
+		 FROM session_start_account_resource_bag_items
+		 WHERE session_id = $1 AND account_id = $2
+		 ORDER BY created_at ASC, bag_item_id ASC`,
+		sessionID, accountID,
+	)
+	if err != nil {
+		return snap, fmt.Errorf("store: load session start account resource bag items: %w", err)
+	}
+	defer bagRows.Close()
+	for bagRows.Next() {
+		item, err := scanAccountResourceBagItem(bagRows)
+		if err != nil {
+			return snap, err
+		}
+		snap.ResourceBagItems = append(snap.ResourceBagItems, item)
+	}
+	if err := bagRows.Err(); err != nil {
 		return snap, err
 	}
 	wpRows, err := s.pool.Query(ctx,

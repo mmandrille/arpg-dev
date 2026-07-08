@@ -63,6 +63,10 @@ var inputHandlers = map[string]inputHandlerFunc{
 	"stash_withdraw_item_intent":      (*Sim).handleStashWithdrawItem,
 	"stash_deposit_gold_intent":       (*Sim).handleStashDepositGold,
 	"stash_withdraw_gold_intent":      (*Sim).handleStashWithdrawGold,
+	"resource_bag_deposit_item_intent": (*Sim).handleResourceBagDepositItem,
+	"resource_bag_deposit_stash_item_intent": (*Sim).handleResourceBagDepositStashItem,
+	"resource_bag_withdraw_item_intent": (*Sim).handleResourceBagWithdrawItem,
+	"stash_deposit_resource_bag_item_intent": (*Sim).handleStashDepositResourceBagItem,
 	"corpse_withdraw_item_intent":     (*Sim).handleCorpseWithdrawItem,
 	"unique_chest_take_item_intent":   (*Sim).handleUniqueChestTakeItem,
 }

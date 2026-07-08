@@ -83,6 +83,7 @@ var _gold_label: Label
 var _resources_button: Button
 var _set_collection_button: Button
 var _resource_wallet: Dictionary = {}
+var _resource_bag_items: Array = []
 var _wallet_window: Control
 var _set_collection_panel: SetCollectionPanel
 var _paper_doll_preview: Control
@@ -168,6 +169,9 @@ class InventorySlotButton:
 				return true
 			if source == "blacksmith_merge" and data.get("merge_panel", null) != null:
 				return true
+			if source == InventoryTransferRouterScript.DRAG_SOURCE_RESOURCE_BAG \
+					and InventoryTransferRouterScript.resource_bag_item_id(data as Dictionary) != "":
+				return true
 			return InventoryTransferRouterScript.is_equipment_slot(source)
 		return false
 
@@ -251,21 +255,27 @@ func set_blacksmith_hidden_item_ids(item_instance_ids: Array) -> void:
 	if _bag_grid != null:
 		_render()
 
-func set_resource_wallet(next_wallet: Dictionary) -> void:
+func set_resource_wallet(next_wallet: Dictionary, next_bag_items: Array = []) -> void:
 	_resource_wallet = next_wallet.duplicate(true)
+	_resource_bag_items = _dup_items(next_bag_items)
 	_ensure_built()
 	_render_resources_button()
 	_sync_wallet_window()
 
 
 func open_wallet_window() -> void:
-	if _wallet_rows().is_empty():
+	if _wallet_rows().is_empty() and _resource_bag_items.is_empty():
 		return
 	_ensure_built()
 	if _wallet_window == null:
 		_wallet_window = MaterialWalletPanelScript.new()
+		_wallet_window.intent_requested.connect(_on_wallet_intent_requested)
 		add_child(_wallet_window)
-	_wallet_window.show_wallet(_resource_wallet)
+	_wallet_window.show_wallet(_resource_wallet, _resource_bag_items)
+
+
+func _on_wallet_intent_requested(intent_type: String, payload: Dictionary) -> void:
+	intent_requested.emit(intent_type, payload)
 
 
 func set_character_progression(next_progression: Dictionary) -> void:
@@ -374,7 +384,7 @@ func get_debug_state() -> Dictionary:
 		},
 		"set_collection": _set_collection_panel.get_debug_state() if _set_collection_panel != null else {},
 		"resources_button_text": _resources_button.text if _resources_button != null else "",
-		"wallet_visible": not _wallet_rows().is_empty(),
+		"wallet_visible": not _wallet_rows().is_empty() or not _resource_bag_items.is_empty(),
 		"wallet_text": "  ".join(_wallet_rows()),
 		"wallet_tooltip": "\n".join(_wallet_detail_lines()),
 		"wallet_rows": _wallet_rows(),
@@ -1573,7 +1583,7 @@ func _render_resources_button() -> void:
 
 func _sync_wallet_window() -> void:
 	if _wallet_window != null:
-		_wallet_window.set_wallet(_resource_wallet)
+		_wallet_window.set_wallet(_resource_wallet, _resource_bag_items)
 
 
 func _wallet_rows() -> Array:
@@ -1635,4 +1645,12 @@ func _resource_name(resource_id: String) -> String:
 func _resource_category(resource_id: String) -> String:
 	var def := ItemRulesLoader.item_definition(resource_id)
 	return str(def.get("category", "")).replace("_", " ").capitalize()
+
+
+func _dup_items(values: Array) -> Array:
+	var out: Array = []
+	for value in values:
+		if typeof(value) == TYPE_DICTIONARY:
+			out.append((value as Dictionary).duplicate(true))
+	return out
 

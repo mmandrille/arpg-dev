@@ -35,6 +35,13 @@ type PersistedStashItem struct {
 	RolledStats json.RawMessage
 }
 
+// PersistedResourceBagItem is an account resource-bag item reloaded at session start.
+type PersistedResourceBagItem struct {
+	BagItemID   string
+	ItemDefID   string
+	RolledStats json.RawMessage
+}
+
 // PersistedResourceAmount is an account resource balance reloaded at session start.
 type PersistedResourceAmount struct {
 	ResourceID string
@@ -169,8 +176,29 @@ func (s *Sim) LoadAccountStash(items []PersistedStashItem, gold int, capacity in
 	s.savePlayer(s.defaultPlayer())
 }
 
-// LoadResourceWallet restores account-owned resource balances into the active
-// player's private state.
+// LoadAccountResourceBag restores account-owned resource bag contents into the active player's private state.
+func (s *Sim) LoadAccountResourceBag(items []PersistedResourceBagItem) {
+	s.resourceBagItems = []*stashItem{}
+	for _, p := range items {
+		id, err := strconv.ParseUint(p.BagItemID, 10, 64)
+		if err != nil || p.ItemDefID == "" {
+			continue
+		}
+		s.resourceBagItems = append(s.resourceBagItems, &stashItem{
+			stashItemID: id,
+			itemDefID:   p.ItemDefID,
+			rollPayload: parseRollPayload(p.RolledStats),
+		})
+		if id >= s.nextID {
+			s.nextID = id + 1
+		}
+	}
+	sort.Slice(s.resourceBagItems, func(i, j int) bool {
+		return s.resourceBagItems[i].stashItemID < s.resourceBagItems[j].stashItemID
+	})
+	s.savePlayer(s.defaultPlayer())
+}
+
 func (s *Sim) LoadResourceWallet(resources []PersistedResourceAmount) {
 	s.resourceWallet = make(map[string]int)
 	for _, resource := range resources {
@@ -408,6 +436,17 @@ func (s *Sim) LoadAccountStashForPlayer(playerID uint64, items []PersistedStashI
 	}
 	s.usePlayer(ps)
 	s.LoadAccountStash(items, gold, capacity)
+	s.savePlayer(ps)
+	s.usePlayer(s.defaultPlayer())
+}
+
+func (s *Sim) LoadAccountResourceBagForPlayer(playerID uint64, items []PersistedResourceBagItem) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return
+	}
+	s.usePlayer(ps)
+	s.LoadAccountResourceBag(items)
 	s.savePlayer(ps)
 	s.usePlayer(s.defaultPlayer())
 }

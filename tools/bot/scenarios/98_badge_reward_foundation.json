@@ -16,6 +16,11 @@
     {
       "action": "assert_inventory_count",
       "item_def_id": "quest_leaf",
+      "equals": 0
+    },
+    {
+      "action": "assert_resource_bag_count",
+      "item_def_id": "quest_leaf",
       "equals": 1
     },
     {
@@ -38,7 +43,7 @@
     {
       "action": "wait_until_assertion",
       "assertion": {
-        "type": "inventory_count",
+        "type": "resource_bag_count",
         "item_def_id": "upgrade_shard",
         "equals": 1
       },
@@ -131,7 +136,7 @@
       "level": 125
     },
     {
-      "type": "inventory_count",
+      "type": "resource_bag_count",
       "item_def_id": "upgrade_shard",
       "equals": 1
     },

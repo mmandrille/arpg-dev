@@ -30,6 +30,17 @@ def _inventory_matches(assertion: dict[str, Any], inventory: list[dict]) -> list
     return matches
 
 
+def _resource_bag_matches(assertion: dict[str, Any], resource_bag_items: list[dict]) -> list[dict]:
+    matches = resource_bag_items
+    if assertion.get("item_def_id") is not None:
+        matches = [item for item in matches if str(item.get("item_def_id", "")) == str(assertion["item_def_id"])]
+    if assertion.get("item_template_id") is not None:
+        matches = [item for item in matches if str(item.get("item_template_id", "")) == str(assertion["item_template_id"])]
+    if assertion.get("display_name") is not None:
+        matches = [item for item in matches if str(item.get("display_name", "")) == str(assertion["display_name"])]
+    return matches
+
+
 def run_assertions(
     assertions: list[Any],
     entities: list[dict],
@@ -50,6 +61,7 @@ def run_assertions(
     stash_gold: int | None = None,
     stash_capacity: int | None = None,
     resource_wallet: dict[str, int] | None = None,
+    resource_bag_items: list[dict[str, Any]] | None = None,
     skill_progression: dict[str, Any] | None = None,
     skill_cooldowns: list[dict[str, Any]] | None = None,
     helpers: dict[str, Any] | None = None,
@@ -94,6 +106,9 @@ def run_assertions(
         if typ == "inventory_count":
             matches = _inventory_matches(assertion, inventory)
             assert_count_matches(len(matches), assertion, f"{where}: inventory count", f": {matches}")
+        elif typ == "resource_bag_count":
+            matches = _resource_bag_matches(assertion, list(resource_bag_items or []))
+            assert_count_matches(len(matches), assertion, f"{where}: resource bag count", f": {matches}")
         elif typ == "inventory_contains":
             expected_equipped = assertion.get("equipped")
             assert_inventory_contains(inventory, str(assertion["item_def_id"]), expected_equipped, where)
@@ -441,6 +456,10 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
         if typ == "inventory_count":
             matches = _inventory_matches(assertion, state.inventory)
             assert_count_matches(len(matches), assertion, f"{where}: inventory count", f": {matches}")
+            continue
+        if typ == "resource_bag_count":
+            matches = _resource_bag_matches(assertion, state.resource_bag_items)
+            assert_count_matches(len(matches), assertion, f"{where}: resource bag count", f": {matches}")
             continue
         if typ == "gold":
             assert_count_matches(state.gold, assertion, f"{where}: gold")

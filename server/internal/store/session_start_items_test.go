@@ -36,7 +36,7 @@ func TestSessionStartItemEquippedMutationPreservesWeaponSetAndLocation(t *testin
 		AccountID: acct.ID, CharacterID: char.ID, CharacterClass: "barbarian", Level: 1,
 		Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{},
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, []store.CharacterItemInstance{item}, nil, nil, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: acct.ID}, nil, progression); err != nil {
+	if err := s.CreateSessionStartSnapshot(ctx, sess.ID, acct.ID, char.ID, []store.CharacterItemInstance{item}, nil, nil, store.CharacterSkillBindings{}, nil, nil, store.AccountStashGold{AccountID: acct.ID}, nil, nil, progression); err != nil {
 		t.Fatalf("create session snapshot: %v", err)
 	}
 	if err := s.SetSessionStartItemEquipped(ctx, sess.ID, acct.ID, char.ID, item.ID, "main_hand", true, 1); err != nil {

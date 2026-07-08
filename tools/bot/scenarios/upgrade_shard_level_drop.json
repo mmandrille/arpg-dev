@@ -14,7 +14,7 @@
     {
       "action": "wait_until_assertion",
       "assertion": {
-        "type": "inventory_count",
+        "type": "resource_bag_count",
         "item_def_id": "upgrade_shard",
         "equals": 1
       },
@@ -23,7 +23,7 @@
     {
       "action": "assert_inventory_count",
       "item_def_id": "upgrade_shard",
-      "equals": 1
+      "equals": 0
     },
     {
       "action": "wait_until_assertion",
@@ -37,9 +37,14 @@
   ],
   "assertions": [
     {
-      "type": "inventory_count",
+      "type": "resource_bag_count",
       "item_def_id": "upgrade_shard",
       "equals": 1
+    },
+    {
+      "type": "inventory_count",
+      "item_def_id": "upgrade_shard",
+      "equals": 0
     },
     {
       "type": "resource_wallet_count",

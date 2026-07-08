@@ -42,7 +42,7 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if not BlacksmithPanel.is_craft_resource(dragged):
 		return false
 	var source := str(data.get("source", ""))
-	return source == "bag"
+	return source == "bag" or source == InventoryTransferRouterScript.DRAG_SOURCE_RESOURCE_BAG
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:

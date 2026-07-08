@@ -150,13 +150,18 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
 			return
 		}
+		resourceBagItems, err := s.store.ListAccountResourceBagItems(r.Context(), accountID)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
+			return
+		}
 		currentLevel, err := rolledStatsItemLevelHTTP(originalItem.RolledStats)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect item level")
 			return
 		}
 		resourceRequiredLevel = game.UpgradeShardMinLevel(currentLevel)
-		resourceInventoryCount = countQualifyingLeveledConsumables(stashItems, originalItems, resourceID, resourceRequiredLevel)
+		resourceInventoryCount = countQualifyingLeveledConsumables(stashItems, originalItems, resourceBagItems, resourceID, resourceRequiredLevel)
 		if resourceInventoryCount < resourceCount {
 			writeError(w, http.StatusConflict, "missing_upgrade_resource", "upgrade resource is required")
 			return
@@ -199,12 +204,17 @@ func (s *Server) handleUpgradeInventoryItem(w http.ResponseWriter, r *http.Reque
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
 			return
 		}
+		resourceBagItems, err := s.store.ListAccountResourceBagItems(r.Context(), accountID)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
+			return
+		}
 		items, err := s.store.ListCharacterItems(r.Context(), accountID, req.CharacterID)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect upgrade resource")
 			return
 		}
-		resourceInventoryCount = countQualifyingLeveledConsumables(stashItems, items, resourceID, resourceRequiredLevel)
+		resourceInventoryCount = countQualifyingLeveledConsumables(stashItems, items, resourceBagItems, resourceID, resourceRequiredLevel)
 	}
 	writeJSON(w, http.StatusOK, upgradeInventoryItemResponse{
 		Item:                   characterItemResponseFromStore(owned),
@@ -280,7 +290,11 @@ func (s *Server) upgradeAccountStashItemForRequest(r *http.Request, accountID st
 		if listErr != nil {
 			return store.AccountStashItem{}, 0, 0, 0, false, listErr
 		}
-		if resolved, ok := resolvePreferredUpgradeShardLevel(inventoryItems, preferredShardCharacterItemID, minShardLevel); ok {
+		resourceBagItems, listErr := s.store.ListAccountResourceBagItems(r.Context(), accountID)
+		if listErr != nil {
+			return store.AccountStashItem{}, 0, 0, 0, false, listErr
+		}
+		if resolved, ok := resolvePreferredUpgradeShardLevel(inventoryItems, resourceBagItems, preferredShardCharacterItemID, minShardLevel); ok {
 			shardLevel = resolved
 		}
 	}
@@ -326,9 +340,20 @@ func (s *Server) itemUpgradeChanceRules() game.ItemUpgradeChanceRules {
 	}
 }
 
-func resolvePreferredUpgradeShardLevel(items []store.CharacterItemInstance, preferredID string, minLevel int) (int, bool) {
+func resolvePreferredUpgradeShardLevel(items []store.CharacterItemInstance, resourceBagItems []store.AccountResourceBagItem, preferredID string, minLevel int) (int, bool) {
 	for _, item := range items {
 		if item.ID != preferredID || item.ItemDefID != game.UpgradeShardItemDefID {
+			continue
+		}
+		level, err := game.LeveledConsumableLevelFromRaw(item.ItemDefID, item.RolledStats)
+		if err != nil || level < minLevel {
+			return 0, false
+		}
+
+		return level, true
+	}
+	for _, item := range resourceBagItems {
+		if item.BagItemID != preferredID || item.ItemDefID != game.UpgradeShardItemDefID {
 			continue
 		}
 		level, err := game.LeveledConsumableLevelFromRaw(item.ItemDefID, item.RolledStats)
@@ -413,7 +438,7 @@ func rolledStatsItemLevelHTTP(raw json.RawMessage) (int, error) {
 	return 0, nil
 }
 
-func countQualifyingLeveledConsumables(stashItems []store.AccountStashItem, inventoryItems []store.CharacterItemInstance, resourceID string, minLevel int) int {
+func countQualifyingLeveledConsumables(stashItems []store.AccountStashItem, inventoryItems []store.CharacterItemInstance, resourceBagItems []store.AccountResourceBagItem, resourceID string, minLevel int) int {
 	count := 0
 	for _, item := range stashItems {
 		if item.ItemDefID != resourceID {
@@ -426,6 +451,16 @@ func countQualifyingLeveledConsumables(stashItems []store.AccountStashItem, inve
 		count++
 	}
 	for _, item := range inventoryItems {
+		if item.ItemDefID != resourceID {
+			continue
+		}
+		level, err := game.LeveledConsumableLevelFromRaw(item.ItemDefID, item.RolledStats)
+		if err != nil || level < minLevel {
+			continue
+		}
+		count++
+	}
+	for _, item := range resourceBagItems {
 		if item.ItemDefID != resourceID {
 			continue
 		}

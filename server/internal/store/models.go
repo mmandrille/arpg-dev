@@ -327,8 +327,9 @@ type SessionStartSnapshot struct {
 	SkillBinds  CharacterSkillBindings
 	ShopStock   []CharacterShopStockItem
 	StashItems  []AccountStashItem
-	StashGold   AccountStashGold
-	Resources   []AccountResourceAmount
+	StashGold       AccountStashGold
+	Resources       []AccountResourceAmount
+	ResourceBagItems []AccountResourceBagItem
 	Progression *CharacterProgression
 }
 

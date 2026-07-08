@@ -590,6 +590,13 @@ async def execute_step(
         assert_count_matches(len(matches), step, "assert_inventory_count", f": {matches}")
         return
 
+    if action == "assert_resource_bag_count":
+        from tools.bot.runtime_assertions import _resource_bag_matches
+
+        matches = _resource_bag_matches(step, state.resource_bag_items)
+        assert_count_matches(len(matches), step, "assert_resource_bag_count", f": {matches}")
+        return
+
     if action == "assert_rolled_inventory_item":
         assert_rolled_inventory_item(state.inventory, step, "runtime protocol")
         return
@@ -2909,6 +2916,7 @@ async def check_persistence(base_url: str, token: str, session_id: str, item_id:
             stash_gold=int(payload.get("stash_gold", 0)),
             stash_capacity=int(payload.get("stash_capacity", 50)),
             resource_wallet={str(row.get("resource_id", "")): max(0, int(row.get("amount", 0))) for row in payload.get("resource_wallet", []) if str(row.get("resource_id", ""))},
+            resource_bag_items=payload.get("resource_bag_items", []),
             skill_progression=payload.get("skill_progression", {}),
             skill_cooldowns=payload.get("skill_cooldowns", []),
         )
@@ -3387,6 +3395,7 @@ def run_assertions(
     stash_gold: int | None = None,
     stash_capacity: int | None = None,
     resource_wallet: dict[str, int] | None = None,
+    resource_bag_items: list[dict[str, Any]] | None = None,
     skill_progression: dict[str, Any] | None = None,
     skill_cooldowns: list[dict[str, Any]] | None = None,
 ) -> None:
@@ -3412,6 +3421,7 @@ def run_assertions(
         stash_gold,
         stash_capacity,
         resource_wallet,
+        resource_bag_items,
         skill_progression,
         skill_cooldowns,
         runtime_assertion_helpers(),
@@ -3509,6 +3519,7 @@ def run_verified_session(
         stash_gold=int(state.get("stash_gold", 0)),
         stash_capacity=int(state.get("stash_capacity", 50)),
         resource_wallet={str(row.get("resource_id", "")): max(0, int(row.get("amount", 0))) for row in state.get("resource_wallet", []) if str(row.get("resource_id", ""))},
+        resource_bag_items=state.get("resource_bag_items", []),
         skill_progression=state.get("skill_progression", {}),
         skill_cooldowns=state.get("skill_cooldowns", []),
     )

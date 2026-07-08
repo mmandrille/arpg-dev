@@ -72,7 +72,12 @@ func (s *Server) handleRenewInventoryItem(w http.ResponseWriter, r *http.Request
 	if resourceRequiredLevel < 1 {
 		resourceRequiredLevel = 1
 	}
-	resourceInventoryCount := countQualifyingLeveledConsumables(nil, originalItems, game.RenewStoneItemDefID, resourceRequiredLevel)
+	resourceBagItems, err := s.store.ListAccountResourceBagItems(r.Context(), accountID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect renew resource")
+		return
+	}
+	resourceInventoryCount := countQualifyingLeveledConsumables(nil, originalItems, resourceBagItems, game.RenewStoneItemDefID, resourceRequiredLevel)
 	if resourceInventoryCount < 1 {
 		writeError(w, http.StatusConflict, "missing_renew_resource", "renew stone is required")
 		return
@@ -116,7 +121,12 @@ func (s *Server) handleRenewInventoryItem(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect renew resource")
 		return
 	}
-	resourceInventoryCount = countQualifyingLeveledConsumables(nil, items, game.RenewStoneItemDefID, resourceRequiredLevel)
+	resourceBagItems, err = s.store.ListAccountResourceBagItems(r.Context(), accountID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not inspect renew resource")
+		return
+	}
+	resourceInventoryCount = countQualifyingLeveledConsumables(nil, items, resourceBagItems, game.RenewStoneItemDefID, resourceRequiredLevel)
 
 	writeJSON(w, http.StatusOK, renewInventoryItemResponse{
 		Item:                   characterItemResponseFromStore(item),

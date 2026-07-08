@@ -13,6 +13,7 @@ const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guar
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
 const ItemTooltipStatSectionsScript := preload("res://scripts/item_tooltip_stat_sections.gd")
+const InventoryTransferRouterScript := preload("res://scripts/inventory_transfer_router.gd")
 const PANEL_SIZE := Vector2(390, 520)
 const COLUMNS := 5
 const STASH_VISIBLE_ROWS := 6
@@ -125,6 +126,10 @@ class StashSlotButton:
 			return false
 		var source := str((data as Dictionary).get("source", ""))
 		var dragged: Dictionary = (data as Dictionary).get("item", {})
+		if source == InventoryTransferRouterScript.DRAG_SOURCE_RESOURCE_BAG:
+			return panel.stash_entity_id != "" \
+				and panel.container_mode == "stash" \
+				and InventoryTransferRouterScript.resource_bag_item_id(data as Dictionary) != ""
 		return (source == DRAG_SOURCE_INVENTORY_BAG or source.begins_with("equip:")) \
 			and panel.stash_entity_id != "" \
 			and not dragged.is_empty() \
@@ -653,6 +658,15 @@ func _handle_drop_on_stash(data: Variant) -> void:
 		return
 	var rec := data as Dictionary
 	var source := str(rec.get("source", ""))
+	if source == InventoryTransferRouterScript.DRAG_SOURCE_RESOURCE_BAG:
+		var bag_item_id := InventoryTransferRouterScript.resource_bag_item_id(rec)
+		if stash_entity_id == "" or bag_item_id == "":
+			return
+		intent_requested.emit("stash_deposit_resource_bag_item_intent", {
+			"stash_entity_id": stash_entity_id,
+			"bag_item_id": bag_item_id,
+		})
+		return
 	if source != DRAG_SOURCE_INVENTORY_BAG and not source.begins_with("equip:"):
 		return
 	var item: Dictionary = rec.get("item", {})

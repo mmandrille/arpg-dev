@@ -279,6 +279,7 @@ run_gate "GDScript panel intent input test" "[gdtest] PASS: test_panel_intent_in
 # 2q. Market/bishop/material/quest panel unit tests (server-independent; v384 review orphans).
 run_gate "GDScript bishop panel test" "[gdtest] PASS: test_bishop_panel" res://tests/test_bishop_panel.gd
 run_gate "GDScript material wallet badges test" "[gdtest] PASS: test_material_wallet_badges" res://tests/test_material_wallet_badges.gd
+run_gate "GDScript material wallet panel test" "[gdtest] PASS: test_material_wallet_panel" res://tests/test_material_wallet_panel.gd
 run_gate "GDScript market board badges test" "[gdtest] PASS: test_market_board_badges" res://tests/test_market_board_badges.gd
 run_gate "GDScript market search sort test" "[gdtest] PASS: test_market_search_sort" res://tests/test_market_search_sort.gd
 run_gate "GDScript market item comparison test" "[gdtest] PASS: test_market_item_comparison" res://tests/test_market_item_comparison.gd

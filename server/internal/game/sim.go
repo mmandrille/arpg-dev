@@ -381,6 +381,7 @@ type playerState struct {
 	StashGold             int
 	StashCapacity         int
 	ResourceWallet        map[string]int
+	ResourceBagItems      []*stashItem
 	HPRegenCarry          float64
 	ManaRegenCarry        float64
 	FogVisibleLevel       int
@@ -450,6 +451,7 @@ type Sim struct {
 	stashGold                 int
 	stashCapacity             int
 	resourceWallet            map[string]int
+	resourceBagItems          []*stashItem
 	corpses                   map[string]*corpseState
 	mercenaryRoster           map[string]MercenaryCharacterSnapshot
 	hpRegenCarry              float64
@@ -780,6 +782,7 @@ func (s *Sim) populatePresetLevel(level *LevelState, worldID string, world World
 		StashGold:             s.stashGold,
 		StashCapacity:         s.stashCapacity,
 		ResourceWallet:        cloneIntMap(s.resourceWallet),
+		ResourceBagItems:      s.resourceBagItems,
 	}
 
 	for _, preset := range world.Entities {
@@ -927,6 +930,10 @@ type Input struct {
 	StashWithdrawItem            *StashWithdrawItemIntent
 	StashDepositGold             *StashDepositGoldIntent
 	StashWithdrawGold            *StashWithdrawGoldIntent
+	ResourceBagDepositItem       *ResourceBagDepositItemIntent
+	ResourceBagDepositStashItem *ResourceBagDepositStashItemIntent
+	ResourceBagWithdrawItem      *ResourceBagWithdrawItemIntent
+	StashDepositResourceBagItem  *StashDepositResourceBagItemIntent
 	CorpseWithdrawItem           *CorpseWithdrawItemIntent
 	UniqueChestTakeItem          *UniqueChestTakeItemIntent
 	DebugPlayerPos               *DebugPlayerPosIntent
@@ -1042,6 +1049,20 @@ type (
 	StashWithdrawGoldIntent struct {
 		StashEntityID string
 		Amount        int
+	}
+	ResourceBagDepositItemIntent struct {
+		ItemInstanceID string
+	}
+	ResourceBagDepositStashItemIntent struct {
+		StashEntityID string
+		StashItemID   string
+	}
+	ResourceBagWithdrawItemIntent struct {
+		BagItemID string
+	}
+	StashDepositResourceBagItemIntent struct {
+		StashEntityID string
+		BagItemID     string
 	}
 	CorpseWithdrawItemIntent struct {
 		CorpseEntityID string
@@ -1740,6 +1761,10 @@ func (s *Sim) pickUpTarget(e *entity, in Input, res *TickResult, ack bool) {
 	}
 	if s.isWalletResourceItem(e.itemDefID) {
 		s.pickUpWalletResource(e, in, res, ack)
+		return
+	}
+	if s.isResourceBagItem(e.itemDefID) {
+		s.pickUpResourceBagItem(e, in, res, ack)
 		return
 	}
 	itemDefID := e.itemDefID
@@ -6379,6 +6404,7 @@ func (s *Sim) SnapshotForPlayer(playerID uint64) Snapshot {
 		StashGold:             s.stashGold,
 		StashCapacity:         s.stashCapacity,
 		ResourceWallet:        s.ResourceWalletView(),
+		ResourceBagItems:      s.resourceBagItemViews(),
 		DiscoveredTeleporters: s.teleporterDiscoveryView(),
 		CharacterProgression:  s.CharacterProgressionView(),
 		SkillProgression:      s.SkillProgressionView(),

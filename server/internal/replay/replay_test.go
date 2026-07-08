@@ -1497,6 +1497,27 @@ func (f *fakeRepo) TransferAccountStashGoldToCharacter(context.Context, string, 
 func (f *fakeRepo) ListAccountResources(context.Context, string) ([]store.AccountResourceAmount, error) {
 	return nil, nil
 }
+func (f *fakeRepo) ListAccountResourceBagItems(context.Context, string) ([]store.AccountResourceBagItem, error) {
+	return nil, nil
+}
+func (f *fakeRepo) InsertAccountResourceBagItem(context.Context, string, string, string, string, json.RawMessage) (store.AccountResourceBagItem, error) {
+	return store.AccountResourceBagItem{}, nil
+}
+func (f *fakeRepo) TransferCharacterItemToAccountResourceBag(context.Context, string, string, string, string) (store.AccountResourceBagItem, error) {
+	return store.AccountResourceBagItem{}, nil
+}
+func (f *fakeRepo) TransferAccountResourceBagItemToCharacter(context.Context, string, string, string, string) (store.CharacterItemInstance, error) {
+	return store.CharacterItemInstance{}, nil
+}
+func (f *fakeRepo) TransferAccountStashItemToAccountResourceBag(context.Context, string, string, string, string) (store.AccountResourceBagItem, error) {
+	return store.AccountResourceBagItem{}, nil
+}
+func (f *fakeRepo) TransferAccountResourceBagItemToAccountStash(context.Context, string, string, string, string) (store.AccountStashItem, error) {
+	return store.AccountStashItem{}, nil
+}
+func (f *fakeRepo) MigrateCharacterResourceItemsToResourceBag(context.Context, string, string) error {
+	return nil
+}
 func (f *fakeRepo) AddAccountResource(context.Context, string, string, int) (store.AccountResourceAmount, error) {
 	return store.AccountResourceAmount{}, nil
 }
@@ -1558,7 +1579,7 @@ func (f *fakeRepo) ExpireMarketListings(context.Context) (int, error) {
 func (f *fakeRepo) GetMarketSummary(context.Context, string) (store.MarketSummary, error) {
 	return store.MarketSummary{}, nil
 }
-func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, []store.AccountResourceAmount, store.CharacterProgression) error {
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, []store.AccountResourceAmount, []store.AccountResourceBagItem, store.CharacterProgression) error {
 	return nil
 }
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {

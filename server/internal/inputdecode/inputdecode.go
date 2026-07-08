@@ -45,6 +45,10 @@ const (
 	TypeStashWithdrawItem   = "stash_withdraw_item_intent"
 	TypeStashDepositGold    = "stash_deposit_gold_intent"
 	TypeStashWithdrawGold   = "stash_withdraw_gold_intent"
+	TypeResourceBagDepositItem = "resource_bag_deposit_item_intent"
+	TypeResourceBagDepositStashItem = "resource_bag_deposit_stash_item_intent"
+	TypeResourceBagWithdrawItem = "resource_bag_withdraw_item_intent"
+	TypeStashDepositResourceBagItem = "stash_deposit_resource_bag_item_intent"
 	TypeCorpseWithdrawItem  = "corpse_withdraw_item_intent"
 	TypeUniqueChestTakeItem = "unique_chest_take_item_intent"
 	TypeQuestStewardPick    = "quest_steward_pick_intent"
@@ -161,6 +165,11 @@ type (
 		ItemInstanceID string `json:"item_instance_id"`
 		StashItemID    string `json:"stash_item_id"`
 	}
+	resourceBagItemPayloadWire struct {
+		ItemInstanceID string `json:"item_instance_id"`
+		BagItemID      string `json:"bag_item_id"`
+		StashEntityID  string `json:"stash_entity_id"`
+	}
 	stashGoldPayloadWire struct {
 		StashEntityID string `json:"stash_entity_id"`
 		Amount        int    `json:"amount"`
@@ -182,7 +191,7 @@ type (
 // IsClientIntent reports whether the type is a buffered authoritative intent.
 func IsClientIntent(t string) bool {
 	switch t {
-	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeQuestStewardPick, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeBishopDebugLootCatalog, TypeBishopDebugLootSourceCatalog, TypeBishopDebugForceLoot, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
+	case TypeMoveIntent, TypeMoveTo, TypeDirectional, TypeAction, TypeDescend, TypeAscend, TypeTeleport, TypeEquip, TypeUnequip, TypeSwapWeaponSet, TypeDrop, TypeUse, TypeAssignHotbar, TypeUseHotbar, TypeAllocateStat, TypeAllocateSkillPoint, TypeCastSkill, TypeChannelSkill, TypeSetSkillBindings, TypeCompanionCommand, TypeShopBuy, TypeShopSell, TypeShopReroll, TypeQuestStewardPick, TypeBishopRespec, TypeBishopReviveAll, TypeBishopDebugLevel, TypeBishopDebugSkill, TypeBishopDebugStat, TypeBishopDebugLootCatalog, TypeBishopDebugLootSourceCatalog, TypeBishopDebugForceLoot, TypeStashDepositItem, TypeStashWithdrawItem, TypeStashDepositGold, TypeStashWithdrawGold, TypeResourceBagDepositItem, TypeResourceBagDepositStashItem, TypeResourceBagWithdrawItem, TypeStashDepositResourceBagItem, TypeCorpseWithdrawItem, TypeUniqueChestTakeItem:
 		return true
 	}
 	return false
@@ -435,6 +444,30 @@ func Decode(typ, messageID, correlationID string, payload json.RawMessage) (game
 			return in, false
 		}
 		in.StashWithdrawGold = &game.StashWithdrawGoldIntent{StashEntityID: p.StashEntityID, Amount: p.Amount}
+	case TypeResourceBagDepositItem:
+		var p resourceBagItemPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.ItemInstanceID == "" {
+			return in, false
+		}
+		in.ResourceBagDepositItem = &game.ResourceBagDepositItemIntent{ItemInstanceID: p.ItemInstanceID}
+	case TypeResourceBagDepositStashItem:
+		var p stashItemPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.StashItemID == "" {
+			return in, false
+		}
+		in.ResourceBagDepositStashItem = &game.ResourceBagDepositStashItemIntent{StashEntityID: p.StashEntityID, StashItemID: p.StashItemID}
+	case TypeResourceBagWithdrawItem:
+		var p resourceBagItemPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.BagItemID == "" {
+			return in, false
+		}
+		in.ResourceBagWithdrawItem = &game.ResourceBagWithdrawItemIntent{BagItemID: p.BagItemID}
+	case TypeStashDepositResourceBagItem:
+		var p resourceBagItemPayloadWire
+		if err := json.Unmarshal(payload, &p); err != nil || p.StashEntityID == "" || p.BagItemID == "" {
+			return in, false
+		}
+		in.StashDepositResourceBagItem = &game.StashDepositResourceBagItemIntent{StashEntityID: p.StashEntityID, BagItemID: p.BagItemID}
 	case TypeCorpseWithdrawItem:
 		var p corpseWithdrawItemPayloadWire
 		if err := json.Unmarshal(payload, &p); err != nil || p.CorpseEntityID == "" || p.ItemInstanceID == "" {

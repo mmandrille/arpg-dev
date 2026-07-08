@@ -228,6 +228,19 @@ func persistedStashItems(items []store.AccountStashItem) []game.PersistedStashIt
 	return out
 }
 
+func persistedResourceBagItems(items []store.AccountResourceBagItem) []game.PersistedResourceBagItem {
+	out := make([]game.PersistedResourceBagItem, 0, len(items))
+	for _, item := range items {
+		out = append(out, game.PersistedResourceBagItem{
+			BagItemID:   item.BagItemID,
+			ItemDefID:   item.ItemDefID,
+			RolledStats: item.RolledStats,
+		})
+	}
+
+	return out
+}
+
 func persistedResources(resources []store.AccountResourceAmount) []game.PersistedResourceAmount {
 	out := make([]game.PersistedResourceAmount, 0, len(resources))
 	for _, resource := range resources {

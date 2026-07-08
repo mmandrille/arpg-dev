@@ -495,6 +495,7 @@ type Snapshot struct {
 	StashGold             int                       `json:"stash_gold"`
 	StashCapacity         int                       `json:"stash_capacity"`
 	ResourceWallet        []ResourceAmountView      `json:"resource_wallet"`
+	ResourceBagItems      []StashItemView           `json:"resource_bag_items"`
 	DiscoveredTeleporters []TeleporterDiscoveryView `json:"discovered_teleporters"`
 	CharacterProgression  CharacterProgressionView  `json:"character_progression"`
 	SkillProgression      SkillProgressionView      `json:"skill_progression"`
@@ -525,6 +526,8 @@ const (
 	OpStashItemRemove            = "stash_item_remove"
 	OpStashGoldUpdate            = "stash_gold_update"
 	OpResourceWalletUpdate       = "resource_wallet_update"
+	OpResourceBagItemAdd         = "resource_bag_item_add"
+	OpResourceBagItemRemove      = "resource_bag_item_remove"
 	OpWallLayoutUpdate           = "wall_layout_update"
 	OpTeleporterDiscoveryUpdate  = "teleporter_discovery_update"
 	OpCharacterProgressionUpdate = "character_progression_update"
@@ -663,6 +666,17 @@ func (c Change) MarshalJSON() ([]byte, error) {
 			ResourceID string `json:"resource_id"`
 			Amount     int    `json:"amount"`
 		}{c.Op, c.ResourceID, amount})
+	case OpResourceBagItemAdd:
+		return json.Marshal(struct {
+			Op   string         `json:"op"`
+			Item *StashItemView `json:"item"`
+		}{c.Op, c.StashItem})
+	case OpResourceBagItemRemove:
+		return json.Marshal(struct {
+			Op          string `json:"op"`
+			BagItemID   string `json:"bag_item_id"`
+			StashItemID string `json:"stash_item_id,omitempty"`
+		}{c.Op, c.StashItemID, c.StashItemID})
 	case OpWallLayoutUpdate:
 		return json.Marshal(struct {
 			Op    string     `json:"op"`

@@ -410,7 +410,18 @@ func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.C
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load account resources")
 		return false
 	}
-	if err := s.store.CreateSessionStartSnapshot(ctx, sessionID, accountID, characterID, items, waypoints, hotbar, skillBinds, shopStock, stashItems, stashGold, resources, progression); err != nil {
+	if err := s.store.MigrateCharacterResourceItemsToResourceBag(ctx, accountID, characterID); err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not migrate resource items")
+		return false
+	}
+	resourceBagItems, err := s.store.ListAccountResourceBagItems(ctx, accountID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load account resource bag")
+		return false
+	}
+	if err := s.store.CreateSessionStartSnapshot(ctx, sessionID, accountID, characterID, items, waypoints, hotbar, skillBinds, shopStock, stashItems, stashGold, resources, resourceBagItems, progression); err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
 		return false

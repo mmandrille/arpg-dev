@@ -1359,6 +1359,24 @@
         {
           "type": "object",
           "additionalProperties": false,
+          "required": ["op", "item"],
+          "properties": {
+            "op": { "const": "resource_bag_item_add" },
+            "item": { "$ref": "#/$defs/stash_item" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "stash_item_id"],
+          "properties": {
+            "op": { "const": "resource_bag_item_remove" },
+            "stash_item_id": { "$ref": "#/$defs/decimal_id" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
           "required": ["op", "level", "discovered"],
           "properties": {
             "op": { "const": "teleporter_discovery_update" },

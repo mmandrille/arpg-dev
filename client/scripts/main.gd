@@ -156,6 +156,7 @@ var stash_items: Array = []
 var stash_gold: int = 0
 var stash_capacity: int = 50
 var resource_wallet: Dictionary = {}
+var resource_bag_items: Array = []
 var pending_stash_equips: Dictionary = {}
 var hotbar_capacity: int = 2
 var hotbar: Array = []
@@ -1251,6 +1252,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	stash_gold = int(p.get("stash_gold", stash_gold))
 	stash_capacity = int(p.get("stash_capacity", stash_capacity))
 	_apply_resource_wallet_snapshot(p.get("resource_wallet", []))
+	_apply_resource_bag_snapshot(p.get("resource_bag_items", []))
 	hotbar_capacity = int(p.get("hotbar_capacity", 2))
 	hotbar = p.get("hotbar", [])
 	character_progression = p.get("character_progression", {})
@@ -1317,7 +1319,7 @@ func _apply_delta(p: Dictionary) -> void:
 			"entity_remove":
 				_delta_ui_sync_gate.mark_entity_removed()
 				_remove_entity(str(c.get("entity_id", "")))
-			"inventory_add", "inventory_update", "inventory_remove", "equipped_update", "weapon_set_update", "hotbar_update", "gold_update", "stash_item_add", "stash_item_remove", "stash_gold_update", "resource_wallet_update":
+			"inventory_add", "inventory_update", "inventory_remove", "equipped_update", "weapon_set_update", "hotbar_update", "gold_update", "stash_item_add", "stash_item_remove", "stash_gold_update", "resource_wallet_update", "resource_bag_item_add", "resource_bag_item_remove":
 				InventoryWalletDeltaRuntimeScript.apply_change(self, c)
 			"teleporter_discovery_update":
 				var discovered_level := int(c.get("level", 0))
@@ -2148,6 +2150,10 @@ func _apply_resource_wallet_snapshot(rows: Variant) -> void:
 	InventoryWalletDeltaRuntimeScript.apply_resource_wallet_snapshot(self, rows)
 
 
+func _apply_resource_bag_snapshot(rows: Variant) -> void:
+	InventoryWalletDeltaRuntimeScript.apply_resource_bag_snapshot(self, rows)
+
+
 func _apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = {}) -> void:
 	InventoryWalletDeltaRuntimeScript.apply_hotbar_update(self, slot_index, item_instance_id, item)
 
@@ -2173,7 +2179,7 @@ func _refresh_inventory_ui() -> void:
 			resource_wallet
 		)
 	if bishop_panel != null and bishop_panel.visible: bishop_panel.set_resource_wallet(resource_wallet)
-	if inventory_panel != null: inventory_panel.set_resource_wallet(resource_wallet)
+	if inventory_panel != null: inventory_panel.set_resource_wallet(resource_wallet, resource_bag_items)
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
@@ -5021,7 +5027,7 @@ func _show_blacksmith_panel(ev: Dictionary) -> void:
 	stash_items = ev.get("stash_items", stash_items)
 	stash_gold = int(ev.get("stash_gold", stash_gold))
 	stash_capacity = int(ev.get("stash_capacity", stash_capacity))
-	blacksmith_panel.show_blacksmith(next_entity_id, _blacksmith_inventory_items(), gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade", resource_wallet)
+	blacksmith_panel.show_blacksmith(next_entity_id, _blacksmith_resource_items(), gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade", resource_wallet)
 	_raise_gameplay_windows()
 
 func _hide_blacksmith_panel() -> void:
@@ -5093,8 +5099,31 @@ func _on_blacksmith_inventory_upgrade_requested(item_instance_id: String, resour
 
 func _consume_blacksmith_craft_resource(resource_instance_id: String, result: Dictionary) -> void:
 	if resource_instance_id != "":
-		_remove_inventory_item(resource_instance_id)
+		if not _remove_resource_bag_item(resource_instance_id):
+			_remove_inventory_item(resource_instance_id)
 	_apply_upgrade_resource_response(result)
+
+
+func _remove_resource_bag_item(bag_item_id: String) -> bool:
+	if bag_item_id == "":
+		return false
+	for i in range(resource_bag_items.size() - 1, -1, -1):
+		var row_id := str(resource_bag_items[i].get("stash_item_id", resource_bag_items[i].get("bag_item_id", "")))
+		if row_id == bag_item_id:
+			resource_bag_items.remove_at(i)
+			return true
+	return false
+
+
+func _blacksmith_resource_items() -> Array:
+	var items: Array = []
+	for value in resource_bag_items:
+		if typeof(value) == TYPE_DICTIONARY:
+			items.append((value as Dictionary).duplicate(true))
+	for value in _blacksmith_inventory_items():
+		if typeof(value) == TYPE_DICTIONARY:
+			items.append((value as Dictionary).duplicate(true))
+	return items
 
 func _blacksmith_inventory_items() -> Array:
 	var hidden: Dictionary = {}
@@ -5125,7 +5154,7 @@ func _refresh_blacksmith_panel() -> void:
 		return
 	blacksmith_panel.show_blacksmith(
 		blacksmith_panel.blacksmith_entity_id,
-		_blacksmith_inventory_items(),
+		_blacksmith_resource_items(),
 		gold,
 		stash_gold,
 		_blacksmith_config(),

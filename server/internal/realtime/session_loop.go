@@ -151,6 +151,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
 	sim.LoadAccountStashForPlayer(hostPlayerID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
 	sim.LoadResourceWalletForPlayer(hostPlayerID, persistedResources(hostStart.Resources))
+	sim.LoadAccountResourceBagForPlayer(hostPlayerID, persistedResourceBagItems(hostStart.ResourceBagItems))
 	if err := h.loadMercenaryRosterIntoSim(ctx, sim, host.AccountID, host.CharacterID); err != nil {
 		return nil, nil, err
 	}
@@ -188,6 +189,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 		sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
 		sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
+		sim.LoadAccountResourceBagForPlayer(playerID, persistedResourceBagItems(start.ResourceBagItems))
 		h.loadCharacterCorpses(ctx, h.log, sim, member)
 		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 			return nil, nil, err
@@ -302,6 +304,7 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
 	l.sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
 	l.sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
+	l.sim.LoadAccountResourceBagForPlayer(playerID, persistedResourceBagItems(start.ResourceBagItems))
 	l.hub.loadCharacterCorpses(context.Background(), l.log, l.sim, member)
 	l.mu.Unlock()
 	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
@@ -705,6 +708,38 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist stash gold withdraw", "account_id", member.AccountID, "character_id", member.CharacterID, "amount", *ev.Amount, "error", err)
 			}
+		case "resource_bag_item_deposited":
+			if ev.ItemInstanceID == "" || ev.StashItemID == "" {
+				break
+			}
+			if _, err := l.hub.store.TransferCharacterItemToAccountResourceBag(ctx, member.AccountID, member.CharacterID, ev.ItemInstanceID, ev.StashItemID); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist resource bag item deposit", "account_id", member.AccountID, "character_id", member.CharacterID, "item_instance_id", ev.ItemInstanceID, "bag_item_id", ev.StashItemID, "error", err)
+			}
+		case "resource_bag_item_withdrawn":
+			if ev.ItemInstanceID == "" || ev.StashItemID == "" {
+				break
+			}
+			if _, err := l.hub.store.TransferAccountResourceBagItemToCharacter(ctx, member.AccountID, member.CharacterID, ev.StashItemID, ev.ItemInstanceID); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist resource bag item withdraw", "account_id", member.AccountID, "character_id", member.CharacterID, "item_instance_id", ev.ItemInstanceID, "bag_item_id", ev.StashItemID, "error", err)
+			}
+		case "resource_bag_stash_item_deposited":
+			if ev.ItemInstanceID == "" || ev.StashItemID == "" {
+				break
+			}
+			if _, err := l.hub.store.TransferAccountStashItemToAccountResourceBag(ctx, member.AccountID, member.CharacterID, ev.StashItemID, ev.ItemInstanceID); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist resource bag stash item deposit", "account_id", member.AccountID, "character_id", member.CharacterID, "stash_item_id", ev.StashItemID, "bag_item_id", ev.ItemInstanceID, "error", err)
+			}
+		case "stash_resource_bag_item_deposited":
+			if ev.ItemInstanceID == "" || ev.StashItemID == "" {
+				break
+			}
+			if _, err := l.hub.store.TransferAccountResourceBagItemToAccountStash(ctx, member.AccountID, member.CharacterID, ev.ItemInstanceID, ev.StashItemID); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist stash resource bag item deposit", "account_id", member.AccountID, "character_id", member.CharacterID, "bag_item_id", ev.ItemInstanceID, "stash_item_id", ev.StashItemID, "error", err)
+			}
 		case "corpse_item_recovered":
 			if ev.CorpseCharacterID == "" || ev.StashItemID == "" || ev.ItemInstanceID == "" {
 				break
@@ -828,6 +863,23 @@ func (l *sessionLoop) persistTick(res game.TickResult, membersByPlayerID map[uin
 			if _, err := l.hub.store.AddAccountResource(ctx, changeMember.AccountID, c.ResourceID, 1); err != nil {
 				l.hub.metrics.PersistenceErrors.Inc()
 				l.log.Error("persist account resource", "resource_id", c.ResourceID, "error", err)
+			}
+		case game.OpResourceBagItemAdd:
+			if c.StashItem == nil {
+				continue
+			}
+			rolledStats := json.RawMessage(`{}`)
+			if payload := c.StashItem.RollPayload(); payload != nil {
+				if raw, err := json.Marshal(payload); err == nil {
+					rolledStats = raw
+				} else {
+					l.hub.metrics.PersistenceErrors.Inc()
+					l.log.Error("marshal resource bag item payload", "error", err)
+				}
+			}
+			if _, err := l.hub.store.InsertAccountResourceBagItem(ctx, changeMember.AccountID, changeMember.CharacterID, c.StashItem.StashItemID, c.StashItem.ItemDefID, rolledStats); err != nil {
+				l.hub.metrics.PersistenceErrors.Inc()
+				l.log.Error("persist resource bag item add", "bag_item_id", c.StashItem.StashItemID, "error", err)
 			}
 		case game.OpTeleporterDiscoveryUpdate:
 			if c.Discovered {

@@ -72,6 +72,13 @@ type CharacterProgressionRepo interface {
 	ListAccountStashItems(ctx context.Context, accountID string) ([]AccountStashItem, error)
 	GetOrCreateAccountStashGold(ctx context.Context, accountID string) (AccountStashGold, error)
 	ListAccountResources(ctx context.Context, accountID string) ([]AccountResourceAmount, error)
+	ListAccountResourceBagItems(ctx context.Context, accountID string) ([]AccountResourceBagItem, error)
+	InsertAccountResourceBagItem(ctx context.Context, accountID, characterID, bagItemID, itemDefID string, rolledStats json.RawMessage) (AccountResourceBagItem, error)
+	TransferCharacterItemToAccountResourceBag(ctx context.Context, accountID, characterID, itemInstanceID, bagItemID string) (AccountResourceBagItem, error)
+	TransferAccountResourceBagItemToCharacter(ctx context.Context, accountID, characterID, bagItemID, itemInstanceID string) (CharacterItemInstance, error)
+	TransferAccountStashItemToAccountResourceBag(ctx context.Context, accountID, characterID, sourceStashItemID, bagItemID string) (AccountResourceBagItem, error)
+	TransferAccountResourceBagItemToAccountStash(ctx context.Context, accountID, characterID, bagItemID, stashItemID string) (AccountStashItem, error)
+	MigrateCharacterResourceItemsToResourceBag(ctx context.Context, accountID, characterID string) error
 	AddAccountResource(ctx context.Context, accountID, resourceID string, amount int) (AccountResourceAmount, error)
 	SpendAccountResource(ctx context.Context, accountID, resourceID string, amount int) (AccountResourceAmount, error)
 	TransferCharacterItemToAccountStash(ctx context.Context, accountID, characterID, itemInstanceID, stashItemID string) (AccountStashItem, error)
@@ -99,7 +106,7 @@ type CharacterProgressionRepo interface {
 	AcceptMarketOffer(ctx context.Context, sellerAccountID, listingID, offerID string) (MarketOffer, error)
 	ExpireMarketListings(ctx context.Context) (int, error)
 	GetMarketSummary(ctx context.Context, accountID string) (MarketSummary, error)
-	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, progression CharacterProgression) error
+	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, resourceBagItems []AccountResourceBagItem, progression CharacterProgression) error
 	UpsertSessionStartItem(ctx context.Context, sessionID string, item CharacterItemInstance) error
 	SetSessionStartItemEquipped(ctx context.Context, sessionID, accountID, characterID, itemInstanceID, slot string, equipped bool, weaponSet int) error
 	RemoveSessionStartItem(ctx context.Context, sessionID, accountID, characterID, itemInstanceID string) error

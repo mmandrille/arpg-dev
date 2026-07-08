@@ -46,6 +46,10 @@
         "stash_withdraw_item_intent",
         "stash_deposit_gold_intent",
         "stash_withdraw_gold_intent",
+        "resource_bag_deposit_item_intent",
+        "resource_bag_deposit_stash_item_intent",
+        "resource_bag_withdraw_item_intent",
+        "stash_deposit_resource_bag_item_intent",
         "corpse_withdraw_item_intent",
         "unique_chest_take_item_intent",
         "quest_steward_pick_intent",
@@ -135,6 +139,14 @@
       "then": { "properties": { "payload": { "$ref": "#/$defs/stash_deposit_gold_intent" } } } },
     { "if": { "properties": { "type": { "const": "stash_withdraw_gold_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/stash_withdraw_gold_intent" } } } },
+    { "if": { "properties": { "type": { "const": "resource_bag_deposit_item_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/resource_bag_deposit_item_intent" } } } },
+    { "if": { "properties": { "type": { "const": "resource_bag_deposit_stash_item_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/resource_bag_deposit_stash_item_intent" } } } },
+    { "if": { "properties": { "type": { "const": "resource_bag_withdraw_item_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/resource_bag_withdraw_item_intent" } } } },
+    { "if": { "properties": { "type": { "const": "stash_deposit_resource_bag_item_intent" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/stash_deposit_resource_bag_item_intent" } } } },
     { "if": { "properties": { "type": { "const": "corpse_withdraw_item_intent" } } },
       "then": { "properties": { "payload": { "$ref": "#/$defs/corpse_withdraw_item_intent" } } } },
     { "if": { "properties": { "type": { "const": "unique_chest_take_item_intent" } } },
@@ -490,6 +502,40 @@
       "properties": {
         "stash_entity_id": { "$ref": "#/$defs/decimal_id" },
         "amount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "resource_bag_deposit_item_intent": {
+      "type": "object",
+      "required": ["item_instance_id"],
+      "additionalProperties": false,
+      "properties": {
+        "item_instance_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "resource_bag_deposit_stash_item_intent": {
+      "type": "object",
+      "required": ["stash_entity_id", "stash_item_id"],
+      "additionalProperties": false,
+      "properties": {
+        "stash_entity_id": { "$ref": "#/$defs/decimal_id" },
+        "stash_item_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "resource_bag_withdraw_item_intent": {
+      "type": "object",
+      "required": ["bag_item_id"],
+      "additionalProperties": false,
+      "properties": {
+        "bag_item_id": { "$ref": "#/$defs/decimal_id" }
+      }
+    },
+    "stash_deposit_resource_bag_item_intent": {
+      "type": "object",
+      "required": ["stash_entity_id", "bag_item_id"],
+      "additionalProperties": false,
+      "properties": {
+        "stash_entity_id": { "$ref": "#/$defs/decimal_id" },
+        "bag_item_id": { "$ref": "#/$defs/decimal_id" }
       }
     },
     "intent_accepted": {

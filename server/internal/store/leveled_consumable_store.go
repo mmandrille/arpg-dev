@@ -222,7 +222,17 @@ func (s *Store) MergeLeveledConsumablesFromBag(ctx context.Context, accountID, c
 
 func spendLeveledConsumableInTx(ctx context.Context, tx pgx.Tx, accountID, characterID, itemDefID string, minLevel int, preferredCharacterItemID string) error {
 	if preferredCharacterItemID != "" {
-		return spendCharacterLeveledConsumableByID(ctx, tx, accountID, characterID, preferredCharacterItemID, itemDefID, minLevel)
+		if err := spendCharacterLeveledConsumableByID(ctx, tx, accountID, characterID, preferredCharacterItemID, itemDefID, minLevel); err == nil {
+			return nil
+		} else if !errors.Is(err, ErrNotFound) {
+			return err
+		}
+		if err := spendResourceBagLeveledConsumableByID(ctx, tx, accountID, preferredCharacterItemID, itemDefID, minLevel); err == nil {
+			return nil
+		} else if !errors.Is(err, ErrNotFound) {
+			return err
+		}
+		return spendStashLeveledConsumableByID(ctx, tx, accountID, preferredCharacterItemID, itemDefID, minLevel)
 	}
 	candidates, err := listLeveledConsumableCandidates(ctx, tx, accountID, characterID, itemDefID)
 	if err != nil {
@@ -278,6 +288,93 @@ func spendCharacterLeveledConsumableByID(ctx context.Context, tx pgx.Tx, account
 		accountID, characterID, itemInstanceID,
 	); err != nil {
 		return fmt.Errorf("store: clear hotbar for spent preferred leveled consumable: %w", err)
+	}
+
+	return nil
+}
+
+func spendResourceBagLeveledConsumableByID(ctx context.Context, tx pgx.Tx, accountID, bagItemID, itemDefID string, minLevel int) error {
+	if bagItemID == "" {
+		return ErrConflict
+	}
+	var defID string
+	var rolled json.RawMessage
+	err := tx.QueryRow(ctx,
+		`SELECT item_def_id, rolled_stats
+		 FROM account_resource_bag_items
+		 WHERE account_id = $1 AND bag_item_id = $2
+		 FOR UPDATE`,
+		accountID, bagItemID,
+	).Scan(&defID, &rolled)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ErrNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("store: lock preferred resource bag leveled consumable: %w", err)
+	}
+	if defID != itemDefID {
+		return ErrConflict
+	}
+	level, err := game.LeveledConsumableLevelFromRaw(itemDefID, rolled)
+	if err != nil {
+		return err
+	}
+	if level < minLevel {
+		return ErrConflict
+	}
+	tag, err := tx.Exec(ctx,
+		`DELETE FROM account_resource_bag_items
+		 WHERE account_id = $1 AND bag_item_id = $2`,
+		accountID, bagItemID,
+	)
+	if err != nil {
+		return fmt.Errorf("store: spend preferred resource bag leveled consumable: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
+
+func spendStashLeveledConsumableByID(ctx context.Context, tx pgx.Tx, accountID, stashItemID, itemDefID string, minLevel int) error {
+	if stashItemID == "" {
+		return ErrConflict
+	}
+	var defID string
+	var rolled json.RawMessage
+	err := tx.QueryRow(ctx,
+		`SELECT item_def_id, rolled_stats
+		 FROM account_stash_items
+		 WHERE account_id = $1 AND stash_item_id = $2
+		 FOR UPDATE`,
+		accountID, stashItemID,
+	).Scan(&defID, &rolled)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ErrNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("store: lock preferred stash leveled consumable: %w", err)
+	}
+	if defID != itemDefID {
+		return ErrConflict
+	}
+	level, err := game.LeveledConsumableLevelFromRaw(itemDefID, rolled)
+	if err != nil {
+		return err
+	}
+	if level < minLevel {
+		return ErrConflict
+	}
+	tag, err := tx.Exec(ctx,
+		`DELETE FROM account_stash_items WHERE account_id = $1 AND stash_item_id = $2`,
+		accountID, stashItemID,
+	)
+	if err != nil {
+		return fmt.Errorf("store: spend preferred stash leveled consumable: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
 	}
 
 	return nil
@@ -349,6 +446,34 @@ func listLeveledConsumableCandidates(ctx context.Context, tx pgx.Tx, accountID, 
 		return nil, fmt.Errorf("store: list inventory leveled consumable rows: %w", err)
 	}
 
+	bagRows, err := tx.Query(ctx,
+		`SELECT bag_item_id, rolled_stats
+		 FROM account_resource_bag_items
+		 WHERE account_id = $1 AND item_def_id = $2
+		 FOR UPDATE`,
+		accountID, itemDefID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: list resource bag leveled consumables: %w", err)
+	}
+	defer bagRows.Close()
+
+	for bagRows.Next() {
+		var bagItemID string
+		var rolled json.RawMessage
+		if err := bagRows.Scan(&bagItemID, &rolled); err != nil {
+			return nil, fmt.Errorf("store: scan resource bag leveled consumable: %w", err)
+		}
+		level, err := game.LeveledConsumableLevelFromRaw(itemDefID, rolled)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, upgradeShardCandidate{resourceBagItemID: bagItemID, level: level})
+	}
+	if err := bagRows.Err(); err != nil {
+		return nil, fmt.Errorf("store: list resource bag leveled consumable rows: %w", err)
+	}
+
 	return out, nil
 }
 
@@ -362,6 +487,9 @@ func spendLeveledConsumableCandidate(ctx context.Context, tx pgx.Tx, accountID, 
 		if sortCandidates[i].level == sortCandidates[j].level {
 			if sortCandidates[i].characterItemID != "" && sortCandidates[j].characterItemID != "" {
 				return sortCandidates[i].characterItemID < sortCandidates[j].characterItemID
+			}
+			if sortCandidates[i].resourceBagItemID != "" && sortCandidates[j].resourceBagItemID != "" {
+				return sortCandidates[i].resourceBagItemID < sortCandidates[j].resourceBagItemID
 			}
 			return sortCandidates[i].stashItemID < sortCandidates[j].stashItemID
 		}
@@ -386,6 +514,21 @@ func spendLeveledConsumableCandidate(ctx context.Context, tx pgx.Tx, accountID, 
 		)
 		if err != nil {
 			return fmt.Errorf("store: spend stash leveled consumable: %w", err)
+		}
+		if tag.RowsAffected() == 0 {
+			return ErrNotFound
+		}
+		return nil
+	}
+
+	if picked.resourceBagItemID != "" {
+		tag, err := tx.Exec(ctx,
+			`DELETE FROM account_resource_bag_items
+			 WHERE account_id = $1 AND bag_item_id = $2`,
+			accountID, picked.resourceBagItemID,
+		)
+		if err != nil {
+			return fmt.Errorf("store: spend resource bag leveled consumable: %w", err)
 		}
 		if tag.RowsAffected() == 0 {
 			return ErrNotFound

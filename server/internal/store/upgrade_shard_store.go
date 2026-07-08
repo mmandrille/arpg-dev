@@ -57,10 +57,11 @@ func (s *Store) MigrateUpgradeShardWalletToStash(ctx context.Context, accountID 
 }
 
 type upgradeShardCandidate struct {
-	stashItemID      string
-	characterItemID  string
-	characterID      string
-	level            int
+	stashItemID       string
+	resourceBagItemID string
+	characterItemID   string
+	characterID       string
+	level             int
 }
 
 func (s *Store) MergeUpgradeShards(ctx context.Context, accountID string, stashItemIDs []string) (AccountStashItem, error) {

@@ -175,6 +175,10 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, ctx: StateIngestConte
             resource_id = str(c.get("resource_id", ""))
             if resource_id:
                 state.resource_wallet[resource_id] = max(0, int(c.get("amount", state.resource_wallet.get(resource_id, 0))))
+        elif c["op"] == "resource_bag_item_add":
+            upsert_resource_bag_item(state, c.get("item", {}))
+        elif c["op"] == "resource_bag_item_remove":
+            remove_resource_bag_item(state, str(c.get("stash_item_id", c.get("bag_item_id", ""))))
         elif c["op"] == "teleporter_discovery_update":
             state.discovered_teleporters[int(c["level"])] = bool(c["discovered"])
         elif c["op"] == "character_progression_update":
@@ -228,6 +232,7 @@ def ingest_snapshot(payload: dict[str, Any], state: RuntimeState, ctx: StateInge
         for row in payload.get("resource_wallet", [])
         if str(row.get("resource_id", ""))
     }
+    state.resource_bag_items = [dict(item) for item in payload.get("resource_bag_items", [])]
     state.discovered_teleporters = parse_discovered_teleporters(payload)
     state.loot_ids = [
         entity_id
@@ -369,4 +374,28 @@ def remove_stash_item(state: RuntimeState, stash_item_id: str) -> None:
     state.stash_items = [
         item for item in state.stash_items
         if str(item.get("stash_item_id")) != stash_item_id
+    ]
+
+
+def upsert_resource_bag_item(state: RuntimeState, item: dict[str, Any]) -> None:
+    if not isinstance(item, dict) or not item:
+        return
+    bag_item_id = str(item.get("stash_item_id", item.get("bag_item_id", "")))
+    if not bag_item_id:
+        return
+    for i, current in enumerate(state.resource_bag_items):
+        if str(current.get("stash_item_id", current.get("bag_item_id", ""))) == bag_item_id:
+            merged = dict(current)
+            merged.update(item)
+            state.resource_bag_items[i] = merged
+            return
+    state.resource_bag_items.append(dict(item))
+
+
+def remove_resource_bag_item(state: RuntimeState, bag_item_id: str) -> None:
+    if not bag_item_id:
+        return
+    state.resource_bag_items = [
+        item for item in state.resource_bag_items
+        if str(item.get("stash_item_id", item.get("bag_item_id", ""))) != bag_item_id
     ]

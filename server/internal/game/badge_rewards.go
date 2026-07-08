@@ -125,25 +125,13 @@ func (s *Sim) grantUpgradeShardItemForPlayer(playerID uint64, depth int, source 
 	}
 
 	level := RollItemLevel(s.rng, depth, s.rules.DungeonGeneration.ItemLevelTiers)
-	if s.bagOccupancyCount()+1 > s.inventoryCapacity() {
-		if switchedPlayer && current != nil {
-			s.usePlayer(current)
-		}
-		return false
-	}
-
-	item := &invItem{
-		instanceID:  s.alloc(),
-		itemDefID:   UpgradeShardItemDefID,
-		rollPayload: NewUpgradeShardRollPayload(level),
-	}
-	s.inventory = append(s.inventory, item)
-	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item))})
+	stored := s.grantResourceBagItem(UpgradeShardItemDefID, NewUpgradeShardRollPayload(level), 0, res)
 	res.Events = append(res.Events, Event{
 		EventType:      "item_picked_up",
 		EntityID:       idStr(playerID),
 		CorrelationID:  corr,
-		ItemInstanceID: idStr(item.instanceID),
+		ItemInstanceID: idStr(stored.stashItemID),
+		StashItemID:    idStr(stored.stashItemID),
 	})
 	s.savePlayer(ps)
 	if switchedPlayer && current != nil {

@@ -13,6 +13,7 @@ const DRAG_SOURCE_UNIQUE_CHEST := "unique_chest"
 const DRAG_SOURCE_BLACKSMITH_STAGE := "blacksmith_stage"
 const DRAG_SOURCE_BLACKSMITH_RESOURCE_STAGE := "blacksmith_resource_stage"
 const DRAG_SOURCE_BLACKSMITH_MERGE := "blacksmith_merge"
+const DRAG_SOURCE_RESOURCE_BAG := "resource_bag"
 
 
 static func double_click_route(
@@ -111,6 +112,10 @@ static func drop_route(slot_kind: String, data: Dictionary, can_equip_to_slot: b
 		return {"kind": KIND_BLACKSMITH_UNSTAGE, "unstage": "resource"}
 	if source == DRAG_SOURCE_BLACKSMITH_MERGE:
 		return {"kind": KIND_BLACKSMITH_MERGE_UNPLACE}
+	if source == DRAG_SOURCE_RESOURCE_BAG:
+		return _intent("resource_bag_withdraw_item_intent", {
+			"bag_item_id": resource_bag_item_id(data),
+		})
 	if is_equipment_slot(source):
 		var unequip_slot := slot_from_kind(source)
 		var unequip_payload := {"slot": unequip_slot}
@@ -127,6 +132,20 @@ static func slot_from_kind(kind: String) -> String:
 	if not is_equipment_slot(kind):
 		return ""
 	return kind.substr(SLOT_KIND_EQUIP_PREFIX.length())
+
+
+static func resource_bag_item_id_from_item(item: Dictionary) -> String:
+	return str(item.get("stash_item_id", item.get("bag_item_id", "")))
+
+
+static func resource_bag_item_id(data: Dictionary) -> String:
+	var bag_item_id := str(data.get("bag_item_id", ""))
+	if bag_item_id != "":
+		return bag_item_id
+	var item: Dictionary = data.get("item", {})
+	if typeof(item) != TYPE_DICTIONARY:
+		return ""
+	return resource_bag_item_id_from_item(item)
 
 
 static func _intent(intent_type: String, payload: Dictionary) -> Dictionary:

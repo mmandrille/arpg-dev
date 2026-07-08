@@ -1,0 +1,61 @@
+client/tests/test_camera_mode_settings.gd
+  s_7f004aea879952::t_04f10be7cf47bf 146,152
+  s_7f004aea879952::t_e53cd549d28f72 25,135-145,147-151
+  s_7f004aea879952::t_55db75624d19c3 15
+client/scripts/player_camera_controller.gd
+  s_7f004aea879952::t_e53cd549d28f72 262
+shared/rules/main_config.v0.schema.json
+  s_d986963fffb335::t_dfe44230ffc3ce 13
+  s_d986963fffb335::t_39083ece63fa70 105-106
+shared/rules/main_config.v0.json
+  s_d986963fffb335::t_cea2d5ab541a93 58-59
+docs/plans/v458_2026-07-08-camera-follow-smoothing-fix.md
+  s_7f004aea879952::t_e53cd549d28f72 1-2,4-25,27,53-59
+  s_7f004aea879952::t_04f10be7cf47bf 3,26,28-52
+docs/specs/v458_spec-camera-follow-smoothing-fix.md
+  s_7f004aea879952::t_e53cd549d28f72 1-2,4-67
+  s_7f004aea879952::t_04f10be7cf47bf 3
+server/internal/game/sim.go
+  s_d986963fffb335::t_b8fc7c22597928 6182-6196
+  s_d986963fffb335::t_6055b93e4ff421 4041-4044
+server/internal/game/main_config_validation.go
+  s_d986963fffb335::t_964209016e9cf5 33-35
+server/internal/game/level_up_test.go
+  s_d986963fffb335::t_52357d05843eb8 8
+shared/rules/monsters.v0.json
+  s_d986963fffb335::t_065540cdf542e9 103
+  s_d986963fffb335::t_4b44191523e78d 115
+  s_d986963fffb335::t_b87be3ab5fbbf7 127
+server/internal/game/rules.go
+  s_d986963fffb335::t_4b9852067c63f2 86
+server/internal/game/game_test.go
+  s_d986963fffb335::t_0b4f9c17cbd14b 6554
+  s_d986963fffb335::t_f198a96866603f 6578-6579
+  s_d986963fffb335::t_76c65de66eaddb 6502
+  s_d986963fffb335::t_d6cd252cc597b6 6542-6543
+  s_d986963fffb335::t_ef9bb3fbab83a7 6449-6450
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1378268b4f946f35dbec41d81da66de273615cf9",
+  "prompts": {},
+  "sessions": {
+    "s_7f004aea879952": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4336-abbf-7df2-9cf2-3a97ff38480a",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    },
+    "s_d986963fffb335": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "87b51421-fabe-465f-bcba-3417eb403948",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

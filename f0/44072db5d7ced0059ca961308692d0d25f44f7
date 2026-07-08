@@ -1,0 +1,25 @@
+client/tests/test_wall_occlusion_fade.gd
+  s_c82b815f40f5ed::t_8495d0f69f799a 4-5
+  s_c82b815f40f5ed::t_8c2fca8001b20a 112-134
+  s_c82b815f40f5ed::t_a93c609f2e5f16 21
+client/scripts/wall_renderer.gd
+  s_c82b815f40f5ed::t_9e575bc6292d7c 75
+  s_c82b815f40f5ed::t_114ad1db2439f6 435-437,448-458
+  s_c82b815f40f5ed::t_a9d4c466126252 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f044072db5d7ced0059ca961308692d0d25f44f7",
+  "prompts": {},
+  "sessions": {
+    "s_c82b815f40f5ed": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "27856d11-e82d-4bc9-8b2d-439d4e5a1ccf",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

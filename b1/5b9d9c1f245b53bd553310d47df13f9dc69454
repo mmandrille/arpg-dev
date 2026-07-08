@@ -1,0 +1,60 @@
+server/internal/realtime/enqueue_coalesce.go
+  s_46ee02ca672af8::t_4e9ad2722174fd 1-64
+server/internal/realtime/session_loop_test.go
+  s_46ee02ca672af8::t_e511a63b574766 587
+  s_46ee02ca672af8::t_9e7992effb2b08 600,613-621,634,638-649
+  s_46ee02ca672af8::t_f4c87a174416d7 223,299,382,424
+client/scripts/client_constants.gd
+  s_46ee02ca672af8::t_cfc5005fe7e644 89
+server/internal/realtime/persist_defer.go
+  s_46ee02ca672af8::t_22694f8bc61b15 84-157
+  s_46ee02ca672af8::t_92d43993a91ea3 19-20
+server/internal/realtime/session_tick_test.go
+  s_46ee02ca672af8::t_dc5c1fc5d51114 38-82
+client/scripts/main.gd
+  s_46ee02ca672af8::t_1fc9e7f0488991 1690,1693
+  s_46ee02ca672af8::t_707c89b4295707 4067,4071-4113
+  s_46ee02ca672af8::t_a39c64fea2d8e6 1067-1070
+  s_46ee02ca672af8::t_4ff0aaf1f3a2ae 328
+  s_46ee02ca672af8::t_541bff98cf72d5 1691-1692,1694-1696,1699-1702
+server/internal/realtime/session_tick.go
+  s_46ee02ca672af8::t_b9e789dc24f679 75-76
+  s_46ee02ca672af8::t_80d369c33fcec1 57,63
+server/internal/realtime/tick_guardrails.go
+  s_46ee02ca672af8::t_7005b06e78f7c4 27-28,43-52
+server/internal/realtime/tick_guardrails_test.go
+  s_46ee02ca672af8::t_ab3683dbc82320 24-37
+server/internal/realtime/enqueue_coalesce_test.go
+  s_46ee02ca672af8::t_e10febe8646734 3-7
+  s_46ee02ca672af8::t_42b408e8c8c3b4 1-2,8-58
+client/scripts/net_client.gd
+  s_46ee02ca672af8::t_327bde206decf2 482-486
+server/internal/realtime/session_loop.go
+  s_46ee02ca672af8::t_836452a5d99d5d 813
+  s_46ee02ca672af8::t_c17345a7ce517b 773,778-779
+  s_46ee02ca672af8::t_6f1950894f5483 833,838,843
+  s_46ee02ca672af8::t_133d6e992ce44c 51
+  s_46ee02ca672af8::t_47ede21d41a2c1 792,800
+  s_46ee02ca672af8::t_bfcd10e54dedbe 416-428,434-444,447,449
+  s_46ee02ca672af8::t_8953bec76adbf4 852,854,859
+  s_46ee02ca672af8::t_f5c58e5d89c49b 664
+server/internal/realtime/persist_budget.go
+  s_46ee02ca672af8::t_dcaceefa444624 1-9,12-28
+  s_46ee02ca672af8::t_5569361c0d7830 10-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b15b9d9c1f245b53bd553310d47df13f9dc69454",
+  "prompts": {},
+  "sessions": {
+    "s_46ee02ca672af8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "4aa6b3ac-9e28-4d1b-b2f1-60c79f24f2ba",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

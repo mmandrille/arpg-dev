@@ -1,0 +1,28 @@
+docs/CODEMAP.md
+  s_bb79460e46840d::t_58fc3b5c9fcd56 12
+tools/bot/run.py
+  s_bb79460e46840d::t_09b108e079c57c 4095-4107,4119-4129,4141-4151
+tools/bot/combat_soak_runtime.py
+  s_bb79460e46840d::t_d9a7aa12da12f4 1-276
+.maintainability/file-size-baseline.tsv
+  s_bb79460e46840d::t_cb7d59efcfaca9 29
+  s_bb79460e46840d::t_2da5fe8088447f 20
+  s_bb79460e46840d::t_5e178314445f37 35
+  s_bb79460e46840d::t_459b1fff87b146 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "f6bcdf26358b62e859121253ef977f9ea08070c4",
+  "prompts": {},
+  "sessions": {
+    "s_bb79460e46840d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ef9b8c00-bb05-4c6b-b511-b3349e00d078",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

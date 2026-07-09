@@ -1,0 +1,33 @@
+shared/golden/treasure_class_rolls.json
+  s_d4fe38f6f89bd2::t_23e34a64d615e1 9,18,30,39,42,51,54,63,66
+skills/finish/SKILL.md
+  s_d4fe38f6f89bd2::t_48b9867c3d3dd6 19-20,64,126,128-131,175
+skills/README.md
+  s_d4fe38f6f89bd2::t_48b9867c3d3dd6 15
+shared/golden/dungeon_equipment_drops.json
+  s_d4fe38f6f89bd2::t_23e34a64d615e1 61,74,87,90
+skills/autoloop/SKILL.md
+  s_d4fe38f6f89bd2::t_48b9867c3d3dd6 4-7,11,17-22,24,28-29,32,35-66,70,78-79,88-90,93-94,97-100,110-114,120-144,149-151,153,160-162,164,171-173,177,180,185-187,196,198,201-203,207,209-210,212,214,216,220
+server/internal/game/potion_items_test.go
+  s_d4fe38f6f89bd2::t_f35fa9328a03f0 37-58
+server/internal/game/rules.go
+  s_d4fe38f6f89bd2::t_096d63542c84b3 2085-2088,2094
+skills/execute/SKILL.md
+  s_d4fe38f6f89bd2::t_48b9867c3d3dd6 20-22,47,118,120-122,128,130,145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "96256ae4e1cb0cbb88bfcc8dfc1a964c5ed09625",
+  "prompts": {},
+  "sessions": {
+    "s_d4fe38f6f89bd2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ded43fae-b215-479b-974a-43082636c147",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

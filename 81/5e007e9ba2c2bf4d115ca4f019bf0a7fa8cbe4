@@ -1,0 +1,29 @@
+.maintainability/file-size-baseline.tsv
+  s_63186a773cd1b6::t_67d5abc16e52e4 13
+shared/rules/items.v0.schema.json
+  s_63186a773cd1b6::t_9967fa7e294b32 40
+client/scripts/potion_icon_label.gd
+  s_63186a773cd1b6::t_00cdfca0331f2b 5,9-11
+client/tests/test_potion_icon_label.gd
+  s_63186a773cd1b6::t_c0b3de6a009889 1-25
+shared/rules/items.v0.json
+  s_63186a773cd1b6::t_2e0d8e582f3a60 22-24
+scripts/client_smoke.sh
+  s_63186a773cd1b6::t_bbdfd928bf7ab6 219
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "815e007e9ba2c2bf4d115ca4f019bf0a7fa8cbe4",
+  "prompts": {},
+  "sessions": {
+    "s_63186a773cd1b6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8bf52c38-7ab7-4cc1-878f-b993f5650fde",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

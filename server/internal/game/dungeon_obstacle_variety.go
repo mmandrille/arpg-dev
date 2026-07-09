@@ -15,12 +15,15 @@ type SolidObstacleKindWeights struct {
 var solidObstacleLineOfSightTrue = true
 
 func (w SolidObstacleKindWeights) total() int {
-	return w.Wall + w.Rock + w.Column + w.Rubble
+	return w.Wall + w.Rock + w.Column
 }
 
 func validateSolidObstacleKindWeights(weights SolidObstacleKindWeights) error {
 	if weights.Wall < 0 || weights.Rock < 0 || weights.Column < 0 || weights.Rubble < 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.solid_kind_weights: must be non-negative")
+	}
+	if weights.Rubble > 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.solid_kind_weights.rubble: rubble generation is deprecated and must be 0")
 	}
 	if weights.total() <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.solid_kind_weights: at least one solid kind must be enabled")
@@ -41,7 +44,7 @@ func chooseSolidObstacleKind(rng *RNG, weights SolidObstacleKindWeights) string 
 	if draw < weights.Column {
 		return obstacleKindColumn
 	}
-	return obstacleKindRubble
+	return obstacleKindWall
 }
 
 func solidObstacleBlocksProjectiles(kind string) bool {

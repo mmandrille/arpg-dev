@@ -20,7 +20,6 @@ func _run() -> void:
 	await _test_tall_obstacle_layout_generates_shadow()
 	await _test_water_layout_skips_shadow()
 	await _test_hole_layout_skips_shadow()
-	await _test_rubble_layout_skips_shadow()
 	await _test_explicit_low_wall_skips_shadow()
 	await _test_supplied_door_occluder_generates_shadow()
 	await _test_diagonal_wall_shadow_starts_near_visible_edge()
@@ -198,20 +197,6 @@ func _test_hole_layout_skips_shadow() -> void:
 	_assert_eq("hole wall count", int(state.get("wall_count", -1)), 0)
 	_assert_eq("hole occluder count", int(state.get("occluder_count", -1)), 0)
 	_assert_eq("hole shadow count", int(state.get("shadow_count", -1)), 0)
-	overlay.free()
-
-
-func _test_rubble_layout_skips_shadow() -> void:
-	var overlay = FogOfWarOverlayScript.new()
-	get_root().add_child(overlay)
-	await process_frame
-	overlay.set_progression({"derived_stats": {"light_radius": 9}})
-	overlay.set_wall_layout([{"kind": "rubble", "position": {"x": 3.0, "y": 0.0}, "size": {"x": 3.0, "y": 3.0}}])
-	await process_frame
-	var state := overlay.get_debug_state()
-	_assert_eq("rubble wall count", int(state.get("wall_count", -1)), 0)
-	_assert_eq("rubble occluder count", int(state.get("occluder_count", -1)), 0)
-	_assert_eq("rubble shadow count", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
 
 

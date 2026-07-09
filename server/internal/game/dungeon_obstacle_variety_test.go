@@ -10,7 +10,6 @@ func TestObstacleVarietyGenerationUsesConfiguredSolidKinds(t *testing.T) {
 	}{
 		{name: "rock", kind: obstacleKindRock, weights: SolidObstacleKindWeights{Rock: 1}},
 		{name: "column", kind: obstacleKindColumn, weights: SolidObstacleKindWeights{Column: 1}},
-		{name: "rubble", kind: obstacleKindRubble, weights: SolidObstacleKindWeights{Rubble: 1}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -93,5 +92,8 @@ func TestObstacleVarietyWeightsValidation(t *testing.T) {
 	}
 	if err := validateSolidObstacleKindWeights(SolidObstacleKindWeights{Rock: -1}); err == nil {
 		t.Fatal("negative solid kind weight accepted")
+	}
+	if err := validateSolidObstacleKindWeights(SolidObstacleKindWeights{Rubble: 1}); err == nil {
+		t.Fatal("deprecated rubble solid kind weight accepted")
 	}
 }

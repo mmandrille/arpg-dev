@@ -640,7 +640,7 @@
         },
         {
           "type": "wall",
-          "kind": "rubble",
+          "kind": "rock",
           "position": {
             "x": 9,
             "y": 5
@@ -740,7 +740,7 @@
         },
         {
           "type": "wall",
-          "kind": "rubble",
+          "kind": "water",
           "position": {
             "x": 12.8,
             "y": 8

@@ -129,11 +129,22 @@ func ground_texel(texture_id: String, x: int, y: int, palette: Dictionary = {}) 
 		if ((x / 8 + y / 8) % 5) == 0 and ((x * 13 + y * 17) % 19) < 3:
 			base = base.lerp(Color("#456f35"), 0.20)
 		return base
-	var rock := _palette_color(palette, "ground_low", Color("#3c3f43")).lerp(_palette_color(palette, "ground_high", Color("#73706b")), float(n) / 16.0)
+	var low := _palette_color(palette, "ground_low", Color("#3c3f43"))
+	var high := _palette_color(palette, "ground_high", Color("#73706b"))
+	var crack := _palette_color(palette, "ground_crack", Color("#25282c"))
+	var highlight := _palette_color(palette, "ground_highlight", Color("#a09a8e"))
+	var rock := low.lerp(high, float(n) / 16.0)
+	var slab_noise := int((x * 13 + y * 7 + ((x / 10) * 19) + ((y / 10) * 11)) % 23)
+	if abs((x % 12) - 6) <= 1 or abs((y % 12) - 6) <= 1:
+		rock = rock.lerp(crack, 0.18)
 	if abs((x % 16) - (y % 16)) <= 1:
-		rock = rock.lerp(_palette_color(palette, "ground_crack", Color("#25282c")), 0.35)
+		rock = rock.lerp(crack, 0.35)
+	if slab_noise < 4:
+		rock = rock.lerp(highlight, 0.18)
+	elif slab_noise > 19:
+		rock = rock.lerp(crack, 0.14)
 	if ((x * 3 + y * 5) % 29) == 0:
-		rock = rock.lerp(_palette_color(palette, "ground_highlight", Color("#a09a8e")), 0.28)
+		rock = rock.lerp(highlight, 0.28)
 	return rock
 
 func ground_normal_texel(texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
@@ -148,9 +159,11 @@ func ground_detail_height(texture_id: String, x: int, y: int, _palette: Dictiona
 	if texture_id == ClientConstantsScript.GROUND_TEXTURE_TOWN:
 		var dirt := 0.35 if int((x * 9 + y * 5 + ((x / 8) * 17) + ((y / 8) * 29)) % 41) < 8 else 0.0
 		return clampf(n * 0.38 + dirt, 0.0, 1.0)
+	var cross_seam := 0.24 if abs((x % 12) - 6) <= 1 or abs((y % 12) - 6) <= 1 else 0.0
 	var crack := 0.46 if abs((x % 16) - (y % 16)) <= 1 else 0.0
 	var highlight := 0.22 if ((x * 3 + y * 5) % 29) == 0 else 0.0
-	return clampf(0.42 + n * 0.34 - crack + highlight, 0.0, 1.0)
+	var slab := 0.12 if int((x * 13 + y * 7 + ((x / 10) * 19) + ((y / 10) * 11)) % 23) < 4 else 0.0
+	return clampf(0.42 + n * 0.34 - crack - cross_seam + highlight + slab, 0.0, 1.0)
 
 func make_wall_texture(texture_id: String, palette: Dictionary = {}) -> ImageTexture:
 	var cache_key := "%s:%s" % [texture_id, str(palette.get("id", "default"))]
@@ -186,17 +199,20 @@ func wall_material_for_level(level: int, source: String, size: Dictionary, wall_
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.roughness = 0.94
 	mat.uv1_scale = Vector3(maxf(1.0, float(size.get("x", 1.0)) / 2.0), maxf(1.0, wall_height / 2.0), 1.0)
+	var base := _palette_color(palette, "wall_base", Color("#34363a"))
+	var highlight := _palette_color(palette, "wall_highlight", Color("#6b6255"))
+	var mortar := _palette_color(palette, "wall_mortar", Color("#17191c"))
 	match source:
 		"generated":
-			mat.albedo_color = Color(0.92, 0.86, 0.76)
+			mat.albedo_color = base.lerp(highlight, 0.40)
 		"room_divider":
-			mat.albedo_color = Color(0.84, 0.78, 0.70)
+			mat.albedo_color = base.lerp(highlight, 0.26)
 		"perimeter":
-			mat.albedo_color = Color(0.62, 0.64, 0.68)
+			mat.albedo_color = base.lerp(mortar, 0.18)
 		"town_perimeter":
 			return town_perimeter_wall_material(size, wall_height)
 		_:
-			mat.albedo_color = Color(0.78, 0.80, 0.82)
+			mat.albedo_color = base.lerp(highlight, 0.18)
 	return mat
 
 
@@ -219,15 +235,16 @@ func obstacle_material_for_level(level: int, kind: String, size: Dictionary) -> 
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.roughness = 0.98
 	mat.uv1_scale = Vector3(maxf(1.0, float(size.get("x", 1.0)) / 2.0), maxf(1.0, float(size.get("y", 1.0)) / 2.0), 1.0)
+	var base := _palette_color(palette, "wall_base", Color("#34363a"))
+	var highlight := _palette_color(palette, "wall_highlight", Color("#6b6255"))
+	var mortar := _palette_color(palette, "wall_mortar", Color("#17191c"))
 	match kind:
 		"rock":
-			mat.albedo_color = Color(0.56, 0.58, 0.55)
+			mat.albedo_color = base.lerp(highlight, 0.16)
 		"column":
-			mat.albedo_color = Color(0.70, 0.68, 0.61)
-		"rubble":
-			mat.albedo_color = Color(0.50, 0.47, 0.42)
+			mat.albedo_color = highlight.lerp(Color.WHITE, 0.14)
 		_:
-			mat.albedo_color = Color(0.72, 0.72, 0.68)
+			mat.albedo_color = base.lerp(mortar, 0.10)
 	return mat
 
 func make_water_texture(palette: Dictionary = {}) -> ImageTexture:
@@ -286,15 +303,22 @@ func wall_texel(_texture_id: String, x: int, y: int, palette: Dictionary = {}) -
 	var local_x := int((x + offset) % brick_w)
 	var local_y := int(y % brick_h)
 	var noise := int((x * 29 + y * 43 + row * 17 + int((x + offset) / brick_w) * 13) % 23)
-	var stone := _palette_color(palette, "wall_base", Color("#34363a")).lerp(_palette_color(palette, "wall_highlight", Color("#6b6255")), float(noise) / 22.0)
+	var base := _palette_color(palette, "wall_base", Color("#34363a"))
+	var highlight := _palette_color(palette, "wall_highlight", Color("#6b6255"))
+	var mortar := _palette_color(palette, "wall_mortar", Color("#17191c"))
+	var stone := base.lerp(highlight, float(noise) / 22.0)
 	if local_x <= 1 or local_y <= 1:
-		return stone.lerp(_palette_color(palette, "wall_mortar", Color("#17191c")), 0.62)
+		return stone.lerp(mortar, 0.62)
 	if local_x >= brick_w - 2 or local_y >= brick_h - 2:
-		stone = stone.lerp(_palette_color(palette, "wall_mortar", Color("#202226")), 0.34)
+		stone = stone.lerp(mortar, 0.34)
+	if (y / 6) % 3 == 0:
+		stone = stone.lerp(highlight, 0.08)
 	if ((x * 5 + y * 7) % 31) == 0:
-		stone = stone.lerp(_palette_color(palette, "wall_highlight", Color("#9b9386")), 0.32)
+		stone = stone.lerp(highlight, 0.32)
 	if ((x - y) % 19) == 0:
-		stone = stone.lerp(_palette_color(palette, "wall_mortar", Color("#22252a")), 0.30)
+		stone = stone.lerp(mortar, 0.30)
+	if int((x * 11 + y * 3 + row * 7) % 37) < 3:
+		stone = stone.lerp(highlight, 0.18)
 	return stone
 
 func wall_normal_texel(_texture_id: String, x: int, y: int, palette: Dictionary = {}) -> Color:
@@ -318,7 +342,8 @@ func wall_detail_height(x: int, y: int, _palette: Dictionary = {}) -> float:
 		return 0.26 + noise * 0.18
 	var chip := 0.18 if ((x * 5 + y * 7) % 31) == 0 else 0.0
 	var vein := 0.12 if ((x - y) % 19) == 0 else 0.0
-	return clampf(0.46 + noise * 0.32 + chip - vein, 0.0, 1.0)
+	var stratum := 0.08 if (y / 6) % 3 == 0 else 0.0
+	return clampf(0.46 + noise * 0.32 + chip + stratum - vein, 0.0, 1.0)
 
 func biome_palette_for_level(level: int) -> Dictionary:
 	var depth: int = abs(level)

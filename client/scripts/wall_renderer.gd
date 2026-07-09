@@ -145,8 +145,6 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 			return _make_rock_node(wall)
 		"column":
 			return _make_column_node(wall)
-		"rubble":
-			return _make_rubble_node(wall)
 		"wood":
 			return _make_wood_palisade_node(wall)
 	var wall_height := _wall_height()
@@ -322,30 +320,6 @@ func _make_column_node(wall: Dictionary) -> Node3D:
 		_add_mesh_child(root, "ColumnPillar_%d" % i, mesh, mat, local_pos)
 	return root
 
-func _make_rubble_node(wall: Dictionary) -> Node3D:
-	var size: Dictionary = wall.get("size", {})
-	var sx: float = maxf(0.5, float(size.get("x", 1.0)))
-	var sz: float = maxf(0.5, float(size.get("y", 1.0)))
-	var root: Node3D = _make_obstacle_root(wall, "Rubble", "rubble")
-	var mat: StandardMaterial3D = _make_obstacle_material(wall, "rubble")
-	var offsets: Array[Vector3] = [
-		Vector3(-sx * 0.26, 0.12, -sz * 0.18),
-		Vector3(sx * 0.22, 0.10, -sz * 0.10),
-		Vector3(-sx * 0.06, 0.16, sz * 0.08),
-		Vector3(sx * 0.28, 0.11, sz * 0.22),
-		Vector3(-sx * 0.30, 0.09, sz * 0.20),
-	]
-	for i in offsets.size():
-		var mesh: BoxMesh = BoxMesh.new()
-		var mesh_size := Vector3(
-			maxf(0.20, sx * (0.18 + float(i % 2) * 0.06)),
-			0.18 + float(i % 3) * 0.05,
-			maxf(0.20, sz * (0.14 + float(i % 2) * 0.05))
-		)
-		mesh.size = mesh_size
-		_add_mesh_child(root, "RubbleChunk_%d" % i, mesh, mat, offsets[i], float(i) * 0.48)
-	return root
-
 func _make_hole_node(wall: Dictionary) -> MeshInstance3D:
 	var pos: Dictionary = wall.get("position", {})
 	var size: Dictionary = wall.get("size", {})
@@ -362,12 +336,12 @@ func _make_hole_node(wall: Dictionary) -> MeshInstance3D:
 	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
 	if _ground_factory != null and _ground_factory.has_method("make_hole_texture"):
 		mat.albedo_texture = _ground_factory.make_hole_texture(palette)
-	mat.albedo_color = Color(0.74, 0.70, 0.65)
+	mat.albedo_color = _palette_color_from_dict(palette, "hole_edge", Color("#6a6258"))
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.roughness = 1.0
 	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 2.5), max(1.0, float(size.get("y", 1.0)) / 2.5), 1.0)
 	node.material_override = mat
-	_add_surface_overlay(node, "HoleParallaxBands", Vector2(mesh.size.x, mesh.size.y), Color("#353947"), 0.20, 0.018, 4)
+	_add_surface_overlay(node, "HoleParallaxBands", Vector2(mesh.size.x, mesh.size.y), _palette_color_from_dict(palette, "hole_crack", Color("#353947")), 0.16, 0.018, 3)
 	return node
 
 func _make_water_node(wall: Dictionary) -> MeshInstance3D:
@@ -386,12 +360,12 @@ func _make_water_node(wall: Dictionary) -> MeshInstance3D:
 	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
 	if _ground_factory != null and _ground_factory.has_method("make_water_texture"):
 		mat.albedo_texture = _ground_factory.make_water_texture(palette)
-	mat.albedo_color = Color(0.85, 0.96, 1.0)
+	mat.albedo_color = _palette_color_from_dict(palette, "water_high", Color("#85d8ea"))
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	mat.roughness = 0.82
+	mat.roughness = 0.70
 	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 3.0), max(1.0, float(size.get("y", 1.0)) / 3.0), 1.0)
 	node.material_override = mat
-	_add_surface_overlay(node, "WaterMotionBands", Vector2(mesh.size.x, mesh.size.y), Color("#b8eef5"), 0.28, 0.026, 5)
+	_add_surface_overlay(node, "WaterMotionBands", Vector2(mesh.size.x, mesh.size.y), _palette_color_from_dict(palette, "water_foam", Color("#b8eef5")), 0.24, 0.026, 4)
 	return node
 
 func _add_surface_overlay(parent: Node3D, overlay_name: String, size: Vector2, color: Color, alpha: float, y_offset: float, band_count: int) -> void:
@@ -419,6 +393,11 @@ func _surface_overlay_material(color: Color, alpha: float) -> StandardMaterial3D
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.no_depth_test = true
 	return mat
+
+func _palette_color_from_dict(palette: Dictionary, key: String, fallback: Color) -> Color:
+	if not palette.has(key):
+		return fallback
+	return Color(str(palette.get(key, "#" + fallback.to_html(false))))
 
 func _read_json(path: String):
 	var f := FileAccess.open(path, FileAccess.READ)

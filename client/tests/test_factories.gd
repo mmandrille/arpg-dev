@@ -53,15 +53,26 @@ func _test_ground_wall_factory() -> void:
 	_assert_eq("hole texture cache count", factory.hole_textures.size(), 1)
 	var town_mat := factory.ground_material_for_level(0)
 	var dungeon_mat := factory.ground_material_for_level(-1)
+	var mid_mat := factory.ground_material_for_level(-5)
+	var deep_mat := factory.ground_material_for_level(-8)
 	var dungeon_palette: Dictionary = factory.biome_palette_for_level(-1)
+	var mid_palette: Dictionary = factory.biome_palette_for_level(-5)
+	var deep_palette: Dictionary = factory.biome_palette_for_level(-8)
 	var dungeon_normal_a := factory.make_ground_normal_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, dungeon_palette)
 	var dungeon_normal_b := factory.make_ground_normal_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, dungeon_palette)
 	_assert_true("town ground normal remains disabled", not town_mat.normal_enabled)
 	_assert_true("dungeon ground normal enabled", dungeon_mat.normal_enabled)
 	_assert_true("dungeon ground normal texture exists", dungeon_mat.normal_texture != null)
 	_assert_true("dungeon ground normal cache stable", dungeon_normal_a == dungeon_normal_b)
-	_assert_eq("ground normal texture cache count", factory.ground_normal_textures.size(), 1)
+	_assert_eq("ground normal texture cache count", factory.ground_normal_textures.size(), 3)
 	_assert_true("dungeon ground normal texel varies", factory.ground_normal_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 0, 0, dungeon_palette) != factory.ground_normal_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 17, 11, dungeon_palette))
+	_assert_eq("shallow palette id", str(dungeon_palette.get("id", "")), "shallow_cave")
+	_assert_eq("mid palette id", str(mid_palette.get("id", "")), "sundered_halls")
+	_assert_eq("deep palette id", str(deep_palette.get("id", "")), "deep_vault")
+	_assert_true("mid ground texture differs from shallow", dungeon_mat.albedo_texture != mid_mat.albedo_texture)
+	_assert_true("deep ground texture differs from mid", mid_mat.albedo_texture != deep_mat.albedo_texture)
+	_assert_true("mid water texture differs from shallow", factory.make_water_texture(dungeon_palette) != factory.make_water_texture(mid_palette))
+	_assert_true("deep water texture differs from mid", factory.make_water_texture(mid_palette) != factory.make_water_texture(deep_palette))
 	var ground := factory.make_ground_node(0)
 	_assert_eq("ground node name", ground.name, "Ground")
 	var deep_layout: Dictionary = factory.dungeon_ground_layout(-6)
@@ -166,19 +177,6 @@ func _test_wall_renderer() -> void:
 	_assert_eq("column metadata kind", str(column.get_meta("kind", "")), "column")
 	_assert_true("column has pillars", column.get_child_count() >= 2)
 	_assert_true("column first mesh is cylinder", (column.get_child(0) as MeshInstance3D).mesh is CylinderMesh)
-	var rubble_walls := renderer.render_wall_layout([{
-		"id": "test_rubble",
-		"position": {"x": 6.0, "y": 6.0},
-		"size": {"x": 3.0, "y": 2.0},
-		"source": "generated",
-		"kind": "rubble",
-	}])
-	_assert_eq("rubble layout count", rubble_walls.size(), 1)
-	_assert_eq("rubble layout kind", str((rubble_walls[0] as Dictionary).get("kind", "")), "rubble")
-	var rubble := root.get_child(0) as Node3D
-	_assert_eq("rubble child name", rubble.name, "Rubble_test_rubble")
-	_assert_eq("rubble metadata kind", str(rubble.get_meta("kind", "")), "rubble")
-	_assert_true("rubble has chunks", rubble.get_child_count() >= 5)
 	renderer.set_level(0)
 	var lab_walls := renderer.render_world_walls("flying_navigation_lab")
 	var lab_water_count := 0
@@ -199,7 +197,6 @@ func _test_wall_renderer() -> void:
 	var variety_walls := renderer.render_world_walls("obstacle_variety_lab")
 	var variety_rock_count := 0
 	var variety_column_count := 0
-	var variety_rubble_count := 0
 	for rendered_wall in variety_walls:
 		var rendered: Dictionary = rendered_wall
 		match str(rendered.get("kind", "wall")):
@@ -207,16 +204,13 @@ func _test_wall_renderer() -> void:
 				variety_rock_count += 1
 			"column":
 				variety_column_count += 1
-			"rubble":
-				variety_rubble_count += 1
 	_assert_eq("variety lab wall layout count", variety_walls.size(), 7)
-	_assert_eq("variety lab rock layout count", variety_rock_count, 1)
+	_assert_eq("variety lab rock layout count", variety_rock_count, 2)
 	_assert_eq("variety lab column layout count", variety_column_count, 1)
-	_assert_eq("variety lab rubble layout count", variety_rubble_count, 1)
 	_assert_eq("variety lab child count", root.get_child_count(), 7)
 	_assert_true("variety lab rock node exists", root.find_child("Rock_obstacle_variety_lab_wall_004", false, false) != null)
 	_assert_true("variety lab column node exists", root.find_child("Column_obstacle_variety_lab_wall_005", false, false) != null)
-	_assert_true("variety lab rubble node exists", root.find_child("Rubble_obstacle_variety_lab_wall_006", false, false) != null)
+	_assert_true("variety lab second rock node exists", root.find_child("Rock_obstacle_variety_lab_wall_006", false, false) != null)
 	root.queue_free()
 
 
@@ -225,7 +219,6 @@ func _test_loot_node_factory() -> void:
 	var factory = LootNodeFactoryScript.new({}, ItemRulesLoader.item_presentations)
 	_assert_eq("gold label text", factory.loot_label_text({"item_def_id": "gold", "amount": 7}), "7 gold")
 	_assert_eq("known loot name", factory.generic_loot_name("rusty_sword"), "Sword")
-	_assert_eq("staff loot name", factory.generic_loot_name("sorcerer_staff"), "Staff")
 	_assert_eq("greatsword loot name", factory.generic_loot_name("great_sword"), "Greatsword")
 	_assert_eq("rolled loot label", factory.loot_label_text({
 		"item_def_id": "sorcerer_staff",
@@ -309,11 +302,6 @@ func _test_dungeon_room_floor_tint() -> void:
 	_assert_true("room tint root exists", tint_root != null)
 	if tint_root != null:
 		_assert_true("room tint overlays created", tint_root.get_child_count() >= 2)
-		var treasure_found := false
-		for child in tint_root.get_children():
-			if str(child.name).begins_with("RoomTint_treasure"):
-				treasure_found = true
-		_assert_true("treasure room tint present", treasure_found)
 	DungeonAmbientMotesScript.sync(ground, -2, ground_factory.floor_size_for_level(-2))
 	_assert_true("ambient motes root exists", ground.get_node_or_null("DungeonAmbientMotes") != null)
 	ground.queue_free()

@@ -3,17 +3,15 @@
   "world_id": "obstacle_variety_lab",
   "seed": "v299_obstacle_variety_pack",
   "title": "Obstacle Variety Pack",
-  "description": "A player routes around rock, column, and rubble blockers to pick up loot while the client can replay all three obstacle visuals.",
+  "description": "A player routes around rock and column blockers to pick up loot while the client replays the simplified obstacle set.",
   "steps": [
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "rock", "at_least": 1 }, "timeout_s": 3 },
     { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "column", "at_least": 1 }, "timeout_s": 3 },
-    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "rubble", "at_least": 1 }, "timeout_s": 3 },
     { "action": "pick_up_loot", "item_def_id": "quest_leaf", "max_ticks": 400 }
   ],
   "assertions": [
     { "type": "wall_count", "kind": "rock", "at_least": 1 },
     { "type": "wall_count", "kind": "column", "at_least": 1 },
-    { "type": "wall_count", "kind": "rubble", "at_least": 1 },
     { "type": "resource_bag_count", "item_def_id": "quest_leaf", "equals": 1 }
   ],
   "visual": {

@@ -55,7 +55,7 @@ func _run() -> void:
 	panel.ensure_display_visible()
 	var state := panel.get_debug_state()
 	_assert_true("panel visible", bool(state.get("visible", false)))
-	_assert_eq("panel width includes passive column", int(panel._panel.custom_minimum_size.x), 720)
+	_assert_eq("panel width includes passive column", int(panel._panel.custom_minimum_size.x), int(SkillTreeLayoutScript.required_tree_width()))
 	_assert_eq("panel height is 30 percent larger", int(panel._panel.custom_minimum_size.y), 650)
 	var window: Dictionary = state.get("window", {})
 	_assert_eq("skills window title", str(window.get("title", "")), "Skills")

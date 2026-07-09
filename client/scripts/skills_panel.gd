@@ -17,7 +17,6 @@ const SKILL_ICON_SIZE := Vector2(62, 62)
 const SKILL_TREE_ORIGIN := Vector2(23, 70)
 const SKILL_TREE_SPACING := Vector2(96, 127)
 const SKILL_ACTIVE_TREE_WIDTH := 530.0
-const SKILL_TREE_WIDTH := 778.0
 const SKILL_TREE_VIEW_HEIGHT := 548.0
 const SKILL_TOOLTIP_SIZE := Vector2(218, 218)
 const SKILL_TOOLTIP_GAP := 8.0
@@ -421,10 +420,11 @@ func _sync_viewport_size() -> void:
 
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	var tree_width := _skill_tree_width()
 	_panel = DraggableWindowScript.new()
-	_panel.custom_minimum_size = Vector2(720, 650)
+	_panel.custom_minimum_size = Vector2(tree_width, 650)
 	_panel.position = Vector2(362, 118)
-	_panel.configure("Skills", Vector2(SKILL_TREE_WIDTH, 567))
+	_panel.configure("Skills", Vector2(tree_width, 567))
 	_panel.set_layout_key("skills")
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _panel_style())
@@ -433,17 +433,17 @@ func _build() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 12)
-	root.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, SKILL_TREE_VIEW_HEIGHT + 36.0)
+	root.custom_minimum_size = Vector2(tree_width, SKILL_TREE_VIEW_HEIGHT + 36.0)
 	_panel.set_content(root)
 
 	var tree := Control.new()
-	tree.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, SKILL_TREE_VIEW_HEIGHT)
+	tree.custom_minimum_size = Vector2(tree_width, SKILL_TREE_VIEW_HEIGHT)
 	tree.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(tree)
 
 	var backdrop := ColorRect.new()
 	backdrop.color = Color("#151617")
-	backdrop.custom_minimum_size = Vector2(SKILL_TREE_WIDTH, SKILL_TREE_VIEW_HEIGHT)
+	backdrop.custom_minimum_size = Vector2(tree_width, SKILL_TREE_VIEW_HEIGHT)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tree.add_child(backdrop)
 
@@ -623,7 +623,7 @@ func _position_tooltip_below_skill(skill_id: String) -> void:
 	var block := _skill_blocks.get(skill_id, null) as Control
 	if block == null:
 		return
-	var x := clampf(block.position.x, 0.0, maxf(0.0, SKILL_TREE_WIDTH - SKILL_TOOLTIP_SIZE.x))
+	var x := clampf(block.position.x, 0.0, maxf(0.0, _skill_tree_width() - SKILL_TOOLTIP_SIZE.x))
 	var y := block.position.y + SKILL_BLOCK_SIZE.y + SKILL_TOOLTIP_GAP
 	_tooltip.position = Vector2(x, y)
 
@@ -679,6 +679,10 @@ func _skill_is_visible(skill_id: String) -> bool:
 
 func _skill_block_position(skill_id: String) -> Vector2:
 	return SkillTreeLayoutScript.block_position(skill_id, SKILL_TREE_ORIGIN, SKILL_TREE_SPACING)
+
+
+func _skill_tree_width() -> float:
+	return SkillTreeLayoutScript.required_tree_width(SKILL_TREE_ORIGIN, SKILL_TREE_SPACING, SKILL_BLOCK_SIZE)
 
 
 func _tooltip_skill_id() -> String:

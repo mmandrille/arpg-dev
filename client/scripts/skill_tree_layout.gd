@@ -8,6 +8,8 @@ const DEFAULT_BLOCK_SIZE := Vector2(83, 83)
 const PASSIVE_DISPLAY_COLUMN_DEFAULT := 5
 const SURVIVAL_DISPLAY_COLUMN := 6
 const COMBAT_COLUMN_LIMIT := 8
+const TREE_RIGHT_PADDING := 16.0
+const DECUPLE_CLASS_IDS := ["barbarian", "paladin", "sorcerer", "ranger", "rogue"]
 
 static var _resolved_by_class: Dictionary = {}
 
@@ -27,6 +29,23 @@ static func block_center(skill_id: String, origin: Vector2 = DEFAULT_ORIGIN, spa
 	var pos := block_position(skill_id, origin, spacing)
 
 	return pos + block_size * 0.5
+
+
+static func required_tree_width(
+	origin: Vector2 = DEFAULT_ORIGIN,
+	spacing: Vector2 = DEFAULT_SPACING,
+	block_size: Vector2 = DEFAULT_BLOCK_SIZE,
+	right_padding: float = TREE_RIGHT_PADDING,
+) -> float:
+	SkillRulesLoader.ensure_loaded()
+	var max_right := 0.0
+	for class_id in DECUPLE_CLASS_IDS:
+		_resolve_class(class_id)
+		for skill_id in _class_skills(class_id):
+			var pos := block_position(str(skill_id), origin, spacing)
+			max_right = maxf(max_right, pos.x + block_size.x)
+
+	return max_right + right_padding
 
 
 static func resolved_tree(skill_id: String) -> Dictionary:

@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_test_ranger_prerequisite_columns()
 	_test_rogue_fan_column()
 	_test_no_false_stacks()
+	_test_required_tree_width_covers_all_blocks()
 	print("[gdtest] PASS: test_skill_tree_layout (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -46,6 +47,33 @@ func _test_rogue_fan_column() -> void:
 func _test_no_false_stacks() -> void:
 	for class_id in ["barbarian", "paladin", "sorcerer", "ranger", "rogue"]:
 		_assert_cross_branch_false_stacks_for_class(class_id)
+
+
+func _test_required_tree_width_covers_all_blocks() -> void:
+	var width := SkillTreeLayoutScript.required_tree_width()
+	_assert_true("required tree width covers paladin passives", width >= 970.0)
+	for class_id in ["barbarian", "paladin", "sorcerer", "ranger", "rogue"]:
+		_resolve_class_for_test(class_id)
+		for skill_id in _all_skill_ids_for_class(class_id):
+			var pos := SkillTreeLayoutScript.block_position(skill_id)
+			_assert_true(
+				"%s fits inside required tree width" % skill_id,
+				pos.x + 83.0 <= width,
+			)
+
+
+func _all_skill_ids_for_class(class_id: String) -> Array:
+	var out: Array = []
+	for raw_id in SkillRulesLoaderScript.skill_ids():
+		var skill_id := str(raw_id)
+		if str(SkillRulesLoaderScript.skill_definition(skill_id).get("class", "")) == class_id:
+			out.append(skill_id)
+
+	return out
+
+
+func _resolve_class_for_test(class_id: String) -> void:
+	SkillTreeLayoutScript.passive_display_column(class_id)
 
 
 func _tier1_roots_for_class(class_id: String) -> Array:

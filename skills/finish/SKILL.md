@@ -16,8 +16,8 @@ disable-model-invocation: true
 ## Hard rules
 
 1. **`make ci` must pass** before committing a standalone slice. No commit on red CI.
-   In `$autoloop` batch mode, commit each slice after adequate focused verification, and let
-   `$autoloop` run one final `make ci` after all requested slices are committed.
+   When `$finish` runs under `$autoloop`, run `make ci` before commit unless focused
+   verification already covered the changed surface and close-out edits introduce no new risk.
 2. **Update `PROGRESS.md`** if not already current — **Current status**, open gaps, review cadence.
    Update [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md) for the new row.
 3. **Commit message format is fixed:**
@@ -61,7 +61,7 @@ Read [`PROGRESS.md`](../../PROGRESS.md) and verify it reflects the shipped slice
 
 | Section | Action |
 |---------|--------|
-| **Current status** | `Latest completed slice` → vN; `Active branch` → feature branch or TBD; `CI gate` → date + green for standalone slices, or focused verification with final batch CI pending for `$autoloop`; `Next slice` → TBD |
+| **Current status** | `Latest completed slice` → vN; `Active branch` → feature branch or TBD; `CI gate` → date + green; `Next slice` → TBD |
 | **Slice lifecycle table** | Add/update row in [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md): Status = Complete after required verification, Spec + Plan links |
 | **As-built summary** | Add or update `docs/as-built/vN_<codename>.md`: what it proves, key decisions, scope limits |
 | **Open gaps & deferred work** | Update deferred/autoloop tables when spec non-goals change — **do not** add inline "Recently closed" prose to `PROGRESS.md` |
@@ -123,14 +123,12 @@ Use focused commands while iterating if helpful: `make validate-shared`, `make t
 
 **Evidence before commit:** confirm `make ci` succeeded in chat (brief summary or exit code 0).
 
-For `$autoloop` batch mode:
+For `$autoloop` mode:
 
-1. Confirm the slice's focused verification evidence from `$execute`.
-2. Run additional focused commands only if close-out changes create new risk.
-3. Do **not** run `make ci` for every slice when focused tests cover the changes. `$autoloop`
-   must run one final `make ci` after all requested slices are committed and fix minor batch
-   regressions there.
-4. Before committing, state that final CI is deferred to the autoloop batch gate.
+1. Confirm the slice's focused verification evidence from `$execute` when execute ran focused tests.
+2. Run `make ci` before commit unless focused verification already covered the changed surface and
+   close-out edits introduce no new risk; when in doubt, run `make ci`.
+3. Include CI fixes in the same commit if they belong to this slice.
 
 ## Phase 3 — Commit
 
@@ -174,8 +172,7 @@ Confirm clean working tree (or only intentional unstaged files). Report commit h
 Tell the user:
 
 1. Slice vN committed with message `feat: vN: …`.
-2. Verification evidence (`make ci` green for standalone finish, or focused commands with final
-   batch CI pending for `$autoloop`).
+2. Verification evidence (`make ci` green, or focused commands plus `make ci` when run under `$autoloop`).
 3. PROGRESS.md updated (list what changed).
 4. Suggested follow-ups:
    - `/next` to pick the following slice

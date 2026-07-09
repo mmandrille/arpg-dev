@@ -12,7 +12,7 @@ Canonical skill definitions for this repo. **Edit files here only** — tool-spe
 | [`review/`](review/SKILL.md) | `/review` or `$review` → write repo-wide engineering review docs |
 | [`showme/`](showme/SKILL.md) | `/showme` or `$showme` → focused screenshot/live preview; `--refresh` hot-reloads gear JSON while tuning; `make regen-screenshots` for batch visual regression |
 | [`3dmodel/`](3dmodel/SKILL.md) | `$3dmodel` → integrate supplied GLB/glTF models into the Godot client |
-| [`autoloop/`](autoloop/SKILL.md) | `$autoloop` → curate or accept feature/gameplay ideas, then run next/spec/plan/execute/finish for every viable slice the user selects |
+| [`autoloop/`](autoloop/SKILL.md) | `$autoloop` → complete one slice from the current session position (next/spec/plan/execute/finish) |
 | [`refactor/`](refactor/SKILL.md) | `$refactor` → scorecard-driven minor cleanup commits after a fresh review |
 
 ## Discovery paths

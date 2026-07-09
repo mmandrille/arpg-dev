@@ -17,9 +17,9 @@ disable-model-invocation: true
 
 1. **Do not start coding until the plan review passes** — unresolved gaps block implementation.
 2. **Follow the plan task order** unless a blocker forces a justified reorder (explain in chat).
-3. **`make ci` must pass** before claiming a standalone slice is done. In `$autoloop` batch mode,
-   use focused per-slice verification instead; `$autoloop` owns the single final `make ci` gate
-   after all requested slices are committed.
+3. **`make ci` must pass** before claiming a standalone slice is done. In `$autoloop` mode,
+   use focused per-slice verification during execute; `$finish` under autoloop runs `make ci`
+   before commit when the changed surface warrants it.
 4. **Do not create git commits** unless the user explicitly asks.
 5. **Do not skip bot scenarios** when the plan includes them.
 6. **Update checkbox status** in the plan file as tasks complete (`- [ ]` → `- [x]`).
@@ -44,7 +44,7 @@ Review the plan before touching code. Produce a short **Plan Review** in chat.
 |------|-------|
 | **Completeness** | File map covers all spec acceptance criteria. |
 | **Ordering** | Shared → server → bot → client → docs; no client-before-server for authoritative behavior. |
-| **Verify commands** | Each task has runnable commands; standalone final verification includes `make ci`. In `$autoloop` batch mode, the plan must identify focused per-slice verification and leave the batch-level `make ci` to `$autoloop`. |
+| **Verify commands** | Each task has runnable commands; standalone final verification includes `make ci`. In `$autoloop` mode, the plan must identify focused per-slice verification; `$finish` owns final `make ci` when needed. |
 | **Bot proof** | Gameplay/protocol tasks include scenario JSON + `make bot`. |
 | **Golden/contracts** | Shared changes have `make validate-shared`; golden lists Go + GDScript tests. |
 | **Branch** | Work only on the current checkout; never create or switch branches. |
@@ -115,19 +115,19 @@ make ci
 
 If `make ci` fails, fix and re-run until green. Use focused commands while iterating (`make validate-shared`, `make test-go`, `make bot`, `make client-unit`).
 
-### `$autoloop` batch-mode gate
+### `$autoloop` mode gate
 
-When this execute pass is running under `$autoloop`, do not run `make ci` per slice unless the
-slice is unusually broad, focused verification cannot cover the risk, or the user explicitly asked
-for per-slice CI. Instead:
+When this execute pass is running under `$autoloop`, prefer focused per-slice verification
+instead of `make ci` unless the slice is unusually broad, focused verification cannot cover the
+risk, or the user explicitly asked for per-slice CI. Instead:
 
 1. Run the smallest sufficient focused command set for the touched areas.
 2. Include `make maintainability` when source/test/tool files were added, moved, or meaningfully
    changed.
 3. Run named bot/client scenarios when gameplay, protocol, or presentation behavior is in scope.
-4. Record the exact focused commands and results so `$autoloop` can report them after commit.
+4. Record the exact focused commands and results so `$autoloop` can report them at finish.
 
-The enclosing `$autoloop` must run one final `make ci` after all requested slices are committed.
+`$finish` under autoloop runs `make ci` before commit when the changed surface warrants it.
 
 **Evidence before claims:** paste or summarize command output showing success before reporting completion.
 
@@ -142,7 +142,7 @@ When the required verification is green:
 4. Report to user:
    - What was implemented (concise).
    - Verification evidence (`make ci` green for standalone execution, or focused command results
-     for `$autoloop` batch mode).
+     for `$autoloop` mode).
    - Suggested manual check from plan (e.g. `make play`) if any.
    - Reminder: commits only when they ask.
 

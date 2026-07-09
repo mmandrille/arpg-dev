@@ -34,6 +34,28 @@ func TestResolvePotionDropKindDistribution(t *testing.T) {
 	}
 }
 
+func TestTreasureClassPotionDropVariety(t *testing.T) {
+	rules := loadRules(t)
+	counts := map[string]int{}
+	for seed := uint64(0); seed < 5000; seed++ {
+		for _, drop := range rules.RollTreasureClass("dungeon_mob_tc_1", NewRNG(seed)) {
+			switch drop.ItemDefID {
+			case "red_potion", "blue_potion", RejuvPotionItemDefID:
+				counts[drop.ItemDefID]++
+			}
+		}
+	}
+	if counts["red_potion"] < 50 {
+		t.Fatalf("red potion drops = %d, want healthy health potion share; counts=%+v", counts["red_potion"], counts)
+	}
+	if counts[RejuvPotionItemDefID] < 20 {
+		t.Fatalf("rejuv potion drops = %d, want non-trivial rejuv share; counts=%+v", counts[RejuvPotionItemDefID], counts)
+	}
+	if counts["blue_potion"] < 50 {
+		t.Fatalf("blue potion drops = %d, want healthy mana potion share; counts=%+v", counts["blue_potion"], counts)
+	}
+}
+
 func TestPotionShopBuyPriceScalesWithLevel(t *testing.T) {
 	rules := loadRules(t)
 	if got := rules.PotionShopBuyPrice("red_potion", 10, 5); got != 400 {

@@ -2082,13 +2082,16 @@ func (r *Rules) RollTreasureClass(classID string, rng *RNG) []LootDrop {
 		if totalEntries <= 0 {
 			continue
 		}
-		roll := rng.IntN(totalEntries)
+		combinedRoll := rng.IntN(totalEntries * 100)
+		entryRoll := combinedRoll / 100
+		bandRoll := combinedRoll % 100
+		roll := entryRoll
 		for _, entry := range attempt.Entries {
 			roll -= entry.Weight
 			if roll < 0 {
 				itemDefID := entry.ItemDefID
 				if itemDefID == "red_potion" || itemDefID == "blue_potion" {
-					itemDefID = r.resolvePotionDropKindFromRoll(itemDefID, roll)
+					itemDefID = r.resolvePotionDropKindFromRoll(itemDefID, bandRoll)
 				}
 				out = append(out, LootDrop{ItemDefID: itemDefID, ItemTemplateID: entry.ItemTemplateID, UniqueItemID: entry.UniqueItemID, SetItemID: entry.SetItemID})
 				break

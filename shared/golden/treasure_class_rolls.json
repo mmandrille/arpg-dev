@@ -6,7 +6,7 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_5",
       "expected_drops": [
         {
-          "item_template_id": "gloves"
+          "item_template_id": "dagger"
         }
       ]
     },
@@ -15,7 +15,7 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_13",
       "expected_drops": [
         {
-          "item_template_id": "boots"
+          "item_template_id": "morningstar"
         }
       ]
     },
@@ -27,7 +27,7 @@
           "item_def_id": "blue_potion"
         },
         {
-          "item_template_id": "great_sword"
+          "item_def_id": "red_potion"
         }
       ]
     },
@@ -36,10 +36,10 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_4",
       "expected_drops": [
         {
-          "item_template_id": "gloves"
+          "item_template_id": "amulet"
         },
         {
-          "item_template_id": "mail"
+          "item_def_id": "gold"
         }
       ]
     },
@@ -48,10 +48,10 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_8",
       "expected_drops": [
         {
-          "item_template_id": "ring"
+          "item_template_id": "war_girdle"
         },
         {
-          "item_template_id": "hammer"
+          "item_template_id": "short_spear"
         }
       ]
     },
@@ -60,10 +60,10 @@
       "seed": "v29_guarded_chest_tc_depth_3_plus_14",
       "expected_drops": [
         {
-          "item_template_id": "amulet"
+          "item_def_id": "gold"
         },
         {
-          "item_template_id": "mace"
+          "item_def_id": "gold"
         }
       ]
     }

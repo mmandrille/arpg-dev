@@ -172,6 +172,25 @@ func TestShopDeltasAreActorScoped(t *testing.T) {
 	}
 }
 
+func TestResourceBagDeltasAreActorScoped(t *testing.T) {
+	actorID := uint64(1001)
+	otherID := uint64(1002)
+	changes := []game.Change{
+		{Op: game.OpResourceBagItemAdd, OwnerPlayerID: actorID, StashItem: &game.StashItemView{StashItemID: "9001", ItemDefID: "quest_leaf"}},
+		{Op: game.OpResourceBagItemRemove, OwnerPlayerID: actorID, StashItemID: "9002"},
+		{Op: game.OpEntityUpdate, Entity: &game.EntityView{ID: "3001", Type: "monster"}},
+	}
+
+	actorChanges := filterChangesForClient(changes, actorID, actorID)
+	if len(actorChanges) != 3 {
+		t.Fatalf("actor changes = %d, want 3: %+v", len(actorChanges), actorChanges)
+	}
+	otherChanges := filterChangesForClient(changes, actorID, otherID)
+	if len(otherChanges) != 1 || otherChanges[0].Op != game.OpEntityUpdate {
+		t.Fatalf("other changes = %+v, want only public entity update", otherChanges)
+	}
+}
+
 func TestProgressionDeltasUseExplicitOwner(t *testing.T) {
 	actorID := uint64(1001)
 	ownerID := uint64(1002)

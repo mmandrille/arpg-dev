@@ -55,7 +55,7 @@ func (s *Sim) resourceBagItemViews() []StashItemView {
 	return out
 }
 
-func (s *Sim) grantResourceBagItem(itemDefID string, payload *ItemRollPayload, questSourceDepth int, res *TickResult) *stashItem {
+func (s *Sim) grantResourceBagItem(playerID uint64, itemDefID string, payload *ItemRollPayload, questSourceDepth int, res *TickResult) *stashItem {
 	bagItemID := s.alloc()
 	stored := &stashItem{
 		stashItemID: bagItemID,
@@ -64,8 +64,9 @@ func (s *Sim) grantResourceBagItem(itemDefID string, payload *ItemRollPayload, q
 	}
 	s.resourceBagItems = append(s.resourceBagItems, stored)
 	res.Changes = append(res.Changes, Change{
-		Op:        OpResourceBagItemAdd,
-		StashItem: ptrStashItemView(s.stashItemView(stored)),
+		Op:            OpResourceBagItemAdd,
+		OwnerPlayerID: playerID,
+		StashItem:     ptrStashItemView(s.stashItemView(stored)),
 	})
 
 	return stored
@@ -99,7 +100,7 @@ func (s *Sim) pickUpResourceBagItemForPlayer(e *entity, playerID uint64, correla
 			questDepth = hunt.SourceDepth
 		}
 	}
-	stored := s.grantResourceBagItem(e.itemDefID, e.rollPayload, questDepth, res)
+	stored := s.grantResourceBagItem(playerID, e.itemDefID, e.rollPayload, questDepth, res)
 	delete(level.entities, e.id)
 	res.Changes = append(res.Changes, Change{Op: OpEntityRemove, EntityID: idStr(e.id)})
 	res.Events = append(res.Events, Event{
@@ -166,7 +167,7 @@ func (s *Sim) handleResourceBagDepositItem(in Input, res *TickResult) {
 	s.resourceBagItems = append(s.resourceBagItems, deposited)
 	res.Changes = append(res.Changes,
 		Change{Op: OpInventoryRemove, ItemInstanceID: &removedID, StashTransferID: transferID},
-		Change{Op: OpResourceBagItemAdd, StashItem: ptrStashItemView(s.stashItemView(deposited)), StashTransferID: transferID},
+		Change{Op: OpResourceBagItemAdd, OwnerPlayerID: s.playerID, StashItem: ptrStashItemView(s.stashItemView(deposited)), StashTransferID: transferID},
 	)
 	res.Events = append(res.Events, Event{
 		EventType:      "resource_bag_item_deposited",
@@ -209,7 +210,7 @@ func (s *Sim) handleResourceBagDepositStashItem(in Input, res *TickResult) {
 	s.resourceBagItems = append(s.resourceBagItems, deposited)
 	res.Changes = append(res.Changes,
 		Change{Op: OpStashItemRemove, StashItemID: sourceStashItemID, StashTransferID: transferID},
-		Change{Op: OpResourceBagItemAdd, StashItem: ptrStashItemView(s.stashItemView(deposited)), StashTransferID: transferID},
+		Change{Op: OpResourceBagItemAdd, OwnerPlayerID: s.playerID, StashItem: ptrStashItemView(s.stashItemView(deposited)), StashTransferID: transferID},
 	)
 	res.Events = append(res.Events, Event{
 		EventType:     "resource_bag_stash_item_deposited",
@@ -247,7 +248,7 @@ func (s *Sim) handleResourceBagWithdrawItem(in Input, res *TickResult) {
 	s.removeResourceBagItemByID(stored.stashItemID)
 	s.inventory = append(s.inventory, item)
 	res.Changes = append(res.Changes,
-		Change{Op: OpResourceBagItemRemove, StashItemID: bagItemID, StashTransferID: transferID},
+		Change{Op: OpResourceBagItemRemove, OwnerPlayerID: s.playerID, StashItemID: bagItemID, StashTransferID: transferID},
 		Change{Op: OpInventoryAdd, Item: ptrItemView(s.itemView(item)), StashTransferID: transferID},
 	)
 	res.Events = append(res.Events, Event{
@@ -294,7 +295,7 @@ func (s *Sim) handleStashDepositResourceBagItem(in Input, res *TickResult) {
 	s.removeResourceBagItemByID(stored.stashItemID)
 	s.stashItems = append(s.stashItems, deposited)
 	res.Changes = append(res.Changes,
-		Change{Op: OpResourceBagItemRemove, StashItemID: sourceBagItemID, StashTransferID: transferID},
+		Change{Op: OpResourceBagItemRemove, OwnerPlayerID: s.playerID, StashItemID: sourceBagItemID, StashTransferID: transferID},
 		Change{Op: OpStashItemAdd, StashItem: ptrStashItemView(s.stashItemView(deposited)), StashTransferID: transferID},
 	)
 	res.Events = append(res.Events, Event{

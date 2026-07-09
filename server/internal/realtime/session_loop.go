@@ -632,7 +632,8 @@ func filterChangesForClient(changes []game.Change, actorPlayerID, clientPlayerID
 			game.OpEquippedUpdate, game.OpHotbarUpdate, game.OpTeleporterDiscoveryUpdate,
 			game.OpGoldUpdate, game.OpCharacterProgressionUpdate, game.OpSkillProgressionUpdate,
 			game.OpShopStockReplace, game.OpShopStockAvailability,
-			game.OpStashItemAdd, game.OpStashItemRemove, game.OpStashGoldUpdate, game.OpResourceWalletUpdate:
+			game.OpStashItemAdd, game.OpStashItemRemove, game.OpStashGoldUpdate, game.OpResourceWalletUpdate,
+			game.OpResourceBagItemAdd, game.OpResourceBagItemRemove:
 			ownerPlayerID := actorPlayerID
 			if change.OwnerPlayerID != 0 {
 				ownerPlayerID = change.OwnerPlayerID

@@ -35,7 +35,7 @@ func (s *Sim) turnInTownQuest(giver *entity, in Input, res *TickResult, ack bool
 	s.gold += rewardGold
 	s.progression.Gold = s.gold
 
-	res.Changes = append(res.Changes, Change{Op: OpResourceBagItemRemove, StashItemID: removedID})
+	res.Changes = append(res.Changes, Change{Op: OpResourceBagItemRemove, OwnerPlayerID: s.playerID, StashItemID: removedID})
 	res.Changes = append(res.Changes, Change{Op: OpGoldUpdate, Gold: intPtr(s.gold)})
 	s.appendCharacterProgressionUpdate(res)
 	res.Events = append(res.Events, Event{

@@ -125,7 +125,7 @@ func (s *Sim) grantUpgradeShardItemForPlayer(playerID uint64, depth int, source 
 	}
 
 	level := RollItemLevel(s.rng, depth, s.rules.DungeonGeneration.ItemLevelTiers)
-	stored := s.grantResourceBagItem(UpgradeShardItemDefID, NewUpgradeShardRollPayload(level), 0, res)
+	stored := s.grantResourceBagItem(playerID, UpgradeShardItemDefID, NewUpgradeShardRollPayload(level), 0, res)
 	res.Events = append(res.Events, Event{
 		EventType:      "item_picked_up",
 		EntityID:       idStr(playerID),

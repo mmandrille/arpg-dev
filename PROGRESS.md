@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-08 (v460 leveled potions)
+Last updated: 2026-07-08 (v460 engineering review)
 
 ---
 
@@ -24,9 +24,9 @@ Last updated: 2026-07-08 (v460 leveled potions)
 | Field | Value |
 |-------|-------|
 | **Latest completed slice** | v460 — leveled potions |
-| **Next slice** | v461 TBD or v458 engineering review (`$review`, then `$refactor`) |
-| **Last engineering review** | v448 — [`docs/reviews/20260707_v448-overview.md`](docs/reviews/20260707_v448-overview.md) (2026-07-07; official cadence) |
-| **Next engineering review** | ~v458 — run `$review` then `$refactor` after next ~10-slice milestone |
+| **Next slice** | v461 TBD |
+| **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
+| **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 
 
 ### Periodic engineering reviews
@@ -85,8 +85,12 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v408 `$review` complete (official cadence at `ffdd3f0b`).** Overview:
-  [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md). Pre-refactor `make ci-full` failed step 1 (`character_stats_panel.gd` ratchet breach) — **fixed in `$refactor`** via `character_stats_breakdown.gd` extraction. Re-run `make ci-full` to confirm full matrix.
+- **v460 `$review` complete (official cadence at `e75e64d0`).** Overview:
+  [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md). Run `$refactor` for minor paydown (resource-bag co-op filter, status-effects validate_shared, leveled-potion golden, `PotionIconLabel` rules-driven fix).
+- **v448 `$review` (superseded by v460).** Overview:
+  [`docs/reviews/20260707_v448-overview.md`](docs/reviews/20260707_v448-overview.md).
+- **v408 `$review` (superseded by v448).** Overview:
+  [`docs/reviews/20260702_v408-overview.md`](docs/reviews/20260702_v408-overview.md). Pre-refactor `make ci-full` failed step 1 (`character_stats_panel.gd` ratchet breach) — **fixed in `$refactor`** via `character_stats_breakdown.gd` extraction.
 - **v398 `$review` (superseded by v408).** Overview:
   [`docs/reviews/20260701_v398-overview.md`](docs/reviews/20260701_v398-overview.md). Protocol ci-full green; 19 client extended failures fixed in prior `$refactor`.
 - **v384 `$review` (superseded by v398).** Overview:

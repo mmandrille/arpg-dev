@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_test_controller_isometric_projection()
 	_test_controller_late_settings_mode_sync()
 	_test_controller_isometric_follow_damps_with_fixed_orientation()
+	_test_controller_isometric_follow_tracks_rendered_visual()
 	_test_settings_panel_camera_mode_button_sync()
 	_test_controller_isometric_mouse_capture_policy()
 	_test_loader_isometric_follow_damping_config()
@@ -154,6 +155,26 @@ func _test_controller_isometric_follow_damps_with_fixed_orientation() -> void:
 	CameraPresentationsLoaderScript.reset_for_tests()
 
 
+func _test_controller_isometric_follow_tracks_rendered_visual() -> void:
+	CameraPresentationsLoaderScript.reset_for_tests()
+	var ctrl := PlayerCameraControllerScript.new()
+	var root := Node3D.new()
+	get_root().add_child(root)
+	var anchor := Node3D.new()
+	root.add_child(anchor)
+	var visual := Node3D.new()
+	anchor.add_child(visual)
+	var ctx := PlayerCameraContextScript.make(anchor, visual, null, Callable())
+	ctrl.setup(ctx, root)
+	anchor.position = Vector3(10.0, 0.0, 0.0)
+	visual.position = Vector3(-0.5, 0.0, 0.0)
+	ctrl.tick_follow(10.0)
+	var cam := ctrl.get_gameplay_camera()
+	_assert_approx("rendered visual biases isometric follow target", cam.global_position.x, 18.5, 0.02)
+	root.queue_free()
+	CameraPresentationsLoaderScript.reset_for_tests()
+
+
 func _test_settings_panel_camera_mode_button_sync() -> void:
 	# Verify SettingsPanel.set_camera_mode() button sync for both modes.
 	# Headless state-mutation test: create button dict, call set_camera_mode(),
@@ -229,3 +250,11 @@ func _assert_true(label: String, value: bool) -> void:
 	else:
 		_fail_count += 1
 		push_error("[gdtest] FAIL %s" % label)
+
+
+func _assert_approx(label: String, got: float, expected: float, tolerance: float) -> void:
+	if absf(got - expected) <= tolerance:
+		_pass_count += 1
+	else:
+		_fail_count += 1
+		push_error("[gdtest] FAIL %s: expected≈%s got=%s tol=%s" % [label, str(expected), str(got), str(tolerance)])

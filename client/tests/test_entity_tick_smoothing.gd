@@ -2,6 +2,7 @@
 extends SceneTree
 
 const EntityTickSmoothingScript := preload("res://scripts/entity_tick_smoothing.gd")
+const EntityTickSmoothingRuntimeScript := preload("res://scripts/entity_tick_smoothing_runtime.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -12,6 +13,8 @@ func _initialize() -> void:
 	_test_large_delta_snaps()
 	_test_advance_settles()
 	_test_adaptive_segment_duration()
+	_test_remote_adaptive_runtime_clamps_to_min()
+	_test_remote_adaptive_runtime_clamps_to_max()
 
 	print("[gdtest] PASS: test_entity_tick_smoothing (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -52,6 +55,34 @@ func _test_adaptive_segment_duration() -> void:
 	smoothing.begin_segment(Vector3(1.0, 0.0, 0.0), Vector3.ZERO, 0.12)
 	var debug := smoothing.get_debug_state()
 	_assert_approx("adaptive duration applied", float(debug.get("segment_duration", 0.0)), 0.12, 0.001)
+
+
+func _test_remote_adaptive_runtime_clamps_to_min() -> void:
+	var runtime := EntityTickSmoothingRuntimeScript.new()
+	var rec := {"type": "monster"}
+	var node := Node3D.new()
+	node.position = Vector3.ZERO
+	runtime.apply_entity_authoritative(rec, node, Vector3(0.5, 0.0, 0.0), false, true)
+	var smoothing = rec.get("tick_smoothing") as EntityTickSmoothing
+	_assert_true("remote adaptive creates smoothing", smoothing != null)
+	if smoothing != null:
+		var debug := smoothing.get_debug_state()
+		_assert_approx("remote adaptive min duration", float(debug.get("segment_duration", 0.0)), 0.11, 0.001)
+	node.free()
+
+
+func _test_remote_adaptive_runtime_clamps_to_max() -> void:
+	var runtime := EntityTickSmoothingRuntimeScript.new()
+	var rec := {"type": "monster"}
+	var node := Node3D.new()
+	node.position = Vector3.ZERO
+	runtime.apply_entity_authoritative(rec, node, Vector3(1.2, 0.0, 0.0), false, true)
+	var smoothing = rec.get("tick_smoothing") as EntityTickSmoothing
+	_assert_true("remote adaptive creates smoothing at max distance", smoothing != null)
+	if smoothing != null:
+		var debug := smoothing.get_debug_state()
+		_assert_approx("remote adaptive max duration", float(debug.get("segment_duration", 0.0)), 0.18, 0.001)
+	node.free()
 
 
 func _assert_true(label: String, value: bool) -> void:

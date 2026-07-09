@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v461** | `entity-locomotion-polish` | Complete (autoloop focused verification) | [`spec`](../specs/v461_spec-entity-locomotion-polish.md) | [`plan`](../plans/v461_2026-07-09-entity-locomotion-polish.md) | [`as-built`](../as-built/v461_entity-locomotion-polish.md) |
 | **v457** | `live-combat-transport-stability` | Complete (`make ci` green) | [`spec`](../specs/v457_spec-live-combat-transport-stability.md) | [`plan`](../plans/v457_2026-07-08-live-combat-transport-stability.md) | [`as-built`](../as-built/v457_live-combat-transport-stability.md) |
 | **v459** | `skill-ground-aim` | Complete (autoloop focused verification) | [`spec`](../specs/v459_spec-skill-ground-aim.md) | [`plan`](../plans/v459_2026-07-08-skill-ground-aim.md) | [`as-built`](../as-built/v459_skill-ground-aim.md) |
 | **v460** | `leveled-potions` | Complete (autoloop focused verification) | [`spec`](../specs/v460_spec-leveled-potions.md) | [`plan`](../plans/v460_2026-07-08-leveled-potions.md) | [`as-built`](../as-built/v460_leveled-potions.md) |

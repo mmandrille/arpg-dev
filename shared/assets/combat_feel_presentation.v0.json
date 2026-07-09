@@ -3,8 +3,8 @@
   "input_buffer_seconds": 0.45,
   "command_retarget_grace_seconds": 0.22,
   "movement_smoothing": {
-    "catch_up_speed": 18.0,
-    "max_offset": 0.7,
+    "catch_up_speed": 14.0,
+    "max_offset": 0.8,
     "reset_distance": 1.5,
     "settle_epsilon": 0.01
   },

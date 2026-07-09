@@ -249,8 +249,7 @@ func _setup_chest_view() -> void:
 
 
 func _sync_isometric(delta: float, snap: bool) -> void:
-	var anchor := _ctx.player_anchor as Node3D
-	var target: Vector3 = anchor.global_position if anchor != null else Vector3.ZERO
+	var target := _isometric_follow_target()
 	var desired: Vector3 = target + _iso_offset + CameraImpactFeedbackScript.get_offset()
 	var damping: float = float(_cfg.get("follow_damping_seconds", 0.0))
 	if snap or damping <= 0.0 or not _follow_initialized:
@@ -260,6 +259,19 @@ func _sync_isometric(delta: float, snap: bool) -> void:
 		var alpha := 1.0 - exp(-maxf(delta, 0.0) / damping)
 		_camera.global_position = _camera.global_position.lerp(desired, alpha)
 	_camera.look_at(_camera.global_position - _iso_offset, Vector3.UP)
+
+
+func _isometric_follow_target() -> Vector3:
+	var anchor := _ctx.player_anchor as Node3D
+	if anchor == null:
+		return Vector3.ZERO
+	var target := anchor.global_position
+	var visual := _ctx.character_visual as Node3D
+	# Follow the rendered hero for routine isometric locomotion so camera damping does not
+	# exaggerate the difference between the authoritative anchor and the smoothed visual child.
+	if visual != null and is_instance_valid(visual):
+		target = visual.global_position
+	return target
 
 
 func _sync_chest_view() -> void:

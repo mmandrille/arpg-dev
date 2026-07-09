@@ -13,7 +13,7 @@
       "pitch_min_degrees": -90.0,
       "pitch_max_degrees": -90.0,
       "reticle_enabled": false,
-      "follow_damping_seconds": 0.12
+      "follow_damping_seconds": 0.16
     },
     "chest_view": {
       "projection": "perspective",

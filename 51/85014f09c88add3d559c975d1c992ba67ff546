@@ -1,0 +1,30 @@
+client/scripts/item_tooltip_stat_sections.gd
+  s_59f059aa58769a::t_f8ba02cce47276 14
+client/tests/test_shop_panel.gd
+  s_59f059aa58769a::t_76453054543d6c 270-279
+  s_59f059aa58769a::t_f8ba02cce47276 261,269
+client/scripts/stat_labels.gd
+  s_59f059aa58769a::t_f8ba02cce47276 35-38
+client/scripts/inventory_panel.gd
+  s_59f059aa58769a::t_f8ba02cce47276 1127,1131,1147
+client/scripts/character_stats_breakdown.gd
+  s_59f059aa58769a::t_f8ba02cce47276 130,153,163-168
+client/tests/test_character_stats_panel.gd
+  s_59f059aa58769a::t_f8ba02cce47276 192-193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5185014f09c88add3d559c975d1c992ba67ff546",
+  "prompts": {},
+  "sessions": {
+    "s_59f059aa58769a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f44d3-494b-73a0-8c62-a18ff4ee856c",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

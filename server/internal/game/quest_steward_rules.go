@@ -60,10 +60,18 @@ type questStewardOffer struct {
 }
 
 type questStewardOffersState struct {
-	GiverEntityID    uint64
-	TrophyInstanceID uint64
-	SourceDepth      int
-	Offers           []questStewardOffer
+	GiverEntityID        uint64
+	TrophyInstanceID     uint64
+	TrophyFromResourceBag bool
+	SourceDepth          int
+	Offers               []questStewardOffer
+}
+
+type questTurnInTrophyRef struct {
+	instanceID  uint64
+	itemDefID   string
+	sourceDepth int
+	fromBag     bool
 }
 
 func loadQuestStewardRules(dir string, r *Rules) error {

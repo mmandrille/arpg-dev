@@ -69,26 +69,91 @@ func (s *Sim) maybeDropStewardHuntTrophy(monster *entity, corr string, res *Tick
 	s.spawnLootDrops(drops, monster.pos, s.targetInteractionRadius(monster), corr, res, goldRollContext{levelNum: level.levelNum})
 }
 
-func (s *Sim) firstQuestStewardTrophyItem() *invItem {
+func (s *Sim) questTurnInSourceDepth(depth int) int {
+	if depth > 0 {
+		return depth
+	}
+	if s.progression.DeepestDungeonDepth > 0 {
+		return s.progression.DeepestDungeonDepth
+	}
+
+	return 1
+}
+
+func (s *Sim) isQuestTurnInItemDef(itemDefID string) bool {
+	if itemDefID == "" {
+		return false
+	}
+	if _, ok := s.rules.questStewardTrophyForItem(itemDefID); ok {
+		return true
+	}
+
+	return itemDefID == s.rules.MainConfig.Gameplay.QuestTurnInItemDefID
+}
+
+func (s *Sim) countQuestTurnInItems() int {
+	count := 0
+	for _, item := range s.inventory {
+		if item != nil && s.isQuestTurnInItemDef(item.itemDefID) {
+			count++
+		}
+	}
+	for _, item := range s.resourceBagItems {
+		if item != nil && s.isQuestTurnInItemDef(item.itemDefID) {
+			count++
+		}
+	}
+
+	return count
+}
+
+func (s *Sim) firstQuestTurnInTrophy() *questTurnInTrophyRef {
 	for _, item := range s.inventory {
 		if item == nil {
 			continue
 		}
-		if _, ok := s.rules.questStewardTrophyForItem(item.itemDefID); ok && item.questSourceDepth > 0 {
-			return item
+		if _, ok := s.rules.questStewardTrophyForItem(item.itemDefID); !ok {
+			continue
+		}
+
+		return &questTurnInTrophyRef{
+			instanceID:  item.instanceID,
+			itemDefID:   item.itemDefID,
+			sourceDepth: s.questTurnInSourceDepth(item.questSourceDepth),
+			fromBag:     false,
+		}
+	}
+	for _, item := range s.resourceBagItems {
+		if item == nil {
+			continue
+		}
+		if _, ok := s.rules.questStewardTrophyForItem(item.itemDefID); !ok {
+			continue
+		}
+
+		return &questTurnInTrophyRef{
+			instanceID:  item.stashItemID,
+			itemDefID:   item.itemDefID,
+			sourceDepth: s.questTurnInSourceDepth(0),
+			fromBag:     true,
 		}
 	}
 
 	return nil
 }
 
-func (s *Sim) openQuestStewardOffers(giver *entity, trophy *invItem, in Input, res *TickResult, ack bool) {
-	offers := s.rollQuestStewardOffers(trophy.instanceID, trophy.questSourceDepth)
+func (s *Sim) openQuestStewardOffers(giver *entity, trophy *questTurnInTrophyRef, in Input, res *TickResult, ack bool) {
+	if trophy == nil {
+		res.reject(in.MessageID, "missing_quest_item")
+		return
+	}
+	offers := s.rollQuestStewardOffers(trophy.instanceID, trophy.sourceDepth)
 	s.pendingQuestStewardOffers = &questStewardOffersState{
-		GiverEntityID:    giver.id,
-		TrophyInstanceID: trophy.instanceID,
-		SourceDepth:      trophy.questSourceDepth,
-		Offers:           offers,
+		GiverEntityID:         giver.id,
+		TrophyInstanceID:      trophy.instanceID,
+		TrophyFromResourceBag: trophy.fromBag,
+		SourceDepth:           trophy.sourceDepth,
+		Offers:                offers,
 	}
 	offerViews := make([]QuestStewardOfferView, 0, len(offers))
 	for _, offer := range offers {
@@ -98,14 +163,31 @@ func (s *Sim) openQuestStewardOffers(giver *entity, trophy *invItem, in Input, r
 			Label:    offer.Label,
 		})
 	}
+	var trophyView ItemView
+	if trophy.fromBag {
+		bagItem := s.findResourceBagItem(idStr(trophy.instanceID))
+		if bagItem == nil {
+			res.reject(in.MessageID, "missing_quest_item")
+			return
+		}
+		trophyView = bagItem.previewItem().view()
+		trophyView.QuestSourceDepth = trophy.sourceDepth
+	} else {
+		invItem := s.inventoryItemByID(trophy.instanceID)
+		if invItem == nil {
+			res.reject(in.MessageID, "missing_quest_item")
+			return
+		}
+		trophyView = s.itemView(invItem)
+	}
 	res.Events = append(res.Events, Event{
-		EventType:        "quest_steward_offers_opened",
-		EntityID:         idStr(giver.id),
-		CorrelationID:    in.CorrelationID,
-		Service:          questTurnInService,
-		ItemInstanceID:   idStr(trophy.instanceID),
-		Item:             ptrItemView(s.itemView(trophy)),
-		SourceDepth:      intPtr(trophy.questSourceDepth),
+		EventType:          "quest_steward_offers_opened",
+		EntityID:           idStr(giver.id),
+		CorrelationID:      in.CorrelationID,
+		Service:            questTurnInService,
+		ItemInstanceID:     idStr(trophy.instanceID),
+		Item:               ptrItemView(trophyView),
+		SourceDepth:        intPtr(trophy.sourceDepth),
 		QuestStewardOffers: offerViews,
 	})
 	if ack {
@@ -144,22 +226,37 @@ func (s *Sim) handleQuestStewardPick(in Input, res *TickResult) {
 		res.reject(in.MessageID, "invalid_offer")
 		return
 	}
-	trophy := s.inventoryItemByID(pending.TrophyInstanceID)
-	if trophy == nil {
-		res.reject(in.MessageID, "missing_quest_item")
-		return
+	var removedID = idStr(pending.TrophyInstanceID)
+	if pending.TrophyFromResourceBag {
+		trophy := s.findResourceBagItem(idStr(pending.TrophyInstanceID))
+		if trophy == nil {
+			res.reject(in.MessageID, "missing_quest_item")
+			return
+		}
+		if _, ok := s.rules.questStewardTrophyForItem(trophy.itemDefID); !ok {
+			res.reject(in.MessageID, "missing_quest_item")
+			return
+		}
+		s.removeResourceBagItemByID(trophy.stashItemID)
+		res.Changes = append(res.Changes, Change{Op: OpResourceBagItemRemove, OwnerPlayerID: s.playerID, StashItemID: removedID})
+	} else {
+		trophy := s.inventoryItemByID(pending.TrophyInstanceID)
+		if trophy == nil {
+			res.reject(in.MessageID, "missing_quest_item")
+			return
+		}
+		if _, ok := s.rules.questStewardTrophyForItem(trophy.itemDefID); !ok {
+			res.reject(in.MessageID, "missing_quest_item")
+			return
+		}
+		s.removeItemByID(trophy.instanceID)
+		res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
 	}
-	if _, ok := s.rules.questStewardTrophyForItem(trophy.itemDefID); !ok {
-		res.reject(in.MessageID, "missing_quest_item")
-		return
-	}
-	payload, ok := s.rollQuestStewardReward(chosen.FamilyID, pending.SourceDepth, trophy.instanceID)
+	payload, ok := s.rollQuestStewardReward(chosen.FamilyID, pending.SourceDepth, pending.TrophyInstanceID)
 	if !ok || itemRarityRank(payload.Rarity) < itemRarityRank(s.rules.QuestSteward.HuntQuest.MinRarity) {
 		res.reject(in.MessageID, "reward_roll_failed")
 		return
 	}
-	removedID := idStr(trophy.instanceID)
-	s.removeItemByID(trophy.instanceID)
 	s.pendingQuestStewardOffers = nil
 	item := s.grantInventoryItem(payload.ItemTemplateID, &payload, s.itemSlot(payload.ItemTemplateID, &payload))
 	if item == nil {
@@ -167,7 +264,6 @@ func (s *Sim) handleQuestStewardPick(in Input, res *TickResult) {
 		return
 	}
 	itemView := s.itemView(item)
-	res.Changes = append(res.Changes, Change{Op: OpInventoryRemove, ItemInstanceID: &removedID})
 	res.Changes = append(res.Changes, Change{Op: OpInventoryAdd, Item: ptrItemView(itemView)})
 	res.Events = append(res.Events, Event{
 		EventType:      "quest_steward_reward_granted",

@@ -149,6 +149,18 @@ static func make_quest_giver_node() -> Node3D:
 	add_merchant_box(root, "QuestScroll", Vector3(0.46, 0.08, 0.26), Vector3(0.0, 0.61, 0.28), Color("#efe0bc"))
 	add_merchant_box(root, "QuestSeal", Vector3(0.14, 0.05, 0.15), Vector3(0.18, 0.61, 0.43), Color("#b93131"))
 	add_merchant_cylinder(root, "QuestMarker", 0.12, 0.08, Vector3(0.0, 1.76, 0.0), Color("#6ee68b"), true)
+	var reward_label := Label3D.new()
+	reward_label.name = "QuestRewardLabel"
+	reward_label.text = ""
+	reward_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	reward_label.font_size = 48
+	reward_label.modulate = Color("#e64545")
+	reward_label.outline_size = 10
+	reward_label.outline_modulate = Color("#1a0a0a")
+	reward_label.position = Vector3(0.0, 2.15, 0.0)
+	reward_label.pixel_size = 0.0045
+	reward_label.visible = false
+	root.add_child(reward_label)
 	return root
 
 static func make_market_board_node() -> Node3D:

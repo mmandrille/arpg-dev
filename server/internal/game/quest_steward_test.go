@@ -175,3 +175,77 @@ func TestQuestStewardRewardFamilyCanGrantNamedUnique(t *testing.T) {
 func TestQuestTurnInConsumesQuestLeafFromResourceBag(t *testing.T) {
 	TestQuestTurnInConsumesQuestItemAndRewardsGold(t)
 }
+
+func TestQuestStewardTrophyTurnInFromResourceBag(t *testing.T) {
+	seed, hunt := findStewardHuntSeedForTest(t, -1)
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_steward_bag_turn_in", seed, rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.progression.DeepestDungeonDepth = 3
+	bagItem := addTestResourceBagItem(sim, 44802, hunt.TrophyItemDefID)
+	giver := findInteractableByDefID(t, sim, "town_quest_giver")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: giver.pos.X - 0.5, Y: giver.pos.Y}
+
+	open := sim.Tick([]Input{{
+		MessageID:     "open_bag_offers",
+		CorrelationID: "corr_open_bag",
+		Type:          "action_intent",
+		Action:        &ActionIntent{TargetID: idStr(giver.id)},
+	}})
+	assertAck(t, open, "open_bag_offers")
+	offersEv := findEvent(open.Events, "quest_steward_offers_opened")
+	if offersEv == nil || len(offersEv.QuestStewardOffers) != rules.QuestSteward.HuntQuest.ChoiceCount {
+		t.Fatalf("quest_steward_offers_opened = %+v", offersEv)
+	}
+	if sim.findResourceBagItem(idStr(bagItem.stashItemID)) == nil {
+		t.Fatal("trophy should remain in resource bag until pick")
+	}
+	offerID := offersEv.QuestStewardOffers[0].OfferID
+	pick := sim.Tick([]Input{{
+		MessageID:     "pick_bag_reward",
+		CorrelationID: "corr_pick_bag",
+		Type:          "quest_steward_pick_intent",
+		QuestStewardPick: &QuestStewardPickIntent{
+			QuestGiverEntityID: idStr(giver.id),
+			OfferID:            offerID,
+		},
+	}})
+	assertAck(t, pick, "pick_bag_reward")
+	if sim.findResourceBagItem(idStr(bagItem.stashItemID)) != nil {
+		t.Fatal("trophy remained in resource bag after pick")
+	}
+	if findEvent(pick.Events, "quest_steward_reward_granted") == nil {
+		t.Fatalf("quest_steward_reward_granted = %+v", pick.Events)
+	}
+}
+
+func TestQuestStewardTrophyTurnInWithoutSourceDepth(t *testing.T) {
+	seed, hunt := findStewardHuntSeedForTest(t, -1)
+	rules := loadRules(t)
+	sim, err := NewSimWithWorld("sess_steward_no_depth", seed, rules, "dungeon_levels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sim.progression.DeepestDungeonDepth = 4
+	trophy := addStaticInventoryItem(sim, 44803, hunt.TrophyItemDefID)
+	giver := findInteractableByDefID(t, sim, "town_quest_giver")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.pos = Vec2{X: giver.pos.X - 0.5, Y: giver.pos.Y}
+
+	open := sim.Tick([]Input{{
+		MessageID: "open_no_depth",
+		Type:      "action_intent",
+		Action:    &ActionIntent{TargetID: idStr(giver.id)},
+	}})
+	assertAck(t, open, "open_no_depth")
+	offersEv := findEvent(open.Events, "quest_steward_offers_opened")
+	if offersEv == nil || offersEv.SourceDepth == nil || *offersEv.SourceDepth != 4 {
+		t.Fatalf("quest_steward_offers_opened = %+v, want source depth 4", offersEv)
+	}
+	if trophy.questSourceDepth != 0 {
+		t.Fatalf("test setup should not set quest source depth")
+	}
+}

@@ -43,6 +43,7 @@ const MercenaryPanelBridgeScript := preload("res://scripts/mercenary_panel_bridg
 const BotDebugProgressionSetupScript := preload("res://scripts/bot_debug_progression_setup.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const MarketBoardBadgesScript := preload("res://scripts/market_board_badges.gd")
+const QuestStewardPresentationScript := preload("res://scripts/quest_steward_presentation.gd")
 const BlacksmithPanelScript := preload("res://scripts/blacksmith_panel.gd")
 const TownServiceBridgeScript := preload("res://scripts/town_service_bridge.gd")
 const ConsumableBarScript := preload("res://scripts/consumable_bar.gd")
@@ -2205,6 +2206,8 @@ func _refresh_inventory_ui() -> void:
 	if consumable_bar != null:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
+	_sync_quest_steward_reward_label()
+
 func _refresh_inventory_panel() -> void:
 	_refresh_inventory_ui()
 	if visual_replay_enabled:
@@ -5054,6 +5057,33 @@ func _update_market_board_badges(incoming_bids: int, published_listings: int) ->
 			continue
 		MarketBoardBadgesScript.apply_to_board(node, incoming_bids, published_listings)
 
+func _sync_quest_steward_reward_label() -> void:
+	var count := QuestStewardPresentationScript.count_turn_in_items(inventory, resource_bag_items)
+	for id in interactable_ids:
+		var key := str(id)
+		if not entities.has(key):
+			continue
+		var rec: Dictionary = entities[key]
+		if str(rec.get("interactable_def_id", "")) != "town_quest_giver":
+			continue
+		var node := rec.get("node", null) as Node3D
+		if node == null:
+			continue
+		QuestStewardPresentationScript.apply_to_steward(node, count)
+
+func _quest_steward_reward_label_debug_state() -> Dictionary:
+	for id in interactable_ids:
+		var key := str(id)
+		if not entities.has(key):
+			continue
+		var rec: Dictionary = entities[key]
+		if str(rec.get("interactable_def_id", "")) != "town_quest_giver":
+			continue
+		var node := rec.get("node", null) as Node3D
+		if node != null:
+			return QuestStewardPresentationScript.debug_state(node)
+	return QuestStewardPresentationScript.empty_state()
+
 func _market_board_badge_debug_state() -> Dictionary:
 	for id in interactable_ids:
 		var key := str(id)
@@ -6143,6 +6173,7 @@ func get_bot_state() -> Dictionary:
 		"mercenary_panel_visible": mercenary_panel != null and mercenary_panel.visible,
 		"market_panel_visible": market_panel != null and market_panel.visible,
 		"market_board_badges": _market_board_badge_debug_state(),
+		"quest_steward_reward_label": _quest_steward_reward_label_debug_state(),
 		"blacksmith_panel_visible": blacksmith_panel != null and blacksmith_panel.visible,
 		"character_stats_panel_visible": character_stats_panel != null and character_stats_panel.visible,
 		"skills_panel_visible": skills_panel != null and skills_panel.visible,

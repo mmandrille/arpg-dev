@@ -19,6 +19,11 @@ func _initialize() -> void:
 		quest_giver.free()
 		main.free()
 		return
+	if quest_giver.find_child("QuestRewardLabel", true, false) == null:
+		_fail("quest steward missing reward label")
+		quest_giver.free()
+		main.free()
+		return
 	quest_giver.free()
 	main.free()
 	print("[gdtest] PASS: quest giver visual")

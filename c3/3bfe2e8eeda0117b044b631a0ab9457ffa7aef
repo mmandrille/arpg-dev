@@ -1,0 +1,64 @@
+client/scripts/dungeon_wall_corner_presentation.gd
+  s_a61cff5fc91864::t_02539f1da0a366 9-14,56,158,220,239,243-244
+  s_a61cff5fc91864::t_512a677aad2da7 177,179
+  s_a61cff5fc91864::t_8311657e8821e1 230
+  s_a61cff5fc91864::t_5b2a0f90d5abcd 17-18
+  s_a61cff5fc91864::t_694b5cbaf43c75 6,19-20,42-45,123,127-128,131,133-134,136-144,149,152-157,159-162,192-217,219,221-227,229,231,233-234,317
+  s_a61cff5fc91864::t_8d59a12a33db90 86-87,271
+  s_a61cff5fc91864::t_dd5c187a3f40b0 1-5,7-8,15-16,21-41,46-55,57-85,88-92,124-125,129-130,132,135,145-148,150-151,163-176,178,180-183,187-191,218,228,232,235-238,240-242,245-270,272-316
+  s_a61cff5fc91864::t_8f83013b5aae0f 93-122,126
+  s_a61cff5fc91864::t_7b9c2235c10b48 184-186
+docs/as-built/v462_rounded-dungeon-corners.md
+  s_a61cff5fc91864::t_abbb8dd693d014 1-50
+client/scripts/wall_renderer.gd
+  s_a61cff5fc91864::t_dd5c187a3f40b0 5,14,67,75-78,122-126
+  s_a61cff5fc91864::t_3e07ac6535c69a 127
+  s_a61cff5fc91864::t_ec5dadc00dc34c 128
+client/scripts/rounded_dungeon_corner_capture.gd
+  s_a61cff5fc91864::t_801b9e6bc12b9a 78-79
+  s_a61cff5fc91864::t_3f740ede5286a8 80-81
+  s_a61cff5fc91864::t_2caaf779299708 88
+  s_a61cff5fc91864::t_dd5c187a3f40b0 1-7,9-27,30-44,47-76,82-87,90-94,97-103,107-108
+  s_a61cff5fc91864::t_b487a3b5a05f34 28-29
+  s_a61cff5fc91864::t_8311657e8821e1 95-96,104-106
+  s_a61cff5fc91864::t_ccd29a3c49bd82 77
+  s_a61cff5fc91864::t_20300d6034a55a 89
+  s_a61cff5fc91864::t_92e1899fcdcff8 8
+  s_a61cff5fc91864::t_0a56c3b78c21a0 45-46
+docs/plans/v462_2026-07-09-rounded-dungeon-corners.md
+  s_a61cff5fc91864::t_dd5c187a3f40b0 1-2,4-52,54-57,59-67,69-72,74-82,84-87,89-92,94-99,101-104,106-111,117-119,121
+  s_a61cff5fc91864::t_ae4ad3cc77aca0 3,53,58,68,73,83,88,93,100,105,112-116,120
+PROGRESS.md
+  s_a61cff5fc91864::t_e60bea5877bf4e 18,26-27,118
+docs/specs/v462_spec-rounded-dungeon-corners.md
+  s_a61cff5fc91864::t_15259dce0d2021 1-2,4-40,43-107
+  s_a61cff5fc91864::t_44540f274e6ce7 3,41-42
+client/tests/test_factories.gd
+  s_a61cff5fc91864::t_f72083047d9fab 118-121
+  s_a61cff5fc91864::t_b91ea1012d3449 133,137,140-144,146-147,150,153-154,156,160-163
+  s_a61cff5fc91864::t_dd5c187a3f40b0 13,116-117,122,129,135,138-139,148,151-152,157-159,167
+  s_a61cff5fc91864::t_f4cd14bec18d51 98,125-127,134,145
+  s_a61cff5fc91864::t_62249bd47df9a5 123-124,128,130,136,149,164-166,168-169
+  s_a61cff5fc91864::t_d9febcc80f8405 131
+  s_a61cff5fc91864::t_b08596dadf7ca0 132,155
+tools/bot/scenarios/client/100_rounded_dungeon_corners.json
+  s_a61cff5fc91864::t_dd5c187a3f40b0 1-14
+docs/progress/slice-lifecycle.md
+  s_a61cff5fc91864::t_a79e121c41a59a 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "c33bfe2e8eeda0117b044b631a0ab9457ffa7aef",
+  "prompts": {},
+  "sessions": {
+    "s_a61cff5fc91864": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4764-5f9f-7d53-a83c-bbf41a152a94",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

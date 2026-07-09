@@ -1,0 +1,41 @@
+client/tests/test_quest_steward_presentation.gd
+  s_c094a87e5ae31c::t_a0d624108b9f88 1-36
+client/scripts/main.gd
+  s_c094a87e5ae31c::t_5bbfe5a192d3ce 46
+  s_c094a87e5ae31c::t_009537700493da 2210
+  s_c094a87e5ae31c::t_7036902005fbac 6176
+  s_c094a87e5ae31c::t_ef34691c4e0718 5060-5086
+  s_c094a87e5ae31c::t_3217cf936b85c2 2209
+server/internal/game/quest_steward_test.go
+  s_c094a87e5ae31c::t_e7cbc2ecea5154 178-186,188-202,222-251
+  s_c094a87e5ae31c::t_e5a71dea964612 187,203-221
+client/tests/test_quest_giver_visual.gd
+  s_c094a87e5ae31c::t_c93e86af14cebc 22-26
+server/internal/game/quest_turn_in.go
+  s_c094a87e5ae31c::t_e1e314fff4b380 20,26-31,35-38,66-92,102-104
+server/internal/game/quest_steward.go
+  s_c094a87e5ae31c::t_371869a2ce933a 72-95,97-126,130-138,145-150,152-156,166-182,184-190,230-253,255
+  s_c094a87e5ae31c::t_80b5d30842287b 229
+client/scripts/quest_steward_presentation.gd
+  s_c094a87e5ae31c::t_e6243ee50d3300 1-71
+server/internal/game/quest_steward_rules.go
+  s_c094a87e5ae31c::t_894017f7bd88e2 63-74
+client/scripts/town_node_factory.gd
+  s_c094a87e5ae31c::t_e5abbb93535bf1 152-163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ff3f9080139485f44be9f4c1543e994e4c972aa4",
+  "prompts": {},
+  "sessions": {
+    "s_c094a87e5ae31c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7c983ea2-479f-4480-b32f-a21e44cbfdef",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -463,7 +463,10 @@ func _do_click_mercenary_stance(action: Dictionary) -> void:
 
 func _do_click_mercenary_hire(action: Dictionary) -> void:
 	if _main != null and _main.has_method("bot_click_mercenary_hire"):
-		_main.bot_click_mercenary_hire(str(action.get("character_id", "")))
+		_main.bot_click_mercenary_hire(
+			str(action.get("character_id", "")),
+			str(action.get("character_name", ""))
+		)
 
 
 func _do_set_stash_search(action: Dictionary) -> void:

@@ -10,16 +10,17 @@
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_loot_count", "min_count": 9, "timeout_s": 10.0 },
     { "type": "click_loot_item", "item_def_id": "upgrade_shard" },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
+    { "type": "wait_event", "event_type": "resource_bag_item_picked_up", "timeout_s": 10.0 },
     { "type": "click_loot_item", "item_def_id": "upgrade_shard" },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
+    { "type": "wait_event", "event_type": "resource_bag_item_picked_up", "timeout_s": 10.0 },
     { "type": "click_loot_item", "item_def_id": "upgrade_shard" },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
+    { "type": "wait_event", "event_type": "resource_bag_item_picked_up", "timeout_s": 10.0 },
     { "type": "click_entity", "entity_type": "interactable", "entity_index": 6 },
     { "type": "wait_blacksmith_panel", "visible": true, "timeout_s": 10.0 },
     { "type": "select_blacksmith_tab", "tab": "Merge" },
     { "type": "fill_blacksmith_merge", "count": 3 },
     { "type": "click_blacksmith_merge" },
-    { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 1 }
+    { "type": "assert_inventory_count", "item_def_id": "upgrade_shard", "equals": 0 },
+    { "type": "assert_resource_wallet_panel", "visible": true }
   ]
 }

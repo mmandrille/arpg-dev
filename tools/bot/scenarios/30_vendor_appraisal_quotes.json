@@ -21,7 +21,7 @@
       "action": "assert_shop_offer_details",
       "shop_id": "town_vendor",
       "offer_kind": "fixed",
-      "equals": 2,
+      "equals": 3,
       "requires_category": true,
       "summary_contains": "Restores"
     },
@@ -106,7 +106,7 @@
       "shop_id": "town_vendor",
       "at_least": 1,
       "requires_category": true,
-      "summary_contains": "Restores"
+      "summary_contains": "Slot:"
     },
     {
       "type": "shop_event",

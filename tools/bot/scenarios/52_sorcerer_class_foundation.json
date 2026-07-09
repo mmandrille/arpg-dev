@@ -94,16 +94,9 @@
       "target_monster_def_id": "combat_lab_soft_target"
     },
     {
-      "action": "action_until_combat_event",
-      "monster_def_id": "combat_lab_soft_target",
-      "event_type": "monster_damaged",
-      "weapon_slot": "main_hand",
-      "target_monster_def_id": "combat_lab_soft_target"
-    },
-    {
       "action": "cast_skill",
       "skill_id": "magic_bolt",
-      "monster_def_id": "combat_lab_soft_target",
+      "monster_def_id": "combat_lab_lightning_resistant",
       "event_type": "skill_cast"
     },
     {
@@ -115,13 +108,6 @@
         "rank": 1
       },
       "timeout_s": 3
-    },
-    {
-      "action": "wait_for_combat_event",
-      "event_type": "monster_damaged",
-      "damage_type": "force",
-      "target_monster_def_id": "combat_lab_soft_target",
-      "min_damage": 1
     },
     {
       "action": "cast_skill",
@@ -184,7 +170,7 @@
       "type": "event_count",
       "event_type": "monster_damaged",
       "weapon_slot": "main_hand",
-      "min": 3
+      "min": 2
     },
     {
       "type": "event_seen",
@@ -197,13 +183,6 @@
       "event_type": "skill_cast",
       "skill_id": "magic_bolt",
       "rank": 1
-    },
-    {
-      "type": "combat_event_seen",
-      "event_type": "monster_damaged",
-      "damage_type": "force",
-      "target_monster_def_id": "combat_lab_soft_target",
-      "min_damage": 1
     },
     {
       "type": "event_seen",

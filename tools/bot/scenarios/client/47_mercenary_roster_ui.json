@@ -29,7 +29,7 @@
       "candidate_count": 2,
       "timeout_s": 15.0
     },
-    { "type": "click_mercenary_hire" },
+    { "type": "click_mercenary_hire", "character_name": "Merc Roster Alt" },
     { "type": "wait_event", "event_type": "mercenary_hired", "timeout_s": 15.0 },
     {
       "type": "wait_mercenary_panel",

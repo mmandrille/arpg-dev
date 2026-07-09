@@ -14,7 +14,7 @@
     {
       "action": "wait_until_assertion",
       "assertion": {
-        "type": "inventory_count",
+        "type": "resource_bag_count",
         "item_def_id": "upgrade_shard",
         "equals": 1
       },
@@ -28,31 +28,31 @@
     {
       "action": "wait_until_assertion",
       "assertion": {
-        "type": "inventory_count",
+        "type": "resource_bag_count",
         "item_def_id": "renew_stone",
         "equals": 1
       },
       "timeout_s": 5
     },
     {
-      "action": "assert_inventory_count",
+      "action": "assert_resource_bag_count",
       "item_def_id": "upgrade_shard",
       "equals": 1
     },
     {
-      "action": "assert_inventory_count",
+      "action": "assert_resource_bag_count",
       "item_def_id": "renew_stone",
       "equals": 1
     }
   ],
   "assertions": [
     {
-      "type": "inventory_count",
+      "type": "resource_bag_count",
       "item_def_id": "upgrade_shard",
       "equals": 1
     },
     {
-      "type": "inventory_count",
+      "type": "resource_bag_count",
       "item_def_id": "renew_stone",
       "equals": 1
     }

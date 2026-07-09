@@ -22,13 +22,13 @@
     },
     {
       "type": "wait_event",
-      "event_type": "item_picked_up",
+      "event_type": "resource_bag_item_picked_up",
       "timeout_s": 15.0
     },
     {
       "type": "assert_inventory_count",
       "item_def_id": "upgrade_shard",
-      "equals": 1
+      "equals": 0
     },
     {
       "type": "click_loot_item",

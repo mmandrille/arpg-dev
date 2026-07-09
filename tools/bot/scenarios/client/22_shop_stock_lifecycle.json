@@ -26,13 +26,22 @@
       "timeout_s": 15.0
     },
     {
+      "type": "click_loot_item",
+      "rolled": true
+    },
+    {
+      "type": "wait_event",
+      "event_type": "item_picked_up",
+      "timeout_s": 15.0
+    },
+    {
       "type": "click_entity",
       "entity_type": "interactable",
       "interactable_def_id": "town_vendor"
     },
     {
       "type": "wait_shop_panel",
-      "equals": 7,
+      "equals": 8,
       "timeout_s": 15.0
     },
     {
@@ -42,7 +51,7 @@
     {
       "type": "assert_shop_offer_count",
       "offer_kind": "fixed",
-      "equals": 2
+      "equals": 3
     },
     {
       "type": "assert_shop_offer_count",
@@ -83,7 +92,7 @@
     {
       "type": "assert_shop_offer_count",
       "offer_kind": "fixed",
-      "equals": 2
+      "equals": 3
     },
     {
       "type": "assert_shop_offer_count",
@@ -92,7 +101,7 @@
     },
     {
       "type": "click_shop_sell_item",
-      "item_def_id": "red_potion"
+      "rolled": true
     },
     {
       "type": "wait_event",
@@ -124,7 +133,7 @@
     {
       "type": "assert_shop_offer_count",
       "offer_kind": "fixed",
-      "equals": 2
+      "equals": 3
     },
     {
       "type": "assert_shop_panel_visible",

@@ -10,6 +10,9 @@
       "action": "pick_up_first_rolled_loot"
     },
     {
+      "action": "pick_up_first_rolled_loot"
+    },
+    {
       "action": "open_shop"
     },
     {
@@ -68,7 +71,7 @@
     },
     {
       "action": "sell_inventory_item",
-      "item_def_id": "red_potion",
+      "rolled": true,
       "equipped": false
     },
     {

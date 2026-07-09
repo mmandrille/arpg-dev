@@ -422,7 +422,15 @@ func _stance_button_debug() -> Dictionary:
 	return out
 
 
-func bot_click_hire_candidate(character_id: String = "") -> void:
+func bot_click_hire_candidate(character_id: String = "", character_name: String = "") -> void:
+	if character_id == "" and character_name != "":
+		for candidate in candidates:
+			if typeof(candidate) != TYPE_DICTIONARY:
+				continue
+			var rec := candidate as Dictionary
+			if str(rec.get("name", "")).strip_edges().to_lower() == character_name.strip_edges().to_lower():
+				character_id = str(rec.get("character_id", ""))
+				break
 	if character_id == "" and not candidates.is_empty() and typeof(candidates[0]) == TYPE_DICTIONARY:
 		character_id = str((candidates[0] as Dictionary).get("character_id", ""))
 	_request_hire(character_id)

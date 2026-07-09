@@ -41,12 +41,13 @@
     },
     {
       "type": "wait_mercenary_panel",
-      "candidate_count": 1,
+      "candidate_count": 2,
       "affordable": true,
       "timeout_s": 15.0
     },
     {
-      "type": "click_mercenary_hire"
+      "type": "click_mercenary_hire",
+      "character_name": "Stats Card Alt"
     },
     {
       "type": "wait_event",

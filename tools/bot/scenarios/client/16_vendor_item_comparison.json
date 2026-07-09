@@ -42,7 +42,7 @@
     {
       "type": "assert_shop_offer_count",
       "offer_kind": "fixed",
-      "equals": 2
+      "equals": 3
     },
     {
       "type": "assert_shop_offer_count",
@@ -52,7 +52,7 @@
     {
       "type": "assert_shop_offer_details",
       "offer_kind": "fixed",
-      "equals": 2,
+      "equals": 3,
       "requires_summary": true,
       "requires_price": true,
       "requires_category": true,

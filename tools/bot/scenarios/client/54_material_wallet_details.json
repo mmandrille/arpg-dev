@@ -5,7 +5,7 @@
   "world_id": "vendor_lab",
   "seed": "v237_material_wallet_details",
   "title": "Material wallet details",
-  "description": "Client auto-picks the upgrade shard and verifies it lands in the inventory bag (not the HUD wallet, since upgrade_shard is now an inventory item).",
+  "description": "Client auto-picks the upgrade shard and verifies it stays out of gear inventory while appearing in the material wallet UI.",
   "client_steps": [
     {
       "type": "wait_ws_open",
@@ -22,17 +22,17 @@
     },
     {
       "type": "wait_event",
-      "event_type": "item_picked_up",
+      "event_type": "resource_bag_item_picked_up",
       "timeout_s": 15.0
     },
     {
       "type": "assert_inventory_count",
       "item_def_id": "upgrade_shard",
-      "equals": 1
+      "equals": 0
     },
     {
       "type": "assert_resource_wallet_panel",
-      "visible": false
+      "visible": true
     }
   ]
 }

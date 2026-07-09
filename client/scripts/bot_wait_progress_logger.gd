@@ -60,6 +60,9 @@ static func log_wait_progress(
 		parts.append("stash_panel=%s" % str(state.get("stash_panel", {})))
 	if stype == "wait_market_panel":
 		parts.append("market_panel=%s" % str(state.get("market_panel", {})))
+	if stype == "wait_mercenary_panel":
+		parts.append("mercenary_panel=%s" % str(state.get("mercenary_panel", {})))
+		parts.append("companion_bar=%s" % str(state.get("companion_bar", {})))
 	if stype == "wait_blacksmith_panel":
 		parts.append("blacksmith_panel=%s" % str(state.get("blacksmith_panel", {})))
 	if stype == "click_entity_until_event" and step_elapsed - last_retry_at < float(step.get("retry_s", 0.25)):

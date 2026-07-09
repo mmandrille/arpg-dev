@@ -54,9 +54,9 @@
       "at_least": 6
     },
     {
-      "type": "inventory_contains",
+      "type": "resource_bag_count",
       "item_def_id": "quest_leaf",
-      "equipped": false
+      "equals": 1
     },
     {
       "type": "hotbar_slot",

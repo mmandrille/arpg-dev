@@ -6497,8 +6497,8 @@ func bot_click_blacksmith_merge() -> void:
 func bot_click_mercenary_stance(stance: String = "assist") -> void:
 	BotFacade.click_mercenary_stance(self, stance)
 
-func bot_click_mercenary_hire(character_id: String = "") -> void:
-	BotFacade.click_mercenary_hire(self, character_id)
+func bot_click_mercenary_hire(character_id: String = "", character_name: String = "") -> void:
+	BotFacade.click_mercenary_hire(self, character_id, character_name)
 func bot_set_stash_search(text: String) -> void:
 	BotFacade.set_stash_search(self, text)
 func bot_select_stash_sort(mode: String) -> void:

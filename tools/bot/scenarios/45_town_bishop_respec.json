@@ -30,7 +30,7 @@
       "item_def_id": "quest_leaf"
     },
     {
-      "action": "assert_inventory_count",
+      "action": "assert_resource_bag_count",
       "item_def_id": "quest_leaf",
       "equals": 1
     },

@@ -45,11 +45,12 @@
       "gold": 400,
       "affordable": true,
       "service_id": "mercenary",
-      "candidate_count": 1,
+      "candidate_count": 2,
       "timeout_s": 15.0
     },
     {
-      "type": "click_mercenary_hire"
+      "type": "click_mercenary_hire",
+      "character_name": "Variant Scout Alt"
     },
     {
       "type": "wait_event",

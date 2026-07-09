@@ -55,7 +55,7 @@
     {
       "type": "assert_inventory_count",
       "item_def_id": "upgrade_shard",
-      "equals": 1
+      "equals": 0
     },
     {
       "type": "assert_resource_wallet_panel",

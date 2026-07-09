@@ -20,7 +20,7 @@
     { "type": "click_bishop_force_loot", "depth": 10, "source_type": "monster", "drop_kind": "resource_pool", "item_def_id": "renew_stone", "item_level": 1 },
     { "type": "wait_event", "event_type": "bishop_debug_loot_dropped", "timeout_s": 10.0 },
     { "type": "click_loot_item", "item_def_id": "renew_stone" },
-    { "type": "wait_event", "event_type": "item_picked_up", "timeout_s": 10.0 },
+    { "type": "wait_event", "event_type": "resource_bag_item_picked_up", "timeout_s": 10.0 },
     {
       "type": "wait_entity",
       "entity_type": "interactable",

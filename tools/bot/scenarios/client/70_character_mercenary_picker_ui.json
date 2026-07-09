@@ -26,11 +26,11 @@
       "gold": 400,
       "affordable": true,
       "service_id": "mercenary",
-      "candidate_count": 1,
+      "candidate_count": 2,
       "hired_count": 0,
       "timeout_s": 15.0
     },
-    { "type": "click_mercenary_hire" },
+    { "type": "click_mercenary_hire", "character_name": "Merc UI Alt" },
     { "type": "wait_event", "event_type": "mercenary_hired", "timeout_s": 15.0 },
     {
       "type": "wait_mercenary_panel",

@@ -1,0 +1,14 @@
+{
+  "id": "rounded_dungeon_corners",
+  "runner": "godot_client",
+  "world_id": "generated_wall_lab",
+  "seed": "v462_rounded_dungeon_corners",
+  "title": "Rounded Dungeon Corners",
+  "description": "Client renders rounded room-wall corner presentation on a generated dungeon floor without changing authoritative wall layout.",
+  "ci_tier": "extended",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_wall_layout", "current_level": -1, "at_least": 8, "generated_at_least": 3, "non_perimeter_at_least": 1, "timeout_s": 15.0 },
+    { "type": "assert_wall_layout", "current_level": -1, "generated_at_least": 3, "non_perimeter_at_least": 1 }
+  ]
+}

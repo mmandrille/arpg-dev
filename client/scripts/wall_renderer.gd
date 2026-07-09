@@ -2,6 +2,7 @@ class_name WallRenderer
 extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
+const DungeonWallCornerPresentationScript := preload("res://scripts/dungeon_wall_corner_presentation.gd")
 const WallOcclusionPresentationLoaderScript := preload("res://scripts/wall_occlusion_presentation_loader.gd")
 const WallOcclusionFadeScript := preload("res://scripts/wall_occlusion_fade.gd")
 const WallOcclusionRuntimeScript := preload("res://scripts/wall_occlusion_runtime.gd")
@@ -10,6 +11,7 @@ var _walls_root: Node3D
 var _ground_factory: RefCounted
 var _current_level: int = 0
 var _ceiling_node: MeshInstance3D
+var _corner_style_override: String = ""
 var _occlusion_meshes: Dictionary = {}
 var _occlusion_bodies: Dictionary = {}
 var _occlusion_fade: WallOcclusionFade
@@ -62,11 +64,16 @@ func render_wall_layout(walls: Array) -> Array:
 		current_wall_layout.append(normalized)
 		if _walls_root != null:
 			_walls_root.add_child(make_wall_node(normalized))
+	_sync_room_wall_corners(current_wall_layout)
 	_sync_dungeon_ceiling()
 	return current_wall_layout
 
 func set_level(level: int) -> void:
 	_current_level = level
+
+
+func set_corner_review_style(style: String) -> void:
+	_corner_style_override = style
 
 
 func clear_wall_nodes() -> void:
@@ -111,6 +118,13 @@ func _sync_dungeon_ceiling() -> void:
 		return
 	_ceiling_node = _ground_factory.make_ceiling_node(_current_level) as MeshInstance3D
 	_walls_root.add_child(_ceiling_node)
+
+
+func _sync_room_wall_corners(wall_layout: Array) -> void:
+	if _walls_root == null or not _dungeon_presentation_active():
+		return
+	var helper := DungeonWallCornerPresentationScript.new(_current_level, _wall_height(), _ground_factory, _corner_style_override)
+	helper.attach_room_wall_presentation(_walls_root, wall_layout)
 
 func normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 	var pos: Dictionary = {}

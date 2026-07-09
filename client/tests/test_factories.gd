@@ -10,6 +10,7 @@ const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 const BossArenaPresenceScript := preload("res://scripts/boss_arena_presence.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
+const DungeonWallCornerPresentationScript := preload("res://scripts/dungeon_wall_corner_presentation.gd")
 const DungeonRoomFloorTintScript := preload("res://scripts/dungeon_room_floor_tint.gd")
 const DungeonAmbientMotesScript := preload("res://scripts/dungeon_ambient_motes.gd")
 
@@ -94,7 +95,7 @@ func _test_wall_renderer() -> void:
 		"source": "generated",
 	}])
 	_assert_eq("wall layout count", walls.size(), 1)
-	_assert_eq("wall child count", root.get_child_count(), 2)
+	_assert_eq("wall child count", root.get_child_count(), 3)
 	var wall_body := root.get_child(0) as StaticBody3D
 	_assert_eq("wall child name", wall_body.name, "Wall_test_wall")
 	var wall := wall_body.get_child(1) as MeshInstance3D
@@ -112,6 +113,60 @@ func _test_wall_renderer() -> void:
 	_assert_true("wall material normal enabled", (wall.material_override as StandardMaterial3D).normal_enabled)
 	_assert_true("wall material has normal texture", (wall.material_override as StandardMaterial3D).normal_texture != null)
 	_assert_eq("wall normal texture cache count", ground_factory.wall_normal_textures.size(), 1)
+	var helper := DungeonWallCornerPresentationScript.new(-4, ground_factory.dungeon_ceiling_height(), ground_factory)
+	var room_corner_layout := [
+		{"id": "room_south", "position": {"x": 5.0, "y": 8.5}, "size": {"x": 7.0, "y": 1.0}, "source": "room_wall"},
+		{"id": "room_north", "position": {"x": 5.0, "y": 1.5}, "size": {"x": 7.0, "y": 1.0}, "source": "room_wall"},
+		{"id": "room_west", "position": {"x": 1.5, "y": 5.0}, "size": {"x": 1.0, "y": 7.0}, "source": "room_wall"},
+		{"id": "room_east", "position": {"x": 8.5, "y": 5.0}, "size": {"x": 1.0, "y": 7.0}, "source": "room_wall"},
+	]
+	var live_corner_layout := [
+		{"id": "perimeter_north", "position": {"x": 6.0, "y": 1.5}, "size": {"x": 10.0, "y": 1.0}, "source": "perimeter"},
+		{"id": "generated_west", "position": {"x": 1.0, "y": 5.0}, "size": {"x": 1.0, "y": 7.0}, "source": "generated"},
+		{"id": "room_divider_south", "position": {"x": 6.0, "y": 8.5}, "size": {"x": 10.0, "y": 1.0}, "source": "room_divider"},
+		{"id": "generated_east", "position": {"x": 11.0, "y": 5.0}, "size": {"x": 1.0, "y": 7.0}, "source": "generated"},
+	]
+	_assert_eq("room wall corner detection count", helper.detect_room_wall_corners(room_corner_layout).size(), 4)
+	_assert_eq("live wall corner detection count", helper.detect_room_wall_corners(live_corner_layout).size(), 4)
+	_assert_eq("room wall endpoint detection count", helper.detect_wall_endpoints(room_corner_layout).size(), 4)
+	_assert_eq("live wall endpoint detection count", helper.detect_wall_endpoints(live_corner_layout).size(), 4)
+	_assert_eq("room wall eligible run count", helper.eligible_room_walls(room_corner_layout).size(), 4)
+	_assert_eq("live wall eligible run count", helper.eligible_room_walls(live_corner_layout).size(), 4)
+	renderer.set_corner_review_style(DungeonWallCornerPresentationScript.STYLE_BEVEL)
+	renderer.render_wall_layout(live_corner_layout)
+	var rounded_root := root.get_node_or_null("DungeonRoomWallPresentation") as Node3D
+	_assert_true("room wall rounded corner root exists", rounded_root != null)
+	_assert_eq("room wall rounded corner style default", str(rounded_root.get_meta("style", "")), DungeonWallCornerPresentationScript.STYLE_BEVEL)
+	var corner_caps := rounded_root.get_node_or_null("CornerCaps") as Node3D
+	var top_rounding := rounded_root.get_node_or_null("WallTopRounding") as Node3D
+	_assert_true("corner caps container exists", corner_caps != null)
+	_assert_true("wall top rounding container exists", top_rounding != null)
+	_assert_eq("room wall rounded corner count", corner_caps.get_child_count(), 4)
+	_assert_eq("room wall top rounding count", top_rounding.get_child_count(), 4)
+	_assert_true("bevel cap child exists", corner_caps.get_child(0).find_child("BevelCap", false, false) != null)
+	_assert_true("wall top child exists", top_rounding.get_child(0).find_child("WallTopRounding", false, false) != null)
+	renderer.set_corner_review_style(DungeonWallCornerPresentationScript.STYLE_ROUNDED)
+	renderer.render_wall_layout(live_corner_layout)
+	rounded_root = root.get_node_or_null("DungeonRoomWallPresentation") as Node3D
+	_assert_true("rounded style root exists", rounded_root != null)
+	_assert_eq("rounded style tag", str(rounded_root.get_meta("style", "")), DungeonWallCornerPresentationScript.STYLE_ROUNDED)
+	corner_caps = rounded_root.get_node_or_null("CornerCaps") as Node3D
+	top_rounding = rounded_root.get_node_or_null("WallTopRounding") as Node3D
+	_assert_eq("rounded endpoint cap count", corner_caps.get_child_count(), 4)
+	var rounded_child := corner_caps.get_child(0) as Node3D
+	var rounded_cap := rounded_child.find_child("RoundedCap", false, false) as MeshInstance3D
+	_assert_true("rounded cap exists", rounded_cap != null)
+	_assert_true("rounded cap mesh is cylinder", rounded_cap.mesh is CylinderMesh)
+	var rounded_top := top_rounding.get_child(0).find_child("WallTopRounding", false, false) as MeshInstance3D
+	_assert_true("rounded top exists", rounded_top != null)
+	_assert_true("rounded top mesh is cylinder", rounded_top.mesh is CylinderMesh)
+	_assert_true("rounded top uses wall material texture", (rounded_top.material_override as StandardMaterial3D).albedo_texture != null)
+	var obstacle_only_layout := [
+		{"id": "water_south", "position": {"x": 5.0, "y": 8.0}, "size": {"x": 8.0, "y": 1.0}, "source": "generated", "kind": "water"},
+		{"id": "rock_east", "position": {"x": 8.5, "y": 4.5}, "size": {"x": 1.0, "y": 8.0}, "source": "generated", "kind": "rock"},
+	]
+	renderer.render_wall_layout(obstacle_only_layout)
+	_assert_true("obstacle-only walls do not get rounded corner root", root.get_node_or_null("DungeonRoomWallPresentation") == null)
 	var water_walls := renderer.render_wall_layout([{
 		"id": "test_water",
 		"position": {"x": 7.0, "y": 8.0},

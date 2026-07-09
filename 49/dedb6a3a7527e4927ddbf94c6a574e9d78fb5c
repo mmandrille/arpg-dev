@@ -1,0 +1,46 @@
+tools/bot/scenarios/client/77_line_of_sight_blocker_shadow.json
+  s_aa9396083189f0::t_a7f4dab5c44c76 8
+client/scripts/ground_wall_factory.gd
+  s_aa9396083189f0::t_a08fbc54cbf383 132-139,141-145,147,162,165-166,202-204,207,209,211,215,238-240,243,245,247,306-309,311,313-315,317,319-321,345-346
+tools/bot/scenarios/client/99_dungeon_surface_kit.json
+  s_aa9396083189f0::t_80f7115850584b 1-16
+client/tests/test_factories.gd
+  s_aa9396083189f0::t_75ad66c4dbe4ce 56-57,59-60,69-75,208,213
+  s_aa9396083189f0::t_908bc96f2a3697 67
+shared/rules/worlds.v0.json
+  s_aa9396083189f0::t_f4dac68f46322b 643,743
+client/scripts/wall_renderer.gd
+  s_aa9396083189f0::t_5d6bfcd19abdeb 339,344,363,365,368,397-400
+shared/rules/dungeon_generation.v0.schema.json
+  s_aa9396083189f0::t_9817d6b72e5375 547-553
+tools/bot/scenarios/101_obstacle_variety_pack.json
+  s_aa9396083189f0::t_f353f29885da05 6
+tools/bot/scenarios/102_line_of_sight_blockers.json
+  s_aa9396083189f0::t_12c5e7008c1f9d 16
+server/internal/game/dungeon_obstacle_variety_test.go
+  s_aa9396083189f0::t_2c7af77b4340df 96-97
+docs/specs/v461_spec-dungeon-surface-kit.md
+  s_aa9396083189f0::t_87a9e65c321e91 1-101
+server/internal/game/dungeon_obstacle_variety.go
+  s_aa9396083189f0::t_b0a0e90f607586 18,25-27,47
+shared/rules/dungeon_generation.v0.json
+  s_aa9396083189f0::t_815be67d8c8def 16-29,32-33,36,38-60,62-75,193
+docs/plans/v461_2026-07-09-dungeon-surface-kit.md
+  s_aa9396083189f0::t_ae3b1ae3737f02 1-166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "49dedb6a3a7527e4927ddbf94c6a574e9d78fb5c",
+  "prompts": {},
+  "sessions": {
+    "s_aa9396083189f0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4552-6a1b-7d81-be15-1053443bf2d9",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

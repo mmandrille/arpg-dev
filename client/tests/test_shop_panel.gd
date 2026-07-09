@@ -258,7 +258,7 @@ func _run() -> void:
 		"item_template_id": "long_sword",
 		"display_name": "Long Sword",
 		"rarity": "magic",
-		"rolled_stats": {"damage_min": 3, "damage_max": 4, "max_hp": 3},
+		"rolled_stats": {"damage_min": 3, "damage_max": 4, "max_hp": 3, "bonus_lightning_damage": 1},
 	}
 	var blade_lines: Array = inventory_panel._tooltip_lines(blade)
 	_assert_true("inventory blade range before stats", _array_contains_text(blade_lines, "Range: 1.5 tiles"))
@@ -266,6 +266,17 @@ func _run() -> void:
 	_assert_true("inventory blade random min delta", _array_contains_text(blade_lines, "Min damage: +1"))
 	_assert_false("inventory blade hides zero max delta", _array_contains_text(blade_lines, "Max damage:"))
 	_assert_true("inventory blade random hp delta", _array_contains_text(blade_lines, "Max HP: +3"))
+	_assert_true("inventory blade elemental damage line", _array_contains_text(blade_lines, "Lightning damage: +1"))
+	var elemental_bow := {
+		"item_instance_id": "2004b",
+		"item_def_id": "bow",
+		"item_template_id": "bow",
+		"display_name": "Bow",
+		"rarity": "magic",
+		"rolled_stats": {"damage_min": 2, "damage_max": 4, "bonus_poison_damage": 2},
+	}
+	var elemental_bow_lines: Array = inventory_panel._tooltip_lines(elemental_bow)
+	_assert_true("inventory bow elemental damage line", _array_contains_text(elemental_bow_lines, "Poison damage: +2"))
 	var rare_blade := {
 		"item_instance_id": "2005",
 		"item_def_id": "long_sword",

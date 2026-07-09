@@ -1124,28 +1124,11 @@ func _rarity_color(rarity: String) -> Color:
 
 
 func _base_stat_lines(def: Dictionary) -> Array:
-	var stats_value = def.get("base_stats", {})
-	if typeof(stats_value) != TYPE_DICTIONARY:
-		return []
-	return _stat_lines_for_tooltip(stats_value as Dictionary, false)
+	return ItemTooltipStatSectionsScript.base_stat_lines_for(def)
 
 
 func _random_stat_lines(stats_value: Variant, def: Dictionary) -> Array:
-	if typeof(stats_value) != TYPE_DICTIONARY:
-		return []
-	var base_stats: Dictionary = def.get("base_stats", {})
-	var deltas: Dictionary = {}
-	for key in (stats_value as Dictionary).keys():
-		var total_value = _numeric_stat_or_null((stats_value as Dictionary).get(key, null))
-		if total_value == null:
-			continue
-		var base_value = _numeric_stat_or_null(base_stats.get(key, 0))
-		var total := int(total_value)
-		var base := int(base_value if base_value != null else 0)
-		var delta := total - base
-		if delta != 0:
-			deltas[key] = delta
-	return _stat_lines_for_tooltip(deltas, true)
+	return ItemTooltipStatSectionsScript.random_stat_lines_for(stats_value, def)
 
 
 func _numeric_stat_or_null(value: Variant):
@@ -1161,23 +1144,7 @@ func _numeric_stat_or_null(value: Variant):
 
 
 func _stat_lines_for_tooltip(stats: Dictionary, signed: bool) -> Array:
-	var lines: Array = []
-	if int(stats.get("damage_min", 0)) > 0 or int(stats.get("damage_max", 0)) > 0:
-		if signed:
-			if int(stats.get("damage_min", 0)) != 0:
-				lines.append("%s: %s" % [_display_stat("damage_min"), _format_stat_value(stats.get("damage_min", 0), false)])
-			if int(stats.get("damage_max", 0)) != 0:
-				lines.append("%s: %s" % [_display_stat("damage_max"), _format_stat_value(stats.get("damage_max", 0), false)])
-		else:
-			lines.append("Damage: %s-%s" % [str(stats.get("damage_min", "?")), str(stats.get("damage_max", "?"))])
-	for key in ["str", "dex", "vit", "magic", "all_skills", "armor", "block_percent", "attack_speed_percent", "hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds", "mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent", "skill_mana_cost_reduction", "magic_find_percent", "hotbar_slots", "inventory_rows"]:
-		if not stats.has(key):
-			continue
-		var value := int(stats.get(key, 0))
-		if value == 0:
-			continue
-		lines.append("%s: %s" % [_display_stat(key), _format_stat_value(value, key == "block_percent" or key == "attack_speed_percent" or key == "hit_chance" or key == "crit_chance" or key == "evade_chance" or key == "skill_damage_percent" or key == "skill_cooldown_reduction_percent" or key == "magic_find_percent")])
-	return lines
+	return ItemTooltipStatSectionsScript.stat_lines_for_tooltip(stats, signed)
 
 
 func _format_stat_value(value: int, percent: bool) -> String:
@@ -1654,4 +1621,3 @@ func _dup_items(values: Array) -> Array:
 		if typeof(value) == TYPE_DICTIONARY:
 			out.append((value as Dictionary).duplicate(true))
 	return out
-

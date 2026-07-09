@@ -11,6 +11,7 @@ const ROLL_STAT_KEYS := [
 	"hit_chance", "crit_chance", "evade_chance", "max_hp", "max_mana", "health_regen_per_10_seconds",
 	"mana_regen_per_10_seconds", "skill_damage_percent", "skill_cooldown_reduction_percent",
 	"skill_mana_cost_reduction", "magic_find_percent", "hotbar_slots", "inventory_rows",
+	"bonus_cold_damage", "bonus_fire_damage", "bonus_lightning_damage", "bonus_poison_damage",
 ]
 
 

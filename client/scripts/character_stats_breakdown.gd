@@ -127,7 +127,7 @@ static func source_formula_terms(
 		if typeof(source) != TYPE_DICTIONARY:
 			continue
 		var source_rec := source as Dictionary
-		var source_text := source_formula_source(progression, source_rec, item_names_by_id)
+		var source_text := source_formula_source(progression, key, source_rec, item_names_by_id)
 		terms.append("%s (%s)" % [format_stat_delta(key, float(source_rec.get("value", 0.0))), source_text])
 	return terms
 
@@ -150,6 +150,7 @@ static func item_names_by_instance_id(sources: Array) -> Dictionary:
 
 static func source_formula_source(
 	progression: Dictionary,
+	key: String,
 	source_rec: Dictionary,
 	item_names_by_id: Dictionary,
 ) -> String:
@@ -159,7 +160,12 @@ static func source_formula_source(
 	var kind := str(source_rec.get("kind", "")).strip_edges()
 	var item_id := str(source_rec.get("item_instance_id", "")).strip_edges()
 	if item_id != "" and (kind == "equipment_base" or kind == "equipment_roll"):
-		return str(item_names_by_id.get(item_id, label))
+		var item_label := str(item_names_by_id.get(item_id, label))
+		if key == "damage_min" or key == "damage_max":
+			if kind == "equipment_base":
+				return "%s base damage" % item_label
+			return "%s rolled damage" % item_label
+		return item_label
 	var detail := label
 	var kind_label := source_kind_label(kind)
 	if kind == "character_formula":

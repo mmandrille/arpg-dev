@@ -189,6 +189,8 @@ func _test_dual_wield_damage_columns() -> void:
 	var main_tooltips: Dictionary = state.get("derived_tooltips_main", {})
 	var off_tooltips: Dictionary = state.get("derived_tooltips_off", {})
 	_assert_true("main damage min tooltip mentions main weapon", str(main_tooltips.get("damage_min", "")).find("Training Blade") >= 0)
+	_assert_true("main damage min tooltip labels weapon base damage", str(main_tooltips.get("damage_min", "")).find("Training Blade base damage") >= 0)
+	_assert_true("main damage min tooltip labels rolled weapon damage", str(main_tooltips.get("damage_min", "")).find("Training Blade rolled damage") >= 0)
 	_assert_true("off damage min tooltip mentions off weapon", str(off_tooltips.get("damage_min", "")).find("Rusty Dagger") >= 0)
 	_assert_true("main and off damage min tooltips differ", str(main_tooltips.get("damage_min", "")) != str(off_tooltips.get("damage_min", "")))
 	panel.free()

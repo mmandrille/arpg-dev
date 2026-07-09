@@ -1,0 +1,32 @@
+client/scripts/skill_tree_layout.gd
+  s_53442da8d02813::t_61c9589968c4b5 34-50
+  s_53442da8d02813::t_ab17ea63391272 11-12
+client/tests/test_skills_panel.gd
+  s_53442da8d02813::t_db3b213eccbe0f 58
+client/tests/test_skill_tree_layout.gd
+  s_53442da8d02813::t_56ab965a1fdf5d 16
+  s_53442da8d02813::t_7c40f6f13f0374 52-78
+client/scripts/skills_panel.gd
+  s_53442da8d02813::t_b8595d8e6fb275 446
+  s_53442da8d02813::t_b3f0badc176f0c 436
+  s_53442da8d02813::t_5be77a01938726 626
+  s_53442da8d02813::t_f315d399567ea6 423,425,427
+  s_53442da8d02813::t_de01e4dfed58eb 684-687
+  s_53442da8d02813::t_ed1e9e2fc28ebc 440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ea0a21e91671232f8257df286a2bb87ddbe3d8a0",
+  "prompts": {},
+  "sessions": {
+    "s_53442da8d02813": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "df5a25ba-08ff-41f4-8799-f77cfe5e2b82",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

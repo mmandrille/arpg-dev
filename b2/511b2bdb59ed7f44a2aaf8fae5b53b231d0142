@@ -1,0 +1,33 @@
+server/internal/realtime/session_loop_test.go
+  s_63186a773cd1b6::t_3c8de2d3d9d2ba 175-193
+server/internal/game/quest_turn_in.go
+  s_63186a773cd1b6::t_8ea4bd6ba3dfec 38
+server/internal/realtime/session_loop.go
+  s_63186a773cd1b6::t_87adae7a118c43 635-636
+server/internal/game/resource_bag.go
+  s_63186a773cd1b6::t_d811782bf28835 58
+  s_63186a773cd1b6::t_0630925b9c0fe1 170
+  s_63186a773cd1b6::t_311a416c7fc8e1 213
+  s_63186a773cd1b6::t_8a7f573b8d301a 103
+  s_63186a773cd1b6::t_7410071beaacd4 67-69
+  s_63186a773cd1b6::t_663a477d11b155 251
+  s_63186a773cd1b6::t_f6361e455b78be 298
+server/internal/game/badge_rewards.go
+  s_63186a773cd1b6::t_d0c8299a44f2bc 128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b2511b2bdb59ed7f44a2aaf8fae5b53b231d0142",
+  "prompts": {},
+  "sessions": {
+    "s_63186a773cd1b6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8bf52c38-7ab7-4cc1-878f-b993f5650fde",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+server/internal/game/mobility_skills_test.go
+  s_4fefecf65ce2b6::t_6605b7f629580c 63-94,96-103
+  s_4fefecf65ce2b6::t_894b79a888f0db 95
+server/internal/game/mobility_skills.go
+  s_4fefecf65ce2b6::t_7daedae3e00747 183-184,190-191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0edec48f7ee0d3bd040c0047190114fee51eb413",
+  "prompts": {},
+  "sessions": {
+    "s_4fefecf65ce2b6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d076738f-a650-4ab1-8579-32ced60277c5",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

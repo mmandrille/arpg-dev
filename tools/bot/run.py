@@ -70,7 +70,17 @@ def load_known_world_ids() -> set[str]:
 def monster_xp_reward(monster_def_id: str) -> int:
     monsters_path = ROOT / "shared" / "rules" / "monsters.v0.json"
     data = json.loads(monsters_path.read_text(encoding="utf-8"))
-    return int(data.get("monsters", {}).get(monster_def_id, {}).get("xp_reward", 0))
+    base = int(data.get("monsters", {}).get(monster_def_id, {}).get("xp_reward", 0))
+    if base <= 0:
+        return 0
+    main_config_path = ROOT / "shared" / "rules" / "main_config.v0.json"
+    main_config = json.loads(main_config_path.read_text(encoding="utf-8"))
+    pct = int(main_config.get("gameplay", {}).get("experience_reward_percent", 100))
+    if pct <= 0:
+        return 0
+    if pct >= 100:
+        return base
+    return max(1, math.floor((base * pct) / 100.0 + 0.5))
 
 
 from tools.bot.skill_cast_runtime import execute_cast_skill

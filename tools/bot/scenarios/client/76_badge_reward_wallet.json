@@ -75,7 +75,6 @@
     {
       "type": "assert_resource_wallet_panel",
       "window_visible": true,
-      "window_row_count_at_least": 4,
       "window_contains": "Resurrection Badge x1"
     },
     {

@@ -1,6 +1,7 @@
 {
   "id": "equipment_requirements_and_preview",
   "ci_tier": "extended",
+  "max_elapsed_s": 18.0,
   "world_id": "requirements_lab",
   "seed": "facefeed00000043",
   "title": "Equipment requirements and preview",
@@ -43,7 +44,7 @@
     {
       "action": "kill_monsters",
       "monster_def_id": "dungeon_mob",
-      "count": 4,
+      "count": 7,
       "timeout_s": 30
     },
     {

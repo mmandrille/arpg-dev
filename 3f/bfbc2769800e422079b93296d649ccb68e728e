@@ -1,0 +1,21 @@
+client/tests/test_potion_icon_label.gd
+  s_63186a773cd1b6::t_32d0d322828d3c 24-31
+client/scripts/potion_icon_label.gd
+  s_63186a773cd1b6::t_da831d39ee52c9 18,23-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3fbfbc2769800e422079b93296d649ccb68e728e",
+  "prompts": {},
+  "sessions": {
+    "s_63186a773cd1b6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8bf52c38-7ab7-4cc1-878f-b993f5650fde",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

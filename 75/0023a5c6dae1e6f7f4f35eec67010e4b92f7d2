@@ -1,0 +1,20 @@
+tools/validate_shared.py
+  s_63186a773cd1b6::t_3ec9085f8b5bcc 221-222
+  s_63186a773cd1b6::t_87d5f582d156b5 3143-3150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "750023a5c6dae1e6f7f4f35eec67010e4b92f7d2",
+  "prompts": {},
+  "sessions": {
+    "s_63186a773cd1b6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8bf52c38-7ab7-4cc1-878f-b993f5650fde",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

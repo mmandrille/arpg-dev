@@ -1,0 +1,20 @@
+docs/reviews/20260708_v460-overview.md
+  s_63186a773cd1b6::t_d20d25d23e5f03 7-11
+  s_63186a773cd1b6::t_d1c8972c5f2b1b 100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ac9583c76a53db78a501bbb6d6c3e691b0cf6bb2",
+  "prompts": {},
+  "sessions": {
+    "s_63186a773cd1b6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8bf52c38-7ab7-4cc1-878f-b993f5650fde",
+        "model": "default"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

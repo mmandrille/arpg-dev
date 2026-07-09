@@ -1,0 +1,42 @@
+client/tests/test_entity_tick_smoothing.gd
+  s_07fd0c4acf4a9b::t_880e7d0d31a082 5,16-17,60-85
+client/scripts/player_camera_controller.gd
+  s_07fd0c4acf4a9b::t_4a6e037b47ec61 252,264-274
+PROGRESS.md
+  s_07fd0c4acf4a9b::t_8d1d0af6368c4e 18,26-27,111
+docs/progress/slice-lifecycle.md
+  s_07fd0c4acf4a9b::t_8d1d0af6368c4e 20
+client/tests/test_camera_mode_settings.gd
+  s_07fd0c4acf4a9b::t_bc44547930a3bf 26,158-177,253-260
+docs/as-built/v461_entity-locomotion-polish.md
+  s_07fd0c4acf4a9b::t_8d1d0af6368c4e 1-51
+shared/assets/camera_presentations.v0.json
+  s_07fd0c4acf4a9b::t_060ada8b2e2518 16
+shared/assets/movement_presentation.v0.json
+  s_07fd0c4acf4a9b::t_4fc0ad808eab95 15-17
+docs/plans/v461_2026-07-09-entity-locomotion-polish.md
+  s_07fd0c4acf4a9b::t_f61307ce185b29 1-41,43-78,80-84,86-91,93-104,106-111,113-117,119-128,131,133-137,139-143,147-148,150-158,160-164,166-171,179
+  s_07fd0c4acf4a9b::t_05ee019e627a12 42,129-130,145-146,149
+  s_07fd0c4acf4a9b::t_0648d18a6ba0de 79,85,92,105,112,118,132,138,144,159,165,172-178
+shared/assets/combat_feel_presentation.v0.json
+  s_07fd0c4acf4a9b::t_7c756d8c61dff2 6-7
+docs/specs/v461_spec-entity-locomotion-polish.md
+  s_07fd0c4acf4a9b::t_a2330fa282850d 1-2,4-111
+  s_07fd0c4acf4a9b::t_8d1d0af6368c4e 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5c9c78b381b76c3bf28bc61c4019908ee013ee25",
+  "prompts": {},
+  "sessions": {
+    "s_07fd0c4acf4a9b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4550-a6fa-7250-b0fe-bb02f103124e",
+        "model": "gpt-5.4"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

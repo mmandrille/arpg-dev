@@ -13,6 +13,7 @@ const BossVisualsControllerScript := preload("res://scripts/boss_visuals_control
 const DungeonWallCornerPresentationScript := preload("res://scripts/dungeon_wall_corner_presentation.gd")
 const DungeonRoomFloorTintScript := preload("res://scripts/dungeon_room_floor_tint.gd")
 const DungeonAmbientMotesScript := preload("res://scripts/dungeon_ambient_motes.gd")
+const DungeonSurfaceDetailPresentationScript := preload("res://scripts/dungeon_surface_detail_presentation.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -26,6 +27,7 @@ func _initialize() -> void:
 	_test_town_node_factory()
 	_test_boss_visuals()
 	_test_dungeon_room_floor_tint()
+	_test_dungeon_surface_detail_presentation()
 
 	if _fail_count > 0:
 		print("[gdtest] FAIL: test_factories (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -267,6 +269,52 @@ func _test_wall_renderer() -> void:
 	_assert_true("variety lab column node exists", root.find_child("Column_obstacle_variety_lab_wall_005", false, false) != null)
 	_assert_true("variety lab second rock node exists", root.find_child("Rock_obstacle_variety_lab_wall_006", false, false) != null)
 	root.queue_free()
+
+
+func _test_dungeon_surface_detail_presentation() -> void:
+	var factory = GroundWallFactoryScript.new()
+	var ground := factory.make_ground_node(-2)
+	var walls_root := Node3D.new()
+	var entities := {
+		"treasure": {
+			"type": "interactable",
+			"interactable_def_id": "treasure_chest",
+			"position": {"x": 9.0, "y": 7.0},
+		},
+	}
+	var walls := [
+		{"id": "north", "position": {"x": 6.0, "y": 1.5}, "size": {"x": 10.0, "y": 1.0}, "source": "room_wall"},
+		{"id": "south", "position": {"x": 6.0, "y": 10.5}, "size": {"x": 10.0, "y": 1.0}, "source": "room_wall"},
+		{"id": "west", "position": {"x": 1.5, "y": 6.0}, "size": {"x": 1.0, "y": 10.0}, "source": "generated"},
+		{"id": "east", "position": {"x": 10.5, "y": 6.0}, "size": {"x": 1.0, "y": 10.0}, "source": "generated"},
+		{"id": "divider_h", "position": {"x": 6.0, "y": 6.0}, "size": {"x": 8.0, "y": 1.0}, "source": "room_divider"},
+		{"id": "divider_v", "position": {"x": 6.0, "y": 6.0}, "size": {"x": 1.0, "y": 8.0}, "source": "room_divider"},
+	]
+	DungeonSurfaceDetailPresentationScript.sync(ground, walls_root, factory, -2, walls, entities)
+	var floor_root := ground.get_node_or_null(DungeonSurfaceDetailPresentationScript.FLOOR_ROOT_NAME) as Node3D
+	var wall_root := walls_root.get_node_or_null(DungeonSurfaceDetailPresentationScript.WALL_ROOT_NAME) as Node3D
+	_assert_true("dungeon floor detail root exists", floor_root != null)
+	_assert_true("dungeon wall detail root exists", wall_root != null)
+	_assert_true("dungeon floor detail count", floor_root.get_child_count() >= 2)
+	_assert_true("dungeon wall detail count", wall_root.get_child_count() >= 3)
+	var scales := {}
+	for child in floor_root.get_children():
+		var node := child as Node3D
+		scales[str(node.get_meta("detail_scale", 0.0))] = true
+	_assert_true("floor details use mixed sizes", scales.size() >= 2)
+	var first_wall_detail := wall_root.get_child(0) as Node3D
+	_assert_true("wall detail motif metadata", str(first_wall_detail.get_meta("motif", "")) != "")
+	_assert_true("wall detail contains meshes", first_wall_detail.get_child_count() >= 2)
+
+	var town_ground := factory.make_ground_node(0)
+	var town_walls := Node3D.new()
+	DungeonSurfaceDetailPresentationScript.sync(town_ground, town_walls, factory, 0, walls, entities)
+	_assert_true("town floor detail skipped", town_ground.get_node_or_null(DungeonSurfaceDetailPresentationScript.FLOOR_ROOT_NAME) == null)
+	_assert_true("town wall detail skipped", town_walls.get_node_or_null(DungeonSurfaceDetailPresentationScript.WALL_ROOT_NAME) == null)
+	ground.queue_free()
+	walls_root.queue_free()
+	town_ground.queue_free()
+	town_walls.queue_free()
 
 
 func _test_loot_node_factory() -> void:

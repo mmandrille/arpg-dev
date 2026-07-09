@@ -23,8 +23,8 @@ Last updated: 2026-07-09 (v462 rounded dungeon corners)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v462 — rounded dungeon corners |
-| **Next slice** | v463 TBD |
+| **Latest completed slice** | v463 — dungeon surface detail overlays |
+| **Next slice** | v464 TBD |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 

@@ -44,6 +44,8 @@ func _initialize() -> void:
 	if _failed: quit(1); return
 	_test_monster_visuals_catalog()
 	if _failed: quit(1); return
+	_test_animation_controller_visual_opt_out()
+	if _failed: quit(1); return
 	_test_flying_monster_pick_collider_height()
 	if _failed: quit(1); return
 	_test_revived_companion_corpse_tint()
@@ -479,6 +481,22 @@ func _test_monster_visuals_catalog() -> void:
 	_assert(str(undead.get("scene", "")) == "monster_skeleton", "dungeon_undead scene = %s" % undead.get("scene", ""))
 	var boss := MonsterVisualsLoaderScript.resolve("dungeon_mob", "monster_tiny_flyer")
 	_assert(str(boss.get("scene", "")) == "monster_tiny_flyer", "boss visual_model should select flyer scene")
+
+
+func _test_animation_controller_visual_opt_out() -> void:
+	var main := MainScript.new()
+	_assert(not main._entity_uses_animation_controller({
+		"type": "monster",
+		"monster_def_id": "town_training_doll",
+	}), "training doll silhouette should not require AnimationPlayer")
+	_assert(main._entity_uses_animation_controller({
+		"type": "monster",
+		"monster_def_id": "dungeon_mob",
+	}), "regular dungeon monster should require AnimationPlayer")
+	_assert(main._entity_uses_animation_controller({
+		"type": "player",
+	}), "player should require AnimationPlayer")
+	main.free()
 
 
 func _test_flying_monster_pick_collider_height() -> void:

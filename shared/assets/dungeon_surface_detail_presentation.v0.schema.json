@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/dungeon_surface_detail_presentation.v0.schema.json",
+  "title": "Dungeon surface detail presentation (v0)",
+  "description": "Client-only tuning for dungeon floor signs and wall artifacts.",
+  "type": "object",
+  "required": [
+    "version",
+    "floor_detail_y",
+    "wall_detail_inset",
+    "wall_detail_height_ratio",
+    "corridor_large_detail_every",
+    "room_large_detail_every",
+    "floor_motifs",
+    "wall_motifs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "floor_detail_y": { "type": "number", "minimum": 0.0, "maximum": 0.2 },
+    "wall_detail_inset": { "type": "number", "minimum": 0.0, "maximum": 0.3 },
+    "wall_detail_height_ratio": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0 },
+    "corridor_large_detail_every": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "room_large_detail_every": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "floor_motifs": {
+      "type": "object",
+      "minProperties": 2,
+      "additionalProperties": { "$ref": "#/$defs/floorMotif" }
+    },
+    "wall_motifs": {
+      "type": "object",
+      "minProperties": 2,
+      "additionalProperties": { "$ref": "#/$defs/wallMotif" }
+    }
+  },
+  "$defs": {
+    "floorMotif": {
+      "type": "object",
+      "required": ["color", "alpha", "scale_min", "scale_max", "band_width"],
+      "additionalProperties": false,
+      "properties": {
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "alpha": { "type": "number", "minimum": 0.05, "maximum": 1.0 },
+        "scale_min": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0 },
+        "scale_max": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 1.2 },
+        "band_width": { "type": "number", "exclusiveMinimum": 0.01, "maximum": 0.5 }
+      }
+    },
+    "wallMotif": {
+      "type": "object",
+      "required": ["color", "alpha", "width_ratio", "height_ratio", "depth"],
+      "additionalProperties": false,
+      "properties": {
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "alpha": { "type": "number", "minimum": 0.05, "maximum": 1.0 },
+        "width_ratio": { "type": "number", "exclusiveMinimum": 0.01, "maximum": 1.0 },
+        "height_ratio": { "type": "number", "exclusiveMinimum": 0.01, "maximum": 1.0 },
+        "depth": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 0.3 }
+      }
+    }
+  }
+}

@@ -1923,7 +1923,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 		var node := _make_entity_node(e)
 		entities_root.add_child(node)
 		var controller: AnimationController = null
-		if _entity_type_uses_combat_presentation(str(e["type"])):
+		if _entity_uses_animation_controller(e):
 			var ap := node.find_child("AnimationPlayer", true, false) as AnimationPlayer
 			if ap != null:
 				controller = AnimationControllerScript.new(ap)
@@ -2101,6 +2101,15 @@ func _remove_entity(id: String) -> void:
 
 func _entity_type_uses_combat_presentation(entity_type: String) -> bool:
 	return entity_type == "monster" or entity_type == "player" or entity_type == "companion"
+
+func _entity_uses_animation_controller(e: Dictionary) -> bool:
+	var entity_type := str(e.get("type", ""))
+	if not _entity_type_uses_combat_presentation(entity_type):
+		return false
+	if entity_type == "monster" or entity_type == "companion":
+		var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
+		return str(visual.get("scene", "")) != "training_doll_silhouette"
+	return true
 
 func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 	var node := rec.get("node", null) as Node3D
@@ -5513,6 +5522,7 @@ func _sync_fog_wall_layout() -> void:
 	if _dungeon_torch_lights != null:
 		_dungeon_torch_lights.sync(current_level, current_wall_layout, current_level < 0 or _lab_world_fog_at_town_level())
 	DungeonRoomFloorTint.sync(ground_node, _ground_factory, current_level, current_wall_layout, entities)
+	DungeonSurfaceDetailPresentation.sync(ground_node, walls_root, _ground_factory, current_level, current_wall_layout, entities)
 	_sync_discovery_minimap()
 	_sync_dungeon_ceiling_visibility()
 

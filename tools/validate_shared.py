@@ -218,6 +218,8 @@ def cross_checks(report: Report) -> None:
     item_templates = load(RULES / "item_templates.v0.json")
     unique_items = load(RULES / "unique_items.v0.json")
     unique_effects = load(RULES / "unique_effects.v0.json")
+    status_effects = load(RULES / "status_effects.v0.json")
+    status_effect_ids = set(status_effects.get("statuses", {}).keys())
     quest_steward = load(RULES / "quest_steward.v0.json")
     unique_effect_defs = unique_effects.get("effects", {})
     set_item_ids = {piece.get("id") for set_def in load(RULES / "set_items.v0.json")["sets"].values() for piece in set_def.get("items", [])}
@@ -3138,6 +3140,14 @@ def cross_checks(report: Report) -> None:
                 report.fail("unique_effects compatibility", f"{effect_id}: unknown item types {unknown_types}")
                 failed_unique_effects = True
             params = effect.get("params", {})
+            for param_key in ("status_id", "dot_status_id", "burn_status_id", "slow_status_id"):
+                status_ref = params.get(param_key)
+                if status_ref and status_ref not in status_effect_ids:
+                    report.fail(
+                        "unique_effects status ref",
+                        f"{effect_id}: unknown {param_key} {status_ref}",
+                    )
+                    failed_unique_effects = True
             if effect_id == "everburning_wound":
                 required_params = {
                     "status_id",

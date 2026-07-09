@@ -21,5 +21,13 @@ func _run() -> void:
 		push_error("expected level label 5, got %s" % label)
 		quit(1)
 		return
+	var rolled_label := PotionIconLabelScript.icon_label(
+		{"item_def_id": "red_potion", "rolled_stats": {"item_level": 3}},
+		"HP",
+	)
+	if rolled_label != "3":
+		push_error("expected rolled_stats level label 3, got %s" % rolled_label)
+		quit(1)
+		return
 	print("[gdtest] PASS: potion_icon_label")
 	quit(0)

@@ -180,12 +180,15 @@ func (s *Sim) startChargeChannel(in Input, res *TickResult, player *entity, skil
 		res.reject(in.MessageID, "invalid_direction")
 		return
 	}
-	if player.mana <= 0 {
+	manaCost := s.effectiveSkillManaCost(def, rank)
+	if player.mana < manaCost && !s.tryBloodPriceForSkill(player, manaCost, in.CorrelationID, res) {
 		res.reject(in.MessageID, "not_enough_mana")
 		return
 	}
 	s.activeLevel().move = nil
 	s.clearAutoNav()
+	s.commitSkillSpend(player, skillID, def, manaCost)
+	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(player))})
 	s.activeLevel().activeChannel = &activeSkillChannel{
 		skillID:            skillID,
 		rank:               rank,

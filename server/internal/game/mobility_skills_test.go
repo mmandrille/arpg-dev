@@ -60,6 +60,47 @@ func TestBarbarianLeapMovesDamagesAndStunsLandingTargets(t *testing.T) {
 	}
 }
 
+func TestPaladinChargeStartConsumesBaseManaCost(t *testing.T) {
+	sim := mobilitySkillSim(t, "paladin", "charge")
+	player := sim.activeLevel().entities[sim.playerID]
+	player.mana = skillManaCost(sim.rules, sim.rules.Skills["charge"], 1)
+
+	start := sim.Tick([]Input{{
+		MessageID:    "charge_start",
+		Type:         "channel_skill_intent",
+		ChannelSkill: &ChannelSkillIntent{SkillID: "charge", Phase: "start", Direction: &Vec2{X: 1}},
+	}})
+
+	assertAck(t, start, "charge_start")
+	if player.mana != 0 {
+		t.Fatalf("charge start mana = %d, want 0 after base cost spent", player.mana)
+	}
+	if !hasEvent(start, "skill_channel_started") {
+		t.Fatalf("charge start events = %+v", start.Events)
+	}
+}
+
+func TestPaladinChargeStartRejectedWhenBelowBaseManaCost(t *testing.T) {
+	sim := mobilitySkillSim(t, "paladin", "charge")
+	player := sim.activeLevel().entities[sim.playerID]
+	baseCost := skillManaCost(sim.rules, sim.rules.Skills["charge"], 1)
+	player.mana = baseCost - 1
+
+	start := sim.Tick([]Input{{
+		MessageID:    "charge_start",
+		Type:         "channel_skill_intent",
+		ChannelSkill: &ChannelSkillIntent{SkillID: "charge", Phase: "start", Direction: &Vec2{X: 1}},
+	}})
+
+	assertReject(t, start, "charge_start", "not_enough_mana")
+	if sim.activeLevel().activeChannel != nil {
+		t.Fatal("charge channel should not start below base mana cost")
+	}
+	if player.mana != baseCost-1 {
+		t.Fatalf("charge start mana = %d, want unchanged %d", player.mana, baseCost-1)
+	}
+}
+
 func TestPaladinChargeMovesDamagesStunsAndPushesLineTargets(t *testing.T) {
 	sim := mobilitySkillSim(t, "paladin", "charge")
 	def := sim.rules.Skills["charge"]

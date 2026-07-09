@@ -37,6 +37,7 @@
           "projectile_speed": { "type": "number", "exclusiveMinimum": 0 },
           "heal": { "$ref": "#/$defs/use_range" },
           "mana_restore": { "$ref": "#/$defs/use_range" },
+          "leveled_consumable": { "type": "boolean" },
           "gold": { "$ref": "#/$defs/use_range" }
         },
         "allOf": [

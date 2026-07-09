@@ -2,14 +2,13 @@ class_name PotionIconLabel
 extends RefCounted
 
 const BlacksmithUpgradePreviewScript := preload("res://scripts/blacksmith_upgrade_preview.gd")
+const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 
 
 static func is_leveled_potion(item_def_id: String) -> bool:
-	match item_def_id:
-		"red_potion", "blue_potion", "rejuv_potion":
-			return true
-		_:
-			return false
+	ItemRulesLoaderScript.ensure_loaded()
+	var def := ItemRulesLoaderScript.item_definition(item_def_id)
+	return bool(def.get("leveled_consumable", false))
 
 
 static func icon_label(item: Dictionary, fallback_label: String) -> String:

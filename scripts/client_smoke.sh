@@ -216,6 +216,7 @@ run_gate "GDScript skills panel test" "[gdtest] PASS: test_skills_panel" res://t
 run_gate "GDScript skill tree layout test" "[gdtest] PASS: test_skill_tree_layout" res://tests/test_skill_tree_layout.gd
 run_gate "GDScript skill bar test" "[gdtest] PASS: test_skill_bar" res://tests/test_skill_bar.gd
 run_gate "GDScript status effects bar test" "[gdtest] PASS: test_status_effects_bar" res://tests/test_status_effects_bar.gd
+run_gate "GDScript potion icon label test" "[gdtest] PASS: potion_icon_label" res://tests/test_potion_icon_label.gd
 run_gate "GDScript status effect presentation test" "[gdtest] PASS: test_status_effect_presentation" res://tests/test_status_effect_presentation.gd
 run_gate "GDScript aura soft lights test" "[gdtest] PASS: test_aura_soft_lights" res://tests/test_aura_soft_lights.gd
 

@@ -14,6 +14,7 @@ const DungeonWallCornerPresentationScript := preload("res://scripts/dungeon_wall
 const DungeonRoomFloorTintScript := preload("res://scripts/dungeon_room_floor_tint.gd")
 const DungeonAmbientMotesScript := preload("res://scripts/dungeon_ambient_motes.gd")
 const DungeonSurfaceDetailPresentationScript := preload("res://scripts/dungeon_surface_detail_presentation.gd")
+const SurfaceMaterialLoaderScript := preload("res://scripts/surface_material_loader.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -21,6 +22,7 @@ var _fail_count: int = 0
 
 func _initialize() -> void:
 	_test_client_constants()
+	_test_surface_material_loader()
 	_test_ground_wall_factory()
 	_test_wall_renderer()
 	_test_loot_node_factory()
@@ -39,6 +41,20 @@ func _initialize() -> void:
 func _test_client_constants() -> void:
 	_assert_eq("player start hp", ClientConstantsScript.PLAYER_START_HP, 10)
 	_assert_true("rarity color present", ClientConstantsScript.LOOT_LABEL_RARITY_COLORS.has("rare"))
+
+
+func _test_surface_material_loader() -> void:
+	SurfaceMaterialLoaderScript.ensure_loaded()
+	var town_style := SurfaceMaterialLoaderScript.material(SurfaceMaterialLoaderScript.STYLE_TOWN_GROUND)
+	var dungeon_style := SurfaceMaterialLoaderScript.material(SurfaceMaterialLoaderScript.STYLE_DUNGEON_FLOOR)
+	var water_style := SurfaceMaterialLoaderScript.material(SurfaceMaterialLoaderScript.STYLE_WATER)
+	_assert_true("surface material town style loaded", not town_style.is_empty())
+	_assert_true("surface material dungeon style loaded", not dungeon_style.is_empty())
+	_assert_true("surface material water style loaded", not water_style.is_empty())
+	_assert_eq("surface material level town style", SurfaceMaterialLoaderScript.style_for_ground_level(0), SurfaceMaterialLoaderScript.STYLE_TOWN_GROUND)
+	_assert_eq("surface material level dungeon style", SurfaceMaterialLoaderScript.style_for_ground_level(-1), SurfaceMaterialLoaderScript.STYLE_DUNGEON_FLOOR)
+	_assert_true("surface material uv scale loaded", SurfaceMaterialLoaderScript.uv_scale(SurfaceMaterialLoaderScript.STYLE_TOWN_GROUND, Vector2.ZERO).x > 1.0)
+	_assert_true("surface material water overlay bands loaded", SurfaceMaterialLoaderScript.integer(SurfaceMaterialLoaderScript.STYLE_WATER, "overlay_bands", 0) >= 1)
 
 
 func _test_ground_wall_factory() -> void:
@@ -64,8 +80,10 @@ func _test_ground_wall_factory() -> void:
 	var dungeon_normal_a := factory.make_ground_normal_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, dungeon_palette)
 	var dungeon_normal_b := factory.make_ground_normal_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, dungeon_palette)
 	_assert_true("town ground normal remains disabled", not town_mat.normal_enabled)
+	_assert_eq("town ground uv from material kit", town_mat.uv1_scale.x, SurfaceMaterialLoaderScript.uv_scale(SurfaceMaterialLoaderScript.STYLE_TOWN_GROUND, Vector2.ZERO).x)
 	_assert_true("dungeon ground normal enabled", dungeon_mat.normal_enabled)
 	_assert_true("dungeon ground normal texture exists", dungeon_mat.normal_texture != null)
+	_assert_float_close("dungeon ground normal scale from material kit", dungeon_mat.normal_scale, SurfaceMaterialLoaderScript.scalar(SurfaceMaterialLoaderScript.STYLE_DUNGEON_FLOOR, "normal_scale", 0.0), 0.001)
 	_assert_true("dungeon ground normal cache stable", dungeon_normal_a == dungeon_normal_b)
 	_assert_eq("ground normal texture cache count", factory.ground_normal_textures.size(), 3)
 	_assert_true("dungeon ground normal texel varies", factory.ground_normal_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 0, 0, dungeon_palette) != factory.ground_normal_texel(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, 17, 11, dungeon_palette))
@@ -101,6 +119,7 @@ func _test_wall_renderer() -> void:
 	var wall_body := root.get_child(0) as StaticBody3D
 	_assert_eq("wall child name", wall_body.name, "Wall_test_wall")
 	var wall := wall_body.get_child(1) as MeshInstance3D
+	var wall_mat := wall.material_override as StandardMaterial3D
 	_assert_true("dungeon wall height", absf((wall.mesh as BoxMesh).size.y - (ground_factory.dungeon_ceiling_height() + 0.08)) <= 0.001)
 	var ceiling := root.get_node_or_null("DungeonCeiling") as MeshInstance3D
 	_assert_true("dungeon ceiling node exists", ceiling != null)
@@ -111,9 +130,10 @@ func _test_wall_renderer() -> void:
 	_assert_true("dungeon ceiling can be hidden for isometric", not ceiling.visible)
 	renderer.set_ceiling_visible(true)
 	_assert_true("dungeon ceiling can be shown for perspective", ceiling.visible)
-	_assert_true("wall material has palette texture", (wall.material_override as StandardMaterial3D).albedo_texture != null)
-	_assert_true("wall material normal enabled", (wall.material_override as StandardMaterial3D).normal_enabled)
-	_assert_true("wall material has normal texture", (wall.material_override as StandardMaterial3D).normal_texture != null)
+	_assert_true("wall material has palette texture", wall_mat.albedo_texture != null)
+	_assert_true("wall material normal enabled", wall_mat.normal_enabled)
+	_assert_true("wall material has normal texture", wall_mat.normal_texture != null)
+	_assert_float_close("wall material roughness from kit", wall_mat.roughness, SurfaceMaterialLoaderScript.scalar(SurfaceMaterialLoaderScript.STYLE_DUNGEON_WALL, "roughness", 0.0), 0.001)
 	_assert_eq("wall normal texture cache count", ground_factory.wall_normal_textures.size(), 1)
 	var helper := DungeonWallCornerPresentationScript.new(-4, ground_factory.dungeon_ceiling_height(), ground_factory)
 	var room_corner_layout := [
@@ -180,10 +200,12 @@ func _test_wall_renderer() -> void:
 	_assert_eq("water layout kind", str((water_walls[0] as Dictionary).get("kind", "")), "water")
 	_assert_eq("water child count", root.get_child_count(), 2)
 	var water := root.get_child(0) as MeshInstance3D
+	var water_mat := water.material_override as StandardMaterial3D
 	_assert_eq("water child name", water.name, "Water_test_water")
 	_assert_eq("water metadata kind", str(water.get_meta("kind", "")), "water")
 	_assert_true("water mesh is plane", water.mesh is PlaneMesh)
-	_assert_true("water material has texture", (water.material_override as StandardMaterial3D).albedo_texture != null)
+	_assert_true("water material has texture", water_mat.albedo_texture != null)
+	_assert_float_close("water material roughness from kit", water_mat.roughness, SurfaceMaterialLoaderScript.scalar(SurfaceMaterialLoaderScript.STYLE_WATER, "roughness", 0.0), 0.001)
 	_assert_true("water motion overlay exists", water.find_child("WaterMotionBands", false, false) != null)
 	var hole_walls := renderer.render_wall_layout([{
 		"id": "test_hole",
@@ -234,6 +256,8 @@ func _test_wall_renderer() -> void:
 	_assert_eq("column metadata kind", str(column.get_meta("kind", "")), "column")
 	_assert_true("column has pillars", column.get_child_count() >= 2)
 	_assert_true("column first mesh is cylinder", (column.get_child(0) as MeshInstance3D).mesh is CylinderMesh)
+	var column_mat := (column.get_child(0) as MeshInstance3D).material_override as StandardMaterial3D
+	_assert_float_close("column material normal scale from kit", column_mat.normal_scale, SurfaceMaterialLoaderScript.scalar(SurfaceMaterialLoaderScript.STYLE_DUNGEON_COLUMN, "normal_scale", 0.0), 0.001)
 	renderer.set_level(0)
 	var lab_walls := renderer.render_world_walls("flying_navigation_lab")
 	var lab_water_count := 0
@@ -416,6 +440,14 @@ func _assert_eq(label: String, got, want) -> void:
 	else:
 		_fail_count += 1
 		push_error("[gdtest] FAIL %s: got=%s want=%s" % [label, str(got), str(want)])
+
+
+func _assert_float_close(label: String, got: float, want: float, epsilon: float) -> void:
+	if absf(got - want) <= epsilon:
+		_pass_count += 1
+	else:
+		_fail_count += 1
+		push_error("[gdtest] FAIL %s: got=%s want=%s epsilon=%s" % [label, str(got), str(want), str(epsilon)])
 
 
 func _assert_true(label: String, value: bool) -> void:

@@ -1,0 +1,68 @@
+{
+  "version": 0,
+  "materials": {
+    "town_ground": {
+      "low": "#2f6136",
+      "high": "#79aa58",
+      "accent": "#b7b56c",
+      "dark": "#274c2b",
+      "soil": "#8f7447",
+      "soil_dark": "#6f5f39",
+      "contrast": 1.0,
+      "uv_scale": [28.0, 18.0],
+      "roughness": 0.92,
+      "normal_scale": 0.0
+    },
+    "dungeon_floor": {
+      "low": "#3c3f43",
+      "high": "#73706b",
+      "accent": "#a09a8e",
+      "dark": "#25282c",
+      "soil": "#4b4842",
+      "soil_dark": "#302d2a",
+      "contrast": 1.08,
+      "uv_scale": [28.0, 18.0],
+      "roughness": 0.88,
+      "normal_scale": 0.18
+    },
+    "dungeon_wall": {
+      "low": "#34363a",
+      "high": "#6b6255",
+      "accent": "#8a8173",
+      "dark": "#17191c",
+      "soil": "#4d4740",
+      "soil_dark": "#26231f",
+      "contrast": 1.12,
+      "uv_scale": [2.0, 2.0],
+      "roughness": 0.94,
+      "normal_scale": 0.24
+    },
+    "dungeon_column": {
+      "low": "#4c4942",
+      "high": "#8d846f",
+      "accent": "#b2aa94",
+      "dark": "#24231f",
+      "soil": "#5d5549",
+      "soil_dark": "#38342d",
+      "contrast": 1.16,
+      "uv_scale": [2.0, 2.0],
+      "roughness": 0.98,
+      "normal_scale": 0.22
+    },
+    "water": {
+      "low": "#1f5f7a",
+      "high": "#5fa8bb",
+      "accent": "#c2eef1",
+      "dark": "#153949",
+      "soil": "#2c748d",
+      "soil_dark": "#194b60",
+      "contrast": 1.1,
+      "uv_scale": [3.0, 3.0],
+      "roughness": 0.7,
+      "normal_scale": 0.0,
+      "overlay_alpha": 0.28,
+      "overlay_y": 0.026,
+      "overlay_bands": 5
+    }
+  }
+}

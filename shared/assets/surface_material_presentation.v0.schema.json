@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/surface_material_presentation.v0.schema.json",
+  "title": "Surface material presentation (v0)",
+  "description": "Client-only procedural material tuning for environment surfaces.",
+  "type": "object",
+  "required": ["version", "materials"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "materials": {
+      "type": "object",
+      "required": ["town_ground", "dungeon_floor", "dungeon_wall", "dungeon_column", "water"],
+      "additionalProperties": false,
+      "properties": {
+        "town_ground": { "$ref": "#/$defs/material" },
+        "dungeon_floor": { "$ref": "#/$defs/material" },
+        "dungeon_wall": { "$ref": "#/$defs/material" },
+        "dungeon_column": { "$ref": "#/$defs/material" },
+        "water": { "$ref": "#/$defs/waterMaterial" }
+      }
+    }
+  },
+  "$defs": {
+    "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "uvScale": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number", "exclusiveMinimum": 0.0, "maximum": 128.0 },
+        { "type": "number", "exclusiveMinimum": 0.0, "maximum": 128.0 }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "material": {
+      "type": "object",
+      "required": ["low", "high", "accent", "dark", "soil", "soil_dark", "contrast", "uv_scale", "roughness", "normal_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "low": { "$ref": "#/$defs/color" },
+        "high": { "$ref": "#/$defs/color" },
+        "accent": { "$ref": "#/$defs/color" },
+        "dark": { "$ref": "#/$defs/color" },
+        "soil": { "$ref": "#/$defs/color" },
+        "soil_dark": { "$ref": "#/$defs/color" },
+        "contrast": { "type": "number", "minimum": 0.1, "maximum": 2.0 },
+        "uv_scale": { "$ref": "#/$defs/uvScale" },
+        "roughness": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "normal_scale": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+      }
+    },
+    "waterMaterial": {
+      "type": "object",
+      "required": ["low", "high", "accent", "dark", "soil", "soil_dark", "contrast", "uv_scale", "roughness", "normal_scale", "overlay_alpha", "overlay_y", "overlay_bands"],
+      "additionalProperties": false,
+      "properties": {
+        "low": { "$ref": "#/$defs/color" },
+        "high": { "$ref": "#/$defs/color" },
+        "accent": { "$ref": "#/$defs/color" },
+        "dark": { "$ref": "#/$defs/color" },
+        "soil": { "$ref": "#/$defs/color" },
+        "soil_dark": { "$ref": "#/$defs/color" },
+        "contrast": { "type": "number", "minimum": 0.1, "maximum": 2.0 },
+        "uv_scale": { "$ref": "#/$defs/uvScale" },
+        "roughness": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "normal_scale": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "overlay_alpha": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "overlay_y": { "type": "number", "minimum": 0.0, "maximum": 0.2 },
+        "overlay_bands": { "type": "integer", "minimum": 1, "maximum": 12 }
+      }
+    }
+  }
+}

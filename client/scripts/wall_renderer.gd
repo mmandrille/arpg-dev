@@ -3,6 +3,7 @@ extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const DungeonWallCornerPresentationScript := preload("res://scripts/dungeon_wall_corner_presentation.gd")
+const SurfaceMaterialLoaderScript := preload("res://scripts/surface_material_loader.gd")
 const WallOcclusionPresentationLoaderScript := preload("res://scripts/wall_occlusion_presentation_loader.gd")
 const WallOcclusionFadeScript := preload("res://scripts/wall_occlusion_fade.gd")
 const WallOcclusionRuntimeScript := preload("res://scripts/wall_occlusion_runtime.gd")
@@ -372,14 +373,24 @@ func _make_water_node(wall: Dictionary) -> MeshInstance3D:
 	node.position = Vector3(float(pos.get("x", 0.0)), 0.018, float(pos.get("y", 0.0)))
 	var mat := StandardMaterial3D.new()
 	var palette: Dictionary = _ground_factory.biome_palette_for_level(_current_level) if _ground_factory != null and _ground_factory.has_method("biome_palette_for_level") else {}
+	var style_id := SurfaceMaterialLoaderScript.STYLE_WATER
 	if _ground_factory != null and _ground_factory.has_method("make_water_texture"):
 		mat.albedo_texture = _ground_factory.make_water_texture(palette)
-	mat.albedo_color = _palette_color_from_dict(palette, "water_high", Color("#85d8ea"))
+	mat.albedo_color = _palette_color_from_dict(palette, "water_high", SurfaceMaterialLoaderScript.color(style_id, "high", Color("#85d8ea")))
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	mat.roughness = 0.70
-	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / 3.0), max(1.0, float(size.get("y", 1.0)) / 3.0), 1.0)
+	mat.roughness = SurfaceMaterialLoaderScript.scalar(style_id, "roughness", 0.70)
+	var uv_scale := SurfaceMaterialLoaderScript.uv_scale(style_id, Vector2(3.0, 3.0))
+	mat.uv1_scale = Vector3(max(1.0, float(size.get("x", 1.0)) / uv_scale.x), max(1.0, float(size.get("y", 1.0)) / uv_scale.y), 1.0)
 	node.material_override = mat
-	_add_surface_overlay(node, "WaterMotionBands", Vector2(mesh.size.x, mesh.size.y), _palette_color_from_dict(palette, "water_foam", Color("#b8eef5")), 0.24, 0.026, 4)
+	_add_surface_overlay(
+		node,
+		"WaterMotionBands",
+		Vector2(mesh.size.x, mesh.size.y),
+		_palette_color_from_dict(palette, "water_foam", SurfaceMaterialLoaderScript.color(style_id, "accent", Color("#b8eef5"))),
+		SurfaceMaterialLoaderScript.scalar(style_id, "overlay_alpha", 0.24),
+		SurfaceMaterialLoaderScript.scalar(style_id, "overlay_y", 0.026),
+		SurfaceMaterialLoaderScript.integer(style_id, "overlay_bands", 4)
+	)
 	return node
 
 func _add_surface_overlay(parent: Node3D, overlay_name: String, size: Vector2, color: Color, alpha: float, y_offset: float, band_count: int) -> void:

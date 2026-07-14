@@ -18,10 +18,12 @@ func _initialize() -> void:
 
 
 func _test_outcome_spawn_rules() -> void:
-	for outcome in ["miss", "block", "immune", "crit"]:
+	for outcome in ["hit", "miss", "block", "immune", "crit"]:
 		_assert_true("%s should spawn" % outcome, CombatOutcomePunchScript.should_spawn({"outcome": outcome}))
 	_assert_true("critical flag should spawn", CombatOutcomePunchScript.should_spawn({"outcome": "hit", "critical": true}))
-	_assert_true("normal hit should not spawn", not CombatOutcomePunchScript.should_spawn({"outcome": "hit"}))
+	_assert_true("monster damaged without explicit outcome should spawn", CombatOutcomePunchScript.should_spawn({"event_type": "monster_damaged"}))
+	_assert_true("monster killed should spawn", CombatOutcomePunchScript.should_spawn({"event_type": "monster_killed", "outcome": "hit"}))
+	_assert_true("empty event should not spawn", not CombatOutcomePunchScript.should_spawn({}))
 
 
 func _test_outcome_nodes() -> void:
@@ -32,9 +34,43 @@ func _test_outcome_nodes() -> void:
 	var block := CombatOutcomePunchScript.make_node({"outcome": "block"})
 	_assert_eq("block ring exists", block.find_child("OutcomeRing", true, false) != null, true)
 	block.free()
+	var hit := CombatOutcomePunchScript.make_node({"event_type": "monster_damaged", "damage": 6, "damage_type": "physical"})
+	_assert_eq("hit outcome meta", str(hit.get_meta("outcome")), "hit")
+	_assert_eq("hit spark count", hit.get_child_count(), 6)
+	hit.free()
+	var kill := CombatOutcomePunchScript.make_node({"event_type": "monster_killed", "outcome": "hit"})
+	_assert_eq("kill outcome meta", str(kill.get_meta("outcome")), "kill")
+	_assert_eq("kill spark count", kill.get_child_count(), 8)
+	kill.free()
 
 
 func _test_special_outcome_integration() -> void:
+	_assert_eq("integrated block punch count", _integrated_outcome_punch_count({
+		"event_type": "attack_missed",
+		"entity_id": "2001",
+		"target_entity_id": "2001",
+		"source_entity_id": "1001",
+		"outcome": "block",
+	}), 1)
+	_assert_eq("integrated hit punch count", _integrated_outcome_punch_count({
+		"event_type": "monster_damaged",
+		"entity_id": "2001",
+		"target_entity_id": "2001",
+		"source_entity_id": "1001",
+		"outcome": "hit",
+		"damage": 3,
+	}), 1)
+	_assert_eq("integrated kill punch count", _integrated_outcome_punch_count({
+		"event_type": "monster_killed",
+		"entity_id": "2001",
+		"target_entity_id": "2001",
+		"source_entity_id": "1001",
+		"outcome": "hit",
+		"damage": 3,
+	}), 1)
+
+
+func _integrated_outcome_punch_count(ev: Dictionary) -> int:
 	var main = MainScript.new()
 	main.player_id = "1001"
 	main.player_anchor = null
@@ -52,19 +88,14 @@ func _test_special_outcome_integration() -> void:
 	root.add_child(main.damage_numbers_layer)
 	root.add_child(main._camera)
 	main._camera.look_at_from_position(Vector3(4.0, 12.0, 14.0), monster.position, Vector3.UP)
-	main._apply_delta({"events": [{
-		"event_type": "attack_missed",
-		"entity_id": "2001",
-		"target_entity_id": "2001",
-		"source_entity_id": "1001",
-		"outcome": "block",
-	}], "changes": []})
-	_assert_eq("integrated outcome punch count", monster.find_children(CombatOutcomePunchScript.NODE_NAME, "", true, false).size(), 1)
+	main._apply_delta({"events": [ev], "changes": []})
+	var count := monster.find_children(CombatOutcomePunchScript.NODE_NAME, "", true, false).size()
 	main.damage_numbers_layer.queue_free()
 	main._camera.queue_free()
 	main.entities_root.queue_free()
 	main.walls_root.queue_free()
 	main.free()
+	return count
 
 
 func _assert_eq(label: String, got, expected) -> void:

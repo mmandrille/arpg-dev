@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-14 (v464 combat input flow polish)
+Last updated: 2026-07-14 (v465 combat impact confirmation)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-07-14 (v464 combat input flow polish)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v464 — combat input flow polish |
-| **Next slice** | v465 TBD |
+| **Latest completed slice** | v465 — combat impact confirmation |
+| **Next slice** | v466 TBD |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 
@@ -108,7 +108,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 |------|---------------|--------|
 | Persistence | Player-facing old-session resume, delete/rename characters, class selection, visual customization, portraits, richer character detail panels, stash tabs/capacity upgrades, town stash delivery/market receipts, quest progress, durable quest turn-in completion/repeat limits/anti-farming, respec/refund, respawn/checkpoints, durable dungeon map snapshots, durable fog-of-war explored-map memory, durable buyback history, starter loadout backfill for existing or compatibility-default characters | v22/v24/v26/v39/v40/v41/v44/v45/v47/v50/v54/v59/v97/v253/v255/v291 non-goals, ADR-0008 deferred, ADR-0011, ADR-0014 |
 | Combat | Basic-attack cooldown rebalance, animation-speed scaling, mana regeneration, respawn, richer spell systems, piercing/AoE/homing projectiles, debuffs/DOT/status effects, summons/traps/auras, richer ranged monster AI, richer quadruped pounce variants/polish beyond the v281 first pass, bat swarm behavior and true flying gameplay/pathing beyond the v280 dive first pass, additional ranged/rectangle boss pattern variants beyond the v282 first rectangle, elite archer packs, retreat/cover seeking, predictive leading, fog-aware monster awareness/aggro/scouting behavior, final ranged monster damage/range/cooldown balance, final combat balance across damage/HP/movement/rarity/depth, depth scaling beyond loot bands, offhand abilities/dual-wield, named elite packs/minions/aura modifiers, additional boss templates/pattern decks beyond the v287 Cave Warden/Crypt Matron set, additional enrage phases and summon variants beyond first wolf/bat adds, weighted/random boss pattern selection, final skill tree and active/passive ability catalog beyond the first passive column, additional active skills beyond Rage/Heal/Magic Bolt/Holy Shield/Arcane Barrage/Sanctuary, free-form skill formulas, class-locked skill trees, skill capability expansion beyond projectile/self-buff/area-heal/area-stat-buff/passive-stat-bonus, PvP/friendly fire | v0/v4/v12/v17/v21/v23/v26/v28/v29/v30/v31/v32/v35/v37/v39/v40/v44/v48/v52/v56/v57/v58/v59/v61/v72/v81/v159/v161/v171/v253/v254, v280-v283/v287 follow-up polish non-goals |
-| Combat / movement feel | Broader shared-rules movement-speed, acceleration, basic-attack cooldown, or attack-speed retuning remains deferred after v461 locomotion polish and v464 client-side combat input flow polish; revisit only if traversal or basic combat cadence still needs gameplay-owned pacing after more visual playtime. | v461/v464 non-goals |
+| Combat / movement feel | Broader shared-rules movement-speed, acceleration, basic-attack cooldown, or attack-speed retuning remains deferred after v461 locomotion polish, v464 client-side combat input flow polish, and v465 combat impact confirmation; deterministic client bot proof for critical/miss/block result variants also remains deferred. Revisit only if traversal or basic combat cadence still needs gameplay-owned pacing after more visual playtime. | v461/v464/v465 non-goals |
 | Itemization | Affix grammar, procedural item names, special-effect execution, loot filters, crafting, richer gold sinks, Magic Find, additional unique/set catalogs beyond the first set package, unique items that change skill/build behavior, unique monster special drops, final item-level/depth progression, richer material wallet UI/stash material storage, shared blacksmith recipe catalog, recipe unlocks, per-recipe costs/success formulas, multi-resource recipes, item-owned levels, success-chance add/improve-roll upgrades, richer boss drop economy, richer dungeon drop economy, expanded shop depth economy bands, badge spending for stat/skill resources, quest reward source-depth metadata, item sorting/filtering, multi-cell item footprints, passive skill sources for inventory rows and equipment requirements, item auto-pickup | v23/v25/v26/v28/v29/v30/v35/v36/v39/v41/v42/v43/v47/v49/v51/v181/v202/v221/v222/v290/v292 non-goals, ADR-0009 deferred, ADR-0012, ADR-0013, ADR-0014 |
 | Itemization | Pilot branch uniques shipped for barbarian/rogue/sorcerer/paladin in v450; ranger/druid branch exemplars and wider named-unique distribution remain deferred on top of the broader itemization backlog. | v450 follow-up, ADR-0014 |
 | Itemization | Affinity-scaling passives shipped as barbarian/rogue pilots in v451; sorcerer/paladin/ranger/druid follow-up passives and broader affinity gear coverage remain deferred. | v451 follow-up, ADR-0014 |

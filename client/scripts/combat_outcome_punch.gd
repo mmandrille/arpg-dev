@@ -8,7 +8,7 @@ const NODE_NAME := "CombatOutcomePunch"
 
 static func should_spawn(ev: Dictionary) -> bool:
 	var outcome := _normalized_outcome(ev)
-	return outcome in ["miss", "block", "immune", "crit"]
+	return outcome in ["hit", "kill", "miss", "block", "immune", "crit"]
 
 
 static func make_node(ev: Dictionary) -> Node3D:
@@ -27,6 +27,11 @@ static func _normalized_outcome(ev: Dictionary) -> String:
 	var outcome := str(ev.get("outcome", "")).to_lower()
 	if bool(ev.get("critical", false)):
 		return "crit"
+	var event_type := str(ev.get("event_type", ""))
+	if event_type == "monster_killed":
+		return "kill"
+	if event_type == "monster_damaged" and outcome == "":
+		return "hit"
 	return outcome
 
 
@@ -34,6 +39,11 @@ static func _color_for_outcome(ev: Dictionary, outcome: String) -> Color:
 	if outcome == "crit":
 		var presentation := DamageTypeCombatTextScript.number_for_event(ev, Color(1.0, 0.58, 0.22))
 		return presentation.get("color", Color(1.0, 0.58, 0.22))
+	if outcome == "kill":
+		return Color(1.0, 0.72, 0.26)
+	if outcome == "hit":
+		var damage_presentation := DamageTypeCombatTextScript.number_for_event(ev, Color(1.0, 0.92, 0.76))
+		return damage_presentation.get("color", Color(1.0, 0.92, 0.76))
 	var special := DamageTypeCombatTextScript.special_outcome(outcome)
 	if not special.is_empty():
 		return special.get("color", Color.WHITE)
@@ -44,8 +54,12 @@ static func _ring_scale(outcome: String) -> float:
 	match outcome:
 		"crit":
 			return 1.18
+		"kill":
+			return 1.26
 		"immune":
 			return 1.08
+		"hit":
+			return 0.96
 		"block":
 			return 1.0
 		_:
@@ -56,8 +70,12 @@ static func _spark_count(outcome: String) -> int:
 	match outcome:
 		"crit":
 			return 8
+		"kill":
+			return 7
 		"immune":
 			return 6
+		"hit":
+			return 5
 		"block":
 			return 4
 		_:
@@ -83,10 +101,12 @@ static func _spark_node(color: Color, index: int, outcome: String) -> MeshInstan
 	var height := 0.22 + float(index % 2) * 0.06
 	if outcome == "crit":
 		height += 0.08
+	elif outcome == "kill":
+		height += 0.12
 	mesh.size = Vector3(0.03, 0.03, height)
 	spark.mesh = mesh
 	var angle := (TAU / float(_spark_count(outcome))) * float(index)
-	var radius := 0.14 if outcome == "miss" else 0.20
+	var radius := 0.14 if outcome == "miss" else 0.24 if outcome == "kill" else 0.20
 	spark.position = Vector3(cos(angle) * radius, 0.58 + float(index) * 0.02, sin(angle) * radius)
 	spark.rotation = Vector3(0.36, angle, 0.18)
 	spark.material_override = _material(color, 0.78 - float(index % 3) * 0.08)

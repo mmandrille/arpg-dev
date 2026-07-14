@@ -1,0 +1,49 @@
+{
+  "id": "combat_input_flow_polish",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "combat_control_lab",
+  "seed": "combatflow001",
+  "title": "Combat input flow polish: combat click can be retargeted into movement",
+  "description": "Click a melee target to start attack-move, then click the floor during local recovery and prove the retarget grace dispatches movement instead of leaving stale combat intent.",
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_entity_buffered",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob"
+    },
+    {
+      "type": "click_floor",
+      "x": 2.0,
+      "z": 8.0
+    },
+    {
+      "type": "wait_command_retarget_grace",
+      "active": false,
+      "kind": "floor",
+      "last_dispatched": true,
+      "dispatched_min": 1,
+      "ground_x": 2.0,
+      "ground_z": 8.0,
+      "distance_max": 0.05,
+      "timeout_s": 2.0
+    },
+    {
+      "type": "wait_player_near",
+      "x": 2.0,
+      "z": 8.0,
+      "distance": 2.5,
+      "timeout_s": 10.0
+    }
+  ]
+}

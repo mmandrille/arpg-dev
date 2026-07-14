@@ -14,6 +14,7 @@ func _initialize() -> void:
 	await _test_melee_attack_lunges_and_recovers()
 	await _test_ranged_attack_does_not_lunge()
 	await _test_non_attack_clip_does_not_lunge()
+	await _test_repeated_melee_attack_replaces_prior_lunge()
 
 	print("[gdtest] PASS: test_melee_lunge_presentation (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -54,6 +55,22 @@ func _test_non_attack_clip_does_not_lunge() -> void:
 	var lunge: Dictionary = controller.get_debug_state().get("melee_lunge", {})
 	_assert_false("hit lunge inactive", bool(lunge.get("active", true)))
 	_assert_eq("hit lunge count", int(lunge.get("count", 0)), 0)
+	(fixture["visual"] as Node).free()
+
+
+func _test_repeated_melee_attack_replaces_prior_lunge() -> void:
+	var fixture := _make_character_fixture()
+	await process_frame
+	var controller = AnimationControllerScript.new(fixture["animation_player"])
+	controller.play_one_shot("attack", "melee")
+	controller.play_one_shot("attack", "melee")
+	var lunge: Dictionary = controller.get_debug_state().get("melee_lunge", {})
+	_assert_true("repeated melee lunge active", bool(lunge.get("active", false)))
+	_assert_eq("repeated melee lunge count", int(lunge.get("count", 0)), 2)
+	await create_timer(CombatFeelConfigScript.melee_lunge_recovery_seconds() + 0.05).timeout
+	lunge = controller.get_debug_state().get("melee_lunge", {})
+	_assert_false("repeated melee lunge recovers", bool(lunge.get("active", true)))
+	_assert_true("repeated melee lunge offset settled", float(lunge.get("offset_length", 1.0)) <= 0.02)
 	(fixture["visual"] as Node).free()
 
 

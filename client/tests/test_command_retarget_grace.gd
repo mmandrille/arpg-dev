@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_test_latest_floor_retarget_replaces_prior()
 	_test_pop_ready_records_dispatched_target()
 	_test_grace_expires_before_long_cooldown()
+	_test_queued_floor_retarget_invokes_cleanup_callback()
 	_test_long_recovery_floor_click_dispatches_immediately()
 
 	print("[gdtest] PASS: test_command_retarget_grace (%d passed, %d failed)" % [_pass_count, _fail_count])
@@ -68,12 +69,31 @@ func _test_long_recovery_floor_click_dispatches_immediately() -> void:
 	_assert_approx("long recovery dispatched x", float(state.get("last_dispatched_ground_x", 0.0)), 8.0, 0.001)
 
 
+func _test_queued_floor_retarget_invokes_cleanup_callback() -> void:
+	var grace := CommandRetargetGraceScript.new()
+	var client := FakeClient.new()
+	var cleanup := CleanupProbe.new()
+	var sent := grace.dispatch_or_queue_floor(Vector3(2.0, 0.0, 7.0), CombatFeelConfigScript.command_retarget_grace_seconds() * 0.5, client, 12, Callable(cleanup, "clear_pending"), Callable())
+	var state := grace.get_debug_state()
+	_assert_false("short recovery queues floor click", sent)
+	_assert_true("queued retarget active", bool(state.get("active", false)))
+	_assert_eq("cleanup callback called before queue", cleanup.clear_count, 1)
+	_assert_eq("queued retarget sent count", client.sent.size(), 0)
+
+
 class FakeClient:
 	var sent: Array = []
 
 	func send(intent_type: String, last_server_tick: int, payload: Dictionary) -> String:
 		sent.append({"intent_type": intent_type, "last_server_tick": last_server_tick, "payload": payload})
 		return "msg"
+
+
+class CleanupProbe:
+	var clear_count: int = 0
+
+	func clear_pending() -> void:
+		clear_count += 1
 
 
 func _assert_true(label: String, value: bool) -> void:

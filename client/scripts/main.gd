@@ -1081,7 +1081,7 @@ func _process(delta: float) -> void:
 	_try_complete_pending_interactable_action()
 	_try_complete_pending_waypoint_travel()
 	_tick_movement_animation_linger(delta)
-	CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta, player_id)
+	if _camera != null and is_instance_valid(_camera): CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta, player_id)
 	if gameplay_active and _camera_controller != null:
 		_camera_controller.tick_follow(delta)
 	if gameplay_active and CameraImpactFeedback.is_active():
@@ -6259,7 +6259,9 @@ func get_bot_state() -> Dictionary:
 	return out
 func _camera_projection_for_bot() -> String:
 	if _camera_controller == null: return "orthogonal"
-	return "perspective" if _camera_controller.get_gameplay_camera().projection == Camera3D.PROJECTION_PERSPECTIVE else "orthogonal"
+	var gameplay_camera := _camera_controller.get_gameplay_camera()
+	if gameplay_camera == null or not is_instance_valid(gameplay_camera): return "orthogonal"
+	return "perspective" if gameplay_camera.projection == Camera3D.PROJECTION_PERSPECTIVE else "orthogonal"
 func bot_set_camera_mode(mode: String) -> void:
 	_on_camera_mode_selected(mode)
 func bot_select_camera_mode(mode: String) -> void:

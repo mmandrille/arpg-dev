@@ -246,6 +246,11 @@ client/96_ranger_tier3_visual.json	ranger_tier3_visual	godot_client	extended	con
 client/97_bone_gear_sockets.json	bone_gear_sockets	godot_client	extended	contract	0	0		
 client/98_steward_hunt_quest.json	steward_hunt_quest	godot_client	extended	contract	0	0		
 client/98_wall_occlusion_fade.json	wall_occlusion_fade	godot_client	extended	contract	0	0		
+client/99_dungeon_surface_kit.json	dungeon_surface_kit	godot_client	extended	contract	1	1		generated wall visual proof uses stairs transition
+client/100_rounded_dungeon_corners.json	rounded_dungeon_corners	godot_client	extended	contract	0	0		generated wall visual proof starts in lab
+client/101_dungeon_surface_detail_overlays.json	dungeon_surface_detail_overlays	godot_client	extended	contract	1	1		generated wall visual proof uses stairs transition
+client/102_surface_material_kit.json	surface_material_kit	godot_client	extended	contract	1	1		generated wall visual proof uses stairs transition
+client/103_combat_input_flow_polish.json	combat_input_flow_polish	godot_client	extended	contract	2	2		combat-control visual proof intentionally clicks monster then floor retarget
 client/blacksmith_renew_item.json	blacksmith_renew_item	godot_client	extended	contract	0	0		
 client/blacksmith_shard_merge.json	blacksmith_shard_merge	godot_client	extended	contract	0	0		
 client/blacksmith_upgrade_risk.json	blacksmith_upgrade_risk	godot_client	extended	contract	0	0		

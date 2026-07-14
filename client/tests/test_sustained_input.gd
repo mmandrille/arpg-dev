@@ -109,11 +109,16 @@ func _test_attack_buffer_queue_replace_and_expire() -> void:
 	_assert_eq("attack buffer target", buffer.target_id, "1002")
 	buffer.queue_attack("1003", 0.30)
 	_assert_eq("attack buffer replaces target", buffer.target_id, "1003")
+	var buffer_state: Dictionary = buffer.get_debug_state()
+	_assert_eq("attack buffer queued count", int(buffer_state.get("queued_count", 0)), 2)
+	_assert_eq("attack buffer replaced count", int(buffer_state.get("replaced_count", 0)), 1)
 	buffer.tick(0.10)
 	_assert_true("attack buffer remains before expiry", buffer.active())
 	buffer.tick(0.25)
 	_assert_false("attack buffer expires", buffer.active())
 	_assert_eq("attack buffer target cleared", buffer.target_id, "")
+	buffer_state = buffer.get_debug_state()
+	_assert_eq("attack buffer expired count", int(buffer_state.get("expired_count", 0)), 1)
 
 
 func _test_attack_buffer_clear_guards() -> void:
@@ -146,6 +151,9 @@ func _test_sticky_target_replacement_and_clear_guards() -> void:
 	_assert_false("valid sticky target does not clear", sticky.should_clear(10, entities))
 	sticky.set_target("1003")
 	_assert_eq("sticky target replaces", sticky.target_id, "1003")
+	var sticky_state: Dictionary = sticky.get_debug_state()
+	_assert_eq("sticky target set count", int(sticky_state.get("set_count", 0)), 2)
+	_assert_eq("sticky target replaced count", int(sticky_state.get("replaced_count", 0)), 1)
 	_assert_true("dead sticky target clears", sticky.should_clear(10, entities))
 	sticky.set_target("missing")
 	_assert_true("missing sticky target clears", sticky.should_clear(10, entities))

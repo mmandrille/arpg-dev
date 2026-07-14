@@ -7,7 +7,7 @@ client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait 
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	701	# v392: class creation features panel
 client/scripts/inventory_panel.gd	1623	# v457 close-out: inherited v449-v456 item/resource UI growth; extraction deferred to scheduled v458 review/refactor
-client/scripts/main.gd	6725	# v457 close-out: inherited v449-v456 combat/resource wiring plus live transport hook; coordinator extraction deferred to scheduled v458 review/refactor
+client/scripts/main.gd	6754	# v464: camera validity guard unblocks combat bot visuals; broader coordinator extraction deferred to scheduled review/refactor
 client/scripts/market_panel.gd	1059
 client/scripts/shop_panel.gd	1243	# v407: baseline sync (no v407 logic edits)
 client/scripts/skills_panel.gd	999	# v460 review: baseline lowered to actual count

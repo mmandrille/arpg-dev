@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v464** | `combat-input-flow-polish` | Complete (autoloop focused verification) | [`spec`](../specs/v464_spec-combat-input-flow-polish.md) | [`plan`](../plans/v464_2026-07-14-combat-input-flow-polish.md) | [`as-built`](../as-built/v464_combat-input-flow-polish.md) |
 | **v463** | `dungeon-surface-detail-overlays` | Complete (focused client verification) | [`spec`](../specs/v463_spec-dungeon-surface-detail-overlays.md) | [`plan`](../plans/v463_2026-07-09-dungeon-surface-detail-overlays.md) | [`as-built`](../as-built/v463_dungeon-surface-detail-overlays.md) |
 | **v462** | `rounded-dungeon-corners` | Complete (focused client verification) | [`spec`](../specs/v462_spec-rounded-dungeon-corners.md) | [`plan`](../plans/v462_2026-07-09-rounded-dungeon-corners.md) | [`as-built`](../as-built/v462_rounded-dungeon-corners.md) |
 | **v461** | `entity-locomotion-polish` | Complete (autoloop focused verification) | [`spec`](../specs/v461_spec-entity-locomotion-polish.md) | [`plan`](../plans/v461_2026-07-09-entity-locomotion-polish.md) | [`as-built`](../as-built/v461_entity-locomotion-polish.md) |

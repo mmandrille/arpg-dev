@@ -801,6 +801,7 @@ func _sync_camera_from_settings() -> void:
 		return
 	if _camera_controller != null:
 		_camera_controller.apply_mode(client_settings.camera_mode)
+	_sync_eye_view_equipment()
 	_refresh_fog_presentation()
 	_sync_dungeon_ceiling_visibility()
 	_update_mouse_capture()
@@ -817,7 +818,6 @@ func _refresh_fog_presentation() -> void:
 func _is_perspective_camera_mode() -> bool:
 	if client_settings == null:
 		return false
-
 	return client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
 
 func _sync_fog_and_dungeon_lighting() -> void:
@@ -1686,6 +1686,7 @@ func _apply_delta(p: Dictionary) -> void:
 			if event_type in ["attack_missed", "attack_blocked"]:
 				_face_event_source_toward_target(ev)
 				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
+				if resolver != null: resolver.present_eye_view_attack(str(ev.get("weapon_slot", "main_hand")))
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "skill_damage_burst":
@@ -1708,6 +1709,7 @@ func _apply_delta(p: Dictionary) -> void:
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			_face_event_source_toward_target(ev)
 			CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
+			if resolver != null: resolver.present_eye_view_attack(str(ev.get("weapon_slot", "main_hand")))
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
 			ClientAudioBridgeScript.damage(audio_controller, false)
@@ -2052,6 +2054,13 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 	if rec["type"] == "interactable":
 		var state := str(e.get("state", rec.get("state", "closed")))
 		_set_interactable_state(id, rec, state)
+	if rec["type"] == "monster" or rec["type"] == "companion":
+		var incoming_hp = e.get("hp", null)
+		var incoming_max_hp = e.get("max_hp", null)
+		if incoming_hp != null:
+			rec["hp"] = int(incoming_hp)
+		if incoming_max_hp != null:
+			rec["max_hp"] = int(incoming_max_hp)
 	if _entity_type_uses_combat_presentation(str(rec["type"])):
 		_apply_entity_visual_metadata(rec, e)
 	# Resume/snapshot consistency: a monster already dead in the snapshot enters
@@ -2632,7 +2641,8 @@ func _refresh_monster_health_bar_visibility(entity_id: String = "") -> void:
 			var hero_pos := player_anchor.global_position if player_anchor != null else Vector3.ZERO
 			monster_health_bars[id].visible = EnemyHealthBarVisibilityScript.should_show(mode, id, hovered_id, pending_action_targets, pending_skill_casts) and EnemyHealthBarVisibilityScript.perspective_visible(entities.get(id, {}).get("node", null), hero_pos, _is_perspective_camera_mode(), float(character_progression.get("derived_stats", {}).get("light_radius", 0.0)))
 	if _wall_renderer != null:
-		_wall_renderer.sync_occlusion_fade(_camera, current_wall_layout, player_anchor, entities, monster_ids, gameplay_active or visual_replay_enabled)
+		var wall_fade_active := (gameplay_active or visual_replay_enabled) and not _is_perspective_camera_mode()
+		_wall_renderer.sync_occlusion_fade(_camera, current_wall_layout, player_anchor, entities, monster_ids, wall_fade_active)
 func _sync_companion_bar() -> void:
 	if companion_bar == null:
 		return
@@ -3088,6 +3098,7 @@ func _handle_autoplay(delta: float) -> void:
 				_face_direction(aim)
 			if autoplay_attack_cooldown <= 0.0:
 				CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
+				if resolver != null: resolver.present_eye_view_attack("main_hand")
 				_send_action_intent(target_id)
 				autoplay_attack_cooldown = autoplay_step_delay
 			autoplay_timer = autoplay_step_delay
@@ -3210,6 +3221,7 @@ func _dispatch_monster_attack_now(target_id: String, rec: Dictionary) -> void:
 		if flat.length_squared() > 0.0001:
 			_face_direction(flat.normalized())
 	CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
+	if resolver != null: resolver.present_eye_view_attack("main_hand")
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)
@@ -3850,6 +3862,7 @@ func _build_scene() -> void:
 	_camera_controller = PlayerCameraControllerScript.new()
 	_camera_controller.setup(PlayerCameraContextScript.make(player_anchor, character_visual, client_settings, Callable(self, "_input_locked")), self)
 	_camera = _camera_controller.get_gameplay_camera()
+	_sync_eye_view_equipment()
 
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -40, 0)
@@ -5720,6 +5733,17 @@ func _remount_local_equipment_visuals() -> void:
 		"weapon_sets": weapon_sets,
 		"active_weapon_set": active_weapon_set,
 	})
+	_sync_eye_view_equipment()
+
+
+func _sync_eye_view_equipment() -> void:
+	if resolver == null or _camera_controller == null or client_settings == null:
+		return
+	var cfg := CameraPresentationsLoaderScript.mode(client_settings.camera_mode)
+	var perspective := client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
+	resolver.set_eye_view(_camera_controller.get_gameplay_camera(), perspective, cfg)
+	if character_visual != null and is_instance_valid(character_visual):
+		character_visual.visible = not (perspective and bool(cfg.get("hide_local_body", false)))
 
 
 func _request_level_loading(target_level: int, traveling: bool) -> void:
@@ -6254,6 +6278,8 @@ func get_bot_state() -> Dictionary:
 		"gameplay_active": gameplay_active,
 		"camera_mode": client_settings.camera_mode if client_settings != null else "isometric",
 		"camera_projection": _camera_projection_for_bot(),
+		"camera": _camera_controller.get_debug_state() if _camera_controller != null else {},
+		"equipment_visuals": resolver.get_debug_state() if resolver != null else {},
 		"mouse_captured": Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
 	}
 	out.merge(TrainingDamageLogBridgeScript.bot_debug_state(training_damage_log_panel))

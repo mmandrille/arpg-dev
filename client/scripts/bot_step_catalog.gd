@@ -48,7 +48,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_stash_gold", "assert_stash_filter", "assert_market_panel_visible", "assert_market_board_badges", "assert_market_listing_rows", "assert_market_offer_rows", "assert_boss_health_bar", "assert_audio_state", "assert_resource_wallet_panel",
 	"assert_bishop_panel_visible", "assert_bishop_panel", "assert_mercenary_panel_visible", "assert_mercenary_panel", "assert_blacksmith_panel_visible", "assert_blacksmith_panel", "assert_boss_reward_status", "assert_remote_player_count",
 	"assert_quest_journal", "assert_elite_objective_tracker", "assert_elite_objective_minimap", "assert_steward_hunt_banner",
-	"assert_camera_mode", "assert_connection_recovery", "assert_session_unchanged",
+	"assert_camera_mode", "assert_eye_view_weapon", "assert_connection_recovery", "assert_session_unchanged",
 ]
 const STEP_TYPES_ACTION := [
 	"press_key", "click_entity", "click_entity_buffered", "click_loot_item", "click_floor",
@@ -275,6 +275,9 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "assert_camera_mode":
 		if str(step.get("mode", "")) == "":
 			return "client_steps[%d] (%s) requires mode" % [index, stype]
+	if stype == "assert_eye_view_weapon":
+		if str(step.get("slot", "")) == "":
+			return "client_steps[%d] (%s) requires slot" % [index, stype]
 	if stype in ["wait_connection_recovery", "wait_connection_resync", "assert_connection_recovery"]:
 		var has_recovery_expectation := false
 		for key in ["active", "overlay_visible", "title_contains", "ws_open", "blocks_input"]:

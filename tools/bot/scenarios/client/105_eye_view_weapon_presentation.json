@@ -1,0 +1,87 @@
+{
+  "id": "eye_view_weapon_presentation",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "combat_control_lab",
+  "seed": "eyeviewweapon01",
+  "title": "Eye-view weapon presentation: equipped hand item is visible from perspective camera",
+  "description": "Switch to perspective camera, equip the combat lab training bow, verify the camera-local view model, and fire once with visible local attack presentation.",
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "chest_view"
+    },
+    {
+      "type": "wait_ticks",
+      "ticks": 2,
+      "timeout_s": 2.0
+    },
+    {
+      "type": "assert_camera_mode",
+      "mode": "chest_view",
+      "projection": "perspective"
+    },
+    {
+      "type": "assert_wall_occlusion",
+      "active": false,
+      "faded_wall_count": 0
+    },
+    {
+      "type": "click_loot_item",
+      "item_def_id": "training_bow"
+    },
+    {
+      "type": "wait_inventory_item",
+      "item_def_id": "training_bow",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "drag_bag_to_weapon_slot",
+      "item_def_id": "training_bow"
+    },
+    {
+      "type": "assert_equipped",
+      "slot": "main_hand"
+    },
+    {
+      "type": "assert_eye_view_weapon",
+      "slot": "main_hand",
+      "item_def_id": "training_bow",
+      "active": true,
+      "visible": true
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob"
+    },
+    {
+      "type": "wait_event",
+      "event_types": [
+        "monster_damaged",
+        "attack_missed"
+      ],
+      "target_entity_type": "monster",
+      "target_monster_def_id": "dungeon_mob",
+      "timeout_s": 8.0
+    },
+    {
+      "type": "assert_eye_view_weapon",
+      "slot": "main_hand",
+      "item_def_id": "training_bow",
+      "active": true,
+      "visible": true,
+      "attack_count_min": 1
+    }
+  ]
+}

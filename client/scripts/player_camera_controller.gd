@@ -2,7 +2,7 @@
 ##
 ## Modes (defined in shared/assets/camera_presentations.v0.json):
 ##   isometric  — orthographic Camera3D at follow_offset above player.
-##   chest_view — perspective Camera3D parented to chest_socket on character_visual.
+##   chest_view — perspective Camera3D held at configured eye height above character_visual.
 ##
 ## Usage:
 ##   var ctx := PlayerCameraContext.new()
@@ -23,6 +23,7 @@ var _scene_root: Node3D
 var _camera: Camera3D
 var _chest_socket_node: Node3D  # non-null when camera is parented to chest socket
 var _chest_socket_fallback: Node3D  # non-null when fallback node was created in _setup_chest_view
+var _eye_view_light: OmniLight3D
 var _current_mode: String = ""
 var _cfg: Dictionary = {}  # current mode data from CameraPresentationsLoader
 var _iso_offset: Vector3 = Vector3(9.0, 20.0, 15.0)  # isometric follow offset, read from data
@@ -76,6 +77,8 @@ func tick_follow(delta: float) -> void:
 		return
 	if _current_mode == "isometric":
 		_sync_isometric(delta, false)
+	elif _current_mode == "chest_view":
+		_sync_chest_view()
 
 
 ## Zoom handler: isometric adjusts camera.size.
@@ -90,6 +93,20 @@ func adjust_zoom(delta_size: float) -> void:
 ## Returns the active Camera3D (callers bind this for raycasting / UI world-space).
 func get_gameplay_camera() -> Camera3D:
 	return _camera
+
+func get_debug_state() -> Dictionary:
+	return {
+		"mode": _current_mode,
+		"projection": "perspective" if _camera != null and _camera.projection == Camera3D.PROJECTION_PERSPECTIVE else "orthogonal",
+		"eye_height": float(_cfg.get("eye_height", 0.0)),
+		"hide_local_body": bool(_cfg.get("hide_local_body", false)),
+		"view_model_position": (_cfg.get("view_model_position", []) as Array).duplicate(),
+		"view_model_rotation_degrees": (_cfg.get("view_model_rotation_degrees", []) as Array).duplicate(),
+		"view_model_scale": float(_cfg.get("view_model_scale", 1.0)),
+		"camera_position_y": _camera.global_position.y if _camera != null else 0.0,
+		"eye_light_energy": _eye_view_light.light_energy if _eye_view_light != null and is_instance_valid(_eye_view_light) else 0.0,
+		"eye_light_range": _eye_view_light.omni_range if _eye_view_light != null and is_instance_valid(_eye_view_light) else 0.0,
+	}
 
 
 ## Return [origin, direction] for a ray from the camera through the given screen position.
@@ -208,6 +225,10 @@ func _teardown_rig() -> void:
 			_chest_socket_node.remove_child(_camera)
 			_scene_root.add_child(_camera)
 		_chest_socket_node = null
+	if _eye_view_light != null:
+		if is_instance_valid(_eye_view_light):
+			_eye_view_light.queue_free()
+		_eye_view_light = null
 
 
 func _setup_isometric() -> void:
@@ -223,29 +244,14 @@ func _setup_isometric() -> void:
 func _setup_chest_view() -> void:
 	_reset_perspective_angles()
 	_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
-	# Try to find the chest socket on character_visual.
-	var socket: Node3D = null
-	if _ctx != null and _ctx.character_visual != null:
-		socket = _ctx.character_visual.find_child("chest_socket", true, false) as Node3D
-	if socket == null:
-		# Fallback: create a temporary node at the known fallback position.
-		var fallback := Node3D.new()
-		fallback.name = "chest_socket_fallback"
-		fallback.position = Vector3(0.0, 1.08, 0.0)
-		if _ctx != null and _ctx.character_visual != null:
-			_ctx.character_visual.add_child(fallback)
-		else:
-			_scene_root.add_child(fallback)
-		_chest_socket_fallback = fallback
-		socket = fallback
-	_chest_socket_node = socket
-	# Reparent camera to the socket.
-	if _camera.get_parent() == _scene_root:
-		_scene_root.remove_child(_camera)
-	socket.add_child(_camera)
-	var fwd_offset: float = _cfg.get("chest_forward_offset", 0.3)
-	_camera.position = Vector3(0.0, 0.0, -fwd_offset)
-	_camera.rotation_degrees = Vector3.ZERO
+	_chest_socket_node = _ctx.character_visual if _ctx != null else null
+	# Keep the gameplay camera outside the local body so hiding the body for eye-view
+	# cannot hide or invalidate the camera. _sync_chest_view follows the hero root by transform.
+	if _camera.get_parent() != _scene_root:
+		_camera.get_parent().remove_child(_camera)
+		_scene_root.add_child(_camera)
+	_setup_eye_view_light()
+	_sync_chest_view()
 
 
 func _sync_isometric(delta: float, snap: bool) -> void:
@@ -278,6 +284,26 @@ func _sync_chest_view() -> void:
 	if _ctx == null or _ctx.character_visual == null:
 		return
 	_ctx.character_visual.rotation.y = _yaw
+	var fwd_offset: float = _cfg.get("chest_forward_offset", 0.12)
+	var eye_height: float = _cfg.get("eye_height", 0.0)
+	var anchor := _ctx.character_visual as Node3D
+	var base := anchor.global_position
+	var yaw_basis := Basis(Vector3.UP, _yaw)
+	_camera.global_position = base + yaw_basis * Vector3(0.0, eye_height, -fwd_offset)
+	_camera.global_rotation = Vector3(_pitch, _yaw, 0.0)
+
+
+func _setup_eye_view_light() -> void:
+	if _eye_view_light == null or not is_instance_valid(_eye_view_light):
+		_eye_view_light = OmniLight3D.new()
+		_eye_view_light.name = "EyeViewLight"
+		_camera.add_child(_eye_view_light)
+	_eye_view_light.position = Vector3.ZERO
+	_eye_view_light.light_energy = float(_cfg.get("eye_light_energy", 0.9))
+	_eye_view_light.omni_range = float(_cfg.get("eye_light_range", 4.0))
+	var raw_color = _cfg.get("eye_light_color", [1.0, 0.92, 0.78])
+	if raw_color is Array and raw_color.size() >= 3:
+		_eye_view_light.light_color = Color(float(raw_color[0]), float(raw_color[1]), float(raw_color[2]))
 
 
 func _apply_perspective_rotation() -> void:

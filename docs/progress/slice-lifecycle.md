@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v466** | `eye-view-weapon-presentation` | Complete (autoloop focused verification) | [`spec`](../specs/v466_spec-eye-view-weapon-presentation.md) | [`plan`](../plans/v466_2026-07-14-eye-view-weapon-presentation.md) | [`as-built`](../as-built/v466_eye-view-weapon-presentation.md) |
 | **v465** | `combat-impact-confirmation` | Complete (autoloop focused verification) | [`spec`](../specs/v465_spec-combat-impact-confirmation.md) | [`plan`](../plans/v465_2026-07-14-combat-impact-confirmation.md) | [`as-built`](../as-built/v465_combat-impact-confirmation.md) |
 | **v464** | `combat-input-flow-polish` | Complete (autoloop focused verification) | [`spec`](../specs/v464_spec-combat-input-flow-polish.md) | [`plan`](../plans/v464_2026-07-14-combat-input-flow-polish.md) | [`as-built`](../as-built/v464_combat-input-flow-polish.md) |
 | **v463** | `dungeon-surface-detail-overlays` | Complete (focused client verification) | [`spec`](../specs/v463_spec-dungeon-surface-detail-overlays.md) | [`plan`](../plans/v463_2026-07-09-dungeon-surface-detail-overlays.md) | [`as-built`](../as-built/v463_dungeon-surface-detail-overlays.md) |

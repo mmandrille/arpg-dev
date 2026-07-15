@@ -535,6 +535,9 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 	var reaction: Dictionary = rec.get("reaction", {})
 	if step.has("reaction") and str(reaction.get("last_reaction", "")) != str(step.get("reaction", "")):
 		return false
+	var animation: Dictionary = rec.get("animation", {})
+	if step.has("animation_current_clip") and str(animation.get("current_clip", "")) != str(step.get("animation_current_clip", "")):
+		return false
 	if step.has("terminal") and bool(reaction.get("terminal", false)) != bool(step.get("terminal", false)):
 		return false
 	if step.has("impact_feedback_min") and int(reaction.get("impact_feedback_count", 0)) < int(step.get("impact_feedback_min", 0)):

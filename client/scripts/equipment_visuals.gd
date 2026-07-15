@@ -58,6 +58,12 @@ var _weapon_sets: Array = []
 var _active_weapon_set: int = 0
 var _mounted_nodes: Dictionary = {} # slot -> Node3D
 var _mounted_mirror_nodes: Dictionary = {} # slot -> Node3D (e.g. right boot)
+var _eye_view_camera: Camera3D
+var _eye_view_enabled := false
+var _eye_view_cfg: Dictionary = {}
+var _eye_view_nodes: Dictionary = {}
+var _eye_view_state: Dictionary = {}
+var _eye_view_attack_count := 0
 var _mounted_state: Dictionary = {} # slot -> debug state
 var _warnings: Array = []
 
@@ -119,6 +125,27 @@ func apply_equipped_update(slot: String, item_instance_id) -> void:
 	_refresh_slot(slot)
 
 
+func set_eye_view(camera: Camera3D, enabled: bool, cfg: Dictionary) -> void:
+	_eye_view_camera = camera
+	_eye_view_enabled = enabled and camera != null and is_instance_valid(camera)
+	_eye_view_cfg = cfg.duplicate(true)
+	_refresh_eye_view()
+
+
+func present_eye_view_attack(slot: String = "main_hand") -> void:
+	var node = _eye_view_nodes.get(slot, null)
+	if node == null or not is_instance_valid(node):
+		return
+	var root := node as Node3D
+	var base := _position_from_state(slot, root.position)
+	root.position = base + Vector3(0.0, 0.04, -0.16)
+	_eye_view_attack_count += 1
+	if root.is_inside_tree():
+		var tween := root.create_tween()
+		tween.tween_property(root, "position", base, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_update_eye_view_motion_state(slot, root)
+
+
 # --- debug surface (spec §4.4 / §4.7) ---------------------------------------
 
 func get_debug_state() -> Dictionary:
@@ -129,6 +156,7 @@ func get_debug_state() -> Dictionary:
 	visuals["weapon"] = visuals.get("main_hand", null)
 	return {
 		"equipped_visuals": visuals,
+		"eye_view": _eye_view_state.duplicate(true),
 		"warnings": _warnings,
 	}
 
@@ -145,6 +173,7 @@ func _refresh_all() -> void:
 	_warnings = []
 	for slot in EQUIPMENT_SLOTS:
 		_refresh_slot(str(slot), false)
+	_refresh_eye_view()
 
 
 func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
@@ -221,6 +250,8 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		"visible": inst.visible,
 		"procedural_fallback": procedural_fallback != null,
 	}
+	if slot == "main_hand" or slot == "off_hand":
+		_refresh_eye_view_slot(slot)
 
 
 func _equipped_instance_id_for_slot(slot: String) -> String:
@@ -315,6 +346,111 @@ func _clear_mounted(slot: String) -> void:
 	if mirror != null and is_instance_valid(mirror):
 		(mirror as Node3D).queue_free()
 	_mounted_mirror_nodes.erase(slot)
+	if slot == "main_hand" or slot == "off_hand":
+		_clear_eye_view_slot(slot)
+
+
+func _refresh_eye_view() -> void:
+	for slot in ["main_hand", "off_hand"]:
+		_refresh_eye_view_slot(slot)
+
+
+func _refresh_eye_view_slot(slot: String) -> void:
+	_clear_eye_view_slot(slot)
+	_eye_view_state[slot] = {"active": false, "visible": false, "slot": slot}
+	if not _eye_view_enabled or _eye_view_camera == null or not is_instance_valid(_eye_view_camera):
+		return
+	if slot == "off_hand" and _main_hand_blocks_off_hand_visual():
+		return
+	var item_instance_id := _equipped_instance_id_for_slot(slot)
+	if item_instance_id == "":
+		return
+	var item: Dictionary = _inventory.get(item_instance_id, {})
+	var def_id := str(item.get("item_def_id", ""))
+	if def_id == "":
+		return
+	var vis: Dictionary = _visual_for(def_id, slot)
+	if vis.is_empty():
+		return
+	var asset_id := str(vis.get("asset_id", ""))
+	var entry = _assets.get(asset_id, null)
+	if entry == null:
+		return
+	var node := _instantiate_visual(asset_id, slot, entry)
+	if node == null:
+		return
+	node.name = "EyeView_%s_%s" % [slot, asset_id]
+	_apply_transform(node, _eye_view_transform_for_slot(slot), false)
+	var rarity := str(item.get("rarity", "common")).to_lower()
+	_apply_tint(node, RARITY_TINTS.get(rarity, RARITY_TINTS["common"]))
+	_eye_view_camera.add_child(node)
+	_eye_view_nodes[slot] = node
+	_eye_view_state[slot] = {
+		"active": true,
+		"visible": node.visible,
+		"attack_count": _eye_view_attack_count,
+		"slot": slot,
+		"item_instance_id": item_instance_id,
+		"item_def_id": def_id,
+		"asset_id": asset_id,
+		"node_path": str(node.get_path()) if node.is_inside_tree() else "",
+		"position": {"x": node.position.x, "y": node.position.y, "z": node.position.z},
+	}
+
+
+func _instantiate_visual(asset_id: String, slot: String, entry) -> Node3D:
+	var procedural_fallback := _procedural_fallback_visual(asset_id, slot, entry)
+	if procedural_fallback != null:
+		return procedural_fallback
+	var packed = load(_res_path(str(entry["runtime_path"])))
+	if packed == null:
+		return null
+	return (packed as PackedScene).instantiate()
+
+
+func _eye_view_transform_for_slot(slot: String) -> Dictionary:
+	var pos := _vec3_dict(_eye_view_cfg.get("view_model_position", [0.34, -0.32, -0.82]))
+	if slot == "off_hand":
+		pos["x"] = -float(pos.get("x", 0.34))
+	var rot := _vec3_dict(_eye_view_cfg.get("view_model_rotation_degrees", [-10.0, -18.0, 8.0]))
+	if slot == "off_hand":
+		rot["y"] = -float(rot.get("y", -18.0))
+		rot["z"] = -float(rot.get("z", 8.0))
+	var scale := float(_eye_view_cfg.get("view_model_scale", 0.82))
+	return {
+		"position": pos,
+		"rotation_degrees": rot,
+		"scale": {"x": scale, "y": scale, "z": scale},
+	}
+
+
+func _vec3_dict(value) -> Dictionary:
+	if value is Array and (value as Array).size() >= 3:
+		return {"x": float(value[0]), "y": float(value[1]), "z": float(value[2])}
+	return {"x": 0.0, "y": 0.0, "z": 0.0}
+
+
+func _clear_eye_view_slot(slot: String) -> void:
+	var mounted = _eye_view_nodes.get(slot, null)
+	if mounted != null and is_instance_valid(mounted):
+		(mounted as Node3D).queue_free()
+	_eye_view_nodes.erase(slot)
+
+
+func _position_from_state(slot: String, fallback: Vector3) -> Vector3:
+	var slot_state: Dictionary = _eye_view_state.get(slot, {})
+	var pos: Dictionary = slot_state.get("position", {})
+	if pos.is_empty():
+		return fallback
+	return Vector3(float(pos.get("x", fallback.x)), float(pos.get("y", fallback.y)), float(pos.get("z", fallback.z)))
+
+
+func _update_eye_view_motion_state(slot: String, node: Node3D) -> void:
+	var slot_state: Dictionary = _eye_view_state.get(slot, {}).duplicate(true)
+	slot_state["attack_count"] = _eye_view_attack_count
+	slot_state["motion_active"] = true
+	slot_state["motion_position"] = {"x": node.position.x, "y": node.position.y, "z": node.position.z}
+	_eye_view_state[slot] = slot_state
 
 
 func _right_boot_transform(vis: Dictionary, slot: String) -> Dictionary:

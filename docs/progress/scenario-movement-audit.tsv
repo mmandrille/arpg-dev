@@ -267,3 +267,4 @@ upgrade_shard_level_drop.json	upgrade_shard_level_drop	protocol	extended	contrac
 106_crowded_skill_overlap_lab.json	crowded_skill_overlap_lab	protocol	extended	contract	0	0		crowded fixed-position combat budget proof
 107_six_player_boss_combat_soak.json	six_player_boss_combat_soak	protocol	extended	contract	0	0		six-peer fixed-position combat soak
 client/99_ranger_volley_live_session_stability.json	ranger_volley_live_session_stability	godot_client	extended	contract	0	0		live Godot fixed-position transport stability proof
+client/105_eye_view_weapon_presentation.json	eye_view_weapon_presentation	godot_client	extended	contract	0	0		perspective camera/equipment presentation proof; no navigation setup

@@ -9,6 +9,7 @@ const ConsumableHealEffectScript := preload("res://scripts/consumable_heal_effec
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const AuraSoftLightsScript := preload("res://scripts/aura_soft_lights.gd")
 const AuraLightPresentationLoaderScript := preload("res://scripts/aura_light_presentation_loader.gd")
+const CombatOutcomePunchScript := preload("res://scripts/combat_outcome_punch.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -26,6 +27,8 @@ func _initialize() -> void:
 	_test_stun_started_and_ended_updates_monster_cue_for_leap_and_charge()
 	_test_rogue_mark_effect_id_updates_monster_skull()
 	_test_monster_death_clears_elite_aura_markers()
+	_test_monster_hp_zero_update_clears_elite_aura_markers()
+	_test_monster_death_clears_combat_outcome_punch()
 	_test_monster_death_clears_bleed_marker()
 	_test_potion_heal_uses_personal_effect()
 	_test_paladin_heal_uses_area_rain()
@@ -449,6 +452,73 @@ func _test_monster_death_clears_elite_aura_markers() -> void:
 	_assert_true("elite command marker removed on death", not bool(after.get("has_elite_command_effect", true)))
 	_assert_true("elite command radius removed on death", not bool(after.get("has_elite_command_radius_preview", true)))
 	_assert_true("elite minion command marker removed after leader death", not bool(minion_after.get("has_elite_command_effect", true)))
+	_free_main(main)
+
+
+func _test_monster_hp_zero_update_clears_elite_aura_markers() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1002",
+		"type": "monster",
+		"position": {"x": 2.0, "y": 0.0},
+		"hp": 10,
+		"max_hp": 10,
+		"monster_def_id": "training_dummy",
+		"effect_ids": ["elite_command"],
+		"monster_pack_id": "pack_1",
+		"monster_pack_leader": true,
+	})
+	main._load_dungeon_generation()
+	main._sync_elite_aura_preview()
+	var before: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+	_assert_true("elite aura active before hp zero update", bool(before.get("has_elite_command_radius_preview", false)))
+
+	main._apply_delta({"events": [], "changes": [{
+		"op": "entity_update",
+		"entity": {
+			"id": "1002",
+			"type": "monster",
+			"position": {"x": 2.0, "y": 0.0},
+			"hp": 0,
+			"max_hp": 10,
+			"monster_def_id": "training_dummy",
+			"effect_ids": ["elite_command"],
+			"monster_pack_id": "pack_1",
+			"monster_pack_leader": true,
+		},
+	}]})
+	var after: Dictionary = _presentation_row(main._bot_entities_presentation_debug(), "1002")
+	_assert_eq("elite monster hp after hp zero update", int(after.get("hp", 1)), 0)
+	_assert_true("elite command marker removed after hp zero update", not bool(after.get("has_elite_command_effect", true)))
+	_assert_true("elite command radius removed after hp zero update", not bool(after.get("has_elite_command_radius_preview", true)))
+	_free_main(main)
+
+
+func _test_monster_death_clears_combat_outcome_punch() -> void:
+	var main = _make_main()
+	main.player_id = "1001"
+	main._upsert_entity({
+		"id": "1002",
+		"type": "monster",
+		"position": {"x": 2.0, "y": 0.0},
+		"hp": 10,
+		"max_hp": 10,
+		"monster_def_id": "dungeon_mob",
+	})
+	var node := main.entities["1002"]["node"] as Node3D
+	node.add_child(CombatOutcomePunchScript.make_node({"event_type": "monster_damaged", "outcome": "hit"}))
+	node.add_child(CombatOutcomePunchScript.make_node({"event_type": "monster_killed"}))
+	_assert_eq("outcome punch active before death", CombatOutcomePunchScript.active_count(node), 2)
+
+	main.entities["1002"]["reaction"] = null
+	main._apply_delta({"events": [{
+		"event_type": "monster_killed",
+		"entity_id": "1002",
+		"source_entity_id": "1001",
+		"target_entity_id": "1002",
+	}], "changes": []})
+	_assert_eq("outcome punch removed on death", CombatOutcomePunchScript.active_count(node), 0)
 	_free_main(main)
 
 

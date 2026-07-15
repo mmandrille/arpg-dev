@@ -4,6 +4,21 @@ extends RefCounted
 const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_text.gd")
 
 const NODE_NAME := "CombatOutcomePunch"
+const META_PUNCH_ROOT := "combat_outcome_punch"
+
+
+static func clear_from(root: Node) -> void:
+	if root == null:
+		return
+	for punch in _collect_from(root):
+		var parent := punch.get_parent()
+		if parent != null:
+			parent.remove_child(punch)
+		punch.queue_free()
+
+
+static func active_count(root: Node) -> int:
+	return _collect_from(root).size()
 
 
 static func should_spawn(ev: Dictionary) -> bool:
@@ -15,6 +30,7 @@ static func make_node(ev: Dictionary) -> Node3D:
 	var outcome := _normalized_outcome(ev)
 	var root := Node3D.new()
 	root.name = NODE_NAME
+	root.set_meta(META_PUNCH_ROOT, true)
 	root.set_meta("outcome", outcome)
 	var color := _color_for_outcome(ev, outcome)
 	root.add_child(_ring_node(color, _ring_scale(outcome)))
@@ -122,3 +138,28 @@ static func _material(color: Color, alpha: float) -> StandardMaterial3D:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	return mat
+
+
+static func _collect_from(root: Node) -> Array[Node]:
+	var found: Array[Node] = []
+	if root == null:
+		return found
+	for child in root.get_children():
+		_collect_into(child, found)
+	return found
+
+
+static func _collect_into(node: Node, found: Array[Node]) -> void:
+	if node == null:
+		return
+	if _is_punch_root(node):
+		found.append(node)
+		return
+	for child in node.get_children():
+		_collect_into(child, found)
+
+
+static func _is_punch_root(node: Node) -> bool:
+	if node.has_meta(META_PUNCH_ROOT) and bool(node.get_meta(META_PUNCH_ROOT)):
+		return true
+	return str(node.name).begins_with(NODE_NAME)

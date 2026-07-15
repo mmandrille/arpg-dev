@@ -60,14 +60,14 @@ func _test_special_outcome_integration() -> void:
 		"outcome": "hit",
 		"damage": 3,
 	}), 1)
-	_assert_eq("integrated kill punch count", _integrated_outcome_punch_count({
+	_assert_eq("integrated kill skips corpse punch count", _integrated_outcome_punch_count({
 		"event_type": "monster_killed",
 		"entity_id": "2001",
 		"target_entity_id": "2001",
 		"source_entity_id": "1001",
 		"outcome": "hit",
 		"damage": 3,
-	}), 1)
+	}), 0)
 
 
 func _integrated_outcome_punch_count(ev: Dictionary) -> int:
@@ -89,7 +89,7 @@ func _integrated_outcome_punch_count(ev: Dictionary) -> int:
 	root.add_child(main._camera)
 	main._camera.look_at_from_position(Vector3(4.0, 12.0, 14.0), monster.position, Vector3.UP)
 	main._apply_delta({"events": [ev], "changes": []})
-	var count := monster.find_children(CombatOutcomePunchScript.NODE_NAME, "", true, false).size()
+	var count := CombatOutcomePunchScript.active_count(monster)
 	main.damage_numbers_layer.queue_free()
 	main._camera.queue_free()
 	main.entities_root.queue_free()

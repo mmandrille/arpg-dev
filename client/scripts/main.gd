@@ -24,6 +24,7 @@ const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
+const CombatOutcomePunchScript := preload("res://scripts/combat_outcome_punch.gd")
 const PlayerDamageVignetteScript := preload("res://scripts/player_damage_vignette.gd")
 const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_text.gd")
 const PickTargetHighlightScript := preload("res://scripts/pick_target_highlight.gd")
@@ -2118,6 +2119,7 @@ func _clear_terminal_entity_status_markers(rec: Dictionary) -> void:
 	var entity_kind := "monster" if str(rec.get("type", "")) == "monster" else "hero"
 	AuraSoftLights.sync_aura(node, AuraSoftLights.build_state([], entity_kind))
 	PlayerStatusEffectMarkers.clear_combat_markers(node)
+	CombatOutcomePunchScript.clear_from(node)
 	rec["bleeding"] = false
 	rec["burning"] = false
 	rec["poisoned"] = false

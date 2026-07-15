@@ -85,6 +85,8 @@ static func spawn_outcome_punch(entity_id: String, ev: Dictionary, node_for_enti
 		return
 	if not CombatOutcomePunchScript.should_spawn(ev):
 		return
+	if str(ev.get("event_type", "")) == "monster_killed":
+		return
 	var target: Node3D = node_for_entity_id.call(entity_id)
 	if target != null:
 		target.add_child(CombatOutcomePunchScript.make_node(ev))

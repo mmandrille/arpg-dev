@@ -1,0 +1,30 @@
+shared/assets/camera_presentations.v0.schema.json
+  s_c9a8bb9d44515c::t_bf6620cd5fc109 59-61
+tools/bot/scenarios/client/105_eye_view_weapon_presentation.json
+  s_c9a8bb9d44515c::t_ba71cd940c3022 29-33
+client/scripts/player_camera_controller.gd
+  s_c9a8bb9d44515c::t_d1b29a1654e981 26,80-81,97-110,228-231,247-254,287-306
+  s_c9a8bb9d44515c::t_9fc5e536a378e7 5
+client/tests/test_camera_mode_settings.gd
+  s_c9a8bb9d44515c::t_ff1ffa4a82277a 199-203
+client/scripts/main.gd
+  s_c9a8bb9d44515c::t_2c0e7fd19eb322 2644-2645
+shared/assets/camera_presentations.v0.json
+  s_c9a8bb9d44515c::t_4cc4e8794259e3 31-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3f3b13e1dadd57d88de598f8d0be4be508d879a5",
+  "prompts": {},
+  "sessions": {
+    "s_c9a8bb9d44515c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f60b5-5268-7a31-bd55-acaf77d15bb1",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mmandrille <mmandrille@gmail.com>"
+    }
+  }
+}

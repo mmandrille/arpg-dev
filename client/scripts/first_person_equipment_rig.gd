@@ -10,6 +10,7 @@ var _cfg: Dictionary = {}
 var _rig: Node3D
 var _animation: AnimationController
 var _mounted: Dictionary = {}
+var _hand_proxies: Dictionary = {}
 var _state: Dictionary = {}
 var _attack_count := 0
 
@@ -33,6 +34,7 @@ func clear() -> void:
 		_rig.queue_free()
 	_rig = null
 	_animation = null
+	_hand_proxies = {}
 	_state = {}
 
 
@@ -97,6 +99,8 @@ func get_debug_state() -> Dictionary:
 	out["animation_clip"] = _animation.current_clip() if _animation != null else ""
 	out["rig_path"] = str(_rig.get_path()) if _rig != null and _rig.is_inside_tree() else ""
 	out["parent"] = _rig.get_parent().name if _rig != null and _rig.get_parent() != null else ""
+	out["hands_visible"] = _visible_hand_proxy_count() > 0
+	out["hand_proxy_count"] = _visible_hand_proxy_count()
 	return out
 
 
@@ -114,6 +118,7 @@ func _ensure_rig() -> void:
 	if ap != null:
 		_animation = AnimationControllerScript.new(ap)
 	_configure_body_geometry()
+	_ensure_hand_proxies()
 
 
 func _apply_rig_transform() -> void:
@@ -135,12 +140,65 @@ func _configure_body_geometry() -> void:
 		geom.visible = body_visible
 
 
+func _ensure_hand_proxies() -> void:
+	if _rig == null:
+		return
+	if not bool(_cfg.get("first_person_hands_visible", true)):
+		return
+	_add_hand_proxy("right_hand_socket", "FirstPersonRightHand", 1.0)
+	_add_hand_proxy("off_hand_socket", "FirstPersonLeftHand", -1.0)
+
+
+func _add_hand_proxy(socket_name: String, proxy_name: String, side: float) -> void:
+	var socket := _rig.find_child(socket_name, true, false) as Node3D
+	if socket == null or _hand_proxies.has(socket_name):
+		return
+	var root := Node3D.new()
+	root.name = proxy_name
+	socket.add_child(root)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.86, 0.68, 0.46, 1.0)
+	mat.roughness = 0.72
+	var forearm := MeshInstance3D.new()
+	forearm.name = "Forearm"
+	var forearm_mesh := CapsuleMesh.new()
+	forearm_mesh.radius = 0.055
+	forearm_mesh.height = 0.48
+	forearm.mesh = forearm_mesh
+	forearm.material_override = mat
+	forearm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	forearm.position = Vector3(-0.05 * side, -0.24, 0.08)
+	forearm.rotation_degrees = Vector3(10.0, 0.0, 12.0 * side)
+	root.add_child(forearm)
+	var hand := MeshInstance3D.new()
+	hand.name = "Hand"
+	var hand_mesh := SphereMesh.new()
+	hand_mesh.radius = 0.075
+	hand_mesh.height = 0.12
+	hand.mesh = hand_mesh
+	hand.material_override = mat
+	hand.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	hand.position = Vector3(0.0, -0.03, 0.03)
+	root.add_child(hand)
+	_hand_proxies[socket_name] = root
+
+
+func _visible_hand_proxy_count() -> int:
+	var count := 0
+	for proxy in _hand_proxies.values():
+		if proxy != null and is_instance_valid(proxy) and bool((proxy as Node3D).visible):
+			count += 1
+	return count
+
+
 func _update_root_state() -> void:
 	_state["rig"] = {
 		"active": _rig != null and is_instance_valid(_rig),
 		"parent": _rig.get_parent().name if _rig != null and _rig.get_parent() != null else "",
 		"right_hand_socket": _rig.find_child("right_hand_socket", true, false) != null if _rig != null else false,
 		"off_hand_socket": _rig.find_child("off_hand_socket", true, false) != null if _rig != null else false,
+		"hands_visible": _visible_hand_proxy_count() > 0,
+		"hand_proxy_count": _visible_hand_proxy_count(),
 	}
 
 

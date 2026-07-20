@@ -63,6 +63,7 @@
         "first_person_rig_rotation_degrees": { "$ref": "#/$defs/vec3" },
         "first_person_rig_scale": { "type": "number", "exclusiveMinimum": 0 },
         "first_person_body_visible": { "type": "boolean" },
+        "first_person_hands_visible": { "type": "boolean" },
         "mouse_sensitivity": { "type": "number", "minimum": 0 },
         "pitch_min_degrees": { "type": "number" },
         "pitch_max_degrees": { "type": "number" },

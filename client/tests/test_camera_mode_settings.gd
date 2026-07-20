@@ -200,6 +200,7 @@ func _test_controller_eye_view_debug_state() -> void:
 	_assert_true("eye-view local body is hidden by config", bool(debug.get("hide_local_body", false)))
 	var chest_cfg := CameraPresentationsLoaderScript.mode(ClientSettingsScript.CAMERA_MODE_CHEST_VIEW)
 	_assert_eq("eye-view first-person rig body is hidden", bool(chest_cfg.get("first_person_body_visible", true)), false)
+	_assert_eq("eye-view first-person hands are visible", bool(chest_cfg.get("first_person_hands_visible", false)), true)
 	var rig_rotation: Array = chest_cfg.get("first_person_rig_rotation_degrees", [])
 	_assert_true("eye-view first-person rig faces away from camera", rig_rotation.size() >= 3 and absf(float(rig_rotation[1]) - 180.0) < 0.01)
 	_assert_true("eye-view camera stays scene-root mounted", cam.get_parent() == root)

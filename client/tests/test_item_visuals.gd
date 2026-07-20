@@ -146,6 +146,11 @@ func _verify_eye_view_weapon_mount() -> bool:
 	await process_frame
 	var state: Dictionary = resolver.get_debug_state().get("eye_view", {})
 	var main_hand: Dictionary = state.get("main_hand", {})
+	var rig: Dictionary = state.get("rig", {})
+	if not bool(rig.get("hands_visible", false)) or int(rig.get("hand_proxy_count", 0)) < 2:
+		_fail("eye-view first-person hand proxies are not visible: %s" % str(state))
+		root.queue_free()
+		return false
 	if not bool(main_hand.get("active", false)) or not bool(main_hand.get("visible", false)):
 		_fail("eye-view main-hand weapon did not mount: %s" % str(state))
 		root.queue_free()

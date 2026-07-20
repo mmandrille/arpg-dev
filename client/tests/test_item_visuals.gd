@@ -20,6 +20,7 @@ const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 const ScaleProbeScript := preload("res://tests/item_visual_scale_probe.gd")
 const EquipmentProbeScript := preload("res://tests/item_visual_equipment_probe.gd")
 const EquippedGearFitProbeScript := preload("res://tests/equipped_gear_fit_probe.gd")
+const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 const InteractableProbeScript := preload("res://tests/item_visual_interactable_probe.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 
@@ -154,13 +155,33 @@ func _verify_eye_view_weapon_mount() -> bool:
 		root.queue_free()
 		return false
 	if not str(main_hand.get("node_path", "")).contains(str(camera.get_path())):
-		_fail("eye-view weapon node is not parented under the camera: %s camera=%s" % [str(main_hand), str(camera.get_path())])
+		_fail("eye-view weapon node is not inside the camera-local rig: %s camera=%s" % [str(main_hand), str(camera.get_path())])
 		root.queue_free()
 		return false
-	resolver.present_eye_view_attack("main_hand")
+	if str(main_hand.get("socket_parent", "")) != "right_hand_socket" or str(main_hand.get("node_parent", "")) != "right_hand_socket":
+		_fail("eye-view weapon is not mounted on first-person hand socket: %s" % str(main_hand))
+		root.queue_free()
+		return false
+	CombatLocalAttackPresentationScript.present_local_start(
+		null,
+		"dummy",
+		null,
+		null,
+		"main_hand",
+		"melee",
+		1.0,
+		[{"item_instance_id": "eye_sword_1", "item_def_id": "rusty_sword"}],
+		{"main_hand": "eye_sword_1"},
+		resolver.first_person_animation_controller(),
+		Callable(resolver, "record_first_person_attack")
+	)
 	var after_attack: Dictionary = resolver.get_debug_state().get("eye_view", {}).get("main_hand", {})
 	if int(after_attack.get("attack_count", 0)) < 1:
 		_fail("eye-view weapon attack motion did not increment: %s" % str(after_attack))
+		root.queue_free()
+		return false
+	if str(after_attack.get("last_attack_clip", "")) == "":
+		_fail("eye-view weapon attack did not record shared clip: %s" % str(after_attack))
 		root.queue_free()
 		return false
 	root.queue_free()

@@ -3,7 +3,6 @@
 client/scripts/blacksmith_panel.gd	771	# v392: two-slot craft UI (item + resource); recipe inferred from resource
 client/scripts/bot_assertion_handlers.gd	655	# v446: assert_wall_occlusion delegates to bot_presentation_assertions.gd
 client/scripts/bot_controller.gd	851	# v460 ci-full recovery: mercenary bot hire targeting supports explicit roster-name selection; controller extraction deferred with broader bot action cleanup
-client/scripts/equipment_visuals.gd	647	# v466: eye-view view-model mount shares resolver asset loading/tinting; extract if another presentation path is added
 client/scripts/bot_scenario_runner.gd	1663	# v355: aura-light presentation wait filters consolidated into flag loop
 client/scripts/fog_of_war_overlay.gd	611	# v372: combat crowd shader throttle hooks; shadow cache coordinator
 client/scripts/character_select_panel.gd	701	# v392: class creation features panel
@@ -16,6 +15,7 @@ client/scripts/stash_panel.gd	1194	# v457 close-out: inherited v452 resource wal
 client/tests/test_client_bot.gd	1153	# v334 client-bot: bot exit cleanup helpers
 client/tests/test_coop_client.gd	1721	# v392: class creation feature panel tests
 client/tests/test_golden.gd	686
+client/tests/test_status_effect_presentation.gd	606	# v467: existing status-effect presentation coverage is over the new-file target; split with future status-effect test refactor
 server/internal/game/dungeon_gen.go	1055
 server/internal/game/game_test.go	7948	# refactor: TestValidateSkillRules moved to skill_rules_validation_test.go
 server/internal/game/handlers.go	1487	# v455 combat skill budget defer hooks on cast_skill and projectile spawn

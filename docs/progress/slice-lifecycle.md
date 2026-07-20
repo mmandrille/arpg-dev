@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v467** | `shared-first-person-equipment-rig` | Complete (`make ci` green) | [`spec`](../specs/v467_spec-shared-first-person-equipment-rig.md) | [`plan`](../plans/v467_2026-07-20-shared-first-person-equipment-rig.md) | [`as-built`](../as-built/v467_shared-first-person-equipment-rig.md) |
 | **v466** | `eye-view-weapon-presentation` | Complete (autoloop focused verification) | [`spec`](../specs/v466_spec-eye-view-weapon-presentation.md) | [`plan`](../plans/v466_2026-07-14-eye-view-weapon-presentation.md) | [`as-built`](../as-built/v466_eye-view-weapon-presentation.md) |
 | **v465** | `combat-impact-confirmation` | Complete (autoloop focused verification) | [`spec`](../specs/v465_spec-combat-impact-confirmation.md) | [`plan`](../plans/v465_2026-07-14-combat-impact-confirmation.md) | [`as-built`](../as-built/v465_combat-impact-confirmation.md) |
 | **v464** | `combat-input-flow-polish` | Complete (autoloop focused verification) | [`spec`](../specs/v464_spec-combat-input-flow-polish.md) | [`plan`](../plans/v464_2026-07-14-combat-input-flow-polish.md) | [`as-built`](../as-built/v464_combat-input-flow-polish.md) |

@@ -35,25 +35,39 @@ func consume_if_matches(ev: Dictionary, local_player_id: String) -> bool:
 	return true
 
 
-static func present_local_start(tracker: CombatLocalAttackPresentation, target: String, audio_controller, player_anim, weapon_slot: String = "main_hand", attack_mode: String = "", attack_speed: float = 1.0, inventory: Array = [], equipped: Dictionary = {}) -> void:
+static func present_local_start(tracker: CombatLocalAttackPresentation, target: String, audio_controller, player_anim, weapon_slot: String = "main_hand", attack_mode: String = "", attack_speed: float = 1.0, inventory: Array = [], equipped: Dictionary = {}, first_person_anim = null, first_person_recorder = null) -> void:
 	if tracker != null:
 		tracker.start(target)
 	ClientAudioBridgeScript.attack(audio_controller)
-	_play_animation(player_anim, weapon_slot, attack_mode, attack_speed, inventory, equipped)
+	var clip := _attack_clip_for(weapon_slot, attack_mode, inventory, equipped)
+	_play_animation_clip(player_anim, clip, attack_mode, attack_speed)
+	_play_animation_clip(first_person_anim, clip, attack_mode, attack_speed)
+	if first_person_recorder != null and first_person_recorder.is_valid():
+		first_person_recorder.call(weapon_slot, clip)
 
 
-static func present_result(tracker: CombatLocalAttackPresentation, ev: Dictionary, local_player_id: String, audio_controller, player_anim, attack_mode: String = "", attack_speed: float = 1.0, inventory: Array = [], equipped: Dictionary = {}) -> void:
+static func present_result(tracker: CombatLocalAttackPresentation, ev: Dictionary, local_player_id: String, audio_controller, player_anim, attack_mode: String = "", attack_speed: float = 1.0, inventory: Array = [], equipped: Dictionary = {}, first_person_anim = null, first_person_recorder = null) -> void:
 	if str(ev.get("source_entity_id", "")) != local_player_id:
 		return
 	if tracker != null and tracker.consume_if_matches(ev, local_player_id):
 		return
 	ClientAudioBridgeScript.attack(audio_controller)
-	_play_animation(player_anim, str(ev.get("weapon_slot", "main_hand")), attack_mode, attack_speed, inventory, equipped)
+	var weapon_slot := str(ev.get("weapon_slot", "main_hand"))
+	var clip := _attack_clip_for(weapon_slot, attack_mode, inventory, equipped)
+	_play_animation_clip(player_anim, clip, attack_mode, attack_speed)
+	_play_animation_clip(first_person_anim, clip, attack_mode, attack_speed)
+	if first_person_recorder != null and first_person_recorder.is_valid():
+		first_person_recorder.call(weapon_slot, clip)
 
 
 static func _play_animation(player_anim, weapon_slot: String = "main_hand", attack_mode: String = "", attack_speed: float = 1.0, inventory: Array = [], equipped: Dictionary = {}) -> void:
 	if player_anim != null:
 		var clip := _attack_clip_for(weapon_slot, attack_mode, inventory, equipped)
+		_play_animation_clip(player_anim, clip, attack_mode, attack_speed)
+
+
+static func _play_animation_clip(player_anim, clip: String, attack_mode: String, attack_speed: float) -> void:
+	if player_anim != null:
 		player_anim.play_one_shot(clip, attack_mode, AttackAnimationScalingScript.speed_scale_for(attack_speed))
 
 

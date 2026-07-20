@@ -52,7 +52,10 @@
       "slot": "main_hand",
       "item_def_id": "training_bow",
       "active": true,
-      "visible": true
+      "visible": true,
+      "rig_active": true,
+      "socket_parent": "right_hand_socket",
+      "node_parent": "right_hand_socket"
     },
     {
       "type": "wait_entity",
@@ -81,7 +84,11 @@
       "item_def_id": "training_bow",
       "active": true,
       "visible": true,
-      "attack_count_min": 1
+      "rig_active": true,
+      "socket_parent": "right_hand_socket",
+      "node_parent": "right_hand_socket",
+      "attack_count_min": 1,
+      "last_attack_clip": "attack_ranged"
     }
   ]
 }

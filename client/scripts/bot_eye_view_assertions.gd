@@ -23,4 +23,15 @@ static func assert_weapon(runner, step: Dictionary, state: Dictionary) -> bool:
 			str(step.get("attack_count_min", 0)), str(slot_state.get("attack_count", 0)), str(eye_view), runner._step_index, str(runner.scenario.get("id", "?"))
 		])
 		return false
+	if step.has("rig_active") and bool(eye_view.get("rig_active", false)) != bool(step.get("rig_active", true)):
+		runner._fail("assert_eye_view_weapon failed: rig_active want=%s got=%s state=%s step=%d scenario=%s" % [
+			str(step.get("rig_active", true)), str(eye_view.get("rig_active", false)), str(eye_view), runner._step_index, str(runner.scenario.get("id", "?"))
+		])
+		return false
+	for key in ["socket_parent", "node_parent", "last_attack_clip"]:
+		if step.has(key) and str(slot_state.get(key, "")) != str(step.get(key, "")):
+			runner._fail("assert_eye_view_weapon failed: %s want=%s got=%s state=%s step=%d scenario=%s" % [
+				key, str(step.get(key, "")), str(slot_state.get(key, "")), str(eye_view), runner._step_index, str(runner.scenario.get("id", "?"))
+			])
+			return false
 	return true

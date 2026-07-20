@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-14 (v466 eye-view weapon presentation)
+Last updated: 2026-07-20 (v467 shared first-person equipment rig)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-07-14 (v466 eye-view weapon presentation)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v466 — eye-view weapon presentation |
-| **Next slice** | v467 TBD |
+| **Latest completed slice** | v467 — shared first-person equipment rig |
+| **Next slice** | v468 TBD |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 
@@ -114,7 +114,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Itemization | Affinity-scaling passives shipped as barbarian/rogue pilots in v451; sorcerer/paladin/ranger/druid follow-up passives and broader affinity gear coverage remain deferred. | v451 follow-up, ADR-0014 |
 | Economy / trade | Gold/resource pricing beyond direct stash-gold listing prices, market restrictions for upgraded/bound/equipped/hotbar-assigned items, player-facing offer browser/cancel UI polish, market notification inbox/unread persistence/polling/realtime push beyond summary-refreshed board badges, clock/timer/daily mystery refresh, account-wide mystery stock, stash overflow delivery for purchases, mystery refunds/binding/special resale, final mystery price tuning against visible vendor prices, clock-based shop refresh, long-term market endgame loops for advanced players | v33/v38/v41/v42/v47/v51/v64/v68/v111/v128/v129/v130/v288 non-goals, ADR-0011, ADR-0012, ADR-0013, ADR-0014 |
 | Content | Production item art/icons, production menu art/audio, production town/vendor/stash/mystery-seller/quest-giver art, production imported town building assets, collision-aware town decorations, ambient NPC movement, production dungeon art/lighting/sound, production fog/visibility art, production chest art/animation/audio, production archer attack animation, production monster art/VFX/audio, production boss art/VFX/audio, generalized ranged-monster equipment overlays, production combat/skill VFX/audio beyond code-native placeholders, production paper-doll art/model preview, colorblind/accessibility-safe rarity presentation, additional NPCs/vendors, quest-giver dialog/portrait/audio polish, mystery seller presentation polish, additional item families beyond current rules, full content-library manifest/index rollout beyond skills for items, classes, and broader presentation assets | v15/v20/v23/v24/v25/v28/v29/v30/v31/v32/v35/v36/v37/v39/v40/v41/v42/v43/v44/v45/v47/v50/v51/v52/v57/v58/v59/v60/v72/v81/v96/v97/v172/v225/v253/v255/v264/v273/v291 non-goals, ADR-0013 |
-| Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, production dungeon fog lighting/art pass beyond code-native radial/LOS/organic masks, minimap routefinding/click-to-navigate/legend/filter UI, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout, bespoke first-person offsets/animations per class and weapon family beyond the v466 reusable eye-view mount | v53/v57/v58/v73/v74/v75/v225/v253/v255/v263/v264/v466 non-goals, ADR-0009 |
+| Client presentation | Boss portraits, multi-boss layouts, exact authoritative boss countdown sync, production shape-specific telegraph decals/VFX/audio, production boss health bar art/audio, production dungeon fog lighting/art pass beyond code-native radial/LOS/organic masks, minimap routefinding/click-to-navigate/legend/filter UI, draggable titlebar migration for waypoint/menu windows, reset-layout UI, server/account-synced UI layout, production first-person hands/arms meshes, bespoke first-person offsets/animations per class and weapon family beyond the v467 shared first-person rig | v53/v57/v58/v73/v74/v75/v225/v253/v255/v263/v264/v466/v467 non-goals, ADR-0009 |
 | Dungeon generation | Non-rectangular/polygon fog line-of-sight blocking beyond current rectangular wall/tall-obstacle and closed-door occlusion, full room/corridor PCG, rotated/polygon/destructible/secret obstacles, boss-floor obstacle generation, final biome/difficulty balance beyond first area-density formulas, perimeter/generated wall-join rounding beyond the v462 `room_wall` pass | v40/v252/v253/v254/v255/v260/v261/v262/v295/v296/v297/v298/v299/v300 non-goals, v462 deferred |
 | Client controls | Reliable full-scene headless modifier/mouse proof for `SHIFT+LMB` stationary attack; v37 covers the behavior with Godot unit helpers and protocol bot coverage instead | v37 deferred |
 | Testing / tooling | **Pre-existing extended-scenario failures (discovered $review v448):** `random_quest_reward_floor` (HTTP 500 server crash on WebSocket, `dungeon_depth_one_lab` world); `teleporter_lab` (level assertion `current_level -3 != 0`); `dungeon_combat_perf_probe` (skill_cast timeout flaky). All confirmed pre-existing at `ebcbdc9a`. | discovered $review 2026-07-07 |

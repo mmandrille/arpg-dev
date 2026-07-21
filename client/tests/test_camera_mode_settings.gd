@@ -187,6 +187,7 @@ func _test_controller_eye_view_debug_state() -> void:
 	anchor.add_child(visual)
 	var head_socket := Node3D.new()
 	head_socket.name = "head_socket"
+	head_socket.position = Vector3(0.0, 1.55, 0.0)  # realistic bone height so camera lands above 1m
 	visual.add_child(head_socket)
 	var ctx := PlayerCameraContextScript.make(anchor, visual, null, Callable())
 	ctrl.setup(ctx, root)

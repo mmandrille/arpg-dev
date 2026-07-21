@@ -23,6 +23,7 @@ var _scene_root: Node3D
 var _camera: Camera3D
 var _chest_socket_node: Node3D  # non-null when camera is parented to chest socket
 var _chest_socket_fallback: Node3D  # non-null when fallback node was created in _setup_chest_view
+var _head_socket_node: Node3D  # head bone socket; camera anchors here to track animations
 var _eye_view_light: OmniLight3D
 var _current_mode: String = ""
 var _cfg: Dictionary = {}  # current mode data from CameraPresentationsLoader
@@ -81,13 +82,23 @@ func tick_follow(delta: float) -> void:
 		_sync_chest_view()
 
 
-## Zoom handler: isometric adjusts camera.size.
+## Returns the active camera mode name.
+func get_current_mode() -> String:
+	return _current_mode
+
+
+## Zoom handler: isometric adjusts camera.size; chest_view adjusts FOV.
 func adjust_zoom(delta_size: float) -> void:
-	if _camera == null or _current_mode != "isometric":
+	if _camera == null:
 		return
-	var zoom_min: float = _cfg.get("zoom_min", 8.0)
-	var zoom_max: float = _cfg.get("zoom_max", 20.0)
-	_camera.size = clampf(_camera.size + delta_size, zoom_min, zoom_max)
+	if _current_mode == "isometric":
+		var zoom_min: float = _cfg.get("zoom_min", 8.0)
+		var zoom_max: float = _cfg.get("zoom_max", 20.0)
+		_camera.size = clampf(_camera.size + delta_size, zoom_min, zoom_max)
+	elif _current_mode == "chest_view":
+		var fov_min: float = _cfg.get("fov_min", 60.0)
+		var fov_max: float = _cfg.get("fov_max", 120.0)
+		_camera.fov = clampf(_camera.fov + delta_size, fov_min, fov_max)
 
 
 ## Returns the active Camera3D (callers bind this for raycasting / UI world-space).
@@ -169,8 +180,8 @@ func camera_relative_flat_direction(input: Vector2) -> Vector2:
 	if _current_mode == "chest_view":
 		# character_visual.rotation.y may lag behind _yaw by one frame due to server
 		# facing overrides; derive forward/right from _yaw directly to stay frame-accurate.
-		var fwd := Vector2(-sin(_yaw), -cos(_yaw))
-		var right := Vector2(cos(_yaw), -sin(_yaw))
+		var fwd := Vector2(sin(_yaw), cos(_yaw))
+		var right := Vector2(-cos(_yaw), sin(_yaw))
 		var world := right * input.x - fwd * input.y
 		return world.normalized() if world.length_squared() > 0.0001 else Vector2.ZERO
 	var forward := -_camera.global_transform.basis.z
@@ -247,6 +258,9 @@ func _setup_chest_view() -> void:
 	_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 	_camera.near = float(_cfg.get("near_clip", 0.25))
 	_chest_socket_node = _ctx.character_visual if _ctx != null else null
+	_head_socket_node = null
+	if _ctx != null and _ctx.character_visual != null:
+		_head_socket_node = _ctx.character_visual.find_child("head_socket", true, false) as Node3D
 	if _camera.get_parent() != _scene_root:
 		_camera.get_parent().remove_child(_camera)
 		_scene_root.add_child(_camera)
@@ -285,12 +299,14 @@ func _sync_chest_view() -> void:
 		return
 	_ctx.character_visual.rotation.y = _yaw
 	var fwd_offset: float = _cfg.get("chest_forward_offset", 0.12)
-	var eye_height: float = _cfg.get("eye_height", 0.0)
-	var anchor := _ctx.character_visual as Node3D
-	var base := anchor.global_position
 	var yaw_basis := Basis(Vector3.UP, _yaw)
-	_camera.global_position = base + yaw_basis * Vector3(0.0, eye_height, -fwd_offset)
-	_camera.global_rotation = Vector3(_pitch, _yaw, 0.0)
+	if _head_socket_node != null and is_instance_valid(_head_socket_node):
+		var eye_offset: float = _cfg.get("eye_height_from_socket", 0.05)
+		_camera.global_position = _head_socket_node.global_position + yaw_basis * Vector3(0.0, eye_offset, -fwd_offset)
+	else:
+		var eye_height: float = _cfg.get("eye_height", 0.0)
+		_camera.global_position = _ctx.character_visual.global_position + yaw_basis * Vector3(0.0, eye_height, -fwd_offset)
+	_camera.global_rotation = Vector3(_pitch, _yaw + PI, 0.0)
 
 
 func _setup_eye_view_light() -> void:
@@ -309,6 +325,6 @@ func _setup_eye_view_light() -> void:
 func _apply_perspective_rotation() -> void:
 	if _current_mode == "chest_view":
 		if _camera != null:
-			_camera.rotation = Vector3(_pitch, 0.0, 0.0)
+			_camera.rotation = Vector3(_pitch, PI, 0.0)
 		if _ctx != null and _ctx.character_visual != null:
 			_ctx.character_visual.rotation.y = _yaw

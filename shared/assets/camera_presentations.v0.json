@@ -25,20 +25,23 @@
     },
     "chest_view": {
       "projection": "perspective",
-      "zoom_default": 1.0,
-      "zoom_min": 1.0,
-      "zoom_max": 1.0,
+      "zoom_default": 0.35,
+      "zoom_min": 0.1,
+      "zoom_max": 2.0,
       "spring_arm_length": 0.0,
       "shoulder_offset": [
         0.0,
         0.0,
         0.0
       ],
-      "chest_forward_offset": 0.25,
-      "eye_height": 1.6,
-      "fov": 90.0,
+      "chest_forward_offset": -0.10,
+      "eye_height": 1.40,
+      "eye_height_from_socket": -0.20,
+      "fov": 100.0,
+      "fov_min": 60.0,
+      "fov_max": 120.0,
       "near_clip": 0.20,
-      "showme_eye_pitch_degrees": -22.0,
+      "showme_eye_pitch_degrees": -10.0,
       "eye_light_energy": 1.35,
       "eye_light_range": 5.0,
       "eye_light_color": [
@@ -47,7 +50,7 @@
         0.82
       ],
       "mouse_sensitivity": 0.003,
-      "pitch_min_degrees": -70.0,
+      "pitch_min_degrees": -45.0,
       "pitch_max_degrees": 10.0,
       "reticle_enabled": true,
       "follow_damping_seconds": 0.0

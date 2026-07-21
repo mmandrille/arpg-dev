@@ -2246,6 +2246,7 @@ func _notify_training_damage_log(entity_id: String, ev: Dictionary) -> void:
 func _play_local_player_reaction_animation(clip: String) -> void:
 	if player_anim == null: return
 	if clip == "hit" and player_anim.current_clip() in ["attack", "attack_off_hand"]: return
+	if clip == "hit" and _camera_controller != null and _camera_controller.get_current_mode() == "chest_view": return
 	player_anim.play_one_shot(clip)
 
 func _node_world_or_local_position(node: Node3D) -> Vector3:

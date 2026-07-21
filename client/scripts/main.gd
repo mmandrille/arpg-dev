@@ -5666,7 +5666,13 @@ func _entity_visual_scale(e: Dictionary) -> float:
 func _apply_local_player_visual_scale(scale: float) -> void:
 	player_visual_scale = scale if scale > 0.0 else 1.0
 	if character_visual != null:
-		character_visual.scale = Vector3.ONE * player_visual_scale
+		character_visual.scale = _local_player_visual_scale_vector()
+
+func _local_player_visual_scale_vector() -> Vector3:
+	var mag := player_visual_scale
+	if _camera_controller != null and _camera_controller.get_current_mode() == ClientSettings.CAMERA_MODE_CHEST_VIEW:
+		return Vector3(-mag, mag, mag)
+	return Vector3.ONE * mag
 
 func _apply_local_player_class_model() -> void:
 	if character_visual == null:

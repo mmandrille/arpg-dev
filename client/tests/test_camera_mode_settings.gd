@@ -240,8 +240,12 @@ func _test_controller_isometric_mouse_capture_policy() -> void:
 	var ctrl := PlayerCameraControllerScript.new()
 	var root := Node3D.new()
 	get_root().add_child(root)
+	var visual := Node3D.new()
+	visual.name = "CharacterVisual"
+	root.add_child(visual)
 	var ctx := PlayerCameraContextScript.new()
 	ctx.player_anchor = root
+	ctx.character_visual = visual
 	ctrl.setup(ctx, root)
 	ctrl.apply_mode(ClientSettingsScript.CAMERA_MODE_ISOMETRIC)
 	var cam := ctrl.get_gameplay_camera()
@@ -254,6 +258,10 @@ func _test_controller_isometric_mouse_capture_policy() -> void:
 	_assert_true("chest_view camera is non-null", cam != null)
 	if cam != null:
 		_assert_eq("chest_view camera projection is PERSPECTIVE", cam.projection, Camera3D.PROJECTION_PERSPECTIVE)
+	_assert_true("chest_view mirrors character scale for hand presentation", visual.scale.x < 0.0)
+
+	ctrl.apply_mode(ClientSettingsScript.CAMERA_MODE_ISOMETRIC)
+	_assert_true("isometric restores positive character scale", visual.scale.x > 0.0)
 
 	root.queue_free()
 	CameraPresentationsLoaderScript.reset_for_tests()

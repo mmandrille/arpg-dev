@@ -25,6 +25,7 @@ var _chest_socket_node: Node3D  # non-null when camera is parented to chest sock
 var _chest_socket_fallback: Node3D  # non-null when fallback node was created in _setup_chest_view
 var _head_socket_node: Node3D  # head bone socket; camera anchors here to track animations
 var _eye_view_light: OmniLight3D
+var _chest_view_mirror_applied := false
 var _current_mode: String = ""
 var _cfg: Dictionary = {}  # current mode data from CameraPresentationsLoader
 var _iso_offset: Vector3 = Vector3(9.0, 20.0, 15.0)  # isometric follow offset, read from data
@@ -221,6 +222,9 @@ func _reset_perspective_angles() -> void:
 
 
 func _teardown_rig() -> void:
+	if _current_mode == "chest_view":
+		_clear_chest_view_mirror()
+
 	# Free chest socket fallback node if one was created.
 	if _chest_socket_fallback != null:
 		if is_instance_valid(_chest_socket_fallback):
@@ -265,6 +269,7 @@ func _setup_chest_view() -> void:
 		_camera.get_parent().remove_child(_camera)
 		_scene_root.add_child(_camera)
 	_setup_eye_view_light()
+	_apply_chest_view_mirror()
 	_sync_chest_view()
 
 
@@ -328,3 +333,26 @@ func _apply_perspective_rotation() -> void:
 			_camera.rotation = Vector3(_pitch, PI, 0.0)
 		if _ctx != null and _ctx.character_visual != null:
 			_ctx.character_visual.rotation.y = _yaw
+
+
+func _apply_chest_view_mirror() -> void:
+	if _ctx == null or _ctx.character_visual == null:
+		return
+	var visual := _ctx.character_visual as Node3D
+	var mag := _positive_uniform_scale(visual.scale)
+	visual.scale = Vector3(-mag, mag, mag)
+	_chest_view_mirror_applied = true
+
+
+func _clear_chest_view_mirror() -> void:
+	if not _chest_view_mirror_applied or _ctx == null or _ctx.character_visual == null:
+		_chest_view_mirror_applied = false
+		return
+	var visual := _ctx.character_visual as Node3D
+	var mag := _positive_uniform_scale(visual.scale)
+	visual.scale = Vector3(mag, mag, mag)
+	_chest_view_mirror_applied = false
+
+
+func _positive_uniform_scale(scale: Vector3) -> float:
+	return maxf(absf(scale.x), maxf(absf(scale.y), absf(scale.z)))

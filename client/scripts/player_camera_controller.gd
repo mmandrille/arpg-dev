@@ -99,10 +99,7 @@ func get_debug_state() -> Dictionary:
 		"mode": _current_mode,
 		"projection": "perspective" if _camera != null and _camera.projection == Camera3D.PROJECTION_PERSPECTIVE else "orthogonal",
 		"eye_height": float(_cfg.get("eye_height", 0.0)),
-		"hide_local_body": bool(_cfg.get("hide_local_body", false)),
-		"view_model_position": (_cfg.get("view_model_position", []) as Array).duplicate(),
-		"view_model_rotation_degrees": (_cfg.get("view_model_rotation_degrees", []) as Array).duplicate(),
-		"view_model_scale": float(_cfg.get("view_model_scale", 1.0)),
+		"near_clip": float(_cfg.get("near_clip", 0.05)),
 		"camera_position_y": _camera.global_position.y if _camera != null else 0.0,
 		"eye_light_energy": _eye_view_light.light_energy if _eye_view_light != null and is_instance_valid(_eye_view_light) else 0.0,
 		"eye_light_range": _eye_view_light.omni_range if _eye_view_light != null and is_instance_valid(_eye_view_light) else 0.0,
@@ -219,6 +216,10 @@ func _teardown_rig() -> void:
 			_chest_socket_fallback.queue_free()
 		_chest_socket_fallback = null
 
+	# Restore default near clip when leaving a mode that overrides it.
+	if _camera != null and is_instance_valid(_camera):
+		_camera.near = 0.05
+
 	# Detach camera from chest socket if it was parented there.
 	if _chest_socket_node != null:
 		if is_instance_valid(_camera) and _camera.get_parent() == _chest_socket_node:
@@ -244,9 +245,8 @@ func _setup_isometric() -> void:
 func _setup_chest_view() -> void:
 	_reset_perspective_angles()
 	_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	_camera.near = float(_cfg.get("near_clip", 0.25))
 	_chest_socket_node = _ctx.character_visual if _ctx != null else null
-	# Keep the gameplay camera outside the local body so hiding the body for eye-view
-	# cannot hide or invalidate the camera. _sync_chest_view follows the hero root by transform.
 	if _camera.get_parent() != _scene_root:
 		_camera.get_parent().remove_child(_camera)
 		_scene_root.add_child(_camera)

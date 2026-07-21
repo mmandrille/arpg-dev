@@ -801,7 +801,6 @@ func _sync_camera_from_settings() -> void:
 		return
 	if _camera_controller != null:
 		_camera_controller.apply_mode(client_settings.camera_mode)
-	_sync_eye_view_equipment()
 	_refresh_fog_presentation()
 	_sync_dungeon_ceiling_visibility()
 	_update_mouse_capture()
@@ -1685,7 +1684,7 @@ func _apply_delta(p: Dictionary) -> void:
 		if clip == null:
 			if event_type in ["attack_missed", "attack_blocked"]:
 				_face_event_source_toward_target(ev)
-				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped, resolver.first_person_animation_controller() if resolver != null else null, Callable(resolver, "record_first_person_attack") if resolver != null else Callable())
+				CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 				_show_combat_text_for_event(eid, ev, Color(0.82, 0.86, 0.92))
 			continue
 		if event_type == "skill_damage_burst":
@@ -1707,7 +1706,7 @@ func _apply_delta(p: Dictionary) -> void:
 			continue
 		if event_type == "monster_damaged" or event_type == "monster_killed":
 			_face_event_source_toward_target(ev)
-			CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped, resolver.first_person_animation_controller() if resolver != null else null, Callable(resolver, "record_first_person_attack") if resolver != null else Callable())
+			CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
 			ClientAudioBridgeScript.damage(audio_controller, false)
@@ -3095,7 +3094,7 @@ func _handle_autoplay(delta: float) -> void:
 			if aim != Vector2.ZERO:
 				_face_direction(aim)
 			if autoplay_attack_cooldown <= 0.0:
-				CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped, resolver.first_person_animation_controller() if resolver != null else null, Callable(resolver, "record_first_person_attack") if resolver != null else Callable())
+				CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 				_send_action_intent(target_id)
 				autoplay_attack_cooldown = autoplay_step_delay
 			autoplay_timer = autoplay_step_delay
@@ -3217,7 +3216,7 @@ func _dispatch_monster_attack_now(target_id: String, rec: Dictionary) -> void:
 		var flat := Vector2(target_node.global_position.x - player_anchor.global_position.x, target_node.global_position.z - player_anchor.global_position.z)
 		if flat.length_squared() > 0.0001:
 			_face_direction(flat.normalized())
-	CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped, resolver.first_person_animation_controller() if resolver != null else null, Callable(resolver, "record_first_person_attack") if resolver != null else Callable())
+	CombatLocalAttackPresentationScript.present_local_start(_local_attack_presentation, target_id, audio_controller, player_anim, "main_hand", CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)
@@ -3858,7 +3857,6 @@ func _build_scene() -> void:
 	_camera_controller = PlayerCameraControllerScript.new()
 	_camera_controller.setup(PlayerCameraContextScript.make(player_anchor, character_visual, client_settings, Callable(self, "_input_locked")), self)
 	_camera = _camera_controller.get_gameplay_camera()
-	_sync_eye_view_equipment()
 
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -40, 0)
@@ -5729,17 +5727,6 @@ func _remount_local_equipment_visuals() -> void:
 		"weapon_sets": weapon_sets,
 		"active_weapon_set": active_weapon_set,
 	})
-	_sync_eye_view_equipment()
-
-
-func _sync_eye_view_equipment() -> void:
-	if resolver == null or _camera_controller == null or client_settings == null:
-		return
-	var cfg := CameraPresentationsLoaderScript.mode(client_settings.camera_mode)
-	var perspective := client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
-	resolver.set_eye_view(_camera_controller.get_gameplay_camera(), perspective, cfg)
-	if character_visual != null and is_instance_valid(character_visual):
-		character_visual.visible = not (perspective and bool(cfg.get("hide_local_body", false)))
 
 
 func _request_level_loading(target_level: int, traveling: bool) -> void:

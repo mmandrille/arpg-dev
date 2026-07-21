@@ -16,7 +16,6 @@ class_name EquipmentVisualResolver
 const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
-const FirstPersonEquipmentRigScript := preload("res://scripts/first_person_equipment_rig.gd")
 const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
 const FALLBACK_ASSET_BY_SLOT := {
 	"head": "fallback_equipment_head_v0",
@@ -59,10 +58,6 @@ var _weapon_sets: Array = []
 var _active_weapon_set: int = 0
 var _mounted_nodes: Dictionary = {} # slot -> Node3D
 var _mounted_mirror_nodes: Dictionary = {} # slot -> Node3D (e.g. right boot)
-var _eye_view_camera: Camera3D
-var _eye_view_enabled := false
-var _eye_view_cfg: Dictionary = {}
-var _eye_view_rig
 var _mounted_state: Dictionary = {} # slot -> debug state
 var _warnings: Array = []
 
@@ -74,7 +69,6 @@ func set_character_class(class_id: String) -> void:
 
 func _init(mount_root: Node3D) -> void:
 	_mount_root = mount_root
-	_eye_view_rig = FirstPersonEquipmentRigScript.new()
 	_load_data()
 
 
@@ -125,22 +119,6 @@ func apply_equipped_update(slot: String, item_instance_id) -> void:
 	_refresh_slot(slot)
 
 
-func set_eye_view(camera: Camera3D, enabled: bool, cfg: Dictionary) -> void:
-	_eye_view_camera = camera
-	_eye_view_enabled = enabled and camera != null and is_instance_valid(camera)
-	_eye_view_cfg = cfg.duplicate(true)
-	_eye_view_rig.set_eye_view(camera, _eye_view_enabled, _eye_view_cfg)
-	_refresh_eye_view()
-
-
-func first_person_animation_controller():
-	return _eye_view_rig.animation_controller() if _eye_view_rig != null else null
-
-
-func record_first_person_attack(slot: String, clip: String) -> void:
-	if _eye_view_rig != null:
-		_eye_view_rig.record_attack(slot, clip)
-
 
 # --- debug surface (spec §4.4 / §4.7) ---------------------------------------
 
@@ -152,7 +130,6 @@ func get_debug_state() -> Dictionary:
 	visuals["weapon"] = visuals.get("main_hand", null)
 	return {
 		"equipped_visuals": visuals,
-		"eye_view": _eye_view_rig.get_debug_state() if _eye_view_rig != null else {},
 		"warnings": _warnings,
 	}
 
@@ -169,7 +146,6 @@ func _refresh_all() -> void:
 	_warnings = []
 	for slot in EQUIPMENT_SLOTS:
 		_refresh_slot(str(slot), false)
-	_refresh_eye_view()
 
 
 func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
@@ -246,8 +222,6 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		"visible": inst.visible,
 		"procedural_fallback": procedural_fallback != null,
 	}
-	if slot == "main_hand" or slot == "off_hand":
-		_refresh_eye_view_slot(slot)
 
 
 func _equipped_instance_id_for_slot(slot: String) -> String:
@@ -342,52 +316,6 @@ func _clear_mounted(slot: String) -> void:
 	if mirror != null and is_instance_valid(mirror):
 		(mirror as Node3D).queue_free()
 	_mounted_mirror_nodes.erase(slot)
-	if slot == "main_hand" or slot == "off_hand":
-		if _eye_view_rig != null:
-			_eye_view_rig.clear_slot(slot)
-
-
-func _refresh_eye_view() -> void:
-	for slot in ["main_hand", "off_hand"]:
-		_refresh_eye_view_slot(slot)
-
-
-func _refresh_eye_view_slot(slot: String) -> void:
-	if _eye_view_rig != null:
-		_eye_view_rig.clear_slot(slot)
-	if not _eye_view_enabled or _eye_view_camera == null or not is_instance_valid(_eye_view_camera):
-		return
-	if slot == "off_hand" and _main_hand_blocks_off_hand_visual():
-		return
-	var item_instance_id := _equipped_instance_id_for_slot(slot)
-	if item_instance_id == "":
-		return
-	var item: Dictionary = _inventory.get(item_instance_id, {})
-	var def_id := str(item.get("item_def_id", ""))
-	if def_id == "":
-		return
-	var vis: Dictionary = _visual_for(def_id, slot)
-	if vis.is_empty():
-		return
-	var asset_id := str(vis.get("asset_id", ""))
-	var entry = _assets.get(asset_id, null)
-	if entry == null:
-		return
-	var node := _instantiate_visual(asset_id, slot, entry)
-	if node == null:
-		return
-	node.name = asset_id
-	_apply_transform(node, _local_transform_for_slot(slot, vis), false)
-	var rarity := str(item.get("rarity", "common")).to_lower()
-	_apply_tint(node, RARITY_TINTS.get(rarity, RARITY_TINTS["common"]))
-	var metadata := {
-		"slot": slot,
-		"item_instance_id": item_instance_id,
-		"item_def_id": def_id,
-		"asset_id": asset_id,
-		"mount_socket": _mount_socket_for_slot(slot, vis),
-	}
-	_eye_view_rig.mount_slot(slot, node, metadata)
 
 
 func _instantiate_visual(asset_id: String, slot: String, entry) -> Node3D:

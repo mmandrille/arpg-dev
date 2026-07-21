@@ -42,6 +42,10 @@ static func mode(name: String) -> Dictionary:
 	return _modes.get("isometric", {})
 
 
-static func reset_for_tests() -> void:
+static func invalidate() -> void:
 	_loaded = false
 	_modes = {}
+
+
+static func reset_for_tests() -> void:
+	invalidate()

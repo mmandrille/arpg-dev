@@ -20,7 +20,6 @@ const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 const ScaleProbeScript := preload("res://tests/item_visual_scale_probe.gd")
 const EquipmentProbeScript := preload("res://tests/item_visual_equipment_probe.gd")
 const EquippedGearFitProbeScript := preload("res://tests/equipped_gear_fit_probe.gd")
-const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
 const InteractableProbeScript := preload("res://tests/item_visual_interactable_probe.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
 
@@ -96,8 +95,6 @@ func _run_all() -> void:
 		return
 	if not EquipmentProbeScript.new().verify_off_hand_weapon_resolver(self, Callable(self, "_fail")):
 		return
-	if not await _verify_eye_view_weapon_mount():
-		return
 	if not _verify_loot_label_presentation(item_rules, item_templates, presentations):
 		return
 	var interactable_probe := InteractableProbeScript.new()
@@ -119,78 +116,6 @@ func _run_all() -> void:
 	print("[gdtest] PASS: item visual resolution and presentation metadata (manifest -> %s)" % res_path)
 	quit(0)
 
-
-func _verify_eye_view_weapon_mount() -> bool:
-	var root := Node3D.new()
-	get_root().add_child(root)
-	var character := CharacterScene.instantiate() as Node3D
-	root.add_child(character)
-	if character.has_method("_ensure_weapon_socket"):
-		character.call("_ensure_weapon_socket")
-	var camera := Camera3D.new()
-	root.add_child(camera)
-	var resolver := ResolverScript.new(character)
-	resolver.set_eye_view(camera, true, {
-		"view_model_position": [0.34, -0.32, -0.82],
-		"view_model_rotation_degrees": [-10.0, -18.0, 8.0],
-		"view_model_scale": 0.82,
-	})
-	resolver.apply_snapshot({
-		"inventory": [{
-			"item_instance_id": "eye_sword_1",
-			"item_def_id": "rusty_sword",
-			"rarity": "magic",
-		}],
-		"equipped": {"main_hand": "eye_sword_1"},
-	})
-	await process_frame
-	var state: Dictionary = resolver.get_debug_state().get("eye_view", {})
-	var main_hand: Dictionary = state.get("main_hand", {})
-	var rig: Dictionary = state.get("rig", {})
-	if not bool(rig.get("hands_visible", false)) or int(rig.get("hand_proxy_count", 0)) < 2:
-		_fail("eye-view first-person hand proxies are not visible: %s" % str(state))
-		root.queue_free()
-		return false
-	if not bool(main_hand.get("active", false)) or not bool(main_hand.get("visible", false)):
-		_fail("eye-view main-hand weapon did not mount: %s" % str(state))
-		root.queue_free()
-		return false
-	if str(main_hand.get("item_def_id", "")) != "rusty_sword":
-		_fail("eye-view main-hand item mismatch: %s" % str(main_hand))
-		root.queue_free()
-		return false
-	if not str(main_hand.get("node_path", "")).contains(str(camera.get_path())):
-		_fail("eye-view weapon node is not inside the camera-local rig: %s camera=%s" % [str(main_hand), str(camera.get_path())])
-		root.queue_free()
-		return false
-	if str(main_hand.get("socket_parent", "")) != "right_hand_socket" or str(main_hand.get("node_parent", "")) != "right_hand_socket":
-		_fail("eye-view weapon is not mounted on first-person hand socket: %s" % str(main_hand))
-		root.queue_free()
-		return false
-	CombatLocalAttackPresentationScript.present_local_start(
-		null,
-		"dummy",
-		null,
-		null,
-		"main_hand",
-		"melee",
-		1.0,
-		[{"item_instance_id": "eye_sword_1", "item_def_id": "rusty_sword"}],
-		{"main_hand": "eye_sword_1"},
-		resolver.first_person_animation_controller(),
-		Callable(resolver, "record_first_person_attack")
-	)
-	var after_attack: Dictionary = resolver.get_debug_state().get("eye_view", {}).get("main_hand", {})
-	if int(after_attack.get("attack_count", 0)) < 1:
-		_fail("eye-view weapon attack motion did not increment: %s" % str(after_attack))
-		root.queue_free()
-		return false
-	if str(after_attack.get("last_attack_clip", "")) == "":
-		_fail("eye-view weapon attack did not record shared clip: %s" % str(after_attack))
-		root.queue_free()
-		return false
-	root.queue_free()
-	return true
 
 func _res_path(runtime_path: String) -> String:
 	# Manifest runtime_path (client/assets/...) -> Godot res:// (ADR-0006 D6).

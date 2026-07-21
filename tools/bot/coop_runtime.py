@@ -52,6 +52,10 @@ async def pump_coop(peers: list[CoopPeer], timeout: float = 0.1, helpers: dict[s
     done, pending = await asyncio.wait(tasks.keys(), timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
     for task in pending:
         task.cancel()
+    # Await cancelled tasks so Python 3.14 asyncio finishes cancellation cleanly
+    # before the websockets library can assert on internal queue state.
+    if pending:
+        await asyncio.gather(*pending, return_exceptions=True)
     for task in done:
         peer = tasks[task]
         ingest_message(json.loads(task.result()), peer.state)

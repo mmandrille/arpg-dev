@@ -26,6 +26,7 @@ const ShowmeGearMatrixCaptureScript := preload("res://scripts/showme/showme_gear
 const GearSocketsLoaderScript := preload("res://scripts/gear_sockets_loader.gd")
 const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
 const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
+const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
 
 const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
@@ -60,6 +61,7 @@ var _rotation_speed := 0.35
 var _live_elapsed := 0.0
 var _gear_resolver: EquipmentVisualResolver
 var _gear_character: Node3D
+var _eye_view_camera: Camera3D
 var _items: Array = []
 var _class_id := ""
 var _skill_id := ""
@@ -128,6 +130,8 @@ func _initialize() -> void:
 			await _setup_market_offer()
 		"skeleton":
 			_subject = await ShowmeSkeletonCaptureScript.setup(self, _class_id)
+		"eye-view":
+			await _setup_eye_view()
 		_:
 			await _setup_gear()
 
@@ -138,7 +142,7 @@ func _initialize() -> void:
 		await process_frame
 
 	if _mode == "live":
-		if _refresh_interval > 0.0 and _focus == "gear":
+		if _refresh_interval > 0.0 and _focus in ["gear", "eye-view"]:
 			await _run_live_gear_refresh_loop()
 			quit(0)
 			return
@@ -181,9 +185,27 @@ func _run_live_gear_refresh_loop() -> void:
 		if _duration > 0.0 and _live_elapsed >= _duration:
 			break
 
-		await _refresh_gear_visuals()
-		if _subject != null:
-			_subject.rotation.y = deg_to_rad(-18.0)
+		if _focus == "eye-view":
+			await _refresh_eye_view_visuals()
+		else:
+			await _refresh_gear_visuals()
+			if _subject != null:
+				_subject.rotation.y = deg_to_rad(-18.0)
+
+
+func _refresh_eye_view_visuals() -> void:
+	CameraPresentationsLoaderScript.invalidate()
+	CameraPresentationsLoaderScript.ensure_loaded()
+	var cfg := CameraPresentationsLoaderScript.mode("chest_view")
+	if _eye_view_camera == null or not is_instance_valid(_eye_view_camera):
+		return
+	_eye_view_camera.near = float(cfg.get("near_clip", 0.2))
+	_eye_view_camera.fov = float(cfg.get("fov", 90.0))
+	var h := float(cfg.get("eye_height", 1.42))
+	var fwd := float(cfg.get("chest_forward_offset", 0.12))
+	var pitch := deg_to_rad(float(cfg.get("showme_eye_pitch_degrees", -22.0)))
+	_eye_view_camera.position = Vector3(0.0, h, -fwd)
+	_eye_view_camera.rotation = Vector3(pitch, PI, 0.0)
 
 
 func _refresh_gear_visuals() -> void:
@@ -311,6 +333,69 @@ func _setup_gear() -> void:
 		ap.play("idle")
 	await process_frame
 	await process_frame
+
+
+func _setup_eye_view() -> void:
+	var root := Node3D.new()
+	root.name = "VisualFeedbackEyeView"
+	get_root().add_child(root)
+
+	_add_light(root)
+
+	var character := CharacterScene.instantiate() as Node3D
+	character.name = "FocusedCharacter"
+	root.add_child(character)
+	_subject = character
+
+	await process_frame
+	var resolver = EquipmentResolverScript.new(character)
+	_gear_character = character
+	_gear_resolver = resolver
+	var class_id := _class_id if _class_id != "" else "paladin"
+	_apply_class_model(character, class_id)
+	resolver.set_character_class(class_id)
+	await process_frame
+	await process_frame
+
+	resolver.apply_snapshot(_gear_snapshot(_items))
+	var ap := character.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap != null:
+		ap.play("idle")
+	await process_frame
+	await process_frame
+
+	# Reference floor so depth reads correctly.
+	var floor_mesh := MeshInstance3D.new()
+	floor_mesh.mesh = BoxMesh.new()
+	(floor_mesh.mesh as BoxMesh).size = Vector3(4.0, 0.04, 4.0)
+	floor_mesh.position = Vector3(0.0, -0.03, 0.0)
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("#3f3f3c")
+	floor_mesh.material_override = floor_mat
+	root.add_child(floor_mesh)
+
+	# Camera position and clip pulled from camera_presentations.v0.json chest_view so
+	# live tuning (--refresh) picks up edits to near_clip, eye_height, fov, etc.
+	CameraPresentationsLoaderScript.ensure_loaded()
+	var cfg := CameraPresentationsLoaderScript.mode("chest_view")
+	var near_clip := float(cfg.get("near_clip", 0.2))
+	var fov := float(cfg.get("fov", 90.0))
+	var eye_h := float(cfg.get("eye_height", 1.42))
+	var fwd := float(cfg.get("chest_forward_offset", 0.12))
+	var pitch := deg_to_rad(float(cfg.get("showme_eye_pitch_degrees", -22.0)))
+
+	# Character's front faces +Z; camera is at -Z looking outward in +Z (rotation.y = PI).
+	# near_clip ~0.2 shears through the back of the skull so the collar doesn't intrude.
+	var camera := Camera3D.new()
+	camera.name = "EyeViewCamera"
+	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	camera.fov = fov
+	camera.near = near_clip
+	camera.position = Vector3(0.0, eye_h, -fwd)
+	camera.rotation = Vector3(pitch, PI, 0.0)
+	camera.current = true
+	root.add_child(camera)
+	_eye_view_camera = camera
 
 
 func _apply_class_model(character: Node3D, class_id: String) -> void:

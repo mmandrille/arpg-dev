@@ -21,7 +21,7 @@ def _default_output(root: Path, focus: str) -> Path:
 def main() -> int:
     root = _repo_root()
     parser = argparse.ArgumentParser(description="Render a focused Godot client visual.")
-    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "skeleton"], default="gear")
+    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "skeleton", "eye-view"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
     parser.add_argument("--class-id", default="", help="Class id for gear focus, e.g. paladin.")

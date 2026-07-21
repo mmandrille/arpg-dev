@@ -34,10 +34,10 @@
         0.0,
         0.0
       ],
-      "chest_forward_offset": 0.12,
-      "eye_height": 1.42,
+      "chest_forward_offset": -0.25,
+      "eye_height": 1.6,
       "fov": 90.0,
-      "near_clip": 0.25,
+      "near_clip": 0.20,
       "showme_eye_pitch_degrees": -22.0,
       "eye_light_energy": 1.35,
       "eye_light_range": 5.0,

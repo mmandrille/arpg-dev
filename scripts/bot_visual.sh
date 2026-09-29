@@ -10,6 +10,8 @@ cd "$ROOT"
 source "$ROOT/scripts/quiet_helpers.sh"
 # shellcheck source=godot_ci_flags.sh
 source "$ROOT/scripts/godot_ci_flags.sh"
+# shellcheck source=server_helpers.sh
+source "$ROOT/scripts/server_helpers.sh"
 
 CLIENT_SCENARIOS_DIR="$ROOT/tools/bot/scenarios/client"
 GODOT="${GODOT:-godot}"
@@ -17,9 +19,9 @@ GODOT_FLAGS="${GODOT_FLAGS:-}"
 if [[ "${HEADLESS:-0}" == "1" && "$GODOT_FLAGS" != *"--headless"* ]]; then
   GODOT_FLAGS="$GODOT_HEADLESS_FLAGS $GODOT_FLAGS"
 fi
-DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
-ADDR="${ARPG_ADDR:-:8888}"
-BASE_URL="${BASE_URL:-http://localhost:8888}"
+DATABASE_URL="${ARPG_DATABASE_URL:-$("$ROOT/scripts/test_db.sh" url)}"
+ADDR="${ARPG_ADDR:-}"
+BASE_URL="${BASE_URL:-}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-${DEV_TOKEN:-local-dev-token}}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
 PERF_DEBUG="${ARPG_PERF_DEBUG:-false}"
@@ -80,7 +82,9 @@ echo "[bot-visual] building server..."
 SERVER_BIN="$(mktemp -t arpg-bot-visual-server.XXXXXX)"
 "$RUN_QUIET" --label "go build arpg-server" -- bash -c "cd server && go build -o \"$SERVER_BIN\" ./cmd/arpg-server"
 
-echo "[bot-visual] starting server on $ADDR (log: $SERVER_LOG)..."
+"$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL"
+arpg_resolve_server_addr
+echo "[bot-visual] starting server on $ADDR db=$(arpg_db_name "$DATABASE_URL") (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
   ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
   ARPG_PERF_DEBUG="$PERF_DEBUG" ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
@@ -89,16 +93,7 @@ ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
 SERVER_PID=$!
 
 echo "[bot-visual] waiting for server readiness..."
-for i in $(seq 1 60); do
-  if curl -fsS "$BASE_URL/readyz" >/dev/null 2>&1; then break; fi
-  if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-    echo "[bot-visual] server exited early; log:"
-    show_log "$SERVER_LOG" "server"
-    exit 1
-  fi
-  sleep 1
-done
-curl -fsS "$BASE_URL/readyz" >/dev/null
+arpg_wait_own_server "bot-visual"
 
 recording_args=(
   "$ROOT/.venv/bin/python" -m tools.bot.run

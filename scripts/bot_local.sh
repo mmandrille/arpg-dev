@@ -9,12 +9,11 @@ cd "$ROOT"
 # shellcheck source=quiet_helpers.sh
 source "$ROOT/scripts/quiet_helpers.sh"
 
-DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
-if [[ -n "${ARPG_ADDR:-}" ]]; then
-  ADDR="$ARPG_ADDR"
-else
-  ADDR=":0"
-fi
+# shellcheck source=server_helpers.sh
+source "$ROOT/scripts/server_helpers.sh"
+
+DATABASE_URL="${ARPG_DATABASE_URL:-$("$ROOT/scripts/test_db.sh" url)}"
+ADDR="${ARPG_ADDR:-}"
 BASE_URL="${BASE_URL:-}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-${DEV_TOKEN:-local-dev-token}}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
@@ -34,7 +33,9 @@ echo "[bot-local] building server..."
 SERVER_BIN="$(mktemp -t arpg-bot-server.XXXXXX)"
 "$RUN_QUIET" --label "go build arpg-server" -- bash -c "cd server && go build -o \"$SERVER_BIN\" ./cmd/arpg-server"
 
-echo "[bot-local] starting server on $ADDR (log: $SERVER_LOG)..."
+"$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL"
+arpg_resolve_server_addr
+echo "[bot-local] starting server on $ADDR db=$(arpg_db_name "$DATABASE_URL") (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
   ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
   ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
@@ -44,56 +45,7 @@ ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
 SERVER_PID=$!
 
 echo "[bot-local] waiting for server readiness..."
-if [[ -z "$BASE_URL" && "$ADDR" == ":0" ]]; then
-  for i in $(seq 1 60); do
-    if [[ -s "$SERVER_LOG" ]]; then
-      PORT="$(python3 - "$SERVER_LOG" <<'PY'
-import json
-import re
-import sys
-path = sys.argv[1]
-for line in open(path, encoding="utf-8"):
-    try:
-        data = json.loads(line)
-    except json.JSONDecodeError:
-        continue
-    if data.get("message") != "server listening":
-        continue
-    addr = str(data.get("addr", ""))
-    match = re.search(r":([0-9]+)$", addr)
-    if match:
-        print(match.group(1))
-        raise SystemExit(0)
-raise SystemExit(1)
-PY
-)" && break
-    fi
-    if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-      echo "[bot-local] server exited early; log:"
-      show_log "$SERVER_LOG" "server"
-      exit 1
-    fi
-    sleep 0.1
-  done
-  BASE_URL="http://localhost:${PORT:?}"
-elif [[ -z "$BASE_URL" ]]; then
-  BASE_URL="http://localhost:${ADDR#:}"
-fi
-for i in $(seq 1 60); do
-  if curl -fsS "${BASE_URL%/}/readyz" >/dev/null 2>&1; then break; fi
-  if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-    echo "[bot-local] server exited early; log:"
-    show_log "$SERVER_LOG" "server"
-    exit 1
-  fi
-  sleep 1
-done
-curl -fsS "${BASE_URL%/}/readyz" >/dev/null
-if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-  echo "[bot-local] server exited before bot could start; log:"
-  show_log "$SERVER_LOG" "server"
-  exit 1
-fi
+arpg_wait_own_server "bot-local"
 
 echo "[bot-local] running protocol bot scenario selection '$SCENARIO'..."
 export ARPG_BOT_SERVER_LOG="$SERVER_LOG"

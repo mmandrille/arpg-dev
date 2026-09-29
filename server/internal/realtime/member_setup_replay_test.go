@@ -22,7 +22,7 @@ import (
 // entity ID and event diverged.
 const (
 	memberSetupWorld      = "dungeon_levels"
-	memberSetupSeed       = "v477_member_setup_seed"
+	memberSetupSeed       = "v478_member_setup_seed"
 	memberSetupCorpseDef  = "hero_corpse"
 	memberSetupStairsDef  = "stairs_down"
 	memberSetupCorpseLvl  = -1
@@ -108,7 +108,7 @@ func newMemberSetupRepo(t *testing.T) *memberSetupRepo {
 		t.Fatalf("load rules: %v", err)
 	}
 	base := newLoadShedMemRepo(rules)
-	base.session.ID = "sess_v477_member_setup"
+	base.session.ID = "sess_v478_member_setup"
 	base.session.Seed = memberSetupSeed
 	base.session.WorldID = memberSetupWorld
 	for key, start := range base.starts {

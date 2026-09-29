@@ -3,7 +3,7 @@
 Status: Complete
 Date: 2026-09-29
 Codename: `shared-member-setup`
-Baseline: v476 `recorded-load-shed` (commit `b164365c`)
+Baseline: v477 `clip-owned-death-pose` (commit `a4490493`); server work built on v476 `recorded-load-shed`
 
 ## Problem
 

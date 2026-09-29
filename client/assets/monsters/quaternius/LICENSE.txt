@@ -1,0 +1,17 @@
+Quaternius models (Wolf, Bat)
+
+Created/distributed by Quaternius (https://quaternius.com)
+Downloaded 2026-09-29 from Poly Pizza:
+  quaternius_wolf.glb  https://poly.pizza/m/P1gU3Qkr9r  (Animated Animal Pack)
+                       sha256 16ac96339d06f7def9af20d5d9b27622d61e53580dab43970c9edb1bffbe8f84
+  quaternius_bat.glb   https://poly.pizza/m/hNO9XvjlKa
+                       sha256 ff20d0c0d68be4ed4ba3a402b8ceaeaf54de5d0c9dc3968117749214aee63c9b
+
+The vendored GLBs are the sources above with their colour materials baked into one palette
+texture (tools/assets/bake_material_palette.py); geometry, rig and clips are unchanged.
+
+License: Creative Commons Zero v1.0 Universal (CC0 1.0), public domain dedication
+https://creativecommons.org/publicdomain/zero/1.0/
+
+This content is free to use in personal, educational and commercial projects.
+Crediting Quaternius is appreciated but not required.

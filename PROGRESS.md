@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v475 kit heroes, ADR-0018 P3a)
+Last updated: 2026-09-29 (v476 CC0 beasts, ADR-0018 P4b)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-29 (v475 kit heroes, ADR-0018 P3a)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v475 — KayKit Adventurers 2.0 heroes + Rig_Medium clips + rig-native weapons (ADR-0018 P3a; `make ci` green). Prior: v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
-| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3b (armor tints + headgear), P3c (retire legacy 17-bone hero pipeline), or P4b (beasts: CC0 source such as Quaternius) |
+| **Latest completed slice** | v476 — Quaternius CC0 wolf + bat replace the last unconfirmed-license beasts; palette-bake tool; license allow-list gate (ADR-0018 P4b; `make ci` green). Prior: v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
+| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3b (armor tints + headgear) or P3c (retire legacy 17-bone hero pipeline). Kit-model corpse lean fix (death lean stacks on authored death clips) is a small follow-up |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 
@@ -93,7 +93,16 @@ Do **not** assume these are the next slice — they are documented backlog items
   - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan
     or as-built**. It needs a closeout; v469 did not fabricate one.
   - Local Godot is 4.7.2 while this file pins 4.6.3.
-  - v471: the v470 ADR-0018 D7 performance floor (v347 24-monster dungeon benchmark) was never re-run; v471 adds kit walls/floors on top. Run `make benchmark` before tuning further.
+  - ~~D7 performance floor never re-run~~: measured 2026-09-29 after v475, A/B against v469 on the same
+    host (`sorcerer_multigroup_perf_probe`, 36 live monsters). Both hold vsync 60 FPS / 16.7 ms frames;
+    uncapped HEAD frame time is ~7 ms. Regressions to watch: **draw calls ~4× (97–175 → 499–543)**, from
+    per-piece kit walls/floors + shadow passes (candidate: MultiMesh/merged static dungeon geometry),
+    and a **first-spawn hitch** (`process_ms` 124 → 761 ms, `d_upsert_m` spike up to 169 ms: kit model
+    instancing). The floor is met on this host; a weaker GPU is the risk.
+  - `make benchmark` harness rotted (not in CI): all 3 scenarios fail at v469 and HEAD — co-op
+    mid-session join breaks replay (entity-ID divergence → `/state` 500), paladin probe runs out of
+    mana, solo probe hits a server that already got a shutdown signal. Only the multigroup scenario
+    produces client frames.
   - macOS `/usr/bin/make` fails until `sudo xcodebuild -license` is accepted, so the v469 `make ci`
     is still owed.
   - ~~Dungeon generation failed on ~2% of seed/level pairs~~: fixed in v472 (room-corridor anchor fallback).

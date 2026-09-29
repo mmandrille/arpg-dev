@@ -441,60 +441,6 @@
         "sha256": "780349ff723d928f401e6f2443524e1f4559383554a55524eb5f67917102221c"
       }
     },
-    "monster_quadruped_predator_v0": {
-      "type": "monster",
-      "source_path": "assets/monsters/purple_fantasy/evil_fox_monster.glb",
-      "runtime_path": "client/assets/monsters/purple_fantasy/evil_fox_monster.glb",
-      "format": "glb",
-      "scale_unit": "meters",
-      "required_nodes": [
-        "root",
-        "spine",
-        "head",
-        "tail",
-        "leg_fl",
-        "leg_fr",
-        "leg_bl",
-        "leg_br"
-      ],
-      "provenance": {
-        "origin": "user-provided local GLB",
-        "license": "unconfirmed-user-provided",
-        "sha256": "74fd71df9304f86d4c28d05819f35b3e76c4f77cc92d2343a92dbf8e32a56ff4"
-      }
-    },
-    "monster_wolf_v0": {
-      "type": "monster",
-      "source_path": "assets/monsters/wolf/wolf.glb",
-      "runtime_path": "client/assets/monsters/wolf/wolf.glb",
-      "format": "glb",
-      "scale_unit": "meters",
-      "required_nodes": [],
-      "provenance": {
-        "origin": "user-provided local GLB",
-        "license": "unconfirmed-user-provided",
-        "sha256": "a96db35755cc459ef36e8c99a1c08cae51d8e33e1dfd6245c52d42f11b47f706"
-      }
-    },
-    "monster_tiny_flyer_v0": {
-      "type": "monster",
-      "source_path": "assets/monsters/tiny_flyer/bat_low_poly.glb",
-      "runtime_path": "client/assets/monsters/tiny_flyer/monster_tiny_flyer.glb",
-      "format": "glb",
-      "scale_unit": "meters",
-      "required_nodes": [
-        "_rootJoint",
-        "hip_00",
-        "kop_06",
-        "rechterVleugel_09",
-        "linkerVleugel_013"
-      ],
-      "provenance": {
-        "origin": "user-provided local GLB",
-        "license": "unconfirmed-user-provided",
-        "sha256": "bf28626b8067012526a6e80865f898c155634e6fffcdb7016bd95bbe16cce3c5"
-      }
-    },
     "monster_skeleton_v0": {
       "type": "monster",
       "source_path": "assets/monsters/skeleton/monster_skeleton.blend",
@@ -1154,6 +1100,46 @@
         "source_url": "https://kaylousberg.itch.io/kaykit-fantasy-weapons-bits",
         "license": "CC0-1.0",
         "sha256": "52eec7f8837831aaf8f0604e41629c1737758698e9ea8d69df92469161c345cb"
+      }
+    },
+    "quaternius_wolf_v0": {
+      "type": "monster",
+      "runtime_path": "client/assets/monsters/quaternius/quaternius_wolf.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "Body",
+        "Neck1",
+        "Head",
+        "Tail1",
+        "FrontUpperLeg.L",
+        "FrontUpperLeg.R",
+        "BackUpperLeg.L",
+        "BackUpperLeg.R"
+      ],
+      "provenance": {
+        "origin": "Quaternius Animated Animal Pack: Wolf (Poly Pizza model P1gU3Qkr9r; source sha256 16ac9633\u2026, palette-baked by tools/assets/bake_material_palette.py)",
+        "source_url": "https://poly.pizza/m/P1gU3Qkr9r",
+        "license": "CC0-1.0",
+        "sha256": "c9460f42aaa5a7789dafe938620cbb3c768126ea8e81852b3361667dca36e81c"
+      }
+    },
+    "quaternius_bat_v0": {
+      "type": "monster",
+      "runtime_path": "client/assets/monsters/quaternius/quaternius_bat.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "Root",
+        "Face",
+        "Wing1.L",
+        "Wing1.R"
+      ],
+      "provenance": {
+        "origin": "Quaternius Bat (Poly Pizza model hNO9XvjlKa; source sha256 ff20d0c0\u2026, palette-baked by tools/assets/bake_material_palette.py)",
+        "source_url": "https://poly.pizza/m/hNO9XvjlKa",
+        "license": "CC0-1.0",
+        "sha256": "a9f9621c72431c9ecfd02735a7a895eba4d12de46a3e1f5c42813b79b5be4f5a"
       }
     }
   }

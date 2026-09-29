@@ -36,7 +36,11 @@
             "properties": {
               "source_url": { "type": "string" },
               "origin": { "type": "string" },
-              "license": { "type": "string", "minLength": 1 },
+              "license": {
+                "description": "ADR-0018 D2 allow-list: free licenses only. CC-BY entries also need assets/CREDITS.md.",
+                "type": "string",
+                "enum": ["CC0-1.0", "CC-BY-3.0", "CC-BY-4.0"]
+              },
               "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
             }
           }

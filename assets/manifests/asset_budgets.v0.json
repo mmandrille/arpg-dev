@@ -9,7 +9,6 @@
     "animation": { "max_triangles": 8000, "max_texture_px": 1024 }
   },
   "exemptions": {
-    "monster_quadruped_predator_v0": "ADR-0018 P4 replaces this AI-generated monster (39.2k tris, 2048² texture)",
     "fallback_equipment_ring_left_v0": "ADR-0018 D5 removes ring world visuals in P3 (3.1k tris)",
     "fallback_equipment_ring_right_v0": "ADR-0018 D5 removes ring world visuals in P3 (3.1k tris)"
   }

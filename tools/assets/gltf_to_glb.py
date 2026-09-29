@@ -50,6 +50,11 @@ def pack(gltf_path: Path) -> bytes:
         image["bufferView"] = len(views) - 1
         if "mimeType" not in image:
             image["mimeType"] = "image/png" if str(uri).lower().endswith(".png") else "image/jpeg"
+    return write_glb(doc, binary)
+
+
+def write_glb(doc: dict, binary: bytearray) -> bytes:
+    """Serialize ``doc`` + one BIN chunk as a GLB (sorted-key JSON, so output is deterministic)."""
     _pad(binary, 0)
     doc["buffers"] = [{"byteLength": len(binary)}]
     json_bytes = bytearray(json.dumps(doc, separators=(",", ":"), sort_keys=True).encode("utf-8"))

@@ -436,27 +436,6 @@ def monster_dummy_glb() -> bytes:
     return _build_skinned_glb(color, joints, parts)
 
 
-def monster_tiny_flyer_glb() -> bytes:
-    """Tiny bat-like flyer with wing joints for client-side flap clips."""
-    color = (0.20, 0.18, 0.28, 1.0)
-    joints = [
-        ("root", -1, (0.0, 0.0, 0.0)),
-        ("body", 0, (0.0, 0.36, 0.0)),
-        ("head", 1, (0.0, 0.10, -0.24)),
-        ("wing_l", 1, (-0.28, 0.03, 0.0)),
-        ("wing_r", 1, (0.28, 0.03, 0.0)),
-    ]
-    parts = [
-        (1, (0.0, 0.38, 0.0), (0.30, 0.26, 0.24)),
-        (2, (0.0, 0.46, -0.24), (0.22, 0.18, 0.18)),
-        (2, (-0.08, 0.58, -0.30), (0.06, 0.10, 0.05)),
-        (2, (0.08, 0.58, -0.30), (0.06, 0.10, 0.05)),
-        (3, (-0.48, 0.40, 0.02), (0.55, 0.05, 0.34)),
-        (4, (0.48, 0.40, 0.02), (0.55, 0.05, 0.34)),
-    ]
-    return _build_skinned_glb(color, joints, parts)
-
-
 def monster_skeleton_glb() -> bytes:
     """Low-poly skeleton silhouette with biped joints for existing hit/death clips."""
     color = (0.82, 0.78, 0.66, 1.0)

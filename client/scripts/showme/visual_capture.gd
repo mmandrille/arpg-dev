@@ -812,7 +812,8 @@ func _setup_companions() -> void:
 	main.right_click_skill_id = "revive"
 	main.skill_progression = {"skills": [{"skill_id": "revive", "rank": 1}]}
 	main.player_anchor.position = Vector3(4.0, 0.0, 4.0)
-	main._sync_camera_to_player()
+	if main._camera_controller != null:
+		main._camera_controller.sync_to_player()
 	main._upsert_entity({
 		"id": "5101",
 		"type": "companion",

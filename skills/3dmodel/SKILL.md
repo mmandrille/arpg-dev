@@ -14,7 +14,7 @@ Use this skill to turn a supplied `.glb`/`.gltf` into a working arpg-dev visual.
    - `docs/adr/0006-asset-pipeline.md`
    - `docs/adr/0007-animation-state-model.md`
 2. Inspect the requested source and target:
-   - Source model path, e.g. `assets/monsters/wolf/wolf.glb`.
+   - Source model path, e.g. `.artifacts/quaternius/wolf.glb`.
    - Replacement target, e.g. ranger summon `black_wolf_companion`, monster `dungeon_wolf`, boss model, or prop/interactable.
 3. Prefer the existing manifest/data path. Do not hardcode model paths in gameplay code.
 4. Record an adopt/borrow/reject decision in the spec or plan when the task is client-side work using outside assets.
@@ -25,9 +25,9 @@ Run the bundled sandbox tool from repo root:
 
 ```bash
 python3 skills/3dmodel/scripts/create_model_probe.py \
-  --model assets/monsters/wolf/wolf.glb \
+  --model .artifacts/quaternius/wolf.glb \
   --key wolf \
-  --yaw-degrees -90
+  --yaw-degrees 0
 ```
 
 The tool:
@@ -44,7 +44,7 @@ Use this as a disposable import/orientation check. After learning the right yaw/
 
 1. Copy runtime bytes under `client/assets/...`.
    - Keep the original source under `assets/...` if supplied by the user.
-   - Runtime path must be under the Godot project, e.g. `client/assets/monsters/wolf/wolf.glb`.
+   - Runtime path must be under the Godot project, e.g. `client/assets/monsters/quaternius/quaternius_wolf.glb`.
    - Let Godot import once so `.import` files and extracted embedded textures appear.
 2. Register the asset in `assets/manifests/assets.v0.json`.
    - Add `type`, `source_path`, `runtime_path`, `format: "glb"`, `scale_unit: "meters"`, `required_nodes`, and `provenance`.

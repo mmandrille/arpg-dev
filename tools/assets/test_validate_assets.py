@@ -263,7 +263,7 @@ def test_static_character_asset_allowed(tmp_path):
 def test_sha256_mismatch(tmp_path):
     manifest = default_manifest()
     manifest["assets"]["weapon_rusty_sword_v0"]["provenance"] = {
-        "license": "CC0",
+        "license": "CC0-1.0",
         "sha256": "0" * 64,
     }
     report = run(build_root(tmp_path, manifest=manifest))
@@ -276,7 +276,7 @@ def test_sha256_match(tmp_path):
     digest = hashlib.sha256(sword_bytes).hexdigest()
     manifest = default_manifest()
     manifest["assets"]["weapon_rusty_sword_v0"]["provenance"] = {
-        "license": "CC0",
+        "license": "CC0-1.0",
         "sha256": digest,
     }
     report = run(build_root(tmp_path, manifest=manifest))
@@ -306,6 +306,14 @@ def test_schema_invalid_manifest(tmp_path):
     manifest["version"] = 99  # violates const 0
     report = run(build_root(tmp_path, manifest=manifest))
     assert any("manifest schema" in f for f in report.failures)
+
+
+def test_unconfirmed_license_rejected(tmp_path):
+    # ADR-0018 D2: only allow-listed free licenses may ship (v476 removed the last unconfirmed ones).
+    manifest = default_manifest()
+    manifest["assets"]["weapon_rusty_sword_v0"]["provenance"] = {"license": "unconfirmed-user-provided"}
+    report = run(build_root(tmp_path, manifest=manifest))
+    assert any("manifest schema" in f and "license" in f for f in report.failures)
 
 
 def test_monster_entry_passes(tmp_path):

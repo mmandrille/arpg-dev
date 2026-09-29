@@ -115,20 +115,9 @@
       ]
     },
     {
-      "asset_id": "monster_quadruped_predator_v0",
-      "height_offset": 0.0,
-      "runtime_path": "client/assets/monsters/purple_fantasy/evil_fox_monster.glb",
-      "scale": 1.0,
-      "scene": "monster_quadruped",
-      "type": "monster",
-      "used_by": [
-        "dungeon_wolf"
-      ]
-    },
-    {
-      "asset_id": "monster_tiny_flyer_v0",
+      "asset_id": "quaternius_bat_v0",
       "height_offset": 0.9,
-      "runtime_path": "client/assets/monsters/tiny_flyer/monster_tiny_flyer.glb",
+      "runtime_path": "client/assets/monsters/quaternius/quaternius_bat.glb",
       "scale": 0.7,
       "scene": "monster_tiny_flyer",
       "type": "monster",
@@ -137,14 +126,15 @@
       ]
     },
     {
-      "asset_id": "monster_wolf_v0",
+      "asset_id": "quaternius_wolf_v0",
       "height_offset": 0.0,
-      "runtime_path": "client/assets/monsters/wolf/wolf.glb",
+      "runtime_path": "client/assets/monsters/quaternius/quaternius_wolf.glb",
       "scale": 1.0,
-      "scene": "monster_wolf",
+      "scene": "monster_quadruped",
       "type": "monster",
       "used_by": [
-        "companion_black_wolf"
+        "companion_black_wolf",
+        "dungeon_wolf"
       ]
     }
   ],

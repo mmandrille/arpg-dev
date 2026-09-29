@@ -2,24 +2,23 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://0aiqhltj3wal"
-path.s3tc="res://.godot/imported/wolf_0.png-81586d7f54b9765469de04fabce640b2.s3tc.ctex"
+uid="uid://nv08aixdt3xn"
+path="res://.godot/imported/quaternius_wolf_palette.png-3aafc68a41b291ba28dae056eb8b3e8d.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "faba4071bee19730adc55ddfa117c8dc"
+"md5": "0b49d2f58e8a153f2fbffd0c04b4c205"
 }
 
 [deps]
 
-source_file="res://assets/monsters/wolf/wolf_0.png"
-dest_files=["res://.godot/imported/wolf_0.png-81586d7f54b9765469de04fabce640b2.s3tc.ctex"]
+source_file="res://assets/monsters/quaternius/quaternius_wolf_palette.png"
+dest_files=["res://.godot/imported/quaternius_wolf_palette.png-3aafc68a41b291ba28dae056eb8b3e8d.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -41,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

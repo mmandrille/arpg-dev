@@ -11,6 +11,12 @@ const GearSocketsLoaderScript := preload("res://scripts/gear_sockets_loader.gd")
 
 const LOGICAL_HERO_CLIPS := ["idle", "walk", "attack", "attack_off_hand", "attack_2h", "attack_ranged", "attack_staff", "hit", "death"]
 
+
+const BEAST_SCENES := {
+	"res://scenes/monster_quadruped.tscn": {"special": "pounce", "bones": ["Head", "Tail1", "FrontUpperLeg.L", "BackUpperLeg.R"], "moves": [["walk", "FrontUpperLeg.L"], ["pounce", "BackUpperLeg.L"]]},
+	"res://scenes/monster_wolf.tscn": {"special": "pounce", "bones": ["Head", "Tail1", "FrontUpperLeg.L", "BackUpperLeg.R"], "moves": [["walk", "FrontUpperLeg.L"]]},
+	"res://scenes/monster_tiny_flyer.tscn": {"special": "dive", "bones": ["Face", "Wing1.L", "Wing1.R"], "moves": [["idle", "Wing1.L"], ["dive", "Wing1.R"]]},
+}
 var _failed: bool = false
 
 
@@ -360,36 +366,9 @@ func _test_monster_scene() -> void:
 		if ap != null:
 			for clip in ["idle", "walk", "hit", "death"]:
 				_assert(ap.has_animation(clip), "%s missing clip %s" % [scene_path, clip])
-			if scene_path == "res://scenes/monster_wolf.tscn":
-				var model_root := s.find_child("ModelRoot", false, false) as Node3D
-				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
-				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s ModelRoot should correct GLB nose to parent +Z, got y=%s" % [scene_path, model_root.rotation.y])
-				var wolf_model := s.find_child("WolfModel", true, false) as Node3D
-				_assert(wolf_model != null, "%s WolfModel missing" % scene_path)
-				ap.play("walk")
-				ap.seek(0.1375, true)
-				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
-				_assert(wolf_model.position.y > 0.0, "%s walk clip should bob WolfModel, got y=%s" % [scene_path, wolf_model.position.y])
-			if scene_path == "res://scenes/monster_quadruped.tscn":
-				var model_root := s.find_child("ModelRoot", false, false) as Node3D
-				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
-				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s ModelRoot should correct GLB nose to parent +Z, got y=%s" % [scene_path, model_root.rotation.y])
-				var quadruped_model := s.find_child("QuadrupedModel", true, false) as Node3D
-				_assert(quadruped_model != null, "%s QuadrupedModel missing" % scene_path)
-				var skel := s.find_child("Skeleton3D", true, false) as Skeleton3D
-				_assert_quadruped_monster_rig(skel, scene_path)
-				_assert(ap.has_animation("attack"), "%s missing clip attack" % scene_path)
-				_assert(ap.has_animation("pounce"), "%s missing clip pounce" % scene_path)
-				ap.play("walk")
-				ap.seek(0.1375, true)
-				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
-				if skel != null:
-					_assert_animation_rotates_bone(ap, skel, "walk", 0.1375, "leg_fl", scene_path)
-					_assert_animation_rotates_bone(ap, skel, "attack", 0.14, "head", scene_path)
-				ap.play("pounce")
-				ap.seek(0.2, true)
-				_assert(absf(model_root.rotation.y + PI * 0.5) <= 0.001, "%s pounce clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
-				_assert(quadruped_model.position.y > 0.1 and quadruped_model.position.z < -0.1, "%s pounce should lift and lunge QuadrupedModel, got %s" % [scene_path, quadruped_model.position])
+			if BEAST_SCENES.has(scene_path):
+				# ADR-0018 P4b: Quaternius CC0 beasts reuse the KitMonsterVisual clip aliasing.
+				_assert_beast_scene(s, ap, scene_path, BEAST_SCENES[scene_path])
 			if scene_path.begins_with("res://scenes/monster_kit_skeleton_"):
 				# ADR-0018 P4a: kit clips are aliased onto logical names; weapons ride handslot bones.
 				_assert(ap.has_animation("attack"), "%s missing clip attack" % scene_path)
@@ -401,49 +380,6 @@ func _test_monster_scene() -> void:
 				_assert(mounts.size() >= 1, "%s must mount at least one catalog weapon" % scene_path)
 				for mount in mounts:
 					_assert((mount as Node).get_child_count() > 0, "%s attachment %s must carry a model" % [scene_path, (mount as Node).name])
-			if scene_path == "res://scenes/monster_tiny_flyer.tscn":
-				var model_root := s.find_child("ModelRoot", false, false) as Node3D
-				_assert(model_root != null, "%s ModelRoot missing" % scene_path)
-				_assert(absf(model_root.rotation.y) <= 0.001, "%s ModelRoot should keep bat nose on parent +Z, got y=%s" % [scene_path, model_root.rotation.y])
-				var model := s.find_child("Model", true, false) as Node3D
-				_assert(model != null, "%s Model missing" % scene_path)
-				_assert(model.scale.is_equal_approx(Vector3(0.56, 0.56, 0.56)), "%s Model should apply bat source scale correction, got %s" % [scene_path, model.scale])
-				_assert(ap.has_animation("dive"), "%s missing clip dive" % scene_path)
-				var skel := s.find_child("Skeleton3D", true, false) as Skeleton3D
-				_assert(skel != null, "%s Skeleton3D missing" % scene_path)
-				var right_wing := -1
-				var left_wing := -1
-				var right_rest := Quaternion.IDENTITY
-				var left_rest := Quaternion.IDENTITY
-				if skel != null:
-					right_wing = skel.find_bone("rechterVleugel_09")
-					left_wing = skel.find_bone("linkerVleugel_013")
-					_assert(right_wing >= 0, "%s right wing bone missing" % scene_path)
-					_assert(left_wing >= 0, "%s left wing bone missing" % scene_path)
-					if right_wing >= 0:
-						right_rest = skel.get_bone_pose_rotation(right_wing)
-					if left_wing >= 0:
-						left_rest = skel.get_bone_pose_rotation(left_wing)
-				ap.play("idle")
-				ap.seek(0.25, true)
-				if skel != null and right_wing >= 0 and left_wing >= 0:
-					var right_flap := skel.get_bone_pose_rotation(right_wing)
-					var left_flap := skel.get_bone_pose_rotation(left_wing)
-					_assert(_quat_delta(right_rest, right_flap) > 0.1, "%s idle should flap right wing, got %s" % [scene_path, right_flap])
-					_assert(_quat_delta(left_rest, left_flap) > 0.1, "%s idle should flap left wing, got %s" % [scene_path, left_flap])
-				ap.play("walk")
-				ap.seek(0.1375, true)
-				_assert(absf(model_root.rotation.y) <= 0.001, "%s walk clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
-				_assert(model.position.y > 0.0, "%s walk clip should bob Model, got y=%s" % [scene_path, model.position.y])
-				ap.play("dive")
-				ap.seek(0.16, true)
-				_assert(absf(model_root.rotation.y) <= 0.001, "%s dive clip must preserve ModelRoot yaw correction, got y=%s" % [scene_path, model_root.rotation.y])
-				_assert(model.position.y > 0.1 and model.position.z < -0.1, "%s dive should lift and lunge Model, got %s" % [scene_path, model.position])
-				if skel != null and right_wing >= 0 and left_wing >= 0:
-					var right_dive := skel.get_bone_pose_rotation(right_wing)
-					var left_dive := skel.get_bone_pose_rotation(left_wing)
-					_assert(_quat_delta(right_rest, right_dive) > 0.1, "%s dive should flare right wing, got %s" % [scene_path, right_dive])
-					_assert(_quat_delta(left_rest, left_dive) > 0.1, "%s dive should flare left wing, got %s" % [scene_path, left_dive])
 		s.free()
 		await process_frame
 
@@ -454,7 +390,7 @@ func _test_monster_visuals_catalog() -> void:
 	_assert(str(mob.get("asset_id", "")) == "kaykit_skeleton_warrior_v0", "dungeon_mob asset = %s" % mob.get("asset_id", ""))
 	var wolf := MonsterVisualsLoaderScript.resolve("dungeon_wolf")
 	_assert(str(wolf.get("scene", "")) == "monster_quadruped", "dungeon_wolf scene = %s" % wolf.get("scene", ""))
-	_assert(str(wolf.get("asset_id", "")) == "monster_quadruped_predator_v0", "dungeon_wolf asset = %s" % wolf.get("asset_id", ""))
+	_assert(str(wolf.get("asset_id", "")) == "quaternius_wolf_v0", "dungeon_wolf asset = %s" % wolf.get("asset_id", ""))
 	var archer := MonsterVisualsLoaderScript.resolve("dungeon_archer")
 	_assert(str(archer.get("scene", "")) == "monster_kit_skeleton_rogue", "dungeon_archer scene = %s" % archer.get("scene", ""))
 	_assert(str(archer.get("asset_id", "")) == "kaykit_skeleton_rogue_v0", "dungeon_archer asset = %s" % archer.get("asset_id", ""))
@@ -540,12 +476,38 @@ func _first_mesh(node: Node) -> MeshInstance3D:
 	return null
 
 
-func _assert_quadruped_monster_rig(skel: Skeleton3D, scene_path: String) -> void:
+func _assert_beast_scene(s: Node, ap: AnimationPlayer, scene_path: String, spec: Dictionary) -> void:
+	var model_root := s.find_child("ModelRoot", false, false) as Node3D
+	_assert(model_root != null, "%s ModelRoot missing" % scene_path)
+	if model_root != null:
+		_assert(absf(model_root.rotation.y) <= 0.001, "%s nose must face parent +Z like the kit rigs, got y=%s" % [scene_path, model_root.rotation.y])
+	for clip in ["attack", spec["special"]]:
+		_assert(ap.has_animation(clip), "%s missing clip %s" % [scene_path, clip])
+	_assert(ap.get_animation("walk").loop_mode == Animation.LOOP_LINEAR, "%s walk alias must loop" % scene_path)
+	_assert(ap.get_animation("death").loop_mode == Animation.LOOP_NONE, "%s death alias must not loop" % scene_path)
+	var skel := s.find_child("Skeleton3D", true, false) as Skeleton3D
 	_assert(skel != null, "%s missing Skeleton3D" % scene_path)
 	if skel == null:
 		return
-	for bone in ["root", "spine", "head", "tail", "leg_fl", "leg_fr", "leg_bl", "leg_br"]:
-		_assert(skel.find_bone(bone) >= 0, "%s missing quadruped bone %s" % [scene_path, bone])
+	for bone in spec["bones"]:
+		_assert(skel.find_bone(bone) >= 0, "%s missing rig bone %s" % [scene_path, bone])
+	for pair in spec["moves"]:
+		_assert_clip_moves_bone(ap, skel, pair[0], pair[1], scene_path)
+
+
+# Imported rigs rest at non-identity rotations, so compare two poses inside the clip.
+func _assert_clip_moves_bone(ap: AnimationPlayer, skel: Skeleton3D, clip: String, bone: String, scene_path: String) -> void:
+	var idx := skel.find_bone(bone)
+	if idx < 0 or not ap.has_animation(clip):
+		_assert(false, "%s cannot sample %s on %s" % [scene_path, clip, bone])
+		return
+	var length := ap.get_animation(clip).length
+	ap.play(clip)
+	ap.seek(0.0, true)
+	var start := skel.get_bone_pose_rotation(idx)
+	ap.seek(length * 0.4, true)
+	var mid := skel.get_bone_pose_rotation(idx)
+	_assert(_quat_delta(start, mid) > 0.01, "%s %s should move %s" % [scene_path, clip, bone])
 
 
 func _quat_delta(a: Quaternion, b: Quaternion) -> float:

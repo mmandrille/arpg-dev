@@ -1,6 +1,6 @@
 {
   "version": 0,
-  "note": "ADR-0018 P4a (v474): KayKit monster scenes. clip_profiles alias the logical clips AnimationController plays onto kit clip names; attachments mount kit weapons on rig bones.",
+  "note": "ADR-0018 P4a (v474) KayKit monster scenes; P4b (v476) Quaternius CC0 beasts. clip_profiles alias the logical clips AnimationController plays onto kit clip names; attachments mount kit weapons on rig bones.",
   "clip_profiles": {
     "kaykit_skeleton_melee": {
       "clips": {
@@ -22,9 +22,46 @@
         "death": "Death_C_Skeletons"
       },
       "loop": ["idle", "walk"]
+    },
+    "quaternius_wolf": {
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "attack": "Attack",
+        "hit": "Idle_HitReact_Left",
+        "death": "Death",
+        "pounce": "Gallop_Jump"
+      },
+      "loop": ["idle", "walk"]
+    },
+    "quaternius_bat": {
+      "clips": {
+        "idle": "BatArmature|Bat_Flying",
+        "walk": "BatArmature|Bat_Flying",
+        "attack": "BatArmature|Bat_Attack",
+        "hit": "BatArmature|Bat_Hit",
+        "death": "BatArmature|Bat_Death",
+        "dive": "BatArmature|Bat_Attack2"
+      },
+      "loop": ["idle", "walk"]
     }
   },
   "monsters": {
+    "monster_quadruped": {
+      "asset_id": "quaternius_wolf_v0",
+      "clip_profile": "quaternius_wolf",
+      "attachments": []
+    },
+    "monster_wolf": {
+      "asset_id": "quaternius_wolf_v0",
+      "clip_profile": "quaternius_wolf",
+      "attachments": []
+    },
+    "monster_tiny_flyer": {
+      "asset_id": "quaternius_bat_v0",
+      "clip_profile": "quaternius_bat",
+      "attachments": []
+    },
     "monster_kit_skeleton_warrior": {
       "asset_id": "kaykit_skeleton_warrior_v0",
       "clip_profile": "kaykit_skeleton_melee",

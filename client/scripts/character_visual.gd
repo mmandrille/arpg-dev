@@ -4,6 +4,8 @@ extends Node3D
 # with data-driven offsets from shared/assets/gear_sockets.v0.json.
 
 const GearSocketsLoaderScript := preload("res://scripts/gear_sockets_loader.gd")
+const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
+const KitHeroClipsScript := preload("res://scripts/kit_hero_clips.gd")
 
 const STATIC_SOCKET_POSITIONS := {
 	"right_hand_socket": Vector3(0.36, 0.92, 0.0),
@@ -19,15 +21,36 @@ const STATIC_SOCKET_POSITIONS := {
 }
 
 var class_id: String = ""
+## The scene's own clip library (legacy 17-bone clips), restored for non-kit models.
+var _default_clip_library: AnimationLibrary
 
 
 func _ready() -> void:
 	_ensure_gear_sockets()
 
 
+## Called after every model swap (all swap sites go through here): rebuilds sockets for the new
+## skeleton and swaps in the class's kit clip library (ADR-0018 P3a).
 func refresh_gear_sockets() -> void:
 	_remove_gear_socket_nodes()
 	_ensure_gear_sockets()
+	_sync_clip_library()
+
+
+func _sync_clip_library() -> void:
+	var player := get_node_or_null("AnimationPlayer") as AnimationPlayer
+	if player == null:
+		return
+	if _default_clip_library == null and player.has_animation_library(""):
+		_default_clip_library = player.get_animation_library("")
+	var profile_id := str(ClassPresentationsLoaderScript.resolve(class_id).get("clip_profile", "")) if class_id != "" else ""
+	var wanted: AnimationLibrary = KitHeroClipsScript.library(profile_id) if profile_id != "" else _default_clip_library
+	if wanted == null or (player.has_animation_library("") and player.get_animation_library("") == wanted):
+		return
+	player.stop()
+	if player.has_animation_library(""):
+		player.remove_animation_library("")
+	player.add_animation_library("", wanted)
 
 
 func _remove_gear_socket_nodes() -> void:
@@ -60,6 +83,11 @@ func _ensure_gear_sockets() -> void:
 		if bone_name == "":
 			continue
 		var bone_idx := skel.find_bone(bone_name)
+		if bone_idx < 0 and typeof(entry.get("fallback", null)) == TYPE_DICTIONARY:
+			# Legacy 17-bone rig (base_human fallback): use the socket's fallback bone + transform.
+			entry = entry["fallback"]
+			bone_name = str(entry.get("bone", ""))
+			bone_idx = skel.find_bone(bone_name)
 		if bone_idx < 0:
 			push_warning("[character] bone %s not found for socket %s" % [bone_name, socket_name])
 			continue

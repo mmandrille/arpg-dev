@@ -36,8 +36,9 @@ func verify_transforms(ctx: Dictionary, fail: Callable) -> bool:
 		fail.call("paladin character visual missing after class model apply")
 		main.queue_free()
 		return false
-	var sword := character.find_child("weapon_long_sword_v0", true, false) as Node3D
-	var shield := character.find_child("equipment_shield_kite_v0", true, false) as Node3D
+	# Mounted nodes are named after their asset id; read it from item_visuals, not a literal.
+	var sword := character.find_child(_asset_id_for("long_sword"), true, false) as Node3D
+	var shield := character.find_child(_asset_id_for("shield"), true, false) as Node3D
 	if sword == null or shield == null:
 		fail.call("paladin mounted equipment missing after class model apply: sword=%s shield=%s" % [str(sword), str(shield)])
 		character.queue_free()
@@ -63,3 +64,14 @@ func verify_transforms(ctx: Dictionary, fail: Callable) -> bool:
 	character.queue_free()
 	main.queue_free()
 	return true
+
+
+func _asset_id_for(item_def_id: String) -> String:
+	var path := ProjectSettings.globalize_path("res://").path_join("../shared/assets/item_visuals.v0.json")
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return ""
+	var parsed = JSON.parse_string(file.get_as_text())
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return ""
+	return str(((parsed as Dictionary).get("item_visuals", {}) as Dictionary).get(item_def_id, {}).get("asset_id", ""))

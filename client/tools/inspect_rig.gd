@@ -9,6 +9,13 @@ func _initialize() -> void:
 		"leg_r", "knee_r", "foot_r",
 	])
 	_check("res://assets/monsters/dummy/monster_dummy.glb", ["root", "pivot"])
+	# ADR-0018 P3a: KayKit Rig_Medium heroes (deform bones used by gear sockets + clips).
+	_check("res://assets/characters/kaykit/knight.glb", [
+		"root", "hips", "spine", "chest", "head",
+		"upperarm.l", "lowerarm.l", "hand.l", "handslot.l",
+		"upperarm.r", "lowerarm.r", "hand.r", "handslot.r",
+		"upperleg.l", "lowerleg.l", "foot.l", "upperleg.r", "lowerleg.r", "foot.r",
+	])
 	print("[rig-gate] PASS")
 	quit(0)
 

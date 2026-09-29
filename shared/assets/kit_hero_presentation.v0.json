@@ -1,0 +1,26 @@
+{
+  "version": 0,
+  "note": "ADR-0018 P3a (v475): KayKit hero animation. Each clip profile aliases the logical clips AnimationController plays onto Character Animations 1.1 Rig_Medium clips, collected from the listed clip-library assets (first library containing a clip wins).",
+  "clip_profiles": {
+    "kaykit_hero": {
+      "libraries": [
+        "kaykit_clips_rig_medium_general_v0",
+        "kaykit_clips_rig_medium_movement_basic_v0",
+        "kaykit_clips_rig_medium_combat_melee_v0",
+        "kaykit_clips_rig_medium_combat_ranged_v0"
+      ],
+      "clips": {
+        "idle": "Idle_A",
+        "walk": "Walking_A",
+        "attack": "Melee_1H_Attack_Chop",
+        "attack_off_hand": "Melee_Dualwield_Attack_Stab",
+        "attack_2h": "Melee_2H_Attack_Chop",
+        "attack_ranged": "Ranged_Bow_Release",
+        "attack_staff": "Ranged_Magic_Shoot",
+        "hit": "Hit_A",
+        "death": "Death_A"
+      },
+      "loop": ["idle", "walk"]
+    }
+  }
+}

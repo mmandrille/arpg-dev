@@ -759,6 +759,402 @@
         "license": "CC0-1.0",
         "sha256": "200f1f5fbd6945e2b38ac6d2dd6f8df5900aae3b1d52623804b2c35fc9846f92"
       }
+    },
+    "kaykit_hero_knight_v0": {
+      "type": "character",
+      "runtime_path": "client/assets/characters/kaykit/knight.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "hips",
+        "chest",
+        "head",
+        "hand.l",
+        "hand.r",
+        "handslot.l",
+        "handslot.r",
+        "foot.l",
+        "foot.r"
+      ],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Characters/gltf/Knight.glb; owner download, archive sha256 abe48f47\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "e484370733824a0740683e7f6040aae0d20e5efd4107dde1175d6a2ad7e2f199"
+      }
+    },
+    "kaykit_hero_barbarian_v0": {
+      "type": "character",
+      "runtime_path": "client/assets/characters/kaykit/barbarian.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "hips",
+        "chest",
+        "head",
+        "hand.l",
+        "hand.r",
+        "handslot.l",
+        "handslot.r",
+        "foot.l",
+        "foot.r"
+      ],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Characters/gltf/Barbarian.glb; owner download, archive sha256 abe48f47\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "d37824a1d6e8e8af57ef9ae4a87e9271c3986210fbc432fb44670749a577ccac"
+      }
+    },
+    "kaykit_hero_mage_v0": {
+      "type": "character",
+      "runtime_path": "client/assets/characters/kaykit/mage.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "hips",
+        "chest",
+        "head",
+        "hand.l",
+        "hand.r",
+        "handslot.l",
+        "handslot.r",
+        "foot.l",
+        "foot.r"
+      ],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Characters/gltf/Mage.glb; owner download, archive sha256 abe48f47\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "1f7d891bde50b879c70965f155b7b765b166dc3f8518e5abb86c0002f191a26e"
+      }
+    },
+    "kaykit_hero_rogue_v0": {
+      "type": "character",
+      "runtime_path": "client/assets/characters/kaykit/rogue.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "hips",
+        "chest",
+        "head",
+        "hand.l",
+        "hand.r",
+        "handslot.l",
+        "handslot.r",
+        "foot.l",
+        "foot.r"
+      ],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Characters/gltf/Rogue.glb; owner download, archive sha256 abe48f47\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "cae5d9b2f08d53f7b4ab2617d9f42f021c546eb10920455fdcd82a110867fae4"
+      }
+    },
+    "kaykit_hero_ranger_v0": {
+      "type": "character",
+      "runtime_path": "client/assets/characters/kaykit/ranger.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "hips",
+        "chest",
+        "head",
+        "hand.l",
+        "hand.r",
+        "handslot.l",
+        "handslot.r",
+        "foot.l",
+        "foot.r"
+      ],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Characters/gltf/Ranger.glb; owner download, archive sha256 abe48f47\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "3a0b0166b9d61d58dcaaa739c3cc0538be46e00d2928dd5cb513d9a41770d2e9"
+      }
+    },
+    "kaykit_clips_rig_medium_combat_melee_v0": {
+      "type": "animation",
+      "runtime_path": "client/assets/animations/kaykit_rig_medium/rig_medium_combat_melee.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Character Animations 1.1 by Kay Lousberg (Animations/gltf/Rig_Medium; owner download, archive sha256 65882f31\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-character-animations",
+        "license": "CC0-1.0",
+        "sha256": "c55e6ec1c79e83ae21d46fe1cd921c1b64be8b9a524a24517e51c6ba99231459"
+      }
+    },
+    "kaykit_clips_rig_medium_combat_ranged_v0": {
+      "type": "animation",
+      "runtime_path": "client/assets/animations/kaykit_rig_medium/rig_medium_combat_ranged.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Character Animations 1.1 by Kay Lousberg (Animations/gltf/Rig_Medium; owner download, archive sha256 65882f31\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-character-animations",
+        "license": "CC0-1.0",
+        "sha256": "7fef1fc0e7b0feafd34b8e12d23f514c8c1f9d068047a691b854b56f1774dff5"
+      }
+    },
+    "kaykit_clips_rig_medium_general_v0": {
+      "type": "animation",
+      "runtime_path": "client/assets/animations/kaykit_rig_medium/rig_medium_general.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Character Animations 1.1 by Kay Lousberg (Animations/gltf/Rig_Medium; owner download, archive sha256 65882f31\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-character-animations",
+        "license": "CC0-1.0",
+        "sha256": "5f725c0f745f36078c7238968cd5c04843cbc6260689eb6e7f5e2bbd7ffdd7ad"
+      }
+    },
+    "kaykit_clips_rig_medium_movement_basic_v0": {
+      "type": "animation",
+      "runtime_path": "client/assets/animations/kaykit_rig_medium/rig_medium_movement_basic.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Character Animations 1.1 by Kay Lousberg (Animations/gltf/Rig_Medium; owner download, archive sha256 65882f31\u2026)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-character-animations",
+        "license": "CC0-1.0",
+        "sha256": "11422afd50abf7e8c92ea107e2e0bc94abd38023d6d15f55ad580347efbfa29e"
+      }
+    },
+    "kaykit_weapon_adv_axe_1handed_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_axe_1handed.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/axe_1handed.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "2f4bf2e39066b299a5a94ed60a013a95dbe5d2708861d4b6d8aa84fcd867c8c4"
+      }
+    },
+    "kaykit_weapon_adv_axe_2handed_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_axe_2handed.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/axe_2handed.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "8ca295951d460645d9def4a33ffb9f58b3001ff37b3a0704b2c0fdc4b5e7e874"
+      }
+    },
+    "kaykit_weapon_adv_bow_withstring_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_bow_withstring.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/bow_withstring.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "cc3ce938035bc819b3c004dbaec7e54c06135b25c540c6ac00f6fd90beb1a7ac"
+      }
+    },
+    "kaykit_weapon_adv_dagger_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_dagger.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/dagger.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "f789586f2d1b826f7d81ffa26b66837c405699d7350b9621e262c3eebf220c51"
+      }
+    },
+    "kaykit_weapon_adv_shield_badge_v0": {
+      "type": "equipment",
+      "slot": "off_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_shield_badge.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/shield_badge.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "68304bd4c481f1234e65ebd131d912e8e244b0b7eef3f20f6a94b03e84ec6099"
+      }
+    },
+    "kaykit_weapon_adv_shield_round_v0": {
+      "type": "equipment",
+      "slot": "off_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_shield_round.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/shield_round.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "c6ad82a8f028872b37214708c88ec635db75d9aee30bac532c2b93145d455765"
+      }
+    },
+    "kaykit_weapon_adv_shield_square_v0": {
+      "type": "equipment",
+      "slot": "off_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_shield_square.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/shield_square.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "96a2fa2c4f641fd687be9b0b036244ce1673c07a509e687aacd9eca4d131af2c"
+      }
+    },
+    "kaykit_weapon_adv_spellbook_closed_v0": {
+      "type": "equipment",
+      "slot": "off_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_spellbook_closed.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/spellbook_closed.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "58f2422e24b2407efb932e311836cc07f0cca44f7a6c4aa9f54702d76080234a"
+      }
+    },
+    "kaykit_weapon_adv_staff_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_staff.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/staff.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "958f38b0ea6078319c3c02ef5096411b87f2e8434ef43821828caeef3911f137"
+      }
+    },
+    "kaykit_weapon_adv_sword_1handed_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_sword_1handed.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/sword_1handed.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "b20b411f639e646efdd0e98df137af99f64b188f8e2c43de620fbcd49f5f89c8"
+      }
+    },
+    "kaykit_weapon_adv_sword_2handed_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_sword_2handed.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/sword_2handed.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "723cce151c5da26a5babc8b465ef67a20a9fc1949cc2c74bd99ab1deb2393cb1"
+      }
+    },
+    "kaykit_weapon_adv_wand_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/adv_wand.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Adventurers 2.0 FREE by Kay Lousberg (Assets/gltf/wand.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-adventurers",
+        "license": "CC0-1.0",
+        "sha256": "04e54071254eaffe3e1c94436accd394dc32d3cc2243659bb21f6bf72c8a6b67"
+      }
+    },
+    "kaykit_weapon_fwb_halberd_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/fwb_halberd.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Fantasy Weapons Bits 1.0 FREE by Kay Lousberg (Assets/gltf/halberd.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-fantasy-weapons-bits",
+        "license": "CC0-1.0",
+        "sha256": "4bb995cbe75122495418c1252a5f9891f87e9e771ea83c55026219b3361bdecd"
+      }
+    },
+    "kaykit_weapon_fwb_hammer_a_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/fwb_hammer_a.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Fantasy Weapons Bits 1.0 FREE by Kay Lousberg (Assets/gltf/hammer_a.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-fantasy-weapons-bits",
+        "license": "CC0-1.0",
+        "sha256": "5dcbd80fb2d9e8ab53b47af10b1d4a03798856dd22f5f3b2abf8ae876953adef"
+      }
+    },
+    "kaykit_weapon_fwb_hammer_c_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/fwb_hammer_c.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Fantasy Weapons Bits 1.0 FREE by Kay Lousberg (Assets/gltf/hammer_c.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-fantasy-weapons-bits",
+        "license": "CC0-1.0",
+        "sha256": "279f738ddb6daba4ded761214b34bfbf46509b1f7d1d062d02cedb1840694358"
+      }
+    },
+    "kaykit_weapon_fwb_spear_a_v0": {
+      "type": "equipment",
+      "slot": "main_hand",
+      "runtime_path": "client/assets/equipment/kaykit/fwb_spear_a.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Fantasy Weapons Bits 1.0 FREE by Kay Lousberg (Assets/gltf/spear_a.gltf packed by tools/assets/gltf_to_glb.py)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-fantasy-weapons-bits",
+        "license": "CC0-1.0",
+        "sha256": "52eec7f8837831aaf8f0604e41629c1737758698e9ea8d69df92469161c345cb"
+      }
     }
   }
 }

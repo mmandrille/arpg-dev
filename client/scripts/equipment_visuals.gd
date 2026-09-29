@@ -16,6 +16,7 @@ class_name EquipmentVisualResolver
 const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
+const ModelTintScript := preload("res://scripts/model_tint.gd")
 const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
 const FALLBACK_ASSET_BY_SLOT := {
 	"head": "fallback_equipment_head_v0",
@@ -201,10 +202,17 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 			return
 		inst = (packed as PackedScene).instantiate()
 	inst.name = asset_id
-	_apply_transform(inst, _local_transform_for_slot(slot, vis), procedural_fallback == null)
-	_apply_model_root_scale_compensation(inst, socket)
+	# rig_native (ADR-0018 P3a): KayKit weapons are authored in hero-rig space for handslot bones,
+	# so they skip the legacy world-meter scale multiplier and ModelRoot scale compensation.
+	var rig_native := bool(vis.get("rig_native", false))
+	_apply_transform(inst, _local_transform_for_slot(slot, vis), procedural_fallback == null and not rig_native)
+	if not rig_native:
+		_apply_model_root_scale_compensation(inst, socket)
 	var rarity := str(item.get("rarity", "common")).to_lower()
 	var tint: Color = RARITY_TINTS.get(rarity, RARITY_TINTS["common"])
+	if rig_native:
+		# Textured kit weapons get a partial rarity tint so the texture stays readable.
+		tint = Color.WHITE.lerp(tint, EquipmentDisplayLoaderScript.rig_native_tint_strength())
 	_apply_tint(inst, tint)
 	socket.add_child(inst)
 	_mounted_nodes[slot] = inst
@@ -229,6 +237,11 @@ func _equipped_instance_id_for_slot(slot: String) -> String:
 		var item_id = WeaponSetTabsScript.hand_equipped_id(_weapon_sets, _equipped, _active_weapon_set, slot)
 		return str(item_id) if item_id != null else ""
 	return str(_equipped.get(slot, ""))
+
+
+## The item_visuals asset id for an item (tests/smoke compare mounts against data, not literals).
+func asset_id_for(def_id: String) -> String:
+	return str((_visuals.get(def_id, {}) as Dictionary).get("asset_id", ""))
 
 
 func _visual_for(def_id: String, slot: String) -> Dictionary:
@@ -409,9 +422,8 @@ func _inverse_scale_component(value: float) -> float:
 
 func _apply_tint(root: Node, color: Color) -> void:
 	if root is MeshInstance3D:
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = color
-		(root as MeshInstance3D).material_override = mat
+		# Multiplies a copy of the mesh's own material so weapon textures survive (ADR-0018 P4a fix).
+		(root as MeshInstance3D).material_override = ModelTintScript.tinted_material(root as MeshInstance3D, color)
 	for child in root.get_children():
 		_apply_tint(child, color)
 

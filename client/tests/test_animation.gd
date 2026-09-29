@@ -6,7 +6,10 @@ const ReactionControllerScript := preload("res://scripts/model_reaction_controll
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const MainScript := preload("res://scripts/main.gd")
+const GearSocketsLoaderScript := preload("res://scripts/gear_sockets_loader.gd")
 
+
+const LOGICAL_HERO_CLIPS := ["idle", "walk", "attack", "attack_off_hand", "attack_2h", "attack_ranged", "attack_staff", "hit", "death"]
 
 var _failed: bool = false
 
@@ -210,50 +213,55 @@ func _test_model_reaction_terminal_reset_restores_model() -> void:
 	await process_frame
 
 
+## Bone a gear socket binds to on this skeleton: the kit bone, or the legacy fallback bone.
+func _socket_bone(skel: Skeleton3D, class_id: String, socket_name: String) -> String:
+	var entry: Dictionary = GearSocketsLoaderScript.sockets_for_class(class_id).get(socket_name, {})
+	var bone := str(entry.get("bone", ""))
+	if skel != null and skel.find_bone(bone) < 0 and typeof(entry.get("fallback", null)) == TYPE_DICTIONARY:
+		bone = str((entry["fallback"] as Dictionary).get("bone", ""))
+	return bone
+
+
+func _ancestor_bone(skel: Skeleton3D, bone: String, levels: int) -> String:
+	var idx := skel.find_bone(bone)
+	for i in levels:
+		if idx < 0 or skel.get_bone_parent(idx) < 0:
+			break
+		idx = skel.get_bone_parent(idx)
+	return skel.get_bone_name(idx) if idx >= 0 else bone
+
+
 func _test_character_scene() -> void:
 	var s = (load("res://scenes/character.tscn") as PackedScene).instantiate()
 	get_root().add_child(s)  # _ready attaches the socket
 	await process_frame      # node enters tree + _ready fires next frame
-	var sock = s.find_child("right_hand_socket", true, false)
-	_assert(sock is BoneAttachment3D, "right_hand_socket must be a BoneAttachment3D")
-	if sock is BoneAttachment3D:
-		_assert(sock.bone_name == "hand_r", "socket bound to hand_r, got %s" % sock.bone_name)
-	var off_sock = s.find_child("off_hand_socket", true, false)
-	_assert(off_sock is BoneAttachment3D, "off_hand_socket must be a BoneAttachment3D")
-	if off_sock is BoneAttachment3D:
-		_assert(off_sock.bone_name == "hand_l", "off_hand_socket bound to hand_l, got %s" % off_sock.bone_name)
+	var skel := s.find_child("Skeleton3D", true, false) as Skeleton3D
+	for socket_name in ["right_hand_socket", "off_hand_socket"]:
+		var sock = s.find_child(socket_name, true, false)
+		_assert(sock is BoneAttachment3D, "%s must be a BoneAttachment3D" % socket_name)
+		if sock is BoneAttachment3D:
+			var want := _socket_bone(skel, "", socket_name)
+			_assert(sock.bone_name == want, "%s bound to %s, got %s" % [socket_name, want, sock.bone_name])
 	var ap := s.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_assert(ap != null, "character AnimationPlayer missing")
 	if ap != null:
-		for clip in ["idle", "walk", "attack", "attack_off_hand", "attack_2h", "attack_ranged", "attack_staff", "hit", "death"]:
+		for clip in LOGICAL_HERO_CLIPS:
 			_assert(ap.has_animation(clip), "character missing clip %s" % clip)
 	s.free()
 	await process_frame
 
 
 func _test_class_character_models() -> void:
+	var presentations = JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../shared/assets/class_presentations.v0.json")))
 	for class_id in ["barbarian", "sorcerer", "paladin", "rogue", "ranger"]:
 		var resolved := ClassPresentationsLoaderScript.resolve(class_id)
-		_assert(str(resolved.get("asset_id", "")) == "character_%s_v0" % class_id, "%s model asset mismatch: %s" % [class_id, resolved])
-		_assert(float(resolved.get("scale", 0.0)) > 0.0, "%s model scale should be positive" % class_id)
+		var authored: Dictionary = (presentations["classes"][class_id] as Dictionary)["model"]
+		_assert(str(resolved.get("asset_id", "")) == str(authored.get("asset_id", "")), "%s must resolve its authored model (no fallback): %s" % [class_id, resolved])
+		_assert(str(resolved.get("clip_profile", "")) != "", "%s kit model must carry a clip profile" % class_id)
 		var packed := ClassPresentationsLoaderScript.packed_scene_for_class(class_id)
 		_assert(packed != null, "%s model packed scene missing" % class_id)
 		if packed == null:
 			continue
-		var model := packed.instantiate() as Node3D
-		get_root().add_child(model)
-		await process_frame
-		var skel := model.find_child("Skeleton3D", true, false) as Skeleton3D
-		_assert(skel != null, "%s model missing Skeleton3D" % class_id)
-		if skel != null:
-			for bone in [
-				"root", "spine", "chest", "neck", "head",
-				"arm_l", "elbow_l", "hand_l", "arm_r", "elbow_r", "hand_r",
-				"leg_l", "knee_l", "foot_l", "leg_r", "knee_r", "foot_r",
-			]:
-				_assert(skel.find_bone(bone) >= 0, "%s model missing bone %s" % [class_id, bone])
-		model.free()
-		await process_frame
 		var character = (load("res://scenes/character.tscn") as PackedScene).instantiate() as Node3D
 		get_root().add_child(character)
 		await process_frame
@@ -272,36 +280,35 @@ func _test_class_character_models() -> void:
 			ap.root_node = NodePath("../ModelRoot")
 		character.set("class_id", class_id)
 		character.call("_ensure_weapon_socket")
-		var right_sock := character.find_child("right_hand_socket", true, false)
-		var off_sock := character.find_child("off_hand_socket", true, false)
-		var head_sock := character.find_child("head_socket", true, false)
-		var chest_sock := character.find_child("chest_socket", true, false)
-		_assert(right_sock is BoneAttachment3D, "%s replacement right_hand_socket should bind to the rig" % class_id)
-		_assert(off_sock is BoneAttachment3D, "%s replacement off_hand_socket should bind to the rig" % class_id)
-		_assert(head_sock is BoneAttachment3D, "%s head_socket should bind to the rig" % class_id)
-		_assert(chest_sock is BoneAttachment3D, "%s chest_socket should bind to the rig" % class_id)
-		if right_sock is BoneAttachment3D:
-			_assert((right_sock as BoneAttachment3D).bone_name == "hand_r", "%s right hand socket bone mismatch" % class_id)
-		if off_sock is BoneAttachment3D:
-			_assert((off_sock as BoneAttachment3D).bone_name == "hand_l", "%s off hand socket bone mismatch" % class_id)
-		if head_sock is BoneAttachment3D:
-			_assert((head_sock as BoneAttachment3D).bone_name == "head", "%s head socket bone mismatch" % class_id)
-		if chest_sock is BoneAttachment3D:
-			_assert((chest_sock as BoneAttachment3D).bone_name == "chest", "%s chest socket bone mismatch" % class_id)
-		if right_sock is Node3D:
-			_assert((right_sock as Node3D).scale.is_equal_approx(Vector3.ONE), "%s right hand socket should keep authored bone scale, got %s" % [class_id, str((right_sock as Node3D).scale)])
 		var class_skel := class_model.find_child("Skeleton3D", true, false) as Skeleton3D
 		_assert(class_skel != null, "%s replacement missing Skeleton3D" % class_id)
+		for socket_name in ["right_hand_socket", "off_hand_socket", "head_socket", "chest_socket"]:
+			var sock := character.find_child(socket_name, true, false)
+			_assert(sock is BoneAttachment3D, "%s %s should bind to the rig" % [class_id, socket_name])
+			if sock is BoneAttachment3D and class_skel != null:
+				var want := _socket_bone(class_skel, class_id, socket_name)
+				_assert(class_skel.find_bone(want) >= 0, "%s rig missing socket bone %s" % [class_id, want])
+				_assert((sock as BoneAttachment3D).bone_name == want, "%s %s bone %s want %s" % [class_id, socket_name, (sock as BoneAttachment3D).bone_name, want])
+				_assert((sock as Node3D).scale.is_equal_approx(Vector3.ONE), "%s %s should keep authored bone scale" % [class_id, socket_name])
+		_assert(ap != null, "%s AnimationPlayer missing" % class_id)
 		if ap != null and class_skel != null:
-			_assert_animation_rotates_bone(ap, class_skel, "walk", 0.4, "leg_l", class_id)
-			_assert_animation_rotates_bone(ap, class_skel, "attack", 0.12, "arm_r", class_id)
-			_assert_animation_rotates_bone(ap, class_skel, "attack_off_hand", 0.12, "arm_l", class_id)
-		if class_id == "paladin":
-			_assert(is_equal_approx(class_model.scale.x, 1.0), "paladin class scale not applied")
+			for clip in LOGICAL_HERO_CLIPS:
+				_assert(ap.has_animation(clip), "%s kit library missing logical clip %s" % [class_id, clip])
+			_assert(ap.get_animation("walk").loop_mode == Animation.LOOP_LINEAR, "%s walk must loop" % class_id)
+			_assert(ap.get_animation("death").loop_mode == Animation.LOOP_NONE, "%s death must not loop" % class_id)
+			# Semantic motion: walk moves a leg, attacks move an arm (bones found from the socket bones).
+			var left_leg := _ancestor_bone(class_skel, _socket_bone(class_skel, class_id, "boots_socket"), 2)
+			var right_arm := _ancestor_bone(class_skel, _socket_bone(class_skel, class_id, "right_hand_socket"), 3)
+			var left_arm := _ancestor_bone(class_skel, _socket_bone(class_skel, class_id, "off_hand_socket"), 3)
+			_assert_animation_rotates_bone(ap, class_skel, "walk", 0.4, left_leg, class_id)
+			_assert_animation_rotates_bone(ap, class_skel, "attack", 0.3, right_arm, class_id)
+			_assert_animation_rotates_bone(ap, class_skel, "attack_off_hand", 0.3, left_arm, class_id)
+		_assert(is_equal_approx(class_model.scale.x, float(resolved.get("scale", 1.0))), "%s class scale not applied" % class_id)
 		character.free()
 		await process_frame
 	var fallback := ClassPresentationsLoaderScript.resolve("necromancer")
 	_assert(str(fallback.get("asset_id", "")) == "character_base_human_v0", "unknown class should use base_human fallback: %s" % fallback)
+	_assert(str(fallback.get("clip_profile", "x")) == "", "base_human fallback keeps the legacy clip library")
 
 
 func _assert_animation_rotates_bone(ap: AnimationPlayer, skel: Skeleton3D, clip: String, seconds: float, bone: String, class_id: String) -> void:

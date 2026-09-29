@@ -4,6 +4,7 @@ extends RefCounted
 static var _loaded: bool = false
 static var _equipped_multiplier: float = 1.0
 static var _ground_multiplier: float = 1.0
+static var _rig_native_tint_strength: float = 1.0
 
 
 static func invalidate() -> void:
@@ -21,11 +22,17 @@ static func ensure_loaded() -> void:
 	var multipliers: Dictionary = data.get("glb_mesh_multipliers", {}) if typeof(data.get("glb_mesh_multipliers", {})) == TYPE_DICTIONARY else {}
 	_equipped_multiplier = float(multipliers.get("equipped", 1.0))
 	_ground_multiplier = float(multipliers.get("ground", 1.0))
+	_rig_native_tint_strength = clampf(float(data.get("rig_native_rarity_tint_strength", 1.0)), 0.0, 1.0)
 
 
 static func equipped_multiplier() -> float:
 	ensure_loaded()
 	return _equipped_multiplier
+
+
+static func rig_native_tint_strength() -> float:
+	ensure_loaded()
+	return _rig_native_tint_strength
 
 
 static func ground_multiplier() -> float:

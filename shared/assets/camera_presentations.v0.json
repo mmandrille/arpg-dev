@@ -34,9 +34,9 @@
         0.0,
         0.0
       ],
-      "chest_forward_offset": -0.10,
-      "eye_height": 1.40,
-      "eye_height_from_socket": -0.20,
+      "chest_forward_offset": -0.45,
+      "eye_height": 1.50,
+      "eye_height_from_socket": -0.05,
       "fov": 100.0,
       "fov_min": 60.0,
       "fov_max": 120.0,

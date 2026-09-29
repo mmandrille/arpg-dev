@@ -336,7 +336,7 @@ and fall under the CLAUDE.md spec-gate exemption. They still write an as-built w
 | **P0** | Repair screenshot harness; "before" captures; download packs (per D2); verify P0 checklist; record measured budgets | spec ([v469](../specs/v469_spec-art-baseline-and-kit-verification.md)) |
 | **P1** | Render baseline (D7) | exempt — shipped [v470](../as-built/v470_render-baseline.md) (perf floor owed) |
 | **P2** | Dungeon auto-tile renderer + kit props (D6) | walls/columns/floors shipped [v471](../as-built/v471_dungeon-kit-walls-floors.md); torches/treasure chests [v473](../as-built/v473_dungeon-kit-props.md) (no kit door; stairs deferred) |
-| **P3** | Heroes + kit animation + clip catalog + socket remap + armor tints (D4, D5) | spec |
+| **P3** | Heroes + kit animation + clip catalog + socket remap + armor tints (D4, D5) | spec — P3a heroes/clips/sockets/weapons shipped [v475](../as-built/v475_kit-heroes.md); P3b armor tints + headgear; P3c legacy pipeline removal |
 | **P4** | Kit monsters; purge unconfirmed-license and unused GLBs (D2) | spec — P4a skeletons + purge shipped [v474](../as-built/v474_kit-skeleton-monsters.md); P4b beasts (fox/wolf/bat) pending a CC0 source |
 | **P5** | Particle VFX + in-repo shader set: hit flash, death dissolve, highlight rim/outline (D3) | exempt |
 

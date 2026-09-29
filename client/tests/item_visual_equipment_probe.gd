@@ -128,7 +128,7 @@ func verify_off_hand_weapon_resolver(tree: SceneTree, fail: Callable) -> bool:
 	if bool(off_hand.get("procedural_fallback", false)):
 		fail.call("rogue starter sword off hand used shield fallback: %s" % off_hand)
 		return false
-	var node := mount.find_child("weapon_rusty_sword_v0", true, false) as Node3D
+	var node := mount.find_child(resolver.asset_id_for("rusty_sword"), true, false) as Node3D
 	if node == null:
 		fail.call("rogue starter sword off hand node missing")
 		return false

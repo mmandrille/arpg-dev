@@ -1,10 +1,10 @@
 {
   "models": [
     {
-      "asset_id": "character_barbarian_v0",
+      "asset_id": "kaykit_hero_barbarian_v0",
       "height_offset": 0.0,
-      "runtime_path": "client/assets/characters/barbarian/barbarian.glb",
-      "scale": 1.0,
+      "runtime_path": "client/assets/characters/kaykit/barbarian.glb",
+      "scale": 0.8,
       "scene": "",
       "type": "character",
       "used_by": [
@@ -12,10 +12,10 @@
       ]
     },
     {
-      "asset_id": "character_paladin_v0",
+      "asset_id": "kaykit_hero_knight_v0",
       "height_offset": 0.0,
-      "runtime_path": "client/assets/characters/paladin/paladin.glb",
-      "scale": 1.0,
+      "runtime_path": "client/assets/characters/kaykit/knight.glb",
+      "scale": 0.8,
       "scene": "",
       "type": "character",
       "used_by": [
@@ -23,10 +23,21 @@
       ]
     },
     {
-      "asset_id": "character_ranger_v0",
+      "asset_id": "kaykit_hero_mage_v0",
       "height_offset": 0.0,
-      "runtime_path": "client/assets/characters/ranger/ranger.glb",
-      "scale": 1.0,
+      "runtime_path": "client/assets/characters/kaykit/mage.glb",
+      "scale": 0.8,
+      "scene": "",
+      "type": "character",
+      "used_by": [
+        "sorcerer"
+      ]
+    },
+    {
+      "asset_id": "kaykit_hero_ranger_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/characters/kaykit/ranger.glb",
+      "scale": 0.8,
       "scene": "",
       "type": "character",
       "used_by": [
@@ -34,25 +45,14 @@
       ]
     },
     {
-      "asset_id": "character_rogue_v0",
+      "asset_id": "kaykit_hero_rogue_v0",
       "height_offset": 0.0,
-      "runtime_path": "client/assets/characters/rogue/rogue.glb",
-      "scale": 1.0,
+      "runtime_path": "client/assets/characters/kaykit/rogue.glb",
+      "scale": 0.8,
       "scene": "",
       "type": "character",
       "used_by": [
         "rogue"
-      ]
-    },
-    {
-      "asset_id": "character_sorcerer_v0",
-      "height_offset": 0.0,
-      "runtime_path": "client/assets/characters/sorcerer/sorcerer.glb",
-      "scale": 1.0,
-      "scene": "",
-      "type": "character",
-      "used_by": [
-        "sorcerer"
       ]
     },
     {

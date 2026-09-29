@@ -33,13 +33,6 @@ const SLOT_SOCKET := {
 	"off_hand": "off_hand_socket",
 }
 
-const SOCKET_BONE := {
-	"head_socket": "head",
-	"chest_socket": "chest",
-	"boots_socket": "foot_l",
-	"right_hand_socket": "hand_r",
-	"off_hand_socket": "hand_l",
-}
 
 const MIN_BONE_REST_Y := {
 	"head": 1.2,
@@ -128,7 +121,11 @@ func _verify_class(tree: SceneTree, class_id: String, fail: Callable) -> bool:
 			return false
 		if socket is BoneAttachment3D:
 			var attachment := socket as BoneAttachment3D
-			var expected_bone := str(SOCKET_BONE.get(socket_name, ""))
+			# Expected bone comes from gear_sockets (kit bone, or legacy fallback when the rig lacks it).
+			var socket_entry: Dictionary = GearSocketsLoaderScript.sockets_for_class(class_id).get(socket_name, {})
+			var expected_bone := str(socket_entry.get("bone", ""))
+			if skel.find_bone(expected_bone) < 0 and typeof(socket_entry.get("fallback", null)) == TYPE_DICTIONARY:
+				expected_bone = str((socket_entry["fallback"] as Dictionary).get("bone", ""))
 			if expected_bone != "" and skel.get_bone_name(attachment.bone_idx) != expected_bone:
 				fail.call("%s socket %s bound to %s want %s" % [
 					class_id, socket_name, skel.get_bone_name(attachment.bone_idx), expected_bone,

@@ -8,6 +8,12 @@
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
+    "rig_native_rarity_tint_strength": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "ADR-0018 P3a: how far textured rig-native weapons are tinted toward their rarity color (0 = untouched texture)."
+    },
     "glb_mesh_multipliers": {
       "type": "object",
       "required": ["equipped", "ground"],

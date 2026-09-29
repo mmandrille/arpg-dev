@@ -234,7 +234,7 @@ func _step_resume(delta: float) -> bool:
 		var ok: bool = w != null and w["visible"] == true \
 			and str(w["item_instance_id"]) == item_id \
 			and w["item_def_id"] == "rusty_sword" \
-			and w["asset_id"] == "weapon_rusty_sword_v0" \
+			and w["asset_id"] == resolver_resume.asset_id_for("rusty_sword") \
 			and w["mount_socket"] == "right_hand_socket"
 		if ok:
 			print("[smoke] PASS: equip visible, survives move, and restored monster death state on resume")
@@ -343,7 +343,7 @@ func _verify_equip() -> bool:
 	var visual_ok: bool = w != null and w["visible"] == true \
 		and str(w["item_instance_id"]) == main_id \
 		and w["item_def_id"] == "rusty_sword" \
-		and w["asset_id"] == "weapon_rusty_sword_v0" \
+		and w["asset_id"] == resolver.asset_id_for("rusty_sword") \
 		and w["mount_socket"] == "right_hand_socket"
 
 	if server_ok and visual_ok:
@@ -367,7 +367,7 @@ func _fail_equip_verification() -> void:
 	var visual_ok: bool = w != null and w["visible"] == true \
 		and str(w["item_instance_id"]) == main_id \
 		and w["item_def_id"] == "rusty_sword" \
-		and w["asset_id"] == "weapon_rusty_sword_v0" \
+		and w["asset_id"] == resolver.asset_id_for("rusty_sword") \
 		and w["mount_socket"] == "right_hand_socket"
 	_fail("equip verification failed (server_ok=%s visual_ok=%s hp=%d main_hand=%s) state=%s visual=%s warnings=%s" % [server_ok, visual_ok, hp, main_id, state, w, resolver.get_debug_state().get("warnings", [])])
 

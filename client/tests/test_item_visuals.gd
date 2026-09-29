@@ -206,7 +206,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 	var root_path := ProjectSettings.globalize_path("res://")
 	loot_factory.configure(_read(root_path.path_join("../assets/manifests/assets.v0.json"))["assets"], ItemRulesLoader.item_presentations)
 	var sword_node: Node3D = loot_factory.make_loot_node({"item_def_id": "rusty_sword", "rarity": "magic"})
-	var sword_model := sword_node.find_child("GroundModel_weapon_rusty_sword_v0", true, false) as Node3D
+	var sword_model := sword_node.find_child("GroundModel_%s" % _ground_model_asset_id("rusty_sword"), true, false) as Node3D
 	if sword_model == null:
 		_fail("equipment floor loot did not use manifest-backed ground model")
 		sword_node.free()
@@ -245,7 +245,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 	armor_node.free()
 
 	var shield_node: Node3D = loot_factory.make_loot_node({"item_def_id": "shield", "rarity": "magic"})
-	if shield_node.find_child("GroundModel_equipment_shield_kite_v0", true, false) == null:
+	if shield_node.find_child("GroundModel_%s" % _ground_model_asset_id("shield"), true, false) == null:
 		_fail("shield floor loot did not use manifest-backed kite shield model")
 		shield_node.free()
 		main.free()
@@ -461,3 +461,10 @@ func _make_labelled_loot_node() -> Node3D:
 func _fail(msg: String) -> void:
 	printerr("[gdtest] FAIL: ", msg)
 	quit(1)
+
+
+
+## Ground loot models come from the merged item presentation (family `3d_model`), the same
+## view the loot factory reads — not item_visuals.
+func _ground_model_asset_id(item_def_id: String) -> String:
+	return str((ItemRulesLoader.item_presentations.get(item_def_id, {}) as Dictionary).get("3d_model", ""))

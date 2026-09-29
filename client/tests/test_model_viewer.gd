@@ -2,6 +2,7 @@ extends SceneTree
 
 const ViewerScene := preload("res://scenes/model_viewer.tscn")
 const ViewerScript := preload("res://scripts/model_viewer.gd")
+const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -9,16 +10,17 @@ var _fail_count: int = 0
 
 func _initialize() -> void:
 	await _test_catalog_resolves_expected_assets()
-	await _test_viewer_loads_asset("character_paladin_v0")
+	await _test_viewer_loads_asset(str(ClassPresentationsLoaderScript.resolve("paladin").get("asset_id", "")))
 	await _test_viewer_loads_asset("monster_tiny_flyer_v0")
 	print("[gdtest] PASS: test_model_viewer (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
 
 func _test_catalog_resolves_expected_assets() -> void:
-	var paladin: Dictionary = ViewerScript.resolve("character_paladin_v0")
+	var paladin_model := ClassPresentationsLoaderScript.resolve("paladin")
+	var paladin: Dictionary = ViewerScript.resolve(str(paladin_model.get("asset_id", "")))
 	_assert(str(paladin.get("type", "")) == "character", "paladin resolves as character")
-	_assert(str(paladin.get("runtime_path", "")) == "client/assets/characters/paladin/paladin.glb", "paladin runtime path")
+	_assert(str(paladin.get("runtime_path", "")) == str(paladin_model.get("runtime_path", "")), "paladin runtime path follows class presentation")
 	_assert((paladin.get("used_by", []) as Array).has("paladin"), "paladin used_by includes paladin")
 	var bat: Dictionary = ViewerScript.resolve("monster_tiny_flyer_v0")
 	_assert(str(bat.get("type", "")) == "monster", "bat resolves as monster")

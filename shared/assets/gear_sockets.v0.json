@@ -1,83 +1,132 @@
 {
   "version": 0,
+  "note": "ADR-0018 P3a (v475): socket bones target the KayKit Rig_Medium heroes; `fallback` keeps the legacy 17-bone base_human (unknown-class fallback, hero corpses) mounting until P3c removes it.",
   "default": {
     "sockets": {
       "right_hand_socket": {
-        "bone": "hand_r"
+        "bone": "handslot.r",
+        "fallback": {
+          "bone": "hand_r"
+        }
       },
       "off_hand_socket": {
-        "bone": "hand_l"
+        "bone": "handslot.l",
+        "fallback": {
+          "bone": "hand_l"
+        }
       },
       "head_socket": {
         "bone": "head",
         "offset": {
           "x": 0.0,
-          "y": -1.35,
-          "z": -0.04
+          "y": 0.6,
+          "z": 0.0
+        },
+        "fallback": {
+          "bone": "head",
+          "offset": {
+            "x": 0.0,
+            "y": -1.35,
+            "z": -0.04
+          }
         }
       },
       "chest_socket": {
         "bone": "chest",
-        "offset": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": -0.04
+        "fallback": {
+          "bone": "chest",
+          "offset": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -0.04
+          }
         }
       },
       "gloves_socket": {
-        "bone": "hand_r",
-        "offset": {
-          "x": 0.0,
-          "y": -0.02,
-          "z": 0.0
+        "bone": "hand.r",
+        "fallback": {
+          "bone": "hand_r",
+          "offset": {
+            "x": 0.0,
+            "y": -0.02,
+            "z": 0.0
+          }
         }
       },
       "belt_socket": {
-        "bone": "spine",
+        "bone": "hips",
         "offset": {
           "x": 0.0,
-          "y": -0.04,
-          "z": 0.08
+          "y": 0.1,
+          "z": 0.0
+        },
+        "fallback": {
+          "bone": "spine",
+          "offset": {
+            "x": 0.0,
+            "y": -0.04,
+            "z": 0.08
+          }
         }
       },
       "boots_socket": {
-        "bone": "foot_l",
-        "offset": {
-          "x": 0.06,
-          "y": 0.06,
-          "z": -0.08
+        "bone": "foot.l",
+        "fallback": {
+          "bone": "foot_l",
+          "offset": {
+            "x": 0.06,
+            "y": 0.06,
+            "z": -0.08
+          }
         }
       },
       "boots_right_socket": {
-        "bone": "foot_r",
-        "offset": {
-          "x": -0.06,
-          "y": 0.06,
-          "z": -0.08
+        "bone": "foot.r",
+        "fallback": {
+          "bone": "foot_r",
+          "offset": {
+            "x": -0.06,
+            "y": 0.06,
+            "z": -0.08
+          }
         }
       },
       "ring_left_socket": {
-        "bone": "hand_l",
-        "offset": {
-          "x": 0.0,
-          "y": -0.03,
-          "z": 0.02
+        "bone": "hand.l",
+        "fallback": {
+          "bone": "hand_l",
+          "offset": {
+            "x": 0.0,
+            "y": -0.03,
+            "z": 0.02
+          }
         }
       },
       "ring_right_socket": {
-        "bone": "hand_r",
-        "offset": {
-          "x": 0.0,
-          "y": -0.03,
-          "z": 0.02
+        "bone": "hand.r",
+        "fallback": {
+          "bone": "hand_r",
+          "offset": {
+            "x": 0.0,
+            "y": -0.03,
+            "z": 0.02
+          }
         }
       },
       "amulet_socket": {
         "bone": "chest",
         "offset": {
           "x": 0.0,
-          "y": 0.1,
-          "z": -0.04
+          "y": 0.3,
+          "z": 0.0
+        },
+        "fallback": {
+          "bone": "chest",
+          "offset": {
+            "x": 0.0,
+            "y": 0.1,
+            "z": -0.04
+          }
         }
       }
     }
@@ -86,11 +135,14 @@
     "rogue": {
       "sockets": {
         "gloves_socket": {
-          "bone": "hand_l",
-          "offset": {
-            "x": 0.0,
-            "y": -0.02,
-            "z": 0.0
+          "bone": "hand.l",
+          "fallback": {
+            "bone": "hand_l",
+            "offset": {
+              "x": 0.0,
+              "y": -0.02,
+              "z": 0.0
+            }
           }
         }
       }

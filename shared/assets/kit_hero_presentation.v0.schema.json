@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/kit_hero_presentation.v0.schema.json",
+  "title": "Kit hero presentation (v0)",
+  "description": "Client-only KayKit hero clip profiles: logical clip -> Rig_Medium clip, from clip-library assets (ADR-0018 P3a).",
+  "type": "object",
+  "required": ["version", "clip_profiles"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "note": { "type": "string" },
+    "clip_profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["libraries", "clips", "loop"],
+        "additionalProperties": false,
+        "properties": {
+          "libraries": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z0-9_]+$" } },
+          "clips": {
+            "type": "object",
+            "required": ["idle", "walk", "attack", "attack_off_hand", "attack_2h", "attack_ranged", "attack_staff", "hit", "death"],
+            "additionalProperties": { "type": "string", "minLength": 1 }
+          },
+          "loop": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    }
+  }
+}

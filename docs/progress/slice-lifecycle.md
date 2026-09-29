@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v475** | `kit-heroes` | Complete (`make ci` green) | [`spec`](../specs/v475_spec-kit-heroes.md) | — | [`as-built`](../as-built/v475_kit-heroes.md) |
 | **v474** | `kit-skeleton-monsters` | Complete (`make ci` green) | [`spec`](../specs/v474_spec-kit-skeleton-monsters.md) | — | [`as-built`](../as-built/v474_kit-skeleton-monsters.md) |
 | **v473** | `dungeon-kit-props` | Complete (`make ci` green) | [`spec`](../specs/v473_spec-dungeon-kit-props.md) | — | [`as-built`](../as-built/v473_dungeon-kit-props.md) |
 | **v472** | `room-corridor-anchor-fallback` | Complete (focused Go verification; `make` unavailable on host) | [`spec`](../specs/v472_spec-room-corridor-anchor-fallback.md) | [`plan`](../plans/v472_2026-09-28-room-corridor-anchor-fallback.md) | [`as-built`](../as-built/v472_room-corridor-anchor-fallback.md) |

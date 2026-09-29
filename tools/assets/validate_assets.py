@@ -93,6 +93,24 @@ def parse_glb_non_unit_node_scales(path: Path, tolerance: float = 0.01) -> list[
         return [("?", [0.0])]
 
 
+
+HAND_SOCKETS = ("right_hand_socket", "off_hand_socket")
+GEAR_SOCKETS_REL = "shared/assets/gear_sockets.v0.json"
+
+
+def hand_mount_bone_options(root: Path) -> dict[str, set[str]]:
+    """Per weapon socket: the bones that may carry it (kit bone + legacy fallback bone)."""
+    path = root / GEAR_SOCKETS_REL
+    if not path.is_file():
+        return {"right_hand_socket": {"hand_r"}, "off_hand_socket": {"hand_l"}}
+    sockets = load(path).get("default", {}).get("sockets", {})
+    options: dict[str, set[str]] = {}
+    for socket in HAND_SOCKETS:
+        entry = sockets.get(socket, {})
+        bones = {entry.get("bone", "")} | {entry.get("fallback", {}).get("bone", "")}
+        options[socket] = {b for b in bones if b}
+    return options
+
 def sha256_of(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -225,20 +243,22 @@ def validate(root: Path, report: Report) -> None:
     characters = {aid: e for aid, e in assets.items() if e["type"] == "character"}
     if not characters:
         report.fail("character coverage", "no character asset declared")
-    HAND_MOUNT_BONES = {"hand_r", "hand_l"}
+    # Hand mount bones come from gear_sockets (ADR-0018 D4): each weapon socket's kit `bone` or its
+    # legacy `fallback.bone` must be declared, so a rig without either can never mount weapons.
+    hand_options = hand_mount_bone_options(root)
     for asset_id, entry in sorted(characters.items()):
         declared = set(entry.get("required_nodes", []))
         if not declared:
             report.ok(f"{asset_id} declares static character fallback sockets")
             continue
-        missing = sorted(HAND_MOUNT_BONES - declared)
+        missing = [socket for socket, options in hand_options.items() if not (options & declared)]
         if missing:
             report.fail(
                 "mount bone",
-                f"{asset_id}: required_nodes missing hand mount bones {missing}",
+                f"{asset_id}: required_nodes cover no bone for {missing} (options {hand_options})",
             )
         else:
-            report.ok(f"{asset_id} declares hand mount bones {sorted(HAND_MOUNT_BONES)}")
+            report.ok(f"{asset_id} declares hand mount bones for {sorted(hand_options)}")
 
     # [6] GLB skin-joint inspection: required_nodes must be SKIN JOINTS, proving
     #     the GLB is actually rigged (spec §6, §10). Characters/monsters are

@@ -36,9 +36,11 @@ static func resolve(class_id: String) -> Dictionary:
 	var entry: Dictionary = _classes.get(class_id, {})
 	var model: Dictionary = entry.get("model", {}) if typeof(entry.get("model", {})) == TYPE_DICTIONARY else {}
 	var asset_id := str(model.get("asset_id", FALLBACK_ASSET_ID))
+	var clip_profile := str(model.get("clip_profile", ""))
 	var asset: Dictionary = _manifest_assets.get(asset_id, {})
 	if str(asset.get("type", "")) != "character":
 		asset_id = FALLBACK_ASSET_ID
+		clip_profile = ""  # the legacy fallback model keeps the legacy clip library
 		asset = _manifest_assets.get(asset_id, {})
 	var runtime_path := str(asset.get("runtime_path", "client/assets/characters/base_human/base_human.glb"))
 	return {
@@ -48,6 +50,7 @@ static func resolve(class_id: String) -> Dictionary:
 		"scene_path": _res_path(runtime_path),
 		"scale": _positive_float(model.get("scale", 1.0), 1.0),
 		"height_offset": float(model.get("height_offset", 0.0)),
+		"clip_profile": clip_profile,
 		"idle_stance": entry.get("idle_stance", {}) if typeof(entry.get("idle_stance", {})) == TYPE_DICTIONARY else {},
 	}
 

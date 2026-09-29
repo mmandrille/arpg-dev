@@ -28,6 +28,7 @@
         "required": ["asset_id", "slot", "mount_socket", "local_transform"],
         "additionalProperties": false,
         "properties": {
+          "rig_native": { "type": "boolean", "description": "Asset is authored in KayKit hero-rig space for handslot bones (no legacy scale multiplier/compensation)." },
           "asset_id": { "type": "string", "minLength": 1 },
           "slot": {
             "type": "string",

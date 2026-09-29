@@ -85,6 +85,7 @@ const AttackMoveInputCoordinatorScript := preload("res://scripts/attack_move_inp
 const DeltaFrameCoalesceScript := preload("res://scripts/delta_frame_coalesce.gd")
 const DeltaUiSyncGateScript := preload("res://scripts/delta_ui_sync_gate.gd")
 const LocalPlayerAuthoritativeSyncScript := preload("res://scripts/local_player_authoritative_sync.gd")
+const RemotePlayerClassSyncScript := preload("res://scripts/remote_player_class_sync.gd")
 const ReconciliationBackpressureScript := preload("res://scripts/reconciliation_backpressure.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const SkillAimInputScript := preload("res://scripts/skill_aim_input.gd")
@@ -1941,10 +1942,9 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 			rec["amount"] = int(e["amount"])
 		if e.has("monster_def_id"):
 			rec["monster_def_id"] = str(e["monster_def_id"])
-	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "class_affinity_status", "skill_bonus_status", "equip_preview", "effect_ids", "character_id", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "combat_stats", "remaining_ticks", "total_ticks", "companion_stance"]:
-		if e.has(key):
-			rec[key] = e[key]
-	for key in ["corpse_character_id", "corpse_name", "corpse_level", "corpse_item_count"]:
+	if not is_new and RemotePlayerClassSyncScript.class_changed(rec, e):
+		RemotePlayerClassSyncScript.swap_model(rec, str(e["character_class"]), _entity_base_tint(e), Callable(self, "_apply_character_class_model"))
+	for key in ["item_template_id", "display_name", "rarity", "rolled_stats", "requirements", "requirement_status", "requirements_met", "class_affinity_status", "skill_bonus_status", "equip_preview", "effect_ids", "character_id", "character_class", "boss_template_id", "visual_model", "visual_tint", "boss_phase", "elite_objective", "quest_reward", "owner_id", "target_id", "combat_stats", "remaining_ticks", "total_ticks", "companion_stance", "corpse_character_id", "corpse_name", "corpse_level", "corpse_item_count"]:
 		if e.has(key):
 			rec[key] = e[key]
 	if e.has("is_boss"):
@@ -6135,7 +6135,9 @@ func get_bot_state() -> Dictionary:
 		"last_intent_reject_reason": _last_intent_reject_reason,
 		"local_player_id": player_id,
 		"party": party.duplicate(true),
-		"remote_player_ids": _remote_player_ids(),
+		"remote_player_ids": RemotePlayerClassSyncScript.remote_player_ids(entities),
+		"remote_player_classes": RemotePlayerClassSyncScript.rendered_classes(entities),
+		"local_player_rendered_class": str(character_visual.get("class_id")) if character_visual != null and "class_id" in character_visual else "",
 		"player_hp": player_hp,
 		"player_max_hp": player_max_hp,
 		"player_mana": player_mana,
@@ -6293,15 +6295,6 @@ func _non_perimeter_wall_count() -> int:
 		if str((wall as Dictionary).get("source", "")) != "perimeter":
 			count += 1
 	return count
-
-func _remote_player_ids() -> Array:
-	var out: Array = []
-	for id in entities.keys():
-		var rec: Dictionary = entities[id]
-		if str(rec.get("type", "")) == "player":
-			out.append(str(id))
-	out.sort()
-	return out
 
 func _character_info_debug_state() -> Dictionary:
 	return {

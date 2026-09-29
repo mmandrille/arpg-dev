@@ -8,6 +8,9 @@ func (s *Sim) entityView(e *entity) EntityView {
 		return EntityView{}
 	}
 	view := e.view()
+	if e.kind == playerEntity {
+		view.CharacterClass = s.playerEntityClass(e)
+	}
 	if e.kind == monsterEntity || e.kind == companionEntity {
 		view.EffectIDs = sortedUniqueStrings(append(cloneStringSlice(e.effectIDs), s.eliteAuraEffectIDs(e)...))
 	}
@@ -111,4 +114,19 @@ func (e *entity) bossPhaseView() *BossPhaseView {
 		StartedTick:   e.bossPhaseStarted,
 		DurationTicks: int(e.bossPhaseEnds - e.bossPhaseStarted),
 	}
+}
+
+// playerEntityClass reads the owning member's class from live progression so
+// co-op partners render as their own hero. Player entity ids are PlayerIDs. The
+// active member's progression lives in s.progression (playerState.Progression
+// is only refreshed by savePlayer); every other member's lives on its
+// playerState.
+func (s *Sim) playerEntityClass(e *entity) string {
+	if e.id == s.playerID {
+		return s.progression.CharacterClass
+	}
+	if ps := s.players[e.id]; ps != nil {
+		return ps.Progression.CharacterClass
+	}
+	return ""
 }

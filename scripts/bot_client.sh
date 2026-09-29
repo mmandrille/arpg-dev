@@ -303,6 +303,7 @@ start_preflight() {
     --seed "$seed" \
     --email "$host_email" \
     --character-name "Join Host" \
+    --character-class "$(json_field "$scenario_path" "d.get('preflight', {}).get('character_class', '')")" \
     --metadata-file "$metadata_file" \
     >"$log_file" 2>&1 &
   pid=$!

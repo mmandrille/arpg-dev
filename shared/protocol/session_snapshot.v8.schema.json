@@ -91,6 +91,7 @@
         "monster_pack_id": { "type": "string" },
         "monster_pack_leader": { "type": "boolean" },
         "character_id": { "$ref": "#/$defs/prefixed_id" },
+        "character_class": { "type": "string", "minLength": 1 },
         "item_def_id": { "type": "string" },
         "amount": { "type": "integer", "minimum": 1 },
         "item_template_id": { "type": "string" },

@@ -261,6 +261,7 @@ v480_* = member-join-tick
 v481_* = recorded-tick-checkpoints
 v482_* = cc0-beasts
 v483_* = armor-look
+v485_* = remote-player-class
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

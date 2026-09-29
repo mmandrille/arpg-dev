@@ -95,7 +95,7 @@ skill_points_and_magic_bolt: level to 5 → learn Magic Bolt at baseline Magic 5
 client_skill_points_and_magic_bolt: headless Godot client opens skill panel → proves baseline Magic 5 availability and rank 2 Magic 8 gating → observes skill bar cooldown and recovery
 rage_and_heal_skills: level to the second skill-point grant → learn Rage and Heal → cast Rage → fresh heal_lab session casts Heal and proves skill-sourced healing
 menu_create_join_flow: Join Game empty state → Settings Create Game Type Solo → solo Create Game → existing-character fresh session
-join_game_listed_session: protocol host holds active listed co-op session → Godot guest joins via Join Game → remote host visible
+join_game_listed_session: rogue protocol host holds active listed co-op session → sorcerer Godot guest joins via Join Game → remote host visible and rendered as rogue, local hero as sorcerer (v485)
 coop_rewards_and_scaling: compact three-account co-op → nearby host/guest share full XP → out-of-range guest excluded → replay/fresh persistence; different-level exclusion stays in lower-level tests
 gold_autopickup_shared_loot: compact co-op loot lab → shared floor gold race → lowest player id wins private wallet update → item loot still requires click
 account_stash_storage: acquire dungeon loot/gold → open town stash → deposit/withdraw item and gold → replay/reconnect/state/fresh session persistence

@@ -17,6 +17,7 @@ const STEP_TYPES_ASSERT := BotStepCatalogScript.STEP_TYPES_ASSERT
 const STEP_TYPES_ACTION := BotStepCatalogScript.STEP_TYPES_ACTION
 const WAIT_LOG_INTERVAL_S := BotStepCatalogScript.WAIT_LOG_INTERVAL_S
 const ALL_STEP_TYPES := BotStepCatalogScript.ALL_STEP_TYPES
+const BotRemotePlayerAssertionsScript := preload("res://scripts/bot_remote_player_assertions.gd")
 
 var scenario: Dictionary = {}
 var step_delay_s: float = 0.0  # pause after each completed step (visual mode)
@@ -1526,12 +1527,7 @@ func _expected_session_id(step: Dictionary) -> String:
 
 
 func _remote_player_count_matches(step: Dictionary, state: Dictionary) -> bool:
-	var remote_ids: Array = state.get("remote_player_ids", [])
-	if step.has("equals") and remote_ids.size() != int(step.get("equals", 0)):
-		return false
-	if step.has("at_least") and remote_ids.size() < int(step.get("at_least", 0)):
-		return false
-	return step.has("equals") or step.has("at_least")
+	return BotRemotePlayerAssertionsScript.matches(step, state)
 
 
 func _advance(completed_type: String = "") -> void:

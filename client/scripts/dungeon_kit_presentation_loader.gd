@@ -65,3 +65,24 @@ static func floor_config() -> Dictionary:
 static func legacy_disabled(feature: String) -> bool:
 	ensure_loaded()
 	return bool((_config.get("disable_legacy", {}) as Dictionary).get(feature, false))
+
+
+static func torch_config() -> Dictionary:
+	ensure_loaded()
+	return (_config.get("torch", {}) as Dictionary).duplicate(true)
+
+
+static func chest_config() -> Dictionary:
+	ensure_loaded()
+	return (_config.get("chest", {}) as Dictionary).duplicate(true)
+
+
+## Props (torches/chests) follow the global kit flag plus their own catalog flag.
+static func prop_enabled(prop: String) -> bool:
+	ensure_loaded()
+	var enabled := bool(_config.get("enabled", false))
+	if enabled_override == "on":
+		enabled = true
+	elif enabled_override == "off":
+		enabled = false
+	return enabled and bool((_config.get(prop, {}) as Dictionary).get("enabled", false))

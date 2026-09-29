@@ -655,6 +655,42 @@
         "license": "CC0-1.0",
         "sha256": "4dd8a74dc00c2272957938f1612c730e06bfddca7a9d9cdc6f316594d4a0f3cf"
       }
+    },
+    "kaykit_dungeon_torch_mounted_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/torch_mounted.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/torch_mounted.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "a617c159e02932db48ca81ec46f1f100acc8904fb6ece43e919d2f93c13950e9"
+      }
+    },
+    "kaykit_dungeon_chest_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/chest.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/chest.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "f72fd2201cd42ad399928a0b7bcc34d5b0e6d0624aeaf824fef81852109955f8"
+      }
+    },
+    "kaykit_dungeon_chest_gold_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/chest_gold.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/chest_gold.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "04708d5f88ed59d361c8a6cec1efe8b7028dbc641dfae0a1467f272e14a94b6e"
+      }
     }
   }
 }

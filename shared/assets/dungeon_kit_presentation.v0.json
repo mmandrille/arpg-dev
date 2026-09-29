@@ -22,6 +22,20 @@
       { "asset_id": "kaykit_dungeon_floor_tile_small_weeds_a_v0", "weight": 1 }
     ]
   },
+  "torch": {
+    "enabled": true,
+    "asset_id": "kaykit_dungeon_torch_mounted_v0",
+    "flame_offset": { "x": 0.0, "y": 0.52, "z": 0.36 },
+    "flame_scale": 0.55
+  },
+  "chest": {
+    "enabled": true,
+    "asset_id": "kaykit_dungeon_chest_v0",
+    "elite_objective_asset_id": "kaykit_dungeon_chest_gold_v0",
+    "lid_node": "chest_lid",
+    "elite_objective_lid_node": "chest_gold_lid",
+    "scale": 0.72
+  },
   "disable_legacy": {
     "rounded_corners": true,
     "surface_details": true

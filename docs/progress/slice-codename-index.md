@@ -246,7 +246,11 @@ v455_* = combat-skill-budget
 v456_* = six-player-boss-combat-soak
 v457_* = live-combat-transport-stability
 v465_* = combat-impact-confirmation
+v469_* = art-baseline-kit-verification
+v470_* = render-baseline
+v471_* = dungeon-kit-walls-floors
 v472_* = room-corridor-anchor-fallback
+v473_* = dungeon-kit-props
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

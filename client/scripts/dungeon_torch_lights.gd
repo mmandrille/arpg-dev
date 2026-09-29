@@ -4,6 +4,8 @@ extends RefCounted
 
 const PlacementScript := preload("res://scripts/dungeon_torch_placement.gd")
 const LoaderScript := preload("res://scripts/dungeon_torch_presentation_loader.gd")
+const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
+const DungeonKitPropsScript := preload("res://scripts/dungeon_kit_props.gd")
 
 var _parent: Node3D
 var _root: Node3D
@@ -25,7 +27,10 @@ func sync(level: int, walls: Array, dungeon_active: bool) -> void:
 	LoaderScript.ensure_loaded()
 	var cfg := LoaderScript.config()
 	var should_show := dungeon_active and level < 0 and bool(cfg.get("enabled", true))
-	var placements := PlacementScript.placements_from_walls(walls, cfg, level) if should_show else []
+	var mounts := PlacementScript.mounts_from_walls(walls, cfg, level) if should_show else []
+	var placements: Array = []
+	for mount in mounts:
+		placements.append((mount as Dictionary)["position"])
 	_ensure_root()
 	if placements.size() == _positions.size() and should_show == _active:
 		var same := true
@@ -45,8 +50,10 @@ func sync(level: int, walls: Array, dungeon_active: bool) -> void:
 		return
 	var wall_height := _mount_wall_height()
 	var mount_height := wall_height * float(cfg.get("mount_height_fraction", 0.72))
-	for i in placements.size():
-		_spawn_torch(i, placements[i] as Vector2, mount_height, cfg)
+	var kit := DungeonKitLoaderScript.prop_enabled("torch") and DungeonKitLoaderScript.active_for_level(level)
+	for i in mounts.size():
+		var mount: Dictionary = mounts[i]
+		_spawn_torch(i, mount["position"] as Vector2, mount_height, cfg, mount["facing"] as Vector2 if kit else Vector2.ZERO)
 	if _fog_overlay != null:
 		_fog_overlay.set_torch_lights(
 			placements,
@@ -92,12 +99,16 @@ func _clear_torches() -> void:
 		child.queue_free()
 
 
-func _spawn_torch(index: int, xz: Vector2, mount_height: float, cfg: Dictionary) -> void:
+## `kit_facing` != ZERO swaps the procedural bracket for the oriented KayKit torch body (ADR-0018 P2b).
+func _spawn_torch(index: int, xz: Vector2, mount_height: float, cfg: Dictionary, kit_facing: Vector2 = Vector2.ZERO) -> void:
 	if _root == null:
 		return
 	var torch := Node3D.new()
 	torch.name = "Torch_%03d" % index
 	torch.position = Vector3(xz.x, mount_height, xz.y)
+	var kit_body: Node3D = DungeonKitPropsScript.make_torch_body(kit_facing) if kit_facing != Vector2.ZERO else null
+	if kit_body != null:
+		torch.add_child(kit_body)
 	var flame_color := Color(str(cfg.get("flame_color", "#ff7a1a")))
 	var emission_color := Color(str(cfg.get("flame_emission_color", "#ffd45a")))
 	var emission_energy := float(cfg.get("flame_emission_energy", 2.4))
@@ -113,7 +124,10 @@ func _spawn_torch(index: int, xz: Vector2, mount_height: float, cfg: Dictionary)
 	bracket_mat.roughness = 0.95
 	bracket.material_override = bracket_mat
 	bracket.position = Vector3(0.0, -bh * 0.4, 0.0)
-	torch.add_child(bracket)
+	if kit_body == null:
+		torch.add_child(bracket)
+	else:
+		bracket.free()
 	var fr_top := float(cfg.get("flame_radius_top", 0.16))
 	var fr_bot := float(cfg.get("flame_radius_bottom", 0.22))
 	var fh := float(cfg.get("flame_height", 0.50))
@@ -131,6 +145,9 @@ func _spawn_torch(index: int, xz: Vector2, mount_height: float, cfg: Dictionary)
 	flame_mat.emission_energy_multiplier = emission_energy
 	flame.material_override = flame_mat
 	flame.position = Vector3(0.0, fh * 0.25, 0.0)
+	if kit_body != null:
+		flame.position = DungeonKitPropsScript.flame_offset(kit_facing)
+		flame.scale = Vector3.ONE * DungeonKitPropsScript.flame_scale()
 	torch.add_child(flame)
 	if bool(cfg.get("omni_light_enabled", false)):
 		var light := OmniLight3D.new()
@@ -139,7 +156,7 @@ func _spawn_torch(index: int, xz: Vector2, mount_height: float, cfg: Dictionary)
 		light.light_energy = float(cfg.get("omni_energy", 0.85))
 		light.omni_range = float(cfg.get("omni_range", 5.0))
 		light.omni_attenuation = 1.8
-		light.position = Vector3(0.0, 0.12, 0.0)
+		light.position = flame.position + Vector3(0.0, 0.12, 0.0)
 		torch.add_child(light)
 	_root.add_child(torch)
 

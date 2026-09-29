@@ -290,6 +290,7 @@ def validate(root: Path, report: Report) -> None:
         kit = load(kit_path)
         kit_ids = [kit["wall"]["full_asset_id"], kit["wall"]["half_asset_id"], kit["column"]["asset_id"]]
         kit_ids += [v["asset_id"] for v in kit["floor"]["variants"]]
+        kit_ids += [kit["torch"]["asset_id"], kit["chest"]["asset_id"], kit["chest"]["elite_objective_asset_id"]]
         for asset_id in kit_ids:
             entry = assets.get(asset_id)
             if entry is None or entry.get("type") != "environment":

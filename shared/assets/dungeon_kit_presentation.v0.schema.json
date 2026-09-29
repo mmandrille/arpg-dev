@@ -4,7 +4,7 @@
   "title": "Dungeon kit presentation (v0)",
   "description": "Client-only KayKit dungeon piece selection for walls, columns and floors (ADR-0018 P2).",
   "type": "object",
-  "required": ["version", "enabled", "min_dungeon_depth", "wall", "column", "floor", "disable_legacy"],
+  "required": ["version", "enabled", "min_dungeon_depth", "wall", "column", "floor", "torch", "chest", "disable_legacy"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
@@ -47,6 +47,35 @@
             }
           }
         }
+      }
+    },
+    "torch": {
+      "type": "object",
+      "required": ["enabled", "asset_id", "flame_offset", "flame_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "asset_id": { "$ref": "#/$defs/asset_id" },
+        "flame_offset": {
+          "type": "object",
+          "required": ["x", "y", "z"],
+          "additionalProperties": false,
+          "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }
+        },
+        "flame_scale": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "chest": {
+      "type": "object",
+      "required": ["enabled", "asset_id", "elite_objective_asset_id", "lid_node", "elite_objective_lid_node", "scale"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "asset_id": { "$ref": "#/$defs/asset_id" },
+        "elite_objective_asset_id": { "$ref": "#/$defs/asset_id" },
+        "lid_node": { "type": "string", "minLength": 1 },
+        "elite_objective_lid_node": { "type": "string", "minLength": 1 },
+        "scale": { "type": "number", "exclusiveMinimum": 0 }
       }
     },
     "disable_legacy": {

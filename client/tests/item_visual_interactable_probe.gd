@@ -16,7 +16,9 @@ func verify_chest_models(tree: SceneTree, fail: Callable) -> bool:
 		fail.call("town stash did not use fortified chest model")
 		main.free()
 		return false
-	if chest == null or chest.name != "TreasureChest" or chest.find_child("ChestLockPlate", true, false) == null:
+	# ADR-0018 P2b kit chests carry their lock in the model; the procedural fallback keeps ChestLockPlate.
+	var has_chest_model := chest != null and (chest.has_meta("kit_chest") or chest.find_child("ChestLockPlate", true, false) != null)
+	if chest == null or chest.name != "TreasureChest" or not has_chest_model:
 		fail.call("treasure chest did not use chest model")
 		stash.free()
 		main.free()

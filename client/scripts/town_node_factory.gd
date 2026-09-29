@@ -5,11 +5,17 @@ const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const DoorPresentationScript := preload("res://scripts/door_presentation.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 const InteractableRulesLoaderScript := preload("res://scripts/interactable_rules_loader.gd")
+const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
+const DungeonKitPropsScript := preload("res://scripts/dungeon_kit_props.gd")
 
 static func make_door_node() -> Node3D:
 	return DoorPresentationScript.make_door_node()
 
 static func make_chest_node(def_id: String, elite_objective: bool = false, quest_reward: bool = false) -> Node3D:
+	if def_id == "treasure_chest" and DungeonKitLoaderScript.prop_enabled("chest"):
+		var kit_chest := DungeonKitPropsScript.make_chest_node(def_id, elite_objective, quest_reward)
+		if kit_chest != null:
+			return kit_chest
 	var is_stash := def_id == "town_stash"
 	var is_unique_test := def_id == "town_unique_chest"
 	var root := Node3D.new()

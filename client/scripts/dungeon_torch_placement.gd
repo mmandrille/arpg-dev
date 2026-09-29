@@ -6,6 +6,15 @@ const HeroVisibilityFieldScript := preload("res://scripts/hero_visibility_field.
 
 
 static func placements_from_walls(walls: Array, cfg: Dictionary, level: int = -1) -> Array:
+	var positions: Array = []
+	for mount in mounts_from_walls(walls, cfg, level):
+		positions.append((mount as Dictionary)["position"])
+	return positions
+
+
+## Mount points with the unit direction (x, z) from the wall toward the room, used to orient
+## wall-mounted torch models (ADR-0018 P2b). Same selection/sampling as placements_from_walls.
+static func mounts_from_walls(walls: Array, cfg: Dictionary, level: int = -1) -> Array:
 	if not bool(cfg.get("enabled", true)):
 		return []
 	var segment_tiles := maxf(1.0, float(cfg.get("wall_segment_tiles", 10.0)))
@@ -72,7 +81,7 @@ static func _torches_for_wall(
 			var t := (float(slot_idx) + 1.0) / float(torch_count + 1)
 			var along := lerpf(chunk_start, chunk_end, t)
 			var mount := _mount_point(cx, cy, sx, sy, horizontal, along, inset, floor_center)
-			out.append(mount)
+			out.append({"position": mount, "facing": _mount_facing(cx, cy, horizontal, floor_center)})
 
 	return out
 
@@ -93,6 +102,12 @@ static func _mount_point(
 
 	var x := cx + (inset if cx <= floor_center.x else -inset)
 	return Vector2(x, cy + along)
+
+
+static func _mount_facing(cx: float, cy: float, horizontal: bool, floor_center: Vector2) -> Vector2:
+	if horizontal:
+		return Vector2(0.0, 1.0 if cy <= floor_center.y else -1.0)
+	return Vector2(1.0 if cx <= floor_center.x else -1.0, 0.0)
 
 
 static func _deterministic_torch_count(wall_id: String, chunk_idx: int, level: int, min_count: int, max_count: int) -> int:

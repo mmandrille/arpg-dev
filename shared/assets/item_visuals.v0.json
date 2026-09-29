@@ -330,8 +330,8 @@
       "local_transform": {
         "position": {
           "x": 0,
-          "y": 0,
-          "z": 0
+          "y": 0.017,
+          "z": 0.156
         },
         "rotation_degrees": {
           "x": 0,
@@ -773,8 +773,8 @@
       "local_transform": {
         "position": {
           "x": 0,
-          "y": 0,
-          "z": 0
+          "y": 0.017,
+          "z": 0.156
         },
         "rotation_degrees": {
           "x": 0,
@@ -1071,8 +1071,8 @@
       "local_transform": {
         "position": {
           "x": 0,
-          "y": 0,
-          "z": 0
+          "y": 0.017,
+          "z": 0.156
         },
         "rotation_degrees": {
           "x": 0,
@@ -1294,8 +1294,8 @@
       "local_transform": {
         "position": {
           "x": 0,
-          "y": 0,
-          "z": 0
+          "y": 0.017,
+          "z": 0.156
         },
         "rotation_degrees": {
           "x": 0,

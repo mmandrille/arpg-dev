@@ -70,6 +70,7 @@ func (s *Sim) AddGuestPlayer(accountID, characterID, displayName string, progres
 		Role:                  "guest",
 		Connected:             true,
 		CurrentLevel:          townLevel,
+		JoinedTick:            s.tick,
 		Equipped:              equipped,
 		WeaponSets:            cloneWeaponSetMaps(weaponSets),
 		ActiveWeaponSet:       defaultWeaponSet,
@@ -177,6 +178,17 @@ func (s *Sim) PlayerIDForCharacter(characterID string) (uint64, bool) {
 func ParseEntityID(id string) (uint64, bool) {
 	n, err := strconv.ParseUint(id, 10, 64)
 	return n, err == nil
+}
+
+// PlayerJoinedTick returns the tick before which the player entity was added.
+// Replay re-adds late members at exactly this tick, so runners must persist it
+// as session_members.joined_tick instead of sampling the tick later.
+func (s *Sim) PlayerJoinedTick(playerID uint64) (uint64, bool) {
+	ps := s.players[playerID]
+	if ps == nil {
+		return 0, false
+	}
+	return ps.JoinedTick, true
 }
 
 func (s *Sim) RemovePlayerEntity(playerID uint64) {

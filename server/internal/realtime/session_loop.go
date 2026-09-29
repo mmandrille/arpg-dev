@@ -35,6 +35,7 @@ type sessionLoop struct {
 	done           chan struct{}
 	closeOnce      sync.Once
 	perfDebug      bool
+	loadShed       loadShedPolicy
 	lastPerfLog    time.Time
 	lastPerfStatus time.Time
 
@@ -244,74 +245,13 @@ func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member s
 	}
 	l.mu.Lock()
 	l.clients[client.key] = client
-	isCoopMember := isCoopSession(l.sess) ||
-		member.AccountID != l.sess.AccountID ||
-		member.CharacterID != l.sess.CharacterID
-	currentLevel, _ := l.sim.PlayerCurrentLevel(playerID)
-	if (isCoopMember || playerID != l.sim.DefaultPlayerID()) && (!member.Connected || member.CurrentLevel != 0 || currentLevel != 0 || !l.sim.PlayerConnected(playerID)) {
-		if err := l.sim.RespawnPlayerInTown(playerID); err != nil {
-			l.log.Error("respawn reconnecting player", "player_id", playerID, "error", err)
-		}
-	}
-	if level, ok := l.sim.PlayerCurrentLevel(playerID); ok {
-		_ = l.hub.store.SetSessionMemberConnected(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), level, int64(l.sim.CurrentTick()))
-		l.sim.SetPlayerConnected(playerID, true)
-	}
+	l.admitMemberLocked(member, playerID)
 	l.mu.Unlock()
 	l.hub.metrics.WSConnections.Inc()
 	go client.writeLoop()
 	go client.readLoop()
 	client.enqueue(l.snapshotEnvelope(playerID))
 	l.broadcastSnapshots()
-}
-
-func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.SessionMember) uint64 {
-	if id, ok := game.ParseEntityID(member.PlayerEntityID); ok && id != 0 {
-		l.mu.Lock()
-		_, exists := l.sim.PlayerCurrentLevel(id)
-		l.mu.Unlock()
-		if exists {
-			return id
-		}
-	}
-	l.mu.Lock()
-	if playerID, ok := l.sim.PlayerIDForCharacter(member.CharacterID); ok {
-		l.mu.Unlock()
-		return playerID
-	}
-	l.mu.Unlock()
-
-	start, err := l.hub.store.LoadSessionStartSnapshotForMember(ctx, member.SessionID, member.AccountID, member.CharacterID)
-	if err != nil {
-		l.log.Error("load late-joined member start snapshot", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
-		return l.sim.DefaultPlayerID()
-	}
-
-	l.mu.Lock()
-	if playerID, ok := l.sim.PlayerIDForCharacter(member.CharacterID); ok {
-		l.mu.Unlock()
-		return playerID
-	}
-	playerID, err := l.sim.AddGuestPlayer(member.AccountID, member.CharacterID, displayNameForMember(member), progressionStateFromStore(l.hub.rules, start.Progression))
-	if err != nil {
-		l.mu.Unlock()
-		l.log.Error("add late-joined guest player", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
-		return l.sim.DefaultPlayerID()
-	}
-	l.sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
-	l.sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
-	l.sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
-	l.sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
-	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
-	l.sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
-	l.sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
-	l.sim.LoadAccountResourceBagForPlayer(playerID, persistedResourceBagItems(start.ResourceBagItems))
-	l.hub.loadCharacterCorpses(context.Background(), l.log, l.sim, member)
-	l.mu.Unlock()
-	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
-		l.log.Error("set late-joined member player", "account_id", member.AccountID, "character_id", member.CharacterID, "player_id", playerID, "error", err)
-	}
-	return playerID
 }
 
 func (l *sessionLoop) detach(client *loopClient) {

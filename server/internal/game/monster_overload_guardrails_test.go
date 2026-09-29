@@ -27,7 +27,7 @@ func TestOverloadDegradationDefersOnlyLowPriorityMovement(t *testing.T) {
 	if lowPriority == nil || highPrecision == nil {
 		t.Fatalf("need low and high precision monsters, got low=%v high=%v", lowPriority != nil, highPrecision != nil)
 	}
-	if !sim.ApplyOverloadDegradation() || !sim.overloadDegraded() {
+	if !sim.applyOverloadDegradation() || !sim.overloadDegraded() {
 		t.Fatal("overload degradation did not activate")
 	}
 	if sim.monsterMovementLODAllowsTick(lowPriority) {

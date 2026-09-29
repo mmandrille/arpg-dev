@@ -10,9 +10,10 @@ func CombatPhaseBudgetForTick() time.Duration {
 	return defaultCombatPhaseBudget
 }
 
-// SetCombatMovementThrottle records whether monster movement should defer
+// setCombatMovementThrottle records whether monster movement should defer
 // low-priority monsters on the next tick (overload or combat phase pressure).
-func (s *Sim) SetCombatMovementThrottle(active bool) {
+// Runtime callers reach it only through ApplyLoadShed.
+func (s *Sim) setCombatMovementThrottle(active bool) {
 	s.combatMovementThrottled = active
 }
 

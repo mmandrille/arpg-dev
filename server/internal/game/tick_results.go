@@ -10,6 +10,7 @@ func (s *Sim) TickResults(inputs []Input) []TickResult {
 func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickResult {
 	s.resetTickPerf()
 	s.resetSkillBudgetCounters()
+	inputs, loadShed := splitLoadShedInputs(inputs)
 	inputs = s.prependDeferredSkillInputs(inputs)
 	previousProfiler := s.tickProfiler
 	s.tickProfiler = profiler
@@ -93,5 +94,9 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 		}
 	}
 
-	return ctx.finalizeResults()
+	results := ctx.finalizeResults()
+	for _, d := range loadShed {
+		s.ApplyLoadShed(d)
+	}
+	return results
 }

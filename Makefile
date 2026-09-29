@@ -17,12 +17,22 @@ ADDR ?= :8888
 BASE_URL ?= http://localhost:8888
 PLAY_ADDR ?= $(ADDR)
 PLAY_BASE_URL ?= $(BASE_URL)
-TEST_ADDR ?= :18081
-TEST_BASE_URL ?= http://localhost:18081
+# CI/bot/benchmark start their own server. Empty ADDR/BASE_URL = kernel-picked
+# free port + pid-verified readiness (scripts/server_helpers.sh), so concurrent
+# worktrees never collide. Set CI_ADDR/BOT_ADDR (or TEST_ADDR) to pin a port.
+TEST_ADDR ?=
+TEST_BASE_URL ?=
 CI_ADDR ?= $(TEST_ADDR)
 CI_BASE_URL ?= $(TEST_BASE_URL)
 BOT_ADDR ?= $(TEST_ADDR)
 BOT_BASE_URL ?= $(TEST_BASE_URL)
+# client-smoke targets an already-running server, so it keeps a fixed default.
+SMOKE_BASE_URL ?= $(or $(TEST_BASE_URL),http://localhost:18081)
+# Per-checkout database for CI/bot/benchmark runs (scripts/test_db.sh); `make
+# play`/`make server` keep using DATABASE_URL.
+ifeq ($(origin TEST_DATABASE_URL),undefined)
+TEST_DATABASE_URL := $(shell $(ROOT)/scripts/test_db.sh url)
+endif
 DEV_TOKEN ?= local-dev-token
 DEBUG_TOKEN ?= local-debug-token
 GODOT ?= godot
@@ -48,7 +58,9 @@ help: ## List available commands
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  Output: make test/ci/bot/test-all/client-* are quiet by default. Use VERBOSE=1 (or V=1) for full logs."
-	@echo "  Ports: make play defaults to $(PLAY_BASE_URL); CI/bot defaults to $(TEST_BASE_URL). Override with PLAY_ADDR/PLAY_BASE_URL or CI_ADDR/CI_BASE_URL/BOT_ADDR/BOT_BASE_URL."
+	@echo "  Ports: make play defaults to $(PLAY_BASE_URL). CI/bot/benchmark bind a free per-run port (safe across worktrees);"
+	@echo "         pin one with CI_ADDR/CI_BASE_URL or BOT_ADDR/BOT_BASE_URL. client-smoke targets $(SMOKE_BASE_URL)."
+	@echo "  DB:    CI/bot/benchmark use this checkout's own test DB (make test-db-url); play/server use $(DATABASE_URL)."
 
 .PHONY: skill-visual
 skill-visual: ## Run a bot-visual replay for a skill: make skill-visual skill=holy_shield rank=1

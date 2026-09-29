@@ -33,13 +33,11 @@ cd "$ROOT"
 source "$ROOT/scripts/quiet_helpers.sh"
 # shellcheck source=godot_ci_flags.sh
 source "$ROOT/scripts/godot_ci_flags.sh"
+# shellcheck source=server_helpers.sh
+source "$ROOT/scripts/server_helpers.sh"
 
-DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
-if [[ -n "${ARPG_ADDR:-}" ]]; then
-  ADDR="$ARPG_ADDR"
-else
-  ADDR=":0"
-fi
+DATABASE_URL="${ARPG_DATABASE_URL:-$("$ROOT/scripts/test_db.sh" url)}"
+ADDR="${ARPG_ADDR:-}"
 BASE_URL="${BASE_URL:-}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-${DEV_TOKEN:-local-dev-token}}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
@@ -109,7 +107,9 @@ echo "[benchmark] building server..."
 SERVER_BIN="$(mktemp -t arpg-benchmark-server.XXXXXX)"
 "$RUN_QUIET" --label "go build arpg-server" -- bash -c "cd server && go build -o \"$SERVER_BIN\" ./cmd/arpg-server"
 
-echo "[benchmark] starting server with ARPG_PERF_DEBUG=1 (log: $SERVER_LOG)..."
+"$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL"
+arpg_resolve_server_addr
+echo "[benchmark] starting server on $ADDR db=$(arpg_db_name "$DATABASE_URL") with ARPG_PERF_DEBUG=1 (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
   ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
   ARPG_GAMEPLAY_DEBUG=true \
@@ -119,48 +119,7 @@ ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
 SERVER_PID=$!
 
 echo "[benchmark] waiting for server readiness..."
-if [[ -z "$BASE_URL" && "$ADDR" == ":0" ]]; then
-  for i in $(seq 1 60); do
-    if [[ -s "$SERVER_LOG" ]]; then
-      PORT="$(python3 - "$SERVER_LOG" <<'PY'
-import json, re, sys
-for line in open(sys.argv[1], encoding="utf-8"):
-    try:
-        data = json.loads(line)
-    except json.JSONDecodeError:
-        continue
-    if data.get("message") != "server listening":
-        continue
-    m = re.search(r":([0-9]+)$", str(data.get("addr", "")))
-    if m:
-        print(m.group(1))
-        raise SystemExit(0)
-raise SystemExit(1)
-PY
-)" && break
-    fi
-    if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-      echo "[benchmark] server exited early; log:"
-      show_log "$SERVER_LOG" "server"
-      exit 1
-    fi
-    sleep 0.1
-  done
-  BASE_URL="http://localhost:${PORT:?}"
-elif [[ -z "$BASE_URL" ]]; then
-  BASE_URL="http://localhost:${ADDR#:}"
-fi
-
-for i in $(seq 1 60); do
-  if curl -fsS "${BASE_URL%/}/readyz" >/dev/null 2>&1; then break; fi
-  if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-    echo "[benchmark] server exited early; log:"
-    show_log "$SERVER_LOG" "server"
-    exit 1
-  fi
-  sleep 1
-done
-curl -fsS "${BASE_URL%/}/readyz" >/dev/null
+arpg_wait_own_server "benchmark"
 
 # ── 2. Enumerate benchmark scenarios ─────────────────────────────────────────
 

@@ -10,10 +10,14 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 # shellcheck source=quiet_helpers.sh
 source "$ROOT/scripts/quiet_helpers.sh"
+# shellcheck source=server_helpers.sh
+source "$ROOT/scripts/server_helpers.sh"
 
-DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
-ADDR="${ARPG_ADDR:-:8888}"
-BASE_URL="${BASE_URL:-http://localhost:8888}"
+# Per-checkout DB + kernel-picked port by default so concurrent worktrees never
+# share bot accounts or talk to each other's server (see server_helpers.sh).
+DATABASE_URL="${ARPG_DATABASE_URL:-$("$ROOT/scripts/test_db.sh" url)}"
+ADDR="${ARPG_ADDR:-}"
+BASE_URL="${BASE_URL:-}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-local-dev-token}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-local-debug-token}"
 GAMEPLAY_DEBUG="${ARPG_GAMEPLAY_DEBUG:-true}"
@@ -307,6 +311,11 @@ ci_step "== 4/11 asset manifest + GLB validation ==" \
 ci_step "== 5/11 determinism lint ==" \
   "$RUN_QUIET" --label "determinism-lint" -- make lint-determinism
 
+# Store integration tests use ARPG_DATABASE_URL; create this checkout's test DB
+# up front when Postgres is already running (otherwise they skip, as before).
+"$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL" >/dev/null 2>&1 || true
+export ARPG_DATABASE_URL="$DATABASE_URL"
+
 ci_step "== 6/11 Go tests + vet ==" \
   "$RUN_QUIET" --label "go test ./... && go vet ./..." -- bash -c 'cd server && go test ./... && go vet ./...'
 
@@ -319,10 +328,10 @@ start_server() {
   begin_step "== 8/11 start Postgres + server =="
   set +e
 
-  make db-up
+  make db-up && "$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL"
   local db_status=$?
   if [[ $db_status -ne 0 ]]; then
-    echo "FAILED: make db-up"
+    echo "FAILED: make db-up / test database"
     finish_step_failed
     set +e
     FAILED_STEPS+=("== 8/11 start Postgres + server ==")
@@ -340,21 +349,19 @@ start_server() {
     return 1
   fi
 
+  if ! arpg_resolve_server_addr; then
+    finish_step_failed
+    FAILED_STEPS+=("== 8/11 start Postgres + server ==")
+    return 1
+  fi
   ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
     ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
     ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
     ARPG_RULES_DIR="$ROOT/shared/rules" \
     "$SERVER_BIN" >"$SERVER_LOG" 2>&1 &
   SERVER_PID=$!
-  echo "server pid=$SERVER_PID (log: $SERVER_LOG); waiting for readiness..."
-  for i in $(seq 1 60); do
-    if curl -fsS "$BASE_URL/readyz" >/dev/null 2>&1; then break; fi
-    sleep 1
-  done
-
-  if ! curl -fsS "$BASE_URL/readyz" >/dev/null 2>&1; then
-    echo "server failed readiness check; log:"
-    show_log "$SERVER_LOG" "server"
+  echo "server pid=$SERVER_PID addr=$ADDR db=$(arpg_db_name "$DATABASE_URL") (log: $SERVER_LOG); waiting for readiness..."
+  if ! arpg_wait_own_server "ci" 90; then
     finish_step_failed
     set +e
     FAILED_STEPS+=("== 8/11 start Postgres + server ==")

@@ -16,8 +16,8 @@ endif
 client-unit: ## Run Godot headless unit tests (quiet; VERBOSE=1 for full logs)
 	GODOT="$(GODOT)" CLIENT_UNIT_ONLY=1 ./scripts/client_smoke.sh
 
-client-smoke: ## Run Godot headless smoke against TEST_BASE_URL (default :18081; use ARPG_ADDR=:18081 make server)
-	GODOT="$(GODOT)" BASE_URL="$(TEST_BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" ./scripts/client_smoke.sh
+client-smoke: ## Run Godot headless smoke against SMOKE_BASE_URL (default :18081; use ARPG_ADDR=:18081 make server)
+	GODOT="$(GODOT)" BASE_URL="$(SMOKE_BASE_URL)" DEV_TOKEN="$(DEV_TOKEN)" DEBUG_TOKEN="$(DEBUG_TOKEN)" ./scripts/client_smoke.sh
 
 skill-logo-sheet: tools ## Render current skill logos and labels to an SVG image
 	@mkdir -p "$$(dirname "$(SKILL_LOGO_SHEET_OUT)")"

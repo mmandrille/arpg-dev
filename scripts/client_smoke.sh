@@ -57,8 +57,8 @@ require_running_server() {
   echo "[client-smoke] FAIL: no reachable server at BASE_URL=${BASE_URL} (/readyz)"
   if [[ "${BASE_URL}" == "http://localhost:18081" ]] \
       && curl -fsS "http://localhost:8888/readyz" >/dev/null 2>&1; then
-    echo "[client-smoke] Hint: a server is up on :8888 (make server default) but client-smoke uses TEST_BASE_URL :18081."
-    echo "[client-smoke] Either: TEST_BASE_URL=http://localhost:8888 make client-smoke"
+    echo "[client-smoke] Hint: a server is up on :8888 (make server default) but client-smoke uses SMOKE_BASE_URL :18081."
+    echo "[client-smoke] Either: make client-smoke SMOKE_BASE_URL=http://localhost:8888"
     echo "[client-smoke] Or:      make db-up && ARPG_ADDR=:18081 make server"
   else
     echo "[client-smoke] Start: make db-up && ARPG_ADDR=:18081 make server"

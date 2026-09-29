@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import struct
 import sys
 from pathlib import Path
 
@@ -30,6 +29,10 @@ from jsonschema import Draft202012Validator
 
 # tools/assets/validate_assets.py -> repo root is parents[2].
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.assets import glb_reader  # noqa: E402
 
 MANIFEST_REL = "assets/manifests/assets.v0.json"
 MANIFEST_SCHEMA_REL = "assets/manifests/assets.v0.schema.json"
@@ -68,42 +71,20 @@ def parse_glb_skin_joint_names(path: Path) -> set[str] | None:
     is what proves the GLB is skinned (spec §6), not a v2 socket placeholder.
     """
     try:
-        data = path.read_bytes()
-        if len(data) < 20 or data[0:4] != b"glTF":
-            return None
-        chunk_len, chunk_type = struct.unpack_from("<II", data, 12)
-        if chunk_type != 0x4E4F534A:  # 'JSON'
-            return None
-        gltf = json.loads(data[20 : 20 + chunk_len].decode("utf-8"))
-        nodes = gltf.get("nodes", [])
-        joint_idx: set[int] = set()
-        for skin in gltf.get("skins", []):
-            joint_idx.update(skin.get("joints", []))
-        return {nodes[i]["name"] for i in joint_idx if i < len(nodes) and "name" in nodes[i]}
+        return glb_reader.skin_joint_name_set(glb_reader.load_gltf(path))
     except Exception:  # noqa: BLE001
         return None
 
 
 def parse_glb_non_unit_node_scales(path: Path, tolerance: float = 0.01) -> list[tuple[str, list[float]]]:
-    """Return [(node_name, scale)] for glTF nodes whose scale is not ~identity."""
+    """Return [(node_name, scale)] for glTF nodes whose scale is not ~identity.
+
+    An unreadable file reports one sentinel issue so the caller fails loudly.
+    """
     try:
-        data = path.read_bytes()
-        if len(data) < 20 or data[0:4] != b"glTF":
-            return []
-        chunk_len, chunk_type = struct.unpack_from("<II", data, 12)
-        if chunk_type != 0x4E4F534A:  # 'JSON'
-            return []
-        gltf = json.loads(data[20 : 20 + chunk_len].decode("utf-8"))
-        issues: list[tuple[str, list[float]]] = []
-        for node in gltf.get("nodes", []):
-            scale = node.get("scale")
-            if not isinstance(scale, list) or len(scale) != 3:
-                continue
-            if any(abs(float(value) - 1.0) > tolerance for value in scale):
-                issues.append((str(node.get("name", "?")), [float(value) for value in scale]))
-        return issues
+        return glb_reader.non_unit_node_scales(glb_reader.load_gltf(path), tolerance)
     except Exception:  # noqa: BLE001
-        return ["?", [0.0]]
+        return [("?", [0.0])]
 
 
 def sha256_of(path: Path) -> str:

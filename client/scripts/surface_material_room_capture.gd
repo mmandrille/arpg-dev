@@ -1,10 +1,13 @@
 extends SceneTree
 
+const DungeonDepthLightingScript := preload("res://scripts/dungeon_depth_lighting.gd")
 const DungeonSurfaceDetailPresentationScript := preload("res://scripts/dungeon_surface_detail_presentation.gd")
+const DungeonTorchLightsScript := preload("res://scripts/dungeon_torch_lights.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 const WallRendererScript := preload("res://scripts/wall_renderer.gd")
 
 var _output: String = ""
+var _level: int = -1
 
 
 func _initialize() -> void:
@@ -14,18 +17,26 @@ func _initialize() -> void:
 	var world := Node3D.new()
 	get_root().add_child(world)
 	var factory = GroundWallFactoryScript.new()
-	var ground := factory.make_ground_node(-1)
+	var ground := factory.make_ground_node(_level)
 	world.add_child(ground)
 	var walls_root := Node3D.new()
 	walls_root.name = "WallsRoot"
 	world.add_child(walls_root)
 	var renderer = WallRendererScript.new(walls_root, factory)
-	renderer.set_level(-1)
+	renderer.set_level(_level)
 	var walls := renderer.render_wall_layout(_sample_material_layout())
-	DungeonSurfaceDetailPresentationScript.sync(ground, walls_root, factory, -1, walls, {})
+	DungeonSurfaceDetailPresentationScript.sync(ground, walls_root, factory, _level, walls, {})
 	world.add_child(_make_camera())
-	world.add_child(_make_key_light())
-	world.add_child(_make_fill_light())
+	# Runtime lighting path (ADR-0018 D9 baseline): biome depth profile + wall torches.
+	# Key-light angle mirrors main.gd _build_scene until P1 moves it into render data.
+	var key_light := DirectionalLight3D.new()
+	key_light.rotation_degrees = Vector3(-50.0, -40.0, 0.0)
+	world.add_child(key_light)
+	var world_environment := WorldEnvironment.new()
+	world.add_child(world_environment)
+	DungeonDepthLightingScript.apply_for_level(_level, key_light, world_environment, factory)
+	var torches = DungeonTorchLightsScript.new(world, null, factory, renderer)
+	torches.sync(_level, walls, true)
 	await process_frame
 	await process_frame
 	await process_frame
@@ -53,6 +64,10 @@ func _parse_args() -> void:
 		var arg := str(args[index])
 		if arg == "--output" and index + 1 < args.size():
 			_output = _resolve_output(str(args[index + 1]))
+			index += 2
+			continue
+		if arg == "--level" and index + 1 < args.size():
+			_level = int(str(args[index + 1]))
 			index += 2
 			continue
 		index += 1
@@ -85,21 +100,3 @@ func _make_camera() -> Camera3D:
 	camera.fov = 38.0
 	camera.look_at_from_position(Vector3(12.5, 9.8, 22.0), Vector3(8.0, 1.2, 8.1), Vector3.UP)
 	return camera
-
-
-func _make_key_light() -> DirectionalLight3D:
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-50.0, 28.0, 0.0)
-	light.light_energy = 1.9
-	light.light_color = Color("#ffe1bd")
-	light.shadow_enabled = true
-	return light
-
-
-func _make_fill_light() -> OmniLight3D:
-	var light := OmniLight3D.new()
-	light.position = Vector3(8.0, 4.0, 9.5)
-	light.light_energy = 0.74
-	light.omni_range = 32.0
-	light.light_color = Color("#86a2c8")
-	return light

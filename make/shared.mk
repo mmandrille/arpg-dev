@@ -1,5 +1,5 @@
 # --- Shared contracts ---------------------------------------------------------
-.PHONY: validate-shared validate-assets gen-assets gen-anims gen-codex
+.PHONY: validate-shared validate-assets inspect-kit gen-assets gen-anims gen-codex
 validate-shared: tools ## Validate all shared JSON (protocol, rules, golden) against schemas
 	$(PY) tools/validate_shared.py
 	$(PY) tools/validate_codemap.py
@@ -9,6 +9,10 @@ gen-codex: tools ## Regenerate shared/content/codex_index.v0.json from rules/ass
 
 validate-assets: tools ## Validate the asset manifest, runtime .glb paths, and GLB nodes
 	$(PY) tools/assets/validate_assets.py
+
+inspect-kit: tools ## Read-only structure report for a model kit (KIT=<file-or-dir> [OUT=<dir>])
+	@test -n "$(KIT)" || { echo "usage: make inspect-kit KIT=<file-or-dir> [OUT=<dir>]"; exit 2; }
+	$(PY) -m tools.assets.inspect_kit $(KIT) $(if $(OUT),--out "$(OUT)",)
 
 gen-assets: tools ## Regenerate committed runtime .glb files (deterministic source-of-truth)
 	$(PY) tools/assets/class_body_morph.py generate

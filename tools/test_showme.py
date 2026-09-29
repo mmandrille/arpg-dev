@@ -29,3 +29,21 @@ def test_skeleton_focus_in_render_focus_choices() -> None:
     assert "showme_skeleton_capture.gd" in capture
     for focus in ("skill-icon", "item-icon", "item-asset"):
         assert f'"{focus}"' in script
+
+
+def test_render_focus_fails_on_gdscript_errors(tmp_path: Path) -> None:
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "render_focus", ROOT / "skills" / "showme" / "scripts" / "render_focus.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    log = tmp_path / "godot.log"
+    assert module._script_errors(log) == []
+    log.write_text(
+        "Godot Engine\nSCRIPT ERROR: Invalid call. Nonexistent function 'x'.\n   at: _setup (res://a.gd:1)\n",
+        encoding="utf-8",
+    )
+    assert module._script_errors(log) == ["SCRIPT ERROR: Invalid call. Nonexistent function 'x'."]

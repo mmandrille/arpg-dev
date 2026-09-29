@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-07-20 (v467 shared first-person equipment rig)
+Last updated: 2026-09-28 (v469 art baseline + KayKit verification, ADR-0018 P0)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-07-20 (v467 shared first-person equipment rig)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v467 — shared first-person equipment rig |
-| **Next slice** | v468 TBD |
+| **Latest completed slice** | v469 — art baseline + KayKit verification (ADR-0018 P0; `make ci` owed, see as-built) |
+| **Next slice** | v470 — ADR-0018 P1 render baseline (Forward+, shadows, tonemap, SSAO, glow, fog, AA) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 
@@ -69,6 +69,10 @@ Feed actionable findings into open gaps or the next slice briefs — reviews are
 | [0012](docs/adr/0012-item-upgrades-and-item-levels.md) | Item upgrades, item levels, and advanced dungeon resources | Proposed |
 | [0013](docs/adr/0013-mystery-seller-and-unidentified-item-offers.md) | Mystery seller with expensive unidentified equipment offers | Proposed |
 | [0014](docs/adr/0014-core-progression-and-endgame-design-rules.md) | Core progression, itemization, economy, endgame, co-op, and PvP design rules | Proposed |
+| [0015](docs/adr/0015-movement-speed-formula.md) | Player movement speed formula | Accepted (v332) |
+| [0016](docs/adr/0016-combat-processing-budget.md) | Combat processing budget | Proposed |
+| [0017](docs/adr/0017-skill-aim-and-cast-resolution.md) | Skill aim and cast resolution | Proposed |
+| [0018](docs/adr/0018-art-direction-and-kit-based-visuals.md) | Art direction: KayKit kit visuals, render baseline, armor tints, dungeon auto-tiling, screenshot gate | Accepted; P0 verification gates import |
 
 Anticipated but **not written:** netcode timing, Protobuf migration, production auth, multiplayer split,
 quest system design, NPC interaction protocol, character progression formulas
@@ -84,6 +88,16 @@ and ADR-0013.
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Active review follow-ups
+
+- **v469 environment / process gaps.**
+  - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan
+    or as-built**. It needs a closeout; v469 did not fabricate one.
+  - Local Godot is 4.7.2 while this file pins 4.6.3.
+  - macOS `/usr/bin/make` fails until `sudo xcodebuild -license` is accepted, so the v469 `make ci`
+    is still owed.
+  - Dungeon generation fails on ~2% of seed/level pairs (`could not place room-corridor layout`,
+    see [`docs/researchs/v469_kaykit-p0-findings.md`](docs/researchs/v469_kaykit-p0-findings.md)).
+    That is a progression blocker, filed as a separate task.
 
 - **v460 `$review` complete (official cadence at `e75e64d0`).** Overview:
   [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md). Run `$refactor` for minor paydown (resource-bag co-op filter, status-effects validate_shared, leveled-potion golden, `PotionIconLabel` rules-driven fix).
@@ -122,7 +136,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Testing / tooling | **Performance test topology discipline:** Python protocol bots and offline Godot replay do not prove live Godot transport stability. Use a `runner: godot_client` scenario for authoritative client failures, assert lifetime reconnect count, capture close diagnostics, and correlate backend/client phases. | v457 live combat transport stability; `docs/performance/tools.md` |
 | Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up, v76/v77/v78 deferred |
 | Settings | Controls remapping, accessibility options, language selection | v24/v224 non-goals; v351 shipped windowed/fullscreen/windowed-fullscreen display mode in `user://settings.json` |
-| Assets | Blender export pipeline, texture budget, remote patcher | ADR-0006 |
+| Assets | Blender export pipeline, remote patcher. Texture/triangle budgets measured in v469 (ADR-0018 D8); enforcement lands with the first kit import. **Before P3:** owner downloads itch.io KayKit Adventurers 2.0 (Ranger, bow) + Character Animations 1.1, then `make inspect-kit` to confirm the 1.0 41-joint rig | ADR-0006, ADR-0018 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
 | Multiplayer | Matchmaking/lobby beyond backend-listed sessions, advanced active-session filtering/pagination/load-aware capacity controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49/v164 non-goals, ADR-0001, ADR-0014 |

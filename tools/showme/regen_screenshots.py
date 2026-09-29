@@ -80,7 +80,8 @@ def main() -> int:
     out_dir = Path(args.out_dir) if args.out_dir else _default_out_dir()
     if not out_dir.is_absolute():
         out_dir = ROOT / out_dir
-    out_dir.mkdir(parents=True, exist_ok=True)
+    if not args.dry_run:
+        out_dir.mkdir(parents=True, exist_ok=True)
 
     manifest = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -92,7 +93,8 @@ def main() -> int:
     failures: list[str] = []
     for job in jobs:
         output = out_dir / job.output_rel
-        output.parent.mkdir(parents=True, exist_ok=True)
+        if not args.dry_run:
+            output.parent.mkdir(parents=True, exist_ok=True)
         ok, message = _run_capture(job, output, args.godot, args.dry_run)
         entry = {
             "suite": job.suite,

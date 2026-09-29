@@ -230,6 +230,7 @@ make regen-screenshots SUITE="skeleton gear"        # class bodies + equipped ge
 make regen-screenshots SUITE="skill-icon"           # every skill icon
 make regen-screenshots SUITE="item-icon item-icons" # per-family + grid
 make regen-screenshots SUITE="floor-item item-asset" # loot + raw 3D assets
+make regen-screenshots SUITE="scenes"               # town/monsters/props + lit dungeon room per biome
 make regen-screenshots DRY_RUN=1                    # print planned jobs only
 make regen-screenshots OUT=.artifacts/screenshots/my-run SUITE=gear
 ```
@@ -243,6 +244,15 @@ make regen-screenshots OUT=.artifacts/screenshots/my-run SUITE=gear
 | `item-icons` | `item-icons` | same families | Full icon grid overview |
 | `floor-item` | `floor-item` | `item_visuals.v0.json` | Ground loot model per item |
 | `item-asset` | `item-asset` | unique `asset_id`s in item visuals | Isolated 3D GLB load |
+| `scenes` | `town`, `monsters`, `chests`, `stairs`, `eye-view`, `heal-rain`, `dungeon-room` | `dungeon_generation.v0.json` `biome_palettes` (one `dungeon-room-<id>` per palette) | Environment, lighting, torches, props — the ADR-0018 before/after baseline |
+
+`dungeon-room` (screenshot mode only) runs `client/scripts/surface_material_room_capture.gd` with
+`--level <negative level>`; it uses the runtime `DungeonDepthLighting` + `DungeonTorchLights` path,
+so lighting changes show up in it:
+
+```bash
+python3 skills/showme/scripts/render_focus.py --focus dungeon-room --level -4
+```
 
 Output directory: `.artifacts/screenshots/<timestamp>/` with `index.json` manifest.
 Symlink `latest` points at the most recent run.

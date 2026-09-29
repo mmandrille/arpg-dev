@@ -13,6 +13,11 @@ SKILLS_REL = "shared/rules/skills.v0.json"
 ITEM_PRESENTATIONS_REL = "shared/assets/item_presentations.v0.json"
 ITEM_VISUALS_REL = "shared/assets/item_visuals.v0.json"
 ASSETS_MANIFEST_REL = "assets/manifests/assets.v0.json"
+DUNGEON_GENERATION_REL = "shared/rules/dungeon_generation.v0.json"
+
+# Existing showme scene focuses captured as-is by the scenes suite (ADR-0018 D9 baseline).
+SCENE_FOCUSES: tuple[str, ...] = ("town", "monsters", "chests", "stairs", "eye-view", "heal-rain")
+DUNGEON_ROOM_FOCUS = "dungeon-room"
 
 
 @dataclass(frozen=True)
@@ -39,6 +44,7 @@ SUITE_SPECS: dict[str, SuiteSpec] = {
     "item-icons": SuiteSpec("item-icons", "item-icons", "Grid of all item icon families"),
     "floor-item": SuiteSpec("floor-item", "floor-item", "Ground loot model per item with visuals"),
     "item-asset": SuiteSpec("item-asset", "item-asset", "Isolated 3D asset per item_visuals asset_id"),
+    "scenes": SuiteSpec("scenes", "scene", "Town/monster/prop scenes + runtime-lit dungeon room per biome"),
 }
 
 DEFAULT_SUITES: tuple[str, ...] = tuple(SUITE_SPECS.keys())
@@ -98,6 +104,24 @@ def item_asset_ids() -> list[str]:
         if asset_id:
             asset_ids.add(asset_id)
     return sorted(asset_ids)
+
+
+def biome_palette_levels() -> list[tuple[str, int]]:
+    """Return (palette_id, level) for each biome palette, at its shallowest depth."""
+    data = _read_json(DUNGEON_GENERATION_REL)
+    palettes = data.get("biome_palettes", [])
+    if not isinstance(palettes, list):
+        return []
+    levels: list[tuple[str, int]] = []
+    for palette in palettes:
+        if not isinstance(palette, dict):
+            continue
+        palette_id = str(palette.get("id", "")).strip()
+        min_depth = palette.get("min_depth")
+        if not palette_id or not isinstance(min_depth, int) or min_depth < 1:
+            continue
+        levels.append((palette_id, -min_depth))
+    return levels
 
 
 def manifest_asset_ids() -> set[str]:
@@ -182,6 +206,23 @@ def discover_jobs(suites: list[str] | None = None) -> list[CaptureJob]:
                     slug=asset_id,
                     output_rel=f"{spec.name}/{asset_id}.png",
                     extra_args=("--asset-id", asset_id),
+                ))
+        elif suite_name == "scenes":
+            for focus in SCENE_FOCUSES:
+                jobs.append(CaptureJob(
+                    suite=spec.name,
+                    focus=focus,
+                    slug=focus,
+                    output_rel=f"{spec.name}/{focus}.png",
+                ))
+            for palette_id, level in biome_palette_levels():
+                slug = f"{DUNGEON_ROOM_FOCUS}-{palette_id}"
+                jobs.append(CaptureJob(
+                    suite=spec.name,
+                    focus=DUNGEON_ROOM_FOCUS,
+                    slug=slug,
+                    output_rel=f"{spec.name}/{slug}.png",
+                    extra_args=("--level", str(level)),
                 ))
         else:
             raise ValueError(f"unhandled suite: {suite_name}")

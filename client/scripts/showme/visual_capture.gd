@@ -684,12 +684,11 @@ func _setup_stairs() -> void:
 	floor.material_override = floor_mat
 	root.add_child(floor)
 
-	var main: Node3D = MainScript.new()
-	var up := main._make_stair_node("stairs_up") as Node3D
+	var up := TownNodeFactory.make_stair_node("stairs_up")
 	up.name = "PreviewStairsUp"
 	up.position = Vector3(-1.0, 0.0, 0.0)
 	root.add_child(up)
-	var down := main._make_stair_node("stairs_down") as Node3D
+	var down := TownNodeFactory.make_stair_node("stairs_down")
 	down.name = "PreviewStairsDown"
 	down.position = Vector3(1.0, 0.0, 0.0)
 	root.add_child(down)
@@ -957,8 +956,7 @@ func _setup_town() -> void:
 	_add_light(root)
 	_add_camera(root, Vector3(20.0, 18.0, 25.0), Vector3(12.0, 0.8, 12.0), 17.5)
 
-	var main: Node3D = MainScript.new()
-	var town: Node3D = main.make_town_preview_scene()
+	var town: Node3D = TownNodeFactory.make_town_preview_scene()
 	root.add_child(town)
 	_subject = town
 

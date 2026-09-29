@@ -43,6 +43,7 @@ def main() -> int:
     parser.add_argument("--rotation-period", type=float, default=0.0, help="Seconds for one 360° rotation in live mode; defaults to --refresh when set.")
     parser.add_argument("--level", type=int, default=-1, help="Dungeon level for dungeon-room focus (negative).")
     parser.add_argument("--godot", default="godot")
+    parser.add_argument("--timeout", type=float, default=90.0, help="Seconds before a screenshot capture is killed.")
     args = parser.parse_args()
 
     output = Path(args.output) if args.output else _default_output(root, args.focus)
@@ -157,7 +158,16 @@ def main() -> int:
 
     print("[showme] running:", " ".join(cmd))
     log_file.unlink(missing_ok=True)  # never judge this run by a previous run's log
-    result = subprocess.run(cmd, cwd=root)
+    # A capture script that fails to compile never reaches quit() and leaves a frozen window;
+    # screenshot runs get a hard ceiling so failures surface instead of hanging.
+    timeout_s = None if args.mode == "live" else args.timeout
+    try:
+        result = subprocess.run(cmd, cwd=root, timeout=timeout_s)
+    except subprocess.TimeoutExpired:
+        print(f"[showme] capture timed out after {timeout_s:.0f}s (see {log_file})", file=sys.stderr)
+        for line in _script_errors(log_file)[:5]:
+            print(f"  {line}", file=sys.stderr)
+        return 1
     if result.returncode != 0:
         return result.returncode
     # Godot keeps running (and saves a frame) after GDScript errors; a capture of a

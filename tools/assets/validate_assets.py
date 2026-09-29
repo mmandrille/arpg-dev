@@ -14,6 +14,9 @@ Engine-free checks over the asset manifest and the shared visual metadata:
   6. Parse GLB skins and hard-fail unless every declared ``required_nodes``
      name is an actual skin joint. Static entries with no required nodes skip
      this rigged-skin check.
+  7. No unmanifested GLB/texture/import files under ``client/assets``.
+  8. Every asset fits its type's triangle/texture budget (ADR-0018 D8) or
+     carries a named exemption in ``asset_budgets.v0.json``.
 
 Authoritative runtime socket/visibility truth lives in the Godot headless smoke,
 not here. Exit code is non-zero if anything fails. Run via ``make validate-assets``.
@@ -33,11 +36,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.assets import glb_reader  # noqa: E402
+from tools.assets.asset_budgets import check_budgets  # noqa: E402
 
 MANIFEST_REL = "assets/manifests/assets.v0.json"
 MANIFEST_SCHEMA_REL = "assets/manifests/assets.v0.schema.json"
 ITEM_VISUALS_REL = "shared/assets/item_visuals.v0.json"
 MONSTER_VISUALS_REL = "shared/assets/monster_visuals.v0.json"
+DUNGEON_KIT_REL = "shared/assets/dungeon_kit_presentation.v0.json"
 
 
 def load(path: Path):
@@ -273,6 +278,24 @@ def validate(root: Path, report: Report) -> None:
             report.fail("orphan client asset", rel)
     else:
         report.ok("no orphan client/assets GLB or import sidecars")
+
+    # [8] ADR-0018 D8 triangle/texture budgets per asset type (data: asset_budgets.v0.json).
+    print("[8] asset budgets")
+    check_budgets(root, assets, report)
+
+    # [9] ADR-0018 P2 dungeon kit catalog ids resolve to environment assets.
+    kit_path = root / DUNGEON_KIT_REL
+    if kit_path.is_file():
+        print("[9] dungeon kit asset ids")
+        kit = load(kit_path)
+        kit_ids = [kit["wall"]["full_asset_id"], kit["wall"]["half_asset_id"], kit["column"]["asset_id"]]
+        kit_ids += [v["asset_id"] for v in kit["floor"]["variants"]]
+        for asset_id in kit_ids:
+            entry = assets.get(asset_id)
+            if entry is None or entry.get("type") != "environment":
+                report.fail("dungeon kit asset", f"{asset_id}: not an environment asset in the manifest")
+            else:
+                report.ok(f"dungeon kit {asset_id} resolves")
 
 
 def main() -> int:

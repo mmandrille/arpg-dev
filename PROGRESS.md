@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v470 render baseline, ADR-0018 P1)
+Last updated: 2026-09-29 (v471 dungeon kit walls/floors, ADR-0018 P2)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-29 (v470 render baseline, ADR-0018 P1)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v470 — render baseline (ADR-0018 P1; `make ci` + perf floor owed, see as-built). Prior: v469 ADR-0018 P0 |
-| **Next slice** | Periodic `$review` + `$refactor` is due (v470 milestone), then v471 — ADR-0018 P2 dungeon kit auto-tiler (client-only; env XZ ×0.5) |
+| **Latest completed slice** | v471 — KayKit dungeon walls/columns/floors (ADR-0018 P2; `make ci` green; hardened client-unit gate). Prior: v470 render baseline, v469 P0 |
+| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P2b (torches/props) or P3 (heroes: owner downloads itch Adventurers 2.0 + Character Animations 1.1 first) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 
@@ -93,6 +93,7 @@ Do **not** assume these are the next slice — they are documented backlog items
   - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan
     or as-built**. It needs a closeout; v469 did not fabricate one.
   - Local Godot is 4.7.2 while this file pins 4.6.3.
+  - v471: the v470 ADR-0018 D7 performance floor (v347 24-monster dungeon benchmark) was never re-run; v471 adds kit walls/floors on top. Run `make benchmark` before tuning further.
   - macOS `/usr/bin/make` fails until `sudo xcodebuild -license` is accepted, so the v469 `make ci`
     is still owed.
   - Dungeon generation fails on ~2% of seed/level pairs (`could not place room-corridor layout`,

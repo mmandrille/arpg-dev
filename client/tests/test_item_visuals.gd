@@ -22,6 +22,7 @@ const EquipmentProbeScript := preload("res://tests/item_visual_equipment_probe.g
 const EquippedGearFitProbeScript := preload("res://tests/equipped_gear_fit_probe.gd")
 const InteractableProbeScript := preload("res://tests/item_visual_interactable_probe.gd")
 const CharacterScene := preload("res://scenes/character.tscn")
+const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
 
 func _initialize() -> void:
 	await _run_all()
@@ -106,7 +107,11 @@ func _run_all() -> void:
 		return
 	if not interactable_probe.verify_stair_models(Callable(self, "_fail")):
 		return
-	if not _verify_ground_texture_selection():
+	# Procedural dungeon ground textures are the ADR-0018 kit-disabled fallback.
+	DungeonKitLoaderScript.enabled_override = "off"
+	var ground_ok := _verify_ground_texture_selection()
+	DungeonKitLoaderScript.enabled_override = ""
+	if not ground_ok:
 		return
 	if not _verify_town_preview_props():
 		return

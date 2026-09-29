@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/asset_budgets.v0.schema.json",
+  "title": "Runtime asset budgets (v0)",
+  "description": "ADR-0018 D8 per-type triangle/texture budgets for manifest assets, plus named exemptions.",
+  "type": "object",
+  "required": ["version", "budgets", "exemptions"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "note": { "type": "string" },
+    "budgets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["max_triangles", "max_texture_px"],
+        "additionalProperties": false,
+        "properties": {
+          "max_triangles": { "type": "integer", "minimum": 1 },
+          "max_texture_px": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "exemptions": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 10 }
+    }
+  }
+}

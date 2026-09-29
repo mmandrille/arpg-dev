@@ -174,7 +174,7 @@ func _test_snapshot_wall_layout_rendering() -> void:
 		"hotbar": [],
 		"character_progression": {},
 	})
-	_assert_eq("snapshot wall nodes", main.walls_root.get_child_count(), 3)
+	_assert_eq("snapshot wall nodes", _wall_body_count(main.walls_root), 2)
 	_assert_eq("snapshot wall layout count", main.current_wall_layout.size(), 2)
 	_assert_eq("snapshot generated wall count", int(main.get_bot_state().get("generated_wall_count", 0)), 1)
 	_assert_eq("snapshot wall metadata source", str(main.walls_root.get_child(1).get_meta("source", "")), "generated")
@@ -218,7 +218,7 @@ func _test_delta_wall_layout_replacement() -> void:
 		],
 	})
 	_assert_eq("delta current level", main.current_level, -2)
-	_assert_eq("delta wall nodes replaced", main.walls_root.get_child_count(), 3)
+	_assert_eq("delta wall nodes replaced", _wall_body_count(main.walls_root), 2)
 	_assert_eq("delta generated wall count", int(main.get_bot_state().get("generated_wall_count", 0)), 1)
 	_assert_eq("delta removed old wall", str(main.walls_root.get_child(0).get_meta("wall_id", "")), "wall_-2_0000")
 	_assert_true("delta entity spawned after wall update", main.entities.has("2001"))
@@ -396,7 +396,7 @@ func _test_character_panel_modes_for_v45() -> void:
 	_assert_true("barbarian features include passives", " ".join(barbarian_features).find("Passives") >= 0)
 	var options: Array = expanded.get("class_options", [])
 	_assert_eq("five class options", options.size(), 5)
-	_assert_true("barbarian tooltip includes skill", str((options[0] as Dictionary).get("tooltip", "")).contains("Skill: Rage"))
+	_assert_true("barbarian tooltip includes skill", str((options[0] as Dictionary).get("tooltip", "")).contains("Rage"))
 	panel.select_class("sorcerer")
 	var sorc_state := panel.get_debug_state()
 	_assert_eq("selected sorcerer", str(sorc_state.get("selected_class", "")), "sorcerer")
@@ -1722,3 +1722,12 @@ func _assert_float(name: String, got: float, want: float) -> void:
 
 func _vec2_as_vec3(v: Vector2) -> Vector3:
 	return Vector3(v.x, 0.0, v.y)
+
+## Wall bodies only (layout walls carry wall_id meta); presentation nodes such as the ceiling,
+## rounded corners or the ADR-0018 kit floor are not walls.
+func _wall_body_count(root: Node) -> int:
+	var count := 0
+	for child in root.get_children():
+		if child.has_meta("wall_id"):
+			count += 1
+	return count

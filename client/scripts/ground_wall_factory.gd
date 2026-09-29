@@ -3,6 +3,7 @@ extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const SurfaceMaterialLoaderScript := preload("res://scripts/surface_material_loader.gd")
+const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
 
 const TOWN_GROUND_SIZE := Vector2(140.0, 90.0)
 const TOWN_GROUND_CENTER := Vector3(50.0, -0.02, 25.0)
@@ -76,6 +77,13 @@ func ground_texture_id_for_level(level: int) -> String:
 	return ClientConstantsScript.GROUND_TEXTURE_TOWN if level == 0 else ClientConstantsScript.GROUND_TEXTURE_DUNGEON
 
 func ground_material_for_level(level: int) -> StandardMaterial3D:
+	if level < 0 and DungeonKitLoaderScript.active_for_level(level):
+		# ADR-0018 P2: kit floor tiles cover the floor; the ground is only a plain base seen
+		# through tile gaps, holes and water, so it must not show the procedural pixel texture.
+		var base := StandardMaterial3D.new()
+		base.albedo_color = Color(str(DungeonKitLoaderScript.floor_config().get("base_color", "#15120f")))
+		base.roughness = 1.0
+		return base
 	var texture_id := ground_texture_id_for_level(level)
 	var palette := biome_palette_for_level(level)
 	var style_id := SurfaceMaterialLoaderScript.style_for_ground_level(level)

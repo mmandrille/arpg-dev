@@ -15,6 +15,7 @@ from tools.assets.validate_assets import Report, validate
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REAL_SCHEMA = REPO_ROOT / "assets/manifests/assets.v0.schema.json"
+REAL_BUDGETS_SCHEMA = REPO_ROOT / "assets/manifests/asset_budgets.v0.schema.json"
 
 CHAR_GLB = "client/assets/characters/base_human/base_human.glb"
 STATIC_CHAR_GLB = "client/assets/characters/static_hero/static_hero.glb"
@@ -168,6 +169,15 @@ def default_monster_visuals() -> dict:
     }
 
 
+def default_budgets(max_triangles: int = 100000, exemptions: dict | None = None) -> dict:
+    per_type = {"max_triangles": max_triangles, "max_texture_px": 4096}
+    return {
+        "version": 0,
+        "budgets": {t: dict(per_type) for t in ("character", "equipment", "monster", "environment")},
+        "exemptions": exemptions or {},
+    }
+
+
 def build_root(
     tmp_path: Path,
     *,
@@ -176,10 +186,13 @@ def build_root(
     monster_visuals: dict | None = None,
     char_nodes: list[str] | None = None,
     write_sword: bool = True,
+    budgets: dict | None = None,
 ) -> Path:
     root = tmp_path / "repo"
     (root / "assets/manifests").mkdir(parents=True, exist_ok=True)
     shutil.copy(REAL_SCHEMA, root / "assets/manifests/assets.v0.schema.json")
+    shutil.copy(REAL_BUDGETS_SCHEMA, root / "assets/manifests/asset_budgets.v0.schema.json")
+    write(root / "assets/manifests/asset_budgets.v0.json", budgets or default_budgets())
     write(root / "assets/manifests/assets.v0.json", manifest or default_manifest())
     write(root / "shared/assets/item_visuals.v0.json", visuals or default_visuals())
     write(root / "shared/assets/monster_visuals.v0.json", monster_visuals or default_monster_visuals())
@@ -336,3 +349,63 @@ def test_orphan_client_asset_fails(tmp_path):
     write(root / "client/assets/monsters/bat.glb", make_glb(["root"]))
     report = run(root)
     assert any("orphan client asset" in f for f in report.failures)
+
+
+def _run(root: Path) -> Report:
+    report = Report()
+    validate(root, report)
+    return report
+
+
+def test_budget_violation_fails_and_exemption_passes(tmp_path: Path) -> None:
+    from tools.assets import gen_glb
+
+    heavy = gen_glb.monster_dummy_glb()  # two cube parts -> a known, non-zero triangle count
+    triangles = 2 * (len(gen_glb._cube_geometry()[2]) // 3)
+    root = build_root(tmp_path, budgets=default_budgets(max_triangles=triangles - 1))
+    (root / SWORD_GLB).write_bytes(heavy)
+    report = _run(root)
+    assert any(
+        f.startswith("asset budget") and "weapon_rusty_sword_v0" in f and f"{triangles} tris > {triangles - 1}" in f
+        for f in report.failures
+    ), report.failures
+
+    exempt = build_root(
+        tmp_path / "exempt",
+        budgets=default_budgets(max_triangles=triangles - 1, exemptions={"weapon_rusty_sword_v0": "replaced in a later slice"}),
+    )
+    (exempt / SWORD_GLB).write_bytes(heavy)
+    exempt_report = _run(exempt)
+    assert not any("weapon_rusty_sword_v0" in f for f in exempt_report.failures), exempt_report.failures
+
+
+def test_budget_exemption_must_be_live(tmp_path: Path) -> None:
+    root = build_root(tmp_path, budgets=default_budgets(exemptions={"weapon_rusty_sword_v0": "temporary exemption for test"}))
+    report = _run(root)
+    assert any("stale budget exemption" in f and "weapon_rusty_sword_v0" in f for f in report.failures)
+
+
+def test_budget_exemption_for_missing_asset_fails(tmp_path: Path) -> None:
+    root = build_root(tmp_path, budgets=default_budgets(exemptions={"ghost_asset_v0": "asset removed long ago"}))
+    report = _run(root)
+    assert any("stale budget exemption" in f and "ghost_asset_v0" in f for f in report.failures)
+
+
+def test_missing_budget_file_fails(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    (root / "assets/manifests/asset_budgets.v0.json").unlink()
+    report = _run(root)
+    assert any("asset budgets" in f for f in report.failures)
+
+
+def test_environment_entry_validates(tmp_path: Path) -> None:
+    manifest = default_manifest()
+    manifest["assets"]["kit_wall_v0"] = {
+        "type": "environment",
+        "runtime_path": SWORD_GLB,
+        "format": "glb",
+        "provenance": {"license": "CC0-1.0"},
+    }
+    root = build_root(tmp_path, manifest=manifest)
+    report = _run(root)
+    assert report.failures == [], report.failures

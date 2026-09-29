@@ -3,6 +3,10 @@ extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const DungeonWallCornerPresentationScript := preload("res://scripts/dungeon_wall_corner_presentation.gd")
+const DungeonKitFloorScript := preload("res://scripts/dungeon_kit_floor.gd")
+const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
+const DungeonKitWallBuilderScript := preload("res://scripts/dungeon_kit_wall_builder.gd")
+const KitPieceLibraryScript := preload("res://scripts/kit_piece_library.gd")
 const SurfaceMaterialLoaderScript := preload("res://scripts/surface_material_loader.gd")
 const WallOcclusionPresentationLoaderScript := preload("res://scripts/wall_occlusion_presentation_loader.gd")
 const WallOcclusionFadeScript := preload("res://scripts/wall_occlusion_fade.gd")
@@ -67,6 +71,7 @@ func render_wall_layout(walls: Array) -> Array:
 			_walls_root.add_child(make_wall_node(normalized))
 	_sync_room_wall_corners(current_wall_layout)
 	_sync_dungeon_ceiling()
+	_sync_kit_floor(current_wall_layout)
 	return current_wall_layout
 
 func set_level(level: int) -> void:
@@ -97,6 +102,19 @@ func _dungeon_presentation_active() -> bool:
 	return _current_level < 0
 
 
+## ADR-0018 P2: KayKit walls/columns/floors replace the procedural dungeon presentation.
+func kit_active() -> bool:
+	return _dungeon_presentation_active() and DungeonKitLoaderScript.active_for_level(_current_level)
+
+
+func _sync_kit_floor(wall_layout: Array) -> void:
+	if _walls_root == null or not kit_active():
+		return
+	var kit_floor := DungeonKitFloorScript.build(wall_layout, _current_level)
+	if kit_floor != null:
+		_walls_root.add_child(kit_floor)
+
+
 func _wall_height() -> float:
 	if not _dungeon_presentation_active():
 		return TOWN_WALL_HEIGHT
@@ -123,6 +141,8 @@ func _sync_dungeon_ceiling() -> void:
 
 func _sync_room_wall_corners(wall_layout: Array) -> void:
 	if _walls_root == null or not _dungeon_presentation_active():
+		return
+	if kit_active() and DungeonKitLoaderScript.legacy_disabled("rounded_corners"):
 		return
 	var helper := DungeonWallCornerPresentationScript.new(_current_level, _wall_height(), _ground_factory, _corner_style_override)
 	helper.attach_room_wall_presentation(_walls_root, wall_layout)
@@ -182,6 +202,13 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 	box.size = Vector3(sx, total_height, sy)
 	shape_node.shape = box
 	body.add_child(shape_node)
+	if kit_active():
+		var kit := DungeonKitWallBuilderScript.build_wall_visual(wall, wall_height)
+		if kit != null:
+			kit.position.y = -body.position.y
+			body.add_child(kit)
+			_register_occlusion_meshes(str(wall.get("id", "")), body, KitPieceLibraryScript.mesh_instances(kit))
+			return body
 	var node := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(sx, total_height, sy)
@@ -317,6 +344,11 @@ func _make_column_node(wall: Dictionary) -> Node3D:
 	var sx: float = maxf(0.5, float(size.get("x", 1.0)))
 	var sz: float = maxf(0.5, float(size.get("y", 1.0)))
 	var root: Node3D = _make_obstacle_root(wall, "Column", "column")
+	if kit_active():
+		var kit := DungeonKitWallBuilderScript.build_column_visual(wall, _wall_height())
+		if kit != null:
+			root.add_child(kit)
+			return root
 	var mat: StandardMaterial3D = _make_obstacle_material(wall, "column")
 	var horizontal: bool = sx >= sz
 	var long_extent: float = sx if horizontal else sz
@@ -433,10 +465,14 @@ func _read_json(path: String):
 
 
 func _register_occlusion_mesh(wall_id: String, mesh: MeshInstance3D) -> void:
-	if wall_id == "" or mesh == null:
+	if mesh != null:
+		_register_occlusion_meshes(wall_id, mesh.get_parent() as StaticBody3D, [mesh])
+
+
+func _register_occlusion_meshes(wall_id: String, body: StaticBody3D, meshes: Array) -> void:
+	if wall_id == "" or meshes.is_empty():
 		return
-	_occlusion_meshes[wall_id] = mesh
-	var body := mesh.get_parent() as StaticBody3D
+	_occlusion_meshes[wall_id] = meshes
 	if body != null:
 		_occlusion_bodies[wall_id] = body
 
@@ -444,11 +480,10 @@ func _register_occlusion_mesh(wall_id: String, mesh: MeshInstance3D) -> void:
 func apply_occlusion_fades(faded_by_id: Dictionary) -> void:
 	var opaque_alpha := WallOcclusionPresentationLoaderScript.opaque_alpha()
 	for wall_id in _occlusion_meshes.keys():
-		var mesh := _occlusion_meshes[wall_id] as MeshInstance3D
-		if mesh == null:
-			continue
 		var alpha := float(faded_by_id.get(wall_id, opaque_alpha))
-		_set_mesh_occlusion_alpha(mesh, alpha)
+		for mesh in _occlusion_meshes[wall_id]:
+			if mesh is MeshInstance3D:
+				_set_mesh_occlusion_alpha(mesh as MeshInstance3D, alpha)
 		_set_wall_pick_block(wall_id, alpha >= opaque_alpha - 0.001)
 
 
@@ -464,6 +499,12 @@ func _set_wall_pick_block(wall_id: String, blocked: bool) -> void:
 
 func _set_mesh_occlusion_alpha(mesh: MeshInstance3D, alpha: float) -> void:
 	var mat := mesh.material_override as StandardMaterial3D
+	if mat == null and alpha < 0.999:
+		# Kit pieces use their imported material; fade a private copy so shared materials stay opaque.
+		var imported := mesh.get_active_material(0) as StandardMaterial3D
+		if imported != null:
+			mat = imported.duplicate() as StandardMaterial3D
+			mesh.material_override = mat
 	if mat == null:
 		return
 	var base := mat.albedo_color

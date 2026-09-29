@@ -3,6 +3,7 @@ extends RefCounted
 
 const DungeonRoomPresentationLoaderScript := preload("res://scripts/dungeon_room_presentation_loader.gd")
 const DungeonSurfaceDetailLoaderScript := preload("res://scripts/dungeon_surface_detail_loader.gd")
+const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
 
 const FLOOR_ROOT_NAME := "DungeonSurfaceFloorDetails"
 const WALL_ROOT_NAME := "DungeonSurfaceWallDetails"
@@ -25,6 +26,9 @@ static func sync(
 ) -> void:
 	_clear(ground_node, walls_root)
 	if ground_node == null or walls_root == null or factory == null or level >= 0:
+		return
+	# ADR-0018 P2: KayKit floor tiles replace the procedural decals on kit dungeon levels.
+	if DungeonKitLoaderScript.active_for_level(level) and DungeonKitLoaderScript.legacy_disabled("surface_details"):
 		return
 	if not factory.has_method("floor_size_for_level"):
 		return

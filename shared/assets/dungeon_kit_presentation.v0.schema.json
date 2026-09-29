@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/dungeon_kit_presentation.v0.schema.json",
+  "title": "Dungeon kit presentation (v0)",
+  "description": "Client-only KayKit dungeon piece selection for walls, columns and floors (ADR-0018 P2).",
+  "type": "object",
+  "required": ["version", "enabled", "min_dungeon_depth", "wall", "column", "floor", "disable_legacy"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "note": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "min_dungeon_depth": { "type": "integer", "minimum": 1 },
+    "wall": {
+      "type": "object",
+      "required": ["full_asset_id", "half_asset_id"],
+      "additionalProperties": false,
+      "properties": {
+        "full_asset_id": { "$ref": "#/$defs/asset_id" },
+        "half_asset_id": { "$ref": "#/$defs/asset_id" }
+      }
+    },
+    "column": {
+      "type": "object",
+      "required": ["asset_id"],
+      "additionalProperties": false,
+      "properties": { "asset_id": { "$ref": "#/$defs/asset_id" } }
+    },
+    "floor": {
+      "type": "object",
+      "required": ["enabled", "surface_y", "base_color", "variants"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "surface_y": { "type": "number", "minimum": 0 },
+        "base_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["asset_id", "weight"],
+            "additionalProperties": false,
+            "properties": {
+              "asset_id": { "$ref": "#/$defs/asset_id" },
+              "weight": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "disable_legacy": {
+      "type": "object",
+      "required": ["rounded_corners", "surface_details"],
+      "additionalProperties": false,
+      "properties": {
+        "rounded_corners": { "type": "boolean" },
+        "surface_details": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "asset_id": { "type": "string", "pattern": "^[a-z0-9_]+$" }
+  }
+}

@@ -15,6 +15,7 @@ const DungeonRoomFloorTintScript := preload("res://scripts/dungeon_room_floor_ti
 const DungeonAmbientMotesScript := preload("res://scripts/dungeon_ambient_motes.gd")
 const DungeonSurfaceDetailPresentationScript := preload("res://scripts/dungeon_surface_detail_presentation.gd")
 const SurfaceMaterialLoaderScript := preload("res://scripts/surface_material_loader.gd")
+const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -23,7 +24,10 @@ var _fail_count: int = 0
 func _initialize() -> void:
 	_test_client_constants()
 	_test_surface_material_loader()
+	# Procedural dungeon ground materials are the ADR-0018 kit-disabled fallback.
+	DungeonKitLoaderScript.enabled_override = "off"
 	_test_ground_wall_factory()
+	DungeonKitLoaderScript.enabled_override = ""
 	_test_wall_renderer()
 	_test_loot_node_factory()
 	_test_town_node_factory()
@@ -34,6 +38,7 @@ func _initialize() -> void:
 	if _fail_count > 0:
 		print("[gdtest] FAIL: test_factories (%d passed, %d failed)" % [_pass_count, _fail_count])
 		quit(1)
+		return
 	print("[gdtest] PASS: test_factories (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(0)
 
@@ -103,6 +108,9 @@ func _test_ground_wall_factory() -> void:
 
 
 func _test_wall_renderer() -> void:
+	# Legacy procedural dungeon walls stay the fallback when the ADR-0018 kit is disabled;
+	# kit walls/floors are covered by test_dungeon_kit.gd.
+	DungeonKitLoaderScript.enabled_override = "off"
 	var root := Node3D.new()
 	get_root().add_child(root)
 	var ground_factory = GroundWallFactoryScript.new()
@@ -293,9 +301,11 @@ func _test_wall_renderer() -> void:
 	_assert_true("variety lab column node exists", root.find_child("Column_obstacle_variety_lab_wall_005", false, false) != null)
 	_assert_true("variety lab second rock node exists", root.find_child("Rock_obstacle_variety_lab_wall_006", false, false) != null)
 	root.queue_free()
-
+	DungeonKitLoaderScript.enabled_override = ""
 
 func _test_dungeon_surface_detail_presentation() -> void:
+	# The v463 procedural decals only render when the ADR-0018 kit is disabled (see test_dungeon_kit.gd).
+	DungeonKitLoaderScript.enabled_override = "off"
 	var factory = GroundWallFactoryScript.new()
 	var ground := factory.make_ground_node(-2)
 	var walls_root := Node3D.new()
@@ -339,7 +349,7 @@ func _test_dungeon_surface_detail_presentation() -> void:
 	walls_root.queue_free()
 	town_ground.queue_free()
 	town_walls.queue_free()
-
+	DungeonKitLoaderScript.enabled_override = ""
 
 func _test_loot_node_factory() -> void:
 	ItemRulesLoader.ensure_loaded()

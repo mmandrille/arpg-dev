@@ -1,0 +1,16 @@
+{
+  "version": 0,
+  "note": "ADR-0018 D8 runtime asset budgets, enforced by tools/assets/validate_assets.py. Exemptions must name the slice/phase that removes them; an exemption that no longer exceeds its budget fails validation so the list only shrinks.",
+  "budgets": {
+    "character": { "max_triangles": 10000, "max_texture_px": 1024 },
+    "monster": { "max_triangles": 20000, "max_texture_px": 1024 },
+    "equipment": { "max_triangles": 3000, "max_texture_px": 1024 },
+    "environment": { "max_triangles": 4000, "max_texture_px": 1024 }
+  },
+  "exemptions": {
+    "monster_dark_purple_v0": "ADR-0018 P4 replaces this AI-generated monster (36.8k tris, 2048² texture)",
+    "monster_quadruped_predator_v0": "ADR-0018 P4 replaces this AI-generated monster (39.2k tris, 2048² texture)",
+    "fallback_equipment_ring_left_v0": "ADR-0018 D5 removes ring world visuals in P3 (3.1k tris)",
+    "fallback_equipment_ring_right_v0": "ADR-0018 D5 removes ring world visuals in P3 (3.1k tris)"
+  }
+}

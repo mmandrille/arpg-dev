@@ -230,7 +230,10 @@ visibility. Details: [findings](../researchs/v469_kaykit-p0-findings.md) §4.
 - The protocol is unchanged: walls stay `{id, position, size, source}` rectangles in the session
   snapshot, and the server stays authoritative for collision and reachability.
 
-**Client rendering**
+**Client rendering** (as built in v471: per-wall tiling at kit scale 1.0 instead of a global
+occupancy auto-tiler, because kit pieces are natively 4 tall × 1 deep, matching `ceiling_height`
+and `wall_thickness`, and per-wall tiling keeps each wall's occlusion/pick identity. See the v471
+spec.)
 - The client rasterizes wall rectangles into a grid occupancy map at a presentation tile size set in
   a `shared/assets/` catalog.
 - It auto-tiles that map into kit pieces (straight, outer corner, inner corner, T-junction, end cap,
@@ -332,7 +335,7 @@ and fall under the CLAUDE.md spec-gate exemption. They still write an as-built w
 |-------|-------|------|
 | **P0** | Repair screenshot harness; "before" captures; download packs (per D2); verify P0 checklist; record measured budgets | spec ([v469](../specs/v469_spec-art-baseline-and-kit-verification.md)) |
 | **P1** | Render baseline (D7) | exempt — shipped [v470](../as-built/v470_render-baseline.md) (perf floor owed) |
-| **P2** | Dungeon auto-tile renderer + kit props (D6) | exempt if walls are grid-aligned; otherwise server snap spec first |
+| **P2** | Dungeon auto-tile renderer + kit props (D6) | walls/columns/floors shipped [v471](../as-built/v471_dungeon-kit-walls-floors.md) (spec'd: manifest + budgets); props/torches → P2b |
 | **P3** | Heroes + kit animation + clip catalog + socket remap + armor tints (D4, D5) | spec |
 | **P4** | Kit monsters; purge unconfirmed-license and unused GLBs (D2) | spec |
 | **P5** | Particle VFX + in-repo shader set: hit flash, death dissolve, highlight rim/outline (D3) | exempt |

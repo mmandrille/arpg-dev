@@ -1,0 +1,29 @@
+{
+  "version": 0,
+  "note": "ADR-0018 P2 (v471): KayKit Dungeon Remastered pieces for dungeon walls, columns and floors. Asset ids resolve through assets/manifests/assets.v0.json; piece dimensions come from the imported mesh AABB at runtime.",
+  "enabled": true,
+  "min_dungeon_depth": 1,
+  "wall": {
+    "full_asset_id": "kaykit_dungeon_wall_v0",
+    "half_asset_id": "kaykit_dungeon_wall_half_v0"
+  },
+  "column": {
+    "asset_id": "kaykit_dungeon_pillar_v0"
+  },
+  "floor": {
+    "enabled": true,
+    "surface_y": 0.02,
+    "base_color": "#15120f",
+    "variants": [
+      { "asset_id": "kaykit_dungeon_floor_tile_small_v0", "weight": 16 },
+      { "asset_id": "kaykit_dungeon_floor_tile_small_broken_a_v0", "weight": 1 },
+      { "asset_id": "kaykit_dungeon_floor_tile_small_broken_b_v0", "weight": 1 },
+      { "asset_id": "kaykit_dungeon_floor_tile_small_decorated_v0", "weight": 1 },
+      { "asset_id": "kaykit_dungeon_floor_tile_small_weeds_a_v0", "weight": 1 }
+    ]
+  },
+  "disable_legacy": {
+    "rounded_corners": true,
+    "surface_details": true
+  }
+}

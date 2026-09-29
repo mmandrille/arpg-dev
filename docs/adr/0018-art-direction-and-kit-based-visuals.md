@@ -342,8 +342,13 @@ and fall under the CLAUDE.md spec-gate exemption. They still write an as-built w
 
 ### P0 verification checklist (resolved in v469, see [findings](../researchs/v469_kaykit-p0-findings.md))
 
-All six items are resolved. The one carried-over item: re-run `make inspect-kit` on the
-owner-downloaded Adventurers 2.0 / Character Animations 1.1 archives before P3 relies on them.
+All six items are resolved. The carried-over rig item is **resolved (2026-09-29)**:
+- Adventurers 2.0 and Character Animations 1.1 share `Rig_Medium`.
+- `Rig_Medium` has 23 joints: the 1.0 rig's deform joints under the same names, minus the IK
+  helpers.
+- So the 1.1 clips drive both the 2.0 heroes and the v474 kit monsters.
+
+See [kaykit-asset-inventory.md](../researchs/kaykit-asset-inventory.md).
 
 
 1. Confirm each pack's license text is on the D2 allow-list (KayKit is expected to be CC0) and

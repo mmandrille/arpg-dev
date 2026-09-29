@@ -22,7 +22,7 @@ server/internal/game/handlers.go	1487	# v455 combat skill budget defer hooks on 
 server/internal/game/rules.go	2813	# v460: potion drop kind uses entry roll without extra RNG; further TC validators remain in-file
 server/internal/game/shop.go	1224	# v460: leveled potion fixed offers and sell pricing; core shop flow remains coordinator
 server/internal/game/shop_test.go	1517
-server/internal/game/sim.go	6731	# v476: Input struct extracted to input.go
+server/internal/game/sim.go	6621	# v485: entity wire views extracted to entity_view.go
 server/internal/game/types.go	721	# v448: steward hunt level state + quest steward offer/pending fields coupled to Sim/LevelState
 server/internal/http/auth_session_test.go	1529	# v390: leveled upgrade shard HTTP test helpers
 server/internal/http/ws_test.go	1482

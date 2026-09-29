@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v470** | `render-baseline` | Complete (focused verification; `make ci` + perf floor owed — Xcode license) | spec-exempt (client presentation) | — | [`as-built`](../as-built/v470_render-baseline.md) |
 | **v469** | `art-baseline-kit-verification` | Complete (focused verification; `make ci` owed — Xcode license) | [`spec`](../specs/v469_spec-art-baseline-and-kit-verification.md) | [`plan`](../plans/v469_2026-09-28-art-baseline-kit-verification.md) | [`as-built`](../as-built/v469_art-baseline-kit-verification.md) |
 | **v467** | `shared-first-person-equipment-rig` | Complete (`make ci` green) | [`spec`](../specs/v467_spec-shared-first-person-equipment-rig.md) | [`plan`](../plans/v467_2026-07-20-shared-first-person-equipment-rig.md) | [`as-built`](../as-built/v467_shared-first-person-equipment-rig.md) |
 | **v466** | `eye-view-weapon-presentation` | Complete (autoloop focused verification) | [`spec`](../specs/v466_spec-eye-view-weapon-presentation.md) | [`plan`](../plans/v466_2026-07-14-eye-view-weapon-presentation.md) | [`as-built`](../as-built/v466_eye-view-weapon-presentation.md) |

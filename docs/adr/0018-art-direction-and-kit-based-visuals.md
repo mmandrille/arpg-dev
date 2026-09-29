@@ -331,7 +331,7 @@ and fall under the CLAUDE.md spec-gate exemption. They still write an as-built w
 | Phase | Slice | Gate |
 |-------|-------|------|
 | **P0** | Repair screenshot harness; "before" captures; download packs (per D2); verify P0 checklist; record measured budgets | spec ([v469](../specs/v469_spec-art-baseline-and-kit-verification.md)) |
-| **P1** | Render baseline (D7) | exempt |
+| **P1** | Render baseline (D7) | exempt — shipped [v470](../as-built/v470_render-baseline.md) (perf floor owed) |
 | **P2** | Dungeon auto-tile renderer + kit props (D6) | exempt if walls are grid-aligned; otherwise server snap spec first |
 | **P3** | Heroes + kit animation + clip catalog + socket remap + armor tints (D4, D5) | spec |
 | **P4** | Kit monsters; purge unconfirmed-license and unused GLBs (D2) | spec |

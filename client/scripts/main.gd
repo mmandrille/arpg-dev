@@ -67,7 +67,7 @@ const ClientSettingsScript := preload("res://scripts/client_settings.gd")
 const ClientAudioControllerScript := preload("res://scripts/client_audio_controller.gd")
 const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const ClientGraphicsBridgeScript := preload("res://scripts/client_graphics_bridge.gd")
-const DungeonDepthLightingScript := preload("res://scripts/dungeon_depth_lighting.gd")
+const SceneLightingRigScript := preload("res://scripts/scene_lighting_rig.gd")
 const PerformanceStatusFormatterScript := preload("res://scripts/performance_status_formatter.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
@@ -335,8 +335,7 @@ var _camera: Camera3D  # convenience alias — always equal to _camera_controlle
 var _camera_controller: PlayerCameraController
 var _aim_reticle: AimReticleOverlay
 var _crosshair_target  # CrosshairTargetSystem
-var _directional_light: DirectionalLight3D
-var _world_environment: WorldEnvironment
+var _scene_lighting := SceneLightingRigScript.new()
 var ground_node: MeshInstance3D
 var _ground_factory: GroundWallFactory = GroundWallFactory.new()
 var _wall_renderer: WallRenderer
@@ -784,6 +783,7 @@ func _on_graphics_quality_selected(quality: String) -> void:
 		quality,
 		Callable(self, "_sync_settings_panel"),
 	)
+	_sync_fog_and_dungeon_lighting()
 
 
 func _on_window_mode_selected(mode: String) -> void:
@@ -826,11 +826,10 @@ func _sync_fog_and_dungeon_lighting() -> void:
 		fog_overlay.set_active(dungeon_fog)
 		fog_overlay.set_perspective_camera(_is_perspective_camera_mode())
 	var suppress_ambient := fog_overlay != null and fog_overlay.should_suppress_ambient()
-	DungeonDepthLightingScript.apply_for_level(
+	_scene_lighting.sync(
 		current_level,
-		_directional_light,
-		_world_environment,
 		_ground_factory,
+		client_settings.graphics_quality if client_settings != null else ClientSettings.DEFAULT_GRAPHICS_QUALITY,
 		suppress_ambient,
 		fog_overlay.ambient_suppression_params() if suppress_ambient else {},
 		town_fog_active,
@@ -3859,14 +3858,8 @@ func _build_scene() -> void:
 	_camera_controller.setup(PlayerCameraContextScript.make(player_anchor, character_visual, client_settings, Callable(self, "_input_locked")), self)
 	_camera = _camera_controller.get_gameplay_camera()
 
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-50, -40, 0)
-	_directional_light = light
-	add_child(light)
-
-	_world_environment = WorldEnvironment.new()
-	add_child(_world_environment)
-	DungeonDepthLightingScript.apply_for_level(current_level, _directional_light, _world_environment, _ground_factory)
+	_scene_lighting.attach(self)
+	_sync_fog_and_dungeon_lighting()
 
 	audio_controller = ClientAudioControllerScript.new()
 	add_child(audio_controller)

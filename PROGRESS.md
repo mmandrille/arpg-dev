@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-28 (v469 art baseline + KayKit verification, ADR-0018 P0)
+Last updated: 2026-09-29 (v470 render baseline, ADR-0018 P1)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-28 (v469 art baseline + KayKit verification, ADR-0018 P0)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v469 — art baseline + KayKit verification (ADR-0018 P0; `make ci` owed, see as-built) |
-| **Next slice** | v470 — ADR-0018 P1 render baseline (Forward+, shadows, tonemap, SSAO, glow, fog, AA) |
+| **Latest completed slice** | v470 — render baseline (ADR-0018 P1; `make ci` + perf floor owed, see as-built). Prior: v469 ADR-0018 P0 |
+| **Next slice** | Periodic `$review` + `$refactor` is due (v470 milestone), then v471 — ADR-0018 P2 dungeon kit auto-tiler (client-only; env XZ ×0.5) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 

@@ -13,6 +13,7 @@ const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessi
 const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const MainScript := preload("res://scripts/main.gd")
+const SceneLightingRigScript := preload("res://scripts/scene_lighting_rig.gd")
 const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
 const HealRainEffectScript := preload("res://scripts/heal_rain_effect.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
@@ -982,11 +983,10 @@ func _make_heal_target_marker(mat: StandardMaterial3D) -> Node3D:
 
 
 func _add_light(root: Node3D) -> void:
-	var light := DirectionalLight3D.new()
-	light.name = "key_light"
-	light.light_energy = 2.2
-	light.rotation_degrees = Vector3(-55, -35, 0)
-	root.add_child(light)
+	# Runtime town lighting + render baseline (ADR-0018 D9), not a capture-only light.
+	var lighting = SceneLightingRigScript.new()
+	lighting.attach(root)
+	lighting.sync(0, null, ClientSettings.DEFAULT_GRAPHICS_QUALITY)
 
 
 func _add_camera(root: Node3D, position: Vector3, target: Vector3, size: float) -> void:

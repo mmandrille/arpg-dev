@@ -1,13 +1,14 @@
 extends SceneTree
 
-const DungeonDepthLightingScript := preload("res://scripts/dungeon_depth_lighting.gd")
 const DungeonSurfaceDetailPresentationScript := preload("res://scripts/dungeon_surface_detail_presentation.gd")
 const DungeonTorchLightsScript := preload("res://scripts/dungeon_torch_lights.gd")
+const SceneLightingRigScript := preload("res://scripts/scene_lighting_rig.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 const WallRendererScript := preload("res://scripts/wall_renderer.gd")
 
 var _output: String = ""
 var _level: int = -1
+var _quality: String = "balanced"
 
 
 func _initialize() -> void:
@@ -27,14 +28,10 @@ func _initialize() -> void:
 	var walls := renderer.render_wall_layout(_sample_material_layout())
 	DungeonSurfaceDetailPresentationScript.sync(ground, walls_root, factory, _level, walls, {})
 	world.add_child(_make_camera())
-	# Runtime lighting path (ADR-0018 D9 baseline): biome depth profile + wall torches.
-	# Key-light angle mirrors main.gd _build_scene until P1 moves it into render data.
-	var key_light := DirectionalLight3D.new()
-	key_light.rotation_degrees = Vector3(-50.0, -40.0, 0.0)
-	world.add_child(key_light)
-	var world_environment := WorldEnvironment.new()
-	world.add_child(world_environment)
-	DungeonDepthLightingScript.apply_for_level(_level, key_light, world_environment, factory)
+	# Runtime lighting path (ADR-0018 D9): the same SceneLightingRig main.gd uses, plus wall torches.
+	var lighting = SceneLightingRigScript.new()
+	lighting.attach(world)
+	lighting.sync(_level, factory, _quality)
 	var torches = DungeonTorchLightsScript.new(world, null, factory, renderer)
 	torches.sync(_level, walls, true)
 	await process_frame
@@ -68,6 +65,10 @@ func _parse_args() -> void:
 			continue
 		if arg == "--level" and index + 1 < args.size():
 			_level = int(str(args[index + 1]))
+			index += 2
+			continue
+		if arg == "--quality" and index + 1 < args.size():
+			_quality = str(args[index + 1])
 			index += 2
 			continue
 		index += 1

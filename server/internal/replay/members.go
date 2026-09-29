@@ -148,7 +148,9 @@ func (r *memberRoster) applyCurrentMemberConnectivity(sess store.Session, player
 // sessionStartSim builds the tick-0 sim exactly like the live session build:
 // host first, then guests already in the session at tick 0. Guests that joined
 // later are returned as pending. joins names the members with a recorded join
-// row: they are always pending and join at that row.
+// row: they are always pending and join at that row. Members with neither a
+// join row nor a non-negative joined_tick never entered the live sim and are
+// skipped.
 func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rules, sess store.Session, joins map[string]bool) (*game.Sim, []memberPlayer, []pendingMember, error) {
 	members, err := sessionsetup.Members(ctx, repo, sess)
 	if err != nil {
@@ -174,11 +176,14 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 		if sessionsetup.IsHost(member, hostMember) {
 			continue
 		}
+		recordedJoin := joins[memberKey(member.AccountID, member.CharacterID)]
+		if !recordedJoin && !sessionsetup.JoinedSim(member) {
+			continue
+		}
 		guest, err := sessionsetup.Resolve(ctx, repo, rules, sess.ID, member)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		recordedJoin := joins[memberKey(member.AccountID, member.CharacterID)]
 		if recordedJoin || member.JoinedTick > 0 {
 			pending = append(pending, pendingMember{Member: guest, recordedJoin: recordedJoin})
 			continue

@@ -117,7 +117,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 			return nil, nil, fmt.Errorf("clear stale hired mercenary: %w", err)
 		}
 	}
-	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, hostMember.AccountID, hostMember.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
+	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, hostMember.AccountID, hostMember.CharacterID, idStr(hostPlayerID), 0, 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err
 	}
 	for _, member := range members {
@@ -132,7 +132,8 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		if err != nil {
 			return nil, nil, err
 		}
-		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
+		// Build-time members, even HTTP guests not attached yet, join at tick 0.
+		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0, 0); err != nil && err != store.ErrNotFound {
 			return nil, nil, err
 		}
 	}

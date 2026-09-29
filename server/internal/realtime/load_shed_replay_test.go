@@ -258,7 +258,7 @@ func (r *loadShedMemRepo) joinGuest() store.SessionMember {
 		CharacterID: "char_guest",
 		Role:        store.SessionMemberGuest,
 		Status:      store.SessionMemberActive,
-		JoinedTick:  -1,
+		JoinedTick:  store.SessionMemberNotJoinedTick,
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -311,10 +311,11 @@ func (r *loadShedMemRepo) LoadSessionStartSnapshotForMember(_ context.Context, _
 	return r.starts[characterID], nil
 }
 
-func (r *loadShedMemRepo) SetSessionMemberPlayer(_ context.Context, _, accountID, characterID, playerEntityID string, currentLevel int) error {
+func (r *loadShedMemRepo) SetSessionMemberPlayer(_ context.Context, _, accountID, characterID, playerEntityID string, currentLevel int, joinedTick int64) error {
 	return r.updateMember(accountID, characterID, func(m *store.SessionMember) {
 		m.PlayerEntityID = playerEntityID
 		m.CurrentLevel = currentLevel
+		m.JoinedTick = joinedTick
 	})
 }
 

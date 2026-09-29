@@ -648,12 +648,12 @@ func (s *Store) SetSessionMemberDisconnected(ctx context.Context, sessionID, acc
 	return nil
 }
 
-func (s *Store) SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int) error {
+func (s *Store) SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, joinedTick int64) error {
 	tag, err := s.pool.Exec(ctx,
 		`UPDATE session_members
-		 SET player_entity_id = $4, current_level = $5, updated_at = now()
+		 SET player_entity_id = $4, current_level = $5, joined_tick = $6, updated_at = now()
 		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3 AND status = 'active'`,
-		sessionID, accountID, characterID, playerEntityID, currentLevel,
+		sessionID, accountID, characterID, playerEntityID, currentLevel, joinedTick,
 	)
 	if err != nil {
 		return fmt.Errorf("store: set member player: %w", err)

@@ -91,6 +91,12 @@ const (
 	SessionMemberLeft   = "left"
 )
 
+// SessionMemberNotJoinedTick is the joined_tick of a member row whose player
+// entity was never put into the sim (HTTP join, no build or websocket attach
+// yet). Any joined_tick >= 0 is the tick the entity was added, and replay
+// relies on that: it skips members still at a negative joined_tick.
+const SessionMemberNotJoinedTick int64 = -1
+
 // defaultWorldID is used when legacy rows omit world_id.
 const defaultWorldID = "vertical_slice"
 

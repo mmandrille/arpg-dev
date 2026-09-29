@@ -57,7 +57,9 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 		return playerID
 	}
 	playerID, err := sessionsetup.AddGuest(l.sim, guest)
+	var joinedTick uint64
 	if err == nil {
+		joinedTick, _ = l.sim.PlayerJoinedTick(playerID)
 		l.recordMemberJoinLocked(member, playerID)
 	}
 	l.mu.Unlock()
@@ -65,7 +67,7 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 		l.log.Error("add late-joined guest player", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
 		return l.sim.DefaultPlayerID()
 	}
-	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
+	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0, int64(joinedTick)); err != nil && err != store.ErrNotFound {
 		l.log.Error("set late-joined member player", "account_id", member.AccountID, "character_id", member.CharacterID, "player_id", playerID, "error", err)
 	}
 	return playerID

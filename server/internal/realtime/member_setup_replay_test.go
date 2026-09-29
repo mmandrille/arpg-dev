@@ -315,9 +315,25 @@ func assertReplayMatchesLive(t *testing.T, repo *memberSetupRepo, loop *sessionL
 	if err != nil {
 		t.Fatalf("reconstruct: %v", err)
 	}
+	// Reconstruct is also the resume path: it removes co-op members whose row
+	// is not connected (applyCurrentMemberConnectivity), so a live member that
+	// never attached has no replayed counterpart. Verify above covers its events.
+	attached := map[string]bool{}
+	members, err := repo.ListSessionMembers(context.Background(), repo.session.ID)
+	if err != nil {
+		t.Fatalf("list members: %v", err)
+	}
+	for _, m := range members {
+		attached[m.PlayerEntityID] = m.Connected
+	}
 	loop.mu.Lock()
 	defer loop.mu.Unlock()
+	compared := 0
 	for _, playerID := range loop.sim.PlayerIDs() {
+		if !attached[idStr(playerID)] {
+			continue
+		}
+		compared++
 		live := loop.sim.SnapshotForPlayer(playerID)
 		replayed := recon.Sim.SnapshotForPlayer(playerID)
 		if got, want := sortedEntityIDs(replayed.Entities), sortedEntityIDs(live.Entities); fmt.Sprint(got) != fmt.Sprint(want) {
@@ -326,6 +342,9 @@ func assertReplayMatchesLive(t *testing.T, repo *memberSetupRepo, loop *sessionL
 		if got, want := fmt.Sprint(replayed.ResourceBagItems), fmt.Sprint(live.ResourceBagItems); got != want {
 			t.Fatalf("player %d resource bag: replay %s != live %s", playerID, got, want)
 		}
+	}
+	if compared == 0 {
+		t.Fatal("no attached live player to compare against replay")
 	}
 }
 

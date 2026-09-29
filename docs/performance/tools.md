@@ -29,12 +29,26 @@ The benchmark runs the **protocol bot and Godot client simultaneously on the sam
 
 1. Server starts with `ARPG_PERF_DEBUG=1`.
 2. For each benchmark scenario, the bot creates a listed co-op session and writes the session ID to a temp file.
-3. Three seconds later, Godot launches and joins the same session as a second player (`ARPG_JOIN_SESSION_ID`).
+3. Three seconds later — if the bot is still running — Godot launches and joins the same session as a
+   second player (`ARPG_JOIN_SESSION_ID`). Vsync is **off** by default (`--disable-vsync`) so frame-time
+   headroom is visible; `BENCHMARK_VSYNC=1 make benchmark` keeps the project's vsync.
 4. The bot drives the scenario (combat, spells, movement). Godot renders what it sees in real-time.
-5. When the bot finishes, Godot is closed. The server log and Godot's stdout are combined into the report.
+5. When the bot finishes, Godot is closed. Each scenario's Godot stdout is kept as
+   `<scenario>-client.log` and reported as its own CLIENT section.
+6. The bot runs with `--skip-replay`, which skips both `/state` (server-side `replay.Reconstruct`) and
+   `/replay` verification — the benchmark measures cost, not determinism. Correctness of the same probes
+   is gated protocol-only in `make ci-full` (see tiers below).
+7. `make benchmark` exits non-zero if any scenario's bot failed (the report is still written).
 
-This captures real `[client-perf]` FPS under actual server load — not a replay. The CLIENT section of
-the report shows what a second player sees while the first player (bot) is actively fighting.
+This captures real `[client-perf]` frame cost under actual server load — not a replay. The CLIENT
+section of the report shows what a second player sees while the first player (bot) is actively
+fighting. It reports the **first-spawn hitch** (first sample with entities on screen: snapshot apply +
+model instantiation) separately, drops the next warmup samples, and leads with `avg_frame_ms` /
+`process_ms` p50/p95/p99/max plus `draw_calls` / `primitives`. FPS is secondary: the report prints the
+observer's vsync mode (`vsync=` field of `[client-perf]`) and flags a cap when the frame-time floor
+(p25) equals the median. On macOS the cap persists even with `--disable-vsync` (Metal and MoltenVK
+both block windowed apps on the compositor's drawables — verified 2026-09-29, Godot 4.7.2, M4 Pro), so
+on Mac read `process_ms` for headroom.
 
 **To measure your own play session:** use `make play-debug`, reproduce the slow scenario for 2–3 minutes,
 then `make perf-analyze LOG=/tmp/arpg-perf.log`.
@@ -199,8 +213,12 @@ code-owned (e.g. combat phase ms) — check file before assuming data-driven.
 
 - **File:** `tools/bot/benchmark_report.py`
 - **Called by:** `scripts/benchmark.sh` (do not invoke directly unless debugging)
-- **Inputs:** `--server-log` (Go structured JSON) + `--bot-log` (bot stderr with scenario markers)
-- **Output:** per-scenario summary using `backend_perf` lines; slices by wall-clock timestamp from bot markers
+- **Inputs:** `--server-log` (Go structured JSON) + `--bot-log` (bot stderr with scenario markers) +
+  repeatable `--scenario-client-log <scenario_id>=<path>` (Godot observer stdout per scenario)
+- **Output:** per-scenario summary using `backend_perf` lines; slices by wall-clock timestamp from bot
+  markers. Client statistics live in `tools/bot/benchmark_client_stats.py` (warmup split, hitch,
+  nearest-rank percentiles); `--warmup-settle-samples` (default 2) controls how many post-hitch samples
+  are dropped.
 
 **Adding a backend metric**
 
@@ -247,7 +265,12 @@ Rules for future performance/session-stability work:
    deterministic live-client regression scenario before closing the issue.
 
 - **`ci_tier: extended`** — included in `make ci-full`, excluded from `make ci`. Manual run with `make bot scenario=<id>`.
-- **`ci_tier: benchmark`** — excluded from all CI. Only launched with `make benchmark`, which runs all benchmark scenarios, opens the visual Godot client with the Performance status overlay, and emits a report.
+- **`ci_tier: benchmark`** — excluded from `make ci`'s bot packs and from `--scenario all`. Launched with
+  `make benchmark` (bot + visual Godot observer + report). Two gates keep them from rotting:
+  `tools/bot/test_benchmark_scenarios.py` (in `make ci`: pinned `debug_progression` must sustain each
+  probe's skill loop under the current mana rules — see `tools/bot/benchmark_mana_budget.py`) and a
+  protocol-only `--scenario benchmark --skip-replay` run in `make ci-full` step 9. Benchmark probes are
+  exempt from the 15s scenario ceiling (CLAUDE.md rule 12); their declared `max_elapsed_s` is the budget.
 
 ### Extended probes
 
@@ -267,11 +290,10 @@ ARPG_PERF_DEBUG=1 HEADLESS=1 make bot-visual scenario=dungeon_combat_perf_probe
 ```bash
 make benchmark                                            # opens Godot, generates report
 make benchmark BENCHMARK_OUT=docs/performance/reports/run.txt
+BENCHMARK_VSYNC=1 make benchmark                          # observer keeps project vsync
 ```
 
-Flow: server starts with `ARPG_PERF_DEBUG=1` → protocol bot records all benchmark scenarios (saves
-replay manifest) → **Godot opens in visual mode** with the Performance status overlay active in the
-top-right corner → after Godot closes, a perf report is generated from the server log.
+Flow: see [How `make benchmark` works](#how-make-benchmark-works--live-concurrent-session).
 
 If Godot is not on `PATH`, the script degrades to protocol-only and still generates the report.
 Set `GODOT=/path/to/godot` to override the binary.
@@ -279,7 +301,7 @@ Set `GODOT=/path/to/godot` to override the binary.
 Artifacts saved under `.artifacts/benchmark-runs/<timestamp>/`:
 - `server.log` — raw structured server output (all `backend_perf` lines)
 - `bot.log` — bot stderr (scenario begin/done markers used to slice the report)
-- `manifest.json` — replay manifest for the Godot visual playback
+- `<scenario>-bot.log` / `<scenario>-client.log` — per-scenario bot stderr and Godot observer stdout
 - `report.txt` — per-scenario perf summary
 
 Report sections per scenario: tick budget (overruns, max overrun ms), simulation phase breakdown
@@ -294,7 +316,9 @@ nodes visited), entity load (monsters moved, changes, events, clients).
 
 **Adding a benchmark scenario**
 
-1. Set `"ci_tier": "benchmark"` in the JSON — automatically discovered by `make benchmark`. No other registration needed.
+1. Set `"ci_tier": "benchmark"` in the JSON — automatically discovered by `make benchmark` and the
+   `make ci-full` protocol-only gate. Pin `debug_progression.stats.magic` high enough for the skill loop;
+   `test_benchmark_scenarios.py` derives the requirement from `shared/rules` and fails with the shortfall.
 2. Prefer a compact lab world with pinned seed for coop+Godot scenarios (e.g. `crowded_lightning_perf_probe`).
 3. For multi-level dungeon worlds (`dungeon_depth_one_lab` etc.): also set `"benchmark_solo_session": true`. This runs the bot in solo mode (correct dungeon spawning) and skips the Godot observer; only server-side metrics are captured.
 4. Add a row to the table above and [Changelog](#changelog).
@@ -326,6 +350,7 @@ nodes visited), entity load (monsters moved, changes, events, clients).
 
 | Date | Area | What | Files / commands |
 |------|------|------|------------------|
+| 2026-09-29 | Bot + Client + CI | `make benchmark` repaired: EXIT-trap-in-subshell server kill fixed, Godot observer launched without `tee` (real pid, log always written), vsync off by default (`BENCHMARK_VSYNC`), `--skip-replay` also skips `/state`, non-zero exit on scenario failure; report gains per-scenario client sections with first-spawn hitch, warmup exclusion, frame/process percentiles, draw load; `[client-perf]` gains `vsync=`; mana-sustainability test + ci-full protocol-only gate | `scripts/benchmark.sh`, `scripts/ci.sh`, `tools/bot/benchmark_report.py`, `tools/bot/benchmark_client_stats.py`, `tools/bot/benchmark_mana_budget.py`, `tools/bot/test_benchmark_scenarios.py`, `client/scripts/perf_debug_sampler.gd` |
 | 2026-07-08 | Client + Server + Bot | Live Godot WebSocket capacity/close diagnostics and zero-reconnect crowded Volley proof; documented topology-aware performance testing | v457; `ranger_volley_live_session_stability`; `scripts/bot_client_local.sh` |
 | 2026-06-29 | Client | Delta sub-phases (`d_prep` … `d_recon`), `d_upsert` / `d_upsert_m` / `d_upsert_player`; ranked phase output; delta UI sync gate + `client_perf` interval keys | `perf_phase_timer.gd`, `perf_debug_sampler.gd`, `main.gd`, `delta_ui_sync_gate.gd`, `main_config.v0.json` |
 | 2026-06-29 | Client | Local player upsert change-detection helpers | `local_player_authoritative_sync.gd` |

@@ -422,6 +422,33 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
       step9_failure_details+=("replay skipped: protocol bot did not report a session id")
     fi
   fi
+
+  # ci-full also drives the ci_tier=benchmark perf probes protocol-only (no
+  # Godot observer), so they cannot rot outside `make benchmark`. Each probe's
+  # declared max_elapsed_s is its budget. --skip-replay: benchmark_mixed_arena
+  # sessions do not replay deterministically yet (tracked separately); drop the
+  # flag once that is fixed so the probes also gate /state + replay.
+  if [[ "$CI_SCENARIO" == "all" ]]; then
+    BENCH_LOG="$(mktemp -t arpg-ci-benchmark.XXXXXX.log)"
+    echo "RUNNING: benchmark scenarios (protocol-only)"
+    set +e
+    "$ROOT/.venv/bin/python" -m tools.bot.run \
+      --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
+      --scenario benchmark --skip-replay --cleanup-characters \
+      2>&1 >/dev/null | stream_bot_progress "$BENCH_LOG"
+    bench_status=${PIPESTATUS[0]}
+    set +e
+    if [[ "$bench_status" -ne 0 ]]; then
+      echo "FAILED: benchmark scenarios (protocol-only)"
+      show_log "$BENCH_LOG" "benchmark scenarios"
+      step9_failed=1
+      step9_failure_details+=("benchmark: $(protocol_bot_failure_detail "$BENCH_LOG")")
+    else
+      echo "OK: benchmark scenarios (protocol-only)"
+    fi
+    rm -f "$BENCH_LOG"
+  fi
+
   if [[ "$step9_failed" -ne 0 ]]; then
     finish_step_failed
     if [[ "${#step9_failure_details[@]}" -gt 0 ]]; then

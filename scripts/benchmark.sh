@@ -9,12 +9,14 @@
 #         file before driving the scenario, then runs the full scenario.
 #      b. Wait for the session ID file to appear (bot has created the session).
 #      c. Wait 3 seconds for the session to stabilise.
-#      d. Launch Godot (full visual, no --headless) with ARPG_JOIN_SESSION_ID=$SID
-#         so it joins the live session and renders real-time gameplay.
+#      d. If the bot is still running, launch Godot (full visual, no --headless,
+#         vsync off unless BENCHMARK_VSYNC=1) with ARPG_JOIN_SESSION_ID=$SID so
+#         it joins the live session and renders real-time gameplay.
 #      e. Wait for the bot to finish driving the scenario.
-#      f. Kill Godot, collect per-scenario logs.
-#   3. Combine all per-scenario client logs into a single client.log.
-#   4. Generate a unified report via tools/bot/benchmark_report.py.
+#      f. Kill Godot, keep the per-scenario client log.
+#   3. Generate a unified report via tools/bot/benchmark_report.py (client
+#      metrics are reported per scenario).
+#   4. Exit non-zero if any scenario's bot failed (after writing the report).
 #
 # Godot is optional — if not found the script degrades gracefully to bot-only
 # (no visual, no client log) and still generates the report.
@@ -22,6 +24,7 @@
 # Usage:
 #   make benchmark
 #   make benchmark BENCHMARK_OUT=docs/performance/reports/myrun.txt
+#   BENCHMARK_VSYNC=1 make benchmark   # keep the project's vsync (FPS capped)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -53,15 +56,22 @@ ARTIFACTS_DIR="$ROOT/.artifacts/benchmark-runs/$TIMESTAMP"
 mkdir -p "$ARTIFACTS_DIR"
 SERVER_LOG="$ARTIFACTS_DIR/server.log"
 BOT_LOG="$ARTIFACTS_DIR/bot.log"
-CLIENT_LOG="$ARTIFACTS_DIR/client.log"   # combined after all scenarios
 if [[ -z "$BENCHMARK_OUT" ]]; then
   BENCHMARK_OUT="$ARTIFACTS_DIR/report.txt"
 fi
 
 # Temp dir for per-scenario session-ID handoff files
 SID_DIR="$(mktemp -d -t arpg-benchmark-sid.XXXXXX)"
-cleanup_sid_dir() { rm -rf "$SID_DIR"; }
-trap cleanup_sid_dir EXIT
+
+# Godot observer vsync. Off by default: a vsync-capped observer pins FPS at the
+# display refresh rate and hides frame-time headroom. BENCHMARK_VSYNC=1 restores
+# the project setting (what players actually see).
+BENCHMARK_VSYNC="${BENCHMARK_VSYNC:-0}"
+GODOT_OBSERVER_FLAGS=()
+case "$BENCHMARK_VSYNC" in
+  1|true|yes|on) ;;
+  *) GODOT_OBSERVER_FLAGS+=(--disable-vsync) ;;
+esac
 
 # ── Godot availability check ──────────────────────────────────────────────────
 
@@ -78,11 +88,18 @@ fi
 SERVER_PID=""
 GODOT_PID=""
 BOT_PID=""
+FAILED_SCENARIOS=()
 
 cleanup() {
+  # Bash can run an inherited EXIT trap inside a forked async child that is
+  # signalled before it execs (e.g. killing a just-launched observer). Without
+  # this guard that child would kill $SERVER_PID mid-run and the next scenario
+  # would hit "Connection refused". Only the main shell may clean up.
+  [[ "$(exec sh -c 'echo "$PPID"')" == "$$" ]] || return 0
   [[ -n "$BOT_PID" ]]    && kill "$BOT_PID"    >/dev/null 2>&1 || true
   [[ -n "$GODOT_PID" ]]  && kill "$GODOT_PID"  >/dev/null 2>&1 || true
   [[ -n "$SERVER_PID" ]] && kill "$SERVER_PID" >/dev/null 2>&1 || true
+  rm -rf "$SID_DIR"
 }
 trap cleanup EXIT
 
@@ -168,7 +185,7 @@ fi
 
 # ── 3. Per-scenario concurrent run ───────────────────────────────────────────
 
-# Accumulate per-scenario client logs; combined into $CLIENT_LOG at the end.
+# "<scenario_id>=<client log path>" pairs, passed to the report per scenario.
 SCENARIO_CLIENT_LOGS=()
 
 for SCENARIO_ID in $SCENARIO_IDS; do
@@ -201,7 +218,11 @@ else:
   #     so Godot can join as an observer.
   #   - Solo scenarios (benchmark_solo_session=true): creates a solo session for
   #     correct world initialization; Godot is skipped for this scenario.
-  echo "[benchmark]   starting bot for $SCENARIO_ID (email: $BOT_EMAIL, solo=$SOLO_SESSION)..."
+  #   --skip-replay also skips the post-run /state reconstruct: benchmark
+  #   sessions (observer co-op join, benchmark_mixed_arena) are not
+  #   replay-deterministic yet, and the benchmark measures cost, not replay.
+  #   The same probes are driven protocol-only in `make ci-full`.
+  echo "[benchmark]   starting bot for $SCENARIO_ID (solo=$SOLO_SESSION)..."
   if [[ "$SOLO_SESSION" -eq 0 ]]; then
     ARPG_PERF_DEBUG=1 \
       "$ROOT/.venv/bin/python" -m tools.bot.run \
@@ -229,90 +250,71 @@ else:
   fi
   BOT_PID=$!
 
-  # 3b. Wait for the session ID file to appear (bot has created the session).
-  echo "[benchmark]   waiting for session ID from bot..."
-  SID_WAIT=0
-  SID_FOUND=0
-  while [[ $SID_WAIT -lt 30 ]]; do
-    if [[ -s "$SID_FILE" ]]; then
-      SID_FOUND=1
-      break
-    fi
-    if ! kill -0 "$BOT_PID" >/dev/null 2>&1; then
-      echo "[benchmark]   WARNING: bot exited before writing session ID — skipping Godot for $SCENARIO_ID."
-      break
-    fi
-    sleep 0.5
-    SID_WAIT=$((SID_WAIT + 1))
-  done
-
   if [[ "$SOLO_SESSION" -eq 1 ]]; then
-    echo "[benchmark]   solo session — skipping Godot observer for $SCENARIO_ID (server metrics only)."
-    if wait "$BOT_PID"; then
-      echo "[benchmark]   bot finished $SCENARIO_ID successfully."
-    else
-      echo "[benchmark]   bot FAILED for $SCENARIO_ID — check $SCENARIO_BOT_LOG"
+    echo "[benchmark]   solo session — no Godot observer for $SCENARIO_ID (server metrics only)."
+  else
+    # 3b. Wait for the session ID file to appear (bot has created the session).
+    echo "[benchmark]   waiting for session ID from bot..."
+    SID_WAIT=0
+    while [[ $SID_WAIT -lt 30 && ! -s "$SID_FILE" ]] && kill -0 "$BOT_PID" >/dev/null 2>&1; do
+      sleep 0.5
+      SID_WAIT=$((SID_WAIT + 1))
+    done
+
+    # 3c. Wait for the session to stabilise, then launch Godot (full visual,
+    # no --headless) as an observer — only if the bot is still driving it.
+    if [[ -s "$SID_FILE" && "$HAS_GODOT" -eq 1 ]]; then
+      SESSION_ID="$(cat "$SID_FILE")"
+      echo "[benchmark]   session ID: $SESSION_ID; waiting 3s for session to stabilise..."
+      sleep 3
+      if kill -0 "$BOT_PID" >/dev/null 2>&1; then
+        echo "[benchmark]   launching Godot observer (vsync=$BENCHMARK_VSYNC, log: $SCENARIO_CLIENT_LOG)..."
+        # Redirect instead of piping through tee: $! must be Godot's own pid so
+        # the kill below actually stops it (a tee pipeline leaves Godot orphaned).
+        ARPG_BASE_URL="$BASE_URL" \
+          ARPG_DEV_TOKEN="$DEV_TOKEN" \
+          ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
+          ARPG_EMAIL="$OBSERVER_EMAIL" \
+          ARPG_JOIN_SESSION_ID="$SESSION_ID" \
+          ARPG_PERF_DEBUG=1 \
+          "$GODOT" --path "$ROOT/client" ${GODOT_OBSERVER_FLAGS[@]+"${GODOT_OBSERVER_FLAGS[@]}"} \
+          >"$SCENARIO_CLIENT_LOG" 2>&1 &
+        GODOT_PID=$!
+      else
+        echo "[benchmark]   bot already exited — skipping Godot observer for $SCENARIO_ID."
+      fi
+    elif [[ ! -s "$SID_FILE" ]]; then
+      echo "[benchmark]   WARNING: bot did not write a session ID — skipping Godot for $SCENARIO_ID."
     fi
-    BOT_PID=""
-    SCENARIO_CLIENT_LOGS+=("$SCENARIO_CLIENT_LOG")  # empty file, still track
-    continue
   fi
 
-  if [[ "$SID_FOUND" -eq 0 ]]; then
-    echo "[benchmark]   skipping Godot for $SCENARIO_ID (no session ID)."
-    wait "$BOT_PID" || echo "[benchmark]   bot FAILED for $SCENARIO_ID — check $SCENARIO_BOT_LOG"
-    BOT_PID=""
-    continue
-  fi
-
-  SESSION_ID="$(cat "$SID_FILE")"
-  echo "[benchmark]   session ID: $SESSION_ID"
-
-  # 3c. Wait 3 seconds for the session to stabilise before Godot joins.
-  echo "[benchmark]   waiting 3s for session to stabilise..."
-  sleep 3
-
-  # 3d. Launch Godot (full visual, no --headless) to join the live session.
-  if [[ "$HAS_GODOT" -eq 1 ]]; then
-    echo "[benchmark]   launching Godot observer (email: $OBSERVER_EMAIL, session: $SESSION_ID)..."
-    ARPG_BASE_URL="$BASE_URL" \
-      ARPG_DEV_TOKEN="$DEV_TOKEN" \
-      ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
-      ARPG_EMAIL="$OBSERVER_EMAIL" \
-      ARPG_JOIN_SESSION_ID="$SESSION_ID" \
-      ARPG_PERF_DEBUG=1 \
-      "$GODOT" --path "$ROOT/client" 2>&1 | tee "$SCENARIO_CLIENT_LOG" &
-    GODOT_PID=$!
-  fi
-
-  # 3e. Wait for bot to finish driving the full scenario.
+  # 3d. Wait for bot to finish driving the full scenario.
   echo "[benchmark]   waiting for bot to complete $SCENARIO_ID..."
   if wait "$BOT_PID"; then
     echo "[benchmark]   bot finished $SCENARIO_ID successfully."
   else
     echo "[benchmark]   bot FAILED for $SCENARIO_ID — check $SCENARIO_BOT_LOG"
+    FAILED_SCENARIOS+=("$SCENARIO_ID")
   fi
   BOT_PID=""
 
-  # 3f. Kill Godot now that the bot is done.
+  # 3e. Stop Godot now that the bot is done.
   if [[ -n "$GODOT_PID" ]]; then
     echo "[benchmark]   closing Godot..."
     kill "$GODOT_PID" >/dev/null 2>&1 || true
     wait "$GODOT_PID" 2>/dev/null || true
     GODOT_PID=""
-    echo "[benchmark]   Godot closed."
   fi
 
-  # Accumulate client log for this scenario (may be empty if no Godot).
   if [[ -s "$SCENARIO_CLIENT_LOG" ]]; then
-    SCENARIO_CLIENT_LOGS+=("$SCENARIO_CLIENT_LOG")
+    SCENARIO_CLIENT_LOGS+=("$SCENARIO_ID=$SCENARIO_CLIENT_LOG")
   fi
 done
 
 # ── 4. Combine bot logs ───────────────────────────────────────────────────────
 
 # Merge all per-scenario bot logs into the single $BOT_LOG artifact.
-echo "" > "$BOT_LOG"
+: > "$BOT_LOG"
 for SCENARIO_ID in $SCENARIO_IDS; do
   SCENARIO_BOT_LOG="$ARTIFACTS_DIR/${SCENARIO_ID}-bot.log"
   if [[ -s "$SCENARIO_BOT_LOG" ]]; then
@@ -320,38 +322,34 @@ for SCENARIO_ID in $SCENARIO_IDS; do
   fi
 done
 
-# Combine per-scenario client logs into unified client.log.
-if [[ "${#SCENARIO_CLIENT_LOGS[@]}" -gt 0 ]]; then
-  cat "${SCENARIO_CLIENT_LOGS[@]}" > "$CLIENT_LOG"
-fi
-
 # ── 5. Shut down server ───────────────────────────────────────────────────────
 
 echo ""
 echo "[benchmark] shutting down server..."
 kill "$SERVER_PID" >/dev/null 2>&1 || true
+wait "$SERVER_PID" 2>/dev/null || true
 SERVER_PID=""
-sleep 1
 
 # ── 6. Generate unified report ────────────────────────────────────────────────
 
 echo "[benchmark] generating report..."
-CLIENT_LOG_ARG=""
-[[ -s "$CLIENT_LOG" ]] && CLIENT_LOG_ARG="--client-log $CLIENT_LOG"
-# shellcheck disable=SC2086
-"$ROOT/.venv/bin/python" -m tools.bot.benchmark_report \
-  --server-log "$SERVER_LOG" \
-  --bot-log "$BOT_LOG" \
-  $CLIENT_LOG_ARG \
-  --out "$BENCHMARK_OUT"
+REPORT_ARGS=(--server-log "$SERVER_LOG" --bot-log "$BOT_LOG" --out "$BENCHMARK_OUT")
+for ENTRY in ${SCENARIO_CLIENT_LOGS[@]+"${SCENARIO_CLIENT_LOGS[@]}"}; do
+  REPORT_ARGS+=(--scenario-client-log "$ENTRY")
+done
+"$ROOT/.venv/bin/python" -m tools.bot.benchmark_report "${REPORT_ARGS[@]}"
 
 echo ""
 echo "[benchmark] artifacts saved under $ARTIFACTS_DIR:"
 echo "  server log  : $SERVER_LOG"
 echo "  bot log     : $BOT_LOG"
-[[ -s "$CLIENT_LOG" ]] && echo "  client log  : $CLIENT_LOG"
-for SCENARIO_ID in $SCENARIO_IDS; do
-  CL="$ARTIFACTS_DIR/${SCENARIO_ID}-client.log"
-  [[ -s "$CL" ]] && echo "  client log  : $CL  (scenario: $SCENARIO_ID)"
+for ENTRY in ${SCENARIO_CLIENT_LOGS[@]+"${SCENARIO_CLIENT_LOGS[@]}"}; do
+  echo "  client log  : ${ENTRY#*=}  (scenario: ${ENTRY%%=*})"
 done
 echo "  report      : $BENCHMARK_OUT"
+
+if [[ "${#FAILED_SCENARIOS[@]}" -gt 0 ]]; then
+  echo ""
+  echo "[benchmark] FAILED scenarios: ${FAILED_SCENARIOS[*]}"
+  exit 1
+fi

@@ -1,9 +1,9 @@
-# v479 As-Built: Member Join Tick
+# v480 As-Built: Member Join Tick
 
 Date: 2026-09-29
 Status: Complete
-Spec: [`v479_spec-member-join-tick.md`](../specs/v479_spec-member-join-tick.md) ·
-Plan: [`v479_2026-09-29-member-join-tick.md`](../plans/v479_2026-09-29-member-join-tick.md)
+Spec: [`v480_spec-member-join-tick.md`](../specs/v480_spec-member-join-tick.md) ·
+Plan: [`v480_2026-09-29-member-join-tick.md`](../plans/v480_2026-09-29-member-join-tick.md)
 
 ## What shipped
 
@@ -19,8 +19,14 @@ Plan: [`v479_2026-09-29-member-join-tick.md`](../plans/v479_2026-09-29-member-jo
   - `SetSessionMemberConnected` keeps its "only while negative" rule, so a reconnect never moves
     the join tick.
 - **Replay skips never-joined members.** `sessionsetup.JoinedSim(member)` is false for a negative
-  `joined_tick`. `replay.sessionStartSim` skips those members before resolving their snapshot, so
-  replay no longer allocates a guest entity that live never did.
+  `joined_tick`. `replay.sessionStartSim` (`replay/members.go`) skips a member that has neither
+  a v479 recorded join row nor a non-negative `joined_tick`, before resolving its snapshot. So
+  replay no longer allocates a guest entity that live never did. A recorded join row always
+  wins, because it proves the entity entered the sim.
+- **Merged over v479.** The late join records both the `system_member_join` row and the join
+  tick under the same lock. With the skip disabled on the merged code, the regression test still
+  fails (`derived 16, recorded 17`), so v479's join rows alone do not cover a guest that never
+  attached.
 
 ## Proof
 
@@ -43,10 +49,9 @@ Plan: [`v479_2026-09-29-member-join-tick.md`](../plans/v479_2026-09-29-member-jo
 
 ## Known gaps (not fixed here)
 
-- **Legacy sessions.** Sessions from before v479 where a guest was built in at tick 0 but never
+- **Legacy sessions.** Sessions from before v480 where a guest was built in at tick 0 but never
   attached still store `joined_tick = -1`. They now replay without that guest, although live had
   it. The data cannot tell them apart from the running-loop case, so there is no migration.
 - **A live guest that never attached keeps its entity.** A build-time guest that never attaches
-  stays in the live sim (`PlayerConnected` true) until the session ends. This predates v479 and
+  stays in the live sim (`PlayerConnected` true) until the session ends. This predates v480 and
   is left unchanged.
-- Leave/rejoin within one sim (`RemovePlayerEntity`) is still not recorded (v476 gap).

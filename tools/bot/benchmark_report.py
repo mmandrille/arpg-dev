@@ -2,7 +2,8 @@
 
 Benchmark usage (called by scripts/benchmark.sh):
     python -m tools.bot.benchmark_report \\
-        --server-log <path> --bot-log <path> [--client-log <path>] [--out <path>]
+        --server-log <path> --bot-log <path> \\
+        [--scenario-client-log <scenario_id>=<path> ...] [--out <path>]
 
 Play-debug analysis usage (called by make perf-analyze):
     python -m tools.bot.benchmark_report --play-log /tmp/arpg-perf.log [--out <path>]
@@ -13,11 +14,15 @@ Play-debug analysis usage (called by make perf-analyze):
 
   --server-log  Raw server output (JSON structured logs, no prefix)
   --bot-log     Bot stderr (scenario begin/done boundary markers)
-  --client-log  Godot stdout captured during benchmark Godot replay
+  --client-log  Godot stdout captured during a benchmark (single, unlabelled)
+  --scenario-client-log  <scenario_id>=<path> Godot observer log for one
+                scenario; repeatable — client stats are reported per scenario
   --out         Optional output file path (also prints to stdout)
 
-The client section shows FPS distribution, frame budget, per-phase delta cost,
-fog cost, and draw calls — the metrics that actually explain low FPS in real play.
+Client sections (tools/bot/benchmark_client_stats.py) report the first-spawn
+hitch separately, drop warmup samples, and lead with avg_frame_ms/process_ms
+percentiles plus draw_calls/primitives — FPS alone is meaningless when the
+observer is vsync-capped.
 """
 
 from __future__ import annotations
@@ -30,6 +35,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from tools.bot.benchmark_client_stats import DEFAULT_SETTLE_SAMPLES, percentile, render_client_block
 
 # ── bot boundary parser ────────────────────────────────────────────────────────
 
@@ -128,6 +135,10 @@ def parse_client_perf_lines(log_path: Path) -> list[dict[str, float]]:
         kv_str = m.group(1)
         row: dict[str, float] = {}
         for k, v in _KV.findall(kv_str):
+            # Phase timers can reuse a base field name (e.g. `entities` count vs
+            # `entities` phase ms); keep the base value and prefix the phase.
+            if k in row:
+                k = f"phase_{k}"
             try:
                 row[k] = float(v)
             except ValueError:
@@ -137,6 +148,20 @@ def parse_client_perf_lines(log_path: Path) -> list[dict[str, float]]:
     return samples
 
 
+def parse_client_sections(client_log: Path | None, scenario_logs: list[str]) -> list[tuple[str, list[dict[str, float]]]]:
+    sections: list[tuple[str, list[dict[str, float]]]] = []
+    if client_log and client_log.exists():
+        sections.append(("live benchmark session", parse_client_perf_lines(client_log)))
+    for entry in scenario_logs:
+        scenario_id, sep, path = entry.partition("=")
+        if not sep or not scenario_id or not path:
+            sys.exit(f"--scenario-client-log expects SCENARIO_ID=PATH, got {entry!r}")
+        log_path = Path(path)
+        if log_path.exists():
+            sections.append((scenario_id, parse_client_perf_lines(log_path)))
+    return sections
+
+
 # ── statistics helpers ─────────────────────────────────────────────────────────
 
 def _vals(samples: list[dict[str, Any]], key: str) -> list[float]:
@@ -144,7 +169,7 @@ def _vals(samples: list[dict[str, Any]], key: str) -> list[float]:
 
 
 def _pct(values: list[float], p: float) -> float:
-    return sorted(values)[max(0, int(len(values) * p) - 1)] if values else 0.0
+    return percentile(values, p)
 
 
 def _fmt(values: list[float], unit: str = "ms") -> str:
@@ -227,85 +252,15 @@ def render_server_block(scenario_id: str, samples: list[dict[str, Any]]) -> list
     return lines
 
 
-# ── client block renderer ──────────────────────────────────────────────────────
-
-def render_client_block(label: str, samples: list[dict[str, float]]) -> list[str]:
-    if not samples:
-        return []
-    lines: list[str] = []
-    sep = "─" * 62
-    lines.append(sep)
-    lines.append(f"  CLIENT — {label}")
-    lines.append(f"  Samples: {len(samples)}")
-    lines.append("")
-
-    fps_vals = _vals(samples, "fps")
-    frame_vals = _vals(samples, "avg_frame_ms")
-    if fps_vals:
-        avg_fps = statistics.mean(fps_vals)
-        p5_fps = _pct(fps_vals, 0.05)   # worst 5% — the "low" tail
-        min_fps = min(fps_vals)
-        lines.append("  FPS")
-        lines.append(f"    avg {avg_fps:5.1f}  p5 (worst tail) {p5_fps:5.1f}  min {min_fps:5.1f}")
-        lines.append("")
-
-    if frame_vals:
-        lines.append("  FRAME TIME (ms)")
-        lines.append(f"    {_fmt(frame_vals)}")
-        lines.append("")
-
-    lines.append("  CLIENT DELTA PHASES (ms accumulated / sample)")
-    for key, label_ in [
-        ("delta",          "delta total "),
-        ("d_chg",          "d_chg       "),
-        ("d_upsert",       "d_upsert    "),
-        ("d_upsert_player","d_upsert_pl "),
-        ("d_upsert_m",     "d_upsert_m  "),
-        ("d_evt",          "d_evt       "),
-        ("d_ui",           "d_ui        "),
-        ("d_recon",        "d_recon     "),
-    ]:
-        vals = _vals(samples, key)
-        if vals and max(vals) > 0.01:
-            lines.append(f"    {label_}  {_fmt(vals)}")
-    lines.append("")
-
-    lines.append("  RENDERING (per sample)")
-    for key, label_ in [
-        ("fog",        "fog ms      "),
-        ("draw_calls", "draw_calls  "),
-        ("primitives", "primitives  "),
-        ("nodes",      "scene nodes "),
-        ("objects",    "objects     "),
-    ]:
-        vals = _vals(samples, key)
-        if vals:
-            if key == "fog":
-                lines.append(f"    {label_}  {_fmt(vals)}")
-            else:
-                lines.append(f"    {label_}  {_fmt_int(vals)}")
-    lines.append("")
-
-    entity_vals = _vals(samples, "live_monsters")
-    proj_vals = _vals(samples, "projectiles")
-    if entity_vals:
-        lines.append("  SCENE ENTITIES (per sample)")
-        lines.append(f"    live_monsters   {_fmt_int(entity_vals)}")
-        if proj_vals:
-            lines.append(f"    projectiles     {_fmt_int(proj_vals)}")
-        lines.append("")
-
-    return lines
-
-
 # ── report entry point ─────────────────────────────────────────────────────────
 
 def render_report(
     scenario_samples: dict[str, list[dict[str, Any]]],
     boundaries: list[dict[str, Any]],
-    client_samples: list[dict[str, float]],
+    client_sections: list[tuple[str, list[dict[str, float]]]],
     generated_at: str,
     mode: str = "benchmark",
+    settle_samples: int = DEFAULT_SETTLE_SAMPLES,
 ) -> str:
     ordered_ids = [b["id"] for b in boundaries if b["id"] in scenario_samples]
     for sid in scenario_samples:
@@ -313,6 +268,7 @@ def render_report(
             ordered_ids.append(sid)
 
     total_server = sum(len(v) for k, v in scenario_samples.items() if k != "_unassigned")
+    total_client = sum(len(samples) for _, samples in client_sections)
 
     header = [
         "╔══════════════════════════════════════════════════════════════╗",
@@ -320,20 +276,20 @@ def render_report(
         "╚══════════════════════════════════════════════════════════════╝",
         f"  Generated : {generated_at}",
         f"  Mode      : {mode}",
-        f"  Server samples: {total_server}  |  Client samples: {len(client_samples)}",
+        f"  Server samples: {total_server}  |  Client samples: {total_client}",
         "",
     ]
 
-    if not client_samples and not total_server:
+    if not total_client and not total_server:
         header.append("  WARNING: no perf data found. Check ARPG_PERF_DEBUG=1 was set")
         header.append("  and that the log files are from the correct session.")
         header.append("")
 
     body: list[str] = []
 
-    # Client block (global — not sliced per scenario in play-debug mode)
-    if client_samples:
-        body.extend(render_client_block("live session" if mode == "play-debug" else "live benchmark session", client_samples))
+    # Client blocks: one per benchmark scenario observer, or one for play-debug.
+    for label, samples in client_sections:
+        body.extend(render_client_block(label, samples, settle_samples))
 
     # Server blocks per scenario
     for sid in ordered_ids:
@@ -356,7 +312,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="ARPG perf report — benchmark or play-debug")
     parser.add_argument("--server-log", type=Path)
     parser.add_argument("--bot-log", type=Path)
-    parser.add_argument("--client-log", type=Path, help="Godot stdout captured during benchmark")
+    parser.add_argument("--client-log", type=Path, help="Godot stdout captured during benchmark (single, unlabelled)")
+    parser.add_argument("--scenario-client-log", action="append", default=[], metavar="SCENARIO_ID=PATH",
+                        help="Per-scenario Godot observer log; repeatable")
+    parser.add_argument("--warmup-settle-samples", type=int, default=DEFAULT_SETTLE_SAMPLES,
+                        help="Client samples dropped after the first-spawn hitch before steady-state stats")
     parser.add_argument("--play-log", type=Path,
                         help="Combined tee log from make play-debug (has [backend]/[client1] prefixes)")
     parser.add_argument("--out", type=Path)
@@ -372,7 +332,7 @@ def main() -> None:
             sys.exit(f"play log not found: {args.play_log}")
         # play-debug log has both server and client lines with prefixes
         server_samples = parse_perf_samples(args.play_log)
-        client_samples = parse_client_perf_lines(args.play_log)
+        client_sections = [("live session", parse_client_perf_lines(args.play_log))]
         scenario_samples = assign_samples(server_samples, [])
         boundaries: list[dict[str, Any]] = []
         mode = "play-debug"
@@ -382,15 +342,15 @@ def main() -> None:
         server_samples = parse_perf_samples(args.server_log)
         boundaries = parse_bot_boundaries(args.bot_log) if args.bot_log and args.bot_log.exists() else []
         scenario_samples = assign_samples(server_samples, boundaries)
-        client_samples = parse_client_perf_lines(args.client_log) if args.client_log and args.client_log.exists() else []
+        client_sections = parse_client_sections(args.client_log, args.scenario_client_log)
         mode = "benchmark"
 
     if not server_samples:
         print("WARNING: no backend_perf lines found in server log — was ARPG_PERF_DEBUG=1 set?")
-    if not client_samples:
+    if not any(samples for _, samples in client_sections):
         print("WARNING: no [client-perf] lines found in client log")
 
-    report = render_report(scenario_samples, boundaries, client_samples, generated_at, mode)
+    report = render_report(scenario_samples, boundaries, client_sections, generated_at, mode, args.warmup_settle_samples)
     print(report)
 
     if args.out:

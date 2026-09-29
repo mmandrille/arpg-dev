@@ -8,7 +8,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
-// v479: SetSessionMemberPlayer records the tick the member's entity entered the
+// v480: SetSessionMemberPlayer records the tick the member's entity entered the
 // sim, so joined_tick < 0 only ever means "never in the sim". A later first
 // websocket connect must not move it.
 func TestSetSessionMemberPlayerRecordsJoinedTick(t *testing.T) {

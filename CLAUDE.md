@@ -322,4 +322,7 @@ These rules emerged from paying down the god-file debt. Agents should follow the
     still point at the slow navigation or wait. Otherwise shorten to the contract it is really
     proving: compact lab worlds, focused setup, or lower-level Go/Python tests for exhaustive
     traversal/timing coverage instead of waiting through unrelated dungeon walks or combat cycles.
-    See `docs/progress/scenario-catalog.md`.
+    See `docs/progress/scenario-catalog.md`. **Exception:** `ci_tier: benchmark` perf probes are
+    sustained-load generators, not proofs; their declared `max_elapsed_s` is the budget. They run
+    only in `make benchmark` and once, protocol-only, in `make ci-full`; their pinned
+    `debug_progression` must pass `tools/bot/test_benchmark_scenarios.py` (mana derived from rules).

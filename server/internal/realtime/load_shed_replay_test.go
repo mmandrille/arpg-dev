@@ -79,6 +79,13 @@ func TestUnrecordedLoadShedBreaksReplay(t *testing.T) {
 
 func newLoadShedTestLoop(t *testing.T) (*loadShedMemRepo, *sessionLoop) {
 	t.Helper()
+	return newLoadShedTestLoopFor(t, nil)
+}
+
+// newLoadShedTestLoopFor lets a test adjust the session (world, seed) before
+// the loop builds its sim.
+func newLoadShedTestLoopFor(t *testing.T, configure func(*loadShedMemRepo)) (*loadShedMemRepo, *sessionLoop) {
+	t.Helper()
 	rulesDir, err := game.FindSharedRulesDir()
 	if err != nil {
 		t.Fatalf("find rules: %v", err)
@@ -88,6 +95,9 @@ func newLoadShedTestLoop(t *testing.T) (*loadShedMemRepo, *sessionLoop) {
 		t.Fatalf("load rules: %v", err)
 	}
 	repo := newLoadShedMemRepo(rules)
+	if configure != nil {
+		configure(repo)
+	}
 	hub := &Hub{store: repo, rules: rules, log: slog.New(slog.NewTextHandler(io.Discard, nil)), metrics: metrics.New()}
 	loop, err := newSessionLoop(context.Background(), hub, repo.session)
 	if err != nil {

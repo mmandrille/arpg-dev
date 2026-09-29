@@ -1,9 +1,9 @@
-# v479 Spec: Member Join Tick (never-attached guests)
+# v480 Spec: Member Join Tick (never-attached guests)
 
 Status: Complete
 Date: 2026-09-29
 Codename: `member-join-tick`
-Baseline: v478 `shared-member-setup` (merge `11831b3f`)
+Baseline: v479 `recorded-member-lifecycle` (commit `7c020abd`); first built on v478 `shared-member-setup`
 
 ## Problem
 
@@ -30,8 +30,9 @@ and event diverges (`event count: derived 16, recorded 17` in the regression tes
    `SetSessionMemberPlayer` gains a `joinedTick` argument and writes `joined_tick`. The build
    passes `0`. A late join passes `Sim.PlayerJoinedTick`. `SetSessionMemberConnected` keeps its
    "only while negative" rule, so a reconnect never moves the original join tick.
-3. Replay skips members with `joined_tick < 0`, through `sessionsetup.JoinedSim`, the shared
-   setup package. It does not resolve their start snapshot either.
+3. Replay skips members with `joined_tick < 0` and no v479 recorded join row, through
+   `sessionsetup.JoinedSim`, the shared setup package. It does not resolve their start snapshot
+   either.
 
 This also closes a crash window in the late join: before, `joined_tick` was written only by
 `admitMemberLocked`, after the lock was released following `AddGuest`.
@@ -41,7 +42,6 @@ This also closes a crash window in the late join: before, `joined_tick` was writ
 - Old sessions where a guest was built in at tick 0 but never attached still store `-1`, and now
   replay without that guest. A migration cannot tell this case apart from the running-loop case.
   This is recorded as a known gap.
-- Leave and rejoin within one sim (`RemovePlayerEntity`) is still not recorded (v476 gap).
 
 ## Acceptance
 

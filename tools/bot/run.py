@@ -3480,33 +3480,37 @@ def run_verified_session(
     log("phase drive done", f"elapsed={time.monotonic() - phase_started:.2f}s")
     run_runtime_assertions(assertions, observed, "runtime protocol")
 
-    phase_started = time.monotonic()
-    state = fetch_state(client, token, debug_token, session_id)
-    run_assertions(
-        assertions,
-        state["entities"],
-        state["inventory"],
-        state["equipped"],
-        observed.item_id,
-        "/state API",
-        current_level=int(state.get("current_level", 0)),
-        walls=state.get("walls", []),
-        discovered_teleporters=parse_discovered_teleporters(state),
-        character_progression=state.get("character_progression", {}),
-        hotbar_capacity=int(state.get("hotbar_capacity", 2)),
-        hotbar=state.get("hotbar", []),
-        inventory_rows=int(state.get("inventory_rows", 3)),
-        inventory_capacity=int(state.get("inventory_capacity", int(state.get("inventory_rows", 3)) * 5)),
-        gold=int(state.get("gold", 0)),
-        stash_items=state.get("stash_items", []),
-        stash_gold=int(state.get("stash_gold", 0)),
-        stash_capacity=int(state.get("stash_capacity", 50)),
-        resource_wallet={str(row.get("resource_id", "")): max(0, int(row.get("amount", 0))) for row in state.get("resource_wallet", []) if str(row.get("resource_id", ""))},
-        resource_bag_items=state.get("resource_bag_items", []),
-        skill_progression=state.get("skill_progression", {}),
-        skill_cooldowns=state.get("skill_cooldowns", []),
-    )
-    log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
+    # GET /state is replay.Reconstruct server-side, so --skip-replay skips it too.
+    if skip_replay:
+        log("phase /state skipped (--skip-replay)", session_id)
+    else:
+        phase_started = time.monotonic()
+        state = fetch_state(client, token, debug_token, session_id)
+        run_assertions(
+            assertions,
+            state["entities"],
+            state["inventory"],
+            state["equipped"],
+            observed.item_id,
+            "/state API",
+            current_level=int(state.get("current_level", 0)),
+            walls=state.get("walls", []),
+            discovered_teleporters=parse_discovered_teleporters(state),
+            character_progression=state.get("character_progression", {}),
+            hotbar_capacity=int(state.get("hotbar_capacity", 2)),
+            hotbar=state.get("hotbar", []),
+            inventory_rows=int(state.get("inventory_rows", 3)),
+            inventory_capacity=int(state.get("inventory_capacity", int(state.get("inventory_rows", 3)) * 5)),
+            gold=int(state.get("gold", 0)),
+            stash_items=state.get("stash_items", []),
+            stash_gold=int(state.get("stash_gold", 0)),
+            stash_capacity=int(state.get("stash_capacity", 50)),
+            resource_wallet={str(row.get("resource_id", "")): max(0, int(row.get("amount", 0))) for row in state.get("resource_wallet", []) if str(row.get("resource_id", ""))},
+            resource_bag_items=state.get("resource_bag_items", []),
+            skill_progression=state.get("skill_progression", {}),
+            skill_cooldowns=state.get("skill_cooldowns", []),
+        )
+        log("phase /state done", f"elapsed={time.monotonic() - phase_started:.2f}s")
 
     phase_started = time.monotonic()
     asyncio.run(check_persistence(base_url, token, session_id, observed.item_id, assertions))
@@ -4320,7 +4324,7 @@ def main() -> int:
     parser.add_argument("--print-session-id", action="store_true")
     parser.add_argument("--cleanup-characters", action="store_true")
     parser.add_argument("--skip-replay", action="store_true",
-        help="Skip the deterministic replay check after driving the scenario. "
+        help="Skip the replay-derived checks (/state reconstruct + replay verify) after driving the scenario. "
              "Use for benchmark scenarios where replay determinism is not the goal.")
     args = parser.parse_args()
 

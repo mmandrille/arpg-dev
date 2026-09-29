@@ -1,6 +1,6 @@
-# v479 Plan: Member Join Tick
+# v480 Plan: Member Join Tick
 
-Spec: [`v479_spec-member-join-tick.md`](../specs/v479_spec-member-join-tick.md)
+Spec: [`v480_spec-member-join-tick.md`](../specs/v480_spec-member-join-tick.md)
 
 1. **Reproduce.** Add `realtime/member_join_tick_replay_test.go`, which reuses the v478
    `member_setup_replay_test.go` harness. The host attaches and descends, `repo.joinGuest()` runs

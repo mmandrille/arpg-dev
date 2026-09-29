@@ -7,7 +7,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
-// v479 regression: joined_tick = -1 must mean "never in the sim". A guest that
+// v480 regression: joined_tick = -1 must mean "never in the sim". A guest that
 // joins over HTTP while the loop is running, and never attaches over the
 // websocket, is never added live. Replay used to treat JoinedTick <= 0 as
 // "present at tick 0" and allocated a guest entity, shifting every later

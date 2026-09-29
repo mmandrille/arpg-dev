@@ -29,8 +29,9 @@ func sample(delta: float, ready_state: int, tick: int, reconciliation_delta: flo
 	if enabled:
 		phase_suffix = " " + PerfPhaseTimerScript.format_snapshot(true)
 		PerfPhaseTimerScript.reset_frame()
-	print("[client-perf] fps=%d avg_frame_ms=%.2f process_ms=%.2f physics_ms=%.2f tick=%d ws=%d recon_delta=%.3f entities=%d monsters=%d live_monsters=%d projectiles=%d loot=%d interactables=%d nodes=%d objects=%d draw_calls=%d primitives=%d%s" % [
+	print("[client-perf] fps=%d vsync=%d avg_frame_ms=%.2f process_ms=%.2f physics_ms=%.2f tick=%d ws=%d recon_delta=%.3f entities=%d monsters=%d live_monsters=%d projectiles=%d loot=%d interactables=%d nodes=%d objects=%d draw_calls=%d primitives=%d%s" % [
 		int(Engine.get_frames_per_second()),
+		int(DisplayServer.window_get_vsync_mode()),
 		avg_frame_ms,
 		float(Performance.get_monitor(Performance.TIME_PROCESS)) * 1000.0,
 		float(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)) * 1000.0,

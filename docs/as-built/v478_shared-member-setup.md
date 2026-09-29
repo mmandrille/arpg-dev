@@ -77,7 +77,7 @@ Commit: pending
 
 - **Mercenary roster** (`mercenaryroster.LoadIntoSim`) still reads live alt-character progression
   and items at build and replay time. This is the same flaw corpses had.
-- **Never-attached guest** (fixed in v479, [`as-built`](v479_member-join-tick.md)). A guest that HTTP-joins a running loop and never attaches keeps
+- **Never-attached guest** (fixed in v480, [`as-built`](v480_member-join-tick.md)). A guest that HTTP-joins a running loop and never attaches keeps
   `joined_tick = -1`. Replay adds it at tick 0; live never does. Reproduced with a scratch
   live-loop test: `event count: derived 43, recorded 38`. To fix it, have the live build persist
   `joined_tick = 0` for the members it adds, and have replay skip `joined_tick < 0`.

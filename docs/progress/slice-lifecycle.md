@@ -17,7 +17,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
-| **v479** | `member-join-tick` | Complete (`make ci` green) | [`spec`](../specs/v479_spec-member-join-tick.md) | [`plan`](../plans/v479_2026-09-29-member-join-tick.md) | [`as-built`](../as-built/v479_member-join-tick.md) |
+| **v480** | `member-join-tick` | Complete (`make ci` green) | [`spec`](../specs/v480_spec-member-join-tick.md) | [`plan`](../plans/v480_2026-09-29-member-join-tick.md) | [`as-built`](../as-built/v480_member-join-tick.md) |
+| **v479** | `recorded-member-lifecycle` | Complete (`make ci` green) | [`spec`](../specs/v479_spec-recorded-member-lifecycle.md) | [`plan`](../plans/v479_2026-09-29-recorded-member-lifecycle.md) | [`as-built`](../as-built/v479_recorded-member-lifecycle.md) |
 | **v478** | `shared-member-setup` | Complete (`make ci` green) | [`spec`](../specs/v478_spec-shared-member-setup.md) | [`plan`](../plans/v478_2026-09-29-shared-member-setup.md) | [`as-built`](../as-built/v478_shared-member-setup.md) |
 | **v477** | `clip-owned-death-pose` | Complete (`make ci` green; client-only, spec-gate exemption) | — | — | [`as-built`](../as-built/v477_clip-owned-death-pose.md) |
 | **v476** | `recorded-load-shed` | Complete (`make ci` green) | [`spec`](../specs/v476_spec-recorded-load-shed.md) | [`plan`](../plans/v476_2026-09-29-recorded-load-shed.md) | [`as-built`](../as-built/v476_recorded-load-shed.md) |

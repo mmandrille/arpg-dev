@@ -330,6 +330,9 @@ type SessionStartSnapshot struct {
 	StashGold       AccountStashGold
 	Resources       []AccountResourceAmount
 	ResourceBagItems []AccountResourceBagItem
+	// Corpses are the same-account recoverable bodies frozen when the member's
+	// snapshot was taken; live corpse rows change as bodies are looted.
+	Corpses     []CharacterCorpse
 	Progression *CharacterProgression
 }
 

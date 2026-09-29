@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/sessionsetup"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -45,9 +46,9 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 	}
 	l.mu.Unlock()
 
-	start, err := l.hub.store.LoadSessionStartSnapshotForMember(ctx, member.SessionID, member.AccountID, member.CharacterID)
+	guest, err := sessionsetup.Resolve(ctx, l.hub.store, l.hub.rules, member.SessionID, member)
 	if err != nil {
-		l.log.Error("load late-joined member start snapshot", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
+		l.log.Error("resolve late-joined member", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
 		return l.sim.DefaultPlayerID()
 	}
 
@@ -56,22 +57,12 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 		l.mu.Unlock()
 		return playerID
 	}
-	playerID, err := l.sim.AddGuestPlayer(member.AccountID, member.CharacterID, displayNameForMember(member), progressionStateFromStore(l.hub.rules, start.Progression))
+	playerID, err := sessionsetup.AddGuest(l.sim, guest)
+	l.mu.Unlock()
 	if err != nil {
-		l.mu.Unlock()
 		l.log.Error("add late-joined guest player", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
 		return l.sim.DefaultPlayerID()
 	}
-	l.sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
-	l.sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
-	l.sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
-	l.sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
-	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
-	l.sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
-	l.sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
-	l.sim.LoadAccountResourceBagForPlayer(playerID, persistedResourceBagItems(start.ResourceBagItems))
-	l.hub.loadCharacterCorpses(context.Background(), l.log, l.sim, member)
-	l.mu.Unlock()
 	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 		l.log.Error("set late-joined member player", "account_id", member.AccountID, "character_id", member.CharacterID, "player_id", playerID, "error", err)
 	}

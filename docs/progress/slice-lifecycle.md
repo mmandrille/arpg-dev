@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v477** | `shared-member-setup` | Complete (`make ci` green) | [`spec`](../specs/v477_spec-shared-member-setup.md) | [`plan`](../plans/v477_2026-09-29-shared-member-setup.md) | [`as-built`](../as-built/v477_shared-member-setup.md) |
 | **v476** | `recorded-load-shed` | Complete (`make ci` green) | [`spec`](../specs/v476_spec-recorded-load-shed.md) | [`plan`](../plans/v476_2026-09-29-recorded-load-shed.md) | [`as-built`](../as-built/v476_recorded-load-shed.md) |
 | **v475** | `kit-heroes` | Complete (`make ci` green) | [`spec`](../specs/v475_spec-kit-heroes.md) | — | [`as-built`](../as-built/v475_kit-heroes.md) |
 | **v474** | `kit-skeleton-monsters` | Complete (`make ci` green) | [`spec`](../specs/v474_spec-kit-skeleton-monsters.md) | — | [`as-built`](../as-built/v474_kit-skeleton-monsters.md) |

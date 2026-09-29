@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"sort"
 	"sync"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/logging"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/replay"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/sessionsetup"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -95,125 +95,48 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		recon.Sim.SetGameplayDebug(h.gameplayDebug)
 		return recon.Sim, &recon.Metadata, nil
 	}
-	members, err := h.store.ListSessionMembers(ctx, sess.ID)
+	members, err := sessionsetup.Members(ctx, h.store, sess)
 	if err != nil {
-		return nil, nil, fmt.Errorf("list members: %w", err)
+		return nil, nil, err
 	}
-	if len(members) == 0 {
-		members = []store.SessionMember{{
-			SessionID:   sess.ID,
-			AccountID:   sess.AccountID,
-			CharacterID: sess.CharacterID,
-			Role:        store.SessionMemberHost,
-			Status:      store.SessionMemberActive,
-		}}
+	hostMember := sessionsetup.Host(members)
+	host, err := sessionsetup.Resolve(ctx, h.store, h.rules, sess.ID, hostMember)
+	if err != nil {
+		return nil, nil, fmt.Errorf("resolve host: %w", err)
 	}
-	sort.Slice(members, func(i, j int) bool {
-		if members[i].Role != members[j].Role {
-			return members[i].Role == store.SessionMemberHost
-		}
-		if members[i].JoinedTick != members[j].JoinedTick {
-			return members[i].JoinedTick < members[j].JoinedTick
-		}
-		if members[i].AccountID != members[j].AccountID {
-			return members[i].AccountID < members[j].AccountID
-		}
-		return members[i].CharacterID < members[j].CharacterID
+	sim, err := sessionsetup.NewHostSim(ctx, h.store, h.rules, sess, host, func(sim *game.Sim) {
+		sim.SetGameplayDebug(h.gameplayDebug)
 	})
-	host := members[0]
-	for _, member := range members {
-		if member.Role == store.SessionMemberHost {
-			host = member
-			break
-		}
-	}
-	worldID := sess.WorldID
-	if worldID == "" {
-		worldID = game.DefaultWorldID
-	}
-	hostStart, err := h.store.LoadSessionStartSnapshotForMember(ctx, sess.ID, host.AccountID, host.CharacterID)
-	if err != nil {
-		return nil, nil, fmt.Errorf("load host start snapshot: %w", err)
-	}
-	hostProgression, err := h.progressionStateForMember(ctx, host, hostStart.Progression)
 	if err != nil {
 		return nil, nil, err
 	}
-	sim, err := game.NewSimWithWorldProgression(sess.ID, sess.Seed, h.rules, worldID, hostProgression)
-	if err != nil {
-		return nil, nil, err
-	}
-	sim.SetGameplayDebug(h.gameplayDebug)
 	hostPlayerID := sim.DefaultPlayerID()
-	sim.SetPlayerMetadata(hostPlayerID, host.AccountID, host.CharacterID, "Hero", store.SessionMemberHost)
-	sim.LoadInventoryForPlayer(hostPlayerID, persistedItems(hostStart.Items))
-	sim.LoadHotbarForPlayer(hostPlayerID, persistedHotbar(hostStart.Hotbar))
-	sim.LoadSkillBindingsForPlayer(hostPlayerID, persistedSkillBindings(hostStart.SkillBinds))
-	sim.LoadDiscoveredTeleportersForPlayer(hostPlayerID, waypointLevels(hostStart.Waypoints))
-	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
-	sim.LoadAccountStashForPlayer(hostPlayerID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
-	sim.LoadResourceWalletForPlayer(hostPlayerID, persistedResources(hostStart.Resources))
-	sim.LoadAccountResourceBagForPlayer(hostPlayerID, persistedResourceBagItems(hostStart.ResourceBagItems))
-	if err := h.loadMercenaryRosterIntoSim(ctx, sim, host.AccountID, host.CharacterID); err != nil {
-		return nil, nil, err
-	}
-	persistedHireID := hostProgression.HiredMercenaryCharacterID
-	sim.RestoreHiredMercenaryCompanion(hostPlayerID)
+	persistedHireID := host.Progression.HiredMercenaryCharacterID
 	if persistedHireID != "" && sim.CharacterProgressionView().HiredMercenaryCharacterID == "" {
-		if err := h.store.UpsertCharacterProgression(ctx, host.AccountID, storeProgressionFromView(host.AccountID, host.CharacterID, sim.CharacterProgressionView())); err != nil {
+		if err := h.store.UpsertCharacterProgression(ctx, hostMember.AccountID, storeProgressionFromView(hostMember.AccountID, hostMember.CharacterID, sim.CharacterProgressionView())); err != nil {
 			return nil, nil, fmt.Errorf("clear stale hired mercenary: %w", err)
 		}
 	}
-	h.loadCharacterCorpses(ctx, h.log, sim, host)
-	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, host.AccountID, host.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
+	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, hostMember.AccountID, hostMember.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err
 	}
 	for _, member := range members {
-		if member.AccountID == host.AccountID && member.CharacterID == host.CharacterID {
+		if sessionsetup.IsHost(member, hostMember) {
 			continue
 		}
-		start, err := h.store.LoadSessionStartSnapshotForMember(ctx, sess.ID, member.AccountID, member.CharacterID)
+		guest, err := sessionsetup.Resolve(ctx, h.store, h.rules, sess.ID, member)
 		if err != nil {
-			return nil, nil, fmt.Errorf("load guest start snapshot: %w", err)
+			return nil, nil, fmt.Errorf("resolve guest: %w", err)
 		}
-		memberProgression, err := h.progressionStateForMember(ctx, member, start.Progression)
-		if err != nil {
-			return nil, nil, err
-		}
-		playerID, err := sim.AddGuestPlayer(member.AccountID, member.CharacterID, "Guest", memberProgression)
+		playerID, err := sessionsetup.AddGuest(sim, guest)
 		if err != nil {
 			return nil, nil, err
 		}
-		sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
-		sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
-		sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
-		sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
-		sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
-		sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
-		sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
-		sim.LoadAccountResourceBagForPlayer(playerID, persistedResourceBagItems(start.ResourceBagItems))
-		h.loadCharacterCorpses(ctx, h.log, sim, member)
 		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
 			return nil, nil, err
 		}
 	}
 	return sim, nil, nil
-}
-
-func (h *Hub) progressionStateForMember(ctx context.Context, member store.SessionMember, progression *store.CharacterProgression) (game.CharacterProgressionState, error) {
-	if progression == nil {
-		return progressionStateFromStore(h.rules, progression), nil
-	}
-	character, err := h.store.GetCharacter(ctx, member.CharacterID)
-	if err != nil {
-		return game.CharacterProgressionState{}, fmt.Errorf("load character class: %w", err)
-	}
-	if character.CharacterClass == "" || character.CharacterClass == progression.CharacterClass {
-		return progressionStateFromStore(h.rules, progression), nil
-	}
-	updated := *progression
-	updated.CharacterClass = character.CharacterClass
-	return progressionStateFromStore(h.rules, &updated), nil
 }
 
 func (l *sessionLoop) start() {
@@ -846,20 +769,6 @@ func memberKey(member store.SessionMember) string {
 
 func idStr(id uint64) string {
 	return fmt.Sprintf("%d", id)
-}
-
-func displayNameForMember(member store.SessionMember) string {
-	if member.Role == store.SessionMemberHost {
-		return "Hero"
-	}
-	if member.CharacterID == "" {
-		return "Guest"
-	}
-	suffix := member.CharacterID
-	if len(suffix) > 6 {
-		suffix = suffix[len(suffix)-6:]
-	}
-	return "Guest " + suffix
 }
 
 func killedEventMember(ev game.Event, membersByPlayerID map[uint64]store.SessionMember) (store.SessionMember, bool) {

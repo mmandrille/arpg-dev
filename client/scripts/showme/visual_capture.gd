@@ -812,7 +812,8 @@ func _setup_companions() -> void:
 	main.right_click_skill_id = "revive"
 	main.skill_progression = {"skills": [{"skill_id": "revive", "rank": 1}]}
 	main.player_anchor.position = Vector3(4.0, 0.0, 4.0)
-	main._sync_camera_to_player()
+	if main._camera_controller != null:
+		main._camera_controller.sync_to_player()
 	main._upsert_entity({
 		"id": "5101",
 		"type": "companion",
@@ -856,6 +857,23 @@ func _setup_companions() -> void:
 		"visual_model": "monster_quadruped",
 		"position": {"x": 4.8, "y": 5.2},
 	})
+	# Dead legacy dummy and dead kit skeleton: death presentation must lay bodies flat, never on end.
+	main._upsert_entity({
+		"id": "5202",
+		"type": "monster",
+		"monster_def_id": "training_dummy",
+		"hp": 0,
+		"max_hp": 8,
+		"position": {"x": 3.2, "y": 5.6},
+	})
+	main._upsert_entity({
+		"id": "5203",
+		"type": "monster",
+		"monster_def_id": "dungeon_mob",
+		"hp": 0,
+		"max_hp": 8,
+		"position": {"x": 3.6, "y": 3.4},
+	})
 	main.hovered_loot_id = "5201"
 	main._refresh_loot_label_visibility()
 	var corpse_rec: Dictionary = main.entities.get("5201", {})
@@ -869,7 +887,8 @@ func _setup_companions() -> void:
 		if corpse_bar != null:
 			corpse_bar.set_process(false)
 			corpse_bar.position = Vector2(390.0, 180.0)
-	await process_frame
+	# Let the terminal death clips and reaction tweens settle into their final pose.
+	await create_timer(2.5).timeout
 
 func _setup_classes() -> void:
 	var root := Node3D.new()

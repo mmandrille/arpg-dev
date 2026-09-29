@@ -254,6 +254,7 @@ v473_* = dungeon-kit-props
 v474_* = kit-skeleton-monsters
 v475_* = kit-heroes
 v476_* = recorded-load-shed
+v477_* = clip-owned-death-pose
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

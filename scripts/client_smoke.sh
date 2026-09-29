@@ -245,6 +245,7 @@ run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filte
 run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
 run_gate "GDScript loot node factory test" "[gdtest] PASS: test_loot_node_factory" res://tests/test_loot_node_factory.gd
 run_gate "GDScript impact sparks test" "[gdtest] PASS: test_impact_sparks" res://tests/test_impact_sparks.gd
+run_gate "GDScript death pose ownership test" "[gdtest] PASS: test_death_pose_ownership" res://tests/test_death_pose_ownership.gd
 run_gate "GDScript combat outcome punch test" "[gdtest] PASS: test_combat_outcome_punch" res://tests/test_combat_outcome_punch.gd
 run_gate "GDScript skill rank intensity test" "[gdtest] PASS: test_skill_rank_intensity" res://tests/test_skill_rank_intensity.gd
 run_gate "GDScript skill rank scaling test" "[gdtest] PASS: compound rank scaling increases" res://tests/test_skill_rank_scaling.gd

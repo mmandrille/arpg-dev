@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v477** | `clip-owned-death-pose` | Complete (`make ci` green; client-only, spec-gate exemption) | — | — | [`as-built`](../as-built/v477_clip-owned-death-pose.md) |
 | **v476** | `recorded-load-shed` | Complete (`make ci` green) | [`spec`](../specs/v476_spec-recorded-load-shed.md) | [`plan`](../plans/v476_2026-09-29-recorded-load-shed.md) | [`as-built`](../as-built/v476_recorded-load-shed.md) |
 | **v475** | `kit-heroes` | Complete (`make ci` green) | [`spec`](../specs/v475_spec-kit-heroes.md) | — | [`as-built`](../as-built/v475_kit-heroes.md) |
 | **v474** | `kit-skeleton-monsters` | Complete (`make ci` green) | [`spec`](../specs/v474_spec-kit-skeleton-monsters.md) | — | [`as-built`](../as-built/v474_kit-skeleton-monsters.md) |

@@ -6,7 +6,6 @@ import (
 	"strconv"
 )
 
-
 type dungeonRoom struct {
 	innerMin Vec2
 	innerMax Vec2
@@ -20,31 +19,47 @@ type roomDoor struct {
 }
 
 // placeRoomCorridorLayout builds rectangular rooms connected by open L-shaped hallways.
+//
+// Anchors (stairs, teleporter, chests) are placed before rooms and stay fixed across attempts, so
+// re-rolling rooms cannot rescue an anchor geometry that no set of spaced, normal-sized rooms can
+// wrap. The first pass keeps every floor that already generates bit-identical; only when it is
+// exhausted does the anchor fallback pass run (v472): conflicting anchor clusters share one
+// oversized room, and anchor rooms may sit flush with the perimeter wall.
 func placeRoomCorridorLayout(seed string, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
 	r := rules.RoomCorridorPCG
 	if !r.Enabled {
 		return nil
 	}
 	anchors := generatedAnchorPoints(*out)
-	for attempt := 0; attempt < r.MaxAttempts; attempt++ {
-		rng := NewRNG(SeedToUint64(seed + "|room_corridor|" + strconv.Itoa(absInt(out.levelNum)) + "|" + strconv.Itoa(attempt)))
-		layout, ok := randomRoomCorridorLayout(rng, rules, anchors)
-		if !ok {
-			continue
+	for _, anchorFallback := range []bool{false, true} {
+		for attempt := 0; attempt < r.MaxAttempts; attempt++ {
+			rng := NewRNG(SeedToUint64(roomCorridorAttemptSeed(seed, out.levelNum, attempt, anchorFallback)))
+			layout, ok := randomRoomCorridorLayout(rng, rules, anchors, anchorFallback)
+			if !ok {
+				continue
+			}
+			candidate := *out
+			candidate.walls = append(append([]wallObstacle(nil), out.walls...), layout.walls...)
+			candidate.corridorZones = append(append([]corridorZone(nil), out.corridorZones...), layout.corridorZones...)
+			candidate.rooms = layout.rooms
+			if err := validateGeneratedDungeonReachability(rules, candidate); err != nil {
+				continue
+			}
+			out.walls = candidate.walls
+			out.corridorZones = candidate.corridorZones
+			out.rooms = candidate.rooms
+			return nil
 		}
-		candidate := *out
-		candidate.walls = append(append([]wallObstacle(nil), out.walls...), layout.walls...)
-		candidate.corridorZones = append(append([]corridorZone(nil), out.corridorZones...), layout.corridorZones...)
-		candidate.rooms = layout.rooms
-		if err := validateGeneratedDungeonReachability(rules, candidate); err != nil {
-			continue
-		}
-		out.walls = candidate.walls
-		out.corridorZones = candidate.corridorZones
-		out.rooms = candidate.rooms
-		return nil
 	}
-	return fmt.Errorf("game: generate dungeon level %d: could not place room-corridor layout after %d attempts", out.levelNum, r.MaxAttempts)
+	return fmt.Errorf("game: generate dungeon level %d: could not place room-corridor layout after %d attempts per pass (including anchor fallback pass)", out.levelNum, r.MaxAttempts)
+}
+
+func roomCorridorAttemptSeed(seed string, levelNum, attempt int, anchorFallback bool) string {
+	stream := "|room_corridor|"
+	if anchorFallback {
+		stream = "|room_corridor_anchor_fallback|"
+	}
+	return seed + stream + strconv.Itoa(absInt(levelNum)) + "|" + strconv.Itoa(attempt)
 }
 
 type roomCorridorLayout struct {
@@ -53,9 +68,9 @@ type roomCorridorLayout struct {
 	corridorZones []corridorZone
 }
 
-func randomRoomCorridorLayout(rng *RNG, rules DungeonGenerationRules, anchors []Vec2) (roomCorridorLayout, bool) {
+func randomRoomCorridorLayout(rng *RNG, rules DungeonGenerationRules, anchors []Vec2, anchorFallback bool) (roomCorridorLayout, bool) {
 	r := rules.RoomCorridorPCG
-	rooms, ok := packDungeonRooms(rng, rules, anchors)
+	rooms, ok := packDungeonRooms(rng, rules, anchors, anchorFallback)
 	if !ok || len(rooms) < r.RoomCount.Min {
 		return roomCorridorLayout{}, false
 	}
@@ -91,7 +106,7 @@ func generatedAnchorPoints(out generatedDungeonLevel) []Vec2 {
 	return points
 }
 
-func packDungeonRooms(rng *RNG, rules DungeonGenerationRules, anchors []Vec2) ([]dungeonRoom, bool) {
+func packDungeonRooms(rng *RNG, rules DungeonGenerationRules, anchors []Vec2, anchorFallback bool) ([]dungeonRoom, bool) {
 	r := rules.RoomCorridorPCG
 	target := randomIntRange(rng, r.RoomCount.Min, r.RoomCount.Max)
 	rooms := make([]dungeonRoom, 0, target)
@@ -100,7 +115,7 @@ func packDungeonRooms(rng *RNG, rules DungeonGenerationRules, anchors []Vec2) ([
 	thickness := rules.WallThickness
 
 	var anchorOK bool
-	rooms, anchorOK = ensureAnchorRooms(rng, rules, rooms, anchors, margin, spacing, thickness)
+	rooms, anchorOK = ensureAnchorRooms(rng, rules, rooms, anchors, margin, spacing, thickness, anchorFallback)
 	if !anchorOK {
 		return nil, false
 	}
@@ -155,7 +170,6 @@ func packDungeonRooms(rng *RNG, rules DungeonGenerationRules, anchors []Vec2) ([
 
 	return rooms, true
 }
-
 
 func randomDungeonRoom(rng *RNG, rules DungeonGenerationRules, hub bool, margin float64) (dungeonRoom, bool) {
 	r := rules.RoomCorridorPCG
@@ -397,7 +411,6 @@ func axisCorridorZone(from, to Vec2, width, depth float64, horizontal bool) []co
 		size: Vec2{X: depth, Y: hi - lo + width},
 	}}
 }
-
 
 func generatedPositionInsideRoom(pos Vec2, radius float64, out generatedDungeonLevel) bool {
 	for _, room := range out.rooms {

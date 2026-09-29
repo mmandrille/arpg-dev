@@ -7,7 +7,10 @@ import (
 
 const anchorRoomInset = 0
 
-func ensureAnchorRooms(rng *RNG, rules DungeonGenerationRules, rooms []dungeonRoom, anchors []Vec2, margin, spacing, thickness float64) ([]dungeonRoom, bool) {
+// ensureAnchorRooms wraps every pre-placed anchor (stairs, teleporter, chests) in a room. With
+// anchorFallback false each distance cluster must fit its own normal-sized room; with it true,
+// the anchor fallback rules apply (see mergedAnchorClusterRooms and anchorClusterRoom).
+func ensureAnchorRooms(rng *RNG, rules DungeonGenerationRules, rooms []dungeonRoom, anchors []Vec2, margin, spacing, thickness float64, anchorFallback bool) ([]dungeonRoom, bool) {
 	uncovered := make([]Vec2, 0, len(anchors))
 	for _, anchor := range anchors {
 		if !pointInsideAnyRoom(anchor, rooms, 0) {
@@ -21,10 +24,20 @@ func ensureAnchorRooms(rng *RNG, rules DungeonGenerationRules, rooms []dungeonRo
 	clusters := clusterAnchorPoints(uncovered, anchorClusterDistance(rules))
 	sortAnchorClusters(clusters, rules.PlayerSpawn)
 
-	for _, cluster := range clusters {
+	if anchorFallback {
+		return mergedAnchorClusterRooms(rng, rules, rooms, clusters, margin, spacing, thickness)
+	}
+	placed, failed := placeAnchorClusterRooms(rng, rules, rooms, clusters, margin, spacing, thickness, false)
+	return placed, failed < 0
+}
+
+// placeAnchorClusterRooms places one room per cluster in order. It returns the rooms placed so
+// far and the index of the first cluster that could not be placed, or -1 when all fit.
+func placeAnchorClusterRooms(rng *RNG, rules DungeonGenerationRules, rooms []dungeonRoom, clusters [][]Vec2, margin, spacing, thickness float64, fallback bool) ([]dungeonRoom, int) {
+	for i, cluster := range clusters {
 		placed := false
 		for try := 0; try < 48; try++ {
-			room, ok := anchorClusterRoom(rng, rules, cluster, margin)
+			room, ok := anchorClusterRoom(rng, rules, cluster, margin, fallback)
 			if !ok {
 				continue
 			}
@@ -43,11 +56,11 @@ func ensureAnchorRooms(rng *RNG, rules DungeonGenerationRules, rooms []dungeonRo
 			break
 		}
 		if !placed {
-			return rooms, false
+			return rooms, i
 		}
 	}
 
-	return rooms, true
+	return rooms, -1
 }
 
 func anchorClusterDistance(rules DungeonGenerationRules) float64 {
@@ -149,9 +162,19 @@ func anchorClusterSpan(cluster []Vec2) float64 {
 	return math.Max(maxX-minX, maxY-minY)
 }
 
-func anchorClusterRoom(rng *RNG, rules DungeonGenerationRules, cluster []Vec2, margin float64) (dungeonRoom, bool) {
+func anchorClusterRoom(rng *RNG, rules DungeonGenerationRules, cluster []Vec2, margin float64, fallback bool) (dungeonRoom, bool) {
 	if len(cluster) == 1 && distance(cluster[0], rules.PlayerSpawn) < 0.01 {
 		return playerSpawnAnchorRoom(rules, margin)
+	}
+	if fallback {
+		// Stairs/teleporters may sit on the margin_from_perimeter line, where a normal anchor room
+		// puts them on its own wall with only an unwalkable sliver behind it. Fallback rooms may
+		// sit flush with the perimeter wall instead, which gives those anchors interior clearance.
+		flushMargin := rules.WallThickness
+		if room, ok := oversizedRoomContainingPoints(rng, rules, cluster, flushMargin, fallbackAnchorRoomClearance); ok {
+			return room, true
+		}
+		return oversizedRoomContainingPoints(rng, rules, cluster, flushMargin, anchorRoomInset)
 	}
 	if len(cluster) == 1 {
 		return roomAroundPoint(rng, rules, cluster[0], margin, anchorRoomInset)

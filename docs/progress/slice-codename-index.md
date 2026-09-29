@@ -246,6 +246,7 @@ v455_* = combat-skill-budget
 v456_* = six-player-boss-combat-soak
 v457_* = live-combat-transport-stability
 v465_* = combat-impact-confirmation
+v472_* = room-corridor-anchor-fallback
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

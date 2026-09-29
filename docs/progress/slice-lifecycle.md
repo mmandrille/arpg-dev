@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v472** | `room-corridor-anchor-fallback` | Complete (focused Go verification; `make` unavailable on host) | [`spec`](../specs/v472_spec-room-corridor-anchor-fallback.md) | [`plan`](../plans/v472_2026-09-28-room-corridor-anchor-fallback.md) | [`as-built`](../as-built/v472_room-corridor-anchor-fallback.md) |
 | **v471** | `dungeon-kit-walls-floors` | Complete (`make ci` green) | [`spec`](../specs/v471_spec-dungeon-kit-walls-floors.md) | [`plan`](../plans/v471_2026-09-29-dungeon-kit-walls-floors.md) | [`as-built`](../as-built/v471_dungeon-kit-walls-floors.md) |
 | **v470** | `render-baseline` | Complete (focused verification; `make ci` + perf floor owed — Xcode license) | spec-exempt (client presentation) | — | [`as-built`](../as-built/v470_render-baseline.md) |
 | **v469** | `art-baseline-kit-verification` | Complete (focused verification; `make ci` owed — Xcode license) | [`spec`](../specs/v469_spec-art-baseline-and-kit-verification.md) | [`plan`](../plans/v469_2026-09-28-art-baseline-kit-verification.md) | [`as-built`](../as-built/v469_art-baseline-kit-verification.md) |

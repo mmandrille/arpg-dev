@@ -456,7 +456,7 @@ func TestReconstructLoadsSessionStartShopStock(t *testing.T) {
 			ShopStock:   stock,
 		},
 	}
-	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session, nil)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
 	}
@@ -708,7 +708,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
 		},
 	}
-	scratch, players, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, players, _, err := sessionStartSim(context.Background(), repo, rules, repo.session, nil)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
 	}
@@ -812,7 +812,7 @@ func TestVerifyCoopReplayMatchesActorCombatAndLootEvents(t *testing.T) {
 			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
 		},
 	}
-	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session, nil)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
 	}
@@ -891,7 +891,7 @@ func TestReconstructCoopReplaySharesXPWithNearbyGuest(t *testing.T) {
 			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
 		},
 	}
-	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session, nil)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
 	}
@@ -1407,7 +1407,7 @@ func (f *fakeRepo) SetSessionMemberConnected(context.Context, string, string, st
 func (f *fakeRepo) SetSessionMemberDisconnected(context.Context, string, string, string, int, int64) error {
 	return nil
 }
-func (f *fakeRepo) SetSessionMemberPlayer(context.Context, string, string, string, string, int) error {
+func (f *fakeRepo) SetSessionMemberPlayer(context.Context, string, string, string, string, int, int64) error {
 	return nil
 }
 func (f *fakeRepo) ListCharacterItems(context.Context, string, string) ([]store.CharacterItemInstance, error) {
@@ -1579,7 +1579,7 @@ func (f *fakeRepo) ExpireMarketListings(context.Context) (int, error) {
 func (f *fakeRepo) GetMarketSummary(context.Context, string) (store.MarketSummary, error) {
 	return store.MarketSummary{}, nil
 }
-func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, []store.AccountResourceAmount, []store.AccountResourceBagItem, store.CharacterProgression) error {
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, store.SessionStartSnapshot) error {
 	return nil
 }
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {
@@ -1591,7 +1591,7 @@ func (f *fakeRepo) LoadSessionStartSnapshotForMember(_ context.Context, sessionI
 			return snap, nil
 		}
 	}
-	if f.start.SessionID == sessionID && f.start.AccountID == accountID && f.start.CharacterID == characterID {
+	if len(f.members) == 0 || (f.start.SessionID == sessionID && f.start.AccountID == accountID && f.start.CharacterID == characterID) {
 		return f.start, nil
 	}
 	return store.SessionStartSnapshot{}, store.ErrNotFound

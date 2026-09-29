@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v476 CC0 beasts, ADR-0018 P4b)
+Last updated: 2026-09-29 (v482 CC0 beasts, ADR-0018 P4b)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-29 (v476 CC0 beasts, ADR-0018 P4b)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v476 — Quaternius CC0 wolf + bat replace the last unconfirmed-license beasts; palette-bake tool; license allow-list gate (ADR-0018 P4b; `make ci` green). Prior: v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
-| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3b (armor tints + headgear) or P3c (retire legacy 17-bone hero pipeline). Kit-model corpse lean fix (death lean stacks on authored death clips) is a small follow-up |
+| **Latest completed slice** | v482 — Quaternius CC0 wolf + bat replace the last unconfirmed-license beasts; palette-bake tool; license allow-list gate (ADR-0018 P4b; `make ci` green). Prior: v481 recorded tick checkpoints, v480 member join tick, v479 recorded co-op member lifecycle, v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
+| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3b (armor tints + headgear) or P3c (retire legacy 17-bone hero pipeline) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 
@@ -98,14 +98,23 @@ Do **not** assume these are the next slice — they are documented backlog items
     uncapped HEAD frame time is ~7 ms. Regressions to watch: **draw calls ~4× (97–175 → 499–543)**, from
     per-piece kit walls/floors + shadow passes (candidate: MultiMesh/merged static dungeon geometry),
     and a **first-spawn hitch** (`process_ms` 124 → 761 ms, `d_upsert_m` spike up to 169 ms: kit model
-    instancing). The floor is met on this host; a weaker GPU is the risk.
-  - `make benchmark` harness rotted (not in CI): all 3 scenarios fail at v469 and HEAD — co-op
-    mid-session join breaks replay (entity-ID divergence → `/state` 500), paladin probe runs out of
-    mana, solo probe hits a server that already got a shutdown signal. Only the multigroup scenario
-    produces client frames.
+    instancing). The floor is met on this host; a weaker GPU is the risk. `make benchmark` has since
+    been repaired and is green for all three probes (gated in `make ci` via
+    `test_benchmark_scenarios.py`, protocol-only in `make ci-full`).
+  - ~~Replay non-determinism on `benchmark_mixed_arena`~~: fixed in v476 (recorded load shed). The
+    t18 tick overran its budget and applied unrecorded overload degradation; the pre-v476 server
+    reproduced both reported divergences, HEAD replays every probe clean. The ci-full benchmark gate
+    now verifies replay (`--skip-replay` dropped from `scripts/ci.sh` step 9).
   - macOS `/usr/bin/make` fails until `sudo xcodebuild -license` is accepted, so the v469 `make ci`
     is still owed.
   - ~~Dungeon generation failed on ~2% of seed/level pairs~~: fixed in v472 (room-corridor anchor fallback).
+- **Replay-determinism gaps** (v476 [`as-built`](docs/as-built/v476_recorded-load-shed.md), v478 [`as-built`](docs/as-built/v478_shared-member-setup.md), v479 [`as-built`](docs/as-built/v479_recorded-member-lifecycle.md), v481 [`as-built`](docs/as-built/v481_recorded-tick-checkpoints.md)):
+  ~~replay member setup skipped wallet/bag/corpses~~ fixed in v478;
+  `mercenaryroster.LoadIntoSim` still reads live alt-character rows at build/replay time (not snapshotted, same flaw corpses had);
+  ~~never-attached HTTP guest added at tick 0 by replay only~~ fixed in v480 ([`as-built`](docs/as-built/v480_member-join-tick.md)); pre-v480 sessions with a build-time guest that never attached now replay without it;
+  ~~co-op leave/reconnect respawn not recorded~~ fixed in v479 (sessions recorded before v479 keep the final-connectivity approximation);
+  ~~quiet trailing ticks lost on stop/restart/crash~~ fixed in v481 (a crash still loses up to 50 quiet ticks);
+  sessions recorded before v476 that shed load cannot replay.
 
 - **v460 `$review` complete (official cadence at `e75e64d0`).** Overview:
   [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md). Run `$refactor` for minor paydown (resource-bag co-op filter, status-effects validate_shared, leveled-potion golden, `PotionIconLabel` rules-driven fix).

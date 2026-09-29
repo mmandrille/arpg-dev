@@ -1,6 +1,6 @@
 {
   "version": 0,
-  "note": "ADR-0018 P4a (v474) KayKit monster scenes; P4b (v476) Quaternius CC0 beasts. clip_profiles alias the logical clips AnimationController plays onto kit clip names; attachments mount kit weapons on rig bones.",
+  "note": "ADR-0018 P4a (v474) KayKit monster scenes; P4b (v482) Quaternius CC0 beasts. clip_profiles alias the logical clips AnimationController plays onto kit clip names; attachments mount kit weapons on rig bones.",
   "clip_profiles": {
     "kaykit_skeleton_melee": {
       "clips": {

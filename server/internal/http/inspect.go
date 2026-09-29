@@ -2,9 +2,11 @@ package httpapi
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"strconv"
 
+	"github.com/mmandrille_meli/arpg-dev/server/internal/logging"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/replay"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
@@ -142,6 +144,7 @@ func (s *Server) handleSessionState(w http.ResponseWriter, r *http.Request) {
 	}
 	recon, err := replay.Reconstruct(r.Context(), s.store, s.rules, sess.ID)
 	if err != nil {
+		s.logReplayFailure(r, "reconstruct", sess.ID, err)
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not reconstruct state")
 		return
 	}
@@ -157,6 +160,7 @@ func (s *Server) handleSessionReplay(w http.ResponseWriter, r *http.Request) {
 	}
 	report, err := replay.Verify(r.Context(), s.store, s.rules, sess.ID)
 	if err != nil {
+		s.logReplayFailure(r, "verify", sess.ID, err)
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not verify replay")
 		return
 	}
@@ -184,8 +188,22 @@ func (s *Server) handleSessionReplayTimeline(w http.ResponseWriter, r *http.Requ
 	}
 	timeline, err := replay.BuildTimeline(r.Context(), s.store, s.rules, sess.ID, throughTick)
 	if err != nil {
+		s.logReplayFailure(r, "timeline", sess.ID, err)
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not build replay timeline")
 		return
 	}
 	writeJSON(w, http.StatusOK, timeline)
+}
+
+// logReplayFailure records why a replay-backed endpoint returned 500. The
+// response body stays generic; the cause (e.g. a determinism break) is only
+// logged server-side.
+func (s *Server) logReplayFailure(r *http.Request, op, sessionID string, err error) {
+	corr, _ := logging.CorrelationFromContext(r.Context())
+	s.log.LogAttrs(r.Context(), slog.LevelError, "session_replay_failed",
+		slog.String("correlation_id", corr),
+		slog.String("op", op),
+		slog.String("session_id", sessionID),
+		slog.String("error", err.Error()),
+	)
 }

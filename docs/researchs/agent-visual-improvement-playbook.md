@@ -67,7 +67,7 @@ make regen-screenshots SUITE=gear
 ## Skeleton / rig loop (Tier 2–3)
 
 1. **Heroes:** `tools/assets/rig_hero_glbs.py` + `HERO_TARGET_HEIGHTS` (~1.85m)
-2. **Monsters and beasts (v474/v476):** vendored kit/CC0 GLBs with embedded clips; scene root
+2. **Monsters and beasts (v474/v482):** vendored kit/CC0 GLBs with embedded clips; scene root
    `KitMonsterVisual` + a clip profile in `shared/assets/kit_monster_presentation.v0.json`
 3. **Probe unfamiliar rigs:** `python -m tools.assets.inspect_kit <dir>` (joints, clips, tris)
 4. Verify: `godot --headless --path client --script res://tests/test_animation.gd`

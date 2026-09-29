@@ -68,25 +68,27 @@ func (l *sessionLoop) doTick() {
 	broadcastDuration = time.Since(broadcastStart)
 	totalDuration := time.Since(start)
 	guardrail := evaluateTickGuardrail(totalDuration)
-	combatBudget := game.CombatPhaseBudgetForTick()
-	degradationApplied := false
+	// Wall-clock load shedding mutates the sim, so it is recorded as a
+	// server-authored input for this tick (v476) to keep replay exact.
+	l.mu.Lock()
+	degradationApplied, loadShedInput := l.applyLoadShed(tick, loadShedSample{
+		guardrail:   guardrail,
+		simDuration: simDuration,
+		counters:    counters,
+		snapshot:    snapshot,
+		nav:         nav,
+		profiler:    profiler,
+	})
+	if resultsHaveEvents(results) {
+		l.noteDurableLocked(int64(tick))
+	}
+	// Quiet ticks leave no row, so replay would stop short of them (v481).
+	checkpoint := l.quietCheckpointLocked(tick)
+	l.mu.Unlock()
+	l.persistSystemInput(loadShedInput)
+	l.persistSystemInput(checkpoint)
 	if guardrail.OverBudget {
-		l.mu.Lock()
-		if l.sim != nil && (shouldApplyOverloadDegradation(counters, snapshot, nav) ||
-			shouldApplySimPressureOverloadDegradation(simDuration, guardrail.Budget, snapshot, nav)) {
-			degradationApplied = l.sim.ApplyOverloadDegradation()
-		}
-		if l.sim != nil {
-			l.sim.SetCombatMovementThrottle(degradationApplied || combatPhaseOverBudget(profiler, combatBudget))
-		}
-		l.mu.Unlock()
 		logTickBudgetWarning(l.log, tick, totalDuration, guardrail, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, degradationApplied)
-	} else {
-		l.mu.Lock()
-		if l.sim != nil {
-			l.sim.SetCombatMovementThrottle(combatPhaseOverBudget(profiler, combatBudget))
-		}
-		l.mu.Unlock()
 	}
 	if l.perfDebug && time.Since(l.lastPerfLog) >= defaultPerfDebugInterval {
 		l.lastPerfLog = time.Now()
@@ -97,4 +99,13 @@ func (l *sessionLoop) doTick() {
 		perf := buildPerformanceStatus(tick, totalDuration, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, profiler, degradationApplied)
 		l.fanoutPerformanceStatus(perf, clients, levelsByPlayerID)
 	}
+}
+
+func resultsHaveEvents(results []game.TickResult) bool {
+	for _, res := range results {
+		if len(res.Events) > 0 {
+			return true
+		}
+	}
+	return false
 }

@@ -1,5 +1,5 @@
 # --- Database -----------------------------------------------------------------
-.PHONY: db-up db-down db-reset
+.PHONY: db-up db-down db-reset test-db-url test-db-prune
 db-up: ## Start local Postgres (canonical DB startup path) and wait for readiness
 	@if docker exec arpg-postgres pg_isready -U arpg -d arpg >/dev/null 2>&1; then \
 		echo "using existing ready arpg-postgres"; \
@@ -19,3 +19,9 @@ db-down: ## Stop local Postgres (keep data volume)
 db-reset: ## Destroy and recreate local Postgres (drops all data)
 	$(COMPOSE) down -v
 	$(MAKE) db-up
+
+test-db-url: ## Print this checkout's CI/bot test DATABASE_URL (pass as DATABASE_URL= to make replay)
+	@echo "$(TEST_DATABASE_URL)"
+
+test-db-prune: db-up ## Drop per-checkout test databases whose worktree no longer exists
+	./scripts/test_db.sh prune

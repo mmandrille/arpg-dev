@@ -337,7 +337,7 @@ and fall under the CLAUDE.md spec-gate exemption. They still write an as-built w
 | **P1** | Render baseline (D7) | exempt — shipped [v470](../as-built/v470_render-baseline.md) (perf floor owed) |
 | **P2** | Dungeon auto-tile renderer + kit props (D6) | walls/columns/floors shipped [v471](../as-built/v471_dungeon-kit-walls-floors.md); torches/treasure chests [v473](../as-built/v473_dungeon-kit-props.md) (no kit door; stairs deferred) |
 | **P3** | Heroes + kit animation + clip catalog + socket remap + armor tints (D4, D5) | spec — P3a heroes/clips/sockets/weapons shipped [v475](../as-built/v475_kit-heroes.md); P3b armor tints + headgear; P3c legacy pipeline removal |
-| **P4** | Kit monsters; purge unconfirmed-license and unused GLBs (D2) | spec — P4a skeletons + purge shipped [v474](../as-built/v474_kit-skeleton-monsters.md); P4b beasts shipped [v476](../as-built/v476_cc0-beasts.md) (Quaternius CC0 wolf + bat, palette-baked) |
+| **P4** | Kit monsters; purge unconfirmed-license and unused GLBs (D2) | spec — P4a skeletons + purge shipped [v474](../as-built/v474_kit-skeleton-monsters.md); P4b beasts shipped [v482](../as-built/v482_cc0-beasts.md) (Quaternius CC0 wolf + bat, palette-baked) |
 | **P5** | Particle VFX + in-repo shader set: hit flash, death dissolve, highlight rim/outline (D3) | exempt |
 
 ### P0 verification checklist (resolved in v469, see [findings](../researchs/v469_kaykit-p0-findings.md))

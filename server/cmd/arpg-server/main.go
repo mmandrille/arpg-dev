@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -118,10 +119,18 @@ func run(cfg config.Config, log *slog.Logger, migrateOnly bool) error {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
+	// Bind before logging so "server listening" is proof of a successful bind and
+	// carries the real port (ARPG_ADDR=:0 picks a free one). Local CI/bot scripts
+	// parse this line from their own server's log to find the port and match pid.
+	listener, err := net.Listen("tcp", cfg.Addr)
+	if err != nil {
+		return err
+	}
+	log.Info("server listening", "addr", listener.Addr().String(), "pid", os.Getpid(), "env", cfg.Env)
+
 	errCh := make(chan error, 1)
 	go func() {
-		log.Info("server listening", "addr", cfg.Addr, "env", cfg.Env)
-		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := httpServer.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errCh <- err
 		}
 	}()
@@ -135,5 +144,9 @@ func run(cfg config.Config, log *slog.Logger, migrateOnly bool) error {
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	return httpServer.Shutdown(shutdownCtx)
+	shutdownErr := httpServer.Shutdown(shutdownCtx)
+	// Hijacked websockets outlive httpServer.Shutdown; stop the session loops
+	// so each records the last tick it ran and resumes there (v481).
+	hub.Shutdown()
+	return shutdownErr
 }

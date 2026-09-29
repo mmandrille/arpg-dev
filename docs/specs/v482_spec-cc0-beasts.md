@@ -1,6 +1,6 @@
-# v476 — CC0 beasts: Quaternius wolf and bat (ADR-0018 P4b)
+# v482 — CC0 beasts: Quaternius wolf and bat (ADR-0018 P4b)
 
-- **Status:** Implemented (v476)
+- **Status:** Implemented (v482)
 - **Date:** 2026-09-29
 - **Codename:** `cc0-beasts`
 - **ADR:** [ADR-0018](../adr/0018-art-direction-and-kit-based-visuals.md) D1/D2/D8, phase P4b

@@ -1,10 +1,10 @@
-# v476 As-Built — CC0 beasts: Quaternius wolf and bat (ADR-0018 P4b)
+# v482 As-Built — CC0 beasts: Quaternius wolf and bat (ADR-0018 P4b)
 
 Date: 2026-09-29
 Status: Complete (`make ci` green)
 Commit: pending
 
-Spec: [`v476_spec-cc0-beasts.md`](../specs/v476_spec-cc0-beasts.md), written before implementation.
+Spec: [`v482_spec-cc0-beasts.md`](../specs/v482_spec-cc0-beasts.md), written before implementation.
 There is no separate plan file. ADR: [ADR-0018](../adr/0018-art-direction-and-kit-based-visuals.md)
 P4b.
 
@@ -72,13 +72,13 @@ It now calls `_camera_controller.sync_to_player()`.
 bats. After: the Quaternius wolf and bat, colours preserved, and the boss bat tinted rather than
 flattened.
 
-![monsters before](assets/v476/monsters-before.png)
-![monsters after](assets/v476/monsters-after.png)
+![monsters before](assets/v482/monsters-before.png)
+![monsters after](assets/v482/monsters-after.png)
 
 `companions` focus, cropped: the black companion wolf, plus a dead Cave Wolf at left.
 
-![companions before](assets/v476/companions-before.png)
-![companions after](assets/v476/companions-after.png)
+![companions before](assets/v482/companions-before.png)
+![companions after](assets/v482/companions-after.png)
 
 **Style verdict.**
 - The bat matches KayKit's chunky, chibi read.
@@ -88,10 +88,9 @@ flattened.
 
 ## Known gaps
 
-- **Corpses stand on end (pre-existing, not introduced here).** `ModelReactionController.enter_death`
-  leans every root about 77°, on top of the authored `death` clips that every kit model now plays.
-  The old fox corpse had the same problem. Kit skeletons and heroes are affected too, so the fix is
-  a separate slice.
+- **Corpse pose.** The standing-corpse lean found while capturing this slice was fixed on main in
+  v477 (clip-owned death pose). v477's own known gap, the fox's nosedive `death` clip, is moot now:
+  the wolf plays the Quaternius `Death` clip.
 - **Duplicate clips.** Each wolf clip ships twice (bare and `AnimalArmature|`-prefixed), about
   0.5 MB. The profile uses the bare names.
 

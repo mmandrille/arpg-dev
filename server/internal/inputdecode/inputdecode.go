@@ -516,7 +516,7 @@ func DecodeStored(raw []byte) (game.Input, bool) {
 		return game.Input{}, false
 	}
 	if !IsClientIntent(env.Type) {
-		return game.Input{}, false
+		return decodeStoredSystem(env)
 	}
 	return Decode(env.Type, env.MessageID, env.CorrelationID, env.Payload)
 }

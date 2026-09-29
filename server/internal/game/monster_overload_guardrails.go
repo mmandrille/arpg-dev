@@ -1,8 +1,9 @@
 package game
 
-// ApplyOverloadDegradation starts or extends a transient server-owned
-// degradation window for the current room simulation.
-func (s *Sim) ApplyOverloadDegradation() bool {
+// applyOverloadDegradation starts or extends a transient server-owned
+// degradation window for the current room simulation. Runtime callers reach it
+// only through ApplyLoadShed so every activation is recorded for replay.
+func (s *Sim) applyOverloadDegradation() bool {
 	ticks := s.activeNav().MonsterOverloadDegradeTicks
 	if ticks <= 0 {
 		return false

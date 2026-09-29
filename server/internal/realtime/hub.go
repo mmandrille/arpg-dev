@@ -85,16 +85,32 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session, me
 		}
 		return
 	}
-	loop.attach(r.Context(), conn, member)
+	for attempt := 0; !loop.attach(r.Context(), conn, member); attempt++ {
+		// The loop stopped between lookup and attach: resume on its successor.
+		if loop, err = h.loopForSession(r.Context(), sess); err != nil || attempt >= 2 {
+			h.log.Error("attach to session loop", "session_id", sess.ID, "attempt", attempt, "error", err)
+			if claimed {
+				_ = h.store.SetSessionMemberDisconnected(context.Background(), sess.ID, member.AccountID, member.CharacterID, member.CurrentLevel, 0)
+			}
+			_ = conn.Close()
+			return
+		}
+	}
 }
 
 func (h *Hub) loopForSession(ctx context.Context, sess store.Session) (*sessionLoop, error) {
 	h.mu.Lock()
-	if loop := h.loops[sess.ID]; loop != nil {
-		h.mu.Unlock()
-		return loop, nil
-	}
+	loop := h.loops[sess.ID]
 	h.mu.Unlock()
+	if loop != nil {
+		if !loop.stopping() {
+			return loop, nil
+		}
+		// Its last client just left. Wait for it to record its final tick
+		// (v481), or the successor would resume from storage behind it.
+		<-loop.stopDone
+		h.removeLoop(sess.ID, loop)
+	}
 
 	loop, err := newSessionLoop(ctx, h, sess)
 	if err != nil {
@@ -120,138 +136,6 @@ func (h *Hub) removeLoop(sessionID string, loop *sessionLoop) {
 	}
 }
 
-func progressionStateFromStore(rules *game.Rules, progression *store.CharacterProgression) game.CharacterProgressionState {
-	if progression == nil {
-		return rules.DefaultCharacterProgressionState()
-	}
-	return game.CharacterProgressionState{
-		CharacterClass:      progression.CharacterClass,
-		Level:               progression.Level,
-		Experience:          progression.Experience,
-		UnspentStatPoints:   progression.UnspentStatPoints,
-		UnspentSkillPoints:  progression.UnspentSkillPoints,
-		SkillRanks:          cloneSkillRanks(progression.SkillRanks),
-		Gold:                progression.Gold,
-		DeepestDungeonDepth: progression.DeepestDungeonDepth,
-		HiredMercenaryCharacterID: progression.HiredMercenaryCharacterID,
-		BaseStats: game.BaseStatsView{
-			Str:   progression.Stats.Str,
-			Dex:   progression.Stats.Dex,
-			Vit:   progression.Stats.Vit,
-			Magic: progression.Stats.Magic,
-		},
-	}
-}
-
-func persistedItems(items []store.CharacterItemInstance) []game.PersistedItem {
-	out := make([]game.PersistedItem, 0, len(items))
-	for _, item := range items {
-		if item.Location != store.ItemLocationInventory && item.Location != store.ItemLocationEquipped {
-			continue
-		}
-		out = append(out, game.PersistedItem{
-			InstanceID:  item.ID,
-			ItemDefID:   item.ItemDefID,
-			Slot:        item.Slot,
-			Equipped:    item.Equipped,
-			WeaponSet:   item.WeaponSet,
-			RolledStats: item.RolledStats,
-		})
-	}
-	return out
-}
-
-func persistedCorpses(corpses []store.CharacterCorpse) []game.PersistedCorpse {
-	return persistedCorpsesWithAccount("", corpses)
-}
-
-func persistedCorpsesWithAccount(accountID string, corpses []store.CharacterCorpse) []game.PersistedCorpse {
-	out := make([]game.PersistedCorpse, 0, len(corpses))
-	for _, corpse := range corpses {
-		out = append(out, game.PersistedCorpse{
-			AccountID:   accountID,
-			CharacterID: corpse.CharacterID,
-			Name:        corpse.Name,
-			Level:       corpse.Level,
-			DeathLevel:  corpse.DeathLevel,
-			Items:       persistedItems(corpse.Items),
-		})
-	}
-	return out
-}
-
-func persistedHotbar(slots []store.CharacterHotbarSlot) []game.PersistedHotbarSlot {
-	out := make([]game.PersistedHotbarSlot, 0, len(slots))
-	for _, slot := range slots {
-		out = append(out, game.PersistedHotbarSlot{
-			SlotIndex:      slot.SlotIndex,
-			ItemInstanceID: slot.ItemInstanceID,
-		})
-	}
-	return out
-}
-
-func persistedSkillBindings(bindings store.CharacterSkillBindings) game.PersistedSkillBindings {
-	return game.PersistedSkillBindings{
-		FunctionKeys:      bindings.FunctionKeys,
-		RightClickSkillID: bindings.RightClickSkillID,
-	}
-}
-
-func persistedShopStock(items []store.CharacterShopStockItem) []game.PersistedShopStockItem {
-	out := make([]game.PersistedShopStockItem, 0, len(items))
-	for _, item := range items {
-		out = append(out, game.PersistedShopStockItem{
-			ShopID:         item.ShopID,
-			RefreshKey:     item.RefreshKey,
-			OfferIndex:     item.OfferIndex,
-			OfferID:        item.OfferID,
-			SourceDepth:    item.SourceDepth,
-			ItemTemplateID: item.ItemTemplateID,
-			RolledPayload:  item.RolledPayload,
-			BuyPrice:       item.BuyPrice,
-			Available:      item.Available,
-		})
-	}
-	return out
-}
-
-func persistedStashItems(items []store.AccountStashItem) []game.PersistedStashItem {
-	out := make([]game.PersistedStashItem, 0, len(items))
-	for _, item := range items {
-		out = append(out, game.PersistedStashItem{
-			StashItemID: item.StashItemID,
-			ItemDefID:   item.ItemDefID,
-			RolledStats: item.RolledStats,
-		})
-	}
-	return out
-}
-
-func persistedResourceBagItems(items []store.AccountResourceBagItem) []game.PersistedResourceBagItem {
-	out := make([]game.PersistedResourceBagItem, 0, len(items))
-	for _, item := range items {
-		out = append(out, game.PersistedResourceBagItem{
-			BagItemID:   item.BagItemID,
-			ItemDefID:   item.ItemDefID,
-			RolledStats: item.RolledStats,
-		})
-	}
-
-	return out
-}
-
-func persistedResources(resources []store.AccountResourceAmount) []game.PersistedResourceAmount {
-	out := make([]game.PersistedResourceAmount, 0, len(resources))
-	for _, resource := range resources {
-		out = append(out, game.PersistedResourceAmount{
-			ResourceID: resource.ResourceID,
-			Amount:     resource.Amount,
-		})
-	}
-	return out
-}
-
 func storeShopStock(accountID, characterID string, items []game.PersistedShopStockItem) []store.CharacterShopStockItem {
 	out := make([]store.CharacterShopStockItem, 0, len(items))
 	for _, item := range items {
@@ -272,10 +156,3 @@ func storeShopStock(accountID, characterID string, items []game.PersistedShopSto
 	return out
 }
 
-func waypointLevels(waypoints []store.CharacterWaypoint) []int {
-	out := make([]int, 0, len(waypoints))
-	for _, wp := range waypoints {
-		out = append(out, wp.Level)
-	}
-	return out
-}

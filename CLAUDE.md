@@ -22,6 +22,8 @@ Everything runs through `make`. Run `make help` for the full list.
 # Infrastructure
 make db-up           # start local Postgres (required before server or bot)
 make db-reset        # destroy + recreate Postgres (drops all data)
+make test-db-url     # print this checkout's CI/bot test DATABASE_URL
+make test-db-prune   # drop test DBs whose worktree no longer exists
 
 # Running
 make server          # run Go server (requires db-up first)
@@ -34,7 +36,7 @@ make test            # unit tests (quiet; add VERBOSE=1 for full logs)
 make test-go         # all Go tests  (`cd server && go test ./...`)
 make test-py         # Python unit tests (`pytest tools/`)
 make client-unit     # Godot headless unit tests (quiet; add VERBOSE=1 for full logs)
-make client-smoke    # Godot headless smoke against a running TEST_BASE_URL server
+make client-smoke    # Godot headless smoke against a running SMOKE_BASE_URL server (default :18081)
 make ci              # fast local CI (ci scenario pack; quiet; add VERBOSE=1 for full logs)
 make ci-full         # full scenario matrix CI (~20+ min; quiet; add VERBOSE=1 for full logs)
 make test-all        # test + ci + headless bot-visual (quiet; add VERBOSE=1 for full logs)
@@ -57,7 +59,18 @@ make regen-screenshots SUITE="gear skeleton"  # subset only
 
 # Replay
 make replay SESSION_ID=<id>   # re-simulate a recorded session and verify output
+make replay SESSION_ID=<id> DATABASE_URL="$(make -s test-db-url)"  # session recorded by ci/bot
 ```
+
+**Concurrent worktrees are safe by default.** `make ci`, `ci-full`, `bot`, `bot-visual`,
+`bot-client` and `benchmark` start their own server on a kernel-picked free port (`ARPG_ADDR=:0`)
+and against a per-checkout database (`arpg_test_<worktree>_<hash>` in the shared `arpg-postgres`
+container, created on demand by `scripts/test_db.sh`). Readiness only trusts the `server listening`
+line from *its own* server's log (bound port + pid) and a live pid, so a run can never silently
+drive another worktree's server (`scripts/server_helpers.sh`). `make play`/`make server` still use
+`DATABASE_URL` (`arpg`) on `:8888`. Pin a port only when you need one:
+`make ci CI_ADDR=:18081` (or `CI_BASE_URL=http://localhost:18081`, `BOT_ADDR`/`BOT_BASE_URL`);
+a pinned port that is taken fails fast with a port-collision hint instead of hijacking.
 
 **Single Go test:** `cd server && go test ./internal/game/... -run TestName`
 
@@ -322,4 +335,7 @@ These rules emerged from paying down the god-file debt. Agents should follow the
     still point at the slow navigation or wait. Otherwise shorten to the contract it is really
     proving: compact lab worlds, focused setup, or lower-level Go/Python tests for exhaustive
     traversal/timing coverage instead of waiting through unrelated dungeon walks or combat cycles.
-    See `docs/progress/scenario-catalog.md`.
+    See `docs/progress/scenario-catalog.md`. **Exception:** `ci_tier: benchmark` perf probes are
+    sustained-load generators, not proofs; their declared `max_elapsed_s` is the budget. They run
+    only in `make benchmark` and once, protocol-only, in `make ci-full`; their pinned
+    `debug_progression` must pass `tools/bot/test_benchmark_scenarios.py` (mana derived from rules).

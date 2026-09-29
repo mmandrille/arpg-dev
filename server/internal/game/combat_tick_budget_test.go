@@ -7,7 +7,7 @@ func TestCombatMovementThrottleSkipsLowPriorityMonsters(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}
-	sim.SetCombatMovementThrottle(true)
+	sim.setCombatMovementThrottle(true)
 	var lowPriority *entity
 	var highPrecision *entity
 	for _, monster := range sim.activeLevel().entities {

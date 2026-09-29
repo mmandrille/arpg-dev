@@ -253,7 +253,13 @@ v472_* = room-corridor-anchor-fallback
 v473_* = dungeon-kit-props
 v474_* = kit-skeleton-monsters
 v475_* = kit-heroes
-v476_* = cc0-beasts
+v476_* = recorded-load-shed
+v477_* = clip-owned-death-pose
+v478_* = shared-member-setup
+v479_* = recorded-member-lifecycle
+v480_* = member-join-tick
+v481_* = recorded-tick-checkpoints
+v482_* = cc0-beasts
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

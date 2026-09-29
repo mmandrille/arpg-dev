@@ -45,7 +45,10 @@ type SessionRepo interface {
 	ClaimSessionMemberConnection(ctx context.Context, sessionID, accountID, characterID string) (bool, error)
 	SetSessionMemberConnected(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, tick int64) error
 	SetSessionMemberDisconnected(ctx context.Context, sessionID, accountID, characterID string, currentLevel int, tick int64) error
-	SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int) error
+	// SetSessionMemberPlayer records the player entity just added to the sim
+	// for a member and the tick it was added (the replay contract for
+	// joined_tick; see SessionMemberNotJoinedTick).
+	SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, joinedTick int64) error
 }
 
 // CharacterProgressionRepo manages durable character items, waypoints, and the
@@ -106,7 +109,7 @@ type CharacterProgressionRepo interface {
 	AcceptMarketOffer(ctx context.Context, sellerAccountID, listingID, offerID string) (MarketOffer, error)
 	ExpireMarketListings(ctx context.Context) (int, error)
 	GetMarketSummary(ctx context.Context, accountID string) (MarketSummary, error)
-	CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, resourceBagItems []AccountResourceBagItem, progression CharacterProgression) error
+	CreateSessionStartSnapshot(ctx context.Context, snap SessionStartSnapshot) error
 	UpsertSessionStartItem(ctx context.Context, sessionID string, item CharacterItemInstance) error
 	SetSessionStartItemEquipped(ctx context.Context, sessionID, accountID, characterID, itemInstanceID, slot string, equipped bool, weaponSet int) error
 	RemoveSessionStartItem(ctx context.Context, sessionID, accountID, characterID, itemInstanceID string) error

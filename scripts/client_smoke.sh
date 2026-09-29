@@ -57,8 +57,8 @@ require_running_server() {
   echo "[client-smoke] FAIL: no reachable server at BASE_URL=${BASE_URL} (/readyz)"
   if [[ "${BASE_URL}" == "http://localhost:18081" ]] \
       && curl -fsS "http://localhost:8888/readyz" >/dev/null 2>&1; then
-    echo "[client-smoke] Hint: a server is up on :8888 (make server default) but client-smoke uses TEST_BASE_URL :18081."
-    echo "[client-smoke] Either: TEST_BASE_URL=http://localhost:8888 make client-smoke"
+    echo "[client-smoke] Hint: a server is up on :8888 (make server default) but client-smoke uses SMOKE_BASE_URL :18081."
+    echo "[client-smoke] Either: make client-smoke SMOKE_BASE_URL=http://localhost:8888"
     echo "[client-smoke] Or:      make db-up && ARPG_ADDR=:18081 make server"
   else
     echo "[client-smoke] Start: make db-up && ARPG_ADDR=:18081 make server"
@@ -245,6 +245,7 @@ run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filte
 run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
 run_gate "GDScript loot node factory test" "[gdtest] PASS: test_loot_node_factory" res://tests/test_loot_node_factory.gd
 run_gate "GDScript impact sparks test" "[gdtest] PASS: test_impact_sparks" res://tests/test_impact_sparks.gd
+run_gate "GDScript death pose ownership test" "[gdtest] PASS: test_death_pose_ownership" res://tests/test_death_pose_ownership.gd
 run_gate "GDScript combat outcome punch test" "[gdtest] PASS: test_combat_outcome_punch" res://tests/test_combat_outcome_punch.gd
 run_gate "GDScript skill rank intensity test" "[gdtest] PASS: test_skill_rank_intensity" res://tests/test_skill_rank_intensity.gd
 run_gate "GDScript skill rank scaling test" "[gdtest] PASS: compound rank scaling increases" res://tests/test_skill_rank_scaling.gd

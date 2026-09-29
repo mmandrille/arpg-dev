@@ -9,9 +9,12 @@ cd "$ROOT"
 # shellcheck source=quiet_helpers.sh
 source "$ROOT/scripts/quiet_helpers.sh"
 
-DATABASE_URL="${ARPG_DATABASE_URL:-postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable}"
-ADDR="${ARPG_ADDR:-:8888}"
-BASE_URL="${BASE_URL:-http://localhost:8888}"
+# shellcheck source=server_helpers.sh
+source "$ROOT/scripts/server_helpers.sh"
+
+DATABASE_URL="${ARPG_DATABASE_URL:-$("$ROOT/scripts/test_db.sh" url)}"
+ADDR="${ARPG_ADDR:-}"
+BASE_URL="${BASE_URL:-}"
 DEV_TOKEN="${ARPG_DEV_TOKEN:-${DEV_TOKEN:-local-dev-token}}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
 GAMEPLAY_DEBUG="${ARPG_GAMEPLAY_DEBUG:-true}"
@@ -27,7 +30,9 @@ echo "[bot-client-local] building server..."
 SERVER_BIN="$(mktemp -t arpg-bot-client-server.XXXXXX)"
 "$RUN_QUIET" --label "go build arpg-server" -- bash -c "cd server && go build -o \"$SERVER_BIN\" ./cmd/arpg-server"
 
-echo "[bot-client-local] starting server on $ADDR (log: $SERVER_LOG)..."
+"$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL"
+arpg_resolve_server_addr
+echo "[bot-client-local] starting server on $ADDR db=$(arpg_db_name "$DATABASE_URL") (log: $SERVER_LOG)..."
 ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
   ARPG_DEV_TOKEN="$DEV_TOKEN" ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
   ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
@@ -36,21 +41,7 @@ ARPG_DATABASE_URL="$DATABASE_URL" ARPG_ADDR="$ADDR" \
 SERVER_PID=$!
 
 echo "[bot-client-local] waiting for server readiness..."
-for i in $(seq 1 60); do
-  if curl -fsS "${BASE_URL%/}/readyz" >/dev/null 2>&1; then break; fi
-  if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-    echo "[bot-client-local] server exited early; log:"
-    show_log "$SERVER_LOG" "server"
-    exit 1
-  fi
-  sleep 1
-done
-curl -fsS "${BASE_URL%/}/readyz" >/dev/null
-if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-  echo "[bot-client-local] server exited before bot-client could start; log:"
-  show_log "$SERVER_LOG" "server"
-  exit 1
-fi
+arpg_wait_own_server "bot-client-local"
 
 GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
   SCENARIO="${SCENARIO:-all}" HEADLESS="${HEADLESS:-0}" ./scripts/bot_client.sh

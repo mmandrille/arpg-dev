@@ -309,7 +309,7 @@ def test_schema_invalid_manifest(tmp_path):
 
 
 def test_unconfirmed_license_rejected(tmp_path):
-    # ADR-0018 D2: only allow-listed free licenses may ship (v476 removed the last unconfirmed ones).
+    # ADR-0018 D2: only allow-listed free licenses may ship (v482 removed the last unconfirmed ones).
     manifest = default_manifest()
     manifest["assets"]["weapon_rusty_sword_v0"]["provenance"] = {"license": "unconfirmed-user-provided"}
     report = run(build_root(tmp_path, manifest=manifest))

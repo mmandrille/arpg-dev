@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"sort"
 	"sync"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/logging"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/replay"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/sessionsetup"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -32,9 +32,9 @@ type sessionLoop struct {
 	received map[string]time.Time
 	seq      int64
 
-	done           chan struct{}
-	closeOnce      sync.Once
+	loopLifecycle
 	perfDebug      bool
+	loadShed       loadShedPolicy
 	lastPerfLog    time.Time
 	lastPerfStatus time.Time
 
@@ -67,17 +67,17 @@ func newSessionLoop(ctx context.Context, h *Hub, sess store.Session) (*sessionLo
 		seq = meta.NextSequence
 	}
 	return &sessionLoop{
-		hub:       h,
-		sess:      sess,
-		sim:       sim,
-		log:       logging.Component(h.log, "realtime").With("session_id", sess.ID),
-		clients:   make(map[string]*loopClient),
-		buffer:    make(map[uint64][]game.Input),
-		seen:      seen,
-		received:  make(map[string]time.Time),
-		seq:       seq,
-		done:      make(chan struct{}),
-		perfDebug: perfDebugEnabled(),
+		hub:           h,
+		sess:          sess,
+		sim:           sim,
+		log:           logging.Component(h.log, "realtime").With("session_id", sess.ID),
+		clients:       make(map[string]*loopClient),
+		buffer:        make(map[uint64][]game.Input),
+		seen:          seen,
+		received:      make(map[string]time.Time),
+		seq:           seq,
+		loopLifecycle: newLoopLifecycle(sim),
+		perfDebug:     perfDebugEnabled(),
 	}, nil
 }
 
@@ -94,135 +94,49 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 		recon.Sim.SetGameplayDebug(h.gameplayDebug)
 		return recon.Sim, &recon.Metadata, nil
 	}
-	members, err := h.store.ListSessionMembers(ctx, sess.ID)
+	members, err := sessionsetup.Members(ctx, h.store, sess)
 	if err != nil {
-		return nil, nil, fmt.Errorf("list members: %w", err)
+		return nil, nil, err
 	}
-	if len(members) == 0 {
-		members = []store.SessionMember{{
-			SessionID:   sess.ID,
-			AccountID:   sess.AccountID,
-			CharacterID: sess.CharacterID,
-			Role:        store.SessionMemberHost,
-			Status:      store.SessionMemberActive,
-		}}
+	hostMember := sessionsetup.Host(members)
+	host, err := sessionsetup.Resolve(ctx, h.store, h.rules, sess.ID, hostMember)
+	if err != nil {
+		return nil, nil, fmt.Errorf("resolve host: %w", err)
 	}
-	sort.Slice(members, func(i, j int) bool {
-		if members[i].Role != members[j].Role {
-			return members[i].Role == store.SessionMemberHost
-		}
-		if members[i].JoinedTick != members[j].JoinedTick {
-			return members[i].JoinedTick < members[j].JoinedTick
-		}
-		if members[i].AccountID != members[j].AccountID {
-			return members[i].AccountID < members[j].AccountID
-		}
-		return members[i].CharacterID < members[j].CharacterID
+	sim, err := sessionsetup.NewHostSim(ctx, h.store, h.rules, sess, host, func(sim *game.Sim) {
+		sim.SetGameplayDebug(h.gameplayDebug)
 	})
-	host := members[0]
-	for _, member := range members {
-		if member.Role == store.SessionMemberHost {
-			host = member
-			break
-		}
-	}
-	worldID := sess.WorldID
-	if worldID == "" {
-		worldID = game.DefaultWorldID
-	}
-	hostStart, err := h.store.LoadSessionStartSnapshotForMember(ctx, sess.ID, host.AccountID, host.CharacterID)
-	if err != nil {
-		return nil, nil, fmt.Errorf("load host start snapshot: %w", err)
-	}
-	hostProgression, err := h.progressionStateForMember(ctx, host, hostStart.Progression)
 	if err != nil {
 		return nil, nil, err
 	}
-	sim, err := game.NewSimWithWorldProgression(sess.ID, sess.Seed, h.rules, worldID, hostProgression)
-	if err != nil {
-		return nil, nil, err
-	}
-	sim.SetGameplayDebug(h.gameplayDebug)
 	hostPlayerID := sim.DefaultPlayerID()
-	sim.SetPlayerMetadata(hostPlayerID, host.AccountID, host.CharacterID, "Hero", store.SessionMemberHost)
-	sim.LoadInventoryForPlayer(hostPlayerID, persistedItems(hostStart.Items))
-	sim.LoadHotbarForPlayer(hostPlayerID, persistedHotbar(hostStart.Hotbar))
-	sim.LoadSkillBindingsForPlayer(hostPlayerID, persistedSkillBindings(hostStart.SkillBinds))
-	sim.LoadDiscoveredTeleportersForPlayer(hostPlayerID, waypointLevels(hostStart.Waypoints))
-	sim.LoadShopStockForPlayer(hostPlayerID, persistedShopStock(hostStart.ShopStock))
-	sim.LoadAccountStashForPlayer(hostPlayerID, persistedStashItems(hostStart.StashItems), hostStart.StashGold.Gold, 0)
-	sim.LoadResourceWalletForPlayer(hostPlayerID, persistedResources(hostStart.Resources))
-	sim.LoadAccountResourceBagForPlayer(hostPlayerID, persistedResourceBagItems(hostStart.ResourceBagItems))
-	if err := h.loadMercenaryRosterIntoSim(ctx, sim, host.AccountID, host.CharacterID); err != nil {
-		return nil, nil, err
-	}
-	persistedHireID := hostProgression.HiredMercenaryCharacterID
-	sim.RestoreHiredMercenaryCompanion(hostPlayerID)
+	persistedHireID := host.Progression.HiredMercenaryCharacterID
 	if persistedHireID != "" && sim.CharacterProgressionView().HiredMercenaryCharacterID == "" {
-		if err := h.store.UpsertCharacterProgression(ctx, host.AccountID, storeProgressionFromView(host.AccountID, host.CharacterID, sim.CharacterProgressionView())); err != nil {
+		if err := h.store.UpsertCharacterProgression(ctx, hostMember.AccountID, storeProgressionFromView(hostMember.AccountID, hostMember.CharacterID, sim.CharacterProgressionView())); err != nil {
 			return nil, nil, fmt.Errorf("clear stale hired mercenary: %w", err)
 		}
 	}
-	h.loadCharacterCorpses(ctx, h.log, sim, host)
-	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, host.AccountID, host.CharacterID, idStr(hostPlayerID), 0); err != nil && err != store.ErrNotFound {
+	if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, hostMember.AccountID, hostMember.CharacterID, idStr(hostPlayerID), 0, 0); err != nil && err != store.ErrNotFound {
 		return nil, nil, err
 	}
 	for _, member := range members {
-		if member.AccountID == host.AccountID && member.CharacterID == host.CharacterID {
+		if sessionsetup.IsHost(member, hostMember) {
 			continue
 		}
-		start, err := h.store.LoadSessionStartSnapshotForMember(ctx, sess.ID, member.AccountID, member.CharacterID)
+		guest, err := sessionsetup.Resolve(ctx, h.store, h.rules, sess.ID, member)
 		if err != nil {
-			return nil, nil, fmt.Errorf("load guest start snapshot: %w", err)
+			return nil, nil, fmt.Errorf("resolve guest: %w", err)
 		}
-		memberProgression, err := h.progressionStateForMember(ctx, member, start.Progression)
-		if err != nil {
-			return nil, nil, err
-		}
-		playerID, err := sim.AddGuestPlayer(member.AccountID, member.CharacterID, "Guest", memberProgression)
+		playerID, err := sessionsetup.AddGuest(sim, guest)
 		if err != nil {
 			return nil, nil, err
 		}
-		sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
-		sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
-		sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
-		sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
-		sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
-		sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
-		sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
-		sim.LoadAccountResourceBagForPlayer(playerID, persistedResourceBagItems(start.ResourceBagItems))
-		h.loadCharacterCorpses(ctx, h.log, sim, member)
-		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
+		// Build-time members, even HTTP guests not attached yet, join at tick 0.
+		if err := h.store.SetSessionMemberPlayer(ctx, sess.ID, member.AccountID, member.CharacterID, idStr(playerID), 0, 0); err != nil && err != store.ErrNotFound {
 			return nil, nil, err
 		}
 	}
 	return sim, nil, nil
-}
-
-func (h *Hub) progressionStateForMember(ctx context.Context, member store.SessionMember, progression *store.CharacterProgression) (game.CharacterProgressionState, error) {
-	if progression == nil {
-		return progressionStateFromStore(h.rules, progression), nil
-	}
-	character, err := h.store.GetCharacter(ctx, member.CharacterID)
-	if err != nil {
-		return game.CharacterProgressionState{}, fmt.Errorf("load character class: %w", err)
-	}
-	if character.CharacterClass == "" || character.CharacterClass == progression.CharacterClass {
-		return progressionStateFromStore(h.rules, progression), nil
-	}
-	updated := *progression
-	updated.CharacterClass = character.CharacterClass
-	return progressionStateFromStore(h.rules, &updated), nil
-}
-
-func (l *sessionLoop) start() {
-	go l.tickLoop()
-}
-
-func (l *sessionLoop) stop() {
-	l.closeOnce.Do(func() {
-		close(l.done)
-	})
 }
 
 func (l *sessionLoop) hasConnectedMember(key string) bool {
@@ -231,7 +145,9 @@ func (l *sessionLoop) hasConnectedMember(key string) bool {
 	return l.clients[key] != nil
 }
 
-func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member store.SessionMember) {
+// attach reports false when the loop is stopping; the caller must attach to
+// the successor loop instead.
+func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member store.SessionMember) bool {
 	playerID := l.playerIDForMember(ctx, member)
 	client := &loopClient{
 		loop:     l,
@@ -243,75 +159,19 @@ func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member s
 		done:     make(chan struct{}),
 	}
 	l.mu.Lock()
+	if l.stopped {
+		l.mu.Unlock()
+		return false
+	}
 	l.clients[client.key] = client
-	isCoopMember := isCoopSession(l.sess) ||
-		member.AccountID != l.sess.AccountID ||
-		member.CharacterID != l.sess.CharacterID
-	currentLevel, _ := l.sim.PlayerCurrentLevel(playerID)
-	if (isCoopMember || playerID != l.sim.DefaultPlayerID()) && (!member.Connected || member.CurrentLevel != 0 || currentLevel != 0 || !l.sim.PlayerConnected(playerID)) {
-		if err := l.sim.RespawnPlayerInTown(playerID); err != nil {
-			l.log.Error("respawn reconnecting player", "player_id", playerID, "error", err)
-		}
-	}
-	if level, ok := l.sim.PlayerCurrentLevel(playerID); ok {
-		_ = l.hub.store.SetSessionMemberConnected(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), level, int64(l.sim.CurrentTick()))
-		l.sim.SetPlayerConnected(playerID, true)
-	}
+	l.admitMemberLocked(member, playerID)
 	l.mu.Unlock()
 	l.hub.metrics.WSConnections.Inc()
 	go client.writeLoop()
 	go client.readLoop()
 	client.enqueue(l.snapshotEnvelope(playerID))
 	l.broadcastSnapshots()
-}
-
-func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.SessionMember) uint64 {
-	if id, ok := game.ParseEntityID(member.PlayerEntityID); ok && id != 0 {
-		l.mu.Lock()
-		_, exists := l.sim.PlayerCurrentLevel(id)
-		l.mu.Unlock()
-		if exists {
-			return id
-		}
-	}
-	l.mu.Lock()
-	if playerID, ok := l.sim.PlayerIDForCharacter(member.CharacterID); ok {
-		l.mu.Unlock()
-		return playerID
-	}
-	l.mu.Unlock()
-
-	start, err := l.hub.store.LoadSessionStartSnapshotForMember(ctx, member.SessionID, member.AccountID, member.CharacterID)
-	if err != nil {
-		l.log.Error("load late-joined member start snapshot", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
-		return l.sim.DefaultPlayerID()
-	}
-
-	l.mu.Lock()
-	if playerID, ok := l.sim.PlayerIDForCharacter(member.CharacterID); ok {
-		l.mu.Unlock()
-		return playerID
-	}
-	playerID, err := l.sim.AddGuestPlayer(member.AccountID, member.CharacterID, displayNameForMember(member), progressionStateFromStore(l.hub.rules, start.Progression))
-	if err != nil {
-		l.mu.Unlock()
-		l.log.Error("add late-joined guest player", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)
-		return l.sim.DefaultPlayerID()
-	}
-	l.sim.LoadInventoryForPlayer(playerID, persistedItems(start.Items))
-	l.sim.LoadHotbarForPlayer(playerID, persistedHotbar(start.Hotbar))
-	l.sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
-	l.sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
-	l.sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
-	l.sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
-	l.sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
-	l.sim.LoadAccountResourceBagForPlayer(playerID, persistedResourceBagItems(start.ResourceBagItems))
-	l.hub.loadCharacterCorpses(context.Background(), l.log, l.sim, member)
-	l.mu.Unlock()
-	if err := l.hub.store.SetSessionMemberPlayer(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), 0); err != nil && err != store.ErrNotFound {
-		l.log.Error("set late-joined member player", "account_id", member.AccountID, "character_id", member.CharacterID, "player_id", playerID, "error", err)
-	}
-	return playerID
+	return true
 }
 
 func (l *sessionLoop) detach(client *loopClient) {
@@ -323,13 +183,16 @@ func (l *sessionLoop) detach(client *loopClient) {
 	}
 	delete(l.clients, client.key)
 	level, _ := l.sim.PlayerCurrentLevel(client.playerID)
+	tick := l.sim.CurrentTick()
 	if isCoopSession(l.sess) {
-		l.sim.RemovePlayerEntity(client.playerID)
+		l.applyMemberLeaveLocked(client.playerID)
 	}
-	_ = l.hub.store.SetSessionMemberDisconnected(context.Background(), l.sess.ID, client.member.AccountID, client.member.CharacterID, level, int64(l.sim.CurrentTick()))
+	_ = l.hub.store.SetSessionMemberDisconnected(context.Background(), l.sess.ID, client.member.AccountID, client.member.CharacterID, level, int64(tick))
 	remaining := len(l.clients)
 	clients := l.clientsForLevelLocked(level)
-	tick := l.sim.CurrentTick()
+	if remaining == 0 {
+		l.stopped = true // refuse new work now; stop() below records the final tick
+	}
 	l.mu.Unlock()
 
 	if isCoopSession(l.sess) && l.sess.Listed && remaining == 0 {
@@ -494,6 +357,11 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 	in.ActorPlayerID = client.playerID
 
 	l.mu.Lock()
+	if l.stopped {
+		l.mu.Unlock()
+		client.enqueue(l.rejectedEnvelope(env.MessageID, "session_stopped", env.CorrelationID))
+		return
+	}
 	if l.seen[env.MessageID] {
 		l.mu.Unlock()
 		client.enqueue(l.rejectedEnvelope(env.MessageID, "duplicate", env.CorrelationID))
@@ -508,6 +376,7 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 	in.Sequence = l.seq
 	l.seq++
 	l.buffer[tick] = append(l.buffer[tick], in)
+	l.noteDurableLocked(int64(tick))
 	l.received[env.MessageID] = time.Now()
 	rec := store.SessionInput{
 		ID:                  ids.New("inp"),
@@ -526,19 +395,6 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 	if err := l.hub.store.AppendInput(context.Background(), rec); err != nil {
 		l.hub.metrics.PersistenceErrors.Inc()
 		l.log.Error("persist input", "error", err)
-	}
-}
-
-func (l *sessionLoop) tickLoop() {
-	ticker := time.NewTicker(time.Second / tickHz)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-l.done:
-			return
-		case <-ticker.C:
-			l.doTick()
-		}
 	}
 }
 
@@ -906,20 +762,6 @@ func memberKey(member store.SessionMember) string {
 
 func idStr(id uint64) string {
 	return fmt.Sprintf("%d", id)
-}
-
-func displayNameForMember(member store.SessionMember) string {
-	if member.Role == store.SessionMemberHost {
-		return "Hero"
-	}
-	if member.CharacterID == "" {
-		return "Guest"
-	}
-	suffix := member.CharacterID
-	if len(suffix) > 6 {
-		suffix = suffix[len(suffix)-6:]
-	}
-	return "Guest " + suffix
 }
 
 func killedEventMember(ev game.Event, membersByPlayerID map[uint64]store.SessionMember) (store.SessionMember, bool) {

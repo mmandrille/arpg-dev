@@ -89,13 +89,20 @@ func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_directio
 	_impact_feedback_count += 1
 	_kill_tween(_hit_tween)
 	_kill_tween(_death_tween)
-	var direction := _reaction_direction(source_position, fallback_direction)
-	var target_x := _base_rotation.x + direction.z * DEATH_LEAN_RADIANS
-	var target_z := _base_rotation.z - direction.x * DEATH_LEAN_RADIANS
+	# A hit mid-lean must not leave the root tilted under the death pose.
+	_root.rotation.x = _base_rotation.x
+	_root.rotation.z = _base_rotation.z
 	_apply_impact_flash()
 	_death_tween = _root.create_tween()
 	_death_tween.tween_interval(HIT_STOP_SECONDS)
 	_death_tween.tween_callback(_apply_color_scale.bind(DEATH_DARKEN))
+	# Every rigged visual's `death` clip already lays the body down; leaning the root on top
+	# stands the corpse on end. The root lean is only the death pose for clip-less visuals.
+	if _has_death_clip():
+		return
+	var direction := _reaction_direction(source_position, fallback_direction)
+	var target_x := _base_rotation.x + direction.z * DEATH_LEAN_RADIANS
+	var target_z := _base_rotation.z - direction.x * DEATH_LEAN_RADIANS
 	_death_tween.tween_property(_root, "rotation:x", target_x, DEATH_SECONDS)
 	_death_tween.parallel().tween_property(_root, "rotation:z", target_z, DEATH_SECONDS)
 
@@ -164,6 +171,13 @@ func _material_for(mesh_node: MeshInstance3D) -> StandardMaterial3D:
 		mat = StandardMaterial3D.new()
 		mat.albedo_color = _base_tint
 	return mat
+
+
+# Checked at death time, not construction: kit visuals alias `death` in _ready and a class
+# swap replaces the player model under the same root.
+func _has_death_clip() -> bool:
+	var player := _root.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	return player != null and player.has_animation("death")
 
 
 func _reaction_direction(source_position: Vector3, fallback_direction: Vector3) -> Vector3:

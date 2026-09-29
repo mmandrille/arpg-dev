@@ -17,28 +17,15 @@ const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
 const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
 const ModelTintScript := preload("res://scripts/model_tint.gd")
+const ArmorLookScript := preload("res://scripts/armor_look.gd")
 const EQUIPMENT_SLOTS := ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]
+# Only weapon slots mount meshes. Armor recolours the hero and jewelry has no world visual
+# (ADR-0018 D5 / P3b); see ArmorLook and shared/assets/armor_look.v0.json.
 const FALLBACK_ASSET_BY_SLOT := {
-	"head": "fallback_equipment_head_v0",
-	"amulet": "fallback_equipment_amulet_v0",
-	"chest": "fallback_equipment_chest_v0",
-	"gloves": "fallback_equipment_gloves_v0",
-	"belt": "fallback_equipment_belt_v0",
-	"boots": "fallback_equipment_boots_v0",
-	"ring_left": "fallback_equipment_ring_left_v0",
-	"ring_right": "fallback_equipment_ring_right_v0",
 	"main_hand": "weapon_rusty_sword_v0",
 	"off_hand": "fallback_equipment_off_hand_v0",
 }
 const SOCKET_BY_SLOT := {
-	"head": "head_socket",
-	"amulet": "amulet_socket",
-	"chest": "chest_socket",
-	"gloves": "gloves_socket",
-	"belt": "belt_socket",
-	"boots": "boots_socket",
-	"ring_left": "ring_left_socket",
-	"ring_right": "ring_right_socket",
 	"main_hand": "right_hand_socket",
 	"off_hand": "off_hand_socket",
 }
@@ -58,8 +45,9 @@ var _equipped: Dictionary = {}      # slot -> item_instance_id
 var _weapon_sets: Array = []
 var _active_weapon_set: int = 0
 var _mounted_nodes: Dictionary = {} # slot -> Node3D
-var _mounted_mirror_nodes: Dictionary = {} # slot -> Node3D (e.g. right boot)
 var _mounted_state: Dictionary = {} # slot -> debug state
+var _look_defs: Dictionary = {}     # armor slot -> item_def_id driving ArmorLook
+var _armor_look_state: Dictionary = {}
 var _warnings: Array = []
 
 
@@ -131,6 +119,7 @@ func get_debug_state() -> Dictionary:
 	visuals["weapon"] = visuals.get("main_hand", null)
 	return {
 		"equipped_visuals": visuals,
+		"armor_look": _armor_look_state.duplicate(true),
 		"warnings": _warnings,
 	}
 
@@ -156,9 +145,12 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		_warnings = []
 	_clear_mounted(slot)
 	_mounted_state.erase(slot)
+	var look_mode := ArmorLookScript.slot_mode(slot)
 
 	var item_instance_id := _equipped_instance_id_for_slot(slot)
 	if item_instance_id == "":
+		if look_mode != "":
+			_set_look_def(slot, "")
 		return
 	if slot == "off_hand" and _main_hand_blocks_off_hand_visual():
 		return
@@ -169,6 +161,19 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 		# Equipped instance not (yet) in the inventory cache; a later
 		# inventory_add/snapshot will resolve it. Surface it, render nothing.
 		_warn({"code": "unknown_item_instance_id", "item_instance_id": item_instance_id, "slot": slot})
+		if look_mode != "":
+			_set_look_def(slot, "")
+		return
+
+	if look_mode != "":
+		_mounted_state[slot] = {
+			"slot": slot,
+			"kind": look_mode,
+			"item_instance_id": item_instance_id,
+			"item_def_id": def_id,
+			"rarity": str(item.get("rarity", "common")).to_lower(),
+		}
+		_set_look_def(slot, def_id if look_mode != ArmorLookScript.MODE_NONE else "")
 		return
 
 	var vis: Dictionary = _visual_for(def_id, slot)
@@ -216,10 +221,9 @@ func _refresh_slot(slot: String, reset_warnings: bool = true) -> void:
 	_apply_tint(inst, tint)
 	socket.add_child(inst)
 	_mounted_nodes[slot] = inst
-	if slot == "boots":
-		_mount_boots_mirror(socket, _right_boot_transform(vis, slot), asset_id, entry, procedural_fallback == null)
 	_mounted_state[slot] = {
 		"slot": slot,
+		"kind": "mesh",
 		"item_instance_id": item_instance_id,
 		"item_def_id": def_id,
 		"asset_id": asset_id,
@@ -325,54 +329,21 @@ func _clear_mounted(slot: String) -> void:
 	if mounted != null and is_instance_valid(mounted):
 		(mounted as Node3D).queue_free()
 	_mounted_nodes.erase(slot)
-	var mirror = _mounted_mirror_nodes.get(slot, null)
-	if mirror != null and is_instance_valid(mirror):
-		(mirror as Node3D).queue_free()
-	_mounted_mirror_nodes.erase(slot)
 
 
-func _instantiate_visual(asset_id: String, slot: String, entry) -> Node3D:
-	var procedural_fallback := _procedural_fallback_visual(asset_id, slot, entry)
-	if procedural_fallback != null:
-		return procedural_fallback
-	var packed = load(_res_path(str(entry["runtime_path"])))
-	if packed == null:
-		return null
-	return (packed as PackedScene).instantiate()
-
-
-func _right_boot_transform(vis: Dictionary, slot: String) -> Dictionary:
-	var transform := _local_transform_for_slot(slot, vis).duplicate(true)
-	var position: Dictionary = (transform.get("position", {}) as Dictionary).duplicate(true)
-	position["x"] = -float(position.get("x", 0.0))
-	transform["position"] = position
-	return transform
-
-
-func _mount_boots_mirror(
-		left_socket: Node,
-		transform: Dictionary,
-		asset_id: String,
-		entry,
-		apply_glb_mesh_multiplier: bool,
-	) -> void:
-	var right_socket := _mount_root.find_child("boots_right_socket", true, false)
-	if right_socket == null:
-		return
-	var procedural_fallback := _procedural_fallback_visual(asset_id, "boots", entry)
-	var right_inst: Node3D
-	if procedural_fallback != null:
-		right_inst = procedural_fallback
+func _set_look_def(slot: String, def_id: String) -> void:
+	if def_id == "":
+		_look_defs.erase(slot)
 	else:
-		var packed = load(_res_path(str(entry["runtime_path"])))
-		if packed == null:
-			return
-		right_inst = (packed as PackedScene).instantiate()
-	right_inst.name = "%s_right" % asset_id
-	_apply_transform(right_inst, transform, procedural_fallback == null)
-	_apply_model_root_scale_compensation(right_inst, right_socket)
-	right_socket.add_child(right_inst)
-	_mounted_mirror_nodes["boots"] = right_inst
+		_look_defs[slot] = def_id
+	_apply_armor_look()
+
+
+func _apply_armor_look() -> void:
+	if _mount_root == null:
+		return
+	var model_root := _mount_root.find_child("ModelRoot", false, false)
+	_armor_look_state = ArmorLookScript.apply(model_root if model_root != null else _mount_root, _look_defs)
 
 
 func _apply_transform(node: Node3D, t: Dictionary, apply_glb_mesh_multiplier: bool = false) -> void:
@@ -441,28 +412,6 @@ func _procedural_fallback_visual(asset_id: String, slot: String, entry) -> Node3
 			root.add_child(_mesh_part("round_shield_face", _cylinder_mesh(0.48, 0.08, 32), Vector3.ZERO, Vector3(90, 0, 0)))
 			root.add_child(_mesh_part("round_shield_boss", _cylinder_mesh(0.16, 0.10, 24), Vector3(0, 0, 0.05), Vector3(90, 0, 0)))
 			root.add_child(_mesh_part("round_shield_grip", _box_mesh(Vector3(0.12, 0.62, 0.07)), Vector3(0, 0, -0.07)))
-		"head":
-			root.add_child(_mesh_part("helmet_cap", _cylinder_mesh(0.62, 0.56, 24), Vector3.ZERO))
-			root.add_child(_mesh_part("helmet_brow", _box_mesh(Vector3(1.0, 0.12, 0.62)), Vector3(0, -0.18, -0.16)))
-		"chest":
-			root.add_child(_mesh_part("chest_plate", _box_mesh(Vector3(0.86, 1.0, 0.28)), Vector3.ZERO))
-			root.add_child(_mesh_part("left_pauldron", _box_mesh(Vector3(0.32, 0.18, 0.34)), Vector3(-0.58, 0.34, 0)))
-			root.add_child(_mesh_part("right_pauldron", _box_mesh(Vector3(0.32, 0.18, 0.34)), Vector3(0.58, 0.34, 0)))
-		"boots":
-			root.add_child(_mesh_part("left_boot", _box_mesh(Vector3(0.48, 0.62, 0.78)), Vector3(-0.52, 0, -0.08)))
-			root.add_child(_mesh_part("right_boot", _box_mesh(Vector3(0.48, 0.62, 0.78)), Vector3(0.52, 0, -0.08)))
-		"gloves":
-			root.add_child(_mesh_part("left_glove", _box_mesh(Vector3(0.42, 0.42, 0.36)), Vector3(-0.36, 0, 0)))
-			root.add_child(_mesh_part("right_glove", _box_mesh(Vector3(0.42, 0.42, 0.36)), Vector3(0.36, 0, 0)))
-		"belt":
-			root.add_child(_mesh_part("belt_band", _box_mesh(Vector3(1.05, 0.24, 0.34)), Vector3.ZERO))
-			root.add_child(_mesh_part("belt_buckle", _box_mesh(Vector3(0.24, 0.28, 0.40)), Vector3(0, 0, -0.04)))
-		"amulet":
-			root.add_child(_mesh_part("amulet_chain", _cylinder_mesh(0.34, 0.04, 24), Vector3.ZERO, Vector3(90, 0, 0)))
-			root.add_child(_mesh_part("amulet_gem", _box_mesh(Vector3(0.20, 0.24, 0.12)), Vector3(0, -0.32, 0)))
-		"ring_left", "ring_right":
-			root.add_child(_mesh_part("ring_band", _cylinder_mesh(0.32, 0.06, 24), Vector3.ZERO, Vector3(90, 0, 0)))
-			root.add_child(_mesh_part("ring_stone", _box_mesh(Vector3(0.14, 0.12, 0.10)), Vector3(0, -0.30, 0)))
 		_:
 			return null
 	return root

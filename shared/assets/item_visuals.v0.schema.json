@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://arpg.dev/schemas/assets/item_visuals.v0.schema.json",
   "title": "Item visual metadata (v0)",
-  "description": "Rendering contract only: maps an item_def_id to an asset_id, mount socket, and local transform. Carries NO gameplay stats (ADR-0006 D3).",
+  "description": "Rendering contract only: maps an item_def_id to an asset_id, mount socket, and local transform. Carries NO gameplay stats (ADR-0006 D3). Since ADR-0018 P3b (v483) only weapon/off-hand items mount meshes; armor recolours the hero via armor_look.v0.json and jewelry has no world visual.",
   "type": "object",
   "required": ["version", "item_visuals"],
   "additionalProperties": false,

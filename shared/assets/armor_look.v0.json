@@ -1,0 +1,49 @@
+{
+  "version": 0,
+  "note": "ADR-0018 D5 / P3b (v483). Armor recolours the kit hero's own body parts through the material detail layer (Mix, alpha = strength); head items show the class headgear. Rings and amulet have no world visual.",
+  "default_strength": 0.6,
+  "regions": {
+    "body": ["_Body"],
+    "arms": ["_ArmLeft", "_ArmRight"],
+    "legs": ["_LegLeft", "_LegRight"],
+    "headgear": ["_Helmet", "_HelmetVisor", "_BearHat", "_Hat"]
+  },
+  "slots": {
+    "chest": { "region": "body", "mode": "tint" },
+    "belt": { "region": "body", "mode": "tint" },
+    "gloves": { "region": "arms", "mode": "tint" },
+    "boots": { "region": "legs", "mode": "tint" },
+    "head": { "region": "headgear", "mode": "headgear" }
+  },
+  "body_precedence": ["chest", "belt"],
+  "no_world_visual_slots": ["ring_left", "ring_right", "amulet"],
+  "items": {
+    "mail": { "color": "#9aa3ad" },
+    "leather_vest": { "color": "#8b5a2b" },
+    "full_plate": { "color": "#c9ced6", "strength": 0.7 },
+    "arcane_robes": { "color": "#5b3f9c" },
+    "crusader_plate": { "color": "#e8dfb8", "strength": 0.7 },
+    "gloves": { "color": "#7a4e2d" },
+    "cloth_wraps": { "color": "#cdbf9f" },
+    "gauntlets": { "color": "#aab2bb", "strength": 0.7 },
+    "war_bracers": { "color": "#6e4b3a" },
+    "assassin_gloves": { "color": "#2e2a33" },
+    "belt": { "color": "#6b4423", "strength": 0.4 },
+    "war_girdle": { "color": "#7d2e22", "strength": 0.4 },
+    "affinity_barbarian_girdle": { "color": "#9c5a2e", "strength": 0.4 },
+    "sash": { "color": "#a33b3b", "strength": 0.4 },
+    "hunting_quiver": { "color": "#5f6b3a", "strength": 0.4 },
+    "iron_girdle": { "color": "#8c9096", "strength": 0.4 },
+    "boots": { "color": "#6f4a2c" },
+    "affinity_rogue_treads": { "color": "#3b2f45" },
+    "soft_boots": { "color": "#9b8466" },
+    "plate_boots": { "color": "#b4bcc5", "strength": 0.7 },
+    "silent_treads": { "color": "#2f3035" },
+    "pathfinder_boots": { "color": "#56663f" },
+    "helm": { "color": "#aab2bb", "strength": 0.3 },
+    "leather_cap": { "color": "#7a4e2d" },
+    "tiara": { "color": "#e6c35c" },
+    "skull_face": { "color": "#e3dccb" },
+    "shadow_mask": { "color": "#2b2733" }
+  }
+}

@@ -36,6 +36,7 @@ try:
     from .validate_main_config import validate_main_config_gameplay
     from .validate_skills import validate_skill_catalogs
     from .validate_fog_presentation import validate_camera_fog_mode_alignment, validate_fog_presentation_ranges
+    from .validate_armor_look import validate_armor_look
 except ImportError:  # pragma: no cover - direct script execution
     from content_manifest import (  # type: ignore[no-redef]
         ManifestError,
@@ -52,6 +53,7 @@ except ImportError:  # pragma: no cover - direct script execution
     from validate_skills import validate_skill_catalogs  # type: ignore[no-redef]
     from validate_unique_items import validate_unique_items_catalog  # type: ignore[no-redef]
     from validate_fog_presentation import validate_camera_fog_mode_alignment, validate_fog_presentation_ranges  # type: ignore[no-redef]
+    from validate_armor_look import validate_armor_look  # type: ignore[no-redef]
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = ROOT / "shared"
@@ -3003,20 +3005,13 @@ def cross_checks(report: Report) -> None:
             report.fail("item_visuals slot", f"{def_id}: {vis['slot']} != item/template slot {slot}")
         else:
             report.ok(f"item_visuals {def_id} resolves to item/template rules with matching slot")
-    visual_required = {
-        def_id
-        for def_id, item in items["items"].items()
-        if item.get("category") == "equipment" and item.get("equippable") and item.get("slot")
-    } | {
-        def_id
-        for def_id, template in item_templates["templates"].items()
-        if template.get("category") == "equipment" and template.get("equippable") and template.get("slot")
+    equippables = {
+        def_id: entry.get("slot")
+        for table in (items["items"], item_templates["templates"])
+        for def_id, entry in table.items()
+        if entry.get("category") == "equipment" and entry.get("equippable") and entry.get("slot")
     }
-    missing_visuals = sorted(visual_required - set(visuals))
-    if missing_visuals:
-        report.fail("item_visuals equipment coverage", f"missing equipment visual mappings: {missing_visuals}")
-    else:
-        report.ok("item_visuals covers all equippable equipment")
+    validate_armor_look(report, load(ASSETS / "armor_look.v0.json"), visuals, equippables, equipment_visual_slot_matches)
 
     visual_golden = load(GOLDEN / "item_visual_resolution.json")
     gdef = visual_golden["item_def_id"]

@@ -10,6 +10,7 @@
 extends SceneTree
 
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
+const ArmorLookScript := preload("res://scripts/armor_look.gd")
 const MainScript := preload("res://scripts/main.gd")
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
@@ -80,12 +81,18 @@ func _run_all() -> void:
 	for item_def_id in item_templates.keys():
 		var template: Dictionary = item_templates[item_def_id]
 		if bool(template.get("equippable", false)) and not visuals.has(str(item_def_id)):
-			_fail("item_visuals is missing equippable template %s" % item_def_id)
-			return
+			# ADR-0018 P3b: armor is covered by armor_look instead; jewelry has no world visual.
+			var slot := str(template.get("slot", ""))
+			var mode := ArmorLookScript.slot_mode("ring_left" if slot == "ring" else slot)
+			if mode == ArmorLookScript.MODE_NONE:
+				continue
+			if mode == "" or ArmorLookScript.item_look(str(item_def_id)).is_empty():
+				_fail("equippable template %s has neither an item_visuals mesh nor an armor_look colour" % item_def_id)
+				return
 
 	if not await EquippedGearFitProbeScript.new().verify_all_classes(self, Callable(self, "_fail")):
 		return
-	if not EquipmentProbeScript.new().verify_equipped_fallback_resolver(self, Callable(self, "_fail")):
+	if not EquipmentProbeScript.new().verify_full_loadout_resolver(self, Callable(self, "_fail")):
 		return
 	var scale_ctx := ScaleProbeScript.new().prepare(self, MainScript, CharacterScene, ResolverScript, Callable(self, "_fail"))
 	if scale_ctx.is_empty():

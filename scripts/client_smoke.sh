@@ -259,6 +259,7 @@ run_gate "GDScript render environment presentation test" "[gdtest] PASS: test_re
 run_gate "GDScript dungeon kit test" "[gdtest] PASS: test_dungeon_kit" res://tests/test_dungeon_kit.gd
 run_gate "GDScript dungeon kit props test" "[gdtest] PASS: test_dungeon_kit_props" res://tests/test_dungeon_kit_props.gd
 run_gate "GDScript kit monsters test" "[gdtest] PASS: test_kit_monsters" res://tests/test_kit_monsters.gd
+run_gate "GDScript armor look test" "[gdtest] PASS: test_armor_look" res://tests/test_armor_look.gd
 run_gate "GDScript town night lighting test" "[gdtest] PASS: test_town_night_lighting" res://tests/test_town_night_lighting.gd
 run_gate "GDScript fog-of-war overlay test" "[gdtest] PASS: test_fog_of_war_overlay" res://tests/test_fog_of_war_overlay.gd
 run_gate "GDScript wall occlusion fade test" "[gdtest] PASS: test_wall_occlusion_fade" res://tests/test_wall_occlusion_fade.gd

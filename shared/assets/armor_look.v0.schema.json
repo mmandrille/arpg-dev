@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/armor_look.v0.schema.json",
+  "title": "Armor look on kit heroes (v0, ADR-0018 D5 / P3b)",
+  "description": "Presentation only: how equipped armor recolours the hero's own body-part meshes (detail-layer tint) and toggles class headgear. Carries NO gameplay stats.",
+  "type": "object",
+  "required": ["version", "default_strength", "regions", "slots", "body_precedence", "no_world_visual_slots", "items"],
+  "additionalProperties": false,
+  "$defs": {
+    "slot": { "type": "string", "enum": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right"] },
+    "strength": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+    "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+  },
+  "properties": {
+    "version": { "const": 0 },
+    "note": { "type": "string" },
+    "default_strength": { "$ref": "#/$defs/strength" },
+    "regions": {
+      "description": "Region id -> mesh-name suffixes matched against the kit hero's MeshInstance3D names.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": { "type": "string", "minLength": 1 }
+      }
+    },
+    "slots": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/slot" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["region", "mode"],
+        "additionalProperties": false,
+        "properties": {
+          "region": { "type": "string", "minLength": 1 },
+          "mode": { "type": "string", "enum": ["tint", "headgear"] }
+        }
+      }
+    },
+    "body_precedence": {
+      "description": "When several slots tint the same region, the first equipped slot in this list wins.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/slot" }
+    },
+    "no_world_visual_slots": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/slot" }
+    },
+    "items": {
+      "description": "item_def_id -> armor colour. Every template in a tint/headgear slot must have one.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["color"],
+        "additionalProperties": false,
+        "properties": {
+          "color": { "$ref": "#/$defs/color" },
+          "strength": { "$ref": "#/$defs/strength" }
+        }
+      }
+    }
+  }
+}

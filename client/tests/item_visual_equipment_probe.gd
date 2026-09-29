@@ -6,7 +6,7 @@ extends RefCounted
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
 
 
-func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
+func verify_full_loadout_resolver(tree: SceneTree, fail: Callable) -> bool:
 	var mount := _make_mount_root(tree)
 	var resolver = ResolverScript.new(mount)
 	var inventory := [
@@ -38,53 +38,27 @@ func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
 	})
 	var state: Dictionary = resolver.get_debug_state()
 	if not state["warnings"].is_empty():
-		fail.call("resolver emitted warnings for complete equipment fallback map: %s" % state["warnings"])
+		fail.call("resolver emitted warnings for a complete loadout: %s" % state["warnings"])
 		return false
 	var equipped_visuals: Dictionary = state["equipped_visuals"]
-	for slot in ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"]:
-		if not equipped_visuals.has(slot):
-			fail.call("resolver did not mount slot %s: %s" % [slot, equipped_visuals])
+	# ADR-0018 P3b: only weapons mount meshes; armor recolours the hero, jewelry has no world visual.
+	var expected_kind := {
+		"head": "headgear", "chest": "tint", "gloves": "tint", "belt": "tint", "boots": "tint",
+		"amulet": "none", "ring_left": "none", "ring_right": "none", "main_hand": "mesh", "off_hand": "mesh",
+	}
+	for slot in expected_kind.keys():
+		var mounted: Dictionary = equipped_visuals.get(slot, {})
+		if str(mounted.get("kind", "")) != str(expected_kind[slot]):
+			fail.call("slot %s kind %s, want %s: %s" % [slot, mounted.get("kind", ""), expected_kind[slot], mounted])
 			return false
-		var mounted: Dictionary = equipped_visuals[slot]
-		if not bool(mounted.get("visible", false)):
-			fail.call("resolver mounted invisible slot %s: %s" % [slot, mounted])
+	for slot in ["main_hand", "off_hand"]:
+		if not bool((equipped_visuals[slot] as Dictionary).get("visible", false)):
+			fail.call("weapon slot %s mounted invisible: %s" % [slot, equipped_visuals[slot]])
 			return false
-	for slot in ["head", "chest", "boots", "off_hand"]:
-		if bool((equipped_visuals[slot] as Dictionary).get("procedural_fallback", false)):
-			fail.call("resolver should mount GLB equipment for slot %s: %s" % [slot, equipped_visuals[slot]])
-			return false
-	if str(equipped_visuals["ring_right"].get("mount_socket", "")) != "ring_right_socket":
-		fail.call("ring_right mounted to wrong socket: %s" % equipped_visuals["ring_right"])
-		return false
-	if str(equipped_visuals["head"].get("tint", "")) != "ffd75e":
-		fail.call("rare head tint mismatch: %s" % equipped_visuals["head"])
-		return false
-	var head_asset := str(equipped_visuals["head"].get("asset_id", ""))
-	var head_node := mount.find_child(head_asset if head_asset != "" else "fallback_equipment_head_v0", true, false) as Node3D
-	if head_node == null:
-		fail.call("helmet visual missing for asset %s" % head_asset)
-		return false
-	var chest_asset := str(equipped_visuals["chest"].get("asset_id", ""))
-	var chest_node := mount.find_child(chest_asset if chest_asset != "" else "fallback_equipment_chest_v0", true, false) as Node3D
-	if chest_node == null:
-		fail.call("chest visual missing for asset %s" % chest_asset)
-		return false
-	var boots_state: Dictionary = equipped_visuals["boots"]
-	var boots_node := mount.find_child(str(boots_state.get("asset_id", "fallback_equipment_boots_v0")), true, false) as Node3D
-	if boots_node == null:
-		fail.call("boots visual missing")
-		return false
-	if bool(boots_state.get("procedural_fallback", false)):
-		if absf(boots_node.rotation_degrees.z) > 0.001:
-			fail.call("boots fallback rotated away from left/right foot layout: %s" % str(boots_node.rotation_degrees))
-			return false
-		var left_boot := boots_node.find_child("left_boot", true, false) as Node3D
-		var right_boot := boots_node.find_child("right_boot", true, false) as Node3D
-		if left_boot == null or right_boot == null or left_boot.position.x > -0.5 or right_boot.position.x < 0.5:
-			fail.call("boots fallback not split across feet: left=%s right=%s" % [
-				str(left_boot.position if left_boot != null else null),
-				str(right_boot.position if right_boot != null else null),
-			])
+	for socket_name in ["head_socket", "amulet_socket", "chest_socket", "gloves_socket", "belt_socket", "boots_socket", "ring_left_socket", "ring_right_socket"]:
+		var socket := mount.find_child(socket_name, false, false)
+		if socket != null and socket.get_child_count() > 0:
+			fail.call("armor socket %s must stay empty, has %s" % [socket_name, socket.get_children()])
 			return false
 
 	resolver.apply_snapshot({
@@ -92,12 +66,12 @@ func verify_equipped_fallback_resolver(tree: SceneTree, fail: Callable) -> bool:
 		"equipped": {"head": "3001"},
 	})
 	state = resolver.get_debug_state()
-	equipped_visuals = state["equipped_visuals"]
-	if not equipped_visuals.has("head") or str(equipped_visuals["head"].get("asset_id", "")) != "fallback_equipment_head_v0":
-		fail.call("unmapped future item did not use head fallback: %s" % equipped_visuals)
+	if not state["warnings"].is_empty():
+		fail.call("an uncoloured future head item must degrade quietly: %s" % state["warnings"])
 		return false
-	if str(equipped_visuals["head"].get("tint", "")) != "5aa7ff":
-		fail.call("unmapped future item magic tint mismatch: %s" % equipped_visuals["head"])
+	var future_head: Dictionary = (state["equipped_visuals"] as Dictionary).get("head", {})
+	if str(future_head.get("kind", "")) != "headgear" or bool((state["armor_look"] as Dictionary).get("regions", {}).has("headgear")):
+		fail.call("uncoloured head item should show headgear without a tint: %s / %s" % [future_head, state["armor_look"]])
 		return false
 	mount.queue_free()
 

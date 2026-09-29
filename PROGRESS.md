@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v482 CC0 beasts, ADR-0018 P4b)
+Last updated: 2026-09-29 (v483 armor look, ADR-0018 P3b)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-29 (v482 CC0 beasts, ADR-0018 P4b)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v482 — Quaternius CC0 wolf + bat replace the last unconfirmed-license beasts; palette-bake tool; license allow-list gate (ADR-0018 P4b; `make ci` green). Prior: v481 recorded tick checkpoints, v480 member join tick, v479 recorded co-op member lifecycle, v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
-| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3b (armor tints + headgear) or P3c (retire legacy 17-bone hero pipeline) |
+| **Latest completed slice** | v483 — armor look: equipped armor recolours the kit hero's own body parts (detail-layer tint), head items toggle class headgear, jewelry has no world visual; legacy armor boxes no longer mount (ADR-0018 P3b; `make ci` green). Prior: v482 CC0 beasts, v481 recorded tick checkpoints, v480 member join tick, v479 recorded co-op member lifecycle, v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
+| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3c (retire legacy 17-bone hero pipeline), kit ground-loot models, or remote-player gear (needs a protocol slice) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 

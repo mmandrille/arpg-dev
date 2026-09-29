@@ -26,35 +26,22 @@ const SHARED_SLOTS := {
 }
 
 const SLOT_SOCKET := {
-	"head": "head_socket",
-	"chest": "chest_socket",
-	"boots": "boots_socket",
 	"main_hand": "right_hand_socket",
 	"off_hand": "off_hand_socket",
 }
 
 
 const MIN_BONE_REST_Y := {
-	"head": 1.2,
-	"chest": 0.9,
 	"main_hand": 0.6,
 	"off_hand": 0.6,
-	"boots": -0.05,
 }
 
 const MAX_LOCAL_SCALE := {
-	"head": 5,
-	"chest": 5,
 	"main_hand": 5,
 	"off_hand": 5,
-	"boots": 5,
 }
 
-const MIN_GLOBAL_SCALE := {
-	"head": 0.12,
-	"chest": 0.14,
-	"boots": 0.06,
-}
+const MIN_GLOBAL_SCALE := {}
 
 
 func verify_all_classes(tree: SceneTree, fail: Callable) -> bool:
@@ -93,6 +80,9 @@ func _verify_class(tree: SceneTree, class_id: String, fail: Callable) -> bool:
 			character.queue_free()
 			return false
 		var mounted: Dictionary = equipped_visuals[slot_name]
+		if str(mounted.get("kind", "")) != "mesh":
+			# Armor recolours the hero instead of mounting (ADR-0018 P3b); test_armor_look.gd owns it.
+			continue
 		if not bool(mounted.get("visible", false)):
 			fail.call("%s slot %s mounted invisible: %s" % [class_id, slot_name, mounted])
 			character.queue_free()
@@ -157,8 +147,6 @@ func _verify_class(tree: SceneTree, class_id: String, fail: Callable) -> bool:
 				])
 				character.queue_free()
 				return false
-		if slot_name == "boots":
-			continue
 	character.queue_free()
 	return true
 

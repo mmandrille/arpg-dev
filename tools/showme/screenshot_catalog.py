@@ -12,6 +12,7 @@ CLASS_PROGRESSION_REL = "shared/rules/character_progression.v0.json"
 SKILLS_REL = "shared/rules/skills.v0.json"
 ITEM_PRESENTATIONS_REL = "shared/assets/item_presentations.v0.json"
 ITEM_VISUALS_REL = "shared/assets/item_visuals.v0.json"
+ARMOR_LOOK_REL = "shared/assets/armor_look.v0.json"
 ASSETS_MANIFEST_REL = "assets/manifests/assets.v0.json"
 DUNGEON_GENERATION_REL = "shared/rules/dungeon_generation.v0.json"
 
@@ -84,11 +85,13 @@ def item_family_ids() -> list[str]:
 
 
 def item_def_ids_with_visuals() -> list[str]:
-    data = _read_json(ITEM_VISUALS_REL)
-    visuals = data.get("item_visuals", {})
-    if not isinstance(visuals, dict):
-        return []
-    return sorted(str(item_def_id) for item_def_id in visuals)
+    """Equipment with a world look: item_visuals (weapons) plus armor_look items (ADR-0018 P3b)."""
+    visuals = _read_json(ITEM_VISUALS_REL).get("item_visuals", {})
+    armor = _read_json(ARMOR_LOOK_REL).get("items", {})
+    ids = set(visuals) if isinstance(visuals, dict) else set()
+    if isinstance(armor, dict):
+        ids |= set(armor)
+    return sorted(str(item_def_id) for item_def_id in ids)
 
 
 def item_asset_ids() -> list[str]:

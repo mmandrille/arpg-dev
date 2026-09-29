@@ -64,6 +64,14 @@ func Host(members []store.SessionMember) store.SessionMember {
 	return members[0]
 }
 
+// JoinedSim reports whether the member's player entity was ever put into the
+// sim. A negative joined_tick means it never was (for example, a guest that
+// joined over HTTP while the loop was running and never attached), so replay
+// must not allocate an entity for it.
+func JoinedSim(member store.SessionMember) bool {
+	return member.JoinedTick >= 0
+}
+
 // IsHost reports whether member is the same account/character as host.
 func IsHost(member, host store.SessionMember) bool {
 	return member.AccountID == host.AccountID && member.CharacterID == host.CharacterID

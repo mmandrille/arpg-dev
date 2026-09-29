@@ -45,7 +45,10 @@ type SessionRepo interface {
 	ClaimSessionMemberConnection(ctx context.Context, sessionID, accountID, characterID string) (bool, error)
 	SetSessionMemberConnected(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, tick int64) error
 	SetSessionMemberDisconnected(ctx context.Context, sessionID, accountID, characterID string, currentLevel int, tick int64) error
-	SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int) error
+	// SetSessionMemberPlayer records the player entity just added to the sim
+	// for a member and the tick it was added (the replay contract for
+	// joined_tick; see SessionMemberNotJoinedTick).
+	SetSessionMemberPlayer(ctx context.Context, sessionID, accountID, characterID, playerEntityID string, currentLevel int, joinedTick int64) error
 }
 
 // CharacterProgressionRepo manages durable character items, waypoints, and the

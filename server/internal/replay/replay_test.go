@@ -1407,7 +1407,7 @@ func (f *fakeRepo) SetSessionMemberConnected(context.Context, string, string, st
 func (f *fakeRepo) SetSessionMemberDisconnected(context.Context, string, string, string, int, int64) error {
 	return nil
 }
-func (f *fakeRepo) SetSessionMemberPlayer(context.Context, string, string, string, string, int) error {
+func (f *fakeRepo) SetSessionMemberPlayer(context.Context, string, string, string, string, int, int64) error {
 	return nil
 }
 func (f *fakeRepo) ListCharacterItems(context.Context, string, string) ([]store.CharacterItemInstance, error) {

@@ -317,6 +317,7 @@ func reconstructFromSim(sim *game.Sim, inputs []RecordedInput, throughTick int64
 // sessionStartSim builds the tick-0 sim exactly like the live session build:
 // host first, then guests already in the session at tick 0. Guests that joined
 // later are returned as pending and added at their recorded joined_tick.
+// Members that never entered the live sim (negative joined_tick) are skipped.
 func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rules, sess store.Session) (*game.Sim, []memberPlayer, []pendingMember, error) {
 	members, err := sessionsetup.Members(ctx, repo, sess)
 	if err != nil {
@@ -339,7 +340,7 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 
 	var pending []pendingMember
 	for _, member := range members {
-		if sessionsetup.IsHost(member, hostMember) {
+		if sessionsetup.IsHost(member, hostMember) || !sessionsetup.JoinedSim(member) {
 			continue
 		}
 		guest, err := sessionsetup.Resolve(ctx, repo, rules, sess.ID, member)

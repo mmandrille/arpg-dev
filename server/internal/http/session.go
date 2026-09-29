@@ -329,7 +329,7 @@ func (s *Server) handleJoinSession(w http.ResponseWriter, r *http.Request) {
 		Role:         store.SessionMemberGuest,
 		Status:       store.SessionMemberActive,
 		CurrentLevel: 0,
-		JoinedTick:   -1,
+		JoinedTick:   store.SessionMemberNotJoinedTick,
 	}); err != nil {
 		switch {
 		case errors.Is(err, store.ErrConflict):

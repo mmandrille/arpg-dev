@@ -186,13 +186,13 @@ func (l *sessionLoop) detach(client *loopClient) {
 	}
 	delete(l.clients, client.key)
 	level, _ := l.sim.PlayerCurrentLevel(client.playerID)
+	tick := l.sim.CurrentTick()
 	if isCoopSession(l.sess) {
-		l.sim.RemovePlayerEntity(client.playerID)
+		l.applyMemberLeaveLocked(client.playerID)
 	}
-	_ = l.hub.store.SetSessionMemberDisconnected(context.Background(), l.sess.ID, client.member.AccountID, client.member.CharacterID, level, int64(l.sim.CurrentTick()))
+	_ = l.hub.store.SetSessionMemberDisconnected(context.Background(), l.sess.ID, client.member.AccountID, client.member.CharacterID, level, int64(tick))
 	remaining := len(l.clients)
 	clients := l.clientsForLevelLocked(level)
-	tick := l.sim.CurrentTick()
 	l.mu.Unlock()
 
 	if isCoopSession(l.sess) && l.sess.Listed && remaining == 0 {

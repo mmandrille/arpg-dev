@@ -15,19 +15,18 @@ func (l *sessionLoop) admitMemberLocked(member store.SessionMember, playerID uin
 	isCoopMember := isCoopSession(l.sess) ||
 		member.AccountID != l.sess.AccountID ||
 		member.CharacterID != l.sess.CharacterID
-	currentLevel, _ := l.sim.PlayerCurrentLevel(playerID)
-	if (isCoopMember || playerID != l.sim.DefaultPlayerID()) && (!member.Connected || member.CurrentLevel != 0 || currentLevel != 0 || !l.sim.PlayerConnected(playerID)) {
-		if err := l.sim.RespawnPlayerInTown(playerID); err != nil {
-			l.log.Error("respawn reconnecting player", "player_id", playerID, "error", err)
-		}
+	currentLevel, ok := l.sim.PlayerCurrentLevel(playerID)
+	if !ok {
+		return
 	}
-	if level, ok := l.sim.PlayerCurrentLevel(playerID); ok {
-		// joined_tick must be the tick the entity was added, not "now": the lock
-		// is released between AddGuestPlayer and here, so ticks may have run.
-		joinedTick, _ := l.sim.PlayerJoinedTick(playerID)
-		_ = l.hub.store.SetSessionMemberConnected(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), level, int64(joinedTick))
-		l.sim.SetPlayerConnected(playerID, true)
-	}
+	respawn := (isCoopMember || playerID != l.sim.DefaultPlayerID()) && (!member.Connected || member.CurrentLevel != 0 || currentLevel != 0 || !l.sim.PlayerConnected(playerID))
+	// Recorded as system_member_rejoin (v479) so replay respawns at this point.
+	l.applyMemberRejoinLocked(playerID, respawn)
+	level, _ := l.sim.PlayerCurrentLevel(playerID)
+	// joined_tick must be the tick the entity was added, not "now": the lock
+	// is released between AddGuestPlayer and here, so ticks may have run.
+	joinedTick, _ := l.sim.PlayerJoinedTick(playerID)
+	_ = l.hub.store.SetSessionMemberConnected(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), level, int64(joinedTick))
 }
 
 func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.SessionMember) uint64 {
@@ -58,6 +57,9 @@ func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.Sessio
 		return playerID
 	}
 	playerID, err := sessionsetup.AddGuest(l.sim, guest)
+	if err == nil {
+		l.recordMemberJoinLocked(member, playerID)
+	}
 	l.mu.Unlock()
 	if err != nil {
 		l.log.Error("add late-joined guest player", "account_id", member.AccountID, "character_id", member.CharacterID, "error", err)

@@ -79,7 +79,7 @@ func (l *sessionLoop) doTick() {
 		profiler:    profiler,
 	})
 	l.mu.Unlock()
-	l.persistLoadShedInput(loadShedInput)
+	l.persistSystemInput(loadShedInput)
 	if guardrail.OverBudget {
 		logTickBudgetWarning(l.log, tick, totalDuration, guardrail, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, degradationApplied)
 	}

@@ -1,7 +1,6 @@
 package realtime
 
 import (
-	"context"
 	"time"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
@@ -54,25 +53,5 @@ func (l *sessionLoop) applyLoadShed(tick uint64, sample loadShedSample) (bool, *
 		return false, nil
 	}
 	applied := l.sim.ApplyLoadShed(d)
-	sequence := l.seq
-	l.seq++
-	l.seen[messageID] = true
-	return applied, &store.SessionInput{
-		ID:        ids.New("inp"),
-		SessionID: l.sess.ID,
-		Tick:      int64(tick),
-		Sequence:  sequence,
-		MessageID: messageID,
-		Payload:   payload,
-	}
-}
-
-func (l *sessionLoop) persistLoadShedInput(rec *store.SessionInput) {
-	if rec == nil {
-		return
-	}
-	if err := l.hub.store.AppendInput(context.Background(), *rec); err != nil {
-		l.hub.metrics.PersistenceErrors.Inc()
-		l.log.Error("persist load shed input", "tick", rec.Tick, "error", err)
-	}
+	return applied, l.systemInputRowLocked(int64(tick), messageID, payload)
 }

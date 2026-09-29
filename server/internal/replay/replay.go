@@ -13,7 +13,6 @@ import (
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/inputdecode"
-	"github.com/mmandrille_meli/arpg-dev/server/internal/sessionsetup"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -76,13 +75,6 @@ type RecordedInput struct {
 	Input game.Input
 }
 
-type memberPlayer struct {
-	member   store.SessionMember
-	playerID uint64
-}
-
-type pendingMember = sessionsetup.Member
-
 // Reconstruction is the authoritative state rebuilt from seed + inputs.
 type Reconstruction struct {
 	Sim           *game.Sim
@@ -118,16 +110,20 @@ func Reconstruct(ctx context.Context, repo store.Repository, rules *game.Rules, 
 		}
 	}
 
-	sim, members, pending, err := sessionStartSim(ctx, repo, rules, sess)
+	sim, members, pending, err := sessionStartSim(ctx, repo, rules, sess, recordedJoins(recordedInputs))
 	if err != nil {
 		return Reconstruction{Session: sess}, err
 	}
-	recon, joined, err := reconstructFromSimWithPendingMembers(sim, recordedInputs, maxTick, pending)
+	roster := newMemberRoster(sim, pending)
+	recon, err := replayTicks(roster, recordedInputs, maxTick, nil)
 	if err != nil {
 		return Reconstruction{Session: sess}, err
 	}
-	members = append(members, joined...)
-	applyCurrentMemberConnectivity(sim, sess, members)
+	// Legacy members still pending past the last tick join now, as before v479.
+	if err := roster.joinLegacyThrough(int64(^uint64(0) >> 1)); err != nil {
+		return Reconstruction{Session: sess}, err
+	}
+	roster.applyCurrentMemberConnectivity(sess, append(members, roster.joined...))
 	recon.Session = sess
 	recon.Snapshot = sim.Snapshot()
 	return recon, nil
@@ -164,8 +160,7 @@ func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules
 		maxTick = throughTick
 	}
 
-	byTick := inputsByTick(recordedInputs)
-	sim, _, pending, err := sessionStartSim(ctx, repo, rules, sess)
+	sim, _, pending, err := sessionStartSim(ctx, repo, rules, sess, recordedJoins(recordedInputs))
 	if err != nil {
 		return Timeline{}, err
 	}
@@ -180,16 +175,7 @@ func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules
 			Payload:   sim.Snapshot(),
 		}},
 	}
-
-	for t := int64(0); t <= maxTick; t++ {
-		var err error
-		pending, _, err = addPendingMembersThroughTick(sim, pending, t)
-		if err != nil {
-			return Timeline{}, err
-		}
-		ins := byTick[t]
-		sortInputs(ins)
-		results := sim.TickResults(ins)
+	_, err = replayTicks(newMemberRoster(sim, pending), recordedInputs, maxTick, func(results []game.TickResult) {
 		for i, res := range results {
 			if len(res.Changes) == 0 && len(res.Events) == 0 {
 				continue
@@ -207,6 +193,9 @@ func BuildTimeline(ctx context.Context, repo store.Repository, rules *game.Rules
 				},
 			})
 		}
+	})
+	if err != nil {
+		return Timeline{}, err
 	}
 	return out, nil
 }
@@ -256,7 +245,7 @@ func ReconstructFromInputsWithGameplayDebug(sessionID, seed string, rules *game.
 		return Reconstruction{}, err
 	}
 	sim.SetGameplayDebug(true)
-	return reconstructFromSim(sim, inputs, throughTick), nil
+	return replayTicks(newMemberRoster(sim, nil), inputs, throughTick, nil)
 }
 
 func ReconstructFromInputsWithProgression(sessionID, seed string, rules *game.Rules, worldID string, inputs []RecordedInput, throughTick int64, items []game.PersistedItem, waypointLevels []int, hotbar []game.PersistedHotbarSlot, progression game.CharacterProgressionState) (Reconstruction, error) {
@@ -267,11 +256,13 @@ func ReconstructFromInputsWithProgression(sessionID, seed string, rules *game.Ru
 	sim.LoadInventory(items)
 	sim.LoadHotbar(hotbar)
 	sim.LoadDiscoveredTeleporters(waypointLevels)
-	recon := reconstructFromSim(sim, inputs, throughTick)
-	return recon, nil
+	return replayTicks(newMemberRoster(sim, nil), inputs, throughTick, nil)
 }
 
-func reconstructFromSim(sim *game.Sim, inputs []RecordedInput, throughTick int64) Reconstruction {
+// replayTicks steps the roster's sim through ticks 0..throughTick. Membership
+// rows stamped with tick T apply after tick T, in sequence order. Rows made
+// before the first tick carry -1. onResults, when set, sees every tick's results.
+func replayTicks(roster *memberRoster, inputs []RecordedInput, throughTick int64, onResults func([]game.TickResult)) (Reconstruction, error) {
 	byTick := make(map[int64][]game.Input)
 	meta := ResumeMetadata{
 		SeenMessageIDs: make(map[string]bool, len(inputs)),
@@ -285,12 +276,25 @@ func reconstructFromSim(sim *game.Sim, inputs []RecordedInput, throughTick int64
 			meta.NextSequence = rec.Input.Sequence + 1
 		}
 	}
+	_, early := splitMemberInputs(byTick[-1])
+	if err := roster.apply(early); err != nil {
+		return Reconstruction{}, err
+	}
 
+	sim := roster.sim
 	var derived []derivedEvent
 	for t := int64(0); t <= throughTick; t++ {
-		ins := byTick[t]
-		sortInputs(ins)
-		results := sim.TickResults(ins)
+		if err := roster.joinLegacyThrough(t); err != nil {
+			return Reconstruction{}, err
+		}
+		players, members := splitMemberInputs(byTick[t])
+		results := sim.TickResults(players)
+		if err := roster.apply(members); err != nil {
+			return Reconstruction{}, err
+		}
+		if onResults != nil {
+			onResults(results)
+		}
 		sequence := int64(0)
 		for _, res := range results {
 			for _, ev := range res.Events {
@@ -311,173 +315,7 @@ func reconstructFromSim(sim *game.Sim, inputs []RecordedInput, throughTick int64
 		Snapshot:      sim.Snapshot(),
 		DerivedEvents: derived,
 		Metadata:      meta,
-	}
-}
-
-// sessionStartSim builds the tick-0 sim exactly like the live session build:
-// host first, then guests already in the session at tick 0. Guests that joined
-// later are returned as pending and added at their recorded joined_tick.
-func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rules, sess store.Session) (*game.Sim, []memberPlayer, []pendingMember, error) {
-	members, err := sessionsetup.Members(ctx, repo, sess)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	hostMember := sessionsetup.Host(members)
-	host, err := sessionsetup.Resolve(ctx, repo, rules, sess.ID, hostMember)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	sim, err := sessionsetup.NewHostSim(ctx, repo, rules, sess, host, nil)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	hostID := sim.DefaultPlayerID()
-	if err := assertStoredPlayerID(hostMember, hostID); err != nil {
-		return nil, nil, nil, err
-	}
-	players := []memberPlayer{{member: hostMember, playerID: hostID}}
-
-	var pending []pendingMember
-	for _, member := range members {
-		if sessionsetup.IsHost(member, hostMember) {
-			continue
-		}
-		guest, err := sessionsetup.Resolve(ctx, repo, rules, sess.ID, member)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		if member.JoinedTick > 0 {
-			pending = append(pending, guest)
-			continue
-		}
-		player, err := addMemberToSim(sim, guest)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		players = append(players, player)
-	}
-	return sim, players, pending, nil
-}
-
-func reconstructFromSimWithPendingMembers(sim *game.Sim, inputs []RecordedInput, throughTick int64, pending []pendingMember) (Reconstruction, []memberPlayer, error) {
-	byTick := make(map[int64][]game.Input)
-	meta := ResumeMetadata{
-		SeenMessageIDs: make(map[string]bool, len(inputs)),
-	}
-	for _, rec := range inputs {
-		byTick[rec.Tick] = append(byTick[rec.Tick], rec.Input)
-		if rec.Input.MessageID != "" {
-			meta.SeenMessageIDs[rec.Input.MessageID] = true
-		}
-		if rec.Input.Sequence >= meta.NextSequence {
-			meta.NextSequence = rec.Input.Sequence + 1
-		}
-	}
-
-	var derived []derivedEvent
-	var joined []memberPlayer
-	for t := int64(0); t <= throughTick; t++ {
-		var err error
-		var added []memberPlayer
-		pending, added, err = addPendingMembersThroughTick(sim, pending, t)
-		if err != nil {
-			return Reconstruction{}, nil, err
-		}
-		joined = append(joined, added...)
-		ins := byTick[t]
-		sortInputs(ins)
-		results := sim.TickResults(ins)
-		sequence := int64(0)
-		for _, res := range results {
-			for _, ev := range res.Events {
-				payload, _ := json.Marshal(ev)
-				derived = append(derived, derivedEvent{
-					Tick:      int64(res.Tick),
-					Sequence:  sequence,
-					EventType: ev.EventType,
-					Payload:   payload,
-				})
-				sequence++
-			}
-		}
-	}
-	var err error
-	pending, joinedAfter, err := addPendingMembersThroughTick(sim, pending, int64(^uint64(0)>>1))
-	if err != nil {
-		return Reconstruction{}, nil, err
-	}
-	_ = pending
-	joined = append(joined, joinedAfter...)
-	return Reconstruction{
-		Sim:           sim,
-		Snapshot:      sim.Snapshot(),
-		DerivedEvents: derived,
-		Metadata:      meta,
-	}, joined, nil
-}
-
-func addPendingMembersThroughTick(sim *game.Sim, pending []pendingMember, tick int64) ([]pendingMember, []memberPlayer, error) {
-	if len(pending) == 0 {
-		return pending, nil, nil
-	}
-	remaining := pending[:0]
-	var added []memberPlayer
-	for _, item := range pending {
-		if item.Member.JoinedTick > tick {
-			remaining = append(remaining, item)
-			continue
-		}
-		player, err := addMemberToSim(sim, item)
-		if err != nil {
-			return nil, nil, err
-		}
-		added = append(added, player)
-	}
-	return remaining, added, nil
-}
-
-func addMemberToSim(sim *game.Sim, guest sessionsetup.Member) (memberPlayer, error) {
-	playerID, err := sessionsetup.AddGuest(sim, guest)
-	if err != nil {
-		return memberPlayer{}, err
-	}
-	if err := assertStoredPlayerID(guest.Member, playerID); err != nil {
-		return memberPlayer{}, err
-	}
-	return memberPlayer{member: guest.Member, playerID: playerID}, nil
-}
-
-func assertStoredPlayerID(member store.SessionMember, actual uint64) error {
-	if member.PlayerEntityID == "" {
-		return nil
-	}
-	want, ok := game.ParseEntityID(member.PlayerEntityID)
-	if !ok {
-		return fmt.Errorf("replay: invalid member player_entity_id %q for %s/%s", member.PlayerEntityID, member.AccountID, member.CharacterID)
-	}
-	if want != actual {
-		return fmt.Errorf("replay: member %s/%s player_entity_id=%d reconstructed=%d", member.AccountID, member.CharacterID, want, actual)
-	}
-	return nil
-}
-
-func applyCurrentMemberConnectivity(sim *game.Sim, sess store.Session, players []memberPlayer) {
-	coop := sess.Mode == store.SessionModeCoop || sess.JoinCodeHash != ""
-	for _, player := range players {
-		if coop && (player.member.Status != store.SessionMemberActive || !player.member.Connected) {
-			sim.RemovePlayerEntity(player.playerID)
-			continue
-		}
-		sim.SetPlayerConnected(player.playerID, true)
-	}
-}
-
-func inputsByTick(inputs []RecordedInput) map[int64][]game.Input {
-	byTick := make(map[int64][]game.Input)
-	for _, rec := range inputs {
-		byTick[rec.Tick] = append(byTick[rec.Tick], rec.Input)
-	}
-	return byTick
+	}, nil
 }
 
 func sortInputs(ins []game.Input) {

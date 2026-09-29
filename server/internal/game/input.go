@@ -1,7 +1,7 @@
 package game
 
 // Input is a decoded client intent (or a server-authored stored input such as
-// SystemLoadShedInputType) applied to a specific tick.
+// SystemLoadShedInputType or a SystemMember*InputType) applied to a specific tick.
 type Input struct {
 	MessageID                    string
 	CorrelationID                string
@@ -52,4 +52,5 @@ type Input struct {
 	UniqueChestTakeItem          *UniqueChestTakeItemIntent
 	DebugPlayerPos               *DebugPlayerPosIntent
 	LoadShed                     *LoadShedDirective
+	Member                       *MemberLifecycle
 }

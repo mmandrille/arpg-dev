@@ -456,7 +456,7 @@ func TestReconstructLoadsSessionStartShopStock(t *testing.T) {
 			ShopStock:   stock,
 		},
 	}
-	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session, nil)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
 	}
@@ -708,7 +708,7 @@ func TestVerifyCoopReplayMatchesActorEventsAndLevelTransition(t *testing.T) {
 			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
 		},
 	}
-	scratch, players, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, players, _, err := sessionStartSim(context.Background(), repo, rules, repo.session, nil)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
 	}
@@ -812,7 +812,7 @@ func TestVerifyCoopReplayMatchesActorCombatAndLootEvents(t *testing.T) {
 			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
 		},
 	}
-	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session, nil)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
 	}
@@ -891,7 +891,7 @@ func TestReconstructCoopReplaySharesXPWithNearbyGuest(t *testing.T) {
 			startKey("acct_guest", "char_guest"): {SessionID: testSessionID, AccountID: "acct_guest", CharacterID: "char_guest"},
 		},
 	}
-	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session)
+	scratch, _, _, err := sessionStartSim(context.Background(), repo, rules, repo.session, nil)
 	if err != nil {
 		t.Fatalf("scratch sim: %v", err)
 	}

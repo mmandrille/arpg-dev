@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v478 shared member setup, live/replay parity)
+Last updated: 2026-09-29 (v479 recorded co-op member lifecycle, replay determinism)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-09-29 (v478 shared member setup, live/replay parity)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v478 — shared member setup: live build, late co-op join, and replay put members into the sim through one `internal/sessionsetup` path (wallet, resource bag, corpses, class override, weapon sets); recoverable corpses frozen in a new `session_start_character_corpses` snapshot (`make ci` green). Prior: v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
+| **Latest completed slice** | v479 — recorded co-op member lifecycle: join/leave/rejoin persisted as `system_member_*` stored inputs applied after the tick they close, so departed guests stop being replay ghosts and resumes land on the exact live tick (`make ci` green). Prior: v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
 | **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3b (armor tints + headgear), P3c (retire legacy 17-bone hero pipeline), or P4b (beasts: CC0 source such as Quaternius) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
@@ -103,11 +103,12 @@ Do **not** assume these are the next slice — they are documented backlog items
   - macOS `/usr/bin/make` fails until `sudo xcodebuild -license` is accepted, so the v469 `make ci`
     is still owed.
   - ~~Dungeon generation failed on ~2% of seed/level pairs~~: fixed in v472 (room-corridor anchor fallback).
-- **Replay-determinism gaps** (v476 [`as-built`](docs/as-built/v476_recorded-load-shed.md), v478 [`as-built`](docs/as-built/v478_shared-member-setup.md)):
+- **Replay-determinism gaps** (v476 [`as-built`](docs/as-built/v476_recorded-load-shed.md), v478 [`as-built`](docs/as-built/v478_shared-member-setup.md), v479 [`as-built`](docs/as-built/v479_recorded-member-lifecycle.md)):
   ~~replay member setup skipped wallet/bag/corpses~~ fixed in v478;
   `mercenaryroster.LoadIntoSim` still reads live alt-character rows at build/replay time (not snapshotted, same flaw corpses had);
   a guest that HTTP-joined a running loop but never attached (`joined_tick = -1`) is added at tick 0 by replay but never by live;
-  co-op leave (`RemovePlayerEntity`) and reconnect respawn are not recorded; sessions recorded before v476 that shed load cannot replay.
+  ~~co-op leave/reconnect respawn not recorded~~ fixed in v479 (sessions recorded before v479 keep the final-connectivity approximation);
+  sessions recorded before v476 that shed load cannot replay.
 
 - **v460 `$review` complete (official cadence at `e75e64d0`).** Overview:
   [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md). Run `$refactor` for minor paydown (resource-bag co-op filter, status-effects validate_shared, leveled-potion golden, `PotionIconLabel` rules-driven fix).

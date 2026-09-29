@@ -218,10 +218,9 @@ else:
   #     so Godot can join as an observer.
   #   - Solo scenarios (benchmark_solo_session=true): creates a solo session for
   #     correct world initialization; Godot is skipped for this scenario.
-  #   --skip-replay also skips the post-run /state reconstruct: benchmark
-  #   sessions (observer co-op join, benchmark_mixed_arena) are not
-  #   replay-deterministic yet, and the benchmark measures cost, not replay.
-  #   The same probes are driven protocol-only in `make ci-full`.
+  #   --skip-replay also skips the post-run /state reconstruct: the benchmark
+  #   measures cost, not replay. The same probes are driven protocol-only in
+  #   `make ci-full`, which also verifies /state + replay.
   echo "[benchmark]   starting bot for $SCENARIO_ID (solo=$SOLO_SESSION)..."
   if [[ "$SOLO_SESSION" -eq 0 ]]; then
     ARPG_PERF_DEBUG=1 \

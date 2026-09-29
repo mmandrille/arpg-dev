@@ -425,16 +425,15 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
 
   # ci-full also drives the ci_tier=benchmark perf probes protocol-only (no
   # Godot observer), so they cannot rot outside `make benchmark`. Each probe's
-  # declared max_elapsed_s is its budget. --skip-replay: benchmark_mixed_arena
-  # sessions do not replay deterministically yet (tracked separately); drop the
-  # flag once that is fixed so the probes also gate /state + replay.
+  # declared max_elapsed_s is its budget. The probes also gate /state + replay
+  # (benchmark_mixed_arena replays deterministically since v476 recorded load shed).
   if [[ "$CI_SCENARIO" == "all" ]]; then
     BENCH_LOG="$(mktemp -t arpg-ci-benchmark.XXXXXX.log)"
     echo "RUNNING: benchmark scenarios (protocol-only)"
     set +e
     "$ROOT/.venv/bin/python" -m tools.bot.run \
       --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
-      --scenario benchmark --skip-replay --cleanup-characters \
+      --scenario benchmark --cleanup-characters \
       2>&1 >/dev/null | stream_bot_progress "$BENCH_LOG"
     bench_status=${PIPESTATUS[0]}
     set +e

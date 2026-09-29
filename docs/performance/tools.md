@@ -269,7 +269,7 @@ Rules for future performance/session-stability work:
   `make benchmark` (bot + visual Godot observer + report). Two gates keep them from rotting:
   `tools/bot/test_benchmark_scenarios.py` (in `make ci`: pinned `debug_progression` must sustain each
   probe's skill loop under the current mana rules — see `tools/bot/benchmark_mana_budget.py`) and a
-  protocol-only `--scenario benchmark --skip-replay` run in `make ci-full` step 9. Benchmark probes are
+  protocol-only `--scenario benchmark` run in `make ci-full` step 9 that also verifies `/state` + replay. Benchmark probes are
   exempt from the 15s scenario ceiling (CLAUDE.md rule 12); their declared `max_elapsed_s` is the budget.
 
 ### Extended probes

@@ -94,12 +94,10 @@ Do **not** assume these are the next slice — they are documented backlog items
     or as-built**. It needs a closeout; v469 did not fabricate one.
   - Local Godot is 4.7.2 while this file pins 4.6.3.
   - v471: the v470 ADR-0018 D7 performance floor (v347 24-monster dungeon benchmark) was never re-run; v471 adds kit walls/floors on top. Run `make benchmark` before tuning further. (2026-09-29: `make benchmark` repaired and green for all three probes; gated in `make ci` via `test_benchmark_scenarios.py` and protocol-only in `make ci-full`.)
-  - **Replay non-determinism on `benchmark_mixed_arena` (2026-09-29).** Solo protocol-only runs of
-    `sorcerer_multigroup_perf_probe` and `paladin_charge_loop_perf_probe` fail `/replay` verification
-    10/10 (first divergence: recorded `monster_attack_windup` ~t26/t39 absent from the derived stream);
-    `sorcerer_dungeon_perf_probe` replays clean. So it is not only the co-op observer join. The world is
-    used only by benchmark probes, so no CI gate ever replayed it. The ci-full benchmark gate runs
-    `--skip-replay` until fixed — drop that flag in `scripts/ci.sh` step 9 once replay matches.
+  - ~~Replay non-determinism on `benchmark_mixed_arena`~~: fixed in v476 (recorded load shed). The
+    t18 tick overran its budget and applied unrecorded overload degradation; the pre-v476 server
+    reproduced both reported divergences, HEAD replays every probe clean. The ci-full benchmark gate
+    now verifies replay (`--skip-replay` dropped from `scripts/ci.sh` step 9).
   - macOS `/usr/bin/make` fails until `sudo xcodebuild -license` is accepted, so the v469 `make ci`
     is still owed.
   - ~~Dungeon generation failed on ~2% of seed/level pairs~~: fixed in v472 (room-corridor anchor fallback).

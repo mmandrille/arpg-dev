@@ -421,7 +421,28 @@ func (s *Server) createSessionStartSnapshot(w http.ResponseWriter, ctx context.C
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not load account resource bag")
 		return false
 	}
-	if err := s.store.CreateSessionStartSnapshot(ctx, sessionID, accountID, characterID, items, waypoints, hotbar, skillBinds, shopStock, stashItems, stashGold, resources, resourceBagItems, progression); err != nil {
+	corpses, err := s.store.ListRecoverableCharacterCorpses(ctx, accountID, characterID)
+	if err != nil {
+		s.metrics.PersistenceErrors.Inc()
+		writeError(w, http.StatusInternalServerError, "internal_error", "could not load character corpses")
+		return false
+	}
+	if err := s.store.CreateSessionStartSnapshot(ctx, store.SessionStartSnapshot{
+		SessionID:        sessionID,
+		AccountID:        accountID,
+		CharacterID:      characterID,
+		Items:            items,
+		Waypoints:        waypoints,
+		Hotbar:           hotbar,
+		SkillBinds:       skillBinds,
+		ShopStock:        shopStock,
+		StashItems:       stashItems,
+		StashGold:        stashGold,
+		Resources:        resources,
+		ResourceBagItems: resourceBagItems,
+		Corpses:          corpses,
+		Progression:      &progression,
+	}); err != nil {
 		s.metrics.PersistenceErrors.Inc()
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not create session start snapshot")
 		return false

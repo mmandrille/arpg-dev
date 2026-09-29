@@ -209,6 +209,7 @@ func (s *Store) DeleteCharacter(ctx context.Context, accountID, characterID stri
 			{`DELETE FROM session_start_account_stash_gold WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_account_resource_wallet WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_account_resource_bag_items WHERE ` + sessionFilter, []any{accountID, characterID}},
+			{`DELETE FROM session_start_character_corpses WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_shop_stock WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_skill_preferences WHERE ` + sessionFilter, []any{accountID, characterID}},
 			{`DELETE FROM session_start_skill_bindings WHERE ` + sessionFilter, []any{accountID, characterID}},
@@ -449,6 +450,7 @@ func (s *Store) DeleteStaleEmptySessions(ctx context.Context, updatedBefore time
 			`DELETE FROM session_start_account_stash_gold WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_account_resource_wallet WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_account_resource_bag_items WHERE session_id = ANY($1)`,
+			`DELETE FROM session_start_character_corpses WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_shop_stock WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_skill_preferences WHERE session_id = ANY($1)`,
 			`DELETE FROM session_start_skill_bindings WHERE session_id = ANY($1)`,
@@ -1832,187 +1834,6 @@ func scanAccountStashItem(row rowScanner) (AccountStashItem, error) {
 	return item, nil
 }
 
-func (s *Store) CreateSessionStartSnapshot(ctx context.Context, sessionID, accountID, characterID string, items []CharacterItemInstance, waypoints []CharacterWaypoint, hotbar []CharacterHotbarSlot, skillBinds CharacterSkillBindings, shopStock []CharacterShopStockItem, stashItems []AccountStashItem, stashGold AccountStashGold, resources []AccountResourceAmount, resourceBagItems []AccountResourceBagItem, progression CharacterProgression) error {
-	characterClass := progression.CharacterClass
-	if characterClass == "" {
-		characterClass = "barbarian"
-	}
-	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
-		if _, err := tx.Exec(ctx,
-			`INSERT INTO session_start_character_progression (
-			   session_id, account_id, character_id, character_class, level, experience, unspent_stat_points, unspent_skill_points, stat_str, stat_dex, stat_vit, stat_magic, gold, deepest_dungeon_depth, hired_mercenary_character_id
-			 )
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-			 ON CONFLICT (session_id, account_id, character_id) DO NOTHING`,
-			sessionID, accountID, characterID, characterClass, progression.Level, progression.Experience, progression.UnspentStatPoints, progression.UnspentSkillPoints,
-			progression.Stats.Str, progression.Stats.Dex, progression.Stats.Vit, progression.Stats.Magic, progression.Gold, progression.DeepestDungeonDepth, progression.HiredMercenaryCharacterID,
-		); err != nil {
-			return fmt.Errorf("store: insert session start progression: %w", err)
-		}
-		for skillID, rank := range progression.SkillRanks {
-			if rank < 0 {
-				return fmt.Errorf("store: insert session start skill rank: negative rank for %s", skillID)
-			}
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_character_skill_ranks (session_id, account_id, character_id, skill_id, rank)
-				 VALUES ($1, $2, $3, $4, $5)
-				 ON CONFLICT (session_id, account_id, character_id, skill_id) DO NOTHING`,
-				sessionID, accountID, characterID, skillID, rank,
-			); err != nil {
-				return fmt.Errorf("store: insert session start skill rank: %w", err)
-			}
-		}
-		for _, item := range items {
-			var slot any
-			if item.Slot != "" {
-				slot = item.Slot
-			}
-			location := item.Location
-			if location == "" {
-				location = ItemLocationInventory
-			}
-			rolledStats := item.RolledStats
-			if len(rolledStats) == 0 {
-				rolledStats = []byte(`{}`)
-			}
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_item_instances (session_id, id, account_id, character_id, item_def_id, location, slot, equipped, weapon_set, rolled_stats)
-				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
-				 ON CONFLICT (session_id, account_id, character_id, id) DO NOTHING`,
-				sessionID, item.ID, accountID, characterID, item.ItemDefID, location, slot, item.Equipped, normalizeWeaponSet(item.WeaponSet), []byte(rolledStats),
-			); err != nil {
-				return fmt.Errorf("store: insert session start item: %w", err)
-			}
-		}
-		for _, wp := range waypoints {
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_waypoints (session_id, character_id, level)
-				 VALUES ($1, $2, $3)
-				 ON CONFLICT (session_id, character_id, level) DO NOTHING`,
-				sessionID, characterID, wp.Level,
-			); err != nil {
-				return fmt.Errorf("store: insert session start waypoint: %w", err)
-			}
-		}
-		for _, slot := range hotbar {
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_hotbar_slots (session_id, account_id, character_id, slot_index, item_instance_id)
-				 VALUES ($1, $2, $3, $4, $5)
-				 ON CONFLICT (session_id, account_id, character_id, slot_index) DO NOTHING`,
-				sessionID, accountID, characterID, slot.SlotIndex, slot.ItemInstanceID,
-			); err != nil {
-				return fmt.Errorf("store: insert session start hotbar: %w", err)
-			}
-		}
-		keys := normalizeSkillFunctionKeys(skillBinds.FunctionKeys)
-		for slot, skillID := range keys {
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_skill_bindings (session_id, account_id, character_id, slot_index, skill_id)
-				 VALUES ($1, $2, $3, $4, $5)
-				 ON CONFLICT (session_id, account_id, character_id, slot_index) DO NOTHING`,
-				sessionID, accountID, characterID, slot, skillID,
-			); err != nil {
-				return fmt.Errorf("store: insert session start skill binding: %w", err)
-			}
-		}
-		if _, err := tx.Exec(ctx,
-			`INSERT INTO session_start_skill_preferences (session_id, account_id, character_id, right_click_skill_id)
-			 VALUES ($1, $2, $3, $4)
-			 ON CONFLICT (session_id, account_id, character_id) DO NOTHING`,
-			sessionID, accountID, characterID, skillBinds.RightClickSkillID,
-		); err != nil {
-			return fmt.Errorf("store: insert session start skill preference: %w", err)
-		}
-		for _, stock := range shopStock {
-			rolledPayload := stock.RolledPayload
-			if len(rolledPayload) == 0 {
-				rolledPayload = []byte(`{}`)
-			}
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_shop_stock (
-				   session_id, account_id, character_id, shop_id, refresh_key, offer_index, offer_id, source_depth, item_template_id, rolled_payload, buy_price, available
-				 )
-				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12)
-				 ON CONFLICT (session_id, account_id, character_id, shop_id, offer_id) DO NOTHING`,
-				sessionID, accountID, characterID, stock.ShopID, stock.RefreshKey, stock.OfferIndex, stock.OfferID,
-				stock.SourceDepth, stock.ItemTemplateID, []byte(rolledPayload), stock.BuyPrice, stock.Available,
-			); err != nil {
-				return fmt.Errorf("store: insert session start shop stock: %w", err)
-			}
-		}
-		for _, stashItem := range stashItems {
-			rolledStats := stashItem.RolledStats
-			if len(rolledStats) == 0 {
-				rolledStats = []byte(`{}`)
-			}
-			var sourceCharacterID any
-			if stashItem.SourceCharacterID != "" {
-				sourceCharacterID = stashItem.SourceCharacterID
-			}
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_account_stash_items (
-				   session_id, account_id, stash_item_id, source_character_id, item_def_id, rolled_stats
-				 )
-				 VALUES ($1, $2, $3, $4, $5, $6::jsonb)
-				 ON CONFLICT (session_id, account_id, stash_item_id) DO NOTHING`,
-				sessionID, accountID, stashItem.StashItemID, sourceCharacterID, stashItem.ItemDefID, []byte(rolledStats),
-			); err != nil {
-				return fmt.Errorf("store: insert session start account stash item: %w", err)
-			}
-		}
-		stashGoldAccountID := stashGold.AccountID
-		if stashGoldAccountID == "" {
-			stashGoldAccountID = accountID
-		}
-		if _, err := tx.Exec(ctx,
-			`INSERT INTO session_start_account_stash_gold (session_id, account_id, gold)
-			 VALUES ($1, $2, $3)
-			 ON CONFLICT (session_id, account_id) DO NOTHING`,
-			sessionID, stashGoldAccountID, stashGold.Gold,
-		); err != nil {
-			return fmt.Errorf("store: insert session start account stash gold: %w", err)
-		}
-		for _, resource := range resources {
-			if resource.ResourceID == "" || resource.Amount < 0 {
-				return fmt.Errorf("store: insert session start account resource: invalid resource %q amount %d", resource.ResourceID, resource.Amount)
-			}
-			resourceAccountID := resource.AccountID
-			if resourceAccountID == "" {
-				resourceAccountID = accountID
-			}
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_account_resource_wallet (session_id, account_id, resource_id, amount)
-				 VALUES ($1, $2, $3, $4)
-				 ON CONFLICT (session_id, account_id, resource_id) DO NOTHING`,
-				sessionID, resourceAccountID, resource.ResourceID, resource.Amount,
-			); err != nil {
-				return fmt.Errorf("store: insert session start account resource: %w", err)
-			}
-		}
-		for _, bagItem := range resourceBagItems {
-			rolledStats := bagItem.RolledStats
-			if len(rolledStats) == 0 {
-				rolledStats = []byte(`{}`)
-			}
-			var sourceCharacterID any
-			if bagItem.SourceCharacterID != "" {
-				sourceCharacterID = bagItem.SourceCharacterID
-			}
-			if _, err := tx.Exec(ctx,
-				`INSERT INTO session_start_account_resource_bag_items (
-				   session_id, account_id, bag_item_id, source_character_id, item_def_id, rolled_stats
-				 )
-				 VALUES ($1, $2, $3, $4, $5, $6::jsonb)
-				 ON CONFLICT (session_id, account_id, bag_item_id) DO NOTHING`,
-				sessionID, accountID, bagItem.BagItemID, sourceCharacterID, bagItem.ItemDefID, []byte(rolledStats),
-			); err != nil {
-				return fmt.Errorf("store: insert session start account resource bag item: %w", err)
-			}
-		}
-		return nil
-	})
-}
-
 func (s *Store) LoadSessionStartSnapshots(ctx context.Context, sessionID string) ([]SessionStartSnapshot, error) {
 	members, err := s.ListSessionMembers(ctx, sessionID)
 	if err != nil {
@@ -2229,6 +2050,9 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 		snap.ResourceBagItems = append(snap.ResourceBagItems, item)
 	}
 	if err := bagRows.Err(); err != nil {
+		return snap, err
+	}
+	if snap.Corpses, err = s.loadSessionStartCorpses(ctx, sessionID, accountID, characterID); err != nil {
 		return snap, err
 	}
 	wpRows, err := s.pool.Query(ctx,

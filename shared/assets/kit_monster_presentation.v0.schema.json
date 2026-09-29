@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/kit_monster_presentation.v0.schema.json",
+  "title": "Kit monster presentation (v0)",
+  "description": "Client-only KayKit monster scenes: logical-clip aliases and bone attachments (ADR-0018 P4a).",
+  "type": "object",
+  "required": ["version", "clip_profiles", "monsters"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "note": { "type": "string" },
+    "clip_profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["clips", "loop"],
+        "additionalProperties": false,
+        "properties": {
+          "clips": {
+            "type": "object",
+            "required": ["idle", "walk", "attack", "hit", "death"],
+            "additionalProperties": { "type": "string", "minLength": 1 }
+          },
+          "loop": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
+    "monsters": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["asset_id", "clip_profile", "attachments"],
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": { "$ref": "#/$defs/asset_id" },
+          "clip_profile": { "type": "string", "minLength": 1 },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["asset_id", "bone"],
+              "additionalProperties": false,
+              "properties": {
+                "asset_id": { "$ref": "#/$defs/asset_id" },
+                "bone": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": { "asset_id": { "type": "string", "pattern": "^[a-z0-9_]+$" } }
+}

@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v473 dungeon kit torches/chests, ADR-0018 P2b)
+Last updated: 2026-09-29 (v474 kit skeleton monsters, ADR-0018 P4a)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-29 (v473 dungeon kit torches/chests, ADR-0018 P2b)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v473 — KayKit wall torches + treasure chests (ADR-0018 P2b; `make ci` green). Prior: v472 room-corridor anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
-| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3 (heroes: owner downloads itch Adventurers 2.0 + Character Animations 1.1 first) or P4 (kit skeleton monsters; no download needed) |
+| **Latest completed slice** | v474 — KayKit skeleton monsters + monster texture fix + asset purge (ADR-0018 P4a; `make ci` green). Prior: v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
+| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3 (heroes: owner downloads itch Adventurers 2.0 + Character Animations 1.1 first) or P4b (beasts: CC0 source such as Quaternius) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
 

@@ -100,17 +100,17 @@
       "animation_profile": "ground_biped"
     },
     "dungeon_mob": {
-      "asset_id": "monster_dark_purple_v0",
-      "scene": "monster_dark_purple",
-      "scale": 1.0,
+      "asset_id": "kaykit_skeleton_warrior_v0",
+      "scene": "monster_kit_skeleton_warrior",
+      "scale": 0.8,
       "height_offset": 0.0,
       "animation_profile": "ground_biped",
       "family_accent": "8b5cf6"
     },
     "dungeon_archer": {
-      "asset_id": "monster_crocodile_archer_v0",
-      "scene": "monster_crocodile_archer",
-      "scale": 1.0,
+      "asset_id": "kaykit_skeleton_rogue_v0",
+      "scene": "monster_kit_skeleton_rogue",
+      "scale": 0.8,
       "height_offset": 0.0,
       "animation_profile": "ground_biped",
       "family_accent": "34d399"
@@ -153,9 +153,9 @@
       "family_accent": "a78bfa"
     },
     "dungeon_undead": {
-      "asset_id": "monster_skeleton_v0",
-      "scene": "monster_skeleton",
-      "scale": 1.0,
+      "asset_id": "kaykit_skeleton_minion_v0",
+      "scene": "monster_kit_skeleton_minion",
+      "scale": 0.8,
       "height_offset": 0.0,
       "animation_profile": "ground_biped"
     }

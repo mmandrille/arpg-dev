@@ -43,6 +43,7 @@ MANIFEST_SCHEMA_REL = "assets/manifests/assets.v0.schema.json"
 ITEM_VISUALS_REL = "shared/assets/item_visuals.v0.json"
 MONSTER_VISUALS_REL = "shared/assets/monster_visuals.v0.json"
 DUNGEON_KIT_REL = "shared/assets/dungeon_kit_presentation.v0.json"
+KIT_MONSTER_REL = "shared/assets/kit_monster_presentation.v0.json"
 
 
 def load(path: Path):
@@ -297,6 +298,21 @@ def validate(root: Path, report: Report) -> None:
                 report.fail("dungeon kit asset", f"{asset_id}: not an environment asset in the manifest")
             else:
                 report.ok(f"dungeon kit {asset_id} resolves")
+
+    # [10] ADR-0018 P4a kit monster scenes and attachments resolve to monster assets.
+    kit_monster_path = root / KIT_MONSTER_REL
+    if kit_monster_path.is_file():
+        print("[10] kit monster asset ids")
+        kit_monsters = load(kit_monster_path)
+        for scene_key, spec in sorted(kit_monsters["monsters"].items()):
+            if spec["clip_profile"] not in kit_monsters["clip_profiles"]:
+                report.fail("kit monster clip profile", f"{scene_key}: unknown profile {spec['clip_profile']}")
+            for asset_id in [spec["asset_id"]] + [a["asset_id"] for a in spec["attachments"]]:
+                entry = assets.get(asset_id)
+                if entry is None or entry.get("type") != "monster":
+                    report.fail("kit monster asset", f"{scene_key}: {asset_id} is not a monster asset")
+                else:
+                    report.ok(f"kit monster {scene_key} -> {asset_id} resolves")
 
 
 def main() -> int:

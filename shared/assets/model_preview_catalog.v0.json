@@ -56,22 +56,33 @@
       ]
     },
     {
-      "asset_id": "monster_crocodile_archer_v0",
+      "asset_id": "kaykit_skeleton_minion_v0",
       "height_offset": 0.0,
-      "runtime_path": "client/assets/monsters/archer/crocodile_archer.glb",
-      "scale": 1.0,
-      "scene": "monster_crocodile_archer",
+      "runtime_path": "client/assets/monsters/kaykit_skeletons/skeleton_minion.glb",
+      "scale": 0.8,
+      "scene": "monster_kit_skeleton_minion",
+      "type": "monster",
+      "used_by": [
+        "dungeon_undead"
+      ]
+    },
+    {
+      "asset_id": "kaykit_skeleton_rogue_v0",
+      "height_offset": 0.0,
+      "runtime_path": "client/assets/monsters/kaykit_skeletons/skeleton_rogue.glb",
+      "scale": 0.8,
+      "scene": "monster_kit_skeleton_rogue",
       "type": "monster",
       "used_by": [
         "dungeon_archer"
       ]
     },
     {
-      "asset_id": "monster_dark_purple_v0",
+      "asset_id": "kaykit_skeleton_warrior_v0",
       "height_offset": 0.0,
-      "runtime_path": "client/assets/monsters/purple_fantasy/dark_purple_monster.glb",
-      "scale": 1.0,
-      "scene": "monster_dark_purple",
+      "runtime_path": "client/assets/monsters/kaykit_skeletons/skeleton_warrior.glb",
+      "scale": 0.8,
+      "scene": "monster_kit_skeleton_warrior",
       "type": "monster",
       "used_by": [
         "dungeon_mob"
@@ -112,17 +123,6 @@
       "type": "monster",
       "used_by": [
         "dungeon_wolf"
-      ]
-    },
-    {
-      "asset_id": "monster_skeleton_v0",
-      "height_offset": 0.0,
-      "runtime_path": "client/assets/monsters/skeleton/monster_skeleton.glb",
-      "scale": 1.0,
-      "scene": "monster_skeleton",
-      "type": "monster",
-      "used_by": [
-        "dungeon_undead"
       ]
     },
     {

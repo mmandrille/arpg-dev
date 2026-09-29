@@ -68,6 +68,7 @@ const ClientAudioControllerScript := preload("res://scripts/client_audio_control
 const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const ClientGraphicsBridgeScript := preload("res://scripts/client_graphics_bridge.gd")
 const SceneLightingRigScript := preload("res://scripts/scene_lighting_rig.gd")
+const ModelTintScript := preload("res://scripts/model_tint.gd")
 const PerformanceStatusFormatterScript := preload("res://scripts/performance_status_formatter.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
@@ -125,8 +126,9 @@ const CrosshairTargetSystemScript := preload("res://scripts/crosshair_target_sys
 const CharacterScene := preload("res://scenes/character.tscn")
 const MonsterScenesByVisual := {
 	"monster_dummy": preload("res://scenes/monster_dummy.tscn"),
-	"monster_dark_purple": preload("res://scenes/monster_dark_purple.tscn"),
-	"monster_crocodile_archer": preload("res://scenes/monster_crocodile_archer.tscn"),
+	"monster_kit_skeleton_warrior": preload("res://scenes/monster_kit_skeleton_warrior.tscn"),
+	"monster_kit_skeleton_rogue": preload("res://scenes/monster_kit_skeleton_rogue.tscn"),
+	"monster_kit_skeleton_minion": preload("res://scenes/monster_kit_skeleton_minion.tscn"),
 	"monster_quadruped": preload("res://scenes/monster_quadruped.tscn"),
 	"monster_wolf": preload("res://scenes/monster_wolf.tscn"),
 	"monster_tiny_flyer": preload("res://scenes/monster_tiny_flyer.tscn"),
@@ -6010,9 +6012,7 @@ func _apply_entity_status_tint(rec: Dictionary) -> void:
 
 func _apply_model_tint(root: Node, color: Color) -> void:
 	if root is MeshInstance3D:
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = color
-		(root as MeshInstance3D).material_override = mat
+		(root as MeshInstance3D).material_override = ModelTintScript.tinted_material(root as MeshInstance3D, color)
 	for child in root.get_children():
 		_apply_model_tint(child, color)
 

@@ -1,0 +1,51 @@
+{
+  "version": 0,
+  "note": "ADR-0018 P4a (v474): KayKit monster scenes. clip_profiles alias the logical clips AnimationController plays onto kit clip names; attachments mount kit weapons on rig bones.",
+  "clip_profiles": {
+    "kaykit_skeleton_melee": {
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walking_D_Skeletons",
+        "attack": "1H_Melee_Attack_Chop",
+        "hit": "Hit_A",
+        "death": "Death_C_Skeletons",
+        "pounce": "1H_Melee_Attack_Jump_Chop"
+      },
+      "loop": ["idle", "walk"]
+    },
+    "kaykit_skeleton_ranged": {
+      "clips": {
+        "idle": "Idle",
+        "walk": "Walking_D_Skeletons",
+        "attack": "2H_Ranged_Shoot",
+        "hit": "Hit_A",
+        "death": "Death_C_Skeletons"
+      },
+      "loop": ["idle", "walk"]
+    }
+  },
+  "monsters": {
+    "monster_kit_skeleton_warrior": {
+      "asset_id": "kaykit_skeleton_warrior_v0",
+      "clip_profile": "kaykit_skeleton_melee",
+      "attachments": [
+        { "asset_id": "kaykit_skeleton_axe_v0", "bone": "handslot.r" },
+        { "asset_id": "kaykit_skeleton_shield_small_a_v0", "bone": "handslot.l" }
+      ]
+    },
+    "monster_kit_skeleton_rogue": {
+      "asset_id": "kaykit_skeleton_rogue_v0",
+      "clip_profile": "kaykit_skeleton_ranged",
+      "attachments": [
+        { "asset_id": "kaykit_skeleton_crossbow_v0", "bone": "handslot.r" }
+      ]
+    },
+    "monster_kit_skeleton_minion": {
+      "asset_id": "kaykit_skeleton_minion_v0",
+      "clip_profile": "kaykit_skeleton_melee",
+      "attachments": [
+        { "asset_id": "kaykit_skeleton_blade_v0", "bone": "handslot.r" }
+      ]
+    }
+  }
+}

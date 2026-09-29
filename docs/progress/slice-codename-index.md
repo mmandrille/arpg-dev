@@ -251,6 +251,7 @@ v470_* = render-baseline
 v471_* = dungeon-kit-walls-floors
 v472_* = room-corridor-anchor-fallback
 v473_* = dungeon-kit-props
+v474_* = kit-skeleton-monsters
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

@@ -1579,7 +1579,7 @@ func (f *fakeRepo) ExpireMarketListings(context.Context) (int, error) {
 func (f *fakeRepo) GetMarketSummary(context.Context, string) (store.MarketSummary, error) {
 	return store.MarketSummary{}, nil
 }
-func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, string, string, string, []store.CharacterItemInstance, []store.CharacterWaypoint, []store.CharacterHotbarSlot, store.CharacterSkillBindings, []store.CharacterShopStockItem, []store.AccountStashItem, store.AccountStashGold, []store.AccountResourceAmount, []store.AccountResourceBagItem, store.CharacterProgression) error {
+func (f *fakeRepo) CreateSessionStartSnapshot(context.Context, store.SessionStartSnapshot) error {
 	return nil
 }
 func (f *fakeRepo) LoadSessionStartSnapshot(context.Context, string) (store.SessionStartSnapshot, error) {
@@ -1591,7 +1591,7 @@ func (f *fakeRepo) LoadSessionStartSnapshotForMember(_ context.Context, sessionI
 			return snap, nil
 		}
 	}
-	if f.start.SessionID == sessionID && f.start.AccountID == accountID && f.start.CharacterID == characterID {
+	if len(f.members) == 0 || (f.start.SessionID == sessionID && f.start.AccountID == accountID && f.start.CharacterID == characterID) {
 		return f.start, nil
 	}
 	return store.SessionStartSnapshot{}, store.ErrNotFound

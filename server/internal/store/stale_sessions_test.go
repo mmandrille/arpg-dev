@@ -102,7 +102,7 @@ func TestDeleteStaleEmptySessions(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("append event: %v", err)
 	}
-	if err := s.CreateSessionStartSnapshot(ctx, oldEmpty.ID, oldEmpty.AccountID, oldEmpty.CharacterID, nil, nil, nil, CharacterSkillBindings{}, nil, nil, AccountStashGold{AccountID: oldEmpty.AccountID}, nil, nil, CharacterProgression{
+	if err := s.CreateSessionStartSnapshot(ctx, SessionStartSnapshot{SessionID: oldEmpty.ID, AccountID: oldEmpty.AccountID, CharacterID: oldEmpty.CharacterID, StashGold: AccountStashGold{AccountID: oldEmpty.AccountID}, Progression: &CharacterProgression{
 		AccountID:         oldEmpty.AccountID,
 		CharacterID:       oldEmpty.CharacterID,
 		Level:             1,
@@ -110,7 +110,7 @@ func TestDeleteStaleEmptySessions(t *testing.T) {
 		UnspentStatPoints: 0,
 		Stats:             CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
 		SkillRanks:        map[string]int{"magic_bolt": 1},
-	}); err != nil {
+	}}); err != nil {
 		t.Fatalf("create start snapshot: %v", err)
 	}
 

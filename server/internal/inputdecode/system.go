@@ -20,6 +20,10 @@ const (
 	TypeSystemMemberRejoin = game.SystemMemberRejoinInputType
 )
 
+// TypeSystemTickCheckpoint is the stored-only, payload-free marker that live
+// finished a tick (v481).
+const TypeSystemTickCheckpoint = game.SystemTickCheckpointInputType
+
 type loadShedPayloadWire struct {
 	OverloadDegrade        bool `json:"overload_degrade"`
 	CombatMovementThrottle bool `json:"combat_movement_throttle"`
@@ -61,7 +65,16 @@ func EncodeStoredMemberLifecycle(typ, messageID string, m game.MemberLifecycle) 
 	return json.Marshal(envelope{Type: typ, MessageID: messageID, Payload: payload})
 }
 
+// EncodeStoredTickCheckpoint builds the persisted envelope for a tick
+// checkpoint. It has no payload fields.
+func EncodeStoredTickCheckpoint(messageID string) (json.RawMessage, error) {
+	return json.Marshal(envelope{Type: TypeSystemTickCheckpoint, MessageID: messageID, Payload: json.RawMessage(`{}`)})
+}
+
 func decodeStoredSystem(env envelope) (game.Input, bool) {
+	if env.Type == TypeSystemTickCheckpoint {
+		return game.Input{MessageID: env.MessageID, Type: env.Type}, true
+	}
 	if game.IsMemberLifecycleInput(game.Input{Type: env.Type}) {
 		return decodeStoredMemberLifecycle(env)
 	}

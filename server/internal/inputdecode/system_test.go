@@ -67,3 +67,20 @@ func TestStoredMemberLifecycleRejectsMissingPlayer(t *testing.T) {
 		t.Fatal("a membership row without a player entity must not decode")
 	}
 }
+
+func TestStoredTickCheckpointRoundTripAndClientGate(t *testing.T) {
+	raw, err := EncodeStoredTickCheckpoint("sys-1")
+	if err != nil {
+		t.Fatalf("encode: %v", err)
+	}
+	in, ok := DecodeStored(raw)
+	if !ok || in.Type != TypeSystemTickCheckpoint || in.MessageID != "sys-1" {
+		t.Fatalf("DecodeStored = %+v ok=%v, want a tick checkpoint", in, ok)
+	}
+	if IsClientIntent(TypeSystemTickCheckpoint) {
+		t.Fatal("clients must not be able to submit system_tick_checkpoint")
+	}
+	if _, ok := Decode(TypeSystemTickCheckpoint, "msg-1", "", json.RawMessage(`{}`)); ok {
+		t.Fatal("client Decode must reject system_tick_checkpoint")
+	}
+}

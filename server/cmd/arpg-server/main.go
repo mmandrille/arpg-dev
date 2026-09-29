@@ -135,5 +135,9 @@ func run(cfg config.Config, log *slog.Logger, migrateOnly bool) error {
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	return httpServer.Shutdown(shutdownCtx)
+	shutdownErr := httpServer.Shutdown(shutdownCtx)
+	// Hijacked websockets outlive httpServer.Shutdown; stop the session loops
+	// so each records the last tick it ran and resumes there (v481).
+	hub.Shutdown()
+	return shutdownErr
 }

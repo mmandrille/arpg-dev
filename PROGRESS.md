@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v480 member join tick, never-attached guests replay)
+Last updated: 2026-09-29 (v481 recorded tick checkpoints, exact resume)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-09-29 (v480 member join tick, never-attached guests replay)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v480 — member join tick: `joined_tick < 0` now means "never in the sim"; `SetSessionMemberPlayer` records the add tick (build = 0, late join = exact), and replay skips members with neither a join row nor a join tick, so an HTTP guest that never attaches no longer shifts replay entity IDs (`make ci` green). Prior: v479 recorded co-op member lifecycle, v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
+| **Latest completed slice** | v481 — recorded tick checkpoints: `system_tick_checkpoint` rows on loop stop, quiet stretches (≤50 ticks lost on crash), and graceful `Hub.Shutdown`, so resume and replay run through the last tick live ran; stopped loops refuse intents and hand off only after their final checkpoint (`make ci` green). Prior: v480 member join tick, v479 recorded co-op member lifecycle, v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
 | **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3b (armor tints + headgear), P3c (retire legacy 17-bone hero pipeline), or P4b (beasts: CC0 source such as Quaternius) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
@@ -101,11 +101,12 @@ Do **not** assume these are the next slice — they are documented backlog items
   - macOS `/usr/bin/make` fails until `sudo xcodebuild -license` is accepted, so the v469 `make ci`
     is still owed.
   - ~~Dungeon generation failed on ~2% of seed/level pairs~~: fixed in v472 (room-corridor anchor fallback).
-- **Replay-determinism gaps** (v476 [`as-built`](docs/as-built/v476_recorded-load-shed.md), v478 [`as-built`](docs/as-built/v478_shared-member-setup.md), v479 [`as-built`](docs/as-built/v479_recorded-member-lifecycle.md)):
+- **Replay-determinism gaps** (v476 [`as-built`](docs/as-built/v476_recorded-load-shed.md), v478 [`as-built`](docs/as-built/v478_shared-member-setup.md), v479 [`as-built`](docs/as-built/v479_recorded-member-lifecycle.md), v481 [`as-built`](docs/as-built/v481_recorded-tick-checkpoints.md)):
   ~~replay member setup skipped wallet/bag/corpses~~ fixed in v478;
   `mercenaryroster.LoadIntoSim` still reads live alt-character rows at build/replay time (not snapshotted, same flaw corpses had);
   ~~never-attached HTTP guest added at tick 0 by replay only~~ fixed in v480 ([`as-built`](docs/as-built/v480_member-join-tick.md)); pre-v480 sessions with a build-time guest that never attached now replay without it;
   ~~co-op leave/reconnect respawn not recorded~~ fixed in v479 (sessions recorded before v479 keep the final-connectivity approximation);
+  ~~quiet trailing ticks lost on stop/restart/crash~~ fixed in v481 (a crash still loses up to 50 quiet ticks);
   sessions recorded before v476 that shed load cannot replay.
 
 - **v460 `$review` complete (official cadence at `e75e64d0`).** Overview:

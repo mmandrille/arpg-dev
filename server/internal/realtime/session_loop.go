@@ -32,8 +32,7 @@ type sessionLoop struct {
 	received map[string]time.Time
 	seq      int64
 
-	done           chan struct{}
-	closeOnce      sync.Once
+	loopLifecycle
 	perfDebug      bool
 	loadShed       loadShedPolicy
 	lastPerfLog    time.Time
@@ -68,17 +67,17 @@ func newSessionLoop(ctx context.Context, h *Hub, sess store.Session) (*sessionLo
 		seq = meta.NextSequence
 	}
 	return &sessionLoop{
-		hub:       h,
-		sess:      sess,
-		sim:       sim,
-		log:       logging.Component(h.log, "realtime").With("session_id", sess.ID),
-		clients:   make(map[string]*loopClient),
-		buffer:    make(map[uint64][]game.Input),
-		seen:      seen,
-		received:  make(map[string]time.Time),
-		seq:       seq,
-		done:      make(chan struct{}),
-		perfDebug: perfDebugEnabled(),
+		hub:           h,
+		sess:          sess,
+		sim:           sim,
+		log:           logging.Component(h.log, "realtime").With("session_id", sess.ID),
+		clients:       make(map[string]*loopClient),
+		buffer:        make(map[uint64][]game.Input),
+		seen:          seen,
+		received:      make(map[string]time.Time),
+		seq:           seq,
+		loopLifecycle: newLoopLifecycle(sim),
+		perfDebug:     perfDebugEnabled(),
 	}, nil
 }
 
@@ -140,23 +139,15 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	return sim, nil, nil
 }
 
-func (l *sessionLoop) start() {
-	go l.tickLoop()
-}
-
-func (l *sessionLoop) stop() {
-	l.closeOnce.Do(func() {
-		close(l.done)
-	})
-}
-
 func (l *sessionLoop) hasConnectedMember(key string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	return l.clients[key] != nil
 }
 
-func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member store.SessionMember) {
+// attach reports false when the loop is stopping; the caller must attach to
+// the successor loop instead.
+func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member store.SessionMember) bool {
 	playerID := l.playerIDForMember(ctx, member)
 	client := &loopClient{
 		loop:     l,
@@ -168,6 +159,10 @@ func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member s
 		done:     make(chan struct{}),
 	}
 	l.mu.Lock()
+	if l.stopped {
+		l.mu.Unlock()
+		return false
+	}
 	l.clients[client.key] = client
 	l.admitMemberLocked(member, playerID)
 	l.mu.Unlock()
@@ -176,6 +171,7 @@ func (l *sessionLoop) attach(ctx context.Context, conn *websocket.Conn, member s
 	go client.readLoop()
 	client.enqueue(l.snapshotEnvelope(playerID))
 	l.broadcastSnapshots()
+	return true
 }
 
 func (l *sessionLoop) detach(client *loopClient) {
@@ -194,6 +190,9 @@ func (l *sessionLoop) detach(client *loopClient) {
 	_ = l.hub.store.SetSessionMemberDisconnected(context.Background(), l.sess.ID, client.member.AccountID, client.member.CharacterID, level, int64(tick))
 	remaining := len(l.clients)
 	clients := l.clientsForLevelLocked(level)
+	if remaining == 0 {
+		l.stopped = true // refuse new work now; stop() below records the final tick
+	}
 	l.mu.Unlock()
 
 	if isCoopSession(l.sess) && l.sess.Listed && remaining == 0 {
@@ -358,6 +357,11 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 	in.ActorPlayerID = client.playerID
 
 	l.mu.Lock()
+	if l.stopped {
+		l.mu.Unlock()
+		client.enqueue(l.rejectedEnvelope(env.MessageID, "session_stopped", env.CorrelationID))
+		return
+	}
 	if l.seen[env.MessageID] {
 		l.mu.Unlock()
 		client.enqueue(l.rejectedEnvelope(env.MessageID, "duplicate", env.CorrelationID))
@@ -372,6 +376,7 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 	in.Sequence = l.seq
 	l.seq++
 	l.buffer[tick] = append(l.buffer[tick], in)
+	l.noteDurableLocked(int64(tick))
 	l.received[env.MessageID] = time.Now()
 	rec := store.SessionInput{
 		ID:                  ids.New("inp"),
@@ -390,19 +395,6 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 	if err := l.hub.store.AppendInput(context.Background(), rec); err != nil {
 		l.hub.metrics.PersistenceErrors.Inc()
 		l.log.Error("persist input", "error", err)
-	}
-}
-
-func (l *sessionLoop) tickLoop() {
-	ticker := time.NewTicker(time.Second / tickHz)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-l.done:
-			return
-		case <-ticker.C:
-			l.doTick()
-		}
 	}
 }
 

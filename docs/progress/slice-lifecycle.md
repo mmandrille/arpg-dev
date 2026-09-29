@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v481** | `recorded-tick-checkpoints` | Complete (`make ci` green) | [`spec`](../specs/v481_spec-recorded-tick-checkpoints.md) | [`plan`](../plans/v481_2026-09-29-recorded-tick-checkpoints.md) | [`as-built`](../as-built/v481_recorded-tick-checkpoints.md) |
 | **v480** | `member-join-tick` | Complete (`make ci` green) | [`spec`](../specs/v480_spec-member-join-tick.md) | [`plan`](../plans/v480_2026-09-29-member-join-tick.md) | [`as-built`](../as-built/v480_member-join-tick.md) |
 | **v479** | `recorded-member-lifecycle` | Complete (`make ci` green) | [`spec`](../specs/v479_spec-recorded-member-lifecycle.md) | [`plan`](../plans/v479_2026-09-29-recorded-member-lifecycle.md) | [`as-built`](../as-built/v479_recorded-member-lifecycle.md) |
 | **v478** | `shared-member-setup` | Complete (`make ci` green) | [`spec`](../specs/v478_spec-shared-member-setup.md) | [`plan`](../plans/v478_2026-09-29-shared-member-setup.md) | [`as-built`](../as-built/v478_shared-member-setup.md) |

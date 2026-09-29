@@ -85,16 +85,32 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session, me
 		}
 		return
 	}
-	loop.attach(r.Context(), conn, member)
+	for attempt := 0; !loop.attach(r.Context(), conn, member); attempt++ {
+		// The loop stopped between lookup and attach: resume on its successor.
+		if loop, err = h.loopForSession(r.Context(), sess); err != nil || attempt >= 2 {
+			h.log.Error("attach to session loop", "session_id", sess.ID, "attempt", attempt, "error", err)
+			if claimed {
+				_ = h.store.SetSessionMemberDisconnected(context.Background(), sess.ID, member.AccountID, member.CharacterID, member.CurrentLevel, 0)
+			}
+			_ = conn.Close()
+			return
+		}
+	}
 }
 
 func (h *Hub) loopForSession(ctx context.Context, sess store.Session) (*sessionLoop, error) {
 	h.mu.Lock()
-	if loop := h.loops[sess.ID]; loop != nil {
-		h.mu.Unlock()
-		return loop, nil
-	}
+	loop := h.loops[sess.ID]
 	h.mu.Unlock()
+	if loop != nil {
+		if !loop.stopping() {
+			return loop, nil
+		}
+		// Its last client just left. Wait for it to record its final tick
+		// (v481), or the successor would resume from storage behind it.
+		<-loop.stopDone
+		h.removeLoop(sess.ID, loop)
+	}
 
 	loop, err := newSessionLoop(ctx, h, sess)
 	if err != nil {

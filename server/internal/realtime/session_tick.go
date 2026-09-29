@@ -3,6 +3,7 @@ package realtime
 import (
 	"time"
 
+	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -78,8 +79,14 @@ func (l *sessionLoop) doTick() {
 		nav:         nav,
 		profiler:    profiler,
 	})
+	if resultsHaveEvents(results) {
+		l.noteDurableLocked(int64(tick))
+	}
+	// Quiet ticks leave no row, so replay would stop short of them (v481).
+	checkpoint := l.quietCheckpointLocked(tick)
 	l.mu.Unlock()
 	l.persistSystemInput(loadShedInput)
+	l.persistSystemInput(checkpoint)
 	if guardrail.OverBudget {
 		logTickBudgetWarning(l.log, tick, totalDuration, guardrail, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, degradationApplied)
 	}
@@ -92,4 +99,13 @@ func (l *sessionLoop) doTick() {
 		perf := buildPerformanceStatus(tick, totalDuration, simDuration, persistDuration, broadcastDuration, len(inputs), results, len(clients), snapshot, counters, profiler, degradationApplied)
 		l.fanoutPerformanceStatus(perf, clients, levelsByPlayerID)
 	}
+}
+
+func resultsHaveEvents(results []game.TickResult) bool {
+	for _, res := range results {
+		if len(res.Events) > 0 {
+			return true
+		}
+	}
+	return false
 }

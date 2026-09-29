@@ -56,11 +56,13 @@ func recordedJoins(inputs []RecordedInput) map[string]bool {
 
 // splitMemberInputs sorts a tick's inputs and separates the membership rows.
 // Only actor-less rows count, as for load shed: a row with an actor is dropped.
+// Tick checkpoints (v481) are dropped too: they only extend the replayed range.
 func splitMemberInputs(inputs []game.Input) ([]game.Input, []game.Input) {
 	sortInputs(inputs)
 	var players, members []game.Input
 	for _, in := range inputs {
 		switch {
+		case in.Type == game.SystemTickCheckpointInputType: // range marker only
 		case !game.IsMemberLifecycleInput(in):
 			players = append(players, in)
 		case in.ActorPlayerID == 0 && in.Member != nil:

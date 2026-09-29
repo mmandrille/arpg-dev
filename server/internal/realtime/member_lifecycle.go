@@ -73,6 +73,7 @@ func (l *sessionLoop) systemInputRowLocked(tick int64, messageID string, payload
 	sequence := l.seq
 	l.seq++
 	l.seen[messageID] = true
+	l.noteDurableLocked(tick)
 	return &store.SessionInput{
 		ID:        ids.New("inp"),
 		SessionID: l.sess.ID,

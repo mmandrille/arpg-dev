@@ -176,6 +176,7 @@ run_gate "GDScript bot facade unit test" "[gdtest] PASS: test_bot_facade" res://
 
 # 2e. Co-op local/remote player handling test (server-independent; v33).
 run_gate "GDScript co-op client unit test" "[gdtest] PASS: test_coop_client" res://tests/test_coop_client.gd
+run_gate "GDScript remote player class test" "[gdtest] PASS: test_remote_player_class" res://tests/test_remote_player_class.gd
 run_gate "GDScript rogue presentation test" "[gdtest] PASS: test_rogue_presentation" res://tests/test_rogue_presentation.gd
 
 # 2f. Waypoint panel scroll/layout test (server-independent; v19).

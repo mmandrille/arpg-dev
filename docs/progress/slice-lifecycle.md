@@ -17,6 +17,8 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v486** | `live-payload-schema-gate` | Complete (`make ci` green) | [`spec`](../specs/v486_spec-live-payload-schema-gate.md) | — | [`as-built`](../as-built/v486_live-payload-schema-gate.md) |
+| **v485** | `remote-player-class` | Complete (`make ci` green) | [`spec`](../specs/v485_spec-remote-player-class.md) | — | [`as-built`](../as-built/v485_remote-player-class.md) |
 | **v484** | `retire-legacy-hero` | Complete (`make ci` green) | [`spec`](../specs/v484_spec-retire-legacy-hero.md) | — | [`as-built`](../as-built/v484_retire-legacy-hero.md) |
 | **v483** | `armor-look` | Complete (`make ci` green) | [`spec`](../specs/v483_spec-armor-look.md) | — | [`as-built`](../as-built/v483_armor-look.md) |
 | **v482** | `cc0-beasts` | Complete (`make ci` green) | [`spec`](../specs/v482_spec-cc0-beasts.md) | — | [`as-built`](../as-built/v482_cc0-beasts.md) |

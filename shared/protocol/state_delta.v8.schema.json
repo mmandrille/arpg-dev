@@ -110,9 +110,9 @@
         "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
         "position": { "$ref": "#/$defs/vec2" },
         "size": { "$ref": "#/$defs/positive_vec2" },
-        "kind": { "type": "string", "enum": ["wall", "water", "hole", "rock", "column", "rubble"] },
+        "kind": { "type": "string", "enum": ["wall", "wood", "water", "hole", "rock", "column", "rubble"] },
         "blocks_line_of_sight": { "type": "boolean" },
-        "source": { "type": "string", "enum": ["perimeter", "generated", "preset"] }
+        "source": { "type": "string", "enum": ["perimeter", "generated", "preset", "room_wall", "room_divider", "town_perimeter"] }
       }
     },
     "entity": {
@@ -131,6 +131,7 @@
         "monster_pack_id": { "type": "string" },
         "monster_pack_leader": { "type": "boolean" },
         "character_id": { "$ref": "#/$defs/prefixed_id" },
+        "character_class": { "type": "string", "minLength": 1 },
         "item_def_id": { "type": "string" },
         "amount": { "type": "integer", "minimum": 1 },
         "item_template_id": { "type": "string" },
@@ -164,6 +165,7 @@
         "owner_id": { "$ref": "#/$defs/decimal_id" },
         "target_id": { "$ref": "#/$defs/decimal_id" },
         "companion_stance": { "type": "string", "enum": ["assist", "defend", "passive"] },
+        "combat_stats": { "$ref": "#/$defs/companion_combat_stats" },
         "remaining_ticks": { "type": "integer", "minimum": 0 },
         "total_ticks": { "type": "integer", "minimum": 0 },
         "projectile_def_id": { "type": "string" },
@@ -189,8 +191,10 @@
         "skill_bonus_status": { "$ref": "#/$defs/skill_bonus_status_list" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
+        "set_piece_id": { "type": "string", "minLength": 1 },
+        "named_unique_id": { "type": "string", "minLength": 1 },
         "summary_lines": { "$ref": "#/$defs/shop_summary_lines" },
-        "slot": { "type": "string", "enum": ["", "head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"] },
+        "slot": { "type": "string", "enum": ["", "head", "amulet", "chest", "gloves", "belt", "boots", "ring", "ring_left", "ring_right", "main_hand", "off_hand"] },
         "equipped": { "type": "boolean" },
         "quest_source_depth": { "type": "integer", "minimum": 1 }
       }
@@ -224,6 +228,8 @@
         "skill_bonus_status": { "$ref": "#/$defs/skill_bonus_status_list" },
         "equip_preview": { "$ref": "#/$defs/equip_preview" },
         "effect_ids": { "$ref": "#/$defs/effect_ids" },
+        "set_piece_id": { "type": "string", "minLength": 1 },
+        "named_unique_id": { "type": "string", "minLength": 1 },
         "summary_lines": { "$ref": "#/$defs/shop_summary_lines" }
       }
     },
@@ -238,7 +244,7 @@
       "required": ["offer_id", "kind", "item_def_id", "display_name", "buy_price"],
       "additionalProperties": false,
       "properties": {
-        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback):[a-z0-9_:-]+$" },
+        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback):[a-z0-9_:|-]+$" },
         "kind": { "type": "string", "enum": ["fixed", "generated", "buyback"] },
         "item_def_id": { "type": "string" },
         "item_template_id": { "type": "string" },
@@ -268,7 +274,7 @@
       "required": ["offer_id", "kind", "concealed", "mystery_label", "slot", "category", "buy_price", "source_depth_min", "source_depth_max"],
       "additionalProperties": false,
       "properties": {
-        "offer_id": { "type": "string", "pattern": "^mystery:[a-z0-9_:-]+$" },
+        "offer_id": { "type": "string", "pattern": "^mystery:[a-z0-9_:|-]+$" },
         "kind": { "const": "mystery" },
         "concealed": { "const": true },
         "mystery_label": { "type": "string", "minLength": 1 },
@@ -276,6 +282,7 @@
         "category": { "type": "string" },
         "buy_price": { "type": "integer", "minimum": 1 },
         "source": { "type": "string" },
+        "source_depth": { "type": "integer", "minimum": 1 },
         "source_depth_min": { "type": "integer", "minimum": 1 },
         "source_depth_max": { "type": "integer", "minimum": 1 }
       }
@@ -301,9 +308,9 @@
       "properties": {
         "shop_id": { "type": "string" },
         "service": { "type": "string", "enum": ["bishop", "market", "mercenary", "blacksmith"] },
-        "refresh_key": { "type": "string", "pattern": "^[a-z0-9_:-]+$" },
+        "refresh_key": { "type": "string", "pattern": "^[a-z0-9_:|-]+$" },
         "offer_index": { "type": "integer", "minimum": 0 },
-        "offer_id": { "type": "string", "pattern": "^(generated|mystery):[a-z0-9_:-]+$" },
+        "offer_id": { "type": "string", "pattern": "^(generated|mystery):[a-z0-9_:|-]+$" },
         "source_depth": { "type": "integer", "minimum": 1 },
         "item_template_id": { "type": "string" },
         "rolled_payload": { "type": "object" },
@@ -368,7 +375,8 @@
     },
     "rolled_stats": {
       "type": "object",
-      "additionalProperties": false,
+      "description": "Server map[string]int keyed by data-driven affix/item stat ids. Listed keys keep their bounds; other rule-defined stat ids are integers.",
+      "additionalProperties": { "type": "integer" },
       "properties": {
         "damage_min": { "type": "integer", "minimum": 0 },
         "damage_max": { "type": "integer", "minimum": 0 },
@@ -390,7 +398,7 @@
         "skill_cooldown_reduction_percent": { "type": "integer", "minimum": 0, "maximum": 75 },
         "skill_mana_cost_reduction": { "type": "integer", "minimum": 0, "maximum": 20 },
         "magic_find_percent": { "type": "integer", "minimum": 0, "maximum": 500 },
-        "hotbar_slots": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "hotbar_slots": { "type": "integer", "minimum": 0 },
         "inventory_rows": { "type": "integer", "minimum": 0, "maximum": 20 }
       }
     },
@@ -496,6 +504,7 @@
     },
     "event": {
       "type": "object",
+      "description": "List/map-valued fields (offers, stash_items, inventory, hotbar, equipped, corpse_items, sell_appraisals, mercenary_candidates, quest_steward_offers) are omitted when empty; readers must treat an absent list as empty, not as unchanged.",
       "required": ["event_type"],
       "properties": {
         "event_type": { "type": "string" },
@@ -550,7 +559,7 @@
           "type": "array",
           "items": { "$ref": "#/$defs/shop_sell_appraisal" }
         },
-        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback|mystery|character|quest_steward):[a-z0-9_:-]+$" },
+        "offer_id": { "type": "string", "pattern": "^(fixed|generated|buyback|mystery|character|quest_steward):[A-Za-z0-9_:-]+$" },
         "family_id": { "type": "string", "minLength": 1 },
         "source_depth": { "type": "integer", "minimum": 1 },
         "monster_name": { "type": "string", "minLength": 1 },
@@ -690,7 +699,7 @@
             "properties": { "event_type": { "const": "player_mana_restored" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["mana", "item_instance_id"] }
+          "then": { "required": ["entity_id", "mana"], "anyOf": [{ "required": ["item_instance_id"] }, { "required": ["reason"] }] }
         },
         {
           "if": {
@@ -795,7 +804,7 @@
             "properties": { "event_type": { "const": "skill_damage_burst" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "skill_id", "correlation_id", "hits"] }
+          "then": { "required": ["entity_id", "skill_id", "hits"] }
         },
         {
           "if": {
@@ -865,28 +874,28 @@
             "properties": { "event_type": { "const": "shop_opened" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "shop_id", "offers"] }
+          "then": { "required": ["entity_id", "shop_id"] }
         },
         {
           "if": {
             "properties": { "event_type": { "const": "shop_purchase" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "shop_id", "offer_id", "item_instance_id", "price", "total_gold", "offers", "sell_appraisals"] }
+          "then": { "required": ["entity_id", "shop_id", "offer_id", "item_instance_id", "price", "total_gold"] }
         },
         {
           "if": {
             "properties": { "event_type": { "const": "shop_sale" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "shop_id", "item_instance_id", "price", "total_gold", "offers", "sell_appraisals"] }
+          "then": { "required": ["entity_id", "shop_id", "item_instance_id", "price", "total_gold"] }
         },
         {
           "if": {
             "properties": { "event_type": { "const": "shop_reroll" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "shop_id", "price", "total_gold", "refresh_key", "offers"] }
+          "then": { "required": ["entity_id", "shop_id", "price", "total_gold", "refresh_key"] }
         },
         {
           "if": {
@@ -907,7 +916,7 @@
             "properties": { "event_type": { "const": "mercenary_board_opened" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "service", "price", "affordable", "total_gold", "mercenary_candidates"] }
+          "then": { "required": ["entity_id", "service", "price", "affordable", "total_gold"] }
         },
         {
           "if": {
@@ -963,7 +972,7 @@
             "properties": { "event_type": { "const": "stash_opened" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "stash_id", "stash_items", "stash_gold", "stash_capacity"] }
+          "then": { "required": ["entity_id", "stash_id", "stash_gold", "stash_capacity"] }
         },
         {
           "if": {
@@ -984,28 +993,28 @@
             "properties": { "event_type": { "const": "corpse_opened" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "corpse_character_id", "corpse_name", "corpse_items", "inventory", "equipped", "hotbar", "gold"] }
+          "then": { "required": ["entity_id", "corpse_character_id", "corpse_name", "gold"] }
         },
         {
           "if": {
             "properties": { "event_type": { "const": "corpse_item_recovered" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "corpse_character_id", "corpse_name", "item_instance_id", "stash_item_id", "corpse_items", "inventory", "equipped", "hotbar", "gold"] }
+          "then": { "required": ["entity_id", "corpse_character_id", "corpse_name", "item_instance_id", "stash_item_id", "gold"] }
         },
         {
           "if": {
             "properties": { "event_type": { "const": "unique_chest_opened" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "service", "stash_items", "inventory", "equipped", "hotbar", "gold"] }
+          "then": { "required": ["entity_id", "service", "gold"] }
         },
         {
           "if": {
             "properties": { "event_type": { "const": "unique_chest_item_taken" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "service", "item_instance_id", "stash_item_id", "stash_items", "inventory", "equipped", "hotbar", "gold"] }
+          "then": { "required": ["entity_id", "service", "item_instance_id", "stash_item_id", "gold"] }
         },
         {
           "if": {
@@ -1019,7 +1028,7 @@
             "properties": { "event_type": { "const": "quest_steward_offers_opened" } },
             "required": ["event_type"]
           },
-          "then": { "required": ["entity_id", "service", "item_instance_id", "item", "source_depth", "quest_steward_offers"] }
+          "then": { "required": ["entity_id", "service", "item_instance_id", "item", "source_depth"] }
         },
         {
           "if": {
@@ -1030,9 +1039,46 @@
         }
       ]
     },
+    "companion_combat_stats": {
+      "type": "object",
+      "required": ["damage_min", "damage_max", "attack_cooldown_ticks", "armor", "block_percent", "hit_chance", "crit_chance"],
+      "additionalProperties": false,
+      "properties": {
+        "damage_min": { "type": "integer", "minimum": 0 },
+        "damage_max": { "type": "integer", "minimum": 0 },
+        "attack_cooldown_ticks": { "type": "integer", "minimum": 0 },
+        "armor": { "type": "number" },
+        "block_percent": { "type": "number" },
+        "hit_chance": { "type": "number", "minimum": 0 },
+        "crit_chance": { "type": "number", "minimum": 0 }
+      }
+    },
+    "equipped": { "$ref": "#/$defs/equipped" },
+    "active_weapon_set": { "type": "integer", "minimum": 0, "maximum": 1 },
+    "weapon_sets": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/weapon_set" }
+    },
+    "hotbar_slot": {
+      "type": "object",
+      "required": ["slot_index", "item_instance_id"],
+      "additionalProperties": false,
+      "properties": {
+        "slot_index": { "type": "integer", "minimum": 0, "maximum": 9 },
+        "item_instance_id": {
+          "oneOf": [
+            { "$ref": "#/$defs/decimal_id" },
+            { "type": "null" }
+          ]
+        },
+        "item": { "$ref": "#/$defs/item" }
+      }
+    },
     "boss_phase": {
       "type": "object",
-      "required": ["pattern_id", "phase_index", "phase_kind", "started_tick", "remaining_ticks"],
+      "required": ["pattern_id", "phase_index", "phase_kind", "started_tick", "duration_ticks"],
       "additionalProperties": false,
       "properties": {
         "pattern_id": { "type": "string" },
@@ -1040,6 +1086,7 @@
         "phase_kind": { "type": "string", "enum": ["telegraph", "active", "recovery", "cooldown"] },
         "started_tick": { "type": "integer", "minimum": 0 },
         "remaining_ticks": { "type": "integer", "minimum": 0 },
+        "duration_ticks": { "type": "integer", "minimum": 0 },
         "telegraph": { "$ref": "#/$defs/boss_telegraph" },
         "hit_shape": { "$ref": "#/$defs/boss_hit_shape" }
       }
@@ -1052,6 +1099,7 @@
         "type": { "type": "string", "enum": ["body_color_charge", "circle", "line", "cone", "rectangle"] },
         "from_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
         "to_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "hit_shape": { "type": "string", "minLength": 1 },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "width": { "type": "number", "exclusiveMinimum": 0 }
       }
@@ -1097,6 +1145,8 @@
         "mana_regen_per_second": { "type": "number", "minimum": 0 },
         "light_radius": { "type": "number", "minimum": 0 },
         "magic_find_percent": { "type": "number", "minimum": 0 },
+        "block_percent": { "type": "number", "minimum": 0 },
+        "evade_chance": { "type": "number", "minimum": 0, "maximum": 1 },
         "weapon_damage_by_slot": { "$ref": "#/$defs/weapon_damage_by_slot" }
       }
     },
@@ -1141,7 +1191,7 @@
       "properties": {
         "label": { "type": "string", "minLength": 1 },
         "value": { "type": "number" },
-        "kind": { "type": "string", "enum": ["base_stat", "character_formula", "equipment_base", "equipment_roll", "set_bonus", "skill_effect", "passive_skill", "buff", "debuff", "combat_rule", "derived", "cap", "clamp"] },
+        "kind": { "type": "string", "enum": ["base_stat", "character_formula", "equipment_base", "equipment_roll", "set_bonus", "skill_effect", "passive_skill", "buff", "debuff", "combat_rule", "derived", "cap", "clamp", "class_affinity"] },
         "item_instance_id": { "$ref": "#/$defs/decimal_id" }
       }
     },
@@ -1150,7 +1200,7 @@
       "required": ["key", "value", "sources"],
       "additionalProperties": false,
       "properties": {
-        "key": { "type": "string", "enum": ["str", "dex", "vit", "magic", "damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "magic_find_percent", "light_radius", "block_percent"] },
+        "key": { "type": "string", "enum": ["str", "dex", "vit", "magic", "damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "magic_find_percent", "light_radius", "block_percent", "evade_chance"] },
         "value": { "type": "number" },
         "uncapped_value": { "type": "number" },
         "cap": { "type": ["number", "null"] },
@@ -1172,6 +1222,7 @@
         "unspent_stat_points": { "type": "integer", "minimum": 0 },
         "gold": { "type": "integer", "minimum": 0 },
         "deepest_dungeon_depth": { "type": "integer", "minimum": 0 },
+        "character_class": { "type": "string", "minLength": 1 },
         "base_stats": { "$ref": "#/$defs/base_stats" },
         "effective_base_stats": { "$ref": "#/$defs/base_stats" },
         "derived_stats": { "$ref": "#/$defs/derived_stats" },
@@ -1398,6 +1449,7 @@
           "required": ["op", "stash_item_id"],
           "properties": {
             "op": { "const": "resource_bag_item_remove" },
+            "bag_item_id": { "$ref": "#/$defs/decimal_id" },
             "stash_item_id": { "$ref": "#/$defs/decimal_id" }
           }
         },
@@ -1454,7 +1506,7 @@
           "properties": {
             "op": { "const": "shop_stock_replace" },
             "shop_id": { "type": "string" },
-            "refresh_key": { "type": "string", "pattern": "^[a-z0-9_:-]+$" },
+            "refresh_key": { "type": "string", "pattern": "^[a-z0-9_:|-]+$" },
             "stock": { "type": "array", "items": { "$ref": "#/$defs/shop_stock_item" } }
           }
         },
@@ -1465,7 +1517,7 @@
           "properties": {
             "op": { "const": "shop_stock_availability_update" },
             "shop_id": { "type": "string" },
-            "offer_id": { "type": "string", "pattern": "^generated:[a-z0-9_:-]+$" },
+            "offer_id": { "type": "string", "pattern": "^(generated|mystery):[a-z0-9_:|-]+$" },
             "available": { "type": "boolean" }
           }
         }

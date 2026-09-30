@@ -88,7 +88,7 @@ async def run(args: argparse.Namespace) -> int:
     metadata_path = Path(args.metadata_file)
     with httpx.Client(base_url=args.base_url, timeout=10.0) as client:
         host_account_id, token = dev_login(client, args.email, args.dev_token)
-        host_character_id = ensure_character(client, token, args.character_name)
+        host_character_id = ensure_character(client, token, args.character_name, args.character_class)
         session = create_listed_coop_session(client, token, args.world_id, host_character_id, args.seed)
         peer = await connect_coop_peer(args.base_url, token, session, "client-join-preflight-host", args.world_id)
         pump_task = asyncio.create_task(_pump_until_stop(peer.ws, stop))
@@ -151,6 +151,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--seed", default="")
     parser.add_argument("--email", required=True)
     parser.add_argument("--character-name", default="Join Host")
+    parser.add_argument("--character-class", default="")
     parser.add_argument("--metadata-file", required=True)
     parser.add_argument("--ready-timeout-s", type=float, default=10.0)
     return parser.parse_args(argv)

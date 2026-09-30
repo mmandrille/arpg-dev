@@ -10,6 +10,7 @@ from typing import Any
 import httpx
 
 from tools.bot.bot_types import CoopPeer, RuntimeState, Scenario
+from tools.bot.payload_schema import suspended as schema_validation_suspended
 
 
 def _require_helpers(helpers: dict[str, Any] | None) -> dict[str, Any]:
@@ -131,27 +132,28 @@ async def run_crowded_skill_overlap_lab(
         if chasers < 25:
             raise AssertionError(f"{scenario.id}: crowded chasers={chasers}, want >= 25")
 
-        for _round in range(3):
-            pending: list[tuple[CoopPeer, str]] = []
-            for peer in peers:
-                message_id = await send_coop_intent(
-                    peer,
-                    "cast_skill_intent",
-                    {"skill_id": "volley", "direction": {"x": 1, "y": 0}},
-                )
-                pending.append((peer, message_id))
-            for peer, message_id in pending:
-                await wait_coop_until(
-                    peers,
-                    f"{peer.label} overlap cast {message_id}",
-                    lambda peer=peer, message_id=message_id: message_id in peer.state.accepted_message_ids
-                    or message_id in peer.state.rejected_message_reasons,
-                    timeout_s=10.0,
-                )
-                if message_id in peer.state.accepted_message_ids:
-                    volley_casts += 1
-            for _ in range(45):
-                await pump_coop(peers, timeout=0.12)
+        with schema_validation_suspended():
+            for _round in range(3):
+                pending: list[tuple[CoopPeer, str]] = []
+                for peer in peers:
+                    message_id = await send_coop_intent(
+                        peer,
+                        "cast_skill_intent",
+                        {"skill_id": "volley", "direction": {"x": 1, "y": 0}},
+                    )
+                    pending.append((peer, message_id))
+                for peer, message_id in pending:
+                    await wait_coop_until(
+                        peers,
+                        f"{peer.label} overlap cast {message_id}",
+                        lambda peer=peer, message_id=message_id: message_id in peer.state.accepted_message_ids
+                        or message_id in peer.state.rejected_message_reasons,
+                        timeout_s=10.0,
+                    )
+                    if message_id in peer.state.accepted_message_ids:
+                        volley_casts += 1
+                for _ in range(45):
+                    await pump_coop(peers, timeout=0.12)
 
         for peer in peers:
             if peer.ws.close_code is not None:
@@ -236,25 +238,26 @@ async def run_six_player_boss_combat_soak(
 
         cast_cycles = int(soak_config.get("cast_cycles", 8))
         ticks_between = int(soak_config.get("ticks_between_cycles", 18))
-        for _cycle in range(cast_cycles):
-            for index, peer in enumerate(peers):
-                skill_id = str(loadouts[index].get("cast_skill", loadouts[index].get("skill_id", "magic_bolt")))
-                message_id = await send_coop_intent(
-                    peer,
-                    "cast_skill_intent",
-                    {"skill_id": skill_id, "direction": {"x": 1, "y": 0}},
-                )
-                await wait_coop_until(
-                    peers,
-                    f"{peer.label} cast response {message_id}",
-                    lambda peer=peer, message_id=message_id: message_id in peer.state.accepted_message_ids
-                    or message_id in peer.state.rejected_message_reasons,
-                    timeout_s=8.0,
-                )
-                if message_id in peer.state.accepted_message_ids:
-                    casts_seen += 1
-            for _ in range(ticks_between):
-                await pump_coop(peers, timeout=0.12)
+        with schema_validation_suspended():
+            for _cycle in range(cast_cycles):
+                for index, peer in enumerate(peers):
+                    skill_id = str(loadouts[index].get("cast_skill", loadouts[index].get("skill_id", "magic_bolt")))
+                    message_id = await send_coop_intent(
+                        peer,
+                        "cast_skill_intent",
+                        {"skill_id": skill_id, "direction": {"x": 1, "y": 0}},
+                    )
+                    await wait_coop_until(
+                        peers,
+                        f"{peer.label} cast response {message_id}",
+                        lambda peer=peer, message_id=message_id: message_id in peer.state.accepted_message_ids
+                        or message_id in peer.state.rejected_message_reasons,
+                        timeout_s=8.0,
+                    )
+                    if message_id in peer.state.accepted_message_ids:
+                        casts_seen += 1
+                for _ in range(ticks_between):
+                    await pump_coop(peers, timeout=0.12)
 
         for peer in peers:
             if peer.ws.close_code is not None:

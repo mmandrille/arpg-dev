@@ -17,7 +17,7 @@ before implementation. There is no separate plan file. ADR:
 - `character.tscn` now embeds the fallback kit hero (Knight, scale 0.8) with an empty
   `AnimationPlayer`. `CharacterVisual._ready` installs the kit clip library as well as the sockets.
 - So every bare instance animates as a kit hero:
-  - **remote co-op players** (the server never sends their class; see Known gaps);
+  - remote co-op players until their class arrives (v485 now sends it);
   - the boss `current_humanoid_player` model;
   - `smoke.gd`, the model viewer and the class-less showme captures.
 - The model-viewer test used to pass only on legacy clip *names* whose tracks didn't bind to the kit
@@ -71,9 +71,10 @@ verbatim to `tools/assets/glb_mesh_io.py` (tested), so re-imported GLBs stay byt
 
 ## Known gaps
 
-- **Remote co-op players all show the fallback Knight.** The server doesn't put `character_class` on
-  player entities. That's a follow-up protocol slice; the client already routes a class to the model
-  swap once it arrives.
+- **Remote co-op players** get their own class since v485 (merged to main just before this slice):
+  player entities carry `character_class`, and `RemotePlayerClassSync` swaps the model. The kit
+  fallback now covers only the gap before the first class-bearing delta, and entities without a
+  class.
 - **Corpses are always the fallback hero.** Corpse interactables carry no class, and adding one needs
   protocol, store, migration and replay changes.
 - **The fallback Knight shows its helmet.** The armor look (v483) runs only for the local player's

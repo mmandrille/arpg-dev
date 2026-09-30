@@ -151,7 +151,7 @@ func TestRangerBlackWolfCompanionSummonsAndReplaces(t *testing.T) {
 		t.Fatalf("wolf owner/source = %d/%s, want %d/black_wolf_companion", firstWolf.ownerID, firstWolf.sourceSkillID, player.id)
 	}
 	view := sim.entityView(firstWolf)
-	if view.Type != companionEntity || view.MonsterDefID != "companion_black_wolf" || view.VisualModel != "monster_wolf" || view.VisualTint != "101014" {
+	if view.Type != companionEntity || view.MonsterDefID != "companion_black_wolf" || view.VisualModel != "monster_wolf" || view.VisualTint != protocolVisualTint(sim.rules.Skills["black_wolf_companion"].Companion.VisualTint) {
 		t.Fatalf("wolf view = %+v, want black wolf companion", view)
 	}
 	percent := companionHeroStatPercent(sim.rules, sim.rules.Skills["black_wolf_companion"], sim.effectiveSkillRank("black_wolf_companion"))

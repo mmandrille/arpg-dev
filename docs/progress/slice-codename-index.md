@@ -262,6 +262,8 @@ v481_* = recorded-tick-checkpoints
 v482_* = cc0-beasts
 v483_* = armor-look
 v484_* = retire-legacy-hero
+v485_* = remote-player-class
+v486_* = live-payload-schema-gate
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

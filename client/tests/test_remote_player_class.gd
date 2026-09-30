@@ -35,10 +35,13 @@ func _two_kit_hero_classes() -> Array:
 	var ids: Array = ClassPresentationsLoaderScript._classes.keys()
 	ids.sort()
 	var picked: Array = []
+	# The fallback is data-driven since v484 (class_presentations fallback_class): whatever an empty
+	# class resolves to. Skip it so both picks visibly differ from the pre-class model.
+	var fallback_asset := str(ClassPresentationsLoaderScript.resolve("").get("asset_id", ""))
 	var assets: Dictionary = {}
 	for id in ids:
 		var asset_id := str(ClassPresentationsLoaderScript.resolve(str(id)).get("asset_id", ""))
-		if asset_id == ClassPresentationsLoaderScript.FALLBACK_ASSET_ID or assets.has(asset_id):
+		if asset_id == fallback_asset or assets.has(asset_id):
 			continue
 		assets[asset_id] = true
 		picked.append(str(id))

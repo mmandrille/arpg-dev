@@ -11,6 +11,7 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 	s.resetTickPerf()
 	s.resetSkillBudgetCounters()
 	inputs, loadShed := splitLoadShedInputs(inputs)
+	inputs, stashSyncs := splitAccountStashSyncInputs(inputs)
 	inputs = s.prependDeferredSkillInputs(inputs)
 	previousProfiler := s.tickProfiler
 	s.tickProfiler = profiler
@@ -18,6 +19,7 @@ func (s *Sim) TickResultsProfiled(inputs []Input, profiler TickProfiler) []TickR
 		s.tickProfiler = previousProfiler
 	}()
 	ctx := newSimTickCtx(s)
+	s.applyAccountStashSyncs(ctx, stashSyncs)
 
 	for _, in := range inputs {
 		ps := s.playerForInput(in)

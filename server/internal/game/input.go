@@ -53,4 +53,5 @@ type Input struct {
 	DebugPlayerPos               *DebugPlayerPosIntent
 	LoadShed                     *LoadShedDirective
 	Member                       *MemberLifecycle
+	StashSync                    *AccountStashSync
 }

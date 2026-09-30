@@ -2165,10 +2165,6 @@ func _remove_inventory_item(item_instance_id: String) -> void:
 	InventoryWalletDeltaRuntimeScript.remove_inventory_item(self, item_instance_id)
 
 
-func _upsert_stash_item(item: Dictionary) -> void:
-	InventoryWalletDeltaRuntimeScript.upsert_stash_item(self, item)
-
-
 func _apply_resource_wallet_snapshot(rows: Variant) -> void:
 	InventoryWalletDeltaRuntimeScript.apply_resource_wallet_snapshot(self, rows)
 
@@ -4868,13 +4864,13 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 	if client == null:
 		return
 	var result := {}
+	# v488: stash changes from these HTTP calls arrive as server stash_item_* ops on the next tick
+	# (live stash sync); only character-inventory side effects are still applied locally.
 	if action == "publish":
 		result = client.create_market_listing(str(payload.get("stash_item_id", "")), int(payload.get("price_gold", 0)))
 		if result.has("_error"):
 			if market_panel != null: market_panel.show_status("Could not publish item", true)
 			return
-		_remove_market_stash_item(str(payload.get("stash_item_id", "")))
-		_refresh_inventory_ui()
 		if market_panel != null: market_panel.show_status("Item published")
 	elif action == "publish_inventory":
 		result = client.create_market_listing_from_inventory(str(payload.get("item_instance_id", "")), client.character_id, int(payload.get("price_gold", 0)))
@@ -4889,17 +4885,12 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		if result.has("_error"):
 			if market_panel != null: market_panel.show_status("Could not cancel listing", true)
 			return
-		_upsert_stash_item(result)
-		_refresh_inventory_ui()
 		if market_panel != null: market_panel.show_status("Listing canceled")
 	elif action == "offer":
 		result = client.create_market_offer(str(payload.get("listing_id", "")), payload.get("stash_item_ids", []))
 		if result.has("_error"):
 			if market_panel != null: market_panel.show_status("Could not make offer", true)
 			return
-		for stash_item_id in payload.get("stash_item_ids", []):
-			_remove_market_stash_item(str(stash_item_id))
-		_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Offer sent")
 			market_panel.return_to_browse_after_offer()
@@ -4919,11 +4910,6 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		if result.has("_error"):
 			if market_panel != null: market_panel.show_status("Could not purchase listing", true)
 			return
-		var delivered_item_raw = result.get("delivered_item", {})
-		var delivered_item: Dictionary = delivered_item_raw if typeof(delivered_item_raw) == TYPE_DICTIONARY else {}
-		if not delivered_item.is_empty():
-			_upsert_stash_item(delivered_item)
-			_refresh_inventory_ui()
 		if market_panel != null:
 			market_panel.show_status("Listing purchased")
 	elif action == "list_offers" or action == "list_my_offers" or action == "list_market_receipts":
@@ -4943,10 +4929,6 @@ func _on_market_action_requested(action: String, payload: Dictionary) -> void:
 		if result.has("_error"):
 			if market_panel != null: market_panel.show_status("Could not cancel offer" if cancel else "Could not accept offer", true)
 			return
-		for item in result.get("items", []):
-			if typeof(item) == TYPE_DICTIONARY:
-				_upsert_stash_item(item as Dictionary)
-		_refresh_inventory_ui()
 		if cancel:
 			var offers := client.list_my_market_offers()
 			if market_panel != null: market_panel.show_my_offers(offers.get("offers", []), "Offer canceled" if not offers.has("_error") else "Offer canceled; refresh failed")
@@ -4974,12 +4956,6 @@ func _refresh_market_panel_data() -> void:
 	var body := client.list_market_listings()
 	var listings: Array = body.get("listings", [])
 	market_panel.show_market(market_panel.market_entity_id, listings, inventory, client.account_id, market_panel.get_debug_state().get("status", ""), equipped, str(character_progression.get("character_class", "")))
-
-func _remove_market_stash_item(stash_item_id: String) -> void:
-	for i in range(stash_items.size() - 1, -1, -1):
-		if str((stash_items[i] as Dictionary).get("stash_item_id", "")) == stash_item_id:
-			stash_items.remove_at(i)
-			return
 
 func _refresh_market_board_summary() -> void:
 	if client == null or interactable_ids.is_empty():

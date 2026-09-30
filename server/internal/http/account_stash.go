@@ -13,9 +13,9 @@ import (
 )
 
 func (s *Server) registerAccountStashRoutes(mux *http.ServeMux) {
-	mux.Handle("POST /v0/account-stash/items/{stash_item_id}/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeAccountStashItem)))
-	mux.Handle("POST /v0/account-stash/items/upgrade", s.requireAuth(http.HandlerFunc(s.handleUpgradeInventoryItem)))
-	mux.Handle("POST /v0/account-stash/items/renew", s.requireAuth(http.HandlerFunc(s.handleRenewInventoryItem)))
+	mux.Handle("POST /v0/account-stash/items/{stash_item_id}/upgrade", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleUpgradeAccountStashItem))))
+	mux.Handle("POST /v0/account-stash/items/upgrade", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleUpgradeInventoryItem))))
+	mux.Handle("POST /v0/account-stash/items/renew", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleRenewInventoryItem))))
 	s.registerAccountStashMergeRoutes(mux)
 }
 

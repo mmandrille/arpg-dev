@@ -14,6 +14,7 @@ func (l *sessionLoop) doTick() {
 	tick := l.sim.CurrentTick()
 	inputs := l.buffer[tick]
 	delete(l.buffer, tick)
+	inputs = append(inputs, l.stashSyncInputsLocked(tick)...)
 	sortInputs(inputs)
 	simStart := time.Now()
 	profiler := newBackendTickProfiler()

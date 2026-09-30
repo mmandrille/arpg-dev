@@ -119,7 +119,8 @@ func persistedShopStock(items []store.CharacterShopStockItem) []game.PersistedSh
 	return out
 }
 
-func persistedStashItems(items []store.AccountStashItem) []game.PersistedStashItem {
+// PersistedStashItems converts stored account stash rows into sim stash rows (session start, v488 live sync).
+func PersistedStashItems(items []store.AccountStashItem) []game.PersistedStashItem {
 	out := make([]game.PersistedStashItem, 0, len(items))
 	for _, item := range items {
 		out = append(out, game.PersistedStashItem{

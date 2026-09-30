@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-30 (v487 kit ground loot; v486 `$refactor` paydown)
+Last updated: 2026-09-30 (v488 live stash HTTP sync; v487 kit ground loot)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-30 (v487 kit ground loot; v486 `$refactor` paydown)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v487 — kit ground loot: dropped weapons/off-hands render the `item_visuals.v0.json` kit model the hero wields, posed from `equipment_display.v0.json` `ground_pose`, tinted via `ModelTint` ([as-built](docs/as-built/v487_kit-ground-loot.md); `make ci` green). Prior: v486 live payload schema gate, v484 legacy hero retirement, then the v486 `$refactor` paydown. |
-| **Next slice** | TBD — `/next`. Open v486 blockers: `origin` credential (owner), `buyer_offer_cancel_ui` (HTTP stash changes never reach the live session; candidate `live-stash-http-sync`). Visual follow-up: kit coin/potion ground props. |
+| **Latest completed slice** | v488 — live stash HTTP sync: stash writes from market/stash HTTP routes reach the live session next tick via a recorded `system_account_stash_sync` input, replay-exact; `buyer_offer_cancel_ui` green ([as-built](docs/as-built/v488_live-stash-http-sync.md); `make ci` green). Prior: v487 kit ground loot. |
+| **Next slice** | TBD — `/next`. Candidate: sync character inventory changed over HTTP (`publish_inventory` / `offer_inventory` leave the live sim holding removed items; v488 follow-up). Visual follow-up: kit coin/potion ground props. |
 | **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
 | **Next engineering review** | ~v496 — run `$review` then `$refactor` after the next ~10-slice milestone |
 
@@ -94,8 +94,8 @@ Do **not** assume these are the next slice — they are documented backlog items
   input tick (`session_loop.go:372`), `origin` credential, ci-full red. **`$refactor` (2026-09-30) landed:** client
   tick clamp, client gate fails on SCRIPT ERROR, determinism lint on all `game/` (baseline), Go golden consumers, gofmt
   + realtime `-race` in CI, occlusion throttle, dead eye-view step, the 9 unique/set ci-full failures (self-referencing
-  `state_delta.v8` `$defs.equipped`). **Still open:** replay max-tick/ctx guard, `origin` credential (owner),
-  `buyer_offer_cancel_ui` (HTTP offer-cancel refund never reaches the live session stash), record debug mode on the session.
+  `state_delta.v8` `$defs.equipped`). **Still open:** replay max-tick/ctx guard, `origin` credential (owner-blocked
+  by network infra; accepted risk), record debug mode on the session. `buyer_offer_cancel_ui` closed by v488.
 
 - **v469 environment / process gaps.**
   - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan

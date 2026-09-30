@@ -51,6 +51,7 @@ type Server struct {
 	realtime *realtime.Hub
 	rules    *game.Rules
 	ready    ReadyFunc
+	stash    stashNotifier // v488 live stash sync; nil without a realtime hub
 }
 
 // New constructs a Server.
@@ -64,6 +65,7 @@ func New(d Deps) *Server {
 		realtime: d.Realtime,
 		rules:    d.Rules,
 		ready:    d.Ready,
+		stash:    stashNotifierFor(d.Realtime),
 	}
 }
 

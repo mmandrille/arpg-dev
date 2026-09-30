@@ -23,6 +23,7 @@ type Hub struct {
 	upgrader      websocket.Upgrader
 	mu            sync.Mutex
 	loops         map[string]*sessionLoop
+	stashDirty    map[*sessionLoop]map[string]bool // v488: accounts to resync per live loop (h.mu)
 }
 
 // NewHub constructs a realtime hub.
@@ -134,6 +135,7 @@ func (h *Hub) removeLoop(sessionID string, loop *sessionLoop) {
 	if h.loops[sessionID] == loop {
 		delete(h.loops, sessionID)
 	}
+	delete(h.stashDirty, loop)
 }
 
 func storeShopStock(accountID, characterID string, items []game.PersistedShopStockItem) []store.CharacterShopStockItem {

@@ -78,6 +78,9 @@ func decodeStoredSystem(env envelope) (game.Input, bool) {
 	if game.IsMemberLifecycleInput(game.Input{Type: env.Type}) {
 		return decodeStoredMemberLifecycle(env)
 	}
+	if env.Type == TypeSystemAccountStashSync {
+		return decodeStoredAccountStashSync(env)
+	}
 	if env.Type != TypeSystemLoadShed {
 		return game.Input{}, false
 	}

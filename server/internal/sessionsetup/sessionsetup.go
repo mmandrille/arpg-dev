@@ -154,7 +154,7 @@ func loadMemberState(sim *game.Sim, playerID uint64, start store.SessionStartSna
 	sim.LoadSkillBindingsForPlayer(playerID, persistedSkillBindings(start.SkillBinds))
 	sim.LoadDiscoveredTeleportersForPlayer(playerID, waypointLevels(start.Waypoints))
 	sim.LoadShopStockForPlayer(playerID, persistedShopStock(start.ShopStock))
-	sim.LoadAccountStashForPlayer(playerID, persistedStashItems(start.StashItems), start.StashGold.Gold, 0)
+	sim.LoadAccountStashForPlayer(playerID, PersistedStashItems(start.StashItems), start.StashGold.Gold, 0)
 	sim.LoadResourceWalletForPlayer(playerID, persistedResources(start.Resources))
 	sim.LoadAccountResourceBagForPlayer(playerID, persistedResourceBagItems(start.ResourceBagItems))
 }

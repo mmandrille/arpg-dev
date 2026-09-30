@@ -13,15 +13,15 @@ import (
 func (s *Server) registerMarketRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /v0/market/summary", s.requireAuth(http.HandlerFunc(s.handleMarketSummary)))
 	mux.Handle("GET /v0/market/listings", s.requireAuth(http.HandlerFunc(s.handleListMarketListings)))
-	mux.Handle("POST /v0/market/listings", s.requireAuth(http.HandlerFunc(s.handleCreateMarketListing)))
-	mux.Handle("POST /v0/market/listings/{listing_id}/purchase", s.requireAuth(http.HandlerFunc(s.handlePurchaseMarketListing)))
-	mux.Handle("POST /v0/market/listings/{listing_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketListing)))
-	mux.Handle("POST /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleCreateMarketOffer)))
+	mux.Handle("POST /v0/market/listings", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleCreateMarketListing))))
+	mux.Handle("POST /v0/market/listings/{listing_id}/purchase", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handlePurchaseMarketListing))))
+	mux.Handle("POST /v0/market/listings/{listing_id}/cancel", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleCancelMarketListing))))
+	mux.Handle("POST /v0/market/listings/{listing_id}/offers", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleCreateMarketOffer))))
 	mux.Handle("GET /v0/market/offers/mine", s.requireAuth(http.HandlerFunc(s.handleListMyMarketOffers)))
 	mux.Handle("GET /v0/market/receipts/mine", s.requireAuth(http.HandlerFunc(s.handleListMyMarketReceipts)))
 	mux.Handle("GET /v0/market/listings/{listing_id}/offers", s.requireAuth(http.HandlerFunc(s.handleListMarketOffers)))
-	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/accept", s.requireAuth(http.HandlerFunc(s.handleAcceptMarketOffer)))
-	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/cancel", s.requireAuth(http.HandlerFunc(s.handleCancelMarketOffer)))
+	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/accept", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleAcceptMarketOffer))))
+	mux.Handle("POST /v0/market/listings/{listing_id}/offers/{offer_id}/cancel", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleCancelMarketOffer))))
 }
 
 type marketListingResponse struct {
@@ -212,6 +212,7 @@ func (s *Server) handlePurchaseMarketListing(w http.ResponseWriter, r *http.Requ
 	response := marketListingResponseFromStore(listing)
 	delivered := accountStashItemResponseFromMarketListing(listing)
 	response.DeliveredItem = &delivered
+	s.notifyStashChanged(listing.SellerAccountID) // the seller's stash gold is credited
 	writeJSON(w, http.StatusOK, response)
 }
 
@@ -344,6 +345,7 @@ func (s *Server) handleAcceptMarketOffer(w http.ResponseWriter, r *http.Request)
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not accept market offer")
 		return
 	}
+	s.notifyStashChanged(offer.BidderAccountID) // the bidder receives the listing item
 	writeJSON(w, http.StatusOK, marketOfferResponseFromStore(offer))
 }
 

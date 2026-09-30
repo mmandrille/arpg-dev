@@ -28,8 +28,8 @@ type mergeLeveledConsumablesResponse struct {
 }
 
 func (s *Server) registerAccountStashMergeRoutes(mux *http.ServeMux) {
-	mux.Handle("POST /v0/account-stash/upgrade-shards/merge", s.requireAuth(http.HandlerFunc(s.handleMergeUpgradeShards)))
-	mux.Handle("POST /v0/account-stash/leveled-consumables/merge", s.requireAuth(http.HandlerFunc(s.handleMergeLeveledConsumables)))
+	mux.Handle("POST /v0/account-stash/upgrade-shards/merge", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleMergeUpgradeShards))))
+	mux.Handle("POST /v0/account-stash/leveled-consumables/merge", s.requireAuth(s.withStashSync(http.HandlerFunc(s.handleMergeLeveledConsumables))))
 }
 
 func (s *Server) handleMergeLeveledConsumables(w http.ResponseWriter, r *http.Request) {

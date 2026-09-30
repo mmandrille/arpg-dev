@@ -32,7 +32,24 @@
           "asset_id": "kaykit_dungeon_floor_tile_small_v0",
           "weight": 1
         }
-      ]
+      ],
+      "rim": {
+        "width_m": 2.0,
+        "tile_variants": [
+          {
+            "asset_id": "kaykit_dungeon_floor_tile_small_v0",
+            "weight": 5
+          },
+          {
+            "asset_id": "kaykit_dungeon_floor_tile_small_decorated_v0",
+            "weight": 1
+          },
+          {
+            "asset_id": "kaykit_dungeon_floor_tile_small_weeds_a_v0",
+            "weight": 1
+          }
+        ]
+      }
     },
     "min_clearance_m": 1.2,
     "props": [
@@ -135,6 +152,189 @@
         "yaw_degrees": 70,
         "scale": 0.4
       }
-    ]
+    ],
+    "anchors": [
+      {
+        "id": "player_spawn",
+        "position": {
+          "x": 11,
+          "y": 18
+        }
+      },
+      {
+        "id": "town_exit_gate",
+        "position": {
+          "x": 11.0,
+          "y": 27.0
+        }
+      },
+      {
+        "id": "stairs_down",
+        "position": {
+          "x": 11,
+          "y": 12
+        }
+      },
+      {
+        "id": "teleporter",
+        "position": {
+          "x": 13,
+          "y": 12
+        }
+      },
+      {
+        "id": "town_blacksmith",
+        "position": {
+          "x": 5,
+          "y": 12
+        }
+      },
+      {
+        "id": "town_stash",
+        "position": {
+          "x": 6,
+          "y": 8
+        }
+      },
+      {
+        "id": "town_bishop",
+        "position": {
+          "x": 16,
+          "y": 8
+        }
+      },
+      {
+        "id": "town_quest_giver",
+        "position": {
+          "x": 11,
+          "y": 5
+        }
+      },
+      {
+        "id": "town_vendor",
+        "position": {
+          "x": 20,
+          "y": 12
+        }
+      },
+      {
+        "id": "town_mystery_seller",
+        "position": {
+          "x": 18,
+          "y": 17
+        }
+      },
+      {
+        "id": "town_market_board",
+        "position": {
+          "x": 7,
+          "y": 18
+        }
+      },
+      {
+        "id": "town_mercenary_board",
+        "position": {
+          "x": 11,
+          "y": 20
+        }
+      },
+      {
+        "id": "town_unique_chest",
+        "position": {
+          "x": 8,
+          "y": 10
+        }
+      },
+      {
+        "id": "town_training_doll",
+        "position": {
+          "x": 14,
+          "y": 16
+        }
+      }
+    ],
+    "service_paths": {
+      "path_width_m": 3.0,
+      "targets": [
+        "town_vendor",
+        "town_mystery_seller"
+      ]
+    },
+    "edge": {
+      "enabled": true,
+      "width_m": 2.0,
+      "surface_y": 0.012,
+      "tile_variants": [
+        {
+          "asset_id": "kaykit_dungeon_floor_dirt_small_a_v0",
+          "weight": 3
+        },
+        {
+          "asset_id": "kaykit_dungeon_floor_dirt_small_b_v0",
+          "weight": 3
+        },
+        {
+          "asset_id": "kaykit_dungeon_floor_dirt_small_c_v0",
+          "weight": 3
+        },
+        {
+          "asset_id": "kaykit_dungeon_floor_dirt_small_d_v0",
+          "weight": 3
+        },
+        {
+          "asset_id": "kaykit_dungeon_floor_dirt_small_weeds_v0",
+          "weight": 1
+        }
+      ]
+    },
+    "scatter": {
+      "enabled": true,
+      "radius_m": 13.0,
+      "cell_m": 3.0,
+      "occupancy_percent": 50,
+      "patch_share_percent": 55,
+      "min_clearance_m": 1.5,
+      "fence_clearance_m": 1.5,
+      "surface_y": 0.0,
+      "patches": [
+        {
+          "asset_id": "kaykit_dungeon_floor_dirt_large_v0",
+          "weight": 2,
+          "radius_m": 2.0,
+          "scale_min": 0.7,
+          "scale_max": 1.0
+        },
+        {
+          "asset_id": "kaykit_dungeon_floor_dirt_large_rocky_v0",
+          "weight": 1,
+          "radius_m": 2.0,
+          "scale_min": 0.7,
+          "scale_max": 1.0
+        },
+        {
+          "asset_id": "kaykit_dungeon_floor_dirt_small_weeds_v0",
+          "weight": 2,
+          "radius_m": 1.0,
+          "scale_min": 0.8,
+          "scale_max": 1.2
+        }
+      ],
+      "rocks": [
+        {
+          "asset_id": "kaykit_resource_bits_stone_chunks_small_v0",
+          "weight": 3,
+          "radius_m": 0.6,
+          "scale_min": 0.5,
+          "scale_max": 0.9
+        },
+        {
+          "asset_id": "kaykit_resource_bits_stone_chunks_large_v0",
+          "weight": 1,
+          "radius_m": 0.8,
+          "scale_min": 0.35,
+          "scale_max": 0.6
+        }
+      ]
+    }
   }
 }

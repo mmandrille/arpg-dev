@@ -318,7 +318,12 @@ def validate(root: Path, report: Report) -> None:
         if town_path.is_file():  # v491 town dressing props
             dressing = load(town_path).get("dressing", {})
             kit_ids += sorted({p["asset_id"] for p in dressing.get("props", [])})
-            kit_ids += [v["asset_id"] for v in dressing.get("plaza", {}).get("tile_variants", [])]
+            plaza = dressing.get("plaza", {})
+            kit_ids += [v["asset_id"] for v in plaza.get("tile_variants", [])]
+            kit_ids += [v["asset_id"] for v in plaza.get("rim", {}).get("tile_variants", [])]  # v493
+            kit_ids += [v["asset_id"] for v in dressing.get("edge", {}).get("tile_variants", [])]
+            scatter = dressing.get("scatter", {})
+            kit_ids += [v["asset_id"] for v in scatter.get("patches", []) + scatter.get("rocks", [])]
         for asset_id in kit_ids:
             entry = assets.get(asset_id)
             if entry is None or entry.get("type") != "environment":

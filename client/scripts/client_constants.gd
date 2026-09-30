@@ -18,7 +18,6 @@ const LOCAL_LOOT_RADIUS := 0.35
 const LOCAL_INTERACTABLE_RADIUS := 0.50
 const LOCAL_REACH_EPSILON := 0.000001
 const PLAYER_TINT := Color("#8fe8a7")
-const REMOTE_PLAYER_TINT := Color("#202934")
 const POISON_TINT := Color("#38f06f")
 const BAG_FULL_CANT_UNEQUIP_TEXT := "bag full, cant unequip"
 const TOWN_EXIT_LOCKED_TEXT := "You can't leave for now."

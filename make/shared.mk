@@ -15,9 +15,7 @@ inspect-kit: tools ## Read-only structure report for a model kit (KIT=<file-or-d
 	$(PY) -m tools.assets.inspect_kit $(KIT) $(if $(OUT),--out "$(OUT)",)
 
 gen-assets: tools ## Regenerate committed runtime .glb files (deterministic source-of-truth)
-	$(PY) tools/assets/class_body_morph.py generate
 	$(PY) tools/assets/gen_glb.py
-	$(PY) tools/assets/rig_hero_glbs.py
 
 gen-anims: ## Regenerate committed AnimationLibrary .tres clips (requires Godot)
 	$(GODOT) --headless --rendering-method gl_compatibility --path client --import >/dev/null 2>&1 || true

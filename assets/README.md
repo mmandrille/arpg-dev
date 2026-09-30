@@ -4,7 +4,6 @@ This tree is the **authoring/provenance** side of the pipeline (ADR-0006).
 
 ```
 assets/
-  characters/          base character source/export notes (e.g. base_human)
   equipment/weapons/   weapon source/export notes (e.g. rusty_sword)
   manifests/           asset manifest JSON: asset_id -> runtime .glb path (+ provenance)
 ```

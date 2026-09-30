@@ -17,7 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 REAL_SCHEMA = REPO_ROOT / "assets/manifests/assets.v0.schema.json"
 REAL_BUDGETS_SCHEMA = REPO_ROOT / "assets/manifests/asset_budgets.v0.schema.json"
 
-CHAR_GLB = "client/assets/characters/base_human/base_human.glb"
+CHAR_GLB = "client/assets/characters/kaykit/hero.glb"
 STATIC_CHAR_GLB = "client/assets/characters/static_hero/static_hero.glb"
 SWORD_GLB = "client/assets/equipment/weapons/rusty_sword/rusty_sword.glb"
 MONSTER_GLB = "client/assets/monsters/dummy/monster_dummy.glb"
@@ -109,13 +109,13 @@ def default_manifest() -> dict:
     return {
         "version": 0,
         "assets": {
-            "character_base_human_v0": {
+            "character_kit_hero_v0": {
                 "type": "character",
                 "runtime_path": CHAR_GLB,
                 "format": "glb",
                 "required_nodes": ["root", "spine", "chest", "neck", "head",
-                                   "arm_l", "elbow_l", "hand_l",
-                                   "arm_r", "elbow_r", "hand_r",
+                                   "arm_l", "elbow_l", "handslot.l",
+                                   "arm_r", "elbow_r", "handslot.r",
                                    "leg_l", "knee_l", "foot_l",
                                    "leg_r", "knee_r", "foot_r"],
             },
@@ -198,8 +198,8 @@ def build_root(
     write(root / "shared/assets/monster_visuals.v0.json", monster_visuals or default_monster_visuals())
     char_joints = char_nodes if char_nodes is not None else [
         "root", "spine", "chest", "neck", "head",
-        "arm_l", "elbow_l", "hand_l",
-        "arm_r", "elbow_r", "hand_r",
+        "arm_l", "elbow_l", "handslot.l",
+        "arm_r", "elbow_r", "handslot.r",
         "leg_l", "knee_l", "foot_l",
         "leg_r", "knee_r", "foot_r",
     ]
@@ -236,12 +236,12 @@ def test_unknown_asset_id(tmp_path):
 def test_socket_coverage_failure(tmp_path):
     manifest = default_manifest()
     # Drop the weapon mount bone: the mount-bone coverage check must fail.
-    manifest["assets"]["character_base_human_v0"]["required_nodes"] = [
-        "root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"
+    manifest["assets"]["character_kit_hero_v0"]["required_nodes"] = [
+        "root", "spine", "arm_r", "handslot.r", "leg_l", "leg_r"
     ]
     report = run(build_root(
         tmp_path, manifest=manifest,
-        char_nodes=["root", "spine", "arm_r", "hand_r", "leg_l", "leg_r"],
+        char_nodes=["root", "spine", "arm_r", "handslot.r", "leg_l", "leg_r"],
     ))
     assert any("mount bone" in f for f in report.failures)
 
@@ -288,7 +288,7 @@ def test_glb_required_node_not_a_skin_joint(tmp_path):
     # (here `spine`) -> [6] must hard-fail because it is not an actual joint.
     report = run(build_root(
         tmp_path,
-        char_nodes=["root", "arm_l", "hand_l", "arm_r", "hand_r", "leg_l", "leg_r"],
+        char_nodes=["root", "arm_l", "handslot.l", "arm_r", "handslot.r", "leg_l", "leg_r"],
     ))
     assert any("glb joint" in f or "not skin joints" in f for f in report.failures)
 
@@ -296,7 +296,7 @@ def test_glb_required_node_not_a_skin_joint(tmp_path):
 def test_asset_id_wrong_type(tmp_path):
     # Point the weapon visual at the character asset -> type mismatch.
     visuals = default_visuals()
-    visuals["item_visuals"]["rusty_sword"]["asset_id"] = "character_base_human_v0"
+    visuals["item_visuals"]["rusty_sword"]["asset_id"] = "character_kit_hero_v0"
     report = run(build_root(tmp_path, visuals=visuals))
     assert any("asset_id type" in f for f in report.failures)
 
@@ -346,8 +346,8 @@ def test_monster_visual_wrong_asset_type(tmp_path):
 
 def test_required_node_not_a_skin_joint_fails(tmp_path):
     manifest = default_manifest()
-    manifest["assets"]["character_base_human_v0"]["required_nodes"] = ["not_a_joint"]
-    root = build_root(tmp_path, manifest=manifest, char_nodes=["root", "hand_r"])
+    manifest["assets"]["character_kit_hero_v0"]["required_nodes"] = ["not_a_joint"]
+    root = build_root(tmp_path, manifest=manifest, char_nodes=["root", "handslot.r"])
     report = run(root)
     assert any("not skin joints" in f or "not_a_joint" in f for f in report.failures)
 

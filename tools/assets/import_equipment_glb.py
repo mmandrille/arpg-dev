@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.assets.rig_hero_glbs import (  # noqa: E402
-    _bounds,
+from tools.assets.glb_mesh_io import (  # noqa: E402
+    bounds,
     parse_glb,
     read_position_accessor,
     write_glb,
@@ -125,7 +125,7 @@ def _normalize_extent(
     positions_by_accessor: dict[int, list[tuple[float, float, float]]],
     target_extent: float,
 ) -> None:
-    mins, maxs = _bounds(positions_by_accessor)
+    mins, maxs = bounds(positions_by_accessor)
     extent = max(maxs[i] - mins[i] for i in range(3))
     if extent <= 0.001:
         return

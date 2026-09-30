@@ -141,7 +141,7 @@ func _test_local_and_remote_players_apply_from_snapshot() -> void:
 	_assert_true("remote player entity stored", main.entities.has("1002"))
 	_assert_eq("remote entity type", str(main.entities["1002"].get("type", "")), "player")
 	_assert_eq("remote character metadata", str(main.entities["1002"].get("character_id", "")), "char_guest")
-	_assert_eq("remote visual tint", str(main.entities["1002"].get("base_tint", "")), ClientConstantsScript.REMOTE_PLAYER_TINT.to_html(false))
+	_assert_eq("remote visual tint", str(main.entities["1002"].get("base_tint", "")), Color.WHITE.to_html(false))
 	_assert_true("remote player has character model", (main.entities["1002"]["node"] as Node3D).find_child("ModelRoot", true, false) != null)
 	_assert_true("remote player has animation controller", main.entities["1002"].get("controller", null) != null)
 	_assert_true("remote player has reaction controller", main.entities["1002"].get("reaction", null) != null)

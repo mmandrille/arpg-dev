@@ -1,19 +1,13 @@
 {
   "version": 0,
-  "note": "ADR-0018 P3a (v475): socket bones target the KayKit Rig_Medium heroes; `fallback` keeps the legacy 17-bone base_human (unknown-class fallback, hero corpses) mounting until P3c removes it.",
+  "note": "ADR-0018 P3a (v475): socket bones target the KayKit Rig_Medium heroes. P3c (v484) removed the legacy 17-bone fallbacks.",
   "default": {
     "sockets": {
       "right_hand_socket": {
-        "bone": "handslot.r",
-        "fallback": {
-          "bone": "hand_r"
-        }
+        "bone": "handslot.r"
       },
       "off_hand_socket": {
-        "bone": "handslot.l",
-        "fallback": {
-          "bone": "hand_l"
-        }
+        "bone": "handslot.l"
       },
       "head_socket": {
         "bone": "head",
@@ -21,37 +15,13 @@
           "x": 0.0,
           "y": 0.6,
           "z": 0.0
-        },
-        "fallback": {
-          "bone": "head",
-          "offset": {
-            "x": 0.0,
-            "y": -1.35,
-            "z": -0.04
-          }
         }
       },
       "chest_socket": {
-        "bone": "chest",
-        "fallback": {
-          "bone": "chest",
-          "offset": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": -0.04
-          }
-        }
+        "bone": "chest"
       },
       "gloves_socket": {
-        "bone": "hand.r",
-        "fallback": {
-          "bone": "hand_r",
-          "offset": {
-            "x": 0.0,
-            "y": -0.02,
-            "z": 0.0
-          }
-        }
+        "bone": "hand.r"
       },
       "belt_socket": {
         "bone": "hips",
@@ -59,59 +29,19 @@
           "x": 0.0,
           "y": 0.1,
           "z": 0.0
-        },
-        "fallback": {
-          "bone": "spine",
-          "offset": {
-            "x": 0.0,
-            "y": -0.04,
-            "z": 0.08
-          }
         }
       },
       "boots_socket": {
-        "bone": "foot.l",
-        "fallback": {
-          "bone": "foot_l",
-          "offset": {
-            "x": 0.06,
-            "y": 0.06,
-            "z": -0.08
-          }
-        }
+        "bone": "foot.l"
       },
       "boots_right_socket": {
-        "bone": "foot.r",
-        "fallback": {
-          "bone": "foot_r",
-          "offset": {
-            "x": -0.06,
-            "y": 0.06,
-            "z": -0.08
-          }
-        }
+        "bone": "foot.r"
       },
       "ring_left_socket": {
-        "bone": "hand.l",
-        "fallback": {
-          "bone": "hand_l",
-          "offset": {
-            "x": 0.0,
-            "y": -0.03,
-            "z": 0.02
-          }
-        }
+        "bone": "hand.l"
       },
       "ring_right_socket": {
-        "bone": "hand.r",
-        "fallback": {
-          "bone": "hand_r",
-          "offset": {
-            "x": 0.0,
-            "y": -0.03,
-            "z": 0.02
-          }
-        }
+        "bone": "hand.r"
       },
       "amulet_socket": {
         "bone": "chest",
@@ -119,14 +49,6 @@
           "x": 0.0,
           "y": 0.3,
           "z": 0.0
-        },
-        "fallback": {
-          "bone": "chest",
-          "offset": {
-            "x": 0.0,
-            "y": 0.1,
-            "z": -0.04
-          }
         }
       }
     }
@@ -135,15 +57,7 @@
     "rogue": {
       "sockets": {
         "gloves_socket": {
-          "bone": "hand.l",
-          "fallback": {
-            "bone": "hand_l",
-            "offset": {
-              "x": 0.0,
-              "y": -0.02,
-              "z": 0.0
-            }
-          }
+          "bone": "hand.l"
         }
       }
     }

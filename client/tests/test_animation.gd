@@ -219,13 +219,10 @@ func _test_model_reaction_terminal_reset_restores_model() -> void:
 	await process_frame
 
 
-## Bone a gear socket binds to on this skeleton: the kit bone, or the legacy fallback bone.
-func _socket_bone(skel: Skeleton3D, class_id: String, socket_name: String) -> String:
+## Kit bone a gear socket binds to (ADR-0018 P3c removed the legacy 17-bone fallbacks).
+func _socket_bone(_skel: Skeleton3D, class_id: String, socket_name: String) -> String:
 	var entry: Dictionary = GearSocketsLoaderScript.sockets_for_class(class_id).get(socket_name, {})
-	var bone := str(entry.get("bone", ""))
-	if skel != null and skel.find_bone(bone) < 0 and typeof(entry.get("fallback", null)) == TYPE_DICTIONARY:
-		bone = str((entry["fallback"] as Dictionary).get("bone", ""))
-	return bone
+	return str(entry.get("bone", ""))
 
 
 func _ancestor_bone(skel: Skeleton3D, bone: String, levels: int) -> String:
@@ -253,6 +250,10 @@ func _test_character_scene() -> void:
 	if ap != null:
 		for clip in LOGICAL_HERO_CLIPS:
 			_assert(ap.has_animation(clip), "character missing clip %s" % clip)
+		# The bare scene is the fallback kit hero: its kit clips must bind to its skeleton.
+		if skel != null:
+			var leg := _ancestor_bone(skel, _socket_bone(skel, "", "boots_socket"), 2)
+			_assert_animation_rotates_bone(ap, skel, "walk", 0.4, leg, "bare character")
 	s.free()
 	await process_frame
 
@@ -312,9 +313,12 @@ func _test_class_character_models() -> void:
 		_assert(is_equal_approx(class_model.scale.x, float(resolved.get("scale", 1.0))), "%s class scale not applied" % class_id)
 		character.free()
 		await process_frame
-	var fallback := ClassPresentationsLoaderScript.resolve("necromancer")
-	_assert(str(fallback.get("asset_id", "")) == "character_base_human_v0", "unknown class should use base_human fallback: %s" % fallback)
-	_assert(str(fallback.get("clip_profile", "x")) == "", "base_human fallback keeps the legacy clip library")
+	var fallback_class := str(presentations.get("fallback_class", ""))
+	var expected := ClassPresentationsLoaderScript.resolve(fallback_class)
+	for unknown in ["necromancer", ""]:
+		var fallback := ClassPresentationsLoaderScript.resolve(unknown)
+		_assert(str(fallback.get("asset_id", "")) == str(expected.get("asset_id", "")), "class '%s' should use the %s kit fallback: %s" % [unknown, fallback_class, fallback])
+		_assert(str(fallback.get("clip_profile", "")) == "kaykit_hero", "class '%s' fallback must use kit clips: %s" % [unknown, fallback])
 
 
 func _assert_animation_rotates_bone(ap: AnimationPlayer, skel: Skeleton3D, clip: String, seconds: float, bone: String, class_id: String) -> void:

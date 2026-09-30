@@ -4,10 +4,15 @@
   "title": "Class presentations (v0)",
   "description": "Client-facing class labels, icons, and character models. Gameplay authority stays in shared/rules/character_progression.v0.json.",
   "type": "object",
-  "required": ["version", "classes"],
+  "required": ["version", "fallback_class", "classes"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
+    "fallback_class": {
+      "description": "Class whose kit model and clips render entities with no or an unknown class (ADR-0018 P3c).",
+      "type": "string",
+      "minLength": 1
+    },
     "classes": {
       "type": "object",
       "minProperties": 1,
@@ -44,15 +49,6 @@
             "properties": {
               "scale": { "type": "number", "exclusiveMinimum": 0 },
               "lean_degrees": { "type": "number" }
-            }
-          },
-          "body_tint": {
-            "type": "object",
-            "required": ["color", "strength"],
-            "additionalProperties": false,
-            "properties": {
-              "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
-              "strength": { "type": "number", "minimum": 0, "maximum": 1 }
             }
           }
         }

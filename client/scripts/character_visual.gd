@@ -21,12 +21,12 @@ const STATIC_SOCKET_POSITIONS := {
 }
 
 var class_id: String = ""
-## The scene's own clip library (legacy 17-bone clips), restored for non-kit models.
-var _default_clip_library: AnimationLibrary
 
 
 func _ready() -> void:
+	# A bare instance (no class yet) is the fallback kit hero: give it sockets and kit clips too.
 	_ensure_gear_sockets()
+	_sync_clip_library()
 
 
 ## Called after every model swap (all swap sites go through here): rebuilds sockets for the new
@@ -41,10 +41,9 @@ func _sync_clip_library() -> void:
 	var player := get_node_or_null("AnimationPlayer") as AnimationPlayer
 	if player == null:
 		return
-	if _default_clip_library == null and player.has_animation_library(""):
-		_default_clip_library = player.get_animation_library("")
-	var profile_id := str(ClassPresentationsLoaderScript.resolve(class_id).get("clip_profile", "")) if class_id != "" else ""
-	var wanted: AnimationLibrary = KitHeroClipsScript.library(profile_id) if profile_id != "" else _default_clip_library
+	# resolve() maps an empty or unknown class to the fallback kit hero (ADR-0018 P3c).
+	var profile_id := str(ClassPresentationsLoaderScript.resolve(class_id).get("clip_profile", ""))
+	var wanted: AnimationLibrary = KitHeroClipsScript.library(profile_id) if profile_id != "" else null
 	if wanted == null or (player.has_animation_library("") and player.get_animation_library("") == wanted):
 		return
 	player.stop()
@@ -83,11 +82,6 @@ func _ensure_gear_sockets() -> void:
 		if bone_name == "":
 			continue
 		var bone_idx := skel.find_bone(bone_name)
-		if bone_idx < 0 and typeof(entry.get("fallback", null)) == TYPE_DICTIONARY:
-			# Legacy 17-bone rig (base_human fallback): use the socket's fallback bone + transform.
-			entry = entry["fallback"]
-			bone_name = str(entry.get("bone", ""))
-			bone_idx = skel.find_bone(bone_name)
 		if bone_idx < 0:
 			push_warning("[character] bone %s not found for socket %s" % [bone_name, socket_name])
 			continue

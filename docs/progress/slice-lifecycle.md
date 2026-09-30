@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v484** | `retire-legacy-hero` | Complete (`make ci` green) | [`spec`](../specs/v484_spec-retire-legacy-hero.md) | — | [`as-built`](../as-built/v484_retire-legacy-hero.md) |
 | **v483** | `armor-look` | Complete (`make ci` green) | [`spec`](../specs/v483_spec-armor-look.md) | — | [`as-built`](../as-built/v483_armor-look.md) |
 | **v482** | `cc0-beasts` | Complete (`make ci` green) | [`spec`](../specs/v482_spec-cc0-beasts.md) | — | [`as-built`](../as-built/v482_cc0-beasts.md) |
 | **v481** | `recorded-tick-checkpoints` | Complete (`make ci` green) | [`spec`](../specs/v481_spec-recorded-tick-checkpoints.md) | [`plan`](../plans/v481_2026-09-29-recorded-tick-checkpoints.md) | [`as-built`](../as-built/v481_recorded-tick-checkpoints.md) |

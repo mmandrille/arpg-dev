@@ -1,13 +1,6 @@
 extends SceneTree
 # Rig gate (spec §10): confirm both rigged GLBs import as real skinned scenes.
 func _initialize() -> void:
-	_check("res://assets/characters/base_human/base_human.glb", [
-		"root", "spine", "chest", "neck", "head",
-		"arm_l", "elbow_l", "hand_l",
-		"arm_r", "elbow_r", "hand_r",
-		"leg_l", "knee_l", "foot_l",
-		"leg_r", "knee_r", "foot_r",
-	])
 	_check("res://assets/monsters/dummy/monster_dummy.glb", ["root", "pivot"])
 	# ADR-0018 P3a: KayKit Rig_Medium heroes (deform bones used by gear sockets + clips).
 	_check("res://assets/characters/kaykit/knight.glb", [

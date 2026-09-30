@@ -66,7 +66,7 @@ make regen-screenshots SUITE=gear
 
 ## Skeleton / rig loop (Tier 2–3)
 
-1. **Heroes:** `tools/assets/rig_hero_glbs.py` + `HERO_TARGET_HEIGHTS` (~1.85m)
+1. **Heroes (v475/v484):** KayKit Adventurers GLBs + `kit_hero_presentation` clips; no generated hero rig
 2. **Monsters and beasts (v474/v482):** vendored kit/CC0 GLBs with embedded clips; scene root
    `KitMonsterVisual` + a clip profile in `shared/assets/kit_monster_presentation.v0.json`
 3. **Probe unfamiliar rigs:** `python -m tools.assets.inspect_kit <dir>` (joints, clips, tris)
@@ -79,7 +79,7 @@ When gen_glb placeholders are not enough:
 1. Drop source GLB under `assets/characters/<class>/` or `assets/monsters/<name>/`
 2. Probe: `python3 skills/3dmodel/scripts/create_model_probe.py --model <path> --key <id>`
 3. Copy runtime bytes to `client/assets/...`, register manifest + provenance (`license`, `sha256`)
-4. Run the hero rig tool (`rig_hero_glbs.py`); monsters use kit rigs (see above)
+4. Heroes and monsters use kit rigs (see above); no rig generation step
 5. Record adopt/borrow/reject in slice spec/plan
 6. `make validate-assets` + class/monster animation smoke
 

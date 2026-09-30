@@ -69,6 +69,7 @@ const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const ClientGraphicsBridgeScript := preload("res://scripts/client_graphics_bridge.gd")
 const SceneLightingRigScript := preload("res://scripts/scene_lighting_rig.gd")
 const ModelTintScript := preload("res://scripts/model_tint.gd")
+const HeroCorpseVisualScript := preload("res://scripts/hero_corpse_visual.gd")
 const PerformanceStatusFormatterScript := preload("res://scripts/performance_status_formatter.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
@@ -109,7 +110,6 @@ const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
-const ClassBodyTintScript := preload("res://scripts/class_body_tint.gd")
 const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
 const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
@@ -5342,43 +5342,7 @@ func _stash_title(next_stash_id: String) -> String:
 			return next_stash_id.replace("_", " ").capitalize()
 
 func _make_hero_corpse_node(e: Dictionary) -> Node3D:
-	var root := Node3D.new()
-	root.name = "HeroCorpse_%s" % str(e.get("corpse_character_id", e.get("id", "")))
-	var body := CharacterScene.instantiate() as Node3D
-	body.name = "FallenHeroBody"
-	body.rotation_degrees = Vector3(0.0, 0.0, -88.0)
-	body.position = Vector3(0.05, 0.18, 0.0)
-	body.scale = Vector3.ONE * 0.82
-	_apply_model_tint(body, Color("#d4af37"))
-	root.add_child(body)
-
-	var shadow := MeshInstance3D.new()
-	shadow.name = "CorpseShadow"
-	var shadow_mesh := CylinderMesh.new()
-	shadow_mesh.top_radius = 0.75
-	shadow_mesh.bottom_radius = 0.75
-	shadow_mesh.height = 0.025
-	shadow.mesh = shadow_mesh
-	shadow.scale.z = 0.48
-	shadow.position = Vector3(0.0, 0.015, 0.0)
-	var shadow_mat := StandardMaterial3D.new()
-	shadow_mat.albedo_color = Color("#171412")
-	shadow.material_override = shadow_mat
-	root.add_child(shadow)
-
-	var marker := Label3D.new()
-	marker.name = "LootLabel"
-	var corpse_name := str(e.get("corpse_name", "Hero"))
-	var corpse_level := int(e.get("corpse_level", 0))
-	marker.text = "%s Lv %d" % [corpse_name, corpse_level] if corpse_level > 0 else corpse_name
-	marker.visible = false
-	marker.font_size = 60
-	marker.modulate = Color("#e8dcc8")
-	marker.outline_size = 10
-	marker.position = Vector3(0.0, 1.15, 0.0)
-	marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	root.add_child(marker)
-	return root
+	return HeroCorpseVisualScript.make(e, CharacterScene, Callable(self, "_apply_model_tint"))
 
 func _sync_waypoint_panel_reach() -> void:
 	if waypoint_panel == null or not waypoint_panel.visible:
@@ -5642,10 +5606,7 @@ func _monster_tint(rarity: String) -> Color:
 func _entity_base_tint(e: Dictionary) -> Color:
 	var kind := str(e.get("type", ""))
 	if kind == "player":
-		var class_id := str(e.get("character_class", ""))
-		if class_id != "":
-			return ClassBodyTintScript.representative_color(class_id)
-		return ClientConstants.REMOTE_PLAYER_TINT
+		return Color.WHITE  # kit heroes are textured; a base tint would multiply the atlas (ADR-0018 P3c)
 	if kind == "monster" or kind == "companion":
 		if e.has("visual_tint"):
 			return Color(str(e.get("visual_tint", "#ffffff")))
@@ -5685,8 +5646,7 @@ func _apply_local_player_class_model() -> void:
 		resolver.set_character_class(class_id)
 	_apply_local_player_visual_scale(player_visual_scale)
 	_remount_local_equipment_visuals()
-	var player_tint := ClassBodyTintScript.representative_color(class_id)
-	player_reaction = ModelReactionControllerScript.new(character_visual, player_tint)
+	player_reaction = ModelReactionControllerScript.new(character_visual, Color.WHITE)
 	var ap := character_visual.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
 		player_anim = AnimationControllerScript.new(ap)
@@ -5716,9 +5676,6 @@ func _apply_character_class_model(root: Node3D, class_id: String) -> void:
 		root.set("class_id", class_id)
 	if root.has_method("_ensure_weapon_socket"):
 		root.call("_ensure_weapon_socket")
-	var model_root := root.find_child("ModelRoot", false, false) as Node3D
-	if model_root != null and class_id != "":
-		ClassBodyTintScript.apply_to_model(model_root, class_id)
 
 func _remount_local_equipment_visuals() -> void:
 	if resolver == null:

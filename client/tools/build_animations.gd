@@ -6,10 +6,7 @@ extends SceneTree
 const DEG := PI / 180.0
 
 func _initialize() -> void:
-	_build(
-		"res://assets/characters/base_human/base_human.glb",
-		"res://animations/character_anims.tres",
-		_character_clips())
+	# Heroes use KayKit clips (kit_hero_presentation, ADR-0018 P3c); only the legacy dummy rig remains.
 	_build(
 		"res://assets/monsters/dummy/monster_dummy.glb",
 		"res://animations/monster_anims.tres",
@@ -50,51 +47,6 @@ func _make_anim(skel_path: String, spec: Dictionary) -> Animation:
 			var q := Quaternion.from_euler(Vector3(key[1] * DEG, key[2] * DEG, key[3] * DEG))
 			a.rotation_track_insert_key(ti, t, q)
 	return a
-
-func _character_clips() -> Dictionary:
-	return {
-		# idle: a near-still pose (one identity key so the track exists).
-		"idle": {"length": 1.0, "loop": true, "bones": {"spine": [[0.0, 0, 0, 0]]}},
-		# walk: alternate the legs back/forth.
-		"walk": {"length": 0.8, "loop": true, "bones": {
-			"leg_l": [[0.0, 25, 0, 0], [0.4, -25, 0, 0], [0.8, 25, 0, 0]],
-			"leg_r": [[0.0, -25, 0, 0], [0.4, 25, 0, 0], [0.8, -25, 0, 0]],
-		}},
-		# attack: swing the right arm down and back (the weapon rides hand_r).
-		"attack": {"length": 0.35, "loop": false, "bones": {
-			"arm_r": [[0.0, 0, 0, 0], [0.12, -110, 0, 0], [0.35, 0, 0, 0]],
-		}},
-		# attack_off_hand: mirror the swing onto the left arm (weapon rides hand_l).
-		"attack_off_hand": {"length": 0.35, "loop": false, "bones": {
-			"spine": [[0.0, 0, 0, 0], [0.12, 0, 0, -9], [0.35, 0, 0, 0]],
-			"arm_l": [[0.0, 0, 0, 0], [0.12, -125, 0, -46], [0.35, 0, 0, 0]],
-		}},
-		# attack_2h: both arms + spine for two-handed weapons.
-		"attack_2h": {"length": 0.4, "loop": false, "bones": {
-			"spine": [[0.0, 0, 0, 0], [0.14, 0, 0, -12], [0.4, 0, 0, 0]],
-			"arm_r": [[0.0, 0, 0, 0], [0.14, -95, 0, 0], [0.4, 0, 0, 0]],
-			"arm_l": [[0.0, 0, 0, 0], [0.14, -95, 0, 0], [0.4, 0, 0, 0]],
-		}},
-		# attack_ranged: bow hold (arm_r) + string pull (arm_l).
-		"attack_ranged": {"length": 0.45, "loop": false, "bones": {
-			"arm_r": [[0.0, 0, 0, 0], [0.1, -35, 0, 15], [0.45, 0, 0, 0]],
-			"arm_l": [[0.0, 0, 0, 0], [0.18, -55, 0, -35], [0.45, 0, 0, 0]],
-		}},
-		# attack_staff: two-hand cast wind-up.
-		"attack_staff": {"length": 0.42, "loop": false, "bones": {
-			"spine": [[0.0, 0, 0, 0], [0.12, 0, 0, 10], [0.42, 0, 0, 0]],
-			"arm_r": [[0.0, 0, 0, 0], [0.12, -70, 0, 20], [0.42, 0, 0, 0]],
-			"arm_l": [[0.0, 0, 0, 0], [0.12, -55, 0, -15], [0.42, 0, 0, 0]],
-		}},
-		# hit: brief backward wobble on authoritative player damage.
-		"hit": {"length": 0.25, "loop": false, "bones": {
-			"spine": [[0.0, 0, 0, 0], [0.08, -14, 0, 0], [0.25, 0, 0, 0]],
-		}},
-		# death: terminal topple pose held at the clip end.
-		"death": {"length": 0.6, "loop": false, "bones": {
-			"spine": [[0.0, 0, 0, 0], [0.6, -72, 0, 0]],
-		}},
-	}
 
 func _monster_clips() -> Dictionary:
 	return {

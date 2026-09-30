@@ -3,7 +3,6 @@ extends RefCounted
 
 const CharacterScene := preload("res://scenes/character.tscn")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
-const ClassBodyTintScript := preload("res://scripts/class_body_tint.gd")
 const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
 
 const SOCKET_COLORS := {
@@ -33,8 +32,8 @@ const SOCKET_LABEL_OFFSETS := {
 }
 
 const SPREAD_BONES := {
-	"leg_r": Vector3(0.0, 0.0, 1.0),
-	"leg_l": Vector3(0.0, 0.0, -1.0),
+	"upperleg.r": Vector3(0.0, 0.0, 1.0),
+	"upperleg.l": Vector3(0.0, 0.0, -1.0),
 }
 const LEG_SPREAD_ANGLE := PI / 7.0
 const CLASS_LEG_SPREAD_OVERRIDE := {
@@ -137,10 +136,10 @@ static func _place_socket_spheres(character: Node3D, root: Node3D) -> void:
 		root.add_child(label)
 		var label_offset: Vector3 = SOCKET_LABEL_OFFSETS.get(str(socket_name), Vector3(0.0, 0.12, 0.0))
 		label.global_position = socket.global_position + label_offset
-	# Also mark foot_r bone position with boots color (no socket node exists for it)
+	# Also mark the kit foot.r bone position with boots color (no socket node exists for it)
 	var skel_node := character.find_child("Skeleton3D", true, false) as Skeleton3D
 	if skel_node != null:
-		var foot_r_idx := skel_node.find_bone("foot_r")
+		var foot_r_idx := skel_node.find_bone("foot.r")
 		if foot_r_idx >= 0:
 			var foot_transform: Transform3D = skel_node.global_transform * skel_node.get_bone_global_pose(foot_r_idx)
 			var mat := StandardMaterial3D.new()
@@ -200,7 +199,6 @@ static func _apply_class_model(character: Node3D, class_id: String) -> void:
 		character.set("class_id", class_id)
 	if character.has_method("_ensure_weapon_socket"):
 		character.call("_ensure_weapon_socket")
-	ClassBodyTintScript.apply_to_model(model, class_id)
 
 
 static func _add_light(root: Node3D) -> void:

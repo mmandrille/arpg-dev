@@ -8,8 +8,9 @@ Engine-free checks over the asset manifest and the shared visual metadata:
   3. Every ``asset_id`` referenced by ``item_visuals`` resolves in the manifest.
   4. Equipment entries declare a ``slot`` matching the visuals that point at
      them, and each visual's ``asset_id`` resolves to an equipment entry.
-  5. Rigged character entries declare hand mount bones (``hand_r`` and
-     ``hand_l``). Static character entries may declare no required nodes and
+  5. Rigged character entries declare the hand mount bones that
+     ``gear_sockets`` names for the weapon sockets (kit ``handslot.r`` /
+     ``handslot.l``). Static character entries may declare no required nodes and
      rely on runtime fallback sockets.
   6. Parse GLB skins and hard-fail unless every declared ``required_nodes``
      name is an actual skin joint. Static entries with no required nodes skip
@@ -99,16 +100,15 @@ GEAR_SOCKETS_REL = "shared/assets/gear_sockets.v0.json"
 
 
 def hand_mount_bone_options(root: Path) -> dict[str, set[str]]:
-    """Per weapon socket: the bones that may carry it (kit bone + legacy fallback bone)."""
+    """Per weapon socket: the kit bone that carries it (ADR-0018 D4; P3c removed legacy fallbacks)."""
     path = root / GEAR_SOCKETS_REL
     if not path.is_file():
-        return {"right_hand_socket": {"hand_r"}, "off_hand_socket": {"hand_l"}}
+        return {"right_hand_socket": {"handslot.r"}, "off_hand_socket": {"handslot.l"}}
     sockets = load(path).get("default", {}).get("sockets", {})
     options: dict[str, set[str]] = {}
     for socket in HAND_SOCKETS:
-        entry = sockets.get(socket, {})
-        bones = {entry.get("bone", "")} | {entry.get("fallback", {}).get("bone", "")}
-        options[socket] = {b for b in bones if b}
+        bone = sockets.get(socket, {}).get("bone", "")
+        options[socket] = {bone} if bone else set()
     return options
 
 def sha256_of(path: Path) -> str:
@@ -243,8 +243,8 @@ def validate(root: Path, report: Report) -> None:
     characters = {aid: e for aid, e in assets.items() if e["type"] == "character"}
     if not characters:
         report.fail("character coverage", "no character asset declared")
-    # Hand mount bones come from gear_sockets (ADR-0018 D4): each weapon socket's kit `bone` or its
-    # legacy `fallback.bone` must be declared, so a rig without either can never mount weapons.
+    # Hand mount bones come from gear_sockets (ADR-0018 D4): each weapon socket's kit `bone` must be
+    # declared, so a rig without it can never mount weapons.
     hand_options = hand_mount_bone_options(root)
     for asset_id, entry in sorted(characters.items()):
         declared = set(entry.get("required_nodes", []))

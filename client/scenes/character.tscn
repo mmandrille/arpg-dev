@@ -1,21 +1,17 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=3 format=3]
 
-; Slice v3 player character (spec animate-and-react §5.1/§5.5). The rigged GLB is
-; instanced as "ModelRoot" (carries Skeleton3D with hand_r/hand_l bones).
-; character_visual.gd attaches hand sockets so equipped weapons ride the matching
-; arm. AnimationPlayer plays idle/walk/attack/off-hand attack from the committed
-; library; root_node targets ModelRoot so bone-pose tracks resolve.
-[ext_resource type="PackedScene" path="res://assets/characters/base_human/base_human.glb" id="1_glb"]
+; Hero visual. ModelRoot is the fallback kit hero (class_presentations fallback_class, ADR-0018
+; P3c); _apply_character_class_model swaps in the class model. character_visual.gd builds the gear
+; sockets on the kit skeleton and installs the kit clip library (kit_hero_presentation) on the
+; AnimationPlayer, whose root_node targets ModelRoot.
+[ext_resource type="PackedScene" path="res://assets/characters/kaykit/knight.glb" id="1_glb"]
 [ext_resource type="Script" path="res://scripts/character_visual.gd" id="2_script"]
-[ext_resource type="AnimationLibrary" path="res://animations/character_anims.tres" id="3_anims"]
 
 [node name="CharacterVisual" type="Node3D"]
 script = ExtResource("2_script")
 
 [node name="ModelRoot" parent="." instance=ExtResource("1_glb")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../ModelRoot")
-libraries = {
-"": ExtResource("3_anims")
-}

@@ -48,18 +48,7 @@
       "properties": {
         "bone": { "type": "string", "minLength": 1 },
         "offset": { "$ref": "#/$defs/vec3" },
-        "rotation_degrees": { "$ref": "#/$defs/vec3" },
-        "fallback": {
-          "description": "Used when `bone` is missing from the skeleton (legacy 17-bone rig).",
-          "type": "object",
-          "required": ["bone"],
-          "additionalProperties": false,
-          "properties": {
-            "bone": { "type": "string", "minLength": 1 },
-            "offset": { "$ref": "#/$defs/vec3" },
-            "rotation_degrees": { "$ref": "#/$defs/vec3" }
-          }
-        }
+        "rotation_degrees": { "$ref": "#/$defs/vec3" }
       }
     },
     "socket_entry": {

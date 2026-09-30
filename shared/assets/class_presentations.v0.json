@@ -1,35 +1,31 @@
 {
   "version": 0,
+  "fallback_class": "paladin",
   "classes": {
     "barbarian": {
       "icon": { "label": "B", "shape": "axe", "color": "#c85f3d", "accent": "#ffd9a8" },
       "model": { "asset_id": "kaykit_hero_barbarian_v0", "clip_profile": "kaykit_hero", "scale": 0.8 },
-      "idle_stance": { "scale": 1.04, "lean_degrees": -2.5 },
-      "body_tint": { "color": "#d07060", "strength": 0.14 }
+      "idle_stance": { "scale": 1.04, "lean_degrees": -2.5 }
     },
     "sorcerer": {
       "icon": { "label": "S", "shape": "spark", "color": "#5e8cff", "accent": "#dce7ff" },
       "model": { "asset_id": "kaykit_hero_mage_v0", "clip_profile": "kaykit_hero", "scale": 0.8 },
-      "idle_stance": { "scale": 0.98, "lean_degrees": 1.5 },
-      "body_tint": { "color": "#8888c8", "strength": 0.15 }
+      "idle_stance": { "scale": 0.98, "lean_degrees": 1.5 }
     },
     "paladin": {
       "icon": { "label": "P", "shape": "shield", "color": "#d9b44a", "accent": "#fff3ba" },
       "model": { "asset_id": "kaykit_hero_knight_v0", "clip_profile": "kaykit_hero", "scale": 0.8 },
-      "idle_stance": { "scale": 1.02, "lean_degrees": 0.0 },
-      "body_tint": { "color": "#c8a858", "strength": 0.12 }
+      "idle_stance": { "scale": 1.02, "lean_degrees": 0.0 }
     },
     "rogue": {
       "icon": { "label": "R", "shape": "dagger", "color": "#3f8f6d", "accent": "#d7f2df" },
       "model": { "asset_id": "kaykit_hero_rogue_v0", "clip_profile": "kaykit_hero", "scale": 0.8 },
-      "idle_stance": { "scale": 0.96, "lean_degrees": 4.0 },
-      "body_tint": { "color": "#585860", "strength": 0.20 }
+      "idle_stance": { "scale": 0.96, "lean_degrees": 4.0 }
     },
     "ranger": {
       "icon": { "label": "Ra", "shape": "bow", "color": "#2f8f4e", "accent": "#d6f2a8" },
       "model": { "asset_id": "kaykit_hero_ranger_v0", "clip_profile": "kaykit_hero", "scale": 0.8 },
-      "idle_stance": { "scale": 1.01, "lean_degrees": -3.5 },
-      "body_tint": { "color": "#78a068", "strength": 0.13 }
+      "idle_stance": { "scale": 1.01, "lean_degrees": -3.5 }
     }
   }
 }

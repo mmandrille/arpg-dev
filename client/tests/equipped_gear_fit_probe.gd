@@ -6,7 +6,6 @@ const CharacterScene := preload("res://scenes/character.tscn")
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
-const ClassBodyTintScript := preload("res://scripts/class_body_tint.gd")
 const GearSocketsLoaderScript := preload("res://scripts/gear_sockets_loader.gd")
 
 const CLASS_IDS := ["barbarian", "paladin", "rogue", "ranger", "sorcerer"]
@@ -111,11 +110,9 @@ func _verify_class(tree: SceneTree, class_id: String, fail: Callable) -> bool:
 			return false
 		if socket is BoneAttachment3D:
 			var attachment := socket as BoneAttachment3D
-			# Expected bone comes from gear_sockets (kit bone, or legacy fallback when the rig lacks it).
+			# Expected bone comes from gear_sockets (kit bone; ADR-0018 P3c removed legacy fallbacks).
 			var socket_entry: Dictionary = GearSocketsLoaderScript.sockets_for_class(class_id).get(socket_name, {})
 			var expected_bone := str(socket_entry.get("bone", ""))
-			if skel.find_bone(expected_bone) < 0 and typeof(socket_entry.get("fallback", null)) == TYPE_DICTIONARY:
-				expected_bone = str((socket_entry["fallback"] as Dictionary).get("bone", ""))
 			if expected_bone != "" and skel.get_bone_name(attachment.bone_idx) != expected_bone:
 				fail.call("%s socket %s bound to %s want %s" % [
 					class_id, socket_name, skel.get_bone_name(attachment.bone_idx), expected_bone,
@@ -214,4 +211,3 @@ func _apply_class_model(character: Node3D, class_id: String) -> void:
 		character.set("class_id", class_id)
 	if character.has_method("refresh_gear_sockets"):
 		character.call("refresh_gear_sockets")
-	ClassBodyTintScript.apply_to_model(model, class_id)

@@ -4,7 +4,6 @@ extends RefCounted
 const CharacterScene := preload("res://scenes/character.tscn")
 const EquipmentResolverScript := preload("res://scripts/equipment_visuals.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
-const ClassBodyTintScript := preload("res://scripts/class_body_tint.gd")
 const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
 
 # Default debug matrix: one class per column, distinct gear per class.
@@ -185,7 +184,6 @@ static func _apply_class_model(character: Node3D, class_id: String) -> void:
 		character.set("class_id", class_id)
 	if character.has_method("refresh_gear_sockets"):
 		character.call("refresh_gear_sockets")
-	ClassBodyTintScript.apply_to_model(model, class_id)
 
 
 static func _add_light(root: Node3D) -> void:

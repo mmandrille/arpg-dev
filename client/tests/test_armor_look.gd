@@ -6,7 +6,6 @@ const CharacterScene := preload("res://scenes/character.tscn")
 const ResolverScript := preload("res://scripts/equipment_visuals.gd")
 const ArmorLookScript := preload("res://scripts/armor_look.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
-const ClassBodyTintScript := preload("res://scripts/class_body_tint.gd")
 const ReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
 
 const CLASS_IDS := ["barbarian", "paladin", "rogue", "ranger", "sorcerer"]
@@ -80,7 +79,7 @@ func _test_tint_survives_hit_flash_and_regear() -> void:
 	var resolver = ResolverScript.new(hero)
 	resolver.set_character_class("paladin")
 	resolver.apply_snapshot(_snapshot({"chest": "full_plate", "boots": "boots"}))
-	var reaction = ReactionControllerScript.new(hero, ClassBodyTintScript.representative_color("paladin"))
+	var reaction = ReactionControllerScript.new(hero, Color.WHITE)
 	reaction.play_hit()
 	for i in 12:
 		await process_frame
@@ -125,7 +124,6 @@ func _hero(class_id: String) -> Node3D:
 		hero.set("class_id", class_id)
 	if hero.has_method("refresh_gear_sockets"):
 		hero.call("refresh_gear_sockets")
-	ClassBodyTintScript.apply_to_model(model, class_id)
 	await process_frame
 	return hero
 

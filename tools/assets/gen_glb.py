@@ -26,7 +26,6 @@ import math
 import struct
 from pathlib import Path
 
-from tools.assets.base_human_mesh import base_human_parts
 from tools.assets.geom_primitives import _smooth_shared_normals
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -308,114 +307,6 @@ def _build_skinned_glb(color, joints, parts, smooth_normals: bool = False):
     total = 12 + len(json_chunk) + len(bin_chunk)
     header = b"glTF" + struct.pack("<II", 2, total)
     return header + json_chunk + bin_chunk
-
-
-def _humanoid_glb(color, parts) -> bytes:
-    """Low-poly humanoid as a SKINNED rig.
-
-    Joints (translation-only bind): arm_r/arm_l pivot at the shoulders so attack
-    clips swing the correct arm; hand_r/hand_l are children of those arm joints
-    so BoneAttachment3D sockets ride the swing. leg_l/leg_r drive the walk clip.
-    """
-    joints = [
-        ("root", -1, (0.0, 0.0, 0.0)),     # 0
-        ("spine", 0, (0.0, 1.15, 0.0)),    # 1  global (0,1.15,0)
-        ("arm_l", 1, (-0.42, 0.35, 0.0)),  # 2  global (-0.42,1.5,0) = shoulder
-        ("hand_l", 2, (0.0, -0.68, 0.12)), # 3  global (-0.42,0.82,0.12) = hand
-        ("arm_r", 1, (0.42, 0.35, 0.0)),   # 4  global (0.42,1.5,0) = shoulder
-        ("hand_r", 4, (0.0, -0.68, 0.12)), # 5  global (0.42,0.82,0.12) = hand
-        ("leg_l", 0, (-0.16, 0.9, 0.0)),   # 6
-        ("leg_r", 0, (0.16, 0.9, 0.0)),    # 7
-    ]
-    return _build_skinned_glb(color, joints, parts)
-
-
-def base_humanoid_glb() -> bytes:
-    """Low-poly blue-grey humanoid (~1.9 m) as the generic fallback."""
-    return _humanoid_glb((0.55, 0.62, 0.72, 1.0), [
-        (1, (0.0, 1.15, 0.0), (0.5, 0.8, 0.3)),     # torso -> spine
-        (1, (0.0, 1.78, 0.0), (0.34, 0.34, 0.34)),  # head  -> spine
-        (2, (-0.42, 1.15, 0.0), (0.16, 0.72, 0.16)),# left arm -> arm_l
-        (4, (0.42, 1.15, 0.0), (0.16, 0.72, 0.16)), # right arm -> arm_r
-        (6, (-0.16, 0.45, 0.0), (0.2, 0.9, 0.2)),   # left leg -> leg_l
-        (7, (0.16, 0.45, 0.0), (0.2, 0.9, 0.2)),    # right leg -> leg_r
-    ])
-
-
-def _full_humanoid_glb(color, parts=None, extra_parts=None, smooth_normals: bool = False) -> bytes:
-    """17-bone humanoid — rest pose matches bind pose so bones sit inside mesh.
-
-    Bone local translations match the re-rigged base_human.glb (arm chain goes
-    from shoulder downward-inward; foot bones extend past the ankle).  Each
-    mesh part is centered at its controlling bone's world position so the
-    editor shows bones inside the mesh without any Blender work.
-
-    Bone index map (used by parts= and extra_parts):
-      0=root 1=spine 2=chest 3=neck 4=head
-      5=arm_l  6=elbow_l  7=hand_l
-      8=arm_r  9=elbow_r 10=hand_r
-     11=leg_l 12=knee_l 13=foot_l
-     14=leg_r 15=knee_r 16=foot_r
-    """
-    joints = [
-        # name        parent   local translation (matches re-rigged GLB)
-        ("root",       -1, ( 0.0,     0.0,     0.1588)),   # 0  world (0, 0, 0.159)
-        ("spine",        0, ( 0.0,     1.1327,  0.0   )),   # 1  world (0, 1.133, 0.159)
-        ("chest",        1, ( 0.0,     0.2068,  0.0   )),   # 2  world (0, 1.340, 0.159)
-        ("neck",         2, ( 0.0,     0.3349,  0.0   )),   # 3  world (0, 1.674, 0.159)
-        ("head",         3, ( 0.0,     0.1379,  0.0   )),   # 4  world (0, 1.812, 0.159)
-        ("arm_l",        2, (-0.3506,  0.1009, -0.129 )),   # 5  world (-0.351, 1.440, 0.030)
-        ("elbow_l",      5, ( 0.07,   -0.3099,  0.0099)),   # 6  world (-0.281, 1.131, 0.040)
-        ("hand_l",       6, ( 0.058,  -0.2539,  0.0079)),   # 7  world (-0.223, 0.877, 0.048)
-        ("arm_r",        2, ( 0.3506,  0.1009, -0.129 )),   # 8  world ( 0.351, 1.440, 0.030)
-        ("elbow_r",      8, (-0.07,   -0.3099,  0.0099)),   # 9  world ( 0.281, 1.131, 0.040)
-        ("hand_r",       9, (-0.058,  -0.2539,  0.0079)),   # 10 world ( 0.223, 0.877, 0.048)
-        ("leg_l",        0, (-0.1551,  0.8865,  0.0   )),   # 11 world (-0.155, 0.887, 0.159)
-        ("knee_l",      11, ( 0.0,    -0.394,   0.0   )),   # 12 world (-0.155, 0.493, 0.159)
-        ("foot_l",      12, (-0.077,  -0.454,  -0.054 )),   # 13 world (-0.232, 0.039, 0.105)
-        ("leg_r",        0, ( 0.1551,  0.8865,  0.0   )),   # 14 world ( 0.155, 0.887, 0.159)
-        ("knee_r",      14, ( 0.0,    -0.394,   0.0   )),   # 15 world ( 0.155, 0.493, 0.159)
-        ("foot_r",      15, ( 0.077,  -0.454,  -0.054 )),   # 16 world ( 0.232, 0.039, 0.105)
-    ]
-    _default_parts = [
-        # head
-        ( 4, ( 0.000,  1.762,  0.159), (0.26, 0.28, 0.26)),
-        # torso: upper (chest) + lower (spine)
-        ( 2, ( 0.000,  1.507,  0.159), (0.46, 0.33, 0.22)),
-        ( 1, ( 0.000,  1.236,  0.159), (0.38, 0.32, 0.18)),
-        # hips
-        ( 1, ( 0.000,  0.980,  0.159), (0.34, 0.18, 0.17)),
-        # right arm: upper (arm_r), forearm (elbow_r), hand (hand_r)
-        ( 8, ( 0.316,  1.285,  0.035), (0.09, 0.32, 0.09)),
-        ( 9, ( 0.252,  1.004,  0.044), (0.08, 0.26, 0.08)),
-        (10, ( 0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),
-        # left arm (mirrored X)
-        ( 5, (-0.316,  1.285,  0.035), (0.09, 0.32, 0.09)),
-        ( 6, (-0.252,  1.004,  0.044), (0.08, 0.26, 0.08)),
-        ( 7, (-0.223,  0.877,  0.048), (0.09, 0.10, 0.07)),
-        # right leg: upper (leg_r), lower (knee_r), foot (foot_r)
-        (14, ( 0.155,  0.690,  0.159), (0.13, 0.40, 0.13)),
-        (15, ( 0.194,  0.266,  0.132), (0.10, 0.46, 0.10)),
-        (16, ( 0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),
-        # left leg (mirrored X)
-        (11, (-0.155,  0.690,  0.159), (0.13, 0.40, 0.13)),
-        (12, (-0.194,  0.266,  0.132), (0.10, 0.46, 0.10)),
-        (13, (-0.232,  0.039,  0.105), (0.13, 0.07, 0.20)),
-    ]
-    if parts is None:
-        parts = _default_parts
-    if extra_parts:
-        parts = list(parts) + list(extra_parts)
-    return _build_skinned_glb(color, joints, parts, smooth_normals=smooth_normals)
-
-
-def base_human_glb() -> bytes:
-    """17-bone low-poly humanoid — anatomy pads, multi-bone weights, smooth normals."""
-    return _full_humanoid_glb(
-        (0.66, 0.36, 0.25, 1.0),
-        parts=base_human_parts(),
-        smooth_normals=True,
-    )
 
 
 def monster_dummy_glb() -> bytes:

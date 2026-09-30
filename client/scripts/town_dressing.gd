@@ -1,6 +1,6 @@
 ## Town look (ADR-0018, v491): a paved KayKit plaza around the town centre, a road to the gate, and
-## kit props grouped behind the services. Presentation only (the server
-## never sees these; tools/test_town_dressing.py keeps props clear of gameplay positions). Data:
+## kit props grouped behind the services; the ground detail (rim, edge, paths, scatter; v493) is
+## built by TownGroundDetail. Presentation only (the server never sees these; tools/test_town_dressing.py keeps props clear of gameplay positions). Data:
 ## shared/assets/town_presentation.v0.json -> center, gate_position, dressing.
 ##
 ## Everything sits under one root in town world space. The live ground plane is translated
@@ -11,10 +11,10 @@ extends RefCounted
 
 const LoaderScript := preload("res://scripts/town_presentation_loader.gd")
 const LibraryScript := preload("res://scripts/kit_piece_library.gd")
-const KitFloorScript := preload("res://scripts/dungeon_kit_floor.gd")
+const GroundDetailScript := preload("res://scripts/town_ground_detail.gd")
 
 const ROOT_NAME := "TownDressing"
-const PLAZA_NAME := "TownPlaza"
+const PLAZA_NAME := GroundDetailScript.PLAZA_NAME
 const PROP_PREFIX := "TownProp_"
 
 
@@ -39,9 +39,7 @@ static func build() -> Node3D:
 	root.name = ROOT_NAME
 	var cfg := LoaderScript.dressing()
 	if bool(cfg.get("enabled", false)):
-		var plaza := build_plaza(cfg.get("plaza", {}))
-		if plaza != null:
-			root.add_child(plaza)
+		root.add_child(GroundDetailScript.build(cfg))
 		var props: Array = cfg.get("props", [])
 		for i in props.size():
 			var node := _make_prop(props[i], i)
@@ -71,52 +69,7 @@ static func plaza_cells(plaza: Dictionary, tile_size: float) -> Array:
 
 
 static func in_plaza(p: Vector2, center: Vector2, gate: Vector2, radius: float, half_width: float) -> bool:
-	if p.distance_to(center) <= radius:
-		return true
-	var seg := gate - center
-	var t := clampf((p - center).dot(seg) / maxf(seg.length_squared(), 0.0001), 0.0, 1.0)
-	return p.distance_to(center + seg * t) <= half_width
-
-
-static func build_plaza(plaza: Dictionary) -> Node3D:
-	# Intact tiles only: the dungeon floor's broken variants have holes meant for a dark dungeon base.
-	var variants: Array = plaza.get("tile_variants", [])
-	if variants.is_empty():
-		return null
-	var ids: Array = []
-	var weights: Array = []
-	for v in variants:
-		ids.append(str((v as Dictionary).get("asset_id", "")))
-		weights.append(int((v as Dictionary).get("weight", 1)))
-	var scale := float(plaza.get("tile_scale", 1.0))
-	var base_box := LibraryScript.bounds(str(ids[0]))
-	var tile_size := maxf(base_box.size.x, base_box.size.z) * scale
-	var surface_y := float(plaza.get("surface_y", 0.0))
-	var per_variant: Array = []
-	for i in ids.size():
-		per_variant.append([])
-	for cell in plaza_cells(plaza, tile_size):
-		var choice := KitFloorScript.pick(cell, 0, weights)
-		(per_variant[choice.x] as Array).append(Vector3(cell.x, float(choice.y), cell.y))
-	var root := Node3D.new()
-	root.name = PLAZA_NAME
-	for i in ids.size():
-		var mesh := LibraryScript.mesh(str(ids[i]))
-		var placements: Array = per_variant[i]
-		if mesh == null or placements.is_empty():
-			continue
-		var box := mesh.get_aabb()
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = mesh
-		mm.instance_count = placements.size()
-		for j in placements.size():
-			mm.set_instance_transform(j, KitFloorScript.tile_transform(placements[j], box, base_box, surface_y, scale))
-		var instance := MultiMeshInstance3D.new()
-		instance.name = "%s_%s" % [PLAZA_NAME, str(ids[i])]
-		instance.multimesh = mm
-		root.add_child(instance)
-	return root
+	return p.distance_to(center) <= radius or GroundDetailScript.capsule_contains(p, center, gate, half_width)
 
 
 ## Prop node name: PROP_PREFIX + index + asset id (unique even when an asset repeats).

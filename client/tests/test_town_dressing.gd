@@ -20,6 +20,7 @@ func _test_sync_attaches_world_aligned_in_town_only() -> void:
 	var root := ground.find_child(TownDressing.ROOT_NAME, false, false) as Node3D
 	_assert_true("town ground has the dressing root", root != null)
 	if root != null:
+		_assert_true("dressing root holds the ground detail", root.find_child(TownGroundDetail.ROOT_NAME, false, false) != null)
 		_assert_true("dressing root cancels the ground offset", (ground.position + root.position).is_equal_approx(Vector3.ZERO))
 		var props: Array = TownPresentationLoader.dressing().get("props", [])
 		var first: Dictionary = props[0]

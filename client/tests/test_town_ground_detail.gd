@@ -18,6 +18,7 @@ func _initialize() -> void:
 	_test_scatter_avoids_anchors_and_props(dressing, frame)
 	_test_scatter_is_deterministic_and_data_driven(dressing, frame)
 	_test_rock_transform_seats_on_the_surface()
+	_test_build_creates_layer_nodes(dressing)
 	_finish()
 
 
@@ -294,6 +295,40 @@ func _assert_true(label: String, value: bool) -> void:
 		return
 	_fail_count += 1
 	printerr("[gdtest] FAIL %s" % label)
+
+
+func _instance_total(layer: Node) -> int:
+	var total := 0
+	for child in layer.get_children():
+		var mmi := child as MultiMeshInstance3D
+		if mmi != null:
+			total += mmi.multimesh.instance_count
+	return total
+
+
+func _test_build_creates_layer_nodes(dressing: Dictionary) -> void:
+	var frame := TownGroundDetail.frame(dressing)
+	var lay := TownGroundDetail.layers(dressing, frame)
+	var root := TownGroundDetail.build(dressing)
+	_assert_true("build returns the ground root", root != null and root.name == TownGroundDetail.ROOT_NAME)
+	for pair in [[TownGroundDetail.PLAZA_NAME, "core"], [TownGroundDetail.RIM_NAME, "rim"], [TownGroundDetail.EDGE_NAME, "edge"]]:
+		var layer := root.find_child(pair[0], false, false)
+		_assert_true("%s layer exists" % pair[0], layer != null)
+		if layer != null:
+			_assert_true("%s holds one instance per planned cell" % pair[0], _instance_total(layer) == (lay[pair[1]] as Array).size())
+	var scat := root.find_child(TownGroundDetail.SCATTER_NAME, false, false)
+	_assert_true("scatter layer exists", scat != null)
+	if scat != null:
+		_assert_true("scatter holds one instance per placement", _instance_total(scat) == TownGroundDetail.scatter(dressing, frame).size())
+	var disabled := dressing.duplicate(true)
+	var disabled_scatter: Dictionary = disabled["scatter"]
+	var disabled_edge: Dictionary = disabled["edge"]
+	disabled_scatter["enabled"] = false
+	disabled_edge["enabled"] = false
+	var quiet := TownGroundDetail.build(disabled)
+	_assert_true("disabled layers are not built", quiet.find_child(TownGroundDetail.SCATTER_NAME, false, false) == null and quiet.find_child(TownGroundDetail.EDGE_NAME, false, false) == null)
+	quiet.free()
+	root.free()
 
 
 func _finish() -> void:

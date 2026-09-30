@@ -4,7 +4,7 @@
 ##
 ## Planning functions are pure (data in, cells/placements out) so they are unit-testable without a
 ## scene. Placement uses hash() only (same scheme as DungeonKitFloor.pick) so every client renders
-## the same town.
+## the same town. The builders at the bottom turn a plan into MultiMeshes.
 class_name TownGroundDetail
 extends RefCounted
 
@@ -263,3 +263,102 @@ static func rock_transform(pos: Vector2, yaw_degrees: float, scale: float, box: 
 	var c := box.get_center()
 	var origin := Vector3(pos.x, surface_y - box.position.y * scale, pos.y) - basis * Vector3(c.x, 0.0, c.z)
 	return Transform3D(basis, origin)
+
+
+## The whole ground detail under one node, in town world space (x, z = town x, y).
+static func build(dressing: Dictionary) -> Node3D:
+	var root := Node3D.new()
+	root.name = ROOT_NAME
+	var frame_data := frame(dressing)
+	if float(frame_data["tile"]) <= 0.0:
+		return root
+	var plaza: Dictionary = dressing.get("plaza", {})
+	var scale := float(plaza.get("tile_scale", 1.0))
+	var base_id := str(((plaza.get("tile_variants", []) as Array)[0] as Dictionary).get("asset_id", ""))
+	var base_box := LibraryScript.bounds(base_id)
+	var lay := layers(dressing, frame_data)
+	var rim_cfg: Dictionary = plaza.get("rim", {})
+	var edge_cfg: Dictionary = dressing.get("edge", {})
+	var plaza_y := float(plaza.get("surface_y", 0.0))
+	_add(root, _tile_layer(PLAZA_NAME, lay[LAYER_CORE], plaza.get("tile_variants", []), base_box, scale, plaza_y, SALT_CORE))
+	_add(root, _tile_layer(RIM_NAME, lay[LAYER_RIM], rim_cfg.get("tile_variants", []), base_box, scale, plaza_y, SALT_RIM))
+	_add(root, _tile_layer(EDGE_NAME, lay[LAYER_EDGE], edge_cfg.get("tile_variants", []), base_box, scale, float(edge_cfg.get("surface_y", plaza_y)), SALT_EDGE))
+	_add(root, _scatter_layer(dressing, frame_data, base_box))
+	return root
+
+
+static func _add(root: Node3D, layer: Node3D) -> void:
+	if layer != null:
+		root.add_child(layer)
+
+
+static func _multimesh_instance(node_name: String, mesh: Mesh, transforms: Array) -> MultiMeshInstance3D:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
+	mm.instance_count = transforms.size()
+	for i in transforms.size():
+		mm.set_instance_transform(i, transforms[i])
+	var instance := MultiMeshInstance3D.new()
+	instance.name = node_name
+	instance.multimesh = mm
+	return instance
+
+
+## One MultiMesh per variant; the variant and quarter-turn come from DungeonKitFloor.pick(cell, salt).
+static func _tile_layer(layer_name: String, cells: Array, variants: Array, base_box: AABB, scale: float, surface_y: float, salt: int) -> Node3D:
+	if cells.is_empty() or variants.is_empty():
+		return null
+	var ids: Array = []
+	var weights: Array = []
+	var per_variant: Array = []
+	for v in variants:
+		ids.append(str((v as Dictionary).get("asset_id", "")))
+		weights.append(int((v as Dictionary).get("weight", 1)))
+		per_variant.append([])
+	for cell in cells:
+		var choice := KitFloorScript.pick(cell, salt, weights)
+		(per_variant[choice.x] as Array).append(Vector3(cell.x, float(choice.y), cell.y))
+	var layer := Node3D.new()
+	layer.name = layer_name
+	for i in ids.size():
+		var mesh := LibraryScript.mesh(str(ids[i]))
+		var placements: Array = per_variant[i]
+		if mesh == null or placements.is_empty():
+			continue
+		var box := mesh.get_aabb()
+		var transforms: Array = []
+		for cell3 in placements:
+			transforms.append(KitFloorScript.tile_transform(cell3, box, base_box, surface_y, scale))
+		layer.add_child(_multimesh_instance("%s_%s" % [layer_name, str(ids[i])], mesh, transforms))
+	return layer
+
+
+## Patches are seated like tiles (quarter turns, top on the plain tile's slab); rocks rest on the surface.
+static func _scatter_layer(dressing: Dictionary, frame_data: Dictionary, base_box: AABB) -> Node3D:
+	var placements := scatter(dressing, frame_data)
+	if placements.is_empty():
+		return null
+	var surface_y := float((dressing.get("scatter", {}) as Dictionary).get("surface_y", 0.0))
+	var by_asset := {}
+	for p in placements:
+		var id := str(p["asset_id"])
+		if not by_asset.has(id):
+			by_asset[id] = []
+		(by_asset[id] as Array).append(p)
+	var layer := Node3D.new()
+	layer.name = SCATTER_NAME
+	for id in by_asset:
+		var mesh := LibraryScript.mesh(str(id))
+		if mesh == null:
+			continue
+		var box := mesh.get_aabb()
+		var transforms: Array = []
+		for p in by_asset[id]:
+			var pos: Vector2 = p["position"]
+			if str(p["kind"]) == "patch":
+				transforms.append(KitFloorScript.tile_transform(Vector3(pos.x, float(p["yaw_quarter"]), pos.y), box, base_box, surface_y, float(p["scale"])))
+			else:
+				transforms.append(rock_transform(pos, float(p["yaw_degrees"]), float(p["scale"]), box, surface_y))
+		layer.add_child(_multimesh_instance("%s_%s" % [SCATTER_NAME, str(id)], mesh, transforms))
+	return layer

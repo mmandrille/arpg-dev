@@ -79,7 +79,7 @@ func TestFanoutLevelTravelScopesDepartureAndArrival(t *testing.T) {
 			FromLevel: &fromLevel,
 			ToLevel:   &toLevel,
 		}},
-	}, clients, nil, map[uint64]int{
+	}, clients, map[uint64]int{
 		hostID:  fromLevel,
 		guestID: toLevel,
 	})
@@ -115,7 +115,7 @@ func TestFanoutLevelTravelScopesDepartureAndArrival(t *testing.T) {
 				Position: game.Vec2{X: 4, Y: 4},
 			},
 		}},
-	}, clients, nil, map[uint64]int{
+	}, clients, map[uint64]int{
 		hostID:  fromLevel,
 		guestID: toLevel,
 	})
@@ -290,7 +290,7 @@ func TestGoldPickupDeltasUseExplicitOwner(t *testing.T) {
 		sess: store.Session{ID: "sess_gold_fanout"},
 		sim:  sim,
 	}
-	loop.fanoutResult(result, []*loopClient{host, guest}, nil, map[uint64]int{
+	loop.fanoutResult(result, []*loopClient{host, guest}, map[uint64]int{
 		hostID:  0,
 		guestID: 0,
 	})
@@ -697,7 +697,7 @@ func TestFanoutTickResultsCoalescesSameTickDeltas(t *testing.T) {
 			Events:  []game.Event{{EventType: "experience_gained", EntityID: idStr(playerID)}},
 		},
 	}
-	loop.fanoutTickResults(results, []*loopClient{client}, nil, map[uint64]int{playerID: 0})
+	loop.fanoutTickResults(results, []*loopClient{client}, map[uint64]int{playerID: 0})
 	delta := mustReceiveDelta(t, client)
 	if len(delta.Changes) != 2 {
 		t.Fatalf("coalesced changes = %d, want 2", len(delta.Changes))

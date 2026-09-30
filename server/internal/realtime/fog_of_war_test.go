@@ -22,7 +22,7 @@ func TestFogOfWarFanoutSuppressesFarMonsterDeltas(t *testing.T) {
 			Entity: &monster,
 		}},
 		Events: []game.Event{{EventType: "monster_aggro", EntityID: monster.ID}},
-	}, []*loopClient{host}, nil, map[uint64]int{hostID: 0})
+	}, []*loopClient{host}, map[uint64]int{hostID: 0})
 
 	assertNoEnvelope(t, host)
 }
@@ -42,7 +42,7 @@ func TestFogOfWarFanoutKeepsNearMonsterDeltas(t *testing.T) {
 			Entity: &monster,
 		}},
 		Events: []game.Event{{EventType: "monster_aggro", EntityID: monster.ID}},
-	}, []*loopClient{host}, nil, map[uint64]int{hostID: 0})
+	}, []*loopClient{host}, map[uint64]int{hostID: 0})
 
 	delta := mustReceiveDelta(t, host)
 	if len(delta.Changes) != 1 || delta.Changes[0].Entity == nil || delta.Changes[0].Entity.ID != monster.ID {

@@ -27,20 +27,20 @@ func mergeStateDeltaPayload(dst, src *stateDeltaPayload) {
 	}
 }
 
-func (l *sessionLoop) fanoutTickResults(results []game.TickResult, clients []*loopClient, inputTypes map[string]string, levelsByPlayerID map[uint64]int) {
+func (l *sessionLoop) fanoutTickResults(results []game.TickResult, clients []*loopClient, levelsByPlayerID map[uint64]int) {
 	batches := make(map[*loopClient]*clientFanoutBatch, len(clients))
 	for _, client := range clients {
 		batches[client] = newClientFanoutBatch()
 	}
 	for _, res := range results {
-		l.accumulateFanoutResults(res, clients, inputTypes, levelsByPlayerID, batches)
+		l.accumulateFanoutResults(res, clients, levelsByPlayerID, batches)
 	}
 	for client, batch := range batches {
 		l.flushClientFanoutBatch(client, batch)
 	}
 }
 
-func (l *sessionLoop) accumulateFanoutResults(res game.TickResult, clients []*loopClient, inputTypes map[string]string, levelsByPlayerID map[uint64]int, batches map[*loopClient]*clientFanoutBatch) {
+func (l *sessionLoop) accumulateFanoutResults(res game.TickResult, clients []*loopClient, levelsByPlayerID map[uint64]int, batches map[*loopClient]*clientFanoutBatch) {
 	for _, client := range clients {
 		level, ok := levelsByPlayerID[client.playerID]
 		if !ok {
@@ -53,7 +53,6 @@ func (l *sessionLoop) accumulateFanoutResults(res game.TickResult, clients []*lo
 		for _, ack := range res.Acks {
 			if res.ActorPlayerID == client.playerID {
 				batch.acks = append(batch.acks, intentAcceptedPayload{AcceptedMessageID: ack.MessageID, ServerTick: res.Tick})
-				_ = inputTypes
 			}
 		}
 		for _, rej := range res.Rejects {

@@ -395,7 +395,7 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 	}
 }
 
-func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, inputTypes map[string]string, levelsByPlayerID map[uint64]int) {
+func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, levelsByPlayerID map[uint64]int) {
 	for _, client := range clients {
 		level, ok := levelsByPlayerID[client.playerID]
 		if !ok {
@@ -404,9 +404,6 @@ func (l *sessionLoop) fanoutResult(res game.TickResult, clients []*loopClient, i
 		for _, ack := range res.Acks {
 			if res.ActorPlayerID == client.playerID {
 				client.enqueue(l.acceptedEnvelope(ack.MessageID, res.Tick, ""))
-				if isInventoryIntentType(inputTypes[ack.MessageID]) {
-					_ = inputTypes
-				}
 			}
 		}
 		for _, rej := range res.Rejects {

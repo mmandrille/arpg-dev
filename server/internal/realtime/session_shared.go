@@ -2,7 +2,6 @@ package realtime
 
 import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
-	"github.com/mmandrille_meli/arpg-dev/server/internal/inputdecode"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
@@ -58,10 +57,6 @@ func less(a, b game.Input) bool {
 	}
 
 	return a.MessageID < b.MessageID
-}
-
-func isInventoryIntentType(t string) bool {
-	return t == inputdecode.TypeEquip || t == inputdecode.TypeUnequip || t == inputdecode.TypeDrop || t == inputdecode.TypeUse
 }
 
 func inventoryPayloadSummary(in game.Input) map[string]string {

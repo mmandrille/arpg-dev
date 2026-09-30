@@ -13,10 +13,6 @@ func (l *sessionLoop) doTick() {
 	l.flushDeferredPersist()
 	tick := l.sim.CurrentTick()
 	inputs := l.buffer[tick]
-	inputTypes := make(map[string]string, len(inputs))
-	for _, in := range inputs {
-		inputTypes[in.MessageID] = in.Type
-	}
 	delete(l.buffer, tick)
 	sortInputs(inputs)
 	simStart := time.Now()
@@ -64,7 +60,7 @@ func (l *sessionLoop) doTick() {
 		persistDuration += time.Since(persistStart)
 	}
 	broadcastStart := time.Now()
-	l.fanoutTickResults(results, clients, inputTypes, levelsByPlayerID)
+	l.fanoutTickResults(results, clients, levelsByPlayerID)
 	broadcastDuration = time.Since(broadcastStart)
 	totalDuration := time.Since(start)
 	guardrail := evaluateTickGuardrail(totalDuration)

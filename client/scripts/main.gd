@@ -1003,7 +1003,6 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 		player_anchor.position = Vector3.ZERO
 		_movement_visual_smoothing.reset(player_anchor, character_visual)
 		_entity_tick_smoothing.player_smoothing().reset(player_anchor.position)
-	_entity_tick_smoothing.player_smoothing().reset(player_anchor.position)
 	_player_movement_feel.reset()
 	if player_anim != null:
 		player_anim.reset_terminal()
@@ -2677,7 +2676,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.pressed and not event.echo and _is_escape_key(event):
 		_handle_escape()
-		get_viewport().set_input_as_handled()
+		_consume_input()
 		return
 	if event is InputEventKey and _input_locked() and not _bot_allows_panel_toggle_key(event) and not _allows_skill_function_key_while_panel_open(event):
 		return
@@ -2688,26 +2687,26 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and not event.echo and _is_force_stand_key(event):
 		if event.pressed:
 			_begin_force_stand()
-		get_viewport().set_input_as_handled()
+		_consume_input()
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var skill_key_slot := _skill_function_key_slot(event)
 		if skill_key_slot >= 0:
 			if _handle_skill_function_key(skill_key_slot):
-				get_viewport().set_input_as_handled()
+				_consume_input()
 				return
 		var hotbar_slot := _hotbar_slot_for_key(event)
 		if hotbar_slot >= 0:
 			if consumable_bar != null:
 				consumable_bar.use_slot(hotbar_slot)
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if _is_inventory_key(event):
 			if inventory_panel != null:
 				_close_gameplay_panels("inventory")
 				inventory_panel.toggle()
 				_raise_gameplay_windows()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if _is_character_stats_key(event):
 			if character_stats_panel != null:
@@ -2715,7 +2714,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				character_stats_panel.toggle()
 				_refresh_progression_ui()
 				_raise_gameplay_windows()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if _is_skills_key(event):
 			if skills_panel != null:
@@ -2723,7 +2722,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				skills_panel.toggle()
 				_refresh_skill_ui()
 				_raise_gameplay_windows()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if _is_quest_journal_key(event):
 			if quest_journal_panel != null:
@@ -2731,25 +2730,25 @@ func _unhandled_input(event: InputEvent) -> void:
 				_sync_quest_journal()
 				quest_journal_panel.toggle()
 				_raise_gameplay_windows()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if event.keycode == KEY_TAB or event.physical_keycode == KEY_TAB:
 			if discovery_minimap != null: discovery_minimap.cycle_display_mode(); _sync_discovery_minimap()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if _is_character_info_key(event):
 			_toggle_character_info_panel()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if _is_skill_slot_key(event):
 			if skill_bar != null:
 				skill_bar.use_slot()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if (event as InputEventKey).keycode == KEY_R:
 			if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
 				client.send("swap_weapon_set_intent", last_server_tick, {})
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if (event as InputEventKey).keycode == KEY_L:
 			_loot_filter.cycle()
@@ -2757,36 +2756,36 @@ func _unhandled_input(event: InputEvent) -> void:
 				client_settings.set_loot_filter_mode(_loot_filter.mode_label())
 			_refresh_loot_label_visibility()
 			_update_level_hud()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 		if _is_camera_cycle_key(event) and not _menu_blocks_gameplay_input():
 			if client_settings != null: _on_camera_mode_selected(client_settings.cycle_camera_mode())
-			get_viewport().set_input_as_handled(); return
+			_consume_input(); return
 		if _is_use_key(event) and not _menu_blocks_gameplay_input():
 			if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0 and _perspective_mode_active():
 				if _try_use_locked_target():
-					get_viewport().set_input_as_handled()
+					_consume_input()
 					return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and client_settings != null and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC:
 		if _camera_controller != null: _camera_controller.apply_mouse_motion((event as InputEventMouseMotion).relative)
-		get_viewport().set_input_as_handled()
+		_consume_input()
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				if client != null and client.ready_state() == WebSocketPeer.STATE_OPEN and player_hp > 0:
 					if _perspective_mode_active():
 						_dispatch_perspective_directional_attack()
-						get_viewport().set_input_as_handled(); return
+						_consume_input(); return
 					if _is_force_stand_held():
 						_start_directional_attack_hold()
-						get_viewport().set_input_as_handled()
+						_consume_input()
 						return
 					var pick := _resolve_click_at_mouse()
 					_sustained_click.begin_from_pick(pick)
 					_execute_click_pick(pick)
 			MOUSE_BUTTON_RIGHT:
 				if _try_use_right_click_skill():
-					get_viewport().set_input_as_handled()
+					_consume_input()
 					return
 			MOUSE_BUTTON_WHEEL_UP:
 				if _camera_controller != null: _camera_controller.adjust_zoom(-ClientConstants.CAMERA_ZOOM_STEP)
@@ -2795,7 +2794,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			_stop_active_channel_skill()
-			get_viewport().set_input_as_handled()
+			_consume_input()
 			return
 func _handle_input(delta: float) -> void:
 	if _crosshair_target != null:
@@ -6703,6 +6702,10 @@ func _update_debug() -> void:
 		lines.append(PerformanceStatusFormatterScript.format_status(fps, _last_ping_ms, ws_state, last_server_tick, current_level, last_performance_status))
 	_level_label.visible = lines.size() > 0
 	_level_label.text = "\n".join(lines)
+# Null-safe: headless unit tests drive _unhandled_input on a main outside the scene tree.
+func _consume_input() -> void:
+	var viewport := get_viewport()
+	if viewport != null: viewport.set_input_as_handled()
 func _debug(msg: String) -> void:
 	print("[client] ", msg)
 func _env(key: String, fallback: String) -> String:

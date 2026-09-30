@@ -118,6 +118,17 @@ run_gate() {
     return 0
   fi
 
+  # In headless --script mode a GDScript runtime error aborts only the current
+  # function: every assertion after it silently disappears while the PASS sentinel
+  # still prints. Any SCRIPT ERROR / Parse Error in the gate log fails the gate.
+  if grep -qE -- "SCRIPT ERROR|Parse Error" "$gate_log"; then
+    echo "FAILED: $label (GDScript runtime/parse error in log, elapsed=${elapsed}s)"
+    show_log "$gate_log" "$label"
+    FAILED_GATES+=("$label")
+    rm -f "$gate_log"
+    return 0
+  fi
+
   if is_quiet_mode; then
     echo "OK: $label (${elapsed}s)"
   else
@@ -160,6 +171,7 @@ run_gate "GDScript item requirement views test" "[gdtest] PASS: test_item_requir
 run_gate "GDScript skill bonus tooltip test" "[gdtest] PASS: test_skill_bonus_tooltip" res://tests/test_skill_bonus_tooltip.gd
 run_gate "GDScript skill synergy tooltip test" "[gdtest] PASS: test_skill_synergy_tooltip" res://tests/test_skill_synergy_tooltip.gd
 run_gate "GDScript skill mechanic tooltip test" "[gdtest] PASS: test_skill_mechanic_tooltip" res://tests/test_skill_mechanic_tooltip.gd
+run_gate "GDScript weapon range tooltip test" "[gdtest] PASS: test_weapon_range_tooltip" res://tests/test_weapon_range_tooltip.gd
 run_gate "GDScript projectile visual test" "[gdtest] PASS: test_projectile_visuals" res://tests/test_projectile_visuals.gd
 
 # 2b. Rig gate: both GLBs import as skinned Skeleton3D (spec §10 fail-fast).
@@ -183,6 +195,7 @@ run_gate "GDScript rogue presentation test" "[gdtest] PASS: test_rogue_presentat
 run_gate "GDScript waypoint panel test" "[gdtest] PASS: test_waypoint_panel" res://tests/test_waypoint_panel.gd
 run_gate "GDScript quest/elite objective state test" "[gdtest] PASS: test_quest_elite_objective_state" res://tests/test_quest_elite_objective_state.gd
 run_gate "GDScript quest journal panel test" "[gdtest] PASS: test_quest_journal_panel" res://tests/test_quest_journal_panel.gd
+run_gate "GDScript quest steward presentation test" "[gdtest] PASS: test_quest_steward_presentation" res://tests/test_quest_steward_presentation.gd
 run_gate "GDScript elite objective tracker test" "[gdtest] PASS: test_elite_objective_tracker" res://tests/test_elite_objective_tracker.gd
 run_gate "GDScript discovery minimap test" "[gdtest] PASS: test_discovery_minimap" res://tests/test_discovery_minimap.gd
 

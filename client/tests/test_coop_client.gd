@@ -502,17 +502,18 @@ func _test_client_settings_language_persistence() -> void:
 
 func _test_status_text_toggle_hides_performance_status_not_level_hud() -> void:
 	var main = _make_main()
-	main._debug_label = Label.new()
 	main._level_label = Label.new()
 	main.client_settings = ClientSettingsScript.new()
-	main.client_settings.status_text = false
 	main.current_level = -3
+	main.client_settings.status_text = true
 	main._update_level_hud()
 	main._update_debug()
-	_assert_true("status text off hides performance status label", not main._debug_label.visible)
+	_assert_true("status text on shows performance status", "Performance Status" in main._level_label.text)
+	main.client_settings.status_text = false
+	main._update_debug()
+	_assert_true("status text off hides performance status", not ("Performance Status" in main._level_label.text))
 	_assert_true("status text off keeps right level visible", main._level_label.visible)
 	_assert_true("right level still shows dungeon depth", main._level_label.text.begins_with("Level 3"))
-	main._debug_label.free()
 	main._level_label.free()
 	main.player_anchor.queue_free()
 	main.entities_root.queue_free()

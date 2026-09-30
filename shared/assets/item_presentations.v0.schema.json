@@ -4,7 +4,11 @@
   "title": "Item presentation metadata (v0)",
   "description": "Client rendering hints only: family icons and ground-loot presentation. Carries NO gameplay stats.",
   "type": "object",
-  "required": ["version", "families", "items"],
+  "required": [
+    "version",
+    "families",
+    "items"
+  ],
   "additionalProperties": false,
   "$defs": {
     "hexColor": {
@@ -13,48 +17,170 @@
     },
     "iconShape": {
       "type": "string",
-      "enum": ["blade", "greatsword", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "coin", "badge", "leaf", "potion", "box", "axe", "hammer", "mace", "spear", "halberd"]
+      "enum": [
+        "blade",
+        "greatsword",
+        "staff",
+        "bow",
+        "shield",
+        "helm",
+        "chest",
+        "gloves",
+        "belt",
+        "boots",
+        "ring",
+        "amulet",
+        "coin",
+        "badge",
+        "leaf",
+        "potion",
+        "box",
+        "axe",
+        "hammer",
+        "mace",
+        "spear",
+        "halberd"
+      ]
     },
     "groundShape": {
       "type": "string",
-      "enum": ["blade", "greatsword", "staff", "bow", "shield", "helm", "chest", "gloves", "belt", "boots", "ring", "amulet", "coin", "badge", "leaf", "potion", "box", "axe", "hammer", "mace", "spear", "halberd"]
+      "enum": [
+        "blade",
+        "greatsword",
+        "staff",
+        "bow",
+        "shield",
+        "helm",
+        "chest",
+        "gloves",
+        "belt",
+        "boots",
+        "ring",
+        "amulet",
+        "coin",
+        "badge",
+        "leaf",
+        "potion",
+        "box",
+        "axe",
+        "hammer",
+        "mace",
+        "spear",
+        "halberd"
+      ]
     }
   },
   "properties": {
-    "version": { "const": 0 },
+    "version": {
+      "const": 0
+    },
     "families": {
       "type": "object",
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["icon", "ground"],
+        "required": [
+          "icon",
+          "ground"
+        ],
         "additionalProperties": false,
         "properties": {
           "icon": {
             "type": "object",
-            "required": ["shape", "color", "accent", "label"],
+            "required": [
+              "shape",
+              "color",
+              "accent",
+              "label"
+            ],
             "additionalProperties": false,
             "properties": {
-              "shape": { "$ref": "#/$defs/iconShape" },
-              "color": { "$ref": "#/$defs/hexColor" },
-              "accent": { "$ref": "#/$defs/hexColor" },
-              "label": { "type": "string", "minLength": 1, "maxLength": 3 }
+              "shape": {
+                "$ref": "#/$defs/iconShape"
+              },
+              "color": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "accent": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 3
+              }
             }
           },
           "ground": {
             "type": "object",
-            "required": ["shape", "color", "accent", "scale"],
+            "required": [
+              "shape",
+              "color",
+              "accent",
+              "scale"
+            ],
             "additionalProperties": false,
             "properties": {
-              "shape": { "$ref": "#/$defs/groundShape" },
-              "color": { "$ref": "#/$defs/hexColor" },
-              "accent": { "$ref": "#/$defs/hexColor" },
-              "scale": { "type": "number", "exclusiveMinimum": 0 }
+              "shape": {
+                "$ref": "#/$defs/groundShape"
+              },
+              "color": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "accent": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "scale": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
             }
           },
           "3d_model": {
             "type": "string",
             "minLength": 1
+          },
+          "ground_tint": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "color",
+              "strength"
+            ],
+            "description": "v490: colour a textured ground model through the material detail layer (lerp toward color at strength) instead of the flat rarity tint.",
+            "properties": {
+              "color": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "strength": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "ground_model_tiers": {
+            "type": "array",
+            "minItems": 1,
+            "description": "v490: amount-based ground models (gold). The highest tier whose min_amount <= the drop amount wins; below the first tier the primitive shape is used.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "min_amount",
+                "asset_id"
+              ],
+              "properties": {
+                "min_amount": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "asset_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
           }
         }
       }
@@ -63,30 +189,64 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["family"],
+        "required": [
+          "family"
+        ],
         "additionalProperties": false,
         "properties": {
-          "family": { "type": "string", "minLength": 1 },
+          "family": {
+            "type": "string",
+            "minLength": 1
+          },
           "icon": {
             "type": "object",
-            "required": ["shape", "color", "accent", "label"],
+            "required": [
+              "shape",
+              "color",
+              "accent",
+              "label"
+            ],
             "additionalProperties": false,
             "properties": {
-              "shape": { "$ref": "#/$defs/iconShape" },
-              "color": { "$ref": "#/$defs/hexColor" },
-              "accent": { "$ref": "#/$defs/hexColor" },
-              "label": { "type": "string", "minLength": 1, "maxLength": 3 }
+              "shape": {
+                "$ref": "#/$defs/iconShape"
+              },
+              "color": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "accent": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 3
+              }
             }
           },
           "ground": {
             "type": "object",
-            "required": ["shape", "color", "accent", "scale"],
+            "required": [
+              "shape",
+              "color",
+              "accent",
+              "scale"
+            ],
             "additionalProperties": false,
             "properties": {
-              "shape": { "$ref": "#/$defs/groundShape" },
-              "color": { "$ref": "#/$defs/hexColor" },
-              "accent": { "$ref": "#/$defs/hexColor" },
-              "scale": { "type": "number", "exclusiveMinimum": 0 }
+              "shape": {
+                "$ref": "#/$defs/groundShape"
+              },
+              "color": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "accent": {
+                "$ref": "#/$defs/hexColor"
+              },
+              "scale": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
             }
           },
           "3d_model": {

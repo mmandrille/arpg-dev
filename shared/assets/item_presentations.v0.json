@@ -300,7 +300,13 @@
         "color": "#d5a928",
         "accent": "#fff0a6",
         "scale": 0.9
-      }
+      },
+      "ground_model_tiers": [
+        { "min_amount": 1, "asset_id": "kaykit_dungeon_coin_v0" },
+        { "min_amount": 20, "asset_id": "kaykit_dungeon_coin_stack_small_v0" },
+        { "min_amount": 100, "asset_id": "kaykit_dungeon_coin_stack_medium_v0" },
+        { "min_amount": 500, "asset_id": "kaykit_dungeon_coin_stack_large_v0" }
+      ]
     },
     "quest": {
       "icon": {
@@ -328,7 +334,9 @@
         "color": "#d63b32",
         "accent": "#ffd3c9",
         "scale": 0.9
-      }
+      },
+      "3d_model": "kaykit_dungeon_bottle_a_labeled_brown_v0",
+      "ground_tint": { "color": "#d63b32", "strength": 0.65 }
     },
     "mana_potion": {
       "icon": {
@@ -342,7 +350,9 @@
         "color": "#42b9e8",
         "accent": "#d8f7ff",
         "scale": 0.9
-      }
+      },
+      "3d_model": "kaykit_dungeon_bottle_b_brown_v0",
+      "ground_tint": { "color": "#42b9e8", "strength": 0.8 }
     },
     "rejuv_potion": {
       "icon": {
@@ -356,7 +366,9 @@
         "color": "#9b59f5",
         "accent": "#ead9ff",
         "scale": 0.9
-      }
+      },
+      "3d_model": "kaykit_dungeon_bottle_c_brown_v0",
+      "ground_tint": { "color": "#9b59f5", "strength": 0.65 }
     },
     "badge": {
       "icon": {

@@ -28,7 +28,7 @@ func make_loot_node(e: Dictionary) -> Node3D:
 	var scale := float(ground.get("scale", 1.0))
 	var rarity := str(e.get("rarity", "common"))
 	add_loot_rarity_glow(root, rarity, scale)
-	var model := make_ground_equipment_model(item_def_id, str(e.get("rarity", "common")))
+	var model := make_ground_equipment_model(item_def_id, str(e.get("rarity", "common")), int(e.get("amount", 0)))
 	if model != null:
 		root.add_child(model)
 	else:
@@ -92,16 +92,25 @@ func add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color
 			add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
 
 ## v487: hand items (main_hand/off_hand) lie on the ground as the kit model the hero wields
-## (item_visuals.v0.json); other equipment falls back to its presentation family `3d_model`.
-func ground_model_asset_id(item_def_id: String) -> String:
+## (item_visuals.v0.json). v490: amount-tiered families (gold) pick the highest
+## `ground_model_tiers` entry whose min_amount <= amount (none below the first tier). Everything
+## else falls back to its presentation family `3d_model`.
+func ground_model_asset_id(item_def_id: String, amount: int = 0) -> String:
 	var hand_asset := ItemVisualsLoader.hand_asset_id(item_def_id)
 	if hand_asset != "":
 		return hand_asset
 	var presentation: Dictionary = item_presentations.get(item_def_id, {})
+	var tiers = presentation.get("ground_model_tiers", [])
+	if typeof(tiers) == TYPE_ARRAY and not (tiers as Array).is_empty():
+		var chosen := ""
+		for tier in tiers:
+			if typeof(tier) == TYPE_DICTIONARY and amount >= int((tier as Dictionary).get("min_amount", 0)):
+				chosen = str((tier as Dictionary).get("asset_id", ""))
+		return chosen
 	return str(presentation.get("3d_model", ""))
 
-func make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
-	var asset_id := ground_model_asset_id(item_def_id)
+func make_ground_equipment_model(item_def_id: String, rarity: String, amount: int = 0) -> Node3D:
+	var asset_id := ground_model_asset_id(item_def_id, amount)
 	if asset_id == "":
 		return null
 	var entry = asset_manifest.get(asset_id, null)
@@ -125,8 +134,19 @@ func make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
 	inst.position = Vector3(0.0, float(pose["height"]), 0.0)
 	inst.rotation_degrees = pose["rotation_degrees"]
 	_fit_ground_pose(inst, pose)
-	apply_model_tint(inst, ground_model_tint(rarity, rig_native))
+	var ground_tint = presentation.get("ground_tint", null)
+	if typeof(ground_tint) == TYPE_DICTIONARY:
+		apply_detail_tint(inst, Color(str(ground_tint.get("color", "#ffffff"))), float(ground_tint.get("strength", 0.0)))
+	else:
+		apply_model_tint(inst, ground_model_tint(rarity, rig_native))
 	return inst
+
+## v490: family `ground_tint` colours textured kit props through the detail layer (keeps shading).
+func apply_detail_tint(root: Node, color: Color, strength: float) -> void:
+	if root is MeshInstance3D:
+		ModelDetailTint.set_detail(root as MeshInstance3D, color, strength)
+	for child in root.get_children():
+		apply_detail_tint(child, color, strength)
 
 ## Applies the optional `max_extent` cap and `rest_on_floor` placement from the ground pose, using
 ## the posed model's bounds in loot-root space.

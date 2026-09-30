@@ -16,7 +16,6 @@ const MODE_NONE := "none"
 
 static var _loaded: bool = false
 static var _config: Dictionary = {}
-static var _detail_textures: Dictionary = {}  # "rrggbb:strength" -> ImageTexture
 
 
 static func ensure_loaded() -> void:
@@ -79,9 +78,9 @@ static func apply(model_root: Node, equipped: Dictionary) -> Dictionary:
 			state["headgear_meshes"] = int(state["headgear_meshes"]) + 1
 			mesh.visible = head_def != ""
 		if winner.is_empty():
-			_clear_detail(mesh)
+			ModelDetailTint.clear_detail(mesh)
 			continue
-		_set_detail(mesh, winner["color"], float(winner["strength"]))
+		ModelDetailTint.set_detail(mesh, winner["color"], float(winner["strength"]))
 		(state["regions"] as Dictionary)[region] = {
 			"slot": winner["slot"],
 			"item_def_id": winner["item_def_id"],
@@ -126,46 +125,3 @@ static func _region_is_headgear(region: String) -> bool:
 		if str((entry as Dictionary).get("region", "")) == region and str((entry as Dictionary).get("mode", "")) == MODE_HEADGEAR:
 			return true
 	return false
-
-
-static func _set_detail(mesh: MeshInstance3D, color: Color, strength: float) -> void:
-	var mat := _override_material(mesh)
-	if mat == null:
-		return
-	mat.detail_enabled = true
-	mat.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MIX
-	mat.detail_albedo = _detail_texture(color, strength)
-
-
-static func _clear_detail(mesh: MeshInstance3D) -> void:
-	var mat := mesh.material_override as StandardMaterial3D
-	if mat != null:
-		mat.detail_enabled = false
-		mat.detail_albedo = null
-
-
-## The mesh's current override, created from its surface material when there is none yet.
-static func _override_material(mesh: MeshInstance3D) -> StandardMaterial3D:
-	if mesh.material_override is StandardMaterial3D:
-		return mesh.material_override as StandardMaterial3D
-	var source: Material = null
-	if mesh.mesh != null and mesh.mesh.get_surface_count() > 0:
-		source = mesh.get_active_material(0)
-	var mat: StandardMaterial3D
-	if source is StandardMaterial3D:
-		mat = (source as StandardMaterial3D).duplicate() as StandardMaterial3D
-	else:
-		mat = StandardMaterial3D.new()
-	mesh.material_override = mat
-	return mat
-
-
-static func _detail_texture(color: Color, strength: float) -> ImageTexture:
-	var key := "%s:%.3f" % [color.to_html(false), strength]
-	if _detail_textures.has(key):
-		return _detail_textures[key]
-	var image := Image.create(1, 1, false, Image.FORMAT_RGBA8)
-	image.set_pixel(0, 0, Color(color.r, color.g, color.b, strength))
-	var texture := ImageTexture.create_from_image(image)
-	_detail_textures[key] = texture
-	return texture

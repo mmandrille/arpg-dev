@@ -49,6 +49,76 @@
       },
       "kaykit_weapon_adv_shield_square_v0": {
         "scale": 0.75
+      },
+      "kaykit_dungeon_coin_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "max_extent": 0.3
+      },
+      "kaykit_dungeon_coin_stack_small_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "max_extent": 0.5
+      },
+      "kaykit_dungeon_coin_stack_medium_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "max_extent": 0.6
+      },
+      "kaykit_dungeon_coin_stack_large_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "max_extent": 0.8
+      },
+      "kaykit_dungeon_bottle_a_labeled_brown_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "max_extent": 0.55
+      },
+      "kaykit_dungeon_bottle_b_brown_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "max_extent": 0.55
+      },
+      "kaykit_dungeon_bottle_c_brown_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "max_extent": 0.55
       }
     }
   }

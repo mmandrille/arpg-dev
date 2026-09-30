@@ -75,3 +75,19 @@ def test_armor_family_keeps_its_fallback_model() -> None:
     armor_family, family = next((fid, fam) for fid, fam in sorted(families.items()) if fam.get("3d_model"))
 
     assert _run(_presentations_with(armor_family, family["3d_model"])).failures == []
+
+
+def _gold_tiers_with(mutate) -> dict[str, Any]:
+    data = _load(ASSETS / "item_presentations.v0.json")
+    mutate(data["families"]["gold"]["ground_model_tiers"])
+    return {"item_presentations.v0.json": data}
+
+
+def test_gold_tier_with_unknown_asset_fails() -> None:
+    failures = _run(_gold_tiers_with(lambda tiers: tiers[0].update(asset_id="not_an_asset"))).failures
+    assert any("not_an_asset" in detail for _label, detail in failures), failures
+
+
+def test_gold_tiers_must_ascend() -> None:
+    failures = _run(_gold_tiers_with(lambda tiers: tiers.reverse())).failures
+    assert any("min_amount" in detail for _label, detail in failures), failures

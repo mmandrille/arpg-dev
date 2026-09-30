@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v490** | `kit-coins-potions` | Complete (focused verification) | [`spec`](../specs/v490_spec-kit-coins-potions.md) | [`plan`](../plans/v490_2026-09-30-kit-coins-potions.md) | [`as-built`](../as-built/v490_kit-coins-potions.md) |
 | **v489** | `kit-stairs` | Complete (focused verification) | [`spec`](../specs/v489_spec-kit-stairs.md) | [`plan`](../plans/v489_2026-09-30-kit-stairs.md) | [`as-built`](../as-built/v489_kit-stairs.md) |
 | **v488** | `live-stash-http-sync` | Complete (focused verification + `make ci` green) | [`spec`](../specs/v488_spec-live-stash-http-sync.md) | [`plan`](../plans/v488_2026-09-30-live-stash-http-sync.md) | [`as-built`](../as-built/v488_live-stash-http-sync.md) |
 | **v487** | `kit-ground-loot` | Complete (focused verification + `make ci` green) | [`spec`](../specs/v487_spec-kit-ground-loot.md) | [`plan`](../plans/v487_2026-09-30-kit-ground-loot.md) | [`as-built`](../as-built/v487_kit-ground-loot.md) |

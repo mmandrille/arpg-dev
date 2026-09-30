@@ -979,6 +979,90 @@
         "license": "CC0-1.0",
         "sha256": "96d1e7a6b519ebe614e66342e0e43b3689017c339f586c5e783d9edf7631e7df"
       }
+    },
+    "kaykit_dungeon_coin_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/coin.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/coin.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "97d3abdd239d8fa365b14957f7bf45c892aad9d211b3c3b47b4b2311bf947297"
+      }
+    },
+    "kaykit_dungeon_coin_stack_small_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/coin_stack_small.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/coin_stack_small.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "b7395adb0c3f8d392f42f483d667af672232a25de4e0cdb23c58fca8bab1dd8f"
+      }
+    },
+    "kaykit_dungeon_coin_stack_medium_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/coin_stack_medium.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/coin_stack_medium.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "a6b3f67cf395820c75fafb09337009be7faf1d6a9de93a3f77cfc04c565374b2"
+      }
+    },
+    "kaykit_dungeon_coin_stack_large_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/coin_stack_large.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/coin_stack_large.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "1a64011dc0d6754bc95d932744ad7717132c538206976a0262293bd4ba31627e"
+      }
+    },
+    "kaykit_dungeon_bottle_a_labeled_brown_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/bottle_A_labeled_brown.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/bottle_A_labeled_brown.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "ba3c6fa3b50b26b7acbbc5112248a8e31a3b9dc64ec51c8e150852dfd7d2b24c"
+      }
+    },
+    "kaykit_dungeon_bottle_b_brown_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/bottle_B_brown.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/bottle_B_brown.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "930b73e80da06d0c7deb03067029472e6208705bd84375a1dc45893c8914a8dc"
+      }
+    },
+    "kaykit_dungeon_bottle_c_brown_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/bottle_C_brown.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/bottle_C_brown.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "5b68d7b4eaee5af15aea7fd02a09f196a6a88d94af3140767cd718571d1c7183"
+      }
     }
   }
 }

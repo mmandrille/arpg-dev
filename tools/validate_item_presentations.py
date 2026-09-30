@@ -48,6 +48,7 @@ def validate_item_presentations(
             report.fail("item presentation family 3d_model", f"{family_id}: unknown asset {model_id}")
         elif model_id:
             report.ok(f"item presentation family {family_id} 3d_model resolves")
+        _validate_ground_model_tiers(report, family_id, family.get("ground_model_tiers"), manifest_assets)
 
     for def_id in sorted(presentations):
         if def_id not in items["items"] and def_id not in item_templates["templates"]:
@@ -66,3 +67,19 @@ def validate_item_presentations(
         report.fail("item_presentations coverage", f"missing entries: {missing_presentations}")
     else:
         report.ok("item_presentations covers all item rules")
+
+
+def _validate_ground_model_tiers(report: Any, family_id: str, tiers: Any, manifest_assets: dict[str, Any]) -> None:
+    """v490: amount tiers must resolve to manifest assets and ascend strictly by min_amount."""
+    if not tiers:
+        return
+    previous = 0
+    for tier in tiers:
+        asset_id, min_amount = tier.get("asset_id"), int(tier.get("min_amount", 0))
+        if asset_id not in manifest_assets:
+            report.fail("item presentation ground_model_tiers", f"{family_id}: unknown asset {asset_id}")
+        elif min_amount <= previous:
+            report.fail("item presentation ground_model_tiers", f"{family_id}: min_amount {min_amount} not above {previous}")
+        else:
+            report.ok(f"item presentation family {family_id} tier {min_amount} resolves")
+        previous = max(previous, min_amount)

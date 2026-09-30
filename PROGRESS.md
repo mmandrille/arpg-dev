@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-30 (v489 kit stairs; graphics batch v489–v492)
+Last updated: 2026-09-30 (v490 kit coins/potions; graphics batch v489–v492)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-09-30 (v489 kit stairs; graphics batch v489–v492)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v489 — kit stairs: `stairs_up` is the KayKit narrow flight, `stairs_down` a kit grate hatch over a dark pit, state tints via `ModelTint` ([as-built](docs/as-built/v489_kit-stairs.md)). Graphics batch in progress: v490 kit coins/potions, v491 town look pass, v492 combat VFX. Prior: v488 live stash HTTP sync. |
+| **Latest completed slice** | v490 — kit coins and potions: gold drops pick a KayKit coin model by amount, potions use kit bottles coloured via the shared `ModelDetailTint` detail layer ([as-built](docs/as-built/v490_kit-coins-potions.md)). Graphics batch: v489 kit stairs done; next v491 town look pass, v492 combat VFX. |
 | **Next slice** | TBD — `/next`. Candidate: sync character inventory changed over HTTP (`publish_inventory` / `offer_inventory` leave the live sim holding removed items; v488 follow-up). Visual follow-up: kit coin/potion ground props. |
 | **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
 | **Next engineering review** | ~v496 — run `$review` then `$refactor` after the next ~10-slice milestone |
@@ -167,7 +167,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Testing / tooling | **Performance test topology discipline:** Python protocol bots and offline Godot replay do not prove live Godot transport stability. Use a `runner: godot_client` scenario for authoritative client failures, assert lifetime reconnect count, capture close diagnostics, and correlate backend/client phases. | v457 live combat transport stability; `docs/performance/tools.md` |
 | Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up, v76/v77/v78 deferred |
 | Settings | Controls remapping, accessibility options, language selection | v24/v224 non-goals; v351 shipped windowed/fullscreen/windowed-fullscreen display mode in `user://settings.json` |
-| Assets | Blender export pipeline, remote patcher. Texture/triangle budgets measured in v469 (ADR-0018 D8); enforcement lands with the first kit import. Kit ground props for gold/potions/quest items (Dungeon Remastered `coin*`, `bottle_*`) and kit-quality armor/jewelry ground models; legacy weapon GLB purge. | ADR-0006, ADR-0018, v487 non-goals |
+| Assets | Blender export pipeline, remote patcher. Texture/triangle budgets measured in v469 (ADR-0018 D8); enforcement lands with the first kit import. Kit ground props for quest items/keys/badges and kit-quality armor/jewelry ground models (gold and potions shipped in v490); legacy weapon GLB purge. | ADR-0006, ADR-0018, v487 non-goals |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
 | Multiplayer | Matchmaking/lobby beyond backend-listed sessions, advanced active-session filtering/pagination/load-aware capacity controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49/v164 non-goals, ADR-0001, ADR-0014 |

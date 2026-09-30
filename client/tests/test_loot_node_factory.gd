@@ -14,6 +14,8 @@ func _initialize() -> void:
 	_test_every_hand_item_uses_its_item_visuals_model()
 	_test_armor_keeps_family_fallback_model()
 	_test_kit_ground_tint_keeps_texture()
+	_test_gold_amount_picks_catalog_tier()
+	_test_potions_use_detail_tint()
 	print("[gdtest] PASS: test_loot_node_factory (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -151,6 +153,53 @@ func _test_kit_ground_tint_keeps_texture() -> void:
 		node.free()
 		return
 	_assert_true("a rig-native hand item exists", false)
+
+
+# --- v490 kit coins and potions (catalog-derived) ---
+
+func _test_gold_amount_picks_catalog_tier() -> void:
+	var factory = _real_factory()
+	var tiers: Array = ItemRulesLoader.item_presentations["gold"]["ground_model_tiers"]
+	for i in range(tiers.size()):
+		var tier: Dictionary = tiers[i]
+		var amount := int(tier["min_amount"])
+		var node: Node3D = factory.make_loot_node({"item_def_id": "gold", "rarity": "common", "amount": amount})
+		_assert_true("gold x%d uses tier %s" % [amount, tier["asset_id"]], node.find_child("GroundModel_%s" % tier["asset_id"], true, false) != null)
+		node.free()
+		if i + 1 < tiers.size() and int(tiers[i + 1]["min_amount"]) - 1 > amount:
+			var below_next: Node3D = factory.make_loot_node({"item_def_id": "gold", "rarity": "common", "amount": int(tiers[i + 1]["min_amount"]) - 1})
+			_assert_true("gold just below the next tier stays on %s" % tier["asset_id"], below_next.find_child("GroundModel_%s" % tier["asset_id"], true, false) != null)
+			below_next.free()
+	var none: Node3D = factory.make_loot_node({"item_def_id": "gold", "rarity": "common", "amount": int(tiers[0]["min_amount"]) - 1})
+	_assert_true("gold below the first tier keeps the primitive", none.find_child("GroundModel_*", true, false) == null)
+	none.free()
+
+
+func _test_potions_use_detail_tint() -> void:
+	var factory = _real_factory()
+	var checked := 0
+	for def_id in ItemRulesLoader.item_presentations.keys():
+		var presentation: Dictionary = ItemRulesLoader.item_presentations[def_id]
+		if typeof(presentation.get("ground_tint", null)) != TYPE_DICTIONARY:
+			continue
+		var node: Node3D = factory.make_loot_node({"item_def_id": def_id, "rarity": "common"})
+		var model := node.find_child("GroundModel_%s" % presentation["3d_model"], true, false)
+		var mesh := _first_mesh(model) if model != null else null
+		var mat := mesh.material_override as StandardMaterial3D if mesh != null else null
+		var tint: Dictionary = presentation["ground_tint"]
+		_assert_true("%s uses its kit bottle" % def_id, model != null)
+		_assert_true("%s detail tint enabled with catalog colour" % def_id, mat != null and mat.detail_enabled and mat.detail_albedo != null \
+			and _color_within_8bit(mat.detail_albedo.get_image().get_pixel(0, 0), Color(Color(str(tint["color"])), float(tint["strength"]))))
+		_assert_true("%s keeps its albedo texture" % def_id, mat != null and mat.albedo_texture != null)
+		node.free()
+		checked += 1
+	_assert_true("potion families with ground_tint were checked", checked > 0)
+
+
+## The detail texture is RGBA8, so channels round to 1/255.
+func _color_within_8bit(got: Color, want: Color) -> bool:
+	var eps := 1.0 / 255.0
+	return absf(got.r - want.r) <= eps and absf(got.g - want.g) <= eps and absf(got.b - want.b) <= eps and absf(got.a - want.a) <= eps
 
 
 func _assert_eq(label: String, got, expected) -> void:

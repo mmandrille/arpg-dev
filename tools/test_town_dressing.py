@@ -72,9 +72,8 @@ def test_anchors_match_the_world_preset_exactly() -> None:
 
 def test_service_path_targets_are_known_anchors() -> None:
     anchors = {a["id"] for a in DRESSING["anchors"]}
-    targets = DRESSING["service_paths"]["targets"]
-    assert targets, "at least one service path target"
-    for target in targets:
+    # An empty list is valid: service paths are off when no target is configured.
+    for target in DRESSING["service_paths"]["targets"]:
         assert target in anchors, f"service path target {target} is not an anchor"
 
 

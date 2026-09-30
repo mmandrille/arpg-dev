@@ -4,6 +4,7 @@ from typing import Any
 
 from tools.bot.bot_context import StateIngestContext
 from tools.bot.bot_types import RuntimeState
+from tools.bot.payload_schema import check_payload
 from tools.bot.runtime_queries import find_player
 
 
@@ -42,6 +43,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, ctx: StateIngestConte
         return
 
     p = m["payload"]
+    check_payload("state_delta", p)
     previous_tick = state.last_tick
     next_tick = max(state.last_tick, int(m.get("tick", 0)), int(p.get("server_tick", state.last_tick)))
     decay_skill_cooldowns(state, next_tick - previous_tick)
@@ -223,6 +225,7 @@ def ingest_message(m: dict[str, Any], state: RuntimeState, ctx: StateIngestConte
 
 def ingest_snapshot(payload: dict[str, Any], state: RuntimeState, ctx: StateIngestContext | None = None) -> None:
     _require_context(ctx)
+    check_payload("session_snapshot", payload)
     state.last_tick = max(state.last_tick, int(payload.get("server_tick", 0)))
     state.current_level = int(payload.get("current_level", 0))
     state.local_player_id = str(payload.get("local_player_id", state.local_player_id))

@@ -109,6 +109,17 @@ static func play_entity_reaction(
 		reaction.enter_death(source_pos, fallback)
 	else:
 		reaction.play_hit(source_pos, fallback)
+	_spawn_reaction_vfx(entities, player_id, player_anchor, entity_id, ev, reaction_name, source_pos, world_pos_fn)
+
+
+## v492: hit sparks / death burst at the entity, added to its parent so they outlive the node.
+static func _spawn_reaction_vfx(entities: Dictionary, player_id: String, player_anchor: Node3D, entity_id: String, ev: Dictionary, reaction_name: String, source_pos: Vector3, world_pos_fn: Callable) -> void:
+	var node: Node3D = player_anchor if entity_id == player_id else (entities.get(entity_id, {}) as Dictionary).get("node", null) as Node3D
+	if node == null or node.get_parent() == null:
+		return
+	var world_pos: Vector3 = world_pos_fn.call(node)
+	var source := world_pos if source_pos == ModelReactionControllerScript.UNRESOLVED_SOURCE else source_pos
+	CombatVfx.spawn_for_reaction(node.get_parent(), world_pos, source, ev, reaction_name)
 
 
 static func reaction_for_entity(entities: Dictionary, player_id: String, player_reaction, entity_id: String):

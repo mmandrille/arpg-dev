@@ -1,0 +1,79 @@
+{
+  "version": 0,
+  "note": "v492 combat VFX (ADR-0018 P5): one-shot GPUParticles3D bursts drawn with client/shaders/vfx_soft_glow.gdshader. Amounts are scaled by render_presentation quality_tiers[*].particle_scale.",
+  "effects": {
+    "hit_spark": {
+      "amount": 18,
+      "lifetime": 0.32,
+      "explosiveness": 1.0,
+      "spawn_height": 0.9,
+      "direction_from_source": true,
+      "spread_degrees": 55,
+      "velocity_min": 2.6,
+      "velocity_max": 5.2,
+      "gravity": -7.0,
+      "damping": 2.0,
+      "size_min": 0.05,
+      "size_max": 0.11,
+      "color": "#ffe08a",
+      "end_color": "#ff6a1a",
+      "glow_energy": 1.7
+    },
+    "death_burst": {
+      "amount": 24,
+      "lifetime": 0.95,
+      "explosiveness": 0.85,
+      "spawn_height": 0.55,
+      "direction_from_source": false,
+      "spread_degrees": 110,
+      "velocity_min": 1.0,
+      "velocity_max": 2.6,
+      "gravity": 1.4,
+      "damping": 1.2,
+      "size_min": 0.07,
+      "size_max": 0.16,
+      "color": "#b8ad98",
+      "end_color": "#4a4038",
+      "glow_energy": 0.55
+    },
+    "heal_rain": {
+      "amount": 140,
+      "lifetime": 1.15,
+      "explosiveness": 0.0,
+      "spawn_height": 4.2,
+      "direction_from_source": false,
+      "spread_degrees": 4,
+      "velocity_min": 3.2,
+      "velocity_max": 4.4,
+      "gravity": -2.0,
+      "damping": 0.0,
+      "size_min": 0.12,
+      "size_max": 0.22,
+      "color": "#8dffab",
+      "end_color": "#1faa4e",
+      "glow_energy": 1.3
+    }
+  },
+  "damage_type_colors": {
+    "force": {
+      "color": "#ffe08a",
+      "end_color": "#ff6a1a"
+    },
+    "fire": {
+      "color": "#ffb347",
+      "end_color": "#ff2a00"
+    },
+    "cold": {
+      "color": "#9fe8ff",
+      "end_color": "#2f9dff"
+    },
+    "poison": {
+      "color": "#b8ff5a",
+      "end_color": "#2e9e2e"
+    },
+    "lightning": {
+      "color": "#fff6a0",
+      "end_color": "#6fb8ff"
+    }
+  }
+}

@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-30 (v491 town look pass; graphics batch v489–v492)
+Last updated: 2026-09-30 (graphics batch v489–v492 complete)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-30 (v491 town look pass; graphics batch v489–v492)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v491 — town look pass: paved kit plaza + road to the gate + kit dressing via `TownDressing` (live and capture share it); fixed buried decorated/weeds dungeon floor tiles and the off-fence ambient silhouettes ([as-built](docs/as-built/v491_town-look-pass.md); `make ci` green). Graphics batch: v489 stairs, v490 coins/potions done; next v492 combat VFX. |
-| **Next slice** | TBD — `/next`. Candidate: sync character inventory changed over HTTP (`publish_inventory` / `offer_inventory` leave the live sim holding removed items; v488 follow-up). Visual follow-up: kit coin/potion ground props. |
+| **Latest completed slice** | v492 — combat VFX foundation (ADR-0018 P5): in-repo glow shader + `CombatVfx` particle bursts from `vfx_presentation.v0.json`: damage-type hit sparks, death burst, particle heal rain, quality-scaled ([as-built](docs/as-built/v492_combat-vfx-foundation.md); `make ci` green). Graphics batch v489–v492 complete (stairs, coins/potions, town, VFX). |
+| **Next slice** | TBD — `/next`. Candidates: sync character inventory changed over HTTP (v488 follow-up); death dissolve + rim/outline (ADR-0018 P5 rest); town nature/village pass once the KayKit Forest Nature + Medieval Hexagon packs are downloaded; wall mesh merge for the ~4× draw-call debt. |
 | **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
 | **Next engineering review** | ~v496 — run `$review` then `$refactor` after the next ~10-slice milestone |
 

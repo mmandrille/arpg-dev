@@ -37,6 +37,7 @@ func sync(
 	var profile := DungeonDepthLightingScript.apply_for_level(
 		level, directional, world_environment, factory, suppress_ambient, fog_suppression, town_fog_active
 	)
+	CombatVfx.set_quality(quality)  # v492: particle counts follow the graphics tier
 	var context_id := RenderPresentationLoaderScript.context_for_level(level, town_fog_active)
 	RenderEnvironmentPresentationScript.apply(
 		RenderPresentationLoaderScript.context(context_id),

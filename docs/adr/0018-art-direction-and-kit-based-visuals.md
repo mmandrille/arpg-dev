@@ -339,7 +339,7 @@ and fall under the CLAUDE.md spec-gate exemption. They still write an as-built w
 | **P2** | Dungeon auto-tile renderer + kit props (D6) | walls/columns/floors shipped [v471](../as-built/v471_dungeon-kit-walls-floors.md); torches/treasure chests [v473](../as-built/v473_dungeon-kit-props.md); stairs [v489](../as-built/v489_kit-stairs.md) (no kit door) |
 | **P3** | Heroes + kit animation + clip catalog + socket remap + armor tints (D4, D5) | spec — P3a heroes/clips/sockets/weapons shipped [v475](../as-built/v475_kit-heroes.md); P3b armor tints + headgear shipped [v483](../as-built/v483_armor-look.md); ground loot weapons/off-hands on kit models [v487](../as-built/v487_kit-ground-loot.md) (armor/jewelry ground fallbacks remain); P3c legacy pipeline removal shipped [v484](../as-built/v484_retire-legacy-hero.md) (kit fallback hero; `class_body_tint.gd` retired) |
 | **P4** | Kit monsters; purge unconfirmed-license and unused GLBs (D2) | spec — P4a skeletons + purge shipped [v474](../as-built/v474_kit-skeleton-monsters.md); P4b beasts shipped [v482](../as-built/v482_cc0-beasts.md) (Quaternius CC0 wolf + bat, palette-baked) |
-| **P5** | Particle VFX + in-repo shader set: hit flash, death dissolve, highlight rim/outline (D3) | exempt |
+| **P5** | Particle VFX + in-repo shader set: hit flash, death dissolve, highlight rim/outline (D3) | exempt — foundation shipped [v492](../as-built/v492_combat-vfx-foundation.md) (glow shader, hit sparks, death burst, particle heal rain); dissolve and rim/outline open |
 
 ### P0 verification checklist (resolved in v469, see [findings](../researchs/v469_kaykit-p0-findings.md))
 

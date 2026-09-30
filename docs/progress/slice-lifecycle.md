@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v492** | `combat-vfx-foundation` | Complete (`make ci` green) | [`spec`](../specs/v492_spec-combat-vfx-foundation.md) | [`plan`](../plans/v492_2026-09-30-combat-vfx-foundation.md) | [`as-built`](../as-built/v492_combat-vfx-foundation.md) |
 | **v491** | `town-look-pass` | Complete (`make ci` green) | [`spec`](../specs/v491_spec-town-look-pass.md) | [`plan`](../plans/v491_2026-09-30-town-look-pass.md) | [`as-built`](../as-built/v491_town-look-pass.md) |
 | **v490** | `kit-coins-potions` | Complete (focused verification) | [`spec`](../specs/v490_spec-kit-coins-potions.md) | [`plan`](../plans/v490_2026-09-30-kit-coins-potions.md) | [`as-built`](../as-built/v490_kit-coins-potions.md) |
 | **v489** | `kit-stairs` | Complete (focused verification) | [`spec`](../specs/v489_spec-kit-stairs.md) | [`plan`](../plans/v489_2026-09-30-kit-stairs.md) | [`as-built`](../as-built/v489_kit-stairs.md) |

@@ -4,127 +4,322 @@
   "title": "Render presentation (v0)",
   "description": "Client-only render baseline (ADR-0018 D7): key-light rig, tonemap, SSAO, glow, fog and color adjustments per lighting context, plus graphics-quality tier toggles.",
   "type": "object",
-  "required": ["version", "key_light", "contexts", "quality_tiers"],
+  "required": [
+    "version",
+    "key_light",
+    "contexts",
+    "quality_tiers"
+  ],
   "additionalProperties": false,
   "properties": {
-    "version": { "const": 0 },
-    "note": { "type": "string" },
+    "version": {
+      "const": 0
+    },
+    "note": {
+      "type": "string"
+    },
     "key_light": {
       "type": "object",
-      "required": ["rotation_degrees", "shadow_enabled", "shadow_max_distance"],
+      "required": [
+        "rotation_degrees",
+        "shadow_enabled",
+        "shadow_max_distance"
+      ],
       "additionalProperties": false,
       "properties": {
-        "rotation_degrees": { "$ref": "#/$defs/vec3" },
-        "shadow_enabled": { "type": "boolean" },
-        "shadow_max_distance": { "type": "number", "exclusiveMinimum": 0 },
-        "shadow_blur": { "type": "number", "minimum": 0 },
-        "shadow_bias": { "type": "number", "minimum": 0 },
-        "shadow_normal_bias": { "type": "number", "minimum": 0 },
-        "shadow_opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+        "rotation_degrees": {
+          "$ref": "#/$defs/vec3"
+        },
+        "shadow_enabled": {
+          "type": "boolean"
+        },
+        "shadow_max_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shadow_blur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shadow_bias": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shadow_normal_bias": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shadow_opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     },
     "contexts": {
       "type": "object",
-      "required": ["town", "town_night", "dungeon"],
+      "required": [
+        "town",
+        "town_night",
+        "dungeon"
+      ],
       "additionalProperties": false,
       "properties": {
-        "town": { "$ref": "#/$defs/context" },
-        "town_night": { "$ref": "#/$defs/context" },
-        "dungeon": { "$ref": "#/$defs/context" }
+        "town": {
+          "$ref": "#/$defs/context"
+        },
+        "town_night": {
+          "$ref": "#/$defs/context"
+        },
+        "dungeon": {
+          "$ref": "#/$defs/context"
+        }
       }
     },
     "quality_tiers": {
       "type": "object",
-      "required": ["balanced", "performance"],
-      "additionalProperties": { "$ref": "#/$defs/quality_tier" }
+      "required": [
+        "balanced",
+        "performance"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/quality_tier"
+      }
     }
   },
   "$defs": {
     "vec3": {
       "type": "object",
-      "required": ["x", "y", "z"],
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
       "additionalProperties": false,
-      "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      }
     },
-    "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    },
     "context": {
       "type": "object",
-      "required": ["tonemap", "ssao", "glow", "fog", "adjustments"],
+      "required": [
+        "tonemap",
+        "ssao",
+        "glow",
+        "fog",
+        "adjustments"
+      ],
       "additionalProperties": false,
       "properties": {
         "tonemap": {
           "type": "object",
-          "required": ["mode", "exposure", "white"],
+          "required": [
+            "mode",
+            "exposure",
+            "white"
+          ],
           "additionalProperties": false,
           "properties": {
-            "mode": { "enum": ["linear", "reinhard", "filmic", "aces", "agx"] },
-            "exposure": { "type": "number", "exclusiveMinimum": 0 },
-            "white": { "type": "number", "exclusiveMinimum": 0 }
+            "mode": {
+              "enum": [
+                "linear",
+                "reinhard",
+                "filmic",
+                "aces",
+                "agx"
+              ]
+            },
+            "exposure": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "white": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
           }
         },
         "ssao": {
           "type": "object",
-          "required": ["enabled"],
+          "required": [
+            "enabled"
+          ],
           "additionalProperties": false,
           "properties": {
-            "enabled": { "type": "boolean" },
-            "radius": { "type": "number", "exclusiveMinimum": 0 },
-            "intensity": { "type": "number", "minimum": 0 },
-            "power": { "type": "number", "exclusiveMinimum": 0 },
-            "detail": { "type": "number", "minimum": 0 }
+            "enabled": {
+              "type": "boolean"
+            },
+            "radius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "intensity": {
+              "type": "number",
+              "minimum": 0
+            },
+            "power": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "detail": {
+              "type": "number",
+              "minimum": 0
+            }
           }
         },
         "glow": {
           "type": "object",
-          "required": ["enabled"],
+          "required": [
+            "enabled"
+          ],
           "additionalProperties": false,
           "properties": {
-            "enabled": { "type": "boolean" },
-            "intensity": { "type": "number", "minimum": 0 },
-            "strength": { "type": "number", "minimum": 0 },
-            "bloom": { "type": "number", "minimum": 0, "maximum": 1 },
-            "hdr_threshold": { "type": "number", "minimum": 0 }
+            "enabled": {
+              "type": "boolean"
+            },
+            "intensity": {
+              "type": "number",
+              "minimum": 0
+            },
+            "strength": {
+              "type": "number",
+              "minimum": 0
+            },
+            "bloom": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "hdr_threshold": {
+              "type": "number",
+              "minimum": 0
+            }
           }
         },
         "fog": {
           "type": "object",
-          "required": ["enabled"],
+          "required": [
+            "enabled"
+          ],
           "additionalProperties": false,
           "properties": {
-            "enabled": { "type": "boolean" },
-            "mode": { "enum": ["exponential", "depth"] },
-            "color": { "$ref": "#/$defs/color" },
-            "light_energy": { "type": "number", "minimum": 0 },
-            "density": { "type": "number", "minimum": 0 },
-            "sky_affect": { "type": "number", "minimum": 0, "maximum": 1 },
-            "depth_begin": { "type": "number", "minimum": 0 },
-            "depth_end": { "type": "number", "exclusiveMinimum": 0 }
+            "enabled": {
+              "type": "boolean"
+            },
+            "mode": {
+              "enum": [
+                "exponential",
+                "depth"
+              ]
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "light_energy": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "sky_affect": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "depth_begin": {
+              "type": "number",
+              "minimum": 0
+            },
+            "depth_end": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
           }
         },
         "adjustments": {
           "type": "object",
-          "required": ["enabled"],
+          "required": [
+            "enabled"
+          ],
           "additionalProperties": false,
           "properties": {
-            "enabled": { "type": "boolean" },
-            "brightness": { "type": "number", "exclusiveMinimum": 0 },
-            "contrast": { "type": "number", "exclusiveMinimum": 0 },
-            "saturation": { "type": "number", "minimum": 0 }
+            "enabled": {
+              "type": "boolean"
+            },
+            "brightness": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "contrast": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "saturation": {
+              "type": "number",
+              "minimum": 0
+            }
           }
         }
       }
     },
     "quality_tier": {
       "type": "object",
-      "required": ["msaa_3d", "screen_space_aa", "key_light_shadows", "ssao", "glow", "fog"],
+      "required": [
+        "msaa_3d",
+        "screen_space_aa",
+        "key_light_shadows",
+        "ssao",
+        "glow",
+        "fog"
+      ],
       "additionalProperties": false,
       "properties": {
-        "msaa_3d": { "enum": ["disabled", "2x", "4x", "8x"] },
-        "screen_space_aa": { "enum": ["none", "fxaa"] },
-        "key_light_shadows": { "type": "boolean" },
-        "ssao": { "type": "boolean" },
-        "glow": { "type": "boolean" },
-        "fog": { "type": "boolean" }
+        "msaa_3d": {
+          "enum": [
+            "disabled",
+            "2x",
+            "4x",
+            "8x"
+          ]
+        },
+        "screen_space_aa": {
+          "enum": [
+            "none",
+            "fxaa"
+          ]
+        },
+        "key_light_shadows": {
+          "type": "boolean"
+        },
+        "ssao": {
+          "type": "boolean"
+        },
+        "glow": {
+          "type": "boolean"
+        },
+        "fog": {
+          "type": "boolean"
+        },
+        "particle_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2,
+          "description": "v492: multiplier on combat VFX particle counts."
+        }
       }
     }
   }

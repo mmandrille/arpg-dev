@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/vfx_presentation.v0.schema.json",
+  "title": "Combat VFX presentation (v0)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "effects",
+    "damage_type_colors"
+  ],
+  "$defs": {
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amount",
+        "lifetime",
+        "explosiveness",
+        "spawn_height",
+        "direction_from_source",
+        "spread_degrees",
+        "velocity_min",
+        "velocity_max",
+        "gravity",
+        "damping",
+        "size_min",
+        "size_max",
+        "color",
+        "end_color",
+        "glow_energy"
+      ],
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 400
+        },
+        "lifetime": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5
+        },
+        "explosiveness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "spawn_height": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "direction_from_source": {
+          "type": "boolean"
+        },
+        "spread_degrees": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180
+        },
+        "velocity_min": {
+          "type": "number",
+          "minimum": 0
+        },
+        "velocity_max": {
+          "type": "number",
+          "minimum": 0
+        },
+        "gravity": {
+          "type": "number"
+        },
+        "damping": {
+          "type": "number",
+          "minimum": 0
+        },
+        "size_min": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "size_max": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "end_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "glow_energy": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 16
+        }
+      }
+    },
+    "colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "color",
+        "end_color"
+      ],
+      "properties": {
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "end_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      }
+    }
+  },
+  "properties": {
+    "version": {
+      "const": 0
+    },
+    "note": {
+      "type": "string"
+    },
+    "effects": {
+      "type": "object",
+      "required": [
+        "hit_spark",
+        "death_burst",
+        "heal_rain"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/effect"
+      }
+    },
+    "damage_type_colors": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/colors"
+      }
+    }
+  }
+}

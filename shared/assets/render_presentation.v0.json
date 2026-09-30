@@ -2,7 +2,11 @@
   "version": 0,
   "note": "Client-only render baseline (ADR-0018 D7). Light colors/energies stay in DungeonDepthLighting (town profile, town night, biome palettes); this catalog owns the key-light rig, tonemap, SSAO, glow, fog, color adjustments and quality tiers.",
   "key_light": {
-    "rotation_degrees": { "x": -50.0, "y": -40.0, "z": 0.0 },
+    "rotation_degrees": {
+      "x": -50.0,
+      "y": -40.0,
+      "z": 0.0
+    },
     "shadow_enabled": true,
     "shadow_max_distance": 60.0,
     "shadow_blur": 1.2,
@@ -12,29 +16,129 @@
   },
   "contexts": {
     "town": {
-      "tonemap": { "mode": "agx", "exposure": 1.25, "white": 8.0 },
-      "ssao": { "enabled": true, "radius": 1.4, "intensity": 1.6, "power": 1.6, "detail": 0.5 },
-      "glow": { "enabled": true, "intensity": 0.55, "strength": 1.0, "bloom": 0.03, "hdr_threshold": 1.1 },
-      "fog": { "enabled": false, "mode": "exponential", "color": "#c9d2df", "light_energy": 1.0, "density": 0.004, "sky_affect": 0.0 },
-      "adjustments": { "enabled": true, "brightness": 1.0, "contrast": 1.06, "saturation": 1.12 }
+      "tonemap": {
+        "mode": "agx",
+        "exposure": 1.25,
+        "white": 8.0
+      },
+      "ssao": {
+        "enabled": true,
+        "radius": 1.4,
+        "intensity": 1.6,
+        "power": 1.6,
+        "detail": 0.5
+      },
+      "glow": {
+        "enabled": true,
+        "intensity": 0.55,
+        "strength": 1.0,
+        "bloom": 0.03,
+        "hdr_threshold": 1.1
+      },
+      "fog": {
+        "enabled": false,
+        "mode": "exponential",
+        "color": "#c9d2df",
+        "light_energy": 1.0,
+        "density": 0.004,
+        "sky_affect": 0.0
+      },
+      "adjustments": {
+        "enabled": true,
+        "brightness": 1.0,
+        "contrast": 1.06,
+        "saturation": 1.12
+      }
     },
     "town_night": {
-      "tonemap": { "mode": "agx", "exposure": 1.35, "white": 8.0 },
-      "ssao": { "enabled": true, "radius": 1.4, "intensity": 1.4, "power": 1.5, "detail": 0.5 },
-      "glow": { "enabled": true, "intensity": 0.8, "strength": 1.05, "bloom": 0.05, "hdr_threshold": 0.9 },
-      "fog": { "enabled": true, "mode": "exponential", "color": "#1c2433", "light_energy": 1.0, "density": 0.012, "sky_affect": 0.0 },
-      "adjustments": { "enabled": true, "brightness": 1.0, "contrast": 1.08, "saturation": 1.0 }
+      "tonemap": {
+        "mode": "agx",
+        "exposure": 1.35,
+        "white": 8.0
+      },
+      "ssao": {
+        "enabled": true,
+        "radius": 1.4,
+        "intensity": 1.4,
+        "power": 1.5,
+        "detail": 0.5
+      },
+      "glow": {
+        "enabled": true,
+        "intensity": 0.8,
+        "strength": 1.05,
+        "bloom": 0.05,
+        "hdr_threshold": 0.9
+      },
+      "fog": {
+        "enabled": true,
+        "mode": "exponential",
+        "color": "#1c2433",
+        "light_energy": 1.0,
+        "density": 0.012,
+        "sky_affect": 0.0
+      },
+      "adjustments": {
+        "enabled": true,
+        "brightness": 1.0,
+        "contrast": 1.08,
+        "saturation": 1.0
+      }
     },
     "dungeon": {
-      "tonemap": { "mode": "agx", "exposure": 1.6, "white": 8.0 },
-      "ssao": { "enabled": true, "radius": 1.2, "intensity": 2.0, "power": 1.8, "detail": 0.6 },
-      "glow": { "enabled": true, "intensity": 0.9, "strength": 1.1, "bloom": 0.06, "hdr_threshold": 0.85 },
-      "fog": { "enabled": true, "mode": "exponential", "color": "#171a21", "light_energy": 1.0, "density": 0.018, "sky_affect": 0.0 },
-      "adjustments": { "enabled": true, "brightness": 1.0, "contrast": 1.1, "saturation": 1.05 }
+      "tonemap": {
+        "mode": "agx",
+        "exposure": 1.6,
+        "white": 8.0
+      },
+      "ssao": {
+        "enabled": true,
+        "radius": 1.2,
+        "intensity": 2.0,
+        "power": 1.8,
+        "detail": 0.6
+      },
+      "glow": {
+        "enabled": true,
+        "intensity": 0.9,
+        "strength": 1.1,
+        "bloom": 0.06,
+        "hdr_threshold": 0.85
+      },
+      "fog": {
+        "enabled": true,
+        "mode": "exponential",
+        "color": "#171a21",
+        "light_energy": 1.0,
+        "density": 0.018,
+        "sky_affect": 0.0
+      },
+      "adjustments": {
+        "enabled": true,
+        "brightness": 1.0,
+        "contrast": 1.1,
+        "saturation": 1.05
+      }
     }
   },
   "quality_tiers": {
-    "balanced": { "msaa_3d": "4x", "screen_space_aa": "none", "key_light_shadows": true, "ssao": true, "glow": true, "fog": true },
-    "performance": { "msaa_3d": "disabled", "screen_space_aa": "fxaa", "key_light_shadows": false, "ssao": false, "glow": true, "fog": false }
+    "balanced": {
+      "msaa_3d": "4x",
+      "screen_space_aa": "none",
+      "key_light_shadows": true,
+      "ssao": true,
+      "glow": true,
+      "fog": true,
+      "particle_scale": 1.0
+    },
+    "performance": {
+      "msaa_3d": "disabled",
+      "screen_space_aa": "fxaa",
+      "key_light_shadows": false,
+      "ssao": false,
+      "glow": true,
+      "fog": false,
+      "particle_scale": 0.5
+    }
   }
 }

@@ -9,7 +9,6 @@ const BotStewardHuntAssertionsScript := preload("res://scripts/bot_steward_hunt_
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
-const BotEyeViewAssertionsScript := preload("res://scripts/bot_eye_view_assertions.gd")
 const BotIntentRejectAssertionsScript := preload("res://scripts/bot_intent_reject_assertions.gd")
 const BotConnectionRecoveryAssertionsScript := preload("res://scripts/bot_connection_recovery_assertions.gd")
 const FLOAT_BOUND_EPSILON := 0.00001
@@ -401,8 +400,6 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			return true
 		"assert_camera_mode":
 			return _assert_camera_mode(runner, step, state)
-		"assert_eye_view_weapon":
-			return BotEyeViewAssertionsScript.assert_weapon(runner, step, state)
 		"assert_connection_recovery":
 			return BotConnectionRecoveryAssertionsScript.assert_connection_recovery(runner, step, state)
 	return true

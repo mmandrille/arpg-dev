@@ -276,10 +276,7 @@ static func click_entity_id(main, target_id: String, buffered: bool = false) -> 
 		return
 	if main.has_method("_send_action_intent"):
 		if typ == "monster":
-			var resolver = _member(main, "resolver")
-			var fp_anim = resolver.first_person_animation_controller() if resolver != null and resolver.has_method("first_person_animation_controller") else null
-			var fp_record := Callable(resolver, "record_first_person_attack") if resolver != null and resolver.has_method("record_first_person_attack") else Callable()
-			CombatLocalAttackPresentation.present_local_start(_member(main, "_local_attack_presentation"), target_id, _member(main, "audio_controller"), _member(main, "player_anim"), "main_hand", CombatReach.local_player_attack_mode(_member(main, "inventory"), _member(main, "equipped")), 1.0, _member(main, "inventory"), _member(main, "equipped"), fp_anim, fp_record)
+			CombatLocalAttackPresentation.present_local_start(_member(main, "_local_attack_presentation"), target_id, _member(main, "audio_controller"), _member(main, "player_anim"), "main_hand", CombatReach.local_player_attack_mode(_member(main, "inventory"), _member(main, "equipped")), 1.0, _member(main, "inventory"), _member(main, "equipped"))
 		main._send_action_intent(target_id)
 	main.set("_attack_cooldown", main._basic_attack_cooldown_seconds() if typ == "monster" and main.has_method("_basic_attack_cooldown_seconds") else ClientConstants.SEND_INTERVAL)
 	if typ == "monster" and main.has_method("_start_basic_attack_recovery_ui"):

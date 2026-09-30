@@ -4,8 +4,8 @@
   "runner": "godot_client",
   "world_id": "combat_control_lab",
   "seed": "eyeviewweapon01",
-  "title": "Eye-view weapon presentation: equipped hand item is visible from perspective camera",
-  "description": "Switch to perspective camera, equip the combat lab training bow, verify the camera-local view model, and fire once with visible local attack presentation.",
+  "title": "Chest-view camera: equip a bow and fire from the perspective camera",
+  "description": "Switch to the chest-view perspective camera, equip the combat lab training bow, and fire once at a monster. The v468 real-body view has no separate first-person weapon rig, so the proof is the camera mode, the equipped slot and an authoritative attack result.",
   "client_steps": [
     {
       "type": "wait_ws_open",
@@ -44,18 +44,13 @@
       "item_def_id": "training_bow"
     },
     {
-      "type": "assert_equipped",
-      "slot": "main_hand"
+      "type": "wait_event",
+      "event_type": "item_equipped",
+      "timeout_s": 10.0
     },
     {
-      "type": "assert_eye_view_weapon",
-      "slot": "main_hand",
-      "item_def_id": "training_bow",
-      "active": true,
-      "visible": true,
-      "rig_active": true,
-      "socket_parent": "right_hand_socket",
-      "node_parent": "right_hand_socket"
+      "type": "assert_equipped",
+      "slot": "main_hand"
     },
     {
       "type": "wait_entity",
@@ -77,18 +72,6 @@
       "target_entity_type": "monster",
       "target_monster_def_id": "dungeon_mob",
       "timeout_s": 8.0
-    },
-    {
-      "type": "assert_eye_view_weapon",
-      "slot": "main_hand",
-      "item_def_id": "training_bow",
-      "active": true,
-      "visible": true,
-      "rig_active": true,
-      "socket_parent": "right_hand_socket",
-      "node_parent": "right_hand_socket",
-      "attack_count_min": 1,
-      "last_attack_clip": "attack_ranged"
     }
   ]
 }

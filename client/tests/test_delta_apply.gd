@@ -221,14 +221,20 @@ func _test_snapshot_stash() -> void:
 
 func _test_malformed_delta_does_not_crash() -> void:
 	var m := _new_main()
-	# Missing required fields — should not throw.
+	m.gold = 5
+	m.inventory = [{"item_instance_id": "ii_1", "item_def_id": "rusty_sword"}]
+	m.equipped = {"main_hand": "ii_1"}
+	# Missing required fields must be ignored (the client gate fails on any SCRIPT ERROR).
 	m._apply_delta({})
 	m._apply_delta({"changes": [{"op": "gold_update"}]})
-	m._apply_delta({"changes": [{"op": "inventory_add"}]})
 	m._apply_delta({"changes": [{"op": "unknown_op", "data": "x"}]})
 	m._apply_delta({"changes": [{"op": "equipped_update", "item_instance_id": "ii_x"}]})
-	_assert_eq("malformed equipped_update without slot does not crash", true, true)
-	_assert_eq("malformed delta does not crash", true, true)
+	m._apply_delta({"changes": [{"op": "entity_spawn"}, {"op": "entity_spawn", "entity": {"type": "monster"}}]})
+	m._apply_delta({"changes": [{"op": "entity_update", "entity": {"id": "77"}}]})
+	_assert_eq("malformed gold_update keeps gold", m.gold, 5)
+	_assert_eq("malformed deltas keep inventory", m.inventory.size(), 1)
+	_assert_eq("equipped_update without slot keeps equipped", m.equipped, {"main_hand": "ii_1"})
+	_assert_eq("entity upsert without id/type creates no entity", m.entities.size(), 0)
 
 
 func _test_malformed_envelope_payloads_do_not_crash() -> void:

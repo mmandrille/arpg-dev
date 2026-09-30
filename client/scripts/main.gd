@@ -1843,13 +1843,14 @@ func _record_upsert_timing(start_usec: int, entity_type: String) -> void:
 func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> void:
 	var upsert_start := Time.get_ticks_usec()
 	var entity_type := str(e.get("type", ""))
-	var id := str(e["id"])
+	var id := str(e.get("id", ""))
+	if id == "" or entity_type == "": return
 	var server_pos := _entity_position(e)
 	if entity_type == "projectile" and _is_skill_authored_projectile(str(e.get("projectile_def_id", ""))):
 		_track_skill_authored_projectile(id, e)
 		_record_upsert_timing(upsert_start, entity_type)
 		return
-	if e["type"] == "player" and (id == player_id or player_id == ""):
+	if entity_type == "player" and (id == player_id or player_id == ""):
 		# The player is the humanoid under PlayerAnchor, not an entity-dict node.
 		player_id = id
 		if e.has("hp"):
@@ -1919,12 +1920,12 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 			if ap != null:
 				controller = AnimationControllerScript.new(ap)
 			else:
-				push_warning("[main] %s %s has no AnimationPlayer" % [str(e["type"]), id])
+				push_warning("[main] %s %s has no AnimationPlayer" % [entity_type, id])
 		var base_tint := _entity_base_tint(e)
 		var reaction = null
-		if _entity_type_uses_combat_presentation(str(e["type"])):
+		if _entity_type_uses_combat_presentation(entity_type):
 			reaction = ModelReactionControllerScript.new(node, base_tint)
-		rec = {"node": node, "controller": controller, "reaction": reaction, "type": str(e["type"]), "base_tint": base_tint.to_html(false)}
+		rec = {"node": node, "controller": controller, "reaction": reaction, "type": entity_type, "base_tint": base_tint.to_html(false)}
 		if e.has("item_def_id"):
 			rec["item_def_id"] = str(e["item_def_id"])
 		if e.has("amount"):
@@ -1945,24 +1946,24 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 	if is_new:
 		entities[id] = rec
 		var new_node := rec["node"] as Node3D
-		if e["type"] != "projectile" and e["type"] != "player":
+		if entity_type != "projectile" and entity_type != "player":
 			var pick_height_offset := 0.0
-			if e["type"] == "monster" or e["type"] == "companion":
+			if entity_type == "monster" or entity_type == "companion":
 				var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
 				pick_height_offset = float(visual.get("height_offset", 0.0))
-			_attach_pick_collider(new_node, id, str(e["type"]), str(rec.get("interactable_def_id", "")), pick_height_offset)
+			_attach_pick_collider(new_node, id, entity_type, str(rec.get("interactable_def_id", "")), pick_height_offset)
 		if str(rec.get("interactable_def_id", "")) == "hero_corpse":
 			_set_loot_label_visible(id, loot_label_reveal_held or id == hovered_loot_id, id == hovered_loot_id)
-	if e["type"] == "loot" and not loot_ids.has(id):
+	if entity_type == "loot" and not loot_ids.has(id):
 		loot_ids.append(id)
 		_refresh_loot_label_visibility()
-	if e["type"] == "monster" and not monster_ids.has(id):
+	if entity_type == "monster" and not monster_ids.has(id):
 		monster_ids.append(id)
 		var monster_node := rec.get("node", null) as Node3D
 		if monster_node != null and player_anchor != null:
 			var dist_sq := Vector2(monster_node.global_position.x - player_anchor.global_position.x, monster_node.global_position.z - player_anchor.global_position.z).length_squared()
 			EntityPresentationLodScript.apply_monster(monster_node, dist_sq, monster_ids.size())
-	if e["type"] == "interactable" and not interactable_ids.has(id):
+	if entity_type == "interactable" and not interactable_ids.has(id):
 		interactable_ids.append(id)
 	if rec["type"] == "projectile":
 		var node := rec["node"] as Node3D

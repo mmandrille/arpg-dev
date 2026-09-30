@@ -135,6 +135,17 @@ func verify_stair_models(fail: Callable) -> bool:
 	var main = MainScript.new()
 	var up := main._make_entity_node({"type": "interactable", "interactable_def_id": "stairs_up"})
 	var down := main._make_entity_node({"type": "interactable", "interactable_def_id": "stairs_down"})
+	if KitStairs.enabled():
+		# v489: kit stairs (covered in depth by test_kit_stairs.gd).
+		var ok: bool = up != null and up.find_child(KitStairs.MODEL_NAME, true, false) != null \
+			and down != null and down.find_child(KitStairs.MODEL_NAME, true, false) != null \
+			and down.find_child(KitStairs.PIT_NAME, true, false) != null
+		if not ok:
+			fail.call("stairs did not use the kit stair models")
+		if up != null: up.free()
+		if down != null: down.free()
+		main.free()
+		return ok
 	if up == null or up.find_child("UpHighLanding", true, false) == null or up.find_child("UpBackWall", true, false) == null:
 		fail.call("stairs_up did not use raised stair model")
 		main.free()

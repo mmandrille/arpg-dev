@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-30 (v488 live stash HTTP sync; v487 kit ground loot)
+Last updated: 2026-09-30 (v489 kit stairs; graphics batch v489–v492)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-09-30 (v488 live stash HTTP sync; v487 kit ground loot)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v488 — live stash HTTP sync: stash writes from market/stash HTTP routes reach the live session next tick via a recorded `system_account_stash_sync` input, replay-exact; `buyer_offer_cancel_ui` green ([as-built](docs/as-built/v488_live-stash-http-sync.md); `make ci` green). Prior: v487 kit ground loot. |
+| **Latest completed slice** | v489 — kit stairs: `stairs_up` is the KayKit narrow flight, `stairs_down` a kit grate hatch over a dark pit, state tints via `ModelTint` ([as-built](docs/as-built/v489_kit-stairs.md)). Graphics batch in progress: v490 kit coins/potions, v491 town look pass, v492 combat VFX. Prior: v488 live stash HTTP sync. |
 | **Next slice** | TBD — `/next`. Candidate: sync character inventory changed over HTTP (`publish_inventory` / `offer_inventory` leave the live sim holding removed items; v488 follow-up). Visual follow-up: kit coin/potion ground props. |
 | **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
 | **Next engineering review** | ~v496 — run `$review` then `$refactor` after the next ~10-slice milestone |

@@ -361,6 +361,9 @@ static func merchant_material(color: Color, emit: bool = false) -> StandardMater
 	return mat
 
 static func make_stair_node(def_id: String) -> Node3D:
+	var kit := KitStairs.make_node(def_id)
+	if kit != null:
+		return kit
 	var root := Node3D.new()
 	root.name = "Stairs_%s" % def_id
 	var is_down := def_id == "stairs_down"

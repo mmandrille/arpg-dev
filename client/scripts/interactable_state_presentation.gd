@@ -48,6 +48,9 @@ static func apply_state_tint(rec: Dictionary, state: String) -> void:
 		core.material_override = mat
 		return
 	if def_id == "stairs_down" or def_id == "stairs_up":
+		if node.has_meta("kit_stairs"):
+			KitStairs.apply_state(node, def_id, state)
+			return
 		var base := node.get_child(0) as MeshInstance3D if node.get_child_count() > 0 else null
 		if base == null:
 			return

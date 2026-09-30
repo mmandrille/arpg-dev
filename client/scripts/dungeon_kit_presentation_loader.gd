@@ -77,7 +77,12 @@ static func chest_config() -> Dictionary:
 	return (_config.get("chest", {}) as Dictionary).duplicate(true)
 
 
-## Props (torches/chests) follow the global kit flag plus their own catalog flag.
+static func stairs_config() -> Dictionary:
+	ensure_loaded()
+	return (_config.get("stairs", {}) as Dictionary).duplicate(true)
+
+
+## Props (torches/chests/stairs) follow the global kit flag plus their own catalog flag.
 static func prop_enabled(prop: String) -> bool:
 	ensure_loaded()
 	var enabled := bool(_config.get("enabled", false))

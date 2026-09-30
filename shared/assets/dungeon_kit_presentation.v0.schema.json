@@ -4,46 +4,99 @@
   "title": "Dungeon kit presentation (v0)",
   "description": "Client-only KayKit dungeon piece selection for walls, columns and floors (ADR-0018 P2).",
   "type": "object",
-  "required": ["version", "enabled", "min_dungeon_depth", "wall", "column", "floor", "torch", "chest", "disable_legacy"],
+  "required": [
+    "version",
+    "enabled",
+    "min_dungeon_depth",
+    "wall",
+    "column",
+    "floor",
+    "torch",
+    "chest",
+    "disable_legacy"
+  ],
   "additionalProperties": false,
   "properties": {
-    "version": { "const": 0 },
-    "note": { "type": "string" },
-    "enabled": { "type": "boolean" },
-    "min_dungeon_depth": { "type": "integer", "minimum": 1 },
+    "version": {
+      "const": 0
+    },
+    "note": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "min_dungeon_depth": {
+      "type": "integer",
+      "minimum": 1
+    },
     "wall": {
       "type": "object",
-      "required": ["full_asset_id", "half_asset_id"],
+      "required": [
+        "full_asset_id",
+        "half_asset_id"
+      ],
       "additionalProperties": false,
       "properties": {
-        "full_asset_id": { "$ref": "#/$defs/asset_id" },
-        "half_asset_id": { "$ref": "#/$defs/asset_id" }
+        "full_asset_id": {
+          "$ref": "#/$defs/asset_id"
+        },
+        "half_asset_id": {
+          "$ref": "#/$defs/asset_id"
+        }
       }
     },
     "column": {
       "type": "object",
-      "required": ["asset_id"],
+      "required": [
+        "asset_id"
+      ],
       "additionalProperties": false,
-      "properties": { "asset_id": { "$ref": "#/$defs/asset_id" } }
+      "properties": {
+        "asset_id": {
+          "$ref": "#/$defs/asset_id"
+        }
+      }
     },
     "floor": {
       "type": "object",
-      "required": ["enabled", "surface_y", "base_color", "variants"],
+      "required": [
+        "enabled",
+        "surface_y",
+        "base_color",
+        "variants"
+      ],
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "surface_y": { "type": "number", "minimum": 0 },
-        "base_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "enabled": {
+          "type": "boolean"
+        },
+        "surface_y": {
+          "type": "number",
+          "minimum": 0
+        },
+        "base_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
         "variants": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": ["asset_id", "weight"],
+            "required": [
+              "asset_id",
+              "weight"
+            ],
             "additionalProperties": false,
             "properties": {
-              "asset_id": { "$ref": "#/$defs/asset_id" },
-              "weight": { "type": "integer", "minimum": 1 }
+              "asset_id": {
+                "$ref": "#/$defs/asset_id"
+              },
+              "weight": {
+                "type": "integer",
+                "minimum": 1
+              }
             }
           }
         }
@@ -51,44 +104,165 @@
     },
     "torch": {
       "type": "object",
-      "required": ["enabled", "asset_id", "flame_offset", "flame_scale"],
+      "required": [
+        "enabled",
+        "asset_id",
+        "flame_offset",
+        "flame_scale"
+      ],
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "asset_id": { "$ref": "#/$defs/asset_id" },
+        "enabled": {
+          "type": "boolean"
+        },
+        "asset_id": {
+          "$ref": "#/$defs/asset_id"
+        },
         "flame_offset": {
           "type": "object",
-          "required": ["x", "y", "z"],
+          "required": [
+            "x",
+            "y",
+            "z"
+          ],
           "additionalProperties": false,
-          "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "z": {
+              "type": "number"
+            }
+          }
         },
-        "flame_scale": { "type": "number", "exclusiveMinimum": 0 }
+        "flame_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     },
     "chest": {
       "type": "object",
-      "required": ["enabled", "asset_id", "elite_objective_asset_id", "lid_node", "elite_objective_lid_node", "scale"],
+      "required": [
+        "enabled",
+        "asset_id",
+        "elite_objective_asset_id",
+        "lid_node",
+        "elite_objective_lid_node",
+        "scale"
+      ],
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "asset_id": { "$ref": "#/$defs/asset_id" },
-        "elite_objective_asset_id": { "$ref": "#/$defs/asset_id" },
-        "lid_node": { "type": "string", "minLength": 1 },
-        "elite_objective_lid_node": { "type": "string", "minLength": 1 },
-        "scale": { "type": "number", "exclusiveMinimum": 0 }
+        "enabled": {
+          "type": "boolean"
+        },
+        "asset_id": {
+          "$ref": "#/$defs/asset_id"
+        },
+        "elite_objective_asset_id": {
+          "$ref": "#/$defs/asset_id"
+        },
+        "lid_node": {
+          "type": "string",
+          "minLength": 1
+        },
+        "elite_objective_lid_node": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     },
     "disable_legacy": {
       "type": "object",
-      "required": ["rounded_corners", "surface_details"],
+      "required": [
+        "rounded_corners",
+        "surface_details"
+      ],
       "additionalProperties": false,
       "properties": {
-        "rounded_corners": { "type": "boolean" },
-        "surface_details": { "type": "boolean" }
+        "rounded_corners": {
+          "type": "boolean"
+        },
+        "surface_details": {
+          "type": "boolean"
+        }
+      }
+    },
+    "stairs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "up_asset_id",
+        "up_scale",
+        "down_asset_id",
+        "down_scale",
+        "down_pit_color",
+        "down_pit_inset",
+        "ready_tint",
+        "locked_tint"
+      ],
+      "description": "v489: kit stairs. stairs_up is a scaled kit flight; stairs_down is a kit open-grate hatch over a dark pit face (the kit floor hides anything below floor level).",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "up_asset_id": {
+          "$ref": "#/$defs/asset_id"
+        },
+        "up_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "up_yaw_degrees": {
+          "type": "number"
+        },
+        "down_asset_id": {
+          "$ref": "#/$defs/asset_id"
+        },
+        "down_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "down_lift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "down_pit_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "down_pit_inset": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Pit face size as a fraction of the hatch footprint."
+        },
+        "ready_tint": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "locked_tint": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
       }
     }
   },
   "$defs": {
-    "asset_id": { "type": "string", "pattern": "^[a-z0-9_]+$" }
+    "asset_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    }
   }
 }

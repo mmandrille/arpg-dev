@@ -15,17 +15,36 @@
     "surface_y": 0.02,
     "base_color": "#15120f",
     "variants": [
-      { "asset_id": "kaykit_dungeon_floor_tile_small_v0", "weight": 16 },
-      { "asset_id": "kaykit_dungeon_floor_tile_small_broken_a_v0", "weight": 1 },
-      { "asset_id": "kaykit_dungeon_floor_tile_small_broken_b_v0", "weight": 1 },
-      { "asset_id": "kaykit_dungeon_floor_tile_small_decorated_v0", "weight": 1 },
-      { "asset_id": "kaykit_dungeon_floor_tile_small_weeds_a_v0", "weight": 1 }
+      {
+        "asset_id": "kaykit_dungeon_floor_tile_small_v0",
+        "weight": 16
+      },
+      {
+        "asset_id": "kaykit_dungeon_floor_tile_small_broken_a_v0",
+        "weight": 1
+      },
+      {
+        "asset_id": "kaykit_dungeon_floor_tile_small_broken_b_v0",
+        "weight": 1
+      },
+      {
+        "asset_id": "kaykit_dungeon_floor_tile_small_decorated_v0",
+        "weight": 1
+      },
+      {
+        "asset_id": "kaykit_dungeon_floor_tile_small_weeds_a_v0",
+        "weight": 1
+      }
     ]
   },
   "torch": {
     "enabled": true,
     "asset_id": "kaykit_dungeon_torch_mounted_v0",
-    "flame_offset": { "x": 0.0, "y": 0.52, "z": 0.36 },
+    "flame_offset": {
+      "x": 0.0,
+      "y": 0.52,
+      "z": 0.36
+    },
     "flame_scale": 0.55
   },
   "chest": {
@@ -39,5 +58,18 @@
   "disable_legacy": {
     "rounded_corners": true,
     "surface_details": true
+  },
+  "stairs": {
+    "enabled": true,
+    "up_asset_id": "kaykit_dungeon_stairs_narrow_v0",
+    "up_scale": 0.3,
+    "up_yaw_degrees": 0,
+    "down_asset_id": "kaykit_dungeon_floor_tile_big_grate_open_v0",
+    "down_scale": 0.36,
+    "down_lift": 0.03,
+    "down_pit_color": "#050608",
+    "down_pit_inset": 0.72,
+    "ready_tint": "#ffffff",
+    "locked_tint": "#c26b6b"
   }
 }

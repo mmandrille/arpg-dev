@@ -894,7 +894,7 @@ func (s *Sim) SetGameplayDebug(enabled bool) {
 }
 
 func gameplayDebugEnabledFromEnv() bool {
-	switch os.Getenv("ARPG_GAMEPLAY_DEBUG") {
+	switch os.Getenv("ARPG_GAMEPLAY_DEBUG") { //nolint:determinism known gap (v486 review): debug mode is not yet recorded on the session
 	case "1", "true", "TRUE", "yes", "YES", "on", "ON":
 		return true
 	default:

@@ -209,8 +209,8 @@ the next autoloop pass unless code changes make them stale.
 ### Invariants (do not break)
 
 - Go sim determinism: seeded RNG only, no wall-clock in `game/`, stable ordering.
-  **Enforced by CI gate:** `make lint-determinism` (step 3/9) — fails on `time.Now()`,
-  `math/rand` import, or bare map range (key+value) in `sim.go` / `handlers.go`.
+  **Enforced by CI gate:** `make lint-determinism` (step 5/11) — fails on `time.Now()`,
+  `math/rand`, `os.Getenv`, or map ranges in any `game/` file above `.maintainability/determinism-baseline.tsv`.
 - New intents: register one entry in `handlers.go inputHandlers` map — do **not** edit
   `applyInput` in `sim.go`. The dispatcher is a registry lookup now.
 - Shared rules are **data**; formulas evaluated in Go + GDScript from the same golden fixtures.

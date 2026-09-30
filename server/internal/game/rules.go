@@ -2793,7 +2793,7 @@ func occupiesExactly(slots []string, wantA, wantB string) bool {
 // "shared/rules" directory, returning its absolute path. Deployments should set
 // ARPG_RULES_DIR explicitly instead of relying on this search.
 func FindSharedRulesDir() (string, error) {
-	if dir := os.Getenv("ARPG_RULES_DIR"); dir != "" {
+	if dir := os.Getenv("ARPG_RULES_DIR"); dir != "" { //nolint:determinism startup rules-dir lookup, not a tick input
 		return dir, nil
 	}
 	cwd, err := os.Getwd()

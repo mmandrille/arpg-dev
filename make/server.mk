@@ -9,8 +9,8 @@ migrate: ## Apply database migrations (server also self-migrates on boot)
 test-go: ## Run all Go tests
 	cd $(SERVER_DIR) && go test ./...
 
-lint-determinism: ## Check game/ for determinism violations (time.Now, math/rand, bare map ranges)
-	cd $(SERVER_DIR) && go run ./cmd/determinism-lint ./internal/game/...
+lint-determinism: ## Check game/ for determinism violations (time.Now, math/rand, os.Getenv, map ranges vs baseline)
+	cd $(SERVER_DIR) && go run ./cmd/determinism-lint -baseline $(ROOT)/.maintainability/determinism-baseline.tsv ./internal/game/...
 
 wall-grid-audit: ## Report dungeon wall-rect grid alignment (ADR-0018 D6) -> .artifacts/wall-grid-audit.json
 	@mkdir -p $(ROOT)/.artifacts

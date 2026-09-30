@@ -1,0 +1,27 @@
+# Grandfathered unsuppressed map ranges in server/internal/game (determinism-lint).
+# Each site is unaudited debt: sort it or add //nolint:determinism with a WHY, then lower the count.
+# Regenerate: cd server && go run ./cmd/determinism-lint -baseline ../.maintainability/determinism-baseline.tsv -write-baseline ./internal/game/...
+boss_pattern_rules.go	1
+depth_scaling.go	2
+dungeon_obstacle_variety.go	1
+dungeon_room_anchor_rooms.go	1
+fog_of_war.go	1
+item_reroll.go	3
+item_roll_upgrade.go	4
+item_skill_level_bonuses.go	1
+mercenary_character.go	2
+mystery_shop.go	1
+passive_skill_rules.go	2
+perf_debug.go	2
+rules.go	26
+rules_companion.go	1
+set_items.go	3
+shop.go	6
+sim.go	7
+sim_load.go	2
+sim_players.go	2
+skill_aim_nav.go	1
+skill_rules_validation.go	3
+status_effects.go	1
+unique_chest.go	7
+upgrade_shard_items.go	1

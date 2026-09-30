@@ -98,7 +98,7 @@ per-edit habit. For a bug fix or minimal, localized change:
   `make client-unit` / `make bot scenario=<focused_scenario>` if the change is client- or
   bot-scenario-specific.
 - Run lint scoped to what changed (e.g. `cd server && go vet ./internal/game/...`,
-  `make lint-determinism` only if you touched `game/`-package hot-path files).
+  `make lint-determinism` only if you touched `game/`-package files).
 - Do **not** run `make ci` / `make ci-full` / `make test-all` for a routine fix. Reserve the
   full pack for: pre-PR validation, changes to shared contracts/protocol/golden fixtures,
   cross-cutting refactors, or when the user explicitly asks for full CI.
@@ -208,7 +208,7 @@ docs/        ADRs + specs + plans + as-built + reviews (periodic ~every 10 slice
 The client is a renderer + input layer; **the server owns every outcome that matters** (HP, damage, loot rolls, inventory). Even in solo play the client speaks the full production-shaped protocol over WebSocket. There is no local-only path or client-side shortcut.
 
 ### Server internals (`server/internal/`)
-- **`game/`** — deterministic authoritative simulation (`Sim`). Given the same seed + ordered inputs it always produces identical output. Enforced: seeded PRNG only (`rng.go`), no `time.Now()`, stable entity-ID ordering, **10 Hz live tick** (`server/internal/realtime/protocol.go:17`). Rules loaded from `shared/rules/` at startup (`rules.go`). **CI gate:** `make lint-determinism` fails on `time.Now()`, `math/rand`, or bare map ranges in hot-path files — see `server/cmd/determinism-lint/`.
+- **`game/`** — deterministic authoritative simulation (`Sim`). Given the same seed + ordered inputs it always produces identical output. Enforced: seeded PRNG only (`rng.go`), no `time.Now()`, stable entity-ID ordering, **10 Hz live tick** (`server/internal/realtime/protocol.go:17`). Rules loaded from `shared/rules/` at startup (`rules.go`). **CI gate:** `make lint-determinism` fails on `time.Now()`, `math/rand`, `os.Getenv`, or any map range in any non-test `game/` file beyond the per-file grandfathered count in `.maintainability/determinism-baseline.tsv` — see `server/cmd/determinism-lint/`.
 - **`realtime/`** — WebSocket hub + per-session runner. `Hub.Run()` upgrades the connection, constructs a `Sim`, and enters the session loop.
 - **`store/`** — repository interface + Postgres implementation. Sessions, inventory, events all persist here.
 - **`auth/`, `http/`, `replay/`** — platform services (auth, REST endpoints, replay command).
@@ -255,9 +255,11 @@ summary and must not creep into feature or balance changes. When in doubt, write
 ## Key Invariants
 
 - **Determinism in the Go sim is non-negotiable.** No `time.Now()`, `rand.Intn()` without the
-  seeded `RNG`, or bare map ranges with key+value in game logic (`game/` package hot-path files).
-  Enforced by `make lint-determinism` (CI step 3/9). Known-safe map clones that output maps are
-  annotated `//nolint:determinism` with a WHY comment. Any violation breaks replay.
+  seeded `RNG`, `os.Getenv`, or order-dependent map ranges anywhere in `game/`.
+  Enforced by `make lint-determinism` (CI step 5/11) on every non-test `game/` file. Known-safe
+  map ranges are annotated `//nolint:determinism` with a WHY comment; pre-existing unaudited sites
+  are counted per file in `.maintainability/determinism-baseline.tsv` (may not grow; lower it when
+  you fix one). A type-check failure fails the lint. Any violation breaks replay.
 - **New intents register in `handlers.go`, not in `applyInput`.** Add one entry to `inputHandlers`
   map in `handlers.go`. Never edit `applyInput` in `sim.go` for a new intent type.
 - **Shared rules are data, not code.** Formula types live in `shared/rules/`; Go and GDScript each
@@ -290,8 +292,8 @@ These rules emerged from paying down the god-file debt. Agents should follow the
 1. **Handler registry discipline.** `applyInput` dispatches via `inputHandlers` map. A new intent
    type adds one line to `handlers.go`. Never add a new `case` to `applyInput`.
 
-2. **Map range in game/.** When you write `for k, v := range someMap` in `sim.go` or
-   `handlers.go`, you must either: (a) use a `sorted*` helper before iterating, or (b) add
+2. **Map range in game/.** When you write any `range` over a map (key+value, key-only or
+   value-only) in a `game/` file, you must either: (a) use a `sorted*` helper before iterating, or (b) add
    `//nolint:determinism` with a one-line comment explaining WHY the result is order-independent
    (e.g., "output is a map", "commutative sum", "bool existence check").
    The lint will fail CI otherwise.

@@ -362,6 +362,7 @@ func _verify_ground_texture_selection() -> bool:
 
 
 func _verify_town_preview_props() -> bool:
+	# v491: the preview renders the same TownDressing as the live town (no preview-only props).
 	var town: Node3D = TownNodeFactoryScript.make_town_preview_scene()
 	if town == null:
 		_fail("town preview scene was not created")
@@ -369,33 +370,22 @@ func _verify_town_preview_props() -> bool:
 	var required := [
 		"TownPreviewGround", "TownService_town_vendor", "TownService_town_mystery_seller",
 		"TownService_town_stash", "TownService_town_bishop", "TownService_town_market_board",
-		"TownCabinWest", "TownCabinEast", "TownCampfire",
+		TownDressing.ROOT_NAME, TownDressing.PLAZA_NAME,
 	]
 	for node_name in required:
 		if town.find_child(str(node_name), true, false) == null:
 			_fail("town preview missing %s" % node_name)
 			town.free()
 			return false
-	var fire := town.find_child("TownCampfire", true, false) as Node3D
-	if fire.find_child("CampfireLight", true, false) == null or fire.find_child("FireFlameInner", true, false) == null:
-		_fail("town campfire is missing light or flame parts")
+	var props := 0
+	for child in town.find_child(TownDressing.ROOT_NAME, true, false).get_children():
+		if str(child.name).begins_with(TownDressing.PROP_PREFIX):
+			props += 1
+	var want: int = (TownPresentationLoader.dressing().get("props", []) as Array).size()
+	if props != want:
+		_fail("town preview has %d dressing props, catalog lists %d" % [props, want])
 		town.free()
 		return false
-	var cabin := town.find_child("TownCabinWest", true, false)
-	if cabin.find_child("CabinDoor", true, false) == null or cabin.find_child("CabinRoofRidge", true, false) == null:
-		_fail("town cabin is missing door or roof parts")
-		town.free()
-		return false
-	var fire_pos := Vector2(fire.position.x, fire.position.z)
-	for node_name in required:
-		if str(node_name) in ["TownPreviewGround", "TownCampfire"]:
-			continue
-		var node := town.find_child(str(node_name), true, false) as Node3D
-		var distance := fire_pos.distance_to(Vector2(node.position.x, node.position.z))
-		if distance < 5.0:
-			_fail("town preview %s is too close to campfire: %.2f" % [node_name, distance])
-			town.free()
-			return false
 	town.free()
 	return true
 

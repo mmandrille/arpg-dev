@@ -17,34 +17,200 @@
   ],
   "additionalProperties": false,
   "properties": {
-    "version": { "const": 0 },
-    "center": { "$ref": "#/$defs/position" },
-    "radius_m": { "type": "number", "exclusiveMinimum": 0 },
-    "segment_count": { "type": "integer", "minimum": 8, "maximum": 128 },
-    "gate_heading": { "type": "string", "enum": ["south", "north", "east", "west"] },
-    "gate_gap_segments": { "type": "integer", "minimum": 1, "maximum": 8 },
-    "wall_kind": { "type": "string", "enum": ["wood", "wall"] },
-    "wall_thickness": { "type": "number", "exclusiveMinimum": 0 },
-    "gate_position": { "$ref": "#/$defs/position" },
+    "version": {
+      "const": 0
+    },
+    "center": {
+      "$ref": "#/$defs/position"
+    },
+    "radius_m": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "segment_count": {
+      "type": "integer",
+      "minimum": 8,
+      "maximum": 128
+    },
+    "gate_heading": {
+      "type": "string",
+      "enum": [
+        "south",
+        "north",
+        "east",
+        "west"
+      ]
+    },
+    "gate_gap_segments": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8
+    },
+    "wall_kind": {
+      "type": "string",
+      "enum": [
+        "wood",
+        "wall"
+      ]
+    },
+    "wall_thickness": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "gate_position": {
+      "$ref": "#/$defs/position"
+    },
     "night_lighting": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "directional_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
-        "directional_energy": { "type": "number", "minimum": 0 },
-        "ambient_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
-        "ambient_energy": { "type": "number", "minimum": 0 }
+        "directional_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "directional_energy": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ambient_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "ambient_energy": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "dressing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "plaza",
+        "min_clearance_m",
+        "props"
+      ],
+      "description": "v491: presentation-only town dressing (paved plaza + road to the gate, kit props). The server does not know these; tools/test_town_dressing.py keeps them clear of gameplay positions.",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "plaza": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "radius_m",
+            "path_width_m",
+            "surface_y",
+            "tile_variants"
+          ],
+          "properties": {
+            "radius_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "path_width_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "surface_y": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.2
+            },
+            "tile_scale": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 2
+            },
+            "tile_variants": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "asset_id",
+                  "weight"
+                ],
+                "properties": {
+                  "asset_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "min_clearance_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "props": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "asset_id",
+              "position"
+            ],
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "position": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                }
+              },
+              "yaw_degrees": {
+                "type": "number"
+              },
+              "scale": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 3
+              }
+            }
+          }
+        }
       }
     }
   },
   "$defs": {
     "position": {
       "type": "object",
-      "required": ["x", "y"],
+      "required": [
+        "x",
+        "y"
+      ],
       "additionalProperties": false,
       "properties": {
-        "x": { "type": "number" },
-        "y": { "type": "number" }
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
       }
     }
   }

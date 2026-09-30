@@ -50,8 +50,37 @@ static func _default_config() -> Dictionary:
 	}
 
 
+## Town layout + v491 dressing (presentation only). Empty dressing when the catalog has none.
+static func center() -> Vector2:
+	ensure_loaded()
+	return _vec2(_config.get("center", {}))
+
+
+static func gate_position() -> Vector2:
+	ensure_loaded()
+	return _vec2(_config.get("gate_position", {}))
+
+
+static func radius_m() -> float:
+	ensure_loaded()
+	return float(_config.get("radius_m", 0.0))
+
+
+static func dressing() -> Dictionary:
+	ensure_loaded()
+	var raw = _config.get("dressing", {})
+	return (raw as Dictionary).duplicate(true) if typeof(raw) == TYPE_DICTIONARY else {}
+
+
+static func _vec2(raw) -> Vector2:
+	if typeof(raw) != TYPE_DICTIONARY:
+		return Vector2.ZERO
+	return Vector2(float((raw as Dictionary).get("x", 0.0)), float((raw as Dictionary).get("y", 0.0)))
+
+
 static func _merge_defaults(parsed: Dictionary) -> Dictionary:
-	var out := _default_config()
+	var out := parsed.duplicate(true)
+	out["night_lighting"] = _default_config()["night_lighting"]
 	if typeof(parsed.get("night_lighting", {})) == TYPE_DICTIONARY:
 		out["night_lighting"] = (_default_config()["night_lighting"] as Dictionary).merged(parsed["night_lighting"] as Dictionary)
 	return out

@@ -67,9 +67,9 @@ func update_ground_material(ground_node: MeshInstance3D, level: int) -> void:
 		return
 	configure_ground_node(ground_node, level)
 	ground_node.material_override = ground_material_for_level(level)
-	if level == 0:
-		TownAmbientLife.attach_to_town(ground_node)
-	else:
+	# v491: plaza, props and ambient silhouettes, world-aligned; removed below the town.
+	TownDressing.sync(ground_node, level)
+	if level != 0:
 		var floor_size := floor_size_for_level(level)
 		DungeonAmbientMotes.sync(ground_node, level, floor_size)
 

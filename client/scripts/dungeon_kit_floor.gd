@@ -84,6 +84,18 @@ static func pick(cell: Vector2, level: int, weights: Array) -> Vector2i:
 	return Vector2i(index, (h / total) % 4)
 
 
+## Placement of one tile instance. `cell` is (x, quarter-turns, z); `box` is the variant's mesh AABB,
+## `base_box` the plain (first) tile's. Every variant is seated by the plain tile's slab top, not its
+## own bounds: decorated and weeds tiles carry props above the slab (bounds top 0.67 / 0.2 vs 0.05),
+## and seating them by their own top sank them under the floor surface (v491 fix). Pure, so it is
+## testable headless (the dummy renderer does not keep MultiMesh buffers).
+static func tile_transform(cell: Vector3, box: AABB, base_box: AABB, surface_y: float, scale: float = 1.0) -> Transform3D:
+	var basis := Basis(Vector3.UP, deg_to_rad(90.0 * cell.y)).scaled(Vector3.ONE * scale)
+	var center := box.get_center()
+	var origin := Vector3(cell.x, surface_y - base_box.end.y * scale, cell.z) - basis * Vector3(center.x, 0.0, center.z)
+	return Transform3D(basis, origin)
+
+
 static func build(walls: Array, level: int) -> Node3D:
 	var cfg := LoaderScript.floor_config()
 	if not bool(cfg.get("enabled", false)):
@@ -118,11 +130,7 @@ static func build(walls: Array, level: int) -> Node3D:
 		mm.mesh = mesh
 		mm.instance_count = placements.size()
 		for j in placements.size():
-			var p: Vector3 = placements[j]
-			var basis := Basis(Vector3.UP, deg_to_rad(90.0 * p.y))
-			var center := box.get_center()
-			var origin := Vector3(p.x, surface_y - box.end.y, p.z) - basis * Vector3(center.x, 0.0, center.z)
-			mm.set_instance_transform(j, Transform3D(basis, origin))
+			mm.set_instance_transform(j, tile_transform(placements[j], box, base_box, surface_y))
 		var instance := MultiMeshInstance3D.new()
 		instance.name = "KitFloor_%s" % str(ids[i])
 		instance.multimesh = mm

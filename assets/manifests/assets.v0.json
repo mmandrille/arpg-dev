@@ -1063,6 +1063,102 @@
         "license": "CC0-1.0",
         "sha256": "5b68d7b4eaee5af15aea7fd02a09f196a6a88d94af3140767cd718571d1c7183"
       }
+    },
+    "kaykit_dungeon_banner_patterna_red_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/banner_patternA_red.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/banner_patternA_red.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "64243b0a8110bbc6e5a02f5c0acbe447dc7ea65319123319c402dd26486dad25"
+      }
+    },
+    "kaykit_dungeon_barrel_large_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/barrel_large.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/barrel_large.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "9fae6a79056241baf253fe9272dc7a7ddb174e1caf153eb5013c58a596722148"
+      }
+    },
+    "kaykit_dungeon_barrel_small_stack_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/barrel_small_stack.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/barrel_small_stack.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "c23dc73a11c5a57ed33cb8a9df99f2b2793517341c5d62c6e50b0150652e8e99"
+      }
+    },
+    "kaykit_dungeon_crates_stacked_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/crates_stacked.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/crates_stacked.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "43182b077ead9b033804300ef453b7402bdc979f00cfce2d7f0c91dcf6bb5d3c"
+      }
+    },
+    "kaykit_dungeon_keg_decorated_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/keg_decorated.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/keg_decorated.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "02a31f44f66de39375510cd1ef35c5d19cee4cf910d78f38bc5f89093a6a2670"
+      }
+    },
+    "kaykit_dungeon_table_medium_tablecloth_decorated_b_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/table_medium_tablecloth_decorated_B.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/table_medium_tablecloth_decorated_B.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "5f8d91096f1748a5f5991b7dacfa90ad205219616cb25312d2640b12f3e521e4"
+      }
+    },
+    "kaykit_dungeon_trunk_large_a_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/trunk_large_A.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/trunk_large_A.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "fb915dc521a92708dfe548922cfb09af23392a83a356e65c837cfbc406f237a9"
+      }
+    },
+    "kaykit_dungeon_candle_triple_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_dungeon/candle_triple.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Dungeon Remastered 1.0 by Kay Lousberg (Assets/gltf/candle_triple.gltf.glb @ b0ca9bd96a80)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+        "license": "CC0-1.0",
+        "sha256": "3536f0a55df50c728ec9c369c4a6a81c913b33a507ac4a192d418d28fd6677c2"
+      }
     }
   }
 }

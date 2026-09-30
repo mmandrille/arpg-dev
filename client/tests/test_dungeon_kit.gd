@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_test_thick_wall_uses_rows()
 	_test_column_matches_footprint()
 	_test_floor_cells_skip_rectangles_and_are_deterministic()
+	_test_floor_variants_share_the_slab_height()
 	_test_renderer_kit_occlusion_fades_all_meshes()
 	_test_disabled_kit_falls_back_to_box_walls()
 	_finish()
@@ -177,6 +178,26 @@ func _test_floor_cells_skip_rectangles_and_are_deterministic() -> void:
 		_fail("floor variant picks must be deterministic")
 		return
 	_pass("floor tiles skip wall/hole/water rectangles deterministically")
+
+
+## v491: decorated/weeds variants carry props above the slab; every variant must be seated by the
+## plain tile's slab top, so all tiles share one height.
+func _test_floor_variants_share_the_slab_height() -> void:
+	var variants: Array = LoaderScript.floor_config()["variants"]
+	var base_box := LibraryScript.bounds(str(variants[0]["asset_id"]))
+	var heights := {}
+	var tops := {}
+	for v in variants:
+		var box := LibraryScript.mesh(str(v["asset_id"])).get_aabb()
+		tops[snappedf(box.end.y, 0.001)] = true
+		heights[snappedf(FloorScript.tile_transform(Vector3(3.0, 1.0, 5.0), box, base_box, 0.02).origin.y, 0.0001)] = true
+	if tops.size() < 2:
+		_fail("slab-height check needs variants with different bounds tops")
+		return
+	if heights.size() != 1:
+		_fail("floor variants sit at different heights: %s" % str(heights.keys()))
+		return
+	_pass("floor variants share the slab height")
 
 
 func _test_renderer_kit_occlusion_fades_all_meshes() -> void:

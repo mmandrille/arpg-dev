@@ -227,20 +227,8 @@ static func make_town_preview_scene() -> Node3D:
 		service.name = "TownService_%s" % str(entry["def_id"])
 		service.position = entry["position"] as Vector3
 		root.add_child(service)
-	var cabin_a := make_town_cabin_node("west")
-	cabin_a.name = "TownCabinWest"
-	cabin_a.position = Vector3(4.0, 0.0, 16.0)
-	cabin_a.rotation_degrees.y = -22.0
-	root.add_child(cabin_a)
-	var cabin_b := make_town_cabin_node("east")
-	cabin_b.name = "TownCabinEast"
-	cabin_b.position = Vector3(22.0, 0.0, 16.0)
-	cabin_b.rotation_degrees.y = 18.0
-	root.add_child(cabin_b)
-	var fire := make_town_campfire_node()
-	fire.position = Vector3(11.0, 0.0, 14.0)
-	root.add_child(fire)
-	TownAmbientLife.attach_to_town(root)
+	# v491: the same dressing as the live town (plaza, road, kit props).
+	root.add_child(TownDressing.build())
 	return root
 
 static func make_interactable_node(def_id: String, elite_objective: bool = false, quest_reward: bool = false) -> Node3D:
@@ -266,47 +254,6 @@ static func make_interactable_node(def_id: String, elite_objective: bool = false
 		"town_exit_gate":
 			return make_door_node()
 	return make_door_node()
-
-static func make_town_cabin_node(variant: String = "plain") -> Node3D:
-	var root := Node3D.new()
-	root.name = "TownCabin"
-	var roof := Color("#5b2b1d") if variant == "west" else Color("#69401f")
-	add_merchant_box(root, "CabinShadow", Vector3(2.45, 0.035, 1.85), Vector3(0.0, 0.018, 0.0), Color("#17130f"))
-	add_merchant_box(root, "CabinBody", Vector3(1.78, 1.02, 1.28), Vector3(0.0, 0.54, 0.0), Color("#6d3f1f"))
-	add_merchant_box(root, "CabinFront", Vector3(1.86, 0.74, 0.08), Vector3(0.0, 0.46, 0.68), Color("#3b2113"))
-	add_merchant_box(root, "CabinDoor", Vector3(0.42, 0.62, 0.10), Vector3(-0.36, 0.35, 0.74), Color("#2b1710"))
-	add_merchant_box(root, "CabinWindow", Vector3(0.34, 0.30, 0.11), Vector3(0.38, 0.58, 0.75), Color("#d7ad58"))
-	add_merchant_box(root, "CabinRoofA", Vector3(2.15, 0.34, 1.58), Vector3(0.0, 1.15, -0.14), roof)
-	add_merchant_box(root, "CabinRoofRidge", Vector3(2.28, 0.18, 0.22), Vector3(0.0, 1.42, 0.0), Color("#b18a4a"))
-	for x in [-0.76, 0.0, 0.76]:
-		add_merchant_box(root, "CabinWallLog", Vector3(0.08, 1.04, 1.36), Vector3(x, 0.56, 0.0), Color("#4f2d18"))
-	return root
-
-static func make_town_campfire_node() -> Node3D:
-	var root := Node3D.new()
-	root.name = "TownCampfire"
-	add_merchant_cylinder(root, "FireStoneRing", 0.58, 0.08, Vector3(0.0, 0.04, 0.0), Color("#4e4d48"))
-	for i in range(6):
-		var angle := TAU * float(i) / 6.0
-		var stone := add_merchant_box(root, "FireStone%d" % i, Vector3(0.20, 0.11, 0.16), Vector3(cos(angle) * 0.47, 0.10, sin(angle) * 0.47), Color("#777067"))
-		stone.rotation_degrees.y = rad_to_deg(angle)
-	for i in range(3):
-		var log := add_merchant_box(root, "FireLog%d" % i, Vector3(0.72, 0.11, 0.16), Vector3(0.0, 0.17 + float(i) * 0.025, 0.0), Color("#4b2815"))
-		log.rotation_degrees.y = 60.0 * float(i)
-	var flame_outer := add_merchant_cylinder(root, "FireFlameOuter", 0.24, 0.62, Vector3(0.0, 0.52, 0.0), Color("#ff7a1a"), true)
-	flame_outer.scale.x = 0.58
-	flame_outer.scale.z = 0.58
-	var flame_inner := add_merchant_cylinder(root, "FireFlameInner", 0.14, 0.44, Vector3(0.0, 0.58, 0.0), Color("#ffd45a"), true)
-	flame_inner.scale.x = 0.52
-	flame_inner.scale.z = 0.52
-	var light := OmniLight3D.new()
-	light.name = "CampfireLight"
-	light.light_color = Color("#ff9b3d")
-	light.light_energy = 1.8
-	light.omni_range = 4.0
-	light.position = Vector3(0.0, 0.78, 0.0)
-	root.add_child(light)
-	return root
 
 static func make_market_badge(badge_name: String, count_name: String, position: Vector3, bg_color: Color, text_color: Color) -> Node3D:
 	var badge := Node3D.new()

@@ -3,7 +3,6 @@ extends SceneTree
 const ClassIdleStanceScript := preload("res://scripts/class_idle_stance.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const MonsterFamilyAccentScript := preload("res://scripts/monster_family_accent.gd")
-const TownAmbientLifeScript := preload("res://scripts/town_ambient_life.gd")
 const CameraImpactFeedbackScript := preload("res://scripts/camera_impact_feedback.gd")
 const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
@@ -21,7 +20,6 @@ func _initialize() -> void:
 	ClassPresentationsLoaderScript.ensure_loaded()
 	_test_class_idle_stance()
 	_test_monster_family_accent()
-	_test_town_ambient_life()
 	_test_camera_impact_feedback()
 	_test_chest_open_burst()
 	_test_tooltip_rarity_border()
@@ -60,23 +58,6 @@ func _test_monster_family_accent() -> void:
 		return
 	node.free()
 	_pass("monster family accent")
-
-
-func _test_town_ambient_life() -> void:
-	var root := Node3D.new()
-	TownAmbientLifeScript.attach_to_town(root)
-	var props := root.find_child("TownAmbientLife", false, false)
-	if props == null or props.get_child_count() < 3:
-		_fail("town ambient life should add silhouettes")
-		root.free()
-		return
-	TownAmbientLifeScript.attach_to_town(root)
-	if props.get_child_count() != 3:
-		_fail("town ambient life should attach once")
-		root.free()
-		return
-	root.free()
-	_pass("town ambient life")
 
 
 func _test_camera_impact_feedback() -> void:

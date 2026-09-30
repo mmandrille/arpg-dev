@@ -314,6 +314,11 @@ def validate(root: Path, report: Report) -> None:
         kit_ids += [kit["torch"]["asset_id"], kit["chest"]["asset_id"], kit["chest"]["elite_objective_asset_id"]]
         if "stairs" in kit:  # v489 kit stairs
             kit_ids += [kit["stairs"]["up_asset_id"], kit["stairs"]["down_asset_id"]]
+        town_path = root / "shared/assets/town_presentation.v0.json"
+        if town_path.is_file():  # v491 town dressing props
+            dressing = load(town_path).get("dressing", {})
+            kit_ids += sorted({p["asset_id"] for p in dressing.get("props", [])})
+            kit_ids += [v["asset_id"] for v in dressing.get("plaza", {}).get("tile_variants", [])]
         for asset_id in kit_ids:
             entry = assets.get(asset_id)
             if entry is None or entry.get("type") != "environment":

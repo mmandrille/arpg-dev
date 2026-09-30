@@ -385,7 +385,10 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
   step9_failed=0
   step9_failure_details=()
   set +e
-  SESSION_ID="$("$ROOT/.venv/bin/python" -m tools.bot.run \
+  # Live wire-contract gate (v486): every received snapshot/state_delta payload must
+  # validate against the v8 schemas. Benchmark probes below stay unvalidated (perf runs).
+  SESSION_ID="$(ARPG_BOT_SCHEMA_VALIDATION="${ARPG_BOT_SCHEMA_VALIDATION:-strict}" \
+    "$ROOT/.venv/bin/python" -m tools.bot.run \
     --base-url "$BASE_URL" --dev-token "$DEV_TOKEN" --debug-token "$DEBUG_TOKEN" \
     --scenario "$CI_SCENARIO" \
     --print-session-id 2> >(stream_bot_progress "$BOT_LOG" >&2))"

@@ -4824,7 +4824,7 @@ func _show_stash_panel(ev: Dictionary) -> void:
 	_close_gameplay_panels("stash_with_inventory")
 	var next_stash_id := str(ev.get("stash_id", "account_stash"))
 	var next_entity_id := str(ev.get("entity_id", ""))
-	stash_items = ev.get("stash_items", stash_items)
+	stash_items = ev.get("stash_items", [])  # full-stash events omit an empty list (v486)
 	stash_gold = int(ev.get("stash_gold", stash_gold))
 	stash_capacity = int(ev.get("stash_capacity", stash_capacity))
 	if inventory_panel != null:
@@ -5121,7 +5121,7 @@ func _show_blacksmith_panel(ev: Dictionary) -> void:
 	_close_gameplay_panels("blacksmith")
 	TownServiceBridgeScript.open_blacksmith_inventory_context(inventory_panel)
 	var next_entity_id := str(ev.get("entity_id", ""))
-	stash_items = ev.get("stash_items", stash_items)
+	stash_items = ev.get("stash_items", [])  # full-stash events omit an empty list (v486)
 	stash_gold = int(ev.get("stash_gold", stash_gold))
 	stash_capacity = int(ev.get("stash_capacity", stash_capacity))
 	blacksmith_panel.show_blacksmith(next_entity_id, _blacksmith_resource_items(), gold, stash_gold, _blacksmith_config(), "Choose an inventory item to upgrade", resource_wallet)

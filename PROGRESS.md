@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v483 armor look, ADR-0018 P3b)
+Last updated: 2026-09-29 (v486 live payload schema gate)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: 2026-09-29 (v483 armor look, ADR-0018 P3b)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v483 — armor look: equipped armor recolours the kit hero's own body parts (detail-layer tint), head items toggle class headgear, jewelry has no world visual; legacy armor boxes no longer mount (ADR-0018 P3b; `make ci` green). Prior: v482 CC0 beasts, v481 recorded tick checkpoints, v480 member join tick, v479 recorded co-op member lifecycle, v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
+| **Latest completed slice** | v486 — live payload schema gate: `make ci` protocol scenarios validate every received snapshot/state_delta against the v8 schemas (strict); ~30 drifts fixed (schema catch-up, companion `#RRGGBB` tint, empty-stash client read). v484/v485 in flight in other worktrees. Prior: v483 — armor look: equipped armor recolours the kit hero's own body parts (detail-layer tint), head items toggle class headgear, jewelry has no world visual; legacy armor boxes no longer mount (ADR-0018 P3b; `make ci` green). Prior: v482 CC0 beasts, v481 recorded tick checkpoints, v480 member join tick, v479 recorded co-op member lifecycle, v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
 | **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then ADR-0018 P3c (retire legacy 17-bone hero pipeline), kit ground-loot models, or remote-player gear (needs a protocol slice) |
 | **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
 | **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
@@ -132,6 +132,11 @@ Do **not** assume these are the next slice — they are documented backlog items
 - **v337 `$review` (ad hoc).** [`docs/reviews/20260625_v337-overview.md`](docs/reviews/20260625_v337-overview.md). Maintainability ratchet breach resolved; coordinator paydown items largely still open.
 - **v334 `$refactor` paydown — landed:** CODEMAP inverse check, fog schema/guards, fog overlay baseline, ADR-0015, bot presentation debug extraction, dungeon generation rules split, movement-input presenter, wall-floor lab nav test + scenario 78 proof, sim tick context starter, item-visual probe extraction, fog validator unit tests.
 - **v337 future-plan items:** `sim.go` phase-helper paydown via `simTickCtx`; quarantine `realtime/runner.go`; `validate_shared.py` validation-domain extraction; `main.gd` attack-move cluster extraction (9-line headroom).
+- **v486 wire-contract follow-ups.** (1) Add a static Go `json:` tag ↔ v8 schema cross-check to
+  `validate_shared` so drift no scenario exercises is caught (e.g. item `set_piece_id`). (2) A slow
+  WebSocket reader makes the server tick run `coalesceOutbound` under the send-overflow mutex; the
+  v486 A/B showed soak tick-overrun p95 0 → 54.7 ms from bot lag alone. (3) Client-bot and
+  `check_persistence` reconnect snapshots are not schema-validated.
 
 ### Other deferred items (from specs / ADRs)
 

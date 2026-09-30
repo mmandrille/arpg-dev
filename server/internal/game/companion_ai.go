@@ -1,8 +1,21 @@
 package game
 
-import "math"
+import (
+	"math"
+	"strings"
+)
 
-const revivedCompanionCorpseVisualTint = "444441"
+// revivedCompanionCorpseVisualTint is the protocol-form (#RRGGBB) tint of a revived corpse.
+const revivedCompanionCorpseVisualTint = "#444441"
+
+// protocolVisualTint converts a rules-form companion tint (skills.v0 stores bare
+// RRGGBB) to the protocol's #RRGGBB entity visual_tint. Empty stays empty.
+func protocolVisualTint(tint string) string {
+	if tint == "" || strings.HasPrefix(tint, "#") {
+		return tint
+	}
+	return "#" + tint
+}
 
 func (s *Sim) newPresetMonsterOrCompanion(level *LevelState, preset WorldEntity, ownerID uint64) *entity {
 	def := s.rules.Monsters[preset.MonsterDefID]
@@ -63,7 +76,7 @@ func (s *Sim) summonCompanion(owner *entity, skillID string, def SkillDef, rank 
 		aiMode:                monsterAIModeIdle,
 		sourceSkillID:         skillID,
 		visualModel:           def.Companion.VisualModel,
-		visualTint:            def.Companion.VisualTint,
+		visualTint:            protocolVisualTint(def.Companion.VisualTint),
 		visualScale:           def.Companion.VisualScale,
 	}
 	companion.id = s.alloc()

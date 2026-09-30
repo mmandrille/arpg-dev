@@ -64,6 +64,8 @@ def _all_ground_asset_ids() -> list[str]:
 
 
 def test_anchors_match_the_world_preset_exactly() -> None:
+    ids = [a["id"] for a in DRESSING["anchors"]]
+    assert len(ids) == len(set(ids)), "dressing.anchors ids must be unique (a dict would hide duplicates)"
     anchors = {a["id"]: _xy(a["position"]) for a in DRESSING["anchors"]}
     assert anchors == _gameplay_points(), "dressing.anchors must list every world-preset gameplay point"
 

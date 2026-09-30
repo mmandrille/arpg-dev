@@ -1,7 +1,8 @@
 ## Town look (ADR-0018, v491): a paved KayKit plaza around the town centre, a road to the gate, and
 ## kit props grouped behind the services; the ground detail (rim, edge, paths, scatter; v493) is
-## built by TownGroundDetail. Presentation only (the server never sees these; tools/test_town_dressing.py keeps props clear of gameplay positions). Data:
-## shared/assets/town_presentation.v0.json -> center, gate_position, dressing.
+## built by TownGroundDetail. Presentation only: the server never sees these, and
+## tools/test_town_dressing.py keeps props clear of gameplay positions.
+## Data: shared/assets/town_presentation.v0.json -> center, gate_position, dressing.
 ##
 ## Everything sits under one root in town world space. The live ground plane is translated
 ## (GroundWallFactory.TOWN_GROUND_CENTER), so sync() offsets the root by the ground's position, and it

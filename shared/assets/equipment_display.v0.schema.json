@@ -4,10 +4,15 @@
   "title": "Equipment display scale (v0)",
   "description": "Global multipliers for Tier-3 GLB equipment relative to the humanoid reference (~1.8m).",
   "type": "object",
-  "required": ["version", "glb_mesh_multipliers"],
+  "required": [
+    "version",
+    "glb_mesh_multipliers"
+  ],
   "additionalProperties": false,
   "properties": {
-    "version": { "const": 0 },
+    "version": {
+      "const": 0
+    },
     "rig_native_rarity_tint_strength": {
       "type": "number",
       "minimum": 0,
@@ -16,7 +21,10 @@
     },
     "glb_mesh_multipliers": {
       "type": "object",
-      "required": ["equipped", "ground"],
+      "required": [
+        "equipped",
+        "ground"
+      ],
       "additionalProperties": false,
       "properties": {
         "equipped": {
@@ -28,6 +36,75 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 2
+        }
+      }
+    },
+    "ground_pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "v487: how GLB ground-loot models lie on the floor. default applies to every GLB ground model; rig_native (KayKit item_visuals models) overrides it; assets[asset_id] overrides both.",
+      "properties": {
+        "default": {
+          "$ref": "#/$defs/ground_pose_entry"
+        },
+        "rig_native": {
+          "$ref": "#/$defs/ground_pose_entry"
+        },
+        "assets": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/ground_pose_entry"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "ground_pose_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "height": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Model origin height above the loot root (m)."
+        },
+        "rotation_degrees": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y",
+            "z"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "z": {
+              "type": "number"
+            }
+          }
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 4,
+          "description": "Extra scale on top of glb_mesh_multipliers.ground."
+        },
+        "max_extent": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 4,
+          "description": "If the posed model's longest side exceeds this (m), scale it down to fit. Caps long kit polearms without equalising small weapons."
+        },
+        "rest_on_floor": {
+          "type": "boolean",
+          "description": "Centre the posed model's bounds on the loot root (XZ) and put their bottom at height, instead of placing the model origin at height (kit weapons have a grip origin)."
         }
       }
     }

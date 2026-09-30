@@ -220,13 +220,15 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		main.free()
 		return false
 	var rusty_ground: Dictionary = ItemRulesLoader.item_presentations.get("rusty_sword", {}).get("ground", {})
-	var expected_ground_scale := float(rusty_ground.get("scale", 1.0)) * EquipmentDisplayLoaderScript.ground_multiplier()
-	if absf(sword_model.scale.x - expected_ground_scale) > 0.001 or absf(sword_model.scale.y - expected_ground_scale) > 0.001 or absf(sword_model.scale.z - expected_ground_scale) > 0.001:
-		_fail("equipment floor loot model scale mismatch want=%s got=%s" % [str(expected_ground_scale), str(sword_model.scale)])
+	var rusty_pose := EquipmentDisplayLoaderScript.ground_pose_for(_ground_model_asset_id("rusty_sword"), true)
+	# Uniform scale, never above the data-driven base (max_extent may only shrink it).
+	var base_ground_scale := float(rusty_ground.get("scale", 1.0)) * EquipmentDisplayLoaderScript.ground_multiplier() * float(rusty_pose["scale"])
+	if not (is_equal_approx(sword_model.scale.x, sword_model.scale.y) and is_equal_approx(sword_model.scale.y, sword_model.scale.z)) or sword_model.scale.x > base_ground_scale + 0.001:
+		_fail("equipment floor loot model scale mismatch base=%s got=%s" % [str(base_ground_scale), str(sword_model.scale)])
 		sword_node.free()
 		main.free()
 		return false
-	if sword_model.position.y > 0.15 or absf(sword_model.rotation_degrees.x - 90.0) > 0.001:
+	if not sword_model.rotation_degrees.is_equal_approx(rusty_pose["rotation_degrees"]):
 		_fail("equipment floor loot model is not lying on the floor: pos=%s rot=%s" % [str(sword_model.position), str(sword_model.rotation_degrees)])
 		sword_node.free()
 		main.free()
@@ -253,7 +255,7 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 
 	var shield_node: Node3D = loot_factory.make_loot_node({"item_def_id": "shield", "rarity": "magic"})
 	if shield_node.find_child("GroundModel_%s" % _ground_model_asset_id("shield"), true, false) == null:
-		_fail("shield floor loot did not use manifest-backed kite shield model")
+		_fail("shield floor loot did not use its item_visuals kit shield model")
 		shield_node.free()
 		main.free()
 		return false
@@ -471,7 +473,12 @@ func _fail(msg: String) -> void:
 
 
 
-## Ground loot models come from the merged item presentation (family `3d_model`), the same
-## view the loot factory reads — not item_visuals.
+## v487: hand items lie on the ground as their item_visuals.v0.json kit model (the one the hero
+## wields); other equipment uses the merged presentation family `3d_model`. Read from the JSON
+## directly so the test does not reuse the factory's own resolver.
 func _ground_model_asset_id(item_def_id: String) -> String:
+	var shared := ProjectSettings.globalize_path("res://").path_join("../shared")
+	var visual: Dictionary = _read(shared.path_join("assets/item_visuals.v0.json"))["item_visuals"].get(item_def_id, {})
+	if str(visual.get("slot", "")) in ["main_hand", "off_hand"]:
+		return str(visual.get("asset_id", ""))
 	return str((ItemRulesLoader.item_presentations.get(item_def_id, {}) as Dictionary).get("3d_model", ""))

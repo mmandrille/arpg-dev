@@ -4,5 +4,52 @@
     "equipped": 1.0,
     "ground": 0.7
   },
-  "rig_native_rarity_tint_strength": 0.25
+  "rig_native_rarity_tint_strength": 0.25,
+  "ground_pose": {
+    "default": {
+      "height": 0.12,
+      "rotation_degrees": {
+        "x": 90,
+        "y": 35,
+        "z": 0
+      },
+      "scale": 1.0
+    },
+    "rig_native": {
+      "height": 0.06,
+      "rotation_degrees": {
+        "x": 90,
+        "y": 35,
+        "z": 0
+      },
+      "scale": 1.0,
+      "max_extent": 1.1,
+      "rest_on_floor": true
+    },
+    "assets": {
+      "kaykit_weapon_adv_bow_withstring_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 0
+        }
+      },
+      "kaykit_weapon_adv_spellbook_closed_v0": {
+        "rotation_degrees": {
+          "x": 0,
+          "y": 35,
+          "z": 90
+        }
+      },
+      "kaykit_weapon_adv_shield_badge_v0": {
+        "scale": 0.75
+      },
+      "kaykit_weapon_adv_shield_round_v0": {
+        "scale": 0.75
+      },
+      "kaykit_weapon_adv_shield_square_v0": {
+        "scale": 0.75
+      }
+    }
+  }
 }

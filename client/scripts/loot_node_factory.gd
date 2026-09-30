@@ -4,6 +4,7 @@ extends RefCounted
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
 const PotionIconLabelScript := preload("res://scripts/potion_icon_label.gd")
+const ModelTintScript := preload("res://scripts/model_tint.gd")
 
 var asset_manifest: Dictionary = {}
 var item_presentations: Dictionary = {}
@@ -90,12 +91,18 @@ func add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color
 		_:
 			add_loot_box(root, "Box", Vector3(0.5, 0.5, 0.5) * scale, Vector3(0.0, 0.25 * scale, 0.0), color)
 
-func make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
+## v487: hand items (main_hand/off_hand) lie on the ground as the kit model the hero wields
+## (item_visuals.v0.json); other equipment falls back to its presentation family `3d_model`.
+func ground_model_asset_id(item_def_id: String) -> String:
+	var hand_asset := ItemVisualsLoader.hand_asset_id(item_def_id)
+	if hand_asset != "":
+		return hand_asset
 	var presentation: Dictionary = item_presentations.get(item_def_id, {})
-	var asset_id := str(presentation.get("3d_model", ""))
+	return str(presentation.get("3d_model", ""))
+
+func make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
+	var asset_id := ground_model_asset_id(item_def_id)
 	if asset_id == "":
-		return null
-	if asset_id == "fallback_equipment_off_hand_v0":
 		return null
 	var entry = asset_manifest.get(asset_id, null)
 	if typeof(entry) != TYPE_DICTIONARY:
@@ -108,14 +115,56 @@ func make_ground_equipment_model(item_def_id: String, rarity: String) -> Node3D:
 	if inst == null:
 		return null
 	inst.name = "GroundModel_%s" % asset_id
+	var rig_native := ItemVisualsLoader.hand_asset_id(item_def_id) != "" and ItemVisualsLoader.is_rig_native(item_def_id)
+	var pose := EquipmentDisplayLoaderScript.ground_pose_for(asset_id, rig_native)
+	var presentation: Dictionary = item_presentations.get(item_def_id, {})
 	var ground: Dictionary = presentation.get("ground", {}) if typeof(presentation.get("ground", {})) == TYPE_DICTIONARY else {}
 	var ground_scale := float(ground.get("scale", 1.0))
-	var mesh_scale := ClientConstantsScript.GROUND_EQUIPMENT_MODEL_SCALE * ground_scale * EquipmentDisplayLoaderScript.ground_multiplier()
+	var mesh_scale := ClientConstantsScript.GROUND_EQUIPMENT_MODEL_SCALE * ground_scale * EquipmentDisplayLoaderScript.ground_multiplier() * float(pose["scale"])
 	inst.scale = Vector3.ONE * mesh_scale
-	inst.position = Vector3(0.0, 0.12, 0.0)
-	inst.rotation_degrees = Vector3(90.0, 35.0, 0.0)
-	apply_model_tint(inst, ground_item_tint(rarity))
+	inst.position = Vector3(0.0, float(pose["height"]), 0.0)
+	inst.rotation_degrees = pose["rotation_degrees"]
+	_fit_ground_pose(inst, pose)
+	apply_model_tint(inst, ground_model_tint(rarity, rig_native))
 	return inst
+
+## Applies the optional `max_extent` cap and `rest_on_floor` placement from the ground pose, using
+## the posed model's bounds in loot-root space.
+func _fit_ground_pose(inst: Node3D, pose: Dictionary) -> void:
+	var max_extent := float(pose.get("max_extent", 0.0))
+	var bounds := posed_bounds(inst)
+	if bounds.size == Vector3.ZERO:
+		return
+	var longest := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
+	if max_extent > 0.0 and longest > max_extent:
+		inst.scale *= max_extent / longest
+		bounds = posed_bounds(inst)
+	if bool(pose.get("rest_on_floor", false)):
+		var center := bounds.get_center()
+		inst.position += Vector3(-center.x, float(pose["height"]) - bounds.position.y, -center.z)
+
+## Bounds of every mesh under `inst`, in the space of inst's parent (inst's own transform applied).
+static func posed_bounds(inst: Node3D) -> AABB:
+	var acc := {"box": AABB(), "any": false}
+	_accumulate_bounds(inst, inst.transform, acc)
+	return acc["box"]
+
+static func _accumulate_bounds(node: Node, xf: Transform3D, acc: Dictionary) -> void:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		var box: AABB = xf * (node as MeshInstance3D).mesh.get_aabb()
+		acc["box"] = box if not acc["any"] else (acc["box"] as AABB).merge(box)
+		acc["any"] = true
+	for child in node.get_children():
+		if child is Node3D:
+			_accumulate_bounds(child, xf * (child as Node3D).transform, acc)
+
+## Textured kit models blend toward the rarity colour at the same strength as equipped kit
+## weapons; untextured fallback GLBs take the full rarity tint.
+func ground_model_tint(rarity: String, rig_native: bool) -> Color:
+	var tint := ground_item_tint(rarity)
+	if rig_native:
+		return Color.WHITE.lerp(tint, EquipmentDisplayLoaderScript.rig_native_tint_strength())
+	return tint
 
 func ground_item_tint(rarity: String) -> Color:
 	match rarity.to_lower():
@@ -387,10 +436,9 @@ func res_path(runtime_path: String) -> String:
 		p = p.substr("client/".length())
 	return "res://" + p
 
+## ModelTint duplicates the mesh's own material, so kit albedo textures survive the tint.
 func apply_model_tint(root: Node, color: Color) -> void:
 	if root is MeshInstance3D:
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = color
-		(root as MeshInstance3D).material_override = mat
+		(root as MeshInstance3D).material_override = ModelTintScript.tinted_material(root as MeshInstance3D, color)
 	for child in root.get_children():
 		apply_model_tint(child, color)

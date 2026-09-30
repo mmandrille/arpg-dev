@@ -4,6 +4,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable
 
+HAND_SLOTS = frozenset({"main_hand", "off_hand"})
+
 
 def validate_item_presentations(
     report: Any,
@@ -27,9 +29,22 @@ def validate_item_presentations(
     else:
         report.ok("item presentation families cover every item family")
 
+    # v487: hand items (main_hand/off_hand) take their ground model from item_visuals.v0.json, the
+    # model the hero wields. A family 3d_model on a hand family would be a second, drifting mapping.
+    item_visuals = load_json(assets_dir / "item_visuals.v0.json")["item_visuals"]
+    hand_families = {
+        str(presentation.get("family", ""))
+        for def_id, presentation in presentations.items()
+        if item_visuals.get(def_id, {}).get("slot") in HAND_SLOTS
+    }
     for family_id, family in sorted(presentation_families.items()):
         model_id = family.get("3d_model")
-        if model_id and model_id not in manifest_assets:
+        if model_id and family_id in hand_families:
+            report.fail(
+                "item presentation family 3d_model",
+                f"{family_id}: hand-item family must not set 3d_model (ground loot uses item_visuals.v0.json)",
+            )
+        elif model_id and model_id not in manifest_assets:
             report.fail("item presentation family 3d_model", f"{family_id}: unknown asset {model_id}")
         elif model_id:
             report.ok(f"item presentation family {family_id} 3d_model resolves")

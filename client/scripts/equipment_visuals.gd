@@ -461,6 +461,7 @@ func reload_from_disk() -> void:
 
 
 func reload_data_only() -> void:
+	ItemVisualsLoader.invalidate()
 	_load_data()
 
 
@@ -469,8 +470,7 @@ func _load_data() -> void:
 	# (test_golden.gd): project root res:// is client/, so shared/ and assets/
 	# sit one level up.
 	var base := ProjectSettings.globalize_path("res://")
-	var iv = _read_json(base.path_join("../shared/assets/item_visuals.v0.json"))
-	_visuals = iv.get("item_visuals", {}) if iv != null else {}
+	_visuals = ItemVisualsLoader.all()
 	var mf = _read_json(base.path_join("../assets/manifests/assets.v0.json"))
 	_assets = mf.get("assets", {}) if mf != null else {}
 

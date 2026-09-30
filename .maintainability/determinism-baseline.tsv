@@ -20,8 +20,7 @@ shop.go	6
 sim.go	7
 sim_load.go	2
 sim_players.go	2
-skill_aim_nav.go	1
 skill_rules_validation.go	3
 status_effects.go	1
-unique_chest.go	7
+unique_chest.go	5
 upgrade_shard_items.go	1

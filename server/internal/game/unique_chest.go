@@ -237,8 +237,12 @@ func (s *Sim) seedUniqueTestChests() {
 		return
 	}
 
-	for _, level := range s.levels {
-		for _, e := range level.entities {
+	// Sorted levels and entity IDs: s.alloc() below must hand out IDs in a
+	// replay-stable order once more than one test chest exists.
+	for _, levelNum := range s.sortedLevelNums() {
+		level := s.levels[levelNum]
+		for _, id := range sortedEntityIDs(level.entities) {
+			e := level.entities[id]
 			if e == nil || e.kind != interactableEntity {
 				continue
 			}

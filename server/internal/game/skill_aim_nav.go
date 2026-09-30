@@ -18,7 +18,9 @@ func (s *Sim) monsterAlongDirectionBeyondRange(player *entity, dir Vec2, castRan
 	var nearest *entity
 	nearestAlong := math.MaxFloat64
 	aimTolerance := playerRadius + meleeRangeEpsilon
-	for _, candidate := range level.entities {
+	// Sorted IDs: equal-distance candidates must tie-break by entity ID, not map order.
+	for _, id := range sortedEntityIDs(level.entities) {
+		candidate := level.entities[id]
 		if candidate == nil || candidate.kind != monsterEntity || candidate.hp <= 0 {
 			continue
 		}

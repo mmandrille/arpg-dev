@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-30 (graphics batch v489–v492 complete)
+Last updated: 2026-09-30 (v493 town floor detail complete)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-09-30 (graphics batch v489–v492 complete)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v492 — combat VFX foundation (ADR-0018 P5): in-repo glow shader + `CombatVfx` particle bursts from `vfx_presentation.v0.json`: damage-type hit sparks, death burst, particle heal rain, quality-scaled ([as-built](docs/as-built/v492_combat-vfx-foundation.md); `make ci` green). Graphics batch v489–v492 complete (stairs, coins/potions, town, VFX). |
-| **Next slice** | TBD — `/next`. Candidates: sync character inventory changed over HTTP (v488 follow-up); death dissolve + rim/outline (ADR-0018 P5 rest); town nature/village pass once the KayKit Forest Nature + Medieval Hexagon packs are downloaded; wall mesh merge for the ~4× draw-call debt. |
+| **Latest completed slice** | v493 — town floor detail (ADR-0018 follow-up): stone rim with weedy wear, dirt edge band, stone service path to the vendor, deterministic grass scatter, from `town_presentation.v0.json` → `dressing` via `town_ground_detail.gd`; the soft-edge goal is not met (kit dirt is the same taupe as the stone) ([as-built](docs/as-built/v493_town-floor-detail.md); `make ci` green, 7m09s). |
+| **Next slice** | v494 — random kit props on every dungeon floor (second of the approved two-slice plan; needs its own spec). Other candidates: sync character inventory changed over HTTP (v488 follow-up); death dissolve + rim/outline (ADR-0018 P5 rest); terrain shader or nature pack for a real town grass blend; showme `town` focus fix (play camera); wall mesh merge for the ~4× draw-call debt. |
 | **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
 | **Next engineering review** | ~v496 — run `$review` then `$refactor` after the next ~10-slice milestone |
 

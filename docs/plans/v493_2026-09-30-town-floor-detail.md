@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-Status: Draft
+Status: Implemented
 Spec: [`docs/specs/v493_spec-town-floor-detail.md`](../specs/v493_spec-town-floor-detail.md)
 
 **Goal:** The live town gets a soft plaza edge (dirt band and stone rim), stone paths from the plaza to the vendor and mystery seller, and deterministic dirt patches and stone chunks on the grass.
@@ -1351,3 +1351,15 @@ Expected: green (~6-15 min). The known `paladin_class_foundation` flake is recor
 - Maintainability (`town_dressing.gd` shrinks; new file < 600): Tasks 4 and 6.
 - `make ci` once, no `ci-full`: Task 6.
 - Known deviations from the spec text, on purpose: (1) `width_m` distances are Chebyshev between cell centres (documented in code and tests); (2) `path_width_m` is 3.0, not the spec's implied 2.0, to guarantee connected diagonal paths; (3) `anchors` (14 world-preset gameplay points) is a new data key the spec did not list, needed so the client can avoid gameplay positions and resolve path targets without reading the server's world preset.
+
+## Execution notes
+
+- `width_m` distances are Chebyshev between cell centres; `service_paths.path_width_m` is 3.0; a new
+  `anchors` data key carries the 14 world-preset gameplay points (all three are deliberate spec
+  deviations).
+- `scatter.radius_m` was raised 13 -> 22 -> 28 after the planner probe (1 placement inside the fence at
+  13) and the max-zoom capture (22 thinned out). `scatter.jitter_fraction` moved from code into data.
+- Visual gate outcome: the soft-edge goal is not met (kit dirt is the same taupe as the stone); the
+  vendor service path is the clear win. Edge band kept behind `dressing.edge.enabled`. Details in the
+  [as-built](../as-built/v493_town-floor-detail.md).
+- `kaykit_dungeon_floor_dirt_large_v0` stays vendored but unused (nine-entry acceptance criterion).

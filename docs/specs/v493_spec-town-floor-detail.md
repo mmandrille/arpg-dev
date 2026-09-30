@@ -1,6 +1,6 @@
 # v493 — Town floor detail: soft plaza edge, paths to services, grass variation (ADR-0018 follow-up)
 
-- **Status:** Draft
+- **Status:** Implemented
 - **Date:** 2026-09-30
 - **Codename:** `town-floor-detail`
 - **ADR:** [ADR-0018](../adr/0018-art-direction-and-kit-based-visuals.md) D6/D10

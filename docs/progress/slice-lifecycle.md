@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v493** | `town-floor-detail` | Complete (`make ci` green) | [`spec`](../specs/v493_spec-town-floor-detail.md) | [`plan`](../plans/v493_2026-09-30-town-floor-detail.md) | [`as-built`](../as-built/v493_town-floor-detail.md) |
 | **v492** | `combat-vfx-foundation` | Complete (`make ci` green) | [`spec`](../specs/v492_spec-combat-vfx-foundation.md) | [`plan`](../plans/v492_2026-09-30-combat-vfx-foundation.md) | [`as-built`](../as-built/v492_combat-vfx-foundation.md) |
 | **v491** | `town-look-pass` | Complete (`make ci` green) | [`spec`](../specs/v491_spec-town-look-pass.md) | [`plan`](../plans/v491_2026-09-30-town-look-pass.md) | [`as-built`](../as-built/v491_town-look-pass.md) |
 | **v490** | `kit-coins-potions` | Complete (focused verification) | [`spec`](../specs/v490_spec-kit-coins-potions.md) | [`plan`](../plans/v490_2026-09-30-kit-coins-potions.md) | [`as-built`](../as-built/v490_kit-coins-potions.md) |

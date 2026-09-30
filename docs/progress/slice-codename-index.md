@@ -264,6 +264,7 @@ v483_* = armor-look
 v484_* = retire-legacy-hero
 v485_* = remote-player-class
 v486_* = live-payload-schema-gate
+v493_* = town-floor-detail
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

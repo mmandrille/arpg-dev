@@ -53,11 +53,11 @@ The deform joints are `root`, `hips`, `spine`, `chest`, `head`, and per side (`.
 
 | Class | Model | Triangles | Height | Mesh parts (tint regions, ADR-0018 D5) |
 |-------|-------|-----------|--------|----------------------------------------|
-| paladin | `Knight.glb` | 5.8k | 2.54 | `Knight_{Body,ArmLeft,ArmRight,LegLeft,LegRight,Head}` + `Helmet`, `HelmetVisor`, `Cape` |
-| barbarian | `Barbarian.glb` | 7.1k | 2.40 | `Barbarian_*` + `BearHat` |
-| sorcerer | `Mage.glb` | 6.7k | 2.65 | `Mage_*` + `Hat`, `Cape` |
-| rogue | `Rogue.glb` | 7.6k | 2.18 | `Rogue_*` + `Cape` |
-| ranger | `Ranger.glb` | 8.9k | 2.27 | `Ranger_*` + `Cape`, `Quiver` |
+| paladin | `Knight.glb` | 5.8k | 2.54 | `Knight_{Body,ArmLeft,ArmRight,LegLeft,LegRight,Head}` + `Knight_Helmet`, `Knight_HelmetVisor`, `Knight_Cape` |
+| barbarian | `Barbarian.glb` | 7.1k | 2.40 | `Barbarian_*` + `Barbarian_BearHat` |
+| sorcerer | `Mage.glb` | 6.7k | 2.65 | `Mage_*` + `Mage_Hat`, `Mage_Cape` |
+| rogue | `Rogue.glb` | 7.6k | 2.18 | `Rogue_*` + `Rogue_Cape` |
+| ranger | `Ranger.glb` | 8.9k | 2.27 | `Ranger_*` + `Ranger_Cape`, `Ranger_Quiver` |
 | (spare) | `Rogue_Hooded.glb` | 7.2k | 2.17 | `RogueHooded_*` (**no underscore after `Rogue`**) + `Mask` |
 
 All six characters:

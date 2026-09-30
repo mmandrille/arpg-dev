@@ -1,7 +1,8 @@
 # ADR-0018: Art Direction and Kit-Based Visuals (KayKit)
 
-- **Status:** Accepted (2026-09-28). P0 checklist resolved in v469 ([findings](../researchs/v469_kaykit-p0-findings.md)). One open item
-  carries into P3: the rig of the itch.io Adventurers 2.0 / Character Animations 1.1 packs.
+- **Status:** Accepted (2026-09-28). P0 checklist resolved in v469 ([findings](../researchs/v469_kaykit-p0-findings.md)). The one open item
+  (the itch.io Adventurers 2.0 / Character Animations 1.1 rig) was resolved in P3a: v475 ships
+  Character Animations 1.1 `Rig_Medium` clips, gated by `client/tools/inspect_rig.gd`.
 - **Date:** 2026-09-28
 - **Deciders:** Project owner (PM / tech lead)
 - **Context tags:** art-direction, assets, rendering, lighting, animation, dungeon-visuals, vfx

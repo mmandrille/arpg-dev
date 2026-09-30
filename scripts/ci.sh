@@ -477,7 +477,7 @@ if [[ "$SERVER_AVAILABLE" -eq 1 ]]; then
     env GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
       SCENARIO="$CI_SCENARIO" HEADLESS=1 ./scripts/bot_client.sh
 
-  ci_captured_step "== 11/11 Godot headless smoke (optional) ==" client_smoke_failure_detail \
+  ci_captured_step "== 11/11 Godot headless smoke ==" client_smoke_failure_detail \
     env GODOT="${GODOT:-godot}" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" \
       DEBUG_TOKEN="$DEBUG_TOKEN" ./scripts/client_smoke.sh
 else

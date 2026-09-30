@@ -91,8 +91,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 - **v486 `$review` (official cadence at `2cf0dcd1`).** Overview:
   [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md). Blockers: unbounded client
-  input tick (`session_loop.go:372`), `origin` credential, ci-full red. Then `$refactor` minors: client gate
-  fails on SCRIPT ERROR, determinism lint on all `game/`, record debug mode on session, Go consumers for three goldens.
+  input tick (`session_loop.go:372`), `origin` credential, ci-full red. **`$refactor` (2026-09-30) landed:** client
+  tick clamp, client gate fails on SCRIPT ERROR, determinism lint on all `game/` (baseline), Go golden consumers, gofmt
+  + realtime `-race` in CI, occlusion throttle, dead eye-view step. **Still open:** replay max-tick/ctx guard, `origin`
+  credential (owner), 9 unique/set ci-full failures + `buyer_offer_cancel_ui`, record debug mode on the session.
 
 - **v469 environment / process gaps.**
   - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan
@@ -113,7 +115,7 @@ Do **not** assume these are the next slice — they are documented backlog items
   - macOS `/usr/bin/make` fails until `sudo xcodebuild -license` is accepted, so the v469 `make ci`
     is still owed.
   - ~~Dungeon generation failed on ~2% of seed/level pairs~~: fixed in v472 (room-corridor anchor fallback).
-- **Protocol schema drift (v485).** Live payloads are never validated against `shared/protocol/` (only examples); `state_delta.v8` `entity` still lacks `combat_stats`. v484 (P3c) is in flight in parallel; merge reconciles the `main.gd` baseline row.
+- ~~**Protocol schema drift (v485)**~~: closed by v486 (live payload schema gate; `combat_stats` is in `state_delta.v8`).
 - **Replay-determinism gaps** (v476 [`as-built`](docs/as-built/v476_recorded-load-shed.md), v478 [`as-built`](docs/as-built/v478_shared-member-setup.md), v479 [`as-built`](docs/as-built/v479_recorded-member-lifecycle.md), v481 [`as-built`](docs/as-built/v481_recorded-tick-checkpoints.md)):
   ~~replay member setup skipped wallet/bag/corpses~~ fixed in v478;
   `mercenaryroster.LoadIntoSim` still reads live alt-character rows at build/replay time (not snapshotted, same flaw corpses had);
@@ -164,7 +166,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 | Testing / tooling | **Performance test topology discipline:** Python protocol bots and offline Godot replay do not prove live Godot transport stability. Use a `runner: godot_client` scenario for authoritative client failures, assert lifetime reconnect count, capture close diagnostics, and correlate backend/client phases. | v457 live combat transport stability; `docs/performance/tools.md` |
 | Testing / tooling | Tuning-friendly rule tests: audit hardcoded values copied from `shared/rules/*.json` across Go/GDScript/Python/bot scenarios, classify each as contract/golden/accidental tuning pin, and convert accidental pins to rule-derived, semantic, range, or eventual assertions. Goal: balance changes such as `training_dummy.max_hp`, skill mana costs, monster cooldowns, loot weights, and generated population tuning should not require unrelated test edits; exact values remain only where a named golden or protocol/schema contract intentionally owns them. | v32 test-locking policy follow-up, v76/v77/v78 deferred |
 | Settings | Controls remapping, accessibility options, language selection | v24/v224 non-goals; v351 shipped windowed/fullscreen/windowed-fullscreen display mode in `user://settings.json` |
-| Assets | Blender export pipeline, remote patcher. Texture/triangle budgets measured in v469 (ADR-0018 D8); enforcement lands with the first kit import. **Before P3:** owner downloads itch.io KayKit Adventurers 2.0 (Ranger, bow) + Character Animations 1.1, then `make inspect-kit` to confirm the 1.0 41-joint rig | ADR-0006, ADR-0018 |
+| Assets | Blender export pipeline, remote patcher. Texture/triangle budgets measured in v469 (ADR-0018 D8); enforcement lands with the first kit import. | ADR-0006, ADR-0018 |
 | Platform | Production auth provider, dashboards, historical inspect API | v0 §8, ADR-0001 |
 | Protocol | Protobuf / `godobuf` migration | ADR-0001 |
 | Multiplayer | Matchmaking/lobby beyond backend-listed sessions, advanced active-session filtering/pagination/load-aware capacity controls, Steam lobby/invites, friend flows, richer party UI, chat/emotes/ready checks, richer party reward bonuses beyond full shared XP and HP/damage scaling, loot allocation, personal/hidden/reserved loot, shared/split gold, friendly fire/PvP, production remote-player art, load-aware capacity limits, split deployables / cross-process session ownership, co-op roles/encounters that change the solo experience, PvP rules that preserve skill expression while respecting builds | v0/v33/v38/v45/v46/v48/v49/v164 non-goals, ADR-0001, ADR-0014 |

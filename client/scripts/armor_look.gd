@@ -3,7 +3,7 @@
 ## Equipped armor recolours the hero's own body-part meshes instead of mounting meshes:
 ## chest/belt -> *_Body, gloves -> arms, boots -> legs, head -> shows the class headgear.
 ## The colour goes in the material DETAIL layer (a 1x1 texture, Mix blend, alpha = strength), which
-## lerps the coloured kit atlas toward the armor colour. albedo_color stays owned by the class body
+## lerps the coloured kit atlas toward the armor colour. albedo_color stays owned by the white base
 ## tint, rarity tint and ModelReactionController (hit flash / death darken); both edit the mesh's
 ## current material_override in place, so neither erases the other.
 class_name ArmorLook

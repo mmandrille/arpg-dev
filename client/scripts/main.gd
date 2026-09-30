@@ -3813,7 +3813,7 @@ func _entity_world_center(entity_id: String) -> Vector3:
 		return Vector3.ZERO
 	return node.global_position
 
-# --- scene construction (placeholder primitives) ----------------------------
+# --- scene construction (kit visuals, HUD and panels) -----------------------
 
 func _build_scene() -> void:
 	ground_node = _ground_factory.make_ground_node(current_level)

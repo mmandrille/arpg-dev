@@ -13,7 +13,6 @@ const (
 	shopOfferKindGenerated = "generated"
 	shopOfferKindBuyback   = "buyback"
 	shopOfferKindMystery   = "mystery"
-	shopSourceCommonMob    = "common_dungeon_mob"
 )
 
 type shopStockState struct {
@@ -46,10 +45,6 @@ type shopOfferEntry struct {
 
 func (s *Sim) shopCatalog(shopID string) ([]ShopOfferView, bool) {
 	return s.shopCatalogWithChanges(shopID, nil)
-}
-
-func (s *Sim) shopCatalogFor(shopID, characterID string, deepestDepth int) ([]ShopOfferView, bool) {
-	return s.statelessShopCatalogFor(shopID, characterID, deepestDepth)
 }
 
 func (s *Sim) shopCatalogWithChanges(shopID string, res *TickResult) ([]ShopOfferView, bool) {

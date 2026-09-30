@@ -170,11 +170,6 @@ func validateQuestStewardRules(steward QuestStewardRules, r *Rules) error {
 	return nil
 }
 
-func (r *Rules) questStewardTrophyForMonster(monsterDefID string) (QuestStewardTrophyRule, bool) {
-	trophy, ok := r.QuestSteward.trophyByMonster[monsterDefID]
-	return trophy, ok
-}
-
 func (r *Rules) questStewardTrophyForItem(itemDefID string) (QuestStewardTrophyRule, bool) {
 	trophy, ok := r.QuestSteward.trophyByItem[itemDefID]
 	return trophy, ok

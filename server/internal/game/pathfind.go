@@ -255,12 +255,3 @@ func absInt(v int) int {
 	return v
 }
 
-func signInt(v int) int {
-	if v < 0 {
-		return -1
-	}
-	if v > 0 {
-		return 1
-	}
-	return 0
-}

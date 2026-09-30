@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -259,8 +258,4 @@ func (s *Sim) healUniquePlayer(player *entity, skillID string, heal int, corr st
 		SkillID:        skillID,
 		Heal:           intPtr(heal),
 	})
-}
-
-func uniqueResourceEffectKey(effectID string, entityID uint64) string {
-	return fmt.Sprintf("%s:%d", effectID, entityID)
 }

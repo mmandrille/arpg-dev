@@ -44,32 +44,6 @@ type replicatedDebuffTarget struct {
 	entity *entity
 }
 
-func (s *Sim) replicateUniqueBurnDot(playerID uint64, primary *entity, dot uniqueBurnDotState, res *TickResult) {
-	if dot.EffectID == "" || dot.RemainingTicks <= 0 {
-		return
-	}
-	for _, replicated := range s.uniqueDebuffReplicationTargets(playerID, primary) {
-		target := replicated.entity
-		clone := dot
-		clone.TargetID = target.id
-		s.uniqueBurnDots[uniqueBurnDotKey(clone.EffectID, target.id)] = clone
-		target.effectIDs = sortedUniqueStrings(append(target.effectIDs, dot.EffectID))
-		res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(target))})
-		res.Events = append(res.Events, Event{
-			EventType:      "skill_effect_started",
-			EntityID:       idStr(target.id),
-			SourceEntityID: idStr(playerID),
-			TargetEntityID: idStr(target.id),
-			CorrelationID:  dot.CorrelationID,
-			SkillID:        dot.EffectID,
-			Amount:         intPtr(dot.DamagePerTick),
-			RemainingTicks: intPtr(dot.RemainingTicks),
-			TotalTicks:     intPtr(dot.TotalTicks),
-			DamageType:     dot.DamageType,
-		})
-	}
-}
-
 func (s *Sim) replicateSkillEffectToNearbyMonsters(playerID uint64, primary *entity, stateKey string, res *TickResult) {
 	state, ok := s.skillEffects[stateKey]
 	if !ok || state.EndsTick <= s.tick {

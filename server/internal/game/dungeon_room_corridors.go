@@ -412,15 +412,6 @@ func axisCorridorZone(from, to Vec2, width, depth float64, horizontal bool) []co
 	}}
 }
 
-func generatedPositionInsideRoom(pos Vec2, radius float64, out generatedDungeonLevel) bool {
-	for _, room := range out.rooms {
-		if circleInsideRoomInner(pos, radius, room) {
-			return true
-		}
-	}
-	return false
-}
-
 func circleInsideRoomInner(pos Vec2, radius float64, room dungeonRoom) bool {
 	return pos.X-radius >= room.innerMin.X && pos.X+radius <= room.innerMax.X &&
 		pos.Y-radius >= room.innerMin.Y && pos.Y+radius <= room.innerMax.Y

@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"sort"
 )
 
 func (r *Rules) rollItemTemplateWithMinRarity(templateID string, rng *RNG, sourceDepth int, minRarity string) (ItemRollPayload, bool) {
@@ -116,14 +115,4 @@ func (s *Sim) rollQuestStewardReward(familyID string, sourceDepth int, trophyIns
 	templateID := family.TemplateIDs[rng.IntN(len(family.TemplateIDs))]
 
 	return s.rules.rollItemTemplateWithMinRarity(templateID, rng, sourceDepth, s.rules.QuestSteward.HuntQuest.MinRarity)
-}
-
-func sortedQuestStewardOfferIDs(offers []questStewardOffer) []string {
-	ids := make([]string, 0, len(offers))
-	for _, offer := range offers {
-		ids = append(ids, offer.OfferID)
-	}
-	sort.Strings(ids)
-
-	return ids
 }

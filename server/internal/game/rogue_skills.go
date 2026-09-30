@@ -356,13 +356,6 @@ func (s *Sim) startRogueMark(player *entity, target *entity, skillID string, def
 	}, rank, correlationID, res)
 }
 
-func (s *Sim) replicatePoisonDot(playerID uint64, primary *entity, dot poisonDotState, res *TickResult) {
-	if dot.SkillID == "" || dot.RemainingTicks <= 0 {
-		return
-	}
-	s.replicateDotStatus(playerID, primary, "poisoned", dot.SkillID, dot.Rank, dot.DamagePerTick, 10, dot.RemainingTicks, dot.CorrelationID, res)
-}
-
 func (s *Sim) advancePoisonDots(res *TickResult) {
 	if len(s.poisonDots) == 0 {
 		return

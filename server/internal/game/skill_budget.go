@@ -40,24 +40,6 @@ func (s *Sim) noteSkillResolution() {
 	s.skillResolutionsThisTick++
 }
 
-func (s *Sim) allowProjectileSpawn() bool {
-	cap := s.combatProcessingBudget().ProjectileSpawnsPerTick
-	if cap <= 0 || s.projectileSpawnsThisTick < cap {
-		s.projectileSpawnsThisTick++
-		return true
-	}
-	return false
-}
-
-func (s *Sim) allowDamageEvent() bool {
-	cap := s.combatProcessingBudget().DamageEventsPerTickSoftCap
-	if cap <= 0 || s.damageEventsThisTick < cap {
-		s.damageEventsThisTick++
-		return true
-	}
-	return false
-}
-
 type CombatProcessingBudget struct {
 	SkillResolutionsPerTick    int `json:"skill_resolutions_per_tick"`
 	ProjectileSpawnsPerTick    int `json:"projectile_spawns_per_tick"`

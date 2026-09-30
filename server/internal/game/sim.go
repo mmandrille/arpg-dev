@@ -1395,10 +1395,6 @@ func (s *Sim) damageMonsterByPlayerWithSlot(target *entity, playerID uint64, cor
 	return outcome
 }
 
-func (s *Sim) damageMonsterByPlayerSkill(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange) combatResolution {
-	return s.damageMonsterByPlayerSkillTyped(target, playerID, corr, res, damageRange, damageTypeForce)
-}
-
 func (s *Sim) damageMonsterByPlayerSkillTyped(target *entity, playerID uint64, corr string, res *TickResult, damageRange DamageRange, damageType string) combatResolution {
 	return s.damageMonsterByPlayerSkillTypedWithID(target, playerID, "", corr, res, damageRange, damageType)
 }
@@ -2392,10 +2388,6 @@ func skillManaCost(r *Rules, def SkillDef, rank int) int {
 	}
 
 	return r.rankScaledManaCost(def.Cost.Mana.Base, def.Cost.Mana.PerRank, rank)
-}
-
-func (s *Sim) skillCastDirection(def SkillDef, cast *CastSkillIntent, player *entity) (Vec2, uint64, string) {
-	return s.skillCastDirectionWithRange(def, cast, player, def.Projectile.Range)
 }
 
 func (s *Sim) skillCastDirectionWithRange(def SkillDef, cast *CastSkillIntent, player *entity, castRange float64) (Vec2, uint64, string) {
@@ -3548,14 +3540,6 @@ func (s *Sim) monsterMoveDelta(pos Vec2, goal Vec2, steps []Vec2, speed float64)
 	}
 }
 
-func cellLess(a, b gridCell) bool {
-	if a.y != b.y {
-		return a.y < b.y
-	}
-
-	return a.x < b.x
-}
-
 func vecLess(a, b Vec2) bool {
 	if math.Abs(a.Y-b.Y) > 1e-9 {
 		return a.Y < b.Y
@@ -4296,10 +4280,6 @@ func segmentIntersectsCircle(start, end, center Vec2, radius float64) (float64, 
 	return 0, false
 }
 
-func (s *Sim) rollDamage() int {
-	return s.rollRange(s.resolvePlayerAttackDamage())
-}
-
 func (s *Sim) resolveCombat(attacker, defender effectiveCombatStats, damageRange DamageRange) combatResolution {
 	hit := s.rollChance(attacker.HitChance)
 	if !hit {
@@ -4785,10 +4765,6 @@ func (s *Sim) clearHotbarReferences(instanceID uint64, res *TickResult) {
 	}
 }
 
-func (s *Sim) slotBlockedByHands(slot string, item *invItem) bool {
-	return s.slotBlockedByHandsForSet(slot, item, s.activeWeaponSet)
-}
-
 func (s *Sim) slotBlockedByHandsForSet(slot string, item *invItem, weaponSet int) bool {
 	if slot != offHandSlot {
 		return false
@@ -4902,15 +4878,6 @@ func (s *Sim) itemAttackMode(item *invItem) string {
 		return def.AttackMode
 	}
 	return attackModeMelee
-}
-
-func (s *Sim) equippedWeaponDef() (ItemDef, bool) {
-	item := s.equippedWeaponItem()
-	if item == nil || item.rollPayload != nil {
-		return ItemDef{}, false
-	}
-	def, ok := s.rules.Items[item.itemDefID]
-	return def, ok
 }
 
 func (s *Sim) equippedWeaponItem() *invItem {

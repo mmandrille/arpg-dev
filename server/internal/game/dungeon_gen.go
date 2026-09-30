@@ -1038,28 +1038,12 @@ func generatedDungeonNavigation(rules DungeonGenerationRules) NavigationRules {
 	}
 }
 
-func generatedDungeonBlockedFn(nav NavigationRules, out generatedDungeonLevel) func(gx, gy int) bool {
-	return func(gx, gy int) bool {
-		center := gridToWorld(nav, gridCell{x: gx, y: gy})
-		for _, wall := range out.walls {
-			if obstacleBlocksMovement(wall) && circleIntersectsAABB(center, playerRadius, wall.pos, wall.size) {
-				return true
-			}
-		}
-		return false
-	}
-}
-
 func insideDungeonFloor(pos Vec2, rules DungeonGenerationRules) bool {
 	margin := rules.MonsterPlacement.MarginFromWall
 	return pos.X >= margin &&
 		pos.Y >= margin &&
 		pos.X <= rules.FloorSize.Width-margin &&
 		pos.Y <= rules.FloorSize.Height-margin
-}
-
-func dungeonNavigation(global NavigationRules, gen DungeonGenerationRules) NavigationRules {
-	return dungeonNavigationForLevel(global, gen, -1)
 }
 
 func dungeonNavigationForLevel(global NavigationRules, gen DungeonGenerationRules, levelNum int) NavigationRules {

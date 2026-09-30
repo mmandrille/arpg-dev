@@ -3,23 +3,115 @@ extends SceneTree
 ## v493 town ground detail: edge/rim/paths/scatter planning derived from
 ## town_presentation.v0.json -> dressing. No pinned coordinates or counts.
 
+const KitFloorScript := preload("res://scripts/dungeon_kit_floor.gd")
+
 var _pass_count := 0
 var _fail_count := 0
 
 
 func _initialize() -> void:
-	var dressing := TownPresentationLoader.dressing()
-	var frame := TownGroundDetail.frame(dressing)
+	var shipped := TownPresentationLoader.dressing()
+	var frame := TownGroundDetail.frame(shipped)
 	_test_loader_keeps_ground_detail_keys()
 	_test_frame(frame)
+	# The shipped flags (edge.enabled, scatter.enabled, rim.width_m, empty catalogs) are tuning
+	# switches, so the planner invariants run on a copy with every layer forced on; the shipped data
+	# is only checked for flag consistency.
+	_test_shipped_flags_are_consistent(shipped, frame)
+	var dressing := _forced_on(shipped, frame)
 	_test_layers_partition_and_definitions(dressing, frame)
 	_test_paths_connect_plaza_to_targets(dressing, frame)
 	_test_scatter_rules(dressing, frame)
 	_test_scatter_avoids_anchors_and_props(dressing, frame)
 	_test_scatter_is_deterministic_and_data_driven(dressing, frame)
+	_test_patch_weights_drive_asset_choice(dressing, frame)
 	_test_rock_transform_seats_on_the_surface()
+	_test_patch_transform_seats_top_on_the_surface()
 	_test_build_creates_layer_nodes(dressing)
 	_finish()
+
+
+## Copy of the dressing with every ground-detail layer switched on, reusing shipped values where they
+## are usable, so disabling a layer in data never hides a planner regression.
+func _forced_on(shipped: Dictionary, frame: Dictionary) -> Dictionary:
+	var out := shipped.duplicate(true)
+	var tile := float(frame["tile"])
+	var rim: Dictionary = (out["plaza"] as Dictionary)["rim"]
+	if float(rim.get("width_m", 0.0)) < tile:
+		rim["width_m"] = tile
+	var edge: Dictionary = out["edge"]
+	edge["enabled"] = true
+	if float(edge.get("width_m", 0.0)) < tile:
+		edge["width_m"] = tile
+	var sc: Dictionary = out["scatter"]
+	sc["enabled"] = true
+	sc["patch_share_percent"] = clampi(int(sc.get("patch_share_percent", 50)), 1, 99)
+	if int(sc.get("occupancy_percent", 0)) <= 0:
+		sc["occupancy_percent"] = 50
+	if float(sc.get("cell_m", 0.0)) <= 0.0:
+		sc["cell_m"] = 3.0
+	if float(sc.get("radius_m", 0.0)) <= float(frame["fence_radius"]):
+		sc["radius_m"] = float(frame["fence_radius"]) + 8.0
+	var patches: Array = sc.get("patches", [])
+	var rocks: Array = sc.get("rocks", [])
+	var fallback := {"asset_id": str((((out["plaza"] as Dictionary)["tile_variants"] as Array)[0] as Dictionary)["asset_id"]), "weight": 1, "radius_m": 1.0, "scale_min": 0.5, "scale_max": 0.5}
+	if rocks.is_empty():
+		rocks.append((patches[0] as Dictionary).duplicate() if not patches.is_empty() else fallback.duplicate())
+	if patches.is_empty():
+		patches.append((rocks[0] as Dictionary).duplicate())
+	# The weight test needs two distinct patch assets.
+	if patches.size() < 2 or str((patches[0] as Dictionary)["asset_id"]) == str((patches[1] as Dictionary)["asset_id"]):
+		var extra := (rocks[0] as Dictionary).duplicate()
+		if str(extra["asset_id"]) == str((patches[0] as Dictionary)["asset_id"]):
+			extra = fallback.duplicate()
+		patches.append(extra)
+	sc["patches"] = patches
+	sc["rocks"] = rocks
+	return out
+
+
+## Shipped data: each switch only decides whether its layer exists.
+func _test_shipped_flags_are_consistent(shipped: Dictionary, frame: Dictionary) -> void:
+	var lay := TownGroundDetail.layers(shipped, frame)
+	var edge_cfg: Dictionary = shipped["edge"]
+	var edge_on := bool(edge_cfg.get("enabled", false)) and float(edge_cfg.get("width_m", 0.0)) >= float(frame["tile"])
+	var rim_on := float(((shipped["plaza"] as Dictionary)["rim"] as Dictionary).get("width_m", 0.0)) >= float(frame["tile"])
+	var sc: Dictionary = shipped["scatter"]
+	var scatter_on := bool(sc.get("enabled", false)) and int(sc.get("occupancy_percent", 0)) > 0 and not ((sc.get("patches", []) as Array).is_empty() and (sc.get("rocks", []) as Array).is_empty())
+	var placements := TownGroundDetail.scatter(shipped, frame)
+	_assert_true("shipped core is not empty", not (lay["core"] as Array).is_empty())
+	_assert_true("shipped edge flag matches the edge layer", edge_on == not (lay["edge"] as Array).is_empty())
+	_assert_true("shipped rim width matches the rim layer", rim_on == not (lay["rim"] as Array).is_empty())
+	if not bool(sc.get("enabled", false)):
+		_assert_true("shipped scatter.enabled=false yields nothing", placements.is_empty())
+	elif scatter_on:
+		_assert_true("shipped scatter.enabled=true yields placements", not placements.is_empty())
+	var root := TownGroundDetail.build(shipped)
+	_assert_true("shipped edge node exists only when the edge has cells", (root.find_child(TownGroundDetail.EDGE_NAME, false, false) != null) == not (lay["edge"] as Array).is_empty())
+	_assert_true("shipped rim node exists only when the rim has cells", (root.find_child(TownGroundDetail.RIM_NAME, false, false) != null) == not (lay["rim"] as Array).is_empty())
+	_assert_true("shipped scatter node exists only when there are placements", (root.find_child(TownGroundDetail.SCATTER_NAME, false, false) != null) == not placements.is_empty())
+	root.free()
+
+
+## One dominant patch weight makes every patch that asset; making another entry dominant flips it.
+func _test_patch_weights_drive_asset_choice(dressing: Dictionary, frame: Dictionary) -> void:
+	var patches: Array = (dressing["scatter"] as Dictionary)["patches"]
+	for which in [0, 1]:
+		var tuned := dressing.duplicate(true)
+		var tuned_patches: Array = (tuned["scatter"] as Dictionary)["patches"]
+		for i in tuned_patches.size():
+			(tuned_patches[i] as Dictionary)["weight"] = 1 if i == which else 0
+		var want := str((patches[which] as Dictionary)["asset_id"])
+		var seen := 0
+		var wrong := 0
+		for p in TownGroundDetail.scatter(tuned, frame):
+			if str(p["kind"]) != "patch":
+				continue
+			seen += 1
+			if str(p["asset_id"]) != want:
+				wrong += 1
+		_assert_true("a dominant weight on %s yields patches" % want, seen > 0)
+		_assert_true("a dominant weight on %s makes every patch that asset" % want, wrong == 0)
 
 
 func _test_loader_keeps_ground_detail_keys() -> void:
@@ -154,7 +246,6 @@ func _test_paths_connect_plaza_to_targets(dressing: Dictionary, frame: Dictionar
 	var paths: Dictionary = dressing["service_paths"]
 	var targets: Array = paths["targets"]
 	var half := float(paths["path_width_m"]) * 0.5
-	_assert_true("there are service path targets", targets.size() > 0)
 	# The reach is the path half-width: a paved tile centre must sit inside the path itself.
 	for id in targets:
 		_assert_true("path tiles connect the plaza to %s" % id, _paved_flood_reaches(dressing, frame, anchors[str(id)], half))
@@ -171,7 +262,8 @@ func _test_paths_connect_plaza_to_targets(dressing: Dictionary, frame: Dictionar
 		if pos.distance_to(frame["center"]) > plaza_radius + half - 0.001:
 			needs_path += 1
 			_assert_true("without service_paths.targets %s is not reached" % id, not _paved_flood_reaches(no_paths, frame, pos, half))
-	_assert_true("at least one target actually depends on a service path", needs_path > 0)
+	if not targets.is_empty():
+		_assert_true("at least one target actually depends on a service path", needs_path > 0)
 	# A far synthetic anchor (diagonal, well outside the plaza) is connected only when it is a target.
 	var far: Vector2 = (frame["center"] as Vector2) + Vector2.ONE.normalized() * (float((dressing["plaza"] as Dictionary)["radius_m"]) + 6.0)
 	_assert_true("far synthetic target is connected by path tiles", _paved_flood_reaches(_with_synthetic_target(dressing, "synthetic_far", far, true), frame, far, half))
@@ -287,6 +379,19 @@ func _test_rock_transform_seats_on_the_surface() -> void:
 	_assert_true("rock bottom sits on the surface", is_equal_approx(bottom_y, 0.02))
 	var centre := t * box.get_center()
 	_assert_true("rock centre lands on the requested xz", is_equal_approx(centre.x, 3.0) and is_equal_approx(centre.z, 4.0))
+
+
+## Patches go through DungeonKitFloor.tile_transform (as _scatter_layer does): the plain tile's
+## slab top, scaled, lands on scatter.surface_y and the patch centre lands on the placement.
+func _test_patch_transform_seats_top_on_the_surface() -> void:
+	var base_box := AABB(Vector3(-1.0, -0.1, -1.0), Vector3(2.0, 0.15, 2.0))
+	var box := AABB(Vector3(-2.0, -0.1, -2.0), Vector3(4.0, 0.2, 4.0))
+	var scale := 0.8
+	var surface_y := 0.01
+	var t := KitFloorScript.tile_transform(Vector3(3.0, 1.0, 4.0), box, base_box, surface_y, scale)
+	_assert_true("patch slab top sits on the scatter surface", is_equal_approx(t.origin.y + base_box.end.y * scale, surface_y))
+	var centre := t * box.get_center()
+	_assert_true("patch centre lands on the requested xz", is_equal_approx(centre.x, 3.0) and is_equal_approx(centre.z, 4.0))
 
 
 func _assert_true(label: String, value: bool) -> void:

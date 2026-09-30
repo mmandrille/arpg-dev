@@ -289,7 +289,7 @@
     },
     "scatter": {
       "enabled": true,
-      "radius_m": 13.0,
+      "radius_m": 22.0,
       "cell_m": 3.0,
       "occupancy_percent": 50,
       "patch_share_percent": 55,

@@ -154,7 +154,14 @@ func _test_scatter_rules(dressing: Dictionary, frame: Dictionary) -> void:
 	var tile := float(frame["tile"])
 	var steps := ceili(float(cfg["radius_m"]) / float(cfg["cell_m"]))
 	var max_cells := (2 * steps + 1) * (2 * steps + 1)
-	_assert_true("scatter produces placements", placements.size() > 0)
+	# Sanity floor derived from the grid the planner walks (5% of the expected occupied cells), so it
+	# survives data retuning without pinning a count. Both kinds must appear.
+	var floor_count := maxi(2, floori(float(max_cells) * float(cfg["occupancy_percent"]) / 100.0 * 0.05))
+	var kinds := {}
+	for p in placements:
+		kinds[str(p["kind"])] = true
+	_assert_true("scatter produces a healthy number of placements", placements.size() >= floor_count)
+	_assert_true("scatter contains both patches and rocks", kinds.has("patch") and kinds.has("rock"))
 	_assert_true("scatter count is bounded by the grid it walks", placements.size() <= max_cells)
 	var avoid: Array = []
 	for pos in TownGroundDetail.anchors(dressing).values():

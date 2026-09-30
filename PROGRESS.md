@@ -93,8 +93,9 @@ Do **not** assume these are the next slice — they are documented backlog items
   [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md). Blockers: unbounded client
   input tick (`session_loop.go:372`), `origin` credential, ci-full red. **`$refactor` (2026-09-30) landed:** client
   tick clamp, client gate fails on SCRIPT ERROR, determinism lint on all `game/` (baseline), Go golden consumers, gofmt
-  + realtime `-race` in CI, occlusion throttle, dead eye-view step. **Still open:** replay max-tick/ctx guard, `origin`
-  credential (owner), 9 unique/set ci-full failures + `buyer_offer_cancel_ui`, record debug mode on the session.
+  + realtime `-race` in CI, occlusion throttle, dead eye-view step, the 9 unique/set ci-full failures (self-referencing
+  `state_delta.v8` `$defs.equipped`). **Still open:** replay max-tick/ctx guard, `origin` credential (owner),
+  `buyer_offer_cancel_ui` (HTTP offer-cancel refund never reaches the live session stash), record debug mode on the session.
 
 - **v469 environment / process gaps.**
   - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan

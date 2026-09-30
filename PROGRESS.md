@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-29 (v484 retire legacy hero, ADR-0018 P3c; merged after v485/v486)
+Last updated: 2026-09-29 (v486 engineering review landed; v484 retire legacy hero)
 
 ---
 
@@ -24,9 +24,9 @@ Last updated: 2026-09-29 (v484 retire legacy hero, ADR-0018 P3c; merged after v4
 | Field | Value |
 |-------|-------|
 | **Latest completed slice** | v484 — legacy 17-bone hero pipeline retired: data-driven kit fallback hero (`fallback_class`) replaces the base_human mannequin for remote players, corpses, boss humanoid and bare scenes; `ClassBodyTint` retired (white base tints); socket fallbacks, rig/morph tools, base_human and legacy class GLBs deleted (ADR-0018 P3c; `make ci` green). Prior (merged earlier): v486 — live payload schema gate: `make ci` protocol scenarios validate every received snapshot/state_delta against the v8 schemas (strict); 44 drifts fixed (schema catch-up, companion `#RRGGBB` tint, empty-stash client read; `make ci` green). Prior: v485 — remote player class: player entity views carry `character_class` from live progression (optional v8 entity prop, additive), remote co-op heroes render and swap to their class; scenario 21 proves rogue host + sorcerer guest (`make ci` green); v483 — armor look: equipped armor recolours the kit hero's own body parts (detail-layer tint), head items toggle class headgear, jewelry has no world visual; legacy armor boxes no longer mount (ADR-0018 P3b; `make ci` green). Prior: v482 CC0 beasts, v481 recorded tick checkpoints, v480 member join tick, v479 recorded co-op member lifecycle, v478 shared member setup, v477 clip-owned death pose, v476 recorded load shedding, v475 kit heroes, v474 kit monsters, v473 torches/chests, v472 anchor fallback, v471 kit walls/floors, v470 render baseline, v469 P0 |
-| **Next slice** | Periodic `$review` + `$refactor` is overdue (v470 milestone; owner deferred it for P2). Then kit ground-loot models, class-specific hero corpses (protocol field), or remote-player gear (protocol slice) |
-| **Last engineering review** | v460 — [`docs/reviews/20260708_v460-overview.md`](docs/reviews/20260708_v460-overview.md) (2026-07-08; official cadence) |
-| **Next engineering review** | ~v470 — run `$review` then `$refactor` after next ~10-slice milestone |
+| **Next slice** | Run `$refactor` against the v486 review, then its three blockers: bound client input ticks (+ replay max-tick guard), remove the `origin` credential (owner), get `make ci-full` green (9 unique/set scenarios fail only in the full pack, dead eye-view scenario, `buyer_offer_cancel_ui`) |
+| **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
+| **Next engineering review** | ~v496 — run `$review` then `$refactor` after the next ~10-slice milestone |
 
 
 ### Periodic engineering reviews
@@ -88,6 +88,11 @@ and ADR-0013.
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Active review follow-ups
+
+- **v486 `$review` (official cadence at `2cf0dcd1`).** Overview:
+  [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md). Blockers: unbounded client
+  input tick (`session_loop.go:372`), `origin` credential, ci-full red. Then `$refactor` minors: client gate
+  fails on SCRIPT ERROR, determinism lint on all `game/`, record debug mode on session, Go consumers for three goldens.
 
 - **v469 environment / process gaps.**
   - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan

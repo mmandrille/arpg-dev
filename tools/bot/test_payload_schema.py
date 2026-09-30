@@ -237,6 +237,32 @@ def test_every_local_ref_resolves(message_type: str) -> None:
     assert refs - set(schema["$defs"]) == set()
 
 
+@pytest.mark.parametrize("message_type", MESSAGE_TYPES)
+def test_no_def_is_a_ref_only_cycle(message_type: str) -> None:
+    # v486 "fixed" the dangling state_delta #/$defs/equipped with a def that referenced
+    # itself; resolving it recursed forever, so every unique_chest_* event crashed the gate.
+    path = payload_schema.PROTOCOL_DIR / payload_schema.SCHEMA_FILES[message_type]
+    defs = json.loads(path.read_text(encoding="utf-8"))["$defs"]
+    for name in defs:
+        seen, node = [name], defs[name]
+        while isinstance(node, dict) and set(node) == {"$ref"} and node["$ref"].startswith("#/$defs/"):
+            target = node["$ref"].removeprefix("#/$defs/")
+            assert target not in seen, f"{message_type} $defs ref-only cycle: {' -> '.join(seen + [target])}"
+            seen.append(target)
+            node = defs.get(target)
+
+
+def test_unique_chest_event_with_equipped_map_validates() -> None:
+    delta = example("state_delta")
+    equipped = dict.fromkeys(("head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "off_hand"))
+    delta.setdefault("events", []).append({
+        "event_type": "unique_chest_opened", "entity_id": "1042", "service": "unique_test_chest",
+        "gold": 0, "equipped": {**equipped, "main_hand": "7177508088046759732"},
+    })
+
+    assert payload_violations("state_delta", delta) == []
+
+
 def test_broken_schema_is_reported_not_raised(monkeypatch: pytest.MonkeyPatch) -> None:
     broken = payload_schema.CompiledPayloadSchema({
         "type": "object",

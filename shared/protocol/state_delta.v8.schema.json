@@ -1053,7 +1053,23 @@
         "crit_chance": { "type": "number", "minimum": 0 }
       }
     },
-    "equipped": { "$ref": "#/$defs/equipped" },
+    "equipped": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["head", "amulet", "chest", "gloves", "belt", "boots", "ring_left", "ring_right", "main_hand", "off_hand"],
+      "properties": {
+        "head": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "amulet": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "chest": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "gloves": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "belt": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "boots": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "ring_left": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "ring_right": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "main_hand": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] },
+        "off_hand": { "oneOf": [ { "$ref": "#/$defs/decimal_id" }, { "type": "null" } ] }
+      }
+    },
     "active_weapon_set": { "type": "integer", "minimum": 0, "maximum": 1 },
     "weapon_sets": {
       "type": "array",

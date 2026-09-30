@@ -311,10 +311,15 @@ ci_step "== 4/11 asset manifest + GLB validation ==" \
 ci_step "== 5/11 determinism lint ==" \
   "$RUN_QUIET" --label "determinism-lint" -- make lint-determinism
 
-# Store integration tests use ARPG_DATABASE_URL; create this checkout's test DB
-# up front when Postgres is already running (otherwise they skip, as before).
-"$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL" >/dev/null 2>&1 || true
-export ARPG_DATABASE_URL="$DATABASE_URL"
+# DB-backed Go tests (store, http) use ARPG_DATABASE_URL, and fail rather than skip when it
+# is set but unreachable (internal/testdb). Export it only when this checkout's test DB is
+# ready now; otherwise they skip loudly (Postgres is started later, in step 8).
+if "$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL" >/dev/null 2>&1; then
+  export ARPG_DATABASE_URL="$DATABASE_URL"
+else
+  unset ARPG_DATABASE_URL ARPG_TEST_DATABASE_URL
+  echo "[ci] Postgres not reachable before step 6: DB-backed Go tests will SKIP (run make db-up first for full coverage)"
+fi
 
 # The race detector covers the concurrent realtime hub/session loop (~30s). internal/http
 # exceeds the 10m test timeout under -race, so it is not included yet.

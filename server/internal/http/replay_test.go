@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 	"encoding/json"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/testdb"
 	"io"
 	"net/http"
 	"testing"
@@ -20,9 +21,9 @@ func testStoreAndRules(t *testing.T) (*store.Store, *game.Rules) {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := store.Connect(ctx, "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable")
+	db, err := store.Connect(ctx, testdb.URL())
 	if err != nil {
-		t.Skipf("skipping replay test: no Postgres: %v", err)
+		testdb.SkipOrFail(t, "replay test", err)
 	}
 	t.Cleanup(db.Close)
 	rulesDir, err := game.FindSharedRulesDir()

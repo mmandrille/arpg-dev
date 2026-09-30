@@ -4,22 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"os"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/testdb"
 	"testing"
 	"time"
 
 	"github.com/mmandrille_meli/arpg-dev/server/internal/ids"
 )
 
-func staleSessionTestDatabaseURL() string {
-	if v := os.Getenv("ARPG_TEST_DATABASE_URL"); v != "" {
-		return v
-	}
-	if v := os.Getenv("ARPG_DATABASE_URL"); v != "" {
-		return v
-	}
-	return "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable"
-}
+func staleSessionTestDatabaseURL() string { return testdb.URL() }
 
 func newStaleSessionStore(t *testing.T) *Store {
 	t.Helper()
@@ -27,7 +19,7 @@ func newStaleSessionStore(t *testing.T) *Store {
 	defer cancel()
 	s, err := Connect(ctx, staleSessionTestDatabaseURL())
 	if err != nil {
-		t.Skipf("skipping store integration test: cannot connect to Postgres: %v", err)
+		testdb.SkipOrFail(t, "store integration test", err)
 	}
 	if err := s.Migrate(ctx); err != nil {
 		t.Fatalf("migrate: %v", err)

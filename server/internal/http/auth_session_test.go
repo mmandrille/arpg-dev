@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/testdb"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -42,12 +43,12 @@ func fullServerWithStore(t *testing.T) (http.Handler, *store.Store) {
 
 func fullServerWithConfigAndStore(t *testing.T, cfg config.Config) (http.Handler, *store.Store) {
 	t.Helper()
-	url := "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable"
+	url := testdb.URL()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	db, err := store.Connect(ctx, url)
 	if err != nil {
-		t.Skipf("skipping auth/session test: no Postgres: %v", err)
+		testdb.SkipOrFail(t, "auth/session test", err)
 	}
 	if err := db.Migrate(ctx); err != nil {
 		t.Fatalf("migrate: %v", err)

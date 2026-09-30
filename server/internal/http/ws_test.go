@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 	"encoding/json"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/testdb"
 	"io"
 	"math"
 	"net/http"
@@ -35,9 +36,9 @@ func fullStackWithRules(t *testing.T, tweak func(*game.Rules)) *httptest.Server 
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := store.Connect(ctx, "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable")
+	db, err := store.Connect(ctx, testdb.URL())
 	if err != nil {
-		t.Skipf("skipping ws test: no Postgres: %v", err)
+		testdb.SkipOrFail(t, "ws test", err)
 	}
 	if err := db.Migrate(ctx); err != nil {
 		t.Fatalf("migrate: %v", err)
@@ -291,9 +292,9 @@ func TestCoopWebSocketRejectsPersistedConnectedMember(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := store.Connect(ctx, "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable")
+	db, err := store.Connect(ctx, testdb.URL())
 	if err != nil {
-		t.Skipf("skipping persisted connected member test: no Postgres: %v", err)
+		testdb.SkipOrFail(t, "persisted connected member test", err)
 	}
 	if err := db.SetSessionMemberConnected(ctx, created.SessionID, guest.AccountID, guestChar.CharacterID, "1007", 0, 0); err != nil {
 		t.Fatalf("mark guest connected: %v", err)

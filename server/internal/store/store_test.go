@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"os"
+	"github.com/mmandrille_meli/arpg-dev/server/internal/testdb"
 	"testing"
 	"time"
 
@@ -13,15 +13,7 @@ import (
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
-func testDatabaseURL() string {
-	if v := os.Getenv("ARPG_TEST_DATABASE_URL"); v != "" {
-		return v
-	}
-	if v := os.Getenv("ARPG_DATABASE_URL"); v != "" {
-		return v
-	}
-	return "postgres://arpg:arpg@localhost:5432/arpg?sslmode=disable"
-}
+func testDatabaseURL() string { return testdb.URL() }
 
 // newStore connects + migrates, or skips when no Postgres is reachable.
 func newStore(t *testing.T) *store.Store {
@@ -30,7 +22,7 @@ func newStore(t *testing.T) *store.Store {
 	defer cancel()
 	s, err := store.Connect(ctx, testDatabaseURL())
 	if err != nil {
-		t.Skipf("skipping store integration test: cannot connect to Postgres: %v", err)
+		testdb.SkipOrFail(t, "store integration test", err)
 	}
 	if err := s.Migrate(ctx); err != nil {
 		t.Fatalf("migrate: %v", err)

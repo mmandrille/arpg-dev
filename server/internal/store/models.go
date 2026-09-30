@@ -270,20 +270,20 @@ type CharacterProgressionDefaults struct {
 // CharacterProgression is durable character-owned XP, level, base stats, and
 // skill progression.
 type CharacterProgression struct {
-	AccountID           string
-	CharacterID         string
-	CharacterClass      string
-	Level               int
-	Experience          int
-	UnspentStatPoints   int
-	UnspentSkillPoints  int
-	Stats               CharacterBaseStats
-	Gold                int
-	DeepestDungeonDepth int
-	SkillRanks          map[string]int
+	AccountID                 string
+	CharacterID               string
+	CharacterClass            string
+	Level                     int
+	Experience                int
+	UnspentStatPoints         int
+	UnspentSkillPoints        int
+	Stats                     CharacterBaseStats
+	Gold                      int
+	DeepestDungeonDepth       int
+	SkillRanks                map[string]int
 	HiredMercenaryCharacterID string
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
+	CreatedAt                 time.Time
+	UpdatedAt                 time.Time
 }
 
 // CharacterHotbarSlot is one durable character-owned hotbar assignment.
@@ -324,17 +324,17 @@ type CharacterShopStockItem struct {
 // SessionStartSnapshot freezes the character progression visible when a
 // session was created. Replay uses this instead of mutable live character rows.
 type SessionStartSnapshot struct {
-	SessionID   string
-	AccountID   string
-	CharacterID string
-	Items       []CharacterItemInstance
-	Waypoints   []CharacterWaypoint
-	Hotbar      []CharacterHotbarSlot
-	SkillBinds  CharacterSkillBindings
-	ShopStock   []CharacterShopStockItem
-	StashItems  []AccountStashItem
-	StashGold       AccountStashGold
-	Resources       []AccountResourceAmount
+	SessionID        string
+	AccountID        string
+	CharacterID      string
+	Items            []CharacterItemInstance
+	Waypoints        []CharacterWaypoint
+	Hotbar           []CharacterHotbarSlot
+	SkillBinds       CharacterSkillBindings
+	ShopStock        []CharacterShopStockItem
+	StashItems       []AccountStashItem
+	StashGold        AccountStashGold
+	Resources        []AccountResourceAmount
 	ResourceBagItems []AccountResourceBagItem
 	// Corpses are the same-account recoverable bodies frozen when the member's
 	// snapshot was taken; live corpse rows change as bodies are looted.

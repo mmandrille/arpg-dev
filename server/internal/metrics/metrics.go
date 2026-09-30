@@ -15,14 +15,14 @@ import (
 type Metrics struct {
 	reg *prometheus.Registry
 
-	HTTPRequests   *prometheus.CounterVec // method,path,status
-	ActiveSessions prometheus.Gauge
-	WSConnections  prometheus.Gauge
-	TickDuration   prometheus.Histogram // seconds
-	MessageLatency prometheus.Histogram // seconds
-	RejectedIntents   prometheus.Counter
-	PersistenceErrors prometheus.Counter
-	ReplayFailures    prometheus.Counter
+	HTTPRequests         *prometheus.CounterVec // method,path,status
+	ActiveSessions       prometheus.Gauge
+	WSConnections        prometheus.Gauge
+	TickDuration         prometheus.Histogram // seconds
+	MessageLatency       prometheus.Histogram // seconds
+	RejectedIntents      prometheus.Counter
+	PersistenceErrors    prometheus.Counter
+	ReplayFailures       prometheus.Counter
 	ReconciliationDeltas prometheus.Histogram // client-reported distance units
 }
 

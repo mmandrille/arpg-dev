@@ -3,13 +3,13 @@ package game
 import "fmt"
 
 type EliteObjectiveRules struct {
-	Enabled             bool    `json:"enabled"`
-	FloorChancePercent  int     `json:"floor_chance_percent"`
-	InteractableDefID   string  `json:"interactable_def_id"`
-	LootTable           string  `json:"loot_table"`
-	MinStairDistance    float64 `json:"min_stair_distance"`
-	RoomClusterRadius   float64 `json:"room_cluster_radius"`
-	MaxAttempts         int     `json:"max_attempts"`
+	Enabled            bool    `json:"enabled"`
+	FloorChancePercent int     `json:"floor_chance_percent"`
+	InteractableDefID  string  `json:"interactable_def_id"`
+	LootTable          string  `json:"loot_table"`
+	MinStairDistance   float64 `json:"min_stair_distance"`
+	RoomClusterRadius  float64 `json:"room_cluster_radius"`
+	MaxAttempts        int     `json:"max_attempts"`
 }
 
 func validateEliteObjectiveRules(objective EliteObjectiveRules, r *Rules) error {

@@ -49,12 +49,12 @@ type characterItemResponse struct {
 }
 
 type upgradeAccountStashItemResponse struct {
-	Item              accountStashItemResponse `json:"item"`
-	Gold              int                      `json:"gold"`
-	StashGold         int                      `json:"stash_gold"`
-	CostGold          int                      `json:"cost_gold"`
-	Success           bool                     `json:"success"`
-	RecipeID          string                   `json:"recipe_id"`
+	Item                   accountStashItemResponse `json:"item"`
+	Gold                   int                      `json:"gold"`
+	StashGold              int                      `json:"stash_gold"`
+	CostGold               int                      `json:"cost_gold"`
+	Success                bool                     `json:"success"`
+	RecipeID               string                   `json:"recipe_id"`
 	ResourceItemDefID      string                   `json:"resource_item_def_id,omitempty"`
 	ResourceCount          int                      `json:"resource_count,omitempty"`
 	ResourceRequiredLevel  int                      `json:"resource_required_level,omitempty"`
@@ -63,12 +63,12 @@ type upgradeAccountStashItemResponse struct {
 }
 
 type upgradeInventoryItemResponse struct {
-	Item              characterItemResponse `json:"item"`
-	Gold              int                   `json:"gold"`
-	StashGold         int                   `json:"stash_gold"`
-	CostGold          int                   `json:"cost_gold"`
-	Success           bool                  `json:"success"`
-	RecipeID          string                `json:"recipe_id"`
+	Item                   characterItemResponse `json:"item"`
+	Gold                   int                   `json:"gold"`
+	StashGold              int                   `json:"stash_gold"`
+	CostGold               int                   `json:"cost_gold"`
+	Success                bool                  `json:"success"`
+	RecipeID               string                `json:"recipe_id"`
 	ResourceItemDefID      string                `json:"resource_item_def_id,omitempty"`
 	ResourceCount          int                   `json:"resource_count,omitempty"`
 	ResourceRequiredLevel  int                   `json:"resource_required_level,omitempty"`

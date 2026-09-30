@@ -13,12 +13,12 @@ type SkillPoisonDef struct {
 }
 
 type SkillBleedDef struct {
-	EffectID                    string `json:"effect_id"`
-	DamagePercentMaxHP          int    `json:"damage_percent_max_hp"`
-	DamagePercentMaxHPPerRank   int    `json:"damage_percent_max_hp_per_rank"`
-	DurationTicks               int    `json:"duration_ticks"`
-	DurationTicksPerRank        int    `json:"duration_ticks_per_rank"`
-	IntervalTicks               int    `json:"interval_ticks"`
+	EffectID                  string `json:"effect_id"`
+	DamagePercentMaxHP        int    `json:"damage_percent_max_hp"`
+	DamagePercentMaxHPPerRank int    `json:"damage_percent_max_hp_per_rank"`
+	DurationTicks             int    `json:"duration_ticks"`
+	DurationTicksPerRank      int    `json:"duration_ticks_per_rank"`
+	IntervalTicks             int    `json:"interval_ticks"`
 }
 
 type SkillMarkDef struct {
@@ -29,11 +29,11 @@ type SkillMarkDef struct {
 }
 
 type SkillDashDef struct {
-	RangeBase             float64 `json:"range_base"`
-	RangePerRank          float64 `json:"range_per_rank"`
-	DamagePercentBase     int     `json:"damage_percent_base"`
-	DamagePercentPerMagic int     `json:"damage_percent_per_magic"`
-	MaxDamageBonusPercent int     `json:"max_damage_bonus_percent"`
+	RangeBase               float64 `json:"range_base"`
+	RangePerRank            float64 `json:"range_per_rank"`
+	DamagePercentBase       int     `json:"damage_percent_base"`
+	DamagePercentPerMagic   int     `json:"damage_percent_per_magic"`
+	MaxDamageBonusPercent   int     `json:"max_damage_bonus_percent"`
 	BleedEffectID           string  `json:"bleed_effect_id"`
 	BleedDamagePercentMaxHP int     `json:"bleed_damage_percent_max_hp"`
 	BleedDurationTicks      int     `json:"bleed_duration_ticks"`

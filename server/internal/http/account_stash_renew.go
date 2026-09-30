@@ -12,9 +12,9 @@ import (
 )
 
 type renewInventoryItemRequest struct {
-	ItemInstanceID           string `json:"item_instance_id"`
-	CharacterID              string `json:"character_id"`
-	ResourceItemInstanceID   string `json:"resource_item_instance_id,omitempty"`
+	ItemInstanceID         string `json:"item_instance_id"`
+	CharacterID            string `json:"character_id"`
+	ResourceItemInstanceID string `json:"resource_item_instance_id,omitempty"`
 }
 
 type renewInventoryItemResponse struct {

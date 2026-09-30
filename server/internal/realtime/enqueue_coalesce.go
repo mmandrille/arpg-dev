@@ -5,8 +5,8 @@ import "sync"
 // loopClient overflow coalescing keeps the tick loop from blocking when sendCh
 // is full: state_delta envelopes merge in memory and drain from writeLoop.
 type clientSendOverflow struct {
-	mu       sync.Mutex
-	pending  *outEnvelope
+	mu      sync.Mutex
+	pending *outEnvelope
 }
 
 func (o *clientSendOverflow) merge(env outEnvelope) bool {

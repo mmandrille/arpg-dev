@@ -30,7 +30,7 @@ func TestPolearmSpearReachFromTemplate(t *testing.T) {
 	spear := addRolledInventoryItem(t, sim, 9410, "spear", nil)
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_spear", Type: "equip_intent", Equip: &EquipIntent{
 		ItemInstanceID: idStr(spear.instanceID),
-		Slot:         mainHandSlot,
+		Slot:           mainHandSlot,
 	}}}), "equip_spear")
 
 	got := sim.playerWeaponSlotReach(mainHandSlot)
@@ -47,7 +47,7 @@ func TestPolearmSpearHitsBeyondLongSwordRange(t *testing.T) {
 	spear := addRolledInventoryItem(t, sim, 9411, "spear", nil)
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_spear", Type: "equip_intent", Equip: &EquipIntent{
 		ItemInstanceID: idStr(spear.instanceID),
-		Slot:         mainHandSlot,
+		Slot:           mainHandSlot,
 	}}}), "equip_spear")
 
 	player := sim.entities[sim.playerID]
@@ -60,7 +60,7 @@ func TestPolearmSpearHitsBeyondLongSwordRange(t *testing.T) {
 	longSword := addRolledInventoryItem(t, sim, 9412, "long_sword", nil)
 	assertAck(t, sim.Tick([]Input{{MessageID: "equip_long_sword", Type: "equip_intent", Equip: &EquipIntent{
 		ItemInstanceID: idStr(longSword.instanceID),
-		Slot:         mainHandSlot,
+		Slot:           mainHandSlot,
 	}}}), "equip_long_sword")
 
 	if sim.inWeaponSlotMeleeRange(target, mainHandSlot) {

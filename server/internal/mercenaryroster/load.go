@@ -77,14 +77,14 @@ func progressionStateFromStore(rules *game.Rules, progression *store.CharacterPr
 	}
 
 	return game.CharacterProgressionState{
-		CharacterClass:      progression.CharacterClass,
-		Level:               progression.Level,
-		Experience:          progression.Experience,
-		UnspentStatPoints:   progression.UnspentStatPoints,
-		UnspentSkillPoints:  progression.UnspentSkillPoints,
-		SkillRanks:          cloneSkillRanks(progression.SkillRanks),
-		Gold:                progression.Gold,
-		DeepestDungeonDepth: progression.DeepestDungeonDepth,
+		CharacterClass:            progression.CharacterClass,
+		Level:                     progression.Level,
+		Experience:                progression.Experience,
+		UnspentStatPoints:         progression.UnspentStatPoints,
+		UnspentSkillPoints:        progression.UnspentSkillPoints,
+		SkillRanks:                cloneSkillRanks(progression.SkillRanks),
+		Gold:                      progression.Gold,
+		DeepestDungeonDepth:       progression.DeepestDungeonDepth,
 		HiredMercenaryCharacterID: progression.HiredMercenaryCharacterID,
 		BaseStats: game.BaseStatsView{
 			Str:   progression.Stats.Str,

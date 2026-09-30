@@ -25,13 +25,13 @@ func TestAccountStashItemUpgradeRejectsDepthCap(t *testing.T) {
 	prog := store.CharacterProgression{
 		AccountID: acct.ID, CharacterID: char.ID, CharacterClass: "barbarian", Level: 1, Gold: 500,
 		DeepestDungeonDepth: 20,
-		Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{},
+		Stats:               store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5}, SkillRanks: map[string]int{},
 	}
 	if err := s.UpsertCharacterProgression(ctx, acct.ID, prog); err != nil {
 		t.Fatal(err)
 	}
 	if err := s.AddCharacterItem(ctx, store.CharacterItemInstance{
-		ID: "depth_upgrade_item_"+suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "long_sword",
+		ID: "depth_upgrade_item_" + suffix, AccountID: acct.ID, CharacterID: char.ID, ItemDefID: "long_sword",
 		Location: store.ItemLocationInventory, RolledStats: json.RawMessage(`{"damage_min":2,"damage_max":4,"item_level":2}`),
 	}); err != nil {
 		t.Fatal(err)

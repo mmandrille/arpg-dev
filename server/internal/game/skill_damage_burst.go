@@ -16,14 +16,14 @@ type SkillDamageBurstHit struct {
 
 func skillDamageBurstHitFromEvent(ev Event) SkillDamageBurstHit {
 	hit := SkillDamageBurstHit{
-		TargetEntityID: ev.TargetEntityID,
-		MonsterDefID:   ev.MonsterDefID,
-		Damage:         ev.Damage,
-		DamageType:     ev.DamageType,
-		Outcome:        ev.Outcome,
-		Critical:       ev.Critical,
-		Blocked:        ev.Blocked,
-		RawDamage:      ev.RawDamage,
+		TargetEntityID:  ev.TargetEntityID,
+		MonsterDefID:    ev.MonsterDefID,
+		Damage:          ev.Damage,
+		DamageType:      ev.DamageType,
+		Outcome:         ev.Outcome,
+		Critical:        ev.Critical,
+		Blocked:         ev.Blocked,
+		RawDamage:       ev.RawDamage,
 		MitigatedDamage: ev.MitigatedDamage,
 	}
 	if ev.EventType == "monster_killed" {
@@ -50,12 +50,12 @@ func (s *Sim) collapseSkillDamageBurst(res *TickResult, playerID uint64, skillID
 	}
 	res.Events = kept
 	res.Events = append(res.Events, Event{
-		EventType:     "skill_damage_burst",
-		EntityID:      idStr(playerID),
+		EventType:      "skill_damage_burst",
+		EntityID:       idStr(playerID),
 		SourceEntityID: idStr(playerID),
-		SkillID:       skillID,
-		CorrelationID: correlationID,
-		Hits:          hits,
+		SkillID:        skillID,
+		CorrelationID:  correlationID,
+		Hits:           hits,
 	})
 }
 

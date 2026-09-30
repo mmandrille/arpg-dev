@@ -619,10 +619,10 @@ func (s *Sim) shopSellAppraisalView(item *invItem, sellPrice int) ShopSellApprai
 		RequirementsMet:     view.RequirementsMet,
 		ClassAffinityStatus: view.ClassAffinityStatus,
 		EquipPreview:        view.EquipPreview,
-		EffectIDs:         view.EffectIDs,
-		SellPrice:         sellPrice,
-		SummaryLines:      s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(item, view.ItemTemplateID)),
-		Comparison:        s.shopComparisonForItem(view.Slot, stats),
+		EffectIDs:           view.EffectIDs,
+		SellPrice:           sellPrice,
+		SummaryLines:        s.itemSummaryLines(category, view.Slot, s.itemHandedness(item), stats, view.Requirements, itemDefPtr(s.rules.Items[item.itemDefID]), templateIDForSummary(item, view.ItemTemplateID)),
+		Comparison:          s.shopComparisonForItem(view.Slot, stats),
 	}
 }
 

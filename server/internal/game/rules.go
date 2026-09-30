@@ -83,8 +83,8 @@ type MainGameplayConfig struct {
 	CompanionFollowDistance                    float64                 `json:"companion_follow_distance"`
 	CompanionFollowStop                        float64                 `json:"companion_follow_stop_radius"`
 	RangedRetreatMinMeleeEngagementSeconds     float64                 `json:"ranged_retreat_min_melee_engagement_seconds"`
-	ExperienceRewardPercent                      int                     `json:"experience_reward_percent"`
-	PotionRules                                  PotionRulesConfig       `json:"potion_rules"`
+	ExperienceRewardPercent                    int                     `json:"experience_reward_percent"`
+	PotionRules                                PotionRulesConfig       `json:"potion_rules"`
 }
 
 // DamageRange is an inclusive [Min, Max] integer range.

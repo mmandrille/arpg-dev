@@ -155,4 +155,3 @@ func storeShopStock(accountID, characterID string, items []game.PersistedShopSto
 	}
 	return out
 }
-

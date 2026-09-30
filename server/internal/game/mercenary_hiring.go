@@ -37,14 +37,14 @@ func (s *Sim) hireMercenaryFromBoard(board *entity, in Input, res *TickResult, a
 	candidates := s.mercenaryCandidatesForPlayer(player)
 	affordable := s.gold >= cost
 	res.Events = append(res.Events, Event{
-		EventType:             "mercenary_board_opened",
-		EntityID:              idStr(board.id),
-		CorrelationID:         in.CorrelationID,
-		Service:               mercenaryService,
-		Price:                 intPtr(cost),
-		Affordable:            boolPtr(affordable),
-		TotalGold:             intPtr(s.gold),
-		MercenaryCandidates:   candidates,
+		EventType:           "mercenary_board_opened",
+		EntityID:            idStr(board.id),
+		CorrelationID:       in.CorrelationID,
+		Service:             mercenaryService,
+		Price:               intPtr(cost),
+		Affordable:          boolPtr(affordable),
+		TotalGold:           intPtr(s.gold),
+		MercenaryCandidates: candidates,
 	})
 
 	characterID := ""
@@ -89,15 +89,15 @@ func (s *Sim) hireMercenaryFromBoard(board *entity, in Input, res *TickResult, a
 		return
 	}
 	res.Events = append(res.Events, Event{
-		EventType:           "mercenary_hired",
-		EntityID:            idStr(board.id),
-		TargetEntityID:      idStr(companion.id),
-		CorrelationID:       in.CorrelationID,
-		Service:             mercenaryService,
-		SourceCharacterID:   snap.CharacterID,
-		CharacterClass:      snap.CharacterClass,
-		Price:               intPtr(cost),
-		TotalGold:           intPtr(s.gold),
+		EventType:         "mercenary_hired",
+		EntityID:          idStr(board.id),
+		TargetEntityID:    idStr(companion.id),
+		CorrelationID:     in.CorrelationID,
+		Service:           mercenaryService,
+		SourceCharacterID: snap.CharacterID,
+		CharacterClass:    snap.CharacterClass,
+		Price:             intPtr(cost),
+		TotalGold:         intPtr(s.gold),
 	})
 	if ack {
 		res.ack(in.MessageID)

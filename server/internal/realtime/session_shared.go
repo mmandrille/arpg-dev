@@ -9,16 +9,16 @@ const sendQueueSize = 256
 
 func storeProgressionFromView(accountID, characterID string, view game.CharacterProgressionView) store.CharacterProgression {
 	return store.CharacterProgression{
-		AccountID:           accountID,
-		CharacterID:         characterID,
-		CharacterClass:      view.CharacterClass,
-		Level:               view.Level,
-		Experience:          view.Experience,
-		UnspentStatPoints:   view.UnspentStatPoints,
-		UnspentSkillPoints:  view.UnspentSkillPoints,
-		SkillRanks:          cloneSkillRanks(view.SkillRanks),
-		Gold:                view.Gold,
-		DeepestDungeonDepth: view.DeepestDungeonDepth,
+		AccountID:                 accountID,
+		CharacterID:               characterID,
+		CharacterClass:            view.CharacterClass,
+		Level:                     view.Level,
+		Experience:                view.Experience,
+		UnspentStatPoints:         view.UnspentStatPoints,
+		UnspentSkillPoints:        view.UnspentSkillPoints,
+		SkillRanks:                cloneSkillRanks(view.SkillRanks),
+		Gold:                      view.Gold,
+		DeepestDungeonDepth:       view.DeepestDungeonDepth,
 		HiredMercenaryCharacterID: view.HiredMercenaryCharacterID,
 		Stats: store.CharacterBaseStats{
 			Str:   view.BaseStats.Str,

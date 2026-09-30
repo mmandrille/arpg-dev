@@ -21,10 +21,10 @@ func TestCoalesceOutboundStateDelta(t *testing.T) {
 		Type: typeStateDelta,
 		Tick: 6,
 		Payload: stateDeltaPayload{
-			ServerTick: 6,
-			Level:      -1,
-			Changes:    []game.Change{{Op: game.OpGoldUpdate, Gold: intPtr(3)}},
-			Events:     []game.Event{{EventType: "monster_damaged"}},
+			ServerTick:  6,
+			Level:       -1,
+			Changes:     []game.Change{{Op: game.OpGoldUpdate, Gold: intPtr(3)}},
+			Events:      []game.Event{{EventType: "monster_damaged"}},
 			Performance: &performanceStatusPayload{Tick: 6, LiveMonsters: 26},
 		},
 	}

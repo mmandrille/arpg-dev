@@ -18,12 +18,12 @@ type ResourceLootPoolEntry struct {
 
 type ResourceLootDropsConfig struct {
 	MonsterCommonRareChancePercent int                     `json:"monster_common_rare_chance_percent"`
-	MonsterChampionChancePercent     int                     `json:"monster_champion_chance_percent"`
-	MonsterUniqueChancePercent       int                     `json:"monster_unique_chance_percent"`
-	BossKillChancePercent            int                     `json:"boss_kill_chance_percent"`
-	ChestRegularChancePercent        int                     `json:"chest_regular_chance_percent"`
-	ChestBossChancePercent           int                     `json:"chest_boss_chance_percent"`
-	Pool                             []ResourceLootPoolEntry `json:"pool"`
+	MonsterChampionChancePercent   int                     `json:"monster_champion_chance_percent"`
+	MonsterUniqueChancePercent     int                     `json:"monster_unique_chance_percent"`
+	BossKillChancePercent          int                     `json:"boss_kill_chance_percent"`
+	ChestRegularChancePercent      int                     `json:"chest_regular_chance_percent"`
+	ChestBossChancePercent         int                     `json:"chest_boss_chance_percent"`
+	Pool                           []ResourceLootPoolEntry `json:"pool"`
 }
 
 func (r *Rules) resourceLootDropChancePercent(hook resourceLootDropHook) int {

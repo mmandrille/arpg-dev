@@ -316,8 +316,8 @@ ci_step "== 5/11 determinism lint ==" \
 "$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL" >/dev/null 2>&1 || true
 export ARPG_DATABASE_URL="$DATABASE_URL"
 
-ci_step "== 6/11 Go tests + vet ==" \
-  "$RUN_QUIET" --label "go test ./... && go vet ./..." -- bash -c 'cd server && go test ./... && go vet ./...'
+ci_step "== 6/11 Go fmt + tests + vet ==" \
+  "$RUN_QUIET" --label "gofmt -l && go test ./... && go vet ./..." -- bash -c 'make fmt-check-go && cd server && go test ./... && go vet ./...'
 
 ci_step "== 7/11 Python unit checks ==" \
   bash -c "make tools >/dev/null && \"$RUN_QUIET\" --label 'pytest tools' -- \"$ROOT/.venv/bin/python\" -m pytest -q tools && \"$ROOT/.venv/bin/python\" -c 'from tools.bot.ci_pack import validate_ci_pack; validate_ci_pack()'"

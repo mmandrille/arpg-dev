@@ -23,8 +23,8 @@ type mergeLeveledConsumablesRequest struct {
 }
 
 type mergeLeveledConsumablesResponse struct {
-	Item              characterItemResponse  `json:"item,omitempty"`
-	StashItem         accountStashItemResponse `json:"stash_item,omitempty"`
+	Item      characterItemResponse    `json:"item,omitempty"`
+	StashItem accountStashItemResponse `json:"stash_item,omitempty"`
 }
 
 func (s *Server) registerAccountStashMergeRoutes(mux *http.ServeMux) {

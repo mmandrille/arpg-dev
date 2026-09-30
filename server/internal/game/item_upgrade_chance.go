@@ -7,14 +7,14 @@ import (
 
 // ItemUpgradeFailureCurve configures logarithmic failure growth by target item level.
 type ItemUpgradeFailureCurve struct {
-	SafeTargetLevelMax          int `json:"safe_target_level_max"`
+	SafeTargetLevelMax          int   `json:"safe_target_level_max"`
 	LevelAnchors                []int `json:"level_anchors"`
 	FailureChancePercentAnchors []int `json:"failure_chance_percent_anchors"`
 }
 
 // ItemUpgradeChanceRules combines failure curve and shard-tier success bonus.
 type ItemUpgradeChanceRules struct {
-	FailureCurve                ItemUpgradeFailureCurve
+	FailureCurve                    ItemUpgradeFailureCurve
 	ShardSuccessBonusPercentPerTier int
 }
 

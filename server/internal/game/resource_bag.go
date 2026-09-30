@@ -213,11 +213,11 @@ func (s *Sim) handleResourceBagDepositStashItem(in Input, res *TickResult) {
 		Change{Op: OpResourceBagItemAdd, OwnerPlayerID: s.playerID, StashItem: ptrStashItemView(s.stashItemView(deposited)), StashTransferID: transferID},
 	)
 	res.Events = append(res.Events, Event{
-		EventType:     "resource_bag_stash_item_deposited",
-		EntityID:      idStr(stashEntity.id),
-		CorrelationID: in.CorrelationID,
-		StashID:       stashID,
-		StashItemID:   sourceStashItemID,
+		EventType:      "resource_bag_stash_item_deposited",
+		EntityID:       idStr(stashEntity.id),
+		CorrelationID:  in.CorrelationID,
+		StashID:        stashID,
+		StashItemID:    sourceStashItemID,
 		ItemInstanceID: idStr(bagItemID),
 	})
 	res.ack(in.MessageID)

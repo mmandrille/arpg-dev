@@ -14,92 +14,92 @@ type Vec2 struct {
 // EntityView is the protocol view of a scene entity.
 // HP/MaxHP preserve dead monsters while loot entities omit them.
 type EntityView struct {
-	ID                         string                  `json:"id"`
-	Type                       string                  `json:"type"`
-	Position                   Vec2                    `json:"position"`
-	HP                         *int                    `json:"hp,omitempty"`
-	MaxHP                      *int                    `json:"max_hp,omitempty"`
-	Mana                       *int                    `json:"mana,omitempty"`
-	MaxMana                    *int                    `json:"max_mana,omitempty"`
-	CharacterID                string                  `json:"character_id,omitempty"`
-	CharacterClass             string                  `json:"character_class,omitempty"`
-	MonsterDefID               string                  `json:"monster_def_id,omitempty"`
-	MonsterPackID              string                  `json:"monster_pack_id,omitempty"`
-	MonsterPackLeader          bool                    `json:"monster_pack_leader,omitempty"`
-	StewardHuntTarget          bool                    `json:"steward_hunt_target,omitempty"`
-	IsBoss                     bool                    `json:"is_boss,omitempty"`
-	BossTemplateID             string                  `json:"boss_template_id,omitempty"`
-	Enraged                    bool                    `json:"enraged,omitempty"`
-	EnrageHealthRatioThreshold float64                 `json:"enrage_health_ratio_threshold,omitempty"`
-	VisualModel                string                  `json:"visual_model,omitempty"`
-	VisualScale                float64                 `json:"visual_scale,omitempty"`
-	VisualTint                 string                  `json:"visual_tint,omitempty"`
-	BossPhase                  *BossPhaseView          `json:"boss_phase,omitempty"`
-	ItemDefID                  string                  `json:"item_def_id,omitempty"`
-	Amount                     *int                    `json:"amount,omitempty"`
-	ItemTemplateID             string                  `json:"item_template_id,omitempty"`
-	DisplayName                string                  `json:"display_name,omitempty"`
-	Rarity                     string                  `json:"rarity,omitempty"`
-	ItemLevel                  int                     `json:"item_level,omitempty"`
-	RolledStats                map[string]int          `json:"rolled_stats,omitempty"`
-	Requirements               map[string]int          `json:"requirements,omitempty"`
+	ID                         string                    `json:"id"`
+	Type                       string                    `json:"type"`
+	Position                   Vec2                      `json:"position"`
+	HP                         *int                      `json:"hp,omitempty"`
+	MaxHP                      *int                      `json:"max_hp,omitempty"`
+	Mana                       *int                      `json:"mana,omitempty"`
+	MaxMana                    *int                      `json:"max_mana,omitempty"`
+	CharacterID                string                    `json:"character_id,omitempty"`
+	CharacterClass             string                    `json:"character_class,omitempty"`
+	MonsterDefID               string                    `json:"monster_def_id,omitempty"`
+	MonsterPackID              string                    `json:"monster_pack_id,omitempty"`
+	MonsterPackLeader          bool                      `json:"monster_pack_leader,omitempty"`
+	StewardHuntTarget          bool                      `json:"steward_hunt_target,omitempty"`
+	IsBoss                     bool                      `json:"is_boss,omitempty"`
+	BossTemplateID             string                    `json:"boss_template_id,omitempty"`
+	Enraged                    bool                      `json:"enraged,omitempty"`
+	EnrageHealthRatioThreshold float64                   `json:"enrage_health_ratio_threshold,omitempty"`
+	VisualModel                string                    `json:"visual_model,omitempty"`
+	VisualScale                float64                   `json:"visual_scale,omitempty"`
+	VisualTint                 string                    `json:"visual_tint,omitempty"`
+	BossPhase                  *BossPhaseView            `json:"boss_phase,omitempty"`
+	ItemDefID                  string                    `json:"item_def_id,omitempty"`
+	Amount                     *int                      `json:"amount,omitempty"`
+	ItemTemplateID             string                    `json:"item_template_id,omitempty"`
+	DisplayName                string                    `json:"display_name,omitempty"`
+	Rarity                     string                    `json:"rarity,omitempty"`
+	ItemLevel                  int                       `json:"item_level,omitempty"`
+	RolledStats                map[string]int            `json:"rolled_stats,omitempty"`
+	Requirements               map[string]int            `json:"requirements,omitempty"`
 	RequirementStatus          []RequirementStatusView   `json:"requirement_status,omitempty"`
 	RequirementsMet            *bool                     `json:"requirements_met,omitempty"`
-	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
-	SkillBonusStatus    []SkillBonusStatusView    `json:"skill_bonus_status,omitempty"`
+	ClassAffinityStatus        []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	SkillBonusStatus           []SkillBonusStatusView    `json:"skill_bonus_status,omitempty"`
 	EquipPreview               *EquipPreviewView         `json:"equip_preview,omitempty"`
-	EffectIDs                  []string                `json:"effect_ids,omitempty"`
-	InteractableDefID          string                  `json:"interactable_def_id,omitempty"`
-	EliteObjective             bool                    `json:"elite_objective,omitempty"`
-	QuestReward                bool                    `json:"quest_reward,omitempty"`
-	CorpseCharacterID          string                  `json:"corpse_character_id,omitempty"`
-	CorpseName                 string                  `json:"corpse_name,omitempty"`
-	CorpseLevel                int                     `json:"corpse_level,omitempty"`
-	CorpseItemCount            *int                    `json:"corpse_item_count,omitempty"`
-	OwnerID                    string                  `json:"owner_id,omitempty"`
-	TargetID                   string                  `json:"target_id,omitempty"`
-	CompanionStance            string                  `json:"companion_stance,omitempty"`
-	CombatStats                *CombatStatsView        `json:"combat_stats,omitempty"`
-	RemainingTicks             *int                    `json:"remaining_ticks,omitempty"`
-	TotalTicks                 *int                    `json:"total_ticks,omitempty"`
-	ProjectileDefID            string                  `json:"projectile_def_id,omitempty"`
-	State                      string                  `json:"state,omitempty"`
+	EffectIDs                  []string                  `json:"effect_ids,omitempty"`
+	InteractableDefID          string                    `json:"interactable_def_id,omitempty"`
+	EliteObjective             bool                      `json:"elite_objective,omitempty"`
+	QuestReward                bool                      `json:"quest_reward,omitempty"`
+	CorpseCharacterID          string                    `json:"corpse_character_id,omitempty"`
+	CorpseName                 string                    `json:"corpse_name,omitempty"`
+	CorpseLevel                int                       `json:"corpse_level,omitempty"`
+	CorpseItemCount            *int                      `json:"corpse_item_count,omitempty"`
+	OwnerID                    string                    `json:"owner_id,omitempty"`
+	TargetID                   string                    `json:"target_id,omitempty"`
+	CompanionStance            string                    `json:"companion_stance,omitempty"`
+	CombatStats                *CombatStatsView          `json:"combat_stats,omitempty"`
+	RemainingTicks             *int                      `json:"remaining_ticks,omitempty"`
+	TotalTicks                 *int                      `json:"total_ticks,omitempty"`
+	ProjectileDefID            string                    `json:"projectile_def_id,omitempty"`
+	State                      string                    `json:"state,omitempty"`
 }
 
 // ItemView is the protocol view of an inventory item.
 type ItemView struct {
-	ItemInstanceID    string                  `json:"item_instance_id"`
-	ItemDefID         string                  `json:"item_def_id"`
-	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
-	DisplayName       string                  `json:"display_name,omitempty"`
-	Rarity            string                  `json:"rarity,omitempty"`
-	ItemLevel         int                     `json:"item_level,omitempty"`
-	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
-	Requirements      map[string]int          `json:"requirements,omitempty"`
-	RequirementStatus    []RequirementStatusView    `json:"requirement_status,omitempty"`
-	RequirementsMet      *bool                      `json:"requirements_met,omitempty"`
-	ClassAffinityStatus  []ClassAffinityStatusView  `json:"class_affinity_status,omitempty"`
-	SkillBonusStatus     []SkillBonusStatusView     `json:"skill_bonus_status,omitempty"`
-	EquipPreview         *EquipPreviewView          `json:"equip_preview,omitempty"`
-	EffectIDs            []string                   `json:"effect_ids,omitempty"`
-	SetPieceID           string                     `json:"set_piece_id,omitempty"`
-	NamedUniqueID        string                     `json:"named_unique_id,omitempty"`
-	SummaryLines         []string                   `json:"summary_lines,omitempty"`
-	Slot                 string                     `json:"slot"`
-	Equipped             bool                       `json:"equipped"`
-	QuestSourceDepth     int                        `json:"quest_source_depth,omitempty"`
+	ItemInstanceID      string                    `json:"item_instance_id"`
+	ItemDefID           string                    `json:"item_def_id"`
+	ItemTemplateID      string                    `json:"item_template_id,omitempty"`
+	DisplayName         string                    `json:"display_name,omitempty"`
+	Rarity              string                    `json:"rarity,omitempty"`
+	ItemLevel           int                       `json:"item_level,omitempty"`
+	RolledStats         map[string]int            `json:"rolled_stats,omitempty"`
+	Requirements        map[string]int            `json:"requirements,omitempty"`
+	RequirementStatus   []RequirementStatusView   `json:"requirement_status,omitempty"`
+	RequirementsMet     *bool                     `json:"requirements_met,omitempty"`
+	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
+	SkillBonusStatus    []SkillBonusStatusView    `json:"skill_bonus_status,omitempty"`
+	EquipPreview        *EquipPreviewView         `json:"equip_preview,omitempty"`
+	EffectIDs           []string                  `json:"effect_ids,omitempty"`
+	SetPieceID          string                    `json:"set_piece_id,omitempty"`
+	NamedUniqueID       string                    `json:"named_unique_id,omitempty"`
+	SummaryLines        []string                  `json:"summary_lines,omitempty"`
+	Slot                string                    `json:"slot"`
+	Equipped            bool                      `json:"equipped"`
+	QuestSourceDepth    int                       `json:"quest_source_depth,omitempty"`
 }
 
 // StashItemView is the protocol view of an account-stash item.
 type StashItemView struct {
-	StashItemID       string                  `json:"stash_item_id"`
-	ItemDefID         string                  `json:"item_def_id"`
-	ItemTemplateID    string                  `json:"item_template_id,omitempty"`
-	DisplayName       string                  `json:"display_name,omitempty"`
-	Rarity            string                  `json:"rarity,omitempty"`
-	ItemLevel         int                     `json:"item_level,omitempty"`
-	RolledStats       map[string]int          `json:"rolled_stats,omitempty"`
-	Requirements      map[string]int          `json:"requirements,omitempty"`
+	StashItemID         string                    `json:"stash_item_id"`
+	ItemDefID           string                    `json:"item_def_id"`
+	ItemTemplateID      string                    `json:"item_template_id,omitempty"`
+	DisplayName         string                    `json:"display_name,omitempty"`
+	Rarity              string                    `json:"rarity,omitempty"`
+	ItemLevel           int                       `json:"item_level,omitempty"`
+	RolledStats         map[string]int            `json:"rolled_stats,omitempty"`
+	Requirements        map[string]int            `json:"requirements,omitempty"`
 	RequirementStatus   []RequirementStatusView   `json:"requirement_status,omitempty"`
 	RequirementsMet     *bool                     `json:"requirements_met,omitempty"`
 	ClassAffinityStatus []ClassAffinityStatusView `json:"class_affinity_status,omitempty"`
@@ -119,15 +119,15 @@ type ResourceAmountView struct {
 
 // ItemRollPayload is the durable JSON payload stored in rolled_stats columns.
 type ItemRollPayload struct {
-	ItemTemplateID string         `json:"item_template_id"`
-	DisplayName    string         `json:"display_name"`
-	Rarity         string         `json:"rarity"`
-	ItemLevel      int            `json:"item_level"`
-	Stats          map[string]int `json:"stats"`
-	Requirements    map[string]int      `json:"requirements"`
-	EffectIDs       []string            `json:"effect_ids"`
-	SetPieceID      string              `json:"set_piece_id,omitempty"`
-	NamedUniqueID   string              `json:"named_unique_id,omitempty"`
+	ItemTemplateID    string                `json:"item_template_id"`
+	DisplayName       string                `json:"display_name"`
+	Rarity            string                `json:"rarity"`
+	ItemLevel         int                   `json:"item_level"`
+	Stats             map[string]int        `json:"stats"`
+	Requirements      map[string]int        `json:"requirements"`
+	EffectIDs         []string              `json:"effect_ids"`
+	SetPieceID        string                `json:"set_piece_id,omitempty"`
+	NamedUniqueID     string                `json:"named_unique_id,omitempty"`
 	ClassAffinities   []ClassAffinityRoll   `json:"class_affinities,omitempty"`
 	SkillLevelBonuses []SkillLevelBonusRoll `json:"skill_level_bonuses,omitempty"`
 }
@@ -177,7 +177,7 @@ func (v ItemView) RollPayload() *ItemRollPayload {
 		Requirements:   cloneIntMap(v.Requirements),
 		EffectIDs:      cloneStringSlice(v.EffectIDs),
 		SetPieceID:     v.SetPieceID,
-		NamedUniqueID:    v.NamedUniqueID,
+		NamedUniqueID:  v.NamedUniqueID,
 	}
 }
 
@@ -255,21 +255,21 @@ type StatBreakdownView struct {
 // CharacterProgressionView is the protocol view of durable character XP/stat
 // progression plus derived display stats.
 type CharacterProgressionView struct {
-	CharacterClass        string              `json:"character_class"`
-	Level                 int                 `json:"level"`
-	Experience            int                 `json:"experience"`
-	ExperienceToNextLevel *int                `json:"experience_to_next_level"`
-	LevelCap              int                 `json:"level_cap"`
-	UnspentStatPoints     int                 `json:"unspent_stat_points"`
-	UnspentSkillPoints    int                 `json:"-"`
-	Gold                  int                 `json:"gold"`
-	DeepestDungeonDepth   int                 `json:"deepest_dungeon_depth"`
-	BaseStats             BaseStatsView       `json:"base_stats"`
-	EffectiveBaseStats    BaseStatsView       `json:"effective_base_stats"`
-	DerivedStats          DerivedStatsView    `json:"derived_stats"`
-	StatBreakdowns        []StatBreakdownView `json:"stat_breakdowns,omitempty"`
-	SkillRanks            map[string]int      `json:"-"`
-	HiredMercenaryCharacterID string          `json:"hired_mercenary_character_id,omitempty"`
+	CharacterClass            string              `json:"character_class"`
+	Level                     int                 `json:"level"`
+	Experience                int                 `json:"experience"`
+	ExperienceToNextLevel     *int                `json:"experience_to_next_level"`
+	LevelCap                  int                 `json:"level_cap"`
+	UnspentStatPoints         int                 `json:"unspent_stat_points"`
+	UnspentSkillPoints        int                 `json:"-"`
+	Gold                      int                 `json:"gold"`
+	DeepestDungeonDepth       int                 `json:"deepest_dungeon_depth"`
+	BaseStats                 BaseStatsView       `json:"base_stats"`
+	EffectiveBaseStats        BaseStatsView       `json:"effective_base_stats"`
+	DerivedStats              DerivedStatsView    `json:"derived_stats"`
+	StatBreakdowns            []StatBreakdownView `json:"stat_breakdowns,omitempty"`
+	SkillRanks                map[string]int      `json:"-"`
+	HiredMercenaryCharacterID string              `json:"hired_mercenary_character_id,omitempty"`
 }
 
 // SkillProgressionSkillView is one skill row in the server-owned skill
@@ -284,11 +284,11 @@ type SkillSynergyStatusView struct {
 }
 
 type SkillProgressionSkillView struct {
-	SkillID        string                   `json:"skill_id"`
-	Rank           int                      `json:"rank"`
-	MaxRank        int                      `json:"max_rank"`
-	CanSpend       bool                     `json:"can_spend"`
-	SynergyStatus  []SkillSynergyStatusView `json:"synergy_status,omitempty"`
+	SkillID       string                   `json:"skill_id"`
+	Rank          int                      `json:"rank"`
+	MaxRank       int                      `json:"max_rank"`
+	CanSpend      bool                     `json:"can_spend"`
+	SynergyStatus []SkillSynergyStatusView `json:"synergy_status,omitempty"`
 }
 
 // SkillProgressionView is the protocol view of spendable skill points and
@@ -351,93 +351,93 @@ type BossHitShapeView struct {
 
 // Event is an authoritative event emitted by the sim.
 type Event struct {
-	EventType            string                  `json:"event_type"`
-	EntityID             string                  `json:"entity_id,omitempty"`
-	SourceEntityID       string                  `json:"source_entity_id,omitempty"`
-	TargetEntityID       string                  `json:"target_entity_id,omitempty"`
-	MonsterDefID         string                  `json:"monster_def_id,omitempty"`
-	BossTemplateID       string                  `json:"boss_template_id,omitempty"`
-	CorrelationID        string                  `json:"correlation_id,omitempty"`
-	HealthRatioThreshold *float64                `json:"health_ratio_threshold,omitempty"`
-	Damage               *int                    `json:"damage,omitempty"`
-	DamageType           string                  `json:"damage_type,omitempty"`
-	Outcome              string                  `json:"outcome,omitempty"`
-	RawDamage            *int                    `json:"raw_damage,omitempty"`
-	MitigatedDamage      *int                    `json:"mitigated_damage,omitempty"`
-	Blocked              *bool                   `json:"blocked,omitempty"`
-	Critical             *bool                   `json:"critical,omitempty"`
-	DamageBreakdown      []CombatBreakdownLineView `json:"damage_breakdown,omitempty"`
-	Heal                 *int                    `json:"heal,omitempty"`
-	Mana                 *int                    `json:"mana,omitempty"`
-	ItemInstanceID       string                  `json:"item_instance_id,omitempty"`
-	Level                *int                    `json:"level,omitempty"`
-	FromLevel            *int                    `json:"from_level,omitempty"`
-	ToLevel              *int                    `json:"to_level,omitempty"`
-	Amount               *int                    `json:"amount,omitempty"`
-	TotalExperience      *int                    `json:"total_experience,omitempty"`
-	TotalGold            *int                    `json:"total_gold,omitempty"`
-	Stat                 string                  `json:"stat,omitempty"`
-	UnspentStatPoints    *int                    `json:"unspent_stat_points,omitempty"`
-	UnspentSkillPoints   *int                    `json:"unspent_skill_points,omitempty"`
-	SkillID              string                  `json:"skill_id,omitempty"`
-	Rank                 *int                    `json:"rank,omitempty"`
-	MaxRank              *int                    `json:"max_rank,omitempty"`
-	RemainingTicks       *int                    `json:"remaining_ticks,omitempty"`
-	TotalTicks           *int                    `json:"total_ticks,omitempty"`
-	ProjectileDefID      string                  `json:"projectile_def_id,omitempty"`
-	Position             *Vec2                   `json:"position,omitempty"`
-	Direction            *Vec2                   `json:"direction,omitempty"`
-	Range                *float64                `json:"range,omitempty"`
-	AngleDegrees         *float64                `json:"angle_degrees,omitempty"`
-	WeaponSlot           string                  `json:"weapon_slot,omitempty"`
-	AttackStyle          string                  `json:"attack_style,omitempty"`
-	WeaponSet            *int                    `json:"weapon_set,omitempty"`
-	Reason               string                  `json:"reason,omitempty"`
-	ShopID               string                  `json:"shop_id,omitempty"`
-	Service              string                  `json:"service,omitempty"`
-	Offers               []ShopOfferView         `json:"offers,omitempty"`
-	SellAppraisals       []ShopSellAppraisalView `json:"sell_appraisals,omitempty"`
-	OfferID               string                  `json:"offer_id,omitempty"`
-	FamilyID              string                  `json:"family_id,omitempty"`
-	SourceDepth           *int                    `json:"source_depth,omitempty"`
-	MonsterName           string                  `json:"monster_name,omitempty"`
-	TrophyItemDefID       string                  `json:"trophy_item_def_id,omitempty"`
-	TrophyLabel           string                  `json:"trophy_label,omitempty"`
-	QuestStewardOffers    []QuestStewardOfferView `json:"quest_steward_offers,omitempty"`
-	SourceCharacterID     string                  `json:"source_character_id,omitempty"`
-	MercenaryCandidates   []MercenaryCandidateView `json:"mercenary_candidates,omitempty"`
-	Price                 *int                    `json:"price,omitempty"`
-	Affordable           *bool                   `json:"affordable,omitempty"`
-	RefreshKey           string                  `json:"refresh_key,omitempty"`
-	Item                 *ItemView               `json:"item,omitempty"`
-	StashID              string                  `json:"stash_id,omitempty"`
-	StashItemID          string                  `json:"stash_item_id,omitempty"`
-	StashItems           []StashItemView         `json:"stash_items,omitempty"`
-	StashGold            *int                    `json:"stash_gold,omitempty"`
-	StashCapacity        *int                    `json:"stash_capacity,omitempty"`
-	ResourceID           string                  `json:"resource_id,omitempty"`
-	ResourceAmount       *int                    `json:"resource_amount,omitempty"`
-	CorpseCharacterID    string                  `json:"corpse_character_id,omitempty"`
-	CorpseName           string                  `json:"corpse_name,omitempty"`
-	CorpseItems          []ItemView              `json:"corpse_items,omitempty"`
-	Inventory            []ItemView              `json:"inventory,omitempty"`
-	Equipped             map[string]*string      `json:"equipped,omitempty"`
-	Hotbar               []HotbarSlotView        `json:"hotbar,omitempty"`
-	Gold                 *int                    `json:"gold,omitempty"`
-	InventoryRows        *int                    `json:"inventory_rows,omitempty"`
-	InventoryCapacity    *int                    `json:"inventory_capacity,omitempty"`
-	HotbarCapacity       *int                    `json:"hotbar_capacity,omitempty"`
-	CharacterClass       string                  `json:"character_class,omitempty"`
-	CharacterLevel       *int                    `json:"character_level,omitempty"`
-	CharacterXP          *int                    `json:"character_xp,omitempty"`
-	PatternID            string                  `json:"pattern_id,omitempty"`
-	PhaseIndex           *int                    `json:"phase_index,omitempty"`
-	PhaseKind            string                  `json:"phase_kind,omitempty"`
-	DurationTicks        *int                    `json:"duration_ticks,omitempty"`
-	Telegraph            *BossTelegraphView      `json:"telegraph,omitempty"`
-	HitShape             *BossHitShapeView       `json:"hit_shape,omitempty"`
-	State                string                  `json:"state,omitempty"`
-	Stance               string                  `json:"stance,omitempty"`
+	EventType               string                       `json:"event_type"`
+	EntityID                string                       `json:"entity_id,omitempty"`
+	SourceEntityID          string                       `json:"source_entity_id,omitempty"`
+	TargetEntityID          string                       `json:"target_entity_id,omitempty"`
+	MonsterDefID            string                       `json:"monster_def_id,omitempty"`
+	BossTemplateID          string                       `json:"boss_template_id,omitempty"`
+	CorrelationID           string                       `json:"correlation_id,omitempty"`
+	HealthRatioThreshold    *float64                     `json:"health_ratio_threshold,omitempty"`
+	Damage                  *int                         `json:"damage,omitempty"`
+	DamageType              string                       `json:"damage_type,omitempty"`
+	Outcome                 string                       `json:"outcome,omitempty"`
+	RawDamage               *int                         `json:"raw_damage,omitempty"`
+	MitigatedDamage         *int                         `json:"mitigated_damage,omitempty"`
+	Blocked                 *bool                        `json:"blocked,omitempty"`
+	Critical                *bool                        `json:"critical,omitempty"`
+	DamageBreakdown         []CombatBreakdownLineView    `json:"damage_breakdown,omitempty"`
+	Heal                    *int                         `json:"heal,omitempty"`
+	Mana                    *int                         `json:"mana,omitempty"`
+	ItemInstanceID          string                       `json:"item_instance_id,omitempty"`
+	Level                   *int                         `json:"level,omitempty"`
+	FromLevel               *int                         `json:"from_level,omitempty"`
+	ToLevel                 *int                         `json:"to_level,omitempty"`
+	Amount                  *int                         `json:"amount,omitempty"`
+	TotalExperience         *int                         `json:"total_experience,omitempty"`
+	TotalGold               *int                         `json:"total_gold,omitempty"`
+	Stat                    string                       `json:"stat,omitempty"`
+	UnspentStatPoints       *int                         `json:"unspent_stat_points,omitempty"`
+	UnspentSkillPoints      *int                         `json:"unspent_skill_points,omitempty"`
+	SkillID                 string                       `json:"skill_id,omitempty"`
+	Rank                    *int                         `json:"rank,omitempty"`
+	MaxRank                 *int                         `json:"max_rank,omitempty"`
+	RemainingTicks          *int                         `json:"remaining_ticks,omitempty"`
+	TotalTicks              *int                         `json:"total_ticks,omitempty"`
+	ProjectileDefID         string                       `json:"projectile_def_id,omitempty"`
+	Position                *Vec2                        `json:"position,omitempty"`
+	Direction               *Vec2                        `json:"direction,omitempty"`
+	Range                   *float64                     `json:"range,omitempty"`
+	AngleDegrees            *float64                     `json:"angle_degrees,omitempty"`
+	WeaponSlot              string                       `json:"weapon_slot,omitempty"`
+	AttackStyle             string                       `json:"attack_style,omitempty"`
+	WeaponSet               *int                         `json:"weapon_set,omitempty"`
+	Reason                  string                       `json:"reason,omitempty"`
+	ShopID                  string                       `json:"shop_id,omitempty"`
+	Service                 string                       `json:"service,omitempty"`
+	Offers                  []ShopOfferView              `json:"offers,omitempty"`
+	SellAppraisals          []ShopSellAppraisalView      `json:"sell_appraisals,omitempty"`
+	OfferID                 string                       `json:"offer_id,omitempty"`
+	FamilyID                string                       `json:"family_id,omitempty"`
+	SourceDepth             *int                         `json:"source_depth,omitempty"`
+	MonsterName             string                       `json:"monster_name,omitempty"`
+	TrophyItemDefID         string                       `json:"trophy_item_def_id,omitempty"`
+	TrophyLabel             string                       `json:"trophy_label,omitempty"`
+	QuestStewardOffers      []QuestStewardOfferView      `json:"quest_steward_offers,omitempty"`
+	SourceCharacterID       string                       `json:"source_character_id,omitempty"`
+	MercenaryCandidates     []MercenaryCandidateView     `json:"mercenary_candidates,omitempty"`
+	Price                   *int                         `json:"price,omitempty"`
+	Affordable              *bool                        `json:"affordable,omitempty"`
+	RefreshKey              string                       `json:"refresh_key,omitempty"`
+	Item                    *ItemView                    `json:"item,omitempty"`
+	StashID                 string                       `json:"stash_id,omitempty"`
+	StashItemID             string                       `json:"stash_item_id,omitempty"`
+	StashItems              []StashItemView              `json:"stash_items,omitempty"`
+	StashGold               *int                         `json:"stash_gold,omitempty"`
+	StashCapacity           *int                         `json:"stash_capacity,omitempty"`
+	ResourceID              string                       `json:"resource_id,omitempty"`
+	ResourceAmount          *int                         `json:"resource_amount,omitempty"`
+	CorpseCharacterID       string                       `json:"corpse_character_id,omitempty"`
+	CorpseName              string                       `json:"corpse_name,omitempty"`
+	CorpseItems             []ItemView                   `json:"corpse_items,omitempty"`
+	Inventory               []ItemView                   `json:"inventory,omitempty"`
+	Equipped                map[string]*string           `json:"equipped,omitempty"`
+	Hotbar                  []HotbarSlotView             `json:"hotbar,omitempty"`
+	Gold                    *int                         `json:"gold,omitempty"`
+	InventoryRows           *int                         `json:"inventory_rows,omitempty"`
+	InventoryCapacity       *int                         `json:"inventory_capacity,omitempty"`
+	HotbarCapacity          *int                         `json:"hotbar_capacity,omitempty"`
+	CharacterClass          string                       `json:"character_class,omitempty"`
+	CharacterLevel          *int                         `json:"character_level,omitempty"`
+	CharacterXP             *int                         `json:"character_xp,omitempty"`
+	PatternID               string                       `json:"pattern_id,omitempty"`
+	PhaseIndex              *int                         `json:"phase_index,omitempty"`
+	PhaseKind               string                       `json:"phase_kind,omitempty"`
+	DurationTicks           *int                         `json:"duration_ticks,omitempty"`
+	Telegraph               *BossTelegraphView           `json:"telegraph,omitempty"`
+	HitShape                *BossHitShapeView            `json:"hit_shape,omitempty"`
+	State                   string                       `json:"state,omitempty"`
+	Stance                  string                       `json:"stance,omitempty"`
 	BishopLootDepthCatalog  *BishopLootDepthCatalogView  `json:"bishop_loot_depth_catalog,omitempty"`
 	BishopLootSourceCatalog *BishopLootSourceCatalogView `json:"bishop_loot_source_catalog,omitempty"`
 	Hits                    []SkillDamageBurstHit        `json:"hits,omitempty"`

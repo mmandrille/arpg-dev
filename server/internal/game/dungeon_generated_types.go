@@ -11,12 +11,12 @@ type generatedDungeonLevel struct {
 	corridorZones []corridorZone
 	rooms         []dungeonRoom
 	stairs        []generatedStair
-	teleporters []generatedTeleporter
-	chests      []generatedChest
-	doors       []generatedDoor
-	monsters    []generatedMonster
-	loot        []generatedLoot
-	stewardHunt *generatedStewardHunt
+	teleporters   []generatedTeleporter
+	chests        []generatedChest
+	doors         []generatedDoor
+	monsters      []generatedMonster
+	loot          []generatedLoot
+	stewardHunt   *generatedStewardHunt
 }
 
 type generatedStair struct {
@@ -51,19 +51,19 @@ type generatedLoot struct {
 }
 
 type generatedMonster struct {
-	defID        string
-	packID       string
-	packLeader   bool
-	rarityID     string
-	bossTemplate string
-	isBoss       bool
+	defID             string
+	packID            string
+	packLeader        bool
+	rarityID          string
+	bossTemplate      string
+	isBoss            bool
 	stewardHuntTarget bool
-	visualModel  string
-	visualTint   string
-	visualScale  float64
-	lootTable    string
-	pos          Vec2
-	maxHP        int
-	attackDamage *DamageRange
-	xpReward     int
+	visualModel       string
+	visualTint        string
+	visualScale       float64
+	lootTable         string
+	pos               Vec2
+	maxHP             int
+	attackDamage      *DamageRange
+	xpReward          int
 }

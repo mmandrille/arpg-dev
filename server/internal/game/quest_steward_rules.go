@@ -60,11 +60,11 @@ type questStewardOffer struct {
 }
 
 type questStewardOffersState struct {
-	GiverEntityID        uint64
-	TrophyInstanceID     uint64
+	GiverEntityID         uint64
+	TrophyInstanceID      uint64
 	TrophyFromResourceBag bool
-	SourceDepth          int
-	Offers               []questStewardOffer
+	SourceDepth           int
+	Offers                []questStewardOffer
 }
 
 type questTurnInTrophyRef struct {

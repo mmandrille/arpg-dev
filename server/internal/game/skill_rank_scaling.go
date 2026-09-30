@@ -4,9 +4,9 @@ import "math"
 
 // RankScalingCurve controls how base + per-rank values grow with skill rank.
 type RankScalingCurve struct {
-	Type            string `json:"type"`
-	PercentPerRank  int    `json:"percent_per_rank"`
-	LinearPerRank   bool   `json:"linear_per_rank,omitempty"`
+	Type           string `json:"type"`
+	PercentPerRank int    `json:"percent_per_rank"`
+	LinearPerRank  bool   `json:"linear_per_rank,omitempty"`
 }
 
 func defaultRankScalingCurve() RankScalingCurve {

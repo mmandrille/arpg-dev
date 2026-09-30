@@ -28,8 +28,8 @@ func (ctx *simTickCtx) resultFor(level int, actor uint64) *TickResult {
 		return res
 	}
 	res := &TickResult{
-		Tick:  ctx.sim.tick,
-		Level: level,
+		Tick:          ctx.sim.tick,
+		Level:         level,
 		ActorPlayerID: actor,
 		Changes:       []Change{},
 		Events:        []Event{},

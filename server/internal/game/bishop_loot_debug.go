@@ -6,9 +6,9 @@ import (
 )
 
 type BishopLootDepthOptionView struct {
-	Depth         int    `json:"depth"`
-	Label         string `json:"label"`
-	MaxItemLevel  int    `json:"max_item_level"`
+	Depth        int    `json:"depth"`
+	Label        string `json:"label"`
+	MaxItemLevel int    `json:"max_item_level"`
 }
 
 type BishopLootDepthCatalogView struct {
@@ -52,13 +52,13 @@ type BishopLootWalletItemView struct {
 }
 
 type BishopLootSourceCatalogView struct {
-	Depth         int                           `json:"depth"`
-	SourceType    string                        `json:"source_type"`
-	MaxItemLevel  int                           `json:"max_item_level"`
-	LootTableID   string                        `json:"loot_table_id"`
-	Attempts      []BishopLootAttemptView       `json:"attempts"`
-	ResourceLoot  *BishopLootResourceBranchView `json:"resource_loot,omitempty"`
-	WalletItems   []BishopLootWalletItemView    `json:"wallet_items"`
+	Depth        int                           `json:"depth"`
+	SourceType   string                        `json:"source_type"`
+	MaxItemLevel int                           `json:"max_item_level"`
+	LootTableID  string                        `json:"loot_table_id"`
+	Attempts     []BishopLootAttemptView       `json:"attempts"`
+	ResourceLoot *BishopLootResourceBranchView `json:"resource_loot,omitempty"`
+	WalletItems  []BishopLootWalletItemView    `json:"wallet_items"`
 }
 
 type BishopDebugLootCatalogIntent struct {
@@ -121,12 +121,12 @@ func (s *Sim) handleBishopDebugLootCatalog(in Input, res *TickResult) {
 	catalog := s.buildBishopLootDepthCatalog()
 	healed, restored := s.restorePlayerResources(player, res)
 	res.Events = append(res.Events, Event{
-		EventType:           "bishop_debug_loot_catalog",
-		EntityID:            idStr(bishopEntity.id),
-		CorrelationID:       in.CorrelationID,
-		Service:             "bishop",
-		Heal:                intPtr(healed),
-		Mana:                intPtr(restored),
+		EventType:              "bishop_debug_loot_catalog",
+		EntityID:               idStr(bishopEntity.id),
+		CorrelationID:          in.CorrelationID,
+		Service:                "bishop",
+		Heal:                   intPtr(healed),
+		Mana:                   intPtr(restored),
 		BishopLootDepthCatalog: &catalog,
 	})
 	res.ack(in.MessageID)
@@ -166,12 +166,12 @@ func (s *Sim) handleBishopDebugLootSourceCatalog(in Input, res *TickResult) {
 	}
 	healed, restored := s.restorePlayerResources(player, res)
 	res.Events = append(res.Events, Event{
-		EventType:            "bishop_debug_loot_source_catalog",
-		EntityID:             idStr(bishopEntity.id),
-		CorrelationID:        in.CorrelationID,
-		Service:              "bishop",
-		Heal:                 intPtr(healed),
-		Mana:                 intPtr(restored),
+		EventType:               "bishop_debug_loot_source_catalog",
+		EntityID:                idStr(bishopEntity.id),
+		CorrelationID:           in.CorrelationID,
+		Service:                 "bishop",
+		Heal:                    intPtr(healed),
+		Mana:                    intPtr(restored),
 		BishopLootSourceCatalog: &catalog,
 	})
 	res.ack(in.MessageID)
@@ -471,8 +471,8 @@ func (s *Sim) bishopLootDropFromCatalog(catalog BishopLootSourceCatalogView, att
 
 func (s *Sim) bishopGoldRollContext(depth int, sourceType string, forcedItemLevel int) goldRollContext {
 	ctx := goldRollContext{
-		levelNum:          -depth,
-		forcedItemLevel:   forcedItemLevel,
+		levelNum:        -depth,
+		forcedItemLevel: forcedItemLevel,
 	}
 	if sourceType == "boss" {
 		ctx.magicFind = true

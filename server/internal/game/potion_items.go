@@ -12,9 +12,9 @@ const (
 
 // PotionRulesConfig holds data-driven leveled potion tuning.
 type PotionRulesConfig struct {
-	RestoreMultiplierPerLevel int `json:"restore_multiplier_per_level"`
-	RejuvMinRestorePercent    int `json:"rejuv_min_restore_percent"`
-	RejuvDropWeightPercent    int `json:"rejuv_drop_weight_percent"`
+	RestoreMultiplierPerLevel int            `json:"restore_multiplier_per_level"`
+	RejuvMinRestorePercent    int            `json:"rejuv_min_restore_percent"`
+	RejuvDropWeightPercent    int            `json:"rejuv_drop_weight_percent"`
 	ShopBaseBuyPrice          map[string]int `json:"shop_base_buy_price"`
 	ShopBuyPricePerLevel      int            `json:"shop_buy_price_per_level"`
 }

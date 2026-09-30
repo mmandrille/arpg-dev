@@ -21,7 +21,6 @@ const ProjectileFlightPresentationScript := preload("res://scripts/projectile_fl
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const EnemyHealthBarVisibilityScript := preload("res://scripts/enemy_health_bar_visibility.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
-const ChestPresentationScript := preload("res://scripts/chest_presentation.gd")
 const SkillRankIntensityScript := preload("res://scripts/skill_rank_intensity.gd")
 const CombatEventPresentationScript := preload("res://scripts/combat_event_presentation.gd")
 const CombatOutcomePunchScript := preload("res://scripts/combat_outcome_punch.gd")
@@ -37,7 +36,6 @@ const ShopPanelScript := preload("res://scripts/shop_panel.gd")
 const StashPanelScript := preload("res://scripts/stash_panel.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const BishopLootDebugPanelScript := preload("res://scripts/bishop_loot_debug_panel.gd")
-const TrainingDamageLogPanelScript := preload("res://scripts/training_damage_log_panel.gd")
 const TrainingDamageLogBridgeScript := preload("res://scripts/training_damage_log_bridge.gd")
 const MercenaryPanelScript := preload("res://scripts/mercenary_panel.gd")
 const MercenaryPanelBridgeScript := preload("res://scripts/mercenary_panel_bridge.gd")
@@ -75,7 +73,6 @@ const MainMenuScript := preload("res://scripts/main_menu.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
 const SettingsPanelScript := preload("res://scripts/settings_panel.gd")
-const CodexPanelScript := preload("res://scripts/codex_panel.gd")
 const CodexMenuBridgeScript := preload("res://scripts/codex_menu_bridge.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SustainedClickInputScript := preload("res://scripts/sustained_click_input.gd")
@@ -112,7 +109,6 @@ const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
 const ClassPresentationsLoaderScript := preload("res://scripts/class_presentations_loader.gd")
 const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
-const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
 const MonsterMeleeWindupMarkerScript := preload("res://scripts/monster_melee_windup_marker.gd")
@@ -585,9 +581,6 @@ func _show_join_game_panel(refresh: bool = false) -> void:
 	multiplayer_panel.show_panel()
 	if refresh:
 		_refresh_multiplayer_sessions()
-
-func _show_multiplayer_panel(refresh: bool = false) -> void:
-	_show_join_game_panel(refresh)
 
 func _refresh_multiplayer_sessions() -> void:
 	if multiplayer_panel == null:
@@ -1817,9 +1810,6 @@ func _on_mobility_visual_finished(entity_id: String, landing: Vector3) -> void:
 	_reconcile_player()
 
 
-func _is_local_player_entity_update(e: Dictionary) -> bool:
-	return str(e.get("type", "")) == "player" and (str(e.get("id", "")) == player_id or player_id == "")
-
 func _entity_position(e: Dictionary) -> Vector3:
 	var pos: Dictionary = e.get("position", {})
 	return Vector3(float(pos.get("x", 0.0)), 0.0, float(pos.get("y", 0.0)))
@@ -2174,16 +2164,8 @@ func _remove_inventory_item(item_instance_id: String) -> void:
 	InventoryWalletDeltaRuntimeScript.remove_inventory_item(self, item_instance_id)
 
 
-func _remove_inventory_items_by_def(item_def_id: String, count: int) -> void:
-	InventoryWalletDeltaRuntimeScript.remove_inventory_items_by_def(self, item_def_id, count)
-
-
 func _upsert_stash_item(item: Dictionary) -> void:
 	InventoryWalletDeltaRuntimeScript.upsert_stash_item(self, item)
-
-
-func _remove_stash_item(stash_item_id: String) -> void:
-	InventoryWalletDeltaRuntimeScript.remove_stash_item(self, stash_item_id)
 
 
 func _apply_resource_wallet_snapshot(rows: Variant) -> void:
@@ -2193,9 +2175,6 @@ func _apply_resource_wallet_snapshot(rows: Variant) -> void:
 func _apply_resource_bag_snapshot(rows: Variant) -> void:
 	InventoryWalletDeltaRuntimeScript.apply_resource_bag_snapshot(self, rows)
 
-
-func _apply_hotbar_update(slot_index: int, item_instance_id, item: Dictionary = {}) -> void:
-	InventoryWalletDeltaRuntimeScript.apply_hotbar_update(self, slot_index, item_instance_id, item)
 
 func _refresh_inventory_ui() -> void:
 	if inventory_panel != null:
@@ -2224,11 +2203,6 @@ func _refresh_inventory_ui() -> void:
 		consumable_bar.set_inventory_state(inventory)
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
 	_sync_quest_steward_reward_label()
-
-func _refresh_inventory_panel() -> void:
-	_refresh_inventory_ui()
-	if visual_replay_enabled:
-		_sync_inventory_replay_display()
 
 func _reconcile_player() -> void:
 	if player_anchor != null:
@@ -2942,9 +2916,6 @@ func _reconcile_force_stand_anchor() -> void:
 		predicted_pos = player_anchor.global_position
 	_reconcile_player()
 
-func _send_stop_movement_intent() -> void:
-	MovementInputPresenterScript.send_stop_intent(client, last_server_tick, player_hp)
-
 func _handle_escape() -> void:
 	if settings_panel != null and settings_panel.visible:
 		_on_settings_back()
@@ -3221,8 +3192,6 @@ func _dispatch_monster_attack_now(target_id: String, rec: Dictionary) -> void:
 	_send_action_intent(target_id)
 	_attack_cooldown = _basic_attack_cooldown_seconds()
 	_start_basic_attack_recovery_ui(_attack_cooldown)
-func _queue_attack_buffer(target_id: String) -> void:
-	AttackMoveInputCoordinatorScript.queue_attack_buffer(self, target_id)
 
 func _defer_monster_click(target_id: String) -> void:
 	AttackMoveInputCoordinatorScript.defer_monster_click(self, target_id)
@@ -3249,12 +3218,6 @@ func _tick_attack_buffer(delta: float) -> void:
 
 func _tick_sticky_attack() -> void:
 	AttackMoveInputCoordinatorScript.tick_sticky_attack(self)
-
-func _repeat_hold_attack() -> void:
-	AttackMoveInputCoordinatorScript.repeat_hold_attack(self)
-
-func _repeat_hold_move() -> void:
-	AttackMoveInputCoordinatorScript.repeat_hold_move(self)
 
 func _try_action_at_mouse() -> void:
 	if _attack_cooldown > 0.0 or player_hp <= 0:
@@ -4525,9 +4488,6 @@ func _skill_cast_payload(skill_id: String, target_id: String = "", direction: Ve
 	)
 
 
-func _skill_targeting(skill_id: String) -> String:
-	return SkillAimInputScript.skill_targeting(skill_id)
-
 func _is_skill_reject_reason(reason: String) -> bool:
 	return reason.begins_with("skill_") \
 		or reason == "unknown_skill" \
@@ -4612,26 +4572,6 @@ func _skill_progression_row(skill_id: String) -> Dictionary:
 		if typeof(row) == TYPE_DICTIONARY and str((row as Dictionary).get("skill_id", "")) == skill_id:
 			return row as Dictionary
 	return {}
-
-func _nearest_live_monster_id() -> String:
-	var best_id := ""
-	var best_dist := INF
-	for mid in monster_ids:
-		var id := str(mid)
-		if not entities.has(id):
-			continue
-		var rec: Dictionary = entities[id]
-		if int(rec.get("hp", 1)) <= 0:
-			continue
-		var node := rec.get("node", null) as Node3D
-		if node == null:
-			continue
-		var pos := _node_world_or_local_position(node)
-		var dist := Vector2(pos.x - predicted_pos.x, pos.z - predicted_pos.z).length()
-		if dist < best_dist:
-			best_dist = dist
-			best_id = id
-	return best_id
 
 func _face_toward_entity(target_id: String) -> void:
 	if target_id == "" or not entities.has(target_id):
@@ -5257,9 +5197,6 @@ func _refresh_blacksmith_panel() -> void:
 		"",
 		resource_wallet
 	)
-
-func _apply_upgrade_resource_wallet_response(result: Dictionary) -> void:
-	_apply_upgrade_resource_response(result)
 
 func _blacksmith_config() -> Dictionary:
 	var config := {}

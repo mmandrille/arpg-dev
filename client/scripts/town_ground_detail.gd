@@ -3,8 +3,8 @@
 ## town_presentation.v0.json -> dressing. Presentation only: the server never sees it.
 ##
 ## Planning functions are pure (data in, cells/placements out) so they are unit-testable without a
-## scene; the builders at the bottom turn a plan into MultiMeshes. Placement uses hash() only (same
-## scheme as DungeonKitFloor.pick) so every client renders the same town.
+## scene. Placement uses hash() only (same scheme as DungeonKitFloor.pick) so every client renders
+## the same town.
 class_name TownGroundDetail
 extends RefCounted
 
@@ -186,6 +186,7 @@ static func scatter(dressing: Dictionary, frame_data: Dictionary) -> Array:
 		return out
 	var center: Vector2 = frame_data["center"]
 	var fence_radius := float(frame_data["fence_radius"])
+	var jitter_fraction := float(cfg.get("jitter_fraction", 0.0))
 	var clearance := float(cfg.get("min_clearance_m", 0.0))
 	var fence_clear := float(cfg.get("fence_clearance_m", 0.0))
 	var occupancy := int(cfg.get("occupancy_percent", 0))
@@ -207,7 +208,7 @@ static func scatter(dressing: Dictionary, frame_data: Dictionary) -> Array:
 				continue
 			var h2 := absi(hash(Vector3i(ix, iy, SCATTER_SALT + 1)))
 			var jitter := Vector2(float((h / 100) % 1000) / 1000.0 - 0.5, float((h / 100000) % 1000) / 1000.0 - 0.5)
-			var pos := center + Vector2(ix, iy) * cell_m + jitter * cell_m * 0.8
+			var pos := center + Vector2(ix, iy) * cell_m + jitter * cell_m * jitter_fraction
 			var is_patch := (h2 % 100) < patch_share
 			if patches.is_empty():
 				is_patch = false

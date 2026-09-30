@@ -340,6 +340,7 @@
             "patch_share_percent",
             "min_clearance_m",
             "fence_clearance_m",
+            "jitter_fraction",
             "surface_y",
             "patches",
             "rocks"
@@ -373,6 +374,11 @@
             "fence_clearance_m": {
               "type": "number",
               "minimum": 0
+            },
+            "jitter_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
             },
             "surface_y": {
               "type": "number",

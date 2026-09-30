@@ -295,6 +295,7 @@
       "patch_share_percent": 55,
       "min_clearance_m": 1.5,
       "fence_clearance_m": 1.5,
+      "jitter_fraction": 0.8,
       "surface_y": 0.0,
       "patches": [
         {

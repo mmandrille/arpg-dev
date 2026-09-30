@@ -15,6 +15,7 @@ func _initialize() -> void:
 	_test_layers_partition_and_definitions(dressing, frame)
 	_test_paths_connect_plaza_to_targets(dressing, frame)
 	_test_scatter_rules(dressing, frame)
+	_test_scatter_avoids_anchors_and_props(dressing, frame)
 	_test_scatter_is_deterministic_and_data_driven(dressing, frame)
 	_test_rock_transform_seats_on_the_surface()
 	_finish()
@@ -119,30 +120,61 @@ func _test_layers_partition_and_definitions(dressing: Dictionary, frame: Diction
 	_assert_true("the road still reaches the gate", reaches_gate)
 
 
-func _test_paths_connect_plaza_to_targets(dressing: Dictionary, frame: Dictionary) -> void:
+## True when a 4-connected flood fill from the centre cell over paved (core + rim) cells reaches a
+## cell centre within `reach` of `target`.
+func _paved_flood_reaches(dressing: Dictionary, frame: Dictionary, target: Vector2, reach: float) -> bool:
 	var layers := TownGroundDetail.layers(dressing, frame)
 	var paved := _set_of(layers["core"] + layers["rim"], frame)
+	var seen := {}
+	var stack: Array = [_key(frame["center"], frame)]
+	while not stack.is_empty():
+		var cur: Vector2i = stack.pop_back()
+		if seen.has(cur) or not paved.has(cur):
+			continue
+		seen[cur] = true
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			stack.append(cur + d)
+	for idx in seen:
+		if TownGroundDetail.cell_center(idx, frame).distance_to(target) <= reach:
+			return true
+	return false
+
+
+func _with_synthetic_target(dressing: Dictionary, id: String, pos: Vector2, as_target: bool) -> Dictionary:
+	var out := dressing.duplicate(true)
+	(out["anchors"] as Array).append({"id": id, "position": {"x": pos.x, "y": pos.y}})
+	if as_target:
+		((out["service_paths"] as Dictionary)["targets"] as Array).append(id)
+	return out
+
+
+func _test_paths_connect_plaza_to_targets(dressing: Dictionary, frame: Dictionary) -> void:
 	var anchors := TownGroundDetail.anchors(dressing)
-	var targets: Array = (dressing["service_paths"] as Dictionary)["targets"]
+	var paths: Dictionary = dressing["service_paths"]
+	var targets: Array = paths["targets"]
+	var half := float(paths["path_width_m"]) * 0.5
 	_assert_true("there are service path targets", targets.size() > 0)
+	# The reach is the path half-width: a paved tile centre must sit inside the path itself.
 	for id in targets:
-		var target: Vector2 = anchors[str(id)]
-		# 4-connected flood fill from the centre cell over paved cells.
-		var seen := {}
-		var stack: Array = [_key(frame["center"], frame)]
-		while not stack.is_empty():
-			var cur: Vector2i = stack.pop_back()
-			if seen.has(cur) or not paved.has(cur):
-				continue
-			seen[cur] = true
-			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-				stack.append(cur + d)
-		var reached := false
-		var half := float((dressing["service_paths"] as Dictionary)["path_width_m"]) * 0.5
-		for idx in seen:
-			if TownGroundDetail.cell_center(idx, frame).distance_to(target) <= half + float(frame["tile"]):
-				reached = true
-		_assert_true("path tiles connect the plaza to %s" % id, reached)
+		_assert_true("path tiles connect the plaza to %s" % id, _paved_flood_reaches(dressing, frame, anchors[str(id)], half))
+	# Discrimination: with no targets configured the same assertion must fail for every anchor that
+	# the plaza disc cannot reach by itself (distance to centre >= plaza radius + half-width, with a
+	# tiny epsilon for a cell centre sitting exactly on the disc edge), so the
+	# disc alone is not what satisfies it. Targets inside the disc's own reach are covered anyway.
+	var no_paths := dressing.duplicate(true)
+	((no_paths["service_paths"] as Dictionary)["targets"] as Array).clear()
+	var plaza_radius := float((dressing["plaza"] as Dictionary)["radius_m"])
+	var needs_path := 0
+	for id in targets:
+		var pos: Vector2 = anchors[str(id)]
+		if pos.distance_to(frame["center"]) > plaza_radius + half - 0.001:
+			needs_path += 1
+			_assert_true("without service_paths.targets %s is not reached" % id, not _paved_flood_reaches(no_paths, frame, pos, half))
+	_assert_true("at least one target actually depends on a service path", needs_path > 0)
+	# A far synthetic anchor (diagonal, well outside the plaza) is connected only when it is a target.
+	var far: Vector2 = (frame["center"] as Vector2) + Vector2.ONE.normalized() * (float((dressing["plaza"] as Dictionary)["radius_m"]) + 6.0)
+	_assert_true("far synthetic target is connected by path tiles", _paved_flood_reaches(_with_synthetic_target(dressing, "synthetic_far", far, true), frame, far, half))
+	_assert_true("far synthetic anchor that is not a target stays unconnected", not _paved_flood_reaches(_with_synthetic_target(dressing, "synthetic_far", far, false), frame, far, half))
 
 
 func _test_scatter_rules(dressing: Dictionary, frame: Dictionary) -> void:
@@ -198,6 +230,34 @@ func _test_scatter_rules(dressing: Dictionary, frame: Dictionary) -> void:
 	_assert_true("placements keep clear of the fence ring", bad_fence == 0)
 	_assert_true("placements keep clear of anchors and props", bad_avoid == 0)
 	_assert_true("placements do not touch paved or edge tiles", bad_tiles == 0)
+
+
+func _has_position(placements: Array, pos: Vector2) -> bool:
+	for p in placements:
+		if (p["position"] as Vector2).is_equal_approx(pos):
+			return true
+	return false
+
+
+## The clearance rule must be able to fail: dropping a synthetic anchor / v491 prop exactly on an
+## existing placement has to remove that placement.
+func _test_scatter_avoids_anchors_and_props(dressing: Dictionary, frame: Dictionary) -> void:
+	var base := TownGroundDetail.scatter(dressing, frame)
+	_assert_true("baseline scatter has a placement to occlude", base.size() > 0)
+	if base.is_empty():
+		return
+	var victim: Vector2 = (base[0] as Dictionary)["position"]
+	var with_anchor := _with_synthetic_target(dressing, "synthetic_block", victim, false)
+	var after_anchor := TownGroundDetail.scatter(with_anchor, frame)
+	_assert_true("an anchor on a placement removes it", not _has_position(after_anchor, victim))
+	_assert_true("an anchor on a placement lowers the count", after_anchor.size() < base.size())
+	var with_prop := dressing.duplicate(true)
+	if not with_prop.has("props"):
+		with_prop["props"] = []
+	(with_prop["props"] as Array).append({"position": {"x": victim.x, "y": victim.y}})
+	var after_prop := TownGroundDetail.scatter(with_prop, frame)
+	_assert_true("a prop on a placement removes it", not _has_position(after_prop, victim))
+	_assert_true("a prop on a placement lowers the count", after_prop.size() < base.size())
 
 
 func _test_scatter_is_deterministic_and_data_driven(dressing: Dictionary, frame: Dictionary) -> void:

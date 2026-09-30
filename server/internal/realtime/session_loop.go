@@ -187,7 +187,7 @@ func (l *sessionLoop) detach(client *loopClient) {
 	if isCoopSession(l.sess) {
 		l.applyMemberLeaveLocked(client.playerID)
 	}
-	_ = l.hub.store.SetSessionMemberDisconnected(context.Background(), l.sess.ID, client.member.AccountID, client.member.CharacterID, level, int64(tick))
+	l.hub.persistMemberDisconnected(l.sess.ID, client.member.AccountID, client.member.CharacterID, level, int64(tick))
 	remaining := len(l.clients)
 	clients := l.clientsForLevelLocked(level)
 	if remaining == 0 {

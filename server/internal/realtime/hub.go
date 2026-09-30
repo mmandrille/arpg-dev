@@ -81,7 +81,7 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session, me
 	if err != nil {
 		// Upgrade writes its own HTTP error response on failure.
 		if claimed {
-			_ = h.store.SetSessionMemberDisconnected(context.Background(), sess.ID, member.AccountID, member.CharacterID, member.CurrentLevel, 0)
+			h.persistMemberDisconnected(sess.ID, member.AccountID, member.CharacterID, member.CurrentLevel, 0)
 		}
 		return
 	}
@@ -90,7 +90,7 @@ func (h *Hub) Run(w http.ResponseWriter, r *http.Request, sess store.Session, me
 		if loop, err = h.loopForSession(r.Context(), sess); err != nil || attempt >= 2 {
 			h.log.Error("attach to session loop", "session_id", sess.ID, "attempt", attempt, "error", err)
 			if claimed {
-				_ = h.store.SetSessionMemberDisconnected(context.Background(), sess.ID, member.AccountID, member.CharacterID, member.CurrentLevel, 0)
+				h.persistMemberDisconnected(sess.ID, member.AccountID, member.CharacterID, member.CurrentLevel, 0)
 			}
 			_ = conn.Close()
 			return

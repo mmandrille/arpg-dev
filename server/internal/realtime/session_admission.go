@@ -26,7 +26,20 @@ func (l *sessionLoop) admitMemberLocked(member store.SessionMember, playerID uin
 	// joined_tick must be the tick the entity was added, not "now": the lock
 	// is released between AddGuestPlayer and here, so ticks may have run.
 	joinedTick, _ := l.sim.PlayerJoinedTick(playerID)
-	_ = l.hub.store.SetSessionMemberConnected(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), level, int64(joinedTick))
+	if err := l.hub.store.SetSessionMemberConnected(context.Background(), member.SessionID, member.AccountID, member.CharacterID, idStr(playerID), level, int64(joinedTick)); err != nil {
+		// joined_tick is a replay input (v480): a lost write must be visible.
+		l.hub.metrics.PersistenceErrors.Inc()
+		l.log.Error("persist member connected", "account_id", member.AccountID, "character_id", member.CharacterID, "joined_tick", joinedTick, "error", err)
+	}
+}
+
+// persistMemberDisconnected clears the member's connected flag. A dropped write
+// leaves connected=true, which rejects the next attach as member_already_connected.
+func (h *Hub) persistMemberDisconnected(sessionID, accountID, characterID string, level int, tick int64) {
+	if err := h.store.SetSessionMemberDisconnected(context.Background(), sessionID, accountID, characterID, level, tick); err != nil {
+		h.metrics.PersistenceErrors.Inc()
+		h.log.Error("persist member disconnected", "session_id", sessionID, "account_id", accountID, "character_id", characterID, "error", err)
+	}
 }
 
 func (l *sessionLoop) playerIDForMember(ctx context.Context, member store.SessionMember) uint64 {

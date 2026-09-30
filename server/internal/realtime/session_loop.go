@@ -369,10 +369,7 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 	}
 	l.seen[env.MessageID] = true
 	cur := l.sim.CurrentTick()
-	tick := env.Tick
-	if tick < cur {
-		tick = cur
-	}
+	tick := scheduleClientTick(env.Tick, cur)
 	in.Sequence = l.seq
 	l.seq++
 	l.buffer[tick] = append(l.buffer[tick], in)

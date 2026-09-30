@@ -7,7 +7,7 @@
       "slot": "",
       "category": "consumable",
       "buy_price": 40,
-      "summary_lines": ["Kind: consumable", "Restores 3 HP"]
+      "summary_lines": ["Level 1", "Restores 3 HP"]
     }
   },
   "generated_offer": {

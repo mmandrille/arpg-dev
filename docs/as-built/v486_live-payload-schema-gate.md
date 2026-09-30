@@ -3,7 +3,7 @@
 Date: 2026-09-29
 Status: Complete
 Commit: pending
-Baseline: v483 `armor-look` (`5e891e5e`); v484/v485 in flight elsewhere
+Baseline: v483 `armor-look` (`5e891e5e`); merged over v485 `remote-player-class` before landing
 Spec: [`v486_spec-live-payload-schema-gate.md`](../specs/v486_spec-live-payload-schema-gate.md)
 
 ## What shipped

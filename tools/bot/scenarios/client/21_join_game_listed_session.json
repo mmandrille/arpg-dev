@@ -4,10 +4,11 @@
   "world_id": "dungeon_levels",
   "seed": "v46-client-join-game-proof",
   "preflight": {
-    "type": "listed_coop_host"
+    "type": "listed_coop_host",
+    "character_class": "rogue"
   },
   "title": "Join Game listed session",
-  "description": "Prepares a connected listed co-op protocol host, then drives the real Godot Join Game path as a guest and proves remote player presence.",
+  "description": "Prepares a connected listed co-op rogue protocol host, then drives the real Godot Join Game path as a sorcerer guest and proves the remote player renders the host's authoritative class (v485).",
   "client_steps": [
     { "type": "wait_main_menu", "timeout_s": 10.0 },
     {
@@ -82,6 +83,7 @@
       "name_field_visible": true,
       "create_button_visible": true
     },
+    { "type": "select_character_class", "class_id": "sorcerer" },
     { "type": "enter_character_name", "name": "Bot Guest 46" },
     { "type": "click_menu_button", "button": "confirm_character_create" },
     { "type": "wait_ws_open", "timeout_s": 10.0 },
@@ -91,6 +93,6 @@
       "mode": "coop",
       "listed": true
     },
-    { "type": "wait_remote_player_count", "at_least": 1, "timeout_s": 10.0 }
+    { "type": "wait_remote_player_count", "at_least": 1, "rendered_classes": ["rogue"], "local_rendered_class": "sorcerer", "timeout_s": 10.0 }
   ]
 }

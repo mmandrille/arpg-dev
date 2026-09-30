@@ -261,6 +261,7 @@ v480_* = member-join-tick
 v481_* = recorded-tick-checkpoints
 v482_* = cc0-beasts
 v483_* = armor-look
+v485_* = remote-player-class
 v486_* = live-payload-schema-gate
 ```
 

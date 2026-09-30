@@ -87,6 +87,24 @@ GODOT=/path/to/godot make bot-visual
 SESSION_ID=abc123 make replay
 ```
 
+## Testing Scope Policy
+
+`make ci` (and especially `make ci-full`) is slow (~15+ min) and is a CI/PR gate, not a
+per-edit habit. For a bug fix or minimal, localized change:
+
+- Run only the targeted test(s) for the affected package/module/scenario — e.g.
+  `cd server && go test ./internal/game/... -run TestName`,
+  `.venv/bin/pytest tools/bot/test_protocol.py::test_name -v`, or a single
+  `make client-unit` / `make bot scenario=<focused_scenario>` if the change is client- or
+  bot-scenario-specific.
+- Run lint scoped to what changed (e.g. `cd server && go vet ./internal/game/...`,
+  `make lint-determinism` only if you touched `game/`-package hot-path files).
+- Do **not** run `make ci` / `make ci-full` / `make test-all` for a routine fix. Reserve the
+  full pack for: pre-PR validation, changes to shared contracts/protocol/golden fixtures,
+  cross-cutting refactors, or when the user explicitly asks for full CI.
+- If it's unclear which test(s) cover the change, find the narrowest existing test file/scenario
+  first rather than defaulting to the full suite.
+
 ## Test Locking Policy
 
 Use exact values only when the test intentionally owns a stable contract: protocol/schema shape,

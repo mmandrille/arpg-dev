@@ -297,7 +297,7 @@
         {
           "asset_id": "kaykit_dungeon_floor_dirt_large_rocky_v0",
           "weight": 2,
-          "radius_m": 1.5,
+          "radius_m": 2.0,
           "scale_min": 0.8,
           "scale_max": 1.0
         },

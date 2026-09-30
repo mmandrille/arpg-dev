@@ -10,6 +10,7 @@ var _last_camera_xz := Vector2(-99999.0, -99999.0)
 var _last_target_signature := ""
 var _last_wall_signature := ""
 var _frames_since_rebuild := 0
+var _cleared := true
 
 
 func _init(wall_renderer) -> void:
@@ -21,7 +22,10 @@ func sync(camera: Camera3D, wall_layout: Array, targets: Array, active: bool) ->
 	if _wall_renderer == null:
 		return
 	if not active or camera == null or wall_layout.is_empty() or targets.is_empty():
-		_wall_renderer.apply_occlusion_fades({})
+		if not _cleared:
+			_wall_renderer.apply_occlusion_fades({})
+			_cleared = true
+		_last_wall_signature = ""  # force an immediate rebuild on reactivation
 		_set_debug(0, 1.0, 0, false)
 		return
 	var camera_xz := Vector2(camera.global_position.x, camera.global_position.z)
@@ -30,13 +34,17 @@ func sync(camera: Camera3D, wall_layout: Array, targets: Array, active: bool) ->
 	_frames_since_rebuild += 1
 	var epsilon := WallOcclusionPresentationLoaderScript.move_epsilon()
 	var min_frames := WallOcclusionPresentationLoaderScript.min_rebuild_interval_frames()
-	if (
-		_frames_since_rebuild < min_frames
-		and camera_xz.distance_to(_last_camera_xz) <= epsilon
-		and target_signature == _last_target_signature
-		and wall_signature == _last_wall_signature
-	):
+	var never_built := _last_wall_signature == ""
+	var changed := (
+		camera_xz.distance_to(_last_camera_xz) > epsilon
+		or target_signature != _last_target_signature
+		or wall_signature != _last_wall_signature
+	)
+	# Throttle: nothing changed -> never rebuild; changed -> at most once per min_frames
+	# (the pending change is picked up on a later frame because _last_* is not updated).
+	if not never_built and (not changed or _frames_since_rebuild < min_frames):
 		return
+	_cleared = false
 	_last_camera_xz = camera_xz
 	_last_target_signature = target_signature
 	_last_wall_signature = wall_signature
@@ -140,6 +148,7 @@ func reset() -> void:
 	_last_target_signature = ""
 	_last_wall_signature = ""
 	_frames_since_rebuild = 0
+	_cleared = true
 	if _wall_renderer != null:
 		_wall_renderer.apply_occlusion_fades({})
 	_reset_debug()

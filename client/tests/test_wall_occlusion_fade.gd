@@ -3,6 +3,7 @@ extends SceneTree
 const WallOcclusionFadeScript := preload("res://scripts/wall_occlusion_fade.gd")
 const WallRendererScript := preload("res://scripts/wall_renderer.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
+const WallOcclusionPresentationLoaderScript := preload("res://scripts/wall_occlusion_presentation_loader.gd")
 
 var _pass_count := 0
 var _fail_count := 0
@@ -20,6 +21,7 @@ func _run() -> void:
 	_test_resolve_faded_walls_for_lab_layout()
 	_test_backdrop_walls_stay_opaque_in_lab_layout()
 	_test_faded_wall_disables_pick_collision()
+	_test_sync_throttles_rebuilds()
 	print("[gdtest] PASS: test_wall_occlusion_fade (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -152,6 +154,41 @@ func _test_faded_wall_disables_pick_collision() -> void:
 	_assert_false("opaque wall restores collision", shape.disabled)
 	_assert_true("opaque wall is ray pickable", body.input_ray_pickable)
 	root.queue_free()
+
+
+class FakeWallRenderer:
+	extends RefCounted
+	var apply_calls := 0
+
+	func apply_occlusion_fades(_faded: Dictionary) -> void:
+		apply_calls += 1
+
+
+func _test_sync_throttles_rebuilds() -> void:
+	var renderer := FakeWallRenderer.new()
+	var fade = WallOcclusionFadeScript.new(renderer)
+	var camera := Camera3D.new()
+	get_root().add_child(camera)
+	camera.global_position = Vector3(11.0, 10.0, 20.0)
+	var walls := [{"id": "w1", "position": {"x": 8.0, "y": 9.5}, "size": {"x": 16.0, "y": 1.0}}]
+	var min_frames := WallOcclusionPresentationLoaderScript.min_rebuild_interval_frames()
+	fade.sync(camera, walls, [Vector3(2.0, 0.0, 5.0)], true)
+	_assert_eq("first sync rebuilds immediately", renderer.apply_calls, 1)
+	for i in range(min_frames * 4):
+		fade.sync(camera, walls, [Vector3(2.0, 0.0, 5.0)], true)
+	_assert_eq("unchanged state never rebuilds", renderer.apply_calls, 1)
+	var frames := min_frames * 6
+	for i in range(frames):
+		fade.sync(camera, walls, [Vector3(2.0 + 0.1 * float(i + 1), 0.0, 5.0)], true)
+	_assert_true("moving target rebuilds at most once per interval", renderer.apply_calls - 1 <= int(ceil(float(frames) / float(min_frames))))
+	_assert_true("moving target still rebuilds", renderer.apply_calls > 1)
+	var before_inactive: int = renderer.apply_calls
+	for i in range(5):
+		fade.sync(camera, walls, [], true)
+	_assert_eq("inactive clears fades once, not every frame", renderer.apply_calls, before_inactive + 1)
+	fade.sync(camera, walls, [Vector3(2.0, 0.0, 5.0)], true)
+	_assert_eq("reactivation rebuilds immediately", renderer.apply_calls, before_inactive + 2)
+	camera.free()
 
 
 func _assert_true(label: String, value: bool) -> void:

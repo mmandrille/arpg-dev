@@ -7,6 +7,7 @@ const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 const InteractableRulesLoaderScript := preload("res://scripts/interactable_rules_loader.gd")
 const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
 const DungeonKitPropsScript := preload("res://scripts/dungeon_kit_props.gd")
+const TownPresentationLoaderScript := preload("res://scripts/town_presentation_loader.gd")
 
 static func make_door_node() -> Node3D:
 	return DoorPresentationScript.make_door_node()
@@ -199,15 +200,33 @@ static func make_mercenary_board_node() -> Node3D:
 	add_merchant_box(root, "MercenaryBoardCoin", Vector3(0.16, 0.16, 0.16), Vector3(0.46, 0.72, 0.17), Color("#d8b24a"))
 	return root
 
+## v491 preview ground size; the grass UV density of the preview is defined against it.
+const PREVIEW_GROUND_BASE_SIZE := Vector2(28.0, 22.0)
+const PREVIEW_GROUND_MARGIN_M := 4.0
+
+## Square preview ground reaching past the dressing's outermost ring (scatter or fence) by a margin.
+static func preview_ground_size() -> Vector2:
+	var scatter: Dictionary = TownPresentationLoaderScript.dressing().get("scatter", {})
+	var reach := maxf(float(scatter.get("radius_m", 0.0)), TownPresentationLoaderScript.radius_m())
+	var side := 2.0 * (reach + PREVIEW_GROUND_MARGIN_M)
+	return Vector2(maxf(side, PREVIEW_GROUND_BASE_SIZE.x), maxf(side, PREVIEW_GROUND_BASE_SIZE.y))
+
 static func make_town_preview_scene() -> Node3D:
 	var root := Node3D.new()
 	root.name = "TownPreview"
 	var ground := GroundWallFactoryScript.new().make_ground_node(0)
 	ground.name = "TownPreviewGround"
-	ground.position = Vector3(11.5, -0.02, 11.5)
+	# v493: cover the whole dressing (scatter reaches scatter.radius_m past the fence) so nothing
+	# floats over the void; keep the old grass texel density by scaling the UVs with the size.
+	var center := TownPresentationLoaderScript.center()
+	ground.position = Vector3(center.x, -0.02, center.y)
 	var ground_mesh := ground.mesh as PlaneMesh
 	if ground_mesh != null:
-		ground_mesh.size = Vector2(28.0, 22.0)
+		ground_mesh.size = preview_ground_size()
+		var mat := ground.material_override as StandardMaterial3D
+		if mat != null:
+			var k := ground_mesh.size / PREVIEW_GROUND_BASE_SIZE
+			mat.uv1_scale = Vector3(mat.uv1_scale.x * k.x, mat.uv1_scale.y * k.y, 1.0)
 	root.add_child(ground)
 	var service_entries := [
 		{"def_id": "stairs_down", "position": Vector3(11.0, 0.0, 12.0)},

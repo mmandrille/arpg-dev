@@ -41,12 +41,8 @@
             "weight": 5
           },
           {
-            "asset_id": "kaykit_dungeon_floor_tile_small_decorated_v0",
-            "weight": 1
-          },
-          {
             "asset_id": "kaykit_dungeon_floor_tile_small_weeds_a_v0",
-            "weight": 1
+            "weight": 2
           }
         ]
       }
@@ -283,7 +279,7 @@
         },
         {
           "asset_id": "kaykit_dungeon_floor_dirt_small_weeds_v0",
-          "weight": 1
+          "weight": 3
         }
       ]
     },
@@ -292,24 +288,17 @@
       "radius_m": 22.0,
       "cell_m": 3.0,
       "occupancy_percent": 50,
-      "patch_share_percent": 55,
+      "patch_share_percent": 65,
       "min_clearance_m": 1.5,
-      "fence_clearance_m": 1.5,
+      "fence_clearance_m": 0.8,
       "jitter_fraction": 0.8,
       "surface_y": 0.0,
       "patches": [
         {
-          "asset_id": "kaykit_dungeon_floor_dirt_large_v0",
-          "weight": 2,
-          "radius_m": 2.0,
-          "scale_min": 0.7,
-          "scale_max": 1.0
-        },
-        {
           "asset_id": "kaykit_dungeon_floor_dirt_large_rocky_v0",
-          "weight": 1,
-          "radius_m": 2.0,
-          "scale_min": 0.7,
+          "weight": 2,
+          "radius_m": 1.5,
+          "scale_min": 0.8,
           "scale_max": 1.0
         },
         {

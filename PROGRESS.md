@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-30 (v494–v500 graphics and smoothness batch complete)
+Last updated: 2026-09-30 (v500 `$review` complete)
 
 ---
 
@@ -24,10 +24,10 @@ Last updated: 2026-09-30 (v494–v500 graphics and smoothness batch complete)
 | Field | Value |
 |-------|-------|
 | **Latest completed slice** | v500 — town terrain and KayKit nature landmarks ([as-built](docs/as-built/v500_town-terrain-landmarks.md)). The v494–v500 graphics and smoothness batch was implemented in isolated worktrees and integrated together; the final combined `make ci` passed in 11m13s after an integration fix. |
-| **Next slice** | Engineering review and refactor at the v500 milestone, then choose the next slice. Candidates: sync character inventory changed over HTTP (v488 follow-up); death dissolve + rim/outline (ADR-0018 P5 rest); showme `town` focus fix (play camera). |
-| **Graphics and smoothness sequence** | Complete in this batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
-| **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
-| **Next engineering review** | Due now at v500. The v496 interim gate was deferred for the user-requested parallel batch and single CI run; run `$review` then `$refactor` before another feature batch. |
+| **Next slice** | `$refactor` against the fresh v500 review, then choose the next feature slice. Candidates: sync character inventory changed over HTTP (v488 follow-up); death dissolve + rim/outline (ADR-0018 P5 rest); showme `town` focus fix (play camera). |
+| **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
+| **Last engineering review** | v500 — [`docs/reviews/20260930_v500-overview.md`](docs/reviews/20260930_v500-overview.md) (2026-09-30; on-cadence, overall 7.1→7.7; `make ci-full` not run this window — see Open gaps) |
+| **Next engineering review** | After the next coordinated batch, or the next ~10-slice milestone for standalone development. |
 
 
 ### Periodic engineering reviews
@@ -86,13 +86,20 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v486 `$review` (official cadence at `2cf0dcd1`).** Overview:
-  [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md). Blockers: unbounded client
-  input tick (`session_loop.go:372`), `origin` credential, ci-full red. **`$refactor` (2026-09-30) landed:** client
-  tick clamp, client gate fails on SCRIPT ERROR, determinism lint on all `game/` (baseline), Go golden consumers, gofmt
-  + realtime `-race` in CI, occlusion throttle, dead eye-view step, the 9 unique/set ci-full failures (self-referencing
-  `state_delta.v8` `$defs.equipped`). **Still open:** replay max-tick/ctx guard, `origin` credential (owner-blocked
-  by network infra; accepted risk), record debug mode on the session. `buyer_offer_cancel_ui` closed by v488.
+- **v500 `$review` (on-cadence at `33c4dc35`), supersedes v486.** Overview:
+  [`docs/reviews/20260930_v500-overview.md`](docs/reviews/20260930_v500-overview.md). Score 7.1 → 7.7; most v486
+  findings (unbounded client tick, determinism-lint blind spot, blind client gate, orphaned goldens, inverted
+  occlusion throttle, dead eye-view step, gofmt/`-race` gates) are genuinely fixed with matching commits/tests.
+  **Still open, ranked:** (1) **mercenary roster still reads/writes live DB rows during replay/build**
+  (`server/internal/mercenaryroster/load.go` — a distinct High finding previously dropped from this list, separate
+  from the debug-flag item below); (2) `make ci-full` not run since v486 — the 9 unique/set + 2 client-bot fixes are
+  unverified by an extended-pack run; (3) `envelope.v8.schema.json` 13/43 intents short of `inputdecode`;
+  (4) `CLAUDE.md`'s "schema version bump" invariant still false (`state_delta.v8` edited in-place again, `b4a5493b`);
+  (5) gameplay-debug mode still an unrecorded `os.Getenv` read (`sim.go:520/897`, `//nolint`-flagged); (6) replay
+  max-tick/ctx guard still absent (lower risk now); (7) `run.py execute_step` / `validate_shared.cross_checks()` /
+  `main.gd _apply_delta` / `sim.go` AI-projectile region still unstructured, first two growing against baseline;
+  (8) ratchet touch-to-shrink slipping (21/35 files over baseline, up from 20/35); (9) `origin` credential
+  (owner-blocked), Godot 4.6.3 pin vs installed 4.7.2, no remote CI — unchanged since v486.
 
 - **v469 environment / process gaps.**
   - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan

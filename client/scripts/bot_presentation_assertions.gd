@@ -15,8 +15,10 @@ static func dungeon_torch_lights_matches(step: Dictionary, state: Dictionary) ->
 		return false
 	if step.has("count") and int(torches.get("count", 0)) != int(step.get("count", 0)):
 		return false
+	if step.has("min_rendered_count") and int(torches.get("rendered_count", 0)) < int(step.get("min_rendered_count", 0)):
+		return false
 
-	return step.has("active") or step.has("min_count") or step.has("count")
+	return step.has("active") or step.has("min_count") or step.has("count") or step.has("min_rendered_count")
 
 
 static func _mobility_smoothing_state_matches(step: Dictionary, smoothing: Dictionary) -> bool:

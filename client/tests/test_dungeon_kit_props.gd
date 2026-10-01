@@ -9,6 +9,7 @@ const TorchLightsScript := preload("res://scripts/dungeon_torch_lights.gd")
 const TorchLoaderScript := preload("res://scripts/dungeon_torch_presentation_loader.gd")
 const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
+const WallRendererScript := preload("res://scripts/wall_renderer.gd")
 
 var _pass_count := 0
 var _fail_count := 0
@@ -19,6 +20,7 @@ func _initialize() -> void:
 	_test_mounts_face_the_room_and_match_placements()
 	_test_torch_lights_use_kit_body_on_kit_levels()
 	_test_torch_lights_keep_bracket_when_kit_disabled()
+	_test_torch_root_survives_wall_clear()
 	_test_kit_chest_contract()
 	_test_elite_chest_uses_gold_variant()
 	_test_factory_routes_only_treasure_chests()
@@ -115,6 +117,28 @@ func _test_torch_lights_keep_bracket_when_kit_disabled() -> void:
 		_fail("disabled kit must keep the procedural torch bracket")
 		return
 	_pass("disabled kit keeps legacy torches")
+
+
+func _test_torch_root_survives_wall_clear() -> void:
+	var scene_root := Node3D.new()
+	get_root().add_child(scene_root)
+	var walls_root := Node3D.new()
+	scene_root.add_child(walls_root)
+	var renderer := WallRendererScript.new(walls_root, GroundWallFactoryScript.new())
+	var lights = TorchLightsScript.new(scene_root, null, GroundWallFactoryScript.new(), renderer)
+	lights.sync(-2, _room_walls(), true)
+	var before: Dictionary = lights.get_debug_state()
+	renderer.clear_wall_nodes()
+	var after: Dictionary = lights.get_debug_state()
+	var ok: bool = int(before.get("rendered_count", 0)) > 0 and before.get("rendered_count") == after.get("rendered_count")
+	if ok:
+		lights.clear()
+		ok = int(lights.get_debug_state().get("rendered_count", -1)) == 0
+	scene_root.free()
+	if not ok:
+		_fail("wall clearing must preserve live torch nodes until torch cleanup")
+		return
+	_pass("torch root survives wall layout clearing and clears explicitly")
 
 
 func _lid_top(chest: Node3D) -> float:

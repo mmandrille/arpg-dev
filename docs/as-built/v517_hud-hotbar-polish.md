@@ -12,7 +12,7 @@
 - **Style:** `hud_style.gd` (`HudStyle`) has no literals: every color, spacing and frame resolves from `hud_*` tokens added to `shared/assets/ui_theme.v0.json` (54 colors, 22 spacing entries, 9 frame recipes, one per line; schema unchanged, pressed slot look uses the schema's `selected` state). `boss_bar_frame.gd` builds the boss panel/reward/trough/gloss/portrait frame from the same tokens. `test_hud_style.gd` loads a temp catalog and proves token edits change the produced StyleBoxes/colors.
 - **Hotbar / slots / minimap / boss bar:** empty, filled, hover, pressed, disabled slot looks; shared bronze frame with shadow; minimap frame only (map drawing untouched); boss bar frame/trough/fill gloss/phase colors. HP, phase, reward logic untouched.
 - **Capture tooling:** `client/scripts/showme/showme_hud_capture.gd` + `hud` focus routing in `skills/showme/scripts/render_focus.py` + `hud` suite in `tools/showme/screenshot_catalog.py` (8 captures). The old `_setup_hud` was removed from the grandfathered `visual_capture.gd` (1259 -> 1248 lines). New client scenario `113_hud_polish_visual.json` (`hud_polish_visual`).
-- `main.gd` unchanged (6645 lines).
+- `main.gd` unchanged by this slice (6645 lines at the slice base; 6654 on integrated `main` after v511/v512/v513, baseline 6632).
 
 ## Evidence
 

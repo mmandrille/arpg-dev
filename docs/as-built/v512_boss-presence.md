@@ -23,7 +23,7 @@
 - Assets (CC0, staged KayKit Skeletons 1.0): `skeleton_mage.glb`, `skeleton_staff.glb`,
   `skeleton_shield_large_a.glb` + manifest entries with sha256 provenance.
 
-## Proof (all in `/Users/mmandrille/git/arpg-dev-batch/v512-boss-presence`)
+## Proof (run in the v512 batch worktree, since removed; evidence preserved under `.artifacts/batch-v511-v517-evidence/v512-boss-presence/`)
 
 - pytest: `tools/test_validate_boss_presentation.py` (8), whole `tools` suite 299 passed;
   `validate_shared.py` 2241 ok; `validate_assets.py` 463 ok; `make maintainability` passed.

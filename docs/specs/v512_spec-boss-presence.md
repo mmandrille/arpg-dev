@@ -3,7 +3,7 @@
 - **Status:** Complete (focused verification; integrated and combined `make ci` green, 12m00s)
 - **Date:** 2026-10-01
 - **Codename:** `boss-presence`
-- **Batch base:** `425b9ae4` (detached v512 worktree `/Users/mmandrille/git/arpg-dev-batch/v512-boss-presence`)
+- **Batch base:** `425b9ae4` (detached v512 batch worktree, removed; evidence preserved under `.artifacts/batch-v511-v517-evidence/v512-boss-presence/`))
 - **Depends on:** v509 boss lane telegraphs (on main), v474 KayKit monster scenes, v287 two-template boss set.
   No unfinished sibling slice is a prerequisite; recheck the integrated baseline (v511, v513) before execution.
 - **ADRs:** ADR-0009 (boss floors; D-series telegraphs, health bar), ADR-0018 (kit visuals, tint rules,

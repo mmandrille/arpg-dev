@@ -2,7 +2,7 @@
 
 - **Spec:** [`v517_spec-hud-hotbar-polish.md`](../specs/v517_spec-hud-hotbar-polish.md)
 - **Date:** 2026-10-01
-- **Baseline commit:** `425b9ae4` (detached worktree `/Users/mmandrille/git/arpg-dev-batch/v517-hud-hotbar`)
+- **Baseline commit:** `425b9ae4` (detached batch worktree, removed; evidence preserved under `.artifacts/batch-v511-v517-evidence/v517-hud-hotbar/`))
 - **Prerequisite slices:** v514 `ui-theme-foundation` (UiTheme + `shared/assets/ui_theme.v0.json`). Not yet
   available. Coordination: v512 `boss-presence` (boss bar ownership), v515, v516 (shared theme/registries).
 - **Final gate:** focused slice verification (Phase 5). The coordinator runs the combined `make ci` after all

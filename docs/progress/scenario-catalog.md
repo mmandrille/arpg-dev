@@ -121,6 +121,9 @@ blacksmith_recipe_selector: headless Godot client stages a blacksmith item → v
 mercenary_stats_card: headless Godot client hires a mercenary → verifies the companion panel stats card shows HP, stance, state, and id
 boss_portrait_panel: headless Godot client starts on the compact boss floor → verifies the Cave Warden boss portrait tile
 boss_intro_banner_cave_warden / boss_intro_banner_crypt_matron: Godot client starts on the compact boss floor (seeded per template) → waits for the one-shot intro name banner, arena aura, and Cave Warden headgear → captures banner, isometric, and Performance-tier frames (v512)
+hud_polish_visual: Godot client starts on the compact boss floor → waits for the boss health bar and asserts it is visible with a live ratio → captures a real-renderer frame of globes, hotbar, minimap and boss bar (v517; capture skipped headless)
+monster_windup_pose: Godot client clicks a `dungeon_mob` in the combat control lab → waits for the attack clip to start slowed (speed scale below 1.0) on `monster_attack_windup` → captures the windup pose beside the ring (v513; capture skipped headless)
+v511_monster_variant_pack: Godot client enters the benchmark mixed arena in isometric camera → waits for live monsters and 20 ticks → captures the pinned variant population through the real play camera (v511; extended, declares `max_elapsed_s` 30; capture skipped headless)
 fog_of_war_overlay: headless Godot client enters the compact fog lab → verifies the fog overlay uses server-derived light and gloom radii
 fog_los_shadow_mask: headless Godot client enters collision_lab → verifies wall layouts produce fog LOS shadow masks
 ```

@@ -2,7 +2,7 @@
 
 - **Spec:** [`docs/specs/v513_spec-monster-animation-polish.md`](../specs/v513_spec-monster-animation-polish.md)
 - **Date:** 2026-10-01
-- **Baseline commit:** `425b9ae4` (detached worktree `/Users/mmandrille/git/arpg-dev-batch/v513-monster-anim-polish`)
+- **Baseline commit:** `425b9ae4` (detached batch worktree, removed; evidence preserved under `.artifacts/batch-v511-v517-evidence/v513-monster-anim-polish/`))
 - **Prerequisites:** none. T0-T9 can all proceed before sibling slices integrate. Re-check drift against v511/v512 before the final handoff.
 - **Final gate:** focused slice verification only. The coordinator runs the combined `make ci` after every accepted slice is integrated; there is no per-slice `make ci`/`make ci-full` here.
 

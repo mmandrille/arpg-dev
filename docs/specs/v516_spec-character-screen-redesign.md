@@ -2,7 +2,7 @@
 
 - **Status:** Complete (focused verification; integrated and combined `make ci` green, 12m00s)
 - **Date:** 2026-10-01
-- **Batch base:** `425b9ae4` (detached worktree `arpg-dev-batch/v516-character-screen`)
+- **Batch base:** `425b9ae4` (detached batch worktree, removed; evidence preserved under `.artifacts/batch-v511-v517-evidence/v516-character-screen/`))
 - **Dependency:** v514 `ui-theme-foundation` (`UiTheme` + `shared/assets/ui_theme.v0.json`) — **not yet available**; only the theme-token migration is blocked on it (see Plan).
 - **Siblings touching nearby files:** v515 (extracting from `inventory_panel.gd`), v517 (HUD/hotbar), v514 (theme).
 

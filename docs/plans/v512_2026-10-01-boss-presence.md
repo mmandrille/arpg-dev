@@ -1,7 +1,7 @@
 # v512 Plan — Boss Presence
 
 - **Spec:** [`v512_spec-boss-presence.md`](../specs/v512_spec-boss-presence.md)
-- **Baseline commit:** `425b9ae4` (detached worktree `/Users/mmandrille/git/arpg-dev-batch/v512-boss-presence`)
+- **Baseline commit:** `425b9ae4` (detached batch worktree, removed; evidence preserved under `.artifacts/batch-v511-v517-evidence/v512-boss-presence/`))
 - **Prerequisites:** none unintegrated (v509 already on main). Tasks 1-4 and 8 (schema, validator,
   loader, assets) can start immediately. Siblings v511/v513 share files; re-diff against the integrated
   state before Task 5 and Task 9 (see conflicts).
@@ -128,7 +128,7 @@ Read-only unless forced: `boss_health_bar.gd`, `boss_lane_marker.gd`, all `serve
 ## Final focused verification (worker gate)
 
 ```bash
-cd /Users/mmandrille/git/arpg-dev-batch/v512-boss-presence
+# run from a checkout containing the v512 changes (original batch worktree was removed)
 .venv/bin/pytest tools/test_validate_boss_presentation.py tools/test_validate_shared.py tools/test_scenario_movement_audit.py -q
 make validate-shared && make validate-assets && make maintainability
 make client-unit                      # or targeted: boss presentation loader/banner/arena presence/factories/boss bar/lane marker

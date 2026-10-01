@@ -3,7 +3,7 @@
 - **Status:** Complete (focused verification; integrated and combined `make ci` green, 12m00s)
 - **Date:** 2026-10-01
 - **Codename:** `hud-hotbar-polish`
-- **Batch base:** `425b9ae4` (detached v517 worktree, `/Users/mmandrille/git/arpg-dev-batch/v517-hud-hotbar`)
+- **Batch base:** `425b9ae4` (detached v517 batch worktree, removed; evidence preserved under `.artifacts/batch-v511-v517-evidence/v517-hud-hotbar/`))
 - **Depends on:** v514 `ui-theme-foundation` (UiTheme + `shared/assets/ui_theme.v0.json`, not yet integrated; see
   "Dependency split"). Soft coordination with v512 `boss-presence` (boss bar ownership), v515
   `inventory-tooltip`, v516 `character-screen` (shared theme/test registries only).

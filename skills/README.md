@@ -4,16 +4,22 @@ Canonical skill definitions for this repo. **Edit files here only** — tool-spe
 
 | Skill | Purpose |
 |-------|---------|
-| [`next/`](next/SKILL.md) | `/next {idea?}` → propose next slice, spec-ready brief |
+| [`next/`](next/SKILL.md) | `/next {idea?}` → offer one slice or a dependency-aware batch for acceptance |
 | [`spec/`](spec/SKILL.md) | `/spec {brief_or_idea}` → draft `docs/specs/vN_spec-*.md` |
 | [`plan/`](plan/SKILL.md) | `/plan {spec}` → review spec, write `docs/plans/` |
-| [`execute/`](execute/SKILL.md) | `/execute {plan}` → implement until `make ci` green |
-| [`finish/`](finish/SKILL.md) | `/finish` → consolidate PROGRESS, CI, `feat: vN:` commit |
+| [`execute/`](execute/SKILL.md) | `/execute {plan}` → implement one slice with focused checks in batch mode |
+| [`finish/`](finish/SKILL.md) | `/finish` → coordinator closes integrated batch with CI and commits; standalone closeout remains supported |
 | [`review/`](review/SKILL.md) | `/review` or `$review` → write repo-wide engineering review docs |
 | [`showme/`](showme/SKILL.md) | `/showme` or `$showme` → focused screenshot/live preview; `--refresh` hot-reloads gear JSON while tuning; `make regen-screenshots` for batch visual regression |
 | [`3dmodel/`](3dmodel/SKILL.md) | `$3dmodel` → integrate supplied GLB/glTF models into the Godot client |
-| [`autoloop/`](autoloop/SKILL.md) | `$autoloop` → complete one slice from the current session position (next/spec/plan/execute/finish) |
+| [`autoloop/`](autoloop/SKILL.md) | `$autoloop` → coordinate accepted slice sessions, integration, final CI, review, and refactor |
 | [`refactor/`](refactor/SKILL.md) | `$refactor` → scorecard-driven minor cleanup commits after a fresh review |
+
+For a batch, read the [shared batch workflow](autoloop/references/batch-workflow.md). The main
+chat dispatches one user-visible detached-worktree session per accepted slice. Slice sessions
+spec, plan, implement, and run focused checks; the main chat integrates ready slices, runs the
+combined `make ci`, closes the batch, then runs `$review` and `$refactor`. `/execute` is the
+implementation command; “implement” in a request refers to that skill.
 
 ## Discovery paths
 

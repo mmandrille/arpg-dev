@@ -31,18 +31,18 @@ Canonical definitions live in [`skills/`](skills/README.md). Tool paths are syml
 
 | Command | Skill | What it does |
 |---------|-------|--------------|
-| `/next {optional idea}` | [`skills/next/SKILL.md`](skills/next/SKILL.md) | Read `PROGRESS.md` + ADRs → propose next slice options or evaluate your idea → spec-ready brief (complexity, requirements, doubts) |
+| `/next {optional idea}` | [`skills/next/SKILL.md`](skills/next/SKILL.md) | Offer one slice or a dependency-aware batch of spec-ready slices for acceptance |
 | `/spec {brief_or_idea}` | [`skills/spec/SKILL.md`](skills/spec/SKILL.md) | Turn an approved brief or idea into `docs/specs/vN_spec-<codename>.md` without implementing |
 | `/plan {spec_file.md}` | [`skills/plan/SKILL.md`](skills/plan/SKILL.md) | Review spec for gaps → ask questions → write `docs/plans/vN_<date>-<codename>.md` (includes bot scenarios when gameplay/protocol is in scope) |
-| `/execute {plan_file.md}` | [`skills/execute/SKILL.md`](skills/execute/SKILL.md) | Review plan for gaps → ask questions → implement task-by-task until `make ci` is green |
-| `/finish` | [`skills/finish/SKILL.md`](skills/finish/SKILL.md) | Consolidate `PROGRESS.md` + uncommitted changes → `make ci` green → commit `feat: v{N}: {title}` |
+| `/execute {plan_file.md}` | [`skills/execute/SKILL.md`](skills/execute/SKILL.md) | Implement one approved plan; focused verification in a batch slice session |
+| `/finish` | [`skills/finish/SKILL.md`](skills/finish/SKILL.md) | Coordinator closes an integrated batch with combined CI, lifecycle docs, and commits; standalone slices retain their own gate |
 | `/review {vN?}` | [`skills/review/SKILL.md`](skills/review/SKILL.md) | Analyze the full repo → write overview at `docs/reviews/YYYYMMDD_vN-overview.md` plus companion reports under `docs/reviews/{backend,client,extras}/` |
 | `/showme {gear\|inventory\|...}` | [`skills/showme/SKILL.md`](skills/showme/SKILL.md) | Capture one focused Godot visual, or run `make regen-screenshots` for batch regression |
 | `$3dmodel {model task}` | [`skills/3dmodel/SKILL.md`](skills/3dmodel/SKILL.md) | Integrate supplied GLB/glTF models into the Godot client presentation path |
-| `/autoloop` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Curate or accept feature/gameplay ideas, then repeat `/next` → `/spec` → `/plan` → `/execute` → `/finish` for every viable slice selected |
+| `/autoloop` | [`skills/autoloop/SKILL.md`](skills/autoloop/SKILL.md) | Main chat offers a batch, dispatches one detached-worktree session per accepted slice, integrates ready work, then runs CI, review, and refactor |
 | `/refactor` | [`skills/refactor/SKILL.md`](skills/refactor/SKILL.md) | Read the latest review scorecard → make small verified cleanup commits until scorecard areas are 9+ or only major work remains |
 
-Workflow: `/next` → `/spec` → `/plan` → `/execute` → `/finish`. When the engineering-review cadence is due, run `/review` first so the scorecard reflects the current baseline, then run `/refactor` against that review for minor verified paydown before the next feature batch. Use `/showme` during client visual work when fast focused feedback is useful. Do not skip the review gates.
+Batch workflow: main chat runs `/next` and waits for acceptance; each accepted slice session runs `/spec` → `/plan` → `/execute` with focused checks in its own detached worktree. Main integrates ready slices as their dependencies permit, runs combined `make ci` after all are integrated, closes them with `/finish`, cleans up batch worktrees, then runs `/review` → `/refactor` on the new baseline. See [`skills/autoloop/references/batch-workflow.md`](skills/autoloop/references/batch-workflow.md). A directly requested standalone slice still uses `/next` → `/spec` → `/plan` → `/execute` → `/finish`. Use `/showme` during visual work. Do not skip spec, plan, or review gates.
 
 ### Per-agent setup
 
@@ -56,18 +56,18 @@ Edit skills only under `skills/` — never duplicate into `.cursor/` or `.claude
 
 ## Git workflow
 
-Do **not** create new branches. Work only on the branch already checked out — even if it is `main`. If a feature branch is needed, the user creates and checks it out before development begins.
+Do **not** create new branches. The coordinator works on the already checked-out branch (normally `main`); batch slice sessions use detached worktrees based on the coordinator's recorded commit. If a feature branch is needed, the user creates and checks it out before development begins.
 
 ### Worktree isolation
 
-Prefer isolating agent implementation work in a separate Git worktree until the slice has passed its targeted verification. This is valid when the user has already provided a worktree/branch for the task, or when the user explicitly approves creating a temporary worktree and branch. Agents must not create that branch unprompted, because Git cannot check out the same branch in two worktrees and this repo's default rule is still "no new branches."
+An accepted slice batch authorizes one temporary **detached** worktree and one user-visible session per slice. Standalone work may use a user-provided worktree or a separately approved detached worktree. Do not check out the coordinator's branch in a second worktree or create a branch on an agent's initiative.
 
 When worktree isolation is used:
 
-1. Keep exploratory edits, generated files, and focused test iterations inside the isolated worktree.
-2. Do not commit from the isolated worktree unless the user explicitly asks.
-3. After verification, transfer the complete tested change set back to `main` and run `/finish` there.
-4. Let `/finish` perform the final `PROGRESS.md` consolidation, `make ci` gate, staging, and single `feat: vN: ...` commit on `main`.
+1. Keep spec, plan, implementation, exploratory edits, and focused test iterations inside the assigned worktree.
+2. Do not run `make ci`, commit, push, or modify `main` from a batch slice session. Report the complete changed/untracked file list and ignored evidence to the coordinator.
+3. The coordinator integrates each ready slice into `main` after its dependencies, resolves overlapping files, and runs focused integration checks. Compare every child's changed path and intended behavior with the integrated result before cleanup.
+4. After all accepted slices are integrated, the coordinator runs the combined `make ci`, fixes and reruns failures, performs `/finish` closeout and commits, preserves referenced evidence, and removes only batch-created worktrees. Then run `/review` and `/refactor`.
 
 ## Testing discipline
 
@@ -82,7 +82,7 @@ icons, floor loot models, class bodies), run `make regen-screenshots` with the r
 Single-element captures still use `/showme` or `python3 skills/showme/scripts/render_focus.py`.
 Full catalog: [`skills/showme/SKILL.md`](skills/showme/SKILL.md).
 
-Do **not** repeatedly run the full suite by default. Reserve `make ci` for the final pre-commit proof when the change is broad enough to justify it, when targeted tests leave meaningful integration risk, or when the user explicitly asks for full CI.
+Do **not** run `make ci` in every batch slice session. Reserve it for the combined integrated state after all accepted slices are in `main`; rerun after fixes until the final state is green. Standalone work may run it for its final pre-commit gate when the change warrants it. A post-review refactor that changes code beyond focused coverage may require one additional final gate.
 
 **CI pack curation:** `make ci` runs only `tools/bot/ci_pack.json`. New scenarios default to
 `"ci_tier": "extended"`; add to the pack only for merge-blocking coverage not already gated elsewhere,

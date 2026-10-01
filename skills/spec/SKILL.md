@@ -1,36 +1,14 @@
 ---
 name: spec
-description: Draft or update SDD slice specs under docs/specs. Use when the user runs /spec or $spec, asks to turn a next-slice brief or idea into a spec, or wants a docs/specs/vN_spec-*.md file before planning.
+description: >-
+  Draft or revise one SDD slice spec under docs/specs. Use for /spec, $spec,
+  or the spec stage of an approved slice session. Writes documentation only.
 ---
 
-# Spec
+# /spec — Slice specification
 
-Use this skill to write a focused SDD slice spec. Do not implement code or write an execution plan here.
+Read `PROGRESS.md` current status, open gaps, and checklist, then `CLAUDE.md`, `docs/CODEMAP.md`, the accepted brief, and relevant ADRs/as-built notes. In a batch session, use the `vN`, codename, dependencies, and base commit assigned by the coordinator; do not recalculate or reserve another number. Standalone: check existing specs, plans, and the lifecycle index before choosing `vN`, and update an existing draft rather than duplicating it.
 
-## Workflow
+Write `docs/specs/vN_spec-<codename>.md` with `- **Status:** To Do`, date, purpose, non-goals, observable acceptance criteria, likely shared/server/client/bot/docs surfaces, focused verification, bot and real-camera proof where relevant, dependencies, integration risks, and only the open questions that affect planning. Client UI, camera, inventory, or art specs must inspect in-repo Godot code and asset manifests first and record an adopt / borrow / reject decision or require it in the plan. Prefer data-owned gameplay tuning and server-owned outcomes.
 
-1. Announce: "Using the **spec** skill to draft the slice spec."
-2. Read `CLAUDE.md`, `PROGRESS.md`, and any next brief, ADR, plan, or prior spec the user references.
-3. Determine the correct `vN` from existing `docs/specs/`, `docs/plans/`, and
-   [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md). If a draft already
-   owns the next number, update it instead of creating a duplicate.
-4. For client UI, inventory presentation, camera tooling, or placeholder art, inspect existing in-repo Godot scripts, scenes, demos, and asset manifests before proposing new dependencies, and include an adopt / borrow / reject note in the spec or call out that the plan must record it.
-5. Write `docs/specs/vN_spec-<codename>.md` with concise sections that are specific enough for `/plan`.
-6. Stop after the spec and summarize the file path plus any open questions that block planning.
-
-## Required Sections
-
-- Title, status, date, and codename.
-- Purpose: what user-visible or system behavior changes.
-- Non-goals: what is intentionally deferred.
-- Acceptance criteria: observable checks, including gameplay/UI behavior.
-- Scope and files likely touched: contracts, client, server, tools, docs, tests.
-- Test and bot proof: unit, smoke, bot, visual, or replay coverage expected.
-- Open questions and risks: only unresolved items that matter before planning.
-
-## Guardrails
-
-- Keep specs small enough for one implementation slice.
-- Prefer updating contracts, fixtures, tests, and docs together over preserving stale compatibility.
-- Do not invent plugin or asset choices without checking existing project assets and recording the client asset/plugin decision when visual/client work is in scope.
-- If the brief is too vague to produce acceptance criteria, ask the minimum blocking question before writing the file.
+This skill does not implement or write a plan. Resolve blocking product decisions with the user; correct minor details supported by the accepted brief. In a batch session, leave the spec in the assigned worktree and proceed to `/plan` under the accepted `$autoloop` assignment once the spec review is sound. Outside a batch, report the file and stop unless the user also authorized later stages. Read [the batch workflow](../autoloop/references/batch-workflow.md) for handoff boundaries.

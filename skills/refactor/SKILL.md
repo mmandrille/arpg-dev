@@ -52,6 +52,11 @@ The command targets the stable review scorecard areas:
 The goal is to push every area toward **9+**. Do not fake or document scores upward; make concrete
 repo improvements that a later `$review` can verify from evidence.
 
+When called by a slice-batch coordinator, read [the batch workflow](../autoloop/references/batch-workflow.md).
+Use the fresh post-integration review, classify every recommendation, and make safe minor paydown
+commits after the batch's green `make ci`. This is part of the accepted batch closeout; do not
+wait for another user command merely because the review cadence was not due.
+
 ## Scope
 
 Allowed work:
@@ -152,7 +157,9 @@ For each `minor-commit` task:
 1. Re-read the specific files named by the review and `docs/CODEMAP.md`.
 2. Make the smallest coherent edit.
 3. Run focused verification that covers the changed files.
-4. If the change is broad or touches core checks, run `make ci` before committing.
+4. In standalone mode, run `make ci` when the change is broad or touches core checks. In a batch
+   closeout, use focused checks per minor commit; the coordinator runs one additional final
+   `make ci` after all refactor commits if code or contracts changed beyond focused coverage.
 5. Stage only files belonging to the task.
 6. Commit with the minor commit policy above.
 7. Run `git status --short` and `git log -1 --oneline`.
@@ -173,8 +180,9 @@ engineering review updates.
 When no more safe minor commits remain:
 
 1. Run `git status --short`.
-2. If the final worktree is clean, report that `$refactor` is complete and the next step is
-   `$next` or `$autoloop` using any `future-slice` recommendations as input.
+2. If the final worktree is clean, report whether the post-refactor state needs a final `make ci`.
+   After that gate, the next step is `$next` or `$autoloop` using any `future-slice`
+   recommendations as input.
 3. If the final worktree is dirty because verification failed or a hard stop fired, report the exact
    files and stop condition.
 4. Summarize remaining `future-slice` and `future-plan` items so `$autoloop` or a later explicit

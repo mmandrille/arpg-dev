@@ -23,7 +23,7 @@ Last updated: 2026-09-30 (v494–v500 graphics and smoothness batch complete)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v500 — town terrain and KayKit nature landmarks ([as-built](docs/as-built/v500_town-terrain-landmarks.md)). The v494–v500 graphics and smoothness batch was implemented in isolated worktrees and integrated together; one combined `make ci` passed in 10m33s. |
+| **Latest completed slice** | v500 — town terrain and KayKit nature landmarks ([as-built](docs/as-built/v500_town-terrain-landmarks.md)). The v494–v500 graphics and smoothness batch was implemented in isolated worktrees and integrated together; the final combined `make ci` passed in 11m13s after an integration fix. |
 | **Next slice** | Engineering review and refactor at the v500 milestone, then choose the next slice. Candidates: sync character inventory changed over HTTP (v488 follow-up); death dissolve + rim/outline (ADR-0018 P5 rest); showme `town` focus fix (play camera). |
 | **Graphics and smoothness sequence** | Complete in this batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
 | **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
@@ -32,14 +32,10 @@ Last updated: 2026-09-30 (v494–v500 graphics and smoothness batch complete)
 
 ### Periodic engineering reviews
 
-Every **~10 completed slices**, pause for a repo-wide engineering review under [`docs/reviews/`](docs/reviews/).
-Use the milestone slice number in filenames and headings (e.g. v50, v60, v70 — v60 is the latest pass).
+After each coordinated batch, review integrated `main` under [`docs/reviews/`](docs/reviews/) and run `$refactor`; standalone reviews remain due about every **10 completed slices**.
+Use the latest completed slice number in review filenames and headings.
 
-**When to write:** after the milestone slice ships and `make ci-full` is green. Run `$review` first to
-generate the fresh scorecard and ranked recommendations from the current baseline. Then run
-`$refactor` pointed at that new review so every recommendation is classified and the minor,
-verified architecture/maintainability/test/docs/process paydown commits land before `/next`
-proposes the next feature batch.
+**When to write:** after the batch's combined `make ci` passes, or at the standalone milestone. Record whether `make ci-full` ran; the fast pack is not full-matrix proof. Run `$review` for a fresh scorecard, then `$refactor` to classify recommendations and land minor verified paydown before `/next` proposes another batch.
 
 **Minimum set** (follow the v53 pattern):
 
@@ -203,15 +199,12 @@ the next autoloop pass unless code changes make them stale.
 2. **Read ADR-0001** and any feature-specific ADRs listed above.
 3. **Spec first** — create or read `docs/specs/vN_spec-<feature>.md` (SDD; `N` = next execution order).
 4. **Plan second** — create `docs/plans/vN_<YYYY-MM-DD>-<feature>.md` with file map + verification commands.
-5. **Branch** — stay on the current checkout; do not create branches (user creates them before development if needed).
-6. **Implement** shared → server → client → bot/smoke → docs; keep `make ci` green.
+5. **Git** — do not create branches. The coordinator stays on the checked-out branch; batch sessions use temporary detached worktrees.
+6. **Implement** shared → server → client → bot/smoke → docs. Batch sessions run focused checks; the coordinator owns combined `make ci`.
 7. **Update this file** when the slice completes: **Current status**, open gaps, and review cadence.
    Add the lifecycle row in [`docs/progress/slice-lifecycle.md`](docs/progress/slice-lifecycle.md).
    Write the as-built summary in `docs/as-built/vN_<codename>.md` — never inline shipped prose here.
-8. **Engineering review cadence** — when the latest completed slice hits the next ~10-slice milestone
-   (see **Next engineering review** above), write or refresh the review set under
-   [`docs/reviews/`](docs/reviews/) first, then run `$refactor` against all review recommendations
-   for scorecard-driven minor cleanup commits before piling on more feature slices.
+8. **Engineering review cadence** — after combined batch CI, run `$review` then `$refactor`; standalone work uses the ~10-slice milestone. Separate runtime evidence from static findings.
 
 ### Invariants (do not break)
 

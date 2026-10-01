@@ -5,9 +5,8 @@ description: >-
   overview-at-root + backend/client/extras subfolder layout. Use when the user
   runs /review or $review, asks for the next periodic engineering review, or
   asks for a full-repo architecture/maintainability review document set. When a
-  periodic review is due, this skill writes the fresh review first so $refactor
-  can classify and act on all current recommendations afterward. Requires
-  make ci-full (full scenario matrix, not the fast make ci pack) as the CI gate.
+  periodic review is due, or an approved slice batch has passed combined CI,
+  write the fresh review so $refactor can act on current recommendations.
 ---
 
 # /review — Repo-wide Engineering Review
@@ -22,9 +21,14 @@ Examples:
 
 **Announce at start:** "Using the **review** skill to audit the repo and write the engineering review set."
 
-**Periodic review handoff:** If `PROGRESS.md` says the review is due, proceed with the review first.
-After the review files are written, tell the user or calling workflow to run `$refactor` pointed at
-the new overview so every recommendation is classified and safe minor paydown commits can land.
+**Batch handoff:** The `$autoloop` coordinator invokes this skill after all accepted slices are
+integrated and the combined `make ci` passes, even when the normal cadence is not due. Write the
+review on that exact `main` baseline, then hand the overview to `$refactor` automatically. Read
+[the batch workflow](../autoloop/references/batch-workflow.md). A standalone review does not
+create slice sessions.
+
+Before the batch handoff to `$refactor`, validate and commit the review reports and any cadence
+update as one documentation commit. Refactor begins only from a clean `main` checkout.
 
 ## Hard rules
 
@@ -33,9 +37,11 @@ the new overview so every recommendation is classified and safe minor paydown co
 3. **Record the baseline.** Every review file must state date, scope, branch/commit, and whether the worktree was clean.
 4. **Use file:line citations for concrete issues.** Prefer `path:line` references for bugs, drift, and refactor targets.
 5. **Separate facts from recommendations.** Issue sections describe observed risk; ranked recommendation sections say what to do next.
-6. **If tests or checks are not run, say so in the review and final response.** Official periodic
-   reviews must record `make ci-full` pass/fail; do not claim a CI-backed review without it unless
-   the user explicitly waived full CI and you documented why.
+6. **If tests or checks are not run, say so in the review and final response.** A batch review
+   records the coordinator's green `make ci`, plus any extended scenarios actually run. Mark
+   `make ci-full` as unrun unless it was requested or justified by a concrete risk; never imply
+   the fast pack proves the extended matrix. A standalone review may run `make ci-full` for
+   deeper coverage, with its exact result recorded.
 
 ## Phase 0 — Baseline
 
@@ -87,22 +93,21 @@ git log -1 --oneline
 rg --files
 ```
 
-**CI gate (required for official cadence and CI-backed reviews):** run the **full** scenario matrix, not the fast merge pack:
+**Verification baseline:** In batch mode, use the coordinator's completed `make ci` on the
+integrated `main` commit. Do not rerun it just to write the review. If the review finds a concrete
+coverage gap, run the narrow relevant extended scenario and record it. Run the full matrix when
+the user explicitly requests it or a specific risk makes it necessary:
 
 ```bash
-make ci-full    # ~20+ min; all protocol + client bot scenarios + unit gates + headless smoke
+make ci-full    # optional deeper matrix; record separately from the batch make ci gate
 ```
 
-Use `VERBOSE=1 make ci-full` when diagnosing failures. Do **not** substitute `make ci` for the review
-gate — `make ci` is the fast development/merge pack only; periodic reviews must exercise extended
-scenarios too.
+Use `VERBOSE=1 make ci-full` when diagnosing failures. A review based only on `make ci` must say
+that extended scenarios were not run; its static findings still stand, but runtime coverage is
+bounded by the fast pack. Record the exact available `make ci` and `make ci-full` outcomes
+(pass/fail, duration, failing step/scenario) in the overview. Do not invent an unrun result.
 
-Record the exact `make ci-full` outcome (pass/fail, duration, failing step/scenario) in the overview
-**Git baseline** or a short **Verification** note. If `make ci-full` is unavailable, too slow for the
-environment, or fails for reasons unrelated to the review baseline, continue writing the review but
-state the limitation explicitly in the final response and overview.
-
-Optional spot-checks while reading code (do not replace `make ci-full`):
+Optional spot-checks while reading code (do not expand the stated CI coverage):
 
 ```bash
 make validate-shared
@@ -189,7 +194,7 @@ Required shape:
 **Reviewer:** ...
 **Scope:** Whole repo — ...
 **Git baseline:** ...
-**Verification:** `make ci-full` — pass/fail, duration, and any failing step/scenario (required for periodic reviews).
+**Verification:** `make ci` — pass/fail and duration; `make ci-full` — result or not run; named extended scenarios and limits.
 **Companion reports:**
 - [`backend/{YYYYMMDD}_vN-backend.md`](backend/{YYYYMMDD}_vN-backend.md) — Go authoritative server
 - [`client/{YYYYMMDD}_vN-client.md`](client/{YYYYMMDD}_vN-client.md) — Godot thin client
@@ -224,7 +229,8 @@ Scores are useful only when justified by concrete evidence. Do not inflate score
 If this is an official periodic review or the user asked to land it as the current review, update [`PROGRESS.md`](../../PROGRESS.md):
 
 - `Last engineering review` → the new overview file and date.
-- `Next engineering review` → next intended milestone, usually `v{N+10}`.
+- `Next engineering review` → after the next coordinated batch, or the next ~10-slice
+  milestone for standalone development.
 - Add or refresh a short open-gap entry only for findings that should steer `/next`. Do not paste the whole review into `PROGRESS.md`.
 - Update `Last updated`.
 
@@ -245,6 +251,6 @@ End with:
 
 1. Files written or updated.
 2. Baseline reviewed.
-3. Verification commands run and outcomes (`make ci-full` required for CI-backed reviews).
+3. Verification commands run and outcomes, distinguishing the fast and extended packs.
 4. Whether `PROGRESS.md` cadence fields were updated.
-5. Suggested next action, usually `$next` using the review findings as input.
+5. Suggested next action: `$refactor` immediately in a coordinated batch; otherwise usually `$next` using the review findings as input.

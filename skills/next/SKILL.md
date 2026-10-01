@@ -1,156 +1,25 @@
 ---
 name: next
 description: >-
-  Propose the next development slice from PROGRESS.md backlog and ADRs, or
-  evaluate a user idea. Use when the user runs /next, asks what to build next,
-  or wants a slice brief before writing a spec.
+  Propose one or more spec-ready game slices from PROGRESS.md, ADRs, and the
+  user's idea. Use for /next, a request for the next slice, or a batch of slices
+  to develop in separate sessions. Discovery only; no spec or code changes.
 disable-model-invocation: true
 ---
 
-# /next — Next Slice Discovery
+# /next — Slice discovery and batch offer
 
-**Trigger:** `/next` or `/next {optional idea}`
+Read `PROGRESS.md` current status, open gaps, and checklist first. Then read `CLAUDE.md`, relevant ADRs, active drafts, and the as-built notes needed to validate the baseline. Check `docs/CODEMAP.md` before broad code searches. Do not infer the next number from stale documents.
 
-Examples:
+## Offer
 
-- `/next` — agent proposes candidates from backlog and trajectory.
-- `/next play session loop` — agent evaluates the idea against baseline and produces a spec-ready brief.
-- `/next character persistence` — same, focused on the user's theme.
+- If the user supplied an idea or slice list, treat it as the primary candidate. Otherwise offer a small coherent group from the backlog and current player experience.
+- For each candidate give a title/codename, player or system value, scope and non-goals, verifiable acceptance criteria, likely files/contracts, focused test or bot proof, size/risk, and asset/plugin adopt-borrow-reject decision to be recorded for client work.
+- Show a dependency graph and likely shared-file conflicts. Mark which sessions can implement immediately and which can only spec/plan until a prerequisite is integrated. Respect existing accepted `To Do` specs and their numbers; assign new consecutive collision-free numbers provisionally until the user accepts the batch.
+- Recommend an order and ask the user to accept the whole set or name the selected subset. Say explicitly that accepting a batch creates one separate user-visible session and temporary detached worktree for each selected slice. That clear approval authorizes dispatch by `$autoloop`; do not ask again per slice.
 
-**Announce at start:** "Using the **next** skill to identify the next slice and prepare a spec brief."
+A single-slice request produces one spec-ready brief. Do not create a session, worktree, spec, plan, or code under `/next` alone. A batch request produces the batch offer; dispatch belongs to the main `$autoloop` workflow after acceptance.
 
-## Hard rules
+If an engineering review is already due, state that fact. In a batch, schedule `/review` then `/refactor` after integration and the combined CI gate, as described in [the batch workflow](../autoloop/references/batch-workflow.md). For standalone work, follow the current review cadence in `PROGRESS.md`.
 
-1. **Do not write code.** Do not implement. Do not run `/execute`.
-2. **Do not write the spec file** unless the user explicitly asks after the brief — this skill produces the **brief**, not `docs/specs/vN_spec-*.md`.
-3. **Read before proposing** — baseline must come from `PROGRESS.md` and as-built code, not assumptions.
-4. **Ask the user** when slice priority is unclear or multiple valid paths exist.
-
-## Phase 0 — Baseline context (read first)
-
-1. [`PROGRESS.md`](../../PROGRESS.md) — read **Current status**, **Open gaps & deferred work**, and
-   **Agent checklist** only. Do not load the full file when pointers are enough.
-2. [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md) — when you need slice
-   history or the next execution number from the lifecycle table.
-3. [`CLAUDE.md`](../../CLAUDE.md) — architecture, invariants, slice pattern.
-3. [`docs/adr/0001-technology-stack.md`](../../docs/adr/0001-technology-stack.md) — if not already familiar.
-4. Relevant ADRs for the candidate area (e.g. [`0008-world-structure-and-dungeon-progression.md`](../../docs/adr/0008-world-structure-and-dungeon-progression.md) for world/progression).
-5. Existing specs/plans without a completed lifecycle row (in-progress or drafted slices).
-6. If user provided an idea — treat it as the primary candidate; still validate against baseline.
-
-### Determine next slice number
-
-- Highest `vN` in `docs/specs/`, `docs/plans/`, and [`docs/progress/slice-lifecycle.md`](../../docs/progress/slice-lifecycle.md) → next is **v(N+1)** unless a drafted spec already claims a number.
-- If `v20_spec-…` exists but v20 is not in the lifecycle table, v20 may be the active in-flight slice — say so explicitly.
-
-## Phase 1 — Candidate discovery
-
-### Without user idea
-
-Survey these sources and rank 2–4 candidates:
-
-| Source | What to extract |
-|--------|-----------------|
-| `PROGRESS.md` → **Open gaps & deferred work** | Documented backlog; do not treat as automatic next slice |
-| `PROGRESS.md` → **Current status** | `Next slice: TBD`, active branch, latest completed, **Next engineering review** milestone |
-| [`docs/reviews/`](../../docs/reviews/) | Latest periodic audit (~every 10 slices); if due or stale, propose a review slice before new features |
-| ADR deferred decisions | e.g. ADR-0008 D1 character persistence, D3 PCG density |
-| In-flight specs | Specs/plans written but not marked complete |
-| Natural trajectory | What logically follows the latest completed slice (e.g. v19 teleporters → v20 play loop) |
-| Bot/scenario gaps | Missing end-to-end proof for a feature area |
-| Maintenance ratchet | Open v80 maintainability findings and over-600-line files likely to be touched |
-
-Score each candidate on:
-
-- **Player value** — does it move `make play` or core loop forward?
-- **Architectural leverage** — unblocks how many future slices?
-- **Complexity** — S / M / L / XL with one-line rationale.
-- **Risk** — protocol changes, determinism, cross-language golden, client+server coupling.
-- **Dependencies** — must ship after/before which slice?
-
-### With user idea
-
-Evaluate the idea directly using the same scoring. Compare briefly to top backlog alternative(s) so the user can confirm or pivot.
-
-## Phase 2 — Slice brief (output)
-
-Produce a structured brief for the **recommended** slice (or the user's idea if viable). Use this template in chat:
-
-```markdown
-## Next slice recommendation
-
-**Proposed:** v{N} — `{codename}` — {human title}
-**Baseline:** v{X} `{prior-codename}` complete
-**Branch:** current checkout (do not create branches)
-
-### Why this slice now
-{2–4 sentences: player value, what it proves, why not something else}
-
-### Complexity
-**Size:** S | M | L | XL
-**Touch surfaces:** shared | server | client | bot | docs (check all that apply)
-**Estimated tasks:** {rough count}
-
-### Purpose (spec §1 draft)
-{What the slice does in plain language}
-
-### Non-goals (spec §2 draft)
-- {explicit deferrals}
-
-### Likely files / contracts
-{Bullet list of paths — protocol, rules, sim, client, bot scenarios}
-
-### Bot proof
-{New scenario `NN_<lab>.json`? migrate existing? or explicit deferral reason}
-
-### Requirements checklist
-- [ ] {verifiable acceptance criterion}
-- [ ] …
-
-### Open questions / doubts
-| # | Question | Default if unanswered |
-|---|----------|---------------------|
-| Q-1 | … | … |
-
-### ADR alignment
-{Which ADR decisions this honors or defers; flag conflicts}
-
-### Alternatives considered
-| Slice | Why not now |
-|-------|-------------|
-| … | … |
-```
-
-### Quality bar
-
-- Every acceptance criterion must be **verifiable** (bot step, test command, or observable behavior).
-- Call out **protocol/schema bumps** explicitly.
-- Call out **determinism** risks for Go `game/` changes.
-- For client UI/art — note that the spec or plan must record an asset/plugin adopt / borrow / reject decision after checking existing in-repo assets and Godot code.
-- If the idea is too large → propose a **thin vertical slice** and defer the rest to non-goals.
-
-## Phase 3 — Handoff
-
-End with:
-
-1. **Recommendation** — one primary slice (or "idea needs refinement" with blockers).
-2. **User decision** — ask which candidate to pursue if multiple remain viable.
-3. **Next commands:**
-   - Write spec: create `docs/specs/vN_spec-<codename>.md` from the brief (or ask agent to draft it).
-   - `/plan docs/specs/vN_spec-<codename>.md`
-   - `/execute docs/plans/vN_<date>-<codename>.md`
-   - `/finish` when implementation is done.
-
-If blockers exist in the brief, **stop** and resolve questions before spec writing.
-
-## Examples
-
-```
-/next
-→ Read PROGRESS (v19 complete) → propose v20 play-session-loop + 2 alternatives → brief for v20
-```
-
-```
-/next town safe zone
-→ Evaluate idea vs ADR-0008 → complexity M → doubts about combat rules in town → brief with Q-1..Q-3
-```
+Ask only questions that affect acceptance, ordering, or architecture. Use a sensible stated default for minor choices and do not block the offer on optional polish.

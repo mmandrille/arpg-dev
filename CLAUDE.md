@@ -72,6 +72,14 @@ drive another worktree's server (`scripts/server_helpers.sh`). `make play`/`make
 `make ci CI_ADDR=:18081` (or `CI_BASE_URL=http://localhost:18081`, `BOT_ADDR`/`BOT_BASE_URL`);
 a pinned port that is taken fails fast with a port-collision hint instead of hijacking.
 
+**Coordinated slice batches:** After the user accepts a group of slices, `$autoloop` creates one
+user-visible session and detached worktree per slice from a recorded base commit; no branch is
+created. Each session runs spec → plan → implementation → focused checks and hands its complete
+change set and evidence to the main chat. The main chat integrates ready slices into `main` as
+dependencies allow, runs one combined `make ci` after all are integrated, closes the lifecycle,
+cleans up those worktrees, then runs review → refactor. See
+[`skills/autoloop/references/batch-workflow.md`](skills/autoloop/references/batch-workflow.md).
+
 **Single Go test:** `cd server && go test ./internal/game/... -run TestName`
 
 **Single Python test:** `cd <repo-root> && .venv/bin/pytest tools/bot/test_protocol.py::test_name -v`
@@ -102,6 +110,9 @@ per-edit habit. For a bug fix or minimal, localized change:
 - Do **not** run `make ci` / `make ci-full` / `make test-all` for a routine fix. Reserve the
   full pack for: pre-PR validation, changes to shared contracts/protocol/golden fixtures,
   cross-cutting refactors, or when the user explicitly asks for full CI.
+- For a coordinated batch, slice sessions run focused checks only. The main chat runs `make ci`
+  on the fully integrated state, repairing and rerunning a failed gate. Review records whether
+  `make ci-full` was run; it is not an automatic second pack for every batch.
 - If it's unclear which test(s) cover the change, find the narrowest existing test file/scenario
   first rather than defaulting to the full suite.
 
@@ -243,14 +254,16 @@ This project uses Spec-Driven Development. Before touching code for any new feat
 2. Read or write the spec under `docs/specs/vN_spec-<feature>.md` (`N` = next execution order from `PROGRESS.md` and existing specs/plans).
 3. Write or check the plan under `docs/plans/vN_<date>-<feature>.md`.
 4. Consult the relevant ADRs in `docs/adr/` — especially ADR-0001 (foundational) and any feature-specific ones.
-5. When the slice completes, update `PROGRESS.md` (lifecycle table, new gaps) and
-   `docs/as-built/vN_<codename>.md` (what it proved).
-6. At ~10-slice milestones, write the repo-wide engineering review under `docs/reviews/` first, then run `$refactor` against that fresh scorecard for minor verified cleanup (see `PROGRESS.md` → **Periodic engineering reviews**).
+5. Write `docs/as-built/vN_<codename>.md` with proof and limits. For a batch, the
+   coordinator updates `PROGRESS.md` and the lifecycle index after integration;
+   standalone slices do so at closeout.
+6. After a coordinated batch's combined CI, write the repo-wide engineering review under `docs/reviews/`, then run `$refactor` against that fresh scorecard. Standalone slices use the ~10-slice review cadence (see `PROGRESS.md` → **Periodic engineering reviews**).
 
-**Spec-gate exemption:** A slice that touches *only* client-side presentation (VFX, shaders, lighting
+**Standalone spec-gate exemption:** A slice that touches *only* client-side presentation (VFX, shaders, lighting
 parameters, material tuning, UI polish) and makes **no changes** to protocol, server state, shared
 rules, or golden fixtures may skip the formal spec/plan. The slice must still have an `as-built`
-summary and must not creep into feature or balance changes. When in doubt, write the spec.
+summary and must not creep into feature or balance changes. Every accepted batch slice writes a
+spec and plan for its independent handoff. When in doubt, write the spec.
 
 ## Key Invariants
 

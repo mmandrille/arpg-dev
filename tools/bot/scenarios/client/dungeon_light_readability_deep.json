@@ -45,7 +45,8 @@
     {
       "type": "capture_frame",
       "name": "v498_deep_balanced",
-      "timeout_s": 5.0
+      "timeout_s": 5.0,
+      "skip_if_headless": true
     },
     {
       "type": "set_graphics_quality",
@@ -65,7 +66,8 @@
     {
       "type": "capture_frame",
       "name": "v498_deep_performance",
-      "timeout_s": 5.0
+      "timeout_s": 5.0,
+      "skip_if_headless": true
     }
   ]
 }

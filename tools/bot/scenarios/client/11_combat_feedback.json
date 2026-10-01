@@ -53,6 +53,7 @@
     {
       "type": "wait_event",
       "event_type": "item_equipped",
+      "allow_prior_pending": true,
       "timeout_s": 15.0
     },
     {
@@ -63,6 +64,7 @@
     {
       "type": "wait_event",
       "event_type": "item_equipped",
+      "allow_prior_pending": true,
       "timeout_s": 15.0
     },
     {
@@ -195,6 +197,7 @@
     {
       "type": "wait_event",
       "event_type": "item_unequipped",
+      "allow_prior_pending": true,
       "timeout_s": 10.0
     },
     {

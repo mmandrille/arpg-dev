@@ -44,7 +44,7 @@ if ! command -v "$GODOT" >/dev/null 2>&1; then
 fi
 
 is_client_scenario_selection() {
-  local selection="$1"
+  local selection="$1" scenario_id
   local f bn
   if [[ -f "$selection" ]]; then
     case "$selection" in
@@ -56,7 +56,8 @@ is_client_scenario_selection() {
   fi
   while IFS= read -r -d '' f; do
     bn="$(basename "$f" .json)"
-    if [[ "$bn" == "$selection" || "$bn.json" == "$selection" || "$bn" == *"_$selection" || "$bn" == "$selection"* ]]; then
+    scenario_id="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("id", ""))' "$f")"
+    if [[ "$bn" == "$selection" || "$bn.json" == "$selection" || "$bn" == *"_$selection" || "$bn" == "$selection"* || "$scenario_id" == "$selection" ]]; then
       return 0
     fi
   done < <(find "$CLIENT_SCENARIOS_DIR" -maxdepth 1 -name '*.json' -print0 | sort -z)
@@ -65,7 +66,11 @@ is_client_scenario_selection() {
 
 if [[ "$SCENARIO" != "all" ]] && is_client_scenario_selection "$SCENARIO"; then
   echo "[bot-visual] '$SCENARIO' is a Godot client scenario; running visible client bot instead of protocol replay recording."
-  BOT_STEP_DELAY="${BOT_STEP_DELAY:-$AUTOPLAY_STEP_DELAY}" \
+  CLIENT_BOT_STEP_DELAY="${BOT_STEP_DELAY:-$AUTOPLAY_STEP_DELAY}"
+  if [[ "${HEADLESS:-0}" == "1" ]]; then
+    CLIENT_BOT_STEP_DELAY="${BOT_STEP_DELAY:-0.0}"
+  fi
+  BOT_STEP_DELAY="$CLIENT_BOT_STEP_DELAY" \
     GODOT="$GODOT" BASE_URL="$BASE_URL" DEV_TOKEN="$DEV_TOKEN" DEBUG_TOKEN="$DEBUG_TOKEN" \
     SCENARIO="$SCENARIO" HEADLESS="${HEADLESS:-0}" ./scripts/bot_client_local.sh
   exit $?

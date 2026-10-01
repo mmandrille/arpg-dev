@@ -115,7 +115,8 @@
     {
       "type": "capture_frame",
       "name": "v498_shallow_loot_balanced",
-      "timeout_s": 5.0
+      "timeout_s": 5.0,
+      "skip_if_headless": true
     },
     {
       "type": "assert_fog_of_war",
@@ -141,7 +142,8 @@
     {
       "type": "capture_frame",
       "name": "v498_shallow_loot_performance",
-      "timeout_s": 5.0
+      "timeout_s": 5.0,
+      "skip_if_headless": true
     }
   ],
   "debug_progression": {

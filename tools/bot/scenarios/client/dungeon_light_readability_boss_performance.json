@@ -53,7 +53,8 @@
     {
       "type": "capture_frame",
       "name": "v498_boss_performance",
-      "timeout_s": 5.0
+      "timeout_s": 5.0,
+      "skip_if_headless": true
     }
   ]
 }

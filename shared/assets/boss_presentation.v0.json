@@ -1,0 +1,80 @@
+{
+  "version": 0,
+  "note": "v512 client-only boss presentation. Keyed by boss_template_id (shared/rules/boss_templates.v0.json). scale/tint override the wire visual_scale/visual_tint; visual_key names a kit_monster_presentation entry whose scene is res://scenes/<visual_key>.tscn. Gameplay stays server-owned.",
+  "bosses": {
+    "cave_warden": {
+      "display_name": "Cave Warden",
+      "epithet": "Warden of the Deep Stone",
+      "visual_key": "monster_kit_skeleton_warden",
+      "scale": 2.0,
+      "tint": "#e6d9ff",
+      "attachments": [
+        {
+          "asset_id": "kaykit_skeleton_axe_v0",
+          "bone": "handslot.r"
+        },
+        {
+          "asset_id": "kaykit_skeleton_shield_large_a_v0",
+          "bone": "handslot.l"
+        }
+      ],
+      "headgear": {
+        "kind": "primitive",
+        "shape": "crown",
+        "bone": "head",
+        "color": "#ffd36b",
+        "size": 2.2,
+        "lift": 0.4
+      },
+      "aura": {
+        "color": "#8f5cff",
+        "radius": 3.2,
+        "inner_alpha": 0.1,
+        "pulse_hz": 0.6,
+        "light_energy": 0.8,
+        "light_range": 6.0
+      },
+      "banner": {
+        "duration_s": 2.8,
+        "fade_in_s": 0.4,
+        "fade_out_s": 0.7,
+        "title_color": "#e3d1ff",
+        "epithet_color": "#b89cff"
+      }
+    },
+    "crypt_matron": {
+      "display_name": "Crypt Matron",
+      "epithet": "Matron of the Bone Crypt",
+      "visual_key": "monster_kit_skeleton_mage",
+      "scale": 1.55,
+      "tint": "#d9ffe2",
+      "attachments": [
+        {
+          "asset_id": "kaykit_skeleton_staff_v0",
+          "bone": "handslot.r"
+        }
+      ],
+      "headgear": {
+        "kind": "none",
+        "bone": "head",
+        "color": "#7dff9a",
+        "size": 1.0
+      },
+      "aura": {
+        "color": "#3fd16a",
+        "radius": 2.7,
+        "inner_alpha": 0.14,
+        "pulse_hz": 0.9,
+        "light_energy": 0.9,
+        "light_range": 5.5
+      },
+      "banner": {
+        "duration_s": 2.8,
+        "fade_in_s": 0.4,
+        "fade_out_s": 0.7,
+        "title_color": "#d2ffdc",
+        "epithet_color": "#7dff9a"
+      }
+    }
+  }
+}

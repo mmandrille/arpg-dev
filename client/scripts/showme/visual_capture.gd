@@ -11,7 +11,6 @@ const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
 const MultiplayerSessionsPanelScript := preload("res://scripts/multiplayer_sessions_panel.gd")
-const PlayerHealthBarScript := preload("res://scripts/player_health_bar.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
 const MainScript := preload("res://scripts/main.gd")
 const SceneLightingRigScript := preload("res://scripts/scene_lighting_rig.gd")
@@ -85,8 +84,6 @@ func _initialize() -> void:
 			await _setup_character_menu()
 		"join-menu":
 			await _setup_join_menu()
-		"hud":
-			await _setup_hud()
 		"stairs":
 			await _setup_stairs()
 		"chests":
@@ -661,14 +658,6 @@ func _setup_join_menu() -> void:
 		{"session_id": "sess_1", "host_display_name": "Astra", "connected_count": 1, "member_count": 4, "world_id": "dungeon_levels", "mode": "coop", "listed": true},
 		{"session_id": "sess_2", "host_display_name": "Bram", "connected_count": 2, "member_count": 4, "world_id": "dungeon_levels", "mode": "coop", "listed": true},
 	])
-
-
-func _setup_hud() -> void:
-	var panel: PlayerHealthBar = PlayerHealthBarScript.new()
-	panel.set_identity("Astra", 4)
-	panel.update_hp(9, 12)
-	panel.update_mana(7, 14)
-	get_root().add_child(panel)
 
 
 func _setup_stairs() -> void:

@@ -81,6 +81,8 @@ static func entities_presentation_debug(entities: Dictionary) -> Array:
 			"position": {"x": node_pos.x, "z": node_pos.z},
 			"visual_scale": float(rec.get("visual_scale", 1.0)),
 			"is_boss": bool(rec.get("is_boss", false)), "boss_template_id": str(rec.get("boss_template_id", "")),
+			"has_boss_arena_presence": bool(rec.get("has_boss_arena_presence", false)), "boss_aura_radius": float(rec.get("boss_aura_radius", 0.0)),
+			"has_boss_headgear": node != null and node.find_child("BossHeadgear", true, false) != null,
 			"boss_phase": rec.get("boss_phase", {}), "boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
 			"telegraph_tint": str(rec.get("telegraph_tint", "")), "has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
 			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)), "telegraph_marker_color": str(rec.get("telegraph_marker_color", "")), "telegraph_marker_shape": str(rec.get("telegraph_marker_shape", "")),

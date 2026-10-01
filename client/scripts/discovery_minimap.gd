@@ -379,15 +379,4 @@ static func _empty_quest_path() -> Dictionary:
 
 
 func _panel_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.035, 0.032, 0.026, _panel_opacity)
-	style.border_color = Color(0.46, 0.39, 0.27, 0.72)
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.content_margin_left = 4
-	style.content_margin_top = 4
-	style.content_margin_right = 4
-	style.content_margin_bottom = 4
-	return style
+	return HudStyle.minimap_frame(_panel_opacity)

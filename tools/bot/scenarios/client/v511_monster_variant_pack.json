@@ -1,0 +1,36 @@
+{
+  "id": "v511_monster_variant_pack",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "benchmark_mixed_arena",
+  "seed": "sorcerer_multigroup_perf_probe_seed",
+  "title": "Monster variant looks in the real player camera",
+  "description": "Stationary isometric capture of the live benchmark arena population (skeleton, wolf, bat families) through the actual play camera.",
+  "max_elapsed_s": 30,
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "isometric"
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_ticks",
+      "ticks": 20,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "capture_frame",
+      "name": "v511_monster_variant_pack_camera",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    }
+  ]
+}

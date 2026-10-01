@@ -1,0 +1,16 @@
+{
+  "id": "hud_polish_visual",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "boss_floor_gate_lab",
+  "seed": "v517_hud_polish_visual",
+  "title": "HUD polish: globes, hotbar, minimap and boss bar in the real camera",
+  "description": "Starts on the compact boss floor so the vitals globes, hotbar cluster, minimap frame and boss health bar are all on screen, asserts the boss bar, and captures real-renderer frames.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
+    { "type": "wait_boss_health_bar", "visible": true, "hp_min": 1, "ratio_min": 0.01, "ratio_max": 1.0, "timeout_s": 15.0 },
+    { "type": "assert_boss_health_bar", "visible": true, "hp_min": 1, "ratio_min": 0.01, "ratio_max": 1.0 },
+    { "type": "capture_frame", "name": "v517_hud_boss_floor", "timeout_s": 5.0, "skip_if_headless": true }
+  ]
+}

@@ -26,7 +26,12 @@ func apply_presentation() -> void:
 	if cfg.is_empty():
 		push_warning("KitMonsterVisual: no catalog entry for %s" % visual_key)
 		return
-	_alias_clips(LoaderScript.clip_profile(str(cfg.get("clip_profile", ""))))
+	var profile := LoaderScript.clip_profile(str(cfg.get("clip_profile", "")))
+	_alias_clips(profile)
+	# v513: AnimationController reads the profile from the player (variants, windup, spawn, idle).
+	var player := animation_player()
+	if player != null:
+		player.set_meta("kit_clip_profile", profile)
 	_mount_attachments(cfg.get("attachments", []))
 
 

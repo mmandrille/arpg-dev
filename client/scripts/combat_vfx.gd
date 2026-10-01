@@ -34,6 +34,10 @@ static func set_quality(quality: String) -> void:
 	_quality = quality
 
 
+static func quality() -> String:
+	return _quality
+
+
 static func effect(effect_id: String) -> Dictionary:
 	ensure_loaded()
 	var raw = (_config.get("effects", {}) as Dictionary).get(effect_id, {})

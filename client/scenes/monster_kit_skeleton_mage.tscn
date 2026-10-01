@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/kit_monster_visual.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/monsters/kaykit_skeletons/skeleton_mage.glb" id="2_glb"]
+
+[node name="MonsterKitSkeletonMage" type="Node3D"]
+script = ExtResource("1_script")
+visual_key = "monster_kit_skeleton_mage"
+
+[node name="ModelRoot" parent="." instance=ExtResource("2_glb")]

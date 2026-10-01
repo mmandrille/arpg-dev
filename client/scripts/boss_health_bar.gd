@@ -152,17 +152,7 @@ func _build() -> void:
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.visible = false
 	_panel.custom_minimum_size = Vector2(PANEL_WIDTH, 88.0)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.055, 0.045, 0.035, 0.92)
-	style.border_color = Color("#9a7425")
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.content_margin_left = 12
-	style.content_margin_top = 7
-	style.content_margin_right = 12
-	style.content_margin_bottom = 8
+	var style := BossBarFrame.panel_style()
 	_panel.add_theme_stylebox_override("panel", style)
 	add_child(_panel)
 
@@ -190,44 +180,46 @@ func _build() -> void:
 	_title_label = Label.new()
 	_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_title_label.add_theme_color_override("font_color", Color("#f3c251"))
+	_title_label.add_theme_color_override("font_color", HudStyle.boss_title())
 	_title_label.add_theme_font_size_override("font_size", 16)
 	top_row.add_child(_title_label)
 
 	_hp_label = Label.new()
 	_hp_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_hp_label.add_theme_color_override("font_color", Color("#e8dcc8"))
+	_hp_label.add_theme_color_override("font_color", HudStyle.boss_text())
 	_hp_label.add_theme_font_size_override("font_size", 14)
 	top_row.add_child(_hp_label)
 
 	var bar_bg := ColorRect.new()
 	bar_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar_bg.custom_minimum_size = BAR_SIZE
-	bar_bg.color = Color(0.12, 0.045, 0.035, 0.96)
+	bar_bg.color = HudStyle.boss_trough()
 	details.add_child(bar_bg)
 
 	_fill = ColorRect.new()
 	_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_fill.color = Color("#b72323")
+	_fill.color = HudStyle.boss_fill_high()
 	_fill.size = BAR_SIZE
 	bar_bg.add_child(_fill)
+	BossBarFrame.add_gloss(_fill, 4.0)
+	BossBarFrame.add_trough_frame(bar_bg)
 
 	_phase_label = Label.new()
 	_phase_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_phase_label.add_theme_color_override("font_color", Color("#d7c6a0"))
+	_phase_label.add_theme_color_override("font_color", HudStyle.boss_phase_text())
 	_phase_label.add_theme_font_size_override("font_size", 12)
 	details.add_child(_phase_label)
 
 	var phase_bg := ColorRect.new()
 	phase_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	phase_bg.custom_minimum_size = PHASE_BAR_SIZE
-	phase_bg.color = Color(0.10, 0.085, 0.065, 0.88)
+	phase_bg.color = HudStyle.boss_phase_trough()
 	details.add_child(phase_bg)
 
 	_phase_fill = ColorRect.new()
 	_phase_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_phase_fill.color = Color("#f05a42")
+	_phase_fill.color = HudStyle.boss_phase_telegraph()
 	_phase_fill.size = PHASE_BAR_SIZE
 	phase_bg.add_child(_phase_fill)
 
@@ -235,17 +227,7 @@ func _build() -> void:
 	_reward_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_reward_panel.visible = false
 	_reward_panel.custom_minimum_size = Vector2(REWARD_PANEL_WIDTH, 88.0)
-	var reward_style := StyleBoxFlat.new()
-	reward_style.bg_color = Color(0.055, 0.075, 0.055, 0.94)
-	reward_style.border_color = Color("#d4b36a")
-	reward_style.border_width_left = 1
-	reward_style.border_width_top = 1
-	reward_style.border_width_right = 1
-	reward_style.border_width_bottom = 1
-	reward_style.content_margin_left = 14
-	reward_style.content_margin_top = 9
-	reward_style.content_margin_right = 14
-	reward_style.content_margin_bottom = 10
+	var reward_style := BossBarFrame.reward_style()
 	_reward_panel.add_theme_stylebox_override("panel", reward_style)
 	add_child(_reward_panel)
 
@@ -256,19 +238,19 @@ func _build() -> void:
 
 	_reward_title_label = Label.new()
 	_reward_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_reward_title_label.add_theme_color_override("font_color", Color("#f3c251"))
+	_reward_title_label.add_theme_color_override("font_color", HudStyle.boss_title())
 	_reward_title_label.add_theme_font_size_override("font_size", 15)
 	reward_root.add_child(_reward_title_label)
 
 	_reward_status_label = Label.new()
 	_reward_status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_reward_status_label.add_theme_color_override("font_color", Color("#e8dcc8"))
+	_reward_status_label.add_theme_color_override("font_color", HudStyle.boss_text())
 	_reward_status_label.add_theme_font_size_override("font_size", 13)
 	reward_root.add_child(_reward_status_label)
 
 	_reward_hint_label = Label.new()
 	_reward_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_reward_hint_label.add_theme_color_override("font_color", Color("#9fd69f"))
+	_reward_hint_label.add_theme_color_override("font_color", HudStyle.boss_reward_hint())
 	_reward_hint_label.add_theme_font_size_override("font_size", 12)
 	reward_root.add_child(_reward_hint_label)
 
@@ -284,12 +266,7 @@ func _update_display() -> void:
 	_title_label.text = _title
 	_hp_label.text = "%d / %d" % [_hp, _max_hp] if _boss_id != "" else ""
 	_fill.size.x = BAR_SIZE.x * _ratio
-	if _ratio > 0.6:
-		_fill.color = Color("#b72323")
-	elif _ratio > 0.3:
-		_fill.color = Color("#c77622")
-	else:
-		_fill.color = Color("#d93a2f")
+	_fill.color = BossBarFrame.fill_color(_ratio)
 	if _phase_kind == "":
 		_phase_label.text = ""
 		_phase_fill.size.x = 0.0
@@ -301,25 +278,15 @@ func _update_display() -> void:
 		_duration_ticks,
 	]
 	_phase_fill.size.x = PHASE_BAR_SIZE.x * _phase_ratio
-	match _phase_kind:
-		"telegraph":
-			_phase_fill.color = Color("#f05a42")
-		"active":
-			_phase_fill.color = Color("#d32f2f")
-		"recovery":
-			_phase_fill.color = Color("#51b56d")
-		_:
-			_phase_fill.color = Color("#d7c6a0")
+	_phase_fill.color = BossBarFrame.phase_color(_phase_kind)
 
 
 func _sync_position() -> void:
 	if _panel == null or _reward_panel == null:
 		return
 	var viewport_size := get_viewport_rect().size
-	var x := maxf(8.0, (viewport_size.x - PANEL_WIDTH) * 0.5)
-	_panel.set_deferred("position", Vector2(x, PANEL_TOP))
-	var reward_x := maxf(8.0, (viewport_size.x - REWARD_PANEL_WIDTH) * 0.5)
-	_reward_panel.set_deferred("position", Vector2(reward_x, PANEL_TOP))
+	_panel.set_deferred("position", HudLayout.boss_bar_rect(viewport_size, PANEL_TOP, PANEL_WIDTH, 88.0).position)
+	_reward_panel.set_deferred("position", HudLayout.boss_bar_rect(viewport_size, PANEL_TOP, REWARD_PANEL_WIDTH, 88.0).position)
 
 
 func _clear_phase_fields() -> void:
@@ -384,8 +351,7 @@ func _draw_portrait() -> void:
 	if _portrait == null:
 		return
 	var rect := Rect2(Vector2.ZERO, PORTRAIT_SIZE)
-	_portrait.draw_rect(rect, Color("#211812"), true)
-	_portrait.draw_rect(rect.grow(-1.0), Color("#9a7425"), false, 1.5)
+	BossBarFrame.draw_portrait_frame(_portrait, rect)
 	var center := rect.get_center()
 	match _portrait_kind():
 		"cave_warden":

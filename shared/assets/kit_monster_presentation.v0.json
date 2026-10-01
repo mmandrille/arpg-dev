@@ -9,9 +9,24 @@
         "attack": "1H_Melee_Attack_Chop",
         "hit": "Hit_A",
         "death": "Death_C_Skeletons",
-        "pounce": "1H_Melee_Attack_Jump_Chop"
+        "pounce": "1H_Melee_Attack_Jump_Chop",
+        "attack_b": "1H_Melee_Attack_Slice_Diagonal",
+        "attack_c": "1H_Melee_Attack_Slice_Horizontal",
+        "hit_b": "Hit_B",
+        "idle_alt": "Idle_B",
+        "idle_alt_b": "Idle_Combat",
+        "spawn": "Spawn_Ground"
       },
-      "loop": ["idle", "walk"]
+      "loop": ["idle", "walk"],
+      "variants": {
+        "attack": ["attack", "attack_b", "attack_c"],
+        "hit": ["hit", "hit_b"],
+        "idle_alt": ["idle_alt", "idle_alt_b"]
+      },
+      "attack_contact": { "attack": 0.55, "attack_b": 0.45, "attack_c": 0.45 },
+      "windup_speed": { "min": 0.5, "max": 1.6 },
+      "spawn": { "enabled": true, "clip": "spawn" },
+      "idle_variation": { "min_interval_s": 4.0, "max_interval_s": 9.0 }
     },
     "kaykit_skeleton_ranged": {
       "clips": {
@@ -19,9 +34,20 @@
         "walk": "Walking_D_Skeletons",
         "attack": "2H_Ranged_Shoot",
         "hit": "Hit_A",
-        "death": "Death_C_Skeletons"
+        "death": "Death_C_Skeletons",
+        "hit_b": "Hit_B",
+        "idle_alt": "Idle_B",
+        "idle_alt_b": "Idle_Combat",
+        "spawn": "Spawn_Ground"
       },
-      "loop": ["idle", "walk"]
+      "loop": ["idle", "walk"],
+      "variants": {
+        "hit": ["hit", "hit_b"],
+        "idle_alt": ["idle_alt", "idle_alt_b"]
+      },
+      "strike_on_damage": false,
+      "spawn": { "enabled": true, "clip": "spawn" },
+      "idle_variation": { "min_interval_s": 4.0, "max_interval_s": 9.0 }
     },
     "quaternius_wolf": {
       "clips": {
@@ -30,9 +56,19 @@
         "attack": "Attack",
         "hit": "Idle_HitReact_Left",
         "death": "Death",
-        "pounce": "Gallop_Jump"
+        "pounce": "Gallop_Jump",
+        "hit_left": "Idle_HitReact_Left",
+        "hit_right": "Idle_HitReact_Right",
+        "idle_alt": "Idle_2",
+        "idle_alt_b": "Idle_2_HeadLow"
       },
-      "loop": ["idle", "walk"]
+      "loop": ["idle", "walk"],
+      "variants": { "idle_alt": ["idle_alt", "idle_alt_b"] },
+      "hit_directional": { "left": "hit_left", "right": "hit_right" },
+      "attack_contact": { "attack": 0.4 },
+      "windup_speed": { "min": 0.5, "max": 1.6 },
+      "spawn": { "enabled": false },
+      "idle_variation": { "min_interval_s": 5.0, "max_interval_s": 12.0 }
     },
     "quaternius_bat": {
       "clips": {
@@ -43,7 +79,9 @@
         "death": "BatArmature|Bat_Death",
         "dive": "BatArmature|Bat_Attack2"
       },
-      "loop": ["idle", "walk"]
+      "loop": ["idle", "walk"],
+      "hit_speed_scale": 1.6,
+      "spawn": { "enabled": false }
     }
   },
   "monsters": {
@@ -77,12 +115,61 @@
         { "asset_id": "kaykit_skeleton_crossbow_v0", "bone": "handslot.r" }
       ]
     },
+    "monster_kit_skeleton_warden": {
+      "asset_id": "kaykit_skeleton_warrior_v0",
+      "clip_profile": "kaykit_skeleton_melee",
+      "attachments": []
+    },
+    "monster_kit_skeleton_mage": {
+      "asset_id": "kaykit_skeleton_mage_v0",
+      "clip_profile": "kaykit_skeleton_ranged",
+      "attachments": []
+    },
     "monster_kit_skeleton_minion": {
       "asset_id": "kaykit_skeleton_minion_v0",
       "clip_profile": "kaykit_skeleton_melee",
       "attachments": [
         { "asset_id": "kaykit_skeleton_blade_v0", "bone": "handslot.r" }
       ]
+    }
+  },
+  "variants": {
+    "note": "v511: client-only monster variant looks. A look = depth tint (biome palette id) blended with a rarity tint, applied through the material detail layer so albedo_color stays free for status/hit-flash owners. scale_multiplier multiplies the server visual_scale on the model child. eye recolors the model's own glow mesh (family.eye_mesh); aura is a ground ring. Unlisted rarity/palette/family resolve to the neutral look.",
+    "rarities": {
+      "common": {
+        "tint": { "color": "#ffffff", "strength": 0.0 },
+        "scale_multiplier": 1.0
+      },
+      "champion": {
+        "tint": { "color": "#3f7fff", "strength": 0.45 },
+        "scale_multiplier": 1.0,
+        "eye": { "color": "#66b3ff", "energy": 3.0 },
+        "aura": { "color": "#3f7fff", "alpha": 0.22, "radius": 0.62, "energy": 0.6 }
+      },
+      "rare": {
+        "tint": { "color": "#e0383c", "strength": 0.5 },
+        "scale_multiplier": 1.12,
+        "eye": { "color": "#ff4040", "energy": 4.0 },
+        "aura": { "color": "#e0383c", "alpha": 0.3, "radius": 0.68, "energy": 0.8 }
+      },
+      "unique": {
+        "tint": { "color": "#ffb020", "strength": 0.55 },
+        "scale_multiplier": 1.0,
+        "eye": { "color": "#ffd040", "energy": 5.0 },
+        "aura": { "color": "#ffb020", "alpha": 0.38, "radius": 0.78, "energy": 1.0 }
+      }
+    },
+    "depth": {
+      "shallow_cave": { "tint": { "color": "#a07040", "strength": 0.12 } },
+      "sundered_halls": { "tint": { "color": "#8a5a9a", "strength": 0.16 } },
+      "deep_vault": { "tint": { "color": "#3f7a8a", "strength": 0.2 } }
+    },
+    "families": {
+      "monster_kit_skeleton_warrior": { "eye_mesh": "Eyes", "aura_radius_scale": 1.0 },
+      "monster_kit_skeleton_rogue": { "eye_mesh": "Eyes", "aura_radius_scale": 1.0 },
+      "monster_kit_skeleton_minion": { "eye_mesh": "Eyes", "aura_radius_scale": 1.0 },
+      "monster_quadruped": { "eye_mesh": "", "aura_radius_scale": 1.2 },
+      "monster_tiny_flyer": { "eye_mesh": "Eyes", "aura_radius_scale": 0.7 }
     }
   }
 }

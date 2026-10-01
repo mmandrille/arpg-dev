@@ -30,10 +30,13 @@ try:
     )
     from .dungeon_density import area_density_count, validate_area_count_formula, validate_area_range_formula
     from .validate_boss_patterns import validate_boss_patterns
+    from .validate_boss_presentation import validate_boss_presentation
     from .validate_dungeon_goldens import validate_dungeon_obstacle_goldens
     from .validate_i18n import validate_i18n_catalog, validate_locale_catalog
     from .validate_item_presentations import validate_item_presentations
     from .validate_rarity_cues import validate_rarity_cues
+    from .validate_ui_theme import validate_ui_theme
+    from .validate_monster_variants import validate_monster_variants
     from .validate_main_config import validate_main_config_gameplay
     from .validate_skills import validate_skill_catalogs
     from .validate_ranger_affinity import validate_ranger_affinity
@@ -49,10 +52,13 @@ except ImportError:  # pragma: no cover - direct script execution
     )
     from dungeon_density import area_density_count, validate_area_count_formula, validate_area_range_formula  # type: ignore[no-redef]
     from validate_boss_patterns import validate_boss_patterns  # type: ignore[no-redef]
+    from validate_boss_presentation import validate_boss_presentation  # type: ignore[no-redef]
     from validate_dungeon_goldens import validate_dungeon_obstacle_goldens  # type: ignore[no-redef]
     from validate_i18n import validate_i18n_catalog, validate_locale_catalog  # type: ignore[no-redef]
     from validate_item_presentations import validate_item_presentations  # type: ignore[no-redef]
     from validate_rarity_cues import validate_rarity_cues  # type: ignore[no-redef]
+    from validate_ui_theme import validate_ui_theme  # type: ignore[no-redef]
+    from validate_monster_variants import validate_monster_variants  # type: ignore[no-redef]
     from validate_main_config import validate_main_config_gameplay  # type: ignore[no-redef]
     from validate_skills import validate_skill_catalogs  # type: ignore[no-redef]
     from validate_ranger_affinity import validate_ranger_affinity  # type: ignore[no-redef]
@@ -3051,6 +3057,8 @@ def cross_checks(report: Report) -> None:
         manifest_assets=manifest_assets,
     )
     validate_rarity_cues(report, load(ASSETS / "rarity_cues.v0.json"), item_templates)
+    validate_ui_theme(report, load(ASSETS / "ui_theme.v0.json"), item_templates)
+    validate_monster_variants(report, load(ASSETS / "kit_monster_presentation.v0.json"), dungeon_generation)
 
     validate_unique_items_catalog(report, unique_items, item_templates, unique_effects)
 
@@ -3150,6 +3158,7 @@ def cross_checks(report: Report) -> None:
             report.ok("unique_effects ready effects define hooks, params, and valid item-type compatibility")
 
     validate_fog_presentation_ranges(report, load, ASSETS)
+    validate_boss_presentation(report, load, SHARED, ROOT / "assets" / "manifests" / "assets.v0.json", ROOT / "client" / "scenes")
     validate_camera_fog_mode_alignment(report, load, ASSETS)
 
 

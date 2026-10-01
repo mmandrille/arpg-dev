@@ -28,12 +28,13 @@ def _default_output(root: Path, focus: str) -> Path:
 def main() -> int:
     root = _repo_root()
     parser = argparse.ArgumentParser(description="Render a focused Godot client visual.")
-    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "rarity-cues", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "mystery-shop", "blacksmith", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "town-play", "skeleton", "eye-view", "dungeon-room"], default="gear")
+    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "rarity-cues", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "mystery-shop", "blacksmith", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "town-play", "skeleton", "eye-view", "dungeon-room", "monster-variants", "character-screen"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
     parser.add_argument("--class-id", default="", help="Class id for gear focus, e.g. paladin.")
     parser.add_argument("--skill-id", default="", help="Skill id for skill-icon focus.")
     parser.add_argument("--family-id", default="", help="Item presentation family id for item-icon focus.")
+    parser.add_argument("--variant", default="", help="Variant for character-screen focus: points, nopoints, dual, nopoints-dual.")
     parser.add_argument("--asset-id", default="", help="Asset manifest id for item-asset focus.")
     parser.add_argument("--output", default="", help="PNG output path for screenshot mode.")
     parser.add_argument("--width", type=int, default=640)
@@ -46,7 +47,9 @@ def main() -> int:
     parser.add_argument("--town-zoom", choices=["normal", "max"], default="normal")
     parser.add_argument("--ground-tone", choices=["dark", "light"], default="dark")
     parser.add_argument("--reveal", action="store_true", help="Reveal the center rare drop's full ground label in the rarity fixture.")
+    parser.add_argument("--grayscale", action="store_true", help="monster-variants focus: save a luminance-only PNG.")
     parser.add_argument("--baseline", action="store_true", help="Hide v508 cues in focused comparison captures.")
+    parser.add_argument("--hud-state", choices=["full", "half", "low", "empty"], default="full", help="HUD fixture state for the hud focus.")
     parser.add_argument("--quality", choices=["balanced", "performance"], default="balanced")
     parser.add_argument("--godot", default="godot")
     parser.add_argument("--timeout", type=float, default=90.0, help="Seconds before a screenshot capture is killed.")
@@ -102,8 +105,12 @@ def main() -> int:
         width, height = 960, 640
     if args.focus in ("town", "town-play", "rarity-cues") and (args.width, args.height) == (640, 480):
         width, height = 1120, 720
+    if args.focus == "monster-variants" and (args.width, args.height) == (640, 480):
+        width, height = 1280, 800
     if args.focus == "skeleton" and (args.width, args.height) == (640, 480):
         width, height = 800, 600
+    if args.focus == "hud" and (args.width, args.height) == (640, 480):
+        width, height = 1280, 720
     if args.focus == "dungeon-room":
         if args.mode != "screenshot":
             print("[showme] dungeon-room focus supports --mode screenshot only", file=sys.stderr)
@@ -118,8 +125,16 @@ def main() -> int:
     if args.focus == "dungeon-room":
         # Dedicated runtime-lit room capture; keeps the grandfathered visual_capture.gd from growing.
         gdscript = root / "client" / "scripts" / "surface_material_room_capture.gd"
+    if args.focus == "monster-variants":
+        gdscript = root / "client" / "scripts" / "showme" / "showme_monster_variants_capture.gd"
     if args.focus == "town-play":
         gdscript = root / "client" / "scripts" / "showme" / "showme_town_play_capture.gd"
+    if args.focus == "character-screen":
+        gdscript = root / "client" / "scripts" / "showme" / "showme_character_screen_capture.gd"
+        if (args.width, args.height) == (640, 480):
+            width, height = 1920, 1080
+    if args.focus == "hud":
+        gdscript = root / "client" / "scripts" / "showme" / "showme_hud_capture.gd"
     if args.focus == "rarity-cues":
         gdscript = root / "client" / "scripts" / "showme" / "showme_rarity_cues_capture.gd"
     cmd = [
@@ -165,12 +180,18 @@ def main() -> int:
         cmd += ["--family-id", args.family_id]
     if args.asset_id:
         cmd += ["--asset-id", args.asset_id]
-    if args.focus == "dungeon-room":
+    if args.variant:
+        cmd += ["--variant", args.variant]
+    if args.focus in ("dungeon-room", "monster-variants"):
         cmd += ["--level", str(args.level)]
+    if args.focus == "monster-variants":
+        cmd += ["--quality", args.quality, "--grayscale", str(args.grayscale).lower()]
     if args.focus == "town-play":
         cmd += ["--town-view", args.town_view, "--town-zoom", args.town_zoom, "--quality", args.quality]
     if args.focus == "rarity-cues":
         cmd += ["--town-zoom", args.town_zoom, "--ground-tone", args.ground_tone, "--reveal", str(args.reveal).lower(), "--quality", args.quality]
+    if args.focus == "hud":
+        cmd += ["--hud-state", args.hud_state]
     if args.baseline:
         cmd += ["--baseline", "true"]
 

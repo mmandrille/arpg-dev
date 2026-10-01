@@ -4,17 +4,26 @@ extends RefCounted
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const BossArenaPresenceScript := preload("res://scripts/boss_arena_presence.gd")
 const BossLaneMarkerScript := preload("res://scripts/boss_lane_marker.gd")
+const BossIntroBannerScript := preload("res://scripts/boss_intro_banner.gd")
 
 var ctx: RefCounted
 var boss_health_bar
+var _intro_seen: Dictionary = {}
+var _intro_banner
 
 func _init(context: RefCounted = null, health_bar = null) -> void:
 	ctx = context
 	boss_health_bar = health_bar
 
 func hide_boss_health_bar() -> void:
+	_intro_seen.clear()  # level change / reset re-arms the intro banner
 	if boss_health_bar != null:
 		boss_health_bar.hide_boss()
+
+func sync_at_tick(tick: int) -> void:
+	if ctx != null:
+		ctx.last_server_tick = tick
+	sync_boss_health_bar()
 
 func sync_boss_health_bar() -> void:
 	if boss_health_bar == null or ctx == null:
@@ -27,6 +36,7 @@ func sync_boss_health_bar() -> void:
 	var hp := int(rec.get("hp", 0))
 	var max_hp := int(rec.get("max_hp", hp))
 	var template_id := str(rec.get("boss_template_id", ""))
+	_maybe_play_intro(boss_id, rec, template_id, hp, max_hp)
 	boss_health_bar.show_boss(boss_id, template_id, boss_health_bar_title(template_id), hp, max_hp)
 	var phase := boss_phase_for_display(rec)
 	if phase.is_empty():
@@ -34,6 +44,28 @@ func sync_boss_health_bar() -> void:
 	else:
 		boss_health_bar.set_phase_state(phase)
 	sync_boss_arena_presence()
+
+## Plays the intro banner once per boss entity, only when first seen at full health with no active
+## phase (a reconnect into a fight in progress stays silent).
+func _maybe_play_intro(boss_id: String, rec: Dictionary, template_id: String, hp: int, max_hp: int) -> void:
+	if _intro_seen.has(boss_id):
+		return
+	_intro_seen[boss_id] = true
+	if max_hp <= 0 or hp < max_hp or not boss_phase_for_display(rec).is_empty():
+		return
+	var banner = intro_banner()
+	if banner != null:
+		banner.play(template_id)
+
+func intro_banner():
+	if _intro_banner == null and ctx != null and ctx.ui_host != null:
+		_intro_banner = BossIntroBannerScript.new()
+		ctx.ui_host.add_child(_intro_banner)
+		ctx.ui_host.move_child(_intro_banner, 0)  # below HUD and modal windows; mouse-transparent
+	return _intro_banner
+
+func intro_banner_debug_state() -> Dictionary:
+	return _intro_banner.get_debug_state() if _intro_banner != null else {"visible": false, "played_count": 0}
 
 func sync_boss_arena_presence() -> void:
 	if ctx == null:

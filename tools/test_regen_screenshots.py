@@ -32,6 +32,7 @@ def test_default_suites_cover_requested_focus_areas() -> None:
     assert "floor-item" in DEFAULT_SUITES
     assert "item-asset" in DEFAULT_SUITES
     assert "scenes" in DEFAULT_SUITES
+    assert "character-screen" in DEFAULT_SUITES
 
 
 def test_discover_jobs_are_data_driven() -> None:
@@ -120,3 +121,17 @@ def test_scenes_dry_run_forwards_dungeon_room_level(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     assert f"--focus {DUNGEON_ROOM_FOCUS}" in result.stdout
     assert "--level -" in result.stdout
+
+
+def test_character_screen_suite_covers_every_class_and_variant() -> None:
+    jobs = discover_jobs(["character-screen"])
+    assert {job.focus for job in jobs} == {"character-screen"}
+    by_class: dict[str, set[str]] = {}
+    for job in jobs:
+        args = list(job.extra_args)
+        class_id = args[args.index("--class-id") + 1]
+        by_class.setdefault(class_id, set()).add(args[args.index("--variant") + 1])
+    assert set(by_class) == set(class_ids())
+    for variants in by_class.values():
+        assert {"points", "nopoints", "paper-doll"} <= variants
+    assert sum("nopoints-dual" in variants for variants in by_class.values()) == 2

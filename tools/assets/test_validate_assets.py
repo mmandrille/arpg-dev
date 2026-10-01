@@ -417,3 +417,41 @@ def test_environment_entry_validates(tmp_path: Path) -> None:
     root = build_root(tmp_path, manifest=manifest)
     report = _run(root)
     assert report.failures == [], report.failures
+
+
+# --- v513: kit monster clip profiles resolve against embedded GLB clips -----------------------
+
+def _glb_with_animations(names: list[str]) -> bytes:
+    gltf = {"asset": {"version": "2.0"}, "nodes": [{"name": "root"}], "animations": [{"name": n, "samplers": [], "channels": []} for n in names]}
+    payload = json.dumps(gltf).encode("utf-8")
+    payload += b" " * ((4 - len(payload) % 4) % 4)
+    chunk = struct.pack("<II", len(payload), 0x4E4F534A) + payload
+    return b"glTF" + struct.pack("<II", 2, 12 + len(chunk)) + chunk
+
+
+def _kit_fixture(tmp_path: Path, profile: dict, embedded: list[str]):
+    from tools.assets.validate_assets import kit_clip_problems
+
+    rel = "client/assets/monsters/kit/m.glb"
+    write(tmp_path / rel, _glb_with_animations(embedded))
+    kit = {"clip_profiles": {"p": profile}, "monsters": {"m": {"asset_id": "m_v0", "clip_profile": "p", "attachments": []}}}
+    return kit_clip_problems(tmp_path, kit, {"m_v0": {"runtime_path": rel}})
+
+
+def test_kit_clip_profile_resolves(tmp_path):
+    profile = {"clips": {"idle": "Idle", "attack": "A", "attack_b": "B"}, "variants": {"attack": ["attack", "attack_b"]}, "attack_contact": {"attack": 0.4}}
+    assert _kit_fixture(tmp_path, profile, ["Idle", "A", "B"]) == []
+
+
+def test_kit_clip_profile_unknown_clip_fails(tmp_path):
+    problems = _kit_fixture(tmp_path, {"clips": {"idle": "Idle", "attack": "Nope"}}, ["Idle"])
+    assert any("attack -> Nope" in p for p in problems)
+
+
+def test_kit_clip_profile_dangling_variant_fails(tmp_path):
+    problems = _kit_fixture(tmp_path, {"clips": {"idle": "Idle"}, "variants": {"attack": ["attack_z"]}}, ["Idle"])
+    assert any("attack_z" in p for p in problems)
+
+
+def test_kit_clip_profile_without_new_keys_passes(tmp_path):
+    assert _kit_fixture(tmp_path, {"clips": {"idle": "Idle"}}, ["Idle"]) == []

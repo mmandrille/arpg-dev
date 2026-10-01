@@ -20,6 +20,11 @@ DUNGEON_GENERATION_REL = "shared/rules/dungeon_generation.v0.json"
 SCENE_FOCUSES: tuple[str, ...] = ("town", "monsters", "chests", "stairs", "eye-view", "heal-rain")
 TOWN_PLAY_VIEWS: tuple[tuple[str, str], ...] = (("plaza", "normal"), ("plaza", "max"), ("vendor", "normal"), ("gate", "max"), ("west", "max"), ("north", "max"))
 DUNGEON_ROOM_FOCUS = "dungeon-room"
+# v516: panel variants captured for every class; dual-wield layout proven for two classes.
+CHARACTER_SCREEN_VARIANTS: tuple[str, ...] = ("points", "nopoints", "paper-doll")
+CHARACTER_SCREEN_DUAL_CLASSES: tuple[str, ...] = ("barbarian", "rogue")
+HUD_STATES: tuple[str, ...] = ("full", "half", "low", "empty")
+HUD_SIZES: tuple[tuple[int, int], ...] = ((1280, 720), (1920, 1080))
 
 
 @dataclass(frozen=True)
@@ -46,6 +51,8 @@ SUITE_SPECS: dict[str, SuiteSpec] = {
     "item-icons": SuiteSpec("item-icons", "item-icons", "Grid of all item icon families"),
     "floor-item": SuiteSpec("floor-item", "floor-item", "Ground loot model per item with visuals"),
     "item-asset": SuiteSpec("item-asset", "item-asset", "Isolated 3D asset per item_visuals asset_id"),
+    "character-screen": SuiteSpec("character-screen", "character-screen", "Character stats panel and paper-doll backdrop per class (v516)"),
+    "hud": SuiteSpec("hud", "hud", "HUD fixture: vitals globes, hotbar cluster, minimap frame, boss bar (full/half/low/empty at two sizes)"),
     "scenes": SuiteSpec("scenes", "scene", "Town/monster/prop scenes + runtime-lit dungeon room per biome"),
 }
 
@@ -211,6 +218,31 @@ def discover_jobs(suites: list[str] | None = None) -> list[CaptureJob]:
                     output_rel=f"{spec.name}/{asset_id}.png",
                     extra_args=("--asset-id", asset_id),
                 ))
+        elif suite_name == "character-screen":
+            for class_id in class_ids():
+                variants = list(CHARACTER_SCREEN_VARIANTS)
+                if class_id in CHARACTER_SCREEN_DUAL_CLASSES:
+                    variants.append("nopoints-dual")
+                for variant in variants:
+                    slug = f"{class_id}-{variant}"
+                    jobs.append(CaptureJob(
+                        suite=spec.name,
+                        focus=spec.focus,
+                        slug=slug,
+                        output_rel=f"{spec.name}/{slug}.png",
+                        extra_args=("--class-id", class_id, "--variant", variant),
+                    ))
+        elif suite_name == "hud":
+            for state in HUD_STATES:
+                for width, height in HUD_SIZES:
+                    slug = f"hud-{state}-{width}x{height}"
+                    jobs.append(CaptureJob(
+                        suite=spec.name,
+                        focus="hud",
+                        slug=slug,
+                        output_rel=f"{spec.name}/{slug}.png",
+                        extra_args=("--hud-state", state, "--width", str(width), "--height", str(height)),
+                    ))
         elif suite_name == "scenes":
             for focus in SCENE_FOCUSES:
                 jobs.append(CaptureJob(

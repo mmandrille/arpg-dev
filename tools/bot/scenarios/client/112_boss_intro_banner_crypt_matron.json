@@ -1,0 +1,70 @@
+{
+  "id": "boss_intro_banner_crypt_matron",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "boss_floor_gate_lab",
+  "seed": "second_boss_template",
+  "title": "Crypt Matron intro banner and presence",
+  "description": "Start in the compact boss-floor lab (no navigation): the Crypt Matron intro banner plays on arrival, the catalog aura and headgear are present, then capture banner, isometric and Performance-tier frames.",
+  "debug_progression": {
+    "level": 1,
+    "stats": {
+      "str": 5,
+      "dex": 5,
+      "vit": 200,
+      "magic": 5
+    }
+  },
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_boss_intro_banner",
+      "visible": true,
+      "template_id": "crypt_matron",
+      "title": "Crypt Matron",
+      "timeout_s": 5.0
+    },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "is_boss": true,
+      "boss_template_id": "crypt_matron",
+      "has_boss_arena_presence": true,
+      "timeout_s": 3.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "isometric"
+    },
+    {
+      "type": "capture_frame",
+      "name": "v512_crypt_matron_banner",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    },
+    {
+      "type": "wait_boss_intro_banner",
+      "visible": false,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "capture_frame",
+      "name": "v512_crypt_matron_iso",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    },
+    {
+      "type": "set_graphics_quality",
+      "quality": "performance"
+    },
+    {
+      "type": "capture_frame",
+      "name": "v512_crypt_matron_performance",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "monster_windup_pose",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "combat_control_lab",
+  "seed": "windupposev513",
+  "title": "Monster windup pose: the attack clip builds, slowed, while the windup ring runs",
+  "description": "v513: a skeleton melee monster starts a scaled attack clip on monster_attack_windup (speed below 1.0 so contact lands as the server windup ends). Visual capture shows the pose beside the v345 ring.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "dungeon_mob", "timeout_s": 10.0 },
+    { "type": "click_entity_buffered", "entity_type": "monster", "monster_def_id": "dungeon_mob" },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "animation_clip_prefix": "attack",
+      "animation_speed_scale_max": 0.99,
+      "timeout_s": 10.0
+    },
+    { "type": "capture_frame", "name": "v513_monster_windup_pose", "timeout_s": 5.0, "skip_if_headless": true }
+  ]
+}

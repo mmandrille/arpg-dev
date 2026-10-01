@@ -468,6 +468,52 @@
         "sha256": "6ffc003f895bed0b074791e0e490846210a2e2f8fc7da300aba53cc185f95968"
       }
     },
+    "kaykit_skeleton_mage_v0": {
+      "type": "monster",
+      "runtime_path": "client/assets/monsters/kaykit_skeletons/skeleton_mage.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [
+        "root",
+        "hips",
+        "chest",
+        "head",
+        "handslot.l",
+        "handslot.r"
+      ],
+      "provenance": {
+        "origin": "KayKit Character Pack: Skeletons 1.0 by Kay Lousberg (Characters/gltf/Skeleton_Mage.glb @ 15b62b9bad12)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0",
+        "license": "CC0-1.0",
+        "sha256": "e05b0f5cfa395271c9f75fd07c0a0613c56f401ece4ab644e080001a79971075"
+      }
+    },
+    "kaykit_skeleton_staff_v0": {
+      "type": "monster",
+      "runtime_path": "client/assets/monsters/kaykit_skeletons/skeleton_staff.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Character Pack: Skeletons 1.0 by Kay Lousberg (Assets/gltf/Skeleton_Staff.gltf (packed by tools/assets/gltf_to_glb.py) @ 15b62b9bad12)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0",
+        "license": "CC0-1.0",
+        "sha256": "c3ae0c1cc405e466769343325d766b2e1ebde745234e52ea931cebf748ba66ff"
+      }
+    },
+    "kaykit_skeleton_shield_large_a_v0": {
+      "type": "monster",
+      "runtime_path": "client/assets/monsters/kaykit_skeletons/skeleton_shield_large_a.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "required_nodes": [],
+      "provenance": {
+        "origin": "KayKit Character Pack: Skeletons 1.0 by Kay Lousberg (Assets/gltf/Skeleton_Shield_Large_A.gltf (packed by tools/assets/gltf_to_glb.py) @ 15b62b9bad12)",
+        "source_url": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0",
+        "license": "CC0-1.0",
+        "sha256": "0485b0da60d7ccd43958d3615c06ea7f54afa4035a6afa2d70a6db7d27e68b2e"
+      }
+    },
     "kaykit_skeleton_axe_v0": {
       "type": "monster",
       "runtime_path": "client/assets/monsters/kaykit_skeletons/skeleton_axe.glb",

@@ -22,7 +22,53 @@
             "required": ["idle", "walk", "attack", "hit", "death"],
             "additionalProperties": { "type": "string", "minLength": 1 }
           },
-          "loop": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          "loop": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "variants": {
+            "type": "object",
+            "additionalProperties": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+          },
+          "attack_contact": {
+            "type": "object",
+            "additionalProperties": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+          },
+          "windup_speed": {
+            "type": "object",
+            "required": ["min", "max"],
+            "additionalProperties": false,
+            "properties": {
+              "min": { "type": "number", "exclusiveMinimum": 0 },
+              "max": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          },
+          "hit_directional": {
+            "type": "object",
+            "required": ["left", "right"],
+            "additionalProperties": false,
+            "properties": {
+              "left": { "type": "string", "minLength": 1 },
+              "right": { "type": "string", "minLength": 1 }
+            }
+          },
+          "hit_speed_scale": { "type": "number", "exclusiveMinimum": 0 },
+          "strike_on_damage": { "type": "boolean" },
+          "spawn": {
+            "type": "object",
+            "required": ["enabled"],
+            "additionalProperties": false,
+            "properties": {
+              "enabled": { "type": "boolean" },
+              "clip": { "type": "string", "minLength": 1 }
+            }
+          },
+          "idle_variation": {
+            "type": "object",
+            "required": ["min_interval_s", "max_interval_s"],
+            "additionalProperties": false,
+            "properties": {
+              "min_interval_s": { "type": "number", "exclusiveMinimum": 0 },
+              "max_interval_s": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          }
         }
       }
     },
@@ -50,7 +96,83 @@
           }
         }
       }
+    },
+    "variants": {
+      "type": "object",
+      "required": ["rarities", "depth", "families"],
+      "additionalProperties": false,
+      "properties": {
+        "note": { "type": "string" },
+        "rarities": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["tint", "scale_multiplier"],
+            "additionalProperties": false,
+            "properties": {
+              "tint": { "$ref": "#/$defs/tint" },
+              "scale_multiplier": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 },
+              "eye": {
+                "type": "object",
+                "required": ["color", "energy"],
+                "additionalProperties": false,
+                "properties": {
+                  "color": { "$ref": "#/$defs/hex" },
+                  "energy": { "type": "number", "minimum": 0, "maximum": 16 }
+                }
+              },
+              "aura": {
+                "type": "object",
+                "required": ["color", "alpha", "radius", "energy"],
+                "additionalProperties": false,
+                "properties": {
+                  "color": { "$ref": "#/$defs/hex" },
+                  "alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "radius": { "type": "number", "exclusiveMinimum": 0, "maximum": 3 },
+                  "energy": { "type": "number", "minimum": 0, "maximum": 8 }
+                }
+              }
+            }
+          }
+        },
+        "depth": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["tint"],
+            "additionalProperties": false,
+            "properties": { "tint": { "$ref": "#/$defs/tint" } }
+          }
+        },
+        "families": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["eye_mesh", "aura_radius_scale"],
+            "additionalProperties": false,
+            "properties": {
+              "eye_mesh": { "type": "string" },
+              "aura_radius_scale": { "type": "number", "exclusiveMinimum": 0, "maximum": 3 }
+            }
+          }
+        }
+      }
     }
   },
-  "$defs": { "asset_id": { "type": "string", "pattern": "^[a-z0-9_]+$" } }
+  "$defs": {
+    "hex": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "tint": {
+      "type": "object",
+      "required": ["color", "strength"],
+      "additionalProperties": false,
+      "properties": {
+        "color": { "$ref": "#/$defs/hex" },
+        "strength": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "asset_id": { "type": "string", "pattern": "^[a-z0-9_]+$" }
+  }
 }

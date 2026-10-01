@@ -7,6 +7,8 @@ const StatLabels := preload("res://scripts/stat_labels.gd")
 const CharacterStatsBreakdown := preload("res://scripts/character_stats_breakdown.gd")
 const StatTooltipLabelScript := preload("res://scripts/stat_tooltip_label.gd")
 const CharacterPanelStyles := preload("res://scripts/character_panel_styles.gd")
+const CharacterStatsHeaderScript := preload("res://scripts/character_stats_header.gd")
+const CharacterStatGroups := preload("res://scripts/character_stat_groups.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const TextCatalogScript := preload("res://scripts/text_catalog.gd")
 const BASE_STATS := StatLabels.BASE_STATS
@@ -29,14 +31,13 @@ const DERIVED_LABELS := {
 	"mana_regen_per_second": "Mana regen /s",
 	"light_radius": "Light radius",
 }
+const CONTENT_SIZE := Vector2(304, 620)
 const DUAL_WIELD_DAMAGE_KEYS := ["damage_min", "damage_max"]
 
 var progression: Dictionary = {}
 var allocation_enabled: bool = false
 var _panel: DraggableWindow
-var _level_label: Label
-var _xp_label: Label
-var _points_label: Label
+var _header: CharacterStatsHeaderScript
 var _stat_value_labels: Dictionary = {}
 var _stat_base_labels: Dictionary = {}
 var _stat_effective_labels: Dictionary = {}
@@ -140,6 +141,8 @@ func get_debug_state() -> Dictionary:
 		"derived_columns": (["NAME", "MAIN", "OFF"] if _derived_dual_wield_active else ["NAME", "VALUE"]),
 		"derived_title": _derived_title.text if _derived_title != null else "",
 		"derived_title_is_button": false,
+		"header": _header.get_header_state() if _header != null else {},
+		"derived_groups": _derived_groups_debug(),
 		"derived_tooltips": _derived_tooltips_by_key(),
 		"derived_tooltips_main": _derived_slot_tooltips_by_key(_derived_labels),
 		"derived_tooltips_off": _derived_slot_tooltips_by_key(_derived_off_labels),
@@ -176,9 +179,9 @@ func _sync_viewport_size() -> void:
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = DraggableWindowScript.new()
-	_panel.custom_minimum_size = Vector2(330, 585)
+	_panel.custom_minimum_size = Vector2(330, 685)
 	_panel.position = Vector2(16, 118)
-	_panel.configure("Character", Vector2(304, 520))
+	_panel.configure("Character", CONTENT_SIZE)
 	_panel.set_layout_key("character_stats")
 	_panel.add_theme_stylebox_override("panel", CharacterPanelStyles.panel_style())
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -187,15 +190,11 @@ func _build() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
-	root.custom_minimum_size = Vector2(304, 520)
+	root.custom_minimum_size = CONTENT_SIZE
 	_panel.set_content(root)
 
-	_level_label = _value_label()
-	_xp_label = _value_label()
-	_points_label = _value_label()
-	root.add_child(_level_label)
-	root.add_child(_xp_label)
-	root.add_child(_points_label)
+	_header = CharacterStatsHeaderScript.new()
+	root.add_child(_header)
 
 	root.add_child(_section_label("Stats"))
 	var stat_header := HBoxContainer.new()
@@ -261,7 +260,15 @@ func _build() -> void:
 	_derived_container.add_theme_constant_override("separation", 3)
 	_derived_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_derived_scroll.add_child(_derived_container)
-	for key in DERIVED_LABELS.keys():
+	for group in CharacterStatGroups.GROUPS:
+		_derived_container.add_child(_group_header(CharacterStatGroups.group_title(group)))
+		_build_derived_rows(group["keys"])
+
+	_render()
+
+
+func _build_derived_rows(keys: Array) -> void:
+	for key in keys:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 6)
 		_derived_container.add_child(row)
@@ -285,12 +292,12 @@ func _build() -> void:
 			row.add_child(off_label)
 			_derived_off_labels[key] = off_label
 
-	_render()
-
 
 func _sync_title() -> void:
 	if _panel != null:
-		_panel.configure(_title_text(), Vector2(304, 520))
+		_panel.configure(_title_text(), CONTENT_SIZE)
+	if _header != null:
+		_header.configure(_hero_name, progression)
 
 
 func _title_text() -> String:
@@ -301,13 +308,7 @@ func _title_text() -> String:
 
 
 func _render() -> void:
-	var level := int(progression.get("level", 1))
-	var xp := int(progression.get("experience", 0))
-	var remaining = progression.get("experience_to_next_level", null)
-	var points := int(progression.get("unspent_stat_points", 0))
-	_level_label.text = "Level %d" % level
-	_xp_label.text = "XP %d%s" % [xp, "" if remaining == null else " (+%d)" % int(remaining)]
-	_points_label.text = "Points %d" % points
+	_header.configure(_hero_name, progression)
 	var base: Dictionary = progression.get("base_stats", {})
 	var effective := CharacterStatsBreakdown.effective_base_stats(progression)
 	for stat in BASE_STATS:
@@ -383,8 +384,38 @@ func _render_buttons() -> void:
 	var points := int(progression.get("unspent_stat_points", 0))
 	for stat in BASE_STATS:
 		var btn: Button = _stat_buttons.get(stat, null)
-		if btn != null:
-			btn.disabled = not allocation_enabled or points <= 0
+		if btn == null:
+			continue
+		btn.disabled = not allocation_enabled or points <= 0
+		_style_allocate_button(btn)
+
+
+func _style_allocate_button(btn: Button) -> void:
+	if btn.disabled or _header == null:
+		for state in ["normal", "hover", "pressed"]:
+			btn.remove_theme_stylebox_override(state)
+		return
+	var accent: Color = _header.accent()
+	btn.add_theme_stylebox_override("normal", CharacterPanelStyles.allocate_button_style(accent, false))
+	btn.add_theme_stylebox_override("hover", CharacterPanelStyles.allocate_button_style(accent, true))
+	btn.add_theme_stylebox_override("pressed", CharacterPanelStyles.allocate_button_style(accent, true))
+
+
+func _derived_groups_debug() -> Array:
+	var out := []
+	for group in CharacterStatGroups.GROUPS:
+		out.append({"id": group["id"], "title": CharacterStatGroups.group_title(group), "keys": (group["keys"] as Array).duplicate()})
+	return out
+
+
+func _group_header(title: String) -> Control:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 0)
+	box.add_child(HSeparator.new())
+	var label := _section_label(title)
+	label.add_theme_font_size_override("font_size", CharacterPanelStyles.font_caption() + 3)
+	box.add_child(label)
+	return box
 
 
 func _dual_wield_damage_active(derived: Dictionary) -> bool:
@@ -485,7 +516,7 @@ func _derived_scroll_debug_state() -> Dictionary:
 		"horizontal_scroll_mode": int(_derived_scroll.horizontal_scroll_mode),
 		"scrollbar_on_right": true,
 		"scrollbar_visible": bar != null and bar.visible,
-		"row_count": _derived_container.get_child_count() if _derived_container != null else 0,
+		"row_count": _derived_labels.size(),
 		"viewport_height": _derived_scroll.custom_minimum_size.y,
 	}
 
@@ -511,8 +542,8 @@ func _derived_tooltip_panel_debug_state() -> Dictionary:
 
 func _value_label() -> Label:
 	var label := Label.new()
-	label.add_theme_color_override("font_color", Color("#d8c7a6"))
-	label.add_theme_font_size_override("font_size", 23)
+	label.add_theme_color_override("font_color", CharacterPanelStyles.text())
+	label.add_theme_font_size_override("font_size", CharacterPanelStyles.font_row())
 	return label
 
 
@@ -525,8 +556,8 @@ func _table_value_label(width: float) -> Label:
 
 func _derived_value_label() -> Label:
 	var label := StatTooltipLabelScript.new()
-	label.add_theme_color_override("font_color", Color("#d8c7a6"))
-	label.add_theme_font_size_override("font_size", 23)
+	label.add_theme_color_override("font_color", CharacterPanelStyles.text())
+	label.add_theme_font_size_override("font_size", CharacterPanelStyles.font_row())
 	return label
 
 
@@ -534,14 +565,14 @@ func _header_label(text: String, width: float, align: HorizontalAlignment) -> La
 	var label := _section_label(text)
 	label.custom_minimum_size = Vector2(width, 22)
 	label.horizontal_alignment = align
-	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_font_size_override("font_size", CharacterPanelStyles.font_caption())
 	return label
 
 
 func _section_label(text: String) -> Label:
 	var label := _value_label()
 	label.text = text
-	label.add_theme_color_override("font_color", Color("#c9a227"))
+	label.add_theme_color_override("font_color", CharacterPanelStyles.section())
 	return label
 
 

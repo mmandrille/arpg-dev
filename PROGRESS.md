@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-01 (v510 review/refactor complete; final `make ci` passed in 6m56s)
+Last updated: 2026-10-01 (v511–v517 batch integrated; combined `make ci` passed in 12m00s; review/refactor pending)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-10-01 (v510 review/refactor complete; final `make ci` passed 
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v510 — Ranger affinity passive; the accepted v501–v510 graphics, feel, and gameplay batch is integrated, with combined `make ci` passing in 11m41s. See the [slice lifecycle](docs/progress/slice-lifecycle.md) and per-slice as-built evidence. |
-| **Next slice** | Propose the next batch with `$next`. `make ci-full` failed only `teleporter_lab` (1/149); the isolated rerun passed, so the full-matrix result remains open. |
+| **Latest completed slice** | v517 — HUD globes and hotbar polish; the accepted v511–v517 monster/boss/UI batch ([v511 variants](docs/as-built/v511_monster-variant-looks.md), [v512 boss presence](docs/as-built/v512_boss-presence.md), [v513 animation](docs/as-built/v513_monster-combat-animation-polish.md), [v514 UI theme](docs/as-built/v514_ui-theme-foundation.md), [v515 inventory](docs/as-built/v515_inventory-tooltip-redesign.md), [v516 character screen](docs/as-built/v516_character-screen-redesign.md), [v517 HUD](docs/as-built/v517_hud-hotbar-polish.md)) is integrated; combined `make ci` passed in 12m00s. |
+| **Next slice** | Run `/review` then `/refactor` on the v511–v517 baseline, then propose the next batch with `$next`. `make ci-full` failed only `teleporter_lab` (1/149); the isolated rerun passed, so the full-matrix result remains open. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
 | **Last engineering review** | v510 — [`docs/reviews/20261001_v510-overview.md`](docs/reviews/20261001_v510-overview.md) (2026-10-01; on-cadence, overall 7.8; `make ci-full` had one failure) |
 | **Next engineering review** | After the next coordinated batch or ~10-slice standalone milestone; run `$refactor` before `$next`. |
@@ -86,6 +86,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
+- **v511–v517 evidence limits:** v512 bosses cost more to draw (about 12–20 draw calls vs 2 in isolation; no in-dungeon A/B) and v517 adds 16 draw calls (108→124; paced probe vsync-capped, weaker GPU untested). v511 has no live in-play champion/rare/unique capture. v513 has no showme suite, no ranged attack clips (no shooter-attributed event), and fog reveals reuse `entity_spawn` (spawn-in can fire on reveal; `spawn.enabled=false` opts out). Shop/stash/market/skills/consumable-bar private style helpers and `stat_tooltip_label.gd` are not yet on `UiTheme`. `main.gd` is 6,654 lines (baseline 6,632 + 25): any growth needs extraction first.
 - **v501–v510 evidence limits:** v506 resident-memory/hands-on town proof, v508 final no-aura matched cost, and v509 live reconnect/matched lane cost remain unverified. Extended CI had 1/149 protocol failures (`teleporter_lab`); its isolated rerun passed, which does not make the full gate green.
 
 - **v510 `$review` (on-cadence; supersedes v500):** [`docs/reviews/20261001_v510-overview.md`](docs/reviews/20261001_v510-overview.md). Mercenary-roster replay, `envelope.v8`, potion golden, and shared-JSON checklist follow-ups are closed. **Fixed in `$refactor`:** cold CI now starts/requires Postgres before DB-backed Go tests (`16eab682`; final `make ci` passed). **Still open:** input may be simulated before durable append; replay has no practical tick bound/context check or pinned rules/debug flag; reconnect snapshot/schema drift checks; `main.gd`, `sim.go`, `run.py`, and `validate_shared.py` cohesion hotspots; ratchet touch-to-shrink; Godot pin, remote CI, and owner-managed origin credential follow-ups.

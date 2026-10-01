@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/ui_theme.v0.schema.json",
+  "title": "Shared client UI theme tokens (v0)",
+  "description": "Client-only presentation tokens: colors, spacing, font roles, frame recipes. Frames/fonts reference color and spacing tokens by name; validate_ui_theme.py resolves the references.",
+  "type": "object",
+  "required": ["version", "colors", "rarity_slot_backgrounds", "spacing", "fonts", "frames", "state_modifiers"],
+  "additionalProperties": false,
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "color": {
+      "oneOf": [
+        {"type": "string", "pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"},
+        {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}}
+      ]
+    },
+    "spacing_ref": {"$ref": "#/$defs/token"},
+    "box_ref": {
+      "oneOf": [
+        {"$ref": "#/$defs/token"},
+        {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/token"}}
+      ]
+    },
+    "frame_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"bg": {"$ref": "#/$defs/token"}, "border": {"$ref": "#/$defs/token"}}
+    }
+  },
+  "properties": {
+    "version": {"const": 0},
+    "colors": {"type": "object", "minProperties": 1, "propertyNames": {"$ref": "#/$defs/token"}, "additionalProperties": {"$ref": "#/$defs/color"}},
+    "rarity_slot_backgrounds": {
+      "type": "object",
+      "required": ["common", "magic", "rare", "unique", "set"],
+      "propertyNames": {"$ref": "#/$defs/token"},
+      "additionalProperties": {"$ref": "#/$defs/color"}
+    },
+    "spacing": {"type": "object", "minProperties": 1, "propertyNames": {"$ref": "#/$defs/token"}, "additionalProperties": {"type": "integer", "minimum": 0}},
+    "fonts": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/token"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["family", "size", "color"],
+        "additionalProperties": false,
+        "properties": {
+          "family": {"const": "default"},
+          "size": {"type": "integer", "minimum": 6},
+          "color": {"$ref": "#/$defs/token"},
+          "outline_size": {"type": "integer", "minimum": 0},
+          "outline_color": {"$ref": "#/$defs/token"}
+        }
+      }
+    },
+    "frames": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/token"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["bg", "border", "border_width"],
+        "additionalProperties": false,
+        "properties": {
+          "bg": {"$ref": "#/$defs/token"},
+          "border": {"$ref": "#/$defs/token"},
+          "border_width": {"$ref": "#/$defs/box_ref"},
+          "radius": {"$ref": "#/$defs/box_ref"},
+          "margin": {"$ref": "#/$defs/box_ref"},
+          "states": {
+            "type": "object",
+            "propertyNames": {"enum": ["hover", "disabled", "invalid", "selected"]},
+            "additionalProperties": {"$ref": "#/$defs/frame_state"}
+          }
+        }
+      }
+    },
+    "state_modifiers": {
+      "type": "object",
+      "required": ["hover_lighten", "invalid_darken", "border_lighten", "border_hover_lighten", "invalid_border", "invalid_border_hover"],
+      "additionalProperties": false,
+      "properties": {
+        "hover_lighten": {"type": "number", "minimum": 0, "maximum": 1},
+        "invalid_darken": {"type": "number", "minimum": 0, "maximum": 1},
+        "border_lighten": {"type": "number", "minimum": 0, "maximum": 1},
+        "border_hover_lighten": {"type": "number", "minimum": 0, "maximum": 1},
+        "invalid_border": {"$ref": "#/$defs/token"},
+        "invalid_border_hover": {"$ref": "#/$defs/token"}
+      }
+    }
+  }
+}

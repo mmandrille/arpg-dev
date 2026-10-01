@@ -347,6 +347,51 @@ def validate(root: Path, report: Report) -> None:
                     report.fail("kit monster asset", f"{scene_key}: {asset_id} is not a monster asset")
                 else:
                     report.ok(f"kit monster {scene_key} -> {asset_id} resolves")
+        # v513: every clip id a profile names must exist among the animations embedded in the
+        # GLB of each monster using that profile (runtime only warns on a missing clip).
+        for problem in kit_clip_problems(root, kit_monsters, assets):
+            report.fail("kit monster clip", problem)
+        report.ok("kit monster clip profiles resolve against embedded GLB clips")
+
+
+def profile_clip_ids(profile: dict) -> list[tuple[str, str]]:
+    """(logical, kit_clip) pairs a clip profile asks the rig for (v513)."""
+    return sorted((str(k), str(v)) for k, v in profile.get("clips", {}).items())
+
+
+def kit_clip_problems(root: Path, kit_monsters: dict, assets: dict) -> list[str]:
+    problems: list[str] = []
+    profiles = kit_monsters.get("clip_profiles", {})
+    clip_cache: dict[str, set[str]] = {}
+    for scene_key, spec in sorted(kit_monsters.get("monsters", {}).items()):
+        profile = profiles.get(spec.get("clip_profile", ""))
+        entry = assets.get(spec.get("asset_id", ""))
+        if profile is None or entry is None or "runtime_path" not in entry:
+            continue  # reported by the checks above
+        rel = entry["runtime_path"]
+        if rel not in clip_cache:
+            glb = root / rel
+            clip_cache[rel] = (
+                {a["name"] for a in glb_reader.animation_summaries(glb_reader.load_gltf(glb))}
+                if glb.is_file() else set()
+            )
+        embedded = clip_cache[rel]
+        logicals = {k for k, _ in profile_clip_ids(profile)}
+        for logical, clip in profile_clip_ids(profile):
+            if clip not in embedded:
+                problems.append(f"{scene_key}: logical clip {logical} -> {clip} not embedded in {rel}")
+        for group, members in sorted(profile.get("variants", {}).items()):
+            for member in members:
+                if member not in logicals:
+                    problems.append(f"{scene_key}: variants.{group} member {member} is not a profile clip")
+        refs = list(profile.get("hit_directional", {}).values())
+        refs += list(profile.get("attack_contact", {}).keys())
+        if "clip" in profile.get("spawn", {}):
+            refs.append(profile["spawn"]["clip"])
+        for ref in refs:
+            if ref not in logicals:
+                problems.append(f"{scene_key}: {ref} is referenced but not a profile clip")
+    return problems
 
 
 def main() -> int:

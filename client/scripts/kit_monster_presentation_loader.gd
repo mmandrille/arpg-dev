@@ -41,3 +41,9 @@ static func visual_keys() -> Array:
 	var keys := (_config.get("monsters", {}) as Dictionary).keys()
 	keys.sort()
 	return keys
+
+
+## v511 variant looks (rarity/depth/family); empty when the catalog has no `variants` section.
+static func variants() -> Dictionary:
+	ensure_loaded()
+	return ((_config.get("variants", {}) as Dictionary)).duplicate(true)

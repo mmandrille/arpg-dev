@@ -30,6 +30,7 @@ const DamageTypeCombatTextScript := preload("res://scripts/damage_type_combat_te
 const PickTargetHighlightScript := preload("res://scripts/pick_target_highlight.gd")
 const BossHealthBarScript := preload("res://scripts/boss_health_bar.gd")
 const BossVisualsContextScript := preload("res://scripts/boss_visuals_context.gd")
+const BossPresentationLoaderScript := preload("res://scripts/boss_presentation_loader.gd")
 const BossVisualsControllerScript := preload("res://scripts/boss_visuals_controller.gd")
 const TownNodeFactoryScript := preload("res://scripts/town_node_factory.gd")
 const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
@@ -68,6 +69,7 @@ const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const ClientGraphicsBridgeScript := preload("res://scripts/client_graphics_bridge.gd")
 const SceneLightingRigScript := preload("res://scripts/scene_lighting_rig.gd")
 const ModelTintScript := preload("res://scripts/model_tint.gd")
+const MonsterVariantLookScript := preload("res://scripts/monster_variant_look.gd")
 const HeroCorpseVisualScript := preload("res://scripts/hero_corpse_visual.gd")
 const PerformanceStatusFormatterScript := preload("res://scripts/performance_status_formatter.gd")
 const MainMenuScript := preload("res://scripts/main_menu.gd")
@@ -114,6 +116,7 @@ const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentat
 const SkillRulesLoaderScript := preload("res://scripts/skill_rules_loader.gd")
 const MonsterAttackAnimationEventsScript := preload("res://scripts/monster_attack_animation_events.gd")
 const MonsterMeleeWindupMarkerScript := preload("res://scripts/monster_melee_windup_marker.gd")
+const MonsterAnimDriverScript := preload("res://scripts/monster_anim_driver.gd")
 const EntityPresentationLodScript := preload("res://scripts/entity_presentation_lod.gd")
 const ProjectilePresentationCapScript := preload("res://scripts/projectile_presentation_cap.gd")
 const PlayerCameraContextScript := preload("res://scripts/player_camera_context.gd")
@@ -1257,8 +1260,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	PerfPhaseTimerScript.measure_usec("snap_entities", snapshot_phase_start)
 	snapshot_phase_start = Time.get_ticks_usec()
 	if _boss_visuals != null:
-		_boss_visuals_context.last_server_tick = last_server_tick
-		_boss_visuals.sync_boss_health_bar()
+		_boss_visuals.sync_at_tick(last_server_tick)
 	inventory = p.get("inventory", [])
 	equipped = p.get("equipped", {})
 	active_weapon_set = int(p.get("active_weapon_set", active_weapon_set))
@@ -1339,7 +1341,10 @@ func _apply_delta(p: Dictionary) -> void:
 				if entity_id == player_id and mobility_skills.has(player_id):
 					_upsert_entity(entity, false)
 				else:
+					var spawn_new := str(c.get("op", "")) == "entity_spawn" and not entities.has(entity_id)
 					_upsert_entity(entity)
+					if spawn_new:
+						MonsterAnimDriverScript.on_live_spawn(entities.get(entity_id, {}), changes, _camera)
 			"entity_remove":
 				_delta_ui_sync_gate.mark_entity_removed()
 				_remove_entity(str(c.get("entity_id", "")))
@@ -1386,6 +1391,7 @@ func _apply_delta(p: Dictionary) -> void:
 		AttackContactTraceScript.record_result(ev, last_server_tick)
 		if event_type == "monster_attack_windup":
 			MonsterMeleeWindupMarkerScript.sync_from_event(ev, entities, player_anchor.global_position if player_anchor != null else Vector3.ZERO)
+			MonsterAnimDriverScript.on_windup(ev, entities)
 			continue
 		if eid == player_id and str(ev.get("skill_id", "")) == "charge":
 			if event_type == "skill_channel_started":
@@ -1757,7 +1763,7 @@ func _apply_delta(p: Dictionary) -> void:
 		if clip == "death":
 			ctrl.enter_terminal("death")
 		else:
-			ctrl.play_one_shot(clip)
+			MonsterAnimDriverScript.play_event_clip(ctrl, entities[eid], ev, clip, entities)
 	PerfPhaseTimerScript.measure_usec("d_evt", phase_start)
 	phase_start = Time.get_ticks_usec()
 	if _delta_needs_fog_resync(p):
@@ -1775,8 +1781,7 @@ func _apply_delta(p: Dictionary) -> void:
 	PerfPhaseTimerScript.measure_usec("d_bot", phase_start)
 	phase_start = Time.get_ticks_usec()
 	if _boss_visuals != null:
-		_boss_visuals_context.last_server_tick = last_server_tick
-		_boss_visuals.sync_boss_health_bar()
+		_boss_visuals.sync_at_tick(last_server_tick)
 	PerfPhaseTimerScript.measure_usec("d_boss", phase_start)
 	phase_start = Time.get_ticks_usec()
 	var reset_visual := _pending_level_position_reset and local_position_update
@@ -1971,7 +1976,7 @@ func _upsert_entity(e: Dictionary, apply_local_player_position: bool = true) -> 
 	if e.has("is_boss"):
 		rec["is_boss"] = bool(e["is_boss"])
 	if e.has("visual_scale"):
-		rec["visual_scale"] = float(e["visual_scale"])
+		rec["visual_scale"] = BossPresentationLoaderScript.effective_scale(str(rec.get("boss_template_id", "")), float(e["visual_scale"]))
 	if e.has("interactable_def_id"):
 		rec["interactable_def_id"] = str(e["interactable_def_id"])
 	if is_new:
@@ -2124,8 +2129,7 @@ func _remove_entity(id: String) -> void:
 	monster_ids.erase(id)
 	interactable_ids.erase(id)
 	if _boss_visuals != null:
-		_boss_visuals_context.last_server_tick = last_server_tick
-		_boss_visuals.sync_boss_health_bar()
+		_boss_visuals.sync_at_tick(last_server_tick)
 	_sync_companion_bar()
 
 func _entity_type_uses_combat_presentation(entity_type: String) -> bool:
@@ -2344,6 +2348,7 @@ func _flat_distance(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
 func _enter_entity_terminal_death(entity_id: String, rec: Dictionary) -> void:
+	MonsterVariantLookScript.hide_aura(rec.get("node", null) as Node3D)
 	var ctrl = rec.get("controller", null)
 	if ctrl != null:
 		ctrl.enter_terminal("death")
@@ -3907,6 +3912,7 @@ func _build_scene() -> void:
 	_boss_visuals_context.entities = entities
 	_boss_visuals_context.apply_model_tint = Callable(self, "_apply_model_tint")
 	_boss_visuals_context.apply_entity_status_tint = Callable(self, "_apply_entity_status_tint")
+	_boss_visuals_context.ui_host = ui
 	_boss_visuals = BossVisualsControllerScript.new(_boss_visuals_context, boss_health_bar)
 	_setup_waypoint_panel(ui)
 	inventory_panel = InventoryPanelScript.new()
@@ -5516,6 +5522,8 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			var player_root := _make_remote_player_node(e)
 			player_root.name = "CompanionVisualRoot"
 			return player_root
+		var boss_root := BossPresentationLoaderScript.make_root(e, Callable(self, "_apply_model_tint"), _entity_base_tint(e))
+		if boss_root != null: return boss_root
 		var visual := MonsterVisualsLoaderScript.resolve(str(e.get("monster_def_id", "")), str(e.get("visual_model", "")))
 		if str(visual.get("scene", "")) == "training_doll_silhouette":
 			var silhouette_root := TrainingDamageLogBridgeScript.make_silhouette_root()
@@ -5533,6 +5541,7 @@ func _make_entity_node(e: Dictionary) -> Node3D:
 			root.add_child(monster)
 			root.scale = Vector3.ONE * _entity_visual_scale(e)
 			_apply_model_tint(root, _entity_base_tint(e))
+			MonsterVariantLookScript.apply_for_entity(root, e, MonsterVariantLookScript.palette_id_for_level(current_level, _ground_factory))
 			_sync_archer_bow_marker(root, str(e.get("monster_def_id", "")))
 			return root
 		# Fallback: red primitive so positioning/targeting still works.
@@ -5573,16 +5582,15 @@ func _entity_base_tint(e: Dictionary) -> Color:
 	if kind == "player":
 		return Color.WHITE  # kit heroes are textured; a base tint would multiply the atlas (ADR-0018 P3c)
 	if kind == "monster" or kind == "companion":
+		if MonsterVariantLookScript.owns_entity(e):
+			return Color.WHITE  # v511: catalog variant looks own the rarity colour (detail layer)
 		if e.has("visual_tint"):
-			return Color(str(e.get("visual_tint", "#ffffff")))
+			return BossPresentationLoaderScript.base_tint(str(e.get("boss_template_id", "")), Color(str(e.get("visual_tint", "#ffffff"))))
 		return _monster_tint(str(e.get("rarity", "common")))
 	return Color.WHITE
 
 func _entity_visual_scale(e: Dictionary) -> float:
-	var scale := float(e.get("visual_scale", 1.0))
-	if scale <= 0.0:
-		return 1.0
-	return scale
+	return BossPresentationLoaderScript.effective_scale(str(e.get("boss_template_id", "")), float(e.get("visual_scale", 1.0)))
 
 func _apply_local_player_visual_scale(scale: float) -> void:
 	player_visual_scale = scale if scale > 0.0 else 1.0
@@ -5770,7 +5778,7 @@ func _apply_entity_visual_metadata(rec: Dictionary, e: Dictionary) -> void:
 	if e.has("is_boss"):
 		rec["is_boss"] = bool(e["is_boss"])
 	if e.has("visual_scale"):
-		rec["visual_scale"] = float(e["visual_scale"])
+		rec["visual_scale"] = BossPresentationLoaderScript.effective_scale(str(rec.get("boss_template_id", "")), float(e["visual_scale"]))
 	var node := rec.get("node", null) as Node3D
 	if node == null:
 		return
@@ -5938,7 +5946,7 @@ func _apply_entity_status_tint(rec: Dictionary) -> void:
 		_apply_model_tint(node, tint)
 
 func _apply_model_tint(root: Node, color: Color) -> void:
-	if root.name == "BossLaneMarker":
+	if BossPresentationLoaderScript.is_untinted(root.name) or root.has_meta(MonsterVariantLookScript.SKIP_META):
 		return
 	if root is MeshInstance3D:
 		(root as MeshInstance3D).material_override = ModelTintScript.tinted_material(root as MeshInstance3D, color)
@@ -6156,6 +6164,7 @@ func get_bot_state() -> Dictionary:
 		"companion_bar": companion_bar.get_debug_state() if companion_bar != null else {"visible": false, "count": 0, "companions": []},
 		"status_effects_bar": status_effects_bar.get_debug_state() if status_effects_bar != null else {"effects": [], "visible": false},
 		"boss_health_bar": boss_health_bar.get_debug_state() if boss_health_bar != null else {"visible": false},
+		"boss_intro_banner": _boss_visuals.intro_banner_debug_state() if _boss_visuals != null else {"visible": false, "played_count": 0},
 		"fog_of_war": fog_overlay.get_debug_state() if fog_overlay != null else {},
 		"wall_occlusion": _wall_renderer.occlusion_debug_state() if _wall_renderer != null else {},
 		"audio": audio_controller.get_debug_state() if audio_controller != null else {},

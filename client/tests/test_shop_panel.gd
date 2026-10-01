@@ -300,7 +300,7 @@ func _run() -> void:
 	_assert_true("summary rare blade shows base damage", _array_contains_text(rare_blade_lines, "Damage: 2-4"))
 	_assert_true("summary rare blade shows min roll delta", _array_contains_text(rare_blade_lines, "Min damage: +1"))
 	_assert_true("summary rare blade shows str roll delta", _array_contains_text(rare_blade_lines, "STR: +2"))
-	var preview_entries: Array = inventory_panel._comparison_entries(rare_blade)
+	var preview_entries: Array = InventoryTooltipContent.comparison_entries(rare_blade)
 	_assert_true("equip preview labels attack speed", _entry_text_contains(preview_entries, "Attack speed preview"))
 	_assert_true("equip preview labels attack interval", _entry_text_contains(preview_entries, "Attack interval preview"))
 	inventory_panel.set_inventory_state([sell_appraisals[0]], {}, 3, 15, 60)
@@ -313,10 +313,10 @@ func _run() -> void:
 	_assert_eq("inventory tooltip item level footer", inventory_tooltip.debug_item_level_text(), "Item level 3")
 	_assert_true("inventory tooltip keeps level requirement", _array_contains_text(inventory_tooltip.debug_requirement_texts(), "Level 2"))
 	_assert_false("inventory tooltip stats exclude requirements", _array_contains_text(inventory_panel._tooltip_lines(sell_appraisals[0]), "Requires"))
-	_assert_true("inventory tooltip requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "Level 2"))
-	_assert_true("inventory tooltip stat requirements extracted", _array_contains_text(inventory_panel._requirement_lines(sell_appraisals[0]), "%s 15(-3)" % StatLabels.display_name("str")))
-	_assert_true("inventory tooltip preview extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "preview"))
-	_assert_true("inventory tooltip comparison extracted", _array_contains_text(inventory_panel._comparison_entries(sell_appraisals[0]), "vs equipped"))
+	_assert_true("inventory tooltip requirements extracted", _array_contains_text(InventoryTooltipContent.requirement_lines(sell_appraisals[0]), "Level 2"))
+	_assert_true("inventory tooltip stat requirements extracted", _array_contains_text(InventoryTooltipContent.requirement_lines(sell_appraisals[0]), "%s 15(-3)" % StatLabels.display_name("str")))
+	_assert_true("inventory tooltip preview extracted", _array_contains_text(InventoryTooltipContent.comparison_entries(sell_appraisals[0]), "preview"))
+	_assert_true("inventory tooltip comparison extracted", _array_contains_text(InventoryTooltipContent.comparison_entries(sell_appraisals[0]), "vs equipped"))
 	inventory_tooltip.queue_free()
 	var requirement_only_item: Dictionary = sell_appraisals[0].duplicate(true)
 	requirement_only_item.erase("item_level")
@@ -354,7 +354,7 @@ func _run() -> void:
 		"comparison": {"slot": "main_hand", "deltas": [{"stat": "damage_max", "offered": 9, "equipped": 4, "delta": 5}]},
 		"effect_ids": ["everburning_wound"],
 	}
-	var unique_plain_lines := Array(inventory_panel._tooltip(unique_blade).split("\n"))
+	var unique_plain_lines := Array(InventoryTooltipContent.tooltip_text(unique_blade, inventory_panel._tooltip_context()).split("\n"))
 	_assert_true("inventory unique tooltip names effect", _array_contains_text(unique_plain_lines, "Unique effect: Everburning Wound"))
 	_assert_eq("inventory unique tooltip effect summary at bottom", str(unique_plain_lines[unique_plain_lines.size() - 1]), "All hero damage applies burn for 10 seconds, ticking once per second for 10% of the original hit damage.")
 	var unique_tooltip := inventory_panel._make_item_tooltip(unique_blade)

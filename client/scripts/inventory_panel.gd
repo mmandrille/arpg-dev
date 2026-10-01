@@ -7,7 +7,8 @@ const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
 const PotionIconLabelScript := preload("res://scripts/potion_icon_label.gd")
-const StatLabels := preload("res://scripts/stat_labels.gd")
+const PaperDollBackdropScript := preload("res://scripts/paper_doll_backdrop.gd")
+const PaperDollLayoutScript := preload("res://scripts/paper_doll_layout.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 const WeaponSetTabsScript := preload("res://scripts/weapon_set_tabs.gd")
@@ -17,8 +18,6 @@ const InventoryRenderGuardScript := preload("res://scripts/inventory_render_guar
 const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
 const MaterialWalletPanelScript := preload("res://scripts/material_wallet_panel.gd")
 const ItemRequirementViewsScript := preload("res://scripts/item_requirement_views.gd")
-const WeaponRangeTooltipScript := preload("res://scripts/weapon_range_tooltip.gd")
-const ItemTooltipStatSectionsScript := preload("res://scripts/item_tooltip_stat_sections.gd")
 const SLOT_KIND_BAG := "bag"
 const SLOT_KIND_EQUIP_PREFIX := "equip:"
 const DRAG_SOURCE_SHOP_OFFER := "shop_offer"
@@ -27,10 +26,9 @@ const DRAG_SOURCE_CORPSE := "corpse"
 const DRAG_SOURCE_UNIQUE_CHEST := "unique_chest"
 const BAG_COLUMNS := 5
 const BASE_INVENTORY_ROWS := 3
-const HOTKEY_LABELS := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+const HOTKEY_LABELS := InventoryTooltipContent.HOTKEY_LABELS
 const TITLE_FONT_SIZE := 33
 const BODY_FONT_SIZE := 23
-const TOOLTIP_META_FONT_SIZE := BODY_FONT_SIZE - 4
 const SLOT_FONT_SIZE := 23
 const ICON_FONT_SIZE := 22
 const EQUIPMENT_SLOT_SIZE := Vector2(96, 58)
@@ -46,18 +44,6 @@ const EQUIPMENT_LABELS := {
 	"ring_right": "Ring R",
 	"main_hand": "Main",
 	"off_hand": "Off"
-}
-const PAPER_DOLL_SLOT_POSITIONS := {
-	"head": Vector2(122, 10),
-	"amulet": Vector2(208, 40),
-	"main_hand": Vector2(20, 116),
-	"off_hand": Vector2(236, 116),
-	"chest": Vector2(122, 112),
-	"ring_left": Vector2(20, 198),
-	"ring_right": Vector2(236, 198),
-	"gloves": Vector2(36, 276),
-	"belt": Vector2(122, 194),
-	"boots": Vector2(122, 276),
 }
 
 var inventory: Array = []
@@ -282,6 +268,7 @@ func _on_wallet_intent_requested(intent_type: String, payload: Dictionary) -> vo
 
 func set_character_progression(next_progression: Dictionary) -> void:
 	character_progression = next_progression.duplicate(true)
+	_sync_paper_doll_backdrop()
 
 
 func ensure_display_visible() -> void:
@@ -516,19 +503,15 @@ func _build() -> void:
 	var paper := Control.new()
 	paper.custom_minimum_size = Vector2(340, 360)
 	left.add_child(paper)
-	_paper_doll_preview = Panel.new()
-	_paper_doll_preview.name = "character_paper_doll"
-	_paper_doll_preview.position = Vector2(124, 78)
-	_paper_doll_preview.custom_minimum_size = Vector2(92, 210)
-	_paper_doll_preview.size = _paper_doll_preview.custom_minimum_size
-	_paper_doll_preview.add_theme_stylebox_override("panel", InventoryPanelStylesScript.paper_doll_style())
+	_paper_doll_preview = PaperDollBackdropScript.new()
 	paper.add_child(_paper_doll_preview)
 	for slot in EQUIPMENT_SLOTS:
 		var btn := _slot_button(_slot_kind_for_equipment(str(slot)), EQUIPMENT_SLOT_SIZE)
-		btn.position = PAPER_DOLL_SLOT_POSITIONS.get(str(slot), Vector2.ZERO)
+		btn.position = PaperDollLayoutScript.position_for(str(slot))
 		btn.size = btn.custom_minimum_size
 		_equipment_slots[str(slot)] = btn
 		paper.add_child(btn)
+	_sync_paper_doll_backdrop()
 	_weapon_set_tabs = WeaponSetTabsScript.build_tabs(paper, Callable(self, "_set_viewed_weapon_set"))
 
 	var right := VBoxContainer.new()
@@ -665,11 +648,11 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 		slot.queue_redraw()
 		return
 	slot.text = ""
-	slot.tooltip_text = _tooltip(item)
+	slot.tooltip_text = InventoryTooltipContent.tooltip_text(item, _tooltip_context())
 	var rarity := str(item.get("rarity", "common"))
 	var invalid_requirements := _item_shows_requirement_warning(item)
 	if bool(item.get("_blocked_by_two_handed", false)):
-		slot.tooltip_text = "%s\nOccupies both hands" % _tooltip(item)
+		slot.tooltip_text = "%s\nOccupies both hands" % InventoryTooltipContent.tooltip_text(item, _tooltip_context())
 		slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.blocked_slot_style(false))
 		slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.blocked_slot_style(true))
 		slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.blocked_slot_style(true))
@@ -714,10 +697,10 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 
 
 func _draw_hotbar_badge(slot: Control, item: Dictionary) -> void:
-	var assigned_slots := _hotbar_slots_for_item(str(item.get("item_instance_id", "")))
+	var assigned_slots := InventoryTooltipContent.hotbar_slots_for_item(hotbar, str(item.get("item_instance_id", "")))
 	if assigned_slots.is_empty():
 		return
-	var label := "H%s" % _hotbar_label_for_slot(int(assigned_slots[0]))
+	var label := "H%s" % InventoryTooltipContent.hotbar_label_for_slot(int(assigned_slots[0]))
 	if assigned_slots.size() > 1:
 		label = "H+"
 	var badge_rect := Rect2(Vector2(slot.size.x - 28.0, 3.0), Vector2(24.0, 16.0))
@@ -743,15 +726,23 @@ func _caption(text: String) -> Label:
 	return label
 
 
+func _tooltip_context() -> InventoryTooltipContent.Context:
+	return InventoryTooltipContent.Context.new(hotbar)
+
+
+func _tooltip_lines(item: Dictionary) -> Array:
+	return InventoryTooltipContent.tooltip_lines(item, _tooltip_context())
+
+
 func _make_item_tooltip(item: Dictionary) -> Control:
 	var tooltip := ItemTooltipPanelScript.new()
 	tooltip.setup(
 		item,
 		item_presentations,
-		_tooltip_lines(item),
-		_requirement_lines(item),
-		_comparison_entries(item) + UniqueEffectTooltipScript.rich_lines_for_item(item),
-		_item_gold_value(item),
+		InventoryTooltipContent.tooltip_lines(item, _tooltip_context()),
+		InventoryTooltipContent.requirement_lines(item),
+		InventoryTooltipContent.comparison_entries(item) + UniqueEffectTooltipScript.rich_lines_for_item(item),
+		InventoryItemPricing.item_gold_value(item),
 		true,
 		_short_label(str(item.get("item_def_id", ""))),
 		preload("res://scripts/class_affinity_tooltip.gd").equipment_bonus_lines_for_item(item, str(character_progression.get("character_class", "")))
@@ -763,82 +754,6 @@ func _make_text_tooltip(text: String) -> Control:
 	var tooltip := ItemTooltipPanelScript.new()
 	tooltip.setup({}, item_presentations, [text], [], [], -1, true, "")
 	return tooltip
-
-
-func _item_gold_value(item: Dictionary) -> int:
-	for key in ["sell_price", "buy_price", "gold_value", "value"]:
-		if item.has(key):
-			return max(0, int(item.get(key, 0)))
-	var buy_price := _item_buy_price(item)
-	if buy_price > 0:
-		return max(1, int(floor(float(buy_price) * _town_vendor_sell_multiplier())))
-	return -1
-
-
-func _item_buy_price(item: Dictionary) -> int:
-	var def_id := str(item.get("item_def_id", ""))
-	var shop := _town_vendor_rules()
-	if def_id == "" or shop.is_empty():
-		return 0
-	if _is_generated_item(item):
-		return _generated_buy_price(item, shop)
-	var fixed_offers = shop.get("fixed_offers", [])
-	if typeof(fixed_offers) == TYPE_ARRAY:
-		for offer in fixed_offers:
-			if typeof(offer) == TYPE_DICTIONARY and str((offer as Dictionary).get("item_def_id", "")) == def_id:
-				return int((offer as Dictionary).get("buy_price", 0))
-	return 0
-
-
-func _generated_buy_price(item: Dictionary, shop: Dictionary) -> int:
-	var template_id := str(item.get("item_template_id", item.get("item_def_id", "")))
-	var template: Dictionary = item_templates.get(template_id, {})
-	if template.is_empty():
-		return 0
-	var pricing: Dictionary = shop.get("pricing", {})
-	var round_to := int(pricing.get("round_buy_to", 0))
-	if round_to <= 0:
-		return 0
-	var rarity := str(item.get("rarity", "common"))
-	var rarity_multipliers: Dictionary = pricing.get("rarity_multipliers", {})
-	var multiplier := float(rarity_multipliers.get(rarity, 0.0))
-	if multiplier <= 0.0:
-		return 0
-	var base_stats: Dictionary = template.get("base_stats", {})
-	var final_stats: Dictionary = item.get("rolled_stats", {})
-	var stat_weights: Dictionary = pricing.get("stat_weights", {})
-	var slot_base: Dictionary = pricing.get("slot_base", {})
-	var score := int(slot_base.get(str(template.get("slot", "")), 0))
-	for stat in stat_weights.keys():
-		var key := str(stat)
-		var weight := int(stat_weights.get(key, 0))
-		score += int(base_stats.get(key, 0)) * weight
-	for stat in stat_weights.keys():
-		var key := str(stat)
-		var weight := int(stat_weights.get(key, 0))
-		var delta := int(final_stats.get(key, 0)) - int(base_stats.get(key, 0))
-		if delta > 0:
-			score += delta * weight
-	var raw = max(1.0, float(score) * multiplier)
-	return int(ceil(raw / float(round_to))) * round_to
-
-
-func _is_generated_item(item: Dictionary) -> bool:
-	if str(item.get("item_template_id", "")) != "":
-		return true
-	var def_id := str(item.get("item_def_id", ""))
-	return item_templates.has(def_id) and str(item.get("rarity", "")) != ""
-
-
-func _town_vendor_rules() -> Dictionary:
-	var shops: Dictionary = ItemRulesLoader.shop_rules.get("shops", {})
-	return shops.get("town_vendor", {})
-
-
-func _town_vendor_sell_multiplier() -> float:
-	var shop := _town_vendor_rules()
-	var pricing: Dictionary = shop.get("pricing", {})
-	return float(pricing.get("sell_multiplier", 0.25))
 
 
 func _reposition_panel() -> void:
@@ -917,12 +832,12 @@ func _apply_transfer_decision(decision: Dictionary, data: Dictionary) -> void:
 func _item_shows_requirement_warning(item: Dictionary) -> bool:
 	return ItemRequirementViewsScript.shows_invalid_requirement_warning(
 		item,
-		bool(_item_definition_for_item(item).get("equippable", false))
+		bool(InventoryTooltipContent.item_definition_for_item(item).get("equippable", false))
 	)
 
 
 func _item_can_equip_to(item: Dictionary, slot: String) -> bool:
-	var def: Dictionary = _item_definition_for_item(item)
+	var def: Dictionary = InventoryTooltipContent.item_definition_for_item(item)
 	if not bool(def.get("equippable", false)):
 		return false
 	var item_slot := str(def.get("slot", ""))
@@ -934,7 +849,7 @@ func _item_can_equip_to(item: Dictionary, slot: String) -> bool:
 
 
 func _preferred_equip_slot(item: Dictionary) -> String:
-	var def: Dictionary = _item_definition_for_item(item)
+	var def: Dictionary = InventoryTooltipContent.item_definition_for_item(item)
 	if not bool(def.get("equippable", false)):
 		return ""
 	var item_slot := str(def.get("slot", ""))
@@ -955,7 +870,7 @@ func _can_rogue_offhand_weapon(def: Dictionary) -> bool:
 
 func _is_consumable(item: Dictionary) -> bool:
 	var def_id := str(item.get("item_def_id", ""))
-	var def: Dictionary = _item_definition(def_id)
+	var def: Dictionary = InventoryTooltipContent.item_definition(def_id)
 	return str(def.get("category", "")) == "consumable"
 
 
@@ -986,7 +901,7 @@ func _equipment_slot_display_item(slot: String) -> Dictionary:
 func _item_occupies_off_hand(item: Dictionary) -> bool:
 	if item.is_empty():
 		return false
-	var def := _item_definition_for_item(item)
+	var def := InventoryTooltipContent.item_definition_for_item(item)
 	if str(def.get("handedness", "")) == "two_handed":
 		return true
 	var occupies = def.get("occupies_hands", [])
@@ -1008,176 +923,6 @@ func _slot_from_kind(kind: String) -> String:
 	return InventoryTransferRouterScript.slot_from_kind(kind)
 
 
-func _tooltip(item: Dictionary) -> String:
-	return "\n".join(_tooltip_text_lines(_tooltip_lines(item)) + _requirement_lines_as_summary(item) + _comparison_text_lines(item) + UniqueEffectTooltipScript.text_lines_for_item(item))
-
-
-func _tooltip_lines(item: Dictionary) -> Array:
-	var def: Dictionary = _item_definition_for_item(item)
-	var def_id := str(item.get("item_def_id", ""))
-	var rarity := str(item.get("rarity", ""))
-	var lines: Array = [_item_name_tooltip_line(str(item.get("display_name", def.get("name", def_id))), rarity)]
-	if rarity != "":
-		lines.append(_metadata_tooltip_line("Rarity: %s" % rarity.capitalize()))
-	var summary_lines := _detail_lines(item, false, false)
-	if not summary_lines.is_empty():
-		var metadata_lines := ItemTooltipStatSectionsScript.metadata_lines_from_summary(summary_lines)
-		WeaponRangeTooltipScript.ensure_after_slot(metadata_lines, item)
-		lines.append_array(_compact_metadata_lines(metadata_lines))
-		ItemTooltipStatSectionsScript.append_equipment_stat_sections(lines, item.get("rolled_stats", {}), def, ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
-		_append_hotbar_tooltip_line(lines, item)
-		return lines
-	var slot := str(def.get("slot", ""))
-	if slot != "":
-		lines.append(_metadata_tooltip_line("Slot: %s" % slot))
-	else:
-		var category := str(def.get("category", ""))
-		if category != "":
-			lines.append("Kind: %s" % category)
-	var range_line := WeaponRangeTooltipScript.line_for_item(item)
-	if range_line != "":
-		lines.append(_metadata_tooltip_line(range_line))
-	var projectile_speed_line := WeaponRangeTooltipScript.projectile_speed_line_for_item(item)
-	if projectile_speed_line != "":
-		lines.append(_metadata_tooltip_line(projectile_speed_line))
-	if def.has("attack_mode"):
-		lines.append("Mode: %s" % str(def["attack_mode"]))
-	lines.append_array(_consumable_effect_lines(def))
-	var base_stat_lines := _base_stat_lines(def)
-	if not base_stat_lines.is_empty():
-		lines.append(ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
-		lines.append_array(base_stat_lines)
-	var random_stat_lines := _random_stat_lines(item.get("rolled_stats", {}), def)
-	if not random_stat_lines.is_empty():
-		lines.append(ItemTooltipStatSectionsScript.TOOLTIP_STAT_SEPARATOR)
-		lines.append_array(random_stat_lines)
-	elif def.has("damage"):
-		var dmg: Dictionary = def["damage"]
-		lines.append("Damage: %s-%s" % [str(dmg.get("min", "?")), str(dmg.get("max", "?"))])
-	_append_hotbar_tooltip_line(lines, item)
-	return lines
-
-
-func _item_name_tooltip_line(text: String, rarity: String) -> Dictionary:
-	return {"text": text, "color": _rarity_color(rarity)}
-
-
-func _metadata_tooltip_line(text: String) -> Dictionary:
-	return {"text": text, "color": Color("#cdbd9f"), "font_size": TOOLTIP_META_FONT_SIZE}
-
-
-func _compact_metadata_lines(lines: Array) -> Array:
-	var out: Array = []
-	for line in lines:
-		var text := str(line)
-		if WeaponRangeTooltipScript.is_weapon_metadata_line(text):
-			out.append(_metadata_tooltip_line(text))
-		elif text.begins_with("Set:"):
-			out.append_array(_set_membership_tooltip_lines(text))
-		elif text.find("set bonus:") >= 0:
-			out.append_array(_set_bonus_tooltip_lines(text))
-		else:
-			out.append(line)
-	return out
-
-
-func _set_membership_tooltip_lines(text: String) -> Array:
-	var split_at := text.rfind(" (")
-	if split_at < 0:
-		return [{"text": text, "color": Color("#55e66f"), "font_size": TOOLTIP_META_FONT_SIZE}]
-	return [
-		{"text": text.substr(0, split_at), "color": Color("#55e66f"), "font_size": TOOLTIP_META_FONT_SIZE},
-		{"text": text.substr(split_at + 1), "color": Color("#55e66f"), "font_size": TOOLTIP_META_FONT_SIZE},
-	]
-
-
-func _set_bonus_tooltip_lines(text: String) -> Array:
-	var color := Color("#7df095") if text.find("(active)") >= 0 else Color("#7d8d7f")
-	var split_at := text.find(": ")
-	if split_at < 0:
-		return [{"text": text, "color": color, "font_size": TOOLTIP_META_FONT_SIZE}]
-	return [
-		{"text": text.substr(0, split_at + 1), "color": color, "font_size": TOOLTIP_META_FONT_SIZE},
-		{"text": text.substr(split_at + 2), "color": color, "font_size": TOOLTIP_META_FONT_SIZE},
-	]
-
-
-func _tooltip_text_lines(lines: Array) -> Array:
-	var out: Array = []
-	for line in lines:
-		if typeof(line) == TYPE_DICTIONARY:
-			out.append(str((line as Dictionary).get("text", "")))
-		else:
-			out.append(str(line))
-	return out
-
-
-func _rarity_color(rarity: String) -> Color:
-	match rarity.to_lower():
-		"magic":
-			return Color("#93c5fd")
-		"rare":
-			return Color("#f4d481")
-		"unique":
-			return Color("#ffb26b")
-		"set":
-			return Color("#55e66f")
-		_:
-			return Color("#e8dcc8")
-
-
-func _base_stat_lines(def: Dictionary) -> Array:
-	return ItemTooltipStatSectionsScript.base_stat_lines_for(def)
-
-
-func _random_stat_lines(stats_value: Variant, def: Dictionary) -> Array:
-	return ItemTooltipStatSectionsScript.random_stat_lines_for(stats_value, def)
-
-
-func _numeric_stat_or_null(value: Variant):
-	match typeof(value):
-		TYPE_INT:
-			return int(value)
-		TYPE_FLOAT:
-			return int(value)
-		TYPE_STRING:
-			if str(value).is_valid_int():
-				return int(value)
-	return null
-
-
-func _stat_lines_for_tooltip(stats: Dictionary, signed: bool) -> Array:
-	return ItemTooltipStatSectionsScript.stat_lines_for_tooltip(stats, signed)
-
-
-func _format_stat_value(value: int, percent: bool) -> String:
-	var sign := "+" if value > 0 else ""
-	var suffix := "%" if percent else ""
-	return "%s%d%s" % [sign, value, suffix]
-
-
-func _append_hotbar_tooltip_line(lines: Array, item: Dictionary) -> void:
-	var hotbar_labels := _hotbar_labels_for_item(str(item.get("item_instance_id", "")))
-	if not hotbar_labels.is_empty():
-		lines.append("Assigned to hotbar: %s" % ", ".join(hotbar_labels))
-
-
-func _hotbar_slots_for_item(item_instance_id: String) -> Array:
-	var slots: Array = []
-	if item_instance_id == "":
-		return slots
-	for slot in hotbar:
-		if typeof(slot) != TYPE_DICTIONARY:
-			continue
-		var rec := slot as Dictionary
-		var assigned_id = rec.get("item_instance_id", null)
-		if assigned_id != null and str(assigned_id) == item_instance_id:
-			var slot_index := int(rec.get("slot_index", -1))
-			if slot_index >= 0 and slot_index < HOTKEY_LABELS.size():
-				slots.append(slot_index)
-	return slots
-
-
 func _first_empty_hotbar_slot() -> int:
 	for slot_index in range(hotbar_capacity):
 		if not _hotbar_slot_has_item(slot_index):
@@ -1197,237 +942,23 @@ func _hotbar_slot_has_item(slot_index: int) -> bool:
 	return false
 
 
-func _hotbar_labels_for_item(item_instance_id: String) -> Array:
-	var labels: Array = []
-	for slot_index in _hotbar_slots_for_item(item_instance_id):
-		var index := int(slot_index)
-		if index >= 0 and index < HOTKEY_LABELS.size():
-			labels.append(_hotbar_label_for_slot(index))
-	return labels
-
-
-func _hotbar_label_for_slot(slot_index: int) -> String:
-	if slot_index >= 0 and slot_index < HOTKEY_LABELS.size():
-		return HOTKEY_LABELS[slot_index]
-	return str(slot_index + 1)
-
-
 func _hotbar_assigned_inventory_count() -> int:
 	var total := 0
 	for item in _bag_items():
-		if not _hotbar_slots_for_item(str((item as Dictionary).get("item_instance_id", ""))).is_empty():
+		if not InventoryTooltipContent.hotbar_slots_for_item(hotbar, str((item as Dictionary).get("item_instance_id", ""))).is_empty():
 			total += 1
 	return total
-
-
-func _consumable_effect_lines(def: Dictionary) -> Array:
-	var lines: Array = []
-	var heal = def.get("heal", {})
-	if typeof(heal) == TYPE_DICTIONARY and not (heal as Dictionary).is_empty():
-		lines.append("Restores %s HP" % _range_text(heal as Dictionary))
-	var mana_restore = def.get("mana_restore", {})
-	if typeof(mana_restore) == TYPE_DICTIONARY and not (mana_restore as Dictionary).is_empty():
-		lines.append("Restores %s mana" % _range_text(mana_restore as Dictionary))
-	return lines
-
-
-func _range_text(value: Dictionary) -> String:
-	var min_value := int(value.get("min", 0))
-	var max_value := int(value.get("max", min_value))
-	if min_value == max_value:
-		return str(min_value)
-	return "%d-%d" % [min_value, max_value]
-
-
-func _detail_lines(item: Dictionary, include_requirements: bool = true, include_comparison: bool = true) -> Array:
-	var lines: Array = []
-	var summary = item.get("summary_lines", [])
-	if typeof(summary) != TYPE_ARRAY:
-		return lines
-	for line in summary:
-		var text := str(line)
-		if text == "":
-			continue
-		if not include_requirements and _is_requirement_summary_line(text):
-			continue
-		if not include_comparison and _is_comparison_summary_line(text):
-			continue
-		lines.append(text)
-	return lines
-
-
-func _requirement_lines(item: Dictionary) -> Array:
-	var lines: Array = []
-	var statuses = item.get("requirement_status", [])
-	if typeof(statuses) == TYPE_ARRAY:
-		for status in statuses:
-			if typeof(status) != TYPE_DICTIONARY:
-				continue
-			var formatted := ItemRequirementViews.format_requirement_status(status as Dictionary, _requirement_color(true), _requirement_color(false))
-			if not formatted.is_empty():
-				lines.append(formatted)
-	if not lines.is_empty():
-		return lines
-	var requirements: Dictionary = item.get("requirements", {})
-	if requirements.has("level"):
-		lines.append("Level %s" % str(requirements["level"]))
-	for key in requirements.keys():
-		var stat := str(key)
-		if stat == "level":
-			continue
-		lines.append("%s %s" % [_display_stat(stat), str(requirements.get(key, ""))])
-	var summary = item.get("summary_lines", [])
-	if typeof(summary) == TYPE_ARRAY:
-		for line in summary:
-			var parsed := _requirement_from_summary_line(str(line))
-			if parsed != "" and not lines.has(parsed):
-				lines.append(parsed)
-	return lines
-
-
-func _requirement_lines_as_summary(item: Dictionary) -> Array:
-	var lines: Array = []
-	for line in _requirement_lines(item):
-		var text := _entry_text(line)
-		if text.to_lower().begins_with("level "):
-			lines.append("Requires %s" % text.to_lower())
-		else:
-			lines.append("Requires %s" % text)
-	return lines
-
-
-func _is_requirement_summary_line(text: String) -> bool:
-	return _requirement_from_summary_line(text) != ""
-
-
-func _is_comparison_summary_line(text: String) -> bool:
-	return _comparison_delta_from_line(text) != null
-
-
-func _requirement_from_summary_line(text: String) -> String:
-	var normalized := text.strip_edges()
-	if not normalized.to_lower().begins_with("requires "):
-		return ""
-	var rest := normalized.substr("Requires ".length()).strip_edges()
-	if rest.to_lower().begins_with("level "):
-		return "Level %s" % rest.substr("level ".length()).strip_edges()
-	return rest.capitalize()
-
-
-func _comparison_entries(item: Dictionary) -> Array:
-	var entries: Array = []
-	_append_equip_preview_entries(entries, item)
-	var comparison = item.get("comparison", {})
-	if typeof(comparison) == TYPE_DICTIONARY:
-		var deltas = (comparison as Dictionary).get("deltas", [])
-		if typeof(deltas) == TYPE_ARRAY:
-			for delta in deltas:
-				if typeof(delta) != TYPE_DICTIONARY:
-					continue
-				var rec := delta as Dictionary
-				var diff := float(rec.get("delta", 0.0))
-				var sign := "+" if diff >= 0 else ""
-				entries.append({
-					"text": "%s%s %s vs equipped" % [sign, _format_delta(diff), _display_stat(str(rec.get("stat", "")))],
-					"color": _comparison_color(diff),
-				})
-	var summary = item.get("summary_lines", [])
-	if typeof(summary) == TYPE_ARRAY:
-		for line in summary:
-			var text := str(line)
-			var diff_value = _comparison_delta_from_line(text)
-			if diff_value == null:
-				continue
-			var duplicate := false
-			for entry in entries:
-				if typeof(entry) == TYPE_DICTIONARY and str((entry as Dictionary).get("text", "")) == text:
-					duplicate = true
-					break
-			if duplicate:
-				continue
-			entries.append({
-				"text": text,
-				"color": _comparison_color(float(diff_value)),
-			})
-	return entries
-
-
-func _append_equip_preview_entries(entries: Array, item: Dictionary) -> void:
-	var preview = item.get("equip_preview", {})
-	if typeof(preview) != TYPE_DICTIONARY:
-		return
-	var deltas = (preview as Dictionary).get("deltas", [])
-	if typeof(deltas) != TYPE_ARRAY:
-		return
-	for delta in deltas:
-		if typeof(delta) != TYPE_DICTIONARY:
-			continue
-		var rec := delta as Dictionary
-		var diff := float(rec.get("delta", 0.0))
-		var sign := "+" if diff >= 0 else ""
-		entries.append({
-			"text": "%s%s %s preview" % [sign, _format_delta(diff), _display_stat(str(rec.get("stat", "")))],
-			"color": _comparison_color(diff),
-		})
-
-
-func _comparison_delta_from_line(text: String):
-	var stripped := text.strip_edges()
-	if not stripped.contains("vs equipped"):
-		return null
-	if stripped.length() == 0 or (not stripped.begins_with("+") and not stripped.begins_with("-")):
-		return null
-	var first_space := stripped.find(" ")
-	if first_space <= 1:
-		return null
-	return float(stripped.substr(0, first_space))
-
-
-func _comparison_lines(comparison_value: Variant) -> Array:
-	if typeof(comparison_value) != TYPE_DICTIONARY:
-		return []
-	var comparison := comparison_value as Dictionary
-	var deltas = comparison.get("deltas", [])
-	if typeof(deltas) != TYPE_ARRAY:
-		return []
-	var lines: Array = []
-	for delta in deltas:
-		if typeof(delta) != TYPE_DICTIONARY:
-			continue
-		var rec := delta as Dictionary
-		var diff := float(rec.get("delta", 0.0))
-		var sign := "+" if diff >= 0 else ""
-		lines.append("%s%s %s vs equipped" % [sign, _format_delta(diff), _display_stat(str(rec.get("stat", "")))])
-	return lines
-
-
-func _comparison_text_lines(item: Dictionary) -> Array:
-	var lines: Array = []
-	for entry in _comparison_entries(item):
-		if typeof(entry) == TYPE_DICTIONARY:
-			lines.append(str((entry as Dictionary).get("text", "")))
-	return lines
-
-
-func _entry_text(value) -> String:
-	if typeof(value) == TYPE_DICTIONARY:
-		return str((value as Dictionary).get("text", ""))
-	return str(value)
-
-
-func _requirement_color(met: bool) -> Color:
-	return Color("#9ee6a8") if met else Color("#ff6f6f")
 
 
 func _requirement_row_count() -> int:
 	var total := 0
 	for item in inventory:
 		if typeof(item) == TYPE_DICTIONARY:
-			total += _requirement_lines(item as Dictionary).size()
+			total += InventoryTooltipContent.requirement_lines(item as Dictionary).size()
 	for slot in EQUIPMENT_SLOTS:
 		var item := _equipped_item(str(slot))
 		if not item.is_empty():
-			total += _requirement_lines(item).size()
+			total += InventoryTooltipContent.requirement_lines(item).size()
 	return total
 
 
@@ -1435,40 +966,12 @@ func _equip_preview_row_count() -> int:
 	var total := 0
 	for item in inventory:
 		if typeof(item) == TYPE_DICTIONARY:
-			total += _equip_preview_count(item as Dictionary)
+			total += InventoryTooltipContent.equip_preview_count(item as Dictionary)
 	for slot in EQUIPMENT_SLOTS:
 		var item := _equipped_item(str(slot))
 		if not item.is_empty():
-			total += _equip_preview_count(item)
+			total += InventoryTooltipContent.equip_preview_count(item)
 	return total
-
-
-func _equip_preview_count(item: Dictionary) -> int:
-	var preview = item.get("equip_preview", {})
-	if typeof(preview) != TYPE_DICTIONARY:
-		return 0
-	var deltas = (preview as Dictionary).get("deltas", [])
-	if typeof(deltas) != TYPE_ARRAY:
-		return 0
-	return (deltas as Array).size()
-
-
-func _comparison_color(delta: float) -> Color:
-	if delta > 0:
-		return Color("#9ee6a8")
-	if delta < 0:
-		return Color("#ff9f7a")
-	return Color("#d8c7a6")
-
-
-func _display_stat(stat: String) -> String:
-	return StatLabels.display_name(stat)
-
-
-func _format_delta(delta: float) -> String:
-	if absf(delta - roundf(delta)) < 0.0001:
-		return str(int(roundf(delta)))
-	return "%.2f" % delta
 
 
 func _short_label(def_id: String) -> String:
@@ -1480,29 +983,6 @@ func _short_label(def_id: String) -> String:
 		if part.length() > 0:
 			out += part.substr(0, 1).to_upper()
 	return out.substr(0, 3)
-
-
-func _item_definition(def_id: String) -> Dictionary:
-	return ItemRulesLoader.item_definition(def_id)
-
-
-func _item_definition_for_item(item: Dictionary) -> Dictionary:
-	var def_id := str(item.get("item_def_id", ""))
-	var def := _item_definition(def_id)
-	if not def.is_empty():
-		return def
-	var template_id := str(item.get("item_template_id", ""))
-	if template_id != "":
-		def = _item_definition(template_id)
-		if not def.is_empty():
-			return def
-	var item_slot := str(item.get("slot", ""))
-	if item_slot != "":
-		return {
-			"equippable": true,
-			"slot": item_slot,
-		}
-	return {}
 
 
 func _debug_presentations() -> Dictionary:
@@ -1518,9 +998,14 @@ func _debug_hotbar_assigned_item_ids() -> Array:
 	var ids: Array = []
 	for item in _bag_items():
 		var item_id := str((item as Dictionary).get("item_instance_id", ""))
-		if item_id != "" and not _hotbar_slots_for_item(item_id).is_empty():
+		if item_id != "" and not InventoryTooltipContent.hotbar_slots_for_item(hotbar, item_id).is_empty():
 			ids.append(item_id)
 	return ids
+
+
+func _sync_paper_doll_backdrop() -> void:
+	if _paper_doll_preview != null:
+		_paper_doll_preview.configure(str(character_progression.get("character_class", "")), PaperDollLayoutScript.slot_rects(EQUIPMENT_SLOT_SIZE))
 
 
 func _debug_paper_doll_slots() -> Dictionary:

@@ -230,6 +230,7 @@ run_gate "GDScript mercenary panel test" "[gdtest] PASS: test_mercenary_panel" r
 run_gate "GDScript town service bridge test" "[gdtest] PASS: test_town_service_bridge" res://tests/test_town_service_bridge.gd
 run_gate "GDScript inventory transfer router test" "[gdtest] PASS: test_inventory_transfer_router" res://tests/test_inventory_transfer_router.gd
 run_gate "GDScript inventory panel test" "[gdtest] PASS: test_inventory_panel" res://tests/test_inventory_panel.gd
+run_gate "GDScript inventory tooltip content test" "[gdtest] PASS: test_inventory_tooltip_content" res://tests/test_inventory_tooltip_content.gd
 
 # 2k. Stash panel render and intent payload test (server-independent; v50).
 run_gate "GDScript stash panel test" "[gdtest] PASS: test_stash_panel" res://tests/test_stash_panel.gd
@@ -240,7 +241,14 @@ run_gate "GDScript enemy health bar settings test" "[gdtest] PASS: test_enemy_he
 run_gate "GDScript audio settings test" "[gdtest] PASS: test_audio_settings" res://tests/test_audio_settings.gd
 run_gate "GDScript client audio controller test" "[gdtest] PASS: test_client_audio_controller" res://tests/test_client_audio_controller.gd
 run_gate "GDScript character bar test" "[gdtest] PASS: test_character_bar" res://tests/test_character_bar.gd
+run_gate "GDScript HUD layout test" "[gdtest] PASS: test_hud_layout" res://tests/test_hud_layout.gd
+run_gate "GDScript HUD style theme test" "[gdtest] PASS: test_hud_style" res://tests/test_hud_style.gd
+run_gate "GDScript HUD globe test" "[gdtest] PASS: test_hud_globe" res://tests/test_hud_globe.gd
+run_gate "GDScript player health bar test" "[gdtest] PASS: test_player_health_bar" res://tests/test_player_health_bar.gd
 run_gate "GDScript character stats panel test" "[gdtest] PASS: test_character_stats_panel" res://tests/test_character_stats_panel.gd
+run_gate "GDScript character stat groups test" "[gdtest] PASS: test_character_stat_groups" res://tests/test_character_stat_groups.gd
+run_gate "GDScript character stats header test" "[gdtest] PASS: test_character_stats_header" res://tests/test_character_stats_header.gd
+run_gate "GDScript paper doll backdrop test" "[gdtest] PASS: test_paper_doll_backdrop" res://tests/test_paper_doll_backdrop.gd
 run_gate "GDScript training damage log panel test" "[gdtest] PASS: test_training_damage_log_panel" res://tests/test_training_damage_log_panel.gd
 run_gate "GDScript skill rules loader test" "[gdtest] PASS: test_skill_rules_loader" res://tests/test_skill_rules_loader.gd
 run_gate "GDScript codex loader test" "[gdtest] PASS: test_codex_loader" res://tests/test_codex_loader.gd
@@ -256,6 +264,9 @@ run_gate "GDScript aura soft lights test" "[gdtest] PASS: test_aura_soft_lights"
 # 2l. Boss health bar render/state test (server-independent; v53).
 run_gate "GDScript boss health bar test" "[gdtest] PASS: test_boss_health_bar" res://tests/test_boss_health_bar.gd
 run_gate "GDScript boss lane marker test" "[gdtest] PASS: test_boss_lane_marker" res://tests/test_boss_lane_marker.gd
+run_gate "GDScript boss presentation loader test" "[gdtest] PASS: test_boss_presentation_loader" res://tests/test_boss_presentation_loader.gd
+run_gate "GDScript boss intro banner test" "[gdtest] PASS: test_boss_intro_banner" res://tests/test_boss_intro_banner.gd
+run_gate "GDScript boss arena presence test" "[gdtest] PASS: test_boss_arena_presence" res://tests/test_boss_arena_presence.gd
 
 # 2m. Delta and snapshot state-mutation unit tests (server-independent; v53).
 run_gate "GDScript net client test" "[gdtest] PASS: test_net_client" res://tests/test_net_client.gd
@@ -271,6 +282,7 @@ run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filte
 run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
 run_gate "GDScript loot node factory test" "[gdtest] PASS: test_loot_node_factory" res://tests/test_loot_node_factory.gd
 run_gate "GDScript rarity cues test" "[gdtest] PASS: test_rarity_cues" res://tests/test_rarity_cues.gd
+run_gate "GDScript ui theme test" "[gdtest] PASS: test_ui_theme" res://tests/test_ui_theme.gd
 run_gate "GDScript impact sparks test" "[gdtest] PASS: test_impact_sparks" res://tests/test_impact_sparks.gd
 run_gate "GDScript death pose ownership test" "[gdtest] PASS: test_death_pose_ownership" res://tests/test_death_pose_ownership.gd
 run_gate "GDScript combat outcome punch test" "[gdtest] PASS: test_combat_outcome_punch" res://tests/test_combat_outcome_punch.gd
@@ -287,6 +299,8 @@ run_gate "GDScript dungeon kit test" "[gdtest] PASS: test_dungeon_kit" res://tes
 run_gate "GDScript dungeon room dressing test" "[gdtest] PASS: test_dungeon_room_dressing" res://tests/test_dungeon_room_dressing.gd
 run_gate "GDScript dungeon kit props test" "[gdtest] PASS: test_dungeon_kit_props" res://tests/test_dungeon_kit_props.gd
 run_gate "GDScript kit monsters test" "[gdtest] PASS: test_kit_monsters" res://tests/test_kit_monsters.gd
+run_gate "GDScript monster anim variants test" "[gdtest] PASS: test_monster_anim_variants" res://tests/test_monster_anim_variants.gd
+run_gate "GDScript monster variant looks test" "[gdtest] PASS: test_monster_variant_looks" res://tests/test_monster_variant_looks.gd
 run_gate "GDScript armor look test" "[gdtest] PASS: test_armor_look" res://tests/test_armor_look.gd
 run_gate "GDScript town night lighting test" "[gdtest] PASS: test_town_night_lighting" res://tests/test_town_night_lighting.gd
 run_gate "GDScript fog-of-war overlay test" "[gdtest] PASS: test_fog_of_war_overlay" res://tests/test_fog_of_war_overlay.gd

@@ -120,6 +120,7 @@ material_wallet_details: headless Godot client auto-picks an upgrade shard → v
 blacksmith_recipe_selector: headless Godot client stages a blacksmith item → verifies the active recipe appears in the preview
 mercenary_stats_card: headless Godot client hires a mercenary → verifies the companion panel stats card shows HP, stance, state, and id
 boss_portrait_panel: headless Godot client starts on the compact boss floor → verifies the Cave Warden boss portrait tile
+boss_intro_banner_cave_warden / boss_intro_banner_crypt_matron: Godot client starts on the compact boss floor (seeded per template) → waits for the one-shot intro name banner, arena aura, and Cave Warden headgear → captures banner, isometric, and Performance-tier frames (v512)
 fog_of_war_overlay: headless Godot client enters the compact fog lab → verifies the fog overlay uses server-derived light and gloom radii
 fog_los_shadow_mask: headless Godot client enters collision_lab → verifies wall layouts produce fog LOS shadow masks
 ```

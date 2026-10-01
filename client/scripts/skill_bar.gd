@@ -177,7 +177,7 @@ func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_panel.add_theme_stylebox_override("panel", _panel_style())
+	_panel.add_theme_stylebox_override("panel", HudStyle.frame_panel(0.88, 6.0, 5.0))
 	add_child(_panel)
 
 	var box := VBoxContainer.new()
@@ -217,9 +217,9 @@ func _build() -> void:
 
 
 func _position_panel() -> void:
-	var vp := get_viewport_rect().size
-	_panel.position = Vector2((vp.x * 0.5) + 302.0, vp.y - 78.0)
-	_panel.size = Vector2(64.0, 64.0)
+	var rect := HudLayout.skill_slot_rect(get_viewport_rect().size)
+	_panel.position = rect.position
+	_panel.size = rect.size
 
 
 func _render() -> void:
@@ -370,25 +370,6 @@ func _make_mana_cost_label() -> Label:
 	label.add_theme_constant_override("shadow_offset_x", 1)
 	label.add_theme_constant_override("shadow_offset_y", 1)
 	return label
-
-
-func _panel_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.06, 0.055, 0.045, 0.88)
-	s.border_color = Color("#5c4a1f")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	s.corner_radius_top_left = 6
-	s.corner_radius_top_right = 6
-	s.corner_radius_bottom_left = 6
-	s.corner_radius_bottom_right = 6
-	s.content_margin_left = 6
-	s.content_margin_right = 6
-	s.content_margin_top = 5
-	s.content_margin_bottom = 5
-	return s
 
 
 func _vec2_debug(v: Vector2) -> Dictionary:

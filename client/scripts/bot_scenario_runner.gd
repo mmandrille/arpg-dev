@@ -498,6 +498,8 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 		"has_elite_command_radius_preview",
 		"has_rage_effect",
 		"has_holy_shield_effect",
+		"has_boss_arena_presence",
+		"has_boss_headgear",
 	]:
 		if step.has(flag) and bool(rec.get(flag, false)) != bool(step.get(flag, false)):
 			return false
@@ -538,6 +540,10 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 		return false
 	var animation: Dictionary = rec.get("animation", {})
 	if step.has("animation_current_clip") and str(animation.get("current_clip", "")) != str(step.get("animation_current_clip", "")):
+		return false
+	if step.has("animation_clip_prefix") and not str(animation.get("current_clip", "")).begins_with(str(step.get("animation_clip_prefix", ""))):
+		return false
+	if step.has("animation_speed_scale_max") and float(animation.get("speed_scale", 1.0)) > float(step.get("animation_speed_scale_max", 1.0)):
 		return false
 	if step.has("terminal") and bool(reaction.get("terminal", false)) != bool(step.get("terminal", false)):
 		return false

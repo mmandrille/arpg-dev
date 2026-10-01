@@ -2,10 +2,13 @@ class_name ItemTooltipPanel
 extends PanelContainer
 
 const BODY_FONT_SIZE := 23
-const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const REQUIREMENT_FONT_SIZE := BODY_FONT_SIZE - 1
 const ICON_FONT_SIZE := 32
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
+const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
+const NAME_FONT_SIZE := BODY_FONT_SIZE + 3
+const RARITY_LINE_PREFIX := "Rarity: "
 const TooltipMouseGuardScript := preload("res://scripts/tooltip_mouse_guard.gd")
 const PREVIEW_SIZE := Vector2(96, 96)
 const PREVIEW_GAP := 8
@@ -23,8 +26,10 @@ class ItemPreview:
 	var item_presentations: Dictionary = {}
 	var fallback_label: String = ""
 	var dimmed: bool = false
+	var rarity: String = ""
 
 	func setup(next_item: Dictionary, next_presentations: Dictionary, next_fallback_label: String = "", next_dimmed: bool = false) -> void:
+		rarity = str(next_item.get("rarity", ""))
 		item = next_item.duplicate(true)
 		item_presentations = next_presentations.duplicate(true)
 		fallback_label = next_fallback_label
@@ -38,15 +43,20 @@ class ItemPreview:
 	func _draw() -> void:
 		var rect := Rect2(Vector2.ZERO, size)
 		draw_rect(rect, Color("#0a0908"), true)
-		draw_rect(rect, Color("#5c4a1f"), false, 1.0)
 		if item.is_empty():
+			draw_rect(rect, Color("#5c4a1f"), false, 1.0)
 			return
+		var has_rarity := rarity != ""
+		var border_width := float(InventoryPanelStylesScript.rarity_border_width(rarity)) if has_rarity else 1.0
+		var border_color := InventoryPanelStylesScript.rarity_border_color(rarity, false) if has_rarity else Color("#5c4a1f")
+		draw_rect(rect.grow(-border_width * 0.5), border_color, false, border_width)
 
 		var def_id := str(item.get("item_def_id", ""))
 		var presentation: Dictionary = item_presentations.get(def_id, {})
 		var icon: Dictionary = presentation.get("icon", {})
 		var label := str(icon.get("label", fallback_label if fallback_label != "" else _short_label(def_id)))
 		ItemIconDrawerScript.draw(self, rect, icon, label, dimmed, 0.36, ICON_FONT_SIZE)
+		RarityCuePresenterScript.draw_slot(self, rect, item)
 
 	func _short_label(def_id: String) -> String:
 		if def_id == "":
@@ -84,8 +94,24 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 	main_stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_row.add_child(main_stats)
 
+	var header_open := has_item and not main_lines.is_empty()
+	var line_index := 0
 	for line in main_lines:
-		main_stats.add_child(_tooltip_label(_entry_text(line), _entry_color(line, Color("#e8dcc8")), MAIN_STAT_WIDTH if has_item else CONTENT_WIDTH, _entry_font_size(line, BODY_FONT_SIZE)))
+		var text := _entry_text(line)
+		var is_name := line_index == 0 and header_open
+		var is_rarity_line := is_name == false and header_open and text.begins_with(RARITY_LINE_PREFIX)
+		var color := _entry_color(line, Color("#e8dcc8"))
+		var font_size := _entry_font_size(line, BODY_FONT_SIZE)
+		if is_name:
+			font_size = NAME_FONT_SIZE
+		elif is_rarity_line:
+			color = InventoryPanelStylesScript.rarity_color(rarity)
+		main_stats.add_child(_tooltip_label(text, color, MAIN_STAT_WIDTH if has_item else CONTENT_WIDTH, font_size))
+		line_index += 1
+		# Header block (name + rarity) ends with a rarity-weighted rule; the body follows.
+		var header_done := (is_name and not (main_lines.size() > 1 and _entry_text(main_lines[1]).begins_with(RARITY_LINE_PREFIX))) or is_rarity_line
+		if header_done:
+			main_stats.add_child(_tooltip_rule(rarity))
 
 	if has_item:
 		var preview := ItemPreview.new()
@@ -95,12 +121,14 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 	var level_text := _item_level_text(item)
 	var visible_requirement_lines := _visible_requirement_lines(requirement_lines, not level_text.begins_with("Item level"))
 	if not visible_requirement_lines.is_empty():
-		root.add_child(_tooltip_spacer(8))
+		root.add_child(_tooltip_spacer(6))
+		root.add_child(_tooltip_separator())
 		root.add_child(_tooltip_label("Requirements", Color("#c9a227")))
 		for line in visible_requirement_lines:
 			root.add_child(_tooltip_label(_entry_text(line), _entry_color(line, Color("#d8c7a6")), CONTENT_WIDTH, REQUIREMENT_FONT_SIZE))
 	if not affinity_lines.is_empty():
-		root.add_child(_tooltip_spacer(8))
+		root.add_child(_tooltip_spacer(6))
+		root.add_child(_tooltip_separator())
 		root.add_child(_tooltip_label("Class affinity", Color("#c9a227")))
 		for line in affinity_lines:
 			root.add_child(_tooltip_label(_entry_text(line), _entry_color(line, Color("#d8c7a6")), CONTENT_WIDTH, REQUIREMENT_FONT_SIZE))
@@ -238,6 +266,16 @@ func _tooltip_spacer(height: int) -> Control:
 	return spacer
 
 
+func _tooltip_rule(rarity: String) -> ColorRect:
+	var rule := ColorRect.new()
+	rule.name = "HeaderRule"
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rule.color = InventoryPanelStylesScript.rarity_border_color(rarity, false) if rarity != "" else Color("#6b5420")
+	rule.custom_minimum_size = Vector2(0, maxi(1, InventoryPanelStylesScript.rarity_border_width(rarity) - 1))
+	rule.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return rule
+
+
 func _tooltip_separator() -> ColorRect:
 	var separator := ColorRect.new()
 	separator.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -250,9 +288,9 @@ func _tooltip_separator() -> ColorRect:
 func _tooltip_style(rarity: String = "common") -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = Color(0.07, 0.06, 0.05, 0.97)
-	var border: Color = ClientConstantsScript.LOOT_LABEL_RARITY_COLORS.get(rarity.to_lower(), Color("#8b6914"))
+	var border: Color = InventoryPanelStylesScript.rarity_color(rarity)
 	s.border_color = border
-	var border_width: int = 2 if rarity.to_lower() in ["magic", "rare", "unique"] else 1
+	var border_width: int = InventoryPanelStylesScript.rarity_border_width(rarity)
 	s.border_width_left = border_width
 	s.border_width_top = border_width
 	s.border_width_right = border_width

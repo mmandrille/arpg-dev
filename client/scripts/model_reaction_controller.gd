@@ -212,6 +212,8 @@ func get_debug_state() -> Dictionary:
 
 
 func _capture_meshes(node: Node) -> void:
+	if node.has_meta(&"presentation_skip_tint"):
+		return  # v511: variant eye glow / aura ring own their emission and albedo
 	if node is MeshInstance3D:
 		var mesh_node := node as MeshInstance3D
 		var mat := _material_for(mesh_node)

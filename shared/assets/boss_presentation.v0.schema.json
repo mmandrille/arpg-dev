@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/boss_presentation.v0.schema.json",
+  "title": "Boss presentation (v0)",
+  "description": "Client-only per-boss presentation: kit model, scale, attachments, headgear, ground aura, and intro banner (v512).",
+  "type": "object",
+  "required": ["version", "bosses"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "note": { "type": "string" },
+    "bosses": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/boss" }
+    }
+  },
+  "$defs": {
+    "hex": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "asset_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "boss": {
+      "type": "object",
+      "required": ["display_name", "epithet", "visual_key", "scale", "attachments", "headgear", "aura", "banner"],
+      "additionalProperties": false,
+      "properties": {
+        "display_name": { "type": "string", "minLength": 1 },
+        "epithet": { "type": "string", "minLength": 1 },
+        "visual_key": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "scale": { "type": "number", "exclusiveMinimum": 0 },
+        "tint": { "$ref": "#/$defs/hex" },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["asset_id", "bone"],
+            "additionalProperties": false,
+            "properties": {
+              "asset_id": { "$ref": "#/$defs/asset_id" },
+              "bone": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "headgear": {
+          "type": "object",
+          "required": ["kind", "bone", "color", "size"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "enum": ["primitive", "asset", "none"] },
+            "shape": { "enum": ["horns", "crown"] },
+            "asset_id": { "$ref": "#/$defs/asset_id" },
+            "bone": { "type": "string", "minLength": 1 },
+            "color": { "$ref": "#/$defs/hex" },
+            "size": { "type": "number", "exclusiveMinimum": 0 },
+            "lift": { "type": "number", "description": "Extra head-bone-local Y offset in meters (clears baked-in helmets and hats)." }
+          }
+        },
+        "aura": {
+          "type": "object",
+          "required": ["color", "radius", "inner_alpha", "pulse_hz", "light_energy", "light_range"],
+          "additionalProperties": false,
+          "properties": {
+            "color": { "$ref": "#/$defs/hex" },
+            "radius": { "type": "number", "exclusiveMinimum": 0 },
+            "inner_alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pulse_hz": { "type": "number", "minimum": 0 },
+            "light_energy": { "type": "number", "minimum": 0 },
+            "light_range": { "type": "number", "minimum": 0 }
+          }
+        },
+        "banner": {
+          "type": "object",
+          "required": ["duration_s", "fade_in_s", "fade_out_s", "title_color", "epithet_color"],
+          "additionalProperties": false,
+          "properties": {
+            "duration_s": { "type": "number", "minimum": 1.0, "maximum": 6.0 },
+            "fade_in_s": { "type": "number", "minimum": 0 },
+            "fade_out_s": { "type": "number", "minimum": 0 },
+            "title_color": { "$ref": "#/$defs/hex" },
+            "epithet_color": { "$ref": "#/$defs/hex" }
+          }
+        }
+      }
+    }
+  }
+}

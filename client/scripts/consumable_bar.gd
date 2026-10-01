@@ -19,6 +19,8 @@ var hotbar_capacity: int = 2
 var hotbar: Array = []
 var _slots: Array = []
 var _slot_items: Array = []
+var _style_empty: StyleBoxFlat = HudStyle.slot("empty")
+var _style_filled: StyleBoxFlat = HudStyle.slot("filled")
 var _drag_data: Dictionary = {}
 var _interactive: bool = true
 var _panel: PanelContainer
@@ -196,7 +198,7 @@ func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_panel.add_theme_stylebox_override("panel", _panel_style())
+	_panel.add_theme_stylebox_override("panel", HudStyle.frame_panel(0.88, 8.0, 6.0))
 	add_child(_panel)
 
 	var row := HBoxContainer.new()
@@ -210,10 +212,11 @@ func _build() -> void:
 		slot.custom_minimum_size = Vector2(52, 52)
 		slot.focus_mode = Control.FOCUS_NONE
 		slot.clip_text = true
-		slot.add_theme_stylebox_override("normal", _slot_style(false))
-		slot.add_theme_stylebox_override("hover", _slot_style(true))
-		slot.add_theme_stylebox_override("pressed", _slot_style(true))
-		slot.add_theme_color_override("font_color", Color("#8b7a62"))
+		slot.add_theme_stylebox_override("normal", _style_empty)
+		slot.add_theme_stylebox_override("hover", HudStyle.slot("hover"))
+		slot.add_theme_stylebox_override("pressed", HudStyle.slot("pressed"))
+		slot.add_theme_stylebox_override("disabled", HudStyle.slot("disabled"))
+		slot.add_theme_color_override("font_color", HudStyle.text_muted())
 		slot.add_theme_font_size_override("font_size", 15)
 		slot.text = HOTKEY_LABELS[i]
 		row.add_child(slot)
@@ -227,10 +230,9 @@ func _build() -> void:
 func _position_panel() -> void:
 	if _panel == null:
 		return
-	var vp := get_viewport_rect().size
-	var panel_w := float(SLOT_COUNT * 58)
-	_panel.position = Vector2((vp.x - panel_w) * 0.5, vp.y - 78)
-	_panel.size = Vector2(panel_w, 64)
+	var rect := HudLayout.hotbar_rect(get_viewport_rect().size)
+	_panel.position = rect.position
+	_panel.size = rect.size
 
 
 func _build_xp_bar() -> void:
@@ -239,13 +241,13 @@ func _build_xp_bar() -> void:
 	_xp_bar.max_value = 1.0
 	_xp_bar.step = 0.001
 	_xp_bar.show_percentage = false
-	_xp_bar.add_theme_stylebox_override("background", _xp_bar_bg_style())
-	_xp_bar.add_theme_stylebox_override("fill", _xp_bar_fill_style())
+	_xp_bar.add_theme_stylebox_override("background", HudStyle.xp_background())
+	_xp_bar.add_theme_stylebox_override("fill", HudStyle.xp_fill())
 	add_child(_xp_bar)
 	_xp_label = Label.new()
 	_xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_xp_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_xp_label.add_theme_color_override("font_color", Color("#f0dfbb"))
+	_xp_label.add_theme_color_override("font_color", HudStyle.text())
 	_xp_label.add_theme_font_size_override("font_size", 9)
 	_xp_bar.add_child(_xp_label)
 	_position_xp_bar()
@@ -255,10 +257,9 @@ func _build_xp_bar() -> void:
 func _position_xp_bar() -> void:
 	if _xp_bar == null:
 		return
-	var vp := get_viewport_rect().size
-	var panel_w := float(SLOT_COUNT * 58)
-	_xp_bar.position = Vector2((vp.x - panel_w) * 0.5, vp.y - 12)
-	_xp_bar.size = Vector2(panel_w, 8)
+	var rect := HudLayout.xp_bar_rect(get_viewport_rect().size)
+	_xp_bar.position = rect.position
+	_xp_bar.size = rect.size
 	if _xp_label != null:
 		_xp_label.position = Vector2.ZERO
 		_xp_label.size = _xp_bar.size
@@ -272,6 +273,7 @@ func _render() -> void:
 		var item: Dictionary = _slot_items[i]
 		slot.item = item.duplicate(true) if not item.is_empty() else {}
 		slot.text = HOTKEY_LABELS[i]
+		slot.add_theme_stylebox_override("normal", _style_filled if not item.is_empty() else _style_empty)
 		slot.tooltip_text = _tooltip(item)
 		slot.disabled = not _is_slot_enabled(i)
 		slot.modulate.a = 1.0 if _is_slot_enabled(i) else 0.42
@@ -379,55 +381,6 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var rect := Rect2(Vector2.ZERO, slot.size)
 	var label := PotionIconLabelScript.icon_label(item, str(icon.get("label", "")))
 	ItemIconDrawerScript.draw(slot, rect, icon, label, false, 0.38, 16)
-
-
-func _panel_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.07, 0.06, 0.05, 0.88)
-	s.border_color = Color("#6b5420")
-	s.border_width_left = 2
-	s.border_width_top = 2
-	s.border_width_right = 2
-	s.border_width_bottom = 2
-	s.content_margin_left = 8
-	s.content_margin_top = 6
-	s.content_margin_right = 8
-	s.content_margin_bottom = 6
-	return s
-
-
-func _slot_style(hover: bool) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color("#3d2e10") if hover else Color("#0a0908")
-	s.border_color = Color("#8b6914") if hover else Color("#5c4a1f")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	s.content_margin_left = 4
-	s.content_margin_top = 4
-	s.content_margin_right = 4
-	s.content_margin_bottom = 4
-	return s
-
-
-func _xp_bar_bg_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.025, 0.022, 0.018, 0.90)
-	s.border_color = Color("#3f3423")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	return s
-
-
-func _xp_bar_fill_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color("#c9a227")
-	return s
-
-
 
 
 func _load_progression_rules() -> void:

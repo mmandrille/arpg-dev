@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-01 (v510 review complete; `make ci-full` reports one non-reproduced protocol failure)
+Last updated: 2026-10-01 (v510 review/refactor complete; final `make ci` passed in 6m56s)
 
 ---
 
@@ -24,7 +24,7 @@ Last updated: 2026-10-01 (v510 review complete; `make ci-full` reports one non-r
 | Field | Value |
 |-------|-------|
 | **Latest completed slice** | v510 — Ranger affinity passive; the accepted v501–v510 graphics, feel, and gameplay batch is integrated, with combined `make ci` passing in 11m41s. See the [slice lifecycle](docs/progress/slice-lifecycle.md) and per-slice as-built evidence. |
-| **Next slice** | Complete the post-batch `$refactor`, then propose the next batch with `$next`. `make ci-full` failed only `teleporter_lab` (1/149); the isolated rerun passed, so the full-matrix result remains open. |
+| **Next slice** | Propose the next batch with `$next`. `make ci-full` failed only `teleporter_lab` (1/149); the isolated rerun passed, so the full-matrix result remains open. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
 | **Last engineering review** | v510 — [`docs/reviews/20261001_v510-overview.md`](docs/reviews/20261001_v510-overview.md) (2026-10-01; on-cadence, overall 7.8; `make ci-full` had one failure) |
 | **Next engineering review** | After the next coordinated batch or ~10-slice standalone milestone; run `$refactor` before `$next`. |
@@ -88,7 +88,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 - **v501–v510 evidence limits:** v506 resident-memory/hands-on town proof, v508 final no-aura matched cost, and v509 live reconnect/matched lane cost remain unverified. Extended CI had 1/149 protocol failures (`teleporter_lab`); its isolated rerun passed, which does not make the full gate green.
 
-- **v510 `$review` (on-cadence; supersedes v500):** [`docs/reviews/20261001_v510-overview.md`](docs/reviews/20261001_v510-overview.md). Mercenary-roster replay, `envelope.v8`, potion golden, and shared-JSON checklist follow-ups are closed. **Still open:** input may be simulated before durable append; cold CI can skip DB-backed tests; replay has no practical tick bound/context check or pinned rules/debug flag; reconnect snapshot/schema drift checks; `main.gd`, `sim.go`, `run.py`, and `validate_shared.py` cohesion hotspots; ratchet touch-to-shrink; Godot pin, remote CI, and owner-managed origin credential follow-ups.
+- **v510 `$review` (on-cadence; supersedes v500):** [`docs/reviews/20261001_v510-overview.md`](docs/reviews/20261001_v510-overview.md). Mercenary-roster replay, `envelope.v8`, potion golden, and shared-JSON checklist follow-ups are closed. **Fixed in `$refactor`:** cold CI now starts/requires Postgres before DB-backed Go tests (`16eab682`; final `make ci` passed). **Still open:** input may be simulated before durable append; replay has no practical tick bound/context check or pinned rules/debug flag; reconnect snapshot/schema drift checks; `main.gd`, `sim.go`, `run.py`, and `validate_shared.py` cohesion hotspots; ratchet touch-to-shrink; Godot pin, remote CI, and owner-managed origin credential follow-ups.
 
 - **v469 environment / process gaps.**
   - v468 (real-body first-person view) shipped in commits `98105010`..`7d792642`, but has **no plan

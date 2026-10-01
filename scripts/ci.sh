@@ -311,21 +311,22 @@ ci_step "== 4/11 asset manifest + GLB validation ==" \
 ci_step "== 5/11 determinism lint ==" \
   "$RUN_QUIET" --label "determinism-lint" -- make lint-determinism
 
-# DB-backed Go tests (store, http) use ARPG_DATABASE_URL, and fail rather than skip when it
-# is set but unreachable (internal/testdb). Export it only when this checkout's test DB is
-# ready now; otherwise they skip loudly (Postgres is started later, in step 8).
-if "$ROOT/scripts/test_db.sh" ensure "$DATABASE_URL" >/dev/null 2>&1; then
-  export ARPG_DATABASE_URL="$DATABASE_URL"
-else
-  unset ARPG_DATABASE_URL ARPG_TEST_DATABASE_URL
-  echo "[ci] Postgres not reachable before step 6: DB-backed Go tests will SKIP (run make db-up first for full coverage)"
-fi
-
+# DB-backed Go tests must not silently skip on a cold checkout. Provision and ensure
+# the test database in this gate, then export its URL for the Go test process.
 # The race detector covers the concurrent realtime hub/session loop (~30s). internal/http
 # exceeds the 10m test timeout under -race, so it is not included yet.
-ci_step "== 6/11 Go fmt + tests + race + vet ==" \
-  "$RUN_QUIET" --label "gofmt -l && go test ./... && go test -race ./internal/realtime/... && go vet ./..." -- \
-  bash -c 'make fmt-check-go && cd server && go test ./... && go test -race ./internal/realtime/... && go vet ./...'
+ci_step "== 6/11 Postgres + Go fmt + tests + race + vet ==" \
+  "$RUN_QUIET" --label "make db-up && go test ./... && go test -race ./internal/realtime/... && go vet ./..." -- \
+  bash -c '\
+    make db-up && \
+    "$1" ensure "$2" && \
+    export ARPG_DATABASE_URL="$2" && \
+    make fmt-check-go && \
+    cd server && \
+    go test ./... && \
+    go test -race ./internal/realtime/... && \
+    go vet ./... \
+  ' _ "$ROOT/scripts/test_db.sh" "$DATABASE_URL"
 
 ci_step "== 7/11 Python unit checks ==" \
   bash -c "make tools >/dev/null && \"$RUN_QUIET\" --label 'pytest tools' -- \"$ROOT/.venv/bin/python\" -m pytest -q tools && \"$ROOT/.venv/bin/python\" -c 'from tools.bot.ci_pack import validate_ci_pack; validate_ci_pack()'"

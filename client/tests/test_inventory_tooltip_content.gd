@@ -25,7 +25,7 @@ func _run() -> void:
 	_test_pricing_is_display_only_and_nonnegative()
 	_test_rarity_border_styles()
 	_test_tooltip_header_hierarchy()
-	_test_theme_matches_loot_label_colors()
+	_test_theme_rarity_colors_drive_loot_labels()
 	print("[gdtest] PASS: test_inventory_tooltip_content (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
@@ -98,10 +98,10 @@ func _test_pricing_is_display_only_and_nonnegative() -> void:
 	_assert_true("unknown item has no price", Pricing.item_gold_value({"item_def_id": "no_such_item"}) == -1)
 
 
-func _test_theme_matches_loot_label_colors() -> void:
-	# World loot labels still read ClientConstants (a const cannot call UiTheme); keep them in lockstep.
+func _test_theme_rarity_colors_drive_loot_labels() -> void:
+	# World loot labels read the same UiTheme tokens as the tooltips (single source).
 	for rarity in ["common", "magic", "rare", "unique", "set"]:
-		_assert_true("%s theme color matches loot label color" % rarity, Styles.rarity_color(rarity) == ClientConstants.LOOT_LABEL_RARITY_COLORS[rarity])
+		_assert_true("%s theme color is the loot label color" % rarity, Styles.rarity_color(rarity) == UiTheme.color("inventory_rarity_" + rarity))
 		_assert_true("%s theme border token resolved" % rarity, UiTheme.has_token("spacing", "inventory_border_" + rarity) or UiTheme.spacing("inventory_border_" + rarity) > 0)
 
 

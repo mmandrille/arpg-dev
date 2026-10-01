@@ -46,11 +46,13 @@ static func has(template_id: String) -> bool:
 	return template_id != "" and _bosses.has(template_id)
 
 
+## Returns the cached catalog entry itself (no copy: it is read every boss every delta). Callers
+## must treat it as read-only; copy with `.duplicate(true)` before mutating.
 static func entry(template_id: String) -> Dictionary:
 	ensure_loaded()
 	if template_id == "" or not _bosses.has(template_id):
 		return {}
-	return (_bosses[template_id] as Dictionary).duplicate(true)
+	return _bosses[template_id] as Dictionary
 
 
 ## Catalog scale when the boss has presentation, else the wire value (never <= 0).

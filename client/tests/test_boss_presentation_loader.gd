@@ -25,6 +25,8 @@ func _run() -> void:
 	_check(LoaderScript.base_tint("cave_warden", fallback) != fallback, "catalog tint overrides the wire tint")
 	_check(LoaderScript.is_untinted("BossArenaPresence") and LoaderScript.is_untinted("BossHeadgear") and not LoaderScript.is_untinted("MonsterVisualRoot"), "tint skip list")
 
+	_check(LoaderScript.entry("cave_warden") == LoaderScript.entry("cave_warden") and LoaderScript.entry("unknown_boss").is_empty(), "entry is served from the cache; unknown is empty")
+
 	# Configurable: a temp catalog proves behavior follows data, not constants.
 	LoaderScript.set_bosses_for_test({"temp_boss": {"scale": 9.0, "tint": "#ff0000"}})
 	_check(is_equal_approx(LoaderScript.effective_scale("temp_boss", 1.0), 9.0), "scale follows catalog data")

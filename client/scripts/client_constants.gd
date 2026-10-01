@@ -28,20 +28,6 @@ const MONSTER_RARITY_TINTS := {
 	"rare": Color("#ff9b9b"),
 	"unique": Color("#ffd978"),
 }
-const ITEM_RARITY_BACKGROUNDS := {
-	"common": Color("#343432"),
-	"magic": Color("#1b3458"),
-	"rare": Color("#5a4520"),
-	"unique": Color("#5a2f17"),
-	"set": Color("#173f28"),
-}
-const LOOT_LABEL_RARITY_COLORS := {
-	"common": Color("#e8dcc8"),
-	"magic": Color("#93c5fd"),
-	"rare": Color("#f4d481"),
-	"unique": Color("#ffb26b"),
-	"set": Color("#55e66f"),
-}
 const LOOT_LABEL_CATEGORY_COLORS := {
 	"currency": Color("#ffd75e"),
 	"quest": Color("#6ee68b"),

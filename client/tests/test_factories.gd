@@ -45,7 +45,7 @@ func _initialize() -> void:
 
 func _test_client_constants() -> void:
 	_assert_eq("player start hp", ClientConstantsScript.PLAYER_START_HP, 10)
-	_assert_true("rarity color present", ClientConstantsScript.LOOT_LABEL_RARITY_COLORS.has("rare"))
+	_assert_true("rarity color token present", UiTheme.has_token("color", "inventory_rarity_rare"))
 
 
 func _test_surface_material_loader() -> void:

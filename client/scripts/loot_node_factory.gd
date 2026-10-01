@@ -261,7 +261,10 @@ func loot_label_color(e: Dictionary) -> Color:
 	if ClientConstantsScript.LOOT_LABEL_CATEGORY_COLORS.has(category):
 		return ClientConstantsScript.LOOT_LABEL_CATEGORY_COLORS[category]
 	var rarity := str(e.get("rarity", "common")).to_lower()
-	return ClientConstantsScript.LOOT_LABEL_RARITY_COLORS.get(rarity, ClientConstantsScript.LOOT_LABEL_RARITY_COLORS["common"])
+	var token := "inventory_rarity_" + rarity
+	if not UiTheme.has_token("color", token):
+		token = "inventory_rarity_common"
+	return UiTheme.color(token)
 
 func loot_label_text(e: Dictionary) -> String:
 	var item_def_id := str(e.get("item_def_id", ""))

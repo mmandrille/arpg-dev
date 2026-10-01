@@ -32,13 +32,6 @@ const DRAG_SOURCE_INVENTORY_BAG := "bag"
 const DRAG_SOURCE_STASH := "stash"
 const DRAG_SOURCE_CORPSE := "corpse"
 const DRAG_SOURCE_UNIQUE_CHEST := "unique_chest"
-const ITEM_RARITY_BACKGROUNDS := {
-	"common": Color("#343432"),
-	"magic": Color("#1b3458"),
-	"rare": Color("#5a4520"),
-	"unique": Color("#5a2f17"),
-	"set": Color("#173f28"),
-}
 var stash_entity_id: String = ""
 var stash_id: String = "account_stash"
 var stash_title: String = "Account Stash"
@@ -1152,7 +1145,7 @@ func _slot_style(hover: bool) -> StyleBoxFlat:
 
 func _item_slot_style(rarity: String, hover: bool, enabled: bool) -> StyleBoxFlat:
 	var s := _slot_style(hover)
-	var base: Color = ITEM_RARITY_BACKGROUNDS.get(rarity.to_lower(), ITEM_RARITY_BACKGROUNDS["common"])
+	var base: Color = UiTheme.rarity_background(rarity)
 	if not enabled:
 		base = base.darkened(0.45)
 	s.bg_color = base.lightened(0.12) if hover else base

@@ -81,14 +81,14 @@ Verify: `make validate-shared`; focused client tests; `make client-unit`; `HEADL
 
 ## Final verification
 
-- [ ] `make validate-shared`
+- [x] `make validate-shared`
 - [x] `make client-unit` on the isolated v493 checkout
 - [x] `make maintainability` on the isolated v493 checkout
 - [x] Named live-client scenarios above on the isolated v493 checkout
 - [x] Real-renderer Balanced and Performance capture review
-- [ ] Coordinating task runs one `make ci` on the combined changes after v495 integration
+- [x] Coordinating task ran the final `make ci` on the combined changes after integration
 
-The coordinating task owns the single combined final gate, lifecycle closeout, and transfer to main. The engineering review and refactor remain next-work items. No protocol or combat-rule changes were needed.
+The coordinating task completed the final combined gate, lifecycle closeout, and transfer to main. The engineering review and refactor remain next-work items. No protocol or combat-rule changes were needed.
 
 ## Opt-in trace and normal-speed capture follow-up
 

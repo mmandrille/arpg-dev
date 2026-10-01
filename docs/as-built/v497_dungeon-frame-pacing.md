@@ -33,6 +33,6 @@ Paired live player-camera captures at shallow level 1 and deep level 4 are retai
 
 ## Verification and limits
 
-Focused floor/kit unit tests, shared schema validation, asset validation, the Python report tests, and the live pinned fixture pass. The `scenes` screenshot suite on the isolated worktree produced 9/9 frames. The combined final `make ci` is deferred to the single integration gate requested by the owner. The observed reduction is in primitive work, not a large FPS gain; vsync and the CPU/overlay work limit the visible frame benefit on this host. A lower-end GPU has not been measured.
+Focused floor/kit unit tests, shared schema validation, asset validation, the Python report tests, and the live pinned fixture pass. The `scenes` screenshot suite on the isolated worktree produced 9/9 frames. The final combined `make ci` passed in 11m13s. The observed reduction is in primitive work, not a large FPS gain; vsync and the CPU/overlay work limit the visible frame benefit on this host. A lower-end GPU has not been measured.
 
 Visual replay: `make bot-client SCENARIO=dungeon_frame_pacing_probe HEADLESS=0`; inspect shallow/deep regression with `make regen-screenshots SUITE=scenes`.

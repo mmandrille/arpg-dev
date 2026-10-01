@@ -59,7 +59,7 @@ Visual replay for the owner: `make bot-visual scenario=wall_floor_dungeon_rollou
 ## Task 4 — Documentation and final verification
 
 - [x] Update CODEMAP and write the as-built with exact capture paths, before/after metrics, test results and remaining limits.
-- [ ] Leave PROGRESS and lifecycle closeout for `/finish` in the owner's main checkout; do not commit or transfer from this isolated worktree.
+- [x] Leave PROGRESS and lifecycle closeout for the coordinating task in the owner's main checkout; the isolated worktree did not commit or transfer.
 
 Final verification in this isolated worktree: `make maintainability`, `make validate-shared`, `make validate-assets`, `make client-unit`, and focused bot scenarios. The coordinating task runs one combined `make ci` after integration. No new branch, commit or `/finish` in this worktree.
 

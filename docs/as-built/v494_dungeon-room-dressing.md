@@ -70,4 +70,4 @@ Visual replay: `make bot-visual scenario=wall_floor_dungeon_rollout` for the spa
 
 The placement filter reserves a conservative straight route between static anchors and margins around walls. It can omit otherwise usable space. Props are nonblocking, so a rare visual overlap with a route does not alter server navigation. The live frames confirm open space near the hero, and the boss-floor inspection covers an active telegraph. A dedicated shot with props and dropped loot together was not captured. The combat scenario proves aggro rendering, but these views do not exhaust every encounter layout.
 
-This isolated worktree has no v494 commit or `/finish` closeout. The coordinating task will transfer the tested change set, update `PROGRESS.md` and slice lifecycle, and run combined `make ci` after integration.
+The v494 work was integrated with v495–v500 on `main`. The lifecycle index and `PROGRESS.md` are current, and the final combined `make ci` passed in 11m13s.

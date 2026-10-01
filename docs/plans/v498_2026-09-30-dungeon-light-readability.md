@@ -112,7 +112,7 @@ Files: `docs/as-built/v498_dungeon-light-readability.md`, `PROGRESS.md`, `docs/p
 
 - [x] Document catalog changes, paired images, exact commands, raw-sample paths, pass/fail against each acceptance criterion, and any fixture limits.
 - [x] Run focused validation and `make maintainability` in this isolated worktree. Leave worktree changes uncommitted for the coordinating task.
-- [ ] After v494–v498 are combined in order, the coordinating task runs **one** `make ci` on the integrated result and handles final lifecycle/commit work. Do not run `/finish`, commit, transfer, or run a separate final `make ci` in this worktree.
+- [x] After integration, the coordinating task ran the final combined `make ci` and handled lifecycle and commits. The isolated v498 worktree did not run a separate final `make ci`.
 
 ## Deferred scope
 

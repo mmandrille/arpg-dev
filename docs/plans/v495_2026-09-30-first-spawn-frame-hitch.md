@@ -1,6 +1,6 @@
 # v495 Plan — First-spawn frame hitch
 
-**Status:** Matched post-v494 A/B complete; combined final CI remains with the coordinating task.
+**Status:** Complete; final combined `make ci` passed in 11m13s.
 **Goal:** Measure the actual first monster frame in a live Godot session, then remove its dominant measured cost without changing authoritative gameplay or visual content.
 **Architecture:** Extend the existing opt-in client performance sampler with per-frame trace records, retaining the existing one-second report. Run the existing `sorcerer_multigroup_perf_probe` bot and a fresh Godot observer process together for each trial. The measured pre-v494 costs led to a bounded material cache, a single reusable town dressing root built during initial scene setup, and one batched skills-panel redraw per snapshot. Repeat the same fixture after v494 lands before accepting the slice.
 **Tech stack:** Godot/GDScript client, Bash benchmark runner, Python report and tests. No server, protocol, gameplay-rule, or asset contract changes expected.
@@ -63,11 +63,11 @@ Verify: focused Godot tests; `make client-unit`; `make validate-assets`; `make b
 ## Task 5 — Lifecycle and final verification
 
 - [x] Saved paired raw samples and summary in the v495 as-built; recorded fixture, renderer, tier, host, model count, and warm/cold state.
-- [ ] Update `PROGRESS.md` and `docs/progress/slice-lifecycle.md` only once v495 is complete.
+- [x] Update `PROGRESS.md` and `docs/progress/slice-lifecycle.md` once the batch is complete.
 - [x] Run `make maintainability`, `make client-unit`, `make validate-assets`, and `make bot-visual scenario=sorcerer_multigroup_perf_probe` in this worktree. The `scenes` screenshot suite captured 9/9 images; inspect the town and monster PNGs. The coordinating task runs one combined `make ci` after integrating slices, per owner instruction.
 
 ## Deferred scope
 
-The combined CI gate and lifecycle closeout remain with the coordinating task. General draw-call batching belongs to v497.
+The combined CI gate and lifecycle closeout were completed by the coordinating task. General draw-call batching belongs to v497.
 
 Provisional run evidence: `docs/performance/investigations/v495-provisional-first-spawn-baseline.md` and raw `.artifacts/benchmark-runs/20260930T223715Z/` (before) and `20260930T224134Z/` (after) logs in this worktree.

@@ -39,6 +39,6 @@ The Balanced controls' first-spawn times ranged 332–465 ms, so their median di
 
 ## Verification and limits
 
-Focused integrated torch placement/viewpoint, engaged-enemy subject, bot, town, and trace tests pass. `make validate-shared` and `make maintainability` pass after integration; the combined `make ci` is reserved for the owner's single final gate. Windowed replay: `make bot-client SCENARIO=dungeon_light_readability_torch HEADLESS=0` and `make bot-client SCENARIO=dungeon_light_readability_engaged_enemy HEADLESS=0`. The boss, loot, shallow, and deep capture scenarios remain extended-tier, so the CI pack did not grow.
+Focused integrated torch placement/viewpoint, engaged-enemy subject, bot, town, and trace tests pass. `make validate-shared` and `make maintainability` pass after integration; the final combined `make ci` passed in 11m13s. The torch route enforces a minimum rendered-light count, and the wall-clear regression test passes. Windowed replay: `make bot-client SCENARIO=dungeon_light_readability_torch HEADLESS=0` and `make bot-client SCENARIO=dungeon_light_readability_engaged_enemy HEADLESS=0`. The boss, loot, shallow, and deep capture scenarios remain extended-tier, so the CI pack did not grow.
 
 The torch frame proves visible mounts and pools at one selected shallow viewpoint; it does not exhaust every possible wall arrangement. Some distant enemies correctly remain obscured beyond explored fog. A matched depth-8 moving-combat recording is still broader evidence than these still frames and remains a useful follow-up.

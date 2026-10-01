@@ -32,4 +32,4 @@ Raw logs and reports: `.artifacts/benchmark-runs/20260930T225402Z/` (before) and
 
 ## Verification and limits
 
-Focused integrated town nature/dressing/ground detail, skills panel, kit monster, room dressing, and trace tests passed. The client scenario and 10+10 live trials exercised actual first spawn. The combined `make ci` gate is reserved for the final multi-slice integration run. The first monster frame remains about 322 ms at p95: the reduction meets the specified 30% target but does not eliminate the visible hitch. Subsequent optimization should profile the remaining monster model upsert and skills redraw cost on the full combined build.
+Focused integrated town nature/dressing/ground detail, skills panel, kit monster, room dressing, and trace tests passed. The client scenario and 10+10 live trials exercised actual first spawn. The final combined `make ci` passed in 11m13s. The first monster frame remains about 322 ms at p95: the reduction meets the specified 30% target but does not eliminate the visible hitch. Subsequent optimization should profile the remaining monster model upsert and skills redraw cost on the full combined build.

@@ -119,9 +119,9 @@ The last bot-visual command is a visual combat regression; final frame pacing mu
 
 Files: `PROGRESS.md`, `docs/progress/slice-lifecycle.md`, `docs/CODEMAP.md`, `docs/performance/tools.md`, `docs/as-built/v497_dungeon-frame-pacing.md`.
 
-- [ ] Record the selected optimization, matched A/B sample counts, raw logs, captures, fixture limitations, and any remaining GPU/headroom uncertainty.
-- [ ] In this worktree, stop after focused tests, visual scenarios, and matched measurements; report changed files and evidence to the coordinating task. Do not commit, transfer, or clean up this worktree from the isolated session.
-- [ ] After the coordinating task combines the dependency slices into `main` in order, it runs the repository's single final `make ci` gate and handles worktree cleanup. The isolated v497 session does not run `make ci`.
+- [x] Record the selected optimization, matched A/B sample counts, raw logs, captures, fixture limitations, and remaining GPU/headroom uncertainty.
+- [x] In this worktree, stop after focused tests, visual scenarios, and matched measurements; report changed files and evidence to the coordinating task. The isolated session did not commit or transfer.
+- [x] After integration on `main`, the coordinating task ran the final combined `make ci` and cleaned up worktrees. The isolated v497 session did not run `make ci`.
 
 ```bash
 make ci

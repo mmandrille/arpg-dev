@@ -3,7 +3,7 @@
   "$id": "https://arpg.dev/schemas/golden/use_consumable.v0.schema.json",
   "title": "Use consumable golden (v0)",
   "type": "object",
-  "required": ["version", "item_def_id", "heal", "cases"],
+  "required": ["version", "item_def_id", "heal", "cases", "rejuvenation_cases"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 0 },
@@ -23,15 +23,36 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["name", "player_hp", "player_max_hp", "draw", "expected_heal", "expected_player_hp"],
+        "required": ["name", "item_level", "player_hp", "player_max_hp", "expected_heal", "expected_player_hp"],
         "additionalProperties": false,
         "properties": {
           "name": { "type": "string" },
+          "item_level": { "type": "integer", "minimum": 1 },
           "player_hp": { "type": "integer", "minimum": 0 },
           "player_max_hp": { "type": "integer", "minimum": 1 },
-          "draw": { "type": "integer", "minimum": 0 },
           "expected_heal": { "type": "integer", "minimum": 0 },
           "expected_player_hp": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "rejuvenation_cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "item_level", "player_hp", "player_max_hp", "player_mana", "player_max_mana", "expected_heal", "expected_player_hp", "expected_mana", "expected_player_mana"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "item_level": { "type": "integer", "minimum": 1 },
+          "player_hp": { "type": "integer", "minimum": 0 },
+          "player_max_hp": { "type": "integer", "minimum": 1 },
+          "player_mana": { "type": "integer", "minimum": 0 },
+          "player_max_mana": { "type": "integer", "minimum": 1 },
+          "expected_heal": { "type": "integer", "minimum": 0 },
+          "expected_player_hp": { "type": "integer", "minimum": 0 },
+          "expected_mana": { "type": "integer", "minimum": 0 },
+          "expected_player_mana": { "type": "integer", "minimum": 0 }
         }
       }
     }

@@ -149,19 +149,38 @@ func _initialize() -> void:
 	# 9. Use consumable golden references shared consumable heal rules.
 	var use_consumable := _read(shared.path_join("golden/use_consumable.json"))
 	var use_item_def: Dictionary = items["items"][use_consumable["item_def_id"]]
+	var potion_main_config := _read(shared.path_join("rules/main_config.v0.json"))
+	var potion_rules: Dictionary = potion_main_config.get("gameplay", {}).get("potion_rules", {})
 	if str(use_item_def.get("category", "")) != "consumable":
 		_fail("use_consumable golden item is not consumable")
 		return
 	if use_item_def["heal"] != use_consumable["heal"]:
 		_fail("use_consumable golden heal != item rules")
 		return
-	var hmin: int = int(use_consumable["heal"]["min"])
-	var hspan: int = int(use_consumable["heal"]["max"]) - hmin + 1
+	var restore_per_level: int = int(potion_rules.get("restore_multiplier_per_level", 3))
 	for c in use_consumable["cases"]:
-		var rolled: int = hmin + (int(c["draw"]) % hspan)
-		var capped: int = mini(rolled, int(c["player_max_hp"]) - int(c["player_hp"]))
+		var item_level: int = maxi(1, int(c.get("item_level", 1)))
+		var restored: int = restore_per_level * item_level
+		var capped: int = mini(restored, int(c["player_max_hp"]) - int(c["player_hp"]))
 		if capped != int(c["expected_heal"]) or int(c["player_hp"]) + capped != int(c["expected_player_hp"]):
-			_fail("use_consumable case %s heal cap mismatch" % str(c["name"]))
+			_fail("use_consumable case %s level restore or heal cap mismatch" % str(c["name"]))
+			return
+	var rejuv_item: Dictionary = items["items"].get("rejuv_potion", {})
+	if str(rejuv_item.get("category", "")) != "consumable" or not bool(rejuv_item.get("leveled_consumable", false)):
+		_fail("rejuv_potion rules do not define a leveled consumable")
+		return
+	var rejuv_min_percent: int = int(potion_rules.get("rejuv_min_restore_percent", 33))
+	for c in use_consumable["rejuvenation_cases"]:
+		var percent: int = maxi(rejuv_min_percent, maxi(1, int(c["item_level"])))
+		var hp_restore: int = roundi(float(c["player_max_hp"]) * float(percent) / 100.0)
+		var mana_restore: int = roundi(float(c["player_max_mana"]) * float(percent) / 100.0)
+		hp_restore = mini(hp_restore, int(c["player_max_hp"]) - int(c["player_hp"]))
+		mana_restore = mini(mana_restore, int(c["player_max_mana"]) - int(c["player_mana"]))
+		if hp_restore != int(c["expected_heal"]) or int(c["player_hp"]) + hp_restore != int(c["expected_player_hp"]):
+			_fail("rejuvenation case %s HP restore mismatch" % str(c["name"]))
+			return
+		if mana_restore != int(c["expected_mana"]) or int(c["player_mana"]) + mana_restore != int(c["expected_player_mana"]):
+			_fail("rejuvenation case %s mana restore mismatch" % str(c["name"]))
 			return
 
 	# 10. Monster chase golden references shared navigation/world/monster rules.

@@ -2645,22 +2645,48 @@ def cross_checks(report: Report) -> None:
         report.fail("use_consumable item", "heal range mismatch with item rules")
     else:
         report.ok("use_consumable golden matches consumable item rules")
-    umin = int(use_heal["min"])
-    umax = int(use_heal["max"])
-    if umax < umin:
+    potion_rules = main_gameplay.get("potion_rules", {})
+    if int(use_heal["max"]) < int(use_heal["min"]):
         report.fail("use_consumable heal", "max must be >= min")
     else:
-        uspan = umax - umin + 1
+        restore_per_level = int(potion_rules.get("restore_multiplier_per_level", 3))
         bad_use = []
         for case in use_consumable_golden["cases"]:
-            rolled = umin + (int(case["draw"]) % uspan)
-            capped = min(rolled, int(case["player_max_hp"]) - int(case["player_hp"]))
+            level = max(1, int(case.get("item_level", 1)))
+            restore = restore_per_level * level
+            capped = min(restore, int(case["player_max_hp"]) - int(case["player_hp"]))
             if capped != int(case["expected_heal"]) or int(case["player_hp"]) + capped != int(case["expected_player_hp"]):
                 bad_use.append(case["name"])
         if bad_use:
-            report.fail("use_consumable cases", f"{len(bad_use)} case(s) violate heal cap formula: {bad_use}")
+            report.fail("use_consumable cases", f"{len(bad_use)} case(s) violate leveled restore + HP cap: {bad_use}")
         else:
-            report.ok("use_consumable cases satisfy heal roll + HP cap")
+            report.ok("use_consumable cases satisfy configured potion-level restore + HP cap")
+
+    rejuv_item = items["items"].get("rejuv_potion")
+    if not use_consumable_golden.get("rejuvenation_cases"):
+        report.fail("use_consumable rejuvenation", "golden has no rejuvenation cases")
+    elif rejuv_item is None or rejuv_item.get("category") != "consumable" or not rejuv_item.get("leveled_consumable"):
+        report.fail("use_consumable rejuvenation", "rejuv_potion must be a leveled consumable in item rules")
+    else:
+        min_percent = int(potion_rules.get("rejuv_min_restore_percent", 33))
+        bad_rejuv = []
+        for case in use_consumable_golden["rejuvenation_cases"]:
+            percent = max(min_percent, max(1, int(case["item_level"])))
+            hp_restore = (int(case["player_max_hp"]) * percent + 50) // 100
+            mana_restore = (int(case["player_max_mana"]) * percent + 50) // 100
+            hp_restore = min(hp_restore, int(case["player_max_hp"]) - int(case["player_hp"]))
+            mana_restore = min(mana_restore, int(case["player_max_mana"]) - int(case["player_mana"]))
+            if (
+                hp_restore != int(case["expected_heal"])
+                or int(case["player_hp"]) + hp_restore != int(case["expected_player_hp"])
+                or mana_restore != int(case["expected_mana"])
+                or int(case["player_mana"]) + mana_restore != int(case["expected_player_mana"])
+            ):
+                bad_rejuv.append(case["name"])
+        if bad_rejuv:
+            report.fail("use_consumable rejuvenation", f"{len(bad_rejuv)} case(s) violate configured restore/cap formula: {bad_rejuv}")
+        else:
+            report.ok("use_consumable rejuvenation cases satisfy configured percentage restore + resource caps")
 
     if monster_chase_golden["navigation"] != navigation:
         report.fail("monster_chase navigation", "navigation block mismatch")

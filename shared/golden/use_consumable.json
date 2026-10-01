@@ -1,24 +1,66 @@
 {
   "version": 0,
-  "description": "Consumable heal rolls and HP cap behavior for level-1 red_potion.",
+  "description": "Leveled health, mana, and rejuvenation potion restores, including resource caps.",
   "item_def_id": "red_potion",
   "heal": { "min": 3, "max": 3 },
   "cases": [
     {
       "name": "partial_heal_after_combat",
+      "item_level": 1,
       "player_hp": 4,
       "player_max_hp": 10,
-      "draw": 0,
       "expected_heal": 3,
       "expected_player_hp": 7
     },
     {
       "name": "top_off_from_hotbar",
+      "item_level": 1,
       "player_hp": 9,
       "player_max_hp": 10,
-      "draw": 0,
       "expected_heal": 1,
       "expected_player_hp": 10
+    },
+    {
+      "name": "level_5_health_restore",
+      "item_level": 5,
+      "player_hp": 10,
+      "player_max_hp": 30,
+      "expected_heal": 15,
+      "expected_player_hp": 25
+    },
+    {
+      "name": "level_10_health_restore_caps_to_missing_hp",
+      "item_level": 10,
+      "player_hp": 28,
+      "player_max_hp": 30,
+      "expected_heal": 2,
+      "expected_player_hp": 30
+    }
+  ],
+  "rejuvenation_cases": [
+    {
+      "name": "level_10_restores_both_resources",
+      "item_level": 10,
+      "player_hp": 20,
+      "player_max_hp": 90,
+      "player_mana": 10,
+      "player_max_mana": 60,
+      "expected_heal": 30,
+      "expected_player_hp": 50,
+      "expected_mana": 20,
+      "expected_player_mana": 30
+    },
+    {
+      "name": "level_5_restore_caps_both_resources",
+      "item_level": 5,
+      "player_hp": 80,
+      "player_max_hp": 90,
+      "player_mana": 58,
+      "player_max_mana": 60,
+      "expected_heal": 10,
+      "expected_player_hp": 90,
+      "expected_mana": 2,
+      "expected_player_mana": 60
     }
   ]
 }

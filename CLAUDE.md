@@ -285,8 +285,9 @@ spec and plan for its independent handoff. When in doubt, write the spec.
   no GDScript consumer, which is valid replay-determinism locking under the Test Locking Policy.
   When writing golden update paths: normalize nil Go slices to `[]T{}` before `writeGolden` —
   Go `null` JSON breaks GDScript `as Array` casts.
-- **Protocol JSON schemas are versioned.** Changes to `shared/protocol/` require a schema version
-  bump and must remain backward-compatible or require coordinated client+server update.
+- **Protocol JSON schemas track the active pre-release contract.** Keep the schema, client, server,
+  and tools aligned when changing protocol data. Additive edits update the active schema in place;
+  introduce a new schema version only for a deliberate breaking contract change.
 - **Asset manifest is the source of truth for asset identity.** `assets/manifests/assets.v0.json`
   maps `asset_id → runtime_path`. `shared/assets/item_visuals.v0.json` maps
   `item_def_id → asset_id + mount_socket`. These two files are the only canonical link between

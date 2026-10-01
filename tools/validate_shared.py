@@ -330,7 +330,6 @@ def cross_checks(report: Report) -> None:
         PROTOCOL / "state_delta.v7.schema.json",
     ]
     v8_protocol_files = [
-        PROTOCOL / "envelope.v8.schema.json",
         PROTOCOL / "messages.v8.schema.json",
         PROTOCOL / "session_snapshot.v8.schema.json",
         PROTOCOL / "state_delta.v8.schema.json",

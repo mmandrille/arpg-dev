@@ -90,12 +90,11 @@ Do **not** assume these are the next slice — they are documented backlog items
   [`docs/reviews/20260930_v500-overview.md`](docs/reviews/20260930_v500-overview.md). Score 7.1 → 7.7; most v486
   findings (unbounded client tick, determinism-lint blind spot, blind client gate, orphaned goldens, inverted
   occlusion throttle, dead eye-view step, gofmt/`-race` gates) are genuinely fixed with matching commits/tests.
-  **Closed before batch dispatch:** mercenary-roster replay leak. Session snapshots freeze identity, death state,
-  progression, and items; reconstruction performs no roster database I/O or progression writes. **Still open, ranked:**
-  (1) `make ci-full` not run since v486; (2) `envelope.v8.schema.json` 13/43 intents short of `inputdecode`; (3)
-  `CLAUDE.md`'s schema-version invariant; (4) unrecorded gameplay-debug env read; (5) replay max-tick/ctx guard;
-  (6) `run.py execute_step` / `validate_shared.cross_checks()` / `main.gd _apply_delta` / `sim.go` AI-projectile
-  hotspots; (7) ratchet touch-to-shrink (21/35 files over baseline); (8) owner-blocked origin credential, Godot pin
+  **Closed before batch dispatch:** mercenary-roster replay leak; stale `envelope.v8` removed in favor of the complete
+  `messages.v8` contract, and the protocol invariant now describes the additive-in-place practice. **Still open,
+  ranked:** (1) `make ci-full` not run since v486; (2) unrecorded gameplay-debug env read; (3) replay max-tick/ctx
+  guard; (4) `run.py execute_step` / `validate_shared.cross_checks()` / `main.gd _apply_delta` / `sim.go` AI-projectile
+  hotspots; (5) ratchet touch-to-shrink (21/35 files over baseline); (6) owner-blocked origin credential, Godot pin
   drift, and no remote CI.
 
 - **v469 environment / process gaps.**

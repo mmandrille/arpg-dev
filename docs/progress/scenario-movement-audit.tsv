@@ -276,9 +276,9 @@ client/107_dungeon_room_dressing_deep.json	dungeon_room_dressing_deep	godot_clie
 client/108_dungeon_frame_pacing_probe.json	dungeon_frame_pacing_probe	godot_client	extended	contract	0	0		v497 frame pacing fixture
 client/109_attack_block_contact.json	attack_block_contact	godot_client	extended	setup-eliminable	5	5		v496 block contact proof
 client/110_boss_lane_telegraphs_visual.json	boss_lane_telegraphs_visual	godot_client	extended	contract	0	0		active player-camera warning proof; no navigation setup
-client/111_boss_intro_banner_cave_warden.json	boss_intro_banner_cave_warden	godot_client	extended	contract	0	0		v512 boss-floor lab start; banner/aura/headgear proof; no navigation setup
-client/112_boss_intro_banner_crypt_matron.json	boss_intro_banner_crypt_matron	godot_client	extended	contract	0	0		v512 boss-floor lab start; banner/aura proof; no navigation setup
-client/113_hud_polish_visual.json	hud_polish_visual	godot_client	extended	contract	0	0		real-camera HUD capture on the boss lab start; no navigation setup
+client/111_boss_intro_banner_cave_warden.json	boss_intro_banner_cave_warden	godot_client	pack	contract	0	0		v512 boss-floor lab start; banner/aura/headgear proof; no navigation setup
+client/112_boss_intro_banner_crypt_matron.json	boss_intro_banner_crypt_matron	godot_client	pack	contract	0	0		v512 boss-floor lab start; banner/aura proof; no navigation setup
+client/113_hud_polish_visual.json	hud_polish_visual	godot_client	pack	contract	0	0		real-camera HUD capture on the boss lab start; no navigation setup
 client/town_living_life.json	town_living_life	godot_client	extended	contract	1	1		plaza movement is part of the live town presentation proof
 client/dungeon_light_readability_boss_balanced.json	dungeon_light_readability_boss_balanced	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
 client/dungeon_light_readability_boss_performance.json	dungeon_light_readability_boss_performance	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
@@ -288,5 +288,5 @@ client/dungeon_light_readability_shallow.json	dungeon_light_readability_shallow	
 client/dungeon_light_readability_torch.json	dungeon_light_readability_torch	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
 client/v496_attack_contact_timeline.json	v496_attack_contact_timeline	godot_client	extended	setup-eliminable	6	6		v496 sword and bow timeline
 client/v508_rarity_cue_preset_camera.json	v508_rarity_cue_preset_camera	godot_client	extended	contract	0	0		preset loot interaction and inventory capture; no navigation setup
-client/monster_windup_pose.json	monster_windup_pose	godot_client	extended	contract	0	0		v513 windup pose proof; click_entity places the player, no navigation setup
+client/monster_windup_pose.json	monster_windup_pose	godot_client	pack	contract	0	0		v513 windup pose proof; click_entity places the player, no navigation setup
 client/v511_monster_variant_pack.json	v511_monster_variant_pack	godot_client	extended	contract	0	0		stationary level-1 capture of the pinned live population; no navigation setup

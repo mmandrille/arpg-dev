@@ -1,6 +1,5 @@
 {
   "id": "monster_windup_pose",
-  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "combat_control_lab",
   "seed": "windupposev513",

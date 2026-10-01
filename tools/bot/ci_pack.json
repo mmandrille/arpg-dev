@@ -37,6 +37,10 @@
     "model_reaction_polish",
     "mercenary_roster_ui",
     "account_stash_panel",
-    "movement_visual_smoothing"
+    "movement_visual_smoothing",
+    "boss_intro_banner_cave_warden",
+    "boss_intro_banner_crypt_matron",
+    "hud_polish_visual",
+    "monster_windup_pose"
   ]
 }

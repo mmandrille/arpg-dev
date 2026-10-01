@@ -1,6 +1,5 @@
 {
   "id": "boss_intro_banner_cave_warden",
-  "ci_tier": "extended",
   "runner": "godot_client",
   "world_id": "boss_floor_gate_lab",
   "seed": "v240_boss_portrait_panel",

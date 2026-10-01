@@ -3057,7 +3057,7 @@ def cross_checks(report: Report) -> None:
         manifest_assets=manifest_assets,
     )
     validate_rarity_cues(report, load(ASSETS / "rarity_cues.v0.json"), item_templates)
-    validate_ui_theme(report, load(ASSETS / "ui_theme.v0.json"), item_templates)
+    validate_ui_theme(report, load(ASSETS / "ui_theme.v0.json"), item_templates, ROOT / "client" / "scripts")
     validate_monster_variants(report, load(ASSETS / "kit_monster_presentation.v0.json"), dungeon_generation)
 
     validate_unique_items_catalog(report, unique_items, item_templates, unique_effects)

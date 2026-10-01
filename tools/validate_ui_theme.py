@@ -1,14 +1,43 @@
 """Semantic guard for the shared client UI theme catalog (token references, rarity parity)."""
 from __future__ import annotations
 
+import re
+from pathlib import Path
 from typing import Any
+
+# Literal-token call sites: UiTheme.<kind>("token"); dynamic tokens (concatenation) are not scanned.
+_TOKEN_CALL = re.compile(r'\bUiTheme\.(color|spacing|frame|font_size|font_color|rarity_background)\(\s*"([A-Za-z0-9_]+)"\s*[,)]')
+_FONT_APPLY = re.compile(r'\bUiTheme\.apply_font\([^,()]+,\s*"([A-Za-z0-9_]+)"\s*\)')
+
+
+def _catalog_for(theme: dict, kind: str) -> set:
+    key = {"color": "colors", "spacing": "spacing", "frame": "frames", "font_size": "fonts",
+           "font_color": "fonts", "font": "fonts", "rarity_background": "rarity_slot_backgrounds"}[kind]
+    return set(theme[key])
+
+
+def unresolved_client_tokens(theme: dict, scripts_dir: Path) -> list[str]:
+    """Client call sites that reference a UiTheme token missing from the catalog."""
+    problems: list[str] = []
+    for path in sorted(scripts_dir.glob("*.gd")):
+        if path.name == "ui_theme.gd":
+            continue
+        for number, line in enumerate(path.read_text().splitlines(), 1):
+            if line.lstrip().startswith("#"):
+                continue
+            refs = [(m.group(1), m.group(2)) for m in _TOKEN_CALL.finditer(line)]
+            refs += [("font", m.group(1)) for m in _FONT_APPLY.finditer(line)]
+            for kind, token in refs:
+                if token not in _catalog_for(theme, kind):
+                    problems.append(f"{path.name}:{number} UiTheme.{kind} -> unknown token {token}")
+    return problems
 
 
 def _as_list(value: Any) -> list:
     return list(value) if isinstance(value, list) else [value]
 
 
-def validate_ui_theme(report: Any, theme: dict, item_templates: dict) -> None:
+def validate_ui_theme(report: Any, theme: dict, item_templates: dict, scripts_dir: Path | None = None) -> None:
     colors = set(theme["colors"])
     spacing = set(theme["spacing"])
     problems: list[str] = []
@@ -61,3 +90,10 @@ def validate_ui_theme(report: Any, theme: dict, item_templates: dict) -> None:
         report.fail("ui theme inventory rarity tokens", "missing " + ", ".join(missing))
     else:
         report.ok("ui theme defines inventory rarity color and border tokens for every rarity")
+
+    if scripts_dir is not None:
+        unresolved = unresolved_client_tokens(theme, scripts_dir)
+        if unresolved:
+            report.fail("ui theme client token references", "; ".join(unresolved))
+        else:
+            report.ok("client UiTheme literal token references resolve in the catalog")

@@ -1,6 +1,7 @@
 ## Combat VFX (ADR-0018 P5, v492): one-shot GPUParticles3D bursts drawn with the in-repo
-## vfx_soft_glow shader, tuned by shared/assets/vfx_presentation.v0.json. Hit sparks and death bursts
-## come from GameplayFeedbackPresentation reactions; HealRainEffect uses the same builder.
+## vfx_soft_glow shader, tuned by shared/assets/vfx_presentation.v0.json. Skill-specific hit bursts,
+## generic hit sparks, and death bursts come from GameplayFeedbackPresentation reactions; HealRainEffect
+## uses the same builder.
 ## Particle counts scale with the active graphics tier (render_presentation quality_tiers
 ## particle_scale), which SceneLightingRig.sync hands over.
 class_name CombatVfx
@@ -37,6 +38,22 @@ static func effect(effect_id: String) -> Dictionary:
 	ensure_loaded()
 	var raw = (_config.get("effects", {}) as Dictionary).get(effect_id, {})
 	return (raw as Dictionary).duplicate(true) if typeof(raw) == TYPE_DICTIONARY else {}
+
+
+## A mapped skill gets a dedicated hit burst. Unknown skills retain the generic hit spark.
+## Death always uses its own effect, even when the event also carries a skill_id.
+static func reaction_effect_id(ev: Dictionary, reaction_name: String) -> String:
+	if reaction_name == "death":
+		return "death_burst"
+	if reaction_name != "hit":
+		return "hit_spark"
+	ensure_loaded()
+	var raw_mappings = _config.get("skill_hit_effects", {})
+	if typeof(raw_mappings) == TYPE_DICTIONARY:
+		var effect_id := str((raw_mappings as Dictionary).get(str(ev.get("skill_id", "")), ""))
+		if not effect(effect_id).is_empty():
+			return effect_id
+	return "hit_spark"
 
 
 ## Start/end colours for a damage type, or the effect's own when the type is unknown.
@@ -139,17 +156,22 @@ static func _quad(glow_energy: float) -> QuadMesh:
 static func spawn_for_reaction(parent: Node, world_pos: Vector3, source_pos: Vector3, ev: Dictionary, reaction_name: String) -> GPUParticles3D:
 	if parent == null:
 		return null
-	var effect_id := "death_burst" if reaction_name == "death" else "hit_spark"
+	var effect_id := reaction_effect_id(ev, reaction_name)
 	var cfg := effect(effect_id)
 	if cfg.is_empty():
 		return null
 	var direction := Vector3.UP
+	var surface_offset_direction := Vector3.ZERO
 	if bool(cfg.get("direction_from_source", false)):
 		var away := world_pos - source_pos
 		away.y = 0.0
-		direction = (away.normalized() + Vector3.UP * 0.6) if away.length_squared() > 0.0001 else Vector3.UP
+		if away.length_squared() > 0.0001:
+			direction = away.normalized() + Vector3.UP * 0.6
+			if source_pos.length_squared() < 1.0e20:
+				surface_offset_direction = away.normalized()
 	var colors := colors_for(effect_id, str(ev.get("damage_type", ""))) if effect_id == "hit_spark" else []
 	var burst := make_burst(effect_id, direction, colors)
-	burst.position = world_pos + Vector3(0.0, float(cfg.get("spawn_height", 0.0)), 0.0)
+	burst.position = world_pos + Vector3(0.0, float(cfg.get("spawn_height", 0.0)), 0.0) \
+		+ surface_offset_direction * float(cfg.get("spawn_surface_offset", 0.0))
 	parent.add_child(burst)
 	return burst

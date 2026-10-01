@@ -125,7 +125,6 @@ def rank_assertion(entry: SkillDemoEntry, rank: int) -> dict[str, Any]:
         "skill_id": entry.skill_id,
         "rank": rank,
         "max_rank": entry.max_rank,
-        "can_spend": False,
     }
 
 
@@ -149,7 +148,7 @@ def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
             })
     elif entry.kind in {"projectile_attack", "cold_projectile_attack", "chain_projectile_attack"}:
         steps.extend([
-            {"action": "move_until_player_position", "x": 4, "y": 5, "pathfind": True, "max_ticks": 220},
+            {"action": "move_until_player_position", "x": 18, "y": 5, "pathfind": True, "max_ticks": 220},
             {
                 "action": "cast_skill",
                 "skill_id": entry.skill_id,
@@ -158,7 +157,7 @@ def build_steps(entry: SkillDemoEntry) -> list[dict[str, Any]]:
             },
             {
                 "action": "wait_until_assertion",
-                "assertion": {"type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1},
+                "assertion": {"type": "combat_event_seen", "event_type": "monster_damaged", "target_monster_def_id": "combat_lab_soft_target", "min_damage": 1},
                 "timeout_s": 8,
             },
         ])
@@ -184,7 +183,14 @@ def build_assertions(entry: SkillDemoEntry, rank: int = 1) -> list[dict[str, Any
         {"type": "event_seen", "event_type": "skill_cast", "skill_id": entry.skill_id, "rank": rank},
         rank_assertion(entry, rank),
     ]
-    if entry.kind in {"projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack"}:
+    if entry.kind in {"projectile_attack", "cold_projectile_attack", "chain_projectile_attack"}:
+        assertions.append({
+            "type": "combat_event_seen",
+            "event_type": "monster_damaged",
+            "target_monster_def_id": "combat_lab_soft_target",
+            "min_damage": 1,
+        })
+    elif entry.kind == "cone_attack":
         assertions.append({"type": "combat_event_seen", "event_type": "monster_damaged", "min_damage": 1})
     elif entry.kind in {"self_buff", "area_stat_buff"}:
         assertions.append({"type": "event_seen", "event_type": "skill_effect_started", "skill_id": entry.skill_id})

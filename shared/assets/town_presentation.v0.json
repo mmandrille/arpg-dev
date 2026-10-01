@@ -379,6 +379,38 @@
           "scale_max": 0.6
         }
       ]
+    },
+    "ambient_life": {
+      "enabled": true,
+      "actor_clearance_m": 0.5,
+      "prop_clearance_m": 1.9,
+      "anchor_clearance_m": 2.0,
+      "service_path_margin_m": 0.5,
+      "fence_clearance_m": 0.8,
+      "gate_approach_clearance_m": 0.5,
+      "actors": [
+        {
+          "id": "west_resident",
+          "class_id": "ranger",
+          "mode": "idle",
+          "position": {"x": 2.5, "y": 16.0},
+          "yaw_degrees": -90.0
+        },
+        {
+          "id": "north_resident",
+          "class_id": "rogue",
+          "mode": "patrol",
+          "path": [
+            {"x": 19.0, "y": 4.5},
+            {"x": 21.5, "y": 5.0},
+            {"x": 21.5, "y": 8.5},
+            {"x": 19.0, "y": 8.5}
+          ],
+          "speed_mps": 0.65,
+          "pause_s": 1.8,
+          "phase_s": 0.7
+        }
+      ]
     }
   }
 }

@@ -82,6 +82,7 @@
     "derived_stats": {
       "damage_min": 0,
       "damage_max": 0,
+      "ranged_damage_bonus_percent": 0,
       "armor": 1,
       "attack_speed": 1.025,
       "attack_interval_ticks": 20,

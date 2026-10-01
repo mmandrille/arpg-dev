@@ -16,6 +16,7 @@
         "required": ["phases", "cooldown_ticks"],
         "additionalProperties": false,
         "properties": {
+          "lanes": { "$ref": "#/$defs/lanes" },
           "phases": {
             "type": "array",
             "minItems": 2,
@@ -27,6 +28,27 @@
     }
   },
   "$defs": {
+    "lanes": {
+      "type": "object",
+      "required": ["count", "width", "length", "safe_color", "danger_color", "safe_intensity", "aim_offsets_degrees", "safe_sequence"],
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 3, "maximum": 9 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "length": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
+        "safe_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "danger_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "safe_intensity": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "aim_offsets_degrees": {
+          "type": "array", "minItems": 1, "maxItems": 8,
+          "items": { "type": "number", "minimum": -180, "maximum": 180 }
+        },
+        "safe_sequence": {
+          "type": "array", "minItems": 1, "maxItems": 16,
+          "items": { "type": "integer", "minimum": 0, "maximum": 8 }
+        }
+      }
+    },
     "phase": {
       "type": "object",
       "required": ["kind", "duration_ticks"],
@@ -36,20 +58,21 @@
         "duration_ticks": { "type": "integer", "minimum": 1 },
         "telegraph_type": {
           "type": "string",
-          "enum": ["body_color_charge", "circle", "line", "cone", "rectangle"]
+          "enum": ["body_color_charge", "circle", "line", "cone", "rectangle", "lanes"]
         },
         "from_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
         "to_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
         "hit_shape": {
           "type": "string",
-          "enum": ["melee_contact", "circle", "line", "cone", "rectangle"]
+          "enum": ["melee_contact", "circle", "line", "cone", "rectangle", "lanes"]
         },
         "shape": {
           "type": "string",
-          "enum": ["melee_contact", "circle", "line", "cone", "rectangle"]
+          "enum": ["melee_contact", "circle", "line", "cone", "rectangle", "lanes"]
         },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "width": { "type": "number", "exclusiveMinimum": 0 },
+        "lane_intensity": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
         "summon_monster_def_id": { "type": "string", "minLength": 1 },
         "summon_count": { "type": "integer", "minimum": 1 },
         "summon_radius": { "type": "number", "exclusiveMinimum": 0 },

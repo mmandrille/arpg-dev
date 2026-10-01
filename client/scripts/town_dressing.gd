@@ -14,6 +14,7 @@ const LoaderScript := preload("res://scripts/town_presentation_loader.gd")
 const LibraryScript := preload("res://scripts/kit_piece_library.gd")
 const GroundDetailScript := preload("res://scripts/town_ground_detail.gd")
 const NatureLandmarksScript := preload("res://scripts/town_nature_landmarks.gd")
+const AmbientLifeScript := preload("res://scripts/town_ambient_life.gd")
 
 const ROOT_NAME := "TownDressing"
 const PLAZA_NAME := GroundDetailScript.PLAZA_NAME
@@ -55,6 +56,7 @@ static func build() -> Node3D:
 	if bool(cfg.get("enabled", false)):
 		root.add_child(GroundDetailScript.build(cfg))
 		root.add_child(NatureLandmarksScript.build(cfg))
+		root.add_child(AmbientLifeScript.build(cfg))
 		var props: Array = cfg.get("props", [])
 		for i in props.size():
 			var node := _make_prop(props[i], i)

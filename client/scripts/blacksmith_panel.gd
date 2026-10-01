@@ -17,6 +17,7 @@ const BlacksmithUpgradeChanceScript := preload("res://scripts/blacksmith_upgrade
 const BlacksmithItemCraftSlotScript := preload("res://scripts/blacksmith_item_craft_slot.gd")
 const BlacksmithResourceCraftSlotScript := preload("res://scripts/blacksmith_resource_craft_slot.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const RarityCueLoaderScript := preload("res://scripts/rarity_cue_loader.gd")
 const PANEL_SIZE := Vector2(320, 260)
 const STAGE_SLOT_SIZE := Vector2(84, 84)
 const BODY_FONT_SIZE := 18
@@ -715,9 +716,9 @@ func _item_title(item: Dictionary) -> String:
 
 func _item_detail(item: Dictionary) -> String:
 	var lines: Array = item.get("summary_lines", [])
-	if not lines.is_empty():
-		return str(lines[0])
-	return _upgrade_level_label(_item_level(item))
+	var detail := str(lines[0]) if not lines.is_empty() else _upgrade_level_label(_item_level(item))
+	var cue := RarityCueLoaderScript.cue_for_item(item)
+	return detail if cue.is_empty() else "%s\nRarity: %s" % [detail, str(cue.get("name", ""))]
 
 
 func _upgrade_level_label(level: int) -> String:
@@ -730,7 +731,7 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
 	var rect := Rect2(Vector2.ZERO, slot.size)
 	var label := str(icon.get("label", _short_label(def_id)))
-	ItemIconDrawerScript.draw(slot, rect, icon, label, false, 0.18, ICON_FONT_SIZE)
+	ItemIconDrawerScript.draw(slot, rect, icon, label, false, 0.18, ICON_FONT_SIZE, item)
 
 
 func _drag_preview(item: Dictionary) -> Control:

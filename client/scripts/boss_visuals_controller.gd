@@ -3,6 +3,7 @@ extends RefCounted
 
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const BossArenaPresenceScript := preload("res://scripts/boss_arena_presence.gd")
+const BossLaneMarkerScript := preload("res://scripts/boss_lane_marker.gd")
 
 var ctx: RefCounted
 var boss_health_bar
@@ -135,11 +136,13 @@ func apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 		"remaining_ticks_float": float(duration),
 		"telegraph": ev.get("telegraph", {}),
 		"hit_shape": ev.get("hit_shape", {}),
+		"lane": ev.get("lane", {}),
 	}
 	var node := rec.get("node", null) as Node3D
 	if node == null:
 		return
 	var phase_kind := str(ev.get("phase_kind", ""))
+	var lane: Dictionary = ev.get("lane", {})
 	if phase_kind == "telegraph":
 		var telegraph: Dictionary = ev.get("telegraph", {})
 		var tint := Color(str(telegraph.get("to_color", "#ff0000")))
@@ -147,7 +150,15 @@ func apply_boss_phase_started(entity_id: String, ev: Dictionary) -> void:
 		rec["telegraph_tint"] = tint.to_html(false)
 		if ctx.apply_model_tint.is_valid():
 			ctx.apply_model_tint.call(node, tint)
-		sync_boss_telegraph_marker(rec, telegraph)
+		if not lane.is_empty():
+			remove_legacy_boss_telegraph_marker(rec)
+			BossLaneMarkerScript.sync(rec, lane)
+		else:
+			sync_boss_telegraph_marker(rec, telegraph)
+	elif phase_kind == "active" and not lane.is_empty():
+		rec["boss_telegraph_active"] = false
+		remove_legacy_boss_telegraph_marker(rec)
+		BossLaneMarkerScript.sync(rec, lane)
 	else:
 		rec["boss_telegraph_active"] = false
 		remove_boss_telegraph_marker(rec)
@@ -181,8 +192,19 @@ func normalize_boss_phase_metadata(rec: Dictionary) -> void:
 			rec["telegraph_tint"] = Color(str(telegraph.get("to_color", "#ff0000"))).to_html(false)
 
 func sync_boss_telegraph_marker_from_record(rec: Dictionary) -> void:
+	if int(rec.get("hp", 1)) <= 0:
+		remove_boss_telegraph_marker(rec)
+		return
 	var phase := boss_phase_for_display(rec)
-	if phase.is_empty() or str(phase.get("phase_kind", "")) != "telegraph":
+	if phase.is_empty():
+		remove_boss_telegraph_marker(rec)
+		return
+	var lane: Dictionary = phase.get("lane", {})
+	if not lane.is_empty() and str(phase.get("phase_kind", "")) in ["telegraph", "active"]:
+		remove_legacy_boss_telegraph_marker(rec)
+		BossLaneMarkerScript.sync(rec, lane)
+		return
+	if str(phase.get("phase_kind", "")) != "telegraph":
 		remove_boss_telegraph_marker(rec)
 		return
 	var telegraph: Dictionary = phase.get("telegraph", {})
@@ -224,16 +246,21 @@ func sync_boss_telegraph_marker(rec: Dictionary, telegraph: Dictionary) -> void:
 	rec["telegraph_marker_color"] = color.to_html(false)
 
 func remove_boss_telegraph_marker(rec: Dictionary) -> void:
-	var node := rec.get("node", null) as Node3D
-	if node != null:
-		var marker := node.find_child(ClientConstantsScript.BOSS_TELEGRAPH_MARKER_NAME, false, false)
-		if marker != null:
-			marker.queue_free()
+	BossLaneMarkerScript.remove(rec)
+	remove_legacy_boss_telegraph_marker(rec)
 	rec["has_boss_telegraph_marker"] = false
 	rec["telegraph_radius"] = 0.0
 	rec["telegraph_marker_shape"] = ""
 	rec["telegraph_marker_width"] = 0.0
 	rec["telegraph_marker_color"] = ""
+
+func remove_legacy_boss_telegraph_marker(rec: Dictionary) -> void:
+	var node := rec.get("node", null) as Node3D
+	if node != null:
+		var marker := node.find_child(ClientConstantsScript.BOSS_TELEGRAPH_MARKER_NAME, false, false)
+		if marker != null:
+			node.remove_child(marker)
+			marker.queue_free()
 
 func boss_telegraph_marker_shape(rec: Dictionary, telegraph: Dictionary) -> String:
 	var phase: Dictionary = rec.get("boss_phase", {})

@@ -8,10 +8,15 @@ extends RefCounted
 const DungeonDepthLightingScript := preload("res://scripts/dungeon_depth_lighting.gd")
 const RenderPresentationLoaderScript := preload("res://scripts/render_presentation_loader.gd")
 const RenderEnvironmentPresentationScript := preload("res://scripts/render_environment_presentation.gd")
+const DungeonDepthMoodLoaderScript := preload("res://scripts/dungeon_depth_mood_loader.gd")
 
 var directional: DirectionalLight3D
 var world_environment: WorldEnvironment
 var _parent: Node3D
+# Private cache: consumers pass this config to read-only presentation application code.
+var _has_cached_dungeon_context := false
+var _cached_dungeon_palette_id := ""
+var _cached_dungeon_context_cfg: Dictionary = {}
 
 
 func attach(parent: Node3D) -> void:
@@ -39,8 +44,13 @@ func sync(
 	)
 	CombatVfx.set_quality(quality)  # v492: particle counts follow the graphics tier
 	var context_id := RenderPresentationLoaderScript.context_for_level(level, town_fog_active)
+	var context_cfg: Dictionary
+	if level < 0:
+		context_cfg = _dungeon_context_for_palette_id(str(profile.get("palette_id", "")))
+	else:
+		context_cfg = RenderPresentationLoaderScript.context(context_id)
 	RenderEnvironmentPresentationScript.apply(
-		RenderPresentationLoaderScript.context(context_id),
+		context_cfg,
 		RenderPresentationLoaderScript.quality_tier(quality),
 		RenderPresentationLoaderScript.key_light(),
 		directional,
@@ -48,6 +58,15 @@ func sync(
 		_viewport(),
 	)
 	return profile
+
+
+func _dungeon_context_for_palette_id(palette_id: String) -> Dictionary:
+	if not _has_cached_dungeon_context or palette_id != _cached_dungeon_palette_id:
+		var base_context := RenderPresentationLoaderScript.context(RenderPresentationLoaderScript.CONTEXT_DUNGEON)
+		_cached_dungeon_context_cfg = DungeonDepthMoodLoaderScript.context_with_fog(base_context, palette_id)
+		_cached_dungeon_palette_id = palette_id
+		_has_cached_dungeon_context = true
+	return _cached_dungeon_context_cfg
 
 
 func _viewport() -> Viewport:

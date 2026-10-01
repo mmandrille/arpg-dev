@@ -9,9 +9,16 @@
   "assertions": [],
   "visual": {
     "camera": {
-      "x": 16,
-      "y": 8,
-      "zoom": 1.0
+      "zoom": 1.5
+    },
+    "capture_frame": {
+      "type": "capture_frame",
+      "event_type": "monster_damaged",
+      "monster_def_id": "combat_lab_soft_target",
+      "skill_ids": ["magic_bolt", "ice_shard", "lightning"],
+      "delay_frames": 3,
+      "name_prefix": "v502_skill",
+      "skip_if_headless": true
     },
     "post_complete_hold_s": 3.0
   }

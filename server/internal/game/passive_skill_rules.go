@@ -33,6 +33,17 @@ func validatePassiveStatSkillPayload(skillID string, skill SkillDef) error {
 			}
 		}
 	}
+	if cfg := skill.PassiveStats.RangerAffinityDamage; cfg != nil {
+		if skillID != "deadeye" || skill.Class != "ranger" {
+			return fmt.Errorf("game: invalid rules skills.%s.passive_stats.ranger_affinity_damage: only Ranger Deadeye may own this rule", skillID)
+		}
+		if cfg.AffinityStat != "str" && cfg.AffinityStat != "dex" && cfg.AffinityStat != "vit" && cfg.AffinityStat != "magic" {
+			return fmt.Errorf("game: invalid rules skills.%s.passive_stats.ranger_affinity_damage.affinity_stat", skillID)
+		}
+		if cfg.BasePercentPerAffinity < 0 || cfg.BasePercentPerAffinity > 10 || cfg.StatPointsPerExtraPercent < 1 || cfg.StatPointsPerExtraPercent > 100 || cfg.MaxActiveAffinities < 1 || cfg.MaxActiveAffinities > 3 || cfg.MaxBonusPercent < 1 || cfg.MaxBonusPercent > 25 {
+			return fmt.Errorf("game: invalid rules skills.%s.passive_stats.ranger_affinity_damage: coefficients outside supported bounds", skillID)
+		}
+	}
 	if len(skill.Effects) > 0 || skill.Execute.ThresholdPercentBase > 0 || skill.Projectile.Range > 0 || skill.Cone.Range > 0 || skill.Dash.RangeBase > 0 || skill.Mobility.RangeBase > 0 {
 		return fmt.Errorf("game: invalid rules skills.%s: passive_stat_bonus does not support active payloads", skillID)
 	}

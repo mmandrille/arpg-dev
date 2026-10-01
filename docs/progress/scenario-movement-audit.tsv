@@ -40,6 +40,9 @@ potion_shop_lab.json	potion_shop_lab	protocol	extended	contract	0	0
 120_steward_hunt_quest.json	steward_hunt_quest	protocol	extended	setup-eliminable	2	2		
 121_affinity_passive_barbarian.json	affinity_passive_barbarian	protocol	extended	contract	0	0		lab loot + debug progression; no navigation setup
 122_affinity_passive_rogue.json	affinity_passive_rogue	protocol	extended	contract	0	0		lab loot + debug progression; no navigation setup
+123_boss_lane_telegraphs.json	boss_lane_telegraphs	protocol	extended	contract	1	1		server-authored safe-lane dodge is the movement contract
+124_boss_lane_danger_hit.json	boss_lane_danger_hit	protocol	extended	contract	1	1		server-authored danger-lane position proves the strike
+125_affinity_passive_ranger.json	affinity_passive_ranger	protocol	extended	contract	0	0		lab loot + debug progression; no navigation setup
 12_dungeon_levels.json	dungeon_levels	protocol	pack	contract	3	3		
 13_teleporter_lab.json	teleporter_lab	protocol	extended	contract	4	4		
 14_dungeon_monsters.json	dungeon_monsters	protocol	extended	setup-eliminable	1	1		
@@ -272,6 +275,8 @@ client/106_live_targeting_corrections.json	live_targeting_corrections	godot_clie
 client/107_dungeon_room_dressing_deep.json	dungeon_room_dressing_deep	godot_client	extended	contract	0	0		v494 deep room dressing proof
 client/108_dungeon_frame_pacing_probe.json	dungeon_frame_pacing_probe	godot_client	extended	contract	0	0		v497 frame pacing fixture
 client/109_attack_block_contact.json	attack_block_contact	godot_client	extended	setup-eliminable	5	5		v496 block contact proof
+client/110_boss_lane_telegraphs_visual.json	boss_lane_telegraphs_visual	godot_client	extended	contract	0	0		active player-camera warning proof; no navigation setup
+client/town_living_life.json	town_living_life	godot_client	extended	contract	1	1		plaza movement is part of the live town presentation proof
 client/dungeon_light_readability_boss_balanced.json	dungeon_light_readability_boss_balanced	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
 client/dungeon_light_readability_boss_performance.json	dungeon_light_readability_boss_performance	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
 client/dungeon_light_readability_deep.json	dungeon_light_readability_deep	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
@@ -279,3 +284,4 @@ client/dungeon_light_readability_engaged_enemy.json	dungeon_light_readability_en
 client/dungeon_light_readability_shallow.json	dungeon_light_readability_shallow	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
 client/dungeon_light_readability_torch.json	dungeon_light_readability_torch	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
 client/v496_attack_contact_timeline.json	v496_attack_contact_timeline	godot_client	extended	setup-eliminable	6	6		v496 sword and bow timeline
+client/v508_rarity_cue_preset_camera.json	v508_rarity_cue_preset_camera	godot_client	extended	contract	0	0		preset loot interaction and inventory capture; no navigation setup

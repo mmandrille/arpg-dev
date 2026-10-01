@@ -97,6 +97,9 @@ func validateSkillKindPayload(skillID string, skill SkillDef, monsters map[strin
 	if err := validateDamageType("skills."+skillID+".damage_type", skill.DamageType); err != nil {
 		return err
 	}
+	if skill.RangerAffinityEligible != nil && (!*skill.RangerAffinityEligible || skill.Class != "ranger" || skill.Kind != "projectile_attack") {
+		return fmt.Errorf("game: invalid rules skills.%s.ranger_affinity_eligible: only true on Ranger projectile attacks is supported", skillID)
+	}
 	switch skill.Kind {
 	case "projectile_attack":
 		if skill.Targeting != "direction" {

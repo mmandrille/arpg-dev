@@ -1,0 +1,21 @@
+{
+  "rule": {
+    "affinity_stat": "dex",
+    "base_percent_per_affinity": 2,
+    "stat_points_per_extra_percent": 10,
+    "max_active_affinities": 2,
+    "max_bonus_percent": 12
+  },
+  "cases": [
+    { "name": "unallocated", "rank": 0, "effective_stat": 17, "affinities": 2, "raw_min": 99, "raw_max": 149, "expected_percent": 0, "expected_min": 99, "expected_max": 149 },
+    { "name": "no_affinity", "rank": 1, "effective_stat": 17, "affinities": 0, "raw_min": 99, "raw_max": 149, "expected_percent": 0, "expected_min": 99, "expected_max": 149 },
+    { "name": "one_affinity", "rank": 1, "effective_stat": 17, "affinities": 1, "raw_min": 99, "raw_max": 149, "expected_percent": 3, "expected_min": 101, "expected_max": 153 },
+    { "name": "two_affinities", "rank": 1, "effective_stat": 17, "affinities": 2, "raw_min": 99, "raw_max": 149, "expected_percent": 6, "expected_min": 104, "expected_max": 157 },
+    { "name": "third_capped", "rank": 1, "effective_stat": 17, "affinities": 3, "raw_min": 99, "raw_max": 149, "expected_percent": 6, "expected_min": 104, "expected_max": 157 },
+    { "name": "below_threshold", "rank": 1, "effective_stat": 9, "affinities": 1, "raw_min": 99, "raw_max": 149, "expected_percent": 2, "expected_min": 100, "expected_max": 151 },
+    { "name": "at_threshold", "rank": 1, "effective_stat": 10, "affinities": 1, "raw_min": 99, "raw_max": 149, "expected_percent": 3, "expected_min": 101, "expected_max": 153 },
+    { "name": "bonus_cap", "rank": 1, "effective_stat": 40, "affinities": 2, "raw_min": 99, "raw_max": 149, "expected_percent": 12, "expected_min": 110, "expected_max": 166 },
+    { "name": "changed_rule", "rank": 1, "effective_stat": 17, "affinities": 3, "raw_min": 99, "raw_max": 149, "expected_percent": 15, "expected_min": 113, "expected_max": 171,
+      "rule_override": { "affinity_stat": "dex", "base_percent_per_affinity": 3, "stat_points_per_extra_percent": 8, "max_active_affinities": 3, "max_bonus_percent": 15 } }
+  ]
+}

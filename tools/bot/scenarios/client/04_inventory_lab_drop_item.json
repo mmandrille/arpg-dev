@@ -20,6 +20,12 @@
       "item_def_id": "rusty_sword"
     },
     {
+      "type": "capture_frame",
+      "name": "v508_ground_loot_camera",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    },
+    {
       "type": "click_entity",
       "entity_type": "loot"
     },
@@ -38,6 +44,12 @@
     {
       "type": "assert_panel_visible",
       "visible": true
+    },
+    {
+      "type": "capture_frame",
+      "name": "v508_inventory_camera",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
     },
     {
       "type": "drag_bag_to_outside",

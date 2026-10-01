@@ -28,7 +28,7 @@ def _default_output(root: Path, focus: str) -> Path:
 def main() -> int:
     root = _repo_root()
     parser = argparse.ArgumentParser(description="Render a focused Godot client visual.")
-    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "town-play", "skeleton", "eye-view", "dungeon-room"], default="gear")
+    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "rarity-cues", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "mystery-shop", "blacksmith", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "town-play", "skeleton", "eye-view", "dungeon-room"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
     parser.add_argument("--class-id", default="", help="Class id for gear focus, e.g. paladin.")
@@ -44,6 +44,9 @@ def main() -> int:
     parser.add_argument("--level", type=int, default=-1, help="Dungeon level for dungeon-room focus (negative).")
     parser.add_argument("--town-view", choices=["plaza", "vendor", "gate", "west", "north"], default="plaza")
     parser.add_argument("--town-zoom", choices=["normal", "max"], default="normal")
+    parser.add_argument("--ground-tone", choices=["dark", "light"], default="dark")
+    parser.add_argument("--reveal", action="store_true", help="Reveal the center rare drop's full ground label in the rarity fixture.")
+    parser.add_argument("--baseline", action="store_true", help="Hide v508 cues in focused comparison captures.")
     parser.add_argument("--quality", choices=["balanced", "performance"], default="balanced")
     parser.add_argument("--godot", default="godot")
     parser.add_argument("--timeout", type=float, default=90.0, help="Seconds before a screenshot capture is killed.")
@@ -69,8 +72,10 @@ def main() -> int:
         width, height = 480, 480
     if args.focus == "item-asset" and (args.width, args.height) == (640, 480):
         width, height = 640, 480
-    if args.focus == "shop" and (args.width, args.height) == (640, 480):
+    if args.focus in ("shop", "mystery-shop") and (args.width, args.height) == (640, 480):
         width, height = 1280, 760
+    if args.focus == "blacksmith" and (args.width, args.height) == (640, 480):
+        width, height = 960, 640
     if args.focus == "bishop" and (args.width, args.height) == (640, 480):
         width, height = 640, 520
     if args.focus in ["market-publish", "market-offer"] and (args.width, args.height) == (640, 480):
@@ -95,7 +100,7 @@ def main() -> int:
         width, height = 1280, 720
     if args.focus == "heal-rain" and (args.width, args.height) == (640, 480):
         width, height = 960, 640
-    if args.focus in ("town", "town-play") and (args.width, args.height) == (640, 480):
+    if args.focus in ("town", "town-play", "rarity-cues") and (args.width, args.height) == (640, 480):
         width, height = 1120, 720
     if args.focus == "skeleton" and (args.width, args.height) == (640, 480):
         width, height = 800, 600
@@ -115,6 +120,8 @@ def main() -> int:
         gdscript = root / "client" / "scripts" / "surface_material_room_capture.gd"
     if args.focus == "town-play":
         gdscript = root / "client" / "scripts" / "showme" / "showme_town_play_capture.gd"
+    if args.focus == "rarity-cues":
+        gdscript = root / "client" / "scripts" / "showme" / "showme_rarity_cues_capture.gd"
     cmd = [
         args.godot,
         "--windowed",
@@ -162,6 +169,10 @@ def main() -> int:
         cmd += ["--level", str(args.level)]
     if args.focus == "town-play":
         cmd += ["--town-view", args.town_view, "--town-zoom", args.town_zoom, "--quality", args.quality]
+    if args.focus == "rarity-cues":
+        cmd += ["--town-zoom", args.town_zoom, "--ground-tone", args.ground_tone, "--reveal", str(args.reveal).lower(), "--quality", args.quality]
+    if args.baseline:
+        cmd += ["--baseline", "true"]
 
     print("[showme] running:", " ".join(cmd))
     log_file.unlink(missing_ok=True)  # never judge this run by a previous run's log

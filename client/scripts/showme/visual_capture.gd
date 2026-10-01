@@ -6,6 +6,7 @@ const InventoryPanelScript := preload("res://scripts/inventory_panel.gd")
 const SkillsPanelScript := preload("res://scripts/skills_panel.gd")
 const ShowmeItemIconsCaptureScript := preload("res://scripts/showme/showme_item_icons_capture.gd")
 const ShopPanelScript := preload("res://scripts/shop_panel.gd")
+const RarityUiFixturesScript := preload("res://scripts/showme/showme_rarity_ui_fixtures.gd")
 const BishopPanelScript := preload("res://scripts/bishop_panel.gd")
 const MarketPanelScript := preload("res://scripts/market_panel.gd")
 const CharacterSelectPanelScript := preload("res://scripts/character_select_panel.gd")
@@ -27,6 +28,7 @@ const GearSocketsLoaderScript := preload("res://scripts/gear_sockets_loader.gd")
 const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
 const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 const CameraPresentationsLoaderScript := preload("res://scripts/camera_presentations_loader.gd")
+const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
 
 const DEFAULT_GEAR_ITEMS := ["long_sword", "shield", "helm", "mail", "boots"]
 const ITEM_SLOT := {
@@ -72,6 +74,7 @@ var _skills_panel: Control
 
 func _initialize() -> void:
 	_parse_args()
+	RarityCuePresenterScript.capture_baseline = OS.get_cmdline_user_args().has("--baseline")
 	DisplayServer.window_set_size(Vector2i(_width, _height))
 	get_root().size = Vector2i(_width, _height)
 
@@ -120,6 +123,10 @@ func _initialize() -> void:
 			_subject = await ShowmeItemAssetCaptureScript.setup(self, _asset_id)
 		"shop":
 			await _setup_shop()
+		"mystery-shop":
+			await RarityUiFixturesScript.setup(self, _focus)
+		"blacksmith":
+			await RarityUiFixturesScript.setup(self, _focus)
 		"bishop":
 			await _setup_bishop()
 		"market-board":
@@ -1062,7 +1069,7 @@ func _gear_snapshot(items: Array) -> Dictionary:
 func _inventory_items() -> Array:
 	return [
 		{"item_instance_id": "2001", "item_def_id": "helm", "slot": "head", "equipped": true, "rarity": "rare"},
-		{"item_instance_id": "2002", "item_def_id": "mail", "slot": "chest", "equipped": true, "rarity": "rare"},
+		{"item_instance_id": "2002", "item_def_id": "mail", "slot": "chest", "equipped": true, "rarity": "unique"},
 		{"item_instance_id": "2003", "item_def_id": "war_girdle", "slot": "belt", "equipped": true, "rarity": "magic"},
 		{"item_instance_id": "2004", "item_def_id": "boots", "slot": "boots", "equipped": true, "rarity": "common"},
 		{
@@ -1080,7 +1087,7 @@ func _inventory_items() -> Array:
 			],
 			"requirements_met": true,
 		},
-		{"item_instance_id": "2006", "item_def_id": "shield", "slot": "off_hand", "equipped": true, "rarity": "magic"},
+		{"item_instance_id": "2006", "item_def_id": "shield", "slot": "off_hand", "equipped": true, "rarity": "set"},
 		{
 			"item_instance_id": "2011",
 			"item_def_id": "amulet",

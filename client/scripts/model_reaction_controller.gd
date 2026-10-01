@@ -25,6 +25,11 @@ var _base_tint := Color.WHITE
 var _impact_feedback_count: int = 0
 var _hit_tween: Tween
 var _death_tween: Tween
+var _death_rim_tween: Tween
+var _death_rim_flash_active := false
+var _death_rim_flash_strength := 0.0
+var _death_rim_peak_strength := 0.0
+var _death_rim_flash_tint := Color.TRANSPARENT
 
 
 func _init(root: Node3D, base_tint: Color = Color.WHITE) -> void:
@@ -109,16 +114,68 @@ func enter_death(source_position: Vector3 = UNRESOLVED_SOURCE, fallback_directio
 	_death_tween.parallel().tween_property(_root, "rotation:z", target_z, DEATH_SECONDS)
 
 
+func play_death_rim_flash(config: Dictionary) -> bool:
+	if _root == null or not _terminal or not bool(config.get("enabled", false)):
+		return false
+	var peak_strength := float(config.get("peak_strength", 0.0))
+	var rise_seconds := float(config.get("rise_seconds", 0.0))
+	var hold_seconds := float(config.get("hold_seconds", 0.0))
+	var release_seconds := float(config.get("release_seconds", 0.0))
+	if peak_strength <= 0.0 or peak_strength > 1.0 or rise_seconds <= 0.0 or release_seconds <= 0.0:
+		return false
+	var tint := Color.from_string(str(config.get("tint", "")), Color.TRANSPARENT)
+	if tint == Color.TRANSPARENT:
+		return false
+	_kill_tween(_death_rim_tween)
+	_restore_death_rim_materials()
+	var affected_meshes := 0
+	for key in _base_mesh_colors.keys():
+		var rec: Dictionary = _base_mesh_colors[key]
+		var raw_node = rec.get("node", null)
+		if raw_node == null or not is_instance_valid(raw_node):
+			continue
+		var mesh_node := raw_node as MeshInstance3D
+		if mesh_node == null:
+			continue
+		var mat := _private_material(mesh_node, rec)
+		if mat == null:
+			continue
+		mat.rim_enabled = true
+		mat.rim_tint = 1.0
+		mat.rim = 0.0
+		mat.emission_enabled = true
+		mat.emission = tint
+		mat.emission_energy_multiplier = 0.0
+		rec["death_rim_applied"] = true
+		_base_mesh_colors[key] = rec
+		affected_meshes += 1
+	if affected_meshes == 0:
+		return false
+	_death_rim_peak_strength = peak_strength
+	_death_rim_flash_tint = tint
+	_death_rim_flash_strength = 0.0
+	_death_rim_flash_active = true
+	_death_rim_tween = _root.create_tween()
+	_death_rim_tween.tween_method(_set_death_rim_flash_strength, 0.0, peak_strength, rise_seconds)
+	if hold_seconds > 0.0:
+		_death_rim_tween.tween_interval(hold_seconds)
+	_death_rim_tween.tween_method(_set_death_rim_release, 0.0, 1.0, release_seconds)
+	_death_rim_tween.tween_callback(_restore_death_rim_materials)
+	return true
+
+
 func reset_terminal() -> void:
 	_terminal = false
 	_highlighted = false
 	_last_reaction = ""
 	_kill_tween(_hit_tween)
 	_kill_tween(_death_tween)
+	_kill_tween(_death_rim_tween)
 	if _root != null:
 		_root.rotation.x = _base_rotation.x
 		_root.rotation.z = _base_rotation.z
 	_apply_color_scale(1.0)
+	_restore_death_rim_materials()
 
 
 func is_terminal() -> bool:
@@ -129,8 +186,11 @@ func dispose() -> void:
 	_highlighted = false
 	_kill_tween(_hit_tween)
 	_kill_tween(_death_tween)
+	_kill_tween(_death_rim_tween)
+	_restore_death_rim_materials()
 	_hit_tween = null
 	_death_tween = null
+	_death_rim_tween = null
 	_root = null
 	_base_mesh_colors.clear()
 
@@ -143,6 +203,8 @@ func get_debug_state() -> Dictionary:
 		"base_tint": _base_tint.to_html(false),
 		"current_tint": _current_tint.to_html(false),
 		"impact_feedback_count": _impact_feedback_count,
+		"death_rim_flash_active": _death_rim_flash_active,
+		"death_rim_flash_strength": _death_rim_flash_strength,
 		"base_rotation": _vec_debug(_base_rotation),
 		"current_rotation": _vec_debug(_root.rotation if _root != null else Vector3.ZERO),
 		"mesh_count": _base_mesh_colors.size(),
@@ -158,6 +220,13 @@ func _capture_meshes(node: Node) -> void:
 			"node": mesh_node,
 			"color": mat.albedo_color,
 			"material_private": false,
+			"rim_enabled": mat.rim_enabled,
+			"rim": mat.rim,
+			"rim_tint": mat.rim_tint,
+			"emission_enabled": mat.emission_enabled,
+			"emission": mat.emission,
+			"emission_energy_multiplier": mat.emission_energy_multiplier,
+			"death_rim_applied": false,
 		}
 	for child in node.get_children():
 		_capture_meshes(child)
@@ -226,6 +295,65 @@ func _apply_color_scale(scale: float) -> void:
 	_sync_highlight_emission()
 
 
+func _set_death_rim_flash_strength(strength: float) -> void:
+	_death_rim_flash_strength = strength
+	for key in _base_mesh_colors.keys():
+		var rec: Dictionary = _base_mesh_colors[key]
+		if not bool(rec.get("death_rim_applied", false)):
+			continue
+		var mat := _reaction_material_for_record(rec)
+		if mat != null:
+			mat.rim = strength
+			mat.emission_energy_multiplier = strength
+
+
+func _set_death_rim_release(progress: float) -> void:
+	var clamped := clampf(progress, 0.0, 1.0)
+	_death_rim_flash_strength = lerpf(_death_rim_peak_strength, 0.0, clamped)
+	for key in _base_mesh_colors.keys():
+		var rec: Dictionary = _base_mesh_colors[key]
+		if not bool(rec.get("death_rim_applied", false)):
+			continue
+		var mat := _reaction_material_for_record(rec)
+		if mat != null:
+			mat.rim = lerpf(_death_rim_peak_strength, float(rec.get("rim", 0.0)), clamped)
+			mat.emission_energy_multiplier = lerpf(
+				_death_rim_peak_strength,
+				float(rec.get("emission_energy_multiplier", 0.0)),
+				clamped
+			)
+
+
+func _restore_death_rim_materials() -> void:
+	for key in _base_mesh_colors.keys():
+		var rec: Dictionary = _base_mesh_colors[key]
+		if not bool(rec.get("death_rim_applied", false)):
+			continue
+		var mat := _reaction_material_for_record(rec)
+		if mat != null:
+			mat.rim_enabled = bool(rec.get("rim_enabled", false))
+			mat.rim = float(rec.get("rim", 0.0))
+			mat.rim_tint = float(rec.get("rim_tint", 0.0))
+			mat.emission_enabled = bool(rec.get("emission_enabled", false))
+			mat.emission = rec.get("emission", Color.BLACK)
+			mat.emission_energy_multiplier = float(rec.get("emission_energy_multiplier", 1.0))
+		rec["death_rim_applied"] = false
+		_base_mesh_colors[key] = rec
+	_death_rim_flash_active = false
+	_death_rim_flash_strength = 0.0
+	_death_rim_peak_strength = 0.0
+	_death_rim_flash_tint = Color.TRANSPARENT
+	_death_rim_tween = null
+
+
+func _reaction_material_for_record(rec: Dictionary) -> StandardMaterial3D:
+	var raw_node = rec.get("node", null)
+	if raw_node == null or not is_instance_valid(raw_node):
+		return null
+	var mesh_node := raw_node as MeshInstance3D
+	return _private_material(mesh_node, rec) if mesh_node != null else null
+
+
 func _sync_highlight_emission() -> void:
 	for key in _base_mesh_colors.keys():
 		var rec: Dictionary = _base_mesh_colors[key]
@@ -238,7 +366,11 @@ func _sync_highlight_emission() -> void:
 		var mat := _private_material(mesh_node, rec)
 		if mat == null:
 			continue
-		if _highlighted and not _terminal:
+		if _death_rim_flash_active and bool(rec.get("death_rim_applied", false)):
+			mat.emission_enabled = true
+			mat.emission = _death_rim_flash_tint
+			mat.emission_energy_multiplier = _death_rim_flash_strength
+		elif _highlighted and not _terminal:
 			mat.emission_enabled = true
 			mat.emission = _highlight_color
 			mat.emission_energy_multiplier = HIGHLIGHT_EMISSION_ENERGY

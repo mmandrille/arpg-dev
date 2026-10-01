@@ -1,0 +1,28 @@
+{
+  "id": "boss_lane_telegraphs_visual",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "boss_floor_gate_lab",
+  "seed": "boss_lane_telegraphs",
+  "title": "Boss lane warning from player camera",
+  "description": "Capture the fixed safe lane and staged danger lanes against live boss-floor lighting in Balanced and Performance tiers.",
+  "debug_progression": {
+    "level": 1,
+    "stats": { "str": 5, "dex": 5, "vit": 200, "magic": 5 }
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "set_camera_mode", "mode": "isometric" },
+    { "type": "set_graphics_quality", "quality": "balanced" },
+    { "type": "wait_boss_health_bar", "visible": true, "boss_template_id": "crypt_matron", "pattern_id": "shifting_bulwark", "phase_kind": "telegraph", "phase_index": 0, "timeout_s": 100.0 },
+    { "type": "wait_entity_reaction", "entity_type": "monster", "is_boss": true, "telegraph_marker_shape": "lanes", "has_boss_telegraph_marker": true, "timeout_s": 2.0 },
+    { "type": "capture_frame", "name": "v509_lane_balanced", "timeout_s": 5.0, "skip_if_headless": true },
+    { "type": "set_graphics_quality", "quality": "performance" },
+    { "type": "capture_frame", "name": "v509_lane_performance_stage0", "timeout_s": 5.0, "skip_if_headless": true },
+    { "type": "wait_boss_health_bar", "visible": true, "boss_template_id": "crypt_matron", "pattern_id": "shifting_bulwark", "phase_kind": "telegraph", "phase_index": 1, "timeout_s": 10.0 },
+    { "type": "wait_entity_reaction", "entity_type": "monster", "is_boss": true, "telegraph_marker_shape": "lanes", "has_boss_telegraph_marker": true, "timeout_s": 2.0 },
+    { "type": "capture_frame", "name": "v509_lane_performance", "timeout_s": 5.0, "skip_if_headless": true },
+    { "type": "set_graphics_quality", "quality": "balanced" },
+    { "type": "capture_frame", "name": "v509_lane_balanced_stage1", "timeout_s": 5.0, "skip_if_headless": true }
+  ]
+}

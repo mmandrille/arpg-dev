@@ -12,8 +12,8 @@ func TestClassSpecialistTemplateCount(t *testing.T) {
 			count++
 		}
 	}
-	if count != 15 {
-		t.Fatalf("class_specialist template count = %d, want 15", count)
+	if count != 16 {
+		t.Fatalf("class_specialist template count = %d, want 16", count)
 	}
 }
 

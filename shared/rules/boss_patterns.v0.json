@@ -182,6 +182,49 @@
         }
       ],
       "cooldown_ticks": 12
+    },
+    "shifting_bulwark": {
+      "lanes": {
+        "count": 3,
+        "width": 2.0,
+        "length": 6.0,
+        "safe_color": "#42e5af",
+        "danger_color": "#ff6838",
+        "safe_intensity": 0.65,
+        "aim_offsets_degrees": [0, -30, 30, -90, 90],
+        "safe_sequence": [1, 0, 2]
+      },
+      "phases": [
+        {
+          "kind": "telegraph",
+          "duration_ticks": 30,
+          "telegraph_type": "lanes",
+          "from_color": "#642f83",
+          "to_color": "#ff6838",
+          "hit_shape": "lanes",
+          "lane_intensity": 0.35
+        },
+        {
+          "kind": "telegraph",
+          "duration_ticks": 30,
+          "telegraph_type": "lanes",
+          "from_color": "#642f83",
+          "to_color": "#ff6838",
+          "hit_shape": "lanes",
+          "lane_intensity": 0.7
+        },
+        {
+          "kind": "active",
+          "duration_ticks": 4,
+          "shape": "lanes",
+          "damage": { "min": 5, "max": 7 }
+        },
+        {
+          "kind": "recovery",
+          "duration_ticks": 16
+        }
+      ],
+      "cooldown_ticks": 32
     }
   }
 }

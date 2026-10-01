@@ -54,6 +54,7 @@
       "reaction": "death",
       "timeout_s": 3.0
     },
+    { "type": "capture_frame", "name": "v501_monster_death_rim", "timeout_s": 5.0, "skip_if_headless": true },
     {
       "type": "assert_melee_lunge",
       "count_min": 1,

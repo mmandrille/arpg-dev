@@ -82,7 +82,7 @@ func (s *Sim) handleInstantProjectileSkillCast(in Input, res *TickResult, player
 	targets := s.rangerLineTargets(player, dir, def.Projectile.Range)
 	if len(targets) > 0 {
 		startEvents := len(res.Events)
-		damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank))
+		damageRange := s.rangerAffinitySkillDamage(def, s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank)))
 		target := targets[0].Target
 		s.damageMonsterByPlayerSkillTypedWithID(target, player.id, skillID, in.CorrelationID, res, damageRange, s.skillDamageType(def))
 		for i := startEvents; i < len(res.Events); i++ {

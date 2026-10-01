@@ -2,36 +2,38 @@
 extends SceneTree
 
 const LootNodeFactoryScript := preload("res://scripts/loot_node_factory.gd")
+const LootQuestBadgeShapesScript := preload("res://scripts/loot_quest_badge_shapes.gd")
+const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
 
 
 func _initialize() -> void:
-	_test_common_gold_has_glow_marker_and_label()
-	_test_rare_equipment_keeps_model_and_rarity_glow()
-	_test_rare_equipment_has_pickup_beam()
+	_test_common_gold_shows_item_and_label_without_aura()
+	_test_rare_equipment_shows_item_without_aura()
 	_test_every_hand_item_uses_its_item_visuals_model()
-	_test_armor_keeps_family_fallback_model()
+	_test_gear_keeps_family_fallback_models()
 	_test_kit_ground_tint_keeps_texture()
 	_test_gold_amount_picks_catalog_tier()
 	_test_potions_use_detail_tint()
+	_test_quest_and_badge_catalog_shapes()
 	print("[gdtest] PASS: test_loot_node_factory (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
 
 
-func _test_common_gold_has_glow_marker_and_label() -> void:
+func _test_common_gold_shows_item_and_label_without_aura() -> void:
 	var factory = LootNodeFactoryScript.new({}, {})
 	var node := factory.make_loot_node({"id": "loot_gold", "type": "loot", "item_def_id": "gold", "rarity": "common", "amount": 12})
-	_assert_true("common loot glow exists", node.find_child("RarityGlow", false, false) != null)
-	_assert_true("common spawn pop exists", node.find_child("SpawnPopRing", false, false) != null)
+	_assert_true("gold primitive remains", node.find_child("Box", false, false) != null)
+	_assert_no_aura(node, "common gold")
 	var label := node.find_child("LootLabel", false, false) as Label3D
 	_assert_true("gold label exists", label != null)
 	_assert_eq("gold label text", label.text if label != null else "", "12 gold")
 	node.free()
 
 
-func _test_rare_equipment_keeps_model_and_rarity_glow() -> void:
+func _test_rare_equipment_shows_item_without_aura() -> void:
 	var factory = LootNodeFactoryScript.new({}, {
 		"long_sword": {
 			"ground": {"shape": "blade", "color": "#b8c7d8", "accent": "#f6e8b1", "scale": 1.0},
@@ -39,28 +41,14 @@ func _test_rare_equipment_keeps_model_and_rarity_glow() -> void:
 		},
 	})
 	var node := factory.make_loot_node({"id": "loot_sword", "type": "loot", "item_def_id": "long_sword", "rarity": "rare"})
-	_assert_true("rare loot glow exists", node.find_child("RarityGlow", false, false) != null)
-	_assert_true("rare spawn pop exists", node.find_child("SpawnPopRing", false, false) != null)
 	_assert_true("rare primitive remains", node.find_child("Blade", false, false) != null)
-	var glow := node.find_child("RarityGlow", false, false) as MeshInstance3D
-	var mat := glow.material_override as StandardMaterial3D
-	_assert_true("rare glow uses warm rarity color", mat != null and mat.albedo_color.r > mat.albedo_color.b)
+	_assert_no_aura(node, "rare equipment")
 	node.free()
 
 
-func _test_rare_equipment_has_pickup_beam() -> void:
-	var factory = LootNodeFactoryScript.new({}, {
-		"long_sword": {
-			"ground": {"shape": "blade", "color": "#b8c7d8", "accent": "#f6e8b1", "scale": 1.0},
-			"3d_model": "fallback_equipment_main_hand_v0",
-		},
-	})
-	var node := factory.make_loot_node({"id": "loot_sword", "type": "loot", "item_def_id": "long_sword", "rarity": "rare"})
-	_assert_true("rare pickup beam exists", node.find_child("PickupBeam", false, false) != null)
-	var common := factory.make_loot_node({"id": "loot_gold", "type": "loot", "item_def_id": "gold", "rarity": "common", "amount": 3})
-	_assert_true("common loot has no pickup beam", common.find_child("PickupBeam", false, false) == null)
-	node.free()
-	common.free()
+func _assert_no_aura(node: Node3D, item: String) -> void:
+	for name in ["RarityGlow", "SpawnPopRing", "PickupBeam", "RarityBackground"]:
+		_assert_true("%s has no %s" % [item, name], node.find_child(name, true, false) == null)
 
 
 # --- v487 kit ground loot (catalog-derived; no pinned asset ids or tuning values) ---
@@ -112,17 +100,55 @@ func _assert_ground_pose(def_id: String, model: Node3D, pose: Dictionary) -> voi
 		_assert_true("%s longest side %.3f within max_extent %.3f" % [def_id, longest, max_extent], longest <= max_extent + 0.001)
 
 
-func _test_armor_keeps_family_fallback_model() -> void:
+func _test_gear_keeps_family_fallback_models() -> void:
 	var factory = _real_factory()
-	for def_id in ItemRulesLoader.item_presentations.keys():
-		var model_id := str((ItemRulesLoader.item_presentations[def_id] as Dictionary).get("3d_model", ""))
-		if model_id == "" or ItemVisualsLoader.hand_asset_id(def_id) != "":
+	var templates: Dictionary = _json("shared/rules/item_templates.v0.json").get("templates", {})
+	var gear_slots := ["head", "chest", "gloves", "belt", "boots", "ring", "amulet"]
+	var checked_slots := {}
+	for def_id in templates.keys():
+		var template: Dictionary = templates[def_id]
+		var slot := str(template.get("slot", ""))
+		if not bool(template.get("equippable", false)) or not gear_slots.has(slot):
 			continue
+		if not ItemRulesLoader.item_presentations.has(def_id):
+			_assert_true("%s has an item presentation" % def_id, false)
+			continue
+		var presentation: Dictionary = ItemRulesLoader.item_presentations[def_id]
+		var model_id := str(presentation.get("3d_model", ""))
+		if model_id == "":
+			_assert_true("%s has a family fallback model" % def_id, false)
+			continue
+		if checked_slots.has(slot):
+			_assert_eq("%s shares its slot fallback" % def_id, model_id, checked_slots[slot])
+		_assert_true("%s fallback %s is in the asset manifest" % [def_id, model_id], factory.asset_manifest.has(model_id))
 		var node: Node3D = factory.make_loot_node({"item_def_id": def_id, "rarity": "rare"})
-		_assert_true("%s keeps family fallback %s" % [def_id, model_id], node.find_child("GroundModel_%s" % model_id, true, false) != null)
+		var model := node.find_child("GroundModel_%s" % model_id, true, false) as Node3D
+		_assert_true("%s keeps family fallback %s" % [def_id, model_id], model != null)
+		_assert_true("%s fallback contains a renderable mesh" % def_id, model != null and _first_mesh(model) != null)
+		if model != null:
+			var pose := EquipmentDisplayLoader.ground_pose_for(model_id, false)
+			_assert_true("%s ground pose rests and centers its model" % def_id, bool(pose.get("rest_on_floor", false)))
+			_assert_ground_pose(def_id, model, pose)
+			_assert_ground_scale(def_id, model, presentation, pose)
+		_assert_true("%s GLB loot omits primitive rarity tile" % def_id, node.find_child("RarityBackground", true, false) == null)
+		_assert_no_aura(node, str(def_id))
 		node.free()
-		return
-	_assert_true("an armor item with a family fallback exists", false)
+		checked_slots[slot] = model_id
+	_assert_eq("all ground gear slots are covered", checked_slots.size(), gear_slots.size())
+
+
+func _assert_ground_scale(def_id: String, model: Node3D, presentation: Dictionary, pose: Dictionary) -> void:
+	var ground: Dictionary = presentation.get("ground", {})
+	var expected := ClientConstantsScript.GROUND_EQUIPMENT_MODEL_SCALE \
+		* float(ground.get("scale", 1.0)) \
+		* EquipmentDisplayLoader.ground_multiplier() \
+		* float(pose.get("scale", 1.0))
+	var uniform := is_equal_approx(model.scale.x, model.scale.y) and is_equal_approx(model.scale.y, model.scale.z)
+	_assert_true("%s ground model scale is uniform" % def_id, uniform)
+	if float(pose.get("max_extent", 0.0)) > 0.0:
+		_assert_true("%s ground pose cap does not enlarge its data scale" % def_id, model.scale.x <= expected + 0.001)
+	else:
+		_assert_true("%s ground model scale follows catalog data" % def_id, is_equal_approx(model.scale.x, expected))
 
 
 func _first_mesh(root: Node) -> MeshInstance3D:
@@ -194,6 +220,56 @@ func _test_potions_use_detail_tint() -> void:
 		node.free()
 		checked += 1
 	_assert_true("potion families with ground_tint were checked", checked > 0)
+
+
+func _test_quest_and_badge_catalog_shapes() -> void:
+	var factory = _real_factory()
+	var items: Dictionary = _json("shared/assets/item_presentations.v0.json").get("items", {})
+	var item_defs: Dictionary = _json("shared/rules/items.v0.json").get("items", {})
+	var trophy_shapes := {}
+	var trophy_count := 0
+	var checked := 0
+	for def_id in items.keys():
+		var family := str((items[def_id] as Dictionary).get("family", ""))
+		if not (family in ["quest", "badge"]):
+			continue
+		checked += 1
+		_assert_true("%s has an authoritative item definition" % def_id, item_defs.has(def_id))
+		var presentation: Dictionary = ItemRulesLoader.item_presentations.get(def_id, {})
+		var ground: Dictionary = presentation.get("ground", {})
+		var shape := str(ground.get("shape", ""))
+		_assert_true("%s selects a known quest/badge shape" % def_id, LootQuestBadgeShapesScript.supports(shape))
+		var node: Node3D = factory.make_loot_node({"item_def_id": def_id, "rarity": "rare"})
+		var model := node.find_child("QuestBadgeShape_%s" % shape, false, false) as Node3D
+		_assert_true("%s builds its catalog shape %s" % [def_id, shape], model != null)
+		_assert_true("%s has renderable geometry" % def_id, model != null and _first_mesh(model) != null)
+		if model != null:
+			var bounds: AABB = LootNodeFactoryScript.posed_bounds(model)
+			_assert_true("%s has nonzero visual bounds" % def_id, bounds.size.x > 0.0 and bounds.size.y > 0.0 and bounds.size.z > 0.0)
+			_assert_true("%s rests above the floor" % def_id, bounds.position.y >= 0.0)
+			var label := node.find_child("LootLabel", false, false) as Label3D
+			_assert_true("%s model clears its label" % def_id, label != null and bounds.end.y < label.position.y)
+		_assert_no_aura(node, str(def_id))
+		_assert_true("%s uses no unrelated GLB" % def_id, node.find_child("GroundModel_*", true, false) == null)
+		if str(def_id).begins_with("quest_trophy_"):
+			trophy_count += 1
+			trophy_shapes[shape] = true
+		node.free()
+	_assert_true("quest and badge catalog items were checked", checked > 0)
+	_assert_true("quest trophies have distinct silhouettes", trophy_count > 1 and trophy_shapes.size() == trophy_count)
+	_assert_true("unknown shape stays on generic fallback", not LootQuestBadgeShapesScript.supports("box"))
+	var leaf_node: Node3D = factory.make_loot_node({"item_def_id": "quest_leaf", "rarity": "common"})
+	var badge_node: Node3D = factory.make_loot_node({"item_def_id": "respec_badge", "rarity": "common"})
+	var leaf := leaf_node.find_child("QuestBadgeShape_leaf", false, false) as Node3D
+	var badge := badge_node.find_child("QuestBadgeShape_badge", false, false) as Node3D
+	if leaf != null and badge != null:
+		var leaf_size: Vector3 = LootNodeFactoryScript.posed_bounds(leaf).size
+		var badge_size: Vector3 = LootNodeFactoryScript.posed_bounds(badge).size
+		_assert_true("leaf is elongated, badge is round", leaf_size.x > leaf_size.z * 1.3 and absf(badge_size.x - badge_size.z) < badge_size.x * 0.2)
+	else:
+		_assert_true("representative quest and badge shapes exist", false)
+	leaf_node.free()
+	badge_node.free()
 
 
 ## The detail texture is RGBA8, so channels round to 1/255.

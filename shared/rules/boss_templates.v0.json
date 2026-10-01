@@ -4,7 +4,7 @@
     "cave_warden": {
       "name": "Cave Warden",
       "base_monster_def_id": "dungeon_mob",
-      "pattern_deck": ["charged_melee", "stone_lance", "summon_wolves", "shard_fan", "crystal_wall", "summon_bats", "ground_slam"],
+      "pattern_deck": ["charged_melee", "stone_lance", "summon_wolves", "shard_fan", "crystal_wall", "summon_bats", "ground_slam", "shifting_bulwark"],
       "hp_multiplier": 16.0,
       "damage_multiplier": 1.0,
       "enrage": {
@@ -22,7 +22,7 @@
     "crypt_matron": {
       "name": "Crypt Matron",
       "base_monster_def_id": "dungeon_undead",
-      "pattern_deck": ["summon_bats", "crystal_wall", "ground_slam", "stone_lance"],
+      "pattern_deck": ["summon_bats", "crystal_wall", "ground_slam", "stone_lance", "shifting_bulwark"],
       "hp_multiplier": 10.0,
       "damage_multiplier": 1.1,
       "enrage": {

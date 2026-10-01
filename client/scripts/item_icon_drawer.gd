@@ -1,8 +1,9 @@
 class_name ItemIconDrawer
 extends RefCounted
 
+const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
 
-static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label: String = "", dimmed: bool = false, label_y_factor: float = 0.36, font_size: int = 16) -> void:
+static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label: String = "", dimmed: bool = false, label_y_factor: float = 0.36, font_size: int = 16, item: Dictionary = {}) -> void:
 	var shape := str(icon.get("shape", "box"))
 	var color := Color(str(icon.get("color", "#d8d0bd")))
 	var accent := Color(str(icon.get("accent", "#6b5420")))
@@ -57,6 +58,7 @@ static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label:
 			_draw_potion(canvas, center, min_side, color, accent)
 		_:
 			canvas.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
+	RarityCuePresenterScript.draw_slot(canvas, rect, item)
 
 
 static func _draw_blade(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:

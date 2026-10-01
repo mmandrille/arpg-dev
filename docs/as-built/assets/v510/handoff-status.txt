@@ -1,0 +1,164 @@
+ M client/scripts/boss_visuals_controller.gd
+ M client/scripts/bot_presentation_debug.gd
+ M client/scripts/bot_wait_handlers.gd
+ M client/scripts/character_stats_breakdown.gd
+ M client/scripts/character_stats_panel.gd
+ M client/scripts/combat_vfx.gd
+ M client/scripts/dungeon_depth_lighting.gd
+ M client/scripts/dungeon_torch_lights.gd
+ M client/scripts/gameplay_feedback_presentation.gd
+ M client/scripts/loot_node_factory.gd
+ M client/scripts/main.gd
+ M client/scripts/model_reaction_controller.gd
+ M client/scripts/player_camera_controller.gd
+ M client/scripts/scene_lighting_rig.gd
+ M client/scripts/skill_passive_tooltip.gd
+ M client/scripts/skills_panel.gd
+ M client/scripts/town_dressing.gd
+ M client/tests/test_combat_vfx.gd
+ M client/tests/test_item_visuals.gd
+ M client/tests/test_loot_node_factory.gd
+ M docs/CODEMAP.md
+ M docs/progress/scenario-movement-audit.tsv
+ M scripts/client_smoke.sh
+ M server/internal/game/boss_pattern_rules.go
+ M server/internal/game/boss_patterns.go
+ M server/internal/game/class_specialist_gear_test.go
+ M server/internal/game/derived_stats.go
+ M server/internal/game/entity_view.go
+ M server/internal/game/passive_skill_rules.go
+ M server/internal/game/ranger_skills.go
+ M server/internal/game/rules.go
+ M server/internal/game/sim.go
+ M server/internal/game/sim_tick_monster_movement.go
+ M server/internal/game/skill_damage_burst.go
+ M server/internal/game/skill_rules_validation.go
+ M server/internal/game/types.go
+ M shared/assets/armor_look.v0.json
+ M shared/assets/equipment_display.v0.json
+ M shared/assets/item_presentations.v0.json
+ M shared/assets/item_presentations.v0.schema.json
+ M shared/assets/town_presentation.v0.json
+ M shared/assets/town_presentation.v0.schema.json
+ M shared/assets/vfx_presentation.v0.json
+ M shared/assets/vfx_presentation.v0.schema.json
+ M shared/protocol/examples/session_snapshot.json
+ M shared/protocol/examples/state_delta.json
+ M shared/protocol/session_snapshot.v8.schema.json
+ M shared/protocol/state_delta.v8.schema.json
+ M shared/rules/boss_patterns.v0.json
+ M shared/rules/boss_patterns.v0.schema.json
+ M shared/rules/boss_templates.v0.json
+ M shared/rules/item_templates.v0.json
+ M shared/rules/skills.v0.json
+ M shared/rules/skills.v0.schema.json
+ M shared/rules/worlds.v0.json
+ M tools/bot/run.py
+ M tools/bot/runtime_assertions.py
+ M tools/bot/runtime_queries.py
+ M tools/bot/scenario_movement_audit.py
+ M tools/bot/scenarios/44_skill_visual.json
+ M tools/bot/scenarios/client/103_combat_input_flow_polish.json
+ M tools/bot/scenarios/client/10_full_equipment.json
+ M tools/bot/scenarios/client/75_quest_town_turn_in.json
+ M tools/bot/scenarios/client/blacksmith_renew_item.json
+ M tools/bot/skill_visual_runtime.py
+ M tools/bot/test_skill_visual.py
+ M tools/test_town_dressing.py
+ M tools/validate_boss_patterns.py
+ M tools/validate_shared.py
+?? .venv
+?? client/scripts/boss_lane_marker.gd
+?? client/scripts/dungeon_depth_mood_loader.gd
+?? client/scripts/loot_quest_badge_shapes.gd
+?? client/scripts/monster_death_presentation_loader.gd
+?? client/scripts/ranger_affinity_damage.gd
+?? client/scripts/showme/class_silhouette_play_camera_capture.gd
+?? client/scripts/skill_visual_capture.gd
+?? client/scripts/skill_visual_capture_runtime.gd
+?? client/scripts/town_ambient_life.gd
+?? client/tests/test_boss_lane_marker.gd
+?? client/tests/test_dungeon_depth_mood.gd
+?? client/tests/test_monster_death_presentation.gd
+?? client/tests/test_ranger_affinity_damage.gd
+?? client/tests/test_town_ambient_life.gd
+?? docs/as-built/assets/v503/amulet-after.png
+?? docs/as-built/assets/v503/amulet-before.png
+?? docs/as-built/assets/v503/belt-after.png
+?? docs/as-built/assets/v503/belt-before.png
+?? docs/as-built/assets/v503/boots-after.png
+?? docs/as-built/assets/v503/boots-before.png
+?? docs/as-built/assets/v503/chest-after.png
+?? docs/as-built/assets/v503/chest-before.png
+?? docs/as-built/assets/v503/gloves-after.png
+?? docs/as-built/assets/v503/gloves-before.png
+?? docs/as-built/assets/v503/ground-gear-camera-after.png
+?? docs/as-built/assets/v503/ground-gear-camera-before.png
+?? docs/as-built/assets/v503/helm-after.png
+?? docs/as-built/assets/v503/helm-before.png
+?? docs/as-built/assets/v503/ring-after.png
+?? docs/as-built/assets/v503/ring-before.png
+?? docs/as-built/assets/v504/archer-head-focused.png
+?? docs/as-built/assets/v504/bat-wing-focused.png
+?? docs/as-built/assets/v504/mob-skull-focused.png
+?? docs/as-built/assets/v504/quest-leaf-focused.png
+?? docs/as-built/assets/v504/quest-leaf-gameplay.png
+?? docs/as-built/assets/v504/renew-stone-focused.png
+?? docs/as-built/assets/v504/renew-stone-gameplay.png
+?? docs/as-built/assets/v504/respec-badge-focused.png
+?? docs/as-built/assets/v504/upgrade-shard-focused.png
+?? docs/as-built/assets/v504/wolf-heart-focused.png
+?? docs/as-built/assets/v509/v509_lane_balanced.json
+?? docs/as-built/assets/v509/v509_lane_balanced.png
+?? docs/as-built/assets/v509/v509_lane_balanced_stage1.json
+?? docs/as-built/assets/v509/v509_lane_balanced_stage1.png
+?? docs/as-built/assets/v509/v509_lane_performance.json
+?? docs/as-built/assets/v509/v509_lane_performance.png
+?? docs/as-built/assets/v509/v509_lane_performance_stage0.json
+?? docs/as-built/assets/v509/v509_lane_performance_stage0.png
+?? docs/as-built/assets/v510/handoff-status.txt
+?? docs/as-built/v501_monster-death-dissolve.md
+?? docs/as-built/v502_skill-specific-vfx.md
+?? docs/as-built/v503_ground-gear-models.md
+?? docs/as-built/v504_quest-badge-ground-loot.md
+?? docs/as-built/v505_dungeon-depth-mood.md
+?? docs/as-built/v506_living-town.md
+?? docs/as-built/v507_class-silhouettes.md
+?? docs/as-built/v509_boss-lane-telegraphs.md
+?? docs/as-built/v510_ranger-affinity-passive.md
+?? docs/plans/v501_2026-10-01-monster-death-dissolve.md
+?? docs/plans/v502_2026-10-01-skill-specific-vfx.md
+?? docs/plans/v503_2026-10-01-ground-gear-models.md
+?? docs/plans/v504_2026-10-01-quest-badge-ground-loot.md
+?? docs/plans/v505_2026-10-01-dungeon-depth-mood.md
+?? docs/plans/v506_2026-10-01-living-town.md
+?? docs/plans/v507_2026-10-01-class-silhouettes.md
+?? docs/plans/v509_2026-10-01-boss-lane-telegraphs.md
+?? docs/plans/v510_2026-10-01-ranger-affinity-passive.md
+?? docs/specs/v501_spec-monster-death-dissolve.md
+?? docs/specs/v502_spec-skill-specific-vfx.md
+?? docs/specs/v503_spec-ground-gear-models.md
+?? docs/specs/v504_spec-quest-badge-ground-loot.md
+?? docs/specs/v505_spec-dungeon-depth-mood.md
+?? docs/specs/v506_spec-living-town.md
+?? docs/specs/v507_spec-class-silhouettes.md
+?? docs/specs/v509_spec-boss-lane-telegraphs.md
+?? docs/specs/v510_spec-ranger-affinity-passive.md
+?? server/internal/game/boss_lanes.go
+?? server/internal/game/boss_lanes_test.go
+?? server/internal/game/ranger_affinity_damage.go
+?? server/internal/game/ranger_affinity_damage_test.go
+?? shared/assets/dungeon_depth_mood.v0.json
+?? shared/assets/dungeon_depth_mood.v0.schema.json
+?? shared/assets/monster_death_presentation.v0.json
+?? shared/assets/monster_death_presentation.v0.schema.json
+?? shared/golden/ranger_affinity_damage.json
+?? shared/golden/ranger_affinity_damage.v0.schema.json
+?? tools/bot/boss_lane_actions.py
+?? tools/bot/scenarios/123_boss_lane_telegraphs.json
+?? tools/bot/scenarios/124_boss_lane_danger_hit.json
+?? tools/bot/scenarios/125_affinity_passive_ranger.json
+?? tools/bot/scenarios/client/110_boss_lane_telegraphs_visual.json
+?? tools/bot/scenarios/client/town_living_life.json
+?? tools/bot/test_boss_lane_queries.py
+?? tools/validate_ranger_affinity.py

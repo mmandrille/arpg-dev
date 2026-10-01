@@ -23,11 +23,18 @@ static func profile_for_level(level: int, factory: GroundWallFactory, town_fog_a
 	var fallback_ambient := str(palette.get("wall_base", "#393b3e"))
 
 	return {
+		"palette_id": str(palette.get("id", "")),
 		"directional_color": str(palette.get("directional_color", fallback_directional)),
 		"directional_energy": float(palette.get("directional_energy", 1.0)),
 		"ambient_color": str(palette.get("ambient_color", fallback_ambient)),
 		"ambient_energy": float(palette.get("ambient_energy", 0.30)),
 	}
+
+
+static func palette_id_for_level(level: int, factory: GroundWallFactory) -> String:
+	if level >= 0 or factory == null:
+		return ""
+	return str(factory.biome_palette_for_level(level).get("id", ""))
 
 static func apply_profile(
 	profile: Dictionary,

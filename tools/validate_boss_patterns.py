@@ -13,6 +13,33 @@ def validate_boss_patterns(
     for pattern_id, pattern in boss_patterns["patterns"].items():
         pattern_failed = False
         previous_telegraph = None
+        lanes = pattern.get("lanes")
+        if lanes is None and any(phase.get("hit_shape") == "lanes" or phase.get("shape") == "lanes"
+                                 for phase in pattern["phases"]):
+            report.fail("boss pattern lanes", f"{pattern_id} lane phase requires lane data")
+            continue
+        if lanes is not None:
+            sequence = lanes.get("safe_sequence", [])
+            offsets = lanes.get("aim_offsets_degrees", [])
+            if (not 3 <= lanes.get("count", 0) <= 9
+                    or lanes.get("width", 0) <= 0
+                    or lanes.get("length", 0) <= 0
+                    or not sequence
+                    or not offsets
+                    or any(angle < -180 or angle > 180 for angle in offsets)
+                    or any(index < 0 or index >= lanes["count"] for index in sequence)):
+                report.fail("boss pattern lanes", f"{pattern_id} has no valid safe corridor")
+                continue
+            lane_warnings = [phase for phase in pattern["phases"] if phase["kind"] == "telegraph"]
+            lane_strikes = [phase for phase in pattern["phases"] if phase["kind"] == "active"]
+            kinds = [phase["kind"] for phase in pattern["phases"]]
+            if (len(lane_warnings) < 2 or len(lane_strikes) != 1
+                    or kinds != ["telegraph"] * len(lane_warnings) + ["active", "recovery"]
+                    or any(phase.get("telegraph_type") != "lanes" or phase.get("hit_shape") != "lanes"
+                           or not 0 < phase.get("lane_intensity", 0) <= 1 for phase in lane_warnings)
+                    or lane_strikes[0].get("shape") != "lanes" or "damage" not in lane_strikes[0]):
+                report.fail("boss pattern lanes", f"{pattern_id} warning and strike geometry differ")
+                continue
         for index, phase in enumerate(pattern["phases"]):
             if phase["duration_ticks"] <= 0:
                 report.fail("boss pattern duration", f"{pattern_id}[{index}] must be positive")

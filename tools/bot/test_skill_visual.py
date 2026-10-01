@@ -93,6 +93,43 @@ def test_skill_visual_steps_hold_after_cast_for_two_seconds() -> None:
     assert POST_CAST_HOLD_TICKS >= 40
 
 
+def test_skill_visual_projectile_showcase_moves_into_soft_target_contact_range() -> None:
+    projectile_kinds = {"projectile_attack", "cold_projectile_attack", "chain_projectile_attack"}
+    for entry in all_skill_demo_entries():
+        if entry.kind not in projectile_kinds:
+            continue
+        steps = build_steps(entry)
+        assert steps[0] == {
+            "action": "move_until_player_position",
+            "x": 18,
+            "y": 5,
+            "pathfind": True,
+            "max_ticks": 220,
+        }
+        assert steps[1]["monster_def_id"] == "combat_lab_soft_target"
+        assert steps[2]["assertion"]["target_monster_def_id"] == "combat_lab_soft_target"
+        assert any(assertion.get("target_monster_def_id") == "combat_lab_soft_target" for assertion in build_assertions(entry))
+
+
+def test_lightning_visual_target_stays_outside_xp_dummy_chain_range() -> None:
+    worlds = load_json(ROOT / "shared" / "rules" / "worlds.v0.json")["worlds"]
+    lightning = load_json(ROOT / "shared" / "rules" / "skills.v0.json")["skills"]["lightning"]
+    entities = worlds["skill_visual_lab"]["entities"]
+    positions = {entity["monster_def_id"]: entity["position"] for entity in entities if entity["type"] == "monster"}
+    target = positions["combat_lab_soft_target"]
+    chain_radius = lightning["projectile"]["range"] * lightning["chain"]["range_multiplier"]
+
+    for dummy_id in ("skill_xp_level6_dummy", "skill_xp_level7_dummy"):
+        dummy = positions[dummy_id]
+        distance = ((target["x"] - dummy["x"]) ** 2 + (target["y"] - dummy["y"]) ** 2) ** 0.5
+        assert distance > chain_radius
+
+    staged_at = build_steps(next(entry for entry in all_skill_demo_entries() if entry.skill_id == "lightning"))[0]
+    caster = {"x": staged_at["x"], "y": staged_at["y"]}
+    cast_distance = ((target["x"] - caster["x"]) ** 2 + (target["y"] - caster["y"]) ** 2) ** 0.5
+    assert cast_distance <= lightning["projectile"]["range"]
+
+
 def test_skill_visual_assertions_use_seeded_rank_without_rank_update_event() -> None:
     entry = next(entry for entry in all_skill_demo_entries() if entry.skill_id == "holy_shield")
     assertions = build_assertions(entry, rank=5)
@@ -100,6 +137,7 @@ def test_skill_visual_assertions_use_seeded_rank_without_rank_update_event() -> 
     assert {"type": "event_seen", "event_type": "skill_cast", "skill_id": "holy_shield", "rank": 5} in assertions
     assert not any(assertion.get("event_type") == "skill_rank_updated" for assertion in assertions)
     assert any(assertion.get("type") == "skill_progression" and assertion.get("rank") == 5 for assertion in assertions)
+    assert not any(assertion.get("type") == "skill_progression" and "can_spend" in assertion for assertion in assertions)
 
 
 def test_heal_visual_uses_compact_self_cast_path() -> None:

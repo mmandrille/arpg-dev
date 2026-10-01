@@ -162,6 +162,7 @@ echo "OK: Godot asset import ($((SECONDS - import_started))s)"
 # 1. GDScript golden-fixture test (server-independent; ADR D6 / acceptance #7).
 run_gate "GDScript golden test" "[gdtest] PASS" res://tests/test_golden.gd
 run_gate "GDScript skill progression golden test" "[gdtest] PASS: consumed shared/golden/skill_points_and_magic_bolt.json" res://tests/test_golden_skill_progression.gd
+run_gate "GDScript Ranger affinity golden test" "[gdtest] PASS: test_ranger_affinity_damage" res://tests/test_ranger_affinity_damage.gd
 
 # 2. Item visual resolution test (server-independent; acceptance #14).
 run_gate "GDScript item visual resolution test" "[gdtest] PASS" res://tests/test_item_visuals.gd
@@ -254,6 +255,7 @@ run_gate "GDScript aura soft lights test" "[gdtest] PASS: test_aura_soft_lights"
 
 # 2l. Boss health bar render/state test (server-independent; v53).
 run_gate "GDScript boss health bar test" "[gdtest] PASS: test_boss_health_bar" res://tests/test_boss_health_bar.gd
+run_gate "GDScript boss lane marker test" "[gdtest] PASS: test_boss_lane_marker" res://tests/test_boss_lane_marker.gd
 
 # 2m. Delta and snapshot state-mutation unit tests (server-independent; v53).
 run_gate "GDScript net client test" "[gdtest] PASS: test_net_client" res://tests/test_net_client.gd
@@ -268,6 +270,7 @@ run_gate "GDScript inventory wallet delta runtime test" "[gdtest] PASS: test_inv
 run_gate "GDScript loot label filter test" "[gdtest] PASS: test_loot_label_filter" res://tests/test_loot_label_filter.gd
 run_gate "GDScript loot filter ground item test" "[gdtest] PASS: test_loot_filter_ground_items" res://tests/test_loot_filter_ground_items.gd
 run_gate "GDScript loot node factory test" "[gdtest] PASS: test_loot_node_factory" res://tests/test_loot_node_factory.gd
+run_gate "GDScript rarity cues test" "[gdtest] PASS: test_rarity_cues" res://tests/test_rarity_cues.gd
 run_gate "GDScript impact sparks test" "[gdtest] PASS: test_impact_sparks" res://tests/test_impact_sparks.gd
 run_gate "GDScript death pose ownership test" "[gdtest] PASS: test_death_pose_ownership" res://tests/test_death_pose_ownership.gd
 run_gate "GDScript combat outcome punch test" "[gdtest] PASS: test_combat_outcome_punch" res://tests/test_combat_outcome_punch.gd

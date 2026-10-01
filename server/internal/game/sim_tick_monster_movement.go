@@ -17,7 +17,7 @@ func (s *Sim) advanceMonsterMovementWithLOD(res *TickResult, applyMovementLOD bo
 		if !ok || def.effectiveBehavior() != monsterBehaviorChase {
 			continue
 		}
-		if monster.isBoss && monster.bossPhaseKind == "active" {
+		if monster.isBoss && (monster.bossPhaseKind == "active" || (monster.bossLane != nil && monster.bossPhaseKind == "telegraph")) {
 			continue
 		}
 		if applyMovementLOD && !s.monsterMovementHighPrecision(monster) && !s.monsterMovementLODAllowsTick(monster) {

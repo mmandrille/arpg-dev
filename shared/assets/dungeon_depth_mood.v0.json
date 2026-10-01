@@ -1,0 +1,56 @@
+{
+  "version": 0,
+  "profiles": {
+    "shallow_cave": {
+      "fog": {
+        "enabled": true,
+        "mode": "exponential",
+        "color": "#493326",
+        "light_energy": 0.9,
+        "density": 0.014,
+        "sky_affect": 0.0
+      },
+      "torch": {
+        "light_color": "#ff9b3d",
+        "omni_energy": 1.8,
+        "flame_color": "#ff7a1a",
+        "flame_emission_color": "#ffd45a",
+        "flame_emission_energy": 6.0
+      }
+    },
+    "sundered_halls": {
+      "fog": {
+        "enabled": true,
+        "mode": "exponential",
+        "color": "#392a2a",
+        "light_energy": 0.95,
+        "density": 0.017,
+        "sky_affect": 0.0
+      },
+      "torch": {
+        "light_color": "#ffb35b",
+        "omni_energy": 1.7,
+        "flame_color": "#ff8d32",
+        "flame_emission_color": "#ffe17c",
+        "flame_emission_energy": 5.8
+      }
+    },
+    "deep_vault": {
+      "fog": {
+        "enabled": true,
+        "mode": "exponential",
+        "color": "#263b4a",
+        "light_energy": 1.0,
+        "density": 0.02,
+        "sky_affect": 0.0
+      },
+      "torch": {
+        "light_color": "#ffbd79",
+        "omni_energy": 1.65,
+        "flame_color": "#ff9b55",
+        "flame_emission_color": "#ffe4a8",
+        "flame_emission_energy": 5.6
+      }
+    }
+  }
+}

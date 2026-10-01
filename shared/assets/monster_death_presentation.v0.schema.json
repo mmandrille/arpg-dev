@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/monster_death_presentation.v0.schema.json",
+  "title": "Monster death presentation (v0)",
+  "description": "Client-only visual feedback for an authoritative monster death.",
+  "type": "object",
+  "required": ["version", "rim_flash"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "rim_flash": {
+      "type": "object",
+      "required": ["enabled", "tint", "peak_strength", "rise_seconds", "hold_seconds", "release_seconds"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "tint": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "peak_strength": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "rise_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.5 },
+        "hold_seconds": { "type": "number", "minimum": 0, "maximum": 0.5 },
+        "release_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 1.5 }
+      }
+    }
+  }
+}

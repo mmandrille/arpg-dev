@@ -9,6 +9,7 @@ const ConsumableUseEffectScript := preload("res://scripts/consumable_use_effect.
 const LevelUpBurstScript := preload("res://scripts/level_up_burst.gd")
 const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
+const MonsterDeathPresentationLoaderScript := preload("res://scripts/monster_death_presentation_loader.gd")
 const AttackContactTraceScript := preload("res://scripts/attack_contact_trace.gd")
 
 
@@ -150,6 +151,14 @@ static func play_entity_reaction(
 	var fallback := fallback_reaction_direction(entities, player_id, player_anchor, entity_id, world_pos_fn)
 	if reaction_name == "death":
 		reaction.enter_death(source_pos, fallback)
+		if (
+			str(ev.get("event_type", "")) == "monster_killed"
+			and entities.has(entity_id)
+			and str((entities[entity_id] as Dictionary).get("type", "")) == "monster"
+		):
+			var rim_flash := MonsterDeathPresentationLoaderScript.rim_flash()
+			if not rim_flash.is_empty():
+				reaction.play_death_rim_flash(rim_flash)
 	else:
 		reaction.play_hit(source_pos, fallback)
 	_spawn_reaction_vfx(entities, player_id, player_anchor, entity_id, ev, reaction_name, source_pos, world_pos_fn)

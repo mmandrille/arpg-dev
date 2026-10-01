@@ -77,6 +77,12 @@ def event_matches(event: dict[str, Any], expected: dict[str, Any]) -> bool:
             return False
     if "affordable" in expected and bool(event.get("affordable", False)) != bool(expected["affordable"]):
         return False
+    if "lane_present" in expected and isinstance(event.get("lane"), dict) != bool(expected["lane_present"]):
+        return False
+    lane = event.get("lane", {})
+    for expected_key, lane_key in (("lane_safe_index", "safe_index"), ("lane_stage_index", "stage_index"), ("lane_count", "count")):
+        if expected_key in expected and (not isinstance(lane, dict) or int(lane.get(lane_key, -1)) != int(expected[expected_key])):
+            return False
     return True
 
 

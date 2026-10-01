@@ -1,0 +1,11 @@
+{
+  "version": 0,
+  "rim_flash": {
+    "enabled": true,
+    "tint": "#ffe4a3",
+    "peak_strength": 0.85,
+    "rise_seconds": 0.07,
+    "hold_seconds": 0.08,
+    "release_seconds": 0.38
+  }
+}

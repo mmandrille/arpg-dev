@@ -65,6 +65,7 @@ static func tooltip_plain_body(skill_id: String, rank: int, skill_progression: D
 	if cooldown_text != "":
 		text += "\n%s" % cooldown_text
 	var description_lines := _tooltip_description_lines(def, rank)
+	description_lines.append_array(SkillPassiveTooltipScript.ranger_affinity_lines(def, character_progression))
 	if not description_lines.is_empty():
 		text += "\n\nDescription:"
 		for line in description_lines:

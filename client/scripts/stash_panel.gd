@@ -595,7 +595,7 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var icon: Dictionary = item_presentations.get(def_id, {}).get("icon", {})
 	var rect := Rect2(Vector2.ZERO, slot.size)
 	var label := str(icon.get("label", _short_label(def_id)))
-	ItemIconDrawerScript.draw(slot, rect, icon, label, slot is Button and (slot as Button).disabled, 0.10, ICON_FONT_SIZE)
+	ItemIconDrawerScript.draw(slot, rect, icon, label, slot is Button and (slot as Button).disabled, 0.10, ICON_FONT_SIZE, item)
 
 
 func _make_item_tooltip(item: Dictionary) -> Control:

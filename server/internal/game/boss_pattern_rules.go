@@ -13,6 +13,9 @@ func validateBossPatterns(patterns map[string]BossPatternDef, minTelegraphTicks 
 		if pattern.CooldownTicks < 0 {
 			return fmt.Errorf("game: invalid rules boss_patterns.%s.cooldown_ticks: must be non-negative", patternID)
 		}
+		if err := validateBossLanes(patternID, pattern); err != nil {
+			return err
+		}
 		var priorTelegraph *BossPatternPhase
 		for idx, phase := range pattern.Phases {
 			if phase.DurationTicks <= 0 {
@@ -25,6 +28,14 @@ func validateBossPatterns(patterns map[string]BossPatternDef, minTelegraphTicks 
 				}
 				if phase.TelegraphType == "" || phase.HitShape == "" {
 					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: telegraph_type and hit_shape required", patternID, idx)
+				}
+				if phase.HitShape == "lanes" {
+					if pattern.Lanes == nil || phase.TelegraphType != "lanes" || phase.LaneIntensity <= 0 || phase.LaneIntensity > 1 {
+						return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: lane telegraph requires lanes and valid intensity", patternID, idx)
+					}
+					copy := phase
+					priorTelegraph = &copy
+					continue
 				}
 				if phase.Radius <= 0 {
 					return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d].radius: must be positive", patternID, idx)
@@ -57,6 +68,9 @@ func validateBossPatterns(patterns map[string]BossPatternDef, minTelegraphTicks 
 					}
 					if err := validateDamageRange(fmt.Sprintf("boss_patterns.%s.phases[%d].damage", patternID, idx), *phase.Damage); err != nil {
 						return err
+					}
+					if phase.Shape == "lanes" && priorTelegraph.HitShape == "lanes" && pattern.Lanes != nil {
+						continue
 					}
 					if phase.Shape != priorTelegraph.HitShape || phase.Radius != priorTelegraph.Radius || phase.Width != priorTelegraph.Width {
 						return fmt.Errorf("game: invalid rules boss_patterns.%s.phases[%d]: active hit predicate must match telegraph", patternID, idx)

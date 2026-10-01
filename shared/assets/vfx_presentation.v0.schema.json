@@ -7,7 +7,8 @@
   "required": [
     "version",
     "effects",
-    "damage_type_colors"
+    "damage_type_colors",
+    "skill_hit_effects"
   ],
   "$defs": {
     "effect": {
@@ -50,6 +51,12 @@
           "type": "number",
           "minimum": 0,
           "maximum": 10
+        },
+        "spawn_surface_offset": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Offsets hit particles along the target surface facing away from the source."
         },
         "direction_from_source": {
           "type": "boolean"
@@ -140,6 +147,17 @@
       "type": "object",
       "additionalProperties": {
         "$ref": "#/$defs/colors"
+      }
+    },
+    "skill_hit_effects": {
+      "type": "object",
+      "minProperties": 3,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
       }
     }
   }

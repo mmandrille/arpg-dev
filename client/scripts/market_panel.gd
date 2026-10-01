@@ -64,7 +64,7 @@ class MarketItemIcon:
 		draw_rect(Rect2(Vector2.ZERO, size), Color("#5c4a1f"), false, 1.0)
 		var def_id := str(item.get("item_def_id", ""))
 		var icon: Dictionary = presentations.get(def_id, {}).get("icon", {})
-		ItemIconDrawerScript.draw(self, Rect2(Vector2.ZERO, size), icon, str(icon.get("label", MarketListingRowsScript.short_label(def_id))), false, 0.38, 20)
+		ItemIconDrawerScript.draw(self, Rect2(Vector2.ZERO, size), icon, str(icon.get("label", MarketListingRowsScript.short_label(def_id))), false, 0.38, 20, item)
 
 class MarketStageSlot:
 	extends Button
@@ -969,7 +969,7 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var def_id := str(item.get("item_def_id", ""))
 	var icon: Dictionary = ItemRulesLoader.item_presentations.get(def_id, {}).get("icon", {})
 	var rect := Rect2(Vector2.ZERO, slot.size)
-	ItemIconDrawerScript.draw(slot, rect, icon, str(icon.get("label", MarketListingRowsScript.short_label(def_id))), false, 0.24, 22)
+	ItemIconDrawerScript.draw(slot, rect, icon, str(icon.get("label", MarketListingRowsScript.short_label(def_id))), false, 0.24, 22, item)
 
 
 func _listing_stat_lines(item: Dictionary) -> Array:

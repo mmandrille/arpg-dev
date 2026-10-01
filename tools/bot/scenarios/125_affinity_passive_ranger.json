@@ -1,0 +1,52 @@
+{
+  "id": "affinity_passive_ranger",
+  "ci_tier": "extended",
+  "world_id": "skill_progression_lab",
+  "seed": "v510_affinity_passive_ranger",
+  "character_class": "ranger",
+  "title": "Affinity passive Ranger",
+  "description": "Allocate Deadeye, equip two beneficial Ranger affinities, land a tagged shot, then remove both items to reverse the bonus.",
+  "debug_progression": {
+    "level": 10,
+    "unspent_skill_points": 1,
+    "stats": { "str": 6, "dex": 17, "vit": 8, "magic": 4 },
+    "skill_ranks": {
+      "trail_sense": 1,
+      "precision_draw": 1,
+      "piercing_shot": 1
+    }
+  },
+  "steps": [
+    { "action": "assert_character_progression", "derived_stats": { "ranged_damage_bonus_percent": 0 } },
+    { "action": "pick_up_loot", "item_def_id": "affinity_compound_bow" },
+    { "action": "pick_up_loot", "item_def_id": "affinity_ranger_quiver" },
+    { "action": "assert_rolled_inventory_item", "item_def_id": "affinity_compound_bow", "item_template_id": "affinity_compound_bow", "class_affinity_active_count": 1 },
+    { "action": "assert_rolled_inventory_item", "item_def_id": "affinity_ranger_quiver", "item_template_id": "affinity_ranger_quiver", "class_affinity_active_count": 1 },
+    { "action": "equip_inventory_item", "item_def_id": "affinity_compound_bow", "slot": "main_hand" },
+    { "action": "assert_character_progression", "derived_stats": { "ranged_damage_bonus_percent": 0 } },
+    { "action": "assert_skill_progression", "unspent_skill_points": 1, "skill_id": "deadeye", "rank": 0, "max_rank": "from_rules", "can_spend": true },
+    {
+      "action": "allocate_skill_point",
+      "skill_id": "deadeye",
+      "expect_skill_progression": { "unspent_skill_points": 0, "skill_id": "deadeye", "rank": 1, "max_rank": "from_rules", "can_spend": false }
+    },
+    { "action": "assert_character_progression", "derived_stats": { "ranged_damage_bonus_percent": 3 } },
+    { "action": "equip_inventory_item", "item_def_id": "affinity_ranger_quiver", "slot": "belt" },
+    { "action": "assert_character_progression", "derived_stats": { "ranged_damage_bonus_percent": 6 } },
+    { "action": "cast_skill", "skill_id": "piercing_shot", "direction": { "x": 1, "y": 0 }, "event_type": "skill_cast" },
+    {
+      "action": "wait_until_assertion",
+      "assertion": { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 1 },
+      "timeout_s": 3
+    },
+    { "action": "unequip_slot", "slot": "belt" },
+    { "action": "assert_character_progression", "derived_stats": { "ranged_damage_bonus_percent": 3 } },
+    { "action": "unequip_slot", "slot": "main_hand" },
+    { "action": "assert_character_progression", "derived_stats": { "ranged_damage_bonus_percent": 0 } }
+  ],
+  "assertions": [
+    { "type": "skill_progression", "unspent_skill_points": 0, "skill_id": "deadeye", "rank": 1, "max_rank": "from_rules", "can_spend": false },
+    { "type": "event_count", "event_type": "monster_damaged", "skill_id": "piercing_shot", "min": 1 },
+    { "type": "character_progression", "derived_stats": { "ranged_damage_bonus_percent": 0 } }
+  ]
+}

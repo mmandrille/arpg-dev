@@ -1,0 +1,20 @@
+{
+  "id": "v508_rarity_cue_preset_camera",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "weapon_elemental_lab",
+  "title": "Rarity cue on a preset magic weapon in the play camera",
+  "description": "Capture a known magic equipment drop and its inventory slot at the real client camera.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_loot_item", "item_def_id": "long_sword", "timeout_s": 10.0 },
+    { "type": "assert_loot_presentation", "item_def_id": "long_sword" },
+    { "type": "capture_frame", "name": "v508_magic_ground_camera", "timeout_s": 5.0, "skip_if_headless": true },
+    { "type": "click_loot_item", "item_def_id": "long_sword" },
+    { "type": "wait_inventory_item", "item_def_id": "long_sword", "timeout_s": 10.0 },
+    { "type": "assert_inventory_presentation", "item_def_id": "long_sword" },
+    { "type": "press_key", "keycode": "KEY_I" },
+    { "type": "assert_panel_visible", "visible": true },
+    { "type": "capture_frame", "name": "v508_magic_inventory_camera", "timeout_s": 5.0, "skip_if_headless": true }
+  ]
+}

@@ -16,6 +16,12 @@
       "timeout_s": 15.0
     },
     {
+      "type": "capture_frame",
+      "name": "v503_ground_gear_camera",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    },
+    {
       "type": "click_loot_item",
       "item_def_id": "long_sword"
     },

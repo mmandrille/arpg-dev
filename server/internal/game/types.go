@@ -330,6 +330,7 @@ type BossPhaseView struct {
 	DurationTicks int                `json:"duration_ticks"`
 	Telegraph     *BossTelegraphView `json:"telegraph,omitempty"`
 	HitShape      *BossHitShapeView  `json:"hit_shape,omitempty"`
+	Lane          *BossLaneView      `json:"lane,omitempty"`
 }
 
 // BossTelegraphView describes the warning data clients render before damage.
@@ -436,6 +437,7 @@ type Event struct {
 	DurationTicks           *int                         `json:"duration_ticks,omitempty"`
 	Telegraph               *BossTelegraphView           `json:"telegraph,omitempty"`
 	HitShape                *BossHitShapeView            `json:"hit_shape,omitempty"`
+	Lane                    *BossLaneView                `json:"lane,omitempty"`
 	State                   string                       `json:"state,omitempty"`
 	Stance                  string                       `json:"stance,omitempty"`
 	BishopLootDepthCatalog  *BishopLootDepthCatalogView  `json:"bishop_loot_depth_catalog,omitempty"`

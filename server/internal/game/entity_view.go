@@ -107,13 +107,18 @@ func (e *entity) view() EntityView {
 }
 
 func (e *entity) bossPhaseView() *BossPhaseView {
-	return &BossPhaseView{
+	view := &BossPhaseView{
 		PatternID:     e.bossPatternID,
 		PhaseIndex:    e.bossPhaseIndex,
 		PhaseKind:     e.bossPhaseKind,
 		StartedTick:   e.bossPhaseStarted,
 		DurationTicks: int(e.bossPhaseEnds - e.bossPhaseStarted),
+		Lane:          e.bossLane.withPhase(e.bossPhaseIndex, BossPatternPhase{Kind: e.bossPhaseKind}),
 	}
+	if e.bossLane != nil && e.bossPhaseKind == "telegraph" {
+		view.Telegraph = &BossTelegraphView{Type: "lanes", ToColor: e.bossLane.DangerColor, HitShape: "lanes"}
+	}
+	return view
 }
 
 // playerEntityClass reads the owning member's class from live progression so

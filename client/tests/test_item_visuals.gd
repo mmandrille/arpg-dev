@@ -211,7 +211,8 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 	gold_node.free()
 
 	var root_path := ProjectSettings.globalize_path("res://")
-	loot_factory.configure(_read(root_path.path_join("../assets/manifests/assets.v0.json"))["assets"], ItemRulesLoader.item_presentations)
+	var asset_manifest: Dictionary = _read(root_path.path_join("../assets/manifests/assets.v0.json"))["assets"]
+	loot_factory.configure(asset_manifest, ItemRulesLoader.item_presentations)
 	var sword_node: Node3D = loot_factory.make_loot_node({"item_def_id": "rusty_sword", "rarity": "magic"})
 	var sword_model := sword_node.find_child("GroundModel_%s" % _ground_model_asset_id("rusty_sword"), true, false) as Node3D
 	if sword_model == null:
@@ -240,18 +241,36 @@ func _verify_loot_label_presentation(item_rules: Dictionary, item_templates: Dic
 		return false
 	sword_node.free()
 
-	var armor_node: Node3D = loot_factory.make_loot_node({"item_def_id": "helm", "rarity": "rare"})
-	if armor_node.find_child("GroundModel_fallback_equipment_head_v0", true, false) == null:
-		_fail("armor floor loot did not use manifest-backed helm model")
-		armor_node.free()
+	var gear_slots := ["head", "chest", "gloves", "belt", "boots", "ring", "amulet"]
+	var checked_gear_slots := {}
+	for item_def_id in item_templates.keys():
+		var template: Dictionary = item_templates[item_def_id]
+		var slot := str(template.get("slot", ""))
+		if not bool(template.get("equippable", false)) or not gear_slots.has(slot) or checked_gear_slots.has(slot):
+			continue
+		var presentation: Dictionary = presentations.get(str(item_def_id), {})
+		var asset_id := str(presentation.get("3d_model", ""))
+		if asset_id == "":
+			_fail("%s gear presentation has no family ground model" % item_def_id)
+			main.free()
+			return false
+		var gear_node: Node3D = loot_factory.make_loot_node({"item_def_id": item_def_id, "rarity": "rare"})
+		if not asset_manifest.has(asset_id) or gear_node.find_child("GroundModel_%s" % asset_id, true, false) == null:
+			_fail("%s gear floor loot did not use its manifest-backed family model %s" % [item_def_id, asset_id])
+			gear_node.free()
+			main.free()
+			return false
+		if gear_node.find_child("RarityBackground", true, false) != null:
+			_fail("%s GLB floor loot should not render a primitive rarity tile" % item_def_id)
+			gear_node.free()
+			main.free()
+			return false
+		checked_gear_slots[slot] = asset_id
+		gear_node.free()
+	if checked_gear_slots.size() != gear_slots.size():
+		_fail("manifest-backed ground gear covers %d of %d equipment slots" % [checked_gear_slots.size(), gear_slots.size()])
 		main.free()
 		return false
-	if armor_node.find_child("RarityBackground", true, false) != null:
-		_fail("armor GLB floor loot should not render primitive rarity tile")
-		armor_node.free()
-		main.free()
-		return false
-	armor_node.free()
 
 	var shield_node: Node3D = loot_factory.make_loot_node({"item_def_id": "shield", "rarity": "magic"})
 	if shield_node.find_child("GroundModel_%s" % _ground_model_asset_id("shield"), true, false) == null:

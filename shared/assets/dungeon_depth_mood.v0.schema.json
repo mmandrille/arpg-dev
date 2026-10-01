@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arpg.dev/schemas/assets/dungeon_depth_mood.v0.schema.json",
+  "title": "Dungeon depth mood (v0)",
+  "description": "Client-only atmospheric fog and torch accents keyed by existing dungeon biome palette identity.",
+  "type": "object",
+  "required": ["version", "profiles"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 0 },
+    "profiles": {
+      "type": "object",
+      "required": ["shallow_cave", "sundered_halls", "deep_vault"],
+      "additionalProperties": false,
+      "properties": {
+        "shallow_cave": { "$ref": "#/$defs/profile" },
+        "sundered_halls": { "$ref": "#/$defs/profile" },
+        "deep_vault": { "$ref": "#/$defs/profile" }
+      }
+    }
+  },
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "required": ["fog", "torch"],
+      "additionalProperties": false,
+      "properties": {
+        "fog": {
+          "type": "object",
+          "required": ["enabled", "mode", "color", "light_energy", "density", "sky_affect"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "mode": { "enum": ["exponential", "depth"] },
+            "color": { "$ref": "#/$defs/color" },
+            "light_energy": { "type": "number", "minimum": 0, "maximum": 2 },
+            "density": { "type": "number", "minimum": 0, "maximum": 0.05 },
+            "sky_affect": { "type": "number", "minimum": 0, "maximum": 1 },
+            "depth_begin": { "type": "number", "minimum": 0 },
+            "depth_end": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        "torch": {
+          "type": "object",
+          "required": ["light_color", "omni_energy", "flame_color", "flame_emission_color", "flame_emission_energy"],
+          "additionalProperties": false,
+          "properties": {
+            "light_color": { "$ref": "#/$defs/color" },
+            "omni_energy": { "type": "number", "exclusiveMinimum": 0, "maximum": 4 },
+            "flame_color": { "$ref": "#/$defs/color" },
+            "flame_emission_color": { "$ref": "#/$defs/color" },
+            "flame_emission_energy": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 }
+          }
+        }
+      }
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    }
+  }
+}

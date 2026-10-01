@@ -13,8 +13,10 @@ WORLD = json.loads((ROOT / "shared/rules/worlds.v0.json").read_text(encoding="ut
 DRESSING = TOWN["dressing"]
 
 
-def _xy(p: dict) -> tuple[float, float]:
-    return float(p["x"]), float(p["y"])
+def _xy(p: dict | tuple[float, float]) -> tuple[float, float]:
+    if isinstance(p, dict):
+        return float(p["x"]), float(p["y"])
+    return float(p[0]), float(p[1])
 
 
 def _gameplay_points() -> dict[str, tuple[float, float]]:
@@ -52,6 +54,7 @@ def test_props_stay_off_the_road_and_inside_the_fence() -> None:
 
 
 MANIFEST = json.loads((ROOT / "assets/manifests/assets.v0.json").read_text(encoding="utf-8"))["assets"]
+CLASS_PRESENTATIONS = json.loads((ROOT / "shared/assets/class_presentations.v0.json").read_text(encoding="utf-8"))["classes"]
 
 
 def _all_ground_asset_ids() -> list[str]:
@@ -61,6 +64,92 @@ def _all_ground_asset_ids() -> list[str]:
     ids += [v["asset_id"] for v in DRESSING["scatter"]["patches"]]
     ids += [v["asset_id"] for v in DRESSING["scatter"]["rocks"]]
     return ids
+
+
+def _point_segment_distance(point: tuple[float, float], a: tuple[float, float], b: tuple[float, float]) -> float:
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    length2 = dx * dx + dy * dy
+    if length2 == 0.0:
+        return math.dist(point, a)
+    t = max(0.0, min(1.0, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / length2))
+    return math.dist(point, (a[0] + t * dx, a[1] + t * dy))
+
+
+def _orientation(a: tuple[float, float], b: tuple[float, float], c: tuple[float, float]) -> float:
+    return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+
+
+def _segments_intersect(a: tuple[float, float], b: tuple[float, float], c: tuple[float, float], d: tuple[float, float]) -> bool:
+    o1, o2, o3, o4 = _orientation(a, b, c), _orientation(a, b, d), _orientation(c, d, a), _orientation(c, d, b)
+    if ((o1 > 1e-9 and o2 < -1e-9) or (o1 < -1e-9 and o2 > 1e-9)) and ((o3 > 1e-9 and o4 < -1e-9) or (o3 < -1e-9 and o4 > 1e-9)):
+        return True
+
+    def on_segment(point: tuple[float, float], start: tuple[float, float], end: tuple[float, float]) -> bool:
+        return min(start[0], end[0]) - 1e-9 <= point[0] <= max(start[0], end[0]) + 1e-9 and min(start[1], end[1]) - 1e-9 <= point[1] <= max(start[1], end[1]) + 1e-9
+
+    return ((abs(o1) <= 1e-9 and on_segment(c, a, b)) or (abs(o2) <= 1e-9 and on_segment(d, a, b))
+            or (abs(o3) <= 1e-9 and on_segment(a, c, d)) or (abs(o4) <= 1e-9 and on_segment(b, c, d)))
+
+
+def _segment_distance(a: tuple[float, float], b: tuple[float, float], c: tuple[float, float], d: tuple[float, float]) -> float:
+    if _segments_intersect(a, b, c, d):
+        return 0.0
+    return min(_point_segment_distance(a, c, d), _point_segment_distance(b, c, d),
+               _point_segment_distance(c, a, b), _point_segment_distance(d, a, b))
+
+
+def _ambient_segments(actor: dict) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+    if actor["mode"] == "idle":
+        point = _xy(actor["position"])
+        return [(point, point)]
+    points = [_xy(p) for p in actor["path"]]
+    return list(zip(points, points[1:] + points[:1]))
+
+
+def test_ambient_roster_keeps_footprints_and_patrols_clear() -> None:
+    life = DRESSING["ambient_life"]
+    assert life["enabled"]
+    assert 0 < len(life["actors"]) <= 4
+    ids = [actor["id"] for actor in life["actors"]]
+    assert len(ids) == len(set(ids)), "ambient actor ids must be unique"
+    anchors = {name: _xy(pos) for name, pos in _gameplay_points().items()}
+    center, gate = _xy(TOWN["center"]), _xy(TOWN["gate_position"])
+    gate_clearance = float(DRESSING["plaza"]["path_width_m"]) / 2.0 + float(life["actor_clearance_m"]) + float(life["gate_approach_clearance_m"])
+    service_half_width = float(DRESSING["service_paths"]["path_width_m"]) / 2.0 + float(life["actor_clearance_m"]) + float(life["service_path_margin_m"])
+    for actor in life["actors"]:
+        resolved = CLASS_PRESENTATIONS[actor["class_id"]]["model"]["asset_id"]
+        assert MANIFEST[resolved]["type"] == "character", f"{resolved} must be a registered character"
+        segments = _ambient_segments(actor)
+        vertices = [point for segment in segments for point in segment]
+        for point in vertices:
+            assert math.dist(point, center) <= float(TOWN["radius_m"]) - float(life["fence_clearance_m"]) - float(life["actor_clearance_m"]), f"{actor['id']} is too close to palisade"
+        for obstacle, point in anchors.items():
+            distance = min(_point_segment_distance(point, *segment) for segment in segments)
+            assert distance >= float(life["anchor_clearance_m"]), f"{actor['id']} route approaches gameplay anchor {obstacle} ({distance:.2f} m)"
+        for prop in DRESSING["props"]:
+            point = _xy(prop["position"])
+            distance = min(_point_segment_distance(point, *segment) for segment in segments)
+            assert distance >= float(life["prop_clearance_m"]), f"{actor['id']} route approaches prop {prop['asset_id']} ({distance:.2f} m)"
+        for target in DRESSING["service_paths"]["targets"]:
+            service = anchors[target]
+            distance = min(_segment_distance(*route, center, service) for route in segments)
+            assert distance >= service_half_width, f"{actor['id']} route blocks service path {target} ({distance:.2f} m)"
+        distance = min(_segment_distance(*route, center, gate) for route in segments)
+        assert distance >= gate_clearance, f"{actor['id']} route blocks the gate approach ({distance:.2f} m)"
+    for index, actor in enumerate(life["actors"]):
+        for other in life["actors"][index + 1:]:
+            distance = min(_segment_distance(*first, *second)
+                           for first in _ambient_segments(actor) for second in _ambient_segments(other))
+            minimum = 2.0 * float(life["actor_clearance_m"])
+            assert distance >= minimum, f"{actor['id']} and {other['id']} routes overlap ({distance:.2f} m)"
+
+
+def test_ambient_clearance_rejects_an_unsafe_anchor_fixture() -> None:
+    life = DRESSING["ambient_life"]
+    unsafe = {"id": "unsafe_fixture", "mode": "idle", "position": {"x": 20.0, "y": 12.0}}
+    vendor = _gameplay_points()["town_vendor"]
+    separation = min(_point_segment_distance(vendor, *segment) for segment in _ambient_segments(unsafe))
+    assert separation < float(life["anchor_clearance_m"]), "negative fixture must overlap the vendor's reserved space"
 
 
 def test_anchors_match_the_world_preset_exactly() -> None:

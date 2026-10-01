@@ -513,16 +513,10 @@ async def execute_step(
         await set_companion_stance(ws, session_id, state, step, loop, make_envelope, wait_for_accept, wait_for_reject)
         return
 
-    if action == "move_until_player_position":
-        move_fn = move_to_position if bool(step.get("pathfind")) else walk_toward
-        await move_fn(
-            ws,
-            session_id,
-            state,
-            {"x": float(step["x"]), "y": float(step["y"])},
-            loop,
-            stop_distance=float(step.get("tolerance", 0.25)),
-            max_ticks=int(step.get("max_ticks", WALK_MAX_TICKS)),
+    if action in {"move_until_player_position", "move_to_boss_lane"}:
+        from tools.bot.boss_lane_actions import move_to_boss_lane_or_position
+        await move_to_boss_lane_or_position(
+            ws, session_id, state, step, loop, walk_toward, move_to_position, WALK_MAX_TICKS,
         )
         return
 

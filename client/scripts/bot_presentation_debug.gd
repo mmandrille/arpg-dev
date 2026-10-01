@@ -69,6 +69,10 @@ static func entities_presentation_debug(entities: Dictionary) -> Array:
 		var rec: Dictionary = entities[id]
 		var node := rec.get("node", null) as Node3D
 		var node_pos := node.position if node != null else Vector3.ZERO
+		var lane_marker := node.find_child("BossLaneMarker", false, false) as Node3D if node != null else null
+		var legacy_marker := node.find_child(ClientConstantsScript.BOSS_TELEGRAPH_MARKER_NAME, false, false) as Node3D if node != null else null
+		var safe_mesh := lane_marker.find_child("SafeLane", false, false) as MeshInstance3D if lane_marker != null else null
+		var safe_material := safe_mesh.material_override as StandardMaterial3D if safe_mesh != null else null
 		var reaction = rec.get("reaction", null)
 		var controller = rec.get("controller", null)
 		out.append({
@@ -80,6 +84,11 @@ static func entities_presentation_debug(entities: Dictionary) -> Array:
 			"boss_phase": rec.get("boss_phase", {}), "boss_telegraph_active": bool(rec.get("boss_telegraph_active", false)),
 			"telegraph_tint": str(rec.get("telegraph_tint", "")), "has_boss_telegraph_marker": bool(rec.get("has_boss_telegraph_marker", false)),
 			"telegraph_radius": float(rec.get("telegraph_radius", 0.0)), "telegraph_marker_color": str(rec.get("telegraph_marker_color", "")), "telegraph_marker_shape": str(rec.get("telegraph_marker_shape", "")),
+			"lane_marker_child_count": lane_marker.get_child_count() if lane_marker != null else 0,
+			"lane_marker_queued_for_deletion": lane_marker.is_queued_for_deletion() if lane_marker != null else false,
+			"legacy_telegraph_marker_present": legacy_marker != null,
+			"safe_lane_material_color": safe_material.albedo_color.to_html(true) if safe_material != null else "",
+			"safe_lane_world_y": safe_mesh.global_position.y if safe_mesh != null else -1.0,
 			"base_tint": str(rec.get("base_tint", "")), "has_bow_marker": bool(rec.get("has_bow_marker", false)), "effect_ids": rec.get("effect_ids", []),
 			"monster_pack_id": str(rec.get("monster_pack_id", "")), "monster_pack_leader": bool(rec.get("monster_pack_leader", false)),
 			"interactable_def_id": str(rec.get("interactable_def_id", "")), "elite_objective": bool(rec.get("elite_objective", false)),

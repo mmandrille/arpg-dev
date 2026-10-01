@@ -35,6 +35,7 @@ The script prints the screenshot path under `.artifacts/showme/`.
 | `--refresh` | `0` (off) | **Gear + live only:** reload shared JSON configs every N seconds (see below). |
 | `--rotation-period` | `0` (auto) | Seconds for one 360° rotation in live mode; defaults to `--refresh` when set. |
 | `--items` | gear default set | Comma-separated `item_def_id`s. Used by `gear` and `floor-item`. |
+| `--baseline` | off | Hide v508 rarity cues only in comparison captures. |
 | `--class-id` | (none) | Class model for `gear` / `skeleton`, e.g. `paladin`. |
 | `--skill-id` | (none) | Skill id for `skill-icon` focus. |
 | `--family-id` | (none) | Item presentation family for `item-icon` focus. |
@@ -98,6 +99,7 @@ Canonical list lives in `skills/showme/scripts/render_focus.py` (`--focus` choic
 | Equipped character / socket placement | `gear` |
 | All three class models side by side | `classes` |
 | Dropped loot on the ground | `floor-item` |
+| Five rarity cues at playable camera zoom | `rarity-cues` |
 | Paper-doll inventory + tooltip | `inventory` |
 | Hero corpse interactable (3D) | `corpse` |
 | Player inventory + corpse loot panels | `corpse-inventory` |
@@ -131,6 +133,7 @@ Canonical list lives in `skills/showme/scripts/render_focus.py` (`--focus` choic
 | `classes` | Barbarian, sorcerer, paladin models in a row with labels. | — | 1120×640 |
 | `skeleton` | Character in spread T-pose; red dot at every bone + colored labeled sphere at each equipment socket. | `--class-id` | 800×600 |
 | `floor-item` | Single loot node on grass (`LootNodeFactory`). First `--items` entry or `long_sword`. | `--items` | 640×480 |
+| `rarity-cues` | Five equipment drops under the playable isometric camera settings on controlled dark/light ground; `--reveal` shows the center rare label. | `--town-zoom`, `--ground-tone`, `--reveal`, `--quality` | 1120×720 |
 
 ### Inventory and icons
 
@@ -150,6 +153,8 @@ Canonical list lives in `skills/showme/scripts/render_focus.py` (`--focus` choic
 | Focus | Shows | Extra flags | Default size* |
 |-------|-------|-------------|---------------|
 | `shop` | `ShopPanel` + inventory sell context, sample offers, offer tooltip. | — | 1280×760 |
+| `mystery-shop` | Concealed vendor offer with no revealed rarity. | — | 1280×760 |
+| `blacksmith` | `BlacksmithPanel` with a staged rare equipment item. | — | 960×640 |
 | `bishop` | `BishopPanel` heal/resurrect UI (debug enabled). | — | 640×520 |
 | `market-board` | 3D market board with incoming/published count labels. | — | 960×640 |
 | `market-publish` | `MarketPanel` on publish tab with sample listings/stash. | — | 1120×720 |

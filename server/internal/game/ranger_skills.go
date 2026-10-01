@@ -88,7 +88,7 @@ func (s *Sim) applyRangerShot(player *entity, skillID string, def SkillDef, rank
 	if def.Pierce.MaxHits > 0 {
 		maxHits = def.Pierce.MaxHits
 	}
-	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank))
+	damageRange := s.rangerAffinitySkillDamage(def, s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank)))
 	for hitIndex, row := range targets {
 		if hitIndex >= maxHits {
 			break
@@ -120,7 +120,7 @@ func (s *Sim) applyRangerVolley(player *entity, skillID string, def SkillDef, ra
 	if count <= 0 {
 		return
 	}
-	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank))
+	damageRange := s.rangerAffinitySkillDamage(def, s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank)))
 	hitIDs := map[uint64]bool{}
 	startEvents := len(res.Events)
 	for _, arrowDir := range volleyDirections(dir, count, s.effectiveVolleySpreadForSkill(skillID, def.Volley.SpreadDegrees)) {

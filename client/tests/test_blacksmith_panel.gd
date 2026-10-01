@@ -53,6 +53,10 @@ func _run() -> void:
 	}
 	panel.show_blacksmith("smith-1", [item, shard, stone], 100, 0, config, "Choose", {})
 	panel.stage_inventory_item(item)
+	var detail_item := item.duplicate(true)
+	detail_item["summary_lines"] = ["Damage 1-2"]
+	_assert_true("staged equipment detail names rarity", panel._item_detail(detail_item).contains("Rarity: Common"))
+	_assert_false("staged resource detail has no rarity", panel._item_detail(shard).contains("Rarity:"))
 	var state := panel.get_debug_state()
 	_assert_eq("default recipe id", str(state.get("selected_recipe_id", "")), "item_upgrade")
 	_assert_eq("preview hidden without resource", (state.get("preview_lines", []) as Array).size(), 0)

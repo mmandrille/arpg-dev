@@ -132,6 +132,8 @@ type entity struct {
 	bossPhaseExecuted        bool
 	bossPhaseAim             Vec2
 	bossPhaseHasAim          bool
+	bossLane                 *BossLaneView
+	bossLaneAttackCount      int
 	bossEnraged              bool
 	bossEnrageThreshold      float64
 	itemDefID                string
@@ -1494,7 +1496,7 @@ func (s *Sim) fireProjectileInDirection(dir Vec2, targetID uint64, in Input, res
 		dir:              dir,
 		speed:            projectileSpeed,
 		maxDistance:      maxDistance,
-		damageRange:      s.resolvePlayerAttackDamage(),
+		damageRange:      s.rangerAffinityBasicDamage(s.resolvePlayerAttackDamage()),
 		sourceDamageType: damageTypeForce,
 		sourceWeaponSlot: weaponSlot,
 		sourceMsgID:      in.MessageID,
@@ -2428,7 +2430,7 @@ func (s *Sim) skillCastDirectionWithRange(def SkillDef, cast *CastSkillIntent, p
 }
 
 func (s *Sim) spawnSkillProjectile(player *entity, skillID string, def SkillDef, rank int, dir Vec2, targetID uint64, in Input) *entity {
-	damageRange := s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank))
+	damageRange := s.rangerAffinitySkillDamage(def, s.scaleSkillDamageForMagic(def, rank, s.skillDamageRangeForSkill(skillID, def, rank)))
 	projectile := &entity{
 		kind:             projectileEntity,
 		pos:              player.pos,

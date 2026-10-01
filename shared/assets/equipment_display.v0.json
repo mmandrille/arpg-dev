@@ -119,6 +119,77 @@
         "rest_on_floor": true,
         "height": 0.05,
         "max_extent": 0.55
+      },
+      "fallback_equipment_head_v0": {
+        "rotation_degrees": {
+          "x": 90,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "scale": 1.25
+      },
+      "fallback_equipment_chest_v0": {
+        "rotation_degrees": {
+          "x": 90,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05
+      },
+      "fallback_equipment_gloves_v0": {
+        "rotation_degrees": {
+          "x": 90,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "scale": 1.5
+      },
+      "fallback_equipment_belt_v0": {
+        "rotation_degrees": {
+          "x": 90,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "scale": 0.5
+      },
+      "fallback_equipment_boots_v0": {
+        "rotation_degrees": {
+          "x": 90,
+          "y": 35,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "scale": 1.2
+      },
+      "fallback_equipment_ring_left_v0": {
+        "rotation_degrees": {
+          "x": 90,
+          "y": 0,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "scale": 3.0,
+        "max_extent": 0.14
+      },
+      "fallback_equipment_amulet_v0": {
+        "rotation_degrees": {
+          "x": 180,
+          "y": 0,
+          "z": 0
+        },
+        "rest_on_floor": true,
+        "height": 0.05,
+        "scale": 2.5,
+        "max_extent": 0.2
       }
     }
   }

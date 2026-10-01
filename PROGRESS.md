@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-01 (v500 pre-batch blocker fixed; extended gates pending)
+Last updated: 2026-10-01 (v501–v510 integrated; combined `make ci` passed; post-batch review pending)
 
 ---
 
@@ -23,11 +23,11 @@ Last updated: 2026-10-01 (v500 pre-batch blocker fixed; extended gates pending)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v500 — town terrain and KayKit nature landmarks ([as-built](docs/as-built/v500_town-terrain-landmarks.md)). The v494–v500 graphics and smoothness batch was implemented in isolated worktrees and integrated together; the final combined `make ci` passed in 11m13s after an integration fix. |
-| **Next slice** | After the v500 blocker, `$refactor`, and `make ci-full` gates, dispatch the accepted v501–v510 graphics, feel, and gameplay batch. |
+| **Latest completed slice** | v510 — Ranger affinity passive; the accepted v501–v510 graphics, feel, and gameplay batch is integrated, with combined `make ci` passing in 11m41s. See the [slice lifecycle](docs/progress/slice-lifecycle.md) and per-slice as-built evidence. |
+| **Next slice** | Run the required post-batch `$review` → `$refactor`, then propose the next batch with `$next`. `make ci-full` remains an open extended-validation gap. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
 | **Last engineering review** | v500 — [`docs/reviews/20260930_v500-overview.md`](docs/reviews/20260930_v500-overview.md) (2026-09-30; on-cadence, overall 7.1→7.7; `make ci-full` not run this window — see Open gaps) |
-| **Next engineering review** | After the next coordinated batch, or the next ~10-slice milestone for standalone development. |
+| **Next engineering review** | Due now after v501–v510; run `$review` → `$refactor`, then set the next review after the next coordinated batch or ~10-slice standalone milestone. |
 
 
 ### Periodic engineering reviews
@@ -85,6 +85,8 @@ and ADR-0013.
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Active review follow-ups
+
+- **v501–v510 evidence limits:** v506 resident-memory and hands-on town proof, v508 final no-aura matched cost, and v509 live reconnect/matched lane cost remain unverified; captures and green CI do not establish performance.
 
 - **v500 `$review` (on-cadence at `33c4dc35`), supersedes v486.** Overview:
   [`docs/reviews/20260930_v500-overview.md`](docs/reviews/20260930_v500-overview.md). Score 7.1 → 7.7; most v486

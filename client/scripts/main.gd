@@ -18,6 +18,7 @@ const AuraSoftLights := preload("res://scripts/aura_soft_lights.gd")
 const EliteAuraPreviewSync := preload("res://scripts/elite_aura_preview_sync.gd")
 const ProjectileVisualsScript := preload("res://scripts/projectile_visuals.gd")
 const ProjectileFlightPresentationScript := preload("res://scripts/projectile_flight_presentation.gd")
+const SkillVisualCaptureRuntimeScript := preload("res://scripts/skill_visual_capture_runtime.gd")
 const MonsterHealthBarScript := preload("res://scripts/monster_health_bar.gd")
 const EnemyHealthBarVisibilityScript := preload("res://scripts/enemy_health_bar_visibility.gd")
 const CorpseStatusBarScript := preload("res://scripts/corpse_status_bar.gd")
@@ -234,6 +235,7 @@ var waypoint_rows: VBoxContainer
 var visual_replay_exit_timer: float = 0.0
 var visual_replay_show_inventory: bool = false
 var visual_replay_completion_hold_s: float = 0.5
+var _skill_visual_capture_runtime := SkillVisualCaptureRuntimeScript.new()
 var _perf_debug_sampler := preload("res://scripts/perf_debug_sampler.gd").new()
 var client_settings: ClientSettings
 var menu_layer: CanvasLayer
@@ -1027,6 +1029,8 @@ func _clear_presentation_session_state() -> void:
 
 
 func _process(delta: float) -> void:
+	if visual_replay_enabled:
+		_skill_visual_capture_runtime.tick()
 	if client == null:
 		return
 	_perf_debug_sampler.begin_frame()
@@ -1083,6 +1087,7 @@ func _process(delta: float) -> void:
 	if _camera != null and is_instance_valid(_camera): CombatEventPresentationScript.bind_camera(_camera, player_max_hp, delta, player_id)
 	if gameplay_active and _camera_controller != null:
 		_camera_controller.tick_follow(delta)
+	_skill_visual_capture_runtime.apply_pending_camera_view(_camera_controller)
 	if gameplay_active and CameraImpactFeedback.is_active():
 		if _camera_controller != null: _camera_controller.sync_to_player()
 
@@ -3728,6 +3733,7 @@ func _start_next_visual_replay() -> void:
 	current_world_id = world_id
 	visual_replay_title = str(scenario.get("title", scenario.get("id", session_id)))
 	var visual_cfg: Dictionary = scenario.get("visual", {})
+	_skill_visual_capture_runtime.configure(visual_cfg)
 	visual_replay_completion_hold_s = maxf(float(visual_cfg.get("post_complete_hold_s", 0.5)), 0.0)
 	visual_replay_show_inventory = bool(visual_cfg.get("inventory_panel", false)) \
 		or world_id == "inventory_lab" \
@@ -3769,10 +3775,13 @@ func _handle_visual_replay(delta: float) -> void:
 	if visual_replay_exit_requested:
 		visual_replay_exit_timer -= delta
 		if visual_replay_exit_timer <= 0.0:
+			if _skill_visual_capture_runtime.has_pending():
+				visual_replay_exit_timer = autoplay_step_delay
+				return
 			_debug("visual replay exit requested")
 			if client != null:
 				client.close()
-			get_tree().quit(0)
+			get_tree().quit(1 if _skill_visual_capture_runtime.error_message() != "" else 0)
 		return
 	if visual_replay_index >= visual_replay_scenarios.size():
 		return
@@ -3790,6 +3799,12 @@ func _handle_visual_replay(delta: float) -> void:
 	var env: Dictionary = visual_replay_envelopes[visual_replay_envelope_index]
 	visual_replay_envelope_index += 1
 	_handle_message(env)
+	var quality := client_settings.graphics_quality if client_settings != null else "unknown"
+	_skill_visual_capture_runtime.capture_replay_envelope(
+		env, get_viewport(), visual_replay_title, last_server_tick, quality,
+		Callable(self, "_flush_pending_deltas"), _camera_controller, player_anchor,
+		entities, _camera, _last_monster_damage_feedback,
+	)
 	visual_replay_timer = _visual_replay_delay_for(env)
 
 func _visual_replay_delay_for(env: Dictionary) -> float:
@@ -5923,6 +5938,8 @@ func _apply_entity_status_tint(rec: Dictionary) -> void:
 		_apply_model_tint(node, tint)
 
 func _apply_model_tint(root: Node, color: Color) -> void:
+	if root.name == "BossLaneMarker":
+		return
 	if root is MeshInstance3D:
 		(root as MeshInstance3D).material_override = ModelTintScript.tinted_material(root as MeshInstance3D, color)
 	for child in root.get_children():

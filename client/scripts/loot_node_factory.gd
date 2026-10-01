@@ -5,6 +5,9 @@ const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const EquipmentDisplayLoaderScript := preload("res://scripts/equipment_display_loader.gd")
 const PotionIconLabelScript := preload("res://scripts/potion_icon_label.gd")
 const ModelTintScript := preload("res://scripts/model_tint.gd")
+const LootQuestBadgeShapesScript := preload("res://scripts/loot_quest_badge_shapes.gd")
+const RarityCueLoaderScript := preload("res://scripts/rarity_cue_loader.gd")
+const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
 
 var asset_manifest: Dictionary = {}
 var item_presentations: Dictionary = {}
@@ -26,17 +29,16 @@ func make_loot_node(e: Dictionary) -> Node3D:
 	var color := Color(str(ground.get("color", "#" + loot_color(item_def_id).to_html(false))))
 	var accent := Color(str(ground.get("accent", "#f6e8b1")))
 	var scale := float(ground.get("scale", 1.0))
-	var rarity := str(e.get("rarity", "common"))
-	add_loot_rarity_glow(root, rarity, scale)
 	var model := make_ground_equipment_model(item_def_id, str(e.get("rarity", "common")), int(e.get("amount", 0)))
 	if model != null:
 		root.add_child(model)
 	else:
-		add_loot_rarity_background(root, item_rarity_background(rarity), scale)
-		add_loot_primitive(root, shape, color, accent, scale)
-	add_loot_spawn_pop(root, rarity, scale)
-	add_loot_pickup_beam(root, rarity, scale)
-	add_loot_label(root, loot_label_text(e), scale, loot_label_color(e))
+		if LootQuestBadgeShapesScript.supports(shape):
+			LootQuestBadgeShapesScript.add_shape(root, shape, color, accent, scale)
+		else:
+			add_loot_primitive(root, shape, color, accent, scale)
+	add_loot_label(root, loot_label_text(e), scale, loot_label_color(e), not RarityCueLoaderScript.cue_for_item(e).is_empty())
+	RarityCuePresenterScript.add_world_marker(root, e, scale)
 	return root
 
 func add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color, scale: float) -> void:
@@ -79,12 +81,9 @@ func add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color
 		"amulet":
 			add_loot_cylinder(root, "AmuletChain", 0.20 * scale, 0.04 * scale, Vector3(0.0, 0.17, 0.0), color)
 			add_loot_box(root, "AmuletGem", Vector3(0.13, 0.12, 0.08) * scale, Vector3(0.0, 0.25, -0.15 * scale), accent)
-		"badge", "coin":
+		"coin":
 			add_loot_cylinder(root, "Badge", 0.24 * scale, 0.08 * scale, Vector3(0.0, 0.16, 0.0), color)
 			add_loot_cylinder(root, "BadgeMark", 0.12 * scale, 0.10 * scale, Vector3(0.0, 0.21, 0.0), accent)
-		"leaf":
-			add_loot_box(root, "Leaf", Vector3(0.42, 0.06, 0.24) * scale, Vector3(0.0, 0.16, 0.0), color)
-			add_loot_box(root, "Stem", Vector3(0.06, 0.08, 0.46) * scale, Vector3(0.0, 0.18, 0.0), accent)
 		"potion":
 			add_loot_cylinder(root, "Bottle", 0.17 * scale, 0.32 * scale, Vector3(0.0, 0.26, 0.0), color)
 			add_loot_box(root, "Cork", Vector3(0.14, 0.10, 0.14) * scale, Vector3(0.0, 0.48 * scale, 0.0), accent)
@@ -199,62 +198,15 @@ func ground_item_tint(rarity: String) -> Color:
 		_:
 			return Color("#d8d0bd")
 
-func add_loot_rarity_background(parent: Node3D, color: Color, scale: float) -> void:
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(0.82, 0.04, 0.82) * maxf(scale, 0.85)
-	add_loot_mesh(parent, "RarityBackground", mesh, Vector3(0.0, 0.045, 0.0), color)
-
-func add_loot_rarity_glow(parent: Node3D, rarity: String, scale: float) -> void:
-	var mesh := TorusMesh.new()
-	mesh.inner_radius = 0.32 * maxf(scale, 0.85)
-	mesh.outer_radius = 0.43 * maxf(scale, 0.85)
-	mesh.ring_segments = 32
-	var node := MeshInstance3D.new()
-	node.name = "RarityGlow"
-	node.mesh = mesh
-	node.position = Vector3(0.0, 0.055, 0.0)
-	node.rotation_degrees.x = 90.0
-	var intensity := _rarity_glow_intensity(rarity)
-	node.material_override = _glow_material(item_rarity_background(rarity), intensity)
-	parent.add_child(node)
-
-
-func add_loot_pickup_beam(parent: Node3D, rarity: String, scale: float) -> void:
-	if not _rarity_has_pickup_beam(rarity):
-		return
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = 0.03 * maxf(scale, 0.85)
-	mesh.bottom_radius = 0.05 * maxf(scale, 0.85)
-	mesh.height = 0.42 * maxf(scale, 0.85)
-	mesh.radial_segments = 10
-	var node := MeshInstance3D.new()
-	node.name = "PickupBeam"
-	node.mesh = mesh
-	node.position = Vector3(0.0, 0.24 * maxf(scale, 0.85), 0.0)
-	node.material_override = _glow_material(ground_item_tint(rarity), _rarity_beam_intensity(rarity))
-	parent.add_child(node)
-
-func add_loot_spawn_pop(parent: Node3D, rarity: String, scale: float) -> void:
-	var mesh := TorusMesh.new()
-	mesh.inner_radius = 0.48 * maxf(scale, 0.85)
-	mesh.outer_radius = 0.52 * maxf(scale, 0.85)
-	mesh.ring_segments = 28
-	var node := MeshInstance3D.new()
-	node.name = "SpawnPopRing"
-	node.mesh = mesh
-	node.position = Vector3(0.0, 0.095, 0.0)
-	node.rotation_degrees.x = 90.0
-	node.material_override = _glow_material(ground_item_tint(rarity), 0.28)
-	parent.add_child(node)
-
-func add_loot_label(parent: Node3D, text: String, scale: float, color: Color = Color("#f4ead8")) -> void:
+func add_loot_label(parent: Node3D, text: String, scale: float, color: Color = Color("#f4ead8"), has_rarity_cue: bool = false) -> void:
 	if text == "":
 		return
 	var label := Label3D.new()
 	label.name = "LootLabel"
 	label.text = text
 	label.visible = false
-	label.position = Vector3(0.0, 0.58 * maxf(scale, 0.8), 0.0)
+	var label_height := float(RarityCueLoaderScript.catalog().get("world", {}).get("revealed_label_height", 1.25)) if has_rarity_cue else 0.58
+	label.position = Vector3(0.0, label_height * maxf(scale, 0.8), 0.0)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
 	label.fixed_size = true
@@ -286,49 +238,6 @@ func add_loot_mesh(parent: Node3D, node_name: String, mesh: Mesh, position: Vect
 	mat.albedo_color = color
 	node.material_override = mat
 	parent.add_child(node)
-
-func _glow_material(color: Color, alpha: float) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(color.r, color.g, color.b, alpha)
-	mat.emission_enabled = true
-	mat.emission = color
-	mat.emission_energy_multiplier = 0.45 + alpha * 0.35
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	return mat
-
-
-func _rarity_glow_intensity(rarity: String) -> float:
-	match rarity.to_lower():
-		"magic":
-			return 0.55
-		"rare":
-			return 0.72
-		"unique":
-			return 0.92
-		"set":
-			return 0.85
-		_:
-			return 0.42
-
-
-func _rarity_beam_intensity(rarity: String) -> float:
-	match rarity.to_lower():
-		"rare":
-			return 0.34
-		"unique":
-			return 0.48
-		"set":
-			return 0.42
-		_:
-			return 0.0
-
-
-func _rarity_has_pickup_beam(rarity: String) -> bool:
-	match rarity.to_lower():
-		"rare", "unique", "set":
-			return true
-		_:
-			return false
 
 func loot_color(item_def_id: String) -> Color:
 	var def: Dictionary = ItemRulesLoader.item_definition(item_def_id)
@@ -367,15 +276,11 @@ func loot_label_text(e: Dictionary) -> String:
 		return "gold"
 	var display_name := str(e.get("display_name", "")).strip_edges()
 	if display_name != "":
-		return display_name
+		return RarityCueLoaderScript.revealed_label(display_name, RarityCueLoaderScript.cue_for_item(e))
 	var rule_name := str(def.get("name", "")).strip_edges()
 	if rule_name != "":
-		return rule_name
-	return generic_loot_name(item_def_id)
-
-func item_rarity_background(rarity: String) -> Color:
-	var key := rarity.to_lower()
-	return ClientConstantsScript.ITEM_RARITY_BACKGROUNDS.get(key, ClientConstantsScript.ITEM_RARITY_BACKGROUNDS["common"])
+		return RarityCueLoaderScript.revealed_label(rule_name, RarityCueLoaderScript.cue_for_item(e))
+	return RarityCueLoaderScript.revealed_label(generic_loot_name(item_def_id), RarityCueLoaderScript.cue_for_item(e))
 
 func item_definition(item_def_id: String) -> Dictionary:
 	return ItemRulesLoader.item_definition(item_def_id)

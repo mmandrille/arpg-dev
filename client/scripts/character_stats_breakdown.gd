@@ -5,7 +5,7 @@ const StatLabels := preload("res://scripts/stat_labels.gd")
 
 const BASE_STATS := StatLabels.BASE_STATS
 const FRACTION_PERCENT_STATS := ["hit_chance", "crit_chance", "evade_chance"]
-const WHOLE_PERCENT_STATS := ["block_percent"]
+const WHOLE_PERCENT_STATS := ["block_percent", "ranged_damage_bonus_percent"]
 const TILES_PER_TICK_STATS := ["movement_speed"]
 
 

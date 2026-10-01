@@ -33,6 +33,15 @@ func (s *Sim) ensureBossPhase(boss *entity, res *TickResult) (bossPhaseRuntime, 
 	if !ok {
 		return bossPhaseRuntime{}, false
 	}
+	if next.index == 0 && next.phase.HitShape == "lanes" {
+		if !s.prepareBossLane(boss, next) {
+			boss.bossPhaseKind = ""
+			boss.bossPhaseIndex = -1
+			boss.bossCooldownEnds = s.tick + 1
+			s.advanceBossPatternDeck(boss)
+			return bossPhaseRuntime{}, false
+		}
+	}
 	boss.bossPatternID = next.patternID
 	boss.bossPhaseIndex = next.index
 	boss.bossPhaseKind = next.phase.Kind
@@ -40,7 +49,11 @@ func (s *Sim) ensureBossPhase(boss *entity, res *TickResult) (bossPhaseRuntime, 
 	boss.bossPhaseEnds = s.tick + uint64(next.phase.DurationTicks)
 	boss.bossActiveHit = map[uint64]bool{}
 	boss.bossPhaseExecuted = false
-	s.captureBossPhaseAim(boss, next.phase)
+	if next.phase.HitShape != "lanes" {
+		s.captureBossPhaseAim(boss, next.phase)
+	} else {
+		boss.bossLane = boss.bossLane.withPhase(next.index, next.phase)
+	}
 	res.Changes = append(res.Changes, Change{Op: OpEntityUpdate, Entity: ptrEntityView(s.entityView(boss))})
 	res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
 	return next, true
@@ -95,6 +108,7 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 		boss.bossActiveHit = nil
 		boss.bossPhaseExecuted = false
 		boss.bossPhaseHasAim = false
+		boss.bossLane = nil
 		s.advanceBossPatternDeck(boss)
 	} else {
 		next := bossPhaseRuntime{patternID: runtime.patternID, index: runtime.index + 1, phase: pattern.Phases[runtime.index+1]}
@@ -104,8 +118,13 @@ func (s *Sim) endBossPhase(boss *entity, runtime bossPhaseRuntime, res *TickResu
 		boss.bossPhaseEnds = s.tick + 1 + uint64(next.phase.DurationTicks)
 		boss.bossActiveHit = map[uint64]bool{}
 		boss.bossPhaseExecuted = false
-		if next.phase.Kind == "telegraph" {
+		if next.phase.Kind == "telegraph" && next.phase.HitShape != "lanes" {
 			s.captureBossPhaseAim(boss, next.phase)
+		}
+		if next.phase.Kind == "recovery" {
+			boss.bossLane = nil
+		} else if boss.bossLane != nil {
+			boss.bossLane = boss.bossLane.withPhase(next.index, next.phase)
 		}
 		res.Events = append(res.Events, bossPhaseEvent("boss_phase_started", boss, next))
 	}
@@ -322,6 +341,8 @@ func bossPhaseHitsPlayer(boss, player *entity, phase BossPatternPhase) bool {
 			radius = monsterRadius + playerRadius
 		}
 		return distance(boss.pos, player.pos) <= radius
+	case "lanes":
+		return bossLaneHitsPlayer(boss.bossLane, player.pos)
 	case "circle":
 		if phase.Radius <= 0 {
 			return false
@@ -367,7 +388,7 @@ func bossPhaseHitsPlayer(boss, player *entity, phase BossPatternPhase) bool {
 }
 
 func (s *Sim) captureBossPhaseAim(boss *entity, phase BossPatternPhase) {
-	if phase.HitShape != "line" && phase.Shape != "line" && phase.HitShape != "cone" && phase.Shape != "cone" && phase.HitShape != "rectangle" && phase.Shape != "rectangle" {
+	if phase.HitShape != "line" && phase.Shape != "line" && phase.HitShape != "cone" && phase.Shape != "cone" && phase.HitShape != "rectangle" && phase.Shape != "rectangle" && phase.HitShape != "lanes" && phase.Shape != "lanes" {
 		boss.bossPhaseHasAim = false
 		return
 	}
@@ -403,6 +424,7 @@ func bossPhaseEvent(eventType string, boss *entity, runtime bossPhaseRuntime) Ev
 		DurationTicks: intPtr(runtime.phase.DurationTicks),
 		Telegraph:     bossTelegraphView(runtime.phase),
 		HitShape:      bossHitShapeView(runtime.phase),
+		Lane:          boss.bossLane.withPhase(runtime.index, runtime.phase),
 	}
 }
 

@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
+from tools.bot.boss_lane_actions import boss_lane_target
 from tools.bot.runtime_economy_assertions import handle_runtime_economy_assertion
+from tools.bot.runtime_queries import dict_distance
 
 _ITEM_RARITY_ORDER = ("normal", "magic", "rare", "unique")
 
@@ -404,6 +406,25 @@ def run_runtime_assertions(assertions: list[Any], state: Any, where: str, helper
                 raise AssertionError(
                     f"{where}: player hp {current_hp} did not decrease below recorded {state.recorded_player_hp}"
                 )
+            continue
+        if typ == "player_hp_not_decreased_from_recorded":
+            if state.recorded_player_hp is None:
+                raise AssertionError(f"{where}: no recorded player hp")
+            player = find_player(state)
+            if player is None or not isinstance(player.get("hp"), int):
+                raise AssertionError(f"{where}: missing current player hp: {player}")
+            if player["hp"] < state.recorded_player_hp:
+                raise AssertionError(f"{where}: player hp {player['hp']} fell below recorded {state.recorded_player_hp}")
+            continue
+        if typ == "boss_lane_position":
+            player = find_player(state)
+            if player is None or not isinstance(player.get("position"), dict):
+                raise AssertionError(f"{where}: missing current player position: {player}")
+            target = boss_lane_target(state, str(assertion.get("pattern_id", "shifting_bulwark")), str(assertion.get("lane_kind", "safe")))
+            gap = dict_distance(player["position"], target)
+            tolerance = float(assertion.get("tolerance", 0.3))
+            if gap > tolerance:
+                raise AssertionError(f"{where}: player {player['position']} is {gap:.3f} from {target}, tolerance {tolerance}")
             continue
         if typ == "current_level":
             want = int(assertion["equals"])

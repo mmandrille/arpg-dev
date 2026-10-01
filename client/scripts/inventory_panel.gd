@@ -5,6 +5,7 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
+const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
 const PotionIconLabelScript := preload("res://scripts/potion_icon_label.gd")
 const StatLabels := preload("res://scripts/stat_labels.gd")
 const UniqueEffectTooltipScript := preload("res://scripts/unique_effect_tooltip.gd")
@@ -668,7 +669,7 @@ func _fill_slot(slot: InventorySlotButton, item: Dictionary) -> void:
 	var rarity := str(item.get("rarity", "common"))
 	var invalid_requirements := _item_shows_requirement_warning(item)
 	if bool(item.get("_blocked_by_two_handed", false)):
-		slot.tooltip_text = "%s occupies both hands" % str(item.get("display_name", item.get("item_def_id", "Two-handed item")))
+		slot.tooltip_text = "%s\nOccupies both hands" % _tooltip(item)
 		slot.add_theme_stylebox_override("normal", InventoryPanelStylesScript.blocked_slot_style(false))
 		slot.add_theme_stylebox_override("hover", InventoryPanelStylesScript.blocked_slot_style(true))
 		slot.add_theme_stylebox_override("pressed", InventoryPanelStylesScript.blocked_slot_style(true))
@@ -701,12 +702,14 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var label := PotionIconLabelScript.icon_label(item, str(icon.get("label", _short_label(def_id))))
 	var blocked := bool(item.get("_blocked_by_two_handed", false))
 	var invalid_requirements := _item_shows_requirement_warning(item)
-	ItemIconDrawerScript.draw(slot, rect, icon, label, blocked or invalid_requirements, 0.38, ICON_FONT_SIZE)
+	ItemIconDrawerScript.draw(slot, rect, icon, label, blocked or invalid_requirements, 0.38, ICON_FONT_SIZE, item)
 	if blocked:
 		slot.draw_rect(rect.grow(-3.0), Color(0.05, 0.05, 0.05, 0.46), true)
+		RarityCuePresenterScript.draw_slot(slot, rect, item)
 		return
 	if invalid_requirements:
 		slot.draw_rect(rect.grow(-4.0), Color(1.0, 0.35, 0.35, 0.30), true)
+		RarityCuePresenterScript.draw_slot(slot, rect, item)
 	_draw_hotbar_badge(slot, item)
 
 

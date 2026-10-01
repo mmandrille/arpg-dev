@@ -1014,6 +1014,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -1109,6 +1110,7 @@
         "column": 2
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -1171,6 +1173,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -1635,6 +1638,7 @@
         "column": 3
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -2339,6 +2343,13 @@
             "base": 4,
             "per_rank": 0
           }
+        },
+        "ranger_affinity_damage": {
+          "affinity_stat": "dex",
+          "base_percent_per_affinity": 2,
+          "stat_points_per_extra_percent": 10,
+          "max_active_affinities": 2,
+          "max_bonus_percent": 12
         }
       },
       "cooldown": {
@@ -2571,6 +2582,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -2633,6 +2645,7 @@
         "column": 4
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -4914,6 +4927,7 @@
         "column": 2
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -4976,6 +4990,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -5098,6 +5113,7 @@
         "column": 4
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {
@@ -5156,6 +5172,7 @@
         "column": 1
       },
       "kind": "projectile_attack",
+      "ranger_affinity_eligible": true,
       "max_rank": 10,
       "targeting": "direction",
       "requirements": {

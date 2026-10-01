@@ -1390,6 +1390,39 @@
       "effect_pool": [],
       "equipment_category": "weapon_2h"
     },
+    "affinity_ranger_quiver": {
+      "name": "Ranger Quiver",
+      "category": "equipment",
+      "item_type": "belt",
+      "slot": "belt",
+      "equippable": true,
+      "class_required": "ranger",
+      "requirements": {
+        "level": 1,
+        "dex": 5
+      },
+      "base_stats": {
+        "dex": 1
+      },
+      "rollable_stats": [
+        {
+          "stat": "attack_speed_percent",
+          "min": 1,
+          "max": 3,
+          "weight": 1
+        }
+      ],
+      "class_affinities": [
+        {
+          "class": "ranger",
+          "stat": "reach_percent",
+          "min": 8,
+          "max": 12
+        }
+      ],
+      "effect_pool": [],
+      "equipment_category": "class_specialist"
+    },
     "affinity_sorcerer_staff": {
       "name": "Affinity Staff",
       "category": "equipment",

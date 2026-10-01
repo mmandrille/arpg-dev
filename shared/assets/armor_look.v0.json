@@ -33,6 +33,7 @@
     "affinity_barbarian_girdle": { "color": "#9c5a2e", "strength": 0.4 },
     "sash": { "color": "#a33b3b", "strength": 0.4 },
     "hunting_quiver": { "color": "#5f6b3a", "strength": 0.4 },
+    "affinity_ranger_quiver": { "color": "#617d43", "strength": 0.4 },
     "iron_girdle": { "color": "#8c9096", "strength": 0.4 },
     "boots": { "color": "#6f4a2c" },
     "affinity_rogue_treads": { "color": "#3b2f45" },

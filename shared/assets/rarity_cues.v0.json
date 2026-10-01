@@ -1,0 +1,29 @@
+{
+  "version": 0,
+  "slot": {
+    "badge_fraction": 0.28,
+    "minimum_size_px": 15,
+    "margin_px": 2,
+    "font_size_px": 10,
+    "stroke_px": 1.5,
+    "foreground": "#ffffff",
+    "background": "#101010"
+  },
+  "world": {
+    "offset_x": 0.68,
+    "height": 0.05,
+    "revealed_label_height": 2.7,
+    "pixel_size": 0.0022,
+    "font_size": 32,
+    "outline_size": 8,
+    "foreground": "#ffffff",
+    "outline": "#000000"
+  },
+  "rarities": {
+    "common": {"name": "Common", "short": "C", "shape": "square", "world_symbol": "C"},
+    "magic": {"name": "Magic", "short": "M", "shape": "circle", "world_symbol": "M"},
+    "rare": {"name": "Rare", "short": "R", "shape": "triangle", "world_symbol": "R"},
+    "unique": {"name": "Unique", "short": "U", "shape": "diamond", "world_symbol": "U"},
+    "set": {"name": "Set", "short": "S", "shape": "star", "world_symbol": "S"}
+  }
+}

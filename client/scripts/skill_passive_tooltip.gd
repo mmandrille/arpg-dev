@@ -14,6 +14,31 @@ static func passive_stat_lines(def: Dictionary, rank: int) -> Array:
 	return lines
 
 
+static func ranger_affinity_lines(def: Dictionary, character_progression: Dictionary) -> Array:
+	var rule: Dictionary = def.get("passive_stats", {}).get("ranger_affinity_damage", {})
+	if rule.is_empty():
+		return []
+	var stat_name := "Dexterity"
+	match str(rule.get("affinity_stat", "dex")):
+		"str":
+			stat_name = "Strength"
+		"vit":
+			stat_name = "Vitality"
+		"magic":
+			stat_name = "Magic"
+	var current := int((character_progression.get("derived_stats", {}) as Dictionary).get("ranged_damage_bonus_percent", 0))
+	return [
+		"Ranged damage per Ranger affinity: %d%% + 1%% per %d %s (up to %d affinities; cap %d%%)." % [
+			int(rule.get("base_percent_per_affinity", 0)),
+			int(rule.get("stat_points_per_extra_percent", 1)),
+			stat_name,
+			int(rule.get("max_active_affinities", 0)),
+			int(rule.get("max_bonus_percent", 0)),
+		],
+		"Current ranged damage bonus: +%d%%" % current,
+	]
+
+
 static func passive_next_rank_lines(def: Dictionary, current_rank: int, next_rank: int) -> Array:
 	var passive_stats: Dictionary = def.get("passive_stats", {}).get("stats", {})
 	var lines: Array = []

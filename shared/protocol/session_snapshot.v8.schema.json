@@ -401,11 +401,12 @@
     },
     "derived_stats": {
       "type": "object",
-      "required": ["damage_min", "damage_max", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "light_radius"],
+      "required": ["damage_min", "damage_max", "ranged_damage_bonus_percent", "armor", "attack_speed", "attack_interval_ticks", "hit_chance", "crit_chance", "crit_damage", "movement_speed", "max_hp", "max_mana", "health_regen_per_second", "mana_regen_per_second", "light_radius"],
       "additionalProperties": false,
       "properties": {
         "damage_min": { "type": "number", "minimum": 0 },
         "damage_max": { "type": "number", "minimum": 0 },
+        "ranged_damage_bonus_percent": { "type": "integer", "minimum": 0, "maximum": 25 },
         "armor": { "type": "number", "minimum": 0 },
         "attack_speed": { "type": "number", "minimum": 0 },
         "attack_interval_ticks": { "type": "integer", "minimum": 1 },
@@ -643,6 +644,7 @@
         "duration_ticks": { "type": "integer", "minimum": 0 },
         "telegraph": { "$ref": "#/$defs/boss_telegraph" },
         "hit_shape": { "$ref": "#/$defs/boss_hit_shape" },
+        "lane": { "$ref": "#/$defs/boss_lane" },
         "state": { "type": "string", "enum": ["closed", "open", "ready", "locked", "disabled"] },
         "stance": { "type": "string", "enum": ["assist", "defend", "passive"] }
       },
@@ -963,7 +965,8 @@
         "remaining_ticks": { "type": "integer", "minimum": 0 },
         "duration_ticks": { "type": "integer", "minimum": 0 },
         "telegraph": { "$ref": "#/$defs/boss_telegraph" },
-        "hit_shape": { "$ref": "#/$defs/boss_hit_shape" }
+        "hit_shape": { "$ref": "#/$defs/boss_hit_shape" },
+        "lane": { "$ref": "#/$defs/boss_lane" }
       }
     },
     "companion_combat_stats": {
@@ -980,12 +983,32 @@
         "crit_chance": { "type": "number", "minimum": 0 }
       }
     },
+    "boss_lane": {
+      "type": "object",
+      "required": ["origin", "forward", "right", "count", "width", "length", "safe_color", "danger_color", "safe_intensity", "safe_index", "stage_index", "intensity", "danger_lanes"],
+      "additionalProperties": false,
+      "properties": {
+        "origin": { "$ref": "#/$defs/vec2" },
+        "forward": { "$ref": "#/$defs/vec2" },
+        "right": { "$ref": "#/$defs/vec2" },
+        "count": { "type": "integer", "minimum": 3, "maximum": 9 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "length": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
+        "safe_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "danger_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "safe_intensity": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "safe_index": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "stage_index": { "type": "integer", "minimum": 0 },
+        "intensity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "danger_lanes": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "type": "integer", "minimum": 0, "maximum": 8 } }
+      }
+    },
     "boss_telegraph": {
       "type": "object",
       "required": ["type"],
       "additionalProperties": false,
       "properties": {
-        "type": { "type": "string", "enum": ["body_color_charge", "circle", "line", "cone", "rectangle"] },
+        "type": { "type": "string", "enum": ["body_color_charge", "circle", "line", "cone", "rectangle", "lanes"] },
         "from_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
         "to_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
         "hit_shape": { "type": "string", "minLength": 1 },
@@ -998,7 +1021,7 @@
       "required": ["shape"],
       "additionalProperties": false,
       "properties": {
-        "shape": { "type": "string", "enum": ["melee_contact", "circle", "line", "cone", "rectangle"] },
+        "shape": { "type": "string", "enum": ["melee_contact", "circle", "line", "cone", "rectangle", "lanes"] },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "width": { "type": "number", "exclusiveMinimum": 0 }
       }

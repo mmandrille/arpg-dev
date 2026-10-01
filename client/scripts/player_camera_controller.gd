@@ -34,6 +34,19 @@ var _pitch: float = 0.0  # vertical orbit angle (radians) for perspective modes
 var _follow_initialized := false
 
 
+static func visual_replay_camera_config(visual_config: Dictionary) -> Dictionary:
+	var raw = visual_config.get("camera", null)
+	if typeof(raw) != TYPE_DICTIONARY:
+		return {}
+	var camera_config: Dictionary = raw
+	if camera_config.is_empty() or not camera_config.has("zoom"):
+		return {}
+	if typeof(camera_config["zoom"]) not in [TYPE_INT, TYPE_FLOAT] \
+			or float(camera_config["zoom"]) <= 0.0:
+		return {}
+	return camera_config.duplicate(true)
+
+
 ## Must be called once before any other method.
 ## scene_root is the Node3D to attach camera nodes to (typically `self` in main.gd).
 func setup(ctx, scene_root: Node3D) -> void:  # ctx: PlayerCameraContext
@@ -100,6 +113,20 @@ func adjust_zoom(delta_size: float) -> void:
 		var fov_min: float = _cfg.get("fov_min", 60.0)
 		var fov_max: float = _cfg.get("fov_max", 120.0)
 		_camera.fov = clampf(_camera.fov + delta_size, fov_min, fov_max)
+
+
+## Pin an isometric visual replay to a deterministic world focus and zoom multiplier.
+## The caller uses this only for replay/capture presentation; gameplay follow remains unchanged.
+func apply_visual_replay_view(world_focus: Vector3, zoom_multiplier: float) -> void:
+	if _camera == null or _current_mode != "isometric":
+		return
+	var zoom_min: float = float(_cfg.get("zoom_min", 8.0))
+	var zoom_max: float = float(_cfg.get("zoom_max", 20.0))
+	var zoom_default: float = float(_cfg.get("zoom_default", 12.0))
+	var multiplier := maxf(zoom_multiplier, 0.01)
+	_camera.size = clampf(zoom_default / multiplier, zoom_min, zoom_max)
+	_camera.global_position = world_focus + _iso_offset + CameraImpactFeedbackScript.get_offset()
+	_camera.look_at(world_focus, Vector3.UP)
 
 
 ## Returns the active Camera3D (callers bind this for raycasting / UI world-space).

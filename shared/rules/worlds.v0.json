@@ -1494,6 +1494,22 @@
             "x": 4,
             "y": 6
           }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "affinity_compound_bow",
+          "position": {
+            "x": 6,
+            "y": 6
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "affinity_ranger_quiver",
+          "position": {
+            "x": 6,
+            "y": 4
+          }
         }
       ]
     },
@@ -1779,7 +1795,7 @@
           "type": "monster",
           "monster_def_id": "combat_lab_soft_target",
           "position": {
-            "x": 24,
+            "x": 27,
             "y": 5
           }
         },

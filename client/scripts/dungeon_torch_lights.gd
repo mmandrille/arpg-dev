@@ -4,6 +4,8 @@ extends RefCounted
 
 const PlacementScript := preload("res://scripts/dungeon_torch_placement.gd")
 const LoaderScript := preload("res://scripts/dungeon_torch_presentation_loader.gd")
+const DepthLightingScript := preload("res://scripts/dungeon_depth_lighting.gd")
+const DepthMoodLoaderScript := preload("res://scripts/dungeon_depth_mood_loader.gd")
 const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
 const DungeonKitPropsScript := preload("res://scripts/dungeon_kit_props.gd")
 
@@ -14,6 +16,11 @@ var _ground_factory: GroundWallFactory
 var _wall_renderer: WallRenderer
 var _active := false
 var _positions: Array = []
+var _palette_id := ""
+# Private config cache; placement and spawn helpers only read these values.
+var _has_cached_torch_config := false
+var _cached_torch_config_palette_id := ""
+var _cached_torch_config: Dictionary = {}
 
 
 func _init(parent: Node3D, fog_overlay: FogOfWarOverlay, ground_factory: GroundWallFactory, wall_renderer: WallRenderer) -> void:
@@ -25,14 +32,15 @@ func _init(parent: Node3D, fog_overlay: FogOfWarOverlay, ground_factory: GroundW
 
 func sync(level: int, walls: Array, dungeon_active: bool) -> void:
 	LoaderScript.ensure_loaded()
-	var cfg := LoaderScript.config()
+	var palette_id := DepthLightingScript.palette_id_for_level(level, _ground_factory)
+	var cfg := _torch_config_for_palette_id(palette_id)
 	var should_show := dungeon_active and level < 0 and bool(cfg.get("enabled", true))
 	var mounts := PlacementScript.mounts_from_walls(walls, cfg, level) if should_show else []
 	var placements: Array = []
 	for mount in mounts:
 		placements.append((mount as Dictionary)["position"])
 	_ensure_root()
-	if placements.size() == _positions.size() and should_show == _active and _rendered_count() == placements.size():
+	if placements.size() == _positions.size() and should_show == _active and palette_id == _palette_id and _rendered_count() == placements.size():
 		var same := true
 		for i in placements.size():
 			if placements[i] != _positions[i]:
@@ -42,6 +50,7 @@ func sync(level: int, walls: Array, dungeon_active: bool) -> void:
 			return
 	_clear_torches()
 	_positions = placements
+	_palette_id = palette_id
 	_active = should_show and not placements.is_empty()
 	if not _active:
 		if _fog_overlay != null:
@@ -60,6 +69,14 @@ func sync(level: int, walls: Array, dungeon_active: bool) -> void:
 			float(cfg.get("fog_light_radius", 5.0)),
 			float(cfg.get("torch_feather_world", 0.35)),
 		)
+
+
+func _torch_config_for_palette_id(palette_id: String) -> Dictionary:
+	if not _has_cached_torch_config or palette_id != _cached_torch_config_palette_id:
+		_cached_torch_config = DepthMoodLoaderScript.torch_config(LoaderScript.config(), palette_id)
+		_cached_torch_config_palette_id = palette_id
+		_has_cached_torch_config = true
+	return _cached_torch_config
 
 
 func get_debug_state() -> Dictionary:

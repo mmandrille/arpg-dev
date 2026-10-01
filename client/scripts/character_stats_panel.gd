@@ -13,6 +13,7 @@ const BASE_STATS := StatLabels.BASE_STATS
 const DERIVED_LABELS := {
 	"damage_min": "Damage min",
 	"damage_max": "Damage max",
+	"ranged_damage_bonus_percent": "Ranged dmg bonus",
 	"armor": "Armor",
 	"attack_speed": "Attack speed",
 	"attack_interval_ticks": "Attack interval",
@@ -340,6 +341,8 @@ func _render() -> void:
 		var tooltip := CharacterStatsBreakdown.breakdown_summary(progression, key, DERIVED_LABELS)
 		if name_label != null:
 			name_label.text = DERIVED_LABELS[key]
+			if key == "ranged_damage_bonus_percent":
+				tooltip = "Conditional Ranger projectile damage from Deadeye, equipped Ranger affinities, and effective Dexterity."
 			if dual_wield and key in DUAL_WIELD_DAMAGE_KEYS:
 				name_label.tooltip_text = ""
 			else:

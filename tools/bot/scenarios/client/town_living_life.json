@@ -1,0 +1,21 @@
+{
+  "id": "town_living_life",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "town_living_life_v506",
+  "title": "Living town residents",
+  "description": "Capture the live town presentation, then move through the plaza and verify the vendor interaction still opens.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_wall_layout", "current_level": 0, "at_least": 24, "timeout_s": 15.0 },
+    { "type": "wait_ticks", "ticks": 80, "timeout_s": 10.0 },
+    { "type": "capture_frame", "name": "v506_town_living_start", "timeout_s": 5.0, "skip_if_headless": true },
+    { "type": "click_floor", "x": 19.0, "z": 12.0 },
+    { "type": "wait_player_near", "x": 19.0, "z": 12.0, "distance": 1.5, "timeout_s": 15.0 },
+    { "type": "capture_frame", "name": "v506_town_living_camera_move", "timeout_s": 5.0, "skip_if_headless": true },
+    { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_vendor" },
+    { "type": "wait_shop_panel", "timeout_s": 10.0, "at_least": 1 },
+    { "type": "assert_shop_panel_visible", "visible": true }
+  ]
+}

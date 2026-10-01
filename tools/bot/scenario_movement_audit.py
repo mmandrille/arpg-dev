@@ -72,6 +72,8 @@ MOVEMENT_CONTRACT_ALLOWLIST: frozenset[str] = frozenset(
         "fog_of_war_radius",
         "companion_ai_foundation",
         "resource_support_mobility_unique_effects",
+        "boss_lane_telegraphs",
+        "boss_lane_danger_hit",
     }
 )
 
@@ -82,6 +84,7 @@ PROTOCOL_MOVEMENT_ACTIONS = frozenset(
         "walk_to_monster",
         "move_until_in_range",
         "move_until_player_position",
+        "move_to_boss_lane",
         "teleport_to_level",
     }
 )

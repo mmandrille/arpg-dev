@@ -511,6 +511,35 @@
               }
             }
           }
+        },
+        "ambient_life": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "enabled",
+            "actor_clearance_m",
+            "prop_clearance_m",
+            "anchor_clearance_m",
+            "service_path_margin_m",
+            "fence_clearance_m",
+            "gate_approach_clearance_m",
+            "actors"
+          ],
+          "description": "v506 client-only ambient residents. Their positions and patrols remain clear of gameplay anchors and travel paths.",
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "actor_clearance_m": {"type": "number", "exclusiveMinimum": 0},
+            "prop_clearance_m": {"type": "number", "exclusiveMinimum": 0},
+            "anchor_clearance_m": {"type": "number", "exclusiveMinimum": 0},
+            "service_path_margin_m": {"type": "number", "minimum": 0},
+            "fence_clearance_m": {"type": "number", "minimum": 0},
+            "gate_approach_clearance_m": {"type": "number", "minimum": 0},
+            "actors": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {"$ref": "#/$defs/ambient_actor"}
+            }
+          }
         }
       }
     }
@@ -539,6 +568,37 @@
         "scale_max": {"type": "number", "exclusiveMinimum": 0},
         "footprint_radius_m": {"type": "number", "exclusiveMinimum": 0}
       }
+    },
+    "ambient_actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class_id", "mode"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "class_id": {"type": "string", "enum": ["barbarian", "sorcerer", "paladin", "rogue", "ranger"]},
+        "mode": {"type": "string", "enum": ["idle", "patrol"]},
+        "position": {"$ref": "#/$defs/position"},
+        "yaw_degrees": {"type": "number", "minimum": -360, "maximum": 360},
+        "path": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": {"$ref": "#/$defs/position"}
+        },
+        "speed_mps": {"type": "number", "exclusiveMinimum": 0, "maximum": 2},
+        "pause_s": {"type": "number", "minimum": 0, "maximum": 20},
+        "phase_s": {"type": "number", "minimum": 0, "maximum": 60}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"mode": {"const": "idle"}}, "required": ["mode"]},
+          "then": {"required": ["position", "yaw_degrees"]}
+        },
+        {
+          "if": {"properties": {"mode": {"const": "patrol"}}, "required": ["mode"]},
+          "then": {"required": ["path", "speed_mps", "pause_s", "phase_s"]}
+        }
+      ]
     },
     "position": {
       "type": "object",

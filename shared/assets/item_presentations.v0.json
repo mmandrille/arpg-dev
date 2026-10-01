@@ -317,9 +317,9 @@
       },
       "ground": {
         "shape": "leaf",
-        "color": "#3fbf62",
-        "accent": "#b8f0a8",
-        "scale": 0.9
+        "color": "#70d94a",
+        "accent": "#f5df87",
+        "scale": 1.1
       }
     },
     "health_potion": {
@@ -611,7 +611,7 @@
         "label": "Sh"
       },
       "ground": {
-        "shape": "badge",
+        "shape": "shard",
         "color": "#8b5cf6",
         "accent": "#e9d5ff",
         "scale": 0.75
@@ -626,7 +626,7 @@
         "label": "Rn"
       },
       "ground": {
-        "shape": "badge",
+        "shape": "stone",
         "color": "#5ec8ff",
         "accent": "#b8ecff",
         "scale": 0.75
@@ -713,20 +713,47 @@
     "affinity_compound_bow": {
       "family": "bow"
     },
+    "affinity_ranger_quiver": {
+      "family": "belt"
+    },
     "quest_leaf": {
       "family": "quest"
     },
     "quest_trophy_wolf_heart": {
-      "family": "quest"
+      "family": "quest",
+      "ground": {
+        "shape": "heart",
+        "color": "#a3424f",
+        "accent": "#f2b3aa",
+        "scale": 0.9
+      }
     },
     "quest_trophy_bat_wing": {
-      "family": "quest"
+      "family": "quest",
+      "ground": {
+        "shape": "wing",
+        "color": "#5b4b75",
+        "accent": "#b9a8dc",
+        "scale": 0.9
+      }
     },
     "quest_trophy_archer_head": {
-      "family": "quest"
+      "family": "quest",
+      "ground": {
+        "shape": "hooded_head",
+        "color": "#66765b",
+        "accent": "#d6bf9b",
+        "scale": 0.9
+      }
     },
     "quest_trophy_mob_skull": {
-      "family": "quest"
+      "family": "quest",
+      "ground": {
+        "shape": "skull",
+        "color": "#c9c5ae",
+        "accent": "#767366",
+        "scale": 0.9
+      }
     },
     "red_potion": {
       "family": "health_potion"

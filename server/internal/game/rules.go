@@ -245,6 +245,18 @@ type BossVisualDef struct {
 type BossPatternDef struct {
 	Phases        []BossPatternPhase `json:"phases"`
 	CooldownTicks int                `json:"cooldown_ticks"`
+	Lanes         *BossLanesDef      `json:"lanes,omitempty"`
+}
+
+type BossLanesDef struct {
+	Count             int       `json:"count"`
+	Width             float64   `json:"width"`
+	Length            float64   `json:"length"`
+	SafeColor         string    `json:"safe_color"`
+	DangerColor       string    `json:"danger_color"`
+	SafeIntensity     float64   `json:"safe_intensity"`
+	AimOffsetsDegrees []float64 `json:"aim_offsets_degrees"`
+	SafeSequence      []int     `json:"safe_sequence"`
 }
 
 type BossPatternPhase struct {
@@ -257,6 +269,7 @@ type BossPatternPhase struct {
 	Shape              string       `json:"shape,omitempty"`
 	Radius             float64      `json:"radius,omitempty"`
 	Width              float64      `json:"width,omitempty"`
+	LaneIntensity      float64      `json:"lane_intensity,omitempty"`
 	SummonMonsterDefID string       `json:"summon_monster_def_id,omitempty"`
 	SummonCount        int          `json:"summon_count,omitempty"`
 	SummonRadius       float64      `json:"summon_radius,omitempty"`
@@ -327,37 +340,38 @@ type ItemTemplateDef struct {
 
 // SkillDef is a server-authoritative active skill definition.
 type SkillDef struct {
-	Name         string               `json:"name"`
-	Class        string               `json:"class"`
-	DamageType   string               `json:"damage_type,omitempty"`
-	Tree         SkillTreeDef         `json:"tree"`
-	Kind         string               `json:"kind"`
-	MaxRank      int                  `json:"max_rank"`
-	Targeting    string               `json:"targeting"`
-	Requirements SkillRequirementDef  `json:"requirements"`
-	Cost         SkillCostDef         `json:"cost"`
-	Damage       SkillDamageDef       `json:"damage"`
-	Projectile   SkillProjectileDef   `json:"projectile"`
-	Pierce       SkillPierceDef       `json:"pierce"`
-	Root         SkillRootDef         `json:"root"`
-	Volley       SkillVolleyDef       `json:"volley"`
-	Cone         SkillConeDef         `json:"cone"`
-	Poison       SkillPoisonDef       `json:"poison"`
-	Bleed        SkillBleedDef        `json:"bleed"`
-	Mark         SkillMarkDef         `json:"mark"`
-	Dash         SkillDashDef         `json:"dash"`
-	Mobility     SkillMobilityDef     `json:"mobility"`
-	Execute      SkillExecuteDef      `json:"execute"`
-	PassiveStats SkillPassiveStatsDef `json:"passive_stats"`
-	Slow         SkillSlowDef         `json:"slow"`
-	Shatter      SkillShatterDef      `json:"shatter"`
-	Chain        SkillChainDef        `json:"chain"`
-	Resolution   string               `json:"resolution,omitempty"`
-	Companion    SkillCompanionDef    `json:"companion"`
-	Revive       SkillReviveDef       `json:"revive"`
-	Synergies    []SkillSynergyDef    `json:"synergies,omitempty"`
-	Effects      []SkillEffectDef     `json:"effects"`
-	Cooldown     SkillCooldownDef     `json:"cooldown"`
+	Name                   string               `json:"name"`
+	Class                  string               `json:"class"`
+	DamageType             string               `json:"damage_type,omitempty"`
+	Tree                   SkillTreeDef         `json:"tree"`
+	Kind                   string               `json:"kind"`
+	RangerAffinityEligible *bool                `json:"ranger_affinity_eligible,omitempty"`
+	MaxRank                int                  `json:"max_rank"`
+	Targeting              string               `json:"targeting"`
+	Requirements           SkillRequirementDef  `json:"requirements"`
+	Cost                   SkillCostDef         `json:"cost"`
+	Damage                 SkillDamageDef       `json:"damage"`
+	Projectile             SkillProjectileDef   `json:"projectile"`
+	Pierce                 SkillPierceDef       `json:"pierce"`
+	Root                   SkillRootDef         `json:"root"`
+	Volley                 SkillVolleyDef       `json:"volley"`
+	Cone                   SkillConeDef         `json:"cone"`
+	Poison                 SkillPoisonDef       `json:"poison"`
+	Bleed                  SkillBleedDef        `json:"bleed"`
+	Mark                   SkillMarkDef         `json:"mark"`
+	Dash                   SkillDashDef         `json:"dash"`
+	Mobility               SkillMobilityDef     `json:"mobility"`
+	Execute                SkillExecuteDef      `json:"execute"`
+	PassiveStats           SkillPassiveStatsDef `json:"passive_stats"`
+	Slow                   SkillSlowDef         `json:"slow"`
+	Shatter                SkillShatterDef      `json:"shatter"`
+	Chain                  SkillChainDef        `json:"chain"`
+	Resolution             string               `json:"resolution,omitempty"`
+	Companion              SkillCompanionDef    `json:"companion"`
+	Revive                 SkillReviveDef       `json:"revive"`
+	Synergies              []SkillSynergyDef    `json:"synergies,omitempty"`
+	Effects                []SkillEffectDef     `json:"effects"`
+	Cooldown               SkillCooldownDef     `json:"cooldown"`
 }
 
 type SkillTreeDef struct {
@@ -472,8 +486,9 @@ type SkillExecuteDef struct {
 
 // SkillPassiveStatsDef defines always-on bonuses applied from learned ranks.
 type SkillPassiveStatsDef struct {
-	Stats           map[string]SkillRankValueDef   `json:"stats"`
-	AffinityScaling SkillPassiveAffinityScalingDef `json:"affinity_scaling,omitempty"`
+	Stats                map[string]SkillRankValueDef   `json:"stats"`
+	AffinityScaling      SkillPassiveAffinityScalingDef `json:"affinity_scaling,omitempty"`
+	RangerAffinityDamage *RangerAffinityDamageDef       `json:"ranger_affinity_damage,omitempty"`
 }
 
 type SkillPassiveAffinityScalingDef struct {

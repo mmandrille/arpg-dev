@@ -30,6 +30,9 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			if bool(step.get("skip_if_headless", false)) and DisplayServer.get_name() == "headless":
 				print("[bot-capture] SKIP windowed-only frame %s in headless fixture run" % str(step.get("name", "")))
 				return true
+			if bool(state.get("pause_menu_visible", false)):
+				runner._fail("capture_frame requires an unpaused gameplay view")
+				return false
 			if not runner._memory.has("capture_job"):
 				var quality := "unknown"
 				if runner._controller._main != null and runner._controller._main.client_settings != null:
@@ -42,7 +45,17 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 					"torch_positions": (state.get("dungeon_torch_lights", {}) as Dictionary).get("positions", []),
 					"rendered_torch_count": (state.get("dungeon_torch_lights", {}) as Dictionary).get("rendered_count", 0),
 					"engaged_entity_id": runner._memory.get("remembered_event_entity_id", ""),
+					"pause_menu_visible": state.get("pause_menu_visible", false),
 				}
+				for row in state.get("entities_presentation_debug", []):
+					if row is Dictionary and bool(row.get("is_boss", false)):
+						fixture["boss_phase"] = row.get("boss_phase", {})
+						fixture["boss_lane_marker_child_count"] = row.get("lane_marker_child_count", 0)
+						fixture["boss_lane_marker_queued_for_deletion"] = row.get("lane_marker_queued_for_deletion", false)
+						fixture["boss_legacy_telegraph_marker_present"] = row.get("legacy_telegraph_marker_present", false)
+						fixture["boss_safe_lane_material_color"] = row.get("safe_lane_material_color", "")
+						fixture["boss_safe_lane_world_y"] = row.get("safe_lane_world_y", -1.0)
+						break
 				runner._memory["capture_job"] = BotFrameCaptureScript.start(
 					runner._controller.get_viewport(), str(step.get("name", "")), quality, fixture)
 			var job = runner._memory["capture_job"]

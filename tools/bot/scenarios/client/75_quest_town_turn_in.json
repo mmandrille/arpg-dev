@@ -8,6 +8,7 @@
   "client_steps": [
     { "type": "wait_ws_open", "timeout_s": 15.0 },
     { "type": "wait_entity", "entity_type": "interactable", "interactable_def_id": "town_quest_giver", "timeout_s": 15.0 },
+    { "type": "capture_frame", "name": "v504_quest_leaf_camera", "timeout_s": 5.0, "skip_if_headless": true },
     { "type": "click_entity", "entity_type": "loot", "item_def_id": "quest_leaf" },
     { "type": "wait_event", "event_type": "resource_bag_item_picked_up", "timeout_s": 15.0 },
     { "type": "click_entity", "entity_type": "interactable", "interactable_def_id": "town_quest_giver" },

@@ -33,8 +33,10 @@ try:
     from .validate_dungeon_goldens import validate_dungeon_obstacle_goldens
     from .validate_i18n import validate_i18n_catalog, validate_locale_catalog
     from .validate_item_presentations import validate_item_presentations
+    from .validate_rarity_cues import validate_rarity_cues
     from .validate_main_config import validate_main_config_gameplay
     from .validate_skills import validate_skill_catalogs
+    from .validate_ranger_affinity import validate_ranger_affinity
     from .validate_fog_presentation import validate_camera_fog_mode_alignment, validate_fog_presentation_ranges
     from .validate_armor_look import validate_armor_look
     from .validate_consumable_golden import validate_use_consumable_golden
@@ -50,8 +52,10 @@ except ImportError:  # pragma: no cover - direct script execution
     from validate_dungeon_goldens import validate_dungeon_obstacle_goldens  # type: ignore[no-redef]
     from validate_i18n import validate_i18n_catalog, validate_locale_catalog  # type: ignore[no-redef]
     from validate_item_presentations import validate_item_presentations  # type: ignore[no-redef]
+    from validate_rarity_cues import validate_rarity_cues  # type: ignore[no-redef]
     from validate_main_config import validate_main_config_gameplay  # type: ignore[no-redef]
     from validate_skills import validate_skill_catalogs  # type: ignore[no-redef]
+    from validate_ranger_affinity import validate_ranger_affinity  # type: ignore[no-redef]
     from validate_unique_items import validate_unique_items_catalog  # type: ignore[no-redef]
     from validate_fog_presentation import validate_camera_fog_mode_alignment, validate_fog_presentation_ranges  # type: ignore[no-redef]
     from validate_armor_look import validate_armor_look  # type: ignore[no-redef]
@@ -257,6 +261,7 @@ def cross_checks(report: Report) -> None:
     guarded_chest_generation_golden = load(GOLDEN / "guarded_chest_generation.json")
     character_progression_golden = load(GOLDEN / "character_progression.json")
     skill_magic_golden = load(GOLDEN / "skill_points_and_magic_bolt.json")
+    ranger_affinity_golden = load(GOLDEN / "ranger_affinity_damage.json")
     combat_stat_effects_golden = load(GOLDEN / "combat_stat_effects.json")
     boss_floor_golden = load(GOLDEN / "boss_floor_-5.json")
     boss_pattern_golden = load(GOLDEN / "boss_pattern_timeline.json")
@@ -1362,6 +1367,7 @@ def cross_checks(report: Report) -> None:
         min_attack_speed=min_attack_speed,
         max_attack_speed=max_attack_speed,
     )
+    validate_ranger_affinity(report, skills, ranger_affinity_golden)
 
     if navigation.get("cell_size", 0) <= 0:
         report.fail("navigation cell_size", "must be positive")
@@ -3044,6 +3050,7 @@ def cross_checks(report: Report) -> None:
         item_templates=item_templates,
         manifest_assets=manifest_assets,
     )
+    validate_rarity_cues(report, load(ASSETS / "rarity_cues.v0.json"), item_templates)
 
     validate_unique_items_catalog(report, unique_items, item_templates, unique_effects)
 

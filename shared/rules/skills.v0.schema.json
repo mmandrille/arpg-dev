@@ -26,6 +26,7 @@
         "damage_type": { "$ref": "#/$defs/damage_type" },
         "tree": { "$ref": "#/$defs/tree_position" },
         "kind": { "type": "string", "enum": ["projectile_attack", "cold_projectile_attack", "chain_projectile_attack", "cone_attack", "self_buff", "area_heal", "area_stat_buff", "summon_companion", "revive_companion", "mobility", "passive_execute", "passive_stat_bonus", "survival_autocast"] },
+        "ranger_affinity_eligible": { "const": true },
         "max_rank": { "type": "integer", "minimum": 1 },
         "targeting": { "type": "string", "enum": ["direction", "direction_or_target", "self", "direction_or_target_area", "self_or_ally_area"] },
         "requirements": { "$ref": "#/$defs/requirements" },
@@ -484,6 +485,7 @@
             "movement_speed_percent": { "$ref": "#/$defs/rank_linear_integer" }
           }
         },
+        "ranger_affinity_damage": { "$ref": "#/$defs/ranger_affinity_damage" },
         "affinity_scaling": {
           "type": "object",
           "required": ["max_active_affinities", "stats"],
@@ -528,6 +530,18 @@
             }
           }
         }
+      }
+    },
+    "ranger_affinity_damage": {
+      "type": "object",
+      "required": ["affinity_stat", "base_percent_per_affinity", "stat_points_per_extra_percent", "max_active_affinities", "max_bonus_percent"],
+      "additionalProperties": false,
+      "properties": {
+        "affinity_stat": { "type": "string", "enum": ["str", "dex", "vit", "magic"] },
+        "base_percent_per_affinity": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "stat_points_per_extra_percent": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "max_active_affinities": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "max_bonus_percent": { "type": "integer", "minimum": 1, "maximum": 25 }
       }
     },
     "mobility": {

@@ -91,6 +91,34 @@ func TestGameplayDebugLiveBuildReplayMatches(t *testing.T) {
 	assertReplayMatchesLive(t, repo, loop)
 }
 
+func TestMercenaryRosterSnapshotReplayAvoidsLiveCharacterReads(t *testing.T) {
+	ctx := context.Background()
+	repo := newMemberSetupRepo(t)
+	host := repo.memberByRole(store.SessionMemberHost)
+	start := repo.starts[host.CharacterID]
+	start.Progression = &store.CharacterProgression{
+		AccountID: host.AccountID, CharacterID: host.CharacterID, CharacterClass: "barbarian", Level: 1,
+		HiredMercenaryCharacterID: "char_mercenary_alt",
+	}
+	start.MercenaryRoster = []store.MercenaryCharacterSnapshot{{
+		CharacterID: "char_mercenary_alt", Name: "Frozen Ranger", CharacterClass: "ranger",
+		Progression: store.CharacterProgression{
+			AccountID: host.AccountID, CharacterID: "char_mercenary_alt", CharacterClass: "ranger", Level: 3,
+			Stats: store.CharacterBaseStats{Str: 4, Dex: 10, Vit: 6, Magic: 2},
+		},
+		Items: []store.CharacterItemInstance{{
+			ID: "860001", AccountID: host.AccountID, CharacterID: "char_mercenary_alt",
+			ItemDefID: "rusty_sword", Location: store.ItemLocationEquipped, Slot: "main_hand", Equipped: true,
+			RolledStats: json.RawMessage(`{}`),
+		}},
+	}}
+	repo.starts[host.CharacterID] = start
+
+	loop := newMemberSetupLoop(t, repo)
+	_ = attachMemberSetupClient(ctx, loop, host)
+	assertReplayMatchesLive(t, repo, loop)
+}
+
 // memberSetupRepo extends the v476 in-memory repo. Corpses live only in the
 // frozen session-start snapshot; the mutable live corpse table panics if read.
 type memberSetupRepo struct {
@@ -157,6 +185,18 @@ func withMemberCorpseAndBag(repo *memberSetupRepo, accountID, characterID, tag s
 // it. Both must use the session-start snapshot.
 func (r *memberSetupRepo) ListRecoverableCharacterCorpses(context.Context, string, string) ([]store.CharacterCorpse, error) {
 	panic("session setup must load corpses from the session start snapshot, not the live corpse table")
+}
+
+func (r *memberSetupRepo) ListCharacters(context.Context, string) ([]store.CharacterSummary, error) {
+	panic("session setup must load mercenaries from the session start snapshot, not live characters")
+}
+
+func (r *memberSetupRepo) GetOrCreateCharacterProgression(context.Context, string, string, store.CharacterProgressionDefaults) (store.CharacterProgression, error) {
+	panic("session setup must not create progression while building or replaying a session")
+}
+
+func (r *memberSetupRepo) ListCharacterItems(context.Context, string, string) ([]store.CharacterItemInstance, error) {
+	panic("session setup must load mercenary items from the session start snapshot, not live items")
 }
 
 func newMemberSetupLoop(t *testing.T, repo *memberSetupRepo) *sessionLoop {

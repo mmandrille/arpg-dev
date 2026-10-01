@@ -1,74 +1,33 @@
-// Package mercenaryroster loads same-account alt characters into the sim
-// mercenary hire roster for live sessions and replay reconstruction.
+// Package mercenaryroster converts frozen session-start mercenary data into
+// the deterministic roster consumed by the simulation.
 package mercenaryroster
 
 import (
-	"context"
-	"fmt"
-
 	"github.com/mmandrille_meli/arpg-dev/server/internal/game"
 	"github.com/mmandrille_meli/arpg-dev/server/internal/store"
 )
 
-// LoadIntoSim replaces the session mercenary roster from durable character data.
-func LoadIntoSim(ctx context.Context, repo store.Repository, rules *game.Rules, sim *game.Sim, accountID, activeCharacterID string) error {
-	if sim == nil || accountID == "" {
-		return nil
+// LoadSnapshotIntoSim replaces the simulation's mercenary roster from the
+// member's immutable session-start snapshot. It performs no database access.
+func LoadSnapshotIntoSim(rules *game.Rules, sim *game.Sim, roster []store.MercenaryCharacterSnapshot) {
+	if sim == nil {
+		return
 	}
-	chars, err := repo.ListCharacters(ctx, accountID)
-	if err != nil {
-		return fmt.Errorf("list mercenary roster characters: %w", err)
-	}
-	roster := make([]game.MercenaryCharacterSnapshot, 0, len(chars))
-	for _, character := range chars {
-		if character.Dead || character.ID == activeCharacterID {
-			continue
-		}
-		progression, err := repo.GetOrCreateCharacterProgression(ctx, accountID, character.ID, progressionDefaults(rules, character.CharacterClass))
-		if err != nil {
-			return fmt.Errorf("load mercenary progression for %s: %w", character.ID, err)
-		}
-		items, err := repo.ListCharacterItems(ctx, accountID, character.ID)
-		if err != nil {
-			return fmt.Errorf("load mercenary items for %s: %w", character.ID, err)
-		}
-		roster = append(roster, game.MercenaryCharacterSnapshot{
-			CharacterID:    character.ID,
-			Name:           character.Name,
-			CharacterClass: character.CharacterClass,
+	characters := make([]game.MercenaryCharacterSnapshot, 0, len(roster))
+	for _, mercenary := range roster {
+		progression := mercenary.Progression
+		progression.CharacterClass = mercenary.CharacterClass
+		characters = append(characters, game.MercenaryCharacterSnapshot{
+			CharacterID:    mercenary.CharacterID,
+			Name:           mercenary.Name,
+			CharacterClass: mercenary.CharacterClass,
 			Level:          progression.Level,
-			Dead:           character.Dead,
+			Dead:           mercenary.Dead,
 			Progression:    progressionStateFromStore(rules, &progression),
-			Items:          persistedItems(items),
+			Items:          persistedItems(mercenary.Items),
 		})
 	}
-	sim.LoadMercenaryRoster(roster)
-
-	return nil
-}
-
-func progressionDefaults(rules *game.Rules, characterClass string) store.CharacterProgressionDefaults {
-	state := rules.DefaultCharacterProgressionState()
-	if classDef, ok := rules.CharacterProgression.Classes[characterClass]; ok {
-		state.CharacterClass = characterClass
-		state.BaseStats = classDef.BaseStats
-	}
-
-	return store.CharacterProgressionDefaults{
-		Level:               state.Level,
-		Experience:          state.Experience,
-		UnspentStatPoints:   state.UnspentStatPoints,
-		UnspentSkillPoints:  state.UnspentSkillPoints,
-		SkillRanks:          state.SkillRanks,
-		Gold:                state.Gold,
-		DeepestDungeonDepth: state.DeepestDungeonDepth,
-		Stats: store.CharacterBaseStats{
-			Str:   state.BaseStats.Str,
-			Dex:   state.BaseStats.Dex,
-			Vit:   state.BaseStats.Vit,
-			Magic: state.BaseStats.Magic,
-		},
-	}
+	sim.LoadMercenaryRoster(characters)
 }
 
 func progressionStateFromStore(rules *game.Rules, progression *store.CharacterProgression) game.CharacterProgressionState {
@@ -103,7 +62,6 @@ func cloneSkillRanks(in map[string]int) map[string]int {
 	for skillID, rank := range in {
 		out[skillID] = rank
 	}
-
 	return out
 }
 
@@ -122,6 +80,5 @@ func persistedItems(items []store.CharacterItemInstance) []game.PersistedItem {
 			RolledStats: item.RolledStats,
 		})
 	}
-
 	return out
 }

@@ -103,7 +103,7 @@ func buildSessionSim(ctx context.Context, h *Hub, sess store.Session) (*game.Sim
 	if err != nil {
 		return nil, nil, fmt.Errorf("resolve host: %w", err)
 	}
-	sim, err := sessionsetup.NewHostSim(ctx, h.store, h.rules, sess, host, func(sim *game.Sim) {
+	sim, err := sessionsetup.NewHostSim(h.rules, sess, host, func(sim *game.Sim) {
 		sim.SetGameplayDebug(h.gameplayDebug)
 	})
 	if err != nil {

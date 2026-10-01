@@ -163,7 +163,7 @@ func sessionStartSim(ctx context.Context, repo store.Repository, rules *game.Rul
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	sim, err := sessionsetup.NewHostSim(ctx, repo, rules, sess, host, nil)
+	sim, err := sessionsetup.NewHostSim(rules, sess, host, nil)
 	if err != nil {
 		return nil, nil, nil, err
 	}

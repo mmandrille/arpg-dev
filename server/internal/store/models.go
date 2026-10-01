@@ -125,6 +125,17 @@ type CharacterCorpse struct {
 	Items       []CharacterItemInstance
 }
 
+// MercenaryCharacterSnapshot freezes one same-account character as a possible
+// hired companion for the lifetime of a session member's snapshot.
+type MercenaryCharacterSnapshot struct {
+	CharacterID    string
+	Name           string
+	CharacterClass string
+	Dead           bool
+	Progression    CharacterProgression
+	Items          []CharacterItemInstance
+}
+
 const (
 	ItemLocationInventory = "inventory"
 	ItemLocationEquipped  = "equipped"
@@ -321,8 +332,8 @@ type CharacterShopStockItem struct {
 	UpdatedAt      time.Time
 }
 
-// SessionStartSnapshot freezes the character progression visible when a
-// session was created. Replay uses this instead of mutable live character rows.
+// SessionStartSnapshot freezes the progression and account-owned gameplay data
+// visible when a member joins. Replay uses it instead of mutable live rows.
 type SessionStartSnapshot struct {
 	SessionID        string
 	AccountID        string
@@ -338,8 +349,9 @@ type SessionStartSnapshot struct {
 	ResourceBagItems []AccountResourceBagItem
 	// Corpses are the same-account recoverable bodies frozen when the member's
 	// snapshot was taken; live corpse rows change as bodies are looted.
-	Corpses     []CharacterCorpse
-	Progression *CharacterProgression
+	Corpses         []CharacterCorpse
+	MercenaryRoster []MercenaryCharacterSnapshot
+	Progression     *CharacterProgression
 }
 
 // SessionMember binds an authenticated account/character to one player entity

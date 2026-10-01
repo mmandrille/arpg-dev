@@ -109,15 +109,15 @@ func progressionForMember(ctx context.Context, repo store.Repository, rules *gam
 	return progressionState(rules, &updated), nil
 }
 
-// NewHostSim builds the session sim around the host: start state, mercenary
-// roster, the restored hired companion, then the host's corpses. The order is
-// part of the replay contract because the companion and corpses allocate IDs.
+// NewHostSim builds the session sim around the host: start state, frozen
+// mercenary roster, the restored hired companion, then the host's corpses.
+// The order is part of the replay contract because these entities allocate IDs.
 //
 // configure, when non-nil, runs right after construction and before any member
 // state loads. Live uses it for SetGameplayDebug: enabling debug seeds unique
 // test chests, and doing that after the per-player loads re-seeds them and
 // allocates IDs that replay never does.
-func NewHostSim(ctx context.Context, repo store.Repository, rules *game.Rules, sess store.Session, host Member, configure func(*game.Sim)) (*game.Sim, error) {
+func NewHostSim(rules *game.Rules, sess store.Session, host Member, configure func(*game.Sim)) (*game.Sim, error) {
 	sim, err := game.NewSimWithWorldProgression(sess.ID, sess.Seed, rules, WorldID(sess.WorldID), host.Progression)
 	if err != nil {
 		return nil, err
@@ -128,9 +128,7 @@ func NewHostSim(ctx context.Context, repo store.Repository, rules *game.Rules, s
 	hostID := sim.DefaultPlayerID()
 	sim.SetPlayerMetadata(hostID, host.Member.AccountID, host.Member.CharacterID, DisplayName(host.Member), store.SessionMemberHost)
 	loadMemberState(sim, hostID, host.Start)
-	if err := mercenaryroster.LoadIntoSim(ctx, repo, rules, sim, host.Member.AccountID, host.Member.CharacterID); err != nil {
-		return nil, err
-	}
+	mercenaryroster.LoadSnapshotIntoSim(rules, sim, host.Start.MercenaryRoster)
 	sim.RestoreHiredMercenaryCompanion(hostID)
 	loadMemberCorpses(sim, host)
 	return sim, nil

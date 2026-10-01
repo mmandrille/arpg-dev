@@ -2055,6 +2055,9 @@ func (s *Store) LoadSessionStartSnapshotForMember(ctx context.Context, sessionID
 	if snap.Corpses, err = s.loadSessionStartCorpses(ctx, sessionID, accountID, characterID); err != nil {
 		return snap, err
 	}
+	if snap.MercenaryRoster, err = s.loadSessionStartMercenaryRoster(ctx, sessionID, accountID, characterID); err != nil {
+		return snap, err
+	}
 	wpRows, err := s.pool.Query(ctx,
 		`SELECT character_id, level, discovered_at
 		 FROM session_start_waypoints

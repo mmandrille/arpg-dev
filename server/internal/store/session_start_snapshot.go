@@ -9,8 +9,8 @@ import (
 )
 
 // CreateSessionStartSnapshot freezes a member's replay inputs when the member
-// joins the session: progression, items, bindings, account storage, and the
-// recoverable corpses it will see. Rows are insert-only (ON CONFLICT DO NOTHING).
+// joins the session: progression, items, bindings, account storage, recoverable
+// corpses, and the mercenary roster. Rows are insert-only.
 func (s *Store) CreateSessionStartSnapshot(ctx context.Context, snap SessionStartSnapshot) error {
 	sessionID, accountID, characterID := snap.SessionID, snap.AccountID, snap.CharacterID
 	items, waypoints, hotbar, skillBinds := snap.Items, snap.Waypoints, snap.Hotbar, snap.SkillBinds
@@ -196,7 +196,10 @@ func (s *Store) CreateSessionStartSnapshot(ctx context.Context, snap SessionStar
 				return fmt.Errorf("store: insert session start account resource bag item: %w", err)
 			}
 		}
-		return insertSessionStartCorpses(ctx, tx, sessionID, accountID, characterID, snap.Corpses)
+		if err := insertSessionStartCorpses(ctx, tx, sessionID, accountID, characterID, snap.Corpses); err != nil {
+			return err
+		}
+		return insertSessionStartMercenaryRoster(ctx, tx, sessionID, accountID, characterID, snap.MercenaryRoster)
 	})
 }
 
@@ -209,6 +212,62 @@ type sessionStartCorpseItem struct {
 	Equipped    bool            `json:"equipped,omitempty"`
 	WeaponSet   int             `json:"weapon_set,omitempty"`
 	RolledStats json.RawMessage `json:"rolled_stats,omitempty"`
+}
+
+type sessionStartMercenaryStats struct {
+	Str   int `json:"str"`
+	Dex   int `json:"dex"`
+	Vit   int `json:"vit"`
+	Magic int `json:"magic"`
+}
+
+type sessionStartMercenaryProgression struct {
+	CharacterClass            string                     `json:"character_class"`
+	Level                     int                        `json:"level"`
+	Experience                int                        `json:"experience"`
+	UnspentStatPoints         int                        `json:"unspent_stat_points"`
+	UnspentSkillPoints        int                        `json:"unspent_skill_points"`
+	SkillRanks                map[string]int             `json:"skill_ranks,omitempty"`
+	Stats                     sessionStartMercenaryStats `json:"stats"`
+	Gold                      int                        `json:"gold"`
+	DeepestDungeonDepth       int                        `json:"deepest_dungeon_depth"`
+	HiredMercenaryCharacterID string                     `json:"hired_mercenary_character_id,omitempty"`
+}
+
+func encodeSessionStartMercenaryProgression(progression CharacterProgression) ([]byte, error) {
+	return json.Marshal(sessionStartMercenaryProgression{
+		CharacterClass:            progression.CharacterClass,
+		Level:                     progression.Level,
+		Experience:                progression.Experience,
+		UnspentStatPoints:         progression.UnspentStatPoints,
+		UnspentSkillPoints:        progression.UnspentSkillPoints,
+		SkillRanks:                progression.SkillRanks,
+		Stats:                     sessionStartMercenaryStats{Str: progression.Stats.Str, Dex: progression.Stats.Dex, Vit: progression.Stats.Vit, Magic: progression.Stats.Magic},
+		Gold:                      progression.Gold,
+		DeepestDungeonDepth:       progression.DeepestDungeonDepth,
+		HiredMercenaryCharacterID: progression.HiredMercenaryCharacterID,
+	})
+}
+
+func decodeSessionStartMercenaryProgression(data []byte, accountID, characterID string) (CharacterProgression, error) {
+	var frozen sessionStartMercenaryProgression
+	if err := json.Unmarshal(data, &frozen); err != nil {
+		return CharacterProgression{}, err
+	}
+	return CharacterProgression{
+		AccountID:                 accountID,
+		CharacterID:               characterID,
+		CharacterClass:            frozen.CharacterClass,
+		Level:                     frozen.Level,
+		Experience:                frozen.Experience,
+		UnspentStatPoints:         frozen.UnspentStatPoints,
+		UnspentSkillPoints:        frozen.UnspentSkillPoints,
+		SkillRanks:                frozen.SkillRanks,
+		Stats:                     CharacterBaseStats{Str: frozen.Stats.Str, Dex: frozen.Stats.Dex, Vit: frozen.Stats.Vit, Magic: frozen.Stats.Magic},
+		Gold:                      frozen.Gold,
+		DeepestDungeonDepth:       frozen.DeepestDungeonDepth,
+		HiredMercenaryCharacterID: frozen.HiredMercenaryCharacterID,
+	}, nil
 }
 
 // insertSessionStartCorpses stores corpses in list order; ordinal preserves it
@@ -240,6 +299,48 @@ func insertSessionStartCorpses(ctx context.Context, tx pgx.Tx, sessionID, accoun
 			sessionID, accountID, characterID, corpse.CharacterID, ordinal, corpse.Name, corpse.Level, corpse.DeathLevel, itemsJSON,
 		); err != nil {
 			return fmt.Errorf("store: insert session start corpse: %w", err)
+		}
+	}
+	return nil
+}
+
+func insertSessionStartMercenaryRoster(ctx context.Context, tx pgx.Tx, sessionID, accountID, characterID string, roster []MercenaryCharacterSnapshot) error {
+	for _, mercenary := range roster {
+		if mercenary.CharacterID == "" || mercenary.CharacterID == characterID {
+			return fmt.Errorf("store: insert session start mercenary: invalid character id")
+		}
+		progressionJSON, err := encodeSessionStartMercenaryProgression(mercenary.Progression)
+		if err != nil {
+			return fmt.Errorf("store: encode session start mercenary progression: %w", err)
+		}
+		items := make([]sessionStartCorpseItem, 0, len(mercenary.Items))
+		for _, item := range mercenary.Items {
+			if item.CharacterID != "" && item.CharacterID != mercenary.CharacterID {
+				return fmt.Errorf("store: insert session start mercenary: item character does not match roster character")
+			}
+			items = append(items, sessionStartCorpseItem{
+				ID:          item.ID,
+				ItemDefID:   item.ItemDefID,
+				Location:    item.Location,
+				Slot:        item.Slot,
+				Equipped:    item.Equipped,
+				WeaponSet:   item.WeaponSet,
+				RolledStats: item.RolledStats,
+			})
+		}
+		itemsJSON, err := json.Marshal(items)
+		if err != nil {
+			return fmt.Errorf("store: encode session start mercenary items: %w", err)
+		}
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO session_start_mercenary_roster (
+			   session_id, account_id, character_id, mercenary_character_id, name, character_class, dead, progression, items
+			 )
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb)
+			 ON CONFLICT (session_id, account_id, character_id, mercenary_character_id) DO NOTHING`,
+			sessionID, accountID, characterID, mercenary.CharacterID, mercenary.Name, mercenary.CharacterClass, mercenary.Dead, progressionJSON, itemsJSON,
+		); err != nil {
+			return fmt.Errorf("store: insert session start mercenary: %w", err)
 		}
 	}
 	return nil
@@ -284,4 +385,49 @@ func (s *Store) loadSessionStartCorpses(ctx context.Context, sessionID, accountI
 		corpses = append(corpses, corpse)
 	}
 	return corpses, rows.Err()
+}
+
+func (s *Store) loadSessionStartMercenaryRoster(ctx context.Context, sessionID, accountID, characterID string) ([]MercenaryCharacterSnapshot, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT mercenary_character_id, name, character_class, dead, progression, items
+		 FROM session_start_mercenary_roster
+		 WHERE session_id = $1 AND account_id = $2 AND character_id = $3
+		 ORDER BY mercenary_character_id ASC`,
+		sessionID, accountID, characterID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store: load session start mercenary roster: %w", err)
+	}
+	defer rows.Close()
+	var roster []MercenaryCharacterSnapshot
+	for rows.Next() {
+		var mercenary MercenaryCharacterSnapshot
+		var progressionJSON, itemsJSON []byte
+		if err := rows.Scan(&mercenary.CharacterID, &mercenary.Name, &mercenary.CharacterClass, &mercenary.Dead, &progressionJSON, &itemsJSON); err != nil {
+			return nil, fmt.Errorf("store: scan session start mercenary: %w", err)
+		}
+		mercenary.Progression, err = decodeSessionStartMercenaryProgression(progressionJSON, accountID, mercenary.CharacterID)
+		if err != nil {
+			return nil, fmt.Errorf("store: decode session start mercenary progression: %w", err)
+		}
+		var items []sessionStartCorpseItem
+		if err := json.Unmarshal(itemsJSON, &items); err != nil {
+			return nil, fmt.Errorf("store: decode session start mercenary items: %w", err)
+		}
+		for _, item := range items {
+			mercenary.Items = append(mercenary.Items, CharacterItemInstance{
+				ID:          item.ID,
+				AccountID:   accountID,
+				CharacterID: mercenary.CharacterID,
+				ItemDefID:   item.ItemDefID,
+				Location:    item.Location,
+				Slot:        item.Slot,
+				Equipped:    item.Equipped,
+				WeaponSet:   item.WeaponSet,
+				RolledStats: item.RolledStats,
+			})
+		}
+		roster = append(roster, mercenary)
+	}
+	return roster, rows.Err()
 }

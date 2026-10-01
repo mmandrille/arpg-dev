@@ -82,6 +82,91 @@ func TestSessionStartSnapshotFreezesRecoverableCorpses(t *testing.T) {
 	}
 }
 
+func TestSessionStartSnapshotFreezesMercenaryRoster(t *testing.T) {
+	s := newStore(t)
+	ctx := context.Background()
+	acct, err := s.UpsertAccountByEmail(ctx, ids.New("acct"), "session-mercenary+"+ids.Token()[:12]+"@example.test")
+	if err != nil {
+		t.Fatalf("upsert account: %v", err)
+	}
+	hero, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Hero", "barbarian")
+	if err != nil {
+		t.Fatalf("create hero: %v", err)
+	}
+	alt, err := s.CreateCharacter(ctx, ids.New("char"), acct.ID, "Alt", "ranger")
+	if err != nil {
+		t.Fatalf("create alternate character: %v", err)
+	}
+	altProgression, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, alt.ID, store.CharacterProgressionDefaults{
+		Level: 4, Experience: 125, UnspentStatPoints: 2, UnspentSkillPoints: 1,
+		Stats: store.CharacterBaseStats{Str: 4, Dex: 12, Vit: 7, Magic: 3}, Gold: 50,
+		DeepestDungeonDepth: 3, SkillRanks: map[string]int{"rapid_shot": 2},
+	})
+	if err != nil {
+		t.Fatalf("create alternate progression: %v", err)
+	}
+	altProgression.CharacterClass = alt.CharacterClass
+	item := store.CharacterItemInstance{
+		ID: ids.New("item"), AccountID: acct.ID, CharacterID: alt.ID,
+		ItemDefID: "rusty_sword", Location: store.ItemLocationEquipped, Slot: "main_hand",
+		Equipped: true, WeaponSet: 1, RolledStats: json.RawMessage(`{"item_level":4}`),
+	}
+	if err := s.AddCharacterItem(ctx, item); err != nil {
+		t.Fatalf("add mercenary item: %v", err)
+	}
+	sess := store.Session{ID: ids.New("sess"), AccountID: acct.ID, CharacterID: hero.ID, Seed: "seed", WorldID: "dungeon_levels", Status: store.SessionActive}
+	if err := s.CreateSession(ctx, sess); err != nil {
+		t.Fatalf("create session: %v", err)
+	}
+	hostProgression, err := s.GetOrCreateCharacterProgression(ctx, acct.ID, hero.ID, store.CharacterProgressionDefaults{
+		Level: 1, Stats: store.CharacterBaseStats{Str: 5, Dex: 5, Vit: 5, Magic: 5},
+	})
+	if err != nil {
+		t.Fatalf("create host progression: %v", err)
+	}
+	start := store.MercenaryCharacterSnapshot{
+		CharacterID: alt.ID, Name: alt.Name, CharacterClass: alt.CharacterClass,
+		Progression: altProgression, Items: []store.CharacterItemInstance{item},
+	}
+	if err := s.CreateSessionStartSnapshot(ctx, store.SessionStartSnapshot{
+		SessionID: sess.ID, AccountID: acct.ID, CharacterID: hero.ID,
+		StashGold: store.AccountStashGold{AccountID: acct.ID}, Progression: &hostProgression,
+		MercenaryRoster: []store.MercenaryCharacterSnapshot{start},
+	}); err != nil {
+		t.Fatalf("create session snapshot: %v", err)
+	}
+
+	if err := s.MarkCharacterDead(ctx, acct.ID, alt.ID, -4); err != nil {
+		t.Fatalf("mark alternate character dead: %v", err)
+	}
+	altProgression.Level = 9
+	altProgression.Stats.Dex = 99
+	if err := s.UpsertCharacterProgression(ctx, acct.ID, altProgression); err != nil {
+		t.Fatalf("update live alternate progression: %v", err)
+	}
+	if err := s.RemoveCharacterItem(ctx, acct.ID, alt.ID, item.ID); err != nil {
+		t.Fatalf("remove live alternate item: %v", err)
+	}
+
+	snap, err := s.LoadSessionStartSnapshotForMember(ctx, sess.ID, acct.ID, hero.ID)
+	if err != nil {
+		t.Fatalf("load session snapshot: %v", err)
+	}
+	if len(snap.MercenaryRoster) != 1 {
+		t.Fatalf("mercenary roster = %+v, want frozen alternate character", snap.MercenaryRoster)
+	}
+	got := snap.MercenaryRoster[0]
+	if got.CharacterID != alt.ID || got.Name != alt.Name || got.CharacterClass != "ranger" || got.Dead {
+		t.Fatalf("mercenary identity snapshot = %+v", got)
+	}
+	if got.Progression.Level != 4 || got.Progression.Experience != 125 || got.Progression.Stats.Dex != 12 || got.Progression.SkillRanks["rapid_shot"] != 2 {
+		t.Fatalf("mercenary progression snapshot = %+v", got.Progression)
+	}
+	if len(got.Items) != 1 || got.Items[0].ID != item.ID || got.Items[0].WeaponSet != 1 || !jsonSame(got.Items[0].RolledStats, item.RolledStats) {
+		t.Fatalf("mercenary items snapshot = %+v", got.Items)
+	}
+}
+
 func jsonSame(a, b json.RawMessage) bool {
 	var va, vb any
 	return json.Unmarshal(a, &va) == nil && json.Unmarshal(b, &vb) == nil && string(mustJSON(va)) == string(mustJSON(vb))

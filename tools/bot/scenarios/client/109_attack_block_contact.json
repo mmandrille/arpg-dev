@@ -1,0 +1,87 @@
+{
+  "id": "attack_block_contact",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "combat_stat_lab",
+  "seed": "attackblock0496",
+  "debug_progression": {
+    "level": 20,
+    "stats": { "str": 10, "dex": 10, "vit": 40, "magic": 10 }
+  },
+  "title": "Attack contact and rapid retarget order",
+  "description": "Prove a server-authored block shows BLOCK without a target hit reaction or hit sparks, then bound rapid buffered clicks and clear them before floor movement.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "set_graphics_quality", "quality": "balanced" },
+    { "type": "set_floating_combat_text", "enabled": true },
+    { "type": "click_floor", "x": 9.2, "z": 6.0 },
+    { "type": "wait_player_near", "x": 9.2, "z": 6.0, "distance": 1.2, "timeout_s": 10.0 },
+    {
+      "type": "wait_entity_near_player",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_blocking_target",
+      "distance": 3.5,
+      "timeout_s": 12.0
+    },
+    {
+      "type": "assert_entity_reaction",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_blocking_target",
+      "reaction": "",
+      "impact_feedback_max": 0
+    },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_blocking_target",
+      "event_type": "monster_damaged",
+      "outcome": "block",
+      "blocked": true,
+      "consume_event": true,
+      "retry_s": 0.5,
+      "timeout_s": 30.0
+    },
+    { "type": "wait_damage_number", "variant": "block", "text": "BLOCK", "timeout_s": 2.0 },
+    { "type": "capture_frame", "name": "v496_block_balanced", "timeout_s": 5.0, "skip_if_headless": true },
+    {
+      "type": "assert_combat_contact",
+      "outcome": "block",
+      "blocked": true,
+      "target_monster_def_id": "combat_lab_blocking_target",
+      "impact_feedback_delta_max": 0
+    },
+    { "type": "set_graphics_quality", "quality": "performance" },
+    { "type": "capture_frame", "name": "v496_block_performance", "timeout_s": 5.0, "skip_if_headless": true },
+    { "type": "click_entity_buffered", "entity_type": "monster", "monster_def_id": "combat_lab_blocking_target" },
+    { "type": "click_entity_buffered", "entity_type": "monster", "monster_def_id": "combat_lab_blocking_target" },
+    {
+      "type": "assert_attack_buffer",
+      "active": true,
+      "queued_count_min": 1,
+      "queued_count_max": 2,
+      "replaced_count_max": 0
+    },
+    { "type": "click_floor", "x": 2.0, "z": 8.0 },
+    {
+      "type": "assert_attack_buffer",
+      "active": false,
+      "target_id": "",
+      "queued_count_max": 2,
+      "cleared_count_min": 1
+    },
+    { "type": "click_floor", "x": 3.0, "z": 8.0 },
+    {
+      "type": "wait_command_retarget_grace",
+      "active": false,
+      "kind": "floor",
+      "last_dispatched": true,
+      "dispatched_min": 1,
+      "ground_x": 3.0,
+      "ground_z": 8.0,
+      "distance_max": 0.05,
+      "timeout_s": 2.0
+    },
+    { "type": "wait_player_near", "x": 3.0, "z": 8.0, "distance": 2.5, "timeout_s": 10.0 },
+    { "type": "assert_attack_buffer", "active": false, "target_id": "" }
+  ]
+}

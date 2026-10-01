@@ -8,6 +8,7 @@ extends RefCounted
 class_name NetClient
 
 const MainConfigLoaderScript := preload("res://scripts/main_config_loader.gd")
+const BotTransportDelayScript := preload("res://scripts/bot_transport_delay.gd")
 
 var base_url: String
 var host: String
@@ -29,9 +30,15 @@ var _ws := WebSocketPeer.new()
 var _msg_counter: int = 0
 var _path_prefix: String = ""
 var _sent_message_msec: Dictionary = {}
+var _bot_delay = BotTransportDelayScript.new()
+var targeting_trace = null
 
 
 func _init(p_base_url: String) -> void:
+	if OS.get_environment("ARPG_BOT_CLIENT") == "1":
+		var profile := OS.get_environment("ARPG_BOT_TRANSPORT_PROFILE")
+		if not _bot_delay.configure("local" if profile == "" else profile):
+			push_error("unsupported client-bot transport profile")
 	base_url = p_base_url.strip_edges().trim_suffix("/")
 	use_tls = base_url.begins_with("https://")
 	var rest := base_url.replace("https://", "").replace("http://", "")
@@ -476,12 +483,14 @@ func merge_upgrade_shards(stash_item_ids: Array) -> Dictionary:
 
 func connect_ws() -> void:
 	var url := websocket_url()
+	_bot_delay.clear()
 	_ws = _new_websocket_peer()
 	_ws.connect_to_url(url)
 
 
 func reconnect_ws() -> void:
 	var old_ws := _ws
+	_bot_delay.clear()
 	_ws = _new_websocket_peer()
 	_ws.connect_to_url(websocket_url())
 	if old_ws.get_ready_state() != WebSocketPeer.STATE_CLOSED:
@@ -525,12 +534,25 @@ func close_diagnostics() -> Dictionary:
 # poll returns any envelopes received this frame as an Array of Dictionaries.
 func poll() -> Array:
 	_ws.poll()
+	if _bot_delay.enabled() and _ws.get_ready_state() == WebSocketPeer.STATE_OPEN:
+		for pending in _bot_delay.release_outbound(Time.get_ticks_msec()):
+			_ws.send_text(JSON.stringify(pending))
+			if targeting_trace != null:
+				targeting_trace.on_command_dispatch(str(pending.get("type", "")), str(pending.get("message_id", "")))
 	var out: Array = []
 	while _ws.get_ready_state() == WebSocketPeer.STATE_OPEN and _ws.get_available_packet_count() > 0:
 		var text := _ws.get_packet().get_string_from_utf8()
 		var env = JSON.parse_string(text)
-		if env != null:
-			out.append(env)
+		if env is Dictionary:
+			if _bot_delay.enabled():
+				_bot_delay.queue_inbound(env, Time.get_ticks_msec())
+			else:
+				out.append(env)
+	if _bot_delay.enabled():
+		out.append_array(_bot_delay.release_inbound(Time.get_ticks_msec()))
+	if targeting_trace != null:
+		for env in out:
+			targeting_trace.on_envelope(env)
 	return out
 
 
@@ -549,7 +571,14 @@ func send(msg_type: String, tick: int, payload: Dictionary) -> String:
 		"tick": tick,
 		"payload": payload,
 	}
-	_ws.send_text(JSON.stringify(env))
+	if targeting_trace != null:
+		targeting_trace.on_command_queued(msg_type, message_id)
+	if _bot_delay.enabled():
+		_bot_delay.queue_outbound(env, Time.get_ticks_msec())
+	else:
+		_ws.send_text(JSON.stringify(env))
+		if targeting_trace != null:
+			targeting_trace.on_command_dispatch(msg_type, message_id)
 	return message_id
 
 
@@ -562,4 +591,5 @@ func consume_latency_ms(message_id: String) -> int:
 
 
 func close() -> void:
+	_bot_delay.clear()
 	_ws.close()

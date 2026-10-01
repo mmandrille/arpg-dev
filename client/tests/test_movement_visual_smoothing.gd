@@ -3,6 +3,7 @@
 extends SceneTree
 
 const MovementVisualSmoothingScript := preload("res://scripts/movement_visual_smoothing.gd")
+const CombatFeelConfigScript := preload("res://scripts/combat_feel_config.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -11,7 +12,8 @@ var _fail_count: int = 0
 func _initialize() -> void:
 	_test_small_anchor_step_preserves_visual_world_position()
 	_test_tick_eases_offset_to_zero()
-	_test_large_anchor_step_resets_offset()
+	_test_coalesced_anchor_step_preserves_bounded_offset()
+	_test_explicit_reset_clears_offset()
 
 	print("[gdtest] PASS: test_movement_visual_smoothing (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -43,16 +45,36 @@ func _test_tick_eases_offset_to_zero() -> void:
 	visual.free()
 
 
-func _test_large_anchor_step_resets_offset() -> void:
+func _test_coalesced_anchor_step_preserves_bounded_offset() -> void:
 	var anchor := Node3D.new()
 	var visual := Node3D.new()
 	anchor.add_child(visual)
 	var smoothing := MovementVisualSmoothingScript.new()
 	smoothing.reset(anchor, visual)
-	anchor.position = Vector3(4.0, 0.0, 0.0)
+	var max_offset := CombatFeelConfigScript.movement_smoothing_max_offset()
+	var step := max_offset * 2.0 + CombatFeelConfigScript.movement_smoothing_settle_epsilon()
+	var initial_visual := max_offset * 0.25
+	visual.position.x = initial_visual
+	anchor.position = Vector3(step, 0.0, 0.0)
 	smoothing.preserve_after_anchor_move(anchor, visual)
-	_assert_approx("large step reset offset x", visual.position.x, 0.0, 0.001)
-	_assert_false("large step smoothing inactive", bool(smoothing.get_debug_state(visual).get("active", true)))
+	_assert_approx("coalesced update keeps bounded offset", visual.position.x, -max_offset, 0.001)
+	_assert_true("coalesced update moves visual less than anchor", anchor.position.x + visual.position.x - initial_visual < step)
+	_assert_true("coalesced update keeps smoothing active", bool(smoothing.get_debug_state(visual).get("active", false)))
+	anchor.free()
+
+
+func _test_explicit_reset_clears_offset() -> void:
+	var anchor := Node3D.new()
+	var visual := Node3D.new()
+	anchor.add_child(visual)
+	var smoothing := MovementVisualSmoothingScript.new()
+	smoothing.reset(anchor, visual)
+	var step := CombatFeelConfigScript.movement_smoothing_max_offset() * 2.0
+	anchor.position = Vector3(step, 0.0, 0.0)
+	smoothing.preserve_after_anchor_move(anchor, visual)
+	smoothing.reset(anchor, visual)
+	_assert_approx("explicit reset clears visual offset", visual.position.x, 0.0, 0.001)
+	_assert_false("explicit reset leaves smoothing inactive", bool(smoothing.get_debug_state(visual).get("active", true)))
 	anchor.free()
 
 

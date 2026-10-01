@@ -1,0 +1,91 @@
+{
+  "id": "dungeon_light_readability_engaged_enemy",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "generated_wall_lab",
+  "seed": "v76_pack_aggro",
+  "title": "Dungeon light readability: engaged enemy",
+  "description": "Trigger a real monster aggro event on a fixed generated floor, wait for a live monster within explored player range, then capture the player and enemy from the isometric camera in both quality tiers.",
+  "debug_progression": {
+    "level": 1,
+    "stats": {
+      "str": 5,
+      "dex": 5,
+      "vit": 80,
+      "magic": 5
+    }
+  },
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": -1,
+      "at_least": 4,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "isometric"
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "event_type": "monster_aggro",
+      "consume_event": true,
+      "retry_s": 0.25,
+      "timeout_s": 20.0,
+      "remember_event_entity_id": true
+    },
+    {
+      "type": "wait_entity_near_player",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "distance": 4.0,
+      "timeout_s": 20.0,
+      "remembered_event_entity": true,
+      "require_alive": true,
+      "in_view": true
+    },
+    {
+      "type": "assert_fog_of_war",
+      "enabled": true,
+      "active": true
+    },
+    {
+      "type": "capture_frame",
+      "name": "v498_engaged_balanced",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    },
+    {
+      "type": "set_graphics_quality",
+      "quality": "performance"
+    },
+    {
+      "type": "wait_entity_near_player",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "distance": 4.0,
+      "timeout_s": 10.0,
+      "remembered_event_entity": true,
+      "require_alive": true,
+      "in_view": true
+    },
+    {
+      "type": "capture_frame",
+      "name": "v498_engaged_performance",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    }
+  ]
+}

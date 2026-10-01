@@ -1,0 +1,11 @@
+{
+  "captured_at_local": "2026-09-30T19:26:04",
+  "driver": "metal",
+  "png": "v498_shallow_loot_performance.png",
+  "quality": "performance",
+  "renderer": "forward_plus",
+  "viewport_size": {
+    "height": 2100,
+    "width": 3840
+  }
+}

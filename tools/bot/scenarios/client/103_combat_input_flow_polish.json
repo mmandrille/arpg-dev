@@ -5,11 +5,15 @@
   "world_id": "combat_control_lab",
   "seed": "combatflow001",
   "title": "Combat input flow polish: combat click can be retargeted into movement",
-  "description": "Click a melee target to start attack-move, then click the floor during local recovery and prove the retarget grace dispatches movement instead of leaving stale combat intent.",
+  "description": "Move into melee range, start a real local swing, prove a lethal result does not restart it, then retarget to floor movement without stale combat intent.",
   "client_steps": [
     {
       "type": "wait_ws_open",
       "timeout_s": 10.0
+    },
+    {
+      "type": "set_graphics_quality",
+      "quality": "balanced"
     },
     {
       "type": "wait_entity",
@@ -18,9 +22,42 @@
       "timeout_s": 10.0
     },
     {
+      "type": "click_floor",
+      "x": 11.0,
+      "z": 5.0
+    },
+    {
+      "type": "wait_player_near",
+      "x": 11.0,
+      "z": 5.0,
+      "distance": 1.0,
+      "timeout_s": 10.0
+    },
+    {
       "type": "click_entity_buffered",
       "entity_type": "monster",
       "monster_def_id": "dungeon_mob"
+    },
+    {
+      "type": "wait_entity_reaction",
+      "local_player": true,
+      "animation_current_clip": "attack",
+      "timeout_s": 3.0
+    },
+    { "type": "capture_frame", "name": "v496_melee_balanced", "timeout_s": 5.0, "skip_if_headless": true },
+    { "type": "set_graphics_quality", "quality": "performance" },
+    { "type": "capture_frame", "name": "v496_melee_performance", "timeout_s": 5.0, "skip_if_headless": true },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "monster_def_id": "dungeon_mob",
+      "reaction": "death",
+      "timeout_s": 3.0
+    },
+    {
+      "type": "assert_melee_lunge",
+      "count_min": 1,
+      "count_max": 1
     },
     {
       "type": "click_floor",

@@ -20,9 +20,10 @@ Play-debug analysis usage (called by make perf-analyze):
   --out         Optional output file path (also prints to stdout)
 
 Client sections (tools/bot/benchmark_client_stats.py) report the first-spawn
-hitch separately, drop warmup samples, and lead with avg_frame_ms/process_ms
-percentiles plus draw_calls/primitives — FPS alone is meaningless when the
-observer is vsync-capped.
+hitch separately, drop warmup samples, and show true frame intervals when
+bounded frame batches are present. Older logs retain one-second average frame
+percentiles plus process_ms and draw_calls/primitives. FPS alone is misleading
+when the observer is vsync-capped.
 """
 
 from __future__ import annotations
@@ -85,7 +86,7 @@ def parse_perf_samples(server_log: Path) -> list[dict[str, Any]]:
             obj = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if obj.get("message") != "backend_perf":
+        if obj.get("message", obj.get("msg")) != "backend_perf":
             continue
         ts_str = obj.get("ts", "")
         try:
@@ -118,22 +119,27 @@ def assign_samples(
 # ── client perf log parser ─────────────────────────────────────────────────────
 
 _CLIENT_PERF_LINE = re.compile(r"\[client-perf\]\s+(.+)")
+_CLIENT_FRAME_BATCH_LINE = re.compile(r"\[client-frame-batch\]\s+(.+)")
 _CLIENT_PREFIX = re.compile(r"^\[client\d*\]\s*")
 _KV = re.compile(r"(\w+)=([-\d.]+)")
+_MAX_FRAME_BATCH = 2048
 
 
-def parse_client_perf_lines(log_path: Path) -> list[dict[str, float]]:
+def parse_client_perf_lines(log_path: Path) -> list[dict[str, Any]]:
     """Parse [client-perf] key=value lines from any log file (raw Godot output,
     tee'd play-debug log with [client1] prefix, or benchmark client log)."""
-    samples: list[dict[str, float]] = []
+    samples: list[dict[str, Any]] = []
     for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
         # Strip [client1] / [client] prefix if present (play-debug format)
         line = _CLIENT_PREFIX.sub("", line.strip())
         m = _CLIENT_PERF_LINE.search(line)
         if not m:
+            batch = _CLIENT_FRAME_BATCH_LINE.search(line)
+            if batch and samples:
+                _attach_frame_batch(samples[-1], batch.group(1))
             continue
         kv_str = m.group(1)
-        row: dict[str, float] = {}
+        row: dict[str, Any] = {}
         for k, v in _KV.findall(kv_str):
             # Phase timers can reuse a base field name (e.g. `entities` count vs
             # `entities` phase ms); keep the base value and prefix the phase.
@@ -148,8 +154,34 @@ def parse_client_perf_lines(log_path: Path) -> list[dict[str, float]]:
     return samples
 
 
-def parse_client_sections(client_log: Path | None, scenario_logs: list[str]) -> list[tuple[str, list[dict[str, float]]]]:
-    sections: list[tuple[str, list[dict[str, float]]]] = []
+def _attach_frame_batch(row: dict[str, Any], fields_text: str) -> None:
+    fields = dict(part.split("=", 1) for part in fields_text.split() if "=" in part)
+    try:
+        count = int(fields.get("n", "-1"))
+        dropped = int(fields.get("dropped", "-1"))
+        tick = int(fields.get("tick", "-1"))
+        raw = fields.get("us", "")
+        values = [int(item) for item in raw.split(",")] if raw else []
+        if ("frame_us" in row or count <= 0 or count > _MAX_FRAME_BATCH or dropped < 0
+                or tick != int(row.get("tick", -2)) or len(values) != count
+                or any(value <= 0 for value in values)):
+            raise ValueError("invalid frame batch shape")
+    except ValueError:
+        row["frame_batch_error"] = "invalid frame batch"
+        return
+    row["frame_us"] = values
+    row["frame_dropped"] = dropped
+    for key in ("renderer", "quality", "camera", "world", "seed"):
+        row[key] = fields.get(key, "")
+    for key in ("width", "height"):
+        try:
+            row[key] = int(fields.get(key, "0"))
+        except ValueError:
+            row["frame_batch_error"] = "invalid viewport"
+
+
+def parse_client_sections(client_log: Path | None, scenario_logs: list[str]) -> list[tuple[str, list[dict[str, Any]]]]:
+    sections: list[tuple[str, list[dict[str, Any]]]] = []
     if client_log and client_log.exists():
         sections.append(("live benchmark session", parse_client_perf_lines(client_log)))
     for entry in scenario_logs:
@@ -257,7 +289,7 @@ def render_server_block(scenario_id: str, samples: list[dict[str, Any]]) -> list
 def render_report(
     scenario_samples: dict[str, list[dict[str, Any]]],
     boundaries: list[dict[str, Any]],
-    client_sections: list[tuple[str, list[dict[str, float]]]],
+    client_sections: list[tuple[str, list[dict[str, Any]]]],
     generated_at: str,
     mode: str = "benchmark",
     settle_samples: int = DEFAULT_SETTLE_SAMPLES,

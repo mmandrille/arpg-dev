@@ -62,6 +62,11 @@ static func floor_config() -> Dictionary:
 	return (_config.get("floor", {}) as Dictionary).duplicate(true)
 
 
+static func dressing_config() -> Dictionary:
+	ensure_loaded()
+	return (_config.get("dressing", {}) as Dictionary).duplicate(true)
+
+
 static func legacy_disabled(feature: String) -> bool:
 	ensure_loaded()
 	return bool((_config.get("disable_legacy", {}) as Dictionary).get(feature, false))

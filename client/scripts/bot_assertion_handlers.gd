@@ -9,6 +9,7 @@ const BotStewardHuntAssertionsScript := preload("res://scripts/bot_steward_hunt_
 const BotMercenaryPanelAssertionsScript := preload("res://scripts/bot_mercenary_panel_assertions.gd")
 const BotMarketBadgeAssertionsScript := preload("res://scripts/bot_market_badge_assertions.gd")
 const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
+const BotCombatContactAssertionsScript := preload("res://scripts/bot_combat_contact_assertions.gd")
 const BotIntentRejectAssertionsScript := preload("res://scripts/bot_intent_reject_assertions.gd")
 const BotConnectionRecoveryAssertionsScript := preload("res://scripts/bot_connection_recovery_assertions.gd")
 const FLOAT_BOUND_EPSILON := 0.00001
@@ -85,6 +86,14 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				runner._fail("assert_entity_reaction failed: want=%s local=%s entities=%s step=%d scenario=%s" % [
 					str(step), str(state.get("local_player_presentation", {})),
 					str(state.get("entities_presentation_debug", [])), runner._step_index, str(runner.scenario.get("id", "?"))
+				])
+				return false
+			return true
+		"assert_combat_contact", "assert_attack_buffer":
+			var state_key := "last_monster_damage_feedback" if stype == "assert_combat_contact" else "attack_buffer"
+			if not BotCombatContactAssertionsScript.matches(stype, step, state):
+				runner._fail("%s failed: want=%s got=%s step=%d scenario=%s" % [
+					stype, str(step), str(state.get(state_key, {})), runner._step_index, str(runner.scenario.get("id", "?"))
 				])
 				return false
 			return true
@@ -571,11 +580,13 @@ static func melee_lunge_matches(step: Dictionary, state: Dictionary) -> bool:
 		return false
 	if step.has("count_min") and int(lunge.get("count", 0)) < int(step.get("count_min", 0)):
 		return false
+	if step.has("count_max") and int(lunge.get("count", 0)) > int(step.get("count_max", 0)):
+		return false
 	if step.has("offset_min") and float(lunge.get("offset_length", 0.0)) < float(step.get("offset_min", 0.0)):
 		return false
 	if step.has("offset_max") and float(lunge.get("offset_length", 0.0)) > float(step.get("offset_max", 0.0)):
 		return false
-	return step.has("active") or step.has("count_min") or step.has("offset_min") or step.has("offset_max")
+	return step.has("active") or step.has("count_min") or step.has("count_max") or step.has("offset_min") or step.has("offset_max")
 
 
 static func _melee_lunge_state(state: Dictionary) -> Dictionary:
@@ -661,4 +672,3 @@ static func _assert_camera_mode(runner, step: Dictionary, state: Dictionary) -> 
 			])
 			return false
 	return true
-

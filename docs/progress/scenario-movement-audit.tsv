@@ -250,7 +250,7 @@ client/99_dungeon_surface_kit.json	dungeon_surface_kit	godot_client	extended	con
 client/100_rounded_dungeon_corners.json	rounded_dungeon_corners	godot_client	extended	contract	0	0		generated wall visual proof starts in lab
 client/101_dungeon_surface_detail_overlays.json	dungeon_surface_detail_overlays	godot_client	extended	contract	1	1		generated wall visual proof uses stairs transition
 client/102_surface_material_kit.json	surface_material_kit	godot_client	extended	contract	1	1		generated wall visual proof uses stairs transition
-client/103_combat_input_flow_polish.json	combat_input_flow_polish	godot_client	extended	contract	2	2		combat-control visual proof intentionally clicks monster then floor retarget
+client/103_combat_input_flow_polish.json	combat_input_flow_polish	godot_client	extended	setup-eliminable	2	2		combat-control visual proof intentionally clicks monster then floor retarget
 client/104_combat_impact_confirmation.json	combat_impact_confirmation	godot_client	extended	contract	0	0		combat-control visual proof exercises authoritative hit and kill confirmation
 client/blacksmith_renew_item.json	blacksmith_renew_item	godot_client	extended	contract	0	0		
 client/blacksmith_shard_merge.json	blacksmith_shard_merge	godot_client	extended	contract	0	0		
@@ -268,3 +268,14 @@ upgrade_shard_level_drop.json	upgrade_shard_level_drop	protocol	extended	contrac
 107_six_player_boss_combat_soak.json	six_player_boss_combat_soak	protocol	extended	contract	0	0		six-peer fixed-position combat soak
 client/99_ranger_volley_live_session_stability.json	ranger_volley_live_session_stability	godot_client	extended	contract	0	0		live Godot fixed-position transport stability proof
 client/105_eye_view_weapon_presentation.json	eye_view_weapon_presentation	godot_client	extended	contract	0	0		perspective camera/equipment presentation proof; no navigation setup
+client/106_live_targeting_corrections.json	live_targeting_corrections	godot_client	extended	setup-eliminable	7	7		v499 live targeting route
+client/107_dungeon_room_dressing_deep.json	dungeon_room_dressing_deep	godot_client	extended	contract	0	0		v494 deep room dressing proof
+client/108_dungeon_frame_pacing_probe.json	dungeon_frame_pacing_probe	godot_client	extended	contract	0	0		v497 frame pacing fixture
+client/109_attack_block_contact.json	attack_block_contact	godot_client	extended	setup-eliminable	5	5		v496 block contact proof
+client/dungeon_light_readability_boss_balanced.json	dungeon_light_readability_boss_balanced	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
+client/dungeon_light_readability_boss_performance.json	dungeon_light_readability_boss_performance	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
+client/dungeon_light_readability_deep.json	dungeon_light_readability_deep	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
+client/dungeon_light_readability_engaged_enemy.json	dungeon_light_readability_engaged_enemy	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
+client/dungeon_light_readability_shallow.json	dungeon_light_readability_shallow	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
+client/dungeon_light_readability_torch.json	dungeon_light_readability_torch	godot_client	extended	contract	0	0		v498 lighting viewpoint proof
+client/v496_attack_contact_timeline.json	v496_attack_contact_timeline	godot_client	extended	setup-eliminable	6	6		v496 sword and bow timeline

@@ -104,6 +104,7 @@ const BotReconnectProofActionsScript := preload("res://scripts/bot_reconnect_pro
 const InventoryWalletDeltaRuntimeScript := preload("res://scripts/inventory_wallet_delta_runtime.gd")
 const ConnectionOverlayBridgeScript := preload("res://scripts/connection_overlay_bridge.gd")
 const CommandRetargetGraceScript := preload("res://scripts/command_retarget_grace.gd")
+const AttackContactTraceScript := preload("res://scripts/attack_contact_trace.gd")
 const ChannelSkillInputScript := preload("res://scripts/channel_skill_input.gd")
 const ChargeChannelVisualScript := preload("res://scripts/charge_channel_visual.gd")
 const MonsterVisualsLoaderScript := preload("res://scripts/monster_visuals_loader.gd")
@@ -300,6 +301,7 @@ var _send_cooldown: float = 0.0
 var _attack_cooldown: float = 0.0
 var _sustained_click: SustainedClickInput = SustainedClickInputScript.new()
 var _attack_buffer: CombatInputBuffer = CombatInputBufferScript.new()
+var _last_monster_damage_feedback: Dictionary = {}
 var _sticky_attack: CombatStickyTarget = CombatStickyTargetScript.new()
 var _path_reject_backoff: PathRejectBackoff = PathRejectBackoffScript.new()
 var _local_attack_presentation: CombatLocalAttackPresentation = CombatLocalAttackPresentationScript.new()
@@ -327,6 +329,7 @@ var _last_facing_direction := Vector2(1.0, 0.0)
 var _level_label: Label
 var last_performance_status: Dictionary = {}
 var _pending_delta_payloads: Array = []
+var _pending_level_position_reset: bool = false
 var _deferred_burst_hits: Array = []
 var _last_ping_ms: int = -1
 var _last_intent_reject_reason: String = ""
@@ -941,6 +944,7 @@ func _teardown_gameplay_state(clear_session: bool) -> void:
 	player_max_mana = 10
 	predicted_pos = Vector3.ZERO
 	reconciliation_delta = 0.0
+	_pending_level_position_reset = false
 	last_server_tick = 0
 	inventory = []
 	equipped = {}
@@ -1025,6 +1029,7 @@ func _clear_presentation_session_state() -> void:
 func _process(delta: float) -> void:
 	if client == null:
 		return
+	_perf_debug_sampler.begin_frame()
 
 	var ws_state := client.ready_state()
 	_connection_recovery_runtime.tick(
@@ -1106,7 +1111,7 @@ func _process(delta: float) -> void:
 			var live_monsters := int(last_performance_status.get("live_monsters", monster_ids.size()))
 			fog_overlay.set_live_monster_count(live_monsters)
 	_update_debug()
-	_perf_debug_sampler.sample(delta, ws_state, last_server_tick, reconciliation_delta, entities, monster_ids)
+	_perf_debug_sampler.sample(delta, ws_state, last_server_tick, reconciliation_delta, entities, monster_ids, client_settings.graphics_quality if client_settings != null else "unknown", client_settings)
 
 # --- message handling -------------------------------------------------------
 
@@ -1216,6 +1221,8 @@ func _record_ping(message_id: String) -> void:
 		_last_ping_ms = latency_ms
 
 func _apply_snapshot(p: Dictionary) -> void:
+	var snapshot_start := Time.get_ticks_usec()
+	_pending_level_position_reset = false
 	current_level = int(p.get("current_level", 0))
 	if discovery_minimap != null: discovery_minimap.sync_session(str(p.get("session_id", client.session_id if client != null else "")))
 	ClientAudioBridgeScript.ambience_for_level(audio_controller, current_level)
@@ -1228,16 +1235,22 @@ func _apply_snapshot(p: Dictionary) -> void:
 	pending_waypoint_travel = false
 	_apply_teleporter_snapshot(p.get("discovered_teleporters", []))
 	_clear_level_entities()
+	PerfPhaseTimerScript.measure_usec("snap_clear", snapshot_start)
+	var snapshot_phase_start := Time.get_ticks_usec()
 	var snapshot_walls = p.get("walls", null)
 	if typeof(snapshot_walls) == TYPE_ARRAY:
-		_render_wall_layout(snapshot_walls as Array)
+		_render_wall_layout(snapshot_walls as Array, p.get("entities", []))
 	else:
 		_render_world_walls(current_world_id)
+	PerfPhaseTimerScript.measure_usec("snap_world", snapshot_phase_start)
+	snapshot_phase_start = Time.get_ticks_usec()
 	_update_level_hud()
 	_refresh_waypoint_panel()
 	# (player is the PlayerAnchor/CharacterVisual, not a per-snapshot entity node)
 	for e in p.get("entities", []):
 		_upsert_entity(e)
+	PerfPhaseTimerScript.measure_usec("snap_entities", snapshot_phase_start)
+	snapshot_phase_start = Time.get_ticks_usec()
 	if _boss_visuals != null:
 		_boss_visuals_context.last_server_tick = last_server_tick
 		_boss_visuals.sync_boss_health_bar()
@@ -1261,7 +1274,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 		_player_movement_feel.set_server_speed(_ms_snap)
 	skill_progression = p.get("skill_progression", {})
 	skill_cooldowns = p.get("skill_cooldowns", [])
-	_apply_skill_bindings(p.get("skill_bindings", {}))
+	_apply_skill_bindings(p.get("skill_bindings", {}), false)
 	_apply_local_player_class_model()
 	_refresh_player_hud_identity()
 	if resolver != null:
@@ -1275,7 +1288,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	_sync_elite_objective_tracker()
 	_sync_discovery_minimap()
 	_refresh_market_board_summary()
-	_reconcile_player()
+	_reconcile_player(true)
 	call_deferred("_refresh_fog_presentation")
 	if bot_mode and not _bot_logged_snapshot:
 		_bot_logged_snapshot = true
@@ -1284,15 +1297,19 @@ func _apply_snapshot(p: Dictionary) -> void:
 		])
 	if _connection_recovery_runtime.is_active():
 		_connection_recovery_runtime.finish_resync(_connection_overlay, Callable(self, "_debug"))
+	PerfPhaseTimerScript.measure_usec("snap_ui", snapshot_phase_start)
+	PerfPhaseTimerScript.measure_usec("snap_total", snapshot_start)
 
 func _apply_delta(p: Dictionary) -> void:
 	var delta_start := Time.get_ticks_usec()
 	var phase_start := delta_start
+	var local_position_update := false
 	var perf_payload = p.get("performance", {})
 	if perf_payload is Dictionary:
 		last_performance_status = (perf_payload as Dictionary).duplicate(true)
 	for ev in p.get("events", []):
 		if str(ev.get("event_type", "")) == "level_changed":
+			_pending_level_position_reset = true
 			current_level = int(ev.get("to_level", current_level))
 			_begin_level_loading(false)
 			_sync_steward_hunt_banner()
@@ -1310,6 +1327,8 @@ func _apply_delta(p: Dictionary) -> void:
 				var entity: Dictionary = c.get("entity", {})
 				_delta_ui_sync_gate.mark_entity_change(str(c.get("op", "")), entity)
 				var entity_id := str(entity.get("id", ""))
+				if entity_id == player_id and entity.has("position"):
+					local_position_update = true
 				if mobility_skills.has(entity_id):
 					mobility_landings[entity_id] = _entity_position(entity)
 				if entity_id == player_id and mobility_skills.has(player_id):
@@ -1359,6 +1378,7 @@ func _apply_delta(p: Dictionary) -> void:
 	for ev in p.get("events", []):
 		var eid := _event_subject_entity_id(ev)
 		var event_type := str(ev.get("event_type", ""))
+		AttackContactTraceScript.record_result(ev, last_server_tick)
 		if event_type == "monster_attack_windup":
 			MonsterMeleeWindupMarkerScript.sync_from_event(ev, entities, player_anchor.global_position if player_anchor != null else Vector3.ZERO)
 			continue
@@ -1703,11 +1723,12 @@ func _apply_delta(p: Dictionary) -> void:
 			CombatLocalAttackPresentationScript.present_result(_local_attack_presentation, ev, player_id, audio_controller, player_anim, CombatReachScript.local_player_attack_mode(inventory, equipped), _local_attack_speed(), inventory, equipped)
 			_show_combat_text_for_event(eid, ev, Color(1.0, 0.92, 0.25))
 		if event_type == "monster_damaged":
-			ClientAudioBridgeScript.damage(audio_controller, false)
 			_notify_training_damage_log(eid, ev)
-			GameplayFeedbackPresentationScript.play_entity_reaction(
-				entities, player_id, player_anchor, player_reaction, eid, ev, "hit",
-				Callable(self, "_node_world_or_local_position"))
+			var contact_feedback: Dictionary = GameplayFeedbackPresentationScript.handle_monster_damage(
+				entities, player_id, player_anchor, player_reaction, eid, ev,
+				audio_controller, Callable(self, "_node_world_or_local_position"), bot_mode)
+			if bot_mode:
+				_last_monster_damage_feedback = contact_feedback
 		if event_type == "monster_killed":
 			ClientAudioBridgeScript.kill(audio_controller, false)
 			_remove_monster_health_bar(eid)
@@ -1753,7 +1774,10 @@ func _apply_delta(p: Dictionary) -> void:
 		_boss_visuals.sync_boss_health_bar()
 	PerfPhaseTimerScript.measure_usec("d_boss", phase_start)
 	phase_start = Time.get_ticks_usec()
-	_reconcile_player()
+	var reset_visual := _pending_level_position_reset and local_position_update
+	_reconcile_player(reset_visual)
+	if reset_visual:
+		_pending_level_position_reset = false
 	PerfPhaseTimerScript.measure_usec("d_recon", phase_start)
 	PerfPhaseTimerScript.measure_usec("delta", delta_start)
 
@@ -1783,6 +1807,8 @@ func _play_mobility_skill_visual(ev: Dictionary, mobility_landings: Dictionary) 
 	var anchor := _mobility_anchor_for_entity(entity_id)
 	if anchor == null:
 		return
+	if entity_id == player_id:
+		_movement_visual_smoothing.reset(player_anchor, character_visual)
 	var landing: Vector3 = mobility_landings.get(entity_id, anchor.position)
 	_mobility_presentation.play_from_skill_cast(
 		entity_id,
@@ -1807,7 +1833,7 @@ func _mobility_anchor_for_entity(entity_id: String) -> Node3D:
 func _on_mobility_visual_finished(entity_id: String, landing: Vector3) -> void:
 	if entity_id == player_id:
 		predicted_pos = landing
-	_reconcile_player()
+	_reconcile_player(entity_id == player_id)
 
 
 func _entity_position(e: Dictionary) -> Vector3:
@@ -2201,15 +2227,21 @@ func _refresh_inventory_ui() -> void:
 		consumable_bar.set_hotbar_state(hotbar_capacity, hotbar)
 	_sync_quest_steward_reward_label()
 
-func _reconcile_player() -> void:
+func _reconcile_player(reset_visual: bool = false) -> void:
 	if player_anchor != null:
+		if reset_visual:
+			_mobility_presentation.clear_entity(player_id)
 		if _mobility_presentation.is_active(player_id):
 			return
 		player_anchor.position = predicted_pos
-		_movement_visual_smoothing.preserve_after_anchor_move(player_anchor, character_visual)
+		if reset_visual:
+			_movement_visual_smoothing.reset(player_anchor, character_visual)
+		else:
+			_movement_visual_smoothing.preserve_after_anchor_move(player_anchor, character_visual)
 
 func _show_combat_text_for_event(entity_id: String, ev: Dictionary, default_color: Color) -> void:
 	CombatEventPresentationScript.show_combat_text_for_event(entity_id, ev, default_color, Callable(self, "_show_damage_number"), Callable(self, "_node_for_entity_id"))
+	AttackContactTraceScript.record_text(ev, entity_id)
 
 func _notify_training_damage_log(entity_id: String, ev: Dictionary) -> void:
 	TrainingDamageLogBridgeScript.notify_combat_event(self, training_damage_log_panel, entity_id, ev)
@@ -2525,6 +2557,7 @@ func _send_action_intent(target_id: String, extra: Dictionary = {}) -> void:
 	for key in extra.keys():
 		payload[key] = extra[key]
 	var message_id := client.send("action_intent", last_server_tick, payload)
+	AttackContactTraceScript.record("intent_sent", {"target_id": target_id, "server_tick": last_server_tick})
 	pending_action_targets[message_id] = {"target_id": target_id}
 
 func _basic_attack_cooldown_seconds() -> float:
@@ -3814,6 +3847,8 @@ func _entity_world_center(entity_id: String) -> Vector3:
 func _build_scene() -> void:
 	ground_node = _ground_factory.make_ground_node(current_level)
 	add_child(ground_node)
+	# Build static town dressing before the first snapshot and reuse it afterward.
+	TownDressing.sync_with_trace(ground_node, current_level, _truthy_env("ARPG_FIRST_SPAWN_TRACE"))
 
 	_camera_controller = PlayerCameraControllerScript.new()
 	_camera_controller.setup(PlayerCameraContextScript.make(player_anchor, character_visual, client_settings, Callable(self, "_input_locked")), self)
@@ -3955,7 +3990,8 @@ func _build_scene() -> void:
 	walls_root.name = "StaticWalls"
 	add_child(walls_root)
 	_wall_renderer = WallRenderer.new(walls_root, _ground_factory)
-	_dungeon_torch_lights = DungeonTorchLightsScript.new(walls_root, fog_overlay, _ground_factory, _wall_renderer)
+	# StaticWalls is cleared on layout updates; torch nodes must survive it.
+	_dungeon_torch_lights = DungeonTorchLightsScript.new(self, fog_overlay, _ground_factory, _wall_renderer)
 
 func _update_ground_material() -> void:
 	_ground_factory.update_ground_material(ground_node, current_level)
@@ -4299,12 +4335,13 @@ func _ensure_skill_function_key_slots() -> void:
 	if skill_function_keys.size() > ClientConstants.SKILL_FUNCTION_KEY_COUNT:
 		skill_function_keys.resize(ClientConstants.SKILL_FUNCTION_KEY_COUNT)
 
-func _apply_skill_bindings(bindings: Dictionary) -> void:
+func _apply_skill_bindings(bindings: Dictionary, refresh_panel: bool = true) -> void:
 	var keys: Array = bindings.get("function_keys", [])
 	skill_function_keys = keys.duplicate(true)
 	_ensure_skill_function_key_slots()
 	right_click_skill_id = str(bindings.get("right_click_skill_id", right_click_skill_id))
-	_sync_skill_bindings_ui()
+	if refresh_panel:
+		_sync_skill_bindings_ui()
 	_sync_skill_bar_selection()
 
 func _send_skill_bindings_intent() -> void:
@@ -4398,10 +4435,7 @@ func _refresh_progression_ui() -> void:
 func _refresh_skill_ui() -> void:
 	_auto_select_right_click_skill()
 	if skills_panel != null:
-		skills_panel.set_character_progression(character_progression)
-		skills_panel.set_skill_progression(skill_progression)
-		skills_panel.set_skill_bindings(skill_function_keys, right_click_skill_id)
-		skills_panel.set_interactive(not _skill_allocation_blocked())
+		skills_panel.set_view_state(character_progression, skill_progression, skill_function_keys, right_click_skill_id, not _skill_allocation_blocked())
 	_sync_skill_bar_selection()
 
 func _sync_progression_interactivity() -> void:
@@ -5388,11 +5422,12 @@ func _render_world_walls(world_id: String) -> void:
 	current_wall_layout = _wall_renderer.render_world_walls(world_id) if _wall_renderer != null else []
 	_sync_fog_wall_layout()
 
-func _render_wall_layout(walls: Array) -> void:
+func _render_wall_layout(walls: Array, anchors: Array = [], include_dressing: bool = true) -> void:
 	_ensure_wall_renderer()
 	if _wall_renderer != null:
 		_wall_renderer.set_level(current_level)
-	current_wall_layout = _wall_renderer.render_wall_layout(walls) if _wall_renderer != null else []
+	var floor_key := "%s|%d" % [client.seed, current_level] if include_dressing and client != null else ""
+	current_wall_layout = _wall_renderer.render_wall_layout(walls, floor_key, anchors if not anchors.is_empty() else entities.values()) if _wall_renderer != null else []
 	_sync_fog_wall_layout()
 func _sync_fog_wall_layout() -> void:
 	if fog_overlay != null:
@@ -5430,6 +5465,8 @@ func _sync_dungeon_ceiling_visibility() -> void:
 	var show_ceiling := current_level < 0 and client_settings.camera_mode != ClientSettings.CAMERA_MODE_ISOMETRIC
 	_wall_renderer.set_ceiling_visible(show_ceiling)
 func _clear_wall_nodes() -> void:
+	if _dungeon_torch_lights != null:
+		_dungeon_torch_lights.clear()
 	_ensure_wall_renderer()
 	if _wall_renderer != null:
 		_wall_renderer.clear_wall_nodes()
@@ -5647,8 +5684,13 @@ func _queue_level_wall_layout(walls: Array) -> void:
 		_level_loading_walls_ready = true
 		call_deferred("_apply_pending_level_walls")
 		return
-	_render_wall_layout(walls)
+	# Replace walls now; fill dressing after static anchors arrive in this delta.
+	_render_wall_layout(walls, [], false)
+	call_deferred("_refresh_dressing_after_level_delta")
 
+func _refresh_dressing_after_level_delta() -> void:
+	if _wall_renderer != null and client != null and not current_wall_layout.is_empty():
+		_wall_renderer.refresh_dressing(current_wall_layout, "%s|%d" % [client.seed, current_level], entities.values())
 
 func _apply_pending_level_walls() -> void:
 	if _pending_level_walls.is_empty():
@@ -6021,8 +6063,11 @@ func get_bot_state() -> Dictionary:
 		"interactable_tick_smoothing": _entity_tick_smoothing.get_active_interactable_debug_state(entities),
 		"mobility_skill_smoothing": _mobility_presentation.get_debug_state(),
 		"dungeon_torch_lights": _dungeon_torch_lights.get_debug_state() if _dungeon_torch_lights != null else {},
+		"dungeon_dressing": _wall_renderer.dressing_debug_state() if _wall_renderer != null else {},
 		"movement_feel": _player_movement_feel.get_debug_state(),
 		"command_retarget_grace": _command_retarget_grace.get_debug_state(),
+		"attack_buffer": _attack_buffer.get_debug_state(),
+		"last_monster_damage_feedback": _last_monster_damage_feedback.duplicate(),
 		"current_level": current_level,
 		"walls": current_wall_layout.duplicate(true),
 		"wall_count": current_wall_layout.size(),
@@ -6418,56 +6463,7 @@ func bot_use_skill_bar(skill_id: String = "", target_id: String = "", force_dire
 func bot_cast_skill_direction(skill_id: String = "", direction: Dictionary = {}) -> void:
 	BotFacade.cast_skill_direction(self, skill_id, direction)
 func bot_click_menu_button(button: String) -> void:
-	match button:
-		"create_game":
-			_on_create_game_pressed()
-		"join_game":
-			_on_join_game_pressed()
-		"continue":
-			_on_create_game_pressed()
-		"new_game":
-			_on_create_game_pressed()
-		"multiplayer":
-			_on_join_game_pressed()
-		"refresh_sessions":
-			_refresh_multiplayer_sessions()
-		"host_listed_session":
-			_on_host_listed_session_requested()
-		"join_first_listed_session":
-			if multiplayer_panel != null:
-				multiplayer_panel.join_first_session()
-		"select_expected_join_session":
-			if multiplayer_panel != null:
-				multiplayer_panel.select_session(OS.get_environment("ARPG_EXPECTED_JOIN_SESSION_ID"))
-		"join_expected_session":
-			if multiplayer_panel != null:
-				multiplayer_panel.join_session(OS.get_environment("ARPG_EXPECTED_JOIN_SESSION_ID"))
-		"settings":
-			if pause_menu != null and pause_menu.visible:
-				_on_settings_from_pause()
-			else:
-				_on_settings_from_main()
-		"codex":
-			_on_codex_from_main()
-		"back":
-			if CodexMenuBridgeScript.handle_back(main_menu, codex_panel):
-				pass
-			elif settings_panel != null and settings_panel.visible:
-				_on_settings_back()
-			elif character_panel != null and character_panel.visible:
-				_on_character_panel_back()
-			elif multiplayer_panel != null and multiplayer_panel.visible:
-				multiplayer_panel.hide_panel()
-				main_menu.show_menu()
-		"create_character", "confirm_character_create", "start":
-			if character_panel != null:
-				character_panel.submit_name()
-		"resume":
-			_resume_from_pause()
-		"return_to_main_menu":
-			_return_to_main_menu()
-		"exit":
-			_exit_game()
+	BotFacade.click_menu_button(self, button)
 
 func bot_enter_character_name(name: String) -> void:
 	if character_panel != null: character_panel.set_name_text(name)

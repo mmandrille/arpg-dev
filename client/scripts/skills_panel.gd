@@ -321,6 +321,15 @@ func set_skill_bindings(function_keys: Array, right_click_skill_id: String) -> v
 	_render()
 
 
+func set_view_state(next_character: Dictionary, next_skills: Dictionary, function_keys: Array, right_click_skill_id: String, enabled: bool) -> void:
+	character_progression = next_character.duplicate(true)
+	skill_progression = next_skills.duplicate(true)
+	_skill_function_keys = function_keys.duplicate(true)
+	_right_click_skill_id = right_click_skill_id
+	interactive = enabled
+	_render()
+
+
 func hovered_skill_id() -> String:
 	return _hovered_skill_id
 
@@ -1000,4 +1009,3 @@ func _badge_style() -> StyleBoxFlat:
 	s.border_width_right = 1
 	s.border_width_bottom = 1
 	return s
-

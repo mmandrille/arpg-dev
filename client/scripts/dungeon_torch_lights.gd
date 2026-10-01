@@ -32,7 +32,7 @@ func sync(level: int, walls: Array, dungeon_active: bool) -> void:
 	for mount in mounts:
 		placements.append((mount as Dictionary)["position"])
 	_ensure_root()
-	if placements.size() == _positions.size() and should_show == _active:
+	if placements.size() == _positions.size() and should_show == _active and _rendered_count() == placements.size():
 		var same := true
 		for i in placements.size():
 			if placements[i] != _positions[i]:
@@ -65,13 +65,29 @@ func sync(level: int, walls: Array, dungeon_active: bool) -> void:
 func get_debug_state() -> Dictionary:
 	LoaderScript.ensure_loaded()
 	var cfg := LoaderScript.config()
+	var positions: Array = []
+	for raw in _positions:
+		var pos := raw as Vector2
+		positions.append({"x": pos.x, "z": pos.y})
 
 	return {
 		"active": _active,
 		"count": _positions.size(),
+		"rendered_count": _rendered_count(),
+		"positions": positions,
 		"light_radius": float(cfg.get("fog_light_radius", 5.0)) if _active else 0.0,
 		"shader_torch_cap": int(cfg.get("max_shader_torches", 32)),
 	}
+
+
+func _rendered_count() -> int:
+	if _root == null or not is_instance_valid(_root) or _root.is_queued_for_deletion() or _root.get_parent() != _parent:
+		return 0
+	var count := 0
+	for child in _root.get_children():
+		if not child.is_queued_for_deletion():
+			count += 1
+	return count
 
 
 func clear() -> void:
@@ -83,7 +99,7 @@ func clear() -> void:
 
 
 func _ensure_root() -> void:
-	if _root != null and is_instance_valid(_root):
+	if _root != null and is_instance_valid(_root) and not _root.is_queued_for_deletion() and _root.get_parent() == _parent:
 		return
 	if _parent == null:
 		return

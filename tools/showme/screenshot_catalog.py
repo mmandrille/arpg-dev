@@ -18,6 +18,7 @@ DUNGEON_GENERATION_REL = "shared/rules/dungeon_generation.v0.json"
 
 # Existing showme scene focuses captured as-is by the scenes suite (ADR-0018 D9 baseline).
 SCENE_FOCUSES: tuple[str, ...] = ("town", "monsters", "chests", "stairs", "eye-view", "heal-rain")
+TOWN_PLAY_VIEWS: tuple[tuple[str, str], ...] = (("plaza", "normal"), ("plaza", "max"), ("vendor", "normal"), ("gate", "max"), ("west", "max"), ("north", "max"))
 DUNGEON_ROOM_FOCUS = "dungeon-room"
 
 
@@ -217,6 +218,15 @@ def discover_jobs(suites: list[str] | None = None) -> list[CaptureJob]:
                     focus=focus,
                     slug=focus,
                     output_rel=f"{spec.name}/{focus}.png",
+                ))
+            for view, zoom in TOWN_PLAY_VIEWS:
+                slug = f"town-play-{view}-{zoom}"
+                jobs.append(CaptureJob(
+                    suite=spec.name,
+                    focus="town-play",
+                    slug=slug,
+                    output_rel=f"{spec.name}/{slug}.png",
+                    extra_args=("--town-view", view, "--town-zoom", zoom),
                 ))
             for palette_id, level in biome_palette_levels():
                 slug = f"{DUNGEON_ROOM_FOCUS}-{palette_id}"

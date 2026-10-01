@@ -24,9 +24,6 @@ func preserve_after_anchor_move(anchor: Node3D, visual: Node3D) -> void:
 		return
 	var delta := _last_anchor_position - current
 	_last_anchor_position = current
-	if Vector2(delta.x, delta.z).length() > CombatFeelConfigScript.movement_smoothing_reset_distance():
-		reset(anchor, visual)
-		return
 	var offset := visual.position + Vector3(delta.x, 0.0, delta.z)
 	offset.y = visual.position.y
 	visual.position = _clamp_offset(offset)

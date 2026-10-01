@@ -3,12 +3,24 @@ extends RefCounted
 
 static var _enabled: bool = false
 static var _phases_ms: Dictionary = {}
+static var _trace_frames: bool = false
+static var _frame_phases_ms: Dictionary = {}
 
 
 static func ensure_enabled() -> void:
-	if _enabled:
-		return
-	_enabled = OS.get_environment("ARPG_PERF_DEBUG").to_lower() in ["1", "true", "yes", "on"]
+	_trace_frames = OS.get_environment("ARPG_FIRST_SPAWN_TRACE").to_lower() in ["1", "true", "yes", "on"]
+	_enabled = _enabled or _trace_frames or OS.get_environment("ARPG_PERF_DEBUG").to_lower() in ["1", "true", "yes", "on"]
+
+
+static func begin_frame() -> void:
+	if _trace_frames:
+		_frame_phases_ms.clear()
+
+
+static func take_frame_snapshot() -> Dictionary:
+	var result := _frame_phases_ms.duplicate()
+	_frame_phases_ms.clear()
+	return result
 
 
 static func reset_frame() -> void:
@@ -22,6 +34,8 @@ static func add_ms(phase: String, elapsed_usec: int) -> void:
 		return
 	var elapsed_ms := float(elapsed_usec) / 1000.0
 	_phases_ms[phase] = float(_phases_ms.get(phase, 0.0)) + elapsed_ms
+	if _trace_frames:
+		_frame_phases_ms[phase] = float(_frame_phases_ms.get(phase, 0.0)) + elapsed_ms
 
 
 static func measure_usec(phase: String, start_usec: int) -> void:

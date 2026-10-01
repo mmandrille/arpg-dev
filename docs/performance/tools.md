@@ -23,6 +23,74 @@ new metrics, probes, or debug hooks.
 | In-game overlay (no log parsing) | Settings → **Performance status** (client panel) |
 | **Full benchmark suite + report** | `make benchmark` |
 
+For a focused live client-bot run, set `BOT_CLIENT_LOG_DIR=.artifacts/client-perf-logs`
+alongside `ARPG_PERF_DEBUG=1 make bot-client SCENARIO=<id> HEADLESS=0`. The runner retains
+`<id>-client.log` and `server.log` in that directory. The client log contains only
+render counters and bounded `[client-frame-batch]` microsecond intervals; the server
+log contains only `backend_perf` counters. This opt-in does not change default logs.
+
+For the v497 live dungeon fixture, run one scenario per log directory:
+
+```bash
+ARPG_PERF_DEBUG=1 BOT_CLIENT_LOG_DIR=.artifacts/dungeon-frame make bot-client SCENARIO=dungeon_frame_pacing_probe HEADLESS=0
+python3 -m tools.bot.dungeon_frame_report --client-log .artifacts/dungeon-frame/dungeon_frame_pacing_probe-client.log --server-log .artifacts/dungeon-frame/server.log --out .artifacts/dungeon-frame/report.txt
+```
+
+The fixture pins the generated seed, level, stationary isometric camera, Balanced tier,
+1920×1080 window, Forward+ renderer, 31 walls, and 24 live monsters. The report rejects
+missing frame batches, dropped intervals, short traces, or a changed scene. It separates
+true per-frame interval p50/p95/p99 from percentiles of one-second averages, and shows
+process, draw, primitive, and server tick costs separately. Repeat A/B only when the
+renderer host is uncontended; keep each pair of raw logs and report.
+
+To sample the Performance tier at the same resolution, use a separate log directory
+and set `BOT_CLIENT_RENDER_QUALITY=performance` on the run, then pass
+`--quality performance` to the report. This override is explicit in the retained
+command and checked against every steady client batch.
+
+```bash
+ARPG_PERF_DEBUG=1 BOT_CLIENT_RENDER_QUALITY=performance BOT_CLIENT_LOG_DIR=.artifacts/dungeon-frame-performance make bot-client SCENARIO=dungeon_frame_pacing_probe HEADLESS=0
+python3 -m tools.bot.dungeon_frame_report --client-log .artifacts/dungeon-frame-performance/dungeon_frame_pacing_probe-client.log --server-log .artifacts/dungeon-frame-performance/server.log --quality performance --out .artifacts/dungeon-frame-performance/report.txt
+```
+
+### First-spawn frame trace (v495)
+
+Run a selected live bot scenario with a fresh visual Godot observer process in
+each trial:
+
+```bash
+BENCHMARK_SCENARIO=sorcerer_multigroup_perf_probe \
+BENCHMARK_RUNS=10 BENCHMARK_FIRST_SPAWN=1 \
+BENCHMARK_BASELINE_LABEL=provisional-pre-v494 make benchmark
+```
+
+The command fails when Godot is absent, the bot fails, a trace has no first
+monster frame, or the scenario's monster count, renderer, or quality tier varies
+between trials. `.artifacts/benchmark-runs/<timestamp>/` contains each bot and
+client log, `first-spawn-summary.json`, and `report.txt`. The summary includes
+fixture seed, world, host, Git revision, Godot version, renderer, quality tier,
+monster count, raw trial timings, phase ranking, frame intervals after spawn,
+steady-frame distribution, draw calls, resource/node counts, and static memory.
+
+`ARPG_FIRST_SPAWN_TRACE=1` enables `[client-spawn-frame]` JSON records. The
+optimized town scene also logs `[client-startup] town_dressing_ms=...` before
+the first network snapshot; include that shifted startup cost in comparisons.
+`first_spawn` marker is the first client frame with monsters. `process_wall_ms`
+measures that frame's main `_process` work. Its visible frame interval appears
+in the *next* record's `frame_interval_ms`, because the next frame start is the
+first time the full interval can be observed. The interval leading into the
+spawn frame is also reported so work is not hidden before the marker. Phase
+buckets overlap (`net_poll`
+contains snapshot/upsert work), so do not sum them. The one-second
+`[client-perf]` series remains available for broader context but is not the
+first-spawn acceptance metric.
+
+“Cold” here means a new Godot process with no in-process resource cache. Asset
+import occurs once before the trials; OS file and GPU driver caches can remain
+warm. Compare before and after on the same host, renderer, quality tier, seed,
+scenario, and trial method. Ten pre-v494 trials are provisional; v495 acceptance
+starts with a fresh post-v494 baseline and ten paired after trials.
+
 ### How `make benchmark` works — live concurrent session
 
 The benchmark runs the **protocol bot and Godot client simultaneously on the same live session**:
@@ -43,8 +111,9 @@ The benchmark runs the **protocol bot and Godot client simultaneously on the sam
 This captures real `[client-perf]` frame cost under actual server load — not a replay. The CLIENT
 section of the report shows what a second player sees while the first player (bot) is actively
 fighting. It reports the **first-spawn hitch** (first sample with entities on screen: snapshot apply +
-model instantiation) separately, drops the next warmup samples, and leads with `avg_frame_ms` /
-`process_ms` p50/p95/p99/max plus `draw_calls` / `primitives`. FPS is secondary: the report prints the
+model instantiation) separately, drops the next warmup samples, and shows true frame interval
+p50/p95/p99 when frame batches are available. It labels `avg_frame_ms` as one-second averages
+and reports `process_ms`, `draw_calls`, and `primitives` separately. FPS is secondary: the report prints the
 observer's vsync mode (`vsync=` field of `[client-perf]`) and flags a cap when the frame-time floor
 (p25) equals the median. On macOS the cap persists even with `--disable-vsync` (Metal and MoltenVK
 both block windowed apps on the compositor's drawables — verified 2026-09-29, Godot 4.7.2, M4 Pro), so
@@ -232,6 +301,45 @@ code-owned (e.g. combat phase ms) — check file before assuming data-driven.
 ---
 
 ## Bot scenarios & lab worlds (stress / regression)
+
+### v499 live targeting measurement
+
+`106_live_targeting_corrections` runs the real Godot client bot against the
+`combat_control_lab` server session. It moves, chases the moving cave wraith,
+waits for an authoritative attack event, then changes floor destinations. The
+client bot uses the existing click bridge; this is a live socket session, not
+an offline replay. Run both profiles on the same commit, Godot build, display
+mode, and seed:
+
+```bash
+HEADLESS=1 make bot-visual scenario=106_live_targeting_corrections
+ARPG_BOT_TRANSPORT_PROFILE=bounded_80_20 HEADLESS=1 make bot-visual scenario=106_live_targeting_corrections
+make bot-visual scenario=106_live_targeting_corrections  # visible play-camera check
+```
+
+The `bounded_80_20` fixture schedules 80 ms base delay plus a fixed sequence of
+offsets from -20 to +20 ms in **each** WebSocket direction. Client frame stalls
+can make actual delivery later than the scheduled 60–100 ms window. Envelopes remain
+ordered and their contents are unchanged. `local` (the default) adds no delay.
+The profile is accepted only while `ARPG_BOT_CLIENT=1`; an unknown profile
+fails the client bot before the scenario begins. The runner saves only
+`[targeting-trace]` JSON records to `.artifacts/v499/targeting-trace.*`,
+excluding account, token, session, entity, and target identifiers.
+
+Each trace marks input receipt, command queue/transport dispatch, the first
+visual-node move or attack response, authoritative acceptance/rejection,
+reconciliation displacement, and process-frame stalls over 33.3 ms. Its
+summary includes sample counts and p50/p95; missing responses remain missing
+samples, never zero-latency samples. A 600 ms post-scenario observation window
+allows final acks and visible movement to arrive. Frame `delta` is a client
+process-frame proxy, so inspect visible play-camera footage alongside the
+trace before claiming a rendered-frame or feel improvement.
+
+Collect at least three runs per profile, alternate profile order when possible,
+and compare matched p95 values with sample counts, frame stalls, Godot version,
+commit, and host/display conditions. v493 measurements are provisional because
+v496 attack timing and v497 frame pacing are still To do. Select a correction
+only after both are integrated and a reproducible defect is identified.
 
 Reproducible perf paths without manual dungeon walks. Two tiers:
 

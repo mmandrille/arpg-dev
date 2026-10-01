@@ -13,10 +13,18 @@ extends RefCounted
 const LoaderScript := preload("res://scripts/town_presentation_loader.gd")
 const LibraryScript := preload("res://scripts/kit_piece_library.gd")
 const GroundDetailScript := preload("res://scripts/town_ground_detail.gd")
+const NatureLandmarksScript := preload("res://scripts/town_nature_landmarks.gd")
 
 const ROOT_NAME := "TownDressing"
 const PLAZA_NAME := GroundDetailScript.PLAZA_NAME
 const PROP_PREFIX := "TownProp_"
+
+
+static func sync_with_trace(ground_node: Node3D, level: int, trace_enabled: bool) -> void:
+	var started := Time.get_ticks_usec()
+	sync(ground_node, level)
+	if trace_enabled:
+		print("[client-startup] town_dressing_ms=%.3f" % (float(Time.get_ticks_usec() - started) / 1000.0))
 
 
 ## Attach (town) or remove (any other level) the dressing under the ground node.
@@ -24,6 +32,11 @@ static func sync(ground_node: Node3D, level: int) -> void:
 	if ground_node == null:
 		return
 	var existing := ground_node.find_child(ROOT_NAME, false, false)
+	if level == 0 and existing != null:
+		# The dressing is static for the session. A snapshot can set the same level
+		# again; preserve the already-built root and keep its world alignment.
+		(existing as Node3D).position = -ground_node.position
+		return
 	if existing != null:
 		ground_node.remove_child(existing)
 		existing.queue_free()
@@ -41,6 +54,7 @@ static func build() -> Node3D:
 	var cfg := LoaderScript.dressing()
 	if bool(cfg.get("enabled", false)):
 		root.add_child(GroundDetailScript.build(cfg))
+		root.add_child(NatureLandmarksScript.build(cfg))
 		var props: Array = cfg.get("props", [])
 		for i in props.size():
 			var node := _make_prop(props[i], i)

@@ -8,9 +8,19 @@ const CombatReachScript := preload("res://scripts/combat_reach.gd")
 const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
 const CombatStickyTargetScript := preload("res://scripts/combat_sticky_target.gd")
 const CombatLocalAttackPresentationScript := preload("res://scripts/combat_local_attack_presentation.gd")
+const GameplayFeedbackPresentationScript := preload("res://scripts/gameplay_feedback_presentation.gd")
+const BotCombatContactAssertionsScript := preload("res://scripts/bot_combat_contact_assertions.gd")
+const BotScenarioRunnerScript := preload("res://scripts/bot_scenario_runner.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
+
+
+class AttackAnimSpy:
+	extends RefCounted
+	var starts := 0
+	func play_one_shot(_clip: String, _attack_mode: String = "", _speed_scale: float = 1.0) -> void:
+		starts += 1
 
 
 func _initialize() -> void:
@@ -27,6 +37,9 @@ func _initialize() -> void:
 	_test_sticky_target_replacement_and_clear_guards()
 	_test_local_attack_presentation_matches_and_clears()
 	_test_local_attack_presentation_ignores_non_matches()
+	_test_lethal_result_does_not_restart_local_swing()
+	_test_contact_feedback_classification()
+	_test_combat_contact_and_buffer_assertions()
 	_test_combat_reach_uses_equipped_weapon()
 	_test_combat_reach_dual_wield_uses_shorter_off_hand()
 	_test_combat_reach_attack_approach_point()
@@ -184,6 +197,48 @@ func _test_local_attack_presentation_ignores_non_matches() -> void:
 	_assert_true("wrong target leaves active", presentation.active())
 	presentation.clear()
 	_assert_false("clear deactivates local presentation", presentation.active())
+
+
+func _test_lethal_result_does_not_restart_local_swing() -> void:
+	var presentation := CombatLocalAttackPresentationScript.new()
+	var anim := AttackAnimSpy.new()
+	CombatLocalAttackPresentationScript.present_local_start(presentation, "1002", null, anim)
+	_assert_eq("local swing starts once", anim.starts, 1)
+	CombatLocalAttackPresentationScript.present_result(presentation, {"event_type": "monster_damaged", "source_entity_id": "p1", "target_entity_id": "1002"}, "p1", null, anim)
+	CombatLocalAttackPresentationScript.present_result(presentation, {"event_type": "monster_killed", "source_entity_id": "p1", "target_entity_id": "1002"}, "p1", null, anim)
+	_assert_eq("lethal damage and kill keep one swing", anim.starts, 1)
+	CombatLocalAttackPresentationScript.present_result(null, {"event_type": "monster_killed", "source_entity_id": "p1", "target_entity_id": "1003"}, "p1", null, anim)
+	_assert_eq("unpaired kill has no basic swing", anim.starts, 1)
+	CombatLocalAttackPresentationScript.present_result(null, {"event_type": "monster_damaged", "source_entity_id": "p1", "target_entity_id": "1003"}, "p1", null, anim)
+	CombatLocalAttackPresentationScript.present_result(null, {"event_type": "attack_missed", "source_entity_id": "p1", "target_entity_id": "1003"}, "p1", null, anim)
+	CombatLocalAttackPresentationScript.present_result(null, {"event_type": "attack_blocked", "source_entity_id": "p1", "target_entity_id": "1003"}, "p1", null, anim)
+	_assert_eq("unpredicted damage, miss and block retain fallback", anim.starts, 4)
+
+
+func _test_contact_feedback_classification() -> void:
+	_assert_true("hit keeps contact feedback", GameplayFeedbackPresentationScript.has_hit_contact({"outcome": "hit", "blocked": false}))
+	_assert_true("crit keeps contact feedback", GameplayFeedbackPresentationScript.has_hit_contact({"outcome": "crit", "blocked": false}))
+	_assert_false("blocked damage has no hit contact", GameplayFeedbackPresentationScript.has_hit_contact({"outcome": "block", "blocked": true}))
+	_assert_false("blocked flag wins over hit label", GameplayFeedbackPresentationScript.has_hit_contact({"outcome": "hit", "blocked": true}))
+	_assert_false("miss has no hit contact", GameplayFeedbackPresentationScript.has_hit_contact({"outcome": "miss"}))
+	_assert_false("immune has no hit contact", GameplayFeedbackPresentationScript.has_hit_contact({"outcome": "immune"}))
+
+
+func _test_combat_contact_and_buffer_assertions() -> void:
+	var contact_step := {"outcome": "block", "blocked": true, "target_monster_def_id": "combat_lab_blocking_target", "impact_feedback_delta_max": 0}
+	var state := {
+		"last_monster_damage_feedback": {"outcome": "block", "blocked": true, "target_monster_def_id": "combat_lab_blocking_target", "impact_feedback_delta": 0},
+		"attack_buffer": {"active": true, "target_id": "1007", "queued_count": 2, "replaced_count": 0, "cleared_count": 0},
+	}
+	_assert_true("blocked event without contact passes", BotCombatContactAssertionsScript.matches("assert_combat_contact", contact_step, state))
+	state["last_monster_damage_feedback"]["impact_feedback_delta"] = 1
+	_assert_false("blocked event with hit reaction fails", BotCombatContactAssertionsScript.matches("assert_combat_contact", contact_step, state))
+	var buffer_step := {"active": true, "queued_count_min": 1, "queued_count_max": 2, "replaced_count_max": 0}
+	_assert_true("bounded rapid attack queue passes", BotCombatContactAssertionsScript.matches("assert_attack_buffer", buffer_step, state))
+	state["attack_buffer"]["queued_count"] = 3
+	_assert_false("unbounded rapid attack queue fails", BotCombatContactAssertionsScript.matches("assert_attack_buffer", buffer_step, state))
+	_assert_eq("contact assertion step validates", BotScenarioRunnerScript.validate_step(contact_step.merged({"type": "assert_combat_contact"}), 0), "")
+	_assert_eq("buffer assertion step validates", BotScenarioRunnerScript.validate_step(buffer_step.merged({"type": "assert_attack_buffer"}), 0), "")
 
 
 func _test_combat_reach_uses_equipped_weapon() -> void:

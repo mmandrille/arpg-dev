@@ -1,0 +1,96 @@
+{
+  "id": "dungeon_light_readability_torch",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "dungeon_levels",
+  "seed": "dungeon_torch_lights_seed",
+  "title": "Dungeon light readability: live torch pool",
+  "description": "Descend, approach a deterministic mounted torch from inside the room, and require it to be near the player and projected inside the live isometric camera before capture.",
+  "debug_progression": {
+    "level": 1,
+    "stats": {
+      "str": 5,
+      "dex": 5,
+      "vit": 80,
+      "magic": 5
+    }
+  },
+  "client_steps": [
+    {
+      "type": "wait_ws_open",
+      "timeout_s": 10.0
+    },
+    {
+      "type": "wait_entity",
+      "entity_type": "interactable",
+      "timeout_s": 15.0
+    },
+    {
+      "type": "click_entity",
+      "entity_type": "interactable",
+      "interactable_def_id": "stairs_down"
+    },
+    {
+      "type": "wait_wall_layout",
+      "current_level": -1,
+      "at_least": 4,
+      "timeout_s": 15.0
+    },
+    {
+      "type": "wait_dungeon_torch_lights",
+      "active": true,
+      "min_count": 2,
+      "min_rendered_count": 2,
+      "timeout_s": 8.0
+    },
+    {
+      "type": "set_camera_mode",
+      "mode": "isometric"
+    },
+    {
+      "type": "set_graphics_quality",
+      "quality": "balanced"
+    },
+    {
+      "type": "approach_nearest_torch",
+      "stand_off": 2.5
+    },
+    {
+      "type": "wait_selected_torch_in_view",
+      "max_distance": 5.0,
+      "timeout_s": 25.0
+    },
+    {
+      "type": "assert_fog_of_war",
+      "enabled": true,
+      "active": true,
+      "torch_count_min": 2
+    },
+    {
+      "type": "capture_frame",
+      "name": "v498_torch_balanced",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    },
+    {
+      "type": "set_graphics_quality",
+      "quality": "performance"
+    },
+    {
+      "type": "wait_ticks",
+      "ticks": 5,
+      "timeout_s": 5.0
+    },
+    {
+      "type": "wait_selected_torch_in_view",
+      "max_distance": 5.0,
+      "timeout_s": 10.0
+    },
+    {
+      "type": "capture_frame",
+      "name": "v498_torch_performance",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
+    }
+  ]
+}

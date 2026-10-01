@@ -17,6 +17,13 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v500** | `town-terrain-landmarks` | Complete (combined CI gate) | [`spec`](../specs/v500_spec-town-terrain-landmarks.md) | [`plan`](../plans/v500_2026-09-30-town-terrain-landmarks.md) | [`as-built`](../as-built/v500_town-terrain-landmarks.md) |
+| **v499** | `live-targeting-corrections` | Complete (combined CI gate) | [`spec`](../specs/v499_spec-live-targeting-corrections.md) | [`plan`](../plans/v499_2026-09-30-live-targeting-corrections.md) | [`as-built`](../as-built/v499_live-targeting-corrections.md) |
+| **v498** | `dungeon-light-readability` | Complete (combined CI gate) | [`spec`](../specs/v498_spec-dungeon-light-readability.md) | [`plan`](../plans/v498_2026-09-30-dungeon-light-readability.md) | [`as-built`](../as-built/v498_dungeon-light-readability.md) |
+| **v497** | `dungeon-frame-pacing` | Complete (combined CI gate) | [`spec`](../specs/v497_spec-dungeon-frame-pacing.md) | [`plan`](../plans/v497_2026-09-30-dungeon-frame-pacing.md) | [`as-built`](../as-built/v497_dungeon-frame-pacing.md) |
+| **v496** | `attack-contact-timing` | Complete (combined CI gate) | [`spec`](../specs/v496_spec-attack-contact-timing.md) | [`plan`](../plans/v496_2026-09-30-attack-contact-timing.md) | [`as-built`](../as-built/v496_attack-contact-timing.md) |
+| **v495** | `first-spawn-frame-hitch` | Complete (combined CI gate) | [`spec`](../specs/v495_spec-first-spawn-frame-hitch.md) | [`plan`](../plans/v495_2026-09-30-first-spawn-frame-hitch.md) | [`as-built`](../as-built/v495_first-spawn-frame-hitch.md) |
+| **v494** | `dungeon-room-dressing` | Complete (combined CI gate) | [`spec`](../specs/v494_spec-dungeon-room-dressing.md) | [`plan`](../plans/v494_2026-09-30-dungeon-room-dressing.md) | [`as-built`](../as-built/v494_dungeon-room-dressing.md) |
 | **v493** | `town-floor-detail` | Complete (`make ci` green) | [`spec`](../specs/v493_spec-town-floor-detail.md) | [`plan`](../plans/v493_2026-09-30-town-floor-detail.md) | [`as-built`](../as-built/v493_town-floor-detail.md) |
 | **v492** | `combat-vfx-foundation` | Complete (`make ci` green) | [`spec`](../specs/v492_spec-combat-vfx-foundation.md) | [`plan`](../plans/v492_2026-09-30-combat-vfx-foundation.md) | [`as-built`](../as-built/v492_combat-vfx-foundation.md) |
 | **v491** | `town-look-pass` | Complete (`make ci` green) | [`spec`](../specs/v491_spec-town-look-pass.md) | [`plan`](../plans/v491_2026-09-30-town-look-pass.md) | [`as-built`](../as-built/v491_town-look-pass.md) |

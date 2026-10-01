@@ -23,6 +23,12 @@ SERVER_PID=""
 SERVER_LOG="$(mktemp -t arpg-bot-client-server.XXXXXX.log)"
 cleanup() {
   [[ -n "$SERVER_PID" ]] && kill "$SERVER_PID" >/dev/null 2>&1 || true
+  [[ -n "$SERVER_PID" ]] && wait "$SERVER_PID" >/dev/null 2>&1 || true
+  if [[ -n "${BOT_CLIENT_LOG_DIR:-}" ]]; then
+    mkdir -p "$BOT_CLIENT_LOG_DIR"
+    grep -F 'backend_perf' "$SERVER_LOG" > "$BOT_CLIENT_LOG_DIR/server.log" || true
+    echo "[bot-client-local] retained server performance counters: $BOT_CLIENT_LOG_DIR/server.log"
+  fi
 }
 trap cleanup EXIT
 

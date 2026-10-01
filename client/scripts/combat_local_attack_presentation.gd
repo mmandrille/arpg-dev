@@ -5,6 +5,7 @@ const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const AttackAnimationScalingScript := preload("res://scripts/attack_animation_scaling.gd")
 const AttackPresentationLoaderScript := preload("res://scripts/attack_presentation_loader.gd")
 const ItemRulesLoaderScript := preload("res://scripts/item_rules_loader.gd")
+const AttackContactTraceScript := preload("res://scripts/attack_contact_trace.gd")
 const RESULT_EVENTS := ["monster_damaged", "monster_killed", "attack_missed", "attack_blocked"]
 
 var target_id: String = ""
@@ -41,10 +42,17 @@ static func present_local_start(tracker: CombatLocalAttackPresentation, target: 
 	ClientAudioBridgeScript.attack(audio_controller)
 	var clip := _attack_clip_for(weapon_slot, attack_mode, inventory, equipped)
 	_play_animation_clip(player_anim, clip, attack_mode, attack_speed)
+	AttackContactTraceScript.record("swing_start", {"clip": clip, "target_id": target, "attack_mode": attack_mode})
 
 
 static func present_result(tracker: CombatLocalAttackPresentation, ev: Dictionary, local_player_id: String, audio_controller, player_anim, attack_mode: String = "", attack_speed: float = 1.0, inventory: Array = [], equipped: Dictionary = {}) -> void:
 	if str(ev.get("source_entity_id", "")) != local_player_id:
+		return
+	# A lethal attack emits monster_damaged and then monster_killed. The damage
+	# event already confirms the swing; the kill event owns death feedback only.
+	if str(ev.get("event_type", "")) == "monster_killed":
+		if tracker != null:
+			tracker.consume_if_matches(ev, local_player_id)
 		return
 	if tracker != null and tracker.consume_if_matches(ev, local_player_id):
 		return

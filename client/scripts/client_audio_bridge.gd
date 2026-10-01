@@ -1,6 +1,8 @@
 extends RefCounted
 class_name ClientAudioBridge
 
+const AttackContactTraceScript := preload("res://scripts/attack_contact_trace.gd")
+
 
 static func apply_settings(controller: ClientAudioController, settings: ClientSettings) -> void:
 	if controller == null or settings == null:
@@ -64,6 +66,7 @@ static func movement(controller: ClientAudioController) -> void:
 static func attack(controller: ClientAudioController) -> void:
 	if controller != null:
 		controller.play_attack()
+		AttackContactTraceScript.record("audio_attack")
 
 
 static func skill(controller: ClientAudioController, skill_id: String) -> void:
@@ -79,6 +82,7 @@ static func heal(controller: ClientAudioController) -> void:
 static func damage(controller: ClientAudioController, local_player: bool) -> void:
 	if controller != null:
 		controller.play_damage(local_player)
+		AttackContactTraceScript.record("audio_damage", {"local_player": local_player})
 
 
 static func kill(controller: ClientAudioController, is_boss: bool) -> void:

@@ -43,11 +43,17 @@ DEV_TOKEN="${ARPG_DEV_TOKEN:-${DEV_TOKEN:-local-dev-token}}"
 DEBUG_TOKEN="${ARPG_DEBUG_TOKEN:-${DEBUG_TOKEN:-local-debug-token}}"
 GODOT="${GODOT:-godot}"
 BENCHMARK_OUT="${BENCHMARK_OUT:-}"
-
-# Bot uses a dedicated account; Godot observer uses a separate account so both
-# can be authenticated concurrently against the same server.
-BOT_EMAIL="benchmark-bot@example.test"
-OBSERVER_EMAIL="benchmark-observer@example.test"
+BENCHMARK_SCENARIO="${BENCHMARK_SCENARIO:-benchmark}"
+BENCHMARK_RUNS="${BENCHMARK_RUNS:-1}"
+BENCHMARK_FIRST_SPAWN="${BENCHMARK_FIRST_SPAWN:-0}"
+if [[ ! "$BENCHMARK_RUNS" =~ ^[1-9][0-9]*$ ]]; then
+  echo "[benchmark] BENCHMARK_RUNS must be a positive integer" >&2
+  exit 2
+fi
+if [[ "$BENCHMARK_FIRST_SPAWN" != 1 && "$BENCHMARK_RUNS" -ne 1 ]]; then
+  echo "[benchmark] repeated trials require BENCHMARK_FIRST_SPAWN=1" >&2
+  exit 2
+fi
 
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 ARTIFACTS_DIR="$ROOT/.artifacts/benchmark-runs/$TIMESTAMP"
@@ -79,6 +85,10 @@ if command -v "$GODOT" >/dev/null 2>&1; then
 else
   echo "[benchmark] WARNING: Godot runtime '$GODOT' not found — will run bot-only (no visual client)."
   echo "[benchmark]           Set GODOT=/path/to/godot to enable the visual client."
+fi
+if [[ "$BENCHMARK_FIRST_SPAWN" == 1 && "$HAS_GODOT" -ne 1 ]]; then
+  echo "[benchmark] first-spawn trials require a live Godot renderer" >&2
+  exit 2
 fi
 
 # ── Process tracking ──────────────────────────────────────────────────────────
@@ -125,7 +135,8 @@ arpg_wait_own_server "benchmark"
 
 echo "[benchmark] enumerating benchmark scenarios..."
 SCENARIO_IDS="$("$ROOT/.venv/bin/python" -c \
-  "from tools.bot.run import load_scenarios,select_scenarios; print(' '.join(s.id for s in select_scenarios(load_scenarios(),'benchmark')))")"
+  'import sys; from tools.bot.run import load_scenarios, select_scenarios; print(" ".join(s.id for s in select_scenarios(load_scenarios(), sys.argv[1])))' \
+  "$BENCHMARK_SCENARIO")"
 
 if [[ -z "$SCENARIO_IDS" ]]; then
   echo "[benchmark] no benchmark scenarios found — nothing to do."
@@ -133,6 +144,10 @@ if [[ -z "$SCENARIO_IDS" ]]; then
 fi
 
 echo "[benchmark] scenarios: $SCENARIO_IDS"
+if [[ "$BENCHMARK_FIRST_SPAWN" == 1 && "$SCENARIO_IDS" == *" "* ]]; then
+  echo "[benchmark] first-spawn trials require exactly one selected scenario" >&2
+  exit 2
+fi
 
 # Optionally import Godot assets once before the scenario loop
 if [[ "$HAS_GODOT" -eq 1 ]]; then
@@ -148,12 +163,16 @@ fi
 SCENARIO_CLIENT_LOGS=()
 
 for SCENARIO_ID in $SCENARIO_IDS; do
+for ((RUN_NUMBER=1; RUN_NUMBER<=BENCHMARK_RUNS; RUN_NUMBER++)); do
+  TRIAL_ID="${SCENARIO_ID}-run$(printf '%02d' "$RUN_NUMBER")"
   echo ""
-  echo "[benchmark] ── scenario: $SCENARIO_ID ──────────────────────────────"
+  echo "[benchmark] ── trial: $TRIAL_ID ──────────────────────────────"
 
-  SCENARIO_BOT_LOG="$ARTIFACTS_DIR/${SCENARIO_ID}-bot.log"
-  SCENARIO_CLIENT_LOG="$ARTIFACTS_DIR/${SCENARIO_ID}-client.log"
-  SID_FILE="$SID_DIR/${SCENARIO_ID}.sid"
+  SCENARIO_BOT_LOG="$ARTIFACTS_DIR/${TRIAL_ID}-bot.log"
+  SCENARIO_CLIENT_LOG="$ARTIFACTS_DIR/${TRIAL_ID}-client.log"
+  SID_FILE="$SID_DIR/${TRIAL_ID}.sid"
+  TRIAL_BOT_EMAIL="benchmark-bot-${TIMESTAMP}-${RUN_NUMBER}@example.test"
+  TRIAL_OBSERVER_EMAIL="benchmark-observer-${TIMESTAMP}-${RUN_NUMBER}@example.test"
 
   # Check if this scenario requires a solo session (e.g. multi-level dungeon worlds
   # that don't spawn monsters in coop mode). Search by id field, not filename,
@@ -187,7 +206,7 @@ else:
         --base-url "$BASE_URL" \
         --dev-token "$DEV_TOKEN" \
         --debug-token "$DEBUG_TOKEN" \
-        --email "$BOT_EMAIL" \
+        --email "$TRIAL_BOT_EMAIL" \
         --scenario "$SCENARIO_ID" \
         --write-session-id "$SID_FILE" \
         --skip-replay \
@@ -200,7 +219,7 @@ else:
         --base-url "$BASE_URL" \
         --dev-token "$DEV_TOKEN" \
         --debug-token "$DEBUG_TOKEN" \
-        --email "benchmark-solo-${SCENARIO_ID}@example.test" \
+        --email "benchmark-solo-${TIMESTAMP}-${RUN_NUMBER}@example.test" \
         --scenario "$SCENARIO_ID" \
         --skip-replay \
         --cleanup-characters \
@@ -232,9 +251,10 @@ else:
         ARPG_BASE_URL="$BASE_URL" \
           ARPG_DEV_TOKEN="$DEV_TOKEN" \
           ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
-          ARPG_EMAIL="$OBSERVER_EMAIL" \
+          ARPG_EMAIL="$TRIAL_OBSERVER_EMAIL" \
           ARPG_JOIN_SESSION_ID="$SESSION_ID" \
           ARPG_PERF_DEBUG=1 \
+          ARPG_FIRST_SPAWN_TRACE="$BENCHMARK_FIRST_SPAWN" \
           "$GODOT" --path "$ROOT/client" ${GODOT_OBSERVER_FLAGS[@]+"${GODOT_OBSERVER_FLAGS[@]}"} \
           >"$SCENARIO_CLIENT_LOG" 2>&1 &
         GODOT_PID=$!
@@ -252,7 +272,7 @@ else:
     echo "[benchmark]   bot finished $SCENARIO_ID successfully."
   else
     echo "[benchmark]   bot FAILED for $SCENARIO_ID — check $SCENARIO_BOT_LOG"
-    FAILED_SCENARIOS+=("$SCENARIO_ID")
+    FAILED_SCENARIOS+=("$TRIAL_ID")
   fi
   BOT_PID=""
 
@@ -265,8 +285,11 @@ else:
   fi
 
   if [[ -s "$SCENARIO_CLIENT_LOG" ]]; then
-    SCENARIO_CLIENT_LOGS+=("$SCENARIO_ID=$SCENARIO_CLIENT_LOG")
+    REPORT_LABEL="$SCENARIO_ID"
+    [[ "$BENCHMARK_FIRST_SPAWN" == 1 ]] && REPORT_LABEL="$TRIAL_ID"
+    SCENARIO_CLIENT_LOGS+=("$REPORT_LABEL=$SCENARIO_CLIENT_LOG")
   fi
+done
 done
 
 # ── 4. Combine bot logs ───────────────────────────────────────────────────────
@@ -274,10 +297,12 @@ done
 # Merge all per-scenario bot logs into the single $BOT_LOG artifact.
 : > "$BOT_LOG"
 for SCENARIO_ID in $SCENARIO_IDS; do
-  SCENARIO_BOT_LOG="$ARTIFACTS_DIR/${SCENARIO_ID}-bot.log"
-  if [[ -s "$SCENARIO_BOT_LOG" ]]; then
-    cat "$SCENARIO_BOT_LOG" >> "$BOT_LOG"
-  fi
+  for ((RUN_NUMBER=1; RUN_NUMBER<=BENCHMARK_RUNS; RUN_NUMBER++)); do
+    SCENARIO_BOT_LOG="$ARTIFACTS_DIR/${SCENARIO_ID}-run$(printf '%02d' "$RUN_NUMBER")-bot.log"
+    if [[ -s "$SCENARIO_BOT_LOG" ]]; then
+      cat "$SCENARIO_BOT_LOG" >> "$BOT_LOG"
+    fi
+  done
 done
 
 # ── 5. Shut down server ───────────────────────────────────────────────────────
@@ -291,11 +316,18 @@ SERVER_PID=""
 # ── 6. Generate unified report ────────────────────────────────────────────────
 
 echo "[benchmark] generating report..."
-REPORT_ARGS=(--server-log "$SERVER_LOG" --bot-log "$BOT_LOG" --out "$BENCHMARK_OUT")
-for ENTRY in ${SCENARIO_CLIENT_LOGS[@]+"${SCENARIO_CLIENT_LOGS[@]}"}; do
-  REPORT_ARGS+=(--scenario-client-log "$ENTRY")
-done
-"$ROOT/.venv/bin/python" -m tools.bot.benchmark_report "${REPORT_ARGS[@]}"
+if [[ "$BENCHMARK_FIRST_SPAWN" == 1 ]]; then
+  "$ROOT/.venv/bin/python" -m tools.bot.first_spawn_report \
+    --run-dir "$ARTIFACTS_DIR" --scenario "$BENCHMARK_SCENARIO" \
+    --runs "$BENCHMARK_RUNS" --godot "$GODOT" \
+    --baseline-label "${BENCHMARK_BASELINE_LABEL:-current-checkout}" --out "$BENCHMARK_OUT"
+else
+  REPORT_ARGS=(--server-log "$SERVER_LOG" --bot-log "$BOT_LOG" --out "$BENCHMARK_OUT")
+  for ENTRY in ${SCENARIO_CLIENT_LOGS[@]+"${SCENARIO_CLIENT_LOGS[@]}"}; do
+    REPORT_ARGS+=(--scenario-client-log "$ENTRY")
+  done
+  "$ROOT/.venv/bin/python" -m tools.bot.benchmark_report "${REPORT_ARGS[@]}"
+fi
 
 echo ""
 echo "[benchmark] artifacts saved under $ARTIFACTS_DIR:"

@@ -2579,9 +2579,31 @@
       },
       "entities": []
     },
+    "dungeon_light_deep_vault_lab": {
+      "mode": "multi_level",
+      "start_level": -8,
+      "player": {
+        "position": {
+          "x": 26,
+          "y": 15
+        }
+      },
+      "entities": []
+    },
     "generated_wall_lab": {
       "mode": "multi_level",
       "start_level": -1,
+      "player": {
+        "position": {
+          "x": 26,
+          "y": 15
+        }
+      },
+      "entities": []
+    },
+    "dungeon_dressing_deep_lab": {
+      "mode": "multi_level",
+      "start_level": -4,
       "player": {
         "position": {
           "x": 26,

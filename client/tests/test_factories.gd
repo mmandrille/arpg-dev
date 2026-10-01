@@ -84,8 +84,15 @@ func _test_ground_wall_factory() -> void:
 	var deep_palette: Dictionary = factory.biome_palette_for_level(-8)
 	var dungeon_normal_a := factory.make_ground_normal_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, dungeon_palette)
 	var dungeon_normal_b := factory.make_ground_normal_texture(ClientConstantsScript.GROUND_TEXTURE_DUNGEON, dungeon_palette)
-	_assert_true("town ground normal remains disabled", not town_mat.normal_enabled)
-	_assert_eq("town ground uv from material kit", town_mat.uv1_scale.x, SurfaceMaterialLoaderScript.uv_scale(SurfaceMaterialLoaderScript.STYLE_TOWN_GROUND, Vector2.ZERO).x)
+	var town_uv := SurfaceMaterialLoaderScript.uv_scale(SurfaceMaterialLoaderScript.STYLE_TOWN_GROUND, Vector2.ZERO)
+	if bool((TownPresentationLoader.dressing().get("terrain", {}) as Dictionary).get("enabled", false)):
+		_assert_true("town ground uses terrain blend", town_mat is ShaderMaterial)
+		if town_mat is ShaderMaterial:
+			_assert_true("town blend retains ground texture", town_mat.get_shader_parameter("ground_texture") != null)
+			_assert_eq("town ground uv from material kit", (town_mat.get_shader_parameter("ground_uv_scale") as Vector2).x, town_uv.x)
+	else:
+		_assert_true("town ground normal remains disabled", not town_mat.normal_enabled)
+		_assert_eq("town ground uv from material kit", town_mat.uv1_scale.x, town_uv.x)
 	_assert_true("dungeon ground normal enabled", dungeon_mat.normal_enabled)
 	_assert_true("dungeon ground normal texture exists", dungeon_mat.normal_texture != null)
 	_assert_float_close("dungeon ground normal scale from material kit", dungeon_mat.normal_scale, SurfaceMaterialLoaderScript.scalar(SurfaceMaterialLoaderScript.STYLE_DUNGEON_FLOOR, "normal_scale", 0.0), 0.001)

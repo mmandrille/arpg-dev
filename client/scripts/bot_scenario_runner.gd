@@ -543,6 +543,8 @@ func _presentation_row_matches(step: Dictionary, rec: Dictionary) -> bool:
 		return false
 	if step.has("impact_feedback_min") and int(reaction.get("impact_feedback_count", 0)) < int(step.get("impact_feedback_min", 0)):
 		return false
+	if step.has("impact_feedback_max") and int(reaction.get("impact_feedback_count", 0)) > int(step.get("impact_feedback_max", 0)):
+		return false
 	if step.has("current_tint") and str(reaction.get("current_tint", "")) != str(step.get("current_tint", "")):
 		return false
 	return true

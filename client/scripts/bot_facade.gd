@@ -205,6 +205,58 @@ static func click_skill_button(main, skill_id: String = "") -> void:
 		panel.bot_click_skill_button(skill_id)
 
 
+static func click_menu_button(main, button: String) -> void:
+	var multiplayer_panel = _member(main, "multiplayer_panel")
+	var settings_panel = _member(main, "settings_panel")
+	var character_panel = _member(main, "character_panel")
+	match button:
+		"create_game", "continue", "new_game":
+			main._on_create_game_pressed()
+		"join_game", "multiplayer":
+			main._on_join_game_pressed()
+		"refresh_sessions":
+			main._refresh_multiplayer_sessions()
+		"host_listed_session":
+			main._on_host_listed_session_requested()
+		"join_first_listed_session":
+			if multiplayer_panel != null:
+				multiplayer_panel.join_first_session()
+		"select_expected_join_session":
+			if multiplayer_panel != null:
+				multiplayer_panel.select_session(OS.get_environment("ARPG_EXPECTED_JOIN_SESSION_ID"))
+		"join_expected_session":
+			if multiplayer_panel != null:
+				multiplayer_panel.join_session(OS.get_environment("ARPG_EXPECTED_JOIN_SESSION_ID"))
+		"settings":
+			var pause_menu = _member(main, "pause_menu")
+			if pause_menu != null and pause_menu.visible:
+				main._on_settings_from_pause()
+			else:
+				main._on_settings_from_main()
+		"codex":
+			main._on_codex_from_main()
+		"back":
+			var main_menu = _member(main, "main_menu")
+			if CodexMenuBridge.handle_back(main_menu, _member(main, "codex_panel")):
+				pass
+			elif settings_panel != null and settings_panel.visible:
+				main._on_settings_back()
+			elif character_panel != null and character_panel.visible:
+				main._on_character_panel_back()
+			elif multiplayer_panel != null and multiplayer_panel.visible:
+				multiplayer_panel.hide_panel()
+				main_menu.show_menu()
+		"create_character", "confirm_character_create", "start":
+			if character_panel != null:
+				character_panel.submit_name()
+		"resume":
+			main._resume_from_pause()
+		"return_to_main_menu":
+			main._return_to_main_menu()
+		"exit":
+			main._exit_game()
+
+
 static func use_skill_bar(main, skill_id: String = "", target_id: String = "", force_direct: bool = false) -> void:
 	if skill_id == "":
 		skill_id = SkillRulesLoader.first_skill_id()

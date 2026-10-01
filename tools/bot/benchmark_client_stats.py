@@ -19,18 +19,19 @@ from __future__ import annotations
 import math
 import statistics
 from dataclasses import dataclass
+from typing import Any
 
 DEFAULT_SETTLE_SAMPLES = 2
 
 
 @dataclass(frozen=True)
 class ClientWarmupSplit:
-    hitch: dict[str, float] | None
-    warmup: list[dict[str, float]]
-    steady: list[dict[str, float]]
+    hitch: dict[str, Any] | None
+    warmup: list[dict[str, Any]]
+    steady: list[dict[str, Any]]
 
 
-def split_warmup(samples: list[dict[str, float]], settle_samples: int = DEFAULT_SETTLE_SAMPLES) -> ClientWarmupSplit:
+def split_warmup(samples: list[dict[str, Any]], settle_samples: int = DEFAULT_SETTLE_SAMPLES) -> ClientWarmupSplit:
     """Split samples into first-spawn hitch, warmup (hitch + settle), and steady state."""
     if not samples:
         return ClientWarmupSplit(None, [], [])
@@ -44,7 +45,7 @@ def split_warmup(samples: list[dict[str, float]], settle_samples: int = DEFAULT_
     return ClientWarmupSplit(samples[hitch_index], samples[:cut], steady)
 
 
-def values(samples: list[dict[str, float]], key: str) -> list[float]:
+def values(samples: list[dict[str, Any]], key: str) -> list[float]:
     return [float(s[key]) for s in samples if key in s]
 
 
@@ -78,7 +79,7 @@ def fmt_avg_p95_max(vals: list[float], unit: str = "ms") -> str:
     return f"avg {statistics.mean(vals):6.1f} {unit}  p95 {percentile(vals, 0.95):6.1f} {unit}  max {max(vals):6.1f} {unit}"
 
 
-def frame_time_floor_capped(samples: list[dict[str, float]]) -> bool:
+def frame_time_floor_capped(samples: list[dict[str, Any]]) -> bool:
     """True when the fast quarter of frame windows is no faster than the median.
 
     Uncapped rendering shows frame times scattered below the median; a display
@@ -93,7 +94,7 @@ def frame_time_floor_capped(samples: list[dict[str, float]]) -> bool:
     return median > 0 and (median - percentile(frames, 0.25)) / median < 0.01
 
 
-def vsync_label(samples: list[dict[str, float]]) -> str:
+def vsync_label(samples: list[dict[str, Any]]) -> str:
     modes = {int(s["vsync"]) for s in samples if "vsync" in s}
     if not modes:
         requested = "unknown (sample predates vsync field)"
@@ -120,7 +121,16 @@ _DELTA_PHASES = [
 _HITCH_KEYS = ["avg_frame_ms", "process_ms", "net_poll", "d_upsert", "d_upsert_m", "delta"]
 
 
-def render_client_block(label: str, samples: list[dict[str, float]], settle_samples: int = DEFAULT_SETTLE_SAMPLES) -> list[str]:
+def frame_intervals_ms(samples: list[dict[str, Any]]) -> tuple[list[float], int, int]:
+    """Return raw frame intervals only when every steady window has a complete batch."""
+    missing = sum(1 for sample in samples if "frame_us" not in sample or "frame_batch_error" in sample)
+    dropped = sum(int(sample.get("frame_dropped", 0)) for sample in samples)
+    if missing or dropped:
+        return [], missing, dropped
+    return [interval / 1000.0 for sample in samples for interval in sample["frame_us"]], 0, 0
+
+
+def render_client_block(label: str, samples: list[dict[str, Any]], settle_samples: int = DEFAULT_SETTLE_SAMPLES) -> list[str]:
     if not samples:
         return []
     split = split_warmup(samples, settle_samples)
@@ -140,7 +150,10 @@ def render_client_block(label: str, samples: list[dict[str, float]], settle_samp
         lines.append("")
 
     lines.append("  FRAME TIME (steady state)")
-    lines.append(f"    avg_frame_ms  {fmt_percentiles(values(steady, 'avg_frame_ms'))}")
+    frames, missing, dropped = frame_intervals_ms(steady)
+    lines.append(f"    frame interval {fmt_percentiles(frames)}  (n={len(frames)})" if frames else
+                 f"    frame interval n/a  (missing batches={missing}, dropped intervals={dropped})")
+    lines.append(f"    avg_frame_ms  {fmt_percentiles(values(steady, 'avg_frame_ms'))}  (1s averages)")
     lines.append(f"    process_ms    {fmt_percentiles(values(steady, 'process_ms'))}")
     lines.append(f"    physics_ms    {fmt_percentiles(values(steady, 'physics_ms'))}")
     fps_vals = values(steady, "fps")

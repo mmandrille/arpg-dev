@@ -37,6 +37,8 @@ func _init(root: Node3D, base_tint: Color = Color.WHITE) -> void:
 
 
 func set_base_tint(color: Color) -> void:
+	if color.is_equal_approx(_base_tint) and _current_tint.is_equal_approx(_base_tint) and not _highlighted:
+		return
 	_base_tint = color
 	for key in _base_mesh_colors.keys():
 		var rec: Dictionary = _base_mesh_colors[key]
@@ -155,6 +157,7 @@ func _capture_meshes(node: Node) -> void:
 		_base_mesh_colors[mesh_node.get_instance_id()] = {
 			"node": mesh_node,
 			"color": mat.albedo_color,
+			"material_private": false,
 		}
 	for child in node.get_children():
 		_capture_meshes(child)
@@ -166,10 +169,22 @@ func _material_for(mesh_node: MeshInstance3D) -> StandardMaterial3D:
 		source = mesh_node.mesh.surface_get_material(0)
 	var mat: StandardMaterial3D
 	if source is StandardMaterial3D:
-		mat = (source as StandardMaterial3D).duplicate() as StandardMaterial3D
+		mat = source as StandardMaterial3D
 	else:
 		mat = StandardMaterial3D.new()
 		mat.albedo_color = _base_tint
+	return mat
+
+
+func _private_material(mesh_node: MeshInstance3D, rec: Dictionary) -> StandardMaterial3D:
+	var mat := mesh_node.material_override as StandardMaterial3D
+	if mat == null:
+		return null
+	if not bool(rec.get("material_private", false)):
+		mat = mat.duplicate() as StandardMaterial3D
+		mesh_node.material_override = mat
+		rec["material_private"] = true
+		_base_mesh_colors[mesh_node.get_instance_id()] = rec
 	return mat
 
 
@@ -202,7 +217,7 @@ func _apply_color_scale(scale: float) -> void:
 		var mesh_node := raw_node as MeshInstance3D
 		if mesh_node == null:
 			continue
-		var mat := mesh_node.material_override as StandardMaterial3D
+		var mat := _private_material(mesh_node, rec)
 		if mat == null:
 			continue
 		var base: Color = rec.get("color", _base_tint)
@@ -220,7 +235,7 @@ func _sync_highlight_emission() -> void:
 		var mesh_node := raw_node as MeshInstance3D
 		if mesh_node == null:
 			continue
-		var mat := mesh_node.material_override as StandardMaterial3D
+		var mat := _private_material(mesh_node, rec)
 		if mat == null:
 			continue
 		if _highlighted and not _terminal:
@@ -240,7 +255,7 @@ func _apply_impact_flash() -> void:
 		if raw_node == null or not is_instance_valid(raw_node):
 			continue
 		var mesh_node := raw_node as MeshInstance3D
-		var mat := mesh_node.material_override as StandardMaterial3D
+		var mat := _private_material(mesh_node, rec)
 		if mesh_node == null or mat == null:
 			continue
 		var base: Color = rec.get("color", _base_tint)

@@ -236,6 +236,20 @@ run_godot_with_timeout() {
   wait "$pid"
 }
 
+retain_performance_log() {
+  local scenario_id="$1"
+  local log_file="$2"
+  if [[ -z "${BOT_CLIENT_LOG_DIR:-}" ]]; then
+    return
+  fi
+  mkdir -p "$BOT_CLIENT_LOG_DIR"
+  local safe_id
+  safe_id="$(printf '%s' "$scenario_id" | tr -c 'A-Za-z0-9_-' '_')"
+  local target="$BOT_CLIENT_LOG_DIR/${safe_id}-client.log"
+  grep -E '^\[client-perf\]|^\[client-frame-batch\]|^\[client-spawn-frame\]|^\[client-startup\]|^\[dungeon-dressing\]|^\[bot-client\] (PASS|FAIL) |^SCRIPT ERROR|^Godot Engine|Using Device' "$log_file" > "$target" || true
+  echo "[bot-client] retained performance counters: $target"
+}
+
 cleanup_account_email() {
   local email="$1"
   if [[ -z "$email" ]]; then
@@ -332,13 +346,15 @@ validate_godot_project_load
 
 run_scenario() {
   local scenario_path="$1"
-  local scenario_id world_id seed character_class debug_progression_json debug_gold exit_code started_ts tmpfile preflight_metadata preflight_log expected_join_session
+  local scenario_id world_id seed character_class debug_progression_json debug_gold render_quality render_size exit_code started_ts tmpfile preflight_metadata preflight_log expected_join_session
   scenario_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('id','unknown'))")"
   world_id="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('world_id',''))")"
   seed="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('seed',''))")"
   character_class="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('character_class','barbarian'))")"
   debug_progression_json="$(python3 -c "import json; d=json.load(open('$scenario_path')); p=d.get('debug_progression', {}); print(json.dumps(p, separators=(',', ':')) if p else '')")"
   debug_gold="$(python3 -c "import json; d=json.load(open('$scenario_path')); print(d.get('debug_progression', {}).get('gold', ''))")"
+  render_quality="${BOT_CLIENT_RENDER_QUALITY:-$(json_field "$scenario_path" "d.get('render_fixture', {}).get('quality', '')")}"
+  render_size="${BOT_CLIENT_RENDER_SIZE:-$(json_field "$scenario_path" "d.get('render_fixture', {}).get('window_size', '')")}"
   started_ts="$(python3 -c 'import time; print(time.monotonic())')"
   tmpfile="$(mktemp)"
   preflight_metadata="$(mktemp)"
@@ -384,12 +400,15 @@ run_scenario() {
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
       ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
       ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
+      ARPG_PERF_DEBUG="${ARPG_PERF_DEBUG:-false}" \
       ARPG_BOT_DEBUG_PROGRESSION="$debug_progression_json" \
       ARPG_BOT_DEBUG_GOLD="$debug_gold" \
       ARPG_BOT_CHARACTER_CLASS="$character_class" \
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
+      ARPG_BOT_RENDER_QUALITY="$render_quality" \
+      ARPG_BOT_RENDER_SIZE="$render_size" \
       "$GODOT" $godot_flags --path "$CLIENT_DIR"
     exit_code=$?
   else
@@ -404,18 +423,26 @@ run_scenario() {
       ARPG_DEV_TOKEN="$DEV_TOKEN" \
       ARPG_DEBUG_TOKEN="$DEBUG_TOKEN" \
       ARPG_GAMEPLAY_DEBUG="$GAMEPLAY_DEBUG" \
+      ARPG_PERF_DEBUG="${ARPG_PERF_DEBUG:-false}" \
       ARPG_BOT_DEBUG_PROGRESSION="$debug_progression_json" \
       ARPG_BOT_DEBUG_GOLD="$debug_gold" \
       ARPG_BOT_CHARACTER_CLASS="$character_class" \
       ARPG_EMAIL="$email" \
       ARPG_EXPECTED_JOIN_SESSION_ID="$expected_join_session" \
       ARPG_BOT_STEP_DELAY="$BOT_STEP_DELAY" \
+      ARPG_BOT_RENDER_QUALITY="$render_quality" \
+      ARPG_BOT_RENDER_SIZE="$render_size" \
       "$GODOT" $godot_flags --path "$CLIENT_DIR"
     exit_code=$?
     echo "[bot-client $(_ts)] Godot process exited code=$exit_code launch_elapsed=$((SECONDS - launch_started))s"
   fi
 
+  if [[ "${ARPG_ATTACK_TRACE:-0}" == "1" ]]; then
+    grep '^\[attack-trace\] ' "$tmpfile" || true
+  fi
+
   if [[ $exit_code -eq 124 ]]; then
+    retain_performance_log "$scenario_id" "$tmpfile"
     echo "[bot-client] FAIL $scenario_id -- timed out after ${scenario_timeout}s" >&2
     if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
       show_log "$tmpfile" "$scenario_id"
@@ -426,6 +453,7 @@ run_scenario() {
   fi
 
   if [[ $exit_code -ne 0 ]]; then
+    retain_performance_log "$scenario_id" "$tmpfile"
     echo "[bot-client] FAIL $scenario_id -- exited with code $exit_code" >&2
     if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
       show_log "$tmpfile" "$scenario_id"
@@ -436,6 +464,7 @@ run_scenario() {
   fi
 
   if ! grep -qF "[bot-client] PASS $scenario_id" "$tmpfile"; then
+    retain_performance_log "$scenario_id" "$tmpfile"
     echo "[bot-client] FAIL $scenario_id -- PASS sentinel not found in output" >&2
     if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then
       show_log "$tmpfile" "$scenario_id"
@@ -443,6 +472,23 @@ run_scenario() {
     rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
     cleanup_preflights
     return 1
+  fi
+
+  if [[ "${ARPG_PERF_DEBUG:-false}" == "1" ]]; then
+    grep -E '^\[dungeon-dressing\]|^\[client-perf\]' "$tmpfile" || true
+  fi
+
+  local targeting_trace_missing=0
+  if [[ "$scenario_id" == "live_targeting_corrections" ]]; then
+    mkdir -p "$ROOT/.artifacts/v499"
+    local trace_file
+    trace_file="$(mktemp "$ROOT/.artifacts/v499/targeting-trace.XXXXXX")"
+    grep -F '[targeting-trace]' "$tmpfile" | sed 's/^.*\[targeting-trace\] //' > "$trace_file" || true
+    if ! grep -qF '"event":"summary"' "$trace_file"; then
+      targeting_trace_missing=1
+    else
+      echo "[bot-client] targeting trace: $trace_file"
+    fi
   fi
 
   cleanup_preflights
@@ -455,7 +501,12 @@ run_scenario() {
     fi
   fi
   cleanup_account_email "$email"
+  retain_performance_log "$scenario_id" "$tmpfile"
   rm -f "$tmpfile" "$preflight_metadata" "$preflight_log"
+  if [[ "$targeting_trace_missing" -eq 1 ]]; then
+    echo "[bot-client] FAIL $scenario_id -- targeting trace summary missing" >&2
+    return 1
+  fi
   local elapsed
   elapsed="$(python3 -c 'import sys,time; print(f"{time.monotonic() - float(sys.argv[1]):.2f}s")' "$started_ts")"
   if is_quiet_mode && [[ "$HEADLESS" == "1" ]]; then

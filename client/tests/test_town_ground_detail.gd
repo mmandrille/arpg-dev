@@ -357,6 +357,7 @@ func _test_scatter_is_deterministic_and_data_driven(dressing: Dictionary, frame:
 	var a := TownGroundDetail.scatter(dressing, frame)
 	var b := TownGroundDetail.scatter(dressing, frame)
 	_assert_true("scatter is deterministic", a == b)
+	_assert_true("shared layer plan keeps placements", a == TownGroundDetail.scatter(dressing, frame, TownGroundDetail.layers(dressing, frame)))
 	var denser := dressing.duplicate(true)
 	var denser_scatter: Dictionary = denser["scatter"]
 	denser_scatter["occupancy_percent"] = 100

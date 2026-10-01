@@ -5,7 +5,6 @@
   "movement_smoothing": {
     "catch_up_speed": 14.0,
     "max_offset": 0.8,
-    "reset_distance": 1.5,
     "settle_epsilon": 0.01
   },
   "melee_lunge": {

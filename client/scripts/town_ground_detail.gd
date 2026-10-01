@@ -172,7 +172,7 @@ static func _weighted(variants: Array, roll: int) -> int:
 ## Scatter plan: a jittered grid of scatter.cell_m cells inside scatter.radius_m. Each cell rolls
 ## occupancy, kind (patch/rock), variant, scale and yaw from hash(); a placement is dropped when its
 ## footprint would touch the fence ring, an anchor or v491 prop, or a paved/edge tile.
-static func scatter(dressing: Dictionary, frame_data: Dictionary) -> Array:
+static func scatter(dressing: Dictionary, frame_data: Dictionary, planned_layers: Dictionary = {}) -> Array:
 	var cfg: Dictionary = dressing.get("scatter", {})
 	var out: Array = []
 	var tile := float(frame_data["tile"])
@@ -195,7 +195,7 @@ static func scatter(dressing: Dictionary, frame_data: Dictionary) -> Array:
 	for prop in dressing.get("props", []):
 		var pp: Dictionary = (prop as Dictionary).get("position", {})
 		avoid.append(Vector2(float(pp.get("x", 0.0)), float(pp.get("y", 0.0))))
-	var lay := layers(dressing, frame_data)
+	var lay := planned_layers if not planned_layers.is_empty() else layers(dressing, frame_data)
 	var occupied := {}
 	for name in [LAYER_CORE, LAYER_RIM, LAYER_EDGE]:
 		for c in lay[name]:
@@ -283,7 +283,7 @@ static func build(dressing: Dictionary) -> Node3D:
 	_add(root, _tile_layer(PLAZA_NAME, lay[LAYER_CORE], plaza.get("tile_variants", []), base_box, scale, plaza_y, SALT_CORE))
 	_add(root, _tile_layer(RIM_NAME, lay[LAYER_RIM], rim_cfg.get("tile_variants", []), base_box, scale, plaza_y, SALT_RIM))
 	_add(root, _tile_layer(EDGE_NAME, lay[LAYER_EDGE], edge_cfg.get("tile_variants", []), base_box, scale, float(edge_cfg.get("surface_y", plaza_y)), SALT_EDGE))
-	_add(root, _scatter_layer(dressing, frame_data, base_box))
+	_add(root, _scatter_layer(dressing, frame_data, base_box, lay))
 	return root
 
 
@@ -335,8 +335,8 @@ static func _tile_layer(layer_name: String, cells: Array, variants: Array, base_
 
 
 ## Patches are seated like tiles (quarter turns, top on the plain tile's slab); rocks rest on the surface.
-static func _scatter_layer(dressing: Dictionary, frame_data: Dictionary, base_box: AABB) -> Node3D:
-	var placements := scatter(dressing, frame_data)
+static func _scatter_layer(dressing: Dictionary, frame_data: Dictionary, base_box: AABB, planned_layers: Dictionary) -> Node3D:
+	var placements := scatter(dressing, frame_data, planned_layers)
 	if placements.is_empty():
 		return null
 	var surface_y := float((dressing.get("scatter", {}) as Dictionary).get("surface_y", 0.0))

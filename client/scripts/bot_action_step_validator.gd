@@ -21,6 +21,8 @@ const STEP_TYPES_ACTION := [
 	"set_market_search", "select_market_sort", "click_waypoint_level",
 	"set_camera_mode", "select_camera_mode",
 	"enable_ws_reconnect_proof", "simulate_ws_drop",
+	"set_graphics_quality",
+	"approach_nearest_torch",
 ]
 
 
@@ -29,6 +31,17 @@ static func validate(step: Dictionary, stype: String, index: int) -> String:
 		return UNHANDLED
 	if stype == "press_key":
 		return _require_string(step, index, stype, "keycode")
+	if stype == "set_graphics_quality":
+		if str(step.get("quality", "")) not in ["balanced", "performance"]:
+			return "client_steps[%d] (set_graphics_quality) requires balanced or performance" % index
+		return ""
+	if stype == "approach_nearest_torch":
+		var stand_off := float(step.get("stand_off", 0.0))
+		if stand_off <= 0.0 or stand_off > 6.0:
+			return "client_steps[%d] (approach_nearest_torch) requires stand_off in (0, 6]" % index
+		if step.has("torch_index") and (typeof(step["torch_index"]) != TYPE_INT or int(step["torch_index"]) < 0 or int(step["torch_index"]) > 31):
+			return "client_steps[%d] (approach_nearest_torch) requires torch_index in [0, 31]" % index
+		return ""
 	if stype == "click_entity" or stype == "click_entity_buffered":
 		return _require_string(step, index, stype, "entity_type")
 	if stype == "click_loot_item":

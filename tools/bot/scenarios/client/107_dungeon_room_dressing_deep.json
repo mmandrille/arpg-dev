@@ -1,0 +1,24 @@
+{
+  "id": "dungeon_room_dressing_deep",
+  "runner": "godot_client",
+  "world_id": "dungeon_dressing_deep_lab",
+  "seed": "v494_dungeon_room_dressing_deep",
+  "title": "Deep dungeon dressing",
+  "description": "Checks a generated depth-four room-corridor floor in the dense presentation band.",
+  "ci_tier": "extended",
+  "debug_progression": {
+    "level": 1,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 5, "dex": 5, "vit": 80, "magic": 5 },
+    "skill_ranks": {}
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_wall_layout", "current_level": -4, "at_least": 8, "non_perimeter_at_least": 1, "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 15.0 },
+    { "type": "wait_ticks", "ticks": 20, "timeout_s": 8.0 },
+    { "type": "assert_wall_layout", "current_level": -4, "at_least": 8, "non_perimeter_at_least": 1 }
+  ]
+}

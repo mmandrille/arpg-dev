@@ -1,0 +1,25 @@
+{
+  "id": "live_targeting_corrections",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "combat_control_lab",
+  "seed": "live_targeting_499",
+  "title": "Live targeting: movement, chase, attack and floor retarget",
+  "description": "A live local hero moves, chases a moving monster, attacks, then changes to a floor destination while transport and rendered frames are traced.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_entity", "entity_type": "monster", "monster_def_id": "dungeon_mob", "timeout_s": 10.0 },
+    { "type": "click_floor", "x": 4.0, "z": 5.0 },
+    { "type": "wait_player_near", "x": 4.0, "z": 5.0, "distance": 1.5, "timeout_s": 10.0 },
+    { "type": "click_entity_buffered", "entity_type": "monster", "monster_def_id": "dungeon_mob" },
+    { "type": "wait_entity_near_player", "entity_type": "monster", "monster_def_id": "dungeon_mob", "distance": 2.5, "timeout_s": 15.0 },
+    { "type": "wait_event", "event_types": ["monster_damaged", "attack_missed"], "target_entity_type": "monster", "target_monster_def_id": "dungeon_mob", "allow_prior_pending": true, "timeout_s": 8.0 },
+    { "type": "click_floor", "x": 2.0, "z": 8.0 },
+    { "type": "wait_command_retarget_grace", "active": false, "kind": "floor", "last_dispatched": true, "dispatched_min": 1, "ground_x": 2.0, "ground_z": 8.0, "distance_max": 0.05, "timeout_s": 3.0 },
+    { "type": "wait_player_near", "x": 2.0, "z": 8.0, "distance": 2.5, "timeout_s": 12.0 },
+    { "type": "click_floor", "x": 4.0, "z": 6.0 },
+    { "type": "click_floor", "x": 3.0, "z": 7.0 },
+    { "type": "wait_command_retarget_grace", "active": false, "kind": "floor", "last_dispatched": true, "dispatched_min": 2, "ground_x": 3.0, "ground_z": 7.0, "distance_max": 0.05, "timeout_s": 3.0 },
+    { "type": "wait_player_near", "x": 3.0, "z": 7.0, "distance": 2.5, "timeout_s": 10.0 }
+  ]
+}

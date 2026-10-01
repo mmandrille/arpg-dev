@@ -2,11 +2,12 @@ class_name BotStepCatalog
 extends RefCounted
 
 const BotActionStepValidatorScript := preload("res://scripts/bot_action_step_validator.gd")
+const BotFrameCaptureScript := preload("res://scripts/bot_frame_capture.gd")
 
 
 const STEP_TYPES_WAIT := [
 	"wait_ws_open", "wait_entity", "wait_event", "wait_inventory_item",
-	"wait_inventory_count", "wait_loot_item", "wait_loot_count", "wait_hotbar_assigned",
+	"wait_inventory_count", "wait_equipped", "wait_loot_item", "wait_loot_count", "wait_hotbar_assigned",
 	"wait_hotbar_capacity",
 	"wait_player_near", "wait_entity_near_player", "assert_entity_removed",
 	"click_entity_until_event", "wait_main_menu", "wait_character_panel",
@@ -18,6 +19,8 @@ const STEP_TYPES_WAIT := [
 	"wait_connection_recovery", "wait_connection_resync",
 	"wait_market_board_badges", "wait_boss_health_bar", "wait_remote_player_count",
 	"wait_ticks", "wait_quest_journal", "wait_elite_objective_tracker", "wait_elite_objective_minimap", "wait_quest_steward_panel", "wait_steward_hunt_banner",
+	"capture_frame",
+	"wait_selected_torch_in_view",
 ]
 const STEP_TYPES_ASSERT := [
 	"assert_panel_visible", "assert_waypoint_panel_visible", "assert_equipped",
@@ -41,7 +44,7 @@ const STEP_TYPES_ASSERT := [
 	"assert_inventory_capacity", "assert_bag_grid", "assert_paper_doll_layout",
 	"assert_inventory_panel_details",
 	"assert_floating_combat_text_enabled", "assert_damage_number", "assert_no_damage_number",
-	"assert_entity_reaction", "assert_movement_visual_smoothing", "assert_entity_tick_smoothing", "assert_projectile_tick_smoothing", "assert_mobility_skill_smoothing", "assert_dungeon_torch_lights", "assert_command_retarget_grace", "assert_melee_lunge",
+	"assert_entity_reaction", "assert_combat_contact", "assert_attack_buffer", "assert_movement_visual_smoothing", "assert_entity_tick_smoothing", "assert_projectile_tick_smoothing", "assert_mobility_skill_smoothing", "assert_dungeon_torch_lights", "assert_command_retarget_grace", "assert_melee_lunge",
 	"assert_wall_layout", "assert_shop_panel_visible", "assert_shop_offer_count",
 	"assert_shop_buy_button", "assert_shop_reroll_button", "assert_shop_sell_rows", "assert_shop_offer_details",
 	"assert_shop_sell_details", "assert_stash_panel_visible", "assert_stash_item_count",
@@ -70,6 +73,8 @@ const STEP_TYPES_ACTION := [
 	"inject_training_damage_log_event", "click_training_damage_log_close",
 	"set_camera_mode", "select_camera_mode",
 	"enable_ws_reconnect_proof", "simulate_ws_drop",
+	"set_graphics_quality",
+	"approach_nearest_torch",
 ]
 const WAIT_LOG_INTERVAL_S := 2.0
 
@@ -106,6 +111,14 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	var action_err := BotActionStepValidatorScript.validate(step, stype, index)
 	if action_err != BotActionStepValidatorScript.UNHANDLED:
 		return action_err
+	if stype == "capture_frame" and not BotFrameCaptureScript.valid_name(str(step.get("name", ""))):
+		return "client_steps[%d] (capture_frame) requires a safe name" % index
+	if stype == "capture_frame" and step.has("skip_if_headless") and typeof(step["skip_if_headless"]) != TYPE_BOOL:
+		return "client_steps[%d] (capture_frame) requires boolean skip_if_headless" % index
+	if stype == "wait_selected_torch_in_view":
+		var max_distance := float(step.get("max_distance", 0.0))
+		if max_distance <= 0.0 or max_distance > 8.0:
+			return "client_steps[%d] (wait_selected_torch_in_view) requires max_distance in (0, 8]" % index
 	if stype in STEP_TYPES_WAIT and stype != "wait_loot_item":
 		var timeout = step.get("timeout_s", null)
 		if timeout == null or float(timeout) <= 0.0:
@@ -116,14 +129,27 @@ static func validate_step(step: Dictionary, index: int) -> String:
 	if stype == "wait_event":
 		if str(step.get("event_type", "")) == "" and (not step.has("event_types") or typeof(step.get("event_types")) != TYPE_ARRAY or (step.get("event_types") as Array).is_empty()):
 			return "client_steps[%d] (%s) requires event_type or event_types" % [index, stype]
+		if step.has("allow_prior_pending") and typeof(step["allow_prior_pending"]) != TYPE_BOOL:
+			return "client_steps[%d] (%s) requires boolean allow_prior_pending" % [index, stype]
 	if stype == "click_entity_until_event":
 		if str(step.get("entity_type", "")) == "" or str(step.get("event_type", "")) == "":
 			return "client_steps[%d] (%s) requires entity_type and event_type" % [index, stype]
+	if stype == "assert_combat_contact" and not step.has("impact_feedback_delta_max") and not step.has("impact_feedback_delta_min"):
+		return "client_steps[%d] (%s) requires an impact feedback delta bound" % [index, stype]
+	if stype == "assert_attack_buffer" and not step.has("active") and not step.has("queued_count_min") and not step.has("queued_count_max") and not step.has("cleared_count_min"):
+		return "client_steps[%d] (%s) requires an input buffer expectation" % [index, stype]
 	if stype == "wait_player_near":
 		if not step.has("x") or not step.has("z"):
 			return "client_steps[%d] (%s) requires x and z" % [index, stype]
 	if stype == "wait_entity_near_player" and (not step.has("distance") or float(step.get("distance", 0.0)) <= 0.0):
 		return "client_steps[%d] (%s) requires positive distance" % [index, stype]
+	if stype == "wait_entity_near_player" and step.has("remembered_event_entity") and typeof(step["remembered_event_entity"]) != TYPE_BOOL:
+		return "client_steps[%d] (wait_entity_near_player) requires boolean remembered_event_entity" % index
+	for flag in ["require_alive", "in_view"]:
+		if stype == "wait_entity_near_player" and step.has(flag) and typeof(step[flag]) != TYPE_BOOL:
+			return "client_steps[%d] (wait_entity_near_player) requires boolean %s" % [index, flag]
+	if stype == "click_entity_until_event" and step.has("remember_event_entity_id") and typeof(step["remember_event_entity_id"]) != TYPE_BOOL:
+		return "client_steps[%d] (click_entity_until_event) requires boolean remember_event_entity_id" % index
 	if stype in ["wait_inventory_count", "assert_inventory_count"]:
 		if not step.has("equals"):
 			return "client_steps[%d] (%s) requires equals" % [index, stype]

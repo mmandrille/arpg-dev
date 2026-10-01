@@ -257,7 +257,7 @@
       ]
     },
     "edge": {
-      "enabled": true,
+      "enabled": false,
       "width_m": 2.0,
       "surface_y": 0.012,
       "tile_variants": [
@@ -280,6 +280,60 @@
         {
           "asset_id": "kaykit_dungeon_floor_dirt_small_weeds_v0",
           "weight": 3
+        }
+      ]
+    },
+    "terrain": {
+      "enabled": true,
+      "ground_size_m": {"x": 160.0, "y": 110.0},
+      "soil_color": "#706d4c",
+      "blend_width_m": 4.0,
+      "footprint_margin_m": 1.0,
+      "noise_scale_per_m": 0.45,
+      "noise_amplitude_m": 0.45
+    },
+    "nature": {
+      "enabled": true,
+      "fence_clearance_m": 2.0,
+      "anchor_clearance_m": 3.0,
+      "gate_approach": {
+        "end_position": {"x": 11.0, "y": 39.0},
+        "half_width_m": 4.0
+      },
+      "groups": [
+        {
+          "id": "north_canopy",
+          "center": {"x": 10.0, "y": -9.0},
+          "radius_m": 9.0,
+          "seed_salt": 5001,
+          "cell_m": 2.4,
+          "occupancy_percent": 45,
+          "landmarks": [
+            {"asset_id": "kaykit_forest_tree_canopy_v0", "position": {"x": 4.0, "y": -9.0}, "scale": 1.0, "yaw_degrees": 25.0, "footprint_radius_m": 1.7},
+            {"asset_id": "kaykit_forest_tree_canopy_v0", "position": {"x": 11.0, "y": -10.0}, "scale": 0.9, "yaw_degrees": 130.0, "footprint_radius_m": 1.5},
+            {"asset_id": "kaykit_forest_tree_pine_v0", "position": {"x": 17.0, "y": -8.0}, "scale": 0.95, "yaw_degrees": 310.0, "footprint_radius_m": 1.4}
+          ],
+          "variants": [
+            {"asset_id": "kaykit_forest_bush_v0", "weight": 3, "scale_min": 0.8, "scale_max": 1.2, "footprint_radius_m": 0.55},
+            {"asset_id": "kaykit_forest_grass_v0", "weight": 5, "scale_min": 0.8, "scale_max": 1.4, "footprint_radius_m": 0.25}
+          ]
+        },
+        {
+          "id": "west_pines",
+          "center": {"x": -11.0, "y": 12.0},
+          "radius_m": 9.0,
+          "seed_salt": 5002,
+          "cell_m": 2.5,
+          "occupancy_percent": 42,
+          "landmarks": [
+            {"asset_id": "kaykit_forest_tree_pine_v0", "position": {"x": -11.0, "y": 5.0}, "scale": 1.0, "yaw_degrees": 65.0, "footprint_radius_m": 1.5},
+            {"asset_id": "kaykit_forest_tree_pine_v0", "position": {"x": -12.0, "y": 15.0}, "scale": 0.95, "yaw_degrees": 195.0, "footprint_radius_m": 1.4},
+            {"asset_id": "kaykit_forest_tree_canopy_v0", "position": {"x": -9.0, "y": 19.0}, "scale": 0.8, "yaw_degrees": 280.0, "footprint_radius_m": 1.3}
+          ],
+          "variants": [
+            {"asset_id": "kaykit_forest_bush_v0", "weight": 4, "scale_min": 0.7, "scale_max": 1.1, "footprint_radius_m": 0.55},
+            {"asset_id": "kaykit_forest_grass_v0", "weight": 6, "scale_min": 0.8, "scale_max": 1.4, "footprint_radius_m": 0.25}
+          ]
         }
       ]
     },

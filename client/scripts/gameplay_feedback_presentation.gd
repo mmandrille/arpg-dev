@@ -9,6 +9,7 @@ const ConsumableUseEffectScript := preload("res://scripts/consumable_use_effect.
 const LevelUpBurstScript := preload("res://scripts/level_up_burst.gd")
 const ClientAudioBridgeScript := preload("res://scripts/client_audio_bridge.gd")
 const ModelReactionControllerScript := preload("res://scripts/model_reaction_controller.gd")
+const AttackContactTraceScript := preload("res://scripts/attack_contact_trace.gd")
 
 
 static func bind_session(main: Node, entities: Dictionary) -> void:
@@ -25,6 +26,46 @@ static func entity_combat_impacts_allowed(entities: Dictionary, entity_id: Strin
 	if not entities.has(entity_id):
 		return true
 	return str((entities[entity_id] as Dictionary).get("type", "")) != "monster"
+
+
+static func has_hit_contact(ev: Dictionary) -> bool:
+	# Blocked attacks still arrive as monster_damaged so combat text can show BLOCK.
+	return not bool(ev.get("blocked", false)) and str(ev.get("outcome", "")) not in ["block", "miss", "immune"]
+
+
+static func handle_monster_damage(
+	entities: Dictionary,
+	player_id: String,
+	player_anchor: Node3D,
+	player_reaction,
+	entity_id: String,
+	ev: Dictionary,
+	audio_controller: Node,
+	world_pos_fn: Callable,
+	bot_mode: bool,
+) -> Dictionary:
+	var impact_before := _entity_impact_feedback_count(entities, entity_id) if bot_mode else 0
+	if has_hit_contact(ev):
+		ClientAudioBridgeScript.damage(audio_controller, false)
+		play_entity_reaction(entities, player_id, player_anchor, player_reaction, entity_id, ev, "hit", world_pos_fn)
+	if not bot_mode:
+		return {}
+	return {
+		"outcome": str(ev.get("outcome", "")),
+		"blocked": bool(ev.get("blocked", false)),
+		"target_entity_id": entity_id,
+		"target_monster_def_id": str((entities.get(entity_id, {}) as Dictionary).get("monster_def_id", "")),
+		"impact_feedback_delta": _entity_impact_feedback_count(entities, entity_id) - impact_before,
+	}
+
+
+static func _entity_impact_feedback_count(entities: Dictionary, entity_id: String) -> int:
+	if not entities.has(entity_id):
+		return 0
+	var reaction = (entities[entity_id] as Dictionary).get("reaction", null)
+	if reaction == null or not reaction.has_method("get_debug_state"):
+		return 0
+	return int((reaction.get_debug_state() as Dictionary).get("impact_feedback_count", 0))
 
 
 static func handle_player_healed(main: Node, ev: Dictionary, entity_id: String, audio_controller: Node) -> void:
@@ -98,6 +139,8 @@ static func play_entity_reaction(
 	reaction_name: String,
 	world_pos_fn: Callable,
 ) -> void:
+	if reaction_name == "hit" and not has_hit_contact(ev):
+		return
 	if not entity_combat_impacts_allowed(entities, entity_id):
 		return
 	var reaction = reaction_for_entity(entities, player_id, player_reaction, entity_id)
@@ -110,6 +153,7 @@ static func play_entity_reaction(
 	else:
 		reaction.play_hit(source_pos, fallback)
 	_spawn_reaction_vfx(entities, player_id, player_anchor, entity_id, ev, reaction_name, source_pos, world_pos_fn)
+	AttackContactTraceScript.record("feedback_reaction", {"target_id": entity_id, "reaction": reaction_name, "outcome": str(ev.get("outcome", ""))})
 
 
 ## v492: hit sparks / death burst at the entity, added to its parent so they outlive the node.

@@ -83,6 +83,32 @@ def test_ground_asset_ids_exist_in_the_manifest() -> None:
         assert MANIFEST[asset_id]["type"] == "environment"
 
 
+def test_nature_asset_ids_exist_in_the_manifest() -> None:
+    nature = DRESSING["nature"]
+    for group in nature["groups"]:
+        for item in [*group["landmarks"], *group["variants"]]:
+            asset_id = item["asset_id"]
+            assert asset_id in MANIFEST, f"{asset_id} missing from the asset manifest"
+            assert MANIFEST[asset_id]["type"] == "environment"
+
+
+def test_nature_landmarks_stay_outside_fence_and_gate() -> None:
+    nature = DRESSING["nature"]
+    center = _xy(TOWN["center"])
+    gate = _xy(TOWN["gate_position"])
+    end = _xy(nature["gate_approach"]["end_position"])
+    for group in nature["groups"]:
+        for landmark in group["landmarks"]:
+            point = _xy(landmark["position"])
+            radius = float(landmark["footprint_radius_m"])
+            assert math.dist(point, center) >= float(TOWN["radius_m"]) + float(nature["fence_clearance_m"]) + radius
+            segment = (end[0] - gate[0], end[1] - gate[1])
+            length2 = segment[0] ** 2 + segment[1] ** 2
+            t = max(0.0, min(1.0, ((point[0] - gate[0]) * segment[0] + (point[1] - gate[1]) * segment[1]) / length2))
+            nearest = (gate[0] + t * segment[0], gate[1] + t * segment[1])
+            assert math.dist(point, nearest) > float(nature["gate_approach"]["half_width_m"]) + radius
+
+
 def test_scatter_fence_clearance_is_positive() -> None:
     # The planner excludes the ring [fence - clearance, fence + clearance] (unit-tested in GDScript),
     # so the only thing to pin in data is that the clearance exists and the scatter radius is sane.

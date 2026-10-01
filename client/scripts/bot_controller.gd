@@ -20,11 +20,17 @@ const BotMarketActionsScript := preload("res://scripts/bot_market_actions.gd")
 const BotScenarioRunnerScript := preload("res://scripts/bot_scenario_runner.gd")
 const BotReconnectProofActionsScript := preload("res://scripts/bot_reconnect_proof_actions.gd")
 const BotTrainingDamageLogActionsScript := preload("res://scripts/bot_training_damage_log_actions.gd")
+const AttackContactTraceScript := preload("res://scripts/attack_contact_trace.gd")
+const LiveTargetingTraceScript := preload("res://scripts/live_targeting_trace.gd")
+const BotTransportDelayScript := preload("res://scripts/bot_transport_delay.gd")
+const BotActionFormatterScript := preload("res://scripts/bot_action_formatter.gd")
 
 var _runner: BotScenarioRunner
 var _scenario_id: String = ""
 var _main = null  # main.gd node (parent)
 var _shutdown_pending: bool = false
+var _targeting_trace = null
+var _trace_finishing: bool = false
 
 
 func _ready() -> void:
@@ -50,6 +56,16 @@ func _ready() -> void:
 		return
 
 	_scenario_id = str((data as Dictionary).get("id", "unknown"))
+	AttackContactTraceScript.begin(_scenario_id, get_viewport())
+	var settings = _main.get("client_settings") if _main != null else null
+	AttackContactTraceScript.record("fixture", {"world": str(data.get("world_id", "")), "seed": str(data.get("seed", "")), "quality": str(settings.graphics_quality) if settings != null else "unknown", "renderer": RenderingServer.get_current_rendering_method()})
+	if _scenario_id == "live_targeting_corrections":
+		var profile := OS.get_environment("ARPG_BOT_TRANSPORT_PROFILE")
+		if profile != "" and profile not in [BotTransportDelayScript.PROFILE_LOCAL, BotTransportDelayScript.PROFILE_BOUNDED]:
+			_fail_startup("unsupported transport profile")
+			return
+		_targeting_trace = LiveTargetingTraceScript.new()
+		_main.client.targeting_trace = _targeting_trace
 	_runner = BotScenarioRunnerScript.new()
 	var delay_str := OS.get_environment("ARPG_BOT_STEP_DELAY")
 	if delay_str != "":
@@ -65,12 +81,19 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _runner == null:
 		return
+	if _targeting_trace != null:
+		_targeting_trace.sample(_main, delta)
+	if _trace_finishing:
+		return
 
 	var state := _get_state()
+	AttackContactTraceScript.sample(state)
 	var done := _runner.tick(delta, state)
 
 	var action: Dictionary = _runner.pending_action
 	if not action.is_empty():
+		if _targeting_trace != null and str(action.get("type", "")) in ["click_floor", "click_entity", "click_entity_buffered"]:
+			_targeting_trace.on_action("floor" if str(action.get("type", "")) == "click_floor" else "target", _main)
 		if str(action.get("type", "")) != "dispatch_intent":
 			print("[bot-client] action %s scenario=%s" % [
 				_format_action(action), _scenario_id
@@ -78,6 +101,10 @@ func _process(delta: float) -> void:
 		_execute_action(action, state)
 
 	if done:
+		if _targeting_trace != null:
+			_trace_finishing = true
+			await get_tree().create_timer(0.6).timeout
+			_targeting_trace.finish()
 		var exit_code := 0 if _runner.passed() else 1
 		if exit_code == 0:
 			print("[bot-client] PASS %s" % _scenario_id)
@@ -517,6 +544,7 @@ func _do_click_entity(action: Dictionary, state: Dictionary, buffered: bool = fa
 		printerr("[bot-client] click_entity: index %d out of range for %s" % [entity_index, entity_type])
 		return
 	var target_id := str(ids[entity_index])
+	AttackContactTraceScript.record("input_attack", {"target_id": target_id, "monster_def_id": str(action.get("monster_def_id", "")), "buffered": buffered})
 	if buffered and _main.has_method("bot_click_entity_buffered_id"):
 		_main.bot_click_entity_buffered_id(target_id)
 	elif _main.has_method("bot_click_entity_id"):
@@ -585,6 +613,7 @@ func _do_click_loot_item(item_def_id: String, state: Dictionary, occurrence: int
 func _do_click_floor(world_x: float, world_z: float) -> void:
 	if _main == null:
 		return
+	AttackContactTraceScript.record("input_floor", {"x": world_x, "z": world_z})
 	if _main.has_method("bot_dispatch_action"):
 		_main.bot_dispatch_action("move_to_intent", {"position": {"x": world_x, "y": world_z}})
 
@@ -724,113 +753,7 @@ func _parse_keycode(name: String) -> Key:
 
 
 func _format_action(action: Dictionary) -> String:
-	var stype := str(action.get("_type", action.get("type", "")))
-	match stype:
-		"click_entity":
-			return "click_entity type=%s index=%s" % [
-				str(action.get("entity_type", "")), str(action.get("entity_index", 0))
-			]
-		"click_loot_item":
-			return "click_loot_item item=%s rolled=%s occurrence=%s" % [
-				str(action.get("item_def_id", "")),
-				str(action.get("rolled", "")),
-				str(action.get("occurrence", 0))
-			]
-		"click_floor":
-			return "click_floor x=%s z=%s" % [str(action.get("x", "")), str(action.get("z", ""))]
-		"press_key":
-			return "press_key %s" % str(action.get("keycode", ""))
-		"click_menu_button":
-			return "click_menu_button %s" % str(action.get("button", ""))
-		"enter_character_name":
-			return "enter_character_name %s" % str(action.get("name", ""))
-		"select_character":
-			return "select_character index=%s" % str(action.get("index", 0))
-		"select_window_size":
-			return "select_window_size %s" % str(action.get("size", ""))
-		"select_create_game_type":
-			return "select_create_game_type %s" % str(action.get("session_type", ""))
-		"click_stat_button":
-			return "click_stat_button %s" % str(action.get("stat", ""))
-		"click_skill_button":
-			return "click_skill_button %s" % str(action.get("skill_id", "magic_bolt"))
-		"use_skill_slot":
-			return "use_skill_slot skill=%s target=%s monster=%s force=%s direction=%s" % [
-				str(action.get("skill_id", "magic_bolt")),
-				str(action.get("target_id", "")),
-				str(action.get("monster_def_id", "")),
-				str(action.get("force_direct", false)),
-				str(action.get("direction", {})),
-			]
-		"click_shop_buy_offer":
-			return "click_shop_buy offer_id=%s kind=%s index=%s" % [
-				str(action.get("offer_id", "")),
-				str(action.get("offer_kind", "")),
-				str(action.get("offer_index", 0)),
-			]
-		"click_shop_reroll":
-			return "click_shop_reroll"
-		"click_shop_sell_item":
-			return "click_shop_sell item=%s rolled=%s bag_index=%s" % [
-				str(action.get("item_def_id", "")),
-				str(action.get("rolled", "")),
-				str(action.get("bag_index", 0)),
-			]
-		"click_waypoint_level":
-			return "click_waypoint_level target=%s" % str(action.get("target_level", ""))
-		"drag_bag_to_stash":
-			return "drag_bag_to_stash item=%s rolled=%s bag_index=%s" % [
-				str(action.get("item_def_id", "")),
-				str(action.get("rolled", "")),
-				str(action.get("bag_index", 0)),
-			]
-		"drag_stash_to_bag":
-			return "drag_stash_to_bag stash_item=%s item=%s rolled=%s stash_index=%s" % [
-				str(action.get("stash_item_id", "")),
-				str(action.get("item_def_id", "")),
-				str(action.get("rolled", "")),
-				str(action.get("stash_index", 0)),
-			]
-		"click_stash_deposit_gold":
-			return "click_stash_deposit_gold amount=%s" % str(action.get("amount", 1))
-		"click_stash_withdraw_gold":
-			return "click_stash_withdraw_gold amount=%s" % str(action.get("amount", 1))
-		"click_bishop_respec":
-			return "click_bishop_respec"
-		"click_bishop_debug":
-			return "click_bishop_debug action=%s" % str(action.get("action", ""))
-		"click_blacksmith_upgrade":
-			return "click_blacksmith_upgrade stash_item=%s item=%s stash_index=%s" % [
-				str(action.get("stash_item_id", "")),
-				str(action.get("item_def_id", "")),
-				str(action.get("stash_index", 0)),
-			]
-		"click_blacksmith_stage_item":
-			return "click_blacksmith_stage_item stash_item=%s item=%s stash_index=%s" % [
-				str(action.get("stash_item_id", "")),
-				str(action.get("item_def_id", "")),
-				str(action.get("stash_index", 0)),
-			]
-		"set_stash_search":
-			return "set_stash_search text=%s" % str(action.get("text", ""))
-		"select_stash_sort":
-			return "select_stash_sort mode=%s" % str(action.get("mode", "acquired"))
-		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", \
-		"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", \
-		"click_market_cancel_offer", "set_market_search", "select_market_sort":
-			return BotMarketActionsScript.summary(action)
-		"assign_hotbar_slot":
-			return "assign_hotbar slot=%s item=%s bag_index=%s" % [
-				str(action.get("slot_index", "")),
-				str(action.get("item_def_id", "")),
-				str(action.get("bag_index", "")),
-			]
-		"double_click_bag_item":
-			return "double_click_bag item=%s bag_index=%s" % [
-				str(action.get("item_def_id", "")), str(action.get("bag_index", ""))
-			]
-		_:
-			return stype
+	return BotActionFormatterScript.format_action(action)
 
 
 func _fail_startup(msg: String) -> void:
@@ -843,6 +766,7 @@ func _request_shutdown(exit_code: int) -> void:
 		return
 
 	_shutdown_pending = true
+	AttackContactTraceScript.finish()
 	_runner = null
 	set_process(false)
 	if _main != null and _main.has_method("bot_finish_exit"):

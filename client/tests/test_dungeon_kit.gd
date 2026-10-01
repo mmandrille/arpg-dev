@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_test_thick_wall_uses_rows()
 	_test_column_matches_footprint()
 	_test_floor_cells_skip_rectangles_and_are_deterministic()
+	_test_flat_floor_shadow_policy()
 	_test_floor_variants_share_the_slab_height()
 	_test_renderer_kit_occlusion_fades_all_meshes()
 	_test_disabled_kit_falls_back_to_box_walls()
@@ -178,6 +179,36 @@ func _test_floor_cells_skip_rectangles_and_are_deterministic() -> void:
 		_fail("floor variant picks must be deterministic")
 		return
 	_pass("floor tiles skip wall/hole/water rectangles deterministically")
+
+
+func _test_flat_floor_shadow_policy() -> void:
+	var layout := [
+		{"id": "north", "position": {"x": 0.0, "y": -8.0}, "size": {"x": 16.0, "y": 1.0}, "source": "perimeter"},
+		{"id": "south", "position": {"x": 0.0, "y": 8.0}, "size": {"x": 16.0, "y": 1.0}, "source": "perimeter"},
+		{"id": "west", "position": {"x": -8.0, "y": 0.0}, "size": {"x": 1.0, "y": 16.0}, "source": "perimeter"},
+		{"id": "east", "position": {"x": 8.0, "y": 0.0}, "size": {"x": 1.0, "y": 16.0}, "source": "perimeter"},
+	]
+	var root := FloorScript.build(layout, -2)
+	if root == null:
+		_fail("kit floor must build for shadow policy")
+		return
+	var flat_id := str((LoaderScript.floor_config().get("variants", []) as Array)[0]["asset_id"])
+	var flat_found := false
+	var raised_found := false
+	for child in root.get_children():
+		if child.name == "KitFloor_%s" % flat_id:
+			flat_found = true
+			if (child as MultiMeshInstance3D).cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+				_fail("flat floor slab must not cast a shadow")
+		else:
+			raised_found = true
+			if (child as MultiMeshInstance3D).cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_ON:
+				_fail("raised floor variants must keep their shadows")
+	root.free()
+	if not flat_found or not raised_found:
+		_fail("flat and raised floor variants must both be present in the test layout")
+		return
+	_pass("flat slab skips redundant shadows; raised floor variants retain them")
 
 
 ## v491: decorated/weeds variants carry props above the slab; every variant must be seated by the

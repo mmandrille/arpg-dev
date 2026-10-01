@@ -9,6 +9,7 @@ from tools.showme.screenshot_catalog import (
     DEFAULT_SUITES,
     DUNGEON_ROOM_FOCUS,
     SCENE_FOCUSES,
+    TOWN_PLAY_VIEWS,
     biome_palette_levels,
     class_ids,
     discover_jobs,
@@ -101,7 +102,9 @@ def test_scenes_suite_covers_scene_focuses_and_every_biome_palette() -> None:
     jobs = discover_jobs(["scenes"])
     slugs = [job.slug for job in jobs]
     assert len(slugs) == len(set(slugs))
-    assert {job.focus for job in jobs if job.focus != DUNGEON_ROOM_FOCUS} == set(SCENE_FOCUSES)
+    assert {job.focus for job in jobs if job.focus != DUNGEON_ROOM_FOCUS} == set(SCENE_FOCUSES) | {"town-play"}
+    for view, zoom in TOWN_PLAY_VIEWS:
+        assert any(job.slug == f"town-play-{view}-{zoom}" and job.extra_args == ("--town-view", view, "--town-zoom", zoom) for job in jobs)
     palettes = biome_palette_levels()
     assert palettes, "dungeon_generation biome_palettes must yield at least one capture level"
     room_jobs = [job for job in jobs if job.focus == DUNGEON_ROOM_FOCUS]

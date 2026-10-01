@@ -70,6 +70,7 @@ func current_clip() -> String:
 func get_debug_state() -> Dictionary:
 	return {
 		"current_clip": current_clip(),
+		"clip_position_s": _player.current_animation_position if _player != null else 0.0,
 		"terminal": _terminal,
 		"terminal_clip": _terminal_clip,
 		"is_moving": _moving,

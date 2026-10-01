@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-09-30 (v493 town floor detail complete)
+Last updated: 2026-09-30 (v494–v500 graphics and smoothness batch complete)
 
 ---
 
@@ -23,10 +23,11 @@ Last updated: 2026-09-30 (v493 town floor detail complete)
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v493 — town floor detail (ADR-0018 follow-up): stone rim with weedy wear, dirt edge band, stone service path to the vendor, deterministic grass scatter, from `town_presentation.v0.json` → `dressing` via `town_ground_detail.gd`; the soft-edge goal is not met (kit dirt is the same taupe as the stone) ([as-built](docs/as-built/v493_town-floor-detail.md); `make ci` green, 7m09s). |
-| **Next slice** | v494 — random kit props on every dungeon floor (second of the approved two-slice plan; needs its own spec). Other candidates: sync character inventory changed over HTTP (v488 follow-up); death dissolve + rim/outline (ADR-0018 P5 rest); terrain shader or nature pack for a real town grass blend; showme `town` focus fix (play camera); wall mesh merge for the ~4× draw-call debt. |
+| **Latest completed slice** | v500 — town terrain and KayKit nature landmarks ([as-built](docs/as-built/v500_town-terrain-landmarks.md)). The v494–v500 graphics and smoothness batch was implemented in isolated worktrees and integrated together; one combined `make ci` passed in 10m33s. |
+| **Next slice** | Engineering review and refactor at the v500 milestone, then choose the next slice. Candidates: sync character inventory changed over HTTP (v488 follow-up); death dissolve + rim/outline (ADR-0018 P5 rest); showme `town` focus fix (play camera). |
+| **Graphics and smoothness sequence** | Complete in this batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
 | **Last engineering review** | v486 — [`docs/reviews/20260929_v486-overview.md`](docs/reviews/20260929_v486-overview.md) (2026-09-29; official cadence, 16 slices late; `make ci-full` FAIL 9+2) |
-| **Next engineering review** | ~v496 — run `$review` then `$refactor` after the next ~10-slice milestone |
+| **Next engineering review** | Due now at v500. The v496 interim gate was deferred for the user-requested parallel batch and single CI run; run `$review` then `$refactor` before another feature batch. |
 
 
 ### Periodic engineering reviews
@@ -106,7 +107,9 @@ Do **not** assume these are the next slice — they are documented backlog items
     uncapped HEAD frame time is ~7 ms. Regressions to watch: **draw calls ~4× (97–175 → 499–543)**, from
     per-piece kit walls/floors + shadow passes (candidate: MultiMesh/merged static dungeon geometry),
     and a **first-spawn hitch** (`process_ms` 124 → 761 ms, `d_upsert_m` spike up to 169 ms: kit model
-    instancing). The floor is met on this host; a weaker GPU is the risk. `make benchmark` has since
+    instancing). v495 reduced the integrated 10-run first-spawn process p95 from 514 to 279 ms; v497
+    reduced dungeon primitives 35.7% in its paired route while preserving shadowed props. The floor
+    is met on this host; a weaker GPU remains untested. `make benchmark` has since
     been repaired and is green for all three probes (gated in `make ci` via
     `test_benchmark_scenarios.py`, protocol-only in `make ci-full`).
   - ~~Replay non-determinism on `benchmark_mixed_arena`~~: fixed in v476 (recorded load shed). The

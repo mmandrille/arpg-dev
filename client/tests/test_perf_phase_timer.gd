@@ -13,6 +13,7 @@ func _init() -> void:
 	_test_disabled_without_env()
 	_test_accumulates_phases()
 	_test_format_snapshot()
+	_test_frame_trace_keeps_interval_aggregate()
 	_finish()
 
 
@@ -47,6 +48,21 @@ func _test_format_snapshot() -> void:
 	_assert_true("format includes entities", formatted.find("entities=") >= 0)
 	var ranked := PerfPhaseTimerScript.format_snapshot(true)
 	_assert_true("ranked puts largest phase first", ranked.begins_with("entities="))
+
+
+func _test_frame_trace_keeps_interval_aggregate() -> void:
+	OS.set_environment("ARPG_FIRST_SPAWN_TRACE", "1")
+	PerfPhaseTimerScript._enabled = false
+	PerfPhaseTimerScript.ensure_enabled()
+	PerfPhaseTimerScript.reset_frame()
+	PerfPhaseTimerScript.begin_frame()
+	PerfPhaseTimerScript.add_ms("d_upsert_m", 1200)
+	_assert_eq("first frame phase", PerfPhaseTimerScript.take_frame_snapshot().get("d_upsert_m", 0.0), 1.2)
+	PerfPhaseTimerScript.begin_frame()
+	PerfPhaseTimerScript.add_ms("d_upsert_m", 800)
+	_assert_eq("second frame phase", PerfPhaseTimerScript.take_frame_snapshot().get("d_upsert_m", 0.0), 0.8)
+	_assert_eq("interval aggregate remains intact", PerfPhaseTimerScript.snapshot_ms().get("d_upsert_m", 0.0), 2.0)
+	OS.set_environment("ARPG_FIRST_SPAWN_TRACE", "0")
 
 
 func _assert_eq(label: String, got, want) -> void:

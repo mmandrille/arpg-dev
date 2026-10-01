@@ -134,6 +134,7 @@ static func build(walls: Array, level: int) -> Node3D:
 		var instance := MultiMeshInstance3D.new()
 		instance.name = "KitFloor_%s" % str(ids[i])
 		instance.multimesh = mm
+		if not bool((variants[i] as Dictionary).get("cast_shadow", true)):
+			instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(instance)
 	return root
-

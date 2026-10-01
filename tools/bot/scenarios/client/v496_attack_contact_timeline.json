@@ -1,0 +1,74 @@
+{
+  "id": "v496_attack_contact_timeline",
+  "ci_tier": "extended",
+  "runner": "godot_client",
+  "world_id": "combat_stat_lab",
+  "seed": "contacttimeline496",
+  "render_fixture": { "quality": "balanced", "window_size": "1280x720" },
+  "debug_progression": {
+    "level": 20,
+    "stats": { "str": 10, "dex": 10, "vit": 40, "magic": 10 }
+  },
+  "title": "Melee and bow attack contact timeline",
+  "description": "Drive one confirmed sword hit and one confirmed bow hit into a durable lab target, then retarget to floor movement; the opt-in trace records each client frame and authoritative result.",
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "wait_loot_count", "min_count": 3, "timeout_s": 10.0 },
+    { "type": "click_loot_item", "item_def_id": "long_sword" },
+    { "type": "wait_inventory_item", "item_def_id": "long_sword", "timeout_s": 10.0 },
+    { "type": "click_loot_item", "item_def_id": "bow" },
+    { "type": "wait_inventory_item", "item_def_id": "bow", "timeout_s": 10.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "long_sword", "slot": "main_hand" },
+    { "type": "wait_equipped", "slot": "main_hand", "item_def_id": "long_sword", "timeout_s": 10.0 },
+    { "type": "click_floor", "x": 7.0, "z": 4.0 },
+    { "type": "wait_player_near", "x": 7.0, "z": 4.0, "distance": 1.0, "timeout_s": 10.0 },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_armored_target",
+      "event_type": "monster_damaged",
+      "outcome": "hit",
+      "blocked": false,
+      "retry_s": 0.5,
+      "consume_event": true,
+      "timeout_s": 20.0
+    },
+    {
+      "type": "wait_entity_reaction",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_armored_target",
+      "reaction": "hit",
+      "impact_feedback_min": 1,
+      "timeout_s": 3.0
+    },
+    { "type": "wait_entity_reaction", "local_player": true, "animation_current_clip": "idle", "timeout_s": 3.0 },
+    { "type": "drag_bag_to_equipment_slot", "item_def_id": "bow", "slot": "main_hand" },
+    { "type": "wait_equipped", "slot": "main_hand", "item_def_id": "bow", "timeout_s": 10.0 },
+    { "type": "click_floor", "x": 4.0, "z": 4.0 },
+    { "type": "wait_player_near", "x": 4.0, "z": 4.0, "distance": 1.0, "timeout_s": 10.0 },
+    {
+      "type": "click_entity_until_event",
+      "entity_type": "monster",
+      "monster_def_id": "combat_lab_armored_target",
+      "event_type": "monster_damaged",
+      "outcome": "hit",
+      "blocked": false,
+      "retry_s": 0.5,
+      "consume_event": true,
+      "timeout_s": 20.0
+    },
+    { "type": "click_floor", "x": 2.0, "z": 8.0 },
+    {
+      "type": "wait_command_retarget_grace",
+      "active": false,
+      "kind": "floor",
+      "last_dispatched": true,
+      "dispatched_min": 1,
+      "ground_x": 2.0,
+      "ground_z": 8.0,
+      "distance_max": 0.05,
+      "timeout_s": 2.0
+    },
+    { "type": "wait_player_near", "x": 2.0, "z": 8.0, "distance": 2.5, "timeout_s": 10.0 }
+  ]
+}

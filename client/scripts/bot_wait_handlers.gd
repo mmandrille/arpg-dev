@@ -12,10 +12,47 @@ const BotAssertionHandlersScript := preload("res://scripts/bot_assertion_handler
 const BotConnectionRecoveryAssertionsScript := preload("res://scripts/bot_connection_recovery_assertions.gd")
 const BotIntentRejectAssertionsScript := preload("res://scripts/bot_intent_reject_assertions.gd")
 const BotPresentationAssertionsScript := preload("res://scripts/bot_presentation_assertions.gd")
+const BotFrameCaptureScript := preload("res://scripts/bot_frame_capture.gd")
+const BotTorchViewpointScript := preload("res://scripts/bot_torch_viewpoint.gd")
 
 
 static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary) -> bool:
 	match stype:
+		"wait_selected_torch_in_view":
+			var viewport: Viewport = runner._controller.get_viewport()
+			var framed: bool = BotTorchViewpointScript.framed_near_player(
+				runner._memory.get("selected_torch", {}), state.get("player_pos", {}),
+				float(step.get("max_distance", 0.0)), viewport.get_camera_3d(), viewport)
+			if framed and DisplayServer.get_name() == "headless":
+				print("[bot-client] torch proximity proved; camera framing requires HEADLESS=0")
+			return framed
+		"capture_frame":
+			if bool(step.get("skip_if_headless", false)) and DisplayServer.get_name() == "headless":
+				print("[bot-capture] SKIP windowed-only frame %s in headless fixture run" % str(step.get("name", "")))
+				return true
+			if not runner._memory.has("capture_job"):
+				var quality := "unknown"
+				if runner._controller._main != null and runner._controller._main.client_settings != null:
+					quality = runner._controller._main.client_settings.graphics_quality
+				var fixture := {
+					"level": state.get("current_level", 0),
+					"tick": state.get("last_tick", 0),
+					"player_pos": state.get("player_pos", {}),
+					"selected_torch": runner._memory.get("selected_torch", {}),
+					"torch_positions": (state.get("dungeon_torch_lights", {}) as Dictionary).get("positions", []),
+					"rendered_torch_count": (state.get("dungeon_torch_lights", {}) as Dictionary).get("rendered_count", 0),
+					"engaged_entity_id": runner._memory.get("remembered_event_entity_id", ""),
+				}
+				runner._memory["capture_job"] = BotFrameCaptureScript.start(
+					runner._controller.get_viewport(), str(step.get("name", "")), quality, fixture)
+			var job = runner._memory["capture_job"]
+			if not job.done:
+				return false
+			runner._memory.erase("capture_job")
+			if job.error != "":
+				runner._fail("capture_frame failed: %s" % job.error)
+				return false
+			return true
 		"wait_ws_open":
 			return bool(state.get("ws_open", false))
 		"wait_main_menu":
@@ -123,7 +160,7 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 			var pending: Array = state.get("pending_events", [])
 			for i in range(pending.size()):
 				var ev = pending[i]
-				if typeof(ev) != TYPE_DICTIONARY or not _event_since_step_start(runner, ev):
+				if typeof(ev) != TYPE_DICTIONARY or (not bool(step.get("allow_prior_pending", false)) and not _event_since_step_start(runner, ev)):
 					continue
 				if evtypes.has(str(ev.get("event_type", ""))) and runner._event_matches(event_step, ev):
 					if runner._controller != null and runner._controller.has_method("consume_pending_event_at"):
@@ -148,6 +185,12 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				if typeof(ev) != TYPE_DICTIONARY or not _event_since_step_start(runner, ev):
 					continue
 				if str(ev.get("event_type", "")) == evtype and runner._event_matches(event_step, ev):
+					if bool(step.get("remember_event_entity_id", false)):
+						var subject_id := str(ev.get("entity_id", ""))
+						if subject_id == "":
+							runner._fail("%s event has no entity_id to remember" % evtype)
+							return false
+						runner._memory["remembered_event_entity_id"] = subject_id
 					if bool(step.get("consume_event", false)) and runner._controller != null and runner._controller.has_method("consume_pending_event_at"):
 						runner._controller.consume_pending_event_at(i)
 					return true
@@ -171,6 +214,18 @@ static func evaluate(runner, step: Dictionary, stype: String, state: Dictionary)
 				return inv.size() > 0
 			for item in inv:
 				if str(item.get("item_def_id", "")) == def_id:
+					return true
+			return false
+		"wait_equipped":
+			var equipped: Dictionary = state.get("equipped", {})
+			var item = equipped.get(str(step.get("slot", "main_hand")), null)
+			if item == null or str(item) == "":
+				return false
+			var expected_def := str(step.get("item_def_id", ""))
+			if expected_def == "":
+				return true
+			for owned in state.get("inventory", []):
+				if str(owned.get("item_instance_id", "")) == str(item) and str(owned.get("item_def_id", "")) == expected_def:
 					return true
 			return false
 		"wait_loot_item":
@@ -270,11 +325,25 @@ static func _entity_near_player(runner, step: Dictionary, state: Dictionary) -> 
 		if typeof(row) != TYPE_DICTIONARY:
 			continue
 		var rec := row as Dictionary
+		var remembered_id := str(runner._memory.get("remembered_event_entity_id", ""))
+		if bool(step.get("remembered_event_entity", false)) and str(rec.get("id", "")) != remembered_id:
+			continue
+		if bool(step.get("require_alive", false)) and int(rec.get("hp", 0)) <= 0:
+			continue
 		if not runner._presentation_row_matches(step, rec):
 			continue
 		var pos: Dictionary = rec.get("position", {})
 		var dx := float(pos.get("x", 0.0)) - px
 		var dz := float(pos.get("z", 0.0)) - pz
-		if sqrt(dx * dx + dz * dz) <= max_dist:
-			return true
+		if sqrt(dx * dx + dz * dz) > max_dist:
+			continue
+		if bool(step.get("in_view", false)) and DisplayServer.get_name() != "headless":
+			var viewport: Viewport = runner._controller.get_viewport()
+			var camera: Camera3D = viewport.get_camera_3d()
+			var world := Vector3(float(pos.get("x", 0.0)), 0.0, float(pos.get("z", 0.0)))
+			if camera == null or camera.is_position_behind(world):
+				continue
+			if not Rect2(Vector2.ZERO, Vector2(viewport.size)).has_point(camera.unproject_position(world)):
+				continue
+		return true
 	return false

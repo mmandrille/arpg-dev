@@ -1,0 +1,38 @@
+{
+  "id": "dungeon_frame_pacing_probe",
+  "runner": "godot_client",
+  "world_id": "generated_wall_lab",
+  "seed": "dungeon_levels_fast_247",
+  "title": "Dungeon frame pacing probe",
+  "description": "Pinned stationary isometric level-1 dungeon scene for live renderer frame pacing and primitive measurements.",
+  "ci_tier": "extended",
+  "max_elapsed_s": 90,
+  "render_fixture": {
+    "quality": "balanced",
+    "window_size": "1920x1080",
+    "renderer": "forward_plus",
+    "vsync": 1,
+    "camera": "isometric",
+    "camera_route": "stationary_isometric",
+    "current_level": -1,
+    "wall_count": 31,
+    "live_monsters": 24,
+    "interactables": 2,
+    "min_steady_batches": 15,
+    "min_steady_frames": 300,
+    "min_steady_tick_span": 180
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 10.0 },
+    { "type": "set_camera_mode", "mode": "isometric" },
+    { "type": "wait_wall_layout", "current_level": -1, "equals": 31, "generated_at_least": 3, "non_perimeter_at_least": 1, "timeout_s": 15.0 },
+    { "type": "wait_entity", "entity_type": "monster", "timeout_s": 10.0 },
+    { "type": "assert_wall_layout", "current_level": -1, "equals": 31, "generated_at_least": 3, "non_perimeter_at_least": 1 },
+    { "type": "assert_camera_mode", "mode": "isometric" },
+    { "type": "wait_ticks", "ticks": 100, "timeout_s": 16.0 },
+    { "type": "wait_ticks", "ticks": 100, "timeout_s": 16.0 },
+    { "type": "wait_ticks", "ticks": 100, "timeout_s": 16.0 },
+    { "type": "assert_wall_layout", "current_level": -1, "equals": 31 },
+    { "type": "assert_camera_mode", "mode": "isometric" }
+  ]
+}

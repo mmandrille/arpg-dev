@@ -54,6 +54,8 @@ static func log_wait_progress(
 			int(state.get("non_perimeter_wall_count", 0)),
 			int(state.get("current_level", 0)),
 		])
+	if stype == "wait_selected_torch_in_view":
+		parts.append("player_pos=%s" % str(state.get("player_pos", {})))
 	if stype == "wait_shop_panel":
 		parts.append("shop_panel=%s" % str(state.get("shop_panel", {})))
 	if stype == "wait_stash_panel":

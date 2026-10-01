@@ -1267,6 +1267,54 @@
         "license": "CC0-1.0",
         "sha256": "64cba4ec1a81a03eb13c9b2e50d5ae7a0232530ad4a0dddadf7a5a349a3cb03e"
       }
+    },
+    "kaykit_forest_tree_canopy_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_forest_nature/Tree_2_A_Color1.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Forest Nature Pack 1.0 FREE by Kay Lousberg (Assets/gltf/Tree_2_A_Color1.gltf; owner archive sha256 2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+        "license": "CC0-1.0",
+        "sha256": "a1598752cefedd0ec95a8eb3a26a078802fa6c806b83d6537f859a5433695dba"
+      }
+    },
+    "kaykit_forest_tree_pine_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_forest_nature/Tree_4_A_Color1.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Forest Nature Pack 1.0 FREE by Kay Lousberg (Assets/gltf/Tree_4_A_Color1.gltf; owner archive sha256 2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+        "license": "CC0-1.0",
+        "sha256": "923cb5b33160a4dccfb5d7c429a661187844fd79e590d4a2ca626400ace567fe"
+      }
+    },
+    "kaykit_forest_bush_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_forest_nature/Bush_3_A_Color1.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Forest Nature Pack 1.0 FREE by Kay Lousberg (Assets/gltf/Bush_3_A_Color1.gltf; owner archive sha256 2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+        "license": "CC0-1.0",
+        "sha256": "3d3e3a8519d28e8fe9d027728261292eebc30c5f0001d02788d80f3ea934ef3a"
+      }
+    },
+    "kaykit_forest_grass_v0": {
+      "type": "environment",
+      "runtime_path": "client/assets/environment/kaykit_forest_nature/Grass_1_A_Color1.glb",
+      "format": "glb",
+      "scale_unit": "meters",
+      "provenance": {
+        "origin": "KayKit Forest Nature Pack 1.0 FREE by Kay Lousberg (Assets/gltf/Grass_1_A_Color1.gltf; owner archive sha256 2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c)",
+        "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+        "license": "CC0-1.0",
+        "sha256": "e105334bc64973e6a59361fc444e69de615ec7abb9f4964f5f659103353ed30c"
+      }
     }
   }
 }

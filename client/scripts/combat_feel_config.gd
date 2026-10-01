@@ -12,7 +12,6 @@ static var ATTACK_BUFFER_SECONDS := 0.45
 static var COMMAND_RETARGET_GRACE_SECONDS := 0.22
 static var MOVEMENT_SMOOTHING_CATCH_UP_SPEED := 18.0
 static var MOVEMENT_SMOOTHING_MAX_OFFSET := 0.70
-static var MOVEMENT_SMOOTHING_RESET_DISTANCE := 1.50
 static var MOVEMENT_SMOOTHING_SETTLE_EPSILON := 0.01
 static var MELEE_LUNGE_DISTANCE := 0.16
 static var MELEE_LUNGE_RECOVERY_SECONDS := 0.14
@@ -30,7 +29,6 @@ static func ensure_loaded() -> void:
 	var movement := CombatFeelPresentationLoaderScript.movement_smoothing()
 	MOVEMENT_SMOOTHING_CATCH_UP_SPEED = float(movement.get("catch_up_speed", MOVEMENT_SMOOTHING_CATCH_UP_SPEED))
 	MOVEMENT_SMOOTHING_MAX_OFFSET = float(movement.get("max_offset", MOVEMENT_SMOOTHING_MAX_OFFSET))
-	MOVEMENT_SMOOTHING_RESET_DISTANCE = float(movement.get("reset_distance", MOVEMENT_SMOOTHING_RESET_DISTANCE))
 	MOVEMENT_SMOOTHING_SETTLE_EPSILON = float(movement.get("settle_epsilon", MOVEMENT_SMOOTHING_SETTLE_EPSILON))
 	var lunge := CombatFeelPresentationLoaderScript.melee_lunge()
 	MELEE_LUNGE_DISTANCE = float(lunge.get("distance", MELEE_LUNGE_DISTANCE))
@@ -57,11 +55,6 @@ static func movement_smoothing_catch_up_speed() -> float:
 static func movement_smoothing_max_offset() -> float:
 	ensure_loaded()
 	return MOVEMENT_SMOOTHING_MAX_OFFSET
-
-
-static func movement_smoothing_reset_distance() -> float:
-	ensure_loaded()
-	return MOVEMENT_SMOOTHING_RESET_DISTANCE
 
 
 static func movement_smoothing_settle_epsilon() -> float:
@@ -101,7 +94,6 @@ static func reset_for_tests() -> void:
 	COMMAND_RETARGET_GRACE_SECONDS = 0.22
 	MOVEMENT_SMOOTHING_CATCH_UP_SPEED = 18.0
 	MOVEMENT_SMOOTHING_MAX_OFFSET = 0.70
-	MOVEMENT_SMOOTHING_RESET_DISTANCE = 1.50
 	MOVEMENT_SMOOTHING_SETTLE_EPSILON = 0.01
 	MELEE_LUNGE_DISTANCE = 0.16
 	MELEE_LUNGE_RECOVERY_SECONDS = 0.14

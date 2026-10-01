@@ -276,6 +276,7 @@
             },
             "targets": {
               "type": "array",
+              "maxItems": 7,
               "items": {
                 "type": "string",
                 "minLength": 1
@@ -324,6 +325,58 @@
                     "type": "integer",
                     "minimum": 1
                   }
+                }
+              }
+            }
+          }
+        },
+        "terrain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "ground_size_m", "soil_color", "blend_width_m", "footprint_margin_m", "noise_scale_per_m", "noise_amplitude_m"],
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "ground_size_m": {"$ref": "#/$defs/position"},
+            "soil_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "blend_width_m": {"type": "number", "exclusiveMinimum": 0},
+            "footprint_margin_m": {"type": "number", "minimum": 0},
+            "noise_scale_per_m": {"type": "number", "exclusiveMinimum": 0},
+            "noise_amplitude_m": {"type": "number", "minimum": 0}
+          }
+        },
+        "nature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "fence_clearance_m", "anchor_clearance_m", "gate_approach", "groups"],
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "fence_clearance_m": {"type": "number", "minimum": 0},
+            "anchor_clearance_m": {"type": "number", "minimum": 0},
+            "gate_approach": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["end_position", "half_width_m"],
+              "properties": {
+                "end_position": {"$ref": "#/$defs/position"},
+                "half_width_m": {"type": "number", "minimum": 0}
+              }
+            },
+            "groups": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "center", "radius_m", "seed_salt", "cell_m", "occupancy_percent", "landmarks", "variants"],
+                "properties": {
+                  "id": {"type": "string", "minLength": 1},
+                  "center": {"$ref": "#/$defs/position"},
+                  "radius_m": {"type": "number", "exclusiveMinimum": 0},
+                  "seed_salt": {"type": "integer"},
+                  "cell_m": {"type": "number", "exclusiveMinimum": 0},
+                  "occupancy_percent": {"type": "integer", "minimum": 0, "maximum": 100},
+                  "landmarks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/nature_landmark"}},
+                  "variants": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/nature_variant"}}
                 }
               }
             }
@@ -463,6 +516,30 @@
     }
   },
   "$defs": {
+    "nature_landmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "position", "scale", "yaw_degrees", "footprint_radius_m"],
+      "properties": {
+        "asset_id": {"type": "string", "minLength": 1},
+        "position": {"$ref": "#/$defs/position"},
+        "scale": {"type": "number", "exclusiveMinimum": 0},
+        "yaw_degrees": {"type": "number"},
+        "footprint_radius_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "nature_variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "weight", "scale_min", "scale_max", "footprint_radius_m"],
+      "properties": {
+        "asset_id": {"type": "string", "minLength": 1},
+        "weight": {"type": "integer", "minimum": 1},
+        "scale_min": {"type": "number", "exclusiveMinimum": 0},
+        "scale_max": {"type": "number", "exclusiveMinimum": 0},
+        "footprint_radius_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
     "position": {
       "type": "object",
       "required": [

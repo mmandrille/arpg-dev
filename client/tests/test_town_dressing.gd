@@ -27,6 +27,8 @@ func _test_sync_attaches_world_aligned_in_town_only() -> void:
 		var node := root.find_child(TownDressing.prop_node_name(0, str(first["asset_id"])), false, false) as Node3D
 		var want := Vector3(float(first["position"]["x"]), 0.0, float(first["position"]["y"]))
 		_assert_true("first prop at its catalog world position", node != null and (ground.position + root.position + node.position).is_equal_approx(want))
+	factory.update_ground_material(ground, 0)
+	_assert_true("same-level snapshot reuses town dressing", ground.find_child(TownDressing.ROOT_NAME, false, false) == root)
 	factory.update_ground_material(ground, -1)
 	_assert_true("dressing removed on a dungeon level", ground.find_child(TownDressing.ROOT_NAME, false, false) == null or ground.find_child(TownDressing.ROOT_NAME, false, false).is_queued_for_deletion())
 	ground.free()

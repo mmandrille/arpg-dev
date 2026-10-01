@@ -169,6 +169,7 @@ run_gate "GDScript item visuals loader test" "[gdtest] PASS: test_item_visuals_l
 run_gate "GDScript kit stairs test" "[gdtest] PASS: test_kit_stairs" res://tests/test_kit_stairs.gd
 run_gate "GDScript town dressing test" "[gdtest] PASS: test_town_dressing" res://tests/test_town_dressing.gd
 run_gate "GDScript town ground detail test" "[gdtest] PASS: test_town_ground_detail" res://tests/test_town_ground_detail.gd
+run_gate "GDScript town nature landmarks test" "[gdtest] PASS: test_town_nature_landmarks" res://tests/test_town_nature_landmarks.gd
 run_gate "GDScript combat VFX test" "[gdtest] PASS: test_combat_vfx" res://tests/test_combat_vfx.gd
 run_gate "GDScript showme capture preload test" "[gdtest] PASS: showme capture scripts preload" res://tests/test_showme_load.gd
 run_gate "GDScript item icon drawer test" "test_item_icon_drawer: ok" res://tests/test_item_icon_drawer.gd
@@ -190,6 +191,9 @@ run_gate "GDScript model viewer test" "[gdtest] PASS: test_model_viewer" res://t
 run_gate "GDScript client bot unit test" "[gdtest] PASS: test_client_bot" res://tests/test_client_bot.gd
 run_gate "GDScript bot entity distance test" "[gdtest] PASS: test_bot_entity_distance" res://tests/test_bot_entity_distance.gd
 run_gate "GDScript bot facade unit test" "[gdtest] PASS: test_bot_facade" res://tests/test_bot_facade.gd
+run_gate "GDScript bot frame capture unit test" "[gdtest] PASS: test_bot_frame_capture" res://tests/test_bot_frame_capture.gd
+run_gate "GDScript bot torch viewpoint test" "[gdtest] PASS: test_bot_torch_viewpoint" res://tests/test_bot_torch_viewpoint.gd
+run_gate "GDScript bot engaged subject test" "[gdtest] PASS: test_bot_engaged_subject" res://tests/test_bot_engaged_subject.gd
 
 # 2e. Co-op local/remote player handling test (server-independent; v33).
 run_gate "GDScript co-op client unit test" "[gdtest] PASS: test_coop_client" res://tests/test_coop_client.gd
@@ -253,6 +257,8 @@ run_gate "GDScript boss health bar test" "[gdtest] PASS: test_boss_health_bar" r
 
 # 2m. Delta and snapshot state-mutation unit tests (server-independent; v53).
 run_gate "GDScript net client test" "[gdtest] PASS: test_net_client" res://tests/test_net_client.gd
+run_gate "GDScript client-bot transport delay test" "[gdtest] PASS: test_bot_transport_delay" res://tests/test_bot_transport_delay.gd
+run_gate "GDScript live targeting trace test" "[gdtest] PASS: test_live_targeting_trace" res://tests/test_live_targeting_trace.gd
 run_gate "GDScript connection recovery test" "[gdtest] PASS: test_connection_recovery" res://tests/test_connection_recovery.gd
 run_gate "GDScript connection recovery runtime test" "[gdtest] PASS: test_connection_recovery_runtime" res://tests/test_connection_recovery_runtime.gd
 run_gate "GDScript delta apply test" "[gdtest] PASS: test_delta_apply" res://tests/test_delta_apply.gd
@@ -275,6 +281,7 @@ run_gate "GDScript ground/wall factories test" "[gdtest] PASS: test_factories" r
 run_gate "GDScript dungeon depth lighting test" "[gdtest] PASS: test_dungeon_depth_lighting" res://tests/test_dungeon_depth_lighting.gd
 run_gate "GDScript render environment presentation test" "[gdtest] PASS: test_render_environment_presentation" res://tests/test_render_environment_presentation.gd
 run_gate "GDScript dungeon kit test" "[gdtest] PASS: test_dungeon_kit" res://tests/test_dungeon_kit.gd
+run_gate "GDScript dungeon room dressing test" "[gdtest] PASS: test_dungeon_room_dressing" res://tests/test_dungeon_room_dressing.gd
 run_gate "GDScript dungeon kit props test" "[gdtest] PASS: test_dungeon_kit_props" res://tests/test_dungeon_kit_props.gd
 run_gate "GDScript kit monsters test" "[gdtest] PASS: test_kit_monsters" res://tests/test_kit_monsters.gd
 run_gate "GDScript armor look test" "[gdtest] PASS: test_armor_look" res://tests/test_armor_look.gd
@@ -283,6 +290,7 @@ run_gate "GDScript fog-of-war overlay test" "[gdtest] PASS: test_fog_of_war_over
 run_gate "GDScript wall occlusion fade test" "[gdtest] PASS: test_wall_occlusion_fade" res://tests/test_wall_occlusion_fade.gd
 run_gate "GDScript fog LOS shadow cache test" "[gdtest] PASS: test_fog_los_shadow_cache" res://tests/test_fog_los_shadow_cache.gd
 run_gate "GDScript perf phase timer test" "[gdtest] PASS: test_perf_phase_timer" res://tests/test_perf_phase_timer.gd
+run_gate "GDScript first-spawn trace test" "[gdtest] PASS: test_first_spawn_trace" res://tests/test_first_spawn_trace.gd
 run_gate "GDScript entity presentation LOD test" "[gdtest] PASS: test_entity_presentation_lod" res://tests/test_entity_presentation_lod.gd
 run_gate "GDScript projectile presentation cap test" "[gdtest] PASS: test_projectile_presentation_cap" res://tests/test_projectile_presentation_cap.gd
 run_gate "GDScript delta frame coalesce test" "[gdtest] PASS: test_delta_frame_coalesce" res://tests/test_delta_frame_coalesce.gd

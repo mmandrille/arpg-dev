@@ -4,6 +4,8 @@ extends RefCounted
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const SurfaceMaterialLoaderScript := preload("res://scripts/surface_material_loader.gd")
 const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
+const TownPresentationLoaderScript := preload("res://scripts/town_presentation_loader.gd")
+const TownGroundBlendScript := preload("res://scripts/town_ground_blend.gd")
 
 const TOWN_GROUND_SIZE := Vector2(140.0, 90.0)
 const TOWN_GROUND_CENTER := Vector3(50.0, -0.02, 25.0)
@@ -35,7 +37,9 @@ func configure_ground_node(ground_node: MeshInstance3D, level: int) -> void:
 	if mesh == null:
 		return
 	if level >= 0:
-		mesh.size = TOWN_GROUND_SIZE
+		var terrain: Dictionary = TownPresentationLoaderScript.dressing().get("terrain", {})
+		var configured: Dictionary = terrain.get("ground_size_m", {})
+		mesh.size = Vector2(float(configured.get("x", TOWN_GROUND_SIZE.x)), float(configured.get("y", TOWN_GROUND_SIZE.y)))
 		mesh.subdivide_width = 32
 		mesh.subdivide_depth = 20
 		ground_node.position = TOWN_GROUND_CENTER
@@ -76,7 +80,7 @@ func update_ground_material(ground_node: MeshInstance3D, level: int) -> void:
 func ground_texture_id_for_level(level: int) -> String:
 	return ClientConstantsScript.GROUND_TEXTURE_TOWN if level == 0 else ClientConstantsScript.GROUND_TEXTURE_DUNGEON
 
-func ground_material_for_level(level: int) -> StandardMaterial3D:
+func ground_material_for_level(level: int) -> Material:
 	if level < 0 and DungeonKitLoaderScript.active_for_level(level):
 		# ADR-0018 P2: kit floor tiles cover the floor; the ground is only a plain base seen
 		# through tile gaps, holes and water, so it must not show the procedural pixel texture.
@@ -98,6 +102,10 @@ func ground_material_for_level(level: int) -> StandardMaterial3D:
 		mat.normal_enabled = true
 		mat.normal_texture = make_ground_normal_texture(texture_id, palette)
 		mat.normal_scale = SurfaceMaterialLoaderScript.scalar(style_id, "normal_scale", 0.18)
+	if level == 0:
+		var dressing := TownPresentationLoaderScript.dressing()
+		if bool((dressing.get("terrain", {}) as Dictionary).get("enabled", false)):
+			return TownGroundBlendScript.material(mat, dressing)
 	return mat
 
 func make_ground_texture(texture_id: String, palette: Dictionary = {}) -> ImageTexture:

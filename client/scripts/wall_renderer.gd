@@ -4,6 +4,7 @@ extends RefCounted
 const ClientConstantsScript := preload("res://scripts/client_constants.gd")
 const DungeonWallCornerPresentationScript := preload("res://scripts/dungeon_wall_corner_presentation.gd")
 const DungeonKitFloorScript := preload("res://scripts/dungeon_kit_floor.gd")
+const DungeonRoomDressingScript := preload("res://scripts/dungeon_room_dressing.gd")
 const DungeonKitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
 const DungeonKitWallBuilderScript := preload("res://scripts/dungeon_kit_wall_builder.gd")
 const KitPieceLibraryScript := preload("res://scripts/kit_piece_library.gd")
@@ -20,6 +21,7 @@ var _corner_style_override: String = ""
 var _occlusion_meshes: Dictionary = {}
 var _occlusion_bodies: Dictionary = {}
 var _occlusion_fade: WallOcclusionFade
+var _dressing_state: Dictionary = {}
 
 const TOWN_WALL_HEIGHT := 1.0
 const WALL_FLOOR_SEAM_OVERLAP := 0.08
@@ -59,7 +61,7 @@ func render_world_walls(world_id: String) -> Array:
 		local_index += 1
 	return render_wall_layout(local_walls)
 
-func render_wall_layout(walls: Array) -> Array:
+func render_wall_layout(walls: Array, floor_key: String = "", anchors: Array = []) -> Array:
 	clear_wall_nodes()
 	var current_wall_layout: Array = []
 	for wall in walls:
@@ -72,6 +74,7 @@ func render_wall_layout(walls: Array) -> Array:
 	_sync_room_wall_corners(current_wall_layout)
 	_sync_dungeon_ceiling()
 	_sync_kit_floor(current_wall_layout)
+	refresh_dressing(current_wall_layout, floor_key, anchors)
 	return current_wall_layout
 
 func set_level(level: int) -> void:
@@ -84,6 +87,7 @@ func set_corner_review_style(style: String) -> void:
 
 func clear_wall_nodes() -> void:
 	_ceiling_node = null
+	_dressing_state = {}
 	_occlusion_meshes.clear()
 	_occlusion_bodies.clear()
 	reset_occlusion_fade()
@@ -113,6 +117,30 @@ func _sync_kit_floor(wall_layout: Array) -> void:
 	var kit_floor := DungeonKitFloorScript.build(wall_layout, _current_level)
 	if kit_floor != null:
 		_walls_root.add_child(kit_floor)
+
+
+func refresh_dressing(wall_layout: Array, floor_key: String, anchors: Array) -> void:
+	if _walls_root == null:
+		return
+	var existing := _walls_root.get_node_or_null(DungeonRoomDressingScript.ROOT_NAME)
+	if existing != null:
+		_walls_root.remove_child(existing)
+		existing.queue_free()
+	if not kit_active():
+		_dressing_state = {}
+		return
+	var cfg := DungeonKitLoaderScript.dressing_config()
+	var planned := DungeonRoomDressingScript.plan(wall_layout, floor_key, _current_level, anchors, cfg)
+	var placements: Array = planned["placements"]
+	_dressing_state = {"instances": placements.size(), "safe_candidates": int(planned["safe_candidates"]), "reason": str(planned["reason"])}
+	print("[dungeon-dressing] level=%d instances=%d safe_candidates=%d reason=%s" % [_current_level, placements.size(), int(planned["safe_candidates"]), str(planned["reason"])])
+	if placements.is_empty():
+		return
+	_walls_root.add_child(DungeonRoomDressingScript.build(placements, float(cfg.get("surface_y", 0.0))))
+
+
+func dressing_debug_state() -> Dictionary:
+	return _dressing_state.duplicate(true)
 
 
 func _wall_height() -> float:

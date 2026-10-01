@@ -16,8 +16,7 @@
       "item_def_id": "training_bow"
     },
     {
-      "type": "wait_event",
-      "event_type": "item_picked_up",
+      "type": "wait_inventory_item",
       "item_def_id": "training_bow",
       "timeout_s": 10.0
     },
@@ -26,8 +25,8 @@
       "item_def_id": "training_bow"
     },
     {
-      "type": "wait_event",
-      "event_type": "item_equipped",
+      "type": "wait_equipped",
+      "slot": "main_hand",
       "timeout_s": 10.0
     },
     {

@@ -42,16 +42,14 @@ func _run() -> void:
 		emitted.append(skill_id)
 	)
 
-	panel.set_character_progression({
+	panel.set_view_state({
 		"character_class": "sorcerer",
 		"level": 3,
 		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": magic_rank1_req},
-	})
-	panel.set_skill_progression({
+	}, {
 		"unspent_skill_points": 1,
 		"skills": _skill_rows(0, true),
-	})
-	panel.set_interactive(true)
+	}, [], "", true)
 	panel.ensure_display_visible()
 	var state := panel.get_debug_state()
 	_assert_true("panel visible", bool(state.get("visible", false)))

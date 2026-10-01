@@ -352,6 +352,15 @@ func effective_window_size() -> Vector2i:
 
 
 func apply() -> void:
+	if OS.get_environment("ARPG_BOT_CLIENT") == "1":
+		var bot_quality := OS.get_environment("ARPG_BOT_RENDER_QUALITY")
+		var bot_size := OS.get_environment("ARPG_BOT_RENDER_SIZE")
+		if bot_quality != "":
+			graphics_quality = normalize_graphics_quality(bot_quality)
+		if bot_size != "":
+			window_size = parse_size_label(bot_size)
+		if bot_quality != "" or bot_size != "":
+			window_mode = WINDOW_MODE_WINDOWED
 	var target_size := _fit_size_to_screen(effective_window_size())
 	DisplayServer.window_set_min_size(SUPPORTED_SIZES[0])
 	match normalize_window_mode(window_mode):

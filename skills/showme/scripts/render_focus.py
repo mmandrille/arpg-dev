@@ -28,7 +28,7 @@ def _default_output(root: Path, focus: str) -> Path:
 def main() -> int:
     root = _repo_root()
     parser = argparse.ArgumentParser(description="Render a focused Godot client visual.")
-    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "skeleton", "eye-view", "dungeon-room"], default="gear")
+    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "town-play", "skeleton", "eye-view", "dungeon-room"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
     parser.add_argument("--class-id", default="", help="Class id for gear focus, e.g. paladin.")
@@ -42,6 +42,9 @@ def main() -> int:
     parser.add_argument("--refresh", type=float, default=0.0, help="Live gear mode: reload shared configs every N seconds (0 = off).")
     parser.add_argument("--rotation-period", type=float, default=0.0, help="Seconds for one 360° rotation in live mode; defaults to --refresh when set.")
     parser.add_argument("--level", type=int, default=-1, help="Dungeon level for dungeon-room focus (negative).")
+    parser.add_argument("--town-view", choices=["plaza", "vendor", "gate", "west", "north"], default="plaza")
+    parser.add_argument("--town-zoom", choices=["normal", "max"], default="normal")
+    parser.add_argument("--quality", choices=["balanced", "performance"], default="balanced")
     parser.add_argument("--godot", default="godot")
     parser.add_argument("--timeout", type=float, default=90.0, help="Seconds before a screenshot capture is killed.")
     args = parser.parse_args()
@@ -92,7 +95,7 @@ def main() -> int:
         width, height = 1280, 720
     if args.focus == "heal-rain" and (args.width, args.height) == (640, 480):
         width, height = 960, 640
-    if args.focus == "town" and (args.width, args.height) == (640, 480):
+    if args.focus in ("town", "town-play") and (args.width, args.height) == (640, 480):
         width, height = 1120, 720
     if args.focus == "skeleton" and (args.width, args.height) == (640, 480):
         width, height = 800, 600
@@ -110,6 +113,8 @@ def main() -> int:
     if args.focus == "dungeon-room":
         # Dedicated runtime-lit room capture; keeps the grandfathered visual_capture.gd from growing.
         gdscript = root / "client" / "scripts" / "surface_material_room_capture.gd"
+    if args.focus == "town-play":
+        gdscript = root / "client" / "scripts" / "showme" / "showme_town_play_capture.gd"
     cmd = [
         args.godot,
         "--windowed",
@@ -155,6 +160,8 @@ def main() -> int:
         cmd += ["--asset-id", args.asset_id]
     if args.focus == "dungeon-room":
         cmd += ["--level", str(args.level)]
+    if args.focus == "town-play":
+        cmd += ["--town-view", args.town_view, "--town-zoom", args.town_zoom, "--quality", args.quality]
 
     print("[showme] running:", " ".join(cmd))
     log_file.unlink(missing_ok=True)  # never judge this run by a previous run's log

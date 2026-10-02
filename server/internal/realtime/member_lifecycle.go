@@ -90,7 +90,7 @@ func (l *sessionLoop) persistSystemInput(rec *store.SessionInput) {
 	}
 	if err := l.hub.store.AppendInput(context.Background(), *rec); err != nil {
 		l.hub.metrics.PersistenceErrors.Inc()
-		l.log.Error("persist system input", "type", systemInputType(rec.Payload), "tick", rec.Tick, "error", err)
+		l.log.Error("persist system input", "type", systemInputType(rec.Payload), "tick", rec.Tick, "error_code", "system_input_persistence_failed")
 	}
 }
 

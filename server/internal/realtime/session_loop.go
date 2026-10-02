@@ -391,7 +391,7 @@ func (l *sessionLoop) handleClientMessage(client *loopClient, data []byte) {
 
 	if err := l.hub.store.AppendInput(context.Background(), rec); err != nil {
 		l.hub.metrics.PersistenceErrors.Inc()
-		l.log.Error("persist input", "error", err)
+		l.log.Error("persist input", "error_code", "input_persistence_failed")
 	}
 }
 

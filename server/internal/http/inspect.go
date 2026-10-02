@@ -144,7 +144,7 @@ func (s *Server) handleSessionState(w http.ResponseWriter, r *http.Request) {
 	}
 	recon, err := replay.Reconstruct(r.Context(), s.store, s.rules, sess.ID)
 	if err != nil {
-		s.logReplayFailure(r, "reconstruct", sess.ID, err)
+		s.logReplayFailure(r, "reconstruct", sess.ID)
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not reconstruct state")
 		return
 	}
@@ -160,7 +160,7 @@ func (s *Server) handleSessionReplay(w http.ResponseWriter, r *http.Request) {
 	}
 	report, err := replay.Verify(r.Context(), s.store, s.rules, sess.ID)
 	if err != nil {
-		s.logReplayFailure(r, "verify", sess.ID, err)
+		s.logReplayFailure(r, "verify", sess.ID)
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not verify replay")
 		return
 	}
@@ -188,22 +188,21 @@ func (s *Server) handleSessionReplayTimeline(w http.ResponseWriter, r *http.Requ
 	}
 	timeline, err := replay.BuildTimeline(r.Context(), s.store, s.rules, sess.ID, throughTick)
 	if err != nil {
-		s.logReplayFailure(r, "timeline", sess.ID, err)
+		s.logReplayFailure(r, "timeline", sess.ID)
 		writeError(w, http.StatusInternalServerError, "internal_error", "could not build replay timeline")
 		return
 	}
 	writeJSON(w, http.StatusOK, timeline)
 }
 
-// logReplayFailure records why a replay-backed endpoint returned 500. The
-// response body stays generic; the cause (e.g. a determinism break) is only
-// logged server-side.
-func (s *Server) logReplayFailure(r *http.Request, op, sessionID string, err error) {
+// logReplayFailure records a stable failure category for a replay endpoint.
+// The response and logs avoid exposing raw database or reconstruction errors.
+func (s *Server) logReplayFailure(r *http.Request, op, sessionID string) {
 	corr, _ := logging.CorrelationFromContext(r.Context())
 	s.log.LogAttrs(r.Context(), slog.LevelError, "session_replay_failed",
 		slog.String("correlation_id", corr),
 		slog.String("op", op),
 		slog.String("session_id", sessionID),
-		slog.String("error", err.Error()),
+		slog.String("error_code", "replay_operation_failed"),
 	)
 }

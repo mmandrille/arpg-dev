@@ -1,6 +1,6 @@
 # v519 — Skill Tree UI (as built)
 
-- **Status:** Focused implementation and visual gates passed; combined batch CI and lifecycle closeout remain coordinator-owned.
+- **Status:** Complete — focused gates and combined batch `make ci` passed.
 - **Date:** 2026-10-01
 - **Spec / plan:** [spec](../specs/v519_spec-skill-tree-ui.md) · [plan](../plans/v519_2026-10-01-skill-tree-ui.md)
 - **Base:** v517 `3a132626aa29581da6e3fdb36833c80e22b77b12`, with the coordinator's exact uncommitted v518 patch transferred into this detached worktree; no integrated prerequisite SHA exists.
@@ -39,12 +39,12 @@ The transferred v518 prerequisite checks also passed before implementation: the 
 - [Skill tree with zero available points](assets/v519/nopoints.png) — reframed to 540×360 around the existing window.
 - [Hovered Ice Shard with tooltip](assets/v519/hover.png) — full 960×640 capture retained so the complete tooltip remains visible.
 
-The capture driver renders a 960×640 window. The points and no-points evidence crop its top-left 540×360 around the skills panel, removing unused gray fixture canvas without changing pixels inside the panel. The hover evidence remains uncropped because its tooltip extends below the window and needs the full viewport to show all lines. The app's persisted Skills window position on this machine is `(0, 0)`, confirming upper-left placement is the existing draggable runtime window behavior, not a capture-only offset. The accepted spec requires readability within the existing window and does not require viewport-wide width. Original full captures remain in ignored `.artifacts/screenshots/20261001-213921/skill-tree/`.
+The capture driver renders a 960×640 window. The points and no-points evidence crop its top-left 540×360 around the skills panel, removing unused gray fixture canvas without changing pixels inside the panel. The hover evidence remains uncropped because its tooltip extends below the window and needs the full viewport to show all lines. The app's persisted Skills window position on this machine is `(0, 0)`, confirming upper-left placement is the existing draggable runtime window behavior, not a capture-only offset. The accepted spec requires readability within the existing window and does not require viewport-wide width. All final renderer evidence is preserved under `docs/as-built/assets/v519/`.
 
 The captures were inspected for state contrast, connector distinction, text fit, tooltip legibility, selection/hover separation, and clipping. The fixtures use the existing icon renderer and shared theme; they are deterministic presentation evidence and do not claim performance or broad gameplay proof. The visible bot scenario covers the live interaction path.
 
 ## Handoff limits
 
-- The worktree is detached and uncommitted. v518's transferred patch remains staged; v519 changes are unstaged/untracked. The coordinator owns dependency integration, combined CI, lifecycle documents, and batch closeout.
+- All v519 source, tests, theme tokens, localized text, documentation, and captures are included in the integrated batch commit. No dependency changes or deleted paths remain outside the commit.
 - Godot reports resource-leak warnings at shutdown after the passing bot run. No frame-time or draw-call A/B was run because this is a presentation-only style change.
 - No known behavior or shared-file integration blocker remains. The full changed/untracked path list and ignored generated evidence are reported in the task handoff.

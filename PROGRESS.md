@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-02 (v522–v531 dungeon-structure batch integrated; repeated 240-floor generation audit was byte-identical; combined `make ci` passed in 21m23s; `make ci-full` not run)
+Last updated: 2026-10-02 (v531 review landed; 240-floor generation audit repeated byte-identically; combined `make ci` passed in 21m23s; `make ci-full` not run)
 
 ---
 
@@ -24,9 +24,9 @@ Last updated: 2026-10-02 (v522–v531 dungeon-structure batch integrated; repeat
 | Field | Value |
 |-------|-------|
 | **Latest completed slice** | v531 — [multi-seed dungeon generation audit](docs/as-built/v531_generation-audit.md); the v522–v531 batch delivered room-first layouts, varied room footprints and topology, corridors, doors, wall continuity, room roles and pack composition. The 240-floor audit repeated byte-identically, and combined `make ci` passed. |
-| **Next slice** | Run `$review` on v531, then `$refactor`; propose the next batch with `$next` after that handoff. `make ci-full` was not run for v522–v531. |
+| **Next slice** | Complete `$refactor` from the v531 review, then propose the next batch with `$next`. `make ci-full` was not run for v522–v531. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
-| **Last engineering review** | v520 — [`docs/reviews/20261001_v520-overview.md`](docs/reviews/20261001_v520-overview.md) (2026-10-01; batch review, overall 7.9; combined `make ci` passed, `make ci-full` not run) |
+| **Last engineering review** | v531 — [`docs/reviews/20261002_v531-overview.md`](docs/reviews/20261002_v531-overview.md) (2026-10-02; batch review, overall 7.7; combined `make ci` passed, `make ci-full` not run) |
 | **Next engineering review** | After the next coordinated batch or ~10-slice standalone milestone; run `$refactor` before `$next`. |
 
 
@@ -86,7 +86,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v522–v531 evidence limits:** combined `make ci` passed and the fixed 20-seed × 12-level generation audit repeated byte-identically with zero failures/findings. This sample is not exhaustive, does not prove player-perceived map quality, combat balance, or performance, and `make ci-full` was not run. The generated-door visual scenario replay matched but Godot emitted resource/ObjectDB shutdown leak warnings; no screenshot was retained as door-appearance proof.
+- **v531 `$review` (batch; supersedes v520):** [`docs/reviews/20261002_v531-overview.md`](docs/reviews/20261002_v531-overview.md). Prioritize source-tick preservation in coalesced bot events, splitting the 1,055-line dungeon encounter composer (the maintainability ratchet currently fails), and sanitizing database/replay errors before logging. Larger follow-ups: bound/cancel replay work, define durable input acceptance, pin replay rules/content, and automate Go struct/schema parity. The 20-seed × 12-level audit repeated byte-identically with zero failures/findings; it is not exhaustive, `make ci-full` was not run, and the generated-door visual run emitted Godot shutdown leak warnings without a retained appearance capture.
 
 - **v518–v520 evidence limits:** v520's scenario 77 Town capture is too dark to establish T-wall-face readability; deterministic geometry tests prove connected T coverage. v519's visible client scenario passed on retry after a transient login failure and emitted Godot shutdown resource-leak warnings. No performance A/B or `make ci-full` was run for the batch. Character-sheet redesign was not part of this accepted three-slice batch.
 - **v511–v517 evidence limits:** v512 bosses cost more to draw (about 12–20 draw calls vs 2 in isolation; no in-dungeon A/B) and v517 adds 16 draw calls (108→124; paced probe vsync-capped, weaker GPU untested). v511 has no live in-play champion/rare/unique capture. v513 has no showme suite, no ranged attack clips (no shooter-attributed event), and fog reveals reuse `entity_spawn` (spawn-in can fire on reveal; `spawn.enabled=false` opts out). Shop/stash/market/skills/consumable-bar private style helpers and `stat_tooltip_label.gd` are not yet on `UiTheme`. `main.gd` is 6,654 lines (baseline 6,632 + 22): any growth needs extraction first.

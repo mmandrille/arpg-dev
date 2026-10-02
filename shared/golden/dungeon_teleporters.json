@@ -4,18 +4,33 @@
   "description": "Pinned outcome after town descend to floor -3, discover the floor -3 teleporter, return to town, then teleport back to floor -3.",
   "discover_descend_teleport": {
     "expected_level": -3,
-    "expected_player_position": { "x": 13, "y": 37 },
+    "expected_player_position": {
+      "x": 8,
+      "y": 13
+    },
     "discovered_teleporters": [
-      { "level": -3, "discovered": true },
-      { "level": 0, "discovered": true }
+      {
+        "level": -3,
+        "discovered": true
+      },
+      {
+        "level": 0,
+        "discovered": true
+      }
     ]
   },
   "visited_undiscovered_target": {
     "description": "After visiting -4, teleport from -3 to -4 is rejected because floor -4 has no discovered teleporter.",
     "reject_reason": "target_level_not_discovered",
     "discovered_teleporters": [
-      { "level": -3, "discovered": true },
-      { "level": 0, "discovered": true }
+      {
+        "level": -3,
+        "discovered": true
+      },
+      {
+        "level": 0,
+        "discovered": true
+      }
     ]
   }
 }

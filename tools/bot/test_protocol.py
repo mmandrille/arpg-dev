@@ -432,11 +432,15 @@ def test_load_scenarios_dungeon_levels_returns_to_matching_stair():
 	dungeon = next(s for s in scenarios if s.id == "dungeon_levels")
 
 	assert dungeon.world_id == "dungeon_levels"
-	assert dungeon.steps[:3] == [
-		{"action": "use_stair", "direction": "down", "max_ticks": 80},
-		{"action": "use_stair", "direction": "down", "max_ticks": 360},
-		{"action": "use_stair", "direction": "up", "max_ticks": 360},
-	]
+	assert [
+		(step["action"], step.get("direction"))
+		for step in dungeon.steps
+		if step["action"] == "use_stair"
+	] == [("use_stair", "down"), ("use_stair", "down"), ("use_stair", "up")]
+	assert sum(
+		step["action"] == "action_entity" and step.get("interactable_def_id") == "wooden_door"
+		for step in dungeon.steps
+	) == 2
 	assert dungeon.steps[-1] == {
 		"action": "assert_player_at_used_stair",
 		"direction": "down",

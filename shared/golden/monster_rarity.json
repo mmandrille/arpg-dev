@@ -158,13 +158,13 @@
           "max_hp": 14,
           "attack_damage": {
             "min": 2,
-            "max": 2
+            "max": 4
           },
           "armor": 5,
           "hit_chance": 0.64,
           "crit_chance": 0.085,
           "block_percent": 13,
-          "attack_cooldown_ticks": 36,
+          "attack_cooldown_ticks": 15,
           "xp_reward": 15
         },
         {

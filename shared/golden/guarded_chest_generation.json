@@ -6,18 +6,21 @@
     {
       "name": "no_chest",
       "seed": "chest_seed_custom_4",
-      "expected_chest": null,
-      "expected_monster_count": 8
+      "expected_monster_count": 8,
+      "expected_chest": null
     },
     {
       "name": "guarded_chest",
       "seed": "chest_seed_guarded_custom_153",
+      "expected_monster_count": 10,
       "expected_chest": {
         "interactable_def_id": "treasure_chest",
         "loot_table": "guarded_chest_drop_depth_1",
-        "position": { "x": 79, "y": 36 }
-      },
-      "expected_monster_count": 10
+        "position": {
+          "x": 22,
+          "y": 42
+        }
+      }
     }
   ]
 }

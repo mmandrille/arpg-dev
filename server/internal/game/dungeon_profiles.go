@@ -6,9 +6,11 @@ import (
 )
 
 type DungeonFloorProfile struct {
-	MinDepth  int              `json:"min_depth"`
-	MaxDepth  *int             `json:"max_depth"`
-	FloorSize DungeonFloorSize `json:"floor_size"`
+	MinDepth    int              `json:"min_depth"`
+	MaxDepth    *int             `json:"max_depth"`
+	FloorSize   DungeonFloorSize `json:"floor_size"`
+	RoomSizeMin *Vec2            `json:"room_size_min,omitempty"`
+	RoomSizeMax *Vec2            `json:"room_size_max,omitempty"`
 }
 
 type AreaCountFormula struct {
@@ -40,18 +42,29 @@ type RoomLayoutRules struct {
 }
 
 type RoomCorridorPCGRules struct {
-	Enabled                bool     `json:"enabled"`
-	MaxAttempts            int      `json:"max_attempts"`
-	RoomCount              IntRange `json:"room_count"`
-	HubRoomEnabled         bool     `json:"hub_room_enabled"`
-	HubSizeMultiplier      float64  `json:"hub_size_multiplier"`
-	RoomSizeMin            Vec2     `json:"room_size_min"`
-	RoomSizeMax            Vec2     `json:"room_size_max"`
-	RoomSpacing            float64  `json:"room_spacing"`
-	CorridorWidth          float64  `json:"corridor_width"`
-	LoopEdgeCount          IntRange `json:"loop_edge_count"`
-	MarginFromPerimeter    float64  `json:"margin_from_perimeter"`
-	DisableObstacleScatter bool     `json:"disable_obstacle_scatter"`
+	Enabled                bool                   `json:"enabled"`
+	MaxAttempts            int                    `json:"max_attempts"`
+	RoomCount              IntRange               `json:"room_count"`
+	HubRoomEnabled         bool                   `json:"hub_room_enabled"`
+	HubSizeMultiplier      float64                `json:"hub_size_multiplier"`
+	RoomSizeMin            Vec2                   `json:"room_size_min"`
+	RoomSizeMax            Vec2                   `json:"room_size_max"`
+	RoomSpacing            float64                `json:"room_spacing"`
+	CorridorWidths         []float64              `json:"corridor_widths"`
+	HubDegree              IntRange               `json:"hub_degree"`
+	BranchJunctionCount    IntRange               `json:"branch_junction_count"`
+	LoopEdgeCount          IntRange               `json:"loop_edge_count"`
+	RoomRoles              DungeonRoomRoleRules   `json:"room_roles"`
+	Doors                  RoomThresholdDoorRules `json:"doors"`
+	MarginFromPerimeter    float64                `json:"margin_from_perimeter"`
+	DisableObstacleScatter bool                   `json:"disable_obstacle_scatter"`
+	RoomShapes             []DungeonRoomShapeRule `json:"room_shapes"`
+}
+
+type DungeonRoomShapeRule struct {
+	ID     string `json:"id"`
+	Weight int    `json:"weight"`
+	Cells  []bool `json:"cells"`
 }
 
 func validateRoomCorridorPCGRules(r RoomCorridorPCGRules) error {
@@ -73,14 +86,64 @@ func validateRoomCorridorPCGRules(r RoomCorridorPCGRules) error {
 	if r.RoomSpacing < 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.room_spacing: must be non-negative")
 	}
-	if r.CorridorWidth <= 0 {
-		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.corridor_width: must be positive")
+	if len(r.CorridorWidths) == 0 {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.corridor_widths: at least one width is required")
+	}
+	maxWidth := math.Min(r.RoomSizeMin.X, r.RoomSizeMin.Y) / roomShapeSide
+	seenCorridorWidths := make(map[float64]struct{}, len(r.CorridorWidths))
+	for _, width := range r.CorridorWidths {
+		if width < 2*playerRadius {
+			return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.corridor_widths: every width must fit the player collision diameter")
+		}
+		if width > maxWidth {
+			return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.corridor_widths: every width must fit the narrowest room-shape cell")
+		}
+		if _, exists := seenCorridorWidths[width]; exists {
+			return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.corridor_widths: duplicate width %v", width)
+		}
+		seenCorridorWidths[width] = struct{}{}
+	}
+	if r.HubDegree.Min < 0 || r.HubDegree.Max < r.HubDegree.Min {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.hub_degree: invalid range")
+	}
+	if r.HubRoomEnabled && (r.HubDegree.Min < 1 || r.HubDegree.Max > r.RoomCount.Max-1) {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.hub_degree: enabled hubs need a degree range from 1 to at most room_count.max - 1")
+	}
+	maxBranchJunctions := r.RoomCount.Max
+	if r.HubRoomEnabled {
+		maxBranchJunctions--
+	}
+	if r.BranchJunctionCount.Min < 0 || r.BranchJunctionCount.Max < r.BranchJunctionCount.Min || r.BranchJunctionCount.Max > maxBranchJunctions {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.branch_junction_count: invalid range for room_count")
 	}
 	if r.LoopEdgeCount.Min < 0 || r.LoopEdgeCount.Max < r.LoopEdgeCount.Min {
 		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.loop_edge_count: invalid range")
 	}
+	if r.LoopEdgeCount.Max > roomTopologyLoopCapacity(r.RoomCount.Min) {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.loop_edge_count.max: exceeds the non-tree edge capacity at room_count.min")
+	}
+	feasibleRoomCount := false
+	for roomCount := r.RoomCount.Min; roomCount <= r.RoomCount.Max; roomCount++ {
+		hubIndex := -1
+		if r.HubRoomEnabled {
+			hubIndex = 0
+		}
+		if len(feasibleRoomTopologyChoices(roomCount, hubIndex, r)) > 0 {
+			feasibleRoomCount = true
+			break
+		}
+	}
+	if !feasibleRoomCount {
+		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg topology: hub_degree and branch_junction_count have no feasible connected graph for room_count")
+	}
 	if r.MarginFromPerimeter < 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.room_corridor_pcg.margin_from_perimeter: must be non-negative")
+	}
+	if err := validateDungeonRoomShapes(r.RoomShapes); err != nil {
+		return err
+	}
+	if err := validateDungeonRoomRoleRules(r.RoomRoles, r.RoomCount, r.RoomShapes); err != nil {
+		return err
 	}
 	return nil
 }
@@ -124,6 +187,12 @@ func (d DungeonGenerationRules) RulesForLevel(levelNum int) DungeonGenerationRul
 			continue
 		}
 		out.FloorSize = profile.FloorSize
+		if profile.RoomSizeMin != nil {
+			out.RoomCorridorPCG.RoomSizeMin = *profile.RoomSizeMin
+		}
+		if profile.RoomSizeMax != nil {
+			out.RoomCorridorPCG.RoomSizeMax = *profile.RoomSizeMax
+		}
 		break
 	}
 	return out.withDensityForSize(out.FloorSize)
@@ -171,6 +240,34 @@ func validateDungeonFloorProfiles(profiles []DungeonFloorProfile) error {
 		}
 		if profile.FloorSize.Width < 16 || profile.FloorSize.Height < 10 {
 			return fmt.Errorf("game: invalid rules dungeon_generation.floor_profiles[%d].floor_size: must be at least 16x10", i)
+		}
+		if profile.RoomSizeMin != nil && (profile.RoomSizeMin.X <= 0 || profile.RoomSizeMin.Y <= 0) {
+			return fmt.Errorf("game: invalid rules dungeon_generation.floor_profiles[%d].room_size_min: dimensions must be positive", i)
+		}
+		if profile.RoomSizeMax != nil && (profile.RoomSizeMax.X <= 0 || profile.RoomSizeMax.Y <= 0) {
+			return fmt.Errorf("game: invalid rules dungeon_generation.floor_profiles[%d].room_size_max: dimensions must be positive", i)
+		}
+	}
+	return nil
+}
+
+func validateDungeonFloorProfileRoomSizes(profiles []DungeonFloorProfile, roomRules RoomCorridorPCGRules) error {
+	for i, profile := range profiles {
+		minimum, maximum := roomRules.RoomSizeMin, roomRules.RoomSizeMax
+		if profile.RoomSizeMin != nil {
+			minimum = *profile.RoomSizeMin
+		}
+		if profile.RoomSizeMax != nil {
+			maximum = *profile.RoomSizeMax
+		}
+		if maximum.X < minimum.X || maximum.Y < minimum.Y {
+			return fmt.Errorf("game: invalid rules dungeon_generation.floor_profiles[%d]: room_size_min exceeds room_size_max", i)
+		}
+		maxCorridorWidth := math.Min(minimum.X, minimum.Y) / roomShapeSide
+		for _, width := range roomRules.CorridorWidths {
+			if width > maxCorridorWidth {
+				return fmt.Errorf("game: invalid rules dungeon_generation.floor_profiles[%d].room_size_min: corridor width %v does not fit", i, width)
+			}
 		}
 	}
 	return nil

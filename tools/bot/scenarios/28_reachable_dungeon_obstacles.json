@@ -1,6 +1,6 @@
 {
   "id": "reachable_dungeon_obstacles",
-  "world_id": "generated_wall_lab",
+  "world_id": "generated_wall_reachability_lab",
   "seed": "wall_seed_00",
   "title": "Reachable dungeon obstacles",
   "description": "On a pinned generated dungeon floor, prove structured room walls, water, and holes remain reachable under the player path budget.",

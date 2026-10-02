@@ -1610,39 +1610,135 @@
     },
     "weapon_slot_families_lab": {
       "player": {
-        "position": { "x": 4, "y": 5 }
+        "position": {
+          "x": 4,
+          "y": 5
+        }
       },
       "entities": [
-        { "type": "loot", "item_template_id": "rapier", "position": { "x": 2, "y": 5 } },
-        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 3, "y": 5 } },
-        { "type": "loot", "item_template_id": "falchion", "position": { "x": 4, "y": 5 } },
-        { "type": "loot", "item_template_id": "hunter_bow", "position": { "x": 5, "y": 5 } },
-        { "type": "loot", "item_template_id": "bow", "position": { "x": 6, "y": 5 } },
-        { "type": "loot", "item_template_id": "war_bow", "position": { "x": 7, "y": 5 } }
+        {
+          "type": "loot",
+          "item_template_id": "rapier",
+          "position": {
+            "x": 2,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "long_sword",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "falchion",
+          "position": {
+            "x": 4,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "hunter_bow",
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "bow",
+          "position": {
+            "x": 6,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "war_bow",
+          "position": {
+            "x": 7,
+            "y": 5
+          }
+        }
       ]
     },
     "item_archetype_lab": {
       "player": {
-        "position": { "x": 4, "y": 5 }
+        "position": {
+          "x": 4,
+          "y": 5
+        }
       },
       "entities": [
-        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 2, "y": 5 } },
-        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 3, "y": 5 } },
-        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 4, "y": 5 } },
-        { "type": "loot", "item_template_id": "long_sword", "position": { "x": 5, "y": 5 } }
+        {
+          "type": "loot",
+          "item_template_id": "long_sword",
+          "position": {
+            "x": 2,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "long_sword",
+          "position": {
+            "x": 3,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "long_sword",
+          "position": {
+            "x": 4,
+            "y": 5
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "long_sword",
+          "position": {
+            "x": 5,
+            "y": 5
+          }
+        }
       ]
     },
     "polearm_archetype_lab": {
       "player": {
-        "position": { "x": 11, "y": 18 }
+        "position": {
+          "x": 11,
+          "y": 18
+        }
       },
       "entities": [
-        { "type": "loot", "item_template_id": "spear", "position": { "x": 10, "y": 18 } },
-        { "type": "loot", "item_template_id": "short_spear", "position": { "x": 10, "y": 19 } },
+        {
+          "type": "loot",
+          "item_template_id": "spear",
+          "position": {
+            "x": 10,
+            "y": 18
+          }
+        },
+        {
+          "type": "loot",
+          "item_template_id": "short_spear",
+          "position": {
+            "x": 10,
+            "y": 19
+          }
+        },
         {
           "type": "monster",
           "monster_def_id": "town_training_doll",
-          "position": { "x": 13, "y": 18 }
+          "position": {
+            "x": 13,
+            "y": 18
+          }
         }
       ]
     },
@@ -2624,6 +2720,17 @@
         "position": {
           "x": 26,
           "y": 15
+        }
+      },
+      "entities": []
+    },
+    "generated_wall_reachability_lab": {
+      "mode": "multi_level",
+      "start_level": -1,
+      "player": {
+        "position": {
+          "x": 4,
+          "y": 10
         }
       },
       "entities": []
@@ -5522,6 +5629,17 @@
           }
         }
       ]
+    },
+    "room_door_interaction_lab": {
+      "mode": "multi_level",
+      "start_level": -1,
+      "player": {
+        "position": {
+          "x": 9.5,
+          "y": 29.5
+        }
+      },
+      "entities": []
     }
   }
 }

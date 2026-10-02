@@ -4,9 +4,14 @@
   "seed": "dungeon_levels_fast_247",
   "title": "Dungeon levels",
   "description": "Descend from town to generated level -2, then ascend back to level -1 at the matching down stair.",
+  "max_elapsed_s": 70.0,
   "steps": [
     { "action": "use_stair", "direction": "down", "max_ticks": 80 },
+    { "action": "move_until_in_range", "interactable_def_id": "wooden_door", "stop_distance": 1.5, "max_ticks": 240 },
+    { "action": "action_entity", "interactable_def_id": "wooden_door", "state": "closed", "event_type": "interactable_activated" },
     { "action": "use_stair", "direction": "down", "max_ticks": 360 },
+    { "action": "move_until_in_range", "interactable_def_id": "wooden_door", "state": "closed", "stop_distance": 1.5, "max_ticks": 240 },
+    { "action": "action_entity", "interactable_def_id": "wooden_door", "state": "closed", "event_type": "interactable_activated" },
     { "action": "use_stair", "direction": "up", "max_ticks": 360 },
     { "action": "assert_player_at_used_stair", "direction": "down", "tolerance": 0.001 }
   ],

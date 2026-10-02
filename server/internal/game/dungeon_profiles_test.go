@@ -47,13 +47,24 @@ func TestDungeonDensityFormulasDeriveOrdinaryFloorCounts(t *testing.T) {
 func TestDungeonFloorProfilesApplyToDeeperOrdinaryFloors(t *testing.T) {
 	rules := loadRules(t)
 	base := rules.DungeonGeneration.RulesForLevel(-1)
+	constrained := rules.DungeonGeneration.RulesForLevel(-6)
 	deep := rules.DungeonGeneration.RulesForLevel(-4)
+	deepest := rules.DungeonGeneration.RulesForLevel(-7)
 
 	if deep.FloorSize.Width <= base.FloorSize.Width || deep.FloorSize.Height <= base.FloorSize.Height {
 		t.Fatalf("deep floor size = %.0fx%.0f, want larger than %.0fx%.0f", deep.FloorSize.Width, deep.FloorSize.Height, base.FloorSize.Width, base.FloorSize.Height)
 	}
 	if deep.MonsterPlacement.Count <= base.MonsterPlacement.Count {
 		t.Fatalf("deep monster count = %d, want greater than %d", deep.MonsterPlacement.Count, base.MonsterPlacement.Count)
+	}
+	if base.RoomCorridorPCG.RoomSizeMin != (Vec2{X: 12, Y: 10}) || deep.RoomCorridorPCG.RoomSizeMin != base.RoomCorridorPCG.RoomSizeMin {
+		t.Fatalf("base/deep room minimums = %+v/%+v, want shared configured minimum %+v", base.RoomCorridorPCG.RoomSizeMin, deep.RoomCorridorPCG.RoomSizeMin, Vec2{X: 12, Y: 10})
+	}
+	if constrained.RoomCorridorPCG.RoomSizeMin != (Vec2{X: 10, Y: 8}) {
+		t.Fatalf("level -6 room minimum = %+v, want profile override {10 8}", constrained.RoomCorridorPCG.RoomSizeMin)
+	}
+	if constrained.RoomCorridorPCG.RoomSizeMax != (Vec2{X: 14, Y: 14}) || deepest.RoomCorridorPCG.RoomSizeMax != constrained.RoomCorridorPCG.RoomSizeMax {
+		t.Fatalf("level -6/deep room maximums = %+v/%+v, want profile override {14 14}", constrained.RoomCorridorPCG.RoomSizeMax, deepest.RoomCorridorPCG.RoomSizeMax)
 	}
 	if deep.ObstacleGeneration.TargetGroupCount.Min <= base.ObstacleGeneration.TargetGroupCount.Min {
 		t.Fatalf("deep obstacle groups = %+v, want greater min than %+v", deep.ObstacleGeneration.TargetGroupCount, base.ObstacleGeneration.TargetGroupCount)
@@ -66,6 +77,35 @@ func TestDungeonFloorProfilesApplyToDeeperOrdinaryFloors(t *testing.T) {
 	bossNav := dungeonNavigationForLevel(rules.Navigation, rules.DungeonGeneration, -5)
 	if bossNav.GridBounds.MaxX != int(rules.DungeonGeneration.BossFloor.FloorSize.Width/rules.Navigation.CellSize) {
 		t.Fatalf("boss navigation max x = %d, want compact boss floor", bossNav.GridBounds.MaxX)
+	}
+}
+
+func TestDungeonFloorProfileRoomSizeOverrideValidation(t *testing.T) {
+	roomRules := loadRules(t).DungeonGeneration.RoomCorridorPCG
+	valid := []DungeonFloorProfile{{
+		MinDepth:    6,
+		FloorSize:   DungeonFloorSize{Width: 120, Height: 70},
+		RoomSizeMin: &Vec2{X: 10, Y: 8},
+	}}
+	if err := validateDungeonFloorProfileRoomSizes(valid, roomRules); err != nil {
+		t.Fatalf("valid room-size override rejected: %v", err)
+	}
+	tooLarge := []DungeonFloorProfile{{
+		MinDepth:    6,
+		FloorSize:   DungeonFloorSize{Width: 120, Height: 70},
+		RoomSizeMin: &Vec2{X: roomRules.RoomSizeMax.X + 1, Y: roomRules.RoomSizeMax.Y},
+	}}
+	if err := validateDungeonFloorProfileRoomSizes(tooLarge, roomRules); err == nil {
+		t.Fatal("room-size override above configured maximum was accepted")
+	}
+	tooSmallMax := []DungeonFloorProfile{{
+		MinDepth:    6,
+		FloorSize:   DungeonFloorSize{Width: 120, Height: 70},
+		RoomSizeMin: &Vec2{X: 12, Y: 10},
+		RoomSizeMax: &Vec2{X: 12, Y: 9},
+	}}
+	if err := validateDungeonFloorProfileRoomSizes(tooSmallMax, roomRules); err == nil {
+		t.Fatal("room_size_max smaller than room_size_min was accepted")
 	}
 }
 

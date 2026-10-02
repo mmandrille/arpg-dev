@@ -5712,7 +5712,20 @@ func TestDungeonMonsterGeneration(t *testing.T) {
 				if distance(monster.pos, rules.DungeonGeneration.PlayerSpawn) < placement.MinSpawnDistance {
 					t.Fatalf("level %d monster %d too close to player spawn: %+v", levelNum, i, monster.pos)
 				}
-				if dungeonMonsterPositionBlocked(monster.pos, rules.DungeonGeneration, levelWithoutMonsterIndex(level, i)) {
+				blocked := dungeonMonsterPositionBlocked(monster.pos, rules.DungeonGeneration, levelWithoutMonsterIndex(level, i))
+				if len(level.roomMonsterBudgets) > 0 {
+					without := levelWithoutMonsterIndex(level, i)
+					filteredChests := make([]generatedChest, 0, len(without.chests))
+					for _, chest := range without.chests {
+						if chest.eliteObjective && monsterPackGuardsObjectiveAt(monster.packID, level, chest.pos, rules.DungeonGeneration.EliteObjective.RoomClusterRadius) {
+							continue
+						}
+						filteredChests = append(filteredChests, chest)
+					}
+					without.chests = filteredChests
+					blocked = dungeonRoomPopulationPositionBlocked(monster.pos, rules.DungeonGeneration, without)
+				}
+				if blocked {
 					t.Fatalf("level %d monster %d blocked at %+v", levelNum, i, monster.pos)
 				}
 			}
@@ -5757,15 +5770,28 @@ func TestDungeonMonsterGenerationCreatesDeterministicPacks(t *testing.T) {
 		if len(monsters) < placement.PackSize.Min || len(monsters) > placement.PackSize.Max {
 			t.Fatalf("%s size = %d, want %d..%d", packID, len(monsters), placement.PackSize.Min, placement.PackSize.Max)
 		}
-		frontlineCount := 0
-		rangedCount := 0
+		roomIndex := monsters[0].roomIndex
+		if roomIndex < 0 || roomIndex >= len(level.rooms) {
+			t.Fatalf("%s has invalid room index %d", packID, roomIndex)
+		}
+		var roomRules DungeonRoomEncounterRules
+		foundRoomRules := false
+		for _, configured := range placement.EncounterComposition.RoomRoles {
+			if configured.RoomRole == level.rooms[roomIndex].role {
+				roomRules = configured
+				foundRoomRules = true
+				break
+			}
+		}
+		if !foundRoomRules {
+			t.Fatalf("%s room role %q has no composition rules", packID, level.rooms[roomIndex].role)
+		}
+		roleCounts := map[string]int{}
 		leaderCount := 0
 		for _, monster := range monsters {
-			switch rules.DungeonGeneration.MonsterRole(monster.defID) {
-			case "frontline":
-				frontlineCount++
-			case "ranged":
-				rangedCount++
+			roleCounts[rules.DungeonGeneration.MonsterRole(monster.defID)]++
+			if monster.roomIndex != roomIndex {
+				t.Fatalf("%s spans rooms %d and %d", packID, roomIndex, monster.roomIndex)
 			}
 			if monster.packLeader {
 				leaderCount++
@@ -5774,11 +5800,10 @@ func TestDungeonMonsterGenerationCreatesDeterministicPacks(t *testing.T) {
 				}
 			}
 		}
-		if frontlineCount < placement.PackComposition.FrontlineMin {
-			t.Fatalf("%s frontline count = %d, want at least %d", packID, frontlineCount, placement.PackComposition.FrontlineMin)
-		}
-		if rangedCount > placement.PackComposition.RangedMax {
-			t.Fatalf("%s ranged count = %d, want at most %d", packID, rangedCount, placement.PackComposition.RangedMax)
+		for _, memberRule := range roomRules.MemberRoles {
+			if roleCounts[memberRule.Role] < memberRule.MinCount || roleCounts[memberRule.Role] > memberRule.MaxCount {
+				t.Fatalf("%s role %s count=%d outside configured %d..%d", packID, memberRule.Role, roleCounts[memberRule.Role], memberRule.MinCount, memberRule.MaxCount)
+			}
 		}
 		if leaderCount > 1 {
 			t.Fatalf("%s leader count = %d, want at most 1", packID, leaderCount)
@@ -5795,27 +5820,27 @@ func TestDungeonMonsterGenerationCreatesDeterministicPacks(t *testing.T) {
 
 func TestDungeonMonsterGenerationCanForceElitePackLeaders(t *testing.T) {
 	rules := loadRules(t)
-	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
-	level, err := GenerateDungeonLevel("v79_forced_elite_packs", -1, rules.DungeonGeneration)
-	if err != nil {
-		t.Fatalf("generate: %v", err)
-	}
-	packLeaders := map[string]int{}
-	for _, monster := range level.monsters {
-		if monster.packID == "" || !monster.packLeader {
-			continue
+	for i := range rules.DungeonGeneration.MonsterPlacement.EncounterComposition.RoomRoles {
+		rules.DungeonGeneration.MonsterPlacement.EncounterComposition.RoomRoles[i].EliteChancePercent = 100
+		encounter := rules.DungeonGeneration.MonsterPlacement.EncounterComposition.RoomRoles[i]
+		roles, elite, err := chooseEncounterMemberRoles(NewRNG(SeedToUint64("forced_elite_"+encounter.RoomRole)), encounter, rules.DungeonGeneration.MonsterPlacement.PackSize.Min)
+		if err != nil {
+			t.Fatalf("%s choose roles: %v", encounter.RoomRole, err)
 		}
-		packLeaders[monster.packID]++
-		if monster.rarityID != "champion" {
-			t.Fatalf("%s leader rarity = %s, want champion", monster.packID, monster.rarityID)
+		if !elite {
+			t.Fatalf("%s did not honor forced elite chance", encounter.RoomRole)
 		}
-	}
-	if len(packLeaders) < rules.DungeonGeneration.MonsterPlacement.PackCount.Min {
-		t.Fatalf("elite leaders = %+v, want one per generated pack", packLeaders)
-	}
-	for packID, count := range packLeaders {
-		if count != 1 {
-			t.Fatalf("%s leader count = %d, want 1", packID, count)
+		leaderFound, guardCount := false, 0
+		for _, role := range roles {
+			if role == encounter.LeaderRole {
+				leaderFound = true
+			}
+			if containsEncounterRole(encounter.GuardRoles, role) {
+				guardCount++
+			}
+		}
+		if !leaderFound || guardCount < encounter.MinimumGuardCount {
+			t.Fatalf("%s roles %v violate leader/guard constraints", encounter.RoomRole, roles)
 		}
 	}
 }

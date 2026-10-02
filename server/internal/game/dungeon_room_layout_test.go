@@ -1,6 +1,8 @@
 package game
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestPlaceRoomLayout_DividersPresent(t *testing.T) {
 	rules := loadRules(t)
@@ -130,7 +132,14 @@ func TestFinalizeGeneratedDungeonLevel_MonsterPresent(t *testing.T) {
 	}
 	start := generatedReachabilityStart(rules.DungeonGeneration.RulesForLevel(-1), level)
 	for _, target := range generatedReachabilityTargets(level) {
-		if !generatedTargetReachableFrom(rules.DungeonGeneration.RulesForLevel(-1), level, start, target.pos) {
+		reachable := generatedTargetReachableFrom(rules.DungeonGeneration.RulesForLevel(-1), level, start, target.pos)
+		if target.kind == woodenDoorDefID {
+			rulesForLevel := rules.DungeonGeneration.RulesForLevel(-1)
+			nav := generatedDungeonNavigation(rulesForLevel)
+			blockedGrid := buildDungeonBlockedGrid(nav, level)
+			reachable = generatedDoorReachableFromNav(nav, blockedGrid.blocked, start, target.pos)
+		}
+		if !reachable {
 			t.Errorf("target %s at %+v unreachable from %+v", target.kind, target.pos, start)
 		}
 	}

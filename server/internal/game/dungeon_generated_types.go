@@ -6,17 +6,23 @@ type corridorZone struct {
 }
 
 type generatedDungeonLevel struct {
-	levelNum      int
-	walls         []wallObstacle
-	corridorZones []corridorZone
-	rooms         []dungeonRoom
-	stairs        []generatedStair
-	teleporters   []generatedTeleporter
-	chests        []generatedChest
-	doors         []generatedDoor
-	monsters      []generatedMonster
-	loot          []generatedLoot
-	stewardHunt   *generatedStewardHunt
+	levelNum                     int
+	walls                        []wallObstacle
+	corridorZones                []corridorZone
+	corridorEdges                []roomEdge
+	corridorRoutes               []roomCorridorRoute
+	rooms                        []dungeonRoom
+	stairs                       []generatedStair
+	teleporters                  []generatedTeleporter
+	chests                       []generatedChest
+	doors                        []generatedDoor
+	monsters                     []generatedMonster
+	roomMonsterBudgets           []dungeonRoomPopulationBudget
+	reservedEliteObjectivePos    *Vec2
+	eliteObjectiveChanceResolved bool
+	eliteObjectiveChancePassed   bool
+	loot                         []generatedLoot
+	stewardHunt                  *generatedStewardHunt
 }
 
 type generatedStair struct {
@@ -53,6 +59,7 @@ type generatedLoot struct {
 type generatedMonster struct {
 	defID             string
 	packID            string
+	roomIndex         int
 	packLeader        bool
 	rarityID          string
 	bossTemplate      string

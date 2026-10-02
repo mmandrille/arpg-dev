@@ -16,7 +16,7 @@ client/tests/test_client_bot.gd	1153	# v334 client-bot: bot exit cleanup helpers
 client/tests/test_coop_client.gd	1721	# v392: class creation feature panel tests
 client/tests/test_golden.gd	686
 client/tests/test_status_effect_presentation.gd	606	# v467: existing status-effect presentation coverage is over the new-file target; split with future status-effect test refactor
-server/internal/game/dungeon_gen.go	1055
+server/internal/game/dungeon_gen.go	926	# v526/v528: extracted dungeon reachability helpers to dungeon_generation_reachability.go
 server/internal/game/game_test.go	7948	# refactor: TestValidateSkillRules moved to skill_rules_validation_test.go
 server/internal/game/handlers.go	1487	# v455 combat skill budget defer hooks on cast_skill and projectile spawn
 server/internal/game/rules.go	2813	# v460: potion drop kind uses entry roll without extra RNG; further TC validators remain in-file

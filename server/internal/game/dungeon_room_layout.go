@@ -11,18 +11,68 @@ import (
 // chests, water, holes, and final reachability validation.
 func finalizeGeneratedDungeonLevel(
 	seed string,
-	rng, monsterDefRNG, rarityRNG, eliteObjectiveRNG *RNG,
+	rng, chestRNG, monsterDefRNG, rarityRNG, eliteObjectiveRNG *RNG,
 	rules DungeonGenerationRules,
+	lootBand DungeonLootBand,
 	out *generatedDungeonLevel,
 ) error {
-	if err := placeRoomLayout(seed, rules, out); err != nil {
-		return err
+	if rules.RoomCorridorPCG.Enabled {
+		if err := placeRoomLayout(seed, rules, out); err != nil {
+			return err
+		}
+		if err := placeRoomCorridorAnchors(
+			seed,
+			NewRNG(roomCorridorAnchorSeed(seed, "stairs", out.levelNum)),
+			NewRNG(roomCorridorAnchorSeed(seed, "teleporter", out.levelNum)),
+			chestRNG,
+			rules,
+			lootBand,
+			out,
+		); err != nil {
+			return err
+		}
+		if err := validateGeneratedDungeonReachability(rules, *out); err != nil {
+			return err
+		}
+	} else {
+		if err := placeLegacyDungeonAnchors(seed, rng, chestRNG, rules, lootBand, out); err != nil {
+			return err
+		}
+		if err := placeRoomLayout(seed, rules, out); err != nil {
+			return err
+		}
 	}
 	if err := placeDungeonObstacles(seed, rules, out); err != nil {
 		return err
 	}
-	if err := placeDungeonMonsters(rng, monsterDefRNG, rarityRNG, rules, out); err != nil {
-		return err
+	monsterCount := rules.MonsterPlacement.Count
+	if len(out.chests) > 0 {
+		monsterCount += rules.ChestPlacement.MonsterCountBonus
+	}
+	packSizes := randomMonsterPackSizes(rng, rules.MonsterPlacement, monsterCount)
+	reserveEliteObjectiveChestPosition(eliteObjectiveRNG, rules, out)
+	roomPopulationRNG := NewRNG(SeedToUint64(seed + "|room_population|" + strconv.Itoa(absInt(out.levelNum))))
+	encounterCompositionRNG := NewRNG(SeedToUint64(seed + "|encounter_composition|" + strconv.Itoa(absInt(out.levelNum))))
+	encounterPlacementRNG := NewRNG(SeedToUint64(seed + "|encounter_placement|" + strconv.Itoa(absInt(out.levelNum))))
+	if err := placeDungeonMonstersWithPackSizes(rng, monsterDefRNG, rarityRNG, roomPopulationRNG, encounterCompositionRNG, encounterPlacementRNG, rules, out, packSizes); err != nil {
+		if out.reservedEliteObjectivePos == nil {
+			return err
+		}
+		out.reservedEliteObjectivePos = nil
+		out.eliteObjectiveChancePassed = false
+		if retryErr := placeDungeonMonstersWithPackSizes(
+			NewRNG(SeedToUint64(seed+"|monster_fallback_without_objective|"+strconv.Itoa(absInt(out.levelNum)))),
+			monsterDefRNG,
+			rarityRNG,
+			NewRNG(SeedToUint64(seed+"|room_population_without_objective|"+strconv.Itoa(absInt(out.levelNum)))),
+			NewRNG(SeedToUint64(seed+"|encounter_composition_without_objective|"+strconv.Itoa(absInt(out.levelNum)))),
+			NewRNG(SeedToUint64(seed+"|encounter_placement_without_objective|"+strconv.Itoa(absInt(out.levelNum)))),
+			rules,
+			out,
+			packSizes,
+		); retryErr != nil {
+			return fmt.Errorf("%w (retry without optional elite objective reservation: %v)", err, retryErr)
+		}
 	}
 	if err := maybePlaceEliteObjectiveChest(eliteObjectiveRNG, rules, out); err != nil {
 		return err
@@ -33,7 +83,11 @@ func finalizeGeneratedDungeonLevel(
 	if err := placeDungeonHoles(seed, rules, out); err != nil {
 		return err
 	}
-	return validateGeneratedDungeonReachability(rules, *out)
+	placeRoomThresholdDoors(seed, rules, out)
+	if err := validateGeneratedDungeonReachability(rules, *out); err != nil {
+		return err
+	}
+	return validateRoomEncounterPlacement(rules, *out)
 }
 
 // placeRoomLayout adds structured room-corridor PCG or legacy cross-floor divider walls.
@@ -126,7 +180,7 @@ func randomHorizontalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObst
 	}
 
 	return wallSegmentsForHorizontalDivider(startX, endX, y, thickness, r.CorridorWidth, gapCenters),
-		corridorZonesForHorizontalGaps(gapCenters, y, r.CorridorWidth, thickness, rules.MonsterPlacement.PackMemberRadius),
+		corridorZonesForHorizontalGaps(gapCenters, y, r.CorridorWidth, thickness, 0),
 		true
 }
 
@@ -164,7 +218,7 @@ func randomVerticalDivider(rng *RNG, rules DungeonGenerationRules) ([]wallObstac
 	}
 
 	return wallSegmentsForVerticalDivider(startY, endY, x, thickness, r.CorridorWidth, gapCenters),
-		corridorZonesForVerticalGaps(gapCenters, x, r.CorridorWidth, thickness, rules.MonsterPlacement.PackMemberRadius),
+		corridorZonesForVerticalGaps(gapCenters, x, r.CorridorWidth, thickness, 0),
 		true
 }
 

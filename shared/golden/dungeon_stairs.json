@@ -1,23 +1,50 @@
 {
   "seed": "0011223344556677",
   "levels": {
-    "0": {
-      "stairs_down": { "x": 11, "y": 12 },
-      "teleporter": { "x": 13, "y": 12 }
-    },
     "-1": {
-      "stairs_up": { "x": 4, "y": 10 },
-      "stairs_down": { "x": 55, "y": 4 }
+      "stairs_down": {
+        "x": 32,
+        "y": 18
+      },
+      "stairs_up": {
+        "x": 4,
+        "y": 10
+      }
     },
     "-2": {
-      "stairs_up": { "x": 93, "y": 35 },
-      "stairs_down": { "x": 71, "y": 13 },
+      "stairs_down": {
+        "x": 15,
+        "y": 45
+      },
+      "stairs_up": {
+        "x": 10,
+        "y": 11
+      },
       "loot": []
     },
     "-3": {
-      "stairs_up": { "x": 67, "y": 35 },
-      "stairs_down": { "x": 17, "y": 20 },
-      "teleporter": { "x": 12, "y": 37 }
+      "stairs_down": {
+        "x": 12,
+        "y": 37
+      },
+      "stairs_up": {
+        "x": 5,
+        "y": 9
+      },
+      "teleporter": {
+        "x": 7,
+        "y": 13
+      }
+    },
+    "0": {
+      "stairs_down": {
+        "x": 11,
+        "y": 12
+      },
+      "teleporter": {
+        "x": 13,
+        "y": 12
+      }
     }
   },
   "descend_then_ascend": {

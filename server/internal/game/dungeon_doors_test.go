@@ -25,7 +25,7 @@ func TestGeneratedDungeonDoorGeneration(t *testing.T) {
 		if door.defID != woodenDoorDefID || door.state != interactableClosed {
 			t.Fatalf("generated door = %+v, want closed wooden door", door)
 		}
-		if !generatedTargetReachable(rules.DungeonGeneration.RulesForLevel(level.levelNum), level, door.pos) {
+		if !generatedDoorReachable(rules.DungeonGeneration.RulesForLevel(level.levelNum), level, door.pos) {
 			t.Fatalf("generated door unreachable: %+v", door)
 		}
 	}

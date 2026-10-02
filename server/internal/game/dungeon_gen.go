@@ -33,48 +33,7 @@ func GenerateDungeonLevel(seed string, levelNum int, rules DungeonGenerationRule
 		return generateBossDungeonLevel(seed, levelNum, rules, lootBand)
 	}
 
-	down, ok := randomStairPosition(rng, rules, nil)
-	if !ok {
-		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place down stairs", levelNum)
-	}
-	if levelNum == -1 {
-		out.stairs = append(out.stairs,
-			generatedStair{defID: stairsUpDefID, pos: rules.PlayerSpawn},
-			generatedStair{defID: stairsDownDefID, pos: down},
-		)
-		if err := addCadencedTeleporter(rng, rules, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		if err := maybePlaceRandomQuestRewardChest(seed, rules, lootBand, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		if err := finalizeGeneratedDungeonLevel(seed, rng, monsterDefRNG, rarityRNG, eliteObjectiveRNG, rules, &out); err != nil {
-			return generatedDungeonLevel{}, err
-		}
-		return out, nil
-	}
-
-	up, ok := randomStairPosition(rng, rules, &down)
-	if !ok {
-		return generatedDungeonLevel{}, fmt.Errorf("game: generate dungeon level %d: could not place up stairs", levelNum)
-	}
-	out.stairs = append(out.stairs,
-		generatedStair{defID: stairsUpDefID, pos: up},
-		generatedStair{defID: stairsDownDefID, pos: down},
-	)
-	if err := addCadencedTeleporter(rng, rules, &out); err != nil {
-		return generatedDungeonLevel{}, err
-	}
-	if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, &out); err != nil {
-		return generatedDungeonLevel{}, err
-	}
-	if err := maybePlaceRandomQuestRewardChest(seed, rules, lootBand, &out); err != nil {
-		return generatedDungeonLevel{}, err
-	}
-	if err := finalizeGeneratedDungeonLevel(seed, rng, monsterDefRNG, rarityRNG, eliteObjectiveRNG, rules, &out); err != nil {
+	if err := finalizeGeneratedDungeonLevel(seed, rng, chestRNG, monsterDefRNG, rarityRNG, eliteObjectiveRNG, rules, lootBand, &out); err != nil {
 		return generatedDungeonLevel{}, err
 	}
 	return out, nil
@@ -94,6 +53,35 @@ func addCadencedTeleporter(rng *RNG, rules DungeonGenerationRules, out *generate
 	}
 	out.teleporters = append(out.teleporters, generatedTeleporter{defID: teleporterDefID, pos: teleporter})
 	return nil
+}
+
+func placeLegacyDungeonAnchors(seed string, rng, chestRNG *RNG, rules DungeonGenerationRules, lootBand DungeonLootBand, out *generatedDungeonLevel) error {
+	down, ok := randomStairPosition(rng, rules, nil)
+	if !ok {
+		return fmt.Errorf("game: generate dungeon level %d: could not place down stairs", out.levelNum)
+	}
+	if out.levelNum == -1 {
+		out.stairs = append(out.stairs,
+			generatedStair{defID: stairsUpDefID, pos: rules.PlayerSpawn},
+			generatedStair{defID: stairsDownDefID, pos: down},
+		)
+	} else {
+		up, found := randomStairPosition(rng, rules, &down)
+		if !found {
+			return fmt.Errorf("game: generate dungeon level %d: could not place up stairs", out.levelNum)
+		}
+		out.stairs = append(out.stairs,
+			generatedStair{defID: stairsUpDefID, pos: up},
+			generatedStair{defID: stairsDownDefID, pos: down},
+		)
+	}
+	if err := addCadencedTeleporter(rng, rules, out); err != nil {
+		return err
+	}
+	if err := maybePlaceGuardedChest(chestRNG, rules, lootBand, out); err != nil {
+		return err
+	}
+	return maybePlaceRandomQuestRewardChest(seed, rules, lootBand, out)
 }
 
 func dungeonLevelHasTeleporter(levelNum int) bool {
@@ -557,10 +545,40 @@ func randomChestPosition(rng *RNG, rules DungeonGenerationRules, out *generatedD
 	if maxX < minX || maxY < minY {
 		return Vec2{}, false
 	}
+	roomPositions := []Vec2(nil)
+	if rules.RoomCorridorPCG.Enabled && rules.RoomCorridorPCG.RoomRoles.Enabled {
+		role := rules.RoomCorridorPCG.RoomRoles.PlacementRoles.Chest
+		roomPositions = roomInteriorCandidates(
+			out.rooms,
+			roomIndicesWithRole(out.rooms, role),
+			math.Max(playerRadius+0.1, rules.MonsterPlacement.MarginFromWall),
+			rules.FloorSize,
+		)
+		shuffleDungeonPositions(rng, roomPositions)
+	}
 	for attempt := 0; attempt < placement.MaxAttempts; attempt++ {
-		pos := Vec2{
-			X: float64(minX + rng.IntN(maxX-minX+1)),
-			Y: float64(minY + rng.IntN(maxY-minY+1)),
+		var pos Vec2
+		if rules.RoomCorridorPCG.Enabled && rules.RoomCorridorPCG.RoomRoles.Enabled {
+			if attempt >= len(roomPositions) {
+				break
+			}
+			pos = roomPositions[attempt]
+		} else if rules.RoomCorridorPCG.Enabled {
+			if len(out.rooms) == 0 {
+				continue
+			}
+			room := out.rooms[rng.IntN(len(out.rooms))]
+			margin := math.Max(playerRadius+0.1, rules.MonsterPlacement.MarginFromWall)
+			var ok bool
+			pos, ok = randomRoomInteriorPosition(rng, room, margin, rules.FloorSize)
+			if !ok {
+				continue
+			}
+		} else {
+			pos = Vec2{
+				X: float64(minX + rng.IntN(maxX-minX+1)),
+				Y: float64(minY + rng.IntN(maxY-minY+1)),
+			}
 		}
 		blocked := false
 		for _, stair := range out.stairPositions() {
@@ -590,18 +608,38 @@ func randomChestPosition(rng *RNG, rules DungeonGenerationRules, out *generatedD
 		if blocked {
 			continue
 		}
+		if rules.RoomCorridorPCG.Enabled && !roomAnchorReachableFromStart(rules, out, pos) {
+			continue
+		}
 		return pos, true
 	}
 	return Vec2{}, false
 }
 
-func placeDungeonMonsters(rng *RNG, defRNG *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
+func placeDungeonMonsters(rng *RNG, defRNG *RNG, rarityRNG *RNG, roomPopulationRNG *RNG, encounterRNG *RNG, encounterPlacementRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
 	placement := rules.MonsterPlacement
 	count := placement.Count
 	if len(out.chests) > 0 {
 		count += rules.ChestPlacement.MonsterCountBonus
 	}
 	packSizes := randomMonsterPackSizes(rng, placement, count)
+	return placeDungeonMonstersWithPackSizes(rng, defRNG, rarityRNG, roomPopulationRNG, encounterRNG, encounterPlacementRNG, rules, out, packSizes)
+}
+
+func placeDungeonMonstersWithPackSizes(rng, defRNG, rarityRNG, roomPopulationRNG, encounterRNG, encounterPlacementRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, packSizes []int) error {
+	placement := rules.MonsterPlacement
+	count := 0
+	for _, size := range packSizes {
+		count += size
+	}
+	budgets, err := allocateDungeonRoomPopulationBudgets(roomPopulationRNG, rules, *out, packSizes)
+	if err != nil {
+		return err
+	}
+	out.roomMonsterBudgets = budgets
+	if len(budgets) > 0 {
+		return placeRoomEncounterMonsters(encounterPlacementRNG, encounterRNG, rarityRNG, rules, out, budgets, packSizes)
+	}
 	defIDs := make([]string, 0, count)
 	for _, minimum := range placement.MinimumMonsters {
 		for i := 0; i < minimum.Count && len(defIDs) < count; i++ {
@@ -745,7 +783,7 @@ func placeGeneratedMonsterPack(rng *RNG, rarityRNG *RNG, rules DungeonGeneration
 					break
 				}
 			}
-			if err := appendGeneratedMonster(rng, rarityRNG, rules, &candidate, defID, packID, i == leaderIndex, pos); err != nil {
+			if err := appendGeneratedMonster(rng, rarityRNG, rules, &candidate, defID, packID, i == leaderIndex, pos, -1, true); err != nil {
 				return err
 			}
 			placed = append(placed, pos)
@@ -758,7 +796,7 @@ func placeGeneratedMonsterPack(rng *RNG, rarityRNG *RNG, rules DungeonGeneration
 	return fmt.Errorf("game: generate dungeon level %d: could not place %s", out.levelNum, packID)
 }
 
-func appendGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defID string, packID string, leader bool, pos Vec2) error {
+func appendGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, defID string, packID string, leader bool, pos Vec2, roomIndex int, spawnChampionMinions bool) error {
 	rarity := rules.RollMonsterRarity(rarityRNG)
 	if leader {
 		if champion, ok := rules.MonsterRarity("champion"); ok {
@@ -773,13 +811,14 @@ func appendGeneratedMonster(rng *RNG, rarityRNG *RNG, rules DungeonGenerationRul
 	out.monsters = append(out.monsters, generatedMonster{
 		defID:      defID,
 		packID:     packID,
+		roomIndex:  roomIndex,
 		packLeader: leader,
 		rarityID:   rarity.ID,
 		lootTable:  effectiveLootBand.MonsterLootTable,
 		pos:        pos,
 	})
-	if rarity.ID == "champion" && !leader {
-		if err := placeChampionCommonMinions(rng, rules, out, pos); err != nil {
+	if spawnChampionMinions && rarity.ID == "champion" && !leader {
+		if err := placeChampionCommonMinions(rng, rules, out, pos, roomIndex); err != nil {
 			return err
 		}
 	}
@@ -832,7 +871,7 @@ func rollDungeonMonsterDef(rng *RNG, placement MonsterPlacementRules) string {
 	return placement.MonsterDefID
 }
 
-func placeChampionCommonMinions(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, championPos Vec2) error {
+func placeChampionCommonMinions(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, championPos Vec2, roomIndex int) error {
 	common, ok := rules.MonsterRarity("common")
 	if !ok {
 		return fmt.Errorf("game: generate dungeon level %d: missing common monster rarity", out.levelNum)
@@ -843,12 +882,13 @@ func placeChampionCommonMinions(rng *RNG, rules DungeonGenerationRules, out *gen
 		return fmt.Errorf("game: generate dungeon level %d: missing common minion loot band for effective depth %d", out.levelNum, effectiveDepth)
 	}
 	for i := 0; i < championCommonMinionCount; i++ {
-		pos, ok := randomChampionMinionPosition(rng, rules, out, championPos)
+		pos, ok := randomChampionMinionPosition(rng, rules, out, championPos, roomIndex)
 		if !ok {
 			return nil
 		}
 		out.monsters = append(out.monsters, generatedMonster{
 			defID:     rules.MonsterPlacement.MonsterDefID,
+			roomIndex: roomIndex,
 			rarityID:  common.ID,
 			lootTable: effectiveLootBand.MonsterLootTable,
 			pos:       pos,
@@ -857,7 +897,7 @@ func placeChampionCommonMinions(rng *RNG, rules DungeonGenerationRules, out *gen
 	return nil
 }
 
-func randomChampionMinionPosition(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, championPos Vec2) (Vec2, bool) {
+func randomChampionMinionPosition(rng *RNG, rules DungeonGenerationRules, out *generatedDungeonLevel, championPos Vec2, roomIndex int) (Vec2, bool) {
 	ringDistance := math.Max(rules.MonsterPlacement.MarginFromWall+0.5, 2.5)
 	baseOffsets := []Vec2{
 		{X: ringDistance, Y: 0},
@@ -872,6 +912,9 @@ func randomChampionMinionPosition(rng *RNG, rules DungeonGenerationRules, out *g
 	for i := 0; i < len(baseOffsets); i++ {
 		offset := baseOffsets[(start+i)%len(baseOffsets)]
 		pos := Vec2{X: championPos.X + offset.X, Y: championPos.Y + offset.Y}
+		if roomIndex >= 0 && (roomIndex >= len(out.rooms) || !roomContainsCircle(out.rooms[roomIndex], pos, rules.MonsterPlacement.MarginFromWall)) {
+			continue
+		}
 		if !dungeonMonsterPositionBlocked(pos, rules, *out) && insideDungeonFloor(pos, rules) && generatedTargetReachable(rules, *out, pos) {
 			return pos, true
 		}
@@ -902,162 +945,4 @@ func randomMonsterPosition(rng *RNG, rules DungeonGenerationRules, out *generate
 		return pos, true
 	}
 	return Vec2{}, false
-}
-
-func dungeonMonsterPositionBlocked(pos Vec2, rules DungeonGenerationRules, out generatedDungeonLevel) bool {
-	placement := rules.MonsterPlacement
-	interactableClearance := math.Max(placement.MarginFromWall, placement.PackMemberRadius*2)
-	if distance(pos, rules.PlayerSpawn) < placement.MinSpawnDistance {
-		return true
-	}
-	for _, stair := range out.stairPositions() {
-		if distance(pos, stair) < interactableClearance {
-			return true
-		}
-	}
-	for _, teleporter := range out.teleporterPositions() {
-		if distance(pos, teleporter) < interactableClearance {
-			return true
-		}
-	}
-	for _, chest := range out.chestPositions() {
-		if distance(pos, chest) < interactableClearance {
-			return true
-		}
-	}
-	for _, door := range out.doorPositions() {
-		if distance(pos, door) < interactableClearance {
-			return true
-		}
-	}
-	for _, monster := range out.monsters {
-		if distance(pos, monster.pos) < placement.MarginFromWall {
-			return true
-		}
-	}
-	for _, wall := range out.walls {
-		if obstacleBlocksMovement(wall) && circleIntersectsAABB(pos, rules.ObstacleGeneration.Clearance.Monster, wall.pos, wall.size) {
-			return true
-		}
-	}
-	if generatedPositionInCorridorZone(pos, placement.PackMemberRadius, out) {
-		return true
-	}
-
-	return false
-}
-
-func validateGeneratedDungeonReachability(rules DungeonGenerationRules, out generatedDungeonLevel) error {
-	start := generatedReachabilityStart(rules, out)
-	nav := generatedDungeonNavigation(rules)
-	blockedGrid := buildDungeonBlockedGrid(nav, out)
-	for _, target := range generatedReachabilityTargets(out) {
-		if !generatedTargetReachableFromNav(nav, blockedGrid.blocked, start, target.pos) {
-			return fmt.Errorf("game: generate dungeon level %d: %s at %.2f,%.2f is unreachable", out.levelNum, target.kind, target.pos.X, target.pos.Y)
-		}
-	}
-
-	return nil
-}
-
-type generatedReachabilityTarget struct {
-	kind string
-	pos  Vec2
-}
-
-func generatedReachabilityTargets(out generatedDungeonLevel) []generatedReachabilityTarget {
-	targets := make([]generatedReachabilityTarget, 0, len(out.stairs)+len(out.teleporters)+len(out.chests)+len(out.doors)+len(out.loot)+len(out.monsters))
-	for _, stair := range out.stairs {
-		targets = append(targets, generatedReachabilityTarget{kind: stair.defID, pos: stair.pos})
-	}
-	for _, teleporter := range out.teleporters {
-		targets = append(targets, generatedReachabilityTarget{kind: teleporter.defID, pos: teleporter.pos})
-	}
-	for _, chest := range out.chests {
-		targets = append(targets, generatedReachabilityTarget{kind: chest.defID, pos: chest.pos})
-	}
-	for _, door := range out.doors {
-		targets = append(targets, generatedReachabilityTarget{kind: door.defID, pos: door.pos})
-	}
-	for _, loot := range out.loot {
-		targets = append(targets, generatedReachabilityTarget{kind: "loot:" + loot.itemDefID, pos: loot.pos})
-	}
-	for _, monster := range out.monsters {
-		targets = append(targets, generatedReachabilityTarget{kind: "monster:" + monster.defID, pos: monster.pos})
-	}
-	return targets
-}
-
-func generatedReachabilityStart(rules DungeonGenerationRules, out generatedDungeonLevel) Vec2 {
-	if out.levelNum == -1 {
-		return rules.PlayerSpawn
-	}
-	for _, stair := range out.stairs {
-		if stair.defID == stairsUpDefID {
-			return stair.pos
-		}
-	}
-	return rules.PlayerSpawn
-}
-
-func generatedTargetReachable(rules DungeonGenerationRules, out generatedDungeonLevel, target Vec2) bool {
-	nav := generatedDungeonNavigation(rules)
-	blockedGrid := buildDungeonBlockedGrid(nav, out)
-
-	return generatedTargetReachableFromNav(nav, blockedGrid.blocked, generatedReachabilityStart(rules, out), target)
-}
-
-func generatedTargetReachableFrom(rules DungeonGenerationRules, out generatedDungeonLevel, start, target Vec2) bool {
-	nav := generatedDungeonNavigation(rules)
-	blockedGrid := buildDungeonBlockedGrid(nav, out)
-
-	return generatedTargetReachableFromNav(nav, blockedGrid.blocked, start, target)
-}
-
-func generatedTargetReachableFromNav(nav NavigationRules, blocked func(gx, gy int) bool, start, target Vec2) bool {
-	if distance(start, target) <= playerRadius {
-		return true
-	}
-	nodeLimit := dungeonReachabilityNodeLimit(nav, start, target)
-	stats := PathSearchStats{NodeLimit: nodeLimit}
-	_, ok := PlanPathWithStats(nav, start, target, blocked, &stats)
-
-	return ok && !stats.LimitExceeded
-}
-
-func generatedDungeonNavigation(rules DungeonGenerationRules) NavigationRules {
-	return NavigationRules{
-		CellSize:     1.0,
-		MaxAutoSteps: int(rules.FloorSize.Width + rules.FloorSize.Height),
-		GridBounds: GridBounds{
-			MinX: 0,
-			MinY: 0,
-			MaxX: int(rules.FloorSize.Width),
-			MaxY: int(rules.FloorSize.Height),
-		},
-	}
-}
-
-func insideDungeonFloor(pos Vec2, rules DungeonGenerationRules) bool {
-	margin := rules.MonsterPlacement.MarginFromWall
-	return pos.X >= margin &&
-		pos.Y >= margin &&
-		pos.X <= rules.FloorSize.Width-margin &&
-		pos.Y <= rules.FloorSize.Height-margin
-}
-
-func dungeonNavigationForLevel(global NavigationRules, gen DungeonGenerationRules, levelNum int) NavigationRules {
-	nav := global
-	size := gen.RulesForLevel(levelNum).FloorSize
-	if isBossFloor(levelNum, gen) && gen.BossFloor.FloorSize.Width > 0 && gen.BossFloor.FloorSize.Height > 0 {
-		size = gen.BossFloor.FloorSize
-	}
-	nav.GridBounds = GridBounds{
-		MinX: 0,
-		MinY: 0,
-		MaxX: int(size.Width / global.CellSize),
-		MaxY: int(size.Height / global.CellSize),
-	}
-	nav.MaxAutoSteps = maxInt(nav.MaxAutoSteps, int(size.Width+size.Height))
-	return nav
 }

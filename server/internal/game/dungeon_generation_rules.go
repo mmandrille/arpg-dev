@@ -29,6 +29,17 @@ type DungeonGenerationRules struct {
 	monsterPackRoles         map[string]string
 }
 
+func validateDungeonGenerationExtendedRules(corridor RoomCorridorPCGRules, profiles []DungeonFloorProfile, placement, basePlacement MonsterPlacementRules, rules *Rules) error {
+	roomRoleCompositionEnabled := corridor.Enabled && corridor.RoomRoles.Enabled
+	if err := validateDungeonEncounterGenerationRules(roomRoleCompositionEnabled, placement, basePlacement, rules); err != nil {
+		return err
+	}
+	if err := validateRoomThresholdDoorRules(corridor.Doors, corridor, rules); err != nil {
+		return err
+	}
+	return validateDungeonFloorProfileRoomSizes(profiles, corridor)
+}
+
 type DungeonFloorSize struct {
 	Width  float64 `json:"width"`
 	Height float64 `json:"height"`
@@ -63,21 +74,45 @@ type TeleporterPlacementRules struct {
 }
 
 type MonsterPlacementRules struct {
-	Count             int                   `json:"-"`
-	MonsterDefID      string                `json:"monster_def_id"`
-	PopulationFormula AreaCountFormula      `json:"population_formula"`
-	PackCount         IntRange              `json:"-"`
-	PackCountFormula  AreaRangeFormula      `json:"pack_count_formula"`
-	PackSize          IntRange              `json:"pack_size"`
-	PackMemberRadius  float64               `json:"pack_member_radius"`
-	PackComposition   PackCompositionRules  `json:"pack_composition"`
-	ElitePackChance   int                   `json:"elite_pack_chance_percent"`
-	EliteAura         *EliteAuraRules       `json:"elite_aura,omitempty"`
-	MonsterPool       []MonsterPoolEntry    `json:"monster_pool,omitempty"`
-	MinimumMonsters   []MinimumMonsterEntry `json:"minimum_monsters,omitempty"`
-	MarginFromWall    float64               `json:"margin_from_wall"`
-	MinSpawnDistance  float64               `json:"min_spawn_distance"`
-	MaxAttempts       int                   `json:"max_attempts"`
+	Count                        int                              `json:"-"`
+	MonsterDefID                 string                           `json:"monster_def_id"`
+	RoomRoleWeights              DungeonRoomPopulationRoleWeights `json:"room_role_weights"`
+	PopulationFormula            AreaCountFormula                 `json:"population_formula"`
+	PackCount                    IntRange                         `json:"-"`
+	PackCountFormula             AreaRangeFormula                 `json:"pack_count_formula"`
+	PackSize                     IntRange                         `json:"pack_size"`
+	PackMemberRadius             float64                          `json:"pack_member_radius"`
+	PackComposition              PackCompositionRules             `json:"pack_composition"`
+	EncounterComposition         DungeonEncounterCompositionRules `json:"encounter_composition"`
+	CompositionSearchNodeLimit   int                              `json:"composition_search_node_limit"`
+	CompositionFormationsPerPack int                              `json:"composition_formations_per_pack"`
+	ElitePackChance              int                              `json:"elite_pack_chance_percent"`
+	EliteAura                    *EliteAuraRules                  `json:"elite_aura,omitempty"`
+	MonsterPool                  []MonsterPoolEntry               `json:"monster_pool,omitempty"`
+	MinimumMonsters              []MinimumMonsterEntry            `json:"minimum_monsters,omitempty"`
+	MarginFromWall               float64                          `json:"margin_from_wall"`
+	MinSpawnDistance             float64                          `json:"min_spawn_distance"`
+	MaxAttempts                  int                              `json:"max_attempts"`
+}
+
+type DungeonEncounterCompositionRules struct {
+	RoomRoles []DungeonRoomEncounterRules `json:"room_roles"`
+}
+
+type DungeonRoomEncounterRules struct {
+	RoomRole           string                           `json:"room_role"`
+	EliteChancePercent int                              `json:"elite_chance_percent"`
+	LeaderRole         string                           `json:"leader_role"`
+	GuardRoles         []string                         `json:"guard_roles"`
+	MinimumGuardCount  int                              `json:"minimum_guard_count"`
+	MemberRoles        []DungeonEncounterMemberRoleRule `json:"member_roles"`
+}
+
+type DungeonEncounterMemberRoleRule struct {
+	Role     string `json:"role"`
+	MinCount int    `json:"min_count"`
+	MaxCount int    `json:"max_count"`
+	Weight   int    `json:"weight"`
 }
 
 type EliteAuraRules struct {

@@ -80,7 +80,9 @@ func TestEliteAuraAppliesOnlyToNearbyPackFollowers(t *testing.T) {
 
 func TestGeneratedDungeonMonstersPreservePackMetadata(t *testing.T) {
 	rules := cloneRules(loadRules(t))
-	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
+	for i := range rules.DungeonGeneration.MonsterPlacement.EncounterComposition.RoomRoles {
+		rules.DungeonGeneration.MonsterPlacement.EncounterComposition.RoomRoles[i].EliteChancePercent = 100
+	}
 	sim, err := NewSimWithWorld("sess_elite_aura_metadata", "v112_pack_metadata", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)

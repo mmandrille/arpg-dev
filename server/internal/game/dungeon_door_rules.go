@@ -2,6 +2,42 @@ package game
 
 import "fmt"
 
+type RoomThresholdDoorRules struct {
+	Enabled  bool `json:"enabled"`
+	MaxCount int  `json:"max_count"`
+}
+
+func validateRoomThresholdDoorRules(doors RoomThresholdDoorRules, corridor RoomCorridorPCGRules, rules *Rules) error {
+	const path = "dungeon_generation.room_corridor_pcg.doors"
+	if doors.MaxCount < 0 {
+		return fmt.Errorf("game: invalid rules %s.max_count: must be non-negative", path)
+	}
+	if !doors.Enabled {
+		return nil
+	}
+	if rules == nil {
+		return fmt.Errorf("game: invalid rules %s: interactable rules are missing", path)
+	}
+	if !corridor.Enabled {
+		return fmt.Errorf("game: invalid rules %s.enabled: room corridor generation must be enabled", path)
+	}
+	maxRouteCount := maxInt(0, corridor.RoomCount.Max-1) + corridor.LoopEdgeCount.Max
+	if doors.MaxCount > maxRouteCount {
+		return fmt.Errorf("game: invalid rules %s.max_count: cannot exceed the maximum room route count %d", path, maxRouteCount)
+	}
+	def, ok := rules.Interactables[woodenDoorDefID]
+	if !ok {
+		return fmt.Errorf("game: invalid rules %s: missing interactable %s", path, woodenDoorDefID)
+	}
+	if def.InitialState != interactableClosed || def.BarrierWhenClosed == nil {
+		return fmt.Errorf("game: invalid rules %s: %s must be a closed barrier interactable", path, woodenDoorDefID)
+	}
+	if def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0 {
+		return fmt.Errorf("game: invalid rules %s: %s barrier dimensions must be positive", path, woodenDoorDefID)
+	}
+	return nil
+}
+
 type DoorGenerationRules struct {
 	Enabled           bool    `json:"enabled"`
 	InteractableDefID string  `json:"interactable_def_id"`

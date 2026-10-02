@@ -1,0 +1,19 @@
+{
+  "id": "room_doors",
+  "ci_tier": "extended",
+  "world_id": "room_door_interaction_lab",
+  "seed": "v526_room_threshold_01",
+  "title": "Generated room doors",
+  "description": "Open the deterministic room-threshold door on a generated floor, then descend to prove progression remains reachable.",
+  "max_elapsed_s": 35.0,
+  "steps": [
+    { "action": "assert_entity_count", "entity_type": "interactable", "interactable_def_id": "wooden_door", "state": "closed", "at_least": 1 },
+    { "action": "action_entity", "interactable_def_id": "wooden_door", "event_type": "interactable_activated", "timeout_s": 10.0 },
+    { "action": "use_stair", "direction": "down", "max_ticks": 360 }
+  ],
+  "assertions": [
+    { "type": "event_count", "event_type": "interactable_activated", "min": 1 },
+    { "type": "current_level", "equals": -2 },
+    { "type": "visited_levels_contain", "level": -2 }
+  ]
+}

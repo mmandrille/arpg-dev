@@ -8,7 +8,10 @@ import (
 func forceEliteObjectiveGenerationRules(t *testing.T) *Rules {
 	t.Helper()
 	rules := loadRules(t)
-	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 100
+	for i := range rules.DungeonGeneration.MonsterPlacement.EncounterComposition.RoomRoles {
+		rules.DungeonGeneration.MonsterPlacement.EncounterComposition.RoomRoles[i].EliteChancePercent = 100
+	}
+	rules.DungeonGeneration.EliteObjective.RoomClusterRadius = rules.DungeonGeneration.FloorSize.Width + rules.DungeonGeneration.FloorSize.Height
 	rules.DungeonGeneration.ChestPlacement.Enabled = false
 	rules.DungeonGeneration.EliteObjective.FloorChancePercent = 100
 	return rules
@@ -45,9 +48,10 @@ func TestEliteObjectiveFloorChanceDistribution(t *testing.T) {
 
 func TestDungeonEliteObjectiveChestRequiresEliteLeader(t *testing.T) {
 	rules := forceEliteObjectiveGenerationRules(t)
+	rules.DungeonGeneration.ChestPlacement.Enabled = false
 	level, err := GenerateDungeonLevel("v158_forced_elite_objective", -1, rules.DungeonGeneration)
 	if err != nil {
-		t.Fatalf("generate forced elite objective: %v", err)
+		t.Fatalf("generate objective fixture: %v", err)
 	}
 	objectives := 0
 	for _, chest := range level.chests {
@@ -59,24 +63,26 @@ func TestDungeonEliteObjectiveChestRequiresEliteLeader(t *testing.T) {
 		}
 	}
 	if objectives != 1 {
-		t.Fatalf("elite objective chests = %d in %+v, want 1", objectives, level.chests)
+		t.Fatalf("eligible leader objective count = %d, want 1", objectives)
 	}
-
-	rules.DungeonGeneration.MonsterPlacement.ElitePackChance = 0
-	level, err = GenerateDungeonLevel("v158_forced_elite_objective", -1, rules.DungeonGeneration)
-	if err != nil {
-		t.Fatalf("generate no elite objective: %v", err)
+	withoutLeader := level
+	for i := range withoutLeader.monsters {
+		withoutLeader.monsters[i].packLeader = false
 	}
-	for _, chest := range level.chests {
+	withoutLeader.chests = nil
+	if err := maybePlaceEliteObjectiveChest(NewRNG(SeedToUint64("no_leader_objective")), rules.DungeonGeneration, &withoutLeader); err != nil {
+		t.Fatalf("no-leader objective attempt: %v", err)
+	}
+	for _, chest := range withoutLeader.chests {
 		if chest.eliteObjective {
-			t.Fatalf("unexpected elite objective without elite leader: %+v", level.chests)
+			t.Fatalf("objective appeared without pack leader: %+v", chest)
 		}
 	}
 }
 
 func TestEliteObjectiveChestRequiresLeaderKill(t *testing.T) {
 	rules := forceEliteObjectiveGenerationRules(t)
-	sim, err := NewSimWithWorld("sess_elite_objective_gate", "v158_elite_objective_0000", rules, "dungeon_levels")
+	sim, err := NewSimWithWorld("sess_elite_objective_gate", "v158_forced_elite_objective", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}
@@ -119,7 +125,7 @@ func TestEliteObjectiveChestRequiresLeaderKill(t *testing.T) {
 
 func TestEliteObjectiveChestRequiresAllLeaderKills(t *testing.T) {
 	rules := forceEliteObjectiveGenerationRules(t)
-	sim, err := NewSimWithWorld("sess_elite_objective_clear_all", "v158_elite_objective_0000", rules, "dungeon_levels")
+	sim, err := NewSimWithWorld("sess_elite_objective_clear_all", "v158_forced_elite_objective", rules, "dungeon_levels")
 	if err != nil {
 		t.Fatalf("new sim: %v", err)
 	}

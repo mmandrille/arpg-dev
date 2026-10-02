@@ -7,70 +7,97 @@ import (
 )
 
 type dungeonRoom struct {
-	innerMin Vec2
-	innerMax Vec2
-	isHub    bool
+	innerMin   Vec2
+	innerMax   Vec2
+	isHub      bool
+	shapeID    string
+	shapeCells [roomShapeCellCount]bool
+	center     Vec2
+	role       string
 }
 
 type roomDoor struct {
 	roomIndex int
 	side      string // north, south, east, west
 	center    Vec2
+	width     float64
 }
 
 // placeRoomCorridorLayout builds rectangular rooms connected by open L-shaped hallways.
 //
-// Anchors (stairs, teleporter, chests) are placed before rooms and stay fixed across attempts, so
-// re-rolling rooms cannot rescue an anchor geometry that no set of spaced, normal-sized rooms can
-// wrap. The first pass keeps every floor that already generates bit-identical; only when it is
-// exhausted does the anchor fallback pass run (v472): conflicting anchor clusters share one
-// oversized room, and anchor rooms may sit flush with the perimeter wall.
+// The fixed player spawn constrains a dedicated room, while all other progression anchors are
+// placed into generated room interiors after this layout succeeds.
 func placeRoomCorridorLayout(seed string, rules DungeonGenerationRules, out *generatedDungeonLevel) error {
-	r := rules.RoomCorridorPCG
-	if !r.Enabled {
+	if !rules.RoomCorridorPCG.Enabled {
 		return nil
 	}
-	anchors := generatedAnchorPoints(*out)
-	for _, anchorFallback := range []bool{false, true} {
-		for attempt := 0; attempt < r.MaxAttempts; attempt++ {
-			rng := NewRNG(SeedToUint64(roomCorridorAttemptSeed(seed, out.levelNum, attempt, anchorFallback)))
-			layout, ok := randomRoomCorridorLayout(rng, rules, anchors, anchorFallback)
-			if !ok {
-				continue
-			}
-			candidate := *out
-			candidate.walls = append(append([]wallObstacle(nil), out.walls...), layout.walls...)
-			candidate.corridorZones = append(append([]corridorZone(nil), out.corridorZones...), layout.corridorZones...)
-			candidate.rooms = layout.rooms
-			if err := validateGeneratedDungeonReachability(rules, candidate); err != nil {
-				continue
-			}
-			out.walls = candidate.walls
-			out.corridorZones = candidate.corridorZones
-			out.rooms = candidate.rooms
-			return nil
-		}
+	if tryRoomCorridorLayoutPass(seed, rules, out) {
+		return nil
 	}
-	return fmt.Errorf("game: generate dungeon level %d: could not place room-corridor layout after %d attempts per pass (including anchor fallback pass)", out.levelNum, r.MaxAttempts)
+	return fmt.Errorf("game: generate dungeon level %d: could not place room-corridor layout after %d attempts", out.levelNum, rules.RoomCorridorPCG.MaxAttempts)
 }
 
-func roomCorridorAttemptSeed(seed string, levelNum, attempt int, anchorFallback bool) string {
-	stream := "|room_corridor|"
-	if anchorFallback {
-		stream = "|room_corridor_anchor_fallback|"
+func tryRoomCorridorLayoutPass(seed string, rules DungeonGenerationRules, out *generatedDungeonLevel) bool {
+	for attempt := 0; attempt < rules.RoomCorridorPCG.MaxAttempts; attempt++ {
+		rng := NewRNG(SeedToUint64(roomCorridorAttemptSeed(seed, out.levelNum, attempt)))
+		layout, ok := randomRoomCorridorLayout(rng, rules, out.walls)
+		if !ok {
+			continue
+		}
+		candidate := *out
+		candidate.walls = append(append([]wallObstacle(nil), out.walls...), layout.walls...)
+		candidate.corridorZones = append(append([]corridorZone(nil), out.corridorZones...), layout.corridorZones...)
+		candidate.rooms = layout.rooms
+		candidate.corridorEdges = append(append([]roomEdge(nil), out.corridorEdges...), layout.edges...)
+		candidate.corridorRoutes = append(append([]roomCorridorRoute(nil), out.corridorRoutes...), layout.routes...)
+		if err := validateGeneratedDungeonReachability(rules, candidate); err != nil {
+			continue
+		}
+		if !allRoomCentersReachable(rules, candidate) {
+			continue
+		}
+		placementClearance := math.Max(playerRadius+0.1, rules.ObstacleGeneration.Clearance.Chest)
+		if err := assignDungeonRoomRoles(seed, out.levelNum, rules.RoomCorridorPCG.RoomRoles, candidate.rooms, placementClearance, rules.StairPlacement.MinSeparation); err != nil {
+			continue
+		}
+		out.walls = candidate.walls
+		out.corridorZones = candidate.corridorZones
+		out.rooms = candidate.rooms
+		out.corridorEdges = candidate.corridorEdges
+		out.corridorRoutes = candidate.corridorRoutes
+		return true
 	}
-	return seed + stream + strconv.Itoa(absInt(levelNum)) + "|" + strconv.Itoa(attempt)
+	return false
+}
+
+func allRoomCentersReachable(rules DungeonGenerationRules, out generatedDungeonLevel) bool {
+	nav := generatedDungeonNavigation(rules)
+	blocked := buildDungeonBlockedGrid(nav, out)
+	for _, from := range out.rooms {
+		for _, to := range out.rooms {
+			if !generatedTargetReachableFromNav(nav, blocked.blocked, roomCenter(from), roomCenter(to)) {
+				return false
+			}
+		}
+	}
+	return len(out.rooms) > 0
+}
+
+func roomCorridorAttemptSeed(seed string, levelNum, attempt int) string {
+	return seed + "|room_corridor|" + strconv.Itoa(absInt(levelNum)) + "|" + strconv.Itoa(attempt)
 }
 
 type roomCorridorLayout struct {
 	rooms         []dungeonRoom
+	edges         []roomEdge
+	routes        []roomCorridorRoute
 	walls         []wallObstacle
 	corridorZones []corridorZone
 }
 
-func randomRoomCorridorLayout(rng *RNG, rules DungeonGenerationRules, anchors []Vec2, anchorFallback bool) (roomCorridorLayout, bool) {
+func randomRoomCorridorLayout(rng *RNG, rules DungeonGenerationRules, baseWalls []wallObstacle) (roomCorridorLayout, bool) {
 	r := rules.RoomCorridorPCG
-	rooms, ok := packDungeonRooms(rng, rules, anchors, anchorFallback)
+	rooms, ok := packDungeonRooms(rng, rules)
 	if !ok || len(rooms) < r.RoomCount.Min {
 		return roomCorridorLayout{}, false
 	}
@@ -80,16 +107,24 @@ func randomRoomCorridorLayout(rng *RNG, rules DungeonGenerationRules, anchors []
 	}
 	doors := make([]roomDoor, 0, len(edges)*2)
 	corridorZones := make([]corridorZone, 0, len(edges)*3)
+	routes := make([]roomCorridorRoute, 0, len(edges))
 	for _, edge := range edges {
-		doorA, doorB, zones, ok := corridorBetweenRooms(rng, rules, rooms, edge[0], edge[1])
+		route, ok := corridorBetweenRooms(rng, rules, rooms, edge, baseWalls)
 		if !ok {
 			return roomCorridorLayout{}, false
 		}
-		doors = append(doors, doorA, doorB)
-		corridorZones = append(corridorZones, zones...)
+		routes = append(routes, route)
+		doors = append(doors, route.doorA, route.doorB)
+		corridorZones = append(corridorZones, route.zones...)
 	}
-	walls := roomPerimeterWalls(rules, rooms, doors, anchors)
-	return roomCorridorLayout{rooms: rooms, walls: walls, corridorZones: corridorZones}, true
+	walls := roomPerimeterWalls(rules, rooms, doors, nil)
+	allWalls := append(append([]wallObstacle(nil), baseWalls...), walls...)
+	for _, route := range routes {
+		if corridorRouteBlocked(route.points, playerRadius, allWalls) {
+			return roomCorridorLayout{}, false
+		}
+	}
+	return roomCorridorLayout{rooms: rooms, edges: edges, routes: routes, walls: walls, corridorZones: corridorZones}, true
 }
 
 func generatedAnchorPoints(out generatedDungeonLevel) []Vec2 {
@@ -106,7 +141,7 @@ func generatedAnchorPoints(out generatedDungeonLevel) []Vec2 {
 	return points
 }
 
-func packDungeonRooms(rng *RNG, rules DungeonGenerationRules, anchors []Vec2, anchorFallback bool) ([]dungeonRoom, bool) {
+func packDungeonRooms(rng *RNG, rules DungeonGenerationRules) ([]dungeonRoom, bool) {
 	r := rules.RoomCorridorPCG
 	target := randomIntRange(rng, r.RoomCount.Min, r.RoomCount.Max)
 	rooms := make([]dungeonRoom, 0, target)
@@ -114,29 +149,26 @@ func packDungeonRooms(rng *RNG, rules DungeonGenerationRules, anchors []Vec2, an
 	spacing := r.RoomSpacing
 	thickness := rules.WallThickness
 
-	var anchorOK bool
-	rooms, anchorOK = ensureAnchorRooms(rng, rules, rooms, anchors, margin, spacing, thickness, anchorFallback)
-	if !anchorOK {
+	spawnRoom, ok := playerSpawnRoom(rules, margin)
+	if !ok {
 		return nil, false
 	}
+	rooms = append(rooms, spawnRoom)
 
 	if r.HubRoomEnabled {
 		hub, ok := randomDungeonRoom(rng, rules, true, margin)
-		if ok {
-			overlap := false
-			for _, existing := range rooms {
-				if roomsOverlap(hub, existing, spacing, thickness) {
-					overlap = true
-					break
-				}
-			}
-			if !overlap {
-				rooms = append(rooms, hub)
+		if !ok {
+			return nil, false
+		}
+		for _, existing := range rooms {
+			if roomsOverlap(hub, existing, spacing, thickness) {
+				return nil, false
 			}
 		}
+		rooms = append(rooms, hub)
 	}
 
-	target = maxInt(2, minInt(target, maxRoomsForFloor(rules, len(rooms))))
+	target = maxInt(2, minInt(target, maxRoomsForFloor(rules)))
 
 	for len(rooms) < target {
 		placed := false
@@ -189,6 +221,10 @@ func randomDungeonRoom(rng *RNG, rules DungeonGenerationRules, hub bool, margin 
 	if width < 4 || height < 4 {
 		return dungeonRoom{}, false
 	}
+	shapeID, shapeCells, ok := selectDungeonRoomShape(rng, r.RoomShapes)
+	if !ok {
+		return dungeonRoom{}, false
+	}
 
 	outerW := width + rules.WallThickness*2
 	outerH := height + rules.WallThickness*2
@@ -203,11 +239,7 @@ func randomDungeonRoom(rng *RNG, rules DungeonGenerationRules, hub bool, margin 
 	x0 := float64(minX+rng.IntN(maxX-minX+1)) + rules.WallThickness
 	y0 := float64(minY+rng.IntN(maxY-minY+1)) + rules.WallThickness
 
-	return dungeonRoom{
-		innerMin: Vec2{X: x0, Y: y0},
-		innerMax: Vec2{X: x0 + width, Y: y0 + height},
-		isHub:    hub,
-	}, true
+	return makeDungeonRoom(Vec2{X: x0, Y: y0}, Vec2{X: x0 + width, Y: y0 + height}, hub, shapeID, shapeCells), true
 }
 
 func roomsOverlap(a, b dungeonRoom, spacing, thickness float64) bool {
@@ -220,51 +252,14 @@ func roomsOverlap(a, b dungeonRoom, spacing, thickness float64) bool {
 }
 
 func pointInsideRoomInner(p Vec2, room dungeonRoom, margin float64) bool {
-	return p.X >= room.innerMin.X+margin && p.X <= room.innerMax.X-margin &&
-		p.Y >= room.innerMin.Y+margin && p.Y <= room.innerMax.Y-margin
+	return roomContainsCircle(room, p, margin)
 }
 
 func roomCenter(room dungeonRoom) Vec2 {
-	return Vec2{
-		X: (room.innerMin.X + room.innerMax.X) / 2,
-		Y: (room.innerMin.Y + room.innerMax.Y) / 2,
-	}
+	return dungeonRoomCenter(room)
 }
 
 type roomEdge [2]int
-
-func roomConnectionEdges(rng *RNG, rooms []dungeonRoom, r RoomCorridorPCGRules) []roomEdge {
-	if len(rooms) < 2 {
-		return nil
-	}
-	mst := primRoomMST(rooms)
-	edgeSet := map[roomEdge]bool{}
-	edges := make([]roomEdge, 0, len(mst)+r.LoopEdgeCount.Max)
-	for _, e := range mst {
-		norm := normalizeRoomEdge(e)
-		if !edgeSet[norm] {
-			edgeSet[norm] = true
-			edges = append(edges, norm)
-		}
-	}
-	loopTarget := randomIntRange(rng, r.LoopEdgeCount.Min, r.LoopEdgeCount.Max)
-	added := 0
-	for tries := 0; tries < 64 && added < loopTarget; tries++ {
-		i := rng.IntN(len(rooms))
-		j := rng.IntN(len(rooms))
-		if i == j {
-			continue
-		}
-		e := normalizeRoomEdge(roomEdge{i, j})
-		if edgeSet[e] {
-			continue
-		}
-		edgeSet[e] = true
-		edges = append(edges, e)
-		added++
-	}
-	return edges
-}
 
 func normalizeRoomEdge(e roomEdge) roomEdge {
 	if e[0] > e[1] {
@@ -312,107 +307,51 @@ func primRoomMST(rooms []dungeonRoom) []roomEdge {
 	return edges
 }
 
-func corridorBetweenRooms(rng *RNG, rules DungeonGenerationRules, rooms []dungeonRoom, a, b int) (roomDoor, roomDoor, []corridorZone, bool) {
-	roomA := rooms[a]
-	roomB := rooms[b]
-	ca := roomCenter(roomA)
-	cb := roomCenter(roomB)
-	width := rules.RoomCorridorPCG.CorridorWidth
-	thickness := rules.WallThickness
-	pad := rules.MonsterPlacement.PackMemberRadius
-
-	dx := cb.X - ca.X
-	dy := cb.Y - ca.Y
+func roomDoorsBetweenRooms(rooms []dungeonRoom, edge roomEdge) (roomDoor, roomDoor, bool) {
+	a, b := edge[0], edge[1]
+	roomA, roomB := rooms[a], rooms[b]
+	ca, cb := roomCenter(roomA), roomCenter(roomB)
+	dx, dy := cb.X-ca.X, cb.Y-ca.Y
 	if math.Abs(dx) >= math.Abs(dy) {
 		if dx >= 0 {
-			doorA, doorB := horizontalRoomDoors(roomA, roomB, width)
-			zones := lCorridorZones(doorA.center, doorB.center, width, thickness, pad, rng.IntN(2) == 0)
-			return roomDoor{roomIndex: a, side: "east", center: doorA.center},
-				roomDoor{roomIndex: b, side: "west", center: doorB.center},
-				zones, true
+			doorA, doorB := horizontalRoomDoors(roomA, roomB, 0)
+			return roomDoor{roomIndex: a, side: "east", center: doorA.center}, roomDoor{roomIndex: b, side: "west", center: doorB.center}, true
 		}
-		doorLeft, doorRight := horizontalRoomDoors(roomB, roomA, width)
-		zones := lCorridorZones(doorLeft.center, doorRight.center, width, thickness, pad, rng.IntN(2) == 0)
-		return roomDoor{roomIndex: a, side: "west", center: doorRight.center},
-			roomDoor{roomIndex: b, side: "east", center: doorLeft.center},
-			zones, true
+		doorLeft, doorRight := horizontalRoomDoors(roomB, roomA, 0)
+		return roomDoor{roomIndex: a, side: "west", center: doorRight.center}, roomDoor{roomIndex: b, side: "east", center: doorLeft.center}, true
 	}
 	if dy >= 0 {
-		doorA, doorB := verticalRoomDoors(roomA, roomB, width)
-		zones := lCorridorZones(doorA.center, doorB.center, width, thickness, pad, rng.IntN(2) == 0)
-		return roomDoor{roomIndex: a, side: "north", center: doorA.center},
-			roomDoor{roomIndex: b, side: "south", center: doorB.center},
-			zones, true
+		doorA, doorB := verticalRoomDoors(roomA, roomB, 0)
+		return roomDoor{roomIndex: a, side: "north", center: doorA.center}, roomDoor{roomIndex: b, side: "south", center: doorB.center}, true
 	}
-	doorBottom, doorTop := verticalRoomDoors(roomB, roomA, width)
-	zones := lCorridorZones(doorBottom.center, doorTop.center, width, thickness, pad, rng.IntN(2) == 0)
-	return roomDoor{roomIndex: a, side: "south", center: doorTop.center},
-		roomDoor{roomIndex: b, side: "north", center: doorBottom.center},
-		zones, true
+	doorBottom, doorTop := verticalRoomDoors(roomB, roomA, 0)
+	return roomDoor{roomIndex: a, side: "south", center: doorTop.center}, roomDoor{roomIndex: b, side: "north", center: doorBottom.center}, true
 }
 
-type doorPoint struct {
-	center Vec2
-}
-
-func horizontalRoomDoors(left, right dungeonRoom, gapWidth float64) (doorPoint, doorPoint) {
+func horizontalRoomDoors(left, right dungeonRoom, _ float64) (doorPoint, doorPoint) {
 	overlapLo := math.Max(left.innerMin.Y, right.innerMin.Y)
 	overlapHi := math.Min(left.innerMax.Y, right.innerMax.Y)
 	y := (overlapLo + overlapHi) / 2
 	if overlapHi <= overlapLo {
 		y = (left.innerMin.Y + left.innerMax.Y) / 2
 	}
-	return doorPoint{center: Vec2{X: left.innerMax.X, Y: y}},
-		doorPoint{center: Vec2{X: right.innerMin.X, Y: y}}
+	return doorPoint{center: Vec2{X: left.innerMax.X, Y: y}}, doorPoint{center: Vec2{X: right.innerMin.X, Y: y}}
 }
 
-func verticalRoomDoors(bottom, top dungeonRoom, gapWidth float64) (doorPoint, doorPoint) {
+func verticalRoomDoors(bottom, top dungeonRoom, _ float64) (doorPoint, doorPoint) {
 	overlapLo := math.Max(bottom.innerMin.X, top.innerMin.X)
 	overlapHi := math.Min(bottom.innerMax.X, top.innerMax.X)
 	x := (overlapLo + overlapHi) / 2
 	if overlapHi <= overlapLo {
 		x = (bottom.innerMin.X + bottom.innerMax.X) / 2
 	}
-	return doorPoint{center: Vec2{X: x, Y: bottom.innerMax.Y}},
-		doorPoint{center: Vec2{X: x, Y: top.innerMin.Y}}
+	return doorPoint{center: Vec2{X: x, Y: bottom.innerMax.Y}}, doorPoint{center: Vec2{X: x, Y: top.innerMin.Y}}
 }
 
-func lCorridorZones(from, to Vec2, width, thickness, pad float64, horizontalFirst bool) []corridorZone {
-	depth := maxFloat(width, thickness+2*pad)
-	zones := make([]corridorZone, 0, 2)
-	if horizontalFirst {
-		mid := Vec2{X: to.X, Y: from.Y}
-		zones = append(zones, axisCorridorZone(from, mid, width, depth, true)...)
-		zones = append(zones, axisCorridorZone(mid, to, width, depth, false)...)
-		return zones
-	}
-	mid := Vec2{X: from.X, Y: to.Y}
-	zones = append(zones, axisCorridorZone(from, mid, width, depth, false)...)
-	zones = append(zones, axisCorridorZone(mid, to, width, depth, true)...)
-	return zones
-}
-
-func axisCorridorZone(from, to Vec2, width, depth float64, horizontal bool) []corridorZone {
-	if distance(from, to) < 0.001 {
-		return nil
-	}
-	if horizontal {
-		lo := math.Min(from.X, to.X)
-		hi := math.Max(from.X, to.X)
-		return []corridorZone{{
-			pos:  Vec2{X: (lo + hi) / 2, Y: from.Y},
-			size: Vec2{X: hi - lo + width, Y: depth},
-		}}
-	}
-	lo := math.Min(from.Y, to.Y)
-	hi := math.Max(from.Y, to.Y)
-	return []corridorZone{{
-		pos:  Vec2{X: from.X, Y: (lo + hi) / 2},
-		size: Vec2{X: depth, Y: hi - lo + width},
-	}}
+type doorPoint struct {
+	center Vec2
 }
 
 func circleInsideRoomInner(pos Vec2, radius float64, room dungeonRoom) bool {
-	return pos.X-radius >= room.innerMin.X && pos.X+radius <= room.innerMax.X &&
-		pos.Y-radius >= room.innerMin.Y && pos.Y+radius <= room.innerMax.Y
+	return roomContainsCircle(room, pos, radius)
 }

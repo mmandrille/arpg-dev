@@ -1,11 +1,61 @@
 {
   "version": 0,
-  "floor_size": { "width": 100, "height": 50 },
+  "floor_size": {
+    "width": 100,
+    "height": 50
+  },
   "floor_profiles": [
     {
+      "min_depth": 2,
+      "max_depth": 2,
+      "floor_size": {
+        "width": 100,
+        "height": 50
+      },
+      "room_size_max": {
+        "x": 14,
+        "y": 12
+      }
+    },
+    {
       "min_depth": 4,
+      "max_depth": 5,
+      "floor_size": {
+        "width": 120,
+        "height": 70
+      },
+      "room_size_max": {
+        "x": 14,
+        "y": 12
+      }
+    },
+    {
+      "min_depth": 6,
+      "max_depth": 6,
+      "floor_size": {
+        "width": 120,
+        "height": 70
+      },
+      "room_size_min": {
+        "x": 10,
+        "y": 8
+      },
+      "room_size_max": {
+        "x": 14,
+        "y": 14
+      }
+    },
+    {
+      "min_depth": 7,
       "max_depth": null,
-      "floor_size": { "width": 120, "height": 70 }
+      "floor_size": {
+        "width": 120,
+        "height": 70
+      },
+      "room_size_max": {
+        "x": 14,
+        "y": 14
+      }
     }
   ],
   "biome_palettes": [
@@ -81,7 +131,10 @@
   ],
   "wall_thickness": 1.0,
   "ceiling_height": 4.0,
-  "player_spawn": { "x": 4, "y": 10 },
+  "player_spawn": {
+    "x": 4,
+    "y": 10
+  },
   "stair_placement": {
     "min_separation": 8.0,
     "margin_from_wall": 2.0,
@@ -94,11 +147,224 @@
   },
   "monster_placement": {
     "monster_def_id": "dungeon_mob",
-    "population_formula": { "area_per_unit": 280, "min": 20, "max": 36 },
-    "pack_count_formula": { "area_per_unit": 900, "min": 6, "max": 12, "spread": 1 },
-    "pack_size": { "min": 2, "max": 5 },
-    "pack_member_radius": 3.0,
-    "pack_composition": { "frontline_min": 1, "ranged_max": 1 },
+    "room_role_weights": {
+      "entry": 0,
+      "transition": 1,
+      "combat": 5,
+      "reward_objective": 2,
+      "boss_arena": 0
+    },
+    "population_formula": {
+      "area_per_unit": 280,
+      "min": 20,
+      "max": 36
+    },
+    "pack_count_formula": {
+      "area_per_unit": 900,
+      "min": 6,
+      "max": 12,
+      "spread": 1
+    },
+    "pack_size": {
+      "min": 2,
+      "max": 5
+    },
+    "pack_member_radius": 2.5,
+    "pack_composition": {
+      "frontline_min": 1,
+      "ranged_max": 1
+    },
+    "encounter_composition": {
+      "room_roles": [
+        {
+          "room_role": "entry",
+          "elite_chance_percent": 0,
+          "leader_role": "frontline",
+          "guard_roles": [
+            "ranged",
+            "flanker",
+            "swarm"
+          ],
+          "minimum_guard_count": 0,
+          "member_roles": [
+            {
+              "role": "frontline",
+              "min_count": 1,
+              "max_count": 5,
+              "weight": 8
+            },
+            {
+              "role": "ranged",
+              "min_count": 0,
+              "max_count": 2,
+              "weight": 1
+            },
+            {
+              "role": "flanker",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 2
+            },
+            {
+              "role": "swarm",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "room_role": "transition",
+          "elite_chance_percent": 10,
+          "leader_role": "frontline",
+          "guard_roles": [
+            "ranged",
+            "flanker",
+            "swarm"
+          ],
+          "minimum_guard_count": 0,
+          "member_roles": [
+            {
+              "role": "frontline",
+              "min_count": 1,
+              "max_count": 5,
+              "weight": 6
+            },
+            {
+              "role": "ranged",
+              "min_count": 0,
+              "max_count": 2,
+              "weight": 2
+            },
+            {
+              "role": "flanker",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 2
+            },
+            {
+              "role": "swarm",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "room_role": "combat",
+          "elite_chance_percent": 30,
+          "leader_role": "frontline",
+          "guard_roles": [
+            "ranged",
+            "flanker",
+            "swarm"
+          ],
+          "minimum_guard_count": 1,
+          "member_roles": [
+            {
+              "role": "frontline",
+              "min_count": 1,
+              "max_count": 5,
+              "weight": 5
+            },
+            {
+              "role": "ranged",
+              "min_count": 0,
+              "max_count": 2,
+              "weight": 2
+            },
+            {
+              "role": "flanker",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 3
+            },
+            {
+              "role": "swarm",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "room_role": "reward_objective",
+          "elite_chance_percent": 35,
+          "leader_role": "frontline",
+          "guard_roles": [
+            "ranged",
+            "flanker",
+            "swarm"
+          ],
+          "minimum_guard_count": 1,
+          "member_roles": [
+            {
+              "role": "frontline",
+              "min_count": 1,
+              "max_count": 5,
+              "weight": 5
+            },
+            {
+              "role": "ranged",
+              "min_count": 0,
+              "max_count": 2,
+              "weight": 3
+            },
+            {
+              "role": "flanker",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 2
+            },
+            {
+              "role": "swarm",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "room_role": "boss_arena",
+          "elite_chance_percent": 0,
+          "leader_role": "frontline",
+          "guard_roles": [
+            "ranged",
+            "flanker",
+            "swarm"
+          ],
+          "minimum_guard_count": 0,
+          "member_roles": [
+            {
+              "role": "frontline",
+              "min_count": 1,
+              "max_count": 5,
+              "weight": 1
+            },
+            {
+              "role": "ranged",
+              "min_count": 0,
+              "max_count": 2,
+              "weight": 1
+            },
+            {
+              "role": "flanker",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 1
+            },
+            {
+              "role": "swarm",
+              "min_count": 0,
+              "max_count": 3,
+              "weight": 1
+            }
+          ]
+        }
+      ]
+    },
+    "composition_search_node_limit": 20000000,
+    "composition_formations_per_pack": 4,
     "elite_pack_chance_percent": 30,
     "elite_aura": {
       "id": "elite_command",
@@ -106,15 +372,36 @@
       "damage_bonus_percent": 20
     },
     "monster_pool": [
-      { "monster_def_id": "dungeon_mob", "weight": 7 },
-      { "monster_def_id": "dungeon_archer", "weight": 1 },
-      { "monster_def_id": "dungeon_wolf", "weight": 2 },
-      { "monster_def_id": "dungeon_bat", "weight": 2 }
+      {
+        "monster_def_id": "dungeon_mob",
+        "weight": 7
+      },
+      {
+        "monster_def_id": "dungeon_archer",
+        "weight": 1
+      },
+      {
+        "monster_def_id": "dungeon_wolf",
+        "weight": 2
+      },
+      {
+        "monster_def_id": "dungeon_bat",
+        "weight": 2
+      }
     ],
     "minimum_monsters": [
-      { "monster_def_id": "dungeon_archer", "count": 1 },
-      { "monster_def_id": "dungeon_wolf", "count": 1 },
-      { "monster_def_id": "dungeon_bat", "count": 1 }
+      {
+        "monster_def_id": "dungeon_archer",
+        "count": 1
+      },
+      {
+        "monster_def_id": "dungeon_wolf",
+        "count": 1
+      },
+      {
+        "monster_def_id": "dungeon_bat",
+        "count": 1
+      }
     ],
     "margin_from_wall": 2.0,
     "min_spawn_distance": 6.0,
@@ -142,8 +429,14 @@
   "room_layout": {
     "enabled": false,
     "max_attempts": 32,
-    "horizontal_dividers": { "min": 1, "max": 2 },
-    "vertical_dividers": { "min": 0, "max": 1 },
+    "horizontal_dividers": {
+      "min": 1,
+      "max": 2
+    },
+    "vertical_dividers": {
+      "min": 0,
+      "max": 1
+    },
     "min_dividers_total": 2,
     "wall_span_ratio_min": 0.65,
     "wall_span_ratio_max": 0.85,
@@ -155,30 +448,211 @@
   },
   "room_corridor_pcg": {
     "enabled": true,
-    "max_attempts": 96,
-    "room_count": { "min": 4, "max": 6 },
+    "max_attempts": 512,
+    "room_count": {
+      "min": 5,
+      "max": 6
+    },
     "hub_room_enabled": true,
     "hub_size_multiplier": 1.3,
-    "room_size_min": { "x": 8, "y": 6 },
-    "room_size_max": { "x": 14, "y": 10 },
+    "room_size_min": {
+      "x": 12,
+      "y": 10
+    },
+    "room_size_max": {
+      "x": 14,
+      "y": 10
+    },
     "room_spacing": 4.0,
-    "corridor_width": 2.0,
-    "loop_edge_count": { "min": 1, "max": 2 },
+    "corridor_widths": [
+      1.5,
+      2.0
+    ],
+    "hub_degree": {
+      "min": 2,
+      "max": 3
+    },
+    "branch_junction_count": {
+      "min": 0,
+      "max": 1
+    },
+    "loop_edge_count": {
+      "min": 1,
+      "max": 2
+    },
+    "room_roles": {
+      "enabled": true,
+      "roles": [
+        {
+          "id": "entry",
+          "weight": 0,
+          "min_rooms": 1,
+          "max_rooms": 1,
+          "allowed_shapes": [
+            "rectangle"
+          ]
+        },
+        {
+          "id": "transition",
+          "weight": 0,
+          "min_rooms": 1,
+          "max_rooms": 1,
+          "allowed_shapes": [
+            "rectangle",
+            "l",
+            "t"
+          ]
+        },
+        {
+          "id": "combat",
+          "weight": 5,
+          "min_rooms": 1,
+          "max_rooms": 6,
+          "allowed_shapes": [
+            "rectangle",
+            "l",
+            "t",
+            "cross"
+          ]
+        },
+        {
+          "id": "reward_objective",
+          "weight": 2,
+          "min_rooms": 1,
+          "max_rooms": 6,
+          "allowed_shapes": [
+            "rectangle",
+            "l",
+            "t"
+          ]
+        },
+        {
+          "id": "boss_arena",
+          "weight": 0,
+          "min_rooms": 0,
+          "max_rooms": 6,
+          "allowed_shapes": [
+            "arena"
+          ]
+        }
+      ],
+      "placement_roles": {
+        "up_stair": "entry",
+        "down_stair": "transition",
+        "teleporter": "entry",
+        "chest": "reward_objective",
+        "elite_objective": "reward_objective",
+        "boss_entity": "boss_arena",
+        "boss_exit": "boss_arena"
+      }
+    },
+    "doors": {
+      "enabled": true,
+      "max_count": 1
+    },
     "margin_from_perimeter": 2.0,
-    "disable_obstacle_scatter": true
+    "disable_obstacle_scatter": true,
+    "room_shapes": [
+      {
+        "id": "rectangle",
+        "weight": 5,
+        "cells": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "id": "l",
+        "weight": 2,
+        "cells": [
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "id": "t",
+        "weight": 2,
+        "cells": [
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "id": "cross",
+        "weight": 1,
+        "cells": [
+          false,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "id": "arena",
+        "weight": 1,
+        "cells": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    ]
   },
   "obstacle_generation": {
     "enabled": true,
     "max_attempts": 64,
-    "target_group_count_formula": { "area_per_unit": 625, "min": 8, "max": 32, "spread": 1 },
+    "target_group_count_formula": {
+      "area_per_unit": 625,
+      "min": 8,
+      "max": 32,
+      "spread": 1
+    },
     "wall_segment": {
       "min_length": 6,
       "max_length": 20,
       "thickness": 1.0
     },
     "solid_block": {
-      "min_size": { "x": 2, "y": 2 },
-      "max_size": { "x": 6, "y": 5 }
+      "min_size": {
+        "x": 2,
+        "y": 2
+      },
+      "max_size": {
+        "x": 6,
+        "y": 5
+      }
     },
     "shape_weights": {
       "line": 4,
@@ -203,16 +677,34 @@
     "water": {
       "enabled": true,
       "max_attempts": 48,
-      "target_count": { "min": 1, "max": 2 },
-      "min_size": { "x": 4, "y": 2 },
-      "max_size": { "x": 9, "y": 3 }
+      "target_count": {
+        "min": 1,
+        "max": 2
+      },
+      "min_size": {
+        "x": 4,
+        "y": 2
+      },
+      "max_size": {
+        "x": 9,
+        "y": 3
+      }
     },
     "holes": {
       "enabled": true,
       "max_attempts": 48,
-      "target_count": { "min": 1, "max": 1 },
-      "min_size": { "x": 2, "y": 2 },
-      "max_size": { "x": 5, "y": 4 }
+      "target_count": {
+        "min": 1,
+        "max": 1
+      },
+      "min_size": {
+        "x": 2,
+        "y": 2
+      },
+      "max_size": {
+        "x": 5,
+        "y": 4
+      }
     },
     "clearance": {
       "player_spawn": 3.0,
@@ -226,16 +718,37 @@
   "boss_floor": {
     "cadence": 5,
     "first_level": -5,
-    "floor_size": { "width": 30, "height": 30 },
+    "floor_size": {
+      "width": 30,
+      "height": 30
+    },
     "monster_count": 2,
     "chest_interactable_def_id": "treasure_chest",
     "chest_loot_table": "boss_chest_drop_tier_1",
-    "boss_template_pool": ["cave_warden", "crypt_matron"],
-    "boss_spawn": { "x": 22, "y": 15 },
-    "chest_position": { "x": 12, "y": 15 },
-    "stairs_up_position": { "x": 4, "y": 15 },
-    "stairs_down_position": { "x": 27, "y": 15 },
-    "teleporter_position": { "x": 25, "y": 7 },
+    "boss_template_pool": [
+      "cave_warden",
+      "crypt_matron"
+    ],
+    "boss_spawn": {
+      "x": 22,
+      "y": 15
+    },
+    "chest_position": {
+      "x": 12,
+      "y": 15
+    },
+    "stairs_up_position": {
+      "x": 4,
+      "y": 15
+    },
+    "stairs_down_position": {
+      "x": 27,
+      "y": 15
+    },
+    "teleporter_position": {
+      "x": 25,
+      "y": 7
+    },
     "locked_exit_reason": "boss_alive"
   },
   "monster_rarity_note": "Generated dungeon monster scaling: depth raises baseline HP, damage, armor, hit chance, crit chance, block, and cadence; rarity adds visible challenge identity and loot-depth offsets. Static/lab monsters and boss templates do not use this curve.",

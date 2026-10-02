@@ -33,7 +33,7 @@ func TestPinnedStewardHuntBotSeedContract(t *testing.T) {
 	if seed != "v448_steward_probe_17" {
 		t.Fatalf("update bot scenario pinned seed/trophy: got seed=%s trophy=%s monster=%s", seed, hunt.TrophyItemDefID, hunt.MonsterDefID)
 	}
-	if hunt.TrophyItemDefID != "quest_trophy_bat_wing" || hunt.MonsterDefID != "dungeon_bat" {
+	if hunt.TrophyItemDefID != "quest_trophy_mob_skull" || hunt.MonsterDefID != "dungeon_mob" {
 		t.Fatalf("pinned hunt metadata incomplete: %+v", hunt)
 	}
 }

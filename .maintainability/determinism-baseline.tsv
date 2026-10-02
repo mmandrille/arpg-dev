@@ -4,7 +4,6 @@
 boss_pattern_rules.go	1
 depth_scaling.go	2
 dungeon_obstacle_variety.go	1
-dungeon_room_anchor_rooms.go	1
 fog_of_war.go	1
 item_reroll.go	3
 item_roll_upgrade.go	4

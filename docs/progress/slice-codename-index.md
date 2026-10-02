@@ -267,6 +267,16 @@ v486_* = live-payload-schema-gate
 v493_* = town-floor-detail
 v518_* = item-models-rarity
 v521_* = world-loot-rarity-labels
+v522_* = rooms-first
+v523_* = room-shapes
+v524_* = topology-motifs
+v525_* = corridor-routing
+v526_* = room-doors
+v527_* = wall-continuity
+v528_* = room-roles
+v529_* = room-population
+v530_* = encounter-composition
+v531_* = generation-audit
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

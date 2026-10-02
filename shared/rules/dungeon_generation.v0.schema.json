@@ -75,10 +75,22 @@
     },
     "monster_placement": {
       "type": "object",
-      "required": ["monster_def_id", "population_formula", "pack_count_formula", "pack_size", "pack_member_radius", "pack_composition", "elite_pack_chance_percent", "margin_from_wall", "min_spawn_distance", "max_attempts"],
+      "required": ["monster_def_id", "room_role_weights", "population_formula", "pack_count_formula", "pack_size", "pack_member_radius", "pack_composition", "encounter_composition", "composition_search_node_limit", "composition_formations_per_pack", "elite_pack_chance_percent", "margin_from_wall", "min_spawn_distance", "max_attempts"],
       "additionalProperties": false,
       "properties": {
         "monster_def_id": { "type": "string", "minLength": 1 },
+        "room_role_weights": {
+          "type": "object",
+          "required": ["entry", "transition", "combat", "reward_objective", "boss_arena"],
+          "additionalProperties": false,
+          "properties": {
+            "entry": { "type": "integer", "minimum": 0, "maximum": 1000 },
+            "transition": { "type": "integer", "minimum": 0, "maximum": 1000 },
+            "combat": { "type": "integer", "minimum": 0, "maximum": 1000 },
+            "reward_objective": { "type": "integer", "minimum": 0, "maximum": 1000 },
+            "boss_arena": { "type": "integer", "minimum": 0, "maximum": 1000 }
+          }
+        },
         "population_formula": { "$ref": "#/$defs/area_count_formula" },
         "pack_count_formula": { "$ref": "#/$defs/area_range_formula" },
         "pack_size": { "$ref": "#/$defs/int_range" },
@@ -92,6 +104,25 @@
             "ranged_max": { "type": "integer", "minimum": 0 }
           }
         },
+        "encounter_composition": {
+          "type": "object", "required": ["room_roles"], "additionalProperties": false,
+          "properties": { "room_roles": { "type": "array", "minItems": 5, "maxItems": 5, "items": {
+            "type": "object", "required": ["room_role", "elite_chance_percent", "leader_role", "guard_roles", "minimum_guard_count", "member_roles"], "additionalProperties": false,
+            "properties": {
+              "room_role": { "type": "string", "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] },
+              "elite_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+              "leader_role": { "type": "string", "minLength": 1 },
+              "guard_roles": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+              "minimum_guard_count": { "type": "integer", "minimum": 0, "maximum": 12 },
+              "member_roles": { "type": "array", "minItems": 1, "items": {
+                "type": "object", "required": ["role", "min_count", "max_count", "weight"], "additionalProperties": false,
+                "properties": { "role": { "type": "string", "enum": ["frontline", "ranged", "flanker", "swarm"] }, "min_count": { "type": "integer", "minimum": 0, "maximum": 12 }, "max_count": { "type": "integer", "minimum": 0, "maximum": 12 }, "weight": { "type": "integer", "minimum": 0, "maximum": 1000 } }
+              } }
+            }
+          } } }
+        },
+        "composition_search_node_limit": { "type": "integer", "minimum": 1, "maximum": 20000000 },
+        "composition_formations_per_pack": { "type": "integer", "minimum": 1, "maximum": 256 },
         "elite_pack_chance_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
         "elite_aura": {
           "type": "object",
@@ -198,10 +229,15 @@
         "room_size_min",
         "room_size_max",
         "room_spacing",
-        "corridor_width",
+        "corridor_widths",
+        "hub_degree",
+        "branch_junction_count",
         "loop_edge_count",
+        "room_roles",
+        "doors",
         "margin_from_perimeter",
-        "disable_obstacle_scatter"
+        "disable_obstacle_scatter",
+        "room_shapes"
       ],
       "additionalProperties": false,
       "properties": {
@@ -213,10 +249,77 @@
         "room_size_min": { "$ref": "#/$defs/position" },
         "room_size_max": { "$ref": "#/$defs/position" },
         "room_spacing": { "type": "number", "minimum": 0 },
-        "corridor_width": { "type": "number", "exclusiveMinimum": 0 },
+        "corridor_widths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "number", "exclusiveMinimum": 0 }
+        },
+        "hub_degree": { "$ref": "#/$defs/int_range" },
+        "branch_junction_count": { "$ref": "#/$defs/int_range" },
         "loop_edge_count": { "$ref": "#/$defs/int_range" },
+        "room_roles": {
+          "type": "object",
+          "required": ["enabled", "roles", "placement_roles"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "roles": {
+              "type": "array",
+              "minItems": 5,
+              "maxItems": 5,
+              "items": {
+                "type": "object",
+                "required": ["id", "weight", "min_rooms", "max_rooms", "allowed_shapes"],
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] },
+                  "weight": { "type": "integer", "minimum": 0, "maximum": 1000 },
+                  "min_rooms": { "type": "integer", "minimum": 0 },
+                  "max_rooms": { "type": "integer", "minimum": 0 },
+                  "allowed_shapes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 5,
+                    "uniqueItems": true,
+                    "items": { "enum": ["rectangle", "l", "t", "cross", "arena"] }
+                  }
+                }
+              }
+            },
+            "placement_roles": {
+              "type": "object",
+              "required": ["up_stair", "down_stair", "teleporter", "chest", "elite_objective", "boss_entity", "boss_exit"],
+              "additionalProperties": false,
+              "properties": {
+                "up_stair": { "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] },
+                "down_stair": { "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] },
+                "teleporter": { "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] },
+                "chest": { "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] },
+                "elite_objective": { "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] },
+                "boss_entity": { "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] },
+                "boss_exit": { "enum": ["entry", "transition", "combat", "reward_objective", "boss_arena"] }
+              }
+            }
+          }
+        },
+        "doors": {
+          "type": "object",
+          "required": ["enabled", "max_count"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "max_count": { "type": "integer", "minimum": 0 }
+          }
+        },
         "margin_from_perimeter": { "type": "number", "minimum": 0 },
-        "disable_obstacle_scatter": { "type": "boolean" }
+        "disable_obstacle_scatter": { "type": "boolean" },
+        "room_shapes": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/room_shape" }
+        }
       }
     },
     "obstacle_generation": {
@@ -510,7 +613,9 @@
             { "type": "null" }
           ]
         },
-        "floor_size": { "$ref": "#/$defs/floor_size" }
+        "floor_size": { "$ref": "#/$defs/floor_size" },
+        "room_size_min": { "$ref": "#/$defs/position" },
+        "room_size_max": { "$ref": "#/$defs/position" }
       }
     },
     "biome_palette": {
@@ -586,6 +691,21 @@
       "properties": {
         "min": { "type": "integer", "minimum": 0 },
         "max": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "room_shape": {
+      "type": "object",
+      "required": ["id", "weight", "cells"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "enum": ["rectangle", "l", "t", "cross", "arena"] },
+        "weight": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "cells": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": { "type": "boolean" }
+        }
       }
     },
     "monster_pool_entry": {

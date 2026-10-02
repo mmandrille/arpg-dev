@@ -38,7 +38,7 @@ def test_audit_tsv_columns_present():
 def test_movement_count_matches_json_for_sample():
     path = Path("tools/bot/scenarios/12_dungeon_levels.json")
     raw = json.loads(path.read_text(encoding="utf-8"))
-    assert count_movement_steps(path, raw) == 3
+    assert count_movement_steps(path, raw) == 5
 
 
 def test_discover_includes_protocol_and_client():

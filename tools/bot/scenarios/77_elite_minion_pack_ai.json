@@ -5,6 +5,7 @@
   "character_class": "barbarian",
   "title": "Elite minion pack AI",
   "description": "Engages a deterministic elite objective leader and proves non-leader minions assist through pack combat while objective locking remains intact.",
+  "max_elapsed_s": 30.0,
   "debug_progression": {
     "level": 6,
     "experience": 0,

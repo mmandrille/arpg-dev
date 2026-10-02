@@ -1789,6 +1789,9 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateMonsterPlacementPool(baseDungeonGeneration.MonsterPlacement, r); err != nil {
 		return nil, err
 	}
+	if err := validateDungeonGenerationExtendedRules(dungeonGeneration.RoomCorridorPCG, dungeonGeneration.FloorProfiles, dungeonGeneration.MonsterPlacement, baseDungeonGeneration.MonsterPlacement, r); err != nil {
+		return nil, err
+	}
 	if aura := dungeonGeneration.MonsterPlacement.EliteAura; aura != nil {
 		if aura.ID == "" {
 			return nil, fmt.Errorf("game: invalid rules dungeon_generation.monster_placement.elite_aura.id: must be non-empty")

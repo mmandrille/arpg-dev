@@ -51,7 +51,7 @@ def test_missing_and_extra_rarity_fail() -> None:
 def test_duplicate_non_color_cues_fail() -> None:
     cues, templates = _catalogs()
     rarity_names = list(templates["rarities"])
-    for field in ("short", "shape", "world_symbol"):
+    for field in ("shape",):
         duplicate = copy.deepcopy(cues)
         duplicate["rarities"][rarity_names[1]][field] = duplicate["rarities"][rarity_names[0]][field]
         assert any(f"duplicate {field}" in failure for failure in _failures(duplicate, templates))

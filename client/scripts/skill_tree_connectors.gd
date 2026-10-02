@@ -2,10 +2,7 @@ class_name SkillTreeConnectors
 extends Control
 
 const SkillTreeLayoutScript := preload("res://scripts/skill_tree_layout.gd")
-
-const MET_COLOR := Color(0.45, 0.40, 0.32, 0.95)
-const UNMET_COLOR := Color(0.18, 0.17, 0.16, 0.75)
-const LINE_WIDTH := 4.0
+const SkillTreeStylesScript := preload("res://scripts/skill_tree_styles.gd")
 
 var _edges: Array = []
 var _origin := SkillTreeLayoutScript.DEFAULT_ORIGIN
@@ -41,7 +38,12 @@ func get_debug_state() -> Dictionary:
 			"met": bool(rec.get("met", false)),
 		})
 
-	return {"connections": out}
+	return {
+		"connections": out,
+		"met_color": SkillTreeStylesScript.connector_color(true),
+		"unmet_color": SkillTreeStylesScript.connector_color(false),
+		"line_width": SkillTreeStylesScript.connector_width(),
+	}
 
 
 func _draw() -> void:
@@ -54,12 +56,12 @@ func _draw() -> void:
 		if from_id == "" or to_id == "":
 			continue
 		var met := bool(rec.get("met", false))
-		var color := MET_COLOR if met else UNMET_COLOR
+		var color := SkillTreeStylesScript.connector_color(met)
 		var points := _orthogonal_path(from_id, to_id)
 		if points.size() < 2:
 			continue
 		for i in range(points.size() - 1):
-			draw_line(points[i], points[i + 1], color, LINE_WIDTH, true)
+			draw_line(points[i], points[i + 1], color, SkillTreeStylesScript.connector_width(), true)
 
 
 func _orthogonal_path(from_id: String, to_id: String) -> PackedVector2Array:

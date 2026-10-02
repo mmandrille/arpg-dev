@@ -34,7 +34,7 @@ def main() -> int:
     parser.add_argument("--class-id", default="", help="Class id for gear focus, e.g. paladin.")
     parser.add_argument("--skill-id", default="", help="Skill id for skill-icon focus.")
     parser.add_argument("--family-id", default="", help="Item presentation family id for item-icon focus.")
-    parser.add_argument("--variant", default="", help="Variant for character-screen focus: points, nopoints, dual, nopoints-dual.")
+    parser.add_argument("--variant", default="", help="Variant for character-screen or skills focus.")
     parser.add_argument("--asset-id", default="", help="Asset manifest id for item-asset focus.")
     parser.add_argument("--output", default="", help="PNG output path for screenshot mode.")
     parser.add_argument("--width", type=int, default=640)

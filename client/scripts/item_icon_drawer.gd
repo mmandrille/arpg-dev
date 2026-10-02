@@ -2,8 +2,9 @@ class_name ItemIconDrawer
 extends RefCounted
 
 const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
+const ItemModelThumbnailCacheScript := preload("res://scripts/item_model_thumbnail_cache.gd")
 
-static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label: String = "", dimmed: bool = false, label_y_factor: float = 0.36, font_size: int = 16, item: Dictionary = {}) -> void:
+static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label: String = "", dimmed: bool = false, label_y_factor: float = 0.36, font_size: int = 16, item: Dictionary = {}, use_model_thumbnail: bool = false) -> void:
 	var shape := str(icon.get("shape", "box"))
 	var color := Color(str(icon.get("color", "#d8d0bd")))
 	var accent := Color(str(icon.get("accent", "#6b5420")))
@@ -13,51 +14,53 @@ static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label:
 	var center := rect.get_center()
 	var min_side := minf(rect.size.x, rect.size.y)
 
-	match shape:
-		"blade":
-			_draw_blade(canvas, center, min_side, color, accent)
-		"axe":
-			_draw_axe(canvas, center, min_side, color, accent)
-		"hammer":
-			_draw_hammer(canvas, center, min_side, color, accent)
-		"mace":
-			_draw_mace(canvas, center, min_side, color, accent)
-		"spear":
-			_draw_spear(canvas, center, min_side, color, accent)
-		"halberd":
-			_draw_halberd(canvas, center, min_side, color, accent)
-		"greatsword":
-			_draw_greatsword(canvas, center, min_side, color, accent)
-		"staff":
-			_draw_staff(canvas, center, min_side, color, accent)
-		"bow":
-			_draw_bow(canvas, center, min_side, color, accent)
-		"shield":
-			_draw_shield(canvas, center, min_side, color, accent)
-		"helm":
-			_draw_helm(canvas, center, min_side, color, accent)
-		"chest":
-			_draw_chest(canvas, center, min_side, color, accent)
-		"gloves":
-			_draw_gloves(canvas, center, min_side, color, accent)
-		"belt":
-			_draw_belt(canvas, center, min_side, color, accent)
-		"boots":
-			_draw_boots(canvas, center, min_side, color, accent)
-		"ring":
-			_draw_ring(canvas, center, min_side, color, accent)
-		"amulet":
-			_draw_amulet(canvas, center, min_side, color, accent)
-		"coin":
-			_draw_coin(canvas, center, min_side, color, accent)
-		"badge":
-			_draw_badge(canvas, center, min_side, color, accent)
-		"leaf":
-			_draw_leaf(canvas, center, min_side, color, accent)
-		"potion":
-			_draw_potion(canvas, center, min_side, color, accent)
-		_:
-			canvas.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
+	var drew_model := use_model_thumbnail and ItemModelThumbnailCacheScript.draw_if_available(canvas, rect, item, dimmed)
+	if not drew_model:
+		match shape:
+			"blade":
+				_draw_blade(canvas, center, min_side, color, accent)
+			"axe":
+				_draw_axe(canvas, center, min_side, color, accent)
+			"hammer":
+				_draw_hammer(canvas, center, min_side, color, accent)
+			"mace":
+				_draw_mace(canvas, center, min_side, color, accent)
+			"spear":
+				_draw_spear(canvas, center, min_side, color, accent)
+			"halberd":
+				_draw_halberd(canvas, center, min_side, color, accent)
+			"greatsword":
+				_draw_greatsword(canvas, center, min_side, color, accent)
+			"staff":
+				_draw_staff(canvas, center, min_side, color, accent)
+			"bow":
+				_draw_bow(canvas, center, min_side, color, accent)
+			"shield":
+				_draw_shield(canvas, center, min_side, color, accent)
+			"helm":
+				_draw_helm(canvas, center, min_side, color, accent)
+			"chest":
+				_draw_chest(canvas, center, min_side, color, accent)
+			"gloves":
+				_draw_gloves(canvas, center, min_side, color, accent)
+			"belt":
+				_draw_belt(canvas, center, min_side, color, accent)
+			"boots":
+				_draw_boots(canvas, center, min_side, color, accent)
+			"ring":
+				_draw_ring(canvas, center, min_side, color, accent)
+			"amulet":
+				_draw_amulet(canvas, center, min_side, color, accent)
+			"coin":
+				_draw_coin(canvas, center, min_side, color, accent)
+			"badge":
+				_draw_badge(canvas, center, min_side, color, accent)
+			"leaf":
+				_draw_leaf(canvas, center, min_side, color, accent)
+			"potion":
+				_draw_potion(canvas, center, min_side, color, accent)
+			_:
+				canvas.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
 	RarityCuePresenterScript.draw_slot(canvas, rect, item)
 
 

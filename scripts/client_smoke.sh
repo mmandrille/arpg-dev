@@ -174,6 +174,7 @@ run_gate "GDScript town nature landmarks test" "[gdtest] PASS: test_town_nature_
 run_gate "GDScript combat VFX test" "[gdtest] PASS: test_combat_vfx" res://tests/test_combat_vfx.gd
 run_gate "GDScript showme capture preload test" "[gdtest] PASS: showme capture scripts preload" res://tests/test_showme_load.gd
 run_gate "GDScript item icon drawer test" "test_item_icon_drawer: ok" res://tests/test_item_icon_drawer.gd
+run_gate "GDScript item model thumbnail cache test" "[gdtest] PASS: test_item_model_thumbnail_cache" res://tests/test_item_model_thumbnail_cache.gd
 run_gate "GDScript item requirement views test" "[gdtest] PASS: test_item_requirement_views" res://tests/test_item_requirement_views.gd
 run_gate "GDScript skill bonus tooltip test" "[gdtest] PASS: test_skill_bonus_tooltip" res://tests/test_skill_bonus_tooltip.gd
 run_gate "GDScript skill synergy tooltip test" "[gdtest] PASS: test_skill_synergy_tooltip" res://tests/test_skill_synergy_tooltip.gd

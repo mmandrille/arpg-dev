@@ -153,6 +153,13 @@ func _test_missing_keycode_rejected() -> void:
 	_assert_ne("press_key without keycode rejected", err, "")
 
 
+func _test_adjust_camera_zoom_requires_bounded_delta() -> void:
+	_assert_ne("camera zoom without delta rejected", BotScenarioRunnerScript.validate_step({"type": "adjust_camera_zoom"}, 0), "")
+	_assert_ne("camera zoom rejects oversized delta", BotScenarioRunnerScript.validate_step({"type": "adjust_camera_zoom", "delta_size": 7.0}, 0), "")
+	_assert_ne("camera zoom rejects non-finite delta", BotScenarioRunnerScript.validate_step({"type": "adjust_camera_zoom", "delta_size": "nan"}, 0), "")
+	_assert_eq("camera zoom accepts bounded delta", BotScenarioRunnerScript.validate_step({"type": "adjust_camera_zoom", "delta_size": -4.0}, 0), "")
+
+
 func _test_missing_click_entity_type_rejected() -> void:
 	var err := BotScenarioRunnerScript.validate_step({"type": "click_entity"}, 0)
 	_assert_ne("click_entity without entity_type rejected", err, "")

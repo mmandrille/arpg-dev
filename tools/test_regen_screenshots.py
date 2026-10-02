@@ -33,6 +33,7 @@ def test_default_suites_cover_requested_focus_areas() -> None:
     assert "item-asset" in DEFAULT_SUITES
     assert "scenes" in DEFAULT_SUITES
     assert "character-screen" in DEFAULT_SUITES
+    assert "skill-tree" in DEFAULT_SUITES
 
 
 def test_discover_jobs_are_data_driven() -> None:
@@ -47,6 +48,13 @@ def test_discover_jobs_are_data_driven() -> None:
     assert skeleton_classes == class_set
     assert gear_classes == class_set
     assert skill_slugs == skill_set
+
+
+def test_skill_tree_suite_covers_points_and_hover_states() -> None:
+    jobs = discover_jobs(["skill-tree"])
+    assert {job.slug for job in jobs} == {"points", "nopoints", "hover"}
+    assert all(job.focus == "skills" for job in jobs)
+    assert all("--variant" in job.extra_args for job in jobs)
 
 
 def test_item_jobs_use_shared_catalog_ids() -> None:

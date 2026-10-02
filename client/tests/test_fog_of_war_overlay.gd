@@ -1,14 +1,14 @@
 extends SceneTree
 
 const FogOfWarOverlayScript := preload("res://scripts/fog_of_war_overlay.gd")
+const HeroVisibilityFieldScript := preload("res://scripts/hero_visibility_field.gd")
+const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
 
-
 func _initialize() -> void:
 	call_deferred("_run")
-
 
 func _run() -> void:
 	await _test_progression_sets_light_and_gloom_radius()
@@ -25,6 +25,14 @@ func _run() -> void:
 	await _test_diagonal_wall_shadow_starts_near_visible_edge()
 	await _test_out_of_range_wall_skips_shadow()
 	await _test_multiple_walls_generate_multiple_shadows()
+	_test_connected_straight_run_shadow_covers_join()
+	_test_connected_corner_shadow_covers_join()
+	_test_connected_t_junction_shadow_covers_join()
+	_test_detached_walls_keep_separate_shadows()
+	_test_large_concave_wall_run_keeps_opening_visible()
+	_test_supplied_door_occluder_behavior_unchanged()
+	_test_shadow_soft_edge_is_deterministic_and_outward()
+	_test_soft_edge_does_not_fill_concave_opening()
 	await _test_zero_radius_disables_overlay()
 	await _test_set_active_false_survives_progression_update()
 	await _test_hero_centered_falloff_debug_state()
@@ -36,7 +44,6 @@ func _run() -> void:
 	await _test_combat_crowd_shader_throttle()
 	print("[gdtest] PASS: test_fog_of_war_overlay (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
-
 
 func _test_progression_sets_light_and_gloom_radius() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -54,7 +61,6 @@ func _test_progression_sets_light_and_gloom_radius() -> void:
 	_assert_false("world space visibility in isometric", bool(state.get("world_space_visibility", true)))
 	_assert_eq("no wall shadows", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
-
 
 func _test_deferred_refresh_after_bind() -> void:
 	var camera := Camera3D.new()
@@ -82,7 +88,6 @@ func _test_deferred_refresh_after_bind() -> void:
 	camera.free()
 	target.free()
 
-
 func _test_organic_edge_debug_state() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -96,8 +101,10 @@ func _test_organic_edge_debug_state() -> void:
 	_assert_true("darkness feather pixels positive", float(state.get("darkness_feather_px", 0.0)) >= 8.0)
 	_assert_true("darkness feather stays modest", float(state.get("darkness_feather_px", 9999.0)) <= float(state.get("gloom_radius_px", 1.0)) * 0.18)
 	_assert_eq("organic edge segments", int(state.get("organic_edge_segments", 0)), 18)
+	_assert_true("shadow soft edge alpha stays subtle", float(state.get("shadow_soft_edge_alpha", 1.0)) <= 0.201)
+	_assert_true("shadow soft edge reaches past gloom", float(state.get("shadow_soft_edge_scale", 0.0)) > 1.035)
+	_assert_true("shadow soft edge has organic variation", float(state.get("shadow_soft_edge_amplitude", 0.0)) > 0.0)
 	overlay.free()
-
 
 func _test_organic_edge_rotates_only_while_target_moves() -> void:
 	var target := Node3D.new()
@@ -124,7 +131,6 @@ func _test_organic_edge_rotates_only_while_target_moves() -> void:
 	overlay.free()
 	target.free()
 
-
 func _test_wall_layout_generates_shadow() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -143,7 +149,6 @@ func _test_wall_layout_generates_shadow() -> void:
 	_assert_true("shadow has polygon points", (first.get("points", []) as Array).size() >= 4)
 	overlay.free()
 
-
 func _test_wood_wall_generates_shadow() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -155,7 +160,6 @@ func _test_wood_wall_generates_shadow() -> void:
 	_assert_eq("wood wall count", int(state.get("wall_count", 0)), 1)
 	_assert_eq("wood occluder count", int(state.get("occluder_count", 0)), 1)
 	overlay.free()
-
 
 func _test_tall_obstacle_layout_generates_shadow() -> void:
 	for kind in ["rock", "column"]:
@@ -171,7 +175,6 @@ func _test_tall_obstacle_layout_generates_shadow() -> void:
 		_assert_eq("%s tall shadow count" % kind, int(state.get("shadow_count", 0)), 1)
 		overlay.free()
 
-
 func _test_water_layout_skips_shadow() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -184,7 +187,6 @@ func _test_water_layout_skips_shadow() -> void:
 	_assert_eq("water occluder count", int(state.get("occluder_count", -1)), 0)
 	_assert_eq("water shadow count", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
-
 
 func _test_hole_layout_skips_shadow() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -199,7 +201,6 @@ func _test_hole_layout_skips_shadow() -> void:
 	_assert_eq("hole shadow count", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
 
-
 func _test_explicit_low_wall_skips_shadow() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -212,7 +213,6 @@ func _test_explicit_low_wall_skips_shadow() -> void:
 	_assert_eq("explicit low wall occluder count", int(state.get("occluder_count", -1)), 0)
 	_assert_eq("explicit low wall shadow count", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
-
 
 func _test_supplied_door_occluder_generates_shadow() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -227,7 +227,6 @@ func _test_supplied_door_occluder_generates_shadow() -> void:
 	_assert_eq("door occluder count", int(state.get("occluder_count", 0)), 1)
 	_assert_eq("door shadow count", int(state.get("shadow_count", 0)), 1)
 	overlay.free()
-
 
 func _test_diagonal_wall_shadow_starts_near_visible_edge() -> void:
 	var target := Node3D.new()
@@ -264,7 +263,6 @@ func _test_diagonal_wall_shadow_starts_near_visible_edge() -> void:
 	camera.free()
 	target.free()
 
-
 func _test_out_of_range_wall_skips_shadow() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -277,7 +275,6 @@ func _test_out_of_range_wall_skips_shadow() -> void:
 	_assert_eq("far wall no occluder", int(state.get("occluder_count", -1)), 0)
 	_assert_eq("far wall no shadow", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
-
 
 func _test_multiple_walls_generate_multiple_shadows() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -295,6 +292,103 @@ func _test_multiple_walls_generate_multiple_shadows() -> void:
 	_assert_eq("multiple shadows", int(state.get("shadow_count", 0)), 2)
 	overlay.free()
 
+func _test_connected_straight_run_shadow_covers_join() -> void:
+	var result := _build_test_shadows([
+		{"x": 3.0, "y": -1.0, "w": 1.0, "h": 2.0},
+		{"x": 3.0, "y": 1.0, "w": 1.0, "h": 2.0},
+	])
+	_assert_eq("straight connected run shadow count", (result.get("polygons", []) as Array).size(), 1)
+	_assert_shadow_covers("straight run behind joint", result, Vector2(4.5, 0.0))
+
+func _test_connected_corner_shadow_covers_join() -> void:
+	var result := _build_test_shadows([
+		{"x": 3.0, "y": 0.0, "w": 1.0, "h": 3.0},
+		{"x": 4.5, "y": 2.0, "w": 2.0, "h": 1.0},
+	])
+	_assert_eq("corner connected run shadow count", (result.get("polygons", []) as Array).size(), 1)
+	_assert_shadow_covers("corner behind joint", result, Vector2(4.3, 2.0))
+
+func _test_connected_t_junction_shadow_covers_join() -> void:
+	var result := _build_test_shadows([
+		{"x": 3.5, "y": 0.0, "w": 4.0, "h": 1.0},
+		{"x": 4.5, "y": 1.0, "w": 1.0, "h": 2.0},
+	])
+	_assert_eq("T-junction connected shadow count", (result.get("polygons", []) as Array).size(), 1)
+	_assert_shadow_covers("T-junction behind stem", result, Vector2(6.5, 1.5))
+
+func _test_detached_walls_keep_separate_shadows() -> void:
+	var result := _build_test_shadows([
+		{"x": 3.0, "y": 0.0, "w": 1.0, "h": 2.0},
+		{"x": 7.0, "y": 0.0, "w": 1.0, "h": 2.0},
+	])
+	_assert_eq("detached wall shadow count", (result.get("polygons", []) as Array).size(), 2)
+
+func _test_large_concave_wall_run_keeps_opening_visible() -> void:
+	var u_shape := [
+		{"x": 3.5, "y": -2.0, "w": 2.0, "h": 1.0},
+		{"x": 3.5, "y": 2.0, "w": 2.0, "h": 1.0},
+		{"x": 5.0, "y": 0.0, "w": 1.0, "h": 4.0},
+	]
+	var component: Dictionary = HeroVisibilityFieldScript.connected_occluder_components(u_shape)[0]
+	_assert_false("large concave component uses a filled hull", HeroVisibilityFieldScript.component_uses_shared_silhouette(component))
+	var result := _build_test_shadows(u_shape)
+	_assert_true("concave opening remains outside shadows", not _shadow_covers(result, Vector2(4.5, 0.0)))
+
+func _test_supplied_door_occluder_behavior_unchanged() -> void:
+	var result := _build_test_shadows([{"x": 3.0, "y": 0.0, "w": 1.0, "h": 0.25}])
+	_assert_eq("single door occluder shadow count", (result.get("polygons", []) as Array).size(), 1)
+	_assert_shadow_covers("door behind shadow", result, Vector2(4.0, 0.0))
+
+func _test_shadow_soft_edge_is_deterministic_and_outward() -> void:
+	var core := [Vector2(0.0, 0.0), Vector2(100.0, 0.0), Vector2(100.0, 100.0), Vector2(0.0, 100.0)]
+	var soft_a := HeroVisibilityFieldScript.organic_expanded_polygon(core, 1.10, 0.018, 18.0, 41.0)
+	var soft_b := HeroVisibilityFieldScript.organic_expanded_polygon(core, 1.10, 0.018, 18.0, 41.0)
+	_assert_eq("soft edge vertex count", soft_a.size(), 32)
+	_assert_eq("soft edge deterministic geometry", soft_a, soft_b)
+	_assert_true("soft edge is wider than core", HeroVisibilityFieldScript.polygon_area(soft_a) > HeroVisibilityFieldScript.polygon_area(core))
+	_assert_false("soft edge preserves a sharp straight expansion", soft_a[0].is_equal_approx(HeroVisibilityFieldScript.expanded_polygon(core, 1.10)[0]))
+	for point in soft_a:
+		_assert_true("soft edge vertices stay outside core bounds", point.x < 0.0 or point.x > 100.0 or point.y < 0.0 or point.y > 100.0)
+
+func _test_soft_edge_does_not_fill_concave_opening() -> void:
+	var result := _build_test_shadows([
+		{"x": 3.5, "y": -2.0, "w": 2.0, "h": 1.0},
+		{"x": 3.5, "y": 2.0, "w": 2.0, "h": 1.0},
+		{"x": 5.0, "y": 0.0, "w": 1.0, "h": 4.0},
+	])
+	var opening := Vector2(4.5, 0.0) * 32.0
+	var polygons: Array = result.get("polygons", [])
+	var soft_edges: Array = result.get("soft_edges", [])
+	for i in range(polygons.size()):
+		var core := polygons[i] as Array
+		_assert_false("concave opening outside hard shadow", Geometry2D.is_point_in_polygon(opening, PackedVector2Array(core)))
+		if i < soft_edges.size() and bool(soft_edges[i]):
+			var soft_edge := HeroVisibilityFieldScript.organic_expanded_polygon(core, 1.10, 0.018, 18.0, 41.0)
+			_assert_false("concave opening outside soft edge", Geometry2D.is_point_in_polygon(opening, PackedVector2Array(soft_edge)))
+		else:
+			_assert_true("concave fallback skips soft edge", i < soft_edges.size() and not bool(soft_edges[i]))
+
+func _build_test_shadows(occluders: Array) -> Dictionary:
+	FogPresentationLoaderScript.ensure_loaded()
+	return HeroVisibilityFieldScript.build_shadow_polygons(
+		null,
+		Vector2.ZERO,
+		12.0,
+		Vector2(1280.0, 720.0),
+		occluders,
+		FogPresentationLoaderScript.shadow(),
+		Vector2.ZERO,
+	)
+
+func _assert_shadow_covers(label: String, result: Dictionary, world_point: Vector2) -> void:
+	_assert_true(label, _shadow_covers(result, world_point))
+
+func _shadow_covers(result: Dictionary, world_point: Vector2) -> bool:
+	var screen_point := world_point * 32.0
+	for polygon in result.get("polygons", []):
+		if Geometry2D.is_point_in_polygon(screen_point, PackedVector2Array(polygon)):
+			return true
+	return false
 
 func _test_zero_radius_disables_overlay() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -309,7 +403,6 @@ func _test_zero_radius_disables_overlay() -> void:
 	_assert_eq("zero radius shadows", int(state.get("shadow_count", -1)), 0)
 	overlay.free()
 
-
 func _test_set_active_false_survives_progression_update() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -321,7 +414,6 @@ func _test_set_active_false_survives_progression_update() -> void:
 	_assert_false("inactive overlay stays hidden after progression", bool(state.get("enabled", true)))
 	_assert_eq("light radius still tracked while inactive", float(state.get("light_radius", 0.0)), 12.0)
 	overlay.free()
-
 
 func _test_hero_centered_falloff_debug_state() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -336,7 +428,6 @@ func _test_hero_centered_falloff_debug_state() -> void:
 	_assert_true("falloff power positive", float(state.get("falloff_power", 0.0)) > 0.0)
 	_assert_true("edge feather world positive", float(state.get("edge_feather_world", 0.0)) > 0.0)
 	overlay.free()
-
 
 func _test_playable_floor_bounds_debug_state() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -353,7 +444,6 @@ func _test_playable_floor_bounds_debug_state() -> void:
 	state = overlay.get_debug_state()
 	_assert_false("floor bounds cleared", bool(state.get("floor_bounds_active", true)))
 	overlay.free()
-
 
 func _test_perspective_world_ground_falloff() -> void:
 	var target := Node3D.new()
@@ -391,7 +481,6 @@ func _test_perspective_world_ground_falloff() -> void:
 	camera.free()
 	target.free()
 
-
 func _test_perspective_disables_organic_edge() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -404,7 +493,6 @@ func _test_perspective_disables_organic_edge() -> void:
 	_assert_false("perspective organic edge disabled", bool(state.get("organic_edge_enabled", true)))
 	_assert_eq("perspective organic edge px", float(state.get("organic_edge_px", -1.0)), 0.0)
 	overlay.free()
-
 
 func _test_shadow_cache_hit_on_static_frames() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -422,7 +510,6 @@ func _test_shadow_cache_hit_on_static_frames() -> void:
 	_assert_true("shadow cache valid", bool(second.get("shadow_cache_valid", false)))
 	overlay.free()
 
-
 func _test_shadow_cache_layout_invalidation() -> void:
 	var overlay = FogOfWarOverlayScript.new()
 	get_root().add_child(overlay)
@@ -436,7 +523,6 @@ func _test_shadow_cache_layout_invalidation() -> void:
 	_assert_eq("layout change rebuild count", int(state.get("shadow_rebuild_count", 0)), 2)
 	_assert_eq("layout change reason", str(state.get("shadow_cache_last_rebuild_reason", "")), "hard_invalidate")
 	overlay.free()
-
 
 func _test_combat_crowd_shader_throttle() -> void:
 	var overlay = FogOfWarOverlayScript.new()
@@ -455,14 +541,12 @@ func _test_combat_crowd_shader_throttle() -> void:
 	await process_frame
 	overlay.free()
 
-
 func _assert_eq(label: String, got, expected) -> void:
 	if got == expected:
 		_pass_count += 1
 	else:
 		_fail_count += 1
 		push_error("[gdtest] FAIL %s: expected=%s got=%s" % [label, str(expected), str(got)])
-
 
 func _assert_true(label: String, value: bool) -> void:
 	if value:
@@ -471,10 +555,8 @@ func _assert_true(label: String, value: bool) -> void:
 		_fail_count += 1
 		push_error("[gdtest] FAIL %s" % label)
 
-
 func _assert_false(label: String, value: bool) -> void:
 	_assert_true(label, not value)
-
 
 func _point_from_debug(point: Dictionary) -> Vector2:
 	return Vector2(float(point.get("x", 0.0)), float(point.get("y", 0.0)))

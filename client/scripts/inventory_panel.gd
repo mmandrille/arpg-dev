@@ -685,7 +685,7 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	var label := PotionIconLabelScript.icon_label(item, str(icon.get("label", _short_label(def_id))))
 	var blocked := bool(item.get("_blocked_by_two_handed", false))
 	var invalid_requirements := _item_shows_requirement_warning(item)
-	ItemIconDrawerScript.draw(slot, rect, icon, label, blocked or invalid_requirements, 0.38, ICON_FONT_SIZE, item)
+	ItemIconDrawerScript.draw(slot, rect, icon, label, blocked or invalid_requirements, 0.38, ICON_FONT_SIZE, item, true)
 	if blocked:
 		slot.draw_rect(rect.grow(-3.0), Color(0.05, 0.05, 0.05, 0.46), true)
 		RarityCuePresenterScript.draw_slot(slot, rect, item)

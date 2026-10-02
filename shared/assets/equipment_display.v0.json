@@ -4,7 +4,7 @@
     "equipped": 1.0,
     "ground": 0.7
   },
-  "rig_native_rarity_tint_strength": 0.25,
+  "rig_native_rarity_tint_strength": 0.45,
   "ground_pose": {
     "default": {
       "height": 0.12,

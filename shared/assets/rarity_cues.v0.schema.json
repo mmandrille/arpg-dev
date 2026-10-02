@@ -10,29 +10,25 @@
     "version": {"const": 0},
     "slot": {
       "type": "object",
-      "required": ["badge_fraction", "minimum_size_px", "margin_px", "font_size_px", "stroke_px", "foreground", "background"],
+      "required": ["badge_fraction", "minimum_size_px", "margin_px", "foreground", "background"],
       "additionalProperties": false,
       "properties": {
         "badge_fraction": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.4},
         "minimum_size_px": {"type": "integer", "minimum": 10},
         "margin_px": {"type": "integer", "minimum": 0},
-        "font_size_px": {"type": "integer", "minimum": 8},
-        "stroke_px": {"type": "number", "exclusiveMinimum": 0},
         "foreground": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
         "background": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
       }
     },
     "world": {
       "type": "object",
-      "required": ["offset_x", "height", "revealed_label_height", "pixel_size", "font_size", "outline_size", "foreground", "outline"],
+      "required": ["offset_x", "height", "revealed_label_height", "marker_size", "foreground", "outline"],
       "additionalProperties": false,
       "properties": {
         "offset_x": {"type": "number", "minimum": 0},
         "height": {"type": "number", "exclusiveMinimum": 0},
         "revealed_label_height": {"type": "number", "exclusiveMinimum": 0},
-        "pixel_size": {"type": "number", "exclusiveMinimum": 0},
-        "font_size": {"type": "integer", "minimum": 12},
-        "outline_size": {"type": "integer", "minimum": 0},
+        "marker_size": {"type": "number", "exclusiveMinimum": 0},
         "foreground": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
         "outline": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
       }
@@ -42,13 +38,11 @@
       "minProperties": 5,
       "additionalProperties": {
         "type": "object",
-        "required": ["name", "short", "shape", "world_symbol"],
+        "required": ["name", "shape"],
         "additionalProperties": false,
         "properties": {
           "name": {"type": "string", "minLength": 1},
-          "short": {"type": "string", "minLength": 1, "maxLength": 2},
-          "shape": {"type": "string", "enum": ["square", "circle", "triangle", "diamond", "star"]},
-          "world_symbol": {"type": "string", "minLength": 1, "maxLength": 2}
+          "shape": {"type": "string", "enum": ["square", "circle", "triangle", "diamond", "star"]}
         }
       }
     }

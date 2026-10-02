@@ -52,6 +52,7 @@ const ITEM_SLOT := {
 
 var _mode := "screenshot"
 var _focus := "gear"
+var _variant := ""
 var _output := ""
 var _width := 640
 var _height := 480
@@ -141,9 +142,12 @@ func _initialize() -> void:
 
 	for _i in range(8):
 		await process_frame
+	if _focus == "inventory":
+		await ItemModelThumbnailCache.wait_until_idle(self)
 	if _focus == "skills" and _skills_panel != null:
-		_skills_panel.bot_hover_skill("rage")
-		await process_frame
+		if _variant == "hover":
+			_skills_panel.bot_hover_skill("ice_shard")
+			await process_frame
 
 	if _mode == "live":
 		if _refresh_interval > 0.0 and _focus in ["gear", "eye-view"]:
@@ -250,6 +254,9 @@ func _parse_args() -> void:
 			"--focus":
 				i += 1
 				_focus = str(args[i])
+			"--variant":
+				i += 1
+				_variant = str(args[i])
 			"--output":
 				i += 1
 				_output = str(args[i])
@@ -547,16 +554,19 @@ func _setup_skills() -> void:
 	_skills_panel = panel
 	get_root().add_child(panel)
 	await process_frame
+	SkillRulesLoader.ensure_loaded()
+	var points := 0 if _variant == "nopoints" else 1
 	panel.set_character_progression({
+		"character_class": "sorcerer",
 		"level": 1,
 		"base_stats": {"str": 5, "dex": 5, "vit": 5, "magic": 15},
 	})
 	panel.set_skill_progression({
-		"unspent_skill_points": 1,
+		"unspent_skill_points": points,
 		"skills": [
-			{"skill_id": "magic_bolt", "rank": 0, "max_rank": 5, "can_spend": true},
-			{"skill_id": "rage", "rank": 0, "max_rank": 5, "can_spend": false},
-			{"skill_id": "heal", "rank": 0, "max_rank": 5, "can_spend": true},
+			{"skill_id": "magic_bolt", "rank": 1, "max_rank": int(SkillRulesLoader.skill_definition("magic_bolt").get("max_rank", 1)), "can_spend": points > 0},
+			{"skill_id": "ice_shard", "rank": 0, "max_rank": int(SkillRulesLoader.skill_definition("ice_shard").get("max_rank", 1)), "can_spend": points > 0},
+			{"skill_id": "lightning", "rank": 0, "max_rank": int(SkillRulesLoader.skill_definition("lightning").get("max_rank", 1)), "can_spend": false},
 		],
 	})
 	panel.ensure_display_visible()

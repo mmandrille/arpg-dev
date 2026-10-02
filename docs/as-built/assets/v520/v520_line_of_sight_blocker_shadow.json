@@ -1,0 +1,24 @@
+{
+	"captured_at_local": "2026-10-01T21:20:47",
+	"driver": "metal",
+	"fixture": {
+		"engaged_entity_id": "",
+		"level": 0,
+		"pause_menu_visible": false,
+		"player_pos": {
+			"x": 3.43638873100281,
+			"z": 4.48338460922241
+		},
+		"rendered_torch_count": 0,
+		"selected_torch": {},
+		"tick": 31,
+		"torch_positions": []
+	},
+	"png": "/Users/mmandrille/.codex/worktrees/v520-fog-wall-occlusion/arpg-dev/.artifacts/bot-captures/v520_line_of_sight_blocker_shadow.png",
+	"quality": "balanced",
+	"renderer": "forward_plus",
+	"viewport_size": {
+		"height": 2100,
+		"width": 3840
+	}
+}

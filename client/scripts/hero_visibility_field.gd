@@ -3,6 +3,9 @@ class_name HeroVisibilityField
 extends RefCounted
 
 const FALLBACK_WORLD_TO_SCREEN := 32.0
+const OCCLUDER_JOIN_EPSILON := 0.02
+const MAX_SILHOUETTE_FILL_RATIO := 1.75
+const ORGANIC_EDGE_POINTS_PER_EDGE := 8
 
 
 static func wall_blocks_line_of_sight(wall: Dictionary) -> bool:
@@ -75,34 +78,173 @@ static func build_shadow_polygons(
 ) -> Dictionary:
 	var polygons: Array = []
 	var debug: Array = []
+	var soft_edges: Array[bool] = []
 	var occluder_count := 0
 	var edge_epsilon := float(shadow_cfg.get("edge_epsilon", 0.08))
 	var start_offset := float(shadow_cfg.get("start_offset", 0.16))
 	var wall_height := float(shadow_cfg.get("wall_height", 1.0))
 
-	for occluder in occluders:
-		var poly := shadow_polygon_for_wall(
-			camera,
-			occluder as Dictionary,
-			hero_world,
-			shadow_reach,
-			viewport_size,
-			edge_epsilon,
-			start_offset,
-			wall_height,
-			fallback_center_px,
-		)
-		if poly.size() < 4:
-			continue
-		occluder_count += 1
-		polygons.append(poly)
-		debug.append(debug_shadow(poly))
+	for component in connected_occluder_components(occluders):
+		var members: Array = component.get("occluders", [])
+		var hull: Array = component.get("hull", [])
+		var silhouettes: Array = []
+		var use_shared_silhouette := component_uses_shared_silhouette(component)
+		if use_shared_silhouette:
+			silhouettes.append({"corners": hull, "occluders": members})
+		if silhouettes.is_empty():
+			for member in members:
+				var wall := member as Dictionary
+				silhouettes.append({
+					"corners": wall_corners(Vector2(float(wall.get("x", 0.0)), float(wall.get("y", 0.0))), Vector2(float(wall.get("w", 0.0)), float(wall.get("h", 0.0)))),
+					"occluders": [wall],
+				})
+		var component_shadow_count := 0
+		var rendered_occluder_count := 0
+		for silhouette in silhouettes:
+			var silhouette_data := silhouette as Dictionary
+			var poly := shadow_polygon_for_silhouette(
+				camera,
+				silhouette_data.get("corners", []) as Array,
+				silhouette_data.get("occluders", []) as Array,
+				hero_world,
+				shadow_reach,
+				viewport_size,
+				edge_epsilon,
+				start_offset,
+				wall_height,
+				fallback_center_px,
+			)
+			if poly.size() < 4:
+				continue
+			component_shadow_count += 1
+			rendered_occluder_count += (silhouette_data.get("occluders", []) as Array).size()
+			polygons.append(poly)
+			debug.append(debug_shadow(poly))
+			soft_edges.append(use_shared_silhouette)
+		if component_shadow_count > 0:
+			occluder_count += rendered_occluder_count
 
 	return {
 		"polygons": polygons,
 		"debug": debug,
+		"soft_edges": soft_edges,
 		"occluder_count": occluder_count,
 	}
+
+
+static func connected_occluder_components(occluders: Array) -> Array:
+	var components: Array = []
+	var visited: Array[bool] = []
+	visited.resize(occluders.size())
+	visited.fill(false)
+	for start in range(occluders.size()):
+		if visited[start] or typeof(occluders[start]) != TYPE_DICTIONARY:
+			continue
+		var members: Array = []
+		var queue: Array[int] = [start]
+		visited[start] = true
+		var cursor := 0
+		while cursor < queue.size():
+			var current_index: int = queue[cursor]
+			cursor += 1
+			var current := occluders[current_index] as Dictionary
+			members.append(current)
+			for candidate_index in range(occluders.size()):
+				if visited[candidate_index] or typeof(occluders[candidate_index]) != TYPE_DICTIONARY:
+					continue
+				if occluders_touch(current, occluders[candidate_index] as Dictionary, OCCLUDER_JOIN_EPSILON):
+					visited[candidate_index] = true
+					queue.append(candidate_index)
+		var corners: Array = []
+		for member in members:
+			var wall := member as Dictionary
+			corners.append_array(wall_corners(Vector2(float(wall.get("x", 0.0)), float(wall.get("y", 0.0))), Vector2(float(wall.get("w", 0.0)), float(wall.get("h", 0.0)))))
+		var hull := Geometry2D.convex_hull(PackedVector2Array(corners))
+		components.append({"occluders": members, "hull": Array(hull), "footprint_area": occluder_union_area(members), "hull_area": polygon_area(Array(hull))})
+	return components
+
+
+static func component_uses_shared_silhouette(component: Dictionary) -> bool:
+	if (component.get("occluders", []) as Array).size() <= 1:
+		return true
+	var footprint_area := float(component.get("footprint_area", 0.0))
+	if footprint_area <= 0.0:
+		return false
+	return float(component.get("hull_area", 0.0)) / footprint_area <= MAX_SILHOUETTE_FILL_RATIO
+
+
+static func occluders_touch(a: Dictionary, b: Dictionary, epsilon: float) -> bool:
+	var a_x := float(a.get("x", 0.0))
+	var a_y := float(a.get("y", 0.0))
+	var a_w := float(a.get("w", 0.0)) * 0.5
+	var a_h := float(a.get("h", 0.0)) * 0.5
+	var b_x := float(b.get("x", 0.0))
+	var b_y := float(b.get("y", 0.0))
+	var b_w := float(b.get("w", 0.0)) * 0.5
+	var b_h := float(b.get("h", 0.0)) * 0.5
+	return absf(a_x - b_x) <= a_w + b_w + epsilon and absf(a_y - b_y) <= a_h + b_h + epsilon
+
+
+static func occluder_union_area(occluders: Array) -> float:
+	var xs: Array[float] = []
+	for occluder in occluders:
+		var wall := occluder as Dictionary
+		var x := float(wall.get("x", 0.0))
+		var half_w := float(wall.get("w", 0.0)) * 0.5
+		xs.append(x - half_w)
+		xs.append(x + half_w)
+	xs.sort()
+	var area := 0.0
+	for x_index in range(xs.size() - 1):
+		var left := xs[x_index]
+		var right := xs[x_index + 1]
+		if right <= left:
+			continue
+		var midpoint_x := (left + right) * 0.5
+		var intervals: Array[Vector2] = []
+		for occluder in occluders:
+			var wall := occluder as Dictionary
+			var wall_x := float(wall.get("x", 0.0))
+			var wall_half_w := float(wall.get("w", 0.0)) * 0.5
+			if midpoint_x > wall_x - wall_half_w and midpoint_x < wall_x + wall_half_w:
+				var wall_y := float(wall.get("y", 0.0))
+				var wall_half_h := float(wall.get("h", 0.0)) * 0.5
+				intervals.append(Vector2(wall_y - wall_half_h, wall_y + wall_half_h))
+		intervals.sort_custom(func(a: Vector2, b: Vector2): return a.x < b.x)
+		if intervals.is_empty():
+			continue
+		var covered_height := 0.0
+		var current_start := intervals[0].x
+		var current_end := intervals[0].y
+		for interval in intervals.slice(1):
+			if interval.x <= current_end:
+				current_end = maxf(current_end, interval.y)
+			else:
+				covered_height += current_end - current_start
+				current_start = interval.x
+				current_end = interval.y
+		covered_height += current_end - current_start
+		area += (right - left) * covered_height
+	return area
+
+
+static func point_in_any_occluder(point: Vector2, occluders: Array) -> bool:
+	for occluder in occluders:
+		var wall := occluder as Dictionary
+		if point_inside_wall(point, Vector2(float(wall.get("x", 0.0)), float(wall.get("y", 0.0))), Vector2(float(wall.get("w", 0.0)), float(wall.get("h", 0.0)))):
+			return true
+	return false
+
+
+static func polygon_area(points: Array) -> float:
+	if points.size() < 3:
+		return 0.0
+	var twice_area := 0.0
+	for i in range(points.size()):
+		var current := points[i] as Vector2
+		var next := points[(i + 1) % points.size()] as Vector2
+		twice_area += current.x * next.y - next.x * current.y
+	return absf(twice_area) * 0.5
 
 
 static func expanded_polygon(points: Array, scale: float) -> Array:
@@ -120,9 +262,34 @@ static func expanded_polygon(points: Array, scale: float) -> Array:
 	return out
 
 
-static func shadow_polygon_for_wall(
+static func organic_expanded_polygon(points: Array, scale: float, amplitude: float, segments: float, seed: float) -> Array:
+	if points.size() < 3:
+		return []
+	var center := Vector2.ZERO
+	for point in points:
+		center += point as Vector2
+	center /= float(points.size())
+	var out: Array = []
+	for edge_index in range(points.size()):
+		var start := points[edge_index] as Vector2
+		var end := points[(edge_index + 1) % points.size()] as Vector2
+		for sample_index in range(ORGANIC_EDGE_POINTS_PER_EDGE):
+			var t := float(sample_index) / float(ORGANIC_EDGE_POINTS_PER_EDGE)
+			var point := start.lerp(end, t)
+			var radial := point - center
+			var angle := atan2(radial.y, radial.x)
+			var low := sin(angle * segments + seed)
+			var high := sin(angle * segments * 2.17 + seed * 3.31)
+			var wave := (low * 0.72 + high * 0.28) * maxf(0.0, amplitude)
+			var radial_scale := maxf(1.02, scale + wave)
+			out.append(center + radial * radial_scale)
+	return out
+
+
+static func shadow_polygon_for_silhouette(
 	camera: Camera3D,
-	wall: Dictionary,
+	corners: Array,
+	occluders: Array,
 	hero_world: Vector2,
 	shadow_reach: float,
 	viewport_size: Vector2,
@@ -131,16 +298,22 @@ static func shadow_polygon_for_wall(
 	wall_height: float,
 	fallback_center_px: Vector2,
 ) -> Array:
-	var center := Vector2(float(wall.get("x", 0.0)), float(wall.get("y", 0.0)))
-	var size := Vector2(float(wall.get("w", 0.0)), float(wall.get("h", 0.0)))
-	if size.x <= 0.0 or size.y <= 0.0:
+	if corners.size() < 3 or not point_outside_occluders(hero_world, occluders):
 		return []
-	var wall_reach := size.length() * 0.5
+	var center := Vector2.ZERO
+	var min_edge := INF
+	for corner in corners:
+		center += corner as Vector2
+	center /= float(corners.size())
+	for occluder in occluders:
+		var wall := occluder as Dictionary
+		min_edge = minf(min_edge, minf(float(wall.get("w", 0.0)), float(wall.get("h", 0.0))))
+	var wall_reach := 0.0
+	for corner in corners:
+		wall_reach = maxf(wall_reach, center.distance_to(corner as Vector2))
 	if hero_world.distance_to(center) > shadow_reach + wall_reach:
 		return []
-	if point_inside_wall(hero_world, center, size):
-		return []
-	var tangent := tangent_corners(hero_world, wall_corners(center, size))
+	var tangent := tangent_corners(hero_world, corners)
 	if tangent.size() < 2:
 		return []
 	var corner_a: Vector2 = tangent[0]
@@ -149,7 +322,7 @@ static func shadow_polygon_for_wall(
 	var dir_b := (corner_b - hero_world).normalized()
 	if dir_a.length() <= 0.0 or dir_b.length() <= 0.0:
 		return []
-	var edge_offset := clampf(start_offset, edge_epsilon, minf(size.x, size.y) * 0.5)
+	var edge_offset := clampf(start_offset, edge_epsilon, min_edge * 0.5)
 	var extend := maxf(
 		shadow_reach * 4.0,
 		hero_world.distance_to(center) + viewport_size.length() / FALLBACK_WORLD_TO_SCREEN + wall_reach
@@ -248,4 +421,8 @@ static func debug_shadow(points: Array) -> Dictionary:
 			"max_x": max_p.x,
 			"max_y": max_p.y,
 		},
-	}
+}
+
+
+static func point_outside_occluders(point: Vector2, occluders: Array) -> bool:
+	return not point_in_any_occluder(point, occluders)

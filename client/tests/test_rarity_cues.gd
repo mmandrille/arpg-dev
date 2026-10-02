@@ -31,11 +31,15 @@ func _test_all_five_rarities() -> void:
 		var original := item.duplicate(true)
 		var cue := Loader.cue_for_item(item)
 		_assert("%s cue maps to catalog" % rarity, cue == entries.get(rarity, {}))
+		_assert("%s cue has no text marker" % rarity, not cue.has("short") and not cue.has("world_symbol"))
 		_assert("%s uppercase normalized" % rarity, Loader.cue_for_rarity(str(rarity).to_upper()) == cue)
 		var node: Node3D = factory.make_loot_node(item)
-		var marker := node.find_child("RarityCue", false, false) as Label3D
+		var marker := node.find_child("RarityCue", false, false) as MeshInstance3D
 		var label := node.find_child("LootLabel", false, false) as Label3D
-		_assert("%s persistent marker" % rarity, marker != null and marker.visible and marker.text == str(cue.get("world_symbol", "")))
+		_assert("%s persistent shape marker" % rarity, marker != null and marker.visible and marker.mesh != null and marker.mesh.get_surface_count() == 1)
+		var world_scale := float(Loader.catalog().get("world", {}).get("marker_size", 0.22))
+		_assert("%s ground marker uses configured scale" % rarity, marker != null and is_equal_approx(marker.scale.x, world_scale))
+		_assert("%s no rarity text node" % rarity, node.find_child("RarityCue", false, false) is MeshInstance3D)
 		_assert("%s revealed full label" % rarity, label != null and not label.visible and label.text == "%s · Long Sword" % cue.get("name", ""))
 		_assert("%s revealed label sits above marker" % rarity, label != null and marker != null and label.position.y > marker.position.y)
 		_assert("%s input unchanged" % rarity, item == original)
@@ -43,6 +47,10 @@ func _test_all_five_rarities() -> void:
 	var named := {"item_def_id": "long_sword", "rarity": "rare", "display_name": "Rare Long Sword"}
 	_assert("existing rarity prefix is not duplicated", factory.loot_label_text(named) == "Rare Long Sword")
 	_assert("template-only trade row resolves", Loader.cue_for_item({"item_template_id": "long_sword", "rarity": "rare"}) == entries.get("rare", {}))
+	var shapes := {}
+	for cue in entries.values():
+		shapes[str(cue.get("shape", ""))] = true
+	_assert("all rarity cues use distinct non-text shapes", shapes.size() == entries.size())
 
 
 func _test_exclusions() -> void:

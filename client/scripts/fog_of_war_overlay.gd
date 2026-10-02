@@ -2,6 +2,7 @@ class_name FogOfWarOverlay
 extends CanvasLayer
 
 const HeroVisibilityFieldScript := preload("res://scripts/hero_visibility_field.gd")
+const FogShadowPolygonLayersScript := preload("res://scripts/fog_shadow_polygon_layers.gd")
 const FogPresentationLoaderScript := preload("res://scripts/fog_presentation_loader.gd")
 const FogLosShadowCacheScript := preload("res://scripts/fog_los_shadow_cache.gd")
 const HeroLightSourceScript := preload("res://scripts/hero_light_source.gd")
@@ -33,8 +34,7 @@ var _extra_occluder_layout: Array = []
 var _torch_positions: Array = []
 var _torch_light_radius: float = 0.0
 var _torch_feather_world: float = 0.35
-var _shadow_gloom_polygons: Array = []
-var _shadow_polygons: Array = []
+var _shadow_polygon_layers: Variant
 var _shadow_debug: Array = []
 var _occluder_count: int = 0
 var _edge_rotation: float = 0.0
@@ -42,7 +42,10 @@ var _edge_rotation_active: bool = false
 var _has_last_target_world: bool = false
 var _last_target_world := Vector2.ZERO
 var _shadow_gloom_color := Color(0.10, 0.11, 0.13, 0.42)
-var _shadow_core_color := Color(0.0, 0.0, 0.0, 0.82)
+var _shadow_core_color := Color(0.0, 0.0, 0.0, 0.76)
+var _shadow_soft_edge_color := Color(0.10, 0.11, 0.13, 0.20)
+var _shadow_soft_edge_scale := 1.12
+var _shadow_soft_edge_amplitude := 0.025
 var _shadow_gloom_scale := 1.035
 var _point_light: OmniLight3D
 var _character_visual: Node3D
@@ -210,6 +213,9 @@ func get_debug_state() -> Dictionary:
 		"darkness_alpha": FogPresentationLoaderScript.darkness_alpha(),
 		"shadow_gloom_alpha": _shadow_gloom_color.a,
 		"shadow_core_alpha": _shadow_core_color.a,
+		"shadow_soft_edge_alpha": _shadow_soft_edge_color.a,
+		"shadow_soft_edge_scale": _shadow_soft_edge_scale,
+		"shadow_soft_edge_amplitude": _shadow_soft_edge_amplitude,
 		"wall_count": _wall_layout.size(),
 		"extra_occluder_count": _extra_occluder_layout.size(),
 		"occluder_count": _occluder_count,
@@ -256,12 +262,27 @@ func _ensure_rect() -> void:
 	_shadow_root = Node2D.new()
 	_shadow_root.name = "FogLOSShadows"
 	add_child(_shadow_root)
+	var organic_cfg: Dictionary = FogPresentationLoaderScript.organic_edge()
+	_shadow_polygon_layers = FogShadowPolygonLayersScript.new(
+		_shadow_root,
+		_shadow_gloom_color,
+		_shadow_core_color,
+		_shadow_soft_edge_color,
+		_shadow_gloom_scale,
+		_shadow_soft_edge_scale,
+		_shadow_soft_edge_amplitude,
+		float(organic_cfg.get("segments", 18.0)),
+		float(organic_cfg.get("seed", 41.0)),
+	)
 
 
 func _load_shadow_colors() -> void:
 	var shadow_cfg: Dictionary = FogPresentationLoaderScript.shadow()
 	_shadow_gloom_color = _color_from_hex(str(shadow_cfg.get("gloom_color", "#1a1c21")), float(shadow_cfg.get("gloom_alpha", 0.42)))
-	_shadow_core_color = _color_from_hex(str(shadow_cfg.get("core_color", "#000000")), float(shadow_cfg.get("core_alpha", 0.82)))
+	_shadow_core_color = _color_from_hex(str(shadow_cfg.get("core_color", "#000000")), float(shadow_cfg.get("core_alpha", 0.76)))
+	_shadow_soft_edge_color = _color_from_hex(str(shadow_cfg.get("gloom_color", "#1a1c21")), float(shadow_cfg.get("soft_edge_alpha", 0.20)))
+	_shadow_soft_edge_scale = maxf(1.0, float(shadow_cfg.get("soft_edge_scale", 1.12)))
+	_shadow_soft_edge_amplitude = maxf(0.0, float(shadow_cfg.get("soft_edge_amplitude", 0.025)))
 	_shadow_gloom_scale = float(shadow_cfg.get("gloom_scale", 1.035))
 
 
@@ -527,47 +548,12 @@ func _update_shadows(viewport_size: Vector2) -> void:
 	)
 	_occluder_count = int(built.get("occluder_count", 0))
 	_shadow_debug = built.get("debug", [])
-	_sync_shadow_polygons(built.get("polygons", []))
-
-
-func _sync_shadow_polygons(polygons: Array) -> void:
-	while _shadow_gloom_polygons.size() < polygons.size():
-		var gloom_node := Polygon2D.new()
-		gloom_node.color = _shadow_gloom_color
-		_shadow_root.add_child(gloom_node)
-		_shadow_gloom_polygons.append(gloom_node)
-	while _shadow_polygons.size() < polygons.size():
-		var node := Polygon2D.new()
-		node.color = _shadow_core_color
-		_shadow_root.add_child(node)
-		_shadow_polygons.append(node)
-	for i in range(_shadow_gloom_polygons.size()):
-		var gloom_node := _shadow_gloom_polygons[i] as Polygon2D
-		if i < polygons.size():
-			gloom_node.visible = true
-			gloom_node.polygon = PackedVector2Array(HeroVisibilityFieldScript.expanded_polygon(polygons[i] as Array, _shadow_gloom_scale))
-		else:
-			gloom_node.visible = false
-			gloom_node.polygon = PackedVector2Array()
-	for i in range(_shadow_polygons.size()):
-		var node := _shadow_polygons[i] as Polygon2D
-		if i < polygons.size():
-			node.visible = true
-			node.polygon = PackedVector2Array(polygons[i])
-		else:
-			node.visible = false
-			node.polygon = PackedVector2Array()
+	_shadow_polygon_layers.sync(built.get("polygons", []), built.get("soft_edges", []))
 
 
 func _hide_shadow_polygons() -> void:
-	for node in _shadow_gloom_polygons:
-		var gloom_polygon := node as Polygon2D
-		gloom_polygon.visible = false
-		gloom_polygon.polygon = PackedVector2Array()
-	for node in _shadow_polygons:
-		var polygon := node as Polygon2D
-		polygon.visible = false
-		polygon.polygon = PackedVector2Array()
+	if _shadow_polygon_layers != null:
+		_shadow_polygon_layers.hide()
 
 
 func _target_world_position() -> Vector2:

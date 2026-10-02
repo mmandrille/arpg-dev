@@ -10,10 +10,10 @@ const SkillMechanicTooltipScript := preload("res://scripts/skill_mechanic_toolti
 const SkillNextRankTooltipScript := preload("res://scripts/skill_next_rank_tooltip.gd")
 const SkillTreeLayoutScript := preload("res://scripts/skill_tree_layout.gd")
 const SkillTreeConnectorsScript := preload("res://scripts/skill_tree_connectors.gd")
+const SkillTreeStylesScript := preload("res://scripts/skill_tree_styles.gd")
 const DraggableWindowScript := preload("res://scripts/draggable_window.gd")
 
 const SKILL_BLOCK_SIZE := Vector2(83, 83)
-const SKILL_ICON_SIZE := Vector2(62, 62)
 const SKILL_TREE_ORIGIN := Vector2(23, 70)
 const SKILL_TREE_SPACING := Vector2(96, 127)
 const SKILL_ACTIVE_TREE_WIDTH := 530.0
@@ -34,6 +34,7 @@ var _points_label: Label
 var _skill_blocks: Dictionary = {}
 var _skill_icons: Dictionary = {}
 var _skill_rank_labels: Dictionary = {}
+var _skill_status_labels: Dictionary = {}
 var _assigned_key_labels: Dictionary = {}
 var _tooltip: PanelContainer
 var _tooltip_title: Label
@@ -354,6 +355,10 @@ func get_debug_state() -> Dictionary:
 			"can_spend": bool(row.get("can_spend", false)),
 			"spend_button_enabled": _skill_spend_enabled(row_skill_id),
 			"visual_state": _skill_visual_state(row_skill_id),
+			"tree_state": _skill_tree_state(row_skill_id),
+			"status_label": _skill_status_text(_skill_tree_state(row_skill_id)),
+			"selected": row_skill_id == _selected_skill_id,
+			"hovered": row_skill_id == _hovered_skill_id,
 			"assigned_key": _assigned_key_for_skill(row_skill_id),
 			"right_click_assigned": _right_click_skill_id == row_skill_id,
 			"requirements_met": _requirements_met(row_requirements),
@@ -363,6 +368,7 @@ func get_debug_state() -> Dictionary:
 	return {
 		"visible": visible,
 		"unspent_skill_points": int(skill_progression.get("unspent_skill_points", 0)),
+		"points_label_text": _points_label.text if _points_label != null else "",
 		"skill_id": skill_id,
 		"skill_ids": _visible_skill_ids(),
 		"skill_name": _skill_name(skill_id),
@@ -417,11 +423,13 @@ func bot_hover_skill(skill_id: String = "") -> void:
 		return
 	_hovered_skill_id = skill_id
 	_show_tooltip(skill_id)
+	_render()
 
 
 func bot_leave_skill_tooltip() -> void:
 	_hovered_skill_id = ""
 	_hide_tooltip()
+	_render()
 
 
 func _sync_viewport_size() -> void:
@@ -437,12 +445,12 @@ func _build() -> void:
 	_panel.configure("Skills", Vector2(tree_width, 567))
 	_panel.set_layout_key("skills")
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_panel.add_theme_stylebox_override("panel", _panel_style())
+	_panel.add_theme_stylebox_override("panel", SkillTreeStylesScript.panel_frame())
 	_panel.close_requested.connect(hide_display)
 	add_child(_panel)
 
 	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 12)
+	root.add_theme_constant_override("separation", UiTheme.spacing("skill_tree_root_separation"))
 	root.custom_minimum_size = Vector2(tree_width, SKILL_TREE_VIEW_HEIGHT + 36.0)
 	_panel.set_content(root)
 
@@ -451,10 +459,10 @@ func _build() -> void:
 	tree.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(tree)
 
-	var backdrop := ColorRect.new()
-	backdrop.color = Color("#151617")
+	var backdrop := Panel.new()
 	backdrop.custom_minimum_size = Vector2(tree_width, SKILL_TREE_VIEW_HEIGHT)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backdrop.add_theme_stylebox_override("panel", SkillTreeStylesScript.canvas_frame())
 	tree.add_child(backdrop)
 
 	_connectors = SkillTreeConnectorsScript.new()
@@ -469,7 +477,7 @@ func _build() -> void:
 		skill_block.size = SKILL_BLOCK_SIZE
 		skill_block.custom_minimum_size = SKILL_BLOCK_SIZE
 		skill_block.mouse_filter = Control.MOUSE_FILTER_STOP
-		skill_block.add_theme_stylebox_override("panel", _skill_block_style("disabled", false))
+		skill_block.add_theme_stylebox_override("panel", SkillTreeStylesScript.node_frame("locked", false, false))
 		skill_block.gui_input.connect(func(event: InputEvent) -> void:
 			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 				_click_skill(skill_id)
@@ -479,21 +487,33 @@ func _build() -> void:
 		_skill_blocks[skill_id] = skill_block
 
 		var icon = SkillIconScript.new()
-		icon.position = Vector2(10, 10)
-		icon.size = SKILL_ICON_SIZE
+		var icon_size := float(UiTheme.spacing("skill_tree_icon_size"))
+		var icon_inset := float(UiTheme.spacing("skill_tree_icon_inset"))
+		icon.position = Vector2(icon_inset, icon_inset)
+		icon.size = Vector2(icon_size, icon_size)
 		icon.configure(skill_id, _skill_presentation(skill_id), 0)
 		skill_block.add_child(icon)
 		_skill_icons[skill_id] = icon
 
+		var status_label := Label.new()
+		status_label.position = Vector2(UiTheme.spacing("skill_tree_status_x"), UiTheme.spacing("skill_tree_status_y"))
+		status_label.size = Vector2(UiTheme.spacing("skill_tree_status_width"), UiTheme.spacing("skill_tree_status_height"))
+		status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		status_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		UiTheme.apply_font(status_label, "skill_node_status")
+		skill_block.add_child(status_label)
+		_skill_status_labels[skill_id] = status_label
+
 		var assigned_key_label := _badge_label("")
-		assigned_key_label.position = Vector2(53, 64)
-		assigned_key_label.custom_minimum_size = Vector2(30, 19)
+		assigned_key_label.position = Vector2(UiTheme.spacing("skill_tree_key_x"), UiTheme.spacing("skill_tree_rank_y"))
+		assigned_key_label.custom_minimum_size = Vector2(UiTheme.spacing("skill_tree_key_width"), 15)
 		skill_block.add_child(assigned_key_label)
 		_assigned_key_labels[skill_id] = assigned_key_label
 
 		var rank_label := _badge_label("")
-		rank_label.position = Vector2(0, 64)
-		rank_label.custom_minimum_size = Vector2(45, 19)
+		rank_label.position = Vector2(0, UiTheme.spacing("skill_tree_rank_y"))
+		rank_label.custom_minimum_size = Vector2(UiTheme.spacing("skill_tree_rank_width"), 15)
 		skill_block.add_child(rank_label)
 		_skill_rank_labels[skill_id] = rank_label
 
@@ -501,27 +521,27 @@ func _build() -> void:
 	_tooltip.visible = false
 	_tooltip.custom_minimum_size = SKILL_TOOLTIP_SIZE
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_tooltip.add_theme_stylebox_override("panel", _tooltip_style())
+	_tooltip.add_theme_stylebox_override("panel", SkillTreeStylesScript.tooltip_frame())
 	tree.add_child(_tooltip)
 
 	var tip_root := VBoxContainer.new()
-	tip_root.add_theme_constant_override("separation", 6)
+	tip_root.add_theme_constant_override("separation", UiTheme.spacing("skill_tree_tooltip_separation"))
 	tip_root.custom_minimum_size = Vector2(184, 154)
 	_tooltip.add_child(tip_root)
 
-	_tooltip_title = _label(_skill_name(_current_skill_id()), 21, Color("#f0dfbb"))
+	_tooltip_title = _theme_label(_skill_name(_current_skill_id()), "skill_tooltip_title")
 	tip_root.add_child(_tooltip_title)
-	_tooltip_rank = _label("", 16, Color("#cfc3aa"))
+	_tooltip_rank = _theme_label("", "skill_tooltip_rank")
 	tip_root.add_child(_tooltip_rank)
 	_tooltip_body = RichTextLabel.new()
 	_tooltip_body.bbcode_enabled = true
 	_tooltip_body.fit_content = true
 	_tooltip_body.scroll_active = false
 	_tooltip_body.custom_minimum_size = Vector2(184, 96)
-	_tooltip_body.add_theme_font_size_override("normal_font_size", 15)
-	_tooltip_body.add_theme_color_override("default_color", Color("#b9ad97"))
+	_tooltip_body.add_theme_font_size_override("normal_font_size", UiTheme.font_size("skill_tooltip_body"))
+	_tooltip_body.add_theme_color_override("default_color", UiTheme.font_color("skill_tooltip_body"))
 	tip_root.add_child(_tooltip_body)
-	_points_label = _label("", 18, Color("#bfc6c2"))
+	_points_label = _theme_label("", "skill_points")
 	_points_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_points_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.add_child(_points_label)
@@ -535,28 +555,34 @@ func _render() -> void:
 	if _selected_skill_id == "" or not _skill_is_visible(_selected_skill_id):
 		_selected_skill_id = str(_visible_skill_ids().front()) if not _visible_skill_ids().is_empty() else SkillRulesLoader.first_skill_id()
 	var unspent := int(skill_progression.get("unspent_skill_points", 0))
-	_points_label.text = "Skill choices remaining  %d" % unspent
+	_points_label.text = "%s  %d" % [TextCatalog.get_text("skills.points_available", "Skill points available"), unspent]
+	_points_label.add_theme_color_override("font_color", SkillTreeStylesScript.points_color(unspent > 0))
 	_update_tooltip_content(_tooltip_skill_id())
 	if _connectors != null:
 		_connectors.set_edges(SkillTreeLayoutScript.prerequisite_edges(_visible_skill_ids(), skill_progression))
-	var skill_id := _current_skill_id()
 	for raw_skill_id in _tree_skill_ids():
 		var row_skill_id := str(raw_skill_id)
 		var row_visible := _skill_is_visible(row_skill_id)
 		var row := _skill_row(row_skill_id)
 		var row_rank := int(row.get("rank", 0))
 		var row_max_rank := int(row.get("max_rank", int(_skill_def(row_skill_id).get("max_rank", 0))))
-		var visual_state := _skill_visual_state(row_skill_id)
-		var selected := row_skill_id == skill_id
+		var selected := row_skill_id == _selected_skill_id
+		var hovered := row_skill_id == _hovered_skill_id
+		var tree_state := _skill_tree_state(row_skill_id)
 		var block := _skill_blocks.get(row_skill_id, null) as Panel
 		if block != null:
 			block.visible = row_visible
 			block.position = _skill_block_position(row_skill_id)
-			block.add_theme_stylebox_override("panel", _skill_block_style(visual_state, selected or _right_click_skill_id == row_skill_id))
+			block.add_theme_stylebox_override("panel", SkillTreeStylesScript.node_frame(tree_state, selected or _right_click_skill_id == row_skill_id, hovered))
 		var icon = _skill_icons.get(row_skill_id, null)
 		if icon != null:
 			icon.configure(row_skill_id, _skill_presentation(row_skill_id), row_rank)
-			icon.modulate = _skill_icon_modulate(visual_state, selected)
+			icon.modulate = SkillTreeStylesScript.icon_modulate(tree_state, selected)
+		var status_label := _skill_status_labels.get(row_skill_id, null) as Label
+		if status_label != null:
+			status_label.text = _skill_status_text(tree_state)
+			status_label.add_theme_color_override("font_color", SkillTreeStylesScript.state_text_color(tree_state))
+			status_label.add_theme_stylebox_override("normal", SkillTreeStylesScript.status_frame(tree_state))
 		var assigned_key_label := _assigned_key_labels.get(row_skill_id, null) as Label
 		if assigned_key_label != null:
 			var assigned_key := _assigned_key_for_skill(row_skill_id)
@@ -565,7 +591,7 @@ func _render() -> void:
 		var rank_label := _skill_rank_labels.get(row_skill_id, null) as Label
 		if rank_label != null:
 			rank_label.text = "%d/%d" % [row_rank, row_max_rank]
-			rank_label.modulate = _skill_rank_modulate(visual_state, selected)
+			rank_label.add_theme_color_override("font_color", SkillTreeStylesScript.rank_text_color(tree_state))
 
 
 func _click_skill(skill_id: String) -> void:
@@ -594,11 +620,13 @@ func _bind_skill_hover(control: Control, skill_id: String) -> void:
 	control.mouse_entered.connect(func() -> void:
 		_hovered_skill_id = skill_id
 		_show_tooltip(skill_id)
+		_render()
 	)
 	control.mouse_exited.connect(func() -> void:
 		if not _mouse_over_skill_controls():
 			_hovered_skill_id = ""
 			_hide_tooltip()
+			_render()
 	)
 
 
@@ -730,6 +758,15 @@ func _skill_visual_state(skill_id: String) -> String:
 	if rank <= 0:
 		return "disabled"
 	return "normal"
+
+
+func _skill_tree_state(skill_id: String) -> String:
+	var rank := int(_skill_row(skill_id).get("rank", 0))
+	return SkillTreeStylesScript.state_for(rank, _skill_spend_enabled(skill_id))
+
+
+func _skill_status_text(state: String) -> String:
+	return TextCatalog.get_text("skills.state.%s" % state, state.to_upper())
 
 
 func _skill_def(skill_id: String) -> Dictionary:
@@ -887,18 +924,17 @@ func _stat_label(stat: String) -> String:
 
 
 func _badge_label(text: String) -> Label:
-	var label := _label(text, 16, Color("#d9d0bd"))
+	var label := _theme_label(text, "skill_rank")
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_stylebox_override("normal", _badge_style())
+	label.add_theme_stylebox_override("normal", UiTheme.frame("skill_rank_badge"))
 	return label
 
 
-func _label(text: String, size: int, color: Color) -> Label:
+func _theme_label(text: String, role: String) -> Label:
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", size)
-	label.add_theme_color_override("font_color", color)
+	UiTheme.apply_font(label, role)
 	return label
 
 
@@ -907,106 +943,5 @@ func _apply_mouse_filter() -> void:
 		_panel.mouse_filter = Control.MOUSE_FILTER_STOP if visible else Control.MOUSE_FILTER_IGNORE
 
 
-func _panel_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.07, 0.072, 0.07, 0.96)
-	s.border_color = Color("#7a6535")
-	s.border_width_left = 2
-	s.border_width_top = 2
-	s.border_width_right = 2
-	s.border_width_bottom = 2
-	s.corner_radius_top_left = 6
-	s.corner_radius_top_right = 6
-	s.corner_radius_bottom_left = 6
-	s.corner_radius_bottom_right = 6
-	s.content_margin_left = 12
-	s.content_margin_right = 12
-	s.content_margin_top = 12
-	s.content_margin_bottom = 12
-	return s
-
-
-func _skill_block_style(visual_state: String, selected: bool) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	match visual_state:
-		"highlight":
-			s.bg_color = Color("#8d681f")
-			s.border_color = Color("#ffe08a")
-		"normal":
-			s.bg_color = Color("#5a4028")
-			s.border_color = Color("#c9a76a") if selected else Color("#8a7245")
-		_:
-			s.bg_color = Color("#151515")
-			s.border_color = Color("#4a4a4a") if selected else Color("#2f2f2f")
-	if selected:
-		match visual_state:
-			"highlight":
-				s.border_color = Color("#f0dfbb")
-			"normal":
-				s.border_color = Color("#c9a76a")
-			_:
-				s.border_color = Color("#5a5a5a")
-	var border_width := 3 if visual_state == "highlight" else 2
-	s.border_width_left = border_width
-	s.border_width_top = border_width
-	s.border_width_right = border_width
-	s.border_width_bottom = border_width
-	s.corner_radius_top_left = 2
-	s.corner_radius_top_right = 2
-	s.corner_radius_bottom_left = 2
-	s.corner_radius_bottom_right = 2
-	return s
-
-
-func _skill_icon_modulate(visual_state: String, selected: bool) -> Color:
-	match visual_state:
-		"highlight":
-			return Color(1.35, 1.24, 0.82, 1)
-		"normal":
-			return Color(1, 1, 1, 1)
-		_:
-			return Color(0.34, 0.34, 0.34, 1) if not selected else Color(0.55, 0.55, 0.55, 1)
-
-
-func _skill_rank_modulate(visual_state: String, selected: bool) -> Color:
-	match visual_state:
-		"highlight":
-			return Color(1, 0.93, 0.72, 1)
-		"normal":
-			return Color(1, 1, 1, 1)
-		_:
-			return Color(0.38, 0.38, 0.38, 1) if not selected else Color(0.55, 0.55, 0.55, 1)
-
-
-func _tooltip_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.045, 0.042, 0.036, 0.96)
-	s.border_color = Color("#7a6535")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	s.corner_radius_top_left = 4
-	s.corner_radius_top_right = 4
-	s.corner_radius_bottom_left = 4
-	s.corner_radius_bottom_right = 4
-	s.content_margin_left = 10
-	s.content_margin_right = 10
-	s.content_margin_top = 10
-	s.content_margin_bottom = 10
-	return s
-
-
 func _vec2_debug(value: Vector2) -> Dictionary:
 	return {"x": value.x, "y": value.y}
-
-
-func _badge_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.025, 0.025, 0.025, 0.92)
-	s.border_color = Color("#50463a")
-	s.border_width_left = 1
-	s.border_width_top = 1
-	s.border_width_right = 1
-	s.border_width_bottom = 1
-	return s

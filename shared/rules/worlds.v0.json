@@ -727,6 +727,17 @@
         },
         {
           "type": "wall",
+          "position": {
+            "x": 5,
+            "y": 3.8
+          },
+          "size": {
+            "x": 2.4,
+            "y": 0.6
+          }
+        },
+        {
+          "type": "wall",
           "kind": "rock",
           "blocks_line_of_sight": true,
           "position": {

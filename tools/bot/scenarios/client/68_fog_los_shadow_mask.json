@@ -54,6 +54,12 @@
       "wall_count_min": 5,
       "occluder_count_min": 1,
       "shadow_count_min": 1
+    },
+    {
+      "type": "capture_frame",
+      "name": "v520_fog_los_shadow_mask",
+      "timeout_s": 5.0,
+      "skip_if_headless": true
     }
   ]
 }

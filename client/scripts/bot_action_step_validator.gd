@@ -19,7 +19,7 @@ const STEP_TYPES_ACTION := [
 	"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing",
 	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
 	"set_market_search", "select_market_sort", "click_waypoint_level",
-	"set_camera_mode", "select_camera_mode",
+	"set_camera_mode", "select_camera_mode", "adjust_camera_zoom",
 	"enable_ws_reconnect_proof", "simulate_ws_drop",
 	"set_graphics_quality",
 	"approach_nearest_torch",
@@ -126,6 +126,15 @@ static func validate(step: Dictionary, stype: String, index: int) -> String:
 		return _require_string(step, index, stype, "recipe_id")
 	if stype in ["set_camera_mode", "select_camera_mode"]:
 		return _require_string(step, index, stype, "mode")
+	if stype == "adjust_camera_zoom":
+		if not step.has("delta_size"):
+			return "client_steps[%d] (adjust_camera_zoom) requires delta_size" % index
+		if typeof(step["delta_size"]) not in [TYPE_INT, TYPE_FLOAT]:
+			return "client_steps[%d] (adjust_camera_zoom) requires numeric delta_size" % index
+		var delta_size := float(step.get("delta_size", 0.0))
+		if not is_finite(delta_size) or absf(delta_size) > 6.0:
+			return "client_steps[%d] (adjust_camera_zoom) requires finite delta_size in [-6, 6]" % index
+		return ""
 	if stype in ["click_market_purchase_listing", "click_market_cancel_listing"]:
 		if str(step.get("listing_id", "")) == "" and str(step.get("item_def_id", "")) == "" and not step.has("price_gold"):
 			return "client_steps[%d] (%s) requires listing_id, item_def_id, or price_gold" % [index, stype]

@@ -9,6 +9,25 @@ from typing import Any
 _TOKEN_CALL = re.compile(r'\bUiTheme\.(color|spacing|frame|font_size|font_color|rarity_background)\(\s*"([A-Za-z0-9_]+)"\s*[,)]')
 _FONT_APPLY = re.compile(r'\bUiTheme\.apply_font\([^,()]+,\s*"([A-Za-z0-9_]+)"\s*\)')
 
+_REQUIRED_SKILL_THEME_TOKENS = {
+    "colors": {
+        "skill_node_available_text", "skill_node_learned_text", "skill_node_locked_text",
+        "skill_node_hover_bg", "skill_node_selected_bg", "skill_node_hover_border", "skill_node_selected_border", "skill_node_focus_border",
+        "skill_connector_met", "skill_connector_unmet", "skill_points_available", "skill_points_empty",
+        "skill_rank_available", "skill_rank_learned", "skill_rank_locked",
+        "skill_icon_locked_modulate", "skill_icon_locked_selected_modulate",
+    },
+    "spacing": {
+        "skill_tree_node_available_border", "skill_tree_node_learned_border", "skill_tree_node_locked_border",
+        "skill_tree_node_selected_extra_border", "skill_tree_node_hover_extra_border", "skill_tree_connector_width",
+    },
+    "fonts": {"skill_points", "skill_node_status", "skill_rank", "skill_tooltip_title", "skill_tooltip_rank", "skill_tooltip_body"},
+    "frames": {
+        "skill_panel", "skill_tree_surface", "skill_node_available", "skill_node_learned", "skill_node_locked",
+        "skill_status_available", "skill_status_learned", "skill_status_locked", "skill_tooltip", "skill_rank_badge",
+    },
+}
+
 
 def _catalog_for(theme: dict, kind: str) -> set:
     key = {"color": "colors", "spacing": "spacing", "frame": "frames", "font_size": "fonts",
@@ -90,6 +109,16 @@ def validate_ui_theme(report: Any, theme: dict, item_templates: dict, scripts_di
         report.fail("ui theme inventory rarity tokens", "missing " + ", ".join(missing))
     else:
         report.ok("ui theme defines inventory rarity color and border tokens for every rarity")
+
+    missing_skill = [
+        f"{section}.{token}"
+        for section, tokens in _REQUIRED_SKILL_THEME_TOKENS.items()
+        for token in sorted(tokens - set(theme[section]))
+    ]
+    if missing_skill:
+        report.fail("ui theme skill tree tokens", "missing " + ", ".join(missing_skill))
+    else:
+        report.ok("ui theme defines required skill tree colors, spacing, fonts, and frames")
 
     if scripts_dir is not None:
         unresolved = unresolved_client_tokens(theme, scripts_dir)

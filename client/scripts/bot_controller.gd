@@ -250,6 +250,11 @@ func _execute_action(action: Dictionary, state: Dictionary) -> void:
 		"select_camera_mode":
 			if _main != null and _main.has_method("bot_select_camera_mode"):
 				_main.bot_select_camera_mode(str(action.get("mode", "isometric")))
+		"adjust_camera_zoom":
+			if _main != null:
+				var camera_controller = _main.get("_camera_controller")
+				if camera_controller != null and camera_controller.has_method("adjust_zoom"):
+					camera_controller.adjust_zoom(float(action.get("delta_size", 0.0)))
 		"set_market_publish_price", "click_market_publish_item", "click_market_purchase_listing", \
 		"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", \
 		"click_market_cancel_offer", "set_market_search", "select_market_sort":

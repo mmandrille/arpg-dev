@@ -153,6 +153,9 @@
         "wall_height": { "type": "number", "minimum": 0 },
         "gloom_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
         "gloom_alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+        "soft_edge_alpha": { "type": "number", "minimum": 0, "maximum": 0.35 },
+        "soft_edge_scale": { "type": "number", "minimum": 1, "maximum": 1.25 },
+        "soft_edge_amplitude": { "type": "number", "minimum": 0, "maximum": 0.05 },
         "core_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
         "core_alpha": { "type": "number", "minimum": 0, "maximum": 1 },
         "gloom_scale": { "type": "number", "exclusiveMinimum": 0 }

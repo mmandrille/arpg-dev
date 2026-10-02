@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-01 (v511–v517 batch integrated; combined `make ci` passed in 12m00s; v517 review written; refactor pending)
+Last updated: 2026-10-02 (v518–v520 batch integrated; combined `make ci` passed in 7m50s; batch review/refactor pending; `make ci-full` not run)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-10-01 (v511–v517 batch integrated; combined `make ci` passe
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v517 — HUD globes and hotbar polish; the accepted v511–v517 monster/boss/UI batch ([v511 variants](docs/as-built/v511_monster-variant-looks.md), [v512 boss presence](docs/as-built/v512_boss-presence.md), [v513 animation](docs/as-built/v513_monster-combat-animation-polish.md), [v514 UI theme](docs/as-built/v514_ui-theme-foundation.md), [v515 inventory](docs/as-built/v515_inventory-tooltip-redesign.md), [v516 character screen](docs/as-built/v516_character-screen-redesign.md), [v517 HUD](docs/as-built/v517_hud-hotbar-polish.md)) is integrated; combined `make ci` passed in 12m00s. |
-| **Next slice** | Propose the next batch with `$next`. `/review` and `/refactor` are complete for v511–v517 and the post-refactor `make ci` passed (7m25s). `make ci-full` has not been run for v511–v517; four of the five new client scenarios are now in the fast CI pack, and `v511_monster_variant_pack` stays extended (its headless proof is vacuous). |
+| **Latest completed slice** | v520 — fog wall occlusion; the accepted v518–v520 batch ( [v518 item models and rarity](docs/as-built/v518_item-models-rarity.md), [v519 skill tree UI](docs/as-built/v519_skill-tree-ui.md), [v520 fog wall occlusion](docs/as-built/v520_fog-wall-occlusion.md)) is integrated and combined `make ci` passed in 7m50s. |
+| **Next slice** | Run `$review` and `$refactor` on the v518–v520 baseline, then propose the next batch with `$next`. `make ci-full` was not run for this batch. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
 | **Last engineering review** | v517 — [`docs/reviews/20261001_v517-overview.md`](docs/reviews/20261001_v517-overview.md) (2026-10-01; batch review, overall 7.7; combined `make ci` passed, `make ci-full` not run) |
 | **Next engineering review** | After the next coordinated batch or ~10-slice standalone milestone; run `$refactor` before `$next`. |
@@ -86,6 +86,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
+- **v518–v520 evidence limits:** v520's scenario 77 Town capture is too dark to establish T-wall-face readability; deterministic geometry tests prove connected T coverage. v519's visible client scenario passed on retry after a transient login failure and emitted Godot shutdown resource-leak warnings. No performance A/B or `make ci-full` was run for the batch. Character-sheet redesign was not part of this accepted three-slice batch.
 - **v511–v517 evidence limits:** v512 bosses cost more to draw (about 12–20 draw calls vs 2 in isolation; no in-dungeon A/B) and v517 adds 16 draw calls (108→124; paced probe vsync-capped, weaker GPU untested). v511 has no live in-play champion/rare/unique capture. v513 has no showme suite, no ranged attack clips (no shooter-attributed event), and fog reveals reuse `entity_spawn` (spawn-in can fire on reveal; `spawn.enabled=false` opts out). Shop/stash/market/skills/consumable-bar private style helpers and `stat_tooltip_label.gd` are not yet on `UiTheme`. `main.gd` is 6,654 lines (baseline 6,632 + 25): any growth needs extraction first.
 - **v501–v510 evidence limits:** v506 resident-memory/hands-on town proof, v508 final no-aura matched cost, and v509 live reconnect/matched lane cost remain unverified. Extended CI had 1/149 protocol failures (`teleporter_lab`); its isolated rerun passed, which does not make the full gate green.
 

@@ -17,6 +17,9 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v520** | `fog-wall-occlusion` | Complete (combined batch `make ci` passed; scenario 77 T-face readability remains limited) | [`spec`](../specs/v520_spec-fog-wall-occlusion.md) | [`plan`](../plans/v520_2026-10-01-fog-wall-occlusion.md) | [`as-built`](../as-built/v520_fog-wall-occlusion.md) |
+| **v519** | `skill-tree-ui` | Complete (combined batch `make ci` passed; focused renderer captures preserved) | [`spec`](../specs/v519_spec-skill-tree-ui.md) | [`plan`](../plans/v519_2026-10-01-skill-tree-ui.md) | [`as-built`](../as-built/v519_skill-tree-ui.md) |
+| **v518** | `item-models-rarity` | Complete (combined batch `make ci` passed; model and rarity cue captures preserved) | [`spec`](../specs/v518_spec-item-models-rarity.md) | [`plan`](../plans/v518_2026-10-01-item-models-rarity.md) | [`as-built`](../as-built/v518_item-models-rarity.md) |
 | **v500** | `town-terrain-landmarks` | Complete (combined CI gate) | [`spec`](../specs/v500_spec-town-terrain-landmarks.md) | [`plan`](../plans/v500_2026-09-30-town-terrain-landmarks.md) | [`as-built`](../as-built/v500_town-terrain-landmarks.md) |
 | **v517** | `hud-hotbar-polish` | Complete (combined CI gate) | [`spec`](../specs/v517_spec-hud-hotbar-polish.md) | [`plan`](../plans/v517_2026-10-01-hud-hotbar-polish.md) | [`as-built`](../as-built/v517_hud-hotbar-polish.md) |
 | **v516** | `character-screen-redesign` | Complete (combined CI gate) | [`spec`](../specs/v516_spec-character-screen-redesign.md) | [`plan`](../plans/v516_2026-10-01-character-screen-redesign.md) | [`as-built`](../as-built/v516_character-screen-redesign.md) |

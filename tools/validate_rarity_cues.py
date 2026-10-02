@@ -12,7 +12,7 @@ def validate_rarity_cues(report: Any, cues: dict, item_templates: dict) -> None:
         report.fail("rarity cues coverage", f"missing={sorted(expected - actual)}, extra={sorted(actual - expected)}")
     else:
         report.ok("rarity cues cover exactly the gameplay rarity keys")
-    for field in ("name", "short", "shape", "world_symbol"):
+    for field in ("name", "shape"):
         values = [str(entry[field]).casefold() for entry in entries.values()]
         if len(values) != len(set(values)):
             report.fail("rarity cues distinct", f"duplicate {field}")

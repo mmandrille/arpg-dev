@@ -71,7 +71,7 @@ const STEP_TYPES_ACTION := [
 	"click_market_view_offers", "click_market_cancel_listing", "click_market_accept_offer", "click_market_cancel_offer",
 	"set_market_search", "select_market_sort", 	"click_waypoint_level",
 	"inject_training_damage_log_event", "click_training_damage_log_close",
-	"set_camera_mode", "select_camera_mode",
+	"set_camera_mode", "select_camera_mode", "adjust_camera_zoom",
 	"enable_ws_reconnect_proof", "simulate_ws_drop",
 	"set_graphics_quality",
 	"approach_nearest_torch",

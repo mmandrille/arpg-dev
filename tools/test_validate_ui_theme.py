@@ -74,6 +74,20 @@ def test_missing_inventory_rarity_token_fails() -> None:
     assert any("inventory_rarity_rare" in f for f in _failures(theme, templates))
 
 
+def test_missing_skill_tree_frame_fails() -> None:
+    theme, templates = _catalogs()
+    theme = copy.deepcopy(theme)
+    del theme["frames"]["skill_node_available"]
+    assert any("frames.skill_node_available" in f for f in _failures(theme, templates))
+
+
+def test_missing_skill_state_color_fails() -> None:
+    theme, templates = _catalogs()
+    theme = copy.deepcopy(theme)
+    del theme["colors"]["skill_node_locked_text"]
+    assert any("colors.skill_node_locked_text" in f for f in _failures(theme, templates))
+
+
 def test_shipped_client_call_sites_resolve() -> None:
     theme, _ = _catalogs()
     assert unresolved_client_tokens(theme, ROOT / "client/scripts") == []

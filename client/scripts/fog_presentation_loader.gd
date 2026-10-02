@@ -166,8 +166,11 @@ static func _default_config() -> Dictionary:
 			"wall_height": 1.0,
 			"gloom_color": "#1a1c21",
 			"gloom_alpha": 0.42,
+			"soft_edge_alpha": 0.20,
+			"soft_edge_scale": 1.12,
+			"soft_edge_amplitude": 0.025,
 			"core_color": "#000000",
-			"core_alpha": 0.82,
+			"core_alpha": 0.76,
 			"gloom_scale": 1.035,
 		},
 		"perspective": {

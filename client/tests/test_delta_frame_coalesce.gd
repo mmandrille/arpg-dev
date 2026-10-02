@@ -9,6 +9,7 @@ var _fail := 0
 
 func _init() -> void:
 	_test_merges_events_and_changes()
+	_test_preserves_event_source_ticks()
 	_test_last_performance_payload_wins()
 	_finish()
 
@@ -29,6 +30,16 @@ func _test_last_performance_payload_wins() -> void:
 	])
 	var perf: Dictionary = merged.get("performance", {})
 	_assert_eq("performance last-wins", int(perf.get("live_monsters", 0)), 9)
+
+
+func _test_preserves_event_source_ticks() -> void:
+	var merged := DeltaFrameCoalesceScript.merge_pending([
+		{"_coalesce_source_tick": 12, "events": [{"event_type": "old"}]},
+		{"_coalesce_source_tick": 15, "events": [{"event_type": "new"}]},
+	])
+	var events: Array = merged.get("events", [])
+	_assert_eq("first event keeps source tick", int(events[0].get("_coalesce_source_tick", -1)), 12)
+	_assert_eq("second event keeps source tick", int(events[1].get("_coalesce_source_tick", -1)), 15)
 
 
 func _assert_eq(label: String, got, want) -> void:

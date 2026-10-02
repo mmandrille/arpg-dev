@@ -9,7 +9,14 @@ static func merge_pending(payloads: Array) -> Dictionary:
 	for payload in payloads:
 		if payload is Dictionary:
 			var p: Dictionary = payload
-			merged_events.append_array(p.get("events", []))
+			var source_tick := int(p.get("_coalesce_source_tick", 0))
+			for event in p.get("events", []):
+				if event is Dictionary:
+					var tagged_event := (event as Dictionary).duplicate(true)
+					tagged_event["_coalesce_source_tick"] = source_tick
+					merged_events.append(tagged_event)
+				else:
+					merged_events.append(event)
 			merged_changes.append_array(p.get("changes", []))
 			if p.has("performance") and p.get("performance") is Dictionary:
 				merged_perf = (p.get("performance") as Dictionary).duplicate(true)

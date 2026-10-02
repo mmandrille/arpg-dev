@@ -1130,7 +1130,9 @@ func _handle_message(env: Dictionary) -> void:
 		"session_snapshot":
 			_apply_snapshot(payload)
 		"state_delta":
-			_pending_delta_payloads.append(payload.duplicate(true))
+			var pending_payload := payload.duplicate(true)
+			pending_payload["_coalesce_source_tick"] = int(env.get("tick", 0))
+			_pending_delta_payloads.append(pending_payload)
 		"intent_accepted":
 			var accepted_message_id := str(payload.get("accepted_message_id", ""))
 			_record_ping(accepted_message_id)
@@ -1774,7 +1776,8 @@ func _apply_delta(p: Dictionary) -> void:
 		for ev in p.get("events", []):
 			if ev is Dictionary:
 				var tagged := (ev as Dictionary).duplicate(true)
-				tagged["_bot_seen_tick"] = last_server_tick
+				tagged["_bot_seen_tick"] = int(tagged.get("_coalesce_source_tick", last_server_tick))
+				tagged.erase("_coalesce_source_tick")
 				_bot_pending_events.append(tagged)
 			else:
 				_bot_pending_events.append(ev)

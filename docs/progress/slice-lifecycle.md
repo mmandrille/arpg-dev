@@ -17,6 +17,7 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v521** | `world-loot-rarity-labels` | Complete (standalone `make ci` passed; renderer capture preserved) | [`spec`](../specs/v521_spec-world-loot-rarity-labels.md) | [`plan`](../plans/v521_2026-10-01-world-loot-rarity-labels.md) | [`as-built`](../as-built/v521_world-loot-rarity-labels.md) |
 | **v520** | `fog-wall-occlusion` | Complete (combined batch `make ci` passed; scenario 77 T-face readability remains limited) | [`spec`](../specs/v520_spec-fog-wall-occlusion.md) | [`plan`](../plans/v520_2026-10-01-fog-wall-occlusion.md) | [`as-built`](../as-built/v520_fog-wall-occlusion.md) |
 | **v519** | `skill-tree-ui` | Complete (combined batch `make ci` passed; focused renderer captures preserved) | [`spec`](../specs/v519_spec-skill-tree-ui.md) | [`plan`](../plans/v519_2026-10-01-skill-tree-ui.md) | [`as-built`](../as-built/v519_skill-tree-ui.md) |
 | **v518** | `item-models-rarity` | Complete (combined batch `make ci` passed; model and rarity cue captures preserved) | [`spec`](../specs/v518_spec-item-models-rarity.md) | [`plan`](../plans/v518_2026-10-01-item-models-rarity.md) | [`as-built`](../as-built/v518_item-models-rarity.md) |

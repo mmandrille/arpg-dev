@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-01 (v518–v520 batch integrated; v520 review complete; token scan/CODEMAP follow-up fixed; `$refactor` continues; combined `make ci` passed in 7m50s; `make ci-full` not run)
+Last updated: 2026-10-01 (v521 floor loot rarity-marker removal complete; standalone `make ci` passed in 7m43s; v520 batch review remains current; `make ci-full` not run)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-10-01 (v518–v520 batch integrated; v520 review complete; to
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v520 — fog wall occlusion; the accepted v518–v520 batch ([v518 item models and rarity](docs/as-built/v518_item-models-rarity.md), [v519 skill tree UI](docs/as-built/v519_skill-tree-ui.md), [v520 fog wall occlusion](docs/as-built/v520_fog-wall-occlusion.md)) is integrated and combined `make ci` passed in 7m50s. |
-| **Next slice** | Run `$refactor` from the v520 review, then propose the next batch with `$next`. `make ci-full` was not run for this batch. |
+| **Latest completed slice** | v521 — [world loot rarity labels](docs/as-built/v521_world-loot-rarity-labels.md); removed floating ground-loot shapes, kept colored names/model tints and slot shapes; standalone `make ci` passed. |
+| **Next slice** | Run `$refactor` from the v520 review, then propose the next batch with `$next`. `make ci-full` was not run for v518–v520 or v521. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
 | **Last engineering review** | v520 — [`docs/reviews/20261001_v520-overview.md`](docs/reviews/20261001_v520-overview.md) (2026-10-01; batch review, overall 7.9; combined `make ci` passed, `make ci-full` not run) |
 | **Next engineering review** | After the next coordinated batch or ~10-slice standalone milestone; run `$refactor` before `$next`. |

@@ -7,7 +7,6 @@ const PotionIconLabelScript := preload("res://scripts/potion_icon_label.gd")
 const ModelTintScript := preload("res://scripts/model_tint.gd")
 const LootQuestBadgeShapesScript := preload("res://scripts/loot_quest_badge_shapes.gd")
 const RarityCueLoaderScript := preload("res://scripts/rarity_cue_loader.gd")
-const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
 
 var asset_manifest: Dictionary = {}
 var item_presentations: Dictionary = {}
@@ -38,7 +37,6 @@ func make_loot_node(e: Dictionary) -> Node3D:
 		else:
 			add_loot_primitive(root, shape, color, accent, scale)
 	add_loot_label(root, loot_label_text(e), scale, loot_label_color(e), not RarityCueLoaderScript.cue_for_item(e).is_empty())
-	RarityCuePresenterScript.add_world_marker(root, e, scale)
 	return root
 
 func add_loot_primitive(root: Node3D, shape: String, color: Color, accent: Color, scale: float) -> void:

@@ -36,12 +36,9 @@ func _test_all_five_rarities() -> void:
 		var node: Node3D = factory.make_loot_node(item)
 		var marker := node.find_child("RarityCue", false, false) as MeshInstance3D
 		var label := node.find_child("LootLabel", false, false) as Label3D
-		_assert("%s persistent shape marker" % rarity, marker != null and marker.visible and marker.mesh != null and marker.mesh.get_surface_count() == 1)
-		var world_scale := float(Loader.catalog().get("world", {}).get("marker_size", 0.22))
-		_assert("%s ground marker uses configured scale" % rarity, marker != null and is_equal_approx(marker.scale.x, world_scale))
-		_assert("%s no rarity text node" % rarity, node.find_child("RarityCue", false, false) is MeshInstance3D)
+		_assert("%s ground has no geometric marker" % rarity, marker == null)
 		_assert("%s revealed full label" % rarity, label != null and not label.visible and label.text == "%s · Long Sword" % cue.get("name", ""))
-		_assert("%s revealed label sits above marker" % rarity, label != null and marker != null and label.position.y > marker.position.y)
+		_assert("%s ground label uses rarity text color" % rarity, label != null and label.modulate.is_equal_approx(factory.loot_label_color(item)))
 		_assert("%s input unchanged" % rarity, item == original)
 		node.free()
 	var named := {"item_def_id": "long_sword", "rarity": "rare", "display_name": "Rare Long Sword"}
@@ -59,7 +56,7 @@ func _test_exclusions() -> void:
 		var item := {"item_def_id": def_id, "rarity": "rare"}
 		_assert("%s category excluded" % def_id, Loader.cue_for_item(item).is_empty())
 		var node: Node3D = factory.make_loot_node(item)
-		_assert("%s ground marker absent" % def_id, node.find_child("RarityCue", false, false) == null)
+		_assert("%s has no geometric marker" % def_id, node.find_child("RarityCue", false, false) == null)
 		node.free()
 	for item in [
 		{"item_def_id": "long_sword"},
@@ -72,7 +69,7 @@ func _test_exclusions() -> void:
 	]:
 		_assert("unknown or concealed item excluded: %s" % str(item), Loader.cue_for_item(item).is_empty())
 	var unknown := factory.make_loot_node({"item_def_id": "long_sword", "rarity": "unrecognized"})
-	_assert("unknown rarity has no ground marker", unknown.find_child("RarityCue", false, false) == null)
+	_assert("unknown rarity has no geometric marker", unknown.find_child("RarityCue", false, false) == null)
 	unknown.free()
 
 

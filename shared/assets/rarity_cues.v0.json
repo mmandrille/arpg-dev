@@ -8,12 +8,7 @@
     "background": "#101010"
   },
   "world": {
-    "offset_x": 0.68,
-    "height": 0.05,
-    "revealed_label_height": 2.7,
-    "marker_size": 0.045,
-    "foreground": "#ffffff",
-    "outline": "#000000"
+    "revealed_label_height": 2.7
   },
   "rarities": {
     "common": {"name": "Common", "shape": "square"},

@@ -22,15 +22,10 @@
     },
     "world": {
       "type": "object",
-      "required": ["offset_x", "height", "revealed_label_height", "marker_size", "foreground", "outline"],
+      "required": ["revealed_label_height"],
       "additionalProperties": false,
       "properties": {
-        "offset_x": {"type": "number", "minimum": 0},
-        "height": {"type": "number", "exclusiveMinimum": 0},
-        "revealed_label_height": {"type": "number", "exclusiveMinimum": 0},
-        "marker_size": {"type": "number", "exclusiveMinimum": 0},
-        "foreground": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
-        "outline": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
+        "revealed_label_height": {"type": "number", "exclusiveMinimum": 0}
       }
     },
     "rarities": {

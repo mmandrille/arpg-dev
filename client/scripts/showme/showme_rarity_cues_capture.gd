@@ -100,7 +100,7 @@ func _add_loot(world: Node3D) -> void:
 		world.add_child(loot)
 		var label := loot.find_child("LootLabel", false, false) as Label3D
 		if label != null:
-			label.visible = _reveal and rarity == "rare"
+			label.visible = _reveal
 			if _baseline:
 				label.text = "Long Sword"
 

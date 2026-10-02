@@ -12,7 +12,7 @@
 - Added an opt-in report-only audit at `server/internal/game/dungeon_generation_audit_test.go` with report types and stable histogram helpers in `server/internal/game/dungeon_generation_audit_report_test.go`.
 - Audits 20 fixed seeds (`generation-audit-01` through `generation-audit-20`) across levels −1 through −12, including boss floors −5 and −10. Depths are selected from the configured floor profiles and boss cadence. Closed doors count as reachable when at least one cardinal approach is reachable from the generated start, matching the player's ability to open the door from that side.
 - The report includes per-seed/level outcomes, generation errors, invariant findings, room/shape/role/area histograms, graph edge/loop/degree and route-segment distributions, target reachability by kind, and rule-derived population/pack distributions.
-- It records generator and invariant failures but does not fail the test for those findings. The existing fail-fast progression sweep remains unchanged.
+- It records generator and invariant failures but does not fail the test for those findings by default. Set `ARPG_DUNGEON_GENERATION_AUDIT_STRICT=1` alongside the report opt-in to make the audit test fail after writing the report when either list is non-empty. The existing fail-fast progression sweep remains unchanged.
 - Report output uses the fixed repository-local `.artifacts/dungeon-generation-audit.json` path, a single accepted opt-in value (`ARPG_DUNGEON_GENERATION_AUDIT=1`), and root-scoped file operations. No caller-supplied path is accepted.
 
 ## Audit evidence
@@ -52,6 +52,7 @@ Both runs produced 278,452 bytes and were byte-identical. SHA-256 for both:
 
 ```bash
 cd server && ARPG_DUNGEON_GENERATION_AUDIT=1 go test ./internal/game -run '^TestDungeonGenerationAudit' -count=1 -timeout 20m
+cd server && ARPG_DUNGEON_GENERATION_AUDIT=1 ARPG_DUNGEON_GENERATION_AUDIT_STRICT=1 go test ./internal/game -run '^TestDungeonGenerationAuditReport$' -count=1 -timeout 20m
 cd server && go test ./internal/game -run '^Test(DungeonRoomRoleRulesValidation|AssignDungeonRoomRolesIsDeterministicAndRuleDriven|GeneratedDungeonAnchorsFollowRoomRoles|DungeonRoomShapes_.*|RoomConnectionEdges_.*|DungeonRoomPopulation.*|.*EncounterComposition.*)$' -count=1 -timeout 10m
 ```
 

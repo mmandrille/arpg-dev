@@ -13,6 +13,7 @@ import (
 
 const (
 	dungeonGenerationAuditEnv       = "ARPG_DUNGEON_GENERATION_AUDIT"
+	dungeonGenerationAuditStrictEnv = "ARPG_DUNGEON_GENERATION_AUDIT_STRICT"
 	dungeonGenerationAuditFilename  = "dungeon-generation-audit.json"
 	dungeonGenerationAuditSeedCount = 20
 )
@@ -67,6 +68,34 @@ func TestDungeonGenerationAuditReport(t *testing.T) {
 	}
 	t.Logf("dungeon generation audit: %d/%d floors generated, %d invariant finding(s), %d seed(s), %d depth(s) -> .artifacts/%s",
 		report.GeneratedFloors, report.AttemptedFloors, len(report.Findings), len(seeds), len(depths), dungeonGenerationAuditFilename)
+	if os.Getenv(dungeonGenerationAuditStrictEnv) == "1" {
+		if err := validateDungeonGenerationAudit(report); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestDungeonGenerationAuditValidation(t *testing.T) {
+	if err := validateDungeonGenerationAudit(dungeonGenerationAuditReport{}); err != nil {
+		t.Fatalf("empty audit should pass: %v", err)
+	}
+	if err := validateDungeonGenerationAudit(dungeonGenerationAuditReport{
+		Failures: []dungeonGenerationAuditFailure{{Seed: "seed", Level: -1, Error: "generation failed"}},
+	}); err == nil {
+		t.Fatal("audit with generation failures should fail validation")
+	}
+	if err := validateDungeonGenerationAudit(dungeonGenerationAuditReport{
+		Findings: []dungeonGenerationAuditFinding{{Seed: "seed", Level: -1, Invariant: "reachable", Detail: "unreachable target"}},
+	}); err == nil {
+		t.Fatal("audit with invariant findings should fail validation")
+	}
+}
+
+func validateDungeonGenerationAudit(report dungeonGenerationAuditReport) error {
+	if len(report.Failures) == 0 && len(report.Findings) == 0 {
+		return nil
+	}
+	return fmt.Errorf("dungeon generation audit has %d generation failure(s) and %d invariant finding(s)", len(report.Failures), len(report.Findings))
 }
 
 func auditGeneratedDungeonFloor(seed string, levelNum int, rules DungeonGenerationRules, out generatedDungeonLevel) (dungeonGenerationAuditFloor, []dungeonGenerationAuditFinding) {

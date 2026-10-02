@@ -116,3 +116,14 @@ def test_scan_ignores_dynamic_tokens_and_comments(tmp_path: Path) -> None:
     assert len(found) == 2
     assert any("no_such_frame" in f for f in found) and any("no_such_role" in f for f in found)
     assert not any("nope_comment" in f or "inventory_rarity_" in f for f in found)
+
+
+def test_scan_recurses_into_nested_scripts(tmp_path: Path) -> None:
+    theme, _ = _catalogs()
+    nested = tmp_path / "showme" / "capture.gd"
+    nested.parent.mkdir()
+    nested.write_text('var color = UiTheme.color("missing_nested_token")\n')
+
+    found = unresolved_client_tokens(theme, tmp_path)
+
+    assert found == ["showme/capture.gd:1 UiTheme.color -> unknown token missing_nested_token"]

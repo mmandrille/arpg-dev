@@ -38,7 +38,7 @@ def _catalog_for(theme: dict, kind: str) -> set:
 def unresolved_client_tokens(theme: dict, scripts_dir: Path) -> list[str]:
     """Client call sites that reference a UiTheme token missing from the catalog."""
     problems: list[str] = []
-    for path in sorted(scripts_dir.glob("*.gd")):
+    for path in sorted(scripts_dir.rglob("*.gd")):
         if path.name == "ui_theme.gd":
             continue
         for number, line in enumerate(path.read_text().splitlines(), 1):
@@ -48,7 +48,8 @@ def unresolved_client_tokens(theme: dict, scripts_dir: Path) -> list[str]:
             refs += [("font", m.group(1)) for m in _FONT_APPLY.finditer(line)]
             for kind, token in refs:
                 if token not in _catalog_for(theme, kind):
-                    problems.append(f"{path.name}:{number} UiTheme.{kind} -> unknown token {token}")
+                    relative_path = path.relative_to(scripts_dir)
+                    problems.append(f"{relative_path}:{number} UiTheme.{kind} -> unknown token {token}")
     return problems
 
 

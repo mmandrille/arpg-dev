@@ -45,8 +45,8 @@ Produce a deterministic, report-only multi-seed audit of the integrated dungeon 
 
 - [x] Run the same audit twice and compare the JSON bytes.
 - [x] Add focused tests for numeric/label ordering, graph connectivity/invalid edges, and target-kind classification without pinning incidental distributions as gameplay goldens.
-- [x] Run the focused room/corridor/anchor and generation reachability tests against the integrated final state. The broader selected suite exposes generator/golden failures recorded in the as-built note; the non-golden room/role/shape/population/composition subset passes.
-- [x] Inspect generated report counts/distributions and attribute all 35 generation failures to encounter placement capacity/formation exhaustion; no invariant findings were silently filtered.
+- [x] Run focused room/corridor/anchor and generation reachability tests against the integrated final state. Initial worker handoff failures were resolved during coordinator integration; the final focused suite and combined CI pass.
+- [x] Inspect generated report counts/distributions. The initial worker handoff report covered 200 pairs and recorded 35 pack-placement failures; after coordinator solver/profile fixes, the final 240-pair audit reports zero generation failures and zero invariant findings. The earlier report is preserved at `.artifacts/dungeon-generation-audit-v531-worker-handoff.json`.
 - **Focused checks:**
   - `cd server && go test ./internal/game -run '^TestDungeonGenerationAudit' -count=1`
   - `cd server && go test ./internal/game -run 'TestRoomCorridorLayout_|TestPlaceRoomCorridorLayout|Test.*Reachability' -count=1`
@@ -54,7 +54,7 @@ Produce a deterministic, report-only multi-seed audit of the integrated dungeon 
 
 ### 4. Document report and handoff
 
-- [x] Add a small as-built report at `docs/as-built/v531_generation-audit.md` with exact inputs, aggregate distributions, commands/results, evidence limits, and unresolved generator findings.
+- [x] Add a small as-built report at `docs/as-built/v531_generation-audit.md` with exact inputs, aggregate distributions, commands/results, evidence limits, and resolved worker-handoff findings.
 - [x] Add the audit ownership to the dungeon generation row in `docs/CODEMAP.md`.
 - [x] Leave `PROGRESS.md`, lifecycle, and codename registries to the coordinator for batch completion and `/finish` closeout.
 - [x] Run `git diff --check`; report all changed, deleted, untracked, and ignored evidence paths to the coordinator.

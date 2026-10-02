@@ -19,6 +19,8 @@
 
 The integrated report covers 240 seed/level pairs: **240 generated successfully, with zero generation errors**. It recorded **zero invariant findings and zero unreachable generated targets**. The sample includes 40 boss-floor outcomes and 200 ordinary floors. It observed 6,415 monsters, 240 up stairs, 240 down stairs, 80 teleporters, 109 treasure chests, and 141 wooden doors; all 7,225 generated targets were reachable under the audit's structural reachability check.
 
+The initial worker handoff report covered 200 pairs and recorded 35 pack-placement failures. Coordinator integration added complete-pack backtracking and corrected room-capacity/objective placement constraints and floor profiles. The final 240-pair audit then generated every floor; the initial report is preserved at `.artifacts/dungeon-generation-audit-v531-worker-handoff.json` for comparison.
+
 Population targets matched shared rule-derived counts on all 240 floors; pack counts stayed within the configured profile ranges. The complete distributions are in the JSON report.
 
 Selected distributions:
@@ -60,7 +62,7 @@ v531-owned changes:
 - Added: `server/internal/game/dungeon_generation_audit_test.go`; `server/internal/game/dungeon_generation_audit_report_test.go`; `docs/as-built/v531_generation-audit.md`.
 - Modified: `docs/specs/v531_spec-generation-audit.md`; `docs/plans/v531_2026-10-01-generation-audit.md`; `docs/CODEMAP.md`.
 - Deleted: none.
-- Ignored evidence to preserve: `.artifacts/dungeon-generation-audit.json`; `.artifacts/dungeon-generation-audit-run1.json`.
+- Ignored evidence to preserve: `.artifacts/dungeon-generation-audit.json`; `.artifacts/dungeon-generation-audit-run1.json`; `.artifacts/dungeon-generation-audit-run2.json`; `.artifacts/dungeon-generation-audit-v531-worker-handoff.json`.
 
 The dependency overlay also contained uncommitted v522–v530 changes; all paths were compared and integrated. `PROGRESS.md` and lifecycle/codename registries were updated during batch closeout.
 

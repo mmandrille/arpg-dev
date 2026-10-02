@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-02 (v518–v520 batch integrated; combined `make ci` passed in 7m50s; batch review/refactor pending; `make ci-full` not run)
+Last updated: 2026-10-01 (v518–v520 batch integrated; v520 review complete; `$refactor` pending; combined `make ci` passed in 7m50s; `make ci-full` not run)
 
 ---
 
@@ -24,9 +24,9 @@ Last updated: 2026-10-02 (v518–v520 batch integrated; combined `make ci` passe
 | Field | Value |
 |-------|-------|
 | **Latest completed slice** | v520 — fog wall occlusion; the accepted v518–v520 batch ([v518 item models and rarity](docs/as-built/v518_item-models-rarity.md), [v519 skill tree UI](docs/as-built/v519_skill-tree-ui.md), [v520 fog wall occlusion](docs/as-built/v520_fog-wall-occlusion.md)) is integrated and combined `make ci` passed in 7m50s. |
-| **Next slice** | Run `$review` and `$refactor` on the v518–v520 baseline, then propose the next batch with `$next`. `make ci-full` was not run for this batch. |
+| **Next slice** | Run `$refactor` from the v520 review, then propose the next batch with `$next`. `make ci-full` was not run for this batch. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
-| **Last engineering review** | v517 — [`docs/reviews/20261001_v517-overview.md`](docs/reviews/20261001_v517-overview.md) (2026-10-01; batch review, overall 7.7; combined `make ci` passed, `make ci-full` not run) |
+| **Last engineering review** | v520 — [`docs/reviews/20261001_v520-overview.md`](docs/reviews/20261001_v520-overview.md) (2026-10-01; batch review, overall 7.9; combined `make ci` passed, `make ci-full` not run) |
 | **Next engineering review** | After the next coordinated batch or ~10-slice standalone milestone; run `$refactor` before `$next`. |
 
 
@@ -87,10 +87,10 @@ Do **not** assume these are the next slice — they are documented backlog items
 ### Active review follow-ups
 
 - **v518–v520 evidence limits:** v520's scenario 77 Town capture is too dark to establish T-wall-face readability; deterministic geometry tests prove connected T coverage. v519's visible client scenario passed on retry after a transient login failure and emitted Godot shutdown resource-leak warnings. No performance A/B or `make ci-full` was run for the batch. Character-sheet redesign was not part of this accepted three-slice batch.
-- **v511–v517 evidence limits:** v512 bosses cost more to draw (about 12–20 draw calls vs 2 in isolation; no in-dungeon A/B) and v517 adds 16 draw calls (108→124; paced probe vsync-capped, weaker GPU untested). v511 has no live in-play champion/rare/unique capture. v513 has no showme suite, no ranged attack clips (no shooter-attributed event), and fog reveals reuse `entity_spawn` (spawn-in can fire on reveal; `spawn.enabled=false` opts out). Shop/stash/market/skills/consumable-bar private style helpers and `stat_tooltip_label.gd` are not yet on `UiTheme`. `main.gd` is 6,654 lines (baseline 6,632 + 25): any growth needs extraction first.
+- **v511–v517 evidence limits:** v512 bosses cost more to draw (about 12–20 draw calls vs 2 in isolation; no in-dungeon A/B) and v517 adds 16 draw calls (108→124; paced probe vsync-capped, weaker GPU untested). v511 has no live in-play champion/rare/unique capture. v513 has no showme suite, no ranged attack clips (no shooter-attributed event), and fog reveals reuse `entity_spawn` (spawn-in can fire on reveal; `spawn.enabled=false` opts out). Shop/stash/market/skills/consumable-bar private style helpers and `stat_tooltip_label.gd` are not yet on `UiTheme`. `main.gd` is 6,654 lines (baseline 6,632 + 22): any growth needs extraction first.
 - **v501–v510 evidence limits:** v506 resident-memory/hands-on town proof, v508 final no-aura matched cost, and v509 live reconnect/matched lane cost remain unverified. Extended CI had 1/149 protocol failures (`teleporter_lab`); its isolated rerun passed, which does not make the full gate green.
 
-- **v517 `$review` (batch; supersedes v510):** [`docs/reviews/20261001_v517-overview.md`](docs/reviews/20261001_v517-overview.md). Client-only batch; no server change, so the v510 replay-durability/bounds/pinning items stay open. New: run the five new client scenarios (and `make ci-full`) on the integrated tree; finish `UiTheme` adoption and tooltip-content unification; add a UI-token reference gate; boss-look dual source of truth; `main.gd` event-router extraction; ratchet touch-to-shrink for `showme/visual_capture.gd` and `bot_scenario_runner.gd`.
+- **v520 `$review` (batch; supersedes v517):** [`docs/reviews/20261001_v520-overview.md`](docs/reviews/20261001_v520-overview.md). Replay durability/horizon/input pinning, `sim.go` cohesion, UI-theme/tooltip ownership, and the ordered `main.gd` event router remain open. The token-reference gate and four earlier client scenarios advanced; follow-ups: make token scanning recursive, add the omitted `boss_bar_frame.gd` CODEMAP reference, close remaining extended visual proof, and keep old evidence clone-reproducible. v520 T-face readability and the broader character-sheet redesign remain future visual follow-ups.
 
 - **v510 `$review` (on-cadence; supersedes v500):** [`docs/reviews/20261001_v510-overview.md`](docs/reviews/20261001_v510-overview.md). Mercenary-roster replay, `envelope.v8`, potion golden, and shared-JSON checklist follow-ups are closed. **Fixed in `$refactor`:** cold CI now starts/requires Postgres before DB-backed Go tests (`16eab682`; final `make ci` passed). **Still open:** input may be simulated before durable append; replay has no practical tick bound/context check or pinned rules/debug flag; reconnect snapshot/schema drift checks; `main.gd`, `sim.go`, `run.py`, and `validate_shared.py` cohesion hotspots; ratchet touch-to-shrink; Godot pin, remote CI, and owner-managed origin credential follow-ups.
 

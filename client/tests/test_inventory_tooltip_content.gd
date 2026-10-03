@@ -25,6 +25,7 @@ func _run() -> void:
 	_test_pricing_is_display_only_and_nonnegative()
 	_test_rarity_border_styles()
 	_test_tooltip_header_hierarchy()
+	_test_tooltip_is_text_only()
 	_test_theme_rarity_colors_drive_loot_labels()
 	print("[gdtest] PASS: test_inventory_tooltip_content (%d passed, %d failed)" % [_pass_count, _fail_count])
 	quit(1 if _fail_count > 0 else 0)
@@ -129,6 +130,34 @@ func _test_rarity_border_styles() -> void:
 	_assert_true("unknown rarity is treated as common weight", Styles.rarity_border_width("bogus") == widths["common"])
 	var invalid: StyleBoxFlat = Styles.item_slot_style("common", false, true)
 	_assert_true("invalid requirement stays red", invalid.border_color.r > 0.55 and invalid.border_color.g < 0.45)
+
+
+func _test_tooltip_is_text_only() -> void:
+	for rarity in ["common", "magic", "rare", "unique", "set"]:
+		var item := {"item_instance_id": "x", "item_def_id": "amulet", "display_name": "Thing", "rarity": rarity}
+		var tooltip := TooltipPanel.new()
+		tooltip.setup(item, {}, Content.tooltip_lines(item, _ctx()), [], [], 12)
+		root.add_child(tooltip)
+		var has_icon_node := false
+		for node in tooltip.find_children("*", "Control", true, false):
+			if "item_presentations" in node:
+				has_icon_node = true
+		_assert_true("%s tooltip has no icon preview node" % rarity, not has_icon_node)
+		var narrow := 0
+		for node in tooltip.find_children("*", "Label", true, false):
+			var label := node as Label
+			if label.name == "GoldValueLabel" or label.name == "ItemLevelLabel":
+				continue
+			if not is_equal_approx(label.custom_minimum_size.x, TooltipPanel.CONTENT_WIDTH):
+				narrow += 1
+		_assert_true("%s text labels span the full content width" % rarity, narrow == 0)
+		tooltip.queue_free()
+	var empty := TooltipPanel.new()
+	empty.setup({}, {}, ["Empty slot"], [], [])
+	root.add_child(empty)
+	var empty_label := empty.find_children("*", "Label", true, false)[0] as Label
+	_assert_true("empty tooltip keeps its single line at content width", is_equal_approx(empty_label.custom_minimum_size.x, TooltipPanel.CONTENT_WIDTH))
+	empty.queue_free()
 
 
 func _test_tooltip_header_hierarchy() -> void:

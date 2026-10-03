@@ -102,6 +102,7 @@ Canonical list lives in `skills/showme/scripts/render_focus.py` (`--focus` choic
 | Five rarity cues at playable camera zoom | `rarity-cues` |
 | Paper-doll inventory + tooltip | `inventory` |
 | Character stats panel / class header / paper-doll backdrop (`--class-id`, `--variant points\|nopoints\|dual\|paper-doll`) | `character-screen` |
+| Shared item tooltip, text only (`--variant common\|magic\|rare\|unique\|set`) | `item-tooltip` |
 | Hero corpse interactable (3D) | `corpse` |
 | Player inventory + corpse loot panels | `corpse-inventory` |
 | Skills panel + hover state | `skills` |

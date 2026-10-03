@@ -23,6 +23,7 @@ DUNGEON_ROOM_FOCUS = "dungeon-room"
 # v516: panel variants captured for every class; dual-wield layout proven for two classes.
 CHARACTER_SCREEN_VARIANTS: tuple[str, ...] = ("points", "nopoints", "paper-doll")
 CHARACTER_SCREEN_DUAL_CLASSES: tuple[str, ...] = ("barbarian", "rogue")
+ITEM_TOOLTIP_RARITIES: tuple[str, ...] = ("common", "magic", "rare", "unique", "set")
 SKILL_TREE_VARIANTS: tuple[str, ...] = ("points", "nopoints", "hover")
 HUD_STATES: tuple[str, ...] = ("full", "half", "low", "empty")
 HUD_SIZES: tuple[tuple[int, int], ...] = ((1280, 720), (1920, 1080))
@@ -53,6 +54,7 @@ SUITE_SPECS: dict[str, SuiteSpec] = {
     "floor-item": SuiteSpec("floor-item", "floor-item", "Ground loot model per item with visuals"),
     "item-asset": SuiteSpec("item-asset", "item-asset", "Isolated 3D asset per item_visuals asset_id"),
     "character-screen": SuiteSpec("character-screen", "character-screen", "Character stats panel and paper-doll backdrop per class (v516)"),
+    "item-tooltip": SuiteSpec("item-tooltip", "item-tooltip", "Shared text-only item tooltip per rarity (v532)"),
     "skill-tree": SuiteSpec("skill-tree", "skills", "Skill tree progression, points, hover, and selection states (v519)"),
     "hud": SuiteSpec("hud", "hud", "HUD fixture: vitals globes, hotbar cluster, minimap frame, boss bar (full/half/low/empty at two sizes)"),
     "scenes": SuiteSpec("scenes", "scene", "Town/monster/prop scenes + runtime-lit dungeon room per biome"),
@@ -234,6 +236,15 @@ def discover_jobs(suites: list[str] | None = None) -> list[CaptureJob]:
                         output_rel=f"{spec.name}/{slug}.png",
                         extra_args=("--class-id", class_id, "--variant", variant),
                     ))
+        elif suite_name == "item-tooltip":
+            for rarity in ITEM_TOOLTIP_RARITIES:
+                jobs.append(CaptureJob(
+                    suite=spec.name,
+                    focus=spec.focus,
+                    slug=rarity,
+                    output_rel=f"{spec.name}/{rarity}.png",
+                    extra_args=("--variant", rarity),
+                ))
         elif suite_name == "skill-tree":
             for variant in SKILL_TREE_VARIANTS:
                 jobs.append(CaptureJob(

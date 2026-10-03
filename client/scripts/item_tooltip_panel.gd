@@ -3,73 +3,18 @@ extends PanelContainer
 
 const BODY_FONT_SIZE := 23
 const REQUIREMENT_FONT_SIZE := BODY_FONT_SIZE - 1
-const ICON_FONT_SIZE := 32
-const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
 const InventoryPanelStylesScript := preload("res://scripts/inventory_panel_styles.gd")
-const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
 const NAME_FONT_SIZE := BODY_FONT_SIZE + 3
 const RARITY_LINE_PREFIX := "Rarity: "
 const TooltipMouseGuardScript := preload("res://scripts/tooltip_mouse_guard.gd")
-const PREVIEW_SIZE := Vector2(96, 96)
-const PREVIEW_GAP := 8
 const CONTENT_WIDTH := 360.0
-const MAIN_STAT_WIDTH := CONTENT_WIDTH - PREVIEW_SIZE.x - PREVIEW_GAP
 const PRICE_WIDTH := 132.0
 const LEVEL_WIDTH := 132.0
 const FOOTER_TOP_GAP := 10
 
 
-class ItemPreview:
-	extends Control
-
-	var item: Dictionary = {}
-	var item_presentations: Dictionary = {}
-	var fallback_label: String = ""
-	var dimmed: bool = false
-	var rarity: String = ""
-
-	func setup(next_item: Dictionary, next_presentations: Dictionary, next_fallback_label: String = "", next_dimmed: bool = false) -> void:
-		rarity = str(next_item.get("rarity", ""))
-		item = next_item.duplicate(true)
-		item_presentations = next_presentations.duplicate(true)
-		fallback_label = next_fallback_label
-		dimmed = next_dimmed
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-		custom_minimum_size = PREVIEW_SIZE
-		size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		queue_redraw()
-
-	func _draw() -> void:
-		var rect := Rect2(Vector2.ZERO, size)
-		draw_rect(rect, Color("#0a0908"), true)
-		if item.is_empty():
-			draw_rect(rect, Color("#5c4a1f"), false, 1.0)
-			return
-		var has_rarity := rarity != ""
-		var border_width := float(InventoryPanelStylesScript.rarity_border_width(rarity)) if has_rarity else 1.0
-		var border_color := InventoryPanelStylesScript.rarity_border_color(rarity, false) if has_rarity else Color("#5c4a1f")
-		draw_rect(rect.grow(-border_width * 0.5), border_color, false, border_width)
-
-		var def_id := str(item.get("item_def_id", ""))
-		var presentation: Dictionary = item_presentations.get(def_id, {})
-		var icon: Dictionary = presentation.get("icon", {})
-		var label := str(icon.get("label", fallback_label if fallback_label != "" else _short_label(def_id)))
-		ItemIconDrawerScript.draw(self, rect, icon, label, dimmed, 0.36, ICON_FONT_SIZE)
-		RarityCuePresenterScript.draw_slot(self, rect, item)
-
-	func _short_label(def_id: String) -> String:
-		if def_id == "":
-			return "?"
-		var parts := def_id.split("_")
-		var out := ""
-		for part in parts:
-			if part.length() > 0:
-				out += part.substr(0, 1).to_upper()
-		return out.substr(0, 3)
-
-
-func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, requirement_lines: Array, comparison_entries: Array, price: int = -1, affordable: bool = true, fallback_label: String = "", affinity_lines: Array = []) -> void:
+## `_item_presentations` and `_fallback_label` are unused since the icon preview was removed (v532); kept so callers stay positional-compatible.
+func setup(item: Dictionary, _item_presentations: Dictionary, main_lines: Array, requirement_lines: Array, comparison_entries: Array, price: int = -1, affordable: bool = true, _fallback_label: String = "", affinity_lines: Array = []) -> void:
 	_clear_children(self)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var rarity := str(item.get("rarity", "common")).to_lower()
@@ -82,17 +27,12 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 	root.custom_minimum_size = Vector2(CONTENT_WIDTH, 0)
 	add_child(root)
 
-	var top_row := HBoxContainer.new()
-	top_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	top_row.add_theme_constant_override("separation", PREVIEW_GAP)
-	root.add_child(top_row)
-
 	var main_stats := VBoxContainer.new()
 	main_stats.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	main_stats.add_theme_constant_override("separation", 2)
-	main_stats.custom_minimum_size = Vector2(MAIN_STAT_WIDTH if has_item else CONTENT_WIDTH, 0)
+	main_stats.custom_minimum_size = Vector2(CONTENT_WIDTH, 0)
 	main_stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_row.add_child(main_stats)
+	root.add_child(main_stats)
 
 	var header_open := has_item and not main_lines.is_empty()
 	var line_index := 0
@@ -106,17 +46,12 @@ func setup(item: Dictionary, item_presentations: Dictionary, main_lines: Array, 
 			font_size = NAME_FONT_SIZE
 		elif is_rarity_line:
 			color = InventoryPanelStylesScript.rarity_color(rarity)
-		main_stats.add_child(_tooltip_label(text, color, MAIN_STAT_WIDTH if has_item else CONTENT_WIDTH, font_size))
+		main_stats.add_child(_tooltip_label(text, color, CONTENT_WIDTH, font_size))
 		line_index += 1
 		# Header block (name + rarity) ends with a rarity-weighted rule; the body follows.
 		var header_done := (is_name and not (main_lines.size() > 1 and _entry_text(main_lines[1]).begins_with(RARITY_LINE_PREFIX))) or is_rarity_line
 		if header_done:
 			main_stats.add_child(_tooltip_rule(rarity))
-
-	if has_item:
-		var preview := ItemPreview.new()
-		preview.setup(item, item_presentations, fallback_label, price >= 0 and not affordable)
-		top_row.add_child(preview)
 
 	var level_text := _item_level_text(item)
 	var visible_requirement_lines := _visible_requirement_lines(requirement_lines, not level_text.begins_with("Item level"))

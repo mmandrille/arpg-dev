@@ -28,7 +28,7 @@ def _default_output(root: Path, focus: str) -> Path:
 def main() -> int:
     root = _repo_root()
     parser = argparse.ArgumentParser(description="Render a focused Godot client visual.")
-    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "rarity-cues", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "mystery-shop", "blacksmith", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "town-play", "skeleton", "eye-view", "dungeon-room", "monster-variants", "character-screen"], default="gear")
+    parser.add_argument("--focus", choices=["gear", "gear-matrix", "classes", "floor-item", "rarity-cues", "inventory", "corpse", "corpse-inventory", "skills", "item-icons", "skill-icon", "item-icon", "item-asset", "shop", "mystery-shop", "blacksmith", "bishop", "market-board", "market-publish", "market-offer", "character-menu", "join-menu", "hud", "stairs", "chests", "vendors", "monsters", "companions", "heal-rain", "town", "town-play", "skeleton", "eye-view", "dungeon-room", "monster-variants", "character-screen", "item-tooltip"], default="gear")
     parser.add_argument("--mode", choices=["screenshot", "live"], default="screenshot")
     parser.add_argument("--items", default="", help="Comma-separated item def ids for gear focus.")
     parser.add_argument("--class-id", default="", help="Class id for gear focus, e.g. paladin.")
@@ -133,6 +133,8 @@ def main() -> int:
         gdscript = root / "client" / "scripts" / "showme" / "showme_character_screen_capture.gd"
         if (args.width, args.height) == (640, 480):
             width, height = 1920, 1080
+    if args.focus == "item-tooltip":
+        gdscript = root / "client" / "scripts" / "showme" / "showme_item_tooltip_capture.gd"
     if args.focus == "hud":
         gdscript = root / "client" / "scripts" / "showme" / "showme_hud_capture.gd"
     if args.focus == "rarity-cues":
@@ -192,6 +194,8 @@ def main() -> int:
         cmd += ["--town-zoom", args.town_zoom, "--ground-tone", args.ground_tone, "--reveal", str(args.reveal).lower(), "--quality", args.quality]
     if args.focus == "hud":
         cmd += ["--hud-state", args.hud_state]
+    if args.focus == "item-tooltip" and args.variant:
+        cmd += ["--rarity", args.variant]
     if args.baseline:
         cmd += ["--baseline", "true"]
 

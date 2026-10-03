@@ -143,3 +143,10 @@ def test_character_screen_suite_covers_every_class_and_variant() -> None:
     for variants in by_class.values():
         assert {"points", "nopoints", "paper-doll"} <= variants
     assert sum("nopoints-dual" in variants for variants in by_class.values()) == 2
+
+
+def test_item_tooltip_suite_covers_every_rarity() -> None:
+    jobs = discover_jobs(["item-tooltip"])
+    assert {job.focus for job in jobs} == {"item-tooltip"}
+    assert [job.extra_args for job in jobs] == [("--variant", rarity) for rarity in ("common", "magic", "rare", "unique", "set")]
+    assert len({job.output_rel for job in jobs}) == len(jobs)

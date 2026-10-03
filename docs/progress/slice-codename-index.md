@@ -277,6 +277,11 @@ v528_* = room-roles
 v529_* = room-population
 v530_* = encounter-composition
 v531_* = generation-audit
+v532_* = tooltip-no-icon
+v533_* = camera-zoom-out
+v535_* = wider-entrances
+v536_* = solid-dungeon-props
+v537_* = door-wall-visual-proof
 ```
 
 Pattern: `docs/specs/vN_spec-<codename>.md`, `docs/plans/vN_<YYYY-MM-DD>-<codename>.md`.

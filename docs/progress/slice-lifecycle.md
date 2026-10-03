@@ -17,6 +17,11 @@ v0 first-playable ──► v2 equip-and-see-it ──► v3 animate-and-react �
 
 | Slice | Codename | Status | Spec | Plan | As-built |
 |-------|----------|--------|------|------|----------|
+| **v537** | `door-wall-visual-proof` | Complete (combined `make ci` passed, 20m36s) | [`spec`](../specs/v537_spec-door-wall-visual-proof.md) | [`plan`](../plans/v537_2026-10-02-door-wall-visual-proof.md) | [`as-built`](../as-built/v537_door-wall-visual-proof.md) |
+| **v536** | `solid-dungeon-props` | Complete (combined `make ci` passed, 20m36s) | [`spec`](../specs/v536_spec-solid-dungeon-props.md) | [`plan`](../plans/v536_2026-10-02-solid-dungeon-props.md) | [`as-built`](../as-built/v536_solid-dungeon-props.md) |
+| **v535** | `wider-entrances` | Complete (combined `make ci` passed, 20m36s) | [`spec`](../specs/v535_spec-wider-entrances.md) | [`plan`](../plans/v535_2026-10-02-wider-entrances.md) | [`as-built`](../as-built/v535_wider-entrances.md) |
+| **v533** | `camera-zoom-out` | Complete (combined `make ci` passed, 20m36s) | [`spec`](../specs/v533_spec-camera-zoom-out.md) | [`plan`](../plans/v533_2026-10-02-camera-zoom-out.md) | [`as-built`](../as-built/v533_camera-zoom-out.md) |
+| **v532** | `tooltip-no-icon` | Complete (combined `make ci` passed, 20m36s) | [`spec`](../specs/v532_spec-tooltip-no-icon.md) | [`plan`](../plans/v532_2026-10-02-tooltip-no-icon.md) | [`as-built`](../as-built/v532_tooltip-no-icon.md) |
 | **v531** | `generation-audit` | Complete (240-floor audit repeated byte-identically; combined `make ci` passed) | [`spec`](../specs/v531_spec-generation-audit.md) | [`plan`](../plans/v531_2026-10-01-generation-audit.md) | [`as-built`](../as-built/v531_generation-audit.md) |
 | **v530** | `encounter-composition` | Complete (integrated room-role packs; combined `make ci` passed) | [`spec`](../specs/v530_spec-encounter-composition.md) | [`plan`](../plans/v530_2026-10-01-encounter-composition.md) | [`as-built`](../as-built/v530_encounter-composition.md) |
 | **v529** | `room-population` | Complete (weighted room population and full-pack placement; combined `make ci` passed) | [`spec`](../specs/v529_spec-room-population.md) | [`plan`](../plans/v529_2026-10-01-room-population.md) | [`as-built`](../as-built/v529_room-population.md) |

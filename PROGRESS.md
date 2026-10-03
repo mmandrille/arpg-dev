@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-02 (v531 review and refactor complete; final combined `make ci` passed in 21m09s; `make ci-full` not run)
+Last updated: 2026-10-03 (v532–v537 playtest-corrections batch complete; combined `make ci` passed in 20m36s; `make ci-full` not run; review/refactor pending)
 
 ---
 
@@ -23,8 +23,8 @@ Last updated: 2026-10-02 (v531 review and refactor complete; final combined `mak
 
 | Field | Value |
 |-------|-------|
-| **Latest completed slice** | v531 — [multi-seed dungeon generation audit](docs/as-built/v531_generation-audit.md); the v522–v531 batch delivered room-first layouts, varied room footprints and topology, corridors, doors, wall continuity, room roles and pack composition. The 240-floor audit repeated byte-identically, and combined `make ci` passed. |
-| **Next slice** | Propose the next batch with `$next`, using the v531 review's future-plan and visual follow-ups. `make ci-full` was not run for v522–v531. |
+| **Latest completed slice** | v537 — [door/wall visual proof](docs/as-built/v537_door-wall-visual-proof.md); the v532–v537 batch (v535 pace cancelled): [tooltip without icon](docs/as-built/v532_tooltip-no-icon.md), [camera zoom-out](docs/as-built/v533_camera-zoom-out.md) (isometric default 12→15), [wider entrances](docs/as-built/v535_wider-entrances.md) (corridors 2.25/2.4, door gap 2.4, clearance floor, door-approach fix), [server-owned solid props](docs/as-built/v536_solid-dungeon-props.md), and visual proof. Combined `make ci` passed. |
+| **Next slice** | Playtest follow-ups first: light-radius buff (≥25%, was v534, not started: class `light_radius` and torch values are server fog inputs) and the tactical movement-pace question (cancelled for now). Then `$next` from the v537/v531 follow-ups. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
 | **Last engineering review** | v531 — [`docs/reviews/20261002_v531-overview.md`](docs/reviews/20261002_v531-overview.md) (2026-10-02; batch review, overall 7.7; combined `make ci` passed, `make ci-full` not run) |
 | **Next engineering review** | After the next coordinated batch or ~10-slice standalone milestone; run `$refactor` before `$next`. |
@@ -85,6 +85,8 @@ and ADR-0013.
 Do **not** assume these are the next slice — they are documented backlog items agents should know about.
 
 ### Active review follow-ups
+
+- **v532–v537 follow-ups:** prune the dead `ItemTooltipPanel.setup` params; click-to-move/approach path budgets are distance-scaled and can return `no_path` on long detours in wide layouts (also on `main`); a 2.25 opening can be one nav cell wide depending on alignment (nav grid 1.0); props not yet shown in a real-floor frame; `go test ./internal/game` is ~600 s (CI timeout now 20m); `dungeon_frame_pacing_probe` fixture is stale (times out at `wait_wall_layout`).
 
 - **v531 `$review` / `$refactor` (batch; supersedes v520):** [`docs/reviews/20261002_v531-overview.md`](docs/reviews/20261002_v531-overview.md). **Fixed:** coalesced bot events preserve source ticks (`103a6384`); encounter composition is split below the file-size ratchet (`9118ed3c`); input/replay persistence logs use stable error codes (`dc8f8b0e`); the dungeon audit has an opt-in strict validator (`4dbb217b`); CODEMAP indexes the split helpers (`1094fda4`). Final integrated `make ci` passed in 21m09s. **Still open:** bound/cancel replay work, define durable input acceptance, pin replay rules/content, automate Go struct/schema parity, reduce the shared validator and client coordinators, and capture representative door/wall visuals. The 20-seed × 12-level audit repeated byte-identically with zero failures/findings; it is not exhaustive, `make ci-full` was not run, and the generated-door visual run emitted Godot shutdown leak warnings without a retained appearance capture.
 

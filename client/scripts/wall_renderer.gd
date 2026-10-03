@@ -61,7 +61,7 @@ func render_world_walls(world_id: String) -> Array:
 		local_index += 1
 	return render_wall_layout(local_walls)
 
-func render_wall_layout(walls: Array, floor_key: String = "", anchors: Array = []) -> Array:
+func render_wall_layout(walls: Array) -> Array:
 	clear_wall_nodes()
 	var current_wall_layout: Array = []
 	for wall in walls:
@@ -71,10 +71,12 @@ func render_wall_layout(walls: Array, floor_key: String = "", anchors: Array = [
 		current_wall_layout.append(normalized)
 		if _walls_root != null:
 			_walls_root.add_child(make_wall_node(normalized))
-	_sync_room_wall_corners(current_wall_layout)
+	# Props are clutter on the floor, not room structure: corners and floor tiles ignore them.
+	var structure := current_wall_layout.filter(func(wall: Dictionary) -> bool: return str(wall.get("kind", "")) != DungeonRoomDressingScript.PROP_KIND)
+	_sync_room_wall_corners(structure)
 	_sync_dungeon_ceiling()
-	_sync_kit_floor(current_wall_layout)
-	refresh_dressing(current_wall_layout, floor_key, anchors)
+	_sync_kit_floor(structure)
+	_sync_dressing(current_wall_layout)
 	return current_wall_layout
 
 func set_level(level: int) -> void:
@@ -119,21 +121,14 @@ func _sync_kit_floor(wall_layout: Array) -> void:
 		_walls_root.add_child(kit_floor)
 
 
-func refresh_dressing(wall_layout: Array, floor_key: String, anchors: Array) -> void:
-	if _walls_root == null:
-		return
-	var existing := _walls_root.get_node_or_null(DungeonRoomDressingScript.ROOT_NAME)
-	if existing != null:
-		_walls_root.remove_child(existing)
-		existing.queue_free()
-	if not kit_active():
+func _sync_dressing(wall_layout: Array) -> void:
+	if _walls_root == null or not kit_active():
 		_dressing_state = {}
 		return
 	var cfg := DungeonKitLoaderScript.dressing_config()
-	var planned := DungeonRoomDressingScript.plan(wall_layout, floor_key, _current_level, anchors, cfg)
-	var placements: Array = planned["placements"]
-	_dressing_state = {"instances": placements.size(), "safe_candidates": int(planned["safe_candidates"]), "reason": str(planned["reason"])}
-	print("[dungeon-dressing] level=%d instances=%d safe_candidates=%d reason=%s" % [_current_level, placements.size(), int(planned["safe_candidates"]), str(planned["reason"])])
+	var placements := DungeonRoomDressingScript.placements_from_walls(wall_layout, cfg)
+	_dressing_state = {"instances": placements.size()}
+	print("[dungeon-dressing] level=%d instances=%d" % [_current_level, placements.size()])
 	if placements.is_empty():
 		return
 	_walls_root.add_child(DungeonRoomDressingScript.build(placements, float(cfg.get("surface_y", 0.0))))
@@ -192,6 +187,8 @@ func normalized_wall_view(wall: Dictionary, index: int) -> Dictionary:
 	var kind := str(wall.get("kind", "wall"))
 	if kind != "" and kind != "wall":
 		out["kind"] = kind
+	if wall.has("prop_id"):
+		out["prop_id"] = str(wall.get("prop_id", ""))
 	if wall.has("blocks_line_of_sight"):
 		out["blocks_line_of_sight"] = bool(wall.get("blocks_line_of_sight", false))
 	return out
@@ -210,6 +207,8 @@ func make_wall_node(wall: Dictionary) -> Node3D:
 			return _make_column_node(wall)
 		"wood":
 			return _make_wood_palisade_node(wall)
+		"prop":
+			return _make_obstacle_root(wall, "Prop", "prop")
 	var wall_height := _wall_height()
 	var floor_overlap := WALL_FLOOR_SEAM_OVERLAP if _dungeon_presentation_active() else 0.0
 	var total_height := wall_height + floor_overlap

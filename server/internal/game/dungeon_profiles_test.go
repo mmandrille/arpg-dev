@@ -1,6 +1,7 @@
 package game
 
 import (
+	"math"
 	"reflect"
 	"testing"
 )
@@ -60,8 +61,15 @@ func TestDungeonFloorProfilesApplyToDeeperOrdinaryFloors(t *testing.T) {
 	if base.RoomCorridorPCG.RoomSizeMin != (Vec2{X: 12, Y: 10}) || deep.RoomCorridorPCG.RoomSizeMin != base.RoomCorridorPCG.RoomSizeMin {
 		t.Fatalf("base/deep room minimums = %+v/%+v, want shared configured minimum %+v", base.RoomCorridorPCG.RoomSizeMin, deep.RoomCorridorPCG.RoomSizeMin, Vec2{X: 12, Y: 10})
 	}
-	if constrained.RoomCorridorPCG.RoomSizeMin != (Vec2{X: 10, Y: 8}) {
-		t.Fatalf("level -6 room minimum = %+v, want profile override {10 8}", constrained.RoomCorridorPCG.RoomSizeMin)
+	// Derived from the loaded profile for depth 6: its override when it has one, else the shared minimum.
+	wantConstrainedMin := base.RoomCorridorPCG.RoomSizeMin
+	for _, profile := range rules.DungeonGeneration.FloorProfiles {
+		if profile.MinDepth <= 6 && (profile.MaxDepth == nil || *profile.MaxDepth >= 6) && profile.RoomSizeMin != nil {
+			wantConstrainedMin = *profile.RoomSizeMin
+		}
+	}
+	if constrained.RoomCorridorPCG.RoomSizeMin != wantConstrainedMin {
+		t.Fatalf("level -6 room minimum = %+v, want %+v from the depth-6 profile", constrained.RoomCorridorPCG.RoomSizeMin, wantConstrainedMin)
 	}
 	if constrained.RoomCorridorPCG.RoomSizeMax != (Vec2{X: 14, Y: 14}) || deepest.RoomCorridorPCG.RoomSizeMax != constrained.RoomCorridorPCG.RoomSizeMax {
 		t.Fatalf("level -6/deep room maximums = %+v/%+v, want profile override {14 14}", constrained.RoomCorridorPCG.RoomSizeMax, deepest.RoomCorridorPCG.RoomSizeMax)
@@ -82,13 +90,27 @@ func TestDungeonFloorProfilesApplyToDeeperOrdinaryFloors(t *testing.T) {
 
 func TestDungeonFloorProfileRoomSizeOverrideValidation(t *testing.T) {
 	roomRules := loadRules(t).DungeonGeneration.RoomCorridorPCG
+	// The smallest valid override is the room size whose narrowest shape cell fits the widest corridor.
+	widestCorridor := 0.0
+	for _, width := range roomRules.CorridorWidths {
+		widestCorridor = max(widestCorridor, width)
+	}
+	fitting := math.Ceil(widestCorridor * roomShapeSide)
 	valid := []DungeonFloorProfile{{
 		MinDepth:    6,
 		FloorSize:   DungeonFloorSize{Width: 120, Height: 70},
-		RoomSizeMin: &Vec2{X: 10, Y: 8},
+		RoomSizeMin: &Vec2{X: fitting, Y: fitting},
 	}}
 	if err := validateDungeonFloorProfileRoomSizes(valid, roomRules); err != nil {
 		t.Fatalf("valid room-size override rejected: %v", err)
+	}
+	tooSmall := []DungeonFloorProfile{{
+		MinDepth:    6,
+		FloorSize:   DungeonFloorSize{Width: 120, Height: 70},
+		RoomSizeMin: &Vec2{X: fitting, Y: widestCorridor*roomShapeSide - 0.5},
+	}}
+	if err := validateDungeonFloorProfileRoomSizes(tooSmall, roomRules); err == nil {
+		t.Fatal("room-size override too small for the widest corridor was accepted")
 	}
 	tooLarge := []DungeonFloorProfile{{
 		MinDepth:    6,

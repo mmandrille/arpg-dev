@@ -1727,6 +1727,7 @@ func LoadRules(dir string) (*Rules, error) {
 		MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 		ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
 		EliteObjective           EliteObjectiveRules      `json:"elite_objective"`
+		PassageClearance         PassageClearanceRules    `json:"passage_clearance"`
 		RoomLayout               RoomLayoutRules          `json:"room_layout"`
 		RoomCorridorPCG          RoomCorridorPCGRules     `json:"room_corridor_pcg"`
 		ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
@@ -1789,7 +1790,7 @@ func LoadRules(dir string) (*Rules, error) {
 	if err := validateMonsterPlacementPool(baseDungeonGeneration.MonsterPlacement, r); err != nil {
 		return nil, err
 	}
-	if err := validateDungeonGenerationExtendedRules(dungeonGeneration.RoomCorridorPCG, dungeonGeneration.FloorProfiles, dungeonGeneration.MonsterPlacement, baseDungeonGeneration.MonsterPlacement, r); err != nil {
+	if err := validateDungeonGenerationExtendedRules(dungeonGeneration.RoomCorridorPCG, dungeonGeneration.FloorProfiles, dungeonGeneration.MonsterPlacement, baseDungeonGeneration.MonsterPlacement, dungeonGeneration.PassageClearance, dungeonGeneration.RoomLayout, dungeonGeneration.ObstacleGeneration.Doors, r); err != nil {
 		return nil, err
 	}
 	if aura := dungeonGeneration.MonsterPlacement.EliteAura; aura != nil {
@@ -1910,6 +1911,7 @@ func LoadRules(dir string) (*Rules, error) {
 		MonsterPlacement:         dungeonGeneration.MonsterPlacement,
 		ChestPlacement:           dungeonGeneration.ChestPlacement,
 		EliteObjective:           dungeonGeneration.EliteObjective,
+		PassageClearance:         dungeonGeneration.PassageClearance,
 		RoomLayout:               dungeonGeneration.RoomLayout,
 		RoomCorridorPCG:          dungeonGeneration.RoomCorridorPCG,
 		ObstacleGeneration:       dungeonGeneration.ObstacleGeneration,

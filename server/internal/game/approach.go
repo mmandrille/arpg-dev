@@ -56,7 +56,12 @@ func (s *Sim) findApproachGoalMatching(target *entity, inRange func(Vec2, *entit
 			}
 			goal := gridToWorld(nav, cell)
 			if !inRange(goal, target) {
-				continue
+				// The player stands at the cell center, not its corner: accept the center when only it is
+				// in range (e.g. beside a door barrier whose inflated footprint blocks the nearer cells).
+				goal = Vec2{X: goal.X + nav.CellSize/2, Y: goal.Y + nav.CellSize/2}
+				if !inRange(goal, target) {
+					continue
+				}
 			}
 			steps, ok := s.planPlayerPathForApproach(nav, player.pos, goal, blocked)
 			if !ok {

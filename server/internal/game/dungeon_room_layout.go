@@ -84,6 +84,7 @@ func finalizeGeneratedDungeonLevel(
 		return err
 	}
 	placeRoomThresholdDoors(seed, rules, out)
+	placeDungeonProps(seed, rules, out)
 	if err := validateGeneratedDungeonReachability(rules, *out); err != nil {
 		return err
 	}

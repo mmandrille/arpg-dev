@@ -318,6 +318,7 @@ type WallView struct {
 	Size              Vec2   `json:"size"`
 	Source            string `json:"source,omitempty"`
 	Kind              string `json:"kind,omitempty"`
+	PropID            string `json:"prop_id,omitempty"`
 	BlocksLineOfSight *bool  `json:"blocks_line_of_sight,omitempty"`
 }
 

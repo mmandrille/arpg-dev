@@ -19,6 +19,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
+from validate_dungeon_props import check as check_dungeon_props
 from validate_item_naming import rolled_equipment_display_name
 
 try:
@@ -243,6 +244,7 @@ def cross_checks(report: Report) -> None:
     shops = load(RULES / "shops.v0.json")
     interactables = load(RULES / "interactables.v0.json")
     navigation = load(RULES / "navigation.v0.json")
+    check_dungeon_props(report, RULES, ASSETS)
     worlds = load(RULES / "worlds.v0.json")
     dungeon_generation = load(RULES / "dungeon_generation.v0.json")
     boss_templates = load(RULES / "boss_templates.v0.json")

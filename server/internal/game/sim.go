@@ -254,6 +254,7 @@ type wallObstacle struct {
 	source      string
 	shapeFamily string
 	kind        string
+	propID      string
 	blocksLOS   *bool
 }
 
@@ -6419,6 +6420,9 @@ func wallViewsForLevel(level *LevelState) []WallView {
 		}
 		if kind := wall.obstacleKind(); kind != obstacleKindWall {
 			view.Kind = kind
+		}
+		if wall.propID != "" {
+			view.PropID = wall.propID
 		}
 		if wall.blocksLOS != nil {
 			view.BlocksLineOfSight = boolPtr(*wall.blocksLOS)

@@ -1249,7 +1249,7 @@ func _apply_snapshot(p: Dictionary) -> void:
 	var snapshot_phase_start := Time.get_ticks_usec()
 	var snapshot_walls = p.get("walls", null)
 	if typeof(snapshot_walls) == TYPE_ARRAY:
-		_render_wall_layout(snapshot_walls as Array, p.get("entities", []))
+		_render_wall_layout(snapshot_walls as Array)
 	else:
 		_render_world_walls(current_world_id)
 	PerfPhaseTimerScript.measure_usec("snap_world", snapshot_phase_start)
@@ -5446,12 +5446,11 @@ func _render_world_walls(world_id: String) -> void:
 	current_wall_layout = _wall_renderer.render_world_walls(world_id) if _wall_renderer != null else []
 	_sync_fog_wall_layout()
 
-func _render_wall_layout(walls: Array, anchors: Array = [], include_dressing: bool = true) -> void:
+func _render_wall_layout(walls: Array) -> void:
 	_ensure_wall_renderer()
 	if _wall_renderer != null:
 		_wall_renderer.set_level(current_level)
-	var floor_key := "%s|%d" % [client.seed, current_level] if include_dressing and client != null else ""
-	current_wall_layout = _wall_renderer.render_wall_layout(walls, floor_key, anchors if not anchors.is_empty() else entities.values()) if _wall_renderer != null else []
+	current_wall_layout = _wall_renderer.render_wall_layout(walls) if _wall_renderer != null else []
 	_sync_fog_wall_layout()
 func _sync_fog_wall_layout() -> void:
 	if fog_overlay != null:
@@ -5710,13 +5709,7 @@ func _queue_level_wall_layout(walls: Array) -> void:
 		_level_loading_walls_ready = true
 		call_deferred("_apply_pending_level_walls")
 		return
-	# Replace walls now; fill dressing after static anchors arrive in this delta.
-	_render_wall_layout(walls, [], false)
-	call_deferred("_refresh_dressing_after_level_delta")
-
-func _refresh_dressing_after_level_delta() -> void:
-	if _wall_renderer != null and client != null and not current_wall_layout.is_empty():
-		_wall_renderer.refresh_dressing(current_wall_layout, "%s|%d" % [client.seed, current_level], entities.values())
+	_render_wall_layout(walls)
 
 func _apply_pending_level_walls() -> void:
 	if _pending_level_walls.is_empty():

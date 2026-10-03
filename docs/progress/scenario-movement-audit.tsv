@@ -45,6 +45,7 @@ scenario_path	scenario_id	runner	ci_tier	movement_class	movement_steps_before	mo
 124_boss_lane_danger_hit.json	boss_lane_danger_hit	protocol	extended	contract	1	1		server-authored danger-lane position proves the strike
 124_room_doors.json	room_doors	protocol	extended	setup-eliminable	1	1		-
 125_affinity_passive_ranger.json	affinity_passive_ranger	protocol	extended	contract	0	0		lab loot + debug progression; no navigation setup
+126_dungeon_props.json	dungeon_props	protocol	extended	contract	0	0		no navigation; asserts the wire carries server-placed props
 12_dungeon_levels.json	dungeon_levels	protocol	pack	contract	3	3		-
 13_teleporter_lab.json	teleporter_lab	protocol	extended	contract	4	4		-
 14_dungeon_monsters.json	dungeon_monsters	protocol	extended	setup-eliminable	1	1		-
@@ -169,6 +170,8 @@ client/111_boss_intro_banner_cave_warden.json	boss_intro_banner_cave_warden	godo
 client/112_boss_intro_banner_crypt_matron.json	boss_intro_banner_crypt_matron	godot_client	pack	contract	0	0		v512 boss-floor lab start; banner/aura proof; no navigation setup
 client/113_hud_polish_visual.json	hud_polish_visual	godot_client	pack	contract	0	0		real-camera HUD capture on the boss lab start; no navigation setup
 client/11_combat_feedback.json	client_combat_feedback	godot_client	pack	setup-eliminable	4	4		-
+client/128_generated_entrance_frames.json	generated_entrance_frames	godot_client	extended	contract	0	0		v537 entrance/door frames; no navigation
+client/129_dungeon_props_deep_frames.json	dungeon_props_deep_frames	godot_client	extended	contract	0	0		v537 deep props frames; no navigation
 client/12_model_reaction_polish.json	model_reaction_polish	godot_client	pack	contract	0	0		-
 client/13_inventory_paper_doll.json	client_inventory_paper_doll	godot_client	extended	contract	0	0		-
 client/14_dungeon_wall_rendering.json	dungeon_wall_rendering	godot_client	pack	contract	0	0		-

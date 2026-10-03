@@ -36,10 +36,6 @@
         "width": 120,
         "height": 70
       },
-      "room_size_min": {
-        "x": 10,
-        "y": 8
-      },
       "room_size_max": {
         "x": 14,
         "y": 14
@@ -426,6 +422,9 @@
     "room_cluster_radius": 12.0,
     "max_attempts": 32
   },
+  "passage_clearance": {
+    "min_player_diameters": 2.5
+  },
   "room_layout": {
     "enabled": false,
     "max_attempts": 32,
@@ -440,7 +439,7 @@
     "min_dividers_total": 2,
     "wall_span_ratio_min": 0.65,
     "wall_span_ratio_max": 0.85,
-    "corridor_width": 2.0,
+    "corridor_width": 2.25,
     "min_gap_separation": 6.0,
     "corridors_per_wall_min": 1,
     "corridors_per_wall_max": 2,
@@ -465,8 +464,8 @@
     },
     "room_spacing": 4.0,
     "corridor_widths": [
-      1.5,
-      2.0
+      2.25,
+      2.4
     ],
     "hub_degree": {
       "min": 2,
@@ -672,7 +671,7 @@
       "max_count": 1,
       "min_wall_length": 8,
       "min_side_length": 2.0,
-      "gap_width": 1.6
+      "gap_width": 2.4
     },
     "water": {
       "enabled": true,
@@ -713,6 +712,23 @@
       "chest": 2.0,
       "monster": 1.5,
       "loot": 1.5
+    },
+    "props": {
+      "enabled": true,
+      "max_attempts": 8,
+      "wall_clearance": 1.5,
+      "door_clearance": 2.5,
+      "spacing": 2.5,
+      "count_bands": [
+        { "min_depth": 1, "max_depth": 3, "area_per_prop": 40, "max_count": 18 },
+        { "min_depth": 4, "max_depth": null, "area_per_prop": 25, "max_count": 32 }
+      ],
+      "catalog": [
+        { "prop_id": "barrel_large", "weight": 4, "footprint": { "x": 1.2, "y": 1.2 } },
+        { "prop_id": "barrel_small_stack", "weight": 3, "footprint": { "x": 1.2, "y": 1.2 } },
+        { "prop_id": "crates_stacked", "weight": 3, "footprint": { "x": 1.4, "y": 1.4 } },
+        { "prop_id": "table_medium", "weight": 1, "footprint": { "x": 1.2, "y": 1.2 } }
+      ]
     }
   },
   "boss_floor": {

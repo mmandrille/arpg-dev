@@ -14,6 +14,7 @@ type DungeonGenerationRules struct {
 	MonsterPlacement         MonsterPlacementRules    `json:"monster_placement"`
 	ChestPlacement           ChestPlacementRules      `json:"chest_placement"`
 	EliteObjective           EliteObjectiveRules      `json:"elite_objective"`
+	PassageClearance         PassageClearanceRules    `json:"passage_clearance"`
 	RoomLayout               RoomLayoutRules          `json:"room_layout"`
 	RoomCorridorPCG          RoomCorridorPCGRules     `json:"room_corridor_pcg"`
 	ObstacleGeneration       ObstacleGenerationRules  `json:"obstacle_generation"`
@@ -29,7 +30,10 @@ type DungeonGenerationRules struct {
 	monsterPackRoles         map[string]string
 }
 
-func validateDungeonGenerationExtendedRules(corridor RoomCorridorPCGRules, profiles []DungeonFloorProfile, placement, basePlacement MonsterPlacementRules, rules *Rules) error {
+func validateDungeonGenerationExtendedRules(corridor RoomCorridorPCGRules, profiles []DungeonFloorProfile, placement, basePlacement MonsterPlacementRules, clearance PassageClearanceRules, layout RoomLayoutRules, doors DoorGenerationRules, rules *Rules) error {
+	if err := validatePassageClearance(clearance, layout, corridor, doors); err != nil {
+		return err
+	}
 	roomRoleCompositionEnabled := corridor.Enabled && corridor.RoomRoles.Enabled
 	if err := validateDungeonEncounterGenerationRules(roomRoleCompositionEnabled, placement, basePlacement, rules); err != nil {
 		return err
@@ -160,6 +164,7 @@ type ObstacleGenerationRules struct {
 	Water                   FloorFeatureGenerationRules `json:"water"`
 	Holes                   FloorFeatureGenerationRules `json:"holes"`
 	Clearance               ObstacleClearanceRules      `json:"clearance"`
+	Props                   PropGenerationRules         `json:"props"`
 }
 
 type IntRange struct {

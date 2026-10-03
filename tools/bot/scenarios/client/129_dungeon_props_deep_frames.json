@@ -1,0 +1,27 @@
+{
+  "id": "dungeon_props_deep_frames",
+  "runner": "godot_client",
+  "world_id": "dungeon_dressing_deep_lab",
+  "seed": "v494_dungeon_room_dressing_deep",
+  "title": "Deep floor props frames",
+  "description": "Real play-camera frames of a generated depth-four floor with server-placed props: default and zoomed-in. v537 visual proof.",
+  "ci_tier": "extended",
+  "max_elapsed_s": 60.0,
+  "debug_progression": {
+    "level": 1,
+    "experience": 0,
+    "unspent_stat_points": 0,
+    "unspent_skill_points": 0,
+    "stats": { "str": 5, "dex": 5, "vit": 80, "magic": 5 },
+    "skill_ranks": {}
+  },
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_wall_layout", "current_level": -4, "at_least": 8, "non_perimeter_at_least": 1, "timeout_s": 15.0 },
+    { "type": "wait_ticks", "ticks": 20, "timeout_s": 8.0 },
+    { "type": "capture_frame", "name": "v537_props_deep_default", "timeout_s": 20.0, "skip_if_headless": true },
+    { "type": "adjust_camera_zoom", "delta_size": -4.0 },
+    { "type": "wait_ticks", "ticks": 6, "timeout_s": 4.0 },
+    { "type": "capture_frame", "name": "v537_props_deep_zoomed_in", "timeout_s": 20.0, "skip_if_headless": true }
+  ]
+}

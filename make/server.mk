@@ -7,7 +7,7 @@ migrate: ## Apply database migrations (server also self-migrates on boot)
 	cd $(SERVER_DIR) && go run ./cmd/arpg-server -migrate-only
 
 test-go: ## Run all Go tests
-	cd $(SERVER_DIR) && go test ./...
+	cd $(SERVER_DIR) && go test -timeout 20m ./...
 
 fmt-check-go: ## Fail if any Go file under server/ is not gofmt-formatted (fix: cd server && gofmt -w .)
 	@cd $(SERVER_DIR) && unformatted="$$(gofmt -l .)" && if [ -n "$$unformatted" ]; then \

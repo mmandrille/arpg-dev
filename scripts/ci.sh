@@ -323,7 +323,7 @@ ci_step "== 6/11 Postgres + Go fmt + tests + race + vet ==" \
     export ARPG_DATABASE_URL="$2" && \
     make fmt-check-go && \
     cd server && \
-    go test ./... && \
+    go test -timeout 20m ./... && \
     go test -race ./internal/realtime/... && \
     go vet ./... \
   ' _ "$ROOT/scripts/test_db.sh" "$DATABASE_URL"

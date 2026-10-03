@@ -35,6 +35,11 @@ func validateRoomThresholdDoorRules(doors RoomThresholdDoorRules, corridor RoomC
 	if def.BarrierWhenClosed.Size.X <= 0 || def.BarrierWhenClosed.Size.Y <= 0 {
 		return fmt.Errorf("game: invalid rules %s: %s barrier dimensions must be positive", path, woodenDoorDefID)
 	}
+	for _, width := range corridor.CorridorWidths {
+		if !doorBarrierSealsOpening(def.BarrierWhenClosed.Size.X, width) {
+			return fmt.Errorf("game: invalid rules %s: %s barrier width %v leaves a player-passable side gap in corridor width %v", path, woodenDoorDefID, def.BarrierWhenClosed.Size.X, width)
+		}
+	}
 	return nil
 }
 
@@ -74,5 +79,14 @@ func validateDoorGenerationRules(doors DoorGenerationRules, r *Rules) error {
 	if doors.GapWidth <= 0 {
 		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.doors.gap_width: must be positive")
 	}
+	if !doorBarrierSealsOpening(def.BarrierWhenClosed.Size.X, doors.GapWidth) {
+		return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.doors.gap_width: %v leaves a player-passable side gap beside the %s barrier %v", doors.GapWidth, woodenDoorDefID, def.BarrierWhenClosed.Size.X)
+	}
 	return nil
+}
+
+// doorBarrierSealsOpening reports whether a centered closed door leaves less than one player diameter
+// on each side of an opening, so nothing player-sized can slip past it.
+func doorBarrierSealsOpening(barrierWidth, openingWidth float64) bool {
+	return (openingWidth-barrierWidth)/2 < 2*playerRadius
 }

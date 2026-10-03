@@ -41,22 +41,48 @@
   "dressing": {
     "enabled": true,
     "surface_y": 0.02,
-    "grid_pitch_m": 2.0,
-    "wall_clearance_m": 1.55,
-    "anchor_clearance_m": 2.8,
-    "route_clearance_m": 1.7,
-    "prop_spacing_m": 2.8,
-    "max_instances": 32,
-    "density_bands": [
-      { "min_depth": 1, "max_depth": 3, "per_thousand_cells": 25, "max_instances": 18 },
-      { "min_depth": 4, "max_depth": null, "per_thousand_cells": 40, "max_instances": 32 }
-    ],
-    "props": [
-      { "asset_id": "kaykit_dungeon_barrel_large_v0", "weight": 4, "scale": 0.74, "yaw_degrees": [0, 90, 180, 270] },
-      { "asset_id": "kaykit_dungeon_barrel_small_stack_v0", "weight": 3, "scale": 0.68, "yaw_degrees": [0, 90, 180, 270] },
-      { "asset_id": "kaykit_dungeon_crates_stacked_v0", "weight": 3, "scale": 0.68, "yaw_degrees": [0, 90, 180, 270] },
-      { "asset_id": "kaykit_dungeon_table_medium_tablecloth_decorated_b_v0", "weight": 1, "scale": 0.62, "yaw_degrees": [0, 90, 180, 270] }
-    ]
+    "props": {
+      "barrel_large": {
+        "asset_id": "kaykit_dungeon_barrel_large_v0",
+        "scale": 0.74,
+        "yaw_degrees": [
+          0,
+          90,
+          180,
+          270
+        ]
+      },
+      "barrel_small_stack": {
+        "asset_id": "kaykit_dungeon_barrel_small_stack_v0",
+        "scale": 0.68,
+        "yaw_degrees": [
+          0,
+          90,
+          180,
+          270
+        ]
+      },
+      "crates_stacked": {
+        "asset_id": "kaykit_dungeon_crates_stacked_v0",
+        "scale": 0.68,
+        "yaw_degrees": [
+          0,
+          90,
+          180,
+          270
+        ]
+      },
+      "table_medium": {
+        "asset_id": "kaykit_dungeon_table_medium_tablecloth_decorated_b_v0",
+        "scale": 0.62,
+        "yaw_degrees": [
+          0,
+          90,
+          180,
+          270
+        ]
+      }
+    }
   },
   "torch": {
     "enabled": true,

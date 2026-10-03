@@ -101,9 +101,15 @@ func validateGeneratedDungeonReachability(rules DungeonGenerationRules, out gene
 	if err := validateGeneratedCorridorRoutes(out); err != nil {
 		return err
 	}
-	start := generatedReachabilityStart(rules, out)
 	nav := generatedDungeonNavigation(rules)
-	blockedGrid := buildDungeonBlockedGrid(nav, out)
+
+	return validateReachabilityOnGrid(rules, out, nav, buildDungeonBlockedGrid(nav, out))
+}
+
+// validateReachabilityOnGrid checks every generation target and room center against a prepared blocked
+// grid, so callers that only add obstacles can reuse the base grid.
+func validateReachabilityOnGrid(rules DungeonGenerationRules, out generatedDungeonLevel, nav NavigationRules, blockedGrid dungeonBlockedGrid) error {
+	start := generatedReachabilityStart(rules, out)
 	for _, target := range generatedReachabilityTargets(out) {
 		reachable := generatedTargetReachableFromNav(nav, blockedGrid.blocked, start, target.pos)
 		if target.kind == woodenDoorDefID {

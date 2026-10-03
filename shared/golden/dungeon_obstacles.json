@@ -6,8 +6,8 @@
       "width": 100,
       "height": 50
     },
-    "minimum_wall_count": 41,
-    "minimum_generated_wall_count": 3,
+    "minimum_wall_count": 46,
+    "minimum_generated_wall_count": 7,
     "minimum_water_count": 2,
     "minimum_hole_count": 1,
     "shape_families": [
@@ -67,11 +67,11 @@
         "id": "wall_-2_0004",
         "position": {
           "x": 15.5,
-          "y": 7
+          "y": 8.6875
         },
         "size": {
           "x": 1,
-          "y": 4
+          "y": 7.375
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -80,11 +80,11 @@
         "id": "wall_-2_0005",
         "position": {
           "x": 15.5,
-          "y": 13
+          "y": 14.8125
         },
         "size": {
           "x": 1,
-          "y": 4
+          "y": 0.375
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -92,11 +92,11 @@
       {
         "id": "wall_-2_0006",
         "position": {
-          "x": 9,
+          "x": 5.4375,
           "y": 15.5
         },
         "size": {
-          "x": 12,
+          "x": 4.875,
           "y": 1
         },
         "source": "room_wall",
@@ -104,6 +104,19 @@
       },
       {
         "id": "wall_-2_0007",
+        "position": {
+          "x": 12.5625,
+          "y": 15.5
+        },
+        "size": {
+          "x": 4.875,
+          "y": 1
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0008",
         "position": {
           "x": 9,
           "y": 4.5
@@ -116,7 +129,7 @@
         "shape_family": "line"
       },
       {
-        "id": "wall_-2_0008",
+        "id": "wall_-2_0009",
         "position": {
           "x": 2.5,
           "y": 10
@@ -129,27 +142,14 @@
         "shape_family": "line"
       },
       {
-        "id": "wall_-2_0009",
-        "position": {
-          "x": 26.5,
-          "y": 30.625
-        },
-        "size": {
-          "x": 1,
-          "y": 2.25
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
         "id": "wall_-2_0010",
         "position": {
-          "x": 26.5,
-          "y": 33.875
+          "x": 61.5,
+          "y": 28.166666666666664
         },
         "size": {
           "x": 1,
-          "y": 1.25
+          "y": 4.333333333333332
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -157,12 +157,12 @@
       {
         "id": "wall_-2_0011",
         "position": {
-          "x": 26.5,
-          "y": 39.75
+          "x": 61.5,
+          "y": 36.83333333333333
         },
         "size": {
           "x": 1,
-          "y": 6.5
+          "y": 4.333333333333336
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -170,12 +170,12 @@
       {
         "id": "wall_-2_0012",
         "position": {
-          "x": 18,
-          "y": 43.5
+          "x": 67.5,
+          "y": 32.5
         },
         "size": {
-          "x": 16,
-          "y": 1
+          "x": 1,
+          "y": 4.333333333333332
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -183,11 +183,11 @@
       {
         "id": "wall_-2_0013",
         "position": {
-          "x": 18,
-          "y": 27.5
+          "x": 52,
+          "y": 35.166666666666664
         },
         "size": {
-          "x": 16,
+          "x": 6,
           "y": 1
         },
         "source": "room_wall",
@@ -196,12 +196,12 @@
       {
         "id": "wall_-2_0014",
         "position": {
-          "x": 9.5,
-          "y": 35.5
+          "x": 64,
+          "y": 35.166666666666664
         },
         "size": {
-          "x": 1,
-          "y": 15
+          "x": 6,
+          "y": 1
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -209,8 +209,164 @@
       {
         "id": "wall_-2_0015",
         "position": {
-          "x": 91.5,
-          "y": 23.5
+          "x": 58,
+          "y": 39.5
+        },
+        "size": {
+          "x": 6,
+          "y": 1
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0016",
+        "position": {
+          "x": 58,
+          "y": 25.5
+        },
+        "size": {
+          "x": 6,
+          "y": 1
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0017",
+        "position": {
+          "x": 52,
+          "y": 29.833333333333332
+        },
+        "size": {
+          "x": 6,
+          "y": 1
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0018",
+        "position": {
+          "x": 64,
+          "y": 29.833333333333332
+        },
+        "size": {
+          "x": 6,
+          "y": 1
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0019",
+        "position": {
+          "x": 48.5,
+          "y": 31.604166666666664
+        },
+        "size": {
+          "x": 1,
+          "y": 2.541666666666668
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0020",
+        "position": {
+          "x": 54.5,
+          "y": 28.166666666666664
+        },
+        "size": {
+          "x": 1,
+          "y": 4.333333333333332
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0021",
+        "position": {
+          "x": 54.5,
+          "y": 36.83333333333333
+        },
+        "size": {
+          "x": 1,
+          "y": 4.333333333333336
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0022",
+        "position": {
+          "x": 32.5,
+          "y": 30.9375
+        },
+        "size": {
+          "x": 1,
+          "y": 3.875
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0023",
+        "position": {
+          "x": 32.5,
+          "y": 37.5625
+        },
+        "size": {
+          "x": 1,
+          "y": 4.875
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0024",
+        "position": {
+          "x": 26,
+          "y": 40.5
+        },
+        "size": {
+          "x": 12,
+          "y": 1
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0025",
+        "position": {
+          "x": 23.6875,
+          "y": 28.5
+        },
+        "size": {
+          "x": 7.375,
+          "y": 1
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0026",
+        "position": {
+          "x": 30.8125,
+          "y": 28.5
+        },
+        "size": {
+          "x": 2.375,
+          "y": 1
+        },
+        "source": "room_wall",
+        "shape_family": "line"
+      },
+      {
+        "id": "wall_-2_0027",
+        "position": {
+          "x": 19.5,
+          "y": 34.5
         },
         "size": {
           "x": 1,
@@ -220,170 +376,14 @@
         "shape_family": "line"
       },
       {
-        "id": "wall_-2_0016",
-        "position": {
-          "x": 85,
-          "y": 29.5
-        },
-        "size": {
-          "x": 12,
-          "y": 1
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0017",
-        "position": {
-          "x": 85,
-          "y": 17.5
-        },
-        "size": {
-          "x": 12,
-          "y": 1
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0018",
-        "position": {
-          "x": 78.5,
-          "y": 22.125
-        },
-        "size": {
-          "x": 1,
-          "y": 8.25
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0019",
-        "position": {
-          "x": 61.5,
-          "y": 25.625
-        },
-        "size": {
-          "x": 1,
-          "y": 1.25
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0020",
-        "position": {
-          "x": 61.5,
-          "y": 32.375
-        },
-        "size": {
-          "x": 1,
-          "y": 9.25
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0021",
-        "position": {
-          "x": 54.5,
-          "y": 37.5
-        },
-        "size": {
-          "x": 13,
-          "y": 1
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0022",
-        "position": {
-          "x": 54.5,
-          "y": 24.5
-        },
-        "size": {
-          "x": 13,
-          "y": 1
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0023",
-        "position": {
-          "x": 47.5,
-          "y": 28.375
-        },
-        "size": {
-          "x": 1,
-          "y": 6.75
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0024",
-        "position": {
-          "x": 47.5,
-          "y": 35.125
-        },
-        "size": {
-          "x": 1,
-          "y": 3.75
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0025",
-        "position": {
-          "x": 49.833333333333336,
-          "y": 5
-        },
-        "size": {
-          "x": 1,
-          "y": 4
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0026",
-        "position": {
-          "x": 49.833333333333336,
-          "y": 13
-        },
-        "size": {
-          "x": 1,
-          "y": 4
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
-        "id": "wall_-2_0027",
-        "position": {
-          "x": 54.5,
-          "y": 7.5
-        },
-        "size": {
-          "x": 1,
-          "y": 1
-        },
-        "source": "room_wall",
-        "shape_family": "line"
-      },
-      {
         "id": "wall_-2_0028",
         "position": {
-          "x": 54.5,
-          "y": 10.5
+          "x": 38.5,
+          "y": 9.1875
         },
         "size": {
           "x": 1,
-          "y": 1
+          "y": 4.375
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -391,12 +391,12 @@
       {
         "id": "wall_-2_0029",
         "position": {
-          "x": 42.33333333333333,
-          "y": 11.5
+          "x": 38.5,
+          "y": 15.8125
         },
         "size": {
-          "x": 4.666666666666664,
-          "y": 1
+          "x": 1,
+          "y": 4.375
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -404,11 +404,11 @@
       {
         "id": "wall_-2_0030",
         "position": {
-          "x": 51.66666666666667,
-          "y": 11.5
+          "x": 26.1875,
+          "y": 18.5
         },
         "size": {
-          "x": 4.666666666666664,
+          "x": 2.375,
           "y": 1
         },
         "source": "room_wall",
@@ -417,11 +417,11 @@
       {
         "id": "wall_-2_0031",
         "position": {
-          "x": 47,
-          "y": 15.5
+          "x": 33.8125,
+          "y": 18.5
         },
         "size": {
-          "x": 4.666666666666671,
+          "x": 8.375,
           "y": 1
         },
         "source": "room_wall",
@@ -430,11 +430,11 @@
       {
         "id": "wall_-2_0032",
         "position": {
-          "x": 47,
-          "y": 2.5
+          "x": 31.5,
+          "y": 6.5
         },
         "size": {
-          "x": 4.666666666666671,
+          "x": 13,
           "y": 1
         },
         "source": "room_wall",
@@ -443,12 +443,12 @@
       {
         "id": "wall_-2_0033",
         "position": {
-          "x": 42.33333333333333,
-          "y": 6.5
+          "x": 24.5,
+          "y": 12.5
         },
         "size": {
-          "x": 4.666666666666664,
-          "y": 1
+          "x": 1,
+          "y": 11
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -456,12 +456,12 @@
       {
         "id": "wall_-2_0034",
         "position": {
-          "x": 51.66666666666667,
-          "y": 6.5
+          "x": 97.5,
+          "y": 17.5
         },
         "size": {
-          "x": 4.666666666666664,
-          "y": 1
+          "x": 1,
+          "y": 11
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -469,12 +469,12 @@
       {
         "id": "wall_-2_0035",
         "position": {
-          "x": 39.5,
-          "y": 9
+          "x": 90,
+          "y": 23.5
         },
         "size": {
-          "x": 1,
-          "y": 4
+          "x": 14,
+          "y": 1
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -482,12 +482,12 @@
       {
         "id": "wall_-2_0036",
         "position": {
-          "x": 44.166666666666664,
-          "y": 5
+          "x": 90,
+          "y": 11.5
         },
         "size": {
-          "x": 1,
-          "y": 4
+          "x": 14,
+          "y": 1
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -495,12 +495,12 @@
       {
         "id": "wall_-2_0037",
         "position": {
-          "x": 44.166666666666664,
-          "y": 13
+          "x": 82.5,
+          "y": 12.1875
         },
         "size": {
           "x": 1,
-          "y": 4
+          "y": 0.375
         },
         "source": "room_wall",
         "shape_family": "line"
@@ -508,26 +508,25 @@
       {
         "id": "wall_-2_0038",
         "position": {
-          "x": 38,
-          "y": 39
+          "x": 82.5,
+          "y": 18.8125
         },
         "size": {
-          "x": 8,
-          "y": 3
+          "x": 1,
+          "y": 8.375
         },
-        "source": "generated",
-        "shape_family": "water",
-        "kind": "water"
+        "source": "room_wall",
+        "shape_family": "line"
       },
       {
         "id": "wall_-2_0039",
         "position": {
-          "x": 19,
-          "y": 23
+          "x": 73,
+          "y": 24
         },
         "size": {
           "x": 8,
-          "y": 3
+          "y": 2
         },
         "source": "generated",
         "shape_family": "water",
@@ -536,19 +535,94 @@
       {
         "id": "wall_-2_0040",
         "position": {
-          "x": 73,
-          "y": 26
+          "x": 39,
+          "y": 38
         },
         "size": {
-          "x": 2,
+          "x": 7,
           "y": 2
+        },
+        "source": "generated",
+        "shape_family": "water",
+        "kind": "water"
+      },
+      {
+        "id": "wall_-2_0041",
+        "position": {
+          "x": 75,
+          "y": 20
+        },
+        "size": {
+          "x": 3,
+          "y": 4
         },
         "source": "generated",
         "shape_family": "hole",
         "kind": "hole"
+      },
+      {
+        "id": "wall_-2_0042",
+        "position": {
+          "x": 93,
+          "y": 16
+        },
+        "size": {
+          "x": 1.2,
+          "y": 1.2
+        },
+        "source": "generated",
+        "kind": "prop"
+      },
+      {
+        "id": "wall_-2_0043",
+        "position": {
+          "x": 11,
+          "y": 10
+        },
+        "size": {
+          "x": 1.2,
+          "y": 1.2
+        },
+        "source": "generated",
+        "kind": "prop"
+      },
+      {
+        "id": "wall_-2_0044",
+        "position": {
+          "x": 28,
+          "y": 11
+        },
+        "size": {
+          "x": 1.4,
+          "y": 1.4
+        },
+        "source": "generated",
+        "kind": "prop"
+      },
+      {
+        "id": "wall_-2_0045",
+        "position": {
+          "x": 58,
+          "y": 30
+        },
+        "size": {
+          "x": 1.4,
+          "y": 1.4
+        },
+        "source": "generated",
+        "kind": "prop"
       }
     ],
-    "doors": [],
+    "doors": [
+      {
+        "kind": "door",
+        "def_id": "wooden_door",
+        "position": {
+          "x": 28.5,
+          "y": 28.5
+        }
+      }
+    ],
     "reachable_targets": [
       {
         "kind": "stairs_up",
@@ -560,56 +634,24 @@
       {
         "kind": "stairs_down",
         "position": {
-          "x": 11,
-          "y": 30
+          "x": 27,
+          "y": 14
         }
       },
       {
         "kind": "chest",
         "def_id": "treasure_chest",
         "position": {
-          "x": 52,
-          "y": 28
+          "x": 27,
+          "y": 35
         }
       },
       {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
+        "kind": "door",
+        "def_id": "wooden_door",
         "position": {
-          "x": 57,
-          "y": 28
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_bat",
-        "position": {
-          "x": 57,
-          "y": 29
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 57,
-          "y": 27
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_bat",
-        "position": {
-          "x": 58,
-          "y": 29
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 57,
-          "y": 30
+          "x": 28.5,
+          "y": 28.5
         }
       },
       {
@@ -617,94 +659,78 @@
         "def_id": "dungeon_mob",
         "position": {
           "x": 22,
-          "y": 31
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_archer",
-        "position": {
-          "x": 22,
-          "y": 32
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 21,
-          "y": 31
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 22,
-          "y": 30
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 21,
-          "y": 32
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 56,
-          "y": 32
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_archer",
-        "position": {
-          "x": 57,
-          "y": 32
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_bat",
-        "position": {
-          "x": 56,
-          "y": 31
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 52,
-          "y": 33
-        }
-      },
-      {
-        "kind": "monster",
-        "def_id": "dungeon_mob",
-        "position": {
-          "x": 53,
-          "y": 33
+          "y": 35
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_wolf",
         "position": {
-          "x": 52,
+          "x": 22,
           "y": 34
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_bat",
+        "position": {
+          "x": 22,
+          "y": 36
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_archer",
+        "position": {
+          "x": 22,
+          "y": 37
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_bat",
+        "position": {
+          "x": 22,
+          "y": 33
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 18,
+          "x": 58,
+          "y": 37
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 57,
+          "y": 37
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_wolf",
+        "position": {
+          "x": 59,
+          "y": 37
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 58,
+          "y": 36
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_wolf",
+        "position": {
+          "x": 57,
           "y": 36
         }
       },
@@ -712,23 +738,63 @@
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 18,
-          "y": 35
+          "x": 90,
+          "y": 20
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 85,
+          "x": 90,
+          "y": 19
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 91,
           "y": 20
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 32,
+          "y": 13
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_wolf",
         "position": {
-          "x": 86,
+          "x": 32,
+          "y": 12
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 33,
+          "y": 13
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 93,
+          "y": 19
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_bat",
+        "position": {
+          "x": 93,
           "y": 20
         }
       },
@@ -736,24 +802,48 @@
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 57,
-          "y": 34.5
+          "x": 88,
+          "y": 14
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 56,
-          "y": 33.5
+          "x": 88,
+          "y": 15
         }
       },
       {
         "kind": "monster",
         "def_id": "dungeon_mob",
         "position": {
-          "x": 58.5,
-          "y": 31
+          "x": 90,
+          "y": 16.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 87.5,
+          "y": 19
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 32,
+          "y": 14.5
+        }
+      },
+      {
+        "kind": "monster",
+        "def_id": "dungeon_mob",
+        "position": {
+          "x": 32,
+          "y": 9.5
         }
       }
     ]

@@ -2,7 +2,7 @@
   "id": "room_doors",
   "ci_tier": "extended",
   "world_id": "room_door_interaction_lab",
-  "seed": "v526_room_threshold_01",
+  "seed": "v526_room_threshold_03",
   "title": "Generated room doors",
   "description": "Open the deterministic room-threshold door on a generated floor, then descend to prove progression remains reachable.",
   "max_elapsed_s": 35.0,

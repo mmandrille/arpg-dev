@@ -16,6 +16,7 @@
     "monster_placement",
     "chest_placement",
     "elite_objective",
+    "passage_clearance",
     "room_layout",
     "room_corridor_pcg",
     "obstacle_generation",
@@ -186,6 +187,14 @@
         "max_attempts": { "type": "integer", "minimum": 1 }
       }
     },
+    "passage_clearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min_player_diameters"],
+      "properties": {
+        "min_player_diameters": { "type": "number", "minimum": 1 }
+      }
+    },
     "room_layout": {
       "type": "object",
       "required": [
@@ -335,7 +344,8 @@
         "doors",
         "water",
         "holes",
-        "clearance"
+        "clearance",
+        "props"
       ],
       "additionalProperties": false,
       "properties": {
@@ -406,6 +416,47 @@
             "target_count": { "$ref": "#/$defs/int_range" },
             "min_size": { "$ref": "#/$defs/positive_size" },
             "max_size": { "$ref": "#/$defs/positive_size" }
+          }
+        },
+        "props": {
+          "type": "object",
+          "required": ["enabled", "max_attempts", "wall_clearance", "door_clearance", "spacing", "count_bands", "catalog"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "max_attempts": { "type": "integer", "minimum": 1 },
+            "wall_clearance": { "type": "number", "minimum": 0 },
+            "door_clearance": { "type": "number", "minimum": 0 },
+            "spacing": { "type": "number", "minimum": 0 },
+            "count_bands": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["min_depth", "max_depth", "area_per_prop", "max_count"],
+                "additionalProperties": false,
+                "properties": {
+                  "min_depth": { "type": "integer", "minimum": 1 },
+                  "max_depth": { "type": ["integer", "null"], "minimum": 1 },
+                  "area_per_prop": { "type": "number", "exclusiveMinimum": 0 },
+                  "max_count": { "type": "integer", "minimum": 0 }
+                }
+              }
+            },
+            "catalog": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["prop_id", "weight", "footprint"],
+                "additionalProperties": false,
+                "properties": {
+                  "prop_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+                  "weight": { "type": "integer", "minimum": 0 },
+                  "footprint": { "$ref": "#/$defs/positive_size" }
+                }
+              }
+            }
           }
         },
         "holes": {

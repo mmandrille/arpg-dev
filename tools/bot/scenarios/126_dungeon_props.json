@@ -1,0 +1,16 @@
+{
+  "id": "dungeon_props",
+  "ci_tier": "extended",
+  "world_id": "room_door_interaction_lab",
+  "seed": "props_sweep_00",
+  "title": "Server-placed dungeon props",
+  "description": "A generated room floor sends solid decorative props on the wire as kind prop walls with a catalog prop_id; the live payload schema gate validates them. Collision and placement are proven by the Go sim and generation tests.",
+  "max_elapsed_s": 15.0,
+  "steps": [
+    { "action": "wait_until_assertion", "assertion": { "type": "wall_count", "kind": "prop", "at_least": 1 }, "timeout_s": 5 }
+  ],
+  "assertions": [
+    { "type": "wall_count", "kind": "prop", "at_least": 1 },
+    { "type": "wall_count", "source": "generated", "kind": "prop", "at_least": 1 }
+  ]
+}

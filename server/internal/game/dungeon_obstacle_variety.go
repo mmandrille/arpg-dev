@@ -102,6 +102,9 @@ func validateObstacleGenerationRules(o ObstacleGenerationRules, floor DungeonFlo
 			return fmt.Errorf("game: invalid rules dungeon_generation.obstacle_generation.clearance.%s: must be non-negative", label)
 		}
 	}
+	if err := validatePropGenerationRules(o.Props); err != nil {
+		return err
+	}
 	maxSpan := math.Max(float64(o.WallSegment.MaxLength), math.Max(o.SolidBlock.MaxSize.X, o.SolidBlock.MaxSize.Y))
 	if o.Water.Enabled {
 		maxSpan = math.Max(maxSpan, math.Max(o.Water.MaxSize.X, o.Water.MaxSize.Y))

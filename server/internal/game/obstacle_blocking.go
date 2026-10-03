@@ -8,6 +8,7 @@ const (
 	obstacleKindRock   = "rock"
 	obstacleKindColumn = "column"
 	obstacleKindRubble = "rubble"
+	obstacleKindProp   = "prop"
 )
 
 func (w wallObstacle) obstacleKind() string {

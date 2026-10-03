@@ -5,8 +5,6 @@ const DungeonTorchLightsScript := preload("res://scripts/dungeon_torch_lights.gd
 const SceneLightingRigScript := preload("res://scripts/scene_lighting_rig.gd")
 const GroundWallFactoryScript := preload("res://scripts/ground_wall_factory.gd")
 const WallRendererScript := preload("res://scripts/wall_renderer.gd")
-const DressingScript := preload("res://scripts/dungeon_room_dressing.gd")
-const KitLoaderScript := preload("res://scripts/dungeon_kit_presentation_loader.gd")
 
 var _output: String = ""
 var _level: int = -1
@@ -28,11 +26,10 @@ func _initialize() -> void:
 	world.add_child(walls_root)
 	var renderer = WallRendererScript.new(walls_root, factory)
 	renderer.set_level(_level)
-	var walls := renderer.render_wall_layout(_sample_material_layout(), "showme|%d" % _level if _dressing_enabled else "")
+	var layout := _sample_material_layout()
 	if _dressing_enabled:
-		var cfg := KitLoaderScript.dressing_config()
-		var planned := DressingScript.plan(walls, "showme|%d" % _level, _level, [], cfg)
-		print("[surface-material-capture] safe_candidates=%d prop_radius=%.2f reason=%s" % [int(planned["safe_candidates"]), DressingScript._max_prop_radius(cfg["props"]), str(planned["reason"])])
+		layout.append_array(_sample_prop_walls())
+	var walls := renderer.render_wall_layout(layout)
 	DungeonSurfaceDetailPresentationScript.sync(ground, walls_root, factory, _level, walls, {})
 	world.add_child(_make_camera())
 	# Runtime lighting path (ADR-0018 D9): the same SceneLightingRig main.gd uses, plus wall torches.
@@ -106,6 +103,16 @@ func _sample_material_layout() -> Array:
 		{"id": "center_column", "position": {"x": 8.0, "y": 11.0}, "size": {"x": 1.2, "y": 3.4}, "source": "generated", "kind": "column"},
 		{"id": "water_pool", "position": {"x": 18.0, "y": 17.0}, "size": {"x": 4.2, "y": 2.4}, "source": "generated", "kind": "water"},
 	]
+
+
+## Server-style prop walls for the fixture room (the server owns real placement, see dungeon_props.go).
+func _sample_prop_walls() -> Array:
+	var props := [["barrel_large", 5.0, 8.0], ["crates_stacked", 11.0, 20.0], ["barrel_small_stack", 21.0, 10.0], ["table_medium", 15.0, 6.0]]
+	var walls: Array = []
+	for i in props.size():
+		var entry: Array = props[i]
+		walls.append({"id": "sample_prop_%d" % i, "position": {"x": entry[1], "y": entry[2]}, "size": {"x": 1.0, "y": 1.0}, "source": "generated", "kind": "prop", "prop_id": entry[0]})
+	return walls
 
 
 func _make_camera() -> Camera3D:

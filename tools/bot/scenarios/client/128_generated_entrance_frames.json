@@ -1,0 +1,23 @@
+{
+  "id": "generated_entrance_frames",
+  "runner": "godot_client",
+  "world_id": "room_door_interaction_lab",
+  "seed": "v526_room_threshold_18",
+  "title": "Generated entrance and door frames",
+  "description": "Real play-camera frames of a generated room-corridor floor with a room threshold door near the up stairs: default zoom, zoomed in, and zoomed out. v537 visual proof; frames are saved under .artifacts/bot-captures by windowed runs.",
+  "ci_tier": "extended",
+  "max_elapsed_s": 60.0,
+  "client_steps": [
+    { "type": "wait_ws_open", "timeout_s": 15.0 },
+    { "type": "wait_wall_layout", "current_level": -1, "at_least": 8, "non_perimeter_at_least": 1, "timeout_s": 15.0 },
+    { "type": "wait_ticks", "ticks": 20, "timeout_s": 8.0 },
+    { "type": "capture_frame", "name": "v537_entrance_default", "timeout_s": 20.0, "skip_if_headless": true },
+    { "type": "adjust_camera_zoom", "delta_size": -4.0 },
+    { "type": "wait_ticks", "ticks": 6, "timeout_s": 4.0 },
+    { "type": "capture_frame", "name": "v537_entrance_zoomed_in", "timeout_s": 20.0, "skip_if_headless": true },
+    { "type": "adjust_camera_zoom", "delta_size": 6.0 },
+    { "type": "adjust_camera_zoom", "delta_size": 6.0 },
+    { "type": "wait_ticks", "ticks": 6, "timeout_s": 4.0 },
+    { "type": "capture_frame", "name": "v537_entrance_zoomed_out", "timeout_s": 20.0, "skip_if_headless": true }
+  ]
+}

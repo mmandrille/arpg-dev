@@ -77,6 +77,8 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 				waterCount++
 			case obstacleKindHole:
 				holeCount++
+			case obstacleKindProp:
+				// Props are server-placed decor, not scatter obstacle groups; they own no shape family.
 			default:
 				shapeFamilies[got.shapeFamily] = true
 				if got.obstacleKind() != obstacleKindWall {
@@ -133,8 +135,15 @@ func TestDungeonObstaclesGolden(t *testing.T) {
 		}
 	}
 	start := generatedReachabilityStart(rules.DungeonGeneration.RulesForLevel(level.levelNum), level)
+	levelRules := rules.DungeonGeneration.RulesForLevel(level.levelNum)
+	nav := generatedDungeonNavigation(levelRules)
+	grid := buildDungeonBlockedGrid(nav, level)
 	for i, got := range generatedReachabilityTargets(level) {
-		if !generatedTargetReachableFrom(rules.DungeonGeneration.RulesForLevel(level.levelNum), level, start, got.pos) {
+		reachable := generatedTargetReachableFromNav(nav, grid.blocked, start, got.pos)
+		if got.kind == woodenDoorDefID {
+			reachable = generatedDoorReachableFromNav(nav, grid.blocked, start, got.pos)
+		}
+		if !reachable {
 			t.Fatalf("target %d %s at %+v unreachable from %+v", i, got.kind, got.pos, start)
 		}
 	}
@@ -167,6 +176,8 @@ func writeDungeonObstaclesGolden(t *testing.T, golden *dungeonObstaclesGolden, l
 				waterCount++
 			case obstacleKindHole:
 				holeCount++
+			case obstacleKindProp:
+				// Props are server-placed decor, not scatter obstacle groups; they own no shape family.
 			default:
 				shapeFamilies[wall.shapeFamily] = true
 				if wall.obstacleKind() != obstacleKindWall {

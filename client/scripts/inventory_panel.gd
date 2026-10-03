@@ -5,7 +5,6 @@ signal intent_requested(intent_type: String, payload: Dictionary)
 
 const ItemTooltipPanelScript := preload("res://scripts/item_tooltip_panel.gd")
 const ItemIconDrawerScript := preload("res://scripts/item_icon_drawer.gd")
-const RarityCuePresenterScript := preload("res://scripts/rarity_cue_presenter.gd")
 const PotionIconLabelScript := preload("res://scripts/potion_icon_label.gd")
 const PaperDollBackdropScript := preload("res://scripts/paper_doll_backdrop.gd")
 const PaperDollLayoutScript := preload("res://scripts/paper_doll_layout.gd")
@@ -688,11 +687,9 @@ func _draw_item_icon(slot: Control, item: Dictionary) -> void:
 	ItemIconDrawerScript.draw(slot, rect, icon, label, blocked or invalid_requirements, 0.38, ICON_FONT_SIZE, item, true)
 	if blocked:
 		slot.draw_rect(rect.grow(-3.0), Color(0.05, 0.05, 0.05, 0.46), true)
-		RarityCuePresenterScript.draw_slot(slot, rect, item)
 		return
 	if invalid_requirements:
 		slot.draw_rect(rect.grow(-4.0), Color(1.0, 0.35, 0.35, 0.30), true)
-		RarityCuePresenterScript.draw_slot(slot, rect, item)
 	_draw_hotbar_badge(slot, item)
 
 

@@ -61,7 +61,9 @@ static func draw(canvas: Control, rect: Rect2, icon: Dictionary, fallback_label:
 				_draw_potion(canvas, center, min_side, color, accent)
 			_:
 				canvas.draw_rect(Rect2(center - Vector2(min_side * 0.20, min_side * 0.20), Vector2(min_side * 0.40, min_side * 0.40)), color, true)
-	RarityCuePresenterScript.draw_slot(canvas, rect, item)
+	# Inventory slots (model thumbnails) show rarity through the slot border and tint, not the shape badge.
+	if not use_model_thumbnail:
+		RarityCuePresenterScript.draw_slot(canvas, rect, item)
 
 
 static func _draw_blade(canvas: Control, center: Vector2, min_side: float, color: Color, accent: Color) -> void:

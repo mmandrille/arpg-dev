@@ -316,7 +316,7 @@ ci_step "== 5/11 determinism lint ==" \
 # The race detector covers the concurrent realtime hub/session loop (~30s). internal/http
 # exceeds the 10m test timeout under -race, so it is not included yet.
 ci_step "== 6/11 Postgres + Go fmt + tests + race + vet ==" \
-  "$RUN_QUIET" --label "make db-up && go test ./... && go test -race ./internal/realtime/... && go vet ./..." -- \
+  "$RUN_QUIET" --label "make db-up && go test -timeout 20m ./... && go test -race ./internal/realtime/... && go vet ./..." -- \
   bash -c '\
     make db-up && \
     "$1" ensure "$2" && \

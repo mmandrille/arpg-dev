@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-03 (v532–v537 playtest-corrections batch complete; combined `make ci` passed in 20m36s; `make ci-full` not run; review landed; refactor pending)
+Last updated: 2026-10-03 (v532–v537 playtest-corrections batch complete; combined `make ci` passed in 20m36s; `make ci-full` not run; review and refactor complete)
 
 ---
 
@@ -86,7 +86,7 @@ Do **not** assume these are the next slice — they are documented backlog items
 
 ### Active review follow-ups
 
-- **v532–v537 follow-ups:** prune the dead `ItemTooltipPanel.setup` params; click-to-move/approach path budgets are distance-scaled and can return `no_path` on long detours in wide layouts (also on `main`); a 2.25 opening can be one nav cell wide depending on alignment (nav grid 1.0); props not yet shown in a real-floor frame; `go test ./internal/game` is ~600 s (CI timeout now 20m); `dungeon_frame_pacing_probe` fixture is stale (times out at `wait_wall_layout`).
+- **v532–v537 follow-ups ([review](docs/reviews/20261003_v537-overview.md)):** detour-aware player path budget (`dist*320+64` returns `no_path` on long detours in wide layouts; also on `main`); a 2.25 opening can be one nav cell wide (grid 1.0); wall counters count props; dead `ItemTooltipPanel.setup` params and stale camera fallback literals; props not yet in a real-floor frame and `capture_frame` is flaky; `go test ./internal/game` ~600 s (CI timeout 20m); `dungeon_frame_pacing_probe` fixture stale. Refactor: CI step label fixed; ranged approach audited (ring search, no change); the rest deferred.
 
 - **v531 `$review` / `$refactor` (batch; supersedes v520):** [`docs/reviews/20261002_v531-overview.md`](docs/reviews/20261002_v531-overview.md). **Fixed:** coalesced bot events preserve source ticks (`103a6384`); encounter composition is split below the file-size ratchet (`9118ed3c`); input/replay persistence logs use stable error codes (`dc8f8b0e`); the dungeon audit has an opt-in strict validator (`4dbb217b`); CODEMAP indexes the split helpers (`1094fda4`). Final integrated `make ci` passed in 21m09s. **Still open:** bound/cancel replay work, define durable input acceptance, pin replay rules/content, automate Go struct/schema parity, reduce the shared validator and client coordinators, and capture representative door/wall visuals. The 20-seed × 12-level audit repeated byte-identically with zero failures/findings; it is not exhaustive, `make ci-full` was not run, and the generated-door visual run emitted Godot shutdown leak warnings without a retained appearance capture.
 

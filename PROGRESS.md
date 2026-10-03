@@ -15,7 +15,7 @@
 Per-slice as-built summaries live in [`docs/as-built/`](docs/as-built/). On `/finish`, update
 `docs/as-built/vN_<codename>.md` and the lifecycle index — **never** add inline shipped prose here.
 
-Last updated: 2026-10-03 (v532–v537 playtest-corrections batch complete; combined `make ci` passed in 20m36s; `make ci-full` not run; review/refactor pending)
+Last updated: 2026-10-03 (v532–v537 playtest-corrections batch complete; combined `make ci` passed in 20m36s; `make ci-full` not run; review landed; refactor pending)
 
 ---
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-03 (v532–v537 playtest-corrections batch complete; combi
 | **Latest completed slice** | v537 — [door/wall visual proof](docs/as-built/v537_door-wall-visual-proof.md); the v532–v537 batch (v535 pace cancelled): [tooltip without icon](docs/as-built/v532_tooltip-no-icon.md), [camera zoom-out](docs/as-built/v533_camera-zoom-out.md) (isometric default 12→15), [wider entrances](docs/as-built/v535_wider-entrances.md) (corridors 2.25/2.4, door gap 2.4, clearance floor, door-approach fix), [server-owned solid props](docs/as-built/v536_solid-dungeon-props.md), and visual proof. Combined `make ci` passed. |
 | **Next slice** | Playtest follow-ups first: light-radius buff (≥25%, was v534, not started: class `light_radius` and torch values are server fog inputs) and the tactical movement-pace question (cancelled for now). Then `$next` from the v537/v531 follow-ups. |
 | **Graphics and smoothness sequence** | Complete in the v494–v500 batch: [v494 room dressing](docs/as-built/v494_dungeon-room-dressing.md) → [v495 first-spawn hitch](docs/as-built/v495_first-spawn-frame-hitch.md) → [v496 attack contact](docs/as-built/v496_attack-contact-timing.md) → [v497 frame pacing](docs/as-built/v497_dungeon-frame-pacing.md) → [v498 dungeon lighting](docs/as-built/v498_dungeon-light-readability.md) → [v499 targeting](docs/as-built/v499_live-targeting-corrections.md) → [v500 town terrain](docs/as-built/v500_town-terrain-landmarks.md). See per-slice as-built notes for measurements and limits. |
-| **Last engineering review** | v531 — [`docs/reviews/20261002_v531-overview.md`](docs/reviews/20261002_v531-overview.md) (2026-10-02; batch review, overall 7.7; combined `make ci` passed, `make ci-full` not run) |
+| **Last engineering review** | v537 — [`docs/reviews/20261003_v537-overview.md`](docs/reviews/20261003_v537-overview.md) (2026-10-03; batch review, overall 7.7; combined `make ci` passed, `make ci-full` not run) |
 | **Next engineering review** | After the next coordinated batch or ~10-slice standalone milestone; run `$refactor` before `$next`. |
 
 

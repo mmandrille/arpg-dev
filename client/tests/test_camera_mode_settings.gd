@@ -40,6 +40,10 @@ func _test_loader_defaults_isometric() -> void:
 	_assert_eq("isometric projection is orthogonal", str(cfg.get("projection", "")), "orthogonal")
 	_assert_true("isometric reticle disabled", cfg.get("reticle_enabled", true) == false)
 	_assert_true("isometric zoom_default > 0", float(cfg.get("zoom_default", 0.0)) > 0.0)
+	var zoom_default := float(cfg.get("zoom_default", 0.0))
+	_assert_true("isometric default zoom sits inside its own bounds", zoom_default >= float(cfg.get("zoom_min", 0.0)) and zoom_default <= float(cfg.get("zoom_max", 0.0)))
+	_assert_true("isometric camera can still zoom out past its default", float(cfg.get("zoom_max", 0.0)) > zoom_default)
+	_assert_true("isometric camera can still zoom in below its default", float(cfg.get("zoom_min", 0.0)) < zoom_default)
 
 
 func _test_loader_perspective_modes() -> void:

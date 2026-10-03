@@ -927,12 +927,7 @@ func _return_to_main_menu() -> void:
 
 func _exit_game() -> void:
 	_intentional_disconnect = true
-	_connection_recovery_runtime.reset_overlay(_connection_overlay)
-	if client != null:
-		if gameplay_active and client.session_id != "":
-			client.end_session()
-		client.close()
-	get_tree().quit(0)
+	_finish_exit(0)
 
 func _teardown_gameplay_state(clear_session: bool) -> void:
 	gameplay_active = false
@@ -6031,6 +6026,10 @@ func bot_prepare_exit() -> void:
 
 
 func bot_finish_exit(exit_code: int) -> void:
+	_finish_exit(exit_code)
+
+
+func _finish_exit(exit_code: int) -> void:
 	bot_prepare_exit()
 	get_tree().create_timer(0.1).timeout.connect(func() -> void:
 		get_tree().quit(exit_code)
